@@ -35,10 +35,18 @@ public class Scratch
   private static final boolean DEBUG = false;
 
   public static void main(String args[]) {
+
+  double d = 2.9;
+  int in = 3;
+
+  double i = d + in;
+  Out.prln(i);
+  /*
+
     try{
       Gate.init();
       doIt();
-/*
+
       URL url = null;
       url = new URL("file:///d:/tmp/testXml.xml");
 
@@ -54,11 +62,11 @@ public class Scratch
       // Unpack the markup
       keyDocFormat.unpackMarkup(keyDocument);
       Out.prln(keyDocument.getContent().toString());
-*/
+
     }catch (Exception e){
       e.printStackTrace(System.out);
     }
-
+*/
   } // main
 
   public static void doIt() throws Exception{

@@ -24,6 +24,7 @@ import javax.swing.table.*;
 
 import java.util.*;
 import java.lang.reflect.*;
+import java.net.*;
 
 import gate.*;
 import gate.annotation.*;
@@ -58,26 +59,21 @@ public class CustomAnnotationEditDialog extends JDialog {
     * @param aFram the parent frame of this dialog
     * @param aModal (wheter or not this dialog is modal)
     */
-  public CustomAnnotationEditDialog(Frame aFrame, boolean aModal) {
-
+  public CustomAnnotationEditDialog(Frame aFrame, boolean aModal){
     super(aFrame,aModal);
     this.setLocationRelativeTo(aFrame);
+    this.setTitle("Custom Annotation Editor");
 
-    initLocalData();
-    initGuiComponents();
-    initListeners();
+    data = new MyCustomFeatureBearer(null);
   }//CustomAnnotationEditDialog
 
-  public CustomAnnotationEditDialog() {
+  public CustomAnnotationEditDialog(){
     this(null, true);
   }// End CustomAnnotationEditDialog
 
   /** Init local data*/
   protected void initLocalData(){
-    if (annot != null)
-      data = new MyCustomFeatureBearer(annot);
-    else
-      data = new MyCustomFeatureBearer();
+    data = new MyCustomFeatureBearer(annot);
   }// initLocalData();
 
   /** Init GUI components with values taken from local data*/
@@ -89,28 +85,56 @@ public class CustomAnnotationEditDialog extends JDialog {
 
     componentsBox.add(Box.createVerticalStrut(10));
 
+    // Add the Annot Type
     Box box = Box.createVerticalBox();
+    Box box1 = Box.createHorizontalBox();
     annotTypeLabel = new JLabel("Annotation type");
-    box.add(annotTypeLabel);
-    box.add(Box.createVerticalStrut(5));
+    annotTypeLabel.setToolTipText("The type of the annotation you are" +
+                                                    " creating or editing");
+    annotTypeLabel.setOpaque(true);
+
+    box1.add(annotTypeLabel);
+    box1.add(Box.createHorizontalGlue());
+    box.add(box1);
+
     annotTypeTextField = new JTextField(data.getAnnotType());
-    box.add(annotTypeTextField);
+    annotTypeTextField.setColumns(80);
+    annotTypeTextField.setPreferredSize(
+                                  annotTypeTextField.getPreferredSize());
+    annotTypeTextField.setMinimumSize(
+                                  annotTypeTextField.getPreferredSize());
+    annotTypeTextField.setMaximumSize(
+                                  annotTypeTextField.getPreferredSize());
+
+
+    box1 = Box.createHorizontalBox();
+    box1.add(annotTypeTextField);
+    box1.add(Box.createHorizontalGlue());
+    box.add(box1);
     box.add(Box.createVerticalStrut(10));
 
     componentsBox.add(box);
-
     // add the features editor
     box = Box.createVerticalBox();
+
     featuresLabel = new JLabel("Features");
-    box.add(featuresLabel);
+    featuresLabel.setToolTipText("The features of the annotation you are" +
+                                                    " creating or editing");
+    featuresLabel.setOpaque(true);
+
+    box1 = Box.createHorizontalBox();
+    box1.add(featuresLabel);
+    box1.add(Box.createHorizontalGlue());
+    box.add(box1);
     box.add(Box.createVerticalStrut(5));
+
     featuresEditor = new FeaturesEditor();
     featuresEditor.setFeatureBearer(data);
+
     box.add(featuresEditor);
     box.add(Box.createVerticalStrut(10));
 
     componentsBox.add(box);
-
     componentsBox.add(Box.createVerticalStrut(10));
 
     // Add the Ok and Cancel buttons
@@ -118,16 +142,18 @@ public class CustomAnnotationEditDialog extends JDialog {
     okButton = new JButton("Ok");
     cancelButton = new JButton("Cancel");
 
+    cancelOkBox.add(Box.createHorizontalGlue());
     cancelOkBox.add(okButton);
     cancelOkBox.add(Box.createHorizontalStrut(25));
     cancelOkBox.add(cancelButton);
+    cancelOkBox.add(Box.createHorizontalGlue());
 
     componentsBox.add(cancelOkBox);
 
     this.getContentPane().add(componentsBox);
     this.getContentPane().add(Box.createVerticalStrut(10));
-
-    setSize(500,350);
+    this.setSize(350,350);
+   // this.pack();
   }//initGuiComponents()
 
   /** Init all the listeners*/
@@ -136,7 +162,7 @@ public class CustomAnnotationEditDialog extends JDialog {
     okButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 //        featuresEditor.stopCellEditing();
-        doOk();
+          doOk();
       }
     });
 
@@ -149,11 +175,24 @@ public class CustomAnnotationEditDialog extends JDialog {
 
   }//initListeners()
 
+  /** Returns annot type edited with this viewer*/
+  public String getAnnotType(){ return data.getAnnotType();}
+
+  /** Returns annot type edited with this viewer*/
+  public FeatureMap getFeatures(){ return data.getFeatures();}
+
   /** This method is called when the user press the OK button*/
   private void doOk(){
     buttonPressed = OK;
-    this.hide();
+    if (!"".equals(annotTypeTextField.getText())){
+      data.setAnnotType(annotTypeTextField.getText());
+      this.hide();
+    }else{
+      JOptionPane.showMessageDialog(this,
+                                    "You need to provide an annotation type!",
+                                    "Gate", JOptionPane.ERROR_MESSAGE);
 
+    }// End if
   }//doOk();
 
   /** This method is called when the user press the CANCEL button*/
@@ -164,18 +203,20 @@ public class CustomAnnotationEditDialog extends JDialog {
 
   /** This method displays the AnnotationEditDialog in creating mode*/
   public int show(Annotation anAnnot){
-    this.setTitle("Custom Annotation Editor");
+    annot = anAnnot;
+
     initLocalData();
     initGuiComponents();
+    initListeners();
     super.show();
-    if (buttonPressed == CANCEL)
-      return JFileChooser.CANCEL_OPTION;
-    else{
-      return JFileChooser.APPROVE_OPTION;
-      // modify the structure of annot if not nulll
-      // otherwise export feature map and annot type
 
-    }
+    if (buttonPressed == CANCEL){
+      doCancel();
+      return JFileChooser.CANCEL_OPTION;
+    }else{
+      doOk();
+      return JFileChooser.APPROVE_OPTION;
+    }// End if
   }// show()
 
   /** This method displays the AnnotationEditDialog in edit mode*/
@@ -188,22 +229,11 @@ public class CustomAnnotationEditDialog extends JDialog {
 
     try {
       Gate.init();
-      FeatureMap parameters = Factory.newFeatureMap();
-      parameters.put("xmlFileUrl", AnnotationEditDialog.class.getResource(
-                              "/gate/resources/creole/schema/PosSchema.xml"));
+      Document doc = Factory.newDocument(new URL("http://www"));
 
-      AnnotationSchema annotSchema = (AnnotationSchema)
-         Factory.createResource("gate.creole.AnnotationSchema", parameters);
-
-      FeatureMap fm = Factory.newFeatureMap();
-      fm.put("time",new Integer(10));
-
-      fm.put("cat","V");
-      fm.put("match", new Vector(3));
-
-      AnnotationEditDialog aed = new AnnotationEditDialog(null,true);
+      CustomAnnotationEditDialog caed = new CustomAnnotationEditDialog();
       //aed.show(annotSchema);
-      aed.show(fm,annotSchema);
+      caed.show(null);
 
   /*
       // Create an annoatationSchema from a URL.
@@ -224,6 +254,9 @@ public class CustomAnnotationEditDialog extends JDialog {
       if (anAnnot != null){
         features = anAnnot.getFeatures();
         annotType = anAnnot.getType();
+      }else{
+        features = Factory.newFeatureMap();
+        annotType = new String("");
       }// End if
     }//MyCustomFeatureBearer
 

@@ -336,7 +336,14 @@ public class AnnotationEditor extends AbstractVisualResource {
         int row = annotationsTable.rowAtPoint(e.getPoint());
         Annotation ann = (Annotation)annotationsTable.getModel().
                                                       getValueAt(row, -1);
-        EditAnnotationAction editAnnAct = new EditAnnotationAction(ann);
+        //find the annotation set
+        String setName = (String)annotationsTable.getModel().
+                                                    getValueAt(row, 1);
+        AnnotationSet set = setName.equals("<Default>")?
+                            document.getAnnotations() :
+                            document.getAnnotations(setName);
+
+        EditAnnotationAction editAnnAct = new EditAnnotationAction(ann,set);
         if(SwingUtilities.isLeftMouseButton(e)){
           if(e.getClickCount() == 1){
             //single left click ->highlight the annotation
@@ -361,12 +368,6 @@ public class AnnotationEditor extends AbstractVisualResource {
           //right click
           //add delete option
           JPopupMenu popup = new JPopupMenu();
-          //find the annotation set
-          String setName = (String)annotationsTable.getModel().
-                                                      getValueAt(row, 1);
-          AnnotationSet set = setName.equals("<Default>")?
-                              document.getAnnotations() :
-                              document.getAnnotations(setName);
           class DeleteAnnotationAction extends AbstractAction{
             public DeleteAnnotationAction(AnnotationSet set, Annotation ann){
               super("Delete");
@@ -440,6 +441,12 @@ public class AnnotationEditor extends AbstractVisualResource {
               //Add to the default AnnotationSet
               JMenu menu = new JMenu("Add to <Default>");
 
+              menu.add(new NewCustomAnnotationPopupItem(
+                                                 start,
+                                                 end,
+                                                 document.getAnnotations()));
+
+              menu.addSeparator();
               Iterator schemasIter = getAnnotationSchemas().iterator();
               while(schemasIter.hasNext()){
                 AnnotationSchema schema = (AnnotationSchema)schemasIter.next();
@@ -468,6 +475,12 @@ public class AnnotationEditor extends AbstractVisualResource {
 
               //Add to a new AnnotationSet
               menu = new JMenu("Add to new annotation set");
+              menu.add(new NewCustomAnnotationPopupItem(
+                                                 start,
+                                                 end,
+                                                 null));
+
+              menu.addSeparator();
               schemasIter = getAnnotationSchemas().iterator();
               while(schemasIter.hasNext()){
                 AnnotationSchema schema = (AnnotationSchema)schemasIter.next();
@@ -1703,9 +1716,10 @@ public class AnnotationEditor extends AbstractVisualResource {
    * to do the editing.
    */
   protected class EditAnnotationAction extends AbstractAction {
-    public EditAnnotationAction(Annotation ann){
+    public EditAnnotationAction(Annotation ann, AnnotationSet set){
       super("Edit");
       this.ann = ann;
+      this.set = set;
     }
 
     public void actionPerformed(ActionEvent e){
@@ -1727,15 +1741,46 @@ public class AnnotationEditor extends AbstractVisualResource {
               features.putAll(newFeatures);
               int tableRow = data.indexOf(ann);
               annotationsTableModel.fireTableRowsUpdated(tableRow, tableRow);
-            }
+            }// End if
             done = true;
-          }
+          }// End if
+        }// End while
+        if (!done ){
+          // Edit the annotation without a schema and stuff
+          editWithCustomEditor();
         }
-      }
+      }else{
+        // Edit the annotation without a schema and stuff
+        editWithCustomEditor();
+      }// End if
     }//public void actionPerformed(ActionEvent e)
 
-    Annotation ann;
-  }
+    private void editWithCustomEditor(){
+      CustomAnnotationEditDialog customAnnotEditor =
+                                        new CustomAnnotationEditDialog();
+      // Creates a new annotation
+      if (customAnnotEditor.show(ann) == JFileChooser.APPROVE_OPTION){
+        String annotType = customAnnotEditor.getAnnotType();
+        FeatureMap annotFeat = customAnnotEditor.getFeatures();
+        Node startNode = ann.getStartNode();
+        Node endNode = ann.getEndNode();
+
+        //Remove the OLD annot form the set
+        set.remove(ann);
+
+        // Add the new one
+        set.add(startNode,endNode,annotType, annotFeat);
+        SwingUtilities.invokeLater(new Runnable(){
+          public void run(){
+            annotationsTableModel.fireTableDataChanged();
+          }
+        });
+      }// End if
+    }// editWithCustomEditor()
+
+    Annotation ann = null;
+    AnnotationSet set = null;
+  }//class EditAnnotationAction
 
   /**
    * The menu items used for creating a new annotation from the right click
@@ -1745,7 +1790,10 @@ public class AnnotationEditor extends AbstractVisualResource {
     public NewAnnotationPopupItem(int aStart, int anEnd,
                                   AnnotationSchema aSchema,
                                   AnnotationSet aTargetAS) {
+
+
       super(aSchema.getAnnotationName());
+
       this.start = aStart;
       this.end = anEnd;
       this.schema = aSchema;
@@ -1762,7 +1810,8 @@ public class AnnotationEditor extends AbstractVisualResource {
                             JOptionPane.QUESTION_MESSAGE);
             if(answer == null) return;
             newASName = (String)answer;
-          }
+          }// End if
+
           FeatureMap features = annotationEditDialog.show(schema);
           if(features != null){
             if(targetAS == null){
@@ -1790,7 +1839,70 @@ public class AnnotationEditor extends AbstractVisualResource {
     int end;
     AnnotationSchema schema;
     AnnotationSet targetAS;
-  }
+  }// End class NewAnnotationPopupItem
+
+
+  /**
+   * The menu items used for creating a new custom annotation from the right click
+   * popup menu.
+   */
+  protected class NewCustomAnnotationPopupItem extends JMenuItem {
+
+    public NewCustomAnnotationPopupItem(int aStart,
+                                        int anEnd,
+                                        AnnotationSet aTargetAS){
+
+
+      super("Create a custom annotation");
+
+      this.start = aStart;
+      this.end = anEnd;
+      this.targetAS = aTargetAS;
+
+      this.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          String newASName = "foo";
+          if(targetAS == null){
+            Object answer = JOptionPane.showInputDialog(
+                            textPane,
+                            "Please provide a name for the new annotation set:",
+                            "Gate",
+                            JOptionPane.QUESTION_MESSAGE);
+            if(answer == null) return;
+            newASName = (String)answer;
+          }// End if
+
+          CustomAnnotationEditDialog customAnnotEditor =
+                                        new CustomAnnotationEditDialog();
+          // Creates a new annotation
+          if (customAnnotEditor.show(null) == JFileChooser.APPROVE_OPTION){
+            String annotType = customAnnotEditor.getAnnotType();
+            FeatureMap annotFeat = customAnnotEditor.getFeatures();
+            if(targetAS == null){
+                targetAS = document.getAnnotations(newASName);
+            }// End if
+            try{
+              targetAS.add(new Long(start),new Long(end),annotType, annotFeat);
+              SwingUtilities.invokeLater(new Runnable(){
+                public void run(){
+                  annotationsTableModel.fireTableDataChanged();
+                }
+              });
+            }catch(InvalidOffsetException ioe){
+              JOptionPane.showMessageDialog(textPane,
+                                            "Invalid input!\n" + ioe.toString(),
+                                            "Gate", JOptionPane.ERROR_MESSAGE);
+            }// End try
+          }// End if
+        }//actionPerformed();
+      });// End new ActionListener
+    }// End addActionListener();
+
+    int start;
+    int end;
+    AnnotationSchema schema;
+    AnnotationSet targetAS;
+  }// End class NewCustomAnnotationPopupItem
 
   /**
    * Fixes the <a

@@ -66,6 +66,7 @@ public class BootStrapDialog extends JDialog{
     mainFrame = aMainFrame;
     thisBootStrapDialog = this;
     this.setTitle("BootStrap Wizard");
+    this.setLocationRelativeTo(aMainFrame);
     initLocalData();
     initGuiComponents();
     initListeners();
