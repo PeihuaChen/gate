@@ -42,7 +42,7 @@ import javax.swing.event.*;
  * The main Gate GUI frame. This is a singleton.
  */
 public class MainFrame extends JFrame
-                       implements ProgressListener, StatusListener, CreoleListener{
+                    implements ProgressListener, StatusListener, CreoleListener{
 
   MainFrame thisMainFrame = null;
   JMenuBar menuBar;
@@ -345,60 +345,60 @@ public class MainFrame extends JFrame
           Object value = path.getLastPathComponent();
           if(value instanceof String){
             if(value == resourcesTreeRoot){
-            }else if(value == applicationsRoot){
+            } else if(value == applicationsRoot){
               popup = appsPopup;
-            }else if(value == languageResourcesRoot){
+            } else if(value == languageResourcesRoot){
               popup = lrsPopup;
-            }else if(value == processingResourcesRoot){
+            } else if(value == processingResourcesRoot){
               popup = prsPopup;
-            }else if(value == datastoresRoot){
+            } else if(value == datastoresRoot){
               popup = dssPopup;
             }
-          }else if(value instanceof Resource){
+          } else if(value instanceof Resource){
             handle = (CustomResourceHandle)handleForResourceName.get(
                 ((Resource)value).getFeatures().get("NAME"));
             if(handle != null) popup = handle.getPopup();
-          }else if(value instanceof DataStore){
+          } else if(value instanceof DataStore){
             handle = (CustomResourceHandle)handleForResourceName.get(
                 ((DataStore)value).getFeatures().get("NAME"));
             if(handle != null) popup = handle.getPopup();
-          }else if(value instanceof CustomResourceHandle){
+          } else if(value instanceof CustomResourceHandle){
             //for applictaions
             handle = (CustomResourceHandle)value;
             popup = handle.getPopup();
           }
         }
-        if(SwingUtilities.isRightMouseButton(e)){
+        if (SwingUtilities.isRightMouseButton(e)) {
           if(popup != null){
             popup.show(resourcesTree, e.getX(), e.getY());
           }
-        }else if(SwingUtilities.isLeftMouseButton(e)){
-          if(e.getClickCount() == 2 && handle != null){
+        } else if(SwingUtilities.isLeftMouseButton(e)) {
+          if(e.getClickCount() == 2 && handle != null) {
             //double click - show the resource
-            if(handle.isShown()){
+            if(handle.isShown()) {
               //select
               JComponent largeView = handle.getLargeView();
-              if(largeView != null){
+              if(largeView != null) {
                 mainTabbedPane.setSelectedComponent(largeView);
               }
               JComponent smallView = handle.getSmallView();
-              if(smallView != null){
+              if(smallView != null) {
                 lowerScroll.getViewport().setView(smallView);
-              }else{
+              } else {
                 lowerScroll.getViewport().setView(null);
               }
-            }else{
+            } else {
               //show
               JComponent largeView = handle.getLargeView();
-              if(largeView != null){
+              if(largeView != null) {
                 mainTabbedPane.addTab(handle.getTitle(), handle.getIcon(),
                                       largeView, handle.getTooltipText());
                 mainTabbedPane.setSelectedComponent(handle.getLargeView());
               }
               JComponent smallView = handle.getSmallView();
-              if(smallView != null){
+              if(smallView != null) {
                 lowerScroll.getViewport().setView(smallView);
-              }else{
+              } else {
                 lowerScroll.getViewport().setView(null);
               }
               handle.setShown(true);
@@ -427,7 +427,7 @@ public class MainFrame extends JFrame
     });
   }
 
-  public void progressChanged(int i){
+  public void progressChanged(int i) {
     progressBar.setStringPainted(true);
     int oldValue = progressBar.getValue();
     if(oldValue != i){
@@ -439,23 +439,23 @@ public class MainFrame extends JFrame
    * Called when the process is finished.
    *
    */
-  public void processFinished(){
+  public void processFinished() {
     progressBar.setStringPainted(false);
     SwingUtilities.invokeLater(new ProgressBarUpdater(0));
   }
 
-  public void statusChanged(String text){
+  public void statusChanged(String text) {
     SwingUtilities.invokeLater(new StatusBarUpdater(text));
   }
 
-  public void resourceLoaded(CreoleEvent e){
+  public void resourceLoaded(CreoleEvent e) {
     Resource res = e.getResource();
     CustomResourceHandle handle = (CustomResourceHandle)
                       handleForResourceName.get(res.getFeatures().get("NAME"));
-    if(handle == null){
+    if(handle == null) {
       ResourceData rData = (ResourceData)
                         Gate.getCreoleRegister().get(res.getClass().getName());
-      if(res instanceof LanguageResource){
+      if(res instanceof LanguageResource) {
         handle = new LRHandle((LanguageResource)res, currentProject);
         handle.setTooltipText("<html><b>Type:</b> " +
                               rData.getName() + "</html>");
@@ -470,16 +470,16 @@ public class MainFrame extends JFrame
     resourcesTreeModel.treeChanged();
   }
 
-  public void resourceUnloaded(CreoleEvent e){
+  public void resourceUnloaded(CreoleEvent e) {
     handleForResourceName.remove(e.getResource().getFeatures().get("NAME"));
     resourcesTreeModel.treeChanged();
   }
 
 
-  static{
-    try{
+  static {
+    try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-    }catch(Exception e){
+    } catch(Exception e) {
       throw new gate.util.GateRuntimeException(e.toString());
     }
   }
@@ -524,8 +524,7 @@ public class MainFrame extends JFrame
   }
 
 
-
-  protected void addProject(ProjectData pData){
+  protected void addProject(ProjectData pData) {
     openProjects.add(pData);
     projectComboModel.addElement(pData);
     projectComboModel.setSelectedItem(pData);
@@ -541,7 +540,8 @@ public class MainFrame extends JFrame
 
     if(!openProjects.contains(project)) openProjects.add(project);
 
-    CustomResourceHandle handle = new CustomResourceHandle(project.toString(), currentProject);
+    CustomResourceHandle handle =
+                  new CustomResourceHandle(project.toString(), currentProject);
     handle.setIcon(new ImageIcon(
            getClass().getResource("/gate/resources/img/project.gif")));
     projectTreeRoot.setUserObject(handle);
@@ -644,40 +644,44 @@ public class MainFrame extends JFrame
   }//protected void setCurrentProject(ProjectData project)
 */
 
-  synchronized void showWaitDialog(){
+  synchronized void showWaitDialog() {
     Point location = getLocationOnScreen();
-    location.translate(10, getHeight() - waitDialog.getHeight() - southBox.getHeight() - 10);
+    location.translate(10,
+              getHeight() - waitDialog.getHeight() - southBox.getHeight() - 10);
     waitDialog.setLocation(location);
     waitDialog.showDialog(new Component[]{});
   }
 
-  synchronized void  hideWaitDialog(){
+  synchronized void  hideWaitDialog() {
     waitDialog.goAway();
   }
 
 
-  class NewProjectAction extends AbstractAction{
+  class NewProjectAction extends AbstractAction {
     public NewProjectAction(){
-      super("New Project", new ImageIcon(MainFrame.class.getResource("/gate/resources/img/newProject.gif")));
+      super("New Project", new ImageIcon(MainFrame.class.getResource(
+                                        "/gate/resources/img/newProject.gif")));
       putValue(SHORT_DESCRIPTION,"Create a new project");
     }
     public void actionPerformed(ActionEvent e){
       fileChooser.setDialogTitle("Select new project file");
       fileChooser.setFileSelectionMode(fileChooser.FILES_ONLY);
       if(fileChooser.showOpenDialog(parentFrame) == fileChooser.APPROVE_OPTION){
-        ProjectData pData = new ProjectData(fileChooser.getSelectedFile(), parentFrame);
+        ProjectData pData = new ProjectData(fileChooser.getSelectedFile(),
+                                                                  parentFrame);
         addProject(pData);
       }
     }
   }
 
-  class NewAnnotDiffAction extends AbstractAction{
-    public NewAnnotDiffAction(){
+  class NewAnnotDiffAction extends AbstractAction {
+    public NewAnnotDiffAction() {
       super("Annotation Diff",
-      new ImageIcon(MainFrame.class.getResource("/gate/resources/img/annDiff.gif")));
+      new ImageIcon(MainFrame.class.getResource(
+                                          "/gate/resources/img/annDiff.gif")));
       putValue(SHORT_DESCRIPTION,"Create a new Annotation Diff Tool");
     }// NewAnnotDiffAction
-    public void actionPerformed(ActionEvent e){
+    public void actionPerformed(ActionEvent e) {
 /*      AnnotDiffHandle handle = new AnnotDiffHandle(thisMainFrame);
       handle.setTooltipText("<html><b>Tool:</b> " +
                             "Annotation diff" + "</html>");
@@ -704,36 +708,37 @@ public class MainFrame extends JFrame
     }// actionPerformed();
   }//class NewAnnotDiffAction
 
-  class NewBootStrapAction extends AbstractAction{
-    public NewBootStrapAction(){
+  class NewBootStrapAction extends AbstractAction {
+    public NewBootStrapAction() {
       super("BootStrap Wizard",
-      new ImageIcon(MainFrame.class.getResource("/gate/resources/img/annDiff.gif")));
+      new ImageIcon(MainFrame.class.getResource(
+                                          "/gate/resources/img/annDiff.gif")));
     }// NewBootStrapAction
-    public void actionPerformed(ActionEvent e){
+    public void actionPerformed(ActionEvent e) {
       BootStrapDialog bootStrapDialog = new BootStrapDialog(thisMainFrame);
       bootStrapDialog.show();
     }// actionPerformed();
   }//class NewBootStrapAction
 
-  class NewApplicationAction extends AbstractAction{
-    public NewApplicationAction(){
+  class NewApplicationAction extends AbstractAction {
+    public NewApplicationAction() {
       super("New Application");
       putValue(SHORT_DESCRIPTION,"Create a new Application");
     }
-    public void actionPerformed(ActionEvent e){
+    public void actionPerformed(ActionEvent e) {
       Object answer = JOptionPane.showInputDialog(
                         parentFrame,
                         "Please provide a name for the new application:",
                         "Gate",
                         JOptionPane.QUESTION_MESSAGE);
-      if(answer instanceof String){
+      if (answer instanceof String) {
         try{
           SerialController controller =
                 (SerialController)Factory.createResource(
                                 "gate.creole.SerialController",
                                 Factory.newFeatureMap());
           FeatureMap fm = controller.getFeatures();
-          if(fm == null){
+          if (fm == null){
             controller.setFeatures(fm = Factory.newFeatureMap());
           }
           fm.put("NAME", answer);
@@ -745,13 +750,13 @@ public class MainFrame extends JFrame
           resourcesTree.expandPath(new TreePath(
                                     new Object[]{resourcesTreeRoot,
                                                  applicationsRoot}));
-        }catch(ResourceInstantiationException rie){
+        } catch(ResourceInstantiationException rie){
           JOptionPane.showMessageDialog(parentFrame,
                                         "Could not create application!\n" +
                                          rie.toString(),
                                         "Gate", JOptionPane.ERROR_MESSAGE);
         }
-      }else{
+      } else{
         JOptionPane.showMessageDialog(parentFrame,
                                       "Unrecognised input!",
                                       "Gate", JOptionPane.ERROR_MESSAGE);
@@ -759,14 +764,14 @@ public class MainFrame extends JFrame
     }
   }
 
-  class NewLRAction extends AbstractAction{
-    public NewLRAction(){
+  class NewLRAction extends AbstractAction {
+    public NewLRAction() {
       super("Create language resource");
       putValue(SHORT_DESCRIPTION,"Create a new language resource");
     }
 
-    public void actionPerformed(ActionEvent e){
-      Runnable runnable = new Runnable(){
+    public void actionPerformed(ActionEvent e) {
+      Runnable runnable = new Runnable() {
         public void run(){
           CreoleRegister reg = Gate.getCreoleRegister();
           List lrTypes = reg.getPublicLrTypes();
@@ -787,8 +792,10 @@ public class MainFrame extends JFrame
                                 lrNames.get(0));
             if(answer != null){
               ResourceData rData = (ResourceData)resourcesByName.get(answer);
-              newResourceDialog.setTitle("Parameters for the new " + rData.getName());
-              LanguageResource res = (LanguageResource)newResourceDialog.show(rData);
+              newResourceDialog.setTitle(
+                                  "Parameters for the new " + rData.getName());
+              LanguageResource res = (LanguageResource)
+                                                  newResourceDialog.show(rData);
               if(res != null){
                 LRHandle handle = new LRHandle(res, currentProject);
                 handle.setTooltipText("<html><b>Type:</b> " +
@@ -806,10 +813,10 @@ public class MainFrame extends JFrame
           }else{
             //no lr types
             JOptionPane.showMessageDialog(parentFrame,
-                                          "Could not find any registered types " +
-                                          "of resources...\n" +
-                                          "Check your Gate installation!",
-                                          "Gate", JOptionPane.ERROR_MESSAGE);
+                                      "Could not find any registered types " +
+                                      "of resources...\n" +
+                                      "Check your Gate installation!",
+                                      "Gate", JOptionPane.ERROR_MESSAGE);
           }
         }//public void run()
       };
@@ -820,21 +827,21 @@ public class MainFrame extends JFrame
   }//class NewLRAction extends AbstractAction
 
 
-  class NewPRAction extends AbstractAction{
-    public NewPRAction(){
+  class NewPRAction extends AbstractAction {
+    public NewPRAction() {
       super("Create processing resource");
       putValue(SHORT_DESCRIPTION,"Create a new processing resource");
     }
 
-    public void actionPerformed(ActionEvent e){
-      Runnable runnable = new Runnable(){
-        public void run(){
+    public void actionPerformed(ActionEvent e) {
+      Runnable runnable = new Runnable() {
+        public void run() {
           CreoleRegister reg = Gate.getCreoleRegister();
           List prTypes = reg.getPublicPrTypes();
           if(prTypes != null && !prTypes.isEmpty()){
             HashMap resourcesByName = new HashMap();
             Iterator lrIter = prTypes.iterator();
-            while(lrIter.hasNext()){
+            while(lrIter.hasNext()) {
               ResourceData rData = (ResourceData)reg.get(lrIter.next());
               resourcesByName.put(rData.getName(), rData);
             }
@@ -848,8 +855,10 @@ public class MainFrame extends JFrame
                                 prNames.get(0));
             if(answer != null){
               ResourceData rData = (ResourceData)resourcesByName.get(answer);
-              newResourceDialog.setTitle("Parameters for the new " + rData.getName());
-              ProcessingResource res = (ProcessingResource)newResourceDialog.show(rData);
+              newResourceDialog.setTitle(
+                                  "Parameters for the new " + rData.getName());
+              ProcessingResource res = (ProcessingResource)
+                                                  newResourceDialog.show(rData);
               if(res != null){
                 PRHandle handle = new PRHandle(res, currentProject);
                 handle.setTooltipText("<html><b>Type:</b> " +
@@ -857,18 +866,19 @@ public class MainFrame extends JFrame
                 handleForResourceName.put(res.getFeatures().get("NAME"), handle);
                 //prRoot.add(new DefaultMutableTreeNode(handle, false));
                 //projectTreeModel.nodeStructureChanged(prRoot);
-                resourcesTree.expandPath(new TreePath(new Object[]{resourcesTreeRoot, processingResourcesRoot}));
+                resourcesTree.expandPath(new TreePath(new Object[]{
+                                resourcesTreeRoot, processingResourcesRoot}));
                 //currentProject.addPR(handle);
                 statusChanged(res.getFeatures().get("NAME") + " loaded!");
               }
             }
-          }else{
+          } else {
             //no lr types
             JOptionPane.showMessageDialog(parentFrame,
-                                          "Could not find any registered types " +
-                                          "of resources...\n" +
-                                          "Check your Gate installation!",
-                                          "Gate", JOptionPane.ERROR_MESSAGE);
+                                        "Could not find any registered types " +
+                                        "of resources...\n" +
+                                        "Check your Gate installation!",
+                                        "Gate", JOptionPane.ERROR_MESSAGE);
           }
         }//public void run()
       };
@@ -878,13 +888,13 @@ public class MainFrame extends JFrame
     }
   }//class NewPRAction extends AbstractAction
 
-  class NewDSAction extends AbstractAction{
+  class NewDSAction extends AbstractAction {
     public NewDSAction(){
       super("Create datastore");
       putValue(SHORT_DESCRIPTION,"Create a new Datastore");
     }
 
-    public void actionPerformed(ActionEvent e){
+    public void actionPerformed(ActionEvent e) {
       DataStoreRegister reg = Gate.getDataStoreRegister();
       Map dsTypes = reg.getDataStoreClassNames();
       HashMap dsTypeByName = new HashMap();
@@ -894,7 +904,7 @@ public class MainFrame extends JFrame
         dsTypeByName.put(entry.getValue(), entry.getKey());
       }
 
-      if(!dsTypeByName.isEmpty()){
+      if(!dsTypeByName.isEmpty()) {
         Object[] names = dsTypeByName.keySet().toArray();
         Object answer = JOptionPane.showInputDialog(
                             parentFrame,
@@ -902,14 +912,15 @@ public class MainFrame extends JFrame
                             "Gate", JOptionPane.QUESTION_MESSAGE,
                             null, names,
                             names[0]);
-        if(answer != null){
+        if(answer != null) {
           String className = (String)dsTypeByName.get(answer);
           if(className.indexOf("SerialDataStore") != -1){
             //get the URL (a file in this case)
             fileChooser.setDialogTitle("Select a new directory");
             fileChooser.setFileSelectionMode(fileChooser.DIRECTORIES_ONLY);
-            if(fileChooser.showOpenDialog(parentFrame) == fileChooser.APPROVE_OPTION){
-              try{
+            if(fileChooser.showOpenDialog(parentFrame) ==
+                                                  fileChooser.APPROVE_OPTION){
+              try {
                 URL dsURL = fileChooser.getSelectedFile().toURL();
                 DataStore ds = Factory.createDataStore(className, dsURL);
                 if(ds != null){
@@ -918,33 +929,34 @@ public class MainFrame extends JFrame
                     FeatureMap features = Factory.newFeatureMap();
                     features.put("NAME", dsURL.getFile());
                     ds.setFeatures(features);
-                  }else if(ds.getFeatures().get("NAME") == null){
+                  } else if(ds.getFeatures().get("NAME") == null) {
                     ds.getFeatures().put("NAME", dsURL.getFile());
                   }
                   DSHandle handle = new DSHandle(ds, currentProject);
-                  handleForResourceName.put(ds.getFeatures().get("NAME"), handle);
+                  handleForResourceName.put(ds.getFeatures().get("NAME"),
+                                                                        handle);
                   resourcesTreeModel.treeChanged();
                   //dsRoot.add(new DefaultMutableTreeNode(handle, false));
                   //projectTreeModel.nodeStructureChanged(dsRoot);
                 }
-              }catch(MalformedURLException mue){
+              } catch(MalformedURLException mue) {
                 JOptionPane.showMessageDialog(
                     parentFrame, "Invalid location for the datastore\n " +
                                       mue.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
-              }catch(PersistenceException pe){
+              } catch(PersistenceException pe) {
                 JOptionPane.showMessageDialog(
                     parentFrame, "Datastore creation error!\n " +
                                       pe.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
               }
             }
-          }else{
+          } else {
             throw new UnsupportedOperationException("Unimplemented option!\n"+
                                                     "Use a serial datastore");
           }
         }
-      }else{
+      } else {
         //no ds types
         JOptionPane.showMessageDialog(parentFrame,
                                       "Could not find any registered types " +
@@ -957,13 +969,13 @@ public class MainFrame extends JFrame
   }//class NewDSAction extends AbstractAction
 
 
-  class OpenDSAction extends AbstractAction{
-    public OpenDSAction(){
+  class OpenDSAction extends AbstractAction {
+    public OpenDSAction() {
       super("Open datastore");
       putValue(SHORT_DESCRIPTION,"Open a datastore");
     }
 
-    public void actionPerformed(ActionEvent e){
+    public void actionPerformed(ActionEvent e) {
       DataStoreRegister reg = Gate.getDataStoreRegister();
       Map dsTypes = reg.getDataStoreClassNames();
       HashMap dsTypeByName = new HashMap();
@@ -973,7 +985,7 @@ public class MainFrame extends JFrame
         dsTypeByName.put(entry.getValue(), entry.getKey());
       }
 
-      if(!dsTypeByName.isEmpty()){
+      if(!dsTypeByName.isEmpty()) {
         Object[] names = dsTypeByName.keySet().toArray();
         Object answer = JOptionPane.showInputDialog(
                             parentFrame,
@@ -981,37 +993,39 @@ public class MainFrame extends JFrame
                             "Gate", JOptionPane.QUESTION_MESSAGE,
                             null, names,
                             names[0]);
-        if(answer != null){
+        if(answer != null) {
           String className = (String)dsTypeByName.get(answer);
           if(className.indexOf("SerialDataStore") != -1){
             //get the URL (a file in this case)
             fileChooser.setDialogTitle("Select the datastore directory");
             fileChooser.setFileSelectionMode(fileChooser.DIRECTORIES_ONLY);
-            if(fileChooser.showOpenDialog(parentFrame) == fileChooser.APPROVE_OPTION){
-              try{
+            if (fileChooser.showOpenDialog(parentFrame) ==
+                                                  fileChooser.APPROVE_OPTION){
+              try {
                 URL dsURL = fileChooser.getSelectedFile().toURL();
                 DataStore ds = Factory.openDataStore(className, dsURL);
                 if(ds != null){
                   //make sure he have a name
-                  if(ds.getFeatures() == null){
+                  if(ds.getFeatures() == null) {
                     FeatureMap features = Factory.newFeatureMap();
                     features.put("NAME", dsURL.getFile());
                     ds.setFeatures(features);
-                  }else if(ds.getFeatures().get("NAME") == null){
+                  } else if(ds.getFeatures().get("NAME") == null){
                     ds.getFeatures().put("NAME", dsURL.getFile());
                   }
                   DSHandle handle = new DSHandle(ds, currentProject);
-                  handleForResourceName.put(ds.getFeatures().get("NAME"), handle);
+                  handleForResourceName.put(ds.getFeatures().get("NAME"),
+                                                                        handle);
                   resourcesTreeModel.treeChanged();
                   //dsRoot.add(new DefaultMutableTreeNode(handle));
                   //projectTreeModel.nodeStructureChanged(dsRoot);
                 }
-              }catch(MalformedURLException mue){
+              } catch(MalformedURLException mue) {
                 JOptionPane.showMessageDialog(
                     parentFrame, "Invalid location for the datastore\n " +
                                       mue.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
-              }catch(PersistenceException pe){
+              } catch(PersistenceException pe) {
                 JOptionPane.showMessageDialog(
                     parentFrame, "Datastore opening error!\n " +
                                       pe.toString(),
@@ -1023,7 +1037,7 @@ public class MainFrame extends JFrame
                                                     "Use a serial datastore");
           }
         }
-      }else{
+      } else {
         //no ds types
         JOptionPane.showMessageDialog(parentFrame,
                                       "Could not find any registered types " +
@@ -1035,18 +1049,18 @@ public class MainFrame extends JFrame
     }
   }//class OpenDSAction extends AbstractAction
 
-  class HelpAboutAction extends AbstractAction{
+  class HelpAboutAction extends AbstractAction {
     public HelpAboutAction(){
       super("About");
     }
 
-    public void actionPerformed(ActionEvent e){
+    public void actionPerformed(ActionEvent e) {
       splash.show();
     }
   }
 
-  protected class ResourceTreeCellRenderer extends DefaultTreeCellRenderer{
-    public ResourceTreeCellRenderer(){
+  protected class ResourceTreeCellRenderer extends DefaultTreeCellRenderer {
+    public ResourceTreeCellRenderer() {
       setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
     }
     public Component getTreeCellRendererComponent(JTree tree,
@@ -1058,38 +1072,43 @@ public class MainFrame extends JFrame
                                               boolean hasFocus){
       super.getTreeCellRendererComponent(tree, value, selected, expanded,
                                          leaf, row, hasFocus);
-      if(value instanceof Resource){
+      if(value instanceof Resource) {
         CustomResourceHandle handle = (CustomResourceHandle)
-              handleForResourceName.get(((Resource)value).getFeatures().get("NAME"));
-        if(handle != null){
+        handleForResourceName.get(((Resource)value).getFeatures().get("NAME"));
+        if(handle != null) {
           setIcon(((CustomResourceHandle)handle).getIcon());
           setText(((CustomResourceHandle)handle).getTitle());
           setToolTipText(((CustomResourceHandle)handle).getTooltipText());
         }
-      }else if(value instanceof CustomResourceHandle){
+      } else if(value instanceof CustomResourceHandle) {
           setIcon(((CustomResourceHandle)value).getIcon());
           setText(((CustomResourceHandle)value).getTitle());
           setToolTipText(((CustomResourceHandle)value).getTooltipText());
-      }else if(value instanceof DataStore){
+      } else if(value instanceof DataStore) {
         CustomResourceHandle handle = (CustomResourceHandle)
-              handleForResourceName.get(((DataStore)value).getFeatures().get("NAME"));
+        handleForResourceName.get(((DataStore)value).getFeatures().get("NAME"));
         if(handle != null){
           setIcon(((CustomResourceHandle)handle).getIcon());
           setText(((CustomResourceHandle)handle).getTitle());
           setToolTipText(((CustomResourceHandle)handle).getTooltipText());
         }
-      }else if(value instanceof String){
+      } else if(value instanceof String) {
         Icon icon = getIcon();
-        if(value == resourcesTreeRoot){
-          icon = new ImageIcon(getClass().getResource("/gate/resources/img/project.gif"));
-        }else if(value == applicationsRoot){
-          icon = new ImageIcon(getClass().getResource("/gate/resources/img/applications.gif"));
-        }else if(value == languageResourcesRoot){
-          icon = new ImageIcon(getClass().getResource("/gate/resources/img/lrs.gif"));
-        }else if(value == processingResourcesRoot){
-          icon = new ImageIcon(getClass().getResource("/gate/resources/img/prs.gif"));
-        }else if(value == datastoresRoot){
-          icon = new ImageIcon(getClass().getResource("/gate/resources/img/dss.gif"));
+        if(value == resourcesTreeRoot) {
+          icon = new ImageIcon(getClass().getResource(
+                                            "/gate/resources/img/project.gif"));
+        } else if(value == applicationsRoot) {
+          icon = new ImageIcon(getClass().getResource(
+                                      "/gate/resources/img/applications.gif"));
+        } else if(value == languageResourcesRoot) {
+          icon = new ImageIcon(getClass().getResource(
+                                                "/gate/resources/img/lrs.gif"));
+        } else if(value == processingResourcesRoot) {
+          icon = new ImageIcon(getClass().getResource(
+                                                "/gate/resources/img/prs.gif"));
+        } else if(value == datastoresRoot) {
+          icon = new ImageIcon(getClass().getResource(
+                                                "/gate/resources/img/dss.gif"));
         }
         setIcon(icon);
       }
@@ -1102,7 +1121,7 @@ public class MainFrame extends JFrame
                                               boolean expanded,
                                               boolean leaf,
                                               int row,
-                                              boolean hasFocus){
+                                              boolean hasFocus) {
       super.getTreeCellRendererComponent(tree, value, selected, expanded,
                                          leaf, row, hasFocus);
       Object handle = ((DefaultMutableTreeNode)value).getUserObject();
@@ -1118,7 +1137,7 @@ public class MainFrame extends JFrame
   /**
    * Model for the tree representing the resources loaded in the system
    */
-  class ResourcesTreeModel implements TreeModel{
+  class ResourcesTreeModel implements TreeModel {
 
     public Object getRoot(){
       return resourcesTreeRoot;
@@ -1143,26 +1162,27 @@ public class MainFrame extends JFrame
       return getChildren(parent).indexOf(child);
     }
 
-    protected List getChildren(Object parent){
+    protected List getChildren(Object parent) {
       List result = new ArrayList();
       if(parent == resourcesTreeRoot){
         result.add(applicationsRoot);
         result.add(languageResourcesRoot);
         result.add(processingResourcesRoot);
         result.add(datastoresRoot);
-      }else if(parent == applicationsRoot){
+      } else if(parent == applicationsRoot) {
         result.addAll(currentProject.getApplicationsList());
-      }else if(parent == languageResourcesRoot){
+      } else if(parent == languageResourcesRoot) {
         result.addAll(Gate.getCreoleRegister().getLrInstances());
-      }else if(parent == processingResourcesRoot){
+      } else if(parent == processingResourcesRoot) {
         result.addAll(Gate.getCreoleRegister().getPrInstances());
-      }else if(parent == datastoresRoot){
+      } else if(parent == datastoresRoot) {
         result.addAll(Gate.getDataStoreRegister());
       }
       ListIterator iter = result.listIterator();
-      while(iter.hasNext()){
+      while(iter.hasNext()) {
         Object value = iter.next();
-        ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(value.getClass().getName());
+        ResourceData rData = (ResourceData)
+                      Gate.getCreoleRegister().get(value.getClass().getName());
         if(rData != null && rData.isPrivate()) iter.remove();
       }
       return result;
@@ -1177,7 +1197,8 @@ public class MainFrame extends JFrame
     }
 
     public synchronized void addTreeModelListener(TreeModelListener l) {
-      Vector v = treeModelListeners == null ? new Vector(2) : (Vector) treeModelListeners.clone();
+      Vector v = treeModelListeners ==
+                    null ? new Vector(2) : (Vector) treeModelListeners.clone();
       if (!v.contains(l)) {
         v.addElement(l);
         treeModelListeners = v;
@@ -1186,8 +1207,9 @@ public class MainFrame extends JFrame
 
     void treeChanged(){
       SwingUtilities.invokeLater(new Runnable(){
-        public void run(){
-          fireTreeStructureChanged(new TreeModelEvent(this,new Object[]{resourcesTreeRoot}));
+        public void run() {
+          fireTreeStructureChanged(new TreeModelEvent(
+                                        this,new Object[]{resourcesTreeRoot}));
         }
       });
     }
@@ -1252,7 +1274,7 @@ public class MainFrame extends JFrame
     int value;
   }
 
-  class StatusBarUpdater implements Runnable{
+  class StatusBarUpdater implements Runnable {
     StatusBarUpdater(String text){
       this.text = text;
     }
@@ -1262,7 +1284,7 @@ public class MainFrame extends JFrame
     String text;
   }
 
-  class JGateMenuItem extends JMenuItem{
+  class JGateMenuItem extends JMenuItem {
     JGateMenuItem(javax.swing.Action a){
       super(a);
       this.addMouseListener(new MouseAdapter() {
@@ -1280,7 +1302,7 @@ public class MainFrame extends JFrame
     String oldText;
   }
 
-  class JGateButton extends JButton{
+  class JGateButton extends JButton {
     JGateButton(javax.swing.Action a){
       super(a);
       this.addMouseListener(new MouseAdapter() {
@@ -1298,8 +1320,8 @@ public class MainFrame extends JFrame
     String oldText;
   }
 
-  class LocaleSelectorMenuItem extends JRadioButtonMenuItem{
-    public LocaleSelectorMenuItem(Locale locale, JFrame pframe){
+  class LocaleSelectorMenuItem extends JRadioButtonMenuItem {
+    public LocaleSelectorMenuItem(Locale locale, JFrame pframe) {
       super(locale.getDisplayName());
       this.frame = pframe;
       me = this;

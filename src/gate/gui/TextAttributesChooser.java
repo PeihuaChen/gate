@@ -101,7 +101,8 @@ public class TextAttributesChooser extends JDialog {
     fontFamilyCombo.setSelectedItem(StyleConstants.getFontFamily(currentStyle));
     fontSizeCombo = new JComboBox(new String[]{"6", "8", "10", "12", "14", "16",
                                               "18", "20", "22", "24", "26"});
-    fontSizeCombo.setSelectedItem(new Integer(StyleConstants.getFontSize(currentStyle)).toString());
+    fontSizeCombo.setSelectedItem(new Integer(
+                        StyleConstants.getFontSize(currentStyle)).toString());
     fontSizeCombo.setEditable(true);
     JPanel box = new JPanel();
     box.setLayout(new BoxLayout(box, BoxLayout.X_AXIS));
@@ -135,7 +136,8 @@ public class TextAttributesChooser extends JDialog {
     superscriptChk = new JCheckBox("<html>T<sup>Superscript</sup></html>");
     superscriptChk.setSelected(StyleConstants.isSuperscript(currentStyle));
     box1.add(superscriptChk);
-    strikethroughChk = new JCheckBox("<html><strike>Strikethrough</strike></html>");
+    strikethroughChk = new JCheckBox(
+                                "<html><strike>Strikethrough</strike></html>");
     strikethroughChk.setSelected(StyleConstants.isStrikeThrough(currentStyle));
     box1.add(strikethroughChk);
     box.add(box1);
@@ -219,59 +221,62 @@ public class TextAttributesChooser extends JDialog {
           fontSizeCombo.setSelectedIndex(3);
         }
         StyleConstants.setFontSize(currentStyle,
-                                   Integer.parseInt((String)fontSizeCombo.getSelectedItem()));
+                                   Integer.parseInt((String)
+                                   fontSizeCombo.getSelectedItem()));
         updateSample();
       }
     });
 
-    boldChk.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e){
+    boldChk.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
         StyleConstants.setBold(currentStyle, boldChk.isSelected());
         updateSample();
       }
     });
 
-    italicChk.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e){
+    italicChk.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
         StyleConstants.setItalic(currentStyle, italicChk.isSelected());
         updateSample();
       }
     });
 
-    underlineChk.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e){
+    underlineChk.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
         if(underlineChk.isSelected()) strikethroughChk.setSelected(false);
         StyleConstants.setUnderline(currentStyle, underlineChk.isSelected());
         updateSample();
       }
     });
 
-    strikethroughChk.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e){
+    strikethroughChk.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
         if(strikethroughChk.isSelected()) underlineChk.setSelected(false);
-        StyleConstants.setStrikeThrough(currentStyle, strikethroughChk.isSelected());
+        StyleConstants.setStrikeThrough(currentStyle,
+                                                strikethroughChk.isSelected());
         updateSample();
       }
     });
 
-    superscriptChk.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e){
+    superscriptChk.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
         if(superscriptChk.isSelected()) subscriptChk.setSelected(false);
-        StyleConstants.setSuperscript(currentStyle, superscriptChk.isSelected());
+        StyleConstants.setSuperscript(currentStyle,
+                                                  superscriptChk.isSelected());
         updateSample();
       }
     });
 
-    subscriptChk.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e){
+    subscriptChk.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
         if(subscriptChk.isSelected()) superscriptChk.setSelected(false);
         StyleConstants.setSubscript(currentStyle, subscriptChk.isSelected());
         updateSample();
       }
     });
 
-    fgChooser.getSelectionModel().addChangeListener(new ChangeListener(){
-      public void stateChanged(ChangeEvent e){
+    fgChooser.getSelectionModel().addChangeListener(new ChangeListener() {
+      public void stateChanged(ChangeEvent e) {
         StyleConstants.setForeground(currentStyle, fgChooser.getColor());
         useForegroundChk.setSelected(true);
         updateSample();
@@ -280,7 +285,7 @@ public class TextAttributesChooser extends JDialog {
 
     useForegroundChk.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        if(useForegroundChk.isSelected()){
+        if(useForegroundChk.isSelected()) {
           StyleConstants.setForeground(currentStyle, fgChooser.getColor());
         }else{
           currentStyle.removeAttribute(StyleConstants.Foreground);
@@ -289,8 +294,8 @@ public class TextAttributesChooser extends JDialog {
       }
     });
 
-    bgChooser.getSelectionModel().addChangeListener(new ChangeListener(){
-      public void stateChanged(ChangeEvent e){
+    bgChooser.getSelectionModel().addChangeListener(new ChangeListener() {
+      public void stateChanged(ChangeEvent e) {
         StyleConstants.setBackground(currentStyle, bgChooser.getColor());
         useBackgroundChk.setSelected(true);
         updateSample();
@@ -308,21 +313,21 @@ public class TextAttributesChooser extends JDialog {
       }
     });
 
-    this.addComponentListener(new ComponentAdapter(){
-      public void componentShown(ComponentEvent e){
+    this.addComponentListener(new ComponentAdapter() {
+      public void componentShown(ComponentEvent e) {
         updateSample();
       }
     });
 
-    okButton.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e){
+    okButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
         choice = true;
         setVisible(false);
       }
     });
 
-    cancelButton.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e){
+    cancelButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
         choice = false;
         setVisible(false);
       }
@@ -341,7 +346,7 @@ public class TextAttributesChooser extends JDialog {
    * @return an {@link javax.swing.text.AttributeSet} containing the values
    * selected by the user.
    */
-  public AttributeSet show(AttributeSet style){
+  public AttributeSet show(AttributeSet style) {
     currentStyle = new SimpleAttributeSet(style);
     //currentStyle.addAttributes(style);
     updateData();
@@ -356,9 +361,10 @@ public class TextAttributesChooser extends JDialog {
    * Updates all the GUI components to show the values in the current attribute
    * set.
    */
-  protected void updateData(){
+  protected void updateData() {
     fontFamilyCombo.setSelectedItem(StyleConstants.getFontFamily(currentStyle));
-    fontSizeCombo.setSelectedItem(new Integer(StyleConstants.getFontSize(currentStyle)).toString());
+    fontSizeCombo.setSelectedItem(new Integer(
+                        StyleConstants.getFontSize(currentStyle)).toString());
     boldChk.setSelected(StyleConstants.isBold(currentStyle));
     italicChk.setSelected(StyleConstants.isItalic(currentStyle));
     italicChk.setSelected(StyleConstants.isItalic(currentStyle));
@@ -369,21 +375,21 @@ public class TextAttributesChooser extends JDialog {
     if(currentStyle.isDefined(StyleConstants.Foreground)){
       fgChooser.setColor(StyleConstants.getForeground(currentStyle));
       useForegroundChk.setSelected(true);
-    }else useForegroundChk.setSelected(false);
+    } else useForegroundChk.setSelected(false);
     if(currentStyle.isDefined(StyleConstants.Background)){
       bgChooser.setColor(StyleConstants.getBackground(currentStyle));
       useBackgroundChk.setSelected(true);
-    }else useBackgroundChk.setSelected(false);
+    } else useBackgroundChk.setSelected(false);
   }
 
   /**
    * Updates the sample text with the current attributes.
    */
-  protected void updateSample(){
+  protected void updateSample() {
     if(sampleText.getSelectedText() != null &&
        sampleText.getSelectedText().length() > 0){
       sampleText.setCharacterAttributes(currentStyle, true);
-    }else{
+    } else {
       sampleText.selectAll();
       sampleText.setCharacterAttributes(currentStyle, true);
       sampleText.setSelectionStart(0);
@@ -394,8 +400,8 @@ public class TextAttributesChooser extends JDialog {
   /**
    * Test code
    */
-  public static void main(String[] args){
-    try{
+  public static void main(String[] args) {
+    try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
       JFrame frame = new JFrame("Frame");
       frame.addWindowListener(new WindowAdapter(){
@@ -403,7 +409,8 @@ public class TextAttributesChooser extends JDialog {
           System.exit(0);
         }
       });
-      final TextAttributesChooser dialog = new TextAttributesChooser(frame, "Dialog", false);
+      final TextAttributesChooser dialog = new TextAttributesChooser(frame,
+                                                              "Dialog", false);
       //frame.getContentPane().add(dialog.getContentPane().getComponent(0));
       JButton btn = new JButton("Display Dialog");
       btn.addActionListener(new ActionListener(){

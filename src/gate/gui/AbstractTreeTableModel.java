@@ -1,4 +1,3 @@
-package gate.gui;
 /*
  *  Copyright (c) 1998-2001, The University of Sheffield.
  *
@@ -12,6 +11,7 @@ package gate.gui;
  *  $Id$
  *
  */
+package gate.gui;
 
 import javax.swing.tree.*;
 import javax.swing.event.*;

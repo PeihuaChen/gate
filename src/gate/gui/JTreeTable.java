@@ -1,3 +1,16 @@
+/*
+ *  Copyright (c) 1998-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Valentin Tablan 06/03/2001
+ *
+ *  $Id$
+ *
+ */
 package gate.gui;
 
 import javax.swing.*;
@@ -94,7 +107,7 @@ public class JTreeTable extends XJTable {
    * The renderer used to display the table cells containing tree nodes.
    * Will use the {@link tree} to paint the nodes.
    */
-  public class TreeTableCellRenderer extends DefaultTableCellRenderer{
+  public class TreeTableCellRenderer extends DefaultTableCellRenderer {
 /*
     public TreeTableCellRenderer() {
 
@@ -150,11 +163,11 @@ public class JTreeTable extends XJTable {
       tree.paint(g);
     }
 
-    public void setBounds(Rectangle bounds){
+    public void setBounds(Rectangle bounds) {
       this.bounds = bounds;
     }
 
-    public void setBounds(int x, int y, int w, int h){
+    public void setBounds(int x, int y, int w, int h) {
       this.bounds = new Rectangle(x, y, w, h);
     }
 
@@ -181,7 +194,7 @@ public class JTreeTable extends XJTable {
                                                  Object value,
                                                  boolean isSelected,
                                                  int row,
-                                                 int column){
+                                                 int column) {
       editor = tree.getCellEditor();
       editorComponent = editor.getTreeCellEditorComponent(
                     tree, tree.getPathForRow(row).getLastPathComponent(),
@@ -194,7 +207,7 @@ public class JTreeTable extends XJTable {
       return editorComponent;
     }
 
-    public Object getCellEditorValue(){
+    public Object getCellEditorValue() {
       return editor == null ? null : editor.getCellEditorValue();
     }
 /*
@@ -247,7 +260,7 @@ public class JTreeTable extends XJTable {
    * into the JTree space. It is used to forward the mouse events to the tree
    * if they occured in the space used by the tree.
    */
-  class MouseHandler extends MouseAdapter{
+  class MouseHandler extends MouseAdapter {
     public void mousePressed(MouseEvent e) {
       if(columnAtPoint(e.getPoint()) == 0){
         tree.dispatchEvent(convertEvent(e));
@@ -319,17 +332,17 @@ public class JTreeTable extends XJTable {
           fireTableDataChanged();
         }
       });
-      tree.getModel().addTreeModelListener(new TreeModelListener(){
-        public void treeNodesChanged(TreeModelEvent e){
+      tree.getModel().addTreeModelListener(new TreeModelListener() {
+        public void treeNodesChanged(TreeModelEvent e) {
           fireTableDataChanged();
         }
-        public void treeNodesInserted(TreeModelEvent e){
+        public void treeNodesInserted(TreeModelEvent e) {
           fireTableDataChanged();
         }
-        public void treeNodesRemoved(TreeModelEvent e){
+        public void treeNodesRemoved(TreeModelEvent e) {
           fireTableDataChanged();
         }
-        public void treeStructureChanged(TreeModelEvent e){
+        public void treeStructureChanged(TreeModelEvent e) {
           fireTableDataChanged();
         }
       });
@@ -377,7 +390,7 @@ public class JTreeTable extends XJTable {
   /**
    * The JTree used for rendering the first column.
    */
-  class CustomJTree extends JTree{
+  class CustomJTree extends JTree {
     public void setEditable(boolean editable){
       super.setEditable(false);
     }
