@@ -90,4 +90,5 @@ class ResourcePersistence implements Persistence{
   protected String resourceName;
   protected Object initParams;
   protected Object features;
+  static final long serialVersionUID = -3196664486112887875L;
 }

@@ -63,4 +63,5 @@ public class ControllerPersistence extends ResourcePersistence {
   }
 
   protected Object prList;
+  static final long serialVersionUID = 727852357092819439L;
 }

@@ -70,5 +70,5 @@ public class LRPersistence extends ResourcePersistence {
 
   protected Serializable dsData;
   protected Object persistenceID;
-
+  static final long serialVersionUID = 3541034274225534363L;
 }

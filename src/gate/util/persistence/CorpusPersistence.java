@@ -80,4 +80,5 @@ public class CorpusPersistence extends LRPersistence {
 
 
   protected ArrayList docList;
+  static final long serialVersionUID = 6181534551802883626L;
 }

@@ -80,4 +80,5 @@ public class MapPersistence implements Persistence {
 
   protected Class mapType;
   protected HashMap localMap;
+  static final long serialVersionUID = 1835776085941379996L;
 }

@@ -60,4 +60,5 @@ public class LanguageAnalyserPersistence extends PRPersistence {
 
   protected Object corpus;
   protected Object document;
+  static final long serialVersionUID = -4632241679877556163L;
 }
