@@ -42,30 +42,32 @@ public class Gate
 
     // check net connection and set canReachGateHome
     // and canReachGateAcUk appropriately
-    try{
-      // determine an IP address for the given host name
-      InetAddress inet = InetAddress.getByName("derwent.dcs.shef.ac.uk");
 
+    // DERWENT
+    try{
+      // ask the web server from derwent if it's alive
+      URL url = new URL("http://derwent.dcs.shef.ac.uk");
+      url.getContent();
       // set the gateHomeReachable
       gateHomeReachable = true;
 
-    } catch (UnknownHostException e) {
-      // if no IP address for the host could be found then
-      // set the gateHomeReachable on false
+    } catch (MalformedURLException exception1){
+      throw new GateException("The URL for derwent is malformed !");
+    } catch (IOException exception2){
       gateHomeReachable = false;
     }
 
+    //GATE.AC.UK
     try{
-      // determine an IP address for www.gate.ac.uk
-      InetAddress inet = InetAddress.getByName("www.gate.ac.uk");
-
-      // set the gateAcUkReachable
+      // ask the web server from gate machine if it's alive
+      URL url = new URL("http://www.gate.ac.uk");
+      url.getContent();
+      // set the gateHomeReachable
       gateAcUkReachable = true;
 
-    } catch (UnknownHostException e) {
-
-      // if no IP address could be found
-      // then set the gateAcUkReachable on false
+    } catch (MalformedURLException exception1){
+      throw new GateException("The URL for gate.ac.uk is malformed !");
+    } catch (IOException exception2){
       gateAcUkReachable = false;
     }
 
