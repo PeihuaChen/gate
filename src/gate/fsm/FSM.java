@@ -23,7 +23,7 @@ import gate.jape.*;
   * This class implements a standard Finite State Machine.
   * It is used for both deterministic and non-deterministic machines.
   */
-public class FSM implements JapeConstants{
+public class FSM implements JapeConstants {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -467,7 +467,7 @@ public class FSM implements JapeConstants{
   /**
     * The set of states for this FSM
     */
-  private Collection allStates =  new HashSet();
+  private transient Collection allStates =  new HashSet();
 
   /**
     * The top level FSM that contains this FSM, null if this FSM is a top

@@ -16,11 +16,12 @@
 package gate.jape;
 import gate.*;
 import java.util.Map;
+import java.io.*;
 
 /** An interface that defines what the action classes created
   * for RightHandSides look like.
   */
-public interface RhsAction {
+public interface RhsAction extends Serializable {
 
   public void doit(Document doc, AnnotationSet annotations, Map bindings)
               throws JapeException;

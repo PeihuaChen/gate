@@ -22,7 +22,7 @@ import gate.jape.*;
  * This class implements a Finite State Machine state.
  *
  */
-public class State {
+public class State implements JapeConstants {
 
   /** Debug flag
    */

@@ -16,6 +16,7 @@
 package gate.creole;
 
 import java.util.*;
+import java.io.*;
 
 import gate.*;
 import gate.util.*;
@@ -24,7 +25,7 @@ import gate.util.*;
 /** A convenience implementation of Resource with some default code.
   */
 abstract public class AbstractResource
-extends AbstractFeatureBearer implements Resource
+extends AbstractFeatureBearer implements Resource, Serializable
 {
   static final long serialVersionUID = -9196293927841163321L;
 

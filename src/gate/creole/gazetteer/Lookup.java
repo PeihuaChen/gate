@@ -22,7 +22,7 @@ package gate.creole.gazetteer;
  * intended to represesnt a comma separated list).
  *
  */
-class Lookup {
+class Lookup implements java.io.Serializable {
 
   /** Debug flag
    */

@@ -16,6 +16,7 @@
 package gate.creole.gazetteer;
 
 import java.util.*;
+import java.io.*;
 
 import gate.creole.tokeniser.*;
 import gate.util.*;
@@ -24,7 +25,7 @@ import gate.util.*;
  * gazetter.
  *
  */
-class FSMState {
+class FSMState implements Serializable {
 
   /** Debug flag
    */

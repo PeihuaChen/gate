@@ -45,13 +45,20 @@ public class CreoleRegisterImpl extends HashMap
   protected static final boolean DEBUG = false;
 
   /** The set of CREOLE directories (URLs). */
-  protected Set directories = new HashSet();
+  protected Set directories;
 
   /** The parser for the CREOLE directory files */
   protected transient SAXParser parser = null;
 
   /** Default constructor. Sets up directory files parser. */
   public CreoleRegisterImpl() throws GateException {
+
+    // initialise the various maps
+    directories = new HashSet();
+    lrTypes = new HashSet();
+    prTypes = new HashSet();
+    vrTypes = new HashSet();
+    toolTypes = new HashSet();
 
     // construct a SAX parser for parsing the CREOLE directory files
     try {
@@ -224,18 +231,27 @@ public class CreoleRegisterImpl extends HashMap
     // add class names to the type lists
     if(LanguageResource.class.isAssignableFrom(resClass)) {
       if(DEBUG) Out.prln("LR: " + resClass);
+      if(lrTypes == null) lrTypes = new HashSet(); // for deserialisation
       lrTypes.add(rd.getClassName());
     } else if(ProcessingResource.class.isAssignableFrom(resClass)) {
-      if(DEBUG) Out.prln("PR: " + resClass);
+      if(DEBUG) {
+        Out.prln("PR: " + resClass);
+        //Out.prln("prTypes: " + prTypes);
+        //Out.prln("rd.getClassName(): " + rd.getClassName());
+      }
+      if(prTypes == null) prTypes = new HashSet(); // for deserialisation
       prTypes.add(rd.getClassName());
     } else if(VisualResource.class.isAssignableFrom(resClass)) {
       if(DEBUG) Out.prln("VR: " + resClass);
+      if(vrTypes == null) vrTypes = new HashSet(); // for deserialisation
       vrTypes.add(rd.getClassName());
     }
 
     // maintain tool types list
-    if(rd.isTool())
+    if(rd.isTool()) {
+      if(toolTypes == null) toolTypes = new HashSet(); // for deserialisation
       toolTypes.add(rd.getClassName());
+    }
 
     return super.put(key, value);
   } // put(key, value)
@@ -438,16 +454,16 @@ public class CreoleRegisterImpl extends HashMap
    */// fireResourceUnloaded
 
   /** A list of the types of LR in the register. */
-  protected Set lrTypes = new HashSet();
+  protected Set lrTypes;
 
   /** A list of the types of PR in the register. */
-  protected Set prTypes = new HashSet();
+  protected Set prTypes;
 
   /** A list of the types of VR in the register. */
-  protected Set vrTypes = new HashSet();
+  protected Set vrTypes;
 
   /** A list of the types of TOOL in the register. */
-  protected Set toolTypes = new HashSet();
+  protected Set toolTypes;
 
   private transient Vector creoleListeners;
   protected void fireResourceLoaded(CreoleEvent e) {

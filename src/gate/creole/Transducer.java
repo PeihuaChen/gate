@@ -21,6 +21,7 @@ import gate.jape.*;
 import java.net.*;
 import gate.event.*;
 import java.util.*;
+import java.io.*;
 
 /**
  * A cascaded multi-phase transducer using the Jape language which is a
@@ -33,8 +34,15 @@ public class Transducer extends AbstractProcessingResource {
    * constructor from the super class. The actual object initialisation is done
    * via the {@link #init} method.
    */
-  public Transducer() {
-  }
+  public Transducer() { }
+
+  /*
+  private void writeObject(ObjectOutputStream oos) throws IOException {
+    Out.prln("writing transducer");
+    oos.defaultWriteObject();
+    Out.prln("finished writing transducer");
+  } // writeObject
+  */
 
   /**
    * This method is the one responsible for initialising the transducer. It
@@ -43,20 +51,25 @@ public class Transducer extends AbstractProcessingResource {
    *@return a reference to <b>this</b>
    */
   public Resource init() throws ResourceInstantiationException {
-    sListener = new StatusListener(){
+    class SerialStatusListener implements StatusListener, Serializable {
       public void statusChanged(String text){
         fireStatusChanged(text);
       }
     };
+    sListener = new SerialStatusListener();
+
     if(grammarURL != null && encoding != null){
       try{
         batch = new Batch(grammarURL, encoding, sListener);
       }catch(JapeException je){
         throw new ResourceInstantiationException(je);
       }
-    }else throw new ResourceInstantiationException(
-          "Both the URL (was " + grammarURL + ") and the encoding (was " +
-          encoding + ") are needed to create a JapeTransducer!");
+    } else
+      throw new ResourceInstantiationException (
+        "Both the URL (was " + grammarURL + ") and the encoding (was " +
+        encoding + ") are needed to create a JapeTransducer!"
+      );
+
     return this;
   }
 
@@ -172,7 +185,10 @@ public class Transducer extends AbstractProcessingResource {
     }
   }
   public synchronized void addStatusListener(StatusListener l) {
-    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
+    Vector v =
+      statusListeners == null
+      ? new Vector(2)
+      : (Vector) statusListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       statusListeners = v;
@@ -209,7 +225,7 @@ public class Transducer extends AbstractProcessingResource {
    */
   private String outputASName;
 
-  private StatusListener sListener;
+  private transient StatusListener sListener;
   private transient Vector statusListeners;
   protected void fireStatusChanged(String e) {
     if (statusListeners != null) {

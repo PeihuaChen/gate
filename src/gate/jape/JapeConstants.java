@@ -20,11 +20,12 @@ import gate.*;
 import gate.annotation.*;
 import gate.util.*;
 import java.util.*;
+import java.io.*;
 
 /**
   * Constants interface for the JAPE package.
   */
-public interface JapeConstants
+public interface JapeConstants extends Serializable
 {
 
   /** no Kleene operator */
@@ -64,6 +65,9 @@ public interface JapeConstants
 
 
 // $Log$
+// Revision 1.5  2001/04/06 17:09:49  hamish
+// save of session state via serialisation prototyped
+//
 // Revision 1.4  2000/11/08 16:35:02  hamish
 // formatting
 //

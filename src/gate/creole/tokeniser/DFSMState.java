@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- * 
+ *
  *  Valentin Tablan, 27/06/2000
  *
  *  $Id$
@@ -27,7 +27,7 @@ import gate.util.*;
   * types to sets of states, hence the nondeterministic character.
   * {@see FSMState FSMState}
   */
-class DFSMState { //extends FSMState{
+class DFSMState implements java.io.Serializable { //extends FSMState{
 
   /** Debug flag */
   private static final boolean DEBUG = false;
