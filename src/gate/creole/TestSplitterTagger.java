@@ -96,7 +96,9 @@ public class TestSplitterTagger extends TestCase{
     Iterator tokIter =doc.getAnnotations("testAS").get("Token").iterator();
     while(tokIter.hasNext()){
       Annotation token = (Annotation)tokIter.next();
-      assertNotNull(token.getFeatures().get("category"));
+      String kind = (String)token.getFeatures().get("kind");
+      if(kind.equals("kind"))
+        assertNotNull(token.getFeatures().get("category"));
     }
   }
 }

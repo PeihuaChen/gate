@@ -162,7 +162,7 @@ public class TestGate {
       boolean allTests = true;
 
       if(! allTests)
-        suite.addTest(CookBook.suite());
+        suite.addTest(TestSplitterTagger.suite());
       else {
         suite.addTest(TestControllers.suite());
         suite.addTest(TestPersist.suite());
