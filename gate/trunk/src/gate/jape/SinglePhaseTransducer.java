@@ -357,7 +357,10 @@ extends Transducer implements JapeConstants, java.io.Serializable
 // >>> was
 //              if(onePath.getFeatures().entrySet().containsAll(features.entrySet())){
 // >>> NASO, FeatArray optimization
-              if(onePath.getFeatures().subsumes(
+							/* ontotext.bp: always try to subsume using an ontology; */
+							/*if null then the ordinary subsume method is started*/
+
+              if(onePath.getFeatures().subsumes(this.getOntology(),
 //dam: was
 //                features
 //dam: now
