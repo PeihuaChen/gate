@@ -211,10 +211,10 @@ public class TestGate {
         suite.addTest(TestCreole.suite());
         suite.addTest(TestPR.suite());
       } else {
+        suite.addTest(TestPersist.suite());
         suite.addTest(TestBumpyStack.suite());
         suite.addTest(TestControllers.suite());
         suite.addTest(TestSecurity.suite());
-        suite.addTest(TestPersist.suite());
         suite.addTest(TestAnnotationDiff.suite());
         suite.addTest(TestConfig.suite());
         suite.addTest(TestAnnotation.suite());
