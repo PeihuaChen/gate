@@ -229,7 +229,11 @@
 	</target>
   
   <!-- Run the beast -->
-  <target name="run">
+  <target name="run" depends="run-pre,run-nonmac,run-mac" >
+  </target>
+  
+  <!-- Prepares for running GATE -->
+  <target name="run-pre">
     <property name="toolsjar.debug" refid="tools.jar.path"/>
     <property name="class.path.debug" refid="run.class.path"/>
     <echo>
@@ -239,15 +243,28 @@
       Using tools.jar at ${toolsjar.debug}
       CLASSPATH=${class.path.debug}
     </echo>
-    <condition property="mac.dock.name.option"
-               value="-Xdock:name=GATE 3.0">
+    <!-- Find if the platform is MAC -->
+    <condition property="running.on.mac">
       <os family="mac"/>
     </condition>
-    <condition property="mac.dock.name.option"
-               value="">
-      <not><os family="mac"/></not>
-    </condition>    
-    
+  </target>
+  
+  <!-- Starts GATE on non MAC platforms -->  
+  <target name="run-nonmac" unless="running.on.mac">
+    <java classname="gate.Main" 
+          classpathref="run.class.path" 
+          fork="true"
+          spawn="false"
+          dir="." 
+          logError="true"
+          maxmemory="${run.memory}">
+       <jvmarg value="-Djava.ext.dirs=${extDir}"/>
+       <jvmarg value="-Dsun.java2d.opengl=true"/>
+     </java>
+  </target>
+  
+  <!-- Starts GATE on MAC platforms -->
+  <target name="run-mac" if="running.on.mac">
     <java classname="gate.Main" 
           classpathref="run.class.path" 
           fork="true"
@@ -260,7 +277,7 @@
        <jvmarg value="-Dapple.laf.useScreenMenuBar=true"/>
        <jvmarg value="-Dcom.apple.mrj.application.growbox.intrudes=false"/>
        <jvmarg value="-Dcom.apple.mrj.application.live-resize=true"/>
-       <jvmarg value="${mac.dock.name.option}"/>
+       <jvmarg value="-Xdock:name=GATE 3.0"/>
      </java>
   </target>
   
