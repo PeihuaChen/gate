@@ -55,6 +55,10 @@ public class SerialAnalyserController extends SerialController {
       super.execute();
 
       corpus.unloadDocument(doc);
+      //kalina: added this to try processing the BNC
+      //needs proper fixing by Valy
+      if(doc.getDataStore() != null)
+        Factory.deleteResource(doc);
 
     }
   }

@@ -30,6 +30,7 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
   implements ProcessingResource {
 
   protected String markupSetName = GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME;
+  protected List annotationTypes;
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException
@@ -57,7 +58,10 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
       throw new GateRuntimeException("No document to process!");
 
     //first clear the default set, which cannot be removed
-    document.getAnnotations().clear();
+    if (annotationTypes == null || annotationTypes.isEmpty())
+      document.getAnnotations().clear();
+    else
+      removeSubSet(document.getAnnotations());
 
     //get the names of all sets
     Map namedSets = document.getNamedAnnotationSets();
@@ -70,11 +74,23 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
     Iterator iter = setNames.iterator();
     while (iter.hasNext()) {
       String setName = (String) iter.next();
-      if (! setName.equals(markupSetName))
-        document.removeAnnotationSet(setName);
+      if (! setName.equals(markupSetName)) {
+        if(annotationTypes == null || annotationTypes.isEmpty())
+          document.removeAnnotationSet(setName);
+        else
+          removeSubSet(document.getAnnotations(setName));
+      }//if
     }
 
   } // execute()
+
+  private void removeSubSet(AnnotationSet theSet) {
+    AnnotationSet toRemove = theSet.get(new HashSet(annotationTypes));
+    if (toRemove == null || toRemove.isEmpty())
+      return;
+    theSet.removeAll(toRemove);
+
+  }//removeSubSet
 
   public void setMarkupASName(String newMarkupASName) {
     markupSetName = newMarkupASName;
@@ -82,6 +98,14 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
 
   public String  getMarkupASName() {
     return markupSetName;
+  }
+
+  public List getAnnotationTypes() {
+    return this.annotationTypes;
+  }
+
+  public void setAnnotationTypes(List newTypes) {
+    annotationTypes = newTypes;
   }
 
 } // class AnnotationSetTransfer

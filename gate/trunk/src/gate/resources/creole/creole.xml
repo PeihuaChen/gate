@@ -264,7 +264,7 @@
     </RESOURCE>
     <!-- creole.xml for namematch -->
     <RESOURCE>
-      <NAME>ANNIE OrthoMatch</NAME>
+      <NAME>ANNIE OrthoMatcher</NAME>
       <CLASS>gate.creole.orthomatcher.OrthoMatcher</CLASS>
       <COMMENT>ANNIE orthographical coreference component</COMMENT>
       <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
@@ -292,6 +292,7 @@
       <CLASS>gate.creole.annotdelete.AnnotationDeletePR</CLASS>
       <COMMENT>Document cleaner</COMMENT>
       <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
+      <PARAMETER NAME="annotationTypes" RUNTIME="true" OPTIONAL="true">java.util.ArrayList</PARAMETER>
     </RESOURCE>
   </CREOLE>
   <!-- creole.xml for Controllers -->
