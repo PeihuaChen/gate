@@ -16,16 +16,10 @@
 
 package gate.creole.gazetteer;
 
-import java.io.*;
 import java.util.*;
-import java.net.*;
-
 import gate.util.*;
-import gate.creole.gazetteer.*;
-import gate.event.*;
 import gate.*;
 import gate.creole.*;
-import javax.swing.*;
 
 /**
  * <p>Title: Flexible Gazetteer </p>
