@@ -99,10 +99,17 @@ public class CreoleRegisterImpl extends HashMap
   } // default constructor
 
   /** Add a CREOLE directory URL to the register and to the GATE classloader.
-    * The directory is <B>not</B> registered.
+    * The directory will be automatically registered.
+    * This method is equivalent with #registerDirectories(URL) which it actually
+    * calls and it's only kept here for backwards compatibility reasons.
+    * @deprecated
     */
   public void addDirectory(URL directoryUrl) {
-    directories.add(directoryUrl);
+    try{
+      registerDirectories(directoryUrl);
+    }catch(GateException ge){
+      throw new GateRuntimeException(ge);
+    }
   } // addDirectory
 
   /** Get the list of CREOLE directory URLs. */
@@ -110,19 +117,19 @@ public class CreoleRegisterImpl extends HashMap
     return Collections.unmodifiableSet(directories);
   } // getDirectories
   
-  /** Register all the CREOLE directories that we know of.
-    * The <CODE>creole.xml</CODE> files
-    * at the URLs are parsed, and <CODE>ResourceData</CODE> objects added
-    * to the register.
-    * URLs for resource JAR files are added to the GATE class loader.
+  /** 
+   * All CREOLE directories are now automatically registered whne they are added
+   * so this method does nothing now. It is only kept here for backwards 
+   * compatibility reasons.
+   * @deprecated
     */
   public void registerDirectories() throws GateException {
-    Iterator iter = directories.iterator();
-
-    while(iter.hasNext()) {
-      URL directoryUrl = (URL) iter.next();
-      registerDirectories(directoryUrl);
-    }
+//    Iterator iter = directories.iterator();
+//
+//    while(iter.hasNext()) {
+//      URL directoryUrl = (URL) iter.next();
+//      registerDirectories(directoryUrl);
+//    }
   } // registerDirectories
 
   /** Register a single CREOLE directory. The <CODE>creole.xml</CODE>
