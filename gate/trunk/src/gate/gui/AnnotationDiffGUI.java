@@ -512,6 +512,10 @@ public class AnnotationDiffGUI extends JFrame{
         throw new GateRuntimeException(ioe);
       }
       
+      String[] matchType = new String[3];
+      matchType[AnnotationDiffer.CORRECT] = "C";
+      matchType[AnnotationDiffer.PARTIALLY_CORRECT] = "P";
+      matchType[AnnotationDiffer.WRONG] = "W";
       switch(column){
         case COL_KEY_START: return key == null ? "" : 
           key.getStartNode().getOffset().toString();
@@ -520,7 +524,7 @@ public class AnnotationDiffGUI extends JFrame{
         case COL_KEY_STRING: return keyStr;
         case COL_KEY_FEATURES: return key == null ? "" : 
           key.getFeatures().toString();
-        case COL_MATCH: return "";
+        case COL_MATCH: return "";//matchType[pairing.getType()];
         case COL_RES_START: return res == null ? "" : 
           res.getStartNode().getOffset().toString();
         case COL_RES_END: return res == null ? "" :
