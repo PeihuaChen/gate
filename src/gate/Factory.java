@@ -637,7 +637,9 @@ public abstract class Factory {
 } // abstract Factory
 
 /**
- *
+ * Factory is basically a collection of static methods but events need to
+ * have as source an object and not a class. The CreolProxy class addresses
+ * this issue acting as source for all events fired by the Factory class.
  */
 class CreoleProxy {
 
