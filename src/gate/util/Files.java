@@ -48,10 +48,14 @@ public class Files {
     BufferedReader resourceReader =
       new BufferedReader(new InputStreamReader(resourceStream));
     StringBuffer resourceBuffer = new StringBuffer();
-    int i;
+    int charsRead = 0;
+    final int size = 1024;
+    char[] charArray = new char[size];
 
-    while( (i = resourceReader.read()) != -1 )
-      resourceBuffer.append((char) i);
+    while( (charsRead = resourceReader.read(charArray,0,size)) != -1 )
+      resourceBuffer.append (charArray,0,charsRead);
+
+
 
     resourceReader.close();
     return resourceBuffer.toString();
@@ -72,15 +76,22 @@ public class Files {
     resourceFileWriter = new FileWriter(resourceFile);
     resourceFile.deleteOnExit ();
     resourceReader = new BufferedReader(new InputStreamReader(contentStream));
-    int i = 0;
 
-    while( (i = resourceReader.read()) != -1 )
-                                resourceFileWriter.write (i);
+    int charsRead = 0;
+    int fileWriterOffset = 0;
+    final int readSize = 1024;
+    char[] chars = new char[readSize];
 
-   resourceFileWriter.close();
-   resourceReader.close ();
-   contentStream.close ();
-   return resourceFile;
+    while( (charsRead = resourceReader.read(chars,0,readSize)) != -1 ){
+      resourceFileWriter.write (chars,fileWriterOffset,charsRead);
+      fileWriterOffset += charsRead;
+    }
+
+
+    resourceFileWriter.close();
+    resourceReader.close ();
+    contentStream.close ();
+    return resourceFile;
   }
 
 
@@ -91,7 +102,7 @@ public class Files {
     * this method should be passed the name <TT>jape/Test11.jape</TT>.
     */
   public static byte[] getResourceAsByteArray(String resourceName)
-  throws IOException {
+  throws IOException, IndexOutOfBoundsException, ArrayStoreException {
     InputStream resourceInputStream = getResourceAsStream(resourceName);
     BufferedInputStream resourceStream =
       new BufferedInputStream(resourceInputStream);
@@ -104,12 +115,9 @@ public class Files {
     while( (b = (byte) resourceStream.read()) != -1 ) {
       if(i == buf.length) {
         byte[] newBuf = new byte[buf.length * 2];
-
-        for(int j=0; j<i; j++)
-          newBuf[j] = buf[j];
+        System.arraycopy (buf,0,newBuf,0,i);
         buf = newBuf;
       }
-
       buf[i++] = b;
     }
 
@@ -118,9 +126,8 @@ public class Files {
 
     // copy the contents of buf to an array of the correct size
     byte[] bytes = new byte[i];
-    for(int j=0; j<i; j++)
-      bytes[j] = buf[j];
-
+    // copy from buf to bytes
+    System.arraycopy (buf,0,bytes,0,i);
     return bytes;
   } // getResourceAsByteArray(String)
 

@@ -1,27 +1,25 @@
 /*
- *	TestXml.java
+ *	TestHtml.java
  *
  *	Cristian URSU,  8/May/2000
  *
  *	$Id$
  */
 
-package gate.xml;
+package gate.html;
 
 import java.util.*;
-import java.net.*;
 import java.io.*;
 import junit.framework.*;
 import org.w3c.www.mime.*;
-import gate.util.*;
 
 /** Test class for XML facilities
   *
   */
-public class TestXml extends TestCase
+public class TestHtml extends TestCase
 {
   /** Construction */
-  public TestXml(String name) { super(name); }
+  public TestHtml(String name) { super(name); }
 
   /** Fixture set up */
   public void setUp() {
@@ -29,14 +27,14 @@ public class TestXml extends TestCase
 
 
   public static void main(String args[]){
-    TestXml app = new TestXml("TestXml");
+    TestHtml app = new TestHtml("TestHtml");
     try{
       app.testSomething ();
     }catch (Exception e){
-      e.printStackTrace (System.err);
+      System.out.println(e);
     }
   }
- 
+
 
   /** A test */
   public void testSomething() throws Exception{
@@ -58,79 +56,34 @@ public class TestXml extends TestCase
     markupElementsMap.put ("a","link");
     */
     // create a new gate document
-    //gate.Document doc = gate.Transients.newDocument(
-    //          new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/bnc.xml")
-
-
     gate.Document doc = gate.Transients.newDocument(
-              new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/xces/xces.xml")
+              "http://www.dcs.shef.ac.uk/~hamish"
     );
-
-
-    /*
-    gate.Document doc = gate.Transients.newDocument(
-              new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/Sentence.xml")
-    );
-    */
-
-    /*
-    File f = Files.writeTempFile(Files.getResourceAsStream("texts/Sentence.xml"));
-    URL u = f.toURL();
-    gate.Document doc = gate.Transients.newDocument(u);
-    f.delete ();
-    */
-   /*
-    gate.Document doc = gate.Transients.newDocument(
-      Files.getResourceAsString("texts/Sentence.xml")
-    );
-    */
     // get the docFormat that deals with it.
     // the parameter MimeType doesn't affect right now the behaviour
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
-      (new MimeType("text","xml")).toString()
+      (new MimeType("text","html")).toString()
     );
 
     // set's the map
     docFormat.setMarkupElementsMap(markupElementsMap);
-
     docFormat.unpackMarkup (doc,"DocumentContent");
 
     // graphic visualisation
-
     /*
-    System.out.println("Timer started...");
     if (docFormat != null){
-        // timing the operation
-        Date startTime = new Date();
-
         docFormat.unpackMarkup (doc);
-
-        Date endTime = new Date();
-        long  time1 = endTime.getTime () - startTime.getTime ();
-        System.out.println("unpacMarkup time for " + doc.getSourceURL () +
-          ": " + time1 / 1000 + "." + time1 % 1000 + " seconds.");
-
-        startTime = new Date();
-
         gate.jape.gui.JapeGUI japeGUI = new gate.jape.gui.JapeGUI();
         gate.Corpus corpus = gate.Transients.newCorpus("XML Test");
         corpus.add(doc);
         japeGUI.setCorpus(corpus);
-
-        endTime = new Date();
-        long time2 = endTime.getTime () - startTime.getTime ();
-        System.out.println("Graphic initialization time : " + time2 / 1000 +
-                            "." + time1 % 1000 + " seconds.");
-        System.out.println("Total time : " + (time1 + time2) / 1000 + "." +
-                            (time1 + time2) % 1000 + " seconds.");
     }
     */
-
   } // testSomething()
 
   /** Test suite routine for the test runner */
   public static Test suite() {
-    return new TestSuite(TestXml.class);
+    return new TestSuite(TestHtml.class);
   } // suite
 
 } // class TestXml

@@ -54,6 +54,11 @@ public class TestFiles extends TestCase
 
   } // testGetResources()
 
+  /** Test the writeTempFile... method. */
+  public void testWriteTempFile() throws Exception {
+   
+  } // testWriteTempFile()
+
   /** Test suite routine for the test runner */
   public static Test suite() {
     return new TestSuite(TestFiles.class);
