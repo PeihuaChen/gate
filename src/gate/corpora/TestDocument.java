@@ -32,7 +32,8 @@ public class TestDocument extends TestCase
 
   /** Fixture set up */
   public void setUp() {
-    testDocument1 = "tests/doc0.html";
+    testDocument1 = "texts/doc0.html";
+
   } // setUp
 
   /** Get the name of the test server */
@@ -43,10 +44,26 @@ public class TestDocument extends TestCase
     Document doc1 = null;
     Document doc2 = null;
     Document doc3 = null;
+    File f = null;
+    URL u = null;
+
+
     try {
-      doc1 = new DocumentImpl(testServer + "tests/def/");
-      doc2 = new DocumentImpl(testServer + "tests/defg/");
-      doc3 = new DocumentImpl(testServer + "tests/abc/");
+      f = Files.writeTempFile(Files.getResourceAsStream("texts/def"));
+      u = f.toURL();
+      doc1 = new DocumentImpl(u);
+      f.delete ();
+
+      f = Files.writeTempFile(Files.getResourceAsStream("texts/defg"));
+      u = f.toURL();
+      doc2 = new DocumentImpl(u);
+      f.delete();
+
+      f = Files.writeTempFile(Files.getResourceAsStream("texts/abc"));
+      u = f.toURL();
+      doc3 = new DocumentImpl(u);
+      f.delete();
+
     } catch (IOException e) {
     }
 
@@ -59,10 +76,12 @@ public class TestDocument extends TestCase
   public void testLotsOfThings() {
     // check that the test URL is available
     URL u = null;
-    try {
-      u = new URL(testServer + testDocument1);
-    } catch(MalformedURLException e) {
-      fail(e.toString());
+    File f = null;
+    try{
+      f = Files.writeTempFile(Files.getResourceAsStream(testDocument1));
+      u = f.toURL();
+    } catch (Exception e){
+      e.printStackTrace(System.err);
     }
 
     // get some text out of the test URL
@@ -75,7 +94,7 @@ public class TestDocument extends TestCase
     } catch(IOException e) {
       fail(e.toString());
     }
-
+    f.delete();
     /*
     Document doc = new TextualDocument(testServer + testDocument1);
     AnnotationGraph ag = new AnnotationGraphImpl();
