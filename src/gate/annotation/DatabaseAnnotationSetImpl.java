@@ -13,13 +13,20 @@
 
 package gate.annotation;
 
+import java.util.*;
+
+import junit.framework.*;
+
 import gate.event.*;
 import gate.*;
-import java.util.*;
 import gate.util.*;
 
 
 public class DatabaseAnnotationSetImpl extends AnnotationSetImpl {
+
+  public static final int CREATED_ANNOTATIONS = 1001;
+  public static final int UPDATED_ANNOTATIONS = 1002;
+  public static final int DELETED_ANNOTATIONS = 1003;
 
   /**
    * The listener for the events coming from the document (annotations and
@@ -117,5 +124,36 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl {
     }
 
   }//inner class EventsHandler
+
+
+  public HashSet getModifiedAnnotationIDs(int changeType) {
+
+    if (changeType != DatabaseAnnotationSetImpl.CREATED_ANNOTATIONS &&
+        changeType != DatabaseAnnotationSetImpl.UPDATED_ANNOTATIONS &&
+        changeType != DatabaseAnnotationSetImpl.DELETED_ANNOTATIONS)
+
+      throw new IllegalArgumentException();
+
+
+    HashSet result = new HashSet();
+
+    switch(changeType) {
+
+      case DatabaseAnnotationSetImpl.CREATED_ANNOTATIONS:
+        result.addAll(this.addedAnnotations);
+        break;
+      case DatabaseAnnotationSetImpl.UPDATED_ANNOTATIONS:
+        result.addAll(this.updatedAnnotations);
+        break;
+      case DatabaseAnnotationSetImpl.DELETED_ANNOTATIONS:
+        result.addAll(this.removedAnnotations);
+        break;
+      default:
+        Assert.fail();
+    }
+
+    return result;
+  }
+
 
 }
