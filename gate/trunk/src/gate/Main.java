@@ -309,7 +309,7 @@ public class Main {
   private static List debugNames = new ArrayList();
 
   /** Are we in batch mode? */
-  private static boolean batchMode = false;
+  public static boolean batchMode = false;
 
   /** Don't save collection after batch? */
   private static boolean destroyColl = false;

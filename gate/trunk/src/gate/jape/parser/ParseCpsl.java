@@ -124,7 +124,8 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
             }
 
             // construct a parser and parse it
-            fireStatusChangedEvent("Reading " + phaseNameTok.image + "...");
+            if (! Main.batchMode) //fire events if not in batch mode
+              fireStatusChangedEvent("Reading " + phaseNameTok.image + "...");
             try {
               parser = new ParseCpsl(sptURL, encoding, macrosMap);
             } catch (IOException e) {

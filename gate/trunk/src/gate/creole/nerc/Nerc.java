@@ -41,14 +41,16 @@ public class Nerc extends SerialController {
       FeatureMap params;
       FeatureMap features;
       Map listeners = new HashMap();
-      listeners.put("gate.event.StatusListener", new StatusListener(){
-        public void statusChanged(String text){
-          fireStatusChanged(text);
-        }
-      });
+      if (! Main.batchMode) {//fire events if not in batch mode
+        listeners.put("gate.event.StatusListener", new StatusListener(){
+          public void statusChanged(String text){
+            fireStatusChanged(text);
+          }
+        });
 
       //tokeniser
-      fireStatusChanged("Creating a tokeniser");
+        fireStatusChanged("Creating a tokeniser");
+      } //if do events if we're not in batch
       params = Factory.newFeatureMap();
       if(tokeniserRulesURL != null) params.put("tokeniserRulesURL",
                                                tokeniserRulesURL);
@@ -77,7 +79,8 @@ public class Nerc extends SerialController {
       features = Factory.newFeatureMap();
       Gate.setHiddenAttribute(features, true);
 
-      listeners.put("gate.event.ProgressListener",
+      if (! Main.batchMode) //fire events if not in batch mode
+        listeners.put("gate.event.ProgressListener",
                     new CustomProgressListener(11, 50));
 
       gazetteer = (DefaultGazetteer)Factory.createResource(
@@ -100,7 +103,8 @@ public class Nerc extends SerialController {
       features = Factory.newFeatureMap();
       Gate.setHiddenAttribute(features, true);
 
-      listeners.put("gate.event.ProgressListener",
+      if (! Main.batchMode) //fire events if not in batch mode
+        listeners.put("gate.event.ProgressListener",
                     new CustomProgressListener(50, 60));
 
       splitter = (SentenceSplitter)Factory.createResource(
@@ -122,7 +126,8 @@ public class Nerc extends SerialController {
       features = Factory.newFeatureMap();
       Gate.setHiddenAttribute(features, true);
 
-      listeners.put("gate.event.ProgressListener",
+      if (! Main.batchMode) //fire events if not in batch mode
+        listeners.put("gate.event.ProgressListener",
                     new CustomProgressListener(60, 65));
 
       tagger = (POSTagger)Factory.createResource(
@@ -145,13 +150,16 @@ public class Nerc extends SerialController {
       if(DEBUG) Out.prln("Parameters for the transducer: \n" + params);
       features = Factory.newFeatureMap();
       Gate.setHiddenAttribute(features, true);
-      listeners.put("gate.event.ProgressListener",
+      if (! Main.batchMode) //fire events if not in batch mode
+        listeners.put("gate.event.ProgressListener",
                     new CustomProgressListener(66, 100));
       transducer = (Transducer)Factory.createResource("gate.creole.Transducer",
                                                       params, features,
                                                       listeners);
-      fireProgressChanged(100);
-      fireProcessFinished();
+      if (! Main.batchMode) {//fire events if not in batch mode
+        fireProgressChanged(100);
+        fireProcessFinished();
+      } //if
       this.add(transducer);
       transducer.setName("Transducer " + System.currentTimeMillis());
     }catch(ResourceInstantiationException rie){

@@ -117,7 +117,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
     */
   public void transduce(Document doc, AnnotationSet inputAS,
                         AnnotationSet outputAS) throws JapeException {
-    fireProgressChanged(0);
+    if (! Main.batchMode) //fire events if not in batch mode
+      fireProgressChanged(0);
 
     //the input annotations will be read from this list
     ArrayList annotations = new ArrayList();
@@ -135,7 +136,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
         }
       }
     }
-    if(annotations.isEmpty()){
+    if(annotations.isEmpty() && !Main.batchMode){
       fireProcessFinished();
       return;
     }
@@ -384,13 +385,14 @@ extends Transducer implements JapeConstants, java.io.Serializable
          startNodeOff = ((Annotation)annotations.get(inputIndex)).
                         getStartNode().getOffset().intValue();
         //fire the progress event
-        if(startNodeOff - oldStartNodeOff > 1024){
+        if(!Main.batchMode && (startNodeOff - oldStartNodeOff > 1024)){
           fireProgressChanged(100 * startNodeOff / lastNodeOff);
           oldStartNodeOff = startNodeOff;
         }
        }
     }//while(inputIndex < annotations.size())
-    fireProcessFinished();
+    if (! Main.batchMode) //fire events if not in batch mode
+      fireProcessFinished();
   } // transduce
 
 
@@ -401,7 +403,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
     */
   public void transduce1(Document doc, AnnotationSet annotationSet)
                                                           throws JapeException {
-    fireProgressChanged(0);
+    if (! Main.batchMode) //fire events if not in batch mode
+      fireProgressChanged(0);
 
     //the input annotations will be read from this set
     AnnotationSet annotations = null;
@@ -661,13 +664,14 @@ extends Transducer implements JapeConstants, java.io.Serializable
       acceptingFSMInstances.clear();
       startNodeOff = startNode.getOffset().intValue();
 
-      if(startNodeOff - oldStartNodeOff > 1024){
+      if(!Main.batchMode && (startNodeOff - oldStartNodeOff > 1024)){
         fireProgressChanged(100 * startNodeOff / lastNodeOff);
         oldStartNodeOff = startNodeOff;
       }
     } // while(startNode != lastNode)
     // FSMInstance.clearInstances();
-    fireProcessFinished();
+    if (! Main.batchMode) //fire events if not in batch mode
+      fireProcessFinished();
   } // transduce
 
 
@@ -682,7 +686,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
     */
   public void transduce2(Document doc, AnnotationSet inputAS,
                         AnnotationSet outputAS) throws JapeException {
-    fireProgressChanged(0);
+    if (! Main.batchMode) //fire events if not in batch mode
+      fireProgressChanged(0);
 
     //the input annotations will be read from this set
     AnnotationSet annotations = null;
@@ -897,7 +902,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
        startNodeOff = newStartNode.getOffset().intValue();
 
       //fire the progress event
-      if(startNodeOff - oldStartNodeOff > 1024){
+      if(!Main.batchMode && (startNodeOff - oldStartNodeOff > 1024)){
         fireProgressChanged(100 * startNodeOff / lastNodeOff);
         oldStartNodeOff = startNodeOff;
       }
@@ -922,7 +927,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
 //System.out.println("->" + startNodeOff);
     } // while(startNode != lastNode)
     // FSMInstance.clearInstances();
-    fireProcessFinished();
+    if (! Main.batchMode) //fire events if not in batch mode
+      fireProcessFinished();
   } // transduce
 
 
@@ -1001,7 +1007,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
   java.util.Set input = new java.util.HashSet();
   private transient Vector progressListeners;
   protected void fireProgressChanged(int e) {
-    if (progressListeners != null) {
+    if (progressListeners != null && !Main.batchMode) {
       Vector listeners = progressListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -1010,7 +1016,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
     }
   }
   protected void fireProcessFinished() {
-    if (progressListeners != null) {
+    if (progressListeners != null && !Main.batchMode) {
       Vector listeners = progressListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {

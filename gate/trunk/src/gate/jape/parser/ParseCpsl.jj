@@ -289,7 +289,8 @@ MultiPhaseTransducer MultiPhaseTransducer() :
             }
 
             // construct a parser and parse it
-            fireStatusChangedEvent("Reading " + phaseNameTok.image + "...");
+            if (! Main.batchMode) //fire events if not in batch mode
+              fireStatusChangedEvent("Reading " + phaseNameTok.image + "...");
             try {
               parser = new ParseCpsl(sptURL, encoding, macrosMap);
             } catch (IOException e) {
@@ -1020,6 +1021,14 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.21  2001/09/12 15:24:45  kalina
+// Made the batchMode flag in Main public. This is now checked before
+// events are fired and listeners created. No bugs in tests or anywhere else
+// yet. To disable events, set batchMode to true in your batch code. By default
+// it is false, because some batch code e.g., MUSE, use events for progress
+// indication. Not having events does give some small performance gains, but
+// not much.
+//
 // Revision 1.20  2001/09/12 11:59:34  kalina
 // Changed the old JAPE stuff to use the new Collections API,
 // instead of com.objectspace stuff. Will eliminate that library

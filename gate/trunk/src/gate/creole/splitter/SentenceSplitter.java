@@ -38,14 +38,17 @@ public class SentenceSplitter extends AbstractProcessingResource{
     FeatureMap params;
     FeatureMap features;
     Map listeners = new HashMap();
-    listeners.put("gate.event.StatusListener", new StatusListener(){
-      public void statusChanged(String text){
-        fireStatusChanged(text);
-      }
-    });
+
+    if (! Main.batchMode){ //fire events if not in batch mode
+      listeners.put("gate.event.StatusListener", new StatusListener(){
+        public void statusChanged(String text){
+          fireStatusChanged(text);
+        }
+      });
 
     //gazetteer
-    fireStatusChanged("Creating the gazetteer");
+      fireStatusChanged("Creating the gazetteer");
+    }//if
     params = Factory.newFeatureMap();
     if(gazetteerListsURL != null) params.put("listsURL",
                                              gazetteerListsURL);
@@ -53,32 +56,40 @@ public class SentenceSplitter extends AbstractProcessingResource{
     features = Factory.newFeatureMap();
     Gate.setHiddenAttribute(features, true);
 
-    listeners.put("gate.event.ProgressListener",
+    if (! Main.batchMode) //fire events if not in batch mode
+      listeners.put("gate.event.ProgressListener",
                   new CustomProgressListener(0, 10));
 
     gazetteer = (DefaultGazetteer)Factory.createResource(
                     "gate.creole.gazetteer.DefaultGazetteer",
                     params, features, listeners);
     gazetteer.setName("Gazetteer " + System.currentTimeMillis());
-    fireProgressChanged(10);
+    if (! Main.batchMode) {//fire events if not in batch mode
+      fireProgressChanged(10);
 
     //transducer
-    fireStatusChanged("Creating the JAPE transducer");
+      fireStatusChanged("Creating the JAPE transducer");
+    }
+
     params = Factory.newFeatureMap();
     if(transducerURL != null) params.put("grammarURL", transducerURL);
     params.put("encoding", encoding);
     features = Factory.newFeatureMap();
     Gate.setHiddenAttribute(features, true);
 
-    listeners.put("gate.event.ProgressListener",
+    if (! Main.batchMode) //fire events if not in batch mode
+      listeners.put("gate.event.ProgressListener",
                   new CustomProgressListener(11, 100));
 
     transducer = (Transducer)Factory.createResource(
                     "gate.creole.Transducer",
                     params, features, listeners);
     transducer.setName("Transducer " + System.currentTimeMillis());
-    fireProgressChanged(100);
-    fireProcessFinished();
+
+    if (! Main.batchMode) {//fire events if not in batch mode
+      fireProgressChanged(100);
+      fireProcessFinished();
+    }
 
     return this;
   }

@@ -51,11 +51,12 @@ public class Transducer extends AbstractProcessingResource {
    *@return a reference to <b>this</b>
    */
   public Resource init() throws ResourceInstantiationException {
-    sListener = new StatusListener(){
-      public void statusChanged(String text){
-        fireStatusChanged(text);
-      }
-    };
+    if (! Main.batchMode) //fire events if not in batch mode
+      sListener = new StatusListener(){
+        public void statusChanged(String text){
+          fireStatusChanged(text);
+        }
+      };
 
     if(grammarURL != null && encoding != null){
       try{
@@ -69,15 +70,16 @@ public class Transducer extends AbstractProcessingResource {
         encoding + ") are needed to create a JapeTransducer!"
       );
 
-    batch.addProgressListener(new ProgressListener(){
-      public void progressChanged(int value){
-        fireProgressChanged(value);
-      }
+    if (! Main.batchMode) //fire events if not in batch mode
+      batch.addProgressListener(new ProgressListener(){
+        public void progressChanged(int value){
+          fireProgressChanged(value);
+        }
 
-      public void processFinished(){
-        fireProcessFinished();
-      }
-    });
+        public void processFinished(){
+          fireProcessFinished();
+        }
+      });
 
     return this;
   }

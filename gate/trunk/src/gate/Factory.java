@@ -204,9 +204,10 @@ public abstract class Factory {
         if(features != null) res.getFeatures().putAll(features);
 
         // fire the event
-        creoleProxy.fireResourceLoaded(
-          new CreoleEvent(res, CreoleEvent.RESOURCE_LOADED)
-        );
+        if (!Main.batchMode)
+          creoleProxy.fireResourceLoaded(
+            new CreoleEvent(res, CreoleEvent.RESOURCE_LOADED)
+          );
 
         return res;
       } // datastore was present
@@ -288,9 +289,10 @@ public abstract class Factory {
     if(features != null) res.getFeatures().putAll(features);
 
     // fire the event
-    creoleProxy.fireResourceLoaded(
-      new CreoleEvent(res, CreoleEvent.RESOURCE_LOADED)
-    );
+    if (!Main.batchMode)
+      creoleProxy.fireResourceLoaded(
+        new CreoleEvent(res, CreoleEvent.RESOURCE_LOADED)
+      );
 
     return res;
   } // create(resourceClassName, parameterValues, features, listeners)
@@ -327,9 +329,10 @@ public abstract class Factory {
     List instances = rd.getInstantiations();
     instances.remove(resource);
 //    resource.clear();
-    creoleProxy.fireResourceUnloaded(
-      new CreoleEvent(resource, CreoleEvent.RESOURCE_UNLOADED)
-    );
+    if (!Main.batchMode)
+      creoleProxy.fireResourceUnloaded(
+        new CreoleEvent(resource, CreoleEvent.RESOURCE_UNLOADED)
+      );
   } // deleteResource
 
   /** For each paramter, set the appropriate property on the resource
@@ -533,6 +536,9 @@ public abstract class Factory {
     IntrospectionException, InvocationTargetException,
     IllegalAccessException, GateException
   {
+    if (Main.batchMode)
+      return; //no need for listeners if in batch mode
+
     // get the beaninfo for the resource bean, excluding data about Object
     BeanInfo resBeanInfo = Introspector.getBeanInfo(
       resource.getClass(), Object.class
@@ -575,6 +581,9 @@ public abstract class Factory {
     IntrospectionException, InvocationTargetException,
     IllegalAccessException, GateException
   {
+    if (Main.batchMode)
+      return;
+
     // get the beaninfo for the resource bean, excluding data about Object
     BeanInfo resBeanInfo = Introspector.getBeanInfo(
       resource.getClass(), Object.class
@@ -673,7 +682,7 @@ public abstract class Factory {
   ) throws PersistenceException {
     DataStore ds = instantiateDataStore(dataStoreClassName, storageUrl);
     ds.open();
-    if(dsReg.add(ds))
+    if(dsReg.add(ds) && !Main.batchMode)
       creoleProxy.fireDatastoreOpened(
         new CreoleEvent(ds, CreoleEvent.DATASTORE_OPENED)
       );
@@ -691,7 +700,7 @@ public abstract class Factory {
     DataStore ds = instantiateDataStore(dataStoreClassName, storageUrl);
     ds.create();
     ds.open();
-    if(dsReg.add(ds))
+    if(dsReg.add(ds) && !Main.batchMode)
       creoleProxy.fireDatastoreCreated(
         new CreoleEvent(ds, CreoleEvent.DATASTORE_CREATED)
       );
@@ -738,7 +747,7 @@ public abstract class Factory {
 class CreoleProxy {
 
   public synchronized void removeCreoleListener(CreoleListener l) {
-    if (creoleListeners != null && creoleListeners.contains(l)) {
+    if (!Main.batchMode && creoleListeners != null && creoleListeners.contains(l)) {
       Vector v = (Vector) creoleListeners.clone();
       v.removeElement(l);
       creoleListeners = v;
@@ -746,6 +755,8 @@ class CreoleProxy {
   }// removeCreoleListener(CreoleListener l)
 
   public synchronized void addCreoleListener(CreoleListener l) {
+    if (Main.batchMode)
+      return;
     Vector v =
       creoleListeners == null ? new Vector(2) : (Vector) creoleListeners.clone();
     if (!v.contains(l)) {
@@ -755,7 +766,7 @@ class CreoleProxy {
   }// addCreoleListener(CreoleListener l)
 
   protected void fireResourceLoaded(CreoleEvent e) {
-    if (creoleListeners != null) {
+    if (!Main.batchMode && creoleListeners != null) {
       Vector listeners = creoleListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -765,7 +776,7 @@ class CreoleProxy {
   }// fireResourceLoaded(CreoleEvent e)
 
   protected void fireResourceUnloaded(CreoleEvent e) {
-    if (creoleListeners != null) {
+    if (!Main.batchMode && creoleListeners != null) {
       Vector listeners = creoleListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -775,7 +786,7 @@ class CreoleProxy {
   }// fireResourceUnloaded(CreoleEvent e)
 
   protected void fireDatastoreOpened(CreoleEvent e) {
-    if (creoleListeners != null) {
+    if (!Main.batchMode && creoleListeners != null) {
       Vector listeners = creoleListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -785,7 +796,7 @@ class CreoleProxy {
   }// fireDatastoreOpened(CreoleEvent e)
 
   protected void fireDatastoreCreated(CreoleEvent e) {
-    if (creoleListeners != null) {
+    if (!Main.batchMode && creoleListeners != null) {
       Vector listeners = creoleListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -795,7 +806,7 @@ class CreoleProxy {
   }// fireDatastoreCreated(CreoleEvent e)
 
   protected void fireDatastoreClosed(CreoleEvent e) {
-    if (creoleListeners != null) {
+    if (!Main.batchMode && creoleListeners != null) {
       Vector listeners = creoleListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {

@@ -96,38 +96,47 @@ implements JapeConstants, java.io.Serializable
   /** Transduce the document by running each phase in turn. */
   public void transduce(Document doc, AnnotationSet input,
                         AnnotationSet output) throws JapeException {
-    ProgressListener pListener = new ProgressListener(){
-      public void processFinished(){
-        donePhases ++;
-        if(donePhases == phasesCnt) fireProcessFinished();
-      }
 
-      public void progressChanged(int i){
-        int value = (donePhases * 100 + i)/phasesCnt;
-        fireProgressChanged(value);
-      }
+    ProgressListener pListener = null;
+    StatusListener sListener = null;
+    if (! Main.batchMode) {//fire events if not in batch mode
+      pListener = new ProgressListener(){
+        public void processFinished(){
+          donePhases ++;
+          if(donePhases == phasesCnt) fireProcessFinished();
+        }
 
-      int phasesCnt = phases.size();
-      int donePhases = 0;
-    };
+        public void progressChanged(int i){
+          int value = (donePhases * 100 + i)/phasesCnt;
+          fireProgressChanged(value);
+        }
 
-    StatusListener sListener = new StatusListener(){
-      public void statusChanged(String text){
-        fireStatusChanged(text);
-      }
-    };
+        int phasesCnt = phases.size();
+        int donePhases = 0;
+      };
+
+      sListener = new StatusListener(){
+        public void statusChanged(String text){
+          fireStatusChanged(text);
+        }
+      };
+    }//if
 
     for(ArrayIterator i = phases.begin(); ! i.atEnd(); i.advance()) {
       Transducer t = (Transducer) i.get();
       try {
-        fireStatusChanged("Transducing " + doc.getName() +
+        if (! Main.batchMode) {//fire events if not in batch mode
+          fireStatusChanged("Transducing " + doc.getName() +
                                " (Phase: " + t.getName() + ")...");
-        t.addProgressListener(pListener);
-        t.addStatusListener(sListener);
+          t.addProgressListener(pListener);
+          t.addStatusListener(sListener);
+        }//if
         t.transduce(doc, input, output);
-        t.removeProgressListener(pListener);
-        t.removeStatusListener(sListener);
-        fireStatusChanged("");
+        if (! Main.batchMode) {//fire events if not in batch mode
+          t.removeProgressListener(pListener);
+          t.removeStatusListener(sListener);
+          fireStatusChanged("");
+        }//if
       } catch(JapeException e) {
         String errorMessage = new String(
           "Error transducing document " + doc.getSourceUrl() +
@@ -179,7 +188,16 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.17  2001/09/12 15:24:44  kalina
+// Made the batchMode flag in Main public. This is now checked before
+// events are fired and listeners created. No bugs in tests or anywhere else
+// yet. To disable events, set batchMode to true in your batch code. By default
+// it is false, because some batch code e.g., MUSE, use events for progress
+// indication. Not having events does give some small performance gains, but
+// not much.
+//
 // Revision 1.16  2001/05/17 11:50:41  valyt
+//
 // 	Factory now handles Runtime parameters as well as inittime ones.
 //
 // 	There is a new rule application style Appelt-shortest

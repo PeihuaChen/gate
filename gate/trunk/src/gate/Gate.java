@@ -82,10 +82,12 @@ public class Gate
     initConfigData();
 
     // the creoleRegister acts as a proxy for datastore related events
-    dataStoreRegister.addCreoleListener(creoleRegister);
+    if (!Main.batchMode) {
+      dataStoreRegister.addCreoleListener(creoleRegister);
 
     // some of the events are actually fired by the {@link gate.Factory}
-    Factory.addCreoleListener(creoleRegister);
+      Factory.addCreoleListener(creoleRegister);
+    }
 
     // check we have a useable JDK
     if(System.getProperty("java.version").compareTo(MIN_JDK_VERSION) < 0) {
