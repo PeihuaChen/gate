@@ -15,7 +15,7 @@ import java.awt.BorderLayout;
 import java.awt.event.*;
 import java.lang.reflect.*;
 import java.util.*;
-
+import java.io.IOException;
 
 public class ApplicationViewer extends AbstractVisualResource {
 
@@ -796,6 +796,23 @@ public class ApplicationViewer extends AbstractVisualResource {
     ParameterValueEditor(){
       combo = new JComboBox();
       textField = new JTextField();
+      button = new JButton(new ImageIcon(getClass().getResource(
+                               "/gate/resources/img/loadFile.gif")));
+      button.setToolTipText("Set from file...");
+      button.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          JFileChooser fileChooser = handle.project.frame.fileChooser;
+          int res = fileChooser.showOpenDialog(ApplicationViewer.this);
+          if(res == fileChooser.APPROVE_OPTION){
+            try{
+              textField.setText(fileChooser.getSelectedFile().
+                                toURL().toExternalForm());
+            }catch(IOException ioe){}
+          }
+        }
+      });
+      textButtonBox = Box.createHorizontalBox();
+      textButtonBox.add(textField, button);
     }
 
     public Component getTableCellEditorComponent(JTable table,
@@ -816,7 +833,9 @@ public class ApplicationViewer extends AbstractVisualResource {
       }else{
         if(value != null) textField.setText(value.toString());
         comboUsed = false;
-        return textField;
+        if(type.equals("java.net.URL")){
+          return textButtonBox;
+        }else return textField;
       }
     }//getTableCellEditorComponent
 
@@ -847,6 +866,8 @@ public class ApplicationViewer extends AbstractVisualResource {
     JComboBox combo;
     JTextField textField;
     boolean comboUsed;
+    JButton button;
+    Box textButtonBox;
   }
 /*
   XJTable prsTable;

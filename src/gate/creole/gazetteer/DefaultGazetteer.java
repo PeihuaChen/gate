@@ -73,23 +73,38 @@ public class DefaultGazetteer extends AbstractProcessingResource
               "No URL provided for gazetteer creation!");
       }
 
+      //find the number of lines
       Reader reader = new InputStreamReader(listsURL.openStream(), encoding);
-
+      int linesCnt = 0;
       BufferedReader bReader = new BufferedReader(reader);
       String line = bReader.readLine();
+      while (line != null) {
+        linesCnt++;
+        line = bReader.readLine();
+      }
+      bReader.close();
+
+      //parse the file
+      reader = new InputStreamReader(listsURL.openStream(), encoding);
+      bReader = new BufferedReader(reader);
+      line = bReader.readLine();
       String toParse = "";
 
+      int lineIdx = 0;
       while (line != null) {
         if(line.endsWith("\\")) {
           toParse += line.substring(0,line.length()-1);
         } else {
           toParse += line;
           fireStatusChanged("Reading " + toParse);
+          fireProgressChanged(lineIdx * 100 / linesCnt);
+          lineIdx ++;
           readList(toParse, true);
           toParse = "";
         }
         line = bReader.readLine();
       }
+      fireProcessFinished();
     }catch(IOException ioe){
       throw new ResourceInstantiationException(ioe);
     }catch(GazetteerException ge){

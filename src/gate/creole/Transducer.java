@@ -19,6 +19,8 @@ import gate.util.*;
 import gate.jape.*;
 
 import java.net.*;
+import gate.event.*;
+import java.util.*;
 
 /**
  * A cascaded multi-phase transducer using the Jape language which is a
@@ -41,9 +43,14 @@ public class Transducer extends AbstractProcessingResource {
    *@return a reference to <b>this</b>
    */
   public Resource init() throws ResourceInstantiationException {
+    sListener = new StatusListener(){
+      public void statusChanged(String text){
+        fireStatusChanged(text);
+      }
+    };
     if(grammarURL != null && encoding != null){
       try{
-        batch = new Batch(grammarURL, encoding);
+        batch = new Batch(grammarURL, encoding, sListener);
       }catch(JapeException je){
         throw new ResourceInstantiationException(je);
       }
@@ -160,6 +167,20 @@ public class Transducer extends AbstractProcessingResource {
   public String getOutputASName() {
     return outputASName;
   }
+  public synchronized void removeStatusListener(StatusListener l) {
+    if (statusListeners != null && statusListeners.contains(l)) {
+      Vector v = (Vector) statusListeners.clone();
+      v.removeElement(l);
+      statusListeners = v;
+    }
+  }
+  public synchronized void addStatusListener(StatusListener l) {
+    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      statusListeners = v;
+    }
+  }
 
   /**
    * The URL to the jape file used as grammar by this transducer.
@@ -190,4 +211,16 @@ public class Transducer extends AbstractProcessingResource {
    * The {@link gate.AnnotationSet} used as output by the transducer.
    */
   private String outputASName;
+
+  private StatusListener sListener;
+  private transient Vector statusListeners;
+  protected void fireStatusChanged(String e) {
+    if (statusListeners != null) {
+      Vector listeners = statusListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
+      }
+    }
+  }
 }

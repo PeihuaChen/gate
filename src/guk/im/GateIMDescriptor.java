@@ -41,6 +41,8 @@ public class GateIMDescriptor implements InputMethodDescriptor {
   public GateIMDescriptor() {
     try{
       InputStream is = GateIM.class.getResourceAsStream(GateIM.getIMBase() + "im.list");
+	    if (is==null) throw new IllegalArgumentException(
+              "Failed to retrieve resource 'im.list'. Please reset classpath.");
       BufferedReader br = new BufferedReader(new InputStreamReader(is));
       String line = br.readLine();
       StringTokenizer st;
