@@ -154,13 +154,6 @@ create or replace package body test is
      values(UG_ID_7,USER_5_ID,GROUP_2_ID);
                  
                     
-
-     -- init the LR_TYPE table
-     insert into t_lr_type(lrtp_id,lrtp_type)
-     values(LR_TYPE_1_ID,'gate document');
-                        
-
-
      -- create documents
  
      insert into t_lang_resource(lr_id,
