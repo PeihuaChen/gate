@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<!-- $Id$ -->
+<!-- creole.xml directory file for GATE builtins -->
+<CREOLE-DIRECTORY>
+  <!-- Processing Resources -->
+  <CREOLE>
+
+    <!-- creole.xml for gazetteer list collector -->
+    <RESOURCE>
+      <NAME>Gazetteer List Collector</NAME>
+      <CLASS>gate.creole.GazetteerListsCollector</CLASS>
+      <COMMENT>A gazetteer lists collector</COMMENT>
+
+      <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
+      <PARAMETER NAME="markupASName" 
+  DEFAULT="Key" RUNTIME="true"
+  OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="annotationTypes"
+  DEFAULT="Organization;Person;Location;Date" RUNTIME="true"
+  OPTIONAL="true">java.util.ArrayList</PARAMETER>
+      <PARAMETER NAME="gazetteer" RUNTIME="true"
+  OPTIONAL="false">gate.creole.gazetteer.Gazetteer</PARAMETER>
+      <PARAMETER NAME="theLanguage" RUNTIME="true"
+  OPTIONAL="true">java.lang.String</PARAMETER>
+    </RESOURCE>
+    
+    
+    <!-- creole.xml for HmmPR -->
+    <RESOURCE>
+      <NAME>Hmm PR</NAME>
+      <CLASS>com.ontotext.gate.hmm.agent.AlternativeHMMAgent</CLASS>
+      <COMMENT>Hidden Markov Model PR</COMMENT>
+      <PARAMETER NAME="modelUrl"  SUFFIXES="xml" COMMENT="HMM model URL">java.net.URL</PARAMETER>
+
+    <OR>
+      <PARAMETER NAME="document" RUNTIME="true" OPTIONAL="true" COMMENT="The document to be processed">gate.corpora.DocumentImpl</PARAMETER>
+      <PARAMETER NAME="corpus" RUNTIME="true" OPTIONAL="true" DEFAULT="" COMMENT="The corpus for training">gate.corpora.CorpusImpl</PARAMETER>
+    </OR>
+
+    <OR>
+      <PARAMETER NAME="annotateOptions"  RUNTIME="true" DEFAULT="" COMMENT="HMM options">java.lang.String</PARAMETER>
+      <PARAMETER NAME="trainOptions"  RUNTIME="true" DEFAULT="" COMMENT="HMM options">java.lang.String</PARAMETER>
+      <PARAMETER NAME="reviseOptions"  RUNTIME="true" DEFAULT="" COMMENT="HMM options">java.lang.String</PARAMETER>
+    </OR>
+      <ICON>pr.gif</ICON>
+    </RESOURCE>
+
+    <!-- creole.xml for TrainHmmPR -->
+    <RESOURCE>
+      <NAME>Train Hmm PR</NAME>
+      <CLASS>com.ontotext.gate.hmm.agent.TrainHMM</CLASS>
+      <COMMENT>Hidden Markov Model PR - Train</COMMENT>
+      <PARAMETER NAME="modelUrl"  SUFFIXES="xml" COMMENT="HMM model URL">java.net.URL</PARAMETER>
+      <PARAMETER NAME="corpus" RUNTIME="true" DEFAULT="" COMMENT="The corpus for training">gate.corpora.CorpusImpl</PARAMETER>
+      <PARAMETER NAME="trainOptions"  RUNTIME="true" DEFAULT="" COMMENT="HMM options">java.lang.String</PARAMETER>
+      <PARAMETER NAME="reconstructModel"  RUNTIME="true" DEFAULT="true" COMMENT="Reconstruct the model before train">java.lang.Boolean</PARAMETER>
+      <ICON>pr.gif</ICON>
+    </RESOURCE>
+
+    <!-- creole.xml for ApplyHmmPR -->
+    <RESOURCE>
+      <NAME>Apply Hmm PR</NAME>
+      <CLASS>com.ontotext.gate.hmm.agent.ApplyHMM</CLASS>
+      <COMMENT>Hidden Markov Model PR - Apply</COMMENT>
+      <PARAMETER NAME="modelUrl"  SUFFIXES="xml" COMMENT="HMM model URL">java.net.URL</PARAMETER>
+      <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.corpora.DocumentImpl</PARAMETER>
+      <PARAMETER NAME="annotateOptions"  RUNTIME="true" DEFAULT="" COMMENT="HMM options">java.lang.String</PARAMETER>
+      <ICON>pr.gif</ICON>
+    </RESOURCE>
+    
+    <!-- creole.xml for ConfidenceAnnotRemoverPR -->
+    <RESOURCE>
+      <NAME>Confidence Annotation Remover PR</NAME>
+      <CLASS>com.ontotext.gate.hmm.agent.ConfidenceAnnotRemover</CLASS>
+      <COMMENT>Helper PR for removing of redundant annotations by confidence</COMMENT>
+      <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.corpora.DocumentImpl</PARAMETER>
+      <PARAMETER NAME="annotationTypes" ITEM_CLASS_NAME="java.lang.String" COMMENT="Competing annotation types">java.util.List</PARAMETER>
+      <PARAMETER NAME="annotationSet" DEFAULT="" COMMENT="Source annotation set">java.lang.String</PARAMETER>
+      <PARAMETER NAME="competeValue" RUNTIME="true" DEFAULT="1.0" COMMENT="Value for competing decision">java.lang.Float</PARAMETER>
+      <ICON>pr.gif</ICON>
+    </RESOURCE>
+
+    <!-- creole.xml for ThresholdConfidenceAnnotRemoverPR -->
+    <RESOURCE>
+      <NAME>Threshold Confidence Annotation Remover PR</NAME>
+      <CLASS>com.ontotext.gate.hmm.agent.ThresholdConfidenceAnnotRemover</CLASS>
+      <COMMENT>Helper PR for removing of annotations by confidence below threshold</COMMENT>
+      <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.corpora.DocumentImpl</PARAMETER>
+      <PARAMETER NAME="annotationTypes" ITEM_CLASS_NAME="java.lang.String" COMMENT="Competing annotation types">java.util.List</PARAMETER>
+      <PARAMETER NAME="annotationSet" DEFAULT="" COMMENT="Source annotation set">java.lang.String</PARAMETER>
+      <PARAMETER NAME="threshold" RUNTIME="true" DEFAULT="0.5" COMMENT="Threshold value">java.lang.Float</PARAMETER>
+      <ICON>pr.gif</ICON>
+    </RESOURCE>
+
+   <!-- VR Gaze - Gazetteers editor -->
+    <RESOURCE>
+      <NAME>Gaze</NAME>
+      <CLASS>com.ontotext.gate.vr.Gaze</CLASS>
+      <GUI TYPE="large">
+        <MAIN_VIEWER/>
+        <RESOURCE_DISPLAYED>gate.creole.gazetteer.Gazetteer</RESOURCE_DISPLAYED>
+      </GUI>
+    </RESOURCE>
+
+
+  </CREOLE>
+</CREOLE-DIRECTORY>
