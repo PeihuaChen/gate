@@ -53,6 +53,16 @@ public class Main {
     * </UL>
     */
   public static void main(String[] args) throws GateException {
+    // check we have a useable JDK
+    if(
+      System.getProperty("java.version").compareTo(Gate.getMinJdkVersion())
+      < 0
+    ) {
+      throw new GateException(
+        "GATE requires JDK " + Gate.getMinJdkVersion() + " or newer"
+      );
+    }
+
     // process command-line options
     processArgs(args);
 
