@@ -48,6 +48,7 @@ public class TestXml extends TestCase
 
     // create the markupElementsMap map
     Map markupElementsMap = null;
+    gate.Document doc = null;
     /*
     markupElementsMap = new HashMap();
     // populate it
@@ -69,20 +70,20 @@ public class TestXml extends TestCase
     anElement2StringMap.put("s","\n");
 
 
+    // init detects if Derwent or www.gate.ac.uk are reachable
+
+    Gate.init();
     // create a new gate document
-    //gate.Document doc = gate.Transients.newDocument(
-    //          new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/bnc.xml")
-
-
-    gate.Document doc = gate.Transients.newDocument(
-             // new URL("http://redmires.dcs.shef.ac.uk/gate/tests/xml/xces/xces.xml")
-             // new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/J52.xml")
-             //   new URL("file:///d:/tmp/J52.xml")
-             // new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/bnc.xml")
-                new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/xces/xces.xml")
-             // new URL("http://redmires.dcs.shef.ac.uk/gate/tests/xml/bnc.xml")
-    );
-
+    if (Gate.isGateHomeReachable())
+        doc = gate.Transients.newDocument(
+            new URL ("http://derwent.dcs.shef.ac.uk/gate.ac.uk/tests/xml/xces.xml")
+        );
+    else if (Gate.isGateAcUkReachable())
+             doc = gate.Transients.newDocument(
+                new URL ("http://www.gate.ac.uk/tests/xml/xces.xml")
+            );
+         else
+          throw new LazyProgrammerException("Derwent and www.gate.ak.uk are not reachable");
 
     /*
     gate.Document doc = gate.Transients.newDocument(
@@ -95,11 +96,6 @@ public class TestXml extends TestCase
     URL u = f.toURL();
     gate.Document doc = gate.Transients.newDocument(u);
     f.delete ();
-    */
-   /*
-    gate.Document doc = gate.Transients.newDocument(
-      Files.getResourceAsString("texts/Sentence.xml")
-    );
     */
     // get the docFormat that deals with it.
     // the parameter MimeType doesn't affect right now the behaviour

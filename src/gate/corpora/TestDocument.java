@@ -25,14 +25,26 @@ public class TestDocument extends TestCase
   public TestDocument(String name) { super(name); setUp();}
 
   /** Base of the test server URL */
-  protected static String testServer = "http://redmires.dcs.shef.ac.uk/";
+  protected static String testServer = null;;
 
   /** Name of test document 1 */
   protected String testDocument1;
 
   /** Fixture set up */
   public void setUp() {
-    testDocument1 = "texts/doc0.html";
+    try{
+      Gate.init();
+    } catch (GateException e){
+      e.printStackTrace(System.err);
+    }
+    if (Gate.isGateHomeReachable())
+        testServer = "http://derwent.dcs.shef.ac.uk/gate.ac.uk/";
+    else if (Gate.isGateAcUkReachable())
+              testServer = "http://www.gate.ac.uk/";
+         else
+          throw new LazyProgrammerException("Derwent and www.gate.ak.uk are not reachable");
+
+    testDocument1 = "tests/html/test2.htm";
   } // setUp
 
   /** Get the name of the test server */
@@ -45,9 +57,9 @@ public class TestDocument extends TestCase
     Document doc3 = null;
 
 
-    doc1 = new DocumentImpl(new URL(testServer + "gate/tests/def/"));
-    doc2 = new DocumentImpl(new URL(testServer + "gate/tests/defg/"));
-    doc3 = new DocumentImpl(new URL(testServer + "gate/tests/abc/"));
+    doc1 = new DocumentImpl(new URL(testServer + "tests/def/"));
+    doc2 = new DocumentImpl(new URL(testServer + "tests/defg/"));
+    doc3 = new DocumentImpl(new URL(testServer + "tests/abc/"));
 
     assert(doc1.compareTo(doc2) < 0);
     assert(doc1.compareTo(doc1) == 0);
@@ -58,10 +70,8 @@ public class TestDocument extends TestCase
   public void testLotsOfThings() {
     // check that the test URL is available
     URL u = null;
-    File f = null;
     try{
-      f = Files.writeTempFile(Files.getGateResourceAsStream(testDocument1));
-      u = f.toURL();
+      u = new URL(testServer + testDocument1);
     } catch (Exception e){
       e.printStackTrace(System.err);
     }
@@ -76,7 +86,6 @@ public class TestDocument extends TestCase
     } catch(IOException e) {
       fail(e.toString());
     }
-    f.delete();
     /*
     Document doc = new TextualDocument(testServer + testDocument1);
     AnnotationGraph ag = new AnnotationGraphImpl();

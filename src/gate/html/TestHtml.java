@@ -11,12 +11,16 @@ package gate.html;
 import java.util.*;
 import java.net.*;
 import java.io.*;
+
+import javax.swing.*;
+
 import junit.framework.*;
 import org.w3c.www.mime.*;
+
 import gate.util.*;
 import gate.gui.*;
 import gate.*;
-import javax.swing.*;
+
 
 /** Test class for XML facilities
   *
@@ -46,6 +50,8 @@ public class TestHtml extends TestCase
     assert(true);
     // create the markupElementsMap map
     Map markupElementsMap = null;
+
+    gate.Document doc = null;
     /*
     markupElementsMap = new HashMap();
     // populate it
@@ -59,17 +65,20 @@ public class TestHtml extends TestCase
     markupElementsMap.put ("A","link");
     markupElementsMap.put ("a","link");
     */
+    // init detects if Derwent or www.gate.ac.uk are reachable
+
+    Gate.init();
     // create a new gate document
-    gate.Document doc = gate.Transients.newDocument(
-             // new URL("http://www.funideas.com/visual_gallery.htm")
-            new URL ("http://www.dcs.shef.ac.uk/~hamish/GateIntro.html")
-            //new URL ("http://www.javasoft.com")
-            //new URL ("http://www.w3.org/TR/REC-xml")
-            //new URL ("http://www.dcs.shef.ac.uk/~cursu")
-            //new URL ("http://www.webhelp.com/home.html")
-            //new URL ("http://big2.hotyellow98.com/sys/signup.cgi")
-            //new URL ("http://www.epilot.com/SearchResults.asp?keyword=costume+baie&page=&source=&TokenID=82C7BE897D9643EDB3CB8A28E398A488")
-    );
+    if (Gate.isGateHomeReachable())
+        doc = gate.Transients.newDocument(
+            new URL ("http://derwent.dcs.shef.ac.uk/gate.ac.uk/tests/html/test1.htm")
+        );
+    else if (Gate.isGateAcUkReachable())
+             doc = gate.Transients.newDocument(
+                new URL ("http://www.gate.ac.uk/tests/html/test1.htm")
+            );
+         else 
+          throw new LazyProgrammerException("Derwent and www.gate.ak.uk are not reachable");
     // get the docFormat that deals with it.
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
       doc, doc.getSourceURL()
