@@ -194,7 +194,7 @@ public class Transducer extends AbstractLanguageAnalyser {
   /**
    * The actual JapeTransducer used for processing the document(s).
    */
-  private Batch batch;
+  protected Batch batch;
 
   /**
    * The encoding used for reding the grammar file(s).

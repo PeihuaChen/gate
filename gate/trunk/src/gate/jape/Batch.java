@@ -560,6 +560,7 @@ public class Batch implements JapeConstants {
   private gate.FeatureMap features;
   private transient Vector progressListeners;
   private transient Vector statusListeners;
+
   protected void fireProgressChanged(int e) {
     if (progressListeners != null) {
       Vector listeners = progressListeners;
@@ -600,6 +601,14 @@ public class Batch implements JapeConstants {
         ((StatusListener) listeners.elementAt(i)).statusChanged(e);
       }
     }
+  }
+
+  /**
+   * Sets the ontology to be used by the transducers
+   * @param ontology
+   */
+  public void setOntology(gate.creole.ontology.Ontology ontology) {
+    transducer.setOntology(ontology);
   }
 
 

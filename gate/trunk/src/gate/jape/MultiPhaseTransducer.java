@@ -23,6 +23,7 @@ import gate.annotation.*;
 import gate.event.*;
 import gate.util.*;
 import gate.creole.*;
+import gate.creole.ontology.Ontology;
 import gate.*;
 
 
@@ -69,6 +70,18 @@ implements JapeConstants, java.io.Serializable
     */
   private ArrayList phases;
 
+
+  /**
+   * Sets the ontology used by this transducer;
+   * @param ontology an {@link gate.creole.ontology.Ontology} value;
+   */
+  public void setOntology(Ontology ontology) {
+    super.setOntology(ontology);
+    Iterator phasesIter = phases.iterator();
+    while(phasesIter.hasNext()){
+      ((Transducer)phasesIter.next()).setOntology(ontology);
+    }
+  }
 
   /** Add phase. */
   public void addPhase(String name, Transducer phase) {
@@ -204,7 +217,11 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.23  2002/05/14 09:43:17  valyt
+// Ontology Aware JAPE transducers
+//
 // Revision 1.22  2002/03/13 11:19:37  valyt
+//
 // bug fix: doc.getSourceURL() replaced by doc.getName()
 //
 // Revision 1.21  2002/02/26 13:27:12  valyt
