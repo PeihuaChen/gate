@@ -93,7 +93,6 @@
   <property category="sys" name="VersionLabel" value="@version" />
   <property category="sys" name="WorkingDirectory" value="." />
   <property category="sys" name="warn.auto.packages" value="false" />
-  <file path="gate2.html" />
   <file path="GukAppletExample.html" />
 </project>
 
