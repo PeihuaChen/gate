@@ -19,6 +19,7 @@ import javax.swing.*;
 
 import gate.*;
 import gate.creole.*;
+import gate.creole.ontology.Ontology;
 // Protege import
 import edu.stanford.smi.protege.ui.*;
 import edu.stanford.smi.protege.model.*;
@@ -77,6 +78,24 @@ public class ProtegeWrapper extends AbstractVisualResource {
     myHandle = handle;
   }
 
+  /** Refresh OntoEditor if any on LargeView tab pane */
+  public void refreshOntoeditor(Ontology o) {
+    if(myHandle == null || myHandle.getLargeView() == null) return;
+    
+    JComponent comp = myHandle.getLargeView();
+    if(comp instanceof JTabbedPane) {
+      JTabbedPane tabPane = (JTabbedPane) comp;
+      Component aView;
+      
+      for(int i=0; i<tabPane.getTabCount(); ++i) {
+        aView = tabPane.getComponentAt(i);
+        if(aView instanceof com.ontotext.gate.vr.OntologyEditorImpl) {
+          ((com.ontotext.gate.vr.OntologyEditorImpl) aView).setOntology(o);
+        }
+      } // for
+    } // if
+  } // refreshOntoeditor()
+  
   public void setTarget(Object target){
     if(target == null){
       // if projectFileName is null Protege will create a new project
@@ -121,6 +140,7 @@ public class ProtegeWrapper extends AbstractVisualResource {
       if(projectFileName != null && prj != null) {
         knBase = prj.getKnowledgeBase();
         projectFileName.setKnowledgeBase(knBase);
+        projectFileName.setViewResource(this);
 // Some debug information about KnowledgeBase instance        
 System.out.println("KnBase name: "+knBase.getName());
 System.out.println("KnBase root cls: "+knBase.getRootClses());
