@@ -504,8 +504,8 @@ public abstract class Factory {
     throws PersistenceException {
 
     if (false == accessControllerPool.containsKey(jdbcURL)) {
-      AccessController ac = new AccessControllerImpl();
-      ac.open(jdbcURL);
+      AccessController ac = new AccessControllerImpl(jdbcURL);
+      ac.open();
       accessControllerPool.put(jdbcURL,ac);
     }
 
