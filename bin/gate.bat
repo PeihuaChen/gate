@@ -25,15 +25,14 @@ REM used. The /bin directory of the gate installation contains the
 REM tools.jar files for java2 versions 1.3 and 1.4.
 REM
 REM
-REM   ALL THE VALUES DESCRIBED ABOVE SHOULD BE VALID PATHS
-REM   DO NOT INCLUDE ANY QUOTE SIGNS EVEN IF YOUR PATH CONTAINS SPACES
+REM   ALL THE VALUES DESCRIBED ABOVESHOULD BE VALID PATHS
+REM   DO NOT INCLUDE ANY QUOTE SIGNS EVEN IF YOU PATH CONTAINS SPACES
 REM   TAKE CARE NOT TO INCLUDE ANY TRAILING SPACES AT THE END OF THE LINES
 REM
 REM
 REM ######################################################################
 REM $Id$
 REM ######################################################################
-
 
 
 
@@ -51,17 +50,18 @@ REM ######################################################################
 
 REM ######################################################################
 REM Attempt to find GATE_HOME if not already set. This procedure will fail
-REM on Windows 95/98 so this value better be already set.
+REM on Windows 95/98 so this value should be already set.
 REM Hopefully the installer did that.
 REM ######################################################################
 
 
-if not "x%GATE_HOME%" == "x" goto doneGateHome
+if not "x%GATE_HOME%"=="x" goto doneGH
 
+echo should not see me
 set GATE_HOME=%~d0%~p0\..
-goto doneGateHome
+goto doneGH
 
-:doneGateHome
+:doneGH
 echo GATE_HOME: %GATE_HOME%
 
 
@@ -69,24 +69,20 @@ REM ######################################################################
 REM set TOOLSJAR to where we hope tools.jar is are located
 REM ######################################################################
 
-if not "x%TOOLSJAR%" == "x" goto doneTOOLSJAR
+if not "x%TOOLSJAR%"=="x" goto doneTJ
 
-if exist "%JAVA_HOME%\lib\tools.jar" goto jdkInstalled
-if exist "%GATE_HOME%\jre1.4" goto localJRE
+if EXIST "%JAVA_HOME%\lib\tools.jar" goto jdk
+
 
 set TOOLSJAR=%GATE_HOME%\bin\tools14.jar
-goto doneTOOLSJAR
+goto doneTJ
 
-
-:jdkInstalled
+echo should not see me 3
+:jdk
 set TOOLSJAR=%JAVA_HOME%\lib\tools.jar
-goto doneTOOLSJAR
+goto doneTJ
 
-:localJRE
-set TOOLSJAR=%GATE_HOME%\bin\tools14.jar
-goto doneTOOLSJAR
-
-:doneTOOLSJAR
+:doneTJ
 echo TOOLSJAR=%TOOLSJAR%
 
 
@@ -94,15 +90,13 @@ REM ######################################################################
 REM set GATE_CONFIG to where we thing gate.xml is (or "" if not around)
 REM ######################################################################
 
-if not "x%GATE_CONFIG%" == "x" goto doneGateConfig
+if not "x%GATE_CONFIG%"=="x" goto doneGC
 
 if exist "%GATE_HOME%\bin\gate.xml" set GATE_CONFIG=%GATE_HOME%\bin\gate.xml
-goto doneGateConfig
+goto doneGC
 
-:doneGateConfig
-
+:doneGC
 echo GATE_CONFIG: %GATE_CONFIG%
-
 
 REM ######################################################################
 REM set GATEJAR
@@ -113,7 +107,6 @@ if not exist "%GATEJAR%" set GATEJAR=%GATE_HOME%\build\gate.jar
 
 echo GATEJAR: %GATEJAR%
 
-
 REM ######################################################################
 REM set EXTDIR
 REM ######################################################################
@@ -122,7 +115,6 @@ set EXTDIR=%GATE_HOME%\bin\ext
 if not exist "%EXTDIR%\guk.jar" set EXTDIR=%GATE_HOME%\lib\ext
 
 echo EXTDIR: %EXTDIR%
-
 
 REM ######################################################################
 REM set JAVA
@@ -133,7 +125,6 @@ if not exist "%JAVA%" set JAVA=%GATE_HOME%\jre1.4\bin\javaw.exe
 if not exist "%JAVA%" set JAVA=javaw.exe
 
 echo JAVA: %JAVA%
-
 
 REM ######################################################################
 REM set CLASSPATH
@@ -148,16 +139,14 @@ REM ######################################################################
 REM if we have a site gate.xml set a var including the -i
 REM ######################################################################
 
-if not "x%GATE_CONFIG%" == "x" set FLAGS=-i %GATE_CONFIG%
+if not "x%GATE_CONFIG%"=="x" set FLAGS=-i "%GATE_CONFIG%"
 
 echo FLAGS: %FLAGS%
-
 
 REM ######################################################################
 REM run the beast
 REM ######################################################################
 
-set RUN="%JAVA%" -Xmx200m -Djava.ext.dirs="%EXTDIR%" -classpath %CLASSPATH% gate.Main %FLAGS% %1 %2 %3 %4 %5 %6 %7 %8 %9
 
-echo RUN: %RUN%
-start "Gate" %RUN%
+echo RUN:"%JAVA%" -Xmx200m -Djava.ext.dirs="%EXTDIR%" -classpath %CLASSPATH% gate.Main %FLAGS% %1 %2 %3 %4 %5 %6 %7 %8 %9
+start "%JAVA%" -Xmx200m -Djava.ext.dirs="%EXTDIR%" -classpath %CLASSPATH% gate.Main %FLAGS% %1 %2 %3 %4 %5 %6 %7 %8 %9
