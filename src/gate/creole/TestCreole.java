@@ -219,14 +219,16 @@ public class TestCreole extends TestCase
     // init time params
     Parameter param = null;
     iter = paramList.getInitimeParameters().iterator();
+    int paramDisjNumber = -1;
     while(iter.hasNext()) {
       List paramDisj = (List) iter.next();
       Iterator iter2 = paramDisj.iterator();
+      paramDisjNumber++;
 
       for(int i=0; iter2.hasNext(); i++) {
         param = (Parameter) iter2.next();
 
-        switch(i) {
+        switch(paramDisjNumber) {
           case 0:
             assert(
               "Doc param 0 wrong type: " + param.getTypeName(),
@@ -287,14 +289,16 @@ public class TestCreole extends TestCase
     // runtime params
     Parameter param = null;
     iter = paramList.getRuntimeParameters().iterator();
+    int paramDisjNumber = -1;
     while(iter.hasNext()) {
       List paramDisj = (List) iter.next();
       Iterator iter2 = paramDisj.iterator();
+      paramDisjNumber++;
 
       for(int i=0; iter2.hasNext(); i++) {
         param = (Parameter) iter2.next();
 
-        switch(i) {
+        switch(paramDisjNumber) {
           case 0:
             assert(
               "POT param 0 wrong type: " + param.getTypeName(),
@@ -334,20 +338,29 @@ public class TestCreole extends TestCase
 
     // init time params
     Parameter param = null;
-    iter = paramList.getInitimeParameters().iterator();
-Out.prln(
-  "paramList.getInitimeParams().size() = " +
-  paramList.getInitimeParameters().size()
-);
+    List initimeParams = paramList.getInitimeParameters();
+    int initimeLen = initimeParams.size();
+    assert(
+      "initime params has wrong number of elements: " + initimeLen,
+      initimeLen == 4
+    );
+    iter = initimeParams.iterator();
+    int paramDisjNumber = -1;
     while(iter.hasNext()) {
       List paramDisj = (List) iter.next();
       Iterator iter2 = paramDisj.iterator();
-Out.prln("paradisj.size() = " + paramDisj.size());
+      paramDisjNumber++;
+
+      int paramDisjLen = paramDisj.size();
+      assert(
+        "param disj wrong length: " + paramDisjLen,
+        paramDisjLen == 1
+      );
 
       for(int i=0; iter2.hasNext(); i++) {
         param = (Parameter) iter2.next();
 
-        switch(i) {
+        switch(paramDisjNumber) {
           case 0:
             assert(
               "Doc param 0 wrong type: " + param.getTypeName(),

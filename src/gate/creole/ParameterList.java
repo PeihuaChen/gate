@@ -51,16 +51,33 @@ public class ParameterList
   /** Add a parameter disjunction.
     * @exception NoSuchElementException disjunction has no more elements.
     */
-  public void add(List disjunction) {
+  public boolean add(List disjunction) {
+    boolean status = false;
     Iterator iter = disjunction.iterator();
     Parameter param = (Parameter) iter.next();
 
     if(param.isRuntime()) {
-      runtimeParameters.add(disjunction);
+      status = runtimeParameters.add(disjunction);
     } else {
-      initimeParameters.add(disjunction);
+      status = initimeParameters.add(disjunction);
     }
+
+    return status;
   } // add(param)
+
+  /** Add all the members of a parameter list (as individual disjunctions) */
+  public boolean addAll(List c) {
+    boolean status = false;
+    Iterator iter = c.iterator();
+    while(iter.hasNext()) {
+      List disj = new ArrayList();
+      Parameter param = (Parameter) iter.next();
+      disj.add(param);
+      status = add(disj);
+    }
+
+    return status;
+  } // addAll(Collection)
 
   /** Get default runtime parameter value set.
     * Calls <TT>getDefaults(List)</TT>.

@@ -172,7 +172,9 @@ public class Parameter
         ResourceData resData =
           (ResourceData) Gate.getCreoleRegister().get(typeName);
         if(resData == null)
-          throw new ParameterException("No resource data for " + typeName);
+          throw new ParameterException(
+            "No resource data for " + typeName + " in Parameter/getParamClz"
+          );
         paramClass = resData.getResourceClass();
       }
     } catch(ClassNotFoundException e) {
