@@ -2187,9 +2187,7 @@ public class MainFrame extends JFrame
           String className = (String)dsTypeByName.get(answer);
           if(className.indexOf("SerialDataStore") != -1){
             openSerialDataStore();
-          } else if(className.equals("gate.persist.OracleDataStore") ||
-                    className.equals("gate.persist.PostgresDataStore")
-                   ) {
+          } else if(className.equals("gate.persist.OracleDataStore")) {
               List dbPaths = new ArrayList();
               Iterator keyIter = reg.getConfigData().keySet().iterator();
               while (keyIter.hasNext()) {
@@ -2199,7 +2197,7 @@ public class MainFrame extends JFrame
               }
               if (dbPaths.isEmpty())
                 throw new
-                  GateRuntimeException("JDBC URL not configured in gate.xml");
+                  GateRuntimeException("Oracle URL not configured in gate.xml");
               //by default make it the first
               String storageURL = (String)dbPaths.get(0);
               if (dbPaths.size() > 1) {
@@ -2893,10 +2891,11 @@ public class MainFrame extends JFrame
     }// NewAnnotDiffAction
 
     public void actionPerformed(ActionEvent e) {
-      OntologyEditor editor = new OntologyEditorImpl();
+      OntologyEditorImpl editor = new OntologyEditorImpl();
       try {
+        JFrame frame = new JFrame();
         editor.init();
-
+        frame.getContentPane().add(editor);
         /*
           SET ONTOLOGY LIST AND ONTOLOGY
         */
@@ -2904,6 +2903,9 @@ public class MainFrame extends JFrame
         editor.setOntologyList(new Vector(ontologies));
 
         editor.visualize();
+        frame.setSize(editor.SIZE_X,editor.SIZE_Y);
+        frame.setLocation(editor.POSITION_X,editor.POSITION_Y);
+        frame.setVisible(true);
       } catch ( ResourceInstantiationException ex ) {
         ex.printStackTrace(Err.getPrintWriter());
       }
