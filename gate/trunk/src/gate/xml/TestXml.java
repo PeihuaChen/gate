@@ -93,11 +93,11 @@ public class TestXml extends TestCase
     // set's the map
     docFormat.setMarkupElementsMap(markupElementsMap);
 
-    //docFormat.unpackMarkup (doc,"DocumentContent");
+    docFormat.unpackMarkup (doc,"DocumentContent");
 
     // graphic visualisation
 
-
+    /*
     System.out.println("Timer started...");
     if (docFormat != null){
         // timing the operation
@@ -124,8 +124,8 @@ public class TestXml extends TestCase
         System.out.println("Total time : " + (time1 + time2) / 1000 + "." +
                             (time1 + time2) % 1000 + " seconds.");
     }
+    */
 
-    
   } // testSomething()
 
   /** Test suite routine for the test runner */
