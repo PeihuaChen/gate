@@ -162,6 +162,7 @@ Angel */
       // namesapace aware one
       // http://xml.org/sax/features/namespaces set to true
       newxmlParser.setFeature("http://xml.org/sax/features/namespaces", true);
+	newxmlParser.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
       newxmlParser.setContentHandler(xmlDocHandler);
       newxmlParser.setErrorHandler(xmlDocHandler);
       newxmlParser.setDTDHandler(xmlDocHandler);
@@ -268,6 +269,7 @@ Angel */
       // namesapace aware one
       // http://xml.org/sax/features/namespaces set to true
       newxmlParser.setFeature("http://xml.org/sax/features/namespaces", true);
+      newxmlParser.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
       newxmlParser.setContentHandler(xmlDocHandler);
       newxmlParser.setErrorHandler(xmlDocHandler);
       newxmlParser.setDTDHandler(xmlDocHandler);
