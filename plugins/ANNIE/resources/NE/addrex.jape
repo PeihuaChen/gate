@@ -6,8 +6,8 @@ Phase:	Addrex
 Input:  Token SpaceToken Lookup
 Options: control = appelt
 
-
 /////////////////////////////////////////////////////////
+
 
 // Email Rules
 
@@ -120,26 +120,12 @@ Macro: PHONE_PREFIX
 )
   
 //////////////////////////////////////////////////
-Rule: PhoneRegContext
-Priority: 100
-
-(
- (PHONE_PREFIX)
-)
-(
-
- (PHONE_AREACODE SPACE)
- (PHONE_REG)
-)
-:phoneNumber -->
- :phoneNumber.Phone = {kind = "phoneNumber", rule = "PhoneRegContext"}
-
-
 Rule:PhoneReg
 Priority: 20
 // regular types of number
 // 01234 123 456
 // (01234) 123456
+
 
 (
 
@@ -149,38 +135,27 @@ Priority: 20
 :phoneNumber -->
  :phoneNumber.Phone = {kind = "phoneNumber", rule = "PhoneReg"}
 
-Rule: PhoneFullContext
+Rule: PhoneRegContext
 Priority: 100
+
 (
  (PHONE_PREFIX)
 )
-
 (
- ((PHONE_COUNTRYCODE SPACE) |
-  ({Token.string == "("} 
-   (PHONE_COUNTRYCODE (SPACE)?)
-   {Token.string == ")"})
- )
-
- ({Token.string == "("} 
-   {Token.string == "0"} 
-   {Token.string == ")"})?
-
- ({Token.kind == number,Token.length == "3"}|
-  {Token.kind == number,Token.length == "4"})
-      
- (SPACE)
+ (PHONE_AREACODE SPACE)
  (PHONE_REG)
 )
 :phoneNumber -->
- :phoneNumber.Phone = {kind = "phoneNumber", rule = "PhoneFullContext"}
+ :phoneNumber.Phone = {kind = "phoneNumber", rule = "PhoneRegContext"}
 
 
 Rule:PhoneFull
 Priority: 50
 // +44 161 222 1234
 // +44 (0)161 222 1234
-
+(
+ (PHONE_PREFIX)?
+)
 (
  ((PHONE_COUNTRYCODE SPACE) |
   ({Token.string == "("} 
@@ -201,6 +176,8 @@ Priority: 50
 :phoneNumber -->
  :phoneNumber.Phone = {kind = "phoneNumber", rule = "PhoneFull"}
 
+
+
 Rule:PhoneExt
 Priority: 10
 
@@ -212,23 +189,11 @@ Priority: 10
 :phoneNumber --> 
  :phoneNumber.Phone = {kind = "phoneNumber", rule = "PhoneExt"}
 
-PhoneRegExtContext
-Priority: 80
-(
- (PHONE_PREFIX)
-)
-(
-
- (PHONE_AREACODE SPACE)?
- (PHONE_REG) (SPACE)
- (PHONE_EXT)
-)
-:phoneNumber -->
- :phoneNumber.Phone = {kind = "phoneNumber", rule = "PhoneRegExtContext"}
-
-
 Rule:PhoneRegExt
 Priority: 30
+
+// 01234 12345 ext. 1234
+// 01234 12345 x1234/5
 
 (
 
@@ -239,6 +204,19 @@ Priority: 30
 :phoneNumber -->
  :phoneNumber.Phone = {kind = "phoneNumber", rule = "PhoneRegExt"}
 
+
+Rule:PhoneRegExtContext
+Priority: 40
+(
+ (PHONE_PREFIX)
+)
+(
+ (PHONE_AREACODE SPACE)?
+ (PHONE_REG) (SPACE)
+ (PHONE_EXT)
+)
+:phoneNumber -->
+ :phoneNumber.Phone = {kind = "phoneNumber", rule = "PhoneRegExtContext"}
 
 Rule:PhoneNumberOnly
 Priority: 20
@@ -285,7 +263,6 @@ Priority: 50
 //////////////////////////////////////////////////////////
 // Url Rules
 
-
 // http://www.amazon.com
 // ftp://amazon.com
 // www.amazon.com
@@ -320,7 +297,7 @@ Priority: 50
 :urlAddress.Url = {kind = "urlAddress", rule = "Url1"}
 
 Rule: UrlContext
-Priority:20
+Priority: 20
 
 (
  {Token.string == "at"}
@@ -349,7 +326,6 @@ Priority:20
 :urlAddress 
 -->
  :urlAddress.Url = {kind = "urlAddress", rule = "UrlContext"}
-
 
 ////////////////////////////////////////////////////////
 
