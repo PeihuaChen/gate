@@ -601,7 +601,13 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       if(rData != null){
         //Gate type
         comboUsed = true;
-        ArrayList values = new ArrayList(rData.getInstantiations());
+        ArrayList values = new ArrayList();
+        try{
+          values.addAll(Gate.getCreoleRegister().
+                                         getAllInstances(rData.getClassName()));
+        }catch(GateException ge){
+          ge.printStackTrace(Err.getPrintWriter());
+        }
         values.add(0, "<none>");
         combo.setModel(new DefaultComboBoxModel(values.toArray()));
         combo.setSelectedItem(value == null ? "<none>" : value);
