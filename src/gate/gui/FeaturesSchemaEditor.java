@@ -45,6 +45,7 @@ import gate.util.Strings;
 public class FeaturesSchemaEditor extends AbstractVisualResource
         implements ResizableVisualResource{
   public FeaturesSchemaEditor(){
+    setBackground(UIManager.getDefaults().getColor("Table.background"));
   }
   
   public void setTargetFeatures(FeatureMap features){
@@ -83,7 +84,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
     featuresModel = new FeaturesTableModel();
     mainTable = new XJTable(){
       public boolean getScrollableTracksViewportWidth(){
-        return false;
+        return true;
       }
       
       public boolean getScrollableTracksViewportHeight(){
@@ -112,6 +113,8 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
     mainTable.getColumnModel().getColumn(DELETE_COL).
       setCellEditor(featureEditorRenderer);
     scroller = new JScrollPane(mainTable);
+    scroller.setBackground(getBackground());
+    scroller.getViewport().setBackground(getBackground());
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     add(scroller);
   }
