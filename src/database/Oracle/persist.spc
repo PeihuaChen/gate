@@ -24,7 +24,10 @@ create or replace package persist is
   VALUE_TYPE_STRING     constant number := 104;
   VALUE_TYPE_BINARY     constant number := 105;
   VALUE_TYPE_FLOAT      constant number := 106;
-
+  
+  CHARACTER_CONTENT     constant number := 1;
+  BINARY_CONTENT        constant number := 2;
+  EMPTY_CONTENT         constant number := 3;  
   
   procedure get_timestamp(p_timestamp  OUT number);
 

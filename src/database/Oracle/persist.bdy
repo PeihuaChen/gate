@@ -16,6 +16,9 @@ create or replace package body persist is
  *
  */
 
+   
+ 
+ 
   /*******************************************************************************************/
   procedure get_timestamp(p_timestamp  OUT number)
   is
@@ -161,11 +164,13 @@ create or replace package body persist is
      insert into t_doc_content(dc_id,
                                dc_encoding_id,
                                dc_character_content,
-                               dc_binary_content)
+                               dc_binary_content,
+                               dc_content_type)
      values(seq_doc_content.nextval,
             l_encoding_id,
             empty_clob(),
-            empty_blob())
+            empty_blob(),
+            persist.EMPTY_CONTENT)
      returning dc_id into p_content_id;
      
      --2. create a document entry  
