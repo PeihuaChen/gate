@@ -457,6 +457,8 @@ public class AnnotationImpl extends AbstractFeatureBearer
                                   AnnotationImpl.this,
                                   AnnotationEvent.FEATURES_UPDATED));
     }
+    static final long serialVersionUID = 2608156420244752907L;
+    
   }//inner class EventsHandler
 
 
