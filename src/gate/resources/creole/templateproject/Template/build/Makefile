@@ -22,7 +22,7 @@ COMPILE=./jdk.sh -s -g:none javac -O -d ../classes $(SP) $(CP)
 # having the main test class as first target, and -Xdepend in the (1.2)
 # javac options, means that most classes get compiled by a single call
 # to javac
-all: ../classes/template/TestTemplate.class classes resources
+all: ../classes/___ALLPACKAGE___TestTemplate.class classes resources
 
 # build the whole thing
 everything: depend all jar docs internaldocs test
@@ -32,28 +32,28 @@ include Makefile.dep
 
 # regenerate Makefile.dep
 depend:
-	./makejdepend.sh ../src/template >Makefile.dep
+	./makejdepend.sh ../src/___PACKAGETOP___ >Makefile.dep
 
 # run the test suite (swap the last line for one of the commented ones to get
 # the JUnit GUI test runner)
 test:
 	./jdk.sh java -Djava.compiler=none \
 	  -classpath template.jar:../lib/gate.jar \
-	  junit.textui.TestRunner template.TestTemplate
+	  junit.textui.TestRunner ___PACKAGE___.TestTemplate
 
 # build template.jar
-jar: resources classes.jar
+jar: classes.jar
 	rm -f template.jar
 	./jdk.sh java -cp ../../Template/lib/gate.jar gate.util.JarFiles \
 	  template.jar classes.jar ../../Template/lib/gate.jar
 
 # just the classes in a jar
 classes.jar:
-	cd ../classes && ../build/jdk.sh jar cvf ../build/classes.jar template
+	cd ../classes && ../build/jdk.sh jar cvf ../build/classes.jar ___PACKAGETOP___
 
 # copy the resources directory into "classes"
 resources:
-	cd ../src/template && cp -R resources ../../classes/template
+	cd ../src/___PACKAGETOP___ && cp -R resources ../../classes/___PACKAGETOP___
 
 # refresh the jar with all the class files
 jarupdate:
@@ -61,11 +61,11 @@ jarupdate:
 
 # run the gui
 rungui:
-	./jdk.sh java -cp template.jar -Xmx200m template.TestTemplate
+	./jdk.sh java -cp template.jar -Xmx200m ___PACKAGE___.TestTemplate
 runguisrc:
 	./jdk.sh java \
 	  -cp ../classes:../../gate2/classes:../../gate2/build/gate.jar \
-	  -Xmx200m template.TestTemplate
+	  -Xmx200m ___PACKAGE___.TestTemplate
 
 # make the javadoc documentation
 docs:

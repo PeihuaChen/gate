@@ -173,7 +173,8 @@ public class BootStrap {
 
     // a map from all the methods from interfaces to the lists which contains
     // the features of every method
-    Map allMethods = new HashMap();
+    List allMethods = new ArrayList();
+
     // add the interfaces that it implements
     if (listInterfaces!=null) {
       interfacesAndClass = interfacesAndClass+ "\n"+ "  implements";
@@ -190,29 +191,41 @@ public class BootStrap {
           name = name.substring(lastDot+1,name.length());
           // add the name of package in the list
           if ((!allPackages.contains(namePackage))&&
-                            (namePackage.compareTo("java.lang.*")!=0))
+                            (namePackage.equals("java.lang.*")))
             allPackages.add(namePackage +".*");
         } else {
           currentClass = Class.forName("gate."+name);
           if (!allPackages.contains("gate.*"))
             allPackages.add("gate.*");
         }
-        Method[] listMethods = currentClass.getMethods();
 
+        Method[] listMethods = currentClass.getMethods();
         for (int i=0;i<=listMethods.length-1;i++) {
 
-          ArrayList features = new ArrayList();
-          // add the type returned by the method
-          features.add(0,listMethods[i].getReturnType());
+          FeatureMethod featureMethod = new FeatureMethod();
+          featureMethod.setNameMethod(listMethods[i].getName());
+          featureMethod.setValueReturn(listMethods[i].getReturnType().getName());
 
-          // add the types of the parameters of the method
-          features.add(1,listMethods[i].getParameterTypes());
+          Class[] parameters = (Class[])(listMethods[i].getParameterTypes());
+          Class[] exceptions = (Class[])(listMethods[i].getExceptionTypes());
 
-          // add the exceptions of the method
-          features.add(2,listMethods[i].getExceptionTypes());
+          List aux = new ArrayList();
+          // determine the parameters for the current method
+          for (int k=0;k<parameters.length;k++){
+            aux.add(parameters[k].getName());
+          }
+          featureMethod.setParameterTypes(aux);
 
-          String nameMethodInterface = listMethods[i].getName();
-          allMethods.put(nameMethodInterface,features);
+          // determine the exceptions for the current method
+          aux = new ArrayList();
+          for (int k=0;k<exceptions.length;k++){
+            aux.add(exceptions[k].getName());
+          }
+          featureMethod.setExceptionTypes(aux);
+          // add the features method in the list
+          if (!allMethods.contains(featureMethod))
+            allMethods.add(featureMethod);
+
         }
 
         interfacesAndClass = interfacesAndClass + " "+ name;
@@ -228,8 +241,29 @@ public class BootStrap {
     Method[] listMethodsClassExtend = currentClassExtend.getMethods();
 
     for (int i=0;i<=listMethodsClassExtend.length-1;i++) {
-      String name = listMethodsClassExtend[i].getName();
-      methods.add(name);
+      FeatureMethod featureMethod = new FeatureMethod();
+      featureMethod.setNameMethod(listMethodsClassExtend[i].getName());
+      featureMethod.setValueReturn(
+                          listMethodsClassExtend[i].getReturnType().getName());
+
+      Class[] parameters = (Class[])(
+                                listMethodsClassExtend[i].getParameterTypes());
+      Class[] exceptions = (Class[])(
+                                listMethodsClassExtend[i].getExceptionTypes());
+
+      // determine the parameters for the current method
+      List aux = new ArrayList();
+      for (int k=0;k<parameters.length;k++)
+        aux.add(parameters[k].getName());
+      featureMethod.setParameterTypes(aux);
+
+      // determine the exceptions for the current method
+      aux = new ArrayList();
+      for (int k=0;k<exceptions.length;k++)
+        aux.add(exceptions[k].getName());
+      featureMethod.setExceptionTypes(aux);
+
+      methods.add(featureMethod);
     }// for
 
     shapeMethod(methods,allMethods);
@@ -243,41 +277,45 @@ public class BootStrap {
     * @listInterfacesMethod is the list with all methods from the interfaces
     * that implement the resource
     */
-  public void shapeMethod (ArrayList listMethodExtend,Map listInterfacesMethod){
+  public void shapeMethod (List listMethodExtend,List listInterfacesMethod){
     // determine all the methods from the interfaces which are not among the
     // methods of the class that extends the resource
-    Set keys = listInterfacesMethod.keySet();
-    Iterator iteratorKeys = keys.iterator();
     int j = 0;
-    while (iteratorKeys.hasNext()) {
-      String nameMethod = (String)(iteratorKeys.next());
-      if (listMethodExtend.contains(nameMethod) == false) {
+    for (int i=0;i<listInterfacesMethod.size();i++) {
+      FeatureMethod featureMethod = (FeatureMethod)listInterfacesMethod.get(i);
 
-        ArrayList currentFeature = (ArrayList)(
-                                          listInterfacesMethod.get(nameMethod));
-        // the value which the method returns
-        Class valReturn = (Class)(currentFeature.get(0));
+      if (listMethodExtend.contains(featureMethod) == false) {
+        // the name of the method
+        String nameMethod = (String)(featureMethod.getNameMethod());
+
         // the types of the parameters of the method
-        Class[] valTypes = (Class[])(currentFeature.get(1));
-        // the exceptions of the method
-        Class[] valException = (Class[])(currentFeature.get(2));
+        List valTypes = (List)(featureMethod.getParameterTypes());
 
-        // the form of the method
-        String typeReturn = determineTypePackage(valReturn.getName());
+        // the value which the method returns
+        String typeReturn = determineTypePackage(
+                                      (String)(featureMethod.getValueReturn()));
 
+        // get the list of exceptions for the current method
+        List valException = (List)(featureMethod.getExceptionTypes());
 
         String declaration = "public "+ typeReturn +" "+
                              nameMethod +"(";
         // parameters
-        if (valTypes.length == 0)
+        if (valTypes.size() == 0)
           declaration = declaration+")";
         else
-          for (int i=0;i<valTypes.length;i++) {
-            declaration = declaration +
-                            determineTypePackage(valTypes[i].getName()) +
-                            " parameter"+ i;
+          for (int k=0;k<valTypes.size();k++) {
+            String type = (String)valTypes.get(k);
+            if (type.endsWith("[]"))
+              declaration = declaration +
+                  determineTypePackage(type.substring(0,type.length()-2)) +
+                  " parameter"+ k;
+            else
+              declaration = declaration +
+                            determineTypePackage((String)valTypes.get(k)) +
+                            " parameter"+ k;
 
-            if (i==valTypes.length-1)
+            if (k==valTypes.size()-1)
               declaration = declaration + ")";
             else
               declaration = declaration + ", ";
@@ -285,16 +323,15 @@ public class BootStrap {
           } // for
 
         // exceptions
-
-        if (valException.length == 0) {
-          if (typeReturn.compareTo("void") !=0 ){
-            if (typeReturn.indexOf("[]") == -1)
+        if (valException.size() == 0) {
+          if (!typeReturn.equals("void")){
+            if (!typeReturn.endsWith("[]"))
               declaration = declaration + "{ " + "return "+
                             typeReturn.toLowerCase()+ j + "; }";
             else
               declaration = declaration + "{ " + "return "+
                             typeReturn.toLowerCase().substring(
-                            0,typeReturn.length()-2)+ j + "[]; }";
+                            0,typeReturn.length()-2)+ j + "; }";
 
             fields.put(new Integer(j),typeReturn);
             j =j+1;
@@ -303,20 +340,19 @@ public class BootStrap {
         } // if
         else {
           declaration = declaration + "\n"+ "                throws ";
-          for (int i=0;i<valException.length;i++) {
+          for (int k=0;k<valException.size();k++) {
+            declaration = declaration + determineTypePackage((String)
+                                                    valException.get(k));
 
-            declaration = declaration + determineTypePackage(
-                                                    valException[i].getName());
-
-            if (i == valException.length-1) {
-              if (typeReturn.compareTo("void") !=0 ){
-                if (typeReturn.indexOf("[]") == -1)
+            if (k == valException.size()-1) {
+              if (!typeReturn.equals("void")){
+                if (!typeReturn.endsWith("[]"))
                   declaration = declaration + "{ " + "return "+
                           typeReturn.toLowerCase()+ j+"; }";
                 else
                   declaration = declaration + "{ " + "return "+
                             typeReturn.toLowerCase().substring(
-                            0,typeReturn.length()-2)+ j + "[]; }";
+                            0,typeReturn.length()-2)+ j + "; }";
 
                 fields.put(new Integer(j),typeReturn);
                 j=j+1;
@@ -395,7 +431,8 @@ public class BootStrap {
   } // addContent
 
   /** create the map with variants of the names... */
-  public Map createNames (String namePackage, String nameClass) {
+  public Map createNames (String namePackage, String nameClass,
+                                                        String stringPackages) {
 
     // determine the name of the current user and the current day
     Calendar calendar = Calendar.getInstance();
@@ -415,13 +452,13 @@ public class BootStrap {
     names.put("___CLASSNAME___",nameClass);
     names.put("___DATE___",date);
     names.put("___AUTHOR___",user);
+    names.put("___ALLPACKAGE___",stringPackages);
     names.put("___PACKAGE___",namePackage);
     names.put("___PACKAGETOP___",listPackages.get(0));
     names.put("___RESOURCE___",nameResource);
 
     oldNames.put("___PACKAGE___","template");
     oldNames.put("___PACKAGETOP___","template");
-
 
     return names;
   }
@@ -431,13 +468,16 @@ public class BootStrap {
     Iterator iterator = listPackages.iterator();
     String packages = new String();
     while (iterator.hasNext()) {
-      packages = packages + "\n" + "import "+ iterator.next()+";";
+      String currentPackage = (String)iterator.next();
+      if (!currentPackage.equals("gate.*"))
+        if (!currentPackage.equals("gate.creole.*"))
+          packages = packages + "\n" + "import "+ currentPackage+";";
     }// while
     return packages;
   }
 
-  /**
-   * */
+  /** determines the name of the packages and adds them to a list
+    */
   public List determinePath (String namePackage)throws IOException {
     List list = new ArrayList();
     StringTokenizer token = new StringTokenizer(namePackage,".");
@@ -470,8 +510,8 @@ public class BootStrap {
     char[] nameClassChars = nameClass.toCharArray();
     for (int i=0;i<nameClassChars.length;i++){
       Character nameClassCharacter = new Character(nameClassChars[i]);
-      if (!nameClassCharacter.isLetter(nameClassChars[i]))
-        throw new GateException("Only letters in the class name");
+      if (!nameClassCharacter.isLetterOrDigit(nameClassChars[i]))
+        throw new GateException("Only letters and digits in the class name");
     }
     // verify if it exits a directory of given path
     File dir = new File(pathNewProject);
@@ -488,15 +528,21 @@ public class BootStrap {
       nameResource = namePackage;
     }
 
+    // determine the path of the main class
+    String stringPackages = "";
+    for (int i=0;i<listPackages.size();i++) {
+      stringPackages = stringPackages + listPackages.get(i)+"/";
+    }
+
     // create the map with the names
-    createNames(namePackage,nameClass);
+    createNames(namePackage,nameClass,stringPackages);
 
     // determine the interfaces that the resource implements and the class
     // that it extends
     String interfacesAndClass = getInterfacesAndClass (typeResource,
                                                   listInterfaces);
 
-    // all the packages from the class which creates the resource
+    // all the packages from the class, which creates the resource
     String packages = namesPackages(allPackages);
 
     // the current file created by the system
@@ -516,11 +562,6 @@ public class BootStrap {
 
     Enumeration keyProperties = properties.propertyNames();
 
-    // determine the path of the main class
-    String stringPackages = "";
-    for (int i=0;i<listPackages.size();i++) {
-      stringPackages = stringPackages + listPackages.get(i)+"/";
-    }
     if (stringPackages.length()>0)
       stringPackages = stringPackages.substring(0,stringPackages.length()-1);
 
@@ -555,7 +596,7 @@ public class BootStrap {
             newPathFile = regularExpressions(
               newPathFile,stringPackages,"___PACKAGE___");
             // change the path according to input
-            newPathFile = changeKeyValue(pathNewProject+"/"+nameFile,names);
+            newPathFile = changeKeyValue(pathNewProject+"/"+newPathFile,names);
             newFile = new File(newPathFile);
             newFile.mkdir();
           }
@@ -584,7 +625,6 @@ public class BootStrap {
             // the content of the current file is copied on the disk
 
             // the current file for writing characters
-
             FileWriter fileWriter = new FileWriter(newFile);
 
             InputStreamReader inputStreamReader = new InputStreamReader (
@@ -599,7 +639,7 @@ public class BootStrap {
               text = new String (cbuffer,0,charRead);
 
               String expr1 = "public class " + names.get("___CLASSNAME___");
-              String expr2 = "import ___PACKAGE___.*;";
+              String expr2 = "import ___packages___.*;";
               String newText;
 
               if (packages.length() == 0){
@@ -628,3 +668,112 @@ public class BootStrap {
     }// while
   } // modify
 } // class BootStrap
+
+/** FeatureMethod is a class encapsulating
+  * information about the feature of a method such as the name, the return
+  * type, the parameters types or exceptions types
+  */
+class FeatureMethod {
+  /** the name of the method*/
+  protected String nameMethod;
+
+  /** the return value*/
+  protected String valueReturn;
+
+  /** the list with the types of the parameters */
+  protected List parameterTypes;
+
+  /** the list with the types of the exceptions */
+  protected List exceptionTypes;
+
+  FeatureMethod() {
+    nameMethod = new String();
+    valueReturn = new String();
+    parameterTypes = new ArrayList();
+    exceptionTypes = new ArrayList();
+  }
+
+  public String getNameMethod() {
+    return nameMethod;
+  }//getNameMethod
+
+  public String getValueReturn() {
+    return valueReturn;
+  }//getValueReturn
+
+  public List getParameterTypes() {
+    return parameterTypes;
+  }//getParameterTypes
+
+  public List getExceptionTypes() {
+    return exceptionTypes;
+  }//getExceptionTypes
+
+  public void setNameMethod(String newNameMethod) {
+    nameMethod = newNameMethod;
+  }//setDocument
+
+  public void setValueReturn(String newValueReturn) {
+    valueReturn = newValueReturn;
+  }//setValueReturn
+
+  public void setParameterTypes(List newParameterTypes) {
+    parameterTypes = newParameterTypes;
+  }//setParameterTypes
+
+  public void setExceptionTypes(List newExceptionTypes) {
+    exceptionTypes = newExceptionTypes;
+  }//setExceptionTypes
+
+  public boolean equals(Object obj){
+    if(obj == null)
+      return false;
+    FeatureMethod other;
+    if(obj instanceof FeatureMethod){
+      other = (FeatureMethod) obj;
+    }else return false;
+
+    // If their names are not equals then return false
+    if((nameMethod == null) ^ (other.getNameMethod() == null))
+      return false;
+    if(nameMethod != null && (!nameMethod.equals(other.getNameMethod())))
+      return false;
+
+    // If their return values are not equals then return false
+    if((valueReturn == null) ^ (other.getValueReturn() == null))
+      return false;
+    if(valueReturn != null && (!valueReturn.equals(other.getValueReturn())))
+      return false;
+
+    // If their parameters types are not equals then return false
+    if((parameterTypes == null) ^ (other.getParameterTypes() == null))
+      return false;
+    if(parameterTypes != null &&
+                            (!parameterTypes.equals(other.getParameterTypes())))
+      return false;
+
+    // If their exceptions types are not equals then return false
+    if((exceptionTypes == null) ^ (other.getExceptionTypes() == null))
+      return false;
+    if(exceptionTypes != null &&
+                            (!exceptionTypes.equals(other.getExceptionTypes())))
+      return false;
+    return true;
+  }// equals
+
+   public int hashCode(){
+    int hashCodeRes = 0;
+    if (nameMethod != null )
+       hashCodeRes ^= nameMethod.hashCode();
+    if (valueReturn != null)
+      hashCodeRes ^= valueReturn.hashCode();
+    if(exceptionTypes != null)
+      hashCodeRes ^= exceptionTypes.hashCode();
+    if(parameterTypes != null)
+      hashCodeRes ^= parameterTypes.hashCode();
+
+    return  hashCodeRes;
+  }// hashCode
+
+
+}
