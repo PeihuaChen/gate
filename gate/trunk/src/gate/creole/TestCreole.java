@@ -219,7 +219,7 @@ public class TestCreole extends TestCase
 
     ResourceData docRd = (ResourceData) reg.get("gate.corpora.DocumentImpl");
     assertNotNull("Couldn: couldn't find document res data", docRd);
-
+    if(DEBUG) Out.prln(docRd.getParameterList().getInitimeParameters());
     ParameterList paramList = docRd.getParameterList();
     if(DEBUG) Out.prln(docRd);
 
