@@ -17,13 +17,10 @@ package gate.gui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
-import javax.swing.JDialog;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
