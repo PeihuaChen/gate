@@ -53,6 +53,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
   private Collection  addedAnotationSets;
 
   private Document    parentDocument;
+  private int         maxAnnotationId;
 
   /**
    * The listener for the events coming from the features.
@@ -1011,6 +1012,11 @@ public class DatabaseDocumentImpl extends DocumentImpl
                   currAnn.getEndNode().getOffset(),
                   currAnn.getType(),
                   currAnn.getFeatures());
+
+      //adjust the maxAnnotationID
+      this.maxAnnotationId = (currAnn.getId().intValue() >= this.maxAnnotationId)
+                              ? currAnn.getId().intValue()
+                              : this.maxAnnotationId;
     }
 
   }
@@ -1257,8 +1263,10 @@ public class DatabaseDocumentImpl extends DocumentImpl
       Iterator itNamed = _named.values().iterator();
       while (itNamed.hasNext()){
         AnnotationSet currSet = (AnnotationSet)itNamed.next();
-        //add them all to the DBAnnotationSet
-        _setAnnotations(currSet.getName(),currSet);
+        //add them all to the DBAnnotationSet, except the ORIGINAL MARKUPS - handled in the super init()
+        if (false == currSet.getName().equals(GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME)) {
+          _setAnnotations(currSet.getName(),currSet);
+        }
       }
     }
 
@@ -1279,6 +1287,18 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
   public Object getInitData__$$__(Object initData) {
     return null;
+  }
+
+  /** Initialise this resource, and return it. */
+  public Resource init() throws ResourceInstantiationException {
+
+    Resource result = super.init();
+
+    if (this.nextAnnotationId <= this.maxAnnotationId) {
+      this.nextAnnotationId = this.maxAnnotationId +1;
+    }
+
+    return result;
   }
 
 }
