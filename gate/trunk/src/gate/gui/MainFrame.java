@@ -1477,7 +1477,10 @@ public class MainFrame extends JFrame
           try{
             // Create a serial analyser
             SerialAnalyserController sac = (SerialAnalyserController)
-                Factory.createResource("gate.creole.SerialAnalyserController");
+                Factory.createResource("gate.creole.SerialAnalyserController",
+                                       Factory.newFeatureMap(),
+                                       Factory.newFeatureMap(),
+                                       "ANNIE_" + Gate.genSym());
             // Load each PR as defined in gate.creole.ANNIEConstants.PR_NAMES
             for(int i = 0; i < PR_NAMES.length; i++){
             ProcessingResource pr = (ProcessingResource)
@@ -1521,7 +1524,9 @@ public class MainFrame extends JFrame
       }// End for
       try{
         // Create an application at the end.
-        Factory.createResource("gate.creole.SerialAnalyserController");
+        Factory.createResource("gate.creole.SerialAnalyserController",
+                               Factory.newFeatureMap(), Factory.newFeatureMap(),
+                               "ANNIE_" + Gate.genSym());
       }catch(gate.creole.ResourceInstantiationException ex){
         ex.printStackTrace(Err.getPrintWriter());
       }// End try
