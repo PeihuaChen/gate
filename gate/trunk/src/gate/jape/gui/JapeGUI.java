@@ -245,7 +245,7 @@ public class JapeGUI extends JFrame {
   }
 
   public void tokenize(Document doc){
-    String content = doc.getContent().getString();
+    String content = doc.getContent().toString();
     BreakIterator bi = BreakIterator.getWordInstance();
     bi.setText(content);
     int start = bi.first();
@@ -271,7 +271,7 @@ public class JapeGUI extends JFrame {
   void updateAll(){
     //display the current document
     text.getHighlighter().removeAllHighlights();
-    text.setText(currentDoc.getContent().getString());
+    text.setText(currentDoc.getContent().toString());
     //get all the annotation types and display the buttons
     typesPanel.removeAll();
     Iterator typesIter = currentDoc.getAnnotations().getAllTypes().iterator();
@@ -417,7 +417,7 @@ public class JapeGUI extends JFrame {
           return currentAnn.getFeatures();
         }
         case 4:{
-          return currentDoc.getContent().getString().substring(
+          return currentDoc.getContent().toString().substring(
               currentAnn.getStartNode().getOffset().intValue(),
               currentAnn.getEndNode().getOffset().intValue());
         }

@@ -71,12 +71,13 @@ public class DocumentContentImpl implements DocumentContent
     );
   } // getContent(start, end)
 
-  /** Returns the Stiung representing the content in case of a textual document.
-    * NOTE: this is a temporary solution until we have a more generic one.
-    */
-  public String getString(){
+/** Returns the String representing the content in case of a textual document.
+  * NOTE: this is a temporary solution until we have a more generic one.
+  */
+  public String toString(){
     return content;
   }
+
   /** The size of this content (e.g. character length for textual
     * content).
     */
