@@ -196,7 +196,8 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       );
     } catch(GateException e) {
       String nl = Strings.getNl();
-      String actionWithNumbers = addLineNumbers(actionClassString.toString());
+      String actionWithNumbers =
+        Strings.addLineNumbers(actionClassString.toString());
       throw new JapeException(
         "Couldn't create action class: " + nl + e + nl +
         "offending code was: " + nl + actionWithNumbers + nl
@@ -421,29 +422,10 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       throw new JapeException(
         "Couldn't run RHS action: " + Strings.getNl() +
         stackTraceWriter.getBuffer().toString() +
-        addLineNumbers(actionClassString.toString())
+        Strings.addLineNumbers(actionClassString.toString())
       );
     }
   } // transduce
-
-  /** Helper method to add line numbers to a string */
-  String addLineNumbers(String text) {
-    // construct a line reader for the text
-    BufferedReader reader = new BufferedReader(new StringReader(text));
-    String line = null;
-    StringBuffer result = new StringBuffer();
-
-    try {
-      for(int lineNum = 1; ( line = reader.readLine() ) != null; lineNum++) {
-        String pad;
-        if(lineNum < 10) pad = " ";
-        else pad = "";
-        result.append(pad + lineNum + "  " + line + Strings.getNl());
-      }
-    } catch(IOException ie) { }
-
-    return result.toString();
-  } // addLineNumbers
 
   /** Create a string representation of the object. */
   public String toString() { return toString(""); }
@@ -492,6 +474,9 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.19  2001/11/16 13:03:35  hamish
+// moved line numbers method to Strings
+//
 // Revision 1.18  2001/11/16 10:29:45  hamish
 // JAPE RHS compiler errors now include the RHS code; test added
 //
