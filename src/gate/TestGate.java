@@ -35,6 +35,7 @@ import gate.util.*;
 import gate.config.*;
 import gate.persist.*;
 import gate.security.*;
+import com.ontotext.gate.gazetteer.*;
 
 /** Top-level entry point for GATE test suite;
   * "main" will run the JUnit test runner interface.
@@ -209,6 +210,10 @@ public class TestGate {
 //        suite.addTest(TestSplitterTagger.suite());
         suite.addTest(TestFeatureMap.suite());
         suite.addTest(TestPR.suite());
+
+        //test ontotext gazetteer
+        suite.addTest(TestNaturalGazetteer.suite());
+
       } // if(allTests)
 
     } catch(Exception e) {
