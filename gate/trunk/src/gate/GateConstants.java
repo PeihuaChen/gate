@@ -21,6 +21,9 @@ public interface GateConstants {
   /** The name of config data files (<TT>gate.xml</TT>). */
   public static final String GATE_DOT_XML = "gate.xml";
 
+  /** The name of the installed plug-ins directory */
+  public static final String PLUGINS = "plugins";
+  
   /** The name of session state data files (<TT>gate.session</TT>). */
   public static final String GATE_DOT_SER = "gate.session";
 
@@ -61,26 +64,50 @@ public interface GateConstants {
     "Save_features_when_preserving_format";
 
   /**
-   * The key for the known plugins path option
+   * The key for the known plugins path option in the GATE config map
    */
   public static final String KNOWN_PLUGIN_PATH_KEY = "Known_plugin_path";
   
   /**
-   * The key for the autoload plugins path option
+   * The key for the autoload plugins path option in the GATE config map
    */
-  public static final String LOAD_PLUGIN_PATH_KEY = "Load_plugin_path";
+  public static final String AUTOLOAD_PLUGIN_PATH_KEY = "Load_plugin_path";
   
   /**
-   * The key for the autoload plugins path system property
+   * The name for the autoload plugins path system property
    */
-  public static final String LOAD_PLUGIN_PATH_SYSPROP_KEY = "load.plugin.path";
+  public static final String AUTOLOAD_PLUGIN_PATH_PROPERTY_NAME = "load.plugin.path";
 
   /**
-   * The key for the GATE_HOME system property
+   * The name of the GATE home system property
    */
-  public static final String GATE_HOME_SYSPROP_KEY = "gate.home";
+  public static final String GATE_HOME_PROPERTY_NAME = "gate.home";
 
+  /**
+   * The name of the GATE plugins home system property
+   */
+  public static final String PLUGINS_HOME_PROPERTY_NAME = "gate.plugins.home";
+
+  /**
+   * The name of the GATE site config system property
+   */
+  public static final String SITE_CONFIG_PROPERTY_NAME = "gate.site.config";
+ /** 
+  * The name of the GATE user config system property
+  */
+ public static final String USER_CONFIG_PROPERTY_NAME = "gate.user.config";
   
+  /**
+   * The name of the GATE site config system property
+   */
+  public static final String GATE_SITE_CONFIG_PROPERTY_NAME = "gate.site.config";
+  
+  /**
+   * The name of the GATE user config system property
+   */
+  public static final String GATE_USER_CONFIG_PROPERTY_NAME = "gate.user.config";
+  
+    
   /** The key for the feature keeping the original content of the document */
   public static final String
    ORIGINAL_DOCUMENT_CONTENT_FEATURE_NAME = "Original_document_content_on_load";
