@@ -94,6 +94,23 @@ public class UnrestrictedAnnotationEditor extends AbstractVisualResource
    * trigger the saving of the newly created annotation(s)
    */
   public void okAction() throws GateException {
+    if (annotTypeTextField.getText().equals("")){
+      throw new GateException("An annotation type must be specified !");
+    }// End if
+    // This code must be uncomented if the desired behaviour for
+    // UnrestrictedAnnoatationEditor is not to allow annotation types
+    // which have a schema present in the system.
+/*
+    CreoleRegister creoleReg = Gate.getCreoleRegister();
+    List currentAnnotationSchemaList =
+                      creoleReg.getLrInstances("gate.creole.AnnotationSchema");
+    Iterator iter = currentAnnotationSchemaList.iterator();
+    while (iter.hasNext()){
+      AnnotationSchema annotSchema = (AnnotationSchema) iter.next();
+      if (annotTypeTextField.getText().equals(annotSchema.getAnnotationName()))
+        throw new GAteException("There is a schema type for this annotation");
+    }// End while
+*/
     data.setAnnotType(annotTypeTextField.getText());
     if (currentAnnot == null){
       currentAnnotSet.add( currentStartOffset,
