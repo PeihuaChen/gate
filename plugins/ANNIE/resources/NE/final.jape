@@ -1,8 +1,18 @@
-// final.jape
-// diana, 05 Jan 01
-// last modified diana, 17 Apr 01
+/*
+*  final.jape
+*
+*  Copyright (c) 1998-2001, The University of Sheffield.
+*
+*  This file is part of GATE (see http://gate.ac.uk/), and is free
+*  software, licenced under the GNU Library General Public License,
+*  Version 2, June 1991 (in the distribution as file licence.html,
+*  and also available at http://gate.ac.uk/gate/licence.html).
+*
+*  Diana Maynard, 02 Aug 2001
+*
+*  $Id$
+*/
 
-//note: organization should be included as part of the address
 
 Phase:	Final
 Options: control = appelt
@@ -339,3 +349,11 @@ Rule:Unknown
 :unknown
 -->
  :unknown.Unknown = {kind = "PN", rule = Unknown}
+
+
+
+
+
+
+
+
