@@ -222,7 +222,9 @@ public class ProtegeProjectName extends AbstractLanguageResource
   }
 
   public Set getTopClasses() {
-    return ontotextOntology.getTopClasses();
+    if(ontotextOntology != null) 
+      return ontotextOntology.getTopClasses();
+    else return new HashSet();
   }
 
   public int getTaxonomicDistance(OClass class1,OClass class2) {
@@ -230,7 +232,19 @@ public class ProtegeProjectName extends AbstractLanguageResource
   }
 
   public boolean equals(Object o) {
-    return ontotextOntology.equals(o);
+    boolean result = false;
+
+    if(o instanceof ProtegeProjectName) {
+      ProtegeProjectName prj = (ProtegeProjectName) o;      
+      if(ontotextOntology != null) {
+        result = ontotextOntology.equals(prj.ontotextOntology);
+      }
+      else { // ontology is null
+        result = prj.ontotextOntology == null;
+      }
+    }
+    
+    return result;
   }
 
   public void setModified(boolean isModified) {
@@ -238,6 +252,7 @@ public class ProtegeProjectName extends AbstractLanguageResource
   }
 
   public boolean isModified() {
+    if(ontotextOntology == null) return false;
     return ontotextOntology.isModified();
   }
 
