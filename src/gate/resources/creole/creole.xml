@@ -75,10 +75,9 @@
   <CREOLE>
     <!-- creole.xml for the internal tokeniser -->
     <RESOURCE>
-      <NAME>GATE internal Tokeniser</NAME>
+      <NAME>GATE Unicode Tokeniser</NAME>
       <CLASS>gate.creole.tokeniser.SimpleTokeniser</CLASS>
       <COMMENT>A customisable tokeniser.</COMMENT>
-      <PRIVATE/>
       <PARAMETER NAME="document" COMMENT="The document to be tokenised" RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
       <PARAMETER NAME="annotationSetName" RUNTIME="true" COMMENT="The annotation set to be used for the generated annotations" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="rulesURL" DEFAULT="gate:/creole/tokeniser/DefaultTokeniser.rules" COMMENT="The URL for the rules file">java.net.URL</PARAMETER>
@@ -88,7 +87,7 @@
 
     <!-- creole.xml for tokeniser -->
     <RESOURCE>
-      <NAME>ANNIE Unicode Tokeniser</NAME>
+      <NAME>ANNIE English Tokeniser</NAME>
       <CLASS>gate.creole.tokeniser.DefaultTokeniser</CLASS>
       <COMMENT>A customisable tokeniser.</COMMENT>
       <PARAMETER NAME="document" COMMENT="The document to be tokenised" RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
