@@ -534,11 +534,6 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     //that's needed, because sometimes names can share a token (e.g., first or
     //last but not be the same
     if (apply_rules_namematch(prevAnnot.getType(), shortName,longName)) {
-      List toMatchList = new ArrayList(matchesList);
-//      if (newAnnot.getType().equals(unknownType))
-//        Out.prln("Matching new " + annotString + " with annots " + toMatchList);
-      toMatchList.remove(prevAnnot.getId());
-
       /**
        * Check whether we need to ensure that there is a match with the rest
        * of the matching annotations, because the rule requires that
@@ -546,6 +541,12 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
        */
       if (allMatchingNeeded) {
         allMatchingNeeded = false;
+
+        List toMatchList = new ArrayList(matchesList);
+  //      if (newAnnot.getType().equals(unknownType))
+  //        Out.prln("Matching new " + annotString + " with annots " + toMatchList);
+        toMatchList.remove(prevAnnot.getId());
+
         return matchOtherAnnots(toMatchList, newAnnot, annotString);
       } else
         return true;
@@ -809,7 +810,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
       if (i != tokens.size()-1)
         newString.append(" ");
     }
-    Out.prln("Strip CDG returned: " + newString + "for string " + annotString);
+//    Out.prln("Strip CDG returned: " + newString + "for string " + annotString);
 
     if (caseSensitive)
       return newString.toString();
@@ -1059,8 +1060,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
         matched = s1.equalsIgnoreCase(s2);
     else matched =  s1.equals(s2) ;
 //kalina: do not remove, nice for debug
-    if (matched && (s2.startsWith("Kenneth") || s1.startsWith("Kenneth")))
-        Out.prln("Rule1: Matched " + s1 + "and " + s2);
+//    if (matched && (s2.startsWith("Kenneth") || s1.startsWith("Kenneth")))
+//        Out.prln("Rule1: Matched " + s1 + "and " + s2);
     return matched;
   }//matchRule1
 
@@ -1160,15 +1161,32 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
         ((Annotation) tokensLongAnnot.get(0)).getFeatures().get("kind").equals("number"))
       return false;
 
-    if (s1.startsWith("Kenneth") || s2.startsWith("Kenneth"))
-      Out.prln("Rule 5: " + s1 + "and " + s2);
-    if (tokensLongAnnot.size()>1)
-      return matchRule1((String)
-                      ((Annotation) tokensLongAnnot.get(0)).getFeatures().get(STRING_FEATURE),
+//    if (s1.startsWith("Patrick") || s2.startsWith("Patrick")) {
+//      Out.prln("Rule 5: " + s1 + "and " + s2);
+//    }
+
+    //require that when matching person names, the shorter one to be of length 1
+    //for the rule to apply. In other words, avoid matching Peter Smith and
+    //Peter Kline, because they share a Peter token.
+    if ( (shortAnnot.getType().equals(personType)
+         || longAnnot.getType().equals(personType)
+         )
+       &&
+         tokensShortAnnot.size()>1
+       )
+       return false;
+
+    if (tokensLongAnnot.size()<=1)
+      return false;
+    boolean result = matchRule1((String)
+                      ((Annotation) tokensLongAnnot.get(0)
+                        ).getFeatures().get(STRING_FEATURE),
                       s2,
                       caseSensitive);
 
-    return false;
+//    if (s1.startsWith("Patrick") || s2.startsWith("Patrick"))
+//      Out.prln("rule 5 result: " + result);
+    return result;
 
   }//matchRule5
 
@@ -1560,7 +1578,6 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     * RULE #15: does one token from a Person name appear as the other token
     * Note that this rule has NOT been used in LaSIE's 1.5
     * namematcher; added for ACE by Di's request
-    * Applied to: organisation annotations only
     */
   public boolean matchRule15(String s1,
             String s2) {
@@ -1593,7 +1610,12 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
       }//for
     } // for
 
-    if (matched_tokens > 0)
+    //19 February 2002: kalina
+    //was originally > 0 (i.e., any match is good)
+    //ensure that we've matched all the tokens in the short annotation
+    //the reason for that is, because otherwise we match
+    //Patrick Viera and Patrick Somebody - not good!
+    if (matched_tokens == tokensShortAnnot.size())
       return true;
 
     return false;
