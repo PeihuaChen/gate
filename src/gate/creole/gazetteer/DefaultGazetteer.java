@@ -66,6 +66,7 @@ public class DefaultGazetteer extends AbstractProcessingResource
    * called before the gazetteer can be used
    */
   public Resource init()throws ResourceInstantiationException{
+    fsmStates = new HashSet();
     try{
       initialState = new FSMState(this);
       if(listsURL == null){
@@ -426,7 +427,7 @@ public class DefaultGazetteer extends AbstractProcessingResource
 
   /** A set containing all the states of the FSM backing the gazetteer
    */
-  Set fsmStates = new HashSet();
+  Set fsmStates;
 
   protected FeatureMap features  = null;
 
