@@ -327,20 +327,20 @@ public class OracleDataStore extends JDBCDataStore {
    * Save: synchonise the in-memory image of the LR with the persistent
    * image.
    */
-  public void sync(LanguageResource lr)
+/*  public void sync(LanguageResource lr)
   throws PersistenceException,SecurityException {
 
     //4.delegate (open a new transaction)
     _sync(lr,true);
   }
-
+*/
 
 
   /**
    * Save: synchonise the in-memory image of the LR with the persistent
    * image.
    */
-  private void _sync(LanguageResource lr, boolean openNewTrans)
+/*  private void _sync(LanguageResource lr, boolean openNewTrans)
     throws PersistenceException,SecurityException {
 
     //0.preconditions
@@ -428,7 +428,7 @@ public class OracleDataStore extends JDBCDataStore {
       new DatastoreEvent(this, DatastoreEvent.RESOURCE_WRITTEN, lr, lr.getLRPersistenceId()));
 
   }
-
+*/
 
 
   /**
@@ -2548,7 +2548,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** helper for sync() - saves a Document in the database */
-  private void syncDocument(Document doc)
+  protected void syncDocument(Document doc)
     throws PersistenceException, SecurityException {
 
     Assert.assertTrue(doc instanceof DatabaseDocumentImpl);
@@ -3136,7 +3136,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** helper for sync() - saves a Corpus in the database */
-  private void syncCorpus(Corpus corp)
+  protected void syncCorpus(Corpus corp)
     throws PersistenceException,SecurityException {
 
     //0. preconditions
@@ -3370,7 +3370,7 @@ public class OracleDataStore extends JDBCDataStore {
   /**
    * Releases the exlusive lock on a resource from the persistent store.
    */
-  private User getLockingUser(LanguageResource lr)
+/*  private User getLockingUser(LanguageResource lr)
     throws PersistenceException,SecurityException {
 
     //0. preconditions
@@ -3383,13 +3383,13 @@ public class OracleDataStore extends JDBCDataStore {
     //delegate
     return getLockingUser((Long)lr.getLRPersistenceId());
   }
-
+*/
 
 
   /**
    * Releases the exlusive lock on a resource from the persistent store.
    */
-  private User getLockingUser(Long lrID)
+/*  private User getLockingUser(Long lrID)
   throws PersistenceException,SecurityException {
 
     //1. check session
@@ -3433,7 +3433,7 @@ public class OracleDataStore extends JDBCDataStore {
       DBHelper.cleanup(pstmt);
     }
   }
-
+*/
 
 
   /**
