@@ -91,6 +91,11 @@ public class ResourceData extends AbstractFeatureBearer {
     instantiationStack.push(resource);
   } // addInstantiation
 
+  /** Remove an instantiation of the resource from the register of these */
+  public void removeInstantiation(Resource resource) {
+    instantiationStack.remove(resource);
+  } // removeInstantiation
+
   /** Bump an instantiation to the top of the instantiation stack */
   public void bumpInstantiation(Resource resource) {
     instantiationStack.bump(resource);
