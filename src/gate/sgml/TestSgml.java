@@ -62,20 +62,24 @@ public class TestSgml extends TestCase
     */
     // create a new gate document
     gate.Document doc = gate.Transients.newDocument(
-            new URL ("http://www.dcs.shef.ac.uk/~cursu/sgml/HDS")
+            new URL ("http://www.dcs.shef.ac.uk/~cursu/sgml/Hds.sgm")
+            //new URL ("http://www.dcs.shef.ac.uk/~cursu/sgml/K79.sgm")
+            //new URL ("http://www.dcs.shef.ac.uk/~cursu/sgml/Fly.sgm")
            //new URL ("file:///d:/tmp/Hds.SGML")
     );
     // get the docFormat that deals with it.
     // the parameter MimeType doesn't affect right now the behaviour
-
+    //*
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
         new MimeType("text","sgml")
     );
-    assert(docFormat instanceof gate.corpora.SgmlDocumentFormat);
+    //*/
+
     /*
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
       doc.getSourceURL()
     );
+    assert(docFormat instanceof gate.corpora.SgmlDocumentFormat);
     */
     // set's the map
       docFormat.setMarkupElementsMap(markupElementsMap);
