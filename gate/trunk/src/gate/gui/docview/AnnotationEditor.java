@@ -232,7 +232,6 @@ public class AnnotationEditor{
     
     featuresEditor.getTable().addComponentListener(new ComponentAdapter(){
       public void componentResized(ComponentEvent e){
-        sizeWindows();
         placeWindows();
       }
     });

@@ -283,7 +283,6 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
       editorCombo.setModel(new DefaultComboBoxModel());
       editorCombo.setBackground(mainTable.getBackground());
       editorCombo.setEditable(true);
-      editorCombo.getEditor().getEditorComponent().setPreferredSize(null);
       editorCombo.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent evt){
           stopCellEditing();
@@ -418,7 +417,6 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
               nameIter.hasNext(); 
               comboModel.addElement(nameIter.next()));
           combo.getEditor().getEditorComponent().setBackground(FeaturesSchemaEditor.this.getBackground());
-          combo.getEditor().getEditorComponent().setPreferredSize(null);
           combo.setSelectedItem(feature.name);
           break;
         case VALUE_COL:
@@ -435,7 +433,6 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
           combo.getEditor().getEditorComponent().setBackground(feature.isCorrect() ?
                   FeaturesSchemaEditor.this.getBackground() :
                   (feature.isRequired() ? REQUIRED_WRONG : OPTIONAL_WRONG));
-          combo.getEditor().getEditorComponent().setPreferredSize(null);
           combo.setSelectedItem(feature.value);
           break;
         default: ;
