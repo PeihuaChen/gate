@@ -51,8 +51,8 @@ public class Scratch
     }
 */
     CreoleRegister reg = Gate.getCreoleRegister();
-System.out.println("VRs for " + reg.getAnnotationVRs ("Tree"));
-System.out.println("VRs for " + reg.getAnnotationVRs ());
+System.out.println("VRs for " + reg.getAnnotationVRs("Tree"));
+System.out.println("VRs for " + reg.getAnnotationVRs());
 //System.out.println(reg.getLargeVRsForResource("gate.corpora.DocumentImpl"));
   } // main
 
