@@ -200,6 +200,19 @@ public class TestGate {
     // say anything more informative than "can't invoke suite" if there's
     // an exception here...
     try {
+      //get the config if set through a property
+      String configFile = System.getProperty("gate.config");
+      if(configFile != null && configFile.length() > 0){
+        File f = new File(configFile);
+        try {
+          URL u = f.toURL();
+        } catch(MalformedURLException e) {
+          Err.prln("Bad initialisation file: " + configFile);
+          Err.prln(e);
+          System.exit(STATUS_ERROR);
+        }
+        Gate.setSiteConfigFile(f);
+      }
       Gate.init();
     } catch(GateException e) {
       Out.prln("can't initialise GATE library! exception = " + e);
