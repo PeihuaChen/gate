@@ -451,9 +451,13 @@ System.out.println("resource loaded...");
   public void resourceUnloaded(CreoleEvent e) {
 
     Assert.assertNotNull(e.getResource());
-System.out.println(e);
-    Assert.assertNotNull(e.getDatastore());
+    if(! (e.getSource() instanceof LanguageResource))
+      return;
+
     LanguageResource lr = (LanguageResource)e.getResource();
+    //this is a resource from another DS, so no need to do anything
+    if(lr.getDataStore() != this)
+      return;
 
     this.dependentResources.remove(lr);
     //don't save it, this may not be the user's choice

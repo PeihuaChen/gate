@@ -875,6 +875,21 @@ public class OracleDataStore extends JDBCDataStore {
       if (doc.getLRPersistenceId() == null || doc.getDataStore().equals(this)) {
         Document dbDoc = createDocument(doc,corpusID,secInfo);
         dbDocs.add(dbDoc);
+        //let the world know
+        fireResourceAdopted(
+            new DatastoreEvent(this, DatastoreEvent.RESOURCE_ADOPTED,
+                               dbDoc,
+                               dbDoc.getLRPersistenceId())
+        );
+
+        //6. fire also resource written event because it's now saved
+        fireResourceWritten(
+          new DatastoreEvent(this, DatastoreEvent.RESOURCE_WRITTEN,
+                              dbDoc,
+                              dbDoc.getLRPersistenceId()
+          )
+        );
+
       }
       else {
         //skip others
@@ -906,6 +921,7 @@ public class OracleDataStore extends JDBCDataStore {
   public LanguageResource getLr(String lrClassName, Object lrPersistenceId)
   throws PersistenceException {
 
+    Out.prln("class name" + lrClassName);
     if (lrClassName.equals(DBHelper.DOCUMENT_CLASS)) {
       Document docResult = null;
       docResult = readDocument(lrPersistenceId);
