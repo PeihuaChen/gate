@@ -79,6 +79,19 @@ public class CorpusBenchmarkTool {
     execute(startDir);
   }
 
+  public void init() {
+    initPRs();
+
+    annotTypes = new ArrayList();
+    annotTypes.add("Organization");
+    annotTypes.add("Person");
+    annotTypes.add("Date");
+    annotTypes.add("Location");
+    annotTypes.add("Address");
+    annotTypes.add("Money");
+    annotTypes.add("Percent");
+  }
+
   public void execute(File dir) {
     if (dir == null)
       return;
@@ -136,27 +149,23 @@ public class CorpusBenchmarkTool {
       corpusTool.setGenerateMode(true);
       i++;
     } else if (args[0].equals("-marked")) {
-      Out.prln("Evaluating only against human-annotated texts...");
+      Out.prln("Evaluating stored results only against human-annotated texts...");
       corpusTool.setMarkedOnly(true);
       i++;
     }
     String dirName = args[i];
+    Out.prln(args[i]);
     File dir = new File(dirName);
     if (!dir.isDirectory())
       throw new GateException(usage);
 
-    corpusTool.initPRs();
-
-    annotTypes = new ArrayList();
-    annotTypes.add("Organization");
-    annotTypes.add("Person");
-    annotTypes.add("Date");
-    annotTypes.add("Location");
-    annotTypes.add("Address");
-    annotTypes.add("Money");
+    corpusTool.init();
 
     corpusTool.setStartDirectory(dir);
     corpusTool.execute();
+
+    Out.prln("Overall average precision: " + corpusTool.getPrecisionAverage());
+    Out.prln("Overall average recall: " + corpusTool.getRecallAverage());
 
     Out.prln("Finished!");
 
@@ -179,6 +188,34 @@ public class CorpusBenchmarkTool {
   public boolean getMarkedOnly() {
     return isMarkedOnly;
   }//getGenerateMode
+
+  /**
+   * Returns the average precision over the entire set of processed documents.
+   * <P>
+   * If the tool has been evaluating the original documents against the
+   * previously-stored automatically annotated ones, then the precision
+   * will be the average precision on those two sets. <P>
+   * If the tool was run in -marked mode, i.e., was evaluating the stored
+   * automatically processed ones against the human-annotated ones, then
+   * the precision will be the average precision on those two sets of documents.
+   */
+  public double getPrecisionAverage() {
+    return precisionSum/docNumber;
+  }
+
+  /**
+   * Returns the average recall over the entire set of processed documents.
+   * <P>
+   * If the tool has been evaluating the original documents against the
+   * previously-stored automatically annotated ones, then the recall
+   * will be the average recall on those two sets. <P>
+   * If the tool was run in -marked mode, i.e., was evaluating the stored
+   * automatically processed ones against the human-annotated ones, then
+   * the recall will be the average recall on those two sets of documents.
+   */
+  public double getRecallAverage() {
+    return recallSum/docNumber;
+  }
 
   public boolean isGenerateMode() {
     return isGenerateMode == true;
@@ -323,9 +360,15 @@ public class CorpusBenchmarkTool {
         }
 
         evaluateDocuments(doc, cleanDoc, markedDoc);
-
+        if (doc != null)
+          Factory.deleteResource(doc);
+        if (cleanDoc != null)
+          Factory.deleteResource(cleanDoc);
+        if (markedDoc != null)
+          Factory.deleteResource(markedDoc);
       }//for loop through saved docs
       sds.close();
+
     } catch (java.net.MalformedURLException ex) {
       throw new GateRuntimeException("CorpusBenchmark: " + ex.getMessage());
     } catch (PersistenceException ex1) {
@@ -383,6 +426,12 @@ public class CorpusBenchmarkTool {
         if (annotDiff == null)
           continue;
 
+        //increase the number of processed documents
+        docNumber++;
+        //add precison and recall to the sums
+        precisionSum += annotDiff.getPrecisionAverage();
+        recallSum += annotDiff.getRecallAverage();
+
         if (annotDiff.getFMeasureAverage() != 1.0) {
           Out.prln("\t\t Annotation type: " + annotType);
 
@@ -439,6 +488,12 @@ public class CorpusBenchmarkTool {
         if (annotDiff == null)
           continue;
 
+        //increase the number of processed documents
+        docNumber++;
+        //add precison and recall to the sums
+        precisionSum += annotDiff.getPrecisionAverage();
+        recallSum += annotDiff.getRecallAverage();
+
         if (annotDiff.getFMeasureAverage() != 1.0) {
           Out.prln("\t\t Annotation type: " + annotType);
 
@@ -470,7 +525,10 @@ public class CorpusBenchmarkTool {
     if (keyDoc == null || respDoc == null)
       return null;
 
-    if (keyDoc.getAnnotations().get(annotType) == null)
+    if (keyDoc.getAnnotations().get(annotType) == null
+    //TO REMOVE WHEN CRISTI FIXES THIS EXCEPTION
+        ||
+        respDoc.getAnnotations().get(annotType) == null)
       return null;
 
     // create the annotation schema needed for AnnotationDiff
@@ -508,6 +566,13 @@ public class CorpusBenchmarkTool {
   private POSTagger tagger;
   private ANNIETransducer transducer;
   private OrthoMatcher orthomatcher;
+
+  //collect the sum of all precisions and recalls of all docs
+  //and the number of docs, so I can calculate the average for
+  //the corpus at the end
+  private double precisionSum = 0;
+  private double recallSum = 0;
+  private int docNumber = 0;
 
   /**
    * If true, the corpus tool will generate the corpus, otherwise it'll
