@@ -24,7 +24,11 @@
 
   <!-- Documentation directory -->
   <property name="docDir"  location="doc"/>
-	  
+
+  <!-- Read version and build numbers -->
+  <loadfile property="gate.version" srcFile="${buildDir}/version.txt"/>
+  <loadfile property="gate.build" srcFile="${buildDir}/build.txt"/>
+
   
   <!-- Use the new 1.3+ compiler -->
   <property name="build.compiler"  value="modern"/>
@@ -59,7 +63,8 @@
   <!-- Prints out some information messages -->
   <echo level="info">
     This is the ANT build script for GATE (http://gate.ac.uk).
-    Type &quot;ant help&quot; for details about the targets available
+    Type &quot;ant help&quot; for details about the targets available.
+    GATE ${gate.version}, build ${gate.build}
   </echo>
   
   <!-- Prints out details about the targets -->
@@ -67,16 +72,22 @@
     <echo level="info">
       This is the ANT build script for gate (http://gate.ac.uk).
       The following targets are available
+        -all (default target): compiles GUK and GATE classes and makes the gate.jar archive.
+        
         -compile: compiles all the .java files
         -resources: copies the resources to the output directory (${outputDir})
         -jar: creates the gate.jar archive
         -run: starts GATE
         -clean: cleans up the output from all previous builds
+        
+        -doc: creates the Javadoc and Jaha2HTML documentation
+        -docclean: deletes all built documentation
+        -jape: rebuilds the JAPE parser files and associated documentation
         -guk: compiles the GUK classes and builds the guk.jar archive
         -gukdemo: starts the GUK Editor (a.k.a. GATE Unicode Editor)
         -test: runs the GATE test suite
         
-        -all (default target): compiles GUK and GATE classes and makes the gate.jar archive.
+        -distro: make a GATE distribution (calls all build tasks in the process)
     </echo>
   </target>
   
@@ -123,7 +134,6 @@
            includes="gate/**"
 					 classpathref="build.class.path"/>
   </target>
-
 	
   <!-- Make gate.jar archive -->
 	<target name="jar" depends="compile,resources">
@@ -168,7 +178,7 @@
   </target>
   
   <!-- Make documentation -->
-  <target name="doc">
+  <target name="javadoc">
     <javadoc access="protected" 
               destdir="${docDir}/javadoc"
               classpathref="run.class.path"
@@ -185,8 +195,8 @@
     </javadoc>
   </target>
   
-  <!-- Make documentation -->
-  <target name="internaldoc">
+  <!-- Make documentation - internal -->
+  <target name="internaljavadoc">
     <javadoc access="private" 
               destdir="${docDir}/javadoc/internal"
               classpathref="run.class.path"
@@ -204,6 +214,77 @@
   </target>
 
   
+  <!-- Convert the source to HTML using the java2html utility -->
+  <target name="java2html">
+    <java jar="${buildDir}/lib/j2h.jar"
+          fork="true"
+          spawn="false">
+      <jvmarg value="-Dfile.encoding=UTF-8"/>
+      <arg value="-d"/> <arg file="${docDir}/java2html/"/>
+      <arg value="-js"/> <arg file="${srcDir}"/>
+      <arg value="-jd"/> <arg file="${docDir}/javadoc"/>
+      <arg value="-m"/> <arg value="4"/>
+      <arg value="-t"/> <arg value="2"/>
+      <arg value="-n"/> <arg value="&quot;GATE source&quot;"/>
+    </java>
+  </target>
+ 
+  <target name="doc" depends="javadoc, internaljavadoc, java2html"/>
+ 
+  
+  <!-- Clear all built documentation -->
+  <target name="docclean">
+    <delete includeemptydirs="true">
+      <fileset dir="${docDir}/javadoc" excludes="**/CVS,**/CVS/**,**/.cvsignore,internal,internal/**"/>
+    </delete>
+    <delete includeemptydirs="true">
+      <fileset dir="${docDir}/javadoc/internal" excludes="**/CVS,**/CVS/**,**/.cvsignore"/>
+    </delete>
+    <delete includeemptydirs="true">
+      <fileset dir="${docDir}/java2html" excludes="**/CVS,**/CVS/**,**/.cvsignore"/>
+    </delete>
+  </target>
+  
+  <!-- Rebuild the JAPE file parser. 
+       Uses JavaCC 0.8pre1 from ../lib for the java, and 0.7 
+       from ./JavaCC-071.zip for the HTML to avoid JJDoc bug in 0.8pre1 -->
+  <target name="jape">
+    <java classname="COM.sun.labs.javacc.Main" 
+          fork="true"
+          spawn="false"
+          dir="${srcDir}/gate/jape/parser">
+      <classpath>
+        <pathelement location="${libDir}/JavaCC.zip"/>
+      </classpath>
+      <arg value="ParseCpsl.jj"/>
+    </java>
+    
+    <java classname="COM.sun.labs.jjdoc.JJDocMain" 
+          fork="true"
+          spawn="false"
+          dir="${srcDir}/gate/jape/parser">
+      <classpath>
+        <pathelement location="${buildDir}/JavaCC-071.zip"/>
+      </classpath>
+      <arg value="ParseCpsl.jj"/>
+    </java>
+
+    <move file="${srcDir}/gate/jape/parser/ParseCpsl.html"
+          toFile="${srcDir}/gate/jape/parser/ParseCpslPlain.html"/>
+          
+    <java classname="COM.sun.labs.jjdoc.JJDocMain" 
+          fork="true"
+          spawn="false"
+          dir="${srcDir}/gate/jape/parser">
+      <classpath>
+        <pathelement location="${buildDir}/JavaCC-071.zip"/>
+      </classpath>
+      <arg value="-ONE_TABLE=false"/>
+      <arg value="ParseCpsl.jj"/>
+    </java>
+  </target>
+  
+  
   <target name="test" depends="jar">
     <junit fork="true" 
            showoutput="yes"
@@ -215,6 +296,101 @@
                  usefile="false"/>
       <test name="gate.TestGate"/>
     </junit>
+  </target>
+  
+  <!-- Make the archives for the GATE Distribution -->
+  <target name="distro"
+          depends="compile, jar, doc">
+    <property name="gate.full.name" 
+              value="gate-${gate.version}-build${gate.build}"/>
+    <property name="distDirname"
+              value="DISTRIBUTION"/>          
+    <property name="distDir" 
+              location="${distDirname}"/>
+    <property name="doc.dirname"
+              value="${gate.full.name}-DOC"/>
+    <property name="doc.archive"
+              location="${distDir}/${doc.dirname}.zip"/>
+    <property name="src.dirname"
+              value="${gate.full.name}-SRC"/>
+    <property name="src.archive"
+              location="${distDir}/${src.dirname}.zip"/>
+    <property name="bin.dirname"
+              value="${gate.full.name}-BIN"/>
+    <property name="bin.archive"
+              location="${distDir}/${bin.dirname}.zip"/>
+    <property name="all.dirname"
+              value="${gate.full.name}-ALL"/>
+    <property name="all.archive"
+              location="${distDir}/${all.dirname}.zip"/>
+    <delete dir="${distDir}"/>    
+    <mkdir dir="${distDir}"/>
+    
+    <!-- Build the DOC archive -->
+    <zip destfile="${doc.archive}" 
+         update="false"
+         compress="true">
+      <zipfileset dir="${basedir}"
+                  prefix="${doc.dirname}"
+                  includes="licence.html,index.html,doc/**"/>
+      <zipfileset dir="${basedir}"
+                  prefix="${doc.dirname}"
+                  file="../sale/tao/tao.pdf"/>
+    </zip>
+    
+    <!-- Build the SRC archive -->
+    <zip destfile="${src.archive}" 
+         update="false"
+         compress="true">
+      <zipfileset dir="${basedir}"
+                  prefix="${src.dirname}">
+        <include name="*"/>
+        <include name="bin/**"/>
+        <include name="build/**"/>
+        <exclude name="build/*.jar"/>
+        <include name="classes"/>
+        <include name="doc/**"/>
+        <include name="doc/javadoc"/>
+        <exclude name="doc/java2html/**"/>
+        <exclude name="doc/javadoc/**"/>
+        <include name="lib/**"/>
+        <include name="misc/**"/>
+        <include name="src/**"/>
+      </zipfileset>
+      <zipfileset dir="${basedir}"
+                  prefix="${src.dirname}/doc/"
+                  file="doc/javadoc"/>
+      <zipfileset dir="${basedir}"
+                  prefix="${src.dirname}/doc/javadoc/"
+                  file="doc/javadoc/internal"/>
+    </zip>
+
+    <!-- Build the BIN archive -->
+    <zip destfile="${bin.archive}" 
+         update="false"
+         compress="true">
+      <zipfileset dir="${basedir}"
+                  prefix="${bin.dirname}"
+                  includes="licence.html,bin/**"/>
+      <zipfileset dir="${basedir}"
+                  prefix="${bin.dirname}/bin/"
+                  file="build/gate.jar"/>
+      <zipfileset dir="${basedir}"
+                  prefix="${bin.dirname}/bin/ext"
+                  file="lib/ext/guk.jar"/>
+      <zipfileset dir="${basedir}"
+                  prefix="${bin.dirname}/bin/ext"
+                  file="lib/ext/nl.mpi.lookup.jar"/>
+    </zip>
+    
+    <!-- Build the ALL archive -->
+    <zip destfile="${all.archive}" 
+         update="false"
+         compress="true">
+      <zipfileset dir="${basedir}"
+                  prefix="${all.dirname}"
+                  excludes="${distDirname},${distDirname}/**"/>
+    </zip>
   </target>
   
 </project>
