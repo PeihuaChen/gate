@@ -1632,14 +1632,13 @@ public class AnnotationEditor extends AbstractVisualResource {
               }
 
               Enumeration typeNodesEnum = setNode.children();
-
               while(typeNodesEnum.hasMoreElements()){
                 DefaultMutableTreeNode typeNode =
                   (DefaultMutableTreeNode)typeNodesEnum.nextElement();
                 TypeData tData = (TypeData)typeNode.getUserObject();
                 if(tData.getVisible()){
                   //1) update the annotations table
-                  data.removeAll(tData.getAnnotations());
+                  data.subList(tData.range.start, tData.range.end).clear();
                   //remove the range
                   int delta = tData.range.end - tData.range.start;
                   //1a)first shift all following ranges
@@ -1667,11 +1666,10 @@ public class AnnotationEditor extends AbstractVisualResource {
                               textPane.getStyle("default"), true);
                   }//while(annIter.hasNext())
                 }//if(tData.getVisible())
-                //remove the node for the type
-                stylesTreeModel.removeNodeFromParent(typeNode);
+                else{
+                }
               }//while(typeNodesEnum.hasMoreElements())
 
-              //remove the data for the set
               typeDataMap.remove(setName);
               //remove the node for the set
               stylesTreeModel.removeNodeFromParent(setNode);
@@ -2012,7 +2010,7 @@ public class AnnotationEditor extends AbstractVisualResource {
             //type node
             if(!setName.equals("Default") &&
                !document.getNamedAnnotationSets().containsKey(setName)){
-              //the set for this type has already bewen removed completely
+              //the set for this type has already been removed completely
               //nothing more do (that's nice :) )
               return;
             }
