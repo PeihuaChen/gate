@@ -13,6 +13,10 @@ else
   LOCAT=`(cd \`dirname $0\` && pwd)`
 fi
 
+# set TOOLSJAR to where we hope tools.jar is are located
+TOOLSJAR=$LOCAT/tools14.jar
+[ ! -f $TOOLSJAR ] && TOOLSJAR=$LOCAT/../lib/tools14.jar
+
 # set SITEGATEXML to where we thing gate.xml is (or "" if not around)
 SITEGATEXML=""
 if [ x$GATE_CONFIG != x ]
@@ -30,12 +34,13 @@ GUK=${LOCAT}/ext
 [ ! -f $GUK/guk.jar ] && GUK=${LOCAT}/../lib/ext
 
 # set JAVA
-JAVA=$JAVA_HOME/bin/java
+JAVA=$LOCAT/../jre1.4/bin/java
+[ ! -f $JAVA ] && JAVA=$JAVA_HOME/bin/java
 [ ! -f $JAVA ] && JAVA=java
 
 # set CLASSPATH
 OLD_CLASSPATH=$CLASSPATH
-CLASSPATH="${GATEJAR}:$CLASSPATH"
+CLASSPATH="${GATEJAR}:${TOOLSJAR}:$CLASSPATH"
 
 # munge filenames if we're on cygwin
 CYG=false
