@@ -177,7 +177,7 @@
   <property category="sys" name="JbxEventListener6" value="gate.gui.StatusListener" />
   <property category="sys" name="JbxEventListener7" value="gate.gui.ProgressListener" />
   <property category="sys" name="LastTag" value="0" />
-  <property category="sys" name="Libraries" value="gatelibs" />
+  <property category="sys" name="Libraries" value="gatelibs;ontotext gazetteer" />
   <property category="sys" name="MakeStable" value="0" />
   <property category="sys" name="OutPath" value="classes" />
   <property category="sys" name="SourcePath" value="src" />
