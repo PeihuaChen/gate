@@ -86,7 +86,7 @@ public class TestFiles extends TestCase
   }
 
   /** Test JarFiles methods */
-  public void testJarFiles(){
+  public void testJarFiles() throws Exception {
     JarFiles jarFiles = new JarFiles();
     Set filesToMerge = new HashSet();
     String jarFilePathFirst = "jartest/ajartest.jar";
@@ -101,28 +101,17 @@ public class TestFiles extends TestCase
     FileInputStream fileStreamSecond = null;
 
     //open first jar file in a temporal file
-    try{
-//      System.out.println(Files.getResourceAsStream(jarFilePathFirst));
-      f1 = Files.writeTempFile(Files.getGateResourceAsStream(jarFilePathFirst));
-    }catch(IOException ioe){
-      ioe.printStackTrace(System.err);
-      System.exit(1);
-    }
+//   System.out.println(Files.getResourceAsStream(jarFilePathFirst));
+    f1 = Files.writeTempFile(Files.getGateResourceAsStream(jarFilePathFirst));
+
     //open second jar file in a temporal file
-    try{
-      f2 =Files.writeTempFile(Files.getGateResourceAsStream(jarFilePathSecond));
-    }catch (IOException ioe){
-      ioe.printStackTrace(System.err);
-      System.exit(1);
-    }
+    f2 =Files.writeTempFile(Files.getGateResourceAsStream(jarFilePathSecond));
+
+
     //create a temporal file in order to put the classes of jar files
-    try{
     resourceFile = File.createTempFile("jarfinal", ".tmp");
-    }catch(IOException ioe){
-      ioe.printStackTrace(System.err);
-      System.exit(1);
-    }
     resourceFile.deleteOnExit();
+
     //determin the paths of the temporal files
     jarPathFirst = f1.getAbsolutePath();
     jarPathSecond = f2.getAbsolutePath();
@@ -132,32 +121,16 @@ public class TestFiles extends TestCase
     filesToMerge.add(jarPathFirst);
     filesToMerge.add(jarPathSecond);
     //close the temporal files
-    try{
-      fileStreamFirst = new FileInputStream(f1);
-    }catch(FileNotFoundException fnfe){
-      fnfe.printStackTrace(System.err);
-    }
-    try{
-      fileStreamSecond = new FileInputStream(f2);
-    }catch(FileNotFoundException fnfe){
-      fnfe.printStackTrace(System.err);
-    }
-    try{
-      fileStreamFirst.close();
-    }catch(IOException ioe){
-      ioe.printStackTrace(System.err);
-    }
-    try{
-      fileStreamSecond.close();
-    }catch(IOException ioe){
-      ioe.printStackTrace(System.err);
-    }
-    //create the final jar file
-    try{
-      jarFiles.merge(filesToMerge,jarPathFinal);
-    }catch(GateException ge){
-      ge.printStackTrace(System.err);
-    }
+    fileStreamFirst = new FileInputStream(f1);
+
+    fileStreamSecond = new FileInputStream(f2);
+
+    fileStreamFirst.close();
+
+    fileStreamSecond.close();
+
+    jarFiles.merge(filesToMerge,jarPathFinal);
+
   }// testJarFiles
 
   public void testFind(){
@@ -172,7 +145,7 @@ public class TestFiles extends TestCase
     if (iter.hasNext()){
       while (iter.hasNext()){
         String verif = iter.next().toString();
-        System.out.println(verif);
+        //System.out.println(verif);
       }
     }
   }//testFind
