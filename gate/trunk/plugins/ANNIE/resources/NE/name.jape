@@ -23,7 +23,7 @@ Options: control = appelt
 /////////////////////////////////////////////////////////////////
 Macro: TITLE
 (
- {Lookup.majorType == title}
+ {Title}
  (SPACE)?
 )
 
@@ -199,6 +199,41 @@ annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
+Rule: PersonTitleGender
+Priority: 18
+// use this rule if the title has a feature gender
+// Miss F Smith
+(
+ ({Title.gender == male}|
+  {Title.gender == female}
+ ) 
+ (SPACE)?
+ ((FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2)
+  (SPACE)? 
+ )*
+ (LASTNAME)
+ (SPACE PERSONENDING)?
+)
+:person -->
+{
+ gate.FeatureMap features = Factory.newFeatureMap();
+gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
+gate.AnnotationSet title = (gate.AnnotationSet)personSet.get("Title");
+// if the annotation type title doesn't exist, do nothing
+if (title != null && title.size()>0)
+{
+// if it does exist, take the first element in the set
+  gate.Annotation personAnn = (gate.Annotation)title.iterator().next();
+//propagate gender feature (and value) from title
+  features.put("gender", personAnn.getFeatures().get("gender"));
+}
+// create some new features
+  features.put("kind", "personName");
+  features.put("rule", "PersonTitleGender");
+// create a TempPerson annotation and add the features we've created
+annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+features);
+}
 
 
 Rule:	PersonTitle
@@ -233,6 +268,32 @@ if (firstPerson != null && firstPerson.size()>0)
   features.put("kind", "personName");
   features.put("rule", "PersonTitle");
 // create a TempPerson annotation and add the features we've created
+annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+features);
+}
+
+Rule:	PersonFirstTitleGender
+Priority: 55
+// use this rule when we know what gender the title indicates
+// Mr Fred
+
+(
+ ({Title.gender == male} | {Title.gender == female})
+ ((FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2)
+ )
+)
+:person -->
+{
+ gate.FeatureMap features = Factory.newFeatureMap();
+gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
+gate.AnnotationSet title = (gate.AnnotationSet)personSet.get("Title");
+if (title != null && title.size()>0)
+{
+  gate.Annotation personAnn = (gate.Annotation)title.iterator().next();
+  features.put("gender", personAnn.getFeatures().get("gender"));
+}
+  features.put("kind", "personName");
+  features.put("rule", "PersonFirstTitleGender");
 annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
