@@ -18,9 +18,13 @@ package gate;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 
 import gate.config.ConfigDataProcessor;
 import gate.creole.CreoleRegisterImpl;
+import gate.creole.ResourceData;
 import gate.event.CreoleListener;
 import gate.util.*;
 
@@ -135,9 +139,59 @@ public class Gate implements GateConstants
   /**
    * Loads the CREOLE repositories (aka plugins) that the user has selected for 
    * automatic loading.
-   *
+   * Loads the information about known plugins in memory.
    */
   protected static void initCreoleRepositories(){
+    //the logic is:
+    //get the list of know plugins from gate.xml
+    //add all the installed plugins
+    //get the list of loadable plugins 
+    //or use ANNIE if value not set
+    //load loadable plugins
+    
+    //process the known plugins list
+    knownPlugins = new ArrayList();
+    String knownPluginsPath = (String)getUserConfig().get(KNOWN_PLUGIN_PATH_KEY);
+    if(knownPluginsPath != null && knownPluginsPath.length() > 0){
+      StringTokenizer strTok = new StringTokenizer(knownPluginsPath, ";", false);
+      while(strTok.hasMoreTokens()){
+        String aKnownPluginPath = strTok.nextToken();
+        try{
+          knownPlugins.add(new URL(aKnownPluginPath));
+        }catch(MalformedURLException mue){
+          Err.prln("Plugin error: " + aKnownPluginPath + " is an invalid URL!");
+        }
+      }
+    }
+    //add all the installed plugins
+    File pluginsHome = new File(System.getProperty(GATE_HOME_SYSPROP_KEY), 
+            "plugins");
+    File[] dirs = pluginsHome.listFiles();
+    for(int i = 0; i < dirs.length; i++){
+      File creoleFile = new File(dirs[i], "creole.xml");
+      if(creoleFile.exists()){
+        try{
+          URL pluginURL = dirs[i].toURL();
+          if(!knownPlugins.contains(pluginURL)) 
+            knownPlugins.add(pluginURL);
+        }catch(MalformedURLException mue){
+          //this shoulod never happen
+          throw new GateRuntimeException(mue);
+        }
+      }
+    }
+    //we now have a full list of known plugins
+    //get the information about the plugins
+    pluginData = new HashMap();
+    Iterator pluginIter = knownPlugins.iterator();
+    while(pluginIter.hasNext()){
+      URL aPluginURL = (URL)pluginIter.next();
+      DirectoryInfo dInfo = new DirectoryInfo(aPluginURL);
+      pluginData.put(aPluginURL, dInfo);
+    }
+    
+    //process the autoload plugins
+    autoloadPlugins = new ArrayList();
     String pluginPath = getUserConfig().getString(LOAD_PLUGIN_PATH_KEY);
     //can be overridden by system property
     String prop = System.getProperty(LOAD_PLUGIN_PATH_SYSPROP_KEY);
@@ -145,8 +199,6 @@ public class Gate implements GateConstants
     
     if(pluginPath == null || pluginPath.length() == 0){
       //value not set -> use the default
-      File pluginsHome = new File(System.getProperty(GATE_HOME_SYSPROP_KEY), 
-              "plugins");
       try{
         pluginPath = new File(pluginsHome, "ANNIE").toURL().toString();
         getUserConfig().put(LOAD_PLUGIN_PATH_KEY, pluginPath);
@@ -155,12 +207,14 @@ public class Gate implements GateConstants
       }
     }
     
-    StringTokenizer strTok = new StringTokenizer(pluginPath, 
-            ";", false);
+    //load all loadable plugins
+    StringTokenizer strTok = new StringTokenizer(pluginPath, ";", false);
     while(strTok.hasMoreTokens()){
       String aDir = strTok.nextToken();
       try{
-        getCreoleRegister().registerDirectories(new URL(aDir));
+        URL aPluginURL = new URL(aDir);
+        autoloadPlugins.add(aPluginURL);
+        getCreoleRegister().registerDirectories(aPluginURL);
       }catch(MalformedURLException mue){
         System.err.println("Cannot load " + aDir + " CREOLE repository.");
         mue.printStackTrace();
@@ -743,6 +797,26 @@ jar/classpath so it's the same as registerBuiltins
    * user's <TT>gate.xml</TT> file (create one if it doesn't exist).
    */
   public static void writeUserConfig() throws GateException {
+    //update the values for knownPluginPath
+    String knownPluginPath = "";
+    Iterator pluginIter = knownPlugins.iterator();
+    while(pluginIter.hasNext()){
+      URL aPluginURL = (URL)pluginIter.next();
+      if(knownPluginPath.length() > 0) knownPluginPath += ";";
+      knownPluginPath += aPluginURL.toExternalForm();
+    }
+    getUserConfig().put(KNOWN_PLUGIN_PATH_KEY, knownPluginPath);
+    
+    //update the autoload plugin list
+    String loadPluginPath = "";
+    pluginIter = autoloadPlugins.iterator();
+    while(pluginIter.hasNext()){
+      URL aPluginURL = (URL)pluginIter.next();
+      if(loadPluginPath.length() > 0) loadPluginPath += ";";
+      loadPluginPath += aPluginURL.toExternalForm();
+    }
+    getUserConfig().put(LOAD_PLUGIN_PATH_KEY, loadPluginPath);
+    
     // the user's config file
     String configFileName = getUserConfigFileName();
     File configFile = new File(configFileName);
@@ -808,6 +882,225 @@ jar/classpath so it's the same as registerBuiltins
     return Strings.getFileSep().equals("/");
   } // runningOnUnix
 
+  /**
+   * Returns the list of CREOLE directories the system knows about (either 
+   * pre-installed plugins in the plugins directory or CREOLE directories that
+   * have previously been loaded manually).
+   * @return a {@link List} of {@link URL}s.
+   */
+  public static List getKnownPlugins(){
+    return knownPlugins;
+  }
+  
+  public static void addKnownPlugin(URL pluginURL){
+    if(knownPlugins.contains(pluginURL)) return;
+    knownPlugins.add(pluginURL);
+    DirectoryInfo dInfo = new DirectoryInfo(pluginURL);
+    pluginData.put(pluginURL, dInfo);
+  }
+
+  /**
+   * Returns the list of CREOLE directories the system loads automatically at
+   * start-up.
+   * @return a {@link List} of {@link URL}s.
+   */
+  public static List getAutoloadPlugins(){
+    return autoloadPlugins;
+  }
+  
+  public static void addAutoloadPlugin(URL pluginUrl){
+    if(autoloadPlugins.contains(pluginUrl))return;
+    //make sure it's known
+    addKnownPlugin(pluginUrl);
+    //add it to autoload list
+    autoloadPlugins.add(pluginUrl);
+  }
+  
+  /**
+   * Gets the information about a known directory.
+   * @param directory the URL for the directory in question.
+   * @return a {@link DirectoryInfo} value.
+   */
+  public static DirectoryInfo getDirectoryInfo(URL directory){
+    return (DirectoryInfo)pluginData.get(directory);
+  }
+  
+  /**
+   * Tells the system to &quot;forget&quot; about one previously known 
+   * directory. If the specified directory was loaded, it will be unloaded as 
+   * well - i.e. all the metadata relating to resources defined by this 
+   * directory will be removed from memory.
+   * @param directory
+   */
+  public static void removeKnownDirectory(URL directory){
+    DirectoryInfo dInfo = (DirectoryInfo)pluginData.get(directory);
+    if(dInfo != null){
+      creoleRegister.removeDirectory(directory);
+      knownPlugins.remove(directory);
+      pluginData.remove(directory);
+    }
+  }  
+  
+  /**
+   * Stores information about the contents of a CREOLE directory.
+   */
+  public static class DirectoryInfo{
+    public DirectoryInfo(URL url){
+      this.url = url;
+      valid = true;
+      resourceInfoList = new ArrayList();
+      //this may invalidate it if something goes wrong
+      parseCreole();
+    }
+    
+    /**
+     * Performs a shallow parse of the creole.xml file to get the information 
+     * about the resources contained.
+     */
+    protected void parseCreole(){
+      SAXBuilder builder = new SAXBuilder(false);
+System.out.println("processing " + url);      
+      try{
+        if(!url.getPath().endsWith("/")) 
+          url = new URL(url.getProtocol(), url.getHost(),
+                  url.getPort(), url.getPath() + "/");
+        URL creoleFileURL = new URL(url, "creole.xml");
+        org.jdom.Document creoleDoc = builder.build(creoleFileURL);
+System.out.println("Creole file " + creoleFileURL);        
+        List jobsList = new ArrayList();
+        jobsList.add(creoleDoc.getRootElement());
+        while(!jobsList.isEmpty()){
+          Element currentElem = (Element)jobsList.remove(0);
+          if(currentElem.getName().equalsIgnoreCase("RESOURCE")){
+            //we don't go deeper than resources so no recursion here
+            String resName = currentElem.getChildTextTrim("NAME");
+System.out.println("found " + resName);            
+            String resClass = currentElem.getChildTextTrim("CLASS");
+            String resComment = currentElem.getChildTextTrim("COMMENT");
+            //create the handler
+            ResourceInfo rHandler = new ResourceInfo(resName, resClass, 
+                    resComment);
+            resourceInfoList.add(rHandler);
+          }else{
+            //this is some higher level element -> simulate recursion
+            //we want Depth-first-search so we need to add at the beginning
+            List newJobsList = new ArrayList(currentElem.getChildren());
+            newJobsList.addAll(jobsList);
+            jobsList = newJobsList;
+          }
+        }
+      }catch(IOException ioe){
+        valid = false;
+        ioe.printStackTrace();
+      }catch(JDOMException jde){
+        valid = false;
+        jde.printStackTrace();
+      }
+    }
+    
+    /**
+     * @return Returns the resourceInfoList.
+     */
+    public List getResourceInfoList(){
+      return resourceInfoList;
+    }
+    /**
+     * @return Returns the url.
+     */
+    public URL getUrl(){
+      return url;
+    }
+    /**
+     * @return Returns the valid.
+     */
+    public boolean isValid(){
+      return valid;
+    }
+    /**
+     * The URL for the CREOLE directory. 
+     */
+    protected URL url;
+    
+    /**
+     * Is the directory valid (i.e. is the location reachable and the 
+     * creole.xml file parsable).
+     */
+    protected boolean valid;
+    
+    /**
+     * The list of {@link ResourceInfo} objects.
+     */
+    protected List resourceInfoList;
+  }
+  
+  /**
+   * Stores information about a resource defined by a CREOLE directory. The 
+   * resource might not have been loaded in the system so not all information
+   * normally provided by the {@link ResourceData} class is available. This is 
+   * what makes this class different from {@link ResourceData}. 
+   */
+  public static class ResourceInfo{
+    public ResourceInfo(String name, String className, String comment){
+      this.resourceClassName = className;
+      this.resourceName = name;
+      this.resourceComment = comment;
+    }
+    
+    /**
+     * @return Returns the resourceClassName.
+     */
+    public String getResourceClassName(){
+      return resourceClassName;
+    }
+    /**
+     * @return Returns the resourceComment.
+     */
+    public String getResourceComment(){
+      return resourceComment;
+    }
+    /**
+     * @return Returns the resourceName.
+     */
+    public String getResourceName(){
+      return resourceName;
+    }
+    /**
+     * The class for the resource.
+     */
+    protected String resourceClassName;
+    
+    /**
+     * The resource name.
+     */
+    protected String resourceName;
+    
+    /**
+     * The comment for the resource.
+     */
+    protected String resourceComment;
+  }
+  
+  /**
+   * The list of plugins (aka CREOLE directories) the system knows about.
+   * This list contains URL objects.
+   */
+  protected static List knownPlugins;
+  
+  /**
+   * The list of plugins (aka CREOLE directories) the system loads automatically
+   * at start-up.
+   * This list contains URL objects.
+   */
+  protected static List autoloadPlugins;
+  
+  
+  /**
+   * Map from URL of directory to {@link DirectoryInfo}.
+   */
+  protected static Map pluginData;
+  
+  
+  
   /** Flag for SLUG GUI start instead of standart GATE GUI. */
   private static boolean slugGui = false;
 

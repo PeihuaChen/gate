@@ -89,6 +89,7 @@ public class MainFrame extends JFrame
 
 
   Splash splash;
+  protected PluginManagerUI pluginManager;
   LogArea logArea;
   JScrollPane logScroll;
   JToolBar toolbar;
@@ -1946,7 +1947,14 @@ public class MainFrame extends JFrame
     }
 
     public void actionPerformed(ActionEvent e) {
-      JOptionPane.showInputDialog(MainFrame.this, new PluginManagerUI());
+      if(pluginManager == null){
+        pluginManager = new PluginManagerUI(MainFrame.this);
+        pluginManager.setLocationRelativeTo(MainFrame.this);
+        pluginManager.setModal(true);
+        getGuiRoots().add(pluginManager);
+        pluginManager.pack();
+      }
+      pluginManager.show();
     }
   }
   
