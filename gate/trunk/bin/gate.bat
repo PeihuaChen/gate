@@ -57,7 +57,6 @@ REM ######################################################################
 
 if not "x%GATE_HOME%"=="x" goto doneGH
 
-echo should not see me
 set GATE_HOME=%~d0%~p0\..
 goto doneGH
 
@@ -77,7 +76,6 @@ if EXIST "%JAVA_HOME%\lib\tools.jar" goto jdk
 set TOOLSJAR=%GATE_HOME%\bin\tools14.jar
 goto doneTJ
 
-echo should not see me 3
 :jdk
 set TOOLSJAR=%JAVA_HOME%\lib\tools.jar
 goto doneTJ
