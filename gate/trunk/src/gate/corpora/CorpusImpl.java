@@ -26,21 +26,41 @@ public class CorpusImpl extends TreeSet implements Corpus
 
   /** Construction from name and features */
   public CorpusImpl(String name, FeatureMap features) {
-    this.features = features;
     this.name = name;
+    this.features = features;
   } // Construction from name and features
+
+  /** Construction from name features and documents map.
+    *This is actually a copy-constructor.
+    */
+  public CorpusImpl(String name, FeatureMap features, Map docsById) {
+    this.name = name;
+    this.features = features;
+    this.docsById = docsById;
+  } // Construction from name features and documents
 
   /** Get the name of the corpus. */
   public String getName() { return name; }
 
   /** Get the data store the document lives in. */
-  public DataStore getDataStore() { throw new LazyProgrammerException(); }
+  public DataStore getDataStore() {
+    //this is the transient version of corpus, hence return null.
+    return null;
+  }
 
+  /**Get the documents. Only available to derived classes*/
+  public Map getDocsById(){
+    return docsById;
+  }
   /** Get the features associated with this corpus. */
   public FeatureMap getFeatures() { return features; }
 
   /** Set the feature set */
   public void setFeatures(FeatureMap features) { this.features = features; }
+
+  public Document getDocument(long id){
+    return (DocumentImpl)docsById.get(new Long(id));
+  }
 
 
 //Persistence stuff
@@ -61,9 +81,8 @@ public class CorpusImpl extends TreeSet implements Corpus
   }
 */
   public String getErrorMessage(){
-    return gate.db.CorpusWrapper.getErrMsg();
+    return gate.db.Checker.errMsg;
   };
-
 
   public static boolean setupDS(DataStore ds){
     //We only have one type of persistent corpora so we don't need to check
@@ -84,5 +103,7 @@ public class CorpusImpl extends TreeSet implements Corpus
   /** The features associated with this corpus. */
   protected FeatureMap features;
 
+  /**The documents contained by this corpus*/
+  protected Map docsById;
 
 } // class CorpusImpl
