@@ -777,7 +777,7 @@ public class OracleDataStore extends JDBCDataStore {
    * <B>Don't use this method - use Factory.createResource with
    * DataStore and DataStoreInstanceId parameters set instead.</B>
    */
-  public LanguageResource getLr(String lrClassName, Object lrPersistenceId)
+/*  public LanguageResource getLr(String lrClassName, Object lrPersistenceId)
   throws PersistenceException,SecurityException {
 
     LanguageResource result = null;
@@ -827,7 +827,7 @@ public class OracleDataStore extends JDBCDataStore {
     //7. done
     return result;
   }
-
+*/
 
   /** Gets a timestamp marker that will be used for all changes made in
    *  the database so that subsequent calls to deleteSince() could restore (partly)
@@ -1685,6 +1685,7 @@ public class OracleDataStore extends JDBCDataStore {
   /**
    *  helper method for getLR - reads LR of type Corpus
    */
+/*
   private DatabaseCorpusImpl readCorpus(Object lrPersistenceId)
     throws PersistenceException {
 
@@ -1753,23 +1754,23 @@ public class OracleDataStore extends JDBCDataStore {
       DBHelper.cleanup(rs);
       DBHelper.cleanup(pstmt);
 
-/*
-      Vector dbDocs = new Vector();
-      for (int i=0; i< docLRIDs.size(); i++) {
-        Long currLRID = (Long)docLRIDs.elementAt(i);
+
+//      Vector dbDocs = new Vector();
+//      for (int i=0; i< docLRIDs.size(); i++) {
+//        Long currLRID = (Long)docLRIDs.elementAt(i);
         //kalina: replaced by a Factory call, so the doc gets registered
         //properly in GATE. Otherwise strange behaviour results in the GUI
         //and no events come about it
-//        Document dbDoc = (Document)getLr(DBHelper.DOCUMENT_CLASS,currLRID);
-        FeatureMap params = Factory.newFeatureMap();
-        params.put(DataStore.DATASTORE_FEATURE_NAME, this);
-        params.put(DataStore.LR_ID_FEATURE_NAME, currLRID);
-        Document dbDoc = (Document)Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
+////        Document dbDoc = (Document)getLr(DBHelper.DOCUMENT_CLASS,currLRID);
+//        FeatureMap params = Factory.newFeatureMap();
+//        params.put(DataStore.DATASTORE_FEATURE_NAME, this);
+//        params.put(DataStore.LR_ID_FEATURE_NAME, currLRID);
+//        Document dbDoc = (Document)Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
 
 
-        dbDocs.add(dbDoc);
-      }
-*/
+//        dbDocs.add(dbDoc);
+//      }
+
       result = new DatabaseCorpusImpl(lrName,
                                       this,
                                       (Long)lrPersistenceId,
@@ -1790,9 +1791,10 @@ public class OracleDataStore extends JDBCDataStore {
 
     return result;
   }
-
+*/
 
   /** helper method for getLR - reads LR of type Document */
+/*
   private DatabaseDocumentImpl readDocument(Object lrPersistenceId)
     throws PersistenceException {
 
@@ -1972,14 +1974,14 @@ public class OracleDataStore extends JDBCDataStore {
 
     return result;
   }
-
+*/
 
 
   /**
    *  reads the features of an entity
    *  entities are of type LR or Annotation
    */
-  private FeatureMap readFeatures(Long entityID, int entityType)
+  protected FeatureMap readFeatures(Long entityID, int entityType)
     throws PersistenceException {
 
     //0. preconditions
