@@ -21,7 +21,26 @@ import java.util.*;
 import java.lang.*;
 import gnu.regexp.*;
 
-/** Some utilities for use with Files. */
+/** Some utilities for use with Files and with resources.
+  * <P>
+  * <B>Note</B> that there is a terminology conflict between the use
+  * of "resources" here and <TT>gate.Resource</TT> and its inheritors.
+  * <P>
+  * Java "resources" are files that live on the CLASSPATH or in a Jar
+  * file that are <I>not</I> <TT>.class</TT> files. For example: a
+  * <TT>.gif</TT> file that is used by a GUI, or one of the XML files
+  * used for testing GATE's document format facilities. This class
+  * allows you to access these files in various ways (as streams, as
+  * byte arrays, etc.).
+  * <P>
+  * GATE resources are components (Java Beans) that provide all of the
+  * natural language processing capabilities of a GATE-based system, and
+  * the language data that such systems analsyse and produce. For
+  * example: parsers, lexicons, generators, corpora.
+  * <P>
+  * Where we say "resource" in this class we mean Java resource; elsewhere
+  * in the system we almost always mean GATE resource.
+  */
 public class Files {
 
   /** Debug flag */
