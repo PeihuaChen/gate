@@ -19,3 +19,4 @@ public interface Node extends IdBearer
   public Long getOffset();
 
 } // interface Node
+
