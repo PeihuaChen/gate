@@ -22,16 +22,18 @@ import gate.creole.AbstractResource;
 import gate.gui.Handle;
 
 /**
- * @author Valentin Tablan
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
+ * A convenience implementation of {@link gate.gui.docview.DocumentView} that
+ * can be extended by implementers of document views.
+ * An implementation of a document view that extends this class will need to 
+ * provide implementations for the three abstract methods:
+ * {@link #initGUI()}, {@link #registerHooks()} and {@link #unregisterHooks()}.
  */
 public abstract class AbstractDocumentView extends AbstractResource
                                            implements DocumentView {
 
   /**
    * Notifies this view that it has become active or inactive.
+   * This method will initialise the GUI the first time the view becomes active.
    * @param active a boolean value.
    */
   public void setActive(boolean active) {
@@ -71,8 +73,6 @@ public abstract class AbstractDocumentView extends AbstractResource
     this.handle = handle;
   }
   
-  
-  
   /**
    * Stores the target (which should always be a {@link Document}) into the 
    * {@link #document} field.
@@ -81,12 +81,17 @@ public abstract class AbstractDocumentView extends AbstractResource
     this.document = (Document)target;
   }
   
+  /**
+   * Gets the document this view displays.
+   * @return
+   */
   public Document getDocument(){
     return document;
   }
   
   /**
-   * Stores the owner of this view into the {@link #owner} field.
+   * Stores the owner of this view into the {@link #owner} field. The owner is 
+   * the {@link DocumentEditor} this view is part of.
    */
   public void setOwner(DocumentEditor editor) {
     this.owner = editor;
@@ -96,16 +101,14 @@ public abstract class AbstractDocumentView extends AbstractResource
    * Implementers should override this method and use it for populating the GUI. 
    *
    */
-  protected void initGUI(){
-  }
+  protected abstract void initGUI();
   
   /**
    * This method will be called whenever the view becomes active. Implementers 
    * should use this to add hooks (such as mouse listeners) to the other views
    * as required by their functionality. 
    */
-  protected void registerHooks(){    
-  }
+  protected abstract void registerHooks();
 
   /**
    * This method will be called whenever this view becomes inactive. 
@@ -113,8 +116,7 @@ public abstract class AbstractDocumentView extends AbstractResource
    * in {@link #registerHooks()}.
    *
    */
-  protected void unregisterHooks(){
-  }
+  protected abstract void unregisterHooks();
   
   /**
    * Stores the active state of this view.
