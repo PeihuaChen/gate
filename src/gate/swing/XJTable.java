@@ -117,6 +117,8 @@ public class XJTable extends JTable {
     setAutoResizeMode(AUTO_RESIZE_OFF);
     headerRenderer = new CustomHeaderRenderer(getTableHeader().getDefaultRenderer());
 
+    getTableHeader().setDefaultRenderer(headerRenderer);
+
     addComponentListener(new ComponentAdapter() {
       public void componentResized(ComponentEvent e) {
         adjustSizes(false);
@@ -142,13 +144,12 @@ public class XJTable extends JTable {
 
     //delete the current rowModel in order to get a new updated one
     //this way we fix a bug in JTable
-    //setRowHeight(Math.max(getRowHeight(0), 10));
     setRowHeight(Math.max(getRowHeight(0), 1));
     for(int column = 0; column < getColumnCount(); column ++){
       int width;
       tCol = getColumnModel().getColumn(column);
       //set the renderer
-      tCol.setHeaderRenderer(headerRenderer);
+//      tCol.setHeaderRenderer(headerRenderer);
       //compute the sizes
       width = headerRenderer.getTableCellRendererComponent(
                   this, tCol.getHeaderValue(), false, false,0,column
