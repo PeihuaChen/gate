@@ -44,8 +44,8 @@ public class TestControllers extends TestCase
 
     // clear the register and the creole directory set
     reg = Gate.getCreoleRegister();
-    reg.clear();
-    reg.getDirectories().clear();
+//    reg.clear();
+//    reg.getDirectories().clear();
 
     // find a URL for finding test files and add to the directory set
     URL testUrl = Gate.getUrl("tests/");
@@ -53,6 +53,7 @@ public class TestControllers extends TestCase
 
     // register the test resources
     reg.registerDirectories();
+
   } // setUp
 
   /** Put things back as they should be after running tests
@@ -72,6 +73,54 @@ public class TestControllers extends TestCase
     );
     assertNotNull("c1 controller is null", c1);
 
+    //get a document
+    Document doc = Factory.newDocument(Gate.getUrl("tests/doc0.html"));
+
+    //create a default tokeniser
+    FeatureMap params = Factory.newFeatureMap();
+    params.put("rulesResourceName", "creole/tokeniser/DefaultTokeniser.rules");
+    params.put("document", doc);
+    ProcessingResource tokeniser = (ProcessingResource) Factory.createResource(
+      "gate.creole.tokeniser.DefaultTokeniser", params
+    );
+
+    //create a default gazetteer
+    params = Factory.newFeatureMap();
+    params.put("document", doc);
+    ProcessingResource gaz = (ProcessingResource) Factory.createResource(
+      "gate.creole.gazetteer.DefaultGazetteer", params
+    );
+
+    // get the controller to encapsulate the tok and gaz
+    c1.add(tokeniser);
+    c1.add(gaz);
+    c1.run();
+
+    // check the resulting annotations
+    if(DEBUG) Out.prln(doc.getAnnotations());
+    AnnotationSet annots = doc.getAnnotations();
+    assertNotNull("no annotations from doc!", annots);
+    Annotation a = annots.get(new Integer(580));
+    assertNotNull("couldn't get annot with id 580", a);
+    assertEquals(
+      "wrong value: " + a.getStartNode().getOffset(),
+      a.getStartNode().getOffset(), new Long(1396)
+    );
+    assertEquals(
+      "wrong value: " + a.getEndNode().getOffset(),
+      a.getEndNode().getOffset(), new Long(1397)
+    );
+  } // testSerial1()
+
+  /** Serial controller test 2 */
+  public void testSerial2() throws Exception {
+    // a controller
+    Controller c1 = (Controller) Factory.createResource(
+      "gate.creole.SerialController",
+      Factory.newFeatureMap()
+    );
+    assertNotNull("c1 controller is null", c1);
+
     // a couple of PRs
     ResourceData pr1rd = (ResourceData) reg.get("testpkg.TestPR1");
     ResourceData pr2rd = (ResourceData) reg.get("testpkg.TestPR2");
@@ -81,7 +130,12 @@ public class TestControllers extends TestCase
       Factory.createResource("testpkg.TestPR1", Factory.newFeatureMap());
     ProcessingResource pr2 = (ProcessingResource)
       Factory.createResource("testpkg.TestPR2", Factory.newFeatureMap());
-  } // testSerial1()
+
+    // add the PRs to the controller and run it
+    c1.add(pr1);
+    c1.add(pr2);
+    c1.run();
+  } // testSerial2()
 
   /** Test suite routine for the test runner */
   public static Test suite() {
