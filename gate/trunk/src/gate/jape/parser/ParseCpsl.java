@@ -236,7 +236,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
           else
             System.err.println(
               "ignoring unknown control strategy " + option +
-              " (should be brill, appelt or appelt-shortest)"
+              " (should be brill, appelt or first)"
             );
         } // control
         else if(optionNameTok.image.equalsIgnoreCase("debug")) {
