@@ -25,6 +25,7 @@ import javax.swing.text.BadLocationException;
 
 import gate.*;
 import gate.creole.AnnotationSchema;
+import gate.creole.ResourceInstantiationException;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
 import gate.gui.FeaturesSchemaEditor;
@@ -178,7 +179,13 @@ public class AnnotationEditor{
     featuresEditor = new FeaturesSchemaEditor();
     featuresEditor.setBackground(UIManager.getLookAndFeelDefaults().
             getColor("ToolTip.background"));
-    JScrollPane scroller = new JScrollPane(featuresEditor);
+    try{
+      featuresEditor.init();
+    }catch(ResourceInstantiationException rie){
+      throw new GateRuntimeException(rie);
+    }
+    JScrollPane scroller = new JScrollPane(featuresEditor.getTable());
+    
     constraints.gridy = 2;
     constraints.fill = GridBagConstraints.BOTH;
     pane.add(scroller, constraints);
@@ -223,7 +230,7 @@ public class AnnotationEditor{
       }
     });
     
-    featuresEditor.addComponentListener(new ComponentAdapter(){
+    featuresEditor.getTable().addComponentListener(new ComponentAdapter(){
       public void componentResized(ComponentEvent e){
         sizeWindows();
         placeWindows();
@@ -265,7 +272,7 @@ public class AnnotationEditor{
    typeCombo.setSelectedItem(annType);
    
    featuresEditor.setSchema((AnnotationSchema)schemasByType.get(annType));
-   featuresEditor.setFeatures(ann.getFeatures());
+   featuresEditor.setTargetFeatures(ann.getFeatures());
   }
   
   public boolean isShowing(){
@@ -283,7 +290,6 @@ public class AnnotationEditor{
   public void show(boolean autohide){
     sizeWindows();
     placeWindows();
-//    topWindow.setVisible(true);
     bottomWindow.setVisible(true);
     if(autohide) hideTimer.restart();
   }
