@@ -193,7 +193,7 @@ public class OrthoMatcher extends AbstractProcessingResource
     processedAnnots.clear();
     annots2Remove.clear();
     tokensMap.clear();
-    matchesDocFeature = null;
+    matchesDocFeature = new ArrayList();
     longAnnot = null;
     shortAnnot = null;
     tokensLongAnnot = null;
