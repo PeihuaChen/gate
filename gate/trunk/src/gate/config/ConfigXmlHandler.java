@@ -24,6 +24,7 @@ import java.net.*;
 
 import gate.*;
 import gate.util.*;
+import gate.xml.SimpleErrorHandler;
 
 ////// rem later?
 import gate.creole.*;
@@ -55,6 +56,9 @@ public class ConfigXmlHandler extends DefaultHandler {
   /** The source URL of the config file being parsed. */
   private URL sourceUrl;
 
+  /** This object indicates what to do when the parser encounts an error*/
+  private SimpleErrorHandler _seh = new SimpleErrorHandler();
+
   /** Construction */
   public ConfigXmlHandler(URL configUrl) {
     this.register = Gate.getCreoleRegister();
@@ -82,15 +86,29 @@ public class ConfigXmlHandler extends DefaultHandler {
     }
   } // endDocument
 
+  /** A verboase method for Attributes*/
+  private String attributes2String(Attributes atts){
+    StringBuffer strBuf = new StringBuffer("");
+    if (atts == null) return strBuf.toString();
+    for (int i = 0; i < atts.getLength(); i++) {
+     String attName  = atts.getQName(i);
+     String attValue = atts.getValue(i);
+     strBuf.append(" ");
+     strBuf.append(attName);
+     strBuf.append("=");
+     strBuf.append(attValue);
+    }// End for
+    return strBuf.toString();
+  }// attributes2String()
+
   /** Called when the SAX parser encounts the beginning of an XML element */
   public void startElement (String uri, String qName, String elementName,
                                                              Attributes atts){
-
     if(DEBUG) {
       Out.pr("startElement: ");
       Out.println(
         elementName + " " +
-        ((atts != null) && (atts.getLength() > 0) ? atts.toString() : "")
+        attributes2String(atts)
       );
     }
 
@@ -170,26 +188,13 @@ public class ConfigXmlHandler extends DefaultHandler {
   /** Called when the SAX parser encounts text (PCDATA) in the XML doc */
   public void characters(char[] text, int start, int length)
   throws SAXException {
-
-    String content = new String(text, start, length);
-
-    // this gets called when all that text is is spaces...
-    // don't want to do anything with them, hence this loop:
-    boolean isSpaces = true;
-    char contentChars[] = content.toCharArray();
-
-    for(int i=0, len=contentChars.length; i < len; i++)
-      if(! Character.isWhitespace(contentChars[i])) {
-        isSpaces = false;
-        break;
-      }
-
-    if(isSpaces) return;
-
+    // Get the trimmed text between elements
+    String content = new String(text, start, length).trim();
+    // If the entire text is empty or is made from whitespaces then we simply
+    // return
+    if (content.length() == 0) return;
     contentStack.push(content);
-
     if(DEBUG) Out.println(content);
-
   } // characters
 
   /** Utility method to create a resource and add to appropriate list.
@@ -237,14 +242,17 @@ public class ConfigXmlHandler extends DefaultHandler {
 
   /** Called for parse errors. */
   public void error(SAXParseException ex) throws SAXException {
+    _seh.error(ex);
   } // error
 
   /** Called for fatal errors. */
   public void fatalError(SAXParseException ex) throws SAXException {
+    _seh.fatalError(ex);
   } // fatalError
 
   /** Called for warnings. */
   public void warning(SAXParseException ex) throws SAXException {
+    _seh.warning(ex);
   } // warning
 
 } // ConfigXmlHandler

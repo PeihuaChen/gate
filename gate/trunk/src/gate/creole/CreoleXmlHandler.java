@@ -24,7 +24,7 @@ import java.net.*;
 
 import gate.*;
 import gate.util.*;
-
+import gate.xml.SimpleErrorHandler;
 
 /** This is a SAX handler for processing <CODE>creole.xml</CODE> files.
   * It would have been better to write it using DOM or JDOM but....
@@ -64,6 +64,9 @@ public class CreoleXmlHandler extends DefaultHandler {
   /** The features (attributes) of VIEW elements */
   private FeatureMap viewFeatures = Factory.newFeatureMap();
 
+  /** This object indicates what to do when the parser encounts an error*/
+  private SimpleErrorHandler _seh = new SimpleErrorHandler();
+
   /** Construction */
   public CreoleXmlHandler(CreoleRegister register, URL directoryUrl) {
     this.register = register;
@@ -91,6 +94,21 @@ public class CreoleXmlHandler extends DefaultHandler {
     }
   } // endDocument
 
+  /** A verboase method for Attributes*/
+  private String attributes2String(Attributes atts){
+    StringBuffer strBuf = new StringBuffer("");
+    if (atts == null) return strBuf.toString();
+    for (int i = 0; i < atts.getLength(); i++) {
+     String attName  = atts.getQName(i);
+     String attValue = atts.getValue(i);
+     strBuf.append(" ");
+     strBuf.append(attName);
+     strBuf.append("=");
+     strBuf.append(attValue);
+    }// End for
+    return strBuf.toString();
+  }// attributes2String()
+
   /** Called when the SAX parser encounts the beginning of an XML element */
   public void startElement (String uri, String qName, String elementName,
                                                              Attributes atts){
@@ -99,7 +117,7 @@ public class CreoleXmlHandler extends DefaultHandler {
       Out.pr("startElement: ");
       Out.println(
         elementName + " " +
-        ((atts != null) && (atts.getLength() > 0) ? atts.toString() : "")
+        attributes2String(atts)
       );
     }
 
@@ -118,8 +136,8 @@ public class CreoleXmlHandler extends DefaultHandler {
         for(int i=0, len=currentAttributes.getLength(); i<len; i++) {
           Out.prln(currentAttributes.getQName(i));
           Out.prln(currentAttributes.getValue(i));
-        }
-      }
+        }// End for
+      }// End if
       currentParam.comment = currentAttributes.getValue("COMMENT");
       currentParam.defaultValueString = currentAttributes.getValue("DEFAULT");
       currentParam.optional =
@@ -127,14 +145,14 @@ public class CreoleXmlHandler extends DefaultHandler {
       currentParam.name = currentAttributes.getValue("NAME");
       currentParam.runtime =
         Boolean.valueOf(currentAttributes.getValue("RUNTIME")).booleanValue();
-    } else if(elementName.toUpperCase().equals("VIEW")) {
+    }else if(elementName.toUpperCase().equals("VIEW")){
       for(int i=0, len=currentAttributes.getLength(); i<len; i++) {
         viewFeatures.put(
           currentAttributes.getQName(i).toUpperCase(),
           currentAttributes.getValue(i)
         );
-      }
-    }
+      }// End for
+    }// End if
 
     // if there are any parameters awaiting addition to the list, add them
     // (note that they're not disjunctive or previous "/OR" would have got 'em)
@@ -142,9 +160,9 @@ public class CreoleXmlHandler extends DefaultHandler {
       if(! currentParamDisjunction.isEmpty()) {
         currentParamList.addAll(currentParamDisjunction);
         currentParamDisjunction = new ArrayList();
-      }
-    }
-  } // startElement
+      }// End if
+    }// End if
+  } // startElement()
 
   /** Utility function to throw exceptions on stack errors. */
   private void checkStack(String methodName, String elementName)
@@ -187,14 +205,14 @@ public class CreoleXmlHandler extends DefaultHandler {
             "Couldn't load autoloading resource: " +
             resourceData.getName() + "; problem was: " + e
           );
-        }
+        }// End try
 
       // if there are any parameters awaiting addition to the list, add them
       // (note that they're not disjunctive or the "/OR" would have got them)
       if(! currentParamDisjunction.isEmpty()) {
         currentParamList.addAll(currentParamDisjunction);
         currentParamDisjunction = new ArrayList();
-      }
+      }// End if
 
       // add the parameter list to the resource (and reinitialise it)
       resourceData.setParameterList(currentParamList);
@@ -202,11 +220,12 @@ public class CreoleXmlHandler extends DefaultHandler {
 
       if(DEBUG) Out.println("added: " + resourceData);
 
+    // End RESOURCE processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("NAME")) {
       checkStack("endElement", "NAME");
       resourceData.setName((String) contentStack.pop());
-
+    // End NAME processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("JAR")) {
       checkStack("endElement", "JAR");
@@ -233,9 +252,9 @@ public class CreoleXmlHandler extends DefaultHandler {
           Gate.getClassLoader().addURL(jarFileUrl);
         } catch(MalformedURLException e) {
           throw new GateSaxException("bad URL " + jarFileUrl + e);
-        }
-      }
-
+        }// End try
+      }// End if
+    // End JAR processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("XML")) {
       checkStack("endElement", "XML");
@@ -257,34 +276,34 @@ public class CreoleXmlHandler extends DefaultHandler {
           resourceData.setXmlFileUrl(xmlFileUrl);
         } catch(MalformedURLException e) {
           throw new GateSaxException("bad URL " + xmlFileUrl + e);
-        }
-      }
-
+        }// End try
+      }// End if
+    // End XML processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("CLASS")) {
       checkStack("endElement", "CLASS");
       resourceData.setClassName((String) contentStack.pop());
-
+    // End CLASS processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("COMMENT")) {
       checkStack("endElement", "COMMENT");
       resourceData.setComment((String) contentStack.pop());
-
+    // End COMMENT processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("INTERFACE")) {
       checkStack("endElement", "INTERFACE");
       resourceData.setInterfaceName((String) contentStack.pop());
-
+    // End INTERFACE processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("ICON")) {
       checkStack("endElement", "ICON");
       resourceData.setIcon((String) contentStack.pop());
-
+    // End ICON processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("OR")) {
       currentParamList.add(currentParamDisjunction);
       currentParamDisjunction = new ArrayList();
-
+    // End OR processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("PARAMETER")) {
       checkStack("endElement", "PARAMETER");
@@ -293,7 +312,7 @@ public class CreoleXmlHandler extends DefaultHandler {
       if(DEBUG)
         Out.prln("added param: " + currentParam);
       currentParam = new Parameter();
-
+    // End PARAMETER processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("VIEW")) {
       checkStack("endElement", "VIEW");
@@ -305,25 +324,25 @@ public class CreoleXmlHandler extends DefaultHandler {
 
       // clear the holding map for the next view
       viewFeatures = Factory.newFeatureMap();
-
+    // End VIEW processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("AUTOLOAD")) {
       resourceData.setAutoLoading(true);
-
+    // End AUTOLOAD processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("PRIVATE")) {
       resourceData.setPrivate(true);
-
+    // End PRIVATE processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("TOOL")) {
       resourceData.setTool(true);
-
+    // End TOOL processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("CREOLE")) {
-
+    // End CREOLE processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("CREOLE-DIRECTORY")) {
-
+    // End CREOLE-DIRECTORY processing
     //////////////////////////////////////////////////////////////////
     } else { // arbitrary elements get added as features of the resource data
       if(resourceData != null)
@@ -339,26 +358,13 @@ public class CreoleXmlHandler extends DefaultHandler {
   /** Called when the SAX parser encounts text (PCDATA) in the XML doc */
   public void characters(char[] text, int start, int length)
   throws SAXException {
-
-    String content = new String(text, start, length);
-
-    // this gets called when all that text is is spaces...
-    // don't want to do anything with them, hence this loop:
-    boolean isSpaces = true;
-    char contentChars[] = content.toCharArray();
-
-    for(int i=0, len=contentChars.length; i < len; i++)
-      if(! Character.isWhitespace(contentChars[i])) {
-        isSpaces = false;
-        break;
-      }
-
-    if(isSpaces) return;
-
+    // Get the trimmed text between elements
+    String content = new String(text, start, length).trim();
+    // If the entire text is empty or is made from whitespaces then we simply
+    // return
+    if (content.length() == 0) return;
     contentStack.push(content);
-
     if(DEBUG) Out.println(content);
-
   } // characters
 
   /** Called when the SAX parser encounts white space */
@@ -368,14 +374,17 @@ public class CreoleXmlHandler extends DefaultHandler {
 
   /** Called for parse errors. */
   public void error(SAXParseException ex) throws SAXException {
+    _seh.error(ex);
   } // error
 
   /** Called for fatal errors. */
   public void fatalError(SAXParseException ex) throws SAXException {
+    _seh.fatalError(ex);
   } // fatalError
 
   /** Called for warnings. */
   public void warning(SAXParseException ex) throws SAXException {
+    _seh.warning(ex);
   } // warning
 
 } // CreoleXmlHandler
