@@ -213,7 +213,66 @@ public class TestAnnotation extends TestCase
       assertEquals(20, endNode.getOffset().longValue());    // end offset
     }
 
-  } // testTypeIndex()
+  } // testTypeIndex() 
+
+  /** Test the annotations set add method that uses existing nodes */
+  public void testAddWithNodes() throws IOException, InvalidOffsetException {
+    Document doc =
+      new DocumentImpl(TestDocument.getTestServerName() + "doc0.html");
+    AnnotationSet as = new AnnotationSetImpl(doc);
+    AnnotationSet asBuf;
+    Integer newId;
+    FeatureMap fm = new SimpleFeatureMapImpl();
+    Annotation a;
+    Node startNode;
+    Node endNode;
+
+    as.get("T"); // to trigger type indexing
+    newId = as.add(new Long(10), new Long(20), "T1", fm);    // 0
+    a = as.get(newId);
+    startNode = a.getStartNode();
+    endNode = a.getEndNode();
+
+    as.add(startNode, endNode, "T2", fm);    // 1
+    as.add(startNode, endNode, "T3", fm);    // 2
+    as.add(startNode, endNode, "T1", fm);    // 3
+    as.add(startNode, endNode, "T1", fm);    // 4
+    as.add(startNode, endNode, "T1", fm);    // 5
+    as.add(startNode, endNode, "T3", fm);    // 6
+    as.add(startNode, endNode, "T1", fm);    // 7
+    as.add(startNode, endNode, "T3", fm);    // 8
+    as.add(startNode, endNode, "T1", fm);    // 9
+    as.add(startNode, endNode, "T1", fm);    // 10
+
+    asBuf = as.get("T");
+    assertEquals(null, asBuf);
+
+    asBuf = as.get("T1");
+    assertEquals(7, asBuf.size());
+    asBuf = as.get("T2");
+    assertEquals(1, asBuf.size());
+    asBuf = as.get("T3");
+    assertEquals(3, asBuf.size());
+
+    // let's check that we've only got two nodes, what the ids are and so on;
+    // first construct a sorted set of annotations
+    SortedSet sortedAnnots = new TreeSet(as);
+
+    int idCounter = 0; // for checking the annotation id
+    Iterator iter = sortedAnnots.iterator();
+    while(iter.hasNext()) {
+      a = (Annotation) iter.next();
+      assertEquals(idCounter++, a.getId().intValue());      // check annot ids
+
+      startNode = a.getStartNode();
+      endNode = a.getEndNode();
+      assertEquals(0,  startNode.getId().intValue());       // start node id
+      assertEquals(10, startNode.getOffset().longValue());  // start offset
+      assertEquals(1,  endNode.getId().intValue());         // end id
+      assertEquals(20, endNode.getOffset().longValue());    // end offset
+    }
+
+  } // testAddWithNodes()
 
   /** Test complex get (with type, offset and feature contraints) */
   public void testComplexGet() throws InvalidOffsetException {

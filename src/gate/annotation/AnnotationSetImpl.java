@@ -247,6 +247,23 @@ implements AnnotationSet
     return (Node) nodesByOffset.get(nodesByOffset.lastKey());
   } // lastNode
 
+  /** Create and add an annotation with pre-existing nodes,
+    * and return its id
+    */
+  public Integer add(Node start, Node end, String type, FeatureMap features)
+  {
+    // the id of the new annotation
+    Integer id = doc.getNextAnnotationId();
+
+    // construct an annotation
+    Annotation a = new AnnotationImpl(id, start, end, type, features);
+
+    // delegate to the method that adds existing annotations
+    add(a);
+
+    return id;
+  } // add(Node, Node, String, FeatureMap)
+
   /** Add an existing annotation. Returns true when the set is modified. */
   public boolean add(Object o) throws ClassCastException {
     Annotation a = (Annotation) o;
@@ -264,9 +281,6 @@ implements AnnotationSet
     if(! doc.isValidOffsetRange(start, end))
       throw new InvalidOffsetException();
 
-    // the id of the new annotation
-    Integer id = doc.getNextAnnotationId();
-
     // the set has to be indexed by position in order to add, as we need
     // to find out if nodes need creating or if they exist already
     if(nodesByOffset == null) indexByStartOffset();
@@ -281,11 +295,8 @@ implements AnnotationSet
     if(endNode == null   || ! endNode.getOffset().equals(end))
       endNode = new NodeImpl(doc.getNextNodeId(), end);
 
-    // construct an annotation
-    Annotation a = new AnnotationImpl(id, startNode, endNode, type, features);
-    add(a);
-
-    return id;
+    // delegate to the method that adds annotations with existing nodes
+    return add(startNode, endNode, type, features);
   } // add(start, end, type, features)
 
   /** Create and add an annotation from database read data

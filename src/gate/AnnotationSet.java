@@ -13,9 +13,12 @@ import gate.util.*;
 /** Annotation sets */
 public interface AnnotationSet extends Set
 {
-  /** Create and add an annotation from database read data
-    * In this case the id is already known being previously fetched from the
-    * database*/
+  /** Create and add an annotation with pre-existing nodes,
+    * and return its id
+    */
+  public Integer add(Node start, Node end, String type, FeatureMap features);
+
+  /** Create and add an annotation with a pre-existing ID */
   public void add(
     Integer id, Long start, Long end, String type, FeatureMap features
   ) throws InvalidOffsetException;
