@@ -184,11 +184,22 @@ public class Main {
         applyUserPreferences();
 
         //all the defaults tables have been updated; build the GUI
-        frame = new MainFrame();
-        if(DEBUG) Out.prln("constructing GUI");
+        if(Gate.isShellSlackGui()) {
+          frame = new ShellSlacFrame();
+          if(DEBUG) Out.prln("constructing Shell SLAC GUI");
+        }
+        else {
+          frame = new MainFrame();
+          if(DEBUG) Out.prln("constructing GUI");
+        } // if - Shell SLAC
 
         // run the GUI
-        frame.setTitle(name + " " + version + " build " + build);
+        if(Gate.isShellSlackGui()) {
+          frame.setTitle("Shell Slac "+name+" " + version + " build " + build);
+        }
+        else {
+          frame.setTitle(name + " " + version + " build " + build);
+        } // if - Shell SLAC
 
         // Validate frames that have preset sizes
         frame.validate();
@@ -467,7 +478,7 @@ public class Main {
     */
   public static void processArgs(String[] args) {
 
-    Getopt g = new Getopt("GATE main", args, "hd:ei:a");
+    Getopt g = new Getopt("GATE main", args, "hd:ei:as");
     int c;
     while( (c = g.getopt()) != -1 )
       switch(c) {
@@ -524,6 +535,10 @@ public class Main {
             Out.prln("Error running the evaluation tool: " + ex.getMessage());
             System.exit(-1);
           }
+          break;
+        // -s runs the Shell SLAC GUI
+        case 's':
+          Gate.setShellSlackGui(true);
           break;
 
 
