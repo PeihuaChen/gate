@@ -267,10 +267,10 @@ public class DatabaseDocumentImpl extends DocumentImpl {
         //super methods will take care
         return;
       }
-      else {
-        this.defaultAnnots = new DatabaseAnnotationSetImpl(this);
+//      else {
+//        this.defaultAnnots = new DatabaseAnnotationSetImpl(this);
         //go on with processing
-      }
+//      }
     }
     else {
       //named set
@@ -303,7 +303,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
         clause =   "        and as_name is null ";
       }
       sql = sql + clause;
-
+//System.out.println(sql);
       pstmt = this.jdbcConn.prepareStatement(sql);
         pstmt.setLong(1,lrID.longValue());
         if (null != name) {
@@ -314,7 +314,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
 
         if (rs.next()) {
           //ok, there is such aset in the DB
-          asetID = new Long(rs.getString(1));
+          asetID = new Long(rs.getLong(1));
         }
         else {
           //wow, there is no such aset, so create new ...
@@ -427,8 +427,8 @@ public class DatabaseDocumentImpl extends DocumentImpl {
     String      prevKey = DBHelper.DUMMY_FEATURE_KEY;
     String      currKey = null;
 
-    Long        prevAnnID = null;
-    Long        currAnnID = null;
+    Integer     prevAnnID = null;
+    Integer     currAnnID = null;
 
     Object      currFeatureValue = null;
     Vector      currFeatureArray = new Vector();
@@ -450,7 +450,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
                    " from  "+Gate.DB_OWNER+".v_annotation_features " +
                    " where  set_id = ? " +
                    " order by ann_local_id,ft_key ";
-
+//System.out.println(sql);
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,asetID.longValue());
       pstmt.execute();
@@ -461,10 +461,11 @@ public class DatabaseDocumentImpl extends DocumentImpl {
         //the columns should be read in the order they appear
         //in the query
 
-        currAnnID = new Long(rs.getLong(1));
+        prevAnnID = currAnnID;
+        currAnnID = new Integer(rs.getInt(1));
 
         //2.1 is this a new Annotation?
-        if (currAnnID != prevAnnID && prevAnnID != null) {
+        if (!currAnnID.equals(prevAnnID) && prevAnnID != null) {
           //new one
           //2.1.1 normalize the hashmap with the features, and add
           //the elements into a new FeatureMap
@@ -494,8 +495,8 @@ public class DatabaseDocumentImpl extends DocumentImpl {
           featuresByAnnotID.put(prevAnnID,annFeatures);
           //2.1.3. clear temp hashtable with feature vectors
           currFeatures.clear();
-          prevAnnID = currAnnID;
-        }//if
+/*??*/          prevAnnID = currAnnID;
+        }//if -- is new annotation
 
         currKey = rs.getString(2);
         Long valueType = new Long(rs.getLong(3));
@@ -570,6 +571,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
           //new key
           Vector keyValue = new Vector();
           keyValue.add(currFeatureValue);
+          currFeatures.put(currKey,keyValue);
         }
         else {
           //key is present, append to existing vector
@@ -605,7 +607,10 @@ public class DatabaseDocumentImpl extends DocumentImpl {
       }//while
 
       //2.3.1. add the featuremap for this annotation to the hashmap
-      featuresByAnnotID.put(prevAnnID,annFeatures);
+      if (null != currAnnID) {
+        // do we have features at all for this annotation?
+        featuresByAnnotID.put(currAnnID,annFeatures);
+      }
 
       //3. return the hashmap
       return featuresByAnnotID;
