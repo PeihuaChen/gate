@@ -1115,13 +1115,13 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
         strBuff.append(getNextAnnotationId());
         strBuff.append("\"");
         strBuff.append(writeFeatures(annot.getFeatures(), includeNamespace));
-        strBuff.append(" >");
+        strBuff.append(">");
       }
       else if (originalMarkupsAnnotSet.contains(annot)) {
           strBuff.append("<");
           strBuff.append(annot.getType());
           strBuff.append(writeFeatures(annot.getFeatures(), includeNamespace));
-          strBuff.append(" >");
+          strBuff.append(">");
         }
       else {
         strBuff.append("<");
@@ -1140,18 +1140,18 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
         strBuff.append(" ");
         if(includeNamespace) {
           strBuff.append("gate:");
-        } // if
+        } // if includeNamespaces
         strBuff.append("gateId=\"");
         strBuff.append(annot.getId());
         strBuff.append("\"");
         strBuff.append(writeFeatures(annot.getFeatures(), includeNamespace));
-        strBuff.append(" >");
+        strBuff.append(">");
       }
       else if (originalMarkupsAnnotSet.contains(annot)) {
         strBuff.append("<");
         strBuff.append(annot.getType());
         strBuff.append(writeFeatures(annot.getFeatures(), includeNamespace));
-        strBuff.append(" >");
+        strBuff.append(">");
       }
       else {
         strBuff.append("<");
@@ -1199,11 +1199,16 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
 
     strBuff.append("<");
     strBuff.append(annot.getType());
-    strBuff.append(" gateId=\"");
-    strBuff.append(annot.getId());
-    strBuff.append("\"");
+
+    AnnotationSet originalMarkupsAnnotSet =
+            this.getAnnotations(GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
+    if (! originalMarkupsAnnotSet.contains(annot)) {
+      strBuff.append(" gateId=\"");
+      strBuff.append(annot.getId());
+      strBuff.append("\"");
+    }
     strBuff.append(writeFeatures(annot.getFeatures(),includeNamespace));
-    strBuff.append(" />");
+    strBuff.append("/>");
 
     return strBuff.toString();
   }// writeEmptyTag()
