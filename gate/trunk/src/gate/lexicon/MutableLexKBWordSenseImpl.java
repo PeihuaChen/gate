@@ -60,4 +60,11 @@ public class MutableLexKBWordSenseImpl implements MutableLexKBWordSense, Seriali
       orderInSynset = newIndex;
   }
 
+  public String toString() {
+    return senseWord.getLemma() + "_" + senseNumber;
+  }//toString
+
+  public void setSenseNumber(int newNumber) {
+    senseNumber = newNumber;
+  }
 }

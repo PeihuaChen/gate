@@ -19,6 +19,13 @@ import gate.LanguageResource;
 
 
 public interface Lexicon extends LanguageResource {
+  public static final String POS_ADJECTIVE  = "adjective";
+  public static final String POS_ADVERB     = "adverb";
+  public static final String POS_NOUN       = "noun";
+  public static final String POS_VERB       = "verb";
+  public static final String POS_CONJ       = "conjunction";
+  public static final String POS_OTHER       = "other";
 
-
+  public static final Object [] POS_TYPES =
+      {POS_ADJECTIVE, POS_ADVERB, POS_NOUN, POS_VERB, POS_CONJ, POS_OTHER};
 }

@@ -26,4 +26,10 @@ public interface MutableLexicalKnowledgeBase extends LexicalKnowledgeBase {
 
   /** add a new synset */
   public MutableLexKBSynset addSynset();
+
+  public void addPOSType(Object newPOSType);
+
+  public void removeWord(MutableWord theWord);
+
+  public void removeSynset(MutableLexKBSynset synset);
 }

@@ -32,4 +32,6 @@ public interface LexicalKnowledgeBase extends Lexicon {
   /** returns list of WordSense-s for specific lemma of the specified POS */
   public List lookupWord(String lemma, Object pos);
 
+  public Object[] getPOSTypes();
+
 }

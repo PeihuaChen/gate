@@ -31,4 +31,8 @@ public interface MutableLexKBSynset extends LexKBSynset {
 
   /** change the offset of an existing word sense */
   public boolean setWordSenseIndex(LexKBWordSense wordSense, int newOffset);
+
+  public void removeSenses();
+
+  public void removeSense(LexKBWordSense theSense);
 }

@@ -16,9 +16,5 @@
 package gate.lexicon;
 
 public interface NLGLexicon extends MutableLexicalKnowledgeBase {
-  public static final String POS_ADJECTIVE  = "adj";
-  public static final String POS_ADVERB     = "adv";
-  public static final String POS_NOUN       = "noun";
-  public static final String POS_VERB       = "verb";
 
 }
