@@ -214,6 +214,46 @@ public class DatabaseDocumentImpl extends DocumentImpl {
   /** Returns a map with the named annotation sets. It returns <code>null</code>
    *  if no named annotaton set exists. */
   public Map getNamedAnnotationSets() {
+
+    Vector annNames = new Vector();
+
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+
+    //1. get the names of all sets
+    try {
+      String sql = " select as_name " +
+                   " from  "+Gate.DB_OWNER+".v_annotation_set " +
+                   " where  lr_id = ? ";
+
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,((Long)this.lrPersistentId).longValue());
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      while (rs.next()) {
+        annNames.add(rs.getString("as_name"));
+      }
+    }
+    catch(SQLException sqle) {
+      throw new SynchronisationException("can't get named annotatios: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      try {
+        DBHelper.cleanup(rs);
+        DBHelper.cleanup(pstmt);
+      }
+      catch(PersistenceException pe) {
+        throw new SynchronisationException("JDBC error: ["+ pe.getMessage()+"]");
+      }
+    }
+
+    //2. delegate
+    for (int i=0; i< annNames.size(); i++) {
+      //delegate because of the data is already read getAnnotations() will just return
+      getAnnotations(name);
+    }
+
     throw new MethodNotImplementedException();
   } // getNamedAnnotationSets
 
