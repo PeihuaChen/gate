@@ -16,6 +16,7 @@
 package gate;
 
 import java.io.*;
+import java.util.*;
 import gate.util.*;
 
 /** An Annotation is an arc in an AnnotationGraph. It is immutable, to avoid
@@ -41,20 +42,48 @@ extends FeatureBearer, IdBearer, Comparable, Serializable {
   /** This verifies if <b>this</b> annotation is compatible with another one.
     * Compatible means that they hit the same possition and the FeatureMap of
     * <b>this</b> is incuded into aAnnot FeatureMap.
-    * @param aAnnot a gate Annotation.
+    * @param anAnnot a gate Annotation.
     * @return <code>true</code> if aAnnot is compatible with <b>this</> and
     * <code>false</code> otherwise.
     */
-  public boolean isCompatible(Annotation aAnnot);
+  public boolean isCompatible(Annotation anAnnot);
+
+  /** This verifies if <b>this</b> annotation is compatible with another one,
+   *  given a set with certain keys.
+    * In this case, compatible means that they hit the same possition
+    * and those keys from <b>this</b>'s FeatureMap intersected with
+    * aFeatureNamesSet are incuded together with their values into the aAnnot's
+    * FeatureMap.
+    * @param anAnnot a gate Annotation.
+    * @param aFeatureNamesSet is a set containing certian key that will be
+    * intersected with <b>this</b>'s FeatureMap's keys.
+    * @return <code>true</code> if aAnnot is compatible with <b>this</> and
+    * <code>false</code> otherwise.
+    */
+  public boolean isCompatible(Annotation anAnnot, Set aFeatureNamesSet);
 
   /** This method verifies if two annotation and are partially compatible.
     * Partially compatible means that they overlap and the FeatureMap of
     * <b>this</b> is incuded into FeatureMap of aAnnot.
-    * @param aAnnot a gate Annotation.
+    * @param anAnnot a gate Annotation.
     * @return <code>true</code> if <b>this</b> is partially compatible with
     * aAnnot and <code>false</code> otherwise.
     */
-  public boolean isPartiallyCompatible(Annotation aAnnot);
+  public boolean isPartiallyCompatible(Annotation anAnnot);
+
+  /** This method verifies if two annotation and are partially compatible,
+    * given a set with certain keys.
+    * In this case, partially compatible means that they overlap
+    * and those keys from <b>this</b>'s FeatureMap intersected with
+    * aFeatureNamesSet are incuded together with their values into the aAnnot's
+    * FeatureMap.
+    * @param anAnnot a gate Annotation.
+    * @param aFeatureNamesSet is a set containing certian key that will be
+    * intersected with <b>this</b>'s FeatureMap's keys.
+    * @return <code>true</code> if <b>this</b> is partially compatible with
+    * aAnnot and <code>false</code> otherwise.
+    */
+  public boolean isPartiallyCompatible(Annotation anAnnot,Set aFeatureNamesSet);
 
   /**  Two Annotation are coestensive if their offsets are the same.
     *  @param anAnnot A Gate annotation.

@@ -180,20 +180,45 @@ public class AnnotationImpl extends AbstractFeatureBearer
   /** This verifies if <b>this</b> annotation is compatible with another one.
     * Compatible means that they hit the same possition and the FeatureMap of
     * <b>this</b> is incuded into aAnnot FeatureMap.
-    * @param aAnnot a gate Annotation.
+    * @param anAnnot a gate Annotation. If anAnnotation is null then false is
+    * returned.
     * @return <code>true</code> if aAnnot is compatible with <b>this</> and
     * <code>false</code> otherwise.
     */
-  public boolean isCompatible(Annotation aAnnot){
-    if (aAnnot == null) return false;
-
-    if (coextensive(aAnnot)){
-      if (aAnnot.getFeatures() == null) return true;
-      if (aAnnot.getFeatures().subsumes(this.getFeatures()))
+  public boolean isCompatible(Annotation anAnnot){
+    if (anAnnot == null) return false;
+    if (coextensive(anAnnot)){
+      if (anAnnot.getFeatures() == null) return true;
+      if (anAnnot.getFeatures().subsumes(this.getFeatures()))
         return true;
     }// End if
     return false;
   }//isCompatible
+
+  /** This verifies if <b>this</b> annotation is compatible with another one,
+    * given a set with certain keys.
+    * In this case, compatible means that they hit the same possition
+    * and those keys from <b>this</b>'s FeatureMap intersected with
+    * aFeatureNamesSet are incuded together with their values into the aAnnot's
+    * FeatureMap.
+    * @param anAnnot a gate Annotation. If param is null, it will return false.
+    * @param aFeatureNamesSet is a set containing certian key that will be
+    * intersected with <b>this</b>'s FeatureMap's keys.If param is null then
+    * isCompatible(Annotation) will be called.
+    * @return <code>true</code> if aAnnot is compatible with <b>this</> and
+    * <code>false</code> otherwise.
+    */
+  public boolean isCompatible(Annotation anAnnot, Set aFeatureNamesSet){
+    // If the set is null then isCompatible(Annotation) will decide.
+    if (aFeatureNamesSet == null) return isCompatible(anAnnot);
+    if (anAnnot == null) return false;
+    if (coextensive(anAnnot)){
+      if (anAnnot.getFeatures() == null) return true;
+      if (anAnnot.getFeatures().subsumes(this.getFeatures(),aFeatureNamesSet))
+        return true;
+    }// End if
+    return false;
+  }//isCompatible()
 
   /** This method verifies if two annotation and are partially compatible.
     * Partially compatible means that they overlap and the FeatureMap of
@@ -202,16 +227,40 @@ public class AnnotationImpl extends AbstractFeatureBearer
     * @return <code>true</code> if <b>this</b> is partially compatible with
     * aAnnot and <code>false</code> otherwise.
     */
-  public boolean isPartiallyCompatible(Annotation aAnnot){
-    if (aAnnot == null) return false;
-
-    if (overlaps(aAnnot)){
-      if (aAnnot.getFeatures() == null) return true;
-      if (aAnnot.getFeatures().subsumes(this.getFeatures()))
+  public boolean isPartiallyCompatible(Annotation anAnnot){
+    if (anAnnot == null) return false;
+    if (overlaps(anAnnot)){
+      if (anAnnot.getFeatures() == null) return true;
+      if (anAnnot.getFeatures().subsumes(this.getFeatures()))
         return true;
     }// End if
     return false;
   }//isPartiallyCompatible
+
+  /** This method verifies if two annotation and are partially compatible,
+    * given a set with certain keys.
+    * In this case, partially compatible means that they overlap
+    * and those keys from <b>this</b>'s FeatureMap intersected with
+    * aFeatureNamesSet are incuded together with their values into the aAnnot's
+    * FeatureMap.
+    * @param anAnnot a gate Annotation. If param is null, the method will return
+    * false.
+    * @param aFeatureNamesSet is a set containing certian key that will be
+    * intersected with <b>this</b>'s FeatureMap's keys.If param is null then
+    * isPartiallyCompatible(Annotation) will be called.
+    * @return <code>true</code> if <b>this</b> is partially compatible with
+    * aAnnot and <code>false</code> otherwise.
+    */
+  public boolean isPartiallyCompatible(Annotation anAnnot,Set aFeatureNamesSet){
+    if (aFeatureNamesSet == null) return isPartiallyCompatible(anAnnot);
+    if (anAnnot == null) return false;
+    if (overlaps(anAnnot)){
+      if (anAnnot.getFeatures() == null) return true;
+      if (anAnnot.getFeatures().subsumes(this.getFeatures(),aFeatureNamesSet))
+        return true;
+    }// End if
+    return false;
+  }//isPartiallyCompatible()
 
   /**
     *  Two Annotation are coextensive if their offsets are the

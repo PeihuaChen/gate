@@ -35,38 +35,80 @@ class AnnotDiffDialog extends JFrame {
     * combo boxes
     */
   Map  documentsMap = null;
+  /** A map from AnnotationSetNames 2 AnnotationSets, used to display AnnotSets
+    * in combo boxes
+    */
   Map keyAnnotationSetMap = null;
+  /** A map from AnnotationSetNames 2 AnnotationSets, used to display AnnotSets
+    * in combo boxes
+    */
   Map responseAnnotationSetMap = null;
+  /** A map from Annotation types 2 AnnotationSchema,
+    * used to display annotations in combo boxes
+    */
   Map  typesMap = null;
+  /** A set containing annot types for calculating falsePoz measure*/
   Set  falsePozTypes = null;
+  /** AnnotDiff's tool parent frame*/
   MainFrame mainFrame = null;
+  /** A pointer to this object used in some internal classes*/
   AnnotDiffDialog thisAnnotDiffDialog = null;
 
   // GUI components used in initGuiComponents()
+  /** Renders key documents*/
   JComboBox keyDocComboBox = null;
+  /** Renders response documents*/
   JComboBox responseDocComboBox = null;
+  /** Renders annot types which come from intersecting keyAnnotSet with
+    * responseAnnotSet
+    */
   JComboBox typesComboBox = null;
+  /** Renders annot types used in calculating falsPoz measure*/
   JComboBox falsePozTypeComboBox = null;
-  JComboBox keyDocAnnotSetComboBox = null;
-  JComboBox responseDocAnnotSetComboBox = null;
+  /** Renders the annotation sets that come from the response document and
+    * used in calculating falsePoz measure
+    */
   JComboBox responseDocAnnotSetFalsePozComboBox = null;
-
+  /** Renders the annotation sets that come from the key document*/
+  JComboBox keyDocAnnotSetComboBox = null;
+  /** Renders the annotation sets that come from the response document*/
+  JComboBox responseDocAnnotSetComboBox = null;
+  /** Renders the text label for keyDocAnnotSetComboBox*/
   JLabel keyLabel = null;
+  /** Renders the text label for responseDocAnnotSetComboBox*/
   JLabel responseLabel = null;
+  /** Renders the text label for typesComboBox*/
   JLabel typesLabel = null;
+  /** Renders the text label for falsePozTypeComboBox*/
   JLabel falsePozLabel = null;
+  /** Renders the text label for keyDocComboBox*/
   JLabel keyDocAnnotSetLabel = null;
+  /** Renders the text label for responseDocComboBox*/
   JLabel responseDocAnnotSetLabel = null;
+  /** Renders the text label for responseDocComboBox used in calc falsePoz.*/
   JLabel responseDocAnnotSetFalsePozLabel = null;
-
+  /** Renders the label for weightTextField*/
   JLabel weightLabel = null;
+  /** Renders the value of weight used in calculating F measure*/
   JTextField weightTextField = null;
-
+  /** Renders the button which triggers the diff process*/
   JButton evalButton = null;
+  /** A reference to annotDiff object that does the diff*/
   AnnotationDiff annotDiff = null;
-
-  protected JSplitPane jSplit;
-
+  /** A split between configuration pannel and AnnotDifff*/
+  JSplitPane jSplit = null;
+  /** A Radio button for selecting certian features that would be used in diff*/
+  JRadioButton someFeaturesRadio = null;
+  /** A Radio button for selecting no features that would be used in diff*/
+  JRadioButton noFeaturesRadio = null;
+  /** A Radio button for selecting all features that would be used in diff*/
+  JRadioButton allFeaturesRadio = null;
+  /** A group buttons for the 3 Radio buttons above*/
+  ButtonGroup groupRadios = null;
+  /** A label for Radio Buttons selection*/
+  JLabel selectFeaturesLabel = null;
+  /** A selection dialog used in case that the user selects some radio button*/
+  CollectionSelectionDialog featureSelectionDialog = null;
   /** Constructs an annotDiffDialog object having as parent aMainFrame
     * @param aMainFrame the parent frame for this AnnotDiffDialog. If can be
     * <b>null</b>, meaning no parent.
@@ -263,6 +305,32 @@ class AnnotDiffDialog extends JFrame {
     evalButton = new JButton("Evaluate");
     evalButton.setFont(evalButton.getFont().deriveFont(Font.BOLD));
 
+    // Some features radio Button
+    someFeaturesRadio = new JRadioButton("Some");
+    someFeaturesRadio.setToolTipText("Select some features from the key"+
+      " annotation set, that will be taken into consideration"+
+      " in the diff process.");
+    // No features RB
+    noFeaturesRadio = new JRadioButton("None");
+    noFeaturesRadio.setToolTipText("No features from the key"+
+      " annotation set will be taken into consideration"+
+      " in the diff process.");
+    // All features RB
+    allFeaturesRadio = new JRadioButton("All");
+    allFeaturesRadio.setSelected(true);
+    allFeaturesRadio.setToolTipText("All features from the key"+
+      " annotation set will be taken into consideration"+
+      " in the diff process.");
+    // Add radio buttons to the group
+    groupRadios = new ButtonGroup();
+    groupRadios.add(allFeaturesRadio);
+    groupRadios.add(someFeaturesRadio);
+    groupRadios.add(noFeaturesRadio);
+    // The label for the Features radio buttons group
+    selectFeaturesLabel = new JLabel("Features");
+    selectFeaturesLabel.setFont(falsePozLabel.getFont().deriveFont(Font.BOLD));
+    selectFeaturesLabel.setOpaque(true);
+    selectFeaturesLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     // ***************************************************************
     // Put all those components at their place
     // ***************************************************************
@@ -293,6 +361,16 @@ class AnnotDiffDialog extends JFrame {
     currentBox = new Box(BoxLayout.Y_AXIS);
     currentBox.add(typesLabel);
     currentBox.add(typesComboBox);
+    northBox.add(currentBox);
+
+    northBox.add(Box.createRigidArea(new Dimension(10,0)));
+
+    // Arrange the radio buttons
+    currentBox = new Box(BoxLayout.Y_AXIS);
+    currentBox.add(selectFeaturesLabel);
+    currentBox.add(allFeaturesRadio);
+    currentBox.add(someFeaturesRadio);
+    currentBox.add(noFeaturesRadio);
     northBox.add(currentBox);
 
     northBox.add(Box.createRigidArea(new Dimension(10,0)));
@@ -443,8 +521,86 @@ class AnnotDiffDialog extends JFrame {
       }// actionPerformed();
     });//addActionListener();
 
+    typesComboBox.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e){
+        if (featureSelectionDialog != null) featureSelectionDialog = null;
+      }// actionPerformed();
+    });//addActionListener();
+
+    someFeaturesRadio.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e){
+        collectSomeFeatures();
+      }// actionPerformed();
+    });//addActionListener();
+
   }//initListeners();
 
+  /** Activates the CollectionSelectionDialog in order to colect those feature
+    * from key that will take part in the diff process
+    */
+  private void collectSomeFeatures(){
+    if (featureSelectionDialog == null){
+      featureSelectionDialog = new CollectionSelectionDialog(
+                                                thisAnnotDiffDialog,true);
+    }else{
+      featureSelectionDialog.setVisible(true);
+      return;
+    }// End if
+    // For the current annotation type take all the features that appear in the
+    // key set and initialize the featureSelectionDialog
+    gate.Document keyDocument = null;
+    keyDocument = (gate.Document) documentsMap.get(
+                                 (String)keyDocComboBox.getSelectedItem());
+    if (keyDocument == null){
+      JOptionPane.showMessageDialog(this,
+                                    "Select a key document first !",
+                                    "Gate", JOptionPane.ERROR_MESSAGE);
+      featureSelectionDialog = null;
+      return;
+    }//End if
+
+    AnnotationSet keySet = null;
+    if (keyDocAnnotSetComboBox.getSelectedItem()== null ||
+        keyAnnotationSetMap.get(keyDocAnnotSetComboBox.getSelectedItem())==null)
+      // First add to the keySet all annotations from default set
+      keySet = keyDocument.getAnnotations();
+    else{
+      // Get all types of annotation from the selected keyAnnotationSet
+      AnnotationSet as = (AnnotationSet) keyAnnotationSetMap.get(
+                                  keyDocAnnotSetComboBox.getSelectedItem());
+      keySet = as;
+    }// End if
+    if (keySet == null){
+      JOptionPane.showMessageDialog(this,
+                                    "Select some annotation sets first !",
+                                    "Gate", JOptionPane.ERROR_MESSAGE);
+      featureSelectionDialog = null;
+      return;
+    }// End if
+    AnnotationSchema annotSchema = (AnnotationSchema)
+                                typesMap.get(typesComboBox.getSelectedItem());
+    if (annotSchema == null){
+      JOptionPane.showMessageDialog(this,
+                                    "Select some annotation types first !",
+                                    "Gate", JOptionPane.ERROR_MESSAGE);
+      featureSelectionDialog = null;
+      return;
+    }// End if
+    AnnotationSet selectedTypeSet = keySet.get(annotSchema.getAnnotationName());
+    Set featureNamesSet = new TreeSet();
+    // Iterate this set and get all feature keys.
+    Iterator selectedTypeIterator = selectedTypeSet.iterator();
+    while(selectedTypeIterator.hasNext()){
+      Annotation a = (Annotation) selectedTypeIterator.next();
+      if (a.getFeatures() != null)
+        featureNamesSet.addAll(a.getFeatures().keySet());
+    }// End while
+    featureSelectionDialog.show("Select features for annotation type \"" +
+        annotSchema.getAnnotationName()+ "\" that would be used in diff proces",
+        featureNamesSet);
+  }//collectSomeFeatures();
+
+  /** Initializes the annotations for false Poz masure*/
   private void initAnnotTypesFalsePoz(){
     gate.Document responseDocument = null;
     responseDocument = (gate.Document) documentsMap.get(
@@ -704,6 +860,16 @@ class AnnotDiffDialog extends JFrame {
       annotDiff.setResponseAnnotationSetNameFalsePoz(
             thisAnnotDiffDialog.getSelectedResponseAnnotationSetNameFalsePoz());
 
+      // Only one of those radio buttons can be selected
+      if (allFeaturesRadio.isSelected())
+        annotDiff.setKeyFeatureNamesSet(null);
+      if (noFeaturesRadio.isSelected())
+        annotDiff.setKeyFeatureNamesSet(new HashSet());
+      // If someFeaturesRadio is selected, then featureSelectionDialog is not
+      // null because of the collectSomeFeatures() method
+      if (someFeaturesRadio.isSelected())
+        annotDiff.setKeyFeatureNamesSet(
+                   new HashSet(featureSelectionDialog.getSelectedCollection()));
       String falsePozAnnot = thisAnnotDiffDialog.getSelectedFalsePozAnnot();
       if ("No annot.".equals(falsePozAnnot))
             falsePozAnnot = null;

@@ -1,0 +1,254 @@
+/*  CollectionSelectionDialog.java
+ *
+ *  Copyright (c) 1998-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Cristian URSU,  05/Oct/2001
+ *
+ *  $Id$
+ *
+ */
+
+package gate.gui;
+
+import java.awt.Frame;
+import java.awt.Dimension;
+import java.awt.Component;
+import java.awt.event.*;
+import javax.swing.*;
+
+import java.util.*;
+
+import gate.*;
+import gate.annotation.*;
+import gate.util.*;
+
+
+/** This class visually selects some items from a collection and returns
+  * a collection with the items selected by the user.
+  */
+public class CollectionSelectionDialog extends JDialog {
+
+  // Local data
+  DefaultListModel sourceListModel = null;
+  DefaultListModel targetListModel = null;
+  int buttonPressed = JFileChooser.CANCEL_OPTION;
+  // Gui Components
+  JButton removeButton = null;
+  JButton addButton = null;
+  JList   sourceList = null;
+  JList   targetList = null;
+  JButton okButton = null;
+  JButton cancelButton = null;
+  JLabel sourceLabel = null;
+  JLabel targetLabel = null;
+
+  Frame mainFrame = null;
+
+  /** Constructs an ColectionSelectionDialog
+    * @param aFram the parent frame of this dialog
+    * @param aModal (wheter or not this dialog is modal)
+    */
+  public CollectionSelectionDialog(Frame aFrame, boolean aModal){
+    super(aFrame,aModal);
+    this.setLocationRelativeTo(aFrame);
+    mainFrame = aFrame;
+  }//CollectionSelectionDialog
+
+  /** Constructs an ColectionSelectionDialog using <b>null<b> as a frame
+    *   and <b>true
+    *  </b> as modal value for dialog
+    */
+  public CollectionSelectionDialog(){
+    this(null, true);
+  }// CollectionSelectionDialog
+
+  /** Init local data*/
+  protected void initLocalData(Collection aSourceData){
+    targetListModel = new DefaultListModel();
+    sourceListModel = new DefaultListModel();
+    if (aSourceData == null) return;
+    ArrayList source = new ArrayList(aSourceData);
+    Collections.sort(source);
+    Iterator iter = source.iterator();
+    while(iter.hasNext()){
+      sourceListModel.addElement(iter.next());
+    }// End while
+  }// initLocalData();
+
+  /** This method creates the GUI components and paces them into the layout*/
+  protected void initGuiComponents(){
+    this.getContentPane().setLayout(new BoxLayout(this.getContentPane(),
+                                                  BoxLayout.Y_AXIS));
+    // Create source label
+    sourceLabel = new JLabel("Source");
+    sourceLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    // Create source list
+    sourceList = new JList(sourceListModel);
+    sourceList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+    sourceList.setVisibleRowCount(10);
+    sourceList.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+    // Create target label
+    targetLabel = new JLabel("Target");
+    targetLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    // Create the target list
+    targetList = new JList(targetListModel);
+    targetList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+    targetList.setVisibleRowCount(10);
+    targetList.setAlignmentX(Component.LEFT_ALIGNMENT);
+    targetList.setPreferredSize(sourceList.getPreferredSize());
+    // Create Add >>  button
+    addButton = new JButton(">>>");
+    // Create Remove <<  button
+    removeButton = new JButton("<<<");
+    // Create ok button
+    okButton = new JButton("Ok");
+    // Create cancel button
+    cancelButton = new JButton("Cancel");
+    ///////////////////////////////////////
+    // Arange components
+    //////////////////////////////////////
+
+    // Create the main box
+    Box componentsBox = Box.createVerticalBox();
+    componentsBox.add(Box.createRigidArea(new Dimension(0,5)));
+
+    Box firstLevelBox = Box.createHorizontalBox();
+    firstLevelBox.add(Box.createRigidArea(new Dimension(10,0)));
+    // Add the Source list
+    Box currentBox = Box.createVerticalBox();
+    currentBox.add(sourceLabel);
+    currentBox.add(new JScrollPane(sourceList));
+
+    // Add the current box to the firstLevelBox
+    firstLevelBox.add(currentBox);
+    firstLevelBox.add(Box.createRigidArea(new Dimension(10,0)));
+
+    // Add the add and remove buttons
+    currentBox = Box.createVerticalBox();
+    currentBox.add(addButton);
+    currentBox.add(Box.createRigidArea(new Dimension(0,10)));
+    currentBox.add(removeButton);
+
+    // Add the remove buttons to the firstLevelBox
+    firstLevelBox.add(currentBox);
+    firstLevelBox.add(Box.createRigidArea(new Dimension(10,0)));
+
+    // Add the target list
+    currentBox = Box.createVerticalBox();
+    currentBox.add(targetLabel);
+    currentBox.add(new JScrollPane(targetList));
+
+    // Add target list to the firstLevelBox
+    firstLevelBox.add(currentBox);
+    firstLevelBox.add(Box.createRigidArea(new Dimension(20,0)));
+
+    // Add ok and cancel buttons to the currentBox
+    currentBox = Box.createHorizontalBox();
+    currentBox.add(Box.createHorizontalGlue());
+    currentBox.add(okButton);
+    currentBox.add(Box.createRigidArea(new Dimension(25,0)));
+    currentBox.add(cancelButton);
+    currentBox.add(Box.createHorizontalGlue());
+
+    // Add all components to the components box
+    componentsBox.add(firstLevelBox);
+    componentsBox.add(Box.createRigidArea(new Dimension(0,10)));
+    componentsBox.add(currentBox);
+    componentsBox.add(Box.createRigidArea(new Dimension(0,5)));
+    // Add the components box to the dialog
+    this.getContentPane().add(componentsBox);
+    this.pack();
+}//initGuiComponents();
+
+  /** Init all the listeners*/
+  protected void initListeners(){
+    okButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        doOk();
+      }// actionPerformed();
+    });// addActionListener();
+   cancelButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        doCancel();
+      }// actionPerformed();
+    });// addActionListener();
+   addButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        doAdd();
+      }// actionPerformed();
+    });// addActionListener();
+   removeButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        doRemove();
+      }// actionPerformed();
+    });// addActionListener();
+  }//initListeners()
+
+  /** This method is called when the user press the OK button*/
+  private void doOk(){
+    buttonPressed = JFileChooser.APPROVE_OPTION;
+    this.hide();
+  }//doOk();
+
+  /** This method is called when the user press the CANCEL button*/
+  private void doCancel(){
+    buttonPressed = JFileChooser.CANCEL_OPTION;
+    this.hide();
+  }//doCancel();
+  /** Called when user press remove button*/
+  private void doRemove(){
+    Object[] selectedItems = targetList.getSelectedValues();
+    for (int i = 0 ; i < selectedItems.length; i ++){
+      sourceListModel.addElement(selectedItems[i]);
+      targetListModel.removeElement(selectedItems[i]);
+    }// end for
+  }// doRemove();
+  /** Called when user press add button*/
+  private void doAdd(){
+    Object[] selectedItems = sourceList.getSelectedValues();
+    for (int i = 0 ; i < selectedItems.length; i ++){
+      targetListModel.addElement(selectedItems[i]);
+      sourceListModel.removeElement(selectedItems[i]);
+    }// end for
+  }// doAdd();
+  /** Returns the target collection*/
+  public Collection getSelectedCollection(){
+    ArrayList resultsList = new ArrayList();
+    for (int i=0; i<targetListModel.getSize(); i++){
+      resultsList.add(targetListModel.getElementAt(i));
+    }// End for
+    return (Collection) resultsList;
+  }// getSelectedCollection()
+
+  /** This method displays the CollectionSelectionDialog*/
+  public int show(String aTitle,Collection aSourceData){
+    if (aTitle == null){
+      JOptionPane.showMessageDialog(mainFrame,
+      "Feature selection dialog coud not been created because title was null!",
+      "Gate", JOptionPane.ERROR_MESSAGE);
+      return buttonPressed;
+    }// End if
+    if (aSourceData == null){
+      JOptionPane.showMessageDialog(mainFrame,
+      "Feature selection dialog coud not been created because data source null!",
+      "Gate", JOptionPane.ERROR_MESSAGE);
+      return buttonPressed;
+    }// End if
+    this.setTitle(aTitle);
+    initLocalData(aSourceData);
+    initGuiComponents();
+    initListeners();
+    super.show();
+    return buttonPressed;
+  }// show()
+
+  //////////////////////////////////////////
+  // Inner classes
+  //////////////////////////////////////////
+}//CollectionSelectionDialog class

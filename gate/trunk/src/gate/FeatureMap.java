@@ -22,11 +22,24 @@ import gate.util.*;
   */
 public interface FeatureMap extends Map
 {
-  /** Test if <b>this</b> featureMap object is included in aFeatureMap
-    * @param aFeatureMap object which will incude or not this FeatureMap obj.
-    * @return <code>true</code> if <b>this</b> is incuded in aFeatureMap
+  /** Tests if <b>this</b> featureMap object includes  aFeatureMap features.
+    * @param aFeatureMap object which will be included  or not in  <b>this</b>
+    * FeatureMap obj.
+    * @return <code>true</code> if <b>this</b> includes aFeatureMap
     * and <code>false</code> if not.
     */
   public boolean subsumes(FeatureMap aFeatureMap);
+
+  /** Tests if <b>this</b> featureMap object includes aFeatureMap but only
+    * for the features present in the aFeatureNamesSet.
+    * @param aFeatureMap which will be included or not in <b>this</b>
+    * FeatureMap obj.
+    * @param aFeatureNamesSet is a set of strings representing the names of the
+    * features that would be considered for subsumes.
+    * @return <code>true</code> if all features present in the aFeaturesNameSet
+    * from aFeatureMap are included in <b>this</b> obj, or <code>false</code>
+    * otherwise.
+    */
+  public boolean subsumes(FeatureMap aFeatureMap, Set aFeatureNamesSet);
 
 } // interface FeatureMap
