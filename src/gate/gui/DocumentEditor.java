@@ -2677,8 +2677,8 @@ Out.prln("NULL size");
 //                       0,0);
 
       String setName = e.getAnnotationSetName();
-      AnnotationSet as = setName == null ? document.getAnnotations() :
-                             document.getAnnotations(setName);
+      AnnotationSet as = (setName == null ? document.getAnnotations() :
+                             document.getAnnotations(setName));
 
       as.addAnnotationSetListener(this);
       if(setName == null) setName = "Default";
