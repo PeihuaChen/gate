@@ -95,7 +95,6 @@ public class TestPR extends TestCase
     //run the tokeniser for doc1
     tokeniser.setDocument(doc1);
     tokeniser.execute();
-    Out.prln(doc1.getAnnotations().size());
     assert(doc1.getAnnotations().size()== 1286);
 
     //run the tokeniser for doc2
