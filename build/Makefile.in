@@ -50,7 +50,7 @@ CP=	-classpath \
 SP=	-sourcepath `$(CYGPATHP) ../src`
 
 # compile and run commands
-#COMPILE=./jdk.sh -s -g:none javac -O -d ../classes $(SP) $(CP)
+#COMPILE=./jdk.sh -s -g:none javac -d ../classes $(SP) $(CP)
 COMPILE=$(JAVAC) -O -d `$(CYGPATH) ../classes` $(SP) $(CP)
 RUN=$(JAVA)
 
