@@ -77,6 +77,9 @@ create or replace package error is
 
   x_invalid_content_type EXCEPTION;
   PRAGMA EXCEPTION_INIT(x_invalid_content_type, -20116);
+
+  x_invalid_annotation EXCEPTION;
+  PRAGMA EXCEPTION_INIT(x_invalid_annotation, -20117);
                            
 end error;
 /
