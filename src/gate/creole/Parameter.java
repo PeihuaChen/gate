@@ -48,6 +48,13 @@ public class Parameter
 
   /** Calculate and return the default value for this parameter */
   public Object calculateDefaultValue() throws ParameterException {
+    // if there's no default string and this is a builtin type, return null
+    if(
+      defaultValueString == null && typeName != null &&
+      typeName.startsWith("java.")
+    )
+      return null;
+
     // nuke any previous default value as it may no longer be valid
     defaultValue = null;
 
