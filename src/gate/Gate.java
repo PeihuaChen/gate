@@ -121,6 +121,13 @@ public class Gate implements GateConstants
         "GATE requires JDK " + MIN_JDK_VERSION + " or newer"
       );
     }
+
+    //register Lucene as a IR search engine
+    try{
+      registerIREngine("gate.creole.ir.lucene.LuceneIREngine");
+    }catch(ClassNotFoundException cnfe){
+      throw new GateRuntimeException(cnfe.toString());
+    }
   } // init()
 
   /** Initialise the CREOLE register. */
@@ -349,6 +356,50 @@ jar/classpath so it's the same as registerBuiltins
   private static boolean netConnected = true;
 
   private static int lastSym;
+
+  /**
+   * A list of names of classes that implement {@link gate.creole.ir.IREngine}
+   * that will be used as information retrieval engines.
+   */
+  private static Set registeredIREngines = new HashSet();
+
+  /**
+   * Registers a new IR engine. The class named should implement
+   * {@link gate.creole.ir.IREngine}.
+   * @param className the fully qualified name of the class to be registered
+   * @throws GateException if the class does not implement the
+   * {@link gate.creole.ir.IREngine} interface.
+   * @throws ClassNotFoundException if the named class cannot be found.
+   */
+  public static void registerIREngine(String className)
+    throws GateException, ClassNotFoundException{
+    Class aClass = Class.forName(className);
+    if(gate.creole.ir.IREngine.class.isAssignableFrom(aClass)){
+      registeredIREngines.add(className);
+    }else{
+      throw new GateException(className + " does not implement the " +
+                              gate.creole.ir.IREngine.class.getName() +
+                              " interface!");
+    }
+  }
+
+  /**
+   * Unregisters a previously registered IR engine.
+   * @param className the name of the class to be removed from the list of
+   * registered IR engines.
+   * @return true if the class was found and removed.
+   */
+  public static boolean unregisterIREngine(String className){
+    return registeredIREngines.remove(className);
+  }
+
+  /**
+   * Gets the set of registered IR engines.
+   * @return an unmodifiable {@link java.util.Set} value.
+   */
+  public static Set getRegisteredIREngines(){
+    return Collections.unmodifiableSet(registeredIREngines);
+  }
 
   /** Should we assume we're connected to the net? */
   public static boolean isNetConnected() { return netConnected; }
