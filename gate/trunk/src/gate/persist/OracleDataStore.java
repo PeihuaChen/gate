@@ -38,10 +38,10 @@ import gate.creole.ResourceData;
 public class OracleDataStore extends JDBCDataStore {
 
   /** Name of this resource */
-  public static final String DS_COMMENT = "GATE Oracle datastore";
+  private static final String DS_COMMENT = "GATE Oracle datastore";
 
   /** the icon for this resource */
-  public static final String DS_ICON_NAME = "ora_ds.gif";
+  private static final String DS_ICON_NAME = "ora_ds.gif";
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -85,25 +85,10 @@ public class OracleDataStore extends JDBCDataStore {
   public OracleDataStore() {
 
     super();
+
+    this.datastoreComment = DS_COMMENT;
+    this.iconName = DS_ICON_NAME;
   }
-
-  /**
-   * Save: synchonise the in-memory image of the LR with the persistent
-   * image.
-   */
-  public String getComment() {
-    return OracleDataStore.DS_COMMENT;
-  }
-
-  /**
-   * Returns the name of the icon to be used when this datastore is displayed
-   * in the GUI
-   */
-  public String getIconName() {
-    return OracleDataStore.DS_ICON_NAME;
-  }
-
-
 
   /** Get the name of an LR from its ID. */
   public String getLrName(Object lrId)
