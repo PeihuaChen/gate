@@ -161,7 +161,7 @@ public class SerialControllerEditor extends AbstractVisualResource
 
     if(analyserMode){
       //we need to add the corpus combo
-      corpusCombo = new JComboBox(new CorporaComboModel());
+      corpusCombo = new JComboBox(corpusComboModel = new CorporaComboModel());
       corpusCombo.setRenderer(new ResourceRenderer());
       if(corpusCombo.getModel().getSize() > 1) corpusCombo.setSelectedIndex(1);
       else corpusCombo.setSelectedIndex(0);
@@ -498,6 +498,10 @@ public class SerialControllerEditor extends AbstractVisualResource
       loadedPRsTableModel.fireTableDataChanged();
       memberPRsTableModel.fireTableDataChanged();
       repaint(100);
+    }else if(e.getResource() instanceof LanguageResource){
+      if(e.getResource() instanceof Corpus){
+        corpusComboModel.fireDataChanged();
+      }
     }
   }// public void resourceLoaded
 
@@ -950,6 +954,8 @@ public class SerialControllerEditor extends AbstractVisualResource
    * corpora.
    */
   JComboBox corpusCombo;
+
+  CorporaComboModel corpusComboModel;
 
   /**The "Add PR" menu; part of the popup menu*/
   JMenu addMenu;

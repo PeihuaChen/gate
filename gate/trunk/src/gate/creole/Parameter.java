@@ -165,9 +165,9 @@ public class Parameter implements Serializable
         //unknown type
         return null;
       }
+
       WeakBumpyStack instantiations = resData.getInstantiations();
-      if(! instantiations.isEmpty())
-        value = instantiations.peek();
+      if(! instantiations.isEmpty()) value = instantiations.peek();
     }
 
     return value;
