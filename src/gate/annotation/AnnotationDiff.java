@@ -279,8 +279,10 @@ public class AnnotationDiff extends AbstractVisualResource{
   /**  Sets the annot diff to work in the text mode.This would not initiate the
     *  GUI part of annot diff but it would calculate precision etc
     */
-  public void setTextMode(boolean aTextMode){
-    textMode = aTextMode;
+  public void setTextMode(Boolean aTextMode){
+    //it needs to be a Boolean and not boolean, because you cannot put
+    //in the parameters hashmap a boolean, it needs an object
+    textMode = aTextMode.booleanValue();
   }// End setTextMode();
 
   /** Gets the annot diff textmode.True means that the text mode is activated.*/

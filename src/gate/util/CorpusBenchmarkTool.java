@@ -866,6 +866,7 @@ public class CorpusBenchmarkTool {
     parameters.put("responseAnnotationSetName",annotSetName);
     //for a start, do not compare the features of the annotations
     parameters.put("keyFeatureNamesSet", new HashSet());
+    parameters.put("textMode", new Boolean(true));
 
     // Create Annotation Diff visual resource
     AnnotationDiff annotDiff = (AnnotationDiff)
