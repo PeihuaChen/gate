@@ -2,7 +2,7 @@
 // diana, 13 Sep 00
 // last modified diana, 17 Apr 01
 
-Phase:	Enamex
+Phase:	Name
 //Input: Token SpaceToken Lookup
 Options: control = appelt
 
@@ -93,7 +93,19 @@ Priority: 20
  {Token.orth == upperInitial, Token.length == "1"}
 )?
 -->
-  :person.TempPerson = {kind = "personName", rule = GazPersonFirst}
+  //:person.TempPerson = {kind = "personName", rule = GazPersonFirst}
+{
+//removes  TempPerson annotation, gets the rule feature and adds a new Person annotation
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("gender", personAnn.getFeatures().get("minorType"));
+features.put("kind", "personName");
+features.put("rule", "GazPersonFirst");
+annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+features);
+//annotations.removeAll(person);
+}
 
 
 Rule: PersonFirstContext
@@ -506,7 +518,7 @@ Priority: 100
 (
  ({Lookup.majorType == country_adj}|
   {Token.orth == lowercase})
- SPA
+ SPACE
  ({Lookup.majorType == org_base}|
   {Lookup.majorType == govern_key})
 )
