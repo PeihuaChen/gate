@@ -35,7 +35,16 @@ public class Scratch
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  public static void main(String args[]) {
+  public static void main(String args[]) throws Exception {
+
+  Gate.setNetConnected(false);
+  Gate.setLocalWebServer(false);
+  Gate.init();
+  Out.prln(new URL("gate:/gate/Main.class").getFile());
+  Out.prln(Gate.locateGateFiles());
+  Out.prln(Gate.getUrl());
+  System.exit(0);
+
     Scratch oneOfMe = new Scratch();
     try{
       oneOfMe.doIt();
