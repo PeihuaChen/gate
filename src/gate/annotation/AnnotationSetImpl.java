@@ -751,12 +751,9 @@ public class AnnotationSetImpl
 
   /** Construct the positional indices for annotation start */
   protected void indexByStartOffset() {
-    if (annotsByStartNode != null)
-      return;
-    if (nodesByOffset == null)
-      nodesByOffset = new RBTreeMap();
+    if (annotsByStartNode != null) return;
+    if (nodesByOffset == null) nodesByOffset = new RBTreeMap();
     annotsByStartNode = new HashMap(Gate.HASH_STH_SIZE);
-    Annotation a;
     Iterator annotIter = annotsById.values().iterator();
     while (annotIter.hasNext())
       addToStartOffsetIndex( (Annotation) annotIter.next());
@@ -876,22 +873,44 @@ public class AnnotationSetImpl
       // remove annots that start at this node
       AnnotationSet invalidatedAnnots =
           (AnnotationSet) annotsByStartNode.get(n.getId());
-      if (invalidatedAnnots != null)
+      if (invalidatedAnnots != null && invalidatedAnnots.size() > 0)
         removeAll(invalidatedAnnots);
-        // remove annots that end at this node
-      invalidatedAnnots =
-          (AnnotationSet) annotsByEndNode.get(n.getId());
-      if (invalidatedAnnots != null)
+      // remove annots that end at this node
+      invalidatedAnnots = (AnnotationSet) annotsByEndNode.get(n.getId());
+      if (invalidatedAnnots != null && invalidatedAnnots.size() > 0)
         removeAll(invalidatedAnnots);
     } // loop over replaced area nodes
-    // update the offsets of the other nodes
-    Iterator nodesAfterReplacementIter =
-        nodesByOffset.tailMap(end).values().iterator();
+
+    // update the offsets and the index byt offset for the rest of the nodes
+    List nodesAfterReplacement = new ArrayList(
+        nodesByOffset.tailMap(end).values());
+
+    //remove from the index by offset
+    Iterator nodesAfterReplacementIter = nodesAfterReplacement.iterator();
+    while (nodesAfterReplacementIter.hasNext()) {
+      NodeImpl n = (NodeImpl) nodesAfterReplacementIter.next();
+      nodesByOffset.remove(n.getOffset());
+    }
+    //change the offsets
+    nodesAfterReplacementIter = nodesAfterReplacement.iterator();
     while (nodesAfterReplacementIter.hasNext()) {
       NodeImpl n = (NodeImpl) nodesAfterReplacementIter.next();
       long oldOffset = n.getOffset().longValue();
       n.setOffset(new Long(oldOffset - ( (e - s) - rlen)));
-    } // loop over nodes after replacement area
+    }
+    //add back to the index by offset with the new offsets
+    nodesAfterReplacementIter = nodesAfterReplacement.iterator();
+    while (nodesAfterReplacementIter.hasNext()) {
+      NodeImpl n = (NodeImpl) nodesAfterReplacementIter.next();
+      nodesByOffset.put(n.getOffset(), n);
+    }
+
+//    //rebuild the indices with the new offsets
+//    nodesByOffset = null;
+//    annotsByStartNode = null;
+//    annotsByEndNode = null;
+//    indexByStartOffset();
+//    indexByEndOffset();
   } // edit(start,end,replacement)
 
   /** Get the name of this set. */
