@@ -335,10 +335,12 @@ public class RepositioningInfo extends ArrayList {
                               endLen);
 
       set(index, frontPI); // substitute old element
-      if(endPI.m_origLength != 0) {
+      if(endPI.m_origLength > 0) {
         add(index+1, endPI); // insert new end element
       } // if
-      add(index+1, correctPI); // insert middle new element
+      if(correctPI.m_origLength > 0) {
+        add(index+1, correctPI); // insert middle new element
+      } // if
     } // if - substitution range check
   } // correctInformation
 
