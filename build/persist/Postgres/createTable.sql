@@ -16,246 +16,257 @@
  */
 
 
-DROP TABLE "T_FEATURE_KEY";
+DROP TABLE t_feature_key ;
 
-CREATE TABLE "T_FEATURE_KEY" (
-   "FK_ID"         int4 NOT NULL DEFAULT NEXTVAL('SEQ_FK_ID'),
-   "FK_STRING"     varchar(128) NOT NULL,
- PRIMARY KEY ("FK_ID")
+CREATE TABLE  t_feature_key  (
+    fk_id          int4 NOT NULL DEFAULT NEXTVAL('SEQ_FK_ID'),
+    fk_string      varchar(128) NOT NULL,
+ PRIMARY KEY ( fk_id )
 );
 
 
-DROP TABLE "T_USER";
+DROP TABLE  t_user ;
 
-CREATE TABLE "T_USER" (
-   "USR_ID"        int4 NOT NULL DEFAULT NEXTVAL('SEQ_USR_ID'),
-   "USR_LOGIN"     varchar(16) NOT NULL,
-   "USR_PASS"      varchar(16) NOT NULL,
- PRIMARY KEY ("USR_ID")
+CREATE TABLE  t_user  (
+    usr_id         int4 NOT NULL DEFAULT NEXTVAL('SEQ_USR_ID'),
+    usr_login      varchar(16) NOT NULL,
+    usr_pass       varchar(16) NOT NULL,
+ PRIMARY KEY ( usr_id )
 );
 
 
-DROP TABLE "T_GROUP";
+DROP TABLE  t_group ;
 
-CREATE TABLE "T_GROUP" (
-   "GRP_ID"        int4 NOT NULL DEFAULT NEXTVAL('SEQ_GRP_ID'),
-   "GRP_NAME"      varchar(128) NOT NULL,
- PRIMARY KEY ("GRP_ID")
+CREATE TABLE  t_group  (
+    grp_id         int4 NOT NULL DEFAULT NEXTVAL('SEQ_GRP_ID'),
+    grp_name       varchar(128) NOT NULL,
+ PRIMARY KEY ( grp_id )
 );
 
 
-DROP TABLE "T_USER_GROUP";
+DROP TABLE  t_user_group ;
 
-CREATE TABLE "T_USER_GROUP" (
-   "UGRP_ID"           int4 DEFAULT nextval('SEQ_UGRP_ID')  NOT NULL ,
-   "UGRP_USER_ID"      int4 NOT NULL ,
-   "UGRP_GROUP_ID"     int4 NOT NULL ,
-   FOREIGN KEY ("UGRP_USER_ID")
-         REFERENCES "T_USER"("USR_ID")
+CREATE TABLE  t_user_group  (
+    ugrp_id            int4 DEFAULT nextval('SEQ_UGRP_ID')  NOT NULL ,
+    ugrp_user_id       int4 NOT NULL ,
+    ugrp_group_id      int4 NOT NULL ,
+   FOREIGN KEY ( ugrp_user_id )
+         REFERENCES  t_user ( usr_id )
          MATCH FULL ,
-   FOREIGN KEY ("UGRP_GROUP_ID")
-         REFERENCES "T_GROUP"("GRP_ID")
+   FOREIGN KEY ( ugrp_group_id )
+         REFERENCES  t_group ( grp_id )
          MATCH FULL ,
-   PRIMARY KEY ("UGRP_ID")
+   PRIMARY KEY ( ugrp_id )
 );
 
 
-DROP TABLE "T_DOC_ENCODING";
+DROP TABLE  t_doc_encoding ;
 
-CREATE TABLE "T_DOC_ENCODING" (
-   "ENC_ID"        int4 NOT NULL DEFAULT NEXTVAL('SEQ_ENC_ID'),
-   "ENC_NAME"      varchar(16) NOT NULL,
- PRIMARY KEY ("ENC_ID")
+CREATE TABLE  t_doc_encoding  (
+    enc_id         int4 NOT NULL DEFAULT NEXTVAL('SEQ_ENC_ID'),
+    enc_name       varchar(16) NOT NULL,
+ PRIMARY KEY ( enc_id )
 );
 
-DROP TABLE "T_DOC_CONTENT";
+DROP TABLE  t_doc_content ;
 
-CREATE TABLE "T_DOC_CONTENT" (
-   "DC_ID"             int4 DEFAULT nextval('SEQ_DC_ID')  NOT NULL ,
-   "DC_ENCODING_ID"    int4,
-   "DC_CHARACTER_CONTENT" text,
-   "DC_BINARY_CONTENT" oid,
-   "DC_CONTENT_TYPE"   int2 NOT NULL ,
-   FOREIGN KEY ("DC_ENCODING_ID")
-      REFERENCES "T_DOC_ENCODING"("ENC_ID")
+CREATE TABLE  t_doc_content  (
+    dc_id              int4 DEFAULT nextval('SEQ_DC_ID')  NOT NULL ,
+    dc_encoding_id     int4,
+    dc_character_content  text,
+    dc_binary_content  oid,
+    dc_content_type    int2 NOT NULL ,
+   FOREIGN KEY ( dc_encoding_id )
+      REFERENCES  t_doc_encoding ( enc_id )
       MATCH FULL ,
-   PRIMARY KEY ("DC_ID")
+   PRIMARY KEY ( dc_id )
 );
 
-DROP TABLE "T_FEATURE";
+DROP TABLE  t_feature ;
 
-CREATE TABLE "T_FEATURE" (
-   "FT_ID"             int4 DEFAULT nextval('SEQ_FT_ID')  NOT NULL ,
-   "FT_ENTITY_ID"      int4 NOT NULL ,
-   "FT_ENTITY_TYPE"    int2 NOT NULL ,
-   "FT_KEY_ID"         int4 NOT NULL ,
-   "FT_NUMBER_VALUE"   int4,
-   "FT_BINARY_VALUE"   oid,
-   "FT_CHARACTER_VALUE" varchar(4000),
-   "FT_LONG_CHARACTER_VALUE" text,
-   "FT_VALUE_TYPE"     int2 NOT NULL ,
-   FOREIGN KEY ("FT_KEY_ID")
-      REFERENCES "T_FEATURE_KEY"("FK_ID")
+CREATE TABLE  t_feature  (
+    ft_id              int4 DEFAULT nextval('SEQ_FT_ID')  NOT NULL ,
+    ft_entity_id       int4 NOT NULL ,
+    ft_entity_type     int2 NOT NULL ,
+    ft_key_id          int4 NOT NULL ,
+    ft_number_value    int4,
+    ft_binary_value    oid,
+    ft_character_value  varchar(4000),
+    ft_long_character_value  text,
+    ft_value_type      int2 NOT NULL ,
+   FOREIGN KEY ( ft_key_id )
+      REFERENCES  t_feature_key ( fk_id )
       MATCH FULL ,
-   PRIMARY KEY ("FT_ID")
+   PRIMARY KEY ( ft_id )
 );
 
-DROP TABLE "T_LR_TYPE";
-CREATE TABLE "T_LR_TYPE" (
-   "LRTP_ID"       int4 NOT NULL DEFAULT NEXTVAL('SEQ_LRTP_ID'),
-   "LRTP_TYPE"     varchar(128) NOT NULL,
- PRIMARY KEY ("LRTP_ID")
-);
+DROP TABLE  t_lr_type ;
 
-
-DROP TABLE "T_LANG_RESOURCE";
-CREATE TABLE "T_LANG_RESOURCE" (
-   "LR_ID"             int4 DEFAULT nextval('SEQ_LR_ID')  NOT NULL ,
-   "LR_OWNER_USER_ID"  int4,
-   "LR_OWNER_GROUP_ID" int4,
-   "LR_LOCKING_USER_ID" int4,
-   "LR_TYPE_ID"        int4 NOT NULL ,
-   "LR_NAME"           varchar(128) NOT NULL ,
-   "LR_ACCESS_MODE"    int2 NOT NULL ,
-   "LR_PARENT_ID"      int4,
-   FOREIGN KEY ("LR_PARENT_ID")
-      REFERENCES "T_LANG_RESOURCE"("LR_ID")
-      MATCH FULL ,
-   FOREIGN KEY ("LR_LOCKING_USER_ID")
-      REFERENCES "T_USER"("USR_ID")
-      MATCH FULL ,
-   FOREIGN KEY ("LR_OWNER_USER_ID")
-      REFERENCES "T_USER"("USR_ID")
-      MATCH FULL ,
-   FOREIGN KEY ("LR_OWNER_GROUP_ID")
-      REFERENCES "T_GROUP"("GRP_ID")
-      MATCH FULL ,
-   PRIMARY KEY ("LR_ID")
+CREATE TABLE  t_lr_type  (
+    lrtp_id        int4 NOT NULL DEFAULT NEXTVAL('SEQ_LRTP_ID'),
+    lrtp_type      varchar(128) NOT NULL,
+ PRIMARY KEY ( lrtp_id )
 );
 
 
-DROP TABLE "T_DOCUMENT";
-CREATE TABLE "T_DOCUMENT" (
-   "DOC_ID"            int4 DEFAULT nextval('SEQ_DOC_ID')  NOT NULL ,
-   "DOC_CONTENT_ID"    int4,
-   "DOC_LR_ID"         int4 NOT NULL ,
-   "DOC_URL"           varchar(4000) NOT NULL ,
-   "DOC_START"         int4,
-   "DOC_END"           int4,
-   "DOC_IS_MARKUP_AWARE" bool NOT NULL ,
-   FOREIGN KEY ("DOC_CONTENT_ID")
-      REFERENCES "T_DOC_CONTENT"("DC_ID")
+DROP TABLE  t_lang_resource ;
+
+CREATE TABLE  t_lang_resource  (
+    lr_id              int4 DEFAULT nextval('SEQ_LR_ID')  NOT NULL ,
+    lr_owner_user_id   int4,
+    lr_owner_group_id  int4,
+    lr_locking_user_id  int4,
+    lr_type_id         int4 NOT NULL ,
+    lr_name            varchar(128) NOT NULL ,
+    lr_access_mode     int2 NOT NULL ,
+    lr_parent_id       int4,
+   FOREIGN KEY ( lr_parent_id )
+      REFERENCES  t_lang_resource ( lr_id )
       MATCH FULL ,
-   FOREIGN KEY ("DOC_LR_ID")
-      REFERENCES "T_LANG_RESOURCE"("LR_ID")
+   FOREIGN KEY ( lr_locking_user_id )
+      REFERENCES  t_user ( usr_id )
       MATCH FULL ,
-   PRIMARY KEY ("DOC_ID")
+   FOREIGN KEY ( lr_owner_user_id )
+      REFERENCES  t_user ( usr_id )
+      MATCH FULL ,
+   FOREIGN KEY ( lr_owner_group_id )
+      REFERENCES  t_group ( grp_id )
+      MATCH FULL ,
+   PRIMARY KEY ( lr_id )
 );
 
 
-DROP TABLE "T_NODE";
-CREATE TABLE "T_NODE" (
-   "NODE_GLOBAL_ID"    int4 DEFAULT nextval('SEQ_NODE_GLOBAL_ID')  NOT NULL ,
-   "NODE_DOC_ID"       int4 NOT NULL ,
-   "NODE_LOCAL_ID"     int4 NOT NULL ,
-   "NODE_OFFSET"       int4 NOT NULL ,
-   FOREIGN KEY ("NODE_DOC_ID")
-      REFERENCES "T_DOCUMENT"("DOC_ID")
+DROP TABLE  t_document ;
+
+CREATE TABLE  t_document  (
+    doc_id             int4 DEFAULT nextval('SEQ_DOC_ID')  NOT NULL ,
+    doc_content_id     int4,
+    doc_lr_id          int4 NOT NULL ,
+    doc_url            varchar(4000) NOT NULL ,
+    doc_start          int4,
+    doc_end            int4,
+    doc_is_markup_aware  bool NOT NULL ,
+   FOREIGN KEY ( doc_content_id )
+      REFERENCES  t_doc_content ( dc_id )
       MATCH FULL ,
-   PRIMARY KEY ("NODE_GLOBAL_ID")
+   FOREIGN KEY ( doc_lr_id )
+      REFERENCES  t_lang_resource ( lr_id )
+      MATCH FULL ,
+   PRIMARY KEY ( doc_id )
 );
 
 
-DROP TABLE "T_ANNOTATION_TYPE";
-CREATE TABLE "T_ANNOTATION_TYPE" (
-   "AT_ID"         int4 NOT NULL DEFAULT NEXTVAL('SEQ_AT_ID'),
-   "AT_NAME"       varchar(128) NULL,
-   PRIMARY KEY ("AT_ID")
+DROP TABLE  t_node ;
+
+CREATE TABLE  t_node  (
+    node_global_id     int4 DEFAULT nextval('SEQ_NODE_GLOBAL_ID')  NOT NULL ,
+    node_doc_id        int4 NOT NULL ,
+    node_local_id      int4 NOT NULL ,
+    node_offset        int4 NOT NULL ,
+   FOREIGN KEY ( node_doc_id )
+      REFERENCES  t_document ( doc_id )
+      MATCH FULL ,
+   PRIMARY KEY ( node_global_id )
 );
 
 
-DROP TABLE "T_ANNOTATION";
-CREATE TABLE "T_ANNOTATION" (
-   "ANN_GLOBAL_ID"     int4 DEFAULT nextval('SEQ_ANN_GLOBAL_ID')  NOT NULL ,
-   "ANN_DOC_ID"        int4,
-   "ANN_LOCAL_ID"      int4 NOT NULL ,
-   "ANN_AT_ID"         int4 NOT NULL ,
-   "ANN_STARTNODE_ID"  int4 NOT NULL ,
-   "ANN_ENDNODE_ID"    int4 NOT NULL ,
-   FOREIGN KEY ("ANN_DOC_ID")
-      REFERENCES "T_DOCUMENT"("DOC_ID")
-      MATCH FULL ,
-   FOREIGN KEY ("ANN_AT_ID")
-      REFERENCES "T_ANNOTATION_TYPE"("AT_ID")
-      MATCH FULL ,
-   FOREIGN KEY ("ANN_STARTNODE_ID")
-      REFERENCES "T_NODE"("NODE_GLOBAL_ID")
-      MATCH FULL ,
-   FOREIGN KEY ("ANN_ENDNODE_ID")
-      REFERENCES "T_NODE"("NODE_GLOBAL_ID")
-      MATCH FULL ,
-   PRIMARY KEY ("ANN_GLOBAL_ID")
+DROP TABLE  t_annotation_type ;
+
+CREATE TABLE  t_annotation_type  (
+    at_id          int4 NOT NULL DEFAULT NEXTVAL('SEQ_AT_ID'),
+    at_name        varchar(128) NULL,
+   PRIMARY KEY ( at_id )
 );
 
 
-DROP TABLE "T_ANNOT_SET";
-CREATE TABLE "T_ANNOT_SET" (
-   "AS_ID"             int4 DEFAULT nextval('SEQ_AS_ID')  NOT NULL ,
-   "AS_NAME"           varchar(128) NOT NULL ,
-   "AS_DOC_ID"         int4 NOT NULL ,
-   FOREIGN KEY ("AS_DOC_ID")
-      REFERENCES "T_DOCUMENT"("DOC_ID")
-      MATCH FULL ,
-   PRIMARY KEY ("AS_ID")
-);
+DROP TABLE  t_annotation ;
 
-DROP TABLE "T_AS_ANNOTATION";
-CREATE TABLE "T_AS_ANNOTATION" (
-   "ASANN_ID"          int4 DEFAULT nextval('SEQ_ASANN_ID')  NOT NULL ,
-   "ASANN_ANN_ID"      int4 NOT NULL ,
-   "ASANN_AS_ID"       int4 NOT NULL ,
-   FOREIGN KEY ("ASANN_ANN_ID")
-      REFERENCES "T_ANNOTATION"("ANN_GLOBAL_ID")
+CREATE TABLE  t_annotation  (
+    ann_global_id      int4 DEFAULT nextval('SEQ_ANN_GLOBAL_ID')  NOT NULL ,
+    ann_doc_id         int4,
+    ann_local_id       int4 NOT NULL ,
+    ann_at_id          int4 NOT NULL ,
+    ann_startnode_id   int4 NOT NULL ,
+    ann_endnode_id     int4 NOT NULL ,
+   FOREIGN KEY ( ann_doc_id )
+      REFERENCES  t_document ( doc_id )
       MATCH FULL ,
-   FOREIGN KEY ("ASANN_AS_ID")
-      REFERENCES "T_ANNOT_SET"("AS_ID")
+   FOREIGN KEY ( ann_at_id )
+      REFERENCES  t_annotation_type ( at_id )
       MATCH FULL ,
-   PRIMARY KEY ("ASANN_ID")
-);
-
-
-DROP TABLE "T_CORPUS";
-CREATE TABLE "T_CORPUS" (
-   "CORP_ID"           int4 DEFAULT nextval('SEQ_CORP_ID')  NOT NULL ,
-   "CORP_LR_ID"        int4 NOT NULL ,
-   FOREIGN KEY ("CORP_LR_ID")
-      REFERENCES "T_LANG_RESOURCE"("LR_ID")
+   FOREIGN KEY ( ann_startnode_id )
+      REFERENCES  t_node ( node_global_id )
       MATCH FULL ,
-   PRIMARY KEY ("CORP_ID")
+   FOREIGN KEY ( ann_endnode_id )
+      REFERENCES  t_node ( node_global_id )
+      MATCH FULL ,
+   PRIMARY KEY ( ann_global_id )
 );
 
 
-DROP TABLE "T_CORPUS_DOCUMENT";
-CREATE TABLE "T_CORPUS_DOCUMENT" (
-   "CD_ID"             int4 DEFAULT nextval('SEQ_CD_ID')  NOT NULL ,
-   "CD_CORP_ID"        int4 NOT NULL ,
-   "CD_DOC_ID"         int4 NOT NULL ,
-   FOREIGN KEY ("CD_CORP_ID")
-      REFERENCES "T_CORPUS"("CORP_ID")
+DROP TABLE  t_annot_set ;
+
+CREATE TABLE  t_annot_set  (
+    as_id              int4 DEFAULT nextval('SEQ_AS_ID')  NOT NULL ,
+    as_name            varchar(128) NOT NULL ,
+    as_doc_id          int4 NOT NULL ,
+   FOREIGN KEY ( as_doc_id )
+      REFERENCES  t_document ( doc_id )
       MATCH FULL ,
-   FOREIGN KEY ("CD_DOC_ID")
-      REFERENCES "T_DOCUMENT"("DOC_ID")
+   PRIMARY KEY ( as_id )
+);
+
+DROP TABLE  t_as_annotation ;
+
+CREATE TABLE  t_as_annotation  (
+    asann_id           int4 DEFAULT nextval('SEQ_ASANN_ID')  NOT NULL ,
+    asann_ann_id       int4 NOT NULL ,
+    asann_as_id        int4 NOT NULL ,
+   FOREIGN KEY ( asann_ann_id )
+      REFERENCES  t_annotation ( ann_global_id )
       MATCH FULL ,
-   PRIMARY KEY ("CD_ID")
+   FOREIGN KEY ( asann_as_id )
+      REFERENCES  t_annot_set ( as_id )
+      MATCH FULL ,
+   PRIMARY KEY ( asann_id )
 );
 
 
-DROP TABLE "T_PARAMETER";
-CREATE TABLE "T_PARAMETER" (
-   "PAR_ID"        int4 NOT NULL DEFAULT NEXTVAL('SEQ_PAR_ID'),
-   "PAR_KEY"       varchar(16) NOT NULL,
-   "PAR_VALUE_STRING" varchar(128) NULL,
-   "PAR_VALUE_DATE" date NULL,
-   "PAR_VALUE_NUMBER" int4 NULL,
-   PRIMARY KEY ("PAR_ID")
+DROP TABLE  t_corpus ;
+
+CREATE TABLE  t_corpus  (
+    corp_id            int4 DEFAULT nextval('SEQ_CORP_ID')  NOT NULL ,
+    corp_lr_id         int4 NOT NULL ,
+   FOREIGN KEY ( corp_lr_id )
+      REFERENCES  t_lang_resource ( lr_id )
+      MATCH FULL ,
+   PRIMARY KEY ( corp_id )
+);
+
+
+DROP TABLE  t_corpus_document ;
+
+CREATE TABLE  t_corpus_document  (
+    cd_id              int4 DEFAULT nextval('SEQ_CD_ID')  NOT NULL ,
+    cd_corp_id         int4 NOT NULL ,
+    cd_doc_id          int4 NOT NULL ,
+   FOREIGN KEY ( cd_corp_id )
+      REFERENCES  t_corpus ( corp_id )
+      MATCH FULL ,
+   FOREIGN KEY ( cd_doc_id )
+      REFERENCES  t_document ( doc_id )
+      MATCH FULL ,
+   PRIMARY KEY ( cd_id )
+);
+
+
+DROP TABLE  t_parameter ;
+
+CREATE TABLE  t_parameter  (
+    par_id         int4 NOT NULL DEFAULT NEXTVAL('SEQ_PAR_ID'),
+    par_key        varchar(16) NOT NULL,
+    par_value_string  varchar(128) NULL,
+    par_value_date  date NULL,
+    par_value_number  int4 NULL,
+   PRIMARY KEY ( par_id )
 );

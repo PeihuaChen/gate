@@ -15,128 +15,128 @@
  *
  */
 
-DROP SEQUENCE "SEQ_FT_ID";
-CREATE SEQUENCE "SEQ_FT_ID"
+drop sequence  seq_ft_id ;
+create sequence  seq_ft_id
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20;
 
-DROP SEQUENCE "SEQ_FK_ID";
-CREATE SEQUENCE "SEQ_FK_ID"
+drop sequence  seq_fk_id ;
+create sequence  seq_fk_id
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-DROP SEQUENCE  "SEQ_USR_ID";
-CREATE SEQUENCE "SEQ_USR_ID"
+drop sequence   seq_usr_id ;
+create sequence  seq_usr_id
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-DROP SEQUENCE   "SEQ_GRP_ID";
-CREATE SEQUENCE "SEQ_GRP_ID"
+drop sequence    seq_grp_id ;
+create sequence  seq_grp_id
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-DROP SEQUENCE   "SEQ_UGRP_ID";
-CREATE SEQUENCE "SEQ_UGRP_ID"
+drop sequence    seq_ugrp_id ;
+create sequence  seq_ugrp_id
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-DROP SEQUENCE   "SEQ_ENC_ID";
-CREATE SEQUENCE "SEQ_ENC_ID"
+drop sequence    seq_enc_id ;
+create sequence  seq_enc_id
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-DROP SEQUENCE   "SEQ_DC_ID";
-CREATE SEQUENCE "SEQ_DC_ID"
+drop sequence    seq_dc_id ;
+create sequence  seq_dc_id
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-DROP SEQUENCE   "SEQ_LRTP_ID";
-CREATE SEQUENCE "SEQ_LRTP_ID"
+drop sequence    seq_lrtp_id ;
+create sequence  seq_lrtp_id
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-DROP SEQUENCE   "SEQ_LR_ID";
-CREATE SEQUENCE "SEQ_LR_ID"
+drop sequence    seq_lr_id ;
+create sequence  seq_lr_id
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-DROP SEQUENCE   "SEQ_DOC_ID";
-CREATE SEQUENCE "SEQ_DOC_ID"
+drop sequence    seq_doc_id ;
+create sequence  seq_doc_id
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-DROP SEQUENCE   "SEQ_NODE_GLOBAL_ID";
-CREATE SEQUENCE "SEQ_NODE_GLOBAL_ID"
+drop sequence    seq_node_global_id ;
+create sequence  seq_node_global_id
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-DROP SEQUENCE   "SEQ_AT_ID";
-CREATE SEQUENCE "SEQ_AT_ID"
+drop sequence    seq_at_id ;
+create sequence  seq_at_id
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-DROP SEQUENCE "SEQ_ANN_GLOBAL_ID";
-CREATE SEQUENCE "SEQ_ANN_GLOBAL_ID"
+drop sequence  seq_ann_global_id ;
+create sequence  seq_ann_global_id
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-DROP SEQUENCE "SEQ_AS_ID";
-CREATE SEQUENCE "SEQ_AS_ID"
+drop sequence  seq_as_id ;
+create sequence  seq_as_id
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-DROP SEQUENCE "SEQ_ASANN_ID";
-CREATE SEQUENCE "SEQ_ASANN_ID"
+drop sequence  seq_asann_id ;
+create sequence  seq_asann_id
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-DROP SEQUENCE "SEQ_CORP_ID";
-CREATE SEQUENCE "SEQ_CORP_ID"
+drop sequence  seq_corp_id ;
+create sequence  seq_corp_id
        start 1
        increment 1
        maxvalue 2147483647
@@ -144,16 +144,16 @@ CREATE SEQUENCE "SEQ_CORP_ID"
        cache 20 ;
 
 
-DROP SEQUENCE "SEQ_CD_ID";
-CREATE SEQUENCE "SEQ_CD_ID"
+drop sequence  seq_cd_id ;
+create sequence  seq_cd_id
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-DROP SEQUENCE "SEQ_PAR_ID";
-CREATE SEQUENCE "SEQ_PAR_ID"
+drop sequence  seq_par_id ;
+create sequence  seq_par_id
        start 1
        increment 1
        maxvalue 2147483647

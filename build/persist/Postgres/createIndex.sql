@@ -15,129 +15,129 @@
  */
 
 
-CREATE UNIQUE INDEX XT_ANNOT_SET_01 ON "T_ANNOT_SET"
+CREATE UNIQUE INDEX xt_annot_set_01 ON	t_annot_set
 (
-       "AS_DOC_ID"			,
-       "AS_NAME"
+	as_doc_id			,
+	as_name
 )
 ;
 
 
-CREATE UNIQUE INDEX XT_ANNOTATION_01 ON "T_ANNOTATION"
+CREATE UNIQUE INDEX xt_annotation_01 on  t_annotation
 (
-       "ANN_DOC_ID"			,
-       "ANN_LOCAL_ID"
+	ann_doc_id			,
+	ann_local_id
 )
 ;
 
-CREATE UNIQUE INDEX XT_ANNOTATION_TYPE_01 ON "T_ANNOTATION_TYPE"
+CREATE UNIQUE INDEX xt_annotation_type_01 on  t_annotation_type
 (
-       "AT_NAME"
+	at_name
 )
 ;
 
-CREATE INDEX XT_AS_ANNOTATION_01 ON "T_AS_ANNOTATION"
+CREATE INDEX xt_as_annotation_01 on  t_as_annotation
 (
-       "ASANN_AS_ID"
+	asann_as_id
 )
 ;
 
-CREATE INDEX XT_AS_ANNOTATION_02 ON "T_AS_ANNOTATION"
+CREATE INDEX xt_as_annotation_02 on  t_as_annotation
 (
-       "ASANN_ANN_ID"
+	asann_ann_id
 )
 ;
 
-CREATE UNIQUE INDEX XT_DOC_ENCODING_01 ON "T_DOC_ENCODING"
+CREATE UNIQUE INDEX xt_doc_encoding_01 on  t_doc_encoding
 (
-       "ENC_NAME"
+	enc_name
 )
 ;
 
-CREATE UNIQUE INDEX XT_DOCUMENT_01 ON "T_DOCUMENT"
+CREATE UNIQUE INDEX xt_document_01 on  t_document
 (
-       "DOC_LR_ID"
+	doc_lr_id
 )
 ;
 
-CREATE INDEX XT_FEATURE_01 ON "T_FEATURE"
+CREATE INDEX xt_feature_01 on  t_feature
 (
-       "FT_ENTITY_ID"			,
-       "FT_ENTITY_TYPE"
+	ft_entity_id			,
+	ft_entity_type
 )
 ;
 
-CREATE UNIQUE INDEX XT_FEATURE_KEY_01 ON "T_FEATURE_KEY"
+CREATE UNIQUE INDEX xt_feature_key_01 on  t_feature_key
 (
-       "FK_STRING"
+	fk_string
 )
 ;
 
-CREATE UNIQUE INDEX XT_GROUP_01 ON "T_GROUP"
+CREATE UNIQUE INDEX xt_group_01 on  t_group
 (
-       "GRP_NAME"
+	grp_name
 )
 ;
 
-CREATE INDEX XT_LANG_RESOURCE_01 ON "T_LANG_RESOURCE"
+CREATE INDEX xt_lang_resource_01 on  t_lang_resource
 (
-       "LR_LOCKING_USER_ID"
+	lr_locking_user_id
 )
 ;
 
-CREATE INDEX XT_LANG_RESOURCE_02 ON "T_LANG_RESOURCE"
+CREATE INDEX xt_lang_resource_02 on  t_lang_resource
 (
-       "LR_OWNER_GROUP_ID"
+	lr_owner_group_id
 )
 ;
 
-CREATE INDEX XT_LANG_RESOURCE_03 ON "T_LANG_RESOURCE"
+CREATE INDEX xt_lang_resource_03 on  t_lang_resource
 (
-       "LR_OWNER_USER_ID"
+	lr_owner_user_id
 )
 ;
 
-CREATE UNIQUE INDEX XT_LR_TYPE_01 ON "T_LR_TYPE"
+CREATE UNIQUE INDEX xt_lr_type_01 on  t_lr_type
 (
-       "LRTP_TYPE"
+	lrtp_type
 )
 ;
 
-CREATE UNIQUE INDEX XT_NODE_01 ON "T_NODE"
+CREATE UNIQUE INDEX xt_node_01 on  t_node
 (
-       "NODE_DOC_ID"			,
-       "NODE_LOCAL_ID"
+	node_doc_id			,
+	node_local_id
 )
 ;
 
-CREATE UNIQUE INDEX XT_PARAMETER_01 ON "T_PARAMETER"
+CREATE UNIQUE INDEX xt_parameter_01 on	t_parameter
 (
-       "PAR_KEY"
+	par_key
 )
 ;
 
-CREATE UNIQUE INDEX XT_USER_01 ON "T_USER"
+CREATE UNIQUE INDEX xt_user_01 on  t_user
 (
-       "USR_LOGIN"
+	usr_login
 )
 ;
 
-CREATE INDEX XT_USER_02 ON "T_USER"
+CREATE INDEX xt_user_02 on  t_user
 (
-       "USR_PASS"
+	usr_pass
 )
 ;
 
-CREATE UNIQUE INDEX XT_USER_GROUP_01 ON "T_USER_GROUP"
+CREATE UNIQUE INDEX xt_user_group_01 on  t_user_group
 (
-       "UGRP_USER_ID"			,
-       "UGRP_GROUP_ID"
+	ugrp_user_id			,
+	ugrp_group_id
 )
 ;
 
-CREATE INDEX XT_USER_GROUP_02 ON "T_USER_GROUP"
+CREATE INDEX xt_user_group_02 on  t_user_group
 (
-       "UGRP_GROUP_ID"
+	ugrp_group_id
 )
 ;
 
