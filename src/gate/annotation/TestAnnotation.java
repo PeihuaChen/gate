@@ -528,17 +528,24 @@ public class TestAnnotation extends TestCase
     assertEquals(as.size(), 0);
 
     // add some annotations
+    FeatureMap fm1 = Factory.newFeatureMap();
+    fm1.put("test", "my-value");
+    FeatureMap fm2 = Factory.newFeatureMap();
+    fm2.put("test", "my-value-different");
+    FeatureMap fm3 = Factory.newFeatureMap();
+    fm3.put("another test", "different my-value");
+
     Integer newId;
     newId =
-      as.add(new Long(0), new Long(10), "Token", new SimpleFeatureMapImpl());
+      as.add(new Long(0), new Long(10), "Token", fm1);
     assertEquals(newId.intValue(), 0);
     newId =
-      as.add(new Long(11), new Long(12), "Token", new SimpleFeatureMapImpl());
+      as.add(new Long(11), new Long(12), "Token", fm2);
     assertEquals(newId.intValue(), 1);
     assertEquals(as.size(), 2);
     assert(! as.isEmpty());
     newId =
-      as.add(new Long(15), new Long(22), "Syntax", new SimpleFeatureMapImpl());
+      as.add(new Long(15), new Long(22), "Syntax", fm1);
 
     // get by ID; remove; add(object)
     Annotation a = as.get(new Integer(1));
@@ -553,19 +560,29 @@ public class TestAnnotation extends TestCase
       a = (Annotation) iter.next();
       if(a.getId().intValue() != 2)
         assertEquals(a.getType(), "Token");
-      assertEquals(a.getFeatures().size(), 0);
+      assertEquals(a.getFeatures().size(), 1);
     }
 
     // add some more
     newId =
-      as.add(new Long(0), new Long(12), "Syntax", new SimpleFeatureMapImpl());
+      as.add(new Long(0), new Long(12), "Syntax", fm3);
     assertEquals(newId.intValue(), 3);
     newId =
-      as.add(new Long(14), new Long(22), "Syntax", new SimpleFeatureMapImpl());
+      as.add(new Long(14), new Long(22), "Syntax", fm1);
     assertEquals(newId.intValue(), 4);
     assertEquals(as.size(), 5);
     newId =
       as.add(new Long(15), new Long(22), "Syntax", new SimpleFeatureMapImpl());
+
+    //get by feature names
+    HashSet hs = new HashSet();
+    hs.add("test");
+    AnnotationSet fnSet = as.get("Token", hs);
+    assertEquals(fnSet.size(), 2);
+    //now try without a concrete type, just features
+    //we'll get some Syntax ones now too
+    fnSet = as.get(null, hs);
+    assertEquals(fnSet.size(), 4);
 
 
     // indexing by type
