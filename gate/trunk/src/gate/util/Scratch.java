@@ -43,6 +43,25 @@ public class Scratch
   private static final boolean DEBUG = false;
 
   public static void main(String args[]) throws Exception {
+    //test for a bug reported by Luc Plamondon
+    
+    Gate.init();
+    Document doc = Factory.newDocument("ala bala portocala");
+    AnnotationSet set = doc.getAnnotations();
+    Integer annId = 
+      set.add(new Long(3), new Long(5), "FooBar", Factory.newFeatureMap());
+    Annotation ann = set.get(annId);
+    //remove the annotation 
+    set.remove(ann);
+    
+    AnnotationSet resSet = set.get(new Long(0), new Long(10));
+    
+    //this set is empty so the bug was fixed.
+    System.out.println(resSet);
+    
+    System.out.println("==============================================");
+    
+    
     Map listsMap = new HashMap();
     listsMap.put("blah", new ArrayList());
     List theList = (List)listsMap.get("blah");
