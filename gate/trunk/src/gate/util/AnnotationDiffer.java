@@ -77,7 +77,7 @@ public class AnnotationDiffer {
 
     //2) from all possible pairings, find the maximal set that also
     //maximises the total score
-    Collections.sort(possibleChoices);
+    Collections.sort(possibleChoices, new ChoiceScoreComparator());
     Collections.reverse(possibleChoices);
     finalChoices = new ArrayList();
     correctMatches = 0;
@@ -288,7 +288,7 @@ public class AnnotationDiffer {
    * Represents a pairing of a key annotation with a response annotation and
    * the associated score for that pairing.
    */
-	class Choice implements Comparable, Pairing{
+	class Choice implements Pairing{
     Choice(int keyIndex, int responseIndex, int type) {
       this.keyIndex = keyIndex;
       this.responseIndex = responseIndex;
@@ -353,19 +353,6 @@ public class AnnotationDiffer {
       List fromResponse = (List)responseChoices.get(responseIndex);
       fromResponse.remove(this);
     }
-    /**
-     * Compares two choices:
-     * the better score is preferred;
-     * for the same score the better type is preferred (exact matches are
-     * preffered to partial ones).
-     * @param other
-     * @return
-     */
-    public int compareTo(Object other){
-      int res = getScore() - ((Choice)other).getScore();
-      if(res == 0) res = type - ((Choice)other).type;
-      return res;
-    }
 
     /**
      * Calculates the score for this choice as:
@@ -392,7 +379,88 @@ public class AnnotationDiffer {
     int score;
     boolean scoreCalculated;
   }
+	
+	protected static class ChoiceScoreComparator implements Comparator{
+    /**
+     * Compares two choices:
+     * the better score is preferred;
+     * for the same score the better type is preferred (exact matches are
+     * preffered to partial ones).
+     * @param other
+     * @return
+     */
+
+	  public int compare(Object o1, Object o2){
+	    Choice first = (Choice)o1;
+	    Choice second = (Choice)o2;
+      int res = first.getScore() - second.getScore();
+      if(res == 0) res = first.getType() - second.getType();
+      return res;
+	  }
+	}
   
+	
+	public static class PairingOffsetComparator implements Comparator{
+    /**
+     * Compares two choices based on start offset of key (or response 
+     * if key not present) and type if offsets are equal.
+     */
+	  public int compare(Object o1, Object o2){
+	    Pairing first = (Pairing)o1;
+	    Pairing second = (Pairing)o2;
+	    Annotation key1 = first.getKey();
+	    Annotation key2 = second.getKey();
+	    Annotation res1 = first.getResponse();
+	    Annotation res2 = second.getResponse();
+	    Long start1 = key1 == null ? null : key1.getStartNode().getOffset();
+	    if(start1 == null) start1 = res1.getStartNode().getOffset();
+	    Long start2 = key2 == null ? null : key2.getStartNode().getOffset();
+	    if(start2 == null) start2 = res2.getStartNode().getOffset();
+	    int res = start1.compareTo(start2);
+	    if(res == 0){
+	      //compare by type
+	      res = second.getType() - first.getType();
+	    }
+	    
+//	    
+//	    
+//	    
+//	    //choices with keys are smaller than ones without
+//	    if(key1 == null && key2 != null) return 1;
+//	    if(key1 != null && key2 == null) return -1;
+//	    if(key1 == null){
+//	      //both keys are null
+//	      res = res1.getStartNode().getOffset().
+//	      		compareTo(res2.getStartNode().getOffset());
+//	      if(res == 0) res = res1.getEndNode().getOffset().
+//      				compareTo(res2.getEndNode().getOffset());
+//	      if(res == 0) res = second.getType() - first.getType();
+//	    }else{
+//	      //both keys are present
+//	      res = key1.getStartNode().getOffset().compareTo(
+//	          key2.getStartNode().getOffset());
+//	      
+//	      if(res == 0){
+//		      //choices with responses are smaller than ones without
+//		      if(res1 == null && res2 != null) return 1;
+//		      if(res1 != null && res2 == null) return -1;
+//		      if(res1 != null){
+//			      res = res1.getStartNode().getOffset().
+//    						compareTo(res2.getStartNode().getOffset());
+//		      }
+//		      if(res == 0)res = key1.getEndNode().getOffset().compareTo(
+//		              key2.getEndNode().getOffset());
+//		      if(res == 0 && res1 != null){
+//				      res = res1.getEndNode().getOffset().
+//	    						compareTo(res2.getEndNode().getOffset());
+//		      }
+//		      if(res == 0) res = second.getType() - first.getType();
+//	      }
+//	    }
+      return res;
+	  }
+	  
+	}
   
   public static final int CORRECT = 2;
   public static final int PARTIALLY_CORRECT = 1;
