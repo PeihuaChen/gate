@@ -414,7 +414,7 @@ public class DocumentEditor extends AbstractVisualResource
               // Loose the selection
               textPane.setSelectionStart(startOffset.intValue());
               textPane.setSelectionEnd(startOffset.intValue());
-            }else if(clickedComp instanceof JTextComponent &&
+            }else if(clickedComp instanceof JLabel &&
                      e.getClickCount() == 2){
               if(styleChooser == null){
                 Window parent = SwingUtilities.getWindowAncestor(
@@ -2185,6 +2185,105 @@ if(!highlights.isEmpty()){
   class NodeRenderer extends LazyJPanel implements TreeCellRenderer{
 
     public NodeRenderer(){
+      visibleChk = new JCheckBox("",false);
+      visibleChk.setOpaque(false);
+      visibleChk.setBorderPaintedFlat(true);
+
+      label = new JLabel();
+      label.setOpaque(true);
+      fontAttrs = new HashMap();
+      selectedBorder = BorderFactory.createLineBorder(Color.blue, 1);
+      normalBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
+      setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+      setOpaque(false);
+      spacer = Box.createHorizontalStrut(3);
+    }
+
+    public Component getTreeCellRendererComponent(JTree tree,
+                                              Object value,
+                                              boolean selected,
+                                              boolean expanded,
+                                              boolean leaf,
+                                              int row,
+                                              boolean hasFocus){
+      removeAll();
+      add(spacer);
+
+      int width = spacer.getWidth();
+
+
+      TypeData nData = (TypeData)
+                            ((DefaultMutableTreeNode)value).getUserObject();
+
+      if(nData != null){
+        label.setText(nData.getTitle());
+        setLabelAttributes(nData.getAttributes());
+
+        if(nData.getType() != null) {
+          visibleChk.setSelected(nData.getVisible());
+          add(visibleChk);
+          width += visibleChk.getMinimumSize().width;
+        }
+      }else{
+        label.setText(((value == null || value.toString() == null) ?
+                              "" : value.toString()));
+      }
+      add(label);
+
+      if(selected) setBorder(selectedBorder);
+      else setBorder(normalBorder);
+      return this;
+    }//public Component getTreeCellRendererComponent
+
+    protected void setLabelAttributes(AttributeSet style){
+      label.setForeground(StyleConstants.getForeground(style));
+      label.setBackground(StyleConstants.getBackground(style));
+      fontAttrs.clear();
+      fontAttrs.put(TextAttribute.FAMILY, StyleConstants.getFontFamily(style));
+      fontAttrs.put(TextAttribute.SIZE, new Float(StyleConstants.getFontSize(style)));
+      if(StyleConstants.isBold(style))
+        fontAttrs.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);
+      else fontAttrs.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_REGULAR);
+      if(StyleConstants.isItalic(style))
+        fontAttrs.put(TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE);
+      else fontAttrs.put(TextAttribute.POSTURE, TextAttribute.POSTURE_REGULAR);
+      if(StyleConstants.isUnderline(style))
+        fontAttrs.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+      else fontAttrs.remove(TextAttribute.UNDERLINE);
+      if(StyleConstants.isStrikeThrough(style))
+        fontAttrs.put(TextAttribute.STRIKETHROUGH, TextAttribute.STRIKETHROUGH_ON);
+      else fontAttrs.remove(TextAttribute.STRIKETHROUGH);
+      if(StyleConstants.isSuperscript(style))
+        fontAttrs.put(TextAttribute.SUPERSCRIPT, TextAttribute.SUPERSCRIPT_SUPER);
+      else if(StyleConstants.isSubscript(style))
+        fontAttrs.put(TextAttribute.SUPERSCRIPT, TextAttribute.SUPERSCRIPT_SUB);
+      else fontAttrs.remove(TextAttribute.SUPERSCRIPT);
+
+      label.setFont(new Font(fontAttrs));
+    }
+
+    Border selectedBorder;
+    Border normalBorder;
+    JCheckBox visibleChk;
+    JLabel label;
+    Map fontAttrs;
+    Component spacer;
+  }//class NodeRenderer extends JPanel implements TreeCellRenderer
+  /**
+   * Displays an entry in the right hand side tree.
+   * <strong>Implementation Note:</strong>
+   * This class overrides
+   * <code>revalidate</code>,
+   * <code>repaint</code>,
+   * and
+   * <code>firePropertyChange</code>
+   * solely to improve performance.
+   * If not overridden, these frequently called methods would execute code paths
+   * that are unnecessary for a tree cell renderer.
+   */
+  class NodeRenderer1 extends LazyJPanel implements TreeCellRenderer{
+
+    public NodeRenderer1(){
       visibleChk = new JCheckBox("",false);
       visibleChk.setOpaque(false);
       visibleChk.setBorderPaintedFlat(true);

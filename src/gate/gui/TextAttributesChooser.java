@@ -133,26 +133,32 @@ public class TextAttributesChooser extends JDialog {
     boldChk = new JCheckBox("<html><b>Bold</b></html>");
     boldChk.setSelected(StyleConstants.isBold(currentStyle));
     box1.add(boldChk);
-    italicChk = new JCheckBox("<html><i>Italic</i></html>");
-    italicChk.setSelected(StyleConstants.isItalic(currentStyle));
-    box1.add(italicChk);
+
+//    italicChk = new JCheckBox("<html><i>Italic</i></html>");
+//    italicChk.setSelected(StyleConstants.isItalic(currentStyle));
+//    box1.add(italicChk);
     underlineChk = new JCheckBox("<html><u>Underline</u></html>");
     underlineChk.setSelected(StyleConstants.isUnderline(currentStyle));
-    box1.add(underlineChk);
+//    box1.add(underlineChk);
     box.add(box1);
 
     //Second column
     box1 = Box.createVerticalBox();
+    italicChk = new JCheckBox("<html><i>Italic</i></html>");
+    italicChk.setSelected(StyleConstants.isItalic(currentStyle));
+    box1.add(italicChk);
+
+
     subscriptChk = new JCheckBox("<html>T<sub>Subscript</sub></html>");
     subscriptChk.setSelected(StyleConstants.isSubscript(currentStyle));
-    box1.add(subscriptChk);
+//    box1.add(subscriptChk);
     superscriptChk = new JCheckBox("<html>T<sup>Superscript</sup></html>");
     superscriptChk.setSelected(StyleConstants.isSuperscript(currentStyle));
-    box1.add(superscriptChk);
+//    box1.add(superscriptChk);
     strikethroughChk = new JCheckBox(
                                 "<html><strike>Strikethrough</strike></html>");
     strikethroughChk.setSelected(StyleConstants.isStrikeThrough(currentStyle));
-    box1.add(strikethroughChk);
+//    box1.add(strikethroughChk);
     box.add(box1);
     box.add(Box.createHorizontalGlue());
     box.setBorder(BorderFactory.createTitledBorder("Effects"));
