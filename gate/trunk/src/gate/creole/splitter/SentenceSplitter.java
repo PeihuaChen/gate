@@ -129,7 +129,7 @@ public class SentenceSplitter extends AbstractProcessingResource{
       transducer.removeProgressListener(pListener);
       transducer.removeStatusListener(sListener);
 
-      //copy the results to the output set if they are different
+      //get pointers to the annotation sets
       AnnotationSet inputAS = (inputASName == null) ?
                               document.getAnnotations() :
                               document.getAnnotations(inputASName);
@@ -137,6 +137,8 @@ public class SentenceSplitter extends AbstractProcessingResource{
       AnnotationSet outputAS = (outputASName == null) ?
                                document.getAnnotations() :
                                document.getAnnotations(outputASName);
+
+      //copy the results to the output set if they are different
       if(inputAS != outputAS){
         outputAS.addAll(inputAS.get("Sentence"));
       }
