@@ -36,7 +36,7 @@ public class Minipar extends AbstractLanguageAnalyser
   private URL miniparDataDir;
   private URL miniparBinary;
   private String annotationTypeName;
-  private String annotationSetName;
+  private String annotationInputSetName, annotationOutputSetName;
   private gate.Document document;
 
   /**
@@ -75,17 +75,31 @@ public class Minipar extends AbstractLanguageAnalyser
   }
 
   /**
-  * Get the AnnotationSetName, source of the annotations to be taken from and to work on
+  * Get the AnnotationInputSetName, source of the annotations to be taken from and to work on
   */
-  public String getAnnotationSetName() {
-    return this.annotationSetName;
+  public String getAnnotationInputSetName() {
+    return this.annotationInputSetName;
   }
 
   /**
-  * Set the AnnotationSetName, source of the annotations to be taken from and to work on
+  * Get the AnnotationOutputSetName, annotations to be created under this annotationSet
   */
-  public void setAnnotationSetName(String aSetName) {
-    this.annotationSetName = aSetName;
+  public String getAnnotationOutputSetName() {
+    return this.annotationOutputSetName;
+  }
+
+  /**
+  * Get the AnnotationInputSetName, source of the annotations to be taken from and to work on
+  */
+  public void setAnnotationInputSetName(String inputSet) {
+    this.annotationInputSetName = inputSet;
+  }
+
+  /**
+  * Get the AnnotationOutputSetName, annotations to be created under this annotationSet
+  */
+  public void getAnnotationOutputSetName(String outputSet) {
+    this.annotationOutputSetName = outputSet;
   }
 
 
@@ -142,9 +156,9 @@ public class Minipar extends AbstractLanguageAnalyser
     AnnotationSet allAnnotations;
 
     // get sentences from document
-    allAnnotations = (annotationSetName == null || annotationSetName.equals("")) ?
+    allAnnotations = (annotationInputSetName == null || annotationInputSetName.equals("")) ?
         document.getAnnotations() :
-        document.getAnnotations(annotationSetName);
+        document.getAnnotations(annotationInputSetName);
 
     if(allAnnotations == null || allAnnotations.size() == 0) {
       throw new ExecutionException("Document doesn't have sentence annotations. please run tokenizer, sentence splitter and then Minipar");
@@ -176,6 +190,8 @@ public class Minipar extends AbstractLanguageAnalyser
         } catch (InvalidOffsetException ioe) {
           throw new GateRuntimeException("Invalid offset of the annotation");
         }
+        sentenceString = sentenceString.replaceAll("\r","");
+        sentenceString = sentenceString.replaceAll("\n","");
         pw.println( sentenceString );
       }
       fw.close();
@@ -221,7 +237,6 @@ public class Minipar extends AbstractLanguageAnalyser
 
       // this will have an annotation for each line begining with a number
       ArrayList tokens = new ArrayList();
-
       outer:while ((line = input.readLine()) != null) {
         WordToken wt = new WordToken();
         // so here whatever we get in line
@@ -289,9 +304,9 @@ public class Minipar extends AbstractLanguageAnalyser
       // ok so here we have all the information we need from the minipar in local variables
       // ok so first we would create annotation for each word Token
 
-      AnnotationSet annotSet = (annotationSetName == null || annotationSetName.equals("")) ?
+      AnnotationSet annotSet = (annotationOutputSetName == null || annotationOutputSetName.equals("")) ?
           document.getAnnotations() :
-          document.getAnnotations(annotationSetName);
+          document.getAnnotations(annotationOutputSetName);
 
       // size of the sentenceTokens and the allSentences would be always same
       for(int i=0;i<sentenceTokens.size();i++) {
@@ -309,7 +324,9 @@ public class Minipar extends AbstractLanguageAnalyser
           // ok so find out the offsets
           int stOffset = sentenceString.toLowerCase().indexOf(wt.word.toLowerCase(),index) + startOffset;
           int enOffset = stOffset + wt.word.length();
-          Integer id = annotSet.add(new Long(stOffset), new Long(enOffset), annotationTypeName, Factory.newFeatureMap());
+          FeatureMap map = Factory.newFeatureMap();
+          map.put("word", wt.word);
+          Integer id = annotSet.add(new Long(stOffset), new Long(enOffset), annotationTypeName, map);
           wt.annotation = annotSet.get(id);
           index = enOffset - startOffset;
         }
@@ -337,17 +354,30 @@ public class Minipar extends AbstractLanguageAnalyser
         tokens = (ArrayList) sentenceTokens.get(i);
 
         for(int j=0;j<tokens.size();j++) {
+          // for every wordtoken,
+          // we look for its head
+          // and create annotations
+          // the annotation will have the type of relation string
+          // and as a features
+          // it will have one head ID and one child ID
+          // head ID is the id of head
+          // and child ID is the id of wt
           WordToken wt = (WordToken) tokens.get(j);
-          FeatureMap map = wt.annotation.getFeatures();
+          FeatureMap map = Factory.newFeatureMap();
           if(wt.headNumber > 0) {
-            Integer head_id = ((WordToken) tokens.get(wt.headNumber - 1)).annotation.getId();
-            map.put("word",wt.word);
-            map.put("head_id",head_id);
-            map.put("rel_with_head", wt.relationWithHead);
-          }
-
-          if(wt.children.size() > 0) {
-            map.put("child_id", wt.children);
+            Annotation headAnn = ((WordToken) tokens.get(wt.headNumber - 1)).annotation;
+            map.put("head_id",headAnn.getId());
+            map.put("child_id",wt.annotation.getId());
+            map.put("head_word",((WordToken) tokens.get(wt.headNumber - 1)).word);
+            map.put("child_word",wt.word);
+            // so create the new annotation
+            int stOffset1 = headAnn.getStartNode().getOffset().intValue();
+            int stOffset2 = wt.annotation.getStartNode().getOffset().intValue();
+            int enOffset1 = headAnn.getEndNode().getOffset().intValue();
+            int enOffset2 = wt.annotation.getEndNode().getOffset().intValue();
+            stOffset1 = stOffset1 < stOffset2 ? stOffset1 : stOffset2;
+            enOffset1 = enOffset1 > enOffset2 ? enOffset1 : enOffset2;
+            annotSet.add(new Long(stOffset1), new Long(enOffset1), wt.relationWithHead, map);
           }
         }
       }
