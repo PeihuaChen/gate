@@ -39,7 +39,7 @@
         COMMENT="The annotation set to be used as output for the transducer"
         OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="grammarURL" COMMENT="The URL to the grammar file"
-        DEFAULT="gate:/creole/chunker/VP/VerbGroups.jape" SUFFIXES="jape">
+        DEFAULT="../ANNIE/resources/VP/VerbGroups.jape" SUFFIXES="jape">
         java.net.URL</PARAMETER>
       <PARAMETER NAME="encoding" DEFAULT="UTF-8"
         COMMENT="The encoding used for reading the grammar">
