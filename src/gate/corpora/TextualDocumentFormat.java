@@ -52,7 +52,7 @@ public class TextualDocumentFormat extends DocumentFormat
 
   /** Initialise this resource, and return it. */
   public Resource init() {
-    return Gate.getCreoleRegister().init(this);
+    return this;
   } // init()
 
   /** Unpack the markup in the document. This converts markup from the

@@ -2,14 +2,14 @@
  *	TestJape.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
- *  
+ *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June1991.
- *  
+ *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *  
+ *
  *	Hamish Cunningham, 23/Feb/00
  *
  *	$Id$
@@ -27,6 +27,7 @@ import gate.util.*;
 import gate.annotation.*;
 import gate.creole.tokeniser.*;
 import gate.creole.gazeteer.*;
+import gate.creole.*;
 
 
 
@@ -80,7 +81,9 @@ public class TestJape extends TestCase
   } // testCombined()
 
   /** Batch run */
-  public void testBatch() throws JapeException, IOException {
+  public void testBatch()
+  throws JapeException, ResourceInstantiationException, IOException
+  {
     Corpus c = Factory.newCorpus("TestJape corpus");
     c.add(
       Factory.newDocument(Files.getGateResourceAsString("texts/doc0.html"))
@@ -245,7 +248,7 @@ public class TestJape extends TestCase
   public static void main(String[] args) {
     for(int i = 0; i < 6; i++){
     System.gc();
-    Out.println("Run " + i + "   =============="); 
+    Out.println("Run " + i + "   ==============");
       try{
         TestJape testJape = new TestJape("Test Jape");
         testJape.setUp();

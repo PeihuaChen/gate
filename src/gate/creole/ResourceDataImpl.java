@@ -25,12 +25,13 @@ import gate.util.*;
 
 /** Models an individual CREOLE resource metadata, plus configuration data,
   * plus the instantiations of the resource current within the system.
+  * @see gate.ResourceData
   */
 public class ResourceDataImpl extends AbstractFeatureBearer
 implements ResourceData {
 
   /** Debug flag */
-  private static final boolean DEBUG = false;
+  protected static final boolean DEBUG = false;
 
   /** Construction */
   public ResourceDataImpl() { }
@@ -71,7 +72,7 @@ implements ResourceData {
   } // hashCode
 
   /** The name of the resource */
-  private String name;
+  protected String name;
 
   /** Set method for the resource name */
   public void setName(String name) { this.name = name; }
@@ -80,7 +81,7 @@ implements ResourceData {
   public String getName() { return name; }
 
   /** The class name of the resource */
-  private String className;
+  protected String className;
 
   /** Set method for the resource class name */
   public void setClassName(String className) { this.className = className; }
@@ -89,7 +90,7 @@ implements ResourceData {
   public String getClassName() { return className; }
 
   /** The interface name of the resource */
-  private String interfaceName;
+  protected String interfaceName;
 
   /** Set method for the resource interface name */
   public void setInterfaceName(String interfaceName) {
@@ -100,7 +101,7 @@ implements ResourceData {
   public String getInterfaceName() { return interfaceName; }
 
   /** The class of the resource */
-  private Class resourceClass;
+  protected Class resourceClass;
 
   /** Set method for the resource class */
   public void setResourceClass(Class resourceClass) {
@@ -120,7 +121,7 @@ implements ResourceData {
   } // getResourceClass
 
   /** The jar file name of the resource */
-  private String jarFileName;
+  protected String jarFileName;
 
   /** Set method for the resource jar file name */
   public void setJarFileName(String jarFileName) {
@@ -131,7 +132,7 @@ implements ResourceData {
   public String getJarFileName() { return jarFileName; }
 
   /** The jar file URL of the resource */
-  private URL jarFileUrl;
+  protected URL jarFileUrl;
 
   /** Set method for the resource jar file URL */
   public void setJarFileUrl(URL jarFileUrl) { this.jarFileUrl = jarFileUrl; }
@@ -139,8 +140,17 @@ implements ResourceData {
   /** Get method for the resource jar file URL */
   public URL getJarFileUrl() { return jarFileUrl; }
 
+  /** The comment string */
+  protected String comment;
+
+  /** Get method for the resource comment */
+  public String getComment() { return comment; }
+
+  /** Set method for the resource comment */
+  public void setComment(String comment) { this.comment = comment; }
+
   /** The set of parameter lists */
-  private Set parameterListsSet = new HashSet();
+  protected Set parameterListsSet = new HashSet();
 
   /** Add a parameter list */
   public void addParameterList(List parameterList) {
@@ -151,7 +161,7 @@ implements ResourceData {
   public Set getParameterListsSet() { return parameterListsSet; }
 
   /** Autoloading flag */
-  private boolean autoLoading;
+  protected boolean autoLoading;
 
   /** Set method for resource autoloading flag */
   public void setAutoLoading(boolean autoLoading) {

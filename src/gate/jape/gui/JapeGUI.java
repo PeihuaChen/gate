@@ -30,6 +30,7 @@ import gate.util.*;
 import gate.jape.*;
 import gate.creole.tokeniser.*;
 import gate.creole.gazeteer.*;
+import gate.creole.*;
 
 
 
@@ -44,11 +45,11 @@ public class JapeGUI extends JFrame implements ProgressListener,
     try  {
       jbInit();
       setVisible(true);
+      corpus = Factory.newCorpus("JapeGUI");
     }
     catch(Exception e) {
       e.printStackTrace();
     }
-    corpus = Factory.newCorpus("JapeGUI");
 
   }
 
@@ -209,8 +210,8 @@ public class JapeGUI extends JFrame implements ProgressListener,
       if(res == JFileChooser.APPROVE_OPTION){
         selectedFiles = filer.getSelectedFiles();
         if(selectedFiles != null){
-          if(corpus == null) corpus = Factory.newCorpus("Jape 2.0");
           try{
+            if(corpus == null) corpus = Factory.newCorpus("Jape 2.0");
             for(int i=0; i< selectedFiles.length; i++){
               currDoc = Factory.newDocument(selectedFiles[i].toURL());
               corpus.add(currDoc);
@@ -218,7 +219,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
             }
           }catch(java.net.MalformedURLException mue){
             mue.printStackTrace(Err.getPrintWriter());
-          }catch(IOException ioe){
+          }catch(ResourceInstantiationException ioe){
             ioe.printStackTrace(Err.getPrintWriter());
           }
         }//if(selectedFiles != null)
@@ -235,14 +236,15 @@ public class JapeGUI extends JFrame implements ProgressListener,
       if(res == JFileChooser.APPROVE_OPTION){
         selectedFile = filer.getSelectedFile();
         if(selectedFile != null){
-          if(corpus == null) corpus = Factory.newCorpus("Jape 2.0");
           try{
+              if(corpus == null)
+                corpus = Factory.newCorpus("Jape 2.0");
               currDoc = Factory.newDocument(selectedFile.toURL());
               corpus.add(currDoc);
               corpusFiles.add(selectedFile.toURL().toExternalForm());
           }catch(java.net.MalformedURLException mue){
             mue.printStackTrace(Err.getPrintWriter());
-          }catch(IOException ioe){
+          }catch(ResourceInstantiationException ioe){
             ioe.printStackTrace(Err.getPrintWriter());
           }
         }//if(selectedFile != null)
@@ -305,7 +307,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
         progressBar.setValue(0);
         statusBar.setText(mue.toString());
         mue.printStackTrace(Err.getPrintWriter());
-      }catch(IOException ioe){
+      }catch(ResourceInstantiationException ioe){
         progressBar.setValue(0);
         statusBar.setText(ioe.toString());
         ioe.printStackTrace(Err.getPrintWriter());

@@ -19,12 +19,13 @@ import java.util.*;
 import java.io.*;
 
 import gate.util.*;
+import gate.creole.*;
 
 /** Models all sorts of resources.
   */
 public interface Resource extends FeatureBearer, Serializable
 {
   /** Initialise this resource, and return it. */
-  public Resource init();
+  public Resource init() throws ResourceInstantiationException;
 
 } // interface Resource

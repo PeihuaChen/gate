@@ -46,10 +46,11 @@ public class TestAnnotation extends TestCase
   protected FeatureMap emptyFeatureMap;
 
   /** Fixture set up */
-  public void setUp() throws IOException, InvalidOffsetException {
+  public void setUp() throws Exception
+  {
     String server = TestDocument.getTestServerName();
     assertNotNull(server);
-    doc1 = new DocumentImpl(new URL(server + "tests/doc0.html"));
+    doc1 = Factory.newDocument(new URL(server + "tests/doc0.html"));
 
     emptyFeatureMap = new SimpleFeatureMapImpl();
 
@@ -177,9 +178,10 @@ public class TestAnnotation extends TestCase
   } // testExceptions()
 
   /** Test type index */
-  public void testTypeIndex() throws IOException, InvalidOffsetException {
-    Document doc =
-      new DocumentImpl(TestDocument.getTestServerName() + "tests/doc0.html");
+  public void testTypeIndex() throws Exception {
+    Document doc = Factory.newDocument(
+      new URL(TestDocument.getTestServerName() + "tests/doc0.html")
+    );
     AnnotationSet as = new AnnotationSetImpl(doc);
     AnnotationSet asBuf;
     Integer newId;
@@ -232,9 +234,10 @@ public class TestAnnotation extends TestCase
   } // testTypeIndex()
 
   /** Test the annotations set add method that uses existing nodes */
-  public void testAddWithNodes() throws IOException, InvalidOffsetException {
-    Document doc =
-      new DocumentImpl(TestDocument.getTestServerName() + "tests/doc0.html");
+  public void testAddWithNodes() throws Exception {
+    Document doc = Factory.newDocument(
+      new URL(TestDocument.getTestServerName() + "tests/doc0.html")
+    );
     AnnotationSet as = new AnnotationSetImpl(doc);
     AnnotationSet asBuf;
     Integer newId;
@@ -466,10 +469,11 @@ public class TestAnnotation extends TestCase
   } // testSetMethods()
 
   /** Test AnnotationSetImpl */
-  public void testAnnotationSet() throws IOException, InvalidOffsetException {
+  public void testAnnotationSet() throws Exception {
     // constuct an empty AS
-    Document doc =
-      new DocumentImpl(TestDocument.getTestServerName() + "tests/doc0.html");
+    Document doc = Factory.newDocument(
+      new URL(TestDocument.getTestServerName() + "tests/doc0.html")
+    );
     AnnotationSet as = new AnnotationSetImpl(doc);
     assertEquals(as.size(), 0);
 

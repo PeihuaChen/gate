@@ -121,7 +121,7 @@ public class CookBook extends TestCase
   Document doc2 = null;
 
   /** Constructing a corpus */
-  public void testCorpusConstruction() {
+  public void testCorpusConstruction() throws GateException {
 
     // corpus constructors require a name
     corpus = Factory.newCorpus("My example corpus");

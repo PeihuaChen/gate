@@ -33,24 +33,20 @@ public class CorpusImpl extends TreeSet implements Corpus
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  /** Construction from name */
-  public CorpusImpl(String name) {
-    this(name, null);
-  } // Construction from name
-
-  /** Construction from name and features */
-  public CorpusImpl(String name, FeatureMap features) {
-    this.name = name;
-    this.features = features;
-  } // Construction from name and features
+  /** Construction */
+  public CorpusImpl() {
+  } // Construction
 
   /** Initialise this resource, and return it. */
   public Resource init() {
-    return Gate.getCreoleRegister().init(this);
+    return this;
   } // init()
 
   /** Get the name of the corpus. */
   public String getName() { return name; }
+
+  /** Set the name of the corpus. */
+  public void setName(String name) { this.name = name; }
 
   /** Get the data store the document lives in. */
   public DataStore getDataStore() {

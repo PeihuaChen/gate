@@ -9,7 +9,7 @@
  *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- * 
+ *
  *  Hamish Cunningham, 23/02/2000
  *
  *  $Id$
@@ -19,13 +19,16 @@
 
 package gate.jape;
 
+import java.util.*;
+import java.io.*;
+
+import com.objectspace.jgl.*;
+
 import gate.jape.parser.*;
 import gate.*;
 import gate.annotation.*;
 import gate.util.*;
-import java.util.*;
-import java.io.*;
-import com.objectspace.jgl.*;
+import gate.creole.*;
 
 /**
   * Second test harness for JAPE.
@@ -84,7 +87,12 @@ public class TestJape2 {
 
     // create a collection and run the tokeniser
     message("creating coll, tokenising and gazetteering");
-    Corpus coll = tokAndGaz(collName, fileNames);
+    Corpus coll = null;
+    try {
+      coll = tokAndGaz(collName, fileNames);
+    } catch(ResourceInstantiationException e) {
+      usage("couldn't open collection: " + e);
+    }
 
     // run the parser test
     message("parsing the .jape file (or deserialising the .ser file)");
@@ -115,7 +123,8 @@ public class TestJape2 {
   /**
     * Create a collection and put tokenised and gazetteered docs in it.
     */
-  static public Corpus tokAndGaz(String collName, Array fileNames) {
+  static public Corpus tokAndGaz(String collName, Array fileNames)
+  throws ResourceInstantiationException {
 
     // create or overwrite the collection
     Corpus collection = null;
@@ -138,8 +147,8 @@ public class TestJape2 {
         collection.add(
           Factory.newDocument(f.getAbsolutePath())
         );
-      } catch(IOException e) {
-	      e.printStackTrace();
+      } catch(ResourceInstantiationException e) {
+        e.printStackTrace();
       }
 
 /*
@@ -147,11 +156,11 @@ public class TestJape2 {
       Tokeniser tokeniser = new Tokeniser(doc, Tokeniser.HMM);
       try { tokeniser.hmmTokenSequence(); }
       catch(sheffield.creole.tokeniser.ParseException ex) {
-	      ex.printStackTrace();
-	      return null;
+        ex.printStackTrace();
+        return null;
       } catch (CreoleException ex) {
-	      ex.printStackTrace();
-	      return null;
+        ex.printStackTrace();
+        return null;
       }
 
       // Gazetteer the document
@@ -246,6 +255,26 @@ public class TestJape2 {
 
 
 // $Log$
+// Revision 1.5  2000/10/23 21:50:42  hamish
+// cleaned up exception handling in gate.creole and added
+// ResourceInstantiationException;
+//
+// changed Factory.newDocument(URL u) to use the new instantiation
+// facilities;
+//
+// added COMMENT to resource metadata / ResourceData;
+//
+// changed Document and DocumentImpl to follow beans style, and moved
+// constructor logic to init(); changed all the Factory newDocument methods to
+// use the new resource creation stuff;
+//
+// added builtin document and corpus metadata to creole/creole.xml (copied from
+// gate.ac.uk/tests/creole.xml);
+//
+// changed Corpus to the new style too;
+//
+// removed CreoleRegister.init()
+//
 // Revision 1.4  2000/10/18 13:26:48  hamish
 // Factory.createResource now working, with a utility method that uses reflection (via java.beans.Introspector) to set properties on a resource from the
 //     parameter list fed to createResource.

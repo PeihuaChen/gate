@@ -176,6 +176,9 @@ public class CreoleXmlHandler extends HandlerBase {
     } else if(elementName.toUpperCase().equals("CLASS")) {
       checkStack("endElement", "CLASS");
       resourceData.setClassName((String) elementStack.pop());
+    } else if(elementName.toUpperCase().equals("COMMENT")) {
+      checkStack("endElement", "COMMENT");
+      resourceData.setComment((String) elementStack.pop());
     } else if(elementName.toUpperCase().equals("INTERFACE")) {
       checkStack("endElement", "INTERFACE");
       resourceData.setInterfaceName((String) elementStack.pop());
