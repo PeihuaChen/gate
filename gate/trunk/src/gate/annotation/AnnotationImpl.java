@@ -15,6 +15,7 @@
 
 package gate.annotation;
 
+import java.io.Serializable;
 import java.util.Set;
 import java.util.Vector;
 
@@ -449,7 +450,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
    * All the events from the features are handled by
    * this inner class.
    */
-  class EventsHandler implements gate.event.FeatureMapListener {
+  class EventsHandler implements gate.event.FeatureMapListener, Serializable {
     public void featureMapUpdated(){
       //tell the annotation listeners that my features have been updated
       fireAnnotationUpdated(new AnnotationEvent(
