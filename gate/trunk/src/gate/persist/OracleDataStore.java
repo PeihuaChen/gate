@@ -371,8 +371,8 @@ public class OracleDataStore extends JDBCDataStore {
       stmt.registerOutParameter(9,java.sql.Types.BIGINT);
 
       stmt.execute();
-      docID = new Long(stmt.getLong(7));
-      docContentID = new Long(stmt.getLong(8));
+      docID = new Long(stmt.getLong(8));
+      docContentID = new Long(stmt.getLong(9));
     }
     catch(SQLException sqle) {
       throw new PersistenceException("can't create LR [step 4] in DB: ["+ sqle.getMessage()+"]");
