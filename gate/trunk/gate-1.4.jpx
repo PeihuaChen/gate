@@ -24,6 +24,8 @@
   <property category="debug.8" name="SmartStepRedefineClasses" value="0"/>
   <property category="debug.9" name="SmartStepRedefineClasses" value="0"/>
   <property category="idl" name="ProcessIDL" value="false"/>
+  <property category="javaFormatting" name="packageThreshold" value="0"/>
+  <property category="javadoc" name="custom.tags.1" value="todo;a;To Do:"/>
   <property category="runtime" name="ConfigurationCount" value="19"/>
   <property category="runtime.0" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
   <property category="runtime.0" name="application.class" value="gate.TestGate"/>
@@ -191,11 +193,12 @@
   <property category="runtime.4" name="jsprunner.docbase" value="."/>
   <property category="runtime.4" name="jsprunner.jspfile" value="."/>
   <property category="runtime.4" name="test.harness" value="junit.textui.TestRunner"/>
+  <property category="runtime.5" name="BuildTargetOnRun" value="com.borland.jbuilder.build.ProjectBuilder$ProjectBuildAction;make"/>
   <property category="runtime.5" name="ConfigurationName" value="TESTS:Default mode (same as above)"/>
   <property category="runtime.5" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
   <property category="runtime.5" name="application.class" value="gate.TestGate"/>
   <property category="runtime.5" name="application.parameters" value="-i y:\gate.xml"/>
-  <property category="runtime.5" name="application.vmparameters" value="-Xint -Xmx150m -Djava.ext.dirs=z:/gate/lib/ext"/>
+  <property category="runtime.5" name="application.vmparameters" value="-Xint -Xmx150m -Djava.ext.dirs=z:/gate/lib/ext -Dcreole.path=&quot;z:/gate/plugins/ANNIE;Z:/gate/plugins/Information_Retrieval;Z:\gate\plugins\Machine_Learning;Z:\gate\plugins\Obsolete;Z:\gate\plugins\Ontology_Tools;Z:\gate\plugins\Tools;Z:\gate\plugins\WordNet&quot; "/>
   <property category="runtime.5" name="appserver.ejbJarsSaved" value="1"/>
   <property category="runtime.5" name="appserver.parameters" value="-jts -jns -jss -jdb"/>
   <property category="runtime.5" name="appserver.servername" value="ejbcontainer"/>
@@ -227,11 +230,12 @@
   <property category="runtime.7" name="jsprunner.docbase" value="."/>
   <property category="runtime.7" name="jsprunner.jspfile" value="D%|/apps/JBuilder4/bin"/>
   <property category="runtime.7" name="jsprunner.launchuri" value="/D%|/apps/JBuilder4/bin"/>
+  <property category="runtime.8" name="BuildTargetOnRun" value="com.borland.jbuilder.build.ProjectBuilder$ProjectBuildAction;make"/>
   <property category="runtime.8" name="ConfigurationName" value="TESTS: No net connection (-n)"/>
   <property category="runtime.8" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
   <property category="runtime.8" name="application.class" value="gate.TestGate"/>
   <property category="runtime.8" name="application.parameters" value="-n -i y:\gate.xml"/>
-  <property category="runtime.8" name="application.vmparameters" value="-Djava.compiler=NONE -Xmx150m"/>
+  <property category="runtime.8" name="application.vmparameters" value="-Djava.compiler=NONE -Xmx150m -Dcreole.path=&quot;z:/gate/plugins/ANNIE;Z:/gate/plugins/Information_Retrieval;Z:\gate\plugins\Machine_Learning;Z:\gate\plugins\Obsolete;Z:\gate\plugins\Ontology_Tools;Z:\gate\plugins\Tools;Z:\gate\plugins\WordNet&quot; "/>
   <property category="runtime.8" name="appserver.ejbJarsSaved" value="1"/>
   <property category="runtime.8" name="appserver.parameters" value="-jts -jns -jss -jdb"/>
   <property category="runtime.8" name="appserver.servername" value="ejbcontainer"/>
@@ -239,11 +243,12 @@
   <property category="runtime.8" name="jsprunner.docbase" value="."/>
   <property category="runtime.8" name="jsprunner.jspfile" value="D%|/apps/JBuilder4/bin"/>
   <property category="runtime.8" name="jsprunner.launchuri" value="/D%|/apps/JBuilder4/bin"/>
+  <property category="runtime.9" name="BuildTargetOnRun" value="com.borland.jbuilder.build.ProjectBuilder$ProjectBuildAction;make"/>
   <property category="runtime.9" name="ConfigurationName" value="TESTS: No net connection and no local server (-N)"/>
   <property category="runtime.9" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
   <property category="runtime.9" name="application.class" value="gate.TestGate"/>
   <property category="runtime.9" name="application.parameters" value="-N -i y:\gate.xml"/>
-  <property category="runtime.9" name="application.vmparameters" value="-Xint -Xmx150m -Djava.compiler=NONE"/>
+  <property category="runtime.9" name="application.vmparameters" value="-Xint -Xmx150m -Djava.compiler=NONE -Dcreole.path=&quot;z:/gate/plugins/ANNIE;Z:/gate/plugins/Information_Retrieval;Z:\gate\plugins\Machine_Learning;Z:\gate\plugins\Obsolete;Z:\gate\plugins\Ontology_Tools;Z:\gate\plugins\Tools;Z:\gate\plugins\WordNet&quot; "/>
   <property category="runtime.9" name="appserver.ejbJarsSaved" value="1"/>
   <property category="runtime.9" name="appserver.parameters" value="-jts -jns -jss -jdb"/>
   <property category="runtime.9" name="appserver.servername" value="ejbcontainer"/>
@@ -270,7 +275,7 @@
   <property category="sys" name="ExcludeClassEnabled" value="0"/>
   <property category="sys" name="IncludeTestPath" value="1"/>
   <property category="sys" name="InstanceVisibility" value="4"/>
-  <property category="sys" name="JDK" value="java version 1.4.1-b21"/>
+  <property category="sys" name="JDK" value="java version 1.4.2-b28"/>
   <property category="sys" name="JbxEventListener0" value="gate.event.ProgressListener"/>
   <property category="sys" name="JbxEventListener1" value="gate.event.StatusListener"/>
   <property category="sys" name="JbxEventListener2" value="gate.event.CreoleListener"/>
