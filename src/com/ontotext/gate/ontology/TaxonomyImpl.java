@@ -1,5 +1,5 @@
 /*
- * OntologyImpl.java
+ * TaxonomyImpl.java
  * Copyright:    Copyright (c) 2001, OntoText Lab.
  * Company:      OntoText Lab.
  * borislav popov 02/2002 */
@@ -69,8 +69,8 @@ extends gate.creole.AbstractLanguageResource implements Taxonomy {
     List lrs = Gate.getCreoleRegister().getLrInstances(
         "com.ontotext.gate.ontology.DAMLOntology");
 
-    Ontology result = null;
-    Ontology tempo = null;
+    Taxonomy result = null;
+    Taxonomy tempo = null;
 
     /* unpack the gate:path urls to absolute form*/
     if (-1 != someUrl.getProtocol().indexOf("gate")) {
@@ -82,7 +82,7 @@ extends gate.creole.AbstractLanguageResource implements Taxonomy {
     /*iterate through the list of lrs and search for the wanted url
     :this is a temporary solution*/
     for (int i = 0 ; i < lrs.size() ; i++ ) {
-       tempo = (Ontology) lrs.get(i);
+       tempo = (Taxonomy) lrs.get(i);
        if (tempo.getURL().equals(someUrl)) {
         result = tempo;
         break;
@@ -93,7 +93,7 @@ extends gate.creole.AbstractLanguageResource implements Taxonomy {
       fm.put("URL",someUrl);
 
       try {
-        result = (Ontology)Factory.createResource(
+        result = (Taxonomy)Factory.createResource(
             "com.ontotext.gate.ontology.DAMLOntology",
             fm
           );
@@ -366,8 +366,8 @@ extends gate.creole.AbstractLanguageResource implements Taxonomy {
    */
   public boolean equals ( Object o ) {
     boolean result = false;
-    if (o instanceof Ontology) {
-      Ontology onto = (Ontology) o;
+    if (o instanceof Taxonomy) {
+      Taxonomy onto = (Taxonomy) o;
       result = true;
       if (null != this.getId() & null != onto.getId())
         result &= this.getId().equals(onto.getId());
@@ -463,4 +463,4 @@ extends gate.creole.AbstractLanguageResource implements Taxonomy {
     return result;
   }
 
-} // Ontology
+} // Taxonomy
