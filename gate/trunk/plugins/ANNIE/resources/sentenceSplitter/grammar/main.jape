@@ -1,0 +1,13 @@
+// SplitMain
+// Valentin Tablan 17/05/2001
+
+
+//A sentence splitter
+MultiPhase:	main
+Phases: 
+
+split1
+split2
+split3
+split4
+split5

@@ -1,0 +1,20 @@
+// Valentin Tablan, 17/05/2001
+
+
+Phase:split3
+Input: Token SpaceToken Split
+Options: control = Appelt
+
+//concatenates groups of splitters
+
+
+Rule: r1
+ (({Split.type=="."}|{Split.type=="punctuation"})+):left
+-->
+{
+	gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("left");
+	annotations.removeAll(toRemove);
+	gate.FeatureMap features = Factory.newFeatureMap();
+	features.put("type", "multi");
+	annotations.add(toRemove.firstNode(), toRemove.lastNode(), "Split", features);
+}

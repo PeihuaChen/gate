@@ -1,0 +1,29 @@
+// Valentin Tablan, 17/05/2001
+
+
+Phase:split4
+Input: Token Split
+Options: control = first
+
+//removes some other false splitters "(!?!?!)"
+
+
+Rule: r1
+{Token.string=="("}
+ (({Split})+):fake
+{Token.string==")"} 
+-->
+{
+	gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("fake");
+	annotations.removeAll(toRemove);
+}
+
+Rule: r2
+{Token.string=="["}
+ (({Split})+):fake
+{Token.string=="]"} 
+-->
+{
+	gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("fake");
+	annotations.removeAll(toRemove);
+}

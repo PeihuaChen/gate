@@ -1,0 +1,28 @@
+// Valentin Tablan, 17/05/2001
+
+
+Phase:split2
+Input: Token Lookup Split SpaceToken
+Options: control = Appelt
+
+//removes the abbreviation false splitters
+
+
+Rule: r1
+ ({Lookup.majorType=="abbreviation"} ({Split.type=="."}):fake)
+-->
+{
+	java.util.Collection toRemove = (java.util.Collection)bindings.get("fake");
+	annotations.removeAll(toRemove);
+}
+
+// A.B.C.
+Rule: r2
+ ({Token.orth=="upperInitial", Token.length=="1"} ({Split.type=="."}):fake)+
+ ({SpaceToken}|{Split})
+-->
+{
+	java.util.Collection toRemove = (java.util.Collection)bindings.get("fake");
+	annotations.removeAll(toRemove);
+}
+
