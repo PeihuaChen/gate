@@ -355,8 +355,8 @@ public class MainFrame extends JFrame
       "<HTML><B><U>GATE contributors:</U></B><BR>" +
       "<B>Hamish Cunningham, Valentin Tablan, Cristian Ursu, " +
       "Kalina Bontcheva</B>,<BR>" +
-      "Oana Hamza, Diana Maynard, Yorick Wilks, Robert Gaizauskas,<BR>" +
-      "Mark Hepple, Mark Leisher, Kevin Humphreys."
+      "Diana Maynard, Horacio Saggion, Oana Hamza, Yorick Wilks,<BR>" +
+      "Robert Gaizauskas, Mark Hepple, Mark Leisher, Kevin Humphreys."
     );
     box = new Box(BoxLayout.X_AXIS);
     box.add(verLbl);
