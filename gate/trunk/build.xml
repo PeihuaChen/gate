@@ -382,12 +382,11 @@
         <exclude name="build/*.jar"/>
         <include name="classes"/>
         <include name="doc/**"/>
-        <include name="doc/javadoc"/>
-        <exclude name="doc/java2html/**"/>
-        <exclude name="doc/javadoc/**"/>
+        <exclude name="doc/java2html/"/>
+        <exclude name="doc/javadoc/"/>
         <include name="lib/**"/>
-        <include name="misc/**"/>
         <include name="src/**"/>
+        <include name="plugins/**"/>
       </zipfileset>
       <zipfileset dir="${basedir}"
                   prefix="${src.dirname}/doc/"
@@ -401,18 +400,18 @@
     <zip destfile="${bin.archive}" 
          update="false"
          compress="true">
+      <zipfileset dir="${basedir}" prefix="${bin.dirname}">
+                  <include name="licence.html"/>
+                  <include name="build.xml"/>
+                  <include name="bin/**"/>
+                  <include name="build/version.txt"/>
+                  <include name="build/build.txt"/>
+                  <include name="lib/**"/>
+                  <include name="plugins/**"/>
+      </zipfileset>
       <zipfileset dir="${basedir}"
                   prefix="${bin.dirname}"
-                  includes="licence.html,bin/**"/>
-      <zipfileset dir="${basedir}"
-                  prefix="${bin.dirname}/bin/"
-                  file="build/gate.jar"/>
-      <zipfileset dir="${basedir}"
-                  prefix="${bin.dirname}/bin/ext"
-                  file="lib/ext/guk.jar"/>
-      <zipfileset dir="${basedir}"
-                  prefix="${bin.dirname}/bin/ext"
-                  file="lib/ext/nl.mpi.lookup.jar"/>
+                  file="../sale/tao/tao.pdf"/>
     </zip>
     
     <!-- Build the ALL archive -->
