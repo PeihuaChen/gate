@@ -18,6 +18,7 @@ package gate.corpora;
 
 import java.sql.*;
 import java.io.*;
+import java.util.*;
 
 import junit.framework.*;
 
@@ -31,6 +32,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
   protected boolean     isContentRead;
   protected Object      contentLock;
   protected Connection  jdbcConn;
+  protected HashMap     annotSetsRead;
 
   public DatabaseDocumentImpl(Connection conn) {
 
@@ -48,6 +50,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
     }
 
     contentLock = new Object();
+    annotSetsRead = new HashMap();
 
     this.isContentRead = false;
     this.jdbcConn = conn;
@@ -126,7 +129,6 @@ public class DatabaseDocumentImpl extends DocumentImpl {
         throw new SynchronisationException("JDBC error: ["+ pe.getMessage()+"]");
       }
     }
-
   }
 
 
@@ -144,5 +146,106 @@ public class DatabaseDocumentImpl extends DocumentImpl {
 
     return super.getEncoding();
   }
+
+  /** Returns a map with the named annotation sets. It returns <code>null</code>
+   *  if no named annotaton set exists. */
+  public Map getNamedAnnotationSets() {
+    throw new MethodNotImplementedException();
+  } // getNamedAnnotationSets
+
+
+  /** Get the default set of annotations. The set is created if it
+    * doesn't exist yet.
+    */
+  public AnnotationSet getAnnotations() {
+
+    //read from DB
+    _getAnnotations(null);
+
+    return super.getAnnotations();
+  } // getAnnotations()
+
+
+  /** Get a named set of annotations. Creates a new set if one with this
+    * name doesn't exist yet.
+    * If the provided name is null then it returns the default annotation set.
+    */
+  public AnnotationSet getAnnotations(String name) {
+
+    //read from DB
+    _getAnnotations(name);
+
+    return super.getAnnotations(name);
+  }
+
+
+  protected void _getAnnotations(String name) {
+
+    //have we already read this set?
+    if (this.annotSetsRead.containsKey(name)) {
+      //we've already read it - do nothing
+      //super methods will take care
+      return;
+    }
+    else {
+      Long lrID = (Long)getLRPersistenceId();
+      //0. preconditions
+      Assert.assertNotNull(lrID);
+
+      //1. read a-set info
+
+
+      //2. read annotations
+      PreparedStatement pstmt = null;
+      ResultSet rs = null;
+
+      try {
+        String sql = " select v1.ann_id, " +
+                     "        v1.ann_id, " +
+                     "        v1.at_name " +
+                     " from  "+Gate.DB_OWNER+".v_annot_set v1 " +
+                     "       "+Gate.DB_OWNER+".v_document v2 " +
+                     " where  v1.lr_id = ? " +
+                     "        and v1.doc_id = v2.as_doc_id " +
+                     "        and v2.and as_name = ? ";
+
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,lrID.longValue());
+      if (null == name) {
+        pstmt.setNull(2,java.sql.Types.VARCHAR);
+      }
+      else {
+        pstmt.setString(2,name);
+      }
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      rs.next();
+
+      //3, add to a-set
+
+    }
+    catch(SQLException sqle) {
+      throw new SynchronisationException("can't read content from DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      try {
+        DBHelper.cleanup(rs);
+        DBHelper.cleanup(pstmt);
+      }
+      catch(PersistenceException pe) {
+        throw new SynchronisationException("JDBC error: ["+ pe.getMessage()+"]");
+      }
+    }
+
+      //4. update internal data members
+
+      //5. read features for the annotations in this a-set
+      throw new MethodNotImplementedException();
+
+      //6. update annotations
+    }
+  }
+
 
 }
