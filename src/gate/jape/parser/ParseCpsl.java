@@ -217,14 +217,14 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         if(optionNameTok.image.equals("control")) {
           if(optionValueTok.image.equalsIgnoreCase("appelt"))
             t.setRuleApplicationStyle(APPELT_STYLE);
-          else if(optionValueTok.image.equalsIgnoreCase("appelt-shortest"))
-            t.setRuleApplicationStyle(APPELT_SHORTEST_STYLE);
+          else if(optionValueTok.image.equalsIgnoreCase("first"))
+            t.setRuleApplicationStyle(FIRST_STYLE);
           else if(optionValueTok.image.equalsIgnoreCase("brill"))
             t.setRuleApplicationStyle(BRILL_STYLE);
           else
             System.err.println(
               "ignoring unknown control strategy " + option +
-              " (should be brill, appelt or appelt-shortest)"
+              " (should be brill, appelt or first)"
             );
         } // control
 

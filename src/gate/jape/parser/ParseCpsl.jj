@@ -330,8 +330,8 @@ SinglePhaseTransducer SinglePhaseTransducer() :
         if(optionNameTok.image.equals("control")) {
           if(optionValueTok.image.equalsIgnoreCase("appelt"))
             t.setRuleApplicationStyle(APPELT_STYLE);
-          else if(optionValueTok.image.equalsIgnoreCase("appelt-shortest"))
-            t.setRuleApplicationStyle(APPELT_SHORTEST_STYLE);
+          else if(optionValueTok.image.equalsIgnoreCase("first"))
+            t.setRuleApplicationStyle(FIRST_STYLE);
           else if(optionValueTok.image.equalsIgnoreCase("brill"))
             t.setRuleApplicationStyle(BRILL_STYLE);
           else
@@ -999,7 +999,13 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.18  2001/05/17 16:02:42  valyt
+// Jape grammars now can match using the "first" style
+//
+// Tokeniser only matches one character per (Space)Tokens in case of whitespace or control characters
+//
 // Revision 1.17  2001/05/17 11:50:42  valyt
+//
 // 	Factory now handles Runtime parameters as well as inittime ones.
 //
 // 	There is a new rule application style Appelt-shortest
