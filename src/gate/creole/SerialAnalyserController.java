@@ -69,8 +69,12 @@ public class SerialAnalyserController extends SerialController
         ((LanguageAnalyser)prList.get(j)).setCorpus(null);
       }
 
-      corpus.unloadDocument(doc);
-      if(!docWasLoaded) Factory.deleteResource(doc);
+      if(!docWasLoaded){
+        //trigger saving
+        corpus.unloadDocument(doc);
+        //close the previoulsy unloaded Doc
+        Factory.deleteResource(doc);
+      }
     }
   }
 
