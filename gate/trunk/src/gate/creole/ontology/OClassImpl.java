@@ -71,12 +71,12 @@ public class OClassImpl extends TClassImpl implements OClass  {
   }
 
   public Set getPropertiesByName(String name) {
-    if (this.propertiesSet.isEmpty())
-      return null;
-    if (name == null)
-      return null;
-    Iterator iter = this.propertiesSet.iterator();
     HashSet resultSet = new HashSet();
+    if (this.propertiesSet.isEmpty())
+      return resultSet;
+    if (name == null)
+      return resultSet;
+    Iterator iter = this.propertiesSet.iterator();
     while (iter.hasNext()) {
       Property property = (Property) iter.next();
       if (name.equals(property.getName()))
@@ -91,9 +91,9 @@ public class OClassImpl extends TClassImpl implements OClass  {
       this.getSuperClasses(OClass.TRANSITIVE_CLOSURE);
     } catch (NoSuchClosureTypeException ex) {};
 
-    if (superClasses == null || superClasses.isEmpty())
-      return null;
     Set inheritedProperties = new HashSet();
+    if (superClasses == null || superClasses.isEmpty())
+      return inheritedProperties;
     Iterator iter = superClasses.iterator();
     while (iter.hasNext()) {
       Set classProperties = ((OClass)iter.next()).getProperties();
