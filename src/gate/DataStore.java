@@ -21,7 +21,7 @@ import java.net.*;
 import gate.util.*;
 import gate.persist.*;
 import gate.event.*;
-import gate.security.SecurityException;
+import gate.security.*;
 
 /** Models all sorts of data storage.
   */
@@ -131,14 +131,14 @@ public interface DataStore extends FeatureBearer {
    * Checks if the user (identified by the sessionID)
    *  has read access to the LR
    */
-  public boolean canReadLR(Long lrID, Long SessionID)
-    throws PersistenceException, SecurityException;
+  public boolean canReadLR(Long lrID, Session s)
+    throws PersistenceException, gate.security.SecurityException;
 
   /**
    * Checks if the user (identified by the sessionID)
    * has write access to the LR
    */
-  public boolean canWriteLR(Long lrID, Long SessionID)
-    throws PersistenceException, SecurityException;
+  public boolean canWriteLR(Long lrID, Session s)
+    throws PersistenceException, gate.security.SecurityException;
 
 } // interface DataStore
