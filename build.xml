@@ -239,6 +239,15 @@
       Using tools.jar at ${toolsjar.debug}
       CLASSPATH=${class.path.debug}
     </echo>
+    <condition property="mac.dock.name.option"
+               value="-Xdock:name=GATE 3.0">
+      <os family="mac"/>
+    </condition>
+    <condition property="mac.dock.name.option"
+               value="">
+      <not><os family="mac"/></not>
+    </condition>    
+    
     <java classname="gate.Main" 
           classpathref="run.class.path" 
           fork="true"
@@ -248,6 +257,10 @@
           maxmemory="${run.memory}">
        <jvmarg value="-Djava.ext.dirs=${extDir}"/>
        <jvmarg value="-Dsun.java2d.opengl=true"/>
+       <jvmarg value="-Dapple.laf.useScreenMenuBar=true"/>
+       <jvmarg value="-Dcom.apple.mrj.application.growbox.intrudes=false"/>
+       <jvmarg value="-Dcom.apple.mrj.application.live-resize=true"/>
+       <jvmarg value="${mac.dock.name.option}"/>
      </java>
   </target>
   
