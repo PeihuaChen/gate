@@ -41,13 +41,18 @@ public class UserImpl
   private Connection conn;
 
   /** --- */
-  private AccessController ac;
+  private AccessControllerImpl ac;
 
   /** --- */
-  private Vector omListeners;
+  private Vector omModificationListeners;
+  /** --- */
+  private Vector omCreationListeners;
+  /** --- */
+  private Vector omDeletionListeners;
+
 
   /** --- */
-  public UserImpl(Long id, String name, List groups,AccessController ac,Connection conn) {
+  public UserImpl(Long id, String name, List groups,AccessControllerImpl ac,Connection conn) {
 
     this.id = id;
     this.name = name;
@@ -55,7 +60,18 @@ public class UserImpl
     this.ac = ac;
     this.conn = conn;
 
-    this.omListeners = new Vector();
+    this.omModificationListeners = new Vector();
+    this.omCreationListeners = new Vector();
+    this.omDeletionListeners = new Vector();
+
+    //register self as listener for the security factory events
+    //of type OBJECT_DELETED (groups)
+    //don't forget that only AC can delete groups, so he's the only
+    //source of such events
+    this.ac.registerObjectModificationListener(
+                                this,
+                                ObjectModificationEvent.OBJECT_DELETED);
+
   }
 
 
@@ -116,11 +132,7 @@ public class UserImpl
     this.name = newName;
 
     //6. fire ObjectModificationEvent for all who care
-    for (int i=0; i< this.omListeners.size(); i++) {
-      ((ObjectModificationListener)this.omListeners.elementAt(i)).objectModified(e);
-    }
-
-
+    fireObjectModifiedEvent(e);
   }
 
   /** --- */
@@ -166,24 +178,83 @@ public class UserImpl
     return (this.id.equals(usr2.getID()));
   }
 
-  public void registerObjectModificationListener(ObjectModificationListener l) {
+  public void registerObjectModificationListener(ObjectModificationListener l,
+                                                 int eventType) {
 
-    this.omListeners.add(l);
+    if (eventType != ObjectModificationEvent.OBJECT_CREATED &&
+        eventType != ObjectModificationEvent.OBJECT_DELETED &&
+        eventType != ObjectModificationEvent.OBJECT_MODIFIED) {
+
+        throw new IllegalArgumentException();
+    }
+
+    switch(eventType) {
+      case ObjectModificationEvent.OBJECT_CREATED :
+        this.omCreationListeners.add(l);
+        break;
+      case ObjectModificationEvent.OBJECT_DELETED :
+        this.omDeletionListeners.add(l);
+        break;
+      case ObjectModificationEvent.OBJECT_MODIFIED :
+        this.omModificationListeners.add(l);
+        break;
+      default:
+        Assert.fail();
+    }
+
+  }
+
+  public void unregisterObjectModificationListener(ObjectModificationListener l,
+                                                   int eventType) {
+
+    if (eventType != ObjectModificationEvent.OBJECT_CREATED &&
+        eventType != ObjectModificationEvent.OBJECT_DELETED &&
+        eventType != ObjectModificationEvent.OBJECT_MODIFIED) {
+
+        throw new IllegalArgumentException();
+    }
+
+    switch(eventType) {
+      case ObjectModificationEvent.OBJECT_CREATED :
+        this.omCreationListeners.remove(l);
+        break;
+      case ObjectModificationEvent.OBJECT_DELETED :
+        this.omDeletionListeners.remove(l);
+        break;
+      case ObjectModificationEvent.OBJECT_MODIFIED :
+        this.omModificationListeners.remove(l);
+        break;
+      default:
+        Assert.fail();
+    }
   }
 
 
+  private void fireObjectModifiedEvent(ObjectModificationEvent e) {
+
+    //sanity check
+    if (e.getType() != ObjectModificationEvent.OBJECT_MODIFIED) {
+      throw new IllegalArgumentException();
+    }
+
+    for (int i=0; i< this.omModificationListeners.size(); i++) {
+      ((ObjectModificationListener)omModificationListeners.elementAt(i)).objectModified(e);
+    }
+  }
+
   //ObjectModificationListener interface
   public void objectCreated(ObjectModificationEvent e) {
-    throw new MethodNotImplementedException();
+    //ignore, we don't care about creations
+    return;
   }
 
   public void objectModified(ObjectModificationEvent e) {
 
     //only groups can disturb the user
-    Assert.assert(e.getSubType() == Group.OBJECT_CHANGE_ADDUSER ||
+/*    Assert.assert(e.getSubType() == Group.OBJECT_CHANGE_ADDUSER ||
                   e.getSubType() == Group.OBJECT_CHANGE_REMOVEUSER ||
                   e.getSubType() == Group.OBJECT_CHANGE_NAME);
-
+*/
     //we get this event only if a group adds/removes user to it
     Group grp = (Group)e.getSource();
 
@@ -222,7 +293,16 @@ public class UserImpl
   }
 
   public void objectDeleted(ObjectModificationEvent e) {
-    throw new MethodNotImplementedException();
+
+    if (e.getSource() instanceof Group) {
+
+      Group grp = (Group)e.getSource();
+      //check if the Group being deleted is one we belong to
+      if (true == this.groups.contains(grp)) {
+        this.groups.remove(grp);
+      }
+
+    }
   }
 
   public void processGateEvent(GateEvent e){

@@ -35,6 +35,9 @@ public class AccessControllerImpl
   public static final int LOGIN_OK = 1;
   public static final int LOGIN_FAILED = 2;
 
+  private static long MY_VERY_SECRET_CONSTANT;
+  private static final int RANDOM_MAX = 1024;
+
   private HashMap     sessions;
   private HashMap     sessionLastUsed;
   private HashMap     sessionTimeouts;
@@ -53,8 +56,13 @@ public class AccessControllerImpl
 
   private static Random r;
 
-  private static long MY_VERY_SECRET_CONSTANT;
-  private static final int RANDOM_MAX = 1024;
+  /** --- */
+  private Vector omModificationListeners;
+  /** --- */
+  private Vector omCreationListeners;
+  /** --- */
+  private Vector omDeletionListeners;
+
 
   static {
     r = new Random();
@@ -74,6 +82,10 @@ public class AccessControllerImpl
 
     groupsByID = new HashMap();
     groupsByName = new HashMap();
+
+    this.omModificationListeners = new Vector();
+    this.omCreationListeners = new Vector();
+    this.omDeletionListeners = new Vector();
   }
 
   /** --- */
@@ -219,7 +231,8 @@ public class AccessControllerImpl
     GroupImpl grp = new GroupImpl(new_id,name,new Vector(),this,this.jdbcConn);
 
     //3. register as objectModification listener for this group
-    grp.registerObjectModificationListener(this);
+    //we care only about name changes
+    grp.registerObjectModificationListener(this,ObjectModificationEvent.OBJECT_MODIFIED);
 
     //4.put in collections
     this.groupsByID.put(new_id,grp);
@@ -287,8 +300,14 @@ public class AccessControllerImpl
     this.groupsByName.remove(grp.getName());
 
     //5. notify all other listeners
-    throw new MethodNotImplementedException();
+    //this one is tricky - sent OBJECT_DELETED event to all who care
+    //but note that the SOURCE is not us but the object being deleted
+    ObjectModificationEvent e = new ObjectModificationEvent(
+                      grp,
+                      ObjectModificationEvent.OBJECT_DELETED,
+                      0);
 
+    fireObjectDeletedEvent(e);
   }
 
   /** --- */
@@ -332,8 +351,9 @@ public class AccessControllerImpl
     // groups list is empty
     UserImpl usr = new UserImpl(new_id,name,new Vector(),this,this.jdbcConn);
 
-    //3. register as objectModification listener for this group
-    usr.registerObjectModificationListener(this);
+    //3. register as objectModification listener for this user
+    //we care only about user changing name
+    usr.registerObjectModificationListener(this,ObjectModificationEvent.OBJECT_MODIFIED);
 
     //4. put in collections
     this.usersByID.put(new_id,usr);
@@ -391,9 +411,16 @@ public class AccessControllerImpl
     logout(s);
 
     //6. notify all other listeners
-    throw new MethodNotImplementedException();
+    //this one is tricky - sent OBJECT_DELETED event to all who care
+    //but note that the SOURCE is not us but the object being deleted
+    ObjectModificationEvent e = new ObjectModificationEvent(
+                      usr,
+                      ObjectModificationEvent.OBJECT_DELETED,
+                      0);
 
+    fireObjectDeletedEvent(e);
   }
+
 
   /** --- */
   public void deleteUser(Long id, Session s)
@@ -784,7 +811,8 @@ public class AccessControllerImpl
 
       GroupImpl grp = new GroupImpl(grpId,grpName,grpMembers,this,this.jdbcConn);
       //register as listener for thsi group
-      grp.registerObjectModificationListener(this);
+      //we care only about name changes
+      grp.registerObjectModificationListener(this,ObjectModificationEvent.OBJECT_MODIFIED);
 
       //add to collection
       this.groupsByID.put(grp.getID(),grp);
@@ -800,7 +828,8 @@ public class AccessControllerImpl
 
       UserImpl usr = new UserImpl(usrId,usrName,usrGroups,this,this.jdbcConn);
       //register as listener for thsi user
-      usr.registerObjectModificationListener(this);
+      //we care only about user changing name
+      usr.registerObjectModificationListener(this,ObjectModificationEvent.OBJECT_MODIFIED);
 
       //add to collection
       this.usersByID.put(usr.getID(),usr);
@@ -809,13 +838,107 @@ public class AccessControllerImpl
   }
 
 
+  private void fireObjectCreatedEvent(ObjectModificationEvent e) {
+
+    //sanity check
+    if (e.getType() != ObjectModificationEvent.OBJECT_CREATED) {
+      throw new IllegalArgumentException();
+    }
+
+    for (int i=0; i< this.omCreationListeners.size(); i++) {
+      ((ObjectModificationListener)this.omCreationListeners.elementAt(i)).objectCreated(e);
+    }
+  }
+
+
+  private void fireObjectDeletedEvent(ObjectModificationEvent e) {
+
+    //sanity check
+    if (e.getType() != ObjectModificationEvent.OBJECT_DELETED) {
+      throw new IllegalArgumentException();
+    }
+
+    for (int i=0; i< this.omDeletionListeners.size(); i++) {
+      ((ObjectModificationListener)this.omDeletionListeners.elementAt(i)).objectDeleted(e);
+    }
+  }
+
+
+  private void fireObjectModifiedEvent(ObjectModificationEvent e) {
+
+    //sanity check
+    if (e.getType() != ObjectModificationEvent.OBJECT_MODIFIED) {
+      throw new IllegalArgumentException();
+    }
+
+    for (int i=0; i< this.omModificationListeners.size(); i++) {
+      ((ObjectModificationListener)omModificationListeners.elementAt(i)).objectModified(e);
+    }
+  }
+
+
+
+
+  public void registerObjectModificationListener(ObjectModificationListener l,
+                                                 int eventType) {
+
+    if (eventType != ObjectModificationEvent.OBJECT_CREATED &&
+        eventType != ObjectModificationEvent.OBJECT_DELETED &&
+        eventType != ObjectModificationEvent.OBJECT_MODIFIED) {
+
+        throw new IllegalArgumentException();
+    }
+
+    switch(eventType) {
+      case ObjectModificationEvent.OBJECT_CREATED :
+        this.omCreationListeners.add(l);
+        break;
+      case ObjectModificationEvent.OBJECT_DELETED :
+        this.omDeletionListeners.add(l);
+        break;
+      case ObjectModificationEvent.OBJECT_MODIFIED :
+        this.omModificationListeners.add(l);
+        break;
+      default:
+        Assert.fail();
+    }
+
+  }
+
+  public void unregisterObjectModificationListener(ObjectModificationListener l,
+                                                   int eventType) {
+
+    if (eventType != ObjectModificationEvent.OBJECT_CREATED &&
+        eventType != ObjectModificationEvent.OBJECT_DELETED &&
+        eventType != ObjectModificationEvent.OBJECT_MODIFIED) {
+
+        throw new IllegalArgumentException();
+    }
+
+    switch(eventType) {
+      case ObjectModificationEvent.OBJECT_CREATED :
+        this.omCreationListeners.remove(l);
+        break;
+      case ObjectModificationEvent.OBJECT_DELETED :
+        this.omDeletionListeners.remove(l);
+        break;
+      case ObjectModificationEvent.OBJECT_MODIFIED :
+        this.omModificationListeners.remove(l);
+        break;
+      default:
+        Assert.fail();
+    }
+
+  }
+
 
 
 
   /* ObjectModificationListener methods */
 
   public void objectCreated(ObjectModificationEvent e) {
-    throw new MethodNotImplementedException();
+    //I've never registered for these events
+    Assert.fail();
   }
 
   public void objectModified(ObjectModificationEvent e) {
@@ -824,8 +947,18 @@ public class AccessControllerImpl
     int type = e.getType();
     int subtype = e.getSubType();
 
-    Assert.assert(source instanceof Group || source instanceof User);
-    Assert.assert(type == ObjectModificationEvent.OBJECT_MODIFIED);
+    //sanity checks
+    if (type != ObjectModificationEvent.OBJECT_MODIFIED) {
+      throw new IllegalArgumentException();
+    }
+
+    //I'm interested only in Groups and Users
+    if (false == source instanceof Group &&
+        false == source instanceof User) {
+
+      throw new IllegalArgumentException();
+    }
+
 
     if (source instanceof Group) {
 
@@ -897,7 +1030,8 @@ public class AccessControllerImpl
   }
 
   public void objectDeleted(ObjectModificationEvent e) {
-    throw new MethodNotImplementedException();
+    //I've never registered for these events
+    Assert.fail();
   }
 
   public void processGateEvent(GateEvent e){
