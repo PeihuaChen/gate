@@ -177,8 +177,7 @@ public class TestGate {
       boolean allTests = true;
 
       if(! allTests){
-        suite.addTest(TestAnnotationDiff.suite());
-        suite.addTest(TestAnnotation.suite());
+        suite.addTest(TestPR.suite());
       }else {
         suite.addTest(TestControllers.suite());
         suite.addTest(TestPersist.suite());
