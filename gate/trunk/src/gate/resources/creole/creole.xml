@@ -32,7 +32,7 @@
                  OPTIONAL="true"
                  ITEM_CLASS_NAME="gate.Document"
                  >java.util.List</PARAMETER>
-      <ICON>lr.gif</ICON>
+      <ICON>lrs.gif</ICON>
     </RESOURCE>
     <RESOURCE>
       <NAME>GATE Oracle Document</NAME>
@@ -47,7 +47,7 @@
       <CLASS>gate.corpora.SerialCorpusImpl</CLASS>
       <COMMENT>GATE persistent corpus (serialisation)</COMMENT>
       <INTERFACE>gate.Corpus</INTERFACE>
-      <ICON>lr.gif</ICON>
+      <ICON>lrs.gif</ICON>
       <PRIVATE/>
     </RESOURCE>
     <RESOURCE>
@@ -55,7 +55,7 @@
       <CLASS>gate.corpora.DatabaseCorpusImpl</CLASS>
       <COMMENT>GATE persistent corpus (Oracle)</COMMENT>
       <INTERFACE>gate.Corpus</INTERFACE>
-      <ICON>lr.gif</ICON>
+      <ICON>lrs.gif</ICON>
       <PRIVATE/>
     </RESOURCE>
 
