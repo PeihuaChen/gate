@@ -202,7 +202,7 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
       else if(priority < other.priority) return -1;
       else if(priority > other.priority) return 1;
       //equal priority
-      else return fileIndex - other.fileIndex;
+      else return other.fileIndex - fileIndex;
     } else throw new ClassCastException(
                     "Attempt to compare a FSMInstance object to an object " +
                     "of type " + obj.getClass()+"!");
