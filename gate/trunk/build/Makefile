@@ -26,7 +26,7 @@ PKGS=	gate gate.annotation gate.corpora gate.creole \
 
 # classpath to build compile commands from
 CP=	-classpath \
-../classes:../lib/junit.jar:../lib/jgl3.1.0.jar:../lib/orajdbc2.zip:../lib/jacl.jar:../lib/oro.jar:../lib/postgres6.5-jdbc1.2.jar:../lib/graph_drawing.jar:../lib/javacompiler.jar:../lib/jaxp.jar:../lib/SunXmlParser.jar:../lib/jigsaw.jar:../lib/gnu-regexp-1.0.8.jar:../lib/guk.jar:../lib/jdom.jar:../lib/GnuGetOpt.jar
+../classes:../lib/junit.jar:../lib/jgl3.1.0.jar:../lib/orajdbc2.zip:../lib/jacl.jar:../lib/oro.jar:../lib/postgres6.5-jdbc1.2.jar:../lib/graph_drawing.jar:../lib/javacompiler.jar:../lib/jaxp.jar:../lib/SunXmlParser.jar:../lib/jigsaw.jar:../lib/gnu-regexp-1.0.8.jar:../lib/ext/guk.jar:../lib/jdom.jar:../lib/GnuGetOpt.jar
 
 # sourcepath to build compile commands from
 SP=	-sourcepath ../src
@@ -39,8 +39,10 @@ COMPILE=./jdk.sh -s -g:none javac -O -d ../classes $(SP) $(CP)
 # having the main test class as first target, and -Xdepend in the (1.2)
 # javac options, means that most classes get compiled by a single call
 # to javac
-all: ../classes/guk/Editor.class ../classes/gate/TestGate.class \
-	  classes resources gukjar TestJdk.jar TestResources.jar
+#GUK all: ../classes/guk/Editor.class ../classes/gate/TestGate.class \
+#GUK	  classes resources gukjar TestJdk.jar TestResources.jar
+all: ../classes/gate/TestGate.class \
+	  classes resources TestJdk.jar TestResources.jar
 
 # build the whole thing
 everything: depend all jar docs internaldocs test
@@ -50,7 +52,8 @@ include Makefile.dep
 
 # regenerate Makefile.dep
 depend:
-	./makejdepend.sh ../src/gate ../src/guk >Makefile.dep
+	./makejdepend.sh ../src/gate >Makefile.dep
+#GUK	./makejdepend.sh ../src/gate ../src/guk >Makefile.dep
 
 # run the test suite (swap the last line for one of the commented ones to get
 # the JUnit GUI test runner)
