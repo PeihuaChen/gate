@@ -20,7 +20,9 @@
   <LR xmlFileUrl="gate:/creole/schema/SyntaxTreeNodeSchema.xml">gate.creole.AnnotationSchema</LR>
 </SYSTEM>
 <DBCONFIG url="jdbc:oracle:thin:GATEUSER/gate2@grindleford.dcs.shef.ac.uk:1521:gatedb2"/>
+<!--DBCONFIG url="jdbc:oracle:thin:GATEUSER/gate2@grindleford.dcs.shef.ac.uk:1521:gatedb2" 
+  url1="jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:gatedb"/-->
 <!--DBCONFIG url="jdbc:oracle:oci8:GATEUSER/gate2@gatedb.dcs.shef.ac.uk"/-->
-<!--DBCONFIG url="jdbc:oracle:oci8:GATEUSER/gate2@/grindleford.dcs.shef.ac.uk:1521:GateDB2"/-->
+<!--DBCONFIG url="jdbc:oracle:oci8:GATEUSER/gate2@grindleford.dcs.shef.ac.uk:1521:GateDB2"/-->
 <GATECONFIG Save_options_on_exit="true" Save_session_on_exit="true"/>
 </GATE>
