@@ -1,5 +1,16 @@
 <?xml version="1.0"?>
 <schema xmlns="http://www.w3.org/2000/10/XMLSchema">
 	<!-- XSchema deffinition for token-->
-	<element name="Address" />
+	<element name="Address">
+		<complexType>
+		    <attribute name="Email" type="string" use="optional"/>
+			<attribute name="Url" type="string" use="optional"/>
+			<attribute name="Phone" type="string" use="optional"/>
+			<attribute name="Ip" type="string" use="optional"/>
+			<attribute name="Street" type="string" use="optional"/>
+			<attribute name="City" type="string" use="optional"/>
+			<attribute name="PostalCode" type="string" use="optional"/>
+			<attribute name="Country" type="string" use="optional"/>
+	  </complexType>
+	</element>
 </schema>
