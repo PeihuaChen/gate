@@ -54,6 +54,10 @@ class SystemData
   void createSystem() throws GateSaxException
   {
     // create the controller
+    if(controllerTypeName.equalsIgnoreCase("none")){
+      //no controller required, bail
+      return;
+    }
     try {
       FeatureMap controllerParams = Factory.newFeatureMap();
       Collection controller = (Collection)

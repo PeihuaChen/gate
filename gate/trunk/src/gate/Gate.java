@@ -294,6 +294,25 @@ public class Gate
     return urlBase == null;
   } // tryFileSystem()
 
+  /**Checks whether a given resource is a hidden resource*/
+  static public boolean isHidden(Resource res){
+    if(res.getFeatures() == null) return false;
+    Object value = res.getFeatures().get("gate.HIDDEN");
+    return value != null &&
+           value instanceof String &&
+           ((String)value).equalsIgnoreCase("true");
+  }
+
+  /**Checks whether a given resource is a Gate application*/
+  static public boolean isApplication(Resource res){
+    if(res.getFeatures() == null) return false;
+    Object value = res.getFeatures().get("gate.APPLICATION");
+    return value != null &&
+           value instanceof String &&
+           ((String)value).equalsIgnoreCase("true");
+  }
+
+
   /** Registers a {@link gate.event.CreoleListener} with the Gate system
     */
   public static synchronized void addCreoleListener(CreoleListener l){

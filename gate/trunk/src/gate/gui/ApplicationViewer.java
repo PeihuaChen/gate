@@ -585,8 +585,16 @@ public class ApplicationViewer extends AbstractVisualResource
 
   class ModulesTableModel extends AbstractTableModel{
     public int getRowCount(){
-      return
-        Gate.getCreoleRegister().getPrInstances().size() - controller.size() -1;
+      List prsList = Gate.getCreoleRegister().getPrInstances();
+      int size = prsList.size();
+      Iterator prsIter = prsList.iterator();
+      while(prsIter.hasNext()){
+        Resource res = (Resource)prsIter.next();
+        if(controller.contains(res)||
+           Gate.isHidden(res) ||
+           Gate.isApplication(res)) size--;
+      }
+      return size;
     }//public int getRowCount()
 
     public int getColumnCount(){
@@ -611,14 +619,16 @@ public class ApplicationViewer extends AbstractVisualResource
 
     public Object getValueAt(int rowIndex, int columnIndex){
       //find the right PR
-      List allPrs = Gate.getCreoleRegister().getPrInstances();
-      allPrs.remove(controller);
+      List allPrs = new ArrayList(Gate.getCreoleRegister().getPrInstances());
       Iterator allPRsIter = allPrs.iterator();
       int index = -1;
       ProcessingResource pr =null;
       while(allPRsIter.hasNext() && index < rowIndex){
         pr = (ProcessingResource)allPRsIter.next();
-        if(!controller.contains(pr))  index ++;
+        if (!(controller.contains(pr)||
+              Gate.isHidden(pr) ||
+              Gate.isApplication(pr))
+            )  index ++;
       }
       if(index == rowIndex && pr != null){
         switch(columnIndex){

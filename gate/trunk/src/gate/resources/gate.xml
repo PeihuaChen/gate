@@ -7,7 +7,7 @@
 
 <GATE>
 <SYSTEM NAME="Brings into GATE the default annotation schemas">
-  <CONTROLLER>gate.creole.SerialController</CONTROLLER>
+  <CONTROLLER>none</CONTROLLER>
   <LR xmlFileUrl="gate:/creole/schema/AddressSchema.xml">gate.creole.AnnotationSchema</LR>
   <LR xmlFileUrl="gate:/creole/schema/DateSchema.xml">gate.creole.AnnotationSchema</LR>
   <LR xmlFileUrl="gate:/creole/schema/IdentifierSchema.xml">gate.creole.AnnotationSchema</LR>

@@ -670,12 +670,11 @@ while(listIter.hasNext()){
 
   public void resourceLoaded(CreoleEvent e) {
     Resource res = e.getResource();
-    String hidden = (String)res.getFeatures().get("gate.HIDDEN");
-    if(hidden != null && hidden.equalsIgnoreCase("true")) return;
+    if(Gate.isHidden(res)) return;
     DefaultResourceHandle handle = new DefaultResourceHandle(res);
     DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
     if(res instanceof ProcessingResource){
-      if(res instanceof SerialController){
+      if(Gate.isApplication(res)){
         handle = new ApplicationHandle((SerialController)res, this, this);
         node = new DefaultMutableTreeNode(handle, false);
         resourcesTreeModel.insertNodeInto(node, applicationsRoot, 0);
@@ -958,6 +957,7 @@ while(listIter.hasNext()){
     waitDialog.goAway();
   }
 
+
 /*
   class NewProjectAction extends AbstractAction {
     public NewProjectAction(){
@@ -1040,19 +1040,11 @@ while(listIter.hasNext()){
         try{
           FeatureMap features = Factory.newFeatureMap();
           features.put("gate.NAME", answer);
+          features.put("gate.APPLICATION", "true");
           SerialController controller =
                 (SerialController)Factory.createResource(
                                 "gate.creole.SerialController",
                                 Factory.newFeatureMap(), features);
-/*
-          ApplicationHandle handle = new ApplicationHandle(controller,
-                                                           currentProject);
-          currentProject.addApplication(handle);
-          //resourcesTreeModel.treeChanged();
-          resourcesTree.expandPath(new TreePath(
-                                    new Object[]{resourcesTreeRoot,
-                                                 applicationsRoot}));
-*/
         } catch(ResourceInstantiationException rie){
           JOptionPane.showMessageDialog(MainFrame.this,
                                         "Could not create application!\n" +

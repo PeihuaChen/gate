@@ -39,6 +39,7 @@ public class Nerc extends SerialController {
     try{
       //create all the componets
       FeatureMap params;
+      FeatureMap features;
       ResourceData rData;
 
       //tokeniser
@@ -50,8 +51,10 @@ public class Nerc extends SerialController {
                                                tokeniserRulesURL);
       params.put("encoding", encoding);
       if(DEBUG) Out.prln("Parameters for the tokeniser: \n" + params);
+      features = Factory.newFeatureMap();
+      features.put("gate.HIDDEN", "true");
       tokeniser = (DefaultTokeniser)Factory.createResource(rData.getClassName(),
-                                                           params);
+                                                           params, features);
       this.add(tokeniser);
       tokeniser.getFeatures().put("gate.NAME", "Tokeniser " + System.currentTimeMillis());
 
@@ -64,8 +67,10 @@ public class Nerc extends SerialController {
                                                tokeniserRulesURL);
       params.put("encoding", encoding);
       if(DEBUG) Out.prln("Parameters for the gazetteer: \n" + params);
+      features = Factory.newFeatureMap();
+      features.put("gate.HIDDEN", "true");
       gazetteer = (DefaultGazetteer)Factory.createResource(rData.getClassName(),
-                                                           params);
+                                                           params, features);
       this.add(gazetteer);
       gazetteer.getFeatures().put("gate.NAME", "Gazetteer " + System.currentTimeMillis());
 
@@ -78,8 +83,10 @@ public class Nerc extends SerialController {
                                             japeGrammarURL);
       params.put("encoding", encoding);
       if(DEBUG) Out.prln("Parameters for the transducer: \n" + params);
+      features = Factory.newFeatureMap();
+      features.put("gate.HIDDEN", "true");
       transducer = (Transducer)Factory.createResource(rData.getClassName(),
-                                                      params);
+                                                      params, features);
       this.add(transducer);
       transducer.getFeatures().put("gate.NAME", "Transducer " + System.currentTimeMillis());
     }catch(ParameterException pe){
