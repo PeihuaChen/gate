@@ -453,8 +453,11 @@ public class AnnotationDiffGUI extends JFrame{
             int column){
       Component res = super.getTableCellRendererComponent(table,
               value, false, true, row, column);
-      res.setBackground(diffTableModel.getBackgroundAt(
-              diffTable.rowViewToModel(row), column));
+      res.setBackground(isSelected ? table.getSelectionBackground() :
+              diffTableModel.getBackgroundAt(diffTable.rowViewToModel(row),
+                      column));
+      res.setForeground(isSelected ? table.getSelectionForeground() :
+        table.getForeground());
       return res;
     }
   }
