@@ -34,7 +34,8 @@ do
     CLASS=../classes/${STEMNAME}.class
     ALLCLASSES="$ALLCLASSES $CLASS"
     echo $CLASS: ${DIRPARENT}/${FILE}
-    echo '	@ $(COMPILE) '${DIRPARENT}/${FILE}
+    echo '	@ echo $(COMPILE) `$(CYGPATH) '${DIRPARENT}/${FILE}'`'
+    echo '	@ $(COMPILE) `$(CYGPATH) '${DIRPARENT}/${FILE}'`'
     echo
   done
 done
