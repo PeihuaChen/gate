@@ -184,9 +184,10 @@ public class AnnotationEditor{
     }catch(ResourceInstantiationException rie){
       throw new GateRuntimeException(rie);
     }
-    JScrollPane scroller = new JScrollPane(featuresEditor.getTable());
+    scroller = new JScrollPane(featuresEditor.getTable());
     
     constraints.gridy = 2;
+    constraints.weighty = 1;
     constraints.fill = GridBagConstraints.BOTH;
     pane.add(scroller, constraints);
   }
@@ -299,11 +300,25 @@ public class AnnotationEditor{
       int x = topLeft.x + startRect.x;
       int y = topLeft.y + endRect.y + endRect.height;
       //ensure window doesn't get off the screen
+      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
       bottomWindow.pack();
-//      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-//      if(x + bottomWindow.getSize().width > screenSize.width){
-//        int newWidth = 
-//      }
+      
+      boolean widthReduced = false;
+      if(x + bottomWindow.getSize().width > screenSize.width){
+        int newWidth = screenSize.width - x;
+        bottomWindow.setSize(newWidth, 
+                bottomWindow.getSize().height + 
+                scroller.getHorizontalScrollBar().getPreferredSize().height);
+        widthReduced = true;
+      }
+      if(y + bottomWindow.getSize().height > screenSize.height){
+        int newHeight = screenSize.height - y;
+        bottomWindow.setSize(bottomWindow.getSize().width + 
+                (widthReduced ? 0 : 
+                 scroller.getVerticalScrollBar().getPreferredSize().width), 
+                newHeight);
+      }
+      bottomWindow.validate();
       bottomWindow.setLocation(x, y);
       
     }catch(BadLocationException ble){
@@ -503,6 +518,7 @@ public class AnnotationEditor{
 
   protected JComboBox typeCombo;
   protected FeaturesSchemaEditor featuresEditor;
+  protected JScrollPane scroller;
   
   protected StartOffsetLeftAction solAction;
   protected StartOffsetRightAction sorAction;
