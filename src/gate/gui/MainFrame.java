@@ -390,41 +390,27 @@ public class MainFrame extends JFrame
     southBox = Box.createHorizontalBox();
     southBox.add(Box.createHorizontalStrut(5));
 
-    statusBar = new JLabel();
+    statusBar = new JLabel(" ");
+    statusBar.setPreferredSize(new Dimension(200,
+                                             statusBar.getPreferredSize().
+                                             height));
 
     UIManager.put("ProgressBar.cellSpacing", new Integer(0));
-    progressBar = new JProgressBar(JProgressBar.HORIZONTAL){
-      public Dimension getPreferredSize(){
-        Dimension pSize = super.getPreferredSize();
-        pSize.height = 5;
-        return pSize;
-      }
-    };
+    progressBar = new JProgressBar(JProgressBar.HORIZONTAL);
     progressBar.setBorder(BorderFactory.createEmptyBorder());
     progressBar.setForeground(new Color(150, 75, 150));
     progressBar.setBorderPainted(false);
     progressBar.setStringPainted(false);
     progressBar.setOrientation(JProgressBar.HORIZONTAL);
-    progressBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 5));
+    progressBar.setPreferredSize(new Dimension(300,
+                                               progressBar.getPreferredSize().
+                                               height));
+    progressBar.setMaximumSize(new Dimension(300, Integer.MAX_VALUE));
 
-    Box sbBox = Box.createHorizontalBox();
-    sbBox.add(statusBar);
-    sbBox.add(new JLabel(" "));
-    sbBox.add(Box.createHorizontalGlue());
-    Box tempVBox = Box.createVerticalBox();
-    tempVBox.add(sbBox);
-    tempVBox.add(progressBar);
-//    stopBtn = new JButton(stopAction);
-//    stopBtn.setBorder(  BorderFactory.createLineBorder(Color.black, 1));BorderFactory.createEtchedBorder()
-//    stopBtn.setBorder(BorderFactory.createCompoundBorder(
-//                                    BorderFactory.createEmptyBorder(2,3,2,3),
-//                                    BorderFactory.createLineBorder(Color.black,
-//                                                                   1)));
-//    stopBtn.setForeground(Color.red);
+    southBox.add(statusBar);
+    southBox.add(Box.createHorizontalGlue());
+    southBox.add(progressBar);
 
-//    southBox.add(Box.createRigidArea(
-//                     new Dimension(5, stopBtn.getPreferredSize().height)));
-    southBox.add(tempVBox);
     southBox.add(Box.createHorizontalStrut(5));
 
     this.getContentPane().add(southBox, BorderLayout.SOUTH);
