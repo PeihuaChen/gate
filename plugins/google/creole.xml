@@ -5,6 +5,7 @@
    <!-- creole.xml for SearchPR -->
     <RESOURCE>
       <JAR>google.jar</JAR>
+      <JAR>lib/googleapi.jar</JAR>
       <NAME>GooglePR</NAME>
       <CLASS>google.GooglePR</CLASS>
       <COMMENT>provides interface to Google API</COMMENT>
