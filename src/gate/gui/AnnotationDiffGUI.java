@@ -129,6 +129,21 @@ public class AnnotationDiffGUI extends JFrame{
     diffTable = new XJTable(diffTableModel);
     diffTable.setDefaultRenderer(String.class, new DiffTableCellRenderer());
     diffTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+    diffTable.setComparator(DiffTableModel.COL_MATCH, new Comparator(){
+      public int compare(Object o1, Object o2){
+        String label1 = (String)o1;
+        String label2 = (String)o2;
+        int match1 = 0;
+        while(!label1.equals(matchLabel[match1])) match1++;
+        int match2 = 0;
+        while(!label2.equals(matchLabel[match2])) match2++;
+        
+        return match1 - match2;
+      }
+    });
+    diffTable.setSortable(true);
+    diffTable.setSortedColumn(DiffTableModel.COL_MATCH);
+    diffTable.setAscending(false);
     scroller = new JScrollPane(diffTable);
     getContentPane().add(scroller, constraints);
     
@@ -438,7 +453,8 @@ public class AnnotationDiffGUI extends JFrame{
             int column){
       Component res = super.getTableCellRendererComponent(table,
               value, false, true, row, column);
-      res.setBackground(diffTableModel.getBackgroundAt(row, column));
+      res.setBackground(diffTableModel.getBackgroundAt(
+              diffTable.rowViewToModel(row), column));
       return res;
     }
   }
@@ -526,10 +542,6 @@ public class AnnotationDiffGUI extends JFrame{
         throw new GateRuntimeException(ioe);
       }
       
-      String[] matchType = new String[3];
-      matchType[AnnotationDiffer.CORRECT] = "C";
-      matchType[AnnotationDiffer.PARTIALLY_CORRECT] = "P";
-      matchType[AnnotationDiffer.WRONG] = "W";
       switch(column){
         case COL_KEY_START: return key == null ? "" : 
           key.getStartNode().getOffset().toString();
@@ -538,7 +550,7 @@ public class AnnotationDiffGUI extends JFrame{
         case COL_KEY_STRING: return keyStr;
         case COL_KEY_FEATURES: return key == null ? "" : 
           key.getFeatures().toString();
-        case COL_MATCH: return "";//matchType[pairing.getType()];
+        case COL_MATCH: return matchLabel[pairing.getType()];
         case COL_RES_START: return res == null ? "" : 
           res.getStartNode().getOffset().toString();
         case COL_RES_END: return res == null ? "" :
@@ -576,7 +588,7 @@ public class AnnotationDiffGUI extends JFrame{
   protected JList featuresList;
   protected DefaultListModel featureslistModel;
   protected DiffTableModel diffTableModel;
-  protected JTable diffTable;
+  protected XJTable diffTable;
   protected JScrollPane scroller;
   protected JComboBox keyDocCombo;
   protected JComboBox keySetCombo;
@@ -608,5 +620,11 @@ public class AnnotationDiffGUI extends JFrame{
   protected static final Color PARTIALLY_CORRECT_BG = new Color(173,215,255);
   protected static final Color MISSING_BG = new Color(255,173,181);;
   protected static final Color FALSE_POZITIVE_BG = new Color(255,231,173);
-  
+  protected static final String[] matchLabel;
+  static{
+    matchLabel = new String[3];
+    matchLabel[AnnotationDiffer.CORRECT] = "=";
+    matchLabel[AnnotationDiffer.PARTIALLY_CORRECT] = "~";
+    matchLabel[AnnotationDiffer.WRONG] = "!=";
+  }  
 }
