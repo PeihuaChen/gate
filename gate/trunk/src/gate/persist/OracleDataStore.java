@@ -164,19 +164,18 @@ public class OracleDataStore extends JDBCDataStore {
 
     CallableStatement stmt = null;
 
-/*    try {
+    try {
       stmt = this.jdbcConn.prepareCall("{ call persist.delete_lr(?,?) }");
       stmt.setLong(1,ID.longValue());
-      stmt.registerOutParameter(2,java.sql.Types.VARCHAR);
+      stmt.setString(2,lrClassName);
       stmt.execute();
-      String result = stmt.getString(2);
-
-      return result;
     }
     catch(SQLException sqle) {
-      throw new PersistenceException("can't get LR name from DB: ["+ sqle.getMessage()+"]");
+      throw new PersistenceException("can't delete LR from DB: ["+ sqle.getMessage()+"]");
     }
-*/
+    finally {
+      DBHelper.cleanup(stmt);
+    }
   }
 
   /**
