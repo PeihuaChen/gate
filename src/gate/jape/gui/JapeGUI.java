@@ -43,7 +43,7 @@ public class JapeGUI extends JFrame {
   private void jbInit() throws Exception {
     southBox = Box.createHorizontalBox();
     westBox = Box.createVerticalBox();
-    centerBox = Box.createVerticalBox();
+    textViewBox = Box.createVerticalBox();
     northBox = Box.createHorizontalBox();
     this.getContentPane().setLayout(borderLayout1);
     statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
@@ -92,7 +92,7 @@ public class JapeGUI extends JFrame {
 //    corpusListModel.addElement("      ");
     corpusList.setModel(corpusListModel);
     typesPanel.setLayout(flowLayout1);
-    jScrollPane1.setPreferredSize(new Dimension(32767, 32767));
+    textViewScroll.setPreferredSize(new Dimension(32767, 32767));
     this.getContentPane().add(southBox, BorderLayout.SOUTH);
     southBox.add(statusBar, null);
     southBox.add(progressBar, null);
@@ -102,14 +102,16 @@ public class JapeGUI extends JFrame {
     westBox.add(corpusList, null);
     westBox.add(jLabel2, null);
     westBox.add(grammarLbl, null);
-    this.getContentPane().add(centerBox, BorderLayout.CENTER);
     this.getContentPane().add(northBox, BorderLayout.NORTH);
     northBox.add(collectionAddBtn, null);
     northBox.add(japeLoadBtn, null);
     northBox.add(runBtn, null);
-    centerBox.add(jScrollPane1, null);
-    jScrollPane1.getViewport().add(text, null);
-    centerBox.add(typesPanel, null);
+    this.getContentPane().add(centerTabPane, BorderLayout.CENTER);
+    centerTabPane.add(textViewBox, "Text View");
+    textViewBox.add(textViewScroll, null);
+    textViewBox.add(typesPanel, null);
+    centerTabPane.add(tableViewScroll, "Table View");
+    textViewScroll.getViewport().add(text, null);
     setSize(800,600);
 
     japeFilter = new ExtensionFileFilter();
@@ -118,40 +120,64 @@ public class JapeGUI extends JFrame {
 
     filer = new JFileChooser();
     filer.addChoosableFileFilter(japeFilter);
+
   }
 
   void collectionAddBtn_actionPerformed(ActionEvent e) {
-    filer.setSelectedFile(null);
-    filer.setSelectedFiles(null);
-    filer.setFileFilter(filer.getAcceptAllFileFilter());
-    filer.setDialogTitle("Select document(s) to open...");
-    filer.setMultiSelectionEnabled(true);
-    filer.setSelectedFile(null);
-    filer.setSelectedFiles(null);
-    int res = filer.showOpenDialog(this);
-    File[] selectedFiles;
-    if(res == JFileChooser.APPROVE_OPTION){
-      selectedFiles = filer.getSelectedFiles();
-      if(selectedFiles != null){
-        if(corpus == null) corpus = Transients.newCorpus("Jape 2.0");
-        try{
-          for(int i=0; i< selectedFiles.length; i++){
-            corpus.add(Transients.newDocument(selectedFiles[i].toURL()));
-            corpusFiles.add(selectedFiles[i]);
+    //multi file selection enabled only in JDK 1.3
+    if(System.getProperty("java.version").compareTo("1.3") >=0 ){
+      //java 1.3
+      filer.setMultiSelectionEnabled(true);
+      filer.setDialogTitle("Select document(s) to add...");
+      filer.setSelectedFiles(null);
+      filer.setFileFilter(filer.getAcceptAllFileFilter());
+      int res = filer.showDialog(this, "Open");
+      File[] selectedFiles;
+      if(res == JFileChooser.APPROVE_OPTION){
+        selectedFiles = filer.getSelectedFiles();
+        if(selectedFiles != null){
+          if(corpus == null) corpus = Transients.newCorpus("Jape 2.0");
+          try{
+            for(int i=0; i< selectedFiles.length; i++){
+              corpus.add(Transients.newDocument(selectedFiles[i].toURL()));
+              corpusFiles.add(selectedFiles[i]);
+            }
+          }catch(java.net.MalformedURLException mue){
+            mue.printStackTrace(System.err);
+          }catch(IOException ioe){
+            ioe.printStackTrace(System.err);
           }
-        }catch(java.net.MalformedURLException mue){
-          mue.printStackTrace(System.err);
-        }catch(IOException ioe){
-          ioe.printStackTrace(System.err);
-        }
-      }//if(selectedFiles != null){
-
-      corpusListModel.clear();
-      Iterator docsIter = corpus.iterator();
-      while(docsIter.hasNext()){
-        currentDoc = (Document) docsIter.next();
-        corpusListModel.addElement(currentDoc.getSourceURL().getFile());
+        }//if(selectedFiles != null)
       }
+
+    }else{
+      //java 1.2
+      filer.setMultiSelectionEnabled(false);
+      filer.setDialogTitle("Select ONE document to add...");
+      filer.setSelectedFile(null);
+      filer.setFileFilter(filer.getAcceptAllFileFilter());
+      int res = filer.showDialog(this, "Open");
+      File selectedFile;
+      if(res == JFileChooser.APPROVE_OPTION){
+        selectedFile = filer.getSelectedFile();
+        if(selectedFile != null){
+          if(corpus == null) corpus = Transients.newCorpus("Jape 2.0");
+          try{
+              corpus.add(Transients.newDocument(selectedFile.toURL()));
+              corpusFiles.add(selectedFile);
+          }catch(java.net.MalformedURLException mue){
+            mue.printStackTrace(System.err);
+          }catch(IOException ioe){
+            ioe.printStackTrace(System.err);
+          }
+        }//if(selectedFile != null)
+      }
+    }//java 1.2
+    corpusListModel.clear();
+    Iterator docsIter = corpus.iterator();
+    while(docsIter.hasNext()){
+      currentDoc = (Document) docsIter.next();
+      corpusListModel.addElement(currentDoc.getSourceURL().getFile());
     }
   }
 
@@ -170,6 +196,7 @@ public class JapeGUI extends JFrame {
 
   void runBtn_actionPerformed(ActionEvent e) {
     if(corpus.isEmpty() || grammarFile == null) return;
+
     if(corpusIsDirty){
       corpus.clear();
       Iterator filesIter = corpusFiles.iterator();
@@ -203,6 +230,7 @@ public class JapeGUI extends JFrame {
     }catch(JapeException je){
       je.printStackTrace(System.err);
     }
+
     //select the first document
     docIter = corpus.iterator();
     if(docIter.hasNext()){
@@ -240,6 +268,7 @@ public class JapeGUI extends JFrame {
 
   void updateAll(){
     //display the current document
+    text.getHighlighter().removeAllHighlights();
     text.setText(currentDoc.getContent().getString());
     //get all the annotation types and display the buttons
     typesPanel.removeAll();
@@ -284,6 +313,9 @@ public class JapeGUI extends JFrame {
       });
       typesPanel.add(typeButton);
     }
+    //create the table
+    tableView = new JTable(new AnnotationSetTableModel(currentDoc.getAnnotations()));
+    tableViewScroll.getViewport().add(tableView, null);    
     validate();
   }
 
@@ -329,11 +361,75 @@ public class JapeGUI extends JFrame {
 //System.out.println(type);
   }
 
+  class AnnotationSetTableModel extends javax.swing.table.AbstractTableModel{
+    public AnnotationSetTableModel(AnnotationSet as){
+      annotations = as.toArray();
+    }
+
+    public int getRowCount(){
+      return annotations.length;
+    }
+
+    public int getColumnCount(){
+      return 5;
+    }
+
+    public String getColumnName(int column){
+      switch(column){
+        case 0:{
+          return "Start";
+        }
+        case 1:{
+          return "End";
+        }
+        case 2:{
+          return "Type";
+        }
+        case 3:{
+          return "Features";
+        }
+        case 4:{
+          return "Text";
+        }
+      }
+      return null;
+    }
+
+    public boolean isCellEditable(int rowIndex, int columnIndex){
+      return false;
+    }
+    
+    public Object getValueAt(int row, int column){
+      gate.Annotation currentAnn = (gate.Annotation)annotations[row];
+      switch(column){
+        case 0:{
+          return currentAnn.getStartNode().getOffset();
+        }
+        case 1:{
+          return currentAnn.getEndNode().getOffset();
+        }
+        case 2:{
+          return currentAnn.getType();
+        }
+        case 3:{
+          return currentAnn.getFeatures();
+        }
+        case 4:{
+          return currentDoc.getContent().getString().substring(
+              currentAnn.getStartNode().getOffset().intValue(),
+              currentAnn.getEndNode().getOffset().intValue());
+        }
+      }
+      return null;
+    }
+    Object[] annotations;
+  }
+
   //Gui members
   JMenuBar jMenuBar1 = new JMenuBar();
 
   Box westBox;
-  Box centerBox;
+  Box textViewBox;
   Box northBox;
   Box southBox;
 
@@ -365,7 +461,11 @@ public class JapeGUI extends JFrame {
   Document currentDoc;
   JPanel typesPanel = new JPanel();
   FlowLayout flowLayout1 = new FlowLayout();
-  JScrollPane jScrollPane1 = new JScrollPane();
+  JScrollPane textViewScroll = new JScrollPane();
   Random randomGen = new Random();
   boolean corpusIsDirty = false;
+  JTabbedPane centerTabPane = new JTabbedPane();
+  JTable tableView;
+  JScrollPane tableViewScroll = new JScrollPane();
+  javax.swing.table.TableModel tm;
 }
