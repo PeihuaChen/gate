@@ -15,10 +15,11 @@
  *  $Id$
  */
 
-package template;
+package ___PACKAGE___;
 
 import java.util.*;
 import junit.framework.*;
+
 /** Tests for the MyClass class
   */
 public class Test___CLASSNAME___ extends TestCase

@@ -14,7 +14,7 @@
  *
  *  $Id$
  */
-package template;
+package ___PACKAGE___;
 
 import java.util.*;
 import junit.framework.*;
