@@ -173,7 +173,7 @@ public class CreoleXmlHandler extends DefaultHandler {
     if(elementName.toUpperCase().equals("PARAMETER")) {
       if(DEBUG) {
         for(int i=0, len=currentAttributes.getLength(); i<len; i++) {
-          Out.prln(currentAttributes.getQName(i));
+          Out.prln(currentAttributes.getLocalName(i));
           Out.prln(currentAttributes.getValue(i));
         }// End for
       }// End if

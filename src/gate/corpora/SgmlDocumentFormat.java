@@ -93,7 +93,7 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
       // non validating one
       saxParserFactory.setValidating(false);
       // non namesapace aware one
-      saxParserFactory.setNamespaceAware(false);
+      saxParserFactory.setNamespaceAware(true);
 
       // Create a SAX parser
       SAXParser parser = saxParserFactory.newSAXParser();

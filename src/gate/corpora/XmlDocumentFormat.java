@@ -29,6 +29,7 @@ import gate.creole.*;
 // xml tools
 import javax.xml.parsers.*;
 import org.xml.sax.*;
+import org.xml.sax.helpers.*;
 import org.w3c.www.mime.*;
 
 /** The format of Documents. Subclasses of DocumentFormat know about
@@ -109,7 +110,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat
       // non validating one
       saxParserFactory.setValidating(false);
       // non namesapace aware one
-      saxParserFactory.setNamespaceAware(false);
+      saxParserFactory.setNamespaceAware(true);
       // create it
       SAXParser xmlParser = saxParserFactory.newSAXParser();
       if (isGateXmlDocument){
@@ -203,7 +204,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat
       // non validating one
       saxParserFactory.setValidating(false);
       // non namesapace aware one
-      saxParserFactory.setNamespaceAware(false);
+      saxParserFactory.setNamespaceAware(true);
       // create it
       SAXParser xmlParser = saxParserFactory.newSAXParser();
       // create a new Xml document handler
