@@ -10,9 +10,10 @@ package gate.util;
 
 import java.io.*;
 import java.lang.reflect.*;
+import java.util.*;
 
-import sun.tools.java.*;
-import sun.tools.javac.*;
+import sun.toolsx.java.*;
+import sun.toolsx.javac.*;
 
 
 /** Jdk encapsulates some utilities for poking around in your Java
@@ -78,113 +79,41 @@ public class Jdk {
     );
   } // getToolsHome
 
-  /** Compile a class.
-    * @param javaSourceFile should have the package path to the source, e.g.
+  /** Compile a class from its source code string.
+    * @param className should have the package path to the source, e.g.
     * com/thing/MyClass.java.
     */
-  public byte[] compile(File javaSourceFile) throws GateException {
+  public byte[] compile(String javaCode, String className)
+  throws GateException {
+    sun.toolsx.javac.Main compiler = new sun.toolsx.javac.Main(
+      System.out, "gate.util.Jdk"
+    );
+    String argv[] = new String[3];
+    argv[0] = "-nodisk";
+    argv[1] = className;
+    argv[2] = javaSource;
+    compiler.compile(argv);
+    List compilerOutput = compiler.getCompilerOutput();
 
-    // see if we can find the sun compiler class
-    Class sunCompilerClass = null;
-    try {
-      sunCompilerClass = Class.forName("sun.tools.javac.Main");
-    } catch(ClassNotFoundException e) {
-      sunCompilerClass = null;
-    }
-/*
-    // if it's 1.2, we can't support the compiler class at present
-    String jversion = System.getProperty("java.version");
-    if(jversion == null || jversion.startsWith("1.2"))
-      sunCompilerClass = null;
-
-
-    // if we have the sun compiler class, try to use it directly
-    if(sunCompilerClass != null) {
-      // none-reflection version:
-      // sun.tools.javac.Main compiler =
-      //   new sun.tools.javac.Main(System.err, "RhsCompiler");
-      // String toBeCompiled[] = new String[1];
-      // toBeCompiled[0] = actionClassJavaFileName;
-      // boolean compiledOk = compiler.compile(toBeCompiled);
-
-      Boolean compiledOk = new Boolean(false);
-      try {
-        // get the compiler constructor
-        Class[] consTypes = new Class[2];
-        consTypes[0] = OutputStream.class;
-        consTypes[1] = String.class;
-        Constructor compilerCons = sunCompilerClass.getConstructor(consTypes);
-
-        // get an instance of the compiler
-        Object[] consArgs = new Object[2];
-        consArgs[0] = System.err;
-        consArgs[1] = "RhsCompiler";
-        Object sunCompiler = compilerCons.newInstance(consArgs);
-
-        // get the compile method
-        Class[] compilerTypes = new Class[1];
-        compilerTypes[0] = String[].class;
-        Method compileMethod = sunCompilerClass.getDeclaredMethod(
-          "compile", compilerTypes
-        );
-
-        // call the compiler
-        String toBeCompiled[] = new String[1];
-        toBeCompiled[0] = javaSourceFile.getPath();
-        Object[] compilerArgs = new Object[1];
-        compilerArgs[0] = toBeCompiled;
-        compiledOk = (Boolean) compileMethod.invoke(sunCompiler, compilerArgs);
-
-      // any exceptions mean the reflection stuff failed, as the compile
-      // method doesn't throw any. so (apart from RuntimeExceptions) we just
-      // print a warning and go on to try execing javac
-      } catch(RuntimeException e) { // rethrow runtime exceptions as they are
-        throw e;
-      } catch(Exception e) { // print out other sorts, and try javac exec
-        compiledOk = new Boolean(false);
-        System.err.println(
-          "Warning: RHS compiler error: " + e.toString()
-        );
-      }
-
-      if(compiledOk.booleanValue())
-        return null;
-    }
-
-    // no sun compiler: try execing javac as an external process
-    Runtime runtime = Runtime.getRuntime();
-    try {
-      String actionCompileCommand = new String(
-        "javac -classpath " +
-        System.getProperty("java.class.path") +
-        " " + javaSourceFile.getPath()
+    Iterator iter = compilerOutput.iterator();
+    while(iter.hasNext()) {
+      byte[] classBytes = (byte[]) iter.next();
+      assert(
+	"no bytes returned from compiler",
+	classBytes != null && classBytes.length > 0
       );
 
-      Process actionCompile = runtime.exec(actionCompileCommand);
-      //InputStream stdout = actionCompile.getInputStream();
-      //InputStream stderr = actionCompile.getErrorStream();
-      actionCompile.waitFor();
+      return classBytes
+    } // while
 
-      //System.out.flush();
-      //while(stdout.available() > 0)
-      //  System.out.print((char) stdout.read());
-      //while(stderr.available() > 0)
-      //  System.out.print((char) stderr.read());
-      //System.out.flush();
+    throw new GateException("no compiler output");
+  } // compile(String, String)
 
-    } catch(Exception e) {
-      throw new GateException(
-        "couldn't compile " + javaSourceFile + ": " + e.toString()
-      );
-    }
-*/
-    return null;
-  } // compile(File)
 
-    /** Read the bytes for a class.
-      * @param classFileName should have the path to the .class
-      * file, e.g. com/thing/MyClass.class.
-      */
+  /** Read the bytes for a class.
+    * @param classFileName should have the path to the .class
+    * file, e.g. com/thing/MyClass.class.
+    */
   public byte[] readClass(String classFileName) throws GateException {
     byte[] classBytes = null;
     try {
@@ -261,33 +190,84 @@ public class Jdk {
 
 
 /** Sun compiler wrapper */
-class SunCompiler {
+class SunCompiler extends /*BatchEnvironment*/ Main
+implements ErrorConsumer {
 
   SunCompiler() {
+    //for Main: super(System.out, "gate.util.Jdk.SunCompiler");
+    super(System.out, "gate.util.Jdk.SunCompiler");
+    //for BEnv: super(new ClassPath(System.getProperty("java.class.path")));
   }
 
   /** Compile a string and return the binary image of the resultant
     * class.
     */
-  byte[] compile(String javaCode, String className) throws Exception /*****/ {
+  byte[] compile(String javaCode, String className) throws GateException {
     boolean status = false;
-    byte[] binary = null;
     ByteArrayOutputStream buf = new ByteArrayOutputStream(4069);
 
     // construct the compilation environment
     BatchEnvironment env = new BatchEnvironment(
       System.out,
-      new ClassPath(System.getProperty("java.class.path"))
+      new ClassPath(System.getProperty("java.class.path")),
+      this
     );
 
     // parse the code
-    env.parseFile(new StringClassFile(javaCode, className));
+    try {
+      env.parseFile(new StringClassFile(javaCode, className));
+    } catch(IOException e) {
+      throw new GateException("Couldn't parse " + className + e);
+    }
 
-    // 
+    // check the class
+    Enumeration classes = env.getClasses();
+    ClassDeclaration classDecl = (ClassDeclaration)classes.nextElement();
+    SourceClass src = null;
+    try {
+      src = (SourceClass) classDecl.getClassDefinition(env);
+      src.check(env);
+    } catch(ClassNotFound e) {
+      throw new GateException("Couldn't find class " + className + e);
+    }
+//pushError("thingFile", 315, "hello", "refText", "refTextPtr");
+    if(src.getError())
+      throw new GateException("Parse errors on " + className);
+
+    // compile the class
+    classes = env.getClasses();
+    classDecl = (ClassDeclaration)classes.nextElement();
+    src = null;
+    try {
+      src = (SourceClass) classDecl.getClassDefinition(env);
+      src.compile(buf);
+    } catch(ClassNotFound e) {
+      throw new GateException("Couldn't find class " + className + e);
+    } catch(InterruptedException e) {
+      throw new GateException("Interrupted on class " + className + e);
+    } catch(IOException e) {
+      throw new GateException("IOException on class " + className + e);
+    }
+    if(src.getNestError())
+      throw new GateException("Compile errors on " + className);
+
 
     // return the binary image of the class
-    return binary;
-  } // compile(String javaCode)
+    return buf.toByteArray();
+} // compile(String javaCode)
+
+  /** Consume errors from the compiler */
+  public void pushError(
+    String errorFileName, int line, String message,
+    String referenceText, String referenceTextPointer
+  ) {
+    String nl = Strings.getNl();
+    System.out.println(
+      "Error compiling: " + errorFileName + " at line " + line + ":" + nl +
+      message + nl + "referenceText: " + referenceText + nl +
+      "referenceTextPointer: " + referenceTextPointer
+    );
+  } // pushError
 
 } // SunCompiler
 
@@ -295,7 +275,7 @@ class SunCompiler {
 /** A wrapper for the Sun ClassFile class that adds the ability to
   * construct from a String containing the Java code for the class
   */
-class StringClassFile extends sun.tools.java.ClassFile {
+class StringClassFile extends sun.toolsx.java.ClassFile {
   /** The source code. */
   private String javaCode = null;
 
@@ -314,4 +294,8 @@ class StringClassFile extends sun.tools.java.ClassFile {
   } // getInputStream
 
 } // StringClassFile
+
+
+
+
 
