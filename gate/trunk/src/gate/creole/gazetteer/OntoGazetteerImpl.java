@@ -22,8 +22,10 @@ import gate.creole.*;
 
 import java.io.*;
 
-/** implementation of onto gazetteer
- *  @todo: ? create factories for mappingDefinition and other lrs? */
+/** OntoGazetteerImpl <br>
+ *  An ontology-aware gazetteer, producing additional annotations
+ *  with features [class] and [ontology].
+ */
 public class OntoGazetteerImpl extends AbstractOntoGazetteer {
 
   public OntoGazetteerImpl() {
@@ -33,7 +35,8 @@ public class OntoGazetteerImpl extends AbstractOntoGazetteer {
     return gaz.lookup(singleItem);
   }
 
-  /** initialize this onto gazetteer */
+  /** Initialize this onto gazetteer
+   *  @return .*/
   public Resource init() throws ResourceInstantiationException {
     try {
       checkParameters();
@@ -60,7 +63,8 @@ public class OntoGazetteerImpl extends AbstractOntoGazetteer {
     return this;
   } // init
 
-  /** execute this onto gazetteer over a pre-set document */
+  /** Executes this onto gazetteer over a pre-set document
+   *  @throws ExecutionException if something goes wrong with the execution */
   public void execute()throws ExecutionException {
     if (null == gaz) {
       throw new ExecutionException("gazetteer not initialized (null).");
@@ -73,6 +77,10 @@ public class OntoGazetteerImpl extends AbstractOntoGazetteer {
     gaz.execute();
   } // execute
 
+  /**
+   * Checks the parameters set to this gazetteer
+   * @throws ResourceInstantiationException if something goes wrong
+   */
   private void checkParameters() throws ResourceInstantiationException {
     boolean set = null!=gazetteerName;
     set &= null!=listsURL;
@@ -84,10 +92,21 @@ public class OntoGazetteerImpl extends AbstractOntoGazetteer {
 
   } // checkParameters
 
+  /**
+   * Removes a single string item from the gazetteer model
+   * @param singleItem removes a string item from the gazetteer model
+   * @return true if the string is removed from the model, otherwise - false
+   */
   public boolean remove(String singleItem) {
     return gaz.remove(singleItem);
   }
 
+  /**
+   * Adds a string item to the model and associates it with a Lookup
+   * @param singleItem the string item to be added
+   * @param lookup the lookup to be associated with the string item
+   * @return true if the item has been added, otherwise - false.
+   */
   public boolean add(String singleItem, Lookup lookup) {
     return gaz.add(singleItem,lookup);
   }

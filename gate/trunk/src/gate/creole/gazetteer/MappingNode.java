@@ -17,16 +17,19 @@ package gate.creole.gazetteer;
 
 
 
-/**represents a single node of the mapping definition*/
+/**Represents a single node from the mapping definition*/
 public class MappingNode{
 
+  /** the gazetteer list filename */
   private String list;
+  /** the class associated with the list */
   private String classID;
+  /** the ontology to which the class belongs */
   private String ontologyID;
 
-  /**create a new mapping node
+  /**Creates a new mapping node given a string representation.
    * @param node a node from the mapping definition
-   * @throws InvalidFormatException
+   * @throws InvalidFormatException if the node is misformatted
    */
   public MappingNode(String node) throws InvalidFormatException {
     int firstColumn = node.indexOf(':');
@@ -39,10 +42,10 @@ public class MappingNode{
     classID = node.substring(lastColumn+1);
   }// MappingNode construct
 
-  /**create a new mapping node
-   * @param aList
-   * @param anOntologyID
-   * @param aClassID
+  /**Creates a new mapping node given its members
+   * @param aList the gaz list file name
+   * @param anOntologyID the ontology
+   * @param aClassID the class
    */
   public MappingNode(String aList, String anOntologyID,String aClassID) {
     list = aList;
@@ -50,42 +53,46 @@ public class MappingNode{
     ontologyID = anOntologyID;
   }
 
-  /**set list to the node
-   * @param aList the list */
+  /**Sets gaz list for the node
+   * @param aList a gazetteer list file name */
   public void setList(String aList) {
     list = aList;
   }
 
-  /** get the list of the node
-   *  @return the list */
+  /** Gets the list of the node
+   *  @return the gazetteer list file name*/
   public String getList(){
     return list;
   }
 
-  /** set the class ID {? maybe the class name }
+  /** Sets the class ID
    * @param theClassID  the class id */
   public void setClassID(String theClassID) {
     classID = theClassID;
   }
 
-  /** get the class id
+  /** Gets the class id
    *  @returm the class id  */
   public String getClassID(){
     return classID;
   }
 
-  /** set the ontology id
-   *  @param id the ontology id   */
+  /** Sets the ontology id
+   *  @param id the ontology id */
   public void setOntologyID(String id) {
     ontologyID = id;
   }
 
-  /** get the ontology id
+  /** Gets the ontology id
    *  @return the ontology id  */
   public String getOntologyID(){
     return ontologyID;
   }
 
+  /**
+   * Gets the string representation of the node
+   * @return the string representation of the node
+   */
   public String toString() {
     return list + ":" + ontologyID + ":" + classID;
   }

@@ -20,9 +20,6 @@ import gate.util.*;
 /** Used to signal Gazetteer specific exceptions */
 public class GazetteerException extends GateException {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   public GazetteerException(String s) {
     super(s);
   }

@@ -21,7 +21,7 @@ import java.io.*;
 import gate.creole.*;
 
 
-/** represents a lists.def file <br>
+/** Represents a Linear Definition [lists.def] file <br>
  *  The normal usage of the class will be
  *  * construct it
  *  * setURL
@@ -32,9 +32,13 @@ import gate.creole.*;
 public class LinearDefinition extends gate.creole.AbstractLanguageResource
                               implements List {
 
+  /** the default encoding of the definition */
   private final static String ENCODING = "UTF-8";
 
+  /** the list of nodes */
   private List nodes = new ArrayList();
+
+  /** the URL of the definition */
   private URL url;
 
   /** set of lists as strings*/
@@ -55,20 +59,20 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   public LinearDefinition() {
   }
 
-  /** set the encoding of the linear def
+  /** Sets the encoding of the linear def
    *  @param encod the encoding to be set */
   public void setEncoding(String encod) {
     encoding = encod;
   }
 
-  /** get the encoding of the linear def
+  /** Gets the encoding of the linear def
    *  @return the encoding of the list*/
   public String getEncoding() {
     return encoding;
   }
 
   /**
-   * loads the gazetteer lists and maps them to the nodes
+   * Loads the gazetteer lists and maps them to the nodes
    * @return a map of nodes vs GazetteerLists
    * @throws ResourceInstantiationException
    */
@@ -141,39 +145,39 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     return list;
   } // loadSingleList
 
-  /**get the lists by node map
+  /**Gets the lists by node map
    * @return a map of nodes vs lists*/
   public Map getListsByNode(){
     return gazListsByNode;
   }
 
-  /** get a map of lists names vs nodes
+  /** Gets a map of lists names vs nodes
    *  @return a map of lists names vs nodes*/
   public Map getNodesByListNames() {
      return nodesByList;
   }
 
-  /**returns the value of the isModified flag.
+  /**Gets the value of the isModified flag.
    * @return true if the definition has been modified    */
   public boolean  isModified() {
     return isModified;
   }
 
-  /**get the url of this linear definition
+  /**Gets the url of this linear definition
    * @return the url of this linear definition   */
   public URL getURL() {
     return url;
   }
 
 
-  /**set the url of this linear definition
+  /**Sets the url of this linear definition
    * @param aUrl the url of this linear definition   */
   public void setURL(URL aUrl) {
     url = aUrl;
   }
 
   /**
-   * load linear definition if url is set
+   * Loads linear definition if url is set
    */
   public void load() throws ResourceInstantiationException {
     if (null == url) {
@@ -198,7 +202,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   } // load();
 
   /**
-   * sotres this to a definition file
+   * Stores this to a definition file.
    */
   public void store() throws ResourceInstantiationException{
     if (null == url) {
@@ -229,6 +233,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   } // store();
 
   /**
+   * Gets gazetteer lists of this definition.
    * note that a new list is created so the adding and removing of lists will
    * not affect the internal members. Also there is no setLists method since the leading
    * member of the class is nodes, and lists cannot be added individually without being
@@ -501,8 +506,8 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
 
 
  /*-----------internal classes -------------*/
- /**this class provides an iterator which is safe to be iterated and objects removed from it*/
 
+ /**SafeIterator class provides an iterator which is safe to be iterated and objects removed from it*/
   private class SafeIterator implements Iterator {
     private Iterator iter = LinearDefinition.this.nodes.iterator();
     private boolean removeCalled = false;

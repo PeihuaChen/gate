@@ -19,18 +19,31 @@ package gate.creole.ontology;
 import java.net.URL;
 import gate.util.GateException;
 
-/** exception thrown when an invalid format of an ontology file is detected */
+/** An exception thrown when invalid format of an ontology file is detected */
 public class InvalidFormatException extends GateException{
 
+  /** the ontology file */
   private String file;
+  /** the url of the file */
   private URL url;
 
+  /** The basic exception message */
   private final static String MSG = "Invalid format of file is detected; file: ";
 
+  /**
+   * Construction given file and comment
+   * @param file the ontology file
+   * @param comment comment of the exception
+   */
   public InvalidFormatException(String file,String comment) {
     super(MSG+file+"\n"+(null==comment ? "" : comment));
   }
 
+  /**
+   * Construction given file URL and comment
+   * @param url the ontology url
+   * @param comment comment of the exception
+   */
   public InvalidFormatException(URL url,String comment) {
     super(MSG+url.toString()+"\n"+(null==comment ? "" : comment));
   }
@@ -39,10 +52,18 @@ public class InvalidFormatException extends GateException{
     super(MSG);
   }
 
+  /**
+   * Gets the file associated with this exception
+   * @return the file associated with this exception
+   */
   public String getFile(){
     return file;
   }
 
+  /**
+   * Gets the URL associated with this exception
+   * @return the URL associated with this exception
+   */
   private URL getURL() {
     return url;
   }

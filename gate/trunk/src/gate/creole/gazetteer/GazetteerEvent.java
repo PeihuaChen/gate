@@ -18,10 +18,11 @@ import gate.event.GateEvent;
  * Gazetteer Event to be used whenever an event needs to be fired and spread
  * among Gazetteer Listeners */
 public class GazetteerEvent extends GateEvent {
+
   /**gazetteer reinitialized event*/
   public static final int REINIT = 1;
 
-  /**
+  /**Creates a gazetteer event
    * @param source the Object that generated the event
    * @param type the tupe of the event
    */

@@ -22,27 +22,27 @@ import java.util.*;
  * according to a mapping definition between lists and ontology classes*/
 public interface OntoGazetteer extends Gazetteer {
 
-  /**set name of the gazzetteer
+  /**Sets name of the gazzetteer
    * @param name the name to be set   */
   public void setGazetteerName(String name) ;
 
-  /** get the name of the gazetteer
+  /** Gets the name of the gazetteer
    *  @return the name of the gazetteer  */
   public String getGazetteerName();
 
-  /**get the linear gazetteer associated with this onto gazetteer
+  /**Gets the linear gazetteer associated with this onto gazetteer
    * @return the linear gazetteer */
   public Gazetteer getGazetteer();
 
-  /**associate a linear gazetteer with an onto gazetteer
+  /**Associates a linear gazetteer with an onto gazetteer
    * @param gaze the linear gazetteer to be associated with this onto gazetteer */
   public void setGazetteer(Gazetteer gaze);
 
-  /**set the url of the mapping definition
+  /**Sets the url of the mapping definition
    * @param url the url of the mapping definition  */
   public void setMappingURL(java.net.URL url) ;
 
-  /**get the url of the mapping definition
+  /**Gets the url of the mapping definition
    * @return the url of the mapping definition  */
   public java.net.URL getMappingURL() ;
 

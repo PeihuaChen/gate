@@ -21,7 +21,8 @@ import gate.util.*;
 
 import java.util.*;
 
-/**AbstractGazetteer*/
+/**AbstractGazetteer
+ * This class implements the common-for-all methods of the Gazetteer interface*/
 public abstract class AbstractGazetteer
   extends gate.creole.AbstractLanguageAnalyser implements Gazetteer {
 
@@ -35,6 +36,7 @@ public abstract class AbstractGazetteer
   /** A map of the features */
   protected FeatureMap features  = null;
 
+  /** the encoding of the gazetteer */
   protected String encoding = "UTF-8";
 
   /**
@@ -103,8 +105,8 @@ public abstract class AbstractGazetteer
     return mappingDefinition;
   }
 
-  /**get the linear definition of this gazetteer. there is no parallel
-   * set method because the definition is laoded through the listsUrl
+  /**Gets the linear definition of this gazetteer. there is no parallel
+   * set method because the definition is loaded through the listsUrl
    * on init().
    * @return the linear definition of the gazetteer */
   public LinearDefinition getLinearDefinition() {
