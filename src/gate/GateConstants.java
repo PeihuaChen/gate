@@ -104,4 +104,8 @@ public interface GateConstants {
 
 //  /** The index type of corpus*/
 //  public static final int IR_LUCENE_INVFILE = 1001;
+
+  /** Property for document new line type. Values {"CR", "LF", "CRLF", "LFCR"}*/
+  public static final String DOCUMENT_NEW_LINE_TYPE = "docNewLineType";
+
 } // GateConstants
