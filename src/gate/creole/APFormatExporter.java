@@ -123,6 +123,17 @@ public class APFormatExporter extends AbstractLanguageAnalyser
     return source;
   }// getSource()
 
+  /** Java bean style accesor for isSourceWritten */
+  public Boolean getIsSourceWritten() {
+    return new Boolean(isSourceWritten);
+  }
+
+  /** Java bean style mutator for isSourceWritten */
+  public void setIsSourceWritten(Boolean aIsSourceWritten){
+    isSourceWritten = aIsSourceWritten.booleanValue();
+  }// setIsSourceWritten();
+
+
 
   /** Initialises the docId with documents' file name without the complete path*/
   private void initDocId(){
@@ -157,8 +168,10 @@ public class APFormatExporter extends AbstractLanguageAnalyser
     else
       xmlDoc.append("\""+dtdFileName+"\"");
     xmlDoc.append(">\n");
-    xmlDoc.append("<source_file TYPE=\"text\" SOURCE=\""+
-                                    source+ "\" VERSION=\"1.2\" URI=\"");
+    xmlDoc.append("<source_file TYPE=\"text\"");
+    if (isSourceWritten)
+      xmlDoc.append(" SOURCE=\""+ source+ "\"");
+    xmlDoc.append("VERSION=\"1.2\" URI=\"");
     xmlDoc.append(docId);
     xmlDoc.append("-lf\">\n");
     xmlDoc.append("  <document DOCID=\"");
@@ -374,5 +387,9 @@ public class APFormatExporter extends AbstractLanguageAnalyser
 
   /** The source attribute for source*/
   private String source = null;
+
+  /** The source attribute for source*/
+  private boolean isSourceWritten = true;
+
 
 }// APFormatExporter
