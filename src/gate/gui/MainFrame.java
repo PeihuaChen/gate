@@ -1263,23 +1263,10 @@ public class MainFrame extends JFrame
                                            null, options, null);
 
         //build the dialog
-        JDialog dialog;
-        String title = "Please wait...";
-        Window window = SwingUtilities.getWindowAncestor(
-          (Component)((ArrayList)getGuiRoots()).get(0));
-        if(window == null) window = JOptionPane.getRootFrame();
-        if (window instanceof Frame) {
-            dialog = new JDialog((Frame)window, title, true);
-        } else {
-            dialog = new JDialog((Dialog)window, title, true);
-        }
-        dialog.getContentPane().setLayout(new BorderLayout());
-        dialog.getContentPane().add(pane, BorderLayout.CENTER);
-
-        dialog.setResizable(false);
-        dialog.pack();
-        dialog.setLocationRelativeTo((Component)
-                                     ((ArrayList)getGuiRoots()).get(0));
+        JDialog dialog = pane.createDialog((Component)
+                                           ((ArrayList)getGuiRoots()).get(0),
+                                           "Please wait...");
+        dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
         guiLock = dialog;
         guiLock.show();
       }
