@@ -23,7 +23,10 @@ import junit.framework.*;
 import gate.*;
 import gate.util.*;
 import gate.creole.*;
-import gate.creole.nerc.*;
+import gate.creole.tokeniser.*;
+import gate.creole.splitter.*;
+import gate.creole.gazetteer.*;
+import gate.creole.orthomatcher.*;
 
 
 /**
@@ -279,16 +282,28 @@ public class CookBook extends TestCase
     Gate.init();
 
     // create some processing resources
-    // NOTE: for now we're using NERC, a composite NE recogniser
     Out.prln("creating PRs");
-    // DefaultTokeniser tok = (DefaultTokeniser)
-    //   Factory.createResource("gate.creole.tokeniser.DefaultTokeniser");
-    // SentenceSplitter split = (SentenceSplitter)
-    //   Factory.createResource("gate.creole.splitter.SentenceSplitter");
-    // POSTagger tag = (POSTagger)
-    //   Factory.createResource("gate.creole.POSTagger");
-    Nerc nerc =
-      (Nerc) Factory.createResource("gate.creole.nerc.Nerc");
+    //create a tokeniser
+    DefaultTokeniser tokeniser = (DefaultTokeniser)Factory.createResource(
+                                      "gate.creole.tokeniser.DefaultTokeniser");
+    //create a sentence splitter
+    SentenceSplitter splitter = (SentenceSplitter)Factory.createResource(
+                                      "gate.creole.splitter.SentenceSplitter");
+    //create a POS tagger
+    POSTagger tagger = (POSTagger)Factory.createResource(
+                                      "gate.creole.POSTagger");
+
+    //create  a gazetteer
+    DefaultGazetteer gazetteer = (DefaultGazetteer)Factory.createResource(
+                                      "gate.creole.gazetteer.DefaultGazetteer");
+
+    //create a grammar
+    ANNIETransducer transducer = (ANNIETransducer)Factory.createResource(
+                                      "gate.creole.ANNIETransducer");
+
+    //create an orthomatcher
+    OrthoMatcher orthomatcher = (OrthoMatcher) Factory.createResource(
+                                "gate.creole.orthomatcher.OrthoMatcher");
 
     // make the "out" directory that will contain the results.
     String outDirName =
@@ -310,7 +325,7 @@ public class CookBook extends TestCase
     // main loop:
     // for each document
     //   create a gate doc
-    //   set as the document for hte PRs
+    //   set as the document for the PRs
     //   run the PRs
     //   dump output from the doc to out/gate__.....txt
     //   delete the doc
@@ -335,16 +350,20 @@ public class CookBook extends TestCase
       );
 
       // set the document param on the PRs
-      // tok.setDocument(doc);
-      // split.setDocument(doc);
-      // tag.setDocument(doc);
-      nerc.setDocument(doc);
+       tokeniser.setDocument(doc);
+       splitter.setDocument(doc);
+       tagger.setDocument(doc);
+       gazetteer.setDocument(doc);
+       transducer.setDocument(doc);
+       orthomatcher.setDocument(doc);
 
       // run each PR
-      // tok.execute();
-      // split.execute();
-      // tag.execute();
-      nerc.execute();
+      tokeniser.execute();
+      splitter.execute();
+      tagger.execute();
+      gazetteer.execute();
+      transducer.execute();
+      orthomatcher.execute();
 
       // dump out results
 
