@@ -37,10 +37,23 @@ public class Scratch
   private static final boolean DEBUG = false;
 
   public static void main(String args[]) throws Exception {
+
+    HashMap map = new HashMap();
+    map.put(null, "a");
+    Iterator keyIter = map.keySet().iterator();
+    while(keyIter.hasNext()){
+      Object key = keyIter.next();
+      Object value = map.get(key);
+      Out.prln(key + ">" + value);
+      keyIter.remove();
+    }
+
+
+
     // initialise the thing
-    Gate.setNetConnected(false);
-    Gate.setLocalWebServer(false);
-    Gate.init();
+//    Gate.setNetConnected(false);
+//    Gate.setLocalWebServer(false);
+//    Gate.init();
 
 //    Scratch oneOfMe = new Scratch();
 //    try{
@@ -50,9 +63,9 @@ public class Scratch
 //    }
 
 
-    CreoleRegister reg = Gate.getCreoleRegister();
-System.out.println("Instances for " + reg.getLrInstances("gate.creole.AnnotationSchema"));
-System.out.println("Instances for " + reg.getAllInstances ("gate.creole.AnnotationSchema"));
+//    CreoleRegister reg = Gate.getCreoleRegister();
+//System.out.println("Instances for " + reg.getLrInstances("gate.creole.AnnotationSchema"));
+//System.out.println("Instances for " + reg.getAllInstances ("gate.creole.AnnotationSchema"));
 
 //System.out.println("VRs for " + reg.getAnnotationVRs("Tree"));
 //System.out.println("VRs for " + reg.getAnnotationVRs());

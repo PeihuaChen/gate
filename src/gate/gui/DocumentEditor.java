@@ -48,7 +48,8 @@ import java.io.*;
  * annotations will be restricted to a very crude method allowing the user to
  * add any type of annotations having any features with any String values.
  */
-public class DocumentEditor extends AbstractVisualResource{
+public class DocumentEditor extends AbstractVisualResource
+                            implements ANNIEConstants{
   //properties
   private transient PropertyChangeSupport propertyChangeListeners =
                                           new PropertyChangeSupport(this);
@@ -1264,7 +1265,7 @@ public class DocumentEditor extends AbstractVisualResource{
 
     Map matchesMap = null;
     try{
-      matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
+      matchesMap = (Map)document.getFeatures().get(DOCUMENT_COREF_FEATURE_NAME);
     }catch(Exception e){
     }
     if(matchesMap == null){
@@ -1282,6 +1283,40 @@ public class DocumentEditor extends AbstractVisualResource{
       setCorefOptionAvailable(false);
       return;
     }
+
+    //matches map is not null; check whether it's valid
+    Iterator setsIter = matchesMap.keySet().iterator();
+    setsLoop: while(setsIter.hasNext()){
+      String setName = (String)setsIter.next();
+      AnnotationSet annSet = setName == null ? document.getAnnotations() :
+                                               document.getAnnotations(setName);
+      Iterator entitiesIter = ((java.util.List)matchesMap.get(setName)).
+                              iterator();
+      //each entity is a list of annotation IDs
+      while(entitiesIter.hasNext()){
+        Iterator idsIter = ((java.util.List)entitiesIter.next()).iterator();
+        while(idsIter.hasNext()){
+          if(annSet.get((Integer)idsIter.next()) == null){
+            //remove the data for this set
+            setsIter.remove();
+            Err.prln("Coreference data for the \"" +
+                     (setName == null ? "Default" : setName) +
+                      "\" annotation set of document \"" + document.getName() +
+                     "\" was invalid and has been removed");
+            continue setsLoop;
+          }
+        }
+      }
+    }
+
+    if(matchesMap.isEmpty()){
+      //no more coref data
+      corefTreeRoot.removeAllChildren();
+      corefTreeModel.nodeStructureChanged(corefTreeRoot);
+      setCorefOptionAvailable(false);
+      return;
+    }
+
     String[] newSetNames = (String[])
                            matchesMap.keySet().toArray(new String[]{});
     Arrays.sort(newSetNames);
@@ -1550,7 +1585,7 @@ public class DocumentEditor extends AbstractVisualResource{
       if(document == null || document.getFeatures() == null) return 0;
       Map matchesMap = null;
       try{
-        matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
+        matchesMap = (Map)document.getFeatures().get(DOCUMENT_COREF_FEATURE_NAME);
       }catch(Exception e){
         e.printStackTrace();
       }
@@ -1569,7 +1604,7 @@ public class DocumentEditor extends AbstractVisualResource{
       if(document == null || document.getFeatures() == null) return null;
       Map matchesMap = null;
       try{
-        matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
+        matchesMap = (Map)document.getFeatures().get(DOCUMENT_COREF_FEATURE_NAME);
       }catch(Exception e){
         e.printStackTrace();
       }
@@ -1869,7 +1904,7 @@ if(!highlights.isEmpty()){
       if(document == null || document.getFeatures() == null) return 0;
       Map matchesMap = null;
       try{
-        matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
+        matchesMap = (Map)document.getFeatures().get(DOCUMENT_COREF_FEATURE_NAME);
       }catch(Exception e){
         e.printStackTrace();
       }
@@ -1886,7 +1921,7 @@ if(!highlights.isEmpty()){
       if(document == null || document.getFeatures() == null) return null;
       Map matchesMap = null;
       try{
-        matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
+        matchesMap = (Map)document.getFeatures().get(DOCUMENT_COREF_FEATURE_NAME);
       }catch(Exception e){
         e.printStackTrace();
       }
@@ -1992,7 +2027,7 @@ if(!highlights.isEmpty()){
   }
 
   /**
-   * A tree node renderer used byt the coref tree
+   * A tree node renderer used by the coref tree
    */
   class CorefNodeRenderer implements TreeCellRenderer{
 
@@ -2784,8 +2819,9 @@ Out.prln("NULL size");
           SwingUtilities.invokeLater(new HighlightsRemover(ann));
         }//if(tData.getVisible())
         //if this was the last annotation of this type remove the type node
-        if(tData.annotations.size() == 1 &&
-           tData.annotations.iterator().next() == ann){
+        if((tData.annotations.size() == 1 &&
+           tData.annotations.iterator().next() == ann) ||
+           tData.annotations.size() == 0){
           //no more annotations of this type -> delete the node
           //first find the set
           DefaultMutableTreeNode node = (DefaultMutableTreeNode)
