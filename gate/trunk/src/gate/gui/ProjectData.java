@@ -19,11 +19,14 @@ import java.util.*;
 
 import javax.swing.tree.*;
 
+import gate.util.*;
+
+
 public class ProjectData {
 
   public ProjectData(File projectFile, MainFrame frame) {
     this.projectFile = projectFile;
-    this.projectFileName = projectFile.getAbsolutePath();
+    //this.projectFileName = projectFile.getAbsolutePath();
     this.frame = frame;
     appList = new ArrayList();
     dsList = new ArrayList();
@@ -38,7 +41,7 @@ public class ProjectData {
   public void addApplication(ApplicationHandle newApp){
     appList.add(newApp);
   }
-  public void remove(ResourceHandle handle){
+  public void remove(CustomResourceHandle handle){
     if(handle instanceof ApplicationHandle){
       appList.remove(handle);
       frame.remove(handle);
@@ -58,15 +61,20 @@ public class ProjectData {
   public void addLR(LRHandle newLR){
     lrList.add(newLR);
   }
+
   List getLRList(){
-    return lrList;
+    List result = new ArrayList();
+    result.addAll(Gate.getCreoleRegister().getLrInstances());
+    return result;
   }
 
   public void addPR(PRHandle newPR){
     prList.add(newPR);
   }
   List getPRList(){
-    return prList;
+    List result = new ArrayList();
+    result.addAll(Gate.getCreoleRegister().getPrInstances());
+    return result;
   }
 
   transient File projectFile;

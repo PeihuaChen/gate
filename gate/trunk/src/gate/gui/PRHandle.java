@@ -19,18 +19,18 @@ import gate.*;
 import javax.swing.*;
 import java.awt.event.*;
 
-public class PRHandle extends ResourceHandle {
+public class PRHandle extends CustomResourceHandle {
 
   public PRHandle(ProcessingResource res, ProjectData project) {
     super(res, project);
     if(res instanceof gate.creole.tokeniser.DefaultTokeniser){
-      setSmallIcon(new ImageIcon(
+      setIcon(new ImageIcon(
              getClass().getResource("/gate/resources/img/shefTokeniser.gif")));
     }else if(res instanceof gate.creole.gazetteer.DefaultGazetteer){
-      setSmallIcon(new ImageIcon(
+      setIcon(new ImageIcon(
              getClass().getResource("/gate/resources/img/shefGazetteer.gif")));
     }else{
-      setSmallIcon(new ImageIcon(
+      setIcon(new ImageIcon(
              getClass().getResource("/gate/resources/img/genericPr.gif")));
     }
     popup = new JPopupMenu();
@@ -46,6 +46,7 @@ public class PRHandle extends ResourceHandle {
 
     public void actionPerformed(ActionEvent e){
       project.remove(myself);
+      Factory.deleteResource(resource);
     }
   }
 }

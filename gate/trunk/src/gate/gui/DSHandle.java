@@ -24,11 +24,11 @@ import javax.swing.tree.*;
 
 import java.util.*;
 
-public class DSHandle extends ResourceHandle {
+public class DSHandle extends CustomResourceHandle {
 
   public DSHandle(DataStore datastore, ProjectData project) {
     super((String)datastore.getFeatures().get("NAME"), project);
-    super.setSmallIcon(new ImageIcon(getClass().
+    super.setIcon(new ImageIcon(getClass().
                            getResource("/gate/resources/img/ds.gif")));
     this.datastore = datastore;
     initLocalData();
@@ -51,10 +51,10 @@ public class DSHandle extends ResourceHandle {
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(rData.getName());
         Iterator lrIDsIter = datastore.getLrIds(type).iterator();
         while(lrIDsIter.hasNext()){
+          String id = (String)lrIDsIter.next();
+          DSEntry entry = new DSEntry(datastore.getLrName(id), id, type);
           DefaultMutableTreeNode lrNode =
-            new DefaultMutableTreeNode(datastore.
-                                         getLrName((String)lrIDsIter.next()),
-                                       false);
+            new DefaultMutableTreeNode(entry, false);
           node.add(lrNode);
         }
         treeRoot.add(node);
@@ -72,6 +72,22 @@ public class DSHandle extends ResourceHandle {
   }
 
   protected void initListeners(){
+
+    tree.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+        if(SwingUtilities.isRightMouseButton(e)){
+          //where inside the tree?
+          TreePath path = tree.getPathForLocation(e.getX(), e.getY());
+          if(path != null){
+            Object value = ((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
+            if(value instanceof DSEntry){
+              JPopupMenu popup = ((DSEntry)value).getPopup();
+              popup.show(tree, e.getX(), e.getY());
+            }
+          }
+        }
+      }
+    });
   }
 
   class RefreshAction extends AbstractAction{
@@ -92,10 +108,10 @@ public class DSHandle extends ResourceHandle {
               DefaultMutableTreeNode node = new DefaultMutableTreeNode(rData.getName());
               Iterator lrIDsIter = datastore.getLrIds(type).iterator();
               while(lrIDsIter.hasNext()){
+                String id = (String)lrIDsIter.next();
+                DSEntry entry = new DSEntry(datastore.getLrName(id), id, type);
                 DefaultMutableTreeNode lrNode =
-                  new DefaultMutableTreeNode(datastore.
-                                               getLrName((String)lrIDsIter.next()),
-                                             false);
+                  new DefaultMutableTreeNode(entry, false);
                 node.add(lrNode);
               }
               treeRoot.add(node);
@@ -126,6 +142,76 @@ public class DSHandle extends ResourceHandle {
     }
   }
 
+  class LoadAction extends AbstractAction{
+    LoadAction(DSEntry entry){
+      super("Load");
+      this.entry = entry;
+    }
+
+    public void actionPerformed(ActionEvent e){
+      try{
+        FeatureMap params = Factory.newFeatureMap();
+        params.put("DataStore", datastore);
+        params.put("DataStoreInstanceId", entry.id);
+        Resource res = Factory.createResource(entry.type, params);
+        datastore.getLr(entry.type, entry.id);
+        project.frame.resourcesTreeModel.treeChanged();
+      }catch(gate.persist.PersistenceException pe){
+        JOptionPane.showMessageDialog(project.frame,
+                                      "Error!\n" + pe.toString(),
+                                      "Gate", JOptionPane.ERROR_MESSAGE);
+      }catch(ResourceInstantiationException rie){
+        JOptionPane.showMessageDialog(project.frame,
+                                      "Error!\n" + rie.toString(),
+                                      "Gate", JOptionPane.ERROR_MESSAGE);
+      }
+    }
+    DSEntry entry;
+  }
+
+  class DeleteAction extends AbstractAction{
+    DeleteAction(DSEntry entry){
+      super("Delete");
+      this.entry = entry;
+    }
+
+    public void actionPerformed(ActionEvent e){
+      try{
+        datastore.delete(entry.type, entry.id);
+        project.frame.resourcesTreeModel.treeChanged();
+      }catch(gate.persist.PersistenceException pe){
+        JOptionPane.showMessageDialog(project.frame,
+                                      "Error!\n" + pe.toString(),
+                                      "Gate", JOptionPane.ERROR_MESSAGE);
+      }
+    }
+    DSEntry entry;
+  }
+
+
+  class DSEntry{
+    DSEntry(String name, String id, String type){
+      this.name = name;
+      this.type = type;
+      this.id = id;
+      popup = new JPopupMenu();
+      popup.add(new LoadAction(this));
+      popup.add(new DeleteAction(this));
+    }
+
+    public String toString(){
+      return name;
+    }
+
+    public JPopupMenu getPopup(){
+      return popup;
+    }
+
+    String name;
+    String type;
+    String id;
+    JPopupMenu popup;
+  }
 
   JTree tree;
   DefaultMutableTreeNode treeRoot;

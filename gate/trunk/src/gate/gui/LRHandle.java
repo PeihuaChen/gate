@@ -23,11 +23,11 @@ import java.awt.event.*;
 
 import java.util.*;
 
-public class LRHandle extends ResourceHandle {
+public class LRHandle extends CustomResourceHandle {
 
   public LRHandle(LanguageResource res, ProjectData project) {
     super(res, project);
-    setSmallIcon(new ImageIcon(
+    setIcon(new ImageIcon(
            getClass().getResource("/gate/resources/img/lr.gif")));
     popup = new JPopupMenu();
     popup.add(new CloseAction());
@@ -50,6 +50,7 @@ public class LRHandle extends ResourceHandle {
 
     public void actionPerformed(ActionEvent e){
       project.remove(myself);
+      Factory.deleteResource(resource);
     }
   }
 
