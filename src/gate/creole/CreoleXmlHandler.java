@@ -65,6 +65,16 @@ public class CreoleXmlHandler extends DefaultHandler {
   /** This object indicates what to do when the parser encounts an error*/
   private SimpleErrorHandler _seh = new SimpleErrorHandler();
 
+  /** This field represents the params map required for autoinstantiation
+    * Its a map from param name to param value.
+    */
+  private FeatureMap currentAutoinstanceParams = null;
+
+  /** This field holds autoinstanceParams describing the resource that
+    * needs to be instantiated
+    */
+  private List currentAutoinstances = null;
+
   /** Construction */
   public CreoleXmlHandler(CreoleRegister register, URL directoryUrl) {
     this.register = register;
@@ -123,10 +133,41 @@ public class CreoleXmlHandler extends DefaultHandler {
     if(elementName.toUpperCase().equals("RESOURCE")) {
       resourceData = new ResourceData();
       resourceData.setFeatures(Factory.newFeatureMap());
-    }
+      currentAutoinstances = new ArrayList();
+    }// End if RESOURCE
 
     // record the attributes of this element
     currentAttributes = atts;
+
+    // When an AUTOINSTANCE element is found a params FeatureMap will
+    // be prepared in order for the resource to be instantiated
+    if (elementName.toUpperCase().equals("AUTOINSTANCE")){
+      currentAutoinstanceParams = Factory.newFeatureMap();
+    }// End if AUTOINSTANCE
+
+    // When a PARAN start element is found, the parameter would be instantiated
+    // with a value and added to the autoinstanceParams
+    if (elementName.toUpperCase().equals("PARAM")){
+      // The autoinstanceParams should always be != null because of the fact
+      // that PARAM is incuded into an AUTOINSTANCE element.
+      // IF a AUTOINSTANCE starting element would be missing then the
+      // parser would signal this later....
+      if (currentAutoinstanceParams == null)
+        currentAutoinstanceParams = Factory.newFeatureMap();
+      // Take the param's name and value
+      String paramName = currentAttributes.getValue("NAME");
+      String paramStrValue = currentAttributes.getValue("VALUE");
+      if (paramName == null)
+        throw new GateRuntimeException ("Found in creole.xml a PARAM element" +
+        " for resource "+ resourceData.getClassName()+ " without a NAME"+
+        " attribute. Check the file and try again.");
+      if (paramStrValue == null)
+        throw new GateRuntimeException("Found in creole.xml a PARAM element"+
+        " for resource "+ resourceData.getClassName()+ " without a VALUE"+
+        " attribute. Check the file and try again.");
+      // Add the paramname and its value to the autoinstanceParams
+      currentAutoinstanceParams.put(paramName,paramStrValue);
+    }// End if PARAM
 
     // process attributes of parameter and GUI elements
     if(elementName.toUpperCase().equals("PARAMETER")) {
@@ -208,9 +249,9 @@ public class CreoleXmlHandler extends DefaultHandler {
       if(resourceData.isAutoLoading())
         try {
           Resource res = Factory.createResource(
-            resourceData.getClassName(), Factory.newFeatureMap()
+              resourceData.getClassName(), Factory.newFeatureMap()
           );
-          resourceData.addInstantiation(res);
+          resourceData.makeInstantiationPersistant(res);
         } catch(ResourceInstantiationException e) {
           throw new GateSaxException(
             "Couldn't load autoloading resource: " +
@@ -230,8 +271,34 @@ public class CreoleXmlHandler extends DefaultHandler {
       currentParamList = new ParameterList();
 
       if(DEBUG) Out.println("added: " + resourceData);
-
+      // Iterate through autoinstances and try to instanciate them
+      if ( currentAutoinstances != null && !currentAutoinstances.isEmpty()){
+        Iterator iter = currentAutoinstances.iterator();
+        while (iter.hasNext()){
+          FeatureMap autoinstanceParams = (FeatureMap) iter.next();
+          iter.remove();
+          // Try to create the resource.
+          try {
+            Resource res = Factory.createResource(
+                              resourceData.getClassName(), autoinstanceParams);
+            resourceData.makeInstantiationPersistant(res);
+          } catch(ResourceInstantiationException e) {
+            throw new GateSaxException(
+              "Couldn't autoinstanciate resource: " +
+              resourceData.getName() + "; problem was: " + e
+            );
+          }// End try
+        }// End while
+      }// End if
+      currentAutoinstances = null;
     // End RESOURCE processing
+    //////////////////////////////////////////////////////////////////
+    } else if(elementName.toUpperCase().equals("AUTOINSTANCE")) {
+      //checkStack("endElement", "AUTOINSTANCE");
+      // Cash the autoinstance into the autoins
+      if (currentAutoinstanceParams != null)
+        currentAutoinstances.add(currentAutoinstanceParams);
+    // End AUTOINSTANCE processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("NAME")) {
       checkStack("endElement", "NAME");

@@ -49,9 +49,14 @@ public class Scratch
 //      e.printStackTrace(Out.getPrintWriter());
 //    }
 
+
     CreoleRegister reg = Gate.getCreoleRegister();
-System.out.println("VRs for " + reg.getAnnotationVRs("Tree"));
-System.out.println("VRs for " + reg.getAnnotationVRs());
+System.out.println("Instances for " + reg.getLrInstances("gate.creole.AnnotationSchema"));
+System.out.println("Instances for " + reg.getAllPublicInstances ("gate.creole.AnnotationSchema"));
+
+//System.out.println("VRs for " + reg.getAnnotationVRs("Tree"));
+//System.out.println("VRs for " + reg.getAnnotationVRs());
+
 //System.out.println(reg.getLargeVRsForResource("gate.corpora.DocumentImpl"));
 
   } // main
