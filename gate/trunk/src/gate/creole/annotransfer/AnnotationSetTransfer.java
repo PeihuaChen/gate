@@ -55,11 +55,15 @@ public class AnnotationSetTransfer extends AbstractProcessingResource
   } // reInit()
 
   /** Run the resource. */
-  public void run()
-  {
-    if(document == null) throw new GateRuntimeException("No document to process!");
-    if(inputASName != null && inputASName.equals("")) inputASName = null;
-    if(outputASName != null && outputASName.equals("")) outputASName = null;
+  public void execute() throws ExecutionException {
+
+    if(document == null)
+      throw new GateRuntimeException("No document to process!");
+
+    if(inputASName != null && inputASName.equals(""))
+      inputASName = null;
+    if(outputASName != null && outputASName.equals(""))
+      outputASName = null;
 
     //get the input annotation set and the output one
     AnnotationSet inputAS = (inputASName == null) ?
