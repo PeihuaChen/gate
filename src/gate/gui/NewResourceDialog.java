@@ -104,14 +104,14 @@ public class NewResourceDialog extends JDialog {
     okBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         userCanceled = false;
-        String name = nameField.getText();
-        if(name == null || name.length() == 0){
-          JOptionPane.showMessageDialog(getOwner(),
-                                        "Please give a name for the new resource!\n",
-                                        "Gate", JOptionPane.ERROR_MESSAGE);
-        }else{
-          hide();
-        }
+//        String name = nameField.getText();
+//        if(name == null || name.length() == 0){
+//          JOptionPane.showMessageDialog(getOwner(),
+//                                        "Please give a name for the new resource!\n",
+//                                        "Gate", JOptionPane.ERROR_MESSAGE);
+//        }else{
+        hide();
+//        }
       }//public void actionPerformed(ActionEvent e)
     });
 
@@ -145,6 +145,7 @@ public class NewResourceDialog extends JDialog {
 
     requestFocus();
     nameField.requestFocus();
+    userCanceled = true;
     super.show();
     if(userCanceled) return;
     else{
@@ -169,9 +170,11 @@ public class NewResourceDialog extends JDialog {
           try {
             long startTime = System.currentTimeMillis();
             FeatureMap features = Factory.newFeatureMap();
+            String name = nameField.getText();
+            if(name == null || name.length() == 0) name = null;
             res = Factory.createResource(resourceData.getClassName(), params,
                                          features, listeners,
-                                         nameField.getText());
+                                         name);
             long endTime = System.currentTimeMillis();
             if(sListener != null) sListener.statusChanged(
                 nameField.getText() + " loaded in " +
