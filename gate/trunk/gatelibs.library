@@ -38,10 +38,11 @@
     <path>[lib/plugins/rdf_backend.jar]</path>
     <path>[lib/plugins/standard_extensions.jar]</path>
     <path>[lib/plugins/xerces.jar]</path>
+    <path>[lib/maxent.jar]</path>
+    <path>[lib/troveForMaxent.jar]</path>
   </class>
   <source>
     <path>build</path>
     <path>src</path>
   </source>
-  <lastmodsaved>1076014201193</lastmodsaved>
 </library>
