@@ -356,30 +356,32 @@ public class RepositioningInfo extends ArrayList {
     } // for
 
     currPI = (PositionInfo) get(index);
-    // should we split this record to two new records (inside the record)
-    if(originalPos > currPI.m_origPos
-        && originalPos < currPI.m_origPos + currPI.m_origLength) {
-      PositionInfo frontPI, endPI;
-      long frontLen = originalPos - currPI.m_origPos;
-      frontPI = new PositionInfo(currPI.m_origPos,
-                              frontLen,
-                              currPI.m_currPos,
-                              frontLen);
 
-      long endLen = currPI.m_origLength - frontLen;
-      endPI = new PositionInfo(originalPos + frontLen + moveLen,
-                              endLen,
-                              currPI.m_currPos + frontLen,
-                              endLen);
-      set(index, frontPI); // substitute old element
-      if(endPI.m_origLength != 0) {
-        add(index+1, endPI); // insert new end element
-      } // if - should add this record
-    }
+    // should we split this record to two new records (inside the record)
+    if(originalPos > currPI.m_origPos) {
+      if(originalPos < currPI.m_origPos + currPI.m_origLength) {
+        PositionInfo frontPI, endPI;
+        long frontLen = originalPos - currPI.m_origPos;
+        frontPI = new PositionInfo(currPI.m_origPos,
+                                frontLen,
+                                currPI.m_currPos,
+                                frontLen);
+
+        long endLen = currPI.m_origLength - frontLen;
+        endPI = new PositionInfo(originalPos + frontLen + moveLen,
+                                endLen,
+                                currPI.m_currPos + frontLen,
+                                endLen);
+        set(index, frontPI); // substitute old element
+        if(endPI.m_origLength != 0) {
+          add(index+1, endPI); // insert new end element
+        } // if - should add this record
+      } // if - inside the record
+    } // if
     else {
       // correction if the position is before the current record
       currPI.m_origPos += moveLen;
-    } // if
+    }
   } // correctInformationOriginalMove
 
 } // class RepositioningInfo
