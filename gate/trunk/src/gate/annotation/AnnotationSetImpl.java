@@ -235,6 +235,18 @@ implements AnnotationSet
     return nextAnnots.get(type, constraints);
   } // get(type, constraints, offset)
 
+  /** Get the node with the smallest offset */
+  public Node firstNode() {
+    indexByStartOffset();
+    return (Node) nodesByOffset.get(nodesByOffset.firstKey());
+  } // firstNode
+
+  /** Get the node with the largest offset */
+  public Node lastNode() {
+    indexByStartOffset();
+    return (Node) nodesByOffset.get(nodesByOffset.lastKey());
+  } // lastNode
+
   /** Add an existing annotation. Returns true when the set is modified. */
   public boolean add(Object o) throws ClassCastException {
     Annotation a = (Annotation) o;
