@@ -46,10 +46,4 @@ public interface AnnotationVisualResource extends VisualResource {
    */
   public void okAction() throws GateException;
 
-  /**
-   * Called by the GUI when the user has pressed the "Cancel" button. This
-   * should drop all the changes.
-   */
-  public void cancelAction() throws GateException;
-
 }//public interface AnnotationVisualResource extends VisualResource
