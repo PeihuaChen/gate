@@ -55,7 +55,7 @@ public class LinearNode {
     int secondColon = node.indexOf(':', firstColon + 1);
     int thirdColon = node.indexOf(':', secondColon + 1);
     if(firstColon == -1){
-      throw new InvalidFormatException();
+      throw new InvalidFormatException("", "Line: " + node);
     }
     list = node.substring(0, firstColon);
 
