@@ -907,7 +907,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
           blockBuffer.append(
             "      { // need a block for the existing annot set" + nl +
             "        AnnotationSet " + existingAnnotSetName +
-            " = bindings.get(\"" + nameTok.image + "\"); " + nl
+            " = (AnnotationSet)bindings.get(\"" + nameTok.image + "\"); " + nl
           );
         jj_consume_token(period);
         nameTok = jj_consume_token(ident);
