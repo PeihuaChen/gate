@@ -179,7 +179,7 @@ Angel */
 
       Boolean bThrow = (Boolean)
         doc.getFeatures().get(GateConstants.THROWEX_FORMAT_PROPERTY_NAME);
-        
+
       if(bThrow != null && bThrow.booleanValue()) {
         // the next line is commented to avoid Document creation fail on error
         throw new DocumentFormatException(e);
@@ -218,9 +218,12 @@ Angel */
         }
     };
     try{
-      Reader reader = new InputStreamReader(
-        new ByteArrayInputStream(aDocument.getContent().toString().getBytes()),
-        "UTF-8");
+      Reader reader = new StringReader(aDocument.getContent().toString());
+//
+//
+//      new InputStreamReader(
+//        new ByteArrayInputStream(aDocument.getContent().toString().getBytes("UTF-8")),
+//        "UTF-8");
       InputSource is = new InputSource(reader);
 
 
