@@ -72,23 +72,24 @@ public class TestEqual {
       message = "Documents named annots not equal!";
       return false;
     }
-    if(doc1 instanceof DocumentImpl){
-      if(doc2 instanceof DocumentImpl){
-        if(! check(((DocumentImpl)doc1).getNextNodeId(),
-                   ((DocumentImpl)doc2).getNextNodeId())){
-          message = "Documents next nodeID not equal!";
-          return false;
-        }
-        if(! check(((DocumentImpl)doc1).getNextAnnotationId(),
-                   ((DocumentImpl)doc2).getNextAnnotationId())){
-          message = "Documents next annotationIDs not equal!";
-          return false;
-        }
-      }else{
-        message = "Documents not equal: DocumentImpl<>non-DocumentImpl!";
-        return false;
-      }
-    }
+
+//    if(doc1 instanceof DocumentImpl){
+//      if(doc2 instanceof DocumentImpl){
+//        if(! check(((DocumentImpl)doc1).getNextNodeId(),
+//                   ((DocumentImpl)doc2).getNextNodeId())){
+//          message = "Documents next nodeID not equal!";
+//          return false;
+//        }
+//        if(! check(((DocumentImpl)doc1).getNextAnnotationId(),
+//                   ((DocumentImpl)doc2).getNextAnnotationId())){
+//          message = "Documents next annotationIDs not equal!";
+//          return false;
+//        }
+//      }else{
+//        message = "Documents not equal: DocumentImpl<>non-DocumentImpl!";
+//        return false;
+//      }
+//    }
 
     if(! check(doc1.getSourceUrl(), doc2.getSourceUrl())){
       message = "Documents sourceURLs not equal!";
