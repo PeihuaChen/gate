@@ -8,7 +8,6 @@
 
 package gate.corpora;
 
-import com.sun.xml.parser.* ;
 import java.util.*;
 import java.io.*;
 import java.net.*;

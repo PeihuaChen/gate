@@ -10,6 +10,7 @@ package gate;
 
 import java.util.*;
 import java.net.*;
+import java.io.*;
 import org.w3c.www.mime.*;
 import gate.util.*;
 
@@ -76,18 +77,16 @@ public abstract class DocumentFormat implements Resource
     // register the class with this map type
     mimeString2mimeTypeMap.put (mime.getType() + "/" + mime.getSubtype(), mime);
 
-    suffixes2mimeStringMap.put("xml",mime.toString());
-    suffixes2mimeStringMap.put("XML",mime.toString());
-    suffixes2mimeStringMap.put("Xml",mime.toString());
+    suffixes2mimeStringMap.put("xml",mime.getType() + "/" + mime.getSubtype());
 
     // register HTML mime type
     mime = new MimeType("text","html");
     mime.addParameter ("ClassHandler","gate.corpora.HtmlDocumentFormat");
     // register the class with this map type
     mimeString2mimeTypeMap.put (mime.getType() + "/" + mime.getSubtype(), mime);
-    
-    suffixes2mimeStringMap.put("htm",mime.toString());
-    suffixes2mimeStringMap.put("html",mime.toString());
+
+    suffixes2mimeStringMap.put("htm",mime.getType() + "/" + mime.getSubtype());
+    suffixes2mimeStringMap.put("html",mime.getType() + "/" + mime.getSubtype());
 
     // register SGML mime type
     mime = new MimeType("text","sgml");
@@ -95,10 +94,8 @@ public abstract class DocumentFormat implements Resource
     // register the class with this map type
     mimeString2mimeTypeMap.put (mime.getType() + "/" + mime.getSubtype(), mime);
 
-    suffixes2mimeStringMap.put("sgm",mime.toString());
-    suffixes2mimeStringMap.put("sgml",mime.toString());
-
-
+    suffixes2mimeStringMap.put("sgm",mime.getType() + "/" + mime.getSubtype());
+    suffixes2mimeStringMap.put("sgml",mime.getType() + "/" + mime.getSubtype());
   }
 
   /** Unpack the markup in the document. This converts markup from the
@@ -121,15 +118,71 @@ public abstract class DocumentFormat implements Resource
     * Returns a MymeType having as input a fileSufix
     */
   static private MimeType  getMimeType(String fileSufix){
-    // for the beginning
-    return MimeType.TEXT;
+    String mimeTypeString = null;
+    MimeType mimeType = null;
+    if (fileSufix != null){
+      mimeTypeString = (String) suffixes2mimeStringMap.get(fileSufix.toLowerCase());
+      if (mimeTypeString != null){
+        try{
+          mimeType = new MimeType(mimeTypeString);
+        }catch (MimeTypeFormatException e){
+          e.printStackTrace(System.err);
+        }
+      }
+    }
+    // default type
+    return mimeType;
   }
 
     /**
     * Returns a MymeType having as input a url
     */
   static private MimeType  getMimeType(URL url){
-    return MimeType.TEXT;
+    String mimeTypeString = null;
+    InputStream is = null;
+    MimeType mimeType = null;
+    String fileSufix = null;
+
+    try{
+      is = url.openConnection().getInputStream();
+      mimeTypeString = URLConnection.guessContentTypeFromStream(is);
+    } catch (IOException e){
+      e.printStackTrace(System.err);
+    }
+
+    // return the corresponding mime type
+    mimeType = (MimeType) mimeString2mimeTypeMap.get(mimeTypeString);
+    if (mimeType == null){
+      // get the file sufix
+      fileSufix = getFileSufix(url);
+      // guess the mime type on the on file sufix
+      mimeType = getMimeType(fileSufix);
+      // if still null then perform magic numbers guess
+      if (mimeType == null){
+         // mimeType = guessTypeUsingMagicNumbers(is);
+      }
+      // if still null then surrender
+    }
+    // try to guess the the mime type from the filesuffix
+    return mimeType;
+  }
+
+    /**
+    * return the fileSuffix or null if the url doesn't have a file suffix
+    *
+    */
+  private static String getFileSufix(URL url){
+    String fileName = null;
+    String fileSuffix = null;
+
+    if (url != null){
+      fileName = url.getFile();
+      StringTokenizer st = new StringTokenizer(fileName,".");
+      // fileSuffix is the last token
+      while (st.hasMoreTokens())
+        fileSuffix = st.nextToken();
+    }
+    return fileSuffix;
   }
 
   /** Find a DocumentFormat implementation that deals with a particular
@@ -139,26 +192,29 @@ public abstract class DocumentFormat implements Resource
     DocumentFormat docFormat = null;
     MimeType mime = null;
     String classHandler = null;
-
-    mime = (MimeType) mimeString2mimeTypeMap.get(mimeType.getType() + "/" +
-                                              mimeType.getSubtype());
-    try{
-      classHandler = mime.getParameterValue("ClassHandler");
-      docFormat = (DocumentFormat) Class.forName(classHandler).newInstance();
-      /*
-      if (mimeType.toString ().equalsIgnoreCase ("text/xml"))
-        docFormat = (gate.corpora.XmlDocumentFormat) Class.forName(
+    if (mimeType != null){
+      mime = (MimeType) mimeString2mimeTypeMap.get(mimeType.getType() + "/" +
+                                                   mimeType.getSubtype());
+      if (mime != null){
+        try{
+          classHandler = mime.getParameterValue("ClassHandler");
+          docFormat = (DocumentFormat) Class.forName(classHandler).newInstance();
+          /*
+          if (mimeType.toString ().equalsIgnoreCase ("text/xml"))
+            docFormat = (gate.corpora.XmlDocumentFormat) Class.forName(
                       "gate.corpora.XmlDocumentFormat").newInstance();
-      if (mimeType.toString ().equalsIgnoreCase ("text/html"))
-        docFormat = (gate.corpora.HtmlDocumentFormat) Class.forName(
+          if (mimeType.toString ().equalsIgnoreCase ("text/html"))
+            docFormat = (gate.corpora.HtmlDocumentFormat) Class.forName(
                       "gate.corpora.HtmlDocumentFormat").newInstance();
-               */       
-    }catch (ClassNotFoundException e){
-      System.out.println(e);
-    }catch (IllegalAccessException e){
-      System.out.println(e);
-    }catch (InstantiationException e){
-      System.out.println(e);
+               */
+        }catch (ClassNotFoundException e){
+          e.printStackTrace(System.err);
+        }catch (IllegalAccessException e){
+          e.printStackTrace(System.err);
+        }catch (InstantiationException e){
+          e.printStackTrace(System.err);
+        }
+      }
     }
     return docFormat;
   } // getDocumentFormat(MimeType)
