@@ -148,13 +148,20 @@ public class CreoleRegisterImpl extends HashMap
         "the creole.xml file, not the file itself; bad URL was: " + urlName
       );
     }
-
+    //CREOLE URLs are directory URLs so they should end with "/"
+    String separator = "/";
+    if(!urlName.endsWith(separator)){
+      urlName += separator;
+      try{
+        directoryUrl = new URL(urlName);
+      }catch(MalformedURLException mue){
+        throw new GateRuntimeException(mue);
+      }
+    }
     // create a URL for the creole.xml file, based on the directory URL
     URL directoryXmlFileUrl = directoryUrl;
-    String separator = "/";
-    if(urlName.endsWith(separator)) separator = "";
     try {
-      directoryXmlFileUrl = new URL(urlName + separator + "creole.xml");
+      directoryXmlFileUrl = new URL(urlName + "creole.xml");
     } catch(MalformedURLException e) {
       throw(new GateException("bad creole.xml URL, based on " + urlName));
     }
