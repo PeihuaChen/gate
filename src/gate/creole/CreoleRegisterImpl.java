@@ -159,7 +159,7 @@ public class CreoleRegisterImpl extends HashMap
     try {
       parseDirectory(directoryXmlFileUrl.openStream(), directoryUrl, 
               directoryXmlFileUrl);
-      System.out.println("CREOLE Plugin loaded: " + directoryUrl);
+      System.out.println("CREOLE plugin loaded: " + directoryUrl);
     } catch(IOException e) {
       //it failed: remove it
       directories.remove(directoryUrl);
@@ -300,6 +300,7 @@ public class CreoleRegisterImpl extends HashMap
         ResourceInfo rInfo = (ResourceInfo)resIter.next();
         remove(rInfo.getResourceClassName());
       }
+      System.out.println("CREOLE plugin unloaded: " + directory);
     }
     
   }
