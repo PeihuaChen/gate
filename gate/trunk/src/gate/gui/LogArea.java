@@ -81,14 +81,15 @@ public class LogArea extends XJTextPane {
     // Redirecting System.out
     originalOut = System.out;
     try{
-      System.setOut(new PrintStream(out, true, "UTF-8"));
+      System.setOut(new UTF8PrintStream(out, true));
     }catch(UnsupportedEncodingException uee){
       uee.printStackTrace();
     }
+
     // Redirecting System.err
     originalErr = System.err;
     try{
-      System.setErr(new PrintStream(err, true, "UTF-8"));
+      System.setErr(new UTF8PrintStream(err, true));
     }catch(UnsupportedEncodingException uee){
       uee.printStackTrace();
     }
@@ -184,6 +185,44 @@ public class LogArea extends XJTextPane {
            throws UnsupportedEncodingException{
       super(new BufferedWriter(new OutputStreamWriter(out, "UTF-8")),
             autoFlush);
+    }
+  }
+
+  /**
+   * A print writer that uses UTF-8 to convert from char[] to byte[]
+   */
+  public static class UTF8PrintStream extends PrintStream{
+    public UTF8PrintStream(OutputStream out)
+           throws UnsupportedEncodingException{
+      this(out, true);
+    }
+
+    public UTF8PrintStream(OutputStream out, boolean autoFlush)
+           throws UnsupportedEncodingException{
+      super(out, autoFlush);
+    }
+
+    /**
+     * Overriden so it uses UTF-8 when converting a string to byte[]
+     * @param s the string to be printed
+     */
+    public void print(String s) {
+      try{
+        write(s.getBytes("UTF-8"));
+      }catch(UnsupportedEncodingException uee){
+        //support for UTF-8 is guaranteed by the JVM specification
+      }catch(IOException ioe){
+        //print streams don't throw exceptions
+        setError();
+      }
+    }
+
+    /**
+     * Overriden so it uses UTF-8 when converting a char[] to byte[]
+     * @param s the string to be printed
+     */
+    public void print(char s[]) {
+      print(String.valueOf(s));
     }
   }
 
