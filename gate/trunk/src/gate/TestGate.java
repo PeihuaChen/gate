@@ -31,6 +31,8 @@ public class TestGate
 {
   /** Main routine. */
   public static void main(String[] args) throws ClassNotFoundException {
+    Gate.init();
+
     String a[] = new String[1];
     a[0] = "gate.TestGate";
     // use the next line if you're running with output to console in text mode:
@@ -52,9 +54,11 @@ public class TestGate
     * registered here.
     */
   public static Test suite() {
-    TestSuite suite = new TestSuite();
-
-    suite.addTest(TestFiles.suite());       //*
+    TestSuite suite = new TestSuite();    
+    suite.addTest(TestFiles.suite());
+    suite.addTest(TestXml.suite());  
+    suite.addTest(TestJdk.suite()); 
+    suite.addTest(TestFiles.suite());
     suite.addTest(TestXml.suite());
     suite.addTest(TestHtml.suite());
     suite.addTest(TestJdk.suite());
@@ -67,7 +71,7 @@ public class TestGate
     suite.addTest(TestRBTreeMap.suite());
     suite.addTest(TestCorpus.suite());
     suite.addTest(CookBook.suite());
-    suite.addTest(TestDB.suite());	    //*/
+    suite.addTest(TestDB.suite());	  
 
     return suite;
   } // suite
