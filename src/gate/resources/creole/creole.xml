@@ -304,7 +304,7 @@
         COMMENT="The encoding used for reading the grammar">
         java.lang.String</PARAMETER>
       <PARAMETER NAME="ontology" 
-        COMMENT="The ontology to be used by this transducer" RUNTIME="true" 
+        COMMENT="The ontology to be used by this transducer" RUNTIME="false" 
         OPTIONAL="true">gate.creole.ontology.Ontology</PARAMETER>
     </RESOURCE>
     <!-- creole.xml for ANNIE Transducer -->
