@@ -29,6 +29,11 @@ depend:
 
 test:
 	./jdk.sh java -Djava.compiler=none ${CP} junit.textui.TestRunner gate.TestGate
+
+jar:
+	cd ../classes && \
+	../build/jdk.sh jar cvf ../build/gate.jar gate
+
 docs:
 	./jdk.sh javadoc $(SP) $(CP) -public \
 	  -d ../doc/javadoc $(PKGS)
@@ -45,6 +50,9 @@ list:
 ############################################################################
 #
 # $Log$
+# Revision 1.12  2000/02/16 13:43:38  hamish
+# added jar target
+#
 # Revision 1.11  2000/02/15 13:52:46  hamish
 # added -Xdepend and TestGate.class target
 #
