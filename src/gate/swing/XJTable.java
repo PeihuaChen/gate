@@ -15,6 +15,7 @@
 
 package gate.swing;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.*;
 import java.awt.event.MouseAdapter;
@@ -525,15 +526,23 @@ public class XJTable extends JTable{
       int viewColumn = convertColumnIndexToView(column);
       TableColumn tCol = getColumnModel().getColumn(column);
       Dimension dim;
-      int width;
+      int width, height;
       TableCellRenderer renderer;
       //compute the sizes
       if(getTableHeader() != null){
         renderer = tCol.getHeaderRenderer();
         if(renderer == null) renderer = getTableHeader().getDefaultRenderer();
-        width = renderer.getTableCellRendererComponent(XJTable.this, 
+        dim = renderer.getTableCellRendererComponent(XJTable.this, 
                 tCol.getHeaderValue(), true, true ,0 , viewColumn).
-                getPreferredSize().width;
+                getPreferredSize(); 
+        width = dim.width;
+        //make sure the table header gets sized correctly
+        height = dim.height;
+        if(height + getRowMargin() > getTableHeader().getPreferredSize().height){
+          getTableHeader().setPreferredSize(
+                  new Dimension(getTableHeader().getPreferredSize().width, 
+                  height));
+        }
         int marginWidth = getColumnModel().getColumnMargin(); 
         if(marginWidth > 0) width += marginWidth;         
       }else{
@@ -547,7 +556,7 @@ public class XJTable extends JTable{
                   getValueAt(row, column), false, false, row, viewColumn).
                   getPreferredSize();
           width = Math.max(width, dim.width);
-          int height = dim.height;
+          height = dim.height;
           if((height + getRowMargin()) > getRowHeight(row)){
             setRowHeight(row, height + getRowMargin());
            }          
