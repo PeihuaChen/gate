@@ -7,6 +7,7 @@
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *
  *  Valentin Tablan 19/11/2002
+ *  semantic type added by Mike Dowman 31-03-2004
  *
  *  $Id$
  *
@@ -134,6 +135,27 @@ public class Attribute implements Serializable{
   public void setPosition(int position) {
     this.position = position;
   }
+
+  /**
+   * This method reports whether the attribute is nominal, numeric or boolean.
+   *
+   * @return Attribute.NOMINAL, Attribute.NUMERIC or Attribute.BOOLEAN
+   */
+  public int semanticType() {
+    // Only nominal attributes specify values, and only numeric and nominal
+    // attributes specify feature, so this code is sufficient to distinguish
+    // the three kinds of attribute.
+    if (feature==null)
+      return BOOLEAN;
+    if (values==null)
+      return NUMERIC;
+    return NOMINAL;
+  }
+
+  // These constants are used only for returning values from semanticType
+  public static final int NOMINAL=1;
+  public static final int NUMERIC=2;
+  public static final int BOOLEAN=3;
 
   boolean isClass = false;
   private String name;
