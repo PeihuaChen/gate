@@ -18,8 +18,10 @@ package gate.creole.nerc;
 import gate.*;
 import gate.util.*;
 
+import java.io.Serializable;
+
 /** Represents a single named entity */
-public class EntityDescriptor {
+public class EntityDescriptor implements Serializable{
 
   /** Constructs a new entity descriptor */
   public EntityDescriptor(String string, String category, int start, int end) {

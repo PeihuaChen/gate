@@ -31,7 +31,7 @@ import java.util.*;
 public class SentenceSplitter extends Nerc{
   public void run(){
     try{
-      super.run();
+      super.runSystem();
       super.check();
       //create the sentence annotations
       if(outputASName != null && outputASName.equals("")) outputASName = null;

@@ -118,71 +118,84 @@ public class Nerc extends SerialController {
     return this;
   } // init()
 
+  /**
+   * Runs the group of processing resources over the current document
+   */
+  protected void runSystem() throws ExecutionException{
+    FeatureMap params;
+    if(tempAnnotationSetName.equals("")) tempAnnotationSetName = null;
+    try{
+      fireProgressChanged(0);
+      params = Factory.newFeatureMap();
+      params.put("document", document);
+      params.put("annotationSetName", tempAnnotationSetName);
+      Factory.setResourceParameters(tokeniser, params);
+
+      params = Factory.newFeatureMap();
+      params.put("document", document);
+      params.put("annotationSetName", tempAnnotationSetName);
+      Factory.setResourceParameters(gazetteer, params);
+
+      params = Factory.newFeatureMap();
+      params.put("document", document);
+      params.put("inputASName", tempAnnotationSetName);
+      params.put("outputASName", tempAnnotationSetName);
+      Factory.setResourceParameters(transducer, params);
+    }catch(Exception e){
+      throw new ExecutionException("Couldn't set parameters: " + e);
+    }
+    fireProgressChanged(5);
+    ProgressListener pListener = new CustomProgressListener(5, 15);
+    StatusListener sListener = new StatusListener(){
+      public void statusChanged(String text){
+        fireStatusChanged(text);
+      }
+    };
+
+    tokeniser.addProgressListener(pListener);
+    tokeniser.addStatusListener(sListener);
+    tokeniser.run();
+    tokeniser.check();
+    tokeniser.removeProgressListener(pListener);
+    tokeniser.removeStatusListener(sListener);
+
+    pListener = new CustomProgressListener(15, 25);
+    gazetteer.addProgressListener(pListener);
+    gazetteer.addStatusListener(sListener);
+    gazetteer.run();
+    gazetteer.check();
+    gazetteer.removeProgressListener(pListener);
+    gazetteer.removeStatusListener(sListener);
+
+    pListener = new CustomProgressListener(25, 90);
+    transducer.addProgressListener(pListener);
+    transducer.addStatusListener(sListener);
+    transducer.run();
+    transducer.check();
+    transducer.removeProgressListener(pListener);
+    transducer.removeStatusListener(sListener);
+  }//protected void runSystem() throws ExecutionException
+
+  /**
+   * reads the results created by the system run and packages them in one
+   * entity set that is added to the document features
+   */
+  protected void createEntitySet(){
+    EntitySet entitySet =
+      new EntitySet(document.getSourceUrl().getFile(),
+                    document,
+                    document.getAnnotations(tempAnnotationSetName).
+                    get(new HashSet(Arrays.asList(
+                      new String[]{"Address", "Date", "Identifier",
+                                   "Location", "Organization", "Person"}))));
+
+    document.getFeatures().put("entitySet", entitySet);
+  }//protected void createEntitySet(){
+
   public void run(){
     try{
-      FeatureMap params;
-      if(tempAnnotationSetName.equals("")) tempAnnotationSetName = null;
-      try{
-        fireProgressChanged(0);
-        params = Factory.newFeatureMap();
-        params.put("document", document);
-        params.put("annotationSetName", tempAnnotationSetName);
-        Factory.setResourceParameters(tokeniser, params);
-
-        params = Factory.newFeatureMap();
-        params.put("document", document);
-        params.put("annotationSetName", tempAnnotationSetName);
-        Factory.setResourceParameters(gazetteer, params);
-
-        params = Factory.newFeatureMap();
-        params.put("document", document);
-        params.put("inputASName", tempAnnotationSetName);
-        params.put("outputASName", tempAnnotationSetName);
-        Factory.setResourceParameters(transducer, params);
-      }catch(Exception e){
-        throw new ExecutionException("Couldn't set parameters: " + e);
-      }
-      fireProgressChanged(5);
-      ProgressListener pListener = new CustomProgressListener(5, 15);
-      StatusListener sListener = new StatusListener(){
-        public void statusChanged(String text){
-          fireStatusChanged(text);
-        }
-      };
-
-      tokeniser.addProgressListener(pListener);
-      tokeniser.addStatusListener(sListener);
-      tokeniser.run();
-      tokeniser.check();
-      tokeniser.removeProgressListener(pListener);
-      tokeniser.removeStatusListener(sListener);
-
-      pListener = new CustomProgressListener(15, 25);
-      gazetteer.addProgressListener(pListener);
-      gazetteer.addStatusListener(sListener);
-      gazetteer.run();
-      gazetteer.check();
-      gazetteer.removeProgressListener(pListener);
-      gazetteer.removeStatusListener(sListener);
-
-      pListener = new CustomProgressListener(25, 90);
-      transducer.addProgressListener(pListener);
-      transducer.addStatusListener(sListener);
-      transducer.run();
-      transducer.check();
-      transducer.removeProgressListener(pListener);
-      transducer.removeStatusListener(sListener);
-
-
-      EntitySet entitySet =
-        new EntitySet(document.getSourceUrl().getFile(),
-                      document,
-                      document.getAnnotations(tempAnnotationSetName).
-                      get(new HashSet(Arrays.asList(
-                        new String[]{"Address", "Date", "Identifier",
-                                     "Location", "Organization", "Person"}))));
-
-      document.getFeatures().put("entitySet", entitySet);
+      runSystem();
+      createEntitySet();
       fireProgressChanged(100);
       fireProcessFinished();
     }catch(ExecutionException ee){
