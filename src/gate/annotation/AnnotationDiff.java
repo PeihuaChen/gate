@@ -16,9 +16,13 @@
 package gate.annotation;
 
 import java.util.*;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
 
 import gate.util.*;
 import gate.*;
+import gate.gui.*;
 import gate.creole.*;
 
 /**
@@ -26,6 +30,10 @@ import gate.creole.*;
   * AnnotationSchema object. It also deals with graphic representation.
   */
 public class AnnotationDiff implements VisualResource{
+
+  /** Debug flag */
+  private static final boolean DEBUG = false;
+
   /** This document contains the key annotation set which is taken as reference
    *  in comparison*/
   private Document keyDocument = null;
@@ -41,10 +49,17 @@ public class AnnotationDiff implements VisualResource{
 
   /** The Precision value (see NLP Information Extraction)*/
   private Double precision = null;
+
   /** The Recall value (see NLP Information Extraction)*/
   private Double recall = null;
 
-  /** Sets the key Document containing the annotation set taken as refference */
+  /** As Required by Resource Interface*/
+  private FeatureMap featureMap = null;
+
+  /** The viewer component */
+  private SortedTable diffTable = new SortedTable();
+
+  /** Sets the key Document containing the annotation set taken as refference*/
   public void setKeyDocument(Document aKeyDocument) {
     keyDocument = aKeyDocument;
   }// setKeyDocument
@@ -63,16 +78,17 @@ public class AnnotationDiff implements VisualResource{
   public void setRecall(Double aRecall){
     recall = aRecall;
   }// setRecall
+
   /** Gets the recall*/
   public Double getRecall(){
     return recall;
   }// getRecall
-  /**
-    * Gets the keyDocument
-    */
+
+  /** Gets the keyDocument */
   public Document getKeyDocument(){
     return keyDocument;
   }// getKeyDocument
+
   /**
     * Sets the response Document(containing the annotation Set being compared)
     */
@@ -93,6 +109,11 @@ public class AnnotationDiff implements VisualResource{
     return annotationSchema;
   }// AnnotationSchema
 
+  /** This method is required in VisualResource Interface*/
+  public Component getGui(){
+    return diffTable;
+  }// getViewer
+
   /**
     * This method does the diff, P&R calculation and so on.
     */
@@ -103,42 +124,207 @@ public class AnnotationDiff implements VisualResource{
     Set diffSet  = null;
 
     // Get the key AnnotationSet from the keyDocument
-    keyAnnotSet = keyDocument.getAnnotations(
+    keyAnnotSet = keyDocument.getAnnotations().get(
                               annotationSchema.getAnnotationName());
     // Get the response AnnotationSet from the resonseDocument
-    responseAnnotSet = responseDocument.getAnnotations(
+    responseAnnotSet = responseDocument.getAnnotations().get(
                                         annotationSchema.getAnnotationName());
     // Calculate the diff Set. This set will be used later at graphic
     // visualisation.
     diffSet = doDiff(keyAnnotSet, responseAnnotSet);
 
+    if (diffSet != null){
+      //Show it
+      AnnotationDiffTableModel diffModel = new AnnotationDiffTableModel();
+      diffModel.setData(diffSet);
+      diffTable.setTableModel(diffModel);
+    }// End If
+    if (DEBUG)
+      printStructure(diffSet);
+
     return this;
   } // init()
+
+  protected void printStructure(Set aDiffSet){
+    Iterator iterator = aDiffSet.iterator();
+    String leftAnnot = null;
+    String rightAnnot = null;
+    while(iterator.hasNext()){
+      DiffSetElement diffElem = (DiffSetElement) iterator.next();
+      if (diffElem.getLeftAnnotation() == null)
+        leftAnnot = "NULL ";
+      else
+        leftAnnot = diffElem.getLeftAnnotation().toString();
+      if (diffElem.getRightAnnotation() == null)
+        rightAnnot = " NULL";
+      else
+        rightAnnot = diffElem.getRightAnnotation().toString();
+      Out.prln( leftAnnot + "|" + rightAnnot);
+    }// end while
+    Out.prln("Precision = " + precision + " , Recall = " + recall);
+  }// printStructure
 
   /** This method does the AnnotationSet diff and creates a set with
     * diffSetElement objects.
     */
   protected Set doDiff( AnnotationSet aKeyAnnotSet,
                         AnnotationSet aResponseAnnotSet){
-    return null;
+
+    // If one of the annotation sets is null then is no point in doing the diff.
+    if (aKeyAnnotSet == null || aResponseAnnotSet == null)
+      return null;
+
+    Set diffSet = new HashSet();
+    Set keyBackupSet = new HashSet();
+    Set responseBackupSet = new HashSet();
+
+    int correctItems = 0;
+    int totalItemsRetrived = aResponseAnnotSet.size();
+    int totalCorrectItems = aKeyAnnotSet.size();
+
+    // Take all annotations from KeySet and detect all from RespnseSet that are
+    // equals.
+    Iterator keyIterator = aKeyAnnotSet.iterator();
+    boolean stopLoop = false;
+    while(keyIterator.hasNext() && !stopLoop){
+      Annotation keyAnnot = (Annotation) keyIterator.next();
+      Iterator responseIterator = aResponseAnnotSet.iterator();
+      // There are no elements in responseSet, then quit this loop.
+      if (!responseIterator.hasNext()){
+        stopLoop = true;
+        continue;
+      } // end if
+      DiffSetElement diffElement = null;
+      while(responseIterator.hasNext()){
+        Annotation responseAnnot = (Annotation) responseIterator.next();
+        if(areEqual(keyAnnot,responseAnnot)){
+          // Create a new DiffSetElement and ass it to the diffSet
+          diffElement = new DiffSetElement(keyAnnot,responseAnnot);
+          responseIterator.remove();
+          // We need to be able to keep intact the responseAnnotSet.
+          // That's why the annotation is saved temporary here.
+          responseBackupSet.add(responseAnnot);
+          // Calculate the number of correct items retrieved
+          correctItems ++;
+          // This break is here because we are iterating through a set and
+          // once we found one element equal to the key element, it means there
+          // is no other element and it's no point to search the nexts elements.
+          break;
+        } // end if
+      }// end while responseIterator
+      if (diffElement == null)
+        diffElement = new DiffSetElement(keyAnnot,null);
+      diffSet.add(diffElement);
+      keyIterator.remove();
+      // We need to be able to keep intact the keyAnnotSet.
+      // That's why the annotation is saved temporary here.
+      keyBackupSet.add(keyAnnot);
+    }// end while keyIterator
+
+    while(keyIterator.hasNext()){
+      Annotation keyAnnot = (Annotation) keyIterator.next();
+      DiffSetElement diffElement = new DiffSetElement(keyAnnot,null);
+      diffSet.add(diffElement);
+    }// end while
+    Iterator responseIterator = aResponseAnnotSet.iterator();
+    while(responseIterator.hasNext()){
+      Annotation responseAnnot = (Annotation) responseIterator.next();
+      DiffSetElement diffElement = new DiffSetElement(null, responseAnnot);
+      diffSet.add(diffElement);
+    }// end while
+
+    // Rebuild the original annotation Sets
+    aKeyAnnotSet.addAll(keyBackupSet);
+    aResponseAnnotSet.addAll(responseBackupSet);
+
+    // Calculate Precision. The formula is:
+    // Precision = No of correct items retrieved / total no. of items retrieved
+    if (totalItemsRetrived == 0)
+      precision = new Double(0);
+    else
+      precision = new Double((double) correctItems/totalItemsRetrived);
+
+    // Calculate Recall. The formula is:
+    // Recall = no. of correct items retrieved / total no. of correct items
+    if (totalCorrectItems == 0)
+      recall = new Double(0);
+    else
+      recall = new Double((double) correctItems/totalCorrectItems);
+
+    return diffSet;
   }// doDiff
 
+  /** This method comes from Resource Interface*/
   public void setFeatures(FeatureMap aFeatureMap){
+    featureMap = aFeatureMap;
   }// setFeatures
 
+  /** This method comes from Resource Interface*/
   public FeatureMap getFeatures(){
-    return null;
+    return featureMap;
   }// getFeatures
-} // class AnnotationDiff
 
-class DiffSetElement {
+  /**  Returns true if two annotation are Equals.
+    *  Two Annotation are equals if their offsets, types and features are the
+    *  same.
+    */
+  protected boolean areEqual(   Annotation anAnnot,
+                                Annotation otherAnnot){
+    if(anAnnot == null || otherAnnot == null)
+      return false;
+
+    // If their types are not equals then return false
+    if((anAnnot.getType() == null) ^ (otherAnnot.getType() == null))
+      return false;
+    if( anAnnot.getType() != null &&
+        (!anAnnot.getType().equals(otherAnnot.getType())))
+      return false;
+
+    // If their start offset is not the same then return false
+    if((anAnnot.getStartNode() == null) ^ (otherAnnot.getStartNode() == null))
+      return false;
+    if(anAnnot.getStartNode() != null){
+      if((anAnnot.getStartNode().getOffset() == null) ^
+         (otherAnnot.getStartNode().getOffset() == null))
+        return false;
+      if(anAnnot.getStartNode().getOffset() != null &&
+        (!anAnnot.getStartNode().getOffset().equals(
+                            otherAnnot.getStartNode().getOffset())))
+        return false;
+    }
+
+  // If their end offset is not the same then return false
+    if((anAnnot.getEndNode() == null) ^ (otherAnnot.getEndNode() == null))
+      return false;
+    if(anAnnot.getEndNode() != null){
+      if((anAnnot.getEndNode().getOffset() == null) ^
+         (otherAnnot.getEndNode().getOffset() == null))
+        return false;
+      if(anAnnot.getEndNode().getOffset() != null &&
+        (!anAnnot.getEndNode().getOffset().equals(
+              otherAnnot.getEndNode().getOffset())))
+        return false;
+    }
+
+    // If their featureMaps are not equals then return false
+    if((anAnnot.getFeatures() == null) ^ (otherAnnot.getFeatures() == null))
+      return false;
+    if(anAnnot.getFeatures() != null && (!anAnnot.getFeatures().equals(
+                                      otherAnnot.getFeatures())))
+      return false;
+    return true;
+  }// areEqual
+
+class DiffSetElement{
 
   private Annotation leftAnnotation = null;
+
   private Annotation rightAnnotation = null;
 
   public DiffSetElement(){
   }// DiffSetElement
 
+  /** Constructor for DiffSetlement*/
   public DiffSetElement( Annotation aLeftAnnotation,
                          Annotation aRightAnnotation){
     leftAnnotation = aLeftAnnotation;
@@ -165,3 +351,4 @@ class DiffSetElement {
     return rightAnnotation;
   }// getRightAnnotation
 }// classs DiffSetElement
+} // class AnnotationDiff

@@ -1,16 +1,18 @@
 /*
  *  SortedTable.java
  *
- *  Copyright (c) 1998-2001, The University of Sheffield.
+ *  Copyright (c) 2000-2001, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
- *  Version 2, June 1991 (in the distribution as file licence.html,
- *  and also available at http://gate.ac.uk/gate/licence.html).
- *  
- *  Cristian URSU,  30/June/2000
+ *  Version 2, June1991.
  *
- *  $Id$
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *
+ *	Cristian URSU,  30/June/2000
+ *
+ *	$Id$
  */
 package gate.gui;
 
@@ -20,31 +22,38 @@ import java.awt.*;
 
 import gate.util.*;
 
+/** This class implements the behaviour of a SortedTable
+  * The user have to provide a SortedTableModel implementation
+  */
 public class SortedTable extends JTable {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  // members area
+  // Members area
+  // The table model being presented
   SortedTableModel m_model = null;
 
-  // constructors
+  // Constructors
   public SortedTable(){}
 
+  /** Constructs a SortedTable using a SortedtableModel*/
   public void setTableModel(SortedTableModel model) {
     m_model = model;
     setModel(model);
     InitHeader();
-    initColumnSizes(JTable.AUTO_RESIZE_OFF);
-  }
+    initColumnSizes(JTable.AUTO_RESIZE_ALL_COLUMNS);
+  }//setTableModel
 
+  /** This method adds a MouseListener as well as other needed things*/
   private void InitHeader() {
     JTableHeader header = getTableHeader();
     header.setUpdateTableInRealTime(true);
     header.addMouseListener(m_model.new ColumnListener(this));
     header.setReorderingAllowed(true);
-  }
+  }//InitHeader
 
+  /** This method calculates the maxim width for colums*/
   private void initColumnSizes(int autoResize) {
         TableColumn column = null;
         Component comp = null;
@@ -81,7 +90,6 @@ public class SortedTable extends JTable {
             if ((column.getMaxWidth() < (width + 1)) && ((width + 1) > 0))
               column.setMaxWidth(width + 1);
             column.setPreferredWidth(width);
-        }
-  }
-
+        }// End for
+  }// initColumnSizes
 } // SortedTable

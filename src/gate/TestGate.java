@@ -148,6 +148,7 @@ public class TestGate {
 
     TestSuite suite = new TestSuite();
 
+   // suite.addTest(TestAnnotationDiff.suite());
     suite.addTest(TestAnnotation.suite());
     suite.addTest(TestEmail.suite());
     suite.addTest(TestXml.suite());

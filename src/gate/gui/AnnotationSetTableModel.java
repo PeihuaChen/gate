@@ -15,26 +15,32 @@
 
 package gate.gui;
 
-
 import gate.*;
+  /** This class implements a SortedTableModel*/
   public class AnnotationSetTableModel extends gate.gui.SortedTableModel {
 
     /** Debug flag */
     private static final boolean DEBUG = false;
 
+    /** Constructor uses inside a AnnotationSetComparator (implemenetd based on
+      * a SortedTableComparator )
+      */
     public AnnotationSetTableModel(Document doc, AnnotationSet as) {
       setData (as, new AnnotationSetComparator());
       document = doc;
-    }
+    }// AnnotationSetTableModel
 
+    /** As requested by TableModel Interface*/
     public int getColumnCount() {
       return 4;
     } // getColumnCount
 
+    /** Get the column class*/
     public Class getColumnClass(int column) {
       return new String("0").getClass();
     } // getColumnClass
 
+    /** gets the column name. As requested by TableModel interface.*/
     public String getColumnName(int column) {
       switch(column){
         case 0:{
@@ -53,10 +59,12 @@ import gate.*;
       return null;
     } // getColumnName
 
+    /** This has to be implemented if the table has editable cells*/
     public boolean isCellEditable(int rowIndex, int columnIndex) {
       return false;
     } // isCellEditable
 
+    /** As requested by TableModel interface*/
     public Object getValueAt(int row, int column) {
       gate.Annotation currentAnn = (gate.Annotation) m_data.get(row);
       switch(column){
