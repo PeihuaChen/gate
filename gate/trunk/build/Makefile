@@ -10,11 +10,12 @@
 #
 ############################################################################
 
-PKGS=	gate gate.util gate.annotation gate.corpora
+PKGS=	gate gate.util gate.annotation gate.corpora gate.jape gate.jape.parser
 CP=	-classpath \
-../classes:../lib/junit.jar
+../classes:../lib/junit.jar:../lib/jgl3.1.0.jar:../lib/orajdbc2.zip
 SP=	-sourcepath ../src
-COMPILE=./jdk.sh -s -g:none javac -Xdepend -Xstdout -O \
+#COMPILE=./jdk.sh -s -g:none javac -Xdepend -Xstdout -O
+COMPILE=./jdk.sh -s -g:none javac -O \
 -d ../classes $(SP) $(CP)
 
 # having the main test class as first target, and -Xdepend in the
@@ -56,6 +57,9 @@ list:
 ############################################################################
 #
 # $Log$
+# Revision 1.19  2000/02/23 13:49:13  hamish
+# added ora jdbc driver to CP
+#
 # Revision 1.18  2000/02/21 15:32:58  hamish
 # gate.jar now includes lib/*.jar/zip; make tests uses gate.jar
 #
