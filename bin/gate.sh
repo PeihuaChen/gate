@@ -22,7 +22,7 @@ NLS_LANG=AMERICAN_AMERICA.UTF8
 
 # set GATE_CONFIG to where we think gate.xml is (or "" if not around)
 # if not already set
-[ x${GATE_CONFIG} = x ] [ -f ${GATE_HOME}/bin/gate.xml ] &&
+[ x${GATE_CONFIG} = x ] && [ -f ${GATE_HOME}/bin/gate.xml ] &&
 GATE_CONFIG=${GATE_HOME}/bin/gate.xml
 
 
