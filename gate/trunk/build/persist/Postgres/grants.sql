@@ -81,7 +81,8 @@ grant select on  V_LR to group GATE_USER_GROUP;
  grant select on persist_add_document_to_corpus to group GATE_USER_GROUP;
  grant select on persist_remove_doc_from_corpus to group GATE_USER_GROUP;
  grant select on persist_lock_lr to group GATE_USER_GROUP;
-
+ grant select on persist_update_document_content to group GATE_USER_GROUP;
+ 
  grant select on security_is_member_of_group to group GATE_USER_GROUP;
  grant select on security_set_group_name to group GATE_USER_GROUP;
  grant select on security_add_user_to_group to group GATE_USER_GROUP;
