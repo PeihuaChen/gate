@@ -176,24 +176,24 @@ public class NameBearerHandle implements Handle,
   private void fillHMMActions(JPopupMenu popup) {
     Action action;
 
-    com.ontotext.gate.hmm.agent.AlternativeHMMAgent hmmPR = 
+    com.ontotext.gate.hmm.agent.AlternativeHMMAgent hmmPR =
       (com.ontotext.gate.hmm.agent.AlternativeHMMAgent) target;
-      
+
     popup.addSeparator();
     action = new com.ontotext.gate.hmm.agent.SaveAction(hmmPR);
-    action.putValue(action.SHORT_DESCRIPTION, 
+    action.putValue(action.SHORT_DESCRIPTION,
       "Save trained HMM model into PR URL file");
     // Add Save trained HMM model action
     popup.add(action);
-    
+
     action = new com.ontotext.gate.hmm.agent.SaveAsAction(hmmPR);
-    action.putValue(action.SHORT_DESCRIPTION, 
+    action.putValue(action.SHORT_DESCRIPTION,
       "Save trained HMM model into new file");
     // Add Save As... trained HMM model action
-    popup.add(action);    
+    popup.add(action);
   } // fillHMMActions(gate.gui.ProtegeWrapper protege)
-  
-  
+
+
   protected void buildViews() {
     //build the popup
     popup = new JPopupMenu();
@@ -205,6 +205,9 @@ public class NameBearerHandle implements Handle,
     if(target instanceof ProcessingResource){
       popup.addSeparator();
       popup.add(new XJMenuItem(new ReloadAction(), sListenerProxy));
+      if(target instanceof gate.ml.DataCollector){
+        popup.add(new DumpArffAction());
+      }
       if(target instanceof com.ontotext.gate.hmm.agent.AlternativeHMMAgent
           || target instanceof com.ontotext.gate.hmm.agent.TrainHMM) {
         fillHMMActions(popup);
@@ -630,6 +633,7 @@ public class NameBearerHandle implements Handle,
               int docCnt = corpus.size();
               int currentDocIndex = 0;
               while(docIter.hasNext()){
+                boolean docWasLoaded = corpus.isDocumentLoaded(currentDocIndex);
                 Document currentDoc = (Document)docIter.next();
                 URL sourceURL = currentDoc.getSourceUrl();
                 String fileName = null;
@@ -712,6 +716,12 @@ public class NameBearerHandle implements Handle,
                 }
 
                 fireStatusChanged(currentDoc.getName() + " saved");
+                //close the doc if it wasn't already loaded
+                if(!docWasLoaded){
+                  corpus.unloadDocument(currentDoc);
+                  Factory.deleteResource(currentDoc);
+                }
+
                 fireProgressChanged(100 * currentDocIndex++ / docCnt);
               }//while(docIter.hasNext())
               fireStatusChanged("Corpus saved");
@@ -817,6 +827,48 @@ public class NameBearerHandle implements Handle,
       new Thread(runnable).start();
     }//public void actionPerformed(ActionEvent e)
   }//class SaveAction
+
+  class DumpArffAction extends AbstractAction{
+    public DumpArffAction(){
+      super("Write data as ARFF");
+      putValue(SHORT_DESCRIPTION,
+               "Saves the data needed to recreate this application");
+    }
+
+    public void actionPerformed(ActionEvent evt){
+      JFileChooser fileChooser = MainFrame.getFileChooser();
+
+      fileChooser.setDialogTitle("Select a file for ARFF dump");
+      fileChooser.setFileSelectionMode(fileChooser.FILES_AND_DIRECTORIES);
+      if (fileChooser.showSaveDialog(largeView) ==
+                                            fileChooser.APPROVE_OPTION){
+        final File file = fileChooser.getSelectedFile();
+        Thread thread = new Thread(new Runnable(){
+          public void run(){
+            fireStatusChanged("Writing ARFF output!");
+            gate.ml.DataCollector collector = (gate.ml.DataCollector)target;
+            try{
+                FileWriter fw = new FileWriter(file);
+                fw.write(collector.getDataSet().toString());
+                fw.flush();
+                fw.close();
+            }catch(IOException ioe){
+                JOptionPane.showMessageDialog(getLargeView(),
+                                "Error!\n"+
+                                 ioe.toString(),
+                                 "Gate", JOptionPane.ERROR_MESSAGE);
+                ioe.printStackTrace(Err.getPrintWriter());
+
+            }
+            fireStatusChanged("ARFF dump finished!");
+
+          }
+        });
+        thread.setPriority(Thread.MIN_PRIORITY);
+        thread.start();
+      }
+    }
+  }//class DumpArffData extends AbstractAction{
 
   class DumpToFileAction extends AbstractAction {
     public DumpToFileAction(){

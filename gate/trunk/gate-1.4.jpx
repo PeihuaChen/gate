@@ -246,7 +246,7 @@
   <property category="sys" name="JbxEventListener6" value="gate.gui.StatusListener"/>
   <property category="sys" name="JbxEventListener7" value="gate.gui.ProgressListener"/>
   <property category="sys" name="LastTag" value="0"/>
-  <property category="sys" name="Libraries" value="gatelibs"/>
+  <property category="sys" name="Libraries" value="gatelibs;Weka"/>
   <property category="sys" name="MakeStable" value="0"/>
   <property category="sys" name="OutPath" value="classes"/>
   <property category="sys" name="SourcePath" value="src;test"/>
@@ -259,4 +259,5 @@
   <property category="sys" name="warn.auto.packages" value="false"/>
   <file path="src/gate/resources/creole/creole.xml"/>
   <file path="src/gate/GateConstants.java"/>
+  <file path="src/gate/TextualDocument.java"/>
 </project>
