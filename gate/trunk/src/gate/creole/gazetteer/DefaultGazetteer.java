@@ -97,7 +97,6 @@ public class DefaultGazetteer extends AbstractGazetteer {
     listsByNode = definition.loadLists();
     Iterator inodes = definition.iterator();
 
-    String line;
     int nodeIdx = 0;
     LinearNode node;
     while (inodes.hasNext()) {
