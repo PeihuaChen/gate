@@ -148,10 +148,12 @@ public class TestConfig extends TestCase
     assertTrue("user config file still there", ! userConfigFile.exists());
 
     // call Gate.writeConfig - check it creates an empty config file
+    //this is no longer a valid test as the written user config will at least
+    //contain the values for the known and autload plugin paths.
     Gate.writeUserConfig();
     String writtenConfig = Files.getString(new File(configName));
     String empty = Gate.getEmptyConfigFile();
-    assertEquals("written config doesn't match", writtenConfig, empty);
+//    assertEquals("written config doesn't match", writtenConfig, empty);
 
     // set some config attributes via Gate.getConfigData
     configMap.put("A", "1");
