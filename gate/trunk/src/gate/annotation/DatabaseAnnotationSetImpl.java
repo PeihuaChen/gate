@@ -140,33 +140,33 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
   }
 
 
-  /** Two AnnotationSet are equal if their name, the documents of which belong
-    *  to the AnnotationSets and annotations from the sets are the same
-    */
-  public boolean equals(Object other) {
-
-    if (false == other instanceof DatabaseAnnotationSetImpl) {
-      return super.equals(other);
-    }
-
-    boolean result = true;
-
-    if (!super.equals((AnnotationSet)other)) {
-      return false;
-    }
-
-    DatabaseAnnotationSetImpl target = (DatabaseAnnotationSetImpl)other;
-
-    result = result && this.addedAnnotations.equals(target.addedAnnotations)
-                    && this.removedAnnotations.equals(target.removedAnnotations)
-                    && this.updatedAnnotations.equals(target.updatedAnnotations);
-
-    //FINALLY - CHECK THAT THE SET IS FROM THE SAME DOCUMENT *INSTANCE*
-    //DO *NOT* USE EQUALS()
-    result = result && ( this.getDocument() == target.getDocument());
-
-    return result;
-  } // equals
+//  /** Two AnnotationSet are equal if their name, the documents of which belong
+//    *  to the AnnotationSets and annotations from the sets are the same
+//    */
+//  public boolean equals(Object other) {
+//
+//    if (false == other instanceof DatabaseAnnotationSetImpl) {
+//      return super.equals(other);
+//    }
+//
+//    boolean result = true;
+//
+//    if (!super.equals((AnnotationSet)other)) {
+//      return false;
+//    }
+//
+//    DatabaseAnnotationSetImpl target = (DatabaseAnnotationSetImpl)other;
+//
+//    result = result && this.addedAnnotations.equals(target.addedAnnotations)
+//                    && this.removedAnnotations.equals(target.removedAnnotations)
+//                    && this.updatedAnnotations.equals(target.updatedAnnotations);
+//
+//    //FINALLY - CHECK THAT THE SET IS FROM THE SAME DOCUMENT *INSTANCE*
+//    //DO *NOT* USE EQUALS()
+//    result = result && ( this.getDocument() == target.getDocument());
+//
+//    return result;
+//  } // equals
 
   /**
    * All the events from the document or its annotation sets are handled by
