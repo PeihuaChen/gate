@@ -337,9 +337,15 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
 
     // put the repositioning information
     if(reposInfo != null) {
-      reposInfo.addPositionInfo(getRealOffset(), content.length(),
-                    tmpDocContent.length()+contentBuffer.length(),
-                    content.length());
+      if(! (start == 0 && length == 1 && text.length <= 2)) {
+        // normal piece of text
+        reposInfo.addPositionInfo(getRealOffset(), content.length(),
+                      tmpDocContent.length()+contentBuffer.length(),
+                      content.length());
+      } // if
+      else {
+        // unicode char or &xxx; coding
+      }
     } // if
 
     // update the document content

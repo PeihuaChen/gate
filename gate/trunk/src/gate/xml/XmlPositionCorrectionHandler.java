@@ -62,8 +62,8 @@ public class XmlPositionCorrectionHandler extends DefaultHandler {
   /** Here is the correction of the Xerces parser bug. */
   public void characters(char[] text, int offset, int len)
                   throws org.xml.sax.SAXException {
-    if(offset == 0 && len == 1 && text.length == 2) {
-        // unicode char
+    if(offset == 0 && len == 1 && text.length <= 2) {
+        // unicode char or &xxx; coding
         return;
     } // if
 
