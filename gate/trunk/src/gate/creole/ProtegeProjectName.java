@@ -26,7 +26,7 @@ import edu.stanford.smi.protege.event.*;
 
 
 /** Dummy Protege LR. Just keep the Protege project file name */
-public class ProtegeProjectName extends AbstractLanguageResource 
+public class ProtegeProjectName extends AbstractLanguageResource
                                 implements ProtegeProject, Ontology {
 
   /** Protege project file name */
@@ -38,7 +38,7 @@ public class ProtegeProjectName extends AbstractLanguageResource
   /** Ontotext Ontology object */
   private Ontology ontotextOntology = null;
   private URL ontotextOntologyUrl = null;
-  
+
   /** Keep visual resource to refresh Ontotext Editor if any */
   ProtegeWrapper visualResource = null;
 
@@ -48,11 +48,11 @@ public class ProtegeProjectName extends AbstractLanguageResource
   public ProtegeProjectName() {
     projectName = null;
   }
-  
+
   public void setProjectName(String name) {
     projectName = name;
   } // setProjectName(String name)
-  
+
   public String getProjectName() {
     return projectName;
   } // getProjectName()
@@ -60,13 +60,13 @@ public class ProtegeProjectName extends AbstractLanguageResource
   public void setViewResource(ProtegeWrapper visual) {
     visualResource = visual;
   } // setViewResource(AbstractVisualResource visual)
-  
+
   public void setKnowledgeBase(KnowledgeBase base) {
     knBase = base;
     fillOntotextOntology();
     createKBListener();
   } // setKnowledgeBase(KnowledgeBase base)
-  
+
   public KnowledgeBase getKnowledgeBase() {
     return knBase;
   } // getKnowledgeBase()
@@ -85,23 +85,23 @@ public class ProtegeProjectName extends AbstractLanguageResource
     };
     knBase.addKnowledgeBaseListener(_knowledgeBaseListener);
   } // createKBListener()
-  
+
   private void fillOntotextOntology() {
     Collection coll = knBase.getRootClses();
     Iterator it = coll.iterator();
     Cls cls;
     OClass oCls;
-    
+
     ontotextOntology = new OntologyImpl();
     ontotextOntology.setURL(ontotextOntologyUrl);
-    
+
     while(it.hasNext()) {
       cls = (Cls) it.next();
       oCls = ontotextOntology.createClass(cls.getName(), "Protege class");
       ontotextOntology.addClass(oCls);
       createSubClasses(cls, oCls);
     }
-    
+
   } // fillOntotextOntology()
 
   private void createSubClasses(Cls protegeClass, OClass ontotextClass) {
@@ -117,35 +117,43 @@ public class ProtegeProjectName extends AbstractLanguageResource
       createSubClasses(cls, oCls);
     }
   } // createSubClasses(Cls protegeClass, OClass ontotextClass)
-    
+
 //------------------------------------------------------------------------------
 //  Ontology interface methods
 
-  public Ontology getOntology(URL someUrl) 
+  public Ontology getOntology(URL someUrl)
         throws ResourceInstantiationException {
     return ontotextOntology.getOntology(someUrl);
   }
 
-  public URL getURL() { 
-    return ontotextOntologyUrl; 
+  public String getLabel() {
+     return ontotextOntology.getLabel();
   }
-  public void setURL(URL aUrl) { 
+
+  public void setLabel(String label) {
+    ontotextOntology.setLabel(label);
+  }
+
+  public URL getURL() {
+    return ontotextOntologyUrl;
+  }
+  public void setURL(URL aUrl) {
     ontotextOntologyUrl = aUrl;
     if(ontotextOntology != null) {
-      ontotextOntology.setURL(aUrl); 
+      ontotextOntology.setURL(aUrl);
     } // if
   }
-  public void setSourceURI(String theURI) { 
+  public void setSourceURI(String theURI) {
     ontotextOntology.setSourceURI(theURI);
   }
-  public String getSourceURI() { 
+  public String getSourceURI() {
     return ontotextOntology.getSourceURI();
   }
   public void setVersion(String theVersion) {
     ontotextOntology.setVersion(theVersion);
   }
-  public String getVersion() { 
-    return ontotextOntology.getVersion(); 
+  public String getVersion() {
+    return ontotextOntology.getVersion();
   }
   public void load() throws ResourceInstantiationException {
     ontotextOntology.load();
@@ -153,17 +161,17 @@ public class ProtegeProjectName extends AbstractLanguageResource
   public void store() throws ResourceInstantiationException {
     ontotextOntology.store();
   }
-  public String getId() { 
-    return ontotextOntology.getId(); 
+  public String getId() {
+    return ontotextOntology.getId();
   }
-  public void setId(String theId) { 
+  public void setId(String theId) {
     ontotextOntology.setId(theId);
   }
-  public String getComment() { 
-    return ontotextOntology.getComment(); 
+  public String getComment() {
+    return ontotextOntology.getComment();
   }
-  public void setComment(String theComment) { 
-    ontotextOntology.setComment(theComment); 
+  public void setComment(String theComment) {
+    ontotextOntology.setComment(theComment);
   }
 
   public OClass createClass(String aName, String aComment) {
@@ -213,5 +221,5 @@ public class ProtegeProjectName extends AbstractLanguageResource
   public boolean isModified() {
     return ontotextOntology.isModified();
   }
-    
+
 } // class ProtegeProjectName extends AbstractLanguageResource
