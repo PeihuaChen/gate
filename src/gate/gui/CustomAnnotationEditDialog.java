@@ -31,14 +31,20 @@ import gate.annotation.*;
 import gate.util.*;
 import gate.creole.*;
 
-/** This class visually adds/edits features and annot type of an annotation*/
+/** This class visually adds/edits features and annot type of an annotation
+  * It does this without using an @see gate.creole.AnnotationSchema.
+  * The user can manipulate annotation and features at his own will.
+  * Is his responsability.Although for annotation that have a schema present
+  * into the system, this class will not be
+  * used.@see gate.gui.AnnotationEditDialog is highly prioritar in this case.
+  */
 public class CustomAnnotationEditDialog extends JDialog {
 
   // Local data
   private final static int OK = 1;
   private final static int CANCEL = 2;
 
-  // internal data
+  // Internal data used in initLocalData() method
   private Annotation annot = null;
   private MyCustomFeatureBearer data = null;
   private Set annotationSchemaSet = null;
@@ -56,11 +62,15 @@ public class CustomAnnotationEditDialog extends JDialog {
   JButton cancelButton = null;
 
   /** Constructs a CustomAnnotationEditDialog
-    * @param aFram the parent frame of this dialog
-    * @param aModal (wheter or not this dialog is modal)
+    * @param aFram the parent frame of this dialog. It can be <b>null</b>.
+    * @param aModal wheter or not this dialog is modal.
+    * @param anAnnotationSchemaSet is used to veryfy the type of the annotation
+    * being eddited. If the annotation has an AnnotationSchema then this
+    * annotation will not be eddited by <b>this</b> object.
     */
-  public CustomAnnotationEditDialog(Frame aFrame, boolean aModal,
-                                                    Set anAnnotationSchemaSet){
+  public CustomAnnotationEditDialog(  Frame aFrame,
+                                      boolean aModal,
+                                      Set anAnnotationSchemaSet){
     super(aFrame,aModal);
     this.setLocationRelativeTo(aFrame);
     this.setTitle("Custom Annotation Editor");
@@ -70,6 +80,9 @@ public class CustomAnnotationEditDialog extends JDialog {
 
   /** Constructs a CustomAnnotationEditDialog.The parent frame is null and the
     * dialog is modal.
+    * @param anAnnotationSchemaSet is used to veryfy the type of the annotation
+    * being eddited. If the annotation has an AnnotationSchema then this
+    * annotation will not be eddited by <b>this</b> object.
     */
   public CustomAnnotationEditDialog(Set anAnnotationSchemaSet){
     this(null, true, anAnnotationSchemaSet);
@@ -157,7 +170,6 @@ public class CustomAnnotationEditDialog extends JDialog {
     this.getContentPane().add(componentsBox);
     this.getContentPane().add(Box.createVerticalStrut(10));
     this.setSize(350,350);
-   // this.pack();
   }//initGuiComponents()
 
   /** Init all the listeners*/
@@ -165,17 +177,16 @@ public class CustomAnnotationEditDialog extends JDialog {
 
     okButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-//        featuresEditor.stopCellEditing();
           doOk();
-      }
-    });
+      }// actionPerformed();
+    });// addActionListener();
 
     cancelButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         requestFocus();
         doCancel();
-      }
-    });
+      }// actionPerformed();
+    });// addActionListener();
 
   }//initListeners()
 
@@ -185,8 +196,7 @@ public class CustomAnnotationEditDialog extends JDialog {
   /** Returns the features edited with this tool*/
   public FeatureMap getFeatures(){ return data.getFeatures();}
 
-  /** This method is called when the user press the OK button
-    */
+  /** This method is called when the user press the OK button */
   private void doOk(){
     buttonPressed = OK;
 
@@ -220,17 +230,19 @@ public class CustomAnnotationEditDialog extends JDialog {
   }//doCancel();
 
   /**  This method displays the AnnotationEditDialog in creating mode
-    *  If a user wnats to create a new annotation then show() must be called with
-    *  null as a param.
+    *  If one wants to create a new annotation then show() must be called with
+    *  <b>null</b> as a param.
+    *  @param anAnnot is the annotation that one wants to edit. If is <b>null</b>
+    *  then an annotation will be created.
+    *  @return JFileChooser.CANCEL_OPTION or JFileChooser.APPROVE_OPTION
+    *  depending on what one choosed.
     */
   public int show(Annotation anAnnot){
     annot = anAnnot;
-
     initLocalData();
     initGuiComponents();
     initListeners();
     super.show();
-
     if (buttonPressed == CANCEL){
       doCancel();
       return JFileChooser.CANCEL_OPTION;
@@ -240,24 +252,7 @@ public class CustomAnnotationEditDialog extends JDialog {
     }// End if
   }// show()
 
-/*
-  public static void main(String[] args){
-
-    try {
-      Gate.init();
-      Document doc = Factory.newDocument(new URL("http://www"));
-
-      CustomAnnotationEditDialog caed = new CustomAnnotationEditDialog();
-      //aed.show(annotSchema);
-      caed.show(null);
-
-    } catch (Exception e){
-      e.printStackTrace(System.err);
-    }
-  }// main
-*/
   // INNER CLASS
-
   /** This class implements a feature bearer. It is used as internal data.
     * The FeatureEditor will use an object belonging to this class.
     */
@@ -268,8 +263,8 @@ public class CustomAnnotationEditDialog extends JDialog {
     private String annotType = null;
 
     /** Constructs a custom feature bearer. If annot is null then it creates
-     *  empty annotType and fetures.
-     */
+      * empty annotType and fetures.
+      */
     public MyCustomFeatureBearer(Annotation anAnnot){
       if (anAnnot != null){
         features = anAnnot.getFeatures();
@@ -298,4 +293,22 @@ public class CustomAnnotationEditDialog extends JDialog {
     }//getAnnotType()
 
   }// End class MyCustomFeatureBearer
+
+/*
+  // Code used in development process
+  public static void main(String[] args){
+
+    try {
+      Gate.init();
+      Document doc = Factory.newDocument(new URL("http://www"));
+
+      CustomAnnotationEditDialog caed = new CustomAnnotationEditDialog();
+      //aed.show(annotSchema);
+      caed.show(null);
+
+    } catch (Exception e){
+      e.printStackTrace(System.err);
+    }
+  }// main
+*/
 }//End class CustomAnnotationEditDialog
