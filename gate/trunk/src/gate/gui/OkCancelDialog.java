@@ -35,6 +35,12 @@ public class OkCancelDialog extends JDialog {
     init(contents);
   }
 
+  protected OkCancelDialog(String title, Component contents){
+    super();
+    setTitle(title);
+    init(contents);
+  }
+
   protected void init(Component contents){
     //fill in the contents
     JPanel vBox = new JPanel();
@@ -95,7 +101,8 @@ public class OkCancelDialog extends JDialog {
     //construct the dialog
     Window parent = SwingUtilities.getWindowAncestor(parentComponent);
     OkCancelDialog dialog;
-    if(parent instanceof Frame){
+    if(parent == null) dialog = new OkCancelDialog(title, contents);
+    else if(parent instanceof Frame){
       dialog = new OkCancelDialog((Frame)parent, title, contents);
     } else{
       dialog = new OkCancelDialog((Dialog)parent, title, contents);

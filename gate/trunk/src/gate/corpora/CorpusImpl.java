@@ -331,7 +331,12 @@ public class CorpusImpl extends AbstractLanguageResource
           }
         }else{
           //create the doc
-          corpus.add(Factory.newDocument(aFile.toURL()));
+          String docName = aFile.getName() + "_" + Gate.genSym();
+          FeatureMap params = Factory.newFeatureMap();
+          params.put("sourceUrl", aFile.toURL());
+
+          corpus.add(Factory.createResource(DocumentImpl.class.getName(),
+                                            params, null, null, docName));
         }
       }
     }
