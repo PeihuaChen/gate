@@ -78,12 +78,25 @@ docs:
 	cp ../src/gate/CookBook.java ../doc/javadoc/gate/CookBook.txt
 
 # make the developer Javadocs (inc. private members)
-internaldocs:
+internaldocs: 
 	./jdk.sh \
 	  -s '-link http://redmires.dcs.shef.ac.uk/Java2_docs/api/' \
 	  javadoc $(SP) $(CP) -private -use \
 	  -d ../doc/javadoc/internal $(PKGS)
 	cp ../src/gate/CookBook.java ../doc/javadoc/internal/gate/CookBook.txt
+java2html:
+	rm -f ../doc/internal/java2html/*.html
+	echo '<!--AUTOGEN!--><HTML><HEAD><TITLE>GATE code</TITLE></HEAD><BODY>' \
+	  >../doc/internal/java2html/index.html
+	cd ../src && for f in \
+	  `find . -name '*.java' -print |sed 's,^..,,' |sort`; \
+	do NAME=`echo $$f |sed 's,\/,\.,g'`; \
+	java2html -i $$f -o ../doc/internal/java2html/$$NAME.html; \
+	echo "<P><A HREF=$$NAME.html>$$NAME</A>" \
+	  >> ../doc/internal/java2html/index.html; done
+	echo '</BODY></HTML>' \
+	  >> ../doc/internal/java2html/index.html
+
 
 # delete all the class files etc. (doesn't delete gate.jar)
 clean:
