@@ -1375,17 +1375,17 @@ public class CorpusBenchmarkTool {
   protected void updateStatistics(AnnotationDiffer annotDiffer, String annotType){
     double precisionAverage = ((double)((double)annotDiffer.getPrecisionLenient() + annotDiffer.getPrecisionStrict()) /
 (double)(2.0));
-    if(precisionAverage != Double.NaN)
-      precisionSum += precisionAverage;
+    if(precisionAverage == Double.NaN) precisionAverage = 0.0;
+    precisionSum += precisionAverage;
 
     double recallAverage = ((double)(annotDiffer.getRecallLenient() + annotDiffer.getRecallStrict()) / (double) (2.0));
-    if(recallAverage != Double.NaN)
-      recallSum += recallAverage;
+    if(recallAverage == Double.NaN) recallAverage = 0.0;
+    recallSum += recallAverage;
 
     double fMeasureAverage = ((double) (annotDiffer.getFMeasureLenient(1.0) + annotDiffer.getFMeasureStrict(1.0)) /
 (double) (2.0));
-    if(fMeasureAverage != Double.NaN)
-      fMeasureSum += fMeasureAverage;
+    if(fMeasureAverage == Double.NaN) fMeasureAverage = 0.0;
+    fMeasureSum += fMeasureAverage;
 
     Double oldPrecision = (Double) precisionByType.get(annotType);
     if (oldPrecision == null)
@@ -1458,16 +1458,16 @@ public class CorpusBenchmarkTool {
     hasProcessed = true;
     double precisionAverage = ((double)(annotDiffer.getPrecisionLenient() + annotDiffer.getPrecisionStrict()) /
 (double)(2.0));
-    if(precisionAverage != Double.NaN)
-      proc_precisionSum += precisionAverage;
+    if(precisionAverage == Double.NaN) precisionAverage = 0.0;
+    proc_precisionSum += precisionAverage;
 
     double recallAverage = ((double)(annotDiffer.getRecallLenient() + annotDiffer.getRecallStrict()) / (double) (2.0));
-    if(recallAverage != Double.NaN)
-      proc_recallSum += recallAverage;
+    if(recallAverage == Double.NaN) recallAverage = 0.0;
+    proc_recallSum += recallAverage;
 
     double fMeasureAverage = ((double) (annotDiffer.getFMeasureLenient(1.0) + annotDiffer.getFMeasureStrict(1.0)) /
 (double) (2.0));
-    if(fMeasureAverage != Double.NaN)
+    if(fMeasureAverage == Double.NaN) fMeasureAverage = 0.0;
       proc_fMeasureSum += fMeasureAverage;
 
     Double oldPrecision = (Double) proc_precisionByType.get(annotType);
