@@ -93,7 +93,7 @@ public class FlexibleGazetteer
       inputFeatureNames = new ArrayList();
     }
 
-    Iterator tokenIter = getTokenIterator(document, null);
+    Iterator tokenIter = getTokenIterator(document, inputAnnotationSetName);
     long totalDeductedSpaces = 0;
     fireStatusChanged("Replacing contents with the feature value...");
 
@@ -211,7 +211,7 @@ public class FlexibleGazetteer
     // lets create the gazetteer based on the provided gazetteer name
     FeatureMap params = Factory.newFeatureMap();
     gazetteerInst.setDocument(tempDoc);
-    gazetteerInst.setAnnotationSetName(this.annotationSetName);
+    gazetteerInst.setAnnotationSetName(this.outputAnnotationSetName);
 
     fireStatusChanged("Executing Gazetteer...");
     gazetteerInst.execute();
@@ -219,10 +219,10 @@ public class FlexibleGazetteer
     // now the tempDoc has been looked up, we need to shift the tokens from
     // this temp document to the original document
     fireStatusChanged("Transfering new tages to the original one...");
-    Iterator tokensIter = getTokenIterator(tempDoc, annotationSetName);
-    AnnotationSet original = (annotationSetName == null) ?
+    Iterator tokensIter = getTokenIterator(tempDoc, outputAnnotationSetName);
+    AnnotationSet original = (outputAnnotationSetName == null) ?
                              document.getAnnotations() :
-                             document.getAnnotations(annotationSetName);
+                             document.getAnnotations(outputAnnotationSetName);
     long totalSpaceAdded = 0;
     long difference = 0;
 
@@ -382,19 +382,35 @@ public class FlexibleGazetteer
   }
 
   /**
-   * sets the annotationSetName
+   * sets the outputAnnotationSetName
    * @param annName
    */
-  public void setAnnotationSetName(String annName) {
-    this.annotationSetName = annName;
+  public void setOutputAnnotationSetName(String annName) {
+    this.outputAnnotationSetName = annName;
   }
 
   /**
-   * Returns the annotationSetName
+   * Returns the outputAnnotationSetName
    * @return
    */
-  public String getAnnotationSetName() {
-    return this.annotationSetName;
+  public String getOutputAnnotationSetName() {
+    return this.outputAnnotationSetName;
+  }
+
+  /**
+   * sets the inputAnnotationSetName
+   * @param annName
+   */
+  public void setInputAnnotationSetName(String annName) {
+    this.inputAnnotationSetName = annName;
+  }
+
+  /**
+   * Returns the inputAnnotationSetName
+   * @return
+   */
+  public String getInputAnnotationSetName() {
+    return this.inputAnnotationSetName;
   }
 
   /**
@@ -444,7 +460,8 @@ public class FlexibleGazetteer
 
   // Gazetteer Runtime parameters
   private gate.Document document;
-  private java.lang.String annotationSetName;
+  private java.lang.String outputAnnotationSetName;
+  private java.lang.String inputAnnotationSetName;
 
   // Flexible Gazetteer parameter
   private Gazetteer gazetteerInst;
