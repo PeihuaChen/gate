@@ -47,6 +47,10 @@ public class TestPersist extends TestCase
   private static Corpus sampleCorpus = null;
   private static int dbType;
 
+//  private static final String UNICODE_STRING = "\u65e5\u672c\u8a9e\u6587\u5b57\u5217";
+  private static final String UNICODE_STRING = "\u0915\u0932\u094d\u0907\u0928\u0643\u0637\u0628\u041a\u0430\u043b\u0438\u043d\u0430 Kalina";
+  private static final String ASCII_STRING = "Never mistake motion for action (Ernest Hemingway)";
+
   private final String VERY_LONG_STRING =
   "The memory of Father came back to her. Ever since she had seen him retreat from those "+
   "twelve-year-old boys she often imagined him in this situation: he is on a sinking ship; "+
@@ -469,12 +473,13 @@ public class TestPersist extends TestCase
     assertNotNull(doc);
 
     doc.getFeatures().put("hi there", new Integer(23232));
-    doc.getFeatures().put("LONG STRING", this.VERY_LONG_STRING);
+    doc.getFeatures().put("LONG STRING feature", this.VERY_LONG_STRING);
     doc.getFeatures().put("NULL feature",null);
     doc.getFeatures().put("BINARY feature",new Dummy(101,"101",true,101.101f));
     doc.getFeatures().put("LONG feature",new Long(101));
 //    doc.getFeatures().put("FLOAT feature",new Double(101.102d));
-//    doc.getFeatures().put("UNICODE feature",new String("\u65e5\u672c\u8a9e\u6587\u5b57\u5217"));
+    doc.getFeatures().put("ASCII feature",ASCII_STRING);
+    doc.getFeatures().put("UNICODE feature",UNICODE_STRING);
 
     //create a complex feature - array of strings
     Vector complexFeature = new Vector();
@@ -486,7 +491,8 @@ public class TestPersist extends TestCase
     doc.getFeatures().put("complex feature",complexFeature);
     FeatureMap fm  = Factory.newFeatureMap();
 //    fm.put("FLOAT feature ZZZ",new Double(101.102d));
-//    fm.put("UNICODE feature",new String("\u65e5\u672c\u8a9e\u6587\u5b57\u5217"));
+//    fm.put("ASCII feature",ASCII_STRING);
+//    fm.put("UNICODE feature",UNICODE_STRING);
     doc.getAnnotations().add(
       new Long(0), new Long(20), "thingymajig", fm);
     doc.setName("DB test Document---");
@@ -566,20 +572,8 @@ public class TestPersist extends TestCase
   }
 
 
-  public void testOracle_01() throws Exception {
-
-    prepareDB("oracle");
-    testDB_UseCase01();
-  }
-
-  public void testPostgres_01() throws Exception {
-
-    prepareDB("postgres");
-    testDB_UseCase01();
-  }
-
   /** Test the DS register. */
-  private void testDB_UseCase01() throws Exception {
+  private void _testDB_UseCase01() throws Exception {
 ///Err.prln("Use case 01 started...");
     //descr: create a document in the DB
 
@@ -636,19 +630,8 @@ public class TestPersist extends TestCase
     }
   }
 
-  public void testPostgres_02() throws Exception {
 
-    prepareDB("postgres");
-    testDB_UseCase02();
-  }
-
-  public void testOracle_02() throws Exception {
-
-    prepareDB("oracle");
-    testDB_UseCase02();
-  }
-
-  private void testDB_UseCase02() throws Exception {
+  private void _testDB_UseCase02() throws Exception {
 ///Err.prln("Use case 02 started...");
     //read a document
     //use the one created in UC01
@@ -789,19 +772,7 @@ public class TestPersist extends TestCase
   }
 
 
-  public void testPostgres_03() throws Exception {
-
-    prepareDB("postgres");
-    testDB_UseCase03();
-  }
-
-  public void testOracle_03() throws Exception {
-
-    prepareDB("oracle");
-    testDB_UseCase03();
-  }
-
-  private void testDB_UseCase03() throws Exception {
+  private void _testDB_UseCase03() throws Exception {
 ///Err.prln("Use case 03 started...");
     //sync a document
     LanguageResource lr = null;
@@ -987,10 +958,14 @@ public class TestPersist extends TestCase
     AnnotationSet aset = dbDoc.getAnnotations(dummySetName);
     aset.addAll(dbDoc.getAnnotations());
     dbDoc.sync();
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
 
-    Assert.assertTrue(dbDoc.getNamedAnnotationSets().size() == doc2.getNamedAnnotationSets().size());
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+    Assert.assertTrue(dbDoc.getNamedAnnotationSets().containsKey(dummySetName));
     Assert.assertTrue(doc2.getNamedAnnotationSets().containsKey(dummySetName));
+    Assert.assertTrue(dbDoc.getNamedAnnotationSets().containsValue(aset));
+    Assert.assertTrue(doc2.getNamedAnnotationSets().containsValue(aset));
+    Assert.assertTrue(dbDoc.getNamedAnnotationSets().size() == doc2.getNamedAnnotationSets().size());
+
     Assert.assertTrue(doc2.getNamedAnnotationSets().equals(dbDoc.getNamedAnnotationSets()));
 
     //12. remove aset
@@ -1014,19 +989,8 @@ public class TestPersist extends TestCase
     }
   }
 
-  public void testOracle_04() throws Exception {
 
-    prepareDB("oracle");
-    testDB_UseCase04();
-  }
-
-  public void testPostgres_04() throws Exception {
-
-    prepareDB("postgres");
-    testDB_UseCase04();
-  }
-
-  private void testDB_UseCase04() throws Exception {
+  private void _testDB_UseCase04() throws Exception {
 ///Err.prln("Use case 04 started...");
     //delete a document
     LanguageResource lr = null;
@@ -1079,20 +1043,9 @@ public class TestPersist extends TestCase
 
   }
 
-  public void testPostgres_101() throws Exception {
-
-    prepareDB("postgres");
-    testDB_UseCase101();
-  }
-
-  public void testOracle_101() throws Exception {
-
-    prepareDB("oracle");
-    testDB_UseCase101();
-  }
 
   /** Test the DS register. */
-  private void testDB_UseCase101() throws Exception {
+  private void _testDB_UseCase101() throws Exception {
 ///Err.prln("Use case 101 started...");
     //descr : create a corpus
 
@@ -1144,20 +1097,10 @@ public class TestPersist extends TestCase
 
   }
 
-  public void testOracle_102() throws Exception {
 
-    prepareDB("oracle");
-    testDB_UseCase102();
-  }
-
-  public void testPostgres_102() throws Exception {
-
-    prepareDB("postgres");
-    testDB_UseCase102();
-  }
 
   /** Test the DS register. */
-  private void testDB_UseCase102() throws Exception {
+  private void _testDB_UseCase102() throws Exception {
     //read a corpus
 ///Err.prln("Use case 102 started...");
     LanguageResource lr = null;
@@ -1221,19 +1164,7 @@ public class TestPersist extends TestCase
   }
 
 
-  public void testPostgres_103() throws Exception {
-
-    prepareDB("postgres");
-    testDB_UseCase103();
-  }
-
-  public void testOracle_103() throws Exception {
-
-    prepareDB("oracle");
-    testDB_UseCase103();
-  }
-
-  private void testDB_UseCase103() throws Exception {
+  private void _testDB_UseCase103() throws Exception {
 ///Err.prln("Use case 103 started...");
     //sync a corpus
     LanguageResource lr = null;
@@ -1314,6 +1245,90 @@ public class TestPersist extends TestCase
     }
 
 }
+
+  public void testOracle_01() throws Exception {
+
+    prepareDB("oracle");
+    _testDB_UseCase01();
+  }
+
+  public void testOracle_02() throws Exception {
+
+    prepareDB("oracle");
+    _testDB_UseCase02();
+  }
+
+  public void testOracle_03() throws Exception {
+
+    prepareDB("oracle");
+    _testDB_UseCase03();
+  }
+
+  public void testOracle_04() throws Exception {
+
+    prepareDB("oracle");
+    _testDB_UseCase04();
+  }
+
+  public void testOracle_101() throws Exception {
+
+    prepareDB("oracle");
+    _testDB_UseCase101();
+  }
+
+  public void testOracle_102() throws Exception {
+
+    prepareDB("oracle");
+    _testDB_UseCase102();
+  }
+
+  public void testOracle_103() throws Exception {
+
+    prepareDB("oracle");
+    _testDB_UseCase103();
+  }
+
+  public void testPostgres_01() throws Exception {
+
+    prepareDB("postgres");
+    _testDB_UseCase01();
+  }
+
+  public void testPostgres_02() throws Exception {
+
+    prepareDB("postgres");
+    _testDB_UseCase02();
+  }
+
+  public void testPostgres_03() throws Exception {
+
+    prepareDB("postgres");
+    _testDB_UseCase03();
+  }
+
+  public void testPostgres_04() throws Exception {
+
+    prepareDB("postgres");
+    _testDB_UseCase04();
+  }
+
+  public void testPostgres_101() throws Exception {
+
+    prepareDB("postgres");
+    _testDB_UseCase101();
+  }
+
+  public void testPostgres_102() throws Exception {
+
+    prepareDB("postgres");
+    _testDB_UseCase102();
+  }
+
+  public void testPostgres_103() throws Exception {
+
+    prepareDB("postgres");
+    _testDB_UseCase103();
+  }
 
 
   public static void main(String[] args){
