@@ -15,6 +15,7 @@
 package gate.util;
 
 import java.util.*;
+import java.io.*;
 import junit.framework.*;
 import java.lang.reflect.*;
 
