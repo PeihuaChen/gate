@@ -71,6 +71,8 @@ public abstract class AbstractDocumentView extends AbstractResource
     this.handle = handle;
   }
   
+  
+  
   /**
    * Stores the target (which should always be a {@link Document}) into the 
    * {@link #document} field.
@@ -79,6 +81,12 @@ public abstract class AbstractDocumentView extends AbstractResource
     this.document = (Document)target;
   }
   
+  /**
+   * Stores the owner of this view into the {@link #owner} field.
+   */
+  public void setOwner(DocumentEditor editor) {
+    this.owner = editor;
+  }
   
   /**
    * Implementers should override this method and use it for populating the GUI. 
@@ -123,4 +131,10 @@ public abstract class AbstractDocumentView extends AbstractResource
    * The document this view displays.
    */
   protected Document document;
+  
+  /**
+   * The {@link DocumentEditor} this view is part of.
+   */
+  protected DocumentEditor owner;
 }
+

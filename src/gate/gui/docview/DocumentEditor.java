@@ -115,6 +115,7 @@ public class DocumentEditor extends AbstractVisualResource
           DocumentView aView = (DocumentView)Factory.
                                createResource(rData.getClassName());
           aView.setTarget(document);
+          aView.setOwner(this);
           //add the view
           addView(aView, rData.getName());
         }
@@ -131,6 +132,18 @@ public class DocumentEditor extends AbstractVisualResource
     remove(progressBar);
     add(horizontalSplit, BorderLayout.CENTER);
     validate();
+  }
+  
+  public List getCentralViews(){
+  	return Collections.unmodifiableList(centralViews);
+  }
+  
+  public List getHorizontalViews(){
+    return Collections.unmodifiableList(horizontalViews);
+  }
+  
+  public List getVerticalViews(){
+    return Collections.unmodifiableList(verticalViews);
   }
   
 
