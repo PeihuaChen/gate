@@ -1,5 +1,5 @@
 /*
- *  LexKBSynset.java
+ *  Lexicon.java
  *
  *  Copyright (c) 1998-2003, The University of Sheffield.
  *
@@ -28,4 +28,8 @@ public interface Lexicon extends LanguageResource {
 
   public static final Object [] POS_TYPES =
       {POS_ADJECTIVE, POS_ADVERB, POS_NOUN, POS_VERB, POS_CONJ, POS_OTHER};
+
+  public Object getLexiconId();
+
+  public void setLexiconId(Object Id);
 }

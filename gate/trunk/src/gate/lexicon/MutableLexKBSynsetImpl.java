@@ -25,6 +25,8 @@ public class MutableLexKBSynsetImpl implements MutableLexKBSynset, Serializable 
   private Long id;
   private static long nextID = 1;
   private List senses = new ArrayList();
+  static final long serialVersionUID = 7483532901922245459L;
+
 
   public MutableLexKBSynsetImpl() {
     id = new Long(nextID);

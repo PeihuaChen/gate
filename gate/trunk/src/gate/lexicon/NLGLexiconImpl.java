@@ -16,126 +16,24 @@
 
 package gate.lexicon;
 
-import gate.creole.AbstractLanguageResource;
-import gate.util.*;
-import gate.*;
-import java.util.*;
-import gate.persist.PersistenceException;
-import gate.security.SecurityException;
-import gate.creole.ResourceInstantiationException;
-import java.net.*;
-import java.io.*;
+import java.io.Serializable;
 
-public class NLGLexiconImpl extends AbstractLanguageResource
-                            implements NLGLexicon {
+public class NLGLexiconImpl extends MutableLexicalKnowledgeBaseImpl
+    implements Serializable {
 
-  private String version = "1.0";
-  private List synsets = new ArrayList();
-  private HashMap words = new HashMap();
-  private List posTypes = new ArrayList();
+  static final long serialVersionUID = -2543190013851016324L;
 
   public NLGLexiconImpl() {
-    for (int i = 0; i < POS_TYPES.length; i++)
-      posTypes.add(POS_TYPES[i]);
+    super();
+    this.setLexiconId("MIAKT NLG Lexicon");
   }
 
-  public Resource init() throws gate.creole.ResourceInstantiationException {
-    return this;
-  }
-
-  public Iterator getSynsets() {
-    return synsets.iterator();
-  }
-
-  public Iterator getSynsets(Object pos) {
-    if (pos == null)
-      return null;
-    List tempList = new ArrayList();
-    for (int i=0; i<synsets.size(); i++) {
-      LexKBSynset synset = (LexKBSynset) synsets.get(i);
-      if (pos.equals(synset.getPOS()))
-        tempList.add(synset);
-    }//for
-    return tempList.iterator();
-  }
-
-  public List lookupWord(String lemma) {
-    if (lemma == null)
-      return null;
-    Word myWord = (Word) words.get(lemma);
-    if (myWord == null)
-      return null;
-    return myWord.getWordSenses();
-  }
-
-  public List lookupWord(String lemma, Object pos) {
-    if (lemma == null || pos == null)
-      return null;
-    Word myWord = (Word) words.get(lemma);
-    if (myWord == null)
-      return null;
-    List posSenses = new ArrayList();
-    Iterator iter = myWord.getWordSenses().iterator();
-    while (iter.hasNext()) {
-      LexKBWordSense sense = (LexKBWordSense) iter.next();
-      if (sense.getPOS().equals(pos))
-        posSenses.add(sense);
-    } //while loop through senses
-    return posSenses;
-  }
-
-  /** add a new word */
-  public MutableWord addWord(String lemma){
+  public MutableWord addWord(String lemma) {
     if (words.containsKey(lemma))
       return (MutableWord) words.get(lemma);
 
-    MutableWordImpl newWord = new MutableWordImpl(lemma);
+    MutableWordImpl newWord = new NLGLexWordImpl(lemma);
     words.put(lemma, newWord);
     return newWord;
   }
-
-  /** sets the lexicon version */
-  public void setVersion(String newVersion){
-    version = newVersion;
-  }
-
-  /** returns the lexicon version */
-  public String getVersion() {
-    return version;
-  }
-
-  public MutableLexKBSynset addSynset() {
-    MutableLexKBSynset newSynset =  new MutableLexKBSynsetImpl();
-    synsets.add(newSynset);
-    return newSynset;
-  }
-
-  public Object[] getPOSTypes() {
-    return posTypes.toArray();
-  }
-
-  public void addPOSType(Object newPOSType) {
-    if (newPOSType == null)
-      return;
-    posTypes.add(newPOSType);
-  }
-
-  public void removeWord(MutableWord theWord) {
-    if (theWord == null)
-      return;
-    theWord.removeSenses();
-    words.remove(theWord.getLemma());
-  }//removeWord
-
-  public void removeSynset(MutableLexKBSynset synset) {
-    if (synset == null)
-      return;
-    List senses = synset.getWordSenses();
-    for (int i = 0; i < senses.size(); i++) {
-      LexKBWordSense sense = (LexKBWordSense) senses.get(i);
-      ((MutableWord) sense.getWord()).removeSense(sense);
-    }//for
-    synset.removeSenses();
-    synsets.remove(synset);
-  }//removeSynset
 }

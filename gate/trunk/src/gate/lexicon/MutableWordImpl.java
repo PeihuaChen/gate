@@ -22,6 +22,8 @@ import gate.util.Out;
 public class MutableWordImpl implements MutableWord, Serializable {
   private String lemma = "";
   private List senseList = new ArrayList();
+  static final long serialVersionUID = -2448794632943663270L;
+
 
   public MutableWordImpl(String newLemma) {
     this.lemma = newLemma;
