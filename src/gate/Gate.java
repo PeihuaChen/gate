@@ -692,4 +692,14 @@ jar/classpath so it's the same as registerBuiltins
   public static boolean runningOnUnix() {
     return Strings.getFileSep().equals("/");
   } // runningOnUnix
+
+  /** Flag for Shell SLAC GUI start instead of standart GATE GUI. */
+  private static boolean shellSlackGui = false;
+
+  /** Should we start Shell SLAC GUI. */
+  public static boolean isShellSlackGui() { return shellSlackGui; }
+
+  /** Tell GATE whether to start Shell SLAC GUI. */
+  public static void setShellSlackGui(boolean b) { shellSlackGui = b; }
+  
 } // class Gate
