@@ -11,7 +11,6 @@ currency_prefix.lst:currency_unit:pre_amount
 currency_unit.lst:currency_unit:post_amount
 day.lst:date:day
 department.lst:organization:department
-determiner.lst:stop:determiner
 festival.lst:date:festival
 govern_key.lst:govern_key
 government.lst:organization:government
