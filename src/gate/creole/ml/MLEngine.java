@@ -18,6 +18,7 @@ import java.io.*;
 
 import org.jdom.*;
 
+import gate.*;
 import gate.util.*;
 import gate.creole.ExecutionException;
 
@@ -70,4 +71,10 @@ public interface MLEngine {
    * @throws GateException
    */
   public void init() throws GateException;
+
+  /**
+   * Registers the PR using the engine with the engine itself.
+   * @param pr the processing resource that owns this engine.
+   */
+  public void setOwnerPR(ProcessingResource pr);
 }

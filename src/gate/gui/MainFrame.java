@@ -14,50 +14,31 @@
 
 package gate.gui;
 
-import java.awt.Component;
-import java.awt.AWTEvent;
-import java.awt.AWTException;
-import java.awt.Font;
-import java.awt.Window;
-import java.awt.Dialog;
-import java.awt.Frame;
-import java.awt.Color;
-import java.awt.Toolkit;
-import java.awt.Dimension;
-import java.awt.BorderLayout;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.event.*;
-import java.awt.font.TextAttribute;
-import java.awt.GraphicsEnvironment;
-
-import java.text.*;
-
-import javax.swing.*;
-import javax.swing.tree.*;
-import javax.swing.event.*;
-import javax.swing.plaf.FontUIResource;
-
 import java.beans.*;
-
-import java.util.*;
 import java.io.*;
 import java.net.*;
+import java.text.*;
+import java.util.*;
+import java.util.List;
 
-import gate.*;
+import javax.swing.*;
+import javax.swing.event.*;
+import javax.swing.tree.*;
 
-import gate.creole.*;
-import gate.event.*;
-import gate.persist.*;
-import gate.util.*;
-import gate.swing.*;
-import gate.security.*;
-import junit.framework.*;
 //import guk.im.*;
-
 /**needed in order to register the Ontology Editor Tool
  * ontotext.bp*/
 import com.ontotext.gate.vr.*;
-import com.ontotext.gate.ontology.*;
+import gate.*;
+import gate.creole.*;
+import gate.event.*;
+import gate.persist.*;
+import gate.security.*;
+import gate.swing.*;
+import gate.util.*;
+import junit.framework.*;
 
 /**
  * The main Gate GUI frame.
@@ -407,6 +388,8 @@ public class MainFrame extends JFrame
     this.getContentPane().add(mainSplit, BorderLayout.CENTER);
 
     southBox = Box.createHorizontalBox();
+    southBox.add(Box.createHorizontalStrut(5));
+
     statusBar = new JLabel();
 
     UIManager.put("ProgressBar.cellSpacing", new Integer(0));
