@@ -32,7 +32,10 @@ public class SessionImpl implements Session {
   private int   timeout;
 
   /** --- */
-  public SessionImpl(Long id,User usr,Group grp, int timeout) {
+  private boolean isPrivileged;
+
+  /** --- */
+  public SessionImpl(Long id,User usr,Group grp, int timeout, boolean isPrivileged) {
 
     this.id = id;
     this.user = usr;
@@ -59,6 +62,14 @@ public class SessionImpl implements Session {
 
     return this.group;
   }
+
+  /** --- */
+  public boolean isPrivilegedSession() {
+
+    return this.isPrivileged;
+  }
+
+
 
   /* misc methods */
   public int getTimeout() {

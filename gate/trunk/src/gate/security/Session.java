@@ -28,4 +28,8 @@ public interface Session {
   /** --- */
   public Group getGroup();
 
+  /** --- */
+  public boolean isPrivilegedSession();
+
+
 }
