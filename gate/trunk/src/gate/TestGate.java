@@ -52,11 +52,6 @@ public class TestGate
   /** Main routine. */
   public static void main(String[] args) throws Exception {
 
-    // inialise the library.
-    // normally we would also call initCreoleRegister, but that's
-    // done in TestCreole
-    Gate.init();
-
     String a[] = new String[1];
     a[0] = "gate.TestGate";
     // use the next line if you're running with output to console in text mode:
@@ -77,10 +72,15 @@ public class TestGate
   /** GATE test suite. Every test case class has to be
     * registered here.
     */
-  public static Test suite() {
+  public static Test suite() throws Exception {
+    // inialise the library.
+    // normally we would also call initCreoleRegister, but that's
+    // done in TestCreole
+    Gate.init();
+
     TestSuite suite = new TestSuite();
-    suite.addTest(TestXSchema.suite());//*
     suite.addTest(TestCreole.suite());
+    suite.addTest(TestXSchema.suite()); //*
     suite.addTest(TestFiles.suite());
     suite.addTest(TestXml.suite());
     suite.addTest(TestHtml.suite());
