@@ -3081,6 +3081,7 @@ Out.prln("NULL size");
             repairHighlights(e.getOffset(), e.getOffset() + e.getLength());
           }
         });
+        updateBlinks();
       }catch(BadLocationException ble){
         ble.printStackTrace(Err.getPrintWriter());
       }catch(InvalidOffsetException ioe){
@@ -3093,8 +3094,12 @@ Out.prln("NULL size");
         document.edit(new Long(e.getOffset()),
                       new Long(e.getOffset() + e.getLength()),
                       new DocumentContentImpl(""));
-        annotationsTable.repaint();
-//        repairHighlights(e.getOffset(), e.getOffset() + e.getLength());
+        SwingUtilities.invokeLater(new Runnable(){
+          public void run(){
+            annotationsTable.repaint();
+          }
+        });
+        updateBlinks();
       }catch(InvalidOffsetException ioe){
         ioe.printStackTrace(Err.getPrintWriter());
       }
@@ -3102,6 +3107,43 @@ Out.prln("NULL size");
 
     public void changedUpdate(javax.swing.event.DocumentEvent e) {
       //some attributes changed: we don't care about that
+    }
+    /**
+     * Restores the blinking selection if any
+     */
+    protected void updateBlinks(){
+      int[] rows = annotationsTable.getSelectedRows();
+      if(rows != null && rows.length > 0){
+        selectionHighlighter.removeAllHighlights();
+        for(int i = 0; i < rows.length; i++){
+          int start = ((Long)annotationsTable.getModel().
+                       getValueAt(rows[i], 2)
+                      ).intValue();
+          int end = ((Long)annotationsTable.getModel().
+                     getValueAt(rows[i], 3)
+                    ).intValue();
+
+          // compute correction for new line breaks in long lines
+          start += longLinesCorrection(start);
+          end += longLinesCorrection(end);
+
+          //start blinking the annotation
+          try{
+            synchronized (selectionHighlighter){
+              selectionHighlighter.addHighlight(start, end,
+                          DefaultHighlighter.DefaultPainter);
+            }
+          }catch(BadLocationException ble){
+            throw new GateRuntimeException(ble.toString());
+          }
+        }//for(int i = 0; i < rows.length; i++)
+
+//        annotationsTable.clearSelection();
+//        for (int i = 0; i < rows.length; i++) {
+//          annotationsTable.addRowSelectionInterval(rows[i], rows[i]);
+//        }
+      }
+
     }
   }//class SwingDocumentListener implements javax.swing.event.DocumentListener
 
