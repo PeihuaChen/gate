@@ -75,6 +75,8 @@ public class CreoleXmlHandler extends DefaultHandler {
     */
   private List currentAutoinstances = null;
 
+  private String contentsForStack = "";
+
   /** Construction */
   public CreoleXmlHandler(CreoleRegister register, URL directoryUrl) {
     this.register = register;
@@ -120,7 +122,7 @@ public class CreoleXmlHandler extends DefaultHandler {
   /** Called when the SAX parser encounts the beginning of an XML element */
   public void startElement (String uri, String qName, String elementName,
                                                              Attributes atts){
-
+    contentsForStack = "";
     if(DEBUG) {
       Out.pr("startElement: ");
       Out.println(
@@ -233,8 +235,18 @@ public class CreoleXmlHandler extends DefaultHandler {
     */
   public void endElement (String uri, String qName, String elementName)
                                                     throws GateSaxException {
-    if(DEBUG) Out.prln("endElement: " + elementName);
 
+    // Addition by Niraj to enable accumulation of text
+    // text should be added only when the endElement recognized
+    if(contentsForStack.length() != 0 ) {
+      if(DEBUG) Out.prln(contentsForStack);
+      contentStack.push(contentsForStack);
+      contentsForStack = "";
+    }
+    // end of addition
+
+
+    if(DEBUG) Out.prln("endElement: " + elementName);
     //////////////////////////////////////////////////////////////////
     if(elementName.toUpperCase().equals("RESOURCE")) {
       // check for validity of the resource data
@@ -461,7 +473,14 @@ public class CreoleXmlHandler extends DefaultHandler {
     // If the entire text is empty or is made from whitespaces then we simply
     // return
     if (content.length() == 0) return;
-    contentStack.push(content);
+    // Commented by Niraj
+    // Text should only be pushed in the stack if it is complete text
+    // between the start and the end elements
+    // contentStack.push(content);
+    // Addition by Niraj
+    // Accumulate text until the endElement called
+    contentsForStack = contentsForStack + content;
+    // end of addition
     if(DEBUG) Out.println(content);
   } // characters
 

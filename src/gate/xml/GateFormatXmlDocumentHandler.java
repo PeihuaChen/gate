@@ -35,7 +35,9 @@ import org.xml.sax.helpers.*;
   */
 public class GateFormatXmlDocumentHandler extends DefaultHandler{
   /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
+
+  private String contentsOfStack = "";
 
   /**
     */
@@ -85,6 +87,10 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
   public void startElement (String uri, String qName, String elemName,
                                                              Attributes atts){
 
+    // Addition by Niraj
+    contentsOfStack = "";
+    // End of addition
+
     // Inform the progress listener to fire only if no of elements processed
     // so far is a multiple of ELEMENTS_RATE
     if ((++elements % ELEMENTS_RATE) == 0 )
@@ -118,6 +124,24 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
     */
     public void endElement (String uri, String qName, String elemName )
                                                            throws SAXException{
+
+     // Addition by Niraj
+     if(contentsOfStack.length() != 0) {
+      if("TextWithNodes".equals((String)currentElementStack.peek())){
+          processTextOfTextWithNodesElement(contentsOfStack);
+      } else if ("Name".equals((String)currentElementStack.peek())){
+          processTextOfNameElement(contentsOfStack);
+      } else if ("Value".equals((String)currentElementStack.peek())){
+             //if (currentFeatureName != null && "string".equals(currentFeatureName) &&
+             //currentAnnot!= null && "Token".equals(currentAnnot.getElemName()) &&
+             //currentAnnot.getEnd().longValue() == 1063)
+             //System.out.println("Content=" + content + " start="+ start + " length=" + length);
+             processTextOfValueElement(contentsOfStack);
+      }
+      if(DEBUG) Out.prln(contentsOfStack);
+      contentsOfStack = "";
+     }
+      // End of Addition
 
     currentElementStack.pop();
     // Deal with Annotation
@@ -216,6 +240,12 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
   public void characters( char[] text,int start,int length) throws SAXException{
     // Create a string object based on the reported text
     String content = new String(text, start, length);
+
+    contentsOfStack = contentsOfStack + content;
+    // Commented By Niraj and has been moved into the endElement method
+    // because it is not sure if the text provided by parser is a full text
+    // or a chunk of the text
+    /* Niraj
     if ("TextWithNodes".equals((String)currentElementStack.peek())){
       processTextOfTextWithNodesElement(content);
       return;
@@ -232,6 +262,7 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
       processTextOfValueElement(content);
       return;
     }// End if
+     Niraj */
   }//characters
 
   /**
@@ -392,16 +423,16 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
 
     // check for new line
     if(text.indexOf('\n') != -1) {
-      String newLineType = 
+      String newLineType =
         (String) doc.getFeatures().get(GateConstants.DOCUMENT_NEW_LINE_TYPE);
 
       if("LF".equalsIgnoreCase(newLineType)) {
         newLineType = null;
       }
-      
+
       // exit with the same text if the change isn't necessary
       if(newLineType == null) return result;
-      
+
       String newLine = "\n";
       if("CRLF".equalsIgnoreCase(newLineType)) {
         newLine = "\r\n";
@@ -413,7 +444,7 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
         newLine = "\n\r";
       }
 
-      StringBuffer buff = new StringBuffer(text);      
+      StringBuffer buff = new StringBuffer(text);
       int index = text.lastIndexOf('\n');
       while(index != -1) {
         buff.replace(index, index+1, newLine);
@@ -421,10 +452,10 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
       } // while
       result = buff.toString();
     } // if
-    
+
     return result;
   } // recoverNewLineSequence(String text)
-  
+
   /** This method deals with a Text belonging to Name element. */
   private void processTextOfNameElement(String text) throws GateSaxException{
     if (currentFeatureMap == null)

@@ -68,6 +68,12 @@ public class XmlPositionCorrectionHandler extends DefaultHandler {
   /** Here is the correction of the Xerces parser bug. */
   public void characters(char[] text, int offset, int len)
                   throws org.xml.sax.SAXException {
+
+  } // characters
+
+  /** Here is the correction of the Xerces parser bug. */
+  public void charactersMethod(char [] text, int offset, int len) {
+
     if(offset == 0 && len == 1 && text.length <= 2) {
         // unicode char or &xxx; coding
         return;
@@ -82,6 +88,6 @@ public class XmlPositionCorrectionHandler extends DefaultHandler {
     m_lastPosition = offset;
     m_lastSize = len;
     m_realOffset = m_multiplyer*0x4000+offset;
-  } // characters
+  } // characters Action
 
 } // XmlPositionCorrectionHandler

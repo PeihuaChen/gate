@@ -59,6 +59,9 @@ public class ConfigXmlHandler extends DefaultHandler {
   /** This object indicates what to do when the parser encounts an error*/
   private SimpleErrorHandler _seh = new SimpleErrorHandler();
 
+
+  private String contentsForStack = "";
+
   /** Construction */
   public ConfigXmlHandler(URL configUrl) {
     this.register = Gate.getCreoleRegister();
@@ -105,6 +108,12 @@ public class ConfigXmlHandler extends DefaultHandler {
   public void startElement (
     String uri, String qName, String elementName, Attributes atts
   ) {
+
+    // Addition by Niraj
+    // the new content for stack should be reset on starting new element
+    contentsForStack = "";
+    // end of Addition
+
     if(DEBUG) {
       Out.pr("startElement: ");
       Out.println(
@@ -147,6 +156,17 @@ public class ConfigXmlHandler extends DefaultHandler {
   public void endElement (String uri, String qName, String elementName)
                                                       throws GateSaxException {
     if(DEBUG) Out.prln("endElement: " + elementName);
+
+    // Addition by Niraj
+    // Contents should only be added to the contentStack once the endElement
+    // method is invoked.  Parser may returns chunks of text, we need to put
+    // the full content only once
+    if(contentsForStack.length() != 0) {
+      if(DEBUG) Out.prln(contentsForStack);
+      contentStack.push(contentsForStack);
+      contentsForStack = "";
+    }
+    // end of Addition
 
     //////////////////////////////////////////////////////////////////
     if(elementName.toUpperCase().equals("GATE")) {
@@ -206,8 +226,15 @@ public class ConfigXmlHandler extends DefaultHandler {
     // If the entire text is empty or is made from whitespaces then we simply
     // return
     if (content.length() == 0) return;
-    contentStack.push(content);
-    if(DEBUG) Out.println(content);
+    // Commented by Niraj
+    //contentStack.push(content);
+    // end of commenting
+    // Addition by Niraj
+    contentsForStack = contentsForStack + content;
+    // end of Addition
+    // commented by Niraj
+    //if(DEBUG) Out.println(content);
+    // end of commenting
   } // characters
 
   /** Utility method to create a resource and add to appropriate list.
