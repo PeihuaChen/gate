@@ -308,9 +308,14 @@ implements AnnotationSet
     return res;
   } // get(offset)
 
-    /** Select annotations by offset. This returns the set of annotations
+  /**
+    * Select annotations by offset. This returns the set of annotations
     * that overlap totaly or partially with the interval defined by the two
-    * provided offsets
+    * provided offsets.The result will include all the annotations that either:
+    * <ul>
+    * <li>start before the start offset and end strictly after it</li>
+    * <li>OR</li>
+    * <li>start at a position between the start and the end offsets</li>
     */
   public AnnotationSet get(Long startOffset, Long endOffset) {
     //the result will include all the annotations that either:

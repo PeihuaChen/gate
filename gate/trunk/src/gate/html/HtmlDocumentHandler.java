@@ -95,7 +95,7 @@ public class HtmlDocumentHandler extends ParserCallback {
         fireStatusChangedEvent("Processed elements : " + elements);
 
     // Construct a feature map from the attributes list
-    FeatureMap fm = new SimpleFeatureMapImpl();
+    FeatureMap fm = Factory.newFeatureMap();
 
     // Take all the attributes an put them into the feature map
     if (0 != a.getAttributeCount()){
@@ -139,9 +139,16 @@ public class HtmlDocumentHandler extends ParserCallback {
     // obj is for internal use
     CustomObject obj = null;
 
-    // if the stack is not empty then we get the object from the stack
+    // If the stack is not empty then we get the object from the stack
     if (!stack.isEmpty()){
       obj = (CustomObject) stack.pop();
+      // Before adding it to the colector, we need to check if is an
+      // emptyAndSpan one. See CustomObject's isEmptyAndSpan field.
+      if (obj.getStart().equals(obj.getEnd())){
+        // The element had an end tag and its start was equal to its end. Hence
+        // it is anEmptyAndSpan one.
+        obj.getFM().put("isEmptyAndSpan","true");
+      }// End iff
       // we add it to the colector
       colector.add(obj);
     }// End if
@@ -226,7 +233,7 @@ public class HtmlDocumentHandler extends ParserCallback {
     }//if
 
     // create the start index of the annotation
-    Long startIndex = new Long(tmpDocContent.length ());
+    Long startIndex = new Long(tmpDocContent.length());
 
     // initialy the start index is equal with the End index
     CustomObject obj = new CustomObject(t.toString(),fm,startIndex,startIndex);
@@ -291,9 +298,22 @@ public class HtmlDocumentHandler extends ParserCallback {
     * @param t the Html tag encounted by the HTML parser
     */
   protected void customizeAppearanceOfDocumentWithSimpleTag(HTML.Tag t){
+    boolean modification = false;
     // if the HTML tag is BR then we add a new line character to the document
-    if (HTML.Tag.BR == t)
+    if (HTML.Tag.BR == t){
       tmpDocContent.append("\n");
+      modification = true;
+    }// End if
+    if (modification == true){
+      Long end = new Long (tmpDocContent.length());
+      java.util.Iterator anIterator = stack.iterator();
+      while (anIterator.hasNext ()){
+        // get the object and move to the next one
+        CustomObject obj = (CustomObject) anIterator.next();
+        // sets its End index
+        obj.setEnd(end);
+      }// End while
+    }//End if
   }// customizeAppearanceOfDocumentWithSimpleTag
 
   /** This method analizes the tag t and adds some \n chars and spaces to the
@@ -302,14 +322,23 @@ public class HtmlDocumentHandler extends ParserCallback {
     * @param t the Html tag encounted by the HTML parser
     */
   protected void customizeAppearanceOfDocumentWithStartTag(HTML.Tag t){
-//*
+    boolean modification = false;
     if (HTML.Tag.P == t){
       int tmpDocContentSize = tmpDocContent.length();
       if ( tmpDocContentSize >= 2 &&
            '\n' != tmpDocContent.charAt(tmpDocContentSize - 2)
-         ) tmpDocContent.append("\n");
+         ) { tmpDocContent.append("\n"); modification = true;}
     }// End if
-//*/
+    if (modification == true){
+      Long end = new Long (tmpDocContent.length());
+      java.util.Iterator anIterator = stack.iterator();
+      while (anIterator.hasNext ()){
+        // get the object and move to the next one
+        CustomObject obj = (CustomObject) anIterator.next();
+        // sets its End index
+        obj.setEnd(end);
+      }// End while
+    }//End if
   }// customizeAppearanceOfDocumentWithStartTag
 
   /** This method analizes the tag t and adds some \n chars and spaces to the
@@ -318,6 +347,7 @@ public class HtmlDocumentHandler extends ParserCallback {
     * @param t the Html tag encounted by the HTML parser
     */
   protected void customizeAppearanceOfDocumentWithEndTag(HTML.Tag t){
+    boolean modification = false;
     // if the HTML tag is BR then we add a new line character to the document
     if ( (HTML.Tag.P == t) ||
 
@@ -330,10 +360,23 @@ public class HtmlDocumentHandler extends ParserCallback {
          (HTML.Tag.TR == t) ||
          (HTML.Tag.CENTER == t) ||
          (HTML.Tag.LI == t)
-       ) tmpDocContent.append("\n");
+       ){ tmpDocContent.append("\n"); modification = true;}
 
-    if (HTML.Tag.TITLE == t)
+    if (HTML.Tag.TITLE == t){
       tmpDocContent.append("\n\n");
+      modification = true;
+    }// End if
+
+    if (modification == true){
+      Long end = new Long (tmpDocContent.length());
+      java.util.Iterator anIterator = stack.iterator();
+      while (anIterator.hasNext ()){
+        // get the object and move to the next one
+        CustomObject obj = (CustomObject) anIterator.next();
+        // sets its End index
+        obj.setEnd(end);
+      }// End while
+    }//End if
   }// customizeAppearanceOfDocumentWithEndTag
 
   /**

@@ -92,7 +92,8 @@ public class XmlDocumentHandler extends DefaultHandler{
     element2StringMap = anElement2StringMap;
 
     basicAS = anAnnotationSet;
-  }
+    customObjectsId = 0;
+  }// XmlDocumentHandler()/
 
   /**
     * This method is called when the SAX parser encounts the beginning of the
@@ -121,6 +122,9 @@ public class XmlDocumentHandler extends DefaultHandler{
     // based on the gate document.
     if (basicAS == null)
       basicAS = doc.getAnnotations("Original markups");
+
+    // sort colector ascending on its id
+    Collections.sort(colector);
 
     // create all the annotations (on this new document) from the collector
     while (!colector.isEmpty()){
@@ -194,8 +198,16 @@ public class XmlDocumentHandler extends DefaultHandler{
       obj = (CustomObject) stack.pop();
     }// End if
 
-    // put the object into colector
-    // later, when the document ends we will use colector to create all the
+    // Before adding it to the colector, we need to check if is an
+    // emptyAndSpan one. See CustomObject's isEmptyAndSpan field.
+    if (obj.getStart().equals(obj.getEnd())){
+      // The element had an end tag and its start was equal to its end. Hence
+      // it is anEmptyAndSpan one.
+      obj.getFM().put("isEmptyAndSpan","true");
+    }// End iff
+
+    // Put the object into colector
+    // Later, when the document ends we will use colector to create all the
     // annotations
     colector.add(obj);
 
@@ -424,66 +436,75 @@ public class XmlDocumentHandler extends DefaultHandler{
   // the transformation will take place inside onDocumentEnd() method
   private LinkedList colector = null;
 
+  protected  long customObjectsId = 0;
+
   //////// INNER CLASS
   /**
     * The objects belonging to this class are used inside the stack.
     * This class is for internal needs
     */
-  class  CustomObject {
+  class  CustomObject implements Comparable {
 
     // constructor
     public CustomObject(String anElemName, FeatureMap aFm,
-                           Long aStart, Long anEnd){
+                           Long aStart, Long anEnd) {
       elemName = anElemName;
       fm = aFm;
       start = aStart;
       end = anEnd;
-    }
+      id = new Long(customObjectsId ++);
+    }// End CustomObject()
+
+    // Methos implemented as required by Comparable interface
+    public int compareTo(Object o){
+      CustomObject obj = (CustomObject) o;
+      return this.id.compareTo(obj.getId());
+    }// compareTo();
 
     // accesor
-    public String getElemName(){
+    public String getElemName() {
       return elemName;
-    }
+    }// getElemName()
 
-    public FeatureMap getFM(){
+    public FeatureMap getFM() {
       return fm;
-    }
+    }// getFM()
 
-    public Long getStart(){
+    public Long getStart() {
       return start;
-    }
+    }// getStart()
 
-    public Long getEnd(){
+    public Long getEnd() {
       return end;
-    }
+    }// getEnd()
+
+    public Long getId(){ return id;}
 
     // mutator
-    public void setElemName(String anElemName){
+    public void setElemName(String anElemName) {
       elemName = anElemName;
-    }
+    }// getElemName()
 
-    public void setFM(FeatureMap aFm){
+    public void setFM(FeatureMap aFm) {
       fm = aFm;
-    }
+    }// setFM();
 
-    public void setStart(Long aStart){
+    public void setStart(Long aStart) {
       start = aStart;
-    }
+    }// setStart();
 
-    public void setEnd(Long anEnd){
+    public void setEnd(Long anEnd) {
       end = anEnd;
-    }
+    }// setEnd();
 
     // data fields
     private String elemName = null;
-
     private FeatureMap fm = null;
-
     private Long start = null;
-
     private Long end  = null;
+    private Long id = null;
 
-  } // CustomObject
+  } // End inner class CustomObject
 
 } //XmlDocumentHandler
 

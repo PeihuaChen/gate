@@ -113,7 +113,7 @@ public interface Document extends LanguageResource, Comparable {
     * @return a string representing an XML document containing the original
     * markup + dumped annotations form the aSourceAnnotationSet
     */
-  public String toXml(AnnotationSet aSourceAnnotationSet);
+  public String toXml(Set aSourceAnnotationSet);
 
   /** Make changes to the content.
    */
