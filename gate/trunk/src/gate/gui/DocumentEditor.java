@@ -115,6 +115,27 @@ public class DocumentEditor extends AbstractVisualResource{
    */
   protected JList corefList;
 
+  /**
+   * The model for the coref list
+   */
+  protected CorefListModel corefListModel;
+  /**
+   * The combobox that selects between the annotation sets for displaying
+   * corefence data.
+   */
+  protected JComboBox corefCombo;
+
+  /**
+   * The model for the corefCombo
+   */
+  protected CorefComboModel corefComboModel;
+
+
+  /**
+   * The component that controls the way the coreference data is displyed.
+   */
+  protected Component corefComponent;
+
   /** The scroller for the coref list*/
   protected JScrollPane corefListScroll;
 
@@ -722,12 +743,26 @@ public class DocumentEditor extends AbstractVisualResource{
     stylesTreeScroll.setHorizontalScrollBarPolicy(
                                       JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-    corefList = new JList();
+    //coreference
+    corefCombo = new JComboBox(corefComboModel = new CorefComboModel());
+    corefCombo.setAlignmentX(Component.LEFT_ALIGNMENT);
+    corefList = new JList(corefListModel = new CorefListModel());
+    corefList.setAlignmentX(Component.LEFT_ALIGNMENT);
     corefListScroll = new JScrollPane(corefList);
     corefListScroll.setOpaque(true);
     corefListScroll.setAlignmentY(Component.TOP_ALIGNMENT);
+    corefListScroll.setAlignmentX(Component.LEFT_ALIGNMENT);
     corefListScroll.setHorizontalScrollBarPolicy(
                                       JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    JPanel corefBox = new JPanel();
+    corefBox.setLayout(new BoxLayout(corefBox, BoxLayout.Y_AXIS));
+    corefBox.setAlignmentY(Component.TOP_ALIGNMENT);
+    corefComponent = corefBox;
+    JLabel label = new JLabel("Annotation set:");
+    label.setAlignmentX(Component.LEFT_ALIGNMENT);
+    corefBox.add(label);
+    corefBox.add(corefCombo);
+    corefBox.add(corefListScroll);
 
     //various containers
     leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
@@ -854,6 +889,8 @@ public class DocumentEditor extends AbstractVisualResource{
       public void run(){
         initLocalData();
         annotationsTableModel.fireTableDataChanged();
+        corefComboModel.fireDataChanged();
+        corefListModel.fireDataChanged();
         Enumeration enum = stylesTreeRoot.children();
         while(enum.hasMoreElements()){
           stylesTreeModel.removeNodeFromParent((DefaultMutableTreeNode)
@@ -1089,12 +1126,11 @@ public class DocumentEditor extends AbstractVisualResource{
 
         if(typesTreeVisible && coreferenceVisible){
           rightSplit.setTopComponent(stylesTreeScroll);
-          rightSplit.setBottomComponent(corefListScroll);
-          rightSplit.setDividerLocation((double)0.5);
+          rightSplit.setBottomComponent(corefComponent);
           mainBox.add(rightSplit);
         }else{
           if(typesTreeVisible) mainBox.add(stylesTreeScroll);
-          else if(coreferenceVisible) mainBox.add(corefListScroll);
+          else if(coreferenceVisible) mainBox.add(corefComponent);
         }
 
         if(DocumentEditor.this.getComponentCount() > 1)
@@ -1102,6 +1138,8 @@ public class DocumentEditor extends AbstractVisualResource{
         DocumentEditor.this.add(mainBox);
         DocumentEditor.this.validate();
         DocumentEditor.this.repaint();
+        if(leftSplit.isVisible()) leftSplit.setDividerLocation((double)0.5);
+        if(rightSplit.isVisible()) rightSplit.setDividerLocation((double)0.5);
       }
     });
   }
@@ -1236,27 +1274,81 @@ public class DocumentEditor extends AbstractVisualResource{
   }//class AnnotationsTableModel extends AbstractTableModel
 
   protected class CorefListModel extends AbstractListModel{
+    CorefListModel(){
+      corefComboModel.addListDataListener(new ListDataListener() {
+        public void intervalAdded(ListDataEvent e) {
+          fireDataChanged();
+        }
+
+        public void intervalRemoved(ListDataEvent e) {
+          fireDataChanged();
+        }
+
+        public void contentsChanged(ListDataEvent e) {
+          fireDataChanged();
+        }
+      });
+    }
+
     public int getSize(){
+      if(document == null || document.getFeatures() == null) return 0;
+      Map matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
+      if(matchesMap == null) return 0;
       java.util.List matchesList = (java.util.List)
-                                   document.getFeatures().get("MatchesAnnots");
+                                   matchesMap.get(corefCombo.getSelectedItem());
       return (matchesList == null) ? 0 : matchesList.size();
     }
 
     public Object getElementAt(int index){
+      Map matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
+      if(matchesMap == null) return null;
       java.util.List matchesList = (java.util.List)
-                                   document.getFeatures().get("MatchesAnnots");
+                                   matchesMap.get(corefCombo.getSelectedItem());
       if(matchesList == null || matchesList.size() <= index) return null;
       java.util.List oneMatch = (java.util.List)matchesList.get(index);
-      return null;
+      return oneMatch;
     }
 
-    protected String getNameForSet(java.util.List matchSet){
-      java.util.List copyList = new ArrayList(matchSet);
-      Collections.sort(copyList);
-      return "";
+    void fireDataChanged(){
+      fireContentsChanged(this, 0, getSize());
     }
   }
 
+
+  protected class CorefComboModel extends AbstractListModel
+                                  implements ComboBoxModel{
+    public int getSize(){
+      if(document == null || document.getFeatures() == null) return 0;
+      Map matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
+      return (matchesMap == null) ? 0 : matchesMap.size();
+    }
+
+    public Object getElementAt(int index){
+      Map matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
+      if(matchesMap == null) return null;
+      java.util.List setsList = new ArrayList(matchesMap.keySet());
+      boolean nullPresent = setsList.remove(null);
+      Collections.sort(setsList);
+      if(nullPresent) setsList.add(0, null);
+      String res = (String)setsList.get(index);
+      return (res == null) ? "Default" : res;
+    }
+
+    public void setSelectedItem(Object anItem){
+      if(anItem == null) selectedItem = null;
+      else selectedItem = ((String)anItem).equals("Default") ? null : anItem;
+    }
+
+    public Object getSelectedItem(){
+      return selectedItem == null ? "Default" : selectedItem;
+    }
+
+    void fireDataChanged(){
+      fireContentsChanged(this, 0, getSize());
+    }
+
+    Object selectedItem = null;
+  }
 
   /**
    * Displays an entry in the right hand side tree.

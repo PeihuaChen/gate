@@ -462,6 +462,9 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       button.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           JFileChooser fileChooser = MainFrame.getFileChooser();
+          fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+          fileChooser.setDialogTitle("Select a file");
+          fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
           int res = fileChooser.showOpenDialog(ResourceParametersEditor.this);
           if(res == fileChooser.APPROVE_OPTION){
             try {
