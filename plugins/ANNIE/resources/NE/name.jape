@@ -728,8 +728,10 @@ Priority: 125
 (
   (UPPER)
   SPACE
-  (UPPER
-   SPACE)*
+  (UPPER SPACE)?
+  (UPPER SPACE)?
+  (UPPER SPACE)?
+  (UPPER SPACE)?
  {Lookup.majorType == org_key}
  (SPACE {Lookup.majorType == org_ending})?
 )
@@ -788,14 +790,15 @@ Priority: 120
  (SPACE)
 )?
 (
-  (UPPER)
-  SPACE
+ (UPPER SPACE)
+ (UPPER SPACE)?
   (({Token.string == "and"} | 
     {Token.string == "&"})
-   (SPACE UPPER)+
-   SPACE
+   (SPACE)?
+   (UPPER SPACE)?
+   (UPPER SPACE)?
+   (UPPER SPACE)?
   )
-  ((UPPER) SPACE)*
  {Lookup.majorType == org_key}
  (SPACE {Lookup.majorType == org_ending})?
 )
