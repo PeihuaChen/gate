@@ -37,7 +37,7 @@ jar:
 docs:
 	./jdk.sh \
 	  -s '-link http://bradfield.dcs.shef.ac.uk/Java2_docs/api/' \
-	  javadoc $(SP) $(CP) -private \
+	  javadoc $(SP) $(CP) -private -use \
 	  -d ../doc/javadoc/internal $(PKGS)
 	./jdk.sh javadoc $(SP) $(CP) -public \
 	  -d ../doc/javadoc $(PKGS)
@@ -52,6 +52,9 @@ list:
 ############################################################################
 #
 # $Log$
+# Revision 1.15  2000/02/18 15:33:04  hamish
+# added classes; added -use to internal javadoc
+#
 # Revision 1.14  2000/02/16 17:26:12  hamish
 # found a better way to do the -link for docs
 #
