@@ -163,12 +163,23 @@ public class CookBook extends TestCase
       "sourceUrlName",
       Gate.getUrl("tests/doc0.html").toExternalForm()
     );
+    params.put("markupAware", new Boolean(true));
     Resource res = Factory.createResource("gate.Document", params);
 
     // now we have a document
     assert(
       "should be document but the class is: " + res.getClass().getName(),
       res instanceof gate.Document
+    );
+    Document doc = (Document) res;
+    AnnotationSet markupAnnotations = doc.getAnnotations();
+    assertNotNull("no markup annotations on doc " + doc, markupAnnotations);
+    int numMarkupAnnotations = markupAnnotations.size();
+    //if(DEBUG)
+      Out.prln("annotations on doc after unpack= " + numMarkupAnnotations);
+    assert(
+      "wrong number annots on doc: " + numMarkupAnnotations,
+      numMarkupAnnotations == 27
     );
 
   } // testResourceCreation

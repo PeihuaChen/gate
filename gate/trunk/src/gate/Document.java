@@ -24,62 +24,80 @@ import gate.util.*;
 
 
 /** Represents the commonalities between all sorts of documents.
-  */
+ */
 public interface Document extends LanguageResource, Comparable {
 
-  /** Documents are identified by URLs */
+  /** Documents are identified by URLs
+   */
   public URL getSourceUrl();
 
-  /** Set method for the document's URL */
+  /** Set method for the document's URL
+   */
   public void setSourceUrl(URL sourceUrl);
 
   /** Get method for the document's URL name (i.e. the string that
-    * describes the URL).
-    */
+   *  describes the URL).
+   */
   public String getSourceUrlName();
 
   /** Set method for the document's URL name (i.e. the string that
-    * describes the URL).
-    */
+   *  describes the URL).
+   */
   public void setSourceUrlName(String sourceUrlName);
 
   /** Documents may be packed within files; in this case an optional pair of
-    * offsets refer to the location of the document.
-    */
+   *  offsets refer to the location of the document.
+   */
   public Long[] getSourceUrlOffsets();
 
   /** Documents may be packed within files; in this case an optional pair of
-    * offsets refer to the location of the document. This method gets the
-    * start offset.
-    */
+   *  offsets refer to the location of the document. This method gets the
+   *  start offset.
+   */
   public Long getSourceUrlStartOffset();
 
   /** Documents may be packed within files; in this case an optional pair of
-    * offsets refer to the location of the document. This method gets the
-    * end offset.
-    */
+   *  offsets refer to the location of the document. This method gets the
+   *  end offset.
+   */
   public Long getSourceUrlEndOffset();
 
   /** The content of the document: wraps e.g. String for text; MPEG for
-    * video; etc.
-    */
+   *  video; etc.
+   */
   public DocumentContent getContent();
 
-  /** Set method for the document content */
+  /** Set method for the document content
+   */
   public void setContent(DocumentContent newContent);
 
   /** Get the default set of annotations. The set is created if it
-    * doesn't exist yet.
-    */
+   *  doesn't exist yet.
+   */
   public AnnotationSet getAnnotations();
 
   /** Get a named set of annotations. Creates a new set if one with this
-    * name doesn't exist yet.
-    */
+   *  name doesn't exist yet.
+   */
   public AnnotationSet getAnnotations(String name);
 
+  /** Make the document markup-aware. This will trigger the creation
+   *  of a DocumentFormat object at Document initialisation time; the
+   *  DocumentFormat object will unpack the markup in the Document and
+   *  add it as annotations. Documents are <B>not</B> markup-aware by default.
+   *
+   *  @param b markup awareness status.
+   */
+  public void setMarkupAware(boolean b);
 
-  /** Make changes to the content. */
+  /** Get the markup awareness status of the Document.
+   *
+   *  @return whether the Document is markup aware.
+   */
+  public boolean isMarkupAware();
+
+  /** Make changes to the content.
+   */
   public void edit(Long start, Long end, DocumentContent replacement)
     throws InvalidOffsetException;
 
