@@ -1516,7 +1516,7 @@ public class AnnotationEditor extends AbstractVisualResource {
 
 
     public void setAnnotations(Set as) {
-      this.annotations = new HashSet(as);
+      this.annotations = as;
     }
 
     public Set getAnnotations() {
@@ -1751,32 +1751,73 @@ public class AnnotationEditor extends AbstractVisualResource {
               }
             } else if(asEvt.getType() == asEvt.ANNOTATION_REMOVED){
               if(tData != null){
-                tData.annotations.remove(ann);
+//                tData.annotations.remove(ann);
                 if(tData.getVisible()){
-                  //update the annotations table
-                  data.remove(ann);
-                  //shorten the range conatining the annotation
-                  tData.range.end--;
-                  //shift all the remaining ranges
-                  Iterator rangesIter = ranges.
-                                      subList(ranges.indexOf(tData.range) + 1,
-                                      ranges.size()).
-                                        iterator();
-                  while(rangesIter.hasNext()){
-                    Range aRange = (Range) rangesIter.next();
-                    aRange.start--;
-                    aRange.end--;
-                  }//while(rangesIter.hasNext())
-                  tableChanged = true;
-                  //update the text
-                  //hide the highlight
-                  int selStart = textPane.getSelectionStart();
-                  int selEnd = textPane.getSelectionEnd();
-                  textPane.select(ann.getStartNode().getOffset().intValue(),
-                                  ann.getEndNode().getOffset().intValue());
-                  textPane.setCharacterAttributes(
-                            textPane.getStyle("default"), true);
-                  textPane.select(selStart, selEnd);
+                  if(tData.getAnnotations().isEmpty()){
+                    //an entire type has been removed.
+                    //it is possible that there are some shaddow annotations
+                    //that only exist in the cached data in the viewer. We
+                    //sould remove al of them as well along with the one that we
+                    //have been notified about.
+                    java.util.List shaddows = data.subList(tData.range.start,
+                                                           tData.range.end);
+                    //update the text -> hide the highlight(s)
+                    int selStart = textPane.getSelectionStart();
+                    int selEnd = textPane.getSelectionEnd();
+                    Iterator shadIter = shaddows.iterator();
+                    while(shadIter.hasNext()){
+                      Annotation someAnn = (Annotation)shadIter.next();
+                      textPane.select(
+                        someAnn.getStartNode().getOffset().intValue(),
+                        someAnn.getEndNode().getOffset().intValue());
+                      textPane.setCharacterAttributes(
+                                textPane.getStyle("default"), true);
+                    }
+                    textPane.select(selStart, selEnd);
+                    //delete from data
+                    shaddows.clear();
+                    //shift all the ranges after the current range that will
+                    //disapear
+                    Iterator rangesIter = ranges.
+                                        subList(ranges.indexOf(tData.range) + 1,
+                                        ranges.size()).
+                                          iterator();
+                    int delta = tData.range.end - tData.range.start;
+                    while(rangesIter.hasNext()){
+                      Range aRange = (Range) rangesIter.next();
+                      aRange.start-=delta;
+                      aRange.end-=delta;
+                    }//while(rangesIter.hasNext())
+                    //remove the current range
+                    ranges.remove(tData.range);
+                    tableChanged = true;
+                  }else{
+                    //only one annotation to remove
+                    //update the annotations table
+                    data.remove(ann);
+                    //shorten the range conatining the annotation
+                    tData.range.end--;
+                    //shift all the remaining ranges
+                    Iterator rangesIter = ranges.
+                                        subList(ranges.indexOf(tData.range) + 1,
+                                        ranges.size()).
+                                          iterator();
+                    while(rangesIter.hasNext()){
+                      Range aRange = (Range) rangesIter.next();
+                      aRange.start--;
+                      aRange.end--;
+                    }//while(rangesIter.hasNext())
+                    tableChanged = true;
+                    //update the text
+                    //hide the highlight
+                    int selStart = textPane.getSelectionStart();
+                    int selEnd = textPane.getSelectionEnd();
+                    textPane.select(ann.getStartNode().getOffset().intValue(),
+                                    ann.getEndNode().getOffset().intValue());
+                    textPane.setCharacterAttributes(
+                              textPane.getStyle("default"), true);
+                    textPane.select(selStart, selEnd);
+                  }//if(tData.getAnnotations().isEmpty())
                 }//if(tData.getVisible())
                 if(tData.annotations.isEmpty()){
                   //no more annotations of this type -> delete the node
