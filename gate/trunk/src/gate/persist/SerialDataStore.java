@@ -25,6 +25,7 @@ import gate.creole.*;
 import gate.util.*;
 import gate.event.*;
 import gate.security.*;
+import gate.security.SecurityException;
 import gate.corpora.*;
 
 /**
@@ -418,7 +419,7 @@ extends AbstractFeatureBearer implements DataStore {
     * (Sometimes I wish Java had "friend" declarations...)
     */
   public LanguageResource getLr(String lrClassName, Object lrPersistenceId)
-  throws PersistenceException {
+  throws PersistenceException,SecurityException {
 
     // find the subdirectory for resources of this type
     File resourceTypeDirectory = new File(storageDir, lrClassName);
@@ -694,5 +695,23 @@ extends AbstractFeatureBearer implements DataStore {
 
     return null;
   }
+
+  /**
+   * Try to acquire exlusive lock on a resource from the persistent store.
+   * Always call unlockLR() when the lock is no longer needed
+   */
+  public boolean lockLr(LanguageResource lr)
+  throws PersistenceException,SecurityException {
+    return true;
+  }
+
+  /**
+   * Releases the exlusive lock on a resource from the persistent store.
+   */
+  public void unlockLr(LanguageResource lr)
+  throws PersistenceException,SecurityException {
+    return;
+  }
+
 
 } // class SerialDataStore
