@@ -10,6 +10,7 @@
  *
  *  Kalina Bontcheva, 20/02/2003
  *
+ *  $Id$
  */
 package gate.gui.lexicon;
 

@@ -21,6 +21,8 @@ import gate.lexicon.*;
 import java.awt.event.*;
 import gate.util.GateRuntimeException;
 import gate.gui.OkCancelDialog;
+import java.util.Vector;
+import javax.swing.event.*;
 
 public class ChooseSynsetPanel extends JPanel {
 
@@ -48,6 +50,16 @@ public class ChooseSynsetPanel extends JPanel {
     return (LexKBSynset) synsetList.getSelectedValue();
   }
 
+  public void addSynsetSelectionListener(ListSelectionListener l) {
+    if (l != null)
+      synsetList.addListSelectionListener(l);
+  }
+
+  public void removeSynsetSelectionListener(ListSelectionListener l) {
+    if (l != null)
+      synsetList.removeListSelectionListener(l);
+  }
+
   protected void initLocalData(){
     this.addSynsetAction = new AddSynsetAction();
     this.removeSynsetAction = new RemoveSynsetAction();
@@ -60,7 +72,8 @@ public class ChooseSynsetPanel extends JPanel {
     synsetList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
     this.posComboBox = new JComboBox(lexKB.POS_TYPES);
-
+    posComboBox.setMaximumSize(new Dimension(Integer.MAX_VALUE,
+                                    posComboBox.getPreferredSize().height));
     mainBox = Box.createHorizontalBox();
     leftBox = Box.createVerticalBox();
     rightBox = Box.createVerticalBox();
@@ -112,10 +125,6 @@ public class ChooseSynsetPanel extends JPanel {
       rightBox.add(buttonBox);
     }
 
-    leftBox.add(Box.createVerticalGlue());
-    leftBox.add(Box.createHorizontalGlue());
-    rightBox.add(Box.createVerticalGlue());
-    rightBox.add(Box.createHorizontalGlue());
     mainBox.add(Box.createVerticalGlue());
 
     updateGUI(null);
