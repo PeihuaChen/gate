@@ -674,11 +674,11 @@ extends AbstractLanguageResource implements Document {
     while (it.hasNext()){
       Object key = it.next();
       Object value = feat.get(key);
-      if((key.getClass().isAssignableFrom(String.class) ||
-          key.getClass().isAssignableFrom(Number.class))
+      if((String.class.isAssignableFrom(key.getClass()) ||
+          Number.class.isAssignableFrom(key.getClass()))
           &&
-          (value.getClass().isAssignableFrom(String.class) ||
-           value.getClass().isAssignableFrom(Number.class))
+          (String.class.isAssignableFrom(value.getClass()) ||
+           Number.class.isAssignableFrom(value.getClass()))
 
         ) strBuff.append(" " + key + "=\"" + value + "\"");
       else

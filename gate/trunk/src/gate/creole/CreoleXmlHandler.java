@@ -152,6 +152,14 @@ public class CreoleXmlHandler extends DefaultHandler {
           currentAttributes.getValue(i)
         );
       }// End for
+    }else if(elementName.toUpperCase().equals("GUI")){
+      String typeValue = currentAttributes.getValue("TYPE");
+      if (typeValue != null){
+        if (typeValue.toUpperCase().equals("LARGE"))
+          resourceData.setGuiType(ResourceData.LARGE_GUI);
+        if (typeValue.toUpperCase().equals("SMALL"))
+          resourceData.setGuiType(ResourceData.SMALL_GUI);
+      }// End if
     }// End if
 
     // if there are any parameters awaiting addition to the list, add them
@@ -192,7 +200,6 @@ public class CreoleXmlHandler extends DefaultHandler {
 
       // add the new resource data object to the creole register
       register.put(resourceData.getClassName(), resourceData);
-
       // if the resource is auto-loading, try and load it
       if(resourceData.isAutoLoading())
         try {
@@ -337,6 +344,33 @@ public class CreoleXmlHandler extends DefaultHandler {
     } else if(elementName.toUpperCase().equals("TOOL")) {
       resourceData.setTool(true);
     // End TOOL processing
+    //////////////////////////////////////////////////////////////////
+    } else if(elementName.toUpperCase().equals("MAIN_VIEWER")) {
+      resourceData.setIsMainView(true);
+    // End MAIN_VIEWER processing
+    //////////////////////////////////////////////////////////////////
+    } else if(elementName.toUpperCase().equals("RESOURCE_DISPLAYED")){
+      checkStack("endElement", "RESOURCE_DISPLAYED");
+      String resourceDisplayed = (String) contentStack.pop();
+      resourceData.setResourceDisplayed(resourceDisplayed);
+      Class resourceDisplayedClass = null;
+      try{
+        resourceDisplayedClass = Class.forName(resourceDisplayed);
+      } catch (ClassNotFoundException ex){
+        throw new GateRuntimeException(
+          "Couldn't get resource class from the resource name :" +
+          resourceDisplayed + " " +ex );
+      }// End try
+    // End RESOURCE_DISPLAYED processing
+    //////////////////////////////////////////////////////////////////
+    } else if(elementName.toUpperCase().equals("ANNOTATION_TYPE_DISPLAYED")){
+      checkStack("endElement", "ANNOTATION_TYPE_DISPLAYED");
+      resourceData.setAnnotationTypeDisplayed((String) contentStack.pop());
+    // End ANNOTATION_TYPE_DISPLAYED processing
+    //////////////////////////////////////////////////////////////////
+    } else if(elementName.toUpperCase().equals("GUI")) {
+
+    // End GUI processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("CREOLE")) {
     // End CREOLE processing

@@ -42,14 +42,18 @@ public class Scratch
     Gate.setNetConnected(false);
     Gate.setLocalWebServer(false);
     Gate.init();
-
+/*
     Scratch oneOfMe = new Scratch();
     try{
       oneOfMe.runNerc();
     } catch (Exception e) {
       e.printStackTrace(Out.getPrintWriter());
     }
-
+*/
+    CreoleRegister reg = Gate.getCreoleRegister();
+//System.out.println("VRs for " + reg.getAnnotationVRs ("Tree"));
+//System.out.println("VRs for " + reg.getAnnotationVRs ());
+System.out.println(reg.getLargeVRsForResource("gate.corpora.DocumentImpl"));
   } // main
 
   /** Example of using an exit-time hook. */

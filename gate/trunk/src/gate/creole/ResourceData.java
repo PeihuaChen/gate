@@ -42,7 +42,7 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   protected static final boolean DEBUG = false;
 
   /** Construction */
-  public ResourceData() { }
+  public ResourceData() {  }// ResourceData
 
   /** String representation */
   public String toString() {
@@ -59,6 +59,10 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
       "; isTool="+ tool + "; validityMessage=" + validityMessage +
       "; numberViewsRegistered=" + noViews +
       "; interfaceName=" + interfaceName +
+      "; guiType=" + guiType +
+      "; mainViewer=" + isMainView +
+      "; resourceDisplayed=" + resourceDisplayed +
+      "; annotationTypeDisplayed=" + annotationTypeDisplayed +
       "; parameterList=" + parameterList +
       "; features=" + features
     );
@@ -380,5 +384,32 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
 
   /** Get validity statues message. */
   public String getValidityMessage() { return validityMessage; }
+
+  // Fields added for GUI tag
+  /////////////////////////////////////////////////////
+  public static final int NULL_GUI = 0;
+  public static final int LARGE_GUI = 1;
+  public static final int SMALL_GUI = 2;
+
+  protected int guiType = NULL_GUI;
+  protected boolean isMainView = false;
+  protected String resourceDisplayed = null;
+  protected String annotationTypeDisplayed = null;
+
+  public void setGuiType(int aGuiType){guiType = aGuiType;}
+  public int getGuiType(){return guiType;}
+
+  public void setIsMainView(boolean mainView){isMainView = mainView;}
+  public boolean isMainView(){return isMainView;}
+
+  public void setResourceDisplayed(String aResourceDisplayed){
+    resourceDisplayed = aResourceDisplayed;
+  }// setResourceDisplayed
+  public String getResourceDisplayed(){return resourceDisplayed;}
+
+  public void setAnnotationTypeDisplayed(String anAnnotationTypeDisplayed){
+    annotationTypeDisplayed = anAnnotationTypeDisplayed;
+  }// setAnnotationTypeDisplayed
+  public String getAnnotationTypeDisplayed(){return annotationTypeDisplayed;}
 
 } // ResourceData

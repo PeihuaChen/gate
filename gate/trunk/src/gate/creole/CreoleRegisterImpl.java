@@ -61,7 +61,7 @@ public class CreoleRegisterImpl extends HashMap
     directories = new HashSet();
     lrTypes = new HashSet();
     prTypes = new HashSet();
-    vrTypes = new HashSet();
+    vrTypes = new LinkedList();
     toolTypes = new HashSet();
 
     // construct a SAX parser for parsing the CREOLE directory files
@@ -247,7 +247,7 @@ public class CreoleRegisterImpl extends HashMap
       prTypes.add(rd.getClassName());
     } else if(VisualResource.class.isAssignableFrom(resClass)) {
       if(DEBUG) Out.prln("VR: " + resClass);
-      if(vrTypes == null) vrTypes = new HashSet(); // for deserialisation
+      if(vrTypes == null) vrTypes = new LinkedList(); // for deserialisation
       vrTypes.add(rd.getClassName());
     }
 
@@ -302,7 +302,7 @@ public class CreoleRegisterImpl extends HashMap
   public Set getPrTypes() { return Collections.unmodifiableSet(prTypes);}
 
   /** Get the list of types of VR in the register. */
-  public Set getVrTypes() { return Collections.unmodifiableSet(vrTypes);}
+  public Set getVrTypes() { return Collections.unmodifiableSet(new HashSet(vrTypes));}
 
   /** Get the list of types of TOOL respurces in the register. */
   public Set getToolTypes() { return Collections.unmodifiableSet(toolTypes);}
@@ -410,45 +410,188 @@ public class CreoleRegisterImpl extends HashMap
    * Returns a list of strings representing class names for large VRs valid
    * for a given type of language/processing resource.
    * The default VR will be the first in the returned list.
+   * @param resoureClassName the name of the resource that has large viewers. If
+   * resourceClassName is <b>null</b> then an empty list will be returned.
+   * @return a list with Strings representing the large VRs for the
+   * resourceClassName
    */
   public List getLargeVRsForResource(String resourceClassName){
-    Map data = new HashMap();
-    data.put("gate.corpora.DocumentImpl",
-             new Object[]{"gate.gui.DocumentEditor",
-                          "gate.gui.FeaturesEditor"});
-
-    data.put("gate.creole.SerialController",
-             new Object[]{"gate.gui.ApplicationViewer"});
-
-    data.put("gate.Document",
-             new Object[]{"gate.gui.DocumentEditor",
-                          "gate.gui.FeaturesEditor"});
-
-    data.put("gate.Resource",
-             new Object[]{"gate.gui.FeaturesEditor"});
-
-    List result = new ArrayList();
-    Object[] VRnames = (Object[])data.get(resourceClassName);
-    if(VRnames != null) result.addAll(Arrays.asList(VRnames));
-    return result;
-  }
+    return getVRsForResource(resourceClassName, ResourceData.LARGE_GUI);
+  }// getLargeVRsForResource()
 
   /**
    * Returns a list of strings representing class names for small VRs valid
    * for a given type of language/processing resource
    * The default VR will be the first in the returned list.
+   * @param resoureClassName the name of the resource that has large viewers. If
+   * resourceClassName is <b>null</b> then an empty list will be returned.
+   * @return a list with Strings representing the large VRs for the
+   * resourceClassName
    */
   public List getSmallVRsForResource(String resourceClassName){
-    Map data = new HashMap();
+    return getVRsForResource(resourceClassName, ResourceData.SMALL_GUI);
+  }// getSmallVRsForResource
 
-    data.put("gate.persist.SerialDataStore",
-             new Object[]{"gate.gui.SerialDatastoreViewer"});
+  /**
+   * Returns a list of strings representing class names for guiType VRs valid
+   * for a given type of language/processing resource
+   * The default VR will be the first in the returned list.
+   * @param resoureClassName the name of the resource that has large viewers. If
+   * resourceClassName is <b>null</b> then an empty list will be returned.
+   * @param guiType can be ResourceData's LARGE_GUI or SMALL_GUI
+   * @return a list with Strings representing the large VRs for the
+   * resourceClassName
+   */
+  private List getVRsForResource(String resourceClassName, int guiType){
+    // If resurceClassName is null return a simply list
+    if (resourceClassName == null)
+      return Collections.unmodifiableList(new ArrayList());
+    // create a Class object for the resource
+    Class resourceClass = null;
+    GateClassLoader classLoader = Gate.getClassLoader();
+    try{
+      resourceClass = classLoader.loadClass(resourceClassName);
+    } catch (ClassNotFoundException ex){
+      throw new GateRuntimeException(
+        "Couldn't get resource class from the resource name:" + ex
+      );
+    }// End try
+    LinkedList responseList = new LinkedList();
+    String defaultVR = null;
+    // Take all VRs and for each large one, test if
+    // resourceClassName is asignable form VR's RESOURCE_DISPLAYED
+    Iterator vrIterator = vrTypes.iterator();
+    while (vrIterator.hasNext()){
+      String vrClassName = (String) vrIterator.next();
+      ResourceData vrResourceData = (ResourceData) this.get(vrClassName);
+      if (vrResourceData == null)
+        throw new GateRuntimeException(
+          "Couldn't get resource data for VR called " + vrClassName
+        );
+      if (vrResourceData.getGuiType() == guiType){
+        String resourceDisplayed = vrResourceData.getResourceDisplayed();
+        if (resourceDisplayed != null){
+          Class resourceDisplayedClass = null;
+          try{
+            resourceDisplayedClass = classLoader.loadClass(resourceDisplayed);
+          } catch (ClassNotFoundException ex){
+              throw new GateRuntimeException(
+                "Couldn't get resource class from the resource name :" +
+                resourceDisplayed + " " +ex );
+          }// End try
+          if (resourceDisplayedClass.isAssignableFrom(resourceClass)){
+            responseList.add(vrClassName);
+            if (vrResourceData.isMainView()){
+              defaultVR = vrClassName;
+            }// End if
+          }// End if
+        }// End if
+      }// End if
+    }// End while
+    if (defaultVR != null){
+      responseList.remove(defaultVR);
+      responseList.addFirst(defaultVR);
+    }// End if
+    return Collections.unmodifiableList(responseList);
+  }// getVRsForResource()
 
-    List result = new ArrayList();
-    Object[] VRnames = (Object[])data.get(resourceClassName);
-    if(VRnames != null) result.addAll(Arrays.asList(VRnames));
-    return result;
-  }
+  /**
+   * Returns a list of strings representing class names for annotation VRs
+   * that are able to display/edit all types of annotations.
+   * The default VR will be the first in the returned list.
+   * @return a list with all VRs that can display all annotation types
+   */
+  public List getAnnotationVRs(){
+    LinkedList responseList = new LinkedList();
+    String defaultVR = null;
+    Iterator vrIterator = vrTypes.iterator();
+    while (vrIterator.hasNext()){
+      String vrClassName = (String) vrIterator.next();
+      ResourceData vrResourceData = (ResourceData) this.get(vrClassName);
+      if (vrResourceData == null)
+        throw new GateRuntimeException(
+          "Couldn't get resource data for VR called " + vrClassName
+        );
+      // Test if VR can display all types of annotations
+      if ( vrResourceData.getGuiType() == ResourceData.NULL_GUI &&
+           vrResourceData.getAnnotationTypeDisplayed() == null &&
+           vrResourceData.getResourceDisplayed() == null ){
+
+          responseList.add(vrClassName);
+          if (vrResourceData.isMainView())
+              defaultVR = vrClassName;
+      }// End if
+    }// End while
+    if (defaultVR != null){
+      responseList.remove(defaultVR);
+      responseList.addFirst(defaultVR);
+    }// End if
+    return Collections.unmodifiableList(responseList);
+  }// getAnnotationVRs()
+
+  /**
+   * Returns a list of strings representing class names for annotation VRs
+   * that are able to display/edit a given annotation type
+   * The default VR will be the first in the returned list.
+   */
+  public List getAnnotationVRs(String annotationType){
+    if (annotationType == null)
+      return Collections.unmodifiableList(new ArrayList());
+    LinkedList responseList = new LinkedList();
+    String defaultVR = null;
+    Iterator vrIterator = vrTypes.iterator();
+    while (vrIterator.hasNext()){
+      String vrClassName = (String) vrIterator.next();
+      ResourceData vrResourceData = (ResourceData) this.get(vrClassName);
+      if (vrResourceData == null)
+        throw new GateRuntimeException(
+          "Couldn't get resource data for VR called " + vrClassName
+        );
+      // Test if VR can display all types of annotations
+      if ( vrResourceData.getGuiType() == ResourceData.NULL_GUI &&
+           vrResourceData.getAnnotationTypeDisplayed() != null ){
+
+          String annotationTypeDisplayed =
+                                  vrResourceData.getAnnotationTypeDisplayed();
+          if (annotationTypeDisplayed.equals(annotationType)){
+            responseList.add(vrClassName);
+            if (vrResourceData.isMainView())
+              defaultVR = vrClassName;
+          }// End if
+      }// End if
+    }// End while
+    if (defaultVR != null){
+      responseList.remove(defaultVR);
+      responseList.addFirst(defaultVR);
+    }// End if
+    return Collections.unmodifiableList(responseList);
+  }//getAnnotationVRs()
+
+  /**
+   * Returns a list of strings representing annotations types for which
+   * there are custom viewers/editor registered.
+   */
+  public List getVREnabledAnnotationTypes(){
+    LinkedList responseList = new LinkedList();
+    Iterator vrIterator = vrTypes.iterator();
+    while (vrIterator.hasNext()){
+      String vrClassName = (String) vrIterator.next();
+      ResourceData vrResourceData = (ResourceData) this.get(vrClassName);
+      if (vrResourceData == null)
+        throw new GateRuntimeException(
+          "Couldn't get resource data for VR called " + vrClassName
+        );
+      // Test if VR can display all types of annotations
+      if ( vrResourceData.getGuiType() == ResourceData.NULL_GUI &&
+           vrResourceData.getAnnotationTypeDisplayed() != null ){
+
+          String annotationTypeDisplayed =
+                                  vrResourceData.getAnnotationTypeDisplayed();
+          responseList.add(annotationTypeDisplayed);
+      }// End if
+    }// End while
+    return Collections.unmodifiableList(responseList);
+  }// getVREnabledAnnotationTypes()
 
 
 
@@ -524,7 +667,7 @@ public class CreoleRegisterImpl extends HashMap
   protected Set prTypes;
 
   /** A list of the types of VR in the register. */
-  protected Set vrTypes;
+  protected List vrTypes;
 
   /** A list of the types of TOOL in the register. */
   protected Set toolTypes;
