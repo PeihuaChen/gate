@@ -250,8 +250,14 @@ gate.util.Err.prln("EXPORTING annotation - class : ["+annClass+"]");
           DAMLClass damlClass = (DAMLClass)((HashMap)ontologies.get(annOntology)).get(annClass);
           Assert.assertNotNull(damlClass);
 
-          DAMLClass annInstance = instanceModel.createDAMLClass(annClass);
-          annInstance.prop_subClassOf().add(damlClass);
+          String instanceName = this.document.getContent().getContent(
+                                                                  ann.getStartNode().getOffset(),
+                                                                  ann.getEndNode().getOffset())
+                                .toString();
+          Assert.assertNotNull(instanceName);
+
+          DAMLClass annInstance = instanceModel.createDAMLClass(instanceName);
+          annInstance.prop_type().add(damlClass);
         }//while
       }//while
 
