@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- * 
+ *
  *  Cristian URSU, 29 September 2000
  *
  *  $Id$
@@ -24,9 +24,14 @@ public class Err {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+  /** A printwriter to delegate to */
   private static PrintWriter err = new PrintWriter(System.err,true);
 
+  /** Don't construct any of these */
   private Err() {}
+
+  /** Flush the output stream. */
+  public static void flush() { err.flush(); }
 
   /** This sets a new printWriter*/
   public static void setPrintWriter(PrintWriter aPrintWriter) {
