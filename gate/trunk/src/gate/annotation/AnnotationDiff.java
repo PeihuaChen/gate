@@ -31,7 +31,7 @@ import gate.creole.*;
   * This class compare two annotation sets on annotation type given by the
   * AnnotationSchema object. It also deals with graphic representation.
   */
-public class AnnotationDiff implements VisualResource{
+public class AnnotationDiff extends JPanel implements VisualResource{
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -62,10 +62,14 @@ public class AnnotationDiff implements VisualResource{
   private FeatureMap featureMap = null;
 
   /** The viewer component */
-  private JPanel diffPanel = new JPanel();
+  //private JPanel diffPanel = new JPanel();
 
   /** The components that will stay into diffPanel*/
   private SortedTable diffTable = new SortedTable();
+
+  /** Constructs a AnnotationDif*/
+  public AnnotationDiff(){
+  }//AnnotationDiff
 
   /** Sets the key Document containing the annotation set taken as refference*/
   public void setKeyDocument(Document aKeyDocument) {
@@ -119,7 +123,8 @@ public class AnnotationDiff implements VisualResource{
 
   /** This method is required in VisualResource Interface*/
   public JComponent getGUI(){
-    return diffPanel;
+   // return diffPanel;
+   return null;
   }// getViewer
 
   /**
@@ -157,12 +162,12 @@ public class AnnotationDiff implements VisualResource{
       diffTable.setDefaultRenderer(java.lang.String.class,
                                   new AnnotationDiffCellRenderer(diffModel));
       // Setting the box layout for diffpanel
-      BoxLayout boxLayout = new BoxLayout(diffPanel,BoxLayout.Y_AXIS);
-      diffPanel.setLayout(boxLayout);
+      BoxLayout boxLayout = new BoxLayout(this,BoxLayout.Y_AXIS);
+      this.setLayout(boxLayout);
       // Put the table into a JScrollPanel
       JScrollPane tableScroll = new JScrollPane(diffTable);
       // Add the tableScroll to the diffPanel
-      diffPanel.add(tableScroll);
+      this.add(tableScroll);
 
       //Lay out the JLabels from left to right.
       JPanel jLabelPane = new JPanel();
@@ -177,7 +182,7 @@ public class AnnotationDiff implements VisualResource{
       JLabel recallLabel = new JLabel("Recall: " + formatter.format(recall));
       jLabelPane.add(recallLabel);
 
-      diffPanel.add(jLabelPane);
+      this.add(jLabelPane);
     }// End if(diffSet != null)
     if (DEBUG)
       printStructure(diffSet);
@@ -308,7 +313,7 @@ public class AnnotationDiff implements VisualResource{
     *  Two Annotation are equals if their offsets, types and features are the
     *  same.
     */
-  public boolean areEqual(   Annotation anAnnot,
+  protected boolean areEqual(   Annotation anAnnot,
                                 Annotation otherAnnot){
     if(anAnnot == null || otherAnnot == null)
       return false;
@@ -437,11 +442,11 @@ public class AnnotationDiff implements VisualResource{
         if (diffElement.getLeftAnnotation() == null ||
             diffElement.getRightAnnotation()== null ){
           // Background red and foreground white
-          defaultComp.setBackground(new Color(255,0,0));
+          defaultComp.setBackground(new Color(255,100,100));
           defaultComp.setForeground(new Color(255,255,255));
         }else{
           // Background green and foreground black
-          defaultComp.setBackground(new Color(0,255,0));
+          defaultComp.setBackground(new Color(150,255,150));
           defaultComp.setForeground(new Color(0,0,0));
         }// end if
       }// end if
