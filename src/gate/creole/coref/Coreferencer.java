@@ -15,11 +15,69 @@
 
 package gate.creole.coref;
 
+import junit.framework.*;
+
+import gate.*;
 import gate.creole.*;
 
 
-public class Coreferencer extends AbstractProcessingResource {
+public class Coreferencer extends AbstractProcessingResource
+                          implements ProcessingResource{
+
+  private Document  doc;
+  private PronominalCoref pronominalModule;
 
   public Coreferencer() {
   }
+
+
+  /** Initialise this resource, and return it. */
+  public Resource init() throws ResourceInstantiationException {
+
+    Resource result = super.init();
+
+    //load all submodules
+    this.pronominalModule = (PronominalCoref)Factory.createResource("gate.creole.coref.PronominalCoref");
+
+    return result;
+  } // init()
+
+
+  /**
+   * Reinitialises the processing resource. After calling this method the
+   * resource should be in the state it is after calling init.
+   * If the resource depends on external resources (such as rules files) then
+   * the resource will re-read those resources. If the data used to create
+   * the resource has changed since the resource has been created then the
+   * resource will change too after calling reInit().
+  */
+  public void reInit() throws ResourceInstantiationException {
+    init();
+  } // reInit()
+
+
+  /** Get the document we're running on. */
+  public Document getDocument() {
+    return this.doc;
+  }
+
+
+  /** Set the document to run on. */
+  public void setDocument(Document newDocument) {
+    Assert.assertNotNull(newDocument);
+    this.doc = newDocument;
+
+    this.pronominalModule.setDocument(this.doc);
+  }
+
+
+  /**
+   * This method runs the coreferencer. It assumes that all the needed parameters
+   * are set. If they are not, an exception will be fired.
+   */
+  public void execute() throws ExecutionException{
+
+    this.pronominalModule.execute();
+  }
+
 }
