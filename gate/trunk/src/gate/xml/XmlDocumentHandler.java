@@ -272,7 +272,6 @@ public class XmlDocumentHandler extends DefaultHandler{
   public void characters( char[] text,int start,int length) throws SAXException{
     // create a string object based on the reported text
     String content = new String(text, start, length);
-
     StringBuffer contentBuffer = new StringBuffer("");
     int tmpDocContentSize = tmpDocContent.length();
     boolean incrementStartIndex = false;

@@ -127,7 +127,7 @@ public class CreoleXmlHandler extends DefaultHandler {
     // record the attributes of this element
     currentAttributes = atts;
 
-    // process attributes of parameter and view elements
+    // process attributes of parameter and GUI elements
     if(elementName.toUpperCase().equals("PARAMETER")) {
       if(DEBUG) {
         for(int i=0, len=currentAttributes.getLength(); i<len; i++) {
@@ -142,6 +142,8 @@ public class CreoleXmlHandler extends DefaultHandler {
       currentParam.name = currentAttributes.getValue("NAME");
       currentParam.runtime =
         Boolean.valueOf(currentAttributes.getValue("RUNTIME")).booleanValue();
+      currentParam.itemClassName =
+                                currentAttributes.getValue("ITEM_CLASS_NAME");
     }else if(elementName.toUpperCase().equals("GUI")){
       String typeValue = currentAttributes.getValue("TYPE");
       if (typeValue != null){

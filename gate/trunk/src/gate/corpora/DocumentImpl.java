@@ -152,12 +152,10 @@ extends AbstractLanguageResource implements Document {
 
     // set up the source URL and create the content
     if(sourceUrl == null){
-      if(stringContent == null)
-      {
+      if(stringContent == null){
         throw new ResourceInstantiationException(
-          "Either the sourceURL (was null) or the stringContent (was null)" +
-          "has to be set in order to construct a Gate document!");
-      }
+          "The sourceURL and document's content were null.");
+      }// End if
       content = new DocumentContentImpl(stringContent);
       getFeatures().put("gate.SourceURL", "created from String");
     }else{

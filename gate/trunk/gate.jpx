@@ -135,6 +135,5 @@
   <property category="sys" name="WorkingDirectory" value="." />
   <property category="sys" name="warn.auto.packages" value="false" />
   <file path="src/gate/resources/creole/creole.xml" />
-  <file path="src/gate/Executable.java" />
 </project>
 
