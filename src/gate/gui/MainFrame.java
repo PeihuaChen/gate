@@ -128,6 +128,7 @@ public class MainFrame extends JFrame
   StoredMarkedCorpusEvalAction storedMarkedCorpusEvalAction = null;
   CleanMarkedCorpusEvalAction cleanMarkedCorpusEvalAction = null;
   VerboseModeCorpusEvalToolAction verboseModeCorpusEvalToolAction = null;
+//  DatastoreModeCorpusEvalToolAction datastoreModeCorpusEvalToolAction = null;
 
   /**ontology editor action
    * ontotext.bp*/
@@ -297,6 +298,7 @@ public class MainFrame extends JFrame
     generateStoredCorpusEvalAction = new GenerateStoredCorpusEvalAction();
     cleanMarkedCorpusEvalAction = new CleanMarkedCorpusEvalAction();
     verboseModeCorpusEvalToolAction = new VerboseModeCorpusEvalToolAction();
+//    datastoreModeCorpusEvalToolAction = new DatastoreModeCorpusEvalToolAction();
 
     /*ontology editor action initialization
     ontotext.bp*/
@@ -631,7 +633,9 @@ public class MainFrame extends JFrame
     JCheckBoxMenuItem verboseModeItem =
       new JCheckBoxMenuItem(verboseModeCorpusEvalToolAction);
     corpusEvalMenu.add(verboseModeItem);
-//    toolsMenu.add(newCorpusEvalAction);
+//    JCheckBoxMenuItem datastoreModeItem =
+//      new JCheckBoxMenuItem(datastoreModeCorpusEvalToolAction);
+//    corpusEvalMenu.add(datastoreModeItem);
     toolsMenu.add(
       new AbstractAction("Unicode editor", getIcon("unicode.gif")){
       public void actionPerformed(ActionEvent evt){
@@ -1538,11 +1542,19 @@ public class MainFrame extends JFrame
           if (state == JFileChooser.CANCEL_OPTION || startDir == null)
             return;
 
+          chooser.setDialogTitle("Please select the application that you want to run");
+          chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          state = chooser.showOpenDialog(MainFrame.this);
+          File testApp = chooser.getSelectedFile();
+          if (state == JFileChooser.CANCEL_OPTION || startDir == null)
+            return;
+
           //first create the tool and set its parameters
           CorpusBenchmarkTool theTool = new CorpusBenchmarkTool();
           theTool.setStartDirectory(startDir);
-          if (MainFrame.this.verboseModeCorpusEvalToolAction.isVerboseMode())
-            theTool.setVerboseMode(true);
+          theTool.setApplicationFile(testApp);
+          theTool.setVerboseMode(
+            MainFrame.this.verboseModeCorpusEvalToolAction.isVerboseMode());
 
           Out.prln("Please wait while GATE tools are initialised.");
           //initialise the tool
@@ -1587,8 +1599,11 @@ public class MainFrame extends JFrame
           CorpusBenchmarkTool theTool = new CorpusBenchmarkTool();
           theTool.setStartDirectory(startDir);
           theTool.setMarkedStored(true);
-          if (MainFrame.this.verboseModeCorpusEvalToolAction.isVerboseMode())
-            theTool.setVerboseMode(true);
+          theTool.setVerboseMode(
+            MainFrame.this.verboseModeCorpusEvalToolAction.isVerboseMode());
+//          theTool.setMarkedDS(
+//            MainFrame.this.datastoreModeCorpusEvalToolAction.isDatastoreMode());
+
 
           Out.prln("Evaluating human-marked documents against pre-stored results.");
           //initialise the tool
@@ -1629,12 +1644,20 @@ public class MainFrame extends JFrame
           if (state == JFileChooser.CANCEL_OPTION || startDir == null)
             return;
 
+          chooser.setDialogTitle("Please select the application that you want to run");
+          chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          state = chooser.showOpenDialog(MainFrame.this);
+          File testApp = chooser.getSelectedFile();
+          if (state == JFileChooser.CANCEL_OPTION || startDir == null)
+            return;
+
           //first create the tool and set its parameters
           CorpusBenchmarkTool theTool = new CorpusBenchmarkTool();
           theTool.setStartDirectory(startDir);
+          theTool.setApplicationFile(testApp);
           theTool.setMarkedClean(true);
-          if (MainFrame.this.verboseModeCorpusEvalToolAction.isVerboseMode())
-            theTool.setVerboseMode(true);
+          theTool.setVerboseMode(
+            MainFrame.this.verboseModeCorpusEvalToolAction.isVerboseMode());
 
           Out.prln("Evaluating human-marked documents against current processing results.");
           //initialise the tool
@@ -1676,9 +1699,17 @@ public class MainFrame extends JFrame
           if (state == JFileChooser.CANCEL_OPTION || startDir == null)
             return;
 
+          chooser.setDialogTitle("Please select the application that you want to run");
+          chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          state = chooser.showOpenDialog(MainFrame.this);
+          File testApp = chooser.getSelectedFile();
+          if (state == JFileChooser.CANCEL_OPTION || startDir == null)
+            return;
+
           //first create the tool and set its parameters
           CorpusBenchmarkTool theTool = new CorpusBenchmarkTool();
           theTool.setStartDirectory(startDir);
+          theTool.setApplicationFile(testApp);
           theTool.setGenerateMode(true);
 
           Out.prln("Processing and storing documents for future evaluation.");
@@ -1712,8 +1743,26 @@ public class MainFrame extends JFrame
       verboseMode = ((JCheckBoxMenuItem)e.getSource()).getState();
     }// actionPerformed();
     protected boolean verboseMode = false;
-  }//class VerboseModeCorpusEvalToolListener
+  }//class f
 
+  /** This class represent an action which brings up the corpus evaluation tool*/
+/*
+  class DatastoreModeCorpusEvalToolAction extends AbstractAction  {
+    public DatastoreModeCorpusEvalToolAction() {
+      super("Use a datastore for human annotated texts");
+      putValue(SHORT_DESCRIPTION,"Use a datastore for the human annotated texts");
+    }// DatastoreModeCorpusEvalToolAction
+
+    public boolean isDatastoreMode() {return datastoreMode;}
+
+    public void actionPerformed(ActionEvent e) {
+      if (! (e.getSource() instanceof JCheckBoxMenuItem))
+        return;
+      datastoreMode = ((JCheckBoxMenuItem)e.getSource()).getState();
+    }// actionPerformed();
+    protected boolean datastoreMode = false;
+  }//class DatastoreModeCorpusEvalToolListener
+*/
 
   /** This class represent an action which loads ANNIE with default params*/
   class LoadANNIEWithDefaultsAction extends AbstractAction
