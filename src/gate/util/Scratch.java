@@ -223,6 +223,7 @@ public class Scratch
     Out.prln("done");
   } // runNerc()
 
+
   /** Inner class for holding CR and DSR for serialisation experiments */
   class SessionState implements Serializable {
     SessionState() {
