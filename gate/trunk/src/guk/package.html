@@ -1,0 +1,27 @@
+<html>
+<body>
+This package is used to add Unicode handling capabilities to any Java application.
+It has been first designed as part of the <a href="http://www.gate.ac.uk">Gate2</a> project and the name GUK stands for "Gate Unicode Kit".
+By "Unicode handling capabilities" we mean the ability to display Unicode text and the one of taking input in an arbitrary language.
+All the classes that are useful for the users of the GUK package are in the root package. There are two additional packages, {@link guk.im} that handles unicode input methods and {@link guk.pcffont} that handles the displaying of text.
+Some sample code on how to use this package has been included in the {@link guk.Editor} class which is an implementation of a simple Unicode enabled text editor.
+<H3>Using GUK</h3>
+<a name="install"><H4>Installing GUK</H4></a>   
+If used only for displaying text GUK has no special requirements, however if the use of the provided input methods is desired than GUK has to be installed as an instaled JVM extension (a jar in the &lt;path to jdk&gt;/jre/lib/ext directory.  
+<H4>Displaying text</h4>
+In the root of the guk package there are some Unicode enabled implementations available for various subclasses of {@link javax.swing.text.JTextComponent}.
+For the simpler cases such as {@link javax.swing.JLabel} or {@link javax.swing.JButton} there is usually a new implementation for the respective UI that can be used by simply setting an object of that type as the UI for the component (see {@link javax.swing.text.JTextComponent#setUI(javax.swing.plaf.TextUI)}), while in other cases (e.g. {@link javax.swing.JTextPane}) there are more complicated solutions.
+Please see the documentation for the respective classes for more detailed information.  
+<h4>Handling input</h4>
+The user (programmer in this case) doesn't need to do anything special to take advantage of the <i>Gate input method</i> which allows Unicode input. All that is needed is proper installation of the package as an "Installed JVM extension". (see <a href="#install">installation</a> above).
+When GUK is properly installed any Java application run in that JVM should have an additional sub-menu in the system menu (the one started by clicking the application's icon, usually in the top left corner of the window) saying "Select Input Method". The functionality of the <i>Gate Input Method</i> is available through that menu.
+The only useful option that is only available through and API is the choice of displaying or not the virtual keyboard map (see {@link guk.im.GateIM#setMapVisible(boolean)}).  
+<H3>Known bugs and limitations</h3>
+<ul>
+<li>Japanese/chinese + any right-to-left script</li><br>
+If any right-to-left script is displayed in the window with either japanese or chinese text than the japanese/chinese text will not wrap properly.
+<li>Windows L&amp;F</li><br>
+Selection does not work well under the Windows Look and Feel. Everything is alright if the cross-platform L&amp;F is used.
+</ul>  
+</body>
+</html>

@@ -24,12 +24,16 @@ import gate.creole.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.*;
-import javax.swing.text.Style;
+import javax.swing.text.*;
 import javax.swing.border.*;
+import java.awt.*;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.font.*;
+import java.awt.Image;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.Component;
 import java.beans.*;
 import java.util.*;
@@ -66,20 +70,21 @@ public class AnnotationEditor extends AbstractVisualResource{
   XJTable annotationTypesTable;
   JScrollPane annotationTypesTableScroll;
   TypesTableModel annotationTypesTableModel;
+  TextAttributesChooser styleChooser;
 
   JTabbedPane rightTabbedpane;
 //data members
   /**
    * holds the data for the table: a list of Annotation objects
    */
-  List data;
+  java.util.List data;
 
   /**
    * a list containing triplets (Object[3]), where the first field is the
    * AnnotationSet name, and the other two are the start and end ranges in the
    * {@link data} structure.
    */
-  List ranges;
+  java.util.List ranges;
 
   /**
    * Set of AnnotationSet. The annotation sets that are visible.
@@ -103,7 +108,7 @@ public class AnnotationEditor extends AbstractVisualResource{
    * List of {@link TypeData}. A list with the data used for dysplaying
    * various annotation types.
    */
-  List annotationTypeData;
+  java.util.List annotationTypeData;
 
   //misc members
   /**
@@ -139,7 +144,7 @@ public class AnnotationEditor extends AbstractVisualResource{
       params.put("sourceUrlName",
                  TestDocument.getTestServerName() + "tests/doc0.html");
 
-      Document doc = (Document)Factory.createResource("gate.corpora.DocumentImpl", params);
+      gate.Document doc = (gate.Document)Factory.createResource("gate.corpora.DocumentImpl", params);
       //create a default tokeniser
      params.clear();
      DefaultTokeniser tokeniser = (DefaultTokeniser) Factory.createResource(
@@ -164,9 +169,9 @@ public class AnnotationEditor extends AbstractVisualResource{
   }
 
   public Resource init(){
-    initListeners();
     initLocalData();
     initGuiComponents();
+    initListeners();
 
     //data initialisation
     if(document != null){
@@ -216,23 +221,27 @@ public class AnnotationEditor extends AbstractVisualResource{
     this.addComponentListener(new ComponentAdapter(){
       public void componentResized(ComponentEvent e) {
         leftSplit.setDividerLocation(leftSplit.getHeight() / 2);
-        Dimension size = annotationSetsList.getPreferredSize();
-        JScrollBar sb = new JScrollBar(JScrollBar.VERTICAL);
-        int barSize = sb.getUI().getMaximumSize(sb).width;
-        listScroll.setMinimumSize(new Dimension(size.width +15 ,
-                                                  size.height));
-        listScroll.setPreferredSize(listScroll.getMinimumSize());
-        size = annotationTypesTable.getPreferredSize();
-        annotationTypesTableScroll.setMinimumSize(new Dimension(size.width + 15 ,
-                                                                  size.height));
-        annotationTypesTableScroll.setPreferredSize(annotationTypesTableScroll.getMinimumSize());
-        doLayout();
       }
 
       public void componentShown(ComponentEvent e){
         componentResized(e);
       }
     });
+
+    annotationTypesTable.addMouseListener(new MouseAdapter(){
+      public void mouseClicked(MouseEvent e){
+        if(SwingUtilities.isLeftMouseButton(e) &&
+           annotationTypesTable.columnAtPoint(e.getPoint())==1){
+          int row = annotationTypesTable.rowAtPoint(e.getPoint());
+          TypeData tData = (TypeData)annotationTypesTable.getValueAt(row, 1);
+          tData.setStyle(styleChooser.show(tData.getStyle()));
+          annotationTypesTable.setValueAt(tData, row, 1);
+          //annotationsTableModel.fireTableRowsUpdated(row, row);
+          //annotationsTableModel.fireTableDataChanged();
+        }
+      }
+    });
+
   }//protected void initListeners()
 
   protected void initLocalData(){
@@ -327,6 +336,11 @@ public class AnnotationEditor extends AbstractVisualResource{
 
     leftSplit.setAlignmentY(Component.TOP_ALIGNMENT);
     rightTabbedpane.setAlignmentY(Component.TOP_ALIGNMENT);
+
+    //Extra Stuff
+    styleChooser = new TextAttributesChooser();
+    styleChooser.setTitle("Select text style");
+    styleChooser.setModal(true);
   }//protected void initGuiComponents()
 
   public boolean makeVisible(AnnotationSet as){
@@ -345,9 +359,11 @@ public class AnnotationEditor extends AbstractVisualResource{
                                  new Integer(firstRange + as.size() - 1)
                                  });
     annotationsTableModel.fireTableDataChanged();
+
     //take care of the annotation types table
-    Set added = (Set)new HashSet(as.getAllTypes()).clone();
-    added.removeAll(annotationTypeDataMap.keySet());
+    Set added = new HashSet(as.getAllTypes());
+    Set existing = new HashSet(annotationTypeDataMap.keySet());
+    added.removeAll(existing);
     Iterator addedIter = added.iterator();
     String name;
     TypeData tData;
@@ -366,6 +382,8 @@ public class AnnotationEditor extends AbstractVisualResource{
     if(!visibleAnnotationSets.contains(as)) return false;
     visibleAnnotationSets.remove(as);
     Iterator rangesIter = ranges.iterator();
+    int removeStart = 0;
+    int removeEnd = 0;
     while(rangesIter.hasNext()){
       Object[] range = (Object[])rangesIter.next();
       if(((String)range[0]).equals(as.getName())||
@@ -373,9 +391,9 @@ public class AnnotationEditor extends AbstractVisualResource{
          ){
         //Found it!
         //remove the range from data and ranges
-        data.subList(((Integer)range[1]).intValue(),
-                     ((Integer)range[2]).intValue() + 1
-                     ).clear();
+        removeStart = ((Integer)range[1]).intValue();
+        removeEnd = ((Integer)range[2]).intValue() + 1;
+        data.subList(removeStart, removeEnd).clear();
         rangesIter.remove();
         //shift left all remaining ranges
         int rangeSize = ((Integer)range[2]).intValue() -
@@ -388,8 +406,9 @@ public class AnnotationEditor extends AbstractVisualResource{
       }//if
     }//while
     annotationsTableModel.fireTableDataChanged();
+
     //take care of the annotation types table
-    Set removed = (Set)new HashSet(annotationTypeDataMap.keySet()).clone();
+    Set removed = new HashSet(annotationTypeDataMap.keySet());
     Iterator remainingSetsIter = visibleAnnotationSets.iterator();
     while(remainingSetsIter.hasNext()){
       removed.removeAll(((AnnotationSet)remainingSetsIter.next()).getAllTypes());
@@ -536,8 +555,8 @@ public class AnnotationEditor extends AbstractVisualResource{
       switch(column){
         case 0: return String.class;
         case 1: return String.class;
-        case 2: return Integer.class;
-        case 3: return Integer.class;
+        case 2: return Long.class;
+        case 3: return Long.class;
         case 4: return String.class;
         default:return Object.class;
       }
@@ -580,7 +599,37 @@ public class AnnotationEditor extends AbstractVisualResource{
    * The columns will be: Visible, Type, Style
    */
   protected class TypesTableModel extends AbstractTableModel{
-    public TypesTableModel(){
+
+    public void fireTableChanged(TableModelEvent e) {
+      super.fireTableChanged(e);
+
+      //adjust the width
+      SwingUtilities.invokeLater(new Runnable(){
+        public void run(){
+          int width = annotationTypesTable.
+                      getPreferredScrollableViewportSize().width +
+                      annotationTypesTableScroll.getInsets().left +
+                      annotationTypesTableScroll.getInsets().right;
+          JComponent comp = annotationTypesTableScroll.getVerticalScrollBar();
+          if(comp != null && comp.isVisible()) width += comp.getPreferredSize().width;
+
+          int height = annotationTypesTable.getRowHeight() +
+                       annotationTypesTable.getRowMargin() +
+                       annotationTypesTableScroll.getInsets().top +
+                       annotationTypesTableScroll.getInsets().bottom;
+          Dimension dim = new Dimension(width + 4, height);
+          annotationTypesTableScroll.setMinimumSize(dim);
+
+          dim = new Dimension(dim);
+          dim.height = annotationTypesTable.
+                       getPreferredScrollableViewportSize().height +
+                       annotationTypesTableScroll.getInsets().top +
+                       annotationTypesTableScroll.getInsets().bottom;
+          annotationTypesTableScroll.setPreferredSize(dim);
+          annotationTypesTableScroll.invalidate();
+          validate();
+        }
+      });
     }
 
     public int getRowCount(){
@@ -614,11 +663,6 @@ public class AnnotationEditor extends AbstractVisualResource{
         case 0:{//visible
           return new Boolean(tData.visible);
         }
-        /*
-        case 1:{//Type
-          return tData.type;
-        }
-        */
         case 1:{//Type & Style
           return tData;
         }
@@ -641,6 +685,8 @@ public class AnnotationEditor extends AbstractVisualResource{
           break;
         }
         case 1:{
+          annotationTypeData.set(rowIndex, aValue);
+          annotationTypesTableModel.fireTableRowsUpdated(rowIndex, rowIndex);
           break;
         }
       }
@@ -648,15 +694,19 @@ public class AnnotationEditor extends AbstractVisualResource{
   }//class CustomTableModel extends AbstractTableModel
 
   class TypeData implements Comparable{
-    public TypeData(String type, Color foreground, Color background, Font font,
+    public TypeData(String type, MutableAttributeSet aStyle,
                     boolean visible){
       this.type = type;
-      this.foreground = foreground;
-      this.background = background;
+      this.style = new SimpleAttributeSet(aStyle);
       this.visible = visible;
-      if(font == null) this.font = textPane.getFont();
-      else this.font = font;
+    }
 
+    public TypeData(String type){
+      this.type = type;
+      style = new SimpleAttributeSet(textPane.getCharacterAttributes());
+      StyleConstants.setForeground(style, colGenerator.getNextColor());
+      StyleConstants.setBackground(style, Color.white);
+      visible = true;
     }
 
     public int compareTo(Object other){
@@ -665,21 +715,21 @@ public class AnnotationEditor extends AbstractVisualResource{
                                         " to " + other.getClass());
     }
 
-    public TypeData(String type){
-      this.type = type;
-      foreground = colGenerator.getNextColor();
-      background = Color.white;
-      visible = true;
-      font = textPane.getFont();
+    public void setStyle(MutableAttributeSet newStyle){
+      style.addAttributes(newStyle.copyAttributes());
     }
-    String type;
-    Color foreground;
-    Color background;
-    boolean visible;
-    Font font;
-  }//class TypeData
 
-  class TypeDataRenderer extends DefaultTableCellRenderer{
+    public MutableAttributeSet getStyle(){
+      return style;
+    }
+
+    String type;
+    MutableAttributeSet style;
+    boolean visible;
+    TypeDataRenderer renderer = new TypeDataRenderer();
+  }//class TypeData
+/*
+  class TypeDataRenderer extends JTextPane implements  TableCellRenderer{
     public Component getTableCellRendererComponent(JTable table,
                                                    Object value,
                                                    boolean isSelected,
@@ -687,18 +737,83 @@ public class AnnotationEditor extends AbstractVisualResource{
                                                    int row,
                                                    int column){
 
+System.out.println("Call");
       //TypeData tData = (TypeData)table.getValueAt(row, column);
+      DefaultTableCellRenderer rend;
       TypeData tData;
       if(value instanceof TypeData) tData = (TypeData)value;
       else return null;
-      setForeground(tData.foreground);
-      setBackground(tData.background);
-      setFont(tData.font);
-      Component res = super.getTableCellRendererComponent(table, tData.type,
-                                                          false, false,
-                                                          row, column);
-      res.setSize(res.getMinimumSize());
-      return res;
+      selectAll();
+      replaceSelection(tData.type);
+      //setText(tData.type);
+      selectAll();
+      setCharacterAttributes(tData.style, true);
+      setSize(getPreferredSize());
+      doLayout();
+      table.setRowHeight(row, getPreferredSize().height);
+      return this;
     }
+
+    public void repaint(long tm, int x, int y, int width, int height){
+    }
+    public void repaint(Rectangle r){}
+
+    protected void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
+      // Strings get interned...
+      if (propertyName=="text") {
+          super.firePropertyChange(propertyName, oldValue, newValue);
+      }
+    }
+
+    public void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) { }
+
+    public void revalidate(){}
+    public void validate(){}
+
+    //JTextPane component = new JTextPane();
   }//class TypeDataRenderer
-}//class AnnotationEditor
+*/
+  class TypeDataRenderer extends DefaultTableCellRenderer{
+    public Component getTableCellRendererComponent(JTable table,
+                                                   Object value,
+                                                   boolean isSelected,
+                                                   boolean hasFocus,
+                                                   int row,
+                                                   int column){
+      TypeData tData;
+      if(value instanceof TypeData) tData = (TypeData)value;
+      else return null;
+      component.selectAll();
+      component.replaceSelection(tData.type);
+      component.selectAll();
+      component.setCharacterAttributes(tData.style, true);
+      Dimension dim = component.getPreferredSize();
+      component.setSize(dim);
+      int height = 0;
+      try{
+        height = (int)component.modelToView(tData.type.length()-1).getMaxY();
+      }catch(BadLocationException ble){
+        ble.printStackTrace();
+      }
+//System.out.println("Renderer height: " + height);
+      dim.height = height;
+      setPreferredSize(dim);
+      return this;
+    }
+
+    public void paintComponent(Graphics g){
+/*
+try{
+  throw new Exception("Paint");
+}catch(Exception e){
+  e.printStackTrace(System.out);
+}
+*/
+      component.paint(g);
+    }
+
+
+    JTextPane component = new JTextPane();
+  }//class TypeDataRenderer
+
+  }//class AnnotationEditor
