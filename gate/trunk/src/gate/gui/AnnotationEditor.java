@@ -94,7 +94,7 @@ public class AnnotationEditor extends AbstractVisualResource {
   JScrollPane stylesTreeScroll;
 
   /**The root for the styles tree*/
-  TreeNode stylesTreeRoot;
+  DefaultMutableTreeNode stylesTreeRoot;
 
   /**The model for the styles tree*/
   DefaultTreeModel stylesTreeModel;
@@ -114,8 +114,14 @@ public class AnnotationEditor extends AbstractVisualResource {
   /**The progress bar used during updating the text*/
   JProgressBar progressBar;
 
-  /**The highlighter used for the selected annotation*/
+  /**The highlighter used for the selecting annotations that overlap*/
   Highlighter highlighter;
+
+  /**The highlighter used for the marking the selected annotations */
+  Highlighter selectionHighlighter;
+
+  /**The highlights painter used for the marking the selected annotations */
+  Highlighter.HighlightPainter selectionHighlighterPainter;
 
 //data members
   /**
@@ -280,7 +286,7 @@ public class AnnotationEditor extends AbstractVisualResource {
             stylesTree.expandPath(new TreePath(node.getPath()));
             node = node.getNextSibling();
           }
-          stylesTreeModel.reload();
+          //stylesTreeModel.reload();
         }
         //set the slider location
         leftSplit.setDividerLocation(leftSplit.getHeight() / 2);
@@ -349,14 +355,17 @@ public class AnnotationEditor extends AbstractVisualResource {
         if(SwingUtilities.isLeftMouseButton(e)){
           if(e.getClickCount() == 1){
             //single left click ->highlight the annotation
+
             int start =
               ((Long)annotationsTable.getModel().getValueAt(row, 2)).intValue();
             int end =
               ((Long)annotationsTable.getModel().getValueAt(row, 3)).intValue();
             try{
+            /*
               highlighter.removeAllHighlights();
               highlighter.addHighlight(start, end,
                                           DefaultHighlighter.DefaultPainter);
+            */
               textPane.scrollRectToVisible(textPane.modelToView(start));
               annotationsTable.requestFocus();
             }catch(BadLocationException ble){
@@ -389,6 +398,32 @@ public class AnnotationEditor extends AbstractVisualResource {
         }
       }
     });
+
+    //takes care of highliting the selected annotations
+    annotationsTable.getSelectionModel().addListSelectionListener(
+      new ListSelectionListener(){
+        public void valueChanged(ListSelectionEvent e){
+          int[] rows = annotationsTable.getSelectedRows();
+          synchronized(selectionHighlighter){
+            selectionHighlighter.removeAllHighlights();
+            for(int i = 0; i < rows.length; i++){
+              int start = ((Long)annotationsTable.getModel().
+                           getValueAt(rows[i], 2)
+                          ).intValue();
+              int end = ((Long)annotationsTable.getModel().
+                         getValueAt(rows[i], 3)
+                        ).intValue();
+              try{
+                selectionHighlighter.addHighlight(start, end,
+                                                  selectionHighlighterPainter);
+              }catch(BadLocationException ble){
+                throw new GateRuntimeException(ble.toString());
+              }
+            }//for(int i = 0; i < rows.length; i++)
+          }//synchronized(highlighter)
+        }
+      });
+
 
     textPane.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
@@ -635,6 +670,21 @@ public class AnnotationEditor extends AbstractVisualResource {
     progressBox.add(Box.createHorizontalStrut(5));
 
     highlighter = textPane.getHighlighter();
+
+    selectionHighlighter = new DefaultHighlighter();
+//    ((DefaultHighlighter)selectionHighlighter).setDrawsLayeredHighlights(true);
+    selectionHighlighter.install(textPane);
+
+    selectionHighlighterPainter = new DefaultHighlighter.
+                                      DefaultHighlightPainter(
+                                        textPane.getBackground()
+                                      );
+
+    Thread thread  = new Thread(Thread.currentThread().getThreadGroup(),
+                                new SelectionBlinker());
+
+    thread.setPriority(Thread.MIN_PRIORITY);
+    thread.start();
   }//protected void initGuiComponents()
 
   /**Updates the size of the styles tree so it gets all the width it needs*/
@@ -837,7 +887,10 @@ public class AnnotationEditor extends AbstractVisualResource {
     TypeData setData = new TypeData(setName, null, false);
     setData.setAnnotations(as);
     DefaultMutableTreeNode setNode = new DefaultMutableTreeNode(setData, true);
-    ((DefaultMutableTreeNode)stylesTreeRoot).add(setNode);
+    stylesTreeModel.insertNodeInto(setNode, stylesTreeRoot,
+                                   stylesTreeRoot.getChildCount());
+    stylesTree.expandPath(new TreePath(new Object[]{stylesTreeRoot, setNode}));
+    //((DefaultMutableTreeNode)stylesTreeRoot).add(setNode);
     ArrayList typesLst = new ArrayList(as.getAllTypes());
     Collections.sort(typesLst);
     int size = typesLst.size();
@@ -852,7 +905,9 @@ public class AnnotationEditor extends AbstractVisualResource {
       typeData.setAnnotations(sameType);
       DefaultMutableTreeNode typeNode = new DefaultMutableTreeNode(typeData,
                                                                    false);
-      setNode.add(typeNode);
+      stylesTreeModel.insertNodeInto(typeNode, setNode,
+                                     setNode.getChildCount());
+      //setNode.add(typeNode);
       value = progressStart +  (progressEnd - progressStart)* cnt/size;
       if(value - lastValue >= 5){
         progressBar.setValue(value);
@@ -861,11 +916,13 @@ public class AnnotationEditor extends AbstractVisualResource {
       }
       cnt ++;
     }
+    /*
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
         stylesTreeModel.reload();
       }
     });
+    */
   }
 
   /**
@@ -1324,7 +1381,8 @@ public class AnnotationEditor extends AbstractVisualResource {
 
     public String getType() {return type;}
 
-    public String getTitle() {return (type == null) ? set : type;}
+    public String getTitle() {return (type == null) ? set + " annotations" :
+                                                      type;}
     public boolean getVisible() {return visible;}
 
     public void setVisible(boolean isVisible) {
@@ -1577,8 +1635,7 @@ public class AnnotationEditor extends AbstractVisualResource {
                             ((DefaultMutableTreeNode)node.getChildAt(i)).
                             getUserObject()
                           ).getType().compareTo(tData.getType())<0) i++;
-                    node.insert(typeNode, i);
-                    stylesTreeModel.nodeStructureChanged(node);
+                    stylesTreeModel.insertNodeInto(typeNode, node, i);
                   }
                 } else if(asEvt.getType() == asEvt.ANNOTATION_REMOVED){
                   tData .annotations.remove(ann);
@@ -1634,6 +1691,57 @@ public class AnnotationEditor extends AbstractVisualResource {
     protected java.util.List eventQueue;
     protected long lastEvent = 0;
   }//class DelayedListener
+
+  class SelectionBlinker implements Runnable{
+    public void run(){
+      while(true){
+        synchronized(selectionHighlighter){
+          SwingUtilities.invokeLater(new Runnable(){
+            public void run(){
+              showHighlights();
+            }
+          });
+          try{
+            Thread.sleep(300);
+          }catch(InterruptedException ie){
+            ie.printStackTrace(Err.getPrintWriter());
+          }
+          SwingUtilities.invokeLater(new Runnable(){
+            public void run(){
+              hideHighlights();
+            }
+          });
+        }//synchronized(selectionHighlighter)
+
+        try{
+          Thread.sleep(700);
+        }catch(InterruptedException ie){
+          ie.printStackTrace(Err.getPrintWriter());
+        }
+      }//while(true)
+    }//run()
+
+    protected void showHighlights(){
+      Highlighter.Highlight[] highligts = selectionHighlighter.getHighlights();
+      actualHighlights.clear();
+      try{
+        for(int i = 0; i < highligts.length; i++){
+          actualHighlights.add(highlighter.addHighlight(highligts[i].getStartOffset(),
+                                   highligts[i].getEndOffset(),
+                                   highligts[i].getPainter()));
+        }
+      }catch(BadLocationException ble){
+        ble.printStackTrace(Err.getPrintWriter());
+      }
+    }
+
+    protected void hideHighlights(){
+      Iterator hIter = actualHighlights.iterator();
+      while(hIter.hasNext()) highlighter.removeHighlight(hIter.next());
+    }
+
+    ArrayList actualHighlights = new ArrayList();
+  }//class SelectionBlinker implements Runnable
 
   /**
    * Fixes the <a

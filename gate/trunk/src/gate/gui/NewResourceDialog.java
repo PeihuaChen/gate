@@ -87,7 +87,7 @@ public class NewResourceDialog extends JDialog {
     table.setDefaultEditor(Object.class,
                            new CustomEditor());
 
-    table.setIntercellSpacing(new Dimension(10, 10));
+    table.setIntercellSpacing(new Dimension(5, 5));
     JScrollPane scroll = new JScrollPane(table);
     this.getContentPane().add(scroll);
     this.getContentPane().add(Box.createVerticalStrut(5));
@@ -393,6 +393,7 @@ public class NewResourceDialog extends JDialog {
         textButtonBox.add(button);
         return textButtonBox;
       }else{
+        setMaximumSize(getPreferredSize());
         return this;
       }
 

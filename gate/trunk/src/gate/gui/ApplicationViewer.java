@@ -875,7 +875,7 @@ public class ApplicationViewer extends AbstractVisualResource implements CreoleL
     JComboBox combo;
   }
 
-  class ParameterValueRenderer extends DefaultTableCellRenderer {
+  class ParameterValueRenderer extends ObjectRenderer {
     public Component getTableCellRendererComponent(JTable table,
                                                Object value,
                                                boolean isSelected,
