@@ -34,17 +34,214 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  protected TreeSet corpusSet = null;
+  public CorpusImpl(){
+    supportList = Collections.synchronizedList(new VerboseList());
+  }
+
+
+  /**
+   * Gets the names of the documents in this corpus.
+   * @return a {@link List} of Strings representing the names of the documents
+   * in this corpus.
+   */
+  public List getDocumentNames(){
+    ArrayList res = new ArrayList(supportList.size());
+    Iterator docIter = supportList.iterator();
+    while(docIter.hasNext()){
+      res.add(((Document)docIter.next()).getName());
+    }
+    return res;
+  }
+
+  /**
+   * Gets the name of a document in this corpus.
+   * @param index the index of the document
+   * @return a String value representing the name of the document at
+   * <tt>index</tt> in this corpus.
+   */
+  public String getDocumentName(int index){
+    return ((Document)supportList.get(index)).getName();
+  }
+
+  /**
+   * The underlying list that holds the documents in this corpus.
+   */
+  protected List supportList = null;
+
+  /**
+   * A proxy list that stores the actual data in an internal list and forwards
+   * all operations to that one but it also fires the appropiate corpus events
+   * when necessary.
+   * It also does some type checking so only Documents are accepted as corpus
+   * members.
+   */
+  protected class VerboseList extends AbstractList{
+
+    public Object get(int index){
+      return data.get(index);
+    }
+
+    public int size(){
+      return data.size();
+    }
+
+    public Object set(int index, Object element){
+      if(element instanceof Document){
+        Document oldDoc = (Document)data.set(index, element);
+        Document newDoc = (Document)element;
+
+        //fire the 2 events
+        fireDocumentRemoved(new CorpusEvent(CorpusImpl.this,
+                                            oldDoc,
+                                            CorpusEvent.DOCUMENT_REMOVED));
+        fireDocumentAdded(new CorpusEvent(CorpusImpl.this,
+                                          newDoc,
+                                          CorpusEvent.DOCUMENT_ADDED));
+        return oldDoc;
+      }else{
+        throw new UnsupportedOperationException(
+          getClass().getName() +
+          " only accepts gate.Document values as members!\n" +
+          element.getClass().getName() + " is not a gate.Document");
+      }
+    }
+
+    public void add(int index, Object element){
+      if(element instanceof Document){
+        data.add(index, element);
+
+        //fire the event
+        fireDocumentAdded(new CorpusEvent(CorpusImpl.this,
+                                          (Document)element,
+                                          CorpusEvent.DOCUMENT_ADDED));
+      }else{
+        throw new UnsupportedOperationException(
+          getClass().getName() +
+          " only accepts gate.Document values as members!\n" +
+          element.getClass().getName() + " is not a gate.Document");
+      }
+    }
+
+    public Object remove(int index){
+      Document oldDoc = (Document)data.remove(index);
+
+      fireDocumentRemoved(new CorpusEvent(CorpusImpl.this,
+                                          oldDoc,
+                                          CorpusEvent.DOCUMENT_REMOVED));
+      return oldDoc;
+    }
+
+    /**
+     * The List containing the actual data.
+     */
+    ArrayList data;
+  }
+
+  //List methods
+  //java docs will be automatically copied from the List interface.
+
+  public int size() {
+    return supportList.size();
+  }
+
+  public boolean isEmpty() {
+    return supportList.isEmpty();
+  }
+
+  public boolean contains(Object o){
+    return supportList.contains(o);
+  }
+
+  public Iterator iterator(){
+    return supportList.iterator();
+  }
+
+  public Object[] toArray(){
+    return supportList.toArray();
+  }
+
+  public Object[] toArray(Object[] a){
+    return supportList.toArray(a);
+  }
+
+  public boolean add(Object o){
+    return supportList.add(o);
+  }
+
+  public boolean remove(Object o){
+    return supportList.remove(o);
+  }
+
+  public boolean containsAll(Collection c){
+    return supportList.containsAll(c);
+  }
+
+  public boolean addAll(Collection c){
+    return supportList.addAll(c);
+  }
+
+  public boolean addAll(int index, Collection c){
+    return supportList.addAll(index, c);
+  }
+
+  public boolean removeAll(Collection c){
+    return supportList.removeAll(c);
+  }
+
+  public boolean retainAll(Collection c){
+    return supportList.retainAll(c);
+  }
+
+  public void clear(){
+    supportList.clear();
+  }
+
+  public boolean equals(Object o){
+    return supportList.equals(o);
+  }
+
+  public int hashCode(){
+    return supportList.hashCode();
+  }
+
+  public Object get(int index){
+    return supportList.get(index);
+  }
+
+  public Object set(int index, Object element){
+    return supportList.set(index, element);
+  }
+
+  public void add(int index, Object element){
+    supportList.add(index, element);
+  }
+
+  public Object remove(int index){
+    return supportList.remove(index);
+  }
+
+  public int indexOf(Object o){
+    return supportList.indexOf(o);
+  }
+
+  public int lastIndexOf(Object o){
+    return lastIndexOf(o);
+  }
+
+  public ListIterator listIterator(){
+    return supportList.listIterator();
+  }
+
+  public ListIterator listIterator(int index){
+    return supportList.listIterator(index);
+  }
+
+  public List subList(int fromIndex, int toIndex){
+    return supportList.subList(fromIndex, toIndex);
+  }
+
 
   /** Construction */
-  public CorpusImpl() {
-    corpusSet = new TreeSet();
-  } // Construction
-
-  public CorpusImpl(String name) {
-    corpusSet = new TreeSet();
-    setName(name);
-  } // Construction
 
   public void cleanup(){
   }
@@ -54,184 +251,11 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
     return this;
   } // init()
 
-  /** Save: synchonise the in-memory image of the corpus with the persistent
-    * image.
-    */
-  public void sync() throws PersistenceException {
-    if(dataStore == null)
-      throw new PersistenceException("LR has no DataStore");
-
-    dataStore.sync(this);
-  } // sync()
-
-
   /** Get the features associated with this corpus. */
   public FeatureMap getFeatures() { return features; }
 
   /** Set the feature set */
   public void setFeatures(FeatureMap features) { this.features = features; }
-
-  public Object last() {
-    return corpusSet.last();
-  }
-
-  public Object first() {
-    return corpusSet.first();
-  }
-
-  public SortedSet tailSet(Object fromElement){
-    return corpusSet.tailSet(fromElement);
-  }
-
-  public SortedSet headSet(Object fromElement){
-    return corpusSet.headSet(fromElement);
-  }
-
-  public SortedSet subSet(Object fromElement, Object toElement){
-    return corpusSet.subSet(fromElement, toElement);
-  }
-
-  public Comparator comparator() {
-    return corpusSet.comparator();
-  }
-
-  public boolean removeAll(Collection c) {
-    return corpusSet.removeAll(c);
-  }
-
-  public boolean retainAll(Collection c) {
-    return corpusSet.retainAll(c);
-  }
-
-  public boolean containsAll(Collection c) {
-    return corpusSet.containsAll(c);
-  }
-
-  public Object[] toArray() {
-    return corpusSet.toArray();
-  }
-
-  public Object[] toArray(Object[] a) {
-    return corpusSet.toArray(a);
-  }
-
-  public boolean contains(Object o) {
-    return corpusSet.contains(o);
-  }
-
-  public boolean isEmpty() {
-    return corpusSet.isEmpty();
-  }
-
-  public int size() {
-    return corpusSet.size();
-  }
-
-  /* Two corpus are equal if they have the same documents
-   * the same features and the same name
-   */
-  public boolean equals(Object other) {
-
-//    if (!corpusSet.equals(other)) return false;
-
-    Corpus corpus;
-    if (!(other instanceof CorpusImpl)) return false;
-    else corpus = (Corpus)other;
-
-    if (! corpusSet.containsAll(corpus))
-      return false;
-
-    // verify the name
-    String name = getName();
-    if ((name == null)^(corpus.getName() == null)) return false;
-    if ((name != null)&& (!name.equals(corpus.getName()))) return false;
-
-    // verify the features
-    if ((features == null) ^ (corpus.getFeatures() == null)) return false;
-    if ((features != null)&&(!features.equals(corpus.getFeatures())))return false;
-
-    return true;
-  }
-
-  /** A Hash value for this corpus */
-  public int hashCode() {
-    int hash = 0;
-    int docHash = 0;
-    Iterator iter = this.iterator();
-    while (iter.hasNext()) {
-      Document currentDoc = (Document)iter.next();
-      docHash = (currentDoc == null ? 0 : currentDoc.hashCode());
-      hash += docHash;
-    }
-    int nameHash = (getName() == null ? 0 : getName().hashCode());
-    int featureHash = (features == null ? 0 : features.hashCode());
-
-    return hash ^ featureHash ^ nameHash;
-  } // hashCode
-
-
-  /**
-   * Overridden so it returns an iterator that generates events when elements
-   * are removed.
-   */
-  public Iterator iterator(){
-    return new VerboseIterator(corpusSet.iterator());
-  }
-
-  /** Clears all documents in that corpus. Does not clear everything else though
-   *  like features, name, etc.
-   */
-  public void clear() {
-    corpusSet.clear();
-  }
-
-  /**
-   * Overridden so it can check the input and notify the listeners of the
-   * addition.
-   */
-  public boolean add(Object o) {
-    if(o instanceof Document){
-      boolean res = corpusSet.add(o);
-      if(res) fireDocumentAdded(new CorpusEvent(this, (Document)o,
-                                CorpusEvent.DOCUMENT_ADDED));
-      return res;
-    }else{
-      throw new IllegalArgumentException(
-        "Cannot add a " + o.getClass().toString() + " to a corpus");
-    }
-  }
-
-  /**
-   * Overridden so it can check the input and notify the listeners of the
-   * addition.
-   */
-  public boolean addAll(Collection c){
-    boolean modified = false;
-    Iterator e = c.iterator();
-    while (e.hasNext()) {
-        if(add(e.next()))
-            modified = true;
-    }
-    return modified;
-  }
-
-  /**
-   * Overridden so it can check the input and notify the listeners of the
-   * removal.
-   */
-  public boolean remove(Object o) {
-    if(o instanceof Document){
-      boolean res = corpusSet.remove(o);
-      if(res)
-        fireDocumentRemoved(new CorpusEvent(this, (Document)o,
-                                  CorpusEvent.DOCUMENT_REMOVED));
-      return res;
-    }else{
-      throw new IllegalArgumentException(
-        "gate.Corpus.remove():\n" +
-        "A corpus cannot contain a " + o.getClass().toString() + "!");
-    }
-  }
 
 
   public synchronized void removeCorpusListener(CorpusListener l) {
@@ -270,62 +294,6 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
   static final long serialVersionUID = 404036675903473841L;
   private transient Vector corpusListeners;
 
-
-  class VerboseIterator implements Iterator{
-    VerboseIterator (Iterator iterator){
-      this.iterator = iterator;
-    }
-
-    public boolean hasNext(){
-      return iterator.hasNext();
-    }
-
-    public Object next(){
-      return lastNext = iterator.next();
-    }
-
-    public void remove(){
-      iterator.remove();
-        fireDocumentRemoved(new CorpusEvent(CorpusImpl.this, (Document)lastNext,
-                                  CorpusEvent.DOCUMENT_REMOVED));
-    }
-    Iterator iterator;
-    Object lastNext;
-  }//class VerboseIterator
-
-
-  //Parameters utility methods
-  /**
-   * Gets the value of a parameter of this resource.
-   * @param paramaterName the name of the parameter
-   * @return the current value of the parameter
-   */
-  public Object getParameterValue(String paramaterName)
-                throws ResourceInstantiationException{
-    return AbstractResource.getParameterValue(this, paramaterName);
-  }
-
-  /**
-   * Sets the value for a specified parameter.
-   *
-   * @param paramaterName the name for the parameteer
-   * @param parameterValue the value the parameter will receive
-   */
-  public void setParameterValue(String paramaterName, Object parameterValue)
-              throws ResourceInstantiationException{
-    AbstractResource.setParameterValue(this, paramaterName, parameterValue);
-  }
-
-  /**
-   * Sets the values for more parameters in one step.
-   *
-   * @param parameters a feature map that has paramete names as keys and
-   * parameter values as values.
-   */
-  public void setParameterValues(FeatureMap parameters)
-              throws ResourceInstantiationException{
-    AbstractResource.setParameterValues(this, parameters);
-  }
 
   protected void fireDocumentAdded(CorpusEvent e) {
     if (corpusListeners != null) {
