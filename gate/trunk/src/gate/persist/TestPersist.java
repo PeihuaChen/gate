@@ -152,7 +152,8 @@ public class TestPersist extends TestCase
 
   /** Test resource save and restore */
   public void testSaveRestore() throws Exception {
-    File storageDir = File.createTempFile("TestPersist__", "__StorageDir");
+    File storageDir = File.createTempFile("TestPersist__" + Gate.genSym() ,
+                                          "__StorageDir");
     storageDir.delete(); // get rid of the temp file
     storageDir.mkdir(); // create an empty dir of same name
 
@@ -226,7 +227,8 @@ public class TestPersist extends TestCase
     // create a temporary directory; because File.createTempFile actually
     // writes the bloody thing, we need to delete it from disk before calling
     // DataStore.create
-    File storageDir = File.createTempFile("TestPersist__", "__StorageDir");
+    File storageDir = File.createTempFile("TestPersist__" + Gate.genSym(),
+                                          "__StorageDir");
     storageDir.delete();
 
     // create and open a serial data store
@@ -273,7 +275,8 @@ public class TestPersist extends TestCase
     // create a temporary directory; because File.createTempFile actually
     // writes the bloody thing, we need to delete it from disk before calling
     // DataStore.create
-    File storageDir = File.createTempFile("TestPersist__", "__StorageDir");
+    File storageDir = File.createTempFile("TestPersist__" + Gate.genSym(),
+                                          "__StorageDir");
     storageDir.delete();
 
     // create and open a serial data store
@@ -362,7 +365,8 @@ public class TestPersist extends TestCase
     // create a temporary directory; because File.createTempFile actually
     // writes the bloody thing, we need to delete it from disk before calling
     // DataStore.create
-    File storageDir = File.createTempFile("TestPersist__", "__StorageDir");
+    File storageDir = File.createTempFile("TestPersist__" + Gate.genSym(),
+                                          "__StorageDir");
     if (DEBUG) Out.prln("Corpus stored to: " + storageDir.getAbsolutePath());
     storageDir.delete();
 
@@ -410,7 +414,8 @@ public class TestPersist extends TestCase
     // create a temporary directory; because File.createTempFile actually
     // writes the bloody thing, we need to delete it from disk before calling
     // DataStore.create
-    File storageDir = File.createTempFile("TestPersist__", "__StorageDir");
+    File storageDir = File.createTempFile("TestPersist__" + Gate.genSym(),
+                                          "__StorageDir");
     storageDir.delete();
 
     // create and open a serial data store
@@ -435,7 +440,8 @@ public class TestPersist extends TestCase
                dsr.size() == 1);
 
     // create and open another serial data store
-    storageDir = File.createTempFile("TestPersist__", "__StorageDir");
+    storageDir = File.createTempFile("TestPersist__" + Gate.genSym(),
+                                     "__StorageDir");
     storageDir.delete();
     DataStore sds2 = Factory.createDataStore(
       "gate.persist.SerialDataStore", storageDir.toURL().toString()
@@ -455,11 +461,14 @@ public class TestPersist extends TestCase
 
     // delete the datastores
     sds.close();
-    assertTrue("DSR has wrong number elements: " + dsr.size(), dsr.size() == 1);
+    assertTrue("DSR has wrong number elements (expected 1): " + dsr.size(),
+               dsr.size() == 1);
     sds.delete();
-    assertTrue("DSR has wrong number elements: " + dsr.size(), dsr.size() == 1);
+    assertTrue("DSR has wrong number elements (expected 1): " + dsr.size(),
+               dsr.size() == 1);
     sds2.delete();
-    assertTrue("DSR has wrong number elements: " + dsr.size(), dsr.size() == 0);
+    assertTrue("DSR has wrong number elements (expected 0): " + dsr.size(),
+               dsr.size() == 0);
 
   } // testDSR()
 
