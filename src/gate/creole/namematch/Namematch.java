@@ -131,10 +131,6 @@ public class Namematch extends AbstractProcessingResource
     AnnotationSet nameAnnotsUnknown;
     nameAnnotsUnknown = nameAllAnnots.get("Unknown", Factory.newFeatureMap());
 
-    // delete them from annotation set
-   // if (annotsUnknown!=null)
-     // nameAllAnnots.removeAll(annotsUnknown);
-
     // go through all the annotation types
     Iterator iterAnnotationTypes = annotationTypes.iterator();
     while (iterAnnotationTypes.hasNext()) {
@@ -250,7 +246,6 @@ public class Namematch extends AbstractProcessingResource
                 shortName = annotString1;
               }
 
-
               // apply name matching rules
               if (apply_rules_namematch(shortName,longName)) {
                 AnnotationMatches matchedAnnot2 = new AnnotationMatches();
@@ -281,7 +276,7 @@ public class Namematch extends AbstractProcessingResource
                       }
                     } // for
                   }
-                  // add the ids of annotation1 to annotation2
+                  // add annotation2 to the ids of annotation1
                   for (int l=0;l<matchedAnnot1.howMany();l++) {
                     String matchedByAnnot1Id = matchedAnnot1.matchedAnnotAt(l);
 
@@ -302,18 +297,7 @@ public class Namematch extends AbstractProcessingResource
 
                   }
 
-
-                  // last add annotation 2 to those of annot1
-                  // and annotation 1 to those of annot2
-                  /*if (nameAnnotsUnknown!=null)
-                  if ((!nameAnnotsUnknown.contains(annot1))||
-                      (!nameAnnotsUnknown.contains(annot2))||
-                      ((nameAnnotsUnknown.contains(annot1))&&
-                        (!annot1.getType().equals("Unknown")))||
-                      ((nameAnnotsUnknown.contains(annot2))&&
-                        (!annot2.getType().equals("Unknown")))
-                      ){
-                      */
+                // added the id annotation to the list of matches
                 if ((!nameAnnotsUnknown.contains(annot1))||
                   (!nameAnnotsUnknown.contains(annot2))) {
                   if (!matchedAnnot1.containsMatched(annot1_id.toString()))
@@ -338,8 +322,10 @@ public class Namematch extends AbstractProcessingResource
                     Long start = annot1.getStartNode().getOffset();
                     Long end = annot1.getEndNode().getOffset();
                     FeatureMap fm = annot1.getFeatures();
+                    // remove the "unknown" annotation
                     nameAnnotsUnknown.remove(annot1);
                     try {
+                      // add the annotation with the new type
                       nameAnnotsUnknown.add(id,start,end,annotationType,fm);
                     } catch (InvalidOffsetException ioe){ioe.printStackTrace();}
                   } else if ((nameAnnotsUnknown.contains(annot2))
@@ -348,8 +334,10 @@ public class Namematch extends AbstractProcessingResource
                     Long start = annot2.getStartNode().getOffset();
                     Long end = annot2.getEndNode().getOffset();
                     FeatureMap fm = annot2.getFeatures();
+                    // remove the "unknown" annotation
                     nameAnnotsUnknown.remove(annot2);
                     try {
+                      // add the annotation with the new type
                       nameAnnotsUnknown.add(id,start,end,annotationType,fm);
                     } catch (InvalidOffsetException ioe){ioe.printStackTrace();}
                   } // else if
@@ -382,7 +370,6 @@ public class Namematch extends AbstractProcessingResource
               };
               // delete them
             }// if
-
           }// if
 
           // append the "matches" attribute to existing annotations
@@ -407,10 +394,12 @@ public class Namematch extends AbstractProcessingResource
       }//if
     }//while
 
-      nameAnnotsUnknown = nameAnnotsUnknown.get("Unknown",
-                        Factory.newFeatureMap());
-      if (nameAnnotsUnknown!=null) {
-        nameAllAnnots.addAll(nameAnnotsUnknown);
+    // update the annotation set
+    // add the "unknown" annotations that are not matching
+    nameAnnotsUnknown = nameAnnotsUnknown.get("Unknown",
+                      Factory.newFeatureMap());
+    if (nameAnnotsUnknown!=null) {
+      nameAllAnnots.addAll(nameAnnotsUnknown);
     }
 
     // set the matches of the document
@@ -511,7 +500,7 @@ public class Namematch extends AbstractProcessingResource
             //verify whether it isn't already in matchesDocument
             Annotation newAnnot = namedAnnots.get(new Integer(value));
             String id = (String)booleanMatches.get(newAnnot);
-            if (id.compareTo("false")==0){
+            if (id.equals("false")){
               matchesAnnotation.add(new Integer(valueInt));
               booleanMatches.remove(newAnnot);
               booleanMatches.put(newAnnot,new String ("true"));
