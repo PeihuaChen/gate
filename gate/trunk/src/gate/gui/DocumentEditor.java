@@ -271,7 +271,8 @@ public class DocumentEditor extends AbstractVisualResource{
       tokeniser.setAnnotationSetName("TokeniserAS");
       tokeniser.execute();
 
-      DocumentEditor editor = new DocumentEditor();
+      DocumentEditor editor = (DocumentEditor)Factory.createResource(
+                            "gate.gui.DocumentEditor", Factory.newFeatureMap());
       frame.getContentPane().add(editor);
       frame.pack();
       frame.setVisible(true);
