@@ -31,7 +31,7 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
   private Set directories = new HashSet();
 
   /** Are we debugging? */
-  private static final boolean debug = true;
+  private static final boolean debug = false;
 
   /** Add a CREOLE directory URL. The directory is <B>not</B> registered. */
   public void addDirectory(URL directoryUrl) {
@@ -48,7 +48,7 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
     * at the URLs are parsed, and <CODE>CreoleData</CODE> objects added
     * to the register.
     */
-  public void registerDirectories() {
+  public void registerDirectories() throws GateException {
     Iterator iter = directories.iterator();
 
     while(iter.hasNext()) {
@@ -62,7 +62,10 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
     * to the register. If the directory URL has not yet been added it
     * is now added.
     */
-  public void registerDirectories(URL directoryUrl) {
+  public void registerDirectories(URL directoryUrl) throws GateException {
+    // add the URL (may overwrite an existing one; who cares)
+    directories.add(directoryUrl);
+
     // if the URL ends in creole.xml, pass it directly to the parser;
     // else add creole.xml and pass it
     String urlName = directoryUrl.toExternalForm().toLowerCase();
@@ -74,7 +77,7 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
           new URL(urlName + ((needSlash) ? "/creole.xml" : "creole.xml"));
       } catch(MalformedURLException e) {
         if(debug) System.out.println(e);
-//// process e
+        throw(new GateException(e));
       }
     }
 
@@ -100,13 +103,13 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
 
 	  } catch (IOException e) {
       if(debug) System.out.println(e);
-//// process e
+      throw(new GateException(e));
 	  } catch (SAXException e) {
       if(debug) System.out.println(e);
-//// process e
+      throw(new GateException(e));
 	  } catch (ParserConfigurationException e) {
       if(debug) System.out.println(e);
-//// process e
+      throw(new GateException(e));
 	  }
 
   } // registerDirectories
@@ -126,7 +129,7 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
 // strip xml header
 // dump into dirfile
 // put </CREOLE-DIRECTORY> into dirfile
-    return null;
+throw new LazyProgrammerException();
   } // createCreoleDirectoryFile
 
 } // class CreoleRegisterImpl
