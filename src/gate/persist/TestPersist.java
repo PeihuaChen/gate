@@ -497,8 +497,6 @@ public class TestPersist extends TestCase
 
     //read a document
     //use the one created in UC01
-//this.uc01_lrID = new Long(1041);
-//System.out.println("docid = " +this.uc01_lrID);
     LanguageResource lr = null;
 
     //1. open data storage
@@ -841,6 +839,38 @@ public class TestPersist extends TestCase
   /** Test the DS register. */
   public void testDB_UseCase102() throws Exception {
     //read a corpus
+
+    LanguageResource lr = null;
+
+    //1. open data storage
+    DatabaseDataStore ds = new OracleDataStore();
+    Assert.assertNotNull(ds);
+    ds.setStorageUrl(this.JDBC_URL);
+    ds.open();
+
+    //2. read LR
+    lr = ds.getLr(DBHelper.CORPUS_CLASS,uc101_lrID);
+
+    //3. check name
+    String name = lr.getName();
+    Assert.assertNotNull(name);
+    Assert.assertEquals(name,uc101_LR.getName());
+
+    //4. check features
+    FeatureMap fm = lr.getFeatures();
+    FeatureMap fmOrig = uc101_LR.getFeatures();
+
+    Assert.assertNotNull(fm);
+    Assert.assertNotNull(fmOrig);
+    Assert.assertTrue(fm.size() == fmOrig.size());
+
+    Iterator keys = fm.keySet().iterator();
+
+    while (keys.hasNext()) {
+      String currKey = (String)keys.next();
+      Assert.assertTrue(fmOrig.containsKey(currKey));
+      Assert.assertEquals(fm.get(currKey),fmOrig.get(currKey));
+    }
 
     if(DEBUG) {
       Err.prln("Use case 102 passed...");
