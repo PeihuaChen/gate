@@ -45,6 +45,7 @@ public class AccessControllerImpl
   private Connection  jdbcConn;
   private String      jdbcURL;
   private String      jdbcSchema;
+  protected int       dbType;
 
   private HashMap     usersByID;
   private HashMap     usersByName;
@@ -79,8 +80,11 @@ public class AccessControllerImpl
     this.refCnt = 0;
     this.jdbcURL = jdbcURL;
     this.jdbcSchema = DBHelper.getSchemaPrefix(this.jdbcURL);
+    this.dbType = DBHelper.getDatabaseType(this.jdbcURL);
 
     Assert.assertNotNull(this.jdbcSchema);
+    Assert.assertTrue(this.dbType == DBHelper.ORACLE_DB ||
+                      this.dbType == DBHelper.POSTGRES_DB);
 
     sessions = new HashMap();
     sessionLastUsed = new HashMap();
@@ -267,35 +271,74 @@ public class AccessControllerImpl
 
     //1. create group in DB
     CallableStatement stmt = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
     Long new_id;
 
-    try {
-      stmt = this.jdbcConn.prepareCall(
-              "{ call "+Gate.DB_OWNER+".security.create_group(?,?)} ");
-      stmt.setString(1,name);
-      //numbers generated from Oracle sequences are BIGINT
-      stmt.registerOutParameter(2,java.sql.Types.BIGINT);
-      stmt.execute();
-      new_id = new Long(stmt.getLong(2));
-    }
-    catch(SQLException sqle) {
+    //Oracle / Postgres ?
 
-      //check for more specifi exceptions
-      switch(sqle.getErrorCode()) {
+    if (this.dbType == DBHelper.ORACLE_DB) {
 
-        case DBHelper.X_ORACLE_DUPLICATE_GROUP_NAME:
-          throw new PersistenceException(
-                "can't create a group in DB, name is not unique: ["
+      try {
+        stmt = this.jdbcConn.prepareCall(
+                "{ call "+Gate.DB_OWNER+".security.create_group(?,?)} ");
+        stmt.setString(1,name);
+        //numbers generated from Oracle sequences are BIGINT
+        stmt.registerOutParameter(2,java.sql.Types.BIGINT);
+        stmt.execute();
+        new_id = new Long(stmt.getLong(2));
+      }
+      catch(SQLException sqle) {
+
+        //check for more specifi exceptions
+        switch(sqle.getErrorCode()) {
+
+          case DBHelper.X_ORACLE_DUPLICATE_GROUP_NAME:
+            throw new PersistenceException(
+                  "can't create a group in DB, name is not unique: ["
                   + sqle.getMessage()+"]");
 
-        default:
-          throw new PersistenceException(
+          default:
+            throw new PersistenceException(
                 "can't create a group in DB: ["+ sqle.getMessage()+"]");
+        }
+      }
+      finally {
+        DBHelper.cleanup(stmt);
+      }
+    }
+    else if (this.dbType == DBHelper.POSTGRES_DB) {
+      try {
+        String sql = "select security_create_group(?) ";
+        pstmt = this.jdbcConn.prepareStatement(sql);
+        pstmt.setString(1,name);
+        pstmt.execute();
+        rs = pstmt.getResultSet();
+        new_id = new Long(rs.getLong(1));
+      }
+      catch(SQLException sqle) {
+
+        //check for more specifi exceptions
+        switch(sqle.getErrorCode()) {
+
+          case DBHelper.X_ORACLE_DUPLICATE_GROUP_NAME:
+            throw new PersistenceException(
+                  "can't create a group in DB, name is not unique: ["
+                  + sqle.getMessage()+"]");
+
+          default:
+            throw new PersistenceException(
+                "can't create a group in DB: ["+ sqle.getMessage()+"]");
+        }
+      }
+      finally {
+        DBHelper.cleanup(rs);
+        DBHelper.cleanup(pstmt);
       }
 
     }
-    finally {
-      DBHelper.cleanup(stmt);
+    else {
+      throw new IllegalArgumentException();
     }
 
     //2. create GroupImpl for the new group and
@@ -342,30 +385,67 @@ public class AccessControllerImpl
 
     //3. delete in DB
     CallableStatement stmt = null;
+    PreparedStatement pstmt = null;
 
-    try {
-      stmt = this.jdbcConn.prepareCall(
-                "{ call "+Gate.DB_OWNER+".security.delete_group(?) } ");
-      stmt.setLong(1,grp.getID().longValue());
-      stmt.execute();
-    }
-    catch(SQLException sqle) {
-      //check for more specific exceptions
-      switch(sqle.getErrorCode()) {
+    //Oracle /Postgres ?
+    if (this.dbType == DBHelper.ORACLE_DB) {
 
-        case DBHelper.X_ORACLE_GROUP_OWNS_RESOURCES:
-          throw new PersistenceException(
-                "can't delete a group from DB, the group owns LR(s): ["
-                  + sqle.getMessage()+"]");
+      try {
+        stmt = this.jdbcConn.prepareCall(
+                  "{ call "+Gate.DB_OWNER+".security.delete_group(?) } ");
+        stmt.setLong(1,grp.getID().longValue());
+        stmt.execute();
+      }
+      catch(SQLException sqle) {
+        //check for more specific exceptions
+        switch(sqle.getErrorCode()) {
 
-        default:
-          throw new PersistenceException(
-                "can't delete a group from DB: ["+ sqle.getMessage()+"]");
+          case DBHelper.X_ORACLE_GROUP_OWNS_RESOURCES:
+            throw new PersistenceException(
+                  "can't delete a group from DB, the group owns LR(s): ["
+                    + sqle.getMessage()+"]");
+
+          default:
+            throw new PersistenceException(
+                  "can't delete a group from DB: ["+ sqle.getMessage()+"]");
+        }
+      }
+      finally {
+        DBHelper.cleanup(stmt);
       }
     }
-    finally {
-      DBHelper.cleanup(stmt);
+
+    else if (this.dbType == DBHelper.POSTGRES_DB) {
+
+      try {
+        String sql = "select security_delete_group(?)";
+        pstmt = this.jdbcConn.prepareStatement(sql);
+        pstmt.setLong(1,grp.getID().longValue());
+        pstmt.execute();
+      }
+      catch(SQLException sqle) {
+        //check for more specific exceptions
+        switch(sqle.getErrorCode()) {
+
+          case DBHelper.X_ORACLE_GROUP_OWNS_RESOURCES:
+            throw new PersistenceException(
+                  "can't delete a group from DB, the group owns LR(s): ["
+                    + sqle.getMessage()+"]");
+
+          default:
+            throw new PersistenceException(
+                  "can't delete a group from DB: ["+ sqle.getMessage()+"]");
+        }
+      }
+      finally {
+        DBHelper.cleanup(pstmt);
+      }
+
     }
+    else {
+      throw new IllegalArgumentException();
+    }
+
 
     //4. delete from collections
     this.groupsByID.remove(grp.getID());
@@ -423,33 +503,79 @@ public class AccessControllerImpl
 
     //1. create user in DB
     CallableStatement stmt = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+
     Long new_id;
 
-    try {
-      stmt = this.jdbcConn.prepareCall(
-                "{ call "+Gate.DB_OWNER+".security.create_user(?,?,?)} ");
-      stmt.setString(1,name);
-      stmt.setString(2,passwd);
-      //numbers generated from Oracle sequences are BIGINT
-      stmt.registerOutParameter(3,java.sql.Types.BIGINT);
-      stmt.execute();
-      new_id = new Long(stmt.getLong(3));
-    }
-    catch(SQLException sqle) {
-      //check for more specific exceptions
-      switch(sqle.getErrorCode()) {
+    if (this.dbType == DBHelper.ORACLE_DB) {
 
-        case DBHelper.X_ORACLE_DUPLICATE_USER_NAME:
-          throw new PersistenceException(
-                "can't create a user in DB, name is not unique: ["
-                  + sqle.getMessage()+"]");
-        default:
-          throw new PersistenceException(
-                "can't create a user in DB: ["+ sqle.getMessage()+"]");
+      try {
+        stmt = this.jdbcConn.prepareCall(
+                  "{ call "+Gate.DB_OWNER+".security.create_user(?,?,?)} ");
+        stmt.setString(1,name);
+        stmt.setString(2,passwd);
+        //numbers generated from Oracle sequences are BIGINT
+        stmt.registerOutParameter(3,java.sql.Types.BIGINT);
+        stmt.execute();
+        new_id = new Long(stmt.getLong(3));
+      }
+      catch(SQLException sqle) {
+        //check for more specific exceptions
+        switch(sqle.getErrorCode()) {
+
+          case DBHelper.X_ORACLE_DUPLICATE_USER_NAME:
+            throw new PersistenceException(
+                  "can't create a user in DB, name is not unique: ["
+                    + sqle.getMessage()+"]");
+          default:
+            throw new PersistenceException(
+                  "can't create a user in DB: ["+ sqle.getMessage()+"]");
+        }
+      }
+      finally {
+        DBHelper.cleanup(stmt);
       }
     }
-    finally {
-      DBHelper.cleanup(stmt);
+
+    else if (this.dbType == DBHelper.POSTGRES_DB) {
+
+      try {
+        String sql = "select security_create_user(?,?) ";
+        pstmt = this.jdbcConn.prepareStatement(sql);
+        pstmt.setString(1,name);
+        pstmt.setString(2,passwd);
+        pstmt.execute();
+        rs = pstmt.getResultSet();
+
+        if (false == rs.next()) {
+          throw new PersistenceException("empty resultset");
+        }
+
+        new_id = new Long(rs.getLong(1));
+      }
+      catch(SQLException sqle) {
+        //check for more specific exceptions
+        switch(sqle.getErrorCode()) {
+
+          case DBHelper.X_ORACLE_DUPLICATE_USER_NAME:
+            throw new PersistenceException(
+                  "can't create a user in DB, name is not unique: ["
+                    + sqle.getMessage()+"]");
+          default:
+            throw new PersistenceException(
+                  "can't create a user in DB: ["+ sqle.getMessage()+"]");
+        }
+      }
+      finally {
+        DBHelper.cleanup(rs);
+        DBHelper.cleanup(pstmt);
+      }
+
+    }
+
+    else {
+      throw new IllegalArgumentException();
     }
 
     //2. create UserImpl for the new user
@@ -482,29 +608,64 @@ public class AccessControllerImpl
     }
 
     //3. delete in DB
-    CallableStatement stmt = null;
+    CallableStatement cstmt = null;
+    PreparedStatement pstmt = null;
 
-    try {
-      stmt = this.jdbcConn.prepareCall(
-                  "{ call "+Gate.DB_OWNER+".security.delete_user(?) } ");
-      stmt.setLong(1,usr.getID().longValue());
-      stmt.execute();
-    }
-    catch(SQLException sqle) {
-      switch(sqle.getErrorCode()) {
+    if (this.dbType == DBHelper.ORACLE_DB) {
 
-        case DBHelper.X_ORACLE_USER_OWNS_RESOURCES:
-          throw new PersistenceException(
-                "can't delete user from DB, the user owns LR(s): ["
-                  + sqle.getMessage()+"]");
-        default:
-          throw new PersistenceException(
-                "can't delete user from DB: ["+ sqle.getMessage()+"]");
+      try {
+        cstmt = this.jdbcConn.prepareCall(
+                    "{ call "+Gate.DB_OWNER+".security.delete_user(?) } ");
+        cstmt.setLong(1,usr.getID().longValue());
+        cstmt.execute();
+      }
+      catch(SQLException sqle) {
+        switch(sqle.getErrorCode()) {
+
+          case DBHelper.X_ORACLE_USER_OWNS_RESOURCES:
+            throw new PersistenceException(
+                  "can't delete user from DB, the user owns LR(s): ["
+                    + sqle.getMessage()+"]");
+          default:
+            throw new PersistenceException(
+                  "can't delete user from DB: ["+ sqle.getMessage()+"]");
+        }
+      }
+      finally {
+        DBHelper.cleanup(cstmt);
       }
     }
-    finally {
-      DBHelper.cleanup(stmt);
+
+    else if (this.dbType == DBHelper.POSTGRES_DB) {
+
+      try {
+        String sql = "select security_delete_user(?) ";
+        pstmt = this.jdbcConn.prepareStatement(sql);
+        pstmt.setLong(1,usr.getID().longValue());
+        pstmt.execute();
+      }
+      catch(SQLException sqle) {
+        switch(sqle.getErrorCode()) {
+
+          case DBHelper.X_ORACLE_USER_OWNS_RESOURCES:
+            throw new PersistenceException(
+                  "can't delete user from DB, the user owns LR(s): ["
+                    + sqle.getMessage()+"]");
+          default:
+            throw new PersistenceException(
+                  "can't delete user from DB: ["+ sqle.getMessage()+"]");
+        }
+      }
+      finally {
+        DBHelper.cleanup(pstmt);
+      }
+
     }
+
+    else {
+      throw new IllegalArgumentException();
+    }
+
 
     //4. delete from collections
     this.usersByID.remove(usr.getID());
@@ -574,37 +735,83 @@ public class AccessControllerImpl
     }
 
     //2. check user/pass in DB
-    CallableStatement stmt = null;
+    CallableStatement cstmt = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+
     boolean isPrivilegedUser = false;
 
-    try {
-      stmt = this.jdbcConn.prepareCall(
-                "{ call "+Gate.DB_OWNER+".security.login(?,?,?,?)} ");
-      stmt.setString(1,usr_name);
-      stmt.setString(2,passwd);
-      stmt.setLong(3,prefGroupID.longValue());
-      stmt.registerOutParameter(4,java.sql.Types.NUMERIC);
-      stmt.execute();
-      isPrivilegedUser = (stmt.getInt(4) == DBHelper.FALSE ? false : true );
-    }
-    catch(SQLException sqle) {
-      switch(sqle.getErrorCode())
-      {
-        case DBHelper.X_ORACLE_INVALID_USER_NAME :
-          throw new SecurityException("Login failed: incorrect user");
-        case DBHelper.X_ORACLE_INVALID_USER_PASS :
-          throw new SecurityException("Login failed: incorrect password");
-        case DBHelper.X_ORACLE_INVALID_USER_GROUP :
-          throw new SecurityException("Login failed: incorrect group");
-        default:
-          throw new PersistenceException("can't login user, DB error is: ["+
-                                          sqle.getMessage()+"]");
+    if (this.dbType == DBHelper.ORACLE_DB) {
+
+      try {
+        cstmt = this.jdbcConn.prepareCall(
+                  "{ call "+Gate.DB_OWNER+".security.login(?,?,?,?)} ");
+        cstmt.setString(1,usr_name);
+        cstmt.setString(2,passwd);
+        cstmt.setLong(3,prefGroupID.longValue());
+        cstmt.registerOutParameter(4,java.sql.Types.NUMERIC);
+        cstmt.execute();
+        isPrivilegedUser = (cstmt.getInt(4) == DBHelper.FALSE ? false : true );
+      }
+      catch(SQLException sqle) {
+        switch(sqle.getErrorCode())
+        {
+          case DBHelper.X_ORACLE_INVALID_USER_NAME :
+            throw new SecurityException("Login failed: incorrect user");
+          case DBHelper.X_ORACLE_INVALID_USER_PASS :
+            throw new SecurityException("Login failed: incorrect password");
+          case DBHelper.X_ORACLE_INVALID_USER_GROUP :
+            throw new SecurityException("Login failed: incorrect group");
+          default:
+            throw new PersistenceException("can't login user, DB error is: ["+
+                                            sqle.getMessage()+"]");
+        }
+      }
+      finally {
+        DBHelper.cleanup(cstmt);
       }
     }
-    finally {
-      DBHelper.cleanup(stmt);
+
+    else if (this.dbType == DBHelper.POSTGRES_DB) {
+
+      try {
+        String sql = "select security_login(?,?,?) ";
+        pstmt = this.jdbcConn.prepareStatement(sql);
+        pstmt.setString(1,usr_name);
+        pstmt.setString(2,passwd);
+        pstmt.setLong(3,prefGroupID.longValue());
+        pstmt.execute();
+        rs = pstmt.getResultSet();
+
+        if (false == rs.next()) {
+          throw new PersistenceException("empty resultset");
+        }
+
+        isPrivilegedUser = rs.getBoolean(1);
+      }
+      catch(SQLException sqle) {
+        switch(sqle.getErrorCode())
+        {
+          case DBHelper.X_ORACLE_INVALID_USER_NAME :
+            throw new SecurityException("Login failed: incorrect user");
+          case DBHelper.X_ORACLE_INVALID_USER_PASS :
+            throw new SecurityException("Login failed: incorrect password");
+          case DBHelper.X_ORACLE_INVALID_USER_GROUP :
+            throw new SecurityException("Login failed: incorrect group");
+          default:
+            throw new PersistenceException("can't login user, DB error is: ["+
+                                            sqle.getMessage()+"]");
+        }
+      }
+      finally {
+        DBHelper.cleanup(rs);
+        DBHelper.cleanup(pstmt);
+      }
     }
 
+    else {
+      throw new IllegalArgumentException();
+    }
 
     //3. create a Session and set User/Group
     Long sessionID = createSessionID();
@@ -710,7 +917,7 @@ public class AccessControllerImpl
 
       //1.1 read groups
       sql = " SELECT grp_name "+
-            " FROM   "+Gate.DB_OWNER+".t_group "+
+            " FROM   "+this.jdbcSchema+"t_group "+
             " ORDER BY grp_name ASC";
       rs = stmt.executeQuery(sql);
 
@@ -748,7 +955,7 @@ public class AccessControllerImpl
 
       //1.1 read groups
       sql = " SELECT usr_login "+
-            " FROM   "+Gate.DB_OWNER+".t_user "+
+            " FROM   "+this.jdbcSchema+"t_user "+
             " ORDER BY usr_login DESC";
       rs = stmt.executeQuery(sql);
 
@@ -801,25 +1008,61 @@ public class AccessControllerImpl
 
     //2. check DB
     CallableStatement stmt = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
 
-    try {
-      stmt = this.jdbcConn.prepareCall(
-                "{ ? = call "+Gate.DB_OWNER+".security.can_delete_group(?) }");
-      stmt.registerOutParameter(1,java.sql.Types.INTEGER);
-      stmt.setLong(2,grp.getID().longValue());
-      stmt.execute();
-      boolean res = stmt.getBoolean(1);
+    if (this.dbType == DBHelper.ORACLE_DB) {
 
-      return res;
-    }
-    catch(SQLException sqle) {
-      throw new PersistenceException("can't perform document checks, DB error is: ["+
-                                          sqle.getMessage()+"]");
-    }
-    finally {
-      DBHelper.cleanup(stmt);
+      try {
+        stmt = this.jdbcConn.prepareCall(
+                  "{ ? = call "+Gate.DB_OWNER+".security.can_delete_group(?) }");
+        stmt.registerOutParameter(1,java.sql.Types.INTEGER);
+        stmt.setLong(2,grp.getID().longValue());
+        stmt.execute();
+        boolean res = stmt.getBoolean(1);
+
+        return res;
+      }
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't perform document checks, DB error is: ["+
+                                            sqle.getMessage()+"]");
+      }
+      finally {
+        DBHelper.cleanup(stmt);
+      }
     }
 
+    else if (this.dbType == DBHelper.POSTGRES_DB) {
+
+      try {
+        String sql = "select security_can_delete_group(?)";
+        pstmt = this.jdbcConn.prepareCall(sql);
+        pstmt.setLong(1,grp.getID().longValue());
+        pstmt.execute();
+        rs = pstmt.getResultSet();
+
+        if (false == rs.next()) {
+          throw new PersistenceException("empty resultset");
+        }
+
+        boolean res = rs.getBoolean(1);
+
+        return res;
+      }
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't perform document checks, DB error is: ["+
+                                            sqle.getMessage()+"]");
+      }
+      finally {
+        DBHelper.cleanup(rs);
+        DBHelper.cleanup(pstmt);
+      }
+
+    }
+
+    else {
+      throw new IllegalArgumentException();
+    }
   }
 
 
@@ -833,24 +1076,55 @@ public class AccessControllerImpl
 
     //2. check DB
     CallableStatement stmt = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
 
-    try {
-      stmt = this.jdbcConn.prepareCall(
-                "{ ? = call "+Gate.DB_OWNER+".security.can_delete_user(?) }");
+    if (this.dbType == DBHelper.ORACLE_DB) {
 
-      stmt.registerOutParameter(1,java.sql.Types.INTEGER);
-      stmt.setLong(2,usr.getID().longValue());
-      stmt.execute();
-      boolean res = stmt.getBoolean(1);
+      try {
+        stmt = this.jdbcConn.prepareCall(
+                  "{ ? = call "+Gate.DB_OWNER+".security.can_delete_user(?) }");
 
-      return res;
+        stmt.registerOutParameter(1,java.sql.Types.INTEGER);
+        stmt.setLong(2,usr.getID().longValue());
+        stmt.execute();
+        boolean res = stmt.getBoolean(1);
+
+        return res;
+      }
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't perform document checks, DB error is: ["+
+                                            sqle.getMessage()+"]");
+      }
+      finally {
+        DBHelper.cleanup(stmt);
+      }
     }
-    catch(SQLException sqle) {
-      throw new PersistenceException("can't perform document checks, DB error is: ["+
-                                          sqle.getMessage()+"]");
+
+    else if (this.dbType == DBHelper.POSTGRES_DB) {
+
+      try {
+        String sql = "select security_can_delete_user(?) ";
+        pstmt = this.jdbcConn.prepareCall(sql);
+        pstmt.setLong(1,usr.getID().longValue());
+        pstmt.execute();
+        boolean res = rs.getBoolean(1);
+
+        return res;
+      }
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't perform document checks, DB error is: ["+
+                                            sqle.getMessage()+"]");
+      }
+      finally {
+        DBHelper.cleanup(rs);
+        DBHelper.cleanup(pstmt);
+      }
+
     }
-    finally {
-      DBHelper.cleanup(stmt);
+
+    else {
+      throw new IllegalArgumentException();
     }
 
   }
