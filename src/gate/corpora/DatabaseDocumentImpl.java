@@ -81,13 +81,13 @@ public class DatabaseDocumentImpl extends DocumentImpl {
     ResultSet rs = null;
 
     try {
-      String sql = " select t1.dc_encoding_id, " +
-                   "        t1.dc_character_content_id, " +
-                   "        t1.dc_binary_content_id, " +
-                   "        t1.dc_content_type " +
-                   " from  "+Gate.DB_OWNER+".t_document_content t1, " +
+      String sql = " select v1.enc_name, " +
+                   "        v1.dc_character_content_id, " +
+                   "        v1.dc_binary_content_id, " +
+                   "        v1.dc_content_type " +
+                   " from  "+Gate.DB_OWNER+".v_doc_content v1, " +
                    "       "+Gate.DB_OWNER+".t_document t2, " +
-                   " where  t2.doc_content_id = t1.dc_id " +
+                   " where  t2.doc_content_id = v1.dc_id " +
                    "        and t2.doc_lr_id = ? ";
 
       pstmt = this.jdbcConn.prepareStatement(sql);
@@ -107,7 +107,9 @@ public class DatabaseDocumentImpl extends DocumentImpl {
       StringBuffer buff = new StringBuffer();
       OracleDataStore.readCLOB(clb,buff);
 
+      //2. set data members that were not previously initialized
       this.content = new DocumentContentImpl(buff.toString());
+      this.encoding = encoding;
     }
     catch(SQLException sqle) {
       throw new SynchronisationException("can't read content from DB: ["+ sqle.getMessage()+"]");
@@ -121,10 +123,26 @@ public class DatabaseDocumentImpl extends DocumentImpl {
         DBHelper.cleanup(pstmt);
       }
       catch(PersistenceException pe) {
-        throw new SynchronisationException("can't read content from DB: ["+ pe.getMessage()+"]");
+        throw new SynchronisationException("JDBC error: ["+ pe.getMessage()+"]");
       }
     }
 
+  }
+
+
+  /** Get the encoding of the document content source */
+  public String getEncoding() {
+
+    //1. assert that no one is reading from DB now
+    synchronized(this.contentLock) {
+      if (false == this.isContentRead) {
+        _readContent();
+
+        this.isContentRead = true;
+      }
+    }
+
+    return super.getEncoding();
   }
 
 }
