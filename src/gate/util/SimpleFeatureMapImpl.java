@@ -47,7 +47,20 @@ public class SimpleFeatureMapImpl
  /** Freeze the serialization UID. */
   static final long serialVersionUID = -2747241616127229116L;
 
-  /** Test if <b>this</b> featureMap includes all features from aFeatureMap
+  /** 
+   * Test if <b>this</b> featureMap includes all features from aFeatureMap
+   * 
+   * However, if aFeatureMap contains a feature whose value is equal to 
+   * gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME (which is normally 
+   * "class"), then GATE will attempt to match that feature using an ontology
+   * which it will try to retreive from a feature in both the feature map 
+   * through which this method is called and in aFeatureMap. If these do not return 
+   * identical ontologies, or if
+   * either feature map does not contain an ontology, then 
+   * matching will fail, and this method will return false. In summary, 
+   * this method will not work normally when aFeatureMap contains a feature 
+   * with the name "class".
+   * 
     * @param aFeatureMap object which will be included or not in
     * <b>this</b> FeatureMap obj.If this param is null then it will return true.
     * @return <code>true</code> if aFeatureMap is incuded in <b>this</b> obj.
@@ -188,6 +201,18 @@ public class SimpleFeatureMapImpl
 
   /** Tests if <b>this</b> featureMap object includes aFeatureMap but only
     * for the those features present in the aFeatureNamesSet.
+    * 
+    * However, if aFeatureMap contains a feature whose value is equal to 
+   * gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME (which is normally 
+   * "class"), then GATE will attempt to match that feature using an ontology
+   * which it will try to retreive from a feature in both the feature map 
+   * through which this method is called and in aFeatureMap. If these do not return 
+   * identical ontologies, or if
+   * either feature map does not contain an ontology, then 
+   * matching will fail, and this method will return false. In summary, 
+   * this method will not work normally when aFeatureMap contains a feature 
+   * with the name "class" if that feature is also in aFeatureNamesSet.
+    * 
     * @param aFeatureMap which will be included or not in <b>this</b>
     * FeatureMap obj.If this param is null then it will return true.
     * @param aFeatureNamesSet is a set of strings representing the names of the

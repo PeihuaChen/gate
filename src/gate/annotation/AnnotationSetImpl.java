@@ -312,7 +312,30 @@ public class AnnotationSetImpl
     return resultSet;
   } // get(types)
 
-  /** Select annotations by type and features */
+  /** 
+   * Select annotations by type and features 
+   * 
+   * This will return an annotation set containing just those annotations of a
+   * particular type (i.e. with a particular name) and which have features with 
+   * specific names and values. (It will also return annotations that have features
+   * besides those specified, but it will not return any annotations that do not
+   * have all the specified feature-value pairs.)
+   * 
+   * However, if constraints contains a feature whose value is equal to 
+   * gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME (which is normally 
+   * "class"), then GATE will attempt to match that feature using an ontology
+   * which it will try to retreive from a feature on the both the annotation
+   * and in constraints. If these do not return identical ontologies, or if
+   * either the annotation or constraints does not contain an ontology, then 
+   * matching will fail, and the annotation will not be added. In summary, 
+   * this method will not work normally for features with the name "class".
+   * 
+   * @param type The name of the annotations to return.
+   * @param constraints A feature map containing all of the feature value pairs
+   * that the annotation must have in order for them to be returned.
+   * @return An annotation set containing only those annotations with the given
+   * name and which have the specified set of feature-value pairs.
+   */
   public AnnotationSet get(String type, FeatureMap constraints) {
     if (annotsByType == null)
       indexByType();
