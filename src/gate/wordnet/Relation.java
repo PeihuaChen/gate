@@ -32,7 +32,7 @@ public interface Relation {
   public static final int REL_SUBSTANCE_HOLONYM = 10005;
   public static final int REL_PART_HOLONYM = 10006;
   public static final int REL_MEMBER_MERONYM = 10007;
-  public static final int REL_SUNSTANCE_MERONYM = 10008;
+  public static final int REL_SUBSTANCE_MERONYM = 10008;
   public static final int REL_PART_MERONYM = 10009;
   public static final int REL_ATTRIBUTE = 10010;
   public static final int REL_ENTAILMENT = 10011;
