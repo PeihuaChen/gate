@@ -98,7 +98,7 @@ classes.jar: classes
 resources:
 	cd ../src/gate && cp -R resources ../../classes/gate
 	cd ../classes/gate/resources && rm -r `find . -name CVS -print`
-	cp version.txt ../classes/gate/resources
+	cp version.txt build.txt ../classes/gate/resources
 
 # refresh the jar with all the class files
 jarupdate:
