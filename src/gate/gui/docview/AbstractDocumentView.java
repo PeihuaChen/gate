@@ -81,6 +81,10 @@ public abstract class AbstractDocumentView extends AbstractResource
     this.document = (Document)target;
   }
   
+  public Document getDocument(){
+    return document;
+  }
+  
   /**
    * Stores the owner of this view into the {@link #owner} field.
    */
