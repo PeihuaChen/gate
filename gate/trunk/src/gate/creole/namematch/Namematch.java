@@ -81,6 +81,9 @@ public class Namematch extends AbstractProcessingResource
     annotationTypes.add("Organization");
     annotationTypes.add("Person");
     annotationTypes.add("Location");
+    try {
+      createLists();
+    } catch (IOException ioe) {ioe.printStackTrace();}
     return this;
   } // init()
 
@@ -100,11 +103,9 @@ public class Namematch extends AbstractProcessingResource
 
     // creates the lists from external files and the cdg list is created
     // both the external list and lookup
-    try {
-      createLists();
-      if (!extLists.booleanValue())
-        buildTables(document);
-    } catch (IOException ioe) {ioe.printStackTrace();}
+    if (!extLists.booleanValue()){
+      buildTables(document);
+    }
 
     // get the annotations from document
     AnnotationSet nameAllAnnots;
@@ -478,19 +479,19 @@ public class Namematch extends AbstractProcessingResource
         if (index != -1){
           String  expr = lineRead.substring(0,index);
           String code = lineRead.substring(index+1,lineRead.length());
-          if (nameList.compareTo("alias")==0 )
+          if (nameList.equals("alias"))
                             alias.put(expr, code);
           else
-          if (nameList.compareTo("def_art")== 0)
+          if (nameList.equals("def_art"))
                             def_art.put(expr, code);
           else
-          if (nameList.compareTo("prepos")== 0)
+          if (nameList.equals("prepos"))
                             prepos.put(expr, code);
           else
-          if (nameList.compareTo("connector")== 0)
+          if (nameList.equals("connector"))
                             connector.put(expr, code);
           else
-          if (nameList.compareTo("spur_match")== 0)
+          if (nameList.equals("spur_match"))
                             spur_match.put(expr, code);
 
       }// if
