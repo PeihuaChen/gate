@@ -18,6 +18,7 @@ import java.awt.Component;
 import java.awt.AWTEvent;
 import java.awt.AWTException;
 import java.awt.Font;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.BorderLayout;
 import java.awt.Point;
@@ -56,7 +57,7 @@ public class MainFrame extends JFrame {
   DefaultMutableTreeNode prRoot;
   DefaultMutableTreeNode dsRoot;
 
-
+  Splash splash;
   JTextArea logArea;
   JScrollPane logScroll;
   JComboBox projectCombo;
@@ -76,6 +77,7 @@ public class MainFrame extends JFrame {
   NewPRAction newPRAction;
   NewDSAction newDSAction;
   OpenDSAction openDSAction;
+  HelpAboutAction helpAboutAction;
 
   /**Construct the frame*/
   public MainFrame() {
@@ -93,6 +95,7 @@ public class MainFrame extends JFrame {
     newPRAction = new NewPRAction();
     newDSAction = new NewDSAction();
     openDSAction = new OpenDSAction();
+    helpAboutAction = new HelpAboutAction();
   }
 
   protected void initGuiComponents(){
@@ -100,7 +103,7 @@ public class MainFrame extends JFrame {
 
     this.getContentPane().setLayout(new BorderLayout());
     this.setSize(new Dimension(800, 600));
-    this.setTitle("Gate 2.0");
+    this.setTitle(Main.name + " " + Main.version);
 
 
     ResourceHandle handle = new ResourceHandle("<No Projects>", null);
@@ -186,6 +189,7 @@ public class MainFrame extends JFrame {
     menuBar.add(editMenu);
 
     JMenu helpMenu = new JMenu("Help");
+    helpMenu.add(helpAboutAction);
     menuBar.add(helpMenu);
 
     this.setJMenuBar(menuBar);
@@ -203,6 +207,32 @@ public class MainFrame extends JFrame {
     newResourceDialog = new NewResourceDialog(parentFrame,
                                               "Resource parameters",
                                               true);
+
+    //build the splash
+    JPanel splashBox = new JPanel();
+    splashBox.setLayout(new BoxLayout(splashBox, BoxLayout.Y_AXIS));
+    splashBox.setBackground(Color.white);
+    JLabel gifLbl = new JLabel(new ImageIcon(MainFrame.class.getResource(
+        "/gate/resources/img/gateSplash.gif")));
+    gifLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+    splashBox.add(gifLbl);
+
+    JLabel verLbl = new JLabel("<HTML>Version <B>" + Main.version + "</B>" +
+                                ", build <B>" + Main.build + "</B></HTML>");
+    splashBox.add(verLbl);
+
+    JButton okBtn = new JButton("OK");
+    okBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        splash.hide();
+      }
+    });
+    okBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+    okBtn.setBackground(Color.white);
+    splashBox.add(Box.createVerticalStrut(10));
+    splashBox.add(okBtn);
+    splashBox.add(Box.createVerticalStrut(10));
+    splash = new Splash(this, splashBox);
   }
 
   protected void initListeners(){
@@ -324,16 +354,7 @@ public class MainFrame extends JFrame {
   public void jMenuFileExit_actionPerformed(ActionEvent e) {
     System.exit(0);
   }
-  /**Help | About action performed*/
-  public void jMenuHelpAbout_actionPerformed(ActionEvent e) {
-    MainFrame_AboutBox dlg = new MainFrame_AboutBox(this);
-    Dimension dlgSize = dlg.getPreferredSize();
-    Dimension frmSize = getSize();
-    Point loc = getLocation();
-    dlg.setLocation((frmSize.width - dlgSize.width) / 2 + loc.x, (frmSize.height - dlgSize.height) / 2 + loc.y);
-    dlg.setModal(true);
-    dlg.show();
-  }
+
   /**Overridden so we can exit when window is closed*/
   protected void processWindowEvent(WindowEvent e) {
     super.processWindowEvent(e);
@@ -770,6 +791,15 @@ public class MainFrame extends JFrame {
     }
   }//class OpenDSAction extends AbstractAction
 
+  class HelpAboutAction extends AbstractAction{
+    public HelpAboutAction(){
+      super("About");
+    }
+
+    public void actionPerformed(ActionEvent e){
+      splash.show();
+    }
+  }
 
   protected class ResourceTreeCellRenderer extends DefaultTreeCellRenderer{
     public ResourceTreeCellRenderer(){
