@@ -163,8 +163,8 @@ public class SerialDatastoreViewer extends JTree
             fireStatusChanged("Loading " + entry.name);
             fireProgressChanged(0);
             FeatureMap params = Factory.newFeatureMap();
-            params.put("DataStore", datastore);
-            params.put("DataStoreInstanceId", entry.id);
+            params.put(DataStore.DATASTORE_FEATURE_NAME, datastore);
+            params.put(DataStore.LR_ID_FEATURE_NAME, entry.id);
             FeatureMap features = Factory.newFeatureMap();
             Gate.setName(features, entry.name);
             Resource res = Factory.createResource(entry.type, params, features);
