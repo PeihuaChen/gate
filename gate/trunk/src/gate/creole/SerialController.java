@@ -1,16 +1,16 @@
 /*
- *  SerialController.java
- *
- *  Copyright (c) 1998-2001, The University of Sheffield.
- *
- *  This file is part of GATE (see http://gate.ac.uk/), and is free
- *  software, licenced under the GNU Library General Public License,
- *  Version 2, June 1991 (in the distribution as file licence.html,
- *  and also available at http://gate.ac.uk/gate/licence.html).
- *
- *  Hamish Cunningham, 9/Nov/2000
- *
- *  $Id$
+*  SerialController.java
+*
+*  Copyright (c) 1998-2001, The University of Sheffield.
+*
+*  This file is part of GATE (see http://gate.ac.uk/), and is free
+*  software, licenced under the GNU Library General Public License,
+*  Version 2, June 1991 (in the distribution as file licence.html,
+*  and also available at http://gate.ac.uk/gate/licence.html).
+*
+*  Hamish Cunningham, 9/Nov/2000
+*
+*  $Id$
  */
 
 package gate.creole;
@@ -22,15 +22,26 @@ import gate.*;
 import gate.util.*;
 import gate.creole.*;
 import gate.event.*;
+import gate.util.profile.*;
 
 /** Execute a list of PRs serially.
-  */
+ */
 public class SerialController extends AbstractController
-                              implements CreoleListener{
+    implements CreoleListener{
+  private final static boolean DEBUG = false;
+
+  /** Profiler to track PR execute time */
+  protected Profiler prof;
 
   public SerialController(){
     prList = Collections.synchronizedList(new ArrayList());
     sListener = new InternalStatusListener();
+
+    if(DEBUG) {
+      prof = new Profiler();
+      prof.enableGCCalling(false);
+      prof.printToSystemOut(true);
+    }
   }
 
   /**
@@ -85,31 +96,44 @@ public class SerialController extends AbstractController
       badPRs = getOffendingPocessingResources();
     }catch(ResourceInstantiationException rie){
       throw new ExecutionException(
-        "Could not check runtime parameters for the processing resources:\n" +
-        rie.toString());
+          "Could not check runtime parameters for the processing resources:\n" +
+          rie.toString());
     }
     if(badPRs != null && !badPRs.isEmpty()){
       throw new ExecutionException(
-        "Some of the processing resources in this controller have unset " +
-        "runtime parameters:\n" +
-        badPRs.toString());
+          "Some of the processing resources in this controller have unset " +
+          "runtime parameters:\n" +
+          badPRs.toString());
     }
   }
-
 
   /** Run the Processing Resources in sequence. */
   public void execute() throws ExecutionException{
     //check all the PRs have the right parameters
     checkParameters();
 
+    if(DEBUG) {
+      prof.initRun("Execute controller [" + getName() + "]");
+    }
+
     //execute all PRs in sequence
     interrupted = false;
     for (int i = 0; i < prList.size(); i++){
       if(isInterrupted()) throw new ExecutionInterruptedException(
-        "The execution of the " + getName() +
-        " application has been abruptly interrupted!");
+          "The execution of the " + getName() +
+          " application has been abruptly interrupted!");
+
       runComponent(i);
+      if (DEBUG) {
+        prof.checkPoint("~Execute PR ["+((ProcessingResource)
+                                   prList.get(i)).getName()+"]");
+      }
     }
+
+    if (DEBUG) {
+      prof.checkPoint("Execute controller [" + getName() + "] finished");
+    }
+
   } // execute()
 
 
@@ -126,8 +150,8 @@ public class SerialController extends AbstractController
     int componentProgress = 100 / prList.size();
     listeners.put("gate.event.ProgressListener",
                   new IntervalProgressListener(
-                          componentIndex * componentProgress,
-                          (componentIndex +1) * componentProgress)
+                  componentIndex * componentProgress,
+                  (componentIndex +1) * componentProgress)
                   );
 
     //add the listeners
@@ -139,13 +163,8 @@ public class SerialController extends AbstractController
                "\n" + e.toString() + "\n...nothing to lose any sleep over.");
     }
 
-    //start DB transactions
-
     //run the thing
     currentPR.execute();
-
-    //commit DB transactions
-
 
     //remove the listeners
     try{
