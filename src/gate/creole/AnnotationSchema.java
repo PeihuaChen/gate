@@ -146,10 +146,14 @@ public class AnnotationSchema extends AbstractLanguageResource{
               throws ResourceInstantiationException {
     org.jdom.Document jDom = null;
     SAXBuilder saxBuilder = new SAXBuilder(false);
+    try {
     try{
       jDom = saxBuilder.build(anXSchemaURL);
     }catch(JDOMException je){
       throw new ResourceInstantiationException(je);
+    }
+    } catch (java.io.IOException ex) {
+      throw new ResourceInstantiationException(ex);
     }
     workWithJDom(jDom);
   } // fromXSchema
@@ -161,10 +165,14 @@ public class AnnotationSchema extends AbstractLanguageResource{
               throws ResourceInstantiationException {
     org.jdom.Document jDom = null;
     SAXBuilder saxBuilder = new SAXBuilder(false);
+    try {
     try{
       jDom = saxBuilder.build(anXSchemaInputStream);
     }catch(JDOMException je){
       throw new ResourceInstantiationException(je);
+    }
+    } catch (java.io.IOException ex) {
+      throw new ResourceInstantiationException(ex);
     }
     workWithJDom(jDom);
   } // end fromXSchema

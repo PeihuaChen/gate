@@ -64,10 +64,14 @@ public class MachineLearningPR extends AbstractLanguageAnalyser
 
     org.jdom.Document jdomDoc;
     SAXBuilder saxBuilder = new SAXBuilder(false);
+    try {
     try{
       jdomDoc = saxBuilder.build(configFileURL);
     }catch(JDOMException jde){
       throw new ResourceInstantiationException(jde);
+    }
+    } catch (java.io.IOException ex) {
+      throw new ResourceInstantiationException(ex);
     }
 
     //go through the jdom document to extract the data we need
