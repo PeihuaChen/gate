@@ -588,10 +588,15 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
           Class  classObj = null;
           try{
             // Create a class object from className
-            classObj = Class.forName(className);
+            classObj = Gate.getClassLoader().loadClass(className);
           }catch (ClassNotFoundException cnfex){
+            try{
+              //now let's try the system classloader
+              classObj = Class.forName(className);
+            }catch (ClassNotFoundException cnfe){
             rd.setValue(aValue);
             return;
+            }
           }// End catch
           // Get its list of constructors
           Constructor[] constrArray = classObj.getConstructors();

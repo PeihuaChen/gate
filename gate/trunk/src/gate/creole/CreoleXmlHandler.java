@@ -417,7 +417,8 @@ public class CreoleXmlHandler extends DefaultHandler {
       resourceData.setResourceDisplayed(resourceDisplayed);
       Class resourceDisplayedClass = null;
       try{
-        resourceDisplayedClass = Class.forName(resourceDisplayed);
+        resourceDisplayedClass = Gate.getClassLoader().
+                                 loadClass(resourceDisplayed);
       } catch (ClassNotFoundException ex){
         throw new GateRuntimeException(
           "Couldn't get resource class from the resource name :" +

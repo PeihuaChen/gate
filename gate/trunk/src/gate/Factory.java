@@ -467,7 +467,8 @@ public abstract class Factory {
     DataStore godfreyTheDataStore = null;
     try {
       godfreyTheDataStore =
-        (DataStore) Class.forName(dataStoreClassName).newInstance();
+        (DataStore) Gate.getClassLoader().
+                    loadClass(dataStoreClassName).newInstance();
     } catch(Exception e) {
       throw new PersistenceException("Couldn't create DS class: " + e);
     }

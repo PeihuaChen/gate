@@ -102,7 +102,7 @@ public class Parameter implements Serializable
       }else{
         Class itemClass = null;
         try{
-          itemClass = Class.forName(itemClassName);
+          itemClass = Gate.getClassLoader().loadClass(itemClassName);
         }catch(ClassNotFoundException e){
           throw new ParameterException("Could not construct a class object for "
             + itemClassName + " for param "+ name +
