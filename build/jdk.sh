@@ -74,7 +74,7 @@ then
   JAVABASE=$JAVA_HOME
 elif [ $SYS=unix ] 
 then
-  JAVABASE=/usr/local/pkg/jdk/jdk1.2fcs
+  JAVABASE=/usr/bin
 fi
 
 # convert from UNIX paths to Windoze paths if necessary; do ___JAVABASE___
