@@ -779,7 +779,8 @@ public class SerialControllerEditor extends AbstractVisualResource
 
           if(analyserMode){
             //set the corpus
-            Corpus corpus = (Corpus)corpusCombo.getSelectedItem();
+            Object value = corpusCombo.getSelectedItem();
+            Corpus corpus = value.equals("<none>") ? null : (Corpus)value;
             if(corpus == null){
               JOptionPane.showMessageDialog(
                 SerialControllerEditor.this,
