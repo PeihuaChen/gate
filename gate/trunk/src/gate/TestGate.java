@@ -179,6 +179,7 @@ public class TestGate {
       if(! allTests){
         suite.addTest(TestWeakValueHashMap.suite());
       }else {
+        suite.addTest(TestWeakValueHashMap.suite());
         suite.addTest(TestControllers.suite());
         suite.addTest(TestSecurity.suite());
         suite.addTest(TestPersist.suite());
@@ -207,7 +208,6 @@ public class TestGate {
 //        suite.addTest(TestGazetteer.suite());
 //        suite.addTest(TestSplitterTagger.suite());
         suite.addTest(TestPR.suite());
-        suite.addTest(TestWeakValueHashMap.suite());
       } // if(allTests)
 
     } catch(Exception e) {
