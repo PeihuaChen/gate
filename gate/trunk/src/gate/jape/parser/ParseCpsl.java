@@ -98,6 +98,9 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   // macrosMap = new HashMap();
   SinglePhaseTransducer s = null;
   MultiPhaseTransducer m = new MultiPhaseTransducer();
+  m.setFileName(fileName);
+  m.setDirName(dirName);
+  m.setFromResource(fromResource);
   Token mptNameTok = null;
   Token phaseNameTok = null;
     switch (jj_nt.kind) {
@@ -115,7 +118,10 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       label_1:
       while (true) {
         s = SinglePhaseTransducer();
-                                  m.addPhase(s.getName(), s);
+        m.addPhase(s.getName(), s);
+        s.setFileName(fileName);
+        s.setDirName(dirName);
+        s.setFromResource(fromResource);
         switch (jj_nt.kind) {
         case phase:
           ;
@@ -297,6 +303,9 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       {if (true) throw(new ParseException("no rules defined in transducer "
                                + t.getName()));}
     t.finish(); // swap the various JGL types for Java arrays
+    t.setFileName(fileName);
+    t.setDirName(dirName);
+    t.setFromResource(fromResource);
     {if (true) return t;}
     throw new Error("Missing return statement in function");
   }
@@ -1051,47 +1060,6 @@ existingAttrName + "\");" + nl +
     return retval;
   }
 
-  final private boolean jj_3R_17() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_19()) {
-    jj_scanpos = xsp;
-    if (jj_3R_20()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3R_12() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_14()) {
-    jj_scanpos = xsp;
-    if (jj_3R_15()) {
-    jj_scanpos = xsp;
-    if (jj_3R_16()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3R_24() {
-    if (jj_scan_token(pling)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3R_22() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_24()) jj_scanpos = xsp;
-    else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(ident)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
   final private boolean jj_3_2() {
     if (jj_3R_13()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
@@ -1168,6 +1136,47 @@ existingAttrName + "\");" + nl +
 
   final private boolean jj_3_1() {
     if (jj_3R_12()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_17() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_19()) {
+    jj_scanpos = xsp;
+    if (jj_3R_20()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_12() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_14()) {
+    jj_scanpos = xsp;
+    if (jj_3R_15()) {
+    jj_scanpos = xsp;
+    if (jj_3R_16()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_24() {
+    if (jj_scan_token(pling)) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_22() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_24()) jj_scanpos = xsp;
+    else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    if (jj_scan_token(ident)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }

@@ -339,6 +339,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
         gazeteer =new DefaultGazeteer(gazeteerListDefFile.getAbsolutePath());
         gazeteer.addProcessProgressListener(this);
         gazeteer.addStatusListener(this);
+        gazeteer.init();
         startLookup = System.currentTimeMillis();
         logTextArea.append("gazeteer lists load time: " +
                            (startLookup - startLookupLoad) +

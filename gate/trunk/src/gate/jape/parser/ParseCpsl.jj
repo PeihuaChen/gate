@@ -219,6 +219,9 @@ MultiPhaseTransducer MultiPhaseTransducer() :
   // macrosMap = new HashMap();
   SinglePhaseTransducer s = null;
   MultiPhaseTransducer m = new MultiPhaseTransducer();
+  m.setFileName(fileName);
+  m.setDirName(dirName);
+  m.setFromResource(fromResource);
   Token mptNameTok = null;
   Token phaseNameTok = null;
 }
@@ -231,7 +234,12 @@ MultiPhaseTransducer MultiPhaseTransducer() :
   // spts
   (
     // sptrannies in this file
-    ( s=SinglePhaseTransducer() { m.addPhase(s.getName(), s); } )+
+    ( s=SinglePhaseTransducer() { 
+    	m.addPhase(s.getName(), s);
+	s.setFileName(fileName);
+	s.setDirName(dirName);
+	s.setFromResource(fromResource);
+     } )+
     |
     // sptrannies in external files
     (
@@ -352,6 +360,9 @@ SinglePhaseTransducer SinglePhaseTransducer() :
       throw(new ParseException("no rules defined in transducer "
                                + t.getName()));
     t.finish(); // swap the various JGL types for Java arrays
+    t.setFileName(fileName);
+    t.setDirName(dirName);
+    t.setFromResource(fromResource);
     return t;
   }
 
@@ -996,6 +1007,9 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.8  2000/07/12 14:34:16  valyt
+// Testing CVS CI
+//
 // Revision 1.7  2000/06/09 16:54:34  hamish
 // support for grammars coming from resources
 //
