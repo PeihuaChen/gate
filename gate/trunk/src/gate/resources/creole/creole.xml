@@ -369,9 +369,6 @@
       <PARAMETER NAME="inputASName"
   COMMENT="The name of the annotation set used for input"
   RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="outputASName"
-  COMMENT="The name of the annotation set used for output"
-  RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="lexiconURL" DEFAULT="gate:/creole/heptag/lexicon"
   COMMENT="The URL for the lexicon file"
   OPTIONAL="true">java.net.URL</PARAMETER>
