@@ -437,15 +437,14 @@ public class MainFrame extends JFrame
     splashBox.add(Box.createVerticalStrut(10));
 
     verLbl = new JLabel(
-      "<HTML>" +
-      "<B>Hamish Cunningham, Valentin Tablan, Cristian Ursu, " +
-      "Kalina Bontcheva</B>,<BR>" +
-      "Diana Maynard, Marin Dimitrov, Horacio Saggion, Oana Hamza,<BR>" +
-      "Atanas Kiryakov, Bobby Popov, Damyan Ognyanoff,<BR>" +
-      "Robert Gaizauskas, Mark Hepple, Mark Leisher, Kevin Humphreys,<BR>" +
-      "Yorick Wilks." +
-      "<P><B>JVM version</B>: " + System.getProperty("java.version") +
-      " from " + System.getProperty("java.vendor")
+"<HTML>" +
+"<B>Hamish Cunningham, Valentin Tablan, Kalina Bontcheva, Diana Maynard,</B>" +
+"<BR>Cristian Ursu, Marin Dimitrov, Oana Hamza, Horacio Saggion," +
+"<BR>Atanas Kiryakov, Angel Kirilov, Bobby Popov, Damyan Ognyanoff," +
+"<BR>Robert Gaizauskas, Mark Hepple, Mark Leisher, " +
+"Kevin Humphreys, Yorick Wilks." +
+"<P><B>JVM version</B>: " + System.getProperty("java.version") +
+" from " + System.getProperty("java.vendor")
     );
     box = new Box(BoxLayout.X_AXIS);
     box.add(verLbl);
