@@ -488,16 +488,17 @@
   DEFAULT=".gate">java.lang.String</PARAMETER>
     </RESOURCE>
 
-    <!-- creole.xml for the RDF exporter -->
+    <!-- creole.xml for the DAML+OIL exporter -->
     <RESOURCE>
-      <NAME>RDF exporter</NAME>
+      <NAME>DAML+OIL exporter</NAME>
       <CLASS>gate.creole.RDFFormatExporter</CLASS>
-      <COMMENT>An RDF exporter</COMMENT>
+      <COMMENT>A DAML+OIL exporter</COMMENT>
       <PARAMETER NAME="document" COMMENT="The document to be exported" RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
       <PARAMETER NAME="ontology"  COMMENT="Ontology" SUFFIXES="daml;rdf">java.net.URL</PARAMETER>
       <PARAMETER DEFAULT="Organization;Person;Location;Facility;GPE" NAME="exportedTypes">java.util.ArrayList</PARAMETER>
       <PARAMETER NAME="exportFilePath"  COMMENT="Destination URL where to export" SUFFIXES="daml;rdf">java.net.URL</PARAMETER>
       <PARAMETER DEFAULT="DAML+OIL" NAME="exportFormat">java.lang.String</PARAMETER>
+      <ICON>daml.jpg</ICON>      
     </RESOURCE>
 
     <!-- creole.xml for SearchPR -->
