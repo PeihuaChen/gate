@@ -1,19 +1,8 @@
 organization
 organisation
-Alcoholics Anonymous
-AA
-Irish Republican Army
-Red Cross
-Salvation Army
-Tammany Hall
-Tammany Society
-Tammany
 line of defense
 line organization
 association
-American Baptist Convention
-Northern Baptist Convention
-Southern Baptist Convention
 cooperative
 club
 society
@@ -24,9 +13,6 @@ order
 athenaeum
 atheneum
 chapter
-American Legion
-Veterans of Foreign Wars
-VFW
 bookclub
 chess club
 country club
@@ -45,16 +31,7 @@ fraternity
 frat
 sorority
 secret society
-Freemasonry
-Masonry
-Ku Klux Klan
-Klan
-KKK
 service club
-Lions Club
-International Association of Lions clubs
-Rotary Club
-Rotary International
 family
 fellowship
 league
@@ -79,7 +56,6 @@ trust
 combine
 cartel
 professional association
-Fabian Society
 gang
 pack
 ring
@@ -89,8 +65,6 @@ youth gang
 legion
 chamber of commerce
 institute
-Association for the Advancement of Retired Persons
-AARP
 polity
 government
 authorities
@@ -99,12 +73,6 @@ ancien regime
 court
 empire
 federal government
-United States government
-United States
-U.S. government
-U.S.
-Capitol
-Washington
 government-in-exile
 local government
 municipal government
@@ -114,7 +82,6 @@ palace
 papacy
 pontificate
 state
-Soviets
 welfare state
 state government
 institution
@@ -129,12 +96,6 @@ giro
 clearing house
 lending institution
 central bank
-Federal Reserve System
-Federal Reserve
-Fed
-Bank of England
-Bundesbank
-Bank of Japan
 foundation
 charity
 philanthropic foundation
@@ -182,7 +143,6 @@ bank
 banking concern
 banking company
 credit union
-Federal Reserve Bank
 reserve bank
 agent bank
 commercial bank
@@ -201,11 +161,7 @@ savings and loan association
 building society
 savings bank
 mutual savings bank
-MSB
 federal savings bank
-FSB
-Home Loan Bank
-Federal Home Loan Bank System
 trust company
 trust corporation
 issuer
@@ -244,8 +200,6 @@ sleeping beauty
 white knight
 white squire
 limited company
-Ltd.
-Ld.
 holding company
 bank holding company
 multibank holding company
@@ -282,83 +236,9 @@ think factory
 religion
 faith
 church
-Christian church
-Christianity
-Catholic Church
-Roman Catholic
-Western Church
-Roman Catholic Church
-Church of Rome
-Roman Church
-Old Catholic Church
-Eastern Church
-Byzantine Church
-Orthodox Church
-Orthodox Catholic Church
-Eastern Orthodox Church
-Eastern Church
-Greek Orthodox Church
-Greek Church
-Russian Orthodox Church
-Uniat Church
-Uniate Church
-Coptic Church
-Protestant Church
-Protestant
-Pentecostal religion
-Judaism
-Hebraism
-Jewish religion
-Orthodox Judaism
-Jewish Orthodoxy
-Conservative Judaism
-Reform Judaism
-Islam
-Islamism
-Muslimism
-Mohammedanism
-Mohammadanism
-Shiah
-Shia
-Shiah Islam
-the Shiites
-Sunni
-Hinduism
-Hindooism
-Brahmanism
-Brahminism
-Taoism
-Buddhism
-Zen
-Zen Buddhism
-Mahayana
-Lamaism
-Hinayana
-Tantrism
-Shinto
-Rastafarianism
 established church
 sect
 religious order
-High Church
-High Anglican Church
-Amish sect
-Shivaism
-Sivaism
-Shaktism
-Saktism
-Vaishnavism
-Vaisnavism
-Hare Krishna
-International Society for Krishna Consciousness
-ISKCON
-Jainism
-Taoism
-Kokka Shinto
-Kokka
-Shuha Shinto
-Shua
-Society of Jesus
 cult
 vicariate
 vicarship
@@ -374,7 +254,6 @@ police academy
 military academy
 naval academy
 air force academy
-Plato's Academy
 correspondence school
 crammer
 dancing school
@@ -454,7 +333,6 @@ college
 university
 academy
 honorary society
-French Academy
 enterprise
 giant
 collective
@@ -529,7 +407,6 @@ retail chain
 conglomerate
 empire
 corporation
-corp
 closed corporation
 close corporation
 private corporation
@@ -538,14 +415,6 @@ family business
 closely held corporation
 shell corporation
 shell entity
-Federal Deposit Insurance Corporation
-FDIC
-Federal Home Loan Mortgage Corporation
-Freddie Mac
-FHLMC
-Federal National Mortgage Association
-Fannie Mae
-FNMA
 firm
 house
 business firm
@@ -604,7 +473,6 @@ show business
 show biz
 film industry
 movie industry
-Hollywood
 growth industry
 lighting industry
 munitions industry
@@ -635,53 +503,6 @@ establishment
 fire brigade
 fire company
 denomination
-Protestant denomination
-Christian Church
-Disciples of Christ
-Anglican Church
-Anglican Communion
-Church of England
-Episcopal Church
-Protestant Episcopal Church
-Church of Ireland
-Episcopal Church
-Mormon Church
-Mormons
-Church of Jesus Christ of Latter-day Saints
-Baptist Church
-Baptists
-Baptist denomination
-Arminian Baptist
-General Baptist
-Calvinistic Baptist
-Particular Baptist
-Church of the Brethren
-Dunkers
-Dippers
-Dunker
-Dunkard
-Tunker
-Christian Science
-Church of Christ Scientist
-Congregational Church
-Congregational Christian Church
-United Church of Christ
-Jehovah's Witnesses
-Lutheran Church
-Presbyterian Church
-Unitarian Church
-Arminian Church
-Methodist Church
-Methodists
-United Methodist Church
-Wesleyan Methodist Church
-Wesleyan Methodists
-Anabaptist denomination
-Mennonite Church
-Religious Society of Friends
-Society of Friends
-Quakers
-Assemblies of God
 company
 troupe
 opera company
@@ -749,8 +570,6 @@ service department
 government department
 ministry
 foreign office
-French foreign office
-Quai d'Orsay
 treasury
 local department
 department of local government
@@ -762,52 +581,6 @@ federal department
 federal office
 department of the federal government
 executive department
-White House
-Department of Agriculture
-Agriculture Department
-Agriculture
-Department of Commerce
-Commerce Department
-Commerce
-Department of Defense
-Defense Department
-Defense
-DoD
-Department of Education
-Education Department
-Education
-Department of Energy
-Energy Department
-Energy
-Department of Health and Human Services
-Health and Human Services
-Department of Housing and Urban Development
-Housing and Urban Development
-HUD
-Department of Justice
-Justice Department
-Justice
-Department of Labor
-Labor Department
-Labor
-Department of State
-State Department
-State
-Department of the Interior
-Interior Department
-Interior
-Department of the Treasury
-Treasury Department
-Treasury
-Department of Transportation
-Transportation
-Department of Veterans Affairs
-Department of Commerce and Labor
-Department of Health Education and Welfare
-Navy Department
-War Department
-Post Office
-Post Office Department
 admiralty
 security
 branch
@@ -819,12 +592,6 @@ executive branch
 legislative branch
 judicial branch
 council
-Security Council
-SC
-Trusteeship Council
-TC
-Economic and Social Council
-ECOSOC
 city council
 executive council
 privy council
@@ -833,31 +600,15 @@ diwan
 works council
 soviet
 world council
-World Council of Churches
 secretariat
 secretariate
-Pam American Union
-United Nations Secretariat
 committee
 commission
-Economic and Social Council commission
-ECOSOC commission
-Commission on Human Rights
-Commission on Narcotic Drugs
-Commission on the Status of Women
-Economic Commission for Africa
-Economic Commission for Asia and the Far East
-Economic Commission for Europe
-Economic Commission for Latin America
-Population Commission
-Social Development Commission
-Statistical Commission
 board
 appeal board
 appeals board
 board of appeals
 board of selectmen
-Federal Reserve Board
 governing board
 board of regents
 board of trustees
@@ -867,9 +618,6 @@ staggered board of directors
 advisory board
 planning board
 cabinet
-British Cabinet
-United States Cabinet
-US Cabinet
 draft board
 school board
 board of education
@@ -899,87 +647,15 @@ government agency
 bureau
 office
 authority
-Atomic Energy Commission
-AEC
-Manhattan Project
-Environmental Protection Agency
-EPA
 executive agency
-Council of Economic Advisors
-Office of Management and Budget
-OMB
-Council on Environmental Policy
-United States Trade Representative
-Center for Disease Control
-Central Intelligence Agency
-CIA
-National Aeronautics and Space Administration
-NASA
-Bureau of the Census
-Census Bureau
-Social Security Administration
-Federal Bureau of Investigation
-FBI
-National Park Service
-Bureau of Alcohol Tobacco and Firearms
-Comptroller of the Currency
-Bureau of Customs
-Bureau of Engraving and Printing
-Internal Revenue Service
-IRS
-United Nations agency
-UN agency
-United Nations Children's Fund
-United Nations International Children's Emergency Fund
-UNICEF
-Food and Agriculture Organization
-Food and Agriculture Organization of the United Nations
-FAO
-General Agreement on Tariffs and Trade
-GATT
-International Atomic Energy Agency
-IAEA
-International Bank for Reconstruction and Development
-World Bank
-IBRD
-International Civil Aviation Organization
-ICAO
-International Development Association
-IDA
-International Finance Corporation
-IFC
-International Labor Organization
-International Labour Organization
-ILO
-International Maritime Organization
-IMO
-International Monetary Fund
-IMF
-United Nations Educational Scientific and Cultural Organization
-UNESCO
-World Health Organization
-WHO
-World Meteorological Organization
-WMO
 organ
 patent office
 central bank
-Federal Reserve System
-Federal Reserve
-Fed
-Bank of England
-Bundesbank
-Bank of Japan
 secret service
-United States Secret Service
 redevelopment authority
 regulatory agency
 regulatory authority
-Selective Service
-Selective Service System
 weather bureau
-Federal Housing Administration
-FHA
 child welfare agency
 child welfare service
 intelligence
@@ -1009,12 +685,7 @@ enemy
 task force
 army unit
 corps
-Reserve Officers Training Corps
-ROTC
 division
-Special Forces
-U. S. Army Special Forces
-battle group
 regiment
 brigade
 battalion
@@ -1024,7 +695,6 @@ detachment
 guard
 bodyguard
 yeomanry
-Praetorian Guard
 patrol
 picket
 press gang
@@ -1051,8 +721,6 @@ infantry
 foot
 paratroops
 naval unit
-Marine Corps
-US Marine Corps
 division
 squadron
 air unit
@@ -1068,9 +736,7 @@ militia
 reserves
 territorial
 territorial reserve
-National Guard
 home reserve
-Territorial Army
 commando
 contingent
 detail
@@ -1138,11 +804,6 @@ commonwealth
 res publica
 body politic
 Reich
-Holy Roman Empire
-First Reich
-Hohenzollern empire
-Second Reich
-Third Reich
 suzerain
 sea power
 world power
@@ -1151,7 +812,6 @@ great power
 power
 superpower
 city state
-Carthage
 ally
 union
 confederation
@@ -1160,10 +820,8 @@ federation
 nation
 tribe
 federation of tribes
-Creek Confederacy
 league
 customs union
-Benelux
 cell
 cadre
 amphictyony
@@ -1171,14 +829,12 @@ lunatic fringe
 revolutionary group
 underground
 resistance
-Maquis
 lobby
 pressure group
 third house
 side
 working group
 expedition
-Peace Corps
 force
 personnel
 military service
@@ -1188,23 +844,12 @@ army
 regular army
 host
 legion
-Sabaoth
 standing army
-Union Army
-Confederate Army
-United States Army
-US Army
-U. S. Army
 navy
 naval forces
-United States Navy
-US Navy
 coastguard
 air force
 airforce
-Air Corps
-Royal Air Force
-RAF
 military
 armed forces
 military reserve
@@ -1217,12 +862,8 @@ constabulary
 law
 gendarmerie
 gendarmery
-Royal Canadian Mounted Police
-Scotland Yard
-New Scotland Yard
 vice squad
 secret police
-Gestapo
 posse
 posse comitatus
 security force
@@ -1329,43 +970,6 @@ rock band
 steel band
 party
 political party
-American Labor Party
-American Party
-Know-Nothing Party
-Anti-Masonic Party
-Communist Party
-Communist Party
-Conservative Party
-Constitutional Union Party
-Democratic Party
-Democratic-Republican Party
-Farmer-Labor Party
-Federalist Party
-American Federalist Party
-Federal Party
-Free Soil Party
-Greenback Party
-Labour Party
-Labour
-Labor Party
-Labor
-Liberal Party
-Liberty Party
-Militant Tendency
-Nazi Party
-People's Party
-Populist Party
-Progressive Party
-Bull Moose Party
-Prohibition Party
-Republican Party
-GOP
-Social Democratic Party
-Socialist Labor Party
-Socialist Party
-States' Rights Democratic Party
-Dixiecrats
-Whig Party
 third party
 machine
 political machine
@@ -1387,26 +991,7 @@ entente cordiale
 popular front
 world organization
 international organization
-British Commonwealth
-Commonwealth of Nations
-Arab League
-European Economic Community
-EEC
-Common Market
-North Atlantic Treaty Organization
-NATO
-Organization of American States
-OAS
-Organization of Petroleum-Exporting Countries
-OPEC
-community
-Commonwealth of Independent States
-CIS
-United Nations
-UN
 federation
-American Federation of Labor-Congress of Industrial Organizations
-AFL-CIO
 committee
 citizens committee
 vigilance committee
@@ -1427,10 +1012,8 @@ missionary post
 missionary station
 foreign mission
 blue
-Union Army
 gray
 grey
-Confederate Army
 host
 pool
 administration
@@ -1440,10 +1023,6 @@ brass
 organization
 organisation
 executive
-Clinton administration
-Bush administration
-Reagan administration
-Carter administration
 judiciary
 bench
 government officials
@@ -1451,6 +1030,5 @@ officialdom
 civil service
 bureaucracy
 bureaucratism
-Pentagon
 management
 
