@@ -10,6 +10,7 @@
  *
  *  Marin Dimitrov, 18/Sep/2001
  *
+ *  $Id$
  */
 
 package gate.persist;

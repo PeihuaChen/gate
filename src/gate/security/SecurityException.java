@@ -10,7 +10,7 @@
  *
  *  Marin Dimitrov, 19/Sep/2001
  *
- *
+ *  $Id$
  */
 
 package gate.security;
