@@ -168,7 +168,6 @@ public class SerialCorpusImpl extends
     Resource res = e.getResource();
     if (! (res instanceof Document))
       return;
-    Out.prln("document unloaded " + res);
     //remove all occurences
     while(contains(res)) remove(res);
   }
@@ -228,9 +227,27 @@ public class SerialCorpusImpl extends
     if (transientCorpus != null)
       return transientCorpus.iterator();
 
-    //there is a problem here, because some docs might not be instantiated
-    //I actually need to do the trick from the WeakValueHashMap
-    return documents.values().iterator();
+      return new Iterator(){
+        Iterator docDataIter = docDataList.iterator();
+
+        public boolean hasNext() {
+          return docDataIter.hasNext();
+        }
+
+        public Object next(){
+
+          //try finding a document with the same name and persistent ID
+          DocumentData docData = (DocumentData) docDataIter.next();
+          int index = docDataList.indexOf(docData);
+          return SerialCorpusImpl.this.get(index);
+        }
+
+        public void remove() {
+          throw new UnsupportedOperationException("SerialCorpusImpl does not " +
+                      "support remove in the iterators");
+        }
+      };
+
   }
 
   public Object[] toArray(){
@@ -280,19 +297,18 @@ public class SerialCorpusImpl extends
     boolean found = false;
     DocumentData docData = null;
 
-    int index = 0;
+    int index;
     //try finding a document with the same name and persistent ID
     Iterator iter = docDataList.iterator();
-    while (iter.hasNext() && !found) {
+    for (index = 0;  iter.hasNext() && !found; index++) {
       docData = (DocumentData) iter.next();
       if (docData.getDocumentName().equals(doc.getName()) &&
           docData.getPersistentID().equals(doc.getLRPersistenceId()))
         found = true;
-      index++;
     }
 
-    if(found) { //we found it, so remove it
-      docDataList.remove(docData);
+    if(found && index < docDataList.size()) { //we found it, so remove it
+      docDataList.remove(index);
       documents.remove(new Integer(index));
     }
 
@@ -466,14 +482,13 @@ public class SerialCorpusImpl extends
     }  //put
 
     public Object remove(Object key){
-      Document oldDoc = (Document) super.get(key);
-      Object res = super.remove(key);
-      if(res != null)
+      Document oldDoc = (Document) super.remove(key);
+      if(oldDoc != null)
         fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
                                             oldDoc,
                                             CorpusEvent.DOCUMENT_REMOVED));
 
-      return res;
+      return oldDoc;
     }//public Object remove(Object key)
 
     public Object get(Object key){
@@ -492,7 +507,9 @@ public class SerialCorpusImpl extends
                       ((DocumentData)docDataList.get(index)).getPersistentID());
           Resource lr = Factory.createResource( "gate.corpora.DocumentImpl",
                                                 features);
+          if (DEBUG) Out.prln("Loading document :" + lr.getName());
           res = lr;
+          this.put(key, res);
         } catch (ResourceInstantiationException ex) {
           Err.prln("Error reading document inside a serialised corpus.");
           throw new GateRuntimeException(ex.getMessage());
@@ -501,8 +518,6 @@ public class SerialCorpusImpl extends
       }
       return res;
     }//public Object get(Object key)
-
-
 
   }//protected class VerboseHashMap extends HashMap
 
@@ -518,6 +533,10 @@ public class SerialCorpusImpl extends
 
     public Object getPersistentID() {
       return persistentID;
+    }
+
+    public String toString() {
+      return new String("DocumentData: " + docName + ", " + persistentID);
     }
 
     String docName;

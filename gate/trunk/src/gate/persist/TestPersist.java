@@ -248,9 +248,15 @@ public class TestPersist extends TestCase
     while (iter.hasNext()) {
       LanguageResource lr = (LanguageResource)iter.next();
       if (DEBUG) Out.prln("Gate knows about resource: " + lr.getName() +
-                         " of type " + lr.getClass().getName());
+                          " of type " + lr.getClass().getName());
 
     }
+
+    Iterator corpusIter = diskCorp.iterator();
+    while(corpusIter.hasNext()){
+      Out.prln(((Document) corpusIter.next()).getName());
+    }
+
 
 //    assert("doc2 from disk not equal to memory version", doc2.equals(diskDoc2));
 

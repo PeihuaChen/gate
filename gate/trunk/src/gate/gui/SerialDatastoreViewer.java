@@ -29,7 +29,7 @@ import gate.event.*;
 
 public class SerialDatastoreViewer extends JTree
                                    implements VisualResource,
-                                              DatastoreListener{
+                                              DatastoreListener {
 
   public SerialDatastoreViewer() {
   }
