@@ -20,7 +20,11 @@ create or replace package body persist is
   ORACLE_FALSE constant number := 0;
  
  
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *   not used yet                                                                                             
+  *   
+  */
   procedure get_timestamp(p_timestamp  OUT number)
   is
   
@@ -31,7 +35,11 @@ create or replace package body persist is
   end;                                                                                                        
 
 
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *   returns LR name by id                                                                                             
+  *   
+  */
   procedure get_lr_name(p_lr_id     IN number,
                         p_lr_name   OUT varchar2)
   is
@@ -48,7 +56,11 @@ create or replace package body persist is
 
   end;                                          
                                                                 
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *   removes a copus and all contained components (features)                                                                                             
+  *   
+  */
   procedure delete_corpus(p_lr_id     IN number)
   is
      l_corp_id number;
@@ -80,7 +92,16 @@ create or replace package body persist is
      
   end;                                                                                                        
 
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *   removes a document and all contained components:
+  *   - content
+  *   - nodes
+  *   - annnotations
+  *   - features
+  *   - annotation sets                                                                                             
+  *   
+  */
   procedure delete_document(p_lr_id     IN number)
   is
      l_doc_id number;
@@ -165,7 +186,11 @@ create or replace package body persist is
   end;                                                                                                        
 
 
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *   creates a new LR                                                                                             
+  *   
+  */
   procedure create_lr(p_usr_id           IN number,
                       p_grp_id           IN number,
                       p_lr_type          IN varchar2,
@@ -217,7 +242,11 @@ create or replace package body persist is
   end;                                                                                                        
 
 
-  /*******************************************************************************************/
+  /*******************************************************************************************
+  *
+  *   creates a new document                                                                                             
+  *   
+  */  
   procedure create_document(p_lr_id        IN number,
                             p_url          IN varchar2,
                             p_encoding     IN varchar2,
@@ -307,7 +336,11 @@ create or replace package body persist is
   end;                                                                                                        
   
 
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *   creates a new annotation set                                                                                             
+  *   
+  */  
   procedure create_annotation_set(p_lr_id           IN number,
                                   p_as_name          IN varchar2,
                                   p_as_id            OUT number)
@@ -338,7 +371,12 @@ create or replace package body persist is
   end;
   
   
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *   inserts annotation in a-set
+  *   if the annotation does not exist then a new one is created                                                                                             
+  *   
+  */
   procedure create_annotation(p_lr_id           IN number,
                               p_ann_local_id         IN number,  
                               p_as_id            IN number,
@@ -486,7 +524,11 @@ create or replace package body persist is
   end;
 
 
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *   creates a corpus                                                                                             
+  *   
+  */  
   procedure create_corpus(p_lr_id     IN number,
                           p_corp_id   OUT number)
   is
@@ -501,7 +543,11 @@ create or replace package body persist is
   end;
 
   
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *   checks if  feature value type is valid                                                                                             
+  *   
+  */  
   function is_valid_feature_type(p_type          IN number)
      return boolean
      deterministic
@@ -518,7 +564,11 @@ create or replace package body persist is
      
   end;
   
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *   creates a new feature                                                                                             
+  *   
+  */  
   procedure create_feature(p_entity_id           IN number,
                            p_entity_type         IN number,
                            p_key                 IN varchar2,  
@@ -577,7 +627,11 @@ create or replace package body persist is
   end;
 
 
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *   not used?                                                                                             
+  *   
+  */  
   procedure change_content_type(p_cont_id        in number,
                                 p_new_type       in number)     
   is         
@@ -596,7 +650,11 @@ create or replace package body persist is
       
   end;
 
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *   updates LR attributes                                                                                             
+  *   
+  */  
   procedure update_lr  (p_lr_id     IN number,
                         p_lr_name   IN varchar2,
                         p_lr_parent_id IN number)
@@ -624,34 +682,12 @@ create or replace package body persist is
 
   end;                                                                                                        
 
-  /*******************************************************************************************/
-  procedure get_id_lot(p_id1        out number,
-                       p_id2        out number,
-                       p_id3        out number,
-                       p_id4        out number,
-                       p_id5        out number,
-                       p_id6        out number,
-                       p_id7        out number,
-                       p_id8        out number,
-                       p_id9        out number,
-                       p_id10       out number)
-  is
-
-  begin
-     select seq_annotation.nextval into p_id1 from dual;
-     select seq_annotation.nextval into p_id2 from dual;
-     select seq_annotation.nextval into p_id3 from dual;
-     select seq_annotation.nextval into p_id4 from dual;
-     select seq_annotation.nextval into p_id5 from dual;
-     select seq_annotation.nextval into p_id6 from dual;
-     select seq_annotation.nextval into p_id7 from dual;
-     select seq_annotation.nextval into p_id8 from dual;
-     select seq_annotation.nextval into p_id9 from dual;
-     select seq_annotation.nextval into p_id10 from dual;
-  end;
-
-
-  /*******************************************************************************************/
+ 
+  /******************************************************************************************
+  *
+  *   updates document components/atrtibutes                                                                                             
+  *   
+  */  
   procedure update_document(p_lr_id        IN number,
                             p_url          IN varchar2,
                             p_start_offset IN number,
@@ -679,7 +715,11 @@ create or replace package body persist is
      where  doc_lr_id = p_lr_id;     
   end;
 
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *   removes features associated with some entity (corpus, document, annotation)                                                                                             
+  *   
+  */  
   procedure delete_features(p_ent_id        IN number,
                             p_ent_type      IN number)
   is
@@ -690,7 +730,11 @@ create or replace package body persist is
   end;
 
 
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *   removes annotation (and its features)                                                                                             
+  *   
+  */  
   procedure delete_annotation(p_doc_id     IN number,
                               p_ann_local_id     IN number)
   is
@@ -725,7 +769,11 @@ create or replace package body persist is
            raise error.x_invalid_annotation;
   end;
 
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *   locks LR, no other sessions may write to it                                                                                             
+  *   
+  */  
   procedure lock_lr(p_lr_id     IN  number,
                     p_usr_id    IN number,
                     p_grp_id    IN number,
@@ -768,7 +816,11 @@ create or replace package body persist is
   end;
 
 
-  /*******************************************************************************************/
+  /*******************************************************************************************
+  *
+  *   unlocks LR                                                                                             
+  *   
+  */  
   procedure unlock_lr(p_lr_id     IN  number,
                       p_usr_id    IN number)
   is
@@ -799,7 +851,11 @@ create or replace package body persist is
      
   end;  
 
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *   removes a-set and its annotations                                                                                             
+  *   
+  */  
   procedure delete_annotation_set(p_lr_id        IN number,
                                   p_set_name     IN varchar2)
   is
@@ -841,7 +897,11 @@ create or replace package body persist is
   end;
 
 
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *   guess                                                                                             
+  *   
+  */
   procedure add_document_to_corpus(p_doc_lrid     IN  number,
                                    p_corp_lrid    IN number)
   is
@@ -885,7 +945,12 @@ create or replace package body persist is
 
   end;
 
-  /*******************************************************************************************/  
+  /******************************************************************************************
+  *
+  *   processes a bulk load - the varrays passed are decomposed and proper calls                                                                                             
+  *   to create_feature() are made
+  *   
+  */  
   procedure create_feature_bulk(p_entity_ids           IN INT_ARRAY,
                                 p_entity_types         IN INT_ARRAY,
                                 p_keys                 IN STRING_ARRAY,  
