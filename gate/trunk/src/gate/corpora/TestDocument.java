@@ -85,10 +85,17 @@ public class TestDocument extends TestCase
 
   public void testOriginalContentPreserving() throws Exception {
     Document doc = null;
+    FeatureMap params;
+    String encoding = "UTF-8";
     String origContent;
 
     // test the default value of preserve content flag
-    doc = Factory.newDocument(new URL(testServer + testDocument1));
+    params = Factory.newFeatureMap();
+    params.put("sourceUrl", new URL(testServer + testDocument1));
+    params.put("encoding", encoding);
+    doc =
+      (Document) Factory.createResource("gate.corpora.DocumentImpl", params);
+
     origContent = (String) doc.getFeatures().get(
       GateConstants.ORIGINAL_DOCUMENT_CONTENT_FEATURE_NAME);
 
@@ -96,9 +103,13 @@ public class TestDocument extends TestCase
       "The original content should not be preserved without demand.",
       origContent);
 
-    DocumentImpl.setPreserveOriginalContent(true);
+    params = Factory.newFeatureMap();
+    params.put("sourceUrl", new URL(testServer + testDocument1));
+    params.put("encoding", encoding);
+    params.put("preserveOriginalContent", new Boolean(true));
+    doc =
+      (Document) Factory.createResource("gate.corpora.DocumentImpl", params);
 
-    doc = Factory.newDocument(new URL(testServer + testDocument1));
     origContent = (String) doc.getFeatures().get(
       GateConstants.ORIGINAL_DOCUMENT_CONTENT_FEATURE_NAME);
 
@@ -106,8 +117,6 @@ public class TestDocument extends TestCase
               origContent);
 
     assertTrue("The original content size is zerro.", origContent.length()>0);
-
-    DocumentImpl.setPreserveOriginalContent(false);
   } // testOriginalContentPreserving()
 
   /** A comprehensive test */
