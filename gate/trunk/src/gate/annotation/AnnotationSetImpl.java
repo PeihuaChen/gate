@@ -78,10 +78,38 @@ implements AnnotationSet
   } // construction from document and name
 
   /** Construction from Collection (which must be an AnnotationSet) */
+//<<<dam: speedup constructor
+/*
   public AnnotationSetImpl(Collection c) throws ClassCastException {
     this(((AnnotationSet) c).getDocument());
     addAll(c);
   } // construction from collection
+*/
+//===dam: now
+  /** Construction from Collection (which must be an AnnotationSet) */
+  public AnnotationSetImpl(Collection c) throws ClassCastException {
+    this(((AnnotationSet) c).getDocument());
+
+    if (c instanceof AnnotationSetImpl)
+    {
+        AnnotationSetImpl theC = (AnnotationSetImpl)c;
+        annotsById = (HashMap)theC.annotsById.clone();
+        if(theC.annotsByEndNode != null)
+        {
+            annotsByEndNode = (Map)((HashMap)theC.annotsByEndNode).clone();
+            annotsByStartNode = (Map)((HashMap)theC.annotsByStartNode).clone();
+        }
+        if (theC.annotsByType != null)
+            annotsByType = (Map)((HashMap)theC.annotsByType).clone();
+        if (theC.nodesByOffset != null)
+        {
+            nodesByOffset = (RBTreeMap)theC.nodesByOffset.clone();
+        }
+
+    } else
+        addAll(c);
+  } // construction from collection
+//>>>dam: end
 
   /** This inner class serves as the return value from the iterator()
     * method.
