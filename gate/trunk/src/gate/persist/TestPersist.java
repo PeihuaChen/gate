@@ -377,8 +377,49 @@ public class TestPersist extends TestCase
     return doc;
   }
 
+
+  private Corpus createTestCorpus()
+    throws Exception {
+
+    String server = TestDocument.getTestServerName();
+    assertNotNull(server);
+    Document doc1 = Factory.newDocument(new URL(server + "tests/doc0.html"));
+    assertNotNull(doc1);
+
+    doc1.getFeatures().put("hi there", new Integer(23232));
+    doc1.getAnnotations().add(
+      new Long(0), new Long(20), "thingymajig", Factory.newFeatureMap()
+    );
+    doc1.setName("DB test Document1");
+
+    // create another document with some annotations / features on it
+    Document doc2 =
+      Factory.newDocument(new URL(server + "tests/html/test1.htm"));
+    doc2.getFeatures().put("hi there again", new Integer(23232));
+    doc2.getAnnotations().add(
+      new Long(5), new Long(25), "dog poo irritates", Factory.newFeatureMap()
+    );
+    doc2.setName("DB test Document2");
+
+    //create corpus
+    Corpus corp = Factory.newCorpus("My test corpus");
+    //add docs
+    corp.add(doc1);
+    corp.add(doc2);
+    //add features
+    corp.getFeatures().put("my STRING feature ", new String("string string"));
+    corp.getFeatures().put("my BOOL feature ", new Boolean("false"));
+    corp.getFeatures().put("my INT feature ", new Integer("1234"));
+    corp.getFeatures().put("my LONG feature ", new Long("123456789"));
+
+    return corp;
+  }
+
   /** Test the DS register. */
   public void testDB_UseCase01() throws Exception {
+
+    //descr: create a document in the DB
+
 
     //1. open data storage
     DatabaseDataStore ds = new OracleDataStore();
@@ -411,7 +452,56 @@ public class TestPersist extends TestCase
     //5. try adding doc to data store
     ds.adopt(doc,si);
 
+    //6.close
+    ac.close();
+    ds.close();
+
     Out.prln("Use case 01 passed...");
+  }
+
+
+  /** Test the DS register. */
+  public void testDB_UseCase02() throws Exception {
+
+    //descr : create a corpus
+
+    //1. open data storage
+    DatabaseDataStore ds = new OracleDataStore();
+    Assert.assertNotNull(ds);
+    ds.setStorageUrl(this.JDBC_URL);
+    ds.open();
+
+    //2. get test document
+    Corpus corp = createTestCorpus();
+    Assert.assertNotNull(corp);
+
+    //3. get security factory & login
+    AccessController ac = new AccessControllerImpl();
+    Assert.assertNotNull(ac);
+    ac.open(this.JDBC_URL);
+
+    User usr = ac.findUser("kalina");
+    Assert.assertNotNull(usr);
+
+    Group grp = (Group)usr.getGroups().get(0);
+    Assert.assertNotNull(grp);
+
+    Session usrSession = ac.login("kalina","sesame",grp.getID());
+    Assert.assertNotNull(usrSession);
+    Assert.assert(ac.isValidSession(usrSession));
+
+    //4. create security settings for doc
+    SecurityInfo si = new SecurityInfo(SecurityInfo.ACCESS_WR_GW,usr,grp);
+
+    //5. try adding doc to data store
+    ds.adopt(corp,si);
+
+    //6.close
+    ac.close();
+    ds.close();
+
+    Out.prln("Use case 02 passed...");
+
   }
 
 
@@ -443,6 +533,10 @@ public class TestPersist extends TestCase
 
       test.setUp();
       test.testDB_UseCase01();
+      test.tearDown();
+
+      test.setUp();
+      test.testDB_UseCase02();
       test.tearDown();
 
     }catch(Exception e){
