@@ -34,12 +34,7 @@ import gate.*;
 public class Constraint
 implements JapeConstants, java.io.Serializable, Cloneable
 {
-  /**
-    *  This field is "final static" because it brings in
-    *  the advantage of dead code elimination
-    *  When DEBUG is set on false the code that it guardes will be eliminated
-    *  by the compiler. This will spead up the progam a little bit.
-    */
+  /** Debug flag */
   private static final boolean DEBUG = false;
 
   /** Construction from annot type string */
@@ -193,6 +188,9 @@ implements JapeConstants, java.io.Serializable, Cloneable
 
 
 // $Log$
+// Revision 1.5  2000/10/16 16:44:33  oana
+// Changed the comment of DEBUG variable
+//
 // Revision 1.4  2000/10/10 15:36:35  oana
 // Changed System.out in Out and System.err in Err;
 // Added the DEBUG variable seted on false;

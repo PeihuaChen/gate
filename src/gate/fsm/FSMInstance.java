@@ -34,12 +34,8 @@ import java.util.*;
 * (java.lang.String) to bags of annotations (gate.AnnotationSet)
 */
 public class FSMInstance implements Comparable, Cloneable{
-  /**
-    *  This field is "final static" because it brings in
-    *  the advantage of dead code elimination
-    *  When DEBUG is set on false the code that it guardes will be eliminated
-    *  by the compiler. This will spead up the progam a little bit.
-    */
+
+  /** Debug flag */
   private static final boolean DEBUG = false;
 
   /** Creates a new FSMInstance object.

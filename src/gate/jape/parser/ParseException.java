@@ -28,12 +28,7 @@ package gate.jape.parser;
  * mechanisms so long as you retain the public fields.
  */
 public class ParseException extends Exception {
-  /**
-    *  This field is "final static" because it brings in
-    *  the advantage of dead code elimination
-    *  When DEBUG is set on false the code that it guardes will be eliminated
-    *  by the compiler. This will spead up the progam a little bit.
-    */
+  /** Debug flag */
   private static final boolean DEBUG = false;
 
   /**
