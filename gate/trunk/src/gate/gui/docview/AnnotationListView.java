@@ -25,6 +25,8 @@ import gate.util.GateRuntimeException;
 import java.awt.*;
 import java.awt.Component;
 import java.awt.GridBagLayout;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.*;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +59,7 @@ public class AnnotationListView extends AbstractDocumentView
 //    table.setAutoResizeMode(XJTable.AUTO_RESIZE_LAST_COLUMN);
     table.setSortable(true);
     table.setSortedColumn(START_COL);
+    table.setIntercellSpacing(new Dimension(2, 0));
     scroller = new JScrollPane(table);
     
     mainPanel = new JPanel();
@@ -78,10 +81,20 @@ public class AnnotationListView extends AbstractDocumentView
     statusLabel = new JLabel();
     mainPanel.add(statusLabel, constraints);
     initListeners();
-    
   }
   
+  public Component getGUI(){
+    return mainPanel;
+  }
   protected void initListeners(){
+    table.addComponentListener(new ComponentAdapter(){
+      public void componentResized(ComponentEvent e){
+        //trigger a resize for the columns
+        table.fixColumnSizes();
+//        tableModel.fireTableDataChanged();
+      }
+    });
+
     tableModel.addTableModelListener(new TableModelListener(){
       public void tableChanged(TableModelEvent e){
         statusLabel.setText(
@@ -117,19 +130,15 @@ public class AnnotationListView extends AbstractDocumentView
   protected void unregisterHooks() {
     //this view is a slave only view so it has no hooks to register  
   }
-  
-  /* (non-Javadoc)
-   * @see gate.gui.docview.DocumentView#getGUI()
-   */
-  public Component getGUI() {
-    return mainPanel;
-  }
-  
+    
   /* (non-Javadoc)
    * @see gate.gui.docview.DocumentView#getType()
    */
   public int getType() {
     return HORIZONTAL;
+  }
+  protected void guiShown(){
+    tableModel.fireTableDataChanged();
   }
   
   
