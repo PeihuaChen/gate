@@ -132,7 +132,7 @@ public class Jacl
     * you have MyJar.jar on the classpath, and it contains a script housed
     * in package x.y called z.tcl, the name should be x/y/z.tcl. (The class
     * loader can then be asked to retrieve /x/y/z.tcl and will find the
-    * file in the jar.
+    * file in the jar.)
     */
   public void loadScripts(List scriptPaths) throws TclException {
     ListIterator iter = scriptPaths.listIterator();
