@@ -52,6 +52,8 @@ public class TestDocument extends TestCase
     try {
       uReader = new BufferedReader(new InputStreamReader(u.openStream()));
       assertEquals(uReader.readLine(), "<HTML>");
+    } catch(UnknownHostException e) { // no network connection
+      return;
     } catch(IOException e) {
       fail(e.toString());
     }
