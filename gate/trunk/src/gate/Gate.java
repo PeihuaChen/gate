@@ -103,7 +103,7 @@ public class Gate implements GateConstants
 
     // create class loader and creole register if they're null
     if(classLoader == null)
-      classLoader = new GateClassLoader();
+      classLoader = new GateClassLoader(Gate.class.getClassLoader());
     if(creoleRegister == null)
       creoleRegister = new CreoleRegisterImpl();
     if(knownPlugins == null) knownPlugins = new ArrayList();
