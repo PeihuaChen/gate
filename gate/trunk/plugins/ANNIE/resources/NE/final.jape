@@ -46,6 +46,7 @@ if (firstPerson != null && firstPerson.size()>0)
   features.put("rule", "PersonFinal");
 annotations.add(personSet.firstNode(), personSet.lastNode(), "Person",
 features);
+annotations.removeAll(personSet);
 }
 
 
@@ -330,8 +331,29 @@ Priority: 10
 ( {TempTime.kind == temp}
 ):time
 -->
- :date.Date = {kind = "date", rule = "TimeContextFinal"},
- :time.Date = {kind = "time", rule = "TimeContextFinal"}
+  {
+//removes TempDate annotation, gets the rule feature and adds a new Date annotation
+gate.AnnotationSet date = (gate.AnnotationSet)bindings.get("date");
+gate.Annotation dateAnn = (gate.Annotation)date.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule1", dateAnn.getFeatures().get("rule"));
+features.put("rule", "TimeContextFinal");
+features.put("kind", "date");
+annotations.add(date.firstNode(), date.lastNode(), "Date",
+features);
+annotations.removeAll(date);
+//removes TempTime annotation, gets the rule feature and adds a new Date annotation
+gate.AnnotationSet time = (gate.AnnotationSet)bindings.get("time");
+gate.Annotation timeAnn = (gate.Annotation)time.iterator().next();
+gate.FeatureMap features2 = Factory.newFeatureMap();
+features2.put("rule1", timeAnn.getFeatures().get("rule"));
+features2.put("rule", "TimeContextFinal");
+features2.put("kind", "time");
+annotations.add(time.firstNode(), date.lastNode(), "Date",
+features2);
+annotations.removeAll(time);
+}
+
 
 Rule: TimeWordsContextFinal
 Priority: 50
@@ -625,3 +647,4 @@ annotations.add(person.firstNode(), person.lastNode(), "Person",
 features);
 annotations.removeAll(person);
 }
+

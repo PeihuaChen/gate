@@ -282,12 +282,3 @@ annotations.add(org.firstNode(), org.lastNode(), "Organization",
 features);
 annotations.removeAll(org);
 }
-
-
-
-
-
-
-
-
-

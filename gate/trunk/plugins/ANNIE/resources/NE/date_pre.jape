@@ -18,7 +18,7 @@ Phase:	DatePre
 Options: control = appelt
 
 ///////
-// Note: this muse come before the timex phase,  because it includes extra context
+// Note: this muse come before the date phase,  because it includes extra context
 // to prevent dates being recognised erroneously in the middle of longer things
 //////
 
