@@ -192,7 +192,7 @@ public class FeaturesEditor extends AbstractVisualResource{
           return key;
         }
         case 1:{
-          return features.get(key).toString();
+          return features.get(key) == null ? "" : features.get(key).toString();
         }
         default:{
           return null;
