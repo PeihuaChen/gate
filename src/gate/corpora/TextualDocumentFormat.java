@@ -22,7 +22,7 @@ import gate.util.*;
 import gate.*;
 import gate.creole.*;
 
-import org.w3c.www.mime.*;
+//import org.w3c.www.mime.*;
 
 /** The format of Documents. Subclasses of DocumentFormat know about
   * particular MIME types and how to unpack the information in any
@@ -89,7 +89,7 @@ public class TextualDocumentFormat extends DocumentFormat
   protected void setNewLineProperty(Document doc) {
     String content = doc.getContent().toString();
     String newLineType = "";
-    
+
     char ch = ' ';
     char lastch = ' ';
     for(int i=0; i < content.length(); ++i) {
@@ -116,15 +116,15 @@ public class TextualDocumentFormat extends DocumentFormat
       }
       lastch = ch;
     } // for
-    
+
     doc.getFeatures().put(GateConstants.DOCUMENT_NEW_LINE_TYPE, newLineType);
   } // setNewLineProperty()
-  
+
   /** Delete '\r' in combination CRLF or LFCR in document content */
   private void removeExtraNewLine(Document doc) {
     String content = doc.getContent().toString();
     StringBuffer buff = new StringBuffer(content);
-    
+
     char ch = ' ';
     char lastch = ' ';
     for(int i=content.length()-1; i > -1; --i) {
@@ -138,7 +138,7 @@ public class TextualDocumentFormat extends DocumentFormat
       }
       lastch = ch;
     } // for
-    
+
     doc.setContent(new DocumentContentImpl(buff.toString()));
   } // removeExtraNewLine(Document doc)
 

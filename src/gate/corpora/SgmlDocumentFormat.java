@@ -26,7 +26,7 @@ import gate.event.*;
 import gate.xml.*;
 import gate.creole.*;
 
-import org.w3c.www.mime.*;
+//import org.w3c.www.mime.*;
 // xml tools
 import javax.xml.parsers.*;
 import org.xml.sax.*;
