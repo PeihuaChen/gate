@@ -2,14 +2,14 @@
  *  ResourceData.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
- * 
+ *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June1991.
- * 
+ *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- * 
+ *
  *  Hamish Cunningham, 1/Sept/2000
  *
  *  $Id$
@@ -18,6 +18,7 @@
 package gate;
 
 import java.util.*;
+import java.net.*;
 
 import gate.util.*;
 
@@ -48,11 +49,23 @@ public interface ResourceData {
   /** Get method for the resource class name */
   public String getClassName();
 
+  /** Set method for the resource class */
+  public void setResourceClass(Class resourceClass);
+
+  /** Get method for the resource class */
+  public Class getResourceClass() throws ClassNotFoundException;
+
   /** Set method for the resource jar file name */
   public void setJarFileName(String jarFileName);
 
   /** Get method for the resource jar file name */
   public String getJarFileName();
+
+  /** Set method for the resource jar file URL */
+  public void setJarFileUrl(URL jarFileUrl);
+
+  /** Get method for the resource jar file URL */
+  public URL getJarFileUrl();
 
   /** Set method for resource autoloading flag */
   public void setAutoLoading(boolean autoLoading);
