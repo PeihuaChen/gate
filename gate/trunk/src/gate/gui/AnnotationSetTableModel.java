@@ -9,7 +9,7 @@ import gate.*;
     }
 
     public int getColumnCount(){
-      return 5;
+      return 4;
     }
 
     public Class getColumnClass(int column){
@@ -29,9 +29,6 @@ import gate.*;
         }
         case 3:{
           return "Features";// + addSortOrderString(3);
-        }
-        case 4:{
-          return "Text";// + addSortOrderString(4);
         }
       }
       return null;
@@ -55,11 +52,6 @@ import gate.*;
         }
         case 3:{
           return currentAnn.getFeatures();
-        }
-        case 4:{
-          return document.getContent().toString().substring(
-              currentAnn.getStartNode().getOffset().intValue(),
-              currentAnn.getEndNode().getOffset().intValue());
         }
       }
       return null;
@@ -113,20 +105,6 @@ import gate.*;
                    }
                  }
                  return maxValue;
-        case 4:
-        //*
-                 for (int i = 0 ; i < getRowCount(); i++){
-                   String strValue = document.getContent().toString().substring(
-                                     ((gate.Annotation) m_data.get(i)).getStartNode().getOffset().intValue(),
-                                     ((gate.Annotation) m_data.get(i)).getEndNode().getOffset().intValue());
-                   int length = strValue.length();
-                   if (length > maxValueLength){
-                      maxValueLength = length;
-                      maxValue = strValue;
-                   }
-                 }
-                 return maxValue;
-          //*/
      }
      return null;
     }
@@ -168,22 +146,11 @@ import gate.*;
             String fm2 = a2.getFeatures().toString();
             result = fm1.compareTo(fm2);
           }break;
-          case 4: // Text
-          {
-            String text1 = document.getContent().toString().substring(
-              a1.getStartNode().getOffset().intValue(),
-              a1.getEndNode().getOffset().intValue());
-            String text2 = document.getContent().toString().substring(
-              a2.getStartNode().getOffset().intValue(),
-              a2.getEndNode().getOffset().intValue());
-            result = text1.compareTo(text2);
-          }break;
         }// switch
         if (!this.getSortOrder()) result = -result;
         return result;
       }//compare
     }
-
   Document document;
 }
 

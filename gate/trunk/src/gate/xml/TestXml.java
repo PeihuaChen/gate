@@ -107,7 +107,7 @@ public class TestXml extends TestCase
     if (docFormat != null){
       // set's the map
       docFormat.setMarkupElementsMap(markupElementsMap);
-      /*
+
       // register a progress listener with it
       docFormat.addStatusListener(new StatusListener(){
           public void statusChanged(String text){
@@ -116,7 +116,7 @@ public class TestXml extends TestCase
           public void processFinished(){
           }
       });
-      */
+      
       // timing the operation
       Date startTime = new Date();
         docFormat.unpackMarkup (doc,"DocumentContent");

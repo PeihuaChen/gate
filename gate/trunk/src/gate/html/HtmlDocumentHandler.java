@@ -48,9 +48,8 @@ public class HtmlDocumentHandler extends ParserCallback{
   // listeners for status report
   protected List myStatusListeners = new LinkedList();
 
-  // the size of the document
-  private int documentSize = 0;
-
+  private int elements = 0;
+  private int elementsRate = 64;
   /**
     * Constructor
     */
@@ -61,8 +60,6 @@ public class HtmlDocumentHandler extends ParserCallback{
     this.doc = doc ;
     this.markupElementsMap = markupElementsMap;
     basicAS = doc.getAnnotations ();
-    documentSize = doc.getContent().size().intValue();
-    if (documentSize == 0) documentSize = 1;
   }
 
   /**
@@ -71,7 +68,8 @@ public class HtmlDocumentHandler extends ParserCallback{
     */
   public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos){
     // inform the progress listener about that
-    fireStatusChangedEvent("Processing:" + t);
+    if ((++elements % elementsRate) == 0)
+        fireStatusChangedEvent("Elements processed so far : " + elements);
     // construct a feature map from the attributes list
     FeatureMap fm = new SimpleFeatureMapImpl();
     // take all the attributes an put them into the feature map
@@ -127,6 +125,7 @@ public class HtmlDocumentHandler extends ParserCallback{
       //out.println (tmpDocContent);
       //out.flush ();
       doc.setContent (new DocumentContentImpl(tmpDocContent));
+      fireStatusChangedEvent("Total elements : " + elements);
     }
   }//handleEndTag
 
@@ -134,8 +133,9 @@ public class HtmlDocumentHandler extends ParserCallback{
     * this method is called when the HTML parser encounts only the beginning of a tag
     */
   public void handleSimpleTag(HTML.Tag t, MutableAttributeSet a, int pos){
-     // inform the progress listener about that
-    fireStatusChangedEvent("Processing:" + t);
+    // inform the progress listener about that
+    if ((++elements % elementsRate) == 0)
+        fireStatusChangedEvent("Elements processed so far : " + elements);
     // construct a feature map from the attributes list
     // these are empty elements
     FeatureMap fm = new SimpleFeatureMapImpl();
