@@ -232,7 +232,7 @@ public class Namematch extends AbstractProcessingResource
               if (matched_annots.containsKey(annot1_id.toString())) {
                 matchedAnnot1 =
                   (AnnotationMatches) matched_annots.get(annot1_id.toString());
-              if (matchedAnnot1.containsMatched(annot2_id.toString())) continue;
+              if (matchedAnnot1.containsMatched(annot2_id)) continue;
               }
 
               // find which annotation string of the two is longer
@@ -271,7 +271,7 @@ public class Namematch extends AbstractProcessingResource
                 // matched by annot1
                 if (matchedAnnot2 !=null) {
                   for (int k=0;k<matchedAnnot2.howMany();k++) {
-                    String matchedByAnnot2Id = matchedAnnot2.matchedAnnotAt(k);
+                    Integer matchedByAnnot2Id = matchedAnnot2.matchedAnnotAt(k);
                     if (!matchedAnnot1.containsMatched(matchedByAnnot2Id)) {
                       matchedAnnot1.addMatchedAnnotId(matchedByAnnot2Id);
                     }
@@ -282,14 +282,14 @@ public class Namematch extends AbstractProcessingResource
 
                       if ((matchedByAnnot2 !=null)&&
                         (!matchedByAnnot2.containsMatched
-                          (annot1_id.toString()))) {
-                        matchedByAnnot2.addMatchedAnnotId(annot1_id.toString());
+                          (annot1_id))) {
+                        matchedByAnnot2.addMatchedAnnotId(annot1_id);
                       }
                     } // for
                   }
                   // add annotation2 to the ids of annotation1
                   for (int l=0;l<matchedAnnot1.howMany();l++) {
-                    String matchedByAnnot1Id = matchedAnnot1.matchedAnnotAt(l);
+                    Integer matchedByAnnot1Id = matchedAnnot1.matchedAnnotAt(l);
 
                     if (!matchedAnnot2.containsMatched(
                                             matchedAnnot1.matchedAnnotAt(l))) {
@@ -302,8 +302,8 @@ public class Namematch extends AbstractProcessingResource
 
                     if ((matchedByAnnot1 !=null)&&
                       (!matchedByAnnot1.containsMatched
-                        (annot2_id.toString()))) {
-                      matchedByAnnot1.addMatchedAnnotId(annot2_id.toString());
+                        (annot2_id))) {
+                      matchedByAnnot1.addMatchedAnnotId(annot2_id);
                     }
 
                   }
@@ -312,15 +312,15 @@ public class Namematch extends AbstractProcessingResource
                 if ((nameAnnotsUnknown == null)||
                    (!nameAnnotsUnknown.contains(annot1))||
                    (!nameAnnotsUnknown.contains(annot2))) {
-                  if (!matchedAnnot1.containsMatched(annot1_id.toString()))
-                    matchedAnnot1.addMatchedAnnotId(annot1_id.toString());
-                  if (!matchedAnnot1.containsMatched(annot2_id.toString()))
-                    matchedAnnot1.addMatchedAnnotId(annot2_id.toString());
+                  if (!matchedAnnot1.containsMatched(annot1_id))
+                    matchedAnnot1.addMatchedAnnotId(annot1_id);
+                  if (!matchedAnnot1.containsMatched(annot2_id))
+                    matchedAnnot1.addMatchedAnnotId(annot2_id);
 
-                  if (!matchedAnnot2.containsMatched(annot1_id.toString()))
-                    matchedAnnot2.addMatchedAnnotId(annot1_id.toString());
-                  if (!matchedAnnot2.containsMatched(annot2_id.toString()))
-                    matchedAnnot2.addMatchedAnnotId(annot2_id.toString());
+                  if (!matchedAnnot2.containsMatched(annot1_id))
+                    matchedAnnot2.addMatchedAnnotId(annot1_id);
+                  if (!matchedAnnot2.containsMatched(annot2_id))
+                    matchedAnnot2.addMatchedAnnotId(annot2_id);
 
                   matched_annots.put(annot1_id.toString(),matchedAnnot1);
                   matched_annots.put(annot2_id.toString(),matchedAnnot2);
@@ -402,14 +402,14 @@ public class Namematch extends AbstractProcessingResource
               (AnnotationMatches) matched_annots.get(annot_id);
 
             // the matches found for the current annotation
-            List matchesVector = matchedAnnot.getMatched();
+            List matchesList = matchedAnnot.getMatched();
             // remove attribute "matches" if such exists:
             // i.e has the namematcher run on the same doc b4?
             Annotation annot = nameAnnots.get(new Integer(annot_id));
             if (annot!=null) {
               FeatureMap attr = annot.getFeatures();
               attr.remove("matches");
-              attr.put("matches", matchesVector);
+              attr.put("matches", matchesList);
             }
           } // for Enumeration
         }// else
@@ -517,14 +517,14 @@ public class Namematch extends AbstractProcessingResource
           booleanMatches.put(annot,new String ("true"));
           List list = (List)fm1.get(type);
           for (int j=0; j< list.size(); j++) {
-            String value = (String)list.get(j);
-            int valueInt =(new Integer(value)).intValue();
+            Integer value = (Integer)list.get(j);
+            int valueInt = value.intValue();
 
             //verify whether it isn't already in matchesDocument
-            Annotation newAnnot = namedAnnots.get(new Integer(value));
+            Annotation newAnnot = namedAnnots.get(value);
             String id = (String)booleanMatches.get(newAnnot);
             if (id.equals("false")){
-              matchesAnnotation.add(new Integer(valueInt));
+              matchesAnnotation.add(value);
               booleanMatches.remove(newAnnot);
               booleanMatches.put(newAnnot,new String ("true"));
             }
@@ -1333,14 +1333,14 @@ class AnnotationMatches {
   }
 
   /** method to add an annotation id into the list of matched annotations */
-  void addMatchedAnnotId(String matchedId) {
+  void addMatchedAnnotId(Integer matchedId) {
     matchedAnnots.add(matchedId);
   }
 
   /** method to check if an annotation (to me metched)
     * is already in the list of matched annotations
     */
-  boolean containsMatched(String matchedId) {
+  boolean containsMatched(Integer matchedId) {
     return matchedAnnots.contains(matchedId);
   }
 
@@ -1355,8 +1355,8 @@ class AnnotationMatches {
   }
 
   /** get the element i from the matches list */
-  String matchedAnnotAt(int i) {
-    return (String) matchedAnnots.get(i);
+  Integer matchedAnnotAt(int i) {
+    return (Integer) matchedAnnots.get(i);
   }
 
 } //class AnnotationMatches
