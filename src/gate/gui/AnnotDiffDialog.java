@@ -13,6 +13,8 @@
  */
 package gate.gui;
 
+// Nedd to fix the  BUG with repaining !!!!!!!
+
 import gate.*;
 import gate.annotation.*;
 import gate.persist.*;
@@ -210,7 +212,8 @@ class AnnotDiffDialog extends JFrame {
     this.getContentPane().add(annotDiff,BorderLayout.CENTER);
     configWidth = northBox.getPreferredSize().width + 10;
 
-    this.setSize(configWidth,400);
+    pack();
+    //this.setSize(configWidth,400);
   }//initGuiComponents
 
   void this_windowClosing(WindowEvent e){
@@ -389,17 +392,11 @@ class AnnotDiffDialog extends JFrame {
       } finally {
         SwingUtilities.invokeLater(new Runnable(){
           public void run(){
-
-            if (annotDiff.getPreferredSize().width > configWidth)
-              configWidth = annotDiff.getPreferredSize().width;
-            thisAnnotDiffDialog.setSize(configWidth,
-                                      thisAnnotDiffDialog.getSize().height);
-
-
+            doLayout();
+            pack();
           }
         });
       }
-
     }// run();
   }//DiffRunner
 
