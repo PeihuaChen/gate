@@ -17,6 +17,7 @@ package gate.gui;
 import gate.*;
 import gate.util.*;
 import gate.swing.*;
+import gate.creole.*;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -31,7 +32,8 @@ import java.util.*;
 
 import gate.creole.AbstractVisualResource;
 
-public class FeaturesEditor extends AbstractVisualResource {
+public class FeaturesEditor extends AbstractVisualResource
+                            implements GenericVisualResource{
 
   public FeaturesEditor() {
     initLocalData();
@@ -111,6 +113,21 @@ public class FeaturesEditor extends AbstractVisualResource {
     features = resource.getFeatures();
     tableModel.fireTableDataChanged();
   }// public void setFeatureBearer(FeatureBearer newResource)
+
+  public void setTarget(Object target) {
+    if(target instanceof FeatureBearer){
+      setFeatureBearer((FeatureBearer)target);
+    }else{
+      throw new IllegalArgumentException(
+        "FeatureEditors can only be used with FeatureBearer!\n" +
+        target.getClass().toString() + " is not a FeatureBearer!");
+    }
+  }//public void setResource(Resource resource)
+
+  public void setHandle(ResourceHandle handle){
+    //NOP
+  }
+
 
   public FeatureBearer getFeatureBearer() {
     return resource;

@@ -39,26 +39,24 @@ import java.io.IOException;
 import java.net.URL;
 
 public class ApplicationViewer extends AbstractVisualResource
-                               implements CreoleListener {
+                               implements CreoleListener,
+                                          GenericVisualResource{
 
   public ApplicationViewer() {
   }
-/*
-  public ApplicationViewer(Controller controller) {
-    if(controller instanceof SerialController){
-      this.controller = (SerialController)controller;
-      this.handle = handle;
-      this.popup = handle.getPopup();
-      init();
-    }else{
-      throw new UnsupportedOperationException(
-        "Editing of controllers implemented only for serial controllers!");
-    }
-  }
-*/
-  public void setController(SerialController controller){
-    this.controller = controller;
+
+  public void setTarget(Object target){
+    if(!(target instanceof SerialController))
+    throw new IllegalArgumentException(
+      "gate.gui.ApplicationViewer can only be used for serial controllers\n" +
+      target.getClass().toString() +
+      " is not a gate.creole.SerialController!");
+    this.controller = (SerialController)target;
+    initLocalData();
+    initGuiComponents();
+    initListeners();
   }//setController
+
 
   public void setHandle(ResourceHandle handle) {
     this.handle = handle;
@@ -73,28 +71,12 @@ public class ApplicationViewer extends AbstractVisualResource
 
   public Resource init() throws ResourceInstantiationException{
     super.init();
-    initLocalData();
-    initGuiComponents();
-    initListeners();
     return this;
   }//init
 
   protected void initLocalData() {
     paramsForPR = new HashMap();
-//    addActionForPR = new HashMap();
-//    removeActionForPR = new HashMap();
     runAction = new RunAction();
-/*
-    Iterator prIter = project.getPRList().iterator();
-    while(prIter.hasNext()){
-      ProcessingResource pr = (ProcessingResource)prIter.next();
-      AddPRAction addAction = new AddPRAction(pr);
-      RemovePRAction remAction = new RemovePRAction(pr);
-      remAction.setEnabled(false);
-      addActionForPR.put(pr, addAction);
-      removeActionForPR.put(pr, remAction);
-    }
-*/
   }//initLocalData
 
   protected void initGuiComponents() {

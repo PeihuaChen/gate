@@ -33,28 +33,36 @@ import gate.event.*;
 /**
  * Class used to store the information about an open resource.
  * Such information will include icon to be used for tree components,
- * popup menu for right click events, etc.
+ * popup menu for right click events, large and small views, etc.
  */
 public class DefaultResourceHandle implements ResourceHandle {
 
   public DefaultResourceHandle(FeatureBearer res) {
     this.resource = res;
-    rData = (ResourceData)Gate.getCreoleRegister().
-                                            get(resource.getClass().getName());
-    if(rData != null){
-      String iconName = rData.getIcon();
-      if(iconName == null){
-        if(resource instanceof LanguageResource) iconName = "lr.gif";
-        else if(resource instanceof ProcessingResource) iconName = "pr.gif";
+    sListenerProxy = new ProxyStatusListener();
+    String iconName = null;
+    if(res instanceof Resource){
+      rData = (ResourceData)Gate.getCreoleRegister().
+                                              get(resource.getClass().getName());
+      if(rData != null){
+        iconName = rData.getIcon();
+        if(iconName == null){
+          if(resource instanceof LanguageResource) iconName = "lr.gif";
+          else if(resource instanceof ProcessingResource) iconName = "pr.gif";
+        }
+        tooltipText = "Type : " + rData.getName();
+      } else {
+        this.icon = MainFrame.getIcon("lr.gif");
       }
-      this.icon = MainFrame.getIcon(iconName);
-      tooltipText = "Type : " + rData.getName();
-    } else {
-      this.icon = MainFrame.getIcon("lr.gif");
+    }else if(res instanceof DataStore){
+      iconName = ((DataStore)res).getIconName();
+      tooltipText = ((DataStore)res).getComment();
     }
 
     popup = null;
     title = (String)resource.getName();
+    this.icon = MainFrame.getIcon(iconName);
+
     buildViews();
   }//public DefaultResourceHandle(FeatureBearer res)
 
@@ -115,58 +123,90 @@ public class DefaultResourceHandle implements ResourceHandle {
     return resource;
   }
 
-  private void addAllViews(){
-    /* Fancy discovery code goes here
-    ...
-    ...
-    ...
-    */
-
-    /* Not so fancy hardcoded views build */
+  protected void buildViews() {
+    //build the popup
     popup = new JPopupMenu();
-    popup.add(new CloseAction());
+    popup.add(new XJMenuItem(new CloseAction(), sListenerProxy));
     if(resource instanceof ProcessingResource &&
        !Gate.getApplicationAttribute(resource.getFeatures())){
       popup.addSeparator();
-      popup.add(new ReloadAction());
+      popup.add(new XJMenuItem(new ReloadAction(), sListenerProxy));
     }
 
     //Language Resources
     if(resource instanceof LanguageResource) {
       popup.addSeparator();
-      popup.add(new SaveAction());
-      popup.add(new SaveToAction());
-      if(resource instanceof gate.corpora.DocumentImpl) {
-        popup.add(new SaveAsXmlAction());
+      popup.add(new XJMenuItem(new SaveAction(), sListenerProxy));
+      popup.add(new XJMenuItem(new SaveToAction(), sListenerProxy));
+      if(resource instanceof gate.corpora.DocumentImpl)
+        popup.add(new XJMenuItem(new SaveAsXmlAction(), sListenerProxy));
+    }//if(resource instanceof LanguageResource)
+
+    fireStatusChanged("Building views...");
+
+    //build the large views
+    List largeViewNames = Gate.getCreoleRegister().
+                          getLargeVRsForResource(resource.getClass().getName());
+    if(largeViewNames != null && !largeViewNames.isEmpty()){
+      largeView = new JTabbedPane(JTabbedPane.BOTTOM);
+      Iterator classNameIter = largeViewNames.iterator();
+      while(classNameIter.hasNext()){
         try{
+          String className = (String)classNameIter.next();
+          ResourceData rData = (ResourceData)Gate.getCreoleRegister().
+                                                  get(className);
           FeatureMap params = Factory.newFeatureMap();
-          params.put("document", resource);
-          largeView.add("Annotations",
-                 (JComponent)Factory.createResource("gate.gui.AnnotationEditor",
-                                                      params)
-                  );
+          FeatureMap features = Factory.newFeatureMap();
+          Gate.setHiddenAttribute(features, true);
+          GenericVisualResource view = (GenericVisualResource)
+                                        Factory.createResource(className,
+                                                               params,
+                                                               features);
+          view.setTarget(resource);
+          view.setHandle(this);
+          ((JTabbedPane)largeView).add((Component)view, rData.getName());
         }catch(ResourceInstantiationException rie){
           rie.printStackTrace(Err.getPrintWriter());
         }
-      }//else if(resource instanceof OtherKindOfLanguageResource){}
-    }else if(resource instanceof ProcessingResource){
-      if(resource instanceof SerialController){
-
-      }//else if(resource instanceof OtherKindOfProcessingResource){}
-      //catch all unknown PR's
+      }
+      if(largeViewNames.size() == 1){
+        largeView = (JComponent)((JTabbedPane)largeView).getComponentAt(0);
+      }else{
+        ((JTabbedPane)largeView).setSelectedIndex(0);
+      }
     }
 
-    FeaturesEditor fEdt = new FeaturesEditor();
-    fEdt.setFeatureBearer(resource);
-    largeView.add("Features", fEdt);
-    smallView = null;
-  }
-
-  protected void buildViews() {
-    //build the large views
-    fireStatusChanged("Building views...");
-    largeView = new JTabbedPane(JTabbedPane.BOTTOM);
-    addAllViews();
+    //build the small views
+    List smallViewNames = Gate.getCreoleRegister().
+                          getSmallVRsForResource(resource.getClass().getName());
+    if(smallViewNames != null && !smallViewNames.isEmpty()){
+      smallView = new JTabbedPane(JTabbedPane.BOTTOM);
+      Iterator classNameIter = smallViewNames.iterator();
+      while(classNameIter.hasNext()){
+        try{
+          String className = (String)classNameIter.next();
+          ResourceData rData = (ResourceData)Gate.getCreoleRegister().
+                                                  get(className);
+          FeatureMap params = Factory.newFeatureMap();
+          FeatureMap features = Factory.newFeatureMap();
+          Gate.setHiddenAttribute(features, true);
+          GenericVisualResource view = (GenericVisualResource)
+                                        Factory.createResource(className,
+                                                               params,
+                                                               features);
+          view.setTarget(resource);
+          view.setHandle(this);
+          ((JTabbedPane)smallView).add((Component)view, rData.getName());
+        }catch(ResourceInstantiationException rie){
+          rie.printStackTrace(Err.getPrintWriter());
+        }
+      }
+      if(smallViewNames.size() == 1){
+        smallView = (JComponent)((JTabbedPane)smallView).getComponentAt(0);
+      }else{
+        ((JTabbedPane)smallView).setSelectedIndex(0);
+      }
+    }
     fireStatusChanged("Views built!");
   }//protected void buildViews
 
@@ -197,18 +237,30 @@ public class DefaultResourceHandle implements ResourceHandle {
   JComponent smallView;
   JComponent largeView;
 
-  File currentDir = null;
+  StatusListener sListenerProxy;
+
+//  File currentDir = null;
   private transient Vector progressListeners;
   private transient Vector statusListeners;
 
   class CloseAction extends AbstractAction {
     public CloseAction() {
       super("Close");
+      putValue(SHORT_DESCRIPTION, "Removes this resource from the system");
     }
 
     public void actionPerformed(ActionEvent e) {
       if(resource instanceof Resource){
         Factory.deleteResource((Resource)resource);
+      }else if(resource instanceof DataStore){
+        try{
+          ((DataStore)resource).close();
+        } catch(PersistenceException pe){
+          JOptionPane.showMessageDialog(largeView != null ?
+                                                     largeView : smallView,
+                                        "Error!\n" + pe.toString(),
+                                        "Gate", JOptionPane.ERROR_MESSAGE);
+      }
       }
     }//public void actionPerformed(ActionEvent e)
   }//class CloseAction
@@ -216,6 +268,7 @@ public class DefaultResourceHandle implements ResourceHandle {
   class SaveAsXmlAction extends AbstractAction {
     public SaveAsXmlAction(){
       super("Save As Xml...");
+      putValue(SHORT_DESCRIPTION, "Saves this resource in XML");
     }// SaveAsXmlAction()
 
     public void actionPerformed(ActionEvent e) {
@@ -256,7 +309,7 @@ public class DefaultResourceHandle implements ResourceHandle {
                                           fileChooser.showDialog(null, "Save");
       if(res == JFileChooser.APPROVE_OPTION){
         selectedFile = fileChooser.getSelectedFile();
-        currentDir = fileChooser.getCurrentDirectory();
+        File currentDir = fileChooser.getCurrentDirectory();
         if(selectedFile == null) return;
         try{
           // Prepare to write into the xmlFile using UTF-8 encoding
@@ -279,6 +332,7 @@ public class DefaultResourceHandle implements ResourceHandle {
   class SaveAction extends AbstractAction {
     public SaveAction(){
       super("Save");
+      putValue(SHORT_DESCRIPTION, "Save back to the datastore");
     }
     public void actionPerformed(ActionEvent e){
       DataStore ds = ((LanguageResource)resource).getDataStore();
@@ -305,6 +359,7 @@ public class DefaultResourceHandle implements ResourceHandle {
   class SaveToAction extends AbstractAction {
     public SaveToAction(){
       super("Save to...");
+      putValue(SHORT_DESCRIPTION, "Save this resource to a new datastore");
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -362,6 +417,7 @@ public class DefaultResourceHandle implements ResourceHandle {
   class ReloadAction extends AbstractAction {
     ReloadAction() {
       super("Reinitialise");
+      putValue(SHORT_DESCRIPTION, "Reloads this resource");
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -431,6 +487,12 @@ public class DefaultResourceHandle implements ResourceHandle {
     }//public void actionPerformed(ActionEvent e)
 
   }//class ReloadAction
+
+  class ProxyStatusListener implements StatusListener{
+    public void statusChanged(String text){
+      fireStatusChanged(text);
+    }
+  }
 
   protected void fireProgressChanged(int e) {
     if (progressListeners != null) {
