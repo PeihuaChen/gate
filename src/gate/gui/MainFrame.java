@@ -150,7 +150,7 @@ public class MainFrame extends JFrame
     return fileChooser;
   }
 
-  protected void select(ResourceHandle handle){
+  protected void select(Handle handle){
     if(mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1) {
       //select
       JComponent largeView = handle.getLargeView();
@@ -560,7 +560,7 @@ public class MainFrame extends JFrame
         int y = e.getY();
         TreePath path = resourcesTree.getPathForLocation(x, y);
         JPopupMenu popup = null;
-        ResourceHandle handle = null;
+        Handle handle = null;
         if(path != null){
           Object value = path.getLastPathComponent();
           if(value == resourcesTreeRoot){
@@ -574,8 +574,8 @@ public class MainFrame extends JFrame
             popup = dssPopup;
           }else{
             value = ((DefaultMutableTreeNode)value).getUserObject();
-            if(value instanceof ResourceHandle){
-              handle = (ResourceHandle)value;
+            if(value instanceof Handle){
+              handle = (Handle)value;
               popup = handle.getPopup();
             }
           }
@@ -613,12 +613,12 @@ public class MainFrame extends JFrame
         DefaultMutableTreeNode node = resourcesTreeRoot;
         while(!done && nodesEnum.hasMoreElements()){
           node = (DefaultMutableTreeNode)nodesEnum.nextElement();
-          done = node.getUserObject() instanceof ResourceHandle &&
-                 ((ResourceHandle)node.getUserObject()).getLargeView()
+          done = node.getUserObject() instanceof Handle &&
+                 ((Handle)node.getUserObject()).getLargeView()
                   == largeView;
         }
         if(done){
-          select((ResourceHandle)node.getUserObject());
+          select((Handle)node.getUserObject());
         }else{
           //the selected item is not a resource (maiber the log area?)
           lowerScroll.getViewport().setView(null);
@@ -637,12 +637,12 @@ public class MainFrame extends JFrame
             DefaultMutableTreeNode node = resourcesTreeRoot;
             while(!done && nodesEnum.hasMoreElements()){
               node = (DefaultMutableTreeNode)nodesEnum.nextElement();
-              done = node.getUserObject() instanceof ResourceHandle &&
-                     ((ResourceHandle)node.getUserObject()).getLargeView()
+              done = node.getUserObject() instanceof Handle &&
+                     ((Handle)node.getUserObject()).getLargeView()
                       == view;
             }
             if(done){
-              ResourceHandle handle = (ResourceHandle)node.getUserObject();
+              Handle handle = (Handle)node.getUserObject();
               JPopupMenu popup = handle.getPopup();
               popup.show(mainTabbedPane, e.getX(), e.getY());
             }
@@ -853,21 +853,17 @@ public class MainFrame extends JFrame
   public void resourceLoaded(CreoleEvent e) {
     Resource res = e.getResource();
     if(Gate.getHiddenAttribute(res.getFeatures())) return;
-    DefaultResourceHandle handle = new DefaultResourceHandle(res);
+    NameBearerHandle handle = new NameBearerHandle(res);
     DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
     if(res instanceof ProcessingResource){
-      if(Gate.getApplicationAttribute(res.getFeatures())){
-        resourcesTreeModel.insertNodeInto(node, applicationsRoot, 0);
-      }else{
-        resourcesTreeModel.insertNodeInto(node, processingResourcesRoot, 0);
-      }
+      resourcesTreeModel.insertNodeInto(node, processingResourcesRoot, 0);
     }else if(res instanceof LanguageResource){
       resourcesTreeModel.insertNodeInto(node, languageResourcesRoot, 0);
     }
 
-    if(handle instanceof DefaultResourceHandle){
-      ((DefaultResourceHandle)handle).addProgressListener(MainFrame.this);
-      ((DefaultResourceHandle)handle).addStatusListener(MainFrame.this);
+    if(handle instanceof NameBearerHandle){
+      ((NameBearerHandle)handle).addProgressListener(MainFrame.this);
+      ((NameBearerHandle)handle).addStatusListener(MainFrame.this);
     }
 
     JPopupMenu popup = handle.getPopup();
@@ -881,11 +877,7 @@ public class MainFrame extends JFrame
     DefaultMutableTreeNode node;
     DefaultMutableTreeNode parent = null;
     if(res instanceof ProcessingResource){
-      if(Gate.getApplicationAttribute(res.getFeatures())){
-        parent = applicationsRoot;
-      }else{
-        parent = processingResourcesRoot;
-      }
+      parent = processingResourcesRoot;
     }else if(res instanceof LanguageResource){
       parent = languageResourcesRoot;
     }
@@ -893,9 +885,9 @@ public class MainFrame extends JFrame
       Enumeration children = parent.children();
       while(children.hasMoreElements()){
         node = (DefaultMutableTreeNode)children.nextElement();
-        if(((ResourceHandle)node.getUserObject()).getResource() == res){
+        if(((NameBearerHandle)node.getUserObject()).getTarget() == res){
           resourcesTreeModel.removeNodeFromParent(node);
-          ResourceHandle handle = (ResourceHandle)node.getUserObject();
+          Handle handle = (Handle)node.getUserObject();
           if(mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1){
             mainTabbedPane.remove(handle.getLargeView());
           }
@@ -914,7 +906,7 @@ public class MainFrame extends JFrame
 
     ds.setName(ds.getStorageUrl().getFile());
 
-    DefaultResourceHandle handle = new DefaultResourceHandle(ds);
+    NameBearerHandle handle = new NameBearerHandle(ds);
     DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
     resourcesTreeModel.insertNodeInto(node, datastoresRoot, 0);
     handle.addProgressListener(MainFrame.this);
@@ -939,10 +931,10 @@ public class MainFrame extends JFrame
       Enumeration children = parent.children();
       while(children.hasMoreElements()){
         node = (DefaultMutableTreeNode)children.nextElement();
-        if(((DefaultResourceHandle)node.getUserObject()).
-            getFeatureBearer() == ds){
+        if(((NameBearerHandle)node.getUserObject()).
+            getTarget() == ds){
           resourcesTreeModel.removeNodeFromParent(node);
-          DefaultResourceHandle handle = (DefaultResourceHandle)
+          NameBearerHandle handle = (NameBearerHandle)
                                           node.getUserObject();
           if(mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1){
             mainTabbedPane.remove(handle.getLargeView());
@@ -1326,20 +1318,12 @@ public class MainFrame extends JFrame
                         JOptionPane.QUESTION_MESSAGE);
       if(answer == null) return;
       if (answer instanceof String) {
-        try{
-          FeatureMap features = Factory.newFeatureMap();
-          Gate.setName(features, (String)answer);
-          Gate.setApplicationAttribute(features, true);
-          SerialController controller =
-                (SerialController)Factory.createResource(
-                                "gate.creole.SerialController",
-                                Factory.newFeatureMap(), features);
-        } catch(ResourceInstantiationException rie){
-          JOptionPane.showMessageDialog(MainFrame.this,
-                                        "Could not create application!\n" +
-                                         rie.toString(),
-                                        "Gate", JOptionPane.ERROR_MESSAGE);
-        }
+        SerialController controller = new gate.creole.SerialController();
+        controller.setName((String)answer);
+        NameBearerHandle handle = new NameBearerHandle(controller);
+        DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle,
+                                                                 false);
+        resourcesTreeModel.insertNodeInto(node, applicationsRoot, 0);
       } else{
         JOptionPane.showMessageDialog(MainFrame.this,
                                       "Unrecognised input!",
@@ -1439,7 +1423,7 @@ public class MainFrame extends JFrame
    * Does not remove the resource from the system, only its view.
    */
   class CloseViewAction extends AbstractAction {
-    public CloseViewAction(ResourceHandle handle) {
+    public CloseViewAction(Handle handle) {
       super("Close this view");
       putValue(SHORT_DESCRIPTION, "Hides this view");
       this.handle = handle;
@@ -1449,7 +1433,7 @@ public class MainFrame extends JFrame
       mainTabbedPane.remove(handle.getLargeView());
       mainTabbedPane.setSelectedIndex(0);
     }//public void actionPerformed(ActionEvent e)
-    ResourceHandle handle;
+    Handle handle;
   }//class CloseViewAction
 
 
@@ -1587,10 +1571,10 @@ public class MainFrame extends JFrame
       }else{
         //not one of the default root nodes
         value = ((DefaultMutableTreeNode)value).getUserObject();
-        if(value instanceof ResourceHandle) {
-          setIcon(((ResourceHandle)value).getIcon());
-          setText(((ResourceHandle)value).getTitle());
-          setToolTipText(((ResourceHandle)value).getTooltipText());
+        if(value instanceof Handle) {
+          setIcon(((Handle)value).getIcon());
+          setText(((Handle)value).getTitle());
+          setToolTipText(((Handle)value).getTooltipText());
         }
       }
       return this;
@@ -1606,10 +1590,10 @@ public class MainFrame extends JFrame
       super.getTreeCellRendererComponent(tree, value, selected, expanded,
                                          leaf, row, hasFocus);
       Object handle = ((DefaultMutableTreeNode)value).getUserObject();
-      if(handle != null && handle instanceof ResourceHandle){
-        setIcon(((ResourceHandle)handle).getIcon());
-        setText(((ResourceHandle)handle).getTitle());
-        setToolTipText(((ResourceHandle)handle).getTooltipText());
+      if(handle != null && handle instanceof Handle){
+        setIcon(((Handle)handle).getIcon());
+        setText(((Handle)handle).getTitle());
+        setToolTipText(((Handle)handle).getTooltipText());
       }
       return this;
     }

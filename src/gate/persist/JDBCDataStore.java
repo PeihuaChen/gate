@@ -365,5 +365,15 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
 
     this.driverName = driverName;
   }
+    /** Sets the name of this resource*/
+  public void setName(String name){
+    this.name = name;
+  }
 
+  /** Returns the name of this resource*/
+  public String getName(){
+    return name;
+  }
+
+  protected String name;
 }

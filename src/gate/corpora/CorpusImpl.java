@@ -46,6 +46,8 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
     setName(name);
   } // Construction
 
+  public void cleanup(){
+  }
 
   /** Initialise this resource, and return it. */
   public Resource init() {
@@ -248,22 +250,17 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
   }
 
 
-  /** Sets the name of this resource*/
+    /** Sets the name of this resource*/
   public void setName(String name){
-    FeatureMap fm = getFeatures();
-    if(fm == null){
-      fm = Factory.newFeatureMap();
-      setFeatures(fm);
-    }
-    Gate.setName(fm, name);
+    this.name = name;
   }
 
   /** Returns the name of this resource*/
   public String getName(){
-    FeatureMap fm = getFeatures();
-    if(fm == null) return null;
-    else return Gate.getName(fm);
+    return name;
   }
+
+  protected String name;
 
   /** The features associated with this corpus. */
   protected FeatureMap features;
@@ -295,7 +292,41 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
     }
     Iterator iterator;
     Object lastNext;
-  }///class VerboseIterator
+  }//class VerboseIterator
+
+
+  //Parameters utility methods
+  /**
+   * Gets the value of a parameter of this resource.
+   * @param paramaterName the name of the parameter
+   * @return the current value of the parameter
+   */
+  public Object getParameterValue(String paramaterName)
+                throws ResourceInstantiationException{
+    return AbstractResource.getParameterValue(this, paramaterName);
+  }
+
+  /**
+   * Sets the value for a specified parameter.
+   *
+   * @param paramaterName the name for the parameteer
+   * @param parameterValue the value the parameter will receive
+   */
+  public void setParameterValue(String paramaterName, Object parameterValue)
+              throws ResourceInstantiationException{
+    AbstractResource.setParameterValue(this, paramaterName, parameterValue);
+  }
+
+  /**
+   * Sets the values for more parameters in one step.
+   *
+   * @param parameters a feature map that has paramete names as keys and
+   * parameter values as values.
+   */
+  public void setParameterValues(FeatureMap parameters)
+              throws ResourceInstantiationException{
+    AbstractResource.setParameterValues(this, parameters);
+  }
 
   protected void fireDocumentAdded(CorpusEvent e) {
     if (/*!Main.batchMode &&*/ corpusListeners != null) {
@@ -315,5 +346,4 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
       }
     }
   }
-
 } // class CorpusImpl

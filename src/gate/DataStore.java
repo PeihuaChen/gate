@@ -25,7 +25,7 @@ import gate.security.*;
 
 /** Models all sorts of data storage.
   */
-public interface DataStore extends FeatureBearer {
+public interface DataStore extends FeatureBearer, NameBearer {
 
   public static final String DATASTORE_FEATURE_NAME = "DataStore";
   public static final String LR_ID_FEATURE_NAME = "LRPersistenceId";

@@ -88,8 +88,7 @@ public class TestConfig extends TestCase
     assertNotNull("no controller instance", controller);
 
     // try running the system
-    controller.run();
-    controller.check();
+    controller.execute();
   } // testConfigReading()
 
   /** Test suite routine for the test runner */

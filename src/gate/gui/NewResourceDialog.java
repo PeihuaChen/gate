@@ -239,9 +239,9 @@ public class NewResourceDialog extends JDialog {
           try {
             long startTime = System.currentTimeMillis();
             FeatureMap features = Factory.newFeatureMap();
-            Gate.setName(features, nameField.getText());
             res = Factory.createResource(resourceData.getClassName(), params,
-                                         features, listeners);
+                                         features, listeners,
+                                         nameField.getText());
             long endTime = System.currentTimeMillis();
             if(sListener != null) sListener.statusChanged(
                 nameField.getText() + " loaded in " +

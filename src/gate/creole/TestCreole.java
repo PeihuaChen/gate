@@ -308,8 +308,8 @@ public class TestCreole extends TestCase
       "PR2 got wrong features: " + pr2features,
       pr2features != null || pr2features.size() != 1
     );
-    pr1.run();
-    pr2.run();
+    pr1.execute();
+    pr2.execute();
     assert(
       "PR1 feature not present",
       pr1.getFeatures().get("I").equals("have been run, thankyou")
@@ -575,10 +575,9 @@ public class TestCreole extends TestCase
   public void testDefaultRun() throws Exception {
     ProcessingResource defaultPr = new AbstractProcessingResource() {
     };
-    defaultPr.run();
     boolean gotExceptionAsExpected = false;
     try {
-      defaultPr.check();
+      defaultPr.execute();
     } catch(ExecutionException e) {
       gotExceptionAsExpected = true;
     }

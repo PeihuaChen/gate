@@ -561,5 +561,16 @@ extends AbstractFeatureBearer implements DataStore {
     throw new MethodNotImplementedException();
   }
 
+    /** Sets the name of this resource*/
+  public void setName(String name){
+    this.name = name;
+  }
 
+  /** Returns the name of this resource*/
+  public String getName(){
+    return name;
+  }
+
+  /** The name of the datastore */
+  protected String name;
 } // class SerialDataStore

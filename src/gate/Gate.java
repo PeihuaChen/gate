@@ -81,17 +81,13 @@ public class Gate
       classLoader = new GateClassLoader();
     if(creoleRegister == null)
       creoleRegister = new CreoleRegisterImpl();
-
     // init the creole register
     initCreoleRegister();
-
     // init the data store register
     initDataStoreRegister();
-
     // read gate.xml files; this must come before creole register
     // initialisation in order for the CREOLE-DIR elements to have and effect
     initConfigData();
-
     // the creoleRegister acts as a proxy for datastore related events
 //    if (!Main.batchMode) {
       dataStoreRegister.addCreoleListener(creoleRegister);
@@ -159,7 +155,6 @@ jar/classpath so it's the same as registerBuiltins
       );
     }
     configProcessor.parseConfigFile(configStream, configUrl);
-
     // parse the user's config file (if it exists)
     String userConfigName =
       System.getProperty("user.home") + Strings.getFileSep() + gateDotXml;
@@ -178,7 +173,6 @@ jar/classpath so it's the same as registerBuiltins
         "user config loaded; DBCONFIG=" + DataStoreRegister.getConfigData()
       );
     }
-
   } // initConfigData()
 
   /** Get a URL that points to either an HTTP server or a file system
@@ -380,39 +374,6 @@ jar/classpath so it's the same as registerBuiltins
     }else{
       fm.remove("gate.HIDDEN");
     }
-  }
-
-  /** Returns the value for the APPLICATION attribute of a feature map */
-  static public boolean getApplicationAttribute(FeatureMap fm){
-    if(fm == null) return false;
-    Object value = fm.get("gate.APPLICATION");
-    return value != null &&
-           value instanceof String &&
-           ((String)value).equalsIgnoreCase("true");
-  }
-
-  /** Sets the value for the APPLICATION attribute of a feature map */
-  static public void setApplicationAttribute(FeatureMap fm,
-                                             boolean isApplication){
-    if(isApplication){
-      fm.put("gate.APPLICATION", "true");
-    }else{
-      fm.remove("gate.APPLICATION");
-    }
-  }
-
-  /** Gets the NAME attribute feature map.*/
-  static public String getName(FeatureMap fm){
-    Object value = fm.get("gate.NAME");
-    if(value != null && value instanceof String){
-      return (String)value;
-    }
-    return null;
-  }
-
-  /** Sets the NAME attribute in a feature map. */
-  static public void setName(FeatureMap fm, String name){
-    fm.put("gate.NAME", name);
   }
 
 

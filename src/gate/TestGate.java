@@ -177,8 +177,7 @@ public class TestGate {
       boolean allTests = true;
 
       if(! allTests){
-        suite.addTest(TestXml.suite());
-        suite.addTest(TestSgml.suite());
+        suite.addTest(TestConfig.suite());
       }else {
         suite.addTest(TestControllers.suite());
         suite.addTest(TestPersist.suite());

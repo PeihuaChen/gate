@@ -1,9 +1,9 @@
 /*
-	TestPR1.java 
+  TestPR1.java
 
-	Hamish Cunningham, 4/Sept/2000
+  Hamish Cunningham, 4/Sept/2000
 
-	$Id$
+  $Id$
 */
 
 package testpkg;
@@ -35,7 +35,7 @@ implements ProcessingResource
   public FeatureMap getFeatures() { return features; }
 
   /** Set the feature set */
-  public void setFeatures(FeatureMap features) { this.features = features; } 
+  public void setFeatures(FeatureMap features) { this.features = features; }
 
   /** The features associated with this resource. */
   protected FeatureMap features;
@@ -47,7 +47,7 @@ implements ProcessingResource
   public void setThing2(String t) { }
 
   /** Run the thing. */
-  public void run() {
+  public void execute() throws ExecutionException{
     features = Factory.newFeatureMap();
     features.put("I", "have been run, thankyou");
   } // run
@@ -56,5 +56,5 @@ implements ProcessingResource
   public Resource init() {
     return this;
   } // init
-   
+
 } // class TestPR1

@@ -251,6 +251,42 @@ public class AnnotationDiff extends AbstractVisualResource{
     return responseAnnotationSetNameFalsePoz;
   } // getResponseAnnotationSetNamefalsePoz()
 
+
+    //Prameters utility methods
+  /**
+   * Gets the value of a parameter of this resource.
+   * @param paramaterName the name of the parameter
+   * @return the current value of the parameter
+   */
+  public Object getParameterValue(String paramaterName)
+                throws ResourceInstantiationException{
+    return AbstractResource.getParameterValue(this, paramaterName);
+  }
+
+  /**
+   * Sets the value for a specified parameter.
+   *
+   * @param paramaterName the name for the parameteer
+   * @param parameterValue the value the parameter will receive
+   */
+  public void setParameterValue(String paramaterName, Object parameterValue)
+              throws ResourceInstantiationException{
+    AbstractResource.setParameterValue(this, paramaterName, parameterValue);
+  }
+
+  /**
+   * Sets the values for more parameters in one step.
+   *
+   * @param parameters a feature map that has paramete names as keys and
+   * parameter values as values.
+   */
+  public void setParameterValues(FeatureMap parameters)
+              throws ResourceInstantiationException{
+    AbstractResource.setParameterValues(this, parameters);
+  }
+
+
+
   ///////////////////////////////////////////////////
   // PRECISION methods
   ///////////////////////////////////////////////////

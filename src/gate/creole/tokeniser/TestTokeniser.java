@@ -59,9 +59,7 @@ public class TestTokeniser extends TestCase{
 
     tokeniser.setDocument(doc);
     tokeniser.setAnnotationSetName("TokeniserAS");
-    tokeniser.run();
-    //check for exceptions
-    tokeniser.check();
+    tokeniser.execute();
     assert(! doc.getAnnotations("TokeniserAS").isEmpty());
   }
 

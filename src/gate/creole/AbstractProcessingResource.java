@@ -36,12 +36,11 @@ extends AbstractResource implements ProcessingResource
    *  this in subclasses so the default implementation signals an
    *  exception.
    */
-  public void run() {
-    executionException = new ExecutionException(
-      "Resource " + getClass() + " hasn't overriden the run() method"
+  public void execute() throws ExecutionException{
+    throw new ExecutionException(
+      "Resource " + getClass() + " hasn't overriden the execute() method"
     );
-    return;
-  } // run()
+  } // execute()
 
   /**
    * Reinitialises the processing resource. After calling this method the
@@ -57,20 +56,28 @@ extends AbstractResource implements ProcessingResource
     init();
   } // reInit()
 
-  /** Trigger any exception that was caught when <CODE>run()</CODE> was
-    * invoked. If there is an exception stored it is cleared by this call.
-    */
-  public void check() throws ExecutionException {
-    if(executionException != null) {
-      ExecutionException e = executionException;
-      executionException = null;
-      throw e;
-    }
-  } // check()
-
-/** should clear all internal data of the resource. Does nothing now **/
-  public void clear() {
+  /** should clear all internal data of the resource. Does nothing now */
+  public void cleanup() {
   }
+
+  /**
+   * Checks whether this PR has been interrupted since the lsat time its
+   * {@link execute()} method was called.
+   */
+  public synchronized boolean isInterrupted(){
+    return interrupted;
+  }
+
+  /**
+   * Notifies this PR that it should stop its execution as soon as possible.
+   */
+  public synchronized void interrupt(){
+    interrupted = true;
+  }
+
+  //parameters code
+
+
 
   /**
    * Removes a {@link gate.event.StatusListener} from the list of listeners for
@@ -195,7 +202,5 @@ extends AbstractResource implements ProcessingResource
    */
   private transient Vector progressListeners;
 
-  /** Any exception caught during run() invocations are stored here. */
-  protected ExecutionException executionException  = null;
-
+  protected boolean interrupted = false;
 } // class AbstractProcessingResource

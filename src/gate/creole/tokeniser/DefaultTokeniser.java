@@ -27,16 +27,14 @@ public class DefaultTokeniser extends AbstractProcessingResource {
       FeatureMap params;
       FeatureMap features;
       Map listeners = new HashMap();
-//      if (! Main.batchMode) {//fire events if not in batch mode
-        listeners.put("gate.event.StatusListener", new StatusListener(){
-          public void statusChanged(String text){
-            fireStatusChanged(text);
-          }
-        });
+      listeners.put("gate.event.StatusListener", new StatusListener(){
+        public void statusChanged(String text){
+          fireStatusChanged(text);
+        }
+      });
 
       //tokeniser
-        fireStatusChanged("Creating a tokeniser");
-//      }//if no events
+      fireStatusChanged("Creating a tokeniser");
       params = Factory.newFeatureMap();
       if(tokeniserRulesURL != null) params.put("rulesURL",
                                                tokeniserRulesURL);
@@ -46,7 +44,7 @@ public class DefaultTokeniser extends AbstractProcessingResource {
       Gate.setHiddenAttribute(features, true);
       tokeniser = (SimpleTokeniser)Factory.createResource(
                     "gate.creole.tokeniser.SimpleTokeniser",
-                    params, features, listeners);
+                    params, features, listeners, null);
       tokeniser.setName("Tokeniser " + System.currentTimeMillis());
 
       fireProgressChanged(50);
@@ -60,12 +58,11 @@ public class DefaultTokeniser extends AbstractProcessingResource {
       if(DEBUG) Out.prln("Parameters for the transducer: \n" + params);
       features.clear();
       Gate.setHiddenAttribute(features, true);
-//      if (! Main.batchMode) //fire events if not in batch mode
-        listeners.put("gate.event.ProgressListener",
+      listeners.put("gate.event.ProgressListener",
                     new IntervalProgressListener(51, 100));
       transducer = (Transducer)Factory.createResource("gate.creole.Transducer",
                                                       params, features,
-                                                      listeners);
+                                                      listeners, null);
       fireProgressChanged(100);
       fireProcessFinished();
       transducer.setName("Transducer " + System.currentTimeMillis());
@@ -77,60 +74,52 @@ public class DefaultTokeniser extends AbstractProcessingResource {
     return this;
   }
 
-  public void run(){
-    FeatureMap params = Factory.newFeatureMap();
+  public void execute() throws ExecutionException{
+    //set the parameters
     try{
+      FeatureMap params = Factory.newFeatureMap();
       fireProgressChanged(0);
       //tokeniser
       params.put("document", document);
       params.put("annotationSetName", annotationSetName);
-      Factory.setResourceRuntimeParameters(tokeniser, params);
+      tokeniser.setParameterValues(params);
 
       //transducer
       params.clear();
       params.put("document", document);
       params.put("inputASName", annotationSetName);
       params.put("outputASName", annotationSetName);
-      Factory.setResourceRuntimeParameters(transducer, params);
-
-      ProgressListener pListener = null;
-      StatusListener sListener = null;
-//      if (!Main.batchMode) {
-        fireProgressChanged(5);
-        pListener = new IntervalProgressListener(5, 50);
-        sListener = new StatusListener(){
-          public void statusChanged(String text){
-            fireStatusChanged(text);
-          }
-        };
-
-      //tokeniser
-        tokeniser.addProgressListener(pListener);
-        tokeniser.addStatusListener(sListener);
-//      }
-      tokeniser.run();
-      tokeniser.check();
-//      if (!Main.batchMode) {
-        tokeniser.removeProgressListener(pListener);
-        tokeniser.removeStatusListener(sListener);
-
-      //transducer
-        pListener = new IntervalProgressListener(50, 100);
-        transducer.addProgressListener(pListener);
-        transducer.addStatusListener(sListener);
-//      }
-      transducer.run();
-      transducer.check();
-//      if (!Main.batchMode) {
-        transducer.removeProgressListener(pListener);
-        transducer.removeStatusListener(sListener);
-//      }
-    }catch(ExecutionException ee){
-      executionException = ee;
-    }catch(Exception e){
-      executionException = new ExecutionException(e);
+      transducer.setParameterValues(params);
+    }catch(ResourceInstantiationException rie){
+      throw new ExecutionException(rie);
     }
-  }//run
+
+    ProgressListener pListener = null;
+    StatusListener sListener = null;
+    fireProgressChanged(5);
+    pListener = new IntervalProgressListener(5, 50);
+    sListener = new StatusListener(){
+      public void statusChanged(String text){
+        fireStatusChanged(text);
+      }
+    };
+
+    //tokeniser
+    tokeniser.addProgressListener(pListener);
+    tokeniser.addStatusListener(sListener);
+    tokeniser.execute();
+    tokeniser.removeProgressListener(pListener);
+    tokeniser.removeStatusListener(sListener);
+
+  //transducer
+    pListener = new IntervalProgressListener(50, 100);
+    transducer.addProgressListener(pListener);
+    transducer.addStatusListener(sListener);
+
+    transducer.execute();
+    transducer.removeProgressListener(pListener);
+    transducer.removeStatusListener(sListener);
+  }//execute
 
   public void setTokeniserRulesURL(java.net.URL tokeniserRulesURL) {
     this.tokeniserRulesURL = tokeniserRulesURL;

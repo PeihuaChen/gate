@@ -96,11 +96,11 @@ public class Transducer extends AbstractProcessingResource {
    * This method is responsible for doing all the processing of the input
    * document.
    */
-  public void run(){
+  public void execute() throws ExecutionException{
+    if(document == null) throw new ExecutionException("No document provided!");
+    if(inputASName != null && inputASName.equals("")) inputASName = null;
+    if(outputASName != null && outputASName.equals("")) outputASName = null;
     try{
-      if(document == null) throw new ParameterException("No document provided!");
-      if(inputASName != null && inputASName.equals("")) inputASName = null;
-      if(outputASName != null && outputASName.equals("")) outputASName = null;
       batch.transduce(document,
                       inputASName == null ?
                         document.getAnnotations() :
@@ -108,8 +108,8 @@ public class Transducer extends AbstractProcessingResource {
                       outputASName == null ?
                         document.getAnnotations() :
                         document.getAnnotations(outputASName));
-    }catch(Exception e){
-      executionException = new ExecutionException(e);
+    }catch(JapeException je){
+      throw new ExecutionException(je);
     }
   }
 

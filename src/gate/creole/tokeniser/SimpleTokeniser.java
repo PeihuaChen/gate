@@ -93,8 +93,7 @@ import gate.util.*;
  * //.
  *
  */
-public class SimpleTokeniser extends AbstractProcessingResource
-implements Runnable, ProcessingResource{
+public class SimpleTokeniser extends AbstractProcessingResource{
   /** Debug flag
    */
   private static final boolean DEBUG = false;
@@ -125,7 +124,7 @@ implements Runnable, ProcessingResource{
       BufferedReader bRulesReader = new BufferedReader(rulesReader);
       String line = bRulesReader.readLine();
       ///String toParse = "";
-      StringBuffer toParse = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
+      StringBuffer toParse = new StringBuffer(Gate.STRINGBUFFER_SIZE);
 
       while (line != null){
         if(line.endsWith("\\")){
@@ -307,7 +306,7 @@ implements Runnable, ProcessingResource{
     else return null;
 
     ///String type = "";
-    StringBuffer type = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
+    StringBuffer type = new StringBuffer(Gate.STRINGBUFFER_SIZE);
 
     while(!token.equals(until)){
       //type += token;
@@ -495,8 +494,8 @@ implements Runnable, ProcessingResource{
   public String getFSMgml(){
     String res = "graph[ \ndirected 1\n";
     ///String nodes = "", edges = "";
-    StringBuffer nodes = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE),
-                 edges = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
+    StringBuffer nodes = new StringBuffer(Gate.STRINGBUFFER_SIZE),
+                 edges = new StringBuffer(Gate.STRINGBUFFER_SIZE);
 
     Iterator fsmStatesIter = fsmStates.iterator();
     while (fsmStatesIter.hasNext()){
@@ -529,8 +528,8 @@ implements Runnable, ProcessingResource{
   public String getDFSMgml() {
     String res = "graph[ \ndirected 1\n";
     ///String nodes = "", edges = "";
-    StringBuffer nodes = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE),
-                 edges = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
+    StringBuffer nodes = new StringBuffer(Gate.STRINGBUFFER_SIZE),
+                 edges = new StringBuffer(Gate.STRINGBUFFER_SIZE);
 
     Iterator dfsmStatesIter = dfsmStates.iterator();
     while (dfsmStatesIter.hasNext()) {
@@ -571,14 +570,13 @@ implements Runnable, ProcessingResource{
   /**
    * The method that does the actual tokenisation.
    */
-  public void run() {
+  public void execute() throws ExecutionException {
     AnnotationSet annotationSet;
     //check the input
     if(document == null) {
-      executionException = new ExecutionException(
+      throw new ExecutionException(
         "No document to tokenise!"
       );
-      return;
     }
 
     if(annotationSetName == null ||
@@ -586,8 +584,7 @@ implements Runnable, ProcessingResource{
     else annotationSet = document.getAnnotations(annotationSetName);
 
     fireStatusChanged(
-        "Tokenising " + document.getSourceUrl().getFile() + "..."
-    );
+        "Tokenising " + document.getSourceUrl().getFile() + "...");
 
     String content = document.getContent().toString();
     int length = content.length();
@@ -675,7 +672,7 @@ implements Runnable, ProcessingResource{
         tokenStart = charIdx;
       }
 
-      if(charIdx - oldCharIdx > 256){
+      if((charIdx - oldCharIdx > 256)){
         fireProgressChanged((100 * charIdx )/ length );
         oldCharIdx = charIdx;
       }

@@ -1,5 +1,5 @@
 /*
- *  FeatureBearer.java
+ *  NameBearer.java
  *
  *  Copyright (c) 1998-2001, The University of Sheffield.
  *
@@ -8,23 +8,23 @@
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *
- *  Hamish Cunningham, 7/Feb/2000
+ *  Valentin Tablan 21 Sep 2001
  *
  *  $Id$
  */
 
 package gate.util;
-import java.util.*;
-import gate.*;
 
-/** Classes that have features.
-  */
-public interface FeatureBearer
-{
-  /** Get the feature set */
-  public FeatureMap getFeatures();
+public abstract class AbstractNameBearer {
+    /** Sets the name of this resource*/
+  public void setName(String name){
+    this.name = name;
+  }
 
-  /** Set the feature set */
-  public void setFeatures(FeatureMap features);
+  /** Returns the name of this resource*/
+  public String getName(){
+    return name;
+  }
 
-} // interface FeatureBearer
+  protected String name;
+}

@@ -128,7 +128,7 @@ public class FeaturesEditor extends AbstractVisualResource{
     }
   }//public void setResource(Resource resource)
 
-  public void setHandle(ResourceHandle handle){
+  public void setHandle(Handle handle){
     //NOP
   }
 

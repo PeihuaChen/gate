@@ -56,10 +56,7 @@ public class TestControllers extends TestCase
   /** Serial controller test 1 */
   public void testSerial1() throws Exception {
     // a controller
-    Controller c1 = (Controller) Factory.createResource(
-      "gate.creole.SerialController",
-      Factory.newFeatureMap()
-    );
+    Controller c1 = new SerialController();
     assertNotNull("c1 controller is null", c1);
 
     //get a document
@@ -98,7 +95,7 @@ public class TestControllers extends TestCase
     // get the controller to encapsulate the tok and gaz
     c1.add(tokeniser);
     c1.add(gaz);
-    c1.run();
+    c1.execute();
 
     // check the resulting annotations
     if(DEBUG) {
@@ -125,10 +122,7 @@ public class TestControllers extends TestCase
   /** Serial controller test 2 */
   public void testSerial2() throws Exception {
     // a controller
-    Controller c1 = (Controller) Factory.createResource(
-      "gate.creole.SerialController",
-      Factory.newFeatureMap()
-    );
+    Controller c1 = new SerialController();
     assertNotNull("c1 controller is null", c1);
 /*
     // a couple of PRs

@@ -35,6 +35,9 @@ public class SerialDatastoreViewer extends JTree
   }
 
 
+  public void cleanup(){
+  }
+
   /** Accessor for features. */
   public FeatureMap getFeatures(){
     return features;
@@ -44,6 +47,39 @@ public class SerialDatastoreViewer extends JTree
   public void setFeatures(FeatureMap features){
     this.features = features;
   }// setFeatures()
+
+  //Parameters utility methods
+  /**
+   * Gets the value of a parameter of this resource.
+   * @param paramaterName the name of the parameter
+   * @return the current value of the parameter
+   */
+  public Object getParameterValue(String paramaterName)
+                throws ResourceInstantiationException{
+    return AbstractResource.getParameterValue(this, paramaterName);
+  }
+
+  /**
+   * Sets the value for a specified parameter.
+   *
+   * @param paramaterName the name for the parameteer
+   * @param parameterValue the value the parameter will receive
+   */
+  public void setParameterValue(String paramaterName, Object parameterValue)
+              throws ResourceInstantiationException{
+    AbstractResource.setParameterValue(this, paramaterName, parameterValue);
+  }
+
+  /**
+   * Sets the values for more parameters in one step.
+   *
+   * @param parameters a feature map that has paramete names as keys and
+   * parameter values as values.
+   */
+  public void setParameterValues(FeatureMap parameters)
+              throws ResourceInstantiationException{
+    AbstractResource.setParameterValues(this, parameters);
+  }
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
@@ -67,9 +103,9 @@ public class SerialDatastoreViewer extends JTree
   }
 
 
-  public void setHandle(ResourceHandle handle){
-    if(handle instanceof DefaultResourceHandle){
-      myHandle = (DefaultResourceHandle)handle;
+  public void setHandle(Handle handle){
+    if(handle instanceof NameBearerHandle){
+      myHandle = (NameBearerHandle)handle;
     }
   }
 
@@ -166,8 +202,8 @@ public class SerialDatastoreViewer extends JTree
             params.put(DataStore.DATASTORE_FEATURE_NAME, datastore);
             params.put(DataStore.LR_ID_FEATURE_NAME, entry.id);
             FeatureMap features = Factory.newFeatureMap();
-            Gate.setName(features, entry.name);
-            Resource res = Factory.createResource(entry.type, params, features);
+            Resource res = Factory.createResource(entry.type, params, features,
+                                                  null, entry.name);
             datastore.getLr(entry.type, entry.id);
             //project.frame.resourcesTreeModel.treeChanged();
             fireProgressChanged(0);
@@ -249,7 +285,7 @@ public class SerialDatastoreViewer extends JTree
   DefaultMutableTreeNode treeRoot;
   DefaultTreeModel treeModel;
   DataStore datastore;
-  DefaultResourceHandle myHandle;
+  NameBearerHandle myHandle;
   protected FeatureMap features;
 
   private transient Vector progressListeners;

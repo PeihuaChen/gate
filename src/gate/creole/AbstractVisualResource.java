@@ -20,7 +20,11 @@ import javax.swing.JPanel;
 
 import gate.*;
 import gate.util.*;
-import gate.gui.ResourceHandle;
+import gate.gui.Handle;
+
+import java.beans.*;
+import java.util.*;
+import java.lang.reflect.*;
 
 /** A convenience implementation of VisualResource with some default code. */
 public abstract class AbstractVisualResource extends JPanel
@@ -49,7 +53,7 @@ public abstract class AbstractVisualResource extends JPanel
   }//init()
 
   /** Does nothing now, but meant to clear all internal data **/
-  public void clear() {
+  public void cleanup() {
   }//clear()
 
   /**
@@ -68,9 +72,41 @@ public abstract class AbstractVisualResource extends JPanel
    * Used by the main GUI to tell this VR what handle created it. The VRs can
    * use this information e.g. to add items to the popup for the resource.
    */
-  public void setHandle(ResourceHandle handle){
+  public void setHandle(Handle handle){
   }
 
+  //Parameters utility methods
+  /**
+   * Gets the value of a parameter of this resource.
+   * @param paramaterName the name of the parameter
+   * @return the current value of the parameter
+   */
+  public Object getParameterValue(String paramaterName)
+                throws ResourceInstantiationException{
+    return AbstractResource.getParameterValue(this, paramaterName);
+  }
+
+  /**
+   * Sets the value for a specified parameter.
+   *
+   * @param paramaterName the name for the parameteer
+   * @param parameterValue the value the parameter will receive
+   */
+  public void setParameterValue(String paramaterName, Object parameterValue)
+              throws ResourceInstantiationException{
+    AbstractResource.setParameterValue(this, paramaterName, parameterValue);
+  }
+
+  /**
+   * Sets the values for more parameters in one step.
+   *
+   * @param parameters a feature map that has paramete names as keys and
+   * parameter values as values.
+   */
+  public void setParameterValues(FeatureMap parameters)
+              throws ResourceInstantiationException{
+    AbstractResource.setParameterValues(this, parameters);
+  }
 
   // Properties for the resource
   protected FeatureMap features;

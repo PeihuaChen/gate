@@ -31,36 +31,43 @@ import gate.persist.*;
 import gate.event.*;
 
 /**
- * Class used to store the information about an open resource.
+ * Class used to store the GUI information about an open entity (resource,
+ * controller, datatstore).
  * Such information will include icon to be used for tree components,
  * popup menu for right click events, large and small views, etc.
  */
-public class DefaultResourceHandle implements ResourceHandle, StatusListener, ProgressListener {
+public class NameBearerHandle implements Handle,
+                                         StatusListener,
+                                         ProgressListener {
 
-  public DefaultResourceHandle(FeatureBearer res) {
-    this.resource = res;
+  public NameBearerHandle(NameBearer target) {
+    this.target = target;
     sListenerProxy = new ProxyStatusListener();
     String iconName = null;
-    if(res instanceof Resource){
+    if(target instanceof Resource){
       rData = (ResourceData)Gate.getCreoleRegister().
-                                              get(resource.getClass().getName());
+                                              get(target.getClass().getName());
       if(rData != null){
         iconName = rData.getIcon();
         if(iconName == null){
-          if(resource instanceof LanguageResource) iconName = "lr.gif";
-          else if(resource instanceof ProcessingResource) iconName = "pr.gif";
+          if(target instanceof LanguageResource) iconName = "lr.gif";
+          else if(target instanceof ProcessingResource) iconName = "pr.gif";
         }
         tooltipText = "Type : " + rData.getName();
       } else {
         this.icon = MainFrame.getIcon("lr.gif");
       }
-    }else if(res instanceof DataStore){
-      iconName = ((DataStore)res).getIconName();
-      tooltipText = ((DataStore)res).getComment();
+    }else if(target instanceof DataStore){
+      iconName = ((DataStore)target).getIconName();
+      tooltipText = ((DataStore)target).getComment();
+    }else if(target instanceof Controller){
+      iconName = "application.gif";
+      tooltipText = ((Controller)target).getName() + " (" +
+                    target.getClass().getName() + ")";
     }
 
     popup = null;
-    title = (String)resource.getName();
+    title = (String)target.getName();
     this.icon = MainFrame.getIcon(iconName);
 
     buildViews();
@@ -114,31 +121,25 @@ public class DefaultResourceHandle implements ResourceHandle, StatusListener, Pr
     this.tooltipText = text;
   }
 
-  public Resource getResource() {
-    if(resource instanceof Resource) return (Resource)resource;
-    else return null;
-  }
-
-  public FeatureBearer getFeatureBearer() {
-    return resource;
+  public Object getTarget() {
+    return target;
   }
 
   protected void buildViews() {
     //build the popup
     popup = new JPopupMenu();
     popup.add(new XJMenuItem(new CloseAction(), sListenerProxy));
-    if(resource instanceof ProcessingResource &&
-       !Gate.getApplicationAttribute(resource.getFeatures())){
+    if(target instanceof Controller){
       popup.addSeparator();
       popup.add(new XJMenuItem(new ReloadAction(), sListenerProxy));
     }
 
     //Language Resources
-    if(resource instanceof LanguageResource) {
+    if(target instanceof LanguageResource) {
       popup.addSeparator();
       popup.add(new XJMenuItem(new SaveAction(), sListenerProxy));
       popup.add(new XJMenuItem(new SaveToAction(), sListenerProxy));
-      if(resource instanceof gate.corpora.DocumentImpl)
+      if(target instanceof gate.corpora.DocumentImpl)
         popup.add(new XJMenuItem(new SaveAsXmlAction(), sListenerProxy));
     }//if(resource instanceof LanguageResource)
 
@@ -146,7 +147,7 @@ public class DefaultResourceHandle implements ResourceHandle, StatusListener, Pr
 
     //build the large views
     List largeViewNames = Gate.getCreoleRegister().
-                          getLargeVRsForResource(resource.getClass().getName());
+                          getLargeVRsForResource(target.getClass().getName());
     if(largeViewNames != null && !largeViewNames.isEmpty()){
       largeView = new JTabbedPane(JTabbedPane.BOTTOM);
       Iterator classNameIter = largeViewNames.iterator();
@@ -162,7 +163,7 @@ public class DefaultResourceHandle implements ResourceHandle, StatusListener, Pr
                                 Factory.createResource(className,
                                                        params,
                                                        features);
-          view.setTarget(resource);
+          view.setTarget(target);
           view.setHandle(this);
           ((JTabbedPane)largeView).add((Component)view, rData.getName());
         }catch(ResourceInstantiationException rie){
@@ -178,7 +179,7 @@ public class DefaultResourceHandle implements ResourceHandle, StatusListener, Pr
 
     //build the small views
     List smallViewNames = Gate.getCreoleRegister().
-                          getSmallVRsForResource(resource.getClass().getName());
+                          getSmallVRsForResource(target.getClass().getName());
     if(smallViewNames != null && !smallViewNames.isEmpty()){
       smallView = new JTabbedPane(JTabbedPane.BOTTOM);
       Iterator classNameIter = smallViewNames.iterator();
@@ -194,7 +195,7 @@ public class DefaultResourceHandle implements ResourceHandle, StatusListener, Pr
                                 Factory.createResource(className,
                                                        params,
                                                        features);
-          view.setTarget(resource);
+          view.setTarget(target);
           view.setHandle(this);
           ((JTabbedPane)smallView).add((Component)view, rData.getName());
         }catch(ResourceInstantiationException rie){
@@ -231,7 +232,7 @@ public class DefaultResourceHandle implements ResourceHandle, StatusListener, Pr
   JPopupMenu popup;
   String title;
   String tooltipText;
-  FeatureBearer resource;
+  NameBearer target;
   ResourceData rData;
   Icon icon;
   JComponent smallView;
@@ -250,11 +251,11 @@ public class DefaultResourceHandle implements ResourceHandle, StatusListener, Pr
     }
 
     public void actionPerformed(ActionEvent e) {
-      if(resource instanceof Resource){
-        Factory.deleteResource((Resource)resource);
-      }else if(resource instanceof DataStore){
+      if(target instanceof Resource){
+        Factory.deleteResource((Resource)target);
+      }else if(target instanceof DataStore){
         try{
-          ((DataStore)resource).close();
+          ((DataStore)target).close();
         } catch(PersistenceException pe){
           JOptionPane.showMessageDialog(largeView != null ?
                                                      largeView : smallView,
@@ -319,7 +320,7 @@ public class DefaultResourceHandle implements ResourceHandle, StatusListener, Pr
           // Write (test the toXml() method)
           // This Action is added only when a gate.Document is created.
           // So, is for sure that the resource is a gate.Document
-          writer.write(((gate.Document)resource).toXml());
+          writer.write(((gate.Document)target).toXml());
           writer.flush();
           writer.close();
         } catch (Exception ex){
@@ -335,11 +336,11 @@ public class DefaultResourceHandle implements ResourceHandle, StatusListener, Pr
       putValue(SHORT_DESCRIPTION, "Save back to the datastore");
     }
     public void actionPerformed(ActionEvent e){
-      DataStore ds = ((LanguageResource)resource).getDataStore();
+      DataStore ds = ((LanguageResource)target).getDataStore();
       if(ds != null){
         try {
           ((LanguageResource)
-                    resource).getDataStore().sync((LanguageResource)resource);
+                    target).getDataStore().sync((LanguageResource)target);
         } catch(PersistenceException pe) {
           JOptionPane.showMessageDialog(getLargeView(),
                                         "Save failed!\n " +
@@ -397,12 +398,12 @@ public class DefaultResourceHandle implements ResourceHandle, StatusListener, Pr
                               " has FAILED! This should never happen again!");
             return;
           }// End if
-          DataStore ownDS = ((LanguageResource)resource).getDataStore();
+          DataStore ownDS = ((LanguageResource)target).getDataStore();
           if(ds == ownDS){
-            ds.sync((LanguageResource)resource);
+            ds.sync((LanguageResource)target);
           }else{
-            ds.adopt((LanguageResource)resource);
-            ds.sync((LanguageResource)resource);
+            ds.adopt((LanguageResource)target);
+            ds.sync((LanguageResource)target);
           }
         }
       } catch(PersistenceException pe) {
@@ -423,11 +424,11 @@ public class DefaultResourceHandle implements ResourceHandle, StatusListener, Pr
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable(){
         public void run(){
-          if(!(resource instanceof ProcessingResource)) return;
+          if(!(target instanceof ProcessingResource)) return;
           try{
             long startTime = System.currentTimeMillis();
             fireStatusChanged("Reinitialising " +
-                               resource.getName());
+                               target.getName());
             Map listeners = new HashMap();
             StatusListener sListener = new StatusListener(){
                                         public void statusChanged(String text){
@@ -447,7 +448,7 @@ public class DefaultResourceHandle implements ResourceHandle, StatusListener, Pr
                 };
             listeners.put("gate.event.ProgressListener", pListener);
 
-            ProcessingResource res = (ProcessingResource)resource;
+            ProcessingResource res = (ProcessingResource)target;
             try{
               Factory.setResourceListeners(res, listeners);
             }catch (Exception e){
@@ -463,7 +464,7 @@ public class DefaultResourceHandle implements ResourceHandle, StatusListener, Pr
               e.printStackTrace(Err.getPrintWriter());
             }
             long endTime = System.currentTimeMillis();
-            fireStatusChanged(resource.getName() +
+            fireStatusChanged(target.getName() +
                               " reinitialised in " +
                               NumberFormat.getInstance().format(
                               (double)(endTime - startTime) / 1000) + " seconds");
