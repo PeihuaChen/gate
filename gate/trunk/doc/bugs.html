@@ -158,19 +158,6 @@ problem.
     <!--<TD>spare2</TD>-->
   </TR>
 
- <TR>
-    <TD>0015</TD>
-    <TD>gui</TD>
-    <TD>Diana</TD>
-    <TD>___adopted_by</TD>
-    <TD>06 Aug 01 Linux 1.3.1 Alpha3</TD>
-    <TD>___fixed_on ___date ___Gversion</TD>
-    <TD>If you manage to create 2 different processing errors/warnings simultaneously (of the type that create pop-up messages), neither pop-up window lets you close it, and nothing can be done until the messages are closed. </TD>
-    <TD>___test_method</TD>
-    <TD>___supporting_materials</TD>
-    <!--<TD>spare1</TD>-->
-    <!--<TD>spare2</TD>-->
-  </TR>
 
   <TR>
     <TD>00022</TD>
@@ -192,33 +179,12 @@ problem.
 
 
 
-  <TR>
-    <TD>00037</TD>
-    <TD>core/gui</TD>
-    <TD>Diana/Marin</TD>
-    <TD>___adopted_by</TD>
-    <TD>bet1</TD>
-    <TD>___fixed_on ___date ___Gversion</TD>
-    <TD>When you select all the loaded documents and then do Close All, and then exit
-Gate, it doesn't appear to have removed the documents properly, because it
-saves them before it exits, and then reloads them when you start Gate again.<br>
-same story here and it happens with PRs (sometimes), applications (almost
-always) and with corpora (almost always, but only an empty corpus is loaded, i.e. containing no documents)
-
-I guess it&prime;s relevant to when GATE tries to persist the settings (and that somehow sometimes it fails to do so)
-</TD>
-    <TD>___test_method</TD>
-    <TD>___supporting_materials</TD>
-    <!--<TD>spare1</TD>-->
-    <!--<TD>spare2</TD>-->
-  </TR>
-
 
   <TR>
     <TD>00043</TD>
     <TD>gui - feature request</TD>
     <TD>Kalina</TD>
-    <TD>Kalina (she volunteered for it)</TD>
+    <TD></TD>
     <TD>beta1</TD>
     <TD>___fixed_on ___date ___Gversion</TD>
     <TD>
@@ -226,7 +192,7 @@ I guess it&prime;s relevant to when GATE tries to persist the settings (and that
  the adiff display, with their own horizontal scrolling, so that we can
  get both on the same screen when the features lists are long
 
- We must show the string for each annotation, because as it is, the ADIFF panel is anything but informative. When I analyse the OM errors for example, I have to keep swapping between the Document viewer where I can see the strings and the adiff, in order to discover why something might have gone wrong. That's not more than 30 mins work that will improve the life of people doing PR debugging increadibly. I volunteer to do it.</TD>
+</TD>
     <TD>___test_method</TD>
     <TD>___supporting_materials</TD>
     <!--<TD>spare1</TD>-->
@@ -287,7 +253,7 @@ Valentin's note: how often do we set parameters on resources? Is it worth the wh
 
   <TR>
     <TD>00049</TD>
-    <TD>core- I/O</TD>
+    <TD>core- I/O -optimisation</TD>
     <TD>Kalina</TD>
     <TD>___adopted_by</TD>
     <TD>beta1</TD>
@@ -344,6 +310,19 @@ Valentin's note: how often do we set parameters on resources? Is it worth the wh
     <!--<TD>spare2</TD>-->
   </TR>
 
+<TR>
+    <TD>00067</TD>
+    <TD>Oracle DB</TD>
+    <TD>Marin</TD>
+    <TD>Marin</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>passwords are kept in plain text in the database</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
 
 
 <!------------------------------------------------------------------------->
@@ -551,6 +530,20 @@ still matches them to BT, when it should not. </TD>
     <!--<TD>spare1</TD>-->
     <!--<TD>spare2</TD>-->
   </TR>
+   <TR>
+    <TD>00013</TD>
+    <TD>gui</TD>
+    <TD>Diana</TD>
+    <TD>Valentin</TD>
+    <TD>27 July 01 Linux 1.3.1 Alpha3</TD>
+    <TD>19 Feb 2002 beta1</TD>
+    <TD>annotation types which are empty do not get automatically removed from the GUI, nor is it possible to remove them manually (with the Delete key)</TD>
+    <TD></TD>
+    <TD></TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
   <TR>
     <TD>0014</TD>
     <TD>gui</TD>
@@ -568,6 +561,20 @@ still matches them to BT, when it should not. </TD>
     <!--<TD>spare1</TD>-->
     <!--<TD>spare2</TD>-->
   </TR>
+ <TR>
+    <TD>0015</TD>
+    <TD>gui</TD>
+    <TD>Diana</TD>
+    <TD>___adopted_by</TD>
+    <TD>06 Aug 01 Linux 1.3.1 Alpha3</TD>
+    <TD>no longer happens in RC1</TD>
+    <TD>If you manage to create 2 different processing errors/warnings simultaneously (of the type that create pop-up messages), neither pop-up window lets you close it, and nothing can be done until the messages are closed. </TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
   <TR>
     <TD>0016</TD>
     <TD>gui</TD>
@@ -684,6 +691,37 @@ still matches them to BT, when it should not. </TD>
     <!--<TD>spare2</TD>-->
   </TR>
 
+  <TR>
+    <TD>00024</TD>
+    <TD>core</TD>
+    <TD>Valentin</TD>
+    <TD>Valentin</TD>
+    <TD>17/Dec/2001 All platforms All JDKs Beta1</TD>
+    <TD>19 Feb 2002 beta1</TD>
+    <TD>Annotations and coref data are represented independently but they depend upon each other.</TD>
+    <TD>Create a doc and run ANNIE on it; you should get a bunch of annotations some of which will corefer.<br>
+    Delete all the annotations and try to show the coref data. It explodes because it tries to find those annotations that were matching but, guess what, they're not there...</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00025</TD>
+    <TD>core</TD>
+    <TD>Diana</TD>
+    <TD>Valentin</TD>
+    <TD>17/Dec/2001 Beta1</TD>
+    <TD>20 Feb 2002 Beta1</TD>
+    <TD>Restoring an application from a file creates an endless loop
+    if one of the components is missing (e.g. you've removed a
+    document from where it was originally stored).</TD>
+    <TD></TD>
+    <TD></TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
 <TR>
     <TD>00026</TD>
     <TD>gui</TD>
@@ -727,51 +765,6 @@ At that point, the treeviewer gets constructed on the first pane and Cristi&prim
    <TD>Just run build/gate.sh</TD>
    <TD>Supporting  materials</TD>
 </TR>
-
-   <TR>
-    <TD>00013</TD>
-    <TD>gui</TD>
-    <TD>Diana</TD>
-    <TD>Valentin</TD>
-    <TD>27 July 01 Linux 1.3.1 Alpha3</TD>
-    <TD>19 Feb 2002 beta1</TD>
-    <TD>annotation types which are empty do not get automatically removed from the GUI, nor is it possible to remove them manually (with the Delete key)</TD>
-    <TD></TD>
-    <TD></TD>
-    <!--<TD>spare1</TD>-->
-    <!--<TD>spare2</TD>-->
-  </TR>
-
-  <TR>
-    <TD>00024</TD>
-    <TD>core</TD>
-    <TD>Valentin</TD>
-    <TD>Valentin</TD>
-    <TD>17/Dec/2001 All platforms All JDKs Beta1</TD>
-    <TD>19 Feb 2002 beta1</TD>
-    <TD>Annotations and coref data are represented independently but they depend upon each other.</TD>
-    <TD>Create a doc and run ANNIE on it; you should get a bunch of annotations some of which will corefer.<br>
-    Delete all the annotations and try to show the coref data. It explodes because it tries to find those annotations that were matching but, guess what, they're not there...</TD>
-    <TD>___supporting_materials</TD>
-    <!--<TD>spare1</TD>-->
-    <!--<TD>spare2</TD>-->
-  </TR>
-
-  <TR>
-    <TD>00025</TD>
-    <TD>core</TD>
-    <TD>Diana</TD>
-    <TD>Valentin</TD>
-    <TD>17/Dec/2001 Beta1</TD>
-    <TD>20 Feb 2002 Beta1</TD>
-    <TD>Restoring an application from a file creates an endless loop
-    if one of the components is missing (e.g. you've removed a
-    document from where it was originally stored).</TD>
-    <TD></TD>
-    <TD></TD>
-    <!--<TD>spare1</TD>-->
-    <!--<TD>spare2</TD>-->
-  </TR>
 
 
   <TR>
@@ -970,6 +963,27 @@ exist :-)
 </TD>
     <TD>___test_method</TD>
     <TD><a href="bugs/trace02.txt">trace</a></TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00037</TD>
+    <TD>core/gui</TD>
+    <TD>Diana/Marin</TD>
+    <TD>Valy</TD>
+    <TD>bet1</TD>
+    <TD>beta1</TD>
+    <TD>When you select all the loaded documents and then do Close All, and then exit
+Gate, it doesn't appear to have removed the documents properly, because it
+saves them before it exits, and then reloads them when you start Gate again.<br>
+same story here and it happens with PRs (sometimes), applications (almost
+always) and with corpora (almost always, but only an empty corpus is loaded, i.e. containing no documents)
+
+I guess it&prime;s relevant to when GATE tries to persist the settings (and that somehow sometimes it fails to do so)
+</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
     <!--<TD>spare1</TD>-->
     <!--<TD>spare2</TD>-->
   </TR>
@@ -1313,6 +1327,24 @@ String suffixForDumpFiles</TD>
     <TD>beta1</TD>
     <TD>27 February 2002 beta1</TD>
     <TD>local newlines in dumped files; a+x on scripts after creation.</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00066</TD>
+    <TD>gui - feature request</TD>
+    <TD>Kalina</TD>
+    <TD>Kalina</TD>
+    <TD>beta1</TD>
+    <TD>05 march 2002; beta1</TD>
+    <TD>
+ AnnotDiff to display the strings of the key and response annotations rather than their type
+ which is already shown in the list above.
+
+</TD>
     <TD>___test_method</TD>
     <TD>___supporting_materials</TD>
     <!--<TD>spare1</TD>-->
