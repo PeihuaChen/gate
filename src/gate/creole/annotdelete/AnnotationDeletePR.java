@@ -66,7 +66,8 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
       return;
 
     //loop through the sets and delete them all unless they're original markups
-    Iterator iter = namedSets.keySet().iterator();
+    List setNames = new ArrayList(namedSets.keySet());
+    Iterator iter = setNames.iterator();
     while (iter.hasNext()) {
       String setName = (String) iter.next();
       if (! setName.equals(markupSetName))
