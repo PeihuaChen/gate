@@ -1,0 +1,4 @@
+I need to add support for update events to the Lexicons in gate.lexicon and
+then make the GUI's to listen to these events and update themselves. Update of words,
+synsets and senses is needed. Also, make the OntoLex editor listen for ontology changes
+events.
