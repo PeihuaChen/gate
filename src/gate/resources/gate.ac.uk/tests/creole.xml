@@ -22,7 +22,7 @@
       		<JAR>TestResources.jar</JAR>
       		<CLASS>testpkg.TestPR2</CLASS>
       		<AUTOLOAD/>
-      		<AUTOINSTANCE></AUTOINSTANCE>
+      		<AUTOINSTANCE/>
       		<ICON>anIconForTPR2</ICON>
     		</RESOURCE>
 		<RESOURCE>
@@ -37,7 +37,7 @@
       		<JAR>TestResources.jar</JAR>
       		<CLASS>testpkg.TestPR3</CLASS>
       		<AUTOLOAD/>
-      		<AUTOINSTANCE></AUTOINSTANCE>
+      		<AUTOINSTANCE/>
       		<PARAMETER NAME ="paramList" DEFAULT="Location;Person; String 3;String 4" RUNTIME="true">java.util.LinkedList</PARAMETER>
       		<PARAMETER NAME ="paramSet" DEFAULT="Location;Person; String 3;String 4" ITEM_CLASS_NAME="java.lang.String" RUNTIME="true">java.util.TreeSet</PARAMETER>
       		<PARAMETER NAME ="paramArrayList" DEFAULT="123;12;3;34" ITEM_CLASS_NAME="java.lang.Integer" RUNTIME="true">java.util.ArrayList</PARAMETER>
@@ -65,7 +65,7 @@
 			<JAR>ShefDocumentFormats.jar</JAR>
 			<CLASS>gate.corpora.XmlDocumentFormat</CLASS>
 			<AUTOLOAD/>
-			<AUTOINSTANCE></AUTOINSTANCE>
+			<AUTOINSTANCE/>
 			<PRIVATE/>
 		</RESOURCE>
 		<RESOURCE>
@@ -73,7 +73,7 @@
 			<JAR>ShefDocumentFormats.jar</JAR>
 			<CLASS>gate.corpora.EmailDocumentFormat</CLASS>
 			<AUTOLOAD/>
-			<AUTOINSTANCE></AUTOINSTANCE>
+			<AUTOINSTANCE/>
 			<PRIVATE/>
 		</RESOURCE>
 	</CREOLE>
