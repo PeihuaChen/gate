@@ -434,6 +434,7 @@ public class AnnotationSetsView extends AbstractDocumentView
         tHandler.setSelected(selected);
         int row = tableRows.indexOf(tHandler);
         tableModel.fireTableRowsUpdated(row, row);
+        mainTable.getSelectionModel().setSelectionInterval(row, row);
       }
     });
   }
@@ -770,6 +771,8 @@ public class AnnotationSetsView extends AbstractDocumentView
           pos++);
       typeHandlers.add(pos, tHandler);
       typeHandlersByType.put(type, tHandler);
+      //preserve table selection
+      int row = mainTable.getSelectedRow();
       int setRow = tableRows.indexOf(this);
       if(typeHandlers.size() == 1) 
         tableModel.fireTableRowsUpdated(setRow, setRow);
@@ -778,6 +781,8 @@ public class AnnotationSetsView extends AbstractDocumentView
         tableModel.fireTableRowsInserted(setRow + pos + 1,
               setRow + pos + 1);
       }
+      //restore selection if any
+      if(row != -1) mainTable.getSelectionModel().setSelectionInterval(row, row);
       return tHandler;
     }
     
@@ -786,6 +791,8 @@ public class AnnotationSetsView extends AbstractDocumentView
       int pos = typeHandlers.indexOf(tHandler);
       typeHandlers.remove(pos);
       typeHandlersByType.remove(tHandler.name);
+      //preserve table selection
+      int row = mainTable.getSelectedRow();
       if(expanded){
         tableRows.remove(setRow + pos + 1);
         tableModel.fireTableRowsDeleted(setRow + pos + 1, setRow + pos + 1);
@@ -795,6 +802,8 @@ public class AnnotationSetsView extends AbstractDocumentView
         setExpanded(false);
         tableModel.fireTableRowsUpdated(setRow, setRow);
       }
+      //restore selection if any
+      if(row != -1) mainTable.getSelectionModel().setSelectionInterval(row, row);
     }
     
     public void removeType(String type){
@@ -1070,7 +1079,15 @@ public class AnnotationSetsView extends AbstractDocumentView
       String name = newSetNameTextField.getText();
       newSetNameTextField.setText("");
       if(name != null && name.length() > 0){
-        document.getAnnotations(name);
+        AnnotationSet set = document.getAnnotations(name);
+        //select the newly added set
+        Iterator rowsIter = tableRows.iterator();
+        int row = -1;
+        for(int i = 0; i < tableRows.size() && row < 0; i++){
+          if(tableRows.get(i) instanceof SetHandler &&
+             ((SetHandler)tableRows.get(i)).set == set) row = i;
+        }
+        if(row >= 0) mainTable.getSelectionModel().setSelectionInterval(row, row);
       }
     }
   }
