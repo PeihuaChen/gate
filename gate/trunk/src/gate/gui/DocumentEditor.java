@@ -2047,11 +2047,15 @@ public class DocumentEditor extends AbstractVisualResource{
         try{
           editor = (AnnotationVisualResource)
                                           Factory.createResource(editorType);
+          JScrollPane scroller = new JScrollPane((Component)editor);
+          scroller.setPreferredSize(((Component) editor).getPreferredSize());
+          tabbedPane.add(scroller,
+                      ((ResourceData)Gate.getCreoleRegister().get(editorType)).
+                                                                getName()
+
+                      );
           editor.setTarget(set);
           editor.setAnnotation(annotation);
-          tabbedPane.add(/*new JScrollPane(*/(Component)editor/*)*/,
-                        ((ResourceData)Gate.getCreoleRegister().get(editorType)).
-                                                                getName());
         }catch(ResourceInstantiationException rie){
           rie.printStackTrace(Err.getPrintWriter());
         }
@@ -2069,7 +2073,7 @@ public class DocumentEditor extends AbstractVisualResource{
           if(editor.canDisplayAnnotationType(annotation.getType())){
             editor.setTarget(set);
             editor.setAnnotation(annotation);
-            tabbedPane.add(/*new JScrollPane(*/(Component)editor/*)*/,
+            tabbedPane.add(new JScrollPane((Component)editor),
                            ((ResourceData)Gate.getCreoleRegister().
                                               get(editorType)).getName());
           }
@@ -2085,9 +2089,9 @@ public class DocumentEditor extends AbstractVisualResource{
         if(OkCancelDialog.showDialog(DocumentEditor.this,
                                      tabbedPane, "Edit Annotation")){
           try{
-            ((AnnotationVisualResource)/*((JScrollPane)*/tabbedPane.
-                                        getSelectedComponent()/*).getViewport().
-                                                                getView()*/
+            ((AnnotationVisualResource)((JScrollPane)tabbedPane.
+                                        getSelectedComponent()).getViewport().
+                                                                getView()
              ).okAction();
              allOK = true;
           }catch(GateException ge){
@@ -2100,6 +2104,21 @@ public class DocumentEditor extends AbstractVisualResource{
             allOK = false;
           }
         }else{
+          if (OkCancelDialog.userHasPressedCancel)
+            try{
+              ((AnnotationVisualResource)((JScrollPane)tabbedPane.
+                                        getSelectedComponent()).getViewport().
+                                                                getView()
+              ).cancelAction();
+               allOK = true;
+            } catch(GateException ge){
+              JOptionPane.showMessageDialog(
+                DocumentEditor.this,
+                "There was an error:\n" +
+                ge.toString(),
+                "Gate", JOptionPane.ERROR_MESSAGE);
+              allOK = false;
+            }
           allOK = true;
         }
       }//while(!allOK)
@@ -2165,11 +2184,12 @@ public class DocumentEditor extends AbstractVisualResource{
         try{
           editor = (AnnotationVisualResource)
                                           Factory.createResource(editorType);
-          editor.setTarget(set);
-          editor.setSpan(startOffset, endOffset);
-          tabbedPane.add(/*new JScrollPane(*/(Component)editor/*)*/,
+          tabbedPane.add(new JScrollPane((Component)editor),
                         ((ResourceData)Gate.getCreoleRegister().get(editorType)).
                                                                 getName());
+          editor.setTarget(set);
+          editor.setSpan(startOffset, endOffset, type);
+
         }catch(ResourceInstantiationException rie){
           rie.printStackTrace(Err.getPrintWriter());
         }
@@ -2188,8 +2208,8 @@ public class DocumentEditor extends AbstractVisualResource{
           if(type == null ||
              (type != null && editor.canDisplayAnnotationType(type))){
             editor.setTarget(set);
-            editor.setSpan(startOffset, endOffset);
-            tabbedPane.add(/*new JScrollPane(*/(Component)editor/*)*/,
+            editor.setSpan(startOffset, endOffset, type);
+            tabbedPane.add(new JScrollPane((Component)editor),
                            ((ResourceData)Gate.getCreoleRegister().
                                               get(editorType)).getName());
           }
@@ -2205,9 +2225,9 @@ public class DocumentEditor extends AbstractVisualResource{
         if(OkCancelDialog.showDialog(DocumentEditor.this,
                                      tabbedPane, "Edit Annotation")){
           try{
-            ((AnnotationVisualResource)/*((JScrollPane)*/tabbedPane.
-                                        getSelectedComponent()/*).getViewport().
-                                                                getView()*/
+            ((AnnotationVisualResource)((JScrollPane)tabbedPane.
+                                        getSelectedComponent()).getViewport().
+                                                                getView()
              ).okAction();
              allOK = true;
           }catch(GateException ge){

@@ -72,6 +72,7 @@ public class OkCancelDialog extends JDialog {
 
     cancelButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+        userHasPressedCancel = true;
         hide();
       }
     });
@@ -81,6 +82,7 @@ public class OkCancelDialog extends JDialog {
   public void show(){
     setModal(true);
     userHasPressedOK = false;
+    userHasPressedCancel = false;
     super.show();
   }
 
@@ -111,4 +113,5 @@ public class OkCancelDialog extends JDialog {
   protected JButton okButton;
   protected JButton cancelButton;
   protected boolean userHasPressedOK;
+  protected static boolean userHasPressedCancel;
 }
