@@ -27,19 +27,17 @@ public interface Synset {
 
   public int getPOS();
 
-  public String getDescription();
-
   public boolean isUniqueBeginner();
 
   public String getGloss();
 
-  public Iterator getWordSenses();
+  public List getWordSenses();
 
   public WordSense getWordSense(int offset);
 
-  public Iterator getSemanticRealtions();
+  public List getSemanticRealtions();
 
-  public Iterator getSemanticRealtions(int type);
+  public List getSemanticRealtions(int type);
 
 }
 
