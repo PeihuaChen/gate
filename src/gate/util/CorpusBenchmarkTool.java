@@ -19,7 +19,7 @@ import java.io.*;
 import java.util.*;
 
 import gate.*;
-import gate.annotation.AnnotationDiff;
+import gate.util.AnnotationDiffer;
 import gate.creole.*;
 import gate.persist.PersistenceException;
 import gate.persist.SerialDataStore;
@@ -61,12 +61,15 @@ public class CorpusBenchmarkTool {
              +" "+ isVerboseMode +" "+ isMoreInfoMode);
 */
     execute(startDir);
-    if (application != null) {
+    System.out.println("Done execute");
+/*    if (application != null) {
       Iterator iter = new ArrayList(application.getPRs()).iterator();
       while (iter.hasNext())
         Factory.deleteResource((Resource) iter.next());
+
       Factory.deleteResource(application);
-    }
+    }*/
+    System.out.println("Done execute");
   }
 
   public void init() {
@@ -257,7 +260,7 @@ public class CorpusBenchmarkTool {
 
     corpusTool.setStartDirectory(dir);
     corpusTool.execute();
-
+    System.out.println("Done Executing");
     //if we're not generating the corpus, then print the precision and recall
     //statistics for the processed corpus
     if (! corpusTool.getGenerateMode())
@@ -460,7 +463,7 @@ public class CorpusBenchmarkTool {
     } catch (gate.security.SecurityException ex3) {
       throw new GateRuntimeException("CorpusBenchmark: " + ex3.getMessage());
     }
-
+    System.out.println("Done");
   }//generateCorpus
 
   protected void evaluateCorpus(File fileDir,
@@ -988,106 +991,106 @@ ex.printStackTrace();
     for (int jj= 0; jj< annotTypes.size(); jj++) {
       String annotType = (String) annotTypes.get(jj);
 
-      AnnotationDiff annotDiff=measureDocs(markedDoc, cleanDoc, annotType);
+      AnnotationDiffer annotDiffer = measureDocs(markedDoc, cleanDoc, annotType);
       //we don't have this annotation type in this document
-      if (annotDiff == null)
+      if (annotDiffer == null)
         continue;
 
       //increase the number of processed documents
       docNumber++;
       //add precison and recall to the sums
-      updateStatistics(annotDiff, annotType);
+      updateStatistics(annotDiffer, annotType);
 
-      AnnotationDiff annotDiff1 =
+      AnnotationDiffer annotDiffer1 =
         measureDocs(markedDoc, persDoc, annotType);
 
       Out.prln("<TR>");
 
-      if(isMoreInfoMode && annotDiff1 != null
-         && (annotDiff1.getPrecisionAverage() != annotDiff.getPrecisionAverage()
-         || annotDiff1.getRecallAverage() != annotDiff.getRecallAverage())
+      if(isMoreInfoMode && annotDiffer1 != null
+         && (annotDiffer1.getPrecisionAverage() != annotDiffer.getPrecisionAverage()
+         || annotDiffer1.getRecallAverage() != annotDiffer.getRecallAverage())
          )
         Out.prln("<TD> " + annotType + "_new"+ "</TD>");
       else
         Out.prln("<TD> " + annotType + "</TD>");
 
       if (isMoreInfoMode) {
-        if(annotDiff1 != null) updateStatisticsProc(annotDiff1, annotType);
+        if(annotDiffer1 != null) updateStatisticsProc(annotDiffer1, annotType);
 
-        Out.prln("<TD>" + annotDiff.getCorrectCount() + "</TD>");
-        Out.prln("<TD>" + annotDiff.getPartiallyCorrectCount() + "</TD>");
-        Out.prln("<TD>" + annotDiff.getMissingCount() + "</TD>");
-        Out.prln("<TD>" + annotDiff.getSpuriousCount() + "</TD>");
+        Out.prln("<TD>" + annotDiffer.getCorrectMatches() + "</TD>");
+        Out.prln("<TD>" + annotDiffer.getPartiallyCorrectMatches() + "</TD>");
+        Out.prln("<TD>" + annotDiffer.getMissing() + "</TD>");
+        Out.prln("<TD>" + annotDiffer.getSpurious() + "</TD>");
       }
 
       Out.prln("<TD>");
 
       //check the precision first
-      if (annotDiff1 != null) {
+      if (annotDiffer1 != null) {
 
-        if (annotDiff1.getPrecisionAverage()
-              < annotDiff.getPrecisionAverage()) {
+        if (annotDiffer1.getPrecisionAverage()
+              < annotDiffer.getPrecisionAverage()) {
             Out.prln("<P><Font color=blue> ");
-            Out.prln(annotDiff.getPrecisionAverage());
+            Out.prln(annotDiffer.getPrecisionAverage());
 
             if(!isMoreInfoMode) {
               Out.pr("<BR>Precision increase on human-marked from ");
-              Out.pr(annotDiff1.getPrecisionAverage() + " to ");
-              Out.prln(annotDiff.getPrecisionAverage());
+              Out.pr(annotDiffer1.getPrecisionAverage() + " to ");
+              Out.prln(annotDiffer.getPrecisionAverage());
             }
             Out.prln(" </Font></P>");
           }
-        else if (annotDiff1.getPrecisionAverage()
-               > annotDiff.getPrecisionAverage()) {
+        else if (annotDiffer1.getPrecisionAverage()
+               > annotDiffer.getPrecisionAverage()) {
           Out.prln("<P><Font color=red> ");
-          Out.prln(annotDiff.getPrecisionAverage());
+          Out.prln(annotDiffer.getPrecisionAverage());
 
           if(!isMoreInfoMode) {
             Out.pr("<BR>Precision decrease on human-marked from ");
-            Out.pr(annotDiff1.getPrecisionAverage() + " to ");
-            Out.prln(annotDiff.getPrecisionAverage());
+            Out.pr(annotDiffer1.getPrecisionAverage() + " to ");
+            Out.prln(annotDiffer.getPrecisionAverage());
           }
           Out.prln(" </Font></P>");
         }
         else
-          Out.prln("<P> " + annotDiff.getPrecisionAverage() + " </P>");
+          Out.prln("<P> " + (double) annotDiffer.getPrecisionAverage() + " </P>");
       }
       else
-        Out.prln("<P> " + annotDiff.getPrecisionAverage() + " </P>");
+        Out.prln("<P> " + annotDiffer.getPrecisionAverage() + " </P>");
 
       Out.prln("</TD>");
 
       Out.prln("<TD>");
 
       //check the recall now
-      if (annotDiff1 != null) {
+      if (annotDiffer1 != null) {
 
-        if (annotDiff1.getRecallAverage() < annotDiff.getRecallAverage()) {
+        if (annotDiffer1.getRecallAverage() < annotDiffer.getRecallAverage()) {
           Out.prln("<P><Font color=blue> ");
-          Out.prln(annotDiff.getRecallAverage());
+          Out.prln(annotDiffer.getRecallAverage());
 
           if(!isMoreInfoMode) {
             Out.pr("<BR>Recall increase on human-marked from ");
-            Out.pr(annotDiff1.getRecallAverage() + " to ");
-            Out.prln(annotDiff.getRecallAverage());
+            Out.pr(annotDiffer1.getRecallAverage() + " to ");
+            Out.prln(annotDiffer.getRecallAverage());
           }
           Out.prln(" </Font></P>");
         }
-        else if (annotDiff1.getRecallAverage() > annotDiff.getRecallAverage()) {
+        else if (annotDiffer1.getRecallAverage() > annotDiffer.getRecallAverage()) {
           Out.prln("<P><Font color=red> ");
-          Out.prln(annotDiff.getRecallAverage());
+          Out.prln(annotDiffer.getRecallAverage());
 
           if(!isMoreInfoMode) {
             Out.pr("<BR>Recall decrease on human-marked from ");
-            Out.pr(annotDiff1.getRecallAverage() + " to ");
-            Out.prln(annotDiff.getRecallAverage());
+            Out.pr(annotDiffer1.getRecallAverage() + " to ");
+            Out.prln(annotDiffer.getRecallAverage());
           }
           Out.prln(" </Font></P>");
         }
         else
-          Out.prln("<P> " + annotDiff.getRecallAverage() + " </P>");
+          Out.prln("<P> " + annotDiffer.getRecallAverage() + " </P>");
       } else
-        Out.prln("<P> " + annotDiff.getRecallAverage() + " </P>");
+        Out.prln("<P> " + annotDiffer.getRecallAverage() + " </P>");
 
 
       Out.prln("</TD>");
@@ -1095,8 +1098,8 @@ ex.printStackTrace();
       //check the recall now
       if ( isVerboseMode ) {
         Out.prln("<TD>");
-        if (annotDiff.getRecallAverage() < threshold) {
-          printAnnotations(annotDiff, markedDoc, cleanDoc);
+        if (annotDiffer.getRecallAverage() < threshold) {
+          printAnnotations(annotDiffer, markedDoc, cleanDoc);
         }
         else {
           Out.prln("&nbsp;");
@@ -1107,42 +1110,42 @@ ex.printStackTrace();
       Out.prln("</TR>");
 
       // show one more table line for processed document
-      if(isMoreInfoMode && annotDiff1 != null
-         && (annotDiff1.getPrecisionAverage() != annotDiff.getPrecisionAverage()
-         || annotDiff1.getRecallAverage() != annotDiff.getRecallAverage())
+      if(isMoreInfoMode && annotDiffer1 != null
+         && (annotDiffer1.getPrecisionAverage() != annotDiffer.getPrecisionAverage()
+         || annotDiffer1.getRecallAverage() != annotDiffer.getRecallAverage())
          ) {
 
         Out.prln("<TR>");
         Out.prln("<TD> " + annotType + "_old" + "</TD>");
 
-        Out.prln("<TD>" + annotDiff1.getCorrectCount() + "</TD>");
-        Out.prln("<TD>" + annotDiff1.getPartiallyCorrectCount() + "</TD>");
-        Out.prln("<TD>" + annotDiff1.getMissingCount() + "</TD>");
-        Out.prln("<TD>" + annotDiff1.getSpuriousCount() + "</TD>");
+        Out.prln("<TD>" + annotDiffer1.getCorrectMatches() + "</TD>");
+        Out.prln("<TD>" + annotDiffer1.getPartiallyCorrectMatches() + "</TD>");
+        Out.prln("<TD>" + annotDiffer1.getMissing() + "</TD>");
+        Out.prln("<TD>" + annotDiffer1.getSpurious() + "</TD>");
 
         Out.prln("<TD>");
-        if (annotDiff1.getPrecisionAverage() < annotDiff.getPrecisionAverage())
+        if (annotDiffer1.getPrecisionAverage() < annotDiffer.getPrecisionAverage())
 
-          Out.prln("<P><Font color=blue> "  + annotDiff1.getPrecisionAverage()
+          Out.prln("<P><Font color=blue> "  + annotDiffer1.getPrecisionAverage()
                 + "</Font></P>");
-        else if (annotDiff1.getPrecisionAverage() > annotDiff.getPrecisionAverage())
+        else if (annotDiffer1.getPrecisionAverage() > annotDiffer.getPrecisionAverage())
           Out.prln(
-             "<P><Font color=red> " + annotDiff1.getPrecisionAverage()
+             "<P><Font color=red> " + annotDiffer1.getPrecisionAverage()
              + " </Font></P>");
         else
-          Out.prln(annotDiff1.getPrecisionAverage());
+          Out.prln(annotDiffer1.getPrecisionAverage());
 
         Out.prln("</TD>");
 
         Out.prln("<TD>");
-        if (annotDiff1.getRecallAverage() < annotDiff.getRecallAverage())
-          Out.prln("<P><Font color=blue> " + annotDiff1.getRecallAverage()
+        if (annotDiffer1.getRecallAverage() < annotDiffer.getRecallAverage())
+          Out.prln("<P><Font color=blue> " + annotDiffer1.getRecallAverage()
                    + " </Font></P>");
-        else if (annotDiff1.getRecallAverage() > annotDiff.getRecallAverage())
-          Out.prln("<P><Font color=red> " + annotDiff1.getRecallAverage()
+        else if (annotDiffer1.getRecallAverage() > annotDiffer.getRecallAverage())
+          Out.prln("<P><Font color=red> " + annotDiffer1.getRecallAverage()
                     + " </Font></P>");
         else
-           Out.prln(annotDiff1.getRecallAverage());
+           Out.prln(annotDiffer1.getRecallAverage());
 
         Out.prln("</TD>");
 
@@ -1151,8 +1154,8 @@ ex.printStackTrace();
           // create error file and start writing
 
           Out.prln("<TD>");
-          if (annotDiff.getRecallAverage() < threshold) {
-            printAnnotations(annotDiff, markedDoc, cleanDoc);
+          if (annotDiffer.getRecallAverage() < threshold) {
+            printAnnotations(annotDiffer, markedDoc, cleanDoc);
           }
           else {
             Out.prln("&nbsp;");
@@ -1163,7 +1166,7 @@ ex.printStackTrace();
       } // if(isMoreInfoMode && annotDiff1 != null)
 
       if (isMoreInfoMode && errDir != null)
-        storeAnnotations(annotType, annotDiff, markedDoc, cleanDoc, errFileWriter);
+        storeAnnotations(annotType, annotDiffer, markedDoc, cleanDoc, errFileWriter);
     }//for loop through annotation types
     Out.prln("</TABLE>");
 
@@ -1206,7 +1209,7 @@ ex.printStackTrace();
     for (int jj= 0; jj< annotTypes.size(); jj++) {
       String annotType = (String) annotTypes.get(jj);
 
-      AnnotationDiff annotDiff=measureDocs(keyDoc, respDoc, annotType);
+      AnnotationDiffer annotDiff = measureDocs(keyDoc, respDoc, annotType);
       //we don't have this annotation type in this document
       if (annotDiff == null)
         continue;
@@ -1220,10 +1223,10 @@ ex.printStackTrace();
       Out.prln("<TD>" + annotType + "</TD>");
 
       if(isMoreInfoMode) {
-        Out.prln("<TD>" + annotDiff.getCorrectCount() + "</TD>");
-        Out.prln("<TD>" + annotDiff.getPartiallyCorrectCount() + "</TD>");
-        Out.prln("<TD>" + annotDiff.getMissingCount() + "</TD>");
-        Out.prln("<TD>" + annotDiff.getSpuriousCount() + "</TD>");
+        Out.prln("<TD>" + annotDiff.getCorrectMatches() + "</TD>");
+        Out.prln("<TD>" + annotDiff.getPartiallyCorrectMatches() + "</TD>");
+        Out.prln("<TD>" + annotDiff.getMissing() + "</TD>");
+        Out.prln("<TD>" + annotDiff.getSpurious() + "</TD>");
       }
 
       Out.prln("<TD>" + annotDiff.getPrecisionAverage() + "</TD>");
@@ -1272,104 +1275,105 @@ ex.printStackTrace();
     Out.prln("</TR>");
   }
 
-  protected void updateStatistics(AnnotationDiff annotDiff, String annotType){
-      precisionSum += annotDiff.getPrecisionAverage();
-      recallSum += annotDiff.getRecallAverage();
-      fMeasureSum += annotDiff.getFMeasureAverage();
-      Double oldPrecision = (Double) precisionByType.get(annotType);
-      if (oldPrecision == null)
-        precisionByType.put(annotType,
-                            new Double(annotDiff.getPrecisionAverage()));
-      else
-        precisionByType.put(annotType,
-                            new Double(oldPrecision.doubleValue() +
-                                       annotDiff.getPrecisionAverage()));
-      Integer precCount = (Integer) prCountByType.get(annotType);
-      if (precCount == null)
+  protected void updateStatistics(AnnotationDiffer annotDiffer, String annotType){
+    double precisionAverage = ((double)(annotDiffer.getPrecisionLenient() + annotDiffer.getPrecisionStrict()) /
+(double)(2.0));
+    precisionSum += precisionAverage;
+
+    double recallAverage = ((double)(annotDiffer.getRecallLenient() + annotDiffer.getRecallStrict()) / (double) (2.0));
+    recallSum += recallAverage;
+
+    double fMeasureAverage = ((double) (annotDiffer.getFMeasureLenient(1) + annotDiffer.getFMeasureStrict(1)) /
+(double) (2.0));
+    fMeasureSum += fMeasureAverage;
+
+    Double oldPrecision = (Double) precisionByType.get(annotType);
+    if (oldPrecision == null)
+        precisionByType.put(annotType, new Double(precisionAverage));
+    else
+        precisionByType.put(annotType, new Double(oldPrecision.doubleValue() + precisionAverage));
+
+    Integer precCount = (Integer) prCountByType.get(annotType);
+    if (precCount == null)
         prCountByType.put(annotType, new Integer(1));
-      else
-        prCountByType.put(annotType, new Integer(precCount.intValue() + 1));
+    else
+       prCountByType.put(annotType, new Integer(precCount.intValue() + 1));
 
 
-      Double oldFMeasure = (Double) fMeasureByType.get(annotType);
-      if (oldFMeasure == null)
-        fMeasureByType.put(annotType,
-                         new Double(annotDiff.getFMeasureAverage()));
-      else
-        fMeasureByType.put(annotType,
-                         new Double(oldFMeasure.doubleValue() +
-                                    annotDiff.getFMeasureAverage()));
-      Integer fCount = (Integer) fMeasureCountByType.get(annotType);
-      if (fCount == null)
-        fMeasureCountByType.put(annotType, new Integer(1));
-      else
-        fMeasureCountByType.put(annotType, new Integer(fCount.intValue() + 1));
+    Double oldFMeasure = (Double) fMeasureByType.get(annotType);
+    if (oldFMeasure == null)
+       fMeasureByType.put(annotType, new Double(fMeasureAverage));
+    else
+       fMeasureByType.put(annotType, new Double(oldFMeasure.doubleValue() + fMeasureAverage));
 
-              Double oldRecall = (Double) recallByType.get(annotType);
-      if (oldRecall == null)
-        recallByType.put(annotType,
-                            new Double(annotDiff.getRecallAverage()));
-      else
-        recallByType.put(annotType,
-                            new Double(oldRecall.doubleValue() +
-                                       annotDiff.getRecallAverage()));
-      Integer recCount = (Integer) recCountByType.get(annotType);
-      if (recCount == null)
-        recCountByType.put(annotType, new Integer(1));
-      else
-        recCountByType.put(annotType, new Integer(recCount.intValue() + 1));
+    Integer fCount = (Integer) fMeasureCountByType.get(annotType);
+    if (fCount == null)
+       fMeasureCountByType.put(annotType, new Integer(1));
+    else
+       fMeasureCountByType.put(annotType, new Integer(fCount.intValue() + 1));
 
-      //Update the missing, spurious, correct, and partial counts
-      Long oldMissingNo = (Long) missingByType.get(annotType);
-      if (oldMissingNo == null)
-        missingByType.put(annotType, new Long(annotDiff.getMissingCount()));
-      else
-        missingByType.put(annotType,
-                        new Long(oldMissingNo.longValue() +
-                                  annotDiff.getMissingCount()));
+    Double oldRecall = (Double) recallByType.get(annotType);
+    if (oldRecall == null)
+       recallByType.put(annotType, new Double(recallAverage));
+    else
+       recallByType.put(annotType, new Double(oldRecall.doubleValue() + recallAverage));
 
-      Long oldCorrectNo = (Long) correctByType.get(annotType);
-      if (oldCorrectNo == null)
-        correctByType.put(annotType, new Long(annotDiff.getCorrectCount()));
-      else
-        correctByType.put(annotType,
-                        new Long(oldCorrectNo.longValue() +
-                                  annotDiff.getCorrectCount()));
+    Integer recCount = (Integer) recCountByType.get(annotType);
+    if (recCount == null)
+       recCountByType.put(annotType, new Integer(1));
+    else
+       recCountByType.put(annotType, new Integer(recCount.intValue() + 1));
 
-      Long oldPartialNo = (Long) partialByType.get(annotType);
-      if (oldPartialNo == null)
-        partialByType.put(annotType, new Long(annotDiff.getPartiallyCorrectCount()));
-      else
-        partialByType.put(annotType,
-                        new Long(oldPartialNo.longValue() +
-                                  annotDiff.getPartiallyCorrectCount()));
+    //Update the missing, spurious, correct, and partial counts
+    Long oldMissingNo = (Long) missingByType.get(annotType);
+    if (oldMissingNo == null)
+       missingByType.put(annotType, new Long(annotDiffer.getMissing()));
+    else
+       missingByType.put(annotType, new Long(oldMissingNo.longValue() + annotDiffer.getMissing()));
 
-      Long oldSpuriousNo = (Long) spurByType.get(annotType);
-      if (oldSpuriousNo == null)
-        spurByType.put(annotType, new Long(annotDiff.getSpuriousCount()));
-      else
-        spurByType.put(annotType,
-                        new Long(oldSpuriousNo.longValue() +
-                                  annotDiff.getSpuriousCount()));
+    Long oldCorrectNo = (Long) correctByType.get(annotType);
+    if (oldCorrectNo == null)
+       correctByType.put(annotType, new Long(annotDiffer.getCorrectMatches()));
+    else
+       correctByType.put(annotType, new Long(oldCorrectNo.longValue() + annotDiffer.getCorrectMatches()));
+
+    Long oldPartialNo = (Long) partialByType.get(annotType);
+    if (oldPartialNo == null)
+       partialByType.put(annotType, new Long(annotDiffer.getPartiallyCorrectMatches()));
+    else
+       partialByType.put(annotType, new Long(oldPartialNo.longValue() + annotDiffer.getPartiallyCorrectMatches()));
+
+    Long oldSpuriousNo = (Long) spurByType.get(annotType);
+    if (oldSpuriousNo == null)
+       spurByType.put(annotType, new Long(annotDiffer.getSpurious()));
+    else
+       spurByType.put(annotType, new Long(oldSpuriousNo.longValue() + annotDiffer.getSpurious()));
   }
 
   /**
    * Update statistics for processed documents
    * The same procedure as updateStatistics with different hashTables
    */
-  protected void updateStatisticsProc(AnnotationDiff annotDiff, String annotType){
+  protected void updateStatisticsProc(AnnotationDiffer annotDiffer, String annotType){
     hasProcessed = true;
-      proc_precisionSum += annotDiff.getPrecisionAverage();
-      proc_recallSum += annotDiff.getRecallAverage();
-      proc_fMeasureSum += annotDiff.getFMeasureAverage();
-      Double oldPrecision = (Double) proc_precisionByType.get(annotType);
-      if (oldPrecision == null)
-        proc_precisionByType.put(annotType,
-                            new Double(annotDiff.getPrecisionAverage()));
+    double precisionAverage = ((double)(annotDiffer.getPrecisionLenient() + annotDiffer.getPrecisionStrict()) /
+(double)(2.0));
+    proc_precisionSum += precisionAverage;
+
+    double recallAverage = ((double)(annotDiffer.getRecallLenient() + annotDiffer.getRecallStrict()) / (double) (2.0));
+    proc_recallSum += recallAverage;
+
+    double fMeasureAverage = ((double) (annotDiffer.getFMeasureLenient(1) + annotDiffer.getFMeasureStrict(1)) /
+(double) (2.0));
+    proc_fMeasureSum += fMeasureAverage;
+
+    Double oldPrecision = (Double) proc_precisionByType.get(annotType);
+    if (oldPrecision == null)
+        proc_precisionByType.put(annotType, new Double(precisionAverage));
       else
         proc_precisionByType.put(annotType,
                             new Double(oldPrecision.doubleValue() +
-                                       annotDiff.getPrecisionAverage()));
+                                       precisionAverage));
       Integer precCount = (Integer) proc_prCountByType.get(annotType);
       if (precCount == null)
         proc_prCountByType.put(annotType, new Integer(1));
@@ -1380,11 +1384,11 @@ ex.printStackTrace();
       Double oldFMeasure = (Double) proc_fMeasureByType.get(annotType);
       if (oldFMeasure == null)
         proc_fMeasureByType.put(annotType,
-                         new Double(annotDiff.getFMeasureAverage()));
+                         new Double(fMeasureAverage));
       else
         proc_fMeasureByType.put(annotType,
                          new Double(oldFMeasure.doubleValue() +
-                                    annotDiff.getFMeasureAverage()));
+                                    fMeasureAverage));
       Integer fCount = (Integer) proc_fMeasureCountByType.get(annotType);
       if (fCount == null)
         proc_fMeasureCountByType.put(annotType, new Integer(1));
@@ -1394,11 +1398,11 @@ ex.printStackTrace();
       Double oldRecall = (Double) proc_recallByType.get(annotType);
       if (oldRecall == null)
         proc_recallByType.put(annotType,
-                            new Double(annotDiff.getRecallAverage()));
+                            new Double(recallAverage));
       else
         proc_recallByType.put(annotType,
                             new Double(oldRecall.doubleValue() +
-                                       annotDiff.getRecallAverage()));
+                                       recallAverage));
       Integer recCount = (Integer) proc_recCountByType.get(annotType);
       if (recCount == null)
         proc_recCountByType.put(annotType, new Integer(1));
@@ -1408,35 +1412,35 @@ ex.printStackTrace();
       //Update the missing, spurious, correct, and partial counts
       Long oldMissingNo = (Long) proc_missingByType.get(annotType);
       if (oldMissingNo == null)
-        proc_missingByType.put(annotType, new Long(annotDiff.getMissingCount()));
+        proc_missingByType.put(annotType, new Long(annotDiffer.getMissing()));
       else
         proc_missingByType.put(annotType,
                         new Long(oldMissingNo.longValue() +
-                                  annotDiff.getMissingCount()));
+                                  annotDiffer.getMissing()));
 
       Long oldCorrectNo = (Long) proc_correctByType.get(annotType);
       if (oldCorrectNo == null)
-        proc_correctByType.put(annotType, new Long(annotDiff.getCorrectCount()));
+        proc_correctByType.put(annotType, new Long(annotDiffer.getCorrectMatches()));
       else
         proc_correctByType.put(annotType,
                         new Long(oldCorrectNo.longValue() +
-                                  annotDiff.getCorrectCount()));
+                                  annotDiffer.getCorrectMatches()));
 
       Long oldPartialNo = (Long) proc_partialByType.get(annotType);
       if (oldPartialNo == null)
-        proc_partialByType.put(annotType, new Long(annotDiff.getPartiallyCorrectCount()));
+        proc_partialByType.put(annotType, new Long(annotDiffer.getPartiallyCorrectMatches()));
       else
         proc_partialByType.put(annotType,
                         new Long(oldPartialNo.longValue() +
-                                  annotDiff.getPartiallyCorrectCount()));
+                                  annotDiffer.getPartiallyCorrectMatches()));
 
       Long oldSpuriousNo = (Long) proc_spurByType.get(annotType);
       if (oldSpuriousNo == null)
-        proc_spurByType.put(annotType, new Long(annotDiff.getSpuriousCount()));
+        proc_spurByType.put(annotType, new Long(annotDiffer.getSpurious()));
       else
         proc_spurByType.put(annotType,
                         new Long(oldSpuriousNo.longValue() +
-                                  annotDiff.getSpuriousCount()));
+                                  annotDiffer.getSpurious()));
   }
 
   public void printStatistics() {
@@ -1601,7 +1605,7 @@ ex.printStackTrace();
     }
   }//printStatsForType
 
-  protected AnnotationDiff measureDocs(
+  protected AnnotationDiffer measureDocs(
     Document keyDoc, Document respDoc, String annotType)
       throws ResourceInstantiationException {
 
@@ -1618,24 +1622,28 @@ ex.printStackTrace();
     // create the annotation schema needed for AnnotationDiff
     AnnotationSchema annotationSchema = new AnnotationSchema();
 
-    // set annotation type
-    annotationSchema.setAnnotationName(annotType);
     // create an annotation diff
-    AnnotationDiff annotDiff = new AnnotationDiff();
-    annotDiff.setTextMode(new Boolean(true));
-    annotDiff.setAnnotationSchema(annotationSchema);
-    annotDiff.setKeyDocument(keyDoc);
-    annotDiff.setResponseDocument(respDoc);
-    annotDiff.setKeyAnnotationSetName(annotSetName);
-    annotDiff.setResponseAnnotationSetName(outputSetName);
-    // set feature names set for annotation diff
-    annotDiff.setKeyFeatureNamesSet(diffFeaturesSet);
-    annotDiff.init();
+    AnnotationDiffer annotDiffer = new AnnotationDiffer();
+    // set the feature names set for annotation differ
+    annotDiffer.setSignificantFeaturesSet(diffFeaturesSet);
+    // we need to find the sets
+    AnnotationSet keys, responses;
+    if(annotSetName == null || annotSetName.equals("")) {
+      keys = keyDoc.getAnnotations();
+      responses = respDoc.getAnnotations();
+    } else {
+      keys = keyDoc.getAnnotations(annotSetName).get();
+      System.out.println("Keys : "+keys.size());
+      responses = respDoc.getAnnotations(outputSetName).get();
+      System.out.println("Resp : "+responses.size());
+    }
 
-    return annotDiff;
+    // we have annotation sets so call the annotationDiffer
+    List pairings = annotDiffer.calculateDiff(keys,responses);
+    return annotDiffer;
   } // measureDocs
 
-  protected void storeAnnotations(String type, AnnotationDiff annotDiff,
+  protected void storeAnnotations(String type, AnnotationDiffer annotDiffer,
                   Document keyDoc, Document respDoc, FileWriter errFileWriter) {
     if(errFileWriter == null) return; // exit on "no file"
 
@@ -1644,17 +1652,17 @@ ex.printStackTrace();
       Comparator comp = new OffsetComparator();
       TreeSet sortedSet = new TreeSet(comp);
       Set missingSet =
-          annotDiff.getAnnotationsOfType(AnnotationDiff.MISSING_TYPE);
+          annotDiffer.getAnnotationsOfType(AnnotationDiffer.MISSING_TYPE);
       sortedSet.clear();
       sortedSet.addAll(missingSet);
       storeAnnotations(type+".miss", sortedSet, keyDoc, errFileWriter);
       Set spuriousSet =
-          annotDiff.getAnnotationsOfType(AnnotationDiff.SPURIOUS_TYPE);
+          annotDiffer.getAnnotationsOfType(AnnotationDiffer.SPURIOUS_TYPE);
       sortedSet.clear();
       sortedSet.addAll(spuriousSet);
       storeAnnotations(type+".spur", sortedSet, respDoc, errFileWriter);
       Set partialSet =
-          annotDiff.getAnnotationsOfType(AnnotationDiff.PARTIALLY_CORRECT_TYPE);
+          annotDiffer.getAnnotationsOfType(AnnotationDiffer.PARTIALLY_CORRECT_TYPE);
       sortedSet.clear();
       sortedSet.addAll(partialSet);
       storeAnnotations(type+".part", sortedSet, respDoc, errFileWriter);
@@ -1687,23 +1695,23 @@ ex.printStackTrace();
     }//while
   }// storeAnnotations
 
-  protected void printAnnotations(AnnotationDiff annotDiff,
+  protected void printAnnotations(AnnotationDiffer annotDiff,
                     Document keyDoc, Document respDoc) {
     Out.pr("MISSING ANNOTATIONS in the automatic texts: ");
     Set missingSet =
-      annotDiff.getAnnotationsOfType(AnnotationDiff.MISSING_TYPE);
+      annotDiff.getAnnotationsOfType(AnnotationDiffer.MISSING_TYPE);
     printAnnotations(missingSet, keyDoc);
     Out.prln("<BR>");
 
     Out.pr("SPURIOUS ANNOTATIONS in the automatic texts: ");
     Set spuriousSet =
-      annotDiff.getAnnotationsOfType(AnnotationDiff.SPURIOUS_TYPE);
+      annotDiff.getAnnotationsOfType(AnnotationDiffer.SPURIOUS_TYPE);
     printAnnotations(spuriousSet, respDoc);
     Out.prln("</BR>");
 
     Out.pr("PARTIALLY CORRECT ANNOTATIONS in the automatic texts: ");
     Set partialSet =
-      annotDiff.getAnnotationsOfType(AnnotationDiff.PARTIALLY_CORRECT_TYPE);
+      annotDiff.getAnnotationsOfType(AnnotationDiffer.PARTIALLY_CORRECT_TYPE);
     printAnnotations(partialSet, respDoc);
   }
 
