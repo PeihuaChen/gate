@@ -398,11 +398,20 @@
   COMMENT="The URL for the ruleset file"
   OPTIONAL="true">java.net.URL</PARAMETER>
     </RESOURCE>
+
     <!-- creole.xml for namematch -->
     <RESOURCE>
       <NAME>ANNIE OrthoMatcher</NAME>
       <CLASS>gate.creole.orthomatcher.OrthoMatcher</CLASS>
       <COMMENT>ANNIE orthographical coreference component</COMMENT>
+
+      <PARAMETER DEFAULT="gate:/creole/namematcher/listsNM.def"
+        COMMENT="The URL for the definition file" SUFFIXES="def"
+  NAME="definitionFileURL">java.net.URL</PARAMETER>
+      <PARAMETER DEFAULT="UTF-8"
+        COMMENT="The encoding used for reading the definitions"
+        NAME="encoding">java.lang.String</PARAMETER>
+
       <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
       <PARAMETER NAME="annotationSetName" RUNTIME="true"
   OPTIONAL="true">java.lang.String</PARAMETER>

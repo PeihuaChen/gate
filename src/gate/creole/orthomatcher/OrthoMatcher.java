@@ -123,11 +123,16 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
    */
   protected FeatureMap tempMap = Factory.newFeatureMap();
 
-  /** a buffer in order to read an array of char */
-  private char[] cbuffer = null;
-
   /** the size of the buffer */
   private final static int BUFF_SIZE = 65000;
+
+  /**
+   * URL to the file containing the definition for this orthomatcher
+   */
+  private java.net.URL definitionFileURL;
+
+  /** The encoding used for the definition file and associated lists.*/
+  private String encoding;
 
   /** @link dependency */
   /*#OrthoMatcher lnkOrthoMatcher;*/
@@ -141,12 +146,31 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
-    cbuffer = new char[BUFF_SIZE];
-
     //initialise the list of annotations which we will match
-    try {
-      createLists();
-    } catch (IOException ioe) {ioe.printStackTrace();}
+    if(definitionFileURL == null){
+      throw new ResourceInstantiationException(
+                "No URL provided for the definition file!");
+    }
+
+    //at this point we have the definition file
+    try{
+      BufferedReader reader = new BufferedReader(
+                      new InputStreamReader(definitionFileURL.openStream(),
+                                            encoding));
+      String lineRead = null;
+      while ((lineRead = reader.readLine()) != null){
+        int index = lineRead.indexOf(":");
+        if (index != -1){
+          String nameFile = lineRead.substring(0,index);
+          String nameList = lineRead.substring(index+1,lineRead.length());
+          createAnnotList(nameFile,nameList);
+        }// if
+      }//while
+      reader.close();
+    }catch(IOException ioe){
+      throw new ResourceInstantiationException(ioe);
+    }
+
     return this;
   } // init()
 
@@ -854,35 +878,43 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
   /** if ( == false) then reads the names of files in order
     *  to create the lookup tables
     */
-  protected void createLists() throws IOException {
-    InputStream inputStream = Files.getGateResourceAsStream(
-                                              "creole/namematcher/listsNM.def");
-    InputStreamReader inputStreamReader = new InputStreamReader (
-                                                    inputStream);
-    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-    String lineRead = null;
-    while ((lineRead = bufferedReader.readLine()) != null){
-      int index = lineRead.indexOf(":");
-      if (index != -1){
-        String nameFile = lineRead.substring(0,index);
-        String nameList = lineRead.substring(index+1,lineRead.length());
-        createAnnotList(nameFile,nameList);
-      }// if
-    }//while
-    bufferedReader.close();
-    inputStreamReader.close();
-    inputStream.close();
-  }// createLists()
+//  protected void createLists() throws IOException {
+//
+//    InputStream inputStream = Files.getGateResourceAsStream(
+//                                              "creole/namematcher/listsNM.def");
+//    InputStreamReader inputStreamReader = new InputStreamReader (
+//                                                    inputStream);
+//    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+//
+//    String lineRead = null;
+//    while ((lineRead = bufferedReader.readLine()) != null){
+//      int index = lineRead.indexOf(":");
+//      if (index != -1){
+//        String nameFile = lineRead.substring(0,index);
+//        String nameList = lineRead.substring(index+1,lineRead.length());
+//        createAnnotList(nameFile,nameList);
+//      }// if
+//    }//while
+//    bufferedReader.close();
+//    inputStreamReader.close();
+//    inputStream.close();
+//  }// createLists()
 
   /** creates the lookup tables */
   protected void createAnnotList(String nameFile,String nameList)
                                                           throws IOException{
-    InputStream inputStream = Files.getGateResourceAsStream(
-                                              "creole/namematcher/"+nameFile);
-    InputStreamReader inputStreamReader = new InputStreamReader (
-                                                    inputStream);
-    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+//    InputStream inputStream = Files.getGateResourceAsStream(
+//                                              "creole/namematcher/"+nameFile);
+//    InputStreamReader inputStreamReader = new InputStreamReader (
+//                                                    inputStream);
+//    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+    //create the relative URL
+    URL fileURL = new URL(definitionFileURL, nameFile);
+    BufferedReader bufferedReader =
+      new BufferedReader(new InputStreamReader(fileURL.openStream(),
+                         encoding));
 
     String lineRead = null;
     while ((lineRead = bufferedReader.readLine()) != null){
@@ -1707,6 +1739,20 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
       result = re.substituteAll( text,replacement);
     } catch (REException ree) {ree.printStackTrace();}
     return result;
+  }
+
+  public void setDefinitionFileURL(java.net.URL definitionFileURL) {
+    this.definitionFileURL = definitionFileURL;
+  }
+
+  public java.net.URL getDefinitionFileURL() {
+    return definitionFileURL;
+  }
+  public void setEncoding(String encoding) {
+    this.encoding = encoding;
+  }
+  public String getEncoding() {
+    return encoding;
   }//regularExpressions
 
 
