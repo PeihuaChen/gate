@@ -1,4 +1,8 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+                        "http://www.w3.org/TR/REC-html40/loose.dtd">
 <HTML>
+<HEAD><TITLE>Name Matcher Documentation</TITLE>
+</HEAD>
 <BODY>
 
 <! ------------------------------------------------------- >
@@ -7,11 +11,9 @@
 
 <H2> Overview </H2>
 <P> The Name Matcher module aims to recognise relations between
-previously recognised entities, but does not attempt to identify new
-entities. It may also assign an entity type to a previously
-unclassified name, based on a relation with an existing entity. A
-previously classified entity cannot be reclassified, so rules are only
-invoked where one or both entities is already categorised.
+previously recognised entities. It may also assign an entity type to a previously
+unclassified name, based on a relation with an existing entity. It may
+not, however, reclassify any other previously classified entity.
 </P>
 
 <H2> Resources</H2>
@@ -116,9 +118,20 @@ are different companies)
 
 The matching rules are hard-coded in the Namematcher, as is priority
 handling of rules. Essentially, the first rule to be applied is the spurious rule
-from the lookup list (where two names are listed specifically as not matching), followed by the rules for all annotations,
-organizations, and persons respectively. In general, rules matching very
-similar strings precede those matching less similar ones.
+from the lookup list (where two names are listed specifically as not
+matching), followed by the rules for all annotations, organizations,
+and persons respectively. In general, rules matching more similar
+strings precede those matching less similar ones.
+
+
+<H2> Classification of Unknown Entities </H2>
+<P>
+The namematcher also checks entities marked as "Unknown" to see if
+they match any entities of type "Person", "Location" or
+"Organization", according to the rules described above. If a match is
+found, the "Unknown" annotation is deleted, and the entity is
+reannotated with the same type as that of its matching entity.
+</P>
 
 <H2> Maintenance </H2>
 <P>
@@ -148,6 +161,7 @@ Namematch.java code.
 </P>
 </BODY>
 </HTML>
+
 
 
 
