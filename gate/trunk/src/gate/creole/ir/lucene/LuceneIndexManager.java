@@ -106,15 +106,14 @@ public class LuceneIndexManager implements IndexManager{
 
   /** Reindexing changed documents, removing removed documents and
    *  add to the index new corpus documents. */
-  public void sync(List added, List removed, List changed) throws IndexException{
+  public void sync(List added, List removedIDs, List changed) throws IndexException{
     String location = idef.getIndexLocation();
     try {
 
       IndexReader reader = IndexReader.open(location);
 
-      for (int i = 0; i<removed.size(); i++) {
-        gate.Document gateDoc = (gate.Document) removed.get(i);
-        String id = gateDoc.getLRPersistenceId().toString();
+      for (int i = 0; i<removedIDs.size(); i++) {
+        String id = removedIDs.get(i).toString();
         org.apache.lucene.index.Term term =
                                new org.apache.lucene.index.Term(DOCUMENT_ID,id);
         reader.delete(term);
