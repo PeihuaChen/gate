@@ -1401,8 +1401,62 @@ System.out.println("trans failed ...rollback");
     throws PersistenceException;
 
   /** helper for sync() - never call directly */
-  protected abstract void _syncAnnotationSets(Document doc,Collection removedSets,Collection addedSets)
-    throws PersistenceException;
+  protected void _syncAnnotationSets(Document doc,Collection removedSets,Collection addedSets)
+    throws PersistenceException {
+
+    //0. preconditions
+    Assert.assertNotNull(doc);
+    Assert.assertTrue(doc instanceof DatabaseDocumentImpl);
+    Assert.assertNotNull(doc.getLRPersistenceId());
+    Assert.assertEquals(((DatabaseDataStore)doc.getDataStore()).getDatabaseID(),
+                      this.getDatabaseID());
+    Assert.assertNotNull(removedSets);
+    Assert.assertNotNull(addedSets);
+
+    Long lrID = (Long)doc.getLRPersistenceId();
+
+    //1. delete from DB removed a-sets
+    PreparedStatement stmt = null;
+
+    try {
+
+      if (this.dbType == DBHelper.ORACLE_DB) {
+        stmt = this.jdbcConn.prepareCall("{ call "+this.dbSchema+"persist.delete_annotation_set(?,?) }");
+      }
+      else if (this.dbType == DBHelper.POSTGRES_DB) {
+        stmt = this.jdbcConn.prepareStatement("select persist_delete_annotation_set(?,?)");
+      }
+      else {
+        Assert.fail();
+      }
+
+      Iterator it = removedSets.iterator();
+      while (it.hasNext()) {
+        String setName = (String)it.next();
+        stmt.setLong(1,lrID.longValue());
+        stmt.setString(2,setName);
+        stmt.execute();
+      }
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't remove annotation set from DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(stmt);
+    }
+
+    //2. create in DB new a-sets
+    Iterator it = addedSets.iterator();
+    while (it.hasNext()) {
+      String setName = (String)it.next();
+      AnnotationSet aset = doc.getAnnotations(setName);
+
+      Assert.assertNotNull(aset);
+      Assert.assertTrue(aset instanceof DatabaseAnnotationSetImpl);
+
+      createAnnotationSet(lrID,aset);
+    }
+  }
 
 
   /** helper for sync() - never call directly */
