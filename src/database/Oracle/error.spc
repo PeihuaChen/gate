@@ -80,6 +80,9 @@ create or replace package error is
 
   x_invalid_annotation EXCEPTION;
   PRAGMA EXCEPTION_INIT(x_invalid_annotation, -20117);
+
+  x_insufficient_privileges EXCEPTION;
+  PRAGMA EXCEPTION_INIT(x_insufficient_privileges, -20118);
                            
 end error;
 /
