@@ -28,24 +28,29 @@ public class Restriction {
   private String key;
   private int    operator_;
 
+  /** --- */
   public Restriction(String key, Object value, int operator_){
     this.key = key;
     this.value = value;
     this.operator_ = operator_;
   }
 
+  /** --- */
   public Object getValue(){
     return value;
   }
 
+  /** --- */
   public String getStringValue(){
     return value.toString();
   }
 
+  /** --- */
   public String getKey(){
     return key;
   }
 
+  /** --- */
   public int getOperator(){
     return operator_;
   }
