@@ -15,6 +15,7 @@
 package gate.creole.ir.lucene;
 
 import gate.*;
+import gate.util.*;
 import gate.creole.ir.*;
 
 import org.apache.lucene.index.*;
@@ -34,21 +35,24 @@ public class LuceneIndexManager implements IndexManager{
   public final static String DOCUMENT_ID = "DOCUMENT_ID";
 
   /** IndexDefinition - location, type, fields, etc.*/
-  private IndexDefinition idef;
+  private IndexDefinition indexDefinition;
 
   /** An corpus for indexing*/
   private Corpus corpus;
 
   /** Constructor of the class. */
-  public LuceneIndexManager(IndexDefinition def, Corpus corpus){
-    this.idef = def;
-    this.corpus = corpus;
+  public LuceneIndexManager(){
   }
 
   /** Creates index directory and indexing all
    *  documents in the corpus. */
   public void createIndex() throws IndexException{
-    String location = idef.getIndexLocation();
+    if(indexDefinition == null)
+      throw new GateRuntimeException("Index definition is null!");
+    if(corpus == null)
+      throw new GateRuntimeException("Corpus is null!");
+
+    String location = indexDefinition.getIndexLocation();
     try {
       File file = new File(location);
       if (file.exists()){
@@ -76,8 +80,10 @@ public class LuceneIndexManager implements IndexManager{
 
   /** Optimize existing index. */
   public void optimizeIndex() throws IndexException{
+    if(indexDefinition == null)
+      throw new GateRuntimeException("Index definition is null!");
     try {
-      IndexWriter writer = new IndexWriter(idef.getIndexLocation(),
+      IndexWriter writer = new IndexWriter(indexDefinition.getIndexLocation(),
                                          new SimpleAnalyzer(), false);
       writer.optimize();
       writer.close();
@@ -88,8 +94,10 @@ public class LuceneIndexManager implements IndexManager{
 
   /** Delete index. */
   public void deleteIndex() throws IndexException{
+    if(indexDefinition == null)
+      throw new GateRuntimeException("Index definition is null!");
     boolean isDeleted = true;
-    File dir = new File(idef.getIndexLocation());
+    File dir = new File(indexDefinition.getIndexLocation());
     if (dir.exists() && dir.isDirectory()) {
       File[] files = dir.listFiles();
       for (int i =0; i<files.length; i++){
@@ -100,14 +108,14 @@ public class LuceneIndexManager implements IndexManager{
     dir.delete();
     if (!isDeleted) {
       throw new IndexException("Can't delete directory"
-                               + idef.getIndexLocation());
+                               + indexDefinition.getIndexLocation());
     }
   }
 
   /** Reindexing changed documents, removing removed documents and
    *  add to the index new corpus documents. */
   public void sync(List added, List removedIDs, List changed) throws IndexException{
-    String location = idef.getIndexLocation();
+    String location = indexDefinition.getIndexLocation();
     try {
 
       IndexReader reader = IndexReader.open(location);
@@ -151,7 +159,7 @@ public class LuceneIndexManager implements IndexManager{
   private org.apache.lucene.document.Document getLuceneDoc(gate.Document gateDoc){
     org.apache.lucene.document.Document luceneDoc =
                                      new org.apache.lucene.document.Document();
-    Iterator fields = idef.getIndexFields();
+    Iterator fields = indexDefinition.getIndexFields();
 
     luceneDoc.add(Field.Keyword(DOCUMENT_ID,
                                 gateDoc.getLRPersistenceId().toString()));
@@ -163,7 +171,7 @@ public class LuceneIndexManager implements IndexManager{
       if (field.getReader() == null){
         valueForIndexing = gateDoc.getFeatures().get(field.getName()).toString();
       } else {
-        valueForIndexing = field.getReader().getRpopertyValue(gateDoc);
+        valueForIndexing = field.getReader().getPropertyValue(gateDoc);
       } //if-else reader or feature
 
       if (field.isPreseved()) {
@@ -175,6 +183,19 @@ public class LuceneIndexManager implements IndexManager{
     }// while (add all fields)
 
     return luceneDoc;
+  }
+
+  public Corpus getCorpus() {
+    return corpus;
+  }
+  public void setCorpus(Corpus corpus) {
+    this.corpus = corpus;
+  }
+  public IndexDefinition getIndexDefinition() {
+    return indexDefinition;
+  }
+  public void setIndexDefinition(IndexDefinition indexDefinition) {
+    this.indexDefinition = indexDefinition;
   }
 
 }

@@ -97,5 +97,4 @@ public class LuceneSearch implements Search {
       throw new SearchException(pe.getMessage());
     }
   }
-
 }

@@ -27,7 +27,12 @@ public interface IndexDefinition extends Serializable{
   /**  @return Iterator of IndexFields, fileds for indexing. */
   public Iterator getIndexFields();
 
-  /**  @return int index type*/
-  public int getIndexType();
+//  /**  @return int index type*/
+//  public int getIndexType();
 
+  /**
+   * Gets the type of IR engine to be used for indexing
+   * @return a String.
+   */
+  public String getIrEngineClassName();
 }

@@ -19,7 +19,7 @@ import gate.Document;
 public class DefaultPropertyReader implements PropertyReader{
 
   /** @return String value of the requested field. */
-  public String getRpopertyValue(Document doc){
+  public String getPropertyValue(Document doc){
     return doc.getContent().toString();
   }
 

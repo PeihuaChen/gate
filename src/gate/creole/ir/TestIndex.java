@@ -91,7 +91,10 @@ public class TestIndex extends TestCase{
   public void testIndex_01() throws IndexException{
     IndexedCorpus ic = (IndexedCorpus) corpus;
     DefaultIndexDefinition did = new DefaultIndexDefinition();
-    did.setIndexType(GateConstants.IR_LUCENE_INVFILE);
+    did.setIrEngineClassName(gate.creole.ir.lucene.
+                             LuceneIREngine.class.getName());
+
+//    did.setIndexType(GateConstants.IR_LUCENE_INVFILE);
 
     did.setIndexLocation(TEMP_LOCATION);
     did.addIndexField(new IndexField("content", new ContentPropertyReader(), false));
@@ -108,7 +111,10 @@ public class TestIndex extends TestCase{
   public void testIndex_02() throws IndexException{
     IndexedCorpus ic = (IndexedCorpus) corpus;
     DefaultIndexDefinition did = new DefaultIndexDefinition();
-    did.setIndexType(GateConstants.IR_LUCENE_INVFILE);
+//    did.setIndexType(GateConstants.IR_LUCENE_INVFILE);
+    did.setIrEngineClassName(gate.creole.ir.lucene.
+                             LuceneIREngine.class.getName());
+
 
     did.setIndexLocation(TEMP_LOCATION);
 
@@ -121,7 +127,9 @@ public class TestIndex extends TestCase{
   public void testIndex_10() throws IndexException, SearchException{
     IndexedCorpus ic = (IndexedCorpus) corpus;
     DefaultIndexDefinition did = new DefaultIndexDefinition();
-    did.setIndexType(GateConstants.IR_LUCENE_INVFILE);
+//    did.setIndexType(GateConstants.IR_LUCENE_INVFILE);
+    did.setIrEngineClassName(gate.creole.ir.lucene.
+                             LuceneIREngine.class.getName());
 
     did.setIndexLocation(TEMP_LOCATION);
 
@@ -152,7 +160,9 @@ public class TestIndex extends TestCase{
   public void testIndex_101() throws IndexException{
     IndexedCorpus ic = (IndexedCorpus) corpus;
     DefaultIndexDefinition did = new DefaultIndexDefinition();
-    did.setIndexType(GateConstants.IR_LUCENE_INVFILE);
+//    did.setIndexType(GateConstants.IR_LUCENE_INVFILE);
+    did.setIrEngineClassName(gate.creole.ir.lucene.
+                             LuceneIREngine.class.getName());
 
     did.setIndexLocation(TEMP_LOCATION);
 
@@ -190,7 +200,7 @@ public class TestIndex extends TestCase{
   }
 
   public class ContentPropertyReader implements PropertyReader{
-    public String getRpopertyValue(gate.Document doc){
+    public String getPropertyValue(gate.Document doc){
       return doc.getContent().toString();
     }
   }
