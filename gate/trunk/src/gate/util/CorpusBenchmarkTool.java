@@ -97,6 +97,11 @@ public class CorpusBenchmarkTool {
           Out.prln("Annotation set in processed docs is: " + setName + " <P>\n");
           this.outputSetName = setName;
         }
+        String encodingString = this.configs.getProperty("encoding");
+        if (encodingString != null && !encodingString.equals("")) {
+          this.documentEncoding = encodingString;
+          Out.prln("New encoding is: " + this.documentEncoding + "<P>\n");
+        }
         String types = this.configs.getProperty("annotTypes");
         if (types != null && !types.equals("")) {
           Out.prln("Using annotation types from the properties file. <P>\n");
@@ -434,7 +439,7 @@ public class CorpusBenchmarkTool {
 
         FeatureMap params = Factory.newFeatureMap();
         params.put(Document.DOCUMENT_URL_PARAMETER_NAME, files[i].toURL());
-        params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
+        params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, documentEncoding);
 
         // create the document
         Document doc = (Document) Factory.createResource(
@@ -552,7 +557,7 @@ public class CorpusBenchmarkTool {
         } else {
           FeatureMap params = Factory.newFeatureMap();
           params.put(Document.DOCUMENT_URL_PARAMETER_NAME, cleanDocFile.toURL());
-          params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
+          params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, documentEncoding);
 
           // create the document
           cleanDoc = (Document) Factory.createResource(
@@ -574,7 +579,7 @@ public class CorpusBenchmarkTool {
           } else {
             FeatureMap params = Factory.newFeatureMap();
             params.put(Document.DOCUMENT_URL_PARAMETER_NAME, markedDocFile.toURL());
-            params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
+            params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, documentEncoding);
 
             // create the document
             markedDoc = (Document) Factory.createResource(
@@ -680,7 +685,7 @@ public class CorpusBenchmarkTool {
           } else {
             FeatureMap params = Factory.newFeatureMap();
             params.put(Document.DOCUMENT_URL_PARAMETER_NAME, markedDocFile.toURL());
-            params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
+            params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, documentEncoding);
 
             // create the document
             markedDoc = (Document) Factory.createResource(
@@ -1812,6 +1817,8 @@ ex.printStackTrace();
   private double threshold = 0.5;
   private Properties configs = new Properties();
   private static int corpusWordCount = 0;
+
+  private String documentEncoding = "";
 
   /** String to print when wrong command-line args */
   private static String usage =
