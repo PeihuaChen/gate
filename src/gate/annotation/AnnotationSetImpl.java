@@ -889,7 +889,9 @@ public class AnnotationSetImpl
           if (annSet != null)
             endingAnnotations.addAll(annSet);
             //remove the node
-          nodesByOffset.remove(aNode.getOffset());
+          	nodesByOffset.remove(aNode.getOffset());
+          	annotsByStartNode.remove(aNode);
+          	annotsByEndNode.remove(aNode);
         }
         //modify the annotations so they point to the saved node
         Iterator annIter = startingAnnotations.iterator();
@@ -911,6 +913,7 @@ public class AnnotationSetImpl
         firstNode.setOffset(start);
         //add back to the offset index
         nodesByOffset.put(firstNode.getOffset(), firstNode);
+        
       }
     }
 
