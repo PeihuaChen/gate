@@ -1,20 +1,23 @@
 /*
-	AnnotationSet.java
+	AnnotationSetImpl.java
 
 	Hamish Cunningham, 7/Feb/2000
 
-  
+  Developer notes:
+  ---
 
-every set to which annotation will be added has to have positional
-indexing, so that we can find or create the nodes on the new annotations
+  the addToIndex... and indexBy... methods could be refactored as I'm
+  sure they can be made simpler
 
-note that annotations added anywhere other than sets that are
-stored on the document will not get stored anywhere...
+  every set to which annotation will be added has to have positional
+  indexing, so that we can find or create the nodes on the new annotations
 
-nodes aren't doing anything useful now. needs some interface that allows
-their creation, defaulting to no coterminous duplicates, but allowing such
-if required
+  note that annotations added anywhere other than sets that are
+  stored on the document will not get stored anywhere...
 
+  nodes aren't doing anything useful now. needs some interface that allows
+  their creation, defaulting to no coterminous duplicates, but allowing such
+  if required
 
 	$Id$
 */
@@ -37,10 +40,10 @@ import gate.*;
   * there is no no-arg constructor, as this would leave the set in
   * an inconsistent state.
   * <P>
-  * There are four indices: annotation by id, annotations by type, annotations
-  * by node and nodes by offset. The last two jointly provide positional
-  * indexing; construction of these is triggered by indexByOffset(), or by
-  * calling a get method that selects on offset. The type
+  * There are five indices: annotation by id, annotations by type, annotations
+  * by start/end node and nodes by offset. The last three jointly provide
+  * positional indexing; construction of these is triggered by indexByOffset(),
+  * or by calling a get method that selects on offset. The type
   * index is triggered by indexByType(), or calling a get method that selects
   * on type. The id index is always present.
   */
@@ -90,12 +93,14 @@ implements AnnotationSet
     return wasPresent;
   } // remove(o)
 
+  /** Remove from the ID index. */
   boolean removeFromIdIndex(Annotation a) {
     if(annotsById.remove(a.getId()) == null)
       return false;
     return true;
   } // removeFromIdIndex(a)
 
+  /** Remove from the type index. */
   void removeFromTypeIndex(Annotation a) {
     if(annotsByType != null) {
       AnnotationSet sameType = (AnnotationSet) annotsByType.get(a.getType());
@@ -103,6 +108,7 @@ implements AnnotationSet
     }
   } // removeFromTypeIndex(a)
 
+  /** Remove from the offset indices. */
   void removeFromOffsetIndex(Annotation a) {
     if(nodesByOffset != null) {
 // knowing when a node is no longer needed would require keeping a reference
@@ -115,6 +121,13 @@ implements AnnotationSet
       starterAnnots.remove(a);
       if(starterAnnots.isEmpty()) // no annotations start here any more
         annotsByStartNode.remove(id);
+    } 
+    if(annotsByEndNode != null) {
+      Integer id = a.getEndNode().getId();
+      AnnotationSet endingAnnots = (AnnotationSet) annotsByEndNode.get(id);
+      endingAnnots.remove(a);
+      if(endingAnnots.isEmpty()) // no annotations start here any more
+        annotsByEndNode.remove(id);
     }
   } // removeFromOffsetIndex(a)
 
@@ -191,7 +204,7 @@ implements AnnotationSet
     * to offset. If a positional index doesn't exist it is created.
     */
   public AnnotationSet get(Long offset) {
-    if(annotsByStartNode == null) indexByOffset();
+    if(annotsByStartNode == null) indexByStartOffset();
 
     // find the next node at or after offset; get the annots starting there
     Node nextNode = (Node) nodesByOffset.getNextOf(offset);
@@ -223,14 +236,14 @@ implements AnnotationSet
     return oldValue != a;
   } // add(o)
 
-  /** Add an annotation and return its id */
+  /** Create and add an annotation and return its id */
   public Integer add(
     Long start, Long end, String type, FeatureMap features
   ) throws InvalidOffsetException {
     // are the offsets valid?
     if(start == null || end == null)
       throw new InvalidOffsetException();
-    long startValue = start.longValue(); 
+    long startValue = start.longValue();
     long endValue = end.longValue();
     if(
       startValue > endValue || startValue < 0 || endValue < 0
@@ -238,10 +251,12 @@ implements AnnotationSet
     )
       throw new InvalidOffsetException();
 
+    // the id of the new annotation
+    Integer id = new Integer(nextAnnotationId++);
 
     // the set has to be indexed by position in order to add, as we need
     // to find out if nodes need creating or if they exist already
-    if(nodesByOffset == null) indexByOffset();
+    if(nodesByOffset == null) indexByStartOffset();
 
     // find existing nodes
     Node startNode  = (Node) nodesByOffset.getNextOf(start);
@@ -254,17 +269,8 @@ implements AnnotationSet
       endNode = new NodeImpl(new Integer(nextNodeId++), end);
 
     // construct an annotation
-    Integer id = new Integer(nextAnnotationId++);
     Annotation a = new AnnotationImpl(id, startNode, endNode, type, features);
-
-    // add to the id index
-    annotsById.put(id, a);
-
-    // add to the type index
-    addToTypeIndex(a);
-
-    // add to the node index
-    addToOffsetIndex(a);
+    add(a);
 
     return id;
   } // add(start, end, type, features)
@@ -281,19 +287,40 @@ implements AnnotationSet
   } // indexByType()
 
   /** Construct the positional indices (nodes by offset and annotations
-    * by node).
+    * by start/end node).
     */
   public void indexByOffset() {
-    if(nodesByOffset != null) return;
+    indexByStartOffset();
+    indexByEndOffset();
+  } // indexByOffset()
 
-    nodesByOffset = new RBTreeMap();
+  /** Construct the positional indices for annotation start */
+  public void indexByStartOffset() {
+    if(annotsByStartNode != null) return;
+
+    if(nodesByOffset == null)
+      nodesByOffset = new RBTreeMap();
     annotsByStartNode = new HashMap();
 
     Annotation a;
     Iterator annotIter = annotsById.values().iterator();
     while(annotIter.hasNext())
-      addToOffsetIndex( (Annotation) annotIter.next() );
-  } // indexByOffset()
+      addToStartOffsetIndex( (Annotation) annotIter.next() );
+  } // indexByStartOffset()
+
+  /** Construct the positional indices for annotation end */
+  public void indexByEndOffset() {
+    if(annotsByEndNode != null) return;
+
+    if(nodesByOffset == null)
+      nodesByOffset = new RBTreeMap();
+    annotsByEndNode = new HashMap();
+
+    Annotation a;
+    Iterator annotIter = annotsById.values().iterator();
+    while(annotIter.hasNext())
+      addToEndOffsetIndex( (Annotation) annotIter.next() );
+  } // indexByEndOffset()
 
   /** Add an annotation to the type index. Does nothing if the index
     * doesn't exist.
@@ -314,12 +341,25 @@ implements AnnotationSet
     * don't exist.
     */
   void addToOffsetIndex(Annotation a) {
-    if(annotsByStartNode == null) return;
+    addToStartOffsetIndex(a);
+    addToEndOffsetIndex(a);
+  } // addToOffsetIndex(a)
 
+  /** Add an annotation to the start offset index. Does nothing if the
+    * index doesn't exist.
+    */
+  void addToStartOffsetIndex(Annotation a) {
     Node startNode  = a.getStartNode();
     Node endNode    = a.getEndNode();
     Long start      = startNode.getOffset();
     Long end        = endNode.getOffset();
+
+    // add a's nodes to the offset index
+    if(nodesByOffset != null)
+      nodesByOffset.put(start, startNode);
+
+    // if there's no appropriate index give up
+    if(annotsByStartNode == null) return;
 
     // get the annotations that start at the same node, or create new set
     AnnotationSet thisNodeAnnots =
@@ -331,10 +371,34 @@ implements AnnotationSet
     // add to the annots listed for a's start node
     thisNodeAnnots.add(a);
 
-    // add a's nodes to the offset indices
-    nodesByOffset.put(start, startNode);
-    nodesByOffset.put(end, endNode);
-  } // addToOffsetIndex(a)
+  } // addToStartOffsetIndex(a)
+
+  /** Add an annotation to the end offset index. Does nothing if the
+    * index doesn't exist.
+    */
+  void addToEndOffsetIndex(Annotation a) {
+    Node startNode  = a.getStartNode();
+    Node endNode    = a.getEndNode();
+    Long start      = startNode.getOffset();
+    Long end        = endNode.getOffset();
+
+    // add a's nodes to the offset index
+    if(nodesByOffset != null) nodesByOffset.put(end, endNode);
+
+    // if there's no appropriate index give up
+    if(annotsByEndNode == null) return;
+
+    // get the annotations that start at the same node, or create new set
+    AnnotationSet thisNodeAnnots =
+      (AnnotationSet) annotsByEndNode.get(endNode.getId());
+    if(thisNodeAnnots == null) {
+      thisNodeAnnots = new AnnotationSetImpl(doc);
+      annotsByEndNode.put(startNode.getId(), thisNodeAnnots);
+    }
+    // add to the annots listed for a's start node
+    thisNodeAnnots.add(a);
+
+  } // addToEndOffsetIndex(a)
 
   /** Get the name of this set. */
   public String getName() { return name; }
@@ -392,6 +456,11 @@ implements AnnotationSet
     * annotations that start from that node
     */
   HashMap annotsByStartNode;
+
+  /** Maps node ids (Integers) to AnnotationSets representing those
+    * annotations that end at that node
+    */
+  HashMap annotsByEndNode;
 
 
 
