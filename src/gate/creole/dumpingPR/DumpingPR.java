@@ -182,7 +182,7 @@ public class DumpingPR extends AbstractLanguageAnalyser
     }//if
 
     write2File(annots2Export);
-    document.removeAnnotationSet(this.DUMPING_PR_SET);
+    document.removeAnnotationSet(DumpingPR.DUMPING_PR_SET);
 
   } // execute()
 

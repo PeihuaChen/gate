@@ -32,6 +32,7 @@ import javax.swing.tree.*;
 
 import junit.framework.Assert;
 
+import com.ontotext.gate.vr.Gaze;
 import com.ontotext.gate.vr.OntologyEditorImpl;
 
 import gate.*;
@@ -1419,9 +1420,9 @@ public class MainFrame extends JFrame
 
     //get the URL (a file in this case)
     fileChooser.setDialogTitle("Please create a new empty directory");
-    fileChooser.setFileSelectionMode(fileChooser.DIRECTORIES_ONLY);
+    fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
     if(fileChooser.showOpenDialog(MainFrame.this) ==
-                                          fileChooser.APPROVE_OPTION){
+                                          JFileChooser.APPROVE_OPTION){
       try {
         URL dsURL = fileChooser.getSelectedFile().toURL();
         ds = Factory.createDataStore("gate.persist.SerialDataStore",
@@ -1448,9 +1449,9 @@ public class MainFrame extends JFrame
 
     //get the URL (a file in this case)
     fileChooser.setDialogTitle("Select the datastore directory");
-    fileChooser.setFileSelectionMode(fileChooser.DIRECTORIES_ONLY);
+    fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
     if (fileChooser.showOpenDialog(MainFrame.this) ==
-                                          fileChooser.APPROVE_OPTION){
+                                          JFileChooser.APPROVE_OPTION){
       try {
         URL dsURL = fileChooser.getSelectedFile().toURL();
         ds = Factory.openDataStore("gate.persist.SerialDataStore",
@@ -1951,10 +1952,10 @@ public class MainFrame extends JFrame
 
         public void actionPerformed(ActionEvent e){
           fileChooser.setMultiSelectionEnabled(false);
-          fileChooser.setFileSelectionMode(fileChooser.DIRECTORIES_ONLY);
+          fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
           int result = fileChooser.showOpenDialog(MainFrame.this);
-          if(result == fileChooser.APPROVE_OPTION){
+          if(result == JFileChooser.APPROVE_OPTION){
             try{
               textField.setText(fileChooser.getSelectedFile().
                                             toURL().toExternalForm());
@@ -2050,7 +2051,7 @@ public class MainFrame extends JFrame
 
     public void actionPerformed(ActionEvent e) {
       DataStoreRegister reg = Gate.getDataStoreRegister();
-      Map dsTypes = reg.getDataStoreClassNames();
+      Map dsTypes = DataStoreRegister.getDataStoreClassNames();
       HashMap dsTypeByName = new HashMap();
       Iterator dsTypesIter = dsTypes.entrySet().iterator();
       while(dsTypesIter.hasNext()){
@@ -2103,9 +2104,9 @@ public class MainFrame extends JFrame
       Runnable runnable = new Runnable(){
         public void run(){
           fileChooser.setDialogTitle("Select a file for this resource");
-          fileChooser.setFileSelectionMode(fileChooser.FILES_AND_DIRECTORIES);
+          fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
           if (fileChooser.showOpenDialog(MainFrame.this) ==
-                                                fileChooser.APPROVE_OPTION){
+                                                JFileChooser.APPROVE_OPTION){
             File file = fileChooser.getSelectedFile();
             try{
               gate.util.persistence.PersistenceManager.loadObjectFromFile(file);
@@ -2273,7 +2274,7 @@ public class MainFrame extends JFrame
 
     public void actionPerformed(ActionEvent e) {
       DataStoreRegister reg = Gate.getDataStoreRegister();
-      Map dsTypes = reg.getDataStoreClassNames();
+      Map dsTypes = DataStoreRegister.getDataStoreClassNames();
       HashMap dsTypeByName = new HashMap();
       Iterator dsTypesIter = dsTypes.entrySet().iterator();
       while(dsTypesIter.hasNext()){
@@ -2297,11 +2298,11 @@ public class MainFrame extends JFrame
                     className.equals("gate.persist.PostgresDataStore")
                    ) {
               List dbPaths = new ArrayList();
-              Iterator keyIter = reg.getConfigData().keySet().iterator();
+              Iterator keyIter = DataStoreRegister.getConfigData().keySet().iterator();
               while (keyIter.hasNext()) {
                 String keyName = (String) keyIter.next();
                 if (keyName.startsWith("url"))
-                  dbPaths.add(reg.getConfigData().get(keyName));
+                  dbPaths.add(DataStoreRegister.getConfigData().get(keyName));
               }
               if (dbPaths.isEmpty())
                 throw new
@@ -2423,7 +2424,7 @@ public class MainFrame extends JFrame
                 FeatureMap securityData = Factory.newFeatureMap();
                 securityData.put("user", usr);
                 securityData.put("group", grp);
-                reg.addSecurityData(ds, securityData);
+                DataStoreRegister.addSecurityData(ds, securityData);
               } catch(PersistenceException pe) {
                 JOptionPane.showMessageDialog(
                     MainFrame.this, "Datastore open error!\n " +
@@ -2990,8 +2991,8 @@ public class MainFrame extends JFrame
 
         editor.setOntologyList(new Vector(ontologies));
 
-        frame.setSize(editor.SIZE_X,editor.SIZE_Y);
-        frame.setLocation(editor.POSITION_X,editor.POSITION_Y);
+        frame.setSize(OntologyEditorImpl.SIZE_X,OntologyEditorImpl.SIZE_Y);
+        frame.setLocation(OntologyEditorImpl.POSITION_X,OntologyEditorImpl.POSITION_Y);
         frame.setVisible(true);
         editor.visualize();
       } catch ( ResourceInstantiationException ex ) {
@@ -3027,8 +3028,8 @@ public class MainFrame extends JFrame
            editor.setTarget(gaz);
         }
 
-        frame.setSize(editor.SIZE_X,editor.SIZE_Y);
-        frame.setLocation(editor.POSITION_X,editor.POSITION_Y);
+        frame.setSize(Gaze.SIZE_X,Gaze.SIZE_Y);
+        frame.setLocation(Gaze.POSITION_X,Gaze.POSITION_Y);
         frame.setVisible(true);
         editor.setVisible(true);
       } catch ( ResourceInstantiationException ex ) {

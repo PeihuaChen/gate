@@ -1063,7 +1063,7 @@ public class OracleDataStore extends JDBCDataStore {
         case DBHelper.VALUE_TYPE_BOOLEAN:
 
           boolean b = ((Boolean)value).booleanValue();
-          stmt.setLong(4, b ? this.ORACLE_TRUE : this.ORACLE_FALSE);
+          stmt.setLong(4, b ? OracleDataStore.ORACLE_TRUE : OracleDataStore.ORACLE_FALSE);
           break;
 
         case DBHelper.VALUE_TYPE_INTEGER:
@@ -1179,7 +1179,7 @@ public class OracleDataStore extends JDBCDataStore {
 
           case DBHelper.VALUE_TYPE_BOOLEAN:
             boolean b = ((Boolean)value).booleanValue();
-            numberValues[arrInd] = b ? this.ORACLE_TRUE : this.ORACLE_FALSE;
+            numberValues[arrInd] = b ? OracleDataStore.ORACLE_TRUE : OracleDataStore.ORACLE_FALSE;
             floatValues[arrInd] = 0;
             stringValues[arrInd] = "";
             break;
@@ -1509,7 +1509,7 @@ public class OracleDataStore extends JDBCDataStore {
    */
   private boolean fitsInVarchar2(String s) {
 
-    return s.getBytes().length < this.ORACLE_VARCHAR_LIMIT_BYTES;
+    return s.getBytes().length < OracleDataStore.ORACLE_VARCHAR_LIMIT_BYTES;
   }
 
 
@@ -2240,8 +2240,8 @@ public class OracleDataStore extends JDBCDataStore {
         stmt.setLong(4,doc.getSourceUrlEndOffset().longValue());
       }
 
-      stmt.setLong(5,true == doc.getMarkupAware().booleanValue() ? this.ORACLE_TRUE
-                                                                  : this.ORACLE_FALSE);
+      stmt.setLong(5,true == doc.getMarkupAware().booleanValue() ? OracleDataStore.ORACLE_TRUE
+                                                                  : OracleDataStore.ORACLE_FALSE);
 
       stmt.execute();
     }
@@ -2871,7 +2871,7 @@ public class OracleDataStore extends JDBCDataStore {
       cstmt.registerOutParameter(4,java.sql.Types.NUMERIC);
       cstmt.execute();
 
-      lockSucceeded = cstmt.getLong(4) == this.ORACLE_TRUE
+      lockSucceeded = cstmt.getLong(4) == OracleDataStore.ORACLE_TRUE
                                           ? true
                                           : false;
     }

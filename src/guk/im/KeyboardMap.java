@@ -232,7 +232,7 @@ public class KeyboardMap implements Runnable{
 
     //add the components to the window
     GridBagConstraints constraints = new GridBagConstraints();
-    constraints.fill = constraints.BOTH;
+    constraints.fill = GridBagConstraints.BOTH;
     constraints.gridwidth = 3;
     contentPane.add((Component)GUIforString.get("`"), constraints);
     contentPane.add((Component)GUIforString.get("1"), constraints);
@@ -855,7 +855,7 @@ public class KeyboardMap implements Runnable{
       }//synchronized(jobs);
       //no more jobs, take a nap :)
       try{
-        myThread.sleep(150);
+        Thread.sleep(150);
       }catch(InterruptedException ie){
         ie.printStackTrace();
       }

@@ -461,9 +461,9 @@ public class Wrapper implements MLEngine, ActionsPublisher {
         public void run(){
           JFileChooser fileChooser = MainFrame.getFileChooser();
           fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
-          fileChooser.setFileSelectionMode(fileChooser.FILES_ONLY);
+          fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           fileChooser.setMultiSelectionEnabled(false);
-          if(fileChooser.showSaveDialog(null) == fileChooser.APPROVE_OPTION){
+          if(fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION){
             File file = fileChooser.getSelectedFile();
             try{
               MainFrame.lockGUI("Saving dataset...");
@@ -501,9 +501,9 @@ public class Wrapper implements MLEngine, ActionsPublisher {
         public void run(){
           JFileChooser fileChooser = MainFrame.getFileChooser();
           fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
-          fileChooser.setFileSelectionMode(fileChooser.FILES_ONLY);
+          fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           fileChooser.setMultiSelectionEnabled(false);
-          if(fileChooser.showSaveDialog(null) == fileChooser.APPROVE_OPTION){
+          if(fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION){
             File file = fileChooser.getSelectedFile();
             try{
               MainFrame.lockGUI("Saving ML model...");
@@ -538,9 +538,9 @@ public class Wrapper implements MLEngine, ActionsPublisher {
         public void run(){
           JFileChooser fileChooser = MainFrame.getFileChooser();
           fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
-          fileChooser.setFileSelectionMode(fileChooser.FILES_ONLY);
+          fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           fileChooser.setMultiSelectionEnabled(false);
-          if(fileChooser.showOpenDialog(null) == fileChooser.APPROVE_OPTION){
+          if(fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION){
             File file = fileChooser.getSelectedFile();
             try{
               MainFrame.lockGUI("Loading model...");

@@ -19,6 +19,7 @@ import java.util.List;
 
 import junit.framework.*;
 
+import gate.*;
 import gate.Factory;
 import gate.Gate;
 import gate.util.*;
@@ -46,11 +47,11 @@ public class TestSecurity extends TestCase
 
   /** Fixture set up */
   public void setUp() throws Exception {
-    if (! Gate.getDataStoreRegister().getConfigData().containsKey("url-test"))
+    if (! DataStoreRegister.getConfigData().containsKey("url-test"))
       throw new GateRuntimeException("DB URL not configured in gate.xml");
     else
       JDBC_URL =
-        (String) Gate.getDataStoreRegister().getConfigData().get("url-test");
+        (String) DataStoreRegister.getConfigData().get("url-test");
   } // setUp
 
   /** Put things back as they should be after running tests
@@ -267,7 +268,7 @@ public class TestSecurity extends TestCase
     Assert.assertTrue(false == ac.isValidSession(mySession));
 
     //11.3 add the user to new group
-    Group suahiliGrp = ac.findGroup(new Long(this.SUAHILI_GROUP_ID));
+    Group suahiliGrp = ac.findGroup(new Long(TestSecurity.SUAHILI_GROUP_ID));
     Assert.assertNotNull(suahiliGrp);
     suahiliGrp.addUser(myUser,adminSession);
     //11.4 check if the group knows the user is now mmeber

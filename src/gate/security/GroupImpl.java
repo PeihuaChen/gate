@@ -183,7 +183,7 @@ public class GroupImpl
     ObjectModificationEvent e = new ObjectModificationEvent(
                                           this,
                                           ObjectModificationEvent.OBJECT_MODIFIED,
-                                          this.OBJECT_CHANGE_NAME);
+                                          Group.OBJECT_CHANGE_NAME);
 
 
     //4. fire ObjectModificationEvent for all who care
@@ -271,7 +271,7 @@ public class GroupImpl
     ObjectModificationEvent e = new ObjectModificationEvent(
                                           this,
                                           ObjectModificationEvent.OBJECT_MODIFIED,
-                                          this.OBJECT_CHANGE_ADDUSER);
+                                          Group.OBJECT_CHANGE_ADDUSER);
 
     //5. update usr collection
     this.users.add(usr);
@@ -361,7 +361,7 @@ public class GroupImpl
     ObjectModificationEvent e = new ObjectModificationEvent(
                                           this,
                                           ObjectModificationEvent.OBJECT_MODIFIED,
-                                          this.OBJECT_CHANGE_REMOVEUSER);
+                                          Group.OBJECT_CHANGE_REMOVEUSER);
 
     //5. update usr collection
     this.users.remove(usr);

@@ -382,9 +382,9 @@ public class BootStrap {
 
     // determine the name of the current user and the current day
     Calendar calendar = Calendar.getInstance();
-    int month = calendar.get(calendar.MONTH)+1;
-    int year = calendar.get(calendar.YEAR);
-    int day = calendar.get(calendar.DAY_OF_MONTH);
+    int month = calendar.get(Calendar.MONTH)+1;
+    int year = calendar.get(Calendar.YEAR);
+    int day = calendar.get(Calendar.DAY_OF_MONTH);
     String date = day+"/"+month+"/"+year;
     String user = System.getProperty("user.name");
 
@@ -464,7 +464,7 @@ public class BootStrap {
     char[] classNameChars = className.toCharArray();
     for (int i=0;i<classNameChars.length;i++){
       Character classNameCharacter = new Character(classNameChars[i]);
-      if (!classNameCharacter.isLetterOrDigit(classNameChars[i]))
+      if (!Character.isLetterOrDigit(classNameChars[i]))
         throw new GateException("Only letters and digits in the class name");
     }
 

@@ -72,11 +72,11 @@ public class UserGroupEditor extends JComponent {
 
     java.util.List dbPaths = new ArrayList();
     DataStoreRegister reg = Gate.getDataStoreRegister();
-    Iterator keyIter = reg.getConfigData().keySet().iterator();
+    Iterator keyIter = DataStoreRegister.getConfigData().keySet().iterator();
     while (keyIter.hasNext()) {
       String keyName = (String) keyIter.next();
       if (keyName.startsWith("url"))
-        dbPaths.add(reg.getConfigData().get(keyName));
+        dbPaths.add(DataStoreRegister.getConfigData().get(keyName));
     }
     if (dbPaths.isEmpty())
       throw new
@@ -328,7 +328,7 @@ public class UserGroupEditor extends JComponent {
   }//readGroups
 
   void displayUsersFirst_itemStateChanged(ItemEvent e) {
-    if (e.getStateChange() == e.DESELECTED) {
+    if (e.getStateChange() == ItemEvent.DESELECTED) {
       if (!usersFirst)
         return;
       displayGroupsFirst.setSelected(true);

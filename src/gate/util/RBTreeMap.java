@@ -14,7 +14,6 @@
  */
 
 package gate.util;
-import java.io.IOException;
 import java.util.*;
 
 /** Slightly modified implementation of java.util.TreeMap in order to return the

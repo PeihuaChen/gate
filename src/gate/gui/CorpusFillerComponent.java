@@ -54,72 +54,72 @@ public class CorpusFillerComponent extends JPanel {
     setLayout(new GridBagLayout());
     //first row
     GridBagConstraints constraints = new GridBagConstraints();
-    constraints.gridx = constraints.RELATIVE;
+    constraints.gridx = GridBagConstraints.RELATIVE;
     constraints.gridy = 0;
     constraints.gridwidth = 2;
-    constraints.anchor = constraints.WEST;
-    constraints.fill = constraints.NONE;
+    constraints.anchor = GridBagConstraints.WEST;
+    constraints.fill = GridBagConstraints.NONE;
     constraints.insets = new Insets(0, 0, 0, 5);
     add(new JLabel("Directory URL:"), constraints);
 
     constraints = new GridBagConstraints();
-    constraints.gridx = constraints.RELATIVE;
+    constraints.gridx = GridBagConstraints.RELATIVE;
     constraints.gridy = 0;
     constraints.gridwidth = 5;
-    constraints.fill = constraints.HORIZONTAL;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
     constraints.insets = new Insets(0, 0, 0, 10);
     add(urlTextField = new JTextField(40), constraints);
 
     constraints = new GridBagConstraints();
-    constraints.gridx = constraints.RELATIVE;
+    constraints.gridx = GridBagConstraints.RELATIVE;
     constraints.gridy = 0;
     constraints.gridwidth = 1;
-    constraints.anchor = constraints.NORTHWEST;
+    constraints.anchor = GridBagConstraints.NORTHWEST;
     add(filerBtn = new JButton(MainFrame.getIcon("loadFile.gif")), constraints);
 
     //second row
     constraints = new GridBagConstraints();
-    constraints.gridx = constraints.RELATIVE;
+    constraints.gridx = GridBagConstraints.RELATIVE;
     constraints.gridy = 1;
     constraints.gridwidth = 2;
-    constraints.anchor = constraints.WEST;
-    constraints.fill = constraints.NONE;
+    constraints.anchor = GridBagConstraints.WEST;
+    constraints.fill = GridBagConstraints.NONE;
     constraints.insets = new Insets(0, 0, 0, 5);
     add(new JLabel("Extensions:"), constraints);
 
     constraints = new GridBagConstraints();
-    constraints.gridx = constraints.RELATIVE;
+    constraints.gridx = GridBagConstraints.RELATIVE;
     constraints.gridy = 1;
     constraints.gridwidth = 5;
-    constraints.fill = constraints.HORIZONTAL;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
     constraints.insets = new Insets(0, 0, 0, 10);
     add(extensionsTextField = new JTextField(40), constraints);
     extensionsTextField.setEditable(false);
     extensionsTextField.setText(extensions.toString());
 
     constraints = new GridBagConstraints();
-    constraints.gridx = constraints.RELATIVE;
+    constraints.gridx = GridBagConstraints.RELATIVE;
     constraints.gridy = 1;
     constraints.gridwidth = 1;
-    constraints.anchor = constraints.NORTHWEST;
+    constraints.anchor = GridBagConstraints.NORTHWEST;
     add(listEditBtn = new JButton(MainFrame.getIcon("editList.gif")), constraints);
 
     //third row
     constraints = new GridBagConstraints();
-    constraints.gridx = constraints.RELATIVE;
+    constraints.gridx = GridBagConstraints.RELATIVE;
     constraints.gridy = 2;
     constraints.gridwidth = 2;
-    constraints.anchor = constraints.WEST;
-    constraints.fill = constraints.NONE;
+    constraints.anchor = GridBagConstraints.WEST;
+    constraints.fill = GridBagConstraints.NONE;
     constraints.insets = new Insets(0, 0, 0, 5);
     add(new JLabel("Encoding:"), constraints);
 
 
     constraints = new GridBagConstraints();
-    constraints.gridx = constraints.RELATIVE;
+    constraints.gridx = GridBagConstraints.RELATIVE;
     constraints.gridy = 2;
     constraints.gridwidth = 4;
-    constraints.fill = constraints.HORIZONTAL;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
     add(encodingTextField = new JTextField(15), constraints);
 
     //fourth row
@@ -127,10 +127,10 @@ public class CorpusFillerComponent extends JPanel {
     recurseCheckBox.setSelected(true);
     recurseCheckBox.setHorizontalTextPosition(SwingConstants.LEFT);
     constraints = new GridBagConstraints();
-    constraints.gridx = constraints.RELATIVE;
+    constraints.gridx = GridBagConstraints.RELATIVE;
     constraints.gridy = 3;
     constraints.gridwidth = 3;
-    constraints.anchor = constraints.NORTHWEST;
+    constraints.anchor = GridBagConstraints.NORTHWEST;
     add(recurseCheckBox, constraints);
 
   }
@@ -149,7 +149,7 @@ public class CorpusFillerComponent extends JPanel {
         filer.setAcceptAllFileFilterUsed(true);
         filer.setFileFilter(filer.getAcceptAllFileFilter());
         int res = filer.showOpenDialog(CorpusFillerComponent.this);
-        if(res == filer.APPROVE_OPTION){
+        if(res == JFileChooser.APPROVE_OPTION){
           try {
             urlTextField.setText(filer.getSelectedFile().
                                  toURL().toExternalForm());

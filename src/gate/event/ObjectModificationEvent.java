@@ -33,10 +33,10 @@ public class ObjectModificationEvent extends GateEvent {
                   type == OBJECT_DELETED ||
                   type == OBJECT_MODIFIED);
 
-    this.subtype = subtype;
+    ObjectModificationEvent.subtype = subtype;
   }
 
   public int getSubType() {
-    return this.subtype;
+    return ObjectModificationEvent.subtype;
   }
   }

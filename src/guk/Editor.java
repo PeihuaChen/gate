@@ -167,7 +167,7 @@ public class Editor extends JFrame {
           filer.setSelectedFile(null);
           filer.setFileFilter(filer.getAcceptAllFileFilter());
           int res1 = filer.showOpenDialog(frame);
-          if(res1 == filer.APPROVE_OPTION){
+          if(res1 == JFileChooser.APPROVE_OPTION){
             //we have the file, what's the encoding?
             Object[] encodings = { "Unicode", "UTF-8", "UTF-16BE", "UTF-16LE", "UTF-16",
                                    "ISO-8859-1", "US-ASCII"};
@@ -287,7 +287,7 @@ public class Editor extends JFrame {
           filer.setSelectedFile(null);
           filer.setFileFilter(filer.getAcceptAllFileFilter());
           int res = filer.showSaveDialog(frame);
-          if(res == filer.APPROVE_OPTION){
+          if(res == JFileChooser.APPROVE_OPTION){
             File newFile = filer.getSelectedFile();
             if(newFile == null) return;
             int res1 = JOptionPane.OK_OPTION;

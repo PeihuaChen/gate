@@ -88,7 +88,7 @@ public class KBClassImpl extends OClassImpl implements KBClass  {
   public Set getInheritedProperties() {
     Set superClasses = null;
     try {
-      this.getSuperClasses(this.TRANSITIVE_CLOSURE);
+      this.getSuperClasses(OClass.TRANSITIVE_CLOSURE);
     } catch (NoSuchClosureTypeException ex) {};
 
     if (superClasses == null || superClasses.isEmpty())

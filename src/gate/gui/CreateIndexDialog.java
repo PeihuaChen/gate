@@ -169,7 +169,7 @@ public class CreateIndexDialog extends JDialog {
     fc.setDialogTitle("Select location directory");
     fc.setSelectedFiles(null);
     int res = fc.showDialog(this, "Select");
-    if (res == fc.APPROVE_OPTION){
+    if (res == JFileChooser.APPROVE_OPTION){
       File f = fc.getSelectedFile();
       locationTextField.setText(f.getAbsolutePath());
     }

@@ -60,7 +60,7 @@ public class Main {
     * </UL>
     */
   public static void main(String[] args) throws GateException {
-    new Main().annotatorArgsMap = null;
+    Main.annotatorArgsMap = null;
     // check we have a useable JDK
     if(
       System.getProperty("java.version").compareTo(Gate.getMinJdkVersion())

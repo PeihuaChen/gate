@@ -43,8 +43,8 @@ public class CreateIndexGUI extends JPanel {
     setLayout(new GridBagLayout());
 
     GridBagConstraints constraints = new GridBagConstraints();
-    constraints.anchor = constraints.WEST;
-    constraints.fill = constraints.HORIZONTAL;
+    constraints.anchor = GridBagConstraints.WEST;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
     constraints.insets = new Insets(2, 5, 2, 5);
 
     //first line
@@ -127,7 +127,7 @@ public class CreateIndexGUI extends JPanel {
       fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
       fileChooser.setDialogTitle("Select a directory for the index files");
       int res = fileChooser.showOpenDialog(CreateIndexGUI.this);
-      if(res == fileChooser.APPROVE_OPTION) indexLocationTextField.
+      if(res == JFileChooser.APPROVE_OPTION) indexLocationTextField.
                                             setText(fileChooser.
                                             getSelectedFile().toString());
     }
