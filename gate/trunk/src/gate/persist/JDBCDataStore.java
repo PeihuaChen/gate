@@ -64,64 +64,6 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
     throw new MethodNotImplementedException();
   }
 
-  /** --- */
-/*  private void loadDrivers()
-    throws ClassNotFoundException {
-
-    if (this.driverName != null) {
-      Class.forName(this.driverName);
-    }
-    else {
-      Class.forName(this.jdbcOracleDriverName);
-      Class.forName(this.jdbcPostgresDriverName);
-      Class.forName(this.jdbcSapDBDriverName);
-    }
-  }
-*/
-
-  /** --- */
-/*  protected void cleanup(ResultSet rs)
-    throws PersistenceException {
-
-    try {
-      if (rs!=null)
-        rs.close();
-    }
-    catch(SQLException sqle) {
-      throw new PersistenceException("an SQL exception occured ["+ sqle.getMessage()+"]");
-    }
-  }
-*/
-  /** --- */
-/*  protected void cleanup(Statement stmt)
-    throws PersistenceException {
-    try {
-      if (stmt!=null)
-        stmt.close();
-    }
-    catch(SQLException sqle) {
-      throw new PersistenceException("an SQL exception occured ["+ sqle.getMessage()+"]");
-    }
-  }
-*/
-  /** --- */
-/*  protected Connection connect(URL connectURL)
-    throws SQLException,ClassNotFoundException{
-
-    loadDrivers();
-    Connection conn = DriverManager.getConnection(connectURL.toString());
-
-    return conn;
-  }
-*/
-
-  /** --- */
-/*  protected void disconnect() {
-    throw new MethodNotImplementedException();
-//    this.jdbcConn.close();
-
-  }
-*/
 
   /*  interface DataStore  */
 
@@ -158,9 +100,8 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   }
 
   /** Get the name of an LR from its ID. */
-  public String getLrName(Object lrId) throws PersistenceException {
-    throw new MethodNotImplementedException();
-  }
+  public abstract String getLrName(Object lrId) throws PersistenceException;
+
 
   /** Set the URL for the underlying storage mechanism. */
   public void setStorageUrl(String storageUrl) throws PersistenceException {
@@ -181,6 +122,7 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
 
   }
 
+
   /**
    * Create a new data store. <B>NOTE:</B> for some data stores
    * creation is an system administrator task; in such cases this
@@ -191,6 +133,8 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
 
     throw new UnsupportedOperationException("create() is not supported for DatabaseDataStore");
   }
+
+
 
   /** Open a connection to the data store. */
   public void open() throws PersistenceException {
@@ -250,18 +194,17 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
    * @param lrId a data-store specific unique identifier for the resource
    * @param lrClassName class name of the type of resource
    */
-  public void delete(String lrClassName, Object lrId)
-  throws PersistenceException {
-    throw new MethodNotImplementedException();
-  }
+  public abstract void delete(String lrClassName, Object lrId)
+    throws PersistenceException;
+
 
   /**
    * Save: synchonise the in-memory image of the LR with the persistent
    * image.
    */
-  public void sync(LanguageResource lr) throws PersistenceException {
-    throw new MethodNotImplementedException();
-  }
+  public abstract void sync(LanguageResource lr)
+    throws PersistenceException;
+
 
   /**
    * Set method for the autosaving behaviour of the data store.
@@ -279,55 +222,42 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   }
 
   /** Adopt a resource for persistence. */
-  public LanguageResource adopt(LanguageResource lr)
-  throws PersistenceException {
-    throw new MethodNotImplementedException();
-  }
+  public abstract LanguageResource adopt(LanguageResource lr)
+    throws PersistenceException;
 
   /**
    * Get a resource from the persistent store.
    * <B>Don't use this method - use Factory.createResource with
    * DataStore and DataStoreInstanceId parameters set instead.</B>
    */
-  public LanguageResource getLr(String lrClassName, Object lrPersistenceId)
-  throws PersistenceException {
-    throw new MethodNotImplementedException();
-  }
+  public abstract LanguageResource getLr(String lrClassName, Object lrPersistenceId)
+  throws PersistenceException;
 
   /** Get a list of the types of LR that are present in the data store. */
-  public List getLrTypes() throws PersistenceException {
-    throw new MethodNotImplementedException();
-  }
+  public abstract List getLrTypes() throws PersistenceException;
+
 
   /** Get a list of the IDs of LRs of a particular type that are present. */
-  public List getLrIds(String lrType) throws PersistenceException {
-    throw new MethodNotImplementedException();
-  }
+  public abstract List getLrIds(String lrType) throws PersistenceException;
+
 
   /** Get a list of the names of LRs of a particular type that are present. */
-  public List getLrNames(String lrType) throws PersistenceException {
-    throw new MethodNotImplementedException();
-  }
+  public abstract List getLrNames(String lrType) throws PersistenceException;
 
   /**
    * Checks if the user (identified by the sessionID)
    *  has read access to the LR
    */
-  public boolean canReadLR(Object lrID, Session s)
-    throws PersistenceException, gate.security.SecurityException{
+  public abstract boolean canReadLR(Object lrID, Session s)
+    throws PersistenceException, gate.security.SecurityException;
 
-    throw new MethodNotImplementedException();
-  }
+
   /**
    * Checks if the user (identified by the sessionID)
    * has write access to the LR
    */
-  public boolean canWriteLR(Object lrID, Session s)
-    throws PersistenceException, gate.security.SecurityException{
-
-    throw new MethodNotImplementedException();
-  }
-
+  public abstract boolean canWriteLR(Object lrID, Session s)
+    throws PersistenceException, gate.security.SecurityException;
 
 
   /*  interface DatabaseDataStore  */
@@ -409,18 +339,11 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
 
 
   /** --- */
-  protected void readCLOB(java.sql.Clob src, StringBuffer dest)
-    throws SQLException, IOException {
-
-    throw new MethodNotImplementedException();
-  }
+  protected abstract void readCLOB(java.sql.Clob src, StringBuffer dest)
+    throws SQLException, IOException;
 
 
   /** --- */
-  protected void writeCLOB(StringBuffer src,java.sql.Clob dest)
-    throws SQLException,IOException  {
-
-    throw new MethodNotImplementedException();
-  }
-
+  protected abstract void writeCLOB(StringBuffer src,java.sql.Clob dest)
+    throws SQLException,IOException;
 }
