@@ -34,6 +34,7 @@ import junit.framework.Assert;
 
 import com.ontotext.gate.vr.Gaze;
 import com.ontotext.gate.vr.OntologyEditorImpl;
+import com.sun.java.swing.SwingUtilities2;
 
 import gate.*;
 import gate.creole.*;
@@ -1800,10 +1801,25 @@ public class MainFrame extends JFrame
     public void actionPerformed(ActionEvent e) {
       if(pluginManager == null){
         pluginManager = new PluginManagerUI(MainFrame.this);
-        pluginManager.setLocationRelativeTo(MainFrame.this);
+//        pluginManager.setLocationRelativeTo(MainFrame.this);
         pluginManager.setModal(true);
         getGuiRoots().add(pluginManager);
         pluginManager.pack();
+        //size the window so that it doesn't go off-screen
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        Dimension dialogSize = pluginManager.getPreferredSize();
+        int width = dialogSize.width > screenSize.width ?
+                screenSize.width * 3 /4 :
+                dialogSize.width;
+        int height = dialogSize.height > screenSize.height ?
+                screenSize.height * 3 /4 :
+                dialogSize.height;
+        pluginManager.setSize(width, height);
+        pluginManager.validate();        
+        //center the window on screen
+        int x = (screenSize.width - width)/2;
+        int y = (screenSize.height - height)/2;
+        pluginManager.setLocation(x, y);
       }
       pluginManager.show();
     }
