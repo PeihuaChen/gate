@@ -36,15 +36,15 @@ class DFSMState{ //extends FSMState{
     *instead.
     */
   void put(int index, DFSMState state){
-    transitionFunction[index +128] =state;
+    transitionFunction[index] = state;
   }
 
   /**This method is used to access the transition function of this state.
     *@param type the Unicode type identifier as the corresponding static value
     *on {@link java.lang.Character}
     */
-  DFSMState next(byte type){//UnicodeType type){
-    return transitionFunction[type +128];
+  DFSMState next(int type){//UnicodeType type){
+    return transitionFunction[type];
   }
 
   /**Returns a GML (Graph Modelling Language) representation of the edges
@@ -61,7 +61,7 @@ class DFSMState{ //extends FSMState{
         res += "edge [ source " + myIndex +
         " target " + nextState.getIndex() +
         " label \"";
-        res += DefaultTokeniser.typesMnemonics[i];
+        res += DefaultTokeniser.typeMnemonics[i];
         res += "\" ]\n";
       }
     };
@@ -192,7 +192,7 @@ class DFSMState{ //extends FSMState{
 
   /**The transition function of this state.
     */
-  DFSMState[] transitionFunction = new DFSMState[256];
+  DFSMState[] transitionFunction = new DFSMState[DefaultTokeniser.maxTypeId];
   String rhs;
   int myIndex;
   static int index;
