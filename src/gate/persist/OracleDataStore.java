@@ -961,7 +961,15 @@ public class OracleDataStore extends JDBCDataStore {
       Node start = (Node)ann.getStartNode();
       Node end = (Node)ann.getEndNode();
       String type = ann.getType();
-
+/*System.out.println("creating annotation, lrid=["+lrID+"],"+
+                    "ann_local_id=["+ann.getId()+"]," +
+                    "aset_id=["+asetID+"]," +
+                    "start_id=["+start.getId()+"]," +
+                    "start_off=["+start.getOffset()+"]," +
+                    "end_id=["+end.getId()+"]," +
+                    "end_off=["+end.getOffset()+"]," +
+                    "type=["+type+"]...");
+*/
       //DB stuff
       Long annGlobalID = null;
       try {
@@ -2065,23 +2073,43 @@ public class OracleDataStore extends JDBCDataStore {
 
       DBHelper.cleanup(rs);
       DBHelper.cleanup(pstmt);
-      sql = " select  max(ann_local_id) as max_ann_id" +
-//            "         max(node_local_id) as max_node_id " +
+      sql = " select  max(ann_local_id),'ann_id'" +
             " from "+Gate.DB_OWNER+".t_annotation " +
-            " where ann_doc_id = ?";
+            " where ann_doc_id = ?" +
+            " union " +
+            " select max(node_local_id),'node_id' " +
+            " from "+Gate.DB_OWNER+".t_node " +
+            " where node_doc_id = ?";
+
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,doc_id);
+      pstmt.setLong(2,doc_id);
       pstmt.execute();
       rs = pstmt.getResultSet();
 
+      int maxAnnID = 0 , maxNodeID = 0;
+      //ann id
       if (false == rs.next()) {
-        //ooops mo data found
+        //ooops no data found
         throw new PersistenceException("Invalid LR ID supplied - no data found");
       }
+      if (rs.getString(2).equals("ann_id"))
+        maxAnnID = rs.getInt(1);
+      else
+        maxNodeID = rs.getInt(1);
 
-      int maxAnnID = rs.getInt("max_ann_id");
+      if (false == rs.next()) {
+        //ooops no data found
+        throw new PersistenceException("Invalid LR ID supplied - no data found");
+      }
+      if (rs.getString(2).equals("node_id"))
+        maxNodeID = rs.getInt(1);
+      else
+        maxAnnID = rs.getInt(1);
+
+      result.setNextNodeId(maxNodeID+1);
       result.setNextAnnotationId(maxAnnID+1);
-      //node?
+
     }
     catch(SQLException sqle) {
       throw new PersistenceException("can't read LR from DB: ["+ sqle.getMessage()+"]");
@@ -2780,14 +2808,23 @@ public class OracleDataStore extends JDBCDataStore {
                       this.getDatabaseID());
 
 
+    EventAwareDocument ead = (EventAwareDocument)doc;
     //1. get the sets read from the DB for this document
     //chnaged annotations can occur only in such sets
-    Collection loadedSets = ((EventAwareDocument)doc).getLoadedAnnotationSets();
+    Collection loadedSets = ead.getLoadedAnnotationSets();
 
     Iterator it = loadedSets.iterator();
     while (it.hasNext()) {
 
       AnnotationSet as = (AnnotationSet)it.next();
+      //check that this set is neither NEW nor DELETED
+      //they should be already synced
+      if (ead.getAddedAnnotationSets().contains(as.getName()) ||
+          ead.getRemovedAnnotationSets().contains(as.getName())) {
+        //oops, ignore it
+        continue;
+      }
+
       EventAwareAnnotationSet eas = (EventAwareAnnotationSet)as;
       Assert.assertNotNull(as);
 
