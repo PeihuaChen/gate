@@ -32,15 +32,15 @@ public interface WordNet extends LanguageResource {
 
   public String getVersion();
 
-  public Iterator getSynsets();
+/*  public Iterator getSynsets(); */
 
   public Iterator getSynsets(int pos)
     throws WordNetException;
 
   public Iterator getUniqueBeginners();
 
-  public List lookupWord(String lemma);
+  public List lookupWord(String lemma) throws WordNetException;
 
-  public List lookupWord(String lemma, int pos);
+  public List lookupWord(String lemma, int pos) throws WordNetException;
 }
 
