@@ -1099,7 +1099,7 @@ jar/classpath so it's the same as registerBuiltins
    */
   public static class DirectoryInfo{
     public DirectoryInfo(URL url){
-      this.url = url;
+      this.url = normaliseCreoleUrl(url);
       valid = true;
       resourceInfoList = new ArrayList();
       //this may invalidate it if something goes wrong
@@ -1113,9 +1113,6 @@ jar/classpath so it's the same as registerBuiltins
     protected void parseCreole(){
       SAXBuilder builder = new SAXBuilder(false);
       try{
-        if(!url.getPath().endsWith("/")) 
-          url = new URL(url.getProtocol(), url.getHost(),
-                  url.getPort(), url.getPath() + "/");
         URL creoleFileURL = new URL(url, "creole.xml");
         org.jdom.Document creoleDoc = builder.build(creoleFileURL);
         List jobsList = new ArrayList();
@@ -1141,10 +1138,12 @@ jar/classpath so it's the same as registerBuiltins
         }
       }catch(IOException ioe){
         valid = false;
-        ioe.printStackTrace();
+        Err.prln("Problem while parsing plugin " + url.toExternalForm() +
+                "!\n" + ioe.toString() + "\nPlugin not available!");
       }catch(JDOMException jde){
         valid = false;
-        jde.printStackTrace();
+        Err.prln("Problem while parsing plugin " + url.toExternalForm() +
+                "!\n" + jde.toString() + "\nPlugin not available!");
       }
     }
     
