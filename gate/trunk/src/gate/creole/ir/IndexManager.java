@@ -15,8 +15,34 @@
 package gate.creole.ir;
 
 import java.util.List;
+import gate.Corpus;
 
 public interface IndexManager{
+
+  /**
+   * Gets the corpus this index manages will index.
+   * @return a {@link gate.Corpus} value;
+   */
+  public Corpus getCorpus();
+
+  /**
+   * Sets the corpus this index manages will index.
+   * @param corpus a {@link gate.Corpus} value;
+   */
+  public void setCorpus(Corpus corpus);
+
+  /**
+   * Gets the index definition for this index manager.
+   * @return a {@link IndexDefinition} value.
+   */
+  public IndexDefinition getIndexDefinition();
+
+  /**
+   * Sets the index definition for this index manager.
+   * @param indexDefinition a {@link IndexDefinition} value.
+   */
+  public void setIndexDefinition(IndexDefinition indexDefinition);
+
 
   /** Creates index directory and indexing all
    *  documents in the corpus. */
@@ -31,5 +57,6 @@ public interface IndexManager{
   /** Reindexing changed documents, removing removed documents and
    *  add to the index new corpus documents. */
   public void sync(List added, List removed, List changed) throws IndexException;
+
 
 }

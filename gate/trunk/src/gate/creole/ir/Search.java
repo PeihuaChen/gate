@@ -41,4 +41,5 @@ public interface Search{
    *  Result length is limited. */
   public QueryResultList search(String query, int limit, List fieldNames)
                          throws IndexException, SearchException;
+
 }

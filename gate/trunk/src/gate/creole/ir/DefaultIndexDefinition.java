@@ -24,8 +24,8 @@ public class DefaultIndexDefinition implements IndexDefinition{
   /** Location (path) of the index store directory */
   private String location;
 
-  /**  Type of index see GateConstants.java*/
-  private int indexType;
+//  /**  Type of index see GateConstants.java*/
+//  private int indexType;
 
   /**  Sets the location of index
    * @param location - index directory path
@@ -38,17 +38,17 @@ public class DefaultIndexDefinition implements IndexDefinition{
     return location;
   }
 
-  /**  @return int index type*/
-  public int getIndexType(){
-    return indexType;
-  }
-
-  /**  Sets the index type.
-   *  @param type - index type
-   */
-  public void setIndexType(int type){
-    this.indexType = type;
-  }
+//  /**  @return int index type*/
+//  public int getIndexType(){
+//    return indexType;
+//  }
+//
+//  /**  Sets the index type.
+//   *  @param type - index type
+//   */
+//  public void setIndexType(int type){
+//    this.indexType = type;
+//  }
 
   /**  @return Iterator of IndexFields, fileds for indexing. */
   public Iterator getIndexFields(){
@@ -63,6 +63,23 @@ public class DefaultIndexDefinition implements IndexDefinition{
     fields.add(fld);
   }
 
+  /**
+   * Sets the fully qualified class name for the IR engine to be used.
+   * @param irEngineClassName a String.
+   */
+  public void setIrEngineClassName(String irEngineClassName) {
+    this.irEngineClassName = irEngineClassName;
+  }
+
+  /**
+   * Gets the fully qualified class name for the IR engine to be used.
+   * @return a String.
+   */
+  public String getIrEngineClassName() {
+    return irEngineClassName;
+  }
+
   /**Serialisation ID*/
   static final long serialVersionUID = 2925395897153647322L;
+  private String irEngineClassName;
 }
