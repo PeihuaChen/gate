@@ -394,9 +394,9 @@ public class MainFrame extends JFrame
 
     UIManager.put("ProgressBar.cellSpacing", new Integer(0));
     progressBar = new JProgressBar(JProgressBar.HORIZONTAL);
-    progressBar.setBorder(BorderFactory.createEmptyBorder());
+//    progressBar.setBorder(BorderFactory.createEmptyBorder());
     progressBar.setForeground(new Color(150, 75, 150));
-    progressBar.setBorderPainted(false);
+//    progressBar.setBorderPainted(false);
     progressBar.setStringPainted(false);
     progressBar.setOrientation(JProgressBar.HORIZONTAL);
 
