@@ -520,91 +520,92 @@ public class SerialControllerEditor extends AbstractVisualResource
       }
     });
 
-    final ActionListener executionModeActionListener = new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        if(selectedPRRunStrategy != null &&
-           selectedPRRunStrategy instanceof AnalyserRunningStrategy){
-          AnalyserRunningStrategy strategy =
-            (AnalyserRunningStrategy)selectedPRRunStrategy;
-          if(yes_RunRBtn.isSelected()){
-            strategy.setRunMode(RunningStrategy.RUN_ALWAYS);
-            featureNameTextField.setEditable(false);
-            featureValueTextField.setEditable(false);
-          }else if(no_RunRBtn.isSelected()){
-            strategy.setRunMode(RunningStrategy.RUN_NEVER);
-            featureNameTextField.setEditable(false);
-            featureValueTextField.setEditable(false);
-          }else if(conditional_RunRBtn.isSelected()){
-            strategy.setRunMode(RunningStrategy.RUN_CONDITIONAL);
-            featureNameTextField.setEditable(true);
-            featureValueTextField.setEditable(true);
+    if(conditionalMode){
+      final ActionListener executionModeActionListener = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          if(selectedPRRunStrategy != null &&
+             selectedPRRunStrategy instanceof AnalyserRunningStrategy){
+            AnalyserRunningStrategy strategy =
+              (AnalyserRunningStrategy)selectedPRRunStrategy;
+            if(yes_RunRBtn.isSelected()){
+              strategy.setRunMode(RunningStrategy.RUN_ALWAYS);
+              featureNameTextField.setEditable(false);
+              featureValueTextField.setEditable(false);
+            }else if(no_RunRBtn.isSelected()){
+              strategy.setRunMode(RunningStrategy.RUN_NEVER);
+              featureNameTextField.setEditable(false);
+              featureValueTextField.setEditable(false);
+            }else if(conditional_RunRBtn.isSelected()){
+              strategy.setRunMode(RunningStrategy.RUN_CONDITIONAL);
+              featureNameTextField.setEditable(true);
+              featureValueTextField.setEditable(true);
 
-            String str = featureNameTextField.getText();
-            strategy.setFeatureName(str == null || str.length()==0 ?
-                                    null : str);
-            str = featureValueTextField.getText();
-            strategy.setFeatureValue(str == null || str.length()==0 ?
-                                    null : str);
+              String str = featureNameTextField.getText();
+              strategy.setFeatureName(str == null || str.length()==0 ?
+                                      null : str);
+              str = featureValueTextField.getText();
+              strategy.setFeatureValue(str == null || str.length()==0 ?
+                                      null : str);
+            }
+          }
+          memberPRsTable.repaint();
+        }
+      };
+
+      yes_RunRBtn.addActionListener(executionModeActionListener);
+
+      no_RunRBtn.addActionListener(executionModeActionListener);
+
+      conditional_RunRBtn.addActionListener(executionModeActionListener);
+
+      featureNameTextField.getDocument().addDocumentListener(
+      new javax.swing.event.DocumentListener() {
+        public void insertUpdate(javax.swing.event.DocumentEvent e) {
+          changeOccured(e);
+        }
+
+        public void removeUpdate(javax.swing.event.DocumentEvent e) {
+          changeOccured(e);
+        }
+
+        public void changedUpdate(javax.swing.event.DocumentEvent e) {
+          changeOccured(e);
+        }
+
+        protected void changeOccured(javax.swing.event.DocumentEvent e){
+          if(selectedPRRunStrategy != null &&
+             selectedPRRunStrategy instanceof AnalyserRunningStrategy){
+            AnalyserRunningStrategy strategy =
+              (AnalyserRunningStrategy)selectedPRRunStrategy;
+            strategy.setFeatureName(featureNameTextField.getText());
           }
         }
-        memberPRsTable.repaint();
-      }
-    };
+      });
 
-    yes_RunRBtn.addActionListener(executionModeActionListener);
-
-    no_RunRBtn.addActionListener(executionModeActionListener);
-
-    conditional_RunRBtn.addActionListener(executionModeActionListener);
-
-    featureNameTextField.getDocument().addDocumentListener(
-    new javax.swing.event.DocumentListener() {
-      public void insertUpdate(javax.swing.event.DocumentEvent e) {
-        changeOccured(e);
-      }
-
-      public void removeUpdate(javax.swing.event.DocumentEvent e) {
-        changeOccured(e);
-      }
-
-      public void changedUpdate(javax.swing.event.DocumentEvent e) {
-        changeOccured(e);
-      }
-
-      protected void changeOccured(javax.swing.event.DocumentEvent e){
-        if(selectedPRRunStrategy != null &&
-           selectedPRRunStrategy instanceof AnalyserRunningStrategy){
-          AnalyserRunningStrategy strategy =
-            (AnalyserRunningStrategy)selectedPRRunStrategy;
-          strategy.setFeatureName(featureNameTextField.getText());
+      featureValueTextField.getDocument().addDocumentListener(
+      new javax.swing.event.DocumentListener() {
+        public void insertUpdate(javax.swing.event.DocumentEvent e) {
+          changeOccured(e);
         }
-      }
-    });
 
-    featureValueTextField.getDocument().addDocumentListener(
-    new javax.swing.event.DocumentListener() {
-      public void insertUpdate(javax.swing.event.DocumentEvent e) {
-        changeOccured(e);
-      }
-
-      public void removeUpdate(javax.swing.event.DocumentEvent e) {
-        changeOccured(e);
-      }
-
-      public void changedUpdate(javax.swing.event.DocumentEvent e) {
-        changeOccured(e);
-      }
-
-      protected void changeOccured(javax.swing.event.DocumentEvent e){
-        if(selectedPRRunStrategy != null &&
-           selectedPRRunStrategy instanceof AnalyserRunningStrategy){
-          AnalyserRunningStrategy strategy =
-            (AnalyserRunningStrategy)selectedPRRunStrategy;
-          strategy.setFeatureValue(featureValueTextField.getText());
+        public void removeUpdate(javax.swing.event.DocumentEvent e) {
+          changeOccured(e);
         }
-      }
-    });
 
+        public void changedUpdate(javax.swing.event.DocumentEvent e) {
+          changeOccured(e);
+        }
+
+        protected void changeOccured(javax.swing.event.DocumentEvent e){
+          if(selectedPRRunStrategy != null &&
+             selectedPRRunStrategy instanceof AnalyserRunningStrategy){
+            AnalyserRunningStrategy strategy =
+              (AnalyserRunningStrategy)selectedPRRunStrategy;
+            strategy.setFeatureValue(featureValueTextField.getText());
+          }
+        }
+      });
+    }//if conditional
   }//protected void initListeners()
 
   /**
