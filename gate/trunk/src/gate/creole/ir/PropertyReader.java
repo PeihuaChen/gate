@@ -18,7 +18,7 @@ import gate.Document;
 
 public interface PropertyReader{
 
-  /** @return String value of the field.*/
+  /** @return String value of the requested field. */
   public String getRpopertyValue(Document doc);
 
 }
