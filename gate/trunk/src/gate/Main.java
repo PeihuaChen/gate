@@ -329,7 +329,7 @@ public class Main {
     */
   public static void processArgs(String[] args) {
 
-    Getopt g = new Getopt("GATE main", args, "hde:");
+    Getopt g = new Getopt("GATE main", args, "hd:e:");
     int c;
     while( (c = g.getopt()) != -1 )
       switch(c) {
