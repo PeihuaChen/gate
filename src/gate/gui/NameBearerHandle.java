@@ -164,10 +164,17 @@ public class NameBearerHandle implements Handle,
 
         popup.add(saveAsXmlItem);
       }else if(target instanceof Corpus){
+        popup.addSeparator();
         corpusFiller = new CorpusFillerComponent();
         popup.add(new XJMenuItem(new PopulateCorpusAction(), sListenerProxy));
+//        popup.add(new XJMenuItem(new SaveCorpusAsXmlAction(), sListenerProxy));
       }
     }//if(resource instanceof LanguageResource)
+    if(target instanceof Resource){
+      popup.addSeparator();
+      popup.add(new XJMenuItem(new ReloadClassAction(), sListenerProxy));
+    }
+
 
     fireStatusChanged("Building views...");
 
@@ -322,6 +329,9 @@ public class NameBearerHandle implements Handle,
     }//public void actionPerformed(ActionEvent e)
   }//class CloseAction
 
+  /**
+   * Used to save a document as XML
+   */
   class SaveAsXmlAction extends AbstractAction {
     public SaveAsXmlAction(){
       super("Save As Xml...");
@@ -395,6 +405,123 @@ public class NameBearerHandle implements Handle,
       thread.start();
     }// actionPerformed()
   }// SaveAsXmlAction
+
+  /**
+   * Saves a corpus as a set of xml files in a directory.
+   */
+  class SaveCorpusAsXmlAction extends AbstractAction {
+    public SaveCorpusAsXmlAction(){
+      super("Save As Xml...");
+      putValue(SHORT_DESCRIPTION, "Saves this corpus in XML");
+    }// SaveAsXmlAction()
+
+    public void actionPerformed(ActionEvent e) {
+      //we need a directory
+      JFileChooser filer = MainFrame.getFileChooser();
+      filer.setDialogTitle("Select the directory that will contain the corpus");
+      filer.setFileSelectionMode(filer.DIRECTORIES_ONLY);
+
+      if (filer.showOpenDialog(getLargeView() != null ?
+                               getLargeView() :
+                               getSmallView()) == filer.APPROVE_OPTION){
+
+        File dir = filer.getSelectedFile();
+        //create the top directory if needed
+        if(!dir.exists()){
+          if(!dir.mkdirs()){
+            JOptionPane.showMessageDialog(largeView != null ?
+                                          largeView : smallView,
+                                          "Could not create top directory!",
+                                          "Gate", JOptionPane.ERROR_MESSAGE);
+            return;
+          }
+        }
+        //iterate through all the docs and save each of them as xml
+        Corpus corpus = (Corpus)target;
+        Iterator docIter = corpus.iterator();
+        while(docIter.hasNext()){
+          Document currentDoc = (Document)docIter.next();
+          URL sourceURL = currentDoc.getSourceUrl();
+          String fileName = sourceURL == null ? currentDoc.getName() :
+                                                sourceURL.getFile();
+Out.prln("File name " + sourceURL.getFile());
+Out.prln("Path name " + sourceURL.getPath());
+          File docFile = new File(dir, fileName);
+Out.prln("Temporary file name " + docFile.toString());
+          boolean nameOK = false;
+          do{
+            if(docFile.exists()){
+              //ask the user if we can ovewrite the file
+              Object[] options = new Object[] {"Yes", "All", "No", "Cancel"};
+              int answer = JOptionPane.showOptionDialog(
+                largeView != null ? largeView : smallView,
+                "File " + docFile.getName() + " already exists!\n" +
+                "Overwrite?" ,
+                "Gate", JOptionPane.DEFAULT_OPTION,
+                JOptionPane.WARNING_MESSAGE, null, options, options[2]);
+              switch(answer){
+                case 0: {
+                  break;
+                }
+                case 1: {
+                  break;
+                }
+                case 2: {
+                  break;
+                }
+                case 3: {
+                  break;
+                }
+              }
+
+            }else{
+              nameOK = true;
+            }
+          }while(!nameOK);
+        }
+
+
+      }
+
+
+    }
+  }
+
+  /**
+   * Saves a corpus as a set of xml files in a directory.
+   */
+  class ReloadClassAction extends AbstractAction {
+    public ReloadClassAction(){
+      super("Reload resource class");
+      putValue(SHORT_DESCRIPTION, "Reloads the java class for this resource");
+    }// SaveAsXmlAction()
+
+    public void actionPerformed(ActionEvent e) {
+      int answer = JOptionPane.showOptionDialog(
+                largeView != null ? largeView : smallView,
+                "This is an advanced option!\n" +
+                "You should not use this unless you're name is Hamish.\n" +
+                "Are you sure you want to do this?" ,
+                "Gate", JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE, null, null, null);
+      if(answer == JOptionPane.OK_OPTION){
+        try{
+          String className = target.getClass().getName();
+          Gate.getClassLoader().reloadClass(className);
+          fireStatusChanged("Class " + className + " reloaded!");
+        }catch(ClassNotFoundException cnfe){
+          JOptionPane.showMessageDialog(largeView != null ?
+                                        largeView : smallView,
+                                        "Error: \n" + cnfe.toString() +
+                                        "\nI told you not to do it...",
+                                        "Gate", JOptionPane.ERROR_MESSAGE);
+          cnfe.printStackTrace(Err.getPrintWriter());
+        }
+      }
+    }
+  }
+
+
 
   class SaveAction extends AbstractAction {
     public SaveAction(){
