@@ -66,7 +66,8 @@ public class AnnotationSetImpl
 
   /** Construction from Document. */
   public AnnotationSetImpl(Document doc) {
-    annotsById = new VerboseHashMap();
+//    annotsById = new VerboseHashMap();
+    annotsById = new HashMap();
     this.doc = (DocumentImpl) doc;
   } // construction from document
 
@@ -129,16 +130,16 @@ public class AnnotationSetImpl
     public void remove() {
       // this takes care of the ID index
       iter.remove();
+      // remove from type index
+      removeFromTypeIndex(lastNext);
+      // remove from offset indices
+      removeFromOffsetIndex(lastNext);
       //that's the second way of removing annotations from a set
       //apart from calling remove() on the set itself
       fireAnnotationRemoved(new AnnotationSetEvent(
           AnnotationSetImpl.this,
           AnnotationSetEvent.ANNOTATION_REMOVED,
-          getDocument(), (Annotation) lastNext));
-      // remove from type index
-      removeFromTypeIndex(lastNext);
-      // remove from offset indices
-      removeFromOffsetIndex(lastNext);
+          getDocument(), (Annotation) lastNext));      
     } // remove()
   }; // AnnotationSetIterator
 
@@ -146,49 +147,49 @@ public class AnnotationSetImpl
        * Class used for the indexById structure. This is a {@link java.util.HashMap}
    * that fires events when elements are removed.
    */
-  public class VerboseHashMap
-      extends HashMap {
-    VerboseHashMap() {
-      super(Gate.HASH_STH_SIZE);
-    } //contructor
-
-    public Object remove(Object key) {
-      Object res = super.remove(key);
-      if (res != null) {
-        if (owner == null) {
-          fireAnnotationRemoved(new AnnotationSetEvent(
-              AnnotationSetImpl.this,
-              AnnotationSetEvent.ANNOTATION_REMOVED,
-              getDocument(), (Annotation) res));
-        }
-        else {
-          owner.fireAnnotationRemoved(new AnnotationSetEvent(
-              AnnotationSetImpl.this,
-              AnnotationSetEvent.ANNOTATION_REMOVED,
-              getDocument(), (Annotation) res));
-        }
-      }
-      return res;
-    } //public Object remove(Object key)
-
-    static final long serialVersionUID = -4832487354063073511L;
-
-    /**
-     * The annotation set this maps is part of.
-     * This is an ugly hack in order to fix a bug: database annotation sets
-     * didn't fire annotation removed events.
-     */
-    private transient AnnotationSetImpl owner;
-
-    /**
-     * Sets the annotation set this maps is part of.
-     * This is an ugly hack in order to fix a bug: database annotation sets
-     * didn't fire annotation removed events.
-     */
-    public void setOwner(AnnotationSetImpl newOwner) {
-      this.owner = newOwner;
-    }
-  } //protected class VerboseHashMap extends HashMap
+//  public class VerboseHashMap
+//      extends HashMap {
+//    VerboseHashMap() {
+//      super(Gate.HASH_STH_SIZE);
+//    } //contructor
+//
+//    public Object remove(Object key) {
+//      Object res = super.remove(key);
+//      if (res != null) {
+//        if (owner == null) {
+//          fireAnnotationRemoved(new AnnotationSetEvent(
+//              AnnotationSetImpl.this,
+//              AnnotationSetEvent.ANNOTATION_REMOVED,
+//              getDocument(), (Annotation) res));
+//        }
+//        else {
+//          owner.fireAnnotationRemoved(new AnnotationSetEvent(
+//              AnnotationSetImpl.this,
+//              AnnotationSetEvent.ANNOTATION_REMOVED,
+//              getDocument(), (Annotation) res));
+//        }
+//      }
+//      return res;
+//    } //public Object remove(Object key)
+//
+//    static final long serialVersionUID = -4832487354063073511L;
+//
+//    /**
+//     * The annotation set this maps is part of.
+//     * This is an ugly hack in order to fix a bug: database annotation sets
+//     * didn't fire annotation removed events.
+//     */
+//    private transient AnnotationSetImpl owner;
+//
+//    /**
+//     * Sets the annotation set this maps is part of.
+//     * This is an ugly hack in order to fix a bug: database annotation sets
+//     * didn't fire annotation removed events.
+//     */
+//    public void setOwner(AnnotationSetImpl newOwner) {
+//      this.owner = newOwner;
+//    }
+//  } //protected class VerboseHashMap extends HashMap
 
   /** Get an iterator for this set */
   public Iterator iterator() {
@@ -203,8 +204,50 @@ public class AnnotationSetImpl
       removeFromTypeIndex(a);
       removeFromOffsetIndex(a);
     }
+    //fire the event
+    fireAnnotationRemoved(new AnnotationSetEvent(
+        AnnotationSetImpl.this,
+        AnnotationSetEvent.ANNOTATION_REMOVED,
+        getDocument(), a));
+    
     return wasPresent;
   } // remove(o)
+  
+  /**
+   * Removes from this set all of its elements that are contained in
+   * the specified collection (optional operation).<p>
+   *
+   * This implementation determines which is the smaller of this set
+   * and the specified collection, by invoking the <tt>size</tt>
+   * method on each.  If this set has fewer elements, then the
+   * implementation iterates over this set, checking each element
+   * returned by the iterator in turn to see if it is contained in
+   * the specified collection.  If it is so contained, it is removed
+   * from this set with the iterator's <tt>remove</tt> method.  If
+   * the specified collection has fewer elements, then the
+   * implementation iterates over the specified collection, removing
+   * from this set each element returned by the iterator, using this
+   * set's <tt>remove</tt> method.<p>
+   *
+   * Note that this implementation will throw an
+   * <tt>UnsupportedOperationException</tt> if the iterator returned by the
+   * <tt>iterator</tt> method does not implement the <tt>remove</tt> method.
+   *
+   * @param c elements to be removed from this set.
+   * @return <tt>true</tt> if this set changed as a result of the call.
+   *
+   * @throws    UnsupportedOperationException removeAll is not supported
+   *            by this set.
+   * @throws    NullPointerException if the specified collection is null.
+   * @see #remove(Object)
+   * @see #contains(Object)
+   */
+  public boolean removeAll(Collection c) {
+      boolean modified = false;
+      for (Iterator i = c.iterator(); i.hasNext(); )
+              modified |= remove(i.next());
+      return modified;
+  }  
 
   /** Remove from the ID index. */
   protected boolean removeFromIdIndex(Annotation a) {
