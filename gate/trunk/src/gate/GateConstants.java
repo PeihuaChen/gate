@@ -60,6 +60,27 @@ public interface GateConstants {
   public static final String SAVE_FEATURES_WHEN_PRESERVING_FORMAT =
     "Save_features_when_preserving_format";
 
+  /**
+   * The key for the known plugins path option
+   */
+  public static final String KNOWN_PLUGIN_PATH_KEY = "Known_plugin_path";
+  
+  /**
+   * The key for the autoload plugins path option
+   */
+  public static final String LOAD_PLUGIN_PATH_KEY = "Load_plugin_path";
+  
+  /**
+   * The key for the autoload plugins path system property
+   */
+  public static final String LOAD_PLUGIN_PATH_SYSPROP_KEY = "load.plugin.path";
+
+  /**
+   * The key for the GATE_HOME system property
+   */
+  public static final String GATE_HOME_SYSPROP_KEY = "gate.home";
+
+  
   /** The key for the feature keeping the original content of the document */
   public static final String
    ORIGINAL_DOCUMENT_CONTENT_FEATURE_NAME = "Original_document_content_on_load";
