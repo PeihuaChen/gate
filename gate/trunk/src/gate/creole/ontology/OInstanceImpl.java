@@ -18,6 +18,8 @@
 
 package gate.creole.ontology;
 
+import java.util.Set;
+
 public class OInstanceImpl implements OInstance {
 
   protected Object userData;
@@ -51,5 +53,33 @@ public class OInstanceImpl implements OInstance {
   public Object getUserData(){
     return userData;
   }
+
+  public void setDifferentFrom(OInstance theIndividual){
+    System.out.println("setDifferentFrom not supported yet");
+  }
+
+  public Set getDifferentFrom(){
+    System.out.println("getDifferentFrom not supported yet");
+    return null;
+  }
+
+  public void setPropertyValue(Property theProperty, Object theValue){
+    System.out.println("setPropertyValue not supported yet");
+  }
+
+  public Object getPropertyValue(Property theProperty){
+    System.out.println("getPropertyValue not supported yet");
+    return null;
+  }
+
+  public void setSameIndividualAs(OInstance theIndividual){
+    System.out.println("setSameIndividualAs not supported yet");
+  }
+
+  public Set getSameIndividualAs(){
+    System.out.println("getSameIndividualAs not supported yet");
+    return null;
+  }
+
 
 }
