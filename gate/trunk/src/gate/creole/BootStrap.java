@@ -20,6 +20,8 @@ import java.util.*;
 import java.net.*;
 import java.lang.reflect.*;
 import java.beans.*;
+import java.util.*;
+
 import gnu.regexp.*;
 import gate.util.*;
 import java.util.jar.*;
@@ -107,7 +109,7 @@ public class BootStrap {
 
   /** return the text between the last dot and the end of input
     */
-  public String findDot(String text) {
+  public String determineTypePackage(String text) {
 
     // determine the position of the last "."
     int index = text.lastIndexOf(".");
@@ -252,7 +254,9 @@ public class BootStrap {
         Class[] valException = (Class[])(currentFeature.get(2));
 
         // the form of the method
-        String typeReturn = findDot(valReturn.getName());
+        Out.prln("val "+valReturn.getName());
+        String typeReturn = determineTypePackage(valReturn.getName());
+
 
         String declaration = "public "+ typeReturn +" "+
                              nameMethod +"(";
@@ -261,7 +265,8 @@ public class BootStrap {
           declaration = declaration+")";
         else
           for (int i=0;i<valTypes.length;i++) {
-            declaration = declaration + findDot(valTypes[i].getName()) +
+            declaration = declaration +
+                            determineTypePackage(valTypes[i].getName()) +
                             " parameter"+ i;
 
             if (i==valTypes.length-1)
@@ -292,7 +297,8 @@ public class BootStrap {
           declaration = declaration + "\n"+ "                throws ";
           for (int i=0;i<valException.length;i++) {
 
-            declaration = declaration + findDot(valException[i].getName());
+            declaration = declaration + determineTypePackage(
+                                                    valException[i].getName());
 
             if (i == valException.length-1) {
               if (typeReturn.compareTo("void") !=0 ){
@@ -453,27 +459,18 @@ public class BootStrap {
     // goes through all the files from the template project
     while (keyProperties.hasMoreElements()) {
 
-      String valKey = (String)keyProperties.nextElement();
+      String key = (String)keyProperties.nextElement();
 
-      String valueKey = properties.getProperty(valKey);
+      String valueKey = properties.getProperty(key);
 
-      int indexEnd = valueKey.indexOf(",");
-      String newValueKey = valueKey;
-
-      while ((indexEnd != -1)||(newValueKey.compareTo("")!=0)) {
-        String nameFile = "";
-
-        if (indexEnd != -1) {
-          nameFile = newValueKey.substring(0,indexEnd);
-        } else {
-          nameFile = newValueKey;
-          newValueKey = "";
-        }
+      StringTokenizer token = new StringTokenizer(valueKey,",");
+      while (token.hasMoreTokens()) {
+        String nameFile = (String)token.nextToken();
 
         // the new path of the current file from template project
         String newPathFile = changeKeyValue(pathNewProject+"/"+nameFile);
 
-        if (valKey.compareTo("dir") == 0) {
+        if (key.compareTo("dir") == 0) {
           // the current directory is created
           newFile = new File(newPathFile);
           newFile.mkdir();
@@ -535,13 +532,7 @@ public class BootStrap {
 
           } // if
         } // else
-        if (indexEnd != -1)
-         newValueKey = newValueKey.substring(indexEnd+1,newValueKey.length());
-
-        indexEnd = newValueKey.indexOf(",");
       } // while
     }// while
-
   } // modify
-
 } // class BootStrap
