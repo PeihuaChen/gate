@@ -108,9 +108,9 @@ public class TestPersist extends TestCase
       (Document) sds.getLr("gate.corpora.DocumentImpl", lrPersistenceId);
 
     //clear the parameters value from features as they will be different
-    doc.getFeatures().remove("gate.PARAMETERS");
-    doc2.getFeatures().remove("gate.PARAMETERS");
-    doc3.getFeatures().remove("gate.PARAMETERS");
+    doc.getFeatures().remove("gate.PARAMETERS(transient)");
+    doc2.getFeatures().remove("gate.PARAMETERS(transient)");
+    doc3.getFeatures().remove("gate.PARAMETERS(transient)");
 
     assert(doc3.equals(doc2));
     assert(doc.equals(doc2));
@@ -160,8 +160,8 @@ public class TestPersist extends TestCase
       (Document) Factory.createResource("gate.corpora.DocumentImpl", features);
 
     //parameters should be different
-    doc.getFeatures().remove("gate.PARAMETERS");
-    doc2.getFeatures().remove("gate.PARAMETERS");
+    doc.getFeatures().remove("gate.PARAMETERS(transient)");
+    doc2.getFeatures().remove("gate.PARAMETERS(transient)");
     // check that the version we read back matches the original
     assert(doc.equals(doc2));
 
@@ -240,13 +240,13 @@ public class TestPersist extends TestCase
     Corpus diskCorp = (Corpus) lrsFromDisk.get(0);
 
     //clear the parameters value from features as they will be different
-    doc.getFeatures().remove("gate.PARAMETERS");
-    doc2.getFeatures().remove("gate.PARAMETERS");
-    corp.getFeatures().remove("gate.PARAMETERS");
+    doc.getFeatures().remove("gate.PARAMETERS(transient)");
+    doc2.getFeatures().remove("gate.PARAMETERS(transient)");
+    corp.getFeatures().remove("gate.PARAMETERS(transient)");
 
-    diskDoc.getFeatures().remove("gate.PARAMETERS");
-    diskDoc2.getFeatures().remove("gate.PARAMETERS");
-    diskCorp.getFeatures().remove("gate.PARAMETERS");
+    diskDoc.getFeatures().remove("gate.PARAMETERS(transient)");
+    diskDoc2.getFeatures().remove("gate.PARAMETERS(transient)");
+    diskCorp.getFeatures().remove("gate.PARAMETERS(transient)");
 
     assert("doc from disk not equal to memory version", doc.equals(diskDoc));
     assert("doc2 from disk not equal to memory version", doc2.equals(diskDoc2));
