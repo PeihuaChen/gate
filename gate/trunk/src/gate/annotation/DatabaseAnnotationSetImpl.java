@@ -223,8 +223,11 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
 //System.out.println("ASNAME=["+this.getName()+"],resourceDeleted() called");
 
       //unregister self
-      DataStore ds = (DataStore)evt.getResource();
-      ds.removeDatastoreListener(this);
+//this is not the correct way, since the resource is null in this case
+//      DataStore ds = (DataStore)evt.getResource();
+      DataStore ds = this.doc.getDataStore();
+      if (ds != null)
+        ds.removeDatastoreListener(this);
     }
 
   }//resourceDeleted
