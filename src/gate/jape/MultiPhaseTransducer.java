@@ -155,7 +155,7 @@ implements JapeConstants, java.io.Serializable
         fireStatusChanged("");
       } catch(JapeException e) {
         String errorMessage = new String(
-          "Error transducing document " + doc.getSourceUrl() +
+          "Error transducing document " + doc.getName() +
           ", phase " + t.getName() + Strings.getNl() + e.getMessage()
         );
         throw(new JapeException(errorMessage));
@@ -204,7 +204,11 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.22  2002/03/13 11:19:37  valyt
+// bug fix: doc.getSourceURL() replaced by doc.getName()
+//
 // Revision 1.21  2002/02/26 13:27:12  valyt
+//
 // Error messages from the compiler
 //
 // Revision 1.20  2001/09/28 15:45:23  valyt
