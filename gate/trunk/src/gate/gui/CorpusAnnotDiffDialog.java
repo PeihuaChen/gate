@@ -154,6 +154,7 @@ class CorpusAnnotDiffDialog extends JFrame {
     Resource resource;
     String corpName;
 
+    corpusMap.put("Not selected", null);
     ResourceData resourceData =
                         (ResourceData)registry.get("gate.corpora.CorpusImpl");
     if(resourceData != null && !resourceData.getInstantiations().isEmpty()){
@@ -199,7 +200,7 @@ class CorpusAnnotDiffDialog extends JFrame {
       }// while
     } // if
 
-    if(corpusMap.isEmpty()) corpusMap.put("No corpuses found",null);
+//    if(corpusMap.isEmpty()) corpusMap.put("No corpuses found",null);
     
     keyAnnotationSetMap = new TreeMap();
     responseAnnotationSetMap = new TreeMap();
@@ -223,9 +224,18 @@ class CorpusAnnotDiffDialog extends JFrame {
     //this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     this.getContentPane().setLayout(new BorderLayout());
     // init keyDocComboBox
-    Set comboCont = new TreeSet(corpusMap.keySet());
-    keyDocComboBox = new JComboBox(comboCont.toArray());
-    keyDocComboBox.setSelectedIndex(0);
+    Object[] corpuses = corpusMap.keySet().toArray();
+    String corpusName;
+    int noneindex = 0;
+    for(int i=0; i<corpuses.length; ++i) {
+      corpusName = (String) corpuses[i];
+      if("Not selected".equalsIgnoreCase(corpusName)) {
+        noneindex = i;
+        break;
+      } // if
+    } // for
+    keyDocComboBox = new JComboBox(corpuses);
+    keyDocComboBox.setSelectedIndex(noneindex);
     keyDocComboBox.setEditable(false);
     keyDocComboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
     Dimension dim = new Dimension(150,keyDocComboBox.getPreferredSize().height);
@@ -256,8 +266,8 @@ class CorpusAnnotDiffDialog extends JFrame {
     keyDocAnnotSetLabel.setBackground(Color.green);
 
     // init responseDocComboBox
-    responseDocComboBox = new JComboBox(comboCont.toArray());
-    responseDocComboBox.setSelectedIndex(0);
+    responseDocComboBox = new JComboBox(corpuses);
+    responseDocComboBox.setSelectedIndex(noneindex);
     responseDocComboBox.setEditable(false);
     responseDocComboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
     responseDocComboBox.setPreferredSize(dim);
