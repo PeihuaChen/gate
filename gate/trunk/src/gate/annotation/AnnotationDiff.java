@@ -484,8 +484,14 @@ public class AnnotationDiff extends AbstractVisualResource{
     AnnotationSet keyAnnotSet = null;
     AnnotationSet responseAnnotSet = null;
 
-    if (annotationSchema == null)
+    if(annotationSchema == null)
      throw new ResourceInstantiationException("No annotation schema defined !");
+
+    if(keyDocument == null)
+      throw new ResourceInstantiationException("No key document defined !");
+
+    if(responseDocument == null)
+      throw new ResourceInstantiationException("No response document defined !");
 
     if (keyAnnotationSetName == null)
       // Get the default key AnnotationSet from the keyDocument
