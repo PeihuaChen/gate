@@ -37,6 +37,7 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
   private static final String jdbcPostgresDriverName = "postgresql.Driver";
   private static final String jdbcSapDBDriverName = "com.sap.dbtech.jdbc.DriverSapDB";
 */
+  private static final boolean DEBUG = false;
 
   /** --- */
   private   String      dbURL;
@@ -444,7 +445,8 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
 
 
   public void resourceLoaded(CreoleEvent e) {
-//System.out.println("resource loaded...");
+    if(DEBUG)
+      System.out.println("resource loaded...");
   }
 
 
@@ -464,15 +466,18 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
   }
 
   public void datastoreOpened(CreoleEvent e) {
-//System.out.println("datastore opened...");
+    if(DEBUG)
+      System.out.println("datastore opened...");
   }
 
   public void datastoreCreated(CreoleEvent e) {
-//System.out.println("datastore created...");
+    if(DEBUG)
+      System.out.println("datastore created...");
   }
 
   public void datastoreClosed(CreoleEvent e) {
-//System.out.println("datastore closed...");
+    if(DEBUG)
+      System.out.println("datastore closed...");
     //sync all dependent resources
   }
 

@@ -34,14 +34,14 @@ public class TestPersist extends TestCase
   private static final String JDBC_URL =
 //           "jdbc:oracle:thin:GATEUSER/gate@192.168.128.7:1521:GATE04";
 //           "jdbc:oracle:oci8:GATEUSER/gate@GATE04.SIRMA.BG";
-           "jdbc:oracle:thin:GATEUSER/gate@onto-text:1521:GATE05";
+//           "jdbc:oracle:thin:GATEUSER/gate@onto-text:1521:GATE05";
 //           "jdbc:oracle:thin:GATEUSER/gate@nasus:1521:GATE06";
-//"jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB";
+"jdbc:oracle:thin:GATEUSER/gate2@grindleford.dcs.shef.ac.uk:1521:GateDB2";
 
 
 
   /** Debug flag */
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static Long uc01_lrID = null;
   private static Long uc101_lrID = null;
   private static LanguageResource uc01_LR = null;
@@ -675,11 +675,13 @@ public class TestPersist extends TestCase
       Assert.assertEquals(asetNew,asetOld);
     }
 
+    //close
+    ds.close();
+
     if(DEBUG) {
       Err.prln("Use case 02 passed...");
     }
 
-    //9.
   }
 
 
@@ -846,6 +848,9 @@ public class TestPersist extends TestCase
     }
 
 */
+    //close
+//    ds.close();
+
     if(DEBUG) {
       Err.prln("Use case 03 passed...");
     }
@@ -869,6 +874,8 @@ public class TestPersist extends TestCase
     //3. try to delete it
     ds.delete(DBHelper.DOCUMENT_CLASS,lr.getLRPersistenceId());
 
+    //close
+//    ds.close();
     if(DEBUG) {
       Err.prln("Use case 04 passed...");
     }
@@ -964,6 +971,9 @@ public class TestPersist extends TestCase
       Assert.assertTrue(fmOrig.containsKey(currKey));
       Assert.assertEquals(fm.get(currKey),fmOrig.get(currKey));
     }
+
+    //close
+//    ds.close();
 
     if(DEBUG) {
       Err.prln("Use case 102 passed...");

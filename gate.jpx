@@ -29,22 +29,34 @@
   <property category="runtime.10" name="ConfigurationName" value="Evaluate corpus" />
   <property category="runtime.10" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.10" name="application.class" value="gate.util.CorpusBenchmarkTool" />
-  <property category="runtime.10" name="application.parameters" value="E:\gatecorpora\test" />
+  <property category="runtime.10" name="application.parameters" value="z:\gatecorpora\test" />
   <property category="runtime.10" name="application.vmparameters" value="-Djava.ext.libs=lib/ext -Xmx500m" />
+  <property category="runtime.10" name="appserver.ejbJarsSaved" value="1" />
+  <property category="runtime.10" name="appserver.parameters" value="-jts -jns -jss -jdb" />
+  <property category="runtime.10" name="appserver.servername" value="ejbcontainer" />
+  <property category="runtime.10" name="appserver.vmparameters" value="-Dvbroker.agent.port=14000 -Djava.library.path=/Borland/AppServer/lib;/Borland/AppServer/bin" />
   <property category="runtime.10" name="jsprunner.docbase" value="." />
   <property category="runtime.10" name="jsprunner.jspfile" value="." />
   <property category="runtime.11" name="ConfigurationName" value="Evaluate stored against marked" />
   <property category="runtime.11" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.11" name="application.class" value="gate.util.CorpusBenchmarkTool" />
-  <property category="runtime.11" name="application.parameters" value="-marked_stored -verbose E:\gatecorpora\test" />
+  <property category="runtime.11" name="application.parameters" value="-marked_stored -verbose z:\gatecorpora\test" />
   <property category="runtime.11" name="application.vmparameters" value="-Djava.ext.libs=lib/ext -Xmx500m" />
+  <property category="runtime.11" name="appserver.ejbJarsSaved" value="1" />
+  <property category="runtime.11" name="appserver.parameters" value="-jts -jns -jss -jdb" />
+  <property category="runtime.11" name="appserver.servername" value="ejbcontainer" />
+  <property category="runtime.11" name="appserver.vmparameters" value="-Dvbroker.agent.port=14000 -Djava.library.path=/Borland/AppServer/lib;/Borland/AppServer/bin" />
   <property category="runtime.11" name="jsprunner.docbase" value="." />
   <property category="runtime.11" name="jsprunner.jspfile" value="." />
   <property category="runtime.12" name="ConfigurationName" value="Evaluate clean against marked" />
   <property category="runtime.12" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.12" name="application.class" value="gate.util.CorpusBenchmarkTool" />
-  <property category="runtime.12" name="application.parameters" value="-marked_clean -verbose E:\gatecorpora\test" />
+  <property category="runtime.12" name="application.parameters" value="-marked_clean -verbose z:\gatecorpora\test" />
   <property category="runtime.12" name="application.vmparameters" value="-Djava.ext.libs=lib/ext -Xmx500m" />
+  <property category="runtime.12" name="appserver.ejbJarsSaved" value="1" />
+  <property category="runtime.12" name="appserver.parameters" value="-jts -jns -jss -jdb" />
+  <property category="runtime.12" name="appserver.servername" value="ejbcontainer" />
+  <property category="runtime.12" name="appserver.vmparameters" value="-Dvbroker.agent.port=14000 -Djava.library.path=/Borland/AppServer/lib;/Borland/AppServer/bin" />
   <property category="runtime.12" name="jsprunner.docbase" value="." />
   <property category="runtime.12" name="jsprunner.jspfile" value="." />
   <property category="runtime.2" name="ConfigurationName" value="Text mode (-t)" />
@@ -124,13 +136,18 @@
   <property category="runtime.8" name="application.class" value="gate.creole.ProfilePRs" />
   <property category="runtime.8" name="application.parameters" value="-dir z:/test/news" />
   <property category="runtime.8" name="application.vmparameters" value="-Djava.ext.libs=lib/ext -Xmx500m" />
+  <property category="runtime.8" name="appserver.servername" value="ejbcontainer" />
   <property category="runtime.8" name="jsprunner.docbase" value="." />
   <property category="runtime.8" name="jsprunner.jspfile" value="." />
   <property category="runtime.9" name="ConfigurationName" value="Generate corpus" />
   <property category="runtime.9" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.9" name="application.class" value="gate.util.CorpusBenchmarkTool" />
-  <property category="runtime.9" name="application.parameters" value="-generate E:\gatecorpora\test" />
+  <property category="runtime.9" name="application.parameters" value="-generate z:\gatecorpora\test" />
   <property category="runtime.9" name="application.vmparameters" value="-Djava.ext.libs=lib/ext -Xmx500m" />
+  <property category="runtime.9" name="appserver.ejbJarsSaved" value="1" />
+  <property category="runtime.9" name="appserver.parameters" value="-jts -jns -jss -jdb" />
+  <property category="runtime.9" name="appserver.servername" value="ejbcontainer" />
+  <property category="runtime.9" name="appserver.vmparameters" value="-Dvbroker.agent.port=14000 -Djava.library.path=/Borland/AppServer/lib;/Borland/AppServer/bin" />
   <property category="runtime.9" name="jsprunner.docbase" value="." />
   <property category="runtime.9" name="jsprunner.jspfile" value="." />
   <property category="sys" name="AuthorLabel" value="@author" />
