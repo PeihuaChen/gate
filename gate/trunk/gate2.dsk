@@ -18,16 +18,13 @@ ivSplitClientMessages=89
 Curtain=0
 
 [Tab0]
-NavigationURL=.\src\gate\impl\ag\AGTest.java
+NavigationURL=.\src\gate\TestGate.java
 URLCount=1
-URL0=.\src\gate\impl\ag\AGTest.java
+URL0=.\src\gate\TestGate.java
 
-[Tab0@.\src\gate\impl\ag\AGTest.java]
-CursorX=16
-CursorY=18
-TopLine=1
+[Tab0@.\src\gate\TestGate.java]
+CursorX=57
+CursorY=27
+TopLine=6
 LeftCol=1
-
-[Tab1]
-NavigationURL=Z:\gate2\src\gate\impl\ag\Annotation.java
 

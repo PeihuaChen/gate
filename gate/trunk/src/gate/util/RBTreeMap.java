@@ -9,8 +9,8 @@
 package gate.util;
 import java.util.*;
 
-/** Slightly modified implementation of java.util.RBTreeMap in order to return the
-  * closest neighbours in the case of a faile search.
+/** Slightly modified implementation of java.util.TreeMap in order to return the
+  * closest neighbours in the case of a failed search.
   */
 public class RBTreeMap extends AbstractMap
 	             implements SortedMap, Cloneable, java.io.Serializable
@@ -181,7 +181,25 @@ public class RBTreeMap extends AbstractMap
       };
       int cmp=compare(key,lub.key);
       if (cmp==0){return new Object[]{lub.value,lub.value};}
-      else return new Object[]{getPrecedingEntry(lub.key),lub.value};
+      else{
+        Entry prec=getPrecedingEntry(lub.key);
+        if (prec == null) return new Object[]{null,lub.value};
+        else return new Object[]{prec.value,lub.value};
+      }
+    }
+
+    /**Returns the value associated to the next key in the map if an exact match
+      *doesn't exist. If there is an exact match, the method will return the
+      *value associated to the given key.
+      *@param key the key for wich the look-up will be done.
+      *@returns the value associated to the given key or the next available
+      *value
+    */
+    public Object getNextOf(Object key){
+      if (root==null) return null;
+      Entry lub=getCeilEntry(key);
+      if (lub == null) return null;
+      return lub.value;
     }
 
     /**
