@@ -226,5 +226,4 @@ public class State implements JapeConstants {
    *
    */
   protected int priority = -1;
-
 } // State
