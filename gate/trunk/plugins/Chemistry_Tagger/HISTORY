@@ -1,0 +1,19 @@
+Version 1.1 (Released 26/03/2004)
+=================================
+This release is to fix a mistake I made in the clean up process which
+means the tagger can take a lot longer to run than it really should do
+especially on long documents. This version won't tag anything that v1.0
+didn't but it will do the job faster!
+
+Version 1.0 (Released 09/02/2004)
+=================================
+Currently compounds, elements and ions are tagged. Compounds which are
+made up only of capital letters are not tagged as it introduces too
+many false positives. For the same reason elements appearing as the
+first token in a sentence are not tagged.
+
+If a text contains "element token (Compound Formula)" then "element token"
+will be tagged as a compound name, e.g. sulphur dioxide is tagged in the
+text "sulphur dioxide (SO2)" (note that this also works if the formula is
+surrounded by commas instead of parenthesis). Hopefully support for
+compound names will be improved in a future release.
