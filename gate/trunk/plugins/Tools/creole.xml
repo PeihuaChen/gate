@@ -83,8 +83,8 @@
         DEFAULT="Person;Location;Date"
         COMMENT="A list of the new names to be used instead of the ANNIE types given for dumping">
         java.util.ArrayList</PARAMETER>
-      <PARAMETER NAME="outputFileUrl" RUNTIME="true" OPTIONAL="true"
-        COMMENT="The url of the output file" SUFFIXES="xml;html;txt">
+      <PARAMETER NAME="outputDirectoryUrl" RUNTIME="true" OPTIONAL="true"
+        COMMENT="The url of the output directory" SUFFIXES="xml;html;txt">
         java.net.URL</PARAMETER>
       <PARAMETER NAME="includeFeatures" OPTIONAL="true"
         COMMENT="Whether or not to include features when exporting the GATE annotations"
