@@ -292,7 +292,11 @@ public class AnnotationDiff extends AbstractVisualResource{
     diffTable.setDefaultRenderer(java.lang.Long.class,cellRenderer);
 
     // Arange all components on a this JPanel
-    arangeAllComponents();
+    SwingUtilities.invokeLater(new Runnable(){
+      public void run(){
+        arangeAllComponents();
+      }
+    });
 
     if (DEBUG)
       printStructure(diffSet);
@@ -302,7 +306,6 @@ public class AnnotationDiff extends AbstractVisualResource{
 
   /** This method aranges everything on this JPanel*/
   protected void arangeAllComponents(){
-
     this.removeAll();
     // Setting the box layout for diffpanel
     BoxLayout boxLayout = new BoxLayout(this,BoxLayout.Y_AXIS);
