@@ -785,8 +785,8 @@ public class DatabaseDocumentImpl extends DocumentImpl
   }
 
   /** Generate and return the next annotation ID */
-  public Integer getNextAnnotationId() {
-/*
+/*  public Integer getNextAnnotationId() {
+
     //1.try to get ID fromt he pool
     if (DEBUG) {
       Out.println(">>> get annID called...");
@@ -799,7 +799,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
     }
 
     return this.sequencePool[this.poolMarker++];
-*/
+
     return super.getNextAnnotationId();
   } // getNextAnnotationId
 
@@ -851,6 +851,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
       }
     }
   }
+*/
 
   public boolean isResourceChanged(int changeType) {
 
