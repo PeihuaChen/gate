@@ -1,4 +1,4 @@
-sw/*
+/*
  *  OracleDataStore.java
  *
  *  Copyright (c) 1998-2001, The University of Sheffield.
