@@ -274,6 +274,7 @@ public class SerialCorpusImpl extends
   public void datastoreCreated(CreoleEvent e) {
   }
   public void datastoreClosed(CreoleEvent e) {
+    Gate.getCreoleRegister().removeCreoleListener(this);
   }
   /**
    * Called by a datastore when a new resource has been adopted
