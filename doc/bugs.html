@@ -173,36 +173,6 @@ problem.
   </TR>
 
   <TR>
-    <TD>00017</TD>
-    <TD>gui</TD>
-    <TD>Valentin</TD>
-    <TD>___adopted_by</TD>
-    <TD>01/12/2001 All platforms All JDKs Beta1</TD>
-    <TD>___fixed_on ___date ___Gversion</TD>
-    <TD><p>The GUI doesn't block while operations are being executed. This
-    allows for multiple threads to be run at the same time which could lead to
-    dangerous situations as the gate API is not thread safe. Although runing
-    things that not affect each other is many times safe it is sometimes
-    difficult to tell whether two certain operations are interfering with each
-    other so the GUI should lock itself not allowing the user to start a new
-    operation before the current one finished.</p>
-
-    Kalina's note: I think that such operations should not be performed in a separate thread allowing the user to control the GUI. Instead they should pop up a dialog telling the user theu have to wait. The problem otherwise:
-
-- I do not know when the save is finished, so I close the document while it's still being saved. What happens is cleanup() gets called, which remoes the data before it's saved.
-
-
-    <P><font color="green"><B>Workaround:</b> Allow each operation to finish before starting
-    a new one. This is particularly important for operations involving
-    datastores and executions of applications.
-    </font></p></TD>
-    <TD>___test_method</TD>
-    <TD>___supporting_materials</TD>
-    <!--<TD>spare1</TD>-->
-    <!--<TD>spare2</TD>-->
-  </TR>
-
-  <TR>
     <TD>00022</TD>
     <TD>Oracle DB</TD>
     <TD>-</TD>
@@ -611,6 +581,38 @@ still matches them to BT, when it should not. </TD>
     <!--<TD>spare1</TD>-->
     <!--<TD>spare2</TD>-->
   </TR>
+
+  <TR>
+    <TD>00017</TD>
+    <TD>gui</TD>
+    <TD>Valentin</TD>
+    <TD>Valentin</TD>
+    <TD>01/12/2001 All platforms All JDKs Beta1</TD>
+    <TD>05 Mar 2002 beta1</TD>
+    <TD><p>The GUI doesn't block while operations are being executed. This
+    allows for multiple threads to be run at the same time which could lead to
+    dangerous situations as the gate API is not thread safe. Although runing
+    things that not affect each other is many times safe it is sometimes
+    difficult to tell whether two certain operations are interfering with each
+    other so the GUI should lock itself not allowing the user to start a new
+    operation before the current one finished.</p>
+
+    Kalina's note: I think that such operations should not be performed in a separate thread allowing the user to control the GUI. Instead they should pop up a dialog telling the user theu have to wait. The problem otherwise:
+
+- I do not know when the save is finished, so I close the document while it's still being saved. What happens is cleanup() gets called, which remoes the data before it's saved.
+
+
+    <P><font color="green"><B>Workaround:</b> Allow each operation to finish before starting
+    a new one. This is particularly important for operations involving
+    datastores and executions of applications.
+    </font></p></TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+
   <TR>
     <TD>0018</TD>
     <TD>Oracle DB</TD>
