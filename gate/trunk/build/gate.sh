@@ -1,5 +1,5 @@
 #!/bin/sh
-# gate.sh - UNIX front-end for GATE 2. Hamish, summer 98
+# gate.sh - UNIX front-end for GATE. Hamish, summer 98
 # $Id$
 
 # if the correct version of java isn't in your path, or in the
@@ -12,5 +12,9 @@ else
   JAVA=java
 fi
 
-${JAVA} -Djava.ext.dirs= ../lib/ext -classpath gate.jar:../lib/ext/guk.jar \
-  -Xmx200m gate.Main
+case `uname` in
+  CYGWIN*) CYGPATH="cygpath -w"; CYGPATHP="cygpath -wp" ;;
+  *) CYGPATH=echo; CYGPATHP=echo ;;
+esac
+
+${JAVA} -Djava.ext.dirs=`${CYGPATH} ../lib/ext` -classpath `${CYGPATHP} gate.jar:../lib/ext/guk.jar` -Xmx200m gate.Main $*
