@@ -50,6 +50,9 @@ public class SerialCorpusImpl extends
   //which defines the document order) and Documents as value
   private transient List documents = null;
 
+  public SerialCorpusImpl() {
+  }
+
   /**
    * Constructor to create a SerialCorpus from a transient one.
    * This is called by adopt() to store the transient corpus
@@ -57,7 +60,7 @@ public class SerialCorpusImpl extends
    * sync-ed on disk. After that, the transientCorpus will always
    * be null, so the new functionality will be used instead.
    */
-  public SerialCorpusImpl(Corpus tCorpus){
+  protected SerialCorpusImpl(Corpus tCorpus){
     //copy the corpus name and features from the one in memory
     this.setName(tCorpus.getName());
     this.setFeatures(tCorpus.getFeatures());
@@ -626,6 +629,54 @@ public class SerialCorpusImpl extends
       this.dataStore.addDatastoreListener(this);
   }
 
+  public void setTransientSource(Object source) {
+    if (! (source instanceof Corpus))
+      return;
+
+    //the following initialisation is only valid when we're constructing
+    //this object from a transient one. If it has already been stored in
+    //a datastore, then the initialisation is done in readObject() since
+    //this method is the one called by serialisation, when objects
+    //are restored.
+    if (this.dataStore != null && this.lrPersistentId != null)
+      return;
+
+    Corpus tCorpus = (Corpus) source;
+
+    //copy the corpus name and features from the one in memory
+    this.setName(tCorpus.getName());
+    this.setFeatures(tCorpus.getFeatures());
+
+    docDataList = new ArrayList();
+    //now cache the names of all docs for future use
+    Iterator iter = tCorpus.getDocumentNames().iterator();
+    while (iter.hasNext())
+      docDataList.add(new DocumentData((String) iter.next(), null));
+
+    //copy all the documents from the transient corpus
+    documents = new ArrayList();
+    documents.addAll(tCorpus);
+
+    //make sure we fire events when docs are added/removed/etc
+    Gate.getCreoleRegister().addCreoleListener(this);
+
+  }
+
+  //we don't keep the transient source, so always return null
+  //Sill this must be implemented, coz of the GUI and Factory
+  public Object setTransientSource() {
+    return null;
+  }
+
+
+  public Resource init() throws gate.creole.ResourceInstantiationException {
+    super.init();
+
+    return this;
+
+  }
+
+
   /**
    * readObject - calls the default readObject() and then initialises the
    * transient data
@@ -674,4 +725,5 @@ public class SerialCorpusImpl extends
     String docName;
     Object persistentID;
   }
+
 }
