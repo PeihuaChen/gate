@@ -312,6 +312,24 @@ public class Gate
            ((String)value).equalsIgnoreCase("true");
   }
 
+  /**Gets the name of a resource.*/
+  static public String getName(Resource res){
+    if(res.getFeatures() == null) return null;
+    Object value = res.getFeatures().get("gate.NAME");
+    if(value != null && value instanceof String){
+      return (String)value;
+    }
+    return null;
+  }
+
+  /**Sets the name of a resource.*/
+  static public void setName(Resource res, String name){
+    if(res.getFeatures() == null){
+      res.setFeatures(Factory.newFeatureMap());
+    }
+    res.getFeatures().put("gate.NAME", name);
+  }
+
 
   /** Registers a {@link gate.event.CreoleListener} with the Gate system
     */
