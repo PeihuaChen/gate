@@ -304,6 +304,53 @@ extends Transducer implements JapeConstants, java.io.Serializable
             //check if the current transition can use the current annotation (path)
             currentConstraints =
                          currentTransition.getConstraints().getConstraints();
+
+	    // We initially only check the first constraint for a match. If it
+	    // does match, we go on to check the others with the other annotations
+	    // that exist at this point in the doc.
+	    if (!onePath.getType().equals(currentConstraints[0].getAnnotType()) ||
+		!onePath.getFeatures().subsumes( ontology, currentConstraints[0].getAttributeSeq() )) {
+		continue transitionsWhile;
+	    }
+ 	    
+	    Constraint oneConstraint = currentConstraints[0];
+
+	    // The first constraint matches. Now check the other constraints,
+	    // which are of a different type.
+	    if (currentConstraints.length > 1) {
+		/*
+		 * TODO - if there are multiple constraints matching, which
+		 * matched constraint do we bind to? For the moment, bind to the
+		 * longest one. To be completely correct, we should actually fire
+		 * off a new FSMInstance for each potential bind.
+		 */
+  
+		int maxEnding = onePath.getEndNode().getOffset().intValue();
+ 	          
+		otherConstraints:
+		for (int i = 1; i < currentConstraints.length; i++) {
+		    Constraint c = currentConstraints[i];
+ 	              
+		    // Look for a path that matches c
+		    for (Iterator j = paths.iterator(); j.hasNext();) {
+			Annotation a = (Annotation) j.next();
+			if (a.getType().equals(c.getAnnotType()) &&
+			    a.getFeatures().subsumes( ontology, c.getAttributeSeq())) {
+ 	                      
+			    if (a.getEndNode().getOffset().intValue() > maxEnding) {
+				onePath = a;
+				oneConstraint = c;
+				maxEnding = a.getEndNode().getOffset().intValue();
+			    }
+			    continue otherConstraints;
+			}
+		    }
+		    // No match found for c, go to the next transition
+		    continue transitionsWhile;
+		}
+	    }
+ 	      
+
             String annType;
             //introduce index of the constraint to process
             int currentConstraintsindex = -1;
@@ -338,16 +385,14 @@ extends Transducer implements JapeConstants, java.io.Serializable
                     currRuleTrace = new RuleTrace(newFSMI.getFSMPosition(), doc);
                     currRuleTrace.addAnnotation(onePath);
                     currRuleTrace.putPattern(onePath,
-                                             currentConstraints[currentConstraintsindex].
-                                             getAttributeSeq());
+                            		     oneConstraint.getAttributeSeq());
                     rulesTrace.add(currRuleTrace);
                   }
                   else {
                     currRuleTrace.addState(newFSMI.getFSMPosition());
                     currRuleTrace.addAnnotation(onePath);
                     currRuleTrace.putPattern(onePath,
-                                             currentConstraints[currentConstraintsindex].
-                                             getAttributeSeq());
+                            		     oneConstraint.getAttributeSeq());
                   }
                 }
               }
@@ -363,7 +408,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
                 oneLabel = (String)labelsIter.next();
                 boundAnnots = (AnnotationSet)binds.get(oneLabel);
                 if(boundAnnots != null)
-                  newSet = new AnnotationSetImpl((AnnotationSet)boundAnnots);
+                  newSet = new AnnotationSetImpl(boundAnnots);
                 else
                   newSet = new AnnotationSetImpl(doc);
                 newSet.add(onePath);
