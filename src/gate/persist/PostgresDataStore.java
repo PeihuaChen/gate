@@ -848,7 +848,11 @@ public class PostgresDataStore extends JDBCDataStore {
     try {
       pstmt = this.jdbcConn.prepareStatement("select persist_update_document(?,?,?,?,?)");
       pstmt.setLong(1,lrID.longValue());
-      pstmt.setString(2,doc.getSourceUrl().toString());
+      if(doc.getSourceUrl() != null){
+        pstmt.setString(2, doc.getSourceUrl().toString());
+      }else{
+        pstmt.setString(2, "");
+      }
       //do we have start offset?
       if (null==doc.getSourceUrlStartOffset()) {
         pstmt.setNull(3,java.sql.Types.INTEGER);
