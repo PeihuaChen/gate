@@ -158,6 +158,12 @@ public class SerialController extends AbstractController
     }
   }//protected void runComponent(int componentIndex)
 
+  /**
+   * Cleans the internal data and prepares this object to be collected
+   */
+  public void cleanup(){
+    prList.clear();
+  }
 
   /** The list of contained PRs*/
   protected List prList;

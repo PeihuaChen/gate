@@ -1021,15 +1021,11 @@ public class NameBearerHandle implements Handle,
     if(smallView != null){
       if(smallView instanceof VisualResource){
         //we only had a view so no tabbed pane was used
-        ((VisualResource)smallView).setTarget(null);
-        ((VisualResource)smallView).setHandle(null);
         Factory.deleteResource((VisualResource)smallView);
       }else{
         Component vrs[] = ((JTabbedPane)smallView).getComponents();
         for(int i = 0; i < vrs.length; i++){
           if(vrs[i] instanceof VisualResource){
-            ((VisualResource)vrs[i]).setTarget(null);
-            ((VisualResource)vrs[i]).setHandle(null);
             Factory.deleteResource((VisualResource)vrs[i]);
           }
         }

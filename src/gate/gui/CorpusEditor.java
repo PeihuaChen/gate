@@ -111,6 +111,7 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
   public void cleanup(){
     super.cleanup();
     corpus = null;
+
   }
 
   public void setTarget(Object target){

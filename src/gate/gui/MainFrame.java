@@ -588,7 +588,7 @@ public class MainFrame extends JFrame
     menuBar.add(toolsMenu);
 
     JMenu helpMenu = new JMenu("Help");
-    helpMenu.add(new HelpUserGuideAction());
+//    helpMenu.add(new HelpUserGuideAction());
     helpMenu.add(helpAboutAction);
     menuBar.add(helpMenu);
 

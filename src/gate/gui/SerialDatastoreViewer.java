@@ -38,6 +38,8 @@ public class SerialDatastoreViewer extends JTree
 
 
   public void cleanup(){
+    myHandle = null;
+    datastore = null;
   }
 
   /** Accessor for features. */
@@ -102,6 +104,10 @@ public class SerialDatastoreViewer extends JTree
   }
 
   public void setTarget(Object target){
+    if(target == null){
+      datastore = null;
+      return;
+    }
     if(target instanceof DataStore){
       datastore = (DataStore)target;
       initLocalData();
