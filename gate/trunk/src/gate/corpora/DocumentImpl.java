@@ -128,7 +128,8 @@ import gate.event.*;
   * newOffset = 4 - ( (3 - 1) - 4 ) = 6
   * </PRE>
   */
-public class DocumentImpl implements Document, StatusReporter
+public class DocumentImpl
+extends AbstractLanguageResource implements Document, StatusReporter
 {
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -236,11 +237,6 @@ public class DocumentImpl implements Document, StatusReporter
   public void setSourceUrlEndOffset(Long sourceUrlEndOffset) {
     this.sourceUrlEndOffset = sourceUrlEndOffset;
   } // setSourceUrlStartOffset
-
-  /** Get the data store the document lives in. */
-  public DataStore getDataStore() {
-    return null;
-  } // getDataStore
 
   /** The content of the document: a String for text; MPEG for video; etc. */
   public DocumentContent getContent() { return content; }
@@ -532,6 +528,98 @@ public class DocumentImpl implements Document, StatusReporter
       }
     }
   }
+
+  /** Equals */
+  public boolean equals(Object other) {
+    DocumentImpl doc = (DocumentImpl) other;
+
+    if(
+      (content == null && doc.content != null) ||
+      ! content.toString().equals(doc.content.toString())
+    )
+      return false;
+
+    if(
+      (defaultAnnots == null && doc.defaultAnnots != null) ||
+      ! defaultAnnots.equals(doc.defaultAnnots)
+    )
+      return false;
+
+    if(
+      (encoding == null && doc.encoding != null) ||
+      ! encoding.equals(doc.encoding)
+    )
+      return false;
+
+    if(
+      (features == null && doc.features != null) ||
+      ! features.equals(doc.features)
+    )
+      return false;
+
+    if(markupAware != doc.markupAware)
+      return false;
+
+    if(
+      (namedAnnotSets == null && doc.namedAnnotSets != null) ||
+      ! namedAnnotSets.equals(doc.namedAnnotSets)
+    )
+      return false;
+
+    if(nextAnnotationId != doc.nextAnnotationId)
+      return false;
+
+    if(nextNodeId != doc.nextNodeId)
+      return false;
+
+    if(
+      (sourceUrl == null && doc.sourceUrl != null) ||
+      ! sourceUrl.equals(doc.sourceUrl)
+    )
+      return false;
+
+    if(
+      (sourceUrlStartOffset == null && doc.sourceUrlStartOffset != null) ||
+      ! sourceUrlStartOffset.equals(doc.sourceUrlStartOffset)
+    )
+      return false;
+
+    if(
+      (sourceUrlName == null && doc.sourceUrlName != null) ||
+      ! sourceUrlName.equals(doc.sourceUrlName)
+    )
+      return false;
+
+    if(
+      (sourceUrlEndOffset == null && doc.sourceUrlEndOffset != null) ||
+      ! sourceUrlEndOffset.equals(doc.sourceUrlEndOffset)
+    )
+      return false;
+
+    return true;
+  } // equals
+
+  /** String respresentation */
+  public String toString() {
+    String n = Strings.getNl();
+    StringBuffer s = new StringBuffer("DocumentImpl: " + n);
+    s.append("  content:" + content + n);
+    s.append("  defaultAnnots:" + defaultAnnots + n);
+    s.append("  encoding:" + encoding + n);
+    s.append("  features:" + features + n);
+    s.append("  markupAware:" + markupAware + n);
+    s.append("  namedAnnotSets:" + namedAnnotSets + n);
+    s.append("  nextAnnotationId:" + nextAnnotationId + n);
+    s.append("  nextNodeId:" + nextNodeId + n);
+    s.append("  sourceUrl:" + sourceUrl + n);
+    s.append("  sourceUrlStartOffset:" + sourceUrlStartOffset + n);
+    s.append("  sourceUrlName:" + sourceUrlName + n);
+    s.append("  sourceUrlEndOffset:" + sourceUrlEndOffset + n);
+    s.append(n);
+
+    return s.toString();
+  } // toString
+
   public synchronized void removeDocumentListener(DocumentListener l) {
     if (documentListeners != null && documentListeners.contains(l)) {
       Vector v = (Vector) documentListeners.clone();
