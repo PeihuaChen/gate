@@ -164,7 +164,8 @@ public class Nerc extends AbstractProcessingResource {
    */
   protected void runSystem() throws ExecutionException{
     FeatureMap params;
-    if(tempAnnotationSetName.equals("")) tempAnnotationSetName = null;
+    if(tempAnnotationSetName != null &&
+       tempAnnotationSetName.equals("")) tempAnnotationSetName = null;
     try{
       fireProgressChanged(0);
       //tokeniser
