@@ -50,4 +50,9 @@ extends AbstractResource implements LanguageResource
     dataStore.sync(this);
   } // sync()
 
+  /** Clear the internal state of the resource
+    */
+  public void clear() {
+  } //clear()
+
 } // class AbstractLanguageResource

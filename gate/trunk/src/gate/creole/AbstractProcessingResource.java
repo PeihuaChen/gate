@@ -67,6 +67,10 @@ extends AbstractResource implements ProcessingResource
     }
   } // check()
 
+/** should clear all internal data of the resource. Does nothing now **/
+  public void clear() {
+  }
+
   /** Any exception caught during run() invocations are stored here. */
   protected ExecutionException executionException  = null;
 

@@ -739,9 +739,18 @@ implements AnnotationSet
     return annotsByType.keySet();
   }
 
+  /**
+   *
+   * @return
+   * @throws CloneNotSupportedException
+   */
   public Object clone() throws CloneNotSupportedException{
     return super.clone();
   }
+  /**
+   *
+   * @param l
+   */
   public synchronized void removeAnnotationSetListener(AnnotationSetListener l) {
     if (annotationSetListeners != null && annotationSetListeners.contains(l)) {
       Vector v = (Vector) annotationSetListeners.clone();
@@ -749,6 +758,10 @@ implements AnnotationSet
       annotationSetListeners = v;
     }
   }
+  /**
+   *
+   * @param l
+   */
   public synchronized void addAnnotationSetListener(AnnotationSetListener l) {
     Vector v = annotationSetListeners == null ? new Vector(2) : (Vector) annotationSetListeners.clone();
     if (!v.contains(l)) {
@@ -813,6 +826,10 @@ implements AnnotationSet
     return true;
   } // equals
 
+  /**
+   *
+   * @return
+   */
   public int hashCode() {
     int hash = 0;
     Iterator i = this.iterator();
@@ -853,6 +870,10 @@ implements AnnotationSet
   Map annotsByEndNode;
   private transient Vector annotationSetListeners;
   private transient Vector gateListeners;
+  /**
+   *
+   * @param e
+   */
   protected void fireAnnotationAdded(AnnotationSetEvent e) {
     if (annotationSetListeners != null) {
       Vector listeners = annotationSetListeners;
@@ -862,6 +883,10 @@ implements AnnotationSet
       }
     }
   }
+  /**
+   *
+   * @param e
+   */
   protected void fireAnnotationRemoved(AnnotationSetEvent e) {
     if (annotationSetListeners != null) {
       Vector listeners = annotationSetListeners;
@@ -871,6 +896,10 @@ implements AnnotationSet
       }
     }
   }
+  /**
+   *
+   * @param l
+   */
   public synchronized void removeGateListener(GateListener l) {
     if (gateListeners != null && gateListeners.contains(l)) {
       Vector v = (Vector) gateListeners.clone();
@@ -878,6 +907,10 @@ implements AnnotationSet
       gateListeners = v;
     }
   }
+  /**
+   *
+   * @param l
+   */
   public synchronized void addGateListener(GateListener l) {
     Vector v = gateListeners == null ? new Vector(2) : (Vector) gateListeners.clone();
     if (!v.contains(l)) {
@@ -885,6 +918,10 @@ implements AnnotationSet
       gateListeners = v;
     }
   }
+  /**
+   *
+   * @param e
+   */
   protected void fireGateEvent(GateEvent e) {
     if (gateListeners != null) {
       Vector listeners = gateListeners;
@@ -897,4 +934,14 @@ implements AnnotationSet
 
  /** Freeze the serialization UID. */
   static final long serialVersionUID = 1479426765310434166L;
+    /**
+   *
+   */
+  public void clear() {
+        super.clear();
+        doc = null;
+        annotsByType = null;
+        annotsByStartNode = null;
+        annotsByEndNode = null;
+    }
 } // AnnotationSetImpl

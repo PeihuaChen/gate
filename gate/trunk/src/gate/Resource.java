@@ -27,5 +27,7 @@ public interface Resource extends FeatureBearer, Serializable
 {
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException;
+  /** Clears the internal data of the resource, when it gets released **/
+  public void clear();
 
 } // interface Resource
