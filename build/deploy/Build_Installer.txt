@@ -1,0 +1,21 @@
+Installer build
+
+make distrib
+
+create u:\gate
+
+copy all from BIN|DOCS distrib into u:\gate
+remove all CVS dirs
+
+
+create u:\gate\misc
+copy gate\src\gate\resources\img\gate[Icon|Splash].gif into u:\gate\misc
+copy gate\build\deploy\GateInstall.jar into u:\gate\misc
+
+
+make sure *.sh are in unix format
+make sure *.bat are in DOS format
+
+
+build installers using gate\build\deploy\gate2.iap
+
