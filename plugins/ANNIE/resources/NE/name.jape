@@ -379,8 +379,7 @@ Priority: 50
 (
  {Token.category == DT}|
  {Token.category == PRP}|
- {Token.category == RB}|
- {Lookup.majorType == location}
+ {Token.category == RB}
 )
 (
  (PREFIX)* 
@@ -389,6 +388,22 @@ Priority: 50
 ):foo
 -->
 {}
+
+
+Rule: LocPersonAmbig
+Priority: 50
+// Location + Surname
+(
+ {Lookup.majorType == location}
+):loc
+(
+ (PREFIX)* 
+ (UPPER)
+ (PERSONENDING)?
+):foo
+-->
+:loc.TempLocation = {kind = "locName", rule = LocPersonAmbig}
+
 
 Rule: 	PersonFull
 Priority: 10
