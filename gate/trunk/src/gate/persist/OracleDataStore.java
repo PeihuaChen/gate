@@ -921,7 +921,6 @@ public class OracleDataStore extends JDBCDataStore {
   public LanguageResource getLr(String lrClassName, Object lrPersistenceId)
   throws PersistenceException {
 
-//    Out.prln("class name" + lrClassName);
     if (lrClassName.equals(DBHelper.DOCUMENT_CLASS)) {
       Document docResult = null;
       docResult = readDocument(lrPersistenceId);
@@ -1559,7 +1558,15 @@ public class OracleDataStore extends JDBCDataStore {
       Vector dbDocs = new Vector();
       for (int i=0; i< docLRIDs.size(); i++) {
         Long currLRID = (Long)docLRIDs.elementAt(i);
-        Document dbDoc = (Document)getLr(DBHelper.DOCUMENT_CLASS,currLRID);
+        //kalina: replaced by a Factory call, so the doc gets registered
+        //properly in GATE. Otherwise strange behaviour results in the GUI
+        //and no events come about it
+//        Document dbDoc = (Document)getLr(DBHelper.DOCUMENT_CLASS,currLRID);
+        FeatureMap params = Factory.newFeatureMap();
+        params.put(DataStore.DATASTORE_FEATURE_NAME, this);
+        params.put(DataStore.LR_ID_FEATURE_NAME, currLRID);
+        Document dbDoc = (Document)
+                    Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
         dbDocs.add(dbDoc);
       }
 

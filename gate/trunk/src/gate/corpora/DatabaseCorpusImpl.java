@@ -52,7 +52,7 @@ public class DatabaseCorpusImpl extends CorpusImpl
     this.dataStore = _ds;
     this.lrPersistentId = _persistenceID;
     this.features = _features;
-    this.documentsList = _dbDocs;
+    this.supportList = _dbDocs;
 
     this.featuresChanged = false;
     this.nameChanged = false;
@@ -88,7 +88,7 @@ public class DatabaseCorpusImpl extends CorpusImpl
     if (result) {
       fireDocumentAdded(new CorpusEvent(this,
                                         doc,
-                                        this.documentsList.size()-1,
+                                        this.supportList.size()-1,
                                         CorpusEvent.DOCUMENT_ADDED));
     }
 
@@ -101,7 +101,7 @@ public class DatabaseCorpusImpl extends CorpusImpl
     Assert.assertNotNull(element);
     Assert.assertTrue(index >= 0);
 
-    long    collInitialSize = this.documentsList.size();
+    long    collInitialSize = this.supportList.size();
 
     //accept only documents
     if (false == element instanceof Document) {
@@ -115,7 +115,7 @@ public class DatabaseCorpusImpl extends CorpusImpl
       super.add(index,doc);
 
       //if added then fire event
-      if (this.documentsList.size() > collInitialSize) {
+      if (this.supportList.size() > collInitialSize) {
         fireDocumentAdded(new CorpusEvent(this,
                                           doc,
                                           index,
@@ -149,7 +149,7 @@ public class DatabaseCorpusImpl extends CorpusImpl
     //funny enough add(index,element) returns void and not boolean
     //so we can't use it
     boolean collectionChanged = false;
-    int collInitialSize = this.documentsList.size();
+    int collInitialSize = this.supportList.size();
     int currIndex = index;
 
     Iterator it = c.iterator();
@@ -160,7 +160,7 @@ public class DatabaseCorpusImpl extends CorpusImpl
       }
     }
 
-    return (this.documentsList.size() > collInitialSize);
+    return (this.supportList.size() > collInitialSize);
   }
 
 
@@ -189,16 +189,16 @@ public class DatabaseCorpusImpl extends CorpusImpl
     //unregister self as listener from the DataStore
     if (deletedID.equals(this.getLRPersistenceId())) {
       //someone deleted this corpus
-      this.documentsList.clear();
+      this.supportList.clear();
       getDataStore().removeDatastoreListener(this);
     }
 
     //check if the ID is of a document the corpus contains
-    Iterator it = this.documentsList.iterator();
+    Iterator it = this.supportList.iterator();
     while (it.hasNext()) {
       Document doc = (Document)it.next();
       if (doc.getLRPersistenceId().equals(deletedID)) {
-        this.documentsList.remove(doc);
+        this.supportList.remove(doc);
         break;
       }
     }
