@@ -79,7 +79,9 @@ public class AnnotationSetsView extends AbstractDocumentView
             .getViewport().getView();
     
     setHandlers.add(new SetHandler(document.getAnnotations()));
-    List setNames = new ArrayList(document.getNamedAnnotationSets().keySet());
+    List setNames = document.getNamedAnnotationSets() == null ?
+            new ArrayList() :
+            new ArrayList(document.getNamedAnnotationSets().keySet());
     Collections.sort(setNames);
     Iterator setsIter = setNames.iterator();
     while(setsIter.hasNext()){
