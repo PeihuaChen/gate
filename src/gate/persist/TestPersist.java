@@ -34,11 +34,14 @@ public class TestPersist extends TestCase
   private static final String JDBC_URL =
 //           "jdbc:oracle:thin:GATEUSER/gate@192.168.128.7:1521:GATE04";
 //           "jdbc:oracle:oci8:GATEUSER/gate@GATE04.SIRMA.BG";
-"jdbc:oracle:thin:GATEUSER/gate2@grindleford:1521:gatedb2";
+           "jdbc:oracle:thin:GATEUSER/gate@onto-text:1521:GATE05";
+//           "jdbc:oracle:thin:GATEUSER/gate@nasus:1521:GATE06";
+//"jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB";
+
 
 
   /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static Long uc01_lrID = null;
   private static Long uc101_lrID = null;
   private static LanguageResource uc01_LR = null;
@@ -778,29 +781,41 @@ public class TestPersist extends TestCase
     Assert.assertEquals(contNew,dbDoc.getContent());
     Assert.assertEquals(contNew,doc2.getContent());
 
-
-/*
-    //7. access the contect again and assure it's not read from the DB twice
-    Assert.assertEquals(cont,((Document)this.uc01_LR).getContent());
-
     //8. encoding
-    String encNew = (String)dbDoc.getParameterValue("encoding");
-    String encOld = (String)((DocumentImpl)this.uc01_LR).getParameterValue("encoding");
+    String encOld = (String)dbDoc.getParameterValue("encoding");
+    dbDoc.setParameterValue("encoding","XXX");
+    dbDoc.sync();
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
+    String encNew = (String)doc2.getParameterValue("encoding");
     Assert.assertEquals(encNew,encOld);
 
+
     //9. default annotations
+    AnnotationSet defaultOld = dbDoc.getAnnotations();
+    Assert.assertNotNull(defaultOld);
+    Iterator it = defaultOld.iterator();
+    if (it.hasNext()) {
+      //remove first element
+      it.next();
+      it.remove();
+    }
     AnnotationSet defaultNew = dbDoc.getAnnotations();
-    AnnotationSet defaultOld = ((DocumentImpl)this.uc01_LR).getAnnotations();
+    dbDoc.sync();
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
 
-    Assert.assertNotNull(defaultNew);
-    Assert.assertTrue(defaultNew.size() == defaultOld.size());
+    Assert.assertTrue(defaultNew.size() == dbDoc.getAnnotations().size());
+    Assert.assertTrue(defaultNew.size() == doc2.getAnnotations().size());
+
+    Assert.assertEquals(defaultNew,dbDoc.getAnnotations());
+    Assert.assertEquals(defaultNew,doc2.getAnnotations());
+
     Iterator itDefault = defaultNew.iterator();
-
     while (itDefault.hasNext()) {
       Annotation currAnn = (Annotation)itDefault.next();
-      Assert.assertTrue(defaultOld.contains(currAnn));
+      Assert.assertTrue(doc2.getAnnotations().contains(currAnn));
     }
 
+/*
     //10. iterate named annotations
     Map namedOld = ((DocumentImpl)this.uc01_LR).getNamedAnnotationSets();
     Iterator itOld = namedOld.keySet().iterator();
@@ -956,6 +971,65 @@ public class TestPersist extends TestCase
 
   }
 
+  public void testDB_UseCase103() throws Exception {
+
+    //sync a corpus
+    LanguageResource lr = null;
+
+    //1. open data storage
+    DatabaseDataStore ds = new OracleDataStore();
+    Assert.assertNotNull(ds);
+    ds.setStorageUrl(this.JDBC_URL);
+    ds.open();
+
+    if (DEBUG) Out.prln("ID " + uc101_lrID);
+
+    //2. read LR
+    lr = ds.getLr(DBHelper.CORPUS_CLASS,uc101_lrID);
+    Corpus dbCorp = (Corpus)lr;
+    Corpus corp2 = null;
+
+    //3. change name
+    String oldName = dbCorp.getName();
+    String newName = oldName + "__UPD";
+    dbCorp.setName(newName);
+    dbCorp.sync();
+    corp2 = (Corpus)ds.getLr(DBHelper.CORPUS_CLASS,uc101_lrID);
+    Assert.assertEquals(newName,dbCorp.getName());
+    Assert.assertEquals(newName,corp2.getName());
+
+    //4. change features
+    FeatureMap fm = dbCorp.getFeatures();
+    Iterator keys = fm.keySet().iterator();
+
+    //4.1 change the value of the first feature
+    while(keys.hasNext()) {
+      String currKey = (String)keys.next();
+      Object val = fm.get(currKey);
+      Object newVal = null;
+      if (val instanceof Long) {
+        newVal = new Long(101010101);
+      }
+      else if (val instanceof Integer) {
+        newVal = new Integer(2121212);
+      }
+      else if (val instanceof String) {
+        newVal = new String("UPD__").concat( (String)val).concat("__UPD");
+      }
+      if (newVal != null)
+        fm.put(currKey,newVal);
+    }
+    dbCorp.sync();
+    corp2 = (Corpus)ds.getLr(DBHelper.CORPUS_CLASS,uc101_lrID);
+    Assert.assertEquals(fm,dbCorp.getFeatures());
+    Assert.assertEquals(fm,corp2.getFeatures());
+
+    if(DEBUG) {
+      Err.prln("Use case 103 passed...");
+    }
+
+}
+
 
   public static void main(String[] args){
     try{
@@ -1017,6 +1091,10 @@ public class TestPersist extends TestCase
 
       test.setUp();
       test.testDB_UseCase102();
+      test.tearDown();
+
+      test.setUp();
+      test.testDB_UseCase103();
       test.tearDown();
 
     }catch(Exception e){
