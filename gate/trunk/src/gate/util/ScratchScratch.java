@@ -1,32 +1,32 @@
 package gate.util;
 
 import java.util.*;
+import java.io.*;
+
+import gate.creole.tokeniser.*;
 
 public class ScratchScratch {
 
   public ScratchScratch() {
   }
 
-  public void doIt(){
-  /*
-    System.out.println("New line " + Character.isSpaceChar('\n'));
-    System.out.println("New line " + Character.isWhitespace('\n'));
-    for(char c = '\u0020'; c <= '\u00ff'; c++)
-      System.out.println(c + " " + Character.getType(c));
-      */
+  public void doIt()throws Exception{
+/*    for(int i = 0; i<= 255; i++){
+      System.out.println("" + i + "\t'" + (char)i + "'\t" +
+                         DefaultTokeniser.typesMnemonics[Character.getType((char)i)+128]);
+    }
+*/
 
-    String unu1 = "unu";
-    String unu2 = "unu";
-    Map map = new HashMap();
-    map.put(unu1, new Byte((byte)1));
-    map.put("doi", new Byte((byte)2));
-
-System.out.println("Unu: " + map.get(unu2));
-System.out.println("Doi: " + map.get("doi"));
+  File tempFF = new File("d:/tmp/aaa/bbb/ccc/ddd/eee/fff/ggg/hhh/iii/jjj/kkk");
+  tempFF.mkdirs();
   }
   public static void main(String[] args) {
     ScratchScratch scratchScratch = new ScratchScratch();
-    scratchScratch.doIt();
+    try{
+      scratchScratch.doIt();
+    }catch(Exception e){
+      e.printStackTrace(System.err);
+    }
 
   }
 }
