@@ -56,16 +56,33 @@ public class TestAnnotationDiff extends TestCase
     // Load the xml Key Document and unpack it
     gate.Document keyDocument =
        gate.Factory.newDocument(
-          Gate.getUrl("tests/annotDiff/KeyDocument.xml")
+         // Gate.getUrl("tests/annotDiff/KeyDocument.xml")
+         Gate.getUrl("tests/xml/xces.xml")
        );
     gate.DocumentFormat keyDocFormat = gate.DocumentFormat.getDocumentFormat(
       keyDocument, keyDocument.getSourceUrl()
     );
     keyDocFormat.unpackMarkup(keyDocument);
-
-   // Out.prln(keyDocument.toXml());
-
+/*
+    OutputStreamWriter writer = new OutputStreamWriter(
+         new FileOutputStream(new File("z:/GateXmlDocumentXCes.gml")),"UTF-8");
+    writer.write(keyDocument.toXml());
+    writer.flush();
+    writer.close();
+*/
   }// testDocumentToXml
+
+  public void testDocumentFromXml() throws Exception{
+    // Load the xml Key Document and unpack it
+    gate.Document gateDocument =
+       gate.Factory.newDocument(
+         Gate.getUrl("file:///z:/GateXmlDocumentXCes.gml")
+       );
+    gate.DocumentFormat gateDocFormat = gate.DocumentFormat.getDocumentFormat(
+      gateDocument, gateDocument.getSourceUrl()
+    );
+    gateDocFormat.unpackMarkup(gateDocument);
+  }// testDocumentFromXml
 
   /** A test */
   public void testDiff() throws Exception {
@@ -365,10 +382,11 @@ public class TestAnnotationDiff extends TestCase
     try{
       Gate.init();
       TestAnnotationDiff testAnnotDiff = new TestAnnotationDiff("");
-      testAnnotDiff.testDocumentToXml();
+      //testAnnotDiff.testDocumentFromXml();
+      //testAnnotDiff.testDocumentToXml();
+
       testAnnotDiff.testDiff();
       testAnnotDiff.testAnnotationAreEquals();
-
     }catch(Exception e){
       e.printStackTrace();
     }

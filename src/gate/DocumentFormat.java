@@ -335,8 +335,8 @@ public abstract class DocumentFormat implements LanguageResource, StatusReporter
 
     // Detect whether or not is a GateXmlDocument
     String magicXml = "<GateDocument";
-    if (strBuffer.indexOf(magicXml) != -1)
-      isGateXmlDocument = true;
+    if (strBuffer.indexOf(magicXml) != -1){
+      isGateXmlDocument = true;}
     else
       isGateXmlDocument = false;
 
