@@ -192,6 +192,11 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
           if(sListener != null) docFormat.addStatusListener(sListener);
 
           // should we collect the repositioning information
+          if(collectRepositioningInfo.booleanValue()) {
+            // set flag as true if document format support collecting
+            docFormat.setShouldCollectRepositioning(collectRepositioningInfo);
+          } // if
+
           if(docFormat.getShouldCollectRepositioning().booleanValue()) {
             // unpack with collectiong of repositioning information
             RepositioningInfo info = new RepositioningInfo();
