@@ -843,7 +843,13 @@ public class ApplicationViewer extends AbstractVisualResource
                 Err.prln("===> from:");
                 exc.printStackTrace(Err.getPrintWriter());
               }
-            }
+            }catch(Exception e){
+              JOptionPane.showMessageDialog(ApplicationViewer.this,
+                                            "Unhandled execution error:\n " +
+                                            e.toString(),
+                                            "Gate", JOptionPane.ERROR_MESSAGE);
+              e.printStackTrace(Err.getPrintWriter());
+            }//catch
             i++;
           }
           long endTime = System.currentTimeMillis();
