@@ -214,7 +214,9 @@ public class DocumentImpl implements Document
     }
   } // edit(start,end,replacement)
 
-  /** Check that an offset is valid */
+  /** Check that an offset is valid, i.e. it is non-null, greater than
+    * or equal to 0 and less than the size of the document content.
+    */
   public boolean isValidOffset(Long offset) {
     if(offset == null)
       return false;
@@ -222,12 +224,13 @@ public class DocumentImpl implements Document
     long o = offset.longValue();
     if(o > content.size().longValue() || o < 0)
       return false;
-      
+
     return true;
   } // isValidOffset
 
   /** Check that both start and end are valid offsets and that
-    * they constitute a valid offset range
+    * they constitute a valid offset range, i.e. start is greater
+    * than or equal to long.
     */
   public boolean isValidOffsetRange(Long start, Long end) {
     return
