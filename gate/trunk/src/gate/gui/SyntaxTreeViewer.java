@@ -125,7 +125,8 @@ public class SyntaxTreeViewer extends JPanel
     final String text = "\u0915\u0932\u094d\u0907\u0928\u0643\u0637\u0628 \u041a\u0430\u043b\u0438\u043d\u0430 Kalina";
     final Document doc = Transients.newDocument(text);
 
-//    final Document doc = Transients.newDocument(new URL("file:///z:/temp/weird.txt"));
+//  that works too but only use if you have the test file there.    
+//    final Document doc = Transients.newDocument(new URL("file:///z:/temp/weird.txt"), "UTF-8");
 
 
     final SyntaxTreeViewer syntaxTreeViewer1 = new SyntaxTreeViewer("SyntaxTreeNode");
@@ -143,7 +144,7 @@ public class SyntaxTreeViewer extends JPanel
     frame.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
         AnnotationSet hs = doc.getAnnotations().get("SyntaxTreeNode");
-        if (hs != null && hs.size() == 0) {
+        if (hs != null && hs.size() > 0) {
           int k = 0;
           for (Iterator i = hs.iterator(); i.hasNext(); k++) {
             System.out.println("Tree Annot " + k + ": ");
@@ -1055,6 +1056,9 @@ class FocusButton extends JButton {
 } //FocusButton
 
 // $Log$
+// Revision 1.3  2000/09/21 14:23:45  kalina
+// Fixed some small bug in main(). To test just run the component itself.
+//
 // Revision 1.2  2000/09/21 14:17:27  kalina
 // Added Unicode support
 //
