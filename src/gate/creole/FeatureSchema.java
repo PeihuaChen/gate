@@ -1,4 +1,6 @@
 /**
+ *  FeatureSchema.java
+ *
  *  Copyright (c) 2000-2001, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -116,7 +118,7 @@ public class FeatureSchema {
     schemaString.append("use=\"" + featureUse + "\"");
     // If there are no permissible values that means that the type must
     // be specified as an attribute for the attribute element
-    if (featurePermissibleValuesSet == null)
+    if (!isEnumeration())
       schemaString.append(" type=\"" + featureValueClassName + "\"/>\n");
     else {
       schemaString.append(">\n <simpleType>\n");

@@ -1,4 +1,6 @@
 /**
+ *  AnnotationSchema.java
+ *
  *  Copyright (c) 2000-2001, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -38,7 +40,7 @@ public class AnnotationSchema {
     */
   private static final boolean DEBUG = false;
 
-//*
+/*
   public static void main(String[] args){
     URL url = null;
     try{
@@ -55,7 +57,7 @@ public class AnnotationSchema {
     annotation.fromXSchema(url);
     Out.pr(annotation.toXSchema());
   }
- //*/
+ */
 
   /** The name of the annotation */
   String annotationName = null;
@@ -72,16 +74,15 @@ public class AnnotationSchema {
     * Constructs an annotation schema given it's name.
     * Feature schema that it might contain is set on null
     */
-  private AnnotationSchema(String anAnnotationName){
+  public AnnotationSchema(String anAnnotationName){
     this(anAnnotationName,null);
-
   }//AnnotationSchema
 
   /**
     * Constructs an AnnotationSchema object given it's name and a set of
     * FeatureSchema
     */
-  private AnnotationSchema(String anAnnotationName,Set aFeatureSchemaSet){
+  public AnnotationSchema(String anAnnotationName,Set aFeatureSchemaSet){
     annotationName   = anAnnotationName;
     featureSchemaSet = aFeatureSchemaSet;
   }//AnnotationSchema
