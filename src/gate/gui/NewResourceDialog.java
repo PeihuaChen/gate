@@ -379,6 +379,8 @@ public class NewResourceDialog extends JDialog {
 
       button.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
+          fileChooser.setDialogTitle("Select file");
+          fileChooser.setFileSelectionMode(fileChooser.FILES_AND_DIRECTORIES);
           int res = fileChooser.showOpenDialog(NewResourceDialog.this);
           if(res == fileChooser.APPROVE_OPTION){
             try{
