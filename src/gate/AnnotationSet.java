@@ -79,6 +79,12 @@ public interface AnnotationSet extends Set, Cloneable, Serializable
     */
   public AnnotationSet get(Long startOffset, Long endOffset);
 
+  /** Select annotations by offset and type. This returns the set of annotations
+    * that overlap totaly or partially the interval defined by the two
+    * provided offsets and are of the given type
+    */
+  public AnnotationSet get(String type, Long startOffset, Long endOffset);
+
   /** Select annotations by offset. This returns the set of annotations
     * that are contained in the interval defined by the two
     * provided offsets. The difference with get(startOffset, endOffset) is
