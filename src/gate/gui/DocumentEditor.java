@@ -2636,7 +2636,7 @@ Out.prln("NULL size");
 
     public AttributeSet getAttributes() { return style;}
 
-    private AttributeSet getActualStyle() { return style;}
+    private AttributeSet getActualStyle() { return actualStyle;}
 
     public void setAttributes(AttributeSet newAttributes) {
       style.removeAttributes(style.copyAttributes());
