@@ -122,6 +122,7 @@ public class TestCreole extends TestCase
       fail("wrong number of documents");
   } // testInstanceLists
 
+
   /** Test view registration */
   public void testViews() throws Exception {
     List smallViews1 =
