@@ -13,24 +13,27 @@
  */
 package gate.util;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.*;
 
 import gate.Annotation;
 
 public class AnnotationDiffer {
   
-  public static interface AnnotationPrinter{
-    public String printAnnotation(Annotation annotation);
-  }
   
+  public static interface Pairing{
+    public Annotation getKey();
+    public Annotation getResponse();
+    public int getType();
+  }
+
   /**
    * Computes a diff between two collections of annotations.
    * @param key
    * @param response
+   * @return a list of {@link Pairing} objects representing the pairing set
+   * that results in the best score.
    */
-  public void calculateDiff(Collection key, Collection response){
+  public List calculateDiff(Collection key, Collection response){
     //initialise data structures
     keyList = new ArrayList(key);
     responseList = new ArrayList(response);
@@ -79,6 +82,8 @@ public class AnnotationDiffer {
     finalChoices = new ArrayList();
     correctMatches = 0;
     partiallyCorrectMatches = 0;
+    missing = 0;
+    spurious = 0;
 
     while(!possibleChoices.isEmpty()){
       Choice bestChoice = (Choice)possibleChoices.remove(0);
@@ -95,6 +100,26 @@ public class AnnotationDiffer {
         }
       }
     }
+    //add choices for the incorrect matches (MISSED, SPURIOUS)
+    //get the unmatched keys
+    for(int i = 0; i < keyChoices.size(); i++){
+      List aList = (List)keyChoices.get(i);
+      if(aList == null || aList.isEmpty()){
+        finalChoices.add(new Choice(i, -1, WRONG));
+        missing ++;
+      }
+    }
+
+    //get the unmatched responses
+    for(int i = 0; i < responseChoices.size(); i++){
+      List aList = (List)responseChoices.get(i);
+      if(aList == null || aList.isEmpty()){
+        finalChoices.add(new Choice(-1, i, WRONG));
+        spurious ++;
+      }
+    }
+    
+    return finalChoices;
   }
 
   public double getPrecisionStrict(){
@@ -128,7 +153,23 @@ public class AnnotationDiffer {
     return ((betaSq + 1) * precision * recall ) /
            (betaSq * precision + recall);
   }
+  
+  public int getCorrectMatches(){
+    return correctMatches;
+  }
+  
+  public int getPartiallyCorrectMatches(){
+    return partiallyCorrectMatches;
+  }
+  
+  public int getMissing(){
+    return missing;
+  }
 
+  public int getSpurious(){
+    return spurious;
+  }
+  
   public int getFalsePositivesStrict(){
     return responseList.size() - correctMatches;
   }
@@ -169,58 +210,6 @@ public class AnnotationDiffer {
     }
   }
 
-  
-  public void writeMissmatches(Writer writer) throws IOException{
-    String nl = Strings.getNl();
-    //get the partial correct matches
-    Iterator iter = finalChoices.iterator();
-    while(iter.hasNext()){
-      Choice aChoice = (Choice)iter.next();
-      switch(aChoice.type){
-        case PARTIALLY_CORRECT:{
-          writer.write("Missmatch (partially correct):");
-          writer.write(nl);
-          writer.write("Key: " + 
-                  (annotationPrinter == null ? 
-                  keyList.get(aChoice.keyIndex).toString():
-                  annotationPrinter.printAnnotation(
-                          (Annotation)keyList.get(aChoice.keyIndex))));
-          writer.write(nl);
-          writer.write("Response: " + 
-                  annotationPrinter == null ?
-                  responseList.get(aChoice.responseIndex).toString() :
-                  annotationPrinter.printAnnotation(
-                          (Annotation)responseList.get(aChoice.responseIndex)));
-          writer.write(nl);
-          break;
-        }
-      }
-    }
-
-    //get the unmatched keys
-    for(int i = 0; i < keyChoices.size(); i++){
-      List aList = (List)keyChoices.get(i);
-      if(aList == null || aList.isEmpty()){
-        writer.write("Missed Key: " + 
-        	(annotationPrinter == null ?
-        	keyList.get(i).toString() :
-        	annotationPrinter.printAnnotation((Annotation)keyList.get(i))));
-        writer.write(nl);
-      }
-    }
-
-    //get the unmatched responses
-    for(int i = 0; i < responseChoices.size(); i++){
-      List aList = (List)responseChoices.get(i);
-      if(aList == null || aList.isEmpty()){
-        writer.write("Spurious Response: " + 
-        	(annotationPrinter == null ?
-        	responseList.get(i).toString() :
-        	annotationPrinter.printAnnotation((Annotation)responseList.get(i))));
-        writer.write(nl);
-      }
-    }
-  }
   
   
   /**
@@ -295,28 +284,37 @@ public class AnnotationDiffer {
     this.significantFeaturesSet = significantFeaturesSet;
   }
 
-  public void setAnnotationPrinter(AnnotationPrinter annotationPrinter){
-    this.annotationPrinter = annotationPrinter;
-  }
-  
   /**
    * Represents a pairing of a key annotation with a response annotation and
    * the associated score for that pairing.
    */
-  class Choice implements Comparable{
+	class Choice implements Comparable, Pairing{
     Choice(int keyIndex, int responseIndex, int type) {
       this.keyIndex = keyIndex;
       this.responseIndex = responseIndex;
       this.type = type;
       scoreCalculated = false;
-    }
+	    }
 
-    int getScore(){
+    public int getScore(){
       if(scoreCalculated) return score;
       else{
         calculateScore();
         return score;
       }
+    }
+    
+    public Annotation getKey(){
+      return keyIndex == -1 ? null : (Annotation)keyList.get(keyIndex);
+    }
+    
+    public Annotation getResponse(){
+      return responseIndex == -1 ? null : 
+        (Annotation)responseList.get(responseIndex);
+    }
+    
+    public int getType(){
+      return type;
     }
 
     /**
@@ -398,12 +396,14 @@ public class AnnotationDiffer {
   
   public static final int CORRECT = 2;
   public static final int PARTIALLY_CORRECT = 1;
-  public static final int DIFFERENT = 0;
+  public static final int WRONG = 0;
 
   private java.util.Set significantFeaturesSet;
 
   protected int correctMatches;
   protected int partiallyCorrectMatches;
+  protected int missing;
+  protected int spurious;
 
   /**
    * A list with all the key annotations
@@ -435,6 +435,4 @@ public class AnnotationDiffer {
    */
   protected List finalChoices;
   
-  protected AnnotationPrinter annotationPrinter;
-
 }
