@@ -135,7 +135,7 @@ public class ShellSlacFrame extends MainFrame {
     // Open All... action - open multiple files from directory
     corpusFiller = new CorpusFillerComponent();
     action = new PopulateCorpusAction();
-    action.putValue(action.NAME, "Open All...");
+    action.putValue(action.NAME, "New Documents...");
     action.putValue(action.SHORT_DESCRIPTION,"Create multiple documents");
     fileMenu.add(new XJMenuItem(action, this));
 
@@ -146,8 +146,14 @@ public class ShellSlacFrame extends MainFrame {
 
     action = new ImportDocumentAction();
     fileMenu.add(new XJMenuItem(action, this));
+
+    JMenu exportMenu = new JMenu("Export...");
     action = new ExportDocumentAction();
-    fileMenu.add(new XJMenuItem(action, this));
+    exportMenu.add(new XJMenuItem(action, this));
+    action = new ExportDocumentInlineAction();
+    exportMenu.add(new XJMenuItem(action, this));
+    fileMenu.add(exportMenu);
+    
     action = new ExportAllDocumentAction();
     fileMenu.add(new XJMenuItem(action, this));
 
@@ -750,9 +756,129 @@ public class ShellSlacFrame extends MainFrame {
   } // ImportRunnable
 
   /** Export current document action */
+  class ExportDocumentInlineAction extends AbstractAction {
+    public ExportDocumentInlineAction() {
+      super("Export with Inline markup");
+      putValue(SHORT_DESCRIPTION, "Save the selected document in XML format"
+            +" with inline markup");
+    } // ExportDocumentInlineAction()
+
+    public void actionPerformed(ActionEvent e) {
+      JComponent resource = (JComponent)
+                                  mainTabbedPane.getSelectedComponent();
+      if (resource == null) return;
+      Component c;
+      Document doc = null;
+
+      for(int i=0; i<resource.getComponentCount(); ++i) {
+        c = resource.getComponent(i);
+        if(c instanceof DocumentEditor) {
+          doc = ((DocumentEditor) c).getDocument();
+        } // if
+      } // for
+
+      if(doc != null) {
+        JFileChooser fileChooser = MainFrame.getFileChooser();
+        File selectedFile = null;
+
+        fileChooser.setMultiSelectionEnabled(false);
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setDialogTitle("Select document to save ...");
+        fileChooser.setSelectedFiles(null);
+
+        int res = fileChooser.showDialog(ShellSlacFrame.this, "Save");
+        if(res == JFileChooser.APPROVE_OPTION){
+          selectedFile = fileChooser.getSelectedFile();
+          fileChooser.setCurrentDirectory(fileChooser.getCurrentDirectory());
+
+          // store document with annotations Document.toXML()
+          Runnable run = new ExportInline(doc, selectedFile);
+          Thread thread = new Thread(run, "");
+          thread.setPriority(Thread.MIN_PRIORITY);
+          thread.start();
+        } // if
+      }// End if
+    } // actionPerformed(ActionEvent e)
+  } // class ExportDocumentInlineAction extends AbstractAction
+
+  /** New thread object for export inline */
+  private class ExportInline implements Runnable {
+    File targetFile;
+    Document document;
+
+    ExportInline(Document doc, File target) {
+      targetFile = target;
+      document = doc;
+    } // ExportAllRunnable(File targetDirectory)
+
+    protected Set getTypes(String types) {
+      Set set = new HashSet();
+      StringTokenizer tokenizer = new StringTokenizer(types, ";");
+
+      while(tokenizer.hasMoreTokens()) {
+        set.add(tokenizer.nextToken());
+      } // while
+      
+      return set;
+    }
+    
+    public void run() {
+      if(document == null || targetFile == null) return;
+      MainFrame.lockGUI("Store document with inline markup...");
+      try{
+        AnnotationSet annotationsToDump = null;
+        annotationsToDump = document.getAnnotations();
+        // check for restriction from Java property
+        String enumaratedAnnTypes =
+          System.getProperty(GateConstants.ANNOT_TYPE_TO_EXPORT);
+
+        if(enumaratedAnnTypes != null) {
+          Set typesSet = getTypes(enumaratedAnnTypes);
+          annotationsToDump = annotationsToDump.get(typesSet);
+        } // if
+        
+        // Prepare to write into the xmlFile using the original encoding
+        String encoding = ((gate.TextualDocument)document).getEncoding();
+        if(encoding == null || encoding.length() == 0)
+          encoding = System.getProperty("file.encoding");
+        if(encoding == null || encoding.length() == 0) encoding = "UTF-8";
+
+        OutputStreamWriter writer = new OutputStreamWriter(
+                                      new FileOutputStream(targetFile),
+                                      encoding);
+
+        //determine if the features need to be saved first
+        Boolean featuresSaved =
+            Gate.getUserConfig().getBoolean(
+              GateConstants.SAVE_FEATURES_WHEN_PRESERVING_FORMAT);
+        boolean saveFeatures = true;
+        if (featuresSaved != null)
+          saveFeatures = featuresSaved.booleanValue();
+
+        // Write with the toXml() method
+        String toXml = document.toXml(annotationsToDump, saveFeatures);
+
+        // check for plain text feature and add root XML tag <GATE>
+        String mimeType = (String) document.getFeatures().get("MimeType");
+        if("text/plain".equalsIgnoreCase(mimeType)) {
+          toXml = "<GATE>\n"+ toXml + "\n</GATE>";
+        } // if
+        
+        writer.write(toXml);
+        writer.flush();
+        writer.close();
+      } catch (Exception ex){
+        ex.printStackTrace(Out.getPrintWriter());
+      }// End try
+      
+      MainFrame.unlockGUI();
+    } // run()
+  } // ExportInline
+
+  /** Export current document action */
   class ExportDocumentAction extends AbstractAction {
     public ExportDocumentAction() {
-      super("Export");
+      super("Export in GATE Format");
       putValue(SHORT_DESCRIPTION, "Save the selected document in XML format");
     } // ExportDocumentAction()
 
@@ -961,9 +1087,7 @@ public class ShellSlacFrame extends MainFrame {
 
   class PopulateCorpusAction extends AbstractAction {
     PopulateCorpusAction() {
-      super("Populate");
-      putValue(SHORT_DESCRIPTION,
-               "Fills this corpus with documents from a directory");
+      super("New Documents...");
     } // PopulateCorpusAction()
 
     public void actionPerformed(ActionEvent e) {
