@@ -514,6 +514,16 @@
       <ICON>binoculars.gif</ICON>
     </RESOURCE>
 
+    <!-- creole.xml for Data collector -->
+    <RESOURCE>
+      <NAME>Weka data collector</NAME>
+      <CLASS>gate.ml.DataCollector</CLASS>
+      <COMMENT>Colects training data from a corpus</COMMENT>
+      <PARAMETER NAME="configFileURL" COMMENT="The configuration file" OPTIONAL="true">java.net.URL</PARAMETER>
+      <PARAMETER NAME="annotationSetName" RUNTIME="true" COMMENT="The annotation set to be used for the generated annotations" OPTIONAL="true">java.lang.String</PARAMETER>
+      <ICON>binoculars.gif</ICON>
+    </RESOURCE>
+
   </CREOLE>
 
 

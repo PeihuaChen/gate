@@ -323,6 +323,48 @@ public class Scratch
     Out.prln("done!");
   }
 
+  /**
+   *
+   * @param file a TXT file containing the text
+   */
+  public static void tokeniseFile(File file) throws Exception{
+    //initialise GATE (only call it once!!)
+    Gate.init();
+
+
+    //create the document
+    Document doc = Factory.newDocument(file.toURL());
+
+    //create the tokeniser
+    DefaultTokeniser tokeniser = (DefaultTokeniser)Factory.createResource(
+      "gate.creole.tokeniser.DefaultTokeniser");
+
+    //tokenise the document
+    tokeniser.setParameterValue(DefaultTokeniser.DEF_TOK_DOCUMENT_PARAMETER_NAME, doc);
+    tokeniser.execute();
+
+    //extract data from document
+    //we need tokens and spaces
+    Set annotationTypes = new HashSet();
+    annotationTypes.add(ANNIEConstants.TOKEN_ANNOTATION_TYPE);
+    annotationTypes.add(ANNIEConstants.SPACE_TOKEN_ANNOTATION_TYPE);
+
+    List tokenList = new ArrayList(doc.getAnnotations().get(annotationTypes));
+    Collections.sort(tokenList, new OffsetComparator());
+
+    //iterate through the tokens
+    Iterator tokIter = tokenList.iterator();
+    while(tokIter.hasNext()){
+      Annotation anAnnotation = (Annotation)tokIter.next();
+      System.out.println("Annotation: (" +
+                        anAnnotation.getStartNode().getOffset().toString() +
+                        ", " + anAnnotation.getEndNode().getOffset().toString() +
+                        "[type: " + anAnnotation.getType() +
+                         ", features: " + anAnnotation.getFeatures().toString()+
+                         "]" );
+    }
+  }
+
 
   public static class ContentPropertyReader implements PropertyReader{
     public String getPropertyValue(gate.Document doc){

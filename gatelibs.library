@@ -28,7 +28,7 @@
     <path>[lib/jakarta-regexp-1.2.jar]</path>
     <path>[lib/lucene-1.2-rc5.jar]</path>
     <path>[lib/jwnl.jar]</path>
-    <path>[lib/weka.jar]</path>
+    <path>[lib/gateHmm.jar]</path>
   </class>
   <required>gatelibs</required>
 </library>
