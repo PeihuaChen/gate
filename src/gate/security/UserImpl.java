@@ -1,5 +1,5 @@
 /*
- *  User.java
+ *  UserImpl.java
  *
  *  Copyright (c) 1998-2001, The University of Sheffield.
  *
@@ -16,6 +16,7 @@ package gate.security;
 
 import java.util.*;
 import java.sql.*;
+import junit.framework.*;
 
 import gate.persist.PersistenceException;
 
@@ -35,11 +36,11 @@ public class UserImpl implements User {
   private Connection conn;
 
   /** --- */
-  private AccessControler ac;
+  private AccessController ac;
 
 
   /** --- */
-  public UserImpl(Long id, String name, List groups,AccessControler ac,Connection conn) {
+  public UserImpl(Long id, String name, List groups,AccessController ac,Connection conn) {
 
     this.id = id;
     this.name = name;
@@ -115,6 +116,24 @@ public class UserImpl implements User {
       throw new PersistenceException("can't change user password in DB: ["+ sqle.getMessage()+"]");
     }
 
+  }
+
+  /**
+   *
+   *  this one is necessary for the contains() operations in Lists
+   *  It is possible that two users have two different UserImpl that refer
+   *  to the very same user in the DB, because they got it fromt he security
+   *  factory at different times. So we assume that two instances refer the same
+   *  GATE user if ID1==ID2 && NAME1==NAME2
+   *
+   *  */
+  public boolean equals(Object obj)
+  {
+    Assert.assert(obj instanceof User);
+
+    User usr2 = (User)obj;
+
+    return (this.id == usr2.getID() && this.name == usr2.getName());
   }
 
 }
