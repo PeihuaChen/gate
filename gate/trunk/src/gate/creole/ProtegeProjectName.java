@@ -14,14 +14,19 @@
 package gate.creole;
 
 import gate.*;
+import edu.stanford.smi.protege.model.KnowledgeBase;
 
 
 /** Dummy Protege LR. Just keep the Protege project file name */
 public class ProtegeProjectName extends AbstractLanguageResource 
                                 implements ProtegeProject {
 
+  /** Protege project file name */
   private String projectName;
 
+  /** Protege ontology */
+  private KnowledgeBase knBase = null;
+  
   public ProtegeProjectName() {
     projectName = null;
   }
@@ -33,4 +38,13 @@ public class ProtegeProjectName extends AbstractLanguageResource
   public String getProjectName() {
     return projectName;
   } // getProjectName()
+
+  public void setKnowledgeBase(KnowledgeBase base) {
+    knBase = base;
+  } // setKnowledgeBase(KnowledgeBase base)
+  
+  public KnowledgeBase getKnowledgeBase() {
+    return knBase;
+  } // getKnowledgeBase()
+  
 } // class ProtegeProjectName extends AbstractLanguageResource
