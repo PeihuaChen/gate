@@ -37,15 +37,15 @@ select 'grant select,insert,update,delete on ' || owner || '.' || table_name || 
 as xx
 from sys.all_tables
 where owner='GATEADMIN'
-union select 'grant select on ' || sequence_owner || '.' || sequence_name || ' to GATEUSER' 
+union select 'grant select on ' || sequence_owner || '.' || sequence_name || ' to GATEUSER;' 
 as xx
 from sys.all_sequences
 where sequence_owner='GATEADMIN'
-union select 'grant select on ' || owner || '.' || view_name || ' to GATEUSER' 
+union select 'grant select on ' || owner || '.' || view_name || ' to GATEUSER;' 
 as xx
 from sys.all_views
 where owner='GATEADMIN'
-union select 'grant execute on ' || owner || '.' || object_name || ' to GATEUSER' 
+union select 'grant execute on ' || owner || '.' || object_name || ' to GATEUSER;' 
 as xx
 from sys.all_objects
 where owner='GATEADMIN'
