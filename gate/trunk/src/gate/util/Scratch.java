@@ -37,7 +37,10 @@ public class Scratch
   private static final boolean DEBUG = false;
 
   public static void main(String args[]) throws Exception {
-
+    String a = "aaaa";
+    String A = a.toUpperCase();
+    System.out.println("a: " + a);
+    System.out.println("A: " + A);
 
 //    javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
 //    Map uidefaults  = (Map)javax.swing.UIManager.getDefaults();
