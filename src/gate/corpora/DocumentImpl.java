@@ -301,25 +301,25 @@ public class DocumentImpl implements Document
   protected FeatureMap features;
 
   /** The id of the next new annotation */
-  int nextAnnotationId = 0;
+  protected int nextAnnotationId = 0;
 
   /** The id of the next new node */
-  int nextNodeId = 0;
+  protected int nextNodeId = 0;
 
   /** The source URL */
-  URL sourceURL = null;
+  protected URL sourceURL = null;
 
   /** The content of the document */
-  DocumentContent content;
+  protected DocumentContent content;
 
   /** The range that the content comes from at the source URL
     * (or null if none).
     */
-  Long[] sourceURLOffsets = null;
+  protected Long[] sourceURLOffsets = null;
 
   /** The default annotation set */
-  AnnotationSet defaultAnnots;
+  protected AnnotationSet defaultAnnots;
 
   /** Named sets of annotations */
-  HashMap namedAnnotSets;
+  protected HashMap namedAnnotSets;
 } // class DocumentImpl
