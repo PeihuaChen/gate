@@ -72,7 +72,9 @@ then
   [ x$GATE_CONFIG != x ] && GATE_CONFIG=`cygpath -w $GATE_CONFIG`
   GATEJAR=`cygpath -w $GATEJAR`
   EXTDIR=`cygpath -w $EXTDIR`
-  CLASSPATH="`cygpath -w -p ${CLASSPATH}`;${OLD_CLASSPATH}"
+#  CLASSPATH="`cygpath -w -p ${CLASSPATH}`;${OLD_CLASSPATH}"
+  TOOLSJAR=`cygpath -w $TOOLSJAR`
+  CLASSPATH=`cygpath -w -p "${GATEJAR};${TOOLSJAR};${OLD_CLASSPATH}"`
 fi
 
 
