@@ -12,6 +12,7 @@ import java.util.*;
 import junit.framework.*;
 import gate.*;
 import gate.util.*;
+import gate.corpora.*;
 
 /** Tests for the Annotation classes
   */
@@ -31,7 +32,8 @@ public class TestAnnotation extends TestCase
 
   /** Fixture set up */
   public void setUp() throws InvalidOffsetException {
-    // doc1 = TestDocument.newDoc();
+    doc1 =
+      new gate.corpora.DocumentImpl("http://derwent:8000/tests/doc1.html");
 
     emptyFeatureMap = new SimpleFeatureMapImpl();
 
@@ -80,24 +82,24 @@ public class TestAnnotation extends TestCase
     Node endNode;
 
     newId = as.add(new Long(10), new Long(20), "T", fm);
-    assertEquals(newId.intValue(), 0);
+    assertEquals(newId.intValue(), 11);
     a = as.get(newId);
 
     startNode = a.getStartNode();
     endNode = a.getEndNode();
-    assertEquals(startNode.getId().intValue(), 0);
-    assertEquals(endNode.getId().intValue(), 1);
+    assertEquals(startNode.getId().intValue(), 4);
+    assertEquals(endNode.getId().intValue(), 5);
     assertEquals(startNode.getOffset().longValue(), 10);
     assertEquals(endNode.getOffset().longValue(), 20);
 
     newId = as.add(new Long(10), new Long(30), "T", fm);
-    assertEquals(newId.intValue(), 1);
+    assertEquals(newId.intValue(), 12);
     a = as.get(newId);
 
     startNode = a.getStartNode();
     endNode = a.getEndNode();
-    assertEquals(startNode.getId().intValue(), 0);
-    assertEquals(endNode.getId().intValue(), 2);
+    assertEquals(startNode.getId().intValue(), 4);
+    assertEquals(endNode.getId().intValue(), 6);
     assertEquals(startNode.getOffset().longValue(), 10);
     assertEquals(endNode.getOffset().longValue(), 30);
 
@@ -159,7 +161,8 @@ public class TestAnnotation extends TestCase
 
   /** Test type index */
   public void testTypeIndex() throws InvalidOffsetException {
-    AnnotationSet as = new AnnotationSetImpl(doc1);
+    Document doc = new DocumentImpl("http://derwent:8000/tests/doc1.html");
+    AnnotationSet as = new AnnotationSetImpl(doc);
     AnnotationSet asBuf;
     Integer newId;
     FeatureMap fm = new SimpleFeatureMapImpl();
@@ -388,7 +391,8 @@ public class TestAnnotation extends TestCase
   /** Test AnnotationSetImpl */
   public void testAnnotationSet() throws InvalidOffsetException {
     // constuct an empty AS
-    AnnotationSet as = new AnnotationSetImpl(doc1);
+    Document doc = new DocumentImpl("http://derwent:8000/tests/doc1.html");
+    AnnotationSet as = new AnnotationSetImpl(doc);
     assertEquals(as.size(), 0);
 
     // add some annotations
