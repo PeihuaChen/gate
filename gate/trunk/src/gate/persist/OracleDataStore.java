@@ -58,7 +58,7 @@ public class OracleDataStore extends JDBCDataStore {
    * image.
    */
   public String getComment() {
-    throw new MethodNotImplementedException();
+    return "GATE Oracle datastore";
   }
 
   /**
@@ -66,7 +66,7 @@ public class OracleDataStore extends JDBCDataStore {
    * in the GUI
    */
   public String getIconName() {
-    throw new MethodNotImplementedException();
+    return "ds.gif";
   }
 
 
@@ -75,7 +75,11 @@ public class OracleDataStore extends JDBCDataStore {
    * from the list listeners for this datastore
    */
   public void removeDatastoreListener(DatastoreListener l) {
-    throw new MethodNotImplementedException();
+    if (datastoreListeners != null && datastoreListeners.contains(l)) {
+      Vector v = (Vector) datastoreListeners.clone();
+      v.removeElement(l);
+      datastoreListeners = v;
+    }
   }
 
 
@@ -83,9 +87,40 @@ public class OracleDataStore extends JDBCDataStore {
    * Registers a new {@link gate.event.DatastoreListener} with this datastore
    */
   public void addDatastoreListener(DatastoreListener l) {
-    throw new MethodNotImplementedException();
+    Vector v = datastoreListeners == null ? new Vector(2) : (Vector) datastoreListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      datastoreListeners = v;
+    }
   }
 
+  protected void fireResourceAdopted(DatastoreEvent e) {
+    if (datastoreListeners != null) {
+      Vector listeners = datastoreListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((DatastoreListener) listeners.elementAt(i)).resourceAdopted(e);
+      }
+    }
+  }
+  protected void fireResourceDeleted(DatastoreEvent e) {
+    if (datastoreListeners != null) {
+      Vector listeners = datastoreListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((DatastoreListener) listeners.elementAt(i)).resourceDeleted(e);
+      }
+    }
+  }
+  protected void fireResourceWritten(DatastoreEvent e) {
+    if (datastoreListeners != null) {
+      Vector listeners = datastoreListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((DatastoreListener) listeners.elementAt(i)).resourceWritten(e);
+      }
+    }
+  }
 
   /** Get the name of an LR from its ID. */
   public String getLrName(Object lrId)
@@ -1826,5 +1861,6 @@ System.out.println();
     throw new MethodNotImplementedException();
   }
 
+  private transient Vector datastoreListeners;
 
 }
