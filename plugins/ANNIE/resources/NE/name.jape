@@ -16,7 +16,7 @@
 
 Phase:	Name
 Input: Token Lookup Title FirstPerson
-Options: control = appelt
+Options: control = appelt debug = true
 
 ///////////////////////////////////////////////////////////////
 
@@ -682,17 +682,13 @@ Priority: 25
 :orgName -->
   :orgName.TempOrganization = {kind = "department", rule = "OrgDept"}
 
-
-
 Rule:	OrgXKey
-Priority: 125
+Priority: 500
 
-// Aaaa Ltd.
-// Xxx Services Ltd. 
-
+// The Aaaa Ltd.
 (
  {Token.category == DT}
-)?
+)
 (
   (UPPER)
   (UPPER)?
@@ -702,8 +698,12 @@ Priority: 125
  {Lookup.majorType == org_key}
  ({Lookup.majorType == org_ending})?
 )
-:orgName -->
-  :orgName.TempOrganization = {kind = "unknown", rule = "OrgXKey"}
+:foo
+-->
+{}
+
+
+
 
 Rule: NotOrgXEnding
 Priority: 500
@@ -720,16 +720,30 @@ Priority: 500
 -->
 {}
  
- 
+ Rule:	NotOrgXEnding2
+Priority: 500
+
+// The Coca Cola Co.
+
+(
+ {Token.category == DT}
+)
+(
+  (UPPER)
+  (UPPER)?
+ {Lookup.majorType == cdg}
+)
+:orgName -->
+  :orgName.TempOrganization = {kind = "unknown", rule = "OrgXEnding"}
+
+
 
 Rule:	OrgXEnding
 Priority: 120
 
 // Coca Cola Co.
 
-(
- {Token.category == DT}
-)?
+
 (
   (UPPER)
   (UPPER)?
