@@ -112,6 +112,7 @@ public class OkCancelDialog extends JDialog {
       dialogSize.height = screenSize.height;
     if (dialogSize.width > screenSize.width)
       dialogSize.width = screenSize.width;
+    dialog.setSize(dialogSize);
     //end kalina
 
     //show the dialog
