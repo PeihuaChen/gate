@@ -35,86 +35,79 @@ public class Nerc extends SerialController {
   public Resource init() throws ResourceInstantiationException {
     //init super object
     super.init();
+    //create all the componets
+    FeatureMap params;
+    FeatureMap features;
+    Map listeners = new HashMap();
+    listeners.put("gate.event.StatusListener", new StatusListener(){
+      public void statusChanged(String text){
+        fireStatusChanged(text);
+      }
+    });
 
-    try{
-      //create all the componets
-      FeatureMap params;
-      FeatureMap features;
-      Map listeners = new HashMap();
-      listeners.put("gate.event.StatusListener", new StatusListener(){
-        public void statusChanged(String text){
-          fireStatusChanged(text);
-        }
-      });
+    //tokeniser
+    fireStatusChanged("Creating a tokeniser");
+    params = Factory.newFeatureMap();
+//      rData = (ResourceData)Gate.getCreoleRegister().get(
+//              "gate.creole.tokeniser.DefaultTokeniser");
+//      params.putAll(rData.getParameterList().getInitimeDefaults());
+    if(tokeniserRulesURL != null) params.put("rulesURL",
+                                             tokeniserRulesURL);
+    params.put("encoding", encoding);
+    if(DEBUG) Out.prln("Parameters for the tokeniser: \n" + params);
+    features = Factory.newFeatureMap();
+    Gate.setHiddenAttribute(features, true);
+    tokeniser = (DefaultTokeniser)Factory.createResource(
+                  "gate.creole.tokeniser.DefaultTokeniser",
+                  params, features, listeners);
+    this.add(tokeniser);
+    tokeniser.setName("Tokeniser " + System.currentTimeMillis());
+    fireProgressChanged(10);
 
-      ResourceData rData;
+    //gazetteer
+    fireStatusChanged("Creating a gazetteer");
+    params = Factory.newFeatureMap();
+//      rData = (ResourceData)Gate.getCreoleRegister().get(
+//              "gate.creole.gazetteer.DefaultGazetteer");
+//      params.putAll(rData.getParameterList().getInitimeDefaults());
+    if(gazetteerListsURL != null) params.put("listsURL",
+                                             gazetteerListsURL);
+    params.put("encoding", encoding);
+    if(DEBUG) Out.prln("Parameters for the gazetteer: \n" + params);
+    features = Factory.newFeatureMap();
+    Gate.setHiddenAttribute(features, true);
 
-      //tokeniser
-      fireStatusChanged("Creating a tokeniser");
-      params = Factory.newFeatureMap();
-      rData = (ResourceData)Gate.getCreoleRegister().get(
-              "gate.creole.tokeniser.DefaultTokeniser");
-      params.putAll(rData.getParameterList().getInitimeDefaults());
-      if(tokeniserRulesURL != null) params.put("rulesURL",
-                                               tokeniserRulesURL);
-      params.put("encoding", encoding);
-      if(DEBUG) Out.prln("Parameters for the tokeniser: \n" + params);
-      features = Factory.newFeatureMap();
-      Gate.setHiddenAttribute(features, true);
-      tokeniser = (DefaultTokeniser)Factory.createResource(rData.getClassName(),
-                                                           params, features,
-                                                           listeners);
-      this.add(tokeniser);
-      tokeniser.setName("Tokeniser " + System.currentTimeMillis());
-      fireProgressChanged(10);
+    listeners.put("gate.event.ProgressListener",
+                  new CustomProgressListener(11, 50));
 
-      //gazetteer
-      fireStatusChanged("Creating a gazetteer");
-      params = Factory.newFeatureMap();
-      rData = (ResourceData)Gate.getCreoleRegister().get(
-              "gate.creole.gazetteer.DefaultGazetteer");
-      params.putAll(rData.getParameterList().getInitimeDefaults());
-      if(gazetteerListsURL != null) params.put("listsURL",
-                                               gazetteerListsURL);
-      params.put("encoding", encoding);
-      if(DEBUG) Out.prln("Parameters for the gazetteer: \n" + params);
-      features = Factory.newFeatureMap();
-      Gate.setHiddenAttribute(features, true);
+    gazetteer = (DefaultGazetteer)Factory.createResource(
+                    "gate.creole.gazetteer.DefaultGazetteer",
+                    params, features, listeners);
+    this.add(gazetteer);
+    gazetteer.setName("Gazetteer " + System.currentTimeMillis());
+    fireProgressChanged(50);
 
-      listeners.put("gate.event.ProgressListener",
-                    new CustomProgressListener(11, 50));
-
-      gazetteer = (DefaultGazetteer)Factory.createResource(rData.getClassName(),
-                                                           params, features,
-                                                           listeners);
-      this.add(gazetteer);
-      gazetteer.setName("Gazetteer " + System.currentTimeMillis());
-      fireProgressChanged(50);
-
-      //transducer
-      fireStatusChanged("Creating a Jape transducer");
-      params = Factory.newFeatureMap();
-      rData = (ResourceData)Gate.getCreoleRegister().get(
-              "gate.creole.Transducer");
-      params.putAll(rData.getParameterList().getInitimeDefaults());
-      if(japeGrammarURL != null) params.put("grammarURL",
-                                            japeGrammarURL);
-      params.put("encoding", encoding);
-      if(DEBUG) Out.prln("Parameters for the transducer: \n" + params);
-      features = Factory.newFeatureMap();
-      Gate.setHiddenAttribute(features, true);
-      listeners.put("gate.event.ProgressListener",
-                    new CustomProgressListener(11, 50));
-      transducer = (Transducer)Factory.createResource(rData.getClassName(),
-                                                      params, features,
-                                                      listeners);
-      fireProgressChanged(100);
-      fireProcessFinished();
-      this.add(transducer);
-      transducer.setName("Transducer " + System.currentTimeMillis());
-    }catch(ParameterException pe){
-      throw new ResourceInstantiationException(pe);
-    }
+    //transducer
+    fireStatusChanged("Creating a Jape transducer");
+    params = Factory.newFeatureMap();
+//      rData = (ResourceData)Gate.getCreoleRegister().get(
+//              "gate.creole.Transducer");
+//      params.putAll(rData.getParameterList().getInitimeDefaults());
+    if(japeGrammarURL != null) params.put("grammarURL",
+                                          japeGrammarURL);
+    params.put("encoding", encoding);
+    if(DEBUG) Out.prln("Parameters for the transducer: \n" + params);
+    features = Factory.newFeatureMap();
+    Gate.setHiddenAttribute(features, true);
+    listeners.put("gate.event.ProgressListener",
+                  new CustomProgressListener(11, 50));
+    transducer = (Transducer)Factory.createResource("gate.creole.Transducer",
+                                                    params, features,
+                                                    listeners);
+    fireProgressChanged(100);
+    fireProcessFinished();
+    this.add(transducer);
+    transducer.setName("Transducer " + System.currentTimeMillis());
     return this;
   } // init()
 
