@@ -54,7 +54,7 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
     * If this succeddes then the document is saved into a temp file and parsed
     * as an XML document.
     *
-    * @param Document doc The gate document you want to parse.
+    * @param doc The gate document you want to parse.
     *
     */
   public void unpackMarkup(Document doc) throws DocumentFormatException{

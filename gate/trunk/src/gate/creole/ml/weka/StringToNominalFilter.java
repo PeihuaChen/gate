@@ -298,7 +298,7 @@ System.out.println("Atribute \"" + newAttribute.name() + "\":" + values.size());
    * Checks whether the aqttribute at a particular index in the input dataset
    * is string.
    * @param index
-   * @return
+   * @return a <tt>boolean</tt> value.
    */
   protected boolean isString(int index){
     int[] stringIndices = getInputStringIndex();

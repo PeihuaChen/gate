@@ -472,7 +472,7 @@ public class CreoleRegisterImpl extends HashMap
    * Returns a list of strings representing class names for large VRs valid
    * for a given type of language/processing resource.
    * The default VR will be the first in the returned list.
-   * @param resoureClassName the name of the resource that has large viewers. If
+   * @param resourceClassName the name of the resource that has large viewers. If
    * resourceClassName is <b>null</b> then an empty list will be returned.
    * @return a list with Strings representing the large VRs for the
    * resourceClassName
@@ -485,7 +485,7 @@ public class CreoleRegisterImpl extends HashMap
    * Returns a list of strings representing class names for small VRs valid
    * for a given type of language/processing resource
    * The default VR will be the first in the returned list.
-   * @param resoureClassName the name of the resource that has large viewers. If
+   * @param resourceClassName the name of the resource that has large viewers. If
    * resourceClassName is <b>null</b> then an empty list will be returned.
    * @return a list with Strings representing the large VRs for the
    * resourceClassName
@@ -498,7 +498,7 @@ public class CreoleRegisterImpl extends HashMap
    * Returns a list of strings representing class names for guiType VRs valid
    * for a given type of language/processing resource
    * The default VR will be the first in the returned list.
-   * @param resoureClassName the name of the resource that has large viewers. If
+   * @param resourceClassName the name of the resource that has large viewers. If
    * resourceClassName is <b>null</b> then an empty list will be returned.
    * @param guiType can be ResourceData's LARGE_GUI or SMALL_GUI
    * @return a list with Strings representing the large VRs for the

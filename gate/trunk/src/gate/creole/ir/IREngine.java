@@ -34,7 +34,7 @@ public interface IREngine {
 
   /**
    * Gets the name for this IR engine.
-   * @return
+   * @return a {@link String} value.
    */
   public String getName();
 

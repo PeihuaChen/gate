@@ -70,7 +70,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat
     * is null, then the doc's content will be parsed. If the doc's content is
     * not a valid XML then the parser might crash.
     *
-    * @param Document doc The gate document you want to parse. If
+    * @param doc The gate document you want to parse. If
     * <code>doc.getSourceUrl()</code> returns <b>null</b> then the content of
     * doc will be parsed. Using a URL is recomended because the parser will
     * report errors corectlly if the XML document is not well formed.

@@ -297,7 +297,7 @@ public class CorpusImpl extends AbstractLanguageResource
 
   /**
    * Fills the provided corpus with documents created on the fly from selected
-   * files in a directory. Uses a link {@FileFilter} to select which files will
+   * files in a directory. Uses a {@link FileFilter} to select which files will
    * be used and which will be ignored.
    * A simple file filter based on extensions is provided in the Gate
    * distribution ({@link gate.util.ExtensionFileFilter}).
@@ -386,7 +386,7 @@ public class CorpusImpl extends AbstractLanguageResource
    * parameter is an URL for uniformity. It needs to be a URL of type file
    * otherwise an InvalidArgumentException will be thrown.
    * An implementation for this method is provided as a static method at
-   * {@link gate.corpora.CorpusImpl#populate(Corpus,URL,FileFilter,boolean)}.
+   * {@link gate.corpora.CorpusImpl#populate(Corpus, URL, FileFilter, String, boolean)}.
    * @param encoding the encoding to be used for reading the documents
    * @param recurseDirectories should the directory be parsed recursively?. If
    * <tt>true</tt> all the files from the provided directory and all its

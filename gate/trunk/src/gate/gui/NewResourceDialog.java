@@ -123,7 +123,7 @@ public class NewResourceDialog extends JDialog {
 
   /** This method is intended to be used in conjunction with
     * getSelectedParameters(). The method will not instantiate the resource
-    * like {@link show(ResourceData)} but it is intended to colect the params
+    * like {@link #show(ResourceData)} but it is intended to colect the params
     * required to instantiate a resource. Returns true if the user pressed Ok
     * and false otherwise.
     */

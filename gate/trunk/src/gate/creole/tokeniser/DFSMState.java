@@ -28,7 +28,7 @@ import java.util.*;
   * transition function which in this case maps character types to other states
   * as oposed to the transition function from FSMState which maps character
   * types to sets of states, hence the nondeterministic character.
-  * {@see FSMState FSMState}
+  * @see FSMState
   */
 class DFSMState implements java.io.Serializable { //extends FSMState{
 
@@ -46,7 +46,7 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
 
   /** Adds a new mapping in the transition function of this state
     * @param type the UnicodeType for this mapping
-    * @state the next state of the FSM Machine when a character of type type
+    * @param state the next state of the FSM Machine when a character of type type
     * is read from the input.
     */
   void put(UnicodeType type, DFSMState state){

@@ -136,11 +136,11 @@ public class FSM implements JapeConstants {
     * Receives a state to start from and a complex pattern element.
     * Parses the complex pattern element and creates all the necessary states
     * and transitions for accepting annotations described by the given PE.
-    * @param state the state to start from
+    * @param startState the state to start from
     * @param cpe the pattern to be recognized
-    * @param label the bindings name for all the annotation accepted along
-    * the way this is actually a listy of Strings. It is necessary to use
-    * a list becuase of the reccursive definition of ComplexPatternElement.
+    * @param labels the bindings name for all the annotation accepted along
+    * the way. This is actually a list of Strings. It is necessary to use
+    * a list because of the recursive definition of ComplexPatternElement.
     * @return the final state reached after accepting a sequence of annotations
     * as described in the pattern
     */

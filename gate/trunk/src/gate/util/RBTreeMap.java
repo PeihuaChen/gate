@@ -281,7 +281,7 @@ public class RBTreeMap extends AbstractMap
     * mappings replace any mappings that this map had for any of the keys
     * currently in the specified map.
     *
-    * @param t Mappings to be stored in this map.
+    * @param map Mappings to be stored in this map.
     * @throws    ClassCastException class of a key or value in the specified
     * 	          map prevents it from being stored in this map.
     *
@@ -1517,7 +1517,7 @@ public class RBTreeMap extends AbstractMap
     *	      the iterator or stream.
     * @param it If non-null, new entries are created from entries
     *        or keys read from this iterator.
-    * @param it If non-null, new entries are created from keys and
+    * @param str If non-null, new entries are created from keys and
     *	      possibly values read from this stream in serialized form.
     *        Exactly one of it and str should be non-null.
     * @param defaultVal if non-null, this default value is used for

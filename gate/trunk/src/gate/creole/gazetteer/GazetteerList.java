@@ -63,7 +63,7 @@ implements List {
   }
 
   /**Sets the modified status of the current list
-   * @param modifed is modified flag   */
+   * @param modified is modified flag   */
   public void setModified(boolean modified) {
     isModified = modified;
   }
@@ -338,9 +338,9 @@ implements List {
 
   /** Retrieves the string representation of the gaz list
    *  according to its mode. If
-   *  {@link gate.creole.gazetteer.GazetteerList.LIST_MODE} then all
+   *  {@link #LIST_MODE} then all
    *  the entries are dumped sequentially to a string. If
-   *  {@link gate.creole.gazetteer.GazetteerList.TEXT_MODE} then
+   *  {@link #STRING_MODE} then
    *  the content (a string) of the gaz list is retrieved.
    *  @return the string representation of the gaz list*/
   public String toString() {
@@ -374,10 +374,10 @@ implements List {
 
   /** Updates the content of the gaz list with the given parameter.
    *  Depends on the mode of the gaz list.
-   *  In the case of {@link gate.creole.gazetteer.GazetteerList.LIST_MODE}
+   *  In the case of {@link #LIST_MODE}
    *  the new content is parsed and loaded as single nodes through the
    *  {@link java.util.List} interface. In the case of
-   *  {@link gate.creole.gazetteer.GazetteerList.STRING_MODE} the new content
+   *  {@link #STRING_MODE} the new content
    *  is stored as a String and is not parsed.
    *  @param newContent the new content of the gazetteer list */
   public void updateContent(String newContent) {

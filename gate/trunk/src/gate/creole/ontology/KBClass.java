@@ -53,7 +53,7 @@ public interface KBClass extends OClass {
    * is because a class can have more than one property with the same name
    * but different ranges.
    * @param name
-   * @return
+   * @return a {@link Set} value.
    */
   public Set getPropertiesByName(String name);
 

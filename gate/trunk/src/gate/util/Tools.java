@@ -64,7 +64,7 @@ public class Tools {
   /**
    * Finds all subclasses of a given class or interface. It will only search
    * within the loaded packages and not the entire classpath.
-   * @param parent the class for which subclasses are sought
+   * @param parentClass the class for which subclasses are sought
    * @return a list of {@link Class} objects.
    */
   static public List findSubclasses(Class parentClass){

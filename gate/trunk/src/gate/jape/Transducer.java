@@ -62,8 +62,8 @@ public abstract class Transducer implements Serializable
 
 
   /**
-   * Checks whether this PR has been interrupted since the lsat time its
-   * {@link execute()} method was called.
+   * Checks whether this PR has been interrupted since the last time its
+   * {@link #transduce(Document, AnnotationSet, AnnotationSet)} method was called.
    */
   public synchronized boolean isInterrupted(){
     return interrupted;

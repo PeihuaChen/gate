@@ -33,7 +33,7 @@ public interface Executable {
 
   /**
    * Returns true if this executable has been interrupted via the
-   * {@link interrupt()} method since the last time its {@link execute()} method
+   * {@link #interrupt()} method since the last time its {@link #execute()} method
    * was called
    */
   public boolean isInterrupted();

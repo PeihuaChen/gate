@@ -495,7 +495,7 @@ public class AnnotationDiff extends AbstractVisualResource
     ArrayList choices = (ArrayList) annotDiffer.calculateDiff(keyAnnotSet.get(), responseAnnotSet.get());
     diffSet = new HashSet();
     for(int i=0;i<choices.size();i++) {
-      AnnotationDiffer.Choice choice = (AnnotationDiffer.Choice) choices.get(i);
+      AnnotationDiffer.PairingImpl choice = (AnnotationDiffer.PairingImpl) choices.get(i);
       int type = choice.getType();
       int leftType = 0;
       int rightType = 0;

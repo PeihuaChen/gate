@@ -43,7 +43,7 @@ public class POSCategoryExtractor extends AbstractAttributeExtractor {
    * This method will find POS category for tokens in the left context of the
    * target annotation (where position is negative).
    * @param data
-   * @return
+   * @return an {@link Object} value.
    */
   protected Object getLeftContextPOS(Object data){
     //the data is an annotation in this case.

@@ -50,26 +50,26 @@ public class AnnotationDiffer {
       for(int j =0; j < responseList.size(); j++){
         Annotation keyAnn = (Annotation)keyList.get(i);
         Annotation resAnn = (Annotation)responseList.get(j);
-        Choice choice = null;
+        PairingImpl choice = null;
         if(significantFeaturesSet == null){
           //full comaptibility required
           if(keyAnn.isCompatible(resAnn)){
-            choice = new Choice(i, j, CORRECT);
+            choice = new PairingImpl(i, j, CORRECT);
           }else if(keyAnn.isPartiallyCompatible(resAnn)){
-            choice = new Choice(i, j, PARTIALLY_CORRECT);
+            choice = new PairingImpl(i, j, PARTIALLY_CORRECT);
           }
         }else{
           //compatibility tests restricted to a set of features
           if(keyAnn.isCompatible(resAnn, significantFeaturesSet)){
-            choice = new Choice(i, j, CORRECT);
+            choice = new PairingImpl(i, j, CORRECT);
           }else if(keyAnn.isPartiallyCompatible(resAnn, significantFeaturesSet)){
-            choice = new Choice(i, j, PARTIALLY_CORRECT);
+            choice = new PairingImpl(i, j, PARTIALLY_CORRECT);
           }
         }
         //add the new choice if any
         if (choice != null) {
-          addChoice(choice, i, keyChoices);
-          addChoice(choice, j, responseChoices);
+          addPairing(choice, i, keyChoices);
+          addPairing(choice, j, responseChoices);
           possibleChoices.add(choice);
         }
       }//for j
@@ -77,7 +77,7 @@ public class AnnotationDiffer {
 
     //2) from all possible pairings, find the maximal set that also
     //maximises the total score
-    Collections.sort(possibleChoices, new ChoiceScoreComparator());
+    Collections.sort(possibleChoices, new PairingScoreComparator());
     Collections.reverse(possibleChoices);
     finalChoices = new ArrayList();
     correctMatches = 0;
@@ -86,7 +86,7 @@ public class AnnotationDiffer {
     spurious = 0;
 
     while(!possibleChoices.isEmpty()){
-      Choice bestChoice = (Choice)possibleChoices.remove(0);
+      PairingImpl bestChoice = (PairingImpl)possibleChoices.remove(0);
       bestChoice.consume();
       finalChoices.add(bestChoice);
       switch(bestChoice.type){
@@ -111,7 +111,7 @@ public class AnnotationDiffer {
       if(aList == null || aList.isEmpty()){
         if(missingAnnotations == null) missingAnnotations = new HashSet();
         missingAnnotations.add((Annotation)(keyList.get(i)));
-        finalChoices.add(new Choice(i, -1, WRONG));
+        finalChoices.add(new PairingImpl(i, -1, WRONG));
         missing ++;
       }
     }
@@ -122,7 +122,7 @@ public class AnnotationDiffer {
       if(aList == null || aList.isEmpty()){
         if(spuriousAnnotations == null) spuriousAnnotations = new HashSet();
         spuriousAnnotations.add((Annotation)(responseList.get(i)));
-        finalChoices.add(new Choice(-1, i, WRONG));
+        finalChoices.add(new PairingImpl(-1, i, WRONG));
         spurious ++;
       }
     }
@@ -202,7 +202,7 @@ public class AnnotationDiffer {
     //get the partial correct matches
     Iterator iter = finalChoices.iterator();
     while(iter.hasNext()){
-      Choice aChoice = (Choice)iter.next();
+      PairingImpl aChoice = (PairingImpl)iter.next();
       switch(aChoice.type){
         case PARTIALLY_CORRECT:{
           System.out.println("Missmatch (partially correct):");
@@ -247,7 +247,7 @@ public class AnnotationDiffer {
           throw new Exception("Multiple choices found!");
         }else if(!choices.isEmpty()){
           //size must be 1
-          Choice aChoice = (Choice)choices.get(0);
+          PairingImpl aChoice = (PairingImpl)choices.get(0);
           //the SAME choice should be found for the associated response
           List otherChoices = (List)responseChoices.get(aChoice.responseIndex);
           if(otherChoices == null ||
@@ -267,7 +267,7 @@ public class AnnotationDiffer {
           throw new Exception("Multiple choices found!");
         }else if(!choices.isEmpty()){
           //size must be 1
-          Choice aChoice = (Choice)choices.get(0);
+          PairingImpl aChoice = (PairingImpl)choices.get(0);
           //the SAME choice should be found for the associated response
           List otherChoices = (List)keyChoices.get(aChoice.keyIndex);
           if(otherChoices == null){
@@ -283,17 +283,18 @@ public class AnnotationDiffer {
   }
   /**
    *
-   * @param choice the choice to be added
-   * @param index the index in the list of choices
-   * @param list the list of choices where the choice should be added
+   * @param pairing the pairing to be added
+   * @param index the index in the list of pairings
+   * @param listOfPairings the list of {@link Pairing}s where the 
+   * pairing should be added
    */
-  protected void addChoice(Choice choice, int index, List listOfChoices){
-    List existingChoices = (List)listOfChoices.get(index);
+  protected void addPairing(PairingImpl pairing, int index, List listOfPairings){
+    List existingChoices = (List)listOfPairings.get(index);
     if(existingChoices == null){
       existingChoices = new ArrayList();
-      listOfChoices.set(index, existingChoices);
+      listOfPairings.set(index, existingChoices);
     }
-    existingChoices.add(choice);
+    existingChoices.add(pairing);
   }
 
   public java.util.Set getSignificantFeaturesSet() {
@@ -308,8 +309,8 @@ public class AnnotationDiffer {
    * Represents a pairing of a key annotation with a response annotation and
    * the associated score for that pairing.
    */
-   public class Choice implements Pairing{
-    Choice(int keyIndex, int responseIndex, int type) {
+   public class PairingImpl implements Pairing{
+    PairingImpl(int keyIndex, int responseIndex, int type) {
       this.keyIndex = keyIndex;
       this.responseIndex = responseIndex;
       this.type = type;
@@ -354,11 +355,11 @@ public class AnnotationDiffer {
 
       Iterator iter = new ArrayList(sameKeyChoices).iterator();
       while(iter.hasNext()){
-        ((Choice)iter.next()).remove();
+        ((PairingImpl)iter.next()).remove();
       }
       iter = new ArrayList(sameResponseChoices).iterator();
       while(iter.hasNext()){
-        ((Choice)iter.next()).remove();
+        ((PairingImpl)iter.next()).remove();
       }
       sameKeyChoices.add(this);
       sameResponseChoices.add(this);
@@ -389,7 +390,7 @@ public class AnnotationDiffer {
       conflictSet.remove(this);
       score = type;
       Iterator conflictIter = conflictSet.iterator();
-      while(conflictIter.hasNext()) score -= ((Choice)conflictIter.next()).type;
+      while(conflictIter.hasNext()) score -= ((PairingImpl)conflictIter.next()).type;
       scoreCalculated = true;
     }
 
@@ -400,19 +401,19 @@ public class AnnotationDiffer {
     boolean scoreCalculated;
   }
 
-	protected static class ChoiceScoreComparator implements Comparator{
+	protected static class PairingScoreComparator implements Comparator{
     /**
      * Compares two choices:
      * the better score is preferred;
      * for the same score the better type is preferred (exact matches are
      * preffered to partial ones).
-     * @param other
-     * @return
+     * @return a positive value if the first pairing is better than the second,
+     * zero if they score the same or negative otherwise.
      */
 
 	  public int compare(Object o1, Object o2){
-	    Choice first = (Choice)o1;
-	    Choice second = (Choice)o2;
+	    PairingImpl first = (PairingImpl)o1;
+	    PairingImpl second = (PairingImpl)o2;
       int res = first.getScore() - second.getScore();
       if(res == 0) res = first.getType() - second.getType();
       return res;
@@ -485,7 +486,7 @@ public class AnnotationDiffer {
   /**
    * A method that returns specific type of annotations
    * @param type
-   * @return
+   * @return a {@link Set} of {@link Pairing}s.
    */
   public Set getAnnotationsOfType(int type) {
     switch(type) {

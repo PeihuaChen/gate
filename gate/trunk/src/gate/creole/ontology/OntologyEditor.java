@@ -104,7 +104,8 @@ note: these methods could be invoked from within a listener or explicitly*/
 
 /**Saves this ontology
  * @param o the ontology to be saved
- * @throws  */
+ * @throws {@link ResourceInstantiationException}  
+ */
 public void saveOntology(Ontology o) throws ResourceInstantiationException ;
 
 /**Invokes a Save As dialog for this ontology and saves it

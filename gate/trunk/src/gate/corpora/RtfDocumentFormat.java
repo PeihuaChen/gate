@@ -49,7 +49,7 @@ public class RtfDocumentFormat extends TextualDocumentFormat{
     * It always tryes to parse te doc's content. It doesn't matter if the
     * sourceUrl is null or not.
     *
-    * @param Document doc The gate document you want to parse.
+    * @param doc The gate document you want to parse.
     *
     */
   public void unpackMarkup(gate.Document doc) throws DocumentFormatException {

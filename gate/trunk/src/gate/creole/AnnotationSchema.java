@@ -218,7 +218,7 @@ public class AnnotationSchema extends AbstractLanguageResource{
 
   /** This method creates and adds a FeatureSchema object to the current
     * AnnotationSchema one.
-    * @param anElement is an XSchema attribute element
+    * @param anAttributeElement is an XSchema attribute element
     */
   public void createAndAddFeatureSchemaObject(org.jdom.Element
                                                           anAttributeElement) {

@@ -316,9 +316,9 @@ public class SimpleFeatureMapImpl
       mapListeners = v;
     }
   } //addFeatureMapListener
+  
   /**
    *
-   * @param e
    */
   protected void fireMapUpdatedEvent () {
     if (mapListeners != null) {

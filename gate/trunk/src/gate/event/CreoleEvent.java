@@ -16,7 +16,7 @@ package gate.event;
 import gate.*;
 
 /**
- * Events related to the {@link gate.creole} package. This kind of events will
+ * Events related to the gate.creole package. This kind of events will
  * be fired when resources are loaded or unloaded in the Gate system.
  */
 public class CreoleEvent extends GateEvent {

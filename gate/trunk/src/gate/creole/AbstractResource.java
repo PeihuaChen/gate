@@ -295,12 +295,12 @@ extends AbstractFeatureBearer implements Resource, Serializable
    * required parameters from the provided list of parameters.
    *
    * @param resource the resource being checked
-   * @param paramters is a {@link List} of {@link List} of {@link Parameter}
+   * @param parameters is a {@link List} of {@link List} of {@link Parameter}
    * representing a list of parameter disjunctions (e.g. the one returned by
    * {@link ParameterList#getRuntimeParameters()}).
    * @return <tt>true</tt> if all the required parameters have non null values,
    * <tt>false</tt> otherwise.
-   * @throw {@link ResourceInstantiationException} if problems occur while
+   * @throws {@link ResourceInstantiationException} if problems occur while
    * inspecting the parameters for the resource. These will normally be
    * introspection problems and are usually caused by the lack of a parameter
    * or of the read accessor for a parameter.

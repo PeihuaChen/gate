@@ -131,7 +131,7 @@ public class UserImpl
   /** changes user name
    *  Only members of the ADMIN group have sufficient privileges.
    *  fires ObjectModificationEvent
-   *  @see gate.events.ObjectModificationEvent
+   *  @see ObjectModificationEvent
    *  */
   public void setName(String newName, Session s)
     throws PersistenceException,SecurityException {

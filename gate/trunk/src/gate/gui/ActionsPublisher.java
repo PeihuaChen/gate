@@ -29,7 +29,7 @@ public interface ActionsPublisher {
    * menu for this resource needs to be built, thus allowing for dynamic updates
    * to the list of actions.
    * A <tt>null</tt> value in this list will cause a separator to be created.
-   * @return
+   * @return a {@link List} of {@link javax.swing.Action}s.
    */
   public List getActions();
 }

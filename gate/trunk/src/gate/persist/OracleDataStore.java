@@ -1505,7 +1505,7 @@ public class OracleDataStore extends JDBCDataStore {
    *  Note that in the worst case 3 bytes are needed to represent a single character
    *  in a database with UTF8 encoding, which limits the string length to 4000/3
    *  (ORACLE_VARCHAR_LIMIT_BYTES)
-   *  @see ORACLE_VARCHAR_LIMIT_BYTES
+   *  @see #ORACLE_VARCHAR_LIMIT_BYTES
    */
   private boolean fitsInVarchar2(String s) {
 
@@ -2137,7 +2137,7 @@ public class OracleDataStore extends JDBCDataStore {
 
   /**
    *   checks if two databases are identical
-   *   @see readDatabaseID()
+   *   @see #readDatabaseID()
    *   NOTE: the same database may be represented by different OracleDataStore instances
    *   but the IDs will be the same
    */

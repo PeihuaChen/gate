@@ -32,8 +32,6 @@ public class State implements JapeConstants {
 
   /**
    * Build a new state.
-   *
-   * @param owner the FSM that owns this state.
    */
   public State() {
     myIndex = State.index++;

@@ -27,7 +27,7 @@ import gate.util.GateRuntimeException;
  * Represents a list of Parameters which are alternative to each other.
  * This class only gives access to one of those parameters ot any one moment.
  * The currently accessible (selected) parameter can be changed using the
- * {@link setSelectedIndex(int index)} method.
+ * {@link #setSelectedIndex(int)} method.
  */
 public class ParameterDisjunction implements CreoleListener {
 
@@ -38,7 +38,7 @@ public class ParameterDisjunction implements CreoleListener {
    * initialisation  the values will be cached inside this object; any changes
    * made to these values will not affect the actual values on the resource.
    *
-   * @param the resource these parameters belong to.
+   * @param resource the resource these parameters belong to.
    * @param parameters a list containing the parameters in this paramater d
    * isjunction; each element is a {@link gate.creole.Parameter}.
    */
