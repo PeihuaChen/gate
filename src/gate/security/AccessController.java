@@ -14,6 +14,8 @@
 
 package gate.security;
 
+import java.net.*;
+
 import gate.persist.PersistenceException;
 
 
@@ -69,13 +71,23 @@ public interface AccessController {
 
   /** --- */
   public void logout(Session s)
-    throws PersistenceException,SecurityException;
+    throws SecurityException;
 
   /** --- */
   public void setSessionTimeout(Session s, int timeoutMins)
-    throws PersistenceException,SecurityException;
+    throws SecurityException;
 
   /** --- */
-  public boolean isValidSession(Session s);
+  public boolean isValidSession(Session s)
+    throws SecurityException;
+
+
+  /** --- */
+  public void open(URL jdbcUrl)
+    throws PersistenceException,SecurityException;;
+
+  /** --- */
+  public void close()
+    throws PersistenceException,SecurityException;;
 
 }
