@@ -62,23 +62,33 @@ public class SerialController extends AbstractController
   public void setPRs(Collection prs){
     prList.clear();
     Iterator prIter = prs.iterator();
-    while(prIter.hasNext()) prList.add(prIter.next());
+    while(prIter.hasNext()) add((ProcessingResource)prIter.next());
   }
 
   public void add(int index, ProcessingResource pr){
     prList.add(index, pr);
+    fireResourceAdded(new ControllerEvent(this, 
+            ControllerEvent.RESOURCE_ADDED, pr));
   }
 
   public void add(ProcessingResource pr){
     prList.add(pr);
+    fireResourceAdded(new ControllerEvent(this, 
+            ControllerEvent.RESOURCE_ADDED, pr));
   }
 
   public ProcessingResource remove(int index){
-    return (ProcessingResource)prList.remove(index);
+    ProcessingResource aPr = (ProcessingResource)prList.remove(index);
+    fireResourceRemoved(new ControllerEvent(this, 
+            ControllerEvent.RESOURCE_REMOVED, aPr));
+    return aPr;
   }
 
   public boolean remove(ProcessingResource pr){
-    return prList.remove(pr);
+    boolean ret = prList.remove(pr);
+    if(ret) fireResourceRemoved(new ControllerEvent(this, 
+            ControllerEvent.RESOURCE_REMOVED, pr));
+    return ret;
   }
 
   public ProcessingResource set(int index, ProcessingResource pr){
