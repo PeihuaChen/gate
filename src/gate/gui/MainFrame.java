@@ -283,7 +283,7 @@ public class MainFrame extends JFrame
                                               true);
     waitDialog = new WaitDialog(this, "");
 
-    //build the splash
+    //build the Help->About dialog
     JPanel splashBox = new JPanel();
     splashBox.setLayout(new BoxLayout(splashBox, BoxLayout.Y_AXIS));
     splashBox.setBackground(Color.white);
