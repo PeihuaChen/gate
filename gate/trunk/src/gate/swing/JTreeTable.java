@@ -80,6 +80,7 @@ public class JTreeTable extends XJTable {
       }
     });
 
+    setAutoCreateColumnsFromModel(false);
     //Install the renderer and editor
     getColumnModel().getColumn(0).setCellRenderer(new TreeTableCellRenderer());
     getColumnModel().getColumn(0).setCellEditor(new TreeTableCellEditor());
@@ -124,11 +125,6 @@ public class JTreeTable extends XJTable {
   public void expandRow(int row){
     tree.expandRow(row);
   }
-/*
-  public void setTreeCellRenderer(TreeCellRenderer renderer){
-    tree.setCellRenderer(new SmartTreeCellRenderer(renderer));
-  }
-*/
 
   /**
    * The renderer used to display the table cells containing tree nodes.

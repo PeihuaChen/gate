@@ -99,10 +99,19 @@ public class ApplicationEditor extends AbstractVisualResource
 
     mainTreeTable.setIntercellSpacing(new Dimension(5,0));
 
-    mainTreeTable.setDefaultRenderer(Object.class, new ParameterValueRenderer());
-    mainTreeTable.setDefaultEditor(Object.class, new ParameterValueEditor());
+    mainTreeTable.getColumnModel().
+                  getColumn(3).setCellRenderer(new ParameterValueRenderer());
+    mainTreeTable.getColumnModel().
+                  getColumn(3).setCellEditor(new ParameterValueEditor());
+    mainTreeTable.getColumnModel().
+                  getColumn(2).setCellRenderer(new BooleanRenderer());
+    mainTreeTable.getColumnModel().
+                  getColumn(1).setCellRenderer(new DefaultTableCellRenderer());
 
-    mainTreeTable.setDefaultRenderer(Boolean.class, new BooleanRenderer());
+
+//    mainTreeTable.setDefaultRenderer(Object.class, new ParameterValueRenderer());
+//    mainTreeTable.setDefaultEditor(Object.class, new ParameterValueEditor());
+//    mainTreeTable.setDefaultRenderer(Boolean.class, new BooleanRenderer());
 
     ToolTipManager.sharedInstance().registerComponent(mainTreeTable.getTree());
     ToolTipManager.sharedInstance().registerComponent(mainTreeTable);
@@ -778,7 +787,8 @@ public class ApplicationEditor extends AbstractVisualResource
         ParameterDisjunction pDisj = new ParameterDisjunction(
                                           (List)paramsIter.next());
         parameterDisjunctions.add(pDisj);
-        DefaultMutableTreeNode paramNode = new DefaultMutableTreeNode(pDisj);
+        DefaultMutableTreeNode paramNode = new DefaultMutableTreeNode(pDisj,
+                                                                      false);
         mainTTModel.insertNodeInto(paramNode, node, node.getChildCount());
         mainTreeTable.expandPath(new TreePath(new Object[]{
                                      mainTTModel.getRoot(), node, paramNode}));
