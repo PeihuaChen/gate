@@ -1,7 +1,7 @@
 // Valentin Tablan, 17/05/2001
 
 
-Phase:split4
+Phase:join
 Input: Token SpaceToken Split
 Options: control = Appelt
 
