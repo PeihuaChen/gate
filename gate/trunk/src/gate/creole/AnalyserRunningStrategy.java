@@ -23,7 +23,7 @@ import gate.util.*;
  * document the PR will run on.
  */
 
-public class AnalyserRunningStrategy implements RunningStrategy {
+public class AnalyserRunningStrategy implements RunningStrategy{
 
   public AnalyserRunningStrategy(LanguageAnalyser pr, int runMode,
                                  String featureName, String featureValue){
