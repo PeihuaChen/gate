@@ -22,7 +22,8 @@ import java.net.*;
 import gate.creole.*;
 
 
-/** implementation of a gazetteer list */
+/** Gazetteer List provides the means for uploading, managing and
+ *  storing the data in the gazetteer list files. */
 public class GazetteerList extends gate.creole.AbstractLanguageResource
 implements List {
 
@@ -60,17 +61,17 @@ implements List {
     return isModified;
   }
 
-  /**sets the modified status of the current list
+  /**Sets the modified status of the current list
    * @param modifed is modified flag   */
   public void setModified(boolean modified) {
     isModified = modified;
   }
 
-  /** retrieves the current mode of the gaz list
+  /** Retrieves the current mode of the gaz list
    *  @return the current mode   */
   public int getMode() { return mode; }
 
-  /**sets mode of the gazetteer list
+  /**Sets mode of the gazetteer list
    * @param m the mode to be set    */
   public void setMode(int m) {
     if (m!=mode) {
@@ -95,20 +96,20 @@ implements List {
   } // setMode(int)
 
 
-  /** set the encoding of the list
+  /** Sets the encoding of the list
    *  @param encod the encoding to be set */
   public void setEncoding(String encod) {
     encoding = encod;
   }
 
-  /** get the encoding of the list
+  /** Gets the encoding of the list
    *  @return the encoding of the list*/
   public String getEncoding() {
     return encoding;
   }
 
   /**
-   * loads a gazetteer list
+   * Loads a gazetteer list
    * @throws ResourceInstantiationException
    */
   public void load() throws ResourceInstantiationException {
@@ -134,7 +135,7 @@ implements List {
   } // load ()
 
   /**
-   * store the list to the specified url
+   * Stores the list to the specified url
    * @throws ResourceInstantiationException
    */
   public void store() throws ResourceInstantiationException{
@@ -169,11 +170,20 @@ implements List {
     isModified = false;
   } // store()
 
+
+  /**
+   * Sets the URL of the list
+   * @param theUrl the URL of the List
+   */
   public void setURL(URL theUrl) {
     url = theUrl;
     isModified = true;
   }
 
+  /**
+   * Gets the URL of the list
+   * @return the URL of the list
+   */
   public URL getURL() {
     return url;
   }
@@ -191,7 +201,7 @@ implements List {
     return entries.contains(o);
   } // contains()
 
-  /*it is not dangerous if the iterator is modified since there
+  /**Gets an iterator over the list. It is not dangerous if the iterator is modified since there
   are no dependencies of entries to other members  */
   public Iterator iterator() {
     return entries.iterator();
@@ -225,7 +235,7 @@ implements List {
   }
 
   /**
-   * add entire collection
+   * Adds entire collection
    * @param c a collection to be addded
    * @return true if all the elements where Strings and all are sucessfully added
    */

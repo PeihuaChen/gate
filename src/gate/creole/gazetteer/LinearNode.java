@@ -18,21 +18,25 @@ package gate.creole.gazetteer;
 import gate.creole.gazetteer.*;
 
 
-/**specifies an entry of the type :
+/**Linear node specifies an entry of the type :
  * list:major:minor:language */
 public class LinearNode {
 
+  /** the gazetteer list from the node */
   private String list;
+  /** the minor type from the node */
   private String minor;
+  /** the major type from the node */
   private String major;
+  /** the languages member from the node */
   private String language;
 
   /**
-   * construct a linear node
-   * @param aList
-   * @param aMajor
-   * @param aMinor
-   * @param aLanguage
+   * Constructs a linear node given its elements
+   * @param aList the gazetteer list file name
+   * @param aMajor the major type
+   * @param aMinor the minor type
+   * @param aLanguage the language(s)
    */
   public LinearNode(String aList,String aMajor,String aMinor, String aLanguage) {
     list = aList;
@@ -42,8 +46,8 @@ public class LinearNode {
   } // LinearNode construct
 
   /**
-   * parse and create  a linear node from a string
-   * @param node
+   * Parses and create a linear node from a string
+   * @param node the linear node to be parsed
    * @throws InvalidFormatException
    */
   public LinearNode (String node) throws InvalidFormatException  {
@@ -71,54 +75,58 @@ public class LinearNode {
     } // else
   } // LinearNode concstruct
 
-  /**get the list of the node
-   * @return the list of the node   */
+  /**Get the gazetteer list filename from the node
+   * @return the gazetteer list filename */
   public String getList() {
     return list;
   }
 
-  /**set the list of the node
-   * @param aList the list of the node   */
+  /**Sets the gazetteer list filename for the node
+   * @param aList  the gazetteer list filename*/
   public void setList(String aList) {
     list = aList;
   }
 
-  /** get the language of the node (optional)
+  /** Gets the language of the node (the language is optional)
    *  @return the language of the node */
   public String getLanguage() {
     return language;
   }
 
-  /** set the language of the node
+  /** Sets the language of the node
    *  @param aLanguage the language of the node */
   public void setLanguage(String aLanguage) {
     language = aLanguage;
   }
 
-  /** get the minor type
+  /** Gets the minor type
    *  @return the minor type  */
   public String getMinorType() {
     return minor;
   }
 
-  /** set the minor type
+  /** Sets the minor type
    *  @return the minor type */
   public void setMinorType(String minorType) {
     minor = minorType;
   }
 
-  /** get the major type
+  /** Gets the major type
    *  @return the major type*/
   public String getMajorType() {
     return major;
   }
 
-  /** set the major type
+  /** Sets the major type
    *  @param majorType the major type */
   public void setMajorType(String majorType) {
     major = majorType;
   }
 
+  /**
+   * Gets the string representation of this node
+   * @return the string representation of this node
+   */
   public String toString() {
     String result = list+':'+major;
 
@@ -133,7 +141,8 @@ public class LinearNode {
     return result;
   }
 
-  /**@param o another node
+  /**Checks this node vs another one for equality.
+   * @param o another node
    * @return true if languages,list,major type and minor type match.*/
   public boolean equals(Object o) {
      boolean result = false;

@@ -22,26 +22,32 @@ import java.io.*;
 
 import gate.creole.ResourceInstantiationException;
 
-/** represents a mapping definition which maps gazetteer lists to ontology classes */
+/** Represents a mapping definition which maps gazetteer lists to ontology classes */
 public class MappingDefinition extends gate.creole.AbstractLanguageResource
                               implements List {
 
+  /** the default encoding of the mapping */
   private final static String ENCODING = "UTF-8";
 
+  /** the list of nodes */
   private List nodes = new ArrayList();
+
+  /** the url of the mapping definition */
   private URL url;
-  /** a set of the lists */
+
+  /** set of gaz lists */
   private Set lists = new HashSet();
 
-  /** a mapping between a list and a node */
+  /** mapping between a list and a node */
   private Map nodesByList = new HashMap();
 
 
-  /** create new mapping definition */
+  /** Creates a new mapping definition */
   public MappingDefinition() {
   }
 
-  /**@return a list of all the ontology urls present in this mapping def   */
+  /**Gets the urls from this definition
+   * @return a list of all the ontology urls present in this mapping def   */
   public List getUrls() {
     Set result = new HashSet();
     for ( int i = 0 ; i < nodes.size() ; i++ ) {
@@ -50,20 +56,20 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
     return new ArrayList(result);
   }  // getUrls()
 
-  /** get the url
-   *  @return the url */
+  /** Gets the url of this definition
+   *  @return the url of the definition */
   public URL getURL() {
     return url;
   }
 
-  /** set the url
-   *  @param aUrl the url */
+  /** Sets the url of this definition
+   *  @param aUrl the url of the definition*/
   public void setURL(URL aUrl) {
     url = aUrl;
   }
 
-  /**load the mapping definition from the url specified
-   * @throws ResourceInstantiationException
+  /**Loads the mapping definition
+   * @throws ResourceInstantiationException if load fails.
    */
   public void load() throws ResourceInstantiationException,InvalidFormatException {
     if (null == url) {
@@ -94,8 +100,8 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
   } // load();
 
   /**
-   * store the mapping definition to the specified url
-   * @throws ResourceInstantiationException
+   * Stores the mapping definition
+   * @throws ResourceInstantiationException if store fails.
    */
   public void store()throws ResourceInstantiationException{
     if (null == url) {
@@ -116,15 +122,16 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
   } //store();
 
   /**
-   * @return a set of the lists
+   * Gets the gaz lists.
+   * @return set of the gazetteer lists
    */
   public Set getLists() {
     return new HashSet(lists);
   }
 
   /**
-   * get node by list
-   * @param list
+   * Gets node by list
+   * @param list a gazetteer list filename
    * @return the mapping node that matches the list
    */
   public MappingNode getNodeByList(String list) {
@@ -321,7 +328,7 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
 
  /*-----------internal classes -------------*/
 
-  /**provides means for safe iteration over
+  /**Provides means for safe iteration over
    * the entries of the Mapping Definition  */
   private class SafeIterator implements Iterator {
     private int index = 0;

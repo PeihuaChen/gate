@@ -16,7 +16,8 @@
 package gate.creole.gazetteer;
 
 import java.util.*;
-/**AbstratOntoGazetteer*/
+/**AbstratOntoGazetteer
+ * This class implemnents the methods common for all ontology-aware gazetteers.*/
 public abstract class AbstractOntoGazetteer
 extends AbstractGazetteer implements OntoGazetteer {
 
@@ -26,34 +27,58 @@ extends AbstractGazetteer implements OntoGazetteer {
   /** class name of the linear gazetteer to be called */
   protected String gazetteerName;
 
-  /** class of the linear gazetteer */
+  /** reference to the linear gazetteer */
   protected Gazetteer gaz;
 
+  /**
+   * Sets the class name of the linear gazetteer to be loaded.
+   * @param name class name of a Gazetteer
+   */
   public void setGazetteerName(String name) {
     gazetteerName = name;
   }
 
+  /**
+   * Gets the class name of the linear gazetteer
+   * @return the class name of the linear gazetteer
+   */
   public String getGazetteerName() {
     return gazetteerName;
   }
 
+  /**
+   * Sets the URL of the mapping definition
+   * @param url the URL of the mapping definition
+   */
   public void setMappingURL(java.net.URL url) {
     mappingURL = url;
   }
 
+  /**
+   * Gets the URL of the mapping definition
+   * @return the URL of the mapping definition
+   */
   public java.net.URL getMappingURL() {
     return mappingURL;
   }
 
+  /**
+   * Gets the linear gazetteer
+   * @return the linear gazetteer
+   */
   public Gazetteer getGazetteer(){
     return gaz;
   }
 
+  /**
+   * Sets the linear gazetteer
+   * @param gaze the linear gazetteer to be associated with this onto gazetteer.
+   */
   public void setGazetteer(Gazetteer gaze) {
     gaz = gaze;
   }
 
-  /**overrides {@link gate.creole.gazetteer.Gazetteer}
+  /**Overrides {@link gate.creole.gazetteer.Gazetteer}
    * and retrieves the linear definition from the underlying
    * linear gazetteer*/
   public LinearDefinition getLinearDefinition() {

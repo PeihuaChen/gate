@@ -33,9 +33,9 @@ public class Lookup implements java.io.Serializable {
    * Creates a new Lookup value with the given major and minor types and
    * languages.
    *
-   * @param major
-   * @param minor
-   * @param theLanguages
+   * @param major major type
+   * @param minor minor type
+   * @param theLanguages the languages
    */
   public Lookup(String theList, String major, String minor, String theLanguages){
     majorType = major;
