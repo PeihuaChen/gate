@@ -57,7 +57,6 @@ CREATE OR REPLACE FUNCTION persist_create_feature(int4,int2,varchar,int4,varchar
                             ft_number_value,
                             ft_binary_value,
                             ft_character_value,
-                            ft_long_character_value,
                             ft_value_type)
       values(nextval(''seq_feature''),
              p_entity_id,
@@ -66,7 +65,6 @@ CREATE OR REPLACE FUNCTION persist_create_feature(int4,int2,varchar,int4,varchar
              p_value_number,
              null /*empty_blob()*/,
              p_value_varchar,
-             null /*empty_clob()*/,
              p_value_type);
 
       return currval(''seq_feature_key'');

@@ -104,7 +104,7 @@ CREATE OR REPLACE FUNCTION persist_create_annotation(int4,int4,int4,int4,int4,in
             values (nextval(''seq_node''),
                     l_doc_id,
                     p_node_end_lid,
-                    p_node_end_offset)
+                    p_node_end_offset);
             /* get ID */
             l_end_node_gid := currval(''seq_node'');
 
@@ -147,7 +147,7 @@ CREATE OR REPLACE FUNCTION persist_create_annotation(int4,int4,int4,int4,int4,in
                  l_start_node_gid,
                  l_end_node_gid);
 
-         l_ann_global_id :=curval(''seq_annotation'');
+         l_ann_global_id :=currval(''seq_annotation'');
 
       end if;
 
@@ -156,7 +156,7 @@ CREATE OR REPLACE FUNCTION persist_create_annotation(int4,int4,int4,int4,int4,in
                                  asann_ann_id,
                                  asann_as_id)
      values (nextval(''seq_annotation''),
-             p_ann_global_id,
+             l_ann_global_id,
              p_as_id);
 
 
