@@ -25,7 +25,7 @@ import gate.event.*;
  */
 public interface Verb extends WordSense {
 
-  public Iterator getVerbFrames();
+  public List getVerbFrames();
 
 }
 
