@@ -123,6 +123,15 @@ public class DocumentContentImpl implements DocumentContent
       start.longValue() <= end.longValue();
   } // isValidOffsetRange(start,end)
 
+  // the same content
+  public boolean equals(Object other) {
+    if (!(other instanceof DocumentContentImpl)) return false;
+
+    DocumentContentImpl docImpl = (DocumentContentImpl) other;
+    return content.equals(docImpl.toString());
+  }
+
+  public int hashCode(){ return toString().hashCode();}
 
   /** Just for now - later we have to cater for different types of
     * content.
