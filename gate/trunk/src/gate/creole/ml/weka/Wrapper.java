@@ -33,7 +33,7 @@ import gate.ProcessingResource;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.ml.DatasetDefintion;
-import gate.creole.ml.MLEngine;
+import gate.creole.ml.AdvancedMLEngine;
 import gate.event.StatusListener;
 import gate.gui.ActionsPublisher;
 import gate.gui.MainFrame;
@@ -44,7 +44,7 @@ import gate.util.*;
  * @see <a href="http://www.cs.waikato.ac.nz/ml/weka/">WEKA homepage</a>
  */
 
-public class Wrapper implements MLEngine, ActionsPublisher {
+public class Wrapper implements AdvancedMLEngine, ActionsPublisher {
 
   public Wrapper() {
     actionsList = new ArrayList();
@@ -539,6 +539,10 @@ public class Wrapper implements MLEngine, ActionsPublisher {
     }
   }
 
+  public boolean supportsBatchMode(){
+  return false;  
+  }
+  
 //  protected class SaveDatasetAsArffAction extends javax.swing.AbstractAction{
 //    public SaveDatasetAsArffAction(){
 //      super("Save dataset as ARFF");
