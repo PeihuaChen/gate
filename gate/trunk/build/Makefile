@@ -39,8 +39,8 @@ COMPILE=./jdk.sh -s -g:none javac -O -d ../classes $(SP) $(CP)
 # having the main test class as first target, and -Xdepend in the (1.2)
 # javac options, means that most classes get compiled by a single call
 # to javac
-all: ../classes/gate/TestGate.class classes resources gukjar \
-	TestJdk.jar TestResources.jar
+all: ../classes/guk/Editor.class ../classes/gate/TestGate.class \
+	  classes resources gukjar TestJdk.jar TestResources.jar
 
 # build the whole thing
 everything: depend all jar docs internaldocs test
