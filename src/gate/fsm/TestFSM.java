@@ -75,9 +75,9 @@ public class TestFSM extends TestCase {
     * results in a graph. It doesn't check the structure graph.
     */
   public void testOne() {
-    Enumeration phases = transducer.getPhases().elements();
-    while(phases.hasMoreElements()) {
-      FSM aFSM = ((SinglePhaseTransducer)phases.nextElement()).getFSM();
+    Iterator phases = transducer.getPhases().iterator();
+    while(phases.hasNext()) {
+      FSM aFSM = ((SinglePhaseTransducer)phases.next()).getFSM();
       //Out.println(aFSM.getGML());
       String gml = aFSM.getGML();
       assert(gml.startsWith("graph["));
@@ -87,10 +87,10 @@ public class TestFSM extends TestCase {
   /** Will try to parse a .jape file and display the graphs resulted. */
   public void graphTest()throws java.io.IOException,
                                  EDU.auburn.VGJ.graph.ParseError {
-    Enumeration phases = transducer.getPhases().elements();
+    Iterator phases = transducer.getPhases().iterator();
 
-    while(phases.hasMoreElements()) {
-      SinglePhaseTransducer phase = (SinglePhaseTransducer)phases.nextElement();
+    while(phases.hasNext()) {
+      SinglePhaseTransducer phase = (SinglePhaseTransducer)phases.next();
       FSM aFSM = new FSM(phase);
       showGraph("Non-deterministic (" + phase.getName() +")",aFSM.getGML());
       aFSM.eliminateVoidTransitions();

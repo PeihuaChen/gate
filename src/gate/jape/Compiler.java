@@ -17,7 +17,6 @@ package gate.jape;
 
 import java.io.*;
 import java.util.*;
-import com.objectspace.jgl.*;
 
 import gate.util.*;
 import gate.annotation.*;
@@ -48,7 +47,7 @@ public class Compiler {
         verbose = true;
 
     // construct list of the files
-    Array fileNames = new Array();
+    ArrayList fileNames = new ArrayList();
     for( ; argsIndex<args.length; argsIndex++)
       fileNames.add(args[argsIndex]);
 
@@ -82,10 +81,10 @@ public class Compiler {
   } // compile(String japeFileName)
 
   /** The main compile method, taking a list of file names. */
-  static public void compile(Array fileNames) {
+  static public void compile(ArrayList fileNames) {
     // for each file, compile and save
-    for(ArrayIterator i = fileNames.begin(); ! i.atEnd(); i.advance())
-      compile((String) i.get(), defaultEncoding);
+    for(Iterator i = fileNames.iterator(); i.hasNext(); )
+      compile((String) i.next(), defaultEncoding);
   } // compile
 
   /** Parse a .jape and return a transducer, or throw exception. */
@@ -143,6 +142,13 @@ public class Compiler {
 
 
 // $Log$
+// Revision 1.7  2001/09/13 12:09:49  kalina
+// Removed completely the use of jgl.objectspace.Array and such.
+// Instead all sources now use the new Collections, typically ArrayList.
+// I ran the tests and I ran some documents and compared with keys.
+// JAPE seems to work well (that's where it all was). If there are problems
+// maybe look at those new structures first.
+//
 // Revision 1.6  2001/02/08 13:46:06  valyt
 // Added full Unicode support for the gazetteer and Jape
 // converted the gazetteer files to UTF-8

@@ -20,8 +20,6 @@ import java.util.*;
 import java.net.*;
 import java.io.*;
 
-import com.objectspace.jgl.*;
-
 import gate.annotation.*;
 import gate.util.*;
 import gate.event.*;

@@ -1,4 +1,4 @@
-/* 
+/*
  *  Matcher.java - transducer class
  *
  *  Copyright (c) 1998-2001, The University of Sheffield.
@@ -17,7 +17,6 @@
 package gate.jape;
 
 import java.util.*;
-import com.objectspace.jgl.*;
 import gate.annotation.*;
 import gate.util.*;
 import gate.*;
@@ -46,6 +45,13 @@ public interface Matcher extends java.io.Serializable
 
 
 // $Log$
+// Revision 1.4  2001/09/13 12:09:50  kalina
+// Removed completely the use of jgl.objectspace.Array and such.
+// Instead all sources now use the new Collections, typically ArrayList.
+// I ran the tests and I ran some documents and compared with keys.
+// JAPE seems to work well (that's where it all was). If there are problems
+// maybe look at those new structures first.
+//
 // Revision 1.3  2000/11/08 16:35:03  hamish
 // formatting
 //

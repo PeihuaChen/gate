@@ -17,7 +17,6 @@
 package gate.jape;
 
 import java.util.*;
-import com.objectspace.jgl.*;
 import gate.annotation.*;
 import gate.event.*;
 import gate.util.*;
@@ -44,7 +43,7 @@ implements JapeConstants, java.io.Serializable
 
   /** Anonymous construction */
   public MultiPhaseTransducer() {
-    phases = new Array();
+    phases = new ArrayList();
   } // anon construction
 
   /** Set the name. */
@@ -53,7 +52,7 @@ implements JapeConstants, java.io.Serializable
   /** The SinglePhaseTransducers that make up this one.
     * Keyed by their phase names.
     */
-  private Array phases;
+  private ArrayList phases;
 
 
   /** Add phase. */
@@ -88,8 +87,8 @@ implements JapeConstants, java.io.Serializable
     * after parsing.
     */
   public void finish() {
-    for(ArrayIterator i = phases.begin(); ! i.atEnd(); i.advance())
-      ((Transducer) i.get()).finish();
+    for(Iterator i = phases.iterator(); i.hasNext(); )
+      ((Transducer) i.next()).finish();
   } // finish
 
 
@@ -122,8 +121,8 @@ implements JapeConstants, java.io.Serializable
       };
     }//if
 
-    for(ArrayIterator i = phases.begin(); ! i.atEnd(); i.advance()) {
-      Transducer t = (Transducer) i.get();
+    for(Iterator i = phases.iterator(); i.hasNext(); ) {
+      Transducer t = (Transducer) i.next();
       try {
         if (! Main.batchMode) {//fire events if not in batch mode
           fireStatusChanged("Transducing " + doc.getName() +
@@ -152,8 +151,8 @@ implements JapeConstants, java.io.Serializable
   /** Ask each phase to clean up (delete action class files, for e.g.). */
   public void cleanUp() {
 
-    for(ArrayIterator i = phases.begin(); ! i.atEnd(); i.advance())
-      ((Transducer) i.get()).cleanUp();
+    for(Iterator i = phases.iterator(); i.hasNext(); )
+      ((Transducer) i.next()).cleanUp();
 
   } // cleanUp
 
@@ -168,9 +167,9 @@ implements JapeConstants, java.io.Serializable
       pad + "MPT: name(" + name + "); phases(" + newline + pad
     );
 
-    for(ArrayIterator i = phases.begin(); ! i.atEnd(); i.advance())
+    for(Iterator i = phases.iterator(); i.hasNext(); )
       buf.append(
-        ((Transducer) i.get()).toString(
+        ((Transducer) i.next()).toString(
             Strings.addPadding(pad, INDENT_PADDING)
         ) + " "
       );
@@ -181,13 +180,20 @@ implements JapeConstants, java.io.Serializable
   } // toString
 
   //needed by FSM
-  public Array getPhases(){ return phases; }
+  public ArrayList getPhases(){ return phases; }
 
 } // class MultiPhaseTransducer
 
 
 
 // $Log$
+// Revision 1.18  2001/09/13 12:09:50  kalina
+// Removed completely the use of jgl.objectspace.Array and such.
+// Instead all sources now use the new Collections, typically ArrayList.
+// I ran the tests and I ran some documents and compared with keys.
+// JAPE seems to work well (that's where it all was). If there are problems
+// maybe look at those new structures first.
+//
 // Revision 1.17  2001/09/12 15:24:44  kalina
 // Made the batchMode flag in Main public. This is now checked before
 // events are fired and listeners created. No bugs in tests or anywhere else

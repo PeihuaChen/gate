@@ -16,13 +16,11 @@
 
 package gate.jape;
 
-import java.util.Enumeration;
-import java.util.Map;
+import java.util.*;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-import com.objectspace.jgl.*;
 
 import gate.annotation.*;
 import gate.util.*;
@@ -93,7 +91,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   private LeftHandSide lhs;
 
   /** A list of the files and directories we create. */
-  static private Array tempFiles = new Array();
+  static private ArrayList tempFiles = new ArrayList();
 
   /** Local fashion for newlines. */
   private final String nl = Strings.getNl();
@@ -155,7 +153,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       return;
     }
 
-    if(blockNames.add(name) == null) // it wasn't already a member
+    if(blockNames.add(name)) // it wasn't already a member
       actionClassString.append(
         "    AnnotationSet " + name + "Annots = (AnnotationSet)bindings.get(\""
         + name + "\"); " + nl
@@ -382,9 +380,10 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
     // traverse the list in reverse order, coz any directories we
     // created were done first
-    for(ArrayIterator i = tempFiles.end(); ! i.atBegin(); ) {
-      i.retreat();
-      File tempFile = (File) i.get();
+    for(ListIterator i = tempFiles.listIterator(tempFiles.size()-1);
+        i.hasPrevious();
+       ) {
+      File tempFile = (File) i.previous();
       tempFile.delete();
     } // for each tempFile
 
@@ -438,6 +437,13 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.15  2001/09/13 12:09:50  kalina
+// Removed completely the use of jgl.objectspace.Array and such.
+// Instead all sources now use the new Collections, typically ArrayList.
+// I ran the tests and I ran some documents and compared with keys.
+// JAPE seems to work well (that's where it all was). If there are problems
+// maybe look at those new structures first.
+//
 // Revision 1.14  2000/11/08 16:35:03  hamish
 // formatting
 //

@@ -1,4 +1,4 @@
-/* 
+/*
  *  PrioritisedRuleList.java - transducer class
  *
  *  Copyright (c) 1998-2001, The University of Sheffield.
@@ -17,7 +17,6 @@
 package gate.jape;
 
 import java.util.*;
-import com.objectspace.jgl.*;
 
 
 /**
@@ -32,7 +31,7 @@ import com.objectspace.jgl.*;
   * insertion of elements at any point. The highest priority rule is the
   * first in the list, which may be accessed by <CODE>front()</CODE>.
   */
-public class PrioritisedRuleList extends DList implements java.io.Serializable
+public class PrioritisedRuleList extends ArrayList implements java.io.Serializable
 {
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -49,16 +48,17 @@ public class PrioritisedRuleList extends DList implements java.io.Serializable
      *   else (it is lower priority) break
      * insert newRule before current position (which may be finish)
      */
-    DListIterator iterator = begin();
-    for(  ; ! iterator.atEnd(); iterator.advance()) {
-      Rule rule	=	(Rule) iterator.get();
+    Iterator iterator = this.iterator();
+    int i = 0;
+    for(  ; iterator.hasNext(); i++) {
+      Rule rule	=	(Rule) iterator.next();
       int rulePriority =	rule.getPriority();
       int newRulePriority =	newRule.getPriority();
       int rulePosition =	rule.getPosition();
       int newRulePosition =	newRule.getPosition();
 
       if(rulePriority > newRulePriority)
-	      continue;
+        continue;
       else if(rulePriority == newRulePriority) {
         if(rulePosition < newRulePosition)
           continue;
@@ -70,7 +70,8 @@ public class PrioritisedRuleList extends DList implements java.io.Serializable
 
     } // while not hit the end of the rules
 
-    insert(iterator, newRule);
+
+    this.add(i, newRule);
   } // add(Rule)
 
   /** Adds a rule in order. Used for matched rules. Implements the
@@ -89,9 +90,10 @@ public class PrioritisedRuleList extends DList implements java.io.Serializable
      *   else (it is shorter) break;
      * insert newRule before current position (which may be finish)
      */
-    DListIterator iterator = begin();
-    for(  ; ! iterator.atEnd(); iterator.advance()) {
-      Rule rule	=	(Rule) iterator.get();
+    Iterator iterator = this.iterator();
+    int i = 0;
+    for(  ; iterator.hasNext(); i++) {
+      Rule rule	=	(Rule) iterator.next();
       int rulePriority =	rule.getPriority();
       int newRulePriority =	newRule.getPriority();
       int rulePosition =	rule.getPosition();
@@ -117,13 +119,20 @@ public class PrioritisedRuleList extends DList implements java.io.Serializable
 
     } // while not hit the end of the rules
 
-    insert(iterator, newRule);
+    add(i, newRule);
   } // add(Rule,int)
 
 } // class PrioritisedRuleList
 
 
 // $Log$
+// Revision 1.5  2001/09/13 12:09:50  kalina
+// Removed completely the use of jgl.objectspace.Array and such.
+// Instead all sources now use the new Collections, typically ArrayList.
+// I ran the tests and I ran some documents and compared with keys.
+// JAPE seems to work well (that's where it all was). If there are problems
+// maybe look at those new structures first.
+//
 // Revision 1.4  2000/11/08 16:35:03  hamish
 // formatting
 //
