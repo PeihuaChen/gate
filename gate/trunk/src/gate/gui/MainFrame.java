@@ -180,6 +180,31 @@ public class MainFrame extends JFrame
   }
 
 
+  /**
+   * Selects a resource if loaded in the system and not invisible.
+   * @param res the resource to be selected.
+   */
+  public void select(Resource res){
+    //first find the handle for the resource
+    Handle handle = null;
+    //go through all the nodes
+    Enumeration nodesEnum = resourcesTreeRoot.breadthFirstEnumeration();
+    while(nodesEnum.hasMoreElements() && handle == null){
+      Object node = nodesEnum.nextElement();
+      if(node instanceof DefaultMutableTreeNode){
+        DefaultMutableTreeNode dmtNode = (DefaultMutableTreeNode)node;
+        if(dmtNode.getUserObject() instanceof Handle){
+          if(((Handle)dmtNode.getUserObject()).getTarget() == res){
+            handle = (Handle)dmtNode.getUserObject();
+          }
+        }
+      }
+    }
+
+    //now select the handle if found
+    if(handle != null) select(handle);
+  }
+
   protected void select(Handle handle){
     if(mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1) {
       //select
@@ -1367,13 +1392,13 @@ public class MainFrame extends JFrame
     guiLock = null;
   }
 
-  /** Flag to protect Frame title to be changed */  
+  /** Flag to protect Frame title to be changed */
   private boolean titleChangable = false;
 
   public void setTitleChangable(boolean isChangable) {
     titleChangable = isChangable;
   } // setTitleChangable(boolean isChangable)
-  
+
   /** Override to avoid Protege to change Frame title */
   public synchronized void setTitle(String title) {
     if(titleChangable) {
@@ -1381,7 +1406,7 @@ public class MainFrame extends JFrame
     } // if
   } // setTitle(String title)
 
-  
+
 
   /** Method is used in NewDSAction */
   protected DataStore createSerialDataStore() {
