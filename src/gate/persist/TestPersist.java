@@ -1087,6 +1087,7 @@ public class TestPersist extends TestCase
 
     //13. unlock
     ds.unlockLr(lr);
+    ds.sync(lr);
 
     //close
     Factory.deleteResource(dbDoc);
