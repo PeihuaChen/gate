@@ -414,13 +414,26 @@ Priority: 20
 
  (NUM_OR_ORDINAL SPACE MONTH_NAME) 
 | 
-(MONTH_NAME (COMMA)? SPACE YEAR)
+(MONTH_NAME (COMMA)? (SPACE)? YEAR)
 )
 :date
 -->
  :date.TempDate = {rule = "DateName"}
 
 
+Rule: DateNameSpan
+// 5-20 Jan
+
+(
+ NUM_OR_ORDINAL
+ (SPACE)? 
+ {Token.string == "-"}
+ (SPACE)?
+ (NUM_OR_ORDINAL SPACE MONTH_NAME ((COMMA)? SPACE YEAR)?)
+)
+:date
+-->
+ :date.TempDate = {rule = "DateSpan"}
 
 Rule: DateNameRev
 // Wed. July 1st, 2000
@@ -428,12 +441,12 @@ Rule: DateNameRev
 // Wed, July 1st, 2000
 (         
  ((DAY_NAME (COMMA)? SPACE)?
-  MONTH_NAME SPACE 
+  MONTH_NAME (SPACE)? 
   ({Token.string == "the"} SPACE)?
  NUM_OR_ORDINAL 
  ((COMMA)? SPACE YEAR)?) |
          
- (MONTH_NAME (COMMA)? {SoaceToken} YEAR)
+ (MONTH_NAME (COMMA)? (SPACE)? YEAR)
 )
 :date
 -->
@@ -648,6 +661,9 @@ Rule: TimeZone
 :date
 -->
  :date.TempZone = {rule = "TimeZone"}
+
+
+
 
 
 
