@@ -10,11 +10,23 @@
  *
  *  Marin Dimitrov, 19/Sep/2001
  * 
- *  auto generated: Wed Oct 17 16:19:47 2001
+ *  auto generated: Wed Oct 17 20:47:04 2001
  *
  *  $Id$
  *
  */
+
+
+DROP VIEW V_ANNOT_SET;
+
+CREATE OR REPLACE VIEW V_ANNOT_SET (AS_DOC_ID, AS_NAME, ANN_ID, AT_NAME, start_offset, end_offset)  AS
+       SELECT T_ANNOT_SET.AS_DOC_ID, T_ANNOT_SET.AS_NAME, T_ANNOTATION.ANN_ID, T_ANNOTATION_TYPE.AT_NAME, s_node.NODE_OFFSET, e_node.NODE_OFFSET
+       FROM T_ANNOT_SET, T_AS_ANNOTATION, T_ANNOTATION, T_ANNOTATION_TYPE, T_NODE s_node, T_NODE e_node
+       WHERE as_id=asann_as_id
+and asann_ann_id=ann_id
+and ann_at_id=at_id
+and ann_startnode_id=s_node.node_id
+and ann_endnode_id=e_node.node_id;
 
 
 DROP VIEW V_DOC_CONTENT;
