@@ -23,35 +23,43 @@ public class Restriction implements java.io.Serializable{
   public static final int OPERATOR_BIGGER = 102;
   public static final int OPERATOR_EQUATION_OR_BIGGER = 103;
   public static final int OPERATOR_EQUATION_OR_LESS = 104;
-  //public static final int OPERATOR_LIMIT_ROWSET = 105;
+  public static final int OPERATOR_LIKE = 105;
 
   private Object value;
   private String key;
   private int    operator_;
 
-  /** --- */
+  /** Constructor.
+   *
+   * @param key string value of a feature key in document.
+   * @param value value of a feature with this key
+   * @operator_  type of operator for cmarision in query
+   *
+   */
   public Restriction(String key, Object value, int operator_){
     this.key = key;
     this.value = value;
     this.operator_ = operator_;
   }
 
-  /** --- */
+  /**
+   * @return Object value of feature
+   */
   public Object getValue(){
     return value;
   }
 
-  /** --- */
+  /** @return String string value og feature */
   public String getStringValue(){
     return value.toString();
   }
 
-  /** --- */
+  /** @return String string value of the feature key  */
   public String getKey(){
     return key;
   }
 
-  /** --- */
+  /** @return int type of operator */
   public int getOperator(){
     return operator_;
   }
