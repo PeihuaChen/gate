@@ -534,31 +534,33 @@ public class DocumentEditor extends AbstractVisualResource{
             popup.add(menu);
 
             //add a new annotation to a named AnnotationSet
-            Iterator annSetsIter = document.getNamedAnnotationSets().
-                                            keySet().iterator();
-            if(annSetsIter.hasNext()) popup.addSeparator();
-            while(annSetsIter.hasNext()){
-              AnnotationSet set = document.getAnnotations(
-                                           (String)annSetsIter.next());
+            if(document.getNamedAnnotationSets() != null){
+              Iterator annSetsIter = document.getNamedAnnotationSets().
+                                              keySet().iterator();
+              if(annSetsIter.hasNext()) popup.addSeparator();
+              while(annSetsIter.hasNext()){
+                AnnotationSet set = document.getAnnotations(
+                                             (String)annSetsIter.next());
 
 
-              menu = new JMenu("Add annotation to \"" + set.getName() + "\"");
-              menu.add(new XJMenuItem(
-                           new NewAnnotationAction(set, startOffset, endOffset),
-                           myHandle));
-              if(!customisedAnnTypes.isEmpty()){
-                menu.addSeparator();
-                Iterator typesIter = customisedAnnTypes.iterator();
-                while(typesIter.hasNext()){
-                  menu.add(new XJMenuItem(
-                               new NewAnnotationAction(set,
-                                                       (String)typesIter.next(),
-                                                       startOffset, endOffset),
-                               myHandle));
-                }
-              }//if(!customisedAnnTypes.isEmpty())
-              popup.add(menu);
-            }//while(annSetsIter.hasNext())
+                menu = new JMenu("Add annotation to \"" + set.getName() + "\"");
+                menu.add(new XJMenuItem(
+                             new NewAnnotationAction(set, startOffset, endOffset),
+                             myHandle));
+                if(!customisedAnnTypes.isEmpty()){
+                  menu.addSeparator();
+                  Iterator typesIter = customisedAnnTypes.iterator();
+                  while(typesIter.hasNext()){
+                    menu.add(new XJMenuItem(
+                                 new NewAnnotationAction(set,
+                                                         (String)typesIter.next(),
+                                                         startOffset, endOffset),
+                                 myHandle));
+                  }
+                }//if(!customisedAnnTypes.isEmpty())
+                popup.add(menu);
+              }//while(annSetsIter.hasNext())
+            }
 
             //add to a new annotation set
             menu = new JMenu("Add annotation to a new set");
@@ -971,30 +973,25 @@ public class DocumentEditor extends AbstractVisualResource{
       try{
         Thread.sleep(100);
       }catch(InterruptedException ie){}
-      synchronized(lock){
-        //refresh the display for the type
-        //(the checkbox has to be shown selected)
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-                                      ((DefaultMutableTreeNode)stylesTreeRoot).
-                                      getFirstChild();
+      //refresh the display for the type
+      //(the checkbox has to be shown selected)
+      DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+                                    ((DefaultMutableTreeNode)stylesTreeRoot).
+                                    getFirstChild();
+      while(node != null &&
+            !((TypeData)node.getUserObject()).getSet().equals(set))
+        node = node.getNextSibling();
+      if(node != null){
+        node = (DefaultMutableTreeNode)node.getFirstChild();
+        String type = ann.getType();
         while(node != null &&
-              !((TypeData)node.getUserObject()).getSet().equals(set))
+              !((TypeData)node.getUserObject()).getType().equals(type))
           node = node.getNextSibling();
-        if(node != null){
-          node = (DefaultMutableTreeNode)node.getFirstChild();
-          String type = ann.getType();
-          while(node != null &&
-                !((TypeData)node.getUserObject()).getType().equals(type))
-            node = node.getNextSibling();
-          if(node != null) stylesTreeModel.nodeChanged(node);
-        }
-      }//synchronized(lock)
+        if(node != null) stylesTreeModel.nodeChanged(node);
+      }
     }
     int position = -1;
-    synchronized(data){
-      position = data.indexOf(ann);
-      data.notifyAll();
-    };
+    position = data.indexOf(ann);
     if(position != -1){
       position = annotationsTable.getTableRow(position);
       if(position != -1){
@@ -1027,9 +1024,7 @@ public class DocumentEditor extends AbstractVisualResource{
     }
 
     public int getRowCount(){
-      synchronized(data){
-        return data.size();
-      }
+      return data.size();
     }
 
     public int getColumnCount(){
@@ -1060,37 +1055,35 @@ public class DocumentEditor extends AbstractVisualResource{
 
     public Object getValueAt(int row, int column){
       Annotation ann;
-      synchronized(data){
-        ann = (Annotation)data.get(row);
-        switch(column){
-          case -1:{//The actual annotation
-            return ann;
-          }
-          case 0:{//Type
-            return ann.getType();
-          }
-          case 1:{//Set
-            Iterator rangesIter = ranges.iterator();
-            while(rangesIter.hasNext()){
-              Range range = (Range)rangesIter.next();
-              if(range.start <= row && row < range.end) return range.setName;
-            }
-            return "?";
-          }
-          case 2:{//Start
-            return ann.getStartNode().getOffset();
-          }
-          case 3:{//End
-            return ann.getEndNode().getOffset();
-          }
-          case 4:{//Features
-            if(ann.getFeatures() == null) return null;
-            else return ann.getFeatures().toString();
-          }
-          default:{
-          }
+      ann = (Annotation)data.get(row);
+      switch(column){
+        case -1:{//The actual annotation
+          return ann;
         }
-      }//synchronized(data)
+        case 0:{//Type
+          return ann.getType();
+        }
+        case 1:{//Set
+          Iterator rangesIter = ranges.iterator();
+          while(rangesIter.hasNext()){
+            Range range = (Range)rangesIter.next();
+            if(range.start <= row && row < range.end) return range.setName;
+          }
+          return "?";
+        }
+        case 2:{//Start
+          return ann.getStartNode().getOffset();
+        }
+        case 3:{//End
+          return ann.getEndNode().getOffset();
+        }
+        case 4:{//Features
+          if(ann.getFeatures() == null) return null;
+          else return ann.getFeatures().toString();
+        }
+        default:{
+        }
+      }
       return null;
     }
   }//class AnnotationsTableModel extends AbstractTableModel
@@ -1335,61 +1328,57 @@ public class DocumentEditor extends AbstractVisualResource{
       //do all that needs doing
       Runnable runnable = new Runnable() {
         public void run() {
-          synchronized(lock){
-            if(visible) {
-              //make the corresponding range visible
-              //update the annotations table
-              synchronized(data) {
-                range = new Range(set, type, data.size(),
-                                  data.size() + annotations.size());
-                ranges.add(range);
-                data.addAll(annotations);
-                SwingUtilities.invokeLater(new Runnable() {
-                  public void run() {
-                    annotationsTableModel.fireTableDataChanged();
-                  }
-                });
-              }
-
-              //update the text display
-              Style actualStyle = textPane.getStyle("_" + set + "." + type);
-              actualStyle.setResolveParent(style);
-              showHighlights(annotations, textPane.getStyle("_" + set + "."
-                                                            + type + "_"));
-            } else {
-              //hide the corresponding range
-              //update the annotations table
-              synchronized(data) {
-                Collections.sort(ranges);
-                Iterator rangesIter = ranges.iterator();
-                while(rangesIter.hasNext()) {
-                  //find my range
-                  Range aRange = (Range)rangesIter.next();
-                  if(aRange == range){
-                    rangesIter.remove();
-                    int size = range.end - range.start;
-                    //remove the elements from Data
-                    data.subList(range.start, range.end).clear();
-                    //shift back all the remaining ranges
-                    while(rangesIter.hasNext()) {
-                      aRange = (Range)rangesIter.next();
-                      aRange.start -= size;
-                      aRange.end -= size;
-                    }
-                  }
+          if(visible) {
+            //make the corresponding range visible
+            //update the annotations table
+            synchronized(data) {
+              range = new Range(set, type, data.size(),
+                                data.size() + annotations.size());
+              ranges.add(range);
+              data.addAll(annotations);
+              SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                  annotationsTableModel.fireTableDataChanged();
                 }
-                range = null;
-                SwingUtilities.invokeLater(new Runnable() {
-                  public void run() {
-                    annotationsTableModel.fireTableDataChanged();
-                  }
-                });
-              }//synchronized(data)
-              //update the text display
-              Style actualStyle = textPane.getStyle("_" + set + "." + type);
-              actualStyle.setResolveParent(textPane.getStyle("default"));
-            }//if(visible)
-          }//synchronized(lock)
+              });
+            }
+
+            //update the text display
+            Style actualStyle = textPane.getStyle("_" + set + "." + type);
+            actualStyle.setResolveParent(style);
+            showHighlights(annotations, textPane.getStyle("_" + set + "."
+                                                          + type + "_"));
+          } else {
+            //hide the corresponding range
+            //update the annotations table
+            Collections.sort(ranges);
+            Iterator rangesIter = ranges.iterator();
+            while(rangesIter.hasNext()) {
+              //find my range
+              Range aRange = (Range)rangesIter.next();
+              if(aRange == range){
+                rangesIter.remove();
+                int size = range.end - range.start;
+                //remove the elements from Data
+                data.subList(range.start, range.end).clear();
+                //shift back all the remaining ranges
+                while(rangesIter.hasNext()) {
+                  aRange = (Range)rangesIter.next();
+                  aRange.start -= size;
+                  aRange.end -= size;
+                }
+              }
+            }
+            range = null;
+            SwingUtilities.invokeLater(new Runnable() {
+              public void run() {
+                annotationsTableModel.fireTableDataChanged();
+              }
+            });
+            //update the text display
+            Style actualStyle = textPane.getStyle("_" + set + "." + type);
+            actualStyle.setResolveParent(textPane.getStyle("default"));
+          }//if(visible)
         }//public void run()
       };//Runnable runnable = new Runnable()
       Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
@@ -2221,6 +2210,11 @@ public class DocumentEditor extends AbstractVisualResource{
                                                               getView()*/
            ).okAction();
         }catch(GateException ge){
+          JOptionPane.showMessageDialog(
+            DocumentEditor.this,
+            "There was an error:\n" +
+            ge.toString(),
+            "Gate", JOptionPane.ERROR_MESSAGE);
           ge.printStackTrace(Err.getPrintWriter());
         }
       }
