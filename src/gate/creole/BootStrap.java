@@ -38,7 +38,8 @@ public class BootStrap {
   protected static String resourcePath = "gate/resources";
 
   /** the name of the resource of the template project from the gate resources*/
-  protected String oldResource = "creole/templateproject";
+  //protected String oldResource = "creole/templateproject";
+  protected String oldResource = "creole/bootstrap";
 
   /** the name of jar resource*/
   protected String nameProject = "Template";
@@ -455,7 +456,12 @@ public class BootStrap {
     names.put("___ALLPACKAGE___",stringPackages);
     names.put("___PACKAGE___",namePackage);
     names.put("___PACKAGETOP___",listPackages.get(0));
-    names.put("___RESOURCE___",nameResource);
+    names.put("___RESOURCE___",nameResource);;
+    names.put(
+      "___GATECLASSPATH___",
+      System.getProperty("path.separator") +
+        System.getProperty("java.class.path")
+    );
 
     oldNames.put("___PACKAGE___","template");
     oldNames.put("___PACKAGETOP___","template");

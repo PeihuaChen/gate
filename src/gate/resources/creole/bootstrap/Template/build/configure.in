@@ -1,0 +1,103 @@
+#########################################################################
+# configure.in, from GATE 1 configure.in
+#########################################################################
+# Hamish, 30/4/1, 23/1/01, 12/6/96
+# $Id$
+#########################################################################
+# Process this file with autoconf to produce a configure script, e.g.
+# autoconf configure.in >configure
+#########################################################################
+
+
+# config.cache anyone? not for me, thank you
+define([AC_CACHE_LOAD], )dnl
+define([AC_CACHE_SAVE], )dnl
+
+# initialise
+AC_INIT()
+
+# Say hello
+echo '***' 1>&2
+echo '*** this is GATE auto-configuration, from GNU autoconf' 1>&2
+echo '*** for CREOLE resource TEMPLATE' 1>&2
+echo '***' 1>&2
+
+
+# Chumley St. John
+AC_PATH_PROG(JAVAC, javac javac.exe, javac, /bin:/usr/bin://w/jdk/jdk1.3/bin)
+AC_PATH_PROG(JAVA, java java.exe, java, /bin:/usr/bin://w/jdk/jdk1.3/bin)
+AC_PATH_PROG(JAR, jar jar.exe, jar, /bin:/usr/bin://w/jdk/jdk1.3/bin)
+AC_PATH_PROG(JAVADOC, javadoc javadoc.exe, javadoc, /bin:/usr/bin://w/jdk/jdk1.3/bin)
+CYGPATH=echo
+AC_PATH_PROG(CYGPATH, cygpath, echo)
+CYGPATHP=$CYGPATH
+
+
+# Just what is this beast we're running on?
+AC_CANONICAL_SYSTEM
+case "$host" in
+  sparc-sun-solaris2.*)	SH_OS=SOLARIS ;;
+  sparc-sun-sunos*)    	SH_OS=SUNOS ;;
+  *linux*)		SH_OS=LINUX ;;
+  *aix*)		SH_OS=AIX ;;
+  *irix*)		SH_OS=IRIX ;;
+  *)			SH_OS=UNKNOWN ;;
+esac
+case "$host_alias" in
+  *cygwin*)		SH_OS=CYGWIN ;;
+esac
+echo Your OS seems to be $SH_OS
+
+# system-specific stuff
+if test $SH_OS = SOLARIS
+then
+  :
+elif test $SH_OS = SUNOS
+then
+  :
+elif test $SH_OS = LINUX
+then
+  :
+elif test $SH_OS = AIX
+then
+  :
+elif test $SH_OS = IRIX
+then
+  :
+elif test $SH_OS = CYGWIN
+then
+  CYGPATH="$CYGPATH -w"
+  CYGPATHP="$CYGPATH -p"
+  :
+elif test $SH_OS = UNKNOWN
+then
+  echo "don't recognise your OS - please take a day off"
+fi
+
+
+# Create an empty Makefile.dep
+echo '# Makefile.dep - do not edit' >Makefile.dep
+
+
+# Set up the sustitutions for Makefile creation
+ECHON=$ac_n
+ECHOC=$ac_c
+AC_SUBST(ECHON)
+AC_SUBST(ECHOC)
+AC_SUBST(JAVA)
+AC_SUBST(JAVAC)
+AC_SUBST(JAR)
+AC_SUBST(JAVADOC)
+AC_SUBST(build)
+AC_SUBST(SH_OS)
+AC_SUBST(CYGPATH)
+AC_SUBST(CYGPATHP)
+
+
+# Create the configured Makefile
+AC_OUTPUT(Makefile)
+
+# now go home and have a nice cup of tea
+echo '***' 1>&2
+echo "*** a makefile in the hand is worth 3 in the bush" 1>&2
+echo '***' 1>&2
