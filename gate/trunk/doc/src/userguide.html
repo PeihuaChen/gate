@@ -317,18 +317,13 @@ finally right click on the application and select "Run".
 
 <P>
 Once the system has run, open the document to be
-viewed with a double click. Note that it may take a few seconds for the text to 
-be
-displayed if it is long.
-The annotation types are displayed to the right of the text. 
-Click on Default (the default annotation set) to display the
-annotation types. Then select the annotation types to be viewed. A
-checkbox will indicate which types are currently being displayed. The
-text segments corresponding to these annotations will be highlighted
-in the main text window. Fonts and colours of the annotations can be
-manually altered by double-clicking on the relevant
-annotation. Default colours and font settings can be altered in the
-same way, by double-clicking on the default button. 
+viewed with a double click on the icon in the left window (if it is
+not already displayed). Note that it may take a few seconds for the
+text to be displayed if it is long.
+The annotation types belonging to each annotation set are displayed to
+the right of the text. Select the annotation types to be viewed by
+clicking on the appropriate checkbox(es). The text segments
+corresponding to these annotations will be highlighted in the main text window.  
 </P>
 
 <P>
@@ -336,8 +331,8 @@ Descriptions of the annotations are simultaneously displayed in the
 bottom pane. These lists can be sorted in ascending and descending
 order by any column, by clicking on the corresponding column
 heading. An arrow will appear indicating the direction of the sorting.
-Clicking on an entry in the table will also
-highlight the respective matching text portion. 
+Clicking on an entry in the table will also highlight the respective
+matching text portion.
 </P>
 
 <P>
@@ -360,7 +355,9 @@ using the keyboard arrows, as well as by using the scrollbars.
 <P>
 At any time, the main viewer can also be used to display other
 information, such as Messages, by clicking on the header
-at the top of the main window. 
+at the top of the main window. If an error occurs in processing, the
+messages tab will flash red, and an additional popup error message
+may also occur.
 </P>
 
 
@@ -369,23 +366,24 @@ at the top of the main window.
 
 <P>
 In order to be able to add/edit annotations in GATE, the relevant
- Annotation Schemata must first be loaded. This is done by selecting an
- Annotation Schema (which is an xml file) from the Language Resources,
- for each annotation type.
+ Annotation Schemata must first be loaded. If only the Default
+annotation types are required, this is done automatically. If other
+types of annotation are required, an Annotation Schema (which is an
+xml file) must be selected from the Language Resources. This process
+must be repeated for each annotation type. It does not, however, need
+to be repeated for each document.
 
 <P>
 Once the Annotation Schemata have been loaded, the annotation types that
 have a Schema present inside GATE can be added or edited. 
-To add a new annotation, 
-select the text, right click, and select an annotation set (either the
-default set, which contains the annotations already found, or create a new one).
-Then select the name of the annotation to be created.
-If the annotation can have features, another window will automatically
-open. Select a feature from the list of possible features, and click
-the arrow to transfer it to the list of current features. The feature
-values can be edited by clicking on them. The new annotation will be
-added to the annotation set, and will appear in the annotation
-description table.
+To add a new annotation, select the text, right click, and select an
+annotation set. Then select the name of the
+annotation to be created. If the annotation can have features, another
+window will automatically open. Select a feature from the list of
+possible features, and click the arrow to transfer it to the list of
+current features. The feature values can be edited by clicking on
+them. The new annotation will be added to the annotation set, and will
+appear in the annotation description table.
 </P>
 
 <P>
@@ -409,6 +407,14 @@ the datastore created earlier).
 </P>
 
 <P>
+A modified file can also be saved as an xml file, by right clicking on
+the document icon in the left window and choosing the
+option "Save as Xml". Once saved, it can be reloaded in t usual way,
+by selecting "New Langugae Resource" from the File menu or by
+selecting "New" and then "Gate document" from the Language Resources icon.
+</P>
+
+<P>
 To load a document from a data store, do not try to load it as a
 language resource. Instead, open the data store, and double click on
 it to view its contents. Double click on the relevant file to display
@@ -421,18 +427,22 @@ treated in the same way as any other document.
 
 <P>
 The annotation tool is activated by selecting it from the 
-Tools menu at the top of the window. It will appear in a new window. Select the key and response
-documents to be used (note that both must have been previously loaded
-into the system), the annotation type to be evaluated, and the
-annotation type to be used as the denominator for evaluating false
-positives (normally, Token). The user should ensure the key and
-response documents are explicitly selected, even if there are no
-alternative choices of document presented. Click on "do diff", and the
-results will be displayed.
+Tools menu at the top of the window. It will appear in a new
+window. Select the key and response documents to be used (note that
+both must have been previously loaded into the system), the annotation
+sets to be used for each, and the annotation
+type to be evaluated. If false positived are to be measured, select
+the annotation type (and relevant annotation set) to be used as the
+denominator (normally, Token or Sentence). The weight for the
+F-Measure can also be changed - by default it is set to 0.5 (i.e. to
+give precision and recall equal weight). Finally, click
+on "Evaluate" to display the results. Note that the window may need to
+be resized manually, by dragging the window edges or internal bars
+as appropriate). 
 </P>
 
 <P>
-In the main window, the key and response annotations will  be
+In the main window, the key and response annotations will be
 displayed. They can be sorted by any category by clicking on the
 relevant column header. The key and response annotations will be aligned if
 their indices are identical, and are colour coded according to the legend
@@ -443,7 +453,7 @@ displayed.
 <H4>Evaluation metrics</H4>
 
 <P>
-Precision, recall and
+Precision, recall, F-measure and
 false positives are also displayed below the annotation tables, each
 according to 3 criteria - strict, lenient and average. The reason for
 these 3 criteria is to deal with partially correct responses in
