@@ -360,7 +360,7 @@
       <sysproperty key="gate.home" value="${basedir}"/>
       <sysproperty key="load.plugin.path" value="file:${basedir}/plugins/ANNIE;file:${basedir}/plugins/Information_Retrieval;file:${basedir}/plugins/Machine_Learning;file:${basedir}/plugins/Obsolete;file:${basedir}/plugins/Ontology_Tools;file:${basedir}/plugins/Tools;file:${basedir}/plugins/WordNet"/>      
       <jvmarg value="-Djava.ext.dirs=${extDir}"/>
-      <jvmarg value="-Xmx=200m"/>
+      <jvmarg value="-Xmx200m"/>
       <formatter type="plain"
                  usefile="false"/>
       <formatter type="xml"
