@@ -391,10 +391,18 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
   /** Create a string representation of the object. */
   public String toString(String pad) {
+    String nl = Strings.getNl();
     StringBuffer buf = new StringBuffer(
       pad + "RHS: actionClassName(" + actionClassName + "); "
     );
-    //buf.append("actionClassString(" + newline + actionClassString + newline);
+    //buf.append("actionClassString(" + nl + actionClassString + nl);
+    buf.append(
+      "actionClassClassFileName(" + nl + actionClassClassFileName + nl
+    );
+    buf.append("actionClassJavaFileName(" + nl + actionClassJavaFileName + nl);
+    buf.append(
+      "actionClassQualifiedName(" + nl + actionClassQualifiedName + nl
+    );
 
     buf.append("blockNames(" + blockNames.toString() + "); ");
 
@@ -413,6 +421,9 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.5  2000/05/05 10:14:09  hamish
+// added more to toString
+//
 // Revision 1.4  2000/05/02 16:54:47  hamish
 // porting to new annotation API
 //
