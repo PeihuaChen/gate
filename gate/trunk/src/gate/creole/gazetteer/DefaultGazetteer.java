@@ -492,11 +492,49 @@ public class DefaultGazetteer extends AbstractGazetteer {
 
   /**lookup <br>
    * @param singleItem a single string to be looked up by the gazetteer
-   * @return the referring Lookup object*/
-  public Lookup lookup(String singleItem) {
-    return null;
+   * @return set of the Lookups associated with the parameter*/
+  public Set lookup(String singleItem) {
+    char currentChar;
+    Set set = new HashSet();
+    FSMState currentState = initialState;
+    FSMState nextState;
+
+    for(int i = 0; i< singleItem.length(); i++) {
+        currentChar = singleItem.charAt(i);
+        if(Character.isWhitespace(currentChar)) currentChar = ' ';
+        nextState = currentState.next(currentChar);
+        if(nextState == null) {
+          return set;
+        }
+        currentState = nextState;
+    } //for(int i = 0; i< text.length(); i++)
+    set = currentState.getLookupSet();
+    return set;
   }
 
+  public boolean remove(String singleItem) {
+    char currentChar;
+    FSMState currentState = initialState;
+    FSMState nextState;
+    Lookup oldLookup;
+
+    for(int i = 0; i< singleItem.length(); i++) {
+        currentChar = singleItem.charAt(i);
+        if(Character.isWhitespace(currentChar)) currentChar = ' ';
+        nextState = currentState.next(currentChar);
+        if(nextState == null) {
+          return false;
+        }//nothing to remove
+        currentState = nextState;
+    } //for(int i = 0; i< text.length(); i++)
+    currentState.lookupSet = new HashSet();
+    return true;
+  }
+
+  public boolean add(String singleItem, Lookup lookup) {
+    addLookup(singleItem,lookup);
+    return true;
+  }
 
 
 } // DefaultGazetteer
