@@ -159,14 +159,12 @@ public class TestJape extends TestCase
     //tokenize all documents
     gate.creole.tokeniser.DefaultTokeniser tokeniser = null;
     try {
-      tokeniser =new gate.creole.tokeniser.DefaultTokeniser(
-        Files.getGateResourceAsStream("creole/tokeniser/DiTokeniser.rules"));
+      tokeniser =new gate.creole.tokeniser.DefaultTokeniser();
+      tokeniser.setRulesResourceName("creole/tokeniser/DiTokeniser.rules");
+      tokeniser.init();
       /*Files.getResourceAsStream("creole/tokeniser/DefaultTokeniser.rules"));*/
-    } catch(IOException ioe) {
-      Err.println("Cannot read the tokeniser rules!" +
-                         "\nAre the Gate resources in place?");
-    } catch(TokeniserException te) {
-      te.printStackTrace(Err.getPrintWriter());
+    } catch(ResourceInstantiationException re) {
+      re.printStackTrace(Err.getPrintWriter());
     }
     startCorpusTokenization = System.currentTimeMillis();
     Out.print(": " +
