@@ -167,8 +167,6 @@ public class XJTable extends JTable {
     for(int column = 0; column < getColumnCount(); column ++){
       int width;
       tCol = getColumnModel().getColumn(column);
-      //set the renderer
-//      tCol.setHeaderRenderer(headerRenderer);
       //compute the sizes
       width = headerRenderer.getTableCellRendererComponent(
                   this, tCol.getHeaderValue(), false, false,0,column
@@ -196,7 +194,6 @@ public class XJTable extends JTable {
       width += getColumnModel().getColumnMargin();
       tCol.setPreferredWidth(width);
       tCol.setWidth(width);
-//      tCol.setMinWidth(width);
       totalWidth += width;
     }
     int totalHeight = 0;
