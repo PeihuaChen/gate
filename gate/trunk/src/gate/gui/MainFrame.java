@@ -357,11 +357,14 @@ public class MainFrame extends JFrame
     splashBox.add(Box.createVerticalStrut(10));
 
     verLbl = new JLabel(
-      "<HTML><B><U>GATE contributors:</U></B><BR>" +
+      "<HTML>" +
       "<B>Hamish Cunningham, Valentin Tablan, Cristian Ursu, " +
       "Kalina Bontcheva</B>,<BR>" +
-      "Diana Maynard, Horacio Saggion, Oana Hamza, Yorick Wilks,<BR>" +
-      "Robert Gaizauskas, Mark Hepple, Mark Leisher, Kevin Humphreys."
+      "Diana Maynard, Marin Dimitrov, Horacio Saggion, Oana Hamza,<BR>" +
+      "Robert Gaizauskas, Mark Hepple, Mark Leisher, Kevin Humphreys,<BR>" +
+      "Yorick Wilks." +
+      "<P><B>JVM version</B>: " + System.getProperty("java.version") +
+      " from " + System.getProperty("java.vendor")
     );
     box = new Box(BoxLayout.X_AXIS);
     box.add(verLbl);
