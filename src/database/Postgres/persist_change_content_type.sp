@@ -13,20 +13,23 @@
  *
  */
 
-CREATE OR REPLACE FUNCTION persist_change_content_type(int4,int2) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION persist_change_content_type(int4,int4) RETURNS boolean AS '
 
    DECLARE
       p_cont_id alias for $1;
-      p_new_type alias for $2;
+      p_new_type_4 alias for $2;
 
       x_invalid_content_type constant varchar := ''x_invalid_content_type'';
 
       C_CHARACTER_CONTENT  constant int4 := 1;
       C_BINARY_CONTENT     constant int4 := 2;
       C_EMPTY_CONTENT      constant int4 := 3;
-
+      p_new_type int2;
 
    BEGIN
+     /* convert the parameter */
+     p_new_type = cast (p_new_type_4 as int2);
+     
      if (p_new_type not in (C_CHARACTER_CONTENT,
                             C_BINARY_CONTENT,
                             C_EMPTY_CONTENT)) then

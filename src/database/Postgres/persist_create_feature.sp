@@ -13,24 +13,31 @@
  *
  */
 
-CREATE OR REPLACE FUNCTION persist_create_feature(int4,int2,varchar,int4,float8,varchar,bytea,int2) RETURNS int4 AS '
+CREATE OR REPLACE FUNCTION persist_create_feature(int4,int4,varchar,int4,float8,varchar,bytea,int4) RETURNS int4 AS '
 
    DECLARE
       p_entity_id           alias for $1;
-      p_entity_type         alias for $2;
+      p_entity_type_4       alias for $2;
       p_key                 alias for $3;
       p_value_int           alias for $4;
       p_value_float         alias for $5;
       p_value_varchar       alias for $6;
       p_value_binary        alias for $7;
-      p_value_type          alias for $8;
+      p_value_type_4        alias for $8;
 
       l_feature_key_id int4;
       cnt int4;
+      p_entity_type int2;
+      p_value_type int2;
 
       x_invalid_feature_type constant varchar := ''x_invalid_feature_type'';
 
    BEGIN
+      /* downcast the input params */
+      p_entity_type = cast(p_entity_type_4 as int2);
+      p_value_type = cast(p_value_type_4 as int2);
+      
+      
       if (false = persist_is_valid_feature_type(p_value_type)) then
          raise exception ''%'',x_invalid_feature_type;
       end if;
