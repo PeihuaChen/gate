@@ -54,7 +54,7 @@ public class ChineseTokeniser
   private String encoding;
 
   /** The name of the sourceFile */
-  private gate.Document sourceDoc;
+  private gate.Document document;
 
   /** Temporary document */
   private gate.Document tempDoc;
@@ -114,6 +114,11 @@ public class ChineseTokeniser
     return this;
   }
 
+  /** This method reInitialises the segmenter */
+  public void reInit() throws ResourceInstantiationException {
+    segmenter = new Segmenter(charform, true);
+  }
+
   /**
    * This method gets executed whenever user clicks on the Run button
    * available in the GATE gui.  It runs the segmenter on the given document
@@ -127,13 +132,13 @@ public class ChineseTokeniser
     fireProgressChanged(0);
 
     // If no document provided to process throw an exception
-    if (sourceDoc == null) {
+    if (document == null) {
       throw new GateRuntimeException("No document to process!");
     }
 
     // run the segmenter on this text
     String segmentedData = segmenter.segmentData(
-        sourceDoc.getContent().toString(),
+        document.getContent().toString(),
         encoding);
 
     // now we need to create a temporary document
@@ -189,7 +194,7 @@ public class ChineseTokeniser
     Comparator offsetComparator = new OffsetComparator();
     Collections.sort(tokens, offsetComparator);
     Iterator tokenIter = tokens.iterator();
-    AnnotationSet original = sourceDoc.getAnnotations();
+    AnnotationSet original = document.getAnnotations();
 
     // to make the process faster, lets copy all the marks into the long array
     long[] markValues = new long[marks.size()];
@@ -273,15 +278,15 @@ public class ChineseTokeniser
    * Sets the document to be processed
    * @param document - document to be processed
    */
-  public void setSourceDoc(gate.Document inputFile) {
-    this.sourceDoc = inputFile;
+  public void setDocument(gate.Document inputFile) {
+    this.document = inputFile;
   }
 
   /**
    * Returns the document under process
    */
-  public gate.Document getSourceDoc() {
-    return this.sourceDoc;
+  public gate.Document getDocument() {
+    return this.document;
   }
 
   /**
