@@ -73,6 +73,12 @@ public class TextualDocumentFormat extends DocumentFormat
                                 GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
   }//unpackMarkup
 
+  public void unpackMarkup(Document doc, RepositioningInfo repInfo)
+                                      throws DocumentFormatException {
+    unpackMarkup(doc);
+  } // unpackMarkup
+
+
   /** This method annotates paragraphs in a GATE document. The investigated text
     * spans beetween start and end offsets and the paragraph annotations are
     * created in the annotSetName. If annotSetName is null then they are creted

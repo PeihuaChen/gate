@@ -22,6 +22,7 @@ import java.io.*;
 import gate.util.*;
 import gate.event.*;
 import gate.creole.*;
+import gate.corpora.RepositioningInfo;
 
 import org.w3c.www.mime.*;
 
@@ -90,6 +91,32 @@ extends AbstractLanguageResource implements LanguageResource{
   /** listeners for status report */
   private transient Vector statusListeners;
 
+  /** Flag for enable/disable collecting of repositioning information */
+  private Boolean shouldCollectRepositioning = new Boolean(false);
+
+  /** If the document format could collect repositioning information
+   *  during the unpack phase this method will return <B>true</B>.
+   *  <BR>
+   *  You should override this method in the child class of the defined
+   *  document format if it could collect the repositioning information.
+   */
+  public Boolean supportsRepositioning() {
+    return new Boolean(false);
+  } // supportsRepositioning
+
+  public void setShouldCollectRepositioning(Boolean b) {
+    if(supportsRepositioning().booleanValue() && b.booleanValue()) {
+      shouldCollectRepositioning = b;
+    }
+    else {
+      shouldCollectRepositioning = new Boolean(false);
+    } // if
+  } // setShouldCollectRepositioning
+
+  public Boolean getShouldCollectRepositioning() {
+    return shouldCollectRepositioning;
+  } //
+
   /** Unpack the markup in the document. This converts markup from the
     * native format (e.g. XML, RTF) into annotations in GATE format.
     * Uses the markupElementsMap to determine which elements to convert, and
@@ -98,6 +125,8 @@ extends AbstractLanguageResource implements LanguageResource{
   abstract public void unpackMarkup(Document doc)
                                       throws DocumentFormatException;
 
+  abstract public void unpackMarkup(Document doc, RepositioningInfo repInfo)
+                                      throws DocumentFormatException;
   /** Unpack the markup in the document. This method calls unpackMarkup on the
     * GATE document, but after it saves its content as a feature atached to
     * the document. This method is usefull if one wants to save the content
