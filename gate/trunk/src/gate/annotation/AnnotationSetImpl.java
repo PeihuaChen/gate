@@ -26,7 +26,9 @@ package gate.annotation;
 
 import java.util.*;
 import gate.util.*;
+
 import gate.*;
+import gate.corpora.*;
 
 
 /** Implementation of AnnotationSet. Has a number of indices, all bar one
@@ -55,7 +57,7 @@ implements AnnotationSet
   /** Construction from Document. */
   public AnnotationSetImpl(Document doc) {
     annotsById = new HashMap();
-    this.doc = doc;
+    this.doc = (DocumentImpl) doc;
   } // construction from document
 
   /** Construction from Collection (which must be an AnnotationSet) */
@@ -432,7 +434,7 @@ implements AnnotationSet
   String name = null;
 
   /** The document this set belongs to */
-  Document doc;
+  DocumentImpl doc;
 
   /** Maps annotation ids (Integers) to Annotations */
   HashMap annotsById;

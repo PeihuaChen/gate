@@ -214,6 +214,24 @@ public class DocumentImpl implements Document
   /** Generate and return the next node ID */
   public Integer getNextNodeId() { return new Integer(nextNodeId++); }
 
+  /** Ordering based on URL.toString() and the URL offsets (if any) */
+  public int compareTo(Object o) throws ClassCastException {
+    DocumentImpl other = (DocumentImpl) o;
+    return getOrderingString().compareTo(other.getOrderingString());
+  } // compareTo
+
+  /** Utility method to produce a string for comparison in ordering.
+    * String is based on the source URL and offsets.
+    */
+  String getOrderingString() { 
+    StringBuffer orderingString = new StringBuffer(sourceURL.toString());
+    if(sourceURLOffsets != null) {
+      orderingString.append(sourceURLOffsets[0].toString());
+      orderingString.append(sourceURLOffsets[1].toString());
+    }
+    return orderingString.toString();
+  } // getOrderingString()
+
   /** The features associated with this document. */
   FeatureMap features;
 
@@ -222,6 +240,9 @@ public class DocumentImpl implements Document
 
   /** The id of the next new node */
   int nextNodeId = 0;
+
+  /** The source URL */
+  URL sourceURL = null;
 
   /** The content of the document */
   DocumentContent content;
