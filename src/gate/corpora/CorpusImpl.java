@@ -76,7 +76,7 @@ public class CorpusImpl extends TreeSet implements Corpus {
   /** Set the feature set */
   public void setFeatures(FeatureMap features) { this.features = features; }
 
-  /* two corpus are equal if they have the same documents
+  /* Two corpus are equal if they have the same documents
    * the same features and the same name
    */
   public boolean equals(Object other) {
@@ -98,6 +98,7 @@ public class CorpusImpl extends TreeSet implements Corpus {
     return true;
   }
 
+  /** A Hash value for this corpus */
   public int hashCode() {
     int hash = 0;
     int docHash = 0;
