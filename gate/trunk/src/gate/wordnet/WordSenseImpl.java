@@ -136,7 +136,13 @@ public class WordSenseImpl implements WordSense {
       this.lexRelations = new ArrayList(jwPointers.length);
 
       for (int i= 0; i< jwPointers.length; i++) {
+
         Pointer currPointer = jwPointers[i];
+        //skip semantic relations
+        if (false == currPointer.isLexical()) {
+          continue;
+        }
+
         PointerType currType = currPointer.getType();
 //        PointerTarget ptrSource = currPointer.getSource();
         PointerTarget ptrTarget = currPointer.getTarget();

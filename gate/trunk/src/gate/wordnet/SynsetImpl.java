@@ -177,6 +177,12 @@ public class SynsetImpl implements Synset {
 
       for (int i= 0; i< jwPointers.length; i++) {
         Pointer currPointer = jwPointers[i];
+
+        //skip lexical relations
+        if (true == currPointer.isLexical()) {
+          continue;
+        }
+
         PointerType currType = currPointer.getType();
 //        PointerTarget ptrSource = currPointer.getSource();
         PointerTarget ptrTarget = currPointer.getTarget();
