@@ -256,32 +256,6 @@ public class MainFrame extends JFrame
     mainTabbedPane.insertTab("Messages",null, logScroll, "Gate log", 0);
     logBlinker = new TabBlinker(mainTabbedPane, logScroll, Color.red);
 
-/*
-UIManager.put("Menu.font",
-              new javax.swing.plaf.FontUIResource("Dialog", Font.ITALIC, 30));
-
-System.out.println("L&F defaults\n===================\n\n\n");
-
-UIDefaults def = UIManager.getLookAndFeelDefaults();
-ArrayList lista = new ArrayList(def.keySet());
-Collections.sort(lista);
-Iterator listIter = lista.iterator();
-while(listIter.hasNext()){
-  Object key = listIter.next();
-  System.out.println("<" + key.getClass().getName() + ">\t" + key +": \t" +
-                     "<" + def.get(key).getClass().getName() + ">\t" + def.get(key));
-}
-/*
-System.out.println("Defaults\n===================\n\n\n");
-def = UIManager.getDefaults();
-lista = new ArrayList(def.keySet());
-//Collections.sort(lista);
-listIter = lista.iterator();
-while(listIter.hasNext()){
-  Object key = listIter.next();
-  System.out.println(key +" : " + def.get(key));
-}
-*/
 
     mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                                leftSplit, mainTabbedPane);
@@ -431,12 +405,20 @@ while(listIter.hasNext()){
 
     for(int i = 0; i < lnfs.length; i++){
       UIManager.LookAndFeelInfo lnf = lnfs[i];
-      JRadioButtonMenuItem item = new JRadioButtonMenuItem(new SetLNFAction(lnf));
-      if(lnf.getName().equals(UIManager.getLookAndFeel().getName())){
-        item.setSelected(true);
+      try{
+        Class lnfClass = Class.forName(lnf.getClassName());
+        if(((LookAndFeel)(lnfClass.newInstance())).isSupportedLookAndFeel()){
+          JRadioButtonMenuItem item = new JRadioButtonMenuItem(new SetLNFAction(lnf));
+          if(lnf.getName().equals(UIManager.getLookAndFeel().getName())){
+            item.setSelected(true);
+          }
+          lnfBg.add(item);
+          lnfMenu.add(item);
+        }
+      }catch(ClassNotFoundException cnfe){
+      }catch(IllegalAccessException iae){
+      }catch(InstantiationException ie){
       }
-      lnfBg.add(item);
-      lnfMenu.add(item);
     }
 
     optionsMenu.add(lnfMenu);
