@@ -141,8 +141,10 @@ public class DefaultGazetteer extends AbstractGazetteer {
     lookup.list = node.getList();
     if ( null != mappingDefinition){
       MappingNode mnode = mappingDefinition.getNodeByList(lookup.list);
-      lookup.oClass = mnode.getClassID();
-      lookup.ontology = mnode.getOntologyID();
+      if (null!=mnode){
+        lookup.oClass = mnode.getClassID();
+        lookup.ontology = mnode.getOntologyID();
+      }
     }//if mapping def
 
     String line;
