@@ -61,15 +61,17 @@ public class Transducer extends AbstractProcessingResource {
   public void run(){
     try{
       if(document == null) throw new ParameterException("No document provided!");
-      if(inputAS == null && outputAS == null){
+      if(inputASName == null && outputASName == null){
          batch.transduce(document);
       }else{
-        if(inputAS == null || outputAS == null){
-          throw new ParameterException("Either both inputAS (was " + inputAS +
-                                       ") and outputAS (was " + outputAS +
+        if(inputASName == null || outputASName == null){
+          throw new ParameterException("Either both inputAS (was " +
+                                       inputASName + ") and outputAS (was " +
+                                       outputASName +
                                        ") or neither of them need to be set!");
         }
-        batch.transduce(document, inputAS, outputAS);
+        batch.transduce(document, document.getAnnotations(inputASName),
+                        document.getAnnotations(outputASName));
       }
     }catch(Exception e){
       executionException = new ExecutionException(e);
@@ -131,32 +133,32 @@ public class Transducer extends AbstractProcessingResource {
    * Sets the {@link gate.AnnotationSet} to be used as input for the transducer.
    * @param newInputAS a {@link gate.AnnotationSet}
    */
-  public void setInputAS(gate.AnnotationSet newInputAS) {
-    inputAS = newInputAS;
+  public void setInputASName(String newInputASName) {
+    inputASName = newInputASName;
   }
 
   /**
    * Gets the {@link gate.AnnotationSet} used as input by this transducer.
    * @return a {@link gate.AnnotationSet}
    */
-  public gate.AnnotationSet getInputAS() {
-    return inputAS;
+  public String getInputASName() {
+    return inputASName;
   }
 
   /**
    * Sets the {@link gate.AnnotationSet} to be used as output by the transducer.
    * @param newOutputAS a {@link gate.AnnotationSet}
    */
-  public void setOutputAS(gate.AnnotationSet newOutputAS) {
-    outputAS = newOutputAS;
+  public void setOutputASName(String newOutputASName) {
+    outputASName = newOutputASName;
   }
 
   /**
    * Gets the {@link gate.AnnotationSet} used as output by this transducer.
    * @return a {@link gate.AnnotationSet}
    */
-  public gate.AnnotationSet getOutputAS() {
-    return outputAS;
+  public String getOutputASName() {
+    return outputASName;
   }
 
   /**
@@ -182,10 +184,10 @@ public class Transducer extends AbstractProcessingResource {
   /**
    * The {@link gate.AnnotationSet} used as input for the transducer.
    */
-  private gate.AnnotationSet inputAS;
+  private String inputASName;
 
   /**
    * The {@link gate.AnnotationSet} used as output by the transducer.
    */
-  private gate.AnnotationSet outputAS;
+  private String outputASName;
 }

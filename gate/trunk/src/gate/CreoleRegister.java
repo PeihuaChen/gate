@@ -20,7 +20,7 @@ import java.net.*;
 import java.io.*;
 
 import gate.util.*;
-
+import gate.event.*;
 
 /** The CREOLE register records the set of resources that are currently
   * known to the system. Each member of the register is a
@@ -128,5 +128,27 @@ public interface CreoleRegister extends Map, Serializable
 
   /** Get a list of all non-private instantiations of VR in the register. */
   public List getPublicVrInstances();
+
+  /** Get a list of all non-private types of LR in the register. */
+  public List getPublicLrTypes();
+
+  /** Get a list of all non-private types of PR in the register. */
+  public List getPublicPrTypes();
+
+  /** Get a list of all non-private types of VR in the register. */
+  public List getPublicVrTypes();
+
+  /**
+   * Registers a {@link gate.event.CreoleListener}with this CreoleRegister.
+   * The register will fire events every time a resource is added to or removed
+   * from the system.
+   */
+  public void addCreoleListener(CreoleListener l);
+
+  /**
+   * Removes a {@link gate.event.CreoleListener} previously registered with this
+   * CreoleRegister. {@see #addCreoleListener()}
+   */
+  public void removeCreoleListener(CreoleListener l);
 
 } // interface CreoleRegister

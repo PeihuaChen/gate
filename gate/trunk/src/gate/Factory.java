@@ -26,6 +26,7 @@ import gate.util.*;
 import gate.annotation.*;
 import gate.creole.*;
 import gate.persist.*;
+import gate.event.*;
 
 /** Provides static methods for the creation of Resources.
   */
@@ -207,7 +208,9 @@ public abstract class Factory
 
     // record the instantiation on the resource data's stack
     resData.addInstantiation(res);
-
+    ((CreoleRegisterImpl)reg).fireResourceLoaded(
+                               new CreoleEvent(res, CreoleEvent.RESOURCE_LOADED)
+                              );
     return res;
   } // create(resourceClassName)
 
@@ -224,6 +227,9 @@ public abstract class Factory
       (ResourceData) reg.get(resource.getClass().getName());
     List instances = rd.getInstantiations();
     instances.remove(resource);
+    ((CreoleRegisterImpl)reg).fireResourceUnloaded(
+            new CreoleEvent(resource, CreoleEvent.RESOURCE_UNLOADED)
+    );
   } // deleteResource
 
   /** For each paramter, set the appropriate property on the resource
@@ -251,13 +257,13 @@ public abstract class Factory
     BeanInfo resBeanInfo =
       Introspector.getBeanInfo(resource.getClass(), Object.class);
     PropertyDescriptor[] properties = resBeanInfo.getPropertyDescriptors();
-
     // for each property of the resource bean
     if(properties != null)
       for(int i = 0; i<properties.length; i++) {
         // get the property's set method, or continue
         PropertyDescriptor prop = properties[i];
         Method setMethod = prop.getWriteMethod();
+
         if(setMethod == null)
           continue;
 
@@ -337,7 +343,6 @@ public abstract class Factory
         "couldn't set all the parameters of resource " +
         resource.getClass().getName()
       );
-
     return removeListenersData;
   } // setResourceParameters
 

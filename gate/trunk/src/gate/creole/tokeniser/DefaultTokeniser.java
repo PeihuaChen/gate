@@ -154,7 +154,7 @@ implements Runnable, ProcessingResource{
    */
   public void reset(){
     document = null;
-    annotationSet = null;
+    annotationSetName = null;
   }
 
   /** Parses one input line containing a tokeniser rule.
@@ -545,6 +545,7 @@ implements Runnable, ProcessingResource{
    * The method that does the actual tokenisation.
    */
   public void run() {
+    AnnotationSet annotationSet;
     //check the input
     if(document == null) {
       executionException = new ExecutionException(
@@ -553,14 +554,8 @@ implements Runnable, ProcessingResource{
       return;
     }
 
-    if(annotationSet == null)
-      annotationSet = document.getAnnotations();
-    else if(annotationSet.getDocument() != document) {
-      executionException = new ExecutionException(
-        "The annotation set provided does not belong to the current document!"
-      );
-      return;
-    }
+    if(annotationSetName == null) annotationSet = document.getAnnotations();
+    else annotationSet = document.getAnnotations(annotationSetName);
 
     fireStatusChangedEvent(
       "Tokenising " + document.getSourceUrl().getFile() + "..."
@@ -747,12 +742,12 @@ implements Runnable, ProcessingResource{
     return document;
   }
   /**    */
-  public void setAnnotationSet(gate.AnnotationSet newAnnotationSet) {
-    annotationSet = newAnnotationSet;
+  public void setAnnotationSetName(String newAnnotationSetName) {
+    annotationSetName = newAnnotationSetName;
   }
   /**    */
-  public gate.AnnotationSet getAnnotationSet() {
-    return annotationSet;
+  public String getAnnotationSetName() {
+    return annotationSetName;
   }
   public void setRulesResourceName(String newRulesResourceName) {
     rulesResourceName = newRulesResourceName;
@@ -783,7 +778,7 @@ implements Runnable, ProcessingResource{
 
   /** the annotations et where the new annotations will be adde
    */
-  protected AnnotationSet annotationSet;
+  protected String annotationSetName;
 
   /** The initial state of the non deterministic machin
    */

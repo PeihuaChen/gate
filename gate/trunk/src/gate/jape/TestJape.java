@@ -181,7 +181,7 @@ public class TestJape extends TestCase
       currentDoc = (Document)docIter.next();
       tokeniser.setDocument(currentDoc);
       //use the default anotation set
-      tokeniser.setAnnotationSet(null);
+      tokeniser.setAnnotationSetName(null);
       tokeniser.run();
     }
 

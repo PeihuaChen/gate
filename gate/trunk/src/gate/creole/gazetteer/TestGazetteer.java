@@ -54,12 +54,11 @@ public class TestGazetteer extends TestCase {
 
     //runtime stuff
     gaz.setDocument(doc);
-    AnnotationSet gazAS = doc.getAnnotations("GazetteerAS");
-    gaz.setAnnotationSet(gazAS);
+    gaz.setAnnotationSetName("GazetteerAS");
     gaz.run();
     //check for exceptions
     gaz.check();
-    assert(!gazAS.isEmpty());
+    assert(!doc.getAnnotations("GazetteerAS").isEmpty());
   }
 
   /** Test suite routine for the test runner */

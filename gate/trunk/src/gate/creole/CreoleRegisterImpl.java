@@ -24,6 +24,7 @@ import javax.xml.parsers.*;
 
 import gate.*;
 import gate.util.*;
+import gate.event.*;
 
 
 /** This class implements the CREOLE register interface. DO NOT
@@ -363,6 +364,15 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
   /** Get a list of all non-private instantiations of VR in the register. */
   public List getPublicVrInstances() { return getPublics(getVrInstances()); }
 
+  /** Get a list of all non-private types of LR in the register. */
+  public List getPublicLrTypes() { return getPublicTypes(getLrTypes()); }
+
+  /** Get a list of all non-private types of PR in the register. */
+  public List getPublicPrTypes() { return getPublicTypes(getPrTypes()); }
+
+  /** Get a list of all non-private types of VR in the register. */
+  public List getPublicVrTypes() { return getPublicTypes(getVrTypes()); }
+
   /** Get a list of all non-private instantiations. */
   protected List getPublics(List instances) {
     Iterator iter = instances.iterator();
@@ -379,6 +389,72 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
     return publics;
   } // getPublics
 
+  /**Gets a list of all non private types from alist of types*/
+  protected List getPublicTypes(Collection types){
+    Iterator iter = types.iterator();
+    List publics = new ArrayList();
+    while(iter.hasNext()){
+      String oneType = (String)iter.next();
+      ResourceData rData = (ResourceData)get(oneType);
+      if(rData != null && !rData.isPrivate()) publics.add(oneType);
+    }
+    return publics;
+  }
+
+  /**
+   * Removes a {@link gate.event.CreoleListener} previously registered with this
+   * CreoleRegister. {@see #addCreoleListener()}
+   */
+  public synchronized void removeCreoleListener(CreoleListener l) {
+    if (creoleListeners != null && creoleListeners.contains(l)) {
+      Vector v = (Vector) creoleListeners.clone();
+      v.removeElement(l);
+      creoleListeners = v;
+    }
+  }
+
+  /**
+   * Registers a {@link gate.event.CreoleListener}with this CreoleRegister.
+   * The register will fire events every time a resource is added to or removed
+   * from the system.
+   */
+  public synchronized void addCreoleListener(CreoleListener l) {
+    Vector v = creoleListeners == null ? new Vector(2) :
+                                         (Vector) creoleListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      creoleListeners = v;
+    }
+  }
+
+  /**
+   * Notifies all listeners that a new {@link gate.Resource} has been loaded
+   * into the system
+   */
+  public void fireResourceLoaded(CreoleEvent e) {
+    if (creoleListeners != null) {
+      Vector listeners = creoleListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((CreoleListener) listeners.elementAt(i)).resourceLoaded(e);
+      }
+    }
+  }
+
+  /**
+   * Notifies all listeners that a {@link gate.Resource} has been unloaded
+   * from the system
+   */
+  public void fireResourceUnloaded(CreoleEvent e) {
+    if (creoleListeners != null) {
+      Vector listeners = creoleListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((CreoleListener) listeners.elementAt(i)).resourceUnloaded(e);
+      }
+    }
+  }
+
   /** A list of the types of LR in the register. */
   protected Set lrTypes = new HashSet();
 
@@ -391,4 +467,6 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
   /** A list of the types of TOOL in the register. */
   protected Set toolTypes = new HashSet();
 
+  /**The lists of listeners registered with this CreoleRegister*/
+  private transient Vector creoleListeners;
 } // class CreoleRegisterImpl
