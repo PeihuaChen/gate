@@ -92,7 +92,7 @@ Priority: 20
 {TempOrganization}
 (SPACE {TempOrganization})?
 )
-:orgName 
+:org
 -->  
 {
 //removes TempOrg annotation, gets the rule feature and adds a new Org annotation
