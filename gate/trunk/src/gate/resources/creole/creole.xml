@@ -16,7 +16,7 @@
         <PARAMETER NAME="stringContent" COMMENT="The content of the document">java.lang.String</PARAMETER>
       </OR>
       <PARAMETER COMMENT="Should the document read the original markup" NAME="markupAware" DEFAULT="true">java.lang.Boolean</PARAMETER>
-      <PARAMETER NAME="encoding" OPTIONAL="true" COMMENT="Encoding" DEFAULT="UTF-8">java.lang.String</PARAMETER>
+      <PARAMETER NAME="encoding" OPTIONAL="true" COMMENT="Encoding" DEFAULT="">java.lang.String</PARAMETER>
       <PARAMETER NAME="sourceUrlStartOffset" COMMENT="Start offset for documents based on ranges" OPTIONAL="true">java.lang.Long</PARAMETER>
       <PARAMETER NAME="sourceUrlEndOffset" COMMENT="End offset for documents based on ranges" OPTIONAL="true">java.lang.Long</PARAMETER>
       <PARAMETER NAME="preserveOriginalContent" COMMENT="Should the document preserve the original content" DEFAULT="false">java.lang.Boolean</PARAMETER>
@@ -285,10 +285,10 @@
       <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
       <PARAMETER NAME="annotationSetName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="annotationTypes" RUNTIME="true" DEFAULT="Person;Location;Date">java.util.ArrayList</PARAMETER>
-      <PARAMETER NAME="dumpTypes" RUNTIME="true" OPTIONAL="true" DEFAULT="Person;Location;Date" COMMENT="A list of the new names to be used instead of the ANNIE types given for dumping">java.util.ArrayList</PARAMETER>      
+      <PARAMETER NAME="dumpTypes" RUNTIME="true" OPTIONAL="true" DEFAULT="Person;Location;Date" COMMENT="A list of the new names to be used instead of the ANNIE types given for dumping">java.util.ArrayList</PARAMETER>
       <PARAMETER NAME="outputFileUrl" RUNTIME="true" OPTIONAL="true" COMMENT="The url of the output file" SUFFIXES="xml;html;txt">java.net.URL</PARAMETER>
     </RESOURCE>
-  </CREOLE>  
+  </CREOLE>
   <!-- creole.xml for Controllers -->
   <CREOLE>
     <RESOURCE>
