@@ -235,11 +235,11 @@ public class MainFrame extends JFrame
 
     JMenu fileMenu = new JMenu("File");
     //fileMenu.add(new JGateMenuItem(newProjectAction));
-    fileMenu.add(new JGateMenuItem(newLRAction));
-    fileMenu.add(new JGateMenuItem(newPRAction));
-    fileMenu.add(new JGateMenuItem(newDSAction));
-    fileMenu.add(new JGateMenuItem(openDSAction));
-    fileMenu.add(new JGateMenuItem(newApplicationAction));
+    fileMenu.add(new XJMenuItem(newLRAction, this));
+    fileMenu.add(new XJMenuItem(newPRAction, this));
+    fileMenu.add(new XJMenuItem(newDSAction, this));
+    fileMenu.add(new XJMenuItem(openDSAction, this));
+    fileMenu.add(new XJMenuItem(newApplicationAction, this));
     menuBar.add(fileMenu);
 
     JMenu editMenu = new JMenu("Edit");
@@ -1330,6 +1330,7 @@ public class MainFrame extends JFrame
     String text;
   }
 
+/*
   class JGateMenuItem extends JMenuItem {
     JGateMenuItem(javax.swing.Action a){
       super(a);
@@ -1365,7 +1366,7 @@ public class MainFrame extends JFrame
     }
     String oldText;
   }
-
+*/
   class LocaleSelectorMenuItem extends JRadioButtonMenuItem {
     public LocaleSelectorMenuItem(Locale locale, JFrame pframe) {
       super(locale.getDisplayName());
