@@ -54,7 +54,7 @@ implements AnnotationSet
     this.doc = doc;
   } // construction from document
 
-  /** Construction from Collection (which must be an AnnotationSet */
+  /** Construction from Collection (which must be an AnnotationSet) */
   public AnnotationSetImpl(Collection c) throws ClassCastException {
     this(((AnnotationSet) c).getDocument());
     addAll(c);
