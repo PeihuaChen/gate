@@ -99,6 +99,12 @@ public interface GateConstants {
   public static final String
     CORPUS_INDEX_STATISTICS_FEATURE_KEY = "Index_statistics_feature_key";
 
+  /** The key used for document editor inser behaviour */
+  public static final String DOCEDIT_INSERT_APPEND = "docedit_insert_append";
+
+  /** The key used for document editor inser behaviour */
+  public static final String DOCEDIT_INSERT_PREPEND = "docedit_insert_prepend";
+
   /** Document property to set throw of exception on parsing format error */
   public static final String THROWEX_FORMAT_PROPERTY_NAME =
     "throwExceptionOnFormatError";
