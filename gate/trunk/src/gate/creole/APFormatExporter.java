@@ -71,10 +71,7 @@ public class APFormatExporter extends AbstractLanguageAnalyser
       exportFilePathStr = new String(document.getSourceUrl().getFile() +
                                                                   ".apf.xml");
     else
-      //kalina: changed it to be just the filename as Di wanted it this way
-      exportFilePathStr = exportFilePath.getPath()+ "/"+
-        gate.util.Files.getLastPathComponent(document.getSourceUrl().getFile())
-        + ".apf.xml";
+      exportFilePathStr = exportFilePath.getPath()+ "/"+docId + ".apf.xml";
 
     if (DEBUG)
       Out.prln("Export file path = "+ exportFilePathStr);
@@ -161,7 +158,6 @@ public class APFormatExporter extends AbstractLanguageAnalyser
     String fileName = "";
     fileName = gate.util.Files.getLastPathComponent(
                                             document.getSourceUrl().getFile());
-
     // File name contains now the last token
     if (DEBUG)
       Out.prln("From initDocId, fileName ="+ fileName);
@@ -191,19 +187,8 @@ public class APFormatExporter extends AbstractLanguageAnalyser
       xmlDoc.append("\""+dtdFileName+"\"");
     xmlDoc.append(">\n");
     xmlDoc.append("<source_file TYPE=\"text\"");
-    if (isSourceWritten) {
-      AnnotationSet docTypeAnns = document.getAnnotations(
-        GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME).get("DOCTYPE");
-      if (docTypeAnns == null || docTypeAnns.isEmpty())
-        xmlDoc.append(" SOURCE=\""+ source+ "\" ");
-      else {
-        Annotation docTypeAnn = (Annotation) docTypeAnns.iterator().next();
-        if (docTypeAnn.getFeatures().get("SOURCE") == null)
-          xmlDoc.append(" SOURCE=\""+ source+ "\" ");
-        else
-          xmlDoc.append(" SOURCE=\""+ docTypeAnn.getFeatures().get("SOURCE")+ "\" ");
-      }//if no doc type annotations
-    }
+    if (isSourceWritten)
+      xmlDoc.append(" SOURCE=\""+ source+ "\"");
     xmlDoc.append("VERSION=\"1.2\" URI=\"");
     xmlDoc.append(docId);
     xmlDoc.append("-lf\">\n");
