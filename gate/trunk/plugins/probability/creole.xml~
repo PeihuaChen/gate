@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!-- $Id$ -->
+<CREOLE-DIRECTORY>
+  <CREOLE>   
+   <!-- creole.xml for SearchPR -->
+    <RESOURCE>
+      <JAR>probability.jar</JAR>
+      <NAME>ProbabilityPR</NAME>
+      <CLASS>probability.ProbabilityPR</CLASS>
+      <COMMENT>A plugin to calculate the probability of the annotations</COMMENT>
+        <PARAMETER NAME="corpus" RUNTIME="true" COMMENT="The corpus for which the prob are to be calculated.">gate.Corpus</PARAMETER>
+        <PARAMETER NAME="type" RUNTIME="true" COMMENT="The Annotation Type that is to be used.">java.lang.String</PARAMETER>
+    </RESOURCE>
+   </CREOLE>
+</CREOLE-DIRECTORY>
