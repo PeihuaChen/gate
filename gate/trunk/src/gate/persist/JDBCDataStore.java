@@ -107,7 +107,42 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
 
 
   /** Get the name of an LR from its ID. */
-  public abstract String getLrName(Object lrId) throws PersistenceException;
+  public String getLrName(Object lrId)
+    throws PersistenceException {
+
+    if (false == lrId instanceof Long) {
+      throw new IllegalArgumentException();
+    }
+
+    Long ID = (Long)lrId;
+
+    PreparedStatement pstmt = null;
+    ResultSet rset = null;
+
+    try {
+      String sql = " select lr_name " +
+                  " from   "+this.dbSchema+"t_lang_resource " +
+                  " where  lr_id = ?";
+
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,ID.longValue());
+      pstmt.execute();
+      rset = pstmt.getResultSet();
+
+      rset.next();
+      String result = rset.getString("lr_name");
+
+      return result;
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't get LR name from DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(pstmt);
+      DBHelper.cleanup(rset);
+    }
+  }
+
 
 
   /** Set the URL for the underlying storage mechanism. */
