@@ -65,6 +65,8 @@ class AnnotDiffDialog extends JFrame {
   JButton evalButton = null;
   AnnotationDiff annotDiff = null;
 
+  protected JSplitPane jSplit;
+
   /** Constructs an annotDiffDialog object having as parent aMainFrame
     * @param aMainFrame the parent frame for this AnnotDiffDialog. If can be
     * <b>null</b>, meaning no parent.
@@ -319,9 +321,44 @@ class AnnotDiffDialog extends JFrame {
     initResponseAnnotSetNames();
     initAnnotTypes();
     initAnnotTypesFalsePoz();
-    this.getContentPane().add(new JScrollPane(northBox),BorderLayout.NORTH);
-    this.getContentPane().add(new JScrollPane(annotDiff),BorderLayout.CENTER);
+
+    this.getContentPane().setLayout(new BoxLayout(this.getContentPane(),
+                                                            BoxLayout.Y_AXIS));
+    jSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+                               new JScrollPane(northBox),
+                               new JScrollPane(annotDiff));
+    jSplit.setOneTouchExpandable(true);
+    jSplit.setOpaque(true);
+    jSplit.setAlignmentY(Component.TOP_ALIGNMENT);
+    this.getContentPane().add(jSplit);
     this.pack();
+    ////////////////////////////////
+    // Center it on screen
+    ///////////////////////////////
+    Dimension ownerSize;
+    Point ownerLocation;
+    if(getOwner() == null){
+      ownerSize = Toolkit.getDefaultToolkit().getScreenSize();
+      ownerLocation = new Point(0, 0);
+    }else{
+      ownerSize = getOwner().getSize();
+      ownerLocation = getOwner().getLocation();
+      if(ownerSize.height == 0 ||
+         ownerSize.width == 0 ||
+         !getOwner().isVisible()){
+        ownerSize = Toolkit.getDefaultToolkit().getScreenSize();
+        ownerLocation = new Point(0, 0);
+      }
+    }
+    //Center the window
+    Dimension frameSize = getSize();
+    if (frameSize.height > ownerSize.height)
+      frameSize.height = ownerSize.height;
+    if (frameSize.width > ownerSize.width)
+      frameSize.width = ownerSize.width;
+    setLocation(ownerLocation.x + (ownerSize.width - frameSize.width) / 2,
+                ownerLocation.y + (ownerSize.height - frameSize.height) / 2);
+
   }//initGuiComponents
 
   /** This method is called when the user want to close the tool. See
@@ -435,6 +472,11 @@ class AnnotDiffDialog extends JFrame {
     falsePozTypeComboBox.setModel(cbm);
   }//initAnnotTypesFalsePoz();
 
+  /** Reads the selected keyDocument + the selected responseDocument and
+    * also reads the selected annotation sets from Key and response and
+    * intersects the annotation types. The result is the typesComboBox which
+    * is filled with the intersected types.
+    */
   private void initAnnotTypes(){
     gate.Document keyDocument = null;
     gate.Document responseDocument = null;
@@ -451,10 +493,6 @@ class AnnotDiffDialog extends JFrame {
       typesMap.put("No annot.",null);
       ComboBoxModel cbm = new DefaultComboBoxModel(typesMap.keySet().toArray());
       typesComboBox.setModel(cbm);
-      // init falsePozTypes
-      falsePozTypes.add("No annot.");
-      cbm = new DefaultComboBoxModel(falsePozTypes.toArray());
-      falsePozTypeComboBox.setModel(cbm);
       return;
     }//End if
 
@@ -510,8 +548,8 @@ class AnnotDiffDialog extends JFrame {
   }//initAnnotTypes();
 
   /** Reads the selected keyDocument + the selected responseDocument and fill
-   *  the two combo boxes called keyDocAnnotSetComboBox and
-   *  responseDocAnnotSetComboBox.
+    * the two combo boxes called keyDocAnnotSetComboBox and
+    * responseDocAnnotSetComboBox.
     */
   private void initKeyAnnotSetNames(){
     gate.Document keyDocument = null;
@@ -530,6 +568,10 @@ class AnnotDiffDialog extends JFrame {
     }// End if
   }//initKeyAnnotSetNames();
 
+  /** Reads the selected responseDocument and fill
+    * the combo box called responseDocAnnotSetFalsePozComboBox as well as
+    * responseDocAnnotSetComboBox.
+    */
   private void initResponseAnnotSetNames(){
     gate.Document responseDocument = null;
     responseDocument = (gate.Document) documentsMap.get(
