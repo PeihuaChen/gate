@@ -48,7 +48,7 @@ public class FeaturesEditor extends AbstractVisualResource{
     this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     tableModel = new FeaturesTableModel();
     table = new XJTable(tableModel);
-    table.setIntercellSpacing(new Dimension(5,5));
+//    table.setIntercellSpacing(new Dimension(5,5));
     table.setDefaultRenderer(String.class, new ObjectRenderer());
     table.setDefaultRenderer(Object.class, new ObjectRenderer());
 
