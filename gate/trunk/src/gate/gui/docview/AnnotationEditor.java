@@ -103,40 +103,30 @@ public class AnnotationEditor{
     Gate.getCreoleRegister().addCreoleListener(creoleListener); 
   }
   
-  protected void initTopWindow(Window parent){
-    topWindow = new JWindow(parent);
-
+  protected void initBottomWindow(Window parent){
+    bottomWindow = new JWindow(parent);
     JPanel pane = new JPanel();
+    pane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
     pane.setLayout(new GridBagLayout());
     pane.setBackground(UIManager.getLookAndFeelDefaults().
             getColor("ToolTip.background"));
-    
-    GridBagConstraints constraints = new GridBagConstraints();
-    
-    
-    typeCombo = new JComboBox();
-    typeCombo.setEditable(true);
-    typeCombo.setBackground(UIManager.getLookAndFeelDefaults().
-            getColor("ToolTip.background"));
-    constraints.fill = GridBagConstraints.BOTH;
-    constraints.gridx = 0;
-    constraints.gridy = 0;
-    constraints.gridwidth = 5;
-    constraints.ipadx = 0;
-    pane.add(typeCombo, constraints);
-    
-    JButton btn = new JButton(solAction);
-    btn.setContentAreaFilled(false);
-    btn.setBorderPainted(false);
+    bottomWindow.getContentPane().add(pane);
+
     Insets insets0 = new Insets(0, 0, 0, 0);
-    btn.setMargin(insets0);
+    GridBagConstraints constraints = new GridBagConstraints();
     constraints.fill = GridBagConstraints.NONE;
     constraints.anchor = GridBagConstraints.CENTER;
     constraints.gridwidth = 1;
-    constraints.gridy = 1;
+    constraints.gridy = 0;
     constraints.gridx = GridBagConstraints.RELATIVE;
     constraints.weightx = 0;
     constraints.weighty= 0;
+    constraints.insets = insets0;
+
+    JButton btn = new JButton(solAction);
+    btn.setContentAreaFilled(false);
+    btn.setBorderPainted(false);
+    btn.setMargin(insets0);
     pane.add(btn, constraints);
     
     btn = new JButton(sorAction);
@@ -149,15 +139,14 @@ public class AnnotationEditor{
     btn.setContentAreaFilled(false);
     btn.setBorderPainted(false);
     btn.setMargin(insets0);
-    constraints.weightx = 1;
+    constraints.insets = new Insets(0, 20, 0, 20);
     pane.add(btn, constraints);
+    constraints.insets = insets0;
     
     btn = new JButton(eolAction);
     btn.setContentAreaFilled(false);
     btn.setBorderPainted(false);
     btn.setMargin(insets0);
-    constraints.insets = insets0;
-    constraints.weightx = 0;
     pane.add(btn, constraints);
     
     btn = new JButton(eorAction);
@@ -165,65 +154,39 @@ public class AnnotationEditor{
     btn.setBorderPainted(false);
     btn.setMargin(insets0);
     pane.add(btn, constraints);
-
+    
+    
     btn = new JButton(new DismissAction());
-    btn.setContentAreaFilled(false);
-    constraints.insets = new Insets(0, 2, 2, 2);
-    constraints.gridheight = 2;
-    constraints.fill = GridBagConstraints.HORIZONTAL;
-    btn.setMargin(insets0);
-    btn.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-    constraints.gridy = 0;
+    constraints.insets = new Insets(0, 10, 0, 0);
+    constraints.anchor = GridBagConstraints.NORTHEAST;
+    constraints.weightx = 1;
+    btn.setMargin(new Insets(3,3,3,3));
     pane.add(btn, constraints);
+    constraints.anchor = GridBagConstraints.CENTER;
+    constraints.insets = insets0;
+
     
-    btn = new JButton(new ApplyAction());
-    btn.setContentAreaFilled(false);
-    btn.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-    btn.setMargin(insets0);
-    constraints.gridy = 1;
-//    pane.add(btn, constraints);
-    
-    pane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-    topWindow.getContentPane().add(pane);
-  }
-  
-  protected void initBottomWindow(Window parent){
-    bottomWindow = new JWindow(parent){
-      
-    };
-    bottomWindow.getContentPane().setLayout(new BorderLayout());
-    bottomWindow.getContentPane().setBackground(
-            UIManager.getLookAndFeelDefaults().
+    typeCombo = new JComboBox();
+    typeCombo.setEditable(true);
+    typeCombo.setBackground(UIManager.getLookAndFeelDefaults().
             getColor("ToolTip.background"));
-//    bottomWindow.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.gridy = 1;
+    constraints.gridwidth = 6;
+    constraints.weightx = 1;
+    constraints.insets = new Insets(3, 2, 2, 2);
+    pane.add(typeCombo, constraints);
     
-//    GridBagConstraints constraints = new GridBagConstraints();
-//    constraints.fill = GridBagConstraints.BOTH;
-//    constraints.weightx = 1;
-//    constraints.weighty = 1;
     featuresEditor = new FeaturesSchemaEditor();
     featuresEditor.setBackground(UIManager.getLookAndFeelDefaults().
             getColor("ToolTip.background"));
-//    featuresEditor.getTableHeader().setBackground(UIManager.getLookAndFeelDefaults().
-//            getColor("ToolTip.background"));
-    JScrollPane scroller = new JScrollPane(featuresEditor){
-//      public Dimension getPreferredSize(){
-//        Dimension viewSize = ((Scrollable)getViewport().getView()).
-//          getPreferredScrollableViewportSize();
-//        int width = viewSize.width + 
-//          (verticalScrollBar.isVisible() ? 
-//           verticalScrollBar.getSize().width : 0) +
-//           (rowHeader != null && rowHeader.isVisible() ? rowHeader.getSize().width : 0);
-//        int height = viewSize.height + 
-//          (horizontalScrollBar.isVisible() ? 
-//           horizontalScrollBar.getSize().height : 0) +
-//          (columnHeader != null && columnHeader.isVisible() ? columnHeader.getSize().height : 0);
-//        return new Dimension(width, height);
-//      }
-    };
-    bottomWindow.getContentPane().add(scroller, BorderLayout.CENTER);
-//    bottomWindow.getContentPane().add(featuresEditor, constraints);
+    JScrollPane scroller = new JScrollPane(featuresEditor);
+    constraints.gridy = 2;
+    constraints.fill = GridBagConstraints.BOTH;
+    pane.add(scroller, constraints);
+    
   }
+  
 
   protected void initListeners(){
     MouseListener windowMouseListener = new MouseAdapter(){
@@ -231,7 +194,7 @@ public class AnnotationEditor{
         hideTimer.stop();
       }
     };
-    topWindow.getRootPane().addMouseListener(windowMouseListener);
+    
     bottomWindow.addMouseListener(windowMouseListener);
     featuresEditor.addMouseListener(windowMouseListener);
     
@@ -260,12 +223,6 @@ public class AnnotationEditor{
       }
     });
     
-//    featuresEditor.getModel().addTableModelListener(new TableModelListener(){
-//      public void tableChanged(TableModelEvent e){
-//        sizeWindows();
-//        placeWindows();
-//      }
-//    });
     featuresEditor.addComponentListener(new ComponentAdapter(){
       public void componentResized(ComponentEvent e){
         sizeWindows();
@@ -283,7 +240,6 @@ public class AnnotationEditor{
     delAction = new DeleteAnnotationAction();
     
     initData();
-    initTopWindow(SwingUtilities.getWindowAncestor(textView.getGUI()));
     initBottomWindow(SwingUtilities.getWindowAncestor(textView.getGUI()));
     initListeners();
     
@@ -313,20 +269,13 @@ public class AnnotationEditor{
   }
   
   public boolean isShowing(){
-    return topWindow.isShowing();
+    return bottomWindow.isShowing();
   }
 
   protected void sizeWindows(){
-    topWindow.pack();
     bottomWindow.pack();
-    Dimension topSize = topWindow.getPreferredSize();
-    Dimension bottomSize = bottomWindow.getPreferredSize();
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    int width = Math.max(topSize.width, bottomSize.width);
-    width = Math.min(width, screenSize.width /2);
-    topWindow.setSize(width, topSize.height);
-    bottomWindow.setSize(width, bottomSize.height);
   }
+  
   /**
    * Shows the UI(s) involved in annotation editing.
    *
@@ -334,7 +283,7 @@ public class AnnotationEditor{
   public void show(boolean autohide){
     sizeWindows();
     placeWindows();
-    topWindow.setVisible(true);
+//    topWindow.setVisible(true);
     bottomWindow.setVisible(true);
     if(autohide) hideTimer.restart();
   }
@@ -346,7 +295,6 @@ public class AnnotationEditor{
 		  Rectangle startRect = textPane.modelToView(ann.getStartNode().
 		    getOffset().intValue());
 		  x = startRect.x;
-		  yTop = startRect.y;
 		  Rectangle endRect = textPane.modelToView(ann.getEndNode().
 				    getOffset().intValue());
 		  yBottom = endRect.y + endRect.height;
@@ -355,13 +303,11 @@ public class AnnotationEditor{
       throw new GateRuntimeException(ble);
     }
     Point topLeft = textPane.getLocationOnScreen();
-    topWindow.setLocation(x + topLeft.x, 
-            yTop + topLeft.y - topWindow.getSize().height); 
     bottomWindow.setLocation(x + topLeft.x, yBottom + topLeft.y); 
   }
   
   public void hide(){
-    topWindow.setVisible(false);
+//    topWindow.setVisible(false);
     bottomWindow.setVisible(false);
   }
   
@@ -527,9 +473,8 @@ public class AnnotationEditor{
   
   protected class DismissAction extends AbstractAction{
     public DismissAction(){
-      super("Dismiss");
-//      putValue(SHORT_DESCRIPTION, "Dismiss");
-      
+      super("", MainFrame.getIcon("exit.gif"));
+      putValue(SHORT_DESCRIPTION, "Dismiss");
     }
     
     public void actionPerformed(ActionEvent evt){
@@ -548,8 +493,6 @@ public class AnnotationEditor{
     }
   }
   
-  
-  protected JWindow topWindow;
   protected JWindow bottomWindow;
 
   protected JComboBox typeCombo;
