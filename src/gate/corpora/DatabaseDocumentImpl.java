@@ -46,6 +46,9 @@ public class DatabaseDocumentImpl extends DocumentImpl
   private boolean     nameChanged;
   private boolean     documentChanged;
 
+  private Collection  removedAnotationSets;
+  private Collection  addedAnotationSets;
+
   //this one should be the same as the values returned
   //in persist.get_id_lot PL/SQL package
   //it sux actually
@@ -75,6 +78,9 @@ public class DatabaseDocumentImpl extends DocumentImpl
     this.featuresChanged = false;
     this.nameChanged = false;
     this.documentChanged = false;
+
+    this.removedAnotationSets = new Vector();
+    this.addedAnotationSets = new Vector();
 
     sequencePool = new Integer[this.SEQUENCE_POOL_SIZE];
     poolMarker = this.SEQUENCE_POOL_SIZE;
@@ -961,11 +967,30 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
     return result;
   }
-  public void removeAnnotationSet(String name) {
-    /**@todo: Override this gate.corpora.DocumentImpl method*/
-    super.removeAnnotationSet( name);
 
-    Out.prln("Needs to be overriden to update the changed structures.");
+
+  public void removeAnnotationSet(String name) {
+
+    //1. add to the list of removed a-sets
+    this.removedAnotationSets.add(name);
+
+    //if the set was read from the DB then it is registered as datastore listener and ...
+    //there may be chnges in it
+    //NOTE that default set cannot be reoved, so we just ignore it
+
+    if (this.namedAnnotSets.keySet().contains(name)) {
+      //set was loaded
+      AnnotationSet aset = (AnnotationSet)this.namedAnnotSets.get(name);
+
+      Assert.assertNotNull(aset);
+      Assert.assertTrue(aset instanceof DatabaseAnnotationSetImpl);
+
+      //3. unregister it as a DataStoreListener
+      this.dataStore.removeDatastoreListener((DatastoreListener)aset);
+    }
+
+    //4. delegate
+    super.removeAnnotationSet(name);
   }
 
 }
