@@ -109,6 +109,24 @@ public class DSHandle extends ResourceHandle {
     }
   }
 
+  class CloseAction extends AbstractAction{
+    public CloseAction(){
+      super("Close");
+    }
+
+    public void actionPerformed(ActionEvent e){
+      try{
+        datastore.close();
+        project.remove(myself);
+      }catch(PersistenceException pe){
+        JOptionPane.showMessageDialog(project.frame,
+                                      "Error!\n" + pe.toString(),
+                                      "Gate", JOptionPane.ERROR_MESSAGE);
+      }
+    }
+  }
+
+
   JTree tree;
   DefaultMutableTreeNode treeRoot;
   DefaultTreeModel treeModel;

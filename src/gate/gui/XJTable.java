@@ -45,6 +45,10 @@ public class XJTable extends JTable {
     adjustSizes(false);
   }
 
+  public void setSortable(boolean isSortable){
+    this.sortable = isSortable;
+  }
+
   protected void init(){
     //make sure we have a model
     if(sorter == null){
@@ -58,8 +62,9 @@ public class XJTable extends JTable {
                                                     "/img/down.gif"));
 
     setColumnSelectionAllowed(false);
-    MouseAdapter listMouseListener = new MouseAdapter() {
+    headerMouseListener = new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
+        if(!sortable) return;
         TableColumnModel columnModel = getColumnModel();
         int viewColumn = columnModel.getColumnIndexAtX(e.getX());
         int column = convertColumnIndexToModel(viewColumn);
@@ -72,7 +77,7 @@ public class XJTable extends JTable {
         adjustSizes(true);
       }
     };
-    getTableHeader().addMouseListener(listMouseListener);
+    if(sortable) getTableHeader().addMouseListener(headerMouseListener);
     setAutoResizeMode(AUTO_RESIZE_OFF);
     headerRenderer = new CustomHeaderRenderer(getTableHeader().getDefaultRenderer());
 
@@ -110,15 +115,22 @@ public class XJTable extends JTable {
               ).getPreferredSize().width;
       if(! headerOnly){
         for(int row = 0; row < getRowCount(); row ++){
-          dim = getCellRenderer(row,column).
-                      getTableCellRendererComponent(
-                        this, getValueAt(row, column), false, false, row, column
-                      ).getPreferredSize();
-          cellWidth = dim.width;
-          cellHeight = dim.height;
-          width = Math.max(width, cellWidth);
-          if((cellHeight + rowMargin) > getRowHeight(row))
-           setRowHeight(row, cellHeight + rowMargin);
+          TableCellRenderer renderer = getCellRenderer(row,column);
+          if(renderer == null){
+            renderer = getDefaultRenderer(getModel().getColumnClass(column));
+          }
+          if(renderer != null){
+            dim = renderer.
+                        getTableCellRendererComponent(
+                          this, getValueAt(row, column), false, false, row, column
+                        ).getPreferredSize();
+            cellWidth = dim.width;
+            cellHeight = dim.height;
+            width = Math.max(width, cellWidth);
+            if((cellHeight + rowMargin) > getRowHeight(row)){
+             setRowHeight(row, cellHeight + rowMargin);
+            }
+          }//if(renderer != null)
         }
       }
       width += getColumnModel().getColumnMargin();
@@ -176,6 +188,8 @@ public class XJTable extends JTable {
 //  int oldSortedColumn = -1;
   boolean ascending = true;
   protected TableCellRenderer headerRenderer;
+  protected boolean sortable = true;
+  MouseListener headerMouseListener;
 //  protected TableCellRenderer savedHeaderRenderer;
 
 //classes

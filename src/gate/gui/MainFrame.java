@@ -84,55 +84,6 @@ public class MainFrame extends JFrame {
     initGuiComponents();
     initListeners();
   }
-  /**Component initialization*/
-  private void jbInit() throws Exception  {
-    /*
-    //setIconImage(Toolkit.getDefaultToolkit().createImage(MainFrame.class.getResource("[Your Icon]")));
-    contentPane = (JPanel) this.getContentPane();
-    contentPane.setLayout(borderLayout1);
-    this.setSize(new Dimension(800, 600));
-    this.setTitle("Gate 2.0");
-
-    //menus
-    jMenuFile.setText("File");
-    jMenuFileExit.setText("Exit");
-    jMenuFileExit.addActionListener(new ActionListener()  {
-      public void actionPerformed(ActionEvent e) {
-        jMenuFileExit_actionPerformed(e);
-      }
-    });
-    jMenuHelp.setText("Help");
-    jMenuHelpAbout.setText("About");
-    jMenuHelpAbout.addActionListener(new ActionListener()  {
-      public void actionPerformed(ActionEvent e) {
-        jMenuHelpAbout_actionPerformed(e);
-      }
-    });
-    jMenuFile.add(jMenuFileExit);
-    jMenuHelp.add(jMenuHelpAbout);
-    jMenuBar1.add(jMenuFile);
-    jMenuBar1.add(jMenuHelp);
-    this.setJMenuBar(jMenuBar1);
-
-    leftSplit.setOrientation(JSplitPane.VERTICAL_SPLIT);
-    leftSplit.add(upperTreeScroll, JSplitPane.TOP);
-    upperTreeScroll.getViewport().add(upperTree, null);
-    leftSplit.add(lowerTreeScroll, JSplitPane.BOTTOM);
-    lowerTreeScroll.getViewport().add(lowerTree, null);
-    mainSplit.add(leftSplit, JSplitPane.LEFT);
-
-    logArea.setText("Gate 2 started at " + new Date());
-    rightTabbedPane.add(logArea, "Messages");
-    mainSplit.add(rightTabbedPane, JSplitPane.RIGHT);
-    contentPane.add(mainSplit, BorderLayout.CENTER);
-
-    statusBar.setText(" ");
-    southBox = Box.createHorizontalBox();
-    southBox.add(statusBar, null);
-    southBox.add(progressBar, null);
-    contentPane.add(southBox, BorderLayout.SOUTH);
-    */
-  }
 
   protected void initLocalData(){
     openProjects = new ArrayList();
@@ -206,6 +157,11 @@ public class MainFrame extends JFrame {
 
     JMenu fileMenu = new JMenu("File");
     fileMenu.add(newProjectAction);
+    fileMenu.add(newLRAction);
+    fileMenu.add(newPRAction);
+    fileMenu.add(newDSAction);
+    fileMenu.add(openDSAction);
+    fileMenu.add(newApplicationAction);
     menuBar.add(fileMenu);
 
     JMenu editMenu = new JMenu("Edit");
@@ -287,19 +243,21 @@ public class MainFrame extends JFrame {
                 if(smallView != null){
                   lowerScroll.getViewport().setView(smallView);
                 }else{
-System.out.println("No small view");
+                  lowerScroll.getViewport().setView(null);
                 }
               }else{
                 //show
                 JComponent largeView = handle.getLargeView();
                 if(largeView != null){
-                  mainTabbedPane.addTab(handle.getTitle(),null, largeView,
-                                        handle.getTooltipText());
+                  mainTabbedPane.addTab(handle.getTitle(), handle.getSmallIcon(),
+                                        largeView, handle.getTooltipText());
                   mainTabbedPane.setSelectedComponent(handle.getLargeView());
                 }
                 JComponent smallView = handle.getSmallView();
                 if(smallView != null){
                   lowerScroll.getViewport().setView(smallView);
+                }else{
+                  lowerScroll.getViewport().setView(null);
                 }
                 handle.setShown(true);
               }
@@ -335,6 +293,31 @@ System.out.println("No small view");
     }catch(Exception e){
       throw new gate.util.GateRuntimeException(e.toString());
     }
+  }
+
+  void remove(ResourceHandle handle){
+    DefaultMutableTreeNode parent = null;
+    if(handle instanceof ApplicationHandle){
+      parent = appRoot;
+    }else if(handle instanceof LRHandle){
+      parent = lrRoot;
+    }else if(handle instanceof PRHandle){
+      parent = prRoot;
+    }
+    DefaultMutableTreeNode node = null;
+    if(parent != null) node = (DefaultMutableTreeNode)parent.getFirstChild();
+    while(node != null && node.getUserObject() != handle){
+      node = (DefaultMutableTreeNode)node.getFirstChild();
+    }
+    if(node != null){
+      node.removeFromParent();
+      projectTreeModel.nodeStructureChanged(parent);
+    }
+    JComponent view = handle.getLargeView();
+    if(view != null) mainTabbedPane.remove(view);
+    view = handle.getSmallView();
+    if(view == lowerScroll.getViewport().getView())
+      lowerScroll.getViewport().removeAll();
   }
 
   /**File | Exit action performed*/
@@ -498,7 +481,7 @@ System.out.println("No small view");
 
   class NewApplicationAction extends AbstractAction{
     public NewApplicationAction(){
-      super("New");
+      super("New Application");
     }
     public void actionPerformed(ActionEvent e){
       Object answer = JOptionPane.showInputDialog(
@@ -540,7 +523,7 @@ System.out.println("No small view");
 
   class NewLRAction extends AbstractAction{
     public NewLRAction(){
-      super("Create new");
+      super("Create language resource");
     }
 
     public void actionPerformed(ActionEvent e){
@@ -590,7 +573,7 @@ System.out.println("No small view");
 
   class NewPRAction extends AbstractAction{
     public NewPRAction(){
-      super("Create new");
+      super("Create processing resource");
     }
 
     public void actionPerformed(ActionEvent e){
@@ -638,7 +621,7 @@ System.out.println("No small view");
 
   class NewDSAction extends AbstractAction{
     public NewDSAction(){
-      super("Create new");
+      super("Create datastore");
     }
 
     public void actionPerformed(ActionEvent e){
@@ -714,7 +697,7 @@ System.out.println("No small view");
 
   class OpenDSAction extends AbstractAction{
     public OpenDSAction(){
-      super("Open");
+      super("Open datastore");
     }
 
     public void actionPerformed(ActionEvent e){

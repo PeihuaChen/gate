@@ -17,6 +17,8 @@ package gate.gui;
 import java.io.*;
 import java.util.*;
 
+import javax.swing.tree.*;
+
 public class ProjectData {
 
   public ProjectData(File projectFile, MainFrame frame) {
@@ -35,6 +37,18 @@ public class ProjectData {
 
   public void addApplication(ApplicationHandle newApp){
     appList.add(newApp);
+  }
+  public void remove(ResourceHandle handle){
+    if(handle instanceof ApplicationHandle){
+      appList.remove(handle);
+      frame.remove(handle);
+    }else if(handle instanceof LRHandle){
+      lrList.remove(handle);
+      frame.remove(handle);
+    }else if(handle instanceof PRHandle){
+      prList.remove(handle);
+      frame.remove(handle);
+    }
   }
 
   List getApplicationsList(){

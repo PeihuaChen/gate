@@ -40,6 +40,7 @@ class ResourceHandle{
     this.title = (String)resource.getFeatures().get("NAME");
     this.project = project;
     buildViews();
+    myself = this;
   }
 
   public ResourceHandle(String title, ProjectData project){
@@ -48,6 +49,7 @@ class ResourceHandle{
     this.project = project;
     largeView = null;
     smallView = null;
+    myself = this;
   }
 
   public Icon getSmallIcon(){
@@ -106,6 +108,9 @@ class ResourceHandle{
     this.tooltipText = text;
   }
 
+  public Resource getResource(){
+    return resource;
+  }
   protected void buildViews(){
     JTabbedPane view = new JTabbedPane(JTabbedPane.BOTTOM);
     ResourceViewer rView = new ResourceViewer();
@@ -126,5 +131,6 @@ class ResourceHandle{
   JComponent smallView;
   JComponent largeView;
 
+  ResourceHandle myself;
   ProjectData project;
 }

@@ -45,6 +45,7 @@ public class PRHandle extends ResourceHandle {
     }
 
     public void actionPerformed(ActionEvent e){
+      project.remove(myself);
     }
   }
 }

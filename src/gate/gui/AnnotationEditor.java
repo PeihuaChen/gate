@@ -119,7 +119,8 @@ public class AnnotationEditor extends AbstractVisualResource{
       params.put("markupAware", new Boolean(true));
 
       params.put("sourceUrlName",
-                 "http://redmires.dcs.shef.ac.uk/admin/index.html");
+                 "file:///d:/tmp/F7V.xml");
+                 //"http://redmires.dcs.shef.ac.uk/admin/index.html");
                  //"http://redmires.dcs.shef.ac.uk/java1.3docs/api/javax/swing/Action.html");
                  //"http://redmires.dcs.shef.ac.uk/java1.3docs/api/java/awt/AWTEventMulticaster.html");
       gate.Document doc = (gate.Document)Factory.createResource("gate.corpora.DocumentImpl", params);
@@ -220,13 +221,15 @@ public class AnnotationEditor extends AbstractVisualResource{
 
       public void componentShown(ComponentEvent e){
         //expand all the nodes in the tree
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-                  ((DefaultMutableTreeNode)stylesTreeRoot).getFirstChild();
-        while(node != null){
-          stylesTree.expandPath(new TreePath(node.getPath()));
-          node = node.getNextSibling();
+        if(stylesTreeRoot.getChildCount() > 0){
+          DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+                    ((DefaultMutableTreeNode)stylesTreeRoot).getFirstChild();
+          while(node != null){
+            stylesTree.expandPath(new TreePath(node.getPath()));
+            node = node.getNextSibling();
+          }
+          stylesTreeModel.reload();
         }
-        stylesTreeModel.reload();
         //set the slider location
         leftSplit.setDividerLocation(leftSplit.getHeight() / 2);
       }
@@ -654,40 +657,62 @@ System.out.println("Annotation added!");
   }
 
   protected void this_documentChanged(){
-    initLocalData();
-    ((DefaultMutableTreeNode)stylesTreeRoot).removeAllChildren();
-    //speed things up by hiding the text display
-    textScroll.getViewport().setView(new JLabel("Updating! Please wait..."));
-    //register the for this new document's events
-    document.addGateListener(eventHandler);
-
-    textPane.setText(document.getContent().toString());
-    //add the default annotation set
-    AnnotationSet currentAS = document.getAnnotations();
-    if(currentAS != null){
-      addAnnotationSet(currentAS);
-    }
-    //add all the other annotation sets
-    Map namedASs = document.getNamedAnnotationSets();
-    if(namedASs != null){
-      Iterator setsIter = namedASs.values().iterator();
-      while(setsIter.hasNext()){
-        currentAS = (AnnotationSet)setsIter.next();
+    Runnable runnable = new Runnable(){
+      public void run(){
+        initLocalData();
+        ((DefaultMutableTreeNode)stylesTreeRoot).removeAllChildren();
+        //speed things up by hiding the text display
+        SwingUtilities.invokeLater(new Runnable(){
+          public void run(){
+            progressBar.setValue(0);
+            textScroll.getViewport().setView(progressBox);
+          }
+        });
+        //register the for this new document's events
+        document.addGateListener(eventHandler);
+        textPane.setText(document.getContent().toString());
+        //add the default annotation set
+        Map namedASs = document.getNamedAnnotationSets();
+        AnnotationSet currentAS = document.getAnnotations();
+        int size = (namedASs == null) ? 1 : (namedASs.size() + 1);
+        int oneASprogress = 100 / size;
         if(currentAS != null){
-          addAnnotationSet(currentAS);
+          addAnnotationSet(currentAS, 0, oneASprogress);
         }
+        //add all the other annotation sets
+        if(namedASs != null){
+          int cnt = 1;
+          Iterator setsIter = namedASs.values().iterator();
+          while(setsIter.hasNext()){
+            currentAS = (AnnotationSet)setsIter.next();
+            if(currentAS != null){
+              addAnnotationSet(currentAS,
+                               cnt * oneASprogress,
+                               (cnt + 1) * oneASprogress);
+            }
+            cnt ++;
+          }
+        }
+        //restore the text display
+        SwingUtilities.invokeLater(new Runnable(){
+          public void run(){
+            textPane.select(0, 0);
+            textScroll.getViewport().setView(textPane);
+            stylesTreeModel.nodeStructureChanged(stylesTreeRoot);
+          }
+        });
       }
-    }
-    //restore the text display
-    textPane.select(0, 0);
-    textScroll.getViewport().setView(textPane);
-    stylesTreeModel.nodeStructureChanged(stylesTreeRoot);
+    };
+    Thread thread = new Thread(runnable);
+    thread.setPriority(Thread.MIN_PRIORITY);
+    thread.start();
   }
 
   /**
    * Used to register with the GUI a new annotation set on the current document.
    */
-  protected void addAnnotationSet(AnnotationSet as){
+  protected void addAnnotationSet(AnnotationSet as, int progressStart,
+                                  int progressEnd){
     as.addGateListener(eventHandler);
     String setName = as.getName();
     if(setName == null) setName = "<Default>";
@@ -697,6 +722,10 @@ System.out.println("Annotation added!");
     ((DefaultMutableTreeNode)stylesTreeRoot).add(setNode);
     ArrayList typesLst = new ArrayList(as.getAllTypes());
     Collections.sort(typesLst);
+    int size = typesLst.size();
+    int cnt = 0;
+    int value = 0;
+    int lastValue = 0;
     Iterator typesIter = typesLst.iterator();
     while(typesIter.hasNext()){
       String type = (String)typesIter.next();
@@ -706,6 +735,13 @@ System.out.println("Annotation added!");
       DefaultMutableTreeNode typeNode = new DefaultMutableTreeNode(typeData,
                                                                    false);
       setNode.add(typeNode);
+      value = progressStart +  (progressEnd - progressStart)* cnt/size;
+      if(value - lastValue >= 5){
+        progressBar.setValue(value);
+        progressBar.paintImmediately(progressBar.getBounds());
+        lastValue = value;
+      }
+      cnt ++;
     }
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
@@ -715,6 +751,9 @@ System.out.println("Annotation added!");
   }
 
 
+  public void paint(Graphics g){
+    super.paint(g);
+  }
   public TypeData getTypeData(String setName, String type){
     Map setMap = (Map)typeDataMap.get(setName);
     if(setMap != null) return (TypeData)setMap.get(type);
@@ -1379,7 +1418,7 @@ System.out.println("Annotation added!");
                 if(docEvt.getType() == docEvt.ANNOTATION_SET_REMOVED){
 throw new UnsupportedOperationException("DocumentEditor -> Annotation set removed");
                 }else if(docEvt.getType() == docEvt.ANNOTATION_SET_ADDED){
-                  addAnnotationSet(document.getAnnotations(docEvt.getAnnotationSetName()));
+                  addAnnotationSet(document.getAnnotations(docEvt.getAnnotationSetName()),0,0);
                 }
               }else if(currentEvent instanceof AnnotationSetEvent){
                 //annotation set event
