@@ -1,0 +1,136 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <TITLE>GATE2 build and installation</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF">
+
+<H1>
+<IMG SRC="gateHeader.gif" ALT="GATE" HEIGHT=76 WIDTH=356></H1>
+
+<!--------------------------------------------------------------------->
+<A NAME=install></A>
+<H2>Installation</H2>
+
+<P>
+GATE will run anywhere that supports recent versions of Java, including
+UNIX and Windoze platforms. It hasn't been tested on Macintosh as yet.
+
+<P>
+<B>Prerequisites:</B>
+<UL>
+<LI>
+A conforming Java environment, version 1.2 or better, available free from
+<A HREF=http://java.sun.com/products/jdk/>Sun Microsystems</A> or from your
+UNIX supplier.
+(We have tested on various Sun 1.2 and 1.3 JDKs on Solaris, Linux and NT.)
+<LI>
+An open mind and a sense of humour.
+</UL>
+
+<P>
+<B>To install</B>,
+put gate.jar (from the gate2/build directory)
+on your classpath, or in the JDK extensions directory.
+You can now run gate.sh and/or call the API from your Java code. See the <A
+HREF=userguide.html>use guide</A> for more details.
+
+
+<!--------------------------------------------------------------------->
+<A NAME=build></A>
+<H2>Building</H2>
+
+<P>
+Note that if you have a conforming Java environment you
+don't need to build GATE unless you're doing development on the system
+itself.
+
+<P>
+<B>Prerequisites:</B>
+<UL>
+<LI>
+A conforming Java environment as above.
+<LI>
+The UNIX shell tools, make etc. On Windoze use the excellent
+Cygwin distribution, available free from:
+  <UL>
+  <LI> <A HREF=http://www.cygnus.com>Cygnus solutions</A>
+  <LI> <A HREF=http://sourceware.cygnus.com>Cygnus' developers' site</A>
+  <LI>
+<A HREF=http://www.mirror.ac.uk/sites/sourceware.cygnus.com/pub/cygwin/>
+    The UK mirrors facility (HTTP)</A>
+  <LI>
+<A HREF=ftp://www.mirror.ac.uk/sites/sourceware.cygnus.com/pub/cygwin/>
+    The UK mirrors facility (FTP)</A>
+  </UL>
+If you're running on UNIX you've got this stuff already
+(though you may need to
+install GNU make, <A HREF=http://www.gnu.org>available here</A>):
+pat yourself on the back and sigh contentedly in the
+knowledge that your 1970s operating system is still the best available.
+<LI>
+An appreciation of natural beauty.
+</UL>
+
+<P>
+<B>To build gate</B>, cd to gate2/build and:
+<OL>
+<LI>
+Start a shell if you're on Windoze (you can use the cygnus.bat script from the
+Cygwin distribution to do this). Make sure GNU make is in your PATH.
+<LI>
+Edit the file jdk.sh
+<BR>*** (this is going to move, eventually) ***<BR>
+to describe the location of your JDK. (The build process can support two JDKs,
+one on UNIX and one on Windoze; you only need to set one if you're not moving
+the thing between platforms.)
+<LI>
+Construct the dependency list and build the class files and a jar file
+containing the whole thing:
+<TT>
+<BR>
+make depend
+<BR>
+make
+<BR>
+make jar
+</TT>
+<LI>
+[optional] To test the system, and build the javadoc code documentation:
+<TT>
+<BR>
+make test
+<BR>
+make docs
+<BR>
+</TT>
+(Note that this needs an open network connection.)
+<LI>
+[optional]
+To build the developer javadoc documentation (including private members):
+<TT>
+<BR>
+make internaldocs
+<BR>
+</TT>
+(Note that you may need to change the name of the server for the Java
+platform documentation in the Makefile,
+as we keep a copy on an internal server in Sheffield.)
+</UL>
+
+<P>
+(Those of you who used GATE 1 and who miss the baroque mystery and
+labyrinthine elegance of the previous build structure may find it useful
+to note that drinking milk is a good cure for an acid stomach.)
+
+<P>
+You can also use a development environment like Borland JBuilder (click on the
+gate2.jpr file) or Emacs JDE (use the prj.el file), but note that it's still
+advisable to use the Makefile to generate documentation, the jar file and so on.
+
+
+<!--------------------------------------------------------------------->
+<!-- $Id$ -->
+</BODY>
+</HTML>
+
