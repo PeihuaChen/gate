@@ -19,22 +19,32 @@ import gate.annotation.*;
   */
 public class CorpusImpl extends TreeSet implements Corpus
 {
-  
+  /** Construction from name */
+  public CorpusImpl(String name) {
+    this(name, null);
+  } // Construction from name
+
+  /** Construction from name and features */
+  public CorpusImpl(String name, FeatureMap features) {
+    this.features = features;
+    this.name = name;
+  } // Construction from name and features
+
+  /** Get the name of the corpus. */
+  public String getName() { return name; }
+
   /** Get the data store the document lives in. */
   public DataStore getDataStore() { throw new LazyProgrammerException(); }
 
   /** Get the features associated with this corpus. */
-  public FeatureMap getFeatures() { return features; }
+  public FeatureMap getFeatures() { return features; } 
 
-  /** The size of this corpus */
-  public int size() { return docsByURL.size(); }
+  /** Set the feature set */
+  public void setFeatures(FeatureMap features) { this.features = features; }
 
-  /** Get an iterator for the members. */
-  public Iterator iterator() { return docsByURL.values().iterator(); }
-
-  /** Map document source URLs to Documents. */
-  TreeMap docsByURL;
-
+  /** The name of the corpus */
+  String name;
+  
   /** The features associated with this corpus. */
   FeatureMap features;
 

@@ -191,7 +191,10 @@ public class DocumentImpl implements Document
   } // getAnnotations(name)
 
   /** Get the features associated with this document. */
-  public FeatureMap getFeatures() { return features; }
+  public FeatureMap getFeatures() { return features; } 
+
+  /** Set the feature set */
+  public void setFeatures(FeatureMap features) { this.features = features; }
 
   /** Propagate edit changes to the document content and annotations. */
   public void edit(Long start, Long end, DocumentContent replacement)
@@ -249,7 +252,9 @@ public class DocumentImpl implements Document
   /** Utility method to produce a string for comparison in ordering.
     * String is based on the source URL and offsets.
     */
-  String getOrderingString() { 
+  String getOrderingString() {
+    if(sourceURL == null) return toString();
+    
     StringBuffer orderingString = new StringBuffer(sourceURL.toString());
     if(sourceURLOffsets != null) {
       orderingString.append(sourceURLOffsets[0].toString());

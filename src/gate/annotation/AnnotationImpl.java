@@ -51,6 +51,9 @@ implements Annotation, FeatureBearer, Comparable
     return features;
   } // getFeatures()
 
+  /** Set the feature set */
+  public void setFeatures(FeatureMap features) { this.features = features; }
+
   /** The start node. */
   public Node getStartNode() {
     return start;
