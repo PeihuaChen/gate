@@ -310,11 +310,9 @@ Priority: 20
 
  ((SPACE)?
   {Token.orth == upperInitial}
-  (SPACE)? )+
+ )+
 
- (SPACE)?
-
- (CDG)?
+ (SPACE CDG)?
 
 )
 :orgName -->
