@@ -239,6 +239,11 @@ public class Batch implements JapeConstants, java.io.Serializable,
   } // transduce(coll)
 
   /** Process a single document. */
+  public void transduce(Document doc) throws JapeException {
+    transducer.transduce(doc, doc.getAnnotations());
+  } // transduce(doc)
+
+  /** Process a single document. */
   public void transduce(Document doc, AnnotationSet annotations) throws JapeException {
     transducer.transduce(doc, annotations);
   } // transduce(doc)
@@ -438,6 +443,9 @@ public class Batch implements JapeConstants, java.io.Serializable,
 } // class Batch
 
 // $Log$
+// Revision 1.9  2000/07/18 12:09:33  valyt
+// Removed muse from the gate tree
+//
 // Revision 1.8  2000/07/12 17:55:39  valyt
 // *** empty log message ***
 //
