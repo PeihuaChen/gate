@@ -53,6 +53,7 @@ public class AnnotationEditDialog extends JDialog {
   // Gui Components
   JTable  featuresTable = null;
   JScrollPane featuresTableScroll = null;
+  JScrollPane featuresListScroll = null;
   JButton removeFeatButton = null;
   JButton addFeatButton = null;
   JList   featureSchemaList = null;
@@ -82,6 +83,7 @@ public class AnnotationEditDialog extends JDialog {
     if (featureMap == null)
       featureMap = Factory.newFeatureMap();
 
+    name2featureSchemaMap = new HashMap();
     // Construct a set of feature names from feature schema
     Map fSNames2FSMap = new HashMap();
 
@@ -103,6 +105,7 @@ public class AnnotationEditDialog extends JDialog {
           }// end if
         }// end if
       }// end while
+      featureSchemaList.setVisibleRowCount(featuresSch.size());
     }// end if
 
     // Init the table model
@@ -132,6 +135,7 @@ public class AnnotationEditDialog extends JDialog {
   protected void buildGuiComponents(){
     this.getContentPane().setLayout(new BoxLayout( this.getContentPane(),
                                                    BoxLayout.Y_AXIS));
+
     //create the main box
     Box componentsBox = Box.createHorizontalBox();
 
@@ -141,15 +145,24 @@ public class AnnotationEditDialog extends JDialog {
     featuresTable.setSelectionMode(
                   ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     featuresTable.setModel(new FeaturesTableModel(new HashSet()));
+    featuresTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+    featuresTable.setDefaultEditor(java.lang.Object.class, new FeaturesEditor());
     featuresTableScroll = new JScrollPane(featuresTable);
 
-    componentsBox.add(featuresTableScroll);
+    Box box = Box.createVerticalBox();
+    box.add(Box.createVerticalStrut(5));
+    box.add(new JLabel("Current features"));
+    box.add(Box.createVerticalStrut(10));
+    box.add(featuresTableScroll);
+    box.add(Box.createVerticalStrut(5));
+
+    componentsBox.add(box);
     componentsBox.add(Box.createHorizontalStrut(10));
 
     // add the remove put buttons
     Box buttBox = Box.createVerticalBox();
-    removeFeatButton = new JButton("->");
-    addFeatButton = new JButton("<-");
+    removeFeatButton = new JButton(">>");
+    addFeatButton = new JButton("<<");
 
     buttBox.add(removeFeatButton);
     buttBox.add(Box.createVerticalStrut(10));
@@ -163,8 +176,19 @@ public class AnnotationEditDialog extends JDialog {
     featureSchemaList = new JList();
     featureSchemaList.setSelectionMode(
                   ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+//    featureSchemaList.setBorder(BorderFactory.createTitledBorder(
+//                    BorderFactory.createEtchedBorder()));
 
-    componentsBox.add(featureSchemaList);
+    featuresListScroll = new JScrollPane(featureSchemaList);
+
+    box = Box.createVerticalBox();
+    box.add(Box.createVerticalStrut(5));
+    box.add(new JLabel("Possible features"));
+    box.add(Box.createVerticalStrut(10));
+    box.add(featuresListScroll);
+    box.add(Box.createVerticalStrut(5));
+
+    componentsBox.add(box);
 
     componentsBox.add(Box.createHorizontalStrut(5));
 
@@ -174,17 +198,17 @@ public class AnnotationEditDialog extends JDialog {
     this.getContentPane().add(Box.createVerticalStrut(5));
 
     Box cancelOkBox = Box.createHorizontalBox();
-    JButton okButton = new JButton("Ok");
-    JButton cancelButton = new JButton("Cancel");
+    okButton = new JButton("Ok");
+    cancelButton = new JButton("Cancel");
 
     cancelOkBox.add(okButton);
-    cancelOkBox.add(Box.createHorizontalStrut(15));
+    cancelOkBox.add(Box.createHorizontalStrut(25));
     cancelOkBox.add(cancelButton);
 
     this.getContentPane().add(cancelOkBox);
     this.getContentPane().add(Box.createVerticalStrut(5));
 
-    setSize(400, 300);
+    setSize(500,350);
   }//buildGuiComponents();
 
   /** Init GUI components with values taken from local data*/
@@ -229,25 +253,23 @@ public class AnnotationEditDialog extends JDialog {
   private void doRemoveFeatures(){
     int[] selectedRows = featuresTable.getSelectedRows();
 
-    if (selectedRows.length == 0) return;
+    if (selectedRows.length <= 0) return;
 
-    for (int i=0; i < selectedRows.length; i++)
+    for (int i = (selectedRows.length - 1); i > -1 ; i--)
       doRemoveFeature(selectedRows[i]);
 
     tableModel.fireTableDataChanged();
-
-
   }// doRemoveFeatures();
 
   /** This removes the feature @ rowIndex*/
   private void doRemoveFeature(int rowIndex){
-   RowData rd =  (RowData) tableModel.data.get(rowIndex);
-   if (rd != null)
+    RowData rd =  (RowData) tableModel.data.get(rowIndex);
+
     name2featureSchemaMap.put(rd.getFeatureSchema().getFeatureName(),
                                                       rd.getFeatureSchema());
 
-   listModel.addElement(rd.getFeatureSchema().getFeatureName());
-   tableModel.data.remove(rowIndex);
+    listModel.addElement(rd.getFeatureSchema().getFeatureName());
+    tableModel.data.remove(rowIndex);
   }// doRemoveFeature();
 
   /** This method adds a feature from the list to the table*/
@@ -280,6 +302,14 @@ public class AnnotationEditDialog extends JDialog {
   private void doOk(){
     buttonPressed = OK;
     this.hide();
+
+    // Construct the response featutre
+    Iterator iter = tableModel.data.iterator();
+    while (iter.hasNext()){
+      RowData rd = (RowData) iter.next();
+      responseMap.put(rd.getFeatureSchema().getFeatureName(), rd.getValue());
+    };
+
   }//doOk();
 
   /** This method is called when the user press the CANCEL button*/
@@ -295,12 +325,18 @@ public class AnnotationEditDialog extends JDialog {
 
     if (annotSchema == null) return null;
 
+    if ( annotSchema.getFeatureSchemaSet() == null ||
+         annotSchema.getFeatureSchemaSet().size() == 0)
+      return Factory.newFeatureMap();
+
+    this.setTitle(annotSchema.getAnnotationName());
     initLocalData();
     initGuiComponents();
     super.show();
     if (buttonPressed == CANCEL)
       return null;
-    else  return null; //construcResponseFM();
+    else
+      return responseMap;
   }// show()
 
   /** This method displays the AnnotationEditDialog in creating mode*/
@@ -386,11 +422,14 @@ public class AnnotationEditDialog extends JDialog {
     public boolean isCellEditable( int rowIndex,
                                    int columnIndex){
 
-        if(columnIndex == 1) return true;
+
+        if(columnIndex == 1){
+          RowData rd = (RowData) data.get(rowIndex);
+          FeatureSchema fs = rd.getFeatureSchema();
+          if (fs.isFixed() || fs.isProhibited()) return false;
+          else return true;
+        }// end if
         if(columnIndex == 0 || columnIndex == 2) return false;
-//        ParameterDisjunction pDisj =
-//                      (ParameterDisjunction)params.get(rowIndex);
-//        return pDisj.size() > 1;
         return false;
     }//isCellEditable
 
@@ -407,7 +446,9 @@ public class AnnotationEditDialog extends JDialog {
       switch(columnIndex){
         case 0: return rd.getFeatureSchema().getFeatureName();
         case 1: return (rd.getValue() == null)? new String(""): rd.getValue();
-        case 2: return rd.getFeatureSchema().getValueClassName();
+        case 2: return (rd.getFeatureSchema().getValueClassName() == null)?
+                      new String(""): rd.getFeatureSchema().getValueClassName();
+
         default: return "?";
       }
     }//getValueAt
@@ -423,6 +464,8 @@ public class AnnotationEditDialog extends JDialog {
           break;
         }
         case 1:{
+          //String className = rd.getFeatureSchema().getValueClassName();
+          rd.setValue(aValue);
           // adaug in table model a randul i, valoarea citita
           // Mai intiai se face conversia la tipul dorit
 
@@ -432,7 +475,7 @@ public class AnnotationEditDialog extends JDialog {
           break;
         }
         case 3:{
-//          pDisj.setValue((String)aValue);
+
           break;
         }
         default:{}
@@ -471,27 +514,72 @@ public class AnnotationEditDialog extends JDialog {
 
   // The EDITOR RENDERER
 
-  class FeaturesEditor extends DefaultCellEditor{
-    public FeaturesEditor(){
-      super(new JComboBox());
-      combo = (JComboBox)super.getComponent();
-    }
+  class FeaturesEditor extends AbstractCellEditor  implements TableCellEditor{
+
+     JComboBox cb = null;
+     JTextField tf = null;
+
+    public FeaturesEditor(){}
 
     public Component getTableCellEditorComponent(JTable table,
                                              Object value,
                                              boolean isSelected,
                                              int row,
                                              int column){
-//     ParameterDisjunction pDisj = (ParameterDisjunction)value;
+     RowData rd = (RowData) tableModel.data.get(row);
+     if (rd.getFeatureSchema().isEnumeration()){
+        cb = new JComboBox(rd.getFeatureSchema().getPermissibleValues().toArray());
+        cb.setSelectedItem(value);
+        tf = null;
+        return cb;
+     }
 
-//     combo.setModel(new DefaultComboBoxModel(pDisj.getNames()));
-     return combo;
+     if ( rd.getFeatureSchema().isDefault() ||
+          rd.getFeatureSchema().isOptional() ||
+          rd.getFeatureSchema().isRequired() ){
+
+          tf = new JTextField(value.toString());
+          cb = null;
+          return tf;
+     }
+     return new JLabel(value.toString());
     }//getTableCellEditorComponent
 
     public Object getCellEditorValue(){
-      return new Integer(combo.getSelectedIndex());
-    }
-    JComboBox combo;
+      if (cb != null ) return cb.getSelectedItem();
+      if (tf != null ) return tf.getText();
+      return new String("");
+    }//getCellEditorValue
+
   }//FeaturesEditor
 
+  public static void main(String[] args){
+
+    try {
+      Gate.init();
+      FeatureMap parameters = Factory.newFeatureMap();
+      parameters.put("xmlFileUrl", new java.net.URL("file:///Z:/gate2/src/gate/resources/creole/schema/PosSchema.xml"));
+
+      AnnotationSchema annotSchema = (AnnotationSchema)
+         Factory.createResource("gate.creole.AnnotationSchema", parameters);
+
+      FeatureMap fm = Factory.newFeatureMap();
+      fm.put("time",new Integer(10));
+
+      fm.put("cat","V");
+      fm.put("match", new Vector(3));
+
+      AnnotationEditDialog aed = new AnnotationEditDialog(null,true);
+      //aed.show(annotSchema);
+      aed.show(fm,annotSchema);
+
+  /*
+      // Create an annoatationSchema from a URL.
+      URL url =
+      annotSchema.fromXSchema(url);
+  */
+    } catch (Exception e){
+      e.printStackTrace(System.err);
+    }
+  }// main
 }//AnnotationEditDialog
