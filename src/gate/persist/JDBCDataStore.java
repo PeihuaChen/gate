@@ -21,6 +21,7 @@ import java.util.*;
 import java.io.*;
 
 import junit.framework.*;
+import oracle.jdbc.driver.*;
 
 import gate.*;
 import gate.util.*;
@@ -39,6 +40,8 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
   /** jdbc url for the database */
   private   String      dbURL;
   protected String      dbSchema;
+  protected int         dbType;
+
   protected String      datastoreComment;
   protected String      iconName;
 
@@ -116,7 +119,9 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
     else {
       this.dbURL = storageUrl;
       this.dbSchema = DBHelper.getSchemaPrefix(this.dbURL);
+      this.dbType = DBHelper.getDatabaseType(this.dbURL);
       Assert.assertNotNull(this.dbSchema);
+      Assert.assertTrue(this.dbType > 0);
     }
 
   }
@@ -295,7 +300,48 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
 
 
   /** Get a list of the IDs of LRs of a particular type that are present. */
-  public abstract List getLrIds(String lrType) throws PersistenceException;
+  public List getLrIds(String lrType) throws PersistenceException {
+
+    Vector lrIDs = new Vector();
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+
+    try {
+      stmt = this.jdbcConn.prepareStatement(
+                      " SELECT lr_id " +
+                      " FROM   "+this.dbSchema+"t_lang_resource LR, " +
+                      "        "+this.dbSchema+"t_lr_type LRTYPE " +
+                      " WHERE  LR.lr_type_id = LRTYPE.lrtp_id " +
+                      "        AND LRTYPE.lrtp_type = ? " +
+                      " ORDER BY lr_name"
+                      );
+      stmt.setString(1,lrType);
+
+      //oracle special
+      if (this.dbType == DBHelper.ORACLE_DB) {
+        ((OraclePreparedStatement)stmt).setRowPrefetch(DBHelper.CHINK_SIZE_SMALL);
+      }
+
+      stmt.execute();
+      rs = stmt.getResultSet();
+
+      while (rs.next()) {
+        //access by index is faster
+        Long lrID = new Long(rs.getLong(1));
+        lrIDs.add(lrID);
+      }
+
+      return lrIDs;
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't get LR types from DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(stmt);
+    }
+
+  }
 
 
   /** Get a list of the names of LRs of a particular type that are present. */
