@@ -41,6 +41,8 @@ public class DatabaseDocumentImpl extends DocumentImpl
   private boolean     isContentRead;
   private Object      contentLock;
   private Connection  jdbcConn;
+  private String      jdbcSchema;
+  protected int       dbType;
 
   private boolean     contentChanged;
   private boolean     featuresChanged;
@@ -79,7 +81,29 @@ public class DatabaseDocumentImpl extends DocumentImpl
     parentDocument = null;
   }
 
-  public DatabaseDocumentImpl(Connection conn) {
+  private void setDatabaseInfo(Connection conn)
+    throws PersistenceException {
+
+    String url = null;
+
+    try {
+      url = conn.getMetaData().getURL();
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("cannot get jdbc metadata: ["+sqle.getMessage()+"]");
+    }
+
+    this.jdbcSchema = DBHelper.getSchemaPrefix(url);
+    this.dbType = DBHelper.getDatabaseType(url);
+    Assert.assertNotNull(this.jdbcSchema);
+    Assert.assertTrue(this.dbType == DBHelper.ORACLE_DB ||
+                      this.dbType == DBHelper.POSTGRES_DB);
+
+  }
+
+
+  public DatabaseDocumentImpl(Connection conn)
+    throws PersistenceException {
 
     //super();
     contentLock = new Object();
@@ -89,6 +113,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
     this.isContentRead = false;
     this.jdbcConn = conn;
+    setDatabaseInfo(this.jdbcConn);
 
     this.contentChanged = false;
     this.featuresChanged = false;
@@ -199,37 +224,64 @@ public class DatabaseDocumentImpl extends DocumentImpl
     ResultSet rs = null;
 
     try {
+
       String sql = " select v1.enc_name, " +
                    "        v1.dc_character_content, " +
                    "        v1.dc_binary_content, " +
                    "        v1.dc_content_type " +
-                   " from  "+Gate.DB_OWNER+".v_content v1 " +
+                   " from  "+this.jdbcSchema+"v_content v1 " +
                    " where  v1.lr_id = ? ";
-
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,lrID.longValue());
       pstmt.execute();
       rs = pstmt.getResultSet();
 
-      rs.next();
-
-      String encoding = rs.getString(1);
-      if (encoding.equals(DBHelper.DUMMY_ENCODING)) {
-        //no encoding was specified for this document
-        encoding = "";
+      if (false == rs.next()) {
+        throw new SynchronisationException("empty reault set");
       }
-      Clob   clb = rs.getClob(2);
-      Blob   blb = rs.getBlob(3);
-      long   contentType = rs.getLong(4);
 
-      Assert.assertTrue(DBHelper.CHARACTER_CONTENT == contentType);
+      if (this.dbType == DBHelper.ORACLE_DB) {
 
-      StringBuffer buff = new StringBuffer();
-      OracleDataStore.readCLOB(clb,buff);
+        String encoding = rs.getString("enc_name");
+        if (encoding.equals(DBHelper.DUMMY_ENCODING)) {
+          //no encoding was specified for this document
+          encoding = "";
+        }
+        Clob   clb = rs.getClob("dc_character_content");
+        Blob   blb = rs.getBlob("dc_binary_content");
+        long   contentType = rs.getLong("dc_content_type");
 
-      //2. set data members that were not previously initialized
-      this.content = new DocumentContentImpl(buff.toString());
-      this.encoding = encoding;
+        Assert.assertTrue(DBHelper.CHARACTER_CONTENT == contentType);
+
+        StringBuffer buff = new StringBuffer();
+        OracleDataStore.readCLOB(clb,buff);
+
+        //2. set data members that were not previously initialized
+        this.content = new DocumentContentImpl(buff.toString());
+        this.encoding = encoding;
+      }
+
+      else if (this.dbType == DBHelper.POSTGRES_DB) {
+
+        String encoding = rs.getString("enc_name");
+        if (encoding.equals(DBHelper.DUMMY_ENCODING)) {
+          //no encoding was specified for this document
+          encoding = "";
+        }
+
+        String content = rs.getString("dc_character_content");
+        long   contentType = rs.getLong("dc_content_type");
+
+        Assert.assertTrue(DBHelper.CHARACTER_CONTENT == contentType);
+
+        //2. set data members that were not previously initialized
+        this.content = new DocumentContentImpl(content);
+        this.encoding = encoding;
+      }
+
+      else {
+        Assert.fail();
+      }
     }
     catch(SQLException sqle) {
       throw new SynchronisationException("can't read content from DB: ["+ sqle.getMessage()+"]");
@@ -276,7 +328,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
     //1. get the names of all sets
     try {
       String sql = " select as_name " +
-                   " from  "+Gate.DB_OWNER+".v_annotation_set " +
+                   " from  "+this.jdbcSchema+"v_annotation_set " +
                    " where  lr_id = ? " +
                    "  and as_name is not null";
 
@@ -424,7 +476,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
     ResultSet rs = null;
     try {
       String sql = " select as_id " +
-                   " from  "+Gate.DB_OWNER+".v_annotation_set " +
+                   " from  "+this.jdbcSchema+"v_annotation_set " +
                    " where  lr_id = ? ";
       //do we have aset name?
       String clause = null;
@@ -463,23 +515,34 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
       //3. read annotations
       AnnotationSetImpl transSet = new AnnotationSetImpl(this);
-      String hint = "/*+ use_nl(v.t_annotation v.t_as_annotation) " +
-                    "     use_nl(v.t_annotation_type v.t_annotation) "+
-                    " */";
+
+      String hint;
+
+      if (this.dbType == DBHelper.ORACLE_DB) {
+        hint = "/*+ use_nl(v.t_annotation v.t_as_annotation) " +
+              "     use_nl(v.t_annotation_type v.t_annotation) "+
+              " */";
+      }
+      else {
+        hint = "";
+      }
 
       String sql1 = " select "+hint+
                     "        ann_local_id, " +
                     "        at_name, " +
                     "        start_offset, " +
                     "        end_offset " +
-                    " from  "+Gate.DB_OWNER+".v_annotation  v" +
+                    " from  "+this.jdbcSchema+"v_annotation  v" +
                     " where  asann_as_id = ? ";
 
       if (DEBUG) Out.println(">>>>> asetID=["+asetID+"]");
 
       pstmt = this.jdbcConn.prepareStatement(sql1);
       pstmt.setLong(1,asetID.longValue());
-      ((OraclePreparedStatement)pstmt).setRowPrefetch(DBHelper.CHINK_SIZE_LARGE);
+
+      if (this.dbType == DBHelper.ORACLE_DB) {
+        ((OraclePreparedStatement)pstmt).setRowPrefetch(DBHelper.CHINK_SIZE_LARGE);
+      }
       pstmt.execute();
       rs = pstmt.getResultSet();
 
@@ -571,30 +634,58 @@ public class DatabaseDocumentImpl extends DocumentImpl
     HashMap     featuresByAnnotID = new HashMap();
 
     //2. read the features from DB
-    try {
-      String sql = " select /*+ use_nl(v.t_annotation v.t_as_annotation) "+
-                   "            use_nl(v.t_feature v.t_annotation) "+
-                   "            index(v.t_feature xt_feature_01) "+
-                   "            use_nl(v.t_feature_key v.t_feature) "+
-                   "           full(v.t_feature_key)           "+
-                   "        */                                  "+
-                   "                                            " +
-                   "        ann_local_id, " +
-                   "        key, " +
-                   "        ft_value_type, " +
-                   "        ft_number_value, " +
-                   "        ft_character_value, " +
-                   "        ft_long_character_value, " +
-                   "        ft_binary_value " +
-                   " from  "+Gate.DB_OWNER+".v_annotation_features " +
-                   " where  set_id = ? " +
-                   " order by ann_local_id,key ";
 
-      pstmt = this.jdbcConn.prepareStatement(sql);
-      pstmt.setLong(1,asetID.longValue());
-      ((OraclePreparedStatement)pstmt).setRowPrefetch(DBHelper.CHINK_SIZE_LARGE);
-      pstmt.execute();
-      rs = pstmt.getResultSet();
+    try {
+
+      if (this.dbType == DBHelper.ORACLE_DB) {
+        String sql = " select /*+ use_nl(v.t_annotation v.t_as_annotation) "+
+                     "            use_nl(v.t_feature v.t_annotation) "+
+                     "            index(v.t_feature xt_feature_01) "+
+                     "            use_nl(v.t_feature_key v.t_feature) "+
+                     "           full(v.t_feature_key)           "+
+                     "        */                                  "+
+                     "                                            " +
+                     "        ann_local_id, " +
+                     "        key, " +
+                     "        ft_value_type, " +
+                     "        ft_number_value, " +
+                     "        ft_character_value, " +
+                     "        ft_long_character_value, " +
+                     "        ft_binary_value " +
+                     " from  "+this.jdbcSchema+"v_annotation_features " +
+                     " where  set_id = ? " +
+                     " order by ann_local_id,key ";
+
+        pstmt = this.jdbcConn.prepareStatement(sql);
+        pstmt.setLong(1,asetID.longValue());
+        ((OraclePreparedStatement)pstmt).setRowPrefetch(DBHelper.CHINK_SIZE_LARGE);
+        pstmt.execute();
+        rs = pstmt.getResultSet();
+      }
+
+      else if (this.dbType == DBHelper.POSTGRES_DB) {
+
+        String sql = " select " +
+                     "        ann_local_id, " +
+                     "        key, " +
+                     "        ft_value_type, " +
+                     "        ft_int_value, " +
+                     "        ft_float_value, " +
+                     "        ft_character_value, " +
+                     "        ft_binary_value " +
+                     " from  "+this.jdbcSchema+"v_annotation_features " +
+                     " where  set_id = ? " +
+                     " order by ann_local_id,key ";
+
+        pstmt = this.jdbcConn.prepareStatement(sql);
+        pstmt.setLong(1,asetID.longValue());
+        pstmt.execute();
+        rs = pstmt.getResultSet();
+      }
+
+      else {
+        Assert.fail();
+      }
 
       while (rs.next()) {
         //NOTE: because there are LOBs in the resulset
@@ -602,7 +693,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
         //in the query
 
         prevAnnID = currAnnID;
-        currAnnID = new Integer(rs.getInt(1));
+        currAnnID = new Integer(rs.getInt("ann_local_id"));
 
         //2.1 is this a new Annotation?
         if (!currAnnID.equals(prevAnnID) && prevAnnID != null) {
@@ -638,8 +729,8 @@ public class DatabaseDocumentImpl extends DocumentImpl
 /*??*/          prevAnnID = currAnnID;
         }//if -- is new annotation
 
-        currKey = rs.getString(2);
-        Long valueType = new Long(rs.getLong(3));
+        currKey = rs.getString("key");
+        Long valueType = new Long(rs.getLong("ft_value_type"));
 
         //we don't quite know what is the type of the NUMBER
         //stored in DB
@@ -650,19 +741,60 @@ public class DatabaseDocumentImpl extends DocumentImpl
         switch(valueType.intValue()) {
 
           case DBHelper.VALUE_TYPE_BOOLEAN:
-            numberValue = new Boolean(rs.getBoolean(4));
+
+            if (this.dbType == DBHelper.ORACLE_DB) {
+              numberValue = new Boolean(rs.getBoolean("ft_number_value"));
+            }
+            else if (this.dbType == DBHelper.POSTGRES_DB){
+              numberValue = new Boolean(rs.getBoolean("ft_int_value"));
+            }
+            else {
+              Assert.fail();
+            }
+
             break;
 
+
           case DBHelper.VALUE_TYPE_FLOAT:
-            numberValue = new Float(rs.getFloat(4));
+
+            if (this.dbType == DBHelper.ORACLE_DB) {
+              numberValue = new Float(rs.getFloat("ft_number_value"));
+            }
+            else if (this.dbType == DBHelper.POSTGRES_DB){
+              numberValue = new Float(rs.getFloat("ft_float_value"));
+            }
+            else {
+              Assert.fail();
+            }
+
             break;
 
           case DBHelper.VALUE_TYPE_INTEGER:
-            numberValue = new Integer(rs.getInt(4));
+
+            if (this.dbType == DBHelper.ORACLE_DB) {
+              numberValue = new Integer(rs.getInt("ft_number_value"));
+            }
+            else if (this.dbType == DBHelper.POSTGRES_DB){
+              numberValue = new Integer(rs.getInt("ft_int_value"));
+            }
+            else {
+              Assert.fail();
+            }
+
             break;
 
           case DBHelper.VALUE_TYPE_LONG:
-            numberValue = new Long(rs.getLong(4));
+
+            if (this.dbType == DBHelper.ORACLE_DB) {
+              numberValue = new Long(rs.getLong("ft_number_value"));
+            }
+            else if (this.dbType == DBHelper.POSTGRES_DB){
+              numberValue = new Long(rs.getLong("ft_int_value"));
+            }
+            else {
+              Assert.fail();
+            }
+
             break;
 
           default:
@@ -670,9 +802,14 @@ public class DatabaseDocumentImpl extends DocumentImpl
         }
 
         //don't forget to read the rest of the current row
-        String stringValue = rs.getString(5);
-        Clob clobValue = rs.getClob(6);
-        Blob blobValue = rs.getBlob(7);
+        String stringValue = rs.getString("ft_character_value");
+        Clob clobValue = null;
+        Blob blobValue = null;
+
+        if (this.dbType == DBHelper.ORACLE_DB) {
+          clobValue = rs.getClob("ft_long_character_value");
+          blobValue = rs.getBlob("ft_binary_value");
+        }
 
         switch(valueType.intValue()) {
 
@@ -691,16 +828,17 @@ public class DatabaseDocumentImpl extends DocumentImpl
             break;
 
           case DBHelper.VALUE_TYPE_STRING:
-            //this one is tricky too
-            //if the string is < 4000 bytes long then it's stored as varchar2
-            //otherwise as CLOB
-            if (null == stringValue) {
-              //oops, we got CLOB
+
+            if (this.dbType == DBHelper.ORACLE_DB && null == stringValue) {
+              //this one is tricky too
+              //if the string is < 4000 bytes long then it's stored as varchar2
+              //otherwise as CLOB
+
               StringBuffer temp = new StringBuffer();
               OracleDataStore.readCLOB(clobValue,temp);
               currFeatureValue = temp.toString();
             }
-            else {
+            else { /* PostgresDB or (Oracle DB + value is stored in varchar column) */
               currFeatureValue = stringValue;
             }
             break;
@@ -820,74 +958,6 @@ public class DatabaseDocumentImpl extends DocumentImpl
     throw new MethodNotImplementedException();
   }
 
-  /** Generate and return the next annotation ID */
-/*  public Integer getNextAnnotationId() {
-
-    //1.try to get ID fromt he pool
-    if (DEBUG) {
-      Out.println(">>> get annID called...");
-    }
-    //is there anything left in the pool?
-    if (this.SEQUENCE_POOL_SIZE == this.poolMarker) {
-      //oops, pool is empty
-      fillSequencePool();
-      this.poolMarker = 0;
-    }
-
-    return this.sequencePool[this.poolMarker++];
-
-    return super.getNextAnnotationId();
-  } // getNextAnnotationId
-
-
-  public void setNextAnnotationId(int aNextAnnotationId){
-
-    //if u get this exception then u definitely don't have an idea what u're doing
-    throw new UnsupportedOperationException("Annotation IDs cannot be changed in " +
-                                            "database stores");
-  }// setNextAnnotationId();
-
-
-  private void fillSequencePool() {
-
-    if(DEBUG) {
-      Out.println("filling ID lot...");
-    }
-
-    CallableStatement stmt = null;
-    try {
-      stmt = this.jdbcConn.prepareCall(
-            "{ call "+Gate.DB_OWNER+".persist.get_id_lot(?,?,?,?,?,?,?,?,?,?) }");
-      stmt.registerOutParameter(1,java.sql.Types.BIGINT);
-      stmt.registerOutParameter(2,java.sql.Types.BIGINT);
-      stmt.registerOutParameter(3,java.sql.Types.BIGINT);
-      stmt.registerOutParameter(4,java.sql.Types.BIGINT);
-      stmt.registerOutParameter(5,java.sql.Types.BIGINT);
-      stmt.registerOutParameter(6,java.sql.Types.BIGINT);
-      stmt.registerOutParameter(7,java.sql.Types.BIGINT);
-      stmt.registerOutParameter(8,java.sql.Types.BIGINT);
-      stmt.registerOutParameter(9,java.sql.Types.BIGINT);
-      stmt.registerOutParameter(10,java.sql.Types.BIGINT);
-      stmt.execute();
-
-      for (int i=0; i < this.SEQUENCE_POOL_SIZE; i++) {
-        //JDBC countsa from 1, not from 0
-        this.sequencePool[0] = new Integer(stmt.getInt(i+1));
-      }
-    }
-    catch(SQLException sqle) {
-      throw new SynchronisationException("can't get Annotation ID pool: ["+ sqle.getMessage()+"]");
-    }
-    finally {
-      try {
-        DBHelper.cleanup(stmt);
-      }
-      catch(PersistenceException pe) {
-        throw new SynchronisationException("JDBC error: ["+ pe.getMessage()+"]");
-      }
-    }
-  }
-*/
 
   public void setNextNodeId(int nextID){
     Assert.assertTrue(nextID >= 0);
@@ -1133,11 +1203,13 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
   }//setParent
 
-  public void setInitData__$$__(Object data) {
+  public void setInitData__$$__(Object data)
+    throws PersistenceException {
 
     HashMap initData = (HashMap)data;
 
     this.jdbcConn = (Connection)initData.get("JDBC_CONN");
+    setDatabaseInfo(this.jdbcConn);
     this.dataStore = (DatabaseDataStore)initData.get("DS");
     this.lrPersistentId = (Long)initData.get("LR_ID");
     this.name = (String)initData.get("DOC_NAME");
