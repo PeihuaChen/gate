@@ -709,29 +709,27 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
                       null :
                       (String)getFeatures().get("MimeType");
     boolean wasXML = mimeType != null && mimeType.equalsIgnoreCase("text/xml");
-//    boolean needsRootTag = false;
+
     if(wasXML){
       String defaultEncoding = System.getProperty("file.encoding");
-      if(defaultEncoding == null) defaultEncoding = "UTF-8";
-      xmlDoc.append("<?xml version=\"1.0\" encoding=\"" +
-                    (encoding == null ? defaultEncoding : encoding) +
-                    "\" ?>" + Strings.getNl());
-      // Add the root start element if not already there
-//      AnnotationSet aType = dumpingSet.get("GatePreserveFormat");
-//      if(aType == null || aType.isEmpty()){
-//        needsRootTag = true;
-//        xmlDoc.append("<GatePreserveFormat " +
-//                      "xmlns:gate=\"http://www.gate.ac.uk\" " +
-//                      "gate:annotMaxId=\"" + getNextAnnotationId() + "\">");
-//      }
-    }
-
+      xmlDoc.append("<?xml version=\"1.0 ?>" + Strings.getNl());
+    }// ENd if
+    // Identify and extract the root annotation from the dumpingSet.
+    theRootAnnotation = identifyTheRootAnnotation(dumpingSet);
+    // If a root annotation has been identified then add it eplicitley at the
+    // beginning of the document
+    if (theRootAnnotation != null){
+      dumpingSet.remove(theRootAnnotation);
+      xmlDoc.append(writeStartTag(theRootAnnotation,includeFeatures));
+    }// End if
+    // Construct and append the rest of the document
     xmlDoc.append(saveAnnotationSetAsXml(dumpingSet, includeFeatures));
+    // If a root annotation has been identified then add it eplicitley at the
+    // end of the document
+    if (theRootAnnotation != null){
+      xmlDoc.append(writeEndTag(theRootAnnotation));
+    }// End if
 
-    xmlDoc.append(rootEnd);
-//    if(wasXML && needsRootTag){
-//      xmlDoc.append("</GatePreserveFormat>");
-//    }
     if(sListener != null) sListener.statusChanged("Done.");
     return xmlDoc.toString();
   }//End toXml()
@@ -833,11 +831,6 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
       Annotation annot = (Annotation) iter.next();
       offsets.add(annot.getStartNode().getOffset());
       offsets.add(annot.getEndNode().getOffset());
-      //compute the smallest ID
-      if(smallestAnnotationID == null ||
-         smallestAnnotationID.compareTo(annot.getId()) > 0){
-        smallestAnnotationID = annot.getId();
-      }
     }// End while
 
     // ofsets is sorted in ascending order.
@@ -1141,9 +1134,10 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
       } // if
 
     }// End while(!offsets.isEmpty())
-    docContStrBuff.append(rootEnd);
+    if (theRootAnnotation != null)
+      docContStrBuff.append(writeEndTag(theRootAnnotation));
     return docContStrBuff.toString();
-  } // saveAnnotationSetAsXml()
+  } // saveAnnotationSetAsXmlInOrig()
 
   /** This method returns a list with annotations ordered that way that
     * they can be serialized from left to right, at the offset. If one of the
@@ -1216,7 +1210,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     StringBuffer strBuff = new StringBuffer("");
     if (annot == null) return strBuff.toString();
 //    if (!addGatePreserveFormatTag && isRootTag){
-      if (annot.getId().equals(smallestAnnotationID)){
+      if (theRootAnnotation != null && annot.getId().equals(theRootAnnotation.getId())){
       //the features are included either if desired or if that's an annotation
       //from the original markup of the document. We don't want for example to
       //spoil all links in an HTML file!
@@ -1285,6 +1279,55 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     return strBuff.toString();
   }// writeStartTag()
 
+  /**
+   * Identifies the root annotations inside an annotation set.
+   * The root annotation is the one that starts at offset 0, and has the
+   * greatest span. If there are more than one with this function, then the
+   * annotation with the smalled ID wil be selected as root.
+   * If none is identified it will return null.
+   * @param anAnnotationSet The annotation set possibly containing
+   *  the root annotation.
+   * @return The root annotation or null is it fails
+   */
+  private Annotation identifyTheRootAnnotation(AnnotationSet anAnnotationSet){
+    if (anAnnotationSet == null) return null;
+    // If the starting node of this annotation is not null, then the annotation
+    // set will not have a root annotation.
+    Node startNode = anAnnotationSet.firstNode();
+    Node endNode = anAnnotationSet.lastNode();
+    // This is placed here just to speed things up. The alghorithm bellow can
+    // can identity the annotation that span over the entire set and with the
+    // smallest ID. However the root annotation will have to have the start
+    // offset equal to 0.
+    if (startNode.getOffset().longValue() != 0) return null;
+    // Go anf find the annotation.
+    Annotation theRootAnnotation = null;
+    // Check if there are annotations starting at offset 0. If there are, then
+    // check all of them to see which one has the greatest span. Basically its
+    // END offset should be the bigest offset from the input annotation set.
+    long start = startNode.getOffset().longValue();
+    long end = endNode.getOffset().longValue();
+    for(Iterator it = anAnnotationSet.iterator(); it.hasNext();){
+      Annotation currentAnnot = (Annotation) it.next();
+      // If the currentAnnot has both its Start and End equals to the Start and
+      // end of the AnnotationSet then check to see if its ID is the smallest.
+      if (
+          (start == currentAnnot.getStartNode().getOffset().longValue()) &&
+          (end   == currentAnnot.getEndNode().getOffset().longValue())
+         ){
+          // The currentAnnotation has is a potencial root one.
+          if (theRootAnnotation == null)
+            theRootAnnotation = currentAnnot;
+          else{
+            // If its ID is greater that the currentAnnot then update the root
+            if ( theRootAnnotation.getId().intValue() > currentAnnot.getId().intValue())
+              theRootAnnotation = currentAnnot;
+          }// End if
+      }// End if
+    }// End for
+    return theRootAnnotation;
+  }// End identifyTheRootAnnotation()
+
   /** This method takes aScanString and searches for those chars from
     * entitiesMap that appear in the string. A tree map(offset2Char) is filled
     * using as key the offsets where those Chars appear and the Char.
@@ -1347,12 +1390,6 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
 */
     strBuff.append("</"+annot.getType()+">");
 
-    //don't write the end for the root element as it will be added
-    //automatically at the end.
-    if(annot.getId().equals(smallestAnnotationID)){
-      rootEnd = strBuff.toString();
-      return "";
-    }
     return strBuff.toString();
   }// writeEndTag()
 
@@ -1876,15 +1913,9 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
 //  private boolean addGatePreserveFormatTag = false;
 
   /**
-   * Used by the XML dump preserving format method to remember the smallest
-   * annoation ID as a marker for the XML document root.
+   * Used by the XML dump preserving format method
    */
-  private Integer smallestAnnotationID = null;
-
-  /**
-   * The closing tag for the document root.
-   */
-  private String rootEnd;
+  private Annotation theRootAnnotation = null;
 
   /** This field is used when creating StringBuffers for toXml() methods.
     * The size of the StringBuffer will be docDonctent.size() multiplied by this
