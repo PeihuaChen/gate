@@ -55,8 +55,14 @@ public class Parameter
     )
       return null;
 
-    // nuke any previous default value as it may no longer be valid
-    defaultValue = null;
+    defaultValue = calculateValueFromString(defaultValueString);
+    return defaultValue;
+  } // calculateDefaultValue()
+
+  /** Calculate and return the default value for this parameter */
+  public Object calculateValueFromString(String stringValue)
+  throws ParameterException {
+    Object value = null;
 
     // get the Class for the parameter via Class.forName or CREOLE register
     Class paramClass = getParameterClass();
@@ -64,17 +70,17 @@ public class Parameter
     // java builtin types
     if(typeName.startsWith("java.")) {
       if(typeName.equals("java.lang.Boolean"))
-        defaultValue = Boolean.valueOf(defaultValueString);
+        value = Boolean.valueOf(defaultValueString);
       else if(typeName.equals("java.lang.Long"))
-        defaultValue = Long.valueOf(defaultValueString);
+        value = Long.valueOf(defaultValueString);
       else if(typeName.equals("java.lang.Integer"))
-        defaultValue = Integer.valueOf(defaultValueString);
+        value = Integer.valueOf(defaultValueString);
       else if(typeName.equals("java.lang.String"))
-        defaultValue = defaultValueString;
+        value = defaultValueString;
       else if(typeName.equals("java.lang.Double"))
-        defaultValue = Double.valueOf(defaultValueString);
+        value = Double.valueOf(defaultValueString);
       else if(typeName.equals("java.lang.Float"))
-        defaultValue = Float.valueOf(defaultValueString);
+        value = Float.valueOf(defaultValueString);
       else
         throw new ParameterException("Unsupported parameter type " + typeName);
 
@@ -87,11 +93,12 @@ public class Parameter
 
       Stack instantiations = resData.getInstantiations();
       if(! instantiations.isEmpty())
-        defaultValue = instantiations.peek();
+        value = instantiations.peek();
     }
 
-    return defaultValue;
-  } // calculateDefaultValue()
+    return value;
+  } // calculateValueFromString()
+
 
   /** The resource data that this parameter is part of. */
   protected ResourceData resData;

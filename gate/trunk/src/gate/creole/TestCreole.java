@@ -335,9 +335,14 @@ public class TestCreole extends TestCase
     // init time params
     Parameter param = null;
     iter = paramList.getInitimeParameters().iterator();
+Out.prln(
+  "paramList.getInitimeParams().size() = " +
+  paramList.getInitimeParameters().size()
+);
     while(iter.hasNext()) {
       List paramDisj = (List) iter.next();
       Iterator iter2 = paramDisj.iterator();
+Out.prln("paradisj.size() = " + paramDisj.size());
 
       for(int i=0; iter2.hasNext(); i++) {
         param = (Parameter) iter2.next();
