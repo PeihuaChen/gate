@@ -454,10 +454,15 @@ extends Transducer implements JapeConstants, java.io.Serializable
         // process the current FSM instance
         if(currentFSM.getFSMPosition().isFinal()){
           // if the current FSM is in a final state
-          //if we are in APPELT mode clear all the old accepting instances as
-          //they would be shorter than this new one
-          if(ruleApplicationStyle == APPELT_STYLE)acceptingFSMInstances.clear();
           acceptingFSMInstances.add(currentFSM.clone());
+          //if we are in APPELT mode clear all the accepting instances
+          //apart from the longest one
+          if(ruleApplicationStyle == APPELT_STYLE &&
+             acceptingFSMInstances.size() > 1){
+            Object longestAcceptor = acceptingFSMInstances.last();
+            acceptingFSMInstances.clear();
+            acceptingFSMInstances.add(longestAcceptor);
+          }
           //if we're only looking for the shortest stop here
           if(ruleApplicationStyle == FIRST_STYLE) break whileloop2;
         }
