@@ -17,4 +17,4 @@ case `uname` in
   *) CYGPATH=echo; CYGPATHP=echo ;;
 esac
 
-${JAVA} -Djava.ext.dirs=`${CYGPATH} ../lib/ext` -classpath `${CYGPATHP} gate.jar:../lib/ext/guk.jar` -Xmx200m gate.Main $*
+${JAVA} -Dsicstus.path=/opt/sicstus/lib/sicstus-3.8.6 -Djava.library.path=/opt/sicstus/lib/sicstus-3.8.6/lib:/opt/sicstus/lib -Djava.ext.dirs=`${CYGPATH} ../lib/ext` -classpath `${CYGPATHP} /opt/sicstus/lib/sicstus-3.8.6/bin/jasper.jar:gate.jar:../lib/ext/guk.jar` gate.Main $*
