@@ -206,6 +206,18 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
                     "of type " + obj.getClass()+"!");
   }
 
+  /** Returns a textual representation of this FSM instance.
+    */
+  public String toString() {
+    String res = "";
+    res +=  "FSM position :" + FSMPosition.getIndex() +
+            "\nFirst matched ANN at:" + startNode.getId() +
+            "\nLast matched ANN at :" + AGPosition.getId() +
+            "\nPriority :" + priority +
+            "\nFile index :" + fileIndex +
+            "\nBindings     :" + bindings;
+    return res;
+  }
 
   /** The FSM for which this FSMInstance is an instance of. */
   private FSM supportGraph;

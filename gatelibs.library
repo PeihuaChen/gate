@@ -20,6 +20,7 @@
     <path>[lib/docwiz.jar]</path>
     <path>[lib/ext/guk.jar]</path>
     <path>[lib/heptag.jar]</path>
+    <path>[lib/graph_drawing.jar]</path>
   </class>
   <required>gatelibs</required>
 </library>
