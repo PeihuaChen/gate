@@ -435,40 +435,6 @@ seem to work: sometimes you get features, sometimes not
     <!--<TD>spare2</TD>-->
   </TR>
 
-  <TR>
-    <TD>00041</TD>
-    <TD>core</TD>
-    <TD>Valentin</TD>
-    <TD>___adopted_by</TD>
-    <TD>beta1</TD>
-    <TD>___fixed_on ___date ___Gversion</TD>
-    <TD>Closing Gate on solaris raised this:
-
-Failed to save config data:
-gate.util.GateException: problem writing user gate.xml:
-java.io.FileNotFoundException: Z:\/.gate.xml (No such file or directory)
-        at gate.Gate.writeUserConfig(Gate.java:597)
-        at gate.gui.MainFrame$28.run(MainFrame.java:1747)
-        at java.lang.Thread.run(Thread.java:484)
-Failed to save session data:
-java.io.FileNotFoundException: Z:\/.gate.session (No such file or
-directory)
-        at java.io.FileOutputStream.open(Native Method)
-        at java.io.FileOutputStream.<init>(FileOutputStream.java:102)
-        at java.io.FileOutputStream.<init>(FileOutputStream.java:62)
-        at java.io.FileOutputStream.<init>(FileOutputStream.java:132)
-        at gate.util.persistence.PersistenceManager.saveObjectToFile(PersistenceMan
-ager.java:358)
-        at gate.gui.MainFrame$28.run(MainFrame.java:1783)
-        at java.lang.Thread.run(Thread.java:484)
-
-Anyone know why it should look for Z:\ on solaris?</TD>
-    <TD>___test_method</TD>
-    <TD>___supporting_materials</TD>
-    <!--<TD>spare1</TD>-->
-    <!--<TD>spare2</TD>-->
-  </TR>
-
 
   <TR>
     <TD>00042</TD>
@@ -685,7 +651,7 @@ annot features in the format-preserving thingy</TD>
     <!--<TD>spare2</TD>-->
   </TR>
 
-  
+
   <TR>
     <TD>00054</TD>
     <TD>core - feature request</TD>
@@ -727,7 +693,7 @@ annot features in the format-preserving thingy</TD>
     <!--<TD>spare1</TD>-->
     <!--<TD>spare2</TD>-->
   </TR>
-  
+
 <TR>
     <TD>00058</TD>
     <TD>creole</TD>
@@ -765,8 +731,8 @@ String suffixForDumpFiles</TD>
     <TD>___adopted_by</TD>
     <TD>beta1</TD>
     <TD>___fixed_on ___date ___Gversion</TD>
-    <TD>When loading ANNIE without defaults, it should 
-    wait for the previous module to load before offering 
+    <TD>When loading ANNIE without defaults, it should
+    wait for the previous module to load before offering
     to configure the next.</TD>
     <TD>___test_method</TD>
     <TD>___supporting_materials</TD>
@@ -795,7 +761,7 @@ String suffixForDumpFiles</TD>
     <TD>___adopted_by</TD>
     <TD>beta1</TD>
     <TD>___fixed_on ___date ___Gversion</TD>
-    <TD>The warning message re. crossover annotations in the XML dump should 
+    <TD>The warning message re. crossover annotations in the XML dump should
     print the offending annotations.</TD>
     <TD>___test_method</TD>
     <TD>___supporting_materials</TD>
@@ -1284,6 +1250,7 @@ exist :-)
     <!--<TD>spare1</TD>-->
     <!--<TD>spare2</TD>-->
   </TR>
+
   <TR>
     <TD>00040</TD>
     <TD>core</TD>
@@ -1297,6 +1264,57 @@ any ideas?
 
 also isn't it possible to automatically populate the organizations lists presented in memory with their acronyms?
 </TD>
+</TR>
+
+
+  <TR>
+    <TD>00041</TD>
+    <TD>core</TD>
+    <TD>Valentin</TD>
+    <TD>Hamish</TD>
+    <TD>beta1</TD>
+    <TD>beta1</TD>
+    <TD>Closing Gate on solaris raised this:
+
+Failed to save config data:
+gate.util.GateException: problem writing user gate.xml:
+java.io.FileNotFoundException: Z:\/.gate.xml (No such file or directory)
+        at gate.Gate.writeUserConfig(Gate.java:597)
+        at gate.gui.MainFrame$28.run(MainFrame.java:1747)
+        at java.lang.Thread.run(Thread.java:484)
+Failed to save session data:
+java.io.FileNotFoundException: Z:\/.gate.session (No such file or
+directory)
+        at java.io.FileOutputStream.open(Native Method)
+        at java.io.FileOutputStream.<init>(FileOutputStream.java:102)
+        at java.io.FileOutputStream.<init>(FileOutputStream.java:62)
+        at java.io.FileOutputStream.<init>(FileOutputStream.java:132)
+        at gate.util.persistence.PersistenceManager.saveObjectToFile(PersistenceMan
+ager.java:358)
+        at gate.gui.MainFrame$28.run(MainFrame.java:1783)
+        at java.lang.Thread.run(Thread.java:484)
+
+Anyone know why it should look for Z:\ on solaris?</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00053</TD>
+    <TD>creole - orthomatcher</TD>
+    <TD>Kalina</TD>
+    <TD>Kalina</TD>
+    <TD>beta1</TD>
+    <TD>19 feb 2002, beta 1</TD>
+    <TD>John Smith matches Peter Smith</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
 
   <TR>
     <TD>00056</TD>
@@ -1306,20 +1324,6 @@ also isn't it possible to automatically populate the organizations lists present
     <TD>beta1</TD>
     <TD>beta1</TD>
     <TD>saving an LR to file (as a parameter for a PR for instance also saves the LR's features which it shouldn't as they will be saved by the LR's persistence mechanism.</TD>
-    <TD>___test_method</TD>
-    <TD>___supporting_materials</TD>
-    <!--<TD>spare1</TD>-->
-    <!--<TD>spare2</TD>-->
-  </TR>
-
-<TR>
-    <TD>00053</TD>
-    <TD>creole - orthomatcher</TD>
-    <TD>Kalina</TD>
-    <TD>Kalina</TD>
-    <TD>beta1</TD>
-    <TD>19 feb 2002, beta 1</TD>
-    <TD>John Smith matches Peter Smith</TD>
     <TD>___test_method</TD>
     <TD>___supporting_materials</TD>
     <!--<TD>spare1</TD>-->
