@@ -223,12 +223,11 @@ public class AnnotationSetsView extends AbstractDocumentView
     int j = 0;
     for(;
     	tableRows.get(j) != previousHandler;
-        j++);
+      j++);
     if(previousHandler.isExpanded()){
-      j+=previousHandler.typeHandlers.size();
-    }else{
-      j++;
+      j += previousHandler.typeHandlers.size();
     }
+    j++;
     tableRows.add(j, sHandler);
     //update the table view
     tableModel.fireTableRowsInserted(j, j);
