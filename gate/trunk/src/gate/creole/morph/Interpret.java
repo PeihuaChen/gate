@@ -121,7 +121,8 @@ public class Interpret {
                   this.affix = morphInst.getAffix();
                   return answer;
                 }
-                else if (methods[i].getName().equals("null_Stem")) {
+                else if (methods[i].getName().equals("null_stem")) {
+                  //return word;
                   String answer = morphInst.null_stem();
                   this.affix = morphInst.getAffix();
                   return answer;
