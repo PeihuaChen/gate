@@ -1,3 +1,16 @@
+/*
+ *
+ *  Copyright (c) 1998-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Valentin Tablan, 18/Feb/2002
+ *
+ *  $Id$
+ */
 package gate.util;
 
 
@@ -14,8 +27,21 @@ import java.util.ArrayList;
 import gate.util.*;
 import gate.*;
 
-
+/**
+ * This class copiles a set of java sources by accessing the java compiler
+ * from tools.jar file in the jdk.
+ * All processing is done without touching the disk.
+ */
 public class Javac{
+
+  /**
+   * Compiles a set of java sources and loads the compiled classes in the gate
+   * class loader.
+   * @param classes a map from fully qualified classname to java source
+   * @throws GateException in case of a compilation error or warning.
+   * In the case of warnings the compiled classes are loaded before the error is
+   * raised.
+   */
   public static void loadClasses(final Map classes)
     throws GateException{
 //Out.prln("Compiling " + classes.size() + " classes");
