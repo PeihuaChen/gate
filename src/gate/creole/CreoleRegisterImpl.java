@@ -187,8 +187,8 @@ public class CreoleRegisterImpl extends HashMap
   public void registerBuiltins() throws GateException {
     try {
       parseDirectory(
-        Files.getGateResourceAsStream("creole/creole.xml"),
-        Gate.getClassLoader().getResource("gate/resources/creole/")
+        new URL("gate:/creole/creole.xml").openStream(),
+        new URL("gate:/creole/")
       );
     } catch(IOException e) {
       if (DEBUG) Out.println(e);

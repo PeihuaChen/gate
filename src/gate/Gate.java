@@ -105,9 +105,13 @@ public class Gate
         throw new GateException(e);
       }
 
-    // add the GATE base URL creole directory
-    creoleRegister.addDirectory(Gate.getUrl("creole/"));
-    creoleRegister.registerDirectories();
+/*
+We'll have to think about this. Right now it points to the creole inside the
+jar/classpath so it's the same as registerBuiltins
+*/
+//    // add the GATE base URL creole directory
+//    creoleRegister.addDirectory(Gate.getUrl("creole/"));
+//    creoleRegister.registerDirectories();
 
     // register the resources that are actually in gate.jar
     creoleRegister.registerBuiltins();
