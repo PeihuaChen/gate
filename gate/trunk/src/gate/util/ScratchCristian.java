@@ -22,7 +22,7 @@ import org.w3c.dom.*;
 public class ScratchCristian
 {
 
-
+/*
   public org.w3c.dom.Document parseXml (String xmlURI){
     // XML DOM
     DocumentBuilder domParser = null;
@@ -138,7 +138,14 @@ public class ScratchCristian
 
 
   //public int i;
+*/
 
+  public static void main (String[] args){
+    StringBuffer str = new StringBuffer("abc");
+    //str.insert(1,'i');
+    str = str.replace(0,1,"A");
+    System.out.println(str);
+  }
 } // class ScratchCristian
 
 

@@ -1,5 +1,5 @@
 /*
- *	XmlDocumentFormat.java
+ *	HtmlDocumentFormat.java
  *
  *	Cristian URSU, 26/May/2000
  *

@@ -128,10 +128,17 @@ public class CustomDocumentHandler extends HandlerBase{
   *  This method is called when the SAX parset encounts text int the XMl doc
   */
   public void characters( char[] text, int start, int length) throws SAXException{
-
     // some internal objects
     String content = new String(text, start, length);
-
+   /*
+    // triming section
+    if (content.charAt(content.length() - 1) == '\n')
+         hasNewLine = true;;
+    content = content.trim();
+    content = content + " ";
+    if (hasNewLine)
+            content = content + "\n";
+    */
     // if u don't want '\n' inside your document decoment the line below
     //content = content.replace('\n',' ');
 
@@ -161,6 +168,7 @@ public class CustomDocumentHandler extends HandlerBase{
   * this method is called when the SAX parser encounts white spaces
   */
   public void ignorableWhitespace(char ch[], int start, int length) throws SAXException{
+
     // internal String object
     String  text = new String(ch, start, length);
 
@@ -170,7 +178,7 @@ public class CustomDocumentHandler extends HandlerBase{
     if (tmpDocContent.length () != 0)
       if (tmpDocContent.charAt (tmpDocContent.length () - 1) != '\n' ||
         !text.equalsIgnoreCase("\n")
-      ) 
+      )
          tmpDocContent += text;
   }
 

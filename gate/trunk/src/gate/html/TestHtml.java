@@ -35,7 +35,6 @@ public class TestHtml extends TestCase
     TestHtml app = new TestHtml("TestHtml");
     try{
       app.testSomething ();
-      app.testSgml();
     }catch (Exception e){
       e.printStackTrace (System.err);
     }
@@ -105,68 +104,6 @@ public class TestHtml extends TestCase
     }
     */
   } // testSomething()
-
-  public void testSgml() throws Exception {
-    assert(true);
-
-    // create the markupElementsMap map
-    Map markupElementsMap = null;
-    /*
-    markupElementsMap = new HashMap();
-    // populate it
-    markupElementsMap.put ("S","Sentence");
-    markupElementsMap.put ("s","Sentence");
-    markupElementsMap.put ("W","Word");
-    markupElementsMap.put ("w","Word");
-    markupElementsMap.put ("p","Paragraph");
-    markupElementsMap.put ("h1","Header 1");
-    markupElementsMap.put ("H1","Header 1");
-    markupElementsMap.put ("A","link");
-    markupElementsMap.put ("a","link");
-    */
-    // create a new gate document
-    gate.Document doc = gate.Transients.newDocument(
-            new URL ("http://www.dcs.shef.ac.uk/~cursu/sgml/F71")
-    );
-    // get the docFormat that deals with it.
-    // the parameter MimeType doesn't affect right now the behaviour
-
-    gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
-        new MimeType("text","html")
-    );
-
-    // set's the map
-    docFormat.setMarkupElementsMap(markupElementsMap);
-    //*
-    // timing the operation
-    Date startTime = new Date();
-      docFormat.unpackMarkup (doc,"DocumentContent");
-    Date endTime = new Date();
-    long  time1 = endTime.getTime () - startTime.getTime ();
-    File f = Files.writeTempFile(doc.getSourceURL().openStream());
-    long docSize = f.length();
-    f.delete();
-    System.out.println("unpacMarkup() time for " + doc.getSourceURL () + "(" +
-      docSize/1024 + "." + docSize % 1024 + " K)" + "=" + time1 / 1000 + "." +
-      time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024 +
-      "." + (docSize/time1*1000)%1024 + " K/second");
-    //*/
-
-    // graphic visualisation
-    /*
-    if (docFormat != null){
-      JFrame jFrame = new JFrame();
-      JScrollPane tableViewScroll = new JScrollPane();
-            //create the table
-      SortedTable tableView = new SortedTable();
-      tableView.setTableModel(new AnnotationSetTableModel(doc.getAnnotations(),doc));
-      tableViewScroll.getViewport().add(tableView, null);
-      jFrame.getContentPane().add(tableViewScroll);
-      jFrame.setSize(800,600);
-      jFrame.setVisible(true);
-    }
-    */
-  }// testSgml
 
   class AnnotationSetTableModel extends gate.gui.SortedTableModel{
     public gate.Document currentDoc = null;

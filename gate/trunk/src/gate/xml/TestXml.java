@@ -118,14 +118,6 @@ public class TestXml extends TestCase
     System.out.println("Timer started...");
     if (docFormat != null){
         // timing the operation
-        Date startTime = new Date();
-
-        docFormat.unpackMarkup (doc);
-
-        Date endTime = new Date();
-        long  time1 = endTime.getTime () - startTime.getTime ();
-        System.out.println("unpacMarkup time for " + doc.getSourceURL () +
-          ": " + time1 / 1000 + "." + time1 % 1000 + " seconds.");
 
         startTime = new Date();
 
@@ -136,7 +128,7 @@ public class TestXml extends TestCase
 
         endTime = new Date();
         long time2 = endTime.getTime () - startTime.getTime ();
-        System.out.println("Graphic initialization time : " + time2 / 1000 +
+        System.out.println("Graphic initialization took : " + time2 / 1000 +
                             "." + time1 % 1000 + " seconds.");
         System.out.println("Total time : " + (time1 + time2) / 1000 + "." +
                             (time1 + time2) % 1000 + " seconds.");

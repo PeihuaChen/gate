@@ -624,8 +624,8 @@ public class JapeGUI extends JFrame implements ProgressListener,
                  return maxValue;
           //*/
      }
-     return null;
-    }
+      return null;
+    } // getMaxValue()
 
     class AnnotationSetComparator extends gate.gui.SortedTableComparator{
 
@@ -678,8 +678,8 @@ public class JapeGUI extends JFrame implements ProgressListener,
         if (!this.getSortOrder()) result = -result;
         return result;
       }//compare
-    }
-  }
+    }//class AnnotationSetComparator
+  }//class AnnotationSetTableModel
 
   //Gui members
   JMenuBar jMenuBar1 = new JMenuBar();
