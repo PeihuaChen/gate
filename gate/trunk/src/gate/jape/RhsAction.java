@@ -23,7 +23,19 @@ import java.io.*;
   */
 public interface RhsAction extends Serializable {
 
-  public void doit(Document doc, AnnotationSet annotations, Map bindings)
+  /**
+   * Fires the RHS action for a particular LHS match.
+   * @param doc the document the RHS action will be run on
+   * @param bindings A map containing the matc results from the LHS in the form
+   * label(String) -> matched annotations (AnnotationSet)
+   * @param annotations copy of the outputAS value provided for backward
+   * compatibility
+   * @param inputAS the input annotation set
+   * @param outputAS the output annotation set
+   * @throws JapeException
+   */
+  public void doit(Document doc, Map bindings, AnnotationSet annotations,
+                   AnnotationSet inputAS, AnnotationSet outputAS)
               throws JapeException;
 
 } // RhsAction
