@@ -263,14 +263,10 @@ public class SerialControllerEditor extends AbstractVisualResource
               "Gate", JOptionPane.ERROR_MESSAGE);
         } else {
           //we need to make sure the rows are sorted
-          List lrows = new ArrayList(rows.length);
-          for(int i = 0; i < rows.length; i++){
-            lrows.add(new Integer(rows[i]));
-          }
-          Collections.sort(lrows);
+          Arrays.sort(rows);
           //get the list of PRs
-          for(int i = 0; i < lrows.size(); i++){
-            int row = ((Integer)lrows.get(i)).intValue();
+          for(int i = 0; i < rows.length; i++){
+            int row = rows[i];
             if(row > 0){
               //move it up
               ProcessingResource value = controller.remove(row);
@@ -302,14 +298,10 @@ public class SerialControllerEditor extends AbstractVisualResource
               "Gate", JOptionPane.ERROR_MESSAGE);
         } else {
           //we need to make sure the rows are sorted
-          List lrows = new ArrayList(rows.length);
-          for(int i = 0; i < rows.length; i++){
-            lrows.add(new Integer(rows[i]));
-          }
-          Collections.sort(lrows);
+          Arrays.sort(rows);
           //get the list of PRs
-          for(int i = lrows.size() - 1; i >= 0; i--){
-            int row = ((Integer)lrows.get(i)).intValue();
+          for(int i = rows.length - 1; i >= 0; i--){
+            int row = rows[i];
             if(row < controller.getPRs().size() -1){
               //move it down
               ProcessingResource value = controller.remove(row);
@@ -472,6 +464,7 @@ public class SerialControllerEditor extends AbstractVisualResource
 
       if(analyserMode){
         //remove corpus and document
+        //create a new list so we don't change the one from CreoleReg.
         List newParameters = new ArrayList();
         Iterator pDisjIter = parameters.iterator();
         while(pDisjIter.hasNext()){

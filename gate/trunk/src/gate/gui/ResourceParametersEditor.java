@@ -320,8 +320,10 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
    */
   class ParameterValueRenderer extends ObjectRenderer {
     ParameterValueRenderer() {
-      button = new JButton(MainFrame.getIcon("loadFile.gif"));
-      button.setToolTipText("Set from file...");
+      fileButton = new JButton(MainFrame.getIcon("loadFile.gif"));
+      fileButton.setToolTipText("Set from file...");
+      listButton = new JButton(MainFrame.getIcon("editList.gif"));
+      listButton.setToolTipText("Edit the list");
       textButtonBox = new JPanel();
       textButtonBox.setLayout(new BoxLayout(textButtonBox, BoxLayout.X_AXIS));
       textButtonBox.setOpaque(false);
@@ -346,6 +348,11 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
                                                               "" : value}));
         return combo;
       }else{
+        Class typeClass = null;
+        try{
+          typeClass = Class.forName(type);
+        }catch(ClassNotFoundException cnfe){
+        }
         //non Gate type -> we'll use the text field
         String text = (value == null) ?
                       "                                        " +
@@ -361,13 +368,24 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
           this.setMaximumSize(new Dimension(Integer.MAX_VALUE,
                                             getPreferredSize().height));
           textButtonBox.add(Box.createHorizontalStrut(5));
-          textButtonBox.add(button);
+          textButtonBox.add(fileButton);
+          return textButtonBox;
+        }else if(typeClass != null &&
+                 List.class.isAssignableFrom(typeClass)){
+          //List value
+          textButtonBox.removeAll();
+          textButtonBox.add(this);
+          this.setMaximumSize(new Dimension(Integer.MAX_VALUE,
+                                            getPreferredSize().height));
+          textButtonBox.add(Box.createHorizontalStrut(5));
+          textButtonBox.add(listButton);
           return textButtonBox;
         }else return this;
       }
     }// public Component getTableCellRendererComponent
 
-    JButton button;
+    JButton fileButton;
+    JButton listButton;
     JComboBox combo;
     JPanel textButtonBox;
   }//class ObjectRenderer extends DefaultTableCellRenderer
@@ -457,10 +475,9 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       textField = new JTextField();
 
       fileChooser = MainFrame.getFileChooser();
-      button = new JButton(new ImageIcon(getClass().getResource(
-                               "/gate/resources/img/loadFile.gif")));
-      button.setToolTipText("Set from file...");
-      button.addActionListener(new ActionListener() {
+      fileButton = new JButton(MainFrame.getIcon("loadFile.gif"));
+      fileButton.setToolTipText("Set from file...");
+      fileButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
           fileChooser.setDialogTitle("Select a file");
@@ -473,6 +490,16 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
           }
         }
       });
+
+      listButton = new JButton(MainFrame.getIcon("editList.gif"));
+      listButton.setToolTipText("Edit the list");
+      listButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          List returnedList = listEditor.showDialog();
+          if(returnedList != null) listValue = returnedList;
+        }
+      });
+
       textButtonBox = new JPanel();
       textButtonBox.setLayout(new BoxLayout(textButtonBox, BoxLayout.X_AXIS));
       textButtonBox.setOpaque(false);
@@ -503,7 +530,8 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
                                                  boolean isSelected,
                                                  int row,
                                                  int column){
-
+      comboUsed = false;
+      listUsed = false;
       ParameterDisjunction pDisj = (ParameterDisjunction)
                                    table.getValueAt(row, 0);
       type = pDisj.getType();
@@ -518,7 +546,12 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
         return combo;
       }else{
         //non Gate type
-        comboUsed = false;
+        Class typeClass = null;
+        try{
+          typeClass = Class.forName(type);
+        }catch(ClassNotFoundException cnfe){
+        }
+
         textField.setText((value == null) ? "" : value.toString());
         if(type.equals("java.net.URL")){
           //clean up all filters
@@ -542,12 +575,30 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
           textButtonBox.removeAll();
           textButtonBox.add(textField);
           textButtonBox.add(Box.createHorizontalStrut(5));
-          textButtonBox.add(button);
+          textButtonBox.add(fileButton);
           return textButtonBox;
         }else if(type.equals("java.lang.Boolean")){
           label.setText(value.toString());
           return label;
-        }else {
+        }else if(typeClass != null &&
+                      List.class.isAssignableFrom(typeClass)){
+          //List value
+          listUsed = true;
+          Parameter param = pDisj.getParameter();
+          Set sufixes = param.getSuffixes();
+
+          listValue = (List)value;
+          listEditor = new ListEditorDialog(ResourceParametersEditor.this,
+                                            (List)value,
+                                            param.getItemClassName());
+
+          textField.setEditable(false);
+          textButtonBox.removeAll();
+          textButtonBox.add(textField);
+          textButtonBox.add(Box.createHorizontalStrut(5));
+          textButtonBox.add(listButton);
+          return textButtonBox;
+        }else{
           textField.setEditable(true);
           return textField;
         }
@@ -556,7 +607,9 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
 
     public Object getCellEditorValue(){
       if(comboUsed) return combo.getSelectedItem();
-      else{
+      else if(listUsed){
+        return listValue;
+      }else{
         if(type.equals("java.lang.Boolean")){
           //get the value from the label
           return new Boolean(label.getText());
@@ -593,8 +646,13 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
      */
     JFileChooser fileChooser;
 
+    ListEditorDialog listEditor = null;
+    List listValue;
+
     boolean comboUsed;
-    JButton button;
+    boolean listUsed;
+    JButton fileButton;
+    JButton listButton;
     JPanel textButtonBox;
   }//class ParameterValueEditor
 

@@ -278,5 +278,13 @@ public class Parameter implements Serializable
     }catch(ParameterException pe){
       throw new GateRuntimeException(pe.toString());
     }
+  }
+
+  /**
+   * If this parameter is a List type this will return the type of the items
+   * in the list. If the type is <tt>null</tt> String will be assumed.
+   */
+  public String getItemClassName() {
+    return itemClassName;
   } // toString()
 } // class Parameter

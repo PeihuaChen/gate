@@ -25,6 +25,8 @@
       <CLASS>gate.corpora.CorpusImpl</CLASS>
       <INTERFACE>gate.Corpus</INTERFACE>
       <ICON>lr.gif</ICON>
+      <PARAMETER NAME="documentList" OPTIONAL="true" ITEM_CLASS_NAME="gate.Document" COMMENT="A list of documents">java.util.List</PARAMETER>
+
     </RESOURCE>
     <RESOURCE>
       <NAME>GATE XML Document Format</NAME>
