@@ -47,6 +47,10 @@ import gate.util.*;
       return 9;
     } // getColumnCount
 
+    public Object getRawObject(int raw){
+      return m_data.get(raw);
+    }
+
     /** Get the column class*/
     public Class getColumnClass(int column) {
       return new String("").getClass();
