@@ -83,7 +83,7 @@ public class OrthoMatcher extends AbstractProcessingResource
 
   protected FeatureMap queryFM = Factory.newFeatureMap();
 
-  protected ExecutionException executionException;
+//  protected ExecutionException executionException;
 
   // name lookup tables (used for namematch)
   //gave them bigger default size, coz rehash is expensive
@@ -139,14 +139,13 @@ public class OrthoMatcher extends AbstractProcessingResource
     *  this in subclasses so the default implementation signals an
     *  exception.
     */
-  public void run() {
+  public void execute() throws ExecutionException{
 
     //check the input
     if(document == null) {
-      executionException = new ExecutionException(
+      throw new ExecutionException(
         "No document for namematch!"
       );
-      return;
     }
 
     // get the annotations from document
@@ -201,7 +200,7 @@ public class OrthoMatcher extends AbstractProcessingResource
 
   } // run()
 
-  protected void matchNameAnnotations() {
+  protected void matchNameAnnotations() throws ExecutionException{
     // go through all the annotation types
     Iterator iterAnnotationTypes = annotationTypes.iterator();
     while (iterAnnotationTypes.hasNext()) {
@@ -229,7 +228,7 @@ public class OrthoMatcher extends AbstractProcessingResource
           annotString = regularExpressions(annotString," ", "\\s+");
 
         } catch (InvalidOffsetException ioe) {
-            executionException = new ExecutionException
+            throw new ExecutionException
                                    ("Invalid offset of the annotation");
         }
         //convert to lower case if we are not doing a case sensitive match
@@ -285,7 +284,7 @@ public class OrthoMatcher extends AbstractProcessingResource
 
   }
 
-  protected void matchUnknown() {
+  protected void matchUnknown() throws ExecutionException {
     //get all Unknown annotations
     AnnotationSet unknownAnnots = nameAllAnnots.get(unknownType);
 
@@ -307,7 +306,7 @@ public class OrthoMatcher extends AbstractProcessingResource
         // now do the reg. exp. substitutions
         unknownString = regularExpressions(unknownString," ", "\\s+");
       } catch (InvalidOffsetException ioe) {
-          executionException = new ExecutionException
+          throw new ExecutionException
                                  ("Invalid offset of the annotation");
       }
       //convert to lower case if we are not doing a case sensitive match
@@ -642,7 +641,8 @@ public class OrthoMatcher extends AbstractProcessingResource
   }//cleanup
 
   /** return a person name without title */
-  protected String containTitle (String annotString, Annotation annot){
+  protected String containTitle (String annotString, Annotation annot)
+                      throws ExecutionException {
     // get the offsets
     Long startAnnot = annot.getStartNode().getOffset();
     Long endAnnot = annot.getEndNode().getOffset();
@@ -686,7 +686,7 @@ public class OrthoMatcher extends AbstractProcessingResource
                                  annotTitle.length()+1,annotString.length());
           }
         } catch (InvalidOffsetException ioe) {
-            executionException = new ExecutionException
+            throw new ExecutionException
                                ("Invalid offset of the annotation");
         }//try
       }// while
@@ -723,7 +723,7 @@ public class OrthoMatcher extends AbstractProcessingResource
     return newString.toString().toLowerCase();
   }
 
-
+/*
   public void check() throws ExecutionException {
     if (executionException != null) {
       ExecutionException e = executionException;
@@ -731,6 +731,7 @@ public class OrthoMatcher extends AbstractProcessingResource
       throw e;
     }
   } // check()
+*/
 
   /** if ( == false) then reads the names of files in order
     *  to create the lookup tables
