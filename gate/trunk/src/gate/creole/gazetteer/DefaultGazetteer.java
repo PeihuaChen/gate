@@ -356,8 +356,15 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
        annotationSetName.equals("")) annotationSet = document.getAnnotations();
     else annotationSet = document.getAnnotations(annotationSetName);
 
-    fireStatusChanged("Doing lookup in " +
-                           document.getSourceUrl().getFile() + "...");
+    String statusText;
+    if(document.getSourceUrl() != null) {
+      statusText = document.getSourceUrl().getFile().toString();
+    }
+    else {
+      statusText = "Document";
+    } // if
+    fireStatusChanged("Doing lookup in " + statusText + "...");
+
     String content = document.getContent().toString();
     int length = content.length();
 // >>> DAM, was
