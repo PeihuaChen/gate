@@ -849,7 +849,17 @@ most MS progeny.
 <H3>Integrating Sicstus Prolog programs</H3>
 
 <P>
-When calling Sicstus from Java, if the memory allocation directive
+Sicstus provide a nice interface for Java, called Jasper, based on a native
+code library that is available for different platforms as part of the
+Sicstus distribution.  Linking native code with Java is a slightly risky
+business - unlike the gentle degradation often available via Java
+exceptions, native code problems are likely to crash the whole application. 
+It is also difficult to get a bug-free implementation of this type of
+language mixing to work identically on different platforms. For example:
+
+<P>
+In Sicstus 3.8.6 on NT,
+when calling Sicstus from Java, if the memory allocation directive
 <TT>-Xmx200m</TT> is given to the JVM, the sicstus runtime throws
 this error:
 <PRE>
@@ -858,22 +868,43 @@ Signal 127
 </PRE>
 
 <P>
-Jasper seems to have static initialiser code that assumes that 
-java.library.path has been set to point to the location of
-the Sicstus native code. This means that it is very difficult to
-set the correct paths from GATE (e.g. by reading them from a Prolog
-PR's creole.xml file). Also, the behaviour of Jasper in relation
-to the sicstus.path property, the setting of the boot path in
-the Sicstus class constructors seems pretty random. For these reasons
-GATE itself tries to set up Sicstus configuration data at install
-time. If this data is incorrect you will need to edit the
-Makefile and/or startup script as appropriate.
+Using a slightly different version of jasper.jar than the one in the 
+Sicstus distribution you're getting the native code from
+(e.g. NT version 3.8.4 vs. Linux version 3.8.6) can crash the
+system, unsurprisingly. But if we include jasper.jar in the GATE libraries
+then this is likely to happen quite often.
 
 <P>
-Jasper's java library also seems to vary accross platforms - I couldn't get
-a jasper.jar from Linux to work on NT and vice-versa. Therefore Sicstus
-support is excluded from GATE itself.
+For these reasons we don't include Sicstus support in GATE itself, but will
+be happy to supply example code from our own modules that integrate Sicstus
+code with GATE on request.
 
+<!--
+
+view this in a big window!
+
+
+
+				LINUX					NT				SOLARIS
+
+
+SICSTUS_TOP		/opt/sicstus				//w/sicstus			?
+
+SICSTUS_LIB		$SICSTUS_TOP/lib/sicstus-3.8.6		$SICSTUS_TOP/library		?
+
+SICSTUS_JLP		$SICSTUS_LIB/lib:$SICSTUS_TOP/lib	$SICSTUS_LIB:$SICSTUS_TOP/bin	?
+
+SICSTUS_PATH		$SICSTUS_LIB				$SICSTUS_TOP			?
+
+JASPER			$SICSTUS_LIB/bin/jasper.jar		$SICSTUS_TOP/bin/jasper.jar	?
+
+-Djava.library.path	$SICSTUS_JLP				$SICSTUS_JLP			$SICSTUS_JLP
+
+-Dsicstus.path		$SICSTUS_PATH				$SICSTUS_PATH			$SICSTUS_PATH
+
+-classpath		$JASPER					$JASPER			 	$JASPER
+
+-->
 
 
 <HR>
