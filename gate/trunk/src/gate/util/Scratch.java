@@ -18,6 +18,7 @@ package gate.util;
 
 import java.awt.Color;
 import java.io.*;
+import java.net.URL;
 import java.util.*;
 import java.util.prefs.Preferences;
 import java.util.zip.GZIPInputStream;
@@ -43,8 +44,23 @@ public class Scratch
   private static final boolean DEBUG = false;
 
   public static void main(String args[]) throws Exception {
-  Map defaultsMap = UIManager.getLookAndFeelDefaults();
-  System.out.println(defaultsMap.keySet());
+    URL url = new URL("jar:file:/Z:/gate/bin/gate.jar!/gate/Gate.class");
+    System.out.println(url);
+    System.out.println("Path: " + url.getPath());
+    System.out.println("File: " + url.getFile());
+    System.out.println("Host: " + url.getHost());
+    System.out.println("Proto: " + url.getProtocol());
+    
+    url = Thread.currentThread().getContextClassLoader().
+      getResource("gate/Gate.class");
+    System.out.println(url);
+    System.out.println("Path: " + url.getPath());
+    System.out.println("File: " + url.getFile());
+    System.out.println("Host: " + url.getHost());
+    System.out.println("Proto: " + url.getProtocol());
+    
+    Map defaultsMap = UIManager.getLookAndFeelDefaults();
+    System.out.println(defaultsMap.keySet());
 
     
     //test for a bug reported by Luc Plamondon
