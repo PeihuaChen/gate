@@ -28,7 +28,7 @@ public class CreoleXmlHandler extends HandlerBase {
   private ResourceData resourceData;
 
   /** Are we debugging? */
-  private static final boolean debug = true;
+  private static final boolean debug = false;
 
   /** Construction */
   public CreoleXmlHandler(CreoleRegister register){ this.register = register; }
