@@ -26,14 +26,30 @@ import gate.creole.*;
 public class GazetteerList extends gate.creole.AbstractLanguageResource
 implements List {
 
+  /** indicates list representation of the gazetteer list*/
+  public final static int LIST_MODE = 0;
+
+  /** indicates representation of the gaz list as a single string */
+  public final static int STRING_MODE = 1;
+
   /** the url of this list */
   private URL url;
+
+  /**the encoding of the list */
   private String encoding = "UTF-8";
+
+  /** indicates the current mode
+   *of the gazetteer list(e.g. STRING_MODE,LIST_MODE) */
+  private int mode = 0 ;
 
   /** flag indicating whether the list has been modified after loading/storing */
   private boolean isModified = false;
 
+  /** the entries of this list */
   private List entries = new ArrayList();
+
+  /** the content of this list */
+  private String content = null;
 
   /** create a new gazetteer list */
   public GazetteerList() {
@@ -43,6 +59,41 @@ implements List {
   public boolean isModified() {
     return isModified;
   }
+
+  /**sets the modified status of the current list
+   * @param modifed is modified flag   */
+  public void setModified(boolean modified) {
+    isModified = modified;
+  }
+
+  /** retrieves the current mode of the gaz list
+   *  @return the current mode   */
+  public int getMode() { return mode; }
+
+  /**sets mode of the gazetteer list
+   * @param m the mode to be set    */
+  public void setMode(int m) {
+    if (m!=mode) {
+    switch (m){
+        case LIST_MODE :{
+          mode = m;
+          updateContent(content);
+          break;
+        }; // LIST_MODE
+        case STRING_MODE:{
+          content = this.toString();
+          mode = m;
+          break;
+        } //STRING_MODE
+        default:{
+          throw new gate.util.GateRuntimeException("Invalid Mode ="+mode
+          +"\nValid modes are:\nLIST_MODE = "+LIST_MODE
+          +"\nSTRING_MODE = "+STRING_MODE);
+        } // default
+      } // switch
+    } // only if different from the current
+  } // setMode(int)
+
 
   /** set the encoding of the list
    *  @param encod the encoding to be set */
@@ -271,43 +322,82 @@ implements List {
   }
 
 
-  /** dumps all the entries to one string */
+  /** Retrieves the string representation of the gaz list
+   *  according to its mode. If
+   *  {@link gate.creole.gazetteer.GazetteerList.LIST_MODE} then all
+   *  the entries are dumped sequentially to a string. If
+   *  {@link gate.creole.gazetteer.GazetteerList.TEXT_MODE} then
+   *  the content (a string) of the gaz list is retrieved.
+   *  @return the string representation of the gaz list*/
   public String toString() {
-    StringBuffer result = new StringBuffer();
-    String entry = null;
-    for ( int i = 0 ; i < entries.size() ; i++) {
-      entry = ((String)entries.get(i)).trim();
-      if (entry.length()>0) {
-        result.append(entry);
-        result.append("\n");
-      }// if
-    }// for
-    return result.toString();
+    String stres = null;
+    switch (mode) {
+      case LIST_MODE : {
+        StringBuffer result = new StringBuffer();
+        String entry = null;
+        for ( int i = 0 ; i < entries.size() ; i++) {
+          entry = ((String)entries.get(i)).trim();
+          if (entry.length()>0) {
+            result.append(entry);
+            result.append("\n");
+          }// if
+        }// for
+        stres = result.toString();
+        break;
+      };
+      case STRING_MODE : {
+        stres = content;
+        break;
+      }
+      default: {
+        throw new gate.util.GateRuntimeException("Invalid Mode ="+mode
+        +"\nValid modes are:\nLIST_MODE = "+LIST_MODE
+        +"\nSTRING_MODE = "+STRING_MODE);
+      }
+    } // switch
+    return stres;
   }//toString()
 
-  /** updates the content of the gaz list with the given parameter
+  /** Updates the content of the gaz list with the given parameter.
+   *  Depends on the mode of the gaz list.
+   *  In the case of {@link gate.creole.gazetteer.GazetteerList.LIST_MODE}
+   *  the new content is parsed and loaded as single nodes through the
+   *  {@link java.util.List} interface. In the case of
+   *  {@link gate.creole.gazetteer.GazetteerList.STRING_MODE} the new content
+   *  is stored as a String and is not parsed.
    *  @param newContent the new content of the gazetteer list */
   public void updateContent(String newContent) {
-    BufferedReader listReader;
+    switch (mode) {
+      case STRING_MODE : {
+        content = newContent;
+        break;
+      };
+      case LIST_MODE : {
+        BufferedReader listReader;
+        listReader = new BufferedReader(new StringReader(newContent));
+        String line;
+        List tempEntries = new ArrayList();
+        try {
+          while (null != (line = listReader.readLine())) {
+            tempEntries.add(line);
+          } //while
+          listReader.close();
+        } catch (IOException x) {
+          /**should never be thrown*/
+          throw new gate.util.LuckyException("IOException :"+x.getMessage());
+        }
 
-
-    listReader = new BufferedReader(new StringReader(newContent));
-    String line;
-    List tempEntries = new ArrayList();
-    try {
-      while (null != (line = listReader.readLine())) {
-        tempEntries.add(line);
-      } //while
-      listReader.close();
-    } catch (IOException x) {
-      /**should never be thrown*/
-      throw new gate.util.LuckyException("IOException :"+x.getMessage());
-    }
-
-    isModified = !tempEntries.equals(entries);
-    clear();
-    entries = tempEntries;
-
+        isModified = !tempEntries.equals(entries);
+        clear();
+        entries = tempEntries;
+        break;
+      } // LIST_MODE
+      default: {
+        throw new gate.util.GateRuntimeException("Invalid Mode ="+mode
+        +"\nValid modes are:\nLIST_MODE = "+LIST_MODE
+        +"\nSTRING_MODE = "+STRING_MODE);
+      }// default
+    } // switch mode
   } // updateContent(String)
 
 } // Class GazetteerList
