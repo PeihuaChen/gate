@@ -105,7 +105,7 @@ public class Namematch extends AbstractProcessingResource
     //check the input
     if(document == null) {
       executionException = new ExecutionException(
-        "No document for namematch!"
+        "Namematcher: No document to process !"
       );
       return;
     }
@@ -131,13 +131,15 @@ public class Namematch extends AbstractProcessingResource
     if (nameAllAnnots != null) {
       if (nameAllAnnots.isEmpty()) {
         executionException = new ExecutionException(
-          "No annotations to process!"
+          "Namematcher: No annotations to process. The input"+
+          " annotation set is empty!"
         );
        return;
       }
     } else {
       executionException = new ExecutionException(
-        "No annotations to process!"
+          "Namematcher: No annotations to process. The input"+
+          " annotation set is null!"
       );
       return;
     }// End if
@@ -192,7 +194,8 @@ public class Namematch extends AbstractProcessingResource
 
             } catch (InvalidOffsetException ioe) {
               executionException = new ExecutionException
-                                     ("Invalid offset of the annotation");
+              ("Namematcher: Invalid offset while trying to get"+
+              " the text span for annotation : " + annot.getType());
             }
 
           } // for
@@ -474,7 +477,9 @@ public class Namematch extends AbstractProcessingResource
               }
             } catch (InvalidOffsetException ioe) {
               executionException = new ExecutionException
-                                 ("Invalid offset of the annotation");
+              ("Namematcher: Invalid offset while trying to get"+
+              " the text span for annotation : " + currentAnnot.getType());
+
             }
         }//if
       }// while
