@@ -26,9 +26,14 @@ public class TestAnnotation extends TestCase
   /** An annotation set */
   protected AnnotationSet basicAS;
 
+  /** An empty feature map */
+  protected FeatureMap emptyFeatureMap;
+
   /** Fixture set up */
-  public void setUp() {
+  public void setUp() throws InvalidOffsetException {
     // doc1 = TestDocument.newDoc();
+
+    emptyFeatureMap = new SimpleFeatureMapImpl();
 
     basicAS = new AnnotationSetImpl(doc1);
     FeatureMap fm = new SimpleFeatureMapImpl();
@@ -63,7 +68,7 @@ public class TestAnnotation extends TestCase
   } // setUp
 
   /** Test indexing by offset */
-  public void testOffsetIndex() {
+  public void testOffsetIndex() throws InvalidOffsetException {
     AnnotationSet as = new AnnotationSetImpl(doc1);
     AnnotationSet asBuf;
     Integer newId;
@@ -99,8 +104,59 @@ public class TestAnnotation extends TestCase
 
   } // testOffsetIndex()
 
+  /** Test exception throwing */
+  public void testExceptions() {
+    AnnotationSet as = new AnnotationSetImpl(doc1);
+    boolean threwUp = false;
+
+    try {
+      as.add(new Long(-1), new Long(1), "T", emptyFeatureMap);
+    } catch (InvalidOffsetException e) {
+      threwUp = true;
+    }
+    if(! threwUp) fail("Should have thrown InvalidOffsetException");
+    threwUp = false;   
+    try {
+      as.add(new Long(1), new Long(-1), "T", emptyFeatureMap);
+    } catch (InvalidOffsetException e) {
+      threwUp = true;
+    }
+    if(! threwUp) fail("Should have thrown InvalidOffsetException");
+    threwUp = false;
+    try {
+      as.add(new Long(1), new Long(0), "T", emptyFeatureMap);
+    } catch (InvalidOffsetException e) {
+      threwUp = true;
+    }
+    if(! threwUp) fail("Should have thrown InvalidOffsetException");
+    threwUp = false;
+    try {
+      as.add(null, new Long(1), "T", emptyFeatureMap);
+    } catch (InvalidOffsetException e) {
+      threwUp = true;
+    }
+    if(! threwUp) fail("Should have thrown InvalidOffsetException");
+    threwUp = false;
+    try {
+      as.add(new Long(1), null, "T", emptyFeatureMap);
+    } catch (InvalidOffsetException e) {
+      threwUp = true;
+    }
+    if(! threwUp) fail("Should have thrown InvalidOffsetException");
+    threwUp = false;
+    try {
+      as.add(new Long(999999), new Long(100000000), "T", emptyFeatureMap);
+    } catch (InvalidOffsetException e) {
+      threwUp = true;
+    }
+// won't work until the doc size check is implemented
+//    if(! threwUp) fail("Should have thrown InvalidOffsetException");
+    threwUp = false;
+
+  } // testExceptions()
+
   /** Test type index */
-  public void testTypeIndex() {
+  public void testTypeIndex() throws InvalidOffsetException {
     AnnotationSet as = new AnnotationSetImpl(doc1);
     AnnotationSet asBuf;
     Integer newId;
@@ -153,8 +209,8 @@ public class TestAnnotation extends TestCase
   } // testTypeIndex()
 
   /** Test complex get (with type, offset and feature contraints) */
-  public void testComplexGet() {
-    AnnotationSet as = new AnnotationSetImpl(doc1);
+  public void testComplexGet() throws InvalidOffsetException {
+    AnnotationSet as = basicAS;
     AnnotationSet asBuf;
     Integer newId;
     FeatureMap fm = new SimpleFeatureMapImpl();
@@ -162,11 +218,18 @@ public class TestAnnotation extends TestCase
     Node startNode;
     Node endNode;
 
-    as.add(new Long(10), new Long(20), "T1", fm);
+    FeatureMap constraints = new SimpleFeatureMapImpl();
+
+
+
+
+
+
+//    constraints.put( ............ );
   } // testComplexGet()
 
   /** Test AnnotationSetImpl */
-  public void testAnnotationSet() {
+  public void testAnnotationSet() throws InvalidOffsetException {
     // constuct an empty AS
     AnnotationSet as = new AnnotationSetImpl(doc1);
     assertEquals(as.size(), 0);

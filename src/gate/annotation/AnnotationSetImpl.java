@@ -209,7 +209,19 @@ implements AnnotationSet
   /** Add an annotation and return its id */
   public Integer add(
     Long start, Long end, String type, FeatureMap features
-  ) {
+  ) throws InvalidOffsetException {
+    // are the offsets valid?
+    if(start == null || end == null)
+      throw new InvalidOffsetException();
+    long startValue = start.longValue(); 
+    long endValue = end.longValue();
+    if(
+      startValue > endValue || startValue < 0 || endValue < 0
+// || startValue > doc.size() || endValue > doc.size()
+    )
+      throw new InvalidOffsetException();
+
+
     // the set has to be indexed by position in order to add, as we need
     // to find out if nodes need creating or if they exist already
     if(nodesByOffset == null) indexByOffset();
