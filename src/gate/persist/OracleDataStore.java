@@ -253,7 +253,7 @@ public class OracleDataStore extends JDBCDataStore {
       }
     }
 
-    Assert.assertTrue(resourceFound);
+    //Assert.assertTrue(resourceFound);
 
     //9. let the world know about it
     fireResourceDeleted(
@@ -802,16 +802,19 @@ public class OracleDataStore extends JDBCDataStore {
 
     //6.2. create named annotation sets
     Map namedAnns = doc.getNamedAnnotationSets();
-    Set setAnns = namedAnns.entrySet();
-    Iterator itAnns = setAnns.iterator();
+    //the map may be null
+    if (null != namedAnns) {
+      Set setAnns = namedAnns.entrySet();
+      Iterator itAnns = setAnns.iterator();
 
-    while (itAnns.hasNext()) {
-      Map.Entry mapEntry = (Map.Entry)itAnns.next();
-      //String currAnnName = (String)mapEntry.getKey();
-      AnnotationSet currAnnSet = (AnnotationSet)mapEntry.getValue();
+      while (itAnns.hasNext()) {
+        Map.Entry mapEntry = (Map.Entry)itAnns.next();
+        //String currAnnName = (String)mapEntry.getKey();
+        AnnotationSet currAnnSet = (AnnotationSet)mapEntry.getValue();
 
-      //create a-sets
-      createAnnotationSet(lrID,currAnnSet);
+        //create a-sets
+        createAnnotationSet(lrID,currAnnSet);
+      }
     }
 
     //7. create features
