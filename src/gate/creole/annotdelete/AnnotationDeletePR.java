@@ -35,8 +35,12 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
   public static final String
     TRANSD_ANNOT_TYPES_PARAMETER_NAME = "annotationTypes";
 
+  public static final String
+    TRANSD_SETS_KEEP_PARAMETER_NAME = "setsToKeep";
+
   protected String markupSetName = GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME;
   protected List annotationTypes;
+  protected List setsToKeep = new ArrayList();
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException
@@ -80,7 +84,9 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
     Iterator iter = setNames.iterator();
     while (iter.hasNext()) {
       String setName = (String) iter.next();
-      if (! setName.equals(markupSetName)) {
+      //check first whether this is the original markups or one of the sets
+      //that we want to keep
+      if (! setName.equals(markupSetName) && !setsToKeep.contains(setName) ) {
         if(annotationTypes == null || annotationTypes.isEmpty())
           document.removeAnnotationSet(setName);
         else
@@ -113,5 +119,14 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
   public void setAnnotationTypes(List newTypes) {
     annotationTypes = newTypes;
   }
+
+  public List getSetsToKeep() {
+    return this.setsToKeep;
+  }
+
+  public void setSetsToKeep(List newSetNames) {
+    setsToKeep = newSetNames;
+  }
+
 
 } // class AnnotationSetTransfer
