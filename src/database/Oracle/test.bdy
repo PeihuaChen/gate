@@ -222,6 +222,26 @@ create or replace package body test is
   end;                                                                                                        
 
 
+  /*******************************************************************************************/
+  procedure remove_all_data
+  is
+  
+  begin
+
+     -- delete documents
+     delete from t_lang_resource;
+
+     -- remove users in groups
+     delete from t_user_group;
+
+    -- delete groups
+     delete from t_group;
+
+     -- delete users
+     delete from t_user;
+
+  end;                                                                                                        
+  
 /*begin
   -- Initialization
   <Statement>; */
