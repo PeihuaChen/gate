@@ -121,6 +121,8 @@ public class TestGate {
     if(textMode) { // text runner mode
       junit.textui.TestRunner.main(junitArgs);
     } else if(autoloadingMode) { // autoloading mode
+      junitArgs[0] = "gate.TestGate";
+      junitArgs[1] = "";
 
       // NOTE: the DB tests fail under this one (doesn't load oracle driver,
       // even after the Class.forName call)
