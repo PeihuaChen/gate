@@ -250,7 +250,7 @@ Priority: 35
  {Token.category == DT}|
  {Token.category == PRP}|
  {Token.category == RB}
-)
+)?
 (
  (TITLE)+
  ((FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2)
