@@ -137,8 +137,16 @@ public class TestGate {
     * registered here.
     */
   public static Test suite() throws Exception {
-    // inialise the library.
-    Gate.init();
+    // inialise the library. we re-throw any exceptions thrown by
+    // init, after printing them out, because the junit gui doesn't
+    // say anything more informative than "can't invoke suite" if there's
+    // an exception here...
+    try {
+      Gate.init();
+    } catch(GateException e) {
+      Out.prln("can't initialise GATE library! exception = " + e);
+      throw(e);
+    }
 
     TestSuite suite = new TestSuite();
 
