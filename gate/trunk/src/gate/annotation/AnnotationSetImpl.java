@@ -905,7 +905,7 @@ public class AnnotationSetImpl
       }
     }
 
-    //now handle the insert
+    //now handle the insert and/or update the rest of the nodes' position
     //get the user selected behaviour (defaults to append)
     boolean shouldPrepend = Gate.getUserConfig().
         getBoolean(GateConstants.DOCEDIT_INSERT_PREPEND).booleanValue();
@@ -930,9 +930,14 @@ public class AnnotationSetImpl
       NodeImpl n = (NodeImpl) nodesAfterReplacementIter.next();
       long oldOffset = n.getOffset().longValue();
       //by default we move all nodes back
-      long newOffset = oldOffset - ( (e - s) - rlen);
-      //for the first node we need behave differently if we prepend
-      if(oldOffset == s && shouldPrepend) newOffset = s;
+      long newOffset = oldOffset - (e - s) + rlen;
+      //for the first node we need behave differently
+      if (oldOffset == s){
+        //the first offset never moves back
+        if(newOffset < s) newOffset = s;
+        //if we're prepending we don't move forward
+        if(shouldPrepend) newOffset = s;
+      }
       n.setOffset(new Long(newOffset));
     }
     //add back to the index by offset with the new offsets
