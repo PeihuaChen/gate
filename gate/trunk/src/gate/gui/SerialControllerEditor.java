@@ -163,7 +163,8 @@ public class SerialControllerEditor extends AbstractVisualResource
       //we need to add the corpus combo
       corpusCombo = new JComboBox(new CorporaComboModel());
       corpusCombo.setRenderer(new ResourceRenderer());
-      if(corpusCombo.getModel().getSize() > 0) corpusCombo.setSelectedIndex(0);
+      if(corpusCombo.getModel().getSize() > 1) corpusCombo.setSelectedIndex(1);
+      else corpusCombo.setSelectedIndex(0);
       Box horBox = Box.createHorizontalBox();
       horBox.add(new JLabel("Corpus:"));
       horBox.add(Box.createHorizontalStrut(5));
@@ -613,32 +614,34 @@ public class SerialControllerEditor extends AbstractVisualResource
                                   implements ComboBoxModel{
     public int getSize(){
       //get all corpora regardless of their actual type
-      java.util.List loadedDocuments = null;
+      java.util.List loadedCorpora = null;
       try{
-        loadedDocuments = Gate.getCreoleRegister().
+        loadedCorpora = Gate.getCreoleRegister().
                                getAllInstances("gate.Corpus");
       }catch(GateException ge){
         ge.printStackTrace(Err.getPrintWriter());
       }
 
-      return loadedDocuments == null ? 0 : loadedDocuments.size();
+      return loadedCorpora == null ? 1 : loadedCorpora.size() + 1;
     }
 
     public Object getElementAt(int index){
-      //get all corpora regardless of their actual type
-      java.util.List loadedDocuments = null;
-      try{
-        loadedDocuments = Gate.getCreoleRegister().
-                               getAllInstances("gate.Corpus");
-      }catch(GateException ge){
-        ge.printStackTrace(Err.getPrintWriter());
+      if(index == 0) return "<none>";
+      else{
+        //get all corpora regardless of their actual type
+        java.util.List loadedCorpora = null;
+        try{
+          loadedCorpora = Gate.getCreoleRegister().
+                                 getAllInstances("gate.Corpus");
+        }catch(GateException ge){
+          ge.printStackTrace(Err.getPrintWriter());
+        }
+        return loadedCorpora == null? "" : loadedCorpora.get(index - 1);
       }
-      return loadedDocuments == null? null : loadedDocuments.get(index);
     }
 
     public void setSelectedItem(Object anItem){
-      if(anItem == null) selectedItem = null;
-      else selectedItem = anItem;
+      selectedItem = anItem;
     }
 
     public Object getSelectedItem(){

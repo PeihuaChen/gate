@@ -109,7 +109,6 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
     addKeyListener(new KeyAdapter() {
       public void keyTyped(KeyEvent e) {
         if(e.getKeyCode() == e.VK_ENTER){
-System.out.println(e);
           if(getEditingColumn() == -1 && getEditingRow() == -1){
             getParent().dispatchEvent(e);
           }
@@ -377,8 +376,9 @@ System.out.println(e);
 
       if(rData != null){
         //Gate type
-        combo.setModel(new DefaultComboBoxModel(new Object[]{(value==null)  ?
-                                                              "" : value}));
+        combo.setModel(new DefaultComboBoxModel(new Object[]{value == null ?
+                                                             "<none>" :
+                                                             value }));
         return combo;
       }else{
         Class typeClass = null;
@@ -523,6 +523,7 @@ System.out.println(e);
     ParameterValueEditor(){
       combo = new JComboBox();
       combo.setRenderer(new ResourceRenderer());
+      combo.setEditable(false);
 
       textField = new JTextField();
 
@@ -600,9 +601,10 @@ System.out.println(e);
       if(rData != null){
         //Gate type
         comboUsed = true;
-        combo.setModel(new DefaultComboBoxModel(
-                                          rData.getInstantiations().toArray()));
-        combo.setSelectedItem(value);
+        ArrayList values = new ArrayList(rData.getInstantiations());
+        values.add(0, "<none>");
+        combo.setModel(new DefaultComboBoxModel(values.toArray()));
+        combo.setSelectedItem(value == null ? "<none>" : value);
         return combo;
       }else{
         //non Gate type
@@ -685,7 +687,10 @@ System.out.println(e);
     }
 
     public Object getCellEditorValue(){
-      if(comboUsed) return combo.getSelectedItem();
+      if(comboUsed){
+        Object value = combo.getSelectedItem();
+         return value == "<none>" ? null : value;
+      }
       else if(listUsed){
         return listValue;
       }else{
