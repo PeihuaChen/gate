@@ -41,11 +41,21 @@ public class TestMaxentWrapper extends TestCase {
    * lookup annotations based on the precence of lookup annotations.
    */
   public void testMaxentWrapper() throws Exception {
+    // Store the original standard output stream, so we can restore it later.
+    java.io.PrintStream normalOutputStream=System.out;
 
     // Display the gui for debugging purposes.
          if (DEBUG) {
       MainFrame mainFrame = new MainFrame();
       mainFrame.show();
+    } else {
+      // We don't want the output displayed unless we are debugging, so set the
+      // standard output stream to a new one that never outputs anything.
+      System.setOut(new java.io.PrintStream(
+          new java.io.OutputStream() {
+        public void write(int b) { }
+        public void write(byte[] b, int off, int len) { }
+      }));
     }
 
     //get a document - take it from the gate server.
@@ -93,6 +103,9 @@ public class TestMaxentWrapper extends TestCase {
     Factory.deleteResource(tokeniser);
     Factory.deleteResource(maxentPR);
     Factory.deleteResource(gazetteerInst);
+
+    // Restore the standard output stream.
+    System.setOut(normalOutputStream);
   } // TestMaxentWrapper
 
   /** Test suite routine for the test runner */
