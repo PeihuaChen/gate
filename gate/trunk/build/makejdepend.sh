@@ -21,6 +21,7 @@ ALLCLASSES=
 HERE=`pwd`
 for DIR in $*
 do
+  [ -d $DIR ] || continue
   DIRPARENT=`dirname $DIR`
   DIRNAME=`basename $DIR`
   cd $DIRPARENT
