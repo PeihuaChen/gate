@@ -176,7 +176,8 @@ public class TestPersist extends TestCase
     );
 
     // create another document with some annotations / features on it
-    Document doc2 = Factory.newDocument(new URL(server + "tests/doc1.html"));
+    Document doc2 =
+      Factory.newDocument(new URL(server + "tests/html/test1.htm"));
     doc.getFeatures().put("hi there again", new Integer(23232));
     doc.getAnnotations().add(
       new Long(5), new Long(25), "dog poo irritates", Factory.newFeatureMap()
