@@ -28,7 +28,7 @@ import edu.stanford.smi.protege.ui.ProjectToolBar;
 import gate.*;
 import gate.creole.AbstractVisualResource;
 import gate.creole.ProtegeProjectName;
-import gate.creole.ontology.Ontology;
+import gate.creole.ontology.Taxonomy;
 
 /**
  *  This class wrap the Protege application to show it as VR in GATE
@@ -39,10 +39,10 @@ public class ProtegeWrapper extends AbstractVisualResource {
 
   /** File name as string will be VR target for now */
   private ProtegeProjectName projectFileName = null;
-  
+
   /** Should have JRootPane to show Protege in it */
   private JRootPane protegeRootPane = null;
-    
+
   protected Handle myHandle;
 
   public ProtegeWrapper() {
@@ -59,13 +59,13 @@ public class ProtegeWrapper extends AbstractVisualResource {
   private void initLocalData() {
     projectFileName = null;
   } // initLocalData()
-  
+
   private void initGuiComponents() {
     setLayout(new BorderLayout());
     protegeRootPane = new JRootPane();
   } // initGuiComponents()
 
-  /** Find and remove the Protege toolbar */  
+  /** Find and remove the Protege toolbar */
   private void removeToolbar(JRootPane rootPane) {
     Container pane = rootPane.getContentPane();
 
@@ -78,7 +78,7 @@ public class ProtegeWrapper extends AbstractVisualResource {
       } // if
     } // for
   } // removeToolbar(JRootPane rootPane)
-  
+
   private void initListeners() {
   } // initListeners()
 
@@ -87,14 +87,14 @@ public class ProtegeWrapper extends AbstractVisualResource {
   }
 
   /** Refresh OntoEditor if any on LargeView tab pane */
-  public void refreshOntoeditor(Ontology o) {
+  public void refreshOntoeditor(Taxonomy o) {
     if(myHandle == null || myHandle.getLargeView() == null) return;
-    
+
     JComponent comp = myHandle.getLargeView();
     if(comp instanceof JTabbedPane) {
       JTabbedPane tabPane = (JTabbedPane) comp;
       Component aView;
-      
+
       for(int i=0; i<tabPane.getTabCount(); ++i) {
         aView = tabPane.getComponentAt(i);
         if(aView instanceof com.ontotext.gate.vr.OntologyEditorImpl) {
@@ -103,7 +103,7 @@ public class ProtegeWrapper extends AbstractVisualResource {
       } // for
     } // if
   } // refreshOntoeditor()
-  
+
   public void setTarget(Object target){
     if(target == null){
       // if projectFileName is null Protege will create a new project
@@ -119,7 +119,7 @@ public class ProtegeWrapper extends AbstractVisualResource {
 
       projectFileName = (ProtegeProjectName) target;
       String fileName = null;
-    
+
       if(projectFileName != null) {
         URL projectURL = projectFileName.getProjectName();
         if(projectURL != null) {
@@ -141,32 +141,32 @@ public class ProtegeWrapper extends AbstractVisualResource {
 
       protegeRootPane.setJMenuBar(null);
       removeToolbar(protegeRootPane);
-      
+
       JScrollPane scroll = new JScrollPane();
       add(scroll, BorderLayout.CENTER);
       scroll.getViewport().add(protegeRootPane);
-      
+
       // set KnowledgeBase object
       Project prj = null;
       KnowledgeBase knBase = null;
-      
+
       prj = ProjectManager.getProjectManager().getCurrentProject();
       if(projectFileName != null && prj != null) {
         knBase = prj.getKnowledgeBase();
         projectFileName.setKnowledgeBase(knBase);
         projectFileName.setViewResource(this);
-// Some debug information about KnowledgeBase instance        
+// Some debug information about KnowledgeBase instance
 System.out.println("KnBase name: "+knBase.getName());
 System.out.println("KnBase root cls: "+knBase.getRootClses());
 System.out.println("KnBase cls count: "+knBase.getClsCount());
       } // if
-      
+
     } // if
   } // setTarget(Object target)
-  
+
 //------------------------------------------------------------------------------
-// Main method for test purposes  
-  
+// Main method for test purposes
+
   /** Test code*/
   public static void main(String[] args) {
 
@@ -174,10 +174,10 @@ System.out.println("KnBase cls count: "+knBase.getClsCount());
       Gate.setLocalWebServer(false);
       Gate.setNetConnected(false);
       Gate.init();
-  
+
       JFrame frame = new JFrame("Protege Wrapper Test");
       frame.setSize(800, 500);
-  
+
       frame.addWindowListener(new WindowAdapter(){
         public void windowClosing(WindowEvent e){
           System.exit(0);
@@ -189,7 +189,7 @@ System.out.println("KnBase cls count: "+knBase.getClsCount());
         "");
       ProtegeProjectName prjName = (ProtegeProjectName) Factory.createResource(
                             "gate.creole.ProtegeProjectName", params);
-  
+
       params.clear();
 
       ProtegeWrapper protege;
@@ -205,6 +205,6 @@ System.out.println("KnBase cls count: "+knBase.getClsCount());
     } catch (Exception ex) {
       ex.printStackTrace();
     }
-    
+
   } // public static void main(String[] args)
 } // class ProtegeWrapper

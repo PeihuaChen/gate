@@ -80,7 +80,7 @@ public class OntoLexEditorVR extends AbstractVisualResource
     //select the given conceptIDs in the ontology editor
     for (int i=0; i < conceptIDs.size(); i++) {
       Object conceptID = conceptIDs.get(i);
-      OClass theClass = theOntology.getClassByName((String) conceptID);
+      TClass theClass = theOntology.getClassByName((String) conceptID);
       TreePath thePath = treePath4Class(theClass);
       if (thePath == null)
         ontoEditor.setSelectionRow(0);
@@ -92,7 +92,7 @@ public class OntoLexEditorVR extends AbstractVisualResource
 
   }
 
-  protected TreePath treePath4Class(OClass theClass) {
+  protected TreePath treePath4Class(TClass theClass) {
     List thePathList = new ArrayList();
     thePathList.add(ontoModel.getRoot());
     TreePath thePath = null;
@@ -100,10 +100,10 @@ public class OntoLexEditorVR extends AbstractVisualResource
     boolean found = false;
     while( !found && theTopsIter.hasNext()) {
       ClassNode theTopNode = (ClassNode) theTopsIter.next();
-      OClass theTop = (OClass) theTopNode.getSource();
+      TClass theTop = (TClass) theTopNode.getSource();
       try {
         //check if our class is a subtype of this top
-        if (theTop.getSubClasses(OClass.TRANSITIVE_CLOSURE).contains(theClass)) {
+        if (theTop.getSubClasses(TClass.TRANSITIVE_CLOSURE).contains(theClass)) {
           //if yes, let's find the full path
           thePathList.add(theTopNode);
           getRemainingPath(theTopNode, theClass, thePathList);
@@ -119,18 +119,18 @@ public class OntoLexEditorVR extends AbstractVisualResource
   }
 
   protected void getRemainingPath(
-      ClassNode theParent, OClass theTarget, List thePath)
+      ClassNode theParent, TClass theTarget, List thePath)
       throws NoSuchClosureTypeException
   {
     Iterator theChildrenIter = theParent.getChildren();
     while (theChildrenIter.hasNext()) {
       ClassNode childNode = (ClassNode) theChildrenIter.next();
-      OClass theChild = (OClass) childNode.getSource();
+      TClass theChild = (TClass) childNode.getSource();
       if (theChild.equals(theTarget)) {
         thePath.add(childNode);
         break;
       }
-      if (!theChild.getSubClasses(OClass.TRANSITIVE_CLOSURE).contains(theTarget))
+      if (!theChild.getSubClasses(TClass.TRANSITIVE_CLOSURE).contains(theTarget))
         continue;
       thePath.add(childNode);
       getRemainingPath(childNode, theTarget, thePath);
@@ -207,7 +207,7 @@ public class OntoLexEditorVR extends AbstractVisualResource
   }
 
   protected void updateGUI(){
-    Ontology ontology = loadOntology(ontoLex.getOntologyIdentifier());
+    Taxonomy ontology = loadOntology(ontoLex.getOntologyIdentifier());
     ClassNode root = ClassNode.createRootNode(ontology, true);
     this.ontoModel = new OntoTreeModel(root);
     this.ontoEditor.setModel(ontoModel);
@@ -227,7 +227,7 @@ public class OntoLexEditorVR extends AbstractVisualResource
     synsetScroller.setVisible(true);
   }
 
-  private Ontology loadOntology(Object ontoId) {
+  private Taxonomy loadOntology(Object ontoId) {
 
     //first if the ontoId is a URL with a gate:// location, this needs to be
     //converted to an absolute URL, coz otherwise this ontology's URL will
@@ -241,9 +241,9 @@ public class OntoLexEditorVR extends AbstractVisualResource
     Iterator iter1 = lrs.iterator();
     while (iter1.hasNext()) {
       gate.LanguageResource lr = (LanguageResource) iter1.next();
-      if (! (lr instanceof Ontology))
+      if (! (lr instanceof Taxonomy))
         continue;
-      Ontology currentOntology = (Ontology) lr;
+      Taxonomy currentOntology = (Taxonomy) lr;
       if (currentOntology.getURL().equals(ontoId)) {
         theOntology = currentOntology;
         break;
@@ -256,7 +256,7 @@ public class OntoLexEditorVR extends AbstractVisualResource
         FeatureMap fm = Factory.newFeatureMap();
         fm.put("URL", ontoId);
 
-        theOntology = (Ontology)Factory.createResource(
+        theOntology = (Taxonomy)Factory.createResource(
             "com.ontotext.gate.ontology.DAMLKnowledgeBaseImpl",
             fm
           );
@@ -298,7 +298,7 @@ public class OntoLexEditorVR extends AbstractVisualResource
   protected OntoTreeModel ontoModel;
   protected ChooseSynsetPanel synsetEditor;
   protected OntoLexLR ontoLex;
-  protected Ontology theOntology;
+  protected Taxonomy theOntology;
   protected GridLayout gridLayout1 = new GridLayout(2,1);
   protected JSplitPane mainBox;
   protected Box leftBox;
@@ -333,9 +333,9 @@ public class OntoLexEditorVR extends AbstractVisualResource
 
       for (int i=0; i< selectedPaths.length; i++) {
         ClassNode selectedNode = (ClassNode) selectedPaths[i].getLastPathComponent();
-        if (! (selectedNode.getSource() instanceof OClass))
+        if (! (selectedNode.getSource() instanceof TClass))
           continue;
-        ontoLex.add(((OClass)selectedNode.getSource()).getName(),
+        ontoLex.add(((TClass)selectedNode.getSource()).getName(),
                     selectedSynset.getId());
       }//for loop
       updateOntologySelection();
@@ -363,9 +363,9 @@ public class OntoLexEditorVR extends AbstractVisualResource
 
       for (int i=0; i< selectedPaths.length; i++) {
         ClassNode selectedNode = (ClassNode) selectedPaths[i].getLastPathComponent();
-        if (! (selectedNode.getSource() instanceof OClass))
+        if (! (selectedNode.getSource() instanceof TClass))
           continue;
-        ontoLex.remove(((OClass)selectedNode.getSource()).getName(),
+        ontoLex.remove(((TClass)selectedNode.getSource()).getName(),
                        selectedSynset.getId());
         ontoEditor.getSelectionModel().removeSelectionPath(selectedPaths[i]);
       }//for loop
@@ -389,7 +389,7 @@ public class OntoLexEditorVR extends AbstractVisualResource
       if (! (value instanceof ClassNode))
         return this;
       ClassNode theNode = (ClassNode) value;
-      if(theNode.getSource() instanceof OClass) {
+      if(theNode.getSource() instanceof TClass) {
         setIcon(MainFrame.getIcon("Class.gif"));
       } else if(theNode.getSource() instanceof OInstance) {
         setIcon(MainFrame.getIcon("Instance.gif"));

@@ -601,8 +601,8 @@ public class EditableTreeView extends JTree
         throw new GateRuntimeException(
           "the class/ontology is null; in EditURIListener");
       }
-      if (obj instanceof KBClass) {
-        KBClass theClass = (KBClass) obj;
+      if (obj instanceof OClass) {
+        OClass theClass = (OClass) obj;
         if (theClass.getProperties() == null)
           return;
         Out.println("Properties for class " + theClass.getName());

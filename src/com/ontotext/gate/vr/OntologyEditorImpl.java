@@ -49,7 +49,7 @@ public class OntologyEditorImpl
   private String name;
 
   /** The ontology currently displayed */
-  private Ontology ontology;
+  private Taxonomy ontology;
 
   /** The list of ontologies */
   private Vector ontoList;
@@ -67,7 +67,7 @@ public class OntologyEditorImpl
 
   /**Is called when an ontology has been selected from the ontology list
    * @param o the selected ontology */
-  public void ontologySelected(Ontology o) {
+  public void ontologySelected(Taxonomy o) {
     if ( null != o ) {
       ontology = o;
 
@@ -124,9 +124,9 @@ public class OntologyEditorImpl
  * @param classComment the comment from the dialog */
 public void addSubClass(ClassNode root, String className, String classComment) {
   Object o = root.getSource();
-  if ( o instanceof Ontology) {
-    Ontology onto = (Ontology) o;
-    OClass clas = onto.createClass(className,classComment);
+  if ( o instanceof Taxonomy) {
+    Taxonomy onto = (Taxonomy) o;
+    TClass clas = onto.createClass(className,classComment);
     clas.setURI(onto.getSourceURI().substring(0,
         onto.getSourceURI().lastIndexOf("#")+1)+className);
     ClassNode subNode = new ClassNode(clas);
@@ -138,9 +138,9 @@ public void addSubClass(ClassNode root, String className, String classComment) {
 
   } // if ontology
   else {
-    if ( o instanceof OClass) {
-      OClass clas = (OClass) o;
-      OClass subClass = clas.getOntology().createClass(className,classComment);
+    if ( o instanceof TClass) {
+      TClass clas = (TClass) o;
+      TClass subClass = clas.getOntology().createClass(className,classComment);
       subClass.setURI(clas.getURI().substring(0,clas.getURI().lastIndexOf("#")+1)
           + className);
       ClassNode subNode = new ClassNode(subClass);
@@ -154,7 +154,7 @@ public void addSubClass(ClassNode root, String className, String classComment) {
       panel.oTree.updateUI();
     } else {
       throw new GateRuntimeException(
-        "class node's source is neither OClass, neither Ontology");
+        "class node's source is neither TClass, neither Ontology");
     } // neither class neither ontology
   } // else
 
@@ -166,13 +166,13 @@ public void addSubClass(ClassNode root, String className, String classComment) {
 public void removeClass(ClassNode node) {
   Object source = node.getSource();
 
-  if (source instanceof Ontology) {
+  if (source instanceof Taxonomy) {
 
   } else {
 
-    if (source instanceof OClass) {
+    if (source instanceof TClass) {
 
-      OClass clas = (OClass) source;
+      TClass clas = (TClass) source;
       clas.getOntology().removeClass(clas);
 
       if ( panel.oTree.getAnchorSelectionPath() != null ) {
@@ -207,7 +207,7 @@ public void removeClass(ClassNode node) {
  * @param n the class node associated with the class
  * @param x coords
  * @param y coords */
-public void renameClass(OClass c,ClassNode n, int x, int y) {
+public void renameClass(TClass c,ClassNode n, int x, int y) {
   if ( null == c )
     throw new GateRuntimeException(
     "ontology class parameter is null while renaming ");
@@ -253,7 +253,7 @@ public void createOntology (
   String name, String sourceURI, String theURL, String comment)
   throws ResourceInstantiationException {
   try {
-    Ontology o = new DAMLOntology();
+    Taxonomy o = new DAMLOntology();
     o.setComment(comment);
 
     URL localurl=null;
@@ -293,12 +293,12 @@ public void createOntology (
 
 /** Sets ontology to be loaded in the editor
  * @param o the ontology to be loaded */
-public void setOntology(Ontology o) {
+public void setOntology(Taxonomy o) {
   ontology = o;
   ontologySelected(o);
 } // setOntology();
 
-public Ontology getOntology() {
+public Taxonomy getOntology() {
    return ontology;
 }
 
@@ -319,8 +319,8 @@ public void setTarget(Object target) {
   if ( target instanceof Vector ) {
     ontoList = (Vector)target;
   } else {
-    if (target instanceof Ontology) {
-      ontology = (Ontology) target;
+    if (target instanceof Taxonomy) {
+      ontology = (Taxonomy) target;
 
       Vector olist = new Vector(Gate.getCreoleRegister().getLrInstances("com.ontotext.gate.ontology.DAMLOntology"));
       setOntologyList( olist );
@@ -371,7 +371,7 @@ public void setTarget(Object target) {
 public Vector getModifiedOntologies() {
   Vector modified = new Vector();
   for ( int i = 0 ; i<ontoList.size(); i++) {
-    Ontology o = (Ontology)ontoList.get(i);
+    Taxonomy o = (Taxonomy)ontoList.get(i);
     if (o.isModified())
       modified.add(o);
   } // for ontologies
@@ -385,7 +385,7 @@ public void saveOntologies(Vector list) {
   try {
     if (null != list) {
       for ( int i = 0 ; i < list.size() ; i++) {
-        this.saveOntology((Ontology) list.get(i));
+        this.saveOntology((Taxonomy) list.get(i));
       } // for list
     } // not null list
   } catch (Exception x) {
@@ -401,7 +401,7 @@ public void closeOntologies(Vector list)throws ResourceInstantiationException{
     Vector modified = new Vector();
     Vector unmodified = new Vector();
     for ( int i = 0 ; i < list.size(); i++) {
-      Ontology o = (Ontology)list.get(i);
+      Taxonomy o = (Taxonomy)list.get(i);
       if ( o.isModified()) {
         modified.add(o);
       } else {
@@ -410,7 +410,7 @@ public void closeOntologies(Vector list)throws ResourceInstantiationException{
     }// for ontologies
 
     for ( int i = 0 ; i < list.size() ; i++ ) {
-      Ontology o = (Ontology) list.get(i);
+      Taxonomy o = (Taxonomy ) list.get(i);
       /** set modified to false and handle saves explicitly */
       o.setModified(false);
       closeOntology(o,0,0);
@@ -426,7 +426,7 @@ public void closeOntologies(Vector list)throws ResourceInstantiationException{
 
 /**save this ontology
  * @param o the ontology to be saved */
-public void saveOntology(Ontology o) throws ResourceInstantiationException {
+public void saveOntology(Taxonomy o) throws ResourceInstantiationException {
   o.store();
 }
 
@@ -435,7 +435,7 @@ public void saveOntology(Ontology o) throws ResourceInstantiationException {
  *  @param o the ontology to be saved
  *  @param x the x coordinate of the save as dialog
  *  @param y the y coordinate of the save as dialog*/
-public void saveAsOntology(Ontology o, int x, int y) throws ResourceInstantiationException {
+public void saveAsOntology(Taxonomy o, int x, int y) throws ResourceInstantiationException {
   try {
     JFileChooser chooser = MainFrame.getFileChooser();
     chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
@@ -458,7 +458,7 @@ public void saveAsOntology(Ontology o, int x, int y) throws ResourceInstantiatio
  * @param o the ontology to be renamed
  * @param x the x coordinate of the rename dialog
  * @param y the y coordinate of the rename dialog*/
-public void renameOntology(Ontology o, int x, int y) {
+public void renameOntology(Taxonomy o, int x, int y) {
   if ( null == o )
     throw new GateRuntimeException(" ontology parameter is null while renaming ");
   RenameOntologyDialog dialog = new RenameOntologyDialog(this,o);
@@ -479,7 +479,7 @@ public void renameOntology(Ontology o, int x, int y) {
  * @param o the ontology to be deleted
  * @param x x coordinate of the option pane to be invoked
  * @param y y coordinate of the option pane to be invoked*/
-public void deleteOntology(Ontology o, int x, int y)
+public void deleteOntology(Taxonomy o, int x, int y)
   throws ResourceInstantiationException {
   int index = ontoList.indexOf(o);
   if ( -1 != index ) {
@@ -514,7 +514,7 @@ public void deleteOntology(Ontology o, int x, int y)
  * @param o the ontology to be edited
  * @param x  coords of the dialog
  * @param y  coords of the dialog */
-public void editURI(Ontology o, int x, int y) {
+public void editURI(Taxonomy o, int x, int y) {
   EditURIDialog dialog = new EditURIDialog(this,o);
   dialog.setLocationRelativeTo(panel.oList);
 
@@ -526,7 +526,7 @@ public void editURI(Ontology o, int x, int y) {
  * @param c class to be edited
  * @param x  coords of the dialog
  * @param y  coords of the dialog */
-public void editClassURI(OClass c, int x, int y){
+public void editClassURI(TClass c, int x, int y){
   EditClassURIDialog dialog = new EditClassURIDialog(this,c);
   dialog.setLocationRelativeTo(panel.oTree);
 
@@ -542,7 +542,7 @@ public void editClassURI(OClass c, int x, int y){
 public Set getAllURIs() {
   Set result = new HashSet();
   for ( int i = 0 ; i < ontoList.size(); i++ ) {
-    String u = ((Ontology)ontoList.get(i)).getSourceURI();
+    String u = ((Taxonomy)ontoList.get(i)).getSourceURI();
 
     result.add(u);
   }
@@ -553,11 +553,11 @@ public Set getAllURIs() {
  * @param o the ontology
  * @return set of all the URIs in the ontology
  */
-public Set getAllURIs(Ontology o) {
+public Set getAllURIs(Taxonomy o) {
   Set result = new HashSet();
   Iterator ci = o.getClasses().iterator();
   while(ci.hasNext()) {
-    OClass c = (OClass) ci.next();
+    TClass c = (TClass) ci.next();
     result.add(c.getURI());
   }
   return result;
@@ -569,7 +569,7 @@ public Set getAllURIs(Ontology o) {
  * @param o the ontology to be closed
  * @param x x coordinate of the option pane to be invoked
  * @param y y coordinate of the option pane to be invoked*/
-public void closeOntology(Ontology o, int x, int y)
+public void closeOntology(Taxonomy o, int x, int y)
   throws ResourceInstantiationException{
   int index = ontoList.indexOf(o);
   if ( -1 != index ) {
@@ -626,9 +626,9 @@ public void fileOpen(int x,int y) throws ResourceInstantiationException {
 
       FeatureMap fm = Factory.newFeatureMap();
       fm.put("URL",url);
-      Ontology damlo;
+      Taxonomy damlo;
 
-      damlo = (Ontology)Factory.createResource(
+      damlo = (Taxonomy)Factory.createResource(
           "com.ontotext.gate.ontology.DAMLOntology",
           fm
         );
@@ -665,7 +665,7 @@ public void fileSave(int x, int y, Vector ontologies) {
       Vector ontolos = new Vector();
       //filter ontologies that are outside of the jar
       for ( int i = 0; i < ontologies.size() ; i++) {
-        Ontology o = (Ontology)ontologies.get(i);
+        Taxonomy o = (Taxonomy)ontologies.get(i);
         if (-1 == o.getURL().getProtocol().indexOf("jar"))
           ontolos.add(o);
       }
@@ -746,7 +746,7 @@ public void fileNew(int x, int y) {
  * @param x x coordinate of the WannaSaveDialog to be invoked
  * @param y y coordinate of the WannaSaveDialog to be invoked
  * @return the result of the option pane execution*/
-public int AskWannaSave(Ontology o, int x, int y) {
+public int AskWannaSave(Taxonomy o, int x, int y) {
   JOptionPane opane = new JOptionPane();
 
   int option = opane.showConfirmDialog(panel,"The ontology "+o+
@@ -779,9 +779,9 @@ public int AskWannaSave(Ontology o, int x, int y) {
   /**Called when a {@link gate.Resource} has been removed from the system*/
   public void resourceUnloaded(CreoleEvent e) {
     Resource r;
-    if ( (r  = e.getResource() )instanceof Ontology ) {
+    if ( (r  = e.getResource() )instanceof Taxonomy ) {
       try {
-        Ontology o = (Ontology)r;
+        Taxonomy o = (Taxonomy)r;
         int option = JOptionPane.NO_OPTION;
 
         if (o.isModified()) {
@@ -795,7 +795,7 @@ public int AskWannaSave(Ontology o, int x, int y) {
         JOptionPane.showMessageDialog(panel,
           "Close ontology failed.\n"+
 
-          ((Ontology)r).getURL()+"\n"+
+          ((Taxonomy)r).getURL()+"\n"+
           "Due to :"+ex.getClass()+":\nMessage:"+ex.getMessage(),
           "Ontology Close Failure",JOptionPane.ERROR_MESSAGE);
       }
@@ -808,7 +808,7 @@ public int AskWannaSave(Ontology o, int x, int y) {
 
         if (null != ontology && ontology.equals(r)) {
           if ( olist.size() > 0 ) {
-            setOntology((Ontology)olist.get(0));
+            setOntology((Taxonomy)olist.get(0));
           } else {
             setOntology(null);
           }
@@ -835,7 +835,7 @@ public int AskWannaSave(Ontology o, int x, int y) {
    */
   public void resourceRenamed(Resource resource, String oldName,
                               String newName){
-    if ( resource instanceof Ontology ) {
+    if ( resource instanceof Taxonomy ) {
       if (ontology.equals(resource)) {
         ontology.setName(newName);
         Object daRoot = panel.oTree.getModel().getRoot();
@@ -861,13 +861,13 @@ public int AskWannaSave(Ontology o, int x, int y) {
   public void objectModified(ObjectModificationEvent e) {
     Object source = e.getSource();
     EditableTreeView view = null;
-    if ( source instanceof Ontology ) {
+    if ( source instanceof Taxonomy ) {
       if (withOntoList) {
-        JTree tree = (JTree)OvsT.get((Ontology)source);
+        JTree tree = (JTree)OvsT.get((Taxonomy)source);
         if ( null!= tree ) {
           OvsT.remove(source);
-          boolean includeInstances = source instanceof KnowledgeBase;
-          ClassNode root = ClassNode.createRootNode((Ontology)source,
+          boolean includeInstances = source instanceof Ontology;
+          ClassNode root = ClassNode.createRootNode((Taxonomy)source,
               includeInstances);
           OntoTreeModel model = new OntoTreeModel(root);
           view = new EditableTreeView(model);
@@ -879,16 +879,16 @@ public int AskWannaSave(Ontology o, int x, int y) {
           /* synchronize the expansion of the old and new trees */
           EditableTreeView.synchronizeTreeExpansion(tree,view);
 
-          OvsT.put((Ontology)source,view);
-          if (ontology.equals((Ontology)source)) {
+          OvsT.put((Taxonomy)source,view);
+          if (ontology.equals((Taxonomy)source)) {
             view.setMainPanel(panel);
             panel.setOntoTree(view);
           }
         }
       } else {
-        if (ontology != null && ontology.equals((Ontology)source)) {
-          boolean includeInstances = source instanceof KnowledgeBase;
-          ClassNode root = ClassNode.createRootNode((Ontology)source,
+        if (ontology != null && ontology.equals((Taxonomy)source)) {
+          boolean includeInstances = source instanceof Ontology;
+          ClassNode root = ClassNode.createRootNode((Taxonomy)source,
               includeInstances);
           OntoTreeModel model = new OntoTreeModel(root);
           view = new EditableTreeView(model);
@@ -900,7 +900,7 @@ public int AskWannaSave(Ontology o, int x, int y) {
           if (panel.oTree != null )
             EditableTreeView.synchronizeTreeExpansion(panel.oTree,view);
 
-          OvsT.put((Ontology)source,view);
+          OvsT.put((Taxonomy)source,view);
           view.setMainPanel(panel);
           panel.setOntoTree(view);
         }
@@ -925,7 +925,7 @@ public int AskWannaSave(Ontology o, int x, int y) {
       if (! (value instanceof ClassNode))
         return this;
       ClassNode theNode = (ClassNode) value;
-      if(theNode.getSource() instanceof OClass) {
+      if(theNode.getSource() instanceof TClass) {
         setIcon(MainFrame.getIcon("Class.gif"));
       } else if(theNode.getSource() instanceof OInstance) {
         setIcon(MainFrame.getIcon("Instance.gif"));

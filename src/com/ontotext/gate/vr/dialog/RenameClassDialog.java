@@ -24,13 +24,13 @@ public class RenameClassDialog extends JDialog {
   /**reference to the ontology editor that invoked this*/
   private OntologyEditor editor;
   /** reference to the ontology being renamed */
-  private Ontology ontology;
+  private Taxonomy ontology;
   /** the main panel of the editor */
   private OEMainPanel panel;
   /**the class node associated with the class */
   private ClassNode node;
   /** the class being renamed */
-  private OClass clas;
+  private TClass clas;
 
   /**construct the dialog
    * @param e the editor
@@ -38,7 +38,7 @@ public class RenameClassDialog extends JDialog {
    * @param n the class node which should also be renamed
    * @param o the ontology being renamed   */
   public RenameClassDialog(OntologyEditor e,OEMainPanel oef,
-                          ClassNode n,OClass c) {
+                          ClassNode n,TClass c) {
     if ( null == e )
       throw new GateRuntimeException(
       "editor is null, on constructing RenameClassDialog");

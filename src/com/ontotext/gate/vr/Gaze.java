@@ -74,7 +74,7 @@ public class Gaze extends AbstractVisualResource
   private MappingNode mappingNode = null;
 
   /** the ontology that is currently displayed */
-  private Ontology ontology = null;
+  private Taxonomy ontology = null;
 
   /** map of ontologies vs trees */
   private Map ontologyTrees = new HashMap();
@@ -836,20 +836,20 @@ public class Gaze extends AbstractVisualResource
 
   public void objectModified(ObjectModificationEvent e) {
     Object source = e.getSource();
-    if ( source instanceof Ontology ) {
+    if ( source instanceof Taxonomy ) {
 
-      JTree tree = (JTree)ontologyTrees.get((Ontology)source);
+      JTree tree = (JTree)ontologyTrees.get((Taxonomy)source);
       if (tree!=null) {
-        ontologyTrees.remove((Ontology)source);
+        ontologyTrees.remove((Taxonomy)source);
         Map namesVsNodes = new HashMap();
-        ClassNode root = ClassNode.createRootNode((Ontology)source,mapping,namesVsNodes);
+        ClassNode root = ClassNode.createRootNode((Taxonomy)source,mapping,namesVsNodes);
         OntoTreeModel model = new OntoTreeModel(root);
         MappingTreeView view = new MappingTreeView(model,mapping,Gaze.this);
 
         /* synchronize the expansion of the old and new trees */
         EditableTreeView.synchronizeTreeExpansion(tree,view);
 
-        if ( ontology.equals((Ontology)ontology)) {
+        if ( ontology.equals((Taxonomy)ontology)) {
           oTree = view;
           ontologyScroll.getViewport().add(oTree,null);
           oTree.setVisible(true);

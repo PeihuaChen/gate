@@ -17,7 +17,7 @@ package gate;
 import java.util.Map;
 import java.util.Set;
 
-import gate.creole.ontology.Ontology;
+import gate.creole.ontology.Taxonomy;
 import gate.event.FeatureMapListener;
 
 /** An attribute-value matrix. Represents the content of an annotation, the
@@ -45,7 +45,7 @@ public interface FeatureMap extends SimpleFeatureMap
 		* @return <code>true</code> if <b>this</b> includes aFeatureMap
 		* and <code>false</code> if not.
 		*/
-	public boolean subsumes(Ontology ontologyLR, FeatureMap aFeatureMap);
+	public boolean subsumes(Taxonomy ontologyLR, FeatureMap aFeatureMap);
 
   /** Tests if <b>this</b> featureMap object includes aFeatureMap but only
     * for the features present in the aFeatureNamesSet.

@@ -178,8 +178,8 @@ public class OEMainPanel extends JPanel  {
 
   /**Same as setOntoTree but builds the tree from an ontology
    * @param o an ontology    */
-  public void buildOntoTree(Ontology o) {
-    boolean includeInstances = o instanceof KnowledgeBase;
+  public void buildOntoTree(Taxonomy o) {
+    boolean includeInstances = o instanceof Ontology;
     ClassNode root = ClassNode.createRootNode(o, includeInstances);
     OntoTreeModel model = new OntoTreeModel(root);
     EditableTreeView view = new EditableTreeView(model);
@@ -224,8 +224,8 @@ public class OEMainPanel extends JPanel  {
       if (0 < oList.getModel().getSize()) {
 
         Object obj = oList.getModel().getElementAt(oList.getAnchorSelectionIndex());
-        if ( obj instanceof Ontology ) {
-          OEMainPanel.this.editor.ontologySelected((Ontology) obj);
+        if ( obj instanceof Taxonomy ) {
+          OEMainPanel.this.editor.ontologySelected((Taxonomy) obj);
         } // only if ontology
       } // size > 0
     } // valueChanged();
@@ -263,7 +263,7 @@ private class SaveListener implements ActionListener{
         Iterator seti = selset.iterator();
 
         while (seti.hasNext()) {
-          OEMainPanel.this.editor.saveOntology((Ontology) seti.next());
+          OEMainPanel.this.editor.saveOntology((Taxonomy) seti.next());
         } // while set iter
 
       } catch (ResourceInstantiationException x) {
@@ -279,8 +279,8 @@ private class SaveAsListener implements ActionListener{
     try {
       Object o = oList.getModel().getElementAt(
             oList.getAnchorSelectionIndex());
-      if ( o instanceof Ontology) {
-        OEMainPanel.this.editor.saveAsOntology((Ontology)o,
+      if ( o instanceof Taxonomy) {
+        OEMainPanel.this.editor.saveAsOntology((Taxonomy)o,
         (int)OEMainPanel.this.oList.getLocation().getX(),
         (int)OEMainPanel.this.oList.getLocation().getY());
       }
@@ -295,8 +295,8 @@ private class RenameListener implements ActionListener{
   public void actionPerformed(ActionEvent e) {
     Object o = oList.getModel().getElementAt(
           oList.getAnchorSelectionIndex());
-    if ( o instanceof Ontology) {
-      OEMainPanel.this.editor.renameOntology((Ontology)o,
+    if ( o instanceof Taxonomy) {
+      OEMainPanel.this.editor.renameOntology((Taxonomy)o,
       (int)OEMainPanel.this.oList.getLocation().getX(),
       (int)OEMainPanel.this.oList.getLocation().getY());
     }
@@ -309,8 +309,8 @@ private class DeleteListener implements ActionListener{
     try  {
       Object o = oList.getModel().getElementAt(
             oList.getAnchorSelectionIndex());
-      if ( o instanceof Ontology) {
-        OEMainPanel.this.editor.deleteOntology((Ontology)o,
+      if ( o instanceof Taxonomy) {
+        OEMainPanel.this.editor.deleteOntology((Taxonomy)o,
         (int)OEMainPanel.this.oList.getLocation().getX(),
         (int)OEMainPanel.this.oList.getLocation().getY());
       }
@@ -325,8 +325,8 @@ private class EditURIListener implements ActionListener{
   public void actionPerformed(ActionEvent e) {
     Object o = oList.getModel().getElementAt(
           oList.getAnchorSelectionIndex());
-    if ( o instanceof Ontology) {
-      OEMainPanel.this.editor.editURI((Ontology)o,
+    if ( o instanceof Taxonomy) {
+      OEMainPanel.this.editor.editURI((Taxonomy)o,
       (int)OEMainPanel.this.oList.getLocation().getX(),
       (int)OEMainPanel.this.oList.getLocation().getY());
     }
@@ -340,8 +340,8 @@ private class CloseListener implements ActionListener{
     try {
       Object o = oList.getModel().getElementAt(
             oList.getAnchorSelectionIndex());
-      if ( o instanceof Ontology) {
-        OEMainPanel.this.editor.closeOntology((Ontology)o,
+      if ( o instanceof Taxonomy) {
+        OEMainPanel.this.editor.closeOntology((Taxonomy)o,
         (int)OEMainPanel.this.oList.getLocation().getX(),
         (int)OEMainPanel.this.oList.getLocation().getY());
       }

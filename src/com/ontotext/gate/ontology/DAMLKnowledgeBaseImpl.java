@@ -18,7 +18,7 @@ import gate.persist.PersistenceException;
 import gate.security.SecurityException;
 import gate.LanguageResource;
 import gate.FeatureMap;
-import gate.creole.ontology.KnowledgeBase;
+import gate.creole.ontology.Ontology;
 import java.util.*;
 import com.hp.hpl.jena.daml.*;
 import com.hp.hpl.jena.daml.common.*;
@@ -36,7 +36,7 @@ import java.net.*;
 import gate.util.Files;
 import gate.util.Out;
 
-public class DAMLKnowledgeBaseImpl extends KnowledgeBaseImpl  {
+public class DAMLKnowledgeBaseImpl extends OntologyImpl  {
 
   /** DEBUG FLAG */
   private static final boolean DEBUG = false;
@@ -59,7 +59,7 @@ public class DAMLKnowledgeBaseImpl extends KnowledgeBaseImpl  {
       instance = (DAMLInstance) inst;
 
       Iterator classTypes = instance.getRDFTypes(false);
-      OClass theClass = null;
+      TClass theClass = null;
       //take only the first class as a type for this instance
       //because we only support instances that belong to one
       //class. If an instance needs to belong to more than 1 class,
@@ -73,7 +73,7 @@ public class DAMLKnowledgeBaseImpl extends KnowledgeBaseImpl  {
           theClass = this.getClassByName(localName);
       }//while
       if (theClass != null && instance.getLocalName() != null) {
-        addInstance(instance.getLocalName(), theClass);
+        addInstance(instance.getLocalName(), (OClass) theClass);
         if (DEBUG)
           System.out.println("Loaded instance: " + instance.getLocalName() +
                              "in class: " + theClass.getName());
@@ -139,7 +139,7 @@ public class DAMLKnowledgeBaseImpl extends KnowledgeBaseImpl  {
 
             /* avoid anonyomouses and restrictions */
             if ( null!=clas.getLocalName()) {
-              OClass oClass = this.createClass(
+              TClass oClass = this.createClass(
                     clas.getLocalName(),
                     comment);
               /*currently only classes from the same ontology are expected*/
@@ -223,13 +223,13 @@ public class DAMLKnowledgeBaseImpl extends KnowledgeBaseImpl  {
             if ( null == clas.getLocalName()) {
               continue;
             }
-            OClass oc = this.getClassByName(clas.getLocalName());
+            TClass oc = this.getClassByName(clas.getLocalName());
             if ( null == oc ) {
               throw new InvalidFormatException(
               curl,"class not found by name = "+clas.getLocalName());
             }
 
-            Property propSCO = RDFS.subClassOf;
+            com.hp.hpl.mesa.rdf.jena.model.Property propSCO = RDFS.subClassOf;
             StmtIterator subi = clas.listProperties(propSCO);
             while(subi.hasNext()) {
               Statement damlSub = (Statement)subi.next();
@@ -239,7 +239,7 @@ public class DAMLKnowledgeBaseImpl extends KnowledgeBaseImpl  {
                 obj=obj.substring(1,obj.length()-1);
               }
               obj = obj.substring(obj.lastIndexOf("#")+1);
-              OClass sub = this.getClassByName(obj);
+              TClass sub = this.getClassByName(obj);
 
               if ( null != sub )
                 oc.addSuperClass(sub);
@@ -261,13 +261,13 @@ public class DAMLKnowledgeBaseImpl extends KnowledgeBaseImpl  {
 
           Iterator propIter =
               theClass.getDefinedProperties(false);
-          OClass oc = this.getClassByName(theClass.getLocalName());
+          TClass oc = this.getClassByName(theClass.getLocalName());
           //if this class in the ontology is not a KBClass, we
           //cannot read properties and restrictions
-          if (! (oc instanceof KBClass) || oc == null)
+          if (! (oc instanceof OClass) || oc == null)
             continue;
 
-          KBClass kbClass = (KBClass) oc;
+          OClass kbClass = (OClass) oc;
 
           if (DEBUG) {
             Out.println("==============================================");
@@ -320,7 +320,7 @@ public class DAMLKnowledgeBaseImpl extends KnowledgeBaseImpl  {
               if (superProp == null || superProp.getLocalName() == null)
                 continue;
               if (DEBUG) Out.println(superProp.getLocalName());
-              ((KBProperty) propertiesMap.get(propName)).
+              ((gate.creole.ontology.Property) propertiesMap.get(propName)).
                                   setSubPropertyOf(superProp.getLocalName());
             }
 
@@ -367,8 +367,9 @@ public class DAMLKnowledgeBaseImpl extends KnowledgeBaseImpl  {
               }
 
 
-              KBProperty theNewProperty = null;
-              KBProperty thePropDefinition = (KBProperty) propertiesMap.get(propName);
+              gate.creole.ontology.Property theNewProperty = null;
+              gate.creole.ontology.Property thePropDefinition =
+                  (gate.creole.ontology.Property) propertiesMap.get(propName);
               if (thePropDefinition == null) {
                 //check if this property is defined for a superclass
                 thePropDefinition =
@@ -380,16 +381,16 @@ public class DAMLKnowledgeBaseImpl extends KnowledgeBaseImpl  {
                   " because cannot find such property defined for this class");
               } else {
                 //process the properties differently depending on their type
-                if (thePropDefinition instanceof KBObjectProperty) {
-                  OClass rangeClass = this.getClassByName(rangeName);
+                if (thePropDefinition instanceof ObjectProperty) {
+                  TClass rangeClass = this.getClassByName(rangeName);
 
-                  if (rangeClass == null || !(rangeClass instanceof KBClass))
-                    rangeClass = (KBClass)((KBObjectProperty) thePropDefinition).getRange();
+                  if (rangeClass == null || !(rangeClass instanceof OClass))
+                    rangeClass = (OClass)((ObjectProperty) thePropDefinition).getRange();
 
                   theNewProperty = this.addObjectProperty(
                                           thePropDefinition.getName(),
                                           kbClass,
-                                          (KBClass) rangeClass);
+                                          (OClass) rangeClass);
                 } else {
                   theNewProperty = this.addDatatypeProperty(
                                           thePropDefinition.getName(),
@@ -430,8 +431,8 @@ public class DAMLKnowledgeBaseImpl extends KnowledgeBaseImpl  {
            "[transitive super classes = " +
            cl.getSuperClasses(OClass.TRANSITIVE_CLOSURE).size() + "]");
 
-          if (cl instanceof KBClass) {
-            KBClass kbCl = (KBClass) cl;
+          if (cl instanceof OClass) {
+            OClass kbCl = (OClass) cl;
             if (kbCl.getProperties() == null)
               continue;
             Iterator ip = kbCl.getProperties().iterator();
@@ -452,22 +453,22 @@ public class DAMLKnowledgeBaseImpl extends KnowledgeBaseImpl  {
     return model;
   } // load()
 
-  private KBProperty addPropertyDefinition(
-        DAMLProperty property, String propName, KBClass kbClass,
+  private gate.creole.ontology.Property addPropertyDefinition(
+        DAMLProperty property, String propName, OClass kbClass,
         Map propertiesMap) throws RDFException{
-    KBProperty newProperty = null;
+    gate.creole.ontology.Property newProperty = null;
     PropertyAccessor propAcc = property.prop_range();
     if (property instanceof DAMLDatatypeProperty) {
       //do not read the ranges of the datatatype properties, because
       //they are tricky
       newProperty =
-        new KBDatatypePropertyImpl(propName, kbClass, (String) null, this);
+        new DatatypePropertyImpl(propName, kbClass, (String) null, this);
       propertiesMap.put(propName, newProperty);
     } else if (propAcc instanceof LiteralAccessor) {
       if (DEBUG) Out.println("Literal accessor");
       //add a DatatypeProperty
       if (((LiteralAccessor)propAcc).getValue() != null) {
-        newProperty = new KBDatatypePropertyImpl(propName, kbClass,
+        newProperty = new DatatypePropertyImpl(propName, kbClass,
             ((LiteralAccessor)propAcc).getValue().getString(), this);
         propertiesMap.put(propName, newProperty);
         if (DEBUG)
@@ -479,19 +480,19 @@ public class DAMLKnowledgeBaseImpl extends KnowledgeBaseImpl  {
       if (propAcc.getDAMLValue() == null) {
         if (DEBUG)
           Out.println("Found a null value, adding as null");
-        newProperty = new KBObjectPropertyImpl(propName, kbClass, null, this);
+        newProperty = new ObjectPropertyImpl(propName, kbClass, null, this);
         propertiesMap.put(propName, newProperty);
       } else {
         if (DEBUG)
           Out.println(propAcc.getDAMLValue().getLocalName());
-        OClass rangeClass =
+        TClass rangeClass =
           this.getClassByName(propAcc.getDAMLValue().getLocalName());
-        if (rangeClass == null || !(rangeClass instanceof KBClass)) {
-          newProperty = new KBObjectPropertyImpl(propName, kbClass, null, this);
+        if (rangeClass == null || !(rangeClass instanceof OClass)) {
+          newProperty = new ObjectPropertyImpl(propName, kbClass, null, this);
           propertiesMap.put(propName, newProperty);
         } else {
           newProperty =
-            new KBObjectPropertyImpl(propName, kbClass, (KBClass) rangeClass, this);
+            new ObjectPropertyImpl(propName, kbClass, (OClass) rangeClass, this);
           propertiesMap.put(propName, newProperty);
         }
       }
@@ -499,7 +500,7 @@ public class DAMLKnowledgeBaseImpl extends KnowledgeBaseImpl  {
     return newProperty;
   }
 
-  private KBProperty searchSuperClasses(String propName, DAMLClass theClass,
+  private gate.creole.ontology.Property searchSuperClasses(String propName, DAMLClass theClass,
                                         Map propertiesMap)
                     throws RDFException{
     if (DEBUG)
@@ -510,7 +511,8 @@ public class DAMLKnowledgeBaseImpl extends KnowledgeBaseImpl  {
     if (propName == null)
       return null;
 
-    KBProperty theProperty = this.getPropertyDefinitionByName(propName);
+    gate.creole.ontology.Property theProperty =
+        this.getPropertyDefinitionByName(propName);
     String propDomainName = null;
     //we have not yet loaded this property, so find it among the inherited ones in
     //the DAML model
@@ -528,11 +530,11 @@ public class DAMLKnowledgeBaseImpl extends KnowledgeBaseImpl  {
           propFound = true;
           if (DEBUG)
             Out.println("Domain is: " + propDomainName);
-          OClass kbClass = this.getClassByName(propDomainName);
-          if (kbClass != null && kbClass instanceof KBClass) {
+          TClass kbClass = this.getClassByName(propDomainName);
+          if (kbClass != null && kbClass instanceof OClass) {
             theProperty =
               this.addPropertyDefinition(
-                    property, propName, (KBClass) kbClass, propertiesMap);
+                    property, propName, (OClass) kbClass, propertiesMap);
           }//if
         }//if
       }//while
@@ -590,7 +592,8 @@ public class DAMLKnowledgeBaseImpl extends KnowledgeBaseImpl  {
       //we have already added this property definition to the ontology
       if (this.getPropertyDefinitionByName(propertyName) != null)
         continue;
-      this.addPropertyDefinition((KBProperty) propertiesMap.get(propertyName));
+      this.addPropertyDefinition(
+          (gate.creole.ontology.Property) propertiesMap.get(propertyName));
     }
   }
 
@@ -601,17 +604,18 @@ public class DAMLKnowledgeBaseImpl extends KnowledgeBaseImpl  {
     Iterator iter = propertiesMap.keySet().iterator();
     while (iter.hasNext()) {
       String propertyName = (String) iter.next();
-      KBProperty theProperty = (KBProperty) propertiesMap.get(propertyName);
+      gate.creole.ontology.Property theProperty =
+          (gate.creole.ontology.Property) propertiesMap.get(propertyName);
 
       //process the properties differently depending on their type
-      if (theProperty instanceof KBObjectProperty) {
+      if (theProperty instanceof ObjectProperty) {
         this.addObjectProperty(theProperty.getName(),
                                theProperty.getDomain(),
-                               (KBClass)((KBObjectProperty)theProperty).getRange());
+                               (OClass)((ObjectProperty)theProperty).getRange());
       } else {
         this.addDatatypeProperty(theProperty.getName(),
                                  theProperty.getDomain(),
-                                 (String)((KBDatatypeProperty)theProperty).getRange());
+                                 (String)((DatatypeProperty)theProperty).getRange());
       }
     }
 
@@ -655,17 +659,21 @@ public class DAMLKnowledgeBaseImpl extends KnowledgeBaseImpl  {
 
       /* create properties necessary for classes & the ontology */
 
-      Property propVersion = model.createProperty(voc.versionInfo().getURI());
+      com.hp.hpl.mesa.rdf.jena.model.Property propVersion =
+          model.createProperty(voc.versionInfo().getURI());
       onto.addProperty(propVersion,this.getVersion());
 
-      Property propLabel = model.createProperty(RDFS.label.getURI());
+      com.hp.hpl.mesa.rdf.jena.model.Property propLabel =
+          model.createProperty(RDFS.label.getURI());
       onto.addProperty(propLabel,this.getLabel());
 
-      Property propComment = model.createProperty(RDFS.comment.getURI());
+      com.hp.hpl.mesa.rdf.jena.model.Property propComment =
+          model.createProperty(RDFS.comment.getURI());
       onto.addProperty(propComment,this.getComment());
 
 
-      Property propSubClassOf = model.createProperty(RDFS.subClassOf.getURI());
+      com.hp.hpl.mesa.rdf.jena.model.Property propSubClassOf =
+          model.createProperty(RDFS.subClassOf.getURI());
 
 
       /* create classes */

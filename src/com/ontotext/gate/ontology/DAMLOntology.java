@@ -25,7 +25,7 @@ import com.hp.hpl.jena.rdf.arp.*;
 /** Provides load and store of ontologies from/to DAML+OIL repository
  *  @author borislav popov
  */
-public class DAMLOntology extends OntologyImpl {
+public class DAMLOntology extends TaxonomyImpl {
 
   /** DEBUG FLAG */
   private static final boolean DEBUG = false;
@@ -102,7 +102,7 @@ public class DAMLOntology extends OntologyImpl {
 
             /* avoid anonyomouses and restrictions */
             if ( null!=clas.getLocalName()) {
-              OClass oClass = this.createClass(
+              TClass oClass = this.createClass(
                     clas.getLocalName(),
                     comment);
               /*currently only classes from the same ontology are expected*/
@@ -170,7 +170,7 @@ public class DAMLOntology extends OntologyImpl {
         /*append the base uri where needed to the class uris*/
         Iterator cli = this.getClasses().iterator();
         while(cli.hasNext()) {
-          OClass ocl = (OClass)cli.next();
+          TClass ocl = (TClass)cli.next();
           if ( -1 == ocl.getURI().indexOf('#')) {
             ocl.setURI(this.getSourceURI()+'#'+ocl.getURI());
           }
@@ -186,13 +186,13 @@ public class DAMLOntology extends OntologyImpl {
             if ( null == clas.getLocalName()) {
               continue;
             }
-            OClass oc = this.getClassByName(clas.getLocalName());
+            TClass oc = this.getClassByName(clas.getLocalName());
             if ( null == oc ) {
               throw new InvalidFormatException(
               curl,"class not found by name = "+clas.getLocalName());
             }
 
-            Property propSCO = RDFS.subClassOf;
+            com.hp.hpl.mesa.rdf.jena.model.Property propSCO = RDFS.subClassOf;
             StmtIterator subi = clas.listProperties(propSCO);
             while(subi.hasNext()) {
               Statement damlSub = (Statement)subi.next();
@@ -202,7 +202,7 @@ public class DAMLOntology extends OntologyImpl {
                 obj=obj.substring(1,obj.length()-1);
               }
               obj = obj.substring(obj.lastIndexOf("#")+1);
-              OClass sub = this.getClassByName(obj);
+              TClass sub = this.getClassByName(obj);
 
               if ( null != sub )
                 oc.addSuperClass(sub);
@@ -217,11 +217,11 @@ public class DAMLOntology extends OntologyImpl {
       if (DEBUG) {
         Iterator ic = this.getClasses().iterator();
         while (ic.hasNext()) {
-          OClass cl = (OClass)ic.next();
+          TClass cl = (TClass)ic.next();
           System.out.println(""+cl+" [direct sub classes = "+
-          cl.getSubClasses(OClass.DIRECT_CLOSURE).size()+"] "+
+          cl.getSubClasses(TClass.DIRECT_CLOSURE).size()+"] "+
           "[transitive sub classes = "+
-          cl.getSubClasses(OClass.TRANSITIVE_CLOSURE).size()+"]");
+          cl.getSubClasses(TClass.TRANSITIVE_CLOSURE).size()+"]");
         }
       } // debug end
 
@@ -267,25 +267,25 @@ public class DAMLOntology extends OntologyImpl {
 
       /* create properties necessary for classes & the ontology */
 
-      Property propVersion = model.createProperty(voc.versionInfo().getURI());
+      com.hp.hpl.mesa.rdf.jena.model.Property propVersion = model.createProperty(voc.versionInfo().getURI());
       onto.addProperty(propVersion,this.getVersion());
 
-      Property propLabel = model.createProperty(RDFS.label.getURI());
+      com.hp.hpl.mesa.rdf.jena.model.Property propLabel = model.createProperty(RDFS.label.getURI());
       onto.addProperty(propLabel,this.getLabel());
 
-      Property propComment = model.createProperty(RDFS.comment.getURI());
+      com.hp.hpl.mesa.rdf.jena.model.Property propComment = model.createProperty(RDFS.comment.getURI());
       onto.addProperty(propComment,this.getComment());
 
 
-      Property propSubClassOf = model.createProperty(RDFS.subClassOf.getURI());
+      com.hp.hpl.mesa.rdf.jena.model.Property propSubClassOf = model.createProperty(RDFS.subClassOf.getURI());
 
 
       /* create classes */
       Iterator classes = this.getClasses().iterator();
-      OClass clas;
+      TClass clas;
       DAMLClass dclas;
       while (classes.hasNext())  {
-        clas = (OClass) classes.next();
+        clas = (TClass) classes.next();
 
         dclas = model.createDAMLClass(clas.getURI());
         dclas.addProperty(propLabel,clas.getName());
@@ -295,9 +295,9 @@ public class DAMLOntology extends OntologyImpl {
 
         /* set super classes */
         Iterator sups = clas.getSuperClasses(clas.DIRECT_CLOSURE).iterator();
-        OClass supClass;
+        TClass supClass;
         while (sups.hasNext()) {
-          supClass = (OClass) sups.next();
+          supClass = (TClass) sups.next();
           dclas.addProperty(propSubClassOf,supClass.getURI());
         } // while subs
 

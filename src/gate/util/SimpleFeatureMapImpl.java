@@ -24,7 +24,7 @@ import java.util.Vector;
 import com.ontotext.gate.ontology.OntologyImpl;
 
 import gate.FeatureMap;
-import gate.creole.ontology.Ontology;
+import gate.creole.ontology.Taxonomy;
 import gate.event.FeatureMapListener;
 
 /** Simple case of features. */
@@ -119,7 +119,7 @@ public class SimpleFeatureMapImpl
    * @return <code>true</code> if <b>this</b> includes aFeatureMap
    * and <code>false</code> if not.
    */
-  public boolean subsumes(Ontology ontologyLR, FeatureMap aFeatureMap) {
+  public boolean subsumes(Taxonomy ontologyLR, FeatureMap aFeatureMap) {
 
     if (ontologyLR == null) {
       return this.subsumes(aFeatureMap);
@@ -315,7 +315,7 @@ public class SimpleFeatureMapImpl
       mapListeners = v;
     }
   } //addFeatureMapListener
-  
+
   /**
    *
    */
@@ -349,7 +349,7 @@ public class SimpleFeatureMapImpl
       since the behaviour behind the getOntology method is
       certainly static.
       : should be temporary */
-      Ontology o = new OntologyImpl().getOntology(url);
+      Taxonomy o = new OntologyImpl().getOntology(url);
 
       result = o.isSubClassOf(value1, value2);
 
