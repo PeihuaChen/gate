@@ -31,11 +31,11 @@ public interface DataStore extends FeatureBearer, NameBearer {
   public static final String LR_ID_FEATURE_NAME = "LRPersistenceId";
 
 
-  /** Set the URL for the underlying storage mechanism. */
-  public void setStorageUrl(URL storageUrl) throws PersistenceException;
+  /** Set the URL as string for the underlying storage mechanism. */
+  public void setStorageUrl(String storageUrl) throws PersistenceException;
 
-  /** Get the URL for the underlying storage mechanism. */
-  public URL getStorageUrl();
+  /** Get the URL as String for the underlying storage mechanism. */
+  public String getStorageUrl();
 
   /**
    * Create a new data store. <B>NOTE:</B> for some data stores

@@ -460,7 +460,7 @@ public abstract class Factory {
 
     if(dsReg == null) // static init ran before Gate.init....
       dsReg = Gate.getDataStoreRegister();
-    godfreyTheDataStore.setStorageUrl(storageUrl);
+    godfreyTheDataStore.setStorageUrl(storageUrl.toString());
 
     return godfreyTheDataStore;
   } // instantiateDS(dataStoreClassName, storageURL)

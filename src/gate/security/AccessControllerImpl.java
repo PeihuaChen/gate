@@ -88,7 +88,7 @@ public class AccessControllerImpl
   }
 
   /** --- */
-  public void open(URL url)
+  public void open(String url)
     throws PersistenceException{
 
     Assert.assertNotNull(url);

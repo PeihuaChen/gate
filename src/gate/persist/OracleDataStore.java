@@ -103,14 +103,14 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
   /** Set the URL for the underlying storage mechanism. */
-  public void setStorageUrl(URL storageUrl) throws PersistenceException {
+  public void setStorageUrl(String storageUrl) throws PersistenceException {
 
     super.setStorageUrl(storageUrl);
 
   }
 
   /** Get the URL for the underlying storage mechanism. */
-  public URL getStorageUrl() {
+  public String getStorageUrl() {
 
     return super.getStorageUrl();
   }
