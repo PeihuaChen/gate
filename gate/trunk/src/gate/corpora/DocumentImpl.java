@@ -147,10 +147,10 @@ public class DocumentImpl implements Document
     content = new DocumentContentImpl(u, start, end);
   } // DocumentImpl(u,start,end)
 
-  /** Construction from String representing URL */
-  public DocumentImpl(String urlString) throws IOException {
-    this(new URL(urlString), null, null);
-  } // DocumentImpl(urlString)
+  /** Construction from String */
+  public DocumentImpl(String str) throws IOException {
+    content = new DocumentContentImpl(str);
+  } // DocumentImpl(string)
 
   /** Documents are identified by URLs */
   public URL getSourceURL() { return sourceURL; }
