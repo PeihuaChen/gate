@@ -124,6 +124,7 @@ public class AnnotationEditor extends AbstractVisualResource{
       gate.Document doc = (gate.Document)Factory.createResource("gate.corpora.DocumentImpl", params);
       //create a default tokeniser
      params.clear();
+     params.put("rulesResourceName", "creole/tokeniser/DefaultTokeniser.rules");
      DefaultTokeniser tokeniser = (DefaultTokeniser) Factory.createResource(
                             "gate.creole.tokeniser.DefaultTokeniser", params);
 
@@ -378,6 +379,8 @@ public class AnnotationEditor extends AbstractVisualResource{
 
     annotationsTableModel = new AnnotationsTableModel();
     annotationsTable = new XJTable(annotationsTableModel);
+    annotationsTable.setIntercellSpacing(new Dimension(10, 5));
+    //annotationsTable.setRowMargin(10);
     tableScroll = new JScrollPane(annotationsTable);
     tableScroll.setOpaque(true);
 
