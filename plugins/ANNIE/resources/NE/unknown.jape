@@ -28,7 +28,8 @@ Priority: 100
  {Money} |
  {Percent}|
  {Token.string == "Dear"}|
- {JobTitle}
+ {JobTitle}|
+ {Lookup}
 ):known
 -->
 {}
