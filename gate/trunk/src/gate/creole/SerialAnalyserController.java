@@ -54,6 +54,8 @@ public class SerialAnalyserController extends SerialController {
 
       super.execute();
 
+      corpus.unloadDocument(doc);
+
     }
   }
 

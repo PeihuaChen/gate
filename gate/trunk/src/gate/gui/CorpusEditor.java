@@ -139,17 +139,18 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
         //a new document has been added to the corpus
         Document doc = e.getDocument();
         //let's find where it should go
-        int docPosition = 0;
-        Iterator iter = corpus.getDocumentNames().iterator();
-        while(iter.hasNext() && ! iter.next().equals(doc.getName()))
-          docPosition++;
-        int[] selIdxs = documentsList.getSelectedIndices();
-        docListModel.insertElementAt(doc.getName(), docPosition);
+//        int docPosition = 0;
+//        Iterator iter = corpus.getDocumentNames().iterator();
+//        while(iter.hasNext() && ! iter.next().equals(doc.getName()))
+//          docPosition++;
+//        int[] selIdxs = documentsList.getSelectedIndices();
+        docListModel.addElement(doc.getName());
+//        docListModel.insertElementAt(doc.getName(), docPosition);
         //restore selection
-        for(int i = 0; i < selIdxs.length; i++){
-          if(selIdxs[i] >= docPosition) selIdxs[i]++;
-        }//for(int i = 0; i < selIdxs.length; i++)
-        documentsList.setSelectedIndices(selIdxs);
+//        for(int i = 0; i < selIdxs.length; i++){
+//          if(selIdxs[i] >= docPosition) selIdxs[i]++;
+//        }//for(int i = 0; i < selIdxs.length; i++)
+//        documentsList.setSelectedIndices(selIdxs);
       }
     });
   }

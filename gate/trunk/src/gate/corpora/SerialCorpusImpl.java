@@ -36,7 +36,7 @@ import gate.creole.*;
 
 public class SerialCorpusImpl extends
           AbstractLanguageResource
-                              implements Corpus, CreoleListener {
+                      implements Corpus, CreoleListener, DatastoreListener {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -50,13 +50,8 @@ public class SerialCorpusImpl extends
   //which defines the document order) and Documents as value
   private transient List documents = null;
 
-  public SerialCorpusImpl(){
-    docDataList = new ArrayList();
+  public SerialCorpusImpl() {
 
-    //make sure we fire events when docs are added/removed/etc
-    documents = new ArrayList();
-
-    Gate.getCreoleRegister().addCreoleListener(this);
   }
 
   /**
@@ -125,7 +120,7 @@ public class SerialCorpusImpl extends
    * Unloads the document from memory, but calls sync() first, to store the
    * changes
    */
-  public void unloadDocumentAt(int index) {
+  public void unloadDocument(int index) {
     //1. check whether its been loaded and is a persistent one
     // if a persistent doc is not loaded, there's nothing we need to do
     if ( (! isDocumentLoaded(index)) && isPersistentDocument(index))
@@ -145,7 +140,7 @@ public class SerialCorpusImpl extends
 
       //3. remove the document from the memory
       //do this, only if the saving has succeeded
-      documents.remove(index);
+      documents.set(index, null);
     } catch (PersistenceException ex) {
         throw new GateRuntimeException("Error unloading document from corpus"
                       + "because document sync failed: " + ex.getMessage());
@@ -157,9 +152,17 @@ public class SerialCorpusImpl extends
   }
 
   /**
-   * This method NEEDS IMPLEMENTING
+   * Unloads a document from memory
    */
   public void unloadDocument(Document doc) {
+    if (DEBUG) Out.prln("Document to be unloaded :" + doc.getName());
+    //1. determine the index of the document; if not there, do nothing
+    int index = findDocument(doc);
+    if (index == -1)
+      return;
+    if (DEBUG) Out.prln("Index of doc: " + index);
+    if (DEBUG) Out.prln("Size of corpus: " + documents.size());
+    unloadDocument(index);
 //    documents.remove(new Integer(index));
   }
 
@@ -178,6 +181,24 @@ public class SerialCorpusImpl extends
   public boolean isPersistentDocument(int index) {
     if (documents == null || documents.isEmpty()) return false;
     return (((DocumentData)docDataList.get(index)).getPersistentID() != null);
+  }
+
+  /**
+   * Every LR that is a CreoleListener (and other Listeners too) must
+   * override this method and make sure it removes itself from the
+   * objects which it has been listening to. Otherwise, the object will
+   * not be released from memory (memory leak!).
+   */
+  public void cleanup() {
+    if (corpusListeners != null)
+      corpusListeners.clear();
+    documents.clear();
+    docDataList.clear();
+    Gate.getCreoleRegister().removeCreoleListener(this);
+    if (this.dataStore != null) {
+      this.dataStore.removeDatastoreListener(this);
+      this.dataStore = null;
+    }
   }
 
   public synchronized void removeCorpusListener(CorpusListener l) {
@@ -216,10 +237,17 @@ public class SerialCorpusImpl extends
   }
   public void resourceUnloaded(CreoleEvent e) {
     Resource res = e.getResource();
-    if (! (res instanceof Document))
-      return;
+    if (res instanceof Document) {
+    if (DEBUG) Out.prln("Unload called ");
     //unload all occurences, but no need to remove them from the corpus too
-    while(contains(res)) unloadDocument((Document) res);
+    if (DEBUG) Out.prln("is contained? " + this.contains(res));
+    if (this.contains(res))
+      unloadDocument((Document) res);
+    } else if (res instanceof Corpus) {
+      //check if we were not unloaded. If so, we must cleanup
+      if (this.equals(res))
+        this.cleanup();
+    }
   }
   public void datastoreOpened(CreoleEvent e) {
   }
@@ -227,6 +255,53 @@ public class SerialCorpusImpl extends
   }
   public void datastoreClosed(CreoleEvent e) {
   }
+  /**
+   * Called by a datastore when a new resource has been adopted
+   */
+  public void resourceAdopted(DatastoreEvent evt){
+  }
+
+  /**
+   * Called by a datastore when a resource has been deleted
+   */
+  public void resourceDeleted(DatastoreEvent evt){
+    DataStore ds = (DataStore)evt.getSource();
+    //1. check whether this datastore fired the event. If not, return.
+    if (!ds.equals(this.dataStore))
+      return;
+
+    Object docID = evt.getResourceID();
+    if (docID == null)
+      return;
+
+    if (DEBUG) Out.prln("Resource deleted called for: " + docID);
+    boolean isDirty=false;
+    //the problem here is that I only have the doc persistent ID
+    //and nothing else, so I need to determine the index of the doc first
+    for (int i=0; i< docDataList.size(); i++) {
+      DocumentData docData = (DocumentData)docDataList.get(i);
+      //we've found the correct document
+      //don't break the loop, because it might appear more than once
+      if (docID.equals(docData.getPersistentID())) {
+        remove(i);
+        isDirty = true;
+      }//if
+    }//for loop through the doc data
+
+    if (isDirty)
+      try {
+        this.dataStore.sync(this);
+      } catch (PersistenceException ex) {
+        throw new GateRuntimeException("SerialCorpusImpl: " + ex.getMessage());
+      }
+  }//resourceDeleted
+
+  /**
+   * Called by a datastore when a resource has been wrote into the datastore
+   */
+  public void resourceWritten(DatastoreEvent evt){
+  }
+
 
 
   //List methods
@@ -248,18 +323,15 @@ public class SerialCorpusImpl extends
     if (! (o instanceof Document))
       return false;
     Document doc = (Document) o;
-    Iterator iter = docDataList.iterator();
-    while (iter.hasNext()) {
-      DocumentData docData = (DocumentData) iter.next();
-      if (docData.getDocumentName().equals(doc.getName())
-          &&
-          ((docData.getPersistentID() == null &&
-              doc.getLRPersistenceId() == null)
-              ||
-            docData.getPersistentID().equals(doc.getLRPersistenceId()))
-          )
-        return true;
-    }
+    //if we've got the doc in memory and it's the same, then return true
+    if (DEBUG) Out.prln("Serial corpus: contained called");
+    if (this.documents.contains(doc))
+      return true;
+
+    //there is no need to search through the docDataList because if someone
+    //has got our document, then it must be loaded
+    //let's see if there'll be counter examples
+
     return false;
   }
 
@@ -318,22 +390,47 @@ public class SerialCorpusImpl extends
     documents.add(doc);
     fireDocumentAdded(new CorpusEvent(SerialCorpusImpl.this,
                                       doc,
-                                      documents.size()-1,
+                                      docDataList.size()-1,
                                       CorpusEvent.DOCUMENT_ADDED));
 
     return result;
   }
 
   public boolean remove(Object o){
+    if (DEBUG) Out.prln("SerialCorpus:Remove object called");
     if (! (o instanceof Document))
       return false;
     Document doc = (Document) o;
 
+    //see if we can find it first. If not, then judt return
+    int index = findDocument(doc);
+    if (index == -1)
+      return false;
+
+    if(index < docDataList.size()) { //we found it, so remove it
+      docDataList.remove(index);
+      Document oldDoc =  (Document) documents.remove(index);
+      if (DEBUG) Out.prln("documents after remove of " + oldDoc.getName()
+                          + " are " + documents);
+      fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
+                                          oldDoc,
+                                          index,
+                                          CorpusEvent.DOCUMENT_REMOVED));
+    }
+
+    return true;
+  }
+
+  public int findDocument(Document doc) {
     boolean found = false;
     DocumentData docData = null;
 
-    int index;
-    //try finding a document with the same name and persistent ID
+    //first try finding the document in memory
+    int index = documents.indexOf(doc);
+    if (index > -1 && index < docDataList.size())
+      return index;
+
+    //else try finding a document with the same name and persistent ID
     Iterator iter = docDataList.iterator();
     for (index = 0;  iter.hasNext() && !found; index++) {
       docData = (DocumentData) iter.next();
@@ -341,18 +438,11 @@ public class SerialCorpusImpl extends
           docData.getPersistentID().equals(doc.getLRPersistenceId()))
         found = true;
     }
-
-    if(found && index < docDataList.size()) { //we found it, so remove it
-      docDataList.remove(index);
-      Document oldDoc =  (Document) documents.remove(index);
-      fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
-                                          oldDoc,
-                                          index,
-                                          CorpusEvent.DOCUMENT_REMOVED));
-    }
-
-    return found;
-  }
+    if (found && index < docDataList.size())
+      return index;
+    else
+      return -1;
+  }//findDocument
 
   public boolean containsAll(Collection c){
     Iterator iter = c.iterator();
@@ -474,16 +564,10 @@ public class SerialCorpusImpl extends
       return;
     Document doc = (Document) o;
 
-    //add the document with its index in the docDataList
-    //in this case, since it's going to be added to the end
-    //the index will be the size of the docDataList before
-    //the addition
     DocumentData docData = new DocumentData(doc.getName(),
                                             doc.getLRPersistenceId());
     docDataList.add(index, docData);
 
-    //PROBLEM: I need to change the documents to a list, so the
-    //order gets automatically changed with inserts.
     documents.add(index, doc);
     fireDocumentAdded(new CorpusEvent(SerialCorpusImpl.this,
                                       doc,
@@ -493,6 +577,7 @@ public class SerialCorpusImpl extends
   }
 
   public Object remove(int index){
+    if (DEBUG) Out.prln("Remove index called");
     docDataList.remove(index);
     Document res = (Document) documents.remove(index);
     fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
@@ -504,7 +589,10 @@ public class SerialCorpusImpl extends
   }
 
   public int indexOf(Object o){
-    throw new gate.util.MethodNotImplementedException();
+    if (o instanceof Document)
+      return findDocument((Document) o);
+
+    return -1;
   }
 
   public int lastIndexOf(Object o){
@@ -527,6 +615,13 @@ public class SerialCorpusImpl extends
     throw new gate.util.MethodNotImplementedException();
   }
 
+  public void setDataStore(DataStore dataStore)
+                throws gate.persist.PersistenceException {
+    super.setDataStore( dataStore);
+    if (this.dataStore != null)
+      this.dataStore.addDatastoreListener(this);
+  }
+
   /**
    * readObject - calls the default readObject() and then initialises the
    * transient data
@@ -539,102 +634,13 @@ public class SerialCorpusImpl extends
     documents = new ArrayList(docDataList.size());
     for (int i = 0; i < docDataList.size(); i++)
       documents.add(null);
+    corpusListeners = new Vector();
+    //finally set the creole listeners if the LR is like that
+    Gate.getCreoleRegister().addCreoleListener(this);
+    if (this.dataStore != null)
+      this.dataStore.addDatastoreListener(this);
+
   }//readObject
-
-  /**
-   * Class used for the documents structure. This is a {@link java.util.HashMap}
-   * that fires events when elements are added/removed/set
-   */
-/*
-  protected class VerboseHashMap extends HashMap{
-    static final long serialVersionUID = -3320104879514836097L;
-
-    public void clear() {
-      //override, so events are fired
-      Iterator iter = this.keySet().iterator();
-      while (iter.hasNext())
-        remove(iter.next());
-    }
-
-    public boolean isNullValue(Object key) {
-      return (super.get(key) == null);
-    }
-
-    public Object put(Object key, Object value) {
-      if (! (value instanceof Document))
-        throw new UnsupportedOperationException(
-          getClass().getName() +
-          " only accepts gate.Document values as members!\n" +
-          value.getClass().getName() + " is not a gate.Document");
-
-      if (containsKey(key)) { //we're replacing a document
-        Document oldDoc = (Document) documents.get(key); ;
-        Document newDoc = (Document)value;
-
-        //fire the 2 events
-        fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
-                                            oldDoc,
-                                            ((Integer) key).intValue(),
-                                            CorpusEvent.DOCUMENT_REMOVED));
-        fireDocumentAdded(new CorpusEvent(SerialCorpusImpl.this,
-                                          newDoc,
-                                          ((Integer) key).intValue(),
-                                          CorpusEvent.DOCUMENT_ADDED));
-      } else { //we're adding a document
-        Document newDoc = (Document)value;
-
-        fireDocumentAdded(new CorpusEvent(SerialCorpusImpl.this,
-                                          newDoc,
-                                          ((Integer) key).intValue(),
-                                          CorpusEvent.DOCUMENT_ADDED));
-      }
-
-      return super.put(key, value);
-    }  //put
-
-    public Object remove(Object key){
-      //the remove event is now fired from the SerialCorpusImpl class, because
-      //I want to be able to remove values, so I can unload documents from
-      //memory, but that should not make anybody think that the document
-      //has been removed from the corpus
-      Document oldDoc = (Document) super.remove(key);
-      return oldDoc;
-    }//public Object remove(Object key)
-
-    public Object get(Object key){
-      if (! (key instanceof Integer))
-        return null;
-      Object res = super.get(key);
-      int index = ((Integer) key).intValue();
-      if (index >= docDataList.size())
-        return null;
-
-      if (DEBUG) Out.prln("index " + index + "result: " + res);
-
-      //if the document is null, then I must get it from the DS
-      if (res == null) {
-        FeatureMap features = Factory.newFeatureMap();
-        features.put(DataStore.DATASTORE_FEATURE_NAME,
-                     SerialCorpusImpl.this.dataStore);
-        try {
-          features.put(DataStore.LR_ID_FEATURE_NAME,
-                      ((DocumentData)docDataList.get(index)).getPersistentID());
-          Resource lr = Factory.createResource( "gate.corpora.DocumentImpl",
-                                                features);
-          if (DEBUG) Out.prln("Loading document :" + lr.getName());
-          res = lr;
-          super.put(key, res);
-        } catch (ResourceInstantiationException ex) {
-          Err.prln("Error reading document inside a serialised corpus.");
-          throw new GateRuntimeException(ex.getMessage());
-        }
-
-      }
-      return res;
-    }//public Object get(Object key)
-
-  }//protected class VerboseHashMap extends HashMap
-*/
 
   protected class DocumentData implements Serializable {
     //fix the ID for serialisation
