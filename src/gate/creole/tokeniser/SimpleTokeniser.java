@@ -586,9 +586,11 @@ implements Runnable, ProcessingResource{
        annotationSetName.equals("")) annotationSet = document.getAnnotations();
     else annotationSet = document.getAnnotations(annotationSetName);
 
-    fireStatusChangedEvent(
-      "Tokenising " + document.getSourceUrl().getFile() + "..."
-    );
+    if (! Main.batchMode) //fire event only if needed
+      fireStatusChangedEvent(
+        "Tokenising " + document.getSourceUrl().getFile() + "..."
+      );
+
     String content = document.getContent().toString();
     int length = content.length();
     char currentChar;
@@ -675,7 +677,7 @@ implements Runnable, ProcessingResource{
         tokenStart = charIdx;
       }
 
-      if(charIdx - oldCharIdx > 256){
+      if(!Main.batchMode && (charIdx - oldCharIdx > 256)){
         fireProgressChangedEvent((100 * charIdx )/ length );
         oldCharIdx = charIdx;
       }
@@ -706,8 +708,10 @@ implements Runnable, ProcessingResource{
     }
 
     reset();
-    fireProcessFinishedEvent();
-    fireStatusChangedEvent("Tokenisation complete!");
+    if (! Main.batchMode) { //fire events only if needed
+      fireProcessFinishedEvent();
+      fireStatusChangedEvent("Tokenisation complete!");
+    }//if
   } // run
 
   //StatusReporter Implementation

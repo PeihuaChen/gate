@@ -63,8 +63,11 @@ public class POSTagger extends AbstractProcessingResource {
       AnnotationSet outputAS = (outputASName == null) ?
                                document.getAnnotations() :
                                document.getAnnotations(outputASName);
-      fireStatusChanged("POS tagging " + document.getName());
-      fireProgressChanged(0);
+
+      if (! Main.batchMode){ //fire events if not in batch mode
+        fireStatusChanged("POS tagging " + document.getName());
+        fireProgressChanged(0);
+      }
       //prepare the input for HepTag
       //define a comparator for annotations by start offset
       Comparator offsetComparator = new OffsetComparator();
@@ -116,11 +119,14 @@ public class POSTagger extends AbstractProcessingResource {
           }//for(i = 0; i<= sentence.size(); i++)
           fireProgressChanged(sentIndex++ * 100 / sentCnt);
         }//while(sentIter.hasNext())
-        fireProcessFinished();
-        long endTime = System.currentTimeMillis();
-        fireStatusChanged(document.getName() + " tagged in " +
+
+        if (! Main.batchMode){ //fire events if not in batch mode
+          fireProcessFinished();
+          long endTime = System.currentTimeMillis();
+          fireStatusChanged(document.getName() + " tagged in " +
                           NumberFormat.getInstance().format(
                           (double)(endTime - startTime) / 1000) + " seconds!");
+        }
       }else{
         throw new GateRuntimeException("No sentences to process!\n" +
                                        "Please run a sentence splitter first!");

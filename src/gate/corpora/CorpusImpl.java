@@ -133,7 +133,7 @@ public class CorpusImpl extends TreeSet implements Corpus {
   public boolean add(Object o) {
     if(o instanceof Document){
       boolean res = super.add(o);
-      if(res) fireDocumentAdded(new CorpusEvent(this, (Document)o,
+      if(res && !Main.batchMode) fireDocumentAdded(new CorpusEvent(this, (Document)o,
                                 CorpusEvent.DOCUMENT_ADDED));
       return res;
     }else{
@@ -163,7 +163,8 @@ public class CorpusImpl extends TreeSet implements Corpus {
   public boolean remove(Object o) {
     if(o instanceof Document){
       boolean res = super.remove(o);
-      if(res) fireDocumentRemoved(new CorpusEvent(this, (Document)o,
+      if(res && !Main.batchMode) //fire only if we need to
+        fireDocumentRemoved(new CorpusEvent(this, (Document)o,
                                   CorpusEvent.DOCUMENT_REMOVED));
       return res;
     }else{
@@ -231,7 +232,8 @@ public class CorpusImpl extends TreeSet implements Corpus {
 
     public void remove(){
       iterator.remove();
-      fireDocumentRemoved(new CorpusEvent(CorpusImpl.this, (Document)lastNext,
+      if (! Main.batchMode)
+        fireDocumentRemoved(new CorpusEvent(CorpusImpl.this, (Document)lastNext,
                                   CorpusEvent.DOCUMENT_REMOVED));
     }
     Iterator iterator;

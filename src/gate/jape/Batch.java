@@ -92,11 +92,12 @@ implements JapeConstants {
   public Batch(URL url, String encoding, StatusListener sListener)
          throws JapeException {
 
-    this.addStatusListener(sListener);
+    if (! Main.batchMode) //fire events if not in batch mode
+      this.addStatusListener(sListener);
     this.japeURL = url;
     this.encoding =  encoding;
     parseJape();
-    if(transducer != null){
+    if(transducer != null && !Main.batchMode){
       transducer.addStatusListener(new StatusListener(){
         public void statusChanged(String text){
           fireStatusChanged(text);
@@ -196,14 +197,18 @@ implements JapeConstants {
       gate.jape.parser.ParseCpsl parser =
         new gate.jape.parser.ParseCpsl(japeURL, encoding);
 
-      StatusListener listener = new StatusListener(){
-        public void statusChanged(String text){
-          fireStatusChanged(text);
-        }
-      };
-      parser.addStatusListener(listener);
+      StatusListener listener = null;
+      if (! Main.batchMode) {//fire events if not in batch mode
+        listener = new StatusListener(){
+          public void statusChanged(String text){
+            fireStatusChanged(text);
+          }
+        };
+        parser.addStatusListener(listener);
+      }
       transducer = parser.MultiPhaseTransducer();
-      parser.removeStatusListener(listener);
+      if (! Main.batchMode) //fire events if not in batch mode
+        parser.removeStatusListener(listener);
     } catch (gate.jape.parser.ParseException e) {
       throw new
         JapeException("Batch: error parsing transducer: " + e.getMessage());

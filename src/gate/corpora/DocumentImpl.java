@@ -289,8 +289,9 @@ extends AbstractLanguageResource implements Document {
   public AnnotationSet getAnnotations() {
     if(defaultAnnots == null){
       defaultAnnots = new AnnotationSetImpl(this);
-      fireAnnotationSetAdded(new DocumentEvent(
-          this, DocumentEvent.ANNOTATION_SET_ADDED, null));
+      if (! Main.batchMode) //fire events if not in batch mode
+        fireAnnotationSetAdded(new DocumentEvent(
+           this, DocumentEvent.ANNOTATION_SET_ADDED, null));
     }
     return defaultAnnots;
   } // getAnnotations()
@@ -306,10 +307,13 @@ extends AbstractLanguageResource implements Document {
     if(namedSet == null) {
       namedSet = new AnnotationSetImpl(this, name);
       namedAnnotSets.put(name, namedSet);
-      DocumentEvent evt = new DocumentEvent(this,
+
+      if (! Main.batchMode) {//fire events if not in batch mode
+        DocumentEvent evt = new DocumentEvent(this,
                                             DocumentEvent.ANNOTATION_SET_ADDED,
                                             name);
-      fireAnnotationSetAdded(evt);
+        fireAnnotationSetAdded(evt);
+      } //if
     }
     return namedSet;
   } // getAnnotations(name)
@@ -921,7 +925,7 @@ extends AbstractLanguageResource implements Document {
    */
   public void removeAnnotationSet(String name){
     Object removed = namedAnnotSets.remove(name);
-    if(removed != null){
+    if(removed != null && !Main.batchMode){
       fireAnnotationSetRemoved(
         new DocumentEvent(this, DocumentEvent.ANNOTATION_SET_REMOVED, name));
     }

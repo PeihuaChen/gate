@@ -73,7 +73,8 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
     long docSize = doc.getContent().size().longValue();
 
     // fire the status listener
-    fireStatusChangedEvent("Total elements: " + elements);
+    if (! Main.batchMode) //fire events if not in batch mode
+      fireStatusChangedEvent("Total elements: " + elements);
 
   }// endDocument
 
@@ -86,7 +87,7 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
 
     // Inform the progress listener to fire only if no of elements processed
     // so far is a multiple of ELEMENTS_RATE
-    if ((++elements % ELEMENTS_RATE) == 0)
+    if ((++elements % ELEMENTS_RATE) == 0 && !Main.batchMode)
         fireStatusChangedEvent("Processed elements : " + elements);
 
     // Set the curent element being processed
@@ -418,6 +419,8 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
     * event.
   */
   protected void fireStatusChangedEvent(String text){
+    if (Main.batchMode) //fire events if not in batch mode
+      return;
     Iterator listenersIter = myStatusListeners.iterator();
     while(listenersIter.hasNext())
       ((StatusListener)listenersIter.next()).statusChanged(text);

@@ -27,14 +27,16 @@ public class DefaultTokeniser extends AbstractProcessingResource {
       FeatureMap params;
       FeatureMap features;
       Map listeners = new HashMap();
-      listeners.put("gate.event.StatusListener", new StatusListener(){
-        public void statusChanged(String text){
-          fireStatusChanged(text);
-        }
-      });
+      if (! Main.batchMode) {//fire events if not in batch mode
+        listeners.put("gate.event.StatusListener", new StatusListener(){
+          public void statusChanged(String text){
+            fireStatusChanged(text);
+          }
+        });
 
       //tokeniser
-      fireStatusChanged("Creating a tokeniser");
+        fireStatusChanged("Creating a tokeniser");
+      }
       params = Factory.newFeatureMap();
       if(tokeniserRulesURL != null) params.put("rulesURL",
                                                tokeniserRulesURL);
@@ -46,25 +48,30 @@ public class DefaultTokeniser extends AbstractProcessingResource {
                     "gate.creole.tokeniser.SimpleTokeniser",
                     params, features, listeners);
       tokeniser.setName("Tokeniser " + System.currentTimeMillis());
-      fireProgressChanged(50);
 
+      if (! Main.batchMode) {//fire events if not in batch mode
+        fireProgressChanged(50);
 
       //transducer
-      fireStatusChanged("Creating a Jape transducer");
-      params = Factory.newFeatureMap();
+        fireStatusChanged("Creating a Jape transducer");
+      }
+      params.clear();
       if(transducerGrammarURL != null) params.put("grammarURL",
                                                   transducerGrammarURL);
       params.put("encoding", encoding);
       if(DEBUG) Out.prln("Parameters for the transducer: \n" + params);
-      features = Factory.newFeatureMap();
+      features.clear();
       Gate.setHiddenAttribute(features, true);
-      listeners.put("gate.event.ProgressListener",
+      if (! Main.batchMode) //fire events if not in batch mode
+        listeners.put("gate.event.ProgressListener",
                     new CustomProgressListener(51, 100));
       transducer = (Transducer)Factory.createResource("gate.creole.Transducer",
                                                       params, features,
                                                       listeners);
-      fireProgressChanged(100);
-      fireProcessFinished();
+      if (! Main.batchMode) {//fire events if not in batch mode
+        fireProgressChanged(100);
+        fireProcessFinished();
+      }
       transducer.setName("Transducer " + System.currentTimeMillis());
     }catch(ResourceInstantiationException rie){
       throw rie;
@@ -75,17 +82,16 @@ public class DefaultTokeniser extends AbstractProcessingResource {
   }
 
   public void run(){
-    FeatureMap params;
+    FeatureMap params = Factory.newFeatureMap();
     try{
       fireProgressChanged(0);
       //tokeniser
-      params = Factory.newFeatureMap();
       params.put("document", document);
       params.put("annotationSetName", annotationSetName);
       Factory.setResourceRuntimeParameters(tokeniser, params);
 
       //transducer
-      params = Factory.newFeatureMap();
+      params.clear();
       params.put("document", document);
       params.put("inputASName", annotationSetName);
       params.put("outputASName", annotationSetName);

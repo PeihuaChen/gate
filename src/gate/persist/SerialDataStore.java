@@ -201,11 +201,12 @@ extends AbstractFeatureBearer implements DataStore {
         throw new PersistenceException("Can't delete " + resourceTypeDirectory);
 
     //let the world know about it
-    fireResourceDeleted(
-      new DatastoreEvent(
-        this, DatastoreEvent.RESOURCE_DELETED, null, dataStoreInstanceId
-      )
-    );
+    if (! Main.batchMode) //fire events if not in batch mode
+      fireResourceDeleted(
+        new DatastoreEvent(
+          this, DatastoreEvent.RESOURCE_DELETED, null, dataStoreInstanceId
+        )
+      );
   } // delete(lr)
 
   /** Adopt a resource for persistence. */
@@ -220,9 +221,10 @@ extends AbstractFeatureBearer implements DataStore {
       lr.setDataStore(this);
 
       // let the world know
-      fireResourceAdopted(
-        new DatastoreEvent(this, DatastoreEvent.RESOURCE_ADOPTED, lr, null)
-      );
+      if (! Main.batchMode) //fire events if not in batch mode
+        fireResourceAdopted(
+          new DatastoreEvent(this, DatastoreEvent.RESOURCE_ADOPTED, lr, null)
+        );
       return lr;
     } else {                      // someone else's child
       throw new PersistenceException(
@@ -327,11 +329,12 @@ extends AbstractFeatureBearer implements DataStore {
     }
 
     // let the world know about it
-    fireResourceWritten(
-      new DatastoreEvent(
-        this, DatastoreEvent.RESOURCE_WRITTEN, lr, lrPersistenceId
-      )
-    );
+    if (! Main.batchMode) //fire events if not in batch mode
+      fireResourceWritten(
+        new DatastoreEvent(
+          this, DatastoreEvent.RESOURCE_WRITTEN, lr, lrPersistenceId
+        )
+      );
   } // sync(LR)
 
   /** Create a persistent store Id from the name of a resource. */
@@ -502,7 +505,7 @@ extends AbstractFeatureBearer implements DataStore {
     }
   }
   protected void fireResourceAdopted(DatastoreEvent e) {
-    if (datastoreListeners != null) {
+    if (datastoreListeners != null && !Main.batchMode) {
       Vector listeners = datastoreListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -511,7 +514,7 @@ extends AbstractFeatureBearer implements DataStore {
     }
   }
   protected void fireResourceDeleted(DatastoreEvent e) {
-    if (datastoreListeners != null) {
+    if (datastoreListeners != null && !Main.batchMode) {
       Vector listeners = datastoreListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -520,7 +523,7 @@ extends AbstractFeatureBearer implements DataStore {
     }
   }
   protected void fireResourceWritten(DatastoreEvent e) {
-    if (datastoreListeners != null) {
+    if (datastoreListeners != null && !Main.batchMode) {
       Vector listeners = datastoreListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
