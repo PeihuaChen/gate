@@ -1,0 +1,73 @@
+/*
+*  pleonasm.jape
+*
+* Copyright (c) 1998-2001, The University of Sheffield.
+*
+*  This file is part of GATE (see http://gate.ac.uk/), and is free
+*  software, licenced under the GNU Library General Public License,
+*  Version 2, June 1991 (in the distribution as file licence.html,
+*  and also available at http://gate.ac.uk/gate/licence.html).
+*
+*  Marin DImitrov, 20/Dec/2001
+* 
+*  $Id$
+*/
+
+
+Phase:	pleonastic_it
+Input: Token
+Options: control = appelt
+
+Macro: IT
+(
+    {Token.category=="PRP",Token.string=="It"}  
+)
+
+Macro: IS
+(
+    {Token.category=="VBZ",Token.string=="is"} | 
+    {Token.category=="VBZ",Token.string=="was"}
+)
+
+Macro: ADVERB
+(
+    {Token.category=="RB", Token.string=="highly"} |
+    {Token.category=="RB", Token.string=="very"} |
+    {Token.category=="RB", Token.string=="stil"} |
+    {Token.category=="RB", Token.string=="increasingly"}    
+)
+
+Macro: MODALADJ
+(
+    {Token.category=="JJ" , Token.string=="necessary"} |   
+    {Token.category=="JJ" , Token.string=="difficult"} |   
+    {Token.category=="JJ" , Token.string=="advisable"} |   
+    {Token.category=="JJ" , Token.string=="easy"} |   
+    {Token.category=="JJ" , Token.string=="good"} |   
+    {Token.category=="JJ" , Token.string=="important"} |   
+    {Token.category=="JJ" , Token.string=="likely"} |   
+    {Token.category=="JJ" , Token.string=="possible"} |   
+    {Token.category=="JJ" , Token.string=="useful"}
+    {Token.category=="JJ" , Token.string=="necessary"}
+)
+
+Rule:IT_IS_ADVERB_MODADJ
+Priority: 99
+(
+    (
+        (IT)
+        (IS)
+        (ADVERB)?
+        (MODALADJ)
+    ) :pleonasm
+)
+-->
+{
+    gate.AnnotationSet found_pleonasm = (gate.AnnotationSet)bindings.get("pleonasm");    
+    Annotation pleonasm = (Annotation)found_pleonasm.iterator().next();
+
+    gate.FeatureMap features = Factory.newFeatureMap();
+    features.put("firedBy","ruleA");
+    annotations.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "pleonastic It", features);
+}
+
