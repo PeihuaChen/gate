@@ -87,6 +87,8 @@ public class SerialCorpusImpl extends
    */
   public List getDocumentNames(){
     List docsNames = new ArrayList();
+    if(docDataList == null)
+      return docsNames;
     Iterator iter = docDataList.iterator();
     while (iter.hasNext()) {
       DocumentData data = (DocumentData) iter.next();
@@ -191,14 +193,15 @@ public class SerialCorpusImpl extends
    * not be released from memory (memory leak!).
    */
   public void cleanup() {
+    if (DEBUG) Out.prln("serial corpus cleanup called");
     if (corpusListeners != null)
-      corpusListeners.clear();
-    documents.clear();
+      corpusListeners = null;
+    if (documents != null)
+      documents.clear();
     docDataList.clear();
     Gate.getCreoleRegister().removeCreoleListener(this);
     if (this.dataStore != null) {
       this.dataStore.removeDatastoreListener(this);
-      this.dataStore = null;
     }
   }
 
@@ -261,15 +264,15 @@ public class SerialCorpusImpl extends
   public void resourceUnloaded(CreoleEvent e) {
     Resource res = e.getResource();
     if (res instanceof Document) {
-    if (DEBUG) Out.prln("Unload called ");
-    //unload all occurences, but no need to remove them from the corpus too
-    if (DEBUG) Out.prln("is contained? " + this.contains(res));
-    if (this.contains(res))
-      unloadDocument((Document) res);
-    } else if (res instanceof Corpus) {
-      //check if we were not unloaded. If so, we must cleanup
-      if (this.equals(res))
-        this.cleanup();
+      if (DEBUG)
+        Out.prln("resource Unloaded called ");
+      //unload all occurences, but no need to remove them from the corpus too
+      int index = indexOf(res);
+      if (index < 0)
+        return;
+      documents.set(index, null);
+      if (DEBUG)
+        Out.prln("corpus: document "+ index + " unloaded and set to null");
     }
   }
   public void datastoreOpened(CreoleEvent e) {
@@ -277,7 +280,13 @@ public class SerialCorpusImpl extends
   public void datastoreCreated(CreoleEvent e) {
   }
   public void datastoreClosed(CreoleEvent e) {
-    Gate.getCreoleRegister().removeCreoleListener(this);
+    if (! e.getDatastore().equals(this.getDataStore()))
+      return;
+    if (this.getDataStore() != null)
+      this.getDataStore().removeDatastoreListener(this);
+    //close this corpus, since it cannot stay open when the DS it comes from
+    //is closed
+    Factory.deleteResource(this);
   }
   /**
    * Called by a datastore when a new resource has been adopted
@@ -346,19 +355,14 @@ public class SerialCorpusImpl extends
     // - the document data list contains a document with such a name
     //   and persistent id
 
-    if (! (o instanceof Document))
+    if(! (o instanceof Document))
       return false;
-    Document doc = (Document) o;
-    //if we've got the doc in memory and it's the same, then return true
-    if (DEBUG) Out.prln("Serial corpus: contained called");
-    if (this.documents.contains(doc))
+
+    int index = findDocument((Document) o);
+    if (index < 0)
+      return false;
+    else
       return true;
-
-    //there is no need to search through the docDataList because if someone
-    //has got our document, then it must be loaded
-    //let's see if there'll be counter examples
-
-    return false;
   }
 
   public Iterator iterator(){
@@ -466,11 +470,13 @@ public class SerialCorpusImpl extends
 
     //else try finding a document with the same name and persistent ID
     Iterator iter = docDataList.iterator();
-    for (index = 0;  iter.hasNext() && !found; index++) {
+    for (index = 0;  iter.hasNext(); index++) {
       docData = (DocumentData) iter.next();
       if (docData.getDocumentName().equals(doc.getName()) &&
-          docData.getPersistentID().equals(doc.getLRPersistenceId()))
+          docData.getPersistentID().equals(doc.getLRPersistenceId())) {
         found = true;
+        break;
+      }
     }
     if (found && index < docDataList.size())
       return index;
@@ -525,12 +531,14 @@ public class SerialCorpusImpl extends
     if (! (o instanceof SerialCorpusImpl))
       return false;
     SerialCorpusImpl oCorpus = (SerialCorpusImpl) o;
-    if ((this == null && oCorpus != null) || oCorpus == null && this != null)
+    if ((this == null && oCorpus != null) || (oCorpus == null && this != null))
       return false;
     if (oCorpus == this)
       return true;
     if ((oCorpus.lrPersistentId == this.lrPersistentId ||
-         oCorpus.lrPersistentId.equals(this.lrPersistentId))
+          ( this.lrPersistentId != null &&
+            this.lrPersistentId.equals(oCorpus.lrPersistentId))
+          )
         &&
         oCorpus.name.equals(this.name)
         &&
@@ -552,8 +560,8 @@ public class SerialCorpusImpl extends
 
       Object res = documents.get(index);
 
-      if (DEBUG) Out.prln("SerialCorpusImpl: get(): index "
-                          + index + "result: " + res);
+      if (DEBUG)
+        Out.prln("SerialCorpusImpl: get(): index " + index + "result: " + res);
 
       //if the document is null, then I must get it from the DS
       if (res == null) {
@@ -564,7 +572,8 @@ public class SerialCorpusImpl extends
                       ((DocumentData)docDataList.get(index)).getPersistentID());
           Resource lr = Factory.createResource( "gate.corpora.DocumentImpl",
                                                 features);
-          if (DEBUG) Out.prln("Loaded document :" + lr.getName());
+          if (DEBUG)
+            Out.prln("Loaded document :" + lr.getName());
           //change the result to the newly loaded doc
           res = lr;
 
