@@ -43,6 +43,10 @@ public class Scratch
   private static final boolean DEBUG = false;
 
   public static void main(String args[]) throws Exception {
+  Map defaultsMap = UIManager.getLookAndFeelDefaults();
+  System.out.println(defaultsMap.keySet());
+
+    
     //test for a bug reported by Luc Plamondon
     
     Gate.init();
