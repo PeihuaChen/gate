@@ -709,14 +709,14 @@ create or replace package body persist is
                     p_grp_id    IN number,
                     p_success   OUT number)
   is
-    l_can_write_lr boolean;
+    l_can_write_lr number;
     l_locking_user_id number;
   begin
 
     --1. check if the user has write access to the LR
     security.has_access_to_lr(p_lr_id,p_usr_id,p_grp_id,security.WRITE_ACCESS,l_can_write_lr);
 
-    if (false = l_can_write_lr) then
+    if (ORACLE_FALSE = l_can_write_lr) then
        raise error.x_insufficient_privileges;
     end if;
     
