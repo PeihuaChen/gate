@@ -117,17 +117,20 @@ public class Javac{
                 throws IOException {
       //the compiler will try to write the class file too;
       //we'll just load the class instead
-      ByteArrayOutputStream os = new ByteArrayOutputStream(2000);
+      ByteArrayOutputStream os = new ByteArrayOutputStream(4000);
       new ClassWriter(Hashtable.make()).writeClassFile(os, c);
       os.flush();
       byte[] bytes = os.toByteArray();
-      String className = c.className();
-      //replace the final '.' with '$' for inner classes
-      if(c.isInner()){
-        int loc = className.lastIndexOf('.');
-        className = className.substring(0, loc) + "$" +
-                    className.substring(loc + 1);
-      }
+//      String className = c.className();
+      //this is the full name with all the $ signs in the right place
+      String className = c.flatName().toJava();
+
+//      //replace the final '.' with '$' for inner classes
+//      if(c.isInner()){
+//        int loc = className.lastIndexOf('.');
+//        if(loc != -1) className = className.substring(0, loc) + "$" +
+//                                  className.substring(loc + 1);
+//      }
 //Out.pr(className + "[" + os.size() + " bytes]");
       Gate.getClassLoader().defineGateClass(className,
                                             bytes, 0, os.size());
