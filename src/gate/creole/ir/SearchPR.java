@@ -81,11 +81,11 @@ public class SearchPR extends AbstractProcessingResource
     }
   }
 
-  public void setCoprus(IndexedCorpus corpus) {
+  public void setCorpus(IndexedCorpus corpus) {
     this.corpus = corpus;
   }
 
-  public IndexedCorpus getCoprus() {
+  public IndexedCorpus getCorpus() {
     return this.corpus;
   }
 
