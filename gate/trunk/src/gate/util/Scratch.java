@@ -23,6 +23,7 @@ import java.util.zip.*;
 
 import gate.*;
 import gate.creole.*;
+import gate.gui.*;
 
 import org.xml.sax.*;
 import javax.xml.parsers.*;
@@ -37,27 +38,96 @@ public class Scratch
 
   public static void main(String args[]) throws Exception {
 
-  Gate.setNetConnected(false);
-  Gate.setLocalWebServer(false);
-  Gate.init();
-  Out.prln(new URL("gate:/gate/Main.class").getFile());
-  Out.prln(Gate.locateGateFiles());
-  Out.prln(Gate.getUrl());
-  System.exit(0);
+    // initialise the thing
+    Gate.setNetConnected(false);
+    Gate.setLocalWebServer(false);
+    Gate.init();
 
     Scratch oneOfMe = new Scratch();
     try{
-      oneOfMe.doIt();
+      oneOfMe.runNerc();
     } catch (Exception e) {
       e.printStackTrace(Out.getPrintWriter());
     }
   } // main
 
-  public void testFinal(String s){
+  /** Example of using an exit-time hook. */
+  public static void exitTimeHook() {
+    Runtime.getRuntime().addShutdownHook(new Thread() {
+      public void run() {
+        System.out.println("shutting down");
+        System.out.flush();
 
-  }// testFinal()
+        // create a File to store the state in
+        File stateFile = new File("z:\\tmp", "GateGuiState.gzsr");
 
-  public void doIt() throws Exception {
+        // dump the state into the new File
+        try {
+          ObjectOutputStream oos = new ObjectOutputStream(
+            new GZIPOutputStream(new FileOutputStream(stateFile))
+          );
+          System.out.println("writing main frame");
+          System.out.flush();
+          oos.writeObject(Main.getMainFrame());
+          oos.close();
+        } catch(Exception e) {
+          System.out.println("Couldn't write to state file: " + e);
+        }
+
+        System.out.println("done");
+        System.out.flush();
+      }
+    });
+  } // exitTimeHook()
+
+  /**
+   * ***** <B>Failed</B> *****
+   * attempt to serialise whole gui state - various swing components
+   * don't like to be serialised :-(. might be worth trying again when
+   * jdk1.4 arrives.
+   */
+  public static void dumpGuiState() {
+    System.out.println("dumping gui state...");
+    System.out.flush();
+
+    // create a File to store the state in
+    File stateFile = new File("z:\\tmp", "GateGuiState.gzsr");
+
+    // dump the state into the new File
+    try {
+      ObjectOutputStream oos = new ObjectOutputStream(
+        new GZIPOutputStream(new FileOutputStream(stateFile))
+      );
+      MainFrame mf = Main.getMainFrame();
+
+      // wait for 1 sec
+      long startTime = System.currentTimeMillis();
+      long timeNow = System.currentTimeMillis();
+      while(timeNow - startTime < 3000){
+        try {
+          Thread.sleep(150);
+          timeNow = System.currentTimeMillis();
+        } catch(InterruptedException ie) {}
+      }
+
+      System.out.println("writing main frame");
+      System.out.flush();
+      oos.writeObject(mf);
+      oos.close();
+    } catch(Exception e) {
+      System.out.println("Couldn't write to state file: " + e);
+    }
+
+    System.out.println("...done gui dump");
+    System.out.flush();
+  } // dumpGuiState
+
+  /**
+   * Run NERC and print out the various stages (doesn't actually
+   * use Nerc but the individual bits), and serialise then deserialise
+   * the NERC system.
+   */
+  public void runNerc() throws Exception {
     long startTime = System.currentTimeMillis();
 
     Out.prln("gate init");
@@ -151,8 +221,9 @@ public class Scratch
 
     Out.prln((System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
     Out.prln("done");
-  } // doIt
+  } // runNerc()
 
+  /** Inner class for holding CR and DSR for serialisation experiments */
   class SessionState implements Serializable {
     SessionState() {
       cr = Gate.getCreoleRegister();
@@ -164,7 +235,7 @@ public class Scratch
     DataStoreRegister dsr;
 
     // other state from Gate? and elsewhere?
-  }
+  } // SessionState
 
   /** Generate a random integer for file naming. */
   protected static int random() {
