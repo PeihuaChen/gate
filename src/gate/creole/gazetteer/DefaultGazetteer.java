@@ -92,34 +92,28 @@ public class DefaultGazetteer extends AbstractGazetteer {
    */
   public Resource init()throws ResourceInstantiationException{
     fsmStates = new HashSet();
-    try{
-      initialState = new FSMState(this);
-      if(listsURL == null){
-        throw new ResourceInstantiationException (
-              "No URL provided for gazetteer creation!");
-      }
-      definition = new LinearDefinition();
-      definition.setURL(listsURL);
-      definition.load();
-      int linesCnt = definition.size();
-      listsByNode = definition.loadLists();
-      Iterator inodes = definition.iterator();
-
-      String line;
-      int nodeIdx = 0;
-      LinearNode node;
-      while (inodes.hasNext()) {
-        node = (LinearNode) inodes.next();
-        fireStatusChanged("Reading " + node.toString());
-        fireProgressChanged(++nodeIdx * 100 / linesCnt);
-        readList(node,true);
-      } // while iline
-      fireProcessFinished();
-    }catch(IOException ioe){
-      throw new ResourceInstantiationException(ioe);
-    }catch(GazetteerException ge){
-      throw new ResourceInstantiationException(ge);
+    initialState = new FSMState(this);
+    if(listsURL == null){
+      throw new ResourceInstantiationException (
+            "No URL provided for gazetteer creation!");
     }
+    definition = new LinearDefinition();
+    definition.setURL(listsURL);
+    definition.load();
+    int linesCnt = definition.size();
+    listsByNode = definition.loadLists();
+    Iterator inodes = definition.iterator();
+
+    String line;
+    int nodeIdx = 0;
+    LinearNode node;
+    while (inodes.hasNext()) {
+      node = (LinearNode) inodes.next();
+      fireStatusChanged("Reading " + node.toString());
+      fireProgressChanged(++nodeIdx * 100 / linesCnt);
+      readList(node,true);
+    } // while iline
+    fireProcessFinished();
     return this;
   }
 
@@ -133,10 +127,10 @@ public class DefaultGazetteer extends AbstractGazetteer {
    *     list will be removed from the list of phrases recognised by this
    *     gazetteer.
    */
-  void readList(LinearNode node, boolean add) throws GazetteerException{
+  void readList(LinearNode node, boolean add) throws ResourceInstantiationException{
     String listName, majorType, minorType, languages;
     if ( null == node ) {
-      throw new GazetteerException (" LinearNode node is null ");
+      throw new ResourceInstantiationException(" LinearNode node is null ");
     }
 
     listName = node.getList();
@@ -145,7 +139,7 @@ public class DefaultGazetteer extends AbstractGazetteer {
     languages = node.getLanguage();
     GazetteerList gazList = (GazetteerList)listsByNode.get(node);
     if (null == gazList) {
-      throw new GazetteerException("gazetteer list not found by node");
+      throw new ResourceInstantiationException("gazetteer list not found by node");
     }
 
     Iterator iline = gazList.iterator();

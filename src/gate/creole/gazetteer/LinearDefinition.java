@@ -18,7 +18,8 @@ package gate.creole.gazetteer;
 import java.net.*;
 import java.util.*;
 import java.io.*;
-import com.ontotext.gate.exception.*;
+import gate.creole.*;
+
 
 /** represents a lists.def file <br>
  *  The normal usage of the class will be
@@ -51,32 +52,34 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   /**
    * loads the gazetteer lists and maps them to the nodes
    * @return a map of nodes vs GazetteerLists
-   * @throws MalformedURLException
-   * @throws IOException
+   * @throws ResourceInstantiationException
    */
-  public Map loadLists() throws MalformedURLException,IOException {
-    if ( null == gazListsByNode ) {
-      gazListsByNode = new HashMap();
-      Iterator inodes = nodes.iterator();
-      while (inodes.hasNext()) {
-        LinearNode node = (LinearNode)inodes.next();
+  public Map loadLists() throws ResourceInstantiationException {
+    try {
+      if ( null == gazListsByNode ) {
+        gazListsByNode = new HashMap();
+        Iterator inodes = nodes.iterator();
+        while (inodes.hasNext()) {
+          LinearNode node = (LinearNode)inodes.next();
 
-        GazetteerList list = new GazetteerList();
-        String path = url.getPath();
-        int slash = path.lastIndexOf("/");
-        if (-1 == slash ) {
-          slash = 0;
-        } else {
-          path = path.substring(0,slash+1);
-        }
-        URL lurl = new URL(url,node.getList());
-//        URL lurl = new URL(url.getProtocol()+"://"+path+node.getList());
-        list.setURL(lurl);
-        list.load();
+          GazetteerList list = new GazetteerList();
+          String path = url.getPath();
+          int slash = path.lastIndexOf("/");
+          if (-1 == slash ) {
+            slash = 0;
+          } else {
+            path = path.substring(0,slash+1);
+          }
+          URL lurl = new URL(url,node.getList());
+          list.setURL(lurl);
+          list.load();
 
-        gazListsByNode.put(node,list);
-      } // while inodes
-    } // if null
+          gazListsByNode.put(node,list);
+        } // while inodes
+      } // if null
+    } catch (Exception ex) {
+      throw new ResourceInstantiationException(ex);
+    }
     return gazListsByNode;
   }  // loadLists()
 
@@ -97,15 +100,11 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
 
   /**
    * load linear definition if url is set
-   * @throws FileNotFoundException
-   * @throws IOException
-   * @throws GazetteerException
    */
-  public void load() throws IOException,InvalidFormatException {
+  public void load() throws ResourceInstantiationException {
     if (null == url) {
-      throw new URLNotSpecifiedException();
+      throw new ResourceInstantiationException("URL not set (null).");
     }
-
     try {
       BufferedReader defReader =
       new BufferedReader(new InputStreamReader((url).openStream(), ENCODING));
@@ -118,29 +117,31 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
       } //while
 
       defReader.close();
-    } catch (InvalidFormatException ife){
-      throw new InvalidFormatException(url,"on load");
+    } catch (Exception x){
+      throw new ResourceInstantiationException(x);
     }
   } // load();
 
   /**
    * sotres this to a definition file
-   * @throws IOException
    */
-  public void store() throws IOException{
+  public void store() throws ResourceInstantiationException{
     if (null == url) {
-      throw new URLNotSpecifiedException();
+      throw new ResourceInstantiationException("URL not set.(null)");
     }
-
-    File fileo = new File(url.getFile());
-    fileo.delete();
-    BufferedWriter defWriter = new BufferedWriter(new FileWriter(fileo));
-    Iterator inodes = nodes.iterator();
-    while (inodes.hasNext()) {
-      defWriter.write(inodes.next().toString());
-      defWriter.newLine();
+    try {
+      File fileo = new File(url.getFile());
+      fileo.delete();
+      BufferedWriter defWriter = new BufferedWriter(new FileWriter(fileo));
+      Iterator inodes = nodes.iterator();
+      while (inodes.hasNext()) {
+        defWriter.write(inodes.next().toString());
+        defWriter.newLine();
+      }
+      defWriter.close();
+    } catch(Exception x) {
+      throw new ResourceInstantiationException(x);
     }
-    defWriter.close();
 
   } // store();
 

@@ -12,10 +12,14 @@
  *
  * borislav popov 02/2002
  *
- */package gate.creole.gazetteer;
+ */
+package gate.creole.gazetteer;
 
 import gate.*;
 import gate.creole.*;
+
+import com.ontotext.gate.exception.*;
+
 import java.io.*;
 
 /** implementation of onto gazetteer
@@ -30,7 +34,7 @@ public class OntoGazetteerImpl extends AbstractOntoGazetteer {
   }
 
   /** initialize this onto gazetteer */
-  public Resource init() {
+  public Resource init() throws ResourceInstantiationException {
     try {
       checkParameters();
 
@@ -50,19 +54,16 @@ public class OntoGazetteerImpl extends AbstractOntoGazetteer {
 
     } catch (ClassNotFoundException e) {
       throw new RuntimeException("ClassNotFoundException : "+e.getMessage());
-    } catch (ResourceInstantiationException e) {
-      throw new RuntimeException("ResourceInstantiationException : "+e.getMessage());
-    } catch (IOException ioe) {
-      throw new RuntimeException("IOException : "+ioe.getMessage());
+    } catch (InvalidFormatException e) {
+      throw new ResourceInstantiationException(e);
     }
-
     return this;
   } // init
 
   /** execute this onto gazetteer over a pre-set document */
   public void execute()throws ExecutionException {
     if (null == gaz) {
-      throw new NullPointerException("gazetteer not initialized");
+      throw new ExecutionException("gazetteer not initialized (null).");
     }
 
     gaz.setDocument(document);
@@ -72,12 +73,12 @@ public class OntoGazetteerImpl extends AbstractOntoGazetteer {
     gaz.execute();
   } // execute
 
-  private void checkParameters(){
+  private void checkParameters() throws ResourceInstantiationException {
     boolean set = null!=gazetteerName;
     set &= null!=listsURL;
     set&=null!=mappingURL;
     if (!set) {
-     throw new NullPointerException("some parameters are not set (e.g.gazetteerName,"
+     throw new ResourceInstantiationException("some parameters are not set (e.g.gazetteerName,"
         +"listURL,mappingDefinition, document");
     }
 

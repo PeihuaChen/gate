@@ -21,6 +21,7 @@ import java.util.*;
 import java.io.*;
 
 import com.ontotext.gate.exception.*;
+import gate.creole.ResourceInstantiationException;
 
 /** represents a mapping definition which maps gazetteer lists to ontology classes */
 public class MappingDefinition extends gate.creole.AbstractLanguageResource
@@ -54,12 +55,11 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
   }
 
   /**load the mapping definition from the url specified
-   * @throws IOException
-   * @throws InvalidFormatException
+   * @throws ResourceInstantiationException
    */
-  public void load() throws IOException,InvalidFormatException {
+  public void load() throws ResourceInstantiationException,InvalidFormatException {
     if (null == url) {
-      throw new URLNotSpecifiedException();
+      throw new ResourceInstantiationException("URL not set (null).");
     }
     try {
       BufferedReader mapReader =
@@ -76,6 +76,8 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
 
     } catch (InvalidFormatException ife){
       throw new InvalidFormatException(url,"on load");
+    } catch (IOException ioe) {
+      throw new ResourceInstantiationException(ioe);
     }
 
 
@@ -83,13 +85,13 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
 
   /**
    * store the mapping definition to the specified url
-   * @throws IOException
+   * @throws ResourceInstantiationException
    */
-  public void store()throws IOException{
+  public void store()throws ResourceInstantiationException{
     if (null == url) {
-      throw new URLNotSpecifiedException();
+      throw new ResourceInstantiationException("URL not set (null).");
     }
-
+    try {
     File fileo = new File(url.getFile());
     fileo.delete();
     BufferedWriter mapWriter = new BufferedWriter(new FileWriter(fileo));
@@ -98,6 +100,9 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
       mapWriter.newLine();
     }
     mapWriter.close();
+    } catch (IOException ioe) {
+      throw new ResourceInstantiationException(ioe);
+    }
   } //store();
 
   /**
