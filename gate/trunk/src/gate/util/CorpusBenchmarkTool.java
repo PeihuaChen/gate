@@ -685,6 +685,7 @@ public class CorpusBenchmarkTool {
       try {
         evaluateDocuments(persDoc, cleanDoc, markedDoc);
       } catch (gate.creole.ResourceInstantiationException ex) {
+ex.printStackTrace();
         Out.prln("Evaluate failed on document: " + cleanDoc.getName());
       }
       if (persDoc != null)

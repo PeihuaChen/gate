@@ -107,6 +107,12 @@ public class FeaturesEditor extends AbstractVisualResource{
     });
   }
 
+  public void cleanup(){
+    super.cleanup();
+    features = null;
+    resource = null;
+  }
+
   public void setFeatureBearer(FeatureBearer newResource) {
     if(newResource == null){
       resource = null;
