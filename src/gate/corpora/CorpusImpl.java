@@ -77,6 +77,8 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
    */
   protected class VerboseList extends AbstractList implements Serializable{
 
+
+
     VerboseList(){
       data = new ArrayList();
     }
@@ -295,6 +297,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
 
 
   /** Freeze the serialization UID. */
+  static final long serialVersionUID = -1113142759053898456L;
   private transient Vector corpusListeners;
 
 
