@@ -500,7 +500,7 @@ Out.prln("Temporary file name " + docFile.toString());
       int answer = JOptionPane.showOptionDialog(
                 largeView != null ? largeView : smallView,
                 "This is an advanced option!\n" +
-                "You should not use this unless you're name is Hamish.\n" +
+                "You should not use this unless your name is Hamish.\n" +
                 "Are you sure you want to do this?" ,
                 "Gate", JOptionPane.YES_NO_OPTION,
                 JOptionPane.WARNING_MESSAGE, null, null, null);
