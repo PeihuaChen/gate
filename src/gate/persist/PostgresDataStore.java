@@ -18,6 +18,7 @@ package gate.persist;
 import java.util.*;
 import java.sql.*;
 import java.net.*;
+import java.io.*;
 
 import junit.framework.*;
 
@@ -273,7 +274,7 @@ public class PostgresDataStore extends JDBCDataStore {
         throw new PersistenceException("empty result set");
       }
 
-      Long result =  new Long(rset.getLong("1"));
+      Long result =  new Long(rset.getLong(1));
 
       return result;
     }
@@ -370,13 +371,6 @@ public class PostgresDataStore extends JDBCDataStore {
   }
 
 
-
-  protected void updateDocumentContent(Long docID,DocumentContent content)
-    throws PersistenceException {
-
-    throw new MethodNotImplementedException();
-  }
-
   protected void createAnnotationSet(Long lrID, AnnotationSet aset)
     throws PersistenceException {
 
@@ -387,6 +381,79 @@ public class PostgresDataStore extends JDBCDataStore {
     throws PersistenceException {
 
     throw new MethodNotImplementedException();
+  }
+
+  /**
+   *  updates the content of the document if it is binary or a long string
+   *  (that does not fit into VARCHAR2)
+   */
+  protected void updateDocumentContent(Long docID,DocumentContent content)
+    throws PersistenceException {
+
+    //1. get LOB locators from DB
+    PreparedStatement pstmt = null;
+    try {
+      String sql =  " update  t_doc_content "      +
+                    " set     dc_character_content = ?,  " +
+                    "         dc_content_type = ? " +
+                    " where   dc_id = (select doc_content_id " +
+                    "                   from t_document " +
+                    "                   where doc_id = ?) ";
+
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setString(1,content.toString());
+      pstmt.setInt(2,DBHelper.CHARACTER_CONTENT);
+      pstmt.setLong(3,docID.longValue());
+      pstmt.executeUpdate();
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't update document content in DB : ["+
+                                      sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(pstmt);
+    }
+
+  }
+
+
+  /** writes the content of a String into the specified CLOB object */
+  public static void writeCLOB(String src,java.sql.Clob dest)
+    throws SQLException, IOException {
+
+    throw new MethodNotImplementedException();
+/*    //preconditions
+    Assert.assertNotNull(src);
+
+    //1. get Oracle CLOB
+    CLOB clo = (CLOB)dest;
+
+    //2. get Unicode stream
+    Writer output = clo.getCharacterOutputStream();
+
+    //3. write
+    BufferedWriter buffOutput = new BufferedWriter(output,INTERNAL_BUFFER_SIZE);
+    buffOutput.write(src.toString());
+
+    //4. flushing is a good idea [although BufferedWriter::close() calls it this is
+    //implementation specific]
+    buffOutput.flush();
+    output.flush();
+
+    //5.close streams
+    buffOutput.close();
+    output.close();
+*/
+  }
+
+
+
+  /** writes the content of a StringBuffer into the specified CLOB object */
+  public static void writeCLOB(StringBuffer src,java.sql.Clob dest)
+    throws SQLException, IOException {
+
+    //delegate
+    writeCLOB(src.toString(),dest);
   }
 
 }
