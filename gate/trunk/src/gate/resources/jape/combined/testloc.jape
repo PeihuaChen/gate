@@ -1,4 +1,6 @@
 // testloc.jape
+// DON'T change the previous line! (It's used by gate.util.TestFiles)
+// $Id$
 
 MultiPhase:	TestLocationGrammars
 Phases:
