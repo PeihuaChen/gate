@@ -12,7 +12,7 @@
 
 PKGS=	gate gate.util
 CP=	-classpath \
-../classes:
+../classes:../lib/junit.jar
 SP=	-sourcepath ../src
 COMPILE=./jdk.sh -s -g:none javac -Xstdout -O -d ../classes $(SP) $(CP)
 
@@ -23,6 +23,8 @@ include Makefile.dep
 depend:
 	./makejdepend.sh ../src/gate >Makefile.dep
 
+test:
+	./jdk.sh java ${CP} junit.ui.TestRunner gate.TestGate
 docs:
 	./jdk.sh javadoc $(SP) $(CP) -public \
 	  -d ../doc/javadoc $(PKGS)
@@ -39,6 +41,9 @@ list:
 ############################################################################
 #
 # $Log$
+# Revision 1.3  2000/01/21 17:01:28  hamish
+# added tests target and junit.jar
+#
 # Revision 1.2  2000/01/19 16:19:31  hamish
 # added
 #
