@@ -87,7 +87,6 @@ public class TestSplitterTagger extends TestCase{
     //runtime stuff
     tagger.setDocument(doc);
     tagger.setInputASName("testAS");
-    tagger.setOutputASName("testAS");
     tagger.execute();
     Iterator tokIter =doc.getAnnotations("testAS").
       get(ANNIEConstants.TOKEN_ANNOTATION_TYPE).iterator();
