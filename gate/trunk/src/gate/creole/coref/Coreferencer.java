@@ -15,17 +15,21 @@
 
 package gate.creole.coref;
 
+import java.util.*;
+
 import junit.framework.*;
 
 import gate.*;
 import gate.creole.*;
-
+import gate.util.*;
 
 public class Coreferencer extends AbstractLanguageAnalyser
                           implements ProcessingResource{
 
+  private static final boolean DEBUG = true;
 //  private Document  doc;
   private PronominalCoref pronominalModule;
+
 
   public Coreferencer() {
     this.pronominalModule = new PronominalCoref();
@@ -79,9 +83,80 @@ public class Coreferencer extends AbstractLanguageAnalyser
    * This method runs the coreferencer. It assumes that all the needed parameters
    * are set. If they are not, an exception will be fired.
    */
-  public void execute() throws ExecutionException{
+  public void execute() throws ExecutionException {
 
     this.pronominalModule.execute();
+    generateCorefChains();
+  }
+
+  private void generateCorefChains() throws GateRuntimeException{
+
+    //1. get the resolved corefs
+    HashMap ana2ant = this.pronominalModule.getResolvedAnaphora();
+
+    //2. get the outout annotation set
+    AnnotationSet outputSet = getDocument().getAnnotations(getAnnotationSetName());
+
+    //3. generate new annotations
+    Iterator it = ana2ant.entrySet().iterator();
+    while (it.hasNext()) {
+      Map.Entry currLink = (Map.Entry)it.next();
+      Annotation anaphor = (Annotation)currLink.getKey();
+      Annotation antecedent = (Annotation)currLink.getValue();
+
+      if (DEBUG) {
+        AnnotationSet corefSet = getDocument().getAnnotations("COREF");
+        Long antOffset = new Long(0);
+
+        if (null != antecedent) {
+          antOffset = antecedent.getStartNode().getOffset();
+        }
+
+        FeatureMap features = new SimpleFeatureMapImpl();
+        features.put("antecedent",antOffset);
+        corefSet.add(anaphor.getStartNode(),anaphor.getEndNode(),"COREF",features);
+      }
+
+      //do we have antecedent?
+      if (null == antecedent) {
+        continue;
+      }
+
+      //get the ortho-matches of the antecedent
+      List matches = (List)antecedent.getFeatures().get("matches");
+      if (null == matches) {
+        matches = new ArrayList();
+        matches.add(antecedent.getId());
+        antecedent.getFeatures().put("matches",matches);
+      }
+
+      FeatureMap features = new SimpleFeatureMapImpl();
+      features.put("type","PRONOUN");
+      features.put("matches",matches);
+      features.put("antecedent_offset",antecedent.getStartNode().getOffset());
+
+      Integer annID = outputSet.add(anaphor.getStartNode(),
+                                    anaphor.getEndNode(),
+                                    antecedent.getType(),
+                                    features);
+      matches.add(annID);
+    }
+
+/*
+
+      //12.add to COREF annotation set
+      corefSet = this.document.getAnnotations("COREF");
+      Long antOffset = new Long(0);
+
+      if (null!= antc) {
+        antOffset = antc.getStartNode().getOffset();
+      }
+
+      //13. create coref annotation
+      FeatureMap features = new SimpleFeatureMapImpl();
+      features.put("antecedent",antOffset);
+      corefSet.add(currPronoun.getStartNode(),currPronoun.getEndNode(),"COREF",features);
+*/
   }
 
 }
