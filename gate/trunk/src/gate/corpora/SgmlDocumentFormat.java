@@ -76,15 +76,11 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
         // create a new Xml document handler
         XmlDocumentHandler xmlDocHandler = new
                             XmlDocumentHandler(doc, this.markupElementsMap);
-        // register a progress listener with it
-        xmlDocHandler.addProcessProgressListener(new ProgressListener(){
-          public void progressChanged(int i){
+        // register a status listener with it 
+        xmlDocHandler.addStatusListener(new StatusListener(){
+          public void statusChanged(String text){
             // this is implemented in DocumentFormat.java and inherited here
-            fireProgressChangedEvent(i);
-          }
-          public void processFinished(){
-            // this is implemented in DocumentFormat.java and inherited here
-            fireProcessFinishedEvent();
+            fireStatusChangedEvent(text);
           }
         });
         parser.parse(xmlUri, xmlDocHandler);

@@ -13,6 +13,7 @@ package gate.util;
 import org.w3c.www.mime.*;
 
 import java.io.*;
+import java.net.*;
 // xml DOM import
 import javax.xml.parsers.*;
 import org.w3c.dom.*;
@@ -161,13 +162,23 @@ public class ScratchCristian
     }
     lax.parseXmlDocument(xmlFile);
    */
-   MimeType type = null;
+   URL url = null;
    try{
-    type = new MimeType("text/xml");
-   } catch (Exception e){
+    //url = new URL ("http://www.dcs.shef.ac.uk/~cursu/xml/input/xces/xces.xml");
+    //url = new URL ("file:///d:/xml/input/xces/xces.xml");
+    //url = new URL ("file:///d:/tmp/index.html");
+    //url = new URL ("file:///d:/tmp/J52.xml");
+    //url = new URL ("file:///d:/tmp/poza.gif");
+    url = new URL ("http://www.dcs.shef.ac.uk/~cursu");
+    //System.out.println(url.getContent());
+    URLConnection con = url.openConnection();
+    //System.out.println(url.getFile());
+    //System.out.println(URLConnection.guessContentTypeFromName(url.getFile()));
+    System.out.println(URLConnection.guessContentTypeFromStream(con.getInputStream()));
+   }
+   catch (Exception e){
     e.printStackTrace(System.err);
    }
-   System.out.println(type.getType() + ":" + type.getSubtype());
   }
 } // class ScratchCristian
 

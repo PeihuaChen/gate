@@ -22,7 +22,7 @@ import org.xml.sax.*;
   * Implements the behaviour of the XML reader
   */
 public class XmlDocumentHandler extends HandlerBase
-                                           implements ProcessProgressReporter{
+                                           implements StatusReporter{
 
   // member data
 
@@ -46,13 +46,14 @@ public class XmlDocumentHandler extends HandlerBase
   // an annotation set
   protected gate.AnnotationSet basicAS;
 
-  // listeners for progress
-  protected List myProgressListeners = new LinkedList();
-
   // listeners for status report
   protected List myStatusListeners = new LinkedList();
 
   private int documentSize = 0;
+
+  private char[] previousText = null;
+  private int currentPosition = 0;
+  private int chuncksLength = 0;
 
   /**
     * Constructor
@@ -66,6 +67,7 @@ public class XmlDocumentHandler extends HandlerBase
 
     documentSize = doc.getContent().size().intValue();
     if (documentSize == 0) documentSize = 1;
+    System.out.println("SIZe = " + documentSize);
   }
 
   /**
@@ -84,7 +86,6 @@ public class XmlDocumentHandler extends HandlerBase
   public void endDocument() throws org.xml.sax.SAXException {
     // replace the document content with the one without markups
     doc.setContent(new DocumentContentImpl(tmpDocContent));
-    fireProcessFinishedEvent();
   }
 
   /**
@@ -92,6 +93,8 @@ public class XmlDocumentHandler extends HandlerBase
     * XML element
     */
   public void startElement(String elemName, AttributeList atts){
+      // inform the progress listener about that
+    fireStatusChangedEvent("Processing:" + elemName);
     // construct a SimpleFeatureMapImpl from the list of attributes
     FeatureMap fm = new SimpleFeatureMapImpl();
     // for all attributes do
@@ -114,7 +117,6 @@ public class XmlDocumentHandler extends HandlerBase
     * XML element
     */
   public void endElement(String elemName) throws SAXException{
-
     // obj is for internal use
     MyCustomObject obj = null;
     // if the stack is not empty, we extract the custom object and delete it
@@ -148,8 +150,6 @@ public class XmlDocumentHandler extends HandlerBase
   public void characters( char[] text, int start, int length) throws SAXException{
     // some internal objects
     String content = new String(text, start, length);
-    // inform the progress listener about that
-    fireProgressChangedEvent(start*100/documentSize);
    /*
     // triming section
     if (content.charAt(content.length() - 1) == '\n')
@@ -191,7 +191,6 @@ public class XmlDocumentHandler extends HandlerBase
 
     // internal String object
     String  text = new String(ch, start, length);
-
     // if the last character in tmpDocContent is \n and the read whitespace is \n
     // then don't add it to tmpDocContent...
 
@@ -277,7 +276,6 @@ public class XmlDocumentHandler extends HandlerBase
   public void endParsedEntity(String name, boolean included)throws SAXException{
   }
 
-
   //StatusReporter Implementation
   public void addStatusListener(StatusListener listener){
     myStatusListeners.add(listener);
@@ -290,30 +288,6 @@ public class XmlDocumentHandler extends HandlerBase
     while(listenersIter.hasNext())
       ((StatusListener)listenersIter.next()).statusChanged(text);
   }
-
-  //ProcessProgressReporter implementation
-  public void addProcessProgressListener(ProgressListener listener){
-    myProgressListeners.add(listener);
-  }
-
-  public void removeProcessProgressListener(ProgressListener listener){
-    myProgressListeners.remove(listener);
-  }
-
-  protected void fireProgressChangedEvent(int i){
-    Iterator listenersIter = myProgressListeners.iterator();
-    while(listenersIter.hasNext())
-      ((ProgressListener)listenersIter.next()).progressChanged(i);
-  }
-
-  protected void fireProcessFinishedEvent(){
-    Iterator listenersIter = myProgressListeners.iterator();
-    while(listenersIter.hasNext())
-      ((ProgressListener)listenersIter.next()).processFinished();
-  }
-  //ProcessProgressReporter implementation ends here
-  
-
 } //CustomDocumentHandler
 
 
@@ -367,3 +341,5 @@ class  MyCustomObject{
   }
 
 }// MyCustomObject
+
+
