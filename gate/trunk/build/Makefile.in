@@ -284,6 +284,15 @@ gatepackages:
 	  echo $$f |sed 's,/,.,g'; \
 	done
 
+# report lines of code in GATE
+loc:
+	@cd ../src; \
+	echo -n sql code:; wc -l database/Oracle/[a-z]* |grep total; \
+	echo -n java code:; \
+	wc -l `find . -name '*.java' -print` |grep total; \
+	echo -n test code:; \
+	wc -l `find . -name 'Test*.java' -print` |grep total;
+
 # rebuild bib2html parser
 ../src/gate/util/Bib2HTML/Bib2HTML.java: ../src/gate/util/Bib2HTML/Bib2HTML.jj
 	cd ../src/gate/util/Bib2HTML; \
