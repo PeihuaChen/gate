@@ -1,0 +1,14 @@
+<CREOLE-DIRECTORY>
+	<CREOLE>
+		
+		<RESOURCE>
+			<NAME>Chemistry Tagger</NAME>
+			<JAR>ChemTagger.jar</JAR>
+			<CLASS>mark.chemistry.Tagger</CLASS>
+			<PARAMETER NAME="document"
+				COMMENT="The document to be analysed."
+				RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
+		</RESOURCE>
+	
+	</CREOLE>
+</CREOLE-DIRECTORY>
