@@ -359,23 +359,6 @@ I guess it&prime;s relevant to when GATE tries to persist the settings (and that
     <!--<TD>spare2</TD>-->
   </TR>
 
-  <TR>
-    <TD>00039</TD>
-    <TD>core - I/O</TD>
-    <TD>Hamish</TD>
-    <TD>___adopted_by</TD>
-    <TD>beta1</TD>
-    <TD>___fixed_on ___date ___Gversion</TD>
-    <TD>the "don't give me all the GATE features" facility doesn't
-seem to work: sometimes you get features, sometimes not
-</TD>
-    <TD>check out GateExamples and run the default configuration in JBuilder - results attached. so the
-"<html>" tag is ok (an extra space added though), but the "<meta " thing has the "gateId" in it...</TD>
-    <TD><a href="bugs/dump01.txt">output dump</a></TD>
-    <!--<TD>spare1</TD>-->
-    <!--<TD>spare2</TD>-->
-  </TR>
-
 
   <TR>
     <TD>00043</TD>
@@ -457,25 +440,6 @@ Valentin's note: how often do we set parameters on resources? Is it worth the wh
   </TR>
 
 
-  <TR>
-    <TD>00047</TD>
-    <TD>?</TD>
-    <TD>Kalina</TD>
-    <TD>___adopted_by</TD>
-    <TD>beta1</TD>
-    <TD>___fixed_on ___date ___Gversion</TD>
-    <TD>The idea is to have a file in the corpus directory which is either empty, then process the entire doc or contains the string of the annotation name which should be the BODY annotation in annotation set transfer.
-
-The problem is that without AST, precision and recall are lower by about 5% from the real figures.
-
-Should fix as soon as Oana has fixed the entire corpus.
-
-Diana's note:
-.....would be very happy later on if it were allowed to process just the main
-body of the documents and not the whole thing, by allowing you to specify the
-tag to be used for the annotation set transfer.
-
-</TD>
     <TD>___test_method</TD>
     <TD>___supporting_materials</TD>
     <!--<TD>spare1</TD>-->
@@ -1188,6 +1152,24 @@ is that it comes up 2 or 3 times
     <!--<TD>spare2</TD>-->
   </TR>
 
+  <TR>
+    <TD>00039</TD>
+    <TD>core - I/O</TD>
+    <TD>Hamish</TD>
+    <TD>Kalina</TD>
+    <TD>beta1</TD>
+    <TD>21 Feb 2002 beta1</TD>
+    <TD>the "don't give me all the GATE features" facility doesn't
+seem to work: sometimes you get features, sometimes not
+</TD>
+    <TD>check out GateExamples and run the default configuration in JBuilder - results attached. so the
+"<html>" tag is ok (an extra space added though), but the "<meta " thing has the "gateId" in it...</TD>
+    <TD><a href="bugs/dump01.txt">output dump</a></TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+
 
   <TR>
     <TD>00040</TD>
@@ -1257,6 +1239,25 @@ Suggestion: add a menu of actions for each annotation type (delete and select fo
     <!--<TD>spare2</TD>-->
   </TR>
 
+  <TR>
+    <TD>00047</TD>
+    <TD>creole/AST</TD>
+    <TD>Kalina</TD>
+    <TD>Kalina</TD>
+    <TD>beta1</TD>
+    <TD>21 February 2002 beta1</TD>
+    <TD>The idea is to have a file in the corpus directory which is either empty, then process the entire doc or contains the string of the annotation name which should be the BODY annotation in annotation set transfer.
+
+The problem is that without AST, precision and recall are lower by about 5% from the real figures.
+
+Should fix as soon as Oana has fixed the entire corpus.
+
+Diana's note:
+.....would be very happy later on if it were allowed to process just the main
+body of the documents and not the whole thing, by allowing you to specify the
+tag to be used for the annotation set transfer.
+
+</TD>
 
     <TR>
     <TD>00053</TD>
