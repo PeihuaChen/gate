@@ -226,7 +226,7 @@ public class TestGate {
       // Test bench
       ////////////////////////////////////////////////
       // set this true to run all tests; false to run the just one below
-      boolean allTests = false;
+      boolean allTests = true;
       if(! allTests){
         suite.addTest(TestJacl.suite());
       } else {
@@ -252,7 +252,10 @@ public class TestGate {
 //        suite.addTest(TestJdk.suite());
         suite.addTest(TestJape.suite());
         suite.addTest(TestTemplate.suite());
-        suite.addTest(TestJacl.suite());
+        /* The TCL tests rely on the application being started from the
+         * gate directory. This is not possible from the nightly build script.
+         */
+//        suite.addTest(TestJacl.suite());
         suite.addTest(TestDocument.suite());
         suite.addTest(TestRBTreeMap.suite());
         suite.addTest(TestCorpus.suite());
