@@ -11,4 +11,4 @@ Rule: r1
 ({Sentence})*
 (({Token})+):left
 -->
-left.Sentence={}
+:left.Sentence={}
