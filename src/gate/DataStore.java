@@ -27,6 +27,10 @@ import gate.security.*;
   */
 public interface DataStore extends FeatureBearer {
 
+  public static final String DATASTORE_FEATURE_NAME = "DataStore";
+  public static final String LR_ID_FEATURE_NAME = "LRPersistenceId";
+
+
   /** Set the URL for the underlying storage mechanism. */
   public void setStorageUrl(URL storageUrl) throws PersistenceException;
 
