@@ -295,7 +295,7 @@ public class OrthoMatcher extends AbstractProcessingResource
       if (processedAnnots.containsValue(unknownString)) {
         Annotation matchedAnnot = updateMatches(unknown, unknownString);
 //        Out.prln("Matched " + unknown + "with string " + unknownString);
-//        Out.prln("Taht's same as " + matchedAnnot);
+//        Out.prln("That's same as " + matchedAnnot);
         if (matchedAnnot.getType().equals(unknownType)) {
           annots2Remove.put(unknown.getId(),
                             annots2Remove.get(matchedAnnot.getId()));
@@ -440,7 +440,7 @@ public class OrthoMatcher extends AbstractProcessingResource
     //if the two matching annotations are of different type which is not
     //unknown, do not match them
     if (! matchedAnnot.getType().equals(newAnnot.getType())
-        && !matchedAnnot.getType().equals(unknownType) )
+        && !newAnnot.getType().equals(unknownType) )
       return matchedAnnot;
 
     List matchesList = (List) matchedAnnot.getFeatures().get(MATCHES_FEATURE);
