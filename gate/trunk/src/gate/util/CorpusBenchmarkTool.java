@@ -982,11 +982,45 @@ ex.printStackTrace();
         recCountByType.put(annotType, new Integer(1));
       else
         recCountByType.put(annotType, new Integer(recCount.intValue() + 1));
+
+      //Update the missing, spurious, correct, and partial counts
+      Long oldMissingNo = (Long) missingByType.get(annotType);
+      if (oldMissingNo == null)
+        missingByType.put(annotType, new Long(annotDiff.getMissingCount()));
+      else
+        missingByType.put(annotType,
+                        new Long(oldMissingNo.longValue() +
+                                  annotDiff.getMissingCount()));
+
+      Long oldCorrectNo = (Long) correctByType.get(annotType);
+      if (oldCorrectNo == null)
+        correctByType.put(annotType, new Long(annotDiff.getCorrectCount()));
+      else
+        correctByType.put(annotType,
+                        new Long(oldCorrectNo.longValue() +
+                                  annotDiff.getCorrectCount()));
+
+      Long oldPartialNo = (Long) partialByType.get(annotType);
+      if (oldPartialNo == null)
+        partialByType.put(annotType, new Long(annotDiff.getPartiallyCorrectCount()));
+      else
+        partialByType.put(annotType,
+                        new Long(oldPartialNo.longValue() +
+                                  annotDiff.getPartiallyCorrectCount()));
+
+      Long oldSpuriousNo = (Long) spurByType.get(annotType);
+      if (oldSpuriousNo == null)
+        spurByType.put(annotType, new Long(annotDiff.getSpuriousCount()));
+      else
+        spurByType.put(annotType,
+                        new Long(oldSpuriousNo.longValue() +
+                                  annotDiff.getSpuriousCount()));
   }
 
-  protected void printStatistics() {
+  public void printStatistics() {
 
     Out.prln("<H2> Statistics </H2>");
+/*
     Out.prln("<H3> Precision </H3>");
     if (precisionByType != null && !precisionByType.isEmpty()) {
       Iterator iter = precisionByType.keySet().iterator();
@@ -1016,23 +1050,70 @@ ex.printStackTrace();
 
     Out.prln("Overall recall: " + getRecallAverage()
              + "<P>");
-
-    Out.prln("<H3> F-Measure </H3>");
-    if (fMeasureByType != null && !fMeasureByType.isEmpty()) {
-      Iterator iter = fMeasureByType.keySet().iterator();
-      while (iter.hasNext()) {
-        String annotType = (String) iter.next();
-        Out.prln(annotType + ": "
-          + ((Double)fMeasureByType.get(annotType)).doubleValue()
-              /
-              ((Integer)fMeasureCountByType.get(annotType)).intValue()
-          + "<P>");
-      }//while
+*/
+    if (annotTypes == null) {
+      Out.prln("No types given for evaluation, cannot obtain precision/recall");
+      return;
     }
+    Out.prln("<table border=1>");
+    Out.prln("<TR> <TD><B>Annotation Type</B></TD> <TD><B>Correct</B></TD>" +
+              "<TD><B>Partially Correct</B></TD> <TD><B>Missing</B></TD>" +
+              "<TD><B>Spurious</B></TD> <TD><B>Precision (strict)</B></TD>" +
+              "<TD><B>Recall (strict)</B></TD> <TD><B>F-Measure</B></TD> </TR>");
+    for (int i = 0; i < annotTypes.size(); i++) {
+      String annotType = (String) annotTypes.get(i);
+      printStatsForType(annotType);
+    }//for
+    Out.prln("</table>");
+  }
 
-    Out.prln("Overall average fMeasure: " + fMeasureSum/docNumber
-             + "<P>");
+  protected void printStatsForType(String annotType){
+      Out.prln("<TR>");
+      Out.prln("<TD>" + annotType + "</TD>");
+      Out.prln("<TD>" + correctByType.get(annotType) + "</TD>");
+      Out.prln("<TD>" + partialByType.get(annotType) + "</TD>");
+      Out.prln("<TD>" + missingByType.get(annotType) + "</TD>");
+      Out.prln("<TD>" + spurByType.get(annotType) + "</TD>");
+      long actual = ((Long)correctByType.get(annotType)).longValue() +
+                    ((Long)partialByType.get(annotType)).longValue() +
+                    ((Long)spurByType.get(annotType)).longValue();
+      long possible = ((Long)correctByType.get(annotType)).longValue() +
+                    ((Long)partialByType.get(annotType)).longValue() +
+                    ((Long)missingByType.get(annotType)).longValue();
+      //precision strict is correct/actual
+      //precision is (correct + 0.5 * partially correct)/actual
+      double precision =
+              (
+                ((Long)correctByType.get(annotType)).longValue() +
+                0.5*((Long)partialByType.get(annotType)).longValue()
+              )/actual;
+      Out.prln("<TD>" +
+             precision +
+            "(" +
+            ((Long)correctByType.get(annotType)).longValue()/actual +
+            ")" +
+            "</TD>");
+      //recall strict is correct/possible
+      double recall =
+            (
+              ((Long)correctByType.get(annotType)).longValue() +
+              0.5*((Long)partialByType.get(annotType)).longValue()
+            )/possible;
+      Out.prln("<TD>" +
+             recall +
+            "(" +
+            ((Long)correctByType.get(annotType)).longValue()/possible +
+            ")" +
+            "</TD>");
 
+      //F-measure = ( (beta*beta + 1)*P*R ) / ((beta*beta*P) + R)
+      double fmeasure =
+        ((beta*beta + 1)*precision*recall)
+        /
+        ((beta*beta*precision) + recall);
+
+      Out.prln("<TD>" + fmeasure + "</TD>");
+      Out.prln("</TR>");
   }
 
   protected AnnotationDiff measureDocs(
@@ -1132,6 +1213,14 @@ ex.printStackTrace();
   private HashMap recCountByType = new HashMap();
   private HashMap fMeasureByType = new HashMap();
   private HashMap fMeasureCountByType = new HashMap();
+
+  private HashMap missingByType = new HashMap();
+  private HashMap spurByType = new HashMap();
+  private HashMap correctByType = new HashMap();
+  private HashMap partialByType = new HashMap();
+
+  double beta = 1;
+
   private int docNumber = 0;
 
   /**
