@@ -493,7 +493,7 @@ jar/classpath so it's the same as registerBuiltins
   } // genSym
 
   /** GATE development environment configuration data (stored in gate.xml). */
-  private static Map userConfig = new HashMap();
+  private static OptionsMap userConfig = new OptionsMap();
 
   /** Name of the XML element for GATE development environment config data. */
   private static String userConfigElement = "GATECONFIG";
@@ -528,7 +528,7 @@ jar/classpath so it's the same as registerBuiltins
    * Get the GATE development environment configuration data
    * (initialised from <TT>gate.xml</TT>).
    */
-  public static Map getUserConfig() { return userConfig; }
+  public static OptionsMap getUserConfig() { return userConfig; }
 
   /**
    * Update the GATE development environment configuration data in the
