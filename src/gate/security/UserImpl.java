@@ -207,7 +207,7 @@ public class UserImpl
    *  */
   public boolean equals(Object obj)
   {
-    Assert.assert(obj instanceof User);
+    Assert.assertTrue(obj instanceof User);
 
     User usr2 = (User)obj;
 
@@ -307,7 +307,7 @@ public class UserImpl
   public void objectModified(ObjectModificationEvent e) {
 
     //only groups can disturb the user
-    Assert.assert(e.getSubType() == Group.OBJECT_CHANGE_ADDUSER ||
+    Assert.assertTrue(e.getSubType() == Group.OBJECT_CHANGE_ADDUSER ||
                   e.getSubType() == Group.OBJECT_CHANGE_REMOVEUSER ||
                   e.getSubType() == Group.OBJECT_CHANGE_NAME);
 
@@ -319,9 +319,9 @@ public class UserImpl
       case Group.OBJECT_CHANGE_ADDUSER:
 
         //1.check that the groupis not already in collection
-        Assert.assert(false == this.groups.contains(grp));
+        Assert.assertTrue(false == this.groups.contains(grp));
         //1.1 verify grp
-        Assert.assert(grp instanceof Group);
+        Assert.assertTrue(grp instanceof Group);
         //2.add group to collection
         this.groups.add(grp);
         //3. the group has laredy registered
@@ -331,7 +331,7 @@ public class UserImpl
 
       case Group.OBJECT_CHANGE_REMOVEUSER:
         //1.check that the group is in collection
-        Assert.assert(true == this.groups.contains(grp));
+        Assert.assertTrue(true == this.groups.contains(grp));
         //2.remove group from collection
         this.groups.remove(grp);
         //3. the group has laredy UNregistered
@@ -394,7 +394,7 @@ public class UserImpl
 
       //is valid?
       Assert.assertNotNull(grp);
-      Assert.assert(grp instanceof Group);
+      Assert.assertTrue(grp instanceof Group);
       //add to our collection, which was empty so far
       this.groups.add(grp);
     }

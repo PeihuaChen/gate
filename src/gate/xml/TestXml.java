@@ -50,29 +50,29 @@ public class TestXml extends TestCase
     URL url = null;
 
     url = Gate.getUrl("tests/xml/xces.xml");
-    assert("Coudn't create a URL object for tests/xml/xces.xml ", url != null);
+    assertTrue("Coudn't create a URL object for tests/xml/xces.xml ", url != null);
     urlList.add(url);
     urlDescription.add(" an XML document ");
 
     url = Gate.getUrl("tests/xml/Sentence.xml");
-    assert("Coudn't create a URL object for tests/xml/Sentence.xml",
+    assertTrue("Coudn't create a URL object for tests/xml/Sentence.xml",
                                                          url != null);
     urlList.add(url);
     urlDescription.add(" an XML document ");
 
     url = Gate.getUrl("tests/html/test1.htm");
-    assert("Coudn't create a URL object for tests/html/test.htm",url != null);
+    assertTrue("Coudn't create a URL object for tests/html/test.htm",url != null);
     urlList.add(url);
     urlDescription.add(" an HTML document ");
 
     url = Gate.getUrl("tests/rtf/Sample.rtf");
-    assert("Coudn't create a URL object for defg ",url != null);
+    assertTrue("Coudn't create a URL object for defg ",url != null);
     urlList.add(url);
     urlDescription.add(" a RTF document ");
 
 
     url = Gate.getUrl("tests/email/test2.eml");
-    assert("Coudn't create a URL object for defg ",url != null);
+    assertTrue("Coudn't create a URL object for defg ",url != null);
     urlList.add(url);
     urlDescription.add(" an EMAIL document ");
 
@@ -96,7 +96,7 @@ public class TestXml extends TestCase
     keyDocument = (Document)Factory.createResource("gate.corpora.DocumentImpl",
                                                     params);
 
-    assert("Coudn't create a Gate document instance for " +
+    assertTrue("Coudn't create a Gate document instance for " +
             url.toString() +
             " Can't continue." , keyDocument != null);
 
@@ -105,7 +105,7 @@ public class TestXml extends TestCase
       keyDocument, keyDocument.getSourceUrl()
     );
 
-    assert("Fail to recognize " +
+    assertTrue("Fail to recognize " +
             url.toString() +
             " as being " + urlDescription + " !", keyDocFormat != null);
 
@@ -123,7 +123,7 @@ public class TestXml extends TestCase
     // using UTF-8 encoding
     File xmlFile = null;
     xmlFile = Files.writeTempFile(keyDocument.toXml(),"UTF-8");
-    assert("The temp Gate XML file is null. Can't continue.",xmlFile != null);
+    assertTrue("The temp Gate XML file is null. Can't continue.",xmlFile != null);
 /*
     // Prepare to write into the xmlFile using UTF-8 encoding
     OutputStreamWriter writer = new OutputStreamWriter(
@@ -137,7 +137,7 @@ public class TestXml extends TestCase
     gate.Document gateDoc = null;
     gateDoc = gate.Factory.newDocument(xmlFile.toURL());
 
-    assert("Coudn't create a Gate document instance for " +
+    assertTrue("Coudn't create a Gate document instance for " +
                 xmlFile.toURL().toString() +
                 " Can't continue." , gateDoc != null);
 
@@ -145,7 +145,7 @@ public class TestXml extends TestCase
     gateDocFormat =
             DocumentFormat.getDocumentFormat(gateDoc,gateDoc.getSourceUrl());
 
-    assert("Fail to recognize " +
+    assertTrue("Fail to recognize " +
       xmlFile.toURL().toString() +
       " as being a Gate XML document !", gateDocFormat != null);
 
@@ -157,10 +157,10 @@ public class TestXml extends TestCase
     long gateDocSize = keyDocument.getContent().size().longValue();
     int gateDocAnnotationSetSize = keyDocument.getAnnotations().size();
 
-    assert("Exporting as Gate XML resulted in document content size lost." +
+    assertTrue("Exporting as Gate XML resulted in document content size lost." +
       " Something went wrong.", keyDocumentSize == gateDocSize);
 
-    assert("Exporting as Gate XML resulted in annotation lost." +
+    assertTrue("Exporting as Gate XML resulted in annotation lost." +
       " No. of annotations missing =  " +
       Math.abs(keyDocumentAnnotationSetSize - gateDocAnnotationSetSize),
       keyDocumentAnnotationSetSize == gateDocAnnotationSetSize);

@@ -36,7 +36,7 @@ public class SecurityInfo {
   public SecurityInfo(int accessMode,User usr,Group grp) {
 
     //0. preconditions
-    Assert.assert(accessMode == this.ACCESS_GR_GW ||
+    Assert.assertTrue(accessMode == this.ACCESS_GR_GW ||
                   accessMode == this.ACCESS_GR_OW ||
                   accessMode == this.ACCESS_OR_OW ||
                   accessMode == this.ACCESS_WR_GW);

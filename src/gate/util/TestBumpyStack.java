@@ -54,15 +54,15 @@ public class TestBumpyStack extends TestCase
     bumper.push(s2);
     bumper.push(s1);
 
-    assert(
+    assertTrue(
       "managed to bump non-existent element",
       ! bumper.bump(new String("something"))
     );
 
-    assert("stack wrong length (I): " + bumper.size(), bumper.size() == 3);
-    assert("couldn't bump s2", bumper.bump(s2));
-    assert("s2 not front of stack", ((String) bumper.pop()).equals("s2"));
-    assert("stack wrong length (II)" + bumper.size(), bumper.size() == 2);
+    assertTrue("stack wrong length (I): " + bumper.size(), bumper.size() == 3);
+    assertTrue("couldn't bump s2", bumper.bump(s2));
+    assertTrue("s2 not front of stack", ((String) bumper.pop()).equals("s2"));
+    assertTrue("stack wrong length (II)" + bumper.size(), bumper.size() == 2);
   } // testBumpiness()
 
   /**
@@ -145,9 +145,6 @@ public class TestBumpyStack extends TestCase
 
 
     //force GC
-    Thread.currentThread().sleep(1000);
-    System.gc();
-    Thread.currentThread().sleep(1000);
     System.gc();
 
     //check instances count
@@ -180,14 +177,10 @@ public class TestBumpyStack extends TestCase
           "\nJapes expected: " + japeCnt + ", got: " + newJapeCnt +
           "\nSerCtls expected: " + serctlCnt + ", got: " + newSerctlCnt;
 
-    assert(message, docCnt == newDocCnt &&
+    assertTrue(message, docCnt == newDocCnt &&
                     corpusCnt == newCorpusCnt &&
                     tokCnt == newTokCnt &&
                     japeCnt == newJapeCnt &&
                     serctlCnt == newSerctlCnt);
   }
-
-
-
-
 } // class TestBumpyStack

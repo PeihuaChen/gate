@@ -45,8 +45,6 @@ public class TestEmail extends TestCase
 
   /** A test */
   public void testUnpackMarkup() throws Exception{
-    assert(true);
-
     // create the markupElementsMap map
     Map markupElementsMap = null;
     gate.Document doc = null;
@@ -57,7 +55,7 @@ public class TestEmail extends TestCase
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
       doc, doc.getSourceUrl()
     );
-    assert( "Bad document Format was produced.EmailDocumentFormat was expected",
+    assertTrue( "Bad document Format was produced.EmailDocumentFormat was expected",
             docFormat instanceof gate.corpora.EmailDocumentFormat
           );
 

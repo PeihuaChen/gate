@@ -669,10 +669,10 @@ public class EmailDocumentHandler{
     String str3 = ":X-Sender oana@derwent";
     String str4 = "X-Sender oana@derwent:";
 
-    Assert.assert((containsSemicolon(str1) == true));
-    Assert.assert((containsSemicolon(str2)== false));
-    Assert.assert((containsSemicolon(str3) == true));
-    Assert.assert((containsSemicolon(str4) == true));
+    Assert.assertTrue((containsSemicolon(str1) == true));
+    Assert.assertTrue((containsSemicolon(str2)== false));
+    Assert.assertTrue((containsSemicolon(str3) == true));
+    Assert.assertTrue((containsSemicolon(str4) == true));
   }// testContainsSemicolon
 
   /**
@@ -684,10 +684,10 @@ public class EmailDocumentHandler{
     String str3 = " Content-Type:TEXT/PLAIN;charset=US-ASCII";
     String str4 = "Content-Type:TEXT/PLAIN;charset=US-ASCII ";
 
-    Assert.assert((containsWhiteSpaces(str1) == true));
-    Assert.assert((containsWhiteSpaces(str2) == false));
-    Assert.assert((containsWhiteSpaces(str3) == true));
-    Assert.assert((containsWhiteSpaces(str4) == true));
+    Assert.assertTrue((containsWhiteSpaces(str1) == true));
+    Assert.assertTrue((containsWhiteSpaces(str2) == false));
+    Assert.assertTrue((containsWhiteSpaces(str3) == true));
+    Assert.assertTrue((containsWhiteSpaces(str4) == true));
   }// testContainsWhiteSpaces
 
   /**
@@ -704,15 +704,15 @@ public class EmailDocumentHandler{
     String str8 = "September";
     String str9 = "Friday";
 
-    Assert.assert((hasAMeaning(str1) == true));
-    Assert.assert((hasAMeaning(str2) == true));
-    Assert.assert((hasAMeaning(str3) == true));
-    Assert.assert((hasAMeaning(str4) == true));
-    Assert.assert((hasAMeaning(str5) == true));
-    Assert.assert((hasAMeaning(str6) == false));
-    Assert.assert((hasAMeaning(str7) == false));
-    Assert.assert((hasAMeaning(str8) == false));
-    Assert.assert((hasAMeaning(str9) == false));
+    Assert.assertTrue((hasAMeaning(str1) == true));
+    Assert.assertTrue((hasAMeaning(str2) == true));
+    Assert.assertTrue((hasAMeaning(str3) == true));
+    Assert.assertTrue((hasAMeaning(str4) == true));
+    Assert.assertTrue((hasAMeaning(str5) == true));
+    Assert.assertTrue((hasAMeaning(str6) == false));
+    Assert.assertTrue((hasAMeaning(str7) == false));
+    Assert.assertTrue((hasAMeaning(str8) == false));
+    Assert.assertTrue((hasAMeaning(str9) == false));
   } // testHasAMeaning
 
   /**
@@ -723,9 +723,9 @@ public class EmailDocumentHandler{
     String str2 = "13/05/22";
     String str3 = "24:05:22";
 
-    Assert.assert((isTime(str1) == true));
-    Assert.assert((isTime(str2) == false));
-    Assert.assert((isTime(str3) == false));
+    Assert.assertTrue((isTime(str1) == true));
+    Assert.assertTrue((isTime(str2) == false));
+    Assert.assertTrue((isTime(str3) == false));
   }// testIsTime
 
   /**
@@ -736,9 +736,9 @@ public class EmailDocumentHandler{
     String str2 = "Date: Wed, 13 Sep 2000 13:05:22 +0100 (BST)";
     String str3 = "From oana@dcs.shef.ac.uk Sep 13 13:05:23 2000";
 
-    Assert.assert((lineBeginsMessage(str1) == true));
-    Assert.assert((lineBeginsMessage(str2) == false));
-    Assert.assert((lineBeginsMessage(str3) == false));
+    Assert.assertTrue((lineBeginsMessage(str1) == true));
+    Assert.assertTrue((lineBeginsMessage(str2) == false));
+    Assert.assertTrue((lineBeginsMessage(str3) == false));
 
   }// testLineBeginsMessage
 
@@ -749,8 +749,8 @@ public class EmailDocumentHandler{
     String str1 = "Message-ID: <Pine.SOL.3.91.1000913130311.19537A-10@derwent>";
     String str2 = "%:ContentType TEXT/PLAIN; charset=US-ASCII";
 
-    Assert.assert((lineBeginsWithField(str1) == true));
-    Assert.assert((lineBeginsWithField(str2) == true));
+    Assert.assertTrue((lineBeginsWithField(str1) == true));
+    Assert.assertTrue((lineBeginsWithField(str2) == true));
   }// testLineBeginsWithField
 
    /**

@@ -56,7 +56,7 @@ public class TestGazetteer extends TestCase {
     gaz.setDocument(doc);
     gaz.setAnnotationSetName("GazetteerAS");
     gaz.execute();
-    assert(!doc.getAnnotations("GazetteerAS").isEmpty());
+    assertTrue(!doc.getAnnotations("GazetteerAS").isEmpty());
   }
 
   /** Test suite routine for the test runner */

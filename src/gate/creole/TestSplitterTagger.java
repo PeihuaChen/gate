@@ -75,7 +75,7 @@ public class TestSplitterTagger extends TestCase{
     splitter.setOutputASName("testAS");
     splitter.setInputASName("testAS");
     splitter.execute();
-    assert(!doc.getAnnotations("testAS").get("Sentence").isEmpty());
+    assertTrue(!doc.getAnnotations("testAS").get("Sentence").isEmpty());
 
     //now check the tagger
     //create a tagger

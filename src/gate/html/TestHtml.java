@@ -45,8 +45,6 @@ public class TestHtml extends TestCase
 
   /** A test */
   public void testUnpackMarkup() throws Exception {
-    assert(true);
-
     // create the markupElementsMap map
     Map markupElementsMap = null;
 
@@ -66,7 +64,7 @@ public class TestHtml extends TestCase
    gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
                                                         doc, doc.getSourceUrl()
                                                         );
-    assert( "Bad document Format was produced. HtmlDocumentFormat was expected",
+    assertTrue( "Bad document Format was produced. HtmlDocumentFormat was expected",
             docFormat instanceof gate.corpora.HtmlDocumentFormat
           );
 

@@ -29,7 +29,7 @@ public class ObjectModificationEvent extends GateEvent {
 
     super(source,type);
 
-    Assert.assert(type == OBJECT_CREATED ||
+    Assert.assertTrue(type == OBJECT_CREATED ||
                   type == OBJECT_DELETED ||
                   type == OBJECT_MODIFIED);
 

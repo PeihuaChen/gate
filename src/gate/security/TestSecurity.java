@@ -87,7 +87,7 @@ public class TestSecurity extends TestCase
     Session mySession = ac.login("kalina", "sesame",
                               ac.findGroup("English Language Group").getID());
     Assert.assertNotNull(mySession);
-//    Assert.assert(ac.isValidSession(mySession));
+//    Assert.assertTrue(ac.isValidSession(mySession));
 
   } // testSecurityTables
 
@@ -116,9 +116,9 @@ public class TestSecurity extends TestCase
     //check session
     Assert.assertNotNull(adminSession);
     //is session valid?
-    Assert.assert(true == ac.isValidSession(adminSession));
+    Assert.assertTrue(true == ac.isValidSession(adminSession));
     //assert session is privieged
-    Assert.assert(adminSession.isPrivilegedSession());
+    Assert.assertTrue(adminSession.isPrivilegedSession());
 
     //3. create a new user and group
     User myUser;
@@ -128,7 +128,7 @@ public class TestSecurity extends TestCase
       //user kalina hasn't got enough priviliges, so login as admin
       adminSession = ac.login("ADMIN", "sesame", ac.findGroup("ADMINS").getID());
       //assert session is privieged
-      Assert.assert(adminSession.isPrivilegedSession());
+      Assert.assertTrue(adminSession.isPrivilegedSession());
 
       myUser = ac.createUser("myUser", "myPassword",adminSession);
     }
@@ -155,10 +155,10 @@ public class TestSecurity extends TestCase
     //4. add user to group
     myGroup.addUser(myUser, adminSession);
     //is the user added to the group?
-    Assert.assert(myGroup.getUsers().contains(myUser));
+    Assert.assertTrue(myGroup.getUsers().contains(myUser));
 
     //4.1 does the user know he's member of the group now?
-    Assert.assert(myUser.getGroups().contains(myGroup));
+    Assert.assertTrue(myUser.getGroups().contains(myGroup));
 
     //5. change group name
     String oldName = myGroup.getName();
@@ -174,7 +174,7 @@ public class TestSecurity extends TestCase
     exceptionThrown = false;
     try { ac.findGroup(oldName); }
     catch(SecurityException sex) {exceptionThrown = true;}
-    Assert.assert(exceptionThrown);
+    Assert.assertTrue(exceptionThrown);
 
     //5.5 change user name
     oldName = myUser.getName();
@@ -190,7 +190,7 @@ public class TestSecurity extends TestCase
     exceptionThrown = false;
     try { ac.findUser(oldName); }
     catch(SecurityException sex) {exceptionThrown = true;}
-    Assert.assert(exceptionThrown);
+    Assert.assertTrue(exceptionThrown);
 
     //5.6. restore name
     myUser.setName(oldName, adminSession);
@@ -203,7 +203,7 @@ public class TestSecurity extends TestCase
       //i.e. evry user in the collection is known by the security factory
       User myUser1 = ac.findUser(((User)myUsers.get(i)).getID());
       //verify that the user is aware he's nmember of the group
-      Assert.assert(myUser1.getGroups().contains(myGroup));
+      Assert.assertTrue(myUser1.getGroups().contains(myGroup));
 
 
     }//for
@@ -219,12 +219,12 @@ public class TestSecurity extends TestCase
     //check session
     Assert.assertNotNull(mySession);
     //is valid session?
-    Assert.assert(true == ac.isValidSession(mySession));
+    Assert.assertTrue(true == ac.isValidSession(mySession));
 
     //9. logout
     ac.logout(mySession);
     //is session invalidated?
-    Assert.assert(false == ac.isValidSession(mySession));
+    Assert.assertTrue(false == ac.isValidSession(mySession));
 
     //10. try to perform an operation with invalid session
     exceptionThrown = false;
@@ -236,7 +236,7 @@ public class TestSecurity extends TestCase
       if(DEBUG)
         Err.prln("++++ OK, got exception ["+ex.getMessage()+"]");
     }
-    Assert.assert(true == exceptionThrown);
+    Assert.assertTrue(true == exceptionThrown);
 
     //10.1 login again
     mySession = ac.login("myUser", "myPassword",
@@ -244,7 +244,7 @@ public class TestSecurity extends TestCase
     //check session
     Assert.assertNotNull(mySession);
     //is valid session?
-    Assert.assert(true == ac.isValidSession(mySession));
+    Assert.assertTrue(true == ac.isValidSession(mySession));
 
     //11. try to delete group
     ac.deleteGroup(myGroup, adminSession);
@@ -260,26 +260,26 @@ public class TestSecurity extends TestCase
 
       exceptionThrown = true;
     }
-    Assert.assert(exceptionThrown);
+    Assert.assertTrue(exceptionThrown);
 
     //11.1 does the user know that he's no longer member of the group?
-    Assert.assert(false == myUser.getGroups().contains(myGroup));
+    Assert.assertTrue(false == myUser.getGroups().contains(myGroup));
 
     //11.2 is the user's sesion invalidated?
-    Assert.assert(false == ac.isValidSession(mySession));
+    Assert.assertTrue(false == ac.isValidSession(mySession));
 
     //11.3 add the user to new group
     Group suahiliGrp = ac.findGroup(new Long(this.SUAHILI_GROUP_ID));
     Assert.assertNotNull(suahiliGrp);
     suahiliGrp.addUser(myUser,adminSession);
     //11.4 check if the group knows the user is now mmeber
-    Assert.assert(suahiliGrp.getUsers().contains(myUser));
+    Assert.assertTrue(suahiliGrp.getUsers().contains(myUser));
     //11.5 check if the user know he's member of the group
-    Assert.assert(myUser.getGroups().contains(suahiliGrp));
+    Assert.assertTrue(myUser.getGroups().contains(suahiliGrp));
     //11.6 login again [with the new group]
     Session newSession = ac.login("myUser","myPassword",suahiliGrp.getID());
     //11.7 check session
-    Assert.assert(ac.isValidSession(newSession));
+    Assert.assertTrue(ac.isValidSession(newSession));
 
 
     //12. check that the sessions are invalidated if the
@@ -299,11 +299,11 @@ public class TestSecurity extends TestCase
 
       exceptionThrown = true;
     }
-    Assert.assert(exceptionThrown);
+    Assert.assertTrue(exceptionThrown);
     //12.3 assert the group has deleted the user as member
-    Assert.assert(false == suahiliGrp.getUsers().contains(myUser));
+    Assert.assertTrue(false == suahiliGrp.getUsers().contains(myUser));
     //12.4 assert the session is invalidated
-    Assert.assert(false == ac.isValidSession(newSession));
+    Assert.assertTrue(false == ac.isValidSession(newSession));
 
     //13. check objectModification events
 

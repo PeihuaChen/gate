@@ -36,18 +36,18 @@ public class TestFiles extends TestCase
 
   /** Test the getResourceAs... methods. */
   public void testGetResources() throws Exception {
-    assert(true);
+    assertTrue(true);
     String japeResName = "jape/combined/testloc.jape";
     String firstLine = "// testloc.jape";
 
     InputStreamReader resReader =
       new InputStreamReader(Files.getGateResourceAsStream(japeResName));
     BufferedReader bufResReader = new BufferedReader(resReader);
-    assert(bufResReader.readLine().equals(firstLine));
+    assertTrue(bufResReader.readLine().equals(firstLine));
     resReader.close();
 
     String resString = Files.getGateResourceAsString(japeResName);
-    assert(resString.startsWith(firstLine));
+    assertTrue(resString.startsWith(firstLine));
 
     byte[] resBytes = Files.getGateResourceAsByteArray(japeResName);
 
@@ -61,13 +61,13 @@ public class TestFiles extends TestCase
     char resChars[] = new char[firstLine.length()];
     for(int i=0; i<resChars.length; i++) resChars[i] = (char)resBytes[i];
     resString = new String(resChars);
-    assert(resString, resString.equals(firstLine));
+    assertTrue(resString, resString.equals(firstLine));
 
   } // testGetResources()
 
   /** Test the writeTempFile... method. */
   public void testWriteTempFile() throws Exception {
-    assert(true);
+    assertTrue(true);
     String japeResName = "jape/combined/testloc.jape";
     String firstLine = "// testloc.jape";
 
@@ -75,7 +75,7 @@ public class TestFiles extends TestCase
     BufferedReader bfr = new BufferedReader(new FileReader(f));
 
     String firstLn = bfr.readLine();
-    assert("first line from jape/combined/testloc.jape doesn't match",
+    assertTrue("first line from jape/combined/testloc.jape doesn't match",
       firstLine.equals(firstLn));
 
     f.delete ();

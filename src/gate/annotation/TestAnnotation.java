@@ -457,9 +457,9 @@ public class TestAnnotation extends TestCase
       Annotation a = (Annotation) iter.next();
       annots[i++] = a;
 
-      assert(basicAS.contains(a));
+      assertTrue(basicAS.contains(a));
       iter.remove();
-      assert(!basicAS.contains(a));
+      assertTrue(!basicAS.contains(a));
     } // while
 
     i = 0;
@@ -477,7 +477,7 @@ public class TestAnnotation extends TestCase
   /** Test Set methods */
   public void testSetMethods() {
     Annotation a = basicAS.get(new Integer(6));
-    assert(basicAS.contains(a));
+    assertTrue(basicAS.contains(a));
 
     Annotation[] annotArray =
       (Annotation[]) basicAS.toArray(new Annotation[0]);
@@ -488,30 +488,30 @@ public class TestAnnotation extends TestCase
     SortedSet sortedAnnots = new TreeSet(basicAS);
     annotArray = (Annotation[]) sortedAnnots.toArray(new Annotation[0]);
     for(int i = 0; i<11; i++)
-      assert( annotArray[i].getId().equals(new Integer(i)) );
+      assertTrue( annotArray[i].getId().equals(new Integer(i)) );
 
     Annotation a1 = basicAS.get(new Integer(3));
     Annotation a2 = basicAS.get(new Integer(4));
     Set a1a2 = new HashSet();
     a1a2.add(a1);
     a1a2.add(a2);
-    assert(basicAS.contains(a1));
-    assert(basicAS.containsAll(a1a2));
+    assertTrue(basicAS.contains(a1));
+    assertTrue(basicAS.containsAll(a1a2));
     basicAS.removeAll(a1a2);
 
     assertEquals(9, basicAS.size());
-    assert(! basicAS.contains(a1));
-    assert(! basicAS.containsAll(a1a2));
+    assertTrue(! basicAS.contains(a1));
+    assertTrue(! basicAS.containsAll(a1a2));
 
     basicAS.addAll(a1a2);
-    assert(basicAS.contains(a2));
-    assert(basicAS.containsAll(a1a2));
+    assertTrue(basicAS.contains(a2));
+    assertTrue(basicAS.containsAll(a1a2));
 
-    assert(basicAS.retainAll(a1a2));
-    assert(basicAS.equals(a1a2));
+    assertTrue(basicAS.retainAll(a1a2));
+    assertTrue(basicAS.equals(a1a2));
 
     basicAS.clear();
-    assert(basicAS.isEmpty());
+    assertTrue(basicAS.isEmpty());
 
   } // testSetMethods()
 
@@ -543,7 +543,7 @@ public class TestAnnotation extends TestCase
       as.add(new Long(11), new Long(12), "Token", fm2);
     assertEquals(newId.intValue(), 1);
     assertEquals(as.size(), 2);
-    assert(! as.isEmpty());
+    assertTrue(! as.isEmpty());
     newId =
       as.add(new Long(15), new Long(22), "Syntax", fm1);
 
@@ -644,7 +644,7 @@ public class TestAnnotation extends TestCase
 
     if (DEBUG)
       Out.println(res);
-    assert(!res.isEmpty());
+    assertTrue(!res.isEmpty());
   }
 
   /** Test Overlaps */
@@ -729,36 +729,36 @@ public class TestAnnotation extends TestCase
     // annot6 -> Start=10, End = 15
 
     // Not overlaping situations
-   assert("Those annotations does not overlap!",!annot1.overlaps(annot3));
-   assert("Those annotations does not overlap!",!annot1.overlaps(annot2));
-   assert("Those annotations does not overlap!",!annot2.overlaps(annot1));
-   assert("Those annotations does not overlap!",!annot3.overlaps(annot1));
-   assert("Those annotations does not overlap!",!annot4.overlaps(annot6));
-   assert("Those annotations does not overlap!",!annot6.overlaps(annot4));
+   assertTrue("Those annotations does not overlap!",!annot1.overlaps(annot3));
+   assertTrue("Those annotations does not overlap!",!annot1.overlaps(annot2));
+   assertTrue("Those annotations does not overlap!",!annot2.overlaps(annot1));
+   assertTrue("Those annotations does not overlap!",!annot3.overlaps(annot1));
+   assertTrue("Those annotations does not overlap!",!annot4.overlaps(annot6));
+   assertTrue("Those annotations does not overlap!",!annot6.overlaps(annot4));
 
-   assert("Those annotations does not overlap!",!annot6.overlaps(null));
-   assert("Those annotations does not overlap!",!annot1.overlaps(annot7));
+   assertTrue("Those annotations does not overlap!",!annot6.overlaps(null));
+   assertTrue("Those annotations does not overlap!",!annot1.overlaps(annot7));
 
    // Overlaping situations
-   assert("Those annotations does overlap!",annot4.overlaps(annot5));
-   assert("Those annotations does overlap!",annot5.overlaps(annot4));
-   assert("Those annotations does overlap!",annot1.overlaps(annot6));
-   assert("Those annotations does overlap!",annot6.overlaps(annot1));
-   assert("Those annotations does overlap!",annot2.overlaps(annot5));
-   assert("Those annotations does overlap!",annot5.overlaps(annot2));
+   assertTrue("Those annotations does overlap!",annot4.overlaps(annot5));
+   assertTrue("Those annotations does overlap!",annot5.overlaps(annot4));
+   assertTrue("Those annotations does overlap!",annot1.overlaps(annot6));
+   assertTrue("Those annotations does overlap!",annot6.overlaps(annot1));
+   assertTrue("Those annotations does overlap!",annot2.overlaps(annot5));
+   assertTrue("Those annotations does overlap!",annot5.overlaps(annot2));
 
    // Not coextensive situations
-   assert("Those annotations are not coextensive!",!annot1.coextensive(annot2));
-   assert("Those annotations are not coextensive!",!annot2.coextensive(annot1));
-   assert("Those annotations are not coextensive!",!annot4.coextensive(annot3));
-   assert("Those annotations are not coextensive!",!annot3.coextensive(annot4));
-   assert("Those annotations are not coextensive!",!annot4.coextensive(annot7));
-   assert("Those annotations are not coextensive!",!annot5.coextensive(annot6));
-   assert("Those annotations are not coextensive!",!annot6.coextensive(annot5));
+   assertTrue("Those annotations are not coextensive!",!annot1.coextensive(annot2));
+   assertTrue("Those annotations are not coextensive!",!annot2.coextensive(annot1));
+   assertTrue("Those annotations are not coextensive!",!annot4.coextensive(annot3));
+   assertTrue("Those annotations are not coextensive!",!annot3.coextensive(annot4));
+   assertTrue("Those annotations are not coextensive!",!annot4.coextensive(annot7));
+   assertTrue("Those annotations are not coextensive!",!annot5.coextensive(annot6));
+   assertTrue("Those annotations are not coextensive!",!annot6.coextensive(annot5));
    //Coextensive situations
-   assert("Those annotations are coextensive!",annot2.coextensive(annot2));
-   assert("Those annotations are coextensive!",annot2.coextensive(annot3));
-   assert("Those annotations are coextensive!",annot3.coextensive(annot2));
+   assertTrue("Those annotations are coextensive!",annot2.coextensive(annot2));
+   assertTrue("Those annotations are coextensive!",annot2.coextensive(annot3));
+   assertTrue("Those annotations are coextensive!",annot3.coextensive(annot2));
 
   }//testOverlapsAndCoextensive
 
@@ -846,48 +846,48 @@ public class TestAnnotation extends TestCase
    annot6 -> Start=10, End = 15,{color="red",Age="25",23="Cristian"}
   */
   // Not compatible situations
-  assert("Those annotations are not compatible!",!annot3.isCompatible(annot2));
+  assertTrue("Those annotations are not compatible!",!annot3.isCompatible(annot2));
 
   // Not partially compatible situations
   // They don't overlap
-  assert("Those annotations("+ annot1 +" & " +
+  assertTrue("Those annotations("+ annot1 +" & " +
                                annot2+ ") are not partially compatible!",
                                        !annot1.isPartiallyCompatible(annot2));
 
   // Again they don't overlap
-  assert("Those annotations("+ annot1 +" & " +
+  assertTrue("Those annotations("+ annot1 +" & " +
                                annot3+ ") are not partially compatible!",
                                        !annot1.isPartiallyCompatible(annot3));
   // Fails because of the age value
-  assert("Those annotations("+ annot1 +" & " +
+  assertTrue("Those annotations("+ annot1 +" & " +
                                annot4+ ") are not partially compatible!",
                                        !annot1.isPartiallyCompatible(annot4));
   // Fails because of the value of Age
-  assert("Those annotations("+ annot4 +" & " +
+  assertTrue("Those annotations("+ annot4 +" & " +
                                annot5+ ") are not partially compatible!",
                                        !annot4.isPartiallyCompatible(annot5));
   // Features from annot6 does not subsumes features annot3
-  assert("Those annotations("+ annot3 +" & " +
+  assertTrue("Those annotations("+ annot3 +" & " +
                                annot6+ ") are not partially compatible!",
                                !annot3.isPartiallyCompatible(annot6,null));
   // Features from annot2 does not subsumes features annot5
-  assert("Those annotations("+ annot5 +" & " +
+  assertTrue("Those annotations("+ annot5 +" & " +
                                annot2+ ") are not partially compatible!",
                                !annot5.isPartiallyCompatible(annot2,null));
   Set keySet = new HashSet();
   // They don't overlap
-  assert("Those annotations("+ annot2 +" & " +
+  assertTrue("Those annotations("+ annot2 +" & " +
                                annot4+ ") are not partially compatible!",
                                !annot2.isPartiallyCompatible(annot4,keySet));
   keySet.add("color");
   keySet.add("Age");
   keySet.add("best");
   // Fails because of best feture
-  assert("Those annotations("+ annot5 +" & " +
+  assertTrue("Those annotations("+ annot5 +" & " +
                                annot2+ ") are not partially compatible!",
                                !annot5.isPartiallyCompatible(annot2,keySet));
   // Fails because start=end in both cases and they don't overlap
-  assert("Those annotations("+ annot4 +" & " +
+  assertTrue("Those annotations("+ annot4 +" & " +
                                annot4+ ") are not partially compatible!",
                                         !annot4.isPartiallyCompatible(annot4));
 
@@ -901,41 +901,41 @@ public class TestAnnotation extends TestCase
   */
 
   // Compatible situations
-  assert("Those annotations("+ annot2 +" & " +
+  assertTrue("Those annotations("+ annot2 +" & " +
                                annot3+ ") should be compatible!",
                                       annot2.isCompatible(annot3));
-  assert("Those annotations("+ annot2 +" & " +
+  assertTrue("Those annotations("+ annot2 +" & " +
                                annot3+ ") should be compatible!",
                                       annot2.isCompatible(annot3,null));
-  assert("Those annotations("+ annot2 +" & " +
+  assertTrue("Those annotations("+ annot2 +" & " +
                                annot3+ ") should be compatible!",
                                      annot2.isCompatible(annot3,new HashSet()));
-  assert("Those annotations("+ annot4 +" & " +
+  assertTrue("Those annotations("+ annot4 +" & " +
                                annot4+ ") should be compatible!",
                                         annot4.isCompatible(annot4));
   keySet = new HashSet();
   keySet.add("color");
   keySet.add(new Long(23));
-  assert("Those annotations("+ annot3 +" & " +
+  assertTrue("Those annotations("+ annot3 +" & " +
                                annot2+ ") should be compatible!",
                                       annot3.isCompatible(annot2,keySet));
 
   // Partially compatible situations
-  assert("Those annotations("+ annot2 +" & " +
+  assertTrue("Those annotations("+ annot2 +" & " +
                                annot3+ ") should be partially compatible!",
                                         annot2.isPartiallyCompatible(annot3));
-  assert("Those annotations("+ annot2 +" & " +
+  assertTrue("Those annotations("+ annot2 +" & " +
                                annot2+ ") should be partially compatible!",
                                         annot2.isPartiallyCompatible(annot2));
-  assert("Those annotations are partially compatible!",
+  assertTrue("Those annotations are partially compatible!",
                                         annot1.isPartiallyCompatible(annot5));
-  assert("Those annotations are partially compatible!",
+  assertTrue("Those annotations are partially compatible!",
                                         annot1.isPartiallyCompatible(annot6));
-  assert("Those annotations are partially compatible!",
+  assertTrue("Those annotations are partially compatible!",
                                         annot3.isPartiallyCompatible(annot5));
-  assert("Those annotations are partially compatible!",
+  assertTrue("Those annotations are partially compatible!",
                                         annot5.isPartiallyCompatible(annot3));
-  assert("Those annotations are partially compatible!",
+  assertTrue("Those annotations are partially compatible!",
                                         annot6.isPartiallyCompatible(annot5));
 
   }// testIsPartiallyCompatibleAndCompatible

@@ -78,13 +78,13 @@ public class TestPersist extends TestCase
     // check that we can't save a resource without adopting it
     boolean cannotSync = false;
     try { sds.sync(doc); } catch(PersistenceException e) { cannotSync=true; }
-    if(! cannotSync) assert("doc synced ok before adoption", false);
+    if(! cannotSync) assertTrue("doc synced ok before adoption", false);
 
     // check that we can't adopt a resource that's stored somewhere else
     doc.setDataStore(new SerialDataStore(new File("z:\\").toURL().toString()));
     try { sds.adopt(doc,null); } catch(PersistenceException e) { cannotSync=true; }
     if(! cannotSync)
-      assert("doc adopted but in other datastore already", false);
+      assertTrue("doc adopted but in other datastore already", false);
     doc.setDataStore(null);
     doc.setName("Alicia Tonbridge, a Document");
 
@@ -95,8 +95,8 @@ public class TestPersist extends TestCase
 
     // test the getLrTypes method
     List lrTypes = sds.getLrTypes();
-    assert("wrong number of types in SDS", lrTypes.size() == 1);
-    assert(
+    assertTrue("wrong number of types in SDS", lrTypes.size() == 1);
+    assertTrue(
       "wrong type LR in SDS",
       lrTypes.get(0).equals("gate.corpora.DocumentImpl")
     );
@@ -117,8 +117,8 @@ public class TestPersist extends TestCase
 
     //clear the parameters value from features as they will be different
 
-    assert(doc3.equals(doc2));
-    assert(persDoc.equals(doc2));
+    assertTrue(doc3.equals(doc2));
+    assertTrue(persDoc.equals(doc2));
 
     // delete the datastore
     sds.delete();
@@ -165,7 +165,7 @@ public class TestPersist extends TestCase
 
     //parameters should be different
     // check that the version we read back matches the original
-    assert(persDoc.equals(doc2));
+    assertTrue(persDoc.equals(doc2));
 
     // delete the datastore
     sds.delete();
@@ -231,16 +231,16 @@ public class TestPersist extends TestCase
     Document diskDoc = (Document) diskCorp.get(0);
 
     if (DEBUG) Out.prln("Documents in corpus: " + corp.getDocumentNames());
-    assert("corp name != mem name", corp.getName().equals(diskCorp.getName()));
+    assertTrue("corp name != mem name", corp.getName().equals(diskCorp.getName()));
     if (DEBUG) Out.prln("Memory features " + corp.getFeatures());
     if (DEBUG) Out.prln("Disk features " + diskCorp.getFeatures());
-    assert("corp feat != mem feat",
+    assertTrue("corp feat != mem feat",
            corp.getFeatures().equals(diskCorp.getFeatures()));
     if (DEBUG)
       Out.prln("Annotations in doc: " + diskDoc.getAnnotations());
-    assert("doc annotations from disk not equal to memory version",
+    assertTrue("doc annotations from disk not equal to memory version",
           doc.getAnnotations().equals(diskDoc.getAnnotations()));
-    assert("doc from disk not equal to memory version",
+    assertTrue("doc from disk not equal to memory version",
           doc.equals(diskDoc));
 
     Iterator corpusIter = diskCorp.iterator();
@@ -252,7 +252,7 @@ public class TestPersist extends TestCase
     }
 
 
-//    assert("doc2 from disk not equal to memory version", doc2.equals(diskDoc2));
+//    assertTrue("doc2 from disk not equal to memory version", doc2.equals(diskDoc2));
 
     // delete the datastore
     sds.delete();
@@ -293,7 +293,7 @@ public class TestPersist extends TestCase
     sds.delete("gate.corpora.DocumentImpl", lrPersistenceId);
 
     // check that there are no LRs left in the DS
-    assert(sds.getLrIds("gate.corpora.DocumentImpl").size() == 0);
+    assertTrue(sds.getLrIds("gate.corpora.DocumentImpl").size() == 0);
 
     // delete the datastore
     sds.delete();
@@ -305,7 +305,7 @@ public class TestPersist extends TestCase
   /** Test the DS register. */
   public void testDSR() throws Exception {
     DataStoreRegister dsr = Gate.getDataStoreRegister();
-    assert("DSR has wrong number elements (not 0): " + dsr.size(),
+    assertTrue("DSR has wrong number elements (not 0): " + dsr.size(),
            dsr.size() == 0);
 
     // create a temporary directory; because File.createTempFile actually
@@ -332,7 +332,7 @@ public class TestPersist extends TestCase
     sds.sync(persDoc);
 
     // DSR should have one member
-    assert("DSR has wrong number elements", dsr.size() == 1);
+    assertTrue("DSR has wrong number elements", dsr.size() == 1);
 
     // create and open another serial data store
     storageDir = File.createTempFile("TestPersist__", "__StorageDir");
@@ -342,7 +342,7 @@ public class TestPersist extends TestCase
     );
 
     // DSR should have two members
-    assert("DSR has wrong number elements: " + dsr.size(), dsr.size() == 2);
+    assertTrue("DSR has wrong number elements: " + dsr.size(), dsr.size() == 2);
 
     // peek at the DSR members
     Iterator dsrIter = dsr.iterator();
@@ -355,11 +355,11 @@ public class TestPersist extends TestCase
 
     // delete the datastores
     sds.close();
-    assert("DSR has wrong number elements: " + dsr.size(), dsr.size() == 1);
+    assertTrue("DSR has wrong number elements: " + dsr.size(), dsr.size() == 1);
     sds.delete();
-    assert("DSR has wrong number elements: " + dsr.size(), dsr.size() == 1);
+    assertTrue("DSR has wrong number elements: " + dsr.size(), dsr.size() == 1);
     sds2.delete();
-    assert("DSR has wrong number elements: " + dsr.size(), dsr.size() == 0);
+    assertTrue("DSR has wrong number elements: " + dsr.size(), dsr.size() == 0);
 
   } // testDSR()
 
@@ -455,7 +455,7 @@ public class TestPersist extends TestCase
 
     Session usrSession = ac.login("kalina","sesame",grp.getID());
     Assert.assertNotNull(usrSession);
-    Assert.assert(ac.isValidSession(usrSession));
+    Assert.assertTrue(ac.isValidSession(usrSession));
 
     //4. create security settings for doc
     SecurityInfo si = new SecurityInfo(SecurityInfo.ACCESS_WR_GW,usr,grp);
@@ -463,9 +463,9 @@ public class TestPersist extends TestCase
     //5. try adding doc to data store
     LanguageResource lr = ds.adopt(doc,si);
 
-    Assert.assert(lr instanceof DatabaseDocumentImpl);
+    Assert.assertTrue(lr instanceof DatabaseDocumentImpl);
     Assert.assertNotNull(lr.getDataStore());
-    Assert.assert(lr.getDataStore() instanceof DatabaseDataStore);
+    Assert.assertTrue(lr.getDataStore() instanceof DatabaseDataStore);
 
     this.uc01_lrID = (Long)lr.getLRPersistenceId();
 //    this.uc01_LR = lr;
@@ -509,7 +509,7 @@ public class TestPersist extends TestCase
 
     Session usrSession = ac.login("kalina","sesame",grp.getID());
     Assert.assertNotNull(usrSession);
-    Assert.assert(ac.isValidSession(usrSession));
+    Assert.assertTrue(ac.isValidSession(usrSession));
 
     //4. create security settings for doc
     SecurityInfo si = new SecurityInfo(SecurityInfo.ACCESS_WR_GW,usr,grp);
@@ -556,13 +556,13 @@ public class TestPersist extends TestCase
 
     Assert.assertNotNull(fm);
     Assert.assertNotNull(fmOrig);
-    Assert.assert(fm.size() == fmOrig.size());
+    Assert.assertTrue(fm.size() == fmOrig.size());
 
     Iterator keys = fm.keySet().iterator();
 
     while (keys.hasNext()) {
       String currKey = (String)keys.next();
-      Assert.assert(fmOrig.containsKey(currKey));
+      Assert.assertTrue(fmOrig.containsKey(currKey));
       Assert.assertEquals(fm.get(currKey),fmOrig.get(currKey));
     }
 
@@ -594,12 +594,12 @@ public class TestPersist extends TestCase
     AnnotationSet defaultOld = ((DocumentImpl)this.uc01_LR).getAnnotations();
 
     Assert.assertNotNull(defaultNew);
-    Assert.assert(defaultNew.size() == defaultOld.size());
+    Assert.assertTrue(defaultNew.size() == defaultOld.size());
     Iterator itDefault = defaultNew.iterator();
 
     while (itDefault.hasNext()) {
       Annotation currAnn = (Annotation)itDefault.next();
-      Assert.assert(defaultOld.contains(currAnn));
+      Assert.assertTrue(defaultOld.contains(currAnn));
     }
 
     //10. iterate named annotations
@@ -619,7 +619,7 @@ public class TestPersist extends TestCase
     Map namedNew = dbDoc.getNamedAnnotationSets();
 
     Assert.assertNotNull(namedNew);
-    Assert.assert(namedNew.size() == namedOld.size());
+    Assert.assertTrue(namedNew.size() == namedOld.size());
 
     Iterator itNames = namedNew.keySet().iterator();
     while (itNames.hasNext()) {

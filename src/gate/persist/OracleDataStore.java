@@ -454,7 +454,7 @@ public class OracleDataStore extends JDBCDataStore {
       Clob clob = (Clob)rs.getClob("dc_character_content");
       Blob blob = (Blob)rs.getBlob("dc_binary_content");
 
-      Assert.assert(contentType == DBHelper.CHARACTER_CONTENT ||
+      Assert.assertTrue(contentType == DBHelper.CHARACTER_CONTENT ||
                     contentType == DBHelper.BINARY_CONTENT ||
                     contentType == DBHelper.EMPTY_CONTENT);
 
@@ -805,9 +805,9 @@ System.out.println();
 
     docResult = readDocument(lrPersistenceId);
 
-    Assert.assert(docResult instanceof DatabaseDocumentImpl);
+    Assert.assertTrue(docResult instanceof DatabaseDocumentImpl);
     Assert.assertNotNull(docResult.getDataStore());
-    Assert.assert(docResult.getDataStore() instanceof DatabaseDataStore);
+    Assert.assertTrue(docResult.getDataStore() instanceof DatabaseDataStore);
     Assert.assertNotNull(docResult.getLRPersistenceId());
 
     return docResult;
@@ -975,7 +975,7 @@ System.out.println();
   private boolean canAccessLR(Long lrID, Session s,int mode)
     throws PersistenceException, SecurityException{
 
-    Assert.assert(READ_ACCESS == mode || WRITE_ACCESS == mode);
+    Assert.assertTrue(READ_ACCESS == mode || WRITE_ACCESS == mode);
 
     //first check the session and then check whether the user is member of the group
     if (this.ac.isValidSession(s) == false) {
@@ -1165,7 +1165,7 @@ System.out.println();
     // although the type may claim so
 
     //0. preconditions
-    Assert.assert(valueType == DBHelper.VALUE_TYPE_BINARY ||
+    Assert.assertTrue(valueType == DBHelper.VALUE_TYPE_BINARY ||
                   valueType == DBHelper.VALUE_TYPE_BINARY_ARR ||
                   valueType == DBHelper.VALUE_TYPE_STRING ||
                   valueType == DBHelper.VALUE_TYPE_STRING_ARR);
@@ -1378,7 +1378,7 @@ System.out.println();
 
       //4.2. markup aware
       long markup = rs.getLong("doc_is_markup_aware");
-      Assert.assert(markup == this.ORACLE_FALSE || markup == this.ORACLE_TRUE);
+      Assert.assertTrue(markup == this.ORACLE_FALSE || markup == this.ORACLE_TRUE);
       if (markup == this.ORACLE_FALSE) {
         result.setMarkupAware(Boolean.FALSE);
       }
@@ -1440,7 +1440,7 @@ System.out.println();
 
     //0. preconditions
     Assert.assertNotNull(entityID);
-    Assert.assert(entityType == DBHelper.FEATURE_OWNER_ANNOTATION ||
+    Assert.assertTrue(entityType == DBHelper.FEATURE_OWNER_ANNOTATION ||
                   entityType == DBHelper.FEATURE_OWNER_CORPUS ||
                   entityType == DBHelper.FEATURE_OWNER_DOCUMENT);
 
@@ -1655,8 +1655,8 @@ System.out.println();
 
   private void syncDocument(Document doc) throws PersistenceException {
 
-    Assert.assert(doc instanceof DatabaseDocumentImpl);
-    Assert.assert(doc.getLRPersistenceId() instanceof Long);
+    Assert.assertTrue(doc instanceof DatabaseDocumentImpl);
+    Assert.assertTrue(doc.getLRPersistenceId() instanceof Long);
 
     DatabaseDocumentImpl dbDoc = (DatabaseDocumentImpl)doc;
     Long lrID = (Long)dbDoc.getLRPersistenceId();

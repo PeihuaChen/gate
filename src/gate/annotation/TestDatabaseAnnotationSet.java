@@ -160,9 +160,9 @@ public class TestDatabaseAnnotationSet extends TestCase
       Annotation a = (Annotation) iter.next();
       annots[i++] = a;
 
-      assert(basicAS.contains(a));
+      assertTrue(basicAS.contains(a));
       iter.remove();
-      assert(!basicAS.contains(a));
+      assertTrue(!basicAS.contains(a));
     } // while
 
     i = 0;
@@ -222,7 +222,7 @@ public class TestDatabaseAnnotationSet extends TestCase
     setUp();
 
     Annotation a = basicAS.get(new Integer(6));
-    assert(basicAS.contains(a));
+    assertTrue(basicAS.contains(a));
 
     Annotation[] annotArray =
       (Annotation[]) basicAS.toArray(new Annotation[0]);
@@ -233,30 +233,30 @@ public class TestDatabaseAnnotationSet extends TestCase
     SortedSet sortedAnnots = new TreeSet(basicAS);
     annotArray = (Annotation[]) sortedAnnots.toArray(new Annotation[0]);
     for(int i = 0; i<11; i++)
-      assert( annotArray[i].getId().equals(new Integer(i)) );
+      assertTrue( annotArray[i].getId().equals(new Integer(i)) );
 
     Annotation a1 = basicAS.get(new Integer(3));
     Annotation a2 = basicAS.get(new Integer(4));
     Set a1a2 = new HashSet();
     a1a2.add(a1);
     a1a2.add(a2);
-    assert(basicAS.contains(a1));
-    assert(basicAS.containsAll(a1a2));
+    assertTrue(basicAS.contains(a1));
+    assertTrue(basicAS.containsAll(a1a2));
     basicAS.removeAll(a1a2);
 
     assertEquals(9, basicAS.size());
-    assert(! basicAS.contains(a1));
-    assert(! basicAS.containsAll(a1a2));
+    assertTrue(! basicAS.contains(a1));
+    assertTrue(! basicAS.containsAll(a1a2));
 
     basicAS.addAll(a1a2);
-    assert(basicAS.contains(a2));
-    assert(basicAS.containsAll(a1a2));
+    assertTrue(basicAS.contains(a2));
+    assertTrue(basicAS.containsAll(a1a2));
 
-    assert(basicAS.retainAll(a1a2));
-    assert(basicAS.equals(a1a2));
+    assertTrue(basicAS.retainAll(a1a2));
+    assertTrue(basicAS.equals(a1a2));
 
     basicAS.clear();
-    assert(basicAS.isEmpty());
+    assertTrue(basicAS.isEmpty());
 
   } // testSetMethods()
 
@@ -288,7 +288,7 @@ public class TestDatabaseAnnotationSet extends TestCase
       as.add(new Long(11), new Long(12), "Token", fm2);
     assertEquals(newId.intValue(), 1);
     assertEquals(as.size(), 2);
-    assert(! as.isEmpty());
+    assertTrue(! as.isEmpty());
     newId =
       as.add(new Long(15), new Long(22), "Syntax", fm1);
 

@@ -309,7 +309,7 @@ public class GroupImpl
    *  */
   public boolean equals(Object obj)
   {
-    Assert.assert(obj instanceof Group);
+    Assert.assertTrue(obj instanceof Group);
 
     Group group2 = (Group)obj;
 
@@ -402,7 +402,7 @@ public class GroupImpl
 
       //is valid?
       Assert.assertNotNull(usr);
-      Assert.assert(usr instanceof User);
+      Assert.assertTrue(usr instanceof User);
       //add to our collection, which was empty so far
       this.users.add(usr);
     }

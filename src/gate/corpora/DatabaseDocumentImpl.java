@@ -142,7 +142,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
     Long lrID = (Long)getLRPersistenceId();
     //0. preconditions
     Assert.assertNotNull(lrID);
-    Assert.assert(false == this.isContentRead);
+    Assert.assertTrue(false == this.isContentRead);
     Assert.assertNotNull(this.content);
 
     //1. read from DB
@@ -169,7 +169,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
       Blob   blb = rs.getBlob(3);
       long   contentType = rs.getLong(4);
 
-      Assert.assert(DBHelper.CHARACTER_CONTENT == contentType);
+      Assert.assertTrue(DBHelper.CHARACTER_CONTENT == contentType);
 
       StringBuffer buff = new StringBuffer();
       OracleDataStore.readCLOB(clb,buff);
@@ -522,7 +522,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
             Vector val = (Vector)currEntry.getValue();
 
             //add to feature map normalized array
-            Assert.assert(val.size() >= 1);
+            Assert.assertTrue(val.size() >= 1);
 
             if (val.size() == 1) {
               //the single elemnt of the array
@@ -637,7 +637,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
         Vector val = (Vector)currEntry.getValue();
 
         //add to feature map normalized array
-        Assert.assert(val.size() >= 1);
+        Assert.assertTrue(val.size() >= 1);
 
         if (val.size() == 1) {
           //the single elemnt of the array
@@ -790,11 +790,11 @@ public class DatabaseDocumentImpl extends DocumentImpl {
   private void setAnnotations(String setName,Collection annotations) {
 
     if (null == setName) {
-      Assert.assert(null == this.defaultAnnots);
+      Assert.assertTrue(null == this.defaultAnnots);
       this.defaultAnnots = new DatabaseAnnotationSetImpl(annotations);
     }
     else {
-      Assert.assert(false == this.namedAnnotSets.containsKey(setName));
+      Assert.assertTrue(false == this.namedAnnotSets.containsKey(setName));
       AnnotationSet annSet = new DatabaseAnnotationSetImpl(this,setName,annotations);
       this.namedAnnotSets.put(setName,annSet);
     }

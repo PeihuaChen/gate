@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- *  
+ *
  *  Hamish Cunningham, 16/Mar/00
  *
  *  $Id$
@@ -51,10 +51,10 @@ public class TestJacl extends TestCase
     // check that the result looks right
     // (this may start to fail if we have packages other than gate
     // that contain tcl scripts...)
-    assert(result.toString().startsWith("gate/"));
+    assertTrue(result.toString().startsWith("gate/"));
 
     // check that a known script is present
-    assert(result.toString().indexOf("FindScripts.tcl") != -1);
+    assertTrue(result.toString().indexOf("FindScripts.tcl") != -1);
   } // testCreation()
 
 

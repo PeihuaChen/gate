@@ -130,7 +130,7 @@ public class TestCreole extends TestCase
     String className1 = new String("");
     if (smallViews1!= null && smallViews1.size()>0)
       className1 = (String)smallViews1.get(0);
-    assert(
+    assertTrue(
       "Found "+className1+
       " as small viewer for gate.persist.SerialDataStore, "+
       "instead  of gate.gui.SerialDatastoreViewer",
@@ -140,7 +140,7 @@ public class TestCreole extends TestCase
 
     List largeViews1 =
                   reg.getLargeVRsForResource("gate.Corpus");
-    assert(
+    assertTrue(
       "Found "+largeViews1.size()+" wich are " +largeViews1 +
       " as large viewers for gate.Corpus, "+
      "instead  of 2 which are [gate.gui.CorpusEditor, gate.gui.FeaturesEditor]",
@@ -149,7 +149,7 @@ public class TestCreole extends TestCase
 
     List largeViews2 =
                   reg.getLargeVRsForResource("gate.Document");
-    assert(
+    assertTrue(
       "Found "+largeViews2.size()+" wich are " +largeViews2 +
       " as large viewers for gate.Document, "+
      "instead  of 2 which are [gate.gui.DocumentEditor, gate.gui.FeaturesEditor]",
@@ -158,7 +158,7 @@ public class TestCreole extends TestCase
 
     List annotViews1 =
                   reg.getAnnotationVRs();
-    assert(
+    assertTrue(
       "Found "+annotViews1.size()+" wich are " +annotViews1 +
       " as annotation viewers for all types annotations, "+
      "instead  of 2 which are [gate.gui.SchemaAnnotationEditor,"+
@@ -201,13 +201,13 @@ public class TestCreole extends TestCase
     ResourceData rd = (ResourceData)
       reg.get("gate.creole.tokeniser.DefaultTokeniser");
     assertNotNull("couldn't find unicode tok in register of resources", rd);
-    assert(rd.getName().equals("ANNIE Unicode Tokeniser"));
+    assertTrue(rd.getName().equals("ANNIE Unicode Tokeniser"));
 
     String docFormatName = "gate.corpora.XmlDocumentFormat";
     ResourceData xmlDocFormatRD = (ResourceData) reg.get(docFormatName);
-    assert(xmlDocFormatRD.getName().equals("Sheffield XML Document Format"));
-    assert(xmlDocFormatRD.isAutoLoading());
-    assert(xmlDocFormatRD.getJarFileName().equals("ShefDocumentFormats.jar"));
+    assertTrue(xmlDocFormatRD.getName().equals("Sheffield XML Document Format"));
+    assertTrue(xmlDocFormatRD.isAutoLoading());
+    assertTrue(xmlDocFormatRD.getJarFileName().equals("ShefDocumentFormats.jar"));
   } // testDiscovery()
 
   /** Test resource metadata */
@@ -216,11 +216,11 @@ public class TestCreole extends TestCase
     // get some res data from the register
     ResourceData pr1rd = (ResourceData) reg.get("testpkg.TestPR1");
     ResourceData pr2rd = (ResourceData) reg.get("testpkg.TestPR2");
-    assert(pr1rd != null & pr2rd != null);
-    assert(pr2rd.getName().equals("Sheffield Test PR 2"));
+    assertTrue(pr1rd != null & pr2rd != null);
+    assertTrue(pr2rd.getName().equals("Sheffield Test PR 2"));
 
     // checks values of parameters of param0 in test pr 1
-    assert(pr1rd.getClassName().equals("testpkg.TestPR1"));
+    assertTrue(pr1rd.getClassName().equals("testpkg.TestPR1"));
     Iterator iter = pr1rd.getParameterList().getRuntimeParameters().iterator();
     Iterator iter2 = null;
     Parameter param = null;
@@ -235,12 +235,12 @@ public class TestCreole extends TestCase
         break;
     }
 
-    assert("param0 was null", param != null);
-    assert(param.typeName.equals("java.lang.String"));
-    assert(param.optional);
-    assert(! param.runtime);
-    assert(param.comment == null);
-    assert(param.name.equals("thing"));
+    assertTrue("param0 was null", param != null);
+    assertTrue(param.typeName.equals("java.lang.String"));
+    assertTrue(param.optional);
+    assertTrue(! param.runtime);
+    assertTrue(param.comment == null);
+    assertTrue(param.name.equals("thing"));
 
     reg.clear();
   } // testMetadata()
@@ -248,13 +248,13 @@ public class TestCreole extends TestCase
   /** Test TOOLS and PRIVATE attributes */
   public void testToolsAndPrivate() throws Exception {
     ResourceData pr3rd = (ResourceData) reg.get("testpkg.PrintOutTokens");
-    assert("couldn't get PR3", pr3rd != null);
-    assert("PR3 not a tool", pr3rd.isTool());
+    assertTrue("couldn't get PR3", pr3rd != null);
+    assertTrue("PR3 not a tool", pr3rd.isTool());
     if(DEBUG) Out.prln(pr3rd.getFeatures());
 
     String docFormatName = "gate.corpora.XmlDocumentFormat";
     ResourceData xmlDocFormatRD = (ResourceData) reg.get(docFormatName);
-    assert("Xml doc format not PRIVATE", xmlDocFormatRD.isPrivate());
+    assertTrue("Xml doc format not PRIVATE", xmlDocFormatRD.isPrivate());
     if(DEBUG) Out.prln(xmlDocFormatRD.getFeatures());
 
     // Create an LR
@@ -266,7 +266,7 @@ public class TestCreole extends TestCase
     List publics = reg.getPublicLrInstances();
     List allLrs = reg.getLrInstances();
 
-    assert(
+    assertTrue(
       "wrong number of public LR instances",
       publics.size() == 1 && allLrs.size() == 5
     );
@@ -286,14 +286,14 @@ public class TestCreole extends TestCase
   public void testLoading() throws Exception {
 
     // get some res data from the register
-    assert(
+    assertTrue(
       "wrong number of resources in the register: " + reg.size(),
       reg.size() == 16
     );
     ResourceData pr1rd = (ResourceData) reg.get("testpkg.TestPR1");
     ResourceData pr2rd = (ResourceData) reg.get("testpkg.TestPR2");
-    assert("couldn't find PR1/PR2 res data", pr1rd != null && pr2rd != null);
-    assert("wrong name on PR1", pr1rd.getName().equals("Sheffield Test PR 1"));
+    assertTrue("couldn't find PR1/PR2 res data", pr1rd != null && pr2rd != null);
+    assertTrue("wrong name on PR1", pr1rd.getName().equals("Sheffield Test PR 1"));
 
     // instantiation
     ProcessingResource pr1 = (ProcessingResource)
@@ -305,17 +305,17 @@ public class TestCreole extends TestCase
     FeatureMap pr1features = pr1.getFeatures();
     FeatureMap pr2features = pr2.getFeatures();
     assertNotNull("PR1 features are null", pr1features);
-    assert(
+    assertTrue(
       "PR2 got wrong features: " + pr2features,
       pr2features != null || pr2features.size() != 1
     );
     pr1.execute();
     pr2.execute();
-    assert(
+    assertTrue(
       "PR1 feature not present",
       pr1.getFeatures().get("I").equals("have been run, thankyou")
     );
-    assert(
+    assertTrue(
       "PR2 feature not present",
       pr2.getFeatures().get("I").equals("am in a bad mood")
     );
@@ -328,11 +328,11 @@ public class TestCreole extends TestCase
 
     ResourceData docRd = (ResourceData) reg.get("gate.corpora.DocumentImpl");
     assertNotNull("couldn't find document res data", docRd);
-    assert(
+    assertTrue(
       "doc res data has wrong class name",
       docRd.getClassName().equals("gate.corpora.DocumentImpl")
     );
-    assert(
+    assertTrue(
       "doc res data has wrong interface name",
       docRd.getInterfaceName().equals("gate.Document")
     );
@@ -340,7 +340,7 @@ public class TestCreole extends TestCase
     Class docClass = docRd.getResourceClass();
     assertNotNull("couldn't get doc class", docClass);
     LanguageResource docRes = (LanguageResource) docClass.newInstance();
-    assert(
+    assertTrue(
       "instance of doc is wrong type",
       docRes instanceof LanguageResource &&
       docRes instanceof gate.Document
@@ -355,9 +355,9 @@ public class TestCreole extends TestCase
     Set prs = reg.getPrTypes();
     Set lrs = reg.getLrTypes();
 
-    assert("wrong number vrs in reg: " + vrs.size(), vrs.size() == 8);
-    assert("wrong number prs in reg: " + prs.size(), prs.size() == 5);
-    assert("wrong number lrs in reg: " + lrs.size(), lrs.size() == 3);
+    assertTrue("wrong number vrs in reg: " + vrs.size(), vrs.size() == 8);
+    assertTrue("wrong number prs in reg: " + prs.size(), prs.size() == 5);
+    assertTrue("wrong number lrs in reg: " + lrs.size(), lrs.size() == 3);
   } // testTypeLists()
 
   /** Test comments on resources */
@@ -366,7 +366,7 @@ public class TestCreole extends TestCase
     ResourceData docRd = (ResourceData) reg.get("gate.corpora.DocumentImpl");
     assertNotNull("testComments: couldn't find document res data", docRd);
     String comment = docRd.getComment();
-    assert(
+    assertTrue(
       "testComments: incorrect or missing COMMENT on document",
       comment != null && comment.equals("GATE document")
     );
@@ -383,7 +383,7 @@ public class TestCreole extends TestCase
 
     // runtime params - none for a document
     Iterator iter = paramList.getRuntimeParameters().iterator();
-    assert("Document has runtime params: " + paramList, ! iter.hasNext());
+    assertTrue("Document has runtime params: " + paramList, ! iter.hasNext());
 
     // init time params
     Parameter param = null;
@@ -399,34 +399,34 @@ public class TestCreole extends TestCase
 
         switch(paramDisjNumber) {
           case 0:
-            assert(
+            assertTrue(
               "Doc param 0 wrong type: " + param.getTypeName(),
               param.getTypeName().equals("java.lang.String")
             );
-            assert(
+            assertTrue(
               "Doc param 0 wrong name: " + param.getName(),
               param.getName().equals("sourceUrlName")
             );
             Object defaultValue = param.calculateDefaultValue();
-            assert(
+            assertTrue(
               "Doc param 0 default should be null but was: " + defaultValue,
               defaultValue == null
             );
             break;
           case 1:
-            assert(
+            assertTrue(
               "Doc param 1 wrong name: " + param.getName(),
               param.getName().equals("encoding")
             );
             break;
           case 2:
-            assert(
+            assertTrue(
               "Doc param 2 wrong name: " + param.getName(),
               param.getName().equals("sourceUrlStartOffset")
             );
             break;
           case 3:
-            assert(
+            assertTrue(
               "Doc param 3 wrong name: " + param.getName(),
               param.getName().equals("sourceUrlEndOffset")
             );
@@ -453,7 +453,7 @@ public class TestCreole extends TestCase
 
     // init time params - none for this one
     Iterator iter = paramList.getInitimeParameters().iterator();
-    assert("POT has initime params: " + paramList, ! iter.hasNext());
+    assertTrue("POT has initime params: " + paramList, ! iter.hasNext());
 
     // runtime params
     Parameter param = null;
@@ -469,16 +469,16 @@ public class TestCreole extends TestCase
 
         switch(paramDisjNumber) {
           case 0:
-            assert(
+            assertTrue(
               "POT param 0 wrong type: " + param.getTypeName(),
               param.getTypeName().equals("gate.corpora.DocumentImpl")
             );
-            assert(
+            assertTrue(
               "POT param 0 wrong name: " + param.getName(),
               param.getName().equals("document")
             );
             Object defaultValue = param.calculateDefaultValue();
-            assert(
+            assertTrue(
               "POT param 0 default should be Document but is " +
               defaultValue.getClass().getName(),
               defaultValue instanceof Document
@@ -500,7 +500,7 @@ public class TestCreole extends TestCase
     ParameterList paramList = rd.getParameterList();
     // runtime params - none for a document
     List runTime = paramList.getRuntimeParameters();
-    assert("PR3 should have 4 runtime params: " + paramList, runTime.size()==4);
+    assertTrue("PR3 should have 4 runtime params: " + paramList, runTime.size()==4);
   }// End testParamAsLists();
 
   /** Test parameters */
@@ -514,13 +514,13 @@ public class TestCreole extends TestCase
 
     // runtime params - none for a document
     Iterator iter = paramList.getRuntimeParameters().iterator();
-    assert("Document has runtime params: " + paramList, ! iter.hasNext());
+    assertTrue("Document has runtime params: " + paramList, ! iter.hasNext());
 
     // init time params
     Parameter param = null;
     List initimeParams = paramList.getInitimeParameters();
     int initimeLen = initimeParams.size();
-    assert(
+    assertTrue(
       "initime params has wrong number of elements: " + initimeLen,
       initimeLen == 4
     );
@@ -532,7 +532,7 @@ public class TestCreole extends TestCase
       paramDisjNumber++;
 
       int paramDisjLen = paramDisj.size();
-      assert(
+      assertTrue(
         "param disj wrong length: " + paramDisjLen,
         paramDisjLen == 1
       );
@@ -542,35 +542,35 @@ public class TestCreole extends TestCase
 
         switch(paramDisjNumber) {
           case 0:
-            assert(
+            assertTrue(
               "Doc param 0 wrong type: " + param.getTypeName(),
               param.getTypeName().equals("java.lang.String")
             );
-            assert(
+            assertTrue(
               "Doc param 0 wrong name: " + param.getName(),
               param.getName().equals("sourceUrlName")
             );
             Object defaultValue = param.calculateDefaultValue();
-            assert(
+            assertTrue(
               "Doc param 0 default should be null but was: " + defaultValue,
               defaultValue == null
             );
             break;
           case 1:
-            assert(
+            assertTrue(
               "Doc param 1 wrong name: " + param.getName(),
               param.getName().equals("encoding")
             );
             break;
           case 2:
-            assert(
+            assertTrue(
               "Doc param 2 wrong name: " + param.getName(),
               param.getName().equals("sourceUrlStartOffset")
             );
             defaultValue = param.getDefaultValue();
             break;
           case 3:
-            assert(
+            assertTrue(
               "Doc param 3 wrong name: " + param.getName(),
               param.getName().equals("sourceUrlEndOffset")
             );
@@ -594,7 +594,7 @@ public class TestCreole extends TestCase
       gotExceptionAsExpected = true;
     }
 
-    assert("check should have thrown exception", gotExceptionAsExpected);
+    assertTrue("check should have thrown exception", gotExceptionAsExpected);
   } // testDefaultRun()
 
   /** Test arbitrary metadata elements on resources */
@@ -604,7 +604,7 @@ public class TestCreole extends TestCase
     assertNotNull("testArbitraryMetadata: couldn't find doc res data", docRd);
     FeatureMap features = docRd.getFeatures();
     String comment = (String) features.get("FUNKY-METADATA-THAING");
-    assert(
+    assertTrue(
       "testArbitraryMetadata: incorrect FUNKY-METADATA-THAING on document",
       comment != null && comment.equals("hubba hubba")
     );
@@ -651,7 +651,7 @@ public class TestCreole extends TestCase
     Object[] args = new Object[1];
     args[0] = feats;
     setFeaturesMethod.invoke(res, args);
-    assert(
+    assertTrue(
       "features not added to resource properly",
       res.getFeatures().get("things are sunny in sunny countries")
         .equals("aren't they?")
