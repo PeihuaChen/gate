@@ -63,7 +63,49 @@ CREATE OR REPLACE FUNCTION persist_delete_document(int4) RETURNS boolean AS '
                                  where  ann_doc_id = l_doc_id
                                 );
 
-     /* dummy */
+     /* 2.2. delete annotation to a-set mappings */
+     delete
+     from   t_as_annotation
+     where  asann_ann_id in (select ann_global_id
+                             from   t_annotation
+                             where  ann_doc_id = l_doc_id
+                             );
+
+     /* 2.3 delete annotations */
+     delete
+     from   t_annotation
+     where  ann_doc_id = l_doc_id;
+
+     /* 3. delete annotation sets */
+     delete
+     from   t_annot_set
+     where  as_doc_id = l_doc_id;
+
+     /* 4. delete nodes */
+     delete
+     from   t_node
+     where  node_doc_id = l_doc_id;
+
+     /* 4.5 delete from corpus (if part of) */
+     delete
+     from   t_corpus_document
+     where  cd_doc_id = l_doc_id;
+
+     /* 5. delete document */
+     delete
+     from   t_document
+     where  doc_id = l_doc_id;
+
+     /* 6. delete document content */
+     delete
+     from   t_doc_content
+     where  dc_id = l_content_id;
+
+     /* 8. delete LR */
+     delete
+     from   t_lang_resource
+     where  lr_id = p_lr_id;
+
      return true;
 
    END;

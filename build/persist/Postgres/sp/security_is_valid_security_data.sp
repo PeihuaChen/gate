@@ -14,20 +14,24 @@
  */
 
 
-CREATE OR REPLACE FUNCTION security_is_valid_security_data(int2,int4,int4) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION security_is_valid_security_data(int4,int4,int4) RETURNS boolean AS '
 
    DECLARE
-      p_perm_mode alias for $1;
+      p_perm_mode_4 alias for $1;
       p_group_id alias for $2;
       p_user_id alias for $3;
 
+      p_perm_mode int2;
+      
       C_PERM_WR_GW constant int2 := 1;
       C_PERM_GR_GW constant int2 := 2;
       C_PERM_GR_OW constant int2 := 3;
       C_PERM_OR_OW constant int2 := 4;
 
    BEGIN
-
+      /*downcast params*/
+      p_perm_mode = cast(p_perm_mode_4 as int2);
+      
       if (p_perm_mode = C_PERM_WR_GW or
           p_perm_mode = C_PERM_GR_GW or
           p_perm_mode = C_PERM_GR_OW) then

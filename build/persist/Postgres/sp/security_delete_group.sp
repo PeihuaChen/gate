@@ -32,6 +32,10 @@ CREATE OR REPLACE FUNCTION security_delete_group(int4) RETURNS boolean AS '
       delete from t_user_group
       where  ugrp_group_id = p_grp_id;
 
+      /* delete group from t_group */
+      delete from t_group
+      where  grp_id = p_grp_id;
+      
       /* dummy */
       return true;
    END;

@@ -15,7 +15,7 @@
  */
 
 
-CREATE OR REPLACE FUNCTION persist_create_lr(int4,int4,varchar,varchar,int2,int4) RETURNS int4 AS '
+CREATE OR REPLACE FUNCTION persist_create_lr(int4,int4,varchar,varchar,int4,int4) RETURNS int4 AS '
 
    DECLARE
       /* in parameters */
@@ -23,17 +23,20 @@ CREATE OR REPLACE FUNCTION persist_create_lr(int4,int4,varchar,varchar,int2,int4
       p_grp_id alias for $2;
       p_lr_type alias for $3;
       p_lr_name alias for $4;
-      p_lr_permissions alias for $5;
+      p_lr_permissions_4 alias for $5;
       p_lr_parent_id alias for $6;
 
       l_lr_type int4;
       l_lr_id int4;
+      p_lr_permissions int2;
 
       x_incomplete_data constant varchar := ''incomplete data'';
       x_invalid_lr_type constant varchar := ''invalid LR type supplied'';
 
    BEGIN
-
+     /* downcast the params */
+     p_lr_permissions = cast(p_lr_permissions_4 as int2);
+   
      /* 1. sanity check */
      if (false = security_is_valid_security_data(p_lr_permissions,p_grp_id,p_usr_id)) then
         raise exception ''error: %'',x_incomplete_data;
