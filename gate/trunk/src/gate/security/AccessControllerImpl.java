@@ -480,7 +480,7 @@ public class AccessControllerImpl
     long sessTimeoutMin = ((Long)this.sessionTimeouts.get(s.getID())).longValue();
     long currTimeMS = System.currentTimeMillis();
     //timeout is in minutes
-    long lastUsedMin = (currTimeMS-lastUsedMS)*1000/60;
+    long lastUsedMin = (currTimeMS-lastUsedMS)/1000*60;
 
     if (lastUsedMin > sessTimeoutMin) {
       //session expired
