@@ -57,7 +57,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
   protected EventsHandler eventHandler;
 
 
-  public DatabaseDocumentImpl(Connection conn) {
+  public DatabaseDocumentImpl() {
 
     //super();
     contentLock = new Object();
@@ -66,7 +66,6 @@ public class DatabaseDocumentImpl extends DocumentImpl
 //    this.defaultAnnots = new DatabaseAnnotationSetImpl(this);
 
     this.isContentRead = false;
-    this.jdbcConn = conn;
 
     this.contentChanged = false;
     this.featuresChanged = false;
@@ -79,7 +78,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
     parentDocument = null;
   }
 
-  public DatabaseDocumentImpl(Connection _conn,
+/*  public DatabaseDocumentImpl(Connection _conn,
                               String _name,
                               DatabaseDataStore _ds,
                               Long _persistenceID,
@@ -129,6 +128,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
     //synced and we'll clear the isXXXChanged flags
     this.dataStore.addDatastoreListener(this);
   }
+*/
 
   /** The content of the document: a String for text; MPEG for video; etc. */
   public DocumentContent getContent() {
@@ -354,6 +354,8 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
   private void _getAnnotations(String name) {
 
+///System.out.print("getting aset ["+name+"] : ");
+
     AnnotationSet as = null;
 
     //preconditions
@@ -374,6 +376,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
       if (this.defaultAnnots != null) {
         //the default set is alredy read - do nothing
         //super methods will take care
+///System.out.println("already available...");
         return;
       }
     }
@@ -382,10 +385,13 @@ public class DatabaseDocumentImpl extends DocumentImpl
       if (this.namedAnnotSets.containsKey(name)) {
         //we've already read it - do nothing
         //super methods will take care
+///System.out.print("already available...");
+///AnnotationSet as1 = (AnnotationSet)this.namedAnnotSets.get(name);
+///System.out.println(" (size="+as1.size()+")...");
         return;
       }
     }
-
+///System.out.println("read from DB...");
 
     Long lrID = (Long)getLRPersistenceId();
     Long asetID = null;
@@ -408,7 +414,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
         clause =   "        and as_name is null ";
       }
       sql = sql + clause;
-//System.out.println(sql);
+
       pstmt = this.jdbcConn.prepareStatement(sql);
         pstmt.setLong(1,lrID.longValue());
         if (null != name) {
@@ -487,7 +493,6 @@ public class DatabaseDocumentImpl extends DocumentImpl
                                               + pe.getMessage()+"]");
           }
         }//finally
-
         //1.5, create a-set
         if (null == name) {
           as = new DatabaseAnnotationSetImpl(this, transSet);
@@ -495,7 +500,8 @@ public class DatabaseDocumentImpl extends DocumentImpl
         else {
           as = new DatabaseAnnotationSetImpl(this,name, transSet);
         }
-
+///System.out.println("trans_set, size=["+transSet.size()+"]");
+///System.out.println("db_set (1), size=["+as.size()+"]");
         //1.6 add the new a-set to the list of the a-sets read from the DB
 //        this.loadedAnnotSets.add(as);
 
@@ -522,6 +528,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
     else {
       //named as
       this.namedAnnotSets.put(name,as);
+///System.out.println("db_set (2), size=["+as.size()+"]");
     }
 
     //don't return the new aset, the super method will take care
@@ -563,7 +570,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
                    " from  "+Gate.DB_OWNER+".v_annotation_features " +
                    " where  set_id = ? " +
                    " order by ann_local_id,ft_key ";
-//System.out.println(sql);
+
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,asetID.longValue());
       pstmt.execute();
@@ -1101,5 +1108,70 @@ public class DatabaseDocumentImpl extends DocumentImpl
     this.parentDocument = (Document)parentLR;
 
   }//setParent
+
+  public void setInitData__$$__(Object data) {
+
+    HashMap initData = (HashMap)data;
+
+    this.jdbcConn = (Connection)initData.get("JDBC_CONN");
+    this.dataStore = (DatabaseDataStore)initData.get("DS");
+    this.lrPersistentId = (Long)initData.get("LR_ID");
+    this.name = (String)initData.get("DOC_NAME");
+    this.content = (DocumentContent)initData.get("DOC_CONTENT");
+    this.isContentRead = true;
+    this.features = (FeatureMap)initData.get("DOC_FEATURES");
+    this.markupAware = (Boolean)initData.get("DOC_MARKUP_AWARE");
+    this.sourceUrl = (URL)initData.get("DOC_SOURCE_URL");
+    this.sourceUrlStartOffset = (Long)initData.get("DOC_SOURCE_URL_START");
+    this.sourceUrlEndOffset = (Long)initData.get("DOC_SOURCE_URL_END");
+
+    Integer nextNodeID = (Integer)initData.get("DOC_NEXT_NODE_ID");
+    if (null != nextNodeID) {
+      this.setNextNodeId(nextNodeID.intValue());
+    }
+
+    Integer nextAnnID = (Integer)initData.get("DOC_NEXT_ANN_ID");
+    if (null != nextAnnID) {
+      this.setNextAnnotationId(nextAnnID.intValue());
+    }
+
+    this.parentDocument = (Document)initData.get("PARENT_LR");
+
+    //annotations
+    //1. default
+    AnnotationSet _default = (AnnotationSet)initData.get("DOC_DEFAULT_ANNOTATIONS");
+    if (null != _default) {
+      _setAnnotations(null,_default);
+    }
+
+    //2. named (if any)
+    Map _named = (Map)initData.get("DOC_NAMED_ANNOTATION_SETS");
+    if (null != _named) {
+      Iterator itNamed = _named.values().iterator();
+      while (itNamed.hasNext()){
+        AnnotationSet currSet = (AnnotationSet)itNamed.next();
+        //add them all to the DBAnnotationSet
+        _setAnnotations(currSet.getName(),currSet);
+      }
+    }
+
+    //3. add the listeners for the features (if any)
+    if (null != this.features) {
+      if (eventHandler == null)
+        eventHandler = new EventsHandler();
+      this.features.addFeatureMapListener(eventHandler);
+    }
+
+    //4. add self as listener for the data store, so that we'll know when the DS is
+    //synced and we'll clear the isXXXChanged flags
+    if (null != this.dataStore) {
+      this.dataStore.addDatastoreListener(this);
+    }
+
+  }
+
+  public Object getInitData__$$__(Object initData) {
+    return null;
+  }
 
 }
