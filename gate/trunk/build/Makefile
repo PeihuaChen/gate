@@ -35,8 +35,9 @@ jar:
 	../build/jdk.sh jar cvf ../build/gate.jar gate
 
 docs:
-	./jdk.sh javadoc $(SP) $(CP) -private \
-	  -link 'http___COLON___\/\/bradfield.dcs.shef.ac.uk\/Java2_docs\/api\/' \
+	./jdk.sh \
+	  -s '-link http://bradfield.dcs.shef.ac.uk/Java2_docs/api/' \
+	  javadoc $(SP) $(CP) -private \
 	  -d ../doc/javadoc/internal $(PKGS)
 	./jdk.sh javadoc $(SP) $(CP) -public \
 	  -d ../doc/javadoc $(PKGS)
@@ -51,6 +52,9 @@ list:
 ############################################################################
 #
 # $Log$
+# Revision 1.14  2000/02/16 17:26:12  hamish
+# found a better way to do the -link for docs
+#
 # Revision 1.13  2000/02/16 17:11:22  hamish
 # added some more foul mess to jdk.sh to allow Makefile
 # to link to JDK docs when doing the internal javadoc run
