@@ -3,20 +3,20 @@ package gate.impl.ag;
 public class Node implements gate.Node{
   /** Default constructor. The -1 Id indicates a non-valid Id*/
   public Node() {
-    id=new Integer(-1);
+    id=gate.util.Tools.gensym("Node");
     offset=null;
   }//Node()
 
-  /** Contructor
+  /** Constructor
   @param id the Id of the new node
-  @param offset the (temporal) offset of the Node; Should be -1 for not anchored nodes*/
-  public Node(int id, Double offset){
-    this.id=new Integer(id);
+  @param offset the (temporal) offset of the Node; Should be <b>null</b> for not anchored nodes*/
+  public Node(String id, Double offset){
+    this.id=id;
     this.offset=offset;
   }//Node(int i)
 
   /**returns the Id of the Node */
-  public Integer getId(){
+  public String getId(){
     return id;
   }
 
@@ -32,13 +32,24 @@ public class Node implements gate.Node{
 
   /** Does this node temporally (i.e. by offset) precede or is equal to n? */
   public boolean tPrecedes(gate.Node n){
-    return (offset.compareTo(n.getId())<=0);
+    return (offset.compareTo(n.getOffset())<=0);
   }
 
   /** Does this node precede n? */
   public boolean precedes(gate.Node n){
     return sPrecedes(n)||tPrecedes(n);
   }
-  private Integer id;
+
+  public void addStartAnnotation(gate.Annotation annot){
+    startAnnotations.put(annot.getId(),annot);
+  }
+
+  public void addEndAnnotation(gate.Annotation annot){
+    endAnnotations.put(annot.getId(),annot);
+  }
+
+  private String id;
   private Double offset;
+  private java.util.Hashtable startAnnotations=new java.util.Hashtable();
+  private java.util.Hashtable endAnnotations=new java.util.Hashtable();
 }
