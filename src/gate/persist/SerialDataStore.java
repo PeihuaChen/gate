@@ -25,18 +25,21 @@ import gate.creole.*;
 import gate.util.*;
 import gate.event.*;
 
-/** A data store based on Java serialisation.
-  */
+/**
+ * A data store based on Java serialisation.
+ */
 public class SerialDataStore
 extends AbstractFeatureBearer implements DataStore {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  /** Construction requires a file protocol URL
-    * pointing to the storage directory used for
-    * the serialised classes.
-    */
+  /**
+   * Construction requires a file protocol URL
+   * pointing to the storage directory used for
+   * the serialised classes. <B>NOTE:</B> should not be called except by
+   * GATE code.
+   */
   public SerialDataStore(URL storageDirUrl) throws PersistenceException {
     setStorageUrl(storageDirUrl);
   } // construction from URL
@@ -47,8 +50,9 @@ extends AbstractFeatureBearer implements DataStore {
    */
   public SerialDataStore() { };
 
-  /** The directory used for the serialised classes.
-    */
+  /**
+   * The directory used for the serialised classes.
+   */
   protected File storageDir;
 
   /** Set method for storage URL */
@@ -115,10 +119,10 @@ extends AbstractFeatureBearer implements DataStore {
   } // create()
 
   /** The name of the version file */
-  protected String versionFileName = "__GATE_SerialDataStore__";
+  protected static String versionFileName = "__GATE_SerialDataStore__";
 
-  /** The protocol version of this data store */
-  protected String currentProtocolVersion = null;
+  /** The protocol version of the currently open data store */
+  protected static String currentProtocolVersion = null;
 
   /** Get a File for the protocol version file. */
   protected File getVersionFile() throws IOException {
@@ -130,10 +134,14 @@ extends AbstractFeatureBearer implements DataStore {
    * Protocol versions:
    * <UL>
    * <LI>
-   * 1.0: has no version file. Uncompressed.
+   * 1.0: uncompressed. Originally had no version file - to read a 1.0
+   * SerialDataStore that has no version file add a version file containing
+   * the line "1.0".
    * <LI>
    * 1.1: has a version file. Uses GZIP compression.
    * </UL>
+   * This variable stores the version of the current level of the
+   * protocol, NOT the level in use in the currently open data store.
    */
   protected String versionNumber = "1.1";
 
@@ -238,7 +246,6 @@ extends AbstractFeatureBearer implements DataStore {
 // if we want to support old style:
 // String versionInVersionFile = "1.0";
 // (but this means it will open *any* directory)
-    currentProtocolVersion = null;
     try {
       FileReader fis = new FileReader(getVersionFile());
       BufferedReader isr = new BufferedReader(fis);
