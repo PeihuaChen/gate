@@ -19,6 +19,10 @@
  *
  *  Also, should change gate.jape.RHS to use the methods here for
  *  defining and instantiating classes.
+ *
+ * We might also try dispensing with javacompiler.jar and overriding
+ * File instead to take input from string, then using the normal
+ * Sun compiler.
  */
 
 package gate.util;
