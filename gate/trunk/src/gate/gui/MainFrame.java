@@ -133,6 +133,9 @@ public class MainFrame extends JFrame
    * ontotext.bp*/
   NewOntologyEditorAction newOntologyEditorAction = null;
 
+  NewGazetteerEditorAction  newGazetteerEditorAction = null;
+
+
   /**
    * Holds all the icons used in the Gate GUI indexed by filename.
    * This is needed so we do not need to decode the icon everytime
@@ -298,6 +301,8 @@ public class MainFrame extends JFrame
     /*ontology editor action initialization
     ontotext.bp*/
     newOntologyEditorAction = new NewOntologyEditorAction();
+
+    newGazetteerEditorAction = new NewGazetteerEditorAction();
 
   }
 
@@ -2923,6 +2928,43 @@ public class MainFrame extends JFrame
         frame.setLocation(editor.POSITION_X,editor.POSITION_Y);
         frame.setVisible(true);
         editor.visualize();
+      } catch ( ResourceInstantiationException ex ) {
+        ex.printStackTrace(Err.getPrintWriter());
+      }
+    }// actionPerformed();
+  }//class NewOntologyEditorAction
+
+  /** This class represent an action which brings up the Gazetteer Editor tool*/
+  class NewGazetteerEditorAction extends AbstractAction {
+    public NewGazetteerEditorAction(){
+      super("Gazetteer Editor", getIcon("controller.gif"));
+      putValue(SHORT_DESCRIPTION,"Start the Gazetteer Editor");
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      com.ontotext.gate.vr.Gaze editor = new com.ontotext.gate.vr.Gaze();
+      try {
+        JFrame frame = new JFrame();
+        editor.init();
+        frame.setTitle("Gazetteer Editor");
+        frame.getContentPane().add(editor);
+
+        Set gazetteers = new HashSet(Gate.getCreoleRegister().getLrInstances(
+          "gate.creole.gazetteer.DefaultGazetteer"));
+        if (gazetteers == null || gazetteers.isEmpty())
+          return;
+        Iterator iter = gazetteers.iterator();
+        while (iter.hasNext()) {
+          gate.creole.gazetteer.Gazetteer gaz =
+            (gate.creole.gazetteer.Gazetteer) iter.next();
+          if (gaz.getListsURL().toString().endsWith(System.getProperty("gate.slug.gazetteer")))
+           editor.setTarget(gaz);
+        }
+
+        frame.setSize(editor.SIZE_X,editor.SIZE_Y);
+        frame.setLocation(editor.POSITION_X,editor.POSITION_Y);
+        frame.setVisible(true);
+        editor.setVisible(true);
       } catch ( ResourceInstantiationException ex ) {
         ex.printStackTrace(Err.getPrintWriter());
       }

@@ -222,6 +222,10 @@ public class ShellSlacFrame extends MainFrame {
 
     /*add the ontology editor to the tools menu ontotext.bp */
     toolsMenu.add(newOntologyEditorAction);
+
+    if (System.getProperty("gate.slug.gazetteer") != null)
+      toolsMenu.add(newGazetteerEditorAction);
+
   } // createToolsMenuItems()
 
   /** Find ResourceData for "Create Document" menu item. */
