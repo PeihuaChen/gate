@@ -25,6 +25,7 @@ import gate.util.GateRuntimeException;
 import java.awt.*;
 import java.awt.Component;
 import java.awt.GridBagLayout;
+import java.awt.event.*;
 import java.util.*;
 import java.util.List;
 import java.util.Map;
@@ -38,16 +39,16 @@ import javax.swing.table.AbstractTableModel;
 
 /**
  * A tabular view for a list of annotations.
- * Used as part of the document viewer to display all the annotation currently 
+ * Used as part of the document viewer to display all the annotation currently
  * highlighted.
  */
-public class AnnotationListView extends AbstractDocumentView 
+public class AnnotationListView extends AbstractDocumentView
 		implements AnnotationListener{
   public AnnotationListView(){
     tagList = new ArrayList();
     annotationHandlerByTag = new HashMap();
   }
-  
+
   /* (non-Javadoc)
    * @see gate.gui.docview.AbstractDocumentView#initGUI()
    */
@@ -59,18 +60,18 @@ public class AnnotationListView extends AbstractDocumentView
     table.setSortedColumn(START_COL);
     table.setIntercellSpacing(new Dimension(2, 0));
     scroller = new JScrollPane(table);
-    
+
     mainPanel = new JPanel();
     mainPanel.setLayout(new GridBagLayout());
     GridBagConstraints constraints = new GridBagConstraints();
-    
+
     constraints.gridx = 0;
     constraints.gridy = 0;
     constraints.weightx = 1;
     constraints.weighty = 1;
     constraints.fill= GridBagConstraints.BOTH;
     mainPanel.add(scroller, constraints);
-    
+
     constraints.gridy = 1;
     constraints.weightx = 0;
     constraints.weighty = 0;
@@ -78,19 +79,19 @@ public class AnnotationListView extends AbstractDocumentView
     constraints.anchor = GridBagConstraints.WEST;
     statusLabel = new JLabel();
     mainPanel.add(statusLabel, constraints);
-    
+
     //get a pointer to the text view used to display
-    //the selected annotations 
+    //the selected annotations
     Iterator centralViewsIter = owner.getCentralViews().iterator();
     while(textView == null && centralViewsIter.hasNext()){
       DocumentView aView = (DocumentView)centralViewsIter.next();
-      if(aView instanceof TextualDocumentView)  
+      if(aView instanceof TextualDocumentView)
         textView = (TextualDocumentView)aView;
     }
-    
+
     initListeners();
   }
-  
+
   public Component getGUI(){
     return mainPanel;
   }
@@ -105,18 +106,19 @@ public class AnnotationListView extends AbstractDocumentView
     tableModel.addTableModelListener(new TableModelListener(){
       public void tableChanged(TableModelEvent e){
         statusLabel.setText(
-                Integer.toString(tableModel.getRowCount()) + 
+                Integer.toString(tableModel.getRowCount()) +
                 " Annotations (" +
                 Integer.toString(table.getSelectedRowCount()) +
                 " selected)");
       }
     });
-    
+
+
     table.getSelectionModel().
       addListSelectionListener(new ListSelectionListener(){
         public void valueChanged(ListSelectionEvent e){
           statusLabel.setText(
-                  Integer.toString(tableModel.getRowCount()) + 
+                  Integer.toString(tableModel.getRowCount()) +
                   " Annotations (" +
                   Integer.toString(table.getSelectedRowCount()) +
                   "selected)");
@@ -131,7 +133,51 @@ public class AnnotationListView extends AbstractDocumentView
           }
         }
     });
-    
+
+    /* Niraj */
+    table.addMouseListener(new MouseListener() {
+      public void mouseClicked(MouseEvent me) {
+        // right click
+        if(table.getSelectedRows().length == 0) {
+          return;
+        }
+
+        if(me.getModifiers() == 4) {
+          final JPopupMenu popup = new JPopupMenu();
+          JButton delete = new JButton("Delete");
+          delete.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+              int [] rows = table.getSelectedRows();
+              ArrayList handlers = new ArrayList();
+
+              for(int i = 0; i < rows.length; i++){
+                Object tag = tagList.get(table.rowViewToModel(rows[i]));
+                handlers.add(tag);
+              }
+
+              for(int i=0;i<handlers.size();i++) {
+                Object tag = handlers.get(i);
+                AnnotationHandler aHandler = (AnnotationHandler)
+                                             annotationHandlerByTag.get(tag);
+                aHandler.set.remove(aHandler.ann);
+                removeAnnotation(tag);
+              }
+              popup.hide();
+              popup.setVisible(false);
+            }
+          });
+
+          popup.add(delete);
+          popup.show(table, me.getX(), me.getY());
+        }
+      }
+      public void mouseReleased(MouseEvent me) { }
+      public void mouseEntered(MouseEvent me) { }
+      public void mouseExited(MouseEvent me) { }
+      public void mousePressed(MouseEvent me) { }
+    });
+    /* End */
+
   }
   /* (non-Javadoc)
    * @see gate.gui.docview.AbstractDocumentView#registerHooks()
@@ -139,14 +185,14 @@ public class AnnotationListView extends AbstractDocumentView
   protected void registerHooks() {
     //this view is a slave only view so it has no hooks to register
   }
-  
+
   /* (non-Javadoc)
    * @see gate.gui.docview.AbstractDocumentView#unregisterHooks()
    */
   protected void unregisterHooks() {
-    //this view is a slave only view so it has no hooks to register  
+    //this view is a slave only view so it has no hooks to register
   }
-    
+
   /* (non-Javadoc)
    * @see gate.gui.docview.DocumentView#getType()
    */
@@ -156,8 +202,8 @@ public class AnnotationListView extends AbstractDocumentView
   protected void guiShown(){
     tableModel.fireTableDataChanged();
   }
-  
-  
+
+
   public void addAnnotation(Object tag, Annotation ann, AnnotationSet set){
     AnnotationHandler aHandler = new AnnotationHandler(set, ann);
     Object oldValue = annotationHandlerByTag.put(tag, aHandler);
@@ -174,7 +220,7 @@ public class AnnotationListView extends AbstractDocumentView
     //listen for the new annotation's events
     ann.addAnnotationListener(this);
   }
-  
+
   public void removeAnnotation(Object tag){
     int row = tagList.indexOf(tag);
     if(row >= 0){
@@ -185,7 +231,7 @@ public class AnnotationListView extends AbstractDocumentView
       if(tableModel != null) tableModel.fireTableRowsDeleted(row, row);
     }
   }
-  
+
   /**
    * Adds a batch of annotations in one go. The tags and annotations collections
    * are accessed through their iterators which are expected to return the
@@ -195,7 +241,7 @@ public class AnnotationListView extends AbstractDocumentView
    * @param annotations a collection of annotations
    * @param set the annotation set to which all the annotations belong.
    */
-  public void addAnnotations(Collection tags, Collection annotations, 
+  public void addAnnotations(Collection tags, Collection annotations,
           AnnotationSet set){
     if(tags.size() != annotations.size()) throw new GateRuntimeException(
             "Invalid invocation - different numbers of annotations and tags!");
@@ -223,7 +269,7 @@ public class AnnotationListView extends AbstractDocumentView
       }
     });
   }
-  
+
   public void removeAnnotations(Collection tags){
     Iterator tagIter = tags.iterator();
     while(tagIter.hasNext()){
@@ -242,7 +288,7 @@ public class AnnotationListView extends AbstractDocumentView
       }
     });
   }
-  
+
   public void annotationUpdated(AnnotationEvent e){
     //update all occurrences of this annotation
     Annotation ann = (Annotation)e.getSource();
@@ -253,16 +299,16 @@ public class AnnotationListView extends AbstractDocumentView
       }
     }
   }
-  
+
   class AnnotationTableModel extends AbstractTableModel{
     public int getRowCount(){
       return tagList.size();
     }
-    
+
     public int getColumnCount(){
       return 5;
     }
-    
+
     public String getColumnName(int column){
       switch(column){
         case TYPE_COL: return "Type";
@@ -273,7 +319,7 @@ public class AnnotationListView extends AbstractDocumentView
         default: return "?";
       }
     }
-      
+
     public Class getColumnClass(int column){
       switch(column){
         case TYPE_COL: return String.class;
@@ -284,11 +330,11 @@ public class AnnotationListView extends AbstractDocumentView
         default: return String.class;
       }
     }
-    
+
     public boolean isCellEditable(int rowIndex, int columnIndex){
       return false;
     }
-    
+
     public Object getValueAt(int row, int column){
       AnnotationHandler aHandler = (AnnotationHandler)annotationHandlerByTag.
       	get(tagList.get(row));
@@ -322,9 +368,9 @@ public class AnnotationListView extends AbstractDocumentView
         default: return "?";
       }
     }
-    
+
   }
-  
+
   protected static class AnnotationHandler{
     public AnnotationHandler(AnnotationSet set, Annotation ann){
       this.ann = ann;
@@ -342,11 +388,11 @@ public class AnnotationListView extends AbstractDocumentView
   protected JPanel mainPanel;
   protected JLabel statusLabel;
   protected TextualDocumentView textView;
-  
+
   private static final int TYPE_COL = 0;
   private static final int SET_COL = 1;
   private static final int START_COL = 2;
   private static final int END_COL = 3;
   private static final int FEATURES_COL = 4;
-  
+
 }
