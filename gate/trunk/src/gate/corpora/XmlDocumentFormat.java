@@ -175,12 +175,21 @@ Angel */
         throw
         new DocumentFormatException("XML parser configuration exception ", e);
     } catch (SAXException e){
-          // the next line is commented to avoid Document creation fail on error
-//        throw new DocumentFormatException(e);
-        doc.getFeatures().put("parsingError", new Boolean(true));
-          Out.println("Warning: Document remains unparsed. \n"
+      doc.getFeatures().put("parsingError", new Boolean(true));
+
+      Boolean bThrow = (Boolean)
+        doc.getFeatures().get(GateConstants.THROWEX_FORMAT_PROPERTY_NAME);
+        
+      if(bThrow != null && bThrow.booleanValue()) {
+        // the next line is commented to avoid Document creation fail on error
+        throw new DocumentFormatException(e);
+      }
+      else {
+        Out.println("Warning: Document remains unparsed. \n"
               +"\n  Stack Dump: ");
-          e.printStackTrace(Out.getPrintWriter());
+        e.printStackTrace(Out.getPrintWriter());
+      } // if
+
     } catch (IOException e){
         throw new DocumentFormatException("I/O exception for " +
                                       doc.getSourceUrl().toString());
