@@ -370,6 +370,21 @@ jar/classpath so it's the same as registerBuiltins
     return urlBaseName;
   } // locateGateFiles
 
+  /**
+   * Checks whether a particular class is a Gate defined type
+   */
+  public static boolean isGateType(String classname){
+    return getCreoleRegister().containsKey(classname) ||
+           classname.equals("gate.Resource")||
+           classname.equals("gate.LanguageResource")||
+           classname.equals("gate.ProcessingResource")||
+           classname.equals("gate.VisualResource")||
+           classname.equals("gate.Controller")||
+           classname.equals("gate.Document")||
+           classname.equals("gate.Corpus")||
+           classname.equals("gate.DataStore");
+  }
+
   /** Returns the value for the HIDDEN attribute of a feature map */
   static public boolean getHiddenAttribute(FeatureMap fm){
     if(fm == null) return false;

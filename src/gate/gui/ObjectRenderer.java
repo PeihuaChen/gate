@@ -35,6 +35,5 @@ public class ObjectRenderer extends DefaultTableCellRenderer{
       return this;
   }//public Component getTableCellRendererComponent
 
-    JButton button;
     JPanel textButtonBox;
 }//class ObjectRenderer extends DefaultTableCellRenderer

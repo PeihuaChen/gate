@@ -254,6 +254,9 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
 
   /** Initialise this resource, and return it. */
   public Resource init() {
+    if(documentList != null && !documentList.isEmpty()){
+      addAll(documentList);
+    }
     return this;
   } // init()
 
@@ -299,6 +302,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
   /** Freeze the serialization UID. */
   static final long serialVersionUID = -1113142759053898456L;
   private transient Vector corpusListeners;
+  private java.util.List documentList;
 
 
   protected void fireDocumentAdded(CorpusEvent e) {
@@ -318,5 +322,11 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
         ((CorpusListener) listeners.elementAt(i)).documentRemoved(e);
       }
     }
+  }
+  public void setDocumentList(java.util.List documentList) {
+    this.documentList = documentList;
+  }
+  public java.util.List getDocumentList() {
+    return documentList;
   }
 } // class CorpusImpl
