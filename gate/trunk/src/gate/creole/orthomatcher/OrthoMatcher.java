@@ -925,7 +925,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
           cdg.add(lineRead.toLowerCase());
       }// if
       else {
-        int index = lineRead.indexOf("£");
+        int index = lineRead.indexOf("Â£");
         if (index != -1){
           String  expr = lineRead.substring(0,index);
           //if not case-sensitive, we need to downcase all strings
