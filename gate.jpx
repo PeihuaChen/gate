@@ -21,8 +21,12 @@
   <property category="debug.7" name="SmartStepRedefineClasses" value="0"/>
   <property category="debug.8" name="SmartStepRedefineClasses" value="0"/>
   <property category="debug.9" name="SmartStepRedefineClasses" value="0"/>
+  <property category="generalFormatting" name="tabSize" value="2"/>
   <property category="idl" name="ProcessIDL" value="false"/>
-  <property category="javaFormatting" name="packageThreshold" value="0"/>
+  <property category="javadoc" name="custom.tags.1" value="todo;a;To Do:"/>
+  <property category="optimize.1" name="OptimizableType" value="intuitive.ide.borland.jb8.ProfilerBootstrap"/>
+  <property category="optimize.1" name="oicc.FilterFile" value="Z:\gate\gate.oif"/>
+  <property category="optimize.1" name="oipr.FilterFile" value="Z:\gate\gate.oif"/>
   <property category="runtime" name="ConfigurationCount" value="17"/>
   <property category="runtime.0" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
   <property category="runtime.0" name="application.class" value="gate.TestGate"/>
@@ -36,11 +40,12 @@
   <property category="runtime.0" name="jsprunner.jspfile" value="W%|/JBuilder4/bin"/>
   <property category="runtime.0" name="jsprunner.launchuri" value="/W%|/JBuilder4/bin"/>
   <property category="runtime.0" name="test.harness" value="junit.textui.TestRunner"/>
+  <property category="runtime.1" name="BuildTargetOnRun" value="com.borland.jbuilder.build.ProjectBuilder$ProjectBuildAction;make"/>
   <property category="runtime.1" name="ConfigurationName" value="Main GUI"/>
   <property category="runtime.1" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
   <property category="runtime.1" name="application.class" value="gate.Main"/>
   <property category="runtime.1" name="application.parameters" value="-i y:\gate.xml"/>
-  <property category="runtime.1" name="application.vmparameters" value="-Djava.ext.dirs=z:/gate/lib/ext -Xmx400m -Djava.library.path=d:/apps/Oracle/Oracle91/bin"/>
+  <property category="runtime.1" name="application.vmparameters" value="-Djava.ext.dirs=z:/gate/lib/ext -Xmx800m -Djava.library.path=d:/apps/Oracle/Oracle91/bin"/>
   <property category="runtime.1" name="appserver.ejbJarsSaved" value="1"/>
   <property category="runtime.1" name="appserver.parameters" value="-jts -jns -jss -jdb"/>
   <property category="runtime.1" name="appserver.servername" value="ejbcontainer"/>
@@ -249,9 +254,9 @@
   <property category="sys" name="ExcludeClassEnabled" value="0"/>
   <property category="sys" name="IncludeTestPath" value="1"/>
   <property category="sys" name="InstanceVisibility" value="4"/>
-  <property category="sys" name="JDK" value="Sun JDK 1.4.1_02-b06"/>
-  <property category="sys" name="JbxEventListener0" value="gate.event.CreoleListener"/>
-  <property category="sys" name="JbxEventListener1" value="gate.event.CreoleListener"/>
+  <property category="sys" name="JDK" value="java version 1.4.2-b28"/>
+  <property category="sys" name="JbxEventListener0" value="gate.creole.gazetteer.GazetteerListener"/>
+  <property category="sys" name="JbxEventListener1" value="gate.creole.gazetteer.GazetteerListener"/>
   <property category="sys" name="JbxEventListener2" value="gate.event.CreoleListener"/>
   <property category="sys" name="JbxEventListener3" value="gate.event.StatusListener"/>
   <property category="sys" name="JbxEventListener4" value="gate.event.ProgressListener"/>
@@ -263,6 +268,7 @@
   <property category="sys" name="MakeStable" value="0"/>
   <property category="sys" name="OutPath" value="classes"/>
   <property category="sys" name="SourcePath" value="src;test"/>
+  <property category="sys" name="SourceVersion" value="1.4"/>
   <property category="sys" name="TestPath" value="test"/>
   <property category="sys" name="Title" value="Gate2"/>
   <property category="sys" name="TitleLabel" value="Title:"/>
