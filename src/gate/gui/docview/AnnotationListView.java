@@ -176,7 +176,7 @@ public class AnnotationListView extends AbstractDocumentView
             if(!first)strBuf.append(" ,");
             strBuf.append(key.toString());
             strBuf.append("=");
-            strBuf.append(value.toString());
+            strBuf.append(value == null ? "[null]" : value.toString());
           }
           strBuf.append("}");
           return strBuf.toString();
