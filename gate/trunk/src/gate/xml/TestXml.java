@@ -28,8 +28,19 @@ public class TestXml extends TestCase
   public void setUp() {
   } // setUp
 
+  /*
+  public static void main(String args[]){
+    TestXml app = new TestXml("TestXml");
+    try{
+      app.testSomething ();
+    }catch (Exception e){
+      System.out.println(e);
+    }
+  }
+  */
+  
   /** A test */
-  public void testSomething() throws Exception {
+  public void testSomething() throws Exception{
     assert(true);
 
 	  try {
@@ -48,8 +59,11 @@ public class TestXml extends TestCase
 		  SAXParser parser = saxParserFactory.newSAXParser();
 
       // use it
-		  parser.parse(new File("V:\\XMLFILES\\TEST\\Sentence.xml"),
-           new CustomDocumentHandler("file:///V:/XMLFILES/TEST/Sentence.xml") );
+		  //parser.parse(new File("V:\\XMLFILES\\TEST\\Sentence.xml"),
+      //     new CustomDocumentHandler("file:///V:/XMLFILES/TEST/Sentence.xml") );
+
+		  parser.parse("http://www.dcs.shef.ac.uk/~cursu/xml/input/bnc.xml",
+           new CustomDocumentHandler("http://www.dcs.shef.ac.uk/~cursu/xml/input/bnc.xml"));
 
 	  } catch (Exception ex) {
 		  System.err.println("Exception : " + ex);
