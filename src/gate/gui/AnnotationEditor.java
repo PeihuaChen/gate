@@ -872,7 +872,6 @@ public class AnnotationEditor extends AbstractVisualResource {
           public void run(){
             textPane.select(0, 0);
             textScroll.getViewport().setView(textPane);
-            stylesTreeModel.nodeStructureChanged(stylesTreeRoot);
           }
         });
       }
