@@ -76,7 +76,7 @@ Priority:99
 
    gate.FeatureMap features = Factory.newFeatureMap();
    features.put("firedBy","rule_Q1");
-   annotations.add(quoted.firstNode(), quoted.lastNode(), "Quoted Text", features);
+   annotations.add(quoted.firstNode(), quoted.lastNode(), "QuotedText", features);
 }
 */
 
@@ -96,6 +96,6 @@ Priority:99
 
    gate.FeatureMap features = Factory.newFeatureMap();
    features.put("firedBy","rule_Q1");
-   annotations.add(quoted.firstNode(), quoted.lastNode(), "Quoted Text", features);
+   annotations.add(quoted.firstNode(), quoted.lastNode(), "QuotedText", features);
 }
 
