@@ -433,7 +433,7 @@ public class TestAnnotation extends TestCase
 
 
     // indexing by type
-    as.indexByType();
+    ((AnnotationSetImpl) as).indexByType();
     AnnotationSet tokenAnnots = as.get("Token");
     assertEquals(tokenAnnots.size(), 2);
 
