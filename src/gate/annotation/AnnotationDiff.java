@@ -485,24 +485,24 @@ public class AnnotationDiff extends AbstractVisualResource
       responseAnnotSet = responseDocument.getAnnotations().get(
                                           annotationSchema.getAnnotationName());
     else
-      responseAnnotSet = responseDocument.getAnnotations(responseAnnotationSetName).
-                                    get(annotationSchema.getAnnotationName());
+      responseAnnotSet = responseDocument.getAnnotations(responseAnnotationSetName).get(annotationSchema.getAnnotationName());
 
 
 
     // Calculate the diff Set. This set will be used later with graphic
     // visualisation.
-    ArrayList choices = (ArrayList) annotDiffer.calculateDiff(keyAnnotSet.get(), responseAnnotSet.get());
+    annotDiffer.setSignificantFeaturesSet(new HashSet());
+    ArrayList choices = (ArrayList) annotDiffer.calculateDiff(keyAnnotSet, responseAnnotSet);
     diffSet = new HashSet();
     for(int i=0;i<choices.size();i++) {
       AnnotationDiffer.PairingImpl choice = (AnnotationDiffer.PairingImpl) choices.get(i);
       int type = choice.getType();
       int leftType = 0;
       int rightType = 0;
-      if(type == 2) {
+      if(type == AnnotationDiffer.CORRECT) {
         leftType = CORRECT_TYPE;
         rightType = CORRECT_TYPE;
-      } else if(type == 1) {
+      } else if(type == AnnotationDiffer.PARTIALLY_CORRECT) {
         leftType = PARTIALLY_CORRECT_TYPE;
         rightType = PARTIALLY_CORRECT_TYPE;
       } else {
@@ -824,7 +824,6 @@ public class AnnotationDiff extends AbstractVisualResource
         //Type - Key
         case 0:{
            if (diffSetElement.getLeftAnnotation() == null) return null;
-//           return diffSetElement.getLeftAnnotation().getType();
            Annotation annot = diffSetElement.getLeftAnnotation();
            String theString = "";
            try {
@@ -861,7 +860,6 @@ public class AnnotationDiff extends AbstractVisualResource
         //Type - Response
         case 5:{
            if (diffSetElement.getRightAnnotation() == null) return null;
-//           return diffSetElement.getRightAnnotation().getType();
            Annotation annot = diffSetElement.getRightAnnotation();
            String theString = "";
            try {
