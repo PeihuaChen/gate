@@ -13,7 +13,7 @@
  *
  */
 
-\i test_create_test_data.sp
-\i test_remove_all_data.sp
-\i test_remove_test_data.sp
+\i sp\test_create_test_data.sp
+\i sp\test_remove_all_data.sp
+\i sp\test_remove_test_data.sp
 \i initTestData.sql
