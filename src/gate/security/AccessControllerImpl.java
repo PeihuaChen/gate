@@ -32,6 +32,13 @@ public class AccessControllerImpl implements AccessController {
   public static final int LOGIN_OK = 1;
   public static final int LOGIN_FAILED = 2;
 
+  /* these should be the same as in the security PL/SQL package definition */
+  private static final int DB_DUPLICATE_GROUP_NAME = -20101;
+  private static final int DB_DUPLICATE_USER_NAME = -20102;
+  private static final int DB_INVALID_USER_NAME = -20103;
+  private static final int DB_INVALID_USER_PASS = -20104;
+
+
 
   private HashMap     sessions;
   private HashMap     sessionLastUsed;
@@ -364,28 +371,29 @@ public class AccessControllerImpl implements AccessController {
 
     //2. check user/pass in DB
     CallableStatement stmt = null;
-    long login_result;
 
     try {
-      stmt = this.jdbcConn.prepareCall("{ call security.login(?,?,?,?)} ");
+      stmt = this.jdbcConn.prepareCall("{ call security.login(?,?,?)} ");
       stmt.setString(1,usr_name);
       stmt.setString(2,passwd);
       stmt.setLong(3,prefGroupID.longValue());
-
-      stmt.registerOutParameter(4,java.sql.Types.INTEGER);
-      stmt.execute();
-      login_result = stmt.getLong(4);
     }
     catch(SQLException sqle) {
-      throw new PersistenceException("can't login user, DB error is: ["+ sqle.getMessage()+"]");
+      switch(sqle.getErrorCode())
+      {
+        case DB_INVALID_USER_NAME :
+          throw new SecurityException("Login failed: incorrect user");
+        case DB_INVALID_USER_PASS :
+          throw new SecurityException("Login failed: incorrect password");
+        default:
+          throw new PersistenceException("can't login user, DB error is: ["+
+                                          sqle.getMessage()+"]");
+      }
     }
     finally {
       DBHelper.cleanup(stmt);
     }
 
-    if (LOGIN_FAILED == login_result) {
-      throw new SecurityException("Login failed: incorrect user,password or group");
-    }
 
     //3. create a Session and set User/Group
     Long sessionID = createSessionID();
