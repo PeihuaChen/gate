@@ -133,6 +133,42 @@ public class NewResourceDialog extends JDialog {
   boolean userCanceled;
   Map listeners;
 
+  /** This method is intended to be used in conjunction with
+    * getSelectedParameters(). The method will not instanciate the resource
+    * like the
+    * other show() method but it is intended to colect the params required to
+    * instanciate a resource. Returns true if the user pressed Ok and false
+    * if the used pressed Cancel;
+    */
+  public synchronized boolean show(ResourceData rData, String aTitle) {
+    this.resourceData = rData;
+    if (aTitle != null) setTitle(aTitle);
+    setLocationRelativeTo(getParent());
+    nameField.setText("");
+    parametersEditor.init(null,
+                          rData.getParameterList().getInitimeParameters());
+
+    validate();
+    pack();
+    requestFocus();
+    nameField.requestFocus();
+    userCanceled = true;
+    setModal(true);
+    super.show();
+    if(userCanceled) return false;
+    else return true;
+  }//show();
+
+  /** Returns the selected params for the resource or null if none was selected
+    * or the user pressed cancel
+    */
+  public FeatureMap getSelectedParameters(){
+    if (parametersEditor != null)
+      return parametersEditor.getParameterValues();
+    else
+      return null;
+  }// getSelectedParameters()
+
   public synchronized void show(ResourceData rData) {
     this.resourceData = rData;
     setLocationRelativeTo(getParent());
