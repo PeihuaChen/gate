@@ -168,10 +168,6 @@ public class ApplicationViewer extends AbstractVisualResource {
 
     public Object getCellEditorValue(){
       ProcessingResource res = (ProcessingResource)prsByName.get(combo.getSelectedItem());
-/*
-      controller.add(res);
-      tableModel.fireTableDataChanged();
-*/
       return res;
     }
 
