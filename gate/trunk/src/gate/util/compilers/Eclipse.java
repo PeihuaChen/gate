@@ -212,9 +212,12 @@ public class Eclipse extends gate.util.Javac {
         if (sources.containsKey(result)) {
           return false;
         }
-        String resourceName = result.replace('.', '/') + ".class";
-        InputStream is = classLoader.getResourceAsStream(resourceName);
-        return is == null;
+//        String resourceName = result.replace('.', '/') + ".class";
+        Class theClass = null;
+        try{
+          theClass = classLoader.loadClass(result);
+        }catch(Throwable e){};
+        return theClass == null;
       }
 
       /**
