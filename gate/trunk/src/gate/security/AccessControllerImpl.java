@@ -35,17 +35,6 @@ public class AccessControllerImpl
   public static final int LOGIN_OK = 1;
   public static final int LOGIN_FAILED = 2;
 
-  /* these should be the same as in the security PL/SQL package definition */
-
-  // user defined error numbers in Oracle are in -21000 ... -21999
-  private static final int DB_ERROR_START = -20100;
-  private static final int DB_DUPLICATE_GROUP_NAME = DB_ERROR_START -1;
-  private static final int DB_DUPLICATE_USER_NAME = DB_ERROR_START -2;
-  private static final int DB_INVALID_USER_NAME = DB_ERROR_START -3;
-  private static final int DB_INVALID_USER_PASS = DB_ERROR_START -4;
-  private static final int DB_INVALID_USER_GROUP = DB_ERROR_START -5;
-
-
   private HashMap     sessions;
   private HashMap     sessionLastUsed;
   private HashMap     sessionTimeouts;
@@ -207,8 +196,19 @@ public class AccessControllerImpl
       new_id = new Long(stmt.getLong(2));
     }
     catch(SQLException sqle) {
-      throw new PersistenceException(
+
+      //check for more specifi exceptions
+      switch(sqle.getErrorCode()) {
+
+        case DBHelper.X_ORACLE_DUPLICATE_GROUP_NAME:
+          throw new PersistenceException(
+                "can't create a group in DB, name is not unique: ["
+                  + sqle.getMessage()+"]");
+        default:
+          throw new PersistenceException(
                 "can't create a group in DB: ["+ sqle.getMessage()+"]");
+      }
+
     }
     finally {
       DBHelper.cleanup(stmt);
@@ -266,7 +266,17 @@ public class AccessControllerImpl
       stmt.execute();
     }
     catch(SQLException sqle) {
-      throw new PersistenceException("can't delete a group from DB: ["+ sqle.getMessage()+"]");
+      //check for more specific exceptions
+      switch(sqle.getErrorCode()) {
+
+        case DBHelper.X_ORACLE_GROUP_OWNS_RESOURCES:
+          throw new PersistenceException(
+                "can't delete a group from DB, the group owns LR(s): ["
+                  + sqle.getMessage()+"]");
+        default:
+          throw new PersistenceException(
+                "can't delete a group from DB: ["+ sqle.getMessage()+"]");
+      }
     }
     finally {
       DBHelper.cleanup(stmt);
@@ -302,7 +312,17 @@ public class AccessControllerImpl
       new_id = new Long(stmt.getLong(3));
     }
     catch(SQLException sqle) {
-      throw new PersistenceException("can't create a user in DB: ["+ sqle.getMessage()+"]");
+      //check for more specific exceptions
+      switch(sqle.getErrorCode()) {
+
+        case DBHelper.X_ORACLE_DUPLICATE_USER_NAME:
+          throw new PersistenceException(
+                "can't create a user in DB, name is not unique: ["
+                  + sqle.getMessage()+"]");
+        default:
+          throw new PersistenceException(
+                "can't create a user in DB: ["+ sqle.getMessage()+"]");
+      }
     }
     finally {
       DBHelper.cleanup(stmt);
@@ -348,7 +368,16 @@ public class AccessControllerImpl
       stmt.execute();
     }
     catch(SQLException sqle) {
-      throw new PersistenceException("can't delete user from DB: ["+ sqle.getMessage()+"]");
+      switch(sqle.getErrorCode()) {
+
+        case DBHelper.X_ORACLE_USER_OWNS_RESOURCES:
+          throw new PersistenceException(
+                "can't delete user from DB, the user owns LR(s): ["
+                  + sqle.getMessage()+"]");
+        default:
+          throw new PersistenceException(
+                "can't delete user from DB: ["+ sqle.getMessage()+"]");
+      }
     }
     finally {
       DBHelper.cleanup(stmt);
@@ -409,11 +438,11 @@ public class AccessControllerImpl
     catch(SQLException sqle) {
       switch(sqle.getErrorCode())
       {
-        case DB_INVALID_USER_NAME :
+        case DBHelper.X_ORACLE_INVALID_USER_NAME :
           throw new SecurityException("Login failed: incorrect user");
-        case DB_INVALID_USER_PASS :
+        case DBHelper.X_ORACLE_INVALID_USER_PASS :
           throw new SecurityException("Login failed: incorrect password");
-        case DB_INVALID_USER_GROUP :
+        case DBHelper.X_ORACLE_INVALID_USER_GROUP :
           throw new SecurityException("Login failed: incorrect group");
         default:
           throw new PersistenceException("can't login user, DB error is: ["+
