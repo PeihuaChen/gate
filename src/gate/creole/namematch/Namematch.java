@@ -335,11 +335,14 @@ public class Namematch extends AbstractProcessingResource
                     Long end = annot1.getEndNode().getOffset();
                     // remove the "unknown" annotation
                     nameAnnotsUnknown.remove(annot1);
-                    FeatureMap fm = annot2.getFeatures();
+                    FeatureMap fm2 = annot2.getFeatures();
+                    FeatureMap fm1 = Factory.newFeatureMap();
+                    fm1.putAll(fm2);
+                    fm1.put("NMrule","Unknown");
                     try {
                       // add the annotation with the new type
                       nameAnnotsUnknown.add(
-                        id,start,end,annotationType,fm);
+                        id,start,end,annotationType,fm1);
                     } catch (InvalidOffsetException ioe){ioe.printStackTrace();}
                   } else if ((nameAnnotsUnknown.contains(annot2))
                       && (!nameAnnotsUnknown.contains(annot1))){
@@ -348,11 +351,14 @@ public class Namematch extends AbstractProcessingResource
                     Long end = annot2.getEndNode().getOffset();
                     // remove the "unknown" annotation
                     nameAnnotsUnknown.remove(annot2);
-                    FeatureMap fm = annot1.getFeatures();
+                    FeatureMap fm1 = annot1.getFeatures();
+                    FeatureMap fm2 = Factory.newFeatureMap();
+                    fm2.putAll(fm1);
+                    fm2.put("NMrule","Unknown");
                     try {
                       // add the annotation with the new type
                       nameAnnotsUnknown.add(
-                        id,start,end,annotationType,fm);
+                        id,start,end,annotationType,fm2);
                     } catch (InvalidOffsetException ioe){ioe.printStackTrace();}
                   } // else if
                 }//if
