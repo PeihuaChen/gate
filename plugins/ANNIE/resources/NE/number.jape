@@ -37,13 +37,17 @@ Macro: NUMBER_WORDS
 // twenty five
 
 (
- (({Lookup.majorType == number} SPACE)*
+ (({Lookup.majorType == number} 
+   (SPACE|{Token.string == "-"})
+  )*
    {Lookup.majorType == number}
    (SPACE)
    {Token.string == "and"}
    (SPACE)
  )*
- ({Lookup.majorType == number} SPACE)*
+ ({Lookup.majorType == number} 
+  (SPACE|{Token.string == "-"})
+ )*
    {Lookup.majorType == number}
 )
 
@@ -123,12 +127,12 @@ Rule: PercentBasic
   {Token.string == "minus"} 
   (SPACE)? 
  )?
- ((AMOUNT_NUMBER|NUMBER_WORDS)
+  (({Token.kind == number}|NUMBER_WORDS)
   SPACE
   {Token.string == "point"}
   SPACE
  )? 
- (AMOUNT_NUMBER|NUMBER_WORDS)
+ ({Token.kind == number}|NUMBER_WORDS)
  (SPACE)?
  (PERCENT)
 )
@@ -140,17 +144,18 @@ Rule: PercentSpan
 // two to four percent
 
 (
- (AMOUNT_NUMBER|NUMBER_WORDS)
+ ({Token.kind == number}|NUMBER_WORDS)
  (SPACE)
  ({Token.string == "-"} |
   {Token.string == "to"})
  (SPACE)
- (AMOUNT_NUMBER|NUMBER_WORDS)
+ ({Token.kind == number}|NUMBER_WORDS)
  (SPACE)? 
  (PERCENT)
 )
 :number -->
   :number.Percent = {rule = "PercentSpan"}
+
 
 
 

@@ -13,7 +13,7 @@
 *  $Id$
 */
 
-Phase:	Identex
+Phase:	Identifier
 Input: Token SpaceToken Lookup
 Options: control = appelt
 

@@ -14,7 +14,7 @@
 */
 
 Phase:	First
-Input: Token SpaceToken Lookup
+Input: Token SpaceToken
 Options: control = appelt
 
 // this has to be run first of all 
@@ -50,7 +50,8 @@ Rule: Silly
 )
 :silly
 -->
- :silly.Silly = {rule = "Silly"}
+ {}
+
 
 
 
