@@ -1549,7 +1549,7 @@ public class OracleDataStore extends JDBCDataStore {
     try {
       String sql = " select par_value_string " +
                    " from  "+Gate.DB_OWNER+".t_parameter " +
-                   " where  par_value_key = ? ";
+                   " where  par_key = ? ";
 
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setString(1,DBHelper.DB_PARAMETER_GUID);
