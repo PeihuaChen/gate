@@ -51,15 +51,17 @@ public class TestGate
     */
   public static Test suite() {
     TestSuite suite = new TestSuite();
-    suite.addTest(TestFSM.suite());
-    suite.addTest(TestJacl.suite());
+    suite.addTest(TestJdk.suite());          
     suite.addTest(TestJape.suite());
+    suite.addTest(TestFSM.suite());
+    suite.addTest(TestTemplate.suite());
+    suite.addTest(TestJacl.suite());
     suite.addTest(TestDocument.suite());
     suite.addTest(TestAnnotation.suite());
     suite.addTest(TestRBTreeMap.suite());
     suite.addTest(TestCorpus.suite());
     suite.addTest(CookBook.suite());
-    suite.addTest(TestDB.suite());        
+    suite.addTest(TestDB.suite());          
     return suite;
   } // suite
 
