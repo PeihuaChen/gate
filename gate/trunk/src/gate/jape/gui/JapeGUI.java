@@ -92,7 +92,8 @@ public class JapeGUI extends JFrame {
 //    corpusListModel.addElement("      ");
     corpusList.setModel(corpusListModel);
     typesPanel.setLayout(flowLayout1);
-    textViewScroll.setPreferredSize(new Dimension(32767, 32767));
+//    textViewScroll.setPreferredSize(new Dimension(32767, 32767));
+    textViewScroll.setPreferredSize(null);
     typesPanel.setPreferredSize(null);
     this.getContentPane().add(southBox, BorderLayout.SOUTH);
     southBox.add(statusBar, null);
