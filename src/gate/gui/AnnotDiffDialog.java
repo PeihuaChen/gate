@@ -195,6 +195,13 @@ class AnnotDiffDialog extends JFrame {
     weightLabel.setOpaque(true);
     weightLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+    // Set initial dimmension for weightTextField
+    Dimension d = new Dimension(weightLabel.getPreferredSize().width,
+                                    weightTextField.getPreferredSize().height);
+    weightTextField.setMinimumSize(d);
+    weightTextField.setMaximumSize(d);
+    weightTextField.setPreferredSize(d);
+
     // evaluate button
     evalButton = new JButton("Evaluate");
     evalButton.setFont(evalButton.getFont().deriveFont(Font.BOLD));
@@ -243,8 +250,8 @@ class AnnotDiffDialog extends JFrame {
     northBox.add(evalButton);
 
     initAnnotTypes();
-    this.getContentPane().add(northBox,BorderLayout.NORTH);
-    this.getContentPane().add(annotDiff,BorderLayout.CENTER);
+    this.getContentPane().add(new JScrollPane(northBox),BorderLayout.NORTH);
+    this.getContentPane().add(new JScrollPane(annotDiff),BorderLayout.CENTER);
     this.pack();
   }//initGuiComponents
 
