@@ -68,6 +68,9 @@ create or replace package error is
 
   x_invalid_lr_type EXCEPTION;
   PRAGMA EXCEPTION_INIT(x_invalid_lr_type, -20113);
+
+  x_invalid_annotation_type EXCEPTION;
+  PRAGMA EXCEPTION_INIT(x_invalid_annotation_type, -20114);
                            
 end error;
 /
