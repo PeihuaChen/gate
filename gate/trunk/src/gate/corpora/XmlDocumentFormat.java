@@ -49,6 +49,17 @@ public class XmlDocumentFormat extends TextualDocumentFormat
   /** Default construction */
   public XmlDocumentFormat() { super(); }
 
+  /** We could collect repositioning information during XML parsing */
+  public Boolean supportsRepositioning() {
+    return new Boolean(true);
+  } // supportsRepositioning
+
+  /** Old style of unpackMarkup (without collecting of RepositioningInfo) */
+  public void unpackMarkup(Document doc) throws DocumentFormatException {
+    unpackMarkup(doc, (RepositioningInfo) null);
+  } // unpackMarkup
+
+
   /** Unpack the markup in the document. This converts markup from the
     * native format (e.g. XML) into annotations in GATE format.
     * Uses the markupElementsMap to determine which elements to convert, and
@@ -64,7 +75,8 @@ public class XmlDocumentFormat extends TextualDocumentFormat
     * doc will be parsed. Using a URL is recomended because the parser will
     * report errors corectlly if the XML document is not well formed.
     */
-  public void unpackMarkup(Document doc) throws DocumentFormatException{
+  public void unpackMarkup(Document doc,
+                  RepositioningInfo repInfo) throws DocumentFormatException {
     if( (doc == null) ||
         (doc.getSourceUrl() == null && doc.getContent() == null)){
 
@@ -99,7 +111,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat
     GateFormatXmlDocumentHandler gateXmlHandler = null;
     XmlDocumentHandler xmlDocHandler = null;
     if (docHasContentButNoValidURL)
-      parseDocumentWithoutURL(doc);
+      parseDocumentWithoutURL(doc, repInfo);
     else try {
       // use Excerces XML parser with JAXP
       // System.setProperty("javax.xml.parsers.SAXParserFactory",
@@ -128,8 +140,28 @@ public class XmlDocumentFormat extends TextualDocumentFormat
                                                  this.element2StringMap);
         // Register a status listener with it
         xmlDocHandler.addStatusListener(statusListener);
+        // set repositioning object
+        xmlDocHandler.setRepositioningInfo(repInfo);
         // Parse the document handler
+/* Angel
         xmlParser.parse(doc.getSourceUrl().toString(), xmlDocHandler );
+Angel */
+      // try to choose concret parser (Xerces)
+// Angel - start
+      org.apache.xerces.parsers.SAXParser newxmlParser =
+          new org.apache.xerces.parsers.SAXParser();
+      // Set up the factory to create the appropriate type of parser
+      // non validating one
+      // http://xml.org/sax/features/validation set to false
+      newxmlParser.setFeature("http://xml.org/sax/features/validation", false);
+      // namesapace aware one
+      // http://xml.org/sax/features/namespaces set to true
+      newxmlParser.setFeature("http://xml.org/sax/features/namespaces", true);
+
+      newxmlParser.setContentHandler(xmlDocHandler);
+      newxmlParser.setReaderFactory(new StreamingCharFactory());
+      newxmlParser.parse(doc.getSourceUrl().toString());
+// Angel - end
         ((DocumentImpl) doc).setNextAnnotationId(
                                           xmlDocHandler.getCustomObjectsId());
         xmlDocHandler.removeStatusListener(statusListener);
@@ -153,7 +185,8 @@ public class XmlDocumentFormat extends TextualDocumentFormat
   /** Called from unpackMarkup() if the document have been created from a
    *  string
    */
-  private void parseDocumentWithoutURL(gate.Document aDocument)
+  private void parseDocumentWithoutURL(gate.Document aDocument,
+                                        RepositioningInfo repInfo)
                                               throws DocumentFormatException {
 
     XmlDocumentHandler xmlDocHandler = null;
@@ -183,14 +216,37 @@ public class XmlDocumentFormat extends TextualDocumentFormat
       saxParserFactory.setNamespaceAware(true);
       // create it
       SAXParser xmlParser = saxParserFactory.newSAXParser();
+
       // create a new Xml document handler
       xmlDocHandler =  new XmlDocumentHandler(aDocument,
                                               this.markupElementsMap,
                                               this.element2StringMap);
       // Regsiter the statusListener with xmlDocHandler
       xmlDocHandler.addStatusListener(statusList);
+      // set repositioning object
+      xmlDocHandler.setRepositioningInfo(repInfo);
       // Parse the document handler
-      xmlParser.parse(is, xmlDocHandler);
+/* Angel
+//      xmlParser.parse(is, xmlDocHandler);
+Angel */
+
+// Angel - start
+      // try to choose concret parser
+      org.apache.xerces.parsers.SAXParser newxmlParser =
+          new org.apache.xerces.parsers.SAXParser();
+      // Set up the factory to create the appropriate type of parser
+      // non validating one
+      // http://xml.org/sax/features/validation set to false
+      newxmlParser.setFeature("http://xml.org/sax/features/validation", false);
+      // namesapace aware one
+      // http://xml.org/sax/features/namespaces set to true
+      newxmlParser.setFeature("http://xml.org/sax/features/namespaces", true);
+
+      newxmlParser.setContentHandler(xmlDocHandler);
+      newxmlParser.setReaderFactory(new StreamingCharFactory());
+      newxmlParser.parse(is);
+// Angel - end
+
       ((DocumentImpl) aDocument).setNextAnnotationId(
                                           xmlDocHandler.getCustomObjectsId());
     } catch (ParserConfigurationException e){
