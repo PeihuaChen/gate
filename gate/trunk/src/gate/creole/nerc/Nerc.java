@@ -126,6 +126,10 @@ public class Nerc extends SerialController {
         params.put("document", document);
         params.put("annotationSetName", "nercAS");
         Factory.setResourceParameters(tokeniser, params);
+
+        params = Factory.newFeatureMap();
+        params.put("document", document);
+        params.put("annotationSetName", "nercAS");
         Factory.setResourceParameters(gazetteer, params);
 
         params = Factory.newFeatureMap();
@@ -142,9 +146,13 @@ public class Nerc extends SerialController {
       gazetteer.check();
       transducer.run();
       transducer.check();
-      EntitySet entitySet = new EntitySet(document.getSourceUrl().getFile(),
-                                          document,
-                                          document.getAnnotations("nercAS"));
+      EntitySet entitySet =
+        new EntitySet(document.getSourceUrl().getFile(),
+                      document,
+                      document.getAnnotations("entities").
+                      get(new HashSet(Arrays.asList(
+                        new String[]{"Address", "Date", "Identifier",
+                                     "Location", "Organization", "Person"}))));
       document.getFeatures().put("entitySet", entitySet);
     }catch(ExecutionException ee){
       executionException = ee;
@@ -174,12 +182,6 @@ public class Nerc extends SerialController {
   }
   public String getEncoding() {
     return encoding;
-  }
-  public void setAnnotationSetName(String newAnnotationSetName) {
-    annotationSetName = newAnnotationSetName;
-  }
-  public String getAnnotationSetName() {
-    return annotationSetName;
   }
   public void setDocument(gate.Document newDocument) {
     document = newDocument;
@@ -220,7 +222,6 @@ public class Nerc extends SerialController {
   private java.net.URL gazetteerListsURL;
   private java.net.URL japeGrammarURL;
   private String encoding;
-  private String annotationSetName;
   private gate.Document document;
   private transient Vector progressListeners;
   private transient Vector statusListeners;
