@@ -61,7 +61,6 @@ public class JapeGUI extends JFrame {
   private void jbInit() throws Exception {
     southBox = Box.createHorizontalBox();
     westBox = Box.createVerticalBox();
-    textViewPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
     northBox = Box.createHorizontalBox();
     this.getContentPane().setLayout(borderLayout1);
     statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
@@ -86,6 +85,7 @@ public class JapeGUI extends JFrame {
       }
     });
     this.setTitle("Jape 2.0");
+    this.addWindowListener(new WindowListener(this));
     runBtn.setText("Run!");
     runBtn.addActionListener(new java.awt.event.ActionListener() {
 
@@ -113,8 +113,10 @@ public class JapeGUI extends JFrame {
     corpusList.setModel(corpusListModel);
     typesPanel.setLayout(flowLayout1);
 //    textViewScroll.setPreferredSize(new Dimension(32767, 32767));
-    textViewScroll.setPreferredSize(null);
+//    textViewScroll.setPreferredSize(null);
 //    typesPanel.setPreferredSize(null);
+    logTextArea.setDisabledTextColor(Color.lightGray);
+    logTextArea.setEditable(false);
     this.getContentPane().add(southBox, BorderLayout.SOUTH);
     southBox.add(statusBar, null);
     southBox.add(progressBar, null);
@@ -129,11 +131,14 @@ public class JapeGUI extends JFrame {
     northBox.add(japeLoadBtn, null);
     northBox.add(runBtn, null);
     this.getContentPane().add(centerTabPane, BorderLayout.CENTER);
+    textViewPane.setDividerLocation(400);
     centerTabPane.add(textViewPane, "Text View");
-    textViewPane.add(textViewScroll, JSplitPane.TOP);
     textViewPane.add(typesPanel, JSplitPane.BOTTOM);
-    centerTabPane.add(tableViewScroll, "Table View");
+    textViewPane.add(textViewScroll, JSplitPane.TOP);
     textViewScroll.getViewport().add(text, null);
+    centerTabPane.add(tableViewScroll, "Table View");
+    centerTabPane.add(logScrollPane, "Log");
+    logScrollPane.getViewport().add(logTextArea, null);
     setSize(800,600);
     validate();
 //    textViewScroll.setPreferredSize(new Dimension(textViewPane.getSize().width,
@@ -142,7 +147,7 @@ public class JapeGUI extends JFrame {
     japeFilter.addExtension("jape");
     japeFilter.setDescription(".jape Files");
 
-    filer = new JFileChooser();
+    filer = new JFileChooser("d:/tmp");
     filer.addChoosableFileFilter(japeFilter);
 
   }
@@ -219,81 +224,103 @@ public class JapeGUI extends JFrame {
   }
 
   void runBtn_actionPerformed(ActionEvent e) {
-    startCorpusLoad = 0;
-    startCorpusTokenization = 0;
-    startJapeFileOpen = 0;
-    startCorpusTransduce = 0;
-    endProcess = 0;
-    Calendar calendar = new GregorianCalendar();
-    if(corpus.isEmpty() || grammarFile == null){
-      statusBar.setText("Missing corpus or grammar!");
-      return;
-    }
-    startCorpusLoad = calendar.getTime().getTime();
-    if(corpusIsDirty){
-      statusBar.setText("Reloading the corpus...");
-      corpus.clear();
-      int progress = 0;
-      int fileCnt = corpusFiles.size();
-      Iterator filesIter = corpusFiles.iterator();
-      try{
-        while(filesIter.hasNext()){
-              progressBar.setValue(progress++/fileCnt);
-              corpus.add(Transients.newDocument(
-                                    ((File)filesIter.next()).toURL()));
-              progressBar.setValue(progress/fileCnt);
-            }
-      }catch(java.net.MalformedURLException mue){
+    //We need to run all the actions in a different thread so the interface
+    //doesn't freeze
+    Thread thread = new Thread(new Runnable(){
+      public void run(){
+        startCorpusLoad = 0;
+        startCorpusTokenization = 0;
+        startJapeFileOpen = 0;
+        startCorpusTransduce = 0;
+        endProcess = 0;
+        if(corpus.isEmpty() || grammarFile == null){
+          statusBar.setText("Missing corpus or grammar!");
+          return;
+        }
+        logTextArea.append("Started at: " + (new Date()) + "\n");
+        startCorpusLoad = (new Date()).getTime();
+
+        if(corpusIsDirty){
+          statusBar.setText("Reloading the corpus...");
+          corpus.clear();
+          int progress = 0;
+          int fileCnt = corpusFiles.size();
+          Iterator filesIter = corpusFiles.iterator();
+          try{
+            while(filesIter.hasNext()){
+                  progressBar.setValue(progress++/fileCnt);
+                  corpus.add(Transients.newDocument(
+                                        ((File)filesIter.next()).toURL()));
+                  progressBar.setValue(progress/fileCnt);
+                }
+          }catch(java.net.MalformedURLException mue){
+            progressBar.setValue(0);
+            statusBar.setText(mue.toString());
+            mue.printStackTrace(System.err);
+          }catch(IOException ioe){
+            progressBar.setValue(0);
+            statusBar.setText(ioe.toString());
+            ioe.printStackTrace(System.err);
+          }
+          progressBar.setValue(0);
+        }
+        //tokenize all documents
+        startCorpusTokenization = (new Date()).getTime();
+        logTextArea.append("corpus loading time: " +
+                           (startCorpusTokenization - startCorpusLoad) +
+                           "ms\n");
+
+        statusBar.setText("Tokenizing all the documents...");
+        int progress = 0;
+        int docCnt = corpus.size();
+        Iterator docIter = corpus.iterator();
+        while(docIter.hasNext()){
+          progressBar.setValue(progress++/docCnt);
+          currentDoc = (Document)docIter.next();
+          tokenize(currentDoc);
+          progressBar.setValue(progress/docCnt);
+        }
+        //do the jape stuff
         progressBar.setValue(0);
-        statusBar.setText(mue.toString());
-        mue.printStackTrace(System.err);
-      }catch(IOException ioe){
-        progressBar.setValue(0);
-        statusBar.setText(ioe.toString());
-        ioe.printStackTrace(System.err);
+        startJapeFileOpen = (new Date()).getTime();
+        logTextArea.append("corpus tokenization time: " +
+                           (startJapeFileOpen - startCorpusTokenization) +
+                           "ms\n");
+        try{
+          statusBar.setText("Opening Jape grammar...");
+          InputStream japeFileStream = new FileInputStream(grammarFile);
+          if(japeFileStream == null)
+            throw new JapeException("couldn't open " + grammarFile.getName());
+          Batch batch = new Batch(grammarFile.getAbsolutePath());
+          statusBar.setText("Transducing the corpus...");
+          startCorpusTransduce = (new Date()).getTime();
+          logTextArea.append("JAPE structures build time: " +
+                             (startCorpusTransduce - startJapeFileOpen) +
+                             "ms\n");
+          batch.transduce(corpus);
+          endProcess = (new Date()).getTime();
+          logTextArea.append("transducing time: " +
+                             (endProcess - startCorpusTransduce) + "ms\n");
+        }catch(FileNotFoundException fnfe){
+          fnfe.printStackTrace(System.err);
+        }catch(JapeException je){
+          je.printStackTrace(System.err);
+        }
+        statusBar.setText("");
+        //select the first document
+        docIter = corpus.iterator();
+        if(docIter.hasNext()){
+          currentDoc = (Document)docIter.next();
+          corpusList.setSelectedIndex(0);
+        }
+        logTextArea.append("Processing ended at: " + (new Date()) + "\n" +
+                           "===============================================\n");
+        //repaint what needs to be repainted
+        updateAll();
+        corpusIsDirty = true;
       }
-      progressBar.setValue(0);
-    }
-    //tokenize all documents
-    startCorpusTokenization = calendar.getTime().getTime();
-    statusBar.setText("Tokenizing all the documents...");
-    int progress = 0;
-    int docCnt = corpus.size();
-    Iterator docIter = corpus.iterator();
-    while(docIter.hasNext()){
-      progressBar.setValue(progress++/docCnt);
-      currentDoc = (Document)docIter.next();
-      tokenize(currentDoc);
-      progressBar.setValue(progress/docCnt);
-    }
-    //do the jape stuff
-    progressBar.setValue(0);
-    startJapeFileOpen = calendar.getTime().getTime();
-    try{
-      statusBar.setText("Opening Jape grammar...");
-      InputStream japeFileStream = new FileInputStream(grammarFile);
-      if(japeFileStream == null)
-        throw new JapeException("couldn't open " + grammarFile.getName());
-      Batch batch = new Batch(grammarFile.getAbsolutePath());
-      statusBar.setText("Transducing the corpus...");
-      startCorpusTransduce = calendar.getTime().getTime();
-      batch.transduce(corpus);
-      endProcess = calendar.getTime().getTime();
-    }catch(FileNotFoundException fnfe){
-      fnfe.printStackTrace(System.err);
-    }catch(JapeException je){
-      je.printStackTrace(System.err);
-    }
-//    statusBar.setText("");
-    //select the first document
-    docIter = corpus.iterator();
-    if(docIter.hasNext()){
-      currentDoc = (Document)docIter.next();
-      corpusList.setSelectedIndex(0);
-    }
-    //repaint what needs to be repainted
-    updateAll();
-    corpusIsDirty = true;
+    });
+    thread.start();
   }
 
   public void tokenize(Document doc){
@@ -484,7 +511,7 @@ public class JapeGUI extends JFrame {
   JMenuBar jMenuBar1 = new JMenuBar();
 
   Box westBox;
-  JSplitPane textViewPane;
+  JSplitPane textViewPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
   Box northBox;
   Box southBox;
 
@@ -526,4 +553,26 @@ public class JapeGUI extends JFrame {
   long startCorpusLoad = 0, startCorpusTokenization = 0,
        startJapeFileOpen = 0, startCorpusTransduce = 0,
        endProcess = 0;
+  FlowLayout flowLayout2 = new FlowLayout();
+  JTextArea logTextArea = new JTextArea();
+  JScrollPane logScrollPane = new JScrollPane();
+
+  void this_windowClosing(WindowEvent e) {
+    System.exit(0);
+  }
+
+
+
+}
+
+class WindowListener extends java.awt.event.WindowAdapter {
+  JapeGUI adaptee;
+
+  WindowListener(JapeGUI adaptee) {
+    this.adaptee = adaptee;
+  }
+
+  public void windowClosing(WindowEvent e) {
+    adaptee.this_windowClosing(e);
+  }
 }
