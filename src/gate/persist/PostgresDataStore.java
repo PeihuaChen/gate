@@ -777,12 +777,12 @@ public class PostgresDataStore extends JDBCDataStore {
    *  updates the value of a feature where the value is string (>4000 bytes, stored as CLOB)
    *  or Object (stored as BLOB)
    */
-  private void _updateFeatureLOB(Long featID,Object value, int valueType)
+/*  private void _updateFeatureLOB(Long featID,Object value, int valueType)
     throws PersistenceException {
 
     throw new MethodNotImplementedException();
   }
-
+*/
   /** helper for sync() - saves a Corpus in the database */
 /*  protected void syncCorpus(Corpus corp)
     throws PersistenceException,SecurityException {
