@@ -32,9 +32,9 @@ CYGPATHP=	@CYGPATHP@
 # package that contains no classes causes javadoc to bomb
 PKGS=	\
 	gate gate.annotation gate.config gate.corpora gate.creole \
-	gate.creole.coref gate.creole.dumpingPR \
 	gate.creole.annotdelete gate.creole.annotransfer \
-	gate.creole.gazetteer gate.creole.orthomatcher gate.creole.ontology\
+	gate.creole.coref gate.creole.dumpingPR gate.creole.gazetteer \
+	gate.creole.nerc gate.creole.orthomatcher gate.creole.ontology \
 	gate.creole.splitter gate.creole.tokeniser \
 	gate.email gate.event gate.fsm gate.gui gate.html gate.jape \
 	gate.jape.parser gate.persist gate.security gate.print \
