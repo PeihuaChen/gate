@@ -295,7 +295,6 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
 
 
   /** Freeze the serialization UID. */
-  static final long serialVersionUID = 404036675903473841L;
   private transient Vector corpusListeners;
 
 

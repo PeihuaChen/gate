@@ -1,6 +1,4 @@
 /*
- *  BumpyStack.java
- *
  *  Copyright (c) 1998-2001, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
