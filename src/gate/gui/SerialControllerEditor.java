@@ -202,6 +202,7 @@ public class SerialControllerEditor extends AbstractVisualResource
 
   protected void initListeners() {
     Gate.getCreoleRegister().addCreoleListener(this);
+
     this.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         if(SwingUtilities.isRightMouseButton(e)){
@@ -504,7 +505,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       memberPRsTableModel.fireTableDataChanged();
       repaint(100);
     }else if(e.getResource() instanceof LanguageResource){
-      if(e.getResource() instanceof Corpus){
+      if(e.getResource() instanceof Corpus && analyserMode){
         corpusComboModel.fireDataChanged();
       }
     }
