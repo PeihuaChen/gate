@@ -853,6 +853,14 @@ public class TestPersist extends TestCase
       it.next();
       it.remove();
     }
+    if (it.hasNext()) {
+      //change second element
+      Annotation ann = (Annotation)it.next();
+      FeatureMap fm1 = new SimpleFeatureMapImpl();
+      fm.put("string key","string value");
+      ann.setFeatures(fm1);
+    }
+
     AnnotationSet defaultNew = dbDoc.getAnnotations();
     dbDoc.sync();
     doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
@@ -881,25 +889,27 @@ public class TestPersist extends TestCase
       Assert.assertEquals(asetNew,asetOld);
 //      Features fmNew = asetNew.getFea
     }
-
-
-    //11. ALL named annotation (ensure nothing is read from DB twice)
-    Map namedNew = dbDoc.getNamedAnnotationSets();
-
-    Assert.assertNotNull(namedNew);
-    Assert.assertTrue(namedNew.size() == namedOld.size());
-
-    Iterator itNames = namedNew.keySet().iterator();
-    while (itNames.hasNext()) {
-      String asetName = (String)itNames.next();
-      AnnotationSet asetNew = (AnnotationSet)namedNew.get(asetName);
-      AnnotationSet asetOld = (AnnotationSet)namedOld.get(asetName);
-      Assert.assertNotNull(asetNew);
-      Assert.assertNotNull(asetOld);
-      Assert.assertEquals(asetNew,asetOld);
-    }
-
 */
+
+    //11. add a new ann-set
+    String dummySetName = "--NO--SUCH--SET--";
+    AnnotationSet aset = dbDoc.getAnnotations(dummySetName);
+    aset.addAll(defaultNew);
+    dbDoc.sync();
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
+
+    Assert.assertTrue(dbDoc.getNamedAnnotationSets().size() == doc2.getNamedAnnotationSets().size());
+    Assert.assertTrue(doc2.getNamedAnnotationSets().containsKey(dummySetName));
+    Assert.assertTrue(doc2.getNamedAnnotationSets().equals(dbDoc.getNamedAnnotationSets()));
+
+    //12. remove aset
+    dbDoc.removeAnnotationSet(dummySetName);
+    dbDoc.sync();
+    Assert.assertTrue(false == ((EventAwareDocument)dbDoc).getLoadedAnnotationSets().contains(dummySetName));
+    Assert.assertTrue(false == dbDoc.getNamedAnnotationSets().containsKey(dummySetName));
+
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
+    Assert.assertTrue(false == doc2.getNamedAnnotationSets().containsKey(dummySetName));
 
     //close
     ac.close();
