@@ -236,9 +236,9 @@ create or replace package body persist is
      -- -1. if encoding is null, then set it to UTF8
      l_encoding := p_encoding;
      if (l_encoding is null) then
-        l_encoding := persist.ENCODING_UTF;
+        l_encoding := ENCODING_DEFAULT;
      end if;
-  
+
      --0. get encoding ID if any, otherwise create a new
      -- entry in T_DOC_ENCODING
      select count(enc_id)
@@ -247,28 +247,23 @@ create or replace package body persist is
      where  enc_name = l_encoding;         
      
      if (cnt = 0) then
-
-       --oops new encoding
-       --add it 
-       insert into t_doc_encoding(enc_id,
-                                  enc_name)
-       values (seq_doc_encoding.nextval,
-               l_encoding)
-       returning enc_id into l_encoding_id;
-
+        --oops new encoding
+        --add it 
+        insert into t_doc_encoding(enc_id,
+                                      enc_name)
+        values (seq_doc_encoding.nextval,
+                   l_encoding)
+        returning enc_id into l_encoding_id;
      else
-
-       --get encoding id
-       select enc_id
-       into   l_encoding_id
-       from   t_doc_encoding
-       where  enc_name = l_encoding;                
-
+        --get encoding id
+        select enc_id
+        into   l_encoding_id
+        from   t_doc_encoding
+        where  enc_name = l_encoding;                
+          
      end if;
-     
-     
-     
-  
+
+       
      --1. create a document_content entry
      insert into t_doc_content(dc_id,
                                dc_encoding_id,
@@ -890,7 +885,31 @@ create or replace package body persist is
 
   end;
 
+  /*******************************************************************************************/  
+  procedure create_feature_bulk(p_entity_ids           IN INTARRAY,
+                                p_entity_types         IN INTARRAY,
+                                p_keys                 IN CHARARRAY,  
+                                p_value_numbers        IN INTARRAY,                                
+                                p_value_varchars       IN CHARARRAY,
+                                p_value_types          IN INTARRAY,
+                                p_feat_ids             OUT INTARRAY,
+                                p_count                IN number)
+  is
+     counter number;
+  begin
+     
+     for counter in 1..p_count loop
+        create_feature(p_entity_ids(counter),
+                       p_entity_types(counter),
+                       p_keys(counter),  
+                       p_value_numbers(counter),                                
+                       p_value_varchars(counter),
+                       p_value_types(counter),
+                       p_feat_ids(counter));
+     end loop;
 
+  end;                           
+                           
     
 /*begin
   -- Initialization
