@@ -177,22 +177,22 @@ public class NameBearerHandle implements Handle,
     action.putValue(action.NAME, "Save Protege");
     action.putValue(action.SHORT_DESCRIPTION, "Save protege project");
     // Add Save Protege action
-    popupItems.add(action);
+    popupItems.add(new XJMenuItem(action, this));
 
     action = new edu.stanford.smi.protege.action.SaveAsProject();
     action.putValue(action.NAME, "Save Protege As...");
     action.putValue(action.SHORT_DESCRIPTION, "Save protege project as");
     // Add Save as... Protege action
-    popupItems.add(action);
+    popupItems.add(new XJMenuItem(action, this));
 
     action = new edu.stanford.smi.protege.action.ChangeProjectStorageFormat();
     // Add Save in format... Protege action
-    popupItems.add(action);
+    popupItems.add(new XJMenuItem(action, this));
 
     popupItems.add(null);
     action = new edu.stanford.smi.protege.action.BuildProject();
     // Add Import... Protege action
-    popupItems.add(action);
+    popupItems.add(new XJMenuItem(action, this));
   } // fillProtegeActions(gate.gui.ProtegeWrapper protege)
 
   /** Fill HMM Save and Save As... actions */
