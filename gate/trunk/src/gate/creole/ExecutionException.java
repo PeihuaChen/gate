@@ -50,7 +50,7 @@ public class ExecutionException extends GateException {
    */
   public void printStackTrace(java.io.PrintStream s) {
     super.printStackTrace(s);
-    s.print("  Caused by:");
+    s.print("  Caused by:\n");
     if(exception != null) exception.printStackTrace(s);
   }
 
@@ -59,7 +59,7 @@ public class ExecutionException extends GateException {
    */
   public void printStackTrace(java.io.PrintWriter s) {
     super.printStackTrace(s);
-    s.print("  Caused by:");
+    s.print("  Caused by:\n");
     if(exception != null) exception.printStackTrace(s);
   }
 
