@@ -27,5 +27,19 @@ public class Tools {
 
     return new Long(new Date().getTime());
   }
+
+
+  /**Specifies whether Gate should or shouldn't know about Unicode*/
+  static public void setUnicodeEnabled(boolean value){
+    unicodeEnabled = value;
+  }
+
+  /**Checks wheter Gate is Unicode enabled*/
+  static public boolean isUnicodeEnabled(){
+    return unicodeEnabled;
+  }
+
+  /**Does Gate know about Unicode?*/
+  static private boolean unicodeEnabled = false;
 }
 

@@ -11,6 +11,7 @@ package gate.gui;
 //java imports
 import java.util.*;
 import java.beans.*;
+import java.net.URL;
 
 //AWT imports - layouts and events
 import java.awt.*;
@@ -86,9 +87,7 @@ The default way is to pass just one annotation of type textAnnotationType which
 corresponds to the entire sentence or utterance to be annotated with syntax tree
 information. Then the viewer automatically tokenises it and creates the leaves.
 This is well-tested and is the usual way.  <P>
-
 */
-
 
 public class SyntaxTreeViewer extends JPanel
     implements Scrollable, ActionListener, MouseListener{
@@ -145,16 +144,10 @@ public class SyntaxTreeViewer extends JPanel
 
   //CONSTRUCTORS
   public SyntaxTreeViewer(String annotType) {
-  	treeNodeAnnotationType = annotType;
-    try  {
-      jbInit();
-    }
-    catch(Exception ex) {
-      ex.printStackTrace();
-    }
+    this(annotType, gate.util.Tools.isUnicodeEnabled());
   }
 
-  public SyntaxTreeViewer(String annotType, boolean unicodeSupport) {
+  private SyntaxTreeViewer(String annotType, boolean unicodeSupport) {
   	treeNodeAnnotationType = annotType;
     unicodeSupportEnabled = unicodeSupport;
     if (unicodeSupportEnabled)
@@ -193,7 +186,6 @@ public class SyntaxTreeViewer extends JPanel
 
     //add popup to container
 		this.add(popup);
-
   }
 
   public static void main(String[] args) throws Exception{
@@ -247,7 +239,7 @@ public class SyntaxTreeViewer extends JPanel
     FeatureMap attrs = Transients.newFeatureMap();
     attrs.put("time", new Long(0));
     attrs.put("text", doc.getContent().toString());
-
+/*
     FeatureMap attrs1 = Transients.newFeatureMap();
     attrs1.put("cat", "N");
     attrs1.put("text", "This");
@@ -257,7 +249,7 @@ public class SyntaxTreeViewer extends JPanel
     attrs2.put("cat", "V");
     attrs2.put("text", "is");
     attrs2.put("consists", new Vector());
-
+ */
 
     doc.getAnnotations().add( new Long(0), new Long(doc.getContent().toString().length()),
                               "utterance", attrs);
@@ -279,14 +271,12 @@ public class SyntaxTreeViewer extends JPanel
     set.add("utterance");
     set.add("SyntaxTreeNode");
     AnnotationSet annots = doc.getAnnotations().get(set);
-
     syntaxTreeViewer1.setTreeAnnotations(annots);
 
   }
 
   protected void paintComponent(Graphics g) {
     super.paintComponent( g);
-
     drawLines(g);
   }
 
@@ -1198,6 +1188,9 @@ class FocusButton extends JButton {
 } //FocusButton
 
 // $Log$
+// Revision 1.6  2000/10/02 12:34:06  valyt
+// Added the UnicodeEnabled switch on gate.util.Tools
+//
 // Revision 1.5  2000/09/28 14:26:09  kalina
 // Added even more documentation (is this me?!) and allowed several tokens to be
 // passed instead of a whole utterance/sentence for annotation. Needs good testing this
