@@ -15,6 +15,7 @@
 
 package gate.corpora;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -30,7 +31,7 @@ public class RepositioningInfo extends ArrayList {
   /**
    * Just information keeper inner class. No significant functionality.
    */
-  public class PositionInfo {
+  public class PositionInfo implements Serializable {
 
     /** Data members for one peace of text information */
     private long m_origPos, m_origLength, m_currPos, m_currLength;
