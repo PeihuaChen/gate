@@ -223,15 +223,17 @@ public class CorpusSaver {
         //first process it with ANNIE if in process mode
         if (processMode)
           processDocument(doc);
+        
         //then store it in the DS and add to corpus
         if (saveMode) {
           LanguageResource lr = ds.adopt(doc, null);
           theCorpus.add(lr);
           theCorpus.unloadDocument( (Document) lr);
-          Factory.deleteResource(doc);
+
           if (lr != doc)
             Factory.deleteResource(lr);
         }
+        Factory.deleteResource(doc);
       } catch (Exception ex) {
         throw new GateRuntimeException(ex.getClass() + " " + ex.getMessage());
       }
