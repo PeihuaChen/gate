@@ -827,7 +827,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
     if (null == setName) {
       Assert.assertTrue(null == this.defaultAnnots);
-      this.defaultAnnots = new DatabaseAnnotationSetImpl(annotations);
+      this.defaultAnnots = new DatabaseAnnotationSetImpl(this,annotations);
     }
     else {
       Assert.assertTrue(false == this.namedAnnotSets.containsKey(setName));
