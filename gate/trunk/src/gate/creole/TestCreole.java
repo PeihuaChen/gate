@@ -130,7 +130,7 @@ public class TestCreole extends TestCase
     // get some res data from the register
     assert(
       "wrong number of resources in the register: " + reg.size(),
-      reg.size() == 7
+      reg.size() == 8
     );
     ResourceData pr1rd = (ResourceData) reg.get("testpkg.TestPR1");
     ResourceData pr2rd = (ResourceData) reg.get("testpkg.TestPR2");
@@ -198,7 +198,7 @@ public class TestCreole extends TestCase
     Set lrs = reg.getLrTypes();
 
     assert("wrong number vrs in reg: " + vrs.size(), vrs.size() == 0);
-    assert("wrong number prs in reg: " + prs.size(), prs.size() == 4);
+    assert("wrong number prs in reg: " + prs.size(), prs.size() == 5);
     assert("wrong number lrs in reg: " + lrs.size(), lrs.size() == 3);
   } // testTypeLists()
 
