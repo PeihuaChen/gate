@@ -24,4 +24,9 @@ public interface DocumentContent
     */
   public Long size();
 
+  /** Returns the Stiung representing the content in case of a textual document.
+    * NOTE: this is a temporary solution until we have a more generic one.
+    */
+  public String getString();
+
 } // interface DocumentContent

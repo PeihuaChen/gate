@@ -513,6 +513,14 @@ implements AnnotationSet
   /** Get the document this set is attached to. */
   public Document getDocument() { return doc; }
 
+  /** Get a set of java.lang.String objects representing all the annotation
+    * types present in this annotation set.
+    */
+  public Set getAllTypes(){
+    indexByType();
+    return annotsByType.keySet();
+  }
+
   public Object clone() throws CloneNotSupportedException{
     return super.clone();
   }

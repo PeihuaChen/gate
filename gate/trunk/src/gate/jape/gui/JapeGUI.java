@@ -11,9 +11,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.*;
+import java.text.*;
 
 import gate.*;
 import gate.gui.*;
+import gate.util.*;
 
 
 
@@ -35,22 +38,14 @@ public class JapeGUI extends JFrame {
     JapeGUI japeGUI = new JapeGUI();
     japeGUI.invokedStandalone = true;
   }
-  private boolean invokedStandalone = false;
-  JMenuBar jMenuBar1 = new JMenuBar();
-  JToolBar toolBar = new JToolBar();
-  BorderLayout borderLayout1 = new BorderLayout();
-  Box southBox;
-  JLabel statusBar = new JLabel();
-  JProgressBar progressBar = new JProgressBar();
-  JButton collectionAddBtn = new JButton();
-  JButton japeLoadBtn = new JButton();
-  JButton runBtn = new JButton();
-  JEditorPane text = new JEditorPane();
 
   private void jbInit() throws Exception {
     southBox = Box.createHorizontalBox();
     westBox = Box.createVerticalBox();
+    centerBox = Box.createVerticalBox();
+    northBox = Box.createHorizontalBox();
     this.getContentPane().setLayout(borderLayout1);
+    statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
     statusBar.setMaximumSize(new Dimension(400, 17));
     statusBar.setMinimumSize(new Dimension(200, 17));
     statusBar.setPreferredSize(new Dimension(200, 17));
@@ -96,14 +91,11 @@ public class JapeGUI extends JFrame {
     });
     corpusListModel.addElement("      ");
     corpusList.setModel(corpusListModel);
-    this.getContentPane().add(toolBar, BorderLayout.NORTH);
-    toolBar.add(collectionAddBtn, null);
-    toolBar.add(japeLoadBtn, null);
-    toolBar.add(runBtn, null);
+    typesPanel.setLayout(flowLayout1);
+    jScrollPane1.setPreferredSize(new Dimension(32767, 32767));
     this.getContentPane().add(southBox, BorderLayout.SOUTH);
     southBox.add(statusBar, null);
     southBox.add(progressBar, null);
-    this.getContentPane().add(text, BorderLayout.CENTER);
     this.getContentPane().add(westBox, BorderLayout.WEST);
     corpusList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 //    String[] data={"...", "...", "...", "..."};
@@ -112,6 +104,14 @@ public class JapeGUI extends JFrame {
     westBox.add(corpusList, null);
     westBox.add(jLabel2, null);
     westBox.add(grammarLbl, null);
+    this.getContentPane().add(centerBox, BorderLayout.CENTER);
+    this.getContentPane().add(northBox, BorderLayout.NORTH);
+    northBox.add(collectionAddBtn, null);
+    northBox.add(japeLoadBtn, null);
+    northBox.add(runBtn, null);
+    centerBox.add(jScrollPane1, null);
+    jScrollPane1.getViewport().add(text, null);
+    centerBox.add(typesPanel, null);
     setSize(800,600);
 
     japeFilter = new ExtensionFileFilter();
@@ -133,11 +133,25 @@ public class JapeGUI extends JFrame {
     int res = filer.showOpenDialog(this);
     if(res == JFileChooser.APPROVE_OPTION){
       selectedFiles = filer.getSelectedFiles();
+      if(selectedFiles != null){
+        if(corpus == null) corpus = Transients.newCorpus("Jape 2.0");
+        try{
+          for(int i=0; i< selectedFiles.length; i++){
+            corpus.add(Transients.newDocument(selectedFiles[i].toURL()));
+          }
+        }catch(java.net.MalformedURLException mue){
+          mue.printStackTrace(System.err);
+        }catch(IOException ioe){
+          ioe.printStackTrace(System.err);
+        }
+      }//if(selectedFiles != null){
+
       corpusListModel.clear();
-      for(int i=0; i< selectedFiles.length; i++){
-        corpusListModel.addElement(selectedFiles[i].getName());
+      Iterator docsIter = corpus.iterator();
+      while(docsIter.hasNext()){
+        currentDoc = (Document) docsIter.next();
+        corpusListModel.addElement(currentDoc.getSourceURL().getFile());
       }
-      corpusList.repaint();
     }
   }
 
@@ -155,37 +169,108 @@ public class JapeGUI extends JFrame {
   }
 
   void runBtn_actionPerformed(ActionEvent e) {
-    if(selectedFiles == null || grammarFile == null) return;
-    corpus = Transients.newCorpus("Jape 2.0");
-    try{
-      for(int i=0; i< selectedFiles.length; i++){
-        corpus.add(Transients.newDocument(selectedFiles[i].toURL()));
-      }
-    }catch(java.net.MalformedURLException mue){
-      mue.printStackTrace(System.err);
-    }catch(IOException ioe){
-      ioe.printStackTrace(System.err);
-    }
     //tokenize all documents
+    Iterator docIter = corpus.iterator();
+    while(docIter.hasNext()){
+      currentDoc = (Document)docIter.next();
+      tokenize(currentDoc);
+    }
     //do the jape stuff
+    updateAll();
+  }
+
+  public void tokenize(Document doc){
+    String content = doc.getContent().getString();
+    BreakIterator bi = BreakIterator.getWordInstance();
+    bi.setText(content);
+    int start = bi.first();
+    FeatureMap fm = Transients.newFeatureMap();
+    try{
+      for (int end = bi.next();
+           end != BreakIterator.DONE;
+           start = end, end = bi.next())
+      {
+        if(!Character.isWhitespace(content.charAt(start))){
+          doc.getAnnotations().add(new Long(start),
+                                   new Long(end),
+                                   "Token", fm);
+//System.out.println("Token: " + content.substring(start, end));
+        }
+      }//for
+    }catch(InvalidOffsetException ioe){
+    }
+  }
+
+  void updateAll(){
+    //display the current document
+    text.setText(currentDoc.getContent().getString());
+    //get all the annotation types and display the buttons
+    typesPanel.removeAll();
+    Iterator typesIter = currentDoc.getAnnotations().getAllTypes().iterator();
+    String currentType;
+    while(typesIter.hasNext()){
+      currentType = (String) typesIter.next();
+      JButton typeButton = new JButton();
+      JLabel typeLabel = new JLabel(currentType);
+      typeLabel.setBackground(Color.black);
+      typeLabel.setForeground(Color.white);
+      typeButton.add(typeLabel);
+      typeButton.setBackground(new Color((int)Math.random()));
+      typesPanel.add(typeButton);
+    }
+    validate();
   }
 
   void corpusList_mouseClicked(MouseEvent e) {
     //display the selected document
+    int docIdx = corpusList.locationToIndex(e.getPoint());
+    corpusList.setSelectedIndex(docIdx);
+    docIdx++;
+    Iterator docIter = corpus.iterator();
+    while(docIter.hasNext() && docIdx >0 ){
+      currentDoc = (Document)docIter.next();
+      docIdx--;
+    }
+    if(docIdx != 0){
+      throw(new RuntimeException(
+                "The user has selected an unexistant document! :)"));
+    }
+    updateAll();
   }
-  
-  Corpus corpus = null;
-  JFileChooser filer;
-  ExtensionFileFilter japeFilter;
-  File[] selectedFiles;
-  File grammarFile;
+
+  //Gui members
+  JMenuBar jMenuBar1 = new JMenuBar();
 
   Box westBox;
+  Box centerBox;
+  Box northBox;
+  Box southBox;
+
+  BorderLayout borderLayout1 = new BorderLayout();
+  JLabel statusBar = new JLabel();
+
+  JButton collectionAddBtn = new JButton();
+  JButton japeLoadBtn = new JButton();
+  JButton runBtn = new JButton();
+
+  JProgressBar progressBar = new JProgressBar();
+  JEditorPane text = new JEditorPane();
   JLabel jLabel1 = new JLabel();
   DefaultListModel corpusListModel = new DefaultListModel();
   JList corpusList = new JList();
   JLabel jLabel2 = new JLabel();
   JLabel grammarLbl = new JLabel();
 
+  Corpus corpus = null;
+  JFileChooser filer;
+  ExtensionFileFilter japeFilter;
+  File[] selectedFiles;
+  File grammarFile;
+
+  private boolean invokedStandalone = false;
+  Document currentDoc;
+  JPanel typesPanel = new JPanel();
+  FlowLayout flowLayout1 = new FlowLayout();
+  JScrollPane jScrollPane1 = new JScrollPane();
 
 }
