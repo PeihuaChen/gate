@@ -38,7 +38,7 @@ public class KBObjectPropertyImpl extends KBPropertyImpl implements KBObjectProp
     return false;
   }
 
-  public KBClass getRange() {
+  public Object getRange() {
     return range;
   }
 
