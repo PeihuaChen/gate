@@ -34,6 +34,7 @@ public class CorpusBenchmarkTool {
   private static final String CLEAN_DIR_NAME = "clean";
   private static final String CVS_DIR_NAME = "Cvs";
   private static final String PROCESSED_DIR_NAME = "processed";
+  private static final String ERROR_DIR_NAME = "err";
 
   private static final boolean DEBUG = true;
 
@@ -59,6 +60,11 @@ public class CorpusBenchmarkTool {
   }
 
   public void execute() {
+/*
+    Out.prln("Flags Gen Cln Str Vrb Minf: "
+             + isGenerateMode +" "+ isMarkedClean +" "+ isMarkedStored
+             +" "+ isVerboseMode +" "+ isMoreInfoMode);
+*/
     execute(startDir);
     if (application != null) {
       Iterator iter = new ArrayList(application.getPRs()).iterator();
@@ -136,6 +142,7 @@ public class CorpusBenchmarkTool {
     File processedDir = null;
     File cleanDir = null;
     File markedDir = null;
+    File errorDir = null;
 
     ArrayList subDirs = new ArrayList();
     File[] dirArray = currDir.listFiles();
@@ -148,6 +155,8 @@ public class CorpusBenchmarkTool {
         markedDir = dirArray[i];
       else if (dirArray[i].getName().equals(PROCESSED_DIR_NAME))
         processedDir = dirArray[i];
+      else if (dirArray[i].getName().equals(ERROR_DIR_NAME))
+        errorDir = dirArray[i];
       else
         subDirs.add(dirArray[i]);
     }
@@ -155,7 +164,7 @@ public class CorpusBenchmarkTool {
     if (this.isGenerateMode)
       generateCorpus(cleanDir, processedDir);
     else
-      evaluateCorpus(cleanDir, processedDir, markedDir);
+      evaluateCorpus(cleanDir, processedDir, markedDir, errorDir);
 
     //if no more subdirs left, return
     if (subDirs.isEmpty())
@@ -224,6 +233,7 @@ public class CorpusBenchmarkTool {
       corpusTool.setApplicationFile(appFile);
 
     corpusTool.init();
+    corpusWordCount = 0;
 
     Out.prln("Measuring annotaitions of types: " + corpusTool.annotTypes + "<P>");
 
@@ -235,8 +245,17 @@ public class CorpusBenchmarkTool {
     if (! corpusTool.getGenerateMode())
       corpusTool.printStatistics();
 
-    Out.prln("Overall average precision: " + corpusTool.getPrecisionAverage());
-    Out.prln("Overall average recall: " + corpusTool.getRecallAverage());
+    Out.prln("<BR>Overall average precision: " + corpusTool.getPrecisionAverage());
+    Out.prln("<BR>Overall average recall: " + corpusTool.getRecallAverage());
+    Out.prln("<BR>Overall word count: " + corpusWordCount);
+
+    if(hasProcessed) {
+      Out.prln("<BR>Old Processed: ");
+      Out.prln("Overall average precision: "
+               + corpusTool.getPrecisionAverageProc());
+      Out.prln("Overall average recall: "
+               + corpusTool.getRecallAverageProc());
+    }
     Out.prln("Finished! <P>");
     Out.prln("</BODY>");
     Out.prln("</HTML>");
@@ -326,6 +345,15 @@ public class CorpusBenchmarkTool {
     return recallSum/docNumber;
   }
 
+  /** For processed documents */
+  public double getPrecisionAverageProc() {
+    return proc_precisionSum/docNumber;
+  }
+  public double getRecallAverageProc() {
+    return proc_recallSum/docNumber;
+  }
+
+
   public boolean isGenerateMode() {
     return isGenerateMode == true;
   }//isGenerateMode
@@ -406,7 +434,8 @@ public class CorpusBenchmarkTool {
   }//generateCorpus
 
   protected void evaluateCorpus(File fileDir,
-                    File processedDir, File markedDir) {
+                    File processedDir, File markedDir,
+                    File errorDir) {
     //1. check if we have input files and the processed Dir
     if (fileDir == null || !fileDir.exists())
       return;
@@ -419,6 +448,22 @@ public class CorpusBenchmarkTool {
       else
         isMarkedClean = true;
 
+    // create the error directory or clean it up if needed
+    File errDir = null;
+    if(isMoreInfoMode) {
+      errDir = errorDir;
+      if (errDir == null) {
+        errDir = new File(currDir, ERROR_DIR_NAME);
+      }
+      else {
+        // get rid of the directory, coz we wants it clean
+        if (!Files.rmdir(errDir))
+          Out.prln("cannot delete old error directory: " + errDir);
+      }
+      Out.prln("Create error directory: " + errDir + "<BR><BR>");
+      errDir.mkdir();
+    }
+
     //looked for marked texts only if the directory exists
     boolean processMarked = markedDir != null && markedDir.exists();
     if (!processMarked && (isMarkedStored || isMarkedClean)) {
@@ -427,10 +472,10 @@ public class CorpusBenchmarkTool {
     }
 
     if (isMarkedStored) {
-      evaluateMarkedStored(markedDir, processedDir);
+      evaluateMarkedStored(markedDir, processedDir, errDir);
       return;
     } else if (isMarkedClean) {
-      evaluateMarkedClean(markedDir, fileDir);
+      evaluateMarkedClean(markedDir, fileDir, errDir);
       return;
     }
 
@@ -457,7 +502,17 @@ public class CorpusBenchmarkTool {
                                     "gate.corpora.DocumentImpl",
                                     features);
 
-        Out.prln("<H2>" + persDoc.getName() + "</H2>");
+        if(isMoreInfoMode) {
+          StringBuffer errName = new StringBuffer(persDoc.getName());
+          errName.replace(
+            persDoc.getName().lastIndexOf("."),
+            persDoc.getName().length(),
+            ".err");
+          Out.prln("<H2>" +
+                   "<a href=err/" + errName.toString() + ">"
+                   + persDoc.getName() + "</a>" + "</H2>");
+        } else
+          Out.prln("<H2>" + persDoc.getName() + "</H2>");
 
         File cleanDocFile = new File(fileDir, persDoc.getName());
         //try reading the original document from clean
@@ -526,7 +581,7 @@ public class CorpusBenchmarkTool {
           }
         }
 
-        evaluateDocuments(persDoc, cleanDoc, markedDoc);
+        evaluateDocuments(persDoc, cleanDoc, markedDoc, errDir);
         if (persDoc != null)
           Factory.deleteResource(persDoc);
         if (cleanDoc != null)
@@ -546,7 +601,7 @@ public class CorpusBenchmarkTool {
 
   }//evaluateCorpus
 
-  protected void evaluateMarkedStored(File markedDir, File storedDir) {
+  protected void evaluateMarkedStored(File markedDir, File storedDir, File errDir) {
     Document persDoc = null;
     Document cleanDoc = null;
     Document markedDoc = null;
@@ -570,7 +625,17 @@ public class CorpusBenchmarkTool {
                                     "gate.corpora.DocumentImpl",
                                     features);
 
-        Out.prln("<H2>" + persDoc.getName() + "</H2>");
+        if(isMoreInfoMode) {
+          StringBuffer errName = new StringBuffer(persDoc.getName());
+          errName.replace(
+            persDoc.getName().lastIndexOf("."),
+            persDoc.getName().length(),
+            ".err");
+          Out.prln("<H2>" +
+                   "<a href=err/" + errName.toString() + ">"
+                   + persDoc.getName() + "</a>" + "</H2>");
+        } else
+          Out.prln("<H2>" + persDoc.getName() + "</H2>");
 
         if (! this.isMarkedDS) { //try finding the marked document as file
           StringBuffer docName = new StringBuffer(persDoc.getName());
@@ -630,7 +695,7 @@ public class CorpusBenchmarkTool {
           }
         }
 
-        evaluateDocuments(persDoc, cleanDoc, markedDoc);
+        evaluateDocuments(persDoc, cleanDoc, markedDoc, errDir);
         if (persDoc != null)
           Factory.deleteResource(persDoc);
         if (markedDoc != null)
@@ -650,7 +715,7 @@ public class CorpusBenchmarkTool {
   }//evaluateMarkedStored
 
 
-  protected void evaluateMarkedClean(File markedDir, File cleanDir) {
+  protected void evaluateMarkedClean(File markedDir, File cleanDir, File errDir) {
     Document persDoc = null;
     Document cleanDoc = null;
     Document markedDoc = null;
@@ -682,7 +747,17 @@ public class CorpusBenchmarkTool {
         continue;
       }
 
-      Out.prln("<TD>" + cleanDocs[i].getName() + "</TD>");
+      if(isMoreInfoMode) {
+        StringBuffer errName = new StringBuffer(cleanDocs[i].getName());
+        errName.replace(
+          cleanDocs[i].getName().lastIndexOf("."),
+          cleanDocs[i].getName().length(),
+          ".err");
+        Out.prln("<H2>" +
+                 "<a href=err/" + errName.toString() + ">"
+                 + cleanDocs[i].getName() + "</a>" + "</H2>");
+      } else
+        Out.prln("<H2>" + cleanDocs[i].getName() + "</H2>");
 
       //try finding the marked document
       if (! isMarkedDS) {
@@ -758,7 +833,7 @@ public class CorpusBenchmarkTool {
       } //if using a DS for marked
 
       try {
-        evaluateDocuments(persDoc, cleanDoc, markedDoc);
+        evaluateDocuments(persDoc, cleanDoc, markedDoc, errDir);
       } catch (gate.creole.ResourceInstantiationException ex) {
 ex.printStackTrace();
         Out.prln("Evaluate failed on document: " + cleanDoc.getName());
@@ -800,7 +875,8 @@ ex.printStackTrace();
   }
 
   protected void evaluateDocuments(Document persDoc,
-                    Document cleanDoc, Document markedDoc)
+                    Document cleanDoc, Document markedDoc,
+                    File errDir)
                         throws ResourceInstantiationException {
     if (cleanDoc == null && markedDoc == null)
       return;
@@ -813,21 +889,69 @@ ex.printStackTrace();
 
       processDocument(cleanDoc);
 
+
+      int wordCount = countWords(cleanDoc);
+      Out.prln("<BR>Word count: " + wordCount);
+      corpusWordCount += wordCount;
+
       if(!isMarkedClean)
-        evaluateAllThree(persDoc, cleanDoc, markedDoc);
+        evaluateAllThree(persDoc, cleanDoc, markedDoc, errDir);
       else
-        evaluateTwoDocs(markedDoc, cleanDoc);
+        evaluateTwoDocs(markedDoc, cleanDoc, errDir);
 
     } else
-      evaluateTwoDocs(markedDoc, persDoc);
+      evaluateTwoDocs(markedDoc, persDoc, errDir);
 
   }
 
+  /**
+   * Count all Token.kind=word annotations in the document
+   */
+  protected int countWords(Document annotDoc) {
+    int count = 0;
+
+    if (annotDoc == null) return 0;
+    // check for Token in outputSetName
+    AnnotationSet tokens = annotDoc.getAnnotations(outputSetName).get("Token");
+    if (tokens == null) return 0;
+
+    Iterator it = tokens.iterator();
+    Annotation currAnnotation;
+    while (it.hasNext()) {
+      currAnnotation = (Annotation) it.next();
+      Object feature = currAnnotation.getFeatures().get("kind");
+      if(feature != null && "word".equalsIgnoreCase((String)feature)) ++count;
+    } // while
+
+    return count;
+  }
+
   protected void evaluateAllThree(Document persDoc,
-                                  Document cleanDoc, Document markedDoc)
+                                  Document cleanDoc, Document markedDoc,
+                                  File errDir)
                                   throws ResourceInstantiationException {
     //first start the table and its header
     printTableHeader();
+
+    // store annotation diff in .err file
+    FileWriter errFileWriter = null;
+    if (isMoreInfoMode && errDir != null) {
+      StringBuffer docName = new StringBuffer(cleanDoc.getName());
+      docName.replace(
+          cleanDoc.getName().lastIndexOf("."),
+          docName.length(),
+          ".err");
+      File errFile = new File(errDir, docName.toString());
+      try {
+        errFileWriter = new FileWriter(errFile, false);
+      }
+      catch (Exception ex) {
+        Out.prln("Exception when creating the error file " + errFile + ": "
+                 + ex.getMessage());
+        errFileWriter = null;
+      }
+    }
+
     for (int jj= 0; jj< annotTypes.size(); jj++) {
       String annotType = (String) annotTypes.get(jj);
 
@@ -845,9 +969,18 @@ ex.printStackTrace();
         measureDocs(markedDoc, persDoc, annotType);
 
       Out.prln("<TR>");
-      Out.prln("<TD> " + annotType + "</TD>");
+
+      if(isMoreInfoMode && annotDiff1 != null
+         && (annotDiff1.getPrecisionAverage() != annotDiff.getPrecisionAverage()
+         || annotDiff1.getRecallAverage() != annotDiff.getRecallAverage())
+         )
+        Out.prln("<TD> " + annotType + "_new"+ "</TD>");
+      else
+        Out.prln("<TD> " + annotType + "</TD>");
 
       if (isMoreInfoMode) {
+        if(annotDiff1 != null) updateStatisticsProc(annotDiff1, annotType);
+
         Out.prln("<TD>" + annotDiff.getCorrectCount() + "</TD>");
         Out.prln("<TD>" + annotDiff.getPartiallyCorrectCount() + "</TD>");
         Out.prln("<TD>" + annotDiff.getMissingCount() + "</TD>");
@@ -947,7 +1080,7 @@ ex.printStackTrace();
          ) {
 
         Out.prln("<TR>");
-        Out.prln("<TD> " + annotType + "_proc" + "</TD>");
+        Out.prln("<TD> " + annotType + "_old" + "</TD>");
 
         Out.prln("<TD>" + annotDiff1.getCorrectCount() + "</TD>");
         Out.prln("<TD>" + annotDiff1.getPartiallyCorrectCount() + "</TD>");
@@ -982,6 +1115,8 @@ ex.printStackTrace();
 
         //check the recall now
         if ( isVerboseMode ) {
+          // create error file and start writing
+
           Out.prln("<TD>");
           if (annotDiff.getRecallAverage() < threshold) {
             printAnnotations(annotDiff, markedDoc, cleanDoc);
@@ -991,20 +1126,49 @@ ex.printStackTrace();
           }
           Out.prln("</TD>");
         }
-
         Out.prln("</TR>");
       } // if(isMoreInfoMode && annotDiff1 != null)
 
+      if (isMoreInfoMode && errDir != null)
+        storeAnnotations(annotType, annotDiff, markedDoc, cleanDoc, errFileWriter);
     }//for loop through annotation types
     Out.prln("</TABLE>");
 
+    try {
+      errFileWriter.close();
+    }
+    catch (Exception ex) {
+      Out.prln("Exception on close of error file " + errFileWriter + ": "
+               + ex.getMessage());
+    }
   }//evaluateAllThree
 
-  protected void evaluateTwoDocs(Document keyDoc, Document respDoc)
+  protected void evaluateTwoDocs(Document keyDoc, Document respDoc,
+                                 File errDir)
         throws ResourceInstantiationException {
 
     //first start the table and its header
     printTableHeader();
+
+    // store annotation diff in .err file
+    FileWriter errFileWriter = null;
+    if (isMoreInfoMode && errDir != null) {
+      StringBuffer docName = new StringBuffer(keyDoc.getName());
+      docName.replace(
+          keyDoc.getName().lastIndexOf("."),
+          docName.length(),
+          ".err");
+      File errFile = new File(errDir, docName.toString());
+      try {
+        errFileWriter = new FileWriter(errFile, false);
+      }
+      catch (Exception ex) {
+        Out.prln("Exception when creating the error file " + errFile + ": "
+                 + ex.getMessage());
+        errFileWriter = null;
+      }
+    }
+
     for (int jj= 0; jj< annotTypes.size(); jj++) {
       String annotType = (String) annotTypes.get(jj);
 
@@ -1041,11 +1205,20 @@ ex.printStackTrace();
         }
         Out.prln("</TD>");
       }
-
       Out.prln("</TR>");
 
+      if (isMoreInfoMode && errDir != null)
+        storeAnnotations(annotType, annotDiff, keyDoc, respDoc, errFileWriter);
     }//for loop through annotation types
     Out.prln("</TABLE>");
+
+    try {
+      errFileWriter.close();
+    }
+    catch (Exception ex) {
+      Out.prln("Exception on close of error file " + errFileWriter + ": "
+               + ex.getMessage());
+    }
   }//evaluateTwoDocs
 
   protected void printTableHeader() {
@@ -1145,6 +1318,92 @@ ex.printStackTrace();
                                   annotDiff.getSpuriousCount()));
   }
 
+  /**
+   * Update statistics for processed documents
+   * The same procedure as updateStatistics with different hashTables
+   */
+  protected void updateStatisticsProc(AnnotationDiff annotDiff, String annotType){
+    hasProcessed = true;
+      proc_precisionSum += annotDiff.getPrecisionAverage();
+      proc_recallSum += annotDiff.getRecallAverage();
+      proc_fMeasureSum += annotDiff.getFMeasureAverage();
+      Double oldPrecision = (Double) proc_precisionByType.get(annotType);
+      if (oldPrecision == null)
+        proc_precisionByType.put(annotType,
+                            new Double(annotDiff.getPrecisionAverage()));
+      else
+        proc_precisionByType.put(annotType,
+                            new Double(oldPrecision.doubleValue() +
+                                       annotDiff.getPrecisionAverage()));
+      Integer precCount = (Integer) proc_prCountByType.get(annotType);
+      if (precCount == null)
+        proc_prCountByType.put(annotType, new Integer(1));
+      else
+        proc_prCountByType.put(annotType, new Integer(precCount.intValue() + 1));
+
+
+      Double oldFMeasure = (Double) proc_fMeasureByType.get(annotType);
+      if (oldFMeasure == null)
+        proc_fMeasureByType.put(annotType,
+                         new Double(annotDiff.getFMeasureAverage()));
+      else
+        proc_fMeasureByType.put(annotType,
+                         new Double(oldFMeasure.doubleValue() +
+                                    annotDiff.getFMeasureAverage()));
+      Integer fCount = (Integer) proc_fMeasureCountByType.get(annotType);
+      if (fCount == null)
+        proc_fMeasureCountByType.put(annotType, new Integer(1));
+      else
+        proc_fMeasureCountByType.put(annotType, new Integer(fCount.intValue() + 1));
+
+      Double oldRecall = (Double) proc_recallByType.get(annotType);
+      if (oldRecall == null)
+        proc_recallByType.put(annotType,
+                            new Double(annotDiff.getRecallAverage()));
+      else
+        proc_recallByType.put(annotType,
+                            new Double(oldRecall.doubleValue() +
+                                       annotDiff.getRecallAverage()));
+      Integer recCount = (Integer) proc_recCountByType.get(annotType);
+      if (recCount == null)
+        proc_recCountByType.put(annotType, new Integer(1));
+      else
+        proc_recCountByType.put(annotType, new Integer(recCount.intValue() + 1));
+
+      //Update the missing, spurious, correct, and partial counts
+      Long oldMissingNo = (Long) proc_missingByType.get(annotType);
+      if (oldMissingNo == null)
+        proc_missingByType.put(annotType, new Long(annotDiff.getMissingCount()));
+      else
+        proc_missingByType.put(annotType,
+                        new Long(oldMissingNo.longValue() +
+                                  annotDiff.getMissingCount()));
+
+      Long oldCorrectNo = (Long) proc_correctByType.get(annotType);
+      if (oldCorrectNo == null)
+        proc_correctByType.put(annotType, new Long(annotDiff.getCorrectCount()));
+      else
+        proc_correctByType.put(annotType,
+                        new Long(oldCorrectNo.longValue() +
+                                  annotDiff.getCorrectCount()));
+
+      Long oldPartialNo = (Long) proc_partialByType.get(annotType);
+      if (oldPartialNo == null)
+        proc_partialByType.put(annotType, new Long(annotDiff.getPartiallyCorrectCount()));
+      else
+        proc_partialByType.put(annotType,
+                        new Long(oldPartialNo.longValue() +
+                                  annotDiff.getPartiallyCorrectCount()));
+
+      Long oldSpuriousNo = (Long) proc_spurByType.get(annotType);
+      if (oldSpuriousNo == null)
+        proc_spurByType.put(annotType, new Long(annotDiff.getSpuriousCount()));
+      else
+        proc_spurByType.put(annotType,
+                        new Long(oldSpuriousNo.longValue() +
+                                  annotDiff.getSpuriousCount()));
+  }
+
   public void printStatistics() {
 
     Out.prln("<H2> Statistics </H2>");
@@ -1189,53 +1448,123 @@ ex.printStackTrace();
               "<TD><B>Partially Correct</B></TD> <TD><B>Missing</B></TD>" +
               "<TD><B>Spurious</B></TD> <TD><B>Precision</B></TD>" +
               "<TD><B>Recall</B></TD> <TD><B>F-Measure</B></TD> </TR>");
+    String annotType;
     for (int i = 0; i < annotTypes.size(); i++) {
-      String annotType = (String) annotTypes.get(i);
+      annotType = (String) annotTypes.get(i);
       printStatsForType(annotType);
     }//for
     Out.prln("</table>");
-  }
+  } // updateStatisticsProc
 
   protected void printStatsForType(String annotType){
-      Out.prln("<TR>");
-      Out.prln("<TD>" + annotType + "</TD>");
-      long correct = (correctByType.get(annotType) == null)? 0 :
-                        ((Long)correctByType.get(annotType)).longValue();
-      long partial = (partialByType.get(annotType) == null)? 0 :
-                        ((Long)partialByType.get(annotType)).longValue();
-      long spurious = (spurByType.get(annotType) == null)? 0 :
-                        ((Long)spurByType.get(annotType)).longValue();
-      long missing = (missingByType.get(annotType) == null)? 0:
-                        ((Long)missingByType.get(annotType)).longValue();
-      Out.prln("<TD>" + correct + "</TD>");
-      Out.prln("<TD>" + partial + "</TD>");
-      Out.prln("<TD>" + missing + "</TD>");
-      Out.prln("<TD>" + spurious + "</TD>");
+    long correct = (correctByType.get(annotType) == null)? 0 :
+                      ((Long)correctByType.get(annotType)).longValue();
+    long partial = (partialByType.get(annotType) == null)? 0 :
+                      ((Long)partialByType.get(annotType)).longValue();
+    long spurious = (spurByType.get(annotType) == null)? 0 :
+                      ((Long)spurByType.get(annotType)).longValue();
+    long missing = (missingByType.get(annotType) == null)? 0:
+                      ((Long)missingByType.get(annotType)).longValue();
+    long actual = correct + partial + spurious;
+    long possible = correct + partial + missing;
+    //precision strict is correct/actual
+    //precision is (correct + 0.5 * partially correct)/actual
+    double precision = (correct + 0.5 * partial) / actual;
+    //recall strict is correct/possible
+    double recall = (correct + 0.5*partial)/possible;
+    //F-measure = ( (beta*beta + 1)*P*R ) / ((beta*beta*P) + R)
+    double fmeasure =
+      ((beta*beta + 1)*precision*recall)
+      /
+      ((beta*beta*precision) + recall);
 
-      long actual = correct + partial + spurious;
-      long possible = correct + partial + missing;
+    long proc_correct=0;
+    long proc_partial=0;
+    long proc_spurious=0;
+    long proc_missing=0;
+    long proc_actual=0;
+    long proc_possible=0;
+    double proc_precision=0;
+    double proc_recall=0;
+    double proc_fmeasure=0;
+
+    if(hasProcessed) {
+      // calculate values for processed
+      proc_correct = (proc_correctByType.get(annotType) == null)? 0 :
+                        ((Long)proc_correctByType.get(annotType)).longValue();
+      proc_partial = (proc_partialByType.get(annotType) == null)? 0 :
+                        ((Long)proc_partialByType.get(annotType)).longValue();
+      proc_spurious = (proc_spurByType.get(annotType) == null)? 0 :
+                        ((Long)proc_spurByType.get(annotType)).longValue();
+      proc_missing = (proc_missingByType.get(annotType) == null)? 0:
+                        ((Long)proc_missingByType.get(annotType)).longValue();
+      proc_actual = proc_correct + proc_partial + proc_spurious;
+      proc_possible = proc_correct + proc_partial + proc_missing;
       //precision strict is correct/actual
       //precision is (correct + 0.5 * partially correct)/actual
-      double precision = (correct + 0.5*partial)/actual;
-      Out.prln("<TD>" +
-             precision +
-            "</TD>");
+      proc_precision = (proc_correct + 0.5*proc_partial)/proc_actual;
       //recall strict is correct/possible
-      double recall = (correct + 0.5*partial)/possible;
-      Out.prln("<TD>" +
-             recall +
-            "</TD>");
-
+      proc_recall = (proc_correct + 0.5*proc_partial)/proc_possible;
       //F-measure = ( (beta*beta + 1)*P*R ) / ((beta*beta*P) + R)
-      double fmeasure =
-        ((beta*beta + 1)*precision*recall)
+      proc_fmeasure =
+        ((beta*beta + 1)*proc_precision*proc_recall)
         /
-        ((beta*beta*precision) + recall);
+        ((beta*beta*proc_precision) + proc_recall);
+    }
 
-      Out.prln("<TD>" + fmeasure + "</TD>");
+    // output data
+    Out.prln("<TR>");
+    if(hasProcessed)
+      Out.prln("<TD>" + annotType+ "_new"  + "</TD>");
+    else
+      Out.prln("<TD>" + annotType + "</TD>");
+
+    Out.prln("<TD>" + correct + "</TD>");
+    Out.prln("<TD>" + partial + "</TD>");
+    Out.prln("<TD>" + missing + "</TD>");
+    Out.prln("<TD>" + spurious + "</TD>");
+
+    if(hasProcessed && (precision < proc_precision))
+      Out.prln("<TD><Font color=red>" + precision + "</TD>");
+      else if(hasProcessed && (precision > proc_precision))
+        Out.prln("<TD><Font color=blue>" + precision + "</TD>");
+        else
+          Out.prln("<TD>" + precision + "</TD>");
+    if(hasProcessed && (recall < proc_recall))
+      Out.prln("<TD><Font color=red>" + recall + "</TD>");
+      else if(hasProcessed && (recall > proc_recall))
+        Out.prln("<TD><Font color=blue>" + recall + "</TD>");
+        else
+          Out.prln("<TD>" + recall + "</TD>");
+    Out.prln("<TD>" + fmeasure + "</TD>");
+    Out.prln("</TR>");
+
+    if(hasProcessed) {
+      // output data
+      Out.prln("<TR>");
+      Out.prln("<TD>" + annotType + "_old" + "</TD>");
+
+      Out.prln("<TD>" + proc_correct + "</TD>");
+      Out.prln("<TD>" + proc_partial + "</TD>");
+      Out.prln("<TD>" + proc_missing + "</TD>");
+      Out.prln("<TD>" + proc_spurious + "</TD>");
+
+      if(precision < proc_precision)
+        Out.prln("<TD><Font color=red>" + proc_precision + "</TD>");
+        else if(precision > proc_precision)
+          Out.prln("<TD><Font color=blue>" + proc_precision + "</TD>");
+          else
+            Out.prln("<TD>" + proc_precision + "</TD>");
+      if(recall < proc_recall)
+        Out.prln("<TD><Font color=red>" + proc_recall + "</TD>");
+        else if(recall > proc_recall)
+          Out.prln("<TD><Font color=blue>" + proc_recall + "</TD>");
+          else
+            Out.prln("<TD>" + proc_recall + "</TD>");
+      Out.prln("<TD>" + proc_fmeasure + "</TD>");
       Out.prln("</TR>");
-
-  }
+    }
+  }//printStatsForType
 
   protected AnnotationDiff measureDocs(
     Document keyDoc, Document respDoc, String annotType)
@@ -1268,7 +1597,59 @@ ex.printStackTrace();
     annotDiff.init();
 
     return annotDiff;
-  }
+  } // measureDocs
+
+  protected void storeAnnotations(String type, AnnotationDiff annotDiff,
+                  Document keyDoc, Document respDoc, FileWriter errFileWriter) {
+    if(errFileWriter == null) return; // exit on "no file"
+
+    try {
+      // extract and store annotations
+      Comparator comp = new OffsetComparator();
+      TreeSet sortedSet = new TreeSet(comp);
+      Set missingSet =
+          annotDiff.getAnnotationsOfType(AnnotationDiff.MISSING_TYPE);
+      sortedSet.clear();
+      sortedSet.addAll(missingSet);
+      storeAnnotations(type+".miss", sortedSet, keyDoc, errFileWriter);
+      Set spuriousSet =
+          annotDiff.getAnnotationsOfType(AnnotationDiff.SPURIOUS_TYPE);
+      sortedSet.clear();
+      sortedSet.addAll(spuriousSet);
+      storeAnnotations(type+".spur", sortedSet, respDoc, errFileWriter);
+      Set partialSet =
+          annotDiff.getAnnotationsOfType(AnnotationDiff.PARTIALLY_CORRECT_TYPE);
+      sortedSet.clear();
+      sortedSet.addAll(partialSet);
+      storeAnnotations(type+".part", sortedSet, respDoc, errFileWriter);
+    } catch (Exception ex) {
+      Out.prln("Exception on close of error file "+errFileWriter+": "
+               +ex.getMessage());
+    }
+  }// storeAnnotations
+
+  protected void storeAnnotations(String type, Set set, Document doc,
+                                  FileWriter file) throws IOException{
+
+    if (set == null || set.isEmpty())
+      return;
+
+    Iterator iter = set.iterator();
+    Annotation ann;
+    while (iter.hasNext()) {
+      ann = (Annotation) iter.next();
+      file.write(type);
+      file.write(".");
+      file.write(doc.getContent().toString().substring(
+          ann.getStartNode().getOffset().intValue(),
+          ann.getEndNode().getOffset().intValue()));
+      file.write(".");
+      file.write(ann.getStartNode().getOffset().toString());
+      file.write(".");
+      file.write(ann.getEndNode().getOffset().toString());
+      file.write("\n");
+    }//while
+  }// storeAnnotations
 
   protected void printAnnotations(AnnotationDiff annotDiff,
                     Document keyDoc, Document respDoc) {
@@ -1307,7 +1688,7 @@ ex.printStackTrace();
 //        + "; features" + ann.getFeatures()
         );
     }//while
-  }
+  }//printAnnotations
 
   /**
    * The directory from which we should generate/evaluate the corpus
@@ -1336,6 +1717,23 @@ ex.printStackTrace();
   private HashMap spurByType = new HashMap();
   private HashMap correctByType = new HashMap();
   private HashMap partialByType = new HashMap();
+
+  // statistic for processed
+  static boolean hasProcessed = false;
+  private double proc_precisionSum = 0;
+  private double proc_recallSum = 0;
+  private double proc_fMeasureSum = 0;
+  private HashMap proc_precisionByType = new HashMap();
+  private HashMap proc_prCountByType = new HashMap();
+  private HashMap proc_recallByType = new HashMap();
+  private HashMap proc_recCountByType = new HashMap();
+  private HashMap proc_fMeasureByType = new HashMap();
+  private HashMap proc_fMeasureCountByType = new HashMap();
+
+  private HashMap proc_missingByType = new HashMap();
+  private HashMap proc_spurByType = new HashMap();
+  private HashMap proc_correctByType = new HashMap();
+  private HashMap proc_partialByType = new HashMap();
 
   double beta = 1;
 
@@ -1372,6 +1770,7 @@ ex.printStackTrace();
 
   private double threshold = 0.5;
   private Properties configs = new Properties();
+  private static int corpusWordCount = 0;
 
   /** String to print when wrong command-line args */
   private static String usage =
