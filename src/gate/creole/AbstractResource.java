@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import gate.*;
 import gate.FeatureMap;
 import gate.Resource;
 import gate.util.*;
@@ -119,7 +120,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
    * Sets the value for a specified parameter for a resource.
    *
    * @param resource the resource for which the parameter value will be set
-   * @param paramaterName the name for the parameteer
+   * @param paramaterName the name for the parameter
    * @param parameterValue the value the parameter will receive
    */
   public static void setParameterValue(Resource resource, BeanInfo resBeanInf,
@@ -149,18 +150,57 @@ extends AbstractFeatureBearer implements Resource, Serializable
         if(parameterValue != null){
           Class propertyType = prop.getPropertyType();
           Class paramType = parameterValue.getClass();
-          try {
-            if(!propertyType.isAssignableFrom(paramType)) {
-              parameterValue =
-                propertyType.getConstructor(
+          if(!propertyType.isAssignableFrom(paramType)) {
+            //first try to find an appropriate constructor
+            try {
+              parameterValue = propertyType.getConstructor(
                   new Class[]{paramType}
                 ).newInstance( new Object[]{parameterValue} );
+            } catch(Exception e) {
+              //this didn't work; if the parameter value is String
+              //try to use the Parameter implementation for finding the 
+              //value
+              if(String.class.isAssignableFrom(paramType)){
+                ResourceData rData = (ResourceData)Gate.getCreoleRegister().
+                  get(resource.getClass().getName());
+                ParameterList pList = rData.getParameterList();
+                Parameter param = null;
+                Iterator disjIter = pList.getInitimeParameters().iterator();
+                while(param == null && disjIter.hasNext()){
+                  Iterator paramIter = ((List)disjIter.next()).iterator();
+                  while(param == null && paramIter.hasNext()){
+                    Parameter aParam = (Parameter)paramIter.next();
+                    if(aParam.getName().equals(paramaterName)) param = aParam; 
+                  }
+                }
+                disjIter = pList.getRuntimeParameters().iterator();
+                while(param == null && disjIter.hasNext()){
+                  Iterator paramIter = ((List)disjIter.next()).iterator();
+                  while(param == null && paramIter.hasNext()){
+                    Parameter aParam = (Parameter)paramIter.next();
+                    if(aParam.getName().equals(paramaterName)) param = aParam; 
+                  }
+                }
+                if(param != null){
+                  try{
+                    parameterValue = param.calculateValueFromString(
+                            (String)parameterValue);
+                  }catch(ParameterException pe){
+                    throw new ResourceInstantiationException(pe);
+                  }
+                }else{
+                  //this should never happen
+                  throw new LuckyException("Unknown parameter " + paramaterName +
+                          " for resource " + resource.getClass().getName() + 
+                          "!");
+                }
+              }else{
+                throw new ResourceInstantiationException(
+                  "Error converting " + parameterValue.getClass() +
+                  " to " + propertyType + ": " + e.toString()
+                );
+              }
             }
-          } catch(Exception e) {
-            throw new ResourceInstantiationException(
-              "Error converting " + parameterValue.getClass() +
-              " to " + propertyType + ": " + e.toString()
-            );
           }
         }//if(parameterValue != null)
 
