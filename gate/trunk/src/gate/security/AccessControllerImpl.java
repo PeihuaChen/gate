@@ -219,7 +219,7 @@ public class AccessControllerImpl
     GroupImpl grp = new GroupImpl(new_id,name,new Vector(),this,this.jdbcConn);
 
     this.groupsByID.put(new_id,grp);
-    this.groupsByName.put(new_id,grp);
+    this.groupsByName.put(name,grp);
 
     return grp;
   }
@@ -309,7 +309,7 @@ public class AccessControllerImpl
     UserImpl usr = new UserImpl(new_id,name,new Vector(),this,this.jdbcConn);
 
     this.usersByID.put(new_id,usr);
-    this.usersByName.put(new_id,usr);
+    this.usersByName.put(name,usr);
 
     return usr;
   }
