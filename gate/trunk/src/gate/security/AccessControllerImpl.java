@@ -563,11 +563,11 @@ public class AccessControllerImpl
 
     try {
       stmt = this.jdbcConn.prepareCall(
-                "{ call "+Gate.DB_OWNER+".security.can_delete_group(?,?) }");
-      stmt.setLong(1,grp.getID().longValue());
-      stmt.registerOutParameter(2,java.sql.Types.INTEGER);
+                "{ ? = call "+Gate.DB_OWNER+".security.can_delete_group(?) }");
+      stmt.registerOutParameter(1,java.sql.Types.INTEGER);
+      stmt.setLong(2,grp.getID().longValue());
       stmt.execute();
-      boolean res = stmt.getBoolean(2);
+      boolean res = stmt.getBoolean(1);
 
       return res;
     }
@@ -595,11 +595,12 @@ public class AccessControllerImpl
 
     try {
       stmt = this.jdbcConn.prepareCall(
-                "{ call "+Gate.DB_OWNER+".security.can_delete_user(?,?) }");
-      stmt.setLong(1,usr.getID().longValue());
-      stmt.registerOutParameter(2,java.sql.Types.INTEGER);
+                "{ ? = call "+Gate.DB_OWNER+".security.can_delete_user(?) }");
+
+      stmt.registerOutParameter(1,java.sql.Types.INTEGER);
+      stmt.setLong(2,usr.getID().longValue());
       stmt.execute();
-      boolean res = stmt.getBoolean(2);
+      boolean res = stmt.getBoolean(1);
 
       return res;
     }
