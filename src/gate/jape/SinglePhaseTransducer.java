@@ -276,7 +276,11 @@ extends Transducer implements JapeConstants, java.io.Serializable
                 features.clear();
                 features.putAll(currentConstraints[i].getAttributeSeq());
               }
-              if(onePath.getFeatures().entrySet().containsAll(features.entrySet())){
+// >>> was
+//              if(onePath.getFeatures().entrySet().containsAll(features.entrySet())){
+// >>> NASO, FeatArray optimization
+              if(onePath.getFeatures().subsumes(features)){
+// >>> end
                 //we have a match
   //System.out.println("Match!");
                 //create a new FSMInstance, advance it over the current annotation
@@ -535,7 +539,13 @@ extends Transducer implements JapeConstants, java.io.Serializable
         // System.out.println("Current FSM from:" +
         //                 currentFSM.getStartAGPosition().getOffset() +
         //                 " to " + currentFSM.getAGPosition().getOffset());
+// >>> dam: was set
+/*
         java.util.Set transitions = fsmPosition.getTransitions();
+*/
+// >>> dam: TransArray optimisation
+        gate.util.SimpleArraySet transitions = fsmPosition.getTransitions();
+// >>> dam: end
         java.util.Iterator transIter = transitions.iterator();
         while(transIter.hasNext()){
           // System.out.print("..");
