@@ -24,9 +24,9 @@ import java.util.*;
 
 import gate.creole.AbstractVisualResource;
 
-public class ResourceViewer extends AbstractVisualResource {
+public class FeaturesEditor extends AbstractVisualResource {
 
-  public ResourceViewer() {
+  public FeaturesEditor() {
     initLocalData();
     initGuiComponents();
     initListeners();
