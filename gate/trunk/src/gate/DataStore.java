@@ -107,6 +107,15 @@ public interface DataStore extends FeatureBearer, NameBearer {
   /** Get a list of the names of LRs of a particular type that are present. */
   public List getLrNames(String lrType) throws PersistenceException;
 
+  /** Get a list of LRs that satisfy some set or restrictions */
+  public List findLrs(List constraints) throws PersistenceException;
+
+  /**
+   *  Get a list of LRs that satisfy some set or restrictions and are
+   *  of a particular type
+   */
+  public List findLrs(List constraints, String lrType) throws PersistenceException;
+
   /** Get the name of an LR from its ID. */
   public String getLrName(Object lrId) throws PersistenceException;
 
