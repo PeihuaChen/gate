@@ -72,7 +72,6 @@ Macro: UPPER
  {Token.orth == upperInitial}|
  {Token.orth == mixedCaps} 
 )
- 
  ({Token.string == "-"}
   {Token.category == NNP}
  )?
@@ -1076,9 +1075,9 @@ Priority: 30
 )
 :loc
 -->
- :loc.TempLocation = {kind = "locName", rule = LocGeneralKey
+ :loc.TempLocation = {kind = "locName", rule = LocGeneralKey}
 
-}
+
 Rule:OrgContext1
 Priority: 1
 // company X
@@ -1089,8 +1088,8 @@ Priority: 1
 )
 (
  (UPPER)
- (SPACE (UPPER)
- )*
+ (SPACE (UPPER))?
+ (SPACE (UPPER))? 
 )
 :org
 -->
@@ -1104,10 +1103,10 @@ Priority: 5
 
 (
  (UPPER)
- (SPACE 
-  (UPPER)
- )*
-): org
+ (SPACE (UPPER))?
+ (SPACE (UPPER))? 
+)
+: org
 (SPACE
  ({Token.string == "offices"} |
  {Token.string == "Offices"} |
@@ -1135,22 +1134,9 @@ Priority: 50
 )
 (
  (UPPER)
- (SPACE 
- (UPPER)
- )*
-) 
+ (SPACE (UPPER))?
+ (SPACE (UPPER))?
+)
 :org
 -->
  :org.TempOrganization= {kind = "orgName", rule = "joinOrg"}
-
-
-
-
-
-
-
-
-
-
-
-
