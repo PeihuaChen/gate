@@ -79,15 +79,16 @@ public class POSTagger extends AbstractLanguageAnalyser {
         long startTime= System.currentTimeMillis();
         while(sentIter.hasNext()){
           Annotation sentenceAnn = (Annotation)sentIter.next();
-//          AnnotationSet rangeSet = inputAS.get(
-//                                    sentenceAnn.getStartNode().getOffset(),
-//                                    sentenceAnn.getEndNode().getOffset());
-//          if(rangeSet == null) continue;
-//          AnnotationSet tokensSet = rangeSet.get("Token");
-//          if(tokensSet == null) continue;
-//          List tokens = new ArrayList(tokensSet);
-//          Collections.sort(tokens, offsetComparator);
-          List tokens = (List)sentenceAnn.getFeatures().get("tokens");
+          AnnotationSet rangeSet = inputAS.get(
+                                    sentenceAnn.getStartNode().getOffset(),
+                                    sentenceAnn.getEndNode().getOffset());
+          if(rangeSet == null) continue;
+          AnnotationSet tokensSet = rangeSet.get("Token");
+          if(tokensSet == null) continue;
+          List tokens = new ArrayList(tokensSet);
+          Collections.sort(tokens, offsetComparator);
+
+//          List tokens = (List)sentenceAnn.getFeatures().get("tokens");
           List sentence = new ArrayList(tokens.size());
           Iterator tokIter = tokens.iterator();
           while(tokIter.hasNext()){
@@ -97,18 +98,23 @@ public class POSTagger extends AbstractLanguageAnalyser {
           }//while(tokIter.hasNext())
 
           //run the POSTagger over this sentence
-          List sentences4tagger = new ArrayList();
+          List sentences4tagger = new ArrayList(1);
           sentences4tagger.add(sentence);
           List taggerResults = tagger.runTagger(sentences4tagger);
           //add the results to the output annotation set
           //we only get one sentence
           List sentenceFromTagger = (List)taggerResults.get(0);
           if(sentenceFromTagger.size() != sentence.size()){
+            String taggerResult = "";
+            for(int i = 0; i< sentenceFromTagger.size(); i++){
+              taggerResult += ((String[])sentenceFromTagger.get(i))[1] + ", ";
+            }
             throw new GateRuntimeException(
               "POS Tagger malfunction: the output size (" +
               sentenceFromTagger.size() +
               ") is different from the input size (" +
-              sentence.size() + ")!");
+              sentence.size() + ")!" +
+              "\n Input: " + sentence + "\nOutput: " + taggerResult);
           }
           for(int i = 0; i< sentence.size(); i++){
             String category = ((String[])sentenceFromTagger.get(i))[1];
