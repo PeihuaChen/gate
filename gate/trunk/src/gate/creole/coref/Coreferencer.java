@@ -34,7 +34,7 @@ public class Coreferencer extends AbstractLanguageAnalyser
   public static final String COREF_ANTECEDENT_FEATURE_NAME = "antecedent_offset";
 
   /** --- */
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   /** --- */
   private PronominalCoref pronominalModule;
 
