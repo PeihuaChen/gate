@@ -19,6 +19,8 @@ import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
 import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,86 +29,136 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
+import gate.*;
 import gate.FeatureMap;
+import gate.Resource;
+import gate.creole.*;
 import gate.creole.AnnotationSchema;
 import gate.creole.FeatureSchema;
 import gate.swing.XJTable;
+import gate.util.*;
 import gate.util.GateRuntimeException;
+import gate.util.Strings;
 
 /**
  */
-public class FeaturesSchemaEditor extends XJTable{
+public class FeaturesSchemaEditor extends AbstractVisualResource
+        implements ResizableVisualResource{
   public FeaturesSchemaEditor(){
-    featureList = new ArrayList();
-    emptyFeature = new Feature("", null);
-    featuresModel = new FeaturesTableModel();
-    setModel(featuresModel);
-    setTableHeader(null);
-    setSortable(false);
-    setAutoResizeMode(AUTO_RESIZE_LAST_COLUMN);
-//    setIntercellSpacing(new Dimension(2,2));
-    featureEditorRenderer = new FeatureEditorRenderer();
-    getColumnModel().getColumn(ICON_COL).setCellRenderer(featureEditorRenderer);
-    getColumnModel().getColumn(NAME_COL).setCellRenderer(featureEditorRenderer);
-    getColumnModel().getColumn(NAME_COL).setCellEditor(featureEditorRenderer);
-    getColumnModel().getColumn(VALUE_COL).setCellRenderer(featureEditorRenderer);
-    getColumnModel().getColumn(VALUE_COL).setCellEditor(featureEditorRenderer);
-    getColumnModel().getColumn(DELETE_COL).setCellRenderer(featureEditorRenderer);
-    getColumnModel().getColumn(DELETE_COL).setCellEditor(featureEditorRenderer);
   }
-  public void setFeatures(FeatureMap features){
-    this.features = features;
+  
+  public void setTargetFeatures(FeatureMap features){
+    this.targetFeatures = features;
     populate();
+  }
+  
+  
+  /* (non-Javadoc)
+   * @see gate.VisualResource#setTarget(java.lang.Object)
+   */
+  public void setTarget(Object target){
+    this.target = (FeatureBearer)target;
+    setTargetFeatures(this.target.getFeatures());
   }
   
   public void setSchema(AnnotationSchema schema){
     this.schema = schema;
     featuresModel.fireTableRowsUpdated(0, featureList.size() - 1);
   }
-  
-  public boolean getScrollableTracksViewportWidth(){
-    return true;
+    
+  public XJTable getTable(){
+    return mainTable;
   }
   
-  public boolean getScrollableTracksViewportHeight(){
-    return false;
+  
+  /** Initialise this resource, and return it. */
+  public Resource init() throws ResourceInstantiationException {
+    featureList = new ArrayList();
+    emptyFeature = new Feature("", null);
+    initGUI();
+    return this;
+  }//init()
+  
+  protected void initGUI(){
+    featuresModel = new FeaturesTableModel();
+    mainTable = new XJTable(){
+      public boolean getScrollableTracksViewportWidth(){
+        return false;
+      }
+      
+      public boolean getScrollableTracksViewportHeight(){
+        return false;
+      }
+    };
+    mainTable.setModel(featuresModel);
+    mainTable.setTableHeader(null);
+    mainTable.setSortable(false);
+    mainTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+    mainTable.setBackground(getBackground());
+//    setIntercellSpacing(new Dimension(2,2));
+    featureEditorRenderer = new FeatureEditorRenderer();
+    mainTable.getColumnModel().getColumn(ICON_COL).
+        setCellRenderer(featureEditorRenderer);
+    mainTable.getColumnModel().getColumn(NAME_COL).
+        setCellRenderer(featureEditorRenderer);
+    mainTable.getColumnModel().getColumn(NAME_COL).
+        setCellEditor(featureEditorRenderer);
+    mainTable.getColumnModel().getColumn(VALUE_COL).
+        setCellRenderer(featureEditorRenderer);
+    mainTable.getColumnModel().getColumn(VALUE_COL).
+        setCellEditor(featureEditorRenderer);
+    mainTable.getColumnModel().getColumn(DELETE_COL).
+        setCellRenderer(featureEditorRenderer);
+    mainTable.getColumnModel().getColumn(DELETE_COL).
+      setCellEditor(featureEditorRenderer);
+    scroller = new JScrollPane(mainTable);
+    setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+    add(scroller);
   }
+  
   /**
    * Called internally whenever the data represented changes.
    *  
    */
   protected void populate(){
     featureList.clear();
-    //get all the exisitng features 
-    Set fNames = new HashSet(features.keySet());
-    //add all the schema features
-    if(schema != null && schema.getFeatureSchemaSet() != null){
-      Iterator fSchemaIter = schema.getFeatureSchemaSet().iterator();
-      while(fSchemaIter.hasNext()){
-        FeatureSchema fSchema = (FeatureSchema)fSchemaIter.next();
-//        if(fSchema.isRequired()) 
-          fNames.add(fSchema.getFeatureName());
+    //get all the exisitng features
+    Set fNames = new HashSet();
+    
+    if(targetFeatures != null){
+      //add all the schema features
+      fNames.addAll(targetFeatures.keySet());
+      if(schema != null && schema.getFeatureSchemaSet() != null){
+        Iterator fSchemaIter = schema.getFeatureSchemaSet().iterator();
+        while(fSchemaIter.hasNext()){
+          FeatureSchema fSchema = (FeatureSchema)fSchemaIter.next();
+  //        if(fSchema.isRequired()) 
+            fNames.add(fSchema.getFeatureName());
+        }
       }
-    }
-    List featureNames = new ArrayList(fNames);
-    Collections.sort(featureNames);
-    Iterator namIter = featureNames.iterator();
-    while(namIter.hasNext()){
-      String name = (String)namIter.next();
-      Object value = features.get(name);
-      featureList.add(new Feature(name, value));
+      List featureNames = new ArrayList(fNames);
+      Collections.sort(featureNames);
+      Iterator namIter = featureNames.iterator();
+      while(namIter.hasNext()){
+        String name = (String)namIter.next();
+        Object value = targetFeatures.get(name);
+        featureList.add(new Feature(name, value));
+      }
     }
     featureList.add(emptyFeature);
     featuresModel.fireTableDataChanged();
 //    setSize(getPreferredScrollableViewportSize());
   }
 
-  FeatureMap features;
+  FeatureMap targetFeatures;
+  FeatureBearer target;
   Feature emptyFeature;
   AnnotationSchema schema;
   FeaturesTableModel featuresModel;
   List featureList;
   FeatureEditorRenderer featureEditorRenderer;
+  XJTable mainTable;
+  JScrollPane scroller;
   
   private static final int COLUMNS = 4;
   private static final int ICON_COL = 0;
@@ -175,18 +227,22 @@ public class FeaturesSchemaEditor extends XJTable{
     
     public void setValueAt(Object aValue, int rowIndex,  int columnIndex){
       Feature feature = (Feature)featureList.get(rowIndex);
+      if(targetFeatures == null){
+        targetFeatures = Factory.newFeatureMap();
+        target.setFeatures(targetFeatures);
+      }
       switch(columnIndex){
         case VALUE_COL:
           feature.value = aValue;
           if(feature.name != null && feature.name.length() > 0){
-            features.put(feature.name, aValue);
+            targetFeatures.put(feature.name, aValue);
             fireTableRowsUpdated(rowIndex, rowIndex);
           }
           break;
         case NAME_COL:
-          features.remove(feature.name);
+          targetFeatures.remove(feature.name);
           feature.name = (String)aValue;
-          features.put(feature.name, feature.value);
+          targetFeatures.put(feature.name, feature.value);
           if(feature == emptyFeature) emptyFeature = new Feature("", null);
           populate();
           break;
@@ -219,7 +275,7 @@ public class FeaturesSchemaEditor extends XJTable{
       super(new JComboBox());
       editorCombo = (JComboBox)editorComponent;
       editorCombo.setModel(new DefaultComboBoxModel());
-      editorCombo.setBackground(FeaturesSchemaEditor.this.getBackground());
+      editorCombo.setBackground(mainTable.getBackground());
       editorCombo.setEditable(true);
       editorCombo.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent evt){
@@ -229,7 +285,7 @@ public class FeaturesSchemaEditor extends XJTable{
       
       rendererCombo = new JComboBox();
       rendererCombo.setModel(new DefaultComboBoxModel());
-      rendererCombo.setBackground(FeaturesSchemaEditor.this.getBackground());
+      rendererCombo.setBackground(mainTable.getBackground());
       rendererCombo.setEditable(false);
       rendererCombo.setOpaque(false);
 
@@ -246,7 +302,7 @@ public class FeaturesSchemaEditor extends XJTable{
       };
       requiredIconLabel.setIcon(MainFrame.getIcon("r.gif"));
       requiredIconLabel.setOpaque(false);
-      requiredIconLabel.setToolTipText("Required");
+      requiredIconLabel.setToolTipText("Required feature");
       
       optionalIconLabel = new JLabel(){
         public void repaint(long tm, int x, int y, int width, int height){}
@@ -260,9 +316,9 @@ public class FeaturesSchemaEditor extends XJTable{
       };
       optionalIconLabel.setIcon(MainFrame.getIcon("o.gif"));
       optionalIconLabel.setOpaque(false);
-      optionalIconLabel.setToolTipText("Optional");
+      optionalIconLabel.setToolTipText("Optional feature");
 
-      nonSchemaIconLabel = new JLabel(){
+      nonSchemaIconLabel = new JLabel(MainFrame.getIcon("c.gif")){
         public void repaint(long tm, int x, int y, int width, int height){}
         public void repaint(Rectangle r){}
         public void validate(){}
@@ -272,6 +328,7 @@ public class FeaturesSchemaEditor extends XJTable{
                 													Object newValue){}
         
       };
+      nonSchemaIconLabel.setToolTipText("Custom feature");
       nonSchemaIconLabel.setOpaque(false);
       
       deleteButton = new JButton(MainFrame.getIcon("delete.gif"));
@@ -282,7 +339,7 @@ public class FeaturesSchemaEditor extends XJTable{
       deleteButton.setToolTipText("Delete");
       deleteButton.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent evt){
-          int row = getEditingRow();
+          int row = mainTable.getEditingRow();
           if(row < 0) return;
           Feature feature = (Feature)featureList.get(row);
           if(feature == emptyFeature){
@@ -290,7 +347,7 @@ public class FeaturesSchemaEditor extends XJTable{
             featuresModel.fireTableRowsUpdated(row, row);
           }else{
             featureList.remove(row);
-            features.remove(feature.name);
+            targetFeatures.remove(feature.name);
             populate();
           }
         }
@@ -306,9 +363,12 @@ public class FeaturesSchemaEditor extends XJTable{
                  (feature.isRequired() ? 
                          requiredIconLabel : 
                          optionalIconLabel) :
-                 nonSchemaIconLabel;  
+                         nonSchemaIconLabel;  
         case NAME_COL:
+          rendererCombo.setPreferredSize(null);
           prepareCombo(rendererCombo, row, column);
+          Dimension dim = rendererCombo.getPreferredSize();
+//          rendererCombo.setPreferredSize(new Dimension(dim.width + 5, dim.height));
           return rendererCombo;
         case VALUE_COL:
           prepareCombo(rendererCombo, row, column);
