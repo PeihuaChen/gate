@@ -65,6 +65,18 @@ public class ParseCpsl implements JapeConstants {
     dirName = f.getParent();
   } // ParseCpsl filename constructor
 
+  /**
+    * Construct from a grammar name and input stream
+    */
+  public ParseCpsl(String cpslFileName, InputStream cpslStream)
+  throws IOException {
+    this(cpslStream);
+
+    macrosMap = new HashMap();
+    fileName = "stream";
+    dirName = "stream";
+  } // ParseCpsl stream constructor
+
   /** Our current file name. */
   private String fileName;
 
@@ -945,6 +957,9 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.5  2000/05/05 11:16:51  hamish
+// added stream constructor to the parser
+//
 // Revision 1.4  2000/05/02 16:56:10  hamish
 // porting to new annotation API
 //
