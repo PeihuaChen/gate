@@ -69,9 +69,6 @@ public class TestBumpyStack extends TestCase
    * Tests whether the CreoleRegisterImpl keeps unreacheable resourecs alive
    */
   public void testSelfCleaning() throws Exception {
-    //force GC
-    System.gc();
-
     //count instances
     Collection instances = ((ResourceData)
                            Gate.getCreoleRegister().
@@ -103,6 +100,7 @@ public class TestBumpyStack extends TestCase
                   getInstantiations();
     int serctlCnt = instances == null ? 0: instances.size();
 
+    instances = null;
     //create some unreacheable resources
     //LRs
 
@@ -140,11 +138,12 @@ public class TestBumpyStack extends TestCase
     res.getFeatures().put("large", new byte[500000]);
     res = Factory.createResource("gate.creole.SerialController");
     res.getFeatures().put("large", new byte[500000]);
-
     res = null;
 
 
     //force GC
+    byte[] largeThing = new byte[100000000];
+    largeThing = null;
     System.gc();
 
     //check instances count
@@ -177,6 +176,11 @@ public class TestBumpyStack extends TestCase
           "\nJapes expected: " + japeCnt + ", got: " + newJapeCnt +
           "\nSerCtls expected: " + serctlCnt + ", got: " + newSerctlCnt;
 
+if(corpusCnt != newCorpusCnt){
+  System.out.println(((Resource)((ResourceData)Gate.getCreoleRegister().
+                  get("gate.corpora.CorpusImpl")).
+                  getInstantiations().get(0)).getName());
+}
     assertTrue(message, docCnt == newDocCnt &&
                     corpusCnt == newCorpusCnt &&
                     tokCnt == newTokCnt &&

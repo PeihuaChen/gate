@@ -604,7 +604,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
         ArrayList values = new ArrayList();
         try{
           values.addAll(Gate.getCreoleRegister().
-                                         getAllInstances(rData.getClassName()));
+                        getAllInstances(rData.getClassName()));
         }catch(GateException ge){
           ge.printStackTrace(Err.getPrintWriter());
         }
