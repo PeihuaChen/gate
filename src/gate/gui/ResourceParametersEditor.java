@@ -652,7 +652,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
           textButtonBox.add(fileButton);
           return textButtonBox;
         }else if(type.equals("java.lang.Boolean")){
-          label.setText(value.toString());
+          label.setText(value == null ? "false" : value.toString());
           return label;
         }else if(typeClass != null &&
                       List.class.isAssignableFrom(typeClass)){
