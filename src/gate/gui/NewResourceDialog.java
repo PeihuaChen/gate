@@ -146,6 +146,7 @@ public class NewResourceDialog extends JDialog {
     requestFocus();
     nameField.requestFocus();
     userCanceled = true;
+    setModal(true);
     super.show();
     if(userCanceled) return;
     else{

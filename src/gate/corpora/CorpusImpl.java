@@ -284,6 +284,9 @@ public class CorpusImpl extends AbstractLanguageResource
     return this;
   } // init()
 
+  public void populate(URL directory, FileFilter filter){
+  }
+
   public synchronized void removeCorpusListener(CorpusListener l) {
     if (corpusListeners != null && corpusListeners.contains(l)) {
       Vector v = (Vector) corpusListeners.clone();

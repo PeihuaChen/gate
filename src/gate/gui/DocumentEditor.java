@@ -2983,7 +2983,8 @@ Out.prln("NULL size");
     public SelectAnnotationPopupItem(Annotation ann, String setName) {
       super(ann.getType());
       setToolTipText("<html><b>Features:</b><br>" +
-                     ann.getFeatures().toString() + "</html>");
+                     (ann.getFeatures() == null ? "" :
+                     ann.getFeatures().toString()) + "</html>");
       annotation = ann;
       start = ann.getStartNode().getOffset().intValue();
       end = ann.getEndNode().getOffset().intValue();
