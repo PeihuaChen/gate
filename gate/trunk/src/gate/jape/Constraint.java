@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- * 
+ *
  *  Hamish Cunningham, 24/07/98
  *
  *  $Id$
@@ -17,7 +17,6 @@
 package gate.jape;
 
 import java.util.*;
-import com.objectspace.jgl.*;
 import gate.annotation.*;
 import gate.util.*;
 import gate.*;
@@ -48,12 +47,12 @@ implements JapeConstants, java.io.Serializable, Cloneable
   } // Construction from annot type and attribute sequence
 
   /** Construction from annot type and array of attributes */
-  public Constraint(String annotType, Array attrsArray) {
+  public Constraint(String annotType, ArrayList attrsArray) {
     this.annotType = annotType;
     attrs1 = new SimpleFeatureMapImpl();
-    for ( ArrayIterator i = attrsArray.begin(); ! i.atEnd(); i.advance())
-      attrs1.put(((JdmAttribute) i.get()).getName(),
-                                          ((JdmAttribute) i.get()).getValue());
+    for ( Iterator i = attrsArray.iterator(); i.hasNext(); )
+      attrs1.put(((JdmAttribute) i.next()).getName(),
+                                          ((JdmAttribute) i.next()).getValue());
   } // Construction from annot type and array of attributes
 
   /** The type of annnotation we're looking for. */
@@ -99,7 +98,7 @@ implements JapeConstants, java.io.Serializable, Cloneable
   public Object clone() {
     Constraint newC = null;
     try {
-    	newC = (Constraint) super.clone();
+      newC = (Constraint) super.clone();
     } catch(CloneNotSupportedException e) {
       throw(new InternalError(e.toString()));
     }
@@ -157,8 +156,8 @@ implements JapeConstants, java.io.Serializable, Cloneable
     /*
     for(int i=0; i<attrs.length(); i++)
       buf.append(" " + attrs.nth(i));
-		for (Enumeration e = attrs.getElements(); e.hasMoreElements(); )
-    	buf.append(" " + ((JdmAttribute) e.nextElement() ).toString());
+    for (Enumeration e = attrs.getElements(); e.hasMoreElements(); )
+      buf.append(" " + ((JdmAttribute) e.nextElement() ).toString());
     buf.append(newline + pad + ") Constraint." + newline);
      */
     // constraints
@@ -186,11 +185,18 @@ implements JapeConstants, java.io.Serializable, Cloneable
     res += ")";
     return res;
   } // shortDesc
-  
+
 } // class Constraint
 
 
 // $Log$
+// Revision 1.8  2001/09/13 12:09:49  kalina
+// Removed completely the use of jgl.objectspace.Array and such.
+// Instead all sources now use the new Collections, typically ArrayList.
+// I ran the tests and I ran some documents and compared with keys.
+// JAPE seems to work well (that's where it all was). If there are problems
+// maybe look at those new structures first.
+//
 // Revision 1.7  2000/11/08 16:35:02  hamish
 // formatting
 //

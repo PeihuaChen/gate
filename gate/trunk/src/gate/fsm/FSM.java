@@ -40,11 +40,11 @@ public class FSM implements JapeConstants {
   public FSM(FSM owner, SinglePhaseTransducer spt){
     initialState = new State(owner);
     this.owner = owner;
-    Enumeration rulesEnum = spt.getRules().elements();
+    Iterator rulesEnum = spt.getRules().iterator();
     Rule currentRule;
 
-    while(rulesEnum.hasMoreElements()){
-      currentRule = (Rule) rulesEnum.nextElement();
+    while(rulesEnum.hasNext()){
+      currentRule = (Rule) rulesEnum.next();
       FSM ruleFSM = new FSM( owner, currentRule);
       initialState.addTransition(new Transition(null,
                                                 ruleFSM.getInitialState()));
@@ -58,11 +58,11 @@ public class FSM implements JapeConstants {
   public FSM(SinglePhaseTransducer spt){
     owner = this;
     initialState = new State(owner);
-    Enumeration rulesEnum = spt.getRules().elements();
+    Iterator rulesEnum = spt.getRules().iterator();
     Rule currentRule;
 
-    while(rulesEnum.hasMoreElements()){
-      currentRule = (Rule) rulesEnum.nextElement();
+    while(rulesEnum.hasNext()){
+      currentRule = (Rule) rulesEnum.next();
       FSM ruleFSM = new FSM( this, currentRule);
       initialState.addTransition(new Transition(null,
                                                 ruleFSM.getInitialState()));

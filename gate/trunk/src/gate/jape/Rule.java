@@ -17,7 +17,6 @@
 package gate.jape;
 
 import java.util.*;
-import com.objectspace.jgl.*;
 import gate.annotation.*;
 import gate.event.*;
 import gate.util.*;
@@ -209,7 +208,15 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.13  2001/09/13 12:09:50  kalina
+// Removed completely the use of jgl.objectspace.Array and such.
+// Instead all sources now use the new Collections, typically ArrayList.
+// I ran the tests and I ran some documents and compared with keys.
+// JAPE seems to work well (that's where it all was). If there are problems
+// maybe look at those new structures first.
+//
 // Revision 1.12  2001/03/06 20:11:14  valyt
+//
 // <b><em><strong>DOCUMENTATION</></></> for most of the GUI classes.
 //
 // Cleaned up some obsolete classes

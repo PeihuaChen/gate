@@ -296,7 +296,6 @@ public class TestJape extends TestCase
 ////  // import sheffield.creole.tokeniser.*;
 ////  import java.util.Enumeration;
 ////  import java.io.*;
-////  import com.objectspace.jgl.*;
 ////
 ////  /**
 ////    * A test harness for JAPE. Uses the Sheffield Tokeniser, and must be run

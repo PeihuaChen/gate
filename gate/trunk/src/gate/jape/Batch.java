@@ -26,7 +26,6 @@ import java.util.*;
 import java.util.jar.*;
 import java.io.*;
 import java.net.*;
-import com.objectspace.jgl.*;
 
 import gate.annotation.*;
 import gate.util.*;

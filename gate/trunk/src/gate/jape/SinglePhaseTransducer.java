@@ -17,7 +17,6 @@
 package gate.jape;
 
 import java.io.*;
-import com.objectspace.jgl.*;
 
 import gate.annotation.*;
 import gate.util.*;
@@ -99,8 +98,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
     else
       finishedAlready = true;
 
-    for(ForwardIterator i = rules.start(); ! i.atEnd(); i.advance())
-      ((Rule) i.get()).finish();
+    for(Iterator i = rules.iterator(); i.hasNext(); )
+      ((Rule) i.next()).finish();
     //build the finite state machine transition graph
     fsm = new FSM(this);
     //convert it to deterministic
@@ -961,9 +960,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
     }
 
     buf.append("rules(" + newline);
-    Enumeration rulesIterator = rules.elements();
-    while(rulesIterator.hasMoreElements())
-      buf.append(((Rule) rulesIterator.nextElement()).toString(newPad) + " ");
+    Iterator rulesIterator = rules.iterator();
+    while(rulesIterator.hasNext())
+      buf.append(((Rule) rulesIterator.next()).toString(newPad) + " ");
 
     buf.append(newline + pad + ")." + newline);
 

@@ -20,7 +20,6 @@ package gate.jape;
 import java.util.*;
 import java.io.*;
 
-import com.objectspace.jgl.*;
 
 import gate.jape.parser.*;
 import gate.*;
@@ -60,7 +59,7 @@ public class TestJape2 {
     // variables to parse the command line options into
     String collName = null;
     String japeName = null;
-    Array fileNames = null;
+    ArrayList fileNames = null;
 
     // process options
     for(int i=0; i<args.length; i++) {
@@ -71,7 +70,7 @@ public class TestJape2 {
       else if(args[i].equals("-v")) // -v = verbose
         verbose = true;
       else { // a list of files
-        fileNames = new Array();
+        fileNames = new ArrayList();
         do {
           fileNames.add(args[i++]);
         } while(i < args.length);
@@ -123,7 +122,7 @@ public class TestJape2 {
   /**
     * Create a collection and put tokenised and gazetteered docs in it.
     */
-  static public Corpus tokAndGaz(String collName, Array fileNames)
+  static public Corpus tokAndGaz(String collName, ArrayList fileNames)
   throws ResourceInstantiationException {
 
     // create or overwrite the collection
@@ -134,8 +133,8 @@ public class TestJape2 {
     );
 
     // add all the documents
-    for(ArrayIterator i = fileNames.begin(); ! i.atEnd(); i.advance()) {
-      String fname = (String) i.get();
+    for(Iterator i = fileNames.iterator(); i.hasNext(); ) {
+      String fname = (String) i.next();
 
       File f = new File(fname);
       FeatureMap attrs = Factory.newFeatureMap();
@@ -255,6 +254,13 @@ public class TestJape2 {
 
 
 // $Log$
+// Revision 1.10  2001/09/13 12:09:50  kalina
+// Removed completely the use of jgl.objectspace.Array and such.
+// Instead all sources now use the new Collections, typically ArrayList.
+// I ran the tests and I ran some documents and compared with keys.
+// JAPE seems to work well (that's where it all was). If there are problems
+// maybe look at those new structures first.
+//
 // Revision 1.9  2001/02/08 13:46:06  valyt
 // Added full Unicode support for the gazetteer and Jape
 // converted the gazetteer files to UTF-8

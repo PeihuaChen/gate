@@ -16,8 +16,7 @@
 
 package gate.jape;
 
-import java.util.Enumeration;
-import com.objectspace.jgl.*;
+import java.util.*;
 import gate.annotation.*;
 import gate.util.*;
 import gate.*;
@@ -35,7 +34,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   private static final boolean DEBUG = false;
 
   /** A set of Constraint. Used during parsing. */
-  private Array constraints1;
+  private ArrayList constraints1;
 
   /** A set of Constraint. Used during matching. */
   private Constraint[] constraints2;
@@ -60,7 +59,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   /** Construction. */
   public BasicPatternElement() {
     constraintsMap = new HashMap();
-    constraints1 = new Array();
+    constraints1 = new ArrayList();
     lastFailurePoint = -1;
     //nextAvailable = new MutableInteger();
     matchedAnnots = new AnnotationSetImpl((Document) null);
@@ -72,11 +71,11 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   public Object clone() {
     BasicPatternElement newPE = (BasicPatternElement) super.clone();
     newPE.constraintsMap = (HashMap) constraintsMap.clone();
-    newPE.constraints1 = new Array();
+    newPE.constraints1 = new ArrayList();
     int consLen = constraints1.size();
     for(int i = 0; i < consLen; i++)
       newPE.constraints1.add(
-        ((Constraint) constraints1.at(i)).clone()
+        ((Constraint) constraints1.get(i)).clone()
       );
 //    newPE.matchedAnnots = new AnnotationSetImpl((Document) null);
 //    newPE.matchedAnnots.addAll(matchedAnnots);
@@ -93,7 +92,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     String annotType = newConstraint.getAnnotType();
     Constraint existingConstraint = (Constraint) constraintsMap.get(annotType);
     if(existingConstraint == null) {
-      constraintsMap.add(annotType, newConstraint);
+      constraintsMap.put(annotType, newConstraint);
       constraints1.add(newConstraint);
     }
     else {
@@ -113,8 +112,8 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   public void finish() {
     int j=0;
     constraints2 = new Constraint[constraints1.size()];
-    for(ArrayIterator i=constraints1.begin(); !i.atEnd(); i.advance()) {
-      constraints2[j] = (Constraint) i.get();
+    for(Iterator i=constraints1.iterator(); i.hasNext(); ) {
+      constraints2[j] = (Constraint) i.next();
       constraints2[j++].finish();
     }
     constraints1 = null;
@@ -298,7 +297,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     if(constraints1 != null) {
       for(int len = constraints1.size(), i = 0; i < len; i++)
         buf.append(
-          newline + ((Constraint) constraints1.at(i)).toString(newPad)
+          newline + ((Constraint) constraints1.get(i)).toString(newPad)
         );
     } else {
       for(int len = constraints2.length, i = 0; i < len; i++)
@@ -321,7 +320,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     String res = "";
     if(constraints1 != null) {
       for(int len = constraints1.size(), i = 0; i < len; i++)
-        res += ((Constraint) constraints1.at(i)).toString();
+        res += ((Constraint) constraints1.get(i)).toString();
     } else {
       for(int len = constraints2.length, i = 0; i < len; i++)
         res += constraints2[i].shortDesc();
