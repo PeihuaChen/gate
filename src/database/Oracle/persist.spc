@@ -18,8 +18,10 @@ create or replace package persist is
   
   procedure get_timestamp(p_timestamp  OUT number);
 
+  
   procedure get_lr_name(p_lr_id     IN number,
                         p_lr_name   OUT varchar2);
+  
   
   procedure delete_lr(p_lr_id     IN number,
                       p_lr_type   IN varchar2);
@@ -33,6 +35,7 @@ create or replace package persist is
                       p_lr_parent_id     IN number,
                       p_lr_id            OUT number);
 
+  
   procedure create_document(p_lr_id        IN number,
                             p_url          IN varchar2,
                             p_encoding     IN varchar2,
@@ -42,6 +45,20 @@ create or replace package persist is
                             p_corpus_id    IN number,
                             p_doc_id       OUT number,
                             p_content_id   OUT number);
+
+                            
+  procedure create_annotation_set(p_doc_id           IN number,
+                                  p_as_name          IN varchar2,
+                                  p_as_id            OUT number);
+
+
+  procedure create_annotation(p_doc_id           IN number,
+                              p_as_id            IN number,
+                              p_ann_start_offset IN number,  
+                              p_ann_end_offset   IN number,                                
+                              p_ann_type         IN varchar2,
+                              p_ann_id           OUT number);
+
     
 end persist;
 /
