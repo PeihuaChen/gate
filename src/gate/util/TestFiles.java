@@ -146,6 +146,7 @@ public class TestFiles extends TestCase
 
   } // testJarFiles
 
+  /** Test the find method. */
   public void testFind(){
     String regex = "z:/gate2/doc/.*.html";
     String filePath = "z:/gate2/doc";
@@ -162,5 +163,86 @@ public class TestFiles extends TestCase
       }
     }
   } // testFind
+
+  /** Test the updateXmlElement method. */
+  public void testUpdateXmlElement() throws IOException {
+    String nl = Strings.getNl();
+    String configElementName = "GATECONFIG";
+    String configElement = "<" + configElementName + " FULLSIZE=\"yes\"/>";
+    String exampleXmlStart =
+      "<?xml version=\"1.0\"?>" + nl +
+      "<!-- a comment -->" + nl +
+      "<GATE>" + nl +
+      "" + nl +
+      "<CREOLE-DIRECTORY>http://on.the.net/</CREOLE-DIRECTORY>" + nl +
+      "<!--- The next element may be overwritten by the GUI --->" + nl;
+    String exampleXmlEnd =
+      "</GATE>" + nl;
+    String exampleXml = exampleXmlStart + configElement + nl + exampleXmlEnd;
+
+    // check that the getEmptyElement method works
+    assertTrue(
+      "the GATECONFIG element doesn't match",
+      getEmptyElement(exampleXml, configElementName).equals(configElement)
+    );
+
+    // a map of values to place in the new element
+    Map newAttrs = new HashMap();
+    newAttrs.put("a", "1");
+    newAttrs.put("b", "2");
+    newAttrs.put("c", "3");
+
+    // test the files method
+    String newXml = Files.updateXmlElement(
+      new BufferedReader(new StringReader(exampleXml)),
+      configElementName,
+      newAttrs
+    );
+    assertTrue(
+      "newXml doesn't match (1): " + newXml.toString(),
+      newXml.toString().startsWith(exampleXmlStart) &&
+        newXml.toString().endsWith(exampleXmlEnd)
+    );
+    if(DEBUG) Out.prln(newXml);
+
+    // write the example data into a temp file and try on that
+    File tempFile = Files.writeTempFile(exampleXml);
+    newXml = Files.updateXmlElement(tempFile, configElementName, newAttrs);
+    assertTrue(
+      "newXml doesn't match (2): " + newXml.toString(),
+      newXml.toString().startsWith(exampleXmlStart) &&
+        newXml.toString().endsWith(exampleXmlEnd)
+    );
+    if(DEBUG) Out.prln(newXml);
+
+    // check that the file was overwritten successfully
+    newXml = Files.getString(tempFile);
+    assertTrue(
+      "newXml doesn't match (3): " + newXml.toString(),
+      newXml.toString().startsWith(exampleXmlStart) &&
+        newXml.toString().endsWith(exampleXmlEnd)
+    );
+    if(DEBUG) Out.prln(newXml);
+
+  } // updateXmlElement
+
+  /**
+   * Helper method to extract an empty element from a string
+   * containing XML
+   */
+  String getEmptyElement(String xml, String elementName) {
+    // find the index of "<elementName"; find the next ">"
+    int start = xml.indexOf("<" + elementName);
+    int end = xml.indexOf(">", start);
+
+    // get the range between the two indices
+    StringBuffer xmlBuf = new StringBuffer(xml);
+    String substr = xmlBuf.substring(start, end + 1);
+    if(DEBUG) {
+      Out.prln("start=" + start + "; end=" + end + "; substr=" + substr);
+    }
+
+    return substr;
+  } // getEmptyElement
 
 } // class TestFiles
