@@ -481,11 +481,15 @@ public class OracleDataStore extends JDBCDataStore {
       cstmt = this.jdbcConn.prepareCall(
                 "{ call "+Gate.DB_OWNER+".persist.create_document(?,?,?,?,?,?,?,?) }");
       cstmt.setLong(1,_lrID.longValue());
-      cstmt.setString(2,_docURL.toString());
+      if (_docURL == null) {
+        cstmt.setNull(2,java.sql.Types.VARCHAR);
+      }else{
+        cstmt.setString(2,_docURL.toString());
+      }
       //do we have doc encoding?
       if (null == _docEncoding) {
         cstmt.setNull(3,java.sql.Types.VARCHAR);
-      }
+     }
       else {
         cstmt.setString(3,_docEncoding);
       }
@@ -519,7 +523,6 @@ public class OracleDataStore extends JDBCDataStore {
 
       cstmt.execute();
       docID = new Long(cstmt.getLong(8));
-
       return docID;
 
     }
@@ -3059,7 +3062,7 @@ public class OracleDataStore extends JDBCDataStore {
         String sql = getSQLQuery(constraints, lrType, false, orderByConstraints, limitcount, sqlValues);
         conn = DBHelper.connect(this.getStorageUrl(), true);
         stmt = conn.prepareCall(sql);
-        //System.out.println(sql);
+        System.out.println("  " + sql);
         for (int i = 0; i<sqlValues.size(); i++){
           if (sqlValues.elementAt(i) instanceof String){
             stmt.setString(i+1,sqlValues.elementAt(i).toString());
@@ -3150,31 +3153,14 @@ public class OracleDataStore extends JDBCDataStore {
 
     query = query.append(" SELECT " + select + " " +
                           " FROM  "+Gate.DB_OWNER+".t_lang_resource LR " + join +
-                          " WHERE ");
+                          "  ( ");
 
-    if (lrType != null){
-      query = query.append(" LR.lr_type_id = ? ");
-      if (lrType.equals(DBHelper.CORPUS_CLASS)) {
-        sqlValues.addElement(new Long(2));
-      }// if DBHelper.CORPUS_CLASS
-      if (lrType.equals(DBHelper.DOCUMENT_CLASS)) {
-        sqlValues.addElement(new Long(1));
-      }// if DBHelper.DOCUMENT_CLASS
-    }
 
-    if (filter!=null && filter.size()>0){
-      if (lrType!=null){
-        query = query.append(" AND ");
-      }
-      for (int i=0; i<filter.size(); i++){
-          query = query.append(getRestrictionPartOfQuery((Restriction) filter.get(i),sqlValues));
-          if (i<filter.size()-1) {
-            query = query.append(" AND ");
-          }
-      }
-    }
+    query = query.append(getIntersectionPart(filter, sqlValues));
 
-    String endPartOfJoin = getEndPartOfJoin(orderByFilter,sqlValues);
+    query = query.append(" ) intersected_feat_restr ");
+
+    String endPartOfJoin = getEndPartOfJoin(orderByFilter, lrType,sqlValues);
     query = query.append(endPartOfJoin);
 
     if (limitcount>0){
@@ -3185,13 +3171,49 @@ public class OracleDataStore extends JDBCDataStore {
     return query.toString();
   }
 
-  private String getRestrictionPartOfQuery(Restriction restr, Vector sqlValues){
+  private String getIntersectionPart(List filter, Vector sqlValues){
+    StringBuffer query = new StringBuffer(" ");
+
+    Collections.sort(filter, new RestrictionComepator());
+    Vector list_of_filters = new Vector();
+    for (int i=0; i<filter.size(); i++){
+      if (i>0){
+        Restriction rest = (Restriction) filter.get(i);
+        Restriction prev = (Restriction) filter.get(i-1);
+        if (rest.getKey().equals(prev.getKey())){
+          Vector temp = (Vector) list_of_filters.get(list_of_filters.size()-1);
+          temp.add(rest);
+        } else {
+          Vector temp = new Vector();
+          temp.add(rest);
+          list_of_filters.add(temp);
+        }
+      } else {
+        Vector temp = new Vector();
+        temp.add(filter.get(0));
+        list_of_filters.add(temp);
+      }
+    }
+
+    if (filter!=null && filter.size()>0){
+      for (int i=0; i<list_of_filters.size(); i++){
+          query = query.append(getRestrictionPartOfQuery((List) list_of_filters.get(i),sqlValues));
+          if (i<list_of_filters.size()-1) {
+            query = query.append("  intersect ");
+          }
+      }
+    }
+    return query.toString();
+  }
+
+  private String getRestrictionPartOfQuery(List list, Vector sqlValues){
     StringBuffer expresion = new StringBuffer(
-                      " EXISTS ("+
-                       " SELECT ft_id " +
+                      " SELECT ft_entity_id "+
                        " FROM "+Gate.DB_OWNER+".t_feature FEATURE, " +
                        Gate.DB_OWNER + ".t_feature_key FTK" +
-                       " WHERE FEATURE.ft_entity_id = LR.lr_id ");
+                       " WHERE FEATURE.ft_entity_type = 2 ");
+
+    Restriction restr = (Restriction) list.get(0);
 
     if (restr.getKey() != null){
       expresion = expresion.append(" AND FTK.fk_id = FEATURE.ft_key_id ");
@@ -3199,29 +3221,30 @@ public class OracleDataStore extends JDBCDataStore {
       sqlValues.addElement(restr.getKey());
     }
 
-    if (restr.getValue() != null){
-      expresion = expresion.append(" AND ");
-      switch (this.findFeatureType(restr.getValue())){
-        case DBHelper.VALUE_TYPE_INTEGER:
-          expresion = expresion.append(getNumberExpresion(restr, sqlValues));
-          break;
-        case DBHelper.VALUE_TYPE_LONG:
-          expresion = expresion.append(getNumberExpresion(restr, sqlValues));
-          break;
-        default:
-          if (restr.getOperator()==Restriction.OPERATOR_EQUATION){
-            expresion = expresion.append(" FEATURE.ft_character_value = ? ");
-            sqlValues.addElement(restr.getStringValue());
+    for (int i =0; i<list.size(); i++) {
+        restr = (Restriction) list.get(i);
+        if (restr.getValue() != null){
+          expresion = expresion.append(" AND ");
+          switch (this.findFeatureType(restr.getValue())){
+            case DBHelper.VALUE_TYPE_INTEGER:
+              expresion = expresion.append(getNumberExpresion(restr, sqlValues));
+              break;
+            case DBHelper.VALUE_TYPE_LONG:
+              expresion = expresion.append(getNumberExpresion(restr, sqlValues));
+              break;
+            default:
+              if (restr.getOperator()==Restriction.OPERATOR_EQUATION){
+                expresion = expresion.append(" FEATURE.ft_character_value = ? ");
+                sqlValues.addElement(restr.getStringValue());
+              }
+              if (restr.getOperator()==Restriction.OPERATOR_LIKE){
+                expresion = expresion.append(" upper(FEATURE.ft_character_value) like ? ");
+                sqlValues.addElement("%"+restr.getStringValue().toUpperCase()+"%");
+              }
+              break;
           }
-          if (restr.getOperator()==Restriction.OPERATOR_LIKE){
-            expresion = expresion.append(" upper(FEATURE.ft_character_value) like ? ");
-            sqlValues.addElement("%"+restr.getStringValue().toUpperCase()+"%");
-          }
-          break;
+        }
       }
-    }
-
-    expresion = expresion.append(" )");
 
     return expresion.toString();
   }
@@ -3257,17 +3280,30 @@ public class OracleDataStore extends JDBCDataStore {
 
   private String getJoinQuery(List orderByFilter, Vector sqlValues){
     StringBuffer join = new StringBuffer("");
+    join = join.append(" , ");
     if (orderByFilter!=null){
       for (int i = 0; i<orderByFilter.size(); i++){
-        join = join.append(" , "+Gate.DB_OWNER+".t_feature FT"+i);
-        join = join.append(" , "+Gate.DB_OWNER+".t_feature_key FTK"+i);
+        join = join.append(Gate.DB_OWNER+".t_feature FT"+i);
+        join = join.append(" , "+Gate.DB_OWNER+".t_feature_key FTK"+i +" , ");
       }
     }
     return join.toString();
   }
 
-  private String getEndPartOfJoin(List orderByFilter, Vector sqlValues){
+  private String getEndPartOfJoin(List orderByFilter, String lrType, Vector sqlValues){
     StringBuffer endJoin = new StringBuffer("");
+    endJoin = endJoin.append(" WHERE ");
+
+    endJoin = endJoin.append(" LR.lr_type_id = ? ");
+    if (lrType.equals(DBHelper.CORPUS_CLASS)) {
+      sqlValues.addElement(new Long(2));
+    }// if DBHelper.CORPUS_CLASS
+    if (lrType.equals(DBHelper.DOCUMENT_CLASS)) {
+      sqlValues.addElement(new Long(1));
+    }// if DBHelper.DOCUMENT_CLASS
+
+    endJoin = endJoin.append(" and intersected_feat_restr.ft_entity_id = lr.lr_id ");
+
     if (orderByFilter!=null && orderByFilter.size()>0){
       for (int i=0; i<orderByFilter.size(); i++){
         endJoin = endJoin.append(" and lr_id=FT"+i+".ft_entity_id ");
@@ -3279,18 +3315,19 @@ public class OracleDataStore extends JDBCDataStore {
       endJoin = endJoin.append(" order by ");
       for (int i=0; i<orderByFilter.size(); i++){
         OrderByRestriction restr = (OrderByRestriction) orderByFilter.get(i);
+
         endJoin = endJoin.append("  FT"+i+".ft_number_value ");
-        if (restr.getOperator()==OrderByRestriction.OPERATOR_ASCENDING){
-          endJoin = endJoin.append(" asc, ");
-        } else {
-          endJoin = endJoin.append(" desc, ");
-        }
-        endJoin = endJoin.append("  FT"+i+".ft_character_value ");
         if (restr.getOperator()==OrderByRestriction.OPERATOR_ASCENDING){
           endJoin = endJoin.append(" asc ");
         } else {
           endJoin = endJoin.append(" desc ");
         }
+       /* endJoin = endJoin.append(", FT"+i+".ft_character_value ");
+        if (restr.getOperator()==OrderByRestriction.OPERATOR_ASCENDING){
+          endJoin = endJoin.append(" asc ");
+        } else {
+          endJoin = endJoin.append(" desc ");
+        }*/
         if (i<orderByFilter.size()-1){
           endJoin = endJoin.append(" , ");
         }
@@ -3299,6 +3336,87 @@ public class OracleDataStore extends JDBCDataStore {
     return endJoin.toString();
   }
 
+  public List findDocIdsByAnn(List constraints, int limitcount) throws PersistenceException {
+      Vector lrsIDs = new Vector();
+      CallableStatement stmt = null;
+      ResultSet rs = null;
+      Connection conn = null;
+
+      try {
+        Vector sqlValues = new Vector();
+        String sql = getSQLQueryAnn(constraints, limitcount, sqlValues);
+        conn = DBHelper.connect(this.getStorageUrl(), true);
+        stmt = conn.prepareCall(sql);
+        System.out.println(sql);
+        for (int i = 0; i<sqlValues.size(); i++){
+          if (sqlValues.elementAt(i) instanceof String){
+            stmt.setString(i+1,sqlValues.elementAt(i).toString());
+          }
+          else if (sqlValues.elementAt(i) instanceof Long){
+            stmt.setLong(i+1,((Long) sqlValues.elementAt(i)).longValue());
+          }
+          else if (sqlValues.elementAt(i) instanceof Integer){
+            stmt.setLong(i+1,((Integer) sqlValues.elementAt(i)).intValue());
+          }
+          System.out.println(" -> " +sqlValues.elementAt(i).toString());
+        }
+        stmt.execute();
+        rs = stmt.getResultSet();
+
+        while (rs.next()) {
+          long lr_ID = rs.getLong(1);
+          lrsIDs.addElement(new Long(lr_ID));
+        }
+        return lrsIDs;
+      }
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't get LRs from DB: ["+ sqle+"]");
+      }
+      catch (ClassNotFoundException cnfe){
+        throw new PersistenceException("can't not find driver: ["+ cnfe +"]");
+      }
+      finally {
+        DBHelper.cleanup(rs);
+        DBHelper.cleanup(stmt);
+        DBHelper.disconnect(conn, true);
+      }
+    }
+
+  private String getSQLQueryAnn(List constraints, int limitcount, Vector sqlValues){
+    StringBuffer sql = new StringBuffer("");
+    sql.append("SELECT lr_id ");
+    sql.append(" FROM gateadmin.t_lang_resource LR ");
+    sql.append(" WHERE LR.lr_type_id = 1 ");
+
+    for (int i = 0; i<constraints.size(); i++){
+      Restriction rest = (Restriction) constraints.get(i);
+      sql.append(" AND EXISTS( ");
+      sql.append(" SELECT F.ft_id ");
+      sql.append(" FROM   gateadmin.t_feature F, ");
+      sql.append(" gateadmin.T_AS_ANNOTATION A, ");
+      sql.append(" gateadmin.T_ANNOT_SET S, ");
+      sql.append(" gateadmin.T_DOCUMENT D, ");
+      sql.append(" gateadmin.t_feature_key FK ");
+      sql.append(" WHERE  F.ft_entity_id = A.asann_ann_id ");
+      sql.append(" AND  A.asann_as_id = S.as_id ");
+      sql.append(" AND  S.as_doc_id = D.doc_id ");
+      sql.append(" AND  D.doc_lr_id = LR.LR_ID ");
+      sql.append(" AND  S.AS_NAME = ? ");
+      sqlValues.add("NewsCollector");
+      sql.append(" AND  FK.fk_id = F.ft_key_id ");
+      sql.append(" AND  FK.fk_string= ? ");
+      sqlValues.add(rest.getKey());
+      sql.append(" AND  F.FT_CHARACTER_VALUE = ? ");
+      sqlValues.add(rest.getStringValue());
+      sql.append(" ) ");
+    }
+    sql.append(" group by lr_id ");
+    if (limitcount>0){
+      sql = sql.insert(0,"select lr_id from ( ");
+      sql = sql.append( ") where rownum<"+limitcount);
+    }
+    return sql.toString();
+  }
 
   private class Feature {
 
@@ -3317,6 +3435,19 @@ public class OracleDataStore extends JDBCDataStore {
       this.valueType = vType;
     }
   }
+
+  private class RestrictionComepator implements Comparator{
+    public int compare(Object o1, Object o2){
+      Restriction r1 = (Restriction) o1;
+      Restriction r2 = (Restriction) o2;
+      return r1.getKey().compareTo(r2.getKey());
+    }
+
+    public boolean equals(Object o){
+      return false;
+    }
+  }
+
 
 }
 
