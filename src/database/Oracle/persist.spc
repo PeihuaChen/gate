@@ -46,8 +46,9 @@ create or replace package persist is
   procedure set_lr_name(p_lr_id     IN number,
                         p_lr_name   IN varchar2);
   
-  procedure delete_lr(p_lr_id     IN number);
-
+  procedure delete_document(p_lr_id     IN number);
+  
+  procedure delete_coprus(p_lr_id     IN number);
 
   procedure create_lr(p_usr_id           IN number,
                       p_grp_id           IN number,

@@ -45,6 +45,14 @@ create or replace package body persist is
        when NO_DATA_FOUND then
           raise error.x_invalid_lr;
 
+  end;                                          
+                                                                
+  /*******************************************************************************************/
+  procedure delete_coprus(p_lr_id     IN number)
+  is
+     l_doc_id number;
+  begin       
+     raise error.x_not_implemented;
   end;                                                                                                        
 
   /*******************************************************************************************/
@@ -126,13 +134,6 @@ create or replace package body persist is
      
   end;                                                                                                        
 
-  /*******************************************************************************************/
-  procedure delete_corpus(p_lr_id     IN number)
-  is
-     l_doc_id number;
-  begin       
-     raise error.x_not_implemented;
-  end;                                                                                                        
 
   /*******************************************************************************************/
   procedure create_lr(p_usr_id           IN number,
@@ -610,6 +611,10 @@ create or replace package body persist is
      where  ft_entity_id = p_ent_id
      and    ft_entity_type = p_ent_type; 
   end;
+
+
+
+
   
 /*begin
   -- Initialization
