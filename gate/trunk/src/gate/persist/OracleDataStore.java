@@ -543,9 +543,23 @@ public class OracleDataStore extends JDBCDataStore {
       stmt.setLong(1,lrID.longValue());
       stmt.setString(2,docURL.toString());
       stmt.setString(3,docEncoding);
-      stmt.setLong(4,(null==docStartOffset)? 0 : docStartOffset.longValue());
-      stmt.setLong(5,(null==docEndOffset)? 0 : docEndOffset.longValue());
+      //do we have start offset?
+      if (null==docStartOffset) {
+        stmt.setNull(4,java.sql.Types.NUMERIC);
+      }
+      else {
+        stmt.setLong(4,docStartOffset.longValue());
+      }
+      //do we have end offset?
+      if (null==docEndOffset) {
+        stmt.setNull(5,java.sql.Types.NUMERIC);
+      }
+      else {
+        stmt.setLong(5,docEndOffset.longValue());
+      }
+
       stmt.setBoolean(6,docIsMarkupAware.booleanValue());
+
       //is the document part of a corpus?
       if (null == corpusID) {
         stmt.setNull(7,java.sql.Types.BIGINT);
@@ -604,7 +618,7 @@ public class OracleDataStore extends JDBCDataStore {
     Document dbDoc = new DatabaseDocumentImpl(this.jdbcConn,
                                               doc.getName(),
                                               this,
-                                              docID,
+                                              lrID,
                                               doc.getContent(),
                                               doc.getFeatures(),
                                               doc.getMarkupAware(),
