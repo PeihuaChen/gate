@@ -25,47 +25,29 @@ public class TestDocument extends TestCase
   public TestDocument(String name) { super(name); }
 
   /** Base of the test server URL */
-  protected static String testServer = "http://derwent.dcs.shef.ac.uk/";
+  protected static String testServer = "http://redmires.dcs.shef.ac.uk/";
 
   /** Name of test document 1 */
   protected String testDocument1;
 
   /** Fixture set up */
   public void setUp() {
-    testDocument1 = "texts/doc0.html";
-
+    testDocument1 = "gate/tests/doc0.html";
   } // setUp
 
   /** Get the name of the test server */
   public static String getTestServerName() { return testServer; }
 
   /** Test ordering */
-  public void testCompareTo() {
+  public void testCompareTo() throws Exception{
     Document doc1 = null;
     Document doc2 = null;
     Document doc3 = null;
-    File f = null;
-    URL u = null;
 
 
-    try {
-      f = Files.writeTempFile(Files.getResourceAsStream("texts/def"));
-      u = f.toURL();
-      doc1 = new DocumentImpl(u);
-      f.delete ();
-
-      f = Files.writeTempFile(Files.getResourceAsStream("texts/defg"));
-      u = f.toURL();
-      doc2 = new DocumentImpl(u);
-      f.delete();
-
-      f = Files.writeTempFile(Files.getResourceAsStream("texts/abc"));
-      u = f.toURL();
-      doc3 = new DocumentImpl(u);
-      f.delete();
-
-    } catch (IOException e) {
-    }
+    doc1 = new DocumentImpl(new URL(testServer + "gate/tests/def/"));
+    doc2 = new DocumentImpl(new URL(testServer + "gate/tests/defg/"));
+    doc3 = new DocumentImpl(new URL(testServer + "gate/tests/abc/"));
 
     assert(doc1.compareTo(doc2) < 0);
     assert(doc1.compareTo(doc1) == 0);

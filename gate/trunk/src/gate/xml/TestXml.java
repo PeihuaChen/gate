@@ -63,7 +63,7 @@ public class TestXml extends TestCase
 
 
     gate.Document doc = gate.Transients.newDocument(
-              new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/xces/xces.xml")
+              new URL("http://redmires.dcs.shef.ac.uk/gate/tests/xml/xces/xces.xml")
     );
     
 
@@ -92,9 +92,7 @@ public class TestXml extends TestCase
 
     // set's the map
     docFormat.setMarkupElementsMap(markupElementsMap);
-    System.out.println("Parsing xml file...");
-      docFormat.unpackMarkup (doc,"DocumentContent");
-    System.out.println("DONE!");
+    docFormat.unpackMarkup (doc,"DocumentContent");
     // graphic visualisation
 
     /*

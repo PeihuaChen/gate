@@ -48,6 +48,7 @@ public class TestJape extends TestCase
     defaultAS.add(new Long(8), new Long(10), "C",feat);
 
     // run the parser test
+    Gate.init();
     Batch batch = null;
     batch = new Batch("jape/combined/", "main.jape");
 

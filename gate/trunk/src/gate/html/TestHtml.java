@@ -69,10 +69,8 @@ public class TestHtml extends TestCase
 
     // set's the map
     docFormat.setMarkupElementsMap(markupElementsMap);
+    docFormat.unpackMarkup (doc,"DocumentContent");
 
-    System.out.println("Parsing HTML file...");
-      docFormat.unpackMarkup (doc,"DocumentContent");
-    System.out.println("DONE!");
     // graphic visualisation
     /*
     if (docFormat != null){
