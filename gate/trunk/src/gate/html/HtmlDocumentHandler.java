@@ -104,8 +104,23 @@ public class HtmlDocumentHandler extends ParserCallback {
       }// while
     }// if
 
+    // Just analize the tag t and add some\n chars and spaces to the
+    // tmpDocContent.The reason behind is that we need to have a readable form
+    // for the final document.
+    customizeAppearanceOfDocumentWithStartTag(t);
+
+    // If until here the "tmpDocContent" ends with a NON whitespace char,
+    // then we add a space char before calculating the START index of this
+    // tag.
+    // This is done in order not to concatenate the content of two separate tags
+    // and obtain a different NEW word.
+    int tmpDocContentSize = tmpDocContent.length();
+    if ( tmpDocContentSize != 0 &&
+         !Character.isWhitespace(tmpDocContent.charAt(tmpDocContentSize - 1))
+       ) tmpDocContent.append(" ");
+
     // create the start index of the annotation
-    Long startIndex = new Long(tmpDocContent.length ());
+    Long startIndex = new Long(tmpDocContent.length());
 
     // initialy the start index is equal with the End index
     CustomObject obj = new CustomObject(t.toString(),fm,startIndex,startIndex);
@@ -113,10 +128,6 @@ public class HtmlDocumentHandler extends ParserCallback {
     // put it into the stack
     stack.push (obj);
 
-    // Just analize the tag t and add some\n chars and spaces to the
-    // tmpDocContent.The reason behind is that we need to have a readable form
-    // for the final document.
-    customizeAppearanceOfDocumentWithStartTag(t);
   }//handleStartTag
 
    /** This method is called when the HTML parser encounts the end of a tag
@@ -143,7 +154,6 @@ public class HtmlDocumentHandler extends ParserCallback {
 
     // if t is the </HTML> tag then we reached the end of theHTMLdocument
     if (t == HTML.Tag.HTML){
-
       // replace the old content with the new one
       doc.setContent (new DocumentContentImpl(tmpDocContent.toString()));
 
@@ -200,11 +210,6 @@ public class HtmlDocumentHandler extends ParserCallback {
     if ((++elements % ELEMENTS_RATE) == 0)
        fireStatusChangedEvent("Processed elements : " + elements);
 
-    // Just analize the tag t and add some\n chars and spaces to the
-    // tmpDocContent.The reason behind is that we need to have a readable form
-    // for the final document.
-    customizeAppearanceOfDocumentWithSimpleTag(t);
-
     // construct a feature map from the attributes list
     // these are empty elements
     FeatureMap fm = new SimpleFeatureMapImpl();
@@ -231,6 +236,12 @@ public class HtmlDocumentHandler extends ParserCallback {
     // we add the object directly into the colector
     // we don't add it to the stack because this is an empty tag
     colector.add(obj);
+
+    // Just analize the tag t and add some\n chars and spaces to the
+    // tmpDocContent.The reason behind is that we need to have a readable form
+    // for the final document.
+    customizeAppearanceOfDocumentWithSimpleTag(t);
+
   } // handleSimpleTag
 
   /** This method is called when the HTML parser encounts text (PCDATA)
@@ -240,16 +251,16 @@ public class HtmlDocumentHandler extends ParserCallback {
     String content = new String(text);
     int tmpDocContentSize = 0;
     tmpDocContentSize = tmpDocContent.length();
-
-    // here we check to see if the first char of content and last char
-    // of the tmpDocContentare not whitespaces...
-    // If that so then we have to introduce a white space in order
-    // not to create a new word
+/*
+    // If the first char of the text just read "text[0]" is NOT whitespace AND
+    // the last char of the tmpDocContent[SIZE-1] is NOT whitespace then
+    // concatenation "tmpDocContent + content" will result into a new different
+    // word... and we want to avoid that...
     if (tmpDocContentSize != 0)
      if (!Character.isWhitespace(content.charAt(0)) &&
       !Character.isWhitespace(tmpDocContent.charAt(tmpDocContentSize - 1)))
           content = " " + content;
-
+*/
     CustomObject obj = null;
     Long end = new Long(tmpDocContentSize + content.length());
 
@@ -281,13 +292,14 @@ public class HtmlDocumentHandler extends ParserCallback {
     * @param t the Html tag encounted by the HTML parser
     */
   protected void customizeAppearanceOfDocumentWithStartTag(HTML.Tag t){
-
+//*
     if (HTML.Tag.P == t){
       int tmpDocContentSize = tmpDocContent.length();
       if ( tmpDocContentSize >= 2 &&
            '\n' != tmpDocContent.charAt(tmpDocContentSize - 2)
          ) tmpDocContent.append("\n");
     }// End if
+//*/
   }// customizeAppearanceOfDocumentWithStartTag
 
   /** This method analizes the tag t and adds some \n chars and spaces to the
