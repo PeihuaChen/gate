@@ -45,6 +45,11 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   /** The name of the action class. */
   private String actionClassName;
 
+  /** Package name for action classes. It's called a "dir name" because
+    * we used to dump the action classes to disk and compile them there.
+    */
+  static private String actionsDirName = "japeactionclasses";
+
   /** The qualified name of the action class. */
   private String actionClassQualifiedName;
 
@@ -80,28 +85,11 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   /** A list of the files and directories we create. */
   static private Array tempFiles = new Array();
 
-  /** Directory for action classes. */
-// BUG WARNING: can't cope with separators in this path (see static init below)
-  static private String actionsDirName = "japeactionclasses";
-
   /** Local fashion for newlines. */
   private final String nl = Strings.getNl();
 
   /** Debug flag. */
   static final boolean debug = false;
-
-  /** Static initialiser to ensure that the japeactionclasses directory
-    * exists.
-    */
-  static {
-    File dir = new File(actionsDirName);
-
-    if(! dir.isDirectory()) {
-      dir.mkdirs();
-// SHOULD BE: for each dir in the split of actionsDirName over File.separator
-      tempFiles.add(dir);
-    }
-  } // Directories initialiser.
 
   /** Construction from the transducer name, rule name and the LHS. */
   public RightHandSide(
@@ -438,6 +426,9 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.9  2000/06/12 13:33:27  hamish
+// removed japeactionclasse create code (static init block
+//
 // Revision 1.8  2000/05/16 10:38:25  hamish
 // removed printout
 //
