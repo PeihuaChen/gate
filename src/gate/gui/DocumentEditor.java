@@ -1569,24 +1569,9 @@ public class DocumentEditor extends AbstractVisualResource{
         tData = new TypeData(setName, type, false);
         tData.setAnnotations(set.get(type));
         setMap.put(type, tData);
-        DefaultMutableTreeNode typeNode =
-                  new DefaultMutableTreeNode(tData, false);
 
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-          ((DefaultMutableTreeNode)stylesTreeRoot).getFirstChild();
-        while(node != null &&
-          !((TypeData)node.getUserObject()).getSet().equals(setName))
-          node = node.getNextSibling();
-        //we have to add typeNode to node
-        //find the right place
-        int i = 0;
-        while (i < node.getChildCount() &&
-              ((TypeData)
-                ((DefaultMutableTreeNode)node.getChildAt(i)).
-                getUserObject()
-              ).getType().compareTo(tData.getType())<0) i++;
+        SwingUtilities.invokeLater(new NodeAdder(tData));
 
-        SwingUtilities.invokeLater(new NodeAdder(typeNode, node, i));
 
       }//new type
 
@@ -1722,19 +1707,35 @@ public class DocumentEditor extends AbstractVisualResource{
      * at a specified index.
      */
     class NodeAdder implements Runnable{
-      NodeAdder(DefaultMutableTreeNode node,
-                DefaultMutableTreeNode parentNode,
-                int index){
-        this.node = node;
-        this.parentNode = parentNode;
-        this.index = index;
+      NodeAdder(TypeData tData){
+        this.tData = tData;
       }
       public void run(){
-        stylesTreeModel.insertNodeInto(node, parentNode, index);
+        //create the new node
+        DefaultMutableTreeNode typeNode =
+                  new DefaultMutableTreeNode(tData, false);
+
+        //find its parent
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+          ((DefaultMutableTreeNode)stylesTreeRoot).getFirstChild();
+        while(node != null &&
+          !((TypeData)node.getUserObject()).getSet().equals(tData.getSet()))
+          node = node.getNextSibling();
+
+        //we have to add typeNode to node
+        //find the right place
+        int i = 0;
+        while (i < node.getChildCount() &&
+              ((TypeData)
+                ((DefaultMutableTreeNode)node.getChildAt(i)).
+                getUserObject()
+              ).getType().compareTo(tData.getType())<0) i++;
+
+        //insert it!
+        stylesTreeModel.insertNodeInto(typeNode, node, i);
       }
-      DefaultMutableTreeNode node;
-      DefaultMutableTreeNode parentNode;
-      int index;
+
+      TypeData tData;
     }//class NodeAdder implements Runnable
   }//class EventsHandler
 
