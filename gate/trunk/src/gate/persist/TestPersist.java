@@ -641,7 +641,7 @@ public class TestPersist extends TestCase
     }
 
     //6. URL
-    Document dbDoc = (Document)lr;
+    DatabaseDocumentImpl dbDoc = (DatabaseDocumentImpl)lr;
     Assert.assertEquals(dbDoc.getSourceUrl(),((Document)this.uc01_LR).getSourceUrl());
 
     //5.start/end
@@ -849,39 +849,39 @@ public class TestPersist extends TestCase
     Assert.assertEquals(encNew,encOld);
 
 
-    //9. default annotations
-    AnnotationSet defaultOld = dbDoc.getAnnotations();
-    Assert.assertNotNull(defaultOld);
-    Iterator it = defaultOld.iterator();
-    if (it.hasNext()) {
-      //remove first element
-      it.next();
-      it.remove();
-    }
-    if (it.hasNext()) {
-      //change second element
-      Annotation ann = (Annotation)it.next();
-      FeatureMap fm1 = new SimpleFeatureMapImpl();
-      fm.put("string key","string value");
-      ann.setFeatures(fm1);
-    }
+    //9. add annotations
+    AnnotationSet dbDocSet = dbDoc.getAnnotations("TEST SET");
+    Assert.assertNotNull(dbDocSet);
 
-    AnnotationSet defaultNew = dbDoc.getAnnotations();
+    FeatureMap fm1 = new SimpleFeatureMapImpl();
+    fm.put("string key","string value");
+
+    Integer annInd = dbDocSet.add(new Long(0), new Long(10),
+                                "TEST TYPE",
+                                fm1);
+
     dbDoc.sync();
     doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
+    AnnotationSet doc2Set = doc2.getAnnotations("TEST SET");
+    Assert.assertTrue(dbDocSet.size() == doc2Set.size());
+    Assert.assertEquals(doc2Set,dbDocSet);
 
-    Assert.assertTrue(defaultNew.size() == dbDoc.getAnnotations().size());
-    Assert.assertTrue(defaultNew.size() == doc2.getAnnotations().size());
 
-    Assert.assertEquals(defaultNew,dbDoc.getAnnotations());
-    Assert.assertEquals(defaultNew,doc2.getAnnotations());
+    //9.1. change+add annotations
+    Annotation dbDocAnn = dbDocSet.get(annInd);
 
-    Iterator itDefault = defaultNew.iterator();
-    while (itDefault.hasNext()) {
-      Annotation currAnn = (Annotation)itDefault.next();
-      Assert.assertTrue(doc2.getAnnotations().contains(currAnn));
-    }
+    Integer newInd = dbDocSet.add(dbDocAnn.getStartNode().getOffset(),
+                                    dbDocAnn.getEndNode().getOffset(),
+                                    dbDocAnn.getType() + "__XX",
+                                    new SimpleFeatureMapImpl());
+    Annotation dbDocAnnNew = dbDocSet.get(newInd);
+    dbDoc.sync();
 
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
+    doc2Set = doc2.getAnnotations("TEST SET");
+    Assert.assertTrue(dbDocSet.size() == doc2Set.size());
+    Assert.assertEquals(doc2Set,dbDocSet);
+    Assert.assertTrue(doc2Set.contains(dbDocAnnNew));
 /*
     //10. iterate named annotations
     Map namedOld = ((DocumentImpl)this.uc01_LR).getNamedAnnotationSets();
@@ -899,7 +899,7 @@ public class TestPersist extends TestCase
     //11. add a new ann-set
     String dummySetName = "--NO--SUCH--SET--";
     AnnotationSet aset = dbDoc.getAnnotations(dummySetName);
-    aset.addAll(defaultNew);
+    aset.addAll(dbDoc.getAnnotations());
     dbDoc.sync();
     doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
 
@@ -1187,9 +1187,11 @@ public class TestPersist extends TestCase
 
   public static void main(String[] args){
     try{
+//System.setProperty(Gate.GATE_CONFIG_PROPERTY,"y:/gate.xml")    ;
       Gate.setLocalWebServer(false);
       Gate.setNetConnected(false);
       Gate.init();
+
       TestPersist test = new TestPersist("");
       test.setUp();
       test.testDelete();
