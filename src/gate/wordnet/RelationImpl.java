@@ -28,16 +28,46 @@ class RelationImpl implements Relation {
     return this.type;
   }
 
-  public int getInverseType() {
-    throw new MethodNotImplementedException();
+  public String getLabel() {
+    return WNHelper.int2PointerType(this.type).getLabel();
   }
 
-  public String getLabel() {
-    throw new MethodNotImplementedException();
+  public int getInverseType() {
+
+    switch(this.type) {
+
+      case Relation.REL_ANTONYM:
+        return Relation.REL_ANTONYM;
+
+      case Relation.REL_HYPONYM:
+        return Relation.REL_HYPERNYM;
+
+      case Relation.REL_HYPERNYM:
+        return Relation.REL_HYPONYM;
+
+      case Relation.REL_MEMBER_HOLONYM:
+        return Relation.REL_MEMBER_MERONYM;
+
+      case Relation.REL_MEMBER_MERONYM:
+        return Relation.REL_MEMBER_HOLONYM;
+
+      case Relation.REL_SIMILAR_TO:
+        return Relation.REL_SIMILAR_TO;
+
+      case Relation.REL_ATTRIBUTE:
+        return Relation.REL_ATTRIBUTE;
+
+      case Relation.REL_VERB_GROUP:
+        return Relation.REL_VERB_GROUP;
+
+      default:
+        return -1;
+    }
   }
+
 
   public boolean isApplicableTo(int pos) {
-    throw new MethodNotImplementedException();
+    return WNHelper.int2PointerType(this.type).appliesTo(WNHelper.int2POS(pos));
   }
 
 }
