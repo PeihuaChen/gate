@@ -66,4 +66,10 @@ public interface Gazetteer extends gate.LanguageAnalyser,gate.ProcessingResource
    * @return the mapping definition of this gazetteer,if such otherwise null   */
   public MappingDefinition getMappingDefinition();
 
+  /**get the linear definition of this gazetteer. there is no parallel
+   * set method because the definition is laoded through the listsUrl
+   * on init().
+   * @return the linear definition of the gazetteer */
+  public LinearDefinition getLinearDefinition();
+
 }//interface Gazetteer

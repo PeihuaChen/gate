@@ -83,7 +83,11 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     return gazListsByNode;
   }  // loadLists()
 
-
+  /**get the lists by node map
+   * @return a map of nodes vs lists */
+  public Map getListsByNode() {
+    return gazListsByNode;
+  }
 
   /**get the url of this linear definition
    * @return the url of this linear definition   */
@@ -154,6 +158,12 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
    */
   public Set getLists() {
     return new HashSet(lists);
+  }
+
+  /** get the nodes of the definition as a set
+   *  @return set of the nodes of the definition*/
+  public Set getNodes() {
+    return new HashSet(nodes);
   }
 
   /*---implementation of interface java.util.Set---*/

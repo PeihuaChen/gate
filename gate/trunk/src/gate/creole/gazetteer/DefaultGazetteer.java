@@ -75,9 +75,6 @@ public class DefaultGazetteer extends AbstractGazetteer {
     DEF_GAZ_CASE_SENSITIVE_PARAMETER_NAME = "caseSensitive";
 
 
-  /** the linear definition of the gazetteer */
-  private LinearDefinition definition;
-
   /** a map of nodes vs gaz lists */
   private Map listsByNode;
 
@@ -501,6 +498,8 @@ public class DefaultGazetteer extends AbstractGazetteer {
   public Lookup lookup(String singleItem) {
     return null;
   }
+
+
 
 } // DefaultGazetteer
 
