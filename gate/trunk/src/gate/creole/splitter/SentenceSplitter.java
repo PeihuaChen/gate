@@ -101,7 +101,8 @@ public class SentenceSplitter extends AbstractProcessingResource{
       if(inputASName != null && inputASName.equals("")) inputASName = null;
       if(outputASName != null && outputASName.equals("")) outputASName = null;
       try{
-        fireProgressChanged(0);
+        if (!Main.batchMode)
+          fireProgressChanged(0);
         params = Factory.newFeatureMap();
         params.put("document", document);
         params.put("annotationSetName", inputASName);
@@ -115,30 +116,38 @@ public class SentenceSplitter extends AbstractProcessingResource{
       }catch(Exception e){
         throw new ExecutionException(e);
       }
-      fireProgressChanged(5);
+      ProgressListener pListener = null;
+      StatusListener sListener = null;
+      if (!Main.batchMode) {
+        fireProgressChanged(5);
 
       //run the gazetteer
-      ProgressListener pListener = new CustomProgressListener(5, 10);
-      StatusListener sListener = new StatusListener(){
-        public void statusChanged(String text){
-          fireStatusChanged(text);
-        }
-      };
-      gazetteer.addProgressListener(pListener);
-      gazetteer.addStatusListener(sListener);
+        pListener = new CustomProgressListener(5, 10);
+        sListener = new StatusListener(){
+          public void statusChanged(String text){
+            fireStatusChanged(text);
+          }
+        };
+        gazetteer.addProgressListener(pListener);
+        gazetteer.addStatusListener(sListener);
+      }
       gazetteer.run();
       gazetteer.check();
-      gazetteer.removeProgressListener(pListener);
-      gazetteer.removeStatusListener(sListener);
+      if (!Main.batchMode) {
+        gazetteer.removeProgressListener(pListener);
+        gazetteer.removeStatusListener(sListener);
 
       //run the transducer
-      pListener = new CustomProgressListener(11, 90);
-      transducer.addProgressListener(pListener);
-      transducer.addStatusListener(sListener);
+        pListener = new CustomProgressListener(11, 90);
+        transducer.addProgressListener(pListener);
+        transducer.addStatusListener(sListener);
+      }
       transducer.run();
       transducer.check();
-      transducer.removeProgressListener(pListener);
-      transducer.removeStatusListener(sListener);
+      if (!Main.batchMode) {
+        transducer.removeProgressListener(pListener);
+        transducer.removeStatusListener(sListener);
+      }
 
       //get pointers to the annotation sets
       AnnotationSet inputAS = (inputASName == null) ?
@@ -153,8 +162,8 @@ public class SentenceSplitter extends AbstractProcessingResource{
       if(inputAS != outputAS){
         outputAS.addAll(inputAS.get("Sentence"));
       }
-
-      fireProcessFinished();
+      if (!Main.batchMode)
+        fireProcessFinished();
     }catch(ExecutionException ee){
       executionException = ee;
     }catch(Exception e){
@@ -193,7 +202,7 @@ public class SentenceSplitter extends AbstractProcessingResource{
   private java.net.URL gazetteerListsURL;
   private gate.Document document;
   protected void fireStatusChanged(String e) {
-    if (statusListeners != null) {
+    if (!Main.batchMode && statusListeners != null) {
       Vector listeners = statusListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -202,7 +211,7 @@ public class SentenceSplitter extends AbstractProcessingResource{
     }
   }
   public synchronized void removeProgressListener(ProgressListener l) {
-    if (progressListeners != null && progressListeners.contains(l)) {
+    if (!Main.batchMode && progressListeners != null && progressListeners.contains(l)) {
       Vector v = (Vector) progressListeners.clone();
       v.removeElement(l);
       progressListeners = v;
@@ -270,11 +279,13 @@ public class SentenceSplitter extends AbstractProcessingResource{
       this.end = end;
     }
     public void progressChanged(int i){
-      fireProgressChanged(start + (end - start) * i / 100);
+      if (!Main.batchMode)
+        fireProgressChanged(start + (end - start) * i / 100);
     }
 
     public void processFinished(){
-      fireProgressChanged(end);
+      if (!Main.batchMode)
+        fireProgressChanged(end);
     }
 
     int start;

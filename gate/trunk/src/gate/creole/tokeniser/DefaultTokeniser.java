@@ -84,7 +84,8 @@ public class DefaultTokeniser extends AbstractProcessingResource {
   public void run(){
     FeatureMap params = Factory.newFeatureMap();
     try{
-      fireProgressChanged(0);
+      if (!Main.batchMode)
+        fireProgressChanged(0);
       //tokeniser
       params.put("document", document);
       params.put("annotationSetName", annotationSetName);
@@ -97,30 +98,38 @@ public class DefaultTokeniser extends AbstractProcessingResource {
       params.put("outputASName", annotationSetName);
       Factory.setResourceRuntimeParameters(transducer, params);
 
-      fireProgressChanged(5);
-      ProgressListener pListener = new CustomProgressListener(5, 50);
-      StatusListener sListener = new StatusListener(){
-        public void statusChanged(String text){
-          fireStatusChanged(text);
-        }
-      };
+      ProgressListener pListener = null;
+      StatusListener sListener = null;
+      if (!Main.batchMode) {
+        fireProgressChanged(5);
+        pListener = new CustomProgressListener(5, 50);
+        sListener = new StatusListener(){
+          public void statusChanged(String text){
+            fireStatusChanged(text);
+          }
+        };
 
       //tokeniser
-      tokeniser.addProgressListener(pListener);
-      tokeniser.addStatusListener(sListener);
+        tokeniser.addProgressListener(pListener);
+        tokeniser.addStatusListener(sListener);
+      }
       tokeniser.run();
       tokeniser.check();
-      tokeniser.removeProgressListener(pListener);
-      tokeniser.removeStatusListener(sListener);
+      if (!Main.batchMode) {
+        tokeniser.removeProgressListener(pListener);
+        tokeniser.removeStatusListener(sListener);
 
       //transducer
-      pListener = new CustomProgressListener(50, 100);
-      transducer.addProgressListener(pListener);
-      transducer.addStatusListener(sListener);
+        pListener = new CustomProgressListener(50, 100);
+        transducer.addProgressListener(pListener);
+        transducer.addStatusListener(sListener);
+      }
       transducer.run();
       transducer.check();
-      transducer.removeProgressListener(pListener);
-      transducer.removeStatusListener(sListener);
+      if (!Main.batchMode) {
+        transducer.removeProgressListener(pListener);
+        transducer.removeStatusListener(sListener);
+      }
     }catch(ExecutionException ee){
       executionException = ee;
     }catch(Exception e){

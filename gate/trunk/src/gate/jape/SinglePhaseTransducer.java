@@ -136,8 +136,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
         }
       }
     }
-    if(annotations.isEmpty() && !Main.batchMode){
-      fireProcessFinished();
+    if(annotations.isEmpty()){
+      if (!Main.batchMode)
+        fireProcessFinished();
       return;
     }
     //sort the input by start offset

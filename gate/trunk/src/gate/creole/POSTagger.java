@@ -117,7 +117,8 @@ public class POSTagger extends AbstractProcessingResource {
             Annotation token = (Annotation)tokens.get(i);
             token.getFeatures().put("category", category);
           }//for(i = 0; i<= sentence.size(); i++)
-          fireProgressChanged(sentIndex++ * 100 / sentCnt);
+          if (!Main.batchMode)
+            fireProgressChanged(sentIndex++ * 100 / sentCnt);
         }//while(sentIter.hasNext())
 
         if (! Main.batchMode){ //fire events if not in batch mode

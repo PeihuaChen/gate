@@ -488,7 +488,7 @@ extends AbstractLanguageResource implements LanguageResource{
     }
   }
   protected void fireStatusChanged(String e) {
-    if (statusListeners != null) {
+    if (!Main.batchMode && statusListeners != null) {
       Vector listeners = statusListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {

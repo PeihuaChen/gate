@@ -240,7 +240,7 @@ public class CorpusImpl extends TreeSet implements Corpus {
     Object lastNext;
   }
   protected void fireDocumentAdded(CorpusEvent e) {
-    if (corpusListeners != null) {
+    if (!Main.batchMode && corpusListeners != null) {
       Vector listeners = corpusListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -249,7 +249,7 @@ public class CorpusImpl extends TreeSet implements Corpus {
     }
   }
   protected void fireDocumentRemoved(CorpusEvent e) {
-    if (corpusListeners != null) {
+    if (!Main.batchMode && corpusListeners != null) {
       Vector listeners = corpusListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {

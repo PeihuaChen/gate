@@ -69,7 +69,7 @@ implements JapeConstants {
     this.japeURL = url;
     this.encoding =  encoding;
     parseJape();
-    if(transducer != null){
+    if(transducer != null && !Main.batchMode){
       transducer.addStatusListener(new StatusListener(){
         public void statusChanged(String text){
           fireStatusChanged(text);
@@ -342,6 +342,9 @@ implements JapeConstants {
   /** Process a single document. */
   public void transduce(Document doc, AnnotationSet inputAS,
                         AnnotationSet outputAS) throws JapeException {
+    //no need to transduce empty document
+    if (inputAS == null || inputAS.isEmpty())
+      return;
     transducer.transduce(doc, inputAS, outputAS);
 
   } // transduce(doc)

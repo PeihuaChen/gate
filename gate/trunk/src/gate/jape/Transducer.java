@@ -95,7 +95,9 @@ public abstract class Transducer implements Serializable
    * be used. By default it is true.
    */
   protected void fireProgressChanged(int e) {
-    if (progressListeners != null && !Main.batchMode) {
+    if (Main.batchMode)
+      return;
+    if (progressListeners != null || progressListeners.isEmpty()) {
       Vector listeners = progressListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
