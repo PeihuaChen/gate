@@ -37,6 +37,24 @@ public class MachineLearningPR extends AbstractLanguageAnalyser
     actionList.add(null);
   }
 
+  /**
+   * This will make sure that any resources allocated by an ml wrapper get
+   * released. This is needed in the case of those wrappers that call
+   * native code, as in such cases there is a need to realese dynamically
+   * allocated memory.
+   */
+  public void cleanup() {
+    // First call cleanup in the parent, in case any clean up needs to be done
+    // there.
+    super.cleanup();
+
+    // So long as an ML Engine (wrapper) is associated with the processing
+    // resource, call its cleanup method.
+    if (engine!=null) {
+      engine.cleanUp();
+    }
+  }
+
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
     if(configFileURL == null){
@@ -88,6 +106,14 @@ public class MachineLearningPR extends AbstractLanguageAnalyser
     }catch(InstantiationException ie){
       throw new ResourceInstantiationException(ie);
     }
+
+    // See if batch classification mode had been set.
+    if (engineElement.getChild("BATCH-MODE-CLASSIFICATION") == null) {
+      batchModeClassification = false;
+    } else {
+      batchModeClassification = true;
+    }
+
     engine.setDatasetDefinition(datasetDefinition);
     engine.setOptions(engineElement.getChild("OPTIONS"));
     engine.setOwnerPR(this);
@@ -104,29 +130,32 @@ public class MachineLearningPR extends AbstractLanguageAnalyser
   /**
    * Run the resource.
    */
-  public void execute() throws ExecutionException{
+  public void execute() throws ExecutionException {
     interrupted = false;
     //check the input
-    if(document == null) {
+    if (document == null) {
       throw new ExecutionException(
-        "No document provided!"
-      );
+          "No document provided!"
+          );
     }
 
-    if(inputASName == null ||
-       inputASName.equals("")) annotationSet = document.getAnnotations();
-    else annotationSet = document.getAnnotations(inputASName);
+    if (inputASName == null ||
+        inputASName.equals(""))
+      annotationSet = document.getAnnotations();
+    else
+      annotationSet = document.getAnnotations(inputASName);
 
-    if(training.booleanValue()){
+    if (training.booleanValue()) {
       fireStatusChanged(
           "Collecting training data from " + document.getName() + "...");
-    }else{
+    }
+    else {
       fireStatusChanged(
           "Applying ML model to " + document.getName() + "...");
     }
     fireProgressChanged(0);
     AnnotationSet anns = annotationSet.
-                                     get(datasetDefinition.getInstanceType());
+                         get(datasetDefinition.getInstanceType());
     annotations = (anns == null || anns.isEmpty()) ?
                   new ArrayList() : new ArrayList(anns);
     Collections.sort(annotations, new OffsetComparator());
@@ -137,41 +166,114 @@ public class MachineLearningPR extends AbstractLanguageAnalyser
     //create the cache structure
     cache = new Cache();
 
-    while(annotationIter.hasNext()){
-      Annotation instanceAnn = (Annotation)annotationIter.next();
-      List attributeValues = new ArrayList(datasetDefinition.
-                                           getAttributes().size());
-      //find the values for all attributes
-      Iterator attrIter = datasetDefinition.getAttributes().iterator();
-      while(attrIter.hasNext()){
-        Attribute attr = (Attribute)attrIter.next();
-        if(attr.isClass && !training.booleanValue()){
-          //we're not training so the class will be undefined
-          attributeValues.add(null);
-        }else{
-          attributeValues.add(cache.getAttributeValue(index, attr));
+    if (!batchModeClassification || training.booleanValue()) {
+      // This code covers the case when instances are going to be passed to
+      // the wrapper one at a time, which is always the case with training,
+      // and the case with classification when we are not using batch mode.
+      while (annotationIter.hasNext()) {
+        Annotation instanceAnn = (Annotation) annotationIter.next();
+        List attributeValues = new ArrayList(datasetDefinition.
+                                             getAttributes().size());
+        //find the values for all attributes
+        Iterator attrIter = datasetDefinition.getAttributes().iterator();
+        while (attrIter.hasNext()) {
+          Attribute attr = (Attribute) attrIter.next();
+          if (attr.isClass && !training.booleanValue()) {
+            //we're not training so the class will be undefined
+            attributeValues.add(null);
+          }
+          else {
+            attributeValues.add(cache.getAttributeValue(index, attr));
+          }
         }
+
+        if (training.booleanValue()) {
+          engine.addTrainingInstance(attributeValues);
+        }
+        else {
+          Object result = engine.classifyInstance(attributeValues);
+          if (result instanceof Collection) {
+            Iterator resIter = ( (Collection) result).iterator();
+            while (resIter.hasNext())
+              updateDocument(resIter.next(), index);
+          }
+          else {
+            updateDocument(result, index);
+          }
+        }
+
+        cache.shift();
+        //every 10 instances fire an event
+        if (index % 10 == 0) {
+          fireProgressChanged(index * 100 / size);
+          if (isInterrupted())
+            throw new ExecutionInterruptedException();
+        }
+        index++;
       }
 
-      if(training.booleanValue()){
-        engine.addTrainingInstance(attributeValues);
-      }else{
-        Object result = engine.classifyInstance(attributeValues);
-        if(result instanceof Collection){
-          Iterator resIter = ((Collection)result).iterator();
-          while(resIter.hasNext()) updateDocument(resIter.next(), index);
-        }else{
+    }
+    else {
+      // This code covers the case when all the instances in a document will be 
+      // passed to the
+      // wrapper as a batch. This is necessary to achieve efficient performance
+      // with some wrappers.
+
+      // This list is needed to collect all the test instances.
+      List instancesToBeClassified = new ArrayList();
+
+      while (annotationIter.hasNext()) {
+        Annotation instanceAnn = (Annotation) annotationIter.next();
+        List attributeValues = new ArrayList(datasetDefinition.
+                                             getAttributes().size());
+        //find the values for all attributes
+        Iterator attrIter = datasetDefinition.getAttributes().iterator();
+        while (attrIter.hasNext()) {
+          Attribute attr = (Attribute) attrIter.next();
+          if (attr.isClass) {
+            //we're not training so the class will be undefined
+            attributeValues.add(null);
+          }
+          else {
+            attributeValues.add(cache.getAttributeValue(index, attr));
+          }
+        }
+
+        // Instead of classifying the instance, just add it to the list of
+        // instances that need classifying.
+        instancesToBeClassified.add(attributeValues);
+
+        cache.shift();
+
+        index++;
+      }
+
+      // Now all the data is collected in instances to be classified, we can
+      // actually get the wrapper to classify them.
+      List classificationResults = engine.batchClassifyInstances(
+          instancesToBeClassified);
+
+      // Now go through the document and add all the annotations appropriately,
+      // given the output of the wrapper.
+
+      // Start with the first instance again.
+      index = 0;
+      Iterator resultsIterator = classificationResults.iterator();
+      while (resultsIterator.hasNext()) {
+
+        Object result = resultsIterator.next();
+        if (result instanceof Collection) {
+          Iterator resIter = ( (Collection) result).iterator();
+          while (resIter.hasNext())
+            updateDocument(resIter.next(), index);
+        }
+        else {
           updateDocument(result, index);
         }
-      }
 
-      cache.shift();
-      //every 10 instances fire an event
-      if(index % 10 == 0){
-        fireProgressChanged(index * 100 / size);
-        if(isInterrupted()) throw new ExecutionInterruptedException();
+        // Move index on so that it points at the next instance.
+        index++;
       }
-      index++;
     }
     annotations = null;
   } // execute()
@@ -454,4 +556,10 @@ public class MachineLearningPR extends AbstractLanguageAnalyser
 
   protected Cache cache;
   private Boolean training;
+
+  /**
+   * This member will be set to true if instances are to be passed to the
+   * wrapper in batches, rather than one instance at a time.
+   */
+  protected boolean batchModeClassification;
 }

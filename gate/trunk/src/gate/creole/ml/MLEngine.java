@@ -63,6 +63,20 @@ public interface MLEngine {
   public Object classifyInstance(List attributes)throws ExecutionException;
 
   /**
+   * Like classify instances, but take a list of instances instead of a single
+   * instance, and return a list of results (one for each instance) instead of
+   * a single result.
+   *
+   * @param instances A list of lists of attributes describing the instance. The
+   * value for all of the class elements will be arbitrary.
+   * @return A list of values predicted for the class attribute, which will be
+   * Strings when the class in nominal or boolean, and a Double values
+   * otherwise.
+   * @throws ExecutionException
+   */
+  public List batchClassifyInstances(List instances) throws ExecutionException;
+
+  /**
    * This method will be called after an engine is created and has its dataset
    * and options set. This allows the ML engine to initialise itself in
    * preparation of being used.
@@ -76,4 +90,11 @@ public interface MLEngine {
    * @param pr the processing resource that owns this engine.
    */
   public void setOwnerPR(ProcessingResource pr);
+
+  /**
+   * Cleans up any resources allocated by the Engine when it is destroyed.
+   * (Generally this is most likely to be needed by those wrappers that
+   * call native code.)
+   */
+  public void cleanUp();
 }
