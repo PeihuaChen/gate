@@ -26,6 +26,7 @@ import junit.framework.*;
 public class TestWordNet extends TestCase {
 
   private static final String propertiesFile = "D:/PRJ/jwnl/file_properties.xml";
+  private static IndexFileWordNetImpl wnMain = null;
 
   public TestWordNet(String dummy) {
     super(dummy);
@@ -35,7 +36,13 @@ public class TestWordNet extends TestCase {
     TestWordNet testWordNet1 = new TestWordNet("");
 
     try {
+
+      testWordNet1.setUp();
+
       testWordNet1.testWN_01();
+
+      testWordNet1.testWN_02();
+
     }
     catch(Exception ex) {
       ex.printStackTrace();
@@ -43,10 +50,8 @@ public class TestWordNet extends TestCase {
   }
 
   public void testWN_01() throws Exception {
-
-    IndexFileWordNetImpl wnMain = new IndexFileWordNetImpl();
-    wnMain.setPropertyFile(new File(propertiesFile));
-    wnMain.init();
+    //test synset access - read all senses for a word and compare them with the entries from the
+    //WN16 index files
 
     //get all synsets for "cup"
     List senseList = wnMain.lookupWord("cup",WordNet.POS_NOUN);
@@ -113,6 +118,87 @@ public class TestWordNet extends TestCase {
     }
   }
 
+
+  public void testWN_02() throws Exception {
+    //test hypernymy - traverse upwards the hierarchy starting from some word
+    //compare the result with the WN16 index files
+    //get all synsets for "cup"
+
+    List senseList = wnMain.lookupWord("cup",WordNet.POS_NOUN);
+    Assert.assertTrue(senseList.size() == 8);
+
+    Iterator itSenses = senseList.iterator();
+
+    for (int i=0; i< senseList.size(); i++) {
+
+      WordSense currSense = (WordSense)senseList.get(i);
+      Synset currSynset = currSense.getSynset();
+      Assert.assertNotNull(currSynset);
+
+      if (false == currSynset.getGloss().equals("a small open container usually used for drinking; \"he put the cup back in the saucer\"; \"the handle of the cup was missing\"")) {
+        continue;
+      }
+
+      List semRelations = currSynset.getSemanticRelations(SemanticRelation.REL_HYPERNYM);
+      Assert.assertNotNull(semRelations);
+      Assert.assertTrue(2 == semRelations.size());
+
+      for (int j=0; j< semRelations.size(); j++ ) {
+
+        SemanticRelation currHyperRel = (SemanticRelation)semRelations.get(j);
+
+        Assert.assertTrue(currHyperRel.getType() == SemanticRelation.REL_HYPERNYM);
+        Assert.assertEquals(currHyperRel.getSymbol(),"@");
+        Assert.assertEquals(currHyperRel.getSource(), currSynset);
+
+        Synset currHypernym = currHyperRel.getTarget();
+        Assert.assertNotNull(currHypernym);
+
+        Synset hyperSynset = currHypernym;
+        if (currHypernym.getGloss().equals("eating and serving dishes collectively")) {
+
+          hyperSynset = ((SemanticRelation)hyperSynset.getSemanticRelations(SemanticRelation.REL_HYPERNYM).get(0)).getTarget();
+          Assert.assertEquals(hyperSynset.getGloss(),"articles for use at the table");
+
+          hyperSynset = ((SemanticRelation)hyperSynset.getSemanticRelations(SemanticRelation.REL_HYPERNYM).get(0)).getTarget();
+          Assert.assertEquals(hyperSynset.getGloss(),"articles of the same kind or material; usually used in combination: silverware; software");
+
+          hyperSynset = ((SemanticRelation)hyperSynset.getSemanticRelations(SemanticRelation.REL_HYPERNYM).get(0)).getTarget();
+          Assert.assertEquals(hyperSynset.getGloss(),"one of a class of artifacts; \"an article of clothing\"");
+
+          hyperSynset = ((SemanticRelation)hyperSynset.getSemanticRelations(SemanticRelation.REL_HYPERNYM).get(0)).getTarget();
+          Assert.assertEquals(hyperSynset.getGloss(),"a man-made object");
+
+          hyperSynset = ((SemanticRelation)hyperSynset.getSemanticRelations(SemanticRelation.REL_HYPERNYM).get(0)).getTarget();
+          Assert.assertEquals(hyperSynset.getGloss(),"a physical (tangible and visible) entity; \"it was full of rackets, balls and other objects\"");
+
+          hyperSynset = ((SemanticRelation)hyperSynset.getSemanticRelations(SemanticRelation.REL_HYPERNYM).get(0)).getTarget();
+          Assert.assertEquals(hyperSynset.getGloss(),"anything having existence (living or nonliving)");
+        }
+        else if (currHypernym.getGloss().equals("something that holds things, especially for transport or storage")) {
+
+          hyperSynset = ((SemanticRelation)hyperSynset.getSemanticRelations(SemanticRelation.REL_HYPERNYM).get(0)).getTarget();
+          Assert.assertEquals(hyperSynset.getGloss(),"an artifact (or system of artifacts) that is instrumental in accomplishing some end");
+
+          hyperSynset = ((SemanticRelation)hyperSynset.getSemanticRelations(SemanticRelation.REL_HYPERNYM).get(0)).getTarget();
+          Assert.assertEquals(hyperSynset.getGloss(),"a man-made object");
+
+          hyperSynset = ((SemanticRelation)hyperSynset.getSemanticRelations(SemanticRelation.REL_HYPERNYM).get(0)).getTarget();
+          Assert.assertEquals(hyperSynset.getGloss(),"a physical (tangible and visible) entity; \"it was full of rackets, balls and other objects\"");
+
+          hyperSynset = ((SemanticRelation)hyperSynset.getSemanticRelations(SemanticRelation.REL_HYPERNYM).get(0)).getTarget();
+          Assert.assertEquals(hyperSynset.getGloss(),"anything having existence (living or nonliving)");
+        }
+        else {
+          Assert.fail();
+        }
+      }
+
+      break;
+    }
+
+  }
+
   private void checkSynset(Synset s, String gloss, int numWords) {
 
     Assert.assertEquals(s.getGloss(),gloss);
@@ -156,5 +242,15 @@ System.out.println(iSet);
   public static Test suite() {
     return new TestSuite(TestWordNet.class);
   } // suite
+
+
+  protected void setUp() throws Exception {
+
+    if (null == wnMain) {
+      wnMain = new IndexFileWordNetImpl();
+      wnMain.setPropertyFile(new File(propertiesFile));
+      wnMain.init();
+    }
+  }
 
 }
