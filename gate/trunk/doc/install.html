@@ -25,7 +25,7 @@
 
 <P>
 GATE will run anywhere that supports recent versions of Java, including
-UNIX and Windoze platforms. It hasn't been tested on Macintosh as yet.
+Solaris, Linux and Windoze platforms. It hasn't been tested on Macintosh.
 
 <P>
 <B>Prerequisites:</B>
@@ -36,13 +36,19 @@ A conforming Java 2 environment, version 1.3 or better, available free from
 UNIX supplier.
 (We have tested on various Sun 1.3 JDKs on Solaris, Linux and NT.)
 <LI>
+Binaries from a GATE distribution:
+gate.jar, guk.jar and a suitable script to start java, e.g. gate.sh or
+gate.bat.
+<LI>
 An open mind and a sense of humour.
 </UL>
 
 <P>
 <B>To install</B>,
-put gate.jar (from the gate2/build directory)
-on your classpath, or in the JDK extensions directory.
+put gate.jar
+on your classpath, and (for Unicode support) guk.jar in
+the JDK extensions directory. (See your Java system documentation if this
+doesn't mean anything to you.)
 You can now run gate.sh and/or call the API from your Java code. See the <A
 HREF=userguide.html>user guide</A> for more details.
 
@@ -135,7 +141,7 @@ to note that drinking milk is a good cure for an acid stomach.)
 
 <P>
 You can also use a development environment like Borland JBuilder (click on the
-gate2.jpr file) or Emacs JDE (use the prj.el file), but note that it's still
+gate2.jpx file) or Emacs JDE (use the prj.el file), but note that it's still
 advisable to use the Makefile to generate documentation, the jar file and so on.
 
 
