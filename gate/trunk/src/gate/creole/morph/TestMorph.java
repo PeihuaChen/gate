@@ -4,7 +4,7 @@ import junit.framework.*;
 import javax.swing.JOptionPane;
 
 /**
- * <p>Title: Gate2</p>
+ * <p>Title: TestMorph </p>
  * <p>Description: </p>
  * <p>Copyright: Copyright (c) 2000</p>
  * <p>Company: University Of Sheffield</p>
@@ -64,12 +64,10 @@ public class TestMorph extends TestCase {
 
         String answer = interpret.runMorpher(words[0]);
 
-        outOf++;
-        if(!words[1].equals(answer)) {
-          counter++;
-        }
+        // compare
+        Assert.assertEquals(words[1],answer);
+
       }
-      JOptionPane.showMessageDialog(null, counter+" out of "+outOf+" words didn't match");
     }
     else {
       System.out.println("Some Error reading verbFile");
