@@ -163,6 +163,9 @@ public class NewResourceDialog extends JDialog {
     super.show();
     if(userCanceled) return null;
     else{
+      if(getParent() instanceof MainFrame){
+        ((MainFrame)getParent()).showWaitDialog();
+      }
       //create the new resource
       FeatureMap params = Factory.newFeatureMap();
       for(int i=0; i< tableModel.getRowCount(); i++){
@@ -183,7 +186,9 @@ public class NewResourceDialog extends JDialog {
                                       "Gate", JOptionPane.ERROR_MESSAGE);
         res = null;
       }
-
+      if(getParent() instanceof MainFrame){
+        ((MainFrame)getParent()).hideWaitDialog();
+      }
       return res;
     }
   }

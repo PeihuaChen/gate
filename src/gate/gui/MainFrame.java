@@ -533,8 +533,15 @@ public class MainFrame extends JFrame
     }
   }//protected void setCurrentProject(ProjectData project)
 
-  protected void showWaitDialog(){
-    waitDialog.setLocation(getLocation());
+  void showWaitDialog(){
+    Point location = getLocationOnScreen();
+    location.translate(10, getHeight() - waitDialog.getHeight() - southBox.getHeight() - 10);
+    waitDialog.setLocation(location);
+    waitDialog.showDialog(new Component[]{});
+  }
+
+  void hideWaitDialog(){
+    waitDialog.goAway();
   }
 
 
@@ -690,7 +697,7 @@ public class MainFrame extends JFrame
                                           "Check your Gate installation!",
                                           "Gate", JOptionPane.ERROR_MESSAGE);
           }
-        }
+        }//public void run()
       };
       Thread thread = new Thread(runnable);
       thread.setPriority(thread.MIN_PRIORITY);

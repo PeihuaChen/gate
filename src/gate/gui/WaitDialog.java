@@ -64,10 +64,12 @@ public class WaitDialog extends JWindow implements Runnable {
 
     centerBox.validate();
     pack();
+/*
     Point loc = frame.getLocation();
     loc.move(frame.getSize().width - getSize().width / 2 ,
              frame.getSize().height - getSize().height /2 );
     setLocation(loc);
+*/
     stop = false;
     Thread thread = new Thread(this);
     thread.setPriority(Thread.MAX_PRIORITY);
@@ -87,9 +89,11 @@ public class WaitDialog extends JWindow implements Runnable {
     }
     centerBox.validate();
     pack();
+/*
     Point loc = frame.getLocation();
     setLocation(loc.x + (frame.getSize().width - getSize().width) / 2 ,
                 loc.y + (frame.getSize().height - getSize().height) /2);
+*/
     stop = false;
     Thread thread = new Thread(this);
     thread.setPriority(Thread.MAX_PRIORITY);
@@ -132,9 +136,11 @@ public class WaitDialog extends JWindow implements Runnable {
         Thread.sleep(300);
         centerBox.validate();
         pack();
+        /*
         Point loc = frame.getLocation();
         setLocation(loc.x + (frame.getSize().width - getSize().width) / 2 ,
                     loc.y + (frame.getSize().height - getSize().height) /2);
+        */
         picture.paintImmediately(picture.getVisibleRect());
       }catch(InterruptedException ie){}
     }
