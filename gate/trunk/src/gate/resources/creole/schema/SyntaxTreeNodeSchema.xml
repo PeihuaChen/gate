@@ -11,10 +11,16 @@
 						<enumeration value="PropN"/>
 						<enumeration value="ADJ"/>
 						<enumeration value="DET"/>
-						<enumeration value="VTRANS"/>
 						<enumeration value="PREP"/>
+						<enumeration value="VTRANS"/>
 						<enumeration value="V"/>
 						<enumeration value="ADV"/>
+						<enumeration value="NP"/>
+						<enumeration value="VP"/>
+						<enumeration value="PP"/>
+						<enumeration value="S"/>
+						<enumeration value="AUX"/>
+
 					</restriction>
 				</simpleType>
 			</attribute>
