@@ -21,6 +21,8 @@ import java.util.*;
 
 import javax.swing.*;
 import javax.swing.Timer;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.text.BadLocationException;
 
 import gate.*;
@@ -186,23 +188,40 @@ public class AnnotationEditor{
   }
   
   protected void initBottomWindow(Window parent){
-    bottomWindow = new JWindow(parent);
-    bottomWindow.getContentPane().setLayout(new GridBagLayout());
+    bottomWindow = new JWindow(parent){
+      
+    };
+    bottomWindow.getContentPane().setLayout(new BorderLayout());
     bottomWindow.getContentPane().setBackground(
             UIManager.getLookAndFeelDefaults().
             getColor("ToolTip.background"));
 //    bottomWindow.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
     
-    GridBagConstraints constraints = new GridBagConstraints();
-    constraints.fill = GridBagConstraints.BOTH;
-    constraints.weightx = 1;
-    constraints.weighty = 1;
+//    GridBagConstraints constraints = new GridBagConstraints();
+//    constraints.fill = GridBagConstraints.BOTH;
+//    constraints.weightx = 1;
+//    constraints.weighty = 1;
     featuresEditor = new FeaturesSchemaEditor();
     featuresEditor.setBackground(UIManager.getLookAndFeelDefaults().
             getColor("ToolTip.background"));
 //    featuresEditor.getTableHeader().setBackground(UIManager.getLookAndFeelDefaults().
 //            getColor("ToolTip.background"));
-    bottomWindow.getContentPane().add(new JScrollPane(featuresEditor), constraints);
+    JScrollPane scroller = new JScrollPane(featuresEditor){
+//      public Dimension getPreferredSize(){
+//        Dimension viewSize = ((Scrollable)getViewport().getView()).
+//          getPreferredScrollableViewportSize();
+//        int width = viewSize.width + 
+//          (verticalScrollBar.isVisible() ? 
+//           verticalScrollBar.getSize().width : 0) +
+//           (rowHeader != null && rowHeader.isVisible() ? rowHeader.getSize().width : 0);
+//        int height = viewSize.height + 
+//          (horizontalScrollBar.isVisible() ? 
+//           horizontalScrollBar.getSize().height : 0) +
+//          (columnHeader != null && columnHeader.isVisible() ? columnHeader.getSize().height : 0);
+//        return new Dimension(width, height);
+//      }
+    };
+    bottomWindow.getContentPane().add(scroller, BorderLayout.CENTER);
 //    bottomWindow.getContentPane().add(featuresEditor, constraints);
   }
 
@@ -215,8 +234,6 @@ public class AnnotationEditor{
     topWindow.getRootPane().addMouseListener(windowMouseListener);
     bottomWindow.addMouseListener(windowMouseListener);
     featuresEditor.addMouseListener(windowMouseListener);
-    
-    
     
     typeCombo.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent evt){
@@ -240,6 +257,19 @@ public class AnnotationEditor{
             throw new GateRuntimeException(ioe);
           }
         }
+      }
+    });
+    
+//    featuresEditor.getModel().addTableModelListener(new TableModelListener(){
+//      public void tableChanged(TableModelEvent e){
+//        sizeWindows();
+//        placeWindows();
+//      }
+//    });
+    featuresEditor.addComponentListener(new ComponentAdapter(){
+      public void componentResized(ComponentEvent e){
+        sizeWindows();
+        placeWindows();
       }
     });
     
@@ -278,39 +308,34 @@ public class AnnotationEditor{
    typeCombo.setModel(new DefaultComboBoxModel(typeList.toArray()));
    typeCombo.setSelectedItem(annType);
    
-   featuresEditor.setFeatures(ann.getFeatures());
    featuresEditor.setSchema((AnnotationSchema)schemasByType.get(annType));
+   featuresEditor.setFeatures(ann.getFeatures());
   }
   
   public boolean isShowing(){
     return topWindow.isShowing();
   }
-  
+
+  protected void sizeWindows(){
+    topWindow.pack();
+    bottomWindow.pack();
+    Dimension topSize = topWindow.getPreferredSize();
+    Dimension bottomSize = bottomWindow.getPreferredSize();
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    int width = Math.max(topSize.width, bottomSize.width);
+    width = Math.min(width, screenSize.width /2);
+    topWindow.setSize(width, topSize.height);
+    bottomWindow.setSize(width, bottomSize.height);
+  }
   /**
    * Shows the UI(s) involved in annotation editing.
    *
    */
   public void show(boolean autohide){
-    //hide the windows is present
-    hide();
-    topWindow.pack();
-    bottomWindow.pack();
-    Dimension topSize = topWindow.getPreferredSize();
-    Dimension bottomSize = bottomWindow.getPreferredSize();
-    int width = Math.max(topSize.width, bottomSize.width);
-    topWindow.setSize(width, topSize.height);
-    bottomWindow.setSize(width, bottomSize.height);
+    sizeWindows();
     placeWindows();
     topWindow.setVisible(true);
     bottomWindow.setVisible(true);
-//    try{
-//	    highlight = textPane.getHighlighter().
-//	    	addHighlight(ann.getStartNode().getOffset().intValue(),
-//	    	             ann.getEndNode().getOffset().intValue(),
-//	                     DefaultHighlighter.DefaultPainter);
-//    }catch(BadLocationException ble){
-//      throw new GateRuntimeException(ble);
-//    }
     if(autohide) hideTimer.restart();
   }
   
@@ -333,14 +358,9 @@ public class AnnotationEditor{
     topWindow.setLocation(x + topLeft.x, 
             yTop + topLeft.y - topWindow.getSize().height); 
     bottomWindow.setLocation(x + topLeft.x, yBottom + topLeft.y); 
-    
   }
   
   public void hide(){
-//    if(highlight != null){ 
-//      textPane.getHighlighter().removeHighlight(highlight);
-//      highlight = null;
-//    }
     topWindow.setVisible(false);
     bottomWindow.setVisible(false);
   }

@@ -185,6 +185,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     document.removeDocumentListener(this);
     super.cleanup();
   }
+  
   public void annotationSetAdded(DocumentEvent e) {
     String newSetName = e.getAnnotationSetName();
     SetHandler sHandler = new SetHandler(document.getAnnotations(newSetName));
@@ -694,6 +695,8 @@ public class AnnotationSetsView extends AbstractDocumentView
       if(this.selected == selected) return;
       this.selected = selected;
       if(selected){
+        //make sure set is expanded
+        setHandler.setExpanded(true);
       	//show highlights
         hghltTagsForAnn.clear();
         Iterator annIter = setHandler.set.get(name).iterator();
