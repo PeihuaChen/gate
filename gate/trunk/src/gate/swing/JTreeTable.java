@@ -130,48 +130,30 @@ public class JTreeTable extends XJTable {
       tree.setPreferredSize(null);
       this.setPreferredSize(new Dimension(tree.getPreferredSize().width,
                                           rect.height));
-/*
-      BufferedImage image = (BufferedImage)table.createImage(tree.getPreferredSize().width,
-                                                             rect.height);
-      if(image != null){
-        Graphics graphics = image.getGraphics();
-        if(graphics != null) {
-          graphics.translate(0, -rect.y);
-          tree.paint(graphics);
-        }
-        icon.setImage(image);
-      }
-      Component comp = tree.getCellRenderer().
-                       getTreeCellRendererComponent(tree, value, isSelected,
-                                                    false, false,row,hasFocus);
+      //get the tooltip
+      Component comp = tree.getCellRenderer().getTreeCellRendererComponent(
+          tree, tree.getPathForRow(row).getLastPathComponent(),
+          isSelected, false, false,row,hasFocus);
       if(comp != null && comp instanceof JComponent){
         setToolTipText(((JComponent)comp).getToolTipText());
       }else{
         setToolTipText(null);
       }
-      */
       return this;
     }
 
+    /**
+     * This tricks the tree into doing the job for us :)
+     */
     public void paint(Graphics g){
       Rectangle rect = tree.getRowBounds(visibleRow);
+      Rectangle bounds = g.getClipBounds();
       g.translate(0, -rect.y);
-      g.setClip(0, rect.y, bounds.width, rect.height);
+      g.setClip(bounds.x, rect.y, bounds.width, rect.height);
       tree.paint(g);
     }
 
-    public void setBounds(Rectangle bounds) {
-      this.bounds = bounds;
-    }
-
-    public void setBounds(int x, int y, int w, int h) {
-      this.bounds = new Rectangle(x, y, w, h);
-    }
-
-
     int visibleRow;
-    Rectangle bounds;
-    //ImageIcon icon;
   }
 
 
