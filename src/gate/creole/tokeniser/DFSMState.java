@@ -152,7 +152,7 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
       } else if(null != prefix) {
         ///read += prefix;
         //OT
-        read.append(prefix);
+        read.append(prefix.toString());
         prefix = null;
       }
 
