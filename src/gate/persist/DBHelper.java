@@ -181,6 +181,10 @@ public class DBHelper {
   /** feature value is array of floats */
   public static final int VALUE_TYPE_EMPTY_ARR         = 113;
 
+  /** Oracle database type */
+  public static final int ORACLE_DB = 101;
+  /** PostgreSQL database type */
+  public static final int POSTGRES_DB = 102;
 
   private static final boolean DEBUG = false;
 
@@ -374,4 +378,18 @@ public class DBHelper {
       throw new IllegalArgumentException();
     }
   }
+
+  public static int getDatabaseType(String jdbcURL) {
+
+    if (jdbcURL.startsWith("jdbc:oracle")) {
+      return DBHelper.ORACLE_DB;
+    }
+    else if (jdbcURL.startsWith("jdbc:postgres")) {
+      return DBHelper.POSTGRES_DB;
+    }
+    else {
+      throw new IllegalArgumentException();
+    }
+  }
+
 }
