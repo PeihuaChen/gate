@@ -22,7 +22,7 @@ import junit.framework.*;
 
 import gate.*;
 import gate.event.*;
-import gate.persist.PersistenceException;
+import gate.persist.*;
 import gate.util.MethodNotImplementedException;
 
 
@@ -84,6 +84,7 @@ public class GroupImpl implements Group{
 
     CallableStatement stmt = null;
 
+    //1. update database
     try {
       //first check the session and then check whether the user is member of the group
       if (this.ac.isValidSession(s) == false) {
@@ -100,6 +101,12 @@ public class GroupImpl implements Group{
     catch(SQLException sqle) {
       throw new PersistenceException("can't change group name in DB: ["+ sqle.getMessage()+"]");
     }
+    finally {
+      DBHelper.cleanup(stmt);
+    }
+
+    //2. update memebr variable
+    this.name = newName;
   }
 
 
