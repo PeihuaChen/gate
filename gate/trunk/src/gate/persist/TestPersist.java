@@ -35,10 +35,10 @@ public class TestPersist extends TestCase
 
   /** Debug flag */
   private static final boolean DEBUG = false;
-  private static Long uc01_lrID = null;
-  private static Long uc101_lrID = null;
-  private static LanguageResource uc01_LR = null;
-  private static LanguageResource uc101_LR = null;
+  private static Long sampleDoc_lrID = null;
+  private static Long sampleCorpus_lrID = null;
+  private static Document sampleDoc = null;
+  private static Corpus sampleCorpus = null;
 
   private final String VERY_LONG_STRING =
   "The memory of Father came back to her. Ever since she had seen him retreat from those "+
@@ -523,7 +523,7 @@ public class TestPersist extends TestCase
 
   /** Test the DS register. */
   public void testDB_UseCase01() throws Exception {
-
+///Err.prln("Use case 01 started...");
     //descr: create a document in the DB
 
 
@@ -565,10 +565,10 @@ public class TestPersist extends TestCase
     Assert.assertNotNull(lr.getDataStore());
     Assert.assertTrue(lr.getDataStore() instanceof DatabaseDataStore);
 
-    uc01_lrID = (Long)lr.getLRPersistenceId();
-    if (DEBUG) Out.prln("lr id: " + this.uc01_lrID);
-//    this.uc01_LR = lr;
-    uc01_LR = doc;
+    sampleDoc_lrID = (Long)lr.getLRPersistenceId();
+    if (DEBUG) Out.prln("lr id: " + this.sampleDoc_lrID);
+//    this.sampleDoc = lr;
+    sampleDoc = doc;
 //System.out.println("adopted doc:name=["+((Document)lr).getName()+"], lr_id=["+((Document)lr).getLRPersistenceId()+"]");
     //6.close
     ac.close();
@@ -581,7 +581,7 @@ public class TestPersist extends TestCase
 
 
   public void testDB_UseCase02() throws Exception {
-
+///Err.prln("Use case 02 started...");
     //read a document
     //use the one created in UC01
     LanguageResource lr = null;
@@ -614,19 +614,20 @@ public class TestPersist extends TestCase
     ds.setSession(usrSession);
 
     //2. read LR
+///Err.println(">>>");
     FeatureMap params = Factory.newFeatureMap();
     params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
-    params.put(DataStore.LR_ID_FEATURE_NAME, this.uc01_lrID);
+    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
     lr = (LanguageResource) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
-
+///Err.println("<<<");
     //3. check name
     String name = lr.getName();
     Assert.assertNotNull(name);
-    Assert.assertEquals(name,uc01_LR.getName());
+    Assert.assertEquals(name,sampleDoc.getName());
 
     //4. check features
     FeatureMap fm = lr.getFeatures();
-    FeatureMap fmOrig = uc01_LR.getFeatures();
+    FeatureMap fmOrig = sampleDoc.getFeatures();
 
     Assert.assertNotNull(fm);
     Assert.assertNotNull(fmOrig);
@@ -642,50 +643,52 @@ public class TestPersist extends TestCase
 
     //6. URL
     DatabaseDocumentImpl dbDoc = (DatabaseDocumentImpl)lr;
-    Assert.assertEquals(dbDoc.getSourceUrl(),((Document)this.uc01_LR).getSourceUrl());
+    Assert.assertEquals(dbDoc.getSourceUrl(),this.sampleDoc.getSourceUrl());
 
     //5.start/end
-    Assert.assertEquals(dbDoc.getSourceUrlStartOffset(),((Document)this.uc01_LR).getSourceUrlStartOffset());
-    Assert.assertEquals(dbDoc.getSourceUrlEndOffset(),((Document)this.uc01_LR).getSourceUrlEndOffset());
+    Assert.assertEquals(dbDoc.getSourceUrlStartOffset(),this.sampleDoc.getSourceUrlStartOffset());
+    Assert.assertEquals(dbDoc.getSourceUrlEndOffset(),this.sampleDoc.getSourceUrlEndOffset());
 
     //6.markupAware
-    Assert.assertEquals(dbDoc.getMarkupAware(),((Document)this.uc01_LR).getMarkupAware());
+    Assert.assertEquals(dbDoc.getMarkupAware(),this.sampleDoc.getMarkupAware());
 
     //7. content
     DocumentContent cont = dbDoc.getContent();
-    Assert.assertEquals(cont,((Document)this.uc01_LR).getContent());
+    Assert.assertEquals(cont,this.sampleDoc.getContent());
 
-    //7. access the contect again and assure it's not read from the DB twice
-    Assert.assertEquals(cont,((Document)this.uc01_LR).getContent());
+    //8. access the content again and assure it's not read from the DB twice
+    Assert.assertEquals(cont,((Document)this.sampleDoc).getContent());
 
-    //8. encoding
+    //9. encoding
     String encNew = (String)dbDoc.getParameterValue("encoding");
-    String encOld = (String)((DocumentImpl)this.uc01_LR).getParameterValue("encoding");
+    String encOld = (String)((DocumentImpl)this.sampleDoc).getParameterValue("encoding");
     Assert.assertEquals(encNew,encOld);
 
-    //9. default annotations
+    //10. default annotations
+///System.out.println("GETTING default ANNOTATIONS...");
     AnnotationSet defaultNew = dbDoc.getAnnotations();
-    AnnotationSet defaultOld = ((DocumentImpl)this.uc01_LR).getAnnotations();
+    AnnotationSet defaultOld = this.sampleDoc.getAnnotations();
 
     Assert.assertNotNull(defaultNew);
     Assert.assertTrue(defaultNew.size() == defaultOld.size());
-    Iterator itDefault = defaultNew.iterator();
+    Assert.assertEquals(defaultNew,defaultOld);
 
-    while (itDefault.hasNext()) {
-      Annotation currAnn = (Annotation)itDefault.next();
-      Assert.assertTrue(defaultOld.contains(currAnn));
-    }
 
     //10. iterate named annotations
-    Map namedOld = ((DocumentImpl)this.uc01_LR).getNamedAnnotationSets();
+    Map namedOld = this.sampleDoc.getNamedAnnotationSets();
     Iterator itOld = namedOld.keySet().iterator();
+///System.out.println("GETTING named ANNOTATIONS...");
     while (itOld.hasNext()) {
       String asetName = (String)itOld.next();
       AnnotationSet asetOld = (AnnotationSet)namedOld.get(asetName);
       AnnotationSet asetNew = (AnnotationSet)dbDoc.getAnnotations(asetName);
       Assert.assertNotNull(asetNew);
+///System.out.println("aset_old, size=["+asetOld.size()+"]");
+///System.out.println("aset_new, size=["+asetNew.size()+"]");
+///System.out.println("old = >>" + asetOld +"<<");
+///System.out.println("new = >>" + asetNew +"<<");
+      Assert.assertTrue(asetNew.size() == asetOld.size());
       Assert.assertEquals(asetNew,asetOld);
-//      Features fmNew = asetNew.getFea
     }
 
 
@@ -718,7 +721,7 @@ public class TestPersist extends TestCase
 
 
   public void testDB_UseCase03() throws Exception {
-
+///Err.prln("Use case 03 started...");
     //sync a document
     LanguageResource lr = null;
 
@@ -746,11 +749,11 @@ public class TestPersist extends TestCase
     //1.5 set DS session
     ds.setSession(usrSession);
 
-    if (DEBUG) Out.prln("ID " + uc01_lrID);
+    if (DEBUG) Out.prln("ID " + sampleDoc_lrID);
     //2. read LR
     FeatureMap params = Factory.newFeatureMap();
     params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
-    params.put(DataStore.LR_ID_FEATURE_NAME, this.uc01_lrID);
+    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
     lr = (LanguageResource) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
     Document dbDoc = (Document)lr;
     Document doc2 = null;
@@ -765,7 +768,7 @@ public class TestPersist extends TestCase
     String newName = oldName + "__UPD";
     dbDoc.setName(newName);
     dbDoc.sync();
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
     Assert.assertEquals(newName,dbDoc.getName());
     Assert.assertEquals(newName,doc2.getName());
 
@@ -791,7 +794,7 @@ public class TestPersist extends TestCase
         fm.put(currKey,newVal);
     }
     dbDoc.sync();
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
     Assert.assertEquals(fm,dbDoc.getFeatures());
     Assert.assertEquals(fm,doc2.getFeatures());
 
@@ -801,7 +804,7 @@ public class TestPersist extends TestCase
     newURL = new URL(docURL.toString()+".UPDATED");
     dbDoc.setSourceUrl(newURL);
     dbDoc.sync();
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
     Assert.assertEquals(newURL,dbDoc.getSourceUrl());
     Assert.assertEquals(newURL,doc2.getSourceUrl());
 
@@ -812,7 +815,7 @@ public class TestPersist extends TestCase
     dbDoc.setSourceUrlEndOffset(newEnd);
     dbDoc.sync();
 
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
     Assert.assertEquals(newStart,dbDoc.getSourceUrlStartOffset());
     Assert.assertEquals(newStart,doc2.getSourceUrlStartOffset());
     Assert.assertEquals(newEnd,dbDoc.getSourceUrlEndOffset());
@@ -825,7 +828,7 @@ public class TestPersist extends TestCase
     dbDoc.setMarkupAware(newMA);
     dbDoc.sync();
 
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
     Assert.assertEquals(newMA,doc2.getMarkupAware());
     Assert.assertEquals(newMA,dbDoc.getMarkupAware());
 
@@ -836,7 +839,7 @@ public class TestPersist extends TestCase
     dbDoc.setContent(contNew);
     dbDoc.sync();
 
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
     Assert.assertEquals(contNew,dbDoc.getContent());
     Assert.assertEquals(contNew,doc2.getContent());
 
@@ -844,7 +847,7 @@ public class TestPersist extends TestCase
     String encOld = (String)dbDoc.getParameterValue("encoding");
     dbDoc.setParameterValue("encoding","XXX");
     dbDoc.sync();
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
     String encNew = (String)doc2.getParameterValue("encoding");
     Assert.assertEquals(encNew,encOld);
 
@@ -861,7 +864,7 @@ public class TestPersist extends TestCase
                                 fm1);
 
     dbDoc.sync();
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
     AnnotationSet doc2Set = doc2.getAnnotations("TEST SET");
     Assert.assertTrue(dbDocSet.size() == doc2Set.size());
     Assert.assertEquals(doc2Set,dbDocSet);
@@ -877,7 +880,7 @@ public class TestPersist extends TestCase
     Annotation dbDocAnnNew = dbDocSet.get(newInd);
     dbDoc.sync();
 
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
     doc2Set = doc2.getAnnotations("TEST SET");
     Assert.assertTrue(dbDocSet.size() == doc2Set.size());
     Assert.assertEquals(doc2Set,dbDocSet);
@@ -901,7 +904,7 @@ public class TestPersist extends TestCase
     AnnotationSet aset = dbDoc.getAnnotations(dummySetName);
     aset.addAll(dbDoc.getAnnotations());
     dbDoc.sync();
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
 
     Assert.assertTrue(dbDoc.getNamedAnnotationSets().size() == doc2.getNamedAnnotationSets().size());
     Assert.assertTrue(doc2.getNamedAnnotationSets().containsKey(dummySetName));
@@ -913,7 +916,7 @@ public class TestPersist extends TestCase
     Assert.assertTrue(false == ((EventAwareDocument)dbDoc).getLoadedAnnotationSets().contains(dummySetName));
     Assert.assertTrue(false == dbDoc.getNamedAnnotationSets().containsKey(dummySetName));
 
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
     Assert.assertTrue(false == doc2.getNamedAnnotationSets().containsKey(dummySetName));
 
     //13. unlock
@@ -930,7 +933,7 @@ public class TestPersist extends TestCase
 
 
   public void testDB_UseCase04() throws Exception {
-
+///Err.prln("Use case 04 started...");
     //delete a document
     LanguageResource lr = null;
 
@@ -959,7 +962,7 @@ public class TestPersist extends TestCase
     //2. read LR
     FeatureMap params = Factory.newFeatureMap();
     params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
-    params.put(DataStore.LR_ID_FEATURE_NAME, this.uc01_lrID);
+    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
     lr = (LanguageResource) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
 
     //2.5 get exclusive lock
@@ -985,7 +988,7 @@ public class TestPersist extends TestCase
 
   /** Test the DS register. */
   public void testDB_UseCase101() throws Exception {
-
+///Err.prln("Use case 101 started...");
     //descr : create a corpus
 
     //0. get security factory & login
@@ -1023,8 +1026,8 @@ public class TestPersist extends TestCase
     Assert.assertTrue(result instanceof DatabaseCorpusImpl);
     Assert.assertNotNull(result.getLRPersistenceId());
 
-    this.uc101_LR =  result;
-    this.uc101_lrID = (Long)result.getLRPersistenceId();
+    this.sampleCorpus =  result;
+    this.sampleCorpus_lrID = (Long)result.getLRPersistenceId();
 
     //6.close
     ac.close();
@@ -1040,7 +1043,7 @@ public class TestPersist extends TestCase
   /** Test the DS register. */
   public void testDB_UseCase102() throws Exception {
     //read a corpus
-
+///Err.prln("Use case 102 started...");
     LanguageResource lr = null;
 
     //0. get security factory & login
@@ -1068,17 +1071,17 @@ public class TestPersist extends TestCase
     //2. read LR
     FeatureMap params = Factory.newFeatureMap();
     params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
-    params.put(DataStore.LR_ID_FEATURE_NAME, uc101_lrID);
+    params.put(DataStore.LR_ID_FEATURE_NAME, sampleCorpus_lrID);
     lr = (LanguageResource) Factory.createResource(DBHelper.CORPUS_CLASS, params);
 
     //3. check name
     String name = lr.getName();
     Assert.assertNotNull(name);
-    Assert.assertEquals(name,uc101_LR.getName());
+    Assert.assertEquals(name,sampleCorpus.getName());
 
     //4. check features
     FeatureMap fm = lr.getFeatures();
-    FeatureMap fmOrig = uc101_LR.getFeatures();
+    FeatureMap fmOrig = sampleCorpus.getFeatures();
 
     Assert.assertNotNull(fm);
     Assert.assertNotNull(fmOrig);
@@ -1103,7 +1106,7 @@ public class TestPersist extends TestCase
 
 
   public void testDB_UseCase103() throws Exception {
-
+///Err.prln("Use case 103 started...");
     //sync a corpus
     LanguageResource lr = null;
 
@@ -1129,12 +1132,12 @@ public class TestPersist extends TestCase
     ds.open();
     ds.setSession(usrSession);
 
-    if (DEBUG) Out.prln("ID " + uc101_lrID);
+    if (DEBUG) Out.prln("ID " + sampleCorpus_lrID);
 
     //2. read LR
     FeatureMap params = Factory.newFeatureMap();
     params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
-    params.put(DataStore.LR_ID_FEATURE_NAME, uc101_lrID);
+    params.put(DataStore.LR_ID_FEATURE_NAME, sampleCorpus_lrID);
     lr = (LanguageResource) Factory.createResource(DBHelper.CORPUS_CLASS, params);
 
     Corpus dbCorp = (Corpus)lr;
@@ -1145,7 +1148,7 @@ public class TestPersist extends TestCase
     String newName = oldName + "__UPD";
     dbCorp.setName(newName);
     dbCorp.sync();
-    corp2 = (Corpus)ds.getLr(DBHelper.CORPUS_CLASS,uc101_lrID);
+    corp2 = (Corpus)ds.getLr(DBHelper.CORPUS_CLASS,sampleCorpus_lrID);
     Assert.assertEquals(newName,dbCorp.getName());
     Assert.assertEquals(newName,corp2.getName());
 
@@ -1171,7 +1174,7 @@ public class TestPersist extends TestCase
         fm.put(currKey,newVal);
     }
     dbCorp.sync();
-    corp2 = (Corpus)ds.getLr(DBHelper.CORPUS_CLASS,uc101_lrID);
+    corp2 = (Corpus)ds.getLr(DBHelper.CORPUS_CLASS,sampleCorpus_lrID);
     Assert.assertEquals(fm,dbCorp.getFeatures());
     Assert.assertEquals(fm,corp2.getFeatures());
 
@@ -1187,7 +1190,7 @@ public class TestPersist extends TestCase
 
   public static void main(String[] args){
     try{
-//System.setProperty(Gate.GATE_CONFIG_PROPERTY,"y:/gate.xml")    ;
+///System.setProperty(Gate.GATE_CONFIG_PROPERTY,"y:/gate.xml")    ;
       Gate.setLocalWebServer(false);
       Gate.setNetConnected(false);
       Gate.init();
@@ -1206,7 +1209,7 @@ public class TestPersist extends TestCase
       test.tearDown();
 
       test.setUp();
-      test.testSaveRestore();
+//      test.testSaveRestore();
       test.tearDown();
 
       test.setUp();
