@@ -1811,37 +1811,38 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
   }// End identifyTheRootAnnotation()
 
   private Annotation identifyTheRootAnnotation(List anAnnotationList){
-    if (anAnnotationList == null) return null;
+    if (anAnnotationList == null || anAnnotationList.isEmpty()) return null;
     // If the first annotation in the list (which is sorted by start offset)
     //does not have an offset = 0, then there's no root tag.
-    Node startNode = ((Annotation) anAnnotationList.get(0)).getStartNode();
-    Node endNode = ((Annotation) anAnnotationList.get(0)).getEndNode();
-    // This is placed here just to speed things up. The alghorithm bellow can
-    // can identity the annotation that span over the entire set and with the
-    // smallest ID. However the root annotation will have to have the start
-    // offset equal to 0.
-    if (startNode.getOffset().longValue() != 0) return null;
-    // Go anf find the annotation.
+    if(((Annotation)anAnnotationList.get(0)).
+       getStartNode().getOffset().longValue() > 0) return null;
+
+    //find the limits
+    long start = 0; //we know this already
+    long end = 0; //end = 0  will be improved by the next loop
+    for(int i = 0; i < anAnnotationList.size(); i++){
+      Annotation anAnnotation = (Annotation)anAnnotationList.get(i);
+      long localEnd = anAnnotation.getEndNode().getOffset().longValue();
+      if(localEnd > end) end = localEnd;
+    }
+
+    // Go and find the annotation.
+    //look at all annotations that start at 0 and end at end
+    //if there are several, choose the one with the smallest ID
     Annotation theRootAnnotation = null;
-    // Check if there are annotations starting at offset 0. If there are, then
-    // check all of them to see which one has the greatest span. Basically its
-    // END offset should be the bigest offset from the input annotation set.
-    long start = startNode.getOffset().longValue();
-    long end = endNode.getOffset().longValue();
     for(int i = 0; i < anAnnotationList.size(); i++){
       Annotation currentAnnot = (Annotation) anAnnotationList.get(i);
+      long localStart = currentAnnot.getStartNode().getOffset().longValue();
+      long localEnd = currentAnnot.getEndNode().getOffset().longValue();
       // If the currentAnnot has both its Start and End equals to the Start and
       // end of the AnnotationSet then check to see if its ID is the smallest.
       if (
-          (start == currentAnnot.getStartNode().getOffset().longValue()) &&
-          (end   == currentAnnot.getEndNode().getOffset().longValue())
-         ){
-          // The currentAnnotation has is a potencial root one.
-          if (theRootAnnotation == null)
-            theRootAnnotation = currentAnnot;
+          (start == localStart) && (end == localEnd)){
+          // The currentAnnotation has is a potential root one.
+          if (theRootAnnotation == null) theRootAnnotation = currentAnnot;
           else{
-            // If its ID is greater that the currentAnnot then update the root
-            if ( theRootAnnotation.getId().intValue() > currentAnnot.getId().intValue())
+            // If root's ID is greater that the currentAnnot then update the root
+            if (theRootAnnotation.getId().intValue() > currentAnnot.getId().intValue())
               theRootAnnotation = currentAnnot;
           }// End if
       }// End if
