@@ -194,17 +194,21 @@ public class ChineseTokeniser
     // so space tokens have been added, now we need to map all the newly added
     // features from tokeniser to the new document to the original one
     AnnotationSet anns;
+    AnnotationSet original;
+
     if(annotationSetName == null || annotationSetName.length() == 0) {
       anns = tempDoc.getAnnotations();
+      original = document.getAnnotations();
     } else {
       anns = tempDoc.getAnnotations(annotationSetName);
+      original = document.getAnnotations(annotationSetName);
     }
 
     List tokens = new ArrayList(anns.get());
     Comparator offsetComparator = new OffsetComparator();
     Collections.sort(tokens, offsetComparator);
     Iterator tokenIter = tokens.iterator();
-    AnnotationSet original = document.getAnnotations();
+
 
     // to make the process faster, lets copy all the marks into the long array
     long[] markValues = new long[marks.size()];
