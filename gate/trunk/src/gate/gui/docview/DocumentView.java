@@ -13,10 +13,10 @@
 
 package gate.gui.docview;
 
-import gate.*;
-import gate.gui.*;
-
 import java.awt.Component;
+
+import gate.VisualResource;
+import gate.gui.ActionsPublisher;
 
 /**
  * A document viewer is composed out of several views (like the on showing the
@@ -40,6 +40,20 @@ public interface DocumentView extends ActionsPublisher, VisualResource{
    * @see #VERTICAL
    */
   public int getType();
+  
+  /**
+   * Notifies this view that it has become active or inactive.
+   * Implementers are encouraged to lazily populate the UI elements, that is 
+   * to use as little CPU time as possible before the view becomes active.
+   * @param active a boolean value.
+   */
+  public void setActive(boolean active);
+  
+  /**
+   * Returns the active state of this view. 
+   * @return a boolean value
+   */
+  public boolean isActive();
   
   /**
    * Constant for the CENTRAL type of the view inside the document editor. Views
