@@ -22,10 +22,10 @@ import java.util.EventObject;
 public class DocumentEvent extends GateEvent {
 
   /**Event type used to mark the addition of an {@link gate.AnnotationSet}*/
-  public static int ANNOTATION_SET_ADDED = 101;
+  public static final int ANNOTATION_SET_ADDED = 101;
 
   /**Event type used to mark the removal of an {@link gate.AnnotationSet}*/
-  public static int ANNOTATION_SET_REMOVED = 102;
+  public static final int ANNOTATION_SET_REMOVED = 102;
 
   /**
    * Constructor.

@@ -22,10 +22,10 @@ import gate.*;
 public class AnnotationSetEvent extends GateEvent{
 
   /**Event type used for situations when a new annotation has been added*/
-  public static int ANNOTATION_ADDED = 201;
+  public static final int ANNOTATION_ADDED = 201;
 
   /**Event type used for situations when an annotation has been removed*/
-  public static int ANNOTATION_REMOVED = 202;
+  public static final int ANNOTATION_REMOVED = 202;
 
 
   /**

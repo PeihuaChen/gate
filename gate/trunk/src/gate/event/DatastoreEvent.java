@@ -40,17 +40,17 @@ public class DatastoreEvent extends GateEvent {
   /**
    * The type of events fired when a resource has been adopted
    */
-  public static int RESOURCE_ADOPTED = 301;
+  public static final int RESOURCE_ADOPTED = 301;
 
   /**
    * The type of events fired when a resource has been deleted from a datastore
    */
-  public static int RESOURCE_DELETED = 302;
+  public static final int RESOURCE_DELETED = 302;
 
   /**
    * The type of events fired when a resource has wrote into the datastore
    */
-  public static int RESOURCE_WRITTEN = 303;
+  public static final int RESOURCE_WRITTEN = 303;
 
   /** Gets the ID of the resource involved in this event */
   public String getResourceID() {
