@@ -88,6 +88,11 @@ public class DocumentEditor extends AbstractVisualResource{
   protected JSplitPane rightSplit;
 
   /**
+   * The main horizontal split that contains all the contents of this viewer
+   */
+  protected JSplitPane mainSplit;
+
+  /**
    * The right hand side tree with all  the annotation sets and types of
    * annotations
    */
@@ -110,34 +115,23 @@ public class DocumentEditor extends AbstractVisualResource{
   /**The dialog used for editing the styles used to highlight annotations*/
   protected TextAttributesChooser styleChooser;
 
-  /**
-   * The list used to select displayed coreference information
-   */
-  protected JList corefList;
 
   /**
-   * The model for the coref list
+   * The Jtree that displays the coreference data
    */
-  protected CorefListModel corefListModel;
+  protected JTree corefTree;
   /**
-   * The combobox that selects between the annotation sets for displaying
-   * corefence data.
+   * The root for the coref tree
    */
-  protected JComboBox corefCombo;
+  protected DefaultMutableTreeNode corefTreeRoot;
 
   /**
-   * The model for the corefCombo
+   * The model for the coref tree
    */
-  protected CorefComboModel corefComboModel;
-
-
-  /**
-   * The component that controls the way the coreference data is displyed.
-   */
-  protected Component corefComponent;
+  protected DefaultTreeModel corefTreeModel;
 
   /** The scroller for the coref list*/
-  protected JScrollPane corefListScroll;
+  protected JScrollPane corefScroll;
 
   /**
    * A box containing a {@link javax.swing.JProgressBar} used to keep the user
@@ -434,12 +428,25 @@ public class DocumentEditor extends AbstractVisualResource{
     });
 
     stylesTree.addComponentListener(new ComponentAdapter() {
-      public void componentResized(ComponentEvent e) {
-        updateTreeSize();
+      public void componentHidden(ComponentEvent e) {
+
       }
+
+      public void componentMoved(ComponentEvent e) {
+      }
+
+      public void componentResized(ComponentEvent e) {
+        SwingUtilities.invokeLater(new Runnable(){
+          public void run(){
+            Enumeration nodes = stylesTreeRoot.depthFirstEnumeration();
+            while(nodes.hasMoreElements()){
+              stylesTreeModel.nodeChanged((TreeNode)nodes.nextElement());
+            }
+          }
+        });
+      }
+
       public void componentShown(ComponentEvent e) {
-        stylesTreeModel.nodeStructureChanged(stylesTreeRoot);
-        updateTreeSize();
       }
     });
 
@@ -701,13 +708,21 @@ public class DocumentEditor extends AbstractVisualResource{
       }
     });
 
-    corefList.addMouseListener(new MouseAdapter() {
+    corefTree.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
-        int row = corefList.locationToIndex(e.getPoint());
-        if(row != -1){
-          if(SwingUtilities.isLeftMouseButton(e)){
-            corefListModel.setVisible(row, !corefListModel.getVisible(row));
-            corefListModel.fireDataChanged();
+        if(SwingUtilities.isLeftMouseButton(e)){
+          //where inside the tree?
+          int x = e.getX();
+          int y = e.getY();
+          TreePath path = corefTree.getPathForLocation(x, y);
+          if(path != null){
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.
+                                         getLastPathComponent();
+            if(node.getUserObject() instanceof CorefData){
+              CorefData cData = (CorefData)node.getUserObject();
+              cData.setVisible(!cData.getVisible());
+              corefTreeModel.nodeChanged(node);
+            }
           }
         }
       }
@@ -722,6 +737,31 @@ public class DocumentEditor extends AbstractVisualResource{
       }
 
       public void mouseExited(MouseEvent e) {
+      }
+    });
+
+
+
+    corefTree.addComponentListener(new ComponentAdapter() {
+      public void componentHidden(ComponentEvent e) {
+
+      }
+
+      public void componentMoved(ComponentEvent e) {
+      }
+
+      public void componentResized(ComponentEvent e) {
+        SwingUtilities.invokeLater(new Runnable(){
+          public void run(){
+            Enumeration nodes = corefTreeRoot.depthFirstEnumeration();
+            while(nodes.hasMoreElements()){
+              corefTreeModel.nodeChanged((TreeNode)nodes.nextElement());
+            }
+          }
+        });
+      }
+
+      public void componentShown(ComponentEvent e) {
       }
     });
   }//protected void initListeners()
@@ -750,6 +790,8 @@ public class DocumentEditor extends AbstractVisualResource{
 
     //the toolbar
     toolbar = new JToolBar(JToolBar.HORIZONTAL);
+    toolbar.setAlignmentX(Component.LEFT_ALIGNMENT);
+    toolbar.setAlignmentY(Component.TOP_ALIGNMENT);
     toolbar.setFloatable(false);
     this.add(toolbar);
 
@@ -764,7 +806,7 @@ public class DocumentEditor extends AbstractVisualResource{
     toolbar.add(typesTreeVisibleBtn);
 
     coreferenceVisibleBtn = new JToggleButton("Coreference", coreferenceVisible);
-//    toolbar.add(coreferenceVisibleBtn);
+    toolbar.add(coreferenceVisibleBtn);
     toolbar.add(Box.createHorizontalGlue());
 
     //The text
@@ -777,6 +819,8 @@ public class DocumentEditor extends AbstractVisualResource{
     StyleConstants.setFontFamily(defaultStyle, "Arial Unicode MS");
     textScroll = new JScrollPane(textPane);
     textScroll.setAlignmentY(Component.TOP_ALIGNMENT);
+    textScroll.setAlignmentX(Component.LEFT_ALIGNMENT);
+
 
     //The table
     annotationsTableModel = new AnnotationsTableModel();
@@ -786,6 +830,8 @@ public class DocumentEditor extends AbstractVisualResource{
     tableScroll = new JScrollPane(annotationsTable);
     tableScroll.setOpaque(true);
     tableScroll.setAlignmentY(Component.TOP_ALIGNMENT);
+    tableScroll.setAlignmentX(Component.LEFT_ALIGNMENT);
+
 
     //RIGHT SIDE - the big tree
     stylesTreeRoot = new DefaultMutableTreeNode(null, true);
@@ -806,44 +852,44 @@ public class DocumentEditor extends AbstractVisualResource{
     stylesTree.setToggleClickCount(0);
     stylesTreeScroll = new JScrollPane(stylesTree);
     stylesTreeScroll.setAlignmentY(Component.TOP_ALIGNMENT);
-    stylesTreeScroll.setHorizontalScrollBarPolicy(
-                                      JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    stylesTreeScroll.setAlignmentX(Component.LEFT_ALIGNMENT);
+
 
     //coreference
-    corefCombo = new JComboBox(corefComboModel = new CorefComboModel());
-    corefCombo.setAlignmentX(Component.LEFT_ALIGNMENT);
-    corefList = new JList(corefListModel = new CorefListModel());
-    corefList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    corefList.setCellRenderer(new CorefListRenderer());
-    corefList.setAlignmentX(Component.LEFT_ALIGNMENT);
-    corefListScroll = new JScrollPane(corefList);
-    corefListScroll.setOpaque(true);
-    corefListScroll.setAlignmentY(Component.TOP_ALIGNMENT);
-    corefListScroll.setAlignmentX(Component.LEFT_ALIGNMENT);
-    corefListScroll.setHorizontalScrollBarPolicy(
-                                      JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-    JPanel corefBox = new JPanel();
-    corefBox.setLayout(new BoxLayout(corefBox, BoxLayout.Y_AXIS));
-    corefBox.setAlignmentY(Component.TOP_ALIGNMENT);
-    corefComponent = corefBox;
-    JLabel label = new JLabel("Annotation set:");
-    label.setAlignmentX(Component.LEFT_ALIGNMENT);
-    corefBox.add(label);
-    corefBox.add(corefCombo);
-    corefBox.add(corefListScroll);
+    corefTreeRoot = new DefaultMutableTreeNode("Coreference data", true);
+    corefTree = new JTree(corefTreeModel = new DefaultTreeModel(corefTreeRoot,
+                                                                true));
+    corefTree.setCellRenderer(new CorefNodeRenderer());
+    corefTree.setRowHeight(0);
+    corefTree.setRootVisible(true);
+    corefTree.setShowsRootHandles(false);
+    corefScroll = new JScrollPane(corefTree);
+    corefScroll.setAlignmentX(Component.LEFT_ALIGNMENT);
+    corefScroll.setAlignmentY(Component.TOP_ALIGNMENT);
+    updateCorefTree();
 
     //various containers
-    leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+    leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, false);
     leftSplit.setOneTouchExpandable(true);
     leftSplit.setOpaque(true);
-    leftSplit.setDividerLocation((double)0.5);
     leftSplit.setAlignmentY(Component.TOP_ALIGNMENT);
+    leftSplit.setAlignmentX(Component.LEFT_ALIGNMENT);
+    leftSplit.setResizeWeight((double)0.75);
 
-    rightSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+    rightSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, false);
     rightSplit.setOneTouchExpandable(true);
     rightSplit.setOpaque(true);
-    rightSplit.setDividerLocation((double)0.5);
     rightSplit.setAlignmentY(Component.TOP_ALIGNMENT);
+    rightSplit.setAlignmentX(Component.LEFT_ALIGNMENT);
+    rightSplit.setResizeWeight((double)0.75);
+
+
+    mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, false);
+    mainSplit.setOneTouchExpandable(true);
+    mainSplit.setOpaque(true);
+    mainSplit.setAlignmentY(Component.TOP_ALIGNMENT);
+    mainSplit.setAlignmentX(Component.LEFT_ALIGNMENT);
+    mainSplit.setResizeWeight((double)0.75);
 
     //put everything together
     layoutComponents();
@@ -857,6 +903,10 @@ public class DocumentEditor extends AbstractVisualResource{
     progressBox.add(Box.createHorizontalStrut(5));
 
     highlighter = textPane.getHighlighter();
+    if(highlighter instanceof javax.swing.text.DefaultHighlighter){
+      ((javax.swing.text.DefaultHighlighter)highlighter).
+      setDrawsLayeredHighlights(true);
+    }
 
     selectionHighlighter = new DefaultHighlighter();
     selectionHighlighter.install(textPane);
@@ -868,28 +918,6 @@ public class DocumentEditor extends AbstractVisualResource{
     thread.setPriority(Thread.MIN_PRIORITY);
     thread.start();
   }//protected void initGuiComponents()
-
-  /**Updates the size of the styles tree so it gets all the width it needs*/
-  protected void updateTreeSize(){
-    javax.swing.plaf.basic.BasicTreeUI ui;
-    stylesTree.setPreferredSize(null);
-    int width = stylesTree.getPreferredSize().width +
-                stylesTreeScroll.getInsets().left +
-                stylesTreeScroll.getInsets().right;
-
-    JComponent comp = stylesTreeScroll.getVerticalScrollBar();
-    if(comp.isVisible()) width += comp.getPreferredSize().width;
-
-    int height = stylesTree.getPreferredSize().height +
-                 stylesTreeScroll.getInsets().top +
-                 stylesTreeScroll.getInsets().bottom;
-
-    stylesTreeScroll.setMinimumSize(new Dimension(width, 20));
-    stylesTreeScroll.setPreferredSize(new Dimension(width, height));
-    stylesTreeScroll.invalidate();
-    validate();
-
-  }//protected void updateTreeSize()
 
 
   /** This method returns true if a text is selected in the textPane*/
@@ -962,8 +990,15 @@ public class DocumentEditor extends AbstractVisualResource{
   protected void this_documentChanged(){
     initLocalData();
     annotationsTableModel.fireTableDataChanged();
-    corefComboModel.fireDataChanged();
-    corefListModel.fireDataChanged();
+    document.getFeatures().addGateListener(new GateListener(){
+      public void processGateEvent(GateEvent e){
+        if(e.getType() == e.FEATURES_UPDATED){
+          updateCorefTree();
+        }
+      }
+    });
+    updateCorefTree();
+
     Enumeration enum = stylesTreeRoot.children();
     while(enum.hasMoreElements()){
       stylesTreeModel.removeNodeFromParent((DefaultMutableTreeNode)
@@ -1163,37 +1198,173 @@ public class DocumentEditor extends AbstractVisualResource{
   protected void layoutComponents(){
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
-        // this contains all the componenets apart from the toolbar
-        Box mainBox = Box.createHorizontalBox();
+        Component leftComp = null, rightComp = null;
         if(textVisible && annotationsTableVisible){
           leftSplit.setTopComponent(textScroll);
           leftSplit.setBottomComponent(tableScroll);
-          leftSplit.setDividerLocation((double)0.5);
-          mainBox.add(leftSplit);
+          leftComp = leftSplit;
         }else{
-          if(textVisible) mainBox.add(textScroll);
-          else if(annotationsTableVisible) mainBox.add(tableScroll);
+          if(textVisible) leftComp = textScroll;
+          else if(annotationsTableVisible) leftComp = tableScroll;
         }
 
         if(typesTreeVisible && coreferenceVisible){
           rightSplit.setTopComponent(stylesTreeScroll);
-          rightSplit.setBottomComponent(corefComponent);
-          mainBox.add(rightSplit);
+          rightSplit.setBottomComponent(corefScroll);
+          rightComp = rightSplit;
         }else{
-          if(typesTreeVisible) mainBox.add(stylesTreeScroll);
-          else if(coreferenceVisible) mainBox.add(corefComponent);
+          if(typesTreeVisible) rightComp = stylesTreeScroll;
+          else if(coreferenceVisible) rightComp = corefScroll;
         }
 
         if(DocumentEditor.this.getComponentCount() > 1)
           DocumentEditor.this.remove(1);
-        DocumentEditor.this.add(mainBox);
+        if(leftComp != null && rightComp != null){
+          //we need the main split
+          mainSplit.setLeftComponent(leftComp);
+          mainSplit.setRightComponent(rightComp);
+          DocumentEditor.this.add(mainSplit);
+        }else{
+          if(leftComp != null) DocumentEditor.this.add(leftComp);
+          else if(rightComp != null)DocumentEditor.this.add(rightComp);
+        }
+
         DocumentEditor.this.validate();
         DocumentEditor.this.repaint();
-        if(leftSplit.isVisible()) leftSplit.setDividerLocation((double)0.5);
-        if(rightSplit.isVisible()) rightSplit.setDividerLocation((double)0.5);
       }
     });
   }
+
+
+  /**
+   * Updates the coref tree from the coref data on the document's features
+   */
+  protected void updateCorefTree(){
+    if(document == null || document.getFeatures() == null){
+      //no coref data; clear the tree
+      corefTreeRoot.removeAllChildren();
+      corefTreeModel.nodeStructureChanged(corefTreeRoot);
+      return;
+    }
+
+    Map matchesMap = null;
+    try{
+      matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
+    }catch(Exception e){
+    }
+    if(matchesMap == null){
+      //no coref data; clear the tree
+      Enumeration nodes = corefTreeRoot.breadthFirstEnumeration();
+      while(nodes.hasMoreElements()){
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+                                      nodes.nextElement();
+        if(node.getUserObject() instanceof CorefData){
+          ((CorefData)node.getUserObject()).setVisible(false);
+        }
+      }
+      corefTreeRoot.removeAllChildren();
+      corefTreeModel.nodeStructureChanged(corefTreeRoot);
+      return;
+    }
+    String[] newSetNames = (String[])
+                           matchesMap.keySet().toArray(new String[]{});
+    Arrays.sort(newSetNames);
+
+    ArrayList oldSetNames = new ArrayList(corefTreeRoot.getChildCount());
+    Enumeration setNodes = corefTreeRoot.children();
+    while(setNodes.hasMoreElements()){
+      String oldSetName = (String)
+                           ((DefaultMutableTreeNode)setNodes.nextElement()).
+                           getUserObject();
+      oldSetNames.add(oldSetName.equals("Default") ? null : oldSetName);
+    }
+
+
+    // stores the new set nodes; they will be added to root after the
+    // processing is done
+    ArrayList newSetNodes = new ArrayList();
+    //for each new set update the children
+    for(int i =0; i < newSetNames.length; i++){
+      String setName = newSetNames[i];
+      int oldNodeIndex = oldSetNames.indexOf(setName);
+      DefaultMutableTreeNode setNode = (oldNodeIndex != -1) ?
+                                        (DefaultMutableTreeNode)
+                                        corefTreeRoot.getChildAt(oldNodeIndex) :
+                                        new DefaultMutableTreeNode(setName,
+                                                                   true);
+      //if found it will be reused so delete it from the list
+      if(oldNodeIndex != -1) oldSetNames.remove(oldNodeIndex);
+
+      // temporarily stores the new nodes
+      ArrayList newEntityNodes = new ArrayList();
+      //for each set the coref data is a list of lists
+      Iterator corefDataIter = ((java.util.List)matchesMap.get(setName)).
+                               iterator();
+      while(corefDataIter.hasNext()){
+        java.util.List newAnnotIDs = (java.util.List)corefDataIter.next();
+        CorefData cData = null;
+        DefaultMutableTreeNode entityNode = null;
+        //try to find the old coref data
+        Enumeration entityNodes = setNode.children();
+        while(cData == null && entityNodes.hasMoreElements()){
+          entityNode = (DefaultMutableTreeNode)entityNodes.nextElement();
+          java.util.List oldAnnotIDs = ((CorefData)entityNode.getUserObject()).
+                                     getAnnoationIDs();
+          java.util.List intersection = new ArrayList(oldAnnotIDs);
+          intersection.retainAll(newAnnotIDs);
+          if(!intersection.isEmpty()){
+            //we have some common values; assume we found it
+            cData = (CorefData)entityNode.getUserObject();
+            if(intersection.size() == newAnnotIDs.size()){
+              //identical values, we just got lucky: noting to do
+            }else{
+              cData.setAnnotationIDs(newAnnotIDs);
+            }
+          }
+        }
+        if(cData == null){
+          //we couldn't find a suitable node, create a new one
+          cData = new CorefData(newAnnotIDs, false, setName == null ?
+                                                    "Default" : setName);
+          entityNode = new DefaultMutableTreeNode(cData, false);
+        }
+        newEntityNodes.add(entityNode);
+      }//while(corefDataIter.hasNext())
+      //we're done with this set: add all the nodes to the set node
+      //set visible to false for all nodes that will not be kept
+      for(Enumeration entityNodes = setNode.children();
+          entityNodes.hasMoreElements();){
+        Object anOldNode = entityNodes.nextElement();
+        if(!newEntityNodes.contains(anOldNode)){
+          ((CorefData)((DefaultMutableTreeNode)anOldNode).
+          getUserObject()).setVisible(false);
+        }
+      }
+
+      setNode.removeAllChildren();
+      for(Iterator nodesIter = newEntityNodes.iterator();
+          nodesIter.hasNext();
+          setNode.add((DefaultMutableTreeNode)nodesIter.next())){
+      }
+      newSetNodes.add(setNode);
+    }//for(int i =0; i < newSetNames.length; i++)
+    //we're done with all the sets: add the nodes to the tree root
+    corefTreeRoot.removeAllChildren();
+    for(Iterator nodesIter = newSetNodes.iterator();
+        nodesIter.hasNext();){
+      DefaultMutableTreeNode setNode = (DefaultMutableTreeNode)nodesIter.next();
+      corefTreeRoot.add(setNode);
+    }
+    corefTreeModel.nodeStructureChanged(corefTreeRoot);
+    //expand the root
+    corefTree.expandPath(new TreePath(new Object[]{corefTreeRoot}));
+    //expand all of root's children
+    Enumeration children = corefTreeRoot.children();
+    while(children.hasMoreElements()){
+      corefTree.expandPath(new TreePath(corefTreeModel.getPathToRoot(
+                           (DefaultMutableTreeNode)children.nextElement())));
+    }
+  }//protected void updateCorefTree()
 
 
   /**Should the editor functionality of this component be enabled*/
@@ -1324,6 +1495,7 @@ public class DocumentEditor extends AbstractVisualResource{
     }
   }//class AnnotationsTableModel extends AbstractTableModel
 
+/*
   protected class CorefListModel extends AbstractListModel{
     CorefListModel(){
       corefComboModel.addListDataListener(new ListDataListener() {
@@ -1470,24 +1642,24 @@ public class DocumentEditor extends AbstractVisualResource{
       highlights.set(row, highlightsForRow);
     }
 
-    /**
-     * Holds the <b>visible</b> attribute for each row in the list
-     */
-    ArrayList visibleList;
-
-    /**
-     * Holds the <b>colour</b> attribute for each row in the list
-     */
-    ArrayList coloursList;
-
-    /**
-     * A list of lists; holds the currently showing highlights for each row
-     */
-    ArrayList highlights;
-
-    int lastReturnedSize;
-  }
-
+//    /**
+//     * Holds the <b>visible</b> attribute for each row in the list
+//     */
+//    ArrayList visibleList;
+//
+//    /**
+//     * Holds the <b>colour</b> attribute for each row in the list
+//     */
+//    ArrayList coloursList;
+//
+//    /**
+//     * A list of lists; holds the currently showing highlights for each row
+//     */
+//    ArrayList highlights;
+//
+//    int lastReturnedSize;
+//  }
+/*
   class CorefListRenderer extends JCheckBox implements ListCellRenderer{
     public CorefListRenderer(){
       setOpaque(true);
@@ -1538,17 +1710,125 @@ public class DocumentEditor extends AbstractVisualResource{
     Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
   }
 
-
+*/
   protected class CorefData{
-//    CorefData(boolean visible, ){
-//    }
-    boolean visible;
-    String setName;
-    Color colour;
-    java.util.List highlights;
+    CorefData(java.util.List annotationIDs, boolean visible, String setName){
+      this.visible = visible;
+      this.setName = setName;
+      this.colour = colGenerator.getNextColor();
+      highlights = new ArrayList();
+      this.annotationIDs = annotationIDs;
+      this.title = getNameForCorefList(annotationIDs);
+    }
 
+    /**
+     * Finds the name for a set of co refering entities (uses the string of the
+     * first one).
+     * @param list a list of annotation IDs
+     */
+    String getNameForCorefList(java.util.List list){
+      if(list == null || list.isEmpty()) return null;
+      Integer id = (Integer)list.get(0);
+      AnnotationSet set = setName.equals("Default") ?
+                          document.getAnnotations() :
+                          document.getAnnotations(setName);
+      Annotation ann = set.get(id);
+
+      String name = null;
+      try{
+        name = document.getContent().
+                        getContent(ann.getStartNode().getOffset(),
+                                   ann.getEndNode().getOffset()).toString();
+      }catch(InvalidOffsetException ioe){
+      }
+      return name;
+    }
+
+    public boolean getVisible(){
+      return visible;
+    }
+
+    public void setVisible(boolean isVisible){
+      if(this.visible == isVisible) return;
+      this.visible = isVisible;
+      if(visible){
+if(!highlights.isEmpty()){
+  Out.prln("Redundant highlights detected!");
+}
+        //add new highlights and store them
+        AnnotationSet set = setName.equals("Default") ?
+                            document.getAnnotations() :
+                            document.getAnnotations(setName);
+        Iterator idIter = annotationIDs.iterator();
+        while(idIter.hasNext()){
+          Integer id = (Integer)idIter.next();
+          Annotation ann = set.get(id);
+          try{
+            highlights.add(highlighter.addHighlight(
+              ann.getStartNode().getOffset().intValue(),
+              ann.getEndNode().getOffset().intValue(),
+              new DefaultHighlighter.DefaultHighlightPainter(colour)));
+          }catch(BadLocationException ble){
+            ble.printStackTrace();
+          }
+        }
+      }else{
+        //remove the highlights
+        if(!highlights.isEmpty()){
+          Iterator hlIter = highlights.iterator();
+          while(hlIter.hasNext()){
+            Object tag = hlIter.next();
+            highlighter.removeHighlight(tag);
+            hlIter.remove();
+          }
+        }
+      }
+    }
+
+    public String getTitle(){
+      return title;
+    }
+
+    public Color getColour(){
+      return colour;
+    }
+
+    public void setColour(Color newColour){
+      this.colour = newColour;
+      if(visible){
+        //update the highlights
+        setVisible(false);
+        setVisible(true);
+      }
+    }
+
+    public java.util.List getAnnoationIDs(){
+      return annotationIDs;
+    }
+
+    public String toString(){
+      return title;
+    }
+
+    public void setAnnotationIDs(java.util.List newAnnIDs){
+      this.annotationIDs =newAnnIDs;
+      this.title = getNameForCorefList(annotationIDs);
+      if(visible){
+        //restore the highlights
+        setVisible(false);
+        setVisible(true);
+      }
+    }
+
+    private boolean visible;
+    private String title;
+    private String setName;
+    private Color colour;
+    private java.util.List highlights;
+    private java.util.List annotationIDs;
   }
 
+/*
   protected class CorefComboModel extends AbstractListModel
                                   implements ComboBoxModel{
 
@@ -1606,10 +1886,230 @@ public class DocumentEditor extends AbstractVisualResource{
     Object selectedItem = null;
     int lastReturnedSize;
   }
+*/
+
+  /**
+   * Panels used in cell/node renderers
+   */
+  class LazyJPanel extends JPanel{
+    /**
+     * Overridden for performance reasons.
+     */
+    public void revalidate() {}
+
+    /**
+     * Overridden for performance reasons.
+     */
+    public void repaint(long tm, int x, int y, int width, int height) {}
+
+    /**
+     * Overridden for performance reasons.
+     */
+    public void repaint(Rectangle r) {}
+
+    /**
+     * Overridden for performance reasons.
+     */
+    protected void firePropertyChange(String propertyName, Object oldValue,
+                                                            Object newValue) {}
+
+    /**
+     * Overridden for performance reasons.
+     */
+    public void firePropertyChange(String propertyName, byte oldValue,
+                                                              byte newValue) {}
+
+    /**
+     * Overridden for performance reasons.
+     */
+    public void firePropertyChange(String propertyName, char oldValue,
+                                                              char newValue) {}
+
+    /**
+     * Overridden for performance reasons.
+     */
+    public void firePropertyChange(String propertyName, short oldValue,
+                                                            short newValue) {}
+
+    /**
+     * Overridden for performance reasons.
+     */
+    public void firePropertyChange(String propertyName, int oldValue,
+                                                              int newValue) {}
+
+    /**
+     * Overridden for performance reasons.
+     */
+    public void firePropertyChange(String propertyName, long oldValue,
+                                                              long newValue) {}
+
+    /**
+     * Overridden for performance reasons.
+     */
+    public void firePropertyChange(String propertyName, float oldValue,
+                                                              float newValue) {}
+
+    /**
+     * Overridden for performance reasons.
+     */
+    public void firePropertyChange(String propertyName, double oldValue,
+                                                            double newValue) {}
+
+    /**
+     * Overridden for performance reasons.
+     */
+    public void firePropertyChange(String propertyName, boolean oldValue,
+                                                            boolean newValue) {}
+  }
+
+  /**
+   * A tree node renderer used byt the coref tree
+   */
+  class CorefNodeRenderer implements TreeCellRenderer{
+
+    CorefNodeRenderer(){
+      label = new JLabel();
+      label.setOpaque(true);
+
+      checkBox = new JCheckBox();
+      checkBox.setBorderPaintedFlat(true);
+
+      panel = new LazyJPanel();
+      panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+      panel.setOpaque(false);
+
+      hBox = new LazyJPanel();
+      hBox.setLayout(new BoxLayout(hBox, BoxLayout.X_AXIS));
+      hBox.setOpaque(false);
+
+      panel.add(Box.createVerticalStrut(2));
+      panel.add(hBox);
+      panel.add(Box.createVerticalStrut(2));
+
+      leftSpacer = Box.createHorizontalStrut(3);
+      rightSpacer = Box.createHorizontalStrut(3);
+
+      selectedBorder = BorderFactory.createLineBorder(Color.blue, 1);
+      normalBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
+    }
+
+    public Component getTreeCellRendererComponent(JTree tree,
+                                              Object value,
+                                              boolean selected,
+                                              boolean expanded,
+                                              boolean leaf,
+                                              int row,
+                                              boolean hasFocus){
+
+      hBox.removeAll();
+      hBox.add(leftSpacer);
+
+      if(value instanceof DefaultMutableTreeNode){
+        value = ((DefaultMutableTreeNode)value).getUserObject();
+      }
+      if(value instanceof CorefData){
+        CorefData cData = (CorefData)value;
+        checkBox.setSelected(cData.getVisible());
+        checkBox.setBackground(tree.getBackground());
+
+        label.setBackground(cData.getColour());
+        label.setForeground(tree.getForeground());
+        label.setText(cData.getTitle());
+        label.setFont(tree.getFont());
+        hBox.add(checkBox);
+        hBox.add(label);
+        hBox.add(rightSpacer);
+      }else{
+        label.setText(value.toString());
+        label.setForeground(tree.getForeground());
+        label.setBackground(tree.getBackground());
+        label.setFont(tree.getFont());
+        hBox.add(label);
+      }
+      if(selected) panel.setBorder(selectedBorder);
+      else panel.setBorder(normalBorder);
+      return panel;
+    }
+
+    JLabel label;
+    JCheckBox checkBox;
+    JPanel panel;
+    JPanel hBox;
+    Border selectedBorder;
+    Border normalBorder;
+    Component leftSpacer, rightSpacer;
+  }
+
+  /**
+   * A tree node renderer used byt the coref tree
+   */
+  class CorefNodeRenderer1 implements TreeCellRenderer{
+
+    CorefNodeRenderer1(){
+      label = new JLabel();
+      label.setOpaque(true);
+
+      toggleButton = new JToggleButton();
+      toggleButton.setMargin(new Insets(0,3,0,3));
+
+      panel = new LazyJPanel();
+      panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+      panel.setOpaque(false);
+      topSpacer = Box.createVerticalStrut(2);
+      bottomSpacer = Box.createVerticalStrut(2);
+
+      selectedBorder = BorderFactory.createLineBorder(Color.blue, 1);
+      normalBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
+
+    }
+
+    public Component getTreeCellRendererComponent(JTree tree,
+                                              Object value,
+                                              boolean selected,
+                                              boolean expanded,
+                                              boolean leaf,
+                                              int row,
+                                              boolean hasFocus){
+
+      panel.removeAll();
+      panel.add(topSpacer);
+
+      if(value instanceof DefaultMutableTreeNode){
+        value = ((DefaultMutableTreeNode)value).getUserObject();
+      }
+      if(value instanceof CorefData){
+        CorefData cData = (CorefData)value;
+        toggleButton.setSelected(cData.getVisible());
+        toggleButton.setBackground(cData.getColour());
+        toggleButton.setForeground(tree.getForeground());
+        toggleButton.setText(cData.getTitle());
+        toggleButton.setFont(tree.getFont());
+        panel.add(toggleButton);
+      }else{
+        label.setText(value.toString());
+        label.setForeground(tree.getForeground());
+        label.setBackground(tree.getBackground());
+        label.setFont(tree.getFont());
+        panel.add(label);
+      }
+      panel.add(bottomSpacer);
+      if(selected) panel.setBorder(selectedBorder);
+      else panel.setBorder(normalBorder);
+      return panel;
+    }
+
+    JLabel label;
+    JToggleButton toggleButton;
+    JPanel panel;
+    Border selectedBorder;
+    Border normalBorder;
+    Component topSpacer, bottomSpacer;
+  }
+
 
   /**
    * Displays an entry in the right hand side tree.
-   * <strong><a name="override">Implementation Note:</a></strong>
+   * <strong>Implementation Note:</strong>
    * This class overrides
    * <code>revalidate</code>,
    * <code>repaint</code>,
@@ -1619,11 +2119,12 @@ public class DocumentEditor extends AbstractVisualResource{
    * If not overridden, these frequently called methods would execute code paths
    * that are unnecessary for a tree cell renderer.
    */
-  class NodeRenderer extends JPanel implements TreeCellRenderer{
+  class NodeRenderer extends LazyJPanel implements TreeCellRenderer{
 
     public NodeRenderer(){
       visibleChk = new JCheckBox("",false);
       visibleChk.setOpaque(false);
+      visibleChk.setBorderPaintedFlat(true);
       textComponent = new JTextPane();
       selectedBorder = BorderFactory.createLineBorder(Color.blue, 1);
       normalBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
@@ -1687,7 +2188,7 @@ public class DocumentEditor extends AbstractVisualResource{
 
    protected void setTextComponentSize(JTextComponent comp){
       try{
-        if(comp.getDocument() == null || comp.getDocument().getLength() == 0){
+        if(comp.getDocument() == null || comp.getDocument().getLength() <= 0){
           return;
         }
         int width = 0;
@@ -1715,100 +2216,6 @@ public class DocumentEditor extends AbstractVisualResource{
         ble.printStackTrace();
       }
     }
-
-   /**
-    * Overridden for performance reasons.
-    * See the <a href="#override">Implementation Note</a>
-    * for more information.
-    */
-    public void revalidate() {}
-
-   /**
-    * Overridden for performance reasons.
-    * See the <a href="#override">Implementation Note</a>
-    * for more information.
-    */
-    public void repaint(long tm, int x, int y, int width, int height) {}
-
-   /**
-    * Overridden for performance reasons.
-    * See the <a href="#override">Implementation Note</a>
-    * for more information.
-    */
-    public void repaint(Rectangle r) {}
-
-   /**
-    * Overridden for performance reasons.
-    * See the <a href="#override">Implementation Note</a>
-    * for more information.
-    */
-    protected void firePropertyChange(String propertyName, Object oldValue,
-                                                            Object newValue) {}
-
-   /**
-    * Overridden for performance reasons.
-    * See the <a href="#override">Implementation Note</a>
-    * for more information.
-    */
-    public void firePropertyChange(String propertyName, byte oldValue,
-                                                              byte newValue) {}
-
-   /**
-    * Overridden for performance reasons.
-    * See the <a href="#override">Implementation Note</a>
-    * for more information.
-    */
-    public void firePropertyChange(String propertyName, char oldValue,
-                                                              char newValue) {}
-
-   /**
-    * Overridden for performance reasons.
-    * See the <a href="#override">Implementation Note</a>
-    * for more information.
-    */
-    public void firePropertyChange(String propertyName, short oldValue,
-                                                            short newValue) {}
-
-   /**
-    * Overridden for performance reasons.
-    * See the <a href="#override">Implementation Note</a>
-    * for more information.
-    */
-    public void firePropertyChange(String propertyName, int oldValue,
-                                                              int newValue) {}
-
-   /**
-    * Overridden for performance reasons.
-    * See the <a href="#override">Implementation Note</a>
-    * for more information.
-    */
-    public void firePropertyChange(String propertyName, long oldValue,
-                                                              long newValue) {}
-
-   /**
-    * Overridden for performance reasons.
-    * See the <a href="#override">Implementation Note</a>
-    * for more information.
-    */
-    public void firePropertyChange(String propertyName, float oldValue,
-                                                              float newValue) {}
-
-   /**
-    * Overridden for performance reasons.
-    * See the <a href="#override">Implementation Note</a>
-    * for more information.
-    */
-    public void firePropertyChange(String propertyName, double oldValue,
-                                                            double newValue) {}
-
-   /**
-    * Overridden for performance reasons.
-    * See the <a href="#override">Implementation Note</a>
-    * for more information.
-    */
-    public void firePropertyChange(String propertyName, boolean oldValue,
-                                                            boolean newValue) {}
-
     Border selectedBorder;
     Border normalBorder;
     JCheckBox visibleChk;
@@ -2584,8 +2991,7 @@ Out.prln("NULL size");
       this.addMouseListener(new MouseAdapter() {
         public void mouseEntered(MouseEvent e) {
           try {
-            highlighter.removeAllHighlights();
-            highlighter.addHighlight(start, end,
+            highlight = highlighter.addHighlight(start, end,
                                             DefaultHighlighter.DefaultPainter);
           }catch(BadLocationException ble){
             throw new GateRuntimeException(ble.toString());
@@ -2593,7 +2999,10 @@ Out.prln("NULL size");
         }
 
         public void mouseExited(MouseEvent e) {
-          highlighter.removeAllHighlights();
+          if(highlight != null){
+            highlighter.removeHighlight(highlight);
+            highlight = null;
+          }
         }
       });
 
@@ -2601,7 +3010,10 @@ Out.prln("NULL size");
         public void actionPerformed(ActionEvent e) {
           Runnable runnable = new Runnable(){
             public void run(){
-             highlighter.removeAllHighlights();
+              if(highlight != null){
+                highlighter.removeHighlight(highlight);
+                highlight = null;
+              }
              selectAnnotation(set, annotation);
             }
           };
@@ -2617,6 +3029,7 @@ Out.prln("NULL size");
     int end;
     String set;
     Annotation annotation;
+    Object highlight;
   }
 
   protected class DeleteSelectedAnnotationsAction extends AbstractAction {
