@@ -514,7 +514,7 @@ public class TestPersist extends TestCase
     //4. create security settings for doc
     SecurityInfo si = new SecurityInfo(SecurityInfo.ACCESS_WR_GW,usr,grp);
 
-    //5. try adding doc to data store
+    //5. try adding corpus to data store
     ds.adopt(corp,si);
 
     //6.close
@@ -673,6 +673,7 @@ public class TestPersist extends TestCase
     ds.setStorageUrl(this.JDBC_URL);
     ds.open();
 
+    if (DEBUG) Out.prln("ID " + this.uc01_lrID);
     //2. read LR
     lr = ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
     Document dbDoc = (Document)lr;
@@ -856,10 +857,10 @@ public class TestPersist extends TestCase
       test.testDB_UseCase01();
       test.tearDown();
 */
-/*      test.setUp();
+      test.setUp();
       test.testDB_UseCase02();
       test.tearDown();
-*/
+
       test.setUp();
       test.testDB_UseCase03();
       test.tearDown();
@@ -868,11 +869,11 @@ public class TestPersist extends TestCase
       test.testDB_UseCase04();
       test.tearDown();
 
-/*
+
       test.setUp();
       test.testDB_UseCase05();
       test.tearDown();
-*/
+
     }catch(Exception e){
       e.printStackTrace();
     }
