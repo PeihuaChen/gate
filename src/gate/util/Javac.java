@@ -170,7 +170,6 @@ public class Javac implements GateConstants{
         if(filename.endsWith(".class")){
           String className = packageName + "." +
                              filename.substring(0, filename.length() - 6);
-System.out.println(className);
           //load the class from the file
           byte[] bytes = Files.getByteArray(files[i]);
           classLoader.defineGateClass(className, bytes, 0, bytes.length);
