@@ -30,6 +30,37 @@ public class PersistenceException extends GateException {
   public PersistenceException(String s) { super(s); }
 
   /** Construction from exception */
-  public PersistenceException(Exception e) { super(e.toString()); }
+  public PersistenceException(Exception e) { 
+    super(e.toString());
+    this.exception = e;
+  }
 
+  /**
+   * Overridden so we can print the enclosed exception's stacktrace too.
+   */
+  public void printStackTrace(){
+    printStackTrace(System.err);
+  }
+
+  /**
+   * Overridden so we can print the enclosed exception's stacktrace too.
+   */
+  public void printStackTrace(java.io.PrintStream s) {
+    s.flush();
+    super.printStackTrace(s);
+    s.print("  Caused by:\n");
+    if(exception != null) exception.printStackTrace(s);
+  }
+
+  /**
+   * Overridden so we can print the enclosed exception's stacktrace too.
+   */
+  public void printStackTrace(java.io.PrintWriter s) {
+    s.flush();
+    super.printStackTrace(s);
+    s.print("  Caused by:\n");
+    if(exception != null) exception.printStackTrace(s);
+  }
+  
+  Exception exception = null;
 } // PersistenceException
