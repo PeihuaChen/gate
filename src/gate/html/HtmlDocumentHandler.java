@@ -333,9 +333,8 @@ public class HtmlDocumentHandler extends ParserCallback {
 
     // put the repositioning information
     if(reposInfo != null) {
-      int extractedPos = tmpDocContent.length()+contentBuffer.length()
-                    +trimCorrection;
-      addRepositioningInfo(content, pos, extractedPos);
+      int extractedPos = tmpDocContent.length() + contentBuffer.length();
+      addRepositioningInfo(content, pos + trimCorrection, extractedPos);
     } // if
 
     contentBuffer.append(content);
