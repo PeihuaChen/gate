@@ -403,8 +403,8 @@ public class FSM implements JapeConstants {
 
     String res = "graph[ \ndirected 1\n";
 ///    String nodes = "", edges = "";
-    StringBuffer nodes = new StringBuffer(gate.Config.STRINGBUFFER_SIZE),
-                 edges = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+    StringBuffer nodes = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE),
+                 edges = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
 
     Iterator stateIter = allStates.iterator();
     while (stateIter.hasNext()){

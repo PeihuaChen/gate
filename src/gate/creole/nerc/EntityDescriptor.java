@@ -85,7 +85,7 @@ public class EntityDescriptor implements Serializable{
     */
   protected String normaliseString(String text){
 ///    String res = "";
-    StringBuffer res = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+    StringBuffer res = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
     if(text == null) return null;
     int charIdx = 0;
     boolean lastWasSpace = false;

@@ -33,6 +33,13 @@ public class Gate
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+  /**
+   *  The default StringBuffer size, it seems that we need longer string
+   *  than the StringBuffer class default because of the high number of
+   *  buffer expansions
+   *  */
+  public static final int STRINGBUFFER_SIZE = 1024;
+
   /** The list of builtin URLs to search for CREOLE resources. */
   private static String builtinCreoleDirectoryUrls[] = {
     // "http://derwent.dcs.shef.ac.uk/gate.ac.uk/creole/"

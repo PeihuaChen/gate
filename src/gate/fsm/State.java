@@ -130,7 +130,7 @@ public class State implements JapeConstants {
    */
   public String getEdgesGML() {
 ///    String res = "";
-    StringBuffer res = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+    StringBuffer res = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
 
     Iterator transIter = transitions.iterator();
     BasicPatternElement bpe;
@@ -169,7 +169,7 @@ public class State implements JapeConstants {
    */
   public String toString() {
 ///    String res = "State " + myIndex;
-    StringBuffer res = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+    StringBuffer res = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
 
     if(isFinal()) ///res += "\nFinal!";
         res.append("\nFinal!");
