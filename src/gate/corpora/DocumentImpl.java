@@ -156,6 +156,19 @@ public class DocumentImpl implements Document
     if(sourceUrlName == null && sourceUrl != null)
       sourceUrlName = sourceUrl.toExternalForm();
 
+    // set up a DocumentFormat if markup unpacking required
+    if(isMarkupAware()) {
+      DocumentFormat docFormat =
+        DocumentFormat.getDocumentFormat(this, sourceUrl);
+      try {
+        if(docFormat != null) docFormat.unpackMarkup(this);
+      } catch(DocumentFormatException e) {
+        throw new ResourceInstantiationException(
+          "Couldn't unpack markup in document " + sourceUrlName + e
+        );
+      }
+    } // if markup aware
+
     return this;
   } // init()
 
@@ -258,8 +271,25 @@ public class DocumentImpl implements Document
     return namedSet;
   } // getAnnotations(name)
 
-  /**
-    * Returns a map with the named annotation sets
+  /** Is the document markup-aware? */
+  protected boolean markupAware = false;
+
+  /** Make the document markup-aware. This will trigger the creation
+   *  of a DocumentFormat object at Document initialisation time; the
+   *  DocumentFormat object will unpack the markup in the Document and
+   *  add it as annotations. Documents are <B>not</B> markup-aware by default.
+   *
+   *  @param b markup awareness status.
+   */
+  public void setMarkupAware(boolean b) { this.markupAware = b; }
+
+  /** Get the markup awareness status of the Document.
+   *  <B>Documents are markup-aware by default.</B>
+   *  @return whether the Document is markup aware.
+   */
+  public boolean isMarkupAware() { return markupAware; }
+
+  /** Returns a map with the named annotation sets
     */
   // This was needed by the constructor on DocumentWrapper that
   // takes a DocumentImpl.
