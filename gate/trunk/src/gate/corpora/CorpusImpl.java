@@ -24,25 +24,32 @@ import gate.persist.*;
 import java.io.*;
 import java.net.*;
 import gate.event.*;
+import gate.creole.AbstractLanguageResource;
 
 /** Corpora are sets of Document. They are ordered by lexicographic collation
   * on Url.
   */
-public class CorpusImpl extends TreeSet implements Corpus {
+public class CorpusImpl extends AbstractLanguageResource implements Corpus {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+  protected TreeSet corpusSet = null;
+
   /** Construction */
   public CorpusImpl() {
+    corpusSet = new TreeSet();
   } // Construction
 
   public CorpusImpl(String name) {
+    corpusSet = new TreeSet();
     setName(name);
   } // Construction
 
   /** The data store this LR lives in. */
-  protected transient DataStore dataStore;
+//  protected transient DataStore dataStore;
+  /** The persistence ID of this LR. Only set, when dataStore is.*/
+//  transient protected Object lrPersistentId = null;
 
   /** Initialise this resource, and return it. */
   public Resource init() {
@@ -51,15 +58,33 @@ public class CorpusImpl extends TreeSet implements Corpus {
 
 
   /** Get the data store the document lives in. */
-  public DataStore getDataStore() {
-    return dataStore;
-  }
+//  public DataStore getDataStore() {
+//    return dataStore;
+//  }
 
 
   /** Set the data store that this LR lives in. */
-  public void setDataStore(DataStore dataStore) throws PersistenceException {
-    this.dataStore = dataStore;
-  } // setDataStore(DS)
+//  public void setDataStore(DataStore dataStore) throws PersistenceException {
+//    this.dataStore = dataStore;
+//  } // setDataStore(DS)
+
+
+
+  /** Returns the persistence id of this LR, if it has been stored in
+   *  a datastore. Null otherwise.
+   */
+//  public Object getLRPersistenceId(){
+//   return lrPersistentId;
+//  }
+
+  /** Sets the persistence id of this LR. To be used only in the
+   *  Factory and DataStore code.
+   */
+//  public void setLRPersistenceId(Object lrID){
+//    this.lrPersistentId = lrID;
+//  }
+
+
 
   /** Save: synchonise the in-memory image of the corpus with the persistent
     * image.
@@ -78,16 +103,75 @@ public class CorpusImpl extends TreeSet implements Corpus {
   /** Set the feature set */
   public void setFeatures(FeatureMap features) { this.features = features; }
 
+  public Object last() {
+    return corpusSet.last();
+  }
+
+  public Object first() {
+    return corpusSet.first();
+  }
+
+  public SortedSet tailSet(Object fromElement){
+    return corpusSet.tailSet(fromElement);
+  }
+
+  public SortedSet headSet(Object fromElement){
+    return corpusSet.headSet(fromElement);
+  }
+
+  public SortedSet subSet(Object fromElement, Object toElement){
+    return corpusSet.subSet(fromElement, toElement);
+  }
+
+  public Comparator comparator() {
+    return corpusSet.comparator();
+  }
+
+  public boolean removeAll(Collection c) {
+    return corpusSet.removeAll(c);
+  }
+
+  public boolean retainAll(Collection c) {
+    return corpusSet.retainAll(c);
+  }
+
+  public boolean containsAll(Collection c) {
+    return corpusSet.containsAll(c);
+  }
+
+  public Object[] toArray() {
+    return corpusSet.toArray();
+  }
+
+  public Object[] toArray(Object[] a) {
+    return corpusSet.toArray(a);
+  }
+
+  public boolean contains(Object o) {
+    return corpusSet.contains(o);
+  }
+
+  public boolean isEmpty() {
+    return corpusSet.isEmpty();
+  }
+
+  public int size() {
+    return corpusSet.size();
+  }
+
   /* Two corpus are equal if they have the same documents
    * the same features and the same name
    */
   public boolean equals(Object other) {
 
-    if (!super.equals(other)) return false;
+//    if (!corpusSet.equals(other)) return false;
 
     Corpus corpus;
     if (!(other instanceof CorpusImpl)) return false;
     else corpus = (Corpus)other;
+
+    if (! corpusSet.containsAll(corpus))
+      return false;
 
     // verify the name
     String name = getName();
@@ -123,7 +207,7 @@ public class CorpusImpl extends TreeSet implements Corpus {
    * are removed.
    */
   public Iterator iterator(){
-    return new VerboseIterator(super.iterator());
+    return new VerboseIterator(corpusSet.iterator());
   }
 
   /**
@@ -132,7 +216,7 @@ public class CorpusImpl extends TreeSet implements Corpus {
    */
   public boolean add(Object o) {
     if(o instanceof Document){
-      boolean res = super.add(o);
+      boolean res = corpusSet.add(o);
       if(res) fireDocumentAdded(new CorpusEvent(this, (Document)o,
                                 CorpusEvent.DOCUMENT_ADDED));
       return res;
@@ -162,7 +246,7 @@ public class CorpusImpl extends TreeSet implements Corpus {
    */
   public boolean remove(Object o) {
     if(o instanceof Document){
-      boolean res = super.remove(o);
+      boolean res = corpusSet.remove(o);
       if(res)
         fireDocumentRemoved(new CorpusEvent(this, (Document)o,
                                   CorpusEvent.DOCUMENT_REMOVED));
