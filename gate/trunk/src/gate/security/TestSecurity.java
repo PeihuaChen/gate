@@ -41,11 +41,7 @@ public class TestSecurity extends TestCase
 
 
   /** JDBC URL */
-  private static final String JDBC_URL =
-//            "jdbc:oracle:thin:GATEUSER/gate@192.168.128.7:1521:GATE04";
-//"jdbc:oracle:thin:GATEUSER/gate@192.168.128.207:1521:GATE03";
-//           "jdbc:oracle:thin:GATEUSER/gate@onto-text:1521:GATE05";
-"jdbc:oracle:thin:GATEUSER/gate2@grindleford:1521:gatedb2";
+  private static String JDBC_URL;
 
   private boolean exceptionThrown = false;
 
@@ -54,6 +50,11 @@ public class TestSecurity extends TestCase
 
   /** Fixture set up */
   public void setUp() throws Exception {
+    if (! Gate.getDataStoreRegister().getConfigData().containsKey("url-test"))
+      throw new GateRuntimeException("DB URL not configured in gate.xml");
+    else
+      JDBC_URL =
+        (String) Gate.getDataStoreRegister().getConfigData().get("url-test");
   } // setUp
 
   /** Put things back as they should be after running tests
