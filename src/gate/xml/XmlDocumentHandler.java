@@ -155,7 +155,7 @@ public class XmlDocumentHandler extends DefaultHandler{
     * This method is called when the SAX parser encounts the beginning of an
     * XML element.
     */
-  public void startElement (String uri, String elemName,String qName,
+  public void startElement (String uri, String qName, String elemName,
                                                              Attributes atts){
 
     // inform the progress listener to fire only if no of elements processed
@@ -188,7 +188,7 @@ public class XmlDocumentHandler extends DefaultHandler{
     * XML element.
     * Here we extract
     */
-  public void endElement (String uri, String elemName, String qName)
+  public void endElement (String uri, String qName, String elemName )
                                                          throws SAXException{
     // obj is for internal use
     CustomObject obj = null;
