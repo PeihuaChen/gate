@@ -36,24 +36,48 @@ import gate.creole.ResourceData;
 
 public class OracleDataStore extends JDBCDataStore {
 
+  /** Name of this resource */
   public static final String DS_COMMENT = "GATE Oracle datastore";
+
+  /** the icon for this resource */
   public static final String DS_ICON_NAME = "ds.gif";
 
+  /** Debug flag */
   private static final boolean DEBUG = false;
 
+  /** "true" value for Oracle (supports no boolean type) */
   private static final int ORACLE_TRUE = 1;
+  /** "false" value for Oracle (supports no boolean type) */
   private static final int ORACLE_FALSE = 0;
 
+  /** used internaly, may change in the future */
   private static final int READ_ACCESS = 0;
+  /** used internaly, may change in the future */
   private static final int WRITE_ACCESS = 1;
 
+  /** the size in bytes if varchar2 column in Oracle
+   *  when a String is stored in Oracle it may be too long
+   *  for a varchar2 value, and then CLOB will be used
+   *  Note that the limit is in bytes, not in characters, so
+   *  in the worst case this will limit the string to 4000/3 characters
+   *  */
   private static final int ORACLE_VARCHAR_LIMIT_BYTES = 4000;
+
+  /** maximum number of bytes that represent a char in UTF8 database */
   private static final int UTF_BYTES_PER_CHAR_MAX = 3;
+
+  /** maximum number of characters per string stored as varchar2
+   *  if longer then stored as CLOB
+   *   */
   private static final int ORACLE_VARCHAR_MAX_SYMBOLS =
                                   ORACLE_VARCHAR_LIMIT_BYTES/UTF_BYTES_PER_CHAR_MAX;
 
+  /** read buffer size (for reading CLOBs) */
   private static final int INTERNAL_BUFFER_SIZE = 16*1024;
 
+  /** default constructor - just call the super constructor
+   *  (may change in the future)
+   *  */
   public OracleDataStore() {
 
     super();
@@ -104,8 +128,9 @@ public class OracleDataStore extends JDBCDataStore {
     finally {
       DBHelper.cleanup(stmt);
     }
-
   }
+
+
 
   /** Set the URL for the underlying storage mechanism. */
   public void setStorageUrl(String storageUrl) throws PersistenceException {
@@ -114,11 +139,15 @@ public class OracleDataStore extends JDBCDataStore {
 
   }
 
+
+
   /** Get the URL for the underlying storage mechanism. */
   public String getStorageUrl() {
 
     return super.getStorageUrl();
   }
+
+
 
   /**
    * Create a new data store. <B>NOTE:</B> for some data stores
@@ -131,17 +160,23 @@ public class OracleDataStore extends JDBCDataStore {
     super.create();
   }
 
+
+
   /** Open a connection to the data store. */
   public void open() throws PersistenceException {
 
     super.open();
   }
 
+
+
   /** Close the data store. */
   public void close() throws PersistenceException {
 
     super.close();
   }
+
+
 
   /**
    * Delete the data store. <B>NOTE:</B> for some data stores
@@ -158,6 +193,8 @@ public class OracleDataStore extends JDBCDataStore {
 */
     super.delete();
   }
+
+
 
   /**
    * Delete a resource from the data store.
@@ -261,7 +298,11 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+
+  /**
+   *  helper method for delete()
+   *  never call it directly beause proper events will not be fired
+   */
   private void deleteDocument(Long lrId)
   throws PersistenceException {
 
@@ -286,7 +327,11 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+
+  /**
+   *  helper method for delete()
+   *  never call it directly beause proper events will not be fired
+   */
   private void deleteCorpus(Long lrId)
   throws PersistenceException {
 
@@ -306,8 +351,9 @@ public class OracleDataStore extends JDBCDataStore {
     finally {
       DBHelper.cleanup(stmt);
     }
-
   }
+
+
 
   /**
    * Save: synchonise the in-memory image of the LR with the persistent
@@ -319,6 +365,8 @@ public class OracleDataStore extends JDBCDataStore {
     //4.delegate (open a new transaction)
     _sync(lr,true);
   }
+
+
 
   /**
    * Save: synchonise the in-memory image of the LR with the persistent
@@ -413,6 +461,8 @@ public class OracleDataStore extends JDBCDataStore {
       new DatastoreEvent(this, DatastoreEvent.RESOURCE_WRITTEN, lr, lr.getLRPersistenceId()));
   }
 
+
+
   /**
    * Set method for the autosaving behaviour of the data store.
    * <B>NOTE:</B> many types of datastore have no auto-save function,
@@ -423,6 +473,8 @@ public class OracleDataStore extends JDBCDataStore {
 
     super.setAutoSaving(autoSaving);
   }
+
+
 
   /** Get the autosaving behaviour of the LR. */
   public boolean isAutoSaving() {
@@ -1948,11 +2000,12 @@ public class OracleDataStore extends JDBCDataStore {
       result.setFeatures(features);
 
       //4.9 set the nextAnnotationID correctly
-/*      long doc_id = rs.getLong("doc_id");
+      long doc_id = rs.getLong("doc_id");
 
       DBHelper.cleanup(rs);
       DBHelper.cleanup(pstmt);
-      sql = " select max(ann_local_id) as max_id" +
+      sql = " select  max(ann_local_id) as max_ann_id" +
+//            "         max(node_local_id) as max_node_id " +
             " from "+Gate.DB_OWNER+".t_annotation " +
             " where ann_doc_id = ?";
       pstmt = this.jdbcConn.prepareStatement(sql);
@@ -1965,10 +2018,9 @@ public class OracleDataStore extends JDBCDataStore {
         throw new PersistenceException("Invalid LR ID supplied - no data found");
       }
 
-      int maxAnnID = rs.getInt("max_id");
-      result.setNextAnnotationId(maxAnnID);
-*/
-
+      int maxAnnID = rs.getInt("max_ann_id");
+      result.setNextAnnotationId(maxAnnID+1);
+      //node?
     }
     catch(SQLException sqle) {
       throw new PersistenceException("can't read LR from DB: ["+ sqle.getMessage()+"]");
