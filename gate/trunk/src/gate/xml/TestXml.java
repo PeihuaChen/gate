@@ -24,6 +24,7 @@ import java.beans.*;
 
 import gate.util.*;
 import gate.gui.*;
+import gate.*;
 
 import junit.framework.*;
 import org.w3c.www.mime.*;
@@ -66,13 +67,15 @@ public class TestXml extends TestCase
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
       doc, doc.getSourceUrl()
     );
-    System.out.println(docFormat.getClass().getName());
     assert(docFormat instanceof gate.corpora.XmlDocumentFormat);
     // Set the maps
     docFormat.setMarkupElementsMap(markupElementsMap);
     docFormat.setElement2StringMap(anElement2StringMap);
 
     docFormat.unpackMarkup (doc,"DocumentContent");
+    AnnotationSet annotSet = doc.getAnnotations();
+
+
   } // testUnpackMarkup()
 
   /** Test suite routine for the test runner */

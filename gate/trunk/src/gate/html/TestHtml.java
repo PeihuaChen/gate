@@ -45,17 +45,6 @@ public class TestHtml extends TestCase
   public void setUp() {
   } // setUp
 
-
-  public static void main(String args[]) {
-    TestHtml app = new TestHtml("TestHtml");
-    try {
-      app.testUnpackMarkup();
-    } catch (Exception e) {
-      e.printStackTrace (Err.getPrintWriter());
-    }
-  }
-
-
   /** A test */
   public void testUnpackMarkup() throws Exception {
     assert(true);

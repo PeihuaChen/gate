@@ -133,9 +133,9 @@ public class EmailDocumentHandler implements StatusReporter{
           // if there are e-mails read before, then the previous e-mail
           // ends here.
           if (true == emailReadBefore){
-            // cursor points at the beggining of the line
-            // e-mail and Body ends before the \n char
-            // email ends as cursor value indicates
+            // Cursor points at the beggining of the line
+            // E-mail and Body ends before the \n char
+            // Email ends as cursor value indicates
             endEmail = cursor - nlSize ;
             // also the e-mail body ends when an e-mail ends
             endBody = cursor - nlSize;

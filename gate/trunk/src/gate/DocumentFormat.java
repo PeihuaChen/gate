@@ -85,71 +85,6 @@ public abstract class DocumentFormat implements LanguageResource, StatusReporter
   /** listeners for status report */
   protected List myStatusListeners = new LinkedList();
 
-  static{
-    register();
-  }
-  /** This method populates the various maps of MIME type to format,
-    * file suffix and magic numbers.
-    */
-  static private void register() {
-  /*
-    // register XML mime type
-    MimeType mime = new MimeType("text","xml");
-    mime.addParameter ("ClassHandler","gate.corpora.XmlDocumentFormat");
-
-    // register the class with this map type
-    mimeString2mimeTypeMap.put(mime.getType() + "/" + mime.getSubtype(), mime);
-
-    //register file sufixes
-    suffixes2mimeStringMap.put("xml",mime.getType() + "/" + mime.getSubtype());
-    suffixes2mimeStringMap.put("xhtm",mime.getType() + "/" + mime.getSubtype());
-    suffixes2mimeStringMap.put(
-      "xhtml",mime.getType() + "/" + mime.getSubtype());
-
-    // register HTML mime type
-    mime = new MimeType("text","html");
-    mime.addParameter ("ClassHandler","gate.corpora.HtmlDocumentFormat");
-
-    // register the class with this map type
-    mimeString2mimeTypeMap.put(mime.getType() + "/" + mime.getSubtype(), mime);
-
-    //register file sufixes
-    suffixes2mimeStringMap.put("htm",mime.getType() + "/" + mime.getSubtype());
-    suffixes2mimeStringMap.put("html",mime.getType() + "/" + mime.getSubtype());
-
-    // register SGML mime type
-    mime = new MimeType("text","sgml");
-    mime.addParameter ("ClassHandler","gate.corpora.SgmlDocumentFormat");
-
-    // register the class with this map type
-    mimeString2mimeTypeMap.put(mime.getType() + "/" + mime.getSubtype(), mime);
-
-    //register file sufixes
-    suffixes2mimeStringMap.put("sgm",mime.getType() + "/" + mime.getSubtype());
-    suffixes2mimeStringMap.put("sgml",mime.getType() + "/" + mime.getSubtype());
-
-    // register RTF mime type
-    mime = new MimeType("text","rtf");
-    mime.addParameter ("ClassHandler","gate.corpora.RtfDocumentFormat");
-
-    // register the class with this map type
-    mimeString2mimeTypeMap.put (mime.getType() + "/" + mime.getSubtype(), mime);
-
-    //register file sufixes
-    suffixes2mimeStringMap.put("rtf",mime.getType() + "/" + mime.getSubtype());
-
-    // register E-mail mime type
-    mime = new MimeType("text","email");
-    mime.addParameter ("ClassHandler","gate.corpora.EmailDocumentFormat");
-
-    // register the class with this map type
-    mimeString2mimeTypeMap.put (mime.getType() + "/" + mime.getSubtype(), mime);
-
-    //register file sufixes
-    suffixes2mimeStringMap.put("eml",mime.getType() + "/" + mime.getSubtype());
-*/
-  }//register
-
   /** Unpack the markup in the document. This converts markup from the
     * native format (e.g. XML, RTF) into annotations in GATE format.
     * Uses the markupElementsMap to determine which elements to convert, and
@@ -183,13 +118,15 @@ public abstract class DocumentFormat implements LanguageResource, StatusReporter
     String mimeTypeString = null;
     String contentType = null;
     InputStream is = null;
-    MimeType mimeType = null;
+    MimeType mimeTypeFromWebServer = null;
+    MimeType mimeTypeFromFileSuffix = null;
+    MimeType mimeTypeFromMagicNumbers = null;
     String fileSufix = null;
 
-    // ask the web server for the content type
-    // we expect to get contentType something like this:
+    // Ask the web server for the content type
+    // We expect to get contentType something like this:
     // "text/html; charset=iso-8859-1"
-    // charset is optional
+    // Charset is optional
     try{
       is = url.openConnection().getInputStream();
       contentType = url.openConnection().getContentType();
@@ -207,28 +144,31 @@ public abstract class DocumentFormat implements LanguageResource, StatusReporter
       // If this doesn't happen then we are wrong...
       mimeTypeString     = st.nextToken().toLowerCase();
     }// end if
-    // return the corresponding mime type from the assocated MAP
-    mimeType = (MimeType) mimeString2mimeTypeMap.get(mimeTypeString);
-    // If mimeType is null then we failed to recognise the mime type with the
-    // web server...
+    // Return the corresponding mime type from the assocated MAP
+    mimeTypeFromWebServer = (MimeType)
+                                mimeString2mimeTypeMap.get(mimeTypeString);
     // Let's try a file suffix detection
-    if (mimeType == null){
-      // Get the file sufix from the URL
-      // See method definition for more details
-      fileSufix = getFileSufix(url);
-      // Get the mime type based on the on file sufix
-      mimeType = getMimeType(fileSufix);
-      // If still null then we failed to recognise the mime type with  the file
-      // suffix... maybe a file sufix wasn't present or wasn't recognised by our
-      // getFileSuffix(url) method.
-      // Let's perform a magic numbers guess.. (our last hope)
-      if (mimeType == null ){
-         mimeType = guessTypeUsingMagicNumbers(is);
-      }// end if
+    // Get the file sufix from the URL
+    // See method definition for more details
+    fileSufix = getFileSufix(url);
+    // Get the mime type based on the on file sufix
+    mimeTypeFromFileSuffix = getMimeType(fileSufix);
 
-      // If still null then surrender
-    } // end if (mimeType == null)
-    return mimeType;
+    // Let's perform a magic numbers guess..
+    mimeTypeFromMagicNumbers = guessTypeUsingMagicNumbers(is);
+    // If all those mimeTypes are != null the the priority is the folowing:
+    // 1. mimeTypeFromFileSuffix
+    // 2. mimeTypeFromWebServer
+    // 3. mimeTypeFromMagicNumbers
+
+    if(mimeTypeFromFileSuffix != null)
+      return mimeTypeFromFileSuffix;
+    if(mimeTypeFromWebServer != null)
+      return mimeTypeFromWebServer;
+    if(mimeTypeFromMagicNumbers != null)
+      return mimeTypeFromMagicNumbers;
+    // If all of them are null then surrender.
+    return null;
   }//getMimeType
   /**
     * This method tries to guess the mime Type using some magic numbers

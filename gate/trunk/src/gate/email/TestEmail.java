@@ -44,17 +44,6 @@ public class TestEmail extends TestCase
   public void setUp() {
   } // setUp
 
-
-  public static void main(String args[]){
-    TestEmail app = new TestEmail("TestEmail");
-    try {
-      app.testUnpackMarkup();
-      app.testEmail();
-    } catch (Exception e) {
-      e.printStackTrace (Err.getPrintWriter());
-    }
-  }
-
   /** A test */
   public void testUnpackMarkup() throws Exception{
     assert(true);
@@ -70,8 +59,7 @@ public class TestEmail extends TestCase
       doc, doc.getSourceUrl()
     );
     assert(docFormat instanceof gate.corpora.EmailDocumentFormat);
-    //docFormat.unpackMarkup (doc,"DocumentContent");
-    docFormat.unpackMarkup(doc);
+    docFormat.unpackMarkup (doc,"DocumentContent");
   } // testUnpackMarkup()
 
   /**

@@ -95,7 +95,7 @@ public class EmailDocumentFormat extends TextualDocumentFormat
 
      fm.put(originalContentFeatureType, doc.getContent().toString());
      doc.setFeatures(fm);
-     unpackMarkup (doc, originalContentFeatureType);
+     unpackMarkup(doc);
   }// unpackMarkup(doc, originalContentFeatureType)
 
   /** Initialise this resource, and return it. */
@@ -110,6 +110,7 @@ public class EmailDocumentFormat extends TextualDocumentFormat
     // Register file sufixes for this mime type
     suffixes2mimeTypeMap.put("eml",mime);
     suffixes2mimeTypeMap.put("email",mime);
+    suffixes2mimeTypeMap.put("mail",mime);
     // Set the mimeType for this language resource
     setMimeType(mime);
     return this;
