@@ -56,14 +56,13 @@ public class Files {
   /** It returns the last component in a file path.
     * It takes E.g: d:/tmp/file.txt and returns file.txt
     */
-  public static String getLastPathComponent(String theFullPath){
-    String fileName = "";
-    if (theFullPath == null) return fileName;
-    StringTokenizer filePathToken = new StringTokenizer(theFullPath,"/");
-    while (filePathToken.hasMoreTokens()){
-      fileName = filePathToken.nextToken();
-    }// End while
-    return fileName;
+  public static String getLastPathComponent(String path){
+    //we should look both for "/" and "\" as on windows the file separator is"\"
+    //but a path coming from an URL will be separated by "/"
+    int index = path.lastIndexOf('/');
+    if(index == -1) index = path.lastIndexOf('\\');
+    if(index == -1) return path;
+    else return path.substring(index + 1);
   }// getLastPathComponent()
 
   /** Get a string representing the contents of a text file. */
