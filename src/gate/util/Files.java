@@ -94,8 +94,9 @@ public class Files {
 
 
   /**
-    * Writes a temporary file into the default temporary directory, form an InputStream
-    * a unique ID is generated and associated automaticaly with the file name...
+    * Writes a temporary file into the default temporary directory,
+    * form an InputStream a unique ID is generated and associated automaticaly
+    * with the file name...
     */
   public static File writeTempFile(InputStream contentStream)
   throws IOException {

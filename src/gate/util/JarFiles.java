@@ -162,12 +162,10 @@ public class JarFiles {
 
   public static void main(String[] args) {
     if(args.length < 2) {
-    System.err.println("USAGE : JarFiles arg0 arg1 ... argN" +
+                   System.err.println("USAGE : JarFiles arg0 arg1 ... argN" +
                                     "(must be at least 2 args)");
-    System.exit(1);
-    }
-    else
-    {
+                   System.exit(1);
+    }else{
       JarFiles jarFiles = new JarFiles();
       Set filesToMerge = new HashSet();
       for (int i=1; i<args.length; i++) {

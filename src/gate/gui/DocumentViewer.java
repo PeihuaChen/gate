@@ -26,6 +26,9 @@ public class DocumentViewer extends JPanel {
   JScrollPane textScroll = new JScrollPane();
   JSplitPane centerSplit = new JSplitPane();
   JTextPane textPane = new JTextPane();
+  //Create the popup menu containing all possible annotation types.
+  JPopupMenu popupMenu = new JPopupMenu();
+
   Document document;
   SortedTable tableView;
   JScrollPane tableScroll = new JScrollPane();
@@ -55,7 +58,26 @@ public class DocumentViewer extends JPanel {
     textPane.setText(document.getContent().toString());
     tableView = new SortedTable();
     tableView.setTableModel(new AnnotationSetTableModel(document,
-                                                   document.getAnnotations()));
+                                                        document.getAnnotations()
+                                                        )
+                            );
+    initPopupMenu(popupMenu);                        
+    // add a mouse listener to textPane component in order
+    // to catch the right click event
+    textPane.addMouseListener(new java.awt.event.MouseAdapter(){
+      public void mousePressed( MouseEvent e){
+        maybeShowPopup(e);
+      }
+      public void mouseReleased( MouseEvent e){
+        maybeShowPopup(e);
+      }
+      private void maybeShowPopup( MouseEvent e){
+        if (e.isPopupTrigger() && null != textPane.getSelectedText()){
+          popupMenu.show(e.getComponent(),e.getX(), e.getY());
+        }
+      }
+    });
+
     tableView.addMouseListener(new java.awt.event.MouseAdapter() {
 
       public void mousePressed(MouseEvent e) {
@@ -173,6 +195,23 @@ public class DocumentViewer extends JPanel {
 
     this.add(centerSplit, BorderLayout.CENTER);
   }
+
+  /** Initializes the popup menu with annotation types*/
+  private void initPopupMenu( JPopupMenu aPopupMenu){
+    ActionListener anActionListener  = new java.awt.event.ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        //:TODO: here call the method showDialog for the selected item
+        System.out.println(((JMenuItem)e.getSource()).getText());
+      }
+    };
+
+    JMenuItem  menuItem = new JMenuItem("Sentence");
+    menuItem.addActionListener(anActionListener);
+    aPopupMenu.add(menuItem);
+    menuItem = new JMenuItem("Token");
+    menuItem.addActionListener(anActionListener);
+    aPopupMenu.add(menuItem);
+  }//initPopupMenu
 
   public void setDocument(Document doc){
     this.document = doc;

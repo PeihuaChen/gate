@@ -101,8 +101,8 @@ public class XmlDocumentFormat extends TextualDocumentFormat
     * native format (e.g. XML, RTF) into annotations in GATE format.
     * Uses the markupElementsMap to determine which elements to convert, and
     * what annotation type names to use.
-    * It also uses the originalContentfeaturetype to preserve the original content
-    * of the Gate document
+    * It also uses the originalContentfeaturetype to preserve the original
+    * content of the Gate document.
     */
    public void unpackMarkup(Document doc,
                                     String  originalContentFeatureType){
@@ -114,4 +114,4 @@ public class XmlDocumentFormat extends TextualDocumentFormat
      doc.setFeatures(fm);
      unpackMarkup (doc);
   }
-} // class XmlDocumentFormat
+}//class XmlDocumentFormat

@@ -55,11 +55,16 @@ public class RtfDocumentFormat extends TextualDocumentFormat
     // NOTE that RTF Kit works only with Systled Document interface
     StyledDocument styledDoc = new DefaultStyledDocument();
     // get an Input stream from the gate document
-    InputStream in = new ByteArrayInputStream(doc.getContent().toString().getBytes());
+    InputStream in = new ByteArrayInputStream(
+                                         doc.getContent().toString().getBytes()
+                                         );
     try{
       aRtfEditorkit.read(in, styledDoc, 0);
       // replace the document content with the one without markups
-      doc.setContent(new DocumentContentImpl(styledDoc.getText(0,styledDoc.getLength())));
+      doc.setContent(new DocumentContentImpl(
+                                      styledDoc.getText(0,styledDoc.getLength())
+                                            )
+                    );
     } catch (Exception e){
       e.printStackTrace(System.err);
     }
@@ -69,8 +74,8 @@ public class RtfDocumentFormat extends TextualDocumentFormat
     * native format (e.g. XML, RTF) into annotations in GATE format.
     * Uses the markupElementsMap to determine which elements to convert, and
     * what annotation type names to use.
-    * It also uses the originalContentfeaturetype to preserve the original content
-    * of the Gate document
+    * It also uses the originalContentfeaturetype to preserve the original
+    * content of the Gate document.
     */
    public void unpackMarkup(gate.Document doc,
                                     String  originalContentFeatureType){
@@ -82,4 +87,4 @@ public class RtfDocumentFormat extends TextualDocumentFormat
      doc.setFeatures(fm);
      unpackMarkup (doc);
   }
-} // class XmlDocumentFormat
+}// class RtfDocumentFormat
