@@ -322,7 +322,8 @@ extends AbstractLanguageResource implements Document {
     * <b>Warning:</b> Annotations from the aSourceAnnotationSet will be lost
     * if they will cause a crosed over situation.
     * @param aSourceAnnotationSet is an annotation set containing all the
-    * annotations that will be combined with the original marup set.
+    * annotations that will be combined with the original marup set. If the
+    * param is <code>null</code> it will only dump the original markups.
     * @return a string representing an XML document containing the original
     * markup + dumped annotations form the aSourceAnnotationSet
     */
@@ -739,7 +740,9 @@ extends AbstractLanguageResource implements Document {
     return strBuff.toString();
   }// writeFeatures()
 
-  /** Returns a GateXml document
+  /** Returns a GateXml document that is a custom XML format for wich there is
+    * a reader inside GATE called gate.xml.GateFormatXmlHandler.
+    * What it does is to serialize a GATE document in an XML format.
     * @return a string representing a Gate Xml document
     */
   public String toXml(){
