@@ -2145,25 +2145,33 @@ public class MainFrame extends JFrame
   class HelpUserGuideAction extends AbstractAction {
     public HelpUserGuideAction(){
       super("User Guide");
+      putValue(SHORT_DESCRIPTION, "This option needs an internet connection");
     }
 
     public void actionPerformed(ActionEvent e) {
-      try{
-        HelpFrame helpFrame = new HelpFrame();
-        helpFrame.setPage(new URL("gate:/userguide.html"));
-        helpFrame.setSize(800, 600);
-        //center on screen
-        Dimension frameSize = helpFrame.getSize();
-        Dimension ownerSize = Toolkit.getDefaultToolkit().getScreenSize();
-        Point ownerLocation = new Point(0, 0);
-        helpFrame.setLocation(
-                  ownerLocation.x + (ownerSize.width - frameSize.width) / 2,
-                  ownerLocation.y + (ownerSize.height - frameSize.height) / 2);
 
-        helpFrame.setVisible(true);
-      }catch(IOException ioe){
-        ioe.printStackTrace(Err.getPrintWriter());
-      }
+      Runnable runnable = new Runnable(){
+        public void run(){
+          try{
+            HelpFrame helpFrame = new HelpFrame();
+            helpFrame.setPage(new URL("http://www.gate.ac.uk/sale/tao/index.html"));
+            helpFrame.setSize(800, 600);
+            //center on screen
+            Dimension frameSize = helpFrame.getSize();
+            Dimension ownerSize = Toolkit.getDefaultToolkit().getScreenSize();
+            Point ownerLocation = new Point(0, 0);
+            helpFrame.setLocation(
+                      ownerLocation.x + (ownerSize.width - frameSize.width) / 2,
+                      ownerLocation.y + (ownerSize.height - frameSize.height) / 2);
+
+            helpFrame.setVisible(true);
+          }catch(IOException ioe){
+            ioe.printStackTrace(Err.getPrintWriter());
+          }
+        }
+      };
+      Thread thread = new Thread(runnable);
+      thread.start();
     }
   }
 
