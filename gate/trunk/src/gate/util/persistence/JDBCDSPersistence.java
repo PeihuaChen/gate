@@ -67,6 +67,7 @@ public class JDBCDSPersistence extends DSPersistence {
 
     DataStoreRegister reg = Gate.getDataStoreRegister();
     boolean securityOK = false;
+    Session mySession = null;
     //1. login the user;
     securityLoop: do{
       try{
@@ -76,7 +77,6 @@ public class JDBCDSPersistence extends DSPersistence {
         Assert.assertNotNull(ac);
         ac.open();
 
-        Session mySession = null;
         try {
           Box listBox = Box.createHorizontalBox();
 
@@ -171,7 +171,11 @@ public class JDBCDSPersistence extends DSPersistence {
 
       //2. open the oracle datastore
       ds = (JDBCDataStore)super.createObject();
-
+      try {
+        ds.setSession(mySession);
+      } catch(gate.security.SecurityException ex1) {
+        throw new PersistenceException(ex1.getMessage());
+      }
 
       //3. add the security data for this datastore
       //this saves the user and group information, so it can
