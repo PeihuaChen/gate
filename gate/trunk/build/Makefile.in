@@ -99,6 +99,8 @@ resources:
 	cd ../src/gate && cp -R resources ../../classes/gate
 	cd ../classes/gate/resources && rm -r `find . -name CVS -print`
 	cp version.txt build.txt ../classes/gate/resources
+	sed 's,gateHeader,img/gateHeader,' ../doc/userguide.html > \
+	  ../classes/gate/resources/userguide.html
 
 # refresh the jar with all the class files
 jarupdate:
