@@ -49,8 +49,7 @@ import java.io.*;
  * annotations will be restricted to a very crude method allowing the user to
  * add any type of annotations having any features with any String values.
  */
-public class DocumentEditor extends AbstractVisualResource
-                            implements GenericVisualResource {
+public class DocumentEditor extends AbstractVisualResource{
   //properties
   private transient PropertyChangeSupport propertyChangeListeners =
                                           new PropertyChangeSupport(this);

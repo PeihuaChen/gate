@@ -32,8 +32,7 @@ import java.util.*;
 
 import gate.creole.AbstractVisualResource;
 
-public class FeaturesEditor extends AbstractVisualResource
-                            implements GenericVisualResource{
+public class FeaturesEditor extends AbstractVisualResource{
 
   public FeaturesEditor() {
     initLocalData();

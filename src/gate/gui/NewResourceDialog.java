@@ -182,7 +182,7 @@ public class NewResourceDialog extends JDialog {
   JFileChooser fileChooser;
   Map listeners;
 
-  public synchronized Resource show(ResourceData rData) {
+  public synchronized void show(ResourceData rData) {
     this.resourceData = rData;
     setLocationRelativeTo(getParent());
     nameField.setText("");
@@ -210,55 +210,61 @@ public class NewResourceDialog extends JDialog {
     requestFocus();
     nameField.requestFocus();
     super.show();
-    if(userCanceled) return null;
+    if(userCanceled) return;
     else{
-      //create the new resource
-      FeatureMap params = Factory.newFeatureMap();
-      for(int i=0; i< tableModel.getRowCount(); i++){
-        ParameterDisjunction pDisj = (ParameterDisjunction)
-                                     tableModel.getValueAt(i,0);
-        if(pDisj.getValue() != null){
-          params.put(pDisj.getName(), pDisj.getValue());
-        }
-      }
-      Resource res;
-      gate.event.StatusListener sListener = (gate.event.StatusListener)
-                                  listeners.get("gate.event.StatusListener");
-      if(sListener != null) sListener.statusChanged("Loading " +
-                                                    nameField.getText() +
-                                                    "...");
+      Runnable runnable = new Runnable(){
+        public void run(){
+          //create the new resource
+          FeatureMap params = Factory.newFeatureMap();
+          for(int i=0; i< tableModel.getRowCount(); i++){
+            ParameterDisjunction pDisj = (ParameterDisjunction)
+                                         tableModel.getValueAt(i,0);
+            if(pDisj.getValue() != null){
+              params.put(pDisj.getName(), pDisj.getValue());
+            }
+          }
+          Resource res;
+          gate.event.StatusListener sListener = (gate.event.StatusListener)
+                                      listeners.get("gate.event.StatusListener");
+          if(sListener != null) sListener.statusChanged("Loading " +
+                                                        nameField.getText() +
+                                                        "...");
 
-      gate.event.ProgressListener pListener = (gate.event.ProgressListener)
-                                  listeners.get("gate.event.ProgressListener");
-      if(pListener != null){
-        pListener.progressChanged(0);
-      }
+          gate.event.ProgressListener pListener = (gate.event.ProgressListener)
+                                      listeners.get("gate.event.ProgressListener");
+          if(pListener != null){
+            pListener.progressChanged(0);
+          }
 
-      try {
-        long startTime = System.currentTimeMillis();
-        FeatureMap features = Factory.newFeatureMap();
-        Gate.setName(features, nameField.getText());
-        res = Factory.createResource(rData.getClassName(), params,
-                                     features, listeners);
-        long endTime = System.currentTimeMillis();
-        if(sListener != null) sListener.statusChanged(
-            nameField.getText() + " loaded in " +
-            NumberFormat.getInstance().format(
-            (double)(endTime - startTime) / 1000) + " seconds");
-        if(pListener != null) pListener.processFinished();
-      } catch(ResourceInstantiationException rie) {
-        JOptionPane.showMessageDialog(getOwner(),
-                                      "Resource could not be created!\n" +
-                                      rie.toString(),
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
-        rie.printStackTrace(Err.getPrintWriter());
-        res = null;
-        if(sListener != null) sListener.statusChanged("Error loading " +
-                                                      nameField.getText() +
-                                                      "!");
-        if(pListener != null) pListener.processFinished();
-      }
-      return res;
+          try {
+            long startTime = System.currentTimeMillis();
+            FeatureMap features = Factory.newFeatureMap();
+            Gate.setName(features, nameField.getText());
+            res = Factory.createResource(resourceData.getClassName(), params,
+                                         features, listeners);
+            long endTime = System.currentTimeMillis();
+            if(sListener != null) sListener.statusChanged(
+                nameField.getText() + " loaded in " +
+                NumberFormat.getInstance().format(
+                (double)(endTime - startTime) / 1000) + " seconds");
+            if(pListener != null) pListener.processFinished();
+          } catch(ResourceInstantiationException rie){
+            JOptionPane.showMessageDialog(getOwner(),
+                                          "Resource could not be created!\n" +
+                                          rie.toString(),
+                                          "Gate", JOptionPane.ERROR_MESSAGE);
+            rie.printStackTrace(Err.getPrintWriter());
+            res = null;
+            if(sListener != null) sListener.statusChanged("Error loading " +
+                                                          nameField.getText() +
+                                                          "!");
+            if(pListener != null) pListener.processFinished();
+          }
+        }//public void run()
+      };
+      Thread thread = new Thread(runnable, "");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
     }
   }// public synchronized Resource show(ResourceData rData)
 

@@ -851,8 +851,6 @@ public class MainFrame extends JFrame
     DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
     if(res instanceof ProcessingResource){
       if(Gate.getApplicationAttribute(res.getFeatures())){
-//        handle = new ApplicationHandle((SerialController)res, this, this);
-//        node = new DefaultMutableTreeNode(handle, false);
         resourcesTreeModel.insertNodeInto(node, applicationsRoot, 0);
       }else{
         resourcesTreeModel.insertNodeInto(node, processingResourcesRoot, 0);
@@ -917,17 +915,8 @@ public class MainFrame extends JFrame
     handle.addStatusListener(MainFrame.this);
 
     JPopupMenu popup = handle.getPopup();
-
-//    DataStore ds = e.getDatastore();
-//    if(ds != null){
-//      //make sure he have a name
-//      ds.setName(ds.getStorageUrl().getFile());
-//      DSHandle handle = new DSHandle(ds);
-//      handle.addStatusListener(this);
-//      handle.addProgressListener(this);
-//      DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
-//      resourcesTreeModel.insertNodeInto(node, datastoresRoot, 0);
-//    }
+    popup.addSeparator();
+    popup.add(new XJMenuItem(new CloseViewAction(handle), this));
   }
 
   /**Called when a {@link gate.DataStore} has been created*/
@@ -1294,124 +1283,6 @@ public class MainFrame extends JFrame
     }
     ResourceData rData;
   }
-
-//  class NewLRAction extends AbstractAction {
-//    public NewLRAction() {
-//      super("Create language resource");
-//      putValue(SHORT_DESCRIPTION,"Create a new language resource");
-//    }
-//
-//    public void actionPerformed(ActionEvent e) {
-//      Runnable runnable = new Runnable() {
-//        public void run(){
-//          CreoleRegister reg = Gate.getCreoleRegister();
-//          List lrTypes = reg.getPublicLrTypes();
-//          if(lrTypes != null && !lrTypes.isEmpty()){
-//            HashMap resourcesByName = new HashMap();
-//            Iterator lrIter = lrTypes.iterator();
-//            while(lrIter.hasNext()){
-//              ResourceData rData = (ResourceData)reg.get(lrIter.next());
-//              resourcesByName.put(rData.getName(), rData);
-//            }
-//            List lrNames = new ArrayList(resourcesByName.keySet());
-//            Collections.sort(lrNames);
-//            Object answer = JOptionPane.showInputDialog(
-//                                MainFrame.this,
-//                                "Select type of Language resource",
-//                                "Gate", JOptionPane.QUESTION_MESSAGE,
-//                                null, lrNames.toArray(),
-//                                lrNames.get(0));
-//            if(answer != null){
-//              ResourceData rData = (ResourceData)resourcesByName.get(answer);
-//              newResourceDialog.setTitle(
-//                                  "Parameters for the new " + rData.getName());
-//              LanguageResource res = (LanguageResource)
-//                                                  newResourceDialog.show(rData);
-//            }
-//          }else{
-//            //no lr types
-//            JOptionPane.showMessageDialog(MainFrame.this,
-//                                      "Could not find any registered types " +
-//                                      "of resources...\n" +
-//                                      "Check your Gate installation!",
-//                                      "Gate", JOptionPane.ERROR_MESSAGE);
-//          }
-//        }//public void run()
-//      };
-//      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-//                                 runnable,
-//                                 "MainFrame3");
-//      thread.setPriority(thread.MIN_PRIORITY);
-//      thread.start();
-//    }
-//  }//class NewLRAction extends AbstractAction
-//
-//
-//  class NewPRAction extends AbstractAction {
-//    public NewPRAction() {
-//      super("Create processing resource");
-//      putValue(SHORT_DESCRIPTION,"Create a new processing resource");
-//    }
-//
-//    public void actionPerformed(ActionEvent e) {
-//      Runnable runnable = new Runnable() {
-//        public void run() {
-//          CreoleRegister reg = Gate.getCreoleRegister();
-//          List prTypes = reg.getPublicPrTypes();
-//          if(prTypes != null && !prTypes.isEmpty()){
-//            HashMap resourcesByName = new HashMap();
-//            Iterator lrIter = prTypes.iterator();
-//            while(lrIter.hasNext()) {
-//              ResourceData rData = (ResourceData)reg.get(lrIter.next());
-//              resourcesByName.put(rData.getName(), rData);
-//            }
-//            List prNames = new ArrayList(resourcesByName.keySet());
-//            Collections.sort(prNames);
-//            Object answer = JOptionPane.showInputDialog(
-//                                MainFrame.this,
-//                                "Select type of Processing resource",
-//                                "Gate", JOptionPane.QUESTION_MESSAGE,
-//                                null, prNames.toArray(),
-//                                prNames.get(0));
-//            if(answer != null){
-//              ResourceData rData = (ResourceData)resourcesByName.get(answer);
-//              newResourceDialog.setTitle(
-//                                  "Parameters for the new " + rData.getName());
-//              ProcessingResource res = (ProcessingResource)
-//                                                  newResourceDialog.show(rData);
-///*
-//              if(res != null){
-//                PRHandle handle = new PRHandle(res, currentProject);
-//                handle.setTooltipText("<html><b>Type:</b> " +
-//                                      rData.getName() + "</html>");
-//                handleForResourceName.put(res.getName(), handle);
-//                //prRoot.add(new DefaultMutableTreeNode(handle, false));
-//                //projectTreeModel.nodeStructureChanged(prRoot);
-//                resourcesTree.expandPath(new TreePath(new Object[]{
-//                                resourcesTreeRoot, processingResourcesRoot}));
-//                //currentProject.addPR(handle);
-//                statusChanged(res.getName() + " loaded!");
-//              }
-//*/
-//            }
-//          } else {
-//            //no lr types
-//            JOptionPane.showMessageDialog(MainFrame.this,
-//                                        "Could not find any registered types " +
-//                                        "of resources...\n" +
-//                                        "Check your Gate installation!",
-//                                        "Gate", JOptionPane.ERROR_MESSAGE);
-//          }
-//        }//public void run()
-//      };
-//      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-//                                 runnable,
-//                                 "MainFrame4");
-//      thread.setPriority(thread.MIN_PRIORITY);
-//      thread.start();
-//    }
-//  }//class NewPRAction extends AbstractAction
-
 
   class NewDSAction extends AbstractAction {
     public NewDSAction(){

@@ -16,8 +16,11 @@
 package gate.creole;
 
 import javax.swing.JPanel;
+
+
 import gate.*;
 import gate.util.*;
+import gate.gui.ResourceHandle;
 
 /** A convenience implementation of VisualResource with some default code. */
 public abstract class AbstractVisualResource extends JPanel
@@ -44,6 +47,26 @@ public abstract class AbstractVisualResource extends JPanel
   public Resource init() throws ResourceInstantiationException {
     return this;
   }//init()
+
+  /**
+   * Called by the GUI when this viewer/editor has to initialise itself for a
+   * specific object.
+   * @param target the object (be it a {@link gate.Resource},
+   * {@link gate.DataStore} or whatever) this viewer has to display
+   */
+  public void setTarget(Object target){
+    throw new RuntimeException(
+      "Class " + getClass() + " hasn't implemented the setTarget() method!");
+  }
+
+
+  /**
+   * Used by the main GUI to tell this VR what handle created it. The VRs can
+   * use this information e.g. to add items to the popup for the resource.
+   */
+  public void setHandle(ResourceHandle handle){
+  }
+
 
   // Properties for the resource
   protected FeatureMap features;

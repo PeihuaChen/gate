@@ -35,7 +35,7 @@ import gate.event.*;
  * Such information will include icon to be used for tree components,
  * popup menu for right click events, large and small views, etc.
  */
-public class DefaultResourceHandle implements ResourceHandle {
+public class DefaultResourceHandle implements ResourceHandle, StatusListener, ProgressListener {
 
   public DefaultResourceHandle(FeatureBearer res) {
     this.resource = res;
@@ -158,10 +158,10 @@ public class DefaultResourceHandle implements ResourceHandle {
           FeatureMap params = Factory.newFeatureMap();
           FeatureMap features = Factory.newFeatureMap();
           Gate.setHiddenAttribute(features, true);
-          GenericVisualResource view = (GenericVisualResource)
-                                        Factory.createResource(className,
-                                                               params,
-                                                               features);
+          VisualResource view = (VisualResource)
+                                Factory.createResource(className,
+                                                       params,
+                                                       features);
           view.setTarget(resource);
           view.setHandle(this);
           ((JTabbedPane)largeView).add((Component)view, rData.getName());
@@ -190,10 +190,10 @@ public class DefaultResourceHandle implements ResourceHandle {
           FeatureMap params = Factory.newFeatureMap();
           FeatureMap features = Factory.newFeatureMap();
           Gate.setHiddenAttribute(features, true);
-          GenericVisualResource view = (GenericVisualResource)
-                                        Factory.createResource(className,
-                                                               params,
-                                                               features);
+          VisualResource view = (VisualResource)
+                                Factory.createResource(className,
+                                                       params,
+                                                       features);
           view.setTarget(resource);
           view.setHandle(this);
           ((JTabbedPane)smallView).add((Component)view, rData.getName());
@@ -538,5 +538,15 @@ public class DefaultResourceHandle implements ResourceHandle {
         ((StatusListener) listeners.elementAt(i)).statusChanged(e);
       }
     }
-  }////class ReloadAction extends AbstractAction
+  }
+
+  public void statusChanged(String e) {
+    fireStatusChanged(e);
+  }
+  public void progressChanged(int e) {
+    fireProgressChanged(e);
+  }
+  public void processFinished() {
+    fireProcessFinished();
+  }
 }//class DefaultResourceHandle

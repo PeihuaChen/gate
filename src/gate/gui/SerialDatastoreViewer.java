@@ -28,7 +28,7 @@ import java.text.NumberFormat;
 import gate.event.*;
 
 public class SerialDatastoreViewer extends JTree
-                                   implements GenericVisualResource,
+                                   implements VisualResource,
                                               DatastoreListener{
 
   public SerialDatastoreViewer() {
