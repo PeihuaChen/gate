@@ -908,6 +908,8 @@ public class MainFrame extends JFrame
       //make sure he have a name
       ds.setName(ds.getStorageUrl().getFile());
       DSHandle handle = new DSHandle(ds);
+      handle.addStatusListener(this);
+      handle.addProgressListener(this);
       DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
       resourcesTreeModel.insertNodeInto(node, datastoresRoot, 0);
     }
@@ -1805,7 +1807,15 @@ public class MainFrame extends JFrame
         if(isActive && targetPanel.isVisible()){
           SwingUtilities.invokeLater(new Runnable(){
             public void run(){
-              targetPanel.repaint();
+//              targetPanel.getParent().validate();
+//              targetPanel.getParent().repaint();
+//              ((JComponent)targetPanel.getParent()).paintImmediately(((JComponent)targetPanel.getParent()).getBounds());
+//              targetPanel.doLayout();
+
+//              targetPanel.requestFocus();
+              targetPanel.getParent().getParent().invalidate();
+              targetPanel.getParent().getParent().repaint();
+//              targetPanel.paintImmediately(targetPanel.getBounds());
             }
           });
         }

@@ -23,6 +23,8 @@ import java.awt.event.*;
 import javax.swing.tree.*;
 
 import java.util.*;
+import java.text.NumberFormat;
+
 import gate.event.*;
 
 public class DSHandle extends DefaultResourceHandle implements DatastoreListener{
@@ -84,18 +86,25 @@ public class DSHandle extends DefaultResourceHandle implements DatastoreListener
     datastore.addDatastoreListener(this);
     tree.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
-        if(SwingUtilities.isRightMouseButton(e)){
-          //where inside the tree?
-          TreePath path = tree.getPathForLocation(e.getX(), e.getY());
-          if(path != null){
-            Object value = ((DefaultMutableTreeNode)
+        //where inside the tree?
+        TreePath path = tree.getPathForLocation(e.getX(), e.getY());
+        Object value = null;
+        if(path != null) value = ((DefaultMutableTreeNode)
                                   path.getLastPathComponent()).getUserObject();
-            if(value instanceof DSEntry){
-              JPopupMenu popup = ((DSEntry)value).getPopup();
-              popup.show(tree, e.getX(), e.getY());
-            }
+
+        if(SwingUtilities.isRightMouseButton(e)){
+          //right click
+          if(value != null && value instanceof DSEntry){
+            JPopupMenu popup = ((DSEntry)value).getPopup();
+            popup.show(tree, e.getX(), e.getY());
           }
-        }//if
+        }else if(SwingUtilities.isLeftMouseButton(e) &&
+                 e.getClickCount() == 2){
+          //double click -> just load the resource
+          if(value != null && value instanceof DSEntry){
+            new LoadAction((DSEntry)value).actionPerformed(null);
+          }
+        }
       }//public void mouseClicked(MouseEvent e)
     });
   }//protected void initListeners()
@@ -160,26 +169,48 @@ public class DSHandle extends DefaultResourceHandle implements DatastoreListener
     }
 
     public void actionPerformed(ActionEvent e){
-      try{
-        FeatureMap params = Factory.newFeatureMap();
-        params.put("DataStore", datastore);
-        params.put("DataStoreInstanceId", entry.id);
-        FeatureMap features = Factory.newFeatureMap();
-        Gate.setName(features, entry.name);
-        Resource res = Factory.createResource(entry.type, params, features);
-        datastore.getLr(entry.type, entry.id);
-        //project.frame.resourcesTreeModel.treeChanged();
-      }catch(gate.persist.PersistenceException pe){
-        JOptionPane.showMessageDialog(getLargeView(),
-                                      "Error!\n" + pe.toString(),
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
-        pe.printStackTrace(Err.getPrintWriter());
-      } catch(ResourceInstantiationException rie){
-        JOptionPane.showMessageDialog(getLargeView(),
-                                      "Error!\n" + rie.toString(),
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
-        rie.printStackTrace(Err.getPrintWriter());
-      }
+      Runnable runnable = new Runnable(){
+        public void run(){
+          try{
+            long start = System.currentTimeMillis();
+            fireStatusChanged("Loading " + entry.name);
+            fireProgressChanged(0);
+            FeatureMap params = Factory.newFeatureMap();
+            params.put("DataStore", datastore);
+            params.put("DataStoreInstanceId", entry.id);
+            FeatureMap features = Factory.newFeatureMap();
+            Gate.setName(features, entry.name);
+            Resource res = Factory.createResource(entry.type, params, features);
+            datastore.getLr(entry.type, entry.id);
+            //project.frame.resourcesTreeModel.treeChanged();
+            fireProgressChanged(0);
+            fireProcessFinished();
+            long end = System.currentTimeMillis();
+            fireStatusChanged(entry.name + " loaded in " +
+                              NumberFormat.getInstance().format(
+                              (double)(end - start) / 1000) + " seconds");
+          }catch(gate.persist.PersistenceException pe){
+            JOptionPane.showMessageDialog(getLargeView(),
+                                          "Error!\n" + pe.toString(),
+                                          "Gate", JOptionPane.ERROR_MESSAGE);
+            pe.printStackTrace(Err.getPrintWriter());
+            fireProgressChanged(0);
+            fireProcessFinished();
+          } catch(ResourceInstantiationException rie){
+            JOptionPane.showMessageDialog(getLargeView(),
+                                          "Error!\n" + rie.toString(),
+                                          "Gate", JOptionPane.ERROR_MESSAGE);
+            rie.printStackTrace(Err.getPrintWriter());
+            fireProgressChanged(0);
+            fireProcessFinished();
+          }
+        }
+      };//runnable
+      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                                 runnable,
+                                 "Loader from DS");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
     }// public void actionPerformed(ActionEvent e)
     DSEntry entry;
   }//class LoadAction extends AbstractAction
@@ -232,6 +263,8 @@ public class DSHandle extends DefaultResourceHandle implements DatastoreListener
   DefaultMutableTreeNode treeRoot;
   DefaultTreeModel treeModel;
   DataStore datastore;
+  private transient Vector progressListeners;
+  private transient Vector statusListeners;
   public void resourceAdopted(DatastoreEvent e) {
     //do nothing; SerialDataStore does actually nothing on adopt()
     //we'll have to listen for RESOURE_WROTE events
@@ -295,5 +328,64 @@ public class DSHandle extends DefaultResourceHandle implements DatastoreListener
         pe.printStackTrace(Err.getPrintWriter());
       }
     }
-  }//public void resourceWritten(DatastoreEvent e)
+  }
+  public synchronized void removeProgressListener(ProgressListener l) {
+    super.removeProgressListener(l);
+    if (progressListeners != null && progressListeners.contains(l)) {
+      Vector v = (Vector) progressListeners.clone();
+      v.removeElement(l);
+      progressListeners = v;
+    }
+  }
+  public synchronized void addProgressListener(ProgressListener l) {
+    super.addProgressListener(l);
+    Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      progressListeners = v;
+    }
+  }
+  protected void fireProgressChanged(int e) {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
+      }
+    }
+  }
+  protected void fireProcessFinished() {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).processFinished();
+      }
+    }
+  }
+  public synchronized void removeStatusListener(StatusListener l) {
+    super.removeStatusListener(l);
+    if (statusListeners != null && statusListeners.contains(l)) {
+      Vector v = (Vector) statusListeners.clone();
+      v.removeElement(l);
+      statusListeners = v;
+    }
+  }
+  public synchronized void addStatusListener(StatusListener l) {
+    super.addStatusListener(l);
+    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      statusListeners = v;
+    }
+  }
+  protected void fireStatusChanged(String e) {
+    if (statusListeners != null) {
+      Vector listeners = statusListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
+      }
+    }
+  }////public void resourceWritten(DatastoreEvent e)
 }//public class DSHandle

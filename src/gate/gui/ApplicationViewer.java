@@ -243,11 +243,12 @@ public class ApplicationViewer extends AbstractVisualResource
         if(rows == null || rows.length == 0){
           JOptionPane.showMessageDialog(
               ApplicationViewer.this,
-              "Please select some components to be removed from the list of used components!\n" ,
+              "Please select some components to be removed "+
+              "from the list of used components!\n" ,
               "Gate", JOptionPane.ERROR_MESSAGE);
         } else {
           List actions = new ArrayList();
-          List nodes = new ArrayList();
+//          List nodes = new ArrayList();
           for(int i = 0; i < rows.length; i++){
             DefaultMutableTreeNode node = (DefaultMutableTreeNode)
                                           mainTreeTable.getTree().
@@ -256,28 +257,22 @@ public class ApplicationViewer extends AbstractVisualResource
             Object value = ((DefaultMutableTreeNode)node).getUserObject();
             if(value instanceof ProcessingResource &&
                controller.contains(value)){
-//              Action act = (Action)removeActionForPR.get(value);
               Action act = new RemovePRAction((ProcessingResource)value);
               if(act != null){
                 actions.add(act);
-                nodes.add(node);
               }
             } else {
               JOptionPane.showMessageDialog(
                   ApplicationViewer.this,
                   "Only processing resources can be removed!\n" +
-                  "(Processing resources are the nodes from the first level of the tree)" ,
+                  "(Processing resources are the nodes from the first level " +
+                  "of the tree)" ,
                   "Gate", JOptionPane.ERROR_MESSAGE);
             }
           }
           Iterator actIter = actions.iterator();
           while(actIter.hasNext()){
             ((Action)actIter.next()).actionPerformed(null);
-          }
-          Iterator nodesIter = nodes.iterator();
-          while(nodesIter.hasNext()){
-            mainTTModel.removeNodeFromParent(
-                        (DefaultMutableTreeNode)nodesIter.next());
           }
         }// else
       }//  public void actionPerformed(ActionEvent e)
@@ -289,7 +284,8 @@ public class ApplicationViewer extends AbstractVisualResource
         if(paths == null || paths.length == 0){
           JOptionPane.showMessageDialog(
               ApplicationViewer.this,
-              "Please select some components to be moved from the list of used components!\n" ,
+              "Please select some components to be moved from the " +
+              "list of used components!\n" ,
               "Gate", JOptionPane.ERROR_MESSAGE);
         } else {
           for(int i = 0; i < paths.length; i++) {
@@ -780,8 +776,20 @@ public class ApplicationViewer extends AbstractVisualResource
       controller.remove(pr);
       paramsForPR.remove(pr);
       modulesTableModel.fireTableDataChanged();
+      //remove the PR from the PRs-and-Params tree
+      Enumeration prNodesEnum = ((DefaultMutableTreeNode)
+                                  mainTTModel.getRoot()).children();
+      children: while(prNodesEnum.hasMoreElements()){
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+                                      prNodesEnum.nextElement();
+        Object value = ((DefaultMutableTreeNode)node).getUserObject();
+        if(value == pr){
+          mainTTModel.removeNodeFromParent(node);
+          break children;
+        }
+      }
+
       this.setEnabled(false);
-//      ((Action)addActionForPR.get(pr)).setEnabled(true);
     }//public void actionPerformed(ActionEvent e)
     ProcessingResource pr;
   }//class RemovePRAction extends AbstractAction
