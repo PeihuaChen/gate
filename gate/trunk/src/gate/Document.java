@@ -96,6 +96,19 @@ public interface Document extends LanguageResource, Comparable {
    */
   public Boolean getMarkupAware();
 
+  /**
+   * Allow/disallow preserving of the original document content.
+   * If is <B>true</B> the original content will be retrieved from
+   * the DocumentContent object and preserved as document feature.
+   */
+  public void setPreserveOriginalContent(Boolean b);
+
+  /** Get the preserving of content status of the Document.
+   *
+   *  @return whether the Document should preserve it's original content.
+   */
+  public Boolean getPreserveOriginalContent();
+
   /** Returns a GateXml document. This document is actually a serialization of
    *  a Gate Document in XML.
     * @return a string representing a Gate Xml document

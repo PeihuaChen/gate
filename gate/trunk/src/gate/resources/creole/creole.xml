@@ -19,6 +19,7 @@
       <PARAMETER NAME="encoding" OPTIONAL="true" COMMENT="Encoding" DEFAULT="UTF-8">java.lang.String</PARAMETER>
       <PARAMETER NAME="sourceUrlStartOffset" COMMENT="Start offset for documents based on ranges" OPTIONAL="true">java.lang.Long</PARAMETER>
       <PARAMETER NAME="sourceUrlEndOffset" COMMENT="End offset for documents based on ranges" OPTIONAL="true">java.lang.Long</PARAMETER>
+      <PARAMETER NAME="preserveOriginalContent" COMMENT="Should the document preserve the original content" DEFAULT="false">java.lang.Boolean</PARAMETER>
       <ICON>lr.gif</ICON>
     </RESOURCE>
     <!-- Corpora -->
