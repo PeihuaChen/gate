@@ -515,6 +515,8 @@ public class MainFrame extends JFrame
     loadANNIEMenu = new JMenu("Load ANNIE system");
     fileMenu.add(loadANNIEMenu);
     fileMenu.add(new XJMenuItem(new LoadCreoleRepositoryAction(), this));
+    
+    fileMenu.add(new XJMenuItem(new ManagePluginsAction(), this));
     fileMenu.addSeparator();
 
     fileMenu.add(new XJMenuItem(new ExitGateAction(), this));
@@ -1936,6 +1938,18 @@ public class MainFrame extends JFrame
     }// actionPerformed();
   }//class NewBootStrapAction
 
+  
+  class ManagePluginsAction extends AbstractAction {
+    public ManagePluginsAction(){
+      super("Manage CREOLE plugins");
+      putValue(SHORT_DESCRIPTION,"Manage CREOLE plugins");
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      JOptionPane.showInputDialog(MainFrame.this, new PluginManagerUI());
+    }
+  }
+  
 
   class LoadCreoleRepositoryAction extends AbstractAction {
     public LoadCreoleRepositoryAction(){
