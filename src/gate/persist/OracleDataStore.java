@@ -1,4 +1,4 @@
-/*
+sw/*
  *  OracleDataStore.java
  *
  *  Copyright (c) 1998-2001, The University of Sheffield.
@@ -280,6 +280,7 @@ public class OracleDataStore extends JDBCDataStore {
       switch(sqle.getErrorCode()) {
         case DBHelper.X_ORACLE_INVALID_LR_TYPE:
           throw new PersistenceException("can't create LR [step 3] in DB, invalid LR Type");
+          break;
         default:
           throw new PersistenceException(
                 "can't create LR [step 3] in DB : ["+ sqle.getMessage()+"]");
@@ -430,11 +431,9 @@ public class OracleDataStore extends JDBCDataStore {
     }
 
     //7. create features
-    _createFeatures(docID,this.FEATURE_OWNER_DOCUMENT,docFeatures);
+    createFeatures(docID,this.FEATURE_OWNER_DOCUMENT,docFeatures);
 
     //8. commit?
-
-    throw new MethodNotImplementedException();
   }
 
 
@@ -496,6 +495,7 @@ public class OracleDataStore extends JDBCDataStore {
           case DBHelper.X_ORACLE_INVALID_ANNOTATION_TYPE:
             throw new PersistenceException(
                 "can't create annotation in DB, [invalid annotation type]");
+            break;
           default:
             throw new PersistenceException(
                 "can't create annotation in DB: ["+ sqle.getMessage()+"]");
@@ -509,7 +509,7 @@ public class OracleDataStore extends JDBCDataStore {
       //2.1. set annotation features
       FeatureMap features = ann.getFeatures();
       Assert.assertNotNull(features);
-      _createFeatures(annID,this.FEATURE_OWNER_ANNOTATION,features);
+      createFeatures(annID,this.FEATURE_OWNER_ANNOTATION,features);
     }
   }
 
@@ -550,7 +550,7 @@ public class OracleDataStore extends JDBCDataStore {
     }
 
     //4. create features
-    _createFeatures(corpusID,this.FEATURE_OWNER_CORPUS,corp.getFeatures());
+    createFeatures(corpusID,this.FEATURE_OWNER_CORPUS,corp.getFeatures());
 
     throw new MethodNotImplementedException();
   }
@@ -890,7 +890,18 @@ public class OracleDataStore extends JDBCDataStore {
       featID = new Long(stmt.getLong(7));
     }
     catch(SQLException sqle) {
-      throw new PersistenceException("can't create feature [step 1] in DB: ["+ sqle.getMessage()+"]");
+
+      switch(sqle.getErrorCode()) {
+
+        case DBHelper.X_ORACLE_INVALID_FEATURE_TYPE:
+          throw new PersistenceException("can't create feature [step 1],"+
+                      "[invalid feature type] in DB: ["+ sqle.getMessage()+"]");
+          break;
+
+        default:
+          throw new PersistenceException("can't create feature [step 1] in DB: ["+
+                                                      sqle.getMessage()+"]");
+      }
     }
     finally {
       DBHelper.cleanup(stmt);
@@ -1043,7 +1054,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
   /** --- */
-  private void _createFeatures(Long entityID, int entityType, FeatureMap features)
+  private void createFeatures(Long entityID, int entityType, FeatureMap features)
     throws PersistenceException {
 
       /* when some day Java has macros, this will be a macro */
