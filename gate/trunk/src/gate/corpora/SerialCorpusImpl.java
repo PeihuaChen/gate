@@ -25,6 +25,7 @@ import java.io.*;
 import java.net.*;
 import gate.event.*;
 import gate.creole.*;
+import gate.security.SecurityException;
 
 //The initial design was to implement this on the basis of a WeakValueHashMap.
 //However this creates problems, because the user might e.g., add a transient
@@ -314,6 +315,8 @@ public class SerialCorpusImpl extends
         this.dataStore.sync(this);
       } catch (PersistenceException ex) {
         throw new GateRuntimeException("SerialCorpusImpl: " + ex.getMessage());
+      } catch (SecurityException sex) {
+        throw new GateRuntimeException("SerialCorpusImpl: " + sex.getMessage());
       }
   }//resourceDeleted
 

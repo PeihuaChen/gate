@@ -20,6 +20,7 @@ import java.io.*;
 
 import gate.util.*;
 import gate.persist.*;
+import gate.security.SecurityException;
 
 /** Models all sorts of language resources.
   */
@@ -44,6 +45,6 @@ public interface LanguageResource extends Resource
   /** Save: synchonise the in-memory image of the LR with the persistent
     * image.
     */
-  public void sync() throws PersistenceException;
+  public void sync() throws PersistenceException,SecurityException;
 
 } // interface LanguageResource
