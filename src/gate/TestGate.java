@@ -12,6 +12,7 @@ import junit.framework.*;
 import gate.annotation.*;
 import gate.corpora.*;
 import gate.util.*;
+import gate.db.*;
 
 /** Top-level entry point for GATE test suite.
   * "main" will run the JUnit test runner interface.
@@ -44,6 +45,7 @@ public class TestGate
     suite.addTest(TestRBTreeMap.suite());
     suite.addTest(TestCorpus.suite());
     suite.addTest(CookBook.suite());
+    suite.addTest(TestDB.suite());
     return suite;
   } // suite
 

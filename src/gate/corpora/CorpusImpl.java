@@ -43,9 +43,9 @@ public class CorpusImpl extends TreeSet implements Corpus
   public void setFeatures(FeatureMap features) { this.features = features; }
 
   /** The name of the corpus */
-  String name;
+  protected String name;
   
   /** The features associated with this corpus. */
-  FeatureMap features;
+  protected FeatureMap features;
 
 } // class CorpusImpl
