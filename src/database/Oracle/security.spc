@@ -30,26 +30,6 @@ create or replace package security is
 
   /* exceptions */
 
-  x_duplicate_group_name EXCEPTION;
-  PRAGMA EXCEPTION_INIT(x_duplicate_group_name, -20101 );
-
-  x_duplicate_user_name EXCEPTION;
-  PRAGMA EXCEPTION_INIT(x_duplicate_user_name, -20102);
-  
-  x_invalid_user_name EXCEPTION;
-  PRAGMA EXCEPTION_INIT(x_invalid_user_name, -20103);
-
-  x_invalid_user_pass EXCEPTION;
-  PRAGMA EXCEPTION_INIT(x_invalid_user_pass, -20104);
-
-  x_invalid_user_group EXCEPTION;
-  PRAGMA EXCEPTION_INIT(x_invalid_user_group, -20104);
-
-  x_invalid_lr EXCEPTION;
-  PRAGMA EXCEPTION_INIT(x_invalid_lr, -20105);
-
-  x_invalid_access_mode EXCEPTION;
-  PRAGMA EXCEPTION_INIT(x_invalid_access_mode, -20106);
   
   /* Group related functionality */
   
@@ -104,6 +84,14 @@ create or replace package security is
                              p_grp_id  IN  number,
                              p_mode    IN  number,                             
                              p_result  OUT boolean);
+
+  /*  -- */                           
+  procedure can_delete_group(p_grp_id     IN  number,
+                             p_result     OUT boolean);
+
+  /*  -- */                           
+  procedure can_delete_user(p_usr_id     IN  number,
+                            p_result     OUT boolean);
                            
 end security;
 /
