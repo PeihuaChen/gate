@@ -32,7 +32,8 @@ import gate.event.*;
 
 public class DatabaseDocumentImpl extends DocumentImpl
                                   implements DatastoreListener,
-                                              EventAwareDocument{
+                                              Document,
+                                              EventAwareLanguageResource{
 
   private static final boolean DEBUG = false;
 
@@ -807,17 +808,17 @@ public class DatabaseDocumentImpl extends DocumentImpl
     }
   }
 
-  public boolean isDocumentChanged(int changeType) {
+  public boolean isResourceChanged(int changeType) {
 
     switch(changeType) {
 
-      case DatabaseDocumentImpl.DOC_CONTENT:
+      case EventAwareLanguageResource.DOC_CONTENT:
         return this.contentChanged;
-      case DatabaseDocumentImpl.DOC_FEATURES:
+      case EventAwareLanguageResource.RES_FEATURES:
         return this.featuresChanged;
-      case DatabaseDocumentImpl.DOC_NAME:
+      case EventAwareLanguageResource.DOC_NAME:
         return this.nameChanged;
-      case DatabaseDocumentImpl.DOC_MAIN:
+      case EventAwareLanguageResource.DOC_MAIN:
         return this.documentChanged;
       default:
         throw new IllegalArgumentException();
