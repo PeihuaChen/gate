@@ -33,7 +33,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   public static final String COREF_ANN_SET_PARAMETER_NAME = "annotationSetName";
 
   /** --- */
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   //JAPE grammars
   private static final String QT_GRAMMAR_URL = "gate://gate/creole/coref/quoted_text.jape";
