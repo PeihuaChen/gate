@@ -326,22 +326,18 @@ public class Gate
            ((String)value).equalsIgnoreCase("true");
   }
 
-  /**Gets the name of a resource.*/
-  static public String getName(Resource res){
-    if(res.getFeatures() == null) return null;
-    Object value = res.getFeatures().get("gate.NAME");
+  /** Gets the NAME attribute feature map.*/
+  static public String getName(FeatureMap fm){
+    Object value = fm.get("gate.NAME");
     if(value != null && value instanceof String){
       return (String)value;
     }
     return null;
   }
 
-  /**Sets the name of a resource.*/
-  static public void setName(Resource res, String name){
-    if(res.getFeatures() == null){
-      res.setFeatures(Factory.newFeatureMap());
-    }
-    res.getFeatures().put("gate.NAME", name);
+  /** Sets the NAME attribute in a feature map. */
+  static public void setName(FeatureMap fm, String name){
+    fm.put("gate.NAME", name);
   }
 
 

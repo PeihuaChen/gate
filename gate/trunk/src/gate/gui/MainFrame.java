@@ -357,7 +357,17 @@ public class MainFrame extends JFrame
       "Mark Leisher, Kevin Humphreys."
     );
     box = new Box(BoxLayout.X_AXIS);
-    box.add(verLbl);
+//    box.add(verLbl);
+
+    JEditorPane authPane = null;
+    try{
+      authPane = new JEditorPane(new URL("gate:/authors.html"));
+    }catch(MalformedURLException mue){
+      mue.printStackTrace(Err.getPrintWriter());
+    }catch(IOException ioe){
+      ioe.printStackTrace(Err.getPrintWriter());
+    }
+    box.add(authPane);
     box.add(Box.createHorizontalGlue());
 
     splashBox.add(box);
@@ -893,13 +903,7 @@ public class MainFrame extends JFrame
     DataStore ds = e.getDatastore();
     if(ds != null){
       //make sure he have a name
-      if(ds.getFeatures() == null) {
-        FeatureMap features = Factory.newFeatureMap();
-        features.put("gate.NAME", ds.getStorageUrl().getFile());
-        ds.setFeatures(features);
-      } else if(ds.getFeatures().get("gate.NAME") == null){
-        ds.getFeatures().put("gate.NAME", ds.getStorageUrl().getFile());
-      }
+      ds.setName(ds.getStorageUrl().getFile());
       DSHandle handle = new DSHandle(ds);
       DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
       resourcesTreeModel.insertNodeInto(node, datastoresRoot, 0);
@@ -1086,13 +1090,7 @@ public class MainFrame extends JFrame
     while(dsIter.hasNext()){
       DataStore ds = (DataStore)dsIter.next();
       //make sure he have a name
-      if(ds.getFeatures() == null){
-        FeatureMap features = Factory.newFeatureMap();
-        features.put("gate.NAME", "Unnamed datasource");
-        ds.setFeatures(features);
-      }else if(ds.getFeatures().get("gate.NAME") == null){
-        ds.getFeatures().put("gate.NAME", "Unnamed datasource");
-      }
+      ds.setName("Unnamed datasource");
       handle = new DSHandle(ds, currentProject);
       dsRoot.add(new DefaultMutableTreeNode(handle));
     }
@@ -1200,7 +1198,7 @@ public class MainFrame extends JFrame
       if (answer instanceof String) {
         try{
           FeatureMap features = Factory.newFeatureMap();
-          features.put("gate.NAME", answer);
+          Gate.setName(features, answer);
           features.put("gate.APPLICATION", "true");
           SerialController controller =
                 (SerialController)Factory.createResource(
@@ -1333,13 +1331,13 @@ public class MainFrame extends JFrame
                 PRHandle handle = new PRHandle(res, currentProject);
                 handle.setTooltipText("<html><b>Type:</b> " +
                                       rData.getName() + "</html>");
-                handleForResourceName.put(res.getFeatures().get("gate.NAME"), handle);
+                handleForResourceName.put(res.getName(), handle);
                 //prRoot.add(new DefaultMutableTreeNode(handle, false));
                 //projectTreeModel.nodeStructureChanged(prRoot);
                 resourcesTree.expandPath(new TreePath(new Object[]{
                                 resourcesTreeRoot, processingResourcesRoot}));
                 //currentProject.addPR(handle);
-                statusChanged(res.getFeatures().get("gate.NAME") + " loaded!");
+                statusChanged(res.getName() + " loaded!");
               }
 */
             }
@@ -1398,16 +1396,9 @@ public class MainFrame extends JFrame
 /*
                 if(ds != null){
                   //make sure he have a name
-                  if(ds.getFeatures() == null){
-                    FeatureMap features = Factory.newFeatureMap();
-                    features.put("gate.NAME", dsURL.getFile());
-                    ds.setFeatures(features);
-                  } else if(ds.getFeatures().get("gate.NAME") == null) {
-                    ds.getFeatures().put("gate.NAME", dsURL.getFile());
-                  }
+                  ds.setName(dsURL.getFile());
                   DSHandle handle = new DSHandle(ds, currentProject);
-                  handleForResourceName.put(ds.getFeatures().get("gate.NAME"),
-                                                                        handle);
+                  handleForResourceName.put(ds.getName(), handle);
                   //resourcesTreeModel.treeChanged();
                   //dsRoot.add(new DefaultMutableTreeNode(handle, false));
                   //projectTreeModel.nodeStructureChanged(dsRoot);

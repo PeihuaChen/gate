@@ -65,7 +65,7 @@ public class Nerc extends SerialController {
                                                            params, features,
                                                            listeners);
       this.add(tokeniser);
-      tokeniser.getFeatures().put("gate.NAME", "Tokeniser " + System.currentTimeMillis());
+      tokeniser.setName("Tokeniser " + System.currentTimeMillis());
       fireProgressChanged(10);
 
       //gazetteer
@@ -88,7 +88,7 @@ public class Nerc extends SerialController {
                                                            params, features,
                                                            listeners);
       this.add(gazetteer);
-      gazetteer.getFeatures().put("gate.NAME", "Gazetteer " + System.currentTimeMillis());
+      gazetteer.setName("Gazetteer " + System.currentTimeMillis());
       fireProgressChanged(50);
 
       //transducer
@@ -111,7 +111,7 @@ public class Nerc extends SerialController {
       fireProgressChanged(100);
       fireProcessFinished();
       this.add(transducer);
-      transducer.getFeatures().put("gate.NAME", "Transducer " + System.currentTimeMillis());
+      transducer.setName("Transducer " + System.currentTimeMillis());
     }catch(ParameterException pe){
       throw new ResourceInstantiationException(pe);
     }

@@ -256,7 +256,8 @@ public class CustomAnnotationEditDialog extends JDialog {
   /** This class implements a feature bearer. It is used as internal data.
     * The FeatureEditor will use an object belonging to this class.
     */
-  class MyCustomFeatureBearer implements FeatureBearer{
+  class MyCustomFeatureBearer extends AbstractFeatureBearer
+                              implements FeatureBearer{
 
     // Members
     private FeatureMap features = null;

@@ -34,4 +34,21 @@ extends AbstractFeatureBearer implements Resource, Serializable
     return this;
   } // init()
 
+  /** Sets the name of this resource*/
+  public void setName(String name){
+    FeatureMap fm = getFeatures();
+    if(fm == null){
+      fm = Factory.newFeatureMap();
+      setFeatures(fm);
+    }
+    Gate.setName(fm, name);
+  }
+
+  /** Returns the name of this resource*/
+  public String getName(){
+    FeatureMap fm = getFeatures();
+    if(fm == null) return null;
+    else return Gate.getName(fm);
+  }
+
 } // class AbstractResource

@@ -582,7 +582,7 @@ public class ApplicationViewer extends AbstractVisualResource
       value = ((DefaultMutableTreeNode)value).getUserObject();
       if (value instanceof ProcessingResource){
         ProcessingResource pr = (ProcessingResource)value;
-        text = (String)pr.getFeatures().get("gate.NAME");
+        text = pr.getName();
         ResourceData rData = (ResourceData)
                    Gate.getCreoleRegister().get(pr.getClass().getName());
         tipText = rData.getComment();
@@ -663,7 +663,7 @@ public class ApplicationViewer extends AbstractVisualResource
       if(index == rowIndex && pr != null){
         switch(columnIndex){
           case -1: return pr;
-          case 0: return pr.getFeatures().get("gate.NAME");
+          case 0: return pr.getName();
           case 1: return getResourceName(pr);
         }
       }
@@ -677,7 +677,7 @@ public class ApplicationViewer extends AbstractVisualResource
 
   class AddPRAction extends AbstractAction {
     AddPRAction(ProcessingResource aPR){
-      super((String)aPR.getFeatures().get("gate.NAME"));
+      super(aPR.getName());
       this.pr = aPR;
     }
 
@@ -717,7 +717,7 @@ public class ApplicationViewer extends AbstractVisualResource
 
   class RemovePRAction extends AbstractAction {
     RemovePRAction(ProcessingResource pr){
-      super((String)pr.getFeatures().get("gate.NAME"));
+      super(pr.getName());
       this.pr = pr;
     }
 
@@ -749,7 +749,7 @@ public class ApplicationViewer extends AbstractVisualResource
           }
           long startTime = System.currentTimeMillis();
           fireStatusChanged("Running " +
-                            controller.getFeatures().get("gate.NAME"));
+                            controller.getName());
           fireProgressChanged(0);
 
           Iterator prsIter = controller.iterator();
@@ -766,12 +766,12 @@ public class ApplicationViewer extends AbstractVisualResource
               }
             }
             try{
-    //System.out.println("PR:" + pr.getFeatures().get("gate.NAME") + "\n" + params);
+    //System.out.println("PR:" + pr.getName() + "\n" + params);
               Factory.setResourceParameters(pr, params);
             }catch(ResourceInstantiationException ie){
               JOptionPane.showMessageDialog(ApplicationViewer.this,
                                             "Could not set parameters for " +
-                                            pr.getFeatures().get("gate.NAME") +
+                                            pr.getName() +
                                             ":\n" + ie.toString(),
                                             "Gate", JOptionPane.ERROR_MESSAGE);
               return;
@@ -790,7 +790,7 @@ public class ApplicationViewer extends AbstractVisualResource
 
           while(prsIter.hasNext()){
             ProcessingResource pr = (ProcessingResource)prsIter.next();
-            fireStatusChanged("Running " + pr.getFeatures().get("gate.NAME"));
+            fireStatusChanged("Running " + pr.getName());
             listeners.put("gate.event.ProgressListener",
                           new CustomProgressListener(
                                 i * 100 / controller.size(),
@@ -851,7 +851,7 @@ public class ApplicationViewer extends AbstractVisualResource
           }
           long endTime = System.currentTimeMillis();
           fireProcessFinished();
-          fireStatusChanged(controller.getFeatures().get("gate.NAME") +
+          fireStatusChanged(controller.getName() +
                             " run in " +
                             NumberFormat.getInstance().format(
                             (double)(endTime - startTime) / 1000) + " seconds");
@@ -1005,7 +1005,7 @@ public class ApplicationViewer extends AbstractVisualResource
       //value = ((DefaultMutableTreeNode)value).getUserObject();
       if(value instanceof FeatureBearer){
         String name = (String)
-                        ((FeatureBearer)value).getFeatures().get("gate.NAME");
+                        ((FeatureBearer)value).getName();
         if(name != null){
           return super.getTableCellRendererComponent(table, name, isSelected,
                                                      hasFocus, row, column);
@@ -1081,7 +1081,7 @@ public class ApplicationViewer extends AbstractVisualResource
                                                     boolean cellHasFocus){
         if(value instanceof FeatureBearer){
           String name = (String)(
-                          (FeatureBearer)value).getFeatures().get("gate.NAME");
+                          (FeatureBearer)value).getName();
           if(name != null){
             return super.getListCellRendererComponent(list, name, index,
                                                       isSelected, cellHasFocus);
@@ -1309,7 +1309,7 @@ public class ApplicationViewer extends AbstractVisualResource
       String name = null;
       if(value != null){
         ProcessingResource res = (ProcessingResource) value;
-        name = (String)res.getFeatures().get("gate.NAME");
+        name = (String)res.getName();
         if(name == null){
           name = "No name: " + res.getClass().toString();
         }
@@ -1341,7 +1341,7 @@ public class ApplicationViewer extends AbstractVisualResource
       while(prsIter.hasNext()){
         PRHandle handle = (PRHandle)prsIter.next();
         ProcessingResource pr = (ProcessingResource)handle.resource;
-        String prName = (String)handle.resource.getFeatures().get("gate.NAME");
+        String prName = (String)handle.resource.getName();
         if(prName == null){
           prName = "No name: " + pr.getClass().toString();
         }
@@ -1353,8 +1353,7 @@ public class ApplicationViewer extends AbstractVisualResource
       if(value != null){
         //select the current value
         try{
-          String currentName = (String)((ProcessingResource)value).
-                               getFeatures().get("gate.NAME");
+          String currentName = (String)((ProcessingResource)value).getName();
           if(prsByName.containsKey(currentName)){
             combo.setSelectedItem(currentName);
           }

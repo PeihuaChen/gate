@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- *  
+ *
  *  Hamish Cunningham, 7/Feb/2000
  *
  *  $Id$
@@ -26,5 +26,11 @@ public interface FeatureBearer
 
   /** Set the feature set */
   public void setFeatures(FeatureMap features);
+
+  /** Sets the name of this resource*/
+  public void setName(String name);
+
+  /** Returns the name of this resource*/
+  public String getName();
 
 } // interface FeatureBearer

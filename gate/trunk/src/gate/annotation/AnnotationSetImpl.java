@@ -67,7 +67,19 @@ implements AnnotationSet
 
   /** Construction from Document. */
   public AnnotationSetImpl(Document doc) {
-    annotsById = new HashMap();
+    annotsById = new HashMap(){
+      public Object remove(Object key){
+        Object res = super.remove(key);
+        if(res != null){
+          fireAnnotationRemoved(new AnnotationSetEvent(
+                                        AnnotationSetImpl.this,
+                                        AnnotationSetEvent.ANNOTATION_REMOVED,
+                                        getDocument(), (Annotation)res));
+System.out.println("Annotation removed fired " + res);
+        }
+        return res;
+      }
+    };
     this.doc = (DocumentImpl) doc;
   } // construction from document
 
@@ -124,12 +136,6 @@ implements AnnotationSet
     if(wasPresent){
       removeFromTypeIndex(a);
       removeFromOffsetIndex(a);
-      AnnotationSetEvent evt = new AnnotationSetEvent(
-                                    this,
-                                    AnnotationSetEvent.ANNOTATION_REMOVED,
-                                    doc, a);
-      fireAnnotationRemoved(evt);
-      fireGateEvent(evt);
     }
     return wasPresent;
   } // remove(o)

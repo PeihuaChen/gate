@@ -99,7 +99,7 @@ class AnnotDiffDialog extends JFrame {
       Iterator iter = instantiations.iterator();
       while (iter.hasNext()){
         Resource resource = (Resource) iter.next();
-        String docName = (String) resource.getFeatures().get("gate.NAME");
+        String docName = resource.getName ();
         gate.Document doc = (Document) resource;
         // add it to the Map
         documentsMap.put(docName,doc);

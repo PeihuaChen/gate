@@ -269,11 +269,11 @@ extends AbstractLanguageResource implements Document {
     * doesn't exist yet.
     */
   public AnnotationSet getAnnotations() {
-    if(defaultAnnots == null)
+    if(defaultAnnots == null){
       defaultAnnots = new AnnotationSetImpl(this);
-    fireAnnotationSetAdded(new DocumentEvent(this,
-                                             DocumentEvent.ANNOTATION_SET_ADDED,
-                                             null));
+      fireAnnotationSetAdded(new DocumentEvent(
+          this, DocumentEvent.ANNOTATION_SET_ADDED, null));
+    }
     return defaultAnnots;
   } // getAnnotations()
 
@@ -292,7 +292,6 @@ extends AbstractLanguageResource implements Document {
                                             DocumentEvent.ANNOTATION_SET_ADDED,
                                             name);
       fireAnnotationSetAdded(evt);
-      fireGateEvent(evt);
     }
     return namedSet;
   } // getAnnotations(name)
@@ -472,7 +471,11 @@ extends AbstractLanguageResource implements Document {
    * @param name the name of the annotation set to be removed
    */
   public void removeAnnotationSet(String name){
-    namedAnnotSets.remove(name);
+    Object removed = namedAnnotSets.remove(name);
+    if(removed != null){
+      fireAnnotationSetRemoved(
+        new DocumentEvent(this, DocumentEvent.ANNOTATION_SET_REMOVED, name));
+    }
   }
 
   /** Get the features associated with this document. */

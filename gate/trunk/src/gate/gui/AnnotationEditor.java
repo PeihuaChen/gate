@@ -364,6 +364,17 @@ public class AnnotationEditor extends AbstractVisualResource {
       }
     });
 
+    //clear selection in table on outside clicks
+    tableScroll.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+        Point location = e.getPoint();
+        if(!tableScroll.getViewport().getView().getBounds().contains(location)){
+          //deselect everything in the table
+          annotationsTable.clearSelection();
+        }
+      }
+    });
+
     annotationsTable.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         int row = annotationsTable.rowAtPoint(e.getPoint());
@@ -397,7 +408,7 @@ public class AnnotationEditor extends AbstractVisualResource {
           }
         } else if(SwingUtilities.isRightMouseButton(e)) {
           //right click
-          //add delete option
+          //add select all option
           JPopupMenu popup = new JPopupMenu();
           popup.add(new AbstractAction(){
             {
@@ -409,38 +420,27 @@ public class AnnotationEditor extends AbstractVisualResource {
           });
 
           popup.addSeparator();
-
-          class DeleteAnnotationAction extends AbstractAction{
-            public DeleteAnnotationAction(){
-              super("Delete selected");
-            }
-
-            public void actionPerformed(ActionEvent e){
-              int[] rows = annotationsTable.getSelectedRows();
-              annotationsTable.clearSelection();
-              for(int i = 0; i < rows.length; i++){
-                int row = rows[i];
-                //find the annotation
-                Annotation ann = (Annotation)annotationsTable.
-                                    getModel().getValueAt(row, -1);
-                //find the annotation set
-                String setName = (String)annotationsTable.getModel().
-                                                            getValueAt(row, 1);
-                AnnotationSet set = setName.equals("Default")?
-                                    document.getAnnotations() :
-                                    document.getAnnotations(setName);
-                set.remove(ann);
-              }//for(int i = 0; i < rows.length; i++)
-            }//public void actionPerformed(ActionEvent e)
-          }//class DeleteAnnotationAction extends AbstractAction
-
-          popup.add(new DeleteAnnotationAction());
+          //add delete option
+          popup.add(new DeleteSelectedAnnotationsAction(annotationsTable));
           popup.addSeparator();
           popup.add(editAnnAct);
           popup.show(annotationsTable, e.getX(), e.getY());
         }
       }
     });
+    annotationsTable.getInputMap().put(
+                  KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_DELETE, 0),
+                  "Delete");
+    annotationsTable.getActionMap().put(
+                        "Delete",
+                        new DeleteSelectedAnnotationsAction(annotationsTable));
+
+    stylesTree.getInputMap().put(
+                  KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_DELETE, 0),
+                  "Delete");
+    stylesTree.getActionMap().put(
+                        "Delete",
+                        new DeleteSelectedAnnotationsAction(stylesTree));
 
     //takes care of highliting the selected annotations
     annotationsTable.getSelectionModel().addListSelectionListener(
@@ -882,7 +882,7 @@ public class AnnotationEditor extends AbstractVisualResource {
           }
         });
         //register the for this new document's events
-        document.addGateListener(eventHandler);
+        document.addDocumentListener(eventHandler);
         textPane.setText(document.getContent().toString());
         //add the default annotation set
         Map namedASs = document.getNamedAnnotationSets();
@@ -926,7 +926,7 @@ public class AnnotationEditor extends AbstractVisualResource {
    */
   protected void addAnnotationSet(AnnotationSet as, int progressStart,
                                   int progressEnd){
-    as.addGateListener(eventHandler);
+    as.addAnnotationSetListener(eventHandler);
     String setName = as.getName();
     if(setName == null) setName = "Default";
     TypeData setData = new TypeData(setName, null, false);
@@ -1568,12 +1568,33 @@ public class AnnotationEditor extends AbstractVisualResource {
    * thread wakes it will process <strong>all</strong> the pending events and
    * then will go back to sleep.
    */
-  class DelayedListener implements GateListener, Runnable {
+  class DelayedListener implements gate.event.DocumentListener, AnnotationSetListener,
+                                   Runnable {
     public DelayedListener() {
       eventQueue = Collections.synchronizedList(new ArrayList());
     }
 
-    public void processGateEvent(GateEvent e) {
+    public void annotationSetAdded(gate.event.DocumentEvent e) {
+      synchronized(eventQueue) {
+        eventQueue.add(e);
+        lastEvent = System.currentTimeMillis();
+      }
+    }
+
+    public void annotationSetRemoved(gate.event.DocumentEvent e) {
+      synchronized(eventQueue) {
+        eventQueue.add(e);
+        lastEvent = System.currentTimeMillis();
+      }
+    }
+
+    public void annotationAdded(AnnotationSetEvent e) {
+      synchronized(eventQueue) {
+        eventQueue.add(e);
+        lastEvent = System.currentTimeMillis();
+      }
+    }
+    public void annotationRemoved(AnnotationSetEvent e){
       synchronized(eventQueue) {
         eventQueue.add(e);
         lastEvent = System.currentTimeMillis();
@@ -1592,9 +1613,11 @@ public class AnnotationEditor extends AbstractVisualResource {
             gate.event.DocumentEvent docEvt =
               (gate.event.DocumentEvent)currentEvent;
             if(docEvt.getType() == docEvt.ANNOTATION_SET_REMOVED) {
+System.out.println("REC: AS removed " + docEvt.getAnnotationSetName());
               throw new UnsupportedOperationException(
                 "DocumentEditor -> Annotation set removed");
             }else if(docEvt.getType() == docEvt.ANNOTATION_SET_ADDED){
+System.out.println("REC: AS added " + docEvt.getAnnotationSetName());
               addAnnotationSet(document.getAnnotations(
                                       docEvt.getAnnotationSetName()),0,0);
             }
@@ -1609,6 +1632,7 @@ public class AnnotationEditor extends AbstractVisualResource {
             TypeData tData = getTypeData(setName, type);
 
             if(asEvt.getType() == asEvt.ANNOTATION_ADDED){
+System.out.println("REC: Annotation added " + asEvt.getAnnotation());
               if(tData != null){
 //                tData.annotations.add(ann);
                 if(tData.getVisible()){
@@ -1663,6 +1687,7 @@ public class AnnotationEditor extends AbstractVisualResource {
                 stylesTreeModel.insertNodeInto(typeNode, node, i);
               }
             } else if(asEvt.getType() == asEvt.ANNOTATION_REMOVED){
+System.out.println("REC: Annotation removed " + asEvt.getAnnotation());
 
 //              tData.annotations.remove(ann);
               if(tData.getVisible()){
@@ -1886,6 +1911,62 @@ public class AnnotationEditor extends AbstractVisualResource {
     String set;
     Annotation annotation;
   }
+
+  protected class DeleteSelectedAnnotationsAction extends AbstractAction {
+    public DeleteSelectedAnnotationsAction(JComponent source){
+      super("Delete selected annotations");
+      this.source = source;
+    }
+
+    public void actionPerformed(ActionEvent evt){
+      if(source == annotationsTable){
+        int[] rows = annotationsTable.getSelectedRows();
+        for(int i = 0; i < rows.length; i++){
+          int row = rows[i];
+          //find the annotation
+          Annotation ann = (Annotation)annotationsTable.
+                              getModel().getValueAt(row, -1);
+          //find the annotation set
+          String setName = (String)annotationsTable.getModel().
+                                                      getValueAt(row, 1);
+          AnnotationSet set = setName.equals("Default")?
+                              document.getAnnotations() :
+                              document.getAnnotations(setName);
+          set.remove(ann);
+        }
+      }else if(source == stylesTree){
+        TreePath[] paths = stylesTree.getSelectionPaths();
+        for(int i = 0; i < paths.length; i++){
+          TypeData tData = (TypeData)((DefaultMutableTreeNode)
+                            paths[i].getLastPathComponent()).getUserObject();
+          String setName = tData.getSet();
+          if(tData.getType() == null){
+            //set node
+            if(setName.equals("Default")){
+              JOptionPane.showMessageDialog(
+                stylesTree,
+                "The default annotation set cannot be deleted!\n" +
+                "It will only be cleared...",
+                "Gate", JOptionPane.ERROR_MESSAGE);
+              document.getAnnotations().clear();
+            }else{
+              document.removeAnnotationSet(setName);
+            }
+          }else{
+            AnnotationSet set = setName.equals("Default") ?
+                                document.getAnnotations() :
+                                document.getAnnotations(setName);
+            //type node
+            if(set != null){
+              AnnotationSet subset = set.get(tData.getType());
+              if(subset != null) set.removeAll(subset);
+            }//if(set != null)
+          }//type node
+        }//for(int i = 0; i < paths.length; i++)
+      }//else if(source == stylesTree)
+    }//public void actionPerformed(ActionEvent evt)
+    JComponent source;
+  }//protected class DeleteSelectedAnnotationsAction
 
   /**
    * The action that is fired when the user wants to edit an annotation.

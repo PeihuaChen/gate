@@ -24,8 +24,8 @@ import gate.corpora.*;
 /** Provides an implementation for the interface gate.Annotation
  *
  */
-public class AnnotationImpl
-  implements Annotation, FeatureBearer, Comparable {
+public class AnnotationImpl extends AbstractFeatureBearer
+                            implements Annotation, FeatureBearer, Comparable {
 
   /** Debug flag
    */

@@ -119,7 +119,7 @@ implements JapeConstants, java.io.Serializable
     for(ArrayIterator i = phases.begin(); ! i.atEnd(); i.advance()) {
       Transducer t = (Transducer) i.get();
       try {
-        fireStatusChanged("Transducing " + doc.getSourceUrl().getFile() +
+        fireStatusChanged("Transducing " + doc.getName() +
                                " (Phase: " + t.getName() + ")...");
         t.addProgressListener(pListener);
         t.addStatusListener(sListener);
@@ -178,7 +178,11 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.14  2001/04/30 16:56:32  valyt
+// Unification of the NAME attribute implementation.
+//
 // Revision 1.13  2001/04/17 18:18:06  valyt
+//
 // events for jape & applications
 //
 // Revision 1.12  2001/03/06 20:11:14  valyt
