@@ -66,7 +66,9 @@ public class TestConfig extends TestCase
       );
     }
     if (DEBUG)
-      Out.prln("Parsing config file ... " + configStream + "from URL" + configUrl);
+      Out.prln(
+        "Parsing config file ... " + configStream + "from URL" + configUrl
+      );
     configProcessor.parseConfigFile(configStream, configUrl);
 
     // check that we got the CREOLE dir entry; then remove it
@@ -79,16 +81,20 @@ public class TestConfig extends TestCase
       dirs.contains(new URL("http://somewhere.on.the.net/creole/"))
     );
 
-    // get a test system
-    ResourceData controllerResData =
-      (ResourceData) reg.get("gate.creole.SerialController");
-    assertNotNull("no resdata for serial controller", controllerResData);
-    ProcessingResource controller =
-      (ProcessingResource) controllerResData.getInstantiations().pop();
-    assertNotNull("no controller instance", controller);
-
-    // try running the system
-    controller.execute();
+// the code below is removed after serial controller stopped
+// being a PR. the XML config scripting of runnable systems isn't
+// working anyhow. when/if it does work, appropriate tests should be
+// re-added here
+//    // get a test system
+//    ResourceData controllerResData =
+//      (ResourceData) reg.get("gate.creole.SerialController");
+//    assertNotNull("no resdata for serial controller", controllerResData);
+//    ProcessingResource controller =
+//      (ProcessingResource) controllerResData.getInstantiations().pop();
+//    assertNotNull("no controller instance", controller);
+//
+//    // try running the system
+//    controller.execute();
   } // testConfigReading()
 
   /** Test suite routine for the test runner */
