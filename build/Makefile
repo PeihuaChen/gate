@@ -10,7 +10,7 @@
 #
 ############################################################################
 
-PKGS=	gate gate.util
+PKGS=	gate gate.util gate.impl.ag
 CP=	-classpath \
 ../classes:../lib/junit.jar
 SP=	-sourcepath ../src
@@ -41,6 +41,9 @@ list:
 ############################################################################
 #
 # $Log$
+# Revision 1.6  2000/01/28 17:08:18  hamish
+# added impl/ag package
+#
 # Revision 1.5  2000/01/24 14:40:59  hamish
 # made test use textual UI, so can use in cron job
 #
