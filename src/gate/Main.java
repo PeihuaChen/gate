@@ -236,6 +236,9 @@ public class Main {
 
   /** Run the db admin interface. */
   private static void dbAdmin() throws GateException {
+    try { UserGroupEditor.main(null); } catch(Exception e) {
+      throw new GateException(e);
+    }
   } // dbAdmin()
 
   /**
