@@ -22,7 +22,7 @@ PKGS=	gate gate.annotation gate.corpora gate.creole \
 	gate.creole.gazetteer gate.creole.tokeniser \
 	gate.db gate.email gate.fsm gate.gui gate.html \
 	gate.jape gate.jape.parser gate.config \
-	gate.sgml gate.util gate.xml
+	gate.sgml gate.util gate.xml guk guk.im
 
 # classpath to build compile commands from
 CP=	-classpath \
@@ -39,7 +39,7 @@ COMPILE=./jdk.sh -s -g:none javac -O -d ../classes $(SP) $(CP)
 # having the main test class as first target, and -Xdepend in the (1.2)
 # javac options, means that most classes get compiled by a single call
 # to javac
-all: ../classes/gate/TestGate.class classes resources \
+all: ../classes/gate/TestGate.class classes resources gukjar \
 	TestJdk.jar TestResources.jar
 
 # build the whole thing
@@ -50,12 +50,14 @@ include Makefile.dep
 
 # regenerate Makefile.dep
 depend:
-	./makejdepend.sh ../src/gate >Makefile.dep
+	./makejdepend.sh ../src/gate ../src/guk >Makefile.dep
 
 # run the test suite (swap the last line for one of the commented ones to get
 # the JUnit GUI test runner)
 test: japefiles
-	./jdk.sh java -Xint -Xmx150m -Djava.compiler=nojit -classpath gate.jar \
+	./jdk.sh java -Xint -Xmx150m \
+	  -classpath gate.jar \
+	  -Djava.ext.dirs=../lib/ext -Djava.compiler=nojit \
 	  junit.textui.TestRunner gate.TestGate
 #	  junit.ui.TestRunner gate.TestGate
 #	  junit.ui.LoadingTestRunner gate.TestGate
@@ -65,6 +67,13 @@ jar: tcl japefiles resources classes.jar
 	rm -f gate.jar
 	./jdk.sh java -cp classes.jar gate.util.JarFiles gate.jar \
 	  classes.jar ../lib/*.jar ../lib/*.zip
+
+# create guk.jar and put in the lib/ext directory
+gukjar: classes.jar ../classes/guk/Editor.class
+	rm -f ../lib/ext/guk.jar
+	cd ../classes && ../build/jdk.sh jar cf ../lib/ext/guk.jar guk
+	cd ../src/guk/resources && ../../../build/jdk.sh \
+	  jar uf ../../../lib/ext/guk.jar `ls |grep -v CVS`
 
 # just the gate classes in a jar
 classes.jar: classes
@@ -95,6 +104,10 @@ tcl:
 # run the Jacl Tcl shell
 jaclsh:
 	./jdk.sh java -Djava.compiler=none $(CP) tcl.lang.Shell
+
+# run the GUK editor
+gukdemo: 
+	./jdk.sh java -Djava.ext.dirs=../lib/ext guk.Editor
 
 # make the javadoc documentation
 docs:
