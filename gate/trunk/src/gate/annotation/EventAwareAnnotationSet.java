@@ -24,10 +24,10 @@ import gate.AnnotationSet;
 
 public interface EventAwareAnnotationSet extends AnnotationSet {
 
-  public Collection getAddedAnnotationIDs();
+  public Collection getAddedAnnotations();
 
-  public Collection getChangedAnnotationIDs();
+  public Collection getChangedAnnotations();
 
-  public Collection getRemovedAnnotationIDs();
+  public Collection getRemovedAnnotations();
 
 }
