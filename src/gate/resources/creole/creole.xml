@@ -165,13 +165,13 @@
       <CLASS>gate.creole.ProtegeProjectName</CLASS>
       <COMMENT>Protege project file name</COMMENT>
       <INTERFACE>gate.ProtegeProject</INTERFACE>
-      <PARAMETER 
-      	NAME="projectName"
+      <PARAMETER
+        NAME="projectName"
         DEFAULT=""
         COMMENT="Protege project file name">java.lang.String</PARAMETER>
       <ICON>lr.gif</ICON>
     </RESOURCE>
-    
+
   </CREOLE>
 
   <!-- Processing Resources -->
@@ -525,14 +525,14 @@
 
     <RESOURCE>
       <NAME>Conditional Pipeline</NAME>
-      <COMMENT>A simple serial controller for conditionally ran PRs</COMMENT>
+      <COMMENT>A simple serial controller for conditionally run PRs</COMMENT>
       <CLASS>gate.creole.ConditionalSerialController</CLASS>
       <ICON>controller.gif</ICON>
     </RESOURCE>
 
     <RESOURCE>
       <NAME>Conditional Corpus Pipeline</NAME>
-      <COMMENT>A serial controller for conditionally ran PR pipelines over corpora</COMMENT>
+      <COMMENT>A serial controller for conditionally run PR pipelines over corpora</COMMENT>
       <CLASS>gate.creole.ConditionalSerialAnalyserController</CLASS>
       <ICON>controller.gif</ICON>
     </RESOURCE>
@@ -647,7 +647,7 @@
         <RESOURCE_DISPLAYED>gate.creole.ontology.Ontology</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
-    
+
     <!-- VR Protege -->
     <RESOURCE>
       <NAME>Protege</NAME>
