@@ -115,19 +115,9 @@ Macro: PHONE_PREFIX
 //Tel:
 
 (
- ({Token.string == "Phone"} |
-  {Token.string == "phone"} |
-  {Token.string == "Telephone"} |
-  {Token.string == "telephone"} |
-  {Token.string == "Tel"} |
-  {Token.string == "tel"} |
-  {Token.string == "Fax"} |
-  {Token.string == "fax"})
- ({Token.string == "."} | {Token.string == ":"})?
- (SPACE)?
- ({Token.string == "No"} | 
-  {Token.string == "no"})?
- ({Token.string == "."} | {Token.string == ":"})?
+ {Lookup.majorType == phone_prefix}
+ (SPACE {Lookup.majorType == phone_prefix})?
+ ({Token.string == ":"})?
  (SPACE)?
 )
   
@@ -403,10 +393,6 @@ Rule: POBoxAddress
 )
 :address -->
  :address.Street = {kind = "poBox", rule = POBoxAddress}
-
-
-
-
 
 
 
