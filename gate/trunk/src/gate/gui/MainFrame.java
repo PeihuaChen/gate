@@ -1198,10 +1198,10 @@ public class MainFrame extends JFrame
    * Overridden so we can exit when window is closed
    */
   protected void processWindowEvent(WindowEvent e) {
-    super.processWindowEvent(e);
     if (e.getID() == WindowEvent.WINDOW_CLOSING) {
       new ExitGateAction().actionPerformed(null);
     }
+    super.processWindowEvent(e);
   }// processWindowEvent(WindowEvent e)
 
   /**
