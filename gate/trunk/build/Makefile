@@ -24,7 +24,7 @@ depend:
 	./makejdepend.sh ../src/gate >Makefile.dep
 
 test:
-	./jdk.sh java ${CP} junit.textui.TestRunner gate.TestGate
+	./jdk.sh java -Djava.compiler=none ${CP} junit.textui.TestRunner gate.TestGate
 docs:
 	./jdk.sh javadoc $(SP) $(CP) -public \
 	  -d ../doc/javadoc $(PKGS)
@@ -41,6 +41,9 @@ list:
 ############################################################################
 #
 # $Log$
+# Revision 1.8  2000/02/09 15:55:44  hamish
+# no jit on test run
+#
 # Revision 1.7  2000/02/07 16:48:12  hamish
 # added annotation pkg
 #
