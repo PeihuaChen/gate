@@ -36,9 +36,9 @@ import gate.util.*;
   * <A HREF=#addDirectory(java.net.URL)>addDirectory</A> method)
   * pointing to CREOLE directories. A <B>CREOLE directory</B> is a URL at
   * which resides a file called <CODE>creole.xml</CODE> describing
-  * the resources present, and one or more Jar files implementing 
+  * the resources present, and one or more Jar files implementing
   * those resources.
-  * <P> 
+  * <P>
   * To register resources clients use the <CODE>registerDirectories</CODE>
   * methods. When resources have been registered they can be accessed via
   * their <CODE>CreoleData</CODE> objects. So a typical use of the register
@@ -66,13 +66,19 @@ public interface CreoleRegister extends Map
     * to the register.
     */
   public void registerDirectories() throws GateException;
-   
+
   /** Register a single CREOLE directory. The <CODE>creole.xml</CODE>
     * file at the URL is parsed, and <CODE>CreoleData</CODE> objects added
     * to the register. If the directory URL has not yet been added it
     * is now added.
     */
   public void registerDirectories(URL directoryUrl) throws GateException;
+
+  /** Register resources that are built in to the GATE distribution.
+    * These resources are described by the <TT>creole.xml</TT> file in
+    * <TT>resources/creole</TT>.
+    */
+  public void registerBuiltins() throws GateException;
 
   /** This is a utility method for creating CREOLE directory files
     * (typically called <CODE>creole.xml</CODE>) from a list of Jar
