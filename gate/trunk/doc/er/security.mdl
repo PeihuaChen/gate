@@ -297,6 +297,32 @@
 			result     	"void"
 			concurrency 	"Sequential"
 			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "isValidSession"
+			quid       	"3BA9DB2703AC"
+			parameters 	(list Parameters
+			    (object Parameter "s"
+				type       	"Session"))
+			result     	"boolean"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "open"
+			quid       	"3BAA1E6C029A"
+			parameters 	(list Parameters
+			    (object Parameter "url"
+				type       	"URL")
+			    (object Parameter "driver"
+				type       	"String"))
+			result     	"void"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "close"
+			quid       	"3BAA1E760349"
+			result     	"void"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
 			uid        	0)))
 	    (object Class "Session"
 		quid       	"3BA75DEC019E"
@@ -367,7 +393,7 @@
 			    fill_color 	13434879
 			    anchor     	2
 			    nlines     	7
-			    max_width  	994)
+			    max_width  	1003)
 			width      	1014
 			height     	492
 			annotation 	8
@@ -407,7 +433,7 @@
 			    fill_color 	13434879
 			    anchor     	2
 			    nlines     	6
-			    max_width  	1081)
+			    max_width  	1090)
 			width      	1102
 			height     	442
 			annotation 	8
@@ -420,7 +446,7 @@
 			location   	(2112, 592)
 			label      	(object ItemLabel
 			    Parent_View 	@3
-			    location   	(1464, 208)
+			    location   	(1464, 133)
 			    fill_color 	13434879
 			    nlines     	1
 			    max_width  	1296
@@ -428,7 +454,7 @@
 			    label      	"AccessController")
 			stereotype 	(object ItemLabel
 			    Parent_View 	@3
-			    location   	(1464, 158)
+			    location   	(1464, 83)
 			    fill_color 	13434879
 			    anchor     	10
 			    nlines     	1
@@ -442,14 +468,14 @@
 			quidu      	"3BA60569024A"
 			compartment 	(object Compartment
 			    Parent_View 	@3
-			    location   	(1464, 269)
+			    location   	(1464, 194)
 			    icon_style 	"Icon"
 			    fill_color 	13434879
 			    anchor     	2
-			    nlines     	15
+			    nlines     	18
 			    max_width  	1294)
 			width      	1314
-			height     	892
+			height     	1042
 			annotation 	8
 			autoResize 	TRUE)
 		    (object ClassView "Class" "Logical View::Session" @4
@@ -481,12 +507,12 @@
 			quidu      	"3BA75DEC019E"
 			compartment 	(object Compartment
 			    Parent_View 	@4
-			    location   	(80, 1584)
+			    location   	(80, 1581)
 			    icon_style 	"Icon"
 			    fill_color 	13434879
 			    anchor     	2
 			    nlines     	4
-			    max_width  	241)
+			    max_width  	250)
 			width      	274
 			height     	342
 			annotation 	8
