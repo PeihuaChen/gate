@@ -139,7 +139,7 @@ public class CreateIndexDialog extends JDialog {
 
   private void createAction(){
     DefaultIndexDefinition did = new DefaultIndexDefinition();
-    did.setIndexType(GateConstants.IR_LUCENE_INVFILE);
+//    did.setIndexType(GateConstants.IR_LUCENE_INVFILE);
 
     String location = locationTextField.getText();
     did.setIndexLocation(location);
