@@ -140,6 +140,11 @@ public class DefaultGazetteer implements ProcessingResource{
     return this;
   }
 
+  public void reset(){
+    document = null;
+    annotationSet = null;
+  }
+
   /** Reads one lists (one file) of phrases
     * @param listDesc the line from the definition file
     * @add if <b>true</b> will add the phrases found in the list to the ones
@@ -375,6 +380,7 @@ public class DefaultGazetteer implements ProcessingResource{
         }
       }//while(lookupIter.hasNext())
     }
+    reset();
     fireProcessFinished();
     fireStatusChanged("Tokenisation complete!");
   } // run

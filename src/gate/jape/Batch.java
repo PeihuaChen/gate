@@ -37,7 +37,8 @@ import gate.creole.*;
   * Construction will parse or deserialise a transducer as required.
   */
 public class Batch implements JapeConstants, java.io.Serializable,
-                              ProcessProgressReporter, StatusReporter{
+                              ProcessProgressReporter, StatusReporter,
+                              ProcessingResource{
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -266,6 +267,7 @@ public class Batch implements JapeConstants, java.io.Serializable,
   } // transduce(doc)
 
   /** Process a single text. */
+/*
   public Document transduce(String text) throws JapeException {
     Document doc = null;
     try {
@@ -276,8 +278,9 @@ public class Batch implements JapeConstants, java.io.Serializable,
     transducer.transduce(doc, doc.getAnnotations());
     return doc;
   } // transduce(text)
-
+*/
   /** Process a single file. */
+/*
   public Document transduce(File textFile) throws JapeException {
     String text = null;
     try {
@@ -285,8 +288,9 @@ public class Batch implements JapeConstants, java.io.Serializable,
     } catch(IOException e) { throw new JapeException(e.toString()); }
     return transduce(text);
   } // transduce(textFile)
-
+*/
   /** Process a set of files. */
+/*
   public Corpus transduce(String[] textFileNames) throws JapeException {
     Corpus coll = null;
     try {
@@ -302,6 +306,7 @@ public class Batch implements JapeConstants, java.io.Serializable,
             Factory.newFeatureMap(),
             Document.COPIED
           );*/
+/*
         transducer.transduce(doc, doc.getAnnotations());
       }
     } catch(ResourceInstantiationException e) {
@@ -309,7 +314,7 @@ public class Batch implements JapeConstants, java.io.Serializable,
     }
     return coll;
   } // transduce(textFileNames)
-
+*/
   /** This is where it all happens. This is <I>the</I> place to be. Take
     * your summer holidays here. Visit on Saturday nights. Buy a season
     * ticket from <CODE>www.programmer.gone.insane.com</CODE>.
@@ -322,6 +327,7 @@ public class Batch implements JapeConstants, java.io.Serializable,
     * collection and saves it to disk.
     */
   public static void main(String args[]) {
+/*
     // oh great bug in the sky give us this day our daily fuckup
     //gate.util.Debug.setDebug(true);
     //gate.util.Debug.setDebug(Rule.class, true);
@@ -410,8 +416,16 @@ public class Batch implements JapeConstants, java.io.Serializable,
     // we won! we won! we can smash up all the computers now!
     batch.message("done");
     //System.exit(0);
-
+*/
   } // main
+
+  public void run(){
+  }
+
+  public Resource init(){
+    return this;
+  }
+
 
   /** Whether to print progress messages or not. */
   private boolean verbose = false;
@@ -462,6 +476,12 @@ public class Batch implements JapeConstants, java.io.Serializable,
   public void removeProcessProgressListener(ProgressListener listener){
     transducer.removeProcessProgressListener(listener);
   }
+  public void setFeatures(gate.FeatureMap newFeatures) {
+    features = newFeatures;
+  }
+  public gate.FeatureMap getFeatures() {
+    return features;
+  }
 
   //ProcessProgressReporter implementation ends here
 
@@ -474,10 +494,16 @@ public class Batch implements JapeConstants, java.io.Serializable,
   private List myProgressListeners = new LinkedList();
 
   private List myStatusListeners = new LinkedList();
+  private gate.FeatureMap features;
 
 } // class Batch
 
 // $Log$
+// Revision 1.16  2000/11/10 12:35:25  valyt
+// Made the tokeniser and gazetter reset after each run.
+//
+// Maybe all the processing resources should do that?
+//
 // Revision 1.15  2000/11/08 16:35:02  hamish
 // formatting
 //
