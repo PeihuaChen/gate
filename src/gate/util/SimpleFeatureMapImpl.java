@@ -25,6 +25,11 @@ public class SimpleFeatureMapImpl extends HashMap implements FeatureMap
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+  // NASO
+  public SimpleFeatureMapImpl() {
+    super(4);
+  }
+
   /** Test if <b>this</b> featureMap object is included in aFeatureMap
     * @param aFeatureMap object which will incude or not this FeatureMap obj.
     * @return <code>true</code> if <b>this</b> is incuded in aFeatureMap
