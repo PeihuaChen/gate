@@ -122,7 +122,7 @@ public class FSMInstance implements Comparable, Cloneable{
     */
   public Object clone() {
   //do a classic clone except for bindings which need to be cloned themselves
-System.out.println("Clone!");
+//System.out.println("Clone!");
     FSMInstance clone = FSMInstance.getNewInstance(this.supportGraph,
                                                    this.FSMPosition,
                                                    this.startNode,

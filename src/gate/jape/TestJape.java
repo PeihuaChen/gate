@@ -159,8 +159,8 @@ public class TestJape extends TestCase
     try{
       System.out.print("Opening Jape grammar... ");
 //      Batch batch = new Batch("jape/combined/", "main.jape");
-      Batch batch = new Batch("z:/gate2/src/gate/resources/jape/combined/main.jape");
-//      Batch batch = new Batch("jape/", "Country.jape");
+//      Batch batch = new Batch("z:/gate2/src/gate/resources/jape/combined/main.jape");
+      Batch batch = new Batch("jape/", "Country.jape");
       startCorpusTransduce = (new Date()).getTime();
       System.out.print(": " + (startCorpusTransduce - startJapeFileOpen) +
                        "ms\n");
