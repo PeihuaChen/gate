@@ -109,6 +109,8 @@ public class Gate implements GateConstants
     // read gate.xml files; this must come before creole register
     // initialisation in order for the CREOLE-DIR elements to have and effect
     initConfigData();
+    
+    initCreoleRepositories();
     // the creoleRegister acts as a proxy for datastore related events
     dataStoreRegister.addCreoleListener(creoleRegister);
 
@@ -126,9 +128,48 @@ public class Gate implements GateConstants
     try{
       registerIREngine("gate.creole.ir.lucene.LuceneIREngine");
     }catch(ClassNotFoundException cnfe){
-      throw new GateRuntimeException(cnfe.toString());
+      throw new GateRuntimeException(cnfe);
     }
   } // init()
+  
+  /**
+   * Loads the CREOLE repositories (aka plugins) that the user has selected for 
+   * automatic loading.
+   *
+   */
+  protected static void initCreoleRepositories(){
+    String pluginPath = getUserConfig().getString(LOAD_PLUGIN_PATH_KEY);
+    //can be overridden by system property
+    String prop = System.getProperty(LOAD_PLUGIN_PATH_SYSPROP_KEY);
+    if(prop != null && prop.length() > 0) pluginPath = prop;
+    
+    if(pluginPath == null || pluginPath.length() == 0){
+      //value not set -> use the default
+      File pluginsHome = new File(System.getProperty(GATE_HOME_SYSPROP_KEY), 
+              "plugins");
+      try{
+        pluginPath = new File(pluginsHome, "ANNIE").toURL().toString();
+        getUserConfig().put(LOAD_PLUGIN_PATH_KEY, pluginPath);
+      }catch(MalformedURLException mue){
+        throw new GateRuntimeException(mue);
+      }
+    }
+    
+    StringTokenizer strTok = new StringTokenizer(pluginPath, 
+            ";", false);
+    while(strTok.hasMoreTokens()){
+      String aDir = strTok.nextToken();
+      try{
+        getCreoleRegister().registerDirectories(new URL(aDir));
+      }catch(MalformedURLException mue){
+        System.err.println("Cannot load " + aDir + " CREOLE repository.");
+        mue.printStackTrace();
+      }catch(GateException ge){
+        System.err.println("Cannot load " + aDir + " CREOLE repository.");
+        ge.printStackTrace();
+      }
+    }
+  }
 
   /** Initialise the CREOLE register. */
   public static void initCreoleRegister() throws GateException {
