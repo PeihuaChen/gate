@@ -2139,6 +2139,15 @@ public class DocumentEditor extends AbstractVisualResource{
     }
 
     public void actionPerformed(ActionEvent e){
+      if(set == null){
+        //get the name from the user
+        String setName = JOptionPane.showInputDialog(
+              DocumentEditor.this,
+              "Please provide a name for the new annotation set",
+              "Gate", JOptionPane.QUESTION_MESSAGE);
+        if(setName == null) return;
+        this.set = document.getAnnotations(setName);
+      }
       //get the lists of editors
       java.util.List specificEditors;
       if(type != null) specificEditors = Gate.getCreoleRegister().
