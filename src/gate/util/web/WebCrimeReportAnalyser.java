@@ -223,6 +223,7 @@ public class WebCrimeReportAnalyser {
         chunkTypesRequired.add("VPCHUNK"); */
         
         AnnotationSet socis = defaultAnnotSet.get(annotTypesRequired);
+
         //AnnotationSet chunks = chunkAnnotSet.get(chunkTypesRequired);
         
         FeatureMap features = doc.getFeatures();
@@ -232,14 +233,18 @@ public class WebCrimeReportAnalyser {
         RepositioningInfo info = (RepositioningInfo)
             features.get(GateConstants.DOCUMENT_REPOSITIONING_INFO_FEATURE_NAME);
         
-        Iterator it = socis.iterator();
         Annotation currAnnot;
         SortedAnnotationList sortedAnnotationsNamedEntities =
             new SortedAnnotationList();
         
-        while(it.hasNext()) {
-            currAnnot = (Annotation) it.next();
-            sortedAnnotationsNamedEntities.addSortedExclusive(currAnnot);
+        // The AnnotationSet socis can be null if no annotations have
+        // been found
+        if (socis != null) {
+            Iterator it = socis.iterator();
+            while(it.hasNext()) {
+                currAnnot = (Annotation) it.next();
+                sortedAnnotationsNamedEntities.addSortedExclusive(currAnnot);
+            }
         }
         
         AnnotationSet uniqueNamedEntities =
