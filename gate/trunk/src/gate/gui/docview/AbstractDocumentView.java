@@ -15,6 +15,7 @@
 
 package gate.gui.docview;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import gate.Document;
@@ -59,11 +60,11 @@ public abstract class AbstractDocumentView extends AbstractResource
 
   
   /* 
-   * By default return a null list of actions.
-   * @return <code>null</code>
+   * By default return an empty list of actions.
+   * @return an empty list.
    */
   public List getActions() {
-    return null;
+    return new ArrayList();
   }
   
   /* 
