@@ -25,7 +25,6 @@ import javax.swing.text.Highlighter;
 
 
 import gate.Annotation;
-import gate.Document;
 import gate.util.GateRuntimeException;
 
 
@@ -90,14 +89,6 @@ public class TextualDocumentView extends AbstractDocumentView {
   }
 
 
-  /* (non-Javadoc)
-   * @see gate.VisualResource#setTarget(java.lang.Object)
-   */
-  public void setTarget(Object target) {
-    this.document = (Document)target;
-  }
-  protected Document document;
-  
   
   /**
    * Stores the highlighter tags for all the highlighted annotations;

@@ -28,6 +28,7 @@ import gate.creole.AnnotationSchema;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
 import gate.gui.MainFrame;
+import gate.util.*;
 import gate.util.GateException;
 import gate.util.GateRuntimeException;
 
@@ -49,12 +50,7 @@ public class AnnotationEditor{
     initGUI();
   }
   
-  protected static void initStaticData(){
-    solAction = new StartOffsetLeftAction();
-    sorAction = new StartOffsetRightAction();
-    eolAction = new EndOffsetLeftAction();
-    eorAction = new EndOffsetRightAction();
-    delAction = new DeleteAnnotationAction();
+  protected void initData(){
     schemasByType = new HashMap();
     try{
 	    java.util.List schemas = Gate.getCreoleRegister().
@@ -104,7 +100,7 @@ public class AnnotationEditor{
     Gate.getCreoleRegister().addCreoleListener(creoleListener); 
   }
   
-  protected static void initTopWindow(Window parent){
+  protected void initTopWindow(Window parent){
     topWindow = new JWindow(parent);
 
     JPanel pane = new JPanel();
@@ -182,21 +178,28 @@ public class AnnotationEditor{
     });
   }
   
-  protected static void initBottomWindow(Window parent){
+  protected void initBottomWindow(Window parent){
   }
 
   protected void initGUI(){
     //initialise static windows if not already done
     if(! inited){
-      initStaticData();
+      solAction = new StartOffsetLeftAction();
+      sorAction = new StartOffsetRightAction();
+      eolAction = new EndOffsetLeftAction();
+      eorAction = new EndOffsetRightAction();
+      delAction = new DeleteAnnotationAction();
+      
+      initData();
       initTopWindow(SwingUtilities.getWindowAncestor(textView.getGUI()));
       initBottomWindow(SwingUtilities.getWindowAncestor(textView.getGUI()));
       inited = true;
     }
   }
   
-  public void setAnnotation(Annotation ann){
+  public void setAnnotation(Annotation ann, AnnotationSet set){
    this.ann = ann;
+   this.set = set;
    //repopulate the types combo
    String annType = ann.getType();
    Set types = new HashSet(schemasByType.keySet());
@@ -205,6 +208,12 @@ public class AnnotationEditor{
    Collections.sort(typeList);
    typeCombo.setModel(new DefaultComboBoxModel(typeList.toArray()));
    typeCombo.setSelectedItem(annType);
+   //notify the actions
+   solAction.setAnnotation(ann, set);
+   sorAction.setAnnotation(ann, set);
+   eolAction.setAnnotation(ann, set);
+   eorAction.setAnnotation(ann, set);
+   
   }
   
   
@@ -236,7 +245,7 @@ public class AnnotationEditor{
   /**
    * Base class for actions on annotations.
    */
-  protected static abstract class AnnotationAction extends AbstractAction{
+  protected abstract class AnnotationAction extends AbstractAction{
     public AnnotationAction(String name, Icon icon){
       super("", icon);
       putValue(SHORT_DESCRIPTION, name);
@@ -245,54 +254,146 @@ public class AnnotationEditor{
     public void actionPerformed(ActionEvent evt){
     }
     
-    public void setAnnotation(Annotation ann){
+    public void setAnnotation(Annotation ann, AnnotationSet set){
       this.ann = ann;
+      this.set = set;
     }
-    Annotation ann;
+    protected Annotation ann;
+    protected AnnotationSet set;
   }
 
-  protected static class StartOffsetLeftAction extends AnnotationAction{
+  protected class StartOffsetLeftAction extends AnnotationAction{
     public StartOffsetLeftAction(){
       super("Extend", MainFrame.getIcon("extend-left.gif"));
     }
     
     public void actionPerformed(ActionEvent evt){
-      
+      Annotation oldAnn = ann;
+      Integer oldID = ann.getId();
+      Long newStartOffset = ann.getStartNode().getOffset();
+      int increment = 1;
+      if((evt.getModifiers() & ActionEvent.SHIFT_MASK) > 0){
+        //CTRL pressed -> use tokens for advancing
+        increment = SHIFT_INCREMENT;
+        if((evt.getModifiers() & ActionEvent.CTRL_MASK) > 0){
+          increment = CTRL_SHIFT_INCREMENT;
+        }
+      }
+      long newValue = newStartOffset.longValue() - increment;
+      if(newValue < 0) newValue = 0;
+      newStartOffset = new Long(newValue);
+      try{
+        set.remove(oldAnn);
+	      set.add(oldID, newStartOffset, ann.getEndNode().getOffset(),
+	              ann.getType(), ann.getFeatures());
+	      AnnotationEditor.this.setAnnotation(set.get(oldID), set);
+      }catch(InvalidOffsetException ioe){
+        throw new GateRuntimeException(ioe);
+      }
     }
   }
   
-  protected static class StartOffsetRightAction extends AnnotationAction{
+  protected class StartOffsetRightAction extends AnnotationAction{
     public StartOffsetRightAction(){
       super("Srink", MainFrame.getIcon("extend-right.gif"));
     }
     
     public void actionPerformed(ActionEvent evt){
+      Annotation oldAnn = ann;
+      Integer oldID = ann.getId();
+      long endOffset = ann.getEndNode().getOffset().longValue(); 
+      Long newStartOffset = ann.getStartNode().getOffset();
+      int increment = 1;
+      if((evt.getModifiers() & ActionEvent.SHIFT_MASK) > 0){
+        //CTRL pressed -> use tokens for advancing
+        increment = SHIFT_INCREMENT;
+        if((evt.getModifiers() & ActionEvent.CTRL_MASK) > 0){
+          increment = CTRL_SHIFT_INCREMENT;
+        }
+      }
       
+      long newValue = newStartOffset.longValue()  + increment;
+      if(newValue > endOffset) newValue = endOffset;
+      newStartOffset = new Long(newValue);
+      try{
+        set.remove(oldAnn);
+	      set.add(oldID, newStartOffset, ann.getEndNode().getOffset(),
+	              ann.getType(), ann.getFeatures());
+	      AnnotationEditor.this.setAnnotation(set.get(oldID), set);
+      }catch(InvalidOffsetException ioe){
+        throw new GateRuntimeException(ioe);
+      }
     }
   }
 
-  protected static class EndOffsetLeftAction extends AnnotationAction{
+  protected class EndOffsetLeftAction extends AnnotationAction{
     public EndOffsetLeftAction(){
       super("Srink", MainFrame.getIcon("extend-left.gif"));
     }
     
     public void actionPerformed(ActionEvent evt){
+      Annotation oldAnn = ann;
+      Integer oldID = ann.getId();
+      long startOffset = ann.getStartNode().getOffset().longValue(); 
+      Long newEndOffset = ann.getEndNode().getOffset();
+      int increment = 1;
+      if((evt.getModifiers() & ActionEvent.SHIFT_MASK) > 0){
+        //CTRL pressed -> use tokens for advancing
+        increment = SHIFT_INCREMENT;
+        if((evt.getModifiers() & ActionEvent.CTRL_MASK) > 0){
+          increment =CTRL_SHIFT_INCREMENT;
+        }
+      }
       
+      long newValue = newEndOffset.longValue()  - increment;
+      if(newValue < startOffset) newValue = startOffset;
+      newEndOffset = new Long(newValue);
+      try{
+        set.remove(oldAnn);
+	      set.add(oldID, ann.getStartNode().getOffset(), newEndOffset,
+	              ann.getType(), ann.getFeatures());
+	      AnnotationEditor.this.setAnnotation(set.get(oldID), set);
+      }catch(InvalidOffsetException ioe){
+        throw new GateRuntimeException(ioe);
+      }
     }
   }
   
-  protected static class EndOffsetRightAction extends AnnotationAction{
+  protected class EndOffsetRightAction extends AnnotationAction{
     public EndOffsetRightAction(){
       super("Extend", MainFrame.getIcon("extend-right.gif"));
     }
     
     public void actionPerformed(ActionEvent evt){
-      
+      Annotation oldAnn = ann;
+      Integer oldID = ann.getId();
+      long maxOffset = textView.getDocument().
+      		getContent().size().longValue() -1; 
+      Long newEndOffset = ann.getEndNode().getOffset();
+      int increment = 1;
+      if((evt.getModifiers() & ActionEvent.SHIFT_MASK) > 0){
+        //CTRL pressed -> use tokens for advancing
+        increment = SHIFT_INCREMENT;
+        if((evt.getModifiers() & ActionEvent.CTRL_MASK) > 0){
+          increment = CTRL_SHIFT_INCREMENT;
+        }
+      }
+      long newValue = newEndOffset.longValue() + increment;
+      if(newValue > maxOffset) newValue = maxOffset;
+      newEndOffset = new Long(newValue);
+      try{
+        set.remove(oldAnn);
+	      set.add(oldID, ann.getStartNode().getOffset(), newEndOffset,
+	              ann.getType(), ann.getFeatures());
+	      AnnotationEditor.this.setAnnotation(set.get(oldID), set);
+      }catch(InvalidOffsetException ioe){
+        throw new GateRuntimeException(ioe);
+      }
     }
   }
   
   
-  protected static class DeleteAnnotationAction extends AnnotationAction{
+  protected class DeleteAnnotationAction extends AnnotationAction{
     public DeleteAnnotationAction(){
       super("Delete", MainFrame.getIcon("delete.gif"));
     }
@@ -303,30 +404,33 @@ public class AnnotationEditor{
   }
   
   
-  protected static JWindow topWindow;
-  protected static JWindow bottomWindow;
-  protected static JComboBox typeCombo;
+  protected JWindow topWindow;
+  protected JWindow bottomWindow;
+  protected JComboBox typeCombo;
   
-  protected static StartOffsetLeftAction solAction;
-  protected static StartOffsetRightAction sorAction;
-  protected static EndOffsetLeftAction eolAction;
-  protected static EndOffsetRightAction eorAction;
+  protected StartOffsetLeftAction solAction;
+  protected StartOffsetRightAction sorAction;
+  protected EndOffsetLeftAction eolAction;
+  protected EndOffsetRightAction eorAction;
   
-  protected static DeleteAnnotationAction delAction;
-  protected static Timer hideTimer;
+  protected DeleteAnnotationAction delAction;
+  protected Timer hideTimer;
   protected static final int HIDE_DELAY = 1500;
+  protected static final int SHIFT_INCREMENT = 5;
+  protected static final int CTRL_SHIFT_INCREMENT = 5;
   
-  protected static boolean inited = false;
+  protected boolean inited = false;
   
   /**
    * Stores the Annotation schema objects available in the system.
    * The annotation types are used as keys for the map.
    */
-  protected static Map schemasByType;
+  protected Map schemasByType;
   
   
   protected TextualDocumentView textView;
   protected AnnotationSetsView setsView;
   protected JEditorPane textPane;
   protected Annotation ann;
+  protected AnnotationSet set; 
 }

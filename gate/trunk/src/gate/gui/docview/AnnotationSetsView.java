@@ -904,7 +904,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     }
     
     public void actionPerformed(ActionEvent evt){
-      annotationEditor.setAnnotation(aHandler.ann);
+      annotationEditor.setAnnotation(aHandler.ann, aHandler.set);
       annotationEditor.show();
     }
     
