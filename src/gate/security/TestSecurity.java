@@ -39,7 +39,8 @@ public class TestSecurity extends TestCase
 
   /** JDBC URL */
   private static final String JDBC_URL =
-            "jdbc:oracle:thin:GATEUSER/gate@192.168.128.207:1521:GATE03";
+            "jdbc:oracle:thin:GATEUSER/gate@192.168.128.7:1521:GATE04";
+//"jdbc:oracle:thin:GATEUSER/gate@192.168.128.207:1521:GATE03";
 //"jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB";
 
   private boolean exceptionThrown = false;
@@ -67,9 +68,11 @@ public class TestSecurity extends TestCase
     Assert.assertEquals(myUser.getName(), "kalina");
 
     List myGroups = myUser.getGroups();
+
     Assert.assertNotNull(myGroups);
     for (int i = 0; i< myGroups.size(); i++) {
-      Group myGroup = ac.findGroup((Long) myGroups.get(i));
+      Group myGroup = //ac.findGroup((Long) myGroups.get(i));
+        (Group)myGroups.get(i);
       if (i == 0)
         Assert.assertEquals(myGroup.getName(), "English Language Group");
       else if (i == 1)
