@@ -5,6 +5,8 @@
 package gate.util;
 import java.io.*;
 import java.util.*;
+import java.lang.*;
+import gnu.regexp.*;
 
 /** Some utilities for use with Files. */
 public class Files {
@@ -48,12 +50,18 @@ public class Files {
     BufferedReader resourceReader =
       new BufferedReader(new InputStreamReader(resourceStream));
     StringBuffer resourceBuffer = new StringBuffer();
+
+    int i;
+
     int charsRead = 0;
     final int size = 1024;
     char[] charArray = new char[size];
 
     while( (charsRead = resourceReader.read(charArray,0,size)) != -1 )
       resourceBuffer.append (charArray,0,charsRead);
+
+    while( (i = resourceReader.read()) != -1 )
+      resourceBuffer.append((char) i);
 
     resourceReader.close();
     return resourceBuffer.toString();
@@ -132,6 +140,49 @@ public class Files {
   throws IOException {
     return Class.class.getResourceAsStream("/gate/resources/" + resourceName);
   } // getResourceAsStream(String)
+
+  /** This method takes a regular expression and a directory name and returns
+    * the set of Files that match the pattern under that directory.
+    */
+  public static Set Find(String regex, String pathFile){
+    Set regexfinal = new HashSet();
+    String[] tab;
+    File file = null;
+    PrintStream printstr = null;
+    Object obj = new Object();
+    //open a file
+    try{
+      file = new File(pathFile);
+    }catch(NullPointerException npe){
+      npe.printStackTrace(System.err);
+      System.exit(1);
+    }
+    //generate a regular expression
+    try{
+      RE regexp = new RE("^"+regex);
+      if (file.isDirectory()){
+        tab = file.list();
+        for (int i=0;i<=tab.length-1;i++){
+          String finalPath = pathFile+"/"+tab[i];
+          REMatch m1 = regexp.getMatch(finalPath);
+          if (regexp.getMatch(finalPath) != null){
+            regexfinal.add(finalPath);
+          }
+        }
+      }
+      else{
+        if (file.isFile()){
+          if (regexp.getMatch(pathFile) != null){
+            regexfinal.add(file.getAbsolutePath());
+        }
+      }
+    }
+    }catch(REException ree){
+      ree.printStackTrace(System.err);
+      System.exit(1);
+    }
+    return regexfinal;
+  }//find
 
 } // class Files
 
