@@ -753,10 +753,8 @@ public class DocumentEditor extends AbstractVisualResource{
 
   /**
    * Sets the document to be displayed
-   * @param newDocument a {@link gate.Document}
    */
   public void setTarget(Object target){
-//  public void setDocument(gate.Document newDocument) {
     if(!(target instanceof gate.Document)){
       throw new IllegalArgumentException(
         "The document editor can only display Gate documents!\n" +
@@ -771,38 +769,13 @@ public class DocumentEditor extends AbstractVisualResource{
 
     propertyChangeListeners.firePropertyChange("document", oldDocument,
                                                target);
-  }
+  }//public void setTarget(Object target)
 
   public void setHandle(ResourceHandle handle){
     myHandle = handle;
   }
 
 
-  /**
-   * If set to true the annotations table will be shown. The default value is
-   * <b>true</b>
-   */
-
-  /**
-   * Is the annotations table shown?
-   */
-
-  /**
-   * If set to true the text display will be shown. Default value is <b>true</b>
-   */
-
-  /**
-   * Is the text display shown?
-   */
-
-  /**
-   * If set to true the right hand side tree will be displayed. Default value
-   * is <b>true</b>
-   */
-
-  /**
-   * Is the right hand side tree shown?
-   */
 
   /**
    * Updates this component when the underlying document is changed. This method
