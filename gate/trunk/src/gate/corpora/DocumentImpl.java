@@ -243,6 +243,15 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
       }
     } // if markup aware
 
+//try{
+//  FileWriter fw = new FileWriter("d:/temp/doccontent.txt");
+//  fw.write(getContent().toString());
+//  fw.flush();
+//  fw.close();
+//}catch(IOException ioe){
+//  ioe.printStackTrace();
+//}
+
     return this;
   } // init()
 
