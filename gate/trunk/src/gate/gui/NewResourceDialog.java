@@ -78,7 +78,7 @@ public class NewResourceDialog extends JDialog {
     table.setDefaultRenderer(Boolean.class,
                              new BooleanRenderer());
     table.setDefaultRenderer(Object.class,
-                             new ObjectRenderer());
+                             new CustomObjectRenderer());
     table.setDefaultRenderer(String.class,
                              new DefaultTableCellRenderer());
 
@@ -364,8 +364,8 @@ public class NewResourceDialog extends JDialog {
   }//class ParameterDisjunctionRenderer
 
 
-  class ObjectRenderer extends DefaultTableCellRenderer{
-    ObjectRenderer(){
+  class CustomObjectRenderer extends ObjectRenderer{
+    CustomObjectRenderer(){
       button = new JButton(new ImageIcon(getClass().getResource(
                                "/gate/resources/img/loadFile.gif")));
       button.setToolTipText("Set from file...");
@@ -384,12 +384,9 @@ public class NewResourceDialog extends JDialog {
       super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
                                           row, column);
 
-      if(table.isCellEditable(row, column))
-        setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-
-
       String type = (String)table.getValueAt(row, 1);
       if(type.equals("java.net.URL")){
+        setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
         textButtonBox.removeAll();
         textButtonBox.add(this);
         textButtonBox.add(Box.createHorizontalGlue());
