@@ -434,9 +434,11 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
   protected void fireResourceAdopted(DatastoreEvent e) {
 
     Assert.assertNotNull(datastoreListeners);
-    int count = datastoreListeners.size();
+    Vector temp = this.datastoreListeners;
+
+    int count = temp.size();
     for (int i = 0; i < count; i++) {
-      ((DatastoreListener)datastoreListeners.elementAt(i)).resourceAdopted(e);
+      ((DatastoreListener)temp.elementAt(i)).resourceAdopted(e);
     }
   }
 
@@ -444,10 +446,12 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
   protected void fireResourceDeleted(DatastoreEvent e) {
 
     Assert.assertNotNull(datastoreListeners);
-    int count = datastoreListeners.size();
+    Vector temp = this.datastoreListeners;
+
+    int count = temp.size();
     for (int i = 0; i < count; i++) {
 //System.out.println("notifying listener...");
-      ((DatastoreListener)datastoreListeners.elementAt(i)).resourceDeleted(e);
+      ((DatastoreListener)temp.elementAt(i)).resourceDeleted(e);
     }
   }
 
@@ -455,9 +459,11 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
   protected void fireResourceWritten(DatastoreEvent e) {
 //System.out.println("lrid=["+e.getResourceID()+"] written...");
     Assert.assertNotNull(datastoreListeners);
-    int count = datastoreListeners.size();
+    Vector temp = this.datastoreListeners;
+
+    int count = temp.size();
     for (int i = 0; i < count; i++) {
-      ((DatastoreListener)datastoreListeners.elementAt(i)).resourceWritten(e);
+      ((DatastoreListener)temp.elementAt(i)).resourceWritten(e);
     }
   }
 
