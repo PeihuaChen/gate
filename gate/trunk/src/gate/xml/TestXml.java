@@ -190,7 +190,8 @@ public class TestXml extends TestCase
     doc = gate.Factory.newDocument(Gate.getUrl("tests/xml/xces.xml"));
  //doc = gate.Factory.newDocument(new URL("file:///z:/gu.xml"));
 
-    AnnotationSet annotSet = doc.getAnnotations("Original markups");
+    AnnotationSet annotSet = doc.getAnnotations(
+                        GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
     assertEquals("For "+doc.getSourceUrl()+" the number of annotations"+
     " should be:758",758,annotSet.size());
 

@@ -40,7 +40,7 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
     */
   public GateFormatXmlDocumentHandler(gate.Document aDocument){
     // This string contains the plain text (the text without markup)
-    tmpDocContent = new StringBuffer("");
+    tmpDocContent = new StringBuffer(aDocument.getContent().size().intValue());
 
     // Colector is used later to transform all custom objects into annotation
     // objects

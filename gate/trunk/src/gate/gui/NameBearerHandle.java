@@ -327,60 +327,70 @@ public class NameBearerHandle implements Handle,
     }// SaveAsXmlAction()
 
     public void actionPerformed(ActionEvent e) {
+      Runnable runableAction = new Runnable(){
+        public void run(){
+          JFileChooser fileChooser = MainFrame.getFileChooser();
+          File selectedFile = null;
 
-      JFileChooser fileChooser = MainFrame.getFileChooser();
-      File selectedFile = null;
+          List filters = Arrays.asList(fileChooser.getChoosableFileFilters());
+          Iterator filtersIter = filters.iterator();
+          FileFilter filter = null;
+          if(filtersIter.hasNext()){
+            filter = (FileFilter)filtersIter.next();
+            while(filtersIter.hasNext() &&
+                  filter.getDescription().indexOf("XML") == -1){
+              filter = (FileFilter)filtersIter.next();
+            }
+          }
+          if(filter == null || filter.getDescription().indexOf("XML") == -1){
+            //no suitable filter found, create a new one
+            ExtensionFileFilter xmlFilter = new ExtensionFileFilter();
+            xmlFilter.setDescription("XML files");
+            xmlFilter.addExtension("xml");
+            xmlFilter.addExtension("gml");
+            fileChooser.addChoosableFileFilter(xmlFilter);
+            filter = xmlFilter;
+          }
+          fileChooser.setFileFilter(filter);
 
-      List filters = Arrays.asList(fileChooser.getChoosableFileFilters());
-      Iterator filtersIter = filters.iterator();
-      FileFilter filter = null;
-      if(filtersIter.hasNext()){
-        filter = (FileFilter)filtersIter.next();
-        while(filtersIter.hasNext() &&
-              filter.getDescription().indexOf("XML") == -1){
-          filter = (FileFilter)filtersIter.next();
-        }
-      }
-      if(filter == null || filter.getDescription().indexOf("XML") == -1){
-        //no suitable filter found, create a new one
-        ExtensionFileFilter xmlFilter = new ExtensionFileFilter();
-        xmlFilter.setDescription("XML files");
-        xmlFilter.addExtension("xml");
-        xmlFilter.addExtension("gml");
-        fileChooser.addChoosableFileFilter(xmlFilter);
-        filter = xmlFilter;
-      }
-      fileChooser.setFileFilter(filter);
+          fileChooser.setMultiSelectionEnabled(false);
+          fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          fileChooser.setDialogTitle("Select document to save ...");
+          fileChooser.setSelectedFiles(null);
 
-      fileChooser.setMultiSelectionEnabled(false);
-      fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-      fileChooser.setDialogTitle("Select document to save ...");
-      fileChooser.setSelectedFiles(null);
+          int res = (getLargeView() != null) ?
+                                  fileChooser.showDialog(getLargeView(), "Save"):
+                    (getSmallView() != null) ?
+                                  fileChooser.showDialog(getSmallView(), "Save") :
+                                              fileChooser.showDialog(null, "Save");
+          if(res == JFileChooser.APPROVE_OPTION){
+            selectedFile = fileChooser.getSelectedFile();
+            File currentDir = fileChooser.getCurrentDirectory();
+            if(selectedFile == null) return;
+            NameBearerHandle.this.statusChanged("Saving as XML to " +
+             selectedFile.toString() + "...");
+            try{
+              // Prepare to write into the xmlFile using UTF-8 encoding
+              OutputStreamWriter writer = new OutputStreamWriter(
+                              new FileOutputStream(selectedFile),"UTF-8");
 
-      int res = (getLargeView() != null) ?
-                              fileChooser.showDialog(getLargeView(), "Save"):
-                (getSmallView() != null) ?
-                              fileChooser.showDialog(getSmallView(), "Save") :
-                                          fileChooser.showDialog(null, "Save");
-      if(res == JFileChooser.APPROVE_OPTION){
-        selectedFile = fileChooser.getSelectedFile();
-        File currentDir = fileChooser.getCurrentDirectory();
-        if(selectedFile == null) return;
-        try{
-          // Prepare to write into the xmlFile using UTF-8 encoding
-          OutputStreamWriter writer = new OutputStreamWriter(
-                          new FileOutputStream(selectedFile),"UTF-8");
-
-          // Write (test the toXml() method)
-          // This Action is added only when a gate.Document is created.
-          // So, is for sure that the resource is a gate.Document
-          writer.write(((gate.Document)target).toXml());
-          writer.flush();
-          writer.close();
-        } catch (Exception ex){
-          ex.printStackTrace(Out.getPrintWriter());
-        }
-      }// End if
+              // Write (test the toXml() method)
+              // This Action is added only when a gate.Document is created.
+              // So, is for sure that the resource is a gate.Document
+              writer.write(((gate.Document)target).toXml());
+              writer.flush();
+              writer.close();
+            } catch (Exception ex){
+              ex.printStackTrace(Out.getPrintWriter());
+            }// End try
+            NameBearerHandle.this.statusChanged("Finished saving as xml into "+
+             " the file : "+ selectedFile.toString());
+          }// End if
+        }// End run()
+      };// End Runnable
+      Thread thread = new Thread(runableAction, "");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
     }// actionPerformed()
   }// SaveAsXmlAction
 

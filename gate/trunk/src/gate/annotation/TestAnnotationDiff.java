@@ -27,6 +27,7 @@ import java.awt.*;
 import gate.util.*;
 import gate.gui.*;
 import gate.creole.*;
+import gate.corpora.*;
 import gate.*;
 
 
@@ -83,10 +84,12 @@ public class TestAnnotationDiff extends TestCase
     AnnotationSet responseAnnotSet = null;
     Set diffSet  = null;
     // Get the key AnnotationSet from the keyDocument
-    keyAnnotSet = keyDocument.getAnnotations("Original markups").get(
+    keyAnnotSet = keyDocument.getAnnotations(
+                            GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME).get(
                               annotationSchema.getAnnotationName());
     // Get the response AnnotationSet from the resonseDocument
-    responseAnnotSet = responseDocument.getAnnotations("Original markups").get(
+    responseAnnotSet = responseDocument.getAnnotations(
+                            GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME).get(
                                         annotationSchema.getAnnotationName());
 
 //*
@@ -98,8 +101,10 @@ public class TestAnnotationDiff extends TestCase
     parameters.put("keyDocument",keyDocument);
     parameters.put("responseDocument",responseDocument);
     parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName","Original markups");
-    parameters.put("responseAnnotationSetName","Original markups");
+    parameters.put("keyAnnotationSetName",
+                                GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
+    parameters.put("responseAnnotationSetName",
+                                GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
 
     // Create Annotation Diff visual resource
     AnnotationDiff annotDiff = (AnnotationDiff)

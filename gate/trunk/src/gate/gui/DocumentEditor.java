@@ -3197,38 +3197,51 @@ Out.prln("NULL size");
 
     /** This method takes care of how the dumping is done*/
     public void actionPerformed(ActionEvent e){
-      JFileChooser fileChooser = MainFrame.getFileChooser();
-      File selectedFile = null;
+      Runnable runableAction = new Runnable(){
+        public void run(){
+          JFileChooser fileChooser = MainFrame.getFileChooser();
+          File selectedFile = null;
 
-      fileChooser.setMultiSelectionEnabled(false);
-      fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-      fileChooser.setDialogTitle("Select document to save ...");
-      fileChooser.setSelectedFiles(null);
+          fileChooser.setMultiSelectionEnabled(false);
+          fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          fileChooser.setDialogTitle("Select document to save ...");
+          fileChooser.setSelectedFiles(null);
 
-      int res = fileChooser.showDialog(DocumentEditor.this, "Save");
-      if(res == JFileChooser.APPROVE_OPTION){
-        selectedFile = fileChooser.getSelectedFile();
-        fileChooser.setCurrentDirectory(fileChooser.getCurrentDirectory());
-        if(selectedFile == null) return;
-        // This method construct a set with all annotations that need to be
-        // dupmped as Xml. If the set is null then only the original markups
-        // are dumped.
-        constructAnnotationsToDump();
-        try{
-          // Prepare to write into the xmlFile using UTF-8 encoding
-          OutputStreamWriter writer = new OutputStreamWriter(
-                                new FileOutputStream(selectedFile),"UTF-8");
+          int res = fileChooser.showDialog(DocumentEditor.this, "Save");
+          if(res == JFileChooser.APPROVE_OPTION){
+            selectedFile = fileChooser.getSelectedFile();
+            fileChooser.setCurrentDirectory(fileChooser.getCurrentDirectory());
+            if(selectedFile == null) return;
+            if (myHandle!= null)
+              myHandle.statusChanged("Please wait while dumping as XML and"+
+              " preserving the format to " + selectedFile.toString() + " ...");
+            // This method construct a set with all annotations that need to be
+            // dupmped as Xml. If the set is null then only the original markups
+            // are dumped.
+            constructAnnotationsToDump();
+            try{
+              // Prepare to write into the xmlFile using UTF-8 encoding
+              OutputStreamWriter writer = new OutputStreamWriter(
+                                    new FileOutputStream(selectedFile),"UTF-8");
 
-          // Write (test the toXml() method)
-          // This Action is added only when a gate.Document is created.
-          // So, is for sure that the resource is a gate.Document
-          writer.write(document.toXml(annotationsToDump));
-          writer.flush();
-          writer.close();
-        } catch (Exception ex){
-          ex.printStackTrace(Out.getPrintWriter());
-        }
-      }// End if
+              // Write (test the toXml() method)
+              // This Action is added only when a gate.Document is created.
+              // So, is for sure that the resource is a gate.Document
+              writer.write(document.toXml(annotationsToDump));
+              writer.flush();
+              writer.close();
+            } catch (Exception ex){
+              ex.printStackTrace(Out.getPrintWriter());
+            }// End try
+            if (myHandle!= null)
+              myHandle.statusChanged("Finished dumping into the "+
+              "file : " + selectedFile.toString());
+          }// End if
+        }// End run()
+      };// End Runnable
+      Thread thread = new Thread(runableAction, "");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
     }//public void actionPerformed(ActionEvent e)
 
     /** This method constructs a set containing all annotation that user wants

@@ -29,7 +29,7 @@ import gate.util.*;
 public class AnnotationDeletePR extends AbstractLanguageAnalyser
   implements ProcessingResource {
 
-  protected String                markupSetName = "Original markups";
+  protected String markupSetName = GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME;
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException

@@ -19,6 +19,7 @@ import java.util.*;
 import gate.*;
 import gate.creole.*;
 import gate.util.*;
+import gate.corpora.*;
 
 /**
  * This class is the implementation of the resource ACEPROCESSOR.
@@ -26,7 +27,7 @@ import gate.util.*;
 public class AnnotationSetTransfer extends AbstractLanguageAnalyser
   implements ProcessingResource {
 
-  protected String                tagASName = "Original markups";
+  protected String   tagASName =  GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME;
   protected String                outputASName = "Filtered";
   protected String                inputASName = null;
   protected String                textTagName = "BODY";
