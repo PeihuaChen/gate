@@ -66,19 +66,19 @@ public class CreoleXmlHandler extends HandlerBase {
   private CreoleRegister register;
 
   /** Called when the SAX parser encounts the beginning of the XML document */
-  public void startDocument() throws SAXException {
+  public void startDocument() throws GateSaxException {
     if(DEBUG) Out.prln("start document");
   } // startDocument
 
   /** Called when the SAX parser encounts the end of the XML document */
-  public void endDocument() throws SAXException {
+  public void endDocument() throws GateSaxException {
     if(DEBUG) Out.prln("end document");
     if(! elementStack.isEmpty()) {
       StringBuffer errorMessage =
         new StringBuffer("document ended but element stack not empty:");
       while(! elementStack.isEmpty())
         errorMessage.append((String) elementStack.pop());
-      throw new SAXException(errorMessage.toString());
+      throw new GateSaxException(errorMessage.toString());
     }
   } // endDocument
 
@@ -118,9 +118,9 @@ public class CreoleXmlHandler extends HandlerBase {
 
   /** Utility function to throw exceptions on stack errors. */
   private void checkStack(String methodName, String elementName)
-  throws SAXException {
+  throws GateSaxException {
     if(elementStack.isEmpty())
-      throw new SAXException(
+      throw new GateSaxException(
         methodName + " called for element " + elementName + " with empty stack"
       );
   } // checkStack
@@ -131,7 +131,7 @@ public class CreoleXmlHandler extends HandlerBase {
     * metadata entries.
     */
   public void endElement(String elementName)
-  throws SAXException {
+  throws GateSaxException {
     if(DEBUG) Out.prln("endElement: " + elementName);
 
     if(elementName.toUpperCase().equals("RESOURCE")) {
@@ -182,7 +182,29 @@ public class CreoleXmlHandler extends HandlerBase {
           if(DEBUG) Out.prln("adding URL to classloader: " + jarFileUrl);
           Gate.getClassLoader().addURL(jarFileUrl);
         } catch(MalformedURLException e) {
-          throw new SAXException("bad URL " + jarFileUrl + e);
+          throw new GateSaxException("bad URL " + jarFileUrl + e);
+        }
+      }
+    } else if(elementName.toUpperCase().equals("XML")) {
+      checkStack("endElement", "XML");
+
+      // add XML file name
+      String xmlFileName = (String) elementStack.pop();
+      resourceData.setXmlFileName(xmlFileName);
+
+      // add xml file URL if there is one
+      if(sourceUrl != null) {
+        String sourceUrlName = sourceUrl.toExternalForm();
+        String separator = "/";
+        if(sourceUrlName.endsWith(separator))
+          separator = "";
+        URL xmlFileUrl = null;
+
+        try {
+          xmlFileUrl = new URL(sourceUrlName + separator + xmlFileName);
+          resourceData.setXmlFileUrl(xmlFileUrl);
+        } catch(MalformedURLException e) {
+          throw new GateSaxException("bad URL " + xmlFileUrl + e);
         }
       }
     } else if(elementName.toUpperCase().equals("CLASS")) {

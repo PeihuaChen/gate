@@ -143,10 +143,10 @@ public class Gate
     try {
       newUrl = new URL(urlBase, path);
     } catch(MalformedURLException e) {
-      throw new GateException("Bad URL, getUrlBase( " + path + "): " + e);
+      throw new GateException("Bad URL, getUrl( " + path + "): " + e);
     }
 
-    if(DEBUG) Out.prln("getUrlBase(" + path + ") returned " + newUrl);
+    if(DEBUG) Out.prln("getUrl(" + path + ") returned " + newUrl);
     return newUrl;
   } // getUrl(path)
 

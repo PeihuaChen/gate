@@ -41,6 +41,7 @@ implements ResourceData {
     StringBuffer s = new StringBuffer(
       "ResourceDataImpl, name=" + name + "; className=" + className +
       "; jarFileName=" + jarFileName + "; jarFileUrl=" + jarFileUrl +
+      "; xmlFileName=" + xmlFileName + "; xmlFileUrl=" + xmlFileUrl +
       "; autoLoading=" + autoLoading + "; interfaceName=" + interfaceName +
       "; parameterListsSet=" + parameterListsSet +
       "; features=" + features
@@ -141,6 +142,26 @@ implements ResourceData {
 
   /** Get method for the resource jar file URL */
   public URL getJarFileUrl() { return jarFileUrl; }
+
+  /** The xml file name of the resource */
+  protected String xmlFileName;
+
+  /** Set method for the resource xml file name */
+  public void setXmlFileName(String xmlFileName) {
+    this.xmlFileName = xmlFileName;
+  } // setXmlFileName
+
+  /** Get method for the resource xml file name */
+  public String getXmlFileName() { return xmlFileName; }
+
+  /** The xml file URL of the resource */
+  protected URL xmlFileUrl;
+
+  /** Set method for the resource xml file URL */
+  public void setXmlFileUrl(URL xmlFileUrl) { this.xmlFileUrl = xmlFileUrl; }
+
+  /** Get method for the resource xml file URL */
+  public URL getXmlFileUrl() { return xmlFileUrl; }
 
   /** The comment string */
   protected String comment;
