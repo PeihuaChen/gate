@@ -39,7 +39,7 @@
   
   
   <!-- tools.jar path -->
-  <path id="tools.jar" location="${java.home}/lib/tools.jar"/>
+  <path id="tools.jar" location="bin/tools14.jar"/>
   
   <!-- The build CLASSPATH -->
   <path id="build.class.path">
@@ -50,7 +50,7 @@
   <!-- The run CLASSPATH -->
   <path id="run.class.path">
     <pathelement location="${buildDir}/gate.jar"/>
-    <pathelement path="${tools.jar}"/>
+    <path refid="tools.jar"/>
   </path>
   
   <!-- Prints out some information messages -->
@@ -133,7 +133,7 @@
     <java classname="gate.Main" 
           classpathref="run.class.path" 
           fork="true"
-          spawn="true"
+          spawn="false"
           maxmemory="200m">
        <jvmarg value="-Djava.ext.dirs=${extDir}"/>   
      </java>
