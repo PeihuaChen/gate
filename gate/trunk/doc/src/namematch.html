@@ -1,0 +1,149 @@
+<HTML>
+<BODY>
+
+<! ------------------------------------------------------- >
+
+<H1> Name Matcher </H1>
+
+<H2> Overview </H2>
+<P> The Name Matcher module aims to recognise relations between
+previously recognised entities, but does not attempt to identify new
+entities. It may also assign an entity type to a previously
+unclassified name, based on a relation with an existing entity. A
+previously classified entity cannot be reclassified, so rules are only
+invoked where one or both entities is already categorised.
+</P>
+
+<H2> Resources</H2>
+<P> The Name Matcher uses an external lookup list of aliases to record non-matching
+strings which represent the same entity, e.g. "New York" and "The Big
+Apple"; "Coca Cola" and "Coke". This table is used only for the case
+where no rules would apply, because the two strings are too
+dissimilar. It would not be used to record acronyms or shorter forms,
+e.g. "ICI" and "Imperial Chemical Industries". It also uses several
+other external lists for things like prepositions which are used in
+the rules.
+</P>
+
+<H3>Options</H3>
+<P>
+The Name Matcher also makes use of lists such as company
+designators. These can be loaded in two ways: either from a set of
+specific external lists, or from the results of the earlier gazetteer lookup
+module. The switch is set at runtime, i.e. via the UsedComponents menu
+which appears when the NameMatcher is added to the application.
+The option "extLists" should be set to true for the former and
+false for the latter.  By default, the latter will be used. An
+alternative AnnotationSet and AnnotationType names can also be
+specified at this point; otherwise the default set will be used.
+</P>
+
+<H2> Rules </H2>
+<P>
+The Name Matcher recognises relations between entities based on a
+number of handcoded rules, detailed below. The rules may be applied to
+annotations produced by the JAPE transducer for people (P), organisations (O) or to all
+types of annotations (A). The rules may be case-dependent or
+case-independent, and may consist of full or partial matches between
+entities, and are both transitive and bi-directional. This means 
+<UL>
+<LI>
+IF name1 matches name2 by ruleA AND name2 matches name3 by ruleB THEN
+name1 also matches name3 
+</LI>
+<LI>
+IF name1 matches name2 by ruleA, THEN name2 also matches name1 by ruleA
+</LI>
+</UL>
+</P>
+Types of match:
+<UL>
+<LI>
+Full: 
+	<UL>
+	<LI>
+	A and B are identical (with or without case matching)
+	<BR> e.g. <I>WHSmith</I> and <I>WHSMITH</I>
+	</LI>
+	</UL>
+<LI>
+Partial: 
+	<UL>
+	<LI>
+	A contains B
+	<BR> e.g. <I>WHSmith Ltd.</I> and <I> WHSmith</I>
+	</LI>
+	<LI>
+         A can be transformed into B (e.g. reversal around a
+preposition)
+	<BR> e.g. <I>Defense Department</I> and <I>U.S. Department of Defense</I>
+	</LI>
+         <LI>
+	A is a concatenated contraction of B
+	<BR> e.g. <I>Pan American</I> and <I>Pan Am</I>
+	</LI>
+	</UL>
+</LI>
+<LI>
+Semantic:
+	<UL>
+	<LI>
+	 A is an alias of B but bears no orthographical resemblance
+	<BR> e.g. <I>New York</I> and <I>The Big Apple</I>
+	</LI>
+	</UL>
+</LI>
+<LI>
+No match:
+	<UL>
+	<LI>A is a spurious match of B
+	<BR> e.g. <I>Eastern Airways</I> and <I>Eastern Air</I> (which
+are different companies)
+	</LI>
+	</UL>
+</UL>
+
+The matching rules are hard-coded in the Namematcher, as is priority
+handling of rules. Essentially, the first rule to be applied is the spurious rule
+from the lookup list (where two names are listed specifically as not matching), followed by the rules for all annotations,
+organizations, and persons respectively. In general, rules matching very
+similar strings precede those matching less similar ones.
+
+<H2> Maintenance </H2>
+<P>
+The external list switch enables specific changes to be made to the
+lists of company designators etc. without having to either rebuild the
+NameMatcher or modify the gazetteer lists (which may have implications
+on the transduction phase). Using the gazetteer lists, on the other
+hand, prevents the need for updating the external lists independently
+every time the gazetteer lists are modified. 
+
+The structure of the external lists is as follows. The lists are
+stored as separate files, with an index file NMlists.def in which the
+list names are defined (as for the gazetteer lists). Each entry in a
+list consists of a name, a separator "£" and an identifier (generally
+a number, though it can be any token or string. The identifier is used
+to match entries, i.e. all entries with the same identifier are to be
+considered as related. For lists such as the preposition list, all
+entries are considered as equivalent (since there is no special
+relation between them other than the fact that they are all
+prepositions), so they are all given the same identifier.
+
+The set of "all annotations" to which the rules may be applied is specified in the
+AnnotationTypes vector in the Used Components menu - by default this
+is Organization, Person and Location. The rules themselves, and their
+ordering, are hard-coded and can only be modified via the
+Namematch.java code.
+</P>
+</BODY>
+</HTML>
+
+
+
+
+
+
+
+
+
+
