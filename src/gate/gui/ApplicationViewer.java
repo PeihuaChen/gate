@@ -17,6 +17,7 @@ package gate.gui;
 
 import gate.creole.*;
 import gate.*;
+import gate.swing.*;
 import gate.util.*;
 
 import javax.swing.*;
@@ -31,8 +32,10 @@ import java.awt.event.*;
 import java.lang.reflect.*;
 import java.util.*;
 import java.io.IOException;
+import java.net.URL;
+import gate.event.*;
 
-public class ApplicationViewer extends AbstractVisualResource {
+public class ApplicationViewer extends AbstractVisualResource implements CreoleListener {
 
   public ApplicationViewer() {
   }
@@ -158,6 +161,7 @@ public class ApplicationViewer extends AbstractVisualResource {
   }
 
   protected void initListeners(){
+    Gate.getCreoleRegister().addCreoleListener(this);
     this.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         if(SwingUtilities.isRightMouseButton(e)){
@@ -199,12 +203,19 @@ public class ApplicationViewer extends AbstractVisualResource {
               "Gate", JOptionPane.ERROR_MESSAGE);
         } else {
           List actions = new ArrayList();
+          List nodes = new ArrayList();
           for(int i = 0; i < rows.length; i++){
-            Object node = mainTreeTable.getTree().getPathForRow(
-                                                rows[i]).getLastPathComponent();
-            if(node instanceof ProcessingResource && controller.contains(node)){
-              Action act = (Action)removeActionForPR.get(node);
-              if(act != null) actions.add(act);
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+                                          mainTreeTable.getTree().
+                                          getPathForRow(rows[i]).
+                                          getLastPathComponent();
+            Object value = ((DefaultMutableTreeNode)node).getUserObject();
+            if(value instanceof ProcessingResource && controller.contains(value)){
+              Action act = (Action)removeActionForPR.get(value);
+              if(act != null){
+                actions.add(act);
+                nodes.add(node);
+              }
             } else {
               JOptionPane.showMessageDialog(
                   ApplicationViewer.this,
@@ -217,35 +228,45 @@ public class ApplicationViewer extends AbstractVisualResource {
           while(actIter.hasNext()){
             ((Action)actIter.next()).actionPerformed(null);
           }
+          Iterator nodesIter = nodes.iterator();
+          while(nodesIter.hasNext()){
+            mainTTModel.removeNodeFromParent(
+                        (DefaultMutableTreeNode)nodesIter.next());
+          }
         }
       }
     });
 
     upBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        boolean changed= false;
-        int rows[] = mainTreeTable.getSelectedRows();
-        List selectedComponents = new ArrayList();
-        Arrays.sort(rows);
-        if(rows == null || rows.length == 0){
+        TreePath[] paths = mainTreeTable.getTree().getSelectionPaths();
+        if(paths == null || paths.length == 0){
           JOptionPane.showMessageDialog(
               ApplicationViewer.this,
               "Please select some components to be moved from the list of used components!\n" ,
               "Gate", JOptionPane.ERROR_MESSAGE);
         }else{
-          for(int i = 0; i < rows.length; i++){
-            TreePath path = mainTreeTable.getTree().getPathForRow(rows[i]);
-            Object node = path.getLastPathComponent();
-            if(node instanceof ProcessingResource && controller.contains(node)){
-              int index = controller.indexOf(node);
+          for(int i = 0; i < paths.length; i++){
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+                                          paths[i].getLastPathComponent();
+            Object value = node.getUserObject();
+            if(value instanceof ProcessingResource &&
+               controller.contains(value)){
+              int index = controller.indexOf(value);
               //move the module up
               if(index > 0){
                 controller.remove(index);
                 index--;
-                controller.add(index, node);
-                changed = true;
+                controller.add(index, value);
+                DefaultMutableTreeNode parent =
+                      (DefaultMutableTreeNode)node.getParent();
+                boolean expanded = mainTreeTable.getTree().isExpanded(paths[i]);
+                mainTTModel.removeNodeFromParent(node);
+                mainTTModel.insertNodeInto(node, parent, index);
+                if(expanded){
+                  mainTreeTable.expandPath(paths[i]);
+                }
               }
-              selectedComponents.add(node);
             }else{
               JOptionPane.showMessageDialog(
                   ApplicationViewer.this,
@@ -254,46 +275,45 @@ public class ApplicationViewer extends AbstractVisualResource {
                   "Gate", JOptionPane.ERROR_MESSAGE);
             }
           }
-          if(changed){
-            mainTTModel.dataChanged();
-            //restore the selection
-            mainTreeTable.clearSelection();
-            Iterator selIter = selectedComponents.iterator();
-            while(selIter.hasNext()){
-              int row = mainTreeTable.getTree().getRowForPath(new TreePath(
-                          new Object[]{controller, selIter.next()}));
-              mainTreeTable.addRowSelectionInterval(row, row);
+          final TreePath[] finalPaths = paths;
+          SwingUtilities.invokeLater(new Runnable(){
+            public void run(){
+              mainTreeTable.getTree().setSelectionPaths(finalPaths);
             }
-          }
+          });
         }
       }//public void actionPerformed(ActionEvent e)
     });
 
     downBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        int rows[] = mainTreeTable.getSelectedRows();
-        boolean changed = false;
-        List selectedComponents = new ArrayList();
-        Arrays.sort(rows);
-        if(rows == null || rows.length == 0){
+        TreePath[] paths = mainTreeTable.getTree().getSelectionPaths();
+        if(paths == null || paths.length == 0){
           JOptionPane.showMessageDialog(
               ApplicationViewer.this,
               "Please select some components to be moved from the list of used components!\n" ,
               "Gate", JOptionPane.ERROR_MESSAGE);
         }else{
-          for(int i = rows.length -1; i >= 0; i--){
-            Object node = mainTreeTable.getTree().getPathForRow(
-                                                rows[i]).getLastPathComponent();
-            if(node instanceof ProcessingResource && controller.contains(node)){
-              int index = controller.indexOf(node);
+          for(int i = paths.length -1; i >= 0; i--){
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+                                          paths[i].getLastPathComponent();
+            Object value = node.getUserObject();
+            if(value instanceof ProcessingResource && controller.contains(value)){
+              int index = controller.indexOf(value);
               //move the module down
               if(index < controller.size() - 1){
                 controller.remove(index);
                 index++;
-                controller.add(index, node);
-                changed = true;
+                controller.add(index, value);
+                DefaultMutableTreeNode parent =
+                      (DefaultMutableTreeNode)node.getParent();
+                boolean expanded = mainTreeTable.getTree().isExpanded(paths[i]);
+                mainTTModel.removeNodeFromParent(node);
+                mainTTModel.insertNodeInto(node, parent, index);
+                if(expanded){
+                  mainTreeTable.expandPath(paths[i]);
+                }
               }
-              selectedComponents.add(node);
             }else{
               JOptionPane.showMessageDialog(
                   ApplicationViewer.this,
@@ -302,17 +322,12 @@ public class ApplicationViewer extends AbstractVisualResource {
                   "Gate", JOptionPane.ERROR_MESSAGE);
             }
           }//for(int i = 0; i < rows.length; i++)
-          if(changed){
-            mainTTModel.dataChanged();
-           //restore the selection
-            mainTreeTable.clearSelection();
-            Iterator selIter = selectedComponents.iterator();
-            while(selIter.hasNext()){
-              int row = mainTreeTable.getTree().getRowForPath(new TreePath(
-                          new Object[]{controller, selIter.next()}));
-              mainTreeTable.addRowSelectionInterval(row, row);
+          final TreePath[] finalPaths = paths;
+          SwingUtilities.invokeLater(new Runnable(){
+            public void run(){
+              mainTreeTable.getTree().setSelectionPaths(finalPaths);
             }
-          }
+          });
         }
       }//public void actionPerformed(ActionEvent e)
     });
@@ -338,7 +353,7 @@ public class ApplicationViewer extends AbstractVisualResource {
     });
   }//protected void initListeners()
 
-  public MenuElement[] getPopupElements(){
+  protected void updateActions(){
     Iterator prIter = Gate.getCreoleRegister().getPrInstances().iterator();
     while(prIter.hasNext()){
       ProcessingResource pr = (ProcessingResource)prIter.next();
@@ -358,6 +373,10 @@ public class ApplicationViewer extends AbstractVisualResource {
         }
       }
     }
+  }//protected void updateActions()
+
+  public MenuElement[] getPopupElements(){
+    updateActions();
     popup.removeAll();
     popup.add(runAction);
     addMenu = new JMenu("Add");
@@ -383,9 +402,9 @@ public class ApplicationViewer extends AbstractVisualResource {
     else return res.getClass().getName();
   }
 
-  class PRsAndParamsTTModel extends AbstractTreeTableModel{
+  class PRsAndParamsTTModel extends DefaultTreeModel implements TreeTableModel{
     PRsAndParamsTTModel(SerialController aController){
-      super(aController);
+      super(new DefaultMutableTreeNode(aController, true), true);
     }
 
     public int getColumnCount(){
@@ -412,30 +431,34 @@ public class ApplicationViewer extends AbstractVisualResource {
     public Object getValueAt(Object node, int column){
       if(node == root){
         return null;
-      }else if (node instanceof ProcessingResource){
-        ProcessingResource pr = (ProcessingResource)node;
-        if(column == 1) return getResourceName(pr);
-        else return null;
-      }else if (node instanceof ParameterDisjunction){
-        ParameterDisjunction pd = (ParameterDisjunction)node;
-        switch(column){
-          case 0: return pd;
-          case 1: {
-            String paramType = pd.getType();
-            if(paramType.startsWith("gate.")){
-              ResourceData rData = (ResourceData)
-                                   Gate.getCreoleRegister().get(paramType);
-              if(rData != null) paramType = rData.getName();
-            }
-            return paramType;
-          }case 2: return pd.getValue();
-          default: return null;
+      }else{
+        node = ((DefaultMutableTreeNode)node).getUserObject();
+        if (node instanceof ProcessingResource){
+          ProcessingResource pr = (ProcessingResource)node;
+          if(column == 1) return getResourceName(pr);
+          else return null;
+        }else if (node instanceof ParameterDisjunction){
+          ParameterDisjunction pd = (ParameterDisjunction)node;
+          switch(column){
+            case 0: return pd;
+            case 1: {
+              String paramType = pd.getType();
+              if(paramType.startsWith("gate.")){
+                ResourceData rData = (ResourceData)
+                                     Gate.getCreoleRegister().get(paramType);
+                if(rData != null) paramType = rData.getName();
+              }
+              return paramType;
+            }case 2: return pd.getValue();
+            default: return null;
+          }
         }
       }
       return null;
     }
 
     public boolean isCellEditable(Object node, int column){
+      node = ((DefaultMutableTreeNode)node).getUserObject();
       if(column == 2) return node instanceof ParameterDisjunction;
       if(column == 0){
         return node instanceof ParameterDisjunction &&
@@ -445,6 +468,7 @@ public class ApplicationViewer extends AbstractVisualResource {
     }
 
     public void setValueAt(Object aValue, Object node, int column){
+      node = ((DefaultMutableTreeNode)node).getUserObject();
       switch(column){
         case 0:{
           if(node instanceof ParameterDisjunction && aValue instanceof Integer){
@@ -455,34 +479,40 @@ public class ApplicationViewer extends AbstractVisualResource {
           if(node instanceof ParameterDisjunction){
             ((ParameterDisjunction)node).setValue(aValue);
           }
-
           break;
         }
       }//switch(column)
     }
-
+/*
     public Object getChild(Object parent, int index){
       if(parent == root){
         SerialController sc = (SerialController)parent;
         return sc.get(index);
-      }else if (parent instanceof ProcessingResource){
-        ProcessingResource pr = (ProcessingResource)parent;
-        List paramsList = (List)paramsForPR.get(pr);
-        return (ParameterDisjunction)paramsList.get(index);
-      }else return null;
+      }else{
+        parent = ((DefaultMutableTreeNode)parent).getUserObject();
+        if (parent instanceof ProcessingResource){
+          ProcessingResource pr = (ProcessingResource)parent;
+          List paramsList = (List)paramsForPR.get(pr);
+          return (ParameterDisjunction)paramsList.get(index);
+        }else return null;
+      }
     }
 
     public int getChildCount(Object parent){
       if(parent == root){
         SerialController sc = (SerialController)parent;
         return sc.size();
-      }else if (parent instanceof ProcessingResource){
-        ProcessingResource pr = (ProcessingResource)parent;
-        List paramsList = (List)paramsForPR.get(pr);
-        return paramsList==null ? 0 : paramsList.size();
-      }else  return 0;
+      }else{
+        parent = ((DefaultMutableTreeNode)parent).getUserObject();
+        if (parent instanceof ProcessingResource){
+          ProcessingResource pr = (ProcessingResource)parent;
+          List paramsList = (List)paramsForPR.get(pr);
+          return paramsList==null ? 0 : paramsList.size();
+        }else  return 0;
+      }
     }
 
+*/
     public void dataChanged(){
       fireTreeStructureChanged(this, new Object[]{getRoot()}, null, null);
     }
@@ -500,38 +530,18 @@ public class ApplicationViewer extends AbstractVisualResource {
 
       String text = "";
       String tipText = null;
+      String iconName = null;
+      value = ((DefaultMutableTreeNode)value).getUserObject();
       if (value instanceof ProcessingResource){
         ProcessingResource pr = (ProcessingResource)value;
         text = (String)pr.getFeatures().get("gate.NAME");
-        tipText = ((ResourceData)
-                   Gate.getCreoleRegister().get(pr.getClass().getName())
-                   ).getComment();
-        List prList = Gate.getCreoleRegister().getPrInstances();
-        prList.remove(controller);
-        Iterator prIter = prList.iterator();
-        boolean done = false;
-        while(!done && prIter.hasNext()){
-          if(pr == prIter.next()){
-            MainFrame frame = MainFrame.getInstance();
-            //PRHandle prHandle = null;// = (PRHandle)frame.handleForResourceName.get(pr.getFeatures().get("gate.NAME"));
-            done = true;
-/*
-            if(prHandle != null){
-              Icon icon = prHandle.getIcon();
-              setOpenIcon(icon);
-              setClosedIcon(icon);
-              setLeafIcon(icon);
-            }
-*/
-          }
-        }
+        ResourceData rData = (ResourceData)
+                   Gate.getCreoleRegister().get(pr.getClass().getName());
+        tipText = rData.getComment();
+        iconName = rData.getIcon();
+        if(iconName == null) iconName = "pr.gif";
       } else if (value instanceof ParameterDisjunction) {
-        Icon icon = new ImageIcon(getClass().
-                                  getResource("/gate/resources/img/param.gif"));
-        setOpenIcon(icon);
-        setClosedIcon(icon);
-        setLeafIcon(icon);
-
+        iconName = "param.gif";
         ParameterDisjunction pd = (ParameterDisjunction)value;
         text =  pd.getName();
         if(pd.size() > 1) text+=" [more...]";
@@ -541,13 +551,29 @@ public class ApplicationViewer extends AbstractVisualResource {
           if(rData != null) tipText = rData.getComment();
         }
       }
-      setToolTipText(tipText);
       //prepare the renderer
       Component comp = super.getTreeCellRendererComponent(tree, text, sel,
                                                           expanded, leaf,
                                                           row, hasFocus);
+      setToolTipText(tipText);
+      setIcon(getIcon(iconName));
       return this;
     }//public Component getTreeCellRendererComponent
+
+    private Icon getIcon(String name){
+      Icon res = (Icon)iconForName.get(name);
+      if(res == null){
+        try{
+          res = new ImageIcon(new URL("gate:/img/" + name));
+          iconForName.put(name, res);
+        }catch(java.net.MalformedURLException mue){
+          mue.printStackTrace(Err.getPrintWriter());
+        }
+      }
+      return res;
+    }
+
+    private Map iconForName = new HashMap();
   }//class CustomTreeCellRenderer extends DefaultTreeCellRenderer
 
   class ModulesTableModel extends AbstractTableModel{
@@ -610,18 +636,29 @@ public class ApplicationViewer extends AbstractVisualResource {
 
     public void actionPerformed(ActionEvent e){
       controller.add(pr);
+      DefaultMutableTreeNode root = (DefaultMutableTreeNode)mainTTModel.
+                                     getRoot();
+      DefaultMutableTreeNode node = new DefaultMutableTreeNode(pr, true);
+      mainTTModel.insertNodeInto(node, root, root.getChildCount());
+      mainTreeTable.expandPath(
+            new TreePath(new Object[]{mainTTModel.getRoot(), node}));
+
       ResourceData rData = (ResourceData)
                           Gate.getCreoleRegister().get(pr.getClass().getName());
       List params = rData.getParameterList().getRuntimeParameters();
       Iterator paramsIter = params.iterator();
       List parameterDisjunctions = new ArrayList();
       while(paramsIter.hasNext()){
-        parameterDisjunctions.add(
-          new ParameterDisjunction((List)paramsIter.next())
-        );
+        ParameterDisjunction pDisj = new ParameterDisjunction(
+                                          (List)paramsIter.next());
+        parameterDisjunctions.add(pDisj);
+        DefaultMutableTreeNode paramNode = new DefaultMutableTreeNode(pDisj);
+        mainTTModel.insertNodeInto(paramNode, node, node.getChildCount());
+        mainTreeTable.expandPath(new TreePath(new Object[]{
+                                     mainTTModel.getRoot(), node, paramNode}));
       }
       paramsForPR.put(pr, parameterDisjunctions);
-      mainTTModel.dataChanged();
+
       modulesTableModel.fireTableDataChanged();
       this.setEnabled(false);
       ((Action)removeActionForPR.get(pr)).setEnabled(true);
@@ -639,7 +676,6 @@ public class ApplicationViewer extends AbstractVisualResource {
     public void actionPerformed(ActionEvent e){
       controller.remove(pr);
       paramsForPR.remove(pr);
-      mainTTModel.dataChanged();
       modulesTableModel.fireTableDataChanged();
       this.setEnabled(false);
       ((Action)addActionForPR.get(pr)).setEnabled(true);
@@ -968,6 +1004,27 @@ public class ApplicationViewer extends AbstractVisualResource {
    */
   Map addActionForPR;
   Map removeActionForPR;
+  public void resourceLoaded(CreoleEvent e) {
+    if(e.getResource() instanceof ProcessingResource){
+      updateActions();
+      modulesTableModel.fireTableDataChanged();
+    }else{
+      mainTreeTable.repaint();
+    }
+  }
+
+  public void resourceUnloaded(CreoleEvent e) {
+    updateActions();
+    modulesTableModel.fireTableDataChanged();
+
+  }
+
+  public void datastoreOpened(CreoleEvent e) {
+  }
+  public void datastoreCreated(CreoleEvent e) {
+  }
+  public void datastoreClosed(CreoleEvent e) {
+  }
 
 /*
   class PRListTableModel extends AbstractTableModel{

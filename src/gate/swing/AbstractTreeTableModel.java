@@ -11,7 +11,7 @@
  *  $Id$
  *
  */
-package gate.gui;
+package gate.swing;
 
 import javax.swing.tree.*;
 import javax.swing.event.*;

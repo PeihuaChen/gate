@@ -25,6 +25,7 @@ import java.awt.Point;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.tree.*;
+import javax.swing.event.*;
 import java.beans.*;
 
 import java.util.*;
@@ -32,12 +33,14 @@ import java.io.*;
 import java.net.*;
 
 import gate.*;
+
 import gate.creole.*;
 import gate.event.*;
 import gate.persist.*;
 import gate.util.*;
+import gate.swing.*;
 import guk.im.*;
-import javax.swing.event.*;
+
 
 /**
  * The main Gate GUI frame. This is a singleton.

@@ -1,4 +1,4 @@
-package gate.gui;
+package gate.swing;
 
 import javax.swing.*;
 import java.awt.Color;
