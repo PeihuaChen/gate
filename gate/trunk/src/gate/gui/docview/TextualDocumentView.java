@@ -15,10 +15,11 @@ package gate.gui.docview;
 import java.awt.*;
 import java.awt.Component;
 import java.awt.Point;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
+import javax.swing.*;
 import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
 import javax.swing.text.*;
@@ -53,6 +54,76 @@ public class TextualDocumentView extends AbstractDocumentView {
       //the offsets should always be OK as they come from an annotation
       throw new GateRuntimeException(ble.toString());
     }
+  }
+
+  public void removeHighlight(Object tag){
+    Highlighter highlighter = textView.getHighlighter();
+    highlighter.removeHighlight(tag);
+    annotationListView.removeAnnotation(tag);
+  }
+
+  /**
+   * Ads several highlights in one go. This method does not assume that it was 
+   * called from the UI thread.
+   * @param annotations
+   * @param set
+   * @param colour
+   * @return
+   */
+  public List addHighlights(Collection annotations, 
+          AnnotationSet set, Color colour){
+    SwingUtilities.invokeLater(new Runnable(){
+      public void run(){
+        scroller.getViewport().setView(new JLabel("Updating"));
+      }
+    });
+    
+    Highlighter highlighter = textView.getHighlighter();
+    
+    Iterator annIter = annotations.iterator();
+    List tagsList = new ArrayList(annotations.size());
+    while(annIter.hasNext()){
+      Annotation ann = (Annotation)annIter.next();
+      try{
+        Object tag = highlighter.addHighlight(
+                ann.getStartNode().getOffset().intValue(),
+                ann.getEndNode().getOffset().intValue(),
+                new DefaultHighlighter.DefaultHighlightPainter(colour));
+        tagsList.add(tag);
+      }catch(BadLocationException ble){
+        //the offsets should always be OK as they come from an annotation
+        throw new GateRuntimeException(ble.toString());
+      }
+    }
+    annotationListView.addAnnotations(tagsList, annotations, set);
+    SwingUtilities.invokeLater(new Runnable(){
+      public void run(){
+        scroller.getViewport().setView(textView);
+      }
+    });
+    return tagsList;
+  }
+  
+  
+  public void removeHighlights(Collection tags){
+    SwingUtilities.invokeLater(new Runnable(){
+      public void run(){
+        scroller.getViewport().setView(new JLabel("Updating"));
+      }
+    });
+    
+    Highlighter highlighter = textView.getHighlighter();
+    
+    Iterator tagIter = tags.iterator();
+    while(tagIter.hasNext()){
+      highlighter.removeHighlight(tagIter.next());
+    }
+    annotationListView.removeAnnotations(tags);
+    SwingUtilities.invokeLater(new Runnable(){
+      public void run(){
+        scroller.getViewport().setView(textView);
+      }
+    });
   }
 
 
@@ -95,13 +166,6 @@ public class TextualDocumentView extends AbstractDocumentView {
   protected void initListeners(){
   }
   
-  public void removeHighlight(Object tag){
-    Highlighter highlighter = textView.getHighlighter();
-    highlighter.removeHighlight(tag);
-    annotationListView.removeAnnotation(tag);
-  }
-
-
   
   /**
    * Stores the highlighter tags for all the highlighted annotations;
