@@ -594,6 +594,15 @@ public class AnnotationEditor extends AbstractVisualResource {
       public void mouseExited(MouseEvent e) {
       }
     });
+
+    textPane.addPropertyChangeListener(new PropertyChangeListener() {
+      public void propertyChange(PropertyChangeEvent e) {
+        if(e.getPropertyName().equals("highlighter")){
+          highlighter = textPane.getHighlighter();
+          selectionHighlighter.install(textPane);
+        }
+      }
+    });
   }//protected void initListeners()
 
   /**
