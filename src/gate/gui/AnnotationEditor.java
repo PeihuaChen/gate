@@ -391,18 +391,6 @@ public class AnnotationEditor extends AbstractVisualResource {
         EditAnnotationAction editAnnAct = new EditAnnotationAction(ann,set);
         if(SwingUtilities.isLeftMouseButton(e)){
           if(e.getClickCount() == 1){
-            //single left click ->highlight the annotation
-
-            int start =
-              ((Long)annotationsTable.getModel().getValueAt(row, 2)).intValue();
-            int end =
-              ((Long)annotationsTable.getModel().getValueAt(row, 3)).intValue();
-            try{
-              textPane.scrollRectToVisible(textPane.modelToView(start));
-              annotationsTable.requestFocus();
-            }catch(BadLocationException ble){
-              throw new GateRuntimeException(ble.toString());
-            }
           }else if(e.getClickCount() == 2){
             //double left click -> edit the annotation
             editAnnAct.actionPerformed(null);
@@ -457,6 +445,14 @@ public class AnnotationEditor extends AbstractVisualResource {
               int end = ((Long)annotationsTable.getModel().
                          getValueAt(rows[i], 3)
                         ).intValue();
+              //bring the annotation in view
+              try{
+                textPane.scrollRectToVisible(textPane.modelToView(start));
+                annotationsTable.requestFocus();
+              }catch(BadLocationException ble){
+                throw new GateRuntimeException(ble.toString());
+              }
+              //start blinking the annotation
               try{
                 selectionHighlighter.addHighlight(start, end,
                             DefaultHighlighter.DefaultPainter);

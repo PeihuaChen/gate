@@ -442,6 +442,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
                   new java.util.HashMap()//no bindings yet!
                   );
       // at this point ActiveFSMInstances should always be empty!
+      activeFSMInstances.clear();
+      acceptingFSMInstances.clear();
       activeFSMInstances.addLast(currentFSM);
       whileloop2:
       while(!activeFSMInstances.isEmpty()){
@@ -584,23 +586,14 @@ extends Transducer implements JapeConstants, java.io.Serializable
         startNode = currentAcceptor.getAGPosition();
 //System.out.println("->" + startNode.getOffset());
       } else throw new RuntimeException("Unknown rule application style!");
-      //release all the accepting instances as they have done their job
-      /*
-        Iterator acceptors = acceptingFSMInstances.iterator();
-        while(acceptors.hasNext())
-        FSMInstance.returnInstance((FSMInstance)acceptors.next());
-      */
-      acceptingFSMInstances.clear();
-      startNodeOff = startNode.getOffset().intValue();
+       startNodeOff = startNode.getOffset().intValue();
 
       //fire the progress event
       if(startNodeOff - oldStartNodeOff > 1024){
         fireProgressChanged(100 * startNodeOff / lastNodeOff);
         oldStartNodeOff = startNodeOff;
       }
-
-      //we start all over again so we need to clear to old unused instances
-      activeFSMInstances.clear();
+//System.out.println("->" + startNodeOff);
     } // while(startNode != lastNode)
     // FSMInstance.clearInstances();
     fireProcessFinished();

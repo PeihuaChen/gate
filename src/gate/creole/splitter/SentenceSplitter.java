@@ -33,6 +33,32 @@ public class SentenceSplitter extends Nerc{
     try{
       super.runSystem();
       super.check();
+      //copy the sentence annotations to the outputSet
+      if(outputASName != null && outputASName.equals("")) outputASName = null;
+      AnnotationSet outputAS = (outputASName == null) ?
+                               document.getAnnotations() :
+                               document.getAnnotations(outputASName);
+      if(tempAnnotationSetName != null &&
+         tempAnnotationSetName.equals("")) tempAnnotationSetName = null;
+      AnnotationSet tempAS =  (tempAnnotationSetName == null) ?
+                               document.getAnnotations() :
+                               document.getAnnotations(tempAnnotationSetName);
+
+      if(outputAS != tempAS){
+        //we need to copy the sentence annotations.
+        outputAS.addAll(tempAS.get("Sentence"));
+      }
+    }catch(ExecutionException ee){
+      executionException = ee;
+    }catch(Exception e){
+      executionException = new ExecutionException(e);
+    }
+  }//run()
+
+  public void run1(){
+    try{
+      super.runSystem();
+      super.check();
       //create the sentence annotations
       if(outputASName != null && outputASName.equals("")) outputASName = null;
       AnnotationSet outputAS = (outputASName == null) ?
@@ -98,7 +124,6 @@ public class SentenceSplitter extends Nerc{
       executionException = new ExecutionException(e);
     }
   }//run()
-
 
   public void setOutputASName(String newOutputASName) {
     outputASName = newOutputASName;
