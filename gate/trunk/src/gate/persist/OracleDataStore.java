@@ -1599,7 +1599,7 @@ System.out.println();
                    " from  "+Gate.DB_OWNER+".t_feature v1 " +
                    " where  v1.ft_entity_id = ? " +
                    "        and v1.ft_entity_type = ? " +
-                   " order by v1.ft_key";
+                   " order by v1.ft_key,v1.ft_id";
 
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,entityID.longValue());
@@ -1803,7 +1803,7 @@ System.out.println();
     EventAwareLanguageResource dbDoc = (EventAwareLanguageResource)doc;
     //1. sync LR
     // only name can be changed here
-    if (true == dbDoc.isResourceChanged(EventAwareLanguageResource.DOC_NAME)) {
+    if (true == dbDoc.isResourceChanged(EventAwareLanguageResource.RES_NAME)) {
       _syncLR(lrID,doc.getName());
     }
 
@@ -2006,7 +2006,56 @@ System.out.println();
 
 
   private void syncCorpus(Corpus corp) throws PersistenceException {
-    throw new MethodNotImplementedException();
+
+    //0. preconditions
+    Assert.assertNotNull(corp);
+    Assert.assertTrue(corp instanceof DatabaseCorpusImpl);
+    Assert.assertEquals(this,corp.getDataStore());
+    Assert.assertNotNull(corp.getLRPersistenceId());
+
+    EventAwareLanguageResource dbCorpus = (EventAwareLanguageResource)corp;
+
+    //1. sync the corpus name?
+    if (dbCorpus.isResourceChanged(EventAwareLanguageResource.RES_NAME)) {
+      _syncLR((Long)corp.getLRPersistenceId(),corp.getName());
+    }
+
+    //2. sync the corpus features?
+    if (dbCorpus.isResourceChanged(EventAwareLanguageResource.RES_FEATURES)) {
+      _syncFeatures(corp);
+    }
+
+    //3. get all documents
+    Iterator it = corp.iterator();
+    while (it.hasNext()) {
+      Document dbDoc = (Document)it.next();
+
+      //adopt/sync?
+      if (null == dbDoc.getLRPersistenceId()) {
+        //doc was never adopted, adopt it
+
+        //3.1 remove the transient doc from the corpus
+        it.remove();
+
+        //3.2 get the security info for the corpus
+        SecurityInfo si = getSecurityInfo(corp);
+
+        //3.3. adopt the doc with the sec info
+        Document adoptedDoc = null;
+        try {
+          adoptedDoc = (Document)adopt(dbDoc,si);
+        }
+        catch(SecurityException se) {
+          throw new PersistenceException(se);
+        }
+
+        //3.4 add back to corpus the new DatabaseDocument
+        corp.add(adoptedDoc);
+      }
+      else {
+        sync(dbDoc);
+      }
+    }
   }
 
 }
