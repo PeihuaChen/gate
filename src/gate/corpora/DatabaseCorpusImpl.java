@@ -39,6 +39,10 @@ public class DatabaseCorpusImpl extends CorpusImpl
    */
   protected EventsHandler eventHandler;
 
+  public DatabaseCorpusImpl() {
+    super();
+  }
+
 
   public DatabaseCorpusImpl(String _name,
                             DatabaseDataStore _ds,
@@ -67,6 +71,7 @@ public class DatabaseCorpusImpl extends CorpusImpl
     //synced and we'll clear the isXXXChanged flags
     this.dataStore.addDatastoreListener(this);
   }
+
 
   public boolean add(Object o){
 
@@ -288,5 +293,35 @@ public class DatabaseCorpusImpl extends CorpusImpl
     if (eventHandler != null)
       this.features.removeFeatureMapListener(eventHandler);
   }///inner class EventsHandler
+
+
+
+  public void setInitData__$$__(Object data) {
+
+    HashMap initData = (HashMap)data;
+
+    this.name = (String)initData.get("CORP_NAME");
+    this.dataStore = (DatabaseDataStore)initData.get("DS");
+    this.lrPersistentId = (Long)initData.get("LR_ID");
+    this.features = (FeatureMap)initData.get("CORP_FEATURES");
+    this.supportList = (List)initData.get("CORP_SUPPORT_LIST");
+
+    this.featuresChanged = false;
+    this.nameChanged = false;
+
+     //3. add the listeners for the features
+    if (eventHandler == null)
+      eventHandler = new EventsHandler();
+    this.features.addFeatureMapListener(eventHandler);
+
+
+    //4. add self as listener for the data store, so that we'll know when the DS is
+    //synced and we'll clear the isXXXChanged flags
+    this.dataStore.addDatastoreListener(this);
+  }
+
+  public Object getInitData__$$__(Object initData) {
+    return null;
+  }
 
 }
