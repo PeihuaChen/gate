@@ -154,8 +154,49 @@ public abstract class Factory {
         "Couldn't get resource class from the resource data:"+Strings.getNl()+e
       );
     }
-    // create an object using the resource's default constructor
+
+    //create a pointer for the resource
     Resource res = null;
+
+    //if the object is an LR and it should come from a DS then create that way
+    DataStore dataStore;
+    if(LanguageResource.class.isAssignableFrom(resClass) &&
+       ((dataStore = (DataStore)parameterValues.
+                     get(DataStore.DATASTORE_FEATURE_NAME)) != null)
+      ){
+      //ask the datastore to create our object
+      if(dataStore instanceof SerialDataStore) {
+        // SDS doesn't need a wrapper class; just check for serialisability
+        if(! (resClass instanceof Serializable))
+          throw new ResourceInstantiationException(
+            "Resource cannot be (de-)serialized: " + resClass.getName()
+          );
+      }
+
+      // get the datastore instance id and retrieve the resource
+      Object instanceId = parameterValues.get(DataStore.LR_ID_FEATURE_NAME);
+      if(instanceId == null)
+        throw new
+          ResourceInstantiationException("No instance id for " + resClass);
+      try {
+        res = dataStore.getLr(resClass.getName(), instanceId);
+      } catch(PersistenceException e) {
+        throw new ResourceInstantiationException("Bad read from DB: " + e);
+      }
+      resData.addInstantiation(res);
+      if(features != null) res.getFeatures().putAll(features);
+
+      // fire the event
+      creoleProxy.fireResourceLoaded(
+        new CreoleEvent(res, CreoleEvent.RESOURCE_LOADED)
+      );
+
+      return res;
+    }
+
+    //The resource is not a persistent LR; use a constructor
+
+    // create an object using the resource's default constructor
     try {
       if(DEBUG) Out.prln("Creating resource " + resClass.getName());
       res = (Resource) resClass.newInstance();
@@ -174,44 +215,12 @@ public abstract class Factory {
       resourceName = resData.getName() + "_" + Gate.genSym();
     }
     res.setName(resourceName);
-    // type-specific stuff for LRs
+
     if(LanguageResource.class.isAssignableFrom(resClass)) {
-      if(DEBUG) Out.prln(resClass.getName() + " is an LR");
-
-      DataStore dataStore = (DataStore)
-                          parameterValues.get(DataStore.DATASTORE_FEATURE_NAME);
-      if(dataStore != null) {
-        if(dataStore instanceof SerialDataStore) {
-          // SDS doesn't need a wrapper class; just check for serialisability
-          if(! (resClass instanceof Serializable))
-            throw new ResourceInstantiationException(
-              "Resource cannot be (de-)serialized: " + resClass.getName()
-            );
-        }
-
-        // get the datastore instance id and retrieve the resource
-        Object instanceId = parameterValues.get(DataStore.LR_ID_FEATURE_NAME);
-        if(instanceId == null)
-          throw new
-            ResourceInstantiationException("No instance id for " + resClass);
-        try {
-          res = dataStore.getLr(resClass.getName(), instanceId);
-        } catch(PersistenceException e) {
-          throw new ResourceInstantiationException("Bad read from DB: " + e);
-        }
-        resData.addInstantiation(res);
-        if(features != null) res.getFeatures().putAll(features);
-
-        // fire the event
-        creoleProxy.fireResourceLoaded(
-          new CreoleEvent(res, CreoleEvent.RESOURCE_LOADED)
-        );
-
-        return res;
-      } // datastore was present
-
-    // type-specific stuff for PRs
+      // type-specific stuff for LRs
+      if(DEBUG) Out.prln(resClass.getName() + " is a LR");
     } else if(ProcessingResource.class.isAssignableFrom(resClass)) {
+      // type-specific stuff for PRs
       if(DEBUG) Out.prln(resClass.getName() + " is a PR");
       //set the runtime parameters to their defaults
       try{
