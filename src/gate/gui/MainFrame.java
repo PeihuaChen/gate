@@ -45,6 +45,8 @@ import gate.event.*;
 import gate.persist.*;
 import gate.util.*;
 import gate.swing.*;
+import gate.security.*;
+import junit.framework.*;
 //import guk.im.*;
 
 
@@ -1665,7 +1667,12 @@ javax.swing.plaf.basic.BasicFileChooserUI uiii;
                                       "Gate", JOptionPane.ERROR_MESSAGE);
               }
             }
-          } else {
+          } else if(className.equals("gate.persist.OracleDataStore")) {
+              JOptionPane.showMessageDialog(
+                    MainFrame.this, "Oracle datastores can only be created " +
+                                    "by your Oracle administrator!",
+                                    "Gate", JOptionPane.ERROR_MESSAGE);
+          }  else {
 
             throw new UnsupportedOperationException("Unimplemented option!\n"+
                                                     "Use a serial datastore");
@@ -1798,11 +1805,58 @@ javax.swing.plaf.basic.BasicFileChooserUI uiii;
                                       "Gate", JOptionPane.ERROR_MESSAGE);
               }
             }
+          } else if(className.equals("gate.persist.OracleDataStore")) {
+              String storageURL = (String) reg.getConfigData().get("url");
+              if (storageURL == null || storageURL.equals(""))
+                throw new
+                  GateRuntimeException("Oracle URL not configured in gate.xml");
+              DataStore ds = null;
+              AccessController ac = null;
+              try {
+                //1. open the oracle datastore
+                ds = Factory.openDataStore(className, storageURL);
+
+                //2. login the user
+                ac = new AccessControllerImpl();
+                Assert.assertNotNull(ac);
+                ac.open(storageURL);
+
+                User usr = ac.findUser("kalina");
+                Assert.assertNotNull(usr);
+
+                Group grp = (Group)usr.getGroups().get(0);
+                Assert.assertNotNull(grp);
+
+                Session usrSession = ac.login("kalina","sesame",grp.getID());
+                Assert.assertNotNull(usrSession);
+                Assert.assertTrue(ac.isValidSession(usrSession));
+
+              } catch(PersistenceException pe) {
+                JOptionPane.showMessageDialog(
+                    MainFrame.this, "Datastore open error!\n " +
+                                      pe.toString(),
+                                      "Gate", JOptionPane.ERROR_MESSAGE);
+              } catch(gate.security.SecurityException se) {
+                JOptionPane.showMessageDialog(
+                    MainFrame.this, "User identification error!\n " +
+                                      se.toString(),
+                                      "Gate", JOptionPane.ERROR_MESSAGE);
+                try {
+                  if (ac != null)
+                    ac.close();
+                  if (ds != null)
+                    ds.close();
+                } catch (gate.persist.PersistenceException ex) {
+                  JOptionPane.showMessageDialog(
+                      MainFrame.this, "Persistence error!\n " +
+                                        se.toString(),
+                                        "Gate", JOptionPane.ERROR_MESSAGE);
+                }
+              }
           }else{
             JOptionPane.showMessageDialog(
                             MainFrame.this,
-                            "This functionality due in the beta 1 release!\n"+
-                            "For now please use a serial datastore",
+                            "Support for this type of datastores is not implemenented!\n",
                             "Gate", JOptionPane.ERROR_MESSAGE);
           }
         }

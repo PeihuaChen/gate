@@ -19,4 +19,5 @@
   <LR xmlFileUrl="gate:/creole/schema/PersonSchema.xml">gate.creole.AnnotationSchema</LR>
   <LR xmlFileUrl="gate:/creole/schema/SyntaxTreeNodeSchema.xml">gate.creole.AnnotationSchema</LR>
 </SYSTEM>
+<DBCONFIG url="jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB"/>
 </GATE>
