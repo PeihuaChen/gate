@@ -303,9 +303,17 @@ public class DatabaseDocumentImpl extends DocumentImpl
     */
   public AnnotationSet getAnnotations(String name) {
 
-    //read from DB
+    //1. read from DB
     _getAnnotations(name);
 
+    //2. is there such set in the DB?
+    if (null != name && this.namedAnnotSets.keySet().contains(name)) {
+      //add the set name to the list with the recently created sets
+      //the set itself will be created by the super method
+      this.addedAnotationSets.add(name);
+    }
+
+    //3. delegate
     return super.getAnnotations(name);
   }
 
@@ -943,7 +951,6 @@ public class DatabaseDocumentImpl extends DocumentImpl
     Assert.assertNotNull(evt);
     Assert.assertNotNull(evt.getResourceID());
 
-//System.out.println("synced ID=["+evt.getResourceID()+"], my ID=["+this.getLRPersistenceId()+"]");
     //is the event for us?
     if (evt.getResourceID().equals(this.getLRPersistenceId())) {
       //wow, the event is for me
@@ -952,8 +959,12 @@ public class DatabaseDocumentImpl extends DocumentImpl
         this.documentChanged =
           this.featuresChanged =
             this.nameChanged = false;
-//System.out.println("dirty flags cleared...");
+
+      this.removedAnotationSets.clear();
+      this.addedAnotationSets.clear();
     }
+
+
   }
 
   public Collection getLoadedAnnotationSets() {
@@ -968,6 +979,18 @@ public class DatabaseDocumentImpl extends DocumentImpl
     return result;
   }
 
+
+  public Collection getRemovedAnnotationSets() {
+
+    //return a clone
+    return new Vector(this.removedAnotationSets);
+  }
+
+  public Collection getAddedAnnotationSets() {
+
+    //return a clone
+    return new Vector(this.addedAnotationSets);
+  }
 
   public void removeAnnotationSet(String name) {
 
