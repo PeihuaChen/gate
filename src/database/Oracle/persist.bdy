@@ -642,7 +642,40 @@ create or replace package body persist is
   end;
 
 
+  /*******************************************************************************************/
+  procedure delete_annotation(p_doc_id     IN number,
+                              p_ann_local_id     IN number)
+  is
+     l_ann_global_id number;
+  begin       
+     
+     -- 0. get the global ID
+     select ann_global_id
+     into   l_ann_global_id
+     from   t_annotation
+     where  ann_doc_id = p_doc_id
+            and ann_local_id = p_ann_local_id;
+     
+     -- 1. delete fetures
+     delete 
+     from   t_feature
+     where  ft_entity_id = l_ann_global_id
+            and ft_entity_type = persist.FEATURE_OWNER_ANNOTATION;
 
+     -- 2. delete aset-to-annotation mappings
+     delete
+     from  t_as_annotation
+     where asann_ann_id = l_ann_global_id;
+     
+     -- 3. delete annotations
+     delete 
+     from   t_annotation
+     where  ann_global_id = l_ann_global_id;
+     
+     exception
+        when NO_DATA_FOUND then
+           raise error.x_invalid_annotation;
+  end;
 
   
 /*begin
