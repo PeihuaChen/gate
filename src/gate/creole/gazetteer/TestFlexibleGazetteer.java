@@ -35,7 +35,7 @@ public class TestFlexibleGazetteer extends TestCase {
   public void setUp() throws Exception {
     //make sure the right plugin is loaded
     File pluginsHome = new File(System.getProperty(
-            GateConstants.GATE_HOME_SYSPROP_KEY), 
+            GateConstants.GATE_HOME_PROPERTY_NAME), 
             "plugins");
     try{
       Gate.getCreoleRegister().registerDirectories(

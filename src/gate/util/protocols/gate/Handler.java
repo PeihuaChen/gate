@@ -33,7 +33,7 @@ public class Handler extends URLStreamHandler {
       //try to fix the problem if caused by the externalisation of GATE 
       //resources
       File pluginHome = new File(
-              System.getProperty(GateConstants.GATE_HOME_SYSPROP_KEY), 
+              System.getProperty(GateConstants.GATE_HOME_PROPERTY_NAME), 
               "plugins");
       Iterator pathIter = conversionMap.keySet().iterator();
       while(pathIter.hasNext()){
