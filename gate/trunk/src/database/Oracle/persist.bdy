@@ -118,6 +118,7 @@ create or replace package body persist is
   is
      l_encoding_id number;
      l_encoding varchar2(16);
+     cnt number;
   begin
   
      -- -1. if encoding is null, then set it to UTF8
@@ -128,18 +129,28 @@ create or replace package body persist is
   
      --0. get encoding ID if any, otherwise create a new
      -- entry in T_DOC_ENCODING
-     select enc_id
-     into   l_encoding_id
+     select count(enc_id)
+     into cnt
      from   t_doc_encoding
      where  enc_name = l_encoding;
+
+       select count(enc_id),enc_id
+       into   cnt,l_encoding_id
+       from   t_doc_encoding
+       where  enc_name = l_encoding;         
      
      if (l_encoding_id is null) then
+       --oops new encoding
+       --add it 
        insert into t_doc_encoding(enc_id,
                                   enc_name)
        values (seq_doc_encoding.nextval,
                l_encoding)
        returning enc_id into l_encoding_id;
      end if;
+     
+     
+     
   
      --1. create a document_content entry
      insert into t_doc_content(dc_id,
