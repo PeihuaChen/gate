@@ -18,6 +18,7 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.border.Border;
 import javax.swing.event.*;
 import javax.swing.event.MouseInputListener;
 import javax.swing.event.PopupMenuListener;
@@ -27,6 +28,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.text.*;
 import javax.swing.text.BadLocationException;
 
+import gate.*;
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.event.AnnotationSetEvent;
@@ -37,6 +39,7 @@ import gate.gui.MainFrame;
 import gate.swing.ColorGenerator;
 import gate.swing.XJTable;
 import gate.util.GateRuntimeException;
+import gate.util.InvalidOffsetException;
 
 /**
  * @author valyt
@@ -60,7 +63,7 @@ public class AnnotationSetsView extends AbstractDocumentView
    * @see gate.gui.docview.DocumentView#getGUI()
    */
   public Component getGUI() {
-    return scroller;
+    return mainPanel;
   }
   /* (non-Javadoc)
    * @see gate.gui.docview.DocumentView#getType()
@@ -91,7 +94,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     tableRows.addAll(setHandlers);
     mainTable = new XJTable(tableModel = new SetsTableModel());
     ((XJTable)mainTable).setSortable(false);
-    mainTable.setRowMargin(2);
+    mainTable.setRowMargin(0);
     mainTable.getColumnModel().setColumnMargin(0);
     SetsTableCellRenderer cellRenderer = new SetsTableCellRenderer();
     mainTable.getColumnModel().getColumn(NAME_COL).setCellRenderer(cellRenderer);
@@ -111,6 +114,27 @@ public class AnnotationSetsView extends AbstractDocumentView
     scroller.getViewport().setBackground(mainTable.getBackground());
     
     annotationEditor = new AnnotationEditor(textView, this);
+    
+    mainPanel = new JPanel();
+    mainPanel.setLayout(new GridBagLayout());
+    GridBagConstraints constraints = new GridBagConstraints();
+    
+    constraints.gridy = 0;
+    constraints.gridx = GridBagConstraints.RELATIVE;
+    constraints.gridwidth = 2;
+    constraints.weighty = 1;
+    constraints.weightx = 1;
+    constraints.fill = GridBagConstraints.BOTH;
+    mainPanel.add(scroller, constraints);
+    
+    constraints.gridy = 1;
+    constraints.gridwidth = 1;
+    constraints.weighty = 0;
+    newSetNameTextField = new JTextField();
+    mainPanel.add(newSetNameTextField, constraints);
+    constraints.weightx = 0;
+    newSetAction = new NewAnnotationSetAction();
+    mainPanel.add(new JButton(newSetAction), constraints);
     initListeners();
   }
   
@@ -163,18 +187,13 @@ public class AnnotationSetsView extends AbstractDocumentView
       private boolean wasShowing = false; 
     };
     
-    mainTable.getSelectionModel().addListSelectionListener(
-      new ListSelectionListener(){
-        public void valueChanged(ListSelectionEvent e){
-          int selectedRow = mainTable.getSelectedRow();
-          if(selectedRow >= 0){
-	          while(!(tableRows.get(selectedRow) instanceof SetHandler)) 
-	            selectedRow --;
-	          mainTable.getSelectionModel().setSelectionInterval(selectedRow, 
-	                  selectedRow);
-          }
-        }
-    });
+    mainTable.getInputMap().put(
+            KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "deleteAll");
+    mainTable.getActionMap().put("deleteAll", 
+            new DeleteSelectedAnnotationGroupAction());
+    newSetNameTextField.getInputMap().put(
+            KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "newSet");
+    newSetNameTextField.getActionMap().put("newSet", newSetAction);
   }
     
 	
@@ -221,6 +240,12 @@ public class AnnotationSetsView extends AbstractDocumentView
 //    Iterator shIter = setHandlers.iterator();
     SetHandler sHandler = getSetHandler(setName);
     if(sHandler != null){
+      //remove highlights if any
+      Iterator typeIter = sHandler.typeHandlers.iterator();
+      while(typeIter.hasNext()){
+        TypeHandler tHandler = (TypeHandler)typeIter.next();
+        tHandler.setSelected(false);
+      }
       setHandlers.remove(sHandler);
       //remove the set from the table
       int row = tableRows.indexOf(sHandler);
@@ -233,12 +258,6 @@ public class AnnotationSetsView extends AbstractDocumentView
           removed++;
         }
       tableModel.fireTableRowsDeleted(row, row + removed -1);
-      //remove highlights if any
-      Iterator typeIter = sHandler.typeHandlers.iterator();
-      while(typeIter.hasNext()){
-        TypeHandler tHandler = (TypeHandler)typeIter.next();
-        tHandler.setSelected(false);
-      }
       sHandler.cleanup();
     }
   }//public void annotationSetRemoved(DocumentEvent e) 
@@ -298,6 +317,15 @@ public class AnnotationSetsView extends AbstractDocumentView
         tableModel.fireTableRowsUpdated(row, row);
       }
     });
+  }
+  
+  /**
+   * Sets the last annotation type created (which will be used as a default
+   * for creating new annotations).
+   * @param annType the type of annotation.
+   */
+  void setLastAnnotationType(String annType){
+    this.lastAnnotationType = annType;
   }
   
   protected class SetsTableModel extends AbstractTableModel{
@@ -427,7 +455,7 @@ public class AnnotationSetsView extends AbstractDocumentView
                 													Object oldValue,
                 													Object newValue){}
       };
-      typeChk.setOpaque(false);
+      typeChk.setOpaque(true);
 //      typeChk.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
 
       setChk = new JCheckBox(){
@@ -444,7 +472,12 @@ public class AnnotationSetsView extends AbstractDocumentView
       setChk.setMaximumSize(setChk.getMinimumSize());
       setChk.setOpaque(true);
       
+      normalBorder = BorderFactory.createLineBorder(
+              mainTable.getBackground(), 2);
+      selectedBorder = BorderFactory.createLineBorder(
+              mainTable.getSelectionBackground(), 2);
     }
+    
     public Component getTableCellRendererComponent(JTable table,
 																		               Object value,
 																			             boolean isSelected,
@@ -476,9 +509,12 @@ public class AnnotationSetsView extends AbstractDocumentView
           case NAME_COL:
             typeLabel.setBackground(tHandler.colour);
             typeLabel.setText(tHandler.name);
+            typeLabel.setBorder(isSelected ? selectedBorder : normalBorder);
             return typeLabel;
           case SELECTED_COL:
-//            typeChk.setBackground(tHandler.colour);
+            typeChk.setBackground(isSelected ?
+       		         table.getSelectionBackground() :
+        		       table.getBackground());
             typeChk.setSelected(tHandler.isSelected());
             return typeChk;
         }
@@ -492,6 +528,8 @@ public class AnnotationSetsView extends AbstractDocumentView
     protected JLabel setLabel;
     protected JCheckBox setChk;
     protected JCheckBox typeChk;
+    protected Border selectedBorder;
+    protected Border normalBorder;
   }
   
   protected class SetsTableCellEditor extends AbstractCellEditor
@@ -702,7 +740,8 @@ public class AnnotationSetsView extends AbstractDocumentView
         Iterator annIter = setHandler.set.get(name).iterator();
         while(annIter.hasNext()){
           Annotation ann = (Annotation)annIter.next();
-          hghltTagsForAnn.put(ann, textView.addHighlight(ann, colour));
+          hghltTagsForAnn.put(ann,
+                  textView.addHighlight(ann, setHandler.set, colour));
         }
       }else{
       	//hide highlights
@@ -728,7 +767,8 @@ public class AnnotationSetsView extends AbstractDocumentView
      */
     public void annotationAdded(Annotation ann){
       //if selected, add new highlight
-      if(selected) hghltTagsForAnn.put(ann, textView.addHighlight(ann, colour));
+      if(selected) hghltTagsForAnn.put(ann, 
+              textView.addHighlight(ann, setHandler.set, colour));
     }
     
     /**
@@ -842,11 +882,53 @@ public class AnnotationSetsView extends AbstractDocumentView
     private static final int TIMER_DELAY = 500;
   }
   
-  protected class NewAnnotationAction extends AbstractAction{
+  protected class NewAnnotationSetAction extends AbstractAction{
+    public NewAnnotationSetAction(){
+      super("New");
+      putValue(SHORT_DESCRIPTION, "Creates a new annotation set");
+    }
+    
     public void actionPerformed(ActionEvent evt){
-      JOptionPane.showMessageDialog(textPane, "New Annotation?");
+      String name = newSetNameTextField.getText();
+      newSetNameTextField.setText("");
+      if(name != null && name.length() > 0){
+        document.getAnnotations(name);
+      }
     }
   }
+
+  protected class NewAnnotationAction extends AbstractAction{
+    public void actionPerformed(ActionEvent evt){
+      int start = textPane.getSelectionStart();
+      int end = textPane.getSelectionEnd();
+      if(start != end){
+        textPane.setSelectionStart(start);
+        textPane.setSelectionEnd(start);
+        //create a new annotation
+        //find the selected set
+        int row = mainTable.getSelectedRow();
+        //select the default annotation set if none selected
+        if(row < 0) row = 0;
+        //find the set handler
+        while(!(tableRows.get(row) instanceof SetHandler)) row --;
+        AnnotationSet set = ((SetHandler)tableRows.get(row)).set;
+        try{
+	        Integer annId =  set.add(new Long(start), new Long(end), 
+	                lastAnnotationType, Factory.newFeatureMap());
+	        Annotation ann = set.get(annId);
+	        //make sure new annotaion is visible
+	        setTypeSelected(set.getName(), ann.getType(), true);
+	        //show the editor
+	        annotationEditor.setAnnotation(ann, set);
+	        annotationEditor.show(true);
+        }catch(InvalidOffsetException ioe){
+          //this should never happen
+          throw new GateRuntimeException(ioe);
+        }
+      }
+    }
+  }
+  
   /**
    * Used to select an annotation for editing.
    *
@@ -983,16 +1065,43 @@ public class AnnotationSetsView extends AbstractDocumentView
     AnnotationHandler aHandler;
   }
   
-  
+  protected class DeleteSelectedAnnotationGroupAction extends AbstractAction{
+    public DeleteSelectedAnnotationGroupAction(){
+    }
+    public void actionPerformed(ActionEvent evt){
+      int row = mainTable.getSelectedRow();
+      if(row >= 0){
+        Object handler = tableRows.get(row);
+        if(handler instanceof TypeHandler){
+          TypeHandler tHandler = (TypeHandler)handler;
+          AnnotationSet set = tHandler.setHandler.set;
+          List toDelete = new ArrayList(set.get(tHandler.name));
+          set.removeAll(toDelete);
+        }else if(handler instanceof SetHandler){
+          SetHandler sHandler = (SetHandler)handler;
+          if(sHandler.set == document.getAnnotations()){
+            //the default annotation set - clear
+            sHandler.set.clear();
+          }else{
+            document.removeAnnotationSet(sHandler.set.getName());
+          }
+        }
+      }
+    }
+  }  
   
   List setHandlers;
   List tableRows; 
   JTable mainTable;
   SetsTableModel tableModel;
   JScrollPane scroller;
+  JPanel mainPanel;
+  JTextField newSetNameTextField;
+  
   TextualDocumentView textView;
   JEditorPane textPane;
   AnnotationEditor annotationEditor;
+  NewAnnotationSetAction newSetAction;
   
   /**
    * The listener for mouse and mouse motion events in the text view.
@@ -1003,6 +1112,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   
   protected AncestorListener textAncestorListener; 
   
+  protected String lastAnnotationType = "_New_";
   
   protected ColorGenerator colourGenerator;
   private static final int NAME_COL = 1;

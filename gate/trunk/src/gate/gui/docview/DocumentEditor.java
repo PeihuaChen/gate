@@ -166,6 +166,7 @@ public class DocumentEditor extends AbstractVisualResource
         horizontalViews.add(view);
       	topBar.add(new ViewButton(view, name));
       	bottomBar.add(new ViewButton(view, name));
+      	break;
       default :
         throw new GateRuntimeException(getClass().getName() +  ": Invalid view type");
     }

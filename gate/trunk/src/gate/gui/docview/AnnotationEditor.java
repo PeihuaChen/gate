@@ -21,8 +21,6 @@ import java.util.*;
 
 import javax.swing.*;
 import javax.swing.Timer;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.text.BadLocationException;
 
 import gate.*;
@@ -155,8 +153,8 @@ public class AnnotationEditor{
     btn.setMargin(insets0);
     pane.add(btn, constraints);
     
-    
-    btn = new JButton(new DismissAction());
+    dismissAction = new DismissAction(); 
+    btn = new JButton(dismissAction);
     constraints.insets = new Insets(0, 10, 0, 0);
     constraints.anchor = GridBagConstraints.NORTHEAST;
     constraints.weightx = 1;
@@ -184,7 +182,6 @@ public class AnnotationEditor{
     constraints.gridy = 2;
     constraints.fill = GridBagConstraints.BOTH;
     pane.add(scroller, constraints);
-    
   }
   
 
@@ -197,28 +194,30 @@ public class AnnotationEditor{
     
     bottomWindow.addMouseListener(windowMouseListener);
     featuresEditor.addMouseListener(windowMouseListener);
+    ((JComponent)bottomWindow.getContentPane()).
+    		getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).
+    		put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "dismiss");
+    ((JComponent)bottomWindow.getContentPane()).
+    		getActionMap().put("dismiss", dismissAction);
     
     typeCombo.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent evt){
         String newType = typeCombo.getSelectedItem().toString();
         if(ann != null && ann.getType().equals(newType)) return;
-        if(ann == null){
-          //annotation creation
-        }else{
-          //annotation editing
-          Integer oldId = ann.getId();
-          Annotation oldAnn = ann;
-          set.remove(ann);
-          try{
-	          set.add(oldId, oldAnn.getStartNode().getOffset(), 
-	                  oldAnn.getEndNode().getOffset(), 
-	                  newType, oldAnn.getFeatures());
-	          setAnnotation(set.get(oldId), set);
-	          
-	          setsView.setTypeSelected(set.getName(), newType, true);
-          }catch(InvalidOffsetException ioe){
-            throw new GateRuntimeException(ioe);
-          }
+        //annotation editing
+        Integer oldId = ann.getId();
+        Annotation oldAnn = ann;
+        set.remove(ann);
+        try{
+          set.add(oldId, oldAnn.getStartNode().getOffset(), 
+                  oldAnn.getEndNode().getOffset(), 
+                  newType, oldAnn.getFeatures());
+          setAnnotation(set.get(oldId), set);
+          
+          setsView.setTypeSelected(set.getName(), newType, true);
+          setsView.setLastAnnotationType(newType);
+        }catch(InvalidOffsetException ioe){
+          throw new GateRuntimeException(ioe);
         }
       }
     });
@@ -502,6 +501,7 @@ public class AnnotationEditor{
   protected StartOffsetRightAction sorAction;
   protected EndOffsetLeftAction eolAction;
   protected EndOffsetRightAction eorAction;
+  protected DismissAction dismissAction;
   
   protected DeleteAnnotationAction delAction;
   protected Timer hideTimer;
@@ -522,5 +522,5 @@ public class AnnotationEditor{
   protected AnnotationSetsView setsView;
   protected JEditorPane textPane;
   protected Annotation ann;
-  protected AnnotationSet set; 
+  protected AnnotationSet set;
 }
