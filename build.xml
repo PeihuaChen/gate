@@ -499,8 +499,10 @@
       <zipfileset dir="${basedir}" prefix="${bin.dirname}">
                   <include name="licence.html"/>
                   <include name="build.xml"/>
+                  <include name="gate.xml"/>
                   <include name="bin/**"/>
                   <include name="build/version.txt"/>
+                  <include name="build/persist/**"/>
                   <include name="build/build.txt"/>
                   <include name="lib/**"/>
                   <include name="plugins/**"/>
