@@ -60,6 +60,7 @@ public class Scratch
       "gate.creole.SerialController",
       Factory.newFeatureMap()
     );
+    c1.getFeatures().put("gate.NAME", "Scratch controller");
 
     //get a document
     FeatureMap params = Factory.newFeatureMap();
