@@ -36,6 +36,8 @@ set SITEGATEXML=%GATE_CONFIG%
 
 :doneGateConfig
 
+if not exist %SITEGATEXML% set SITEGATEXML=
+
 echo SITEGATEXML: %SITEGATEXML%
 
 

@@ -21,6 +21,7 @@ then
 else
   [ -f $LOCAT/gate.xml ] && SITEGATEXML="$LOCAL/gate.xml"
 fi
+[ -f "$SITEGATEXML" ] || SITEGATEXML=""
 
 # set GATEJAR and GUK to gate.jar and ext locations
 GATEJAR=${LOCAT}/gate.jar
