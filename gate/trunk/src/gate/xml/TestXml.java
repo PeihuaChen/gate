@@ -25,6 +25,7 @@ public class TestXml extends TestCase
 
   /** Fixture set up */
   public void setUp() {
+    System.out.println("SETUP ....");
   } // setUp
 
 
@@ -36,7 +37,7 @@ public class TestXml extends TestCase
       e.printStackTrace (System.err);
     }
   }
- 
+
 
   /** A test */
   public void testSomething() throws Exception{
@@ -65,7 +66,7 @@ public class TestXml extends TestCase
     gate.Document doc = gate.Transients.newDocument(
               new URL("http://redmires.dcs.shef.ac.uk/gate/tests/xml/xces/xces.xml")
     );
-    
+
 
     /*
     gate.Document doc = gate.Transients.newDocument(

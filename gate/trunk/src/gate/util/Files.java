@@ -73,10 +73,10 @@ public class Files {
     */
   public static File writeTempFile(InputStream contentStream)
   throws IOException {
-    // create a temporary file name
     File resourceFile  = null;
     FileOutputStream resourceFileOutputStream = null;
-
+    
+    // create a temporary file name
     resourceFile = File.createTempFile ("gateResource", ".tmp");
     resourceFileOutputStream = new FileOutputStream(resourceFile);
     resourceFile.deleteOnExit ();
