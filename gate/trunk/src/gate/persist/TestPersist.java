@@ -74,14 +74,14 @@ public class TestPersist extends TestCase
 
     // check that we can't adopt a resource that's stored somewhere else
     doc.setDataStore(new SerialDataStore(new File("z:\\").toURL().toString()));
-    try { sds.adopt(doc); } catch(PersistenceException e) { cannotSync=true; }
+    try { sds.adopt(doc,null); } catch(PersistenceException e) { cannotSync=true; }
     if(! cannotSync)
       assert("doc adopted but in other datastore already", false);
     doc.setDataStore(null);
     doc.setName("Alicia Tonbridge, a Document");
 
     // save the document
-    doc = (Document) sds.adopt(doc);
+    doc = (Document) sds.adopt(doc,null);
     sds.sync(doc);
     Object lrPersistenceId = doc.getLRPersistenceId();
 
@@ -141,7 +141,7 @@ public class TestPersist extends TestCase
     );
 
     // save the document
-    doc = (Document) sds.adopt(doc);
+    doc = (Document) sds.adopt(doc,null);
     sds.sync(doc);
 
     // remember the persistence ID for reading back
@@ -193,8 +193,8 @@ public class TestPersist extends TestCase
     );
 
     // save the documents
-    doc = (Document) sds.adopt(doc);
-    doc2 = (Document) sds.adopt(doc2);
+    doc = (Document) sds.adopt(doc,null);
+    doc2 = (Document) sds.adopt(doc2,null);
     sds.sync(doc);
     sds.sync(doc2);
 
@@ -202,7 +202,7 @@ public class TestPersist extends TestCase
     Corpus corp = Factory.newCorpus("Hamish test corpus");
     corp.add(doc);
     corp.add(doc2);
-    sds.adopt(corp);
+    sds.adopt(corp,null);
     sds.sync(corp);
 
     // read the documents back
@@ -267,7 +267,7 @@ public class TestPersist extends TestCase
     );
 
     // save the document
-    doc = (Document) sds.adopt(doc);
+    doc = (Document) sds.adopt(doc,null);
     sds.sync(doc);
 
     // remember the persistence ID for reading back
@@ -310,7 +310,7 @@ public class TestPersist extends TestCase
     );
 
     // save the document
-    doc = (Document) sds.adopt(doc);
+    doc = (Document) sds.adopt(doc,null);
     sds.sync(doc);
 
     // DSR should have one member

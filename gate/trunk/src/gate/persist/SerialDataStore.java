@@ -35,6 +35,9 @@ extends AbstractFeatureBearer implements DataStore {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+  /** The name of the datastore */
+  protected String name;
+
   /**
    * Construction requires a file protocol URL
    * pointing to the storage directory used for
@@ -218,8 +221,10 @@ extends AbstractFeatureBearer implements DataStore {
   } // delete(lr)
 
   /** Adopt a resource for persistence. */
-  public LanguageResource adopt(LanguageResource lr)
-  throws PersistenceException {
+  public LanguageResource adopt(LanguageResource lr,SecurityInfo secInfo)
+  throws PersistenceException,gate.security.SecurityException {
+
+    //ignore security info
 
     // check the LR's current DS
     DataStore currentDS = lr.getDataStore();
@@ -557,7 +562,7 @@ extends AbstractFeatureBearer implements DataStore {
   public boolean canReadLR(Object lrID, Session s)
     throws PersistenceException, gate.security.SecurityException{
 
-    throw new MethodNotImplementedException();
+    return true;
   }
   /**
    * Checks if the user (identified by the sessionID)
@@ -566,7 +571,7 @@ extends AbstractFeatureBearer implements DataStore {
   public boolean canWriteLR(Object lrID, Session s)
     throws PersistenceException, gate.security.SecurityException{
 
-    throw new MethodNotImplementedException();
+    return true;
   }
 
     /** Sets the name of this resource*/
@@ -579,6 +584,23 @@ extends AbstractFeatureBearer implements DataStore {
     return name;
   }
 
-  /** The name of the datastore */
-  protected String name;
+
+
+  /** get security information for LR . */
+  public SecurityInfo getSecurityInfo(LanguageResource lr)
+    throws PersistenceException {
+
+    throw new UnsupportedOperationException("security information is not supported "+
+                                            "for DatabaseDataStore");
+  }
+
+  /** set security information for LR . */
+  public void setSecurityInfo(LanguageResource lr,SecurityInfo si)
+    throws PersistenceException, gate.security.SecurityException {
+
+    throw new UnsupportedOperationException("security information is not supported "+
+                                            "for DatabaseDataStore");
+
+  }
+
 } // class SerialDataStore
