@@ -312,26 +312,38 @@ create or replace package body persist is
   
 
   /*******************************************************************************************/
-  procedure create_annotation_set(p_doc_id           IN number,
+  procedure create_annotation_set(p_lr_id           IN number,
                                   p_as_name          IN varchar2,
                                   p_as_id            OUT number)
   is
-  
+     l_doc_id number;
   begin
   
+     -- 1. get the DOC_ID
+     select doc_id
+     into   l_doc_id
+     from   t_document
+     where  doc_lr_id = p_lr_id;
+  
+     -- 2. create an entry for the set
      insert into t_annot_set(as_id,
                              as_doc_id,
                              as_name)
      values(seq_annot_set.nextval,
-            p_doc_id,
+            l_doc_id,
             p_as_name)
      returning as_id into p_as_id;
+     
+     exception
+     
+        when NO_DATA_FOUND then
+           raise error.x_invalid_lr;
                                  
   end;
   
   
   /*******************************************************************************************/
-  procedure create_annotation(p_doc_id           IN number,
+  procedure create_annotation(p_lr_id           IN number,
                               p_ann_local_id         IN number,  
                               p_as_id            IN number,
                               p_node_start_lid   IN number,                                
@@ -341,11 +353,18 @@ create or replace package body persist is
                               p_ann_type         IN varchar2,
                               p_ann_global_id    OUT number)
   is
+     l_doc_id number;
      l_start_node_gid number;
      l_end_node_gid   number;     
      l_ann_type_id   number;
      cnt             number;
   begin
+
+     -- 0. get the DOC_ID
+     select doc_id
+     into   l_doc_id
+     from   t_document
+     where  doc_lr_id = p_lr_id;
      
      -- 1. store nodes in DB only if they're new
      -- (nodes are shared between annotations so the chances 
@@ -355,7 +374,7 @@ create or replace package body persist is
      select count(node_global_id)
      into   cnt     
      from   t_node
-     where  node_doc_id = p_doc_id
+     where  node_doc_id = l_doc_id
             and node_local_id = p_node_start_lid;
      
      if (0 = cnt) then
@@ -365,7 +384,7 @@ create or replace package body persist is
                            node_local_id,
                            node_offset)
         values (seq_node.nextval,
-                p_doc_id,
+                l_doc_id,
                 p_node_start_lid,
                 p_node_start_offset)
         returning node_global_id into l_start_node_gid;        
@@ -374,7 +393,7 @@ create or replace package body persist is
         select node_global_id
         into   l_start_node_gid
         from   t_node
-        where  node_doc_id = p_doc_id
+        where  node_doc_id = l_doc_id
                and node_local_id = p_node_start_lid;        
      end if;
      
@@ -383,7 +402,7 @@ create or replace package body persist is
      select count(node_global_id)
      into   cnt     
      from   t_node
-     where  node_doc_id = p_doc_id
+     where  node_doc_id = l_doc_id
             and node_local_id = p_node_end_lid;
      
      if (0 = cnt) then
@@ -393,7 +412,7 @@ create or replace package body persist is
                            node_local_id,
                            node_offset)
         values (seq_node.nextval,
-                p_doc_id,
+                l_doc_id,
                 p_node_end_lid,
                 p_node_end_offset)
         returning node_global_id into l_end_node_gid;        
@@ -402,7 +421,7 @@ create or replace package body persist is
         select node_global_id
         into   l_end_node_gid
         from   t_node
-        where  node_doc_id = p_doc_id
+        where  node_doc_id = l_doc_id
                and node_local_id = p_node_end_lid;        
      end if;
      
@@ -444,7 +463,7 @@ create or replace package body persist is
                               ann_startnode_id,
                               ann_endnode_id)
      values (seq_annotation.nextval,
-             p_doc_id,
+             l_doc_id,
              p_ann_local_id,
              l_ann_type_id,
              l_start_node_gid,
@@ -459,6 +478,11 @@ create or replace package body persist is
              p_ann_global_id,
              p_as_id);
      
+
+     exception
+     
+        when NO_DATA_FOUND then
+           raise error.x_invalid_lr;
           
   end;
 
