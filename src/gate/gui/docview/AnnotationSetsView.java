@@ -731,24 +731,57 @@ public class AnnotationSetsView extends AbstractDocumentView
     public void setSelected(boolean selected){
       if(this.selected == selected) return;
       this.selected = selected;
+      final List annots = new ArrayList(setHandler.set.get(name));
       if(selected){
         //make sure set is expanded
         setHandler.setExpanded(true);
       	//show highlights
         hghltTagsForAnn.clear();
-        Iterator annIter = setHandler.set.get(name).iterator();
-        while(annIter.hasNext()){
-          Annotation ann = (Annotation)annIter.next();
-          hghltTagsForAnn.put(ann,
-                  textView.addHighlight(ann, setHandler.set, colour));
+        Iterator annIter = annots.iterator();
+        if(annots.size() > BLOCK_LIMIT){
+          //we're doing a lot of operations so let's get out of the UI thread
+          Runnable runnable = new Runnable(){
+            public void run(){
+              //do all operations in one go
+              List tags = textView.addHighlights(annots, setHandler.set, colour);
+              for(int i = 0; i < annots.size(); i++){
+                hghltTagsForAnn.put(annots.get(i), tags.get(i));
+              }
+            }
+          };
+          Thread thread = new Thread(runnable);
+          thread.setPriority(Thread.MIN_PRIORITY);
+          thread.start();
+        }else{
+          //just a small number of annotations -> show them one by one
+          while(annIter.hasNext()){
+            Annotation ann = (Annotation)annIter.next();
+            hghltTagsForAnn.put(ann,
+                    textView.addHighlight(ann, setHandler.set, colour));
+          }
         }
       }else{
       	//hide highlights
-      	Iterator tagIter = hghltTagsForAnn.values().iterator();
-      	while(tagIter.hasNext()){
-      	  textView.removeHighlight(tagIter.next());
-      	}
-      	hghltTagsForAnn.clear();
+        if(annots.size() > BLOCK_LIMIT){
+          //we're doing a lot of operations so let's get out of the UI thread
+          Runnable runnable = new Runnable(){
+            public void run(){
+              //do all operations in one go
+              textView.removeHighlights(hghltTagsForAnn.values());
+              hghltTagsForAnn.clear();
+            }
+          };
+          Thread thread = new Thread(runnable);
+          thread.setPriority(Thread.MIN_PRIORITY);
+          thread.start();
+        }else{
+          Iterator tagIter = hghltTagsForAnn.values().iterator();
+          
+          while(tagIter.hasNext()){
+            textView.removeHighlight(tagIter.next());
+          }
+          hghltTagsForAnn.clear();
+        }
       }
       //update the table display
       int row = tableRows.indexOf(this);
@@ -1114,5 +1147,12 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected ColorGenerator colourGenerator;
   private static final int NAME_COL = 1;
   private static final int SELECTED_COL = 0;
+  
+  /**
+   * Used to trigger the optimisation for highlights adding when  more 
+   * annotations are shown/hidden in one go.
+   */
+  protected static final int BLOCK_LIMIT = 50;  
+
   
 }

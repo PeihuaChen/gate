@@ -21,11 +21,14 @@ import gate.AnnotationSet;
 import gate.event.AnnotationEvent;
 import gate.event.AnnotationListener;
 import gate.swing.XJTable;
+import gate.util.GateRuntimeException;
 import java.awt.Component;
 import java.util.*;
 import java.util.List;
 import java.util.Map;
+import javax.swing.*;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 
 /**
@@ -50,6 +53,8 @@ public class AnnotationListView extends AbstractDocumentView
     table.setSortable(true);
     table.setSortedColumn(START_COL);
     scroller = new JScrollPane(table);
+    
+    
   }
   
   /* (non-Javadoc)
@@ -80,6 +85,7 @@ public class AnnotationListView extends AbstractDocumentView
     return HORIZONTAL;
   }
   
+  
   public void addAnnotation(Object tag, Annotation ann, AnnotationSet set){
     AnnotationHandler aHandler = new AnnotationHandler(set, ann);
     Object oldValue = annotationHandlerByTag.put(tag, aHandler);
@@ -106,6 +112,63 @@ public class AnnotationListView extends AbstractDocumentView
       if(aHandler != null)aHandler.ann.removeAnnotationListener(this);
       if(tableModel != null) tableModel.fireTableRowsDeleted(row, row);
     }
+  }
+  
+  /**
+   * Adds a batch of annotations in one go. The tags and annotations collections
+   * are accessed through their iterators which are expected to return the
+   * corresponding tag for the right annotation.
+   * This method does not assume it was called from the UI Thread.
+   * @param tags a collection of tags
+   * @param annotations a collection of annotations
+   * @param set the annotation set to which all the annotations belong.
+   */
+  public void addAnnotations(Collection tags, Collection annotations, 
+          AnnotationSet set){
+    if(tags.size() != annotations.size()) throw new GateRuntimeException(
+            "Invalid invocation - different numbers of annotations and tags!");
+    Iterator tagIter = tags.iterator();
+    Iterator annIter = annotations.iterator();
+    while(tagIter.hasNext()){
+      Object tag = tagIter.next();
+      Annotation ann = (Annotation)annIter.next();
+      AnnotationHandler aHandler = new AnnotationHandler(set, ann);
+      Object oldValue = annotationHandlerByTag.put(tag, aHandler);
+      if(oldValue == null){
+        //new value
+        tagList.add(tag);
+        int row = tagList.size() -1;
+      }else{
+        //update old value
+        int row = tagList.indexOf(tag);
+      }
+      //listen for the new annotation's events
+      ann.addAnnotationListener(this);
+    }
+    SwingUtilities.invokeLater(new Runnable(){
+      public void run(){
+        if(tableModel != null) tableModel.fireTableDataChanged();
+      }
+    });
+  }
+  
+  public void removeAnnotations(Collection tags){
+    Iterator tagIter = tags.iterator();
+    while(tagIter.hasNext()){
+      Object tag = tagIter.next();
+      int row = tagList.indexOf(tag);
+      if(row >= 0){
+        tagList.remove(row);
+        AnnotationHandler aHandler = (AnnotationHandler)
+            annotationHandlerByTag.remove(tag);
+        if(aHandler != null)aHandler.ann.removeAnnotationListener(this);
+      }
+    }
+    SwingUtilities.invokeLater(new Runnable(){
+      public void run(){
+        if(tableModel != null) tableModel.fireTableDataChanged();
+      }
+    });
   }
   
   public void annotationUpdated(AnnotationEvent e){
@@ -199,11 +262,14 @@ public class AnnotationListView extends AbstractDocumentView
     AnnotationSet set;
   }
 
-  XJTable table;
-  AnnotationTableModel tableModel;
-  JScrollPane scroller;
-  Map annotationHandlerByTag;
-  List tagList; 
+  protected XJTable table;
+  protected AnnotationTableModel tableModel;
+  protected JScrollPane scroller;
+  protected Map annotationHandlerByTag;
+  protected List tagList;
+  protected JPanel mainPanel;
+  protected JLabel statusLabel;
+  
   private static final int TYPE_COL = 0;
   private static final int SET_COL = 1;
   private static final int START_COL = 2;
