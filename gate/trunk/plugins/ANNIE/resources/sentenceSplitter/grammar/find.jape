@@ -56,7 +56,7 @@ Rule:Fake
  (({Token})+{Token.string == "."})+ {Token}
 ):fake
 -->
-:fake.Fake ={}
+{}
 
 
 Rule: Abbrev1
@@ -65,7 +65,7 @@ Rule: Abbrev1
  {Token.string == "."}
 ):fake
 -->
-:fake.Abbrev1 ={}
+{}
 
 Rule: Abbrev2
 ({Token.orth=="upperInitial", Token.length=="1"} FULLSTOP)+
