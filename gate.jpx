@@ -5,7 +5,7 @@
   <property category="build" name="CopyExtensions.1" value="txt" />
   <property category="build" name="CopyExtensions.2" value="xml" />
   <property category="idl" name="ProcessIDL" value="false" />
-  <property category="runtime" name="ConfigurationCount" value="6" />
+  <property category="runtime" name="ConfigurationCount" value="7" />
   <property category="runtime.0" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.0" name="application.class" value="gate.TestGate" />
   <property category="runtime.0" name="application.vmparameters" value="-Xint -Xmx150m -Djava.ext.dirs=z:/gate/lib/ext" />
@@ -86,6 +86,18 @@
   <property category="runtime.6" name="jsprunner.docbase" value="." />
   <property category="runtime.6" name="jsprunner.jspfile" value="D%|/apps/JBuilder4/bin" />
   <property category="runtime.6" name="jsprunner.launchuri" value="/D%|/apps/JBuilder4/bin" />
+  <property category="runtime.7" name="ConfigurationName" value="Sirma DB, no net connection and no local server (-N)" />
+  <property category="runtime.7" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
+  <property category="runtime.7" name="application.class" value="gate.TestGate" />
+  <property category="runtime.7" name="application.parameters" value="-N -s" />
+  <property category="runtime.7" name="application.vmparameters" value="-Xint -Xmx150m -Djava.compiler=NONE" />
+  <property category="runtime.7" name="appserver.ejbJarsSaved" value="1" />
+  <property category="runtime.7" name="appserver.parameters" value="-jts -jns -jss -jdb" />
+  <property category="runtime.7" name="appserver.servername" value="ejbcontainer" />
+  <property category="runtime.7" name="appserver.vmparameters" value="-Dvbroker.agent.port=14000 -Djava.library.path=/Borland/AppServer/lib;/Borland/AppServer/bin" />
+  <property category="runtime.7" name="jsprunner.docbase" value="." />
+  <property category="runtime.7" name="jsprunner.jspfile" value="D%|/apps/JBuilder4/bin" />
+  <property category="runtime.7" name="jsprunner.launchuri" value="/D%|/apps/JBuilder4/bin" />
   <property category="sys" name="AuthorLabel" value="@author" />
   <property category="sys" name="BackupPath" value="bak" />
   <property category="sys" name="BeansInstantiate" value="false" />
