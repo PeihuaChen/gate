@@ -10,10 +10,13 @@
 
 package gate.util;
 
+import org.w3c.www.mime.*;
+
 import java.io.*;
 // xml DOM import
 import javax.xml.parsers.*;
 import org.w3c.dom.*;
+import org.xml.sax.*;
 
 
 /**
@@ -140,12 +143,78 @@ public class ScratchCristian
   //public int i;
 */
 
+// WORKING with LAX
+
+
+
   public static void main (String[] args){
-    StringBuffer str = new StringBuffer("abc");
-    //str.insert(1,'i');
-    str = str.replace(0,1,"A");
-    System.out.println(str);
+  /*
+    HandlerObject ho = new HandlerObject();
+    TemplateLaxErrorHandler errHandler= new TemplateLaxErrorHandler();
+    Lax lax = new Lax(ho,errHandler);
+    File xmlFile = null;
+     try{
+      // load the xml resource
+      xmlFile = Files.writeTempFile(Files.getResourceAsStream("creole/creole.xml"));
+    } catch (Exception e){
+      e.printStackTrace (System.err);
+    }
+    lax.parseXmlDocument(xmlFile);
+   */
+   MimeType type = null;
+   try{
+    type = new MimeType("text/xml");
+   } catch (Exception e){
+    e.printStackTrace(System.err);
+   }
+   System.out.println(type.getType() + ":" + type.getSubtype());
   }
 } // class ScratchCristian
 
 
+class HandlerObject {
+  public HandlerObject(){
+  }
+
+  public void startresource(AttributeList alAttrs){
+    String className = alAttrs.getValue("class");
+    // do something with this class name;
+    System.out.println("Attribue :" + className);
+  }
+  public void textOfresource(String txt){
+    /// do something with it
+  }
+}
+
+// modify the class name the way you want
+class MyLaxErrorHandler extends LaxErrorHandler {
+/**
+ * TemplateLaxErrorHandler constructor comment.
+ */
+public MyLaxErrorHandler() {super();}
+/**
+ * error method comment.
+ */
+public void error(SAXParseException ex) throws SAXException{
+  // do something with the error
+	File fInput = new File (ex.getSystemId());
+	System.err.println("e: " + fInput.getPath() + ": line " + ex.getLineNumber() + ": " + ex);
+}
+/**
+ * fatalError method comment.
+ */
+public void fatalError(SAXParseException ex) throws SAXException{
+  // do something with the fatalError
+	File fInput = new File(ex.getSystemId());
+	System.err.println("E: " + fInput.getName() + ": line " + ex.getLineNumber() + ": " + ex);
+}
+/**
+ * warning method comment.
+ */
+public void warning(SAXParseException ex) throws SAXException {
+  // do something with the warning.
+	File fInput = new File(ex.getSystemId());
+	System.err.println("w: " + fInput.getName() + ": line " + ex.getLineNumber() + ": " + ex);
+}
+
+}// TemplateLaxErrorHandler
