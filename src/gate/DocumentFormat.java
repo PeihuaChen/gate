@@ -39,6 +39,12 @@ public abstract class DocumentFormat implements LanguageResource, StatusReporter
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+  /** This fields indicates whether the document being processed is in a
+    * Gate XML custom format.
+    * Detection is done in runMagicNumbers().
+    */
+  protected static boolean isGateXmlDocument = false;
+
   /** The MIME type of this format. */
   private MimeType mimeType = null;
 
@@ -326,6 +332,13 @@ public abstract class DocumentFormat implements LanguageResource, StatusReporter
     }
 
     strBuffer = new String(cbuf,0,charReads);
+
+    // Detect whether or not is a GateXmlDocument
+    String magicXml = "<GateDocument";
+    if (strBuffer.indexOf(magicXml) != -1)
+      isGateXmlDocument = true;
+    else
+      isGateXmlDocument = false;
 
     // Run the magic numbers test
     Set magicSet = magic2mimeTypeMap.keySet();
