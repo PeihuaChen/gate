@@ -7,6 +7,7 @@ import gate.util.*;
 import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.Component;
+import java.awt.Color;
 import java.awt.Dimension;
 
 import java.util.*;
@@ -32,22 +33,31 @@ public class ApplicationViewer extends AbstractVisualResource {
 
   protected void initGuiComponents(){
     this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-    tableModel = new PRListTableModel();
-    table = new XJTable(tableModel);
-    table.setDefaultRenderer(ProcessingResource.class, new PRRenderer());
-    table.setDefaultEditor(ProcessingResource.class, new PREditor());
-    table.setIntercellSpacing(new Dimension(10, 10));
-    table.setSortable(false);
-    JScrollPane scroll = new JScrollPane(table);
-    this.add(scroll);
+    JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
+    prsTableModel = new PRListTableModel();
+    prsTable = new XJTable(prsTableModel);
+    prsTable.setDefaultRenderer(ProcessingResource.class, new PRRenderer());
+    prsTable.setDefaultEditor(ProcessingResource.class, new PREditor());
+    prsTable.setIntercellSpacing(new Dimension(10, 10));
+    prsTable.setSortable(false);
+    tabbedPane.add("Processing resources", new JScrollPane(prsTable));
+
+    paramsTableModel = new PRParametersTableModel();
+    paramsTable = new XJTable(paramsTableModel);
+    paramsTable.setIntercellSpacing(new Dimension(10, 10));
+    paramsTable.setSortable(false);
+    tabbedPane.add("Attributes", new JScrollPane(paramsTable));
+    this.add(tabbedPane);
   }
 
   protected void initListeners(){
   }
 
 
-  XJTable table;
-  PRListTableModel tableModel;
+  XJTable prsTable;
+  XJTable paramsTable;
+  PRListTableModel prsTableModel;
+  PRParametersTableModel paramsTableModel;
 
   SerialController controller;
   ProjectData project;
@@ -140,6 +150,7 @@ public class ApplicationViewer extends AbstractVisualResource {
       super(new JComboBox());
       combo = (JComboBox)getComponent();
       prsByName = new TreeMap();
+      setClickCountToStart(2);
     }
 
     public Component getTableCellEditorComponent(JTable table,
@@ -162,11 +173,24 @@ public class ApplicationViewer extends AbstractVisualResource {
       if(prsByName.isEmpty()) return null;
       prsByName.put("< Delete! >", null);
       combo.setModel(new DefaultComboBoxModel(prsByName.keySet().toArray()));
+      if(value != null){
+        //select the current value
+        try{
+          String currentName = (String)((ProcessingResource)value).
+                               getFeatures().get("NAME");
+          if(prsByName.containsKey(currentName)){
+            combo.setSelectedItem(currentName);
+          }
+        }catch(Exception e){}
+      }else{
+        combo.setSelectedItem("< Delete! >");
+      }
       return super.getTableCellEditorComponent(table, value, isSelected,
                                                row, column);
     }
 
     public Object getCellEditorValue(){
+      if(prsByName == null || combo.getSelectedItem() == null) return null;
       ProcessingResource res = (ProcessingResource)prsByName.get(combo.getSelectedItem());
       return res;
     }
@@ -174,4 +198,48 @@ public class ApplicationViewer extends AbstractVisualResource {
     JComboBox combo;
     Map prsByName;
   }//class PREditor extends DefaultCellEditor
+
+  class PRParametersTableModel extends AbstractTableModel{
+    public int getRowCount(){
+      return controller.size();
+    }
+
+    public int getColumnCount(){
+      return 4;
+    }
+
+    public String getColumnName(int columnIndex){
+      switch (columnIndex){
+        case 0: return "Processing resource";
+        case 1: return "Parameter name";
+        case 2: return "Type";
+        case 3: return "Value";
+        default: return "?";
+      }
+    }
+
+    public Class getColumnClass(int columnIndex){
+      switch (columnIndex){
+        case 0: return ProcessingResource.class;
+        case 1: return String.class;
+        case 2: return String.class;
+        case 3: return String.class;
+        default: return Object.class;
+      }
+    }
+
+    public boolean isCellEditable(int rowIndex, int columnIndex){
+      return columnIndex == 3;
+    }
+
+    public Object getValueAt(int rowIndex, int columnIndex){
+      return null;
+    }
+
+    public void setValueAt(Object aValue,
+                       int rowIndex,
+                       int columnIndex){
+    }
+  }//class PRParametersTableModel
+
 }

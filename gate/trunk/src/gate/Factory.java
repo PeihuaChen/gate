@@ -259,7 +259,7 @@ public abstract class Factory
         Class paramType = paramValue.getClass();
         try{
           if(!propertyType.isAssignableFrom(paramType)){
-            if(DEBUG) Out.pr("Converted " + paramValue.getClass());
+            if(DEBUG) Out.pr("Converting " + paramValue.getClass());
             paramValue = propertyType.getConstructor(new Class[]{paramType}).
                          newInstance(new Object[]{paramValue});
             if(DEBUG) Out.prln(" to " + paramValue.getClass());
