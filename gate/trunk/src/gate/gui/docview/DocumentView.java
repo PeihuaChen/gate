@@ -60,5 +60,6 @@ public interface DocumentView extends ActionsPublisher, VisualResource{
    * document editor.
    */
   public static final int HORIZONTAL = 2;
+  
 
 }

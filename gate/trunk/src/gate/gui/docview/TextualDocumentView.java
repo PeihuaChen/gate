@@ -18,6 +18,8 @@ import gate.gui.Handle;
 import gate.util.Out;
 
 import java.awt.Component;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
@@ -25,6 +27,8 @@ import java.util.List;
 
 import javax.swing.*;
 import javax.swing.event.*;
+import javax.swing.text.BadLocationException;
+
 import java.awt.event.*;
 
 
@@ -77,5 +81,19 @@ public class TextualDocumentView extends AbstractResource implements DocumentVie
   public void setTarget(Object target) {
     this.document = (Document)target;
     textView.setText(document.getContent().toString());
+    scroller.getViewport().setViewPosition(new Point(1,1));
+////    textView.setSize(textView.getPreferredSize());
+////    scroller.setSize(scroller.getPreferredSize());
+//    try{
+//      Rectangle rect = textView.modelToView(0);
+//Out.prln(rect);      
+//      textView.scrollRectToVisible(rect);
+//    }catch(BadLocationException ble){
+//      //ignore
+//      ble.printStackTrace();
+//    }
+//    scroller.getViewport().setViewPosition(new Point(0,0));
+//    scroller.getViewport().scrollRectToVisible(new Rectangle(0,0,1,1));
+//      JComponent comp;
   }
 }

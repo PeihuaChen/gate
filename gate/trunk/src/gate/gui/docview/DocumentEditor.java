@@ -22,6 +22,7 @@ import gate.creole.ResourceData;
 import gate.creole.ResourceInstantiationException;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.event.*;
 import java.awt.Component;
 import java.util.ArrayList;
@@ -32,6 +33,8 @@ import java.util.Set;
 import javax.swing.*;
 
 import gate.gui.ActionsPublisher;
+import gate.util.GateRuntimeException;
+import gate.util.OffsetComparator;
 import gate.util.Out;
 import javax.swing.event.*;
 
@@ -69,6 +72,7 @@ public class DocumentEditor extends AbstractVisualResource
       }
       //lazily build the GUI only when needed
       public void componentShown(ComponentEvent e) {
+Out.prln("Docedit shown");        
         initViews();
       }
     });
@@ -103,31 +107,13 @@ public class DocumentEditor extends AbstractVisualResource
   protected void initViews(){
     //start building the UI
     setLayout(new BorderLayout());
-    add(new JLabel("Building UI"), BorderLayout.CENTER);
+    JProgressBar progressBar = new JProgressBar();
+    progressBar.setStringPainted(true);
+    add(progressBar, BorderLayout.CENTER);
 
-    //parse all Creole resources and look for document views
-    Set vrSet = Gate.getCreoleRegister().getVrTypes();
-    Iterator vrIter = vrSet.iterator();
-    views = new ArrayList();
-    while(vrIter.hasNext()){
-      ResourceData rData = (ResourceData)Gate.getCreoleRegister().
-                           get(vrIter.next());
-      try{
-        if(DocumentView.class.isAssignableFrom(rData.getResourceClass())){
-          //create the resource
-          DocumentView aView = (DocumentView)Factory.
-                               createResource(rData.getClassName());
-          aView.setTarget(document);
-          views.add(aView);
-        }
-      }catch(ClassNotFoundException cnfe){
-        cnfe.printStackTrace();
-      }catch(ResourceInstantiationException rie){
-            rie.printStackTrace();
-      }
-
-    }
-
+    progressBar.setString("Building views");
+    progressBar.setValue(10);
+    
     //create the skeleton UI
     topSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, null, null);
     bottomSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topSplit, null);
@@ -150,27 +136,62 @@ public class DocumentEditor extends AbstractVisualResource
     rightBar.setFloatable(false);
     add(rightBar, BorderLayout.EAST);
 
-    //add the views
-    Iterator viewsIter = views.iterator();
-    while(viewsIter.hasNext()){
-      DocumentView aView = (DocumentView)viewsIter.next();
-      switch(aView.getType()){
-        case DocumentView.CENTRAL :
-          setCentralComponent(aView.getGUI());
-          break;
-        default :
-          break;
+    progressBar.setValue(40);
+    //parse all Creole resources and look for document views
+    Set vrSet = Gate.getCreoleRegister().getVrTypes();
+    Iterator vrIter = vrSet.iterator();
+    views = new ArrayList();
+    centralViews = new ArrayList();
+    verticalViews = new ArrayList();
+    horizontalViews = new ArrayList();
+    
+    while(vrIter.hasNext()){
+      ResourceData rData = (ResourceData)Gate.getCreoleRegister().
+                           get(vrIter.next());
+      try{
+        if(DocumentView.class.isAssignableFrom(rData.getResourceClass())){
+          //create the resource
+          DocumentView aView = (DocumentView)Factory.
+                               createResource(rData.getClassName());
+          aView.setTarget(document);
+          views.add(aView);
+          //add the view
+          switch(aView.getType()){
+            case DocumentView.CENTRAL :
+              centralViews.add(aView);
+//              setCentralComponent(aView.getGUI());
+              break;
+            case DocumentView.VERTICAL :
+              verticalViews.add(aView);
+            	break;
+            case DocumentView.HORIZONTAL :
+              horizontalViews.add(aView);
+            default :
+              throw new GateRuntimeException(getClass().getName() +  ": Invalid view type");
+          }
+        }
+      }catch(ClassNotFoundException cnfe){
+        cnfe.printStackTrace();
+      }catch(ResourceInstantiationException rie){
+            rie.printStackTrace();
       }
+
     }
 
     //populate the main VIEW
-    SwingUtilities.invokeLater(new Runnable(){
-      public void run(){
-        add(horizontalSplit, BorderLayout.CENTER);
-//        invalidate();
-      }
-    });
+    remove(progressBar);
+    progressBar = null;
+    add(horizontalSplit, BorderLayout.CENTER);
 
+  }
+  
+  protected static class ViewButton extends JButton{
+    public ViewButton(DocumentView view, int type){
+      super();
+      this.view = view;
+      if(type == DocumentView.HORIZONTAL)
+    }
+    protected DocumentView view;
   }
 
   protected JSplitPane horizontalSplit;
@@ -188,5 +209,11 @@ public class DocumentEditor extends AbstractVisualResource
    * A list of {@link DocumentView} objects representing the components
    */
   protected List views;
+  
+  protected List centralViews;
+  
+  protected List verticalViews;
+  
+  protected List horizontalViews;
 
 }
