@@ -118,7 +118,7 @@ public class CreoleRegisterImpl extends HashMap
   } // getDirectories
   
   /** 
-   * All CREOLE directories are now automatically registered whne they are added
+   * All CREOLE directories are now automatically registered when they are added
    * so this method does nothing now. It is only kept here for backwards 
    * compatibility reasons.
    * @deprecated
