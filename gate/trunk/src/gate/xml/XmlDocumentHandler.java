@@ -148,6 +148,7 @@ public class XmlDocumentHandler extends HandlerBase
   public void characters( char[] text, int start, int length) throws SAXException{
     // some internal objects
     String content = new String(text, start, length);
+    // inform the progress listener about that
     fireProgressChangedEvent(start*100/documentSize);
    /*
     // triming section
@@ -230,7 +231,7 @@ public class XmlDocumentHandler extends HandlerBase
 
   /**
   * this method is called when the SAX parser encounts a comment
-  * It's working only if the CustomDocumentHandler implements a com.sun.parser.LexicalEventListener
+  * It's working only if the XmlDocumentHandler implements a com.sun.parser.LexicalEventListener
   *
   */
   public void comment(String text) throws SAXException{
@@ -249,21 +250,21 @@ public class XmlDocumentHandler extends HandlerBase
 
   /**
   * this method is called when the SAX parser encounts a start of a CDATA section
-  * It's working only if the CustomDocumentHandler implements a com.sun.parser.LexicalEventListener
+  * It's working only if the XmlDocumentHandler implements a com.sun.parser.LexicalEventListener
   */
   public void startCDATA()throws SAXException{
   }
 
   /**
   * this method is called when the SAX parser encounts the end of a CDATA section
-  * It's working only if the CustomDocumentHandler implements a com.sun.parser.LexicalEventListener
+  * It's working only if the XmlDocumentHandler implements a com.sun.parser.LexicalEventListener
   */
   public void endCDATA() throws SAXException{
   }
 
   /**
   * this method is called when the SAX parser encounts a parsed Entity
-  * It's working only if the CustomDocumentHandler implements a com.sun.parser.LexicalEventListener
+  * It's working only if the XmlDocumentHandler implements a com.sun.parser.LexicalEventListener
   */
   public void startParsedEntity(String name) throws SAXException{
   }

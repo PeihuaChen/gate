@@ -11,8 +11,12 @@ package gate;
 import java.util.*;
 import java.net.*;
 import java.io.*;
-import org.w3c.www.mime.*;
+
 import gate.util.*;
+import gate.gui.*;
+
+import org.w3c.www.mime.*;
+
 
 /** The format of Documents. Subclasses of DocumentFormat know about
   * particular MIME types and how to unpack the information in any
@@ -23,7 +27,7 @@ import gate.util.*;
   * getDocumentFormat methods can then be used to get the appropriate
   * format class for a particular document.
   */
-public abstract class DocumentFormat implements Resource
+public abstract class DocumentFormat implements Resource,ProcessProgressReporter
 {
   /** The MIME type of this format. */
   private MimeType mimeType;
@@ -56,6 +60,12 @@ public abstract class DocumentFormat implements Resource
   /** Default construction */
   public DocumentFormat() {}
 
+  // listeners for progress
+  protected List myProgressListeners = new LinkedList();
+
+  // listeners for status report
+  protected List myStatusListeners = new LinkedList();
+  
   static{
     register();
   }
@@ -250,4 +260,27 @@ public abstract class DocumentFormat implements Resource
   }
 
   public void setFeatures(FeatureMap features){}
+
+  //ProcessProgressReporter implementation
+  public void addProcessProgressListener(ProgressListener listener){
+    myProgressListeners.add(listener);
+  }
+
+  public void removeProcessProgressListener(ProgressListener listener){
+    myProgressListeners.remove(listener);
+  }
+
+  protected void fireProgressChangedEvent(int i){
+    Iterator listenersIter = myProgressListeners.iterator();
+    while(listenersIter.hasNext())
+      ((ProgressListener)listenersIter.next()).progressChanged(i);
+  }
+
+  protected void fireProcessFinishedEvent(){
+    Iterator listenersIter = myProgressListeners.iterator();
+    while(listenersIter.hasNext())
+      ((ProgressListener)listenersIter.next()).processFinished();
+  }
+  //ProcessProgressReporter implementation ends here
+
 } // class DocumentFormat

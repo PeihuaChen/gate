@@ -1,5 +1,5 @@
 /**
- *	HtmlCustomDocumentHandler.java
+ *	HtmlDocumentHandler.java
  *
  *	Cristian URSU,  12/June/2000
  *  $Id$
@@ -7,20 +7,22 @@
 
 package gate.html;
 
-import gate.corpora.*;
-import gate.util.*;
-import gate.*;
-
 import javax.swing.text.html.*;
 import javax.swing.text.html.parser.*;
 import javax.swing.text.html.HTMLEditorKit.*;
 import javax.swing.text.*;
 import java.util.*;
 
+import gate.corpora.*;
+import gate.util.*;
+import gate.*;
+import gate.gui.*;
+
+
 /**
-  * Implements the behaviour of the XML reader
+  * Implements the behaviour of the HTML reader (kind of SAX)
   */
-public class HtmlCustomDocumentHandler extends ParserCallback{
+public class HtmlDocumentHandler extends ParserCallback{
 
   // member data
 
@@ -43,17 +45,27 @@ public class HtmlCustomDocumentHandler extends ParserCallback{
   /** an annotation set */
   protected gate.AnnotationSet basicAS;
 
+  // listeners for progress
+  protected List myProgressListeners = new LinkedList();
+
+  // listeners for status report
+  protected List myStatusListeners = new LinkedList();
+
+  // the size of the document
+  private int documentSize = 0;
 
   /**
     * Constructor
     */
-  public HtmlCustomDocumentHandler(gate.Document doc, java.util.Map markupElementsMap){
+  public HtmlDocumentHandler(gate.Document doc, java.util.Map markupElementsMap){
     // init stack, tmpDocContent, doc
     stack = new java.util.Stack();
     tmpDocContent = new String("");
     this.doc = doc ;
     this.markupElementsMap = markupElementsMap;
     basicAS = doc.getAnnotations ();
+    documentSize = doc.getContent().size().intValue();
+    if (documentSize == 0) documentSize = 1;
   }
 
   /**
@@ -164,6 +176,8 @@ public class HtmlCustomDocumentHandler extends ParserCallback{
     MyCustomObject obj = null;
     Long end = new Long(tmpDocContent.length() + content.length());
 
+    // inform the progress listener about that
+    fireProgressChangedEvent(pos*100/documentSize);
     Iterator iterator = stack.iterator ();
     while (iterator.hasNext()){
       obj = (MyCustomObject) iterator.next();
@@ -222,6 +236,29 @@ public class HtmlCustomDocumentHandler extends ParserCallback{
     if (HTML.Tag.IMG.equals(t)) return true;
     return false;
  }
+
+  //ProcessProgressReporter implementation
+  public void addProcessProgressListener(ProgressListener listener){
+    myProgressListeners.add(listener);
+  }
+
+  public void removeProcessProgressListener(ProgressListener listener){
+    myProgressListeners.remove(listener);
+  }
+
+  protected void fireProgressChangedEvent(int i){
+    Iterator listenersIter = myProgressListeners.iterator();
+    while(listenersIter.hasNext())
+      ((ProgressListener)listenersIter.next()).progressChanged(i);
+  }
+
+  protected void fireProcessFinishedEvent(){
+    Iterator listenersIter = myProgressListeners.iterator();
+    while(listenersIter.hasNext())
+      ((ProgressListener)listenersIter.next()).processFinished();
+  }
+  //ProcessProgressReporter implementation ends here
+
 } //CustomDocumentHandler
 
 

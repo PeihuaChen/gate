@@ -11,11 +11,14 @@ package gate.corpora;
 import java.util.*;
 import java.io.*;
 import java.net.*;
-import org.w3c.www.mime.*;
+
 import gate.util.*;
 import gate.*;
 import gate.sgml.*;
+import gate.gui.*;
+import gate.xml.*;
 
+import org.w3c.www.mime.*;
 // xml tools
 import javax.xml.parsers.*;
 import org.xml.sax.*;
@@ -70,21 +73,28 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
 
       // use it
       if (null != doc){
-        // parse and construct the gate annotations
-        //String s = doc.getContent().toString();
-        //StringReader sr = new StringReader(s);
-        //InputSource is = new InputSource (sr);
-        //doc.getSourceURL ().toString ()
-        parser.parse(xmlUri,
-                new gate.xml.CustomDocumentHandler(doc, this.markupElementsMap)
-        );
+        // create a new Xml document handler
+        XmlDocumentHandler xmlDocHandler = new
+                            XmlDocumentHandler(doc, this.markupElementsMap);
+        // register a progress listener with it
+        xmlDocHandler.addProcessProgressListener(new ProgressListener(){
+          public void progressChanged(int i){
+            // this is implemented in DocumentFormat.java and inherited here
+            fireProgressChangedEvent(i);
+          }
+          public void processFinished(){
+            // this is implemented in DocumentFormat.java and inherited here
+            fireProcessFinishedEvent();
+          }
+        });
+        parser.parse(xmlUri, xmlDocHandler);
       }
 
 	  } catch (Exception ex) {
       ex.printStackTrace(System.err);
 		  //System.exit(2);
 	  }
-    
+
   }
 
   private String sgml2Xml(Document doc){

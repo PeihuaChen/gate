@@ -7,12 +7,42 @@
 
 package gate.sgml;
 
-import gate.corpora.*;
-import gate.util.*;
-import gate.*;
 import java.util.*;
 import java.io.*;
 
+
+import gate.corpora.*;
+import gate.util.*;
+import gate.*;
+
+/**
+  Not so fast...
+  This class is not a realy Sgml2Xml convertor.
+  It takes an SGML document and tries to prepare it for an XML parser
+  For a true conversion we need an Java SGML parser...
+  If you know one let me know....
+
+  What does it do:
+  <ul>
+    <li>If it finds something like this : &lt;element attribute = value&gt;
+        it will produce: &lt;element attribute = "value"&gt;
+    <li>If it finds something like this : &lt;element something attribute2=value&gt;
+      it will produce : &lt;element defaultAttribute="something" attribute2="value"&gt;
+    <li>If it finds : &lt;element att1='value1 value2' att2="value2 value3"&gt; it will
+      produce: &lt;element att1="value1 value2" att2="value2 value3"&gt;
+    <li>If it finds : &lt;element1&gt; &lt;elem&gt;text &lt;/element1&gt; will produce:
+        &lt;element1&gt; &lt;elem&gt;text&lt;elem&gt; &lt;/element1&gt;
+    <li>If it find : &lt;element1&gt; &lt;elem&gt;[white spaces]&lt;/element1&gt;, it will produce:
+        &lt;element1&gt; &lt;elem/&gt;[white spaces]&lt;/element1&gt;
+  </ul>
+  What doesn't:
+  <ul>
+    <li>Doesn't expand the entities. So the entities from the SGML document must be
+        resolved by the XML parser
+    <li>Doesn't replace internal entities with their corresponding value
+  </ul>
+
+*/
 
 public class Sgml2Xml{
   Document m_doc = null;
@@ -82,7 +112,7 @@ public class Sgml2Xml{
               // change state
               m_currState = 2;
               if (!stack.isEmpty()){
-                // peek the element fron the top of the stack
+                // peek the element from the top of the stack
                 CustomObject o = (CustomObject) stack.peek();
                 // set some properties for this element
                 if (charPos > 0){
@@ -168,7 +198,7 @@ public class Sgml2Xml{
             // the same as in state 10
             attrEnd = m_cursor -1 ;
             m_modifier.insert(attrEnd,'"');
-            m_modifier.insert(attrStart,"Attr_5=\"");
+            m_modifier.insert(attrStart,"defaultAttr=\"");
             // go to state 4
             m_currState = 4;
             // parse again the entire sequence
@@ -237,7 +267,7 @@ public class Sgml2Xml{
             // this mean that the attribute was a value and we have to create
             // a default attribute
             m_modifier.insert(attrEnd,'"');
-            m_modifier.insert(attrStart,"Attr_10=\"");
+            m_modifier.insert(attrStart,"defaultAttr=\"");
             m_currState = 4;
             m_cursor = attrStart;
           }

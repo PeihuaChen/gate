@@ -64,33 +64,36 @@ public class TestHtml extends TestCase
     gate.Document doc = gate.Transients.newDocument(
              // new URL("http://www.funideas.com/visual_gallery.htm")
             new URL ("http://www.dcs.shef.ac.uk/~hamish/GateIntro.html")
-            //new URL ("http://www.dcs.shef.ac.uk/~cursu/sgml/F71")
+            //new URL ("http://www.dcs.shef.ac.uk/~cursu")
             //new URL ("http://www.webhelp.com/home.html")
             //new URL ("http://big2.hotyellow98.com/sys/signup.cgi")
             //new URL ("http://www.epilot.com/SearchResults.asp?keyword=costume+baie&page=&source=&TokenID=82C7BE897D9643EDB3CB8A28E398A488")
     );
     // get the docFormat that deals with it.
     // the parameter MimeType doesn't affect right now the behaviour
-
+    /*
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
         new MimeType("text","html")
     );
-
-    // set's the map
-    docFormat.setMarkupElementsMap(markupElementsMap);
+    */
+    gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
+      doc.getSourceURL()
+    );
     //*
-    // timing the operation
-    Date startTime = new Date();
-      docFormat.unpackMarkup (doc,"DocumentContent");
-    Date endTime = new Date();
-    long  time1 = endTime.getTime () - startTime.getTime ();
-    File f = Files.writeTempFile(doc.getSourceURL().openStream());
-    long docSize = f.length();
-    f.delete();
-    System.out.println("unpacMarkup() time for " + doc.getSourceURL () + "(" +
-      docSize/1024 + "." + docSize % 1024 + " K)" + "=" + time1 / 1000 + "." +
-      time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024 +
-      "." + (docSize/time1*1000)%1024 + " K/second");
+    if (docFormat != null){
+      // set's the map
+      docFormat.setMarkupElementsMap(markupElementsMap);
+      // timing the operation
+      Date startTime = new Date();
+        docFormat.unpackMarkup (doc,"DocumentContent");
+      Date endTime = new Date();
+      long  time1 = endTime.getTime () - startTime.getTime ();
+      int docSize = doc.getContent().size().intValue();
+      System.out.println("unpacMarkup() time for " + doc.getSourceURL () + "(" +
+        docSize/1024 + "." + docSize % 1024 + " K)" + "=" + time1 / 1000 + "." +
+        time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024 +
+        "." + (docSize/time1*1000)%1024 + " K/second");
+    }
     //*/
 
     // graphic visualisation
