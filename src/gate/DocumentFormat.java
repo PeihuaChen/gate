@@ -382,9 +382,15 @@ extends AbstractLanguageResource implements LanguageResource{
     // Create a string form the buffer and perform some search on it.
     strBuffer = new String(cbuf,0,charReads);
 
+    // If this fails then surrender
+    return getTypeFromContent(strBuffer);
+  }// runMagicNumbers
+
+  private static MimeType getTypeFromContent(String aContent){
+    MimeType detectedMimeType = null;
     // Detect whether or not is a GateXmlDocument
-    if (  strBuffer.indexOf("<GateDocument") != -1  ||
-          strBuffer.indexOf(" GateDocument") != -1)
+    if (  aContent.indexOf("<GateDocument") != -1  ||
+          aContent.indexOf(" GateDocument") != -1)
       isGateXmlDocument = true;
     else
       isGateXmlDocument = false;
@@ -392,16 +398,17 @@ extends AbstractLanguageResource implements LanguageResource{
     // Run the magic numbers test
     Set magicSet = magic2mimeTypeMap.keySet();
     Iterator iterator=magicSet.iterator();
+    String magic;
     while (iterator.hasNext()){
-      String magic = (String) iterator.next();
-      if (strBuffer.indexOf(magic) != -1)
-        return (MimeType) magic2mimeTypeMap.get(magic);
+      magic = (String) iterator.next();
+      if (aContent.indexOf(magic) != -1)
+        detectedMimeType = (MimeType) magic2mimeTypeMap.get(magic);
     }// End while
 
     // If this fails then surrender
-    return null;
-  }// runMagicNumbers
-
+    return detectedMimeType;
+  }// getTypeFromContent
+  
   /**
     * Return the fileSuffix or null if the url doesn't have a file suffix
     * If the url is null then the file suffix will be null also
@@ -438,6 +445,13 @@ extends AbstractLanguageResource implements LanguageResource{
   static public DocumentFormat getDocumentFormat(gate.Document aGateDocument,
                                                             MimeType mimeType){
     FeatureMap      aFeatureMap    = null;
+    if(mimeType == null) {
+      String content = aGateDocument.getContent().toString();
+      // reduce size for better performance
+      if(content.length() > 2048) content = content.substring(0, 2048);
+      mimeType = getTypeFromContent( content );
+    }
+    
     if (mimeType != null){
       // If the Gate Document doesn't have a feature map atached then
       // We will create and set one.
