@@ -114,6 +114,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
     Iterator annIter = annotations.iterator();
     while(annIter.hasNext()){
       Annotation ann = (Annotation)annIter.next();
+      //ignore empty annotations
+      if(ann.getStartNode().getOffset().equals(ann.getEndNode().getOffset()))
+        continue;
       Long offset = ann.getStartNode().getOffset();
       List annsAtThisOffset = null;
       if(keys.add(offset)){
@@ -191,7 +194,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
     //the big while for the actual parsing
     while(startNodeOff != -1){
-
+Out.prln();
+Out.pr("Start: " + startNodeOff);
       //while there are more annotations to parse
       //create initial active FSM instance starting parsing from new startNode
       //currentFSM = FSMInstance.getNewInstance(
@@ -211,6 +215,12 @@ extends Transducer implements JapeConstants, java.io.Serializable
       //far each active FSM Instance, try to advance
       whileloop2:
       while(!activeFSMInstances.isEmpty()){
+        if(isInterrupted()) throw new ExecutionInterruptedException(
+          "The execution of the \"" + getName() +
+          "\" Jape transducer has been abruptly interrupted!");
+
+Out.pr(" <" + acceptingFSMInstances.size() + "/" +
+              activeFSMInstances.size() +">");
         // take the first active FSM instance
         currentFSM = (FSMInstance)activeFSMInstances.removeFirst();
 
@@ -293,6 +303,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
                   binds.put(oneLabel, newSet);
                 }//while(labelsIter.hasNext())
                 activeFSMInstances.addLast(newFSMI);
+Out.pr("^(" + newFSMI.getStartAGPosition().getOffset() +
+                               "->" + newFSMI.getAGPosition().getOffset() + ")");
               }//if match
             }//while(transitionsIter.hasNext())
           }//while(pathsIter.hasNext())
@@ -372,6 +384,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
         //eliminate the possibility for infinite looping
         if(oldStartNodeOff == startNodeOff){
+Out.prln("");
+Out.pr("SKIP " + startNodeOff);
           //we are about to step twice in the same place, ...skip ahead
           lastAGPosition = new Long(startNodeOff + 1);
           OffsetsTailSet = offsets.tailSet(lastAGPosition);
@@ -386,6 +400,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
                         getStartNode();
             startNodeOff =startNode.getOffset().longValue();
           }
+//Out.prln(" ->" + startNodeOff);
         }//if(oldStartNodeOff == startNodeOff)
 
 
