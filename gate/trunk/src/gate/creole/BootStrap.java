@@ -647,18 +647,20 @@ public class BootStrap {
     interfaces.add("gate.Document");
     interfaces.add("gate.ProcessingResource");
     try{
-    try{
-    try{
-    try{
-    try{
 
     bootStrap.createResource("morph","creole.sheffield.ac.lisa","LanguageResource",
       "Documente", interfaces, "z:/test");
-    } catch (GateException ge) {ge.printStackTrace(Err.getPrintWriter());}
-    } catch (REException ree) {ree.printStackTrace(Err.getPrintWriter());}
-    } catch (ClassNotFoundException cnfe) {cnfe.printStackTrace(Err.getPrintWriter());}
-    } catch (IOException ioe) {ioe.printStackTrace(Err.getPrintWriter());}
-    } catch (InterruptedException ie){ie.printStackTrace(Err.getPrintWriter());}
+    } catch (GateException ge) {
+      ge.printStackTrace(Err.getPrintWriter());
+    } catch (REException ree) {
+      ree.printStackTrace(Err.getPrintWriter());
+    } catch (ClassNotFoundException cnfe) {
+      cnfe.printStackTrace(Err.getPrintWriter());
+    } catch (IOException ioe) {
+      ioe.printStackTrace(Err.getPrintWriter());
+    } catch (InterruptedException ie){
+      ie.printStackTrace(Err.getPrintWriter());
+    }
   }// main
 
 } // class BootStrap
