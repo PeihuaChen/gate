@@ -1,5 +1,5 @@
 /*
-	DocumentImpl.java 
+	DocumentImpl.java
 
 	Hamish Cunningham, 11/Feb/2000
 
@@ -17,18 +17,18 @@ import gate.annotation.*;
 import gate.util.*;
 
 /** Represents the commonalities between all sorts of documents.
-  * 
+  *
   * <H2>Editing</H2>
-  * 
+  *
   * <P>
   * The DocumentImpl class implements the Document interface.
   * The DocumentContentImpl class models the textual or audio-visual
   * materials which are the source and content of Documents.
   * The AnnotationSetImpl class supplies annotations on Documents.
-  * 
+  *
   * <P>
   * Abbreviations:
-  * 
+  *
   * <UL>
   * <LI>
   * DC = DocumentContent
@@ -37,23 +37,23 @@ import gate.util.*;
   * <LI>
   * AS = AnnotationSet
   * </UL>
-  * 
+  *
   * <P>
   * We add an edit method to each of these classes; for DC and AS
   * the methods are package private; D has the public method.
-  * 
+  *
   * <PRE>
   *   void edit(Long start, Long end, DocumentContent replacement)
   *   throws InvalidOffsetException;
   * </PRE>
-  * 
+  *
   * <P>
   * D receives edit requests and forwards them to DC and AS.
   * On DC, this method makes a change to the content - e.g. replacing
   * a String range from start to end with replacement. (Deletions
   * are catered for by having replacement = null.) D then calls
   * AS.edit on each of its annotation sets.
-  * 
+  *
   * <P>
   * On AS, edit calls replacement.size() (i.e. DC.size()) to
   * figure out how long the replacement is (0 for null). It then
@@ -72,12 +72,12 @@ import gate.util.*;
   * the nodes that are after the end of the affected area will have the
   * offset changed according to the formula below.
   * </UL>
-  * 
+  *
   * <P>
   * A note re. AS and annotations: annotations no longer have
   * offsets as in the old model, they now have nodes, and nodes
   * have offsets.
-  * 
+  *
   * <P>
   * To implement AS.edit, we have several indices:
   * <PRE>
@@ -88,7 +88,7 @@ import gate.util.*;
   *   RBTreeMap nodesByOffset;
   * </PRE>
   * which maps offset to Nodes.
-  * 
+  *
   * <P>
   * When we get an edit request, we traverse that part of the
   * nodesByOffset tree representing the altered or deleted
@@ -170,7 +170,7 @@ public class DocumentImpl implements Document
   public DocumentContent getContent() { return content; }
 
   /** mutator method*/
-  // added by Cristian URSU on 7/June/2000 
+  // added by Cristian URSU on 7/June/2000
   public void setContent(DocumentContent newContent){content = newContent;}
 
   /** Get the default set of annotations. The set is created if it

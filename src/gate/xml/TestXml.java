@@ -35,7 +35,7 @@ public class TestXml extends TestCase
   public static void main(String args[]){
     TestXml app = new TestXml("TestXml");
     try{
-      app.testSomething ();
+      app.testUnpackMarkup();
     }catch (Exception e){
       e.printStackTrace (System.err);
     }
@@ -43,7 +43,7 @@ public class TestXml extends TestCase
 
 
   /** A test */
-  public void testSomething() throws Exception{
+  public void testUnpackMarkup() throws Exception{
     assert(true);
 
     // create the markupElementsMap map
@@ -103,12 +103,11 @@ public class TestXml extends TestCase
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
       doc.getSourceURL()
     );
+    assert(docFormat instanceof gate.corpora.XmlDocumentFormat);
     //*
-    if (docFormat != null){
-      // set's the map
-      docFormat.setMarkupElementsMap(markupElementsMap);
-
-      // register a progress listener with it
+    // set's the map
+    docFormat.setMarkupElementsMap(markupElementsMap);
+    // register a progress listener with it
       /*
       docFormat.addStatusListener(new StatusListener(){
           public void statusChanged(String text){
@@ -134,21 +133,8 @@ public class TestXml extends TestCase
         time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024 +
         "." + (docSize/time1*1000)%1024 + " K/second");
       */
-    }
-    //*/
-
-    // graphic visualisation
-    /*
-    System.out.println("Timer started...");
-    if (docFormat != null){
-        gate.jape.gui.JapeGUI japeGUI = new gate.jape.gui.JapeGUI();
-        gate.Corpus corpus = gate.Transients.newCorpus("XML Test");
-        corpus.add(doc);
-        japeGUI.setCorpus(corpus);
-    }
-    */
-
-  } // testSomething()
+   //*/
+  } // testUnpackMarkup()
 
   /** Test suite routine for the test runner */
   public static Test suite() {

@@ -19,236 +19,191 @@ import gate.*;
 import gate.gui.*;
 
 
-/**
-  * Implements the behaviour of the HTML reader (kind of SAX)
+  /**
+   Implements the behaviour of the HTML reader
+   Methods of an object of this class are called by the HTML parser when
+   events will appear.
+   The idea is to parse the HTML document and construct Gate annotations objects
+   This class also will replace the content of the Gate document with a new one
+   containing anly text from the HTML document
   */
 public class HtmlDocumentHandler extends ParserCallback{
 
-  // member data
-
-  // the markupElementsMap
-  private java.util.Map markupElementsMap = null;
-
-
-  // the content of the HTML document, without any tag
-  // for internal use
-  private String tmpDocContent = null;
-
-  // a stack used to remember elements
-  private java.util.Stack stack = null;
-
-  private java.io.PrintWriter out = null;
-
-  /** a gate document */
-  protected gate.Document doc = null;
-
-  /** an annotation set */
-  protected gate.AnnotationSet basicAS;
-
-  // listeners for status report
-  protected List myStatusListeners = new LinkedList();
-
-  private int elements = 0;
-  private int elementsRate = 128;
-
   /**
-    * Constructor
-    */
-  public HtmlDocumentHandler(gate.Document doc, java.util.Map markupElementsMap){
-    // init stack, tmpDocContent, doc
+    Constructor initialises all the private memeber data
+  */
+  public HtmlDocumentHandler(gate.Document aDocument, Map aMarkupElementsMap){
+    // init stack
     stack = new java.util.Stack();
+    // this string contains the plain text (the text without markup)
     tmpDocContent = new String("");
-    this.doc = doc ;
-    this.markupElementsMap = markupElementsMap;
-    basicAS = doc.getAnnotations ();
+    // colector is used later to transform all custom objects into annotation objects
+    colector = new LinkedList();
+    // the Gate document
+    doc = aDocument;
+    // this map contains the elements name that we want to create
+    // if it's null all the elements from the XML documents will be transformed
+    // into Gate annotation objects
+    markupElementsMap = aMarkupElementsMap;
   }
 
   /**
-    * this method is called when the HTML parser encounts the beginning of a tag
-    * that means that the tag is paired by an end tag
-    */
+    This method is called when the HTML parser encounts the beginning of a tag
+    that means that the tag is paired by an end tag and it's not an empty one
+
+   */
   public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos){
-    // inform the progress listener about that
-    if ((++elements % elementsRate) == 0)
+    // fire the status listener if the elements processed exceded the rate
+    if (0 == (++elements % ELEMENTS_RATE))
         fireStatusChangedEvent("Processed elements : " + elements);
     // construct a feature map from the attributes list
     FeatureMap fm = new SimpleFeatureMapImpl();
     // take all the attributes an put them into the feature map
-
-    //out.println("START TAG:" + t + " @:" + pos);
-    if (0 != a.getAttributeCount ()){
-       // System.out.println("HAS  attributes = " + a.getAttributeCount ());
-        Enumeration enum = a.getAttributeNames ();
-        while (enum.hasMoreElements ()){
-          Object attribute = enum.nextElement ();
-          //out.print ( attribute + " = " + a.getAttribute (attribute) + ",");
-          fm.put ( attribute.toString(), (a.getAttribute (attribute)).toString());
-        }
-        //out.println();
-    }
+    if (0 != a.getAttributeCount()){
+      Enumeration enum = a.getAttributeNames();
+      while (enum.hasMoreElements()){
+        Object attribute = enum.nextElement();
+        fm.put(attribute.toString(),(a.getAttribute(attribute)).toString());
+      }// while
+    }// if
     // create the start index of the annotation
     Long startIndex = new Long(tmpDocContent.length ());
     // initialy the start index is equal with the End index
-    MyCustomObject obj = new MyCustomObject(t.toString(),fm,startIndex, startIndex);
+    CustomObject obj = new CustomObject(t.toString(),fm,startIndex,startIndex);
     // put it into the stack
     stack.push (obj);
-
-       //if ( t == HTML.Tag.A )
   } //handleStartTag
 
-  /**
-    * this method is called when the HTML parser encounts the end of a tag
-    * that means that the tag is paired by a beginning tag
+   /**
+    This method is called when the HTML parser encounts the end of a tag
+    that means that the tag is paired by a beginning tag
     */
   public void handleEndTag(HTML.Tag t, int pos){
- // System.out.println(t);
     // obj is for internal use
-    MyCustomObject obj = null;
-    // if the stack is not empty we check to see if the object from the top of the
-    // stack is a simple tag.
-    // if is a simple tag, then we create  annotations (one with the simple tag )
-    // and with the pair of the this End tag
-    // every simple tag from the stack is one that contains text.
-    if (!stack.isEmpty ())
-      obj = (MyCustomObject) stack.pop ();
-      try{
-        if (markupElementsMap == null)
-          basicAS.add(obj.getStart(),obj.getEnd(),obj.getElemName(),obj.getFM());
-        else {
-          String annotationType = (String) markupElementsMap.get(obj.getElemName());
-          if (annotationType != null)
-                basicAS.add(obj.getStart(),obj.getEnd(),annotationType,obj.getFM());
-        }
-      } catch (InvalidOffsetException e){
-            e.printStackTrace (System.err);
-      }
-    if (stack.isEmpty ()){
-      //out.println (tmpDocContent);
-      //out.flush ();
+    CustomObject obj = null;
+    // if the stack is not empty then we get the object from the stack
+    if (!stack.isEmpty()){
+      obj = (CustomObject) stack.pop();
+      // we add it to the colector
+      colector.add(obj);
+    }else{
+      // the stack is empty and that means that the document was parsed completly
+      // replace the old content with the new one
       doc.setContent (new DocumentContentImpl(tmpDocContent));
+      // get an annotation set from this document
+      basicAS = doc.getAnnotations();
+      // iterate through colector and construct annotations
+      Iterator anIterator = colector.iterator();
+      while (anIterator.hasNext()){
+        obj = (CustomObject) anIterator.next();
+        // construct an annotation from this obj
+        try{
+          if (markupElementsMap == null){
+            basicAS.add(obj.getStart(),obj.getEnd(),obj.getElemName(),obj.getFM());
+          }else{
+            String annotationType = (String) markupElementsMap.get(obj.getElemName());
+            if (annotationType != null)
+               basicAS.add(obj.getStart(),obj.getEnd(),annotationType,obj.getFM());
+          }
+        }catch (InvalidOffsetException e){
+            e.printStackTrace (System.err);
+        }    
+      }//while
+      // notify the listener about the total amount of elements that has been processed
       fireStatusChangedEvent("Total elements : " + elements);
-    }
+    }//else
   }//handleEndTag
 
   /**
-    * this method is called when the HTML parser encounts only the beginning of a tag
-    */
+    This method is called when the HTML parser encounts an empty tag
+  */
   public void handleSimpleTag(HTML.Tag t, MutableAttributeSet a, int pos){
-    // inform the progress listener about that
-    if ((++elements % elementsRate) == 0)
+    // fire the status listener if the elements processed exceded the rate
+    if ((++elements % ELEMENTS_RATE) == 0)
        fireStatusChangedEvent("Processed elements : " + elements);
+    // if the HTML tag is BR then we add a new line character to the document
+    if (HTML.Tag.BR == t)
+      tmpDocContent += "\n";
     // construct a feature map from the attributes list
     // these are empty elements
     FeatureMap fm = new SimpleFeatureMapImpl();
     // take all the attributes an put them into the feature map
-
-    //out.println("START TAG:" + t + " @:" + pos);
     if (0 != a.getAttributeCount ()){
        // System.out.println("HAS  attributes = " + a.getAttributeCount ());
         Enumeration enum = a.getAttributeNames ();
         while (enum.hasMoreElements ()){
           Object attribute = enum.nextElement ();
-          //out.print ( attribute + " = " + a.getAttribute (attribute) + ",");
           fm.put ( attribute.toString(), (a.getAttribute (attribute)).toString());
-        }
-        //out.println();
-    }
+        }//while
+    }//if
     // create the start index of the annotation
     Long startIndex = new Long(tmpDocContent.length ());
-    try{
-      if (markupElementsMap == null)
-        basicAS.add(startIndex,startIndex,t.toString(),fm);
-      else {
-        String annotationType = (String) markupElementsMap.get(t.toString());
-        if (annotationType != null)
-          basicAS.add(startIndex, startIndex,annotationType, fm);
-      }
-    } catch (InvalidOffsetException e){
-      e.printStackTrace (System.err);
-    }
-    if (HTML.Tag.BR == t)
-      tmpDocContent += "\n";
+    // initialy the start index is equal with the End index
+    CustomObject obj = new CustomObject(t.toString(),fm,startIndex,startIndex);
+    // we add the object directly into the colector
+    // we don't add it to the stack because this is an empty tag
+    colector.add(obj);
   }//handleSimpleTag
 
   /**
-    * this method is called when the HTML parser encounts text (PCDATA)
-    */
+    This method is called when the HTML parser encounts text (PCDATA)
+   */
   public void handleText(char[] text, int pos){
+    // create a string object from this text array
     String content = new String(text);
     int tmpDocContentSize = 0;
     tmpDocContentSize = tmpDocContent.length();
 
+    // here we check to see if the first char of content and last char
+    // of the tmpDocContentare not whitespaces...
+    // If that so then we have to introduce a white space in order not to create
+    // a new word
     if (tmpDocContentSize != 0)
      if (!Character.isWhitespace(content.charAt(0)) &&
       !Character.isWhitespace(tmpDocContent.charAt(tmpDocContentSize - 1)))
           content = " " + content;
-          
-    MyCustomObject obj = null;
+
+    CustomObject obj = null;
     Long end = new Long(tmpDocContentSize + content.length());
 
+    //modify all the elements from the stack with the new calculated end index
     Iterator iterator = stack.iterator ();
     while (iterator.hasNext()){
-      obj = (MyCustomObject) iterator.next();
-      if (null != obj){
-        obj.setEnd (end);
-      }
+      obj = (CustomObject) iterator.next();
+      obj.setEnd(end);
     }
     // update the document content
     tmpDocContent += content;
   }
 
   /**
-    * this method is called when the HTML parser encounts an error
-    * it depends on the programmer if he wants to deal with that error
+    This method is called when the HTML parser encounts an error
+    it depends on the programmer if he wants to deal with that error
     */
   public void handleError(String errorMsg, int pos){
     //System.out.println ("ERROR CALLED : " + errorMsg);
   }
 
   /**
-    * this method is called once, when the HTML parser reaches the end of its input
-    * streamin order to notify the parserCallback that there is nothing more to
-    * parse.
-    */
+    This method is called once, when the HTML parser reaches the end of its input
+    streamin order to notify the parserCallback that there is nothing more to
+    parse.
+  */
   public void flush() throws BadLocationException{
     //System.out.println("Flush called!!!!!!!!!!!");
   }
-  /*
-  public void flush() throws BadLocationException{
-    System.out.println("Flush called.");
-    doc.setContent (new DocumentContentImpl(tmpDocContent));
-    out.println ("DOC content:");
-    out.println ("===========================================================");
-    out.println (tmpDocContent);
-    out.flush ();
-    out.close();
-  }
-  */
   /**
-    * this method is called when the HTML parser encounts a comment
+    This method is called when the HTML parser encounts a comment
     */
   public void handleComment(char[] text, int pos){
-  //  String s = new String(text);
-  //  System.out.println (s);
   }
 
-  /**
-    * here we check if the HTML tag is a empty one
-    * we have to distingusih between P and IMG for example
-    */
-  private boolean isEmpty(HTML.Tag t){
-    //  return false;
-    //System.out.println (t);
-    if (HTML.Tag.A.equals (t)) return true;
-    if (HTML.Tag.BR.equals(t)) return true;
-    if (HTML.Tag.IMG.equals(t)) return true;
-    return false;
- }
-
   //StatusReporter Implementation
+
   public void addStatusListener(StatusListener listener){
     myStatusListeners.add(listener);
   }
+
   public void removeStatusListener(StatusListener listener){
     myStatusListeners.remove(listener);
   }
@@ -258,26 +213,59 @@ public class HtmlDocumentHandler extends ParserCallback{
       ((StatusListener)listenersIter.next()).statusChanged(text);
   }
 
-} //CustomDocumentHandler
+  // HtmlDocumentHandler member data
+
+  // this constant indicates when to fire the status listener
+  // this listener will add an overhead and we don't want a big overhead
+  // this listener will be callled from ELEMENTS_RATE to ELEMENTS_RATE
+  final static  int ELEMENTS_RATE = 128;
+
+  // this map contains the elements name that we want to create
+  // if it's null all the elements from the HTML documents will be transformed
+  // into Gate annotation objects otherwise only the elements it contains will
+  // be transformed
+  private Map markupElementsMap = null;
+
+  // the content of the HTML document, without any tag
+  // for internal use
+  private String tmpDocContent = null;
+
+  // a stack used to remember elements and to keep the order
+  private java.util.Stack stack = null;
+
+  // a gate document
+  private gate.Document doc = null;
+
+  // an annotation set used for creating annotation reffering the doc
+  private gate.AnnotationSet basicAS;
+
+  // listeners for status report
+  protected List myStatusListeners = new LinkedList();
+
+  // this reports the the number of elements that have beed processed so far
+  private int elements = 0;
+
+  // we need a colection to retain all the CustomObjects that will be
+  // transformed into annotation over the gate document...
+  // the transformation will take place inside onDocumentEnd() method
+  private List colector = null;
+
+} //HtmlDocumentHandler
 
 
 /*
- * The objects belonging to this class are used inside the stack
+  The objects belonging to this class are used inside the stack.
+  This class is for internal needs
  */
-class  MyCustomObject{
+class  CustomObject{
 
-  // data fields
-  private String elemName = null;
-  private FeatureMap fm = null;
-  private Long start = null;
-  private Long end  = null;
   // constructor
-  public MyCustomObject(String elemName, FeatureMap fm,
-                         Long start, Long end){
-    this.elemName = elemName;
-    this.fm = fm;
-    this.start = start;
-    this.end = end;
+  public CustomObject(String anElemName, FeatureMap aFm,
+                         Long aStart, Long anEnd){
+    elemName = anElemName;
+    fm = aFm;
+    start = aStart;
+    end = anEnd;
   }
 
   // accesor
@@ -294,18 +282,27 @@ class  MyCustomObject{
     return end;
   }
 
+
   // mutator
-  public void setElemName(String elemName){
-    this.elemName = elemName;
+  public void setElemName(String anElemName){
+    elemName = anElemName;
   }
-  public void setFM(FeatureMap fm){
-    this.fm = fm;
+  public void setFM(FeatureMap aFm){
+    fm = aFm;
   }
-  public void setStart(Long start){
-    this.start = start;
+  public void setStart(Long aStart){
+    start = aStart;
   }
-  public void setEnd(Long end){
-    this.end = end;
+  public void setEnd(Long anEnd){
+    end = anEnd;
   }
 
-}// MyCustomObject
+  // data fields
+  private String elemName = null;
+  private FeatureMap fm = null;
+  private Long start = null;
+  private Long end  = null;
+
+}// CustomObject
+
+
