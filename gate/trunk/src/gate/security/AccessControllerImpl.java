@@ -43,7 +43,7 @@ public class AccessControllerImpl
   private HashMap     sessionTimeouts;
 
   private Connection  jdbcConn;
-  private URL         jdbcURL;
+  private String      jdbcURL;
 
   private HashMap     usersByID;
   private HashMap     usersByName;
@@ -71,9 +71,12 @@ public class AccessControllerImpl
   }
 
   /** --- */
-  public AccessControllerImpl() {
+  public AccessControllerImpl(String jdbcURL) {
+
+    Assert.assertNotNull(jdbcURL);
 
     this.refCnt = 0;
+    this.jdbcURL = jdbcURL;
 
     sessions = new HashMap();
     sessionLastUsed = new HashMap();
@@ -91,17 +94,15 @@ public class AccessControllerImpl
   }
 
   /** --- */
-  public void open(String url)
+  public void open()
     throws PersistenceException{
-
-    Assert.assertNotNull(url);
 
     synchronized(this) {
       if (refCnt++ == 0) {
         //open connection
         try {
           //1. get connection to the database
-          jdbcConn = DBHelper.connect(url);
+          jdbcConn = DBHelper.connect(this.jdbcURL);
 
           Assert.assertNotNull(jdbcConn);
 
