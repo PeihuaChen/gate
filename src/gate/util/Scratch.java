@@ -41,6 +41,7 @@ public class Scratch
   private static final boolean DEBUG = false;
 
   public static void main(String args[]) throws Exception {
+
     Gate.init();
     Document doc = Factory.newDocument("The quick brown fox jumped over the lazy dog");
     AnnotationSet annSet1 = doc.getAnnotations("Set1");
