@@ -461,11 +461,8 @@ extends AbstractLanguageResource implements Document {
     return str.toString();
   }// annotationSetToXml
 
-  /** Returns a map with the named annotation sets
-    */
-  // This was needed by the constructor on DocumentWrapper that
-  // takes a DocumentImpl.
-  public Map getNamedAnnotationSets(){
+  /** Returns a map with the named annotation sets */
+  public Map getNamedAnnotationSets() {
     return namedAnnotSets;
   } // getNamedAnnotationSets
 
