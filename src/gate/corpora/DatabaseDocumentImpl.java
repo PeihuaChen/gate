@@ -19,6 +19,7 @@ package gate.corpora;
 import java.sql.*;
 import java.io.*;
 import java.util.*;
+import java.net.*;
 
 import junit.framework.*;
 
@@ -34,7 +35,6 @@ public class DatabaseDocumentImpl extends DocumentImpl {
   private boolean     isContentRead;
   private Object      contentLock;
   private Connection  jdbcConn;
-  private HashSet     annotationsRead;
 
   private boolean     contentChanged;
   private boolean     featuresChanged;
@@ -58,7 +58,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
     contentLock = new Object();
 
     this.namedAnnotSets = new HashMap();
-    this.defaultAnnots = new DatabaseAnnotationSetImpl(this);
+//    this.defaultAnnots = new DatabaseAnnotationSetImpl(this);
 
     this.isContentRead = false;
     this.jdbcConn = conn;
@@ -69,6 +69,46 @@ public class DatabaseDocumentImpl extends DocumentImpl {
 
     sequencePool = new Integer[this.SEQUENCE_POOL_SIZE];
     poolMarker = this.SEQUENCE_POOL_SIZE;
+  }
+
+  public DatabaseDocumentImpl(Connection _conn,
+                              String _name,
+                              DatabaseDataStore _ds,
+                              Long _persistenceID,
+                              DocumentContent _content,
+                              FeatureMap _features,
+                              Boolean _isMarkupAware,
+                              URL _sourceURL,
+                              Long _urlStartOffset,
+                              Long _urlEndOffset,
+                              AnnotationSet _default,
+                              Map _named) {
+
+    //this.jdbcConn =  _conn;
+    this(_conn);
+
+    this.name = _name;
+    this.dataStore = _ds;
+    this.lrPersistentId = _persistenceID;
+    this.content = _content;
+    this.isContentRead = true;
+    this.features = _features;
+    this.markupAware = _isMarkupAware;
+    this.sourceUrl = _sourceURL;
+    this.sourceUrlStartOffset = _urlStartOffset;
+    this.sourceUrlEndOffset = _urlEndOffset;
+
+    //annotations
+    //1. default
+    setAnnotations(null,_default);
+
+    //2. named
+    Iterator itNamed = _named.values().iterator();
+    while (itNamed.hasNext()){
+      AnnotationSet currSet = (AnnotationSet)itNamed.next();
+      //add them all to the DBAnnotationSet
+      setAnnotations(currSet.getName(),currSet);
+    }
   }
 
   /** The content of the document: a String for text; MPEG for video; etc. */
@@ -697,16 +737,15 @@ public class DatabaseDocumentImpl extends DocumentImpl {
 
   }
 
-  public void setAnnotations(String setName,Collection annotations) {
+  private void setAnnotations(String setName,Collection annotations) {
 
     if (null == setName) {
-      Assert.assert(0 == this.defaultAnnots.size());
-      this.defaultAnnots.addAll(annotations);
+      Assert.assert(null == this.defaultAnnots);
+      this.defaultAnnots = new DatabaseAnnotationSetImpl(annotations);
     }
     else {
       Assert.assert(false == this.namedAnnotSets.containsKey(setName));
-      AnnotationSet annSet = new DatabaseAnnotationSetImpl(this,setName);
-      annSet.addAll(annotations);
+      AnnotationSet annSet = new DatabaseAnnotationSetImpl(this,setName,annotations);
       this.namedAnnotSets.put(setName,annSet);
     }
   }
