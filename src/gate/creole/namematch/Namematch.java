@@ -44,6 +44,8 @@ public class Namematch extends AbstractProcessingResource
 
   protected boolean int_cdg_list;
 
+  protected Vector matchesDocument = null;
+
   ExecutionException executionException;
 
   // name lookup tables (used for namematch)
@@ -66,8 +68,6 @@ public class Namematch extends AbstractProcessingResource
     *  exception.
     */
   public void run() {
-
-//    buildTables(document, int_cdg_list);
 
     //check the input
     if(document == null) {
@@ -278,10 +278,67 @@ public class Namematch extends AbstractProcessingResource
       attr.remove("matches");
       attr.put("matches", matchesVector);
     } // for Enumeration
-
     AnnotationSet nameAnnots1 =
-    document.getAnnotations().get(annotType, Factory.newFeatureMap());
+      document.getAnnotations().get(annotType, Factory.newFeatureMap());
 
+    // get the annotation from the document
+    Map namedAnnotationSets = document.getNamedAnnotationSets();
+    Iterator iter = namedAnnotationSets.keySet().iterator();
+
+    while (iter.hasNext()) {
+      AnnotationSet namedAnnots =
+        (AnnotationSet)namedAnnotationSets.get(iter.next());
+
+      FeatureMap fm1;
+      Annotation annot;
+      Iterator iterator;
+
+      // a vector with the matches from the current document
+      matchesDocument = new Vector();
+
+      Vector booleanMatches = new Vector(namedAnnots.size());
+      for (int j=0;j<namedAnnots.size();j++) booleanMatches.add(j,"false");
+      Out.prln(booleanMatches.size());
+
+      // go through all the annotations and put all the matches in a vector
+      for (int i = 0; i< namedAnnots.size();i++) {
+        //the vector with the matches of the current annotation
+        Vector matchesAnnotation = new Vector();
+
+        annot = (Annotation)namedAnnots.get(new Integer(i));
+        Integer idAnnot = annot.getId();
+
+        fm1 = annot.getFeatures();
+        iterator = fm1.keySet().iterator();
+        while (iterator.hasNext()) {
+          String type = (String) iterator.next();
+          if (type == "matches") {
+            // add the id of the annotation
+            String valueId = (String)booleanMatches.get(idAnnot.intValue());
+            if (valueId.compareTo("false")==0) matchesAnnotation.add(idAnnot);
+            // update the vector (true)
+            booleanMatches.set(i,new String ("true"));
+
+            Vector vector = (Vector)fm1.get(type);
+            for (int j=0; j< vector.size(); j++) {
+              String value = (String)vector.get(j);
+              int valueInt =(new Integer(value)).intValue();
+
+              //verify whether it isn't already in matchesDocument
+              String id = (String)booleanMatches.get(valueInt);
+              if (id.compareTo("false")==0){
+                matchesAnnotation.add(new Integer(value));
+                booleanMatches.set(valueInt,new String ("true"));
+              }
+            } // for
+          } // if
+        } // while
+        if (matchesAnnotation != null)
+          if (matchesAnnotation.size()>0)
+            matchesDocument.add(matchesAnnotation);
+      } // for
+
+    } // while
     return;
   } // run()
 
@@ -394,13 +451,16 @@ public class Namematch extends AbstractProcessingResource
     int_cdg_list = newIntCdgList;
   }
 
+  public Vector getMatchesDocument() {
+    return matchesDocument;
+  }
 
   /** RULE #0: If the two names are listed in table of
     * spurius matches then they do NOT match
     * Condition(s): -
     * Applied to: all name annotations
     */
-  private boolean matchRule0(String s1,
+  public boolean matchRule0(String s1,
 			     String s2) {
     if (spur_match.containsKey(s1)
 	&& spur_match.containsKey(s2)) {
@@ -414,7 +474,7 @@ public class Namematch extends AbstractProcessingResource
     * Condition(s): depend on case
     * Applied to: all name annotations
     */
-  private boolean matchRule1(String s1,
+  public boolean matchRule1(String s1,
 			     String s2,
 			     boolean MatchCase) {
     if (MatchCase == true) return s1.equalsIgnoreCase(s2);
@@ -428,7 +488,7 @@ public class Namematch extends AbstractProcessingResource
     * Condition(s): -
     * Applied to: all name annotations
     */
-  private boolean matchRule2(String s1,
+  public boolean matchRule2(String s1,
 			     String s2) {
 
     if (alias.containsKey(s1) && alias.containsKey(s2))
@@ -445,7 +505,7 @@ public class Namematch extends AbstractProcessingResource
     * Condition(s): case-insensitive match
     * Applied to: all name annotations
     */
-  private boolean matchRule3(String s1,
+  public boolean matchRule3(String s1,
                              String s2) {
 
     if (s2.endsWith("'s") || s2.endsWith("'")
@@ -480,7 +540,7 @@ public class Namematch extends AbstractProcessingResource
     * Condition(s): case-insensitive match
     * Applied to: organisation annotations only
     */
-  private boolean matchRule4(String s1,
+  public boolean matchRule4(String s1,
 			     String s2) {
 
     String stringToTokenize1 = s1;
@@ -508,7 +568,7 @@ public class Namematch extends AbstractProcessingResource
     * Condition(s): case-insensitive match
     * Applied to: all name annotations
     */
-  private boolean matchRule5(String s1,
+  public boolean matchRule5(String s1,
 			     String s2) {
 
     String stringToTokenize1 = s1;
@@ -526,7 +586,7 @@ public class Namematch extends AbstractProcessingResource
     * Condition(s): case-sensitive match, remove initial "The"
     * Applied to: organisation annotations only
     */
-  private boolean matchRule6(String s1,
+  public boolean matchRule6(String s1,
 			     String s2) {
 
     if (s1.startsWith("The ")) s1 = s1.substring(4);
@@ -558,7 +618,7 @@ public class Namematch extends AbstractProcessingResource
     * Condition(s): case-sensitive match
     * Applied to: organisation and person annotations only
     */
-  private boolean matchRule7(String s1,
+  public boolean matchRule7(String s1,
 			     String s2) {
 
     String stringToTokenize1 = s1;
@@ -584,7 +644,7 @@ public class Namematch extends AbstractProcessingResource
     * Condition(s): case-sensitive match
     * Applied to: organisation annotations only
     */
-  private boolean matchRule8(String s1,
+  public boolean matchRule8(String s1,
 			     String s2) {
 
     if (s1.startsWith("The ")) s1 = s1.substring(4);
@@ -637,7 +697,7 @@ public class Namematch extends AbstractProcessingResource
     * Condition(s): case-sensitive match
     * Applied to: organisation and person annotations only
     */
-  private boolean matchRule9(String s1,
+  public boolean matchRule9(String s1,
 			     String s2) {
 
     if (!cdg.isEmpty()) {
@@ -668,7 +728,7 @@ public class Namematch extends AbstractProcessingResource
     * Condition(s): case-sensitive match
     * Applied to: organisation annotations only
     */
-  private boolean matchRule10(String s1,
+  public boolean matchRule10(String s1,
 			      String s2) {
 
     String stringToTokenize1 = s1;
@@ -714,7 +774,7 @@ public class Namematch extends AbstractProcessingResource
     * Condition(s): case-sensitive match
     * Applied to: organisation annotations only
     */
-  private boolean matchRule11(String s1,
+  public boolean matchRule11(String s1,
 			      String s2) {
 
 
@@ -767,7 +827,7 @@ public class Namematch extends AbstractProcessingResource
     * Condition(s): case-sensitive match
     * Applied to: organisation annotations only
     */
-  private boolean matchRule12(String s1,
+  public boolean matchRule12(String s1,
 			      String s2) {
 
     String stringToTokenize1 = s1;
@@ -811,7 +871,7 @@ public class Namematch extends AbstractProcessingResource
     * Condition(s): case-sensitive match
     * Applied to: organisation annotations only
     */
-  private boolean matchRule13(String s1,
+  public boolean matchRule13(String s1,
 			      String s2) {
 
     String stringToTokenize1 = s1;

@@ -41,12 +41,12 @@ public class TestNamematch extends TestCase
     return new TestSuite(TestNamematch.class);
   } // suite
 
-  /** test the namatcher */
+  /** test the namematcher */
   public void testNamematch() throws Exception{
     //get a document
     Document doc = Factory.newDocument(
       new URL(TestDocument.getTestServerName() + "tests/matcher.txt"));
-    //create a default tokeniser
+    //create a namematcher
     FeatureMap params = Factory.newFeatureMap();
     Namematch namematch = (Namematch) Factory.createResource(
                           "gate.creole.namematch.Namematch", params);
@@ -60,61 +60,61 @@ public class TestNamematch extends TestCase
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(255), new Long(272), "TTTT", fm);
+      annotSetAS.add(new Long(257), new Long(274), "TTTT", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","person");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(273), new Long(291), "TTTT", fm);
+      annotSetAS.add(new Long(275), new Long(293), "TTTT", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(292), new Long(304), "TTTT", fm);
+      annotSetAS.add(new Long(294), new Long(306), "TTTT", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(305), new Long(324), "TTTT", fm);
+      annotSetAS.add(new Long(307), new Long(326), "TTTT", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(325), new Long(335), "TTTT", fm);
+      annotSetAS.add(new Long(327), new Long(338), "TTTT", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(336), new Long(346), "TTTT", fm);
+      annotSetAS.add(new Long(339), new Long(349), "TTTT", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(347), new Long(362), "TTTT", fm);
+      annotSetAS.add(new Long(350), new Long(365), "TTTT", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(383), new Long(386), "TTTT", fm);
+      annotSetAS.add(new Long(386), new Long(389), "TTTT", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(387), new Long(391), "TTTT", fm);
+      annotSetAS.add(new Long(390), new Long(394), "TTTT", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(392), new Long(419), "TTTT", fm);
+      annotSetAS.add(new Long(395), new Long(422), "TTTT", fm);
 
     } catch (InvalidOffsetException ioe) {
       ioe.printStackTrace();
@@ -126,6 +126,10 @@ public class TestNamematch extends TestCase
     namematch.setIntCdgList(false);
     namematch.run();
     namematch.check();
+
+    // the vector with all the matches from the document
+    Vector matches = namematch.getMatchesDocument();
+    assert(matches.toString().equals("[[0, 3, 5], [2, 4], [6, 8], [7, 9]]"));
 
     AnnotationSet annotSet = doc.getAnnotations("AnnotationSetAS");
     FeatureMap fm1;
