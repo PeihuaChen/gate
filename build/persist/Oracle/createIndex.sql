@@ -1,7 +1,7 @@
 /*
- *  DDL script for Oracle 8.x
+ *  DDL script for Oracle 8.x and Oracle 9.x
  *
- *  Copyright (c) 1998-2001, The University of Sheffield.
+ *  Copyright (c) 1998-2002, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -9,8 +9,8 @@
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *
  *  Marin Dimitrov, 19/Sep/2001
- * 
- *  auto generated: Wed Nov 28 11:44:30 2001
+ *
+ *  auto generated: Wed Jan 23 12:37:54 2002
  *
  *  $Id$
  *
@@ -19,176 +19,197 @@
 
 CREATE UNIQUE INDEX XT_ANNOT_SET_01 ON T_ANNOT_SET
 (
-       AS_DOC_ID                      ,
-       AS_NAME                        
+       AS_DOC_ID		      ,
+       AS_NAME
 )
     	 TABLESPACE GATE01IS
- 	 REVERSE	LOGGING 
+ 	 REVERSE	LOGGING
 ;
 
 CREATE UNIQUE INDEX XT_ANNOTATION_01 ON T_ANNOTATION
 (
-       ANN_DOC_ID                     ,
-       ANN_LOCAL_ID                   
+       ANN_DOC_ID		      ,
+       ANN_LOCAL_ID
 )
     	 TABLESPACE GATE01IS
- 	 REVERSE	LOGGING 
+ 	 REVERSE	LOGGING
 ;
 
 CREATE INDEX XT_ANNOTATION_02 ON T_ANNOTATION
 (
-       ANN_STARTNODE_ID               
+       ANN_STARTNODE_ID
 )
     	 TABLESPACE GATE01IS
- 	 REVERSE	LOGGING 
+ 	 REVERSE	LOGGING
 ;
 
 CREATE INDEX XT_ANNOTATION_03 ON T_ANNOTATION
 (
-       ANN_ENDNODE_ID                 
+       ANN_ENDNODE_ID
 )
     	 TABLESPACE GATE01IS
- 	 REVERSE	LOGGING 
+ 	 REVERSE	LOGGING
 ;
 
 CREATE UNIQUE INDEX XT_ANNOTATION_TYPE_01 ON T_ANNOTATION_TYPE
 (
-       AT_NAME                        
+       AT_NAME
 )
     	 TABLESPACE GATE01IS
- 	 REVERSE	LOGGING 
+ 	 STORAGE  (
+		 BUFFER_POOL KEEP
+ 	)
+	 REVERSE	LOGGING
 ;
 
 CREATE INDEX XT_AS_ANNOTATION_01 ON T_AS_ANNOTATION
 (
-       ASANN_AS_ID                    
+       ASANN_AS_ID
 )
     	 TABLESPACE GATE01IS
- 	 REVERSE	LOGGING 
+ 	 REVERSE	LOGGING
 ;
 
 CREATE INDEX XT_AS_ANNOTATION_02 ON T_AS_ANNOTATION
 (
-       ASANN_ANN_ID                   
+       ASANN_ANN_ID
 )
     	 TABLESPACE GATE01IS
- 	 REVERSE	LOGGING 
+ 	 REVERSE	LOGGING
 ;
 
 CREATE UNIQUE INDEX XT_DOC_ENCODING_01 ON T_DOC_ENCODING
 (
-       ENC_NAME                       
+       ENC_NAME
 )
     	 TABLESPACE GATE01IS
- 	 REVERSE	LOGGING 
+ 	 STORAGE  (
+		 BUFFER_POOL KEEP
+ 	)
+	 REVERSE	LOGGING
 ;
 
 CREATE UNIQUE INDEX XT_DOCUMENT_01 ON T_DOCUMENT
 (
-       DOC_LR_ID                      
+       DOC_LR_ID
 )
     	 TABLESPACE GATE01IS
- 	 REVERSE	LOGGING 
+ 	 REVERSE	LOGGING
 ;
 
 CREATE INDEX XT_FEATURE_01 ON T_FEATURE
 (
-       FT_ENTITY_ID                   ,
-       FT_ENTITY_TYPE                 
+       FT_ENTITY_ID		      ,
+       FT_ENTITY_TYPE
 )
     	 TABLESPACE GATE01IS
- 	 REVERSE	LOGGING 
+ 	 REVERSE	LOGGING
+;
+
+CREATE UNIQUE INDEX I_FEATURE_KEY_01 ON T_FEATURE_KEY
+(
+       FK_STRING
+)
+    	 TABLESPACE GATE01IS
+ 	 STORAGE  (
+		 BUFFER_POOL KEEP
+ 	)
+	 REVERSE	LOGGING
 ;
 
 CREATE UNIQUE INDEX XT_GROUP_01 ON T_GROUP
 (
-       GRP_NAME                       
+       GRP_NAME
 )
     	 TABLESPACE GATE01IS
- 	 REVERSE	LOGGING 
+ 	 REVERSE	LOGGING
 ;
 
 CREATE INDEX XT_LANG_RESOURCE_01 ON T_LANG_RESOURCE
 (
-       LR_LOCKING_USER_ID             
+       LR_LOCKING_USER_ID
 )
     	 TABLESPACE GATE01IS
- 	 REVERSE	LOGGING 
+ 	 REVERSE	LOGGING
 ;
 
 CREATE INDEX XT_LANG_RESOURCE_02 ON T_LANG_RESOURCE
 (
-       LR_OWNER_GROUP_ID              
+       LR_OWNER_GROUP_ID
 )
     	 TABLESPACE GATE01IS
- 	 REVERSE	LOGGING 
+ 	 REVERSE	LOGGING
 ;
 
 CREATE INDEX XT_LANG_RESOURCE_03 ON T_LANG_RESOURCE
 (
-       LR_OWNER_USER_ID               
+       LR_OWNER_USER_ID
 )
     	 TABLESPACE GATE01IS
- 	 REVERSE	LOGGING 
+ 	 REVERSE	LOGGING
 ;
 
 CREATE UNIQUE INDEX XT_LR_TYPE_01 ON T_LR_TYPE
 (
-       LRTP_TYPE                      
+       LRTP_TYPE
 )
     	 TABLESPACE GATE01IS
- 	 REVERSE	LOGGING 
+ 	 STORAGE  (
+		 BUFFER_POOL KEEP
+ 	)
+	 REVERSE	LOGGING
 ;
 
 CREATE UNIQUE INDEX XT_NODE_01 ON T_NODE
 (
-       NODE_DOC_ID                    ,
-       NODE_LOCAL_ID                  
+       NODE_DOC_ID		      ,
+       NODE_LOCAL_ID
 )
     	 TABLESPACE GATE01IS
- 	 REVERSE	LOGGING 
+ 	 REVERSE	LOGGING
 ;
 
 CREATE UNIQUE INDEX XT_PARAMETER_01 ON T_PARAMETER
 (
-       PAR_KEY                        
+       PAR_KEY
 )
     	 TABLESPACE GATE01IS
- 	 REVERSE	LOGGING 
+ 	 REVERSE	LOGGING
 ;
 
 CREATE UNIQUE INDEX XT_USER_01 ON T_USER
 (
-       USR_LOGIN                      
+       USR_LOGIN
 )
     	 TABLESPACE GATE01IS
- 	 REVERSE	LOGGING 
+ 	 REVERSE	LOGGING
 ;
 
 CREATE INDEX XT_USER_02 ON T_USER
 (
-       USR_PASS                       
+       USR_PASS
 )
     	 TABLESPACE GATE01IS
- 	 REVERSE	LOGGING 
+ 	 REVERSE	LOGGING
 ;
 
 CREATE UNIQUE INDEX XT_USER_GROUP_01 ON T_USER_GROUP
 (
-       UGRP_USER_ID                   ,
-       UGRP_GROUP_ID                  
+       UGRP_USER_ID		      ,
+       UGRP_GROUP_ID
 )
     	 TABLESPACE GATE01IS
- 	 REVERSE	LOGGING 
+ 	 REVERSE	LOGGING
 ;
 
 CREATE INDEX XT_USER_GROUP_02 ON T_USER_GROUP
 (
-       UGRP_GROUP_ID                  
+       UGRP_GROUP_ID
 )
     	 TABLESPACE GATE01IS
- 	 REVERSE	LOGGING 
+ 	 REVERSE	LOGGING
 ;
+
 
 
 
