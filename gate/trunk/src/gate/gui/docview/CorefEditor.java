@@ -328,13 +328,13 @@ public class CorefEditor
     CorefTreeNode annotSetNode = null;
 
     if (annotSet.equals(DEFAULT_ANNOTSET_NAME))
-      annotSetNode = createChain(document.getAnnotations(), true);
+      annotSetNode = createAnnotSetNode(document.getAnnotations(), true);
     else
-      annotSetNode = createChain(document.getAnnotations(annotSet), false);
+      annotSetNode = createAnnotSetNode(document.getAnnotations(annotSet), false);
 
     corefAnnotationSetNodesMap.put(annotSet, annotSetNode);
-    annotSetsModel.addElement(annotSet);
-    annotSets.setModel(annotSetsModel);
+    /*annotSetsModel.addElement(annotSet);
+    annotSets.setModel(annotSetsModel);*/
 
     if (annotSetName != null)
       annotSets.setSelectedItem(annotSetName);
@@ -439,11 +439,12 @@ public class CorefEditor
       String currentSet = (String) setIter.next();
       java.util.List matches = (java.util.List) matchesMap.get(currentSet);
       currentSet = (currentSet == null) ? DEFAULT_ANNOTSET_NAME : currentSet;
-      AnnotationSet currAnnotSet = getAnnotationSet(currentSet);
-      annotSetsNamesMap.put(currentSet, new Boolean(true));
 
       if (matches == null)
         continue;
+
+      AnnotationSet currAnnotSet = getAnnotationSet(currentSet);
+      annotSetsNamesMap.put(currentSet, new Boolean(true));
 
       Iterator entitiesIter = matches.iterator();
       //each entity is a list of annotation IDs
@@ -462,9 +463,7 @@ public class CorefEditor
         continue outer;
       }
 
-      HashMap chains = (HashMap) corefChains.get(corefAnnotationSetNodesMap.
-                                                 get(
-          currentSet));
+      HashMap chains = (HashMap) corefChains.get(corefAnnotationSetNodesMap.get(currentSet));
       HashMap visitedList = new HashMap();
 
       if (chains != null) {
@@ -488,7 +487,7 @@ public class CorefEditor
           for (int i = 0; i < ids.size(); i++) {
             Integer id = (Integer) ids.get(i);
             // now lets find out the headnode for this, if it is available
-            chainHead = findOutTheChainHead(currAnnotSet.get(id));
+            chainHead = findOutTheChainHead(currAnnotSet.get(id), currentSet);
             if (chainHead != null) {
               visitedList.put(chainHead, new Boolean(true));
               break;
@@ -499,10 +498,11 @@ public class CorefEditor
             // we found the chainHead for this
             // so we would replace the ids
             // but before that we would check if chainHead should be replaced
-            Annotation longestAnn = findOutTheLongestAnnotation(ids,
-                getAnnotationSet(currentSet));
+            Annotation longestAnn = findOutTheLongestAnnotation(ids, getAnnotationSet(currentSet));
             if (getString(longestAnn).equals(chainHead.toString())) {
-              // no action needed
+              chains.put(chainHead, ids);
+              corefChains.put(corefAnnotationSetNodesMap.get(currentSet),
+                              chains);
             }
             else {
               // we first check if new longestAnnotation String is already available as some other chain Node head
@@ -510,7 +510,7 @@ public class CorefEditor
                 // yes one chainHead with this string already exists
                 // so we need to merge them together
                 String longestString = getString(longestAnn);
-                CorefTreeNode tempChainHead = findOutChainNode(longestString);
+                CorefTreeNode tempChainHead = findOutChainNode(longestString, currentSet);
                 // now all the ids under current chainHead should be placed under the tempChainHead
                 ArrayList tempIds = (ArrayList) chains.get(tempChainHead);
                 ArrayList currentChainHeadIds = (ArrayList) chains.get(
@@ -560,14 +560,16 @@ public class CorefEditor
                 currentSet);
 
             // we need to find out the longest string annotation
-            Annotation ann = findOutTheLongestAnnotation(ids, currAnnotSet);
+            AnnotationSet actSet = getAnnotationSet(currentSet);
+
+            Annotation ann = findOutTheLongestAnnotation(ids, getAnnotationSet(currentSet));
             // so before creating a new chainNode we need to find out if
             // any of the chainNodes has the same string that of this chainNode
             HashMap tempSelection = (HashMap) selectionChainsMap.get(
                 currentSet);
             CorefTreeNode chainNode = null;
             if (tempSelection.containsKey(getString(ann))) {
-              chainNode = findOutChainNode(getString(ann));
+              chainNode = findOutChainNode(getString(ann), currentSet);
 
               // ArrayList matches
               HashMap newHashMap = (HashMap) corefChains.get(annotSetNode);
@@ -590,8 +592,12 @@ public class CorefEditor
               newHashMap.put(chainNode, ids);
               corefChains.put(annotSetNode, newHashMap);
 
+              boolean selectionValue = false;
+              if(currentAnnotSet.equals(currentSet))
+                selectionValue = true;
+
               // entry into the selection
-              tempSelection.put(chainNode.toString(), new Boolean(true));
+              tempSelection.put(chainNode.toString(), new Boolean(selectionValue));
               selectionChainsMap.put(currentSet, tempSelection);
 
               // entry into the colors
@@ -949,6 +955,38 @@ public class CorefEditor
     }
   }
 
+  private CorefTreeNode createAnnotSetNode(AnnotationSet set, boolean isDefaultSet) {
+    // create the node for setName
+    String setName = isDefaultSet ? DEFAULT_ANNOTSET_NAME : set.getName();
+    CorefTreeNode annotSetNode = new CorefTreeNode(setName, true,
+        CorefTreeNode.ANNOTSET_NODE);
+
+    // see if this setName available in the annotSets
+    boolean found = false;
+    for (int i = 0; i < annotSets.getModel().getSize(); i++) {
+      if ( ( (String) annotSets.getModel().getElementAt(i)).equals(setName)) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      explicitCall = true;
+      annotSets.addItem(setName);
+      explicitCall = false;
+    }
+
+    // the internal datastructure
+    HashMap chainLinks = new HashMap();
+    HashMap selectionMap = new HashMap();
+    HashMap colorMap = new HashMap();
+
+    corefChains.put(annotSetNode, chainLinks);
+    selectionChainsMap.put(setName, selectionMap);
+    colorChainsMap.put(setName, colorMap);
+    return annotSetNode;
+
+  }
+
   /**
    * Creates the internal data structure
    * @param set
@@ -1092,9 +1130,9 @@ public class CorefEditor
    * @param ann
    * @return
    */
-  private CorefTreeNode findOutTheChainHead(Annotation ann) {
+  private CorefTreeNode findOutTheChainHead(Annotation ann, String set) {
     HashMap chains = (HashMap) corefChains.get(corefAnnotationSetNodesMap.get(
-        annotSets.getSelectedItem()));
+        set));
     if (chains == null)
       return null;
     Iterator iter = chains.keySet().iterator();
@@ -1237,12 +1275,11 @@ public class CorefEditor
     }
   }
 
-  public CorefTreeNode findOutChainNode(String chainNodeString) {
+  public CorefTreeNode findOutChainNode(String chainNodeString, String set) {
     if (corefChains == null || corefAnnotationSetNodesMap == null) {
       return null;
     }
-    HashMap chains = (HashMap) corefChains.get(corefAnnotationSetNodesMap.get(
-        annotSets.getSelectedItem()));
+    HashMap chains = (HashMap) corefChains.get(corefAnnotationSetNodesMap.get(set));
     if (chains == null) {
       return null;
     }
@@ -1346,7 +1383,7 @@ public class CorefEditor
         textPane.removeAll();
         annotToConsiderForChain = (Annotation) highlightedTypeAnnots.get(index);
         // now check if this annotation is already linked with something
-        CorefTreeNode headNode = findOutTheChainHead(annotToConsiderForChain);
+        CorefTreeNode headNode = findOutTheChainHead(annotToConsiderForChain, (String) annotSets.getSelectedItem());
         if (headNode != null) {
           popup1 = new JPopupMenu();
           popup1.setBackground(UIManager.getLookAndFeelDefaults().
@@ -1545,7 +1582,7 @@ public class CorefEditor
               // now first find out the annotation
               if (ann == null)
                 return;
-              CorefTreeNode chainNode = findOutChainNode(getString(ann));
+              CorefTreeNode chainNode = findOutChainNode(getString(ann), (String) annotSets.getSelectedItem());
               if (chainNode != null) {
                 try {
                   JOptionPane.showMessageDialog(Main.getMainFrame(),
@@ -1585,7 +1622,7 @@ public class CorefEditor
               return;
             }
 
-            CorefTreeNode chainNode = findOutChainNode(field);
+            CorefTreeNode chainNode = findOutChainNode(field, (String) annotSets.getSelectedItem());
             HashMap chains = (HashMap)
                              corefChains.get(corefAnnotationSetNodesMap.get(
                 annotSets.getSelectedItem()));
@@ -1671,7 +1708,7 @@ public class CorefEditor
         popup.removeAll();
         final int tempIndex = index;
         CorefTreeNode chainHead = findOutTheChainHead( (Annotation)
-            highlightedChainAnnots.get(index));
+            highlightedChainAnnots.get(index), (String) annotSets.getSelectedItem());
         final HashMap tempMap = new HashMap();
         popup.setLayout(new FlowLayout(FlowLayout.LEFT));
         if (chainHead != null) {
