@@ -152,6 +152,13 @@ public class DumpingPR extends AbstractLanguageAnalyser
       return;
     }
 
+    //if we're saving into standOffXML, then the rest of the settings do
+    //not matter because that toXML method saves everything
+    if (this.useStandOffXML) {
+      write2File();
+      return;
+    }
+
     //first transfer the annotation types from a list to a set
     //don't I just hate this!
     Set types2Export = new HashSet(annotationTypes);
