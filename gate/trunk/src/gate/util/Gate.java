@@ -24,23 +24,19 @@ import java.io.*;
 import gate.*;
 import gate.creole.*;
 
-/**
-  * The class is responsible for initialising the GATE libraries.
+/** The class is responsible for initialising the GATE libraries, and
+  * providing access to singleton utility objects, such as the GATE class
+  * loader, CREOLE register and so on.
   */
 public class Gate
 {
-  /**
-    *  This field is "final static" because it brings in
-    *  the advantage of dead code elimination
-    *  When DEBUG is set on false the code that it guardes will be eliminated
-    *  by the compiler. This will spead up the progam a little bit.
-    */
+  /** Debugging flag. */
   private static final boolean DEBUG = false;
 
   /** The list of builtin URLs to search for CREOLE resources. */
   private static String builtinCreoleDirectoryUrls[] = {
-    // moved to resources/creole/creole.xml
-    // "http://gate.ac.uk/creole/creole.xml"
+    // "http://derwent.dcs.shef.ac.uk/gate.ac.uk/creole/creole.xml"
+     "http://gate.ac.uk/creole/creole.xml"
   };
 
   /** Initialisation - must be called by all clients before using
@@ -53,13 +49,11 @@ public class Gate
     if(creoleRegister == null)
       creoleRegister = new CreoleRegisterImpl();
 
-    if(creoleLoader == null)
-      creoleLoader = new CreoleLoaderImpl();
-
     // check net connection and set canReachGateHome
     // and canReachGateAcUk appropriately
 
     // DERWENT
+    /*
     try{
       // ask the web server from derwent if it's alive
       URL url = new URL("http://derwent.dcs.shef.ac.uk");
@@ -71,7 +65,7 @@ public class Gate
       throw new GateException("The URL for derwent is malformed !");
     } catch (IOException exception2){
       gateHomeReachable = false;
-    }
+    }*/
 
     //GATE.AC.UK
     try{
@@ -98,7 +92,7 @@ public class Gate
   /** Get reachability status of GATE internal server */
   public static boolean isGateHomeReachable() { return gateHomeReachable; }
 
-  /** Get reachability status of make cGATE.ac.uk public server */
+  /** Get reachability status of GATE.ac.uk public server */
   public static boolean isGateAcUkReachable() { return gateAcUkReachable; }
 
   /** Initialise the CREOLE register. */
@@ -132,12 +126,5 @@ public class Gate
 
   /** Get the CREOLE register. */
   public static CreoleRegister getCreoleRegister() { return creoleRegister; }
-
-  /** The CREOLE loader. */
-  private static CreoleLoader creoleLoader = null;
-
-  /** Get the CREOLE register. */
-  public static CreoleLoader getCreoleLoader() { return creoleLoader; }
-
 
 } // class Gate
