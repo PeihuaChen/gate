@@ -43,15 +43,8 @@ public class TestTokeniser extends TestCase{
       new URL(TestDocument.getTestServerName() + "tests/doc0.html")
     );
     //create a default tokeniser
-   FeatureMap params = Factory.newFeatureMap();
-   params.put(DefaultTokeniser.DEF_TOK_TOKRULES_URL_PARAMETER_NAME,
-              "gate:/creole/tokeniser/DefaultTokeniser.rules");
-   params.put(DefaultTokeniser.DEF_TOK_GRAMRULES_URL_PARAMETER_NAME,
-              "gate:/creole/tokeniser/postprocess.jape");
-
-   params.put(DefaultTokeniser.DEF_TOK_ENCODING_PARAMETER_NAME, "UTF-8");
    DefaultTokeniser tokeniser = (DefaultTokeniser) Factory.createResource(
-                          "gate.creole.tokeniser.DefaultTokeniser", params);
+                          "gate.creole.tokeniser.DefaultTokeniser");
 
     tokeniser.setDocument(doc);
     tokeniser.setAnnotationSetName("TokeniserAS");

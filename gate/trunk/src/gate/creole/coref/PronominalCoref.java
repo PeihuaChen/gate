@@ -24,6 +24,7 @@ import junit.framework.Assert;
 import gate.*;
 import gate.annotation.AnnotationSetImpl;
 import gate.creole.*;
+import gate.util.*;
 import gate.util.Err;
 import gate.util.SimpleFeatureMapImpl;
 
@@ -38,8 +39,12 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   private static final boolean DEBUG = false;
 
   //JAPE grammars
-  private static final String QT_GRAMMAR_URL = "gate://gate/creole/coref/quoted_text.jape";
-  private static final String PLEON_GRAMMAR_URL = "gate://gate/creole/coref/pleonasm.jape";
+  private static final String QT_GRAMMAR_URL = Gate.class.
+      getResource(Files.getResourcePath() +  
+              "/gate/creole/coref/quoted_text.jape").toString();
+  private static final String PLEON_GRAMMAR_URL = Gate.class.getResource(
+          Files.getResourcePath() +  
+          "/gate/creole/coref/pleonasm.jape").toString();
 
   //annotation types
   private static final String QUOTED_TEXT_TYPE = "QuotedText";

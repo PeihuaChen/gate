@@ -20,6 +20,7 @@ import gate.*;
 import gate.corpora.*;
 import java.net.*;
 import gate.gui.MainFrame;
+import gate.util.Files;
 
 public class TestMaxentWrapper extends TestCase {
 
@@ -78,7 +79,8 @@ public class TestMaxentWrapper extends TestCase {
     // First set up the parameters
     FeatureMap maxentParameters = Factory.newFeatureMap();
     maxentParameters.put("configFileURL",
-                         "gate:/gate.ac.uk/tests/TestMaxentConfigFile.xml");
+                         Gate.class.getResource(Files.getResourcePath() +  
+                                 "/gate.ac.uk/tests/TestMaxentConfigFile.xml"));
     // Then actually make the PR
     gate.creole.ml.MachineLearningPR maxentPR =
         (gate.creole.ml.MachineLearningPR)

@@ -9,6 +9,8 @@ import junit.framework.*;
 import gate.*;
 import gate.creole.*;
 import gate.creole.tokeniser.DefaultTokeniser;
+import gate.util.*;
+import gate.util.Files;
 import gate.util.OffsetComparator;
 
 /**
@@ -23,8 +25,6 @@ import gate.util.OffsetComparator;
 public class TestMorph
     extends TestCase {
 
-  private String testVerbFile, answerVerbFile, testNounFile, answerNounFile,
-      defaultRuleFile;
   private Morph morpher;
   private Document verbDocumentToTest, verbDocumentWithAnswers,
       nounDocumentToTest, nounDocumentWithAnswers;
@@ -43,54 +43,38 @@ public class TestMorph
    * the morph program
    */
   protected void setUp() {
-
-    // initialise the rule file that will be used to find the base word
-    defaultRuleFile = "gate:/creole/morph/default.rul";
-
-    // initialise the file to be tested
-    testVerbFile = "gate:/creole/morph/verbTest.dat";
-    answerVerbFile = "gate:/creole/morph/verbAnswer.dat";
-    testNounFile = "gate:/creole/morph/nounTest.dat";
-    answerNounFile = "gate:/creole/morph/nounAnswer.dat";
-
-
-    // creating documents
-    try {
-      verbDocumentToTest = Factory.newDocument(new URL(testVerbFile));
-      verbDocumentWithAnswers = Factory.newDocument(new URL(answerVerbFile));
-      nounDocumentToTest = Factory.newDocument(new URL(testNounFile));
-      nounDocumentWithAnswers = Factory.newDocument(new URL(answerNounFile));
-    }
-    catch (MalformedURLException murle) {
-      fail("Document cannot be created ");
-    }
-    catch (ResourceInstantiationException rie) {
-      fail("Resources cannot be created for the test and the answer file");
+    try{
+      // creating documents
+      verbDocumentToTest = Factory.newDocument(
+        Gate.class.getResource(Files.getResourcePath() + 
+        "/gate.ac.uk/tests/morph/verbTest.dat"));
+      verbDocumentWithAnswers = Factory.newDocument(
+              Gate.class.getResource(Files.getResourcePath() + 
+              "/gate.ac.uk/tests/morph/verbAnswer.dat"));
+      nounDocumentToTest = Factory.newDocument(
+              Gate.class.getResource(Files.getResourcePath() + 
+              "/gate.ac.uk/tests/morph/nounTest.dat"));
+      nounDocumentWithAnswers = Factory.newDocument(
+              Gate.class.getResource(Files.getResourcePath() + 
+              "/gate.ac.uk/tests/morph/nounAnswer.dat"));
+      // create the instance of (Morphological analyzer)
+      morpher = (Morph)Factory.createResource("gate.creole.morph.Morph");
+    }catch (ResourceInstantiationException rie) {
+      throw new GateRuntimeException(rie);
+//      fail("Resources cannot be created for the test and the answer file");
     }
 
 
-    // create the instance of (Morphological analyzer)
-    morpher = new Morph();
 
     // set the parameters for the morpher, feature names
     morpher.setAffixFeatureName("affix");
     morpher.setRootFeatureName("root");
 
-    // ruleFile
-    morpher.setRulesFile(defaultRuleFile);
-
-    // initialise the parameters for the Sentence Tokenizer
-    params = Factory.newFeatureMap();
-    params.put(DefaultTokeniser.DEF_TOK_TOKRULES_URL_PARAMETER_NAME,
-               "gate:/creole/tokeniser/DefaultTokeniser.rules");
-    params.put(DefaultTokeniser.DEF_TOK_GRAMRULES_URL_PARAMETER_NAME,
-               "gate:/creole/tokeniser/postprocess.jape");
-    params.put(DefaultTokeniser.DEF_TOK_ENCODING_PARAMETER_NAME, "UTF-8");
 
     try {
       // finally create the Tokenizer
       tokeniser = (DefaultTokeniser) Factory.createResource(
-          "gate.creole.tokeniser.DefaultTokeniser", params);
+          "gate.creole.tokeniser.DefaultTokeniser");
     }
     catch (ResourceInstantiationException rie) {
       fail("Resources cannot be created fpr tokenizers");
