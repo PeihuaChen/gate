@@ -63,7 +63,7 @@ implements AnnotationSet
   /** This inner class serves as the return value from the iterator()
     * method.
     */
-  private class AnnotationSetIterator implements Iterator {
+  class AnnotationSetIterator implements Iterator {
     private Iterator iter;
     private Annotation lastNext = null;
     AnnotationSetIterator()  { iter = annotsById.values().iterator(); }
@@ -94,15 +94,8 @@ implements AnnotationSet
       Integer id = a.getStartNode().getId();
       AnnotationSet starterAnnots = (AnnotationSet) annotsByStartNode.get(id);
       starterAnnots.remove(a);
-      if(starterAnnots.isEmpty())
+      if(starterAnnots.isEmpty()) // no annotations start here any more
         annotsByStartNode.remove(id);
-/*
-      Node startNode = a.getStartNode();
-      AnnotationSet thisNodeAnnots =
-        (AnnotationSet) annotsByStartNode.get(startNode.getId());
-      if(thisNodeAnnots != null)
-        thisNodeAnnots.remove(a);
-*/
     }
 
     return true;
@@ -185,27 +178,9 @@ implements AnnotationSet
 
     // find the next node at or after offset; get the annots starting there
     Node nextNode = (Node) nodesByOffset.getNextOf(offset);
-/*
-SortedSet s = new TreeSet();
-s.addAll(nodesByOffset.values());
-System.out.println(s);
-System.out.println(annotsByStartNode);
-System.out.println("");
-System.out.println(nodesByOffset);
-System.out.println("");
-System.out.println(annotsById);
-System.out.println("");
-Integer id = nextNode.getId();
-// the next call won't trace into, and returns a null set when
-// id = 1 (offset = 10)
-
-// node with id 6 has offset 0!!!!!
-
-AnnotationSet nextAnnots1 = (AnnotationSet) annotsByStartNode.get(id);
-*/
-
     AnnotationSet nextAnnots =
       (AnnotationSet) annotsByStartNode.get(nextNode.getId());
+
     return nextAnnots;
   } // get(offset)
 
@@ -292,7 +267,7 @@ AnnotationSet nextAnnots1 = (AnnotationSet) annotsByStartNode.get(id);
   /** Add an annotation to the type index. Does nothing if the index
     * doesn't exist.
     */
-  private void addToTypeIndex(Annotation a) {
+  void addToTypeIndex(Annotation a) {
     if(annotsByType == null) return;
 
     String type = a.getType();
@@ -307,7 +282,7 @@ AnnotationSet nextAnnots1 = (AnnotationSet) annotsByStartNode.get(id);
   /** Add an annotation to the offset indices. Does nothing if they
     * don't exist.
     */
-  private void addToOffsetIndex(Annotation a) {
+  void addToOffsetIndex(Annotation a) {
     if(annotsByStartNode == null) return;
 
     Node startNode  = a.getStartNode();
@@ -368,30 +343,32 @@ AnnotationSet nextAnnots1 = (AnnotationSet) annotsByStartNode.get(id);
 */
 
   /** The name of this set */
-  private String name = null;
+  String name = null;
 
   /** The document this set belongs to */
-  private Document doc;
+  Document doc;
 
-  /** Maps longs (ids) to Annotations */
-  private HashMap annotsById;
+  /** Maps annotation ids (Integers) to Annotations */
+  HashMap annotsById;
 
-  /** Maps strings (types) to AnnotationSets */
-  private HashMap annotsByType = null;
+  /** Maps annotation types (Strings) to AnnotationSets */
+  HashMap annotsByType = null;
 
-  /** Maps offsets to nodes */
-  private RBTreeMap nodesByOffset;
+  /** Maps offsets (Longs) to nodes */
+  RBTreeMap nodesByOffset;
 
-  /** Maps annotations to nodes */
-  private HashMap annotsByStartNode;
+  /** Maps node ids (Integers) to AnnotationSets representing those
+    * annotations that start from that node
+    */
+  HashMap annotsByStartNode;
 
 
 
 // these should move into Document
   /** The id of the next new annotation */
-  private int nextAnnotationId = 0;
+  int nextAnnotationId = 0;
 
   /** The id of the next new node */
-  private int nextNodeId = 0;
+  int nextNodeId = 0;
 
 } // AnnotationSetImpl

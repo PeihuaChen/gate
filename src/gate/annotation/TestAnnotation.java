@@ -65,6 +65,58 @@ public class TestAnnotation extends TestCase
 
   } // testOffsetIndex()
 
+  /** Test type index */
+  public void testTypeIndex() {
+    AnnotationSet as = new AnnotationSetImpl(doc1);
+    AnnotationSet asBuf;
+    Integer newId;
+    FeatureMap fm = new SimpleFeatureMapImpl();
+    Annotation a;
+    Node startNode;
+    Node endNode;
+
+    as.get("T"); // to trigger type indexing
+    as.add(new Long(10), new Long(20), "T1", fm);    // 0
+    as.add(new Long(10), new Long(20), "T2", fm);    // 1
+    as.add(new Long(10), new Long(20), "T3", fm);    // 2
+    as.add(new Long(10), new Long(20), "T1", fm);    // 3
+    as.add(new Long(10), new Long(20), "T1", fm);    // 4
+    as.add(new Long(10), new Long(20), "T1", fm);    // 5
+    as.add(new Long(10), new Long(20), "T3", fm);    // 6
+    as.add(new Long(10), new Long(20), "T1", fm);    // 7
+    as.add(new Long(10), new Long(20), "T3", fm);    // 8
+    as.add(new Long(10), new Long(20), "T1", fm);    // 9
+    as.add(new Long(10), new Long(20), "T1", fm);    // 10
+
+    asBuf = as.get("T");
+    assertEquals(null, asBuf);
+
+    asBuf = as.get("T1");
+    assertEquals(7, asBuf.size());
+    asBuf = as.get("T2");
+    assertEquals(1, asBuf.size());
+    asBuf = as.get("T3");
+    assertEquals(3, asBuf.size());
+
+    // let's check that we've only got two nodes
+    SortedSet sortedAnnots = new TreeSet();
+    sortedAnnots.addAll( ((AnnotationSetImpl) as).annotsById.values() );
+    Iterator iter = sortedAnnots.iterator();
+    int idCounter = 0;
+    while(iter.hasNext()) {
+      a = (Annotation) iter.next();
+      assertEquals(idCounter++, a.getId().intValue());
+
+      startNode = a.getStartNode();
+      endNode = a.getEndNode();
+      assertEquals(0, startNode.getId().intValue());
+      assertEquals(10, startNode.getOffset().longValue());
+      assertEquals(1, startNode.getId().intValue());
+      assertEquals(20, startNode.getOffset().longValue());
+    }
+
+  } // testTypeIndex()
+
   /** Test AnnotationSetImpl */
   public void testAnnotationSet() {
     // constuct an empty AS
