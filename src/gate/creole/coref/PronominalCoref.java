@@ -727,7 +727,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       java.util.Arrays.sort(quotesArray,ANNOTATION_OFFSET_COMPARATOR);
 
       for (int i =0; i < quotesArray.length; i++) {
-        this.quotedText[i] = new Quote((Annotation)quotesArray[i]);
+        this.quotedText[i] = new Quote((Annotation)quotesArray[i],i);
       }
     }
 
@@ -941,12 +941,14 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     private AnnotationSet antecedentsBackInContext;
     /** --- */
     private Annotation quoteAnnotation;
-
+    /** --- */
+    private int quoteIndex;
 
     /** --- */
-    public Quote(Annotation quoteAnnotation) {
+    public Quote(Annotation quoteAnnotation, int index) {
 
       this.quoteAnnotation = quoteAnnotation;
+      this.quoteIndex = index;
       init();
     }
 
@@ -973,13 +975,16 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
       //1.2. get the persons and restrict to these that precede the quote (i.e. not contained
       //in the quote)
-      this.antecedentsBefore = generateAntecedentCandidates(startSentenceIndex, ANTEC_BEFORE);
+      this.antecedentsBefore = generateAntecedentCandidates(startSentenceIndex,
+                                                            this.quoteIndex,
+                                                            ANTEC_BEFORE);
 
 
       //2. generate the precPersonsInCOntext set
       //2.1. get the persons from the sentence precedeing the sentence containing the quote start
       if (startSentenceIndex > 0) {
-        this.antecedentsBackInContext = generateAntecedentCandidates(startSentenceIndex-1,
+        this.antecedentsBackInContext = generateAntecedentCandidates(startSentenceIndex -1,
+                                                                    this.quoteIndex,
                                                                     ANTEC_BACK);
       }
 
@@ -992,46 +997,82 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       //normalize it
       int endSentenceIndex = quoteEndPos >= 0 ? quoteEndPos
                                               : -quoteEndPos -1 -1; // blame Sun, not me
-      this.antecedentsAfter = generateAntecedentCandidates(endSentenceIndex,ANTEC_AFTER);
+      this.antecedentsAfter = generateAntecedentCandidates(endSentenceIndex,
+                                                            this.quoteIndex,
+                                                            ANTEC_AFTER);
       //generate t
     }
 
 
     /** --- */
-    private AnnotationSet generateAntecedentCandidates(int sentenceNumber, int mode) {
+    private AnnotationSet generateAntecedentCandidates(int sentenceNumber,
+                                                        int quoteNumber ,
+                                                        int mode) {
 
       //0. preconditions
+      Assert.assertTrue(sentenceNumber >=0);
+      Assert.assertTrue(quoteNumber >=0);
+      Assert.assertTrue(mode == Quote.ANTEC_AFTER ||
+                        mode == Quote.ANTEC_BEFORE ||
+                        mode == Quote.ANTEC_BACK);
 
       //1. get sentence
-      Sentence sentence = textSentences[sentenceNumber];
+     Sentence sentence = textSentences[sentenceNumber];
 
       //2. get the persons
       AnnotationSet antecedents = new AnnotationSetImpl(sentence.getPersons());
 
       //3. depending on the mode, may have to restrict persons to these that precede/succeed
       //the quoted fragment
-      if (Quote.ANTEC_AFTER == mode || Quote.ANTEC_BEFORE == mode) {
-        Iterator itPersons = antecedents.iterator();
+      //
+      //for ANTEC_BEFORE, get the ones #preceding# the quote, contained in the sentence where
+      //the quote *starts*
+      //
+      //for ANTEC_AFTER, get the ones #succeeding# the quote, contained in the sentence where
+      //the quote *ends*
+      //
+      //for ANTEC_BACK, we are operating in the context of the sentence previous to the
+      //sentence where the quote starts. I.e. we're resolbinf a case like
+      // [sss "q1q1q1q1" s1s1s1s1]["q2q2q2q2"]
+      //...and we want to get the entities from the s1s1 part - they *succeed* the #previous# quote
+      //Note that the cirrent sentence is the first one, not the second
+      //
+      Iterator itPersons = antecedents.iterator();
 
-        while (itPersons.hasNext()) {
-          Annotation currPerson = (Annotation)itPersons.next();
+      while (itPersons.hasNext()) {
+        Annotation currPerson = (Annotation)itPersons.next();
 
-          //cut
-          if (Quote.ANTEC_BEFORE == mode) {
-            //restrict only to persosn preceding
-            if (currPerson.getStartNode().getOffset().intValue() >
-                                                              getStartOffset().intValue()) {
-              itPersons.remove();
-            }
-          }
-          else if (Quote.ANTEC_AFTER == mode) {
-            if (currPerson.getStartNode().getOffset().intValue() <
-                                                              getEndOffset().intValue()) {
+        //cut
+        if (Quote.ANTEC_BEFORE == mode &&
+            currPerson.getStartNode().getOffset().intValue() > getStartOffset().intValue()) {
+          //restrict only to persosn preceding
+          itPersons.remove();
+        }
+        else if (Quote.ANTEC_AFTER == mode &&
+                currPerson.getStartNode().getOffset().intValue() < getEndOffset().intValue()) {
+          //restrict only to persons succeeding the quote
+          itPersons.remove();
+        }
+        else if (Quote.ANTEC_BACK == mode) {
+          //this one is tricky
+          //locate the quote previous to the one we're resolving
+          //(since we're operating in the sentence previous to the quote being resolved
+          //wew try to find if any quote (prevQuote) exist in this sentence and get the
+          //persons succeeding it)
+
+          //get prev quote
+          //is the curr quote the first one?
+          if (quoteNumber >0) {
+            Quote prevQuote = PronominalCoref.this.quotedText[quoteNumber-1];
+
+            //restrict to the succeeding persons
+            if (currPerson.getStartNode().getOffset().longValue() < prevQuote.getEndOffset().longValue()) {
               itPersons.remove();
             }
           }
         }
       }
+
 
       //4. now get the he/she pronouns in the relevant context
       AnnotationSet annotations = null;
