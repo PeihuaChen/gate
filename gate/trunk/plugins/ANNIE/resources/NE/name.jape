@@ -1184,12 +1184,11 @@ Rule:LocKey
 
 
 Rule:InLoc1
-
 (
  {Token.string == "in"}
 )
 (
- {Lookup.majorType == location, Token.orth == allCaps}
+ {Lookup.majorType == location}
 )
 :locName
 -->
@@ -1269,6 +1268,10 @@ Priority: 50
 :org
 -->
  :org.TempOrganization= {kind = "orgName", rule = "joinOrg"}
+
+
+
+
 
 
 
