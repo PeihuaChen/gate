@@ -44,7 +44,9 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
     initLocalData();
     initGuiComponents();
     initListeners();
-//    setSortable(false);
+    setSortable(true);
+    setSortedColumn(0);
+    setComparator(0, new ParameterDisjunctionComparator());
   }
 
   /**
@@ -492,6 +494,14 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
     JComboBox combo;
     JPanel textButtonBox;
   }//class ObjectRenderer extends DefaultTableCellRenderer
+  
+  class ParameterDisjunctionComparator implements Comparator{
+    public int compare(Object o1, Object o2){
+      ParameterDisjunction pDisj1 = (ParameterDisjunction)o1;
+      ParameterDisjunction pDisj2 = (ParameterDisjunction)o2;
+      return pDisj1.getName().compareTo(pDisj2.getName());
+    }
+  }
 
   class ParameterDisjunctionEditor extends DefaultCellEditor{
     public ParameterDisjunctionEditor(){
