@@ -22,6 +22,7 @@ class RelationImpl implements Relation {
   private int type;
 
   protected RelationImpl(int _type) {
+    this.type = _type;
   }
 
   public int getType() {
