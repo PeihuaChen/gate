@@ -17,6 +17,8 @@ import gate.*;
 import gate.util.*;
 import gate.annotation.*;
 import gate.creole.tokeniser.*;
+import gate.creole.gazeteer.*;
+
 
 
 /** Tests for the Corpus classes
@@ -117,11 +119,12 @@ public class TestJape extends TestCase
 
   public void DoTestBigGrammar(String textName){
     long startCorpusLoad = 0, startCorpusTokenization = 0,
+         startGazeteerLoad = 0, startLookup = 0,
          startJapeFileOpen = 0, startCorpusTransduce = 0,
          endProcess = 0;
     System.out.print("Procesing " + textName + "...\n" +
                      "Started at: " + (new Date()) + "\n");
-    startCorpusLoad = (new Date()).getTime();
+    startCorpusLoad = System.currentTimeMillis();
     System.out.print("Loading corpus... ");
     Corpus corpus = Transients.newCorpus("Jape Corpus");
     try{
@@ -148,7 +151,7 @@ public class TestJape extends TestCase
     }catch(TokeniserException te){
       te.printStackTrace(System.err);
     }
-    startCorpusTokenization = (new Date()).getTime();
+    startCorpusTokenization = System.currentTimeMillis();
     System.out.print(": " +
                        (startCorpusTokenization - startCorpusLoad) +
                        "ms\n");
@@ -162,11 +165,46 @@ public class TestJape extends TestCase
       currentDoc = (Document)docIter.next();
       tokeniser.tokenise(currentDoc, false);
     }
-    //do the jape stuff
-    Gate.init();
-    startJapeFileOpen = (new Date()).getTime();
+
+    startJapeFileOpen = System.currentTimeMillis();
     System.out.print(": " + (startJapeFileOpen - startCorpusTokenization) +
                      "ms\n");
+
+    //Do gazeteer lookup
+    gate.creole.gazeteer.DefaultGazeteer gazeteer = null;
+    startGazeteerLoad = startLookup = System.currentTimeMillis();
+    System.out.print("Loading gazeteer lists...");
+    try{
+      gazeteer =new gate.creole.gazeteer.DefaultGazeteer(
+                    "creole/gazeteer/aventinus3","lists.def");
+
+      startLookup = System.currentTimeMillis();
+      System.out.print(": " +
+                         (startLookup - startGazeteerLoad) +
+                         "ms\n");
+
+      System.out.print("Doing gazeteer lookup... ");
+      docIter = corpus.iterator();
+      while(docIter.hasNext()){
+        currentDoc = (Document)docIter.next();
+        gazeteer.doLookup(currentDoc, false);
+      }
+    }catch(IOException ioe){
+      System.err.println("Cannot read the gazeteer lists!" +
+                         "\nAre the Gate resources in place?");
+    }catch(GazeteerException ge){
+      ge.printStackTrace(System.err);
+    }
+
+    startJapeFileOpen = System.currentTimeMillis();
+    System.out.print(": " + (startJapeFileOpen - startLookup) +
+                     "ms\n");
+
+
+    //do the jape stuff
+    Gate.init();
+
+
     try{
       System.out.print("Opening Jape grammar... ");
       Batch batch = new Batch("jape/combined/", "main.jape");
@@ -178,37 +216,13 @@ public class TestJape extends TestCase
                        "ms\n");
       System.out.print("Transducing the corpus... ");
       batch.transduce(corpus);
-      endProcess = (new Date()).getTime();
+      endProcess = System.currentTimeMillis();
       System.out.print(": " + (endProcess - startCorpusTransduce) + "ms\n");
     }catch(JapeException je){
       je.printStackTrace(System.err);
     }
   }
 
-
-  public void tokenize(Document doc){
-    String content = doc.getContent().toString();
-    BreakIterator bi = BreakIterator.getWordInstance();
-    bi.setText(content);
-    int start = bi.first();
-    FeatureMap fm;
-    try{
-      for (int end = bi.next();
-           end != BreakIterator.DONE;
-           start = end, end = bi.next())
-      {
-        if(!Character.isWhitespace(content.charAt(start))){
-          fm = Transients.newFeatureMap();
-          fm.put("string", content.substring(start, end));
-          doc.getAnnotations().add(new Long(start),
-                                   new Long(end),
-                                   "Token", fm);
-//System.out.println("Token: " + content.substring(start, end));
-        }
-      }//for
-    }catch(InvalidOffsetException ioe){
-    }
-  }
 
   /** Test suite routine for the test runner */
   public static Test suite() {
@@ -217,13 +231,17 @@ public class TestJape extends TestCase
 
   //main method for running this test as a standalone test
   public static void main(String[] args) {
-    try{
-      TestJape testJape = new TestJape("Test Jape");
-      testJape.setUp();
-      if(args.length < 1) testJape.DoTestBigGrammar("AveShort");
-     else testJape.DoTestBigGrammar(args[0]);
-    }catch(Exception e){
-      e.printStackTrace(System.err);
+    for(int i = 0; i < 6; i++){
+    System.gc();
+System.out.println("Run " + i + "   =============="); 
+      try{
+        TestJape testJape = new TestJape("Test Jape");
+        testJape.setUp();
+        if(args.length < 1) testJape.DoTestBigGrammar("AveShort");
+       else testJape.DoTestBigGrammar(args[0]);
+      }catch(Exception e){
+        e.printStackTrace(System.err);
+      }
     }
   }
 } // class TestJape
