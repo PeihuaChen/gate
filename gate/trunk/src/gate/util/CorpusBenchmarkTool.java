@@ -270,6 +270,7 @@ public class CorpusBenchmarkTool {
 
     Out.prln("<BR>Overall average precision: " + corpusTool.getPrecisionAverage());
     Out.prln("<BR>Overall average recall: " + corpusTool.getRecallAverage());
+    Out.prln("<BR>Overall average fMeasure: " + corpusTool.getFMeasureAverage());
     if(corpusWordCount == 0)
       Out.prln("<BR>No Token annotations to count words in the corpus.");
     else
@@ -282,6 +283,8 @@ public class CorpusBenchmarkTool {
                + corpusTool.getPrecisionAverageProc());
       Out.prln("<BR>Overall average recall: "
                + corpusTool.getRecallAverageProc());
+      Out.prln("<BR>Overall average fMeasure: "
+               + corpusTool.getFMeasureAverageProc());
     }
     Out.prln("<BR>Finished! <P>");
     Out.prln("</BODY>");
@@ -380,12 +383,19 @@ public class CorpusBenchmarkTool {
     return (double)recallSum/docNumber;
   }
 
+
+  public double getFMeasureAverage() {
+    return (double) fMeasureSum/docNumber;
+  }
   /** For processed documents */
   public double getPrecisionAverageProc() {
     return (double)proc_precisionSum/docNumber;
   }
   public double getRecallAverageProc() {
     return (double)proc_recallSum/docNumber;
+  }
+  public double getFMeasureAverageProc() {
+    return (double)proc_fMeasureSum/docNumber;
   }
 
 
@@ -445,7 +455,7 @@ public class CorpusBenchmarkTool {
 //        Gate.setHiddenAttribute(features, true);
 
         // create the document
-        Document doc = (Document) Factory.createResource(
+        final Document doc = (Document) Factory.createResource(
           "gate.corpora.DocumentImpl", params, features
         );
 
@@ -453,10 +463,14 @@ public class CorpusBenchmarkTool {
         if (doc == null)
           continue;
         processDocument(doc);
-        LanguageResource lr = sds.adopt(doc, null);
+        final LanguageResource lr = sds.adopt(doc, null);
         sds.sync(lr);
-        Factory.deleteResource(doc);
-        Factory.deleteResource(lr);
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            Factory.deleteResource(doc);
+            Factory.deleteResource(lr);
+          }
+        });
       }//for
       sds.close();
     } catch (java.net.MalformedURLException ex) {
@@ -623,12 +637,31 @@ public class CorpusBenchmarkTool {
         }
 
         evaluateDocuments(persDoc, cleanDoc, markedDoc, errDir);
-        if (persDoc != null)
-          Factory.deleteResource(persDoc);
-        if (cleanDoc != null)
-          Factory.deleteResource(cleanDoc);
-        if (markedDoc != null)
-          Factory.deleteResource(markedDoc);
+
+          if (persDoc != null) {
+            final gate.Document pd = persDoc;
+            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+              public void run() {
+                Factory.deleteResource(pd);
+              }
+            });
+          }
+          if (cleanDoc != null) {
+            final gate.Document cd = cleanDoc;
+            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+              public void run() {
+                Factory.deleteResource(cd);
+              }
+            });
+          }
+          if (markedDoc != null) {
+            final gate.Document md = markedDoc;
+            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+              public void run() {
+                Factory.deleteResource(md);
+              }
+            });
+          }
 
       }//for loop through saved docs
       sds.close();
@@ -742,10 +775,23 @@ public class CorpusBenchmarkTool {
         }
 
         evaluateDocuments(persDoc, cleanDoc, markedDoc, errDir);
-        if (persDoc != null)
-          Factory.deleteResource(persDoc);
-        if (markedDoc != null)
-          Factory.deleteResource(markedDoc);
+          if (persDoc != null) {
+            final gate.Document pd = persDoc;
+            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+              public void run() {
+                Factory.deleteResource(pd);
+              }
+            });
+          }
+          if (markedDoc != null) {
+            final gate.Document md = markedDoc;
+            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+              public void run() {
+                Factory.deleteResource(md);
+              }
+            });
+          }
+
 
       }//for loop through saved docs
       sds.close();
@@ -886,12 +932,30 @@ public class CorpusBenchmarkTool {
         ex.printStackTrace();
         Out.prln("Evaluate failed on document: " + cleanDoc.getName());
       }
-      if (persDoc != null)
-        Factory.deleteResource(persDoc);
-      if (cleanDoc != null)
-        Factory.deleteResource(cleanDoc);
-      if (markedDoc != null)
-        Factory.deleteResource(markedDoc);
+      if (persDoc != null) {
+        final gate.Document pd = persDoc;
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            Factory.deleteResource(pd);
+          }
+        });
+      }
+      if (cleanDoc != null) {
+        final gate.Document cd = cleanDoc;
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            Factory.deleteResource(cd);
+          }
+        });
+      }
+      if (markedDoc != null) {
+        final gate.Document md = markedDoc;
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            Factory.deleteResource(md);
+          }
+        });
+      }
 
     }//for loop through clean docs
 

@@ -66,19 +66,19 @@ public class MainFrame extends JFrame
    * Popup used for right click actions on the Datastores node.
    */
   protected JPopupMenu dssPopup;
-  
+
   /**
    * Popup used for right click actions on the LRs node.
    */
   protected JPopupMenu lrsPopup;
-  
+
   /**
    * Popup used for right click actions on the PRs node.
    */
   protected JPopupMenu prsPopup;
 
   protected JCheckBoxMenuItem verboseModeItem;
-  
+
   protected JTree resourcesTree;
   protected JScrollPane resourcesTreeScroll;
   protected DefaultTreeModel resourcesTreeModel;
@@ -264,7 +264,7 @@ public class MainFrame extends JFrame
                                height == null ? 600 : height.intValue()));
 
     this.setIconImage(Toolkit.getDefaultToolkit().getImage(
-          MainFrame.class.getResource(Files.getResourcePath() + 
+          MainFrame.class.getResource(Files.getResourcePath() +
                   "/img/gateIcon.gif")));
     resourcesTree = new JTree(resourcesTreeModel){
       public void updateUI(){
@@ -335,8 +335,8 @@ public class MainFrame extends JFrame
     logArea = new LogArea();
     logScroll = new JScrollPane(logArea);
     // Out has been redirected to the logArea
-    
-    Out.prln("GATE " + Main.version + " build " + Main.build + " started at: " + 
+
+    Out.prln("GATE " + Main.version + " build " + Main.build + " started at: " +
             new Date().toString());
     mainTabbedPane = new XJTabbedPane(JTabbedPane.TOP);
     mainTabbedPane.insertTab("Messages",null, logScroll, "GATE log", 0);
@@ -464,12 +464,12 @@ public class MainFrame extends JFrame
     newAPPMenu.setText("New application");
     newAPPMenu.setIcon(getIcon("applications.gif"));
     fileMenu.add(newAPPMenu);
-    
+
     LiveMenu newLRMenu = new LiveMenu(LiveMenu.LR);
     newLRMenu.setText("New language resource");
     newLRMenu.setIcon(getIcon("lrs.gif"));
     fileMenu.add(newLRMenu);
-    
+
     LiveMenu newPRMenu = new LiveMenu(LiveMenu.PR);
     newPRMenu.setText("New processing resource");
     newPRMenu.setIcon(getIcon("prs.gif"));
@@ -480,19 +480,19 @@ public class MainFrame extends JFrame
     dsMenu.add(new XJMenuItem(new NewDSAction(), this));
     dsMenu.add(new XJMenuItem(new OpenDSAction(), this));
     fileMenu.add(dsMenu);
-    
+
     fileMenu.addSeparator();
     fileMenu.add(new XJMenuItem(new LoadResourceFromFileAction(), this));
-    
+
     fileMenu.addSeparator();
     JMenu loadANNIEMenu = new JMenu("Load ANNIE system");
     loadANNIEMenu.setIcon(getIcon("application.gif"));
     loadANNIEMenu.add(new XJMenuItem(new LoadANNIEWithDefaultsAction(), this));
     loadANNIEMenu.add(new XJMenuItem(new LoadANNIEWithoutDefaultsAction(), this));
     fileMenu.add(loadANNIEMenu);
-    
+
 //    fileMenu.add(new XJMenuItem(new LoadCreoleRepositoryAction(), this));
-    
+
     fileMenu.add(new XJMenuItem(new ManagePluginsAction(), this));
     fileMenu.addSeparator();
 
@@ -646,7 +646,7 @@ public class MainFrame extends JFrame
     dssPopup.add(new NewDSAction());
     dssPopup.add(new OpenDSAction());
     guiRoots.add(dssPopup);
-    
+
     //TOOLBAR
     toolbar = new JToolBar(JToolBar.HORIZONTAL);
     toolbar.setFloatable(false);
@@ -670,7 +670,7 @@ public class MainFrame extends JFrame
     tbNewLRMenu.setIcon(getIcon("lrs.gif"));
     smallMenuBar.add(tbNewLRMenu);
     toolbar.add(smallMenuBar);
-    
+
     smallMenuBar = new JMenuBar();
     smallMenuBar.setBorderPainted(false);
     smallMenuBar.setAlignmentY(JComponent.CENTER_ALIGNMENT);
@@ -679,7 +679,7 @@ public class MainFrame extends JFrame
     tbNewPRMenu.setIcon(getIcon("prs.gif"));
     smallMenuBar.add(tbNewPRMenu);
     toolbar.add(smallMenuBar);
-    
+
     smallMenuBar = new JMenuBar();
     smallMenuBar.setBorderPainted(false);
     smallMenuBar.setAlignmentY(JComponent.CENTER_ALIGNMENT);
@@ -688,7 +688,7 @@ public class MainFrame extends JFrame
     tbNewAppMenu.setIcon(getIcon("applications.gif"));
     smallMenuBar.add(tbNewAppMenu);
     toolbar.add(smallMenuBar);
-    
+
     smallMenuBar = new JMenuBar();
     smallMenuBar.setBorderPainted(false);
     smallMenuBar.setAlignmentY(JComponent.CENTER_ALIGNMENT);
@@ -699,14 +699,14 @@ public class MainFrame extends JFrame
     tbDsMenu.add(new OpenDSAction());
     smallMenuBar.add(tbDsMenu);
     toolbar.add(smallMenuBar);
-    
+
     toolbar.addSeparator();
     toolbar.add(new ManagePluginsAction());
     toolbar.addSeparator();
     toolbar.add(new NewAnnotDiffAction());
-    
+
     toolbar.add(Box.createGlue());
-    this.getContentPane().add(toolbar, BorderLayout.NORTH);    
+    this.getContentPane().add(toolbar, BorderLayout.NORTH);
   }
 
   protected void initListeners(boolean isShellSlacGIU){
@@ -1009,7 +1009,7 @@ public class MainFrame extends JFrame
 
   public void resourceLoaded(CreoleEvent e) {
     Resource res = e.getResource();
-    if(Gate.getHiddenAttribute(res.getFeatures()) || 
+    if(Gate.getHiddenAttribute(res.getFeatures()) ||
             res instanceof VisualResource) return;
     NameBearerHandle handle = new NameBearerHandle(res, MainFrame.this);
     DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
@@ -1439,6 +1439,7 @@ public class MainFrame extends JFrame
 
           Out.prln("Overall average precision: " + theTool.getPrecisionAverage());
           Out.prln("Overall average recall: " + theTool.getRecallAverage());
+          Out.prln("Overall average fMeasure : "+theTool.getFMeasureAverage());
           Out.prln("Finished!");
           theTool.unloadPRs();
         }
@@ -1488,6 +1489,7 @@ public class MainFrame extends JFrame
 
           Out.prln("Overall average precision: " + theTool.getPrecisionAverage());
           Out.prln("Overall average recall: " + theTool.getRecallAverage());
+          Out.prln("Overall average fMeasure : "+theTool.getFMeasureAverage());
           Out.prln("Finished!");
           theTool.unloadPRs();
         }
@@ -1542,6 +1544,7 @@ public class MainFrame extends JFrame
 
           Out.prln("Overall average precision: " + theTool.getPrecisionAverage());
           Out.prln("Overall average recall: " + theTool.getRecallAverage());
+          Out.prln("Overall average fMeasure : "+theTool.getFMeasureAverage());
           Out.prln("Finished!");
           theTool.unloadPRs();
         }
@@ -1789,7 +1792,7 @@ public class MainFrame extends JFrame
     }// actionPerformed();
   }//class NewBootStrapAction
 
-  
+
   class ManagePluginsAction extends AbstractAction {
     public ManagePluginsAction(){
       super("Manage CREOLE plugins");
@@ -1814,7 +1817,7 @@ public class MainFrame extends JFrame
                 screenSize.height * 3 /4 :
                 dialogSize.height;
         pluginManager.setSize(width, height);
-        pluginManager.validate();        
+        pluginManager.validate();
         //center the window on screen
         int x = (screenSize.width - width)/2;
         int y = (screenSize.height - height)/2;
@@ -1823,7 +1826,7 @@ public class MainFrame extends JFrame
       pluginManager.setVisible(true);
     }
   }
-  
+
 
   class LoadCreoleRepositoryAction extends AbstractAction {
     public LoadCreoleRepositoryAction(){
@@ -2372,7 +2375,7 @@ public class MainFrame extends JFrame
   }//class OpenDSAction extends AbstractAction
 
   /**
-   * A menu that self populates based on CREOLE register data before being 
+   * A menu that self populates based on CREOLE register data before being
    * shown. Used for creating new resources of all possible types.
    */
   class LiveMenu extends XJMenu{
@@ -2381,7 +2384,7 @@ public class MainFrame extends JFrame
       this.type = type;
       init();
     }
-    
+
 
     protected void init(){
       addMenuListener(new MenuListener(){
@@ -2395,7 +2398,7 @@ public class MainFrame extends JFrame
           CreoleRegister reg = Gate.getCreoleRegister();
           List resTypes;
           switch (type){
-            case LR: 
+            case LR:
               resTypes = reg.getPublicLrTypes();
               break;
             case PR:
@@ -2407,7 +2410,7 @@ public class MainFrame extends JFrame
             default:
               throw new GateRuntimeException("Unknown LiveMenu type: " + type);
           }
-          
+
           if(resTypes != null && !resTypes.isEmpty()){
             HashMap resourcesByName = new HashMap();
             Iterator resIter = resTypes.iterator();
@@ -2428,7 +2431,7 @@ public class MainFrame extends JFrame
         }
       });
     }
-    
+
     protected int type;
     /**
      * Switch for using LR data.
@@ -2439,14 +2442,14 @@ public class MainFrame extends JFrame
      * Switch for using PR data.
      */
     public static final int PR = 2;
-    
+
     /**
      * Switch for using Controller data.
      */
     public static final int APP = 3;
   }
-  
-  
+
+
   class HelpAboutAction extends AbstractAction {
     public HelpAboutAction(){
       super("About");
