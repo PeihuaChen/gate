@@ -48,11 +48,35 @@ create or replace package body persist is
   end;                                          
                                                                 
   /*******************************************************************************************/
-  procedure delete_coprus(p_lr_id     IN number)
+  procedure delete_corpus(p_lr_id     IN number)
   is
-     l_doc_id number;
+     l_corp_id number;
   begin       
-     raise error.x_not_implemented;
+     --0. get corp id
+     select corp_id 
+     into   l_corp_id
+     from   t_corpus
+     where  corp_lr_id = p_lr_id;
+     
+     --1. delete from t_corpus_document
+     delete 
+     from   t_corpus_document
+     where  cd_corp_id = l_corp_id;
+
+     --2. delete t_corpus
+     delete 
+     from   t_corpus
+     where  corp_id = l_corp_id;
+
+     --3. delete from t_lang_resource
+     delete 
+     from   t_lang_resource
+     where  lr_id = p_lr_id;     
+     
+     exception
+        when NO_DATA_FOUND then
+           raise error.x_invalid_lr;
+     
   end;                                                                                                        
 
   /*******************************************************************************************/
@@ -112,6 +136,11 @@ create or replace package body persist is
      delete 
      from   t_node
      where  node_doc_id = l_doc_id;
+     
+     -- 4.5 delete from corpus if part of
+     delete
+     from   t_corpus_document
+     where  cd_doc_id = l_doc_id;
           
      -- 5. delete document
      delete

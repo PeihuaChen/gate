@@ -48,7 +48,7 @@ create or replace package persist is
   
   procedure delete_document(p_lr_id     IN number);
   
-  procedure delete_coprus(p_lr_id     IN number);
+  procedure delete_corpus(p_lr_id     IN number);
 
   procedure create_lr(p_usr_id           IN number,
                       p_grp_id           IN number,
