@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!-- $Id$ -->
+<CREOLE-DIRECTORY>
+  <CREOLE>
+   <!-- WordNet  -->
+    <RESOURCE>
+      <NAME>WordNet 1.6</NAME>
+      <CLASS>gate.wordnet.IndexFileWordNetImpl</CLASS>
+      <INTERFACE>gate.wordnet.WordNet</INTERFACE>
+      <COMMENT>Princeton WordNet 1.6</COMMENT>
+      <PARAMETER   NAME="propertyUrl" SUFFIXES="xml" COMMENT="Property File">java.net.URL</PARAMETER>      
+      <ICON>controller.gif</ICON>
+    </RESOURCE>
+    
+    <!-- WordNet  -->
+    <RESOURCE>
+      <NAME>WordNet 1.6</NAME>
+      <CLASS>gate.gui.wordnet.WordNetViewer</CLASS>
+      <GUI TYPE="large">
+        <MAIN_VIEWER/>
+        <RESOURCE_DISPLAYED>gate.wordnet.WordNet</RESOURCE_DISPLAYED>
+      </GUI>
+    </RESOURCE>
+    
+  </CREOLE>
+</CREOLE-DIRECTORY>
+
