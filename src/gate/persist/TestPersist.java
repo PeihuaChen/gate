@@ -40,7 +40,9 @@ public class TestPersist extends TestCase
   /** Debug flag */
   private static final boolean DEBUG = false;
   private static Long uc01_lrID = null;
+  private static Long uc101_lrID = null;
   private static LanguageResource uc01_LR = null;
+  private static LanguageResource uc101_LR = null;
 
   /** Construction */
   public TestPersist(String name) throws GateException { super(name); }
@@ -491,54 +493,7 @@ public class TestPersist extends TestCase
   }
 
 
-  /** Test the DS register. */
   public void testDB_UseCase02() throws Exception {
-
-    //descr : create a corpus
-
-    //1. open data storage
-    DatabaseDataStore ds = new OracleDataStore();
-    Assert.assertNotNull(ds);
-    ds.setStorageUrl(this.JDBC_URL);
-    ds.open();
-
-    //2. get test document
-    Corpus corp = createTestCorpus();
-    Assert.assertNotNull(corp);
-
-    //3. get security factory & login
-    AccessController ac = new AccessControllerImpl();
-    Assert.assertNotNull(ac);
-    ac.open(this.JDBC_URL);
-
-    User usr = ac.findUser("kalina");
-    Assert.assertNotNull(usr);
-
-    Group grp = (Group)usr.getGroups().get(0);
-    Assert.assertNotNull(grp);
-
-    Session usrSession = ac.login("kalina","sesame",grp.getID());
-    Assert.assertNotNull(usrSession);
-    Assert.assertTrue(ac.isValidSession(usrSession));
-
-    //4. create security settings for doc
-    SecurityInfo si = new SecurityInfo(SecurityInfo.ACCESS_WR_GW,usr,grp);
-
-    //5. try adding corpus to data store
-    ds.adopt(corp,si);
-
-    //6.close
-    ac.close();
-    ds.close();
-
-    if(DEBUG) {
-      Err.prln("Use case 02 passed...");
-    }
-
-  }
-
-
-  public void testDB_UseCase03() throws Exception {
 
     //read a document
     //use the one created in UC01
@@ -642,14 +597,15 @@ public class TestPersist extends TestCase
     }
 
     if(DEBUG) {
-      Err.prln("Use case 03 passed...");
+      Err.prln("Use case 02 passed...");
     }
 
     //9.
-
   }
 
-  public void testDB_UseCase04() throws Exception {
+
+
+  public void testDB_UseCase03() throws Exception {
 
     //sync a document
     LanguageResource lr = null;
@@ -800,11 +756,12 @@ public class TestPersist extends TestCase
 
 */
     if(DEBUG) {
-      Err.prln("Use case 04 passed...");
+      Err.prln("Use case 03 passed...");
     }
   }
 
-  public void testDB_UseCase05() throws Exception {
+
+  public void testDB_UseCase04() throws Exception {
 
     //delete a document
     LanguageResource lr = null;
@@ -822,10 +779,75 @@ public class TestPersist extends TestCase
     ds.delete(DBHelper.DOCUMENT_CLASS,lr.getLRPersistenceId());
 
     if(DEBUG) {
-      Err.prln("Use case 05 passed...");
+      Err.prln("Use case 04 passed...");
     }
 
   }
+
+
+  /** Test the DS register. */
+  public void testDB_UseCase101() throws Exception {
+
+    //descr : create a corpus
+
+    //1. open data storage
+    DatabaseDataStore ds = new OracleDataStore();
+    Assert.assertNotNull(ds);
+    ds.setStorageUrl(this.JDBC_URL);
+    ds.open();
+
+    //2. get test document
+    Corpus corp = createTestCorpus();
+    Assert.assertNotNull(corp);
+
+    //3. get security factory & login
+    AccessController ac = new AccessControllerImpl();
+    Assert.assertNotNull(ac);
+    ac.open(this.JDBC_URL);
+
+    User usr = ac.findUser("kalina");
+    Assert.assertNotNull(usr);
+
+    Group grp = (Group)usr.getGroups().get(0);
+    Assert.assertNotNull(grp);
+
+    Session usrSession = ac.login("kalina","sesame",grp.getID());
+    Assert.assertNotNull(usrSession);
+    Assert.assertTrue(ac.isValidSession(usrSession));
+
+    //4. create security settings for doc
+    SecurityInfo si = new SecurityInfo(SecurityInfo.ACCESS_WR_GW,usr,grp);
+
+    //5. try adding corpus to data store
+    Corpus result = (Corpus)ds.adopt(corp,si);
+    Assert.assertNotNull(result);
+    Assert.assertTrue(result instanceof DatabaseCorpusImpl);
+    Assert.assertNotNull(result.getLRPersistenceId());
+
+    this.uc101_LR =  result;
+    this.uc101_lrID = (Long)result.getLRPersistenceId();
+
+    //6.close
+    ac.close();
+    ds.close();
+
+    if(DEBUG) {
+      Err.prln("Use case 101 passed...");
+    }
+
+  }
+
+
+  /** Test the DS register. */
+  public void testDB_UseCase102() throws Exception {
+    //read a corpus
+
+    if(DEBUG) {
+      Err.prln("Use case 102 passed...");
+    }
+
+  }
+
 
   public static void main(String[] args){
     try{
@@ -882,7 +904,11 @@ public class TestPersist extends TestCase
 
 
       test.setUp();
-      test.testDB_UseCase05();
+      test.testDB_UseCase101();
+      test.tearDown();
+
+      test.setUp();
+      test.testDB_UseCase102();
       test.tearDown();
 
     }catch(Exception e){
