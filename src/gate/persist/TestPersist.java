@@ -21,6 +21,7 @@ import java.net.*;
 import java.beans.*;
 import java.lang.reflect.*;
 import junit.framework.*;
+import java.sql.*;
 
 import gate.*;
 import gate.util.*;
@@ -39,6 +40,7 @@ public class TestPersist extends TestCase
   private static Long sampleCorpus_lrID = null;
   private static Document sampleDoc = null;
   private static Corpus sampleCorpus = null;
+  private static int dbType;
 
   private final String VERY_LONG_STRING =
   "The memory of Father came back to her. Ever since she had seen him retreat from those "+
@@ -127,6 +129,8 @@ public class TestPersist extends TestCase
     else
       JDBC_URL =
         (String) Gate.getDataStoreRegister().getConfigData().get("url-test");
+
+      this.dbType = DBHelper.getDatabaseType(JDBC_URL);
   } // setUp
 
   /** Put things back as they should be after running tests
@@ -521,6 +525,23 @@ public class TestPersist extends TestCase
     return corp;
   }
 
+  private DatabaseDataStore _createDS() {
+
+    DatabaseDataStore ds = null;
+    if (this.dbType == DBHelper.ORACLE_DB) {
+      ds = new OracleDataStore();
+    }
+    else if (this.dbType == DBHelper.POSTGRES_DB) {
+      ds = new PostgresDataStore();
+    }
+    else {
+      throw new IllegalArgumentException();
+    }
+
+    Assert.assertNotNull(ds);
+    return ds;
+  }
+
   /** Test the DS register. */
   public void testDB_UseCase01() throws Exception {
 ///Err.prln("Use case 01 started...");
@@ -528,7 +549,7 @@ public class TestPersist extends TestCase
 
 
     //1. open data storage
-    DatabaseDataStore ds = new OracleDataStore();
+    DatabaseDataStore ds = this._createDS();
     Assert.assertNotNull(ds);
     ds.setStorageUrl(this.JDBC_URL);
     ds.open();
@@ -587,7 +608,7 @@ public class TestPersist extends TestCase
     LanguageResource lr = null;
 
     //1. open data storage
-    DatabaseDataStore ds = new OracleDataStore();
+    DatabaseDataStore ds = this._createDS();
     Assert.assertNotNull(ds);
     ds.setStorageUrl(this.JDBC_URL);
     ds.open();
@@ -743,7 +764,7 @@ public class TestPersist extends TestCase
     Assert.assertTrue(ac.isValidSession(usrSession));
 
     //1. open data storage
-    DatabaseDataStore ds = new OracleDataStore();
+    DatabaseDataStore ds = this._createDS();
     Assert.assertNotNull(ds);
     ds.setStorageUrl(this.JDBC_URL);
     ds.open();
@@ -957,7 +978,7 @@ public class TestPersist extends TestCase
     Assert.assertTrue(ac.isValidSession(usrSession));
 
     //1. open data storage
-    DatabaseDataStore ds = new OracleDataStore();
+    DatabaseDataStore ds = this._createDS();
     Assert.assertNotNull(ds);
     ds.setStorageUrl(this.JDBC_URL);
     ds.open();
@@ -1011,7 +1032,7 @@ public class TestPersist extends TestCase
     Assert.assertTrue(ac.isValidSession(usrSession));
 
     //1. open data storage
-    DatabaseDataStore ds = new OracleDataStore();
+    DatabaseDataStore ds = this._createDS();
     Assert.assertNotNull(ds);
     ds.setStorageUrl(this.JDBC_URL);
     ds.open();
@@ -1066,7 +1087,7 @@ public class TestPersist extends TestCase
     Assert.assertTrue(ac.isValidSession(usrSession));
 
     //1. open data storage
-    DatabaseDataStore ds = new OracleDataStore();
+    DatabaseDataStore ds = this._createDS();
     Assert.assertNotNull(ds);
     ds.setStorageUrl(this.JDBC_URL);
     ds.open();
@@ -1130,7 +1151,7 @@ public class TestPersist extends TestCase
     Assert.assertTrue(ac.isValidSession(usrSession));
 
     //1. open data storage
-    DatabaseDataStore ds = new OracleDataStore();
+    DatabaseDataStore ds = this._createDS();
     Assert.assertNotNull(ds);
     ds.setStorageUrl(this.JDBC_URL);
     ds.open();
@@ -1194,12 +1215,16 @@ public class TestPersist extends TestCase
 
   public static void main(String[] args){
     try{
-///System.setProperty(Gate.GATE_CONFIG_PROPERTY,"y:/gate.xml")    ;
+
+//System.setProperty(Gate.GATE_CONFIG_PROPERTY,"y:/gate.xml")    ;
       Gate.setLocalWebServer(false);
       Gate.setNetConnected(false);
       Gate.init();
 
+
       TestPersist test = new TestPersist("");
+//      test.testPostgres01();
+
       test.setUp();
       test.testDelete();
       test.tearDown();
@@ -1267,6 +1292,40 @@ public class TestPersist extends TestCase
       e.printStackTrace();
     }
   }
+
+ /* public void testPostgres01() throws Exception {
+
+    DatabaseDataStore ds = new PostgresDataStore();
+    Assert.assertNotNull(ds);
+    ds.setStorageUrl("jdbc:postgresql://192.168.128.208:5432/gate09?user=gateuser&password=gate");
+    ds.open();
+    List lTypes = ds.getLrTypes();
+System.out.println(lTypes);
+    List lIds = ds.getLrIds(DBHelper.DOCUMENT_CLASS);
+System.out.println(lIds);
+
+*/
+
+/*
+    String url = "jdbc:postgresql://192.168.128.208:5432/gate09";
+    try {
+
+      Connection c = DBHelper.connect(url,"gateadmin","gate");
+      try {
+        PreparedStatement ps = c.prepareStatement("select test(1)");
+        ps.execute();
+      }
+      catch (SQLException sex) {
+        System.out.println("code:"+sex.getErrorCode());
+        sex.printStackTrace();
+      }
+    }
+    catch(Exception e) {
+      e.printStackTrace();
+    }
+*/
+/*  }
+*/
 } // class TestPersist
 
 
@@ -1300,4 +1359,5 @@ class Dummy implements Serializable {
   public String toString() {
     return "Dummy: intV=["+this.intValue+"], stringV=["+this.stringValue+"], boolV=["+this.boolValue+"], floatV = ["+this.floatValue+"]";
   }
+
 }
