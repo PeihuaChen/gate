@@ -316,6 +316,8 @@ public class Main {
   /** Verbose? */
   private static boolean verbose = false;
 
+  private static boolean runCorpusBenchmarkTool = false;
+
   public static String name = "Gate";
   public static String version;
   public static String build;
@@ -327,7 +329,7 @@ public class Main {
     */
   public static void processArgs(String[] args) {
 
-    Getopt g = new Getopt("GATE main", args, "hd:");
+    Getopt g = new Getopt("GATE main", args, "hde:");
     int c;
     while( (c = g.getopt()) != -1 )
       switch(c) {
@@ -352,6 +354,15 @@ public class Main {
           Out.prln(
             "CREOLE Directory " + urlString + " queued for registration"
           );
+          break;
+        //-e runs the CorpusBenchmarkTool (e for evaluate)
+        case 'e':
+          try {
+            CorpusBenchmarkTool.main(args);
+          } catch (GateException ex) {
+            Out.prln("Error running the evaluation tool: " + ex.getMessage());
+            System.exit(-1);
+          }
           break;
 
 
