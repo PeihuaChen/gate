@@ -112,7 +112,7 @@
       <NAME>Arabic OrthoMatcher</NAME>
       <JAR>arabic.jar</JAR>
       <CLASS>arabic.ArabicOrthoMatcher</CLASS>
-      <COMMENT>Chinese Orthomatcher</COMMENT>
+      <COMMENT>Arabic Orthomatcher</COMMENT>
       <PARAMETER DEFAULT="application/orthomatcher/listsNM.def"
         COMMENT="The URL for the definition file" SUFFIXES="def"
         NAME="definitionFileURL">java.net.URL</PARAMETER>
