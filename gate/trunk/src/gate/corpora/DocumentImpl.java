@@ -267,7 +267,7 @@ public class DocumentImpl implements Document
   } // getOrderingString()
 
   /** The features associated with this document. */
-  FeatureMap features;
+  protected FeatureMap features;
 
   /** The id of the next new annotation */
   int nextAnnotationId = 0;
