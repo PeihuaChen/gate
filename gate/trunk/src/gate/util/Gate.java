@@ -256,7 +256,6 @@ public class Gate
 
 //    return false;
   } // tryNetServer()
-
   /** Try to find GATE files in the local file system */
   protected static boolean tryFileSystem() throws MalformedURLException {
     String aGateResourceName = "gate/resources/creole/creole.xml";

@@ -301,14 +301,16 @@ public class DocumentImpl implements Document, StatusReporter
   public String toXml(){
     StringBuffer xmlContent = new StringBuffer("");
     // Add xml header
-    xmlContent.append("<?xml version=\"1.0\"?>\n");
+    xmlContent.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
 
     // Add the root element
     xmlContent.append("<GateDocument" +
         featuresToXml(this.getFeatures()) + ">\n");
     // Add plain text element
     xmlContent.append("<PlainText>");
+    xmlContent.append("<![CDATA[");
     xmlContent.append(this.getContent().toString());
+    xmlContent.append("]]>");
     xmlContent.append("</PlainText>\n");
     // Save the AnnotationSet element
     xmlContent.append(annotationSetToXml(this.getAnnotations()));

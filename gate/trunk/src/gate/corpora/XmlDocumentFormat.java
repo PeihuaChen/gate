@@ -142,7 +142,6 @@ public class XmlDocumentFormat extends TextualDocumentFormat
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException{
-    //Out.prln("XML Resource called");
     // Register XML mime type
     MimeType mime = new MimeType("text","xml");
     // Register the class handler for this mime type

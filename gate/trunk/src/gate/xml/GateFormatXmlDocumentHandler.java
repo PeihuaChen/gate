@@ -37,7 +37,7 @@ public class GateFormatXmlDocumentHandler extends HandlerBase
     */
   public GateFormatXmlDocumentHandler(gate.Document aDocument){
     // This string contains the plain text (the text without markup)
-    tmpDocContent = new String("");
+    tmpDocContent = new StringBuffer("");
 
     // Colector is used later to transform all custom objects into annotation
     // objects
@@ -66,6 +66,7 @@ public class GateFormatXmlDocumentHandler extends HandlerBase
 
     // replace the document content with the one without markups
     doc.setContent(new DocumentContentImpl(tmpDocContent.toString()));
+    long docSize = doc.getContent().size().longValue();
 
     // fire the status listener
     fireStatusChangedEvent("Total elements: " + elements);
@@ -74,7 +75,42 @@ public class GateFormatXmlDocumentHandler extends HandlerBase
     // based on the gate document.
     if (basicAS == null)
       basicAS = doc.getAnnotations();
+
+
+    // Create and add annotation to the basicAs
+    Iterator iterator = colector.iterator();
+    while (iterator.hasNext()){
+      AnnotationObject annot = (AnnotationObject) iterator.next();
+      iterator.remove();
+      // Create a new annotation and add it to the annotation set
+      if (canCreateAnnotation(annot.getStart().longValue(),
+                              annot.getEnd().longValue(),
+                              docSize)
+          )
+        try{
+          basicAS.add( annot.getStart(),
+                       annot.getEnd(),
+                       annot.getElemName(),
+                       annot.getFM()
+          );
+        }catch (gate.util.InvalidOffsetException e){
+          throw new GateSaxException(e);
+        }
+    }// End while
   }// endDocument
+
+  /**
+    * This method verifies if an Annotation can be created.
+    */
+  private boolean canCreateAnnotation(long start,
+                                      long end,
+                                      long gateDocumentSize){
+
+    if (start < 0 || end < 0 ) return false;
+    if (start > end ) return false;
+    if ((start > gateDocumentSize) || (end > gateDocumentSize)) return false;
+    return true;
+  }// canCreateAnnotation
 
   /**
     * This method is called when the SAX parser encounts the beginning of an
@@ -87,8 +123,7 @@ public class GateFormatXmlDocumentHandler extends HandlerBase
         fireStatusChangedEvent("Processed elements : " + elements);
 
     // Set the curent element being processed
-    currentElement = elemName;
-
+    currentElementStack.add(elemName);
     if ("GateDocument".equals(elemName))
       processGateDocumentElement(atts);
 
@@ -124,8 +159,7 @@ public class GateFormatXmlDocumentHandler extends HandlerBase
   public void characters( char[] text,int start,int length) throws SAXException{
     // Create a string object based on the reported text
     String content = new String(text, start, length);
-
-    if ("PlainText".equals(currentElement))
+    if ("PlainText".equals((String)currentElementStack.peek()))
       processTextOfPlainTextElement(content);
   }//characters
 
@@ -219,11 +253,24 @@ public class GateFormatXmlDocumentHandler extends HandlerBase
 
   /** This method deals with a Features element. */
   private void processFeaturesElement(AttributeList atts){
+    FeatureMap fm = new SimpleFeatureMapImpl();
+    if (atts != null){
+      for (int i = 0; i < atts.getLength(); i++){
+       // Extract name and value
+       String attName  = atts.getName(i);
+       String attValue = atts.getValue(i);
+       // Add them to the fm
+       fm.put(attName,attValue);
+      }// End for
+    }// End if
+    // Set the fm to the current Annotation
+    if (currentAnnot != null)
+      currentAnnot.setFM(fm);
   }//processFeaturesElement
 
   /** This method deals with a Text belonging to PlainText element. */
   private void processTextOfPlainTextElement(String text){
-    tmpDocContent = text.trim();
+    tmpDocContent.append(text);
   }//processTextOfPlainTextElement
 
   /**
@@ -305,7 +352,7 @@ public class GateFormatXmlDocumentHandler extends HandlerBase
   private SimpleErrorHandler _seh = new SimpleErrorHandler();
 
   /** The content of the XML document, without any tag */
-  private String tmpDocContent = null;
+  private StringBuffer tmpDocContent = new StringBuffer("");
 
   /** A gate document */
   private gate.Document doc = null;
@@ -327,7 +374,7 @@ public class GateFormatXmlDocumentHandler extends HandlerBase
 
 
   private FeatureMap documentFeatures = null;
-  private String currentElement = null;
+  private Stack currentElementStack = new Stack();
   private AnnotationObject currentAnnot = null;
 
 }//XmlDocumentHandler
