@@ -16,6 +16,7 @@
 package gate.wordnet;
 
 import java.util.*;
+import java.net.*;
 
 import gate.*;
 import gate.event.*;
@@ -47,5 +48,9 @@ public interface WordNet extends LanguageResource {
 
   /** returns list of WordSense-s for specific lemma of the specified POS */
   public List lookupWord(String lemma, int pos) throws WordNetException;
+
+  public void setPropertyUrl(URL _propertiesUrl);
+  public URL getPropertyUrl();
+
 }
 
