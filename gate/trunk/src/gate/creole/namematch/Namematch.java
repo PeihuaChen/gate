@@ -105,6 +105,10 @@ public class Namematch extends AbstractProcessingResource
     // both the external list and lookup
     if (!extLists.booleanValue()){
       buildTables(document);
+    } else {
+      try {
+        createAnnotList("cdg.lst","cdg");
+      } catch (IOException ioe){ioe.printStackTrace();}
     }
 
     // get the annotations from document
@@ -234,7 +238,6 @@ public class Namematch extends AbstractProcessingResource
 
               // apply name matching rules
               if (apply_rules_namematch(shortName,longName)) {
-
                 AnnotationMatches matchedAnnot2 = new AnnotationMatches();
                 AnnotationMatches matchedByAnnot2 = new AnnotationMatches();
 
@@ -622,7 +625,7 @@ public class Namematch extends AbstractProcessingResource
   public boolean matchRule0(String s1,
 			     String s2) {
     if (spur_match.containsKey(s1)
-	&& spur_match.containsKey(s2)) {
+	&& spur_match.containsKey(s2)&&(!s1.equals(s2))) {
       return
 	spur_match.get(s1).toString().equals(spur_match.get(s2).toString());
       }
