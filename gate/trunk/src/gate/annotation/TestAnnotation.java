@@ -35,12 +35,20 @@ public class TestAnnotation extends TestCase
     AnnotationSet as = new AnnotationSetImpl(testDocument1);
     assertEquals(as.size(), 0);
 
-    as.add(new Long(0), new Long(10), "Token", new SimpleFeatureMapImpl());
+    Integer newId;
+    newId =
+      as.add(new Long(0), new Long(10), "Token", new SimpleFeatureMapImpl());
+    assertEquals(newId.intValue(), 0);
+    newId =
+      as.add(new Long(11), new Long(12), "Token", new SimpleFeatureMapImpl());
+    assertEquals(newId.intValue(), 1);
+
+    assertEquals(as.size(), 2);
+    assert(! as.isEmpty());
 
     Iterator iter = as.iterator();
     while(iter.hasNext()) {
       Annotation a = (Annotation) iter.next();
-      assertEquals(a.getId().longValue(), 0);
       assertEquals(a.getType(), "Token");
       assertEquals(a.getFeatures().size(), 0);
     }
