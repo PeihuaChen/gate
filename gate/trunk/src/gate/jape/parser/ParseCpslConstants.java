@@ -15,43 +15,52 @@ public interface ParseCpslConstants {
   int lettersAndDigitsAndDashes = 9;
   int multiphase = 10;
   int phases = 11;
-  int phase = 12;
-  int input = 13;
-  int option = 14;
-  int rule = 15;
-  int macro = 16;
-  int priority = 17;
-  int pling = 18;
-  int kleeneOp = 19;
-  int integer = 20;
-  int string = 27;
-  int bool = 28;
-  int ident = 29;
-  int floatingPoint = 30;
-  int exponent = 31;
-  int colon = 32;
-  int semicolon = 33;
-  int period = 34;
-  int bar = 35;
-  int comma = 36;
-  int leftBrace = 37;
-  int rightBrace = 38;
-  int leftBracket = 39;
-  int rightBracket = 40;
-  int assign = 41;
-  int equals = 42;
-  int colonplus = 43;
-  int whiteSpace = 44;
-  int singleLineCStyleComment = 45;
-  int singleLineCpslStyleComment = 46;
-  int commentStart = 47;
-  int commentChars = 48;
-  int commentEnd = 49;
-  int other = 50;
+  int path = 12;
+  int phasesWhiteSpace = 13;
+  int phasesSingleLineCStyleComment = 14;
+  int phasesSingleLineCpslStyleComment = 15;
+  int phasesCommentStart = 16;
+  int phasesCommentChars = 17;
+  int phasesCommentEnd = 18;
+  int phase = 19;
+  int input = 20;
+  int option = 21;
+  int rule = 22;
+  int macro = 23;
+  int priority = 24;
+  int pling = 25;
+  int kleeneOp = 26;
+  int integer = 27;
+  int string = 34;
+  int bool = 35;
+  int ident = 36;
+  int floatingPoint = 37;
+  int exponent = 38;
+  int colon = 39;
+  int semicolon = 40;
+  int period = 41;
+  int bar = 42;
+  int comma = 43;
+  int leftBrace = 44;
+  int rightBrace = 45;
+  int leftBracket = 46;
+  int rightBracket = 47;
+  int assign = 48;
+  int equals = 49;
+  int colonplus = 50;
+  int whiteSpace = 51;
+  int singleLineCStyleComment = 52;
+  int singleLineCpslStyleComment = 53;
+  int commentStart = 54;
+  int commentChars = 55;
+  int commentEnd = 56;
+  int other = 57;
 
   int DEFAULT = 0;
-  int IN_STRING = 1;
-  int WithinComment = 2;
+  int IN_PHASES = 1;
+  int PHASES_WITHIN_COMMENT = 2;
+  int IN_STRING = 3;
+  int WITHIN_COMMENT = 4;
 
   String[] tokenImage = {
     "<EOF>",
@@ -66,6 +75,13 @@ public interface ParseCpslConstants {
     "<lettersAndDigitsAndDashes>",
     "\"Multiphase:\"",
     "\"Phases:\"",
+    "<path>",
+    "<phasesWhiteSpace>",
+    "<phasesSingleLineCStyleComment>",
+    "<phasesSingleLineCpslStyleComment>",
+    "<phasesCommentStart>",
+    "<phasesCommentChars>",
+    "<phasesCommentEnd>",
     "\"Phase:\"",
     "\"Input:\"",
     "\"Options:\"",
@@ -80,7 +96,7 @@ public interface ParseCpslConstants {
     "\"\\\\r\"",
     "\"\\\\t\"",
     "\"\\\\\\\"\"",
-    "<token of kind 26>",
+    "<token of kind 33>",
     "\"\\\"\"",
     "<bool>",
     "<ident>",
