@@ -63,29 +63,37 @@ public class AnnotationDiff extends AbstractVisualResource{
     */
   private String responseAnnotationSetNameFalsePoz = null;
 
-  /** The annotation schema object used to get the annotation name
-    */
+  /** The annotation schema object used to get the annotation name*/
   private AnnotationSchema annotationSchema = null;
 
-  /** The Precision value (see NLP Information Extraction)*/
+  /** The precision strict value (see NLP Information Extraction)*/
   private double precisionStrict = 0.0;
+  /** The precision lenient value (see NLP Information Extraction)*/
   private double precisionLenient = 0.0;
+  /** The precision average value (see NLP Information Extraction)*/
   private double precisionAverage = 0.0;
 
-  /** The Recall value (see NLP Information Extraction)*/
+  /** The Recall strict value (see NLP Information Extraction)*/
   private double recallStrict = 0.0;
+  /** The Recall lenient value (see NLP Information Extraction)*/
   private double recallLenient = 0.0;
+  /** The Recall average value (see NLP Information Extraction)*/
   private double recallAverage = 0.0;
 
-  /** The False positive (see NLP Information Extraction)*/
+  /** The False positive strict (see NLP Information Extraction)*/
   private double falsePositiveStrict = 0.0;
+  /** The False positive lenient (see NLP Information Extraction)*/
   private double falsePositiveLenient = 0.0;
+  /** The False positive average (see NLP Information Extraction)*/
   private double falsePositiveAverage = 0.0;
 
-  /** The F-measure and weight (see NLP Information Extraction)*/
+  /** The F-measure strict (see NLP Information Extraction)*/
   private double fMeasureStrict = 0.0;
+  /** The F-measure lenient (see NLP Information Extraction)*/
   private double fMeasureLenient = 0.0;
+  /** The F-measure average (see NLP Information Extraction)*/
   private double fMeasureAverage = 0.0;
+  /** The weight used in F-measure (see NLP Information Extraction)*/
   public  static double weight = 0.5;
 
   /**  This string represents the type of annotations used to play the roll of
@@ -102,33 +110,55 @@ public class AnnotationDiff extends AbstractVisualResource{
   /** Used to represent the result of diff. See DiffSetElement class.*/
   private Set diffSet = null;
 
-  /** These fields are used in doDiff() and detectKey(Response)Type()*/
+  /** This field is used in doDiff() and detectKeyType() methods and holds all
+   *  partially correct keys */
   private Set keyPartiallySet = new HashSet();
+  /** This field is used in doDiff() and detectResponseType() methods*/
   private Set responsePartiallySet = new HashSet();
 
-  /** This lists are created from keyAnnotationSet and responseAnnotationSet*/
+  /** This list is created from keyAnnotationSet at init() time*/
   private java.util.List keyAnnotList = null;
+  /** This list is created from responseAnnotationSet at init() time*/
   private java.util.List responseAnnotList = null;
 
-  /** Fields used to describe the type of annotations */
+  /**  Field designated to represent the max nr of annot types and coolors for
+    *  each type
+    **/
   public final int MAX_TYPES = 5;
-
-  public final int NULL_TYPE = -1;
+  /** A default type when all annotation are the same represented by White color*/
   public final int DEFAULT_TYPE = 0;
+  /** A correct type when all annotation are corect represented by Green color*/
   public final int CORRECT_TYPE = 1;
+  /** A partially correct type when all annotation are corect represented
+   *  by Blue color*/
   public final int PARTIALLY_CORRECT_TYPE = 2;
+  /** A spurious type when annotations in response were not present in key.
+   *  Represented by Red color*/
   public final int SPURIOUS_TYPE = 3;
+  /** A missing type when annotations in key were not present in response
+   *  Represented by Yellow color*/
   public final int MISSING_TYPE = 4;
 
+  /** Red used for SPURIOUS_TYPE*/
   private  final Color RED = new Color(255,173,181);
+  /** Green used for CORRECT_TYPE*/
   private  final Color GREEN = new Color(173,255,214);
+  /** White used for DEFAULT_TYPE*/
   private  final Color WHITE = new Color(255,255,255);
+  /** Blue used for PARTIALLY_CORRECT_TYPE*/
   private  final Color BLUE = new Color(173,215,255);
+  /** Yellow used for MISSING_TYPE*/
   private  final Color YELLOW = new Color(255,231,173);
-  private  final Color BLACK = new Color(0,0,0);
 
+  /** Used in DiffSetElement to represent an empty raw in the table*/
+  public final int NULL_TYPE = -1;
+  /** Used in some setForeground() methods*/
+  private  final Color BLACK = new Color(0,0,0);
+  /** The array holding the colours according to the annotation types*/
   private Color colors[] = new Color[MAX_TYPES];
-  JScrollPane scrollPane = new JScrollPane();
+
+  /** A scroll for the AnnotDiff's table*/
+  private JScrollPane scrollPane = new JScrollPane();
 
   /** Used to store the no. of annotations from response,identified as belonging
     * to one of the previous types.
@@ -1021,7 +1051,7 @@ public class AnnotationDiff extends AbstractVisualResource{
     ) {
       JComponent defaultComp = null;
       defaultComp = (JComponent) super.getTableCellRendererComponent(
-	table, value, isSelected, hasFocus, row, column
+  table, value, isSelected, hasFocus, row, column
       );
 
       // The column number four will be randered using a blank component

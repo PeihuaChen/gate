@@ -73,6 +73,9 @@ public class TestSgml extends TestCase
     // set's the map
     docFormat.setMarkupElementsMap(markupElementsMap);
     docFormat.unpackMarkup (doc,"DocumentContent");
+    AnnotationSet annotSet = doc.getAnnotations("Original markups");
+    assertEquals("For "+doc.getSourceUrl()+" the number of annotations"+
+    " should be:1022",1022,annotSet.size());
     // Verfy if all annotations from the default annotation set are consistent
     gate.corpora.TestDocument.verifyNodeIdConsistency(doc);
   }// testSgml

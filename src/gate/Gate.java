@@ -42,6 +42,10 @@ public class Gate
     // "http://gate.ac.uk/creole/"
   };
 
+
+  /** The GATE URI used to interpret custom GATE tags*/
+  public static final String URI = "http://www.gate.ac.uk";
+
   /** Minimum version of JDK we support */
   protected static final String MIN_JDK_VERSION = "1.3";
 

@@ -176,9 +176,10 @@ public class TestGate {
       // set this true to run all tests; false to run the just one below
       boolean allTests = true;
 
-      if(! allTests)
-        suite.addTest(TestCreole.suite());
-      else {
+      if(! allTests){
+        suite.addTest(TestXml.suite());
+        suite.addTest(TestSgml.suite());
+      }else {
         suite.addTest(TestControllers.suite());
         suite.addTest(TestPersist.suite());
         suite.addTest(TestAnnotationDiff.suite());
