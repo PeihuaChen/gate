@@ -107,7 +107,7 @@ public class PostgresDataStore extends JDBCDataStore {
     boolean lockSucceeded = false;
 
     try {
-      String sql = " perform persist_unlock_lr(?,?) ";
+      String sql = " select persist_unlock_lr(?,?) ";
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,((Long)lr.getLRPersistenceId()).longValue());
       pstmt.setLong(2,this.session.getUser().getID().longValue());
@@ -237,9 +237,12 @@ public class PostgresDataStore extends JDBCDataStore {
 
       pstmt.execute();
       rset = pstmt.getResultSet();
-      rset.next();
 
-      lockSucceeded = rset.getBoolean(4);
+      if (false == rset.next()) {
+        throw new PersistenceException("empty result set");
+      }
+
+      lockSucceeded = rset.getBoolean(1);
     }
     catch(SQLException sqle) {
 
@@ -924,7 +927,34 @@ public class PostgresDataStore extends JDBCDataStore {
   protected void _syncDocumentContent(Document doc)
     throws PersistenceException {
 
-    throw new MethodNotImplementedException();
+    //0.
+    Assert.assertNotNull(doc);
+    Assert.assertNotNull(doc.getLRPersistenceId());
+    Assert.assertTrue(doc instanceof DatabaseDocumentImpl);
+
+    PreparedStatement pstmt = null;
+    //1.
+    try {
+      pstmt = this.jdbcConn.prepareStatement("select persist_update_document_content(?,?)");
+      pstmt.setLong(1,((Long)doc.getLRPersistenceId()).longValue());
+
+      DocumentContent dc = doc.getContent();
+      if (dc.size().longValue() > 0) {
+        pstmt.setString(2,dc.toString());
+      }
+      else {
+        pstmt.setNull(2,java.sql.Types.LONGVARCHAR);
+      }
+
+      pstmt.execute();
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("Cannot update document content ["+
+                                      sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(pstmt);
+    }
   }
 
   /** helper for sync() - never call directly */
@@ -975,12 +1005,12 @@ public class PostgresDataStore extends JDBCDataStore {
   }
 
   /** helper for sync() - never call directly */
-  protected void _syncAnnotationSets(Document doc,Collection removedSets,Collection addedSets)
+/*  protected void _syncAnnotationSets(Document doc,Collection removedSets,Collection addedSets)
     throws PersistenceException {
 
     throw new MethodNotImplementedException();
   }
-
+*/
 
   /** helper for sync() - never call directly */
 /*  protected void _syncAddedAnnotations(Document doc, AnnotationSet as, Collection changes)
