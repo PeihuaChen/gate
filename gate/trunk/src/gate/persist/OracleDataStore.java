@@ -894,12 +894,14 @@ System.out.println();
     createFeatures(lrID,DBHelper.FEATURE_OWNER_CORPUS,corp.getFeatures());
 
     //5. create a DatabaseCorpusImpl and return it
-
-    //5. set the corpus persistence ID
-    corp.setLRPersistenceId(corpusID);
+    Corpus dbCorpus = new DatabaseCorpusImpl(corp.getName(),
+                                             this,
+                                              lrID,
+                                              corp.getFeatures(),
+                                              dbDocs);
 
     //6. done
-    return corp;
+    return dbCorpus;
   }
 
 
