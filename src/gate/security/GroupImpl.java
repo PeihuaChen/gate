@@ -92,9 +92,10 @@ public class GroupImpl
 
     /** NOTE that we're returning a copy of the actuall collection of users
      *  so that someone would not accidentaly modify it */
-
-    Vector copy = new Vector(users.subList(0,users.size()-1));
+    Vector copy = new Vector();
+    copy.addAll(this.users);
     return copy;
+
   }
 
 
@@ -308,7 +309,6 @@ public class GroupImpl
    *  */
   public boolean equals(Object obj)
   {
-System.out.println(">>>> " +obj);
     Assert.assert(obj instanceof Group);
 
     Group group2 = (Group)obj;
@@ -382,6 +382,32 @@ System.out.println(">>>> " +obj);
       default:
         Assert.fail();
     }
+  }
+
+  /*package*/ void setUsers(Vector userIDs) {
+
+    for (int i=0; i< userIDs.size(); i++) {
+      Long usr_id = (Long)userIDs.elementAt(i);
+      User usr = null;
+
+      try {
+        usr = (User)this.ac.findUser(usr_id);
+      }
+      catch(SecurityException se) {
+        Assert.fail();
+      }
+      catch(PersistenceException se) {
+        Assert.fail();
+      }
+
+      //is valid?
+      Assert.assertNotNull(usr);
+      Assert.assert(usr instanceof User);
+      //add to our collection, which was empty so far
+      this.users.add(usr);
+    }
+
+
   }
 
 }
