@@ -32,19 +32,20 @@ public class Namematch extends AbstractProcessingResource
   /** the document for namematch */
   protected gate.Document document;
 
-  /** the annotation set for the document */
-  protected AnnotationSet nameAnnots ;
+  protected String annotationSetName;
 
-  // annotation specific variables
   // the type of the annotation
-  protected String annotType;
+  protected String annotationType;
 
   // the type of the attribute
-  protected String attrName;
+  protected String attributeType;
 
-  protected boolean int_cdg_list;
+  protected boolean intCdgList;
 
-  protected boolean int_ext_lists;
+  protected boolean intExtLists;
+
+  /** the annotation set for the document */
+  protected AnnotationSet nameAnnots ;
 
   protected Vector matchesDocument = null;
 
@@ -147,30 +148,45 @@ public class Namematch extends AbstractProcessingResource
       return;
     }
 
-    if (int_ext_lists)
-      buildTables(document, int_cdg_list);
+    if (intExtLists)
+      buildTables(document, intCdgList);
     else {
       try {
       createLists();
       } catch (IOException ioe) {ioe.printStackTrace();}
     }
 
-    if(nameAnnots == null) nameAnnots = document.getAnnotations();
+    if  ((annotationSetName != null)||(annotationSetName != ""))
+      nameAnnots = document.getAnnotations(annotationSetName);
+    else
+      nameAnnots = document.getAnnotations();
+
+    if (nameAnnots != null) {
+      if (nameAnnots.isEmpty()) {
+        Out.prln("No annotations");
+        return;
+      }
+    } else {return;}
+
+
+/*    nameAnnots = document.getAnnotations();
     else if(nameAnnots.getDocument() != document) {
       executionException = new ExecutionException(
         "The annotation set provided does not belong to the current document!"
       );
       return;
-    }
+    }*/
 
-    nameAnnots = nameAnnots.get(annotType,
+    nameAnnots = nameAnnots.get(annotationType,
                                 Factory.newFeatureMap());
 
     // return if no such annotations exist
-    if (nameAnnots.isEmpty()) {
-      System.out.println("No annotations of this kind...");
-      return;
-    }
+    if (nameAnnots != null) {
+      if (nameAnnots.isEmpty()) {
+        Out.prln("No annotations of this kind...");
+        return;
+      }
+    } else {return;}
 
     // PROBLEM:
     // due to the fact that the strings to be compared
@@ -228,11 +244,11 @@ public class Namematch extends AbstractProcessingResource
       // the map with the attributes of the annot1
       FeatureMap attrib1 = annot1.getFeatures();
       String annot1IdValue;
-      if (attrib1.get(attrName) == null)
+      if (attrib1.get(attributeType) == null)
         continue; //do not match if the attribute is missing
       else
-        // the value of the attribute of type attrName
-        annot1IdValue = (String )attrib1.get(attrName);
+        // the value of the attribute of type attributeType
+        annot1IdValue = (String )attrib1.get(attributeType);
 
       AnnotationMatches matchedAnnot1 = new AnnotationMatches();
 
@@ -246,10 +262,10 @@ public class Namematch extends AbstractProcessingResource
         FeatureMap attrib2 = annot2.getFeatures();
 
         String annot2IdValue;
-        if (attrib2.get(attrName) == null)
+        if (attrib2.get(attributeType) == null)
           continue; //do not match if the attribute is missing
         else
-          annot2IdValue = (String )attrib2.get(attrName);
+          annot2IdValue = (String )attrib2.get(attributeType);
 
         // first check that annot2 is NOT already in the list of
         // matched annotations for annot1 - do not proceed with
@@ -316,20 +332,20 @@ public class Namematch extends AbstractProcessingResource
 
             //get the map with the attributes
             // replace annot1IdValue ->annot2IdValue
-            attrib1.put(attrName,(String)annot2IdValue);
+            attrib1.put(attributeType,(String)annot2IdValue);
 
             // set the map with the attribute
             annot1.setFeatures(attrib1);
           } else if (!annot1IdValue.equals("unknown")
 		    && annot2IdValue.equals("unknown")) {
 
-            // annot2.removeAttribute(attrName);
-            attrib2.remove(attrName);
+            // annot2.removeAttribute(attributeType);
+            attrib2.remove(attributeType);
 
 	    annot2.setFeatures(attrib2);
 
             //get the map with the attributes
-            attrib2.put(attrName,(String)annot1IdValue);
+            attrib2.put(attributeType,(String)annot1IdValue);
 
             // set the map with the attribute
             annot1.setFeatures(attrib2);
@@ -354,7 +370,7 @@ public class Namematch extends AbstractProcessingResource
       attr.put("matches", matchesVector);
     } // for Enumeration
     AnnotationSet nameAnnots1 =
-      document.getAnnotations().get(annotType, Factory.newFeatureMap());
+      document.getAnnotations().get(annotationType, Factory.newFeatureMap());
 
     // get the annotation from the document
     Map namedAnnotationSets = document.getNamedAnnotationSets();
@@ -373,7 +389,6 @@ public class Namematch extends AbstractProcessingResource
 
       Vector booleanMatches = new Vector(namedAnnots.size());
       for (int j=0;j<namedAnnots.size();j++) booleanMatches.add(j,"false");
-      Out.prln(booleanMatches.size());
 
       // go through all the annotations and put all the matches in a vector
       for (int i = 0; i< namedAnnots.size();i++) {
@@ -508,27 +523,27 @@ public class Namematch extends AbstractProcessingResource
 
   /** set the annotations */
   public void setIntExtLists(boolean newInt_Ext_Lists) {
-    int_ext_lists = newInt_Ext_Lists;
+    intExtLists = newInt_Ext_Lists;
   }
 
   /** set the annotation set */
-  public void setAnnotationSet(gate.AnnotationSet newAnnotationSet) {
-    nameAnnots = newAnnotationSet;//.addAll(newAnnotationSet);
+  public void setAnnotationSetName(String newAnnotationSetName) {
+    annotationSetName = newAnnotationSetName;
   }
 
   /** set the type of the annotation*/
-  public void setType(String newType) {
-    annotType = newType;
+  public void setAnnotationType(String newType) {
+    annotationType = newType;
   }
 
   /** set the type of the attribute*/
-  public void setTypeAttr(String newTypeAttr) {
-    attrName = newTypeAttr;
+  public void setAttributeType(String newTypeAttr) {
+    attributeType = newTypeAttr;
   }
 
-
+  /** set intCdgList */
   public void setIntCdgList(boolean newIntCdgList) {
-    int_cdg_list = newIntCdgList;
+    intCdgList = newIntCdgList;
   }
 
   public Vector getMatchesDocument() {
@@ -1016,7 +1031,7 @@ public class Namematch extends AbstractProcessingResource
     * (used by the namematch rules)
     */
 
-  private void buildTables(Document doc, boolean int_cdg_list) {
+  private void buildTables(Document doc, boolean intCdgList) {
 
     // aliases table: corresponding aliases have the same value
     alias = new HashMap(17);
@@ -1046,7 +1061,7 @@ public class Namematch extends AbstractProcessingResource
 
     // company designators
     cdg = new HashMap();
-    if (!int_cdg_list) {// i.e. get cdg from Lookup annotations
+    if (!intCdgList) {// i.e. get cdg from Lookup annotations
       // get all Lookup annotations
       AnnotationSet nameAnnots =
       //doc.selectAnnotations("Lookup", new JdmAttributeSequence());
@@ -1075,7 +1090,7 @@ public class Namematch extends AbstractProcessingResource
         }// for
       } // if (!nameAnnots.isEmpty())
 
-    } //if (!int_cdg_list)
+    } //if (!intCdgList)
     else {
       cdg.put("Co","cdg");
       cdg.put("PTE LTD","cdg");
