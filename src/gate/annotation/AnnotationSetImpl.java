@@ -42,7 +42,8 @@ import gate.*;
   * <P>
   * There are five indices: annotation by id, annotations by type, annotations
   * by start/end node and nodes by offset. The last three jointly provide
-  * positional indexing; construction of these is triggered by indexByOffset(),
+  * positional indexing; construction of these is triggered by 
+  * indexByStart/EndOffset(),
   * or by calling a get method that selects on offset. The type
   * index is triggered by indexByType(), or calling a get method that selects
   * on type. The id index is always present.
@@ -105,6 +106,8 @@ implements AnnotationSet
     if(annotsByType != null) {
       AnnotationSet sameType = (AnnotationSet) annotsByType.get(a.getType());
       if(sameType != null) sameType.remove(a);
+      if(sameType.isEmpty()) // none left of this type
+        annotsByType.remove(a.getType());
     }
   } // removeFromTypeIndex(a)
 
@@ -143,6 +146,8 @@ implements AnnotationSet
   public AnnotationSet get() {
     AnnotationSet resultSet = new AnnotationSetImpl(doc);
     resultSet.addAll(annotsById.values());
+    if(resultSet.isEmpty())
+      return null;
     return resultSet;
   } // get()
 
@@ -169,8 +174,7 @@ implements AnnotationSet
 
     if(resultSet.isEmpty())
       return null;
-    else
-      return resultSet;
+    return resultSet;
   } // get(types)
 
   /** Select annotations by type and features */
@@ -195,8 +199,7 @@ implements AnnotationSet
 
     if(resultSet.isEmpty())
       return null;
-    else
-      return resultSet;
+    return resultSet;
   } // get(type, constraints)
 
   /** Select annotations by offset. This returns the set of annotations
@@ -210,10 +213,7 @@ implements AnnotationSet
     Node nextNode = (Node) nodesByOffset.getNextOf(offset);
     if(nextNode == null) // no nodes beyond this offset
       return null;
-    AnnotationSet nextAnnots =
-      (AnnotationSet) annotsByStartNode.get(nextNode.getId());
-
-    return nextAnnots;
+    return (AnnotationSet) annotsByStartNode.get(nextNode.getId());
   } // get(offset)
 
   /** Select annotations by type, features and offset */
@@ -227,7 +227,7 @@ implements AnnotationSet
     return nextAnnots.get(type, constraints);
   } // get(type, constraints, offset)
 
-  /** Add an existing annotation */
+  /** Add an existing annotation. Returns true when the set is modified. */
   public boolean add(Object o) throws ClassCastException {
     Annotation a = (Annotation) o;
     Object oldValue = annotsById.put(a.getId(), a);
@@ -285,14 +285,6 @@ implements AnnotationSet
     while(annotIter.hasNext())
       addToTypeIndex( (Annotation) annotIter.next() );
   } // indexByType()
-
-  /** Construct the positional indices (nodes by offset and annotations
-    * by start/end node).
-    */
-  public void indexByOffset() {
-    indexByStartOffset();
-    indexByEndOffset();
-  } // indexByOffset()
 
   /** Construct the positional indices for annotation start */
   public void indexByStartOffset() {
