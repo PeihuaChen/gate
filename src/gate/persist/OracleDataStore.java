@@ -202,8 +202,11 @@ public class OracleDataStore extends JDBCDataStore {
           throw new PersistenceException(sqle);
         }
       }
-   }
+    }
 
+    //let the world know about it
+    fireResourceDeleted(
+      new DatastoreEvent(this, DatastoreEvent.RESOURCE_DELETED, null, lrId));
   }
 
   private void deleteDocument(Long lrId)
@@ -218,11 +221,6 @@ public class OracleDataStore extends JDBCDataStore {
                       "{ call "+Gate.DB_OWNER+".persist.delete_document(?) }");
       stmt.setLong(1,ID.longValue());
       stmt.execute();
-
-      //let the world know about it
-      fireResourceDeleted(
-        new DatastoreEvent(this, DatastoreEvent.RESOURCE_DELETED, null, lrId));
-
     }
     catch(SQLException sqle) {
       throw new PersistenceException("can't delete LR from DB: ["+ sqle.getMessage()+"]");
@@ -246,11 +244,6 @@ public class OracleDataStore extends JDBCDataStore {
                       "{ call "+Gate.DB_OWNER+".persist.delete_corpus(?) }");
       stmt.setLong(1,ID.longValue());
       stmt.execute();
-
-      //let the world know about it
-      fireResourceDeleted(
-        new DatastoreEvent(this, DatastoreEvent.RESOURCE_DELETED, null, lrId));
-
     }
     catch(SQLException sqle) {
       throw new PersistenceException("can't delete LR from DB: ["+ sqle.getMessage()+"]");
@@ -321,10 +314,7 @@ public class OracleDataStore extends JDBCDataStore {
 
     // let the world know about it
     fireResourceWritten(
-      new DatastoreEvent(
-        this, DatastoreEvent.RESOURCE_WRITTEN, lr, lr.getLRPersistenceId()
-      )
-    );
+      new DatastoreEvent(this, DatastoreEvent.RESOURCE_WRITTEN, lr, lr.getLRPersistenceId()));
   }
 
   /**
@@ -451,9 +441,9 @@ public class OracleDataStore extends JDBCDataStore {
     // fire also resource written event because it's now saved
 //System.out.println("firing adopt(), ID=["+result.getLRPersistenceId()+"]");
     fireResourceWritten(
-      new DatastoreEvent(
-        this, DatastoreEvent.RESOURCE_WRITTEN,
-        result, result.getLRPersistenceId()
+      new DatastoreEvent(this, DatastoreEvent.RESOURCE_WRITTEN,
+                          result,
+                          result.getLRPersistenceId()
       )
     );
 
