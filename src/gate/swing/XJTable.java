@@ -198,7 +198,8 @@ public class XJTable extends JTable {
         }//if(renderer != null)
       }//for
 
-      width += getColumnModel().getColumnMargin();
+      int marginWidth = getColumnModel().getColumnMargin(); 
+      if(marginWidth > 0) width += marginWidth; 
       tCol.setPreferredWidth(width);
       tCol.setWidth(width);
       totalWidth += width;
@@ -208,6 +209,7 @@ public class XJTable extends JTable {
       totalHeight += getRowHeight(row);
     dim = new Dimension(totalWidth, totalHeight);
     setPreferredScrollableViewportSize(dim);
+    setPreferredSize(dim);
 
     //extend the last column if autoresize
     if(getAutoResizeMode() != AUTO_RESIZE_OFF){
