@@ -34,9 +34,9 @@ import org.xml.sax.helpers.*;
   * The idea is to parse the XML document and construct Gate annotations
   * objects.
   * This class also will replace the content of the Gate document with a
-  * new one containing anly text from the XML document.
+  * new one containing only text from the XML document.
   */
-public class XmlDocumentHandler extends DefaultHandler{
+public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -68,6 +68,8 @@ public class XmlDocumentHandler extends DefaultHandler{
                             Map                 aMarkupElementsMap,
                             Map                 anElement2StringMap,
                             gate.AnnotationSet  anAnnotationSet){
+    // init parent
+    super();
     // init stack
     stack = new java.util.Stack();
 
@@ -100,6 +102,8 @@ public class XmlDocumentHandler extends DefaultHandler{
     * XML document.
     */
   public void startDocument() throws org.xml.sax.SAXException {
+    // init of variables in the parent
+    super.startDocument();
   }
 
   /**
@@ -266,6 +270,8 @@ public class XmlDocumentHandler extends DefaultHandler{
     * separatley regardless of the text sourinding the entity.
     */
   public void characters( char[] text,int start,int length) throws SAXException{
+    // correction of real offset. Didn't affect on other data.
+    super.characters(text, start, length);
     // create a string object based on the reported text
     String content = new String(text, start, length);
     StringBuffer contentBuffer = new StringBuffer("");
