@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- * 
+ *
  *  Hamish Cunningham, 24/07/98
  *
  *  $Id$
@@ -17,7 +17,7 @@
 package gate.jape;
 
 import java.util.*;
-import com.objectspace.jgl.*;
+//import com.objectspace.jgl.*;
 import gate.annotation.*;
 import gate.util.*;
 import gate.*;
@@ -44,7 +44,7 @@ implements JapeConstants, java.io.Serializable
   public String getBindingName() { return bindingName; }
 
   /** Get a list of CPEs that we contain. */
-  protected ArrayIterator getCPEs() {
+  protected Iterator getCPEs() {
     return constraintGroup.getCPEs();
   } // getCPEs
 
@@ -200,6 +200,13 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.7  2001/09/12 11:59:33  kalina
+// Changed the old JAPE stuff to use the new Collections API,
+// instead of com.objectspace stuff. Will eliminate that library
+// completely very soon! Just one class left to re-implement,
+//
+// ParseCPSL.jj changed accordingly. All tested and no smoke.
+//
 // Revision 1.6  2000/11/08 16:35:02  hamish
 // formatting
 //

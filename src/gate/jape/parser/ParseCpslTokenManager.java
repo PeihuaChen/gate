@@ -2,8 +2,8 @@
 package gate.jape.parser;
 import java.io.*;
 import java.net.*;
-import java.util.Enumeration;
-import com.objectspace.jgl.*;
+import java.util.*;
+import com.objectspace.jgl.Pair;
 import gate.util.*;
 import gate.*;
 import gate.jape.*;
