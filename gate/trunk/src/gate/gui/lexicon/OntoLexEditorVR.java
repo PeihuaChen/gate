@@ -20,11 +20,9 @@ import com.ontotext.gate.vr.*;
 import gate.lexicon.*;
 import gate.util.*;
 import javax.swing.*;
-import java.awt.GridLayout;
 import gate.creole.ontology.*;
 import java.util.*;
 import gate.*;
-import java.awt.Dimension;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
@@ -32,6 +30,10 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.*;
 import gate.util.GateRuntimeException;
 import java.net.URL;
+import java.awt.GridLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import gate.gui.MainFrame;
 
 public class OntoLexEditorVR extends AbstractVisualResource
     implements ListSelectionListener, TreeSelectionListener {
@@ -157,6 +159,11 @@ public class OntoLexEditorVR extends AbstractVisualResource
     ontoEditor.getSelectionModel().setSelectionMode(
         javax.swing.tree.TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
 
+    KnowledgeBaseTreeCellRenderer kbTreeCellRenderer =
+                              new KnowledgeBaseTreeCellRenderer();
+    ontoEditor.setCellRenderer(kbTreeCellRenderer);
+
+
     synsetScroller = new JScrollPane();
     leftBox.add(synsetScroller, null);
     synsetScroller.setVisible(false);
@@ -201,7 +208,7 @@ public class OntoLexEditorVR extends AbstractVisualResource
 
   protected void updateGUI(){
     Ontology ontology = loadOntology(ontoLex.getOntologyIdentifier());
-    ClassNode root = ClassNode.createRootNode(ontology);
+    ClassNode root = ClassNode.createRootNode(ontology, true);
     this.ontoModel = new OntoTreeModel(root);
     this.ontoEditor.setModel(ontoModel);
     ontoEditor.setVisible(true);
@@ -250,7 +257,7 @@ public class OntoLexEditorVR extends AbstractVisualResource
         fm.put("URL", ontoId);
 
         theOntology = (Ontology)Factory.createResource(
-            "com.ontotext.gate.ontology.DAMLOntology",
+            "com.ontotext.gate.ontology.DAMLKnowledgeBaseImpl",
             fm
           );
       } catch (gate.creole.ResourceInstantiationException ex) {
@@ -366,5 +373,30 @@ public class OntoLexEditorVR extends AbstractVisualResource
       updateOntologySelection();
     }//actionPerformed
   }
+
+  protected class KnowledgeBaseTreeCellRenderer extends DefaultTreeCellRenderer {
+    public KnowledgeBaseTreeCellRenderer() {
+    }
+    public Component getTreeCellRendererComponent(JTree tree,
+                                              Object value,
+                                              boolean sel,
+                                              boolean expanded,
+                                              boolean leaf,
+                                              int row,
+                                              boolean hasFocus){
+      super.getTreeCellRendererComponent(tree, value, sel, expanded,
+                                         leaf, row, hasFocus);
+      if (! (value instanceof ClassNode))
+        return this;
+      ClassNode theNode = (ClassNode) value;
+      if(theNode.getSource() instanceof OClass) {
+        setIcon(MainFrame.getIcon("Class.gif"));
+      } else if(theNode.getSource() instanceof OInstance) {
+        setIcon(MainFrame.getIcon("Instance.gif"));
+      }
+      return this;
+    }
+  }
+
 
 }
