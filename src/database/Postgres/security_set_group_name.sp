@@ -13,9 +13,8 @@
  *
  */
 
-DROP FUNCTION security_set_group_name(int4,varchar);
 
-CREATE FUNCTION security_set_group_name(int4,varchar) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION security_set_group_name(int4,varchar) RETURNS boolean AS '
 
    DECLARE
       p_group_id alias for $1;

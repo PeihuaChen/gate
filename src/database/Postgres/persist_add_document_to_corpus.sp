@@ -13,9 +13,8 @@
  *
  */
 
-DROP FUNCTION persist_add_document_to_corpus(int4,int4);
 
-CREATE FUNCTION persist_add_document_to_corpus(int4,int4) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION persist_add_document_to_corpus(int4,int4) RETURNS boolean AS '
 
    DECLARE
       p_doc_lrid     alias for $1;

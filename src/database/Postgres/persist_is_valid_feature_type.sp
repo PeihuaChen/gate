@@ -13,8 +13,7 @@
  *
  */
 
-DROP FUNCTION persist_is_valid_feature_type(int4);
-CREATE FUNCTION persist_is_valid_feature_type(int4) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION persist_is_valid_feature_type(int4) RETURNS boolean AS '
 
    DECLARE
       p_type alias for $1;

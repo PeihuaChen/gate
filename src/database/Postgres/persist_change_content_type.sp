@@ -13,8 +13,7 @@
  *
  */
 
-DROP FUNCTION persist_change_content_type(int4,int2);
-CREATE FUNCTION persist_change_content_type(int4,int2) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION persist_change_content_type(int4,int2) RETURNS boolean AS '
 
    DECLARE
       p_cont_id alias for $1;

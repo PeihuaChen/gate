@@ -13,7 +13,7 @@
  *
  */
 
-CREATE FUNCTION persist_delete_document(int4) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION persist_delete_document(int4) RETURNS boolean AS '
 
    DECLARE
       p_lr_id alias for $1;

@@ -13,8 +13,8 @@
  *
  */
 
-DROP FUNCTION security_remove_user_from_group(int4,int4);
-CREATE FUNCTION security_remove_user_from_group(int4,int4) RETURNS boolean AS '
+
+CREATE OR REPLACE FUNCTION security_remove_user_from_group(int4,int4) RETURNS boolean AS '
 
    DECLARE
       p_group_id alias for $1;

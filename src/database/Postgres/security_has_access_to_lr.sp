@@ -13,8 +13,8 @@
  *
  */
 
-DROP FUNCTION security_has_access_to_lr(int4,int4,int4,int2);
-CREATE FUNCTION security_has_access_to_lr(int4,int4,int4,int2) RETURNS boolean AS '
+
+CREATE OR REPLACE FUNCTION security_has_access_to_lr(int4,int4,int4,int2) RETURNS boolean AS '
 
    DECLARE
       p_lr_id alias for $1;

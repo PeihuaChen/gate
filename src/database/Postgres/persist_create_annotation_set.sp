@@ -13,8 +13,7 @@
  *
  */
 
-DROP FUNCTION persist_create_annotation_set(int4,varchar);
-CREATE FUNCTION persist_create_annotation_set(int4,varchar) RETURNS int4 AS '
+CREATE OR REPLACE FUNCTION persist_create_annotation_set(int4,varchar) RETURNS int4 AS '
 
    DECLARE
       p_lr_id alias for $1;

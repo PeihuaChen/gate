@@ -14,9 +14,8 @@
  *
  */
 
-DROP FUNCTION persist_create_document(int4,varchar,varchar,int4,int4,boolean,int4);
 
-CREATE FUNCTION persist_create_document(int4,varchar,varchar,int4,int4,boolean,int4)
+CREATE OR REPLACE FUNCTION persist_create_document(int4,varchar,varchar,int4,int4,boolean,int4)
 RETURNS int4 AS   '
 
    DECLARE

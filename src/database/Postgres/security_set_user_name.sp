@@ -13,9 +13,8 @@
  *
  */
 
-DROP FUNCTION security_set_user_name(int4,varchar);
 
-CREATE FUNCTION security_set_user_name(int4,varchar) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION security_set_user_name(int4,varchar) RETURNS boolean AS '
 
    DECLARE
       /* in parameters */

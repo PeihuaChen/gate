@@ -14,9 +14,8 @@
  *
  */
 
-DROP FUNCTION persist_create_lr(int4,int4,varchar,varchar,int2,int4);
 
-CREATE FUNCTION persist_create_lr(int4,int4,varchar,varchar,int2,int4) RETURNS int4 AS '
+CREATE OR REPLACE FUNCTION persist_create_lr(int4,int4,varchar,varchar,int2,int4) RETURNS int4 AS '
 
    DECLARE
       /* in parameters */

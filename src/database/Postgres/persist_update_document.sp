@@ -13,8 +13,7 @@
  *
  */
 
-DROP FUNCTION persist_update_document(int4,varchar,int4,int4,boolean);
-CREATE FUNCTION persist_update_document(int4,varchar,int4,int4,boolean) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION persist_update_document(int4,varchar,int4,int4,boolean) RETURNS boolean AS '
 
    DECLARE
       p_lr_id        alias for $1;

@@ -13,9 +13,8 @@
  *
  */
 
-DROP FUNCTION persist_lock_lr(int4,int4,int4);
 
-CREATE FUNCTION persist_lock_lr(int4,int4,int4) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION persist_lock_lr(int4,int4,int4) RETURNS boolean AS '
    DECLARE
       p_lr_id  alias for $1;
       p_usr_id alias for $2;

@@ -13,8 +13,7 @@
  *
  */
 
-DROP FUNCTION persist_update_lr(int4,varchar,int4);
-CREATE FUNCTION persist_update_lr(int4,varchar,int4) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION persist_update_lr(int4,varchar,int4) RETURNS boolean AS '
 
    DECLARE
       p_lr_id     alias for $1;

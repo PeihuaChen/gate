@@ -13,8 +13,7 @@
  *
  */
 
-DROP FUNCTION persist_create_feature(int4,int2,varchar,int4,varchar,int2);
-CREATE FUNCTION persist_create_feature(int4,int2,varchar,int4,varchar,int2) RETURNS int4 AS '
+CREATE OR REPLACE FUNCTION persist_create_feature(int4,int2,varchar,int4,varchar,int2) RETURNS int4 AS '
 
    DECLARE
       p_entity_id           alias for $1;

@@ -13,8 +13,8 @@
  *
  */
 
-DROP FUNCTION security_login(varchar,varchar,int4);
-CREATE FUNCTION security_login(varchar,varchar,int4) RETURNS boolean AS '
+
+CREATE OR REPLACE FUNCTION security_login(varchar,varchar,int4) RETURNS boolean AS '
 
    DECLARE
       p_usr_name alias for $1;
