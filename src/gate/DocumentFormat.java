@@ -399,8 +399,10 @@ extends AbstractLanguageResource implements LanguageResource{
     Set magicSet = magic2mimeTypeMap.keySet();
     Iterator iterator=magicSet.iterator();
     String magic;
+    // change case to cover more variants
+    aContent = aContent.toLowerCase();
     while (iterator.hasNext()){
-      magic = (String) iterator.next();
+      magic = ((String) iterator.next()).toLowerCase();
       if (aContent.indexOf(magic) != -1)
         detectedMimeType = (MimeType) magic2mimeTypeMap.get(magic);
     }// End while
