@@ -91,11 +91,14 @@ public class Batch implements JapeConstants, java.io.Serializable {
   private void parseJape(InputStream japeStream) throws JapeException {
     try {
       gate.jape.parser.ParseCpsl parser =
-        new gate.jape.parser.ParseCpsl(japeStream);
+        new gate.jape.parser.ParseCpsl(japeFileName, japeStream);
       transducer = parser.MultiPhaseTransducer();
     } catch (gate.jape.parser.ParseException e) {
       throw new
         JapeException("Batch: error parsing transducer: " + e.getMessage());
+    } catch (java.io.IOException e) {
+      throw new
+        JapeException("Batch: couldn't read JAPE stream: " + e.getMessage());
     }
   } // parseJape(InputStream)
 
@@ -344,6 +347,9 @@ public class Batch implements JapeConstants, java.io.Serializable {
 } // class Batch
 
 // $Log$
+// Revision 1.4  2000/05/05 11:17:47  hamish
+// use new parser constructor for streams
+//
 // Revision 1.3  2000/05/05 10:32:25  hamish
 // added some error handling
 //
