@@ -300,13 +300,13 @@ extends AbstractFeatureBearer implements DataStore {
     FeatureMap lrFeatures = lr.getFeatures();
     if(lrFeatures != null) {
       lrName = lr.getName();
-      lrPersistenceId = (String) lrFeatures.get("DataStoreInstanceId");
+      lrPersistenceId = (String) lrFeatures.get(DataStore.LR_ID_FEATURE_NAME);
     }
     if(lrName == null)
       lrName = lrData.getName();
     if(lrPersistenceId == null) {
       lrPersistenceId = constructPersistenceId(lrName);
-      lr.getFeatures().put("DataStoreInstanceId", lrPersistenceId);
+      lr.getFeatures().put(DataStore.LR_ID_FEATURE_NAME, lrPersistenceId);
     }
 
     // create a File to store the resource in

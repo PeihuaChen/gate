@@ -83,7 +83,7 @@ public class TestPersist extends TestCase
     doc = (Document) sds.adopt(doc);
     sds.sync(doc);
     String lrPersistenceId =
-      (String) doc.getFeatures().get("DataStoreInstanceId");
+      (String) doc.getFeatures().get(DataStore.LR_ID_FEATURE_NAME);
 
     // test the getLrTypes method
     List lrTypes = sds.getLrTypes();
@@ -100,8 +100,8 @@ public class TestPersist extends TestCase
 
     // read the document back
     FeatureMap features = Factory.newFeatureMap();
-    features.put("DataStoreInstanceId", lrPersistenceId);
-    features.put("DataStore", sds);
+    features.put(DataStore.LR_ID_FEATURE_NAME, lrPersistenceId);
+    features.put(DataStore.DATASTORE_FEATURE_NAME, sds);
     Document doc2 =
       (Document) Factory.createResource("gate.corpora.DocumentImpl", features);
     Document doc3 =
@@ -147,12 +147,12 @@ public class TestPersist extends TestCase
     // remember the persistence ID for reading back
     // (in the normal case these ids are obtained by DataStore.getLrIds(type))
     String lrPersistenceId =
-      (String) doc.getFeatures().get("DataStoreInstanceId");
+      (String) doc.getFeatures().get(DataStore.LR_ID_FEATURE_NAME);
 
     // read the document back
     FeatureMap features = Factory.newFeatureMap();
-    features.put("DataStoreInstanceId", lrPersistenceId);
-    features.put("DataStore", sds);
+    features.put(DataStore.LR_ID_FEATURE_NAME, lrPersistenceId);
+    features.put(DataStore.DATASTORE_FEATURE_NAME, sds);
     Document doc2 =
       (Document) Factory.createResource("gate.corpora.DocumentImpl", features);
 
@@ -218,8 +218,8 @@ public class TestPersist extends TestCase
       while(idsIter.hasNext()) {
         String lrId = (String) idsIter.next();
         FeatureMap features = Factory.newFeatureMap();
-        features.put("DataStore", sds);
-        features.put("DataStoreInstanceId", lrId);
+        features.put(DataStore.DATASTORE_FEATURE_NAME, sds);
+        features.put(DataStore.LR_ID_FEATURE_NAME, lrId);
         Resource lr = Factory.createResource(typeName, features);
         if(lrId.startsWith("Hamish test cor")) // ensure ordering regardless of OS
           lrsFromDisk.add(0, lr);
@@ -274,7 +274,7 @@ public class TestPersist extends TestCase
     // remember the persistence ID for reading back
     // (in the normal case these ids are obtained by DataStore.getLrIds(type))
     String lrPersistenceId =
-      (String) doc.getFeatures().get("DataStoreInstanceId");
+      (String) doc.getFeatures().get(DataStore.LR_ID_FEATURE_NAME);
 
     // delete document back
     sds.delete("gate.corpora.DocumentImpl", lrPersistenceId);
