@@ -744,7 +744,7 @@ public class SerialCorpusImpl extends
 
   }//readObject
 
-  protected class DocumentData implements Serializable {
+  public class DocumentData implements Serializable {
     //fix the ID for serialisation
     static final long serialVersionUID = 4192762901421847525L;
 
