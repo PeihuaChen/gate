@@ -959,14 +959,12 @@ jar/classpath so it's the same as registerBuiltins
      */
     protected void parseCreole(){
       SAXBuilder builder = new SAXBuilder(false);
-System.out.println("processing " + url);      
       try{
         if(!url.getPath().endsWith("/")) 
           url = new URL(url.getProtocol(), url.getHost(),
                   url.getPort(), url.getPath() + "/");
         URL creoleFileURL = new URL(url, "creole.xml");
         org.jdom.Document creoleDoc = builder.build(creoleFileURL);
-System.out.println("Creole file " + creoleFileURL);        
         List jobsList = new ArrayList();
         jobsList.add(creoleDoc.getRootElement());
         while(!jobsList.isEmpty()){
@@ -974,7 +972,6 @@ System.out.println("Creole file " + creoleFileURL);
           if(currentElem.getName().equalsIgnoreCase("RESOURCE")){
             //we don't go deeper than resources so no recursion here
             String resName = currentElem.getChildTextTrim("NAME");
-System.out.println("found " + resName);            
             String resClass = currentElem.getChildTextTrim("CLASS");
             String resComment = currentElem.getChildTextTrim("COMMENT");
             //create the handler
