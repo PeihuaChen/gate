@@ -104,6 +104,7 @@ public class MainFrame extends JFrame
   static JFileChooser fileChooser;
 
   AppearanceDialog appearanceDialog;
+  OptionsDialog optionsDialog;
   CartoonMinder animator;
   TabHighlighter logHighlighter;
   NewResourceDialog newResourceDialog;
@@ -138,6 +139,7 @@ public class MainFrame extends JFrame
    * are the actual listeners (e.g "gate.event.StatusListener" -> this).
    */
   private static java.util.Map listeners = new HashMap();
+  private static java.util.Collection guiRoots = new ArrayList();
 
   static public Icon getIcon(String filename){
     Icon result = (Icon)iconByName.get(filename);
@@ -163,6 +165,7 @@ public class MainFrame extends JFrame
   static public JFileChooser getFileChooser(){
     return fileChooser;
   }
+
 
   protected void select(Handle handle){
     if(mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1) {
@@ -196,9 +199,11 @@ public class MainFrame extends JFrame
 
   /**Construct the frame*/
   public MainFrame() {
+    guiRoots.add(this);
     if(fileChooser == null){
       fileChooser = new JFileChooser();
       fileChooser.setMultiSelectionEnabled(false);
+      guiRoots.add(fileChooser);
     }
     enableEvents(AWTEvent.WINDOW_EVENT_MASK);
     initLocalData();
@@ -469,66 +474,17 @@ public class MainFrame extends JFrame
 
 
     JMenu optionsMenu = new JMenu("Options");
-    appearanceDialog = new AppearanceDialog(this, "Fonts", true, targets);
-    optionsMenu.add(new XJMenuItem(new AbstractAction("Fonts"){
+
+    optionsDialog = new OptionsDialog(MainFrame.this);
+    optionsMenu.add(new XJMenuItem(new AbstractAction("Configuration"){
       {
-        putValue(SHORT_DESCRIPTION, "Set the fonts used in the application");
+        putValue(SHORT_DESCRIPTION, "Edit gate options");
       }
       public void actionPerformed(ActionEvent evt){
-        appearanceDialog.setLocationRelativeTo(MainFrame.this);
-        appearanceDialog.show(targets);
+        optionsDialog.show();
       }
     }, this));
 
-    JMenu lnfMenu = new JMenu("Look & Feel");
-    ButtonGroup lnfBg = new ButtonGroup();
-
-    UIManager.LookAndFeelInfo[] lnfs = UIManager.getInstalledLookAndFeels();
-    class SetLNFAction extends AbstractAction{
-      SetLNFAction(UIManager.LookAndFeelInfo info){
-        super(info.getName());
-        this.info = info;
-        putValue(SHORT_DESCRIPTION, "Switch to " + info.getName() +
-                                   " look-and-feel");
-      }
-      public void actionPerformed(ActionEvent evt) {
-        try{
-          String lnfClassName = info.getClassName();
-          UIManager.setLookAndFeel(lnfClassName);
-          for(int i = 0; i< targets.length; i++){
-            if(targets[i] instanceof Window){
-              SwingUtilities.updateComponentTreeUI(targets[i]);
-            }else{
-              SwingUtilities.updateComponentTreeUI(SwingUtilities.getRoot(targets[i]));
-            }
-          }
-          Gate.getUserConfig().put(GateConstants.LOOK_AND_FEEL, lnfClassName);
-        }catch(Exception e){
-          e.printStackTrace(Err.getPrintWriter());
-        }
-      }
-      UIManager.LookAndFeelInfo info;
-    };//class SetLNFAction extends AbstractAction
-
-    for(int i = 0; i < lnfs.length; i++){
-      UIManager.LookAndFeelInfo lnf = lnfs[i];
-      try{
-        Class lnfClass = Class.forName(lnf.getClassName());
-        if(((LookAndFeel)(lnfClass.newInstance())).isSupportedLookAndFeel()){
-          JRadioButtonMenuItem item = new JRadioButtonMenuItem(new SetLNFAction(lnf));
-          if(lnf.getName().equals(UIManager.getLookAndFeel().getName())){
-            item.setSelected(true);
-          }
-          lnfBg.add(item);
-          lnfMenu.add(item);
-        }
-      }catch(ClassNotFoundException cnfe){
-      }catch(IllegalAccessException iae){
-      }catch(InstantiationException ie){
-      }
-    }
-
-    optionsMenu.add(lnfMenu);
 
     try{
       JMenu imMenu = null;
@@ -561,7 +517,6 @@ public class MainFrame extends JFrame
 
     menuBar.add(optionsMenu);
 
-
     JMenu toolsMenu = new JMenu("Tools");
     toolsMenu.add(newAnnotDiffAction);
     toolsMenu.add(newBootStrapAction);
@@ -587,18 +542,25 @@ public class MainFrame extends JFrame
     newAppPopupMenu = new JMenu("New");
     appsPopup = new JPopupMenu();
     appsPopup.add(newAppPopupMenu);
+    guiRoots.add(newAppPopupMenu);
+    guiRoots.add(appsPopup);
 
     newLrsPopupMenu = new JMenu("New");
     lrsPopup = new JPopupMenu();
     lrsPopup.add(newLrsPopupMenu);
+    guiRoots.add(lrsPopup);
+    guiRoots.add(newLrsPopupMenu);
 
     newPrsPopupMenu = new JMenu("New");
     prsPopup = new JPopupMenu();
     prsPopup.add(newPrsPopupMenu);
+    guiRoots.add(newPrsPopupMenu);
+    guiRoots.add(prsPopup);
 
     dssPopup = new JPopupMenu();
     dssPopup.add(newDSAction);
     dssPopup.add(openDSAction);
+    guiRoots.add(dssPopup);
   }
 
   protected void initListeners(){
@@ -1165,7 +1127,6 @@ public class MainFrame extends JFrame
     }
   }
 
-
   /**
    * Overridden so we can exit when window is closed
    */
@@ -1188,6 +1149,9 @@ public class MainFrame extends JFrame
    */
   public static java.util.Map getListeners() {
     return listeners;
+  }
+  public static java.util.Collection getGuiRoots() {
+    return guiRoots;
   }
 
 /*
@@ -1722,24 +1686,73 @@ public class MainFrame extends JFrame
     }
 
     public void actionPerformed(ActionEvent e) {
-      OptionsMap userConfig = Gate.getUserConfig();
-      if(userConfig.getBoolean(GateConstants.SAVE_OPTIONS_ON_EXIT).
-         booleanValue()){
-        //save the window size
-        Integer width = new Integer(MainFrame.this.getWidth());
-        Integer height = new Integer(MainFrame.this.getHeight());
-        userConfig.put(GateConstants.MAIN_FRAME_WIDTH, width);
-        userConfig.put(GateConstants.MAIN_FRAME_HEIGHT, height);
-        try{
-          Gate.writeUserConfig();
-        }catch(GateException ge){
-          logArea.getOriginalErr().println("Failed to save config data:");
-          ge.printStackTrace(logArea.getOriginalErr());
-        }
-      }
-      setVisible(false);
-      dispose();
-      System.exit(0);
+      Runnable runnable = new Runnable(){
+        public void run(){
+          //save the options
+          OptionsMap userConfig = Gate.getUserConfig();
+          if(userConfig.getBoolean(GateConstants.SAVE_OPTIONS_ON_EXIT).
+             booleanValue()){
+            //save the window size
+            Integer width = new Integer(MainFrame.this.getWidth());
+            Integer height = new Integer(MainFrame.this.getHeight());
+            userConfig.put(GateConstants.MAIN_FRAME_WIDTH, width);
+            userConfig.put(GateConstants.MAIN_FRAME_HEIGHT, height);
+            try{
+              Gate.writeUserConfig();
+            }catch(GateException ge){
+              logArea.getOriginalErr().println("Failed to save config data:");
+              ge.printStackTrace(logArea.getOriginalErr());
+            }
+          }else{
+            //don't save options on close
+            //save the option not to save the options
+            OptionsMap originalUserConfig = Gate.getOriginalUserConfig();
+            originalUserConfig.put(GateConstants.SAVE_OPTIONS_ON_EXIT,
+                                   new Boolean(false));
+            userConfig.clear();
+            userConfig.putAll(originalUserConfig);
+            try{
+              Gate.writeUserConfig();
+            }catch(GateException ge){
+              logArea.getOriginalErr().println("Failed to save config data:");
+              ge.printStackTrace(logArea.getOriginalErr());
+            }
+          }
+
+          //save the session;
+          File sessionFile = new File(Gate.getUserSessionFileName());
+          if(userConfig.getBoolean(GateConstants.SAVE_SESSION_ON_EXIT).
+             booleanValue()){
+            //save all the open applications
+            try{
+              ArrayList appList = new ArrayList(Gate.getCreoleRegister().
+                                  getAllInstances("gate.Controller"));
+              //remove all hidden instances
+              Iterator appIter = appList.iterator();
+              while(appIter.hasNext())
+                if(Gate.getHiddenAttribute(((Controller)appIter.next()).
+                   getFeatures())) appIter.remove();
+
+
+              gate.util.persistence.PersistenceManager.
+                                    saveObjectToFile(appList, sessionFile);
+            }catch(Exception ex){
+              logArea.getOriginalErr().println("Failed to save session data:");
+              ex.printStackTrace(logArea.getOriginalErr());
+            }
+          }else{
+            //we don't want to save the session
+            if(sessionFile.exists()) sessionFile.delete();
+          }
+          setVisible(false);
+          dispose();
+          System.exit(0);
+        }//run
+      };//Runnable
+      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                                 runnable, "Session loader");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
     }
   }
 
@@ -2353,6 +2366,6 @@ public class MainFrame extends JFrame
     Locale myLocale;
     JRadioButtonMenuItem me;
     JFrame frame;
-  }///class LocaleSelectorMenuItem extends JRadioButtonMenuItem
+  }////class LocaleSelectorMenuItem extends JRadioButtonMenuItem
 
 }

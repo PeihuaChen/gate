@@ -50,4 +50,7 @@ public interface GateConstants {
   /** The key for the save options on exit value*/
   public static final String SAVE_OPTIONS_ON_EXIT = "Save_options_on_exit";
 
+  /** The key for the save session on exit value*/
+  public static final String SAVE_SESSION_ON_EXIT = "Save_session_on_exit";
+
 } // GateConstants

@@ -42,6 +42,7 @@ public class OkCancelDialog extends JDialog {
   }
 
   protected void init(Component contents){
+    MainFrame.getGuiRoots().add(this);
     //fill in the contents
     JPanel vBox = new JPanel();
     vBox.setLayout(new BoxLayout(vBox, BoxLayout.Y_AXIS));
@@ -82,6 +83,11 @@ public class OkCancelDialog extends JDialog {
         hide();
       }
     });
+  }
+
+  public void dispose(){
+    MainFrame.getGuiRoots().remove(this);
+    super.dispose();
   }
 
 

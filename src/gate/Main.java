@@ -183,6 +183,26 @@ public class Main {
 
         frame.setVisible(true);
         splash.hide();
+
+        //load session if required and available;
+        //do everything from a new thread.
+        Runnable runnable = new Runnable(){
+          public void run(){
+            try{
+              File sessionFile = new File(Gate.getUserSessionFileName());
+              if(sessionFile.exists()){
+                gate.util.persistence.PersistenceManager.loadObjectFromFile(sessionFile);
+              }
+            }catch(Exception e){
+              Err.prln("Failed to load session data:");
+              e.printStackTrace(Err.getPrintWriter());
+            }
+          }
+        };
+        Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                                   runnable, "Session loader");
+        thread.setPriority(Thread.MIN_PRIORITY);
+        thread.start();
       }
     });
   } // runGui()
@@ -191,10 +211,6 @@ public class Main {
    * Reads the user config data and applies the required settings.
    */
   protected static void applyUserPreferences(){
-    //hardcode for now
-    Gate.getUserConfig().put(GateConstants.SAVE_OPTIONS_ON_EXIT,
-                             new Boolean(true));
-
     //look and feel
     String lnfClassName = Gate.getUserConfig().
                           getString(GateConstants.LOOK_AND_FEEL);
@@ -217,6 +233,8 @@ public class Main {
       String fontName = Gate.guessUnicodeFont();
       if(fontName != null){
         font = new Font(fontName, Font.PLAIN, 12);
+      }else{
+        font = UIManager.getFont("TextPane.font");
       }
     }
 
@@ -230,6 +248,8 @@ public class Main {
       String fontName = Gate.guessUnicodeFont();
       if(fontName != null){
         font = new Font(fontName, Font.PLAIN, 12);
+      }else{
+        font = UIManager.getFont("Menu.font");
       }
     }
 
@@ -243,6 +263,8 @@ public class Main {
       String fontName = Gate.guessUnicodeFont();
       if(fontName != null){
         font = new Font(fontName, Font.PLAIN, 12);
+      }else{
+        font = UIManager.getFont("Button.font");
       }
     }
 
