@@ -21,6 +21,7 @@ import java.util.*;
 
 import javax.swing.*;
 import javax.swing.Timer;
+import javax.swing.border.LineBorder;
 import javax.swing.text.BadLocationException;
 
 import gate.*;
@@ -159,7 +160,7 @@ public class AnnotationEditor{
     constraints.insets = new Insets(0, 10, 0, 0);
     constraints.anchor = GridBagConstraints.NORTHEAST;
     constraints.weightx = 1;
-    btn.setMargin(new Insets(3,3,3,3));
+    btn.setBorder(null);
     pane.add(btn, constraints);
     constraints.anchor = GridBagConstraints.CENTER;
     constraints.insets = insets0;
@@ -511,7 +512,10 @@ public class AnnotationEditor{
   
   protected class DismissAction extends AbstractAction{
     public DismissAction(){
-      super("", MainFrame.getIcon("exit.gif"));
+      super("");
+      Icon icon = UIManager.getIcon("InternalFrame.closeIcon");
+      if(icon == null) icon = MainFrame.getIcon("exit.gif");
+      putValue(SMALL_ICON, icon);
       putValue(SHORT_DESCRIPTION, "Dismiss");
     }
     
