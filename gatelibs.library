@@ -21,6 +21,7 @@
     <path>[lib/graph_drawing.jar]</path>
     <path>[lib/sapdbc.jar]</path>
     <path>[lib/xerces.jar]</path>
+    <path>[lib/dbswing.jar]</path>
   </class>
   <required>gatelibs</required>
 </library>
