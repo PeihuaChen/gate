@@ -687,7 +687,7 @@ public class OracleDataStore extends JDBCDataStore {
     //6. insert annotations, etc
 
     //6.1. create default annotation set
-    createAnnotationSet(docID,defaultAnnotations);
+    createAnnotationSet(lrID,defaultAnnotations);
 
     //6.2. create named annotation sets
     Map namedAnns = doc.getNamedAnnotationSets();
@@ -700,7 +700,7 @@ public class OracleDataStore extends JDBCDataStore {
       AnnotationSet currAnnSet = (AnnotationSet)mapEntry.getValue();
 
       //create a-sets
-      createAnnotationSet(docID,currAnnSet);
+      createAnnotationSet(lrID,currAnnSet);
     }
 
     //7. create features
@@ -751,7 +751,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** -- */
-  private void createAnnotationSet(Long docID, AnnotationSet aset)
+  private void createAnnotationSet(Long lrID, AnnotationSet aset)
     throws PersistenceException {
 
     //1. create a-set
@@ -763,7 +763,7 @@ public class OracleDataStore extends JDBCDataStore {
       try {
         stmt = this.jdbcConn.prepareCall(
             "{ call "+Gate.DB_OWNER+".persist.create_annotation_set(?,?,?) }");
-        stmt.setLong(1,docID.longValue());
+        stmt.setLong(1,lrID.longValue());
 
         if (null == asetName) {
           stmt.setNull(2,java.sql.Types.VARCHAR);
@@ -800,7 +800,7 @@ public class OracleDataStore extends JDBCDataStore {
       try {
         stmt = this.jdbcConn.prepareCall(
             "{ call "+Gate.DB_OWNER+".persist.create_annotation(?,?,?,?,?,?,?,?,?) }");
-        stmt.setLong(1,docID.longValue());
+        stmt.setLong(1,lrID.longValue());
         stmt.setLong(2,ann.getId().longValue());
         stmt.setLong(3,asetID.longValue());
         stmt.setLong(4,start.getId().longValue());
@@ -2366,10 +2366,11 @@ public class OracleDataStore extends JDBCDataStore {
       DBHelper.cleanup(cstmt);
     }
 
-    //1. create in DB new a-sets
+    //2. create in DB new a-sets
     Iterator it = addedSets.iterator();
-/*    while (it.hasNext()) {
+    while (it.hasNext()) {
       String setName = (String)it.next();
+System.out.println("set name=["+setName+"]");
       AnnotationSet aset = (AnnotationSet)doc.getNamedAnnotationSets().get(setName);
 
       Assert.assertNotNull(aset);
@@ -2377,7 +2378,6 @@ public class OracleDataStore extends JDBCDataStore {
 
       createAnnotationSet(lrID,aset);
     }
-*/
   }
 
 
