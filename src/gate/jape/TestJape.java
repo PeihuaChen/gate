@@ -53,7 +53,7 @@ public class TestJape extends TestCase
 
     // test the transducers
     batch.transduce(c);
-System.out.println(batch.getTransducer());
+    //System.out.println(batch.getTransducer());
 
     // check the results
     doc = (Document)c.first();
