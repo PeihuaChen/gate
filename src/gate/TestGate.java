@@ -64,6 +64,18 @@ public class TestGate {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
+  private static final String
+                defOracleDriver = "jdbc:oracle:thin:@derwent:1521:dbgate";
+  private static final String
+                saiOracleDriver = "jdbc:oracle:thin:@sirma:1521:dbgate";
+  private static final String
+                defPSQLDriver = "jdbc:postgresql://redmires/gate";
+  private static final String
+                saiPSQLDriver = "jdbc:postgresql://sirma/gate";
+
+
+  public static String oracleDriver = defOracleDriver;
+  public static String psqlDriver = defPSQLDriver;
 
   /** Main routine for the GATE test suite.
     * Command-line arguments:
@@ -84,7 +96,7 @@ public class TestGate {
     boolean autoloadingMode = false;
 
     // process command-line options
-    Getopt g = new Getopt("GATE test suite", args, "tnNa");
+    Getopt g = new Getopt("GATE test suite", args, "tnNas");
     int c;
     while( (c = g.getopt()) != -1 )
       switch(c) {
@@ -100,6 +112,10 @@ public class TestGate {
           break;
         case 'a':
           autoloadingMode = true;
+          break;
+        case 's':
+          oracleDriver = saiOracleDriver;
+          psqlDriver = saiPSQLDriver;
           break;
         case '?':
           // leave the warning to getopt
