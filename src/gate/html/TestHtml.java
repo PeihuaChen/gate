@@ -63,7 +63,8 @@ public class TestHtml extends TestCase
     // create a new gate document
     gate.Document doc = gate.Transients.newDocument(
              // new URL("http://www.funideas.com/visual_gallery.htm")
-            new URL ("http://www.dcs.shef.ac.uk/~hamish/GateIntro.html")
+            //new URL ("http://www.dcs.shef.ac.uk/~hamish/GateIntro.html")
+            new URL ("http://www.w3.org/TR/REC-xml")
             //new URL ("http://www.dcs.shef.ac.uk/~cursu")
             //new URL ("http://www.webhelp.com/home.html")
             //new URL ("http://big2.hotyellow98.com/sys/signup.cgi")
@@ -83,6 +84,7 @@ public class TestHtml extends TestCase
     if (docFormat != null){
       // set's the map
       docFormat.setMarkupElementsMap(markupElementsMap);
+      /*
       // register a progress listener with it
       docFormat.addStatusListener(new StatusListener(){
           public void statusChanged(String text){
@@ -91,6 +93,7 @@ public class TestHtml extends TestCase
           public void processFinished(){
           }
       });
+      */
       // timing the operation
       Date startTime = new Date();
         docFormat.unpackMarkup (doc,"DocumentContent");

@@ -68,10 +68,12 @@ public class Sgml2Xml{
     m_doc = doc;
 
     m_modifier = new StringBuffer(m_doc.getContent().toString());
+    /*
     whiteSpaces = new HashSet();
     whiteSpaces.add(" ");
     whiteSpaces.add("\t");
     whiteSpaces.add("\n");
+    */
     dubiousElements = new ArrayList();
     stack = new Stack();
   }
@@ -366,8 +368,9 @@ public class Sgml2Xml{
   }
 
   private boolean isWhiteSpace(char c){
-    if (whiteSpaces.contains(new Character(c).toString())) return true;
-    else return false;
+    //if (whiteSpaces.contains(new Character(c).toString())) return true;
+    //else return false;
+    return Character.isWhitespace(c);
   }
 }
 
