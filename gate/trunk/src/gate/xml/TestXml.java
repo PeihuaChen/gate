@@ -94,7 +94,7 @@ public class TestXml extends TestCase
     keyDocument = (Document)Factory.createResource("gate.corpora.DocumentImpl",
                                                     params);
 
-    assertTrue("Coudn't create a Gate document instance for " +
+    assertTrue("Coudn't create a GATE document instance for " +
             url.toString() +
             " Can't continue." , keyDocument != null);
 
@@ -121,7 +121,7 @@ public class TestXml extends TestCase
     // using UTF-8 encoding
     File xmlFile = null;
     xmlFile = Files.writeTempFile(keyDocument.toXml(),"UTF-8");
-    assertTrue("The temp Gate XML file is null. Can't continue.",xmlFile != null);
+    assertTrue("The temp GATE XML file is null. Can't continue.",xmlFile != null);
 /*
     // Prepare to write into the xmlFile using UTF-8 encoding
     OutputStreamWriter writer = new OutputStreamWriter(
@@ -135,7 +135,7 @@ public class TestXml extends TestCase
     gate.Document gateDoc = null;
     gateDoc = gate.Factory.newDocument(xmlFile.toURL());
 
-    assertTrue("Coudn't create a Gate document instance for " +
+    assertTrue("Coudn't create a GATE document instance for " +
                 xmlFile.toURL().toString() +
                 " Can't continue." , gateDoc != null);
 
@@ -145,7 +145,7 @@ public class TestXml extends TestCase
 
     assertTrue("Fail to recognize " +
       xmlFile.toURL().toString() +
-      " as being a Gate XML document !", gateDocFormat != null);
+      " as being a GATE XML document !", gateDocFormat != null);
 
     gateDocFormat.unpackMarkup(gateDoc);
     // Verfy if all annotations from the default annotation set are consistent
@@ -155,10 +155,10 @@ public class TestXml extends TestCase
     long gateDocSize = keyDocument.getContent().size().longValue();
     int gateDocAnnotationSetSize = keyDocument.getAnnotations().size();
 
-    assertTrue("Exporting as Gate XML resulted in document content size lost." +
+    assertTrue("Exporting as GATE XML resulted in document content size lost." +
       " Something went wrong.", keyDocumentSize == gateDocSize);
 
-    assertTrue("Exporting as Gate XML resulted in annotation lost." +
+    assertTrue("Exporting as GATE XML resulted in annotation lost." +
       " No. of annotations missing =  " +
       Math.abs(keyDocumentAnnotationSetSize - gateDocAnnotationSetSize),
       keyDocumentAnnotationSetSize == gateDocAnnotationSetSize);

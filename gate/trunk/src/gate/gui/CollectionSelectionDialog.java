@@ -241,13 +241,13 @@ public class CollectionSelectionDialog extends JDialog {
     if (aTitle == null){
       JOptionPane.showMessageDialog(mainFrame,
       "Feature selection dialog coud not been created because title was null!",
-      "Gate", JOptionPane.ERROR_MESSAGE);
+      "GATE", JOptionPane.ERROR_MESSAGE);
       return buttonPressed;
     }// End if
     if (aSourceData == null){
      JOptionPane.showMessageDialog(mainFrame,
      "Feature selection dialog coud not been created because data source null!",
-     "Gate", JOptionPane.ERROR_MESSAGE);
+     "GATE", JOptionPane.ERROR_MESSAGE);
      return buttonPressed;
     }// End if
     this.setTitle(aTitle);

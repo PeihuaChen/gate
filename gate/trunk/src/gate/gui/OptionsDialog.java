@@ -34,7 +34,7 @@ import gate.util.OptionsMap;
  */
 public class OptionsDialog extends JDialog {
   public OptionsDialog(Frame owner){
-    super(owner, "Gate Options", true);
+    super(owner, "GATE Options", true);
     MainFrame.getGuiRoots().add(this);
   }
 

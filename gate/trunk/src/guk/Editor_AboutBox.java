@@ -38,7 +38,7 @@ public class Editor_AboutBox extends JDialog implements ActionListener {
   BorderLayout borderLayout2 = new BorderLayout();
   FlowLayout flowLayout1 = new FlowLayout();
   GridLayout gridLayout1 = new GridLayout();
-  String product = "Gate Unicode Kit";
+  String product = "GATE Unicode Kit";
   String version = "";
   String copyright = "Copyright (c) 1999";
   String comments = "";
@@ -66,7 +66,7 @@ public class Editor_AboutBox extends JDialog implements ActionListener {
     insetsPanel2.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
     gridLayout1.setRows(4);
     gridLayout1.setColumns(1);
-    label1.setText("Gate Unicode Kit Editor");
+    label1.setText("GATE Unicode Kit Editor");
     label2.setText(version);
     label3.setText("Copyright (c) 2000 - 2001");
     label4.setText(comments);

@@ -251,7 +251,7 @@ public class MainFrame extends JFrame
   } // MainFrame(boolean simple)
 
   protected void initLocalData(boolean isShellSlacGIU){
-    resourcesTreeRoot = new DefaultMutableTreeNode("Gate", true);
+    resourcesTreeRoot = new DefaultMutableTreeNode("GATE", true);
     applicationsRoot = new DefaultMutableTreeNode("Applications", true);
     if(isShellSlacGIU) {
       languageResourcesRoot = new DefaultMutableTreeNode("Documents",
@@ -371,9 +371,9 @@ public class MainFrame extends JFrame
     logArea = new LogArea();
     logScroll = new JScrollPane(logArea);
     // Out has been redirected to the logArea
-    Out.prln("Gate 2 started at: " + new Date().toString());
+    Out.prln("GATE 2 started at: " + new Date().toString());
     mainTabbedPane = new XJTabbedPane(JTabbedPane.TOP);
-    mainTabbedPane.insertTab("Messages",null, logScroll, "Gate log", 0);
+    mainTabbedPane.insertTab("Messages",null, logScroll, "GATE log", 0);
 
     logHighlighter = new TabHighlighter(mainTabbedPane, logScroll, Color.red);
 
@@ -1444,12 +1444,12 @@ public class MainFrame extends JFrame
         JOptionPane.showMessageDialog(
             MainFrame.this, "Invalid location for the datastore\n " +
                               mue.toString(),
-                              "Gate", JOptionPane.ERROR_MESSAGE);
+                              "GATE", JOptionPane.ERROR_MESSAGE);
       } catch(PersistenceException pe) {
         JOptionPane.showMessageDialog(
             MainFrame.this, "Datastore creation error!\n " +
                               pe.toString(),
-                              "Gate", JOptionPane.ERROR_MESSAGE);
+                              "GATE", JOptionPane.ERROR_MESSAGE);
       } // catch
     } // if
 
@@ -1473,12 +1473,12 @@ public class MainFrame extends JFrame
         JOptionPane.showMessageDialog(
             MainFrame.this, "Invalid location for the datastore\n " +
                               mue.toString(),
-                              "Gate", JOptionPane.ERROR_MESSAGE);
+                              "GATE", JOptionPane.ERROR_MESSAGE);
       } catch(PersistenceException pe) {
         JOptionPane.showMessageDialog(
             MainFrame.this, "Datastore opening error!\n " +
                               pe.toString(),
-                              "Gate", JOptionPane.ERROR_MESSAGE);
+                              "GATE", JOptionPane.ERROR_MESSAGE);
       } // catch
     } // if
 
@@ -2032,7 +2032,7 @@ public class MainFrame extends JFrame
               MainFrame.this,
               "There was a problem with your selection:\n" +
               ex.toString() ,
-              "Gate", JOptionPane.ERROR_MESSAGE);
+              "GATE", JOptionPane.ERROR_MESSAGE);
           ex.printStackTrace(Err.getPrintWriter());
         }
       }
@@ -2101,7 +2101,7 @@ public class MainFrame extends JFrame
         Object answer = JOptionPane.showInputDialog(
                             MainFrame.this,
                             "Select type of Datastore",
-                            "Gate", JOptionPane.QUESTION_MESSAGE,
+                            "GATE", JOptionPane.QUESTION_MESSAGE,
                             null, names,
                             names[0]);
         if(answer != null) {
@@ -2112,7 +2112,7 @@ public class MainFrame extends JFrame
               JOptionPane.showMessageDialog(
                     MainFrame.this, "Oracle datastores can only be created " +
                                     "by your Oracle administrator!",
-                                    "Gate", JOptionPane.ERROR_MESSAGE);
+                                    "GATE", JOptionPane.ERROR_MESSAGE);
           }  else {
 
             throw new UnsupportedOperationException("Unimplemented option!\n"+
@@ -2124,8 +2124,8 @@ public class MainFrame extends JFrame
         JOptionPane.showMessageDialog(MainFrame.this,
                                       "Could not find any registered types " +
                                       "of datastores...\n" +
-                                      "Check your Gate installation!",
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
+                                      "Check your GATE installation!",
+                                      "GATE", JOptionPane.ERROR_MESSAGE);
 
       }
     }
@@ -2152,14 +2152,14 @@ public class MainFrame extends JFrame
               JOptionPane.showMessageDialog(MainFrame.this,
                               "Error!\n"+
                                rie.toString(),
-                               "Gate", JOptionPane.ERROR_MESSAGE);
+                               "GATE", JOptionPane.ERROR_MESSAGE);
               rie.printStackTrace(Err.getPrintWriter());
             }catch(Exception ex){
               processFinished();
               JOptionPane.showMessageDialog(MainFrame.this,
                               "Error!\n"+
                                ex.toString(),
-                               "Gate", JOptionPane.ERROR_MESSAGE);
+                               "GATE", JOptionPane.ERROR_MESSAGE);
               ex.printStackTrace(Err.getPrintWriter());
             }
           }
@@ -2324,7 +2324,7 @@ public class MainFrame extends JFrame
         Object answer = JOptionPane.showInputDialog(
                             MainFrame.this,
                             "Select type of Datastore",
-                            "Gate", JOptionPane.QUESTION_MESSAGE,
+                            "GATE", JOptionPane.QUESTION_MESSAGE,
                             null, names,
                             names[0]);
         if(answer != null) {
@@ -2351,7 +2351,7 @@ public class MainFrame extends JFrame
                 answer = JOptionPane.showInputDialog(
                                     MainFrame.this,
                                     "Select a database",
-                                    "Gate", JOptionPane.QUESTION_MESSAGE,
+                                    "GATE", JOptionPane.QUESTION_MESSAGE,
                                     null, paths,
                                     paths[0]);
                 if (answer != null)
@@ -2466,12 +2466,12 @@ public class MainFrame extends JFrame
                 JOptionPane.showMessageDialog(
                     MainFrame.this, "Datastore open error!\n " +
                                       pe.toString(),
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
+                                      "GATE", JOptionPane.ERROR_MESSAGE);
               } catch(gate.security.SecurityException se) {
                 JOptionPane.showMessageDialog(
                     MainFrame.this, "User identification error!\n " +
                                       se.toString(),
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
+                                      "GATE", JOptionPane.ERROR_MESSAGE);
                 try {
                   if (ac != null)
                     ac.close();
@@ -2481,7 +2481,7 @@ public class MainFrame extends JFrame
                   JOptionPane.showMessageDialog(
                       MainFrame.this, "Persistence error!\n " +
                                         ex.toString(),
-                                        "Gate", JOptionPane.ERROR_MESSAGE);
+                                        "GATE", JOptionPane.ERROR_MESSAGE);
                 }
               }
 
@@ -2489,7 +2489,7 @@ public class MainFrame extends JFrame
             JOptionPane.showMessageDialog(
                 MainFrame.this,
                 "Support for this type of datastores is not implemenented!\n",
-                "Gate", JOptionPane.ERROR_MESSAGE);
+                "GATE", JOptionPane.ERROR_MESSAGE);
           }
         }
       } else {
@@ -2497,8 +2497,8 @@ public class MainFrame extends JFrame
         JOptionPane.showMessageDialog(MainFrame.this,
                                       "Could not find any registered types " +
                                       "of datastores...\n" +
-                                      "Check your Gate installation!",
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
+                                      "Check your GATE installation!",
+                                      "GATE", JOptionPane.ERROR_MESSAGE);
 
       }
     }
@@ -2562,10 +2562,10 @@ public class MainFrame extends JFrame
                                          leaf, row, hasFocus);
       if(value == resourcesTreeRoot) {
         setIcon(MainFrame.getIcon("project.gif"));
-        setToolTipText("Gate");
+        setToolTipText("GATE");
       } else if(value == applicationsRoot) {
         setIcon(MainFrame.getIcon("applications.gif"));
-        setToolTipText("Gate applications");
+        setToolTipText("GATE applications");
       } else if(value == languageResourcesRoot) {
         setIcon(MainFrame.getIcon("lrs.gif"));
         setToolTipText("Language Resources");
@@ -2574,7 +2574,7 @@ public class MainFrame extends JFrame
         setToolTipText("Processing Resources");
       } else if(value == datastoresRoot) {
         setIcon(MainFrame.getIcon("dss.gif"));
-        setToolTipText("Gate Datastores");
+        setToolTipText("GATE Datastores");
       }else{
         //not one of the default root nodes
         value = ((DefaultMutableTreeNode)value).getUserObject();

@@ -445,7 +445,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
               PluginManagerUI.this,
               "There was a problem with your selection:\n" +
               ex.toString() ,
-              "Gate", JOptionPane.ERROR_MESSAGE);
+              "GATE", JOptionPane.ERROR_MESSAGE);
           ex.printStackTrace(Err.getPrintWriter());
         }
       }

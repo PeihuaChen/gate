@@ -456,7 +456,7 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
   /** This method deals with a Text belonging to Name element. */
   private void processTextOfNameElement(String text) throws GateSaxException{
     if (currentFeatureMap == null)
-      throw new GateSaxException("Gate xml format processing error:" +
+      throw new GateSaxException("GATE xml format processing error:" +
       " Found a Name element that is not enclosed into a Feature one while" +
       " analyzing the annotation " +
       currentAnnot +
@@ -475,7 +475,7 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
   /** This method deals with a Text belonging to Value element. */
   private void processTextOfValueElement(String text) throws GateSaxException{
     if (currentFeatureMap == null)
-      throw new GateSaxException("Gate xml format processing error:" +
+      throw new GateSaxException("GATE xml format processing error:" +
       " Found a Value element that is not enclosed into a Feature one while" +
       " analyzing the annotation " +
       currentAnnot+

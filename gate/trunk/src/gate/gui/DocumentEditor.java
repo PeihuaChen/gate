@@ -966,7 +966,7 @@ public class DocumentEditor extends AbstractVisualResource
     }
     if(!(target instanceof gate.Document)){
       throw new IllegalArgumentException(
-        "The document editor can only display Gate documents!\n" +
+        "The document editor can only display GATE documents!\n" +
         "The provided resource is not a document but a: " +
         target.getClass().toString() + "!");
     }
@@ -3398,7 +3398,7 @@ Out.prln("NULL size");
                 DocumentEditor.this,
                 "The default annotation set cannot be deleted!\n" +
                 "It will only be cleared...",
-                "Gate", JOptionPane.ERROR_MESSAGE);
+                "GATE", JOptionPane.ERROR_MESSAGE);
               document.getAnnotations().clear();
             }else{
               document.removeAnnotationSet(setName);
@@ -3533,7 +3533,7 @@ Out.prln("NULL size");
             JOptionPane.showMessageDialog(
               searchDialog,
               "String not found!",
-              "Gate", JOptionPane.INFORMATION_MESSAGE);
+              "GATE", JOptionPane.INFORMATION_MESSAGE);
           }
         }
       };
@@ -3581,7 +3581,7 @@ Out.prln("NULL size");
             JOptionPane.showMessageDialog(
               searchDialog,
               "String not found!",
-              "Gate", JOptionPane.INFORMATION_MESSAGE);
+              "GATE", JOptionPane.INFORMATION_MESSAGE);
           }
         }
       };
@@ -3685,7 +3685,7 @@ Out.prln("NULL size");
             searchDialog,
             "Invalid pattern!\n" +
             ree.toString(),
-            "Gate", JOptionPane.ERROR_MESSAGE);
+            "GATE", JOptionPane.ERROR_MESSAGE);
         }
       }else{
         findFirstAction.setEnabled(false);
@@ -3849,7 +3849,7 @@ Out.prln("NULL size");
               DocumentEditor.this,
               "There was an error:\n" +
               ge.toString(),
-              "Gate", JOptionPane.ERROR_MESSAGE);
+              "GATE", JOptionPane.ERROR_MESSAGE);
             ge.printStackTrace(Err.getPrintWriter());
             allOK = false;
           }
@@ -3871,7 +3871,7 @@ Out.prln("NULL size");
                 DocumentEditor.this,
                 "There was an error:\n" +
                 ge.toString(),
-                "Gate", JOptionPane.ERROR_MESSAGE);
+                "GATE", JOptionPane.ERROR_MESSAGE);
               allOK = false;
             }
           allOK = true;
@@ -3916,7 +3916,7 @@ Out.prln("NULL size");
         String setName = JOptionPane.showInputDialog(
               DocumentEditor.this,
               "Please provide a name for the new annotation set",
-              "Gate", JOptionPane.QUESTION_MESSAGE);
+              "GATE", JOptionPane.QUESTION_MESSAGE);
         if(setName == null) return;
         this.set = document.getAnnotations(setName);
       }
@@ -3990,7 +3990,7 @@ Out.prln("NULL size");
               DocumentEditor.this,
               "There was an error:\n" +
               ge.toString(),
-              "Gate", JOptionPane.ERROR_MESSAGE);
+              "GATE", JOptionPane.ERROR_MESSAGE);
 //            ge.printStackTrace(Err.getPrintWriter());
             allOK = false;
           }

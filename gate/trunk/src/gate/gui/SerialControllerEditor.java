@@ -321,7 +321,7 @@ public class SerialControllerEditor extends AbstractVisualResource
           JOptionPane.showMessageDialog(
               SerialControllerEditor.this,
               "Please select some components from the list of available components!\n" ,
-              "Gate", JOptionPane.ERROR_MESSAGE);
+              "GATE", JOptionPane.ERROR_MESSAGE);
         } else {
           List actions = new ArrayList();
           for(int i = 0; i < rows.length; i++) {
@@ -345,7 +345,7 @@ public class SerialControllerEditor extends AbstractVisualResource
               SerialControllerEditor.this,
               "Please select some components to be removed "+
               "from the list of used components!\n" ,
-              "Gate", JOptionPane.ERROR_MESSAGE);
+              "GATE", JOptionPane.ERROR_MESSAGE);
         } else {
           List actions = new ArrayList();
           for(int i = 0; i < rows.length; i++){
@@ -369,7 +369,7 @@ public class SerialControllerEditor extends AbstractVisualResource
               SerialControllerEditor.this,
               "Please select some components to be moved "+
               "from the list of used components!\n" ,
-              "Gate", JOptionPane.ERROR_MESSAGE);
+              "GATE", JOptionPane.ERROR_MESSAGE);
         } else {
           //we need to make sure the rows are sorted
           Arrays.sort(rows);
@@ -404,7 +404,7 @@ public class SerialControllerEditor extends AbstractVisualResource
               SerialControllerEditor.this,
               "Please select some components to be moved "+
               "from the list of used components!\n" ,
-              "Gate", JOptionPane.ERROR_MESSAGE);
+              "GATE", JOptionPane.ERROR_MESSAGE);
         } else {
           //we need to make sure the rows are sorted
           Arrays.sort(rows);
@@ -747,7 +747,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       JOptionPane.showMessageDialog(
           SerialControllerEditor.this,
           "Failed to set parameters for \"" + pr.getName() +"\"!\n" ,
-          "Gate", JOptionPane.ERROR_MESSAGE);
+          "GATE", JOptionPane.ERROR_MESSAGE);
       rie.printStackTrace(Err.getPrintWriter());
     }
 
@@ -1150,7 +1150,7 @@ public class SerialControllerEditor extends AbstractVisualResource
               "Could not set parameters for the \"" +
               parametersEditor.getResource().getName() +
               "\" processing resource:\nSee \"Messages\" tab for details!",
-              "Gate", JOptionPane.ERROR_MESSAGE);
+              "GATE", JOptionPane.ERROR_MESSAGE);
               rie.printStackTrace(Err.getPrintWriter());
               return;
           }
@@ -1164,7 +1164,7 @@ public class SerialControllerEditor extends AbstractVisualResource
                 SerialControllerEditor.this,
                 "No corpus provided!\n" +
                 "Please select a corpus and try again!",
-                "Gate", JOptionPane.ERROR_MESSAGE);
+                "GATE", JOptionPane.ERROR_MESSAGE);
               return;
             }
             if(controller instanceof SerialAnalyserController)
@@ -1181,7 +1181,7 @@ public class SerialControllerEditor extends AbstractVisualResource
               SerialControllerEditor.this,
               "Could not check runtime parameters for " +
               "the processing resources:\n" + rie.toString(),
-              "Gate", JOptionPane.ERROR_MESSAGE);
+              "GATE", JOptionPane.ERROR_MESSAGE);
             return;
           }
           if(badPRs != null && !badPRs.isEmpty()){
@@ -1190,7 +1190,7 @@ public class SerialControllerEditor extends AbstractVisualResource
             JOptionPane.showMessageDialog(
               SerialControllerEditor.this,
               "Some required runtime parameters are not set!",
-              "Gate", JOptionPane.ERROR_MESSAGE);
+              "GATE", JOptionPane.ERROR_MESSAGE);
             return;
           }
 
@@ -1217,7 +1217,7 @@ public class SerialControllerEditor extends AbstractVisualResource
             JOptionPane.showMessageDialog(
               SerialControllerEditor.this,
               "Interrupted!\n" + eie.toString(),
-              "Gate", JOptionPane.ERROR_MESSAGE);
+              "GATE", JOptionPane.ERROR_MESSAGE);
           }catch(ExecutionException ee) {
             ee.printStackTrace(Err.getPrintWriter());
             MainFrame.unlockGUI();
@@ -1225,13 +1225,13 @@ public class SerialControllerEditor extends AbstractVisualResource
               SerialControllerEditor.this,
               "Execution error while running \"" + controller.getName() +
               "\" :\nSee \"Messages\" tab for details!",
-              "Gate", JOptionPane.ERROR_MESSAGE);
+              "GATE", JOptionPane.ERROR_MESSAGE);
           }catch(Exception e){
             MainFrame.unlockGUI();
             JOptionPane.showMessageDialog(SerialControllerEditor.this,
                                           "Unhandled execution error!\n " +
                                           "See \"Messages\" tab for details!",
-                                          "Gate", JOptionPane.ERROR_MESSAGE);
+                                          "GATE", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace(Err.getPrintWriter());
           }finally{
             MainFrame.unlockGUI();

@@ -607,7 +607,7 @@ class CorpusAnnotDiffDialog extends JFrame {
     if (keyCorpus == null){
       JOptionPane.showMessageDialog(this,
                                     "Select a key corpus first !",
-                                    "Gate", JOptionPane.ERROR_MESSAGE);
+                                    "GATE", JOptionPane.ERROR_MESSAGE);
       featureSelectionDialog = null;
       return;
     }//End if
@@ -615,7 +615,7 @@ class CorpusAnnotDiffDialog extends JFrame {
     if(0 == keyCorpus.size()) {
       JOptionPane.showMessageDialog(this,
                                     "Select a nonempty key corpus first !",
-                                    "Gate", JOptionPane.ERROR_MESSAGE);
+                                    "GATE", JOptionPane.ERROR_MESSAGE);
       featureSelectionDialog = null;
       return;
     }
@@ -642,7 +642,7 @@ class CorpusAnnotDiffDialog extends JFrame {
     if (keySet == null){
       JOptionPane.showMessageDialog(this,
                                     "Select some annotation sets first !",
-                                    "Gate", JOptionPane.ERROR_MESSAGE);
+                                    "GATE", JOptionPane.ERROR_MESSAGE);
       featureSelectionDialog = null;
       return;
     }// End if
@@ -651,7 +651,7 @@ class CorpusAnnotDiffDialog extends JFrame {
     if (annotSchema == null){
       JOptionPane.showMessageDialog(this,
                                     "Select some annotation types first !",
-                                    "Gate", JOptionPane.ERROR_MESSAGE);
+                                    "GATE", JOptionPane.ERROR_MESSAGE);
       featureSelectionDialog = null;
       return;
     }// End if

@@ -134,7 +134,7 @@ public class GateIMDescriptor implements InputMethodDescriptor {
    */
   public String getInputMethodDisplayName(Locale inputLocale,
                                           Locale displayLanguage) {
-    if(inputLocale == null) return "Gate Unicode Input Methods";
+    if(inputLocale == null) return "GATE Unicode Input Methods";
     return inputLocale.getDisplayName(inputLocale);
   }
 

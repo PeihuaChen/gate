@@ -215,7 +215,7 @@ public class TestJape extends TestCase
       }
     } catch(ResourceInstantiationException re) {
       Err.println("Cannot read the gazeteer lists!" +
-                         "\nAre the Gate resources in place?\n" + re);
+                         "\nAre the GATE resources in place?\n" + re);
     }
 
     startJapeFileOpen = System.currentTimeMillis();

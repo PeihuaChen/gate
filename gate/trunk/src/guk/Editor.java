@@ -157,7 +157,7 @@ public class Editor extends JFrame {
                 frame,
                 "Close unsaved file " +
                 (file== null?"Untitled":file.getName()) + "?",
-                "Gate",
+                "GATE",
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.WARNING_MESSAGE);
         }
@@ -193,7 +193,7 @@ public class Editor extends JFrame {
             } catch(FileNotFoundException fnfe) {
               JOptionPane.showMessageDialog(frame,
                                             "Cannot find the file specified!",
-                                            "Gate",
+                                            "GATE",
                                             JOptionPane.ERROR_MESSAGE);
               file = null;
               docChanged = false;
@@ -202,7 +202,7 @@ public class Editor extends JFrame {
               JOptionPane.showMessageDialog(frame,
                                             "Unsupported encoding!\n" +
                                             "Please choose another.",
-                                            "Gate",
+                                            "GATE",
                                             JOptionPane.ERROR_MESSAGE);
               file = null;
               docChanged = false;
@@ -212,7 +212,7 @@ public class Editor extends JFrame {
                                   frame,
                                   "Input/Output error! (wrong encoding?)\n" +
                                   "Please try again.",
-                                  "Gate",
+                                  "GATE",
                                   JOptionPane.ERROR_MESSAGE);
               file = null;
               docChanged = false;
@@ -259,7 +259,7 @@ public class Editor extends JFrame {
               JOptionPane.showMessageDialog(frame,
                                             "Unsupported encoding!\n" +
                                             "Please choose another.",
-                                            "Gate",
+                                            "GATE",
                                             JOptionPane.ERROR_MESSAGE);
               docChanged = true;
               updateTitle();
@@ -267,7 +267,7 @@ public class Editor extends JFrame {
               JOptionPane.showMessageDialog(frame,
                                             "Input/Output error!\n" +
                                             "Please try again.",
-                                            "Gate",
+                                            "GATE",
                                             JOptionPane.ERROR_MESSAGE);
               docChanged = true;
               updateTitle();
@@ -295,7 +295,7 @@ public class Editor extends JFrame {
               res1 = JOptionPane.showConfirmDialog(
                       frame,
                       "Overwrite existing file " + newFile.getName() + "?",
-                      "Gate",
+                      "GATE",
                       JOptionPane.OK_CANCEL_OPTION,
                       JOptionPane.WARNING_MESSAGE);
             }
@@ -319,7 +319,7 @@ public class Editor extends JFrame {
                 frame,
                 "Close unsaved file " +
                 (file== null?"Untitled":file.getName()) + "?",
-                "Gate",
+                "GATE",
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.WARNING_MESSAGE);
         }
@@ -345,7 +345,7 @@ public class Editor extends JFrame {
                 frame,
                 "Close unsaved file " +
                 (file== null?"Untitled":file.getName()) + "?",
-                "Gate",
+                "GATE",
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.WARNING_MESSAGE);
         }
@@ -586,7 +586,7 @@ public class Editor extends JFrame {
   }// jbInit()
 
   protected void updateTitle(){
-    String title = "Gate Unicode Editor - ";
+    String title = "GATE Unicode Editor - ";
     if(file != null) title += file.getName();
     else title += "Untitled";
     if(docChanged) title += "*";

@@ -140,14 +140,14 @@ public class LocaleHandler {
             } else if(remains.length() == 0) {
               //we're done with this line
               addAction(keyStr, output, keycapStr);
-            } else System.err.println("[Gate Unicode input method loader]" +
+            } else System.err.println("[GATE Unicode input method loader]" +
                                      " Ignoring line: " + line);
           } else if(remains.startsWith("resetorsend")){
             //send declaration
             //skip the resetorsend
             remains = remains.substring(11).trim();
   //XXXXXXXXXXXXXXXXXX//TO DO handle resetorsend declaration
-          } else System.err.println("[Gate Unicode input method loader]" +
+          } else System.err.println("[GATE Unicode input method loader]" +
                                  " Ignoring line: " + line);
         } else if(remains.startsWith("keymap")){
           //keymap declaration
@@ -155,10 +155,10 @@ public class LocaleHandler {
           //ignore
         } else if(remains.startsWith("option")){
           //ignore
-        } else System.err.println("[Gate Unicode input method loader]" +
+        } else System.err.println("[GATE Unicode input method loader]" +
                                  " Ignoring line: " + line);
       } catch(StringIndexOutOfBoundsException siobe) {
-        System.err.println("[Gate Unicode input method loader]" +
+        System.err.println("[GATE Unicode input method loader]" +
                            " Ignoring line: " + line);
       }
       line = br.readLine();
