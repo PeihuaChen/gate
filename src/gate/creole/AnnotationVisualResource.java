@@ -44,13 +44,21 @@ public interface AnnotationVisualResource extends VisualResource {
    * @param endOffset the end offset of the span covered by the new
    * annotation(s)
    */
-  public void setSpan(Long startOffset, Long endOffset);
+  public void setSpan(Long startOffset, Long endOffset, String annotationType);
 
   /**
    * Called by the GUI when the user has pressed the "OK" button. This should
    * trigger the saving of the newly created annotation(s)
    */
   public void okAction() throws GateException;
+
+  /**
+   * Called by the GUI when the user has pressed the "Cancel" button. This should
+   * trigger cleaning up action, if the editor has done any changes to the
+   * annotation sets or document or annotation
+   */
+  public void cancelAction() throws GateException;
+
 
   /**
    * Checks whether this viewer/editor can handle a specific annotation type.
