@@ -46,6 +46,34 @@ public class TestJacl extends TestCase
     assert(result.toString().indexOf("FindScripts.tcl") != -1);
   } // testCreation()
 
+
+  /** Test the finding and listing methods */
+  public void testListing() throws TclException {
+    // create and interpreter and load all the GATE scripts
+    Jacl jacl = new Jacl();
+
+    // find the list of script files in the GATE source tree
+    // (the parameter to findScripts causes a dir change before the search)
+    List scriptPaths = jacl.findScripts(jacl.goToGateSrcScript);
+    System.out.println("Scripts found: " + scriptPaths); 
+
+    // refresh Jacl.java's list of GATE scripts
+    // System.out.println("Updating Jacl.java....");
+    // jacl.listGateScripts();
+
+    // copy the scripts to the classes tree
+    System.out.println("Doing copy....");
+    jacl.copyGateScripts(scriptPaths);
+
+    // load the scripts (as a test)
+    System.out.println("Doing load....");
+    jacl.loadScripts(scriptPaths);
+
+    // tell the world
+    System.out.println("Tcl scripts found, installed and loaded");
+  } // testListing
+
+
   /** Test suite routine for the test runner */
   public static Test suite() {
     return new TestSuite(TestJacl.class);
