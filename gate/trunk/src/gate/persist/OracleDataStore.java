@@ -3050,7 +3050,7 @@ public class OracleDataStore extends JDBCDataStore {
    * @param orderByConstraints liat of OrderByRestriction objects
    * @param limitcount limit returning objects -1 for unlimited
    */
-  public List findLrIds(List constraints, String lrType,
+ public List findLrIds(List constraints, String lrType,
                       List orderByConstraints, int limitcount) throws PersistenceException {
       Vector lrsIDs = new Vector();
       CallableStatement stmt = null;
@@ -3062,7 +3062,6 @@ public class OracleDataStore extends JDBCDataStore {
         String sql = getSQLQuery(constraints, lrType, false, orderByConstraints, limitcount, sqlValues);
         conn = DBHelper.connect(this.getStorageUrl(), true);
         stmt = conn.prepareCall(sql);
-///System.out.println("  " + sql);
         for (int i = 0; i<sqlValues.size(); i++){
           if (sqlValues.elementAt(i) instanceof String){
             stmt.setString(i+1,sqlValues.elementAt(i).toString());
@@ -3145,27 +3144,27 @@ public class OracleDataStore extends JDBCDataStore {
   private String getSQLQuery(List filter, String lrType, boolean count,
                               List orderByFilter, int limitcount, Vector sqlValues){
     StringBuffer query = new StringBuffer("");
-    String join = getJoinQuery(orderByFilter, sqlValues);
+    String join = getJoinQuery(filter, orderByFilter, sqlValues);
     String select = "lr_id";
     if (count){
       select = "count(*)";
     }
 
     query = query.append(" SELECT " + select + " " +
-                          " FROM  "+Gate.DB_OWNER+".t_lang_resource LR " + join +
-                          "  ( ");
+                          " FROM  "+Gate.DB_OWNER+".t_lang_resource LR " + join);
 
+   if (filter != null && filter.size()>0) {
+      query = query.append("  ( ");
+      query = query.append(getIntersectionPart(filter, sqlValues));
+      query = query.append(" ) intersected_feat_restr ");
+   }
 
-    query = query.append(getIntersectionPart(filter, sqlValues));
-
-    query = query.append(" ) intersected_feat_restr ");
-
-    String endPartOfJoin = getEndPartOfJoin(orderByFilter, lrType,sqlValues);
+    String endPartOfJoin = getEndPartOfJoin(filter,orderByFilter, lrType,sqlValues);
     query = query.append(endPartOfJoin);
 
     if (limitcount>0){
       query = query.insert(0,"select lr_id from ( ");
-      query = query.append( ") where rownum<"+limitcount);
+      query = query.append( ") where rownum<"+(limitcount+1));
     }
 
     return query.toString();
@@ -3278,9 +3277,11 @@ public class OracleDataStore extends JDBCDataStore {
     return expr.toString();
   }
 
-  private String getJoinQuery(List orderByFilter, Vector sqlValues){
+  private String getJoinQuery(List filter, List orderByFilter, Vector sqlValues){
     StringBuffer join = new StringBuffer("");
-    join = join.append(" , ");
+    if (filter !=null && filter.size()>0) {
+      join = join.append(" , ");
+    }
     if (orderByFilter!=null){
       for (int i = 0; i<orderByFilter.size(); i++){
         join = join.append(Gate.DB_OWNER+".t_feature FT"+i);
@@ -3290,7 +3291,7 @@ public class OracleDataStore extends JDBCDataStore {
     return join.toString();
   }
 
-  private String getEndPartOfJoin(List orderByFilter, String lrType, Vector sqlValues){
+  private String getEndPartOfJoin(List filter, List orderByFilter, String lrType, Vector sqlValues){
     StringBuffer endJoin = new StringBuffer("");
     endJoin = endJoin.append(" WHERE ");
 
@@ -3302,7 +3303,9 @@ public class OracleDataStore extends JDBCDataStore {
       sqlValues.addElement(new Long(1));
     }// if DBHelper.DOCUMENT_CLASS
 
-    endJoin = endJoin.append(" and intersected_feat_restr.ft_entity_id = lr.lr_id ");
+    if (filter != null && filter.size()>0){
+      endJoin = endJoin.append(" and intersected_feat_restr.ft_entity_id = lr.lr_id ");
+    }
 
     if (orderByFilter!=null && orderByFilter.size()>0){
       for (int i=0; i<orderByFilter.size(); i++){
@@ -3347,7 +3350,6 @@ public class OracleDataStore extends JDBCDataStore {
         String sql = getSQLQueryAnn(constraints, limitcount, sqlValues);
         conn = DBHelper.connect(this.getStorageUrl(), true);
         stmt = conn.prepareCall(sql);
-///System.out.println(sql);
         for (int i = 0; i<sqlValues.size(); i++){
           if (sqlValues.elementAt(i) instanceof String){
             stmt.setString(i+1,sqlValues.elementAt(i).toString());
@@ -3358,7 +3360,6 @@ public class OracleDataStore extends JDBCDataStore {
           else if (sqlValues.elementAt(i) instanceof Integer){
             stmt.setLong(i+1,((Integer) sqlValues.elementAt(i)).intValue());
           }
-///System.out.println(" -> " +sqlValues.elementAt(i).toString());
         }
         stmt.execute();
         rs = stmt.getResultSet();
@@ -3413,11 +3414,10 @@ public class OracleDataStore extends JDBCDataStore {
     sql.append(" group by lr_id ");
     if (limitcount>0){
       sql = sql.insert(0,"select lr_id from ( ");
-      sql = sql.append( ") where rownum<"+limitcount);
+      sql = sql.append( ") where rownum<"+(limitcount+1));
     }
     return sql.toString();
   }
-
   private class Feature {
 
     Long entityID;
