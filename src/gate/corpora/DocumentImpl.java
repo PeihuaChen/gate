@@ -263,6 +263,11 @@ public class DocumentImpl implements Document
     return getOrderingString().compareTo(other.getOrderingString());
   } // compareTo
 
+  /** Get the factory that created this object. */
+  public Factory getFactory() {
+    throw new LazyProgrammerException();
+  } // getFactory()
+
   /** Utility method to produce a string for comparison in ordering.
     * String is based on the source URL and offsets.
     */

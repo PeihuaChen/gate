@@ -28,31 +28,26 @@ public abstract class Factory
   /** Create a new LanguageResource. */
   public static LanguageResource newLR(Class LRClass, Object[] args) {
     throw new RuntimeException();
-    return null;
   }
 
   /** Create a new Corpus. */
   public static Corpus newCorpus(String name) { 
     throw new RuntimeException();
-    return null;
   }
 
   /** Create a new Document from a URL. */
   public static Document newDocument(URL u) throws IOException { 
     throw new RuntimeException();
-    return null;
   }
 
   /** Create a new Document from a String. */
   public static Document newDocument(String s) throws IOException { 
     throw new RuntimeException();
-    return null;
   }
 
   /** Create a new FeatureMap. */
   public static FeatureMap newFeatureMap() { 
     throw new RuntimeException();
-    return null;
   }
 
 } // abstract Factory

@@ -45,7 +45,12 @@ public class CorpusImpl extends TreeSet implements Corpus
   public FeatureMap getFeatures() { return features; }
 
   /** Set the feature set */
-  public void setFeatures(FeatureMap features) { this.features = features; }
+  public void setFeatures(FeatureMap features) { this.features = features; } 
+
+  /** Get the factory that created this object. */
+  public Factory getFactory() {
+    throw new LazyProgrammerException();
+  } // getFactory()
 
   /** The name of the corpus */
   protected String name;
