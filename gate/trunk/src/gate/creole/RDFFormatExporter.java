@@ -200,7 +200,9 @@ public class RDFFormatExporter extends AbstractLanguageAnalyser {
       while (itClasses.hasNext()) {
         DAMLClass cls = (DAMLClass)itClasses.next();
         String className = cls.getLocalName();
-        defaultClasses.put(className.toLowerCase(),cls);
+        if (null != className) {
+          defaultClasses.put(className.toLowerCase(),cls);
+        }
       }
 
       Iterator itTypes = this.exportedTypes.iterator();
@@ -318,8 +320,11 @@ public class RDFFormatExporter extends AbstractLanguageAnalyser {
     Iterator itClasses = ontology.listDAMLClasses();
     while (itClasses.hasNext()) {
       DAMLClass clazz = (DAMLClass)itClasses.next();
-      Assert.assertNotNull(clazz.getLocalName());
-      result.put(clazz.getLocalName(),clazz);
+      //Assert.assertNotNull(clazz.getLocalName());
+      if (null != clazz.getLocalName()) {
+        result.put(clazz.getLocalName(),clazz);
+      }
+
     }
 
     return result;
