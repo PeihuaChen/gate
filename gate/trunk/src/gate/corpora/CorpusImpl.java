@@ -76,23 +76,25 @@ public class CorpusImpl extends TreeSet implements Corpus {
   /** Set the feature set */
   public void setFeatures(FeatureMap features) { this.features = features; }
 
-  // two corpus are equals if they have the same size, the same documents
-  // and the same features
+  /* two corpus are equal if they have the same documents
+   * the same features and the same name
+   */
   public boolean equals(Object other) {
+
+    if (!super.equals(other)) return false;
+
     Corpus corpus;
     if (!(other instanceof CorpusImpl)) return false;
     else corpus = (Corpus)other;
 
-    if ((this.size() == 0)^(corpus.size() == 0)) return false;
-    if ((this.size()!= 0)&&(this.size() != corpus.size())) return false;
-
+    // verify the name
     if ((name == null)^(corpus.getName() == null)) return false;
-    if ((name != null)&& (name.equals(corpus.getName()))) return false;
+    if ((name != null)&& (!name.equals(corpus.getName()))) return false;
 
-    if (!this.containsAll(corpus)) return false;
-
+    // verify the features
     if ((features == null) ^ (corpus.getFeatures() == null)) return false;
     if ((features != null)&&(!features.equals(corpus.getFeatures())))return false;
+
     return true;
   }
 
