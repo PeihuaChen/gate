@@ -604,7 +604,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       textButtonBox.setLayout(new BoxLayout(textButtonBox, BoxLayout.X_AXIS));
       textButtonBox.setOpaque(false);
       label = new JLabel(){
-        public boolean isFocusTraversable(){
+        public boolean isFocusable(){
           return true;
         }
       };
