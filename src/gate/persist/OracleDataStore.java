@@ -601,8 +601,19 @@ public class OracleDataStore extends JDBCDataStore {
 
     //9. create a DatabaseDocument wrapper and return it
 
-    Document dbDoc = new DatabaseDocumentImpl(this.jdbcConn);
-
+    Document dbDoc = new DatabaseDocumentImpl(this.jdbcConn,
+                                              doc.getName(),
+                                              this,
+                                              docID,
+                                              doc.getContent(),
+                                              doc.getFeatures(),
+                                              doc.getMarkupAware(),
+                                              doc.getSourceUrl(),
+                                              doc.getSourceUrlStartOffset(),
+                                              doc.getSourceUrlEndOffset(),
+                                              doc.getAnnotations(),
+                                              doc.getNamedAnnotationSets());
+/*
     dbDoc.setContent(doc.getContent());
     dbDoc.setDataStore(this);
     dbDoc.setFeatures(doc.getFeatures());
@@ -624,7 +635,7 @@ public class OracleDataStore extends JDBCDataStore {
       //add them all to the DBAnnotationSet
       ((DatabaseDocumentImpl)dbDoc).setAnnotations(currSet.getName(),currSet);
     }
-
+*/
     return dbDoc;
   }
 
