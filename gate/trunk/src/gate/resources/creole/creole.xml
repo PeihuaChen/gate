@@ -75,7 +75,7 @@
   <CREOLE>
     <!-- creole.xml for the internal tokeniser -->
     <RESOURCE>
-      <NAME>GATE internal Tokeniser</NAME>
+      <NAME>GATE Unicode Tokeniser</NAME>
       <CLASS>gate.creole.tokeniser.SimpleTokeniser</CLASS>
       <COMMENT>A customisable tokeniser.</COMMENT>
       <PRIVATE/>
@@ -88,7 +88,7 @@
 
     <!-- creole.xml for tokeniser -->
     <RESOURCE>
-      <NAME>ANNIE Unicode Tokeniser</NAME>
+      <NAME>ANNIE English Tokeniser</NAME>
       <CLASS>gate.creole.tokeniser.DefaultTokeniser</CLASS>
       <COMMENT>A customisable tokeniser.</COMMENT>
       <PARAMETER NAME="document" COMMENT="The document to be tokenised" RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
