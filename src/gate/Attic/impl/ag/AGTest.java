@@ -25,7 +25,7 @@ public class AGTest {
         catch (gate.util.InvalidOffsetException e) {
             e.printStackTrace(System.err);
         }
-
+/*
         System.out.println(ag);
         ag.newAnnotation(Tools.gensym(), 0, 1, "char", "");
         ag.newAnnotation(Tools.gensym(), 1, 2, "char", "");
@@ -33,6 +33,7 @@ public class AGTest {
         ag.newAnnotation(Tools.gensym(), 3, 4, "char", "");
         gate.AnnotationGraph ag1 = doc.getAnnotationGraph(agId);
         System.out.println(ag1.getAnnotations("char"));
+*/
     }
 
 

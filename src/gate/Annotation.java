@@ -27,6 +27,6 @@ public interface Annotation extends FeatureBearer {
   public Node getEndNode();
 
   /** The id of this annotation. */
-  public long getId();
+  public Long getId();
 
 } // interface Annotation

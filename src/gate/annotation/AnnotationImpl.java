@@ -53,8 +53,8 @@ public class AnnotationImpl implements Annotation, FeatureBearer
   }
 
   /**The id of the annotation.*/
-  public long getId() {
-      return id;
+  public Long getId() {
+      return new Long(id);
   }
 
   private String type = null;
