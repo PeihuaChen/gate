@@ -114,7 +114,7 @@ public class AnnotationListView extends AbstractDocumentView
     for(int i = 0; i < tagList.size(); i++){
       Object tag = tagList.get(i);
       if(((AnnotationHandler)annotationHandlerByTag.get(tag)).ann == ann){
-        tableModel.fireTableRowsUpdated(i, i);
+        if(tableModel != null)tableModel.fireTableRowsUpdated(i, i);
       }
     }
   }

@@ -108,7 +108,7 @@ public class AnnotationEditor{
     pane.setLayout(new GridBagLayout());
     pane.setBackground(UIManager.getLookAndFeelDefaults().
             getColor("ToolTip.background"));
-    bottomWindow.getContentPane().add(pane);
+    bottomWindow.setContentPane(pane);
 
     Insets insets0 = new Insets(0, 0, 0, 0);
     GridBagConstraints constraints = new GridBagConstraints();
@@ -190,10 +190,15 @@ public class AnnotationEditor{
       public void mouseEntered(MouseEvent evt){
         hideTimer.stop();
       }
+      public void mouseExited(MouseEvent evt){
+        System.out.println("Exit!");
+        hideTimer.restart();
+      }
     };
+
+    bottomWindow.getRootPane().addMouseListener(windowMouseListener);
+//    featuresEditor.addMouseListener(windowMouseListener);
     
-    bottomWindow.addMouseListener(windowMouseListener);
-    featuresEditor.addMouseListener(windowMouseListener);
     ((JComponent)bottomWindow.getContentPane()).
     		getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).
     		put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "dismiss");
