@@ -4,13 +4,11 @@
 
 Phase:	Enamex
 //Input: Token SpaceToken Lookup
-Options: control = appelt
+Options: control = brill
 
 ///////////////////////////////////////////////////////////////
 
 // Person Rules
-
-
 
 /////////////////////////////////////////////////////////////////
 Macro: TITLE
@@ -138,7 +136,7 @@ Priority: 40
 
 
 Rule:	PersonTitle
-Priority: 25
+Priority: 15
 // Mr. Jones
 // Mr Fred Jones
 
@@ -165,8 +163,6 @@ Priority: 20
  (SPACE {Lookup.majorType == stop}
   (SPACE)?
  )
- (LASTNAME)*
- (SPACE PERSONENDING)?
 )
 -->
   :person.TempPerson = {kind = "personName", rule = "FirstPersonStop"}
@@ -181,11 +177,9 @@ Priority: 50
  (SPACE {Lookup.majorType == stop}
   (SPACE)?
  )
- (LASTNAME)*
- (SPACE PERSONENDING)?
 )
 :person -->
-  :person.TempPerson = {kind = "negative", rule = "FirstPersonStop"}
+  :person.TempPerson = {kind = "negative", rule = "NotFirstPersonStop"}
 
 
 Rule: 	PersonFull
@@ -298,8 +292,8 @@ Priority: 5
 :orgName -->  
   :orgName.TempOrganization = {kind = "orgName", rule=GazOrganization}
 
-Rule:	XOrganization
-Priority: 10
+Rule:	LocOrganization
+Priority: 20
 // Ealing Police
 (
  ({Lookup.majorType == location} |
@@ -309,11 +303,11 @@ Priority: 10
 (SPACE {Lookup.majorType == organization})?
 )
 :orgName -->  
-  :orgName.TempOrganization = {kind = "orgName", rule=GazOrganization}
+  :orgName.TempOrganization = {kind = "orgName", rule=LocOrganization}
 
 
 Rule:	OrgXandY
-Priority: 10
+Priority: 20
 
 // Bradford & Bingley
 // Bradford & Bingley Ltd
@@ -338,7 +332,7 @@ Priority: 10
 
 
 Rule:OrgUni
-Priority: 15
+Priority: 25
 // University of Sheffield
 // Sheffield University
 // A Sheffield University
@@ -355,7 +349,7 @@ Priority: 15
 
 
 Rule: OrgDept
-Priority: 15
+Priority: 25
 // Department of Pure Mathematics and Physics
 
 (
@@ -376,7 +370,7 @@ Priority: 15
 
 
 Rule:	OrgXKey
-Priority: 5
+Priority: 15
 
 // Aaaa Ltd.
 // Xxx Services Ltd. 
@@ -387,9 +381,11 @@ Priority: 5
 )?
 (
   ({Token.orth == upperInitial} | 
-   {Token.orth == allCaps})
+   {Token.orth == allCaps}|
+   {Token.orth == mixedCaps}
+  )
   SPACE
-  ({Token.orth == upperInitial}
+  (({Token.orth == upperInitial} | {Token.orth == allCaps})
    SPACE)*
  {Lookup.majorType == org_key}
  (SPACE {Lookup.majorType == org_ending})?
@@ -399,7 +395,7 @@ Priority: 5
 
 
 Rule:	OrgXEnding
-Priority: 10
+Priority: 20
 
 // Coca Cola Co.
 
@@ -409,10 +405,12 @@ Priority: 10
 )?
 (
   ({Token.orth == upperInitial} | 
-   {Token.orth == allCaps})
+   {Token.orth == allCaps}|
+   {Token.orth == mixedCaps})
   SPACE
-  ({Token.orth == upperInitial}
-   SPACE)*
+  (({Token.orth == upperInitial} |
+   {Token.orth == allCaps})
+   SPACE)?
  {Lookup.majorType == cdg}
 )
 :orgName -->
@@ -421,7 +419,7 @@ Priority: 10
 
 
 Rule:	OrgXandYKey
-Priority: 10
+Priority: 20
 
 // Aaaa Ltd.
 // Xxx Services Ltd. 
@@ -442,7 +440,8 @@ Priority: 10
    {Token.orth == allCaps})
    SPACE
   )
-  ({Token.orth == upperInitial}
+  (({Token.orth == upperInitial}| 
+    {Token.orth == allCaps})
    SPACE)*
  {Lookup.majorType == org_key}
  (SPACE {Lookup.majorType == org_ending})?
@@ -452,7 +451,7 @@ Priority: 10
 
 
 Rule:	OrgXsKeyBase
-Priority: 10
+Priority: 20
  
 // Gandy's Circus
 // Queen's Ware
@@ -513,9 +512,8 @@ Priority: 100
 //:orgName -->
 //  :orgName.Temp = {kind = "notorgName", rule = "NotOrgXBase"}
 
-
 Rule:	OrgXBase
-Priority: 20
+Priority: 30
 
 // same as OrgXKey but uses base instead of key
 // includes govern_key e.g. academy
@@ -530,7 +528,9 @@ Priority: 20
 )
 (
  ({Token.orth == upperInitial} | 
-   {Token.orth == allCaps})
+  {Token.orth == allCaps} |
+  {Token.orth == mixedCaps}
+ )
   SPACE
   ({Token.orth == upperInitial}
    SPACE)?
@@ -552,7 +552,7 @@ Priority: 20
 
 
 Rule:	OrgPreX
-Priority: 20
+Priority: 30
 
 // Royal Tuscan
 
@@ -585,7 +585,7 @@ Priority: 50
 
 
 Rule:OrgPersonAmbig
-Priority: 20
+Priority: 30
 // Alexandra Pottery should be org not person
 // overrides PersonFull
 
@@ -599,6 +599,52 @@ Priority: 20
 -->
  :org.TempOrganization= {kind = "orgName", rule = "OrgPersonAmbig"}
 
+Rule:OrgContext1
+Priority: 1
+// company X
+
+(
+ {Token.string == "company"}
+ (SPACE)
+)
+(
+ ({Token.orth == upperInitial} |
+  {Token.orth == allCaps})
+ (SPACE 
+  ({Token.orth == upperInitial} |
+   {Token.orth == allCaps})
+ )*
+)
+:org
+-->
+ :org.TempOrganization= {kind = "orgName", rule = "OrgContext1"}
+
+Rule: OrgContext2
+Priority: 5
+
+// Telstar laboratory
+// Medici offices
+
+(
+ ({Token.orth == upperInitial} |
+  {Token.orth == allCaps})
+ (SPACE 
+  ({Token.orth == upperInitial} |
+   {Token.orth == allCaps})
+ )*
+): org
+(SPACE
+ ({Token.string == "offices"} |
+ {Token.string == "Offices"} |
+ {Token.string == "laboratory"} | 
+ {Token.string == "Laboratory"} |
+ {Token.string == "laboratories"} |
+ {Token.string == "Laboratories"})
+)
+-->
+ :org.TempOrganization= {kind = "orgName", rule = "OrgContext2"}
+
+ 
 
 /////////////////////////////////////////////////////////////////
 // Location rules
@@ -648,5 +694,9 @@ Rule:AmbigNameLoc1
 :locName
 -->
  :locName.TempLocation = {kind = "locName", rule = AmbigNameLoc1}
+
+
+
+
 
 
