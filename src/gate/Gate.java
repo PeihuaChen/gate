@@ -450,7 +450,8 @@ jar/classpath so it's the same as registerBuiltins
     if(!res){
       try{
         Class aClass = Class.forName(classname);
-        res = Resource.class.isAssignableFrom(aClass);
+        res = Resource.class.isAssignableFrom(aClass) ||
+              Controller.class.isAssignableFrom(aClass);
       }catch(ClassNotFoundException cfe){}
     }
     return res;
