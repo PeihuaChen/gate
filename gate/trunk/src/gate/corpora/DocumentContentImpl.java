@@ -178,6 +178,10 @@ public class DocumentContentImpl implements DocumentContent
    */
   String originalContent;
 
+  /**
+   * Return the original content of the document received during the loading
+   * phase or on construction from string.
+   */
   public String getOriginalContent() { return originalContent; }
 
   /** For ranges */
