@@ -47,6 +47,11 @@ public class Gate
     * @see #initCreoleRegister
     */
   public static void init() throws GateException {
+    //register the URL handler  for the "gate://" URLs
+    System.setProperty("java.protocol.handler.pkgs",
+                       System.getProperty("java.protocol.handler.pkgs" ) + "|" +
+                       "gate.util.protocols");
+
     // create class loader and creole register if they're null
     if(classLoader == null)
       classLoader = new GateClassLoader();
