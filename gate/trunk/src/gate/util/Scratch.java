@@ -19,6 +19,7 @@ package gate.util;
 import java.util.*;
 import java.net.*;
 import java.io.*;
+import java.util.zip.*;
 
 import gate.*;
 import gate.creole.*;
@@ -108,12 +109,12 @@ public class Scratch
     Out.prln("dumping state");
 
     // create a File to store the state in
-    File stateFile = new File("z:\\tmp", "SerialisedGateState.ser");
+    File stateFile = new File("z:\\tmp", "SerialisedGateState.gzsr");
 
     // dump the state into the new File
     try {
       ObjectOutputStream oos = new ObjectOutputStream(
-        new FileOutputStream(stateFile)
+        new GZIPOutputStream(new FileOutputStream(stateFile))
       );
       oos.writeObject(new SessionState());
       oos.close();
@@ -128,7 +129,8 @@ public class Scratch
 
     try {
       FileInputStream fis = new FileInputStream(stateFile);
-      ObjectInputStream ois = new ObjectInputStream(fis);
+      GZIPInputStream zis = new GZIPInputStream(fis);
+      ObjectInputStream ois = new ObjectInputStream(zis);
       SessionState state = (SessionState) ois.readObject();
       ois.close();
     } catch(IOException e) {

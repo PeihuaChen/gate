@@ -57,9 +57,9 @@ public class DataStoreRegister extends HashSet {
    */
   public boolean remove(Object o) {
     boolean res = super.remove(o);
-    if(res) fireDatastoreClosed(new CreoleEvent((DataStore)o,
-                                        CreoleEvent.DATASTORE_CLOSED)
-                        );
+    if(res) fireDatastoreClosed(
+      new CreoleEvent((DataStore)o, CreoleEvent.DATASTORE_CLOSED)
+    );
     return res;
   } // remove
 
@@ -72,12 +72,12 @@ public class DataStoreRegister extends HashSet {
     super.clear();
 
     Iterator iter = datastores.iterator();
-    while(iter.hasNext()){
-      fireDatastoreClosed(new CreoleEvent((DataStore) iter.next(),
-                                          CreoleEvent.DATASTORE_CLOSED)
-                          );
-    }// while
-  }// clear()
+    while(iter.hasNext()) {
+      fireDatastoreClosed(
+        new CreoleEvent((DataStore) iter.next(), CreoleEvent.DATASTORE_CLOSED)
+      );
+    } // while
+  }   // clear()
 
   /**
    * Removes a previously registered {@link gate.event.CreoleListener}
@@ -92,7 +92,7 @@ public class DataStoreRegister extends HashSet {
       v.removeElement(l);
       creoleListeners = v;
     }
-  }// removeCreoleListener(CreoleListener l)
+  } // removeCreoleListener(CreoleListener l)
 
   /**
    * Registers a new {@link gate.event.CreoleListener} with this
@@ -121,9 +121,9 @@ public class DataStoreRegister extends HashSet {
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
         ((CreoleListener) listeners.elementAt(i)).datastoreOpened(e);
-      }// for
-    }// if
-  }// fireDatastoreOpened(CreoleEvent e)
+      } // for
+    }   // if
+  }     // fireDatastoreOpened(CreoleEvent e)
 
   /**
    * Notifies all registered {@link gate.event.CreoleListener}s that a new
@@ -137,9 +137,9 @@ public class DataStoreRegister extends HashSet {
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
         ((CreoleListener) listeners.elementAt(i)).datastoreCreated(e);
-      }// for
-    }// if
-  }// fireDatastoreCreated(CreoleEvent e)
+      } // for
+    }   // if
+  } // fireDatastoreCreated(CreoleEvent e)
 
   /**
    * Notifies all registered {@link gate.event.CreoleListener}s that a
@@ -153,10 +153,11 @@ public class DataStoreRegister extends HashSet {
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
         ((CreoleListener) listeners.elementAt(i)).datastoreClosed(e);
-      }// for
-    }// if
-  }// fireDatastoreClosed(CreoleEvent e)
+      } // for
+    }   // if
+  } // fireDatastoreClosed(CreoleEvent e)
 
+  /** */
   private transient Vector creoleListeners;
 
 } // class DataStoreRegister

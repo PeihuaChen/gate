@@ -304,7 +304,7 @@ public class Files {
   } //find
 
   /** Recursively remove a directory <B>even if it contains other files
-    * or directories<B>. Returns true when the directory and all its
+    * or directories</B>. Returns true when the directory and all its
     * contents are successfully removed, else false.
     */
   public static boolean rmdir(File dir) {

@@ -16,6 +16,7 @@
 package gate.persist;
 
 import java.util.*;
+import java.util.zip.*;
 import java.net.*;
 import java.io.*;
 
@@ -33,11 +34,14 @@ extends AbstractFeatureBearer implements DataStore {
     * pointing to the storage directory used for
     * the serialised classes.
     */
-  public SerialDataStore(URL storageDirUrl) {
-    this.storageDir = new File(storageDirUrl.getFile());
+  public SerialDataStore(URL storageDirUrl) throws PersistenceException {
+    setStorageUrl(storageDirUrl);
   } // construction from URL
 
-  /** Default construction */
+  /**
+   * Default construction. <B>NOTE:</B> should not be called except by
+   * GATE code.
+   */
   public SerialDataStore() { };
 
   /** The directory used for the serialised classes.
@@ -73,7 +77,8 @@ extends AbstractFeatureBearer implements DataStore {
   } // getStorageUrl()
 
   /** Create a new data store. This tries to create a directory in
-    * the local file system. If the directory already exists, or is
+    * the local file system. If the directory already exists and is
+    * non-empty, or is
     * a file, or cannot be created, PersistenceException is thrown.
     */
   public void create()
@@ -114,7 +119,7 @@ extends AbstractFeatureBearer implements DataStore {
       (! resourceTypeDirectory.exists()) ||
       (! resourceTypeDirectory.isDirectory())
     ) {
-        throw new PersistenceException("Can't find " + resourceTypeDirectory);
+      throw new PersistenceException("Can't find " + resourceTypeDirectory);
     }
 
     // create a File to representing the resource storage file
@@ -132,9 +137,11 @@ extends AbstractFeatureBearer implements DataStore {
         throw new PersistenceException("Can't delete " + resourceTypeDirectory);
 
     //let the world know about it
-    fireResourceDeleted(new DatastoreEvent(this,
-                                           DatastoreEvent.RESOURCE_DELETED,
-                                           null, dataStoreInstanceId));
+    fireResourceDeleted(
+      new DatastoreEvent(
+        this, DatastoreEvent.RESOURCE_DELETED, null, dataStoreInstanceId
+      )
+    );
   } // delete(lr)
 
   /** Adopt a resource for persistence. */
@@ -147,18 +154,17 @@ extends AbstractFeatureBearer implements DataStore {
       return lr;
     else if(currentDS == null) {  // an orphan - do the adoption
       lr.setDataStore(this);
-      //let the world know
-      fireResourceAdopted(new DatastoreEvent(this,
-                                             DatastoreEvent.RESOURCE_ADOPTED,
-                                             lr, null));
+
+      // let the world know
+      fireResourceAdopted(
+        new DatastoreEvent(this, DatastoreEvent.RESOURCE_ADOPTED, lr, null)
+      );
       return lr;
     } else {                      // someone else's child
       throw new PersistenceException(
         "Can't adopt a resource which is already in a different datastore"
       );
     }
-
-    // set up the LR's persistent storage ID
 
   } // adopt(LR)
 
@@ -172,15 +178,16 @@ extends AbstractFeatureBearer implements DataStore {
       throw new PersistenceException("Can't read " + storageDir);
     }
 
-    //check storage directory is a Gate datastore
+    // check storage directory is a Gate datastore
     List names = Arrays.asList(storageDir.list());
     Iterator namesIter = names.iterator();
     while(namesIter.hasNext()){
       String name = (String)namesIter.next();
-      ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(name);
-      if(rData == null){
-        throw new PersistenceException("Invalid storage directory: " +
-                                       name + " is not a valid Gate type");
+      ResourceData resData = (ResourceData) Gate.getCreoleRegister().get(name);
+      if(resData == null) {
+        throw new PersistenceException(
+          "Invalid storage directory: " + name + " is not a valid Gate type"
+        );
       }
     }
   } // open()
@@ -236,37 +243,45 @@ extends AbstractFeatureBearer implements DataStore {
     if(lrFeatures != null) {
       lrName = (String) lrFeatures.get("gate.NAME");
       lrPersistenceId = (String) lrFeatures.get("DataStoreInstanceId");
-    }// End if
-    if(lrName == null) lrName = lrData.getName();
-    if (lrPersistenceId == null){
-     lrPersistenceId = lrName + "___" + new Date().getTime() + "___" + random();
-     lr.getFeatures().put("DataStoreInstanceId", lrPersistenceId);
-    }// End if
+    }
+    if(lrName == null)
+      lrName = lrData.getName();
+    if(lrPersistenceId == null) {
+      lrPersistenceId = constructPersistenceId(lrName);
+      lr.getFeatures().put("DataStoreInstanceId", lrPersistenceId);
+    }
 
     // create a File to store the resource in
     File resourceFile = new File(resourceTypeDirectory, lrPersistenceId);
+
     // dump the LR into the new File
     try {
       ObjectOutputStream oos = new ObjectOutputStream(
-        new FileOutputStream(resourceFile)
+        new GZIPOutputStream(new FileOutputStream(resourceFile))
       );
       oos.writeObject(lr);
       oos.close();
     } catch(IOException e) {
-e.printStackTrace(System.err);
       throw new PersistenceException("Couldn't write to storage file: " + e);
     }
 
-    //restore the original features, taking care to preserve any new values
-    //that have been added or changed
+    // restore the original features, taking care to preserve any new values
+    // that have been added or changed
     originalFeatures.putAll(persistentFeatures);
     lr.setFeatures(originalFeatures);
 
-    //let the world know about it
-    fireResourceWritten(new DatastoreEvent(this,
-                                         DatastoreEvent.RESOURCE_WRITTEN,
-                                         lr, lrPersistenceId));
+    // let the world know about it
+    fireResourceWritten(
+      new DatastoreEvent(
+        this, DatastoreEvent.RESOURCE_WRITTEN, lr, lrPersistenceId
+      )
+    );
   } // sync(LR)
+
+  /** Create a persistent store Id from the name of a resource. */
+  protected String constructPersistenceId(String lrName) {
+    return lrName + "___" + new Date().getTime() + "___" + random();
+  } // constructPersistenceId
 
   /** Get a resource from the persistent store.
     * <B>Don't use this method - use Factory.createResource with
@@ -294,9 +309,14 @@ e.printStackTrace(System.err);
     LanguageResource lr = null;
     try {
       FileInputStream fis = new FileInputStream(resourceFile);
-      ObjectInputStream ois = new ObjectInputStream(fis);
+      GZIPInputStream zis = new GZIPInputStream(fis);
+      ObjectInputStream ois = new ObjectInputStream(zis);
       lr = (LanguageResource) ois.readObject();
-      ois.close();
+
+      // think we don't need to close the nested streams, as the close
+      // methods of the outer streams cascade to the inner ones...
+      // ois.close();
+      // zis.close();
       fis.close();
     } catch(IOException e) {
       throw
@@ -307,7 +327,7 @@ e.printStackTrace(System.err);
     }
 
     // set the dataStore property of the LR (which is transient and therefore
-    // not serialised
+    // not serialised)
     lr.setDataStore(this);
 
     return lr;
@@ -392,15 +412,19 @@ e.printStackTrace(System.err);
     return s.toString();
   } // toString()
 
+  /** Calculate a hash code based on the class and the storage dir. */
   public int hashCode(){
     return getClass().hashCode() ^ storageDir.hashCode();
-  }
+  } // hashCode
 
-  public boolean equals(Object other){
-    return other instanceof SerialDataStore
-           &&
-           ((SerialDataStore)other).storageDir.equals(storageDir);
-  }
+  /** Equality: based on storage dir of other. */
+  public boolean equals(Object other) {
+    return
+      other instanceof SerialDataStore
+      &&
+      ((SerialDataStore)other).storageDir.equals(storageDir);
+  } // equals
+
   public synchronized void removeDatastoreListener(DatastoreListener l) {
     if (datastoreListeners != null && datastoreListeners.contains(l)) {
       Vector v = (Vector) datastoreListeners.clone();
