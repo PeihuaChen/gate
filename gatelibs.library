@@ -7,6 +7,7 @@
     <path>[lib/GnuGetOpt.jar]</path>
     <path>[lib/gnu-regexp-1.0.8.jar]</path>
     <path>[lib/gateHmm.jar]</path>
+    <path>[lib/ontotext.jar]</path>
     <path>[lib/jacl.jar]</path>
     <path>[lib/Bib2HTML.jar]</path>
     <path>[lib/JavaCC.zip]</path>
@@ -38,11 +39,10 @@
     <path>[lib/maxent.jar]</path>
     <path>[lib/troveForMaxent.jar]</path>
     <path>[lib/JAPEDebugger1170.jar]</path>
-    <path>[lib/plugins/ontotext.jar]</path>
   </class>
   <source>
     <path>build</path>
     <path>src</path>
   </source>
-  <lastmodsaved>1090587101588</lastmodsaved>
+  <lastmodsaved>1090604247009</lastmodsaved>
 </library>
