@@ -65,7 +65,7 @@ Macro: PERSONENDING
 
 Macro: DET
 (
- {POS.category == DT}
+ {Token.category == DT}
 )
 
 
@@ -172,8 +172,8 @@ Priority: 50
 
 (
  ((FIRSTNAMEAMBIG (SPACE)?)+ | 
-  {POS.category == PRP}|
-  {POS.category == DT}
+  {Token.category == PRP}|
+  {Token.category == DT}
  )
  (SPACE {Lookup.majorType == stop}
   (SPACE)?
@@ -188,7 +188,7 @@ Priority: 50
 // A British
 
 (
- {POS.category == DT}
+ {Token.category == DT}
  (SPACE)
 )
 (
@@ -220,7 +220,7 @@ Priority: 20
  (LASTNAME)
  {Token.string == ","}
  (SPACE)?
- {POS.category == PRP}
+ {Token.category == PRP}
  (SPACE PERSONENDING)?
 )
 :unknown 
@@ -328,12 +328,12 @@ Priority: 20
 // Bradford & Bingley
 // Bradford & Bingley Ltd
 (
- {POS.category == IN}
+ {Token.category == IN}
  (SPACE)
 )?
 
 (
- ({POS.category == NNP}
+ ({Token.category == NNP}
   (SPACE)? )+
 
  {Token.string == "&"}
@@ -394,7 +394,7 @@ Priority: 15
 // Xxx Services Ltd. 
 // but NOT A XXX Services Ltd.
 (
- {POS.category == DT}
+ {Token.category == DT}
  (SPACE)
 )?
 (
@@ -418,7 +418,7 @@ Priority: 20
 // Coca Cola Co.
 
 (
- {POS.category == DT}
+ {Token.category == DT}
  (SPACE)
 )?
 (
@@ -444,7 +444,7 @@ Priority: 20
 // AA and BB Services Ltd.
 // but NOT A XXX Services Ltd.
 (
- {POS.category == DT}
+ {Token.category == DT}
  (SPACE)
 )?
 (
@@ -522,7 +522,7 @@ Priority: 30
 // Royal Academy of Art
 (
  (
-  {POS.category == DT}
+  {Token.category == DT}
   SPACE
  )?
 )
@@ -613,7 +613,7 @@ Priority: 25
 // South China sea
 (
  (
-  {POS.category == DT}
+  {Token.category == DT}
   SPACE
  )?
 )
@@ -632,7 +632,7 @@ Rule:	GazLocation
 Priority: 50
 (
  (
-  {POS.category == DT}
+  {Token.category == DT}
   SPACE
  )?
 )

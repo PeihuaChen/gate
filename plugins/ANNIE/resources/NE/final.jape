@@ -318,9 +318,9 @@ Priority: 10
 Rule: UnknownTempPerson
 Priority: 5
 ( 
- {POS.category == NNP}
+ {Token.category == NNP}
  ((SPACE|{Token.string == "-"})
-  {POS.category == NNP})*
+  {Token.category == NNP})*
 ):unknown
  (SPACE)
 (
@@ -332,9 +332,9 @@ Priority: 5
 
 Rule:Unknown
 ( 
- {POS.category == NNP}
+ {Token.category == NNP}
 // ((SPACE|{Token.string == "-"})
-// {POS.category == NNP})*
+// {Token.category == NNP})*
 ) 
 :unknown
 -->

@@ -197,7 +197,7 @@ Priority: 10
 ):org
 (
 (SPACE)
-{POS.category == CC}
+{Token.category == CC}
 (SPACE)
 {Organization}
 )
@@ -218,7 +218,7 @@ Priority: 10
 (
  {Organization}
  (SPACE)
- {POS.category == CC}
+ {Token.category == CC}
  (SPACE)
 )
 
