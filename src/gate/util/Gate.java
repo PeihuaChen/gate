@@ -39,7 +39,8 @@ public class Gate
 
   /** The list of builtin URLs to search for CREOLE resources. */
   private static String builtinCreoleDirectoryUrls[] = {
-    "http://gate.ac.uk/creole/creole.xml"
+    // moved to resources/creole/creole.xml
+    // "http://gate.ac.uk/creole/creole.xml"
   };
 
   /** Initialisation - must be called by all clients before using
@@ -97,7 +98,7 @@ public class Gate
   /** Get reachability status of GATE internal server */
   public static boolean isGateHomeReachable() { return gateHomeReachable; }
 
-  /** Get reachability status of GATE.ac.uk public server */
+  /** Get reachability status of make cGATE.ac.uk public server */
   public static boolean isGateAcUkReachable() { return gateAcUkReachable; }
 
   /** Initialise the CREOLE register. */
@@ -113,6 +114,9 @@ public class Gate
         throw new GateException(e);
       }
     creoleRegister.registerDirectories();
+
+    // register the resources that are actually in gate.jar
+    creoleRegister.registerBuiltins();
   } // initCreoleRegister
 
   /** Class loader used e.g. for loading CREOLE modules, of compiling
