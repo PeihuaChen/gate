@@ -98,6 +98,11 @@ public interface Document extends LanguageResource, Comparable {
    */
   public boolean isMarkupAware();
 
+  /** Returns a GateXml document
+    * @return a string representing a Gate Xml document
+    */
+  public String toXml();
+
   /** Make changes to the content.
    */
   public void edit(Long start, Long end, DocumentContent replacement)

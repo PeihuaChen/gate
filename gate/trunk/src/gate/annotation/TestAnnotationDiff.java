@@ -52,6 +52,21 @@ public class TestAnnotationDiff extends TestCase
 
   } // setUp
 
+  public void testDocumentToXml() throws Exception{
+    // Load the xml Key Document and unpack it
+    gate.Document keyDocument =
+       gate.Factory.newDocument(
+          Gate.getUrl("tests/annotDiff/KeyDocument.xml")
+       );
+    gate.DocumentFormat keyDocFormat = gate.DocumentFormat.getDocumentFormat(
+      keyDocument, keyDocument.getSourceUrl()
+    );
+    keyDocFormat.unpackMarkup(keyDocument);
+
+   // Out.prln(keyDocument.toXml());
+
+  }// testDocumentToXml
+
   /** A test */
   public void testDiff() throws Exception {
     // Create a AnnotationSchema object from URL.
@@ -350,8 +365,10 @@ public class TestAnnotationDiff extends TestCase
     try{
       Gate.init();
       TestAnnotationDiff testAnnotDiff = new TestAnnotationDiff("");
+      testAnnotDiff.testDocumentToXml();
       testAnnotDiff.testDiff();
       testAnnotDiff.testAnnotationAreEquals();
+
     }catch(Exception e){
       e.printStackTrace();
     }
