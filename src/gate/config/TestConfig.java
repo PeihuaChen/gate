@@ -161,6 +161,27 @@ public class TestConfig extends TestCase
 
   } // testConfigUpdating
 
+  /** Test config file naming */
+  public void testConfigFileNaming() throws Exception {
+    String fileSep = Strings.getFileSep();
+    if(DEBUG) {
+      Out.prln("file sep is: " + fileSep);
+    }
+
+    if(Gate.runningOnUnix()) {
+      assertTrue(fileSep.equals("/"));
+      assertTrue(
+        Gate.getUserConfigFile().endsWith("." + GateConstants.GATE_DOT_XML)
+      );
+    } else {
+      assertTrue(! fileSep.equals("/"));
+      assertTrue(
+        ! Gate.getUserConfigFile().endsWith("." + GateConstants.GATE_DOT_XML)
+      );
+    }
+
+  } // testConfigFileNaming
+
   /** Test suite routine for the test runner */
   public static Test suite() {
     return new TestSuite(TestConfig.class);

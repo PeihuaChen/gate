@@ -28,7 +28,7 @@ import gate.event.*;
   * providing access to singleton utility objects, such as the GATE class
   * loader, CREOLE register and so on.
   */
-public class Gate
+public class Gate implements GateConstants
 {
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -153,21 +153,18 @@ jar/classpath so it's the same as registerBuiltins
     dataStoreRegister = new DataStoreRegister();
   } // initDataStoreRegister()
 
-  /** The name of config data files (<TT>gate.xml</TT>). */
-  private static String gateDotXml = "gate.xml";
-
   /** Reads config data (<TT>gate.xml</TT> files). */
   public static void initConfigData() throws GateException {
     ConfigDataProcessor configProcessor = new ConfigDataProcessor();
 
     // url of the builtin config data (for error messages)
     URL configUrl =
-      Gate.getClassLoader().getResource("gate/resources/" + gateDotXml);
+      Gate.getClassLoader().getResource("gate/resources/" + GATE_DOT_XML);
 
     // open a stream to the builtin config data file
     InputStream configStream = null;
     try {
-      configStream = Files.getGateResourceAsStream(gateDotXml);
+      configStream = Files.getGateResourceAsStream(GATE_DOT_XML);
     } catch(IOException e) {
       throw new GateException(
         "Couldn't open builtin config data file: " + configUrl + " " + e
@@ -513,7 +510,7 @@ jar/classpath so it's the same as registerBuiltins
   /** An empty config data file. */
   private static String emptyConfigFile =
     "<?xml version=\"1.0\"?>" + nl +
-    "<!-- " + gateDotXml + ": GATE configuration data -->" + nl +
+    "<!-- " + GATE_DOT_XML + ": GATE configuration data -->" + nl +
     "<GATE>" + nl +
     "" + nl +
     "<!-- NOTE: the next line may be overwritten by the GUI!!! -->" + nl +
@@ -558,7 +555,7 @@ jar/classpath so it's the same as registerBuiltins
 
     } catch(IOException e) {
       throw new GateException(
-        "problem writing user " + gateDotXml + ": " + nl + e.toString()
+        "problem writing user " + GATE_DOT_XML + ": " + nl + e.toString()
       );
     }
   } // writeUserConfig
@@ -568,9 +565,25 @@ jar/classpath so it's the same as registerBuiltins
    * doesn't guarantee that file exists!).
    */
   public static String getUserConfigFile() {
+    String filePrefix = "";
+    if(runningOnUnix()) filePrefix = ".";
+
     String userConfigName =
-      System.getProperty("user.home") + Strings.getFileSep() + gateDotXml;
+      System.getProperty("user.home") + Strings.getFileSep() +
+      filePrefix + GATE_DOT_XML;
     return userConfigName;
   } // getUserConfigFile
+
+  /**
+   * This method tries to guess if we are on a UNIX system. It does this
+   * by checking the value of <TT>System.getProperty("file.separator")</TT>;
+   * if this is "/" it concludes we are on UNIX. <B>This is obviously not
+   * a very good idea in the general case, so nothing much should be made
+   * to depend on this method (e.g. just naming of config file
+   * <TT>.gate.xml</TT> as opposed to <TT>gate.xml</TT>)</B>.
+   */
+  public static boolean runningOnUnix() {
+    return Strings.getFileSep().equals("/");
+  } // runningOnUnix
 
 } // class Gate

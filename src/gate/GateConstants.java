@@ -15,9 +15,14 @@
 
 package gate;
 
-/** Interface used to hold different GATE constants*/
-public interface GateConstants{
-  /** The name of the annotation set storing original markups in a document*/
-  public static final String ORIGINAL_MARKUPS_ANNOT_SET_NAME =
-                                                             "Original markups";
-}// GateConstants
+/** Interface used to hold different GATE constants */
+public interface GateConstants {
+
+  /** The name of config data files (<TT>gate.xml</TT>). */
+  public static String GATE_DOT_XML = "gate.xml";
+
+  /** The name of the annotation set storing original markups in a document */
+  public static final String
+    ORIGINAL_MARKUPS_ANNOT_SET_NAME = "Original markups";
+
+} // GateConstants
