@@ -27,7 +27,7 @@ Rule: r4
 -->
 :left.Split = {type="singleQuote"}
 
-Rule: r3
+Rule: r5
  (({SpaceToken.string=="\n"}|{SpaceToken.string=="\r"})+):left 
 -->
 :left.Split = {type="CR"}
