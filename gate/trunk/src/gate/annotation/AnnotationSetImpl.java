@@ -252,7 +252,7 @@ implements AnnotationSet
       throw new InvalidOffsetException();
 
     // the id of the new annotation
-    Integer id = new Integer(nextAnnotationId++);
+    Integer id = doc.getNextAnnotationId();
 
     // the set has to be indexed by position in order to add, as we need
     // to find out if nodes need creating or if they exist already
@@ -264,9 +264,9 @@ implements AnnotationSet
 
     // if appropriate nodes don't already exist, create them
     if(startNode == null || ! startNode.getOffset().equals(start))
-      startNode = new NodeImpl(new Integer(nextNodeId++), start);
+      startNode = new NodeImpl(doc.getNextNodeId(), start);
     if(endNode == null   || ! endNode.getOffset().equals(end))
-      endNode = new NodeImpl(new Integer(nextNodeId++), end);
+      endNode = new NodeImpl(doc.getNextNodeId(), end);
 
     // construct an annotation
     Annotation a = new AnnotationImpl(id, startNode, endNode, type, features);
@@ -392,6 +392,12 @@ implements AnnotationSet
 
   } // addToEndOffsetIndex(a)
 
+  /** Propagate changes to the document content. */
+  void edit(Long start, Long end, DocumentContent replacement)
+  throws InvalidOffsetException {
+    throw new LazyProgrammerException();
+  } // edit(start,end,replacement)
+
   /** Get the name of this set. */
   public String getName() { return name; }
 
@@ -453,14 +459,4 @@ implements AnnotationSet
     * annotations that end at that node
     */
   HashMap annotsByEndNode;
-
-
-
-// these should move into Document
-  /** The id of the next new annotation */
-  int nextAnnotationId = 0;
-
-  /** The id of the next new node */
-  int nextNodeId = 0;
-
 } // AnnotationSetImpl

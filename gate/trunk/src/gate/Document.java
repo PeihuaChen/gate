@@ -23,17 +23,10 @@ public interface Document extends LanguageResource
     */
   public Long[] getSourceURLOffsets();
 
-  /** The content of the document: a String for text; MPEG for video; etc. */
-  public Object getContent();
-
-  /** The portion of content falling between two offsets. */
-  public Object getContent(Long start, Long end) throws InvalidOffsetException;
-
-  /** The size of the set of valid offsets in this document's content.
-    * For texts this will be the length of the string. For audiovisual
-    * materials this will be a measure of time.
+  /** The content of the document: wraps e.g. String for text; MPEG for
+    * video; etc.
     */
-  public Long size();
+  public DocumentContent getContent();
 
   /** Get the default set of annotations. The set is created if it
     * doesn't exist yet.
@@ -44,5 +37,16 @@ public interface Document extends LanguageResource
     * name doesn't exist yet.
     */
   public AnnotationSet getAnnotations(String name);
+
+  /** Make changes to the content. */
+  public void edit(Long start, Long end, DocumentContent replacement)
+  throws InvalidOffsetException;
+
+  
+  /** Generate and return the next annotation ID */
+  public Integer getNextAnnotationId();
+
+  /** Generate and return the next node ID */
+  public Integer getNextNodeId();
 
 } // interface Document
