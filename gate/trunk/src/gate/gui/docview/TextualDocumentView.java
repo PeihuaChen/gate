@@ -15,15 +15,14 @@ package gate.gui.docview;
 import java.awt.*;
 import java.awt.Component;
 import java.awt.Point;
+import java.awt.event.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.List;
 
 import javax.swing.*;
-import javax.swing.JEditorPane;
-import javax.swing.JScrollPane;
+import javax.swing.Timer;
 import javax.swing.text.*;
 import javax.swing.text.Highlighter;
 
@@ -41,6 +40,7 @@ public class TextualDocumentView extends AbstractDocumentView {
 
   public TextualDocumentView(){
     hgTagForAnn = new HashMap();
+    blinkingTagsForAnnotations = new HashMap();
   }
   
   public Object addHighlight(Annotation ann, AnnotationSet set, Color colour){
@@ -155,10 +155,45 @@ public class TextualDocumentView extends AbstractDocumentView {
     });
   }
 
+  
+  public void addBlinkingHighlight(Annotation ann){
+    synchronized(blinkingTagsForAnnotations){
+      blinkingTagsForAnnotations.put(ann, null);
+    }
+  }
+  
+  public void removeBlinkingHighlight(Annotation ann){
+    synchronized(blinkingTagsForAnnotations){
+      Object tag = blinkingTagsForAnnotations.remove(ann);
+      if(tag != null){
+        Highlighter highlighter = textView.getHighlighter();
+        highlighter.removeHighlight(tag);
+      }
+    }
+  }
+  
+  public void removeAllBlinkingHighlights(){
+    synchronized(blinkingTagsForAnnotations){
+      Iterator annIter = new ArrayList(blinkingTagsForAnnotations.keySet()).
+        iterator();
+      while(annIter.hasNext()){
+        Annotation ann = (Annotation)annIter.next();
+        Object tag = blinkingTagsForAnnotations.remove(ann);
+        if(tag != null){
+          Highlighter highlighter = textView.getHighlighter();
+          highlighter.removeHighlight(tag);
+        }
+      }
+    }
+  }
+  
+  
   public int getType() {
     return CENTRAL;
   }
 
+  
+  
   /* (non-Javadoc)
    * @see gate.gui.docview.AbstractDocumentView#initGUI()
    */
@@ -180,6 +215,9 @@ public class TextualDocumentView extends AbstractDocumentView {
       if(aView instanceof AnnotationListView) 
         annotationListView = (AnnotationListView)aView;
     }
+    blinker = new Timer(BLINK_DELAY, new BlinkAction());
+    blinker.setRepeats(true);
+    blinker.start();
     initListeners();
   }
   
@@ -205,12 +243,70 @@ public class TextualDocumentView extends AbstractDocumentView {
   
   
   /**
+   * Blinks the blinking highlights if any.
+   */
+  protected class BlinkAction extends AbstractAction{
+    public void actionPerformed(ActionEvent evt){
+      //this needs to either add or remove the highlights
+      synchronized(blinkingTagsForAnnotations){
+        //get out as quickly as possible if nothing to do
+        if(blinkingTagsForAnnotations.isEmpty()) return;
+        Iterator annIter = new ArrayList(blinkingTagsForAnnotations.keySet()).
+          iterator();
+        Highlighter highlighter = textView.getHighlighter();
+        if(highlightsShown){
+          //hide current highlights
+          while(annIter.hasNext()){
+            Annotation ann = (Annotation)annIter.next();
+            Object tag = blinkingTagsForAnnotations.get(ann);
+            if(tag != null) highlighter.removeHighlight(tag);
+            blinkingTagsForAnnotations.put(ann, null);
+          }
+          highlightsShown = false;
+        }else{
+          //show highlights
+          while(annIter.hasNext()){
+            Annotation ann = (Annotation)annIter.next();
+            try{
+              Object tag = highlighter.addHighlight(
+                      ann.getStartNode().getOffset().intValue(),
+                      ann.getEndNode().getOffset().intValue(),
+                      new DefaultHighlighter.DefaultHighlightPainter(
+                              textView.getSelectionColor()));
+              blinkingTagsForAnnotations.put(ann, tag);
+              textView.scrollRectToVisible(textView.
+                      modelToView(ann.getStartNode().getOffset().intValue()));
+            }catch(BadLocationException ble){
+              //this should never happen
+              throw new GateRuntimeException(ble);
+            }
+          }
+          highlightsShown = true;
+        }
+      }
+    }
+    protected boolean highlightsShown = false;
+  }
+  
+  /**
    * Stores the highlighter tags for all the highlighted annotations;
    */
   protected Map hgTagForAnn; 
   protected JScrollPane scroller;
   protected AnnotationListView annotationListView;
 
-
+  /**
+   * The annotations used for blinking highlights and their tags. A map from 
+   * {@link Annotation} to tag(i.e. {@link Object}).
+   */
+  protected Map blinkingTagsForAnnotations;
+  
+  protected Timer blinker;
+  
   protected JEditorPane textView;
+  
+  /**
+   * The delay used by the blinker.
+   */
+  protected final static int BLINK_DELAY = 400;
 }
