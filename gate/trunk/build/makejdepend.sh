@@ -26,7 +26,7 @@ do
   DIRNAME=`basename $DIR`
   cd $DIRPARENT
   JAVAS=`find $DIRNAME -name '*.java' -print`
-  cd $HERE
+  cd "$HERE"
 
   for FILE in $JAVAS
   do
