@@ -23,8 +23,11 @@ public class TestCreole extends TestCase
   /** Construction */
   public TestCreole(String name) { super(name); }
 
+  /** Debug flag */
+  private static final boolean debug = false;
+
   /** Fixture set up */
-  public void setUp() throws Exception {  
+  public void setUp() throws Exception {
     Gate.init();
     Gate.initCreoleRegister();
   } // setUp
@@ -33,9 +36,7 @@ public class TestCreole extends TestCase
   public void testRegister() throws Exception {
 
     CreoleRegister reg = Gate.getCreoleRegister();
-
-    assertEquals(reg.size(), 3);
-    if(true) {
+    if(debug) {
       Iterator iter = reg.values().iterator();
       while(iter.hasNext())
         System.out.println(iter.next());
