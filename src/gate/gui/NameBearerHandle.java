@@ -262,6 +262,8 @@ public class NameBearerHandle implements Handle,
                                         "Error!\n" + pe.toString(),
                                         "Gate", JOptionPane.ERROR_MESSAGE);
       }
+      statusListeners.clear();
+      progressListeners.clear();
       }
     }//public void actionPerformed(ActionEvent e)
   }//class CloseAction
