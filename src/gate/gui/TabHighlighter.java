@@ -34,6 +34,13 @@ public class TabHighlighter {
         if(tPane.getSelectedIndex() == tab) removeHighlight();
       }
     });
+
+    tPane.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+        if(tPane.getSelectedIndex() == tab) removeHighlight();
+      }
+    });
+
   }// TabBlinker(JTabbedPane pane, Component comp, Color blinkColor)
 
   /**
