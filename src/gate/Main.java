@@ -47,9 +47,6 @@ public class Main {
     * </UL>
     */
   public static void main(String[] args) throws GateException {
-    //This will eventually go out
-    Gate.setLocalWebServer(false);
-    Gate.setNetConnected(false);
     Gate.init();
     // process command-line options
     processArgs(args);

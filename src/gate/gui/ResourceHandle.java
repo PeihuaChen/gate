@@ -35,15 +35,17 @@ import gate.*;
  * popup menu for right click events, etc.
  */
 class ResourceHandle{
-  public ResourceHandle(Resource resource){
+  public ResourceHandle(Resource resource, ProjectData project){
     this.resource = resource;
-    this.title = (String)resource.getFeatures().get("Name");
+    this.title = (String)resource.getFeatures().get("NAME");
+    this.project = project;
     buildViews();
   }
 
-  public ResourceHandle(String title){
+  public ResourceHandle(String title, ProjectData project){
     this.resource = null;
     this.title = title;
+    this.project = project;
     largeView = null;
     smallView = null;
   }
@@ -69,7 +71,7 @@ class ResourceHandle{
    * the main tree in the Gate GUI for the selected resource
    */
   public JComponent getSmallView(){
-    return null;
+    return smallView;
   }
 
   /**
@@ -120,4 +122,6 @@ class ResourceHandle{
   boolean shown;
   JComponent smallView;
   JComponent largeView;
+
+  ProjectData project;
 }

@@ -70,17 +70,17 @@ public class Parameter
     // java builtin types
     if(typeName.startsWith("java.")) {
       if(typeName.equals("java.lang.Boolean"))
-        value = Boolean.valueOf(defaultValueString);
+        value = Boolean.valueOf(stringValue);
       else if(typeName.equals("java.lang.Long"))
-        value = Long.valueOf(defaultValueString);
+        value = Long.valueOf(stringValue);
       else if(typeName.equals("java.lang.Integer"))
-        value = Integer.valueOf(defaultValueString);
+        value = Integer.valueOf(stringValue);
       else if(typeName.equals("java.lang.String"))
-        value = defaultValueString;
+        value = stringValue;
       else if(typeName.equals("java.lang.Double"))
-        value = Double.valueOf(defaultValueString);
+        value = Double.valueOf(stringValue);
       else if(typeName.equals("java.lang.Float"))
-        value = Float.valueOf(defaultValueString);
+        value = Float.valueOf(stringValue);
       else
         throw new ParameterException("Unsupported parameter type " + typeName);
 
