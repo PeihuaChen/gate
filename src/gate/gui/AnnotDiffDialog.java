@@ -266,6 +266,10 @@ class AnnotDiffDialog extends JFrame {
     Vector typesCont = new Vector(typesMap.keySet());
     Collections.sort(typesCont);
     typesComboBox = new JComboBox(typesCont);
+    dim = new Dimension(Integer.MAX_VALUE, typesComboBox.getPreferredSize().height);
+    typesComboBox.setMaximumSize(dim);
+
+
     typesComboBox.setEditable(false);
     typesComboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
     // init its label
@@ -361,6 +365,7 @@ class AnnotDiffDialog extends JFrame {
     currentBox = new Box(BoxLayout.Y_AXIS);
     currentBox.add(typesLabel);
     currentBox.add(typesComboBox);
+    currentBox.add(Box.createVerticalGlue());
     northBox.add(currentBox);
 
     northBox.add(Box.createRigidArea(new Dimension(10,0)));
