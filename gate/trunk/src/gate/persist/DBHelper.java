@@ -64,7 +64,7 @@ public class DBHelper {
   public static final String CORPUS_CLASS =  "gate.corpora.CorpusImpl";
 
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
 
 

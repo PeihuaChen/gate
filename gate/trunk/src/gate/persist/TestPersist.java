@@ -458,7 +458,9 @@ public class TestPersist extends TestCase
     ac.close();
     ds.close();
 
-    Err.prln("Use case 01 passed...");
+    if(DEBUG) {
+      Err.prln("Use case 01 passed...");
+    }
   }
 
 
@@ -502,7 +504,9 @@ public class TestPersist extends TestCase
     ac.close();
     ds.close();
 
-    Err.prln("Use case 02 passed...");
+    if(DEBUG) {
+      Err.prln("Use case 02 passed...");
+    }
 
   }
 
