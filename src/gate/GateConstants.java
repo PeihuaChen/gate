@@ -56,4 +56,13 @@ public interface GateConstants {
   /** The key for the save session on exit value*/
   public static final String SAVE_SESSION_ON_EXIT = "Save_session_on_exit";
 
+  /** The key for the feature keeping the original content of the document */
+  public static final String
+   ORIGINAL_DOCUMENT_CONTENT_FEATURE_NAME = "Original_document_content_on_load";
+
+  /** The key for the feature keeping the repositioning information
+   *  between original and displayed content of the document*/
+  public static final String
+    DOCUMENT_REPOSITIONING_INFO_FEATURE_NAME = "Document_repositioning_info";
+
 } // GateConstants
