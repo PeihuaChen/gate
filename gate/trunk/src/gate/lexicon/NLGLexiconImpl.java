@@ -55,12 +55,20 @@ public class NLGLexiconImpl extends AbstractLanguageResource
   }
 
   public List lookupWord(String lemma) {
+    if (lemma == null)
+      return null;
     Word myWord = (Word) words.get(lemma);
+    if (myWord == null)
+      return null;
     return myWord.getWordSenses();
   }
 
   public List lookupWord(String lemma, Object pos) {
+    if (lemma == null || pos == null)
+      return null;
     Word myWord = (Word) words.get(lemma);
+    if (myWord == null)
+      return null;
     List posSenses = new ArrayList();
     Iterator iter = myWord.getWordSenses().iterator();
     while (iter.hasNext()) {
