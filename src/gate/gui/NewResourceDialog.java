@@ -18,6 +18,7 @@ import java.awt.Frame;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.table.*;
@@ -61,6 +62,7 @@ public class NewResourceDialog extends JDialog {
   protected void initGuiComponents(){
     this.getContentPane().setLayout(new BoxLayout(this.getContentPane(),
                                                   BoxLayout.Y_AXIS));
+
     //name field
     Box nameBox = Box.createHorizontalBox();
     nameBox.add(Box.createHorizontalStrut(5));
@@ -307,15 +309,6 @@ public class NewResourceDialog extends JDialog {
 
     public int getRowCount(){
       return getRowCnt();
-      /*
-      if(params == null){
-        System.out.println("Null indeed!");
-        return 0;
-      }else{
-        System.out.println("Like hell null!");
-        return params.size();
-      }
-      */
     }// public int getRowCount()
 
     public Object getValueAt(int rowIndex,
@@ -357,6 +350,23 @@ public class NewResourceDialog extends JDialog {
   }///class FeaturesTableModel extends DefaultTableModel
 
   class ParameterDisjunctionRenderer extends DefaultTableCellRenderer {
+    public ParameterDisjunctionRenderer(){
+      combo = new JComboBox();
+      class CustomRenderer extends JLabel implements ListCellRenderer {
+        public Component getListCellRendererComponent(JList list,
+                                                      Object value,
+                                                      int index,
+                                                      boolean isSelected,
+                                                      boolean cellHasFocus){
+
+          setText(text);
+          setIcon(MainFrame.getIcon(iconName));
+          return this;
+        }
+      };
+      combo.setRenderer(new CustomRenderer());
+    }
+
     public Component getTableCellRendererComponent(JTable table,
                                                    Object value,
                                                    boolean isSelected,
@@ -364,37 +374,30 @@ public class NewResourceDialog extends JDialog {
                                                    int row,
                                                    int column) {
       ParameterDisjunction pDisj = (ParameterDisjunction)value;
-      String text = pDisj.getName();
-      if(pDisj.size() > 1) text += " [more...]";
+      text = pDisj.getName();
+      String type = pDisj.getType();
+      iconName = "param.gif";
+      if(Gate.getCreoleRegister().containsKey(type)){
+        ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(type);
+        if(rData != null) iconName = rData.getIcon();
+      }
+      if(pDisj.size() > 1){
+        combo.setModel(new DefaultComboBoxModel(new Object[]{text}));
+        return combo;
+      }
       //prepare the renderer
       Component comp = super.getTableCellRendererComponent(table,
                                                            text,
                                                            isSelected, hasFocus,
                                                            row, column);
-      String type = pDisj.getType();
-      String iconName = "param.gif";
-      if(Gate.getCreoleRegister().containsKey(type)){
-        ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(type);
-        if(rData != null) iconName = rData.getIcon();
-      }
       setIcon(MainFrame.getIcon(iconName));
       return this;
-/*
-      if(comp instanceof JLabel){
-        try{
-          JLabel label = (JLabel)comp;
-          label.setToolTipText(pDisj.getComment());
-          label.setHorizontalTextPosition(JLabel.LEFT);
-          if(pDisj.size() > 1){
-            label.setIcon(MainFrame.getIcon("down.gif"));
-          }else{
-            label.setIcon(null);
-          }
-        }catch(Exception e){}
-      }
-      return comp;
-*/
     }// public Component getTableCellRendererComponent
+
+    //combobox used for OR parameters
+    JComboBox combo;
+    String iconName;
+    String text;
   }//class ParameterDisjunctionRenderer
 
 
@@ -422,6 +425,7 @@ public class NewResourceDialog extends JDialog {
         //ensure a reasonable space is reserved (40 spaces)
         super.getTableCellRendererComponent(
           table,
+          "                                        " +
           "                                        ",
           isSelected, hasFocus, row, column);
       }else{
@@ -453,6 +457,49 @@ public class NewResourceDialog extends JDialog {
     public ParameterDisjunctionEditor(){
       super(new JComboBox());
       combo = (JComboBox)super.getComponent();
+      class CustomRenderer extends JLabel implements ListCellRenderer {
+        public CustomRenderer(){
+          setOpaque(true);
+        }
+        public Component getListCellRendererComponent(JList list,
+                                                      Object value,
+                                                      int index,
+                                                      boolean isSelected,
+                                                      boolean cellHasFocus){
+          if (isSelected) {
+              setBackground(list.getSelectionBackground());
+              setForeground(list.getSelectionForeground());
+          }
+          else {
+              setBackground(list.getBackground());
+              setForeground(list.getForeground());
+          }
+
+          setFont(list.getFont());
+
+          setText((String)value);
+
+          String iconName = "param.gif";
+          Object[] params = pDisj.getParameters();
+          for(int i = 0; i < params.length; i++){
+            Parameter param = (Parameter)params[i];
+            if(param.getName().equals(value)){
+              String type = param.getTypeName();
+              if(Gate.getCreoleRegister().containsKey(type)){
+                ResourceData rData = (ResourceData)
+                                     Gate.getCreoleRegister().get(type);
+                if(rData != null) iconName = rData.getIcon();
+              }
+              break;
+            }//if(params[i].getName().equals(value))
+          }//for(int i = 0; params.length; i++)
+
+          setIcon(MainFrame.getIcon(iconName));
+          return this;
+        }
+      };//class CustomRenderer extends JLabel implements ListCellRenderer
+      combo.setRenderer(new CustomRenderer());
+
     }// public ParameterDisjunctionEditor()
 
     public Component getTableCellEditorComponent(JTable table,
@@ -460,8 +507,7 @@ public class NewResourceDialog extends JDialog {
                                              boolean isSelected,
                                              int row,
                                              int column){
-     ParameterDisjunction pDisj = (ParameterDisjunction)value;
-
+     pDisj = (ParameterDisjunction)value;
      combo.setModel(new DefaultComboBoxModel(pDisj.getNames()));
      return combo;
     }// public Component getTableCellEditorComponent
@@ -470,6 +516,7 @@ public class NewResourceDialog extends JDialog {
       return new Integer(combo.getSelectedIndex());
     }
     JComboBox combo;
+    ParameterDisjunction pDisj;
   }// class ParameterDisjunctionEditor extends DefaultCellEditor
 
   class CustomEditor extends DefaultCellEditor{
@@ -530,7 +577,7 @@ public class NewResourceDialog extends JDialog {
       names = new String[options.size()];
       int i = 0;
       while(paramsIter.hasNext()){
-        names[i++] = ((Parameter)paramsIter.next()).getComment();
+        names[i++] = ((Parameter)paramsIter.next()).getName();
       }
       values = new Object[options.size()];
       setSelectedIndex(0);
@@ -571,6 +618,10 @@ public class NewResourceDialog extends JDialog {
 
     public String[] getNames(){
       return names;
+    }
+
+    public Object[] getParameters(){
+      return options.toArray();
     }
 
     public void setValue(String stringValue){

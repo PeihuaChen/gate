@@ -77,7 +77,7 @@ public class XJTable extends JTable {
 
   public void tableChanged(TableModelEvent e){
     super.tableChanged(e);
-    adjustSizes(false);
+    adjustSizes();
   }
 
   /**Should the soring facility be enabled*/
@@ -110,7 +110,7 @@ public class XJTable extends JTable {
           sorter.sortByColumn(column);
           sortedColumn = column;
         }
-        adjustSizes(true);
+        adjustSizes();
       }
     };
     if(sortable) getTableHeader().addMouseListener(headerMouseListener);
@@ -137,11 +137,11 @@ public class XJTable extends JTable {
         if (viewport != null && viewport.getView() == this) {
           scrollPane.addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent e) {
-              adjustSizes(false);
+              adjustSizes();
             }
 
             public void componentShown(ComponentEvent e) {
-              adjustSizes(false);
+              adjustSizes();
             }
           });
         }//if
@@ -153,7 +153,7 @@ public class XJTable extends JTable {
   /**Resizes all the cells so they accommodate the components at their
    * preferred sizes.
    */
-  protected void adjustSizes(boolean headerOnly){
+  protected void adjustSizes(){
     int totalWidth = 0;
     TableColumn tCol = null;
     Dimension dim;
@@ -173,67 +173,64 @@ public class XJTable extends JTable {
       width = headerRenderer.getTableCellRendererComponent(
                   this, tCol.getHeaderValue(), false, false,0,column
               ).getPreferredSize().width;
-      if(! headerOnly){
-        for(int row = 0; row < getRowCount(); row ++){
-          TableCellRenderer renderer = getCellRenderer(row,column);
-          if(renderer == null){
-            renderer = getDefaultRenderer(getModel().getColumnClass(column));
+      for(int row = 0; row < getRowCount(); row ++){
+        TableCellRenderer renderer = getCellRenderer(row,column);
+        if(renderer == null){
+          renderer = getDefaultRenderer(getModel().getColumnClass(column));
+        }
+        if(renderer != null){
+          dim = renderer.
+                      getTableCellRendererComponent(
+                        this, getValueAt(row, column), false, false, row, column
+                      ).getPreferredSize();
+          cellWidth = dim.width;
+          cellHeight = dim.height;
+          width = Math.max(width, cellWidth);
+          //width = Math.max(width, tCol.getPreferredWidth());
+          if((cellHeight + rowMargin) > getRowHeight(row)){
+           setRowHeight(row, cellHeight + rowMargin);
           }
-          if(renderer != null){
-            dim = renderer.
-                        getTableCellRendererComponent(
-                          this, getValueAt(row, column), false, false, row, column
-                        ).getPreferredSize();
-            cellWidth = dim.width;
-            cellHeight = dim.height;
-            width = Math.max(width, cellWidth);
-            //width = Math.max(width, tCol.getPreferredWidth());
-            if((cellHeight + rowMargin) > getRowHeight(row)){
-             setRowHeight(row, cellHeight + rowMargin);
-            }
-          }//if(renderer != null)
-        }//for
-      }
+        }//if(renderer != null)
+      }//for
+
       width += getColumnModel().getColumnMargin();
       tCol.setPreferredWidth(width);
-      tCol.setMinWidth(width);
+      tCol.setWidth(width);
+//      tCol.setMinWidth(width);
       totalWidth += width;
     }
-    if(! headerOnly){
-      int totalHeight = 0;
-      for (int row = 0; row < getRowCount(); row++)
-        totalHeight += getRowHeight(row);
-      dim = new Dimension(totalWidth, totalHeight);
-      setPreferredScrollableViewportSize(dim);
+    int totalHeight = 0;
+    for (int row = 0; row < getRowCount(); row++)
+      totalHeight += getRowHeight(row);
+    dim = new Dimension(totalWidth, totalHeight);
+    setPreferredScrollableViewportSize(dim);
 
-      //extend the last column
-      Container p = getParent();
-      if (p instanceof JViewport) {
-        Container gp = p.getParent();
-        if (gp instanceof JScrollPane) {
-          JScrollPane scrollPane = (JScrollPane)gp;
-          // Make certain we are the viewPort's view and not, for
-          // example, the rowHeaderView of the scrollPane -
-          // an implementor of fixed columns might do this.
-          JViewport viewport = scrollPane.getViewport();
-          if (viewport == null || viewport.getView() != this) {
-              return;
-          }
-          int portWidth = scrollPane.getSize().width -
-                          scrollPane.getInsets().left -
-                          scrollPane.getInsets().right;
-          if(scrollPane.getVerticalScrollBar().isVisible())
-            portWidth -= scrollPane.getVerticalScrollBar().getWidth();
-          if(totalWidth < portWidth){
-            int width = tCol.getMinWidth() + portWidth - totalWidth;
-            tCol.setPreferredWidth(width);
-            tCol.setMinWidth(width);
-          }
+    //extend the last column
+    Container p = getParent();
+    if (p instanceof JViewport) {
+      Container gp = p.getParent();
+      if (gp instanceof JScrollPane) {
+        JScrollPane scrollPane = (JScrollPane)gp;
+        // Make certain we are the viewPort's view and not, for
+        // example, the rowHeaderView of the scrollPane -
+        // an implementor of fixed columns might do this.
+        JViewport viewport = scrollPane.getViewport();
+        if (viewport == null || viewport.getView() != this) {
+            return;
         }
-      }
-
-    }//if(! headerOnly)
-  }
+        int portWidth = scrollPane.getSize().width -
+                        scrollPane.getInsets().left -
+                        scrollPane.getInsets().right;
+        if(scrollPane.getVerticalScrollBar().isVisible())
+          portWidth -= scrollPane.getVerticalScrollBar().getWidth();
+        if(totalWidth < portWidth){
+          int width = tCol.getWidth() + portWidth - totalWidth;
+          tCol.setPreferredWidth(width);
+          tCol.setWidth(width);
+        }//if(totalWidth < portWidth)
+      }//if (gp instanceof JScrollPane)
+    }//if (p instanceof JViewport)
+  }//protected void adjustSizes()
 
   /**
    * Sets the column to be used as key for sorting. This column changes

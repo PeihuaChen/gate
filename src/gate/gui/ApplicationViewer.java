@@ -103,14 +103,18 @@ public class ApplicationViewer extends AbstractVisualResource
 
     mainTTModel = new PRsAndParamsTTModel(controller);
     mainTreeTable = new JTreeTable(mainTTModel);
-    mainTreeTable.getTree().setCellRenderer(new CustomTreeCellRenderer());
     mainTreeTable.getTree().setRootVisible(false);
-//    mainTreeTable.getTree().setEditable(true);
     mainTreeTable.getTree().setShowsRootHandles(true);
+
+    mainTreeTable.getTree().setCellRenderer(new CustomTreeCellRenderer());
     mainTreeTable.getTree().setCellEditor(new ParameterDisjunctionEditor());
+
+
     mainTreeTable.setIntercellSpacing(new Dimension(5,0));
+
     mainTreeTable.setDefaultRenderer(Object.class, new ParameterValueRenderer());
     mainTreeTable.setDefaultEditor(Object.class, new ParameterValueEditor());
+
     mainTreeTable.setDefaultRenderer(Boolean.class, new BooleanRenderer());
 
     ToolTipManager.sharedInstance().registerComponent(mainTreeTable.getTree());
@@ -566,16 +570,18 @@ public class ApplicationViewer extends AbstractVisualResource
     }//public boolean isCellEditable(Object node, int column)
 
     public void setValueAt(Object aValue, Object node, int column){
-      node = ((DefaultMutableTreeNode)node).getUserObject();
+      Object nodeObject = ((DefaultMutableTreeNode)node).getUserObject();
       switch(column){
         case 0:{
-          if(node instanceof ParameterDisjunction && aValue instanceof Integer){
-            ((ParameterDisjunction)node).
+          if(nodeObject instanceof ParameterDisjunction && aValue instanceof Integer){
+            ((ParameterDisjunction)nodeObject).
               setSelectedIndex(((Integer)aValue).intValue());
           }
+          nodeChanged((DefaultMutableTreeNode)node);
+          break;
         }case 3:{
-          if(node instanceof ParameterDisjunction){
-            ((ParameterDisjunction)node).setValue(aValue);
+          if(nodeObject instanceof ParameterDisjunction){
+            ((ParameterDisjunction)nodeObject).setValue(aValue);
           }
           break;
         }
@@ -618,6 +624,27 @@ public class ApplicationViewer extends AbstractVisualResource
   }//class PRsAndParamsTTModel extends AbstractTreeTableModel
 
   class CustomTreeCellRenderer extends DefaultTreeCellRenderer {
+    public CustomTreeCellRenderer(){
+      combo = new JComboBox();
+      comboRenderer = new CustomRenderer();
+      combo.setRenderer(comboRenderer);
+    }
+
+    class CustomRenderer extends JLabel implements ListCellRenderer {
+      public Component getListCellRendererComponent(JList list,
+                                                    Object value,
+                                                    int index,
+                                                    boolean isSelected,
+                                                    boolean cellHasFocus){
+
+        setText(value.toString());
+        setToolTipText(tipText);
+        setIcon(MainFrame.getIcon(iconName));
+        setMinimumSize(getPreferredSize());
+        return this;
+      }
+    };
+
     public Component getTreeCellRendererComponent(JTree tree,
                                                   Object value,
                                                   boolean sel,
@@ -627,8 +654,8 @@ public class ApplicationViewer extends AbstractVisualResource
                                                   boolean hasFocus){
 
       String text = "";
-      String tipText = null;
-      String iconName = null;
+      tipText = null;
+      iconName = null;
       value = ((DefaultMutableTreeNode)value).getUserObject();
       if (value instanceof ProcessingResource){
         ProcessingResource pr = (ProcessingResource)value;
@@ -639,10 +666,9 @@ public class ApplicationViewer extends AbstractVisualResource
         iconName = rData.getIcon();
         if(iconName == null) iconName = "pr.gif";
       } else if (value instanceof ParameterDisjunction) {
-        iconName = "param.gif";
         ParameterDisjunction pd = (ParameterDisjunction)value;
-        text =  pd.getName();
-        if(pd.size() > 1) text+=" [more...]";
+
+        iconName = "param.gif";
         if(Gate.getCreoleRegister().containsKey(pd.getType())){
           ResourceData rData = (ResourceData)
                                Gate.getCreoleRegister().get(pd.getType());
@@ -651,7 +677,14 @@ public class ApplicationViewer extends AbstractVisualResource
             iconName = rData.getIcon();
           }
         }
+
+        text =  pd.getName();
+        if(pd.size() > 1){
+          combo.setModel(new DefaultComboBoxModel(new Object[]{text}));
+          return combo;
+        };
       }
+
       //prepare the renderer
       Component comp = super.getTreeCellRendererComponent(tree, text, sel,
                                                           expanded, leaf,
@@ -661,6 +694,13 @@ public class ApplicationViewer extends AbstractVisualResource
       return this;
     }//public Component getTreeCellRendererComponent
 
+    /**
+     * Used for Parameter Disjunctions
+     */
+    JComboBox combo;
+    String iconName;
+    String tipText;
+    CustomRenderer comboRenderer;
   }//class CustomTreeCellRenderer extends DefaultTreeCellRenderer
 
   class ModulesTableModel extends AbstractTableModel{
@@ -991,6 +1031,9 @@ public class ApplicationViewer extends AbstractVisualResource
       return names;
     }
 
+    public Object[] getParameters(){
+      return options.toArray();
+    }
     /**
      * Called when the value used for this parameter has been unloaded.
      * Will set the value for this param to the default
@@ -1058,7 +1101,51 @@ public class ApplicationViewer extends AbstractVisualResource
     public ParameterDisjunctionEditor(){
       super(new JComboBox());
       combo = (JComboBox)super.getComponent();
+      setClickCountToStart(1);
+      combo.setRenderer(new CustomRenderer());
     }//public ParameterDisjunctionEditor()
+      class CustomRenderer extends JLabel implements ListCellRenderer {
+        public CustomRenderer(){
+          setOpaque(true);
+        }
+
+        public Component getListCellRendererComponent(JList list,
+                                                      Object value,
+                                                      int index,
+                                                      boolean isSelected,
+                                                      boolean cellHasFocus){
+          if (isSelected) {
+              setBackground(list.getSelectionBackground());
+              setForeground(list.getSelectionForeground());
+          }
+          else {
+              setBackground(list.getBackground());
+              setForeground(list.getForeground());
+          }
+
+          setFont(list.getFont());
+
+          setText((String)value);
+
+          String iconName = "param.gif";
+          Object[] params = pDisj.getParameters();
+          for(int i = 0; i < params.length; i++){
+            Parameter param = (Parameter)params[i];
+            if(param.getName().equals(value)){
+              String type = param.getTypeName();
+              if(Gate.getCreoleRegister().containsKey(type)){
+                ResourceData rData = (ResourceData)
+                                     Gate.getCreoleRegister().get(type);
+                if(rData != null) iconName = rData.getIcon();
+              }
+              break;
+            }//if(params[i].getName().equals(value))
+          }//for(int i = 0; params.length; i++)
+
+          setIcon(MainFrame.getIcon(iconName));
+          return this;
+        }
+      };//class CustomRenderer extends JLabel implements ListCellRenderer
 
     public Component getTreeCellEditorComponent(JTree tree,
                                                 Object value,
@@ -1066,17 +1153,19 @@ public class ApplicationViewer extends AbstractVisualResource
                                                 boolean expanded,
                                                 boolean leaf,
                                                 int row){
-     ParameterDisjunction pDisj = (ParameterDisjunction)
-                                  ((DefaultMutableTreeNode)value).
-                                  getUserObject();
+     pDisj = (ParameterDisjunction)((DefaultMutableTreeNode)value).
+                                    getUserObject();
      combo.setModel(new DefaultComboBoxModel(pDisj.getNames()));
      combo.setSelectedItem(pDisj.getName());
      return combo;
     }//public Component getTreeCellEditorComponent
+
     public Object getCellEditorValue(){
       return new Integer(combo.getSelectedIndex());
     }
+
     JComboBox combo;
+    ParameterDisjunction pDisj;
   }//class ParameterDisjunctionEditor
 
   class ParameterValueRenderer extends ObjectRenderer {

@@ -31,7 +31,9 @@ public class BooleanRenderer extends DefaultTableCellRenderer {
                                                          "",
                                                          isSelected, hasFocus,
                                                          row, column);
-    if(((Boolean)value).booleanValue()){
+    if(value instanceof Boolean &&
+       value != null &&
+       ((Boolean)value).booleanValue()){
       setIcon(MainFrame.getIcon("tick.gif"));
     } else {
       setIcon(null);

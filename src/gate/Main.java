@@ -101,6 +101,9 @@ public class Main {
   /** Main Frame of the GUI; null when no GUI running */
   private static MainFrame frame;
 
+  /** The splash shown when Gate starts*/
+  private static Splash splash;
+
   /**
    * Get the main frame of the GUI. If the GUI isn't running, it
    * is started.
@@ -113,67 +116,69 @@ public class Main {
 
   /** Run the user interface. */
   private static void runGui() throws GateException {
-    //build the Spash
-    JPanel splashBox = new JPanel();
-    splashBox.setLayout(new BoxLayout(splashBox, BoxLayout.Y_AXIS));
-    splashBox.setBackground(Color.white);
+    //show the splash
+    SwingUtilities.invokeLater(new Runnable(){
+      public void run(){
+        //build the Spash
+        JPanel splashBox = new JPanel();
+        splashBox.setLayout(new BoxLayout(splashBox, BoxLayout.Y_AXIS));
+        splashBox.setBackground(Color.white);
 
-    JLabel gifLbl = new JLabel(new ImageIcon(Main.class.getResource(
-        "/gate/resources/img/gateSplash.gif")));
-    Box box = new Box(BoxLayout.X_AXIS);
-    box.add(Box.createHorizontalGlue());
-    box.add(gifLbl);
-    box.add(Box.createHorizontalGlue());
-    splashBox.add(box);
-    gifLbl = new JLabel(new ImageIcon(Main.class.getResource(
-        "/gate/resources/img/gateHeader.gif")));
-    box = new Box(BoxLayout.X_AXIS);
-    box.add(Box.createHorizontalGlue());
-    box.add(gifLbl);
-    box.add(Box.createHorizontalGlue());
-    splashBox.add(box);
-    splashBox.add(Box.createVerticalStrut(15));
-    Splash splash = new Splash(splashBox);
-    splash.show();
+        JLabel gifLbl = new JLabel(new ImageIcon(Main.class.getResource(
+            "/gate/resources/img/gateSplash.gif")));
+        Box box = new Box(BoxLayout.X_AXIS);
+        box.add(Box.createHorizontalGlue());
+        box.add(gifLbl);
+        box.add(Box.createHorizontalGlue());
+        splashBox.add(box);
+        gifLbl = new JLabel(new ImageIcon(Main.class.getResource(
+            "/gate/resources/img/gateHeader.gif")));
+        box = new Box(BoxLayout.X_AXIS);
+        box.add(Box.createHorizontalGlue());
+        box.add(gifLbl);
+        box.add(Box.createHorizontalGlue());
+        splashBox.add(box);
+        splashBox.add(Box.createVerticalStrut(15));
+        splash = new Splash(splashBox);
+        splash.show();
+      }
+    });
 
     // initialise the library and load user CREOLE directories
     Gate.init();
     registerCreoleUrls();
 
 
-    frame = new MainFrame();
-    long startTime = System.currentTimeMillis();
+    //create the main frame, show it and hide the splash
+    SwingUtilities.invokeLater(new Runnable(){
+      public void run(){
+        frame = new MainFrame();
 
-    if(DEBUG) Out.prln("constructing GUI");
+        if(DEBUG) Out.prln("constructing GUI");
 
-    // run the GUI
-    frame.setTitle(name + " " + version + " build " + build);
+        // run the GUI
+        frame.setTitle(name + " " + version + " build " + build);
 
-    // Validate frames that have preset sizes
-    frame.validate();
+        // Validate frames that have preset sizes
+        frame.validate();
 
-    // Center the window
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    Dimension frameSize = frame.getSize();
-    if (frameSize.height > screenSize.height) {
-      frameSize.height = screenSize.height;
-    }
-    if (frameSize.width > screenSize.width) {
-      frameSize.width = screenSize.width;
-    }
-    frame.setLocation((screenSize.width - frameSize.width) / 2,
-                      (screenSize.height - frameSize.height) / 2);
-    frame.setVisible(true);
+        // Center the window
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        Dimension frameSize = frame.getSize();
+        if (frameSize.height > screenSize.height) {
+          frameSize.height = screenSize.height;
+        }
+        if (frameSize.width > screenSize.width) {
+          frameSize.width = screenSize.width;
+        }
+        frame.setLocation((screenSize.width - frameSize.width) / 2,
+                          (screenSize.height - frameSize.height) / 2);
 
-    // wait for 1 sec
-    long timeNow = System.currentTimeMillis();
-    while(timeNow - startTime < 3000){
-      try {
-        Thread.sleep(150);
-        timeNow = System.currentTimeMillis();
-      } catch(InterruptedException ie) {}
-    }
-    splash.hide();
+        frame.setVisible(true);
+
+        splash.hide();
+      }
+    });
 
   } // runGui()
 
