@@ -30,11 +30,11 @@ import gate.creole.*;
  *  * store
  */
 public class LinearDefinition extends gate.creole.AbstractLanguageResource
-                              implements Set {
+                              implements List {
 
   private final static String ENCODING = "UTF-8";
 
-  private Set nodes = new HashSet();
+  private List nodes = new ArrayList();
   private URL url;
 
   /** set of lists as strings*/
@@ -45,6 +45,9 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
 
   /** a map of gazetteer lists by nodes. this is loaded on loadLists*/
   private Map gazListsByNode;
+
+  /** flag whether the definition has been modified after loading */
+  private boolean isModified = false;
 
   public LinearDefinition() {
   }
@@ -89,6 +92,12 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     return gazListsByNode;
   }
 
+  /**returns the value of the isModified flag.
+   * @return true if the definition has been modified    */
+  public boolean  isModified() {
+    return isModified;
+  }
+
   /**get the url of this linear definition
    * @return the url of this linear definition   */
   public URL getURL() {
@@ -121,6 +130,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
       } //while
 
       defReader.close();
+      isModified = false;
     } catch (Exception x){
       throw new ResourceInstantiationException(x);
     }
@@ -134,7 +144,14 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
       throw new ResourceInstantiationException("URL not set.(null)");
     }
     try {
-      File fileo = new File(url.getFile());
+      URL tempUrl = url;
+      if (-1 != url.getProtocol().indexOf("gate")) {
+        tempUrl = gate.util.protocols.gate.Handler.class.getResource(
+                      gate.util.Files.getResourcePath() + url.getPath()
+                    );
+      } // if gate:path url
+
+      File fileo = new File(tempUrl.getFile());
       fileo.delete();
       BufferedWriter defWriter = new BufferedWriter(new FileWriter(fileo));
       Iterator inodes = nodes.iterator();
@@ -143,6 +160,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
         defWriter.newLine();
       }
       defWriter.close();
+      isModified = false;
     } catch(Exception x) {
       throw new ResourceInstantiationException(x);
     }
@@ -166,7 +184,75 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     return new HashSet(nodes);
   }
 
-  /*---implementation of interface java.util.Set---*/
+  /*---implementation of interface java.util.List---*/
+  public boolean addAll(int index, Collection c) {
+    int size = nodes.size();
+    Iterator iter = c.iterator();
+    Object o;
+    while (iter.hasNext()) {
+      o = iter.next();
+      if (o instanceof LinearNode)  {
+        add(index,o);
+      } // instance of linearnode
+    } // while
+
+    boolean result = (size != nodes.size());
+    isModified |= result;
+    return result;
+  }
+
+  public Object get(int index) {
+    return nodes.get(index);
+  }
+
+  public Object set(int index, Object element) {
+    throw new UnsupportedOperationException("this method has not been implemented");
+  }
+
+  public void add(int index, Object o) {
+    if (o instanceof LinearNode) {
+      String list = ((LinearNode)o).getList();
+      if (!nodesByList.containsKey(list)) {
+        nodes.add(index,o);
+        nodesByList.put(list,o);
+        lists.add(list);
+        isModified = true;
+      } // if unique
+    } // if a linear node
+  }
+
+  public Object remove(int index) {
+    Object result = null;
+    int size = nodes.size();
+    result = nodes.remove(index);
+    if (null!=result) {
+      String list = ((LinearNode)result).getList();
+      lists.remove(list);
+      nodesByList.remove(list);
+      isModified |= (size != nodes.size());
+    }
+    return result;
+  }
+
+  public int indexOf(Object o) {
+    return nodes.indexOf(o);
+  }
+
+  public int lastIndexOf(Object o) {
+    return nodes.lastIndexOf(o);
+  }
+
+  public ListIterator listIterator() {
+    throw new UnsupportedOperationException("this method is not implemented");
+  }
+
+  public ListIterator listIterator(int index) {
+    throw new UnsupportedOperationException("this method is not implemented");
+  }
+
+  public List subList(int fromIndex, int toIndex) {
+    return nodes.subList(fromIndex,toIndex);
+  } // class SafeIterator
 
   public int size() {
     return nodes.size();
@@ -205,6 +291,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
         result = nodes.add(o);
         nodesByList.put(list,o);
         lists.add(list);
+        isModified=true;
       } // if unique
     } // if a linear node
     return result;
@@ -212,11 +299,13 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
 
   public boolean remove(Object o) {
     boolean result = false;
+    int size = nodes.size();
     if (o instanceof LinearNode) {
       result = nodes.remove(o);
       String list = ((LinearNode)o).getList();
       lists.remove(list);
       nodesByList.remove(list);
+      isModified |= (size != nodes.size());
     } // if linear node
     return result;
   }// remove
@@ -265,7 +354,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     } //for
 
     removeAll(scrap);
-
+    isModified |= (aprioriSize != nodes.size());
     return (aprioriSize != nodes.size());
   }
 
@@ -274,6 +363,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     nodes.clear();
     lists.clear();
     nodesByList.clear();
+    isModified = true;
   }
 
   public boolean equals(Object o) {
@@ -287,7 +377,11 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     return result;
   } // equals()
 
- /*---end of implementation of interface java.util.Set---*/
+ /*---end of implementation of interface java.util.List---*/
+
+
+
+
 
  /*-----------internal classes -------------*/
  /**this class provides an iterator which is safe to be iterated and objects removed from it*/
@@ -315,5 +409,6 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     } // remove
 
   } // class SafeIterator
+
 
 } // class LinearDefinition
