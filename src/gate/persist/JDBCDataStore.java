@@ -260,8 +260,101 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
    * @param lrId a data-store specific unique identifier for the resource
    * @param lrClassName class name of the type of resource
    */
-  public abstract void delete(String lrClassName, Object lrId)
-    throws PersistenceException,SecurityException;
+
+  public void delete(String lrClassName, Object lrId)
+  throws PersistenceException,SecurityException {
+    //0. preconditions
+    if (false == lrId instanceof Long) {
+      throw new IllegalArgumentException();
+    }
+
+    if (!lrClassName.equals(DBHelper.DOCUMENT_CLASS) &&
+        !lrClassName.equals(DBHelper.CORPUS_CLASS)) {
+      throw new IllegalArgumentException("Only Corpus and Document classes are supported" +
+                                          " by Database data store");
+    }
+
+    //1. check session
+    if (null == this.session) {
+      throw new SecurityException("session not set");
+    }
+
+    if (false == this.ac.isValidSession(this.session)) {
+      throw new SecurityException("invalid session supplied");
+    }
+
+    //2. check permissions
+    if (false == canWriteLR(lrId)) {
+      throw new SecurityException("insufficient privileges");
+    }
+
+    //3. try to lock document, so that we'll be sure no one is editing it
+    //NOTE: use the private method
+    User lockingUser = this.getLockingUser((Long)lrId);
+    User currUser = this.session.getUser();
+
+    if (null != lockingUser && false == lockingUser.equals(currUser)) {
+      //oops, someone is editing now
+      throw new PersistenceException("LR locked by another user");
+    }
+
+    boolean transFailed = false;
+    try {
+      //4. autocommit should be FALSE because of LOBs
+      beginTrans();
+
+      //5. perform changes, if anything goes wrong, rollback
+      if (lrClassName.equals(DBHelper.DOCUMENT_CLASS)) {
+        deleteDocument((Long)lrId);
+      }
+      else {
+        deleteCorpus((Long)lrId);
+      }
+
+      //6. done, commit
+      commitTrans();
+    }
+    catch(PersistenceException pe) {
+      transFailed = true;
+      throw(pe);
+    }
+    finally {
+      //problems?
+      if (transFailed) {
+        rollbackTrans();
+      }
+    }
+
+    //7, unlock
+    //do nothing - the resource does not exist anymore
+
+    //8. delete from the list of dependent resources
+    boolean resourceFound = false;
+    Iterator it = this.dependentResources.iterator();
+    while (it.hasNext()) {
+      LanguageResource lr = (LanguageResource)it.next();
+      if (lr.getLRPersistenceId().equals(lrId)) {
+        resourceFound = true;
+        it.remove();
+        break;
+      }
+    }
+
+    //Assert.assertTrue(resourceFound);
+
+    //9. let the world know about it
+    fireResourceDeleted(
+      new DatastoreEvent(this, DatastoreEvent.RESOURCE_DELETED, null, lrId));
+
+    //10. unload the resource form the GUI
+    try {
+      unloadLR((Long)lrId);
+    }
+    catch(GateException ge) {
+      Err.prln("can't unload resource from GUI...");
+    }
+  }
+
 
 
   /**
@@ -2123,5 +2216,43 @@ System.out.println("trans failed ...rollback");
    */
   protected abstract FeatureMap readFeatures(Long entityID, int entityType)
     throws PersistenceException;
+
+  /**
+   *  helper method for delete()
+   *  never call it directly beause proper events will not be fired
+   */
+  protected abstract void deleteDocument(Long lrId)
+    throws PersistenceException;
+
+  /**
+   *  helper method for delete()
+   *  never call it directly beause proper events will not be fired
+   */
+  protected abstract void deleteCorpus(Long lrId)
+    throws PersistenceException;
+
+  /**
+   *   unloads a LR from the GUI
+   */
+  protected void unloadLR(Long lrID)
+  throws GateException{
+
+    //0. preconfitions
+    Assert.assertNotNull(lrID);
+
+    //1. get all LRs in the system
+    List resources = Gate.getCreoleRegister().getAllInstances("gate.LanguageResource");
+
+    Iterator it = resources.iterator();
+    while (it.hasNext()) {
+      LanguageResource lr = (LanguageResource)it.next();
+      if (lrID.equals(lr.getLRPersistenceId()) &&
+          this.equals(lr.getDataStore())) {
+        //found it - unload it
+        Factory.deleteResource(lr);
+        break;
+      }
+    }
+  }
 
 }
