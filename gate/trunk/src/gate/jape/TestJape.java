@@ -42,17 +42,17 @@ public class TestJape extends TestCase
     AnnotationSet defaultAS = doc.getAnnotations();
     try{
       FeatureMap feat = Transients.newFeatureMap();
-      defaultAS.add(new Long( 0), new Long( 2), "A",feat);
+//      defaultAS.add(new Long( 0), new Long( 2), "A",feat);
       defaultAS.add(new Long( 2), new Long( 4), "A",feat);
 //      defaultAS.add(new Long( 4), new Long( 6), "A",feat);
 //      defaultAS.add(new Long( 6), new Long( 8), "A",feat);
-      defaultAS.add(new Long( 8), new Long(10), "B",feat);
+      defaultAS.add(new Long( 4), new Long(6), "B",feat);
 //      defaultAS.add(new Long(10), new Long(12), "B",feat);
 //      defaultAS.add(new Long(12), new Long(14), "B",feat);
 //      defaultAS.add(new Long(14), new Long(16), "B",feat);
 //      defaultAS.add(new Long(16), new Long(18), "B",feat);
-      defaultAS.add(new Long(18), new Long(20), "C",feat);
-//      defaultAS.add(new Long(20), new Long(22), "C",feat);
+      defaultAS.add(new Long(6), new Long(8), "C",feat);
+      defaultAS.add(new Long(8), new Long(10), "C",feat);
 //      defaultAS.add(new Long(22), new Long(24), "C",feat);
 //      defaultAS.add(new Long(24), new Long(26), "C",feat);
     }catch(gate.util.InvalidOffsetException ioe){

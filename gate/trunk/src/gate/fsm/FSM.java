@@ -121,6 +121,7 @@ public class FSM implements JapeConstants{
       //an empty transition.
       currentRowState.addTransition(new Transition(null,finalState));
       finalState.setAction(rule.getRHS());
+      finalState.setFileIndex(rule.getPosition());
     }//for i
   }
 
