@@ -331,6 +331,7 @@ public class WordNetViewer extends AbstractVisualResource
         relHoloMeroHypo(ri.getSenses(), Relation.REL_MEMBER_MERONYM, "HAS MEMBER: ");
         break;
       case Relation.REL_PARTICIPLE_OF_VERB:
+        relAntonymSeeAlso(ri.getSenses(), Relation.REL_PARTICIPLE_OF_VERB,"=> ");
         break;
       case Relation.REL_PART_HOLONYM:
         relHoloMeroHypo(ri.getSenses(), Relation.REL_PART_HOLONYM, "PART OF: ");
