@@ -438,15 +438,22 @@ jar/classpath so it's the same as registerBuiltins
    * Checks whether a particular class is a Gate defined type
    */
   public static boolean isGateType(String classname){
-    return getCreoleRegister().containsKey(classname) ||
-           classname.equals("gate.Resource")||
-           classname.equals("gate.LanguageResource")||
-           classname.equals("gate.ProcessingResource")||
-           classname.equals("gate.VisualResource")||
-           classname.equals("gate.Controller")||
-           classname.equals("gate.Document")||
-           classname.equals("gate.Corpus")||
-           classname.equals("gate.DataStore");
+    boolean res =  getCreoleRegister().containsKey(classname) ||
+                   classname.equals("gate.Resource")||
+                   classname.equals("gate.LanguageResource")||
+                   classname.equals("gate.ProcessingResource")||
+                   classname.equals("gate.VisualResource")||
+                   classname.equals("gate.Controller")||
+                   classname.equals("gate.Document")||
+                   classname.equals("gate.Corpus")||
+                   classname.equals("gate.DataStore");
+    if(!res){
+      try{
+        Class aClass = Class.forName(classname);
+        res = Resource.class.isAssignableFrom(aClass);
+      }catch(ClassNotFoundException cfe){}
+    }
+    return res;
   }
 
   /** Returns the value for the HIDDEN attribute of a feature map */
@@ -701,5 +708,5 @@ jar/classpath so it's the same as registerBuiltins
 
   /** Tell GATE whether to start SLUG GUI. */
   public static void setSlugGui(boolean b) { slugGui = b; }
-  
+
 } // class Gate
