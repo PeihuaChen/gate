@@ -376,6 +376,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     DFSMState nextState;
     String tokenString;
     int charIdx = 0;
+    FeatureMap newTokenFm;
     while(charIdx < length){
       currentChar = content.charAt(charIdx);
 //System.out.println(currentChar + typesMnemonics[Character.getType(currentChar)+128]);
@@ -388,16 +389,40 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
         }
         charIdx ++;
       }else{//we have a match!
+        newTokenFm = Transients.newFeatureMap();
         if(null == lastMatchingState){
           tokenString = content.substring(tokenStart, tokenStart +1);
-          System.out.println("Default token: " + tokenStart +
-                             "->" + tokenStart + " :" + tokenString + ";");
+          newTokenFm.put("type","UNKNOWN");
+          newTokenFm.put("string", tokenString);
+          try{
+            annotationSet.add(new Long(tokenStart),
+                              new Long(tokenStart + 1),
+                              "DEFAULT_TOKEN", newTokenFm);
+          }catch(InvalidOffsetException ioe){
+            //This REALLY shouldn't happen!
+            ioe.printStackTrace(System.err);
+          }
+//          System.out.println("Default token: " + tokenStart +
+//                             "->" + tokenStart + " :" + tokenString + ";");
           charIdx  = tokenStart + 1;
         }else{
           tokenString = content.substring(tokenStart, lastMatch + 1);
-          System.out.println(lastMatchingState.getTokenDesc()[0][0] +
-                             ": " + tokenStart + "->" + lastMatch +
-                             " :" + tokenString + ";");
+          newTokenFm.put("string", tokenString);
+          for(int i = 1; i < lastMatchingState.getTokenDesc().length; i++){
+            newTokenFm.put(lastMatchingState.getTokenDesc()[i][0],
+                           lastMatchingState.getTokenDesc()[i][1]);
+          }
+          try{
+            annotationSet.add(new Long(tokenStart),
+                              new Long(lastMatch + 1),
+                              lastMatchingState.getTokenDesc()[0][0], newTokenFm);
+          }catch(InvalidOffsetException ioe){
+            //This REALLY shouldn't happen!
+            ioe.printStackTrace(System.err);
+          }
+//          System.out.println(lastMatchingState.getTokenDesc()[0][0] +
+//                             ": " + tokenStart + "->" + lastMatch +
+//                             " :" + tokenString + ";");
           charIdx = lastMatch + 1;
         }
         lastMatchingState = null;
