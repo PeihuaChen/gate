@@ -150,7 +150,8 @@ public class CreoleRegisterImpl extends HashMap
     directories.add(directoryUrl);
     // parse the directory file
     try {
-      parseDirectory(directoryXmlFileUrl.openStream(), directoryUrl);
+      parseDirectory(directoryXmlFileUrl.openStream(), directoryUrl, 
+              directoryXmlFileUrl);
     } catch(IOException e) {
       //it failed: remove it
       directories.remove(directoryUrl);
@@ -163,13 +164,15 @@ public class CreoleRegisterImpl extends HashMap
     * If the resource is from a URL then that location is passed (otherwise
     * null).
     */
-  protected void parseDirectory(InputStream directoryStream, URL directoryUrl)
+  protected void parseDirectory(InputStream directoryStream, URL directoryUrl,
+          URL creoleFileUrl)
   throws GateException
   {
     // create a handler for the directory file and parse it;
     // this will create ResourceData entries in the register
     try {
-      DefaultHandler handler = new CreoleXmlHandler(this, directoryUrl);
+      DefaultHandler handler = new CreoleXmlHandler(this, directoryUrl, 
+              creoleFileUrl);
       parser.parse(directoryStream, handler);
       if(DEBUG) {
         Out.prln(
@@ -193,10 +196,9 @@ public class CreoleRegisterImpl extends HashMap
   public void registerBuiltins() throws GateException {
 
     try {
-      parseDirectory(
-        new URL("gate:/creole/creole.xml").openStream(),
-        new URL("gate:/creole/")
-      );
+      URL creoleFileURL = new URL("gate:/creole/creole.xml");
+      parseDirectory(creoleFileURL.openStream(), new URL("gate:/creole/"),
+              creoleFileURL);
     } catch(IOException e) {
       if (DEBUG) Out.println(e);
       throw(new GateException(e));

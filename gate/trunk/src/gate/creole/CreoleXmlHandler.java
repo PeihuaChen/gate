@@ -60,6 +60,11 @@ public class CreoleXmlHandler extends DefaultHandler {
 
   /** The source URL of the directory file being parsed. */
   private URL sourceUrl;
+  
+  /**
+   * The URL to the creole.xml file being parsed.
+   */
+  private URL creoleFileUrl;
 
   /** This object indicates what to do when the parser encounts an error*/
   private SimpleErrorHandler _seh = new SimpleErrorHandler();
@@ -82,9 +87,11 @@ public class CreoleXmlHandler extends DefaultHandler {
   private boolean readCharacterStatus = false;
 
   /** Construction */
-  public CreoleXmlHandler(CreoleRegister register, URL directoryUrl) {
+  public CreoleXmlHandler(CreoleRegister register, URL directoryUrl, 
+          URL creoleFileUrl) {
     this.register = register;
     this.sourceUrl = directoryUrl;
+    this.creoleFileUrl = creoleFileUrl;
   } // construction
 
   /** The register object that we add ResourceData objects to during parsing.
@@ -261,6 +268,8 @@ public class CreoleXmlHandler extends DefaultHandler {
           "Invalid resource data: " + resourceData.getValidityMessage()
         );
 
+      //set the URL to the creole.xml file on the resource data object
+      resourceData.setXmlFileUrl(creoleFileUrl);
       // add the new resource data object to the creole register
       register.put(resourceData.getClassName(), resourceData);
       // if the resource is auto-loading, try and load it
@@ -355,30 +364,6 @@ public class CreoleXmlHandler extends DefaultHandler {
         }// End try
       }// End if
     // End JAR processing
-    //////////////////////////////////////////////////////////////////
-    } else if(elementName.toUpperCase().equals("XML")) {
-      checkStack("endElement", "XML");
-
-      // add XML file name
-      String xmlFileName = (String) contentStack.pop();
-      resourceData.setXmlFileName(xmlFileName);
-
-      // add xml file URL if there is one
-      if(sourceUrl != null) {
-        String sourceUrlName = sourceUrl.toExternalForm();
-        String separator = "/";
-        if(sourceUrlName.endsWith(separator))
-          separator = "";
-        URL xmlFileUrl = null;
-
-        try {
-          xmlFileUrl = new URL(sourceUrlName + separator + xmlFileName);
-          resourceData.setXmlFileUrl(xmlFileUrl);
-        } catch(MalformedURLException e) {
-          throw new GateSaxException("bad URL " + xmlFileUrl + e);
-        }// End try
-      }// End if
-    // End XML processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("CLASS")) {
       checkStack("endElement", "CLASS");
