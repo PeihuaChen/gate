@@ -72,6 +72,10 @@ extends AbstractResource implements ProcessingResource
   public void clear() {
   }
 
+  /**
+   * Removes a {@link gate.event.StatusListener} from the list of listeners for
+   * this processing resource
+   */
   public synchronized void removeStatusListener(StatusListener l) {
     if (statusListeners != null && statusListeners.contains(l)) {
       Vector v = (Vector) statusListeners.clone();
@@ -80,6 +84,10 @@ extends AbstractResource implements ProcessingResource
     }
   }
 
+  /**
+   * Adds a {@link gate.event.StatusListener} to the list of listeners for
+   * this processing resource
+   */
   public synchronized void addStatusListener(StatusListener l) {
     Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
     if (!v.contains(l)) {
@@ -88,6 +96,10 @@ extends AbstractResource implements ProcessingResource
     }
   }
 
+  /**
+   * Notifies all the {@link gate.event.StatusListener}s of a change of status.
+   * @param e the message describing the status change
+   */
   protected void fireStatusChanged(String e) {
     if (statusListeners != null) {
       Vector listeners = statusListeners;
@@ -98,6 +110,10 @@ extends AbstractResource implements ProcessingResource
     }
   }
 
+  /**
+   * Adds a {@link gate.event.ProgressListener} to the list of listeners for
+   * this processing resource.
+   */
   public synchronized void addProgressListener(ProgressListener l) {
     Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
     if (!v.contains(l)) {
@@ -106,6 +122,10 @@ extends AbstractResource implements ProcessingResource
     }
   }
 
+  /**
+   * Removes a {@link gate.event.ProgressListener} from the list of listeners
+   * for this processing resource.
+   */
   public synchronized void removeProgressListener(ProgressListener l) {
     if (progressListeners != null && progressListeners.contains(l)) {
       Vector v = (Vector) progressListeners.clone();
@@ -114,6 +134,11 @@ extends AbstractResource implements ProcessingResource
     }
   }
 
+  /**
+   * Notifies all the {@link gate.event.ProgressListener}s of a progress change
+   * event.
+   * @param e the new value of execution completion
+   */
   protected void fireProgressChanged(int e) {
     if (progressListeners != null) {
       Vector listeners = progressListeners;
@@ -124,6 +149,10 @@ extends AbstractResource implements ProcessingResource
     }
   }
 
+  /**
+   * Notifies all the {@link gate.event.ProgressListener}s of a progress
+   * finished.
+   */
   protected void fireProcessFinished() {
     if (progressListeners != null) {
       Vector listeners = progressListeners;
@@ -137,8 +166,8 @@ extends AbstractResource implements ProcessingResource
   /**
    * A progress listener used to convert a 0..100 interval into a smaller one
    */
-  protected class CustomProgressListener implements ProgressListener{
-    public CustomProgressListener(int start, int end){
+  protected class IntervalProgressListener implements ProgressListener{
+    public IntervalProgressListener(int start, int end){
       this.start = start;
       this.end = end;
     }
@@ -154,7 +183,16 @@ extends AbstractResource implements ProcessingResource
     int end;
   }//CustomProgressListener
 
+  /**
+   * The list of {@link gate.event.StatusListener}s registered with this
+   * resource
+   */
   private transient Vector statusListeners;
+
+  /**
+   * The list of {@link gate.event.ProgressListener}s registered with this
+   * resource
+   */
   private transient Vector progressListeners;
 
   /** Any exception caught during run() invocations are stored here. */

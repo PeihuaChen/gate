@@ -64,7 +64,7 @@ public class DefaultTokeniser extends AbstractProcessingResource {
       Gate.setHiddenAttribute(features, true);
       if (! Main.batchMode) //fire events if not in batch mode
         listeners.put("gate.event.ProgressListener",
-                    new CustomProgressListener(51, 100));
+                    new IntervalProgressListener(51, 100));
       transducer = (Transducer)Factory.createResource("gate.creole.Transducer",
                                                       params, features,
                                                       listeners);
@@ -102,7 +102,7 @@ public class DefaultTokeniser extends AbstractProcessingResource {
       StatusListener sListener = null;
       if (!Main.batchMode) {
         fireProgressChanged(5);
-        pListener = new CustomProgressListener(5, 50);
+        pListener = new IntervalProgressListener(5, 50);
         sListener = new StatusListener(){
           public void statusChanged(String text){
             fireStatusChanged(text);
@@ -120,7 +120,7 @@ public class DefaultTokeniser extends AbstractProcessingResource {
         tokeniser.removeStatusListener(sListener);
 
       //transducer
-        pListener = new CustomProgressListener(50, 100);
+        pListener = new IntervalProgressListener(50, 100);
         transducer.addProgressListener(pListener);
         transducer.addStatusListener(sListener);
       }

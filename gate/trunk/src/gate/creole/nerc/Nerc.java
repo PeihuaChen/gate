@@ -82,7 +82,7 @@ public class Nerc extends AbstractProcessingResource {
 
       if (! Main.batchMode) //fire events if not in batch mode
         listeners.put("gate.event.ProgressListener",
-                    new CustomProgressListener(11, 50));
+                    new IntervalProgressListener(11, 50));
 
       gazetteer = (DefaultGazetteer)Factory.createResource(
                       "gate.creole.gazetteer.DefaultGazetteer",
@@ -107,7 +107,7 @@ public class Nerc extends AbstractProcessingResource {
 
       if (! Main.batchMode) //fire events if not in batch mode
         listeners.put("gate.event.ProgressListener",
-                    new CustomProgressListener(50, 60));
+                    new IntervalProgressListener(50, 60));
 
       splitter = (SentenceSplitter)Factory.createResource(
                       "gate.creole.splitter.SentenceSplitter",
@@ -131,7 +131,7 @@ public class Nerc extends AbstractProcessingResource {
 
       if (! Main.batchMode) //fire events if not in batch mode
         listeners.put("gate.event.ProgressListener",
-                    new CustomProgressListener(60, 65));
+                    new IntervalProgressListener(60, 65));
 
       tagger = (POSTagger)Factory.createResource(
                       "gate.creole.POSTagger",
@@ -156,7 +156,7 @@ public class Nerc extends AbstractProcessingResource {
       Gate.setHiddenAttribute(features, true);
       if (! Main.batchMode) //fire events if not in batch mode
         listeners.put("gate.event.ProgressListener",
-                    new CustomProgressListener(66, 100));
+                    new IntervalProgressListener(66, 100));
       transducer = (ANNIETransducer)Factory.createResource(
                                               "gate.creole.ANNIETransducer",
                                               params, features,
@@ -222,7 +222,7 @@ public class Nerc extends AbstractProcessingResource {
     StatusListener sListener = null;
     if (!Main.batchMode) {
       fireProgressChanged(5);
-      pListener = new CustomProgressListener(5, 15);
+      pListener = new IntervalProgressListener(5, 15);
       sListener = new StatusListener(){
         public void statusChanged(String text){
           fireStatusChanged(text);
@@ -241,7 +241,7 @@ public class Nerc extends AbstractProcessingResource {
 
     //gazetteer
 
-      pListener = new CustomProgressListener(10, 20);
+      pListener = new IntervalProgressListener(10, 20);
       gazetteer.addProgressListener(pListener);
       gazetteer.addStatusListener(sListener);
     }
@@ -252,7 +252,7 @@ public class Nerc extends AbstractProcessingResource {
       gazetteer.removeStatusListener(sListener);
 
     //sentence splitter
-      pListener = new CustomProgressListener(20, 35);
+      pListener = new IntervalProgressListener(20, 35);
       splitter.addProgressListener(pListener);
       splitter.addStatusListener(sListener);
     }
@@ -263,7 +263,7 @@ public class Nerc extends AbstractProcessingResource {
       splitter.removeStatusListener(sListener);
 
     //POS tagger
-      pListener = new CustomProgressListener(35, 40);
+      pListener = new IntervalProgressListener(35, 40);
       tagger.addProgressListener(pListener);
       tagger.addStatusListener(sListener);
     }
@@ -274,7 +274,7 @@ public class Nerc extends AbstractProcessingResource {
       tagger.removeStatusListener(sListener);
 
     //transducer
-      pListener = new CustomProgressListener(40, 90);
+      pListener = new IntervalProgressListener(40, 90);
       transducer.addProgressListener(pListener);
       transducer.addStatusListener(sListener);
     }
