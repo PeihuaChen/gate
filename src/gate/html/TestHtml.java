@@ -58,7 +58,11 @@ public class TestHtml extends TestCase
     */
     // create a new gate document
     gate.Document doc = gate.Transients.newDocument(
-              new URL("http://www.gate.ac.uk/gate2/doc/install.html")
+             // new URL("http://www.funideas.com/visual_gallery.htm")
+            new URL ("http://www.dcs.shef.ac.uk/~hamish/GateIntro.html")
+            //new URL ("http://www.webhelp.com/home.html")
+            //new URL ("http://big2.hotyellow98.com/sys/signup.cgi")
+            //new URL ("http://www.epilot.com/SearchResults.asp?keyword=costume+baie&page=&source=&TokenID=82C7BE897D9643EDB3CB8A28E398A488")
     );
     // get the docFormat that deals with it.
     // the parameter MimeType doesn't affect right now the behaviour

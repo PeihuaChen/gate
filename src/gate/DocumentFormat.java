@@ -30,17 +30,17 @@ public abstract class DocumentFormat implements Resource
   /** Map of MimeType to DocumentFormat Class. This is used to find the
     * DocumentFormat subclass that deals with a particular MIME type.
     */
-  static private Map mime2ClassMap = new HashMap();
+  static private Map mimeString2mimeTypeMap = new HashMap();
 
   /** Map of Set of file suffixes to MimeType. This is used to figure
     * out what MIME type a document is from its file name.
     */
-  static private Map suffixes2MimeTypeMap = new HashMap();
+  static private Map suffixes2mimeStringMap = new HashMap();
 
   /** Map of Set of magic numbers to MimeType. This is used to guess the
     * MIME type of a document, when we don't have any other clues.
     */
-  static private Map magic2MimeTypeMap = new HashMap();
+  static private Map magic2mimeStringMap = new HashMap();
 
   /** Map of markup elements to annotation types. If it is null, the
     * unpackMarkup() method will convert all markup, using the element names
@@ -53,32 +53,42 @@ public abstract class DocumentFormat implements Resource
   private FeatureMap features = null;
 
   /** Default construction */
-  public DocumentFormat() { register(); }
+  public DocumentFormat() {}
 
+  static{
+    register();
+  }
   /** Construction with a map of what markup elements we want to
     * convert when doing unpackMarkup(), and what annotation types
     * to convert them to.
     */
   public DocumentFormat(Map markupElementsMap) {
     this.markupElementsMap = markupElementsMap;
-    register();
   } // construction with map
 
   /** This method populates the various maps of MIME type to format,
     * file suffix and magic numbers.
     */
-  private void register() {
-    // create a new mime type
-    /*
+  static private void register() {
+    // register XML mime type
     MimeType mime = new MimeType("text","xml");
-    mime.addParameter ("Class","gate.corpora.XmlDocumentFormat");
-
+    mime.addParameter ("ClassHandler","gate.corpora.XmlDocumentFormat");
     // register the class with this map type
-    mime2ClassMap.put (mime.toString (), "");
+    mimeString2mimeTypeMap.put (mime.getType() + "/" + mime.getSubtype(), mime);
 
+    suffixes2mimeStringMap.put("xml",mime.toString());
+    suffixes2mimeStringMap.put("XML",mime.toString());
+    suffixes2mimeStringMap.put("Xml",mime.toString());
+
+    // register HTML mime type
     mime = new MimeType("text","html");
-    mime2ClassMap.put (mime, "gate.corpora.htmlDocumentFormat");
-    */
+    mime.addParameter ("ClassHandler","gate.corpora.HtmlDocumentFormat");
+    // register the class with this map type
+    mimeString2mimeTypeMap.put (mime.getType() + "/" + mime.getSubtype(), mime);
+    
+    suffixes2mimeStringMap.put("htm",mime.toString());
+    suffixes2mimeStringMap.put("html",mime.toString());
+
   }
 
   /** Unpack the markup in the document. This converts markup from the
@@ -117,13 +127,22 @@ public abstract class DocumentFormat implements Resource
     */
   static public DocumentFormat getDocumentFormat(MimeType mimeType) {
     DocumentFormat docFormat = null;
+    MimeType mime = null;
+    String classHandler = null;
+
+    mime = (MimeType) mimeString2mimeTypeMap.get(mimeType.getType() + "/" +
+                                              mimeType.getSubtype());
     try{
+      classHandler = mime.getParameterValue("ClassHandler");
+      docFormat = (DocumentFormat) Class.forName(classHandler).newInstance();
+      /*
       if (mimeType.toString ().equalsIgnoreCase ("text/xml"))
         docFormat = (gate.corpora.XmlDocumentFormat) Class.forName(
                       "gate.corpora.XmlDocumentFormat").newInstance();
       if (mimeType.toString ().equalsIgnoreCase ("text/html"))
         docFormat = (gate.corpora.HtmlDocumentFormat) Class.forName(
                       "gate.corpora.HtmlDocumentFormat").newInstance();
+               */       
     }catch (ClassNotFoundException e){
       System.out.println(e);
     }catch (IllegalAccessException e){

@@ -54,12 +54,6 @@ public class HtmlCustomDocumentHandler extends ParserCallback{
     this.doc = doc ;
     this.markupElementsMap = markupElementsMap;
     basicAS = doc.getAnnotations ();
-
-    try{
-      out = new java.io.PrintWriter(new java.io.FileOutputStream("d:\\cursu\\Results.txt"));
-    } catch (Exception e){
-      System.out.println (e);
-    }
   }
 
   /**
@@ -186,7 +180,7 @@ public class HtmlCustomDocumentHandler extends ParserCallback{
     * it depends on the programmer if he wants to deal with that error
     */
   public void handleError(String errorMsg, int pos){
-    //System.out.println ("ERROR during parsing:" + errorMsg);
+    //System.out.println ("ERROR CALLED : " + errorMsg);
   }
 
   /**
