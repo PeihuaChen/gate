@@ -282,7 +282,36 @@ public class OracleDataStore extends JDBCDataStore {
   /** -- */
   private void updateDocumentContent(Long docContentID,DocumentContent content)
   throws PersistenceException {
-    throw new MethodNotImplementedException();
+
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = this.jdbcConn.createStatement();
+      String sql =  "select dc_content " +
+                    "from "+gate.Gate.DB_OWNER+".t_doc_content";
+      stmt.execute(sql);
+      rs = stmt.getResultSet();
+
+      while (rs.next()) {
+        //important: read the objects in the order they appear in
+        //the ResultSet, otherwise data may be lost
+        Clob clob = (Clob)rs.getObject(1);
+        writeCLOB(content.toString(),clob);
+      }
+    }
+    catch(IOException ioe) {
+      throw new PersistenceException("can't update document content in DB : ["+
+                                      ioe.getMessage()+"]");
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't update document content in DB : ["+
+                                      sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(stmt);
+    }
+
   }
 
 
@@ -308,6 +337,15 @@ public class OracleDataStore extends JDBCDataStore {
     Boolean docIsMarkupAware = doc.getMarkupAware();
     Long docStartOffset = doc.getSourceUrlStartOffset();
     Long docEndOffset = doc.getSourceUrlEndOffset();
+    String docEncoding = null;
+    try {
+      docEncoding = (String)doc.getParameterValue("encoding");
+      Assert.assertNotNull(docEncoding);
+    }
+    catch(gate.creole.ResourceInstantiationException re) {
+      throw new PersistenceException("cannot create document: error getting " +
+                                     " document encoding ["+re.getMessage()+"]");
+    }
 
     //3. create a Language Resource (an entry in T_LANG_RESOURCE) for this document
     Long lrID = null;// = this.createLR(this.session,"gate.corpora.DocumentImpl",?,?);
@@ -319,17 +357,18 @@ public class OracleDataStore extends JDBCDataStore {
 
     try {
       stmt = this.jdbcConn.prepareCall(
-          "{ call "+Gate.DB_OWNER+".persist.create_document(?,?,?,?,?,?,?,?) }");
+          "{ call "+Gate.DB_OWNER+".persist.create_document(?,?,?,?,?,?,?,?,?) }");
       stmt.setLong(1,lrID.longValue());
       stmt.setString(2,docURL.toString());
-      stmt.setLong(3,docStartOffset.longValue());
-      stmt.setLong(4,docEndOffset.longValue());
-      stmt.setBoolean(5,docIsMarkupAware.booleanValue());
+      stmt.setString(3,docEncoding);
+      stmt.setLong(4,docStartOffset.longValue());
+      stmt.setLong(5,docEndOffset.longValue());
+      stmt.setBoolean(6,docIsMarkupAware.booleanValue());
       //is the document part of a corpus?
-      stmt.setLong(6,null == corpusID ? 0 : corpusID.longValue());
+      stmt.setLong(7,null == corpusID ? 0 : corpusID.longValue());
       //results
-      stmt.registerOutParameter(7,java.sql.Types.BIGINT);
       stmt.registerOutParameter(8,java.sql.Types.BIGINT);
+      stmt.registerOutParameter(9,java.sql.Types.BIGINT);
 
       stmt.execute();
       docID = new Long(stmt.getLong(7));
@@ -601,7 +640,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** --- */
-  protected void writeCLOB(StringBuffer src,java.sql.Clob dest)
+  protected void writeCLOB(String src,java.sql.Clob dest)
     throws SQLException, IOException {
 
     //preconditions
@@ -625,6 +664,14 @@ public class OracleDataStore extends JDBCDataStore {
     //5.close streams
     buffOutput.close();
     output.close();
+  }
+
+  /** --- */
+  protected void writeCLOB(StringBuffer src,java.sql.Clob dest)
+    throws SQLException, IOException {
+
+    //delegate
+    writeCLOB(src.toString(),dest);
   }
 
 }

@@ -346,4 +346,10 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   /** --- */
   protected abstract void writeCLOB(StringBuffer src,java.sql.Clob dest)
     throws SQLException,IOException;
+
+  /** --- */
+  protected abstract void writeCLOB(String src,java.sql.Clob dest)
+    throws SQLException,IOException;
+
+
 }
