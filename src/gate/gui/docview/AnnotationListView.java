@@ -146,7 +146,7 @@ public class AnnotationListView extends AbstractDocumentView
           return;
         }
 
-        if(me.getModifiers() == 4) {
+        if(javax.swing.SwingUtilities.isRightMouseButton(me)) {
           final JPopupMenu popup = new JPopupMenu();
           JButton delete = new JButton("Delete");
           delete.addActionListener(new ActionListener() {
