@@ -450,7 +450,11 @@ public class DefaultGazetteer extends AbstractProcessingResource
    * lists dtaht define this Gazetteer
    */
   private java.net.URL listsURL;
-  private Boolean caseSensitive;
+
+  /**
+   * Should this gazetteer be case sensitive. The default value is true.
+   */
+  private Boolean caseSensitive = new Boolean(true);
 
   /**    */
   protected void fireProgressChanged(int e) {
