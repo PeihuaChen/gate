@@ -169,6 +169,7 @@
         NAME="projectName"
         DEFAULT=""
         COMMENT="Protege project file name">java.lang.String</PARAMETER>
+      <PARAMETER NAME="URL" DEFAULT="gate:/creole/ontology/demo.daml" COMMENT="The URL of the Ontology">java.net.URL</PARAMETER>
       <ICON>lr.gif</ICON>
     </RESOURCE>
 
