@@ -285,25 +285,6 @@
         java.lang.Boolean</PARAMETER>
       <ICON>shefGazetteer.gif</ICON>
     </RESOURCE>
-    <!-- Creole for Database Exporter -->
-    <RESOURCE>
-      <NAME>Database Exporter </NAME>
-      <CLASS>gate.creole.ExportAnnotations</CLASS>
-      <COMMENT>exports the specified annotations to the MS-Access 
-        Database</COMMENT>
-      <PARAMETER NAME="document" RUNTIME="true" 
-        COMMENT="The document to be processed" OPTIONAL="false">
-        gate.Document</PARAMETER>
-      <PARAMETER NAME="annotationSetName" RUNTIME="true" 
-        COMMENT="The annotation set to be used for the generated annotations" 
-        OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="databaseInstanceURL" 
-        COMMENT="Ms-Access Database Source Name" OPTIONAL="false">
-        java.lang.String</PARAMETER>
-      <PARAMETER NAME="tableName" RUNTIME="true" 
-        COMMENT="table in which to store the information" OPTIONAL="false">
-        java.lang.String</PARAMETER>
-    </RESOURCE>
     <!-- creole.xml for JapeTransducer -->
     <RESOURCE>
       <NAME>Jape Transducer</NAME>
