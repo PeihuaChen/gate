@@ -307,6 +307,13 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
     StringBuffer contentBuffer = new StringBuffer("");
     int tmpDocContentSize = tmpDocContent.length();
     boolean incrementStartIndex = false;
+    boolean addExtraSpace = true;
+    if ( Gate.getUserConfig().get(
+          GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME)!= null)
+      addExtraSpace =
+        Gate.getUserConfig().getBoolean(
+          GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME
+        ).booleanValue();
     // If the first char of the text just read "text[0]" is NOT whitespace AND
     // the last char of the tmpDocContent[SIZE-1] is NOT whitespace then
     // concatenation "tmpDocContent + content" will result into a new different
@@ -343,7 +350,9 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
                 tmpDocContent.charAt(tmpDocContentSize - 1) == '"' ||
                 tmpDocContent.charAt(tmpDocContentSize - 1) == '\''
                )){// do nothing. The content will be appended
-         }else{
+         }else if (!addExtraSpace) { Out.prln("No need to add extra space");
+         }else
+           {
             // In all other cases append " "
             contentBuffer.append(" ");
             incrementStartIndex = true;
