@@ -400,7 +400,7 @@ public class DatabaseCorpusImpl extends CorpusImpl
     this.dataStore = (DatabaseDataStore)initData.get("DS");
     this.lrPersistentId = (Long)initData.get("LR_ID");
     this.features = (FeatureMap)initData.get("CORP_FEATURES");
-    this.supportList = (List)initData.get("CORP_SUPPORT_LIST");
+    this.supportList = new ArrayList((List)initData.get("CORP_SUPPORT_LIST"));
 
     this.documentData = new ArrayList(this.supportList.size());
     this.removedDocuments = new ArrayList();
@@ -799,5 +799,25 @@ public class DatabaseCorpusImpl extends CorpusImpl
 
     return (((DocumentData)this.documentData.get(index)).getPersistentID() != null);
   }
+
+
+  public boolean equals(Object o){
+
+    if (! (o instanceof DatabaseCorpusImpl))
+      return false;
+
+    DatabaseCorpusImpl dbCorp = (DatabaseCorpusImpl)o;
+
+    if (this.getDataStore() != null && this.getDataStore() != dbCorp.getDataStore()) {
+      return false;
+    }
+
+    if (this.getLRPersistenceId() != null && this.getLRPersistenceId() != dbCorp.getLRPersistenceId()) {
+      return false;
+    }
+
+    return supportList.equals(o);
+  }
+
 
 }
