@@ -58,25 +58,25 @@
 #------- The rules start here -----------------
 
 #words#
-// a word can be any combination of letters, including a dash,
-// but excluding other symbols or punctuation, e.g. apostrophes
+// a word can be any combination of letters, 
+// but excluding symbols and punctuation, e.g. apostrophes, hyphens
 
 
-"UPPERCASE_LETTER" "LOWERCASE_LETTER"* > Token;orth=upperInitial;kind=word;
-"UPPERCASE_LETTER" "UPPERCASE_LETTER"+ > Token;orth=allCaps;kind=word;
-"LOWERCASE_LETTER" (LOWERCASE_LETTER|DASH_PUNCTUATION)* > Token;orth=lowercase;kind=word;
+"UPPERCASE_LETTER" (LOWERCASE_LETTER)* > Token;orth=upperInitial;kind=word;
+"UPPERCASE_LETTER" (UPPERCASE_LETTER)+ > Token;orth=allCaps;kind=word;
+"LOWERCASE_LETTER" (LOWERCASE_LETTER)* > Token;orth=lowercase;kind=word;
 
 // MixedCaps is any mixture of caps and small letters that doesn't 
 // fit in the preceding categories
 
 ("UPPERCASE_LETTER" "UPPERCASE_LETTER"+ "LOWERCASE_LETTER"+ \
-(UPPERCASE_LETTER|LOWERCASE_LETTER|DASH_PUNCTUATION)*)|\
+(UPPERCASE_LETTER|LOWERCASE_LETTER)*)|\
 ("UPPERCASE_LETTER""LOWERCASE_LETTER"+ "UPPERCASE_LETTER"+ \
-(UPPERCASE_LETTER|LOWERCASE_LETTER|DASH_PUNCTUATION)*)|\
+(UPPERCASE_LETTER|LOWERCASE_LETTER)*)|\
 ("LOWERCASE_LETTER" "LOWERCASE_LETTER"+"UPPERCASE_LETTER"+ \
-(UPPERCASE_LETTER|LOWERCASE_LETTER|DASH_PUNCTUATION)*)|\
+(UPPERCASE_LETTER|LOWERCASE_LETTER)*)|\
 ("LOWERCASE_LETTER" "LOWERCASE_LETTER"*"UPPERCASE_LETTER"+\
-(UPPERCASE_LETTER|LOWERCASE_LETTER|DASH_PUNCTUATION)*) \
+(UPPERCASE_LETTER|LOWERCASE_LETTER)*) \
 > Token;orth=mixedCaps;kind=word;
 
 
@@ -93,9 +93,11 @@
 CURRENCY_SYMBOL > Token;kind=symbol;symbolkind=currency;
 
 #punctuation#
-(DASH_PUNCTUATION|CONNECTOR_PUNCTUATION|OTHER_PUNCTUATION)>Token;kind=punctuation;
+"DASH_PUNCTUATION" >Token;kind=punctuation;subkind=dashpunct;
+(CONNECTOR_PUNCTUATION|OTHER_PUNCTUATION)>Token;kind=punctuation;
 "START_PUNCTUATION" >Token;kind=punctuation;position=startpunct;
 "END_PUNCTUATION" >Token;kind=punctuation;position=endpunct;
+
 
 
 
