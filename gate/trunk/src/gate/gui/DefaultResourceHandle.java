@@ -24,6 +24,7 @@ import java.io.*;
 
 import gate.*;
 import gate.util.*;
+import gate.swing.*;
 import gate.creole.*;
 import gate.persist.*;
 import gate.event.*;

@@ -12,7 +12,7 @@
  *
  *  $Id$
  */
-package gate.gui;
+package gate.swing;
 
 
 import javax.swing.filechooser.*;
