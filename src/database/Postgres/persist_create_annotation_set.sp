@@ -45,4 +45,4 @@ CREATE OR REPLACE FUNCTION persist_create_annotation_set(int4,varchar) RETURNS i
 
    END;
 '
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql';

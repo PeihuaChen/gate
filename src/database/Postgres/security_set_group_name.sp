@@ -29,4 +29,4 @@ CREATE OR REPLACE FUNCTION security_set_group_name(int4,varchar) RETURNS boolean
       return true;
 
    END;
-' LANGUAGE 'plpgsql'
+' LANGUAGE 'plpgsql';

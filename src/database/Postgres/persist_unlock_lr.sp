@@ -49,4 +49,4 @@ CREATE OR REPLACE FUNCTION persist_unlock_lr(int4,int4) RETURNS boolean AS '
 
    END;
 '
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql';

@@ -28,4 +28,4 @@ CREATE OR REPLACE FUNCTION persist_create_corpus(int4) RETURNS int4 AS '
 
    END;
 '
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql';

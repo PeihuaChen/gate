@@ -65,4 +65,4 @@ CREATE OR REPLACE FUNCTION persist_delete_document(int4) RETURNS boolean AS '
 
    END;
 '
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql';

@@ -30,4 +30,4 @@ CREATE OR REPLACE FUNCTION security_add_user_to_group(int4,int4) RETURNS boolean
        /* dummy */
        return true;
    END;
-' LANGUAGE 'plpgsql'
+' LANGUAGE 'plpgsql';

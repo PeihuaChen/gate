@@ -44,4 +44,4 @@ CREATE OR REPLACE FUNCTION persist_update_lr(int4,varchar,int4) RETURNS boolean 
       return true;
 
    END;'
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql';

@@ -73,4 +73,4 @@ CREATE OR REPLACE FUNCTION persist_create_feature(int4,int2,varchar,int4,varchar
 
    END;
 '
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql';

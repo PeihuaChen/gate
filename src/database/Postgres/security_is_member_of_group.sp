@@ -35,4 +35,4 @@ CREATE OR REPLACE FUNCTION security_is_member_of_group(int4,int4) RETURNS boolea
     return (cnt > 0);
 
    END;
-' LANGUAGE 'plpgsql'
+' LANGUAGE 'plpgsql';

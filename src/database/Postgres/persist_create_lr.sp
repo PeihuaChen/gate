@@ -74,4 +74,4 @@ CREATE OR REPLACE FUNCTION persist_create_lr(int4,int4,varchar,varchar,int2,int4
      return l_lr_id;
 
    END;
-' LANGUAGE 'plpgsql'
+' LANGUAGE 'plpgsql';

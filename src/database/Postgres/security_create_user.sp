@@ -43,4 +43,4 @@ CREATE OR REPLACE FUNCTION security_create_user(varchar,varchar) RETURNS int4 AS
 
    END;
 '
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql';

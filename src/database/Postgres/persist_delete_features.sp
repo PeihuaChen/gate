@@ -31,4 +31,4 @@ CREATE OR REPLACE FUNCTION persist_delete_features(int4,int2) RETURNS boolean AS
 
    END;
 '
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql';

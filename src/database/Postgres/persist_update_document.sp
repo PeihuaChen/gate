@@ -48,4 +48,4 @@ CREATE OR REPLACE FUNCTION persist_update_document(int4,varchar,int4,int4,boolea
 
    END;
 '
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql';
