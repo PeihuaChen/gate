@@ -45,8 +45,9 @@ public class UserGroupEditor extends JComponent {
 
   /** JDBC URL */
   private static final String JDBC_URL =
+            "jdbc:oracle:thin:GATEUSER/gate@192.168.128.7:1521:GATE04";
 //            "jdbc:oracle:thin:GATEUSER/gate@192.168.128.207:1521:GATE03";
-            "jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB";
+//            "jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB";
 
   public UserGroupEditor(AccessController ac, Session theSession) {
     try {
@@ -348,7 +349,8 @@ public class UserGroupEditor extends JComponent {
 
       for (int j = 0; j< myGroups.size(); j++) {
         try {
-          Group myGroup = controller.findGroup((Long) myGroups.get(j));
+          Group myGroup = //controller.findGroup((Long) myGroups.get(j));
+            (Group)myGroups.get(j);
           secondListData.addElement(myGroup.getName());
         } catch (Exception ex) {
           throw new gate.util.GateRuntimeException(
@@ -384,7 +386,8 @@ public class UserGroupEditor extends JComponent {
 
       for (int j = 0; j< myUsers.size(); j++) {
         try {
-          User myUser = controller.findUser((Long) myUsers.get(j));
+          User myUser = //controller.findUser((Long) myUsers.get(j));
+            (User)myUsers.get(j);
           secondListData.addElement(myUser.getName());
         } catch (Exception ex) {
           throw new gate.util.GateRuntimeException(
