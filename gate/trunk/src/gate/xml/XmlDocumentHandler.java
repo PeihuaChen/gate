@@ -145,6 +145,7 @@ public class XmlDocumentHandler extends HandlerBase
   public void characters( char[] text, int start, int length) throws SAXException{
     // some internal objects
     String content = new String(text, start, length);
+
    /*
     // triming section
     if (content.charAt(content.length() - 1) == '\n')

@@ -81,6 +81,7 @@ public class TestSgml extends TestCase
     if (docFormat != null){
       // set's the map
       docFormat.setMarkupElementsMap(markupElementsMap);
+      /*
       // register a progress listener with it
       docFormat.addStatusListener(new StatusListener(){
           public void statusChanged(String text){
@@ -89,6 +90,7 @@ public class TestSgml extends TestCase
           public void processFinished(){
           }
       });
+      */
       // timing the operation
       Date startTime = new Date();
         docFormat.unpackMarkup (doc,"DocumentContent");
@@ -107,23 +109,12 @@ public class TestSgml extends TestCase
     // graphic visualisation
 
     if (docFormat != null){
-     /*
-      JFrame jFrame = new JFrame();
-      JScrollPane tableViewScroll = new JScrollPane();
-            //create the table
-      SortedTable tableView = new SortedTable();
-      tableView.setTableModel(new AnnotationSetTableModel(doc.getAnnotations(),doc));
-      tableViewScroll.getViewport().add(tableView, null);
-      jFrame.getContentPane().add(tableViewScroll);
-      jFrame.setSize(800,600);
-      jFrame.setVisible(true);
-     */
-     /*
+     //*
         gate.jape.gui.JapeGUI japeGUI = new gate.jape.gui.JapeGUI();
         gate.Corpus corpus = gate.Transients.newCorpus("SGML Test");
         corpus.add(doc);
         japeGUI.setCorpus(corpus);
-      */
+     // */
     }
   }// testSgml
 

@@ -107,7 +107,7 @@ public class TestXml extends TestCase
     if (docFormat != null){
       // set's the map
       docFormat.setMarkupElementsMap(markupElementsMap);
-
+       /*
       // register a progress listener with it
       docFormat.addStatusListener(new StatusListener(){
           public void statusChanged(String text){
@@ -116,7 +116,7 @@ public class TestXml extends TestCase
           public void processFinished(){
           }
       });
-      
+      */
       // timing the operation
       Date startTime = new Date();
         docFormat.unpackMarkup (doc,"DocumentContent");
@@ -135,26 +135,15 @@ public class TestXml extends TestCase
 
     // graphic visualisation
 
-    /*
+    //*
     System.out.println("Timer started...");
     if (docFormat != null){
-        // timing the operation
-
-        startTime = new Date();
-
         gate.jape.gui.JapeGUI japeGUI = new gate.jape.gui.JapeGUI();
         gate.Corpus corpus = gate.Transients.newCorpus("XML Test");
         corpus.add(doc);
         japeGUI.setCorpus(corpus);
-
-        endTime = new Date();
-        long time2 = endTime.getTime () - startTime.getTime ();
-        System.out.println("Graphic initialization took : " + time2 / 1000 +
-                            "." + time1 % 1000 + " seconds.");
-        System.out.println("Total time : " + (time1 + time2) / 1000 + "." +
-                            (time1 + time2) % 1000 + " seconds.");
     }
-    */
+    //*/
 
   } // testSomething()
 
