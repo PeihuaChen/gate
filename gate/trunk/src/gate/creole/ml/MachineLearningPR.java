@@ -430,6 +430,12 @@ public class MachineLearningPR extends AbstractLanguageAnalyser
   public Boolean getTraining() {
     return training;
   }
+  public MLEngine getEngine() {
+    return engine;
+  }
+  public void setEngine(MLEngine engine) {
+    this.engine = engine;
+  }
 
   private java.net.URL configFileURL;
   protected DatasetDefintion datasetDefinition;

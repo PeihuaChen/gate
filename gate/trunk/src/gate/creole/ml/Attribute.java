@@ -65,6 +65,14 @@ public class Attribute implements Serializable{
     }
   }
 
+  public Attribute(){
+    name = null;
+    type =null;
+    feature = null;
+    isClass = false;
+    position = 0;
+    values = new ArrayList();
+  }
 
   public String toString(){
     StringBuffer res = new StringBuffer();
@@ -109,8 +117,21 @@ public class Attribute implements Serializable{
   public java.util.List getValues() {
     return values;
   }
+
   public int getPosition() {
     return position;
+  }
+
+  public void setClass(boolean isClass) {
+    this.isClass = isClass;
+  }
+
+  public void setValues(java.util.List values) {
+    this.values = values;
+  }
+
+  public void setPosition(int position) {
+    this.position = position;
   }
 
   boolean isClass = false;

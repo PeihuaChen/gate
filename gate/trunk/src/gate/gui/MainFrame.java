@@ -511,11 +511,11 @@ public class MainFrame extends JFrame
     menuBar = new JMenuBar();
 
 
-    JMenu fileMenu = new JMenu("File");
+    JMenu fileMenu = new XJMenu("File");
 
-    newLrMenu = new JMenu("New language resource");
+    newLrMenu = new XJMenu("New language resource");
     fileMenu.add(newLrMenu);
-    newPrMenu = new JMenu("New processing resource");
+    newPrMenu = new XJMenu("New processing resource");
     fileMenu.add(newPrMenu);
 
     newAppMenu = new JMenu("New application");
@@ -583,7 +583,7 @@ public class MainFrame extends JFrame
     });
     JMenuItem item;
     if(!installedLocales.isEmpty()){
-      imMenu = new JMenu("Input methods");
+      imMenu = new XJMenu("Input methods");
       ButtonGroup bg = new ButtonGroup();
       item = new LocaleSelectorMenuItem();
       imMenu.add(item);
@@ -601,7 +601,7 @@ public class MainFrame extends JFrame
 
     menuBar.add(optionsMenu);
 
-    JMenu toolsMenu = new JMenu("Tools");
+    JMenu toolsMenu = new XJMenu("Tools");
     toolsMenu.add(newAnnotDiffAction);
     toolsMenu.add(newCorpusAnnotDiffAction);
     toolsMenu.add(newBootStrapAction);
@@ -643,27 +643,27 @@ public class MainFrame extends JFrame
     this.setJMenuBar(menuBar);
 
     //popups
-    newAppPopupMenu = new JMenu("New");
-    appsPopup = new JPopupMenu();
+    newAppPopupMenu = new XJMenu("New");
+    appsPopup = new XJPopupMenu();
     appsPopup.add(newAppPopupMenu);
     appsPopup.addSeparator();
     appsPopup.add(new XJMenuItem(new LoadResourceFromFileAction(), this));
     guiRoots.add(newAppPopupMenu);
     guiRoots.add(appsPopup);
 
-    newLrsPopupMenu = new JMenu("New");
-    lrsPopup = new JPopupMenu();
+    newLrsPopupMenu = new XJMenu("New");
+    lrsPopup = new XJPopupMenu();
     lrsPopup.add(newLrsPopupMenu);
     guiRoots.add(lrsPopup);
     guiRoots.add(newLrsPopupMenu);
 
-    newPrsPopupMenu = new JMenu("New");
-    prsPopup = new JPopupMenu();
+    newPrsPopupMenu = new XJMenu("New");
+    prsPopup = new XJPopupMenu();
     prsPopup.add(newPrsPopupMenu);
     guiRoots.add(newPrsPopupMenu);
     guiRoots.add(prsPopup);
 
-    dssPopup = new JPopupMenu();
+    dssPopup = new XJPopupMenu();
     dssPopup.add(newDSAction);
     dssPopup.add(openDSAction);
     guiRoots.add(dssPopup);
@@ -702,7 +702,7 @@ public class MainFrame extends JFrame
         if (SwingUtilities.isRightMouseButton(e)) {
           if(resourcesTree.getSelectionCount() > 1){
             //multiple selection in tree-> show a popup for delete all
-            popup = new JPopupMenu();
+            popup = new XJPopupMenu();
             popup.add(new XJMenuItem(new CloseSelectedResourcesAction(),
                       MainFrame.this));
             popup.show(resourcesTree, e.getX(), e.getY());
