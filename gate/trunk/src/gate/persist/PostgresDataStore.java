@@ -1227,7 +1227,7 @@ public class PostgresDataStore extends JDBCDataStore {
     PreparedStatement pstmt = null;
 
     try {
-      pstmt = this.jdbcConn.prepareStatement("select persist_remove_document_from_corpus(?,?)");
+      pstmt = this.jdbcConn.prepareStatement("select persist_remove_doc_from_corpus(?,?)");
 
       Iterator it = docLRIDs.iterator();
       while (it.hasNext()) {
