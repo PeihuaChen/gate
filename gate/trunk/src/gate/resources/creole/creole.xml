@@ -114,6 +114,7 @@
       <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/PersonSchema.xml" /></AUTOINSTANCE>
       <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/TokenSchema.xml" /></AUTOINSTANCE>
       <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/SyntaxTreeNodeSchema.xml" /></AUTOINSTANCE>
+      <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/CorefSchema.xml" /></AUTOINSTANCE>
     </RESOURCE>
   </CREOLE>
 
