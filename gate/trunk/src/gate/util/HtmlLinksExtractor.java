@@ -98,9 +98,9 @@ public class HtmlLinksExtractor extends ParserCallback {
     if (a == null) return;
     // Take all the attributes an put them into the feature map
     if (0 != a.getAttributeCount()){
-      Enumeration enum = a.getAttributeNames();
-      while (enum.hasMoreElements()){
-        Object attribute = enum.nextElement();
+      Enumeration enumeration = a.getAttributeNames();
+      while (enumeration.hasMoreElements()){
+        Object attribute = enumeration.nextElement();
         Out.pr(" "+ attribute.toString() + "=\"" +
                                   a.getAttribute(attribute).toString()+"\"");
       }// End while

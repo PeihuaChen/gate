@@ -140,9 +140,9 @@ public class HtmlDocumentHandler extends ParserCallback {
 
     // Take all the attributes an put them into the feature map
     if (0 != a.getAttributeCount()){
-      Enumeration enum = a.getAttributeNames();
-      while (enum.hasMoreElements()){
-        Object attribute = enum.nextElement();
+      Enumeration enumeration = a.getAttributeNames();
+      while (enumeration.hasMoreElements()){
+        Object attribute = enumeration.nextElement();
         fm.put(attribute.toString(),(a.getAttribute(attribute)).toString());
       }// while
     }// if
@@ -270,9 +270,9 @@ public class HtmlDocumentHandler extends ParserCallback {
     if (0 != a.getAttributeCount ()){
 
        // Out.println("HAS  attributes = " + a.getAttributeCount ());
-        Enumeration enum = a.getAttributeNames ();
-        while (enum.hasMoreElements ()){
-          Object attribute = enum.nextElement ();
+        Enumeration enumeration = a.getAttributeNames ();
+        while (enumeration.hasMoreElements ()){
+          Object attribute = enumeration.nextElement ();
           fm.put ( attribute.toString(),(a.getAttribute(attribute)).toString());
 
         }//while
