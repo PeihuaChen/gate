@@ -223,6 +223,7 @@ public abstract class Factory
   {
     // the number of parameters that we manage to set on the bean
     int numParametersSet = 0;
+    StringBuffer unsetParameters = new StringBuffer();
     if(DEBUG) {
       Out.prln("setResourceParameters, params = ");
       Iterator iter = parameterValues.entrySet().iterator();
@@ -240,7 +241,10 @@ public abstract class Factory
         // get the property's set method, or continue
         PropertyDescriptor prop = properties[i];
         Method setMethod = prop.getWriteMethod();
-        if(setMethod == null) continue;
+        if(setMethod == null) {
+          unsetParameters.append(prop.getDisplayName() + "; ");
+          continue;
+        }
 
         // get the parameter value for this property, or continue
         Object paramValue = parameterValues.get(prop.getName());
@@ -293,7 +297,9 @@ public abstract class Factory
     // did we set all the parameters?
     if(numParametersSet != parameterValues.size())
       throw new GateException(
-        "couldn't set all the parameters of resource " + resource
+        "couldn't set all the parameters of resource " +
+        resource.getClass().getName() +
+        ": unset parameters were: " + unsetParameters.toString()
       );
 
     return removeListenersData;
