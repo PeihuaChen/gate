@@ -19,12 +19,15 @@ package gate.gui;
 import javax.swing.*;
 import javax.swing.event.*;
 import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+
+import junit.framework.*;
+
 import gate.security.*;
 import gate.*;
-import java.awt.event.*;
 import gate.util.Out;
 import gate.util.Files;
-import java.io.*;
 
 
 public class UserGroupEditor extends JComponent {
@@ -74,8 +77,10 @@ public class UserGroupEditor extends JComponent {
 
     JFrame frame = new JFrame();
 
-    AccessController ac = new AccessControllerImpl();
-    ac.open(urlString);
+//    AccessController ac = new AccessControllerImpl(urlString);
+    AccessController ac = Factory.createAccessController(urlString);
+    Assert.assertNotNull(ac);
+    ac.open();
 
     Session mySession = null;
 

@@ -119,9 +119,10 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
 
       //2. create security factory
 //      this.ac = new AccessControllerImpl();
-      //3. open and init the security factory with the same DB repository
-//      ac.open(dbURL);
       this.ac = Factory.createAccessController(dbURL);
+
+      //3. open and init the security factory with the same DB repository
+      ac.open();
 
       //4. get DB ID
       this.dbID = this.readDatabaseID();

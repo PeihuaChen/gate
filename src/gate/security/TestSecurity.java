@@ -47,7 +47,7 @@ public class TestSecurity extends TestCase
 //           "jdbc:oracle:thin:GATEUSER/gate@onto-text:1521:GATE05";
 "jdbc:oracle:thin:GATEUSER/gate2@grindleford:1521:gatedb2";
 
-  private boolean exceptionThrown = true;
+  private boolean exceptionThrown = false;
 
   /** Construction */
   public TestSecurity(String name) throws GateException { super(name); }
@@ -64,8 +64,9 @@ public class TestSecurity extends TestCase
 
 
   public void testSecurityTables() throws Exception {
-    AccessController ac = new AccessControllerImpl();
-    ac.open(JDBC_URL);
+//    AccessController ac = new AccessControllerImpl(JDBC_URL);
+    AccessController ac = Factory.createAccessController(JDBC_URL);
+    ac.open();
 
     User myUser = ac.findUser("kalina");
     Assert.assertNotNull(myUser);
@@ -97,8 +98,8 @@ public class TestSecurity extends TestCase
   public void testUserGroupManipulation() throws Exception {
 
     //1. open security factory
-    AccessController ac = new AccessControllerImpl();
-    ac.open(JDBC_URL);
+    AccessController ac = Factory.createAccessController(JDBC_URL);
+    ac.open();
 
     //1.1 list groups and users
     List groups = ac.listGroups();

@@ -1827,9 +1827,10 @@ public class MainFrame extends JFrame
               AccessController ac = null;
               try {
                 //1. login the user
-                ac = new AccessControllerImpl();
+//                ac = new AccessControllerImpl(storageURL);
+                ac = Factory.createAccessController(storageURL);
                 Assert.assertNotNull(ac);
-                ac.open(storageURL);
+                ac.open();
 
                 Session mySession = null;
                 User usr = null;
