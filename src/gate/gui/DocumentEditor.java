@@ -1545,222 +1545,7 @@ public class DocumentEditor extends AbstractVisualResource
     }
   }//class AnnotationsTableModel extends AbstractTableModel
 
-/*
-  protected class CorefListModel extends AbstractListModel{
-    CorefListModel(){
-      corefComboModel.addListDataListener(new ListDataListener() {
-        public void intervalAdded(ListDataEvent e) {
-          fireDataChanged();
-        }
 
-        public void intervalRemoved(ListDataEvent e) {
-          fireDataChanged();
-        }
-
-        public void contentsChanged(ListDataEvent e) {
-          fireDataChanged();
-        }
-      });
-      coloursList = new ArrayList();
-      visibleList = new ArrayList();
-      highlights = new ArrayList();
-      lastReturnedSize = 0;
-    }
-
-    public int getSize(){
-      if(document == null || document.getFeatures() == null) return 0;
-      Map matchesMap = null;
-      try{
-        matchesMap = (Map)document.getFeatures().get(DOCUMENT_COREF_FEATURE_NAME);
-      }catch(Exception e){
-        e.printStackTrace();
-      }
-      if(matchesMap == null) return 0;
-      java.util.List matchesList = (java.util.List)
-                                   matchesMap.get(corefCombo.getSelectedItem());
-      int size = (matchesList == null) ? 0 : matchesList.size();
-      if(lastReturnedSize != size){
-        lastReturnedSize = size;
-        fireDataChanged();
-      }
-      return lastReturnedSize;
-    }
-
-    public Object getElementAt(int index){
-      if(document == null || document.getFeatures() == null) return null;
-      Map matchesMap = null;
-      try{
-        matchesMap = (Map)document.getFeatures().get(DOCUMENT_COREF_FEATURE_NAME);
-      }catch(Exception e){
-        e.printStackTrace();
-      }
-      if(matchesMap == null) return null;
-      java.util.List matchesList = (java.util.List)
-                                   matchesMap.get(corefCombo.getSelectedItem());
-      if(matchesList == null || matchesList.size() <= index) return null;
-      java.util.List oneMatch = (java.util.List)matchesList.get(index);
-      return oneMatch;
-    }
-
-    void fireDataChanged(){
-      fireContentsChanged(this, 0, getSize());
-    }
-
-    Color getColour(int row){
-      if(row >= coloursList.size()){
-        for(int i = coloursList.size(); i <= row; i++){
-          coloursList.add(i, colGenerator.getNextColor());
-        }
-      }
-      return (Color)coloursList.get(row);
-    }
-
-    void setColour(int row, Color color){
-      if(row >= coloursList.size()){
-        for(int i = coloursList.size(); i <= row; i++){
-          coloursList.add(i, colGenerator.getNextColor());
-        }
-      }
-      coloursList.set(row, color);
-    }
-
-    boolean getVisible(int row){
-      if(row >= visibleList.size()){
-        for(int i = visibleList.size(); i <= row; i++){
-          visibleList.add(i, new Boolean(false));
-        }
-      }
-      return ((Boolean)visibleList.get(row)).booleanValue();
-    }
-
-    void setVisible(int row, boolean visible){
-      if(row >= visibleList.size()){
-        for(int i = visibleList.size(); i <= row; i++){
-          visibleList.add(i, new Boolean(false));
-        }
-      }
-      visibleList.set(row, new Boolean(visible));
-      java.util.List highlightsForRow = getHighlights(row);
-      if(visible){
-        //add new highlights and store them
-        java.util.List ids = (java.util.List)getElementAt(row);
-        String setName = (String)corefCombo.getSelectedItem();
-        AnnotationSet set = setName.equals("Default") ?
-                            document.getAnnotations() :
-                            document.getAnnotations(setName);
-        Iterator idIter = ids.iterator();
-        while(idIter.hasNext()){
-          Integer id = (Integer)idIter.next();
-          Annotation ann = set.get(id);
-          try{
-            highlightsForRow.add(highlighter.addHighlight(
-              ann.getStartNode().getOffset().intValue(),
-              ann.getEndNode().getOffset().intValue(),
-              new DefaultHighlighter.DefaultHighlightPainter(getColour(row))));
-          }catch(BadLocationException ble){
-            ble.printStackTrace();
-          }
-        }
-      }else{
-        //remove the highlights
-        if(!highlightsForRow.isEmpty()){
-          Iterator hlIter = highlightsForRow.iterator();
-          while(hlIter.hasNext()){
-            Object tag = hlIter.next();
-            highlighter.removeHighlight(tag);
-            hlIter.remove();
-          }
-        }
-      }
-    }//void setVisible(int row, boolean visible){
-
-    java.util.List getHighlights(int row){
-      if(row >= highlights.size()){
-        for(int i = highlights.size(); i <= row; i++){
-          highlights.add(i, new ArrayList());
-        }
-      }
-      return ((java.util.List)highlights.get(row));
-    }
-
-    void setHighlights(int row, java.util.List highlightsForRow ){
-      if(row >= highlights.size()){
-        for(int i = highlights.size(); i <= row; i++){
-          highlights.add(i, new ArrayList());
-        }
-      }
-      highlights.set(row, highlightsForRow);
-    }
-
-//    /**
-//     * Holds the <b>visible</b> attribute for each row in the list
-//     */
-//    ArrayList visibleList;
-//
-//    /**
-//     * Holds the <b>colour</b> attribute for each row in the list
-//     */
-//    ArrayList coloursList;
-//
-//    /**
-//     * A list of lists; holds the currently showing highlights for each row
-//     */
-//    ArrayList highlights;
-//
-//    int lastReturnedSize;
-//  }
-/*
-  class CorefListRenderer extends JCheckBox implements ListCellRenderer{
-    public CorefListRenderer(){
-      setOpaque(true);
-    }
-
-    public Component getListCellRendererComponent(JList list,
-                                                  Object value,
-                                                  int index,
-                                                  boolean isSelected,
-                                                  boolean cellHasFocus){
-//      if (isSelected) {
-//        setForeground(list.getSelectionForeground());
-//        setBackground(list.getSelectionBackground());
-//      }else{
-        setForeground(list.getForeground());
-        setBackground(list.getBackground());
-//      }
-      setBackground(((CorefListModel)list.getModel()).getColour(index));
-      setFont(list.getFont());
-      if (cellHasFocus) {
-        setBorder( UIManager.getBorder("Table.focusCellHighlightBorder") );
-      }else{
-        setBorder(noFocusBorder);
-      }
-      setText(getNameForCorefList((java.util.List) value));
-      setSelected(((CorefListModel)list.getModel()).getVisible(index));
-      return this;
-    }
-
-    String getNameForCorefList(java.util.List list){
-      if(list == null || list.isEmpty()) return null;
-      Integer id = (Integer)list.get(0);
-      String setName = (String)corefCombo.getSelectedItem();
-      AnnotationSet set = setName.equals("Default") ?
-                          document.getAnnotations() :
-                          document.getAnnotations(setName);
-      Annotation ann = set.get(id);
-
-      String name = null;
-      try{
-        name = document.getContent().
-                        getContent(ann.getStartNode().getOffset(),
-                                   ann.getEndNode().getOffset()).toString();
-      }catch(InvalidOffsetException ioe){
-      }
-      return name;
-    }
-    Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
-  }
-
-*/
   protected class CorefData{
     CorefData(java.util.List annotationIDs, boolean visible, String setName){
       this.visible = visible;
@@ -1802,18 +1587,18 @@ public class DocumentEditor extends AbstractVisualResource
       if(this.visible == isVisible) return;
       this.visible = isVisible;
       if(visible){
-if(!highlights.isEmpty()){
-  Out.prln("Redundant highlights detected!");
-}
         //add new highlights and store them
         AnnotationSet set = setName.equals("Default") ?
                             document.getAnnotations() :
                             document.getAnnotations(setName);
         Iterator idIter = annotationIDs.iterator();
+        ArrayList invalidIDs = new ArrayList();
         while(idIter.hasNext()){
           Integer id = (Integer)idIter.next();
           Annotation ann = set.get(id);
-          try{
+          if(ann == null){
+            invalidIDs.add(id);
+          }else try{
             highlights.add(highlighter.addHighlight(
               ann.getStartNode().getOffset().intValue(),
               ann.getEndNode().getOffset().intValue(),
@@ -1821,6 +1606,9 @@ if(!highlights.isEmpty()){
           }catch(BadLocationException ble){
             ble.printStackTrace();
           }
+        }
+        if(!invalidIDs.isEmpty()){
+          annotationIDs.removeAll(invalidIDs);
         }
       }else{
         //remove the highlights
