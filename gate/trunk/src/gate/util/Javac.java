@@ -87,21 +87,29 @@ public class Javac implements GateConstants{
     args.add("-d");
     args.add(classesDir.getAbsolutePath());
     //call the compiler for each class in turn so we can get the errors
-    boolean errors = false;
-    for(int i = 0; i < sourceFiles.size(); i++){
-      String aSourceFile = (String)sourceFiles.get(i);
-      args.add(aSourceFile);
-      //call the compiler
-      int res = Main.compile((String[])args.toArray(new String[args.size()]));
-      if(res != 0){
-        errors = true;
-        //javac writes the error to System.err; let's print the source as well
-        Err.prln("\nThe offending input was:\n");
-        String source = (String)sourceListings.get(i);
-        source = Strings.addLineNumbers(source);
-        Err.prln(source);
+    //make a copy of the arguments in case we need to call calss by class
+    List argsSave = new ArrayList(args);
+    args.addAll(sourceFiles);
+    int res = Main.compile((String[])args.toArray(new String[args.size()]));
+    boolean errors = res != 0;
+    if(errors){
+      //we got errors: call class by class
+      args = argsSave;
+      for(int i = 0; i < sourceFiles.size(); i++){
+        String aSourceFile = (String)sourceFiles.get(i);
+        args.add(aSourceFile);
+        //call the compiler
+        res = Main.compile((String[])args.toArray(new String[args.size()]));
+        if(res != 0){
+          //javac writes the error to System.err; let's print the source as well
+          Err.prln("\nThe offending input was:\n");
+          String source = (String)sourceListings.get(i);
+          source = Strings.addLineNumbers(source);
+          Err.prln(source);
+        }
+        args.remove(args.size() -1);
       }
-      args.remove(args.size() -1);
+
     }
 
 //    args.addAll(sourceFiles);
