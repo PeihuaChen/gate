@@ -143,7 +143,7 @@ public class Coreferencer extends AbstractLanguageAnalyser
       }
 
       FeatureMap features = new SimpleFeatureMapImpl();
-      features.put("type","PRONOUN");
+      features.put("ENTITY_MENTION_TYPE","PRONOUN");
       features.put("matches",matches);
       features.put("antecedent_offset",antecedent.getStartNode().getOffset());
 
