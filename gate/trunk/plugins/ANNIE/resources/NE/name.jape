@@ -149,7 +149,7 @@ features);
 
 
 Rule:	GazPersonFirst
-Priority: 20
+Priority: 70
 (
  {FirstPerson}
 )
