@@ -984,7 +984,7 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
     * @param ch the char to be tested
     * @return true if is a valid XML char and fals if is not.
     */
-  private boolean isXmlChar(char ch){
+  public static boolean isXmlChar(char ch){
     if (ch == 0x9 || ch == 0xA || ch ==0xD) return true;
     if ((0x20 <= ch) && (ch <= 0xD7FF)) return true;
     if ((0xE000 <= ch) && (ch <= 0xFFFD)) return true;
