@@ -278,6 +278,8 @@ implements AnnotationSet
   /** Select annotations by offset. This returns the set of annotations
     * whose start node is the least such that it is less than or equal
     * to offset. If a positional index doesn't exist it is created.
+    * If there are no nodes at or beyond the offset param then it will return
+    * null.
     */
   public AnnotationSet get(Long offset) {
     if(annotsByStartNode == null) indexByStartOffset();
