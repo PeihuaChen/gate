@@ -125,7 +125,7 @@ public class DefaultResourceHandle implements ResourceHandle {
     popup = new JPopupMenu();
     popup.add(new CloseAction());
     if(resource instanceof ProcessingResource &&
-       !Gate.isApplication((Resource)resource) ){
+       !Gate.getApplicationAttribute(resource.getFeatures())){
       popup.addSeparator();
       popup.add(new ReloadAction());
     }

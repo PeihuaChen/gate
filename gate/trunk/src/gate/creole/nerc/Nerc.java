@@ -60,7 +60,7 @@ public class Nerc extends SerialController {
       params.put("encoding", encoding);
       if(DEBUG) Out.prln("Parameters for the tokeniser: \n" + params);
       features = Factory.newFeatureMap();
-      features.put("gate.HIDDEN", "true");
+      Gate.setHiddenAttribute(features, true);
       tokeniser = (DefaultTokeniser)Factory.createResource(rData.getClassName(),
                                                            params, features,
                                                            listeners);
@@ -79,7 +79,7 @@ public class Nerc extends SerialController {
       params.put("encoding", encoding);
       if(DEBUG) Out.prln("Parameters for the gazetteer: \n" + params);
       features = Factory.newFeatureMap();
-      features.put("gate.HIDDEN", "true");
+      Gate.setHiddenAttribute(features, true);
 
       listeners.put("gate.event.ProgressListener",
                     new CustomProgressListener(11, 50));
@@ -102,7 +102,7 @@ public class Nerc extends SerialController {
       params.put("encoding", encoding);
       if(DEBUG) Out.prln("Parameters for the transducer: \n" + params);
       features = Factory.newFeatureMap();
-      features.put("gate.HIDDEN", "true");
+      Gate.setHiddenAttribute(features, true);
       listeners.put("gate.event.ProgressListener",
                     new CustomProgressListener(11, 50));
       transducer = (Transducer)Factory.createResource(rData.getClassName(),
