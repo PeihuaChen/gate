@@ -54,7 +54,10 @@ public class TestCorpus extends TestCase
     Corpus c2 = Factory.newCorpus("test corpus2");
     c2.getFeatures().put("author", "hamish");
     c2.getFeatures().put("author", "valy");
-    assert(c2.getFeatures().size() == 1);
+    assert(
+      "corpus feature set wrong, size = " + c2.getFeatures().size(),
+      c2.getFeatures().size() == 1
+    );
     assert(c2.getFeatures().get("author").equals("valy"));
 
   } // testCreation()

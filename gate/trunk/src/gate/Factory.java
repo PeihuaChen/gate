@@ -36,6 +36,33 @@ public abstract class Factory
   /** The CREOLE register */
   private static CreoleRegister reg = Gate.getCreoleRegister();
 
+  /** Create and instance of a resource using default parameter values.
+    * @see #createResource(String,FeatureMap)
+    */
+  public static Resource createResource(String resourceClassName)
+  throws ResourceInstantiationException
+  {
+    // get the resource metadata
+    ResourceData resData = (ResourceData) reg.get(resourceClassName);
+    if(resData == null)
+      throw new ResourceInstantiationException(
+        "Couldn't get resource data for " + resourceClassName
+      );
+
+    // get the parameter list and default values
+    ParameterList paramList = resData.getParameterList();
+    FeatureMap parameterValues = null;
+    try {
+      parameterValues = paramList.getInitimeDefaults();
+    } catch(ParameterException e) {
+      throw new ResourceInstantiationException(
+        "Couldn't get default parameters for " + resourceClassName + ": " + e
+      );
+    }
+
+    return createResource(resourceClassName, parameterValues);
+  } // createResource(resClassName)
+
   /** Create an instance of a resource, and return it.
     * Callers of this method are responsible for
     * querying the resource's parameter lists, putting together a set that
@@ -43,11 +70,12 @@ public abstract class Factory
     * containing these parameter settings.
     *
     * @param resourceClassName the name of the class implementing the resource.
-    * @param parameters the feature map containing parameters for the resource.
+    * @param parameterValues the feature map containing
+    *   parameterValues for the resource.
     * @return an instantiated resource.
     */
   public static Resource createResource(
-    String resourceClassName, FeatureMap parameters
+    String resourceClassName, FeatureMap parameterValues
   ) throws ResourceInstantiationException
    {
     // get the resource metadata
@@ -64,6 +92,21 @@ public abstract class Factory
     } catch(ClassNotFoundException e) {
       throw new ResourceInstantiationException(
         "Couldn't get resource class from the resource data:"+Strings.getNl()+e
+      );
+    }
+
+    // create an object using the resource's default constructor
+    Resource res = null;
+    try {
+      if(DEBUG) Out.prln("Creating resource " + resClass.getName());
+      res = (Resource) resClass.newInstance();
+    } catch(IllegalAccessException e) {
+      throw new ResourceInstantiationException(
+        "Couldn't create resource instance, access denied: " + e
+      );
+    } catch(InstantiationException e) {
+      throw new ResourceInstantiationException(
+        "Couldn't create resource instance due to newInstance() failure: " + e
       );
     }
 
@@ -93,26 +136,11 @@ public abstract class Factory
       Err.prln(resData + "END OF WARNING" + Strings.getNl());
     }
 
-    // create an object using the resource's default constructor
-    Resource res = null;
-    try {
-      if(DEBUG) Out.prln("Creating resource " + resClass.getName());
-      res = (Resource) resClass.newInstance();
-    } catch(IllegalAccessException e) {
-      throw new ResourceInstantiationException(
-        "Couldn't create resource instance, access denied: " + e
-      );
-    } catch(InstantiationException e) {
-      throw new ResourceInstantiationException(
-        "Couldn't create resource instance due to newInstance() failure: " + e
-      );
-    }
-
-    // set the parameters of the resource and add the listeners
+    // set the parameterValues of the resource and add the listeners
     List listenersToRemove;
     try {
       if(DEBUG) Out.prln("Setting the parameters for  " + res.toString());
-      listenersToRemove = setResourceParameters(res, parameters);
+      listenersToRemove = setResourceParameters(res, parameterValues);
     } catch(Exception e) {
       if(DEBUG) Out.prln("Failed to set the parameters for " + res.toString());
       throw new ResourceInstantiationException("Parameterisation failure" + e);
@@ -155,10 +183,10 @@ public abstract class Factory
     *
     * @see java.beans.Introspector
     * @param resource the resource to be parameterised.
-    * @param parameters the parameters and their values.
+    * @param parameterValues the parameters and their values.
     */
-  protected static List setResourceParameters(
-    Resource resource, FeatureMap parameters
+  public static List setResourceParameters(
+    Resource resource, FeatureMap parameterValues
   ) throws
     IntrospectionException, InvocationTargetException,
     IllegalAccessException, GateException
@@ -167,7 +195,7 @@ public abstract class Factory
     int numParametersSet = 0;
     if(DEBUG) {
       Out.prln("setResourceParameters, params = ");
-      Iterator iter = parameters.entrySet().iterator();
+      Iterator iter = parameterValues.entrySet().iterator();
       while(iter.hasNext()) Out.prln("  " + iter.next());
     }
 
@@ -185,7 +213,7 @@ public abstract class Factory
         if(setMethod == null) continue;
 
         // get the parameter value for this property, or continue
-        Object paramValue = parameters.get(prop.getName());
+        Object paramValue = parameterValues.get(prop.getName());
         if(paramValue == null) continue;
 
         // call the set method with the parameter value
@@ -215,7 +243,8 @@ public abstract class Factory
         event = events[i];
 
         // did we get such a listener?
-        Object listener = parameters.get(event.getListenerType().getName());
+        Object listener =
+          parameterValues.get(event.getListenerType().getName());
         if(listener != null){
           Method addListener = event.getAddListenerMethod();
 
@@ -232,7 +261,7 @@ public abstract class Factory
     }   // if events != null
 
     // did we set all the parameters?
-    if(numParametersSet != parameters.size())
+    if(numParametersSet != parameterValues.size())
       throw new GateException(
         "couldn't set all the parameters of resource " + resource
       );
@@ -244,36 +273,39 @@ public abstract class Factory
   public static Corpus newCorpus(String name)
   throws ResourceInstantiationException
   {
-    FeatureMap parameters = newFeatureMap();
-    parameters.put("name", name);
-    parameters.put("features", Factory.newFeatureMap());
-    return (Corpus) createResource("gate.Corpus", parameters);
+    FeatureMap parameterValues = newFeatureMap();
+    parameterValues.put("name", name);
+    parameterValues.put("features", Factory.newFeatureMap());
+    return (Corpus) createResource("gate.corpora.CorpusImpl", parameterValues);
   } // newCorpus
 
   /** Create a new transient Document from a URL. */
   public static Document newDocument(URL sourceUrl)
   throws ResourceInstantiationException
   {
-    FeatureMap parameters = newFeatureMap();
-    parameters.put("sourceUrlName", sourceUrl.toExternalForm());
-    return (Document) createResource("gate.Document", parameters);
+    FeatureMap parameterValues = newFeatureMap();
+    parameterValues.put("sourceUrlName", sourceUrl.toExternalForm());
+    return
+      (Document) createResource("gate.corpora.DocumentImpl", parameterValues);
   } // newDocument(URL)
 
   /** Create a new transient Document from a URL and an encoding. */
   public static Document newDocument(URL sourceUrl, String encoding)
   throws ResourceInstantiationException
   {
-    FeatureMap parameters = newFeatureMap();
-    parameters.put("sourceUrlName", sourceUrl.toExternalForm());
-    parameters.put("encoding", encoding);
-    return (Document) createResource("gate.Document", parameters);
+    FeatureMap parameterValues = newFeatureMap();
+    parameterValues.put("sourceUrlName", sourceUrl.toExternalForm());
+    parameterValues.put("encoding", encoding);
+    return
+      (Document) createResource("gate.corpora.DocumentImpl", parameterValues);
   } // newDocument(URL)
 
   /** Create a new transient textual Document from a string. */
   public static Document newDocument(String content)
   throws ResourceInstantiationException
   {
-    Document doc = (Document) createResource("gate.Document", newFeatureMap());
+    Document doc =
+      (Document) createResource("gate.corpora.DocumentImpl", newFeatureMap());
 
     // laziness: should fit this into createResource by adding a new
     // document parameter, but haven't time right now...

@@ -49,21 +49,9 @@ public class ResourceData extends AbstractFeatureBearer {
       "; jarFileName=" + jarFileName + "; jarFileUrl=" + jarFileUrl +
       "; xmlFileName=" + xmlFileName + "; xmlFileUrl=" + xmlFileUrl +
       "; autoLoading=" + autoLoading + "; interfaceName=" + interfaceName +
-      "; parameterListsSet=" + parameterListsSet +
+      "; parameterList=" + parameterList +
       "; features=" + features
     );
-
-    Iterator iter = parameterListsSet.iterator();
-    if(iter.hasNext()) s.append(Strings.getNl() + "  params=");
-    while(iter.hasNext()) {
-      s.append(Strings.getNl() + "    ");
-      List paramList = (List) iter.next();
-      Iterator iter2 = paramList.iterator();
-
-      while(iter2.hasNext())
-        s.append( (Parameter) iter2.next() + Strings.getNl() + "    " );
-    }
-
     return s.toString();
   } // toString
 
@@ -198,15 +186,15 @@ public class ResourceData extends AbstractFeatureBearer {
   public void setComment(String comment) { this.comment = comment; }
 
   /** The set of parameter lists */
-  protected Set parameterListsSet = new HashSet();
+  protected ParameterList parameterList = new ParameterList();
 
-  /** Add a parameter list */
-  public void addParameterList(List parameterList) {
-    parameterListsSet.add(parameterList);
+  /** Set the parameter list */
+  public void setParameterList(ParameterList parameterList) {
+    this.parameterList = parameterList;
   } // addParameterList
 
-  /** Get the set of parameter lists */
-  public Set getParameterListsSet() { return parameterListsSet; }
+  /** Get the parameter list */
+  public ParameterList getParameterList() { return parameterList; }
 
   /** Autoloading flag */
   protected boolean autoLoading;
@@ -218,5 +206,23 @@ public class ResourceData extends AbstractFeatureBearer {
 
   /** Is the resource autoloading? */
   public boolean isAutoLoading() { return autoLoading; }
+
+  /** Is this a valid resource data configuration? If not, leave an
+    * error message that can be returned by <TT>getValidityMessage()</TT>.
+    */
+  public boolean isValid() {
+    boolean valid = true;
+//******************************
+// here should check that the resource has all mandatory elements,
+// e.g. class name, and non-presence of runtime params on LRs and VRs etc.
+//******************************
+    return valid;
+  } // isValid()
+
+  /** Status message set by isValid() */
+  protected String validityMessage;
+
+  /** Get validity statues message. */
+  public String getValidityMessage() { return validityMessage; }
 
 } // ResourceData
