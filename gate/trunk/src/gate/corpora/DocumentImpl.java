@@ -150,7 +150,7 @@ public class DocumentImpl implements Document
   /** Construction from String */
   public DocumentImpl(String str) throws IOException {
     content = new DocumentContentImpl(str);
-      sourceURL = new URL("http://no_host/String");
+    sourceURL = new URL("http://no_host/From_String");
   } // DocumentImpl(string)
 
   /** Documents are identified by URLs */
