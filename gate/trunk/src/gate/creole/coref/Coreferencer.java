@@ -26,9 +26,9 @@ public class Coreferencer extends AbstractLanguageAnalyser
 
 //  private Document  doc;
   private PronominalCoref pronominalModule;
-//  private QuotedTextCoref qtModule;
 
   public Coreferencer() {
+    this.pronominalModule = new PronominalCoref();
   }
 
 
@@ -36,8 +36,9 @@ public class Coreferencer extends AbstractLanguageAnalyser
   public Resource init() throws ResourceInstantiationException {
     Resource result = super.init();
     //load all submodules
-    this.pronominalModule = (PronominalCoref)Factory.createResource("gate.creole.coref.PronominalCoref");
+//    this.pronominalModule = (PronominalCoref)Factory.createResource("gate.creole.coref.PronominalCoref");
 //    this.qtModule = (QuotedTextCoref)Factory.createResource("gate.creole.coref.QuotedTextCoref");
+    this.pronominalModule.init();
 
     return result;
   } // init()
@@ -67,6 +68,14 @@ public class Coreferencer extends AbstractLanguageAnalyser
   }
 
 
+  public void setAnnotationSetName(String annotationSetName) {
+    this.pronominalModule.setAnnotationSetName(annotationSetName);
+  }
+
+  public String getAnnotationSetName() {
+    return this.pronominalModule.getAnnotationSetName();
+  }
+
   /**
    * This method runs the coreferencer. It assumes that all the needed parameters
    * are set. If they are not, an exception will be fired.
@@ -74,7 +83,6 @@ public class Coreferencer extends AbstractLanguageAnalyser
   public void execute() throws ExecutionException{
 
     this.pronominalModule.execute();
-//    this.qtModule.execute();
   }
 
 }

@@ -52,6 +52,8 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
   private static AnnotationOffsetComparator ANNOTATION_OFFSET_COMPARATOR;
 
+  private String annotationSetName;
+
   private AnnotationSet defaultAnnotations;
   private Sentence[] textSentences;
   private Quote[] quotedText;
@@ -124,6 +126,14 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     super.setDocument(newDocument);
   }
 
+  public void setAnnotationSetName(String annotationSetName) {
+    this.annotationSetName = annotationSetName;
+  }
+
+  public String getAnnotationSetName() {
+    return annotationSetName;
+  }
+
   /**
    * This method runs the coreferencer. It assumes that all the needed parameters
    * are set. If they are not, an exception will be fired.
@@ -139,7 +149,10 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     preprocess();
 
     //2. remove corefs from previous run
-    AnnotationSet corefSet = this.document.getAnnotations("COREF");
+    String annSetName = this.annotationSetName == null ? "COREF"
+                                                       : this.annotationSetName;
+
+    AnnotationSet corefSet = this.document.getAnnotations(annSetName);
     if (false == corefSet.isEmpty()) {
       corefSet.clear();
     }
