@@ -8,7 +8,7 @@
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *
- *  Kalina Bontcheva, 20/09/2000
+ *  Kalina Bontcheva, 07/08/2001
  *
  *  $Id$
  */
@@ -19,9 +19,8 @@ import javax.swing.tree.*;
 
 import java.awt.Rectangle;
 
-import java.util.Iterator;
-import java.util.HashSet;
-import java.util.Vector;
+import java.util.*;
+
 
 import gate.*;
 import gate.util.*;
@@ -31,15 +30,17 @@ public class STreeNode extends DefaultMutableTreeNode {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
+  private static final String ADDEDSET = "TreeViewerTempAdded";
+  private static final String REMOVEDSET = "TreeViewerTempRemoved";
 
   static int nextID = 0;
 
   int level;            // level in the syntax tree
   int nodeID;           //ID of the node
 
-  int start, end;       //the start and end nodes for this annotation
+  long start, end;       //the start and end nodes for this annotation
   Annotation annot;     //the annotation that's created during import/export
-  											//not to be used otherwise. During import span is set to
+                        //not to be used otherwise. During import span is set to
                         //be the same as the annotation span. During export the
                         //annotation span is set to be the same as the span.
 
@@ -48,10 +49,10 @@ public class STreeNode extends DefaultMutableTreeNode {
     nodeID = nextID++;
     //span = annot.getSpans().getElementAt(0);
     //get the first span, there should be no others
-		this.annot = annot;
+    this.annot = annot;
   }// public STreeNode(Annotation annot)
 
-  public STreeNode(int start, int end) {
+  public STreeNode(long start, long end) {
     level = -1;
     nodeID = nextID++;
     this.start = start;
@@ -69,6 +70,10 @@ public class STreeNode extends DefaultMutableTreeNode {
     return level;
   }// public int getLevel()
 
+  public void setLevel(long level) {
+    this.level = (int) level;
+  }// public void setLevel(int level)
+
   public void setLevel(int level) {
     this.level = level;
   }// public void setLevel(int level)
@@ -77,19 +82,19 @@ public class STreeNode extends DefaultMutableTreeNode {
     return nodeID;
   }// public int getID()
 
-  public int getStart() {
+  public long getStart() {
     return start;
   }// public int getStart()
 
-  public void setStart(int start) {
+  public void setStart(long start) {
     this.start = start;
   }// public void setStart(int start)
 
-  public int getEnd() {
+  public long getEnd() {
     return end;
   }// public int getEnd()
 
-  public void setEnd(int end) {
+  public void setEnd(long end) {
     this.end = end;
   }// public void setEnd(int end)
 
@@ -97,13 +102,13 @@ public class STreeNode extends DefaultMutableTreeNode {
     * This also sets the span to match the annotation span!
     */
   public void setAnnotation(Annotation annot) {
-		this.annot = annot;
-    this.start = annot.getStartNode().getOffset().intValue();
-    this.end = annot.getEndNode().getOffset().intValue();
+    this.annot = annot;
+    this.start = annot.getStartNode().getOffset().longValue();
+    this.end = annot.getEndNode().getOffset().longValue();
   }// public void setAnnotation(Annotation annot)
 
   public Annotation getAnnotation() {
-  	return annot;
+    return annot;
   }// public Annotation getAnnotation()
 
   public void disconnectChildren() {
@@ -118,45 +123,49 @@ public class STreeNode extends DefaultMutableTreeNode {
     * Expects the text string relative to which all offsets were created!
     */
   public boolean createAnnotation(Document doc, String type,
-                                    String text, int utteranceOffset) {
-  	boolean created = false;
+                                    String text, long utteranceOffset) {
+    boolean created = false;
 
     if (annot != null )
-    	return false;
+      return false;
+
+    //no document, so cannot add annotations
+    if (doc == null)
+      return false;
 
     // check if it has children. If it hasn't then it shouldn't have an
     // annotation because all our leaf nodes are actually just words
     // from the text (e.g. "this", "that"). Their categories are always
     // encoded as non-terminal nodes.
     if ( ! this.getAllowsChildren())
-			return false;
+      return false;
 
     FeatureMap attribs = Factory.newFeatureMap();
     // the text spanned by the annotation is stored as the userObject of the
     // tree node
     // comes from the default Swing tree node
-    Vector consists = new Vector();
+    List consists = new ArrayList();
 
     attribs.put("text",
-                  text.substring(start - utteranceOffset,
-                                 end - utteranceOffset)
+                  text.substring( (int) (start - utteranceOffset),
+                                 (int) (end - utteranceOffset) )
     );
     attribs.put("cat", (String) this.getUserObject());
     attribs.put("consists", consists);
 
     // children comes from DefaultMutableTreeNode
     for (Iterator i = children.iterator(); i.hasNext(); ) {
-    	STreeNode child = (STreeNode) i.next();
+      STreeNode child = (STreeNode) i.next();
       if (child.getAnnotation() == null) {
-      	if (child.getAllowsChildren())
-	  	    if (createAnnotation(doc, type, text, utteranceOffset))
+        if (child.getAllowsChildren())
+          if (createAnnotation(doc, type, text, utteranceOffset))
             consists.add(child.getAnnotation().getId());
       } else
-			  consists.add(child.getAnnotation().getId());
+        consists.add(child.getAnnotation().getId());
     }
 
     //!!! Need to account for the name of the Annot Set
-    AnnotationSet theSet = doc.getAnnotations();
+    AnnotationSet theSet = doc.getAnnotations(ADDEDSET);
     try {
       Integer Id = theSet.add(new Long(start), new Long(end), type, attribs);
       this.annot = theSet.get(Id);
@@ -170,12 +179,47 @@ public class STreeNode extends DefaultMutableTreeNode {
     return created;
   }// public boolean createAnnotation
 
+
+  /**
+    * Transfers the annotations from added to the given annotation set
+    * Also, for each annotation in removed, removes it from the given annotation set
+    * Called by OkAction() in the treeViewer to finalise the changes.
+    */
+  public static boolean transferAnnotations(Document doc, AnnotationSet targetAS) {
+    if (doc == null || targetAS == null)
+      return false;
+
+    AnnotationSet addedSet = doc.getAnnotations(ADDEDSET);
+    targetAS.addAll(addedSet);
+
+    AnnotationSet removedSet = doc.getAnnotations(REMOVEDSET);
+    if (removedSet == null || removedSet.isEmpty())
+      return true;
+
+    targetAS.removeAll(removedSet);
+
+    addedSet.clear();
+    removedSet.clear();
+    doc.removeAnnotationSet(ADDEDSET);
+    doc.removeAnnotationSet(REMOVEDSET);
+    return true;
+  }
+
+  public static void undo(Document doc) {
+    AnnotationSet addedSet = doc.getAnnotations(ADDEDSET);
+    AnnotationSet removedSet = doc.getAnnotations(REMOVEDSET);
+    addedSet.clear();
+    removedSet.clear();
+    doc.removeAnnotationSet(ADDEDSET);
+    doc.removeAnnotationSet(REMOVEDSET);
+  }
+
   /** Store the annotation in the deleted list so it can retrieved later */
   public void removeAnnotation(Document doc) {
-  	if (this.annot == null)
-    	return;
+    if (this.annot == null || doc == null)
+      return;
 
-    doc.getAnnotations().remove(this.annot);
+    doc.getAnnotations(REMOVEDSET).add(this.annot);
 
     this.annot = null;
   }//  public void removeAnnotation(Document doc)
@@ -183,6 +227,14 @@ public class STreeNode extends DefaultMutableTreeNode {
 } // STreeNode
 
 // $Log$
+// Revision 1.8  2001/08/07 17:01:32  kalina
+// Changed the AVR implementing classes in line with the updated AVR
+// API (cancelAction() and setSpan new parameter).
+//
+// Also updated the TreeViewer, so now it can be used to edit and view
+// Sentence annotations and the SyntaxTreeNodes associated with them.
+// So if you have trees, it'll show them, if not, it'll help you build them.
+//
 // Revision 1.7  2001/04/09 10:36:36  oana
 // a few changes in the code style
 //

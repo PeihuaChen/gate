@@ -77,7 +77,7 @@ public class UnrestrictedAnnotationEditor extends AbstractVisualResource
     * @param endOffset the end offset of the span covered by the new
     * annotation(s). If is <b>null</b> the method will simply return.
     */
-  public void setSpan(Long startOffset, Long endOffset){
+  public void setSpan(Long startOffset, Long endOffset, String annotationType){
     // If one of them is null, then simply return.
     if (startOffset == null || endOffset == null) return;
 
@@ -129,6 +129,14 @@ public class UnrestrictedAnnotationEditor extends AbstractVisualResource
       }// End if
     }// End if
   }//okAction();
+
+
+  public void cancelAction() throws GateException {
+    //no need to do anything, because the editor has not modified anything
+    //on the document or the annotation sets
+    //Had to be added for the tree editor, which does
+    return;
+  }
 
   /**
     * Checks whether this viewer/editor can handle a specific annotation type.

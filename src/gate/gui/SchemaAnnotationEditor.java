@@ -37,7 +37,13 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
                                     implements AnnotationVisualResource{
 
   /** Default constructor */
-  public SchemaAnnotationEditor(){}
+  public SchemaAnnotationEditor(){
+    try {
+      jbInit();
+    }
+    catch(Exception e) {
+      e.printStackTrace();
+    }}
 
   // Methods required by AnnotationVisualResource
 
@@ -93,7 +99,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     * @param endOffset the end offset of the span covered by the new
     * annotation(s). If is <b>null</b> the method will simply return.
     */
-  public void setSpan(Long startOffset, Long endOffset){
+  public void setSpan(Long startOffset, Long endOffset, String annotType){
     // If one of them is null, then simply return.
     if (startOffset == null || endOffset == null) return;
     currentStartOffset = startOffset;
@@ -148,6 +154,13 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       }// End if
     }// End if
   }//okAction();
+
+  public void cancelAction() throws GateException {
+    //no need for any cleanup, because this editor has been implemented
+    //so that it does not modify the document and annotations, unless
+    //OK is pressed
+    return;
+  }
 
   /**
     * Checks whether this viewer/editor can handle a specific annotation type.
@@ -703,5 +716,16 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       if (tf != null ) return tf.getText();
       return new String("");
     }//getCellEditorValue
-  }//InnerFeaturesEditor inner class
+  }
+  private void jbInit() throws Exception {
+    this.addComponentListener(new java.awt.event.ComponentAdapter() {
+      public void componentShown(ComponentEvent e) {
+        this_componentShown(e);
+      }
+    });
+  }
+
+  void this_componentShown(ComponentEvent e) {
+    Out.println("Component shown");
+  }///InnerFeaturesEditor inner class
 }// End class SchemaAnnotationEditor
