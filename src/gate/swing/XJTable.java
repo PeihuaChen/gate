@@ -30,6 +30,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
+import gate.util.ObjectComparator;
 
 /**
  * A &quot;smarter&quot; JTable. Feaures include:
@@ -341,7 +342,7 @@ public class XJTable extends JTable{
       if(comparator == null){
         //use the default comparator
         if(defaultComparator == null) 
-          defaultComparator = new DefaultComparator();
+          defaultComparator = new ObjectComparator();
         comparator = defaultComparator;
       }
       for(int i = 0; i < sourceData.size() - 1; i++){
@@ -580,41 +581,8 @@ public class XJTable extends JTable{
     private static final int HIDDEN_WIDTH = 5;
   }
   
-  /**
-   * This is used as the default comparator for a column when a custom was
-   * not provided.
-   */
-  protected class DefaultComparator implements Comparator{
-    
-    public int compare(Object o1, Object o2){
-      // If both values are null, return 0.
-      if (o1 == null && o2 == null) {
-        return 0;
-      } else if (o1 == null) { // Define null less than everything.
-        return -1;
-      } else if (o2 == null) {
-        return 1;
-      }
-      int result;
-      if(o1 instanceof Comparable){
-        try {
-          result = ((Comparable)o1).compareTo(o2);
-        } catch(ClassCastException cce) {
-          String s1 = o1.toString();
-          String s2 = o2.toString();
-          result = s1.compareTo(s2);
-        }
-      } else {
-        String s1 = o1.toString();
-        String s2 = o2.toString();
-        result = s1.compareTo(s2);
-      }
-      
-      return result;
-    }
-  }
   protected SortingModel sortingModel;
-  protected DefaultComparator defaultComparator;
+  protected ObjectComparator defaultComparator;
   
   /**
    * The column currently being sorted.
