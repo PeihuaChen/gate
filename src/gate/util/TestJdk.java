@@ -146,7 +146,9 @@ if(true) return;
     GateClassLoader loader = Gate.getClassLoader();
 
     if (Gate.isGateHomeReachable())
-      loader.addURL(new URL("http://derwent.dcs.shef.ac.uk/tests/TestJdk.jar"));
+      loader.addURL(new URL(
+        "http://derwent.dcs.shef.ac.uk/gate.ac.uk/tests/TestJdk.jar")
+      );
     else if (Gate.isGateAcUkReachable())
       loader.addURL(new URL("http://gate.ac.uk/tests/TestJdk.jar"));
     else
