@@ -50,17 +50,25 @@ public class Wrapper implements MLEngine, ActionsPublisher {
     actionsList = new ArrayList();
     actionsList.add(new LoadModelAction());
     actionsList.add(new SaveModelAction());
-    actionsList.add(new SaveDatasetAsArffAction());
+    actionsList.add(null);
+    actionsList.add(new LoadDatasetFromArffAction());
+//    actionsList.add(new SaveDatasetAsArffAction());
   }
 
   public void setOptions(Element optionsElem) {
     this.optionsElement = optionsElem;
   }
 
+  
   public void addTrainingInstance(List attributeValues)
-              throws ExecutionException{
+  throws ExecutionException{
     Instance instance = buildInstance(attributeValues);
-    dataset.add(instance);
+    addTrainingInstance(instance);
+  }
+  
+  protected void addTrainingInstance(Instance instance)
+              throws ExecutionException{
+    
     if(classifier != null){
       if(classifier instanceof UpdateableClassifier){
         //the classifier can learn on the fly; we need to update it
@@ -72,8 +80,20 @@ public class Wrapper implements MLEngine, ActionsPublisher {
             e.toString());
         }
       }else{
-        //the classifier is not updatebale; we need to mark the dataset as changed
+//      the classifier is not updatebale; we need to mark the dataset as changed
+        dataset.add(instance);
         datasetChanged = true;
+      }
+    }
+    if(datasetFile != null){
+      //write the new instance to the file
+      try{
+        FileWriter fw = new FileWriter(datasetFile, true);
+        fw.write(instance.toString() + "\n");
+        fw.flush();
+        fw.close();
+      }catch(IOException ioe){
+        throw new ExecutionException(ioe);
       }
     }
   }
@@ -314,6 +334,26 @@ public class Wrapper implements MLEngine, ActionsPublisher {
 
     }
 
+    //find the file to be used for dataset
+    Element datafileElem = optionsElement.getChild("DATASET-FILE");
+    if(datafileElem != null){
+      datasetFile = new File(datafileElem.getTextTrim());
+      try{
+	      Out.prln("Warning (WEKA ML engine): writing dataset as ARFF to " +
+	               datasetFile.getCanonicalPath());
+      }catch(IOException ioe){
+        throw new ResourceInstantiationException(ioe);
+      }
+      
+    }else{
+      if(classifier == null){
+        //both classifier and datasetFile are null
+        throw new ResourceInstantiationException(
+                "Neither classifier or dataset file are specified in the " +
+                "definition!\nRunning this PR this way would be pointless!");
+      }
+    }
+    
     //initialise the dataset
     if(sListener != null) sListener.statusChanged("Initialising dataset...");
     FastVector attributes = new FastVector();
@@ -359,6 +399,18 @@ public class Wrapper implements MLEngine, ActionsPublisher {
     dataset = new Instances("Weka ML Engine Dataset", attributes, 0);
     dataset.setClassIndex(datasetDefinition.getClassIndex());
 
+    //write the head of the datafile
+    if(datasetFile != null){
+      try{
+	      FileWriter fw = new FileWriter(datasetFile);
+	      fw.write(dataset.toString());
+	      fw.flush();
+	      fw.close();
+      }catch(IOException ioe){
+        throw new ResourceInstantiationException(ioe);
+      }
+    }
+    
     if(classifier != null && classifier instanceof UpdateableClassifier){
       try{
         classifier.buildClassifier(dataset);
@@ -441,19 +493,74 @@ public class Wrapper implements MLEngine, ActionsPublisher {
     return datasetDefinition;
   }
 
-  public void saveDatasetAsARFF(FileWriter writer){
-    try {
-      writer.write(dataset.toString());
-      writer.flush();
-    } catch (IOException ioe) {
-      throw new GateRuntimeException(ioe.getMessage());
+//  public void saveDatasetAsARFF(FileWriter writer){
+//    try {
+//      writer.write(dataset.toString());
+//      writer.flush();
+//    } catch (IOException ioe) {
+//      throw new GateRuntimeException(ioe.getMessage());
+//    }
+//  }
+  
+  public void loadDatasetFromArff(FileReader reader) throws IOException, 
+  																													ExecutionException,
+  																													Exception{
+    Instances newDataset = new Instances(reader);
+    if(!dataset.equalHeaders(newDataset)) 
+      throw new ExecutionException("Loaded dataset incompatible with the one " +
+              " in the definition!");
+    Enumeration instEnum = newDataset.enumerateInstances();
+    while(instEnum.hasMoreElements()){
+      addTrainingInstance((Instance)instEnum.nextElement());
     }
   }
 
-  protected class SaveDatasetAsArffAction extends javax.swing.AbstractAction{
-    public SaveDatasetAsArffAction(){
-      super("Save dataset as ARFF");
-      putValue(SHORT_DESCRIPTION, "Saves the dataset to a file in ARFF format");
+//  protected class SaveDatasetAsArffAction extends javax.swing.AbstractAction{
+//    public SaveDatasetAsArffAction(){
+//      super("Save dataset as ARFF");
+//      putValue(SHORT_DESCRIPTION, "Saves the dataset to a file in ARFF format");
+//    }
+//
+//    public void actionPerformed(java.awt.event.ActionEvent evt){
+//      Runnable runnable = new Runnable(){
+//        public void run(){
+//          JFileChooser fileChooser = MainFrame.getFileChooser();
+//          fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
+//          fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+//          fileChooser.setMultiSelectionEnabled(false);
+//          if(fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION){
+//            File file = fileChooser.getSelectedFile();
+//            try{
+//              MainFrame.lockGUI("Saving dataset...");
+//              FileWriter fw = new FileWriter(file.getCanonicalPath(), false);
+//              saveDatasetAsARFF(fw);
+//              fw.close();
+//            }catch(IOException ioe){
+//              JOptionPane.showMessageDialog(null,
+//                              "Error!\n"+
+//                               ioe.toString(),
+//                               "Gate", JOptionPane.ERROR_MESSAGE);
+//              ioe.printStackTrace(Err.getPrintWriter());
+//            }finally{
+//              MainFrame.unlockGUI();
+//            }
+//          }
+//        }
+//      };
+//
+//      Thread thread = new Thread(runnable, "DatasetSaver(ARFF)");
+//      thread.setPriority(Thread.MIN_PRIORITY);
+//      thread.start();
+//    }
+//  }
+
+
+  protected class LoadDatasetFromArffAction extends javax.swing.AbstractAction{
+    public LoadDatasetFromArffAction(){
+      super("Load data from ARFF");
+      putValue(SHORT_DESCRIPTION, 
+              "Loads training data from a file in ARFF format and " + 
+              "appends it to the current dataset.");
     }
 
     public void actionPerformed(java.awt.event.ActionEvent evt){
@@ -463,19 +570,19 @@ public class Wrapper implements MLEngine, ActionsPublisher {
           fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
           fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           fileChooser.setMultiSelectionEnabled(false);
-          if(fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION){
+          if(fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION){
             File file = fileChooser.getSelectedFile();
             try{
-              MainFrame.lockGUI("Saving dataset...");
-              FileWriter fw = new FileWriter(file.getCanonicalPath(), false);
-              saveDatasetAsARFF(fw);
-              fw.close();
-            }catch(IOException ioe){
+              MainFrame.lockGUI("Loading dataset...");
+              FileReader reader = new FileReader(file.getCanonicalPath());
+              loadDatasetFromArff(reader);
+              reader.close();
+            }catch(Exception e){
               JOptionPane.showMessageDialog(null,
                               "Error!\n"+
-                               ioe.toString(),
-                               "Gate", JOptionPane.ERROR_MESSAGE);
-              ioe.printStackTrace(Err.getPrintWriter());
+                              e.toString(),
+                              "Gate", JOptionPane.ERROR_MESSAGE);
+              e.printStackTrace(Err.getPrintWriter());
             }finally{
               MainFrame.unlockGUI();
             }
@@ -488,8 +595,8 @@ public class Wrapper implements MLEngine, ActionsPublisher {
       thread.start();
     }
   }
-
-
+  
+  
   protected class SaveModelAction extends javax.swing.AbstractAction{
     public SaveModelAction(){
       super("Save model");
@@ -589,6 +696,8 @@ public class Wrapper implements MLEngine, ActionsPublisher {
    * was built.
    */
   protected boolean datasetChanged = false;
+  
+  protected File datasetFile;
 
   protected List actionsList;
 
