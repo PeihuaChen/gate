@@ -167,7 +167,6 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
    */
   public void reset(){
     document = null;
-    annotationSetName = null;
   }
 
   /** Parses one input line containing a tokeniser rule.
