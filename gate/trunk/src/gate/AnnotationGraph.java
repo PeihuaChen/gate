@@ -56,4 +56,7 @@ public interface AnnotationGraph extends SortedSet
   public AnnotationGraph getAnnotations(String type, String equivalenceClass,
 					Long offset);
 
+  /**Creates a new node with the offset offset
+  @param offset the offset in document where the node will point*/
+  public void putNodeAt(int id,double offset)throws gate.util.InvalidOffsetException;
 } // interface AnnotationGraph

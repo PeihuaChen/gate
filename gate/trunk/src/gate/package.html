@@ -28,13 +28,23 @@ EM.kalina {background: pink}
 	<li><A href="#tiling">Tiling</a>
 	</OL>
 </OL>
-<P align=right>Comments by: <EM class=hamish>Hamish</em>, <EM class=valy>Valy</em>, <em class=kalina>Kalina</em>.
+<P align=right>Comments by: <EM class=hamish>Hamish</em>, <EM
+class=valy>Valy</em>, <em class=kalina>Kalina</em>.
 <a name="representation"><hr><h2>Representation</h2>
 <p align=justify>
-We might want to consider having two representations for AG's. That is because there are things that are very easy (and fast) to do using DB primitives (such as finding all arcs that "cover" a given node...a fairly simple SELECT) whereas for other operations we might need to actually represent the graph in memory by means of objects (e.g. where dealing with partially anchored structures, the order between nodes is easy to represent
+We might want to consider having two representations for AG's. That is because
+there are things that are very easy (and fast) to do using DB primitives (such
+as finding all arcs that "cover" a given node...a fairly simple SELECT)
+whereas for other operations we might need to actually represent the graph in
+memory by means of objects (e.g. where dealing with partially anchored
+structures, the order between nodes is easy to represent
 using a binary sort-tree though difficult/expensive to put in a DB table).
-I think that the basic representation should be the DB one and, when needed, parts of the document ("tiles") are loaded in memory, operations are performed on them, and than the input data and any modifications that occurred during the process are saved back to DB.
-If we intend to work with huge corpora we might consider only loading a segment of the annotated document (e.g. from node 10123 to node 11123).
+I think that the basic representation should be the DB one and, when needed,
+parts of the document ("tiles") are loaded in memory, operations are performed
+on them, and than the input data and any modifications that occurred during
+the process are saved back to DB.
+If we intend to work with huge corpora we might consider only loading a
+segment of the annotated document (e.g. from node 10123 to node 11123).
 <br><a href="#top">top</a>
 
 <a name="operations"><hr><h2>Operations</h2>
@@ -44,13 +54,21 @@ If we intend to work with huge corpora we might consider only loading a segment 
 	<LI>public Node getNode(String id);
 		<DIR>/** find a node by ID</DIR>
     	<LI>public SortedSet getAnchors();
-    		<DIR>/** The ordered set of anchors present in the nodes of the AG.(unnecessary?)
-    		<br><em class=valy>Probably unnecessary; anyway not <b>public</b>!</em></DIR>
+    		<DIR>/** The ordered set of anchors present in the nodes of the
+AG.(unnecessary?)
+    		<br><em class=valy>Probably unnecessary; anyway not
+<b>public</b>!</em></DIR>
     	<li>public Long greatestLowerBound(Annotation a);
-    		<DIR>  /** Greatest lower bound on an annotation: the greatest anchor in the AG
+    		<DIR>  /** Greatest lower bound on an annotation: the greatest anchor in
+the AG
     			such that there is a node with this anchor which structurally precedes
     			the start node of annotation a. */<br>
-<em class=valy>If we use Nodes instead of indices I think we can get a simpler approach. Basically most of the nodes will be anchored and there can only be one node at a given offset so if you know the offset you can get the node (if any); for non-anchored nodes an ID can be used to find them (or an anchored node + the no. of nodes until the sought one). Using Nodes instead of (byte/time) offsets <b>I think</b> eliminates the need for glb, lub.</em>
+<em class=valy>If we use Nodes instead of indices I think we can get a simpler
+approach. Basically most of the nodes will be anchored and there can only be
+one node at a given offset so if you know the offset you can get the node (if
+any); for non-anchored nodes an ID can be used to find them (or an anchored
+node + the no. of nodes until the sought one). Using Nodes instead of
+(byte/time) offsets <b>I think</b> eliminates the need for glb, lub.</em>
 </dir>
 	<LI>public Long leastUpperBound(Annotation a);
 		<dir>  /** Least upper bound on an annotation: the smallest anchor in the AG
@@ -58,35 +76,45 @@ If we intend to work with huge corpora we might consider only loading a segment 
     			by the end node of annotation a. */</dir>
     	<li>public AnnotationGraph getOverlappingAnnotations(Annotation a);
     		<dir> /** The set of annotations overlapping a */<br>
-<em class=valy>This is difficult to implement in both DB and memory models. If in memory maybe the search can be stopped earlier than in the case of a &quot;SELECT&quot; that will have to process all the annotations.</em>
+<em class=valy>This is difficult to implement in both DB and memory models. If
+in memory maybe the search can be stopped earlier than in the case of a
+&quot;SELECT&quot; that will have to process all the annotations.</em>
 </dir>
     	<li>public AnnotationGraph getIncludedAnnotations(Annotation a);
     		<dir>  /** The set of annotations included by a */</dir>
     	<li>public AnnotationGraph getAnnotations(String type);
     		<dir>  /** Get annotations by type */<br>
 <em class=valy>Should be as easy with both models</em></dir>
-    	<li>public AnnotationGraph getAnnotations(String type, FeatureSet features);
+    	<li>public AnnotationGraph getAnnotations(String type, FeatureSet
+features);
     		<dir>  /** Get annotations by type and features */<br>
-<em class=valy>For simple features we could use DB; for complex features memory processing is required</em></dir>
-  
-	<li>public AnnotationGraph getAnnotations(String type, String equivalenceClass);    		
+<em class=valy>For simple features we could use DB; for complex features
+memory processing is required</em></dir>
+ 
+	<li>public AnnotationGraph getAnnotations(String type, String
+equivalenceClass);    		
 		<dir>  /** Get annotations by type and equivalence class */</dir>
 	<li>public AnnotationGraph getAnnotations(String type, Long offset);
-		<dir>	/** Get annotations by type and position. This is the set of annotations of
+		<dir>	/** Get annotations by type and position. This is the set of
+annotations of
     			a particular type which share the smallest leastUpperBound that is >=
     			offset */</dir>
-    	<li>public AnnotationGraph getAnnotations(String type, FeatureSet features,Long offset);
+    	<li>public AnnotationGraph getAnnotations(String type, FeatureSet
+features,Long offset);
     		<dir> /** Get annotations by type and features */</dir>
-    	<li>public AnnotationGraph getAnnotations(String type, String equivalenceClass,Long offset);
+    	<li>public AnnotationGraph getAnnotations(String type, String
+equivalenceClass,Long offset);
   		<dir> /** Get annotations by type and equivalence class */</dir>
     	</UL>
     <LI>Annotation
     	<UL
     	<LI>public String getType();
-    		<dir>/** The type of the annotation (corresponds to TIPSTER "name"). */</dir>
-    	<li>public FeatureSet getFeatures();  
+    		<dir>/** The type of the annotation (corresponds to TIPSTER "name").
+*/</dir>
+    	<li>public FeatureSet getFeatures(); 
     		<dir>	/** The features, or content of this arc (corresponds to TIPSTER
-    			* "attributes", and to LDC "label", which is the simplest case). */</dir>
+    			* "attributes", and to LDC "label", which is the simplest case).
+*/</dir>
   	<li>public String getEquivalenceClass();
   		<dir>/** The equivalence class of this annotation. */</dir>
   	<li>public Long getStart();
@@ -102,7 +130,8 @@ If we intend to work with huge corpora we might consider only loading a segment 
 	<li>public boolean sIncludes(Annotation a);  		
 		<dir>/** Does this annotation structurally include a? */</dir>
 	<li>public boolean tIncludes(Annotation a);
-		<dir>/** Does this annotation temporally (i.e. by offset) include a? */</dir>
+		<dir>/** Does this annotation temporally (i.e. by offset) include a?
+*/</dir>
 	<li>public boolean includes(Annotation a);
 		<dir>/** Does this annotation include a? */</dir>
     	</UL>
@@ -118,6 +147,8 @@ Where we say "temporal offset" this should generally be taken to by
 synonymous with "character offset", except where made clear by context. The
 usage is driven by the fact that the AGs formalism uses "temporal" where it
 might have been better to use "offset".
+	
+
 <br><a href="#top">top</a>
 
 <a name="anchoring"><hr width="30%" align=left><h3>Anchoring</h3>
@@ -132,7 +163,7 @@ In a minimally anchored AG (Bir99 p.31) there is always some offset
 information about the position of a node, though this may need to be inferred
 by traversing the graph until an anchored node is encountered. In the textual
 case, the values can often be calculated at creation time by reference to the
-text. The getStart()/getEnd() methods of Annotation may cache this value at 
+text. The getStart()/getEnd() methods of Annotation may cache this value at
 creation time and recalculate it in face of edits.
 <br><a href="#top">top</a>
 
@@ -143,10 +174,17 @@ Type precedence (Bir99 p. 38).
 
 <a name="tiling"><hr width="30%" align=left><h3>Tiling</h3>
 <p align=justify>
-If we want to work with VERY large documents the AG approach allows us to employ an idea used in most graphic processing programs: we can "tile" the document in pieces, loading and processing in memory only one tile at a time; where "tile" can be a subgraph defined by a sequence of nodes and the
+If we want to work with VERY large documents the AG approach allows us to
+employ an idea used in most graphic processing programs: we can "tile" the
+document in pieces, loading and processing in memory only one tile at a time;
+where "tile" can be a subgraph defined by a sequence of nodes and the
 associated arcs.
-We should have no problem loading a few thousands of nodes so there are a lot of operations that can be done without needing any node outside the current tile.
-We will still have to deal with connecting two tiles (arcs that start in one tile and end in another, etc) but this is better than trying to load the entire document and have the system paging forever to and from the harddisk.
+We should have no problem loading a few thousands of nodes so there are a lot
+of operations that can be done without needing any node outside the current
+tile.
+We will still have to deal with connecting two tiles (arcs that start in one
+tile and end in another, etc) but this is better than trying to load the
+entire document and have the system paging forever to and from the harddisk.
 <br><a href="#top">top</a>
 </BODY>
 </html>
