@@ -37,7 +37,7 @@ public class State {
   *  Gets the set of transitions for this state.
   *@return a Set contining objects of type gate.fsm.Transition
   */
-  protected Set getTransitions(){
+  public Set getTransitions(){
     return transitions;
   }
 
@@ -113,7 +113,7 @@ public class State {
              bpe = currentTrans.getConstraints();
              if(bpe == null) res += "null";
              else res += bpe.shortDesc();
-             res += " :" + currentTrans.getLabels() +
+             res += " :" + currentTrans.getBindings() +
              "\" ]\n";
     }
     return res;

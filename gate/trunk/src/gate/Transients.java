@@ -14,6 +14,7 @@ import java.io.*;
 
 import gate.corpora.*;
 import gate.util.*;
+import gate.annotation.*;
 
 /** Provides static methods for the creation of transient Language
   * Resources. These are non-persistent; to save them a DataStore
@@ -45,5 +46,10 @@ public class Transients
   public static FeatureMap newFeatureMap() {
     return new SimpleFeatureMapImpl();
   } // newFeatureMap
-
+  /**
+  * Creates a new empty standalone AnnotationSet
+  */
+  public static AnnotationSet newAnnotationSet(){
+    return new AnnotationSetImpl();
+  }
 } // class Transients

@@ -247,6 +247,17 @@ implements AnnotationSet
     return (Node) nodesByOffset.get(nodesByOffset.lastKey());
   } // lastNode
 
+  /**
+  * Get the first node that is relevant for this annotation set and which has
+  * the offset larger than the one of the node provided.
+  */
+  public Node nextNode(Node node){
+    indexByStartOffset();
+    return (Node)nodesByOffset.getNextOf(
+                               new Long(node.getOffset().longValue() + 1)
+                               );
+  }
+
   /** Create and add an annotation with pre-existing nodes,
     * and return its id
     */

@@ -40,7 +40,7 @@ public class Transition {
     this();
     this.constraints = constraints;
     target = state;
-    labels = new LinkedList();
+    bindings = new LinkedList();
   }
 
   /**
@@ -49,11 +49,11 @@ public class Transition {
   * (aka annotations).
   */
   public Transition(BasicPatternElement constraints, State state,
-                    LinkedList labels) {
+                    LinkedList bindings) {
     this();
     this.constraints = constraints;
     target = state;
-    this.labels = labels;
+    this.bindings = bindings;
   }
 
   /**
@@ -88,7 +88,7 @@ public class Transition {
   /**
   *  Returns the list of bindings associated to this transition
   */
-  protected LinkedList getLabels(){ return labels; }
+  public LinkedList getBindings(){ return bindings; }
 
   /**
   * The constraints on this transition.
@@ -106,7 +106,7 @@ public class Transition {
   * We need to use the actual object and not the interface (java.util.List)
   * because we need this object to be cloneable
   */
-  private LinkedList labels;
+  private LinkedList bindings;
 
   private int myIndex;
   private static int index = 0;

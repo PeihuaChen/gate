@@ -84,28 +84,159 @@ extends Transducer implements JapeConstants, java.io.Serializable
       ((Rule) i.get()).finish();
   } // finish
 
-  
-//#################################
-//modified versions of the old methods to account for the new style of jape-ing
-  /** Transduce a document using the default annotation set.
-    * Defers to other methods dependent on
-    * the current rule application style.
-    */
+
+  /**
+  * Transduce a document using the default annotation set and the current
+  * rule application style.
+  */
   public void transduce(Document doc) throws JapeException {
+   //INITIALISATION
+
     //build the finite state machine transition graph
     FSM fsm = new FSM(this);
     //convert it to deterministic
     fsm.eliminateVoidTransitions();
-    //startNode = leftMost node
+    //define data structures
+    //FSM instances that haven't blocked yet
+    java.util.LinkedList activeFSMInstances = new java.util.LinkedList();
+    //FSM instances that have reached a final state
+    //This is a sorted set and the contained objects are sorted by the length
+    //of the document content covered by the matched annotations
+    java.util.SortedSet acceptingFSMInstances = new java.util.TreeSet();
+    FSMInstance currentFSM;
+    //startNode: the node from the current matching attepmt starts.
+    //initially startNode = leftMost node
     Node startNode = doc.getAnnotations().firstNode();
+    //The last node: where the parsing will stop
+    Node lastNode = doc.getAnnotations().lastNode();
 
+    //the big while for the actual parsing
+    while(startNode != lastNode){
+    //while there are more annotations to parse
+    //create initial active FSM instance starting parsing from new startNode
+    currentFSM = new FSMInstance(
+                fsm,
+                fsm.getInitialState(),//fresh start
+                startNode,//the matching starts form the current startNode
+                startNode,//current position in AG is the start position
+                new java.util.HashMap()//no bindings yet!
+                );
+    //at this point ActiveFSMInstances should be always empty!
+    activeFSMInstances.addLast(currentFSM);
+      while(!activeFSMInstances.isEmpty()){
+      //while there are some "alive" FSM instances
+      //take the first active FSM instance
+      currentFSM = (FSMInstance)activeFSMInstances.removeFirst();
+      //process the current FSM instance
+      if(currentFSM.getFSMPosition().isFinal()){
+        //if the current FSM is in a final state
+        acceptingFSMInstances.add(currentFSM.clone());
+      }
+
+      //this will (should) be optimised
+      State fsmPosition = currentFSM.getFSMPosition();
+      java.util.Set transitions = fsmPosition.getTransitions();
+      java.util.Iterator transIter = transitions.iterator();
+      while(transIter.hasNext()){
+        //for each transition, check if it is possible and "DO IT!"
+        Transition currentTrans = (Transition)transIter.next();
+        //holds all the matched annotations. In case of success all these
+        //annotations will be added to the bindings Map for the new FSMInstance
+        //...using LinkedList instead of HashSet because Annotation does not
+        //implement hashCode()
+
+        //get an empty annotation set. 
+        AnnotationSet matchedAnnots = new AnnotationSetImpl(doc);
+        //maps String to gate.FeatureMap
+        java.util.Map constraintsByType = new java.util.HashMap();
+        Constraint[] currentConstraints =
+                     currentTrans.getConstraints().getConstraints();
+        String annType;
+        FeatureMap newAttributes, oldAttributes;
+        for(int i=0; i < currentConstraints.length; i++){
+          annType = currentConstraints[i].getAnnotType();
+          newAttributes = currentConstraints[i].getAttributeSeq();
+          oldAttributes = (FeatureMap)constraintsByType.get(annType);
+          if(oldAttributes != null) newAttributes.putAll(oldAttributes);
+          constraintsByType.put(annType, newAttributes);
+        }
+        //try to match all the constraints
+        boolean success = true;
+        java.util.Iterator typesIter = constraintsByType.keySet().iterator();
+        AnnotationSet matchedHere;
+        Long offset;
+        while(success && typesIter.hasNext()){
+          //do a query for each annotation type
+          annType = (String)typesIter.next();
+          newAttributes = (FeatureMap)constraintsByType.get(annType);
+          offset = currentFSM.getAGPosition().getOffset();
+          matchedHere = doc.getAnnotations().get(annType,
+                                                 newAttributes,
+                                                 offset);
+          if(matchedHere.isEmpty()) success = false;
+          else{
+            //we have some matched annotations of the current type
+            //let's add them to the list of matched annotations
+            matchedAnnots.addAll(matchedHere);
+          }
+        }//while(success && typesIter.hasNext())
+        if(success){
+          //create a new FSMInstance, make it advance in AG, take care of its
+          //bindings data structure and add it to the list of active FSMs.
+          FSMInstance newFSMI = (FSMInstance)currentFSM.clone();
+          newFSMI.setAGPosition(matchedAnnots.lastNode());
+          //do the bindings
+
+          //all the annotations matched here will be added to the sets
+          //corresponding to the labels in this list in case of succesful matching
+          java.util.Iterator labelsIter = currentTrans.getBindings().iterator();
+          AnnotationSet oldSet;
+          String label;
+          while(labelsIter.hasNext()){
+            //for each label add the set of matched annotations to the set of
+            //annotations currently bound to that name
+            label = (String)labelsIter.next();
+            oldSet = (AnnotationSet)newFSMI.getBindings().get(label);
+            oldSet.addAll(matchedAnnots);
+          }//while(labelsIter.hasNext())
+          activeFSMInstances.addLast(newFSMI);
+        }
+      }//while(transIter.hasNext())
+     }//while(!activeFSMInstances.isEmpty())
+
+     //FIRE THE RULE
+    if(acceptingFSMInstances.isEmpty()){
+      //advance to next relevant node in the Annotation Graph
+      startNode = doc.getAnnotations().nextNode(startNode);
+    }else if(ruleApplicationStyle == BRILL_STYLE){
+
+
+
+    }else if(ruleApplicationStyle == APPELT_STYLE){
+
+    }else throw new RuntimeException("Unknown rule application style!");
+
+    }//while(startNode != lastNode)
+  } // transduce
+
+
+//###############end modified versions
+
+  /** Transduce a document. Defers to other methods dependent on
+    * the current rule application style.
+    */
+  public void transduce_(Document doc) throws JapeException {
 
     if(ruleApplicationStyle == BRILL_STYLE)
       transduceBrillStyle(doc);
     else if(ruleApplicationStyle == APPELT_STYLE)
       transduceAppeltStyle(doc);
+
   } // transduce
 
+  /** Transduce a document. Rule application is Brill style (i.e. we
+    * try to find all possible applications of all rules).
+    */
   protected void transduceBrillStyle(Document doc) throws JapeException {
     int finalPosition = doc.getContent().size().intValue();
 
@@ -133,189 +264,6 @@ extends Transducer implements JapeConstants, java.io.Serializable
     * apply only a single rule in any position, based on length/priority).
     */
   protected void transduceAppeltStyle(Document doc) throws JapeException {
-
-    PrioritisedRuleList candidates = new PrioritisedRuleList();// matched rules
-    int pos = 0; // position in the document byte stream
-    int end = doc.getContent().size().intValue(); // the end of the byte stream
-
-    while(pos < end) {
-      int smallestPending = Integer.MAX_VALUE; // next pending rule left offset
-
-      // Set each rule to its next match and collect candidates for this pos.
-      // Rules will be in one of five states during this loop:
-      // 1. the last match failed, and there are no more annotations
-      //    of required types in the document, so the rule is finished
-      // 2. the rule is pending, but at a position that has been jumped
-      //    over by another rule firing. reset and shift to state 3.
-      // 3. not pending, not finished. this is the initial state; get
-      //    the next match (shift to state 1, 4 or 5)
-      // 4. pending at the current position: this is a candidate for firing
-      // 5. pending at some future point (the smallest of these is recorded
-      //    so we can advance position to there)
-      // After this loop we have zero or more candidates for firing and
-      // zero or more pending. The fired rule is reset by the firing process;
-      // pending rules that are no longer valid after a firing are in state 2.
-      // and get reset in this loop. So rule state is consistent for the
-      // duration of this document; all rules get reset at the end of the
-      // document.
-      for(ForwardIterator i = rules.start(); ! i.atEnd(); i.advance()) {
-        Rule rule = (Rule) i.get();
-        //System.out.println("trying rule " + rule.getName());
-
-        // 1. rule has no more matches in this document: ignore
-        if(rule.finished())
-          continue;
-
-        int pendingAt = rule.pending(); // rule pending status or offset
-
-        // 2. it was pending but got jumped by other rule firing: shift to 3.
-        if(pendingAt != -1 && pendingAt < pos) {
-          rule.reset(); // implies any candidate will be reset before next try,
-          pendingAt = -1; // as best gets to transduce and others end up here
-        }
-
-        // 3. it isn't pending: get the next match (shift to state 1, 4 or 5)
-        if(pendingAt == -1)
-          pendingAt = rule.getNextMatch(doc, pos, end);
-
-        // 4. it's a valid match at this position, so add to candidates
-        if(pendingAt == pos)
-          candidates.add(rule, rule.getEndPosition()-rule.getStartPosition());
-
-        // 5. pending in the future; record pending point if it's the smallest
-        else if(pendingAt != -1)
-          smallestPending = Math.min(smallestPending, pendingAt);
-      } // for each rule
-
-      // fire the best rule
-      if(candidates.size() > 0) {
-        Rule bestRule = (Rule) candidates.at(0); // first candidate is best
-        candidates = new PrioritisedRuleList();  // forget the other candidates
-        pos = bestRule.getEndPosition(); // advance to end of this rule
-        bestRule.transduce(doc); // do the transduction (resets rule)
-        //System.out.println("applied rule " + bestRule.getName());
-      }
-
-      // no match, and none pending so give up
-      else if(smallestPending == Integer.MAX_VALUE)
-        break;
-
-      // no rules matched here but some are pending: advance to the leftmost
-      else
-        pos = Math.max(smallestPending, pos + 1);
-
-    }   // while pos < end
-
-    // reset all rules; some may be finished, some pending
-    for(ForwardIterator i = rules.start(); ! i.atEnd(); i.advance())
-      ((Rule) i.get()).reset();
-
-
-
-  /************* BUGGY: ***********
-    int position = 0;
-    int finalPosition = doc.getByteSequence().length();
-    PrioritisedRuleList candidateRules = new PrioritisedRuleList();
-
-    while(position <= finalPosition) {
-      int leftmostFailurePosition = Integer.MAX_VALUE;
-
-      Enumeration rulesIterator = rules.elements();
-      while(rulesIterator.hasMoreElements()) {
-        Rule rule = (Rule) rulesIterator.nextElement();
-        MutableInteger newPosition = new MutableInteger();
-        newPosition.value = 0;
-        if(rule.matches(doc, position, newPosition)) {
-          //Debug.pr(
-          //  this, "matched rule: " + Debug.getNl() + rule.toString("  ")
-          //);
-          candidateRules.add(
-            rule, newPosition.value - rule.getStartPosition()
-          );
-
-        }
-        else {
-          //Debug.pr("rule " + rule.getName() + " failed, newPos = " +
-          //         newPosition.value + Debug.getNl());
-          if(leftmostFailurePosition > newPosition.value)
-            leftmostFailurePosition = newPosition.value;
-        }
-      } // while there are more rules
-
-      if(candidateRules.size() > 0) {
-        DListIterator i = candidateRules.begin();
-        Rule bestRule = (Rule) i.get();
-        //Debug.pr(
-        //  this, "bestRule: " + bestRule.getName() + Debug.getNl()
-        //);
-        position = bestRule.getEndPosition();
-        //Debug.pr("position = " + position);
-        bestRule.transduce(doc);
-
-        // reset the rules that weren't applied
-        for(i.advance(); ! i.atEnd(); i.advance()) {
-          //Debug.pr(
-          //  this,
-          //  "reseting rule: " + ((Rule) i.get()).getName() + Debug.getNl()
-          //);
-          ((Rule) i.get()).reset();
-        }
-      } else { // no rules matched
-        position = leftmostFailurePosition;
-        //Debug.pr(this,
-        //         "no rules matched, position = " + position + Debug.getNl());
-      }
-
-      // clear the candidates list
-      candidateRules.clear();
-    } // while position <= final
-******************/
-  } // transduceAppeltStyle
-
-//###############end modified versions
-
-  /** Transduce a document. Defers to other methods dependent on
-    * the current rule application style.
-    */
-  public void transduce_(Document doc) throws JapeException {
-
-    if(ruleApplicationStyle == BRILL_STYLE)
-      transduceBrillStyle(doc);
-    else if(ruleApplicationStyle == APPELT_STYLE)
-      transduceAppeltStyle(doc);
-
-  } // transduce
-
-  /** Transduce a document. Rule application is Brill style (i.e. we
-    * try to find all possible applications of all rules).
-    */
-  protected void transduceBrillStyle_(Document doc) throws JapeException {
-    int finalPosition = doc.getContent().size().intValue();
-
-    Enumeration rulesIterator = rules.elements();
-    while(rulesIterator.hasMoreElements()) {
-      int position = 0;
-      MutableInteger newPosition = new MutableInteger();
-      newPosition.value = 0;
-      Rule rule = (Rule) rulesIterator.nextElement();
-
-      while(position <= finalPosition) {
-
-	      if(rule.matches(doc, position, newPosition)) {
-	        rule.transduce(doc);
-        }
-	      position = newPosition.value;
-
-      } // while position not final
-
-    } // while there are more rules
-
-  } // transduceBrillStyle
-
-  /** Transduce a document. Rule application is Appelt style (i.e. we
-    * apply only a single rule in any position, based on length/priority).
-    */
-  protected void transduceAppeltStyle_(Document doc) throws JapeException {
 
     PrioritisedRuleList candidates = new PrioritisedRuleList();// matched rules
     int pos = 0; // position in the document byte stream
@@ -501,6 +449,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.5  2000/05/12 14:14:16  valyt
+// Done some work on jape....almost done :)
+//
 // Revision 1.4  2000/05/08 14:14:36  valyt
 // Moved the ORACLE tests to derwent
 //
