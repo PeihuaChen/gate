@@ -27,17 +27,26 @@ import org.apache.lucene.store.*;
 import java.io.*;
 import java.util.*;
 
+/** This class represents Lucene implementation of IndexManeager interface.*/
 public class LuceneIndexManager implements IndexManager{
 
+  /** used in Lucene Documents as a key for gate document ID value. */
   public final static String DOCUMENT_ID = "DOCUMENT_ID";
+
+  /** IndexDefinition - location, type, fields, etc.*/
   private IndexDefinition idef;
+
+  /** An corpus for indexing*/
   private Corpus corpus;
 
+  /** Constructor of the class. */
   public LuceneIndexManager(IndexDefinition def, Corpus corpus){
     this.idef = def;
     this.corpus = corpus;
   }
 
+  /** Creates index directory and indexing all
+   *  documents in the corpus. */
   public void createIndex() throws IndexException{
     String location = idef.getIndexLocation();
     try {
@@ -65,6 +74,7 @@ public class LuceneIndexManager implements IndexManager{
     }
   }
 
+  /** Optimize existing index. */
   public void optimizeIndex() throws IndexException{
     try {
       IndexWriter writer = new IndexWriter(idef.getIndexLocation(),
@@ -76,6 +86,7 @@ public class LuceneIndexManager implements IndexManager{
     }
   }
 
+  /** Delete index. */
   public void deleteIndex() throws IndexException{
     boolean isDeleted = true;
     File dir = new File(idef.getIndexLocation());
@@ -93,6 +104,8 @@ public class LuceneIndexManager implements IndexManager{
     }
   }
 
+  /** Reindexing changed documents, removing removed documents and
+   *  add to the index new corpus documents. */
   public void sync(List added, List removed, List changed) throws IndexException{
     String location = idef.getIndexLocation();
     try {
