@@ -199,6 +199,7 @@ if (null == strPronoun) {
 }
 
     if (strPronoun.equalsIgnoreCase("HE") ||
+        strPronoun.equalsIgnoreCase("HIM") ||
         strPronoun.equalsIgnoreCase("HIS")) {
       return _resolve$HE$HIM$HIS$(currPronoun,prnSentIndex);
     }
@@ -489,16 +490,14 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
     Assert.assertTrue(pronounString.equalsIgnoreCase("SHE") ||
                       pronounString.equalsIgnoreCase("HER") ||
                       pronounString.equalsIgnoreCase("HE") ||
-                      pronounString.equalsIgnoreCase("HIS") ||
-                      pronounString.equalsIgnoreCase("IT") ||
-                      pronounString.equalsIgnoreCase("ITS"));
+                      pronounString.equalsIgnoreCase("HIM") ||
+                      pronounString.equalsIgnoreCase("HIS"));
 
     if (pronounString.equalsIgnoreCase("HE") ||
         pronounString.equalsIgnoreCase("HIS")||
+        pronounString.equalsIgnoreCase("HIM") ||
         pronounString.equalsIgnoreCase("SHE") ||
-        pronounString.equalsIgnoreCase("HER") ||
-        pronounString.equalsIgnoreCase("IT") ||
-        pronounString.equalsIgnoreCase("ITS")) {
+        pronounString.equalsIgnoreCase("HER")) {
 
       Long offset1 = ant1.getStartNode().getOffset();
       Long offset2 = ant2.getStartNode().getOffset();
