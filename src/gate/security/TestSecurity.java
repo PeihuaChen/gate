@@ -102,11 +102,14 @@ public class TestSecurity extends TestCase
     //1.1 list groups and users
     List groups = ac.listGroups();
     Assert.assertNotNull(groups);
-     Err.prln("+++ found ["+groups.size()+"] groups...");
+
+    if(DEBUG)
+      Err.prln("+++ found ["+groups.size()+"] groups...");
 
     List users = ac.listUsers();
     Assert.assertNotNull(users);
-     Err.prln("+++ found ["+users.size()+"] users...");
+    if(DEBUG)
+      Err.prln("+++ found ["+users.size()+"] users...");
 
     //2. log into the securoty factory
     Session adminSession = ac.login("ADMIN", "sesame",new Long(ADMIN_GROUP_ID));
@@ -212,7 +215,8 @@ public class TestSecurity extends TestCase
     }
     catch(SecurityException ex) {
       exceptionThrown = true;
-      Err.prln("++++ OK, got exception ["+ex.getMessage()+"]");
+      if(DEBUG)
+        Err.prln("++++ OK, got exception ["+ex.getMessage()+"]");
     }
     Assert.assert(true == exceptionThrown);
 
@@ -232,7 +236,10 @@ public class TestSecurity extends TestCase
       ac.findGroup(myGroup.getName());
     }
     catch(SecurityException se) {
-      Err.prln("++ OK, got exception");
+
+      if(DEBUG)
+        Err.prln("++ OK, got exception");
+
       exceptionThrown = true;
     }
     Assert.assert(exceptionThrown);
@@ -268,7 +275,10 @@ public class TestSecurity extends TestCase
       ac.findUser(myUser.getName());
     }
     catch(SecurityException se) {
-      Err.prln("++ OK, got exception");
+
+      if(DEBUG)
+        Err.prln("++ OK, got exception");
+
       exceptionThrown = true;
     }
     Assert.assert(exceptionThrown);
