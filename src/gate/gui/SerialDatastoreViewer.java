@@ -50,6 +50,8 @@ public class SerialDatastoreViewer extends JTree
     return this;
   }//init()
 
+  public void clear(){
+  }
 
   public void setTarget(Object target){
     if(target instanceof DataStore){

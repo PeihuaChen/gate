@@ -199,6 +199,22 @@ extends AbstractLanguageResource implements Document {
     return this;
   } // init()
 
+  public void clear() {
+    if (defaultAnnots != null) defaultAnnots.clear();
+    defaultAnnots = null;
+    if (entitiesMap!= null) entitiesMap.clear();
+    entitiesMap = null;
+    if ( (namedAnnotSets != null) && (!namedAnnotSets.isEmpty())) {
+        Iterator iter = namedAnnotSets.values().iterator();
+        while (iter.hasNext()) {
+            AnnotationSet annots = (AnnotationSet) iter.next();
+            annots.clear();
+        }
+        namedAnnotSets.clear();
+    }//if
+    namedAnnotSets = null;
+  }
+
   /** Documents are identified by URLs */
   public URL getSourceUrl() { return sourceUrl; }
 

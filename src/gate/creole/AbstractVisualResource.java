@@ -48,6 +48,10 @@ public abstract class AbstractVisualResource extends JPanel
     return this;
   }//init()
 
+  /** Does nothing now, but meant to clear all internal data **/
+  public void clear() {
+  }//clear()
+
   /**
    * Called by the GUI when this viewer/editor has to initialise itself for a
    * specific object.
