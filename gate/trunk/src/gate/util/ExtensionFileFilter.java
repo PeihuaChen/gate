@@ -14,17 +14,17 @@
  */
 package gate.util;
 
-
-import javax.swing.filechooser.*;
 import java.io.*;
 import java.util.*;
 
 /**
+ * Implementation of a file filter
  * This class is used by {@link javax.swing.JFileChooser} to filter the
  * displayed files by their extension.
  *
  */
-public class ExtensionFileFilter extends javax.swing.filechooser.FileFilter{
+public class ExtensionFileFilter extends javax.swing.filechooser.FileFilter
+                                 implements FileFilter {
 
   /** Debug flag
    */

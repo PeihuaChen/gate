@@ -649,12 +649,15 @@ public class SerialControllerEditor extends AbstractVisualResource
       }
     }
 
+    //use the controller for data caching
     public void setSelectedItem(Object anItem){
-      selectedItem = anItem;
+      ((SerialAnalyserController)controller).
+        setCorpus((Corpus)(anItem.equals("<none>") ? null : anItem));
     }
 
     public Object getSelectedItem(){
-      return selectedItem;
+      Corpus corpus = ((SerialAnalyserController)controller).getCorpus();
+      return (corpus == null ? (Object)"<none>" : (Object)corpus);
     }
 
     void fireDataChanged(){
