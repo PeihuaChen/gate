@@ -1805,6 +1805,10 @@ public class OracleDataStore extends JDBCDataStore {
       pstmt.setLong(1,((Long)lr.getLRPersistenceId()).longValue());
       rs = pstmt.executeQuery();
 
+      if (false == rs.next()) {
+        throw new PersistenceException("Invalid LR ID supplied - no data found");
+      }
+
       userID = new Long(rs.getLong("lr_owner_user_id"));
       groupID = new Long(rs.getLong("lr_owner_group_id"));
       perm = rs.getInt("lr_access_mode");
@@ -2877,7 +2881,7 @@ public class OracleDataStore extends JDBCDataStore {
     Iterator it = corp.iterator();
     while (it.hasNext()) {
       Document dbDoc = (Document)it.next();
-
+//System.out.println("found doc ["+dbDoc.getName()+"]");
       //adopt/sync?
       if (null == dbDoc.getLRPersistenceId()) {
         //doc was never adopted, adopt it
@@ -2891,6 +2895,7 @@ public class OracleDataStore extends JDBCDataStore {
         //3.3. adopt the doc with the sec info
         Document adoptedDoc = null;
         try {
+//System.out.println("adopting ["+dbDoc.getName()+"] ...");
           //don't open a new transaction, since sync() already has opended one
           adoptedDoc = (Document)_adopt(dbDoc,si,false);
         }
