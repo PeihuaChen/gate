@@ -41,25 +41,21 @@ public class SerialAnalyserController extends SerialController {
       "(SerialAnalyserController) \"" + getName() + "\":\n" +
       "The corpus supplied for execution was null!");
     //iterate through the documents in the corpus
-    Iterator docsIter = corpus.iterator();
-    while(docsIter.hasNext()){
-      Document doc = (Document)docsIter.next();
+    for(int i = 0; i < corpus.size(); i++){
+      boolean docWasLoaded = corpus.isDocumentLoaded(i);
+      Document doc = (Document)corpus.get(i);
       //run the system over this document
 
       //set the doc and corpus
-      for(int i = 0; i < prList.size(); i++){
-        ((LanguageAnalyser)prList.get(i)).setDocument(doc);
-        ((LanguageAnalyser)prList.get(i)).setCorpus(corpus);
+      for(int j = 0; j < prList.size(); j++){
+        ((LanguageAnalyser)prList.get(j)).setDocument(doc);
+        ((LanguageAnalyser)prList.get(j)).setCorpus(corpus);
       }
 
       super.execute();
 
       corpus.unloadDocument(doc);
-      //kalina: added this to try processing the BNC
-      //needs proper fixing by Valy
-      if(doc.getDataStore() != null)
-        Factory.deleteResource(doc);
-
+      if(!docWasLoaded) Factory.deleteResource(doc);
     }
   }
 
