@@ -208,7 +208,7 @@ public class TestGate {
       boolean allTests = true;
 
       if(! allTests){
-        suite.addTest(TestPR.suite());
+        suite.addTest(TestJavac.suite());
       } else {
         suite.addTest(TestPersist.suite());
         suite.addTest(TestBumpyStack.suite());
@@ -225,6 +225,7 @@ public class TestGate {
         suite.addTest(TestCreole.suite());
         suite.addTest(CookBook.suite());
         suite.addTest(TestFiles.suite());
+        suite.addTest(TestJavac.suite());
         suite.addTest(TestJdk.suite());
         suite.addTest(TestJape.suite());
         suite.addTest(TestTemplate.suite());
