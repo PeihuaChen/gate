@@ -40,6 +40,8 @@ public class GroupImpl
 
   /** --- */
   private Connection conn;
+  /** --- */
+  private int dbType;
 
   /** --- */
   private AccessControllerImpl ac;
@@ -60,6 +62,16 @@ public class GroupImpl
     this.users = users;
     this.ac = ac;
     this.conn = conn;
+
+    try {
+      String jdbcURL = conn.getMetaData().getURL();
+      this.dbType = DBHelper.getDatabaseType(jdbcURL);
+      Assert.assertTrue(this.dbType == DBHelper.ORACLE_DB ||
+                        this.dbType == DBHelper.POSTGRES_DB);
+    }
+    catch(SQLException sqex) {
+      sqex.printStackTrace();
+    }
 
     this.omModificationListeners = new Vector();
     this.omCreationListeners = new Vector();
@@ -103,32 +115,63 @@ public class GroupImpl
   public void setName(String newName, Session s)
     throws PersistenceException,SecurityException {
 
+    //first check the session and then check whether the user is member of the group
+    if (this.ac.isValidSession(s) == false) {
+      throw new SecurityException("invalid session supplied");
+    }
+
+    //2.1 check if the user is privileged
+    if (false == s.isPrivilegedSession() ) {
+      throw new SecurityException("insufficient privileges to change group name");
+    }
+
     CallableStatement stmt = null;
+    PreparedStatement pstmt = null;
 
-    //1. update database
-    try {
-      //first check the session and then check whether the user is member of the group
-      if (this.ac.isValidSession(s) == false) {
-        throw new SecurityException("invalid session supplied");
+    //Oracle / Postgres ?
+
+    if (this.dbType == DBHelper.ORACLE_DB) {
+
+      //1. update database
+      try {
+
+        stmt = this.conn.prepareCall(
+                "{ call "+Gate.DB_OWNER+".security.set_group_name(?,?)} ");
+        stmt.setLong(1,this.id.longValue());
+        stmt.setString(2,newName);
+        stmt.execute();
+        //release stmt???
+      }
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't change group name in DB: ["+ sqle.getMessage()+"]");
+      }
+      finally {
+        DBHelper.cleanup(stmt);
+      }
+    }
+
+    else if (this.dbType == DBHelper.POSTGRES_DB) {
+
+      try {
+
+        String sql = "select security_set_group_name(?,?) ";
+        pstmt = this.conn.prepareStatement(sql);
+        pstmt.setLong(1,this.id.longValue());
+        pstmt.setString(2,newName);
+        pstmt.execute();
+        //release stmt???
+      }
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't change group name in DB: ["+ sqle.getMessage()+"]");
+      }
+      finally {
+        DBHelper.cleanup(pstmt);
       }
 
-      //2.1 check if the user is privileged
-      if (false == s.isPrivilegedSession() ) {
-        throw new SecurityException("insufficient privileges to change group name");
-      }
+    }
 
-      stmt = this.conn.prepareCall(
-              "{ call "+Gate.DB_OWNER+".security.set_group_name(?,?)} ");
-      stmt.setLong(1,this.id.longValue());
-      stmt.setString(2,newName);
-      stmt.execute();
-      //release stmt???
-    }
-    catch(SQLException sqle) {
-      throw new PersistenceException("can't change group name in DB: ["+ sqle.getMessage()+"]");
-    }
-    finally {
-      DBHelper.cleanup(stmt);
+    else {
+      throw new IllegalArgumentException();
     }
 
     //2. update memebr variable
@@ -176,18 +219,51 @@ public class GroupImpl
 
     //3. update DB
     CallableStatement stmt = null;
+    PreparedStatement pstmt = null;
 
-    try {
-      stmt = this.conn.prepareCall(
-                "{ call "+Gate.DB_OWNER+".security.add_user_to_group(?,?)} ");
-      stmt.setLong(1,this.id.longValue());
-      stmt.setLong(2,usr.getID().longValue());
-      stmt.execute();
-      //release stmt???
+    //Oracle / Postgres ?
+
+    if (this.dbType == DBHelper.ORACLE_DB) {
+
+      try {
+        stmt = this.conn.prepareCall(
+                  "{ call "+Gate.DB_OWNER+".security.add_user_to_group(?,?)} ");
+        stmt.setLong(1,this.id.longValue());
+        stmt.setLong(2,usr.getID().longValue());
+        stmt.execute();
+        //release stmt???
+      }
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't add user to group in DB: ["+ sqle.getMessage()+"]");
+      }
+      finally {
+        DBHelper.cleanup(stmt);
+      }
     }
-    catch(SQLException sqle) {
-      throw new PersistenceException("can't add user to group in DB: ["+ sqle.getMessage()+"]");
+
+    else if (this.dbType == DBHelper.POSTGRES_DB) {
+
+      try {
+        String sql = "select security_add_user_to_group(?,?) ";
+        pstmt = this.conn.prepareStatement(sql);
+        pstmt.setLong(1,this.id.longValue());
+        pstmt.setLong(2,usr.getID().longValue());
+        pstmt.execute();
+        //release stmt???
+      }
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't add user to group in DB: ["+ sqle.getMessage()+"]");
+      }
+      finally {
+        DBHelper.cleanup(pstmt);
+      }
+
     }
+
+    else {
+      throw new IllegalArgumentException();
+    }
+
 
     //4. create ObjectModificationEvent
     ObjectModificationEvent e = new ObjectModificationEvent(
@@ -237,17 +313,46 @@ public class GroupImpl
 
     //3. update DB
     CallableStatement stmt = null;
+    PreparedStatement pstmt = null;
 
-    try {
-      stmt = this.conn.prepareCall(
-                "{ call "+Gate.DB_OWNER+".security.remove_user_from_group(?,?)} ");
-      stmt.setLong(1,this.id.longValue());
-      stmt.setLong(2,usr.getID().longValue());
-      stmt.execute();
-      //release stmt???
+    //Oracle / Postgres ?
+
+    if (this.dbType == DBHelper.ORACLE_DB) {
+      try {
+        stmt = this.conn.prepareCall(
+                  "{ call "+Gate.DB_OWNER+".security.remove_user_from_group(?,?)} ");
+        stmt.setLong(1,this.id.longValue());
+        stmt.setLong(2,usr.getID().longValue());
+        stmt.execute();
+        //release stmt???
+      }
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't remove user from group in DB: ["+ sqle.getMessage()+"]");
+      }
+      finally {
+        DBHelper.cleanup(stmt);
+      }
     }
-    catch(SQLException sqle) {
-      throw new PersistenceException("can't remove user from group in DB: ["+ sqle.getMessage()+"]");
+
+    else if (this.dbType == DBHelper.POSTGRES_DB) {
+      try {
+        String sql = "select security_remove_user_from_group(?,?) ";
+        pstmt = this.conn.prepareStatement(sql);
+        pstmt.setLong(1,this.id.longValue());
+        pstmt.setLong(2,usr.getID().longValue());
+        pstmt.execute();
+        //release stmt???
+      }
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't remove user from group in DB: ["+ sqle.getMessage()+"]");
+      }
+      finally {
+        DBHelper.cleanup(pstmt);
+      }
+    }
+
+    else {
+      throw new IllegalArgumentException();
     }
 
     //4. create ObjectModificationEvent
