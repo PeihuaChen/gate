@@ -294,22 +294,13 @@ I guess it&prime;s relevant to when GATE tries to persist the settings (and that
   </TR>
 
   <TR>
-    <TD>00045</TD>
+    <TD>00045 3)</TD>
     <TD>gui - feature requests</TD>
     <TD>Kalina</TD>
     <TD>___adopted_by</TD>
     <TD>beta1</TD>
     <TD>___fixed_on ___date ___Gversion</TD>
-    <TD>1. Search - allows you to find a string in the DocumentViewer/Editor. Vitally needed when marking up text. For example, you want to markup all occurences of 'he'. The only way to do that now is to read the entire text. Maybe it should be easier than that.
-
-technical difficulty: very low (content.indexOf (given string) + do
-highlight)
-<br>
-2. Corpus/save preserving format - same as the existing save as XML functionality, just slightly different method call. Just new entry on the menu.
-
-technical difficulty: low
-<br>
-3. make the action menu for resources a separate class and that gets constructed from actions exposed on the resources themselves. Valy says that's a really good idea and not difficult to implement. The nice thing about it is that it'll reduce the overhead of adding new types of LRs like Wordnet to the GUI with no programming effort on behalf of the user.
+    <TD>3. make the action menu for resources a separate class and that gets constructed from actions exposed on the resources themselves. Valy says that's a really good idea and not difficult to implement. The nice thing about it is that it'll reduce the overhead of adding new types of LRs like Wordnet to the GUI with no programming effort on behalf of the user.
 
 technical difficulty: medium (Valy knows exactly how but just not enough time till the beta; suggests done in January, before final release).
 </TD>
@@ -1082,6 +1073,29 @@ Anyone know why it should look for Z:\ on solaris?</TD>
 you have to have the annotations table on, then click on the annotation text, then choose the annotation type, get positioned in the table (which is slow and confusing on long documents) just to press delete. The problem is that linguists don't care about all the internal features produced by GATE most of the time.
 
 Suggestion: add a menu of actions for each annotation type (delete and select for now). It'll take longer to explain in writing but Valy agrees it's a good idea to bypass the complex delete procedure. It will not be computationally more expensive and will only take 10 mins to implement (as a pessimist I say 30).</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+
+  <TR>
+    <TD>00045 1) &amp; 2)</TD>
+    <TD>gui - feature requests</TD>
+    <TD>Kalina</TD>
+    <TD>___adopted_by</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>1. Search - allows you to find a string in the DocumentViewer/Editor. Vitally needed when marking up text. For example, you want to markup all occurences of 'he'. The only way to do that now is to read the entire text. Maybe it should be easier than that.
+
+technical difficulty: very low (content.indexOf (given string) + do
+highlight)
+<br>
+2. Corpus/save preserving format - same as the existing save as XML functionality, just slightly different method call. Just new entry on the menu.
+
+technical difficulty: low
+</TD>
     <TD>___test_method</TD>
     <TD>___supporting_materials</TD>
     <!--<TD>spare1</TD>-->
