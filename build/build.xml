@@ -63,6 +63,4 @@ $id$
                src="${buildDir}/junit-noframes.html"/>
     </mail>
   </target>
-  
-  
 </project>

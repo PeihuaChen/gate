@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <!-- $Id$ -->
 <project name="GATE" default="all" basedir=".">
     <description>
@@ -60,13 +61,17 @@
     <path refid="tools.jar.path"/>
   </path>
   
+  <tstamp>
+    <format property="TODAY_UK" pattern="d-MMMM-yyyy" locale="en"/>
+    <format property="TSTAMP_UK" pattern="hh:mm" locale="en"/>
+  </tstamp>
+  
   <!-- Prints out some information messages -->
   <echo level="info">
     This is the ANT build script for GATE (http://gate.ac.uk).
     Type &quot;ant help&quot; for details about the targets available.
-    GATE ${gate.version}, build ${gate.build}
-  </echo>
-  
+    GATE ${gate.version}, build ${gate.build}</echo>
+    
   <!-- Prints out details about the targets -->
   <target name="help">
     <echo level="info">
@@ -80,7 +85,7 @@
         -run: starts GATE
         -clean: cleans up the output from all previous builds
         
-        -doc: creates the Javadoc and Jaha2HTML documentation
+        -doc: creates the Javadoc and Java2HTML documentation
         -docclean: deletes all built documentation
         -jape: rebuilds the JAPE parser files and associated documentation
         -guk: compiles the GUK classes and builds the guk.jar archive
@@ -112,13 +117,9 @@
            srcdir="${srcDir}"/>
 		<jar destfile="${libDir}/ext/guk.jar" 
          update="false"
-         index="false">
+         index="true">
       <fileset dir="${outputDir}"
                includes="guk/**"/>
-    </jar>
-		<jar destfile="${libDir}/ext/guk.jar" 
-         update="true"
-         index="true">
       <fileset dir="${srcDir}/guk/resources"
                excludes="**/CVS,**/CVS/**,**/.cvsignore"/>
     </jar>
@@ -294,7 +295,11 @@
       <jvmarg value="-Djava.ext.dirs=${extDir}"/>
       <formatter type="plain"
                  usefile="false"/>
-      <test name="gate.TestGate"/>
+      <formatter type="xml"
+                 if="write.xml"/>
+      <test name="gate.TestGate"
+            outfile="testResult"
+            todir="${buildDir}"/>
     </junit>
   </target>
   
