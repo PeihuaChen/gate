@@ -105,18 +105,49 @@ public class TestBumpyStack extends TestCase
 
     //create some unreacheable resources
     //LRs
-    Factory.newCorpus("corpus");
-    Factory.newDocument("content");
-    Factory.newDocument(Gate.getUrl("tests/doc0.html"));
+
+    Resource res = Factory.newCorpus("corpus1");
+    res.getFeatures().put("large", new byte[500000]);
+    res = Factory.newCorpus("corpus2");
+    res.getFeatures().put("large", new byte[500000]);
+    res = Factory.newCorpus("corpus3");
+    res.getFeatures().put("large", new byte[500000]);
+
+    res = Factory.newDocument("content");
+    res.getFeatures().put("large", new byte[500000]);
+    res = Factory.newDocument(Gate.getUrl("tests/doc0.html"));
+    res.getFeatures().put("large", new byte[500000]);
+    res = Factory.newDocument(Gate.getUrl("tests/doc0.html"));
+    res.getFeatures().put("large", new byte[500000]);
+    res = Factory.newDocument(Gate.getUrl("tests/doc0.html"));
+    res.getFeatures().put("large", new byte[500000]);
 
     //PRs
-    Factory.createResource("gate.creole.tokeniser.DefaultTokeniser");
-    Factory.createResource("gate.creole.ANNIETransducer");
+    res = Factory.createResource("gate.creole.tokeniser.DefaultTokeniser");
+    res.getFeatures().put("large", new byte[500000]);
+    res = Factory.createResource("gate.creole.tokeniser.DefaultTokeniser");
+    res.getFeatures().put("large", new byte[500000]);
+    res = Factory.createResource("gate.creole.tokeniser.DefaultTokeniser");
+    res.getFeatures().put("large", new byte[500000]);
+
+    res = Factory.createResource("gate.creole.ANNIETransducer");
+    res.getFeatures().put("large", new byte[500000]);
 
     //Controllers
-    Factory.createResource("gate.creole.SerialController");
+    res = Factory.createResource("gate.creole.SerialController");
+    res.getFeatures().put("large", new byte[500000]);
+    res = Factory.createResource("gate.creole.SerialController");
+    res.getFeatures().put("large", new byte[500000]);
+    res = Factory.createResource("gate.creole.SerialController");
+    res.getFeatures().put("large", new byte[500000]);
+
+    res = null;
+
 
     //force GC
+    Thread.currentThread().sleep(1000);
+    System.gc();
+    Thread.currentThread().sleep(1000);
     System.gc();
 
     //check instances count
@@ -129,28 +160,34 @@ public class TestBumpyStack extends TestCase
                   Gate.getCreoleRegister().
                   get("gate.corpora.CorpusImpl")).
                   getInstantiations().size();
-
     int newTokCnt = ((ResourceData)
                   Gate.getCreoleRegister().
                   get("gate.creole.tokeniser.DefaultTokeniser")).
                   getInstantiations().size();
-
     int newJapeCnt = ((ResourceData)
                   Gate.getCreoleRegister().
                   get("gate.creole.ANNIETransducer")).
                   getInstantiations().size();
-
     int newSerctlCnt = ((ResourceData)
                   Gate.getCreoleRegister().
                   get("gate.creole.SerialController")).
                   getInstantiations().size();
 
-    assertEquals("Documents not cleaned", docCnt, newDocCnt);
-    assertEquals("Corpora not cleaned", corpusCnt, newCorpusCnt);
-    assertEquals("Tokenisers not cleaned", tokCnt, newTokCnt);
-    assertEquals("Japes not cleaned", japeCnt, newJapeCnt);
-    assertEquals("Controllers not cleaned", serctlCnt, newSerctlCnt);
+    String message =
+          "\nDocs expected: " + docCnt + ", got: " + newDocCnt +
+          "\nCorpora expected: " + corpusCnt + ", got: " + newCorpusCnt +
+          "\nTokenisers expected: " + tokCnt + ", got: " + newTokCnt +
+          "\nJapes expected: " + japeCnt + ", got: " + newJapeCnt +
+          "\nSerCtls expected: " + serctlCnt + ", got: " + newSerctlCnt;
+
+    assert(message, docCnt == newDocCnt &&
+                    corpusCnt == newCorpusCnt &&
+                    tokCnt == newTokCnt &&
+                    japeCnt == newJapeCnt &&
+                    serctlCnt == newSerctlCnt);
   }
+
+
 
 
 } // class TestBumpyStack
