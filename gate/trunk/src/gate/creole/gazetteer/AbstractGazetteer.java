@@ -50,12 +50,19 @@ public abstract class AbstractGazetteer
    */
   protected Boolean caseSensitive = new Boolean(true);
 
+  /**
+   * Should this gazetteer only match whole words. The default value is
+   * <tt>true</tt>.
+   */
+  protected Boolean wholeWordsOnly;
+
   /** the linear definition of the gazetteer */
   protected LinearDefinition definition;
 
   /** reference to mapping definiton info
    *  allows filling of Lookup.ontologyClass according to a list*/
   protected MappingDefinition mappingDefinition;
+
 
   /**
    * Sets the AnnotationSet that will be used at the next run for the newly
@@ -148,4 +155,21 @@ public abstract class AbstractGazetteer
     if ( null!=gl )
       listeners.add(gl);
   }
+
+  /**
+   * Gets the value for the {@link #wholeWordsOnly} parameter.
+   * @return a Boolean value.
+   */
+  public Boolean getWholeWordsOnly() {
+    return wholeWordsOnly;
+  }
+
+  /**
+   * Sets the value for the {@link #wholeWordsOnly} parameter.
+   * @param wholeWordsOnly a Boolean value.
+   */
+  public void setWholeWordsOnly(Boolean wholeWordsOnly) {
+    this.wholeWordsOnly = wholeWordsOnly;
+  }
+
 }//class AbstractGazetteer

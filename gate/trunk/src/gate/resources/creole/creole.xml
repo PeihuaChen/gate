@@ -245,6 +245,9 @@
       <PARAMETER DEFAULT="true"
         COMMENT="Should this gazetteer diferentiate on case"
   NAME="caseSensitive">java.lang.Boolean</PARAMETER>
+      <PARAMETER DEFAULT="true"
+                 COMMENT="Should this gazetteer only match whole words"
+                 NAME="wholeWordsOnly">java.lang.Boolean</PARAMETER>
       <ICON>shefGazetteer.gif</ICON>
     </RESOURCE>
 
