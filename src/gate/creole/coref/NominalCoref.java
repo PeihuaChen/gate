@@ -243,31 +243,55 @@ public class NominalCoref extends AbstractCoreferencer
                 continue;
             }            
 
-            // Don't associate if it's immediately followed by a person.
+	    // nominals immediately followed by Person annotations:
+	    // BAD:
+	    //   Chairman Bill Gates               (title)
+	    // GOOD:
+	    //   secretary of state, Colin Powell  (inverted appositive)
+	    //   the home secretary David Blunkett (same but no comma, 
+	    //                                      possible in transcriptions)
+	    // "the" is a good indicator for apposition
+
 	    // Luckily we have an array of all Person annotations in order...
-	    Annotation nextAnnotation = (Annotation) nominalArray[i+1];
-	    if (nextAnnotation.getType().equals(PERSON_CATEGORY)) {
-		// Get all tokens between this and the next person
-		int interveningTokens =
-		    countInterveningTokens(nominal, nextAnnotation,
-					   currentToken, tokens);
-		if (interveningTokens == 0) {
+	    if (i < nominalArray.length - 1) {
+		Annotation nextAnnotation = (Annotation) nominalArray[i+1];
+		if (nextAnnotation.getType().equals(PERSON_CATEGORY)) {
+		    // is it preceded by a definite article?
+		    previousToken = (Annotation) tokens[currentToken - 1];
+		    previousValue = (String) 
+			previousToken.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
+		    
+		    // Get all tokens between this and the next person
+		    int interveningTokens =
+			countInterveningTokens(nominal, nextAnnotation,
+					       currentToken, tokens);
+		    if (interveningTokens == 0 && 
+			! previousValue.equalsIgnoreCase("the")) {
+			
 		    // There is nothing between the job title and the person,
 		    // like "Chairman Gates" -- do nothing.
-		    Out.println("immediately followed by Person");
-		    continue;
-		}
-		else if (interveningTokens == 1) {
-		    if (getFollowingToken(nominal, currentToken, tokens)
-			.getFeatures().get(TOKEN_STRING_FEATURE_NAME)
-			.equals(",")) {
-			anaphor2antecedent.put(nominal, nextAnnotation);
-			Out.println("associating with " +
-				    stringValue(nextAnnotation));
+			Out.println("immediately followed by Person");
 			continue;
 		    }
-		}
+		    else if (interveningTokens == 1) {
+			String tokenString =
+			    (String) getFollowingToken(nominal,
+						       currentToken, tokens)
+			    .getFeatures().get(TOKEN_STRING_FEATURE_NAME);
+			Out.print("STRING VALUE [" + tokenString + "] ");
+			if (! tokenString.equals(",") &&
+			    ! tokenString.equals("-")) {
+			    Out.println("nominal and person separated by NOT [,-]");
+			    continue;
+			}
+		    }
 		    
+		    anaphor2antecedent.put(nominal, nextAnnotation);
+		    Out.println("associating with " +
+				stringValue(nextAnnotation));
+		    continue;
+		    
+		}
 	    }
             
             // If we have no possible antecedents, create a new Person
@@ -400,7 +424,7 @@ public class NominalCoref extends AbstractCoreferencer
       .getStartNode().getOffset().longValue();
     
     while (currentOffset < endOffset) {
-      if (currentOffset > startOffset) {
+      if (currentOffset >= startOffset) {
         interveningTokens++;
       }
       currentPosition++;
@@ -415,7 +439,7 @@ public class NominalCoref extends AbstractCoreferencer
     long endOffset = current.getEndNode().getOffset().longValue();
     long currentOffset = ((Annotation) tokens[currentPosition])
       .getStartNode().getOffset().longValue();
-    while (currentOffset <= endOffset) {
+    while (currentOffset < endOffset) {
       currentPosition++;
       currentOffset = ((Annotation) tokens[currentPosition])
 	.getStartNode().getOffset().longValue();
