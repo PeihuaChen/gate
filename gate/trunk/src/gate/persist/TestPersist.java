@@ -626,7 +626,9 @@ public class TestPersist extends TestCase
     Assert.assertTrue(lr instanceof DatabaseDocumentImpl);
     Assert.assertNotNull(lr.getDataStore());
     Assert.assertTrue(lr.getDataStore() instanceof DatabaseDataStore);
-    Assert.assertEquals(doc.getAnnotations(), ((DatabaseDocumentImpl)lr).getAnnotations());
+//The transient doc has been unloaded during adopt and is now empty
+//the following test doesn't make sense
+//    Assert.assertEquals(doc.getAnnotations(), ((DatabaseDocumentImpl)lr).getAnnotations());
 
     sampleDoc_lrID = (Long)lr.getLRPersistenceId();
     if (DEBUG) Out.prln("lr id: " + this.sampleDoc_lrID);
