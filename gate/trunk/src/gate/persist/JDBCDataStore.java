@@ -407,7 +407,7 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
    * from the list listeners for this datastore
    */
   public void removeDatastoreListener(DatastoreListener l) {
-//System.out.println(">> ["+l.hashCode()+"] listener being removed...");
+//System.out.println("listener being removed...");
     Assert.assertNotNull(this.datastoreListeners);
 //    Assert.assertTrue(this.datastoreListeners.contains(l));
 
@@ -422,7 +422,7 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
    * Registers a new {@link gate.event.DatastoreListener} with this datastore
    */
   public void addDatastoreListener(DatastoreListener l) {
-//System.out.println(">> ["+l.hashCode()+"] listener added...");
+//System.out.println("listener added...");
     Assert.assertNotNull(this.datastoreListeners);
     if (false == this.datastoreListeners.contains(l)) {
       Vector temp = (Vector)this.datastoreListeners.clone();
@@ -446,6 +446,7 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
     Assert.assertNotNull(datastoreListeners);
     int count = datastoreListeners.size();
     for (int i = 0; i < count; i++) {
+//System.out.println("notifying listener...");
       ((DatastoreListener)datastoreListeners.elementAt(i)).resourceDeleted(e);
     }
   }
@@ -468,18 +469,27 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
 
 
   public void resourceUnloaded(CreoleEvent e) {
-
+//Out.prln("RESOURCE UNLOADED res=["+e .getResource().getClass() .toString()+"], src=["+e.getSource().getClass().toString()+"]...");
     Assert.assertNotNull(e.getResource());
-    if(! (e.getSource() instanceof LanguageResource))
+    if(! (e.getResource() instanceof LanguageResource))
       return;
 
+    //1. check it's our resource
     LanguageResource lr = (LanguageResource)e.getResource();
+//Out.prln("CLOSING A RESOURCE...");
     //this is a resource from another DS, so no need to do anything
     if(lr.getDataStore() != this)
       return;
 
+    //2. remove from the list of reosurce that should be sunced if DS is closed
     this.dependentResources.remove(lr);
-    //don't save it, this may not be the user's choice
+
+    //3. don't save it, this may not be the user's choice
+
+    //4. remove the reource as listener for events from the DataStore
+    //otherwise the DS will continue sending it events when the reource is
+    // no longer active
+    this.removeDatastoreListener((DatastoreListener)lr);
   }
 
   public void datastoreOpened(CreoleEvent e) {
