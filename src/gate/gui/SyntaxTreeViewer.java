@@ -34,7 +34,7 @@ import javax.swing.event.PopupMenuEvent;
 import gate.util.*;
 import gate.*;
 
-import guk.*;
+//import guk.*;
 
 /**
   * The SyntaxTreeViewer works by getting an annotation set of all annotations
@@ -174,7 +174,7 @@ public class SyntaxTreeViewer extends JPanel
   private Document document = null;
   // the document to which the annotations belong
 
-  private static BasicUnicodeButtonUI buttonUI = null;
+//  private static BasicUnicodeButtonUI buttonUI = null;
   private boolean unicodeSupportEnabled = false;
 
   private SyntaxTreeViewer() { //override so we can't be constructed like that!
@@ -189,9 +189,10 @@ public class SyntaxTreeViewer extends JPanel
 
   	treeNodeAnnotationType = annotType;
     unicodeSupportEnabled = unicodeSupport;
-
+/*
     if (unicodeSupportEnabled)
        buttonUI = new BasicUnicodeButtonUI();
+*/
     try  {
       jbInit();
     }
@@ -241,7 +242,7 @@ public class SyntaxTreeViewer extends JPanel
 
     final SyntaxTreeViewer syntaxTreeViewer1 =
       new SyntaxTreeViewer("SyntaxTreeNode");
-    syntaxTreeViewer1.setUnicodeSupportEnabled(true);
+    //syntaxTreeViewer1.setUnicodeSupportEnabled(true);
     //need to set the document here!!!!
 
 
@@ -648,11 +649,11 @@ public class SyntaxTreeViewer extends JPanel
 
     JButton button = new JButton((String) node.getUserObject());
     button.setBorderPainted(false);
-
+/*
     //change the button UI so it supports Unicode (only if we need to)
     if (unicodeSupportEnabled)
       button.setUI(buttonUI);
-
+*/
     FontMetrics fm = button.getFontMetrics(button.getFont());
 
     int buttonWidth,
@@ -1232,13 +1233,16 @@ public class SyntaxTreeViewer extends JPanel
   public void setTextAnnotationType(String newTextAnnotationType) {
     textAnnotationType = newTextAnnotationType;
   }
-
+/*
   public void setUnicodeSupportEnabled(boolean newUnicodeSupportEnabled) {
     unicodeSupportEnabled = newUnicodeSupportEnabled;
+
     if (unicodeSupportEnabled)
        buttonUI = new BasicUnicodeButtonUI();
     this.repaint();
   }
+
+  */
 
 
 
@@ -1289,6 +1293,9 @@ class FocusButton extends JButton {
 } // class SyntaxTreeViewer
 
 // $Log$
+// Revision 1.15  2000/12/08 14:50:29  valyt
+// Removed all traces of Unicode stuff
+//
 // Revision 1.14  2000/12/04 12:29:29  valyt
 // Done some work on the visual resources
 // Added the smart XJTable
