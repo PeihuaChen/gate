@@ -78,7 +78,7 @@ public class SynsetImpl implements Synset {
 
       Word gateWord = new WordImpl(jwWord.getLemma(),
                                    jwIndexWord.getSenseCount(),
-                                   _wnDictionary);
+                                   this.wnDictionary);
 
       //construct the proper word form
       WordSense gateWordSense = null;
@@ -93,7 +93,8 @@ public class SynsetImpl implements Synset {
                                           0,
                                           jwWord.getIndex(),
                                           false,
-                                          WNHelper.AdjPosition2int(jwAdjective));
+                                          WNHelper.AdjPosition2int(jwAdjective),
+                                          this.wnDictionary);
       }
       else if (this.synsetPOS == WordNet.POS_VERB) {
       }
