@@ -1687,6 +1687,7 @@ Deafening VBG
 Deal NNP NN
 Dealers NNS NNPS NNP
 Dealing VBG
+Dear RB
 Death NN NNP
 Debate NN
 Debates NNS
@@ -2307,7 +2308,7 @@ Flaws NNS
 Flemish JJ
 Flesh NN
 Flexible JJ NNP
-Flick NN
+Flick NN NNP
 Flight NNP NN
 Flights NNS
 Floating VBG JJ
@@ -5591,6 +5592,7 @@ Venetian JJ
 Venezuelan JJ
 Ventures NNPS NNP
 Verbatim JJ
+Very RB JJ
 Veterans NNP NNPS
 Veterinary JJ
 Vice NNP NN
