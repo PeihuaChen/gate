@@ -24,7 +24,7 @@ import gate.creole.ResourceInstantiationException;
 
 /** represents a mapping definition which maps gazetteer lists to ontology classes */
 public class MappingDefinition extends gate.creole.AbstractLanguageResource
-                              implements Set {
+                              implements List {
 
   private final static String ENCODING = "UTF-8";
 
@@ -120,14 +120,14 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
     return (MappingNode)nodesByList.get(list);
   }
 
-  /*---implementation of interface java.util.Set---*/
+  /*---implementation of interface java.util.List---*/
 
   public int size() {
     return nodes.size();
   }
 
   public boolean isEmpty() {
-    return 0 == nodes.size();
+    return nodes.isEmpty();
   }
 
   public boolean contains(Object o) {
@@ -164,6 +164,30 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
     return result;
   } // add()
 
+  /**
+   * adds a new node at the specified position, only if its list is new and uniquely mapped to this node.
+   * @param o a node
+   * @param index position in the list
+   */
+  public void add(int index,Object o) {
+    if (o instanceof MappingNode) {
+      String list = ((MappingNode)o).getList();
+      if (!nodesByList.containsKey(list)) {
+        nodes.add(index,o);
+        nodesByList.put(list,o);
+        lists.add(list);
+      } // if unique
+    } // if a linear node
+  } // add()
+
+  public Object set(int index, Object o) {
+    throw new UnsupportedOperationException("this method has not been implemented");
+  }
+
+  public Object get(int index){
+    return nodes.get(index);
+  }
+
   public boolean remove(Object o) {
     boolean result = false;
     if (o instanceof MappingNode) {
@@ -174,6 +198,17 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
     } // if linear node
     return result;
   }// remove
+
+  public Object remove(int index) {
+    Object result = null;
+    result = nodes.remove(index);
+    if (null!=result) {
+      String list = ((MappingNode)result).getList();
+      lists.remove(list);
+      nodesByList.remove(list);
+    }
+    return result;
+  }
 
   public boolean containsAll(Collection c) {
     return nodes.containsAll(c);
@@ -190,8 +225,20 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
       } // instance of MappingNode
     } // while
     return result;
-  } // addAll()
+  } // addAll(Collection)
 
+  public boolean addAll(int index,Collection c) {
+    int size = nodes.size();
+    Iterator iter = c.iterator();
+    Object o;
+    while (iter.hasNext()) {
+      o = iter.next();
+      if (o instanceof MappingNode)  {
+        add(index++, o);
+      } // instance of MappingNode
+    } // while
+    return (size!=nodes.size());
+  }//addAll(int,Collection)
 
   public boolean removeAll(Collection c) {
     boolean result = false;
@@ -240,7 +287,26 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
     return result;
   } // equals()
 
- /*---end of implementation of interface java.util.Set---*/
+  public List subList(int i1, int i2) {
+    return nodes.subList(i1,i2);
+  }
+
+  public ListIterator listIterator(int index) {
+    throw new UnsupportedOperationException("this method is not implemented");
+  }
+  public ListIterator listIterator() {
+    throw new UnsupportedOperationException("this method is not implemented");
+  }
+
+  public int lastIndexOf(Object o) {
+    return nodes.lastIndexOf(o);
+  }
+
+  public int indexOf(Object o) {
+    return nodes.indexOf(o);
+  }
+
+ /*---end of implementation of interface java.util.List---*/
 
  /*-----------internal classes -------------*/
 
@@ -266,6 +332,7 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
       }// if possible remove
       removeCalled = true;
     } // remove
+
 
   } // class SafeIterator
 

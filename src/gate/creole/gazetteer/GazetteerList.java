@@ -24,16 +24,24 @@ import gate.creole.*;
 
 /** implementation of a gazetteer list */
 public class GazetteerList extends gate.creole.AbstractLanguageResource
-implements Set {
+implements List {
 
   /** the url of this list */
   private URL url;
   private String encoding = "UTF-8";
 
-  private Set entries = new HashSet();
+  /** flag indicating whether the list has been modified after loading/storing */
+  private boolean isModified = false;
+
+  private List entries = new ArrayList();
 
   /** create a new gazetteer list */
   public GazetteerList() {
+  }
+
+  /** @return true if the list has been modified after load/store  */
+  public boolean isModified() {
+    return isModified;
   }
 
   /** set the encoding of the list
@@ -71,7 +79,7 @@ implements Set {
     } catch (Exception x) {
       throw new ResourceInstantiationException(x);
     }
-
+    isModified = false;
   } // load ()
 
   /**
@@ -84,7 +92,15 @@ implements Set {
         throw new ResourceInstantiationException("URL not specified (null)");
       }
 
-      File fileo = new File(url.getPath()+url.getFile());
+      URL tempUrl = url;
+      if (-1 != url.getProtocol().indexOf("gate")) {
+        tempUrl = gate.util.protocols.gate.Handler.class.getResource(
+                      gate.util.Files.getResourcePath() + url.getPath()
+                    );
+      } // if gate:path url
+
+      File fileo = new File(tempUrl.getFile());
+
       fileo.delete();
       BufferedWriter listWriter = new BufferedWriter(new FileWriter(fileo));
       Iterator iter = entries.iterator();
@@ -96,18 +112,19 @@ implements Set {
     } catch (Exception x) {
       throw new ResourceInstantiationException(x);
     }
+    isModified = false;
   } // store()
 
   public void setURL(URL theUrl) {
     url = theUrl;
+    isModified = true;
   }
 
   public URL getURL() {
     return url;
   }
 
-  /*---implementation of interface java.util.Set---*/
-
+/*--------------implementation of java.util.List--------------------*/
   public int size() {
     return entries.size();
   }
@@ -139,11 +156,14 @@ implements Set {
     if (o instanceof String) {
       result = entries.add(o);
     }
+    isModified |= result;
     return result;
   } // add()
 
   public boolean remove(Object o) {
-    return entries.remove(o);
+    boolean result = entries.remove(o);
+    isModified |= result;
+    return result;
   }
 
   public boolean containsAll(Collection c) {
@@ -166,20 +186,36 @@ implements Set {
         result |= entries.add(o);
       }
     } // while
+    isModified |= result;
+
     return result;
-  } // addAll()
+  } // addAll(Collection)
+
+  public boolean addAll(int index, Collection c) {
+    boolean result = entries.addAll(index,c);
+    isModified |= result;
+    return result;
+  } //addAll(int,Collection)
+
 
   public boolean removeAll(Collection c) {
-    return entries.removeAll(c);
+    boolean result = entries.removeAll(c);
+    isModified |= result;
+    return result;
   }
 
   public boolean retainAll(Collection c) {
-    return entries.retainAll(c);
+    boolean result = entries.retainAll(c);
+    isModified |= result;
+    return result;
   }
 
   public void clear() {
+    if (0 < entries.size())
+      isModified = true;
     entries.clear();
   }
+
 
   public boolean equals(Object o) {
     boolean result = false;
@@ -191,6 +227,87 @@ implements Set {
     return result;
   } // equals()
 
-  /*---end of implementation of interface java.util.Set---*/
+
+
+  public Object get(int index) {
+    return entries.get(index);
+  }
+
+  public Object set(int index, Object element) {
+    isModified=true;
+    return entries.set(index,element);
+  }
+
+  public void add(int index, Object element) {
+    isModified = true;
+    entries.add(index,element);
+  }
+
+  public Object remove(int index) {
+    int size = entries.size();
+    Object result = entries.remove(index);
+    isModified |= (size!=entries.size());
+    return result;
+  }
+
+  public int indexOf(Object o) {
+    return entries.indexOf(o);
+  }
+
+  public int lastIndexOf(Object o) {
+    return entries.lastIndexOf(o);
+  }
+
+  public ListIterator listIterator() {
+    return entries.listIterator();
+  }
+
+  public ListIterator listIterator(int index) {
+    return entries.listIterator(index);
+  }
+
+  public List subList(int fromIndex, int toIndex) {
+    return entries.subList(fromIndex,toIndex);
+  }
+
+
+  /** dumps all the entries to one string */
+  public String toString() {
+    StringBuffer result = new StringBuffer();
+    String entry = null;
+    for ( int i = 0 ; i < entries.size() ; i++) {
+      entry = ((String)entries.get(i)).trim();
+      if (entry.length()>0) {
+        result.append(entry);
+        result.append("\n");
+      }// if
+    }// for
+    return result.toString();
+  }//toString()
+
+  /** updates the content of the gaz list with the given parameter
+   *  @param newContent the new content of the gazetteer list */
+  public void updateContent(String newContent) {
+    BufferedReader listReader;
+
+
+    listReader = new BufferedReader(new StringReader(newContent));
+    String line;
+    List tempEntries = new ArrayList();
+    try {
+      while (null != (line = listReader.readLine())) {
+        tempEntries.add(line);
+      } //while
+      listReader.close();
+    } catch (IOException x) {
+      /**should never be thrown*/
+      throw new gate.util.LuckyException("IOException :"+x.getMessage());
+    }
+
+    isModified = !tempEntries.equals(entries);
+    clear();
+    entries = tempEntries;
+
+  } // updateContent(String)
 
 } // Class GazetteerList
