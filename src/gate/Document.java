@@ -25,13 +25,7 @@ import gate.util.InvalidOffsetException;
 
 /** Represents the commonalities between all sorts of documents.
  */
-public interface Document extends LanguageResource, Comparable {
-
-  /**
-   * The parameter name for the document URL
-   */
-  public static final String
-    DOCUMENT_URL_PARAMETER_NAME = "sourceUrl";
+public interface Document extends SimpleDocument {
 
   /**
   * The parameter name that determines whether or not a document is markup aware
@@ -57,14 +51,6 @@ public interface Document extends LanguageResource, Comparable {
   public static final String
     DOCUMENT_END_OFFSET_PARAMETER_NAME = "sourceUrlEndOffset";
 
-  /** Documents are identified by URLs
-   */
-  public URL getSourceUrl();
-
-  /** Set method for the document's URL
-   */
-  public void setSourceUrl(URL sourceUrl);
-
   /** Documents may be packed within files; in this case an optional pair of
    *  offsets refer to the location of the document.
    */
@@ -82,35 +68,9 @@ public interface Document extends LanguageResource, Comparable {
    */
   public Long getSourceUrlEndOffset();
 
-  /** The content of the document: wraps e.g. String for text; MPEG for
-   *  video; etc.
-   */
-  public DocumentContent getContent();
-
-  /** Set method for the document content
-   */
-  public void setContent(DocumentContent newContent);
-
-  /** Get the default set of annotations. The set is created if it
-   *  doesn't exist yet.
-   */
-  public AnnotationSet getAnnotations();
-
-  /** Get a named set of annotations. Creates a new set if one with this
-   *  name doesn't exist yet.
-   */
-  public AnnotationSet getAnnotations(String name);
-
   /** Returns a map with the named annotation sets
     */
   public Map getNamedAnnotationSets();
-
-  /**
-   * Removes one of the named annotation sets.
-   * Note that the default annotation set cannot be removed.
-   * @param name the name of the annotation set to be removed
-   */
-  public void removeAnnotationSet(String name);
 
   /** Make the document markup-aware. This will trigger the creation
    *  of a DocumentFormat object at Document initialisation time; the

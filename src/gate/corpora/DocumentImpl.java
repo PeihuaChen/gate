@@ -2336,6 +2336,13 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     return namedAnnotSets;
   } // getNamedAnnotationSets
 
+  /** Returns a set of all named annotation sets in existence
+  */
+  public Set getAnnotationSetNames(){
+    return namedAnnotSets.keySet();
+  }
+
+
   /**
    * Removes one of the named annotation sets.
    * Note that the default annotation set cannot be removed.
@@ -2368,7 +2375,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
         ((AnnotationSetImpl) iter.next()).edit(start, end, replacement);
     }
     //let the listeners know
-    fireContentEdited(new DocumentEvent(this, DocumentEvent.CONTENT_EDITED, 
+    fireContentEdited(new DocumentEvent(this, DocumentEvent.CONTENT_EDITED,
             start, end));
   } // edit(start,end,replacement)
 
@@ -2704,7 +2711,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
       }
     }
   }
-  
+
   protected void fireContentEdited(DocumentEvent e) {
     if (documentListeners != null) {
       Vector listeners = documentListeners;
@@ -2714,7 +2721,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
       }
     }
   }
-  
+
   public void resourceLoaded(CreoleEvent e) {
   }
   public void resourceUnloaded(CreoleEvent e) {

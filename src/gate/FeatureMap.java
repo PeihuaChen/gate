@@ -26,7 +26,7 @@ import gate.event.FeatureMapListener;
   * The event code is needed so a persistent annotation can fire updated events
   * when its features are updated
   */
-public interface FeatureMap extends Map
+public interface FeatureMap extends SimpleFeatureMap
 {
   /** Tests if <b>this</b> featureMap object includes  aFeatureMap features.
     * @param aFeatureMap object which will be included  or not in  <b>this</b>
