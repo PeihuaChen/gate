@@ -105,6 +105,7 @@ public class AnnotationDiff extends AbstractVisualResource{
   private  final Color BLACK = new Color(0,0,0);
 
   private Color colors[] = new Color[MAX_TYPES];
+  JScrollPane scrollPane = new JScrollPane();
 
   /** Used to store the no. of annotations from response,identified as belonging
     * to one of the previous types.
@@ -298,122 +299,151 @@ public class AnnotationDiff extends AbstractVisualResource{
 
   /** This method aranges everything on this JPanel*/
   protected void arangeAllComponents(){
+
+    this.removeAll();
     // Setting the box layout for diffpanel
     BoxLayout boxLayout = new BoxLayout(this,BoxLayout.Y_AXIS);
     this.setLayout(boxLayout);
+
     // Put the table into a JScrollPanel
-    JScrollPane scrollPane = new JScrollPane(diffTable);
+    scrollPane.getViewport().setView(diffTable);
     // Add the tableScroll to the diffPanel
     this.add(scrollPane);
 
     // ADD the LEGENDA
     //Lay out the JLabels from left to right.
-    JPanel jLabelPane = new JPanel();
-    jLabelPane.setLayout(new BoxLayout(jLabelPane, BoxLayout.X_AXIS));
+    Box infoBox = new Box(BoxLayout.X_AXIS);
     // Keep the components together
-    jLabelPane.add(Box.createHorizontalGlue());
-    JLabel jLabel = new JLabel("Missing (key but no response): " +
+    //box.add(Box.createHorizontalGlue());
+
+    Box box = new Box(BoxLayout.Y_AXIS);
+    JLabel jLabel = new JLabel("LEGENDA");
+    jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
+    jLabel.setOpaque(true);
+    jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    box.add(jLabel);
+
+    jLabel = new JLabel("Missing (present in Key but not in Response):  " +
                                                 typeCounter[MISSING_TYPE]);
-    jLabel.setForeground(colors[MISSING_TYPE]);
-    jLabel.setBackground(BLACK);
+    jLabel.setForeground(BLACK);
+    jLabel.setBackground(colors[MISSING_TYPE]);
+    jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
     jLabel.setOpaque(true);
-    jLabelPane.add(jLabel);
-    // This places a space between the two JLabel components
-    jLabelPane.add(Box.createRigidArea(new Dimension(40, 0)));
-    jLabel = new JLabel("Correct (exact match): " + typeCounter[CORRECT_TYPE]);
-    jLabel.setForeground(colors[CORRECT_TYPE]);
-    jLabel.setBackground(BLACK);
+    jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    box.add(jLabel);
+
+    // Add a space
+    box.add(Box.createRigidArea(new Dimension(0,5)));
+
+    jLabel = new JLabel("Correct (total match):  " + typeCounter[CORRECT_TYPE]);
+    jLabel.setForeground(BLACK);
+    jLabel.setBackground(colors[CORRECT_TYPE]);
+    jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
     jLabel.setOpaque(true);
-    jLabelPane.add(jLabel);
-    // This places a space between the two JLabel components
-    jLabelPane.add(Box.createRigidArea(new Dimension(40, 0)));
-    jLabel =new JLabel("Partially correct (overlap between key and response): "+
+    jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    box.add(jLabel);
+
+    // Add a space
+    box.add(Box.createRigidArea(new Dimension(0,5)));
+
+    jLabel =new JLabel("Partially correct (overlap in Key and Response):  "+
                                         typeCounter[PARTIALLY_CORRECT_TYPE]);
-    jLabel.setForeground(colors[PARTIALLY_CORRECT_TYPE]);
-    jLabel.setBackground(BLACK);
+    jLabel.setForeground(BLACK);
+    jLabel.setBackground(colors[PARTIALLY_CORRECT_TYPE]);
+    jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
     jLabel.setOpaque(true);
-    jLabelPane.add(jLabel);
-    // This places a space between the two JLabel components
-    jLabelPane.add(Box.createRigidArea(new Dimension(40, 0)));
-    jLabel = new JLabel("Spurious (response but no key): " +
+    jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    box.add(jLabel);
+
+    // Add a space
+    box.add(Box.createRigidArea(new Dimension(0,5)));
+
+    jLabel = new JLabel("Spurious (present in Response but not in Key):  " +
                                         typeCounter[SPURIOUS_TYPE]);
-    jLabel.setForeground(colors[SPURIOUS_TYPE]);
-    jLabel.setBackground(BLACK);
+    jLabel.setForeground(BLACK);
+    jLabel.setBackground(colors[SPURIOUS_TYPE]);
+    jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
     jLabel.setOpaque(true);
-    jLabelPane.add(jLabel);
+    jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    box.add(jLabel);
 
-    this.add(jLabelPane);
+    infoBox.add(box);
+    // Add a space
+    infoBox.add(Box.createRigidArea(new Dimension(40,0)));
 
-    // ADD A SPACE
+    // Precision measure
     //Lay out the JLabels from left to right.
-    jLabelPane = new JPanel();
-    jLabelPane.setLayout(new BoxLayout(jLabelPane, BoxLayout.X_AXIS));
-    jLabelPane.add(Box.createHorizontalGlue());
-    jLabelPane.add(Box.createRigidArea(new Dimension(35, 10)));
-    this.add(jLabelPane);
+    box = new Box(BoxLayout.Y_AXIS);
 
-    // FIRST ROW of MEASURES
-    //Lay out the JLabels from left to right.
-    jLabelPane = new JPanel();
-    jLabelPane.setLayout(new BoxLayout(jLabelPane, BoxLayout.X_AXIS));
-    // Keep the components together
-    jLabelPane.add(Box.createHorizontalGlue());
     jLabel = new JLabel("Precision strict: " +
                                     formatter.format(precisionStrict));
-    jLabelPane.add(jLabel);
-    // This places a space between the two JLabel components
-    jLabelPane.add(Box.createRigidArea(new Dimension(35, 0)));
-    jLabel = new JLabel("Recall strict: " + formatter.format(recallStrict));
-    jLabelPane.add(jLabel);
-    // This places a space between the two JLabel components
-    jLabelPane.add(Box.createRigidArea(new Dimension(35, 0)));
-    jLabel = new JLabel("False positive strict: " +
-                                        formatter.format(falsePositiveStrict));
-    jLabelPane.add(jLabel);
+    jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
+    box.add(jLabel);
 
-    this.add(jLabelPane);
-
-    // SECOND ROW of MEASURES
-    //Lay out the JLabels from left to right.
-    jLabelPane = new JPanel();
-    jLabelPane.setLayout(new BoxLayout(jLabelPane, BoxLayout.X_AXIS));
-    // Keep the components together
-    jLabelPane.add(Box.createHorizontalGlue());
     jLabel = new JLabel("Precision average: " +
                                     formatter.format(precisionAverage));
-    jLabelPane.add(jLabel);
-    // This places a space between the two JLabel components
-    jLabelPane.add(Box.createRigidArea(new Dimension(20, 0)));
-    jLabel = new JLabel("Recall average: " + formatter.format(recallAverage));
-    jLabelPane.add(jLabel);
-    // This places a space between the two JLabel components
-    jLabelPane.add(Box.createRigidArea(new Dimension(20, 0)));
-    jLabel = new JLabel("False positive average: " +
-                                        formatter.format(falsePositiveAverage));
-    jLabelPane.add(jLabel);
+    jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
+    box.add(jLabel);
 
-    this.add(jLabelPane);
-
-    // THIRD ROW of MEASURES
-    //Lay out the JLabels from left to right.
-    jLabelPane = new JPanel();
-    jLabelPane.setLayout(new BoxLayout(jLabelPane, BoxLayout.X_AXIS));
-    // Keep the components together
-    jLabelPane.add(Box.createHorizontalGlue());
     jLabel = new JLabel("Precision lenient: " +
                                     formatter.format(precisionLenient));
-    jLabelPane.add(jLabel);
-    // This places a space between the two JLabel components
-    jLabelPane.add(Box.createRigidArea(new Dimension(28, 0)));
+    jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
+    box.add(jLabel);
+
+    infoBox.add(box);
+    // Add a space
+    infoBox.add(Box.createRigidArea(new Dimension(40,0)));
+
+    // RECALL measure
+    //Lay out the JLabels from left to right.
+    box = new Box(BoxLayout.Y_AXIS);
+
+    jLabel = new JLabel("Recall strict: " + formatter.format(recallStrict));
+    jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
+    box.add(jLabel);
+
+    jLabel = new JLabel("Recall average: " + formatter.format(recallAverage));
+    jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
+    box.add(jLabel);
+
     jLabel = new JLabel("Recall lenient: " + formatter.format(recallLenient));
-    jLabelPane.add(jLabel);
-    // This places a space between the two JLabel components
-    jLabelPane.add(Box.createRigidArea(new Dimension(28, 0)));
+    jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
+    box.add(jLabel);
+
+    infoBox.add(box);
+    // Add a space
+    infoBox.add(Box.createRigidArea(new Dimension(40,0)));
+
+    // FALSE POZITIVE measure
+    //Lay out the JLabels from left to right.
+    box = new Box(BoxLayout.Y_AXIS);
+
+    jLabel = new JLabel("False positive strict: " +
+                                        formatter.format(falsePositiveStrict));
+    jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
+    box.add(jLabel);
+
+    jLabel = new JLabel("False positive average: " +
+                                        formatter.format(falsePositiveAverage));
+    jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
+    box.add(jLabel);
+
     jLabel = new JLabel("False positive lenient: " +
                                         formatter.format(falsePositiveLenient));
-    jLabelPane.add(jLabel);
+    jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
+    box.add(jLabel);
 
-    this.add(jLabelPane);
+    infoBox.add(box);
+    this.add(infoBox);
 
   }//arangeAllComponents
 
