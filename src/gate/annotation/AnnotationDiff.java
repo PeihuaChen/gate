@@ -73,9 +73,6 @@ public class AnnotationDiff extends AbstractVisualResource{
   /** A number formater for displaying precision and recall*/
   protected static NumberFormat formatter = NumberFormat.getInstance();
 
-  /** As Required by Resource Interface*/
-  private FeatureMap featureMap = null;
-
   /** The components that will stay into diffPanel*/
   private XJTable diffTable = new XJTable();
 
@@ -224,7 +221,7 @@ public class AnnotationDiff extends AbstractVisualResource{
   /**
     * This method does the diff, P&R calculation and so on.
     */
-  public Resource init() {
+  public Resource init() throws ResourceInstantiationException {
 
     colors[DEFAULT_TYPE] = WHITE;
     colors[CORRECT_TYPE] = GREEN;
@@ -239,12 +236,26 @@ public class AnnotationDiff extends AbstractVisualResource{
     // Get the key AnnotationSet from the keyDocument
     keyAnnotSet = keyDocument.getAnnotations().get(
                               annotationSchema.getAnnotationName());
+    if (keyAnnotSet == null){
+      throw new ResourceInstantiationException("No <" +
+                              annotationSchema.getAnnotationName() +
+                              "> annotations found in the KeyDocument");
+
+    }//if (keyAnnotSet == null)
+
     // The alghoritm will modify this annotation set. It is better to make a
     // separate copy of them.
     keyAnnotList = new LinkedList(keyAnnotSet);
     // Get the response AnnotationSet from the resonseDocument
     responseAnnotSet = responseDocument.getAnnotations().get(
                                         annotationSchema.getAnnotationName());
+    if (responseAnnotSet == null){
+      throw new ResourceInstantiationException("No <" +
+                              annotationSchema.getAnnotationName() +
+                              "> annotations found in the ResponseDocument");
+
+    }//if (responseAnnotSet == null)
+
     // The same thing applies here.
     responseAnnotList = new LinkedList(responseAnnotSet);
 
@@ -639,15 +650,6 @@ public class AnnotationDiff extends AbstractVisualResource{
       typeCounter[aDiffSetElement.getLeftType()]++;
   }// addToDiffset
 
-  /** This method comes from Resource Interface*/
-  public void setFeatures(FeatureMap aFeatureMap){
-    featureMap = aFeatureMap;
-  }// setFeatures
-
-  /** This method comes from Resource Interface*/
-  public FeatureMap getFeatures(){
-    return featureMap;
-  }// getFeatures
 
 
   /* ********************************************************************
