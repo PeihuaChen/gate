@@ -93,8 +93,8 @@ public abstract class Transducer implements Serializable
    * be used. By default it is true.
    */
   protected void fireProgressChanged(int e) {
-    if (Main.batchMode)
-      return;
+//    if (Main.batchMode)
+//      return;
     if (progressListeners != null || progressListeners.isEmpty()) {
       Vector listeners = progressListeners;
       int count = listeners.size();
@@ -104,7 +104,7 @@ public abstract class Transducer implements Serializable
     }
   }
   protected void fireProcessFinished() {
-    if (progressListeners != null && !Main.batchMode) {
+    if (progressListeners != null /*&& !Main.batchMode*/) {
       Vector listeners = progressListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -127,7 +127,7 @@ public abstract class Transducer implements Serializable
     }
   }
   protected void fireStatusChanged(String e) {
-    if (statusListeners != null && !Main.batchMode) {
+    if (statusListeners != null /*&& !Main.batchMode*/) {
       Vector listeners = statusListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {

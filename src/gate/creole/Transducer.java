@@ -51,7 +51,7 @@ public class Transducer extends AbstractProcessingResource {
    *@return a reference to <b>this</b>
    */
   public Resource init() throws ResourceInstantiationException {
-    if (! Main.batchMode) //fire events if not in batch mode
+//    if (! Main.batchMode) //fire events if not in batch mode
       sListener = new StatusListener(){
         public void statusChanged(String text){
           fireStatusChanged(text);
@@ -70,7 +70,7 @@ public class Transducer extends AbstractProcessingResource {
         encoding + ") are needed to create a JapeTransducer!"
       );
 
-    if (! Main.batchMode) //fire events if not in batch mode
+//    if (! Main.batchMode) //fire events if not in batch mode
       batch.addProgressListener(new ProgressListener(){
         public void progressChanged(int value){
           fireProgressChanged(value);

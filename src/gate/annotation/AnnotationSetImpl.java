@@ -103,11 +103,10 @@ implements AnnotationSet
       iter.remove();
       //that's the second way of removing annotations from a set
       //apart from calling remove() on the set itself
-      if (! Main.batchMode)
-        fireAnnotationRemoved(new AnnotationSetEvent(
-                              AnnotationSetImpl.this,
-                              AnnotationSetEvent.ANNOTATION_REMOVED,
-                              getDocument(), (Annotation)lastNext));
+      fireAnnotationRemoved(new AnnotationSetEvent(
+                            AnnotationSetImpl.this,
+                            AnnotationSetEvent.ANNOTATION_REMOVED,
+                            getDocument(), (Annotation)lastNext));
 
       // remove from type index
       removeFromTypeIndex(lastNext);
@@ -132,11 +131,11 @@ implements AnnotationSet
 
     public Object remove(Object key){
       Object res = super.remove(key);
-      if(res != null && !Main.batchMode){
+      if(res != null) {
         fireAnnotationRemoved(new AnnotationSetEvent(
-                                      AnnotationSetImpl.this,
-                                      AnnotationSetEvent.ANNOTATION_REMOVED,
-                                      getDocument(), (Annotation)res));
+                                    AnnotationSetImpl.this,
+                                    AnnotationSetEvent.ANNOTATION_REMOVED,
+                                    getDocument(), (Annotation)res));
       }
       return res;
     }//public Object remove(Object key)
@@ -566,14 +565,14 @@ implements AnnotationSet
       addToTypeIndex(a);
     if (annotsByStartNode != null || annotsByEndNode != null)
       addToOffsetIndex(a);
-    if (! Main.batchMode) {
+//    if (! Main.batchMode) {
       AnnotationSetEvent evt = new AnnotationSetEvent(
                                     this,
                                     AnnotationSetEvent.ANNOTATION_ADDED,
                                     doc, a);
       fireAnnotationAdded(evt);
       fireGateEvent(evt);
-    } //if firing events
+//    } //if firing events
     return oldValue != a;
   } // add(o)
 
@@ -860,7 +859,7 @@ implements AnnotationSet
    * @param l
    */
   public synchronized void removeAnnotationSetListener(AnnotationSetListener l) {
-    if (!Main.batchMode && annotationSetListeners != null && annotationSetListeners.contains(l)) {
+    if (/*!Main.batchMode &&*/ annotationSetListeners != null && annotationSetListeners.contains(l)) {
       Vector v = (Vector) annotationSetListeners.clone();
       v.removeElement(l);
       annotationSetListeners = v;
@@ -871,8 +870,8 @@ implements AnnotationSet
    * @param l
    */
   public synchronized void addAnnotationSetListener(AnnotationSetListener l) {
-    if (Main.batchMode)
-      return;
+//    if (Main.batchMode)
+//      return;
     Vector v = annotationSetListeners == null ? new Vector(2) : (Vector) annotationSetListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
@@ -985,7 +984,7 @@ implements AnnotationSet
    * @param e
    */
   protected void fireAnnotationAdded(AnnotationSetEvent e) {
-    if (!Main.batchMode && annotationSetListeners != null) {
+    if (/*!Main.batchMode &&*/ annotationSetListeners != null) {
       Vector listeners = annotationSetListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -998,7 +997,7 @@ implements AnnotationSet
    * @param e
    */
   protected void fireAnnotationRemoved(AnnotationSetEvent e) {
-    if (!Main.batchMode && annotationSetListeners != null) {
+    if (/*!Main.batchMode &&*/ annotationSetListeners != null) {
       Vector listeners = annotationSetListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -1011,7 +1010,7 @@ implements AnnotationSet
    * @param l
    */
   public synchronized void removeGateListener(GateListener l) {
-    if (!Main.batchMode && gateListeners != null && gateListeners.contains(l)) {
+    if (/*!Main.batchMode &&*/ gateListeners != null && gateListeners.contains(l)) {
       Vector v = (Vector) gateListeners.clone();
       v.removeElement(l);
       gateListeners = v;
@@ -1022,8 +1021,8 @@ implements AnnotationSet
    * @param l
    */
   public synchronized void addGateListener(GateListener l) {
-    if (Main.batchMode)
-      return;
+//    if (Main.batchMode)
+//      return;
     Vector v = gateListeners == null ? new Vector(2) : (Vector) gateListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
@@ -1035,7 +1034,7 @@ implements AnnotationSet
    * @param e
    */
   protected void fireGateEvent(GateEvent e) {
-    if (!Main.batchMode && gateListeners != null) {
+    if (/*!Main.batchMode &&*/ gateListeners != null) {
       Vector listeners = gateListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {

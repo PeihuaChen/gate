@@ -135,8 +135,8 @@ public class EmailDocumentHandler{
             // Inform the status listener to fire only
             // if no. of elements processed.
             // So far is a multiple of ELEMENTS_RATE
-          if ((++ emails % EMAILS_RATE) == 0 && !Main.batchMode)
-              fireStatusChangedEvent("Reading emails : " + emails);
+          if ((++ emails % EMAILS_RATE) == 0)
+            fireStatusChangedEvent("Reading emails : " + emails);
           // if there are e-mails read before, then the previous e-mail
           // ends here.
           if (true == emailReadBefore){

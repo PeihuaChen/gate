@@ -69,8 +69,7 @@ public class EmailDocumentFormat extends TextualDocumentFormat
                                                        this.markupElementsMap,
                                                        this.element2StringMap);
     // register a status listener with it
-    if (!Main.batchMode)
-      emailDocHandler.addStatusListener(new StatusListener() {
+     emailDocHandler.addStatusListener(new StatusListener() {
         public void statusChanged(String text) {
           // this is implemented in DocumentFormat.java and inherited here
           fireStatusChanged(text);

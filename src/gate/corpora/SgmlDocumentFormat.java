@@ -69,14 +69,12 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
     try {
       Sgml2Xml sgml2Xml = new Sgml2Xml(doc);
 
-      if (!Main.batchMode)
-        fireStatusChanged("Performing SGML to XML...");
+      fireStatusChanged("Performing SGML to XML...");
 
       // convert the SGML document
       String xmlUri = sgml2Xml.convert();
 
-      if (!Main.batchMode)
-        fireStatusChanged("DONE !");
+      fireStatusChanged("DONE !");
 
       //Out.println("Conversion done..." + xmlUri);
       //Out.println(sgml2Xml.convert());
@@ -102,13 +100,12 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
                                                this.element2StringMap);
 
         // register a status listener with it
-        if (!Main.batchMode)
-          xmlDocHandler.addStatusListener(new StatusListener(){
+        xmlDocHandler.addStatusListener(new StatusListener(){
             public void statusChanged(String text){
               // this is implemented in DocumentFormat.java and inherited here
               fireStatusChanged(text);
             }
-          });
+        });
 
         parser.parse(xmlUri, xmlDocHandler);
         ((DocumentImpl) doc).setNextAnnotationId(

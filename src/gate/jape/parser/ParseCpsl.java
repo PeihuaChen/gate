@@ -4,6 +4,7 @@ package gate.jape.parser;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import com.objectspace.jgl.Pair;
 import gate.util.*;
 import gate.*;
 import gate.jape.*;
@@ -123,8 +124,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
             }
 
             // construct a parser and parse it
-            if (! Main.batchMode) //fire events if not in batch mode
-              fireStatusChangedEvent("Reading " + phaseNameTok.image + "...");
+            fireStatusChangedEvent("Reading " + phaseNameTok.image + "...");
             try {
               parser = new ParseCpsl(sptURL, encoding, macrosMap);
             } catch (IOException e) {

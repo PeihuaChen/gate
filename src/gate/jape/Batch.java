@@ -68,7 +68,7 @@ implements JapeConstants {
     this.japeURL = url;
     this.encoding =  encoding;
     parseJape();
-    if(transducer != null && !Main.batchMode){
+    if(transducer != null /*&& !Main.batchMode*/){
       transducer.addStatusListener(new StatusListener(){
         public void statusChanged(String text){
           fireStatusChanged(text);
@@ -91,12 +91,12 @@ implements JapeConstants {
   public Batch(URL url, String encoding, StatusListener sListener)
          throws JapeException {
 
-    if (! Main.batchMode) //fire events if not in batch mode
+//    if (! Main.batchMode) //fire events if not in batch mode
       this.addStatusListener(sListener);
     this.japeURL = url;
     this.encoding =  encoding;
     parseJape();
-    if(transducer != null && !Main.batchMode){
+    if(transducer != null /*&& !Main.batchMode*/){
       transducer.addStatusListener(new StatusListener(){
         public void statusChanged(String text){
           fireStatusChanged(text);
@@ -197,16 +197,16 @@ implements JapeConstants {
         new gate.jape.parser.ParseCpsl(japeURL, encoding);
 
       StatusListener listener = null;
-      if (! Main.batchMode) {//fire events if not in batch mode
+//      if (! Main.batchMode) {//fire events if not in batch mode
         listener = new StatusListener(){
           public void statusChanged(String text){
             fireStatusChanged(text);
           }
         };
         parser.addStatusListener(listener);
-      }
+//      }
       transducer = parser.MultiPhaseTransducer();
-      if (! Main.batchMode) //fire events if not in batch mode
+//      if (! Main.batchMode) //fire events if not in batch mode
         parser.removeStatusListener(listener);
     } catch (gate.jape.parser.ParseException e) {
       throw new

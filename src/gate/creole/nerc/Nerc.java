@@ -41,7 +41,7 @@ public class Nerc extends AbstractProcessingResource {
       FeatureMap params;
       FeatureMap features;
       Map listeners = new HashMap();
-      if (! Main.batchMode) {//fire events if not in batch mode
+//      if (! Main.batchMode) {//fire events if not in batch mode
         listeners.put("gate.event.StatusListener", new StatusListener(){
           public void statusChanged(String text){
             fireStatusChanged(text);
@@ -50,7 +50,7 @@ public class Nerc extends AbstractProcessingResource {
 
       //tokeniser
         fireStatusChanged("Creating a tokeniser");
-      } //if do events if we're not in batch
+//      } //if do events if we're not in batch
       params = Factory.newFeatureMap();
       if(tokeniserRulesURL != null) params.put("tokeniserRulesURL",
                                                tokeniserRulesURL);
@@ -65,12 +65,10 @@ public class Nerc extends AbstractProcessingResource {
                     "gate.creole.tokeniser.DefaultTokeniser",
                     params, features, listeners);
       tokeniser.setName("Tokeniser " + System.currentTimeMillis());
-      if (!Main.batchMode) {
-        fireProgressChanged(10);
+      fireProgressChanged(10);
 
       //gazetteer
         fireStatusChanged("Creating a gazetteer");
-      }
       params = Factory.newFeatureMap();
       if(gazetteerListsURL != null) params.put("listsURL",
                                                gazetteerListsURL);
@@ -80,7 +78,7 @@ public class Nerc extends AbstractProcessingResource {
       features = Factory.newFeatureMap();
       Gate.setHiddenAttribute(features, true);
 
-      if (! Main.batchMode) //fire events if not in batch mode
+//      if (! Main.batchMode) //fire events if not in batch mode
         listeners.put("gate.event.ProgressListener",
                     new IntervalProgressListener(11, 50));
 
@@ -88,12 +86,10 @@ public class Nerc extends AbstractProcessingResource {
                       "gate.creole.gazetteer.DefaultGazetteer",
                       params, features, listeners);
       gazetteer.setName("Gazetteer " + System.currentTimeMillis());
-      if (!Main.batchMode) {
-        fireProgressChanged(50);
+      fireProgressChanged(50);
 
       //sentence spliter
-        fireStatusChanged("Creating a sentence splitter");
-      }
+      fireStatusChanged("Creating a sentence splitter");
       params = Factory.newFeatureMap();
       if(splitterGazetteerURL != null) params.put("gazetteerListsURL",
                                                splitterGazetteerURL);
@@ -105,7 +101,7 @@ public class Nerc extends AbstractProcessingResource {
       features = Factory.newFeatureMap();
       Gate.setHiddenAttribute(features, true);
 
-      if (! Main.batchMode) //fire events if not in batch mode
+//      if (! Main.batchMode) //fire events if not in batch mode
         listeners.put("gate.event.ProgressListener",
                     new IntervalProgressListener(50, 60));
 
@@ -113,12 +109,11 @@ public class Nerc extends AbstractProcessingResource {
                       "gate.creole.splitter.SentenceSplitter",
                       params, features, listeners);
       splitter.setName("Splitter " + System.currentTimeMillis());
-      if (!Main.batchMode) {
-        fireProgressChanged(60);
+
+      fireProgressChanged(60);
 
       //POS Tagger
-        fireStatusChanged("Creating a POS tagger");
-      }
+      fireStatusChanged("Creating a POS tagger");
       params = Factory.newFeatureMap();
       if(taggerLexiconURL != null) params.put("lexiconURL",
                                                taggerLexiconURL);
@@ -129,7 +124,7 @@ public class Nerc extends AbstractProcessingResource {
       features = Factory.newFeatureMap();
       Gate.setHiddenAttribute(features, true);
 
-      if (! Main.batchMode) //fire events if not in batch mode
+//      if (! Main.batchMode) //fire events if not in batch mode
         listeners.put("gate.event.ProgressListener",
                     new IntervalProgressListener(60, 65));
 
@@ -137,13 +132,11 @@ public class Nerc extends AbstractProcessingResource {
                       "gate.creole.POSTagger",
                       params, features, listeners);
       tagger.setName("Tagger " + System.currentTimeMillis());
-      if (!Main.batchMode) {
-        fireProgressChanged(65);
+      fireProgressChanged(65);
 
 
       //transducer
-        fireStatusChanged("Creating a Jape transducer");
-      }
+      fireStatusChanged("Creating a Jape transducer");
       params = Factory.newFeatureMap();
   //      rData = (ResourceData)Gate.getCreoleRegister().get(
   //              "gate.creole.Transducer");
@@ -154,17 +147,15 @@ public class Nerc extends AbstractProcessingResource {
       if(DEBUG) Out.prln("Parameters for the transducer: \n" + params);
       features = Factory.newFeatureMap();
       Gate.setHiddenAttribute(features, true);
-      if (! Main.batchMode) //fire events if not in batch mode
+//      if (! Main.batchMode) //fire events if not in batch mode
         listeners.put("gate.event.ProgressListener",
                     new IntervalProgressListener(66, 100));
       transducer = (ANNIETransducer)Factory.createResource(
                                               "gate.creole.ANNIETransducer",
                                               params, features,
                                               listeners);
-      if (! Main.batchMode) {//fire events if not in batch mode
-        fireProgressChanged(100);
-        fireProcessFinished();
-      } //if
+      fireProgressChanged(100);
+      fireProcessFinished();
       transducer.setName("Transducer " + System.currentTimeMillis());
     }catch(ResourceInstantiationException rie){
       throw rie;
@@ -181,8 +172,7 @@ public class Nerc extends AbstractProcessingResource {
     FeatureMap params;
     if(tempAnnotationSetName.equals("")) tempAnnotationSetName = null;
     try{
-      if (!Main.batchMode)
-        fireProgressChanged(0);
+      fireProgressChanged(0);
       //tokeniser
       params = Factory.newFeatureMap();
       params.put("document", document);
@@ -220,7 +210,7 @@ public class Nerc extends AbstractProcessingResource {
     }
     ProgressListener pListener = null;
     StatusListener sListener = null;
-    if (!Main.batchMode) {
+//    if (!Main.batchMode) {
       fireProgressChanged(5);
       pListener = new IntervalProgressListener(5, 15);
       sListener = new StatusListener(){
@@ -232,10 +222,10 @@ public class Nerc extends AbstractProcessingResource {
     //tokeniser
       tokeniser.addProgressListener(pListener);
       tokeniser.addStatusListener(sListener);
-    }
+//    }
     tokeniser.run();
     tokeniser.check();
-    if (!Main.batchMode) {
+//    if (!Main.batchMode) {
       tokeniser.removeProgressListener(pListener);
       tokeniser.removeStatusListener(sListener);
 
@@ -244,10 +234,10 @@ public class Nerc extends AbstractProcessingResource {
       pListener = new IntervalProgressListener(10, 20);
       gazetteer.addProgressListener(pListener);
       gazetteer.addStatusListener(sListener);
-    }
+//    }
     gazetteer.run();
     gazetteer.check();
-    if (!Main.batchMode) {
+//    if (!Main.batchMode) {
       gazetteer.removeProgressListener(pListener);
       gazetteer.removeStatusListener(sListener);
 
@@ -255,10 +245,10 @@ public class Nerc extends AbstractProcessingResource {
       pListener = new IntervalProgressListener(20, 35);
       splitter.addProgressListener(pListener);
       splitter.addStatusListener(sListener);
-    }
+//    }
     splitter.run();
     splitter.check();
-    if (!Main.batchMode) {
+//    if (!Main.batchMode) {
       splitter.removeProgressListener(pListener);
       splitter.removeStatusListener(sListener);
 
@@ -266,10 +256,10 @@ public class Nerc extends AbstractProcessingResource {
       pListener = new IntervalProgressListener(35, 40);
       tagger.addProgressListener(pListener);
       tagger.addStatusListener(sListener);
-    }
+//    }
     tagger.run();
     tagger.check();
-    if (!Main.batchMode) {
+//    if (!Main.batchMode) {
       tagger.removeProgressListener(pListener);
       tagger.removeStatusListener(sListener);
 
@@ -277,13 +267,13 @@ public class Nerc extends AbstractProcessingResource {
       pListener = new IntervalProgressListener(40, 90);
       transducer.addProgressListener(pListener);
       transducer.addStatusListener(sListener);
-    }
+//    }
     transducer.run();
     transducer.check();
-    if (!Main.batchMode) {
+//    if (!Main.batchMode) {
       transducer.removeProgressListener(pListener);
       transducer.removeStatusListener(sListener);
-    }
+//    }
   }//protected void runSystem() throws ExecutionException
 
   /**

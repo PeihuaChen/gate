@@ -39,7 +39,7 @@ public class SentenceSplitter extends AbstractProcessingResource{
     FeatureMap features;
     Map listeners = new HashMap();
 
-    if (! Main.batchMode){ //fire events if not in batch mode
+//    if (! Main.batchMode){ //fire events if not in batch mode
       listeners.put("gate.event.StatusListener", new StatusListener(){
         public void statusChanged(String text){
           fireStatusChanged(text);
@@ -48,7 +48,7 @@ public class SentenceSplitter extends AbstractProcessingResource{
 
     //gazetteer
       fireStatusChanged("Creating the gazetteer");
-    }//if
+//    }//if
     params = Factory.newFeatureMap();
     if(gazetteerListsURL != null) params.put("listsURL",
                                              gazetteerListsURL);
@@ -56,7 +56,7 @@ public class SentenceSplitter extends AbstractProcessingResource{
     features = Factory.newFeatureMap();
     Gate.setHiddenAttribute(features, true);
 
-    if (! Main.batchMode) //fire events if not in batch mode
+//    if (! Main.batchMode) //fire events if not in batch mode
       listeners.put("gate.event.ProgressListener",
                   new IntervalProgressListener(0, 10));
 
@@ -64,12 +64,12 @@ public class SentenceSplitter extends AbstractProcessingResource{
                     "gate.creole.gazetteer.DefaultGazetteer",
                     params, features, listeners);
     gazetteer.setName("Gazetteer " + System.currentTimeMillis());
-    if (! Main.batchMode) {//fire events if not in batch mode
+//    if (! Main.batchMode) {//fire events if not in batch mode
       fireProgressChanged(10);
 
     //transducer
       fireStatusChanged("Creating the JAPE transducer");
-    }
+//    }
 
     params = Factory.newFeatureMap();
     if(transducerURL != null) params.put("grammarURL", transducerURL);
@@ -77,7 +77,7 @@ public class SentenceSplitter extends AbstractProcessingResource{
     features = Factory.newFeatureMap();
     Gate.setHiddenAttribute(features, true);
 
-    if (! Main.batchMode) //fire events if not in batch mode
+//    if (! Main.batchMode) //fire events if not in batch mode
       listeners.put("gate.event.ProgressListener",
                   new IntervalProgressListener(11, 100));
 
@@ -86,10 +86,8 @@ public class SentenceSplitter extends AbstractProcessingResource{
                     params, features, listeners);
     transducer.setName("Transducer " + System.currentTimeMillis());
 
-    if (! Main.batchMode) {//fire events if not in batch mode
-      fireProgressChanged(100);
-      fireProcessFinished();
-    }
+    fireProgressChanged(100);
+    fireProcessFinished();
 
     return this;
   }
@@ -101,8 +99,7 @@ public class SentenceSplitter extends AbstractProcessingResource{
       if(inputASName != null && inputASName.equals("")) inputASName = null;
       if(outputASName != null && outputASName.equals("")) outputASName = null;
       try{
-        if (!Main.batchMode)
-          fireProgressChanged(0);
+        fireProgressChanged(0);
         params = Factory.newFeatureMap();
         params.put("document", document);
         params.put("annotationSetName", inputASName);
@@ -118,7 +115,7 @@ public class SentenceSplitter extends AbstractProcessingResource{
       }
       ProgressListener pListener = null;
       StatusListener sListener = null;
-      if (!Main.batchMode) {
+//      if (!Main.batchMode) {
         fireProgressChanged(5);
 
       //run the gazetteer
@@ -130,10 +127,10 @@ public class SentenceSplitter extends AbstractProcessingResource{
         };
         gazetteer.addProgressListener(pListener);
         gazetteer.addStatusListener(sListener);
-      }
+//      }//if no events
       gazetteer.run();
       gazetteer.check();
-      if (!Main.batchMode) {
+//      if (!Main.batchMode) {
         gazetteer.removeProgressListener(pListener);
         gazetteer.removeStatusListener(sListener);
 
@@ -141,13 +138,13 @@ public class SentenceSplitter extends AbstractProcessingResource{
         pListener = new IntervalProgressListener(11, 90);
         transducer.addProgressListener(pListener);
         transducer.addStatusListener(sListener);
-      }
+//      } //if no events
       transducer.run();
       transducer.check();
-      if (!Main.batchMode) {
+//      if (!Main.batchMode) {
         transducer.removeProgressListener(pListener);
         transducer.removeStatusListener(sListener);
-      }
+//      }//if no events
 
       //get pointers to the annotation sets
       AnnotationSet inputAS = (inputASName == null) ?
@@ -162,8 +159,7 @@ public class SentenceSplitter extends AbstractProcessingResource{
       if(inputAS != outputAS){
         outputAS.addAll(inputAS.get("Sentence"));
       }
-      if (!Main.batchMode)
-        fireProcessFinished();
+      fireProcessFinished();
     }catch(ExecutionException ee){
       executionException = ee;
     }catch(Exception e){
