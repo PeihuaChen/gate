@@ -261,7 +261,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-
+  /** --- */
   private void deleteDocument(Long lrId)
   throws PersistenceException {
 
@@ -286,7 +286,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-
+  /** --- */
   private void deleteCorpus(Long lrId)
   throws PersistenceException {
 
@@ -429,6 +429,8 @@ public class OracleDataStore extends JDBCDataStore {
     throw new MethodNotImplementedException();
   }
 
+
+  /** --- */
   public LanguageResource adopt(LanguageResource lr, SecurityInfo secInfo)
   throws PersistenceException,SecurityException {
     //open a new transaction
@@ -1277,6 +1279,7 @@ public class OracleDataStore extends JDBCDataStore {
     }
   }
 
+
   /** --- */
   public static void readCLOB(java.sql.Clob src, StringBuffer dest)
     throws SQLException, IOException {
@@ -1337,6 +1340,7 @@ public class OracleDataStore extends JDBCDataStore {
     output.close();
   }
 
+
   /** --- */
   public static void writeCLOB(StringBuffer src,java.sql.Clob dest)
     throws SQLException, IOException {
@@ -1345,6 +1349,38 @@ public class OracleDataStore extends JDBCDataStore {
     writeCLOB(src.toString(),dest);
   }
 
+
+  /** --- */
+  public static void writeBLOB(Object src,java.sql.Blob dest)
+    throws SQLException, IOException {
+
+    //preconditions
+    Assert.assertNotNull(src);
+
+    //1. get Oracle CLOB
+    BLOB blo = (BLOB)dest;
+
+    //2. get Unicode stream
+    OutputStream output = blo.getBinaryOutputStream();
+    BufferedOutputStream buffOutput = new BufferedOutputStream(output,INTERNAL_BUFFER_SIZE);
+
+    //3. write
+    ObjectOutputStream oos = new ObjectOutputStream(buffOutput);
+    oos.writeObject(src);
+    oos.close();
+
+    //4. flushing is a good idea
+    //[although ::close() calls it this is implementation specific]
+    buffOutput.flush();
+    output.flush();
+
+    //5.close streams
+    buffOutput.close();
+    output.close();
+  }
+
+
+  /** --- */
   private Long _createFeature(Long entityID,
                               int entityType,
                               String key,
@@ -1395,11 +1431,12 @@ public class OracleDataStore extends JDBCDataStore {
 
           Double d = (Double)value;
           stmt.setDouble(4,d.doubleValue());
+          break;
 
         case DBHelper.VALUE_TYPE_BINARY:
-
           //ignore
           //will be handled later in processing
+          break;
 
         case DBHelper.VALUE_TYPE_STRING:
 
@@ -1408,10 +1445,11 @@ public class OracleDataStore extends JDBCDataStore {
           if (fitsInVarchar2(s)) {
             stmt.setString(5,s);
           }
-          //else : will be handled later in processing
+          break;
 
+        default:
+          throw new IllegalArgumentException("unsuppoeted feature type");
       }
-
 
       stmt.execute();
       featID = new Long(stmt.getLong(7));
@@ -1419,7 +1457,6 @@ public class OracleDataStore extends JDBCDataStore {
     catch(SQLException sqle) {
 
       switch(sqle.getErrorCode()) {
-
         case DBHelper.X_ORACLE_INVALID_FEATURE_TYPE:
           throw new PersistenceException("can't create feature [step 1],"+
                       "[invalid feature type] in DB: ["+ sqle.getMessage()+"]");
@@ -1436,6 +1473,8 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+
+  /** --- */
   private void _updateFeatureLOB(Long featID,Object value, int valueType)
     throws PersistenceException {
 
@@ -1444,9 +1483,7 @@ public class OracleDataStore extends JDBCDataStore {
 
     //0. preconditions
     Assert.assertTrue(valueType == DBHelper.VALUE_TYPE_BINARY ||
-                  valueType == DBHelper.VALUE_TYPE_BINARY_ARR ||
-                  valueType == DBHelper.VALUE_TYPE_STRING ||
-                  valueType == DBHelper.VALUE_TYPE_STRING_ARR);
+                  valueType == DBHelper.VALUE_TYPE_STRING);
 
 
     //1. get the row to be updated
@@ -1466,23 +1503,29 @@ public class OracleDataStore extends JDBCDataStore {
       stmtA.execute();
       rsA = stmtA.getResultSet();
 
-      rsA.next();
-      //NOTE: if the result set contains LOBs always read them
+      if (false == rsA.next()) {
+        throw new PersistenceException("Incorrect feature ID supplied ["+featID+"]");
+      }
+
+      //NOTE1: if the result set contains LOBs always read them
       // in the order they appear in the SQL query
       // otherwise data will be lost
+      //NOTE2: access by index rather than name is usually faster
       clobValue = rsA.getClob(1);
       blobValue = rsA.getBlob(2);
 
       //blob or clob?
-      if (valueType == DBHelper.VALUE_TYPE_BINARY ||
-          valueType == DBHelper.VALUE_TYPE_BINARY_ARR) {
+      if (valueType == DBHelper.VALUE_TYPE_BINARY) {
         //blob
-        throw new MethodNotImplementedException();
+        writeBLOB(value,blobValue);
       }
-      else {
+      else if (valueType == DBHelper.VALUE_TYPE_STRING) {
         //clob
         String s = (String)value;
         writeCLOB(s,clobValue);
+      }
+      else {
+        Assert.fail();
       }
     }
     catch(SQLException sqle) {
@@ -1556,7 +1599,6 @@ public class OracleDataStore extends JDBCDataStore {
 
         //3.2. update CLOBs if needed
         if (valueType == DBHelper.VALUE_TYPE_STRING) {
-
           //does this string fit into a varchar2 or into clob?
           String s = (String)currValue;
           if (false == this.fitsInVarchar2(s)) {
@@ -1565,10 +1607,9 @@ public class OracleDataStore extends JDBCDataStore {
             _updateFeatureLOB(featID,value,valueType);
           }
         }
-
-        //3.3. BLOBs
-        if (valueType == DBHelper.VALUE_TYPE_BINARY) {
-          throw new MethodNotImplementedException();
+        else if (valueType == DBHelper.VALUE_TYPE_BINARY) {
+          //3.3. BLOBs
+            _updateFeatureLOB(featID,value,valueType);
         }
     }
 
@@ -1576,6 +1617,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+  /** --- */
   private boolean fitsInVarchar2(String s) {
 
     return s.getBytes().length < this.ORACLE_VARCHAR_LIMIT_BYTES;
@@ -1680,6 +1722,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+  /** --- */
   private DatabaseCorpusImpl readCorpus(Object lrPersistenceId)
     throws PersistenceException {
 
@@ -1780,6 +1823,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+  /** --- */
   private DatabaseDocumentImpl readDocument(Object lrPersistenceId)
     throws PersistenceException {
 
@@ -1884,6 +1928,8 @@ public class OracleDataStore extends JDBCDataStore {
     return result;
   }
 
+
+  /** --- */
   private FeatureMap readFeatures(Long entityID, int entityType)
     throws PersistenceException {
 
@@ -2093,6 +2139,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+  /** --- */
   public boolean equals(Object obj) {
 
     if (false == obj instanceof OracleDataStore) {
@@ -2109,6 +2156,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+  /** --- */
   private void syncDocument(Document doc) throws PersistenceException {
 
     Assert.assertTrue(doc instanceof DatabaseDocumentImpl);
@@ -2148,6 +2196,8 @@ public class OracleDataStore extends JDBCDataStore {
     _syncAnnotations(doc);
   }
 
+
+  /** --- */
   private void _syncLR(Long lrID, String newName)
     throws PersistenceException {
 
@@ -2175,6 +2225,8 @@ public class OracleDataStore extends JDBCDataStore {
     }
   }
 
+
+  /** --- */
   private void _syncDocument(Document doc)
     throws PersistenceException {
 
@@ -2224,6 +2276,7 @@ public class OracleDataStore extends JDBCDataStore {
 
   }
 
+  /** --- */
   private void _syncDocumentContent(Document doc)
     throws PersistenceException {
 
@@ -2263,6 +2316,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+  /** --- */
   private void _syncAddedAnnotations(Document doc, AnnotationSet as, Collection changes)
     throws PersistenceException {
 
@@ -2365,6 +2419,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+  /** --- */
   private void _syncChangedAnnotations(Document doc,AnnotationSet as, Collection changes)
     throws PersistenceException {
 
@@ -2378,6 +2433,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+  /** --- */
   private void _syncRemovedAnnotations(Document doc,AnnotationSet as, Collection changes)
     throws PersistenceException {
     //0.preconditions
@@ -2460,6 +2516,8 @@ public class OracleDataStore extends JDBCDataStore {
     }
   }
 
+
+  /** --- */
   private void _syncAnnotationSets(Document doc,Collection removedSets,Collection addedSets)
     throws PersistenceException {
 
@@ -2511,6 +2569,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+  /** --- */
   private void _syncAnnotations(Document doc)
     throws PersistenceException {
 
@@ -2555,6 +2614,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+  /** --- */
   private void _syncFeatures(LanguageResource lr)
     throws PersistenceException {
 
@@ -2604,6 +2664,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+  /** --- */
   private void syncCorpus(Corpus corp) throws PersistenceException {
 
     //0. preconditions
