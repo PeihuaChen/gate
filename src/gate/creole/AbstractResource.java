@@ -121,20 +121,10 @@ extends AbstractFeatureBearer implements Resource, Serializable
    * @param paramaterName the name for the parameteer
    * @param parameterValue the value the parameter will receive
    */
-  public static void setParameterValue(Resource resource,
+  public static void setParameterValue(Resource resource, BeanInfo resBeanInf,
                                        String paramaterName,
                                        Object parameterValue)
               throws ResourceInstantiationException{
-    // get the beaninfo for the resource bean, excluding data about Object
-    BeanInfo resBeanInf = null;
-    try {
-      resBeanInf = Introspector.getBeanInfo(resource.getClass(), Object.class);
-    } catch(Exception e) {
-      throw new ResourceInstantiationException(
-        "Couldn't get bean info for resource " + resource.getClass().getName()
-        + Strings.getNl() + "Introspector exception was: " + e
-      );
-    }
     PropertyDescriptor[] properties = resBeanInf.getPropertyDescriptors();
     //find the property we're interested on
     if(properties == null){
@@ -202,11 +192,21 @@ extends AbstractFeatureBearer implements Resource, Serializable
   public static void setParameterValues(Resource resource,
                                         FeatureMap parameters)
               throws ResourceInstantiationException{
+    // get the beaninfo for the resource bean, excluding data about Object
+    BeanInfo resBeanInf = null;
+    try {
+      resBeanInf = Introspector.getBeanInfo(resource.getClass(), Object.class);
+    } catch(Exception e) {
+      throw new ResourceInstantiationException(
+        "Couldn't get bean info for resource " + resource.getClass().getName()
+        + Strings.getNl() + "Introspector exception was: " + e
+      );
+    }
 
     Iterator parnameIter = parameters.keySet().iterator();
     while(parnameIter.hasNext()){
       String parName = (String)parnameIter.next();
-      setParameterValue(resource, parName, parameters.get(parName));
+      setParameterValue(resource, resBeanInf, parName, parameters.get(parName));
     }
   }
 
@@ -348,7 +348,17 @@ extends AbstractFeatureBearer implements Resource, Serializable
    */
   public void setParameterValue(String paramaterName, Object parameterValue)
               throws ResourceInstantiationException{
-    setParameterValue(this, paramaterName, parameterValue);
+    // get the beaninfo for the resource bean, excluding data about Object
+    BeanInfo resBeanInf = null;
+    try {
+      resBeanInf = Introspector.getBeanInfo(this.getClass(), Object.class);
+    } catch(Exception e) {
+      throw new ResourceInstantiationException(
+        "Couldn't get bean info for resource " + this.getClass().getName()
+        + Strings.getNl() + "Introspector exception was: " + e
+      );
+    }
+    setParameterValue(this, resBeanInf, paramaterName, parameterValue);
   }
 
   /**
