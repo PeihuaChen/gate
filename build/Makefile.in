@@ -206,7 +206,7 @@ distrib:
 	V=`cat version.txt`; B=`cat build.txt`; N=gate-$${V}-build$${B}; \
 	TARZ="tar czf"; D=DISTRIB; rm -rf ../../xxx; \
 	rm -rf ../../$${D}; mkdir ../../$${D}; cd ../../$${D}; \
-	cvs co gate; rm -rf gate/doc/internal; GN=$${N}--SOURCE; \
+	cvs co gate; GN=$${N}--SOURCE; \
 	mv gate $${GN}; $${TARZ} $${GN}.tgz $${GN}; rm -rf $${GN}; \
 	cd ..; GN=$${N}--ALL; cp -R gate $${GN}; \
 	cp sale/tao/tao.pdf $${GN} || :; \
