@@ -34,7 +34,7 @@ public class FeaturesEditor extends AbstractVisualResource {
     initLocalData();
     initGuiComponents();
     initListeners();
-  }
+  }// FeaturesEditor()
 
   protected void initLocalData(){
     features = Factory.newFeatureMap();
@@ -48,7 +48,7 @@ public class FeaturesEditor extends AbstractVisualResource {
     table.setDefaultRenderer(Object.class, new FeaturesTableRenderer());
     JScrollPane scroll = new JScrollPane(table);
     this.add(scroll, BorderLayout.CENTER);
-  }
+  }// protected void initGuiComponents()
 
   protected void initListeners(){
   }
@@ -57,7 +57,7 @@ public class FeaturesEditor extends AbstractVisualResource {
     resource = newResource;
     features = resource.getFeatures();
     tableModel.fireTableDataChanged();
-  }
+  }// public void setFeatureBearer(FeatureBearer newResource)
 
   public FeatureBearer getFeatureBearer() {
     return resource;
@@ -99,7 +99,7 @@ public class FeaturesEditor extends AbstractVisualResource {
              ||
              ((!((String)getValueAt(rowIndex, 0)).startsWith("gate."))
              );
-    }
+    }// public boolean isCellEditable
 
     public Object getValueAt(int rowIndex,
                          int columnIndex){
@@ -130,7 +130,7 @@ public class FeaturesEditor extends AbstractVisualResource {
           return null;
         }
       }
-    }
+    }// public Object getValueAt
 
     public void setValueAt(Object aValue,
                        int rowIndex,
@@ -150,25 +150,25 @@ public class FeaturesEditor extends AbstractVisualResource {
           newKey = null;
           newValue = null;
         }
-      }else{
-        if(columnIndex == 0){
+      } else {
+        if(columnIndex == 0) {
           //the name of the feature changed
           String oldName = (String)getValueAt(rowIndex, 0);
           Object oldValue = features.remove(oldName);
           features.put(aValue, oldValue);
-        }else{
+        } else {
           //the value of a feature changed
-          if(aValue.equals("")){
+          if(aValue.equals("")) {
             //remove feature
             features.remove(getValueAt(rowIndex, 0));
-          }else{
+          } else {
             //change feature
             features.put(getValueAt(rowIndex, 0), aValue);
           }
         }
       }
       fireTableDataChanged();
-    }
+    }// public void setValueAt
 
     String newKey;
     Object newValue;
@@ -188,5 +188,5 @@ public class FeaturesEditor extends AbstractVisualResource {
       return this;
     }
 
-  }
-}
+  }// class FeaturesTableRenderer
+}// class FeaturesEditor

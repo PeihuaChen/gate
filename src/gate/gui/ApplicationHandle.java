@@ -31,7 +31,7 @@ class ApplicationHandle extends DefaultResourceHandle {
                            StatusListener sListener,
                            ProgressListener pListener) {
     super(controller);
-    try{
+    try {
       FeatureMap params = Factory.newFeatureMap();
       params.put("controller", controller);
       appView = (ApplicationViewer)Factory.createResource(
@@ -42,17 +42,17 @@ class ApplicationHandle extends DefaultResourceHandle {
       JTabbedPane view = (JTabbedPane)super.getLargeView();
       view.add("Design", appView);
       view.setSelectedComponent(appView);
-    }catch(ResourceInstantiationException rie){
+    } catch(ResourceInstantiationException rie) {
       rie.printStackTrace(Err.getPrintWriter());
     }
 
     viewPopupElements = new MenuElement[]{};
-  }
+  }//ApplicationHandle
 
   ApplicationViewer appView;
   MenuElement[] viewPopupElements;
 
-  public JPopupMenu getPopup(){
+  public JPopupMenu getPopup() {
     //clear the local elements from popup
     for(int i = 0; i< viewPopupElements.length; i++)
         popup.remove((JComponent)viewPopupElements[i]);
@@ -61,6 +61,6 @@ class ApplicationHandle extends DefaultResourceHandle {
     for(int i = 0; i< viewPopupElements.length; i++)
         popup.add((JComponent)viewPopupElements[i]);
     return popup;
-  }
+  }//getPopup
 
-}
+}//ApplicationHandle class

@@ -32,9 +32,9 @@ import gate.event.*;
  * Such information will include icon to be used for tree components,
  * popup menu for right click events, etc.
  */
-public class DefaultResourceHandle implements ResourceHandle{
+public class DefaultResourceHandle implements ResourceHandle {
 
-  public DefaultResourceHandle(FeatureBearer res){
+  public DefaultResourceHandle(FeatureBearer res) {
     this.resource = res;
     rData = (ResourceData)Gate.getCreoleRegister().
                                             get(resource.getClass().getName());
@@ -44,16 +44,16 @@ public class DefaultResourceHandle implements ResourceHandle{
         if(resource instanceof LanguageResource) iconName = "lr.gif";
         else if(resource instanceof ProcessingResource) iconName = "pr.gif";
       }
-      try{
+      try {
         this.icon = new ImageIcon(new URL("gate:/img/" + iconName));
-      }catch(MalformedURLException mue){
+      } catch(MalformedURLException mue){
         mue.printStackTrace(Err.getPrintWriter());
       }
       tooltipText = "Type : " + rData.getName();
-    }else{
-      try{
+    } else {
+      try {
         this.icon = new ImageIcon(new URL("gate:/img/lr.gif"));
-      }catch(MalformedURLException mue){
+      } catch(MalformedURLException mue) {
         mue.printStackTrace(Err.getPrintWriter());
       }
     }
@@ -61,7 +61,7 @@ public class DefaultResourceHandle implements ResourceHandle{
     popup = null;
     title = (String)resource.getFeatures().get("gate.NAME");
     buildViews();
-  }
+  }//public DefaultResourceHandle(FeatureBearer res)
 
   public Icon getIcon(){
     return icon;
@@ -83,7 +83,7 @@ public class DefaultResourceHandle implements ResourceHandle{
    * Returns a GUI component to be used as a small viewer/editor, e.g. below
    * the main tree in the Gate GUI for the selected resource
    */
-  public JComponent getSmallView(){
+  public JComponent getSmallView() {
     return smallView;
   }
 
@@ -91,36 +91,36 @@ public class DefaultResourceHandle implements ResourceHandle{
    * Returns the large view for this resource. This view will go into the main
    * display area.
    */
-  public JComponent getLargeView(){
+  public JComponent getLargeView() {
     return largeView;
   }
 
-  public JPopupMenu getPopup(){
+  public JPopupMenu getPopup() {
     return popup;
   }
 
-  public void setPopup(JPopupMenu popup){
+  public void setPopup(JPopupMenu popup) {
     this.popup = popup;
   }
 
-  public String getTooltipText(){
+  public String getTooltipText() {
     return tooltipText;
   }
 
-  public void setTooltipText(String text){
+  public void setTooltipText(String text) {
     this.tooltipText = text;
   }
 
-  public Resource getResource(){
+  public Resource getResource() {
     if(resource instanceof Resource) return (Resource)resource;
     else return null;
   }
 
-  public FeatureBearer getFeatureBearer(){
+  public FeatureBearer getFeatureBearer() {
     return resource;
   }
 
-  protected void buildViews(){
+  protected void buildViews() {
     //build the large views
     fireStatusChanged("Building views...");
     JTabbedPane view = new JTabbedPane(JTabbedPane.BOTTOM);
@@ -137,17 +137,17 @@ public class DefaultResourceHandle implements ResourceHandle{
     popup.addSeparator();
     popup.add(new ReloadAction());
     //Language Resources
-    if(resource instanceof LanguageResource){
+    if(resource instanceof LanguageResource) {
       popup.addSeparator();
       popup.add(new SaveAction());
       popup.add(new SaveToAction());
-      if(resource instanceof gate.corpora.DocumentImpl){
+      if(resource instanceof gate.corpora.DocumentImpl) {
         popup.add(new SaveAsXmlAction());
         try{
           FeatureMap params = Factory.newFeatureMap();
           params.put("document", resource);
           view.add("Annotations",
-                   (JComponent)Factory.createResource("gate.gui.AnnotationEditor",
+                 (JComponent)Factory.createResource("gate.gui.AnnotationEditor",
                                                       params)
                   );
         }catch(ResourceInstantiationException rie){
@@ -167,23 +167,25 @@ public class DefaultResourceHandle implements ResourceHandle{
     largeView = view;
     smallView = null;
     fireStatusChanged("Views built!");
-  }
+  }//protected void buildViews
 
   public String toString(){ return title;}
+
   public synchronized void removeProgressListener(ProgressListener l) {
     if (progressListeners != null && progressListeners.contains(l)) {
       Vector v = (Vector) progressListeners.clone();
       v.removeElement(l);
       progressListeners = v;
     }
-  }
+  }//public synchronized void removeProgressListener(ProgressListener l)
+
   public synchronized void addProgressListener(ProgressListener l) {
     Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       progressListeners = v;
     }
-  }
+  }//public synchronized void addProgressListener(ProgressListener l)
 
   JPopupMenu popup;
   String title;
@@ -198,24 +200,24 @@ public class DefaultResourceHandle implements ResourceHandle{
   private transient Vector progressListeners;
   private transient Vector statusListeners;
 
-  class CloseAction extends AbstractAction{
-    public CloseAction(){
+  class CloseAction extends AbstractAction {
+    public CloseAction() {
       super("Close");
     }
 
-    public void actionPerformed(ActionEvent e){
+    public void actionPerformed(ActionEvent e) {
       if(resource instanceof Resource){
         Factory.deleteResource((Resource)resource);
       }
-    }
-  }
+    }//public void actionPerformed(ActionEvent e)
+  }//class CloseAction
 
-  class SaveAsXmlAction extends AbstractAction{
+  class SaveAsXmlAction extends AbstractAction {
     public SaveAsXmlAction(){
       super("Save As Xml...");
     }// SaveAsXmlAction()
 
-    public void actionPerformed(ActionEvent e){
+    public void actionPerformed(ActionEvent e) {
 
       JFileChooser fileChooser = MainFrame.getFileChooser();
       File selectedFile = null;
@@ -257,39 +259,39 @@ public class DefaultResourceHandle implements ResourceHandle{
     }// actionPerformed()
   }// SaveAsXmlAction
 
-  class SaveAction extends AbstractAction{
+  class SaveAction extends AbstractAction {
     public SaveAction(){
       super("Save");
     }
     public void actionPerformed(ActionEvent e){
       DataStore ds = ((LanguageResource)resource).getDataStore();
       if(ds != null){
-        try{
+        try {
           ((LanguageResource)
                     resource).getDataStore().sync((LanguageResource)resource);
-        }catch(PersistenceException pe){
+        } catch(PersistenceException pe) {
           JOptionPane.showMessageDialog(getLargeView(),
                                         "Save failed!\n " +
                                         pe.toString(),
                                         "Gate", JOptionPane.ERROR_MESSAGE);
         }
-      }else{
+      } else {
         JOptionPane.showMessageDialog(getLargeView(),
                         "This resource has not been loaded from a datastore.\n"+
                          "Please use the \"Save to\" option!\n",
                          "Gate", JOptionPane.ERROR_MESSAGE);
 
       }
-    }
-  }
+    }//public void actionPerformed(ActionEvent e)
+  }//class SaveAction
 
-  class SaveToAction extends AbstractAction{
+  class SaveToAction extends AbstractAction {
     public SaveToAction(){
       super("Save to...");
     }
 
-    public void actionPerformed(ActionEvent e){
-      try{
+    public void actionPerformed(ActionEvent e) {
+      try {
         DataStoreRegister dsReg = Gate.getDataStoreRegister();
         Map dsByName =new HashMap();
         Iterator dsIter = dsReg.iterator();
@@ -298,7 +300,7 @@ public class DefaultResourceHandle implements ResourceHandle{
           String name;
           if(oneDS.getFeatures() != null &&
              (name = (String)oneDS.getFeatures().get("gate.NAME")) != null){
-          }else{
+          } else {
             name  = oneDS.getStorageUrl().getFile();
           }
           dsByName.put(name, oneDS);
@@ -310,7 +312,7 @@ public class DefaultResourceHandle implements ResourceHandle{
                                         "Please open a datastore first!",
                                         "Gate", JOptionPane.ERROR_MESSAGE);
 
-        }else{
+        } else {
           Object answer = JOptionPane.showInputDialog(
                               getLargeView(),
                               "Select the datastore",
@@ -326,7 +328,7 @@ public class DefaultResourceHandle implements ResourceHandle{
             ds.sync((LanguageResource)resource);
           }
         }
-      }catch(PersistenceException pe){
+      } catch(PersistenceException pe) {
         JOptionPane.showMessageDialog(getLargeView(),
                                       "Save failed!\n " +
                                       pe.toString(),
@@ -335,15 +337,16 @@ public class DefaultResourceHandle implements ResourceHandle{
     }
   }//class SaveToAction extends AbstractAction
 
-  class ReloadAction extends AbstractAction{
-    ReloadAction(){
+  class ReloadAction extends AbstractAction {
+    ReloadAction() {
       super("Reload");
     }
 
-    public void actionPerformed(ActionEvent e){
+    public void actionPerformed(ActionEvent e) {
       //resource
     }
-  }
+  }//class ReloadAction
+
   protected void fireProgressChanged(int e) {
     if (progressListeners != null) {
       Vector listeners = progressListeners;
@@ -352,7 +355,8 @@ public class DefaultResourceHandle implements ResourceHandle{
         ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
       }
     }
-  }
+  }//protected void fireProgressChanged(int e)
+
   protected void fireProcessFinished() {
     if (progressListeners != null) {
       Vector listeners = progressListeners;
@@ -361,21 +365,24 @@ public class DefaultResourceHandle implements ResourceHandle{
         ((ProgressListener) listeners.elementAt(i)).processFinished();
       }
     }
-  }
+  }//protected void fireProcessFinished()
+
   public synchronized void removeStatusListener(StatusListener l) {
     if (statusListeners != null && statusListeners.contains(l)) {
       Vector v = (Vector) statusListeners.clone();
       v.removeElement(l);
       statusListeners = v;
     }
-  }
+  }//public synchronized void removeStatusListener(StatusListener l)
+
   public synchronized void addStatusListener(StatusListener l) {
     Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       statusListeners = v;
     }
-  }
+  }//public synchronized void addStatusListener(StatusListener l)
+
   protected void fireStatusChanged(String e) {
     if (statusListeners != null) {
       Vector listeners = statusListeners;
@@ -385,4 +392,4 @@ public class DefaultResourceHandle implements ResourceHandle{
       }
     }
   }////class ReloadAction extends AbstractAction
-}
+}//class DefaultResourceHandle

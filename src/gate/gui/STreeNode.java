@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- * 
+ *
  *  Kalina Bontcheva, 20/09/2000
  *
  *  $Id$
@@ -43,55 +43,55 @@ public class STreeNode extends DefaultMutableTreeNode {
                         //be the same as the annotation span. During export the
                         //annotation span is set to be the same as the span.
 
-	public STreeNode(Annotation annot) {
-  	level = -1;
+  public STreeNode(Annotation annot) {
+    level = -1;
     nodeID = nextID++;
     //span = annot.getSpans().getElementAt(0);
     //get the first span, there should be no others
 		this.annot = annot;
-  }
+  }// public STreeNode(Annotation annot)
 
   public STreeNode(int start, int end) {
     level = -1;
     nodeID = nextID++;
     this.start = start;
     this.end = end;
-  }
+  }// public STreeNode(int start, int end)
 
   public STreeNode() {
     level = -1;
     nodeID = nextID++;
     start = 0;
     end = 0;
-  }
+  }// public STreeNode()
 
   public int getLevel() {
     return level;
-  }
+  }// public int getLevel()
 
   public void setLevel(int level) {
     this.level = level;
-  }
+  }// public void setLevel(int level)
 
   public int getID() {
     return nodeID;
-  }
+  }// public int getID()
 
   public int getStart() {
     return start;
-  }
+  }// public int getStart()
 
   public void setStart(int start) {
     this.start = start;
-  }
+  }// public void setStart(int start)
 
   public int getEnd() {
     return end;
-  }
+  }// public int getEnd()
 
   public void setEnd(int end) {
     this.end = end;
-  }
+  }// public void setEnd(int end)
 
   /**
     * This also sets the span to match the annotation span!
@@ -100,17 +100,17 @@ public class STreeNode extends DefaultMutableTreeNode {
 		this.annot = annot;
     this.start = annot.getStartNode().getOffset().intValue();
     this.end = annot.getEndNode().getOffset().intValue();
-  }
+  }// public void setAnnotation(Annotation annot)
 
   public Annotation getAnnotation() {
   	return annot;
-  }
+  }// public Annotation getAnnotation()
 
   public void disconnectChildren() {
     for (Iterator i = this.children.iterator(); i.hasNext(); )
       ((STreeNode) i.next()).setParent(null);
     this.children.clear();
-  }
+  }// public void disconnectChildren()
 
   /**
     * Creates an annotation of the given type. If the children don't have their
@@ -168,7 +168,7 @@ public class STreeNode extends DefaultMutableTreeNode {
     }
 
     return created;
-  }
+  }// public boolean createAnnotation
 
   /** Store the annotation in the deleted list so it can retrieved later */
   public void removeAnnotation(Document doc) {
@@ -178,11 +178,14 @@ public class STreeNode extends DefaultMutableTreeNode {
     doc.getAnnotations().remove(this.annot);
 
     this.annot = null;
-  }
+  }//  public void removeAnnotation(Document doc)
 
-} // STreeNode 
+} // STreeNode
 
 // $Log$
+// Revision 1.7  2001/04/09 10:36:36  oana
+// a few changes in the code style
+//
 // Revision 1.6  2000/11/08 16:35:00  hamish
 // formatting
 //
