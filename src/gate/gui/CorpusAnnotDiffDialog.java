@@ -169,7 +169,7 @@ class CorpusAnnotDiffDialog extends JFrame {
         corpusMap.put(corpName, corp);
       }// while
     } // if
-    
+
     // add serialized one
     resourceData = (ResourceData)registry.get("gate.corpora.SerialCorpusImpl");
     if(resourceData != null && !resourceData.getInstantiations().isEmpty()){
@@ -201,7 +201,7 @@ class CorpusAnnotDiffDialog extends JFrame {
     } // if
 
 //    if(corpusMap.isEmpty()) corpusMap.put("No corpuses found",null);
-    
+
     keyAnnotationSetMap = new TreeMap();
     responseAnnotationSetMap = new TreeMap();
 
@@ -619,7 +619,7 @@ class CorpusAnnotDiffDialog extends JFrame {
       featureSelectionDialog = null;
       return;
     }
-    
+
     AnnotationSet keySet = null;
     if (keyDocAnnotSetComboBox.getSelectedItem()== null ||
         keyAnnotationSetMap.get(keyDocAnnotSetComboBox.getSelectedItem())==null) {
@@ -755,16 +755,22 @@ class CorpusAnnotDiffDialog extends JFrame {
     }
     else{
       // Get all types of annotation from the selected keyAnnotationSet
-      AnnotationSet as = (AnnotationSet) keyAnnotationSetMap.get(
-                                  keyDocAnnotSetComboBox.getSelectedItem());
-      keySet = new HashSet(as.getAllTypes());
+      keySet = new HashSet();
+      Document doc;
+      Set docTypeSet;
+      for(int i=0; i<keyCorpus.size(); ++i) {
+        doc = (Document) keyCorpus.get(i);
+        docTypeSet = doc.getAnnotations( (String)
+                        keyDocAnnotSetComboBox.getSelectedItem()).getAllTypes();
+        keySet.addAll(docTypeSet);
+      } // for
     }// End if
 
     // Do the same thing for the responseSet
     // Fill the responseSet
     Set responseSet = null;
     if (responseDocAnnotSetComboBox.getSelectedItem() == null ||
-        responseAnnotationSetMap.get(
+        responseAnnotationSetMap.get( (String)
                           responseDocAnnotSetComboBox.getSelectedItem())==null) {
       responseSet = new HashSet();
       Document doc;
@@ -777,9 +783,15 @@ class CorpusAnnotDiffDialog extends JFrame {
     }
     else{
       // Get all types of annotation from the selected responseAnnotationSet
-      AnnotationSet as = (AnnotationSet) responseAnnotationSetMap.get(
-                                 responseDocAnnotSetComboBox.getSelectedItem());
-      responseSet = new HashSet(as.getAllTypes());
+      responseSet = new HashSet();
+      Document doc;
+      Set docTypeSet;
+      for(int i=0; i<responseCorpus.size(); ++i) {
+        doc = (Document) responseCorpus.get(i);
+        docTypeSet = doc.getAnnotations( (String)
+                        keyDocAnnotSetComboBox.getSelectedItem()).getAllTypes();
+        responseSet.addAll(docTypeSet);
+      } // for
     }// End if
 
     // DO intersection between keySet & responseSet
