@@ -3510,14 +3510,20 @@ Out.prln("NULL size");
         AnnotationVisualResource editor;
         try{
           editor = (AnnotationVisualResource)
-                                          Factory.createResource(editorType);
-          JScrollPane scroller = new JScrollPane((Component)editor);
-          scroller.setPreferredSize(((Component) editor).getPreferredSize());
-          tabbedPane.add(scroller,
-                      ((ResourceData)Gate.getCreoleRegister().get(editorType)).
-                                                                getName()
+                   Factory.createResource(editorType);
+          if(editor instanceof ResizableVisualResource){
+            tabbedPane.add((Component)editor,
+                           ((ResourceData)Gate.getCreoleRegister().
+                           get(editorType)).getName());
+          }else{
+            JScrollPane scroller = new JScrollPane((Component)editor);
+//            scroller.setPreferredSize(((Component) editor).getPreferredSize());
+            tabbedPane.add(scroller,
+                           ((ResourceData)Gate.getCreoleRegister().
+                            get(editorType)).getName());
+          }
 
-                      );
+
           editor.setTarget(set);
           editor.setAnnotation(annotation);
         }catch(ResourceInstantiationException rie){
@@ -3537,9 +3543,15 @@ Out.prln("NULL size");
           if(editor.canDisplayAnnotationType(annotation.getType())){
             editor.setTarget(set);
             editor.setAnnotation(annotation);
-            tabbedPane.add(new JScrollPane((Component)editor),
-                           ((ResourceData)Gate.getCreoleRegister().
-                                              get(editorType)).getName());
+            if(editor instanceof ResizableVisualResource){
+              tabbedPane.add((Component)editor,
+                             ((ResourceData)Gate.getCreoleRegister().
+                                                get(editorType)).getName());
+            }else{
+              tabbedPane.add(new JScrollPane((Component)editor),
+                             ((ResourceData)Gate.getCreoleRegister().
+                                                get(editorType)).getName());
+            }
           }
         }catch(ResourceInstantiationException rie){
           rie.printStackTrace(Err.getPrintWriter());
@@ -3554,28 +3566,39 @@ Out.prln("NULL size");
                                      tabbedPane,
                                      "Edit Annotation")){
           try{
-            ((AnnotationVisualResource)((JScrollPane)tabbedPane.
-                                        getSelectedComponent()).getViewport().
-                                                                getView()
-             ).okAction();
-             allOK = true;
+            Component comp = tabbedPane.getSelectedComponent();
+            if(comp instanceof AnnotationVisualResource){
+              ((AnnotationVisualResource)comp).okAction();
+            }else if(comp instanceof JScrollPane){
+              ((AnnotationVisualResource)((JScrollPane)comp).
+                                          getViewport().getView()).okAction();
+            }else{
+              throw new LuckyException("DocumentEditor.EditAnnotationAction1");
+            }
+
+            allOK = true;
           }catch(GateException ge){
             JOptionPane.showMessageDialog(
               DocumentEditor.this,
               "There was an error:\n" +
               ge.toString(),
               "Gate", JOptionPane.ERROR_MESSAGE);
-//            ge.printStackTrace(Err.getPrintWriter());
+            ge.printStackTrace(Err.getPrintWriter());
             allOK = false;
           }
         }else{
           if (OkCancelDialog.userHasPressedCancel)
             try{
-              ((AnnotationVisualResource)((JScrollPane)tabbedPane.
-                                        getSelectedComponent()).getViewport().
-                                                                getView()
-              ).cancelAction();
-               allOK = true;
+              Component comp = tabbedPane.getSelectedComponent();
+              if(comp instanceof AnnotationVisualResource){
+                ((AnnotationVisualResource)comp).cancelAction();
+              }else if(comp instanceof JScrollPane){
+                ((AnnotationVisualResource)
+                    ((JScrollPane)comp).getViewport().getView()).cancelAction();
+              }else{
+                throw new LuckyException("DocumentEditor.EditAnnotationAction");
+              }
+              allOK = true;
             } catch(GateException ge){
               JOptionPane.showMessageDialog(
                 DocumentEditor.this,
