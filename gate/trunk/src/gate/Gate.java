@@ -571,8 +571,11 @@ jar/classpath so it's the same as registerBuiltins
    * property and uses it if non-null.
    */
   public static File getSiteConfigFile() {
-    if(siteConfigFile == null)
-      siteConfigFile = new File(System.getProperty(GATE_CONFIG_PROPERTY));
+    if(siteConfigFile == null) {
+      String gateConfigProperty = System.getProperty(GATE_CONFIG_PROPERTY);
+      if(gateConfigProperty != null)
+        siteConfigFile = new File(gateConfigProperty);
+    }
     return siteConfigFile;
   } // getSiteConfigFile
 
