@@ -2,14 +2,14 @@
  * DefaultTokeniser.java
  *
  * Copyright (c) 2000-2001, The University of Sheffield.
- * 
+ *
  * This file is part of GATE (see http://gate.ac.uk/), and is free
  * software, licenced under the GNU Library General Public License,
  * Version 2, June1991.
- * 
+ *
  * A copy of this licence is included in the distribution in the file
  * licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- * 
+ *
  * @author Hamish, Kalina, Christian, Valentin
  *
  * @version
@@ -23,6 +23,7 @@ import java.io.*;
 import java.lang.reflect.*;
 
 import gate.*;
+import gate.creole.*;
 import gate.gui.*;
 import gate.util.*;
 import gate.fsm.TestFSM;
@@ -93,9 +94,10 @@ import gate.fsm.TestFSM;
   *The tokeniser ignores all the empty lines or the ones that start with # or
   * //.
  */
-public class DefaultTokeniser implements Runnable, ProcessingResource,
-                                         ProcessProgressReporter,
-                                         StatusReporter{
+public class DefaultTokeniser extends AbstractResource
+implements Runnable, ProcessingResource, ProcessProgressReporter,
+           StatusReporter
+{
   /**
     *  This field is "final static" because it brings in
     *  the advantage of dead code elimination

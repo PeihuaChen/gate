@@ -31,17 +31,18 @@ import gate.util.*;
 /** This class implements the CREOLE register interface. DO NOT
   * construct objects of this class unless your name is gate.util.Gate
   * (in which case please go back to the source code repository and stop
-  * looking at other class' code).
+  * looking at other class's code).
   * @see gate.CreoleRegister
   */
 public class CreoleRegisterImpl extends HashMap implements CreoleRegister
 {
-  /**
-    *  This field is "final static" because it brings in
-    *  the advantage of dead code elimination
-    *  When DEBUG is set on false the code that it guardes will be eliminated
-    *  by the compiler. This will spead up the progam a little bit.
-    */
+  /** Initialise a resource, and return it. */
+  public Resource init(Resource resource) {
+    throw new LazyProgrammerException();
+    //return resource;
+  } // init(Resource)
+
+  /** Debug flag */
   private static final boolean DEBUG = false;
 
   /** The set of CREOLE directories (URLs). */

@@ -26,7 +26,8 @@ import gate.util.*;
 /** Models an individual CREOLE resource metadata, plus configuration data,
   * plus the instantiations of the resource current within the system.
   */
-public class ResourceDataImpl implements ResourceData {
+public class ResourceDataImpl extends AbstractFeatureBearer
+implements ResourceData {
   /**
     *  This field is "final static" because it brings in
     *  the advantage of dead code elimination
@@ -40,8 +41,23 @@ public class ResourceDataImpl implements ResourceData {
 
   /** String representation */
   public String toString() {
-    return "ResourceDataImpl, name=" + name + "; className=" + className +
-           "; jarFileName=" + jarFileName + "; autoLoading=" + autoLoading;
+    StringBuffer s = new StringBuffer(
+      "ResourceDataImpl, name=" + name + "; className=" + className +
+      "; jarFileName=" + jarFileName + "; autoLoading=" + autoLoading +
+      "; features=" + features
+    );
+
+    Iterator iter = parameterListsSet.iterator();
+    if(iter.hasNext()) s.append(Strings.getNl() + "  params=");
+    while(iter.hasNext()) {
+      s.append(Strings.getNl() + "    ");
+      List paramList = (List) iter.next();
+      Iterator iter2 = paramList.iterator();
+      while(iter2.hasNext())
+        s.append( (Parameter) iter2.next() + Strings.getNl() + "    " );
+    }
+
+    return s.toString();
   } // toString
 
   /** Equality: two resource data objects are the same if they have the
@@ -115,6 +131,17 @@ public class ResourceDataImpl implements ResourceData {
 
   /** Get method for the resource jar file URL */
   public URL getJarFileUrl() { return jarFileUrl; }
+
+  /** The set of parameter lists */
+  private Set parameterListsSet = new HashSet();
+
+  /** Add a parameter list */
+  public void addParameterList(List parameterList) {
+    parameterListsSet.add(parameterList);
+  } // addParameterList
+
+  /** Get the set of parameter lists */
+  public Set getParameterListsSet() { return parameterListsSet; }
 
   /** Autoloading flag */
   private boolean autoLoading;

@@ -29,12 +29,7 @@ import gate.util.*;
   */
 public class TestCreole extends TestCase
 {
-  /**
-    *  This field is "final static" because it brings in
-    *  the advantage of dead code elimination
-    *  When DEBUG is set on false the code that it guardes will be eliminated
-    *  by the compiler. This will spead up the progam a little bit.
-    */
+  /** Debug flag */
   private static final boolean DEBUG = false;
 
   /** Construction */
@@ -53,8 +48,7 @@ public class TestCreole extends TestCase
     CreoleRegister reg = Gate.getCreoleRegister();
     if(DEBUG) {
       Iterator iter = reg.values().iterator();
-      while(iter.hasNext())
-        Out.println(iter.next());
+      while(iter.hasNext()) Out.println(iter.next());
     }
 
     ResourceData rd = (ResourceData) reg.get("Sheffield Unicode Tokeniser");
@@ -68,6 +62,49 @@ public class TestCreole extends TestCase
     assert(xmlDocFormatRD.getJarFileName().equals("ShefDocumentFormats.jar"));
   } // testDiscovery()
 
+  /** Test resource metadata */
+  public void testMetadata() throws Exception {
+
+    // clear the register and the creole directory set
+    CreoleRegister reg = Gate.getCreoleRegister();
+    reg.clear();
+    reg.getDirectories().clear();
+
+    // find a URL for finding test files and add to the directory set
+    URL testUrl = Gate.getUrl("tests/");
+    reg.addDirectory(testUrl);
+
+    reg.registerDirectories();
+    if(DEBUG) {
+      Iterator iter = reg.values().iterator();
+      while(iter.hasNext()) Out.println(iter.next());
+    }
+
+    // get some res data from the register
+    assert(reg.size() == 2);
+    ResourceData pr1rd = (ResourceData) reg.get("Sheffield Test PR 1");
+    ResourceData pr2rd = (ResourceData) reg.get("Sheffield Test PR 2");
+    assert(pr1rd != null & pr2rd != null);
+
+    // checks values of parameters of param0 in test pr 1
+    assert(pr1rd.getClassName().equals("testpkg.TestPR1"));
+    Iterator iter = pr1rd.getParameterListsSet().iterator();
+    Iterator iter2 = null;
+    Parameter param = null;
+    while(iter.hasNext())
+      iter2 = ((List) iter.next()).iterator();
+    while(iter2.hasNext())
+      param = (Parameter) iter2.next();
+    assert(param.valueString.equals("param0"));
+    assert(! param.optional);
+    assert(param.runtime);
+    assert(param.comment == null);
+    assert(param.defaultValueString == null);
+    assert(param.name.equals("HOOPY DOOPY"));
+
+    reg.clear();
+  } // testMetadata()
+
   /** Test resource loading */
   public void testLoading() throws Exception {
 
@@ -76,32 +113,23 @@ public class TestCreole extends TestCase
     reg.clear();
     reg.getDirectories().clear();
 
-/*
-    if (Gate.isGateHomeReachable())
-      reg.addDirectory(
-        new URL("http://derwent.dcs.shef.ac.uk/gate.ac.uk/tests/")
-      );
-    else if (Gate.isGateAcUkReachable())
-      reg.addDirectory(
-        new URL("http://www.gate.ac.uk/tests/")
-      );
-    else
-      throw new GateException("Derwent and www.gate.ac.uk are not reachable");
-*/
     // find a URL for finding test files and add to the directory set
     URL testUrl = Gate.getUrl("tests/");
     reg.addDirectory(testUrl);
 
     reg.registerDirectories();
+    if(DEBUG) {
+      Iterator iter = reg.values().iterator();
+      while(iter.hasNext()) Out.println(iter.next());
+    }
 
+    // get some res data from the register
     assert(reg.size() == 2);
     ResourceData pr1rd = (ResourceData) reg.get("Sheffield Test PR 1");
     ResourceData pr2rd = (ResourceData) reg.get("Sheffield Test PR 2");
     assert(pr1rd != null & pr2rd != null);
 
-    Class pr1class = pr1rd.getResourceClass();
-    assertNotNull(pr1class);
-    ProcessingResource pr1 = (ProcessingResource) (pr1class.newInstance());
+// try instantiation here
 
     reg.clear();
   } // testLoading()
