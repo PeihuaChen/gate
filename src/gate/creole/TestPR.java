@@ -35,7 +35,7 @@ import gate.annotation.*;
 public class TestPR extends TestCase
 {
   /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   protected static Document doc1;
   protected static Document doc2;
@@ -67,6 +67,7 @@ public class TestPR extends TestCase
           "tests/in-outlook-09-aug-2001.html")
       );
 
+    annotationTypes.add("Sentence");
     annotationTypes.add("Organization");
     annotationTypes.add("Location");
     annotationTypes.add("Person");
