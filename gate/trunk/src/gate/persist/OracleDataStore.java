@@ -334,6 +334,8 @@ public class OracleDataStore extends JDBCDataStore {
     throw new MethodNotImplementedException();
   }
 
+
+
   /** Adopt a resource for persistence. */
   public LanguageResource adopt(LanguageResource lr,SecurityInfo secInfo)
   throws PersistenceException,SecurityException {
@@ -433,14 +435,14 @@ public class OracleDataStore extends JDBCDataStore {
       }
     }
 
-    // let the world know
+    //5. let the world know
     fireResourceAdopted(
         new DatastoreEvent(this, DatastoreEvent.RESOURCE_ADOPTED,
                            result,
                            result.getLRPersistenceId())
     );
-    // fire also resource written event because it's now saved
-//System.out.println("firing adopt(), ID=["+result.getLRPersistenceId()+"]");
+
+    //6. fire also resource written event because it's now saved
     fireResourceWritten(
       new DatastoreEvent(this, DatastoreEvent.RESOURCE_WRITTEN,
                           result,
@@ -448,8 +450,13 @@ public class OracleDataStore extends JDBCDataStore {
       )
     );
 
+    //7. add the resource to the list of dependent resources - i.e. the ones that the
+    //data store should take care upon closing [and call sync()]
+    this.dependentResources.add(result);
+
     return result;
   }
+
 
 
   /** -- */
@@ -901,7 +908,7 @@ System.out.println();
   throws PersistenceException {
 
     if (lrClassName.equals(DBHelper.DOCUMENT_CLASS)) {
-      DatabaseDocumentImpl docResult = null;
+      Document docResult = null;
       docResult = readDocument(lrPersistenceId);
 
       Assert.assertTrue(docResult instanceof DatabaseDocumentImpl);
@@ -910,7 +917,11 @@ System.out.println();
       Assert.assertNotNull(docResult.getLRPersistenceId());
 
       //register the read doc as listener for sync events
-      addDatastoreListener(docResult);
+      addDatastoreListener((DatastoreListener)docResult);
+
+      //add the resource to the list of dependent resources - i.e. the ones that the
+      //data store should take care upon closing [and call sync()]
+      this.dependentResources.add(docResult);
 
       return docResult;
     }
@@ -1782,27 +1793,26 @@ System.out.println();
     Assert.assertTrue(doc instanceof DatabaseDocumentImpl);
     Assert.assertTrue(doc.getLRPersistenceId() instanceof Long);
 
-    DatabaseDocumentImpl dbDoc = (DatabaseDocumentImpl)doc;
-    Long lrID = (Long)dbDoc.getLRPersistenceId();
+    Long lrID = (Long)doc.getLRPersistenceId();
     //1. sync LR
     // only name can be changed here
-    if (true == dbDoc.isDocumentChanged(DatabaseDocumentImpl.DOC_NAME)) {
-      _syncLR(lrID,dbDoc.getName());
+    if (true == ((EventAwareDocument)doc).isDocumentChanged(DatabaseDocumentImpl.DOC_NAME)) {
+      _syncLR(lrID,doc.getName());
     }
 
     //2. sync Document
-    if (true == dbDoc.isDocumentChanged(DatabaseDocumentImpl.DOC_MAIN)) {
-      _syncDocument(dbDoc);
+    if (true == ((EventAwareDocument)doc).isDocumentChanged(DatabaseDocumentImpl.DOC_MAIN)) {
+      _syncDocument(doc);
     }
 
     //3. [optional] sync Content
-    if (true == dbDoc.isDocumentChanged(DatabaseDocumentImpl.DOC_CONTENT)) {
-      _syncDocumentContent(dbDoc);
+    if (true == ((EventAwareDocument)doc).isDocumentChanged(DatabaseDocumentImpl.DOC_CONTENT)) {
+      _syncDocumentContent(doc);
     }
 
     //4. [optional] sync Features
-    if (true == dbDoc.isDocumentChanged(DatabaseDocumentImpl.DOC_FEATURES)) {
-      _syncFeatures(dbDoc);
+    if (true == ((EventAwareDocument)doc).isDocumentChanged(DatabaseDocumentImpl.DOC_FEATURES)) {
+      _syncFeatures(doc);
     }
 
 
