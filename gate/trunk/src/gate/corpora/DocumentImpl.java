@@ -184,18 +184,17 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
           sourceUrl, getEncoding(), sourceUrlStartOffset, sourceUrlEndOffset);
         getFeatures().put("gate.SourceURL", sourceUrl.toExternalForm());
       } catch(IOException e) {
-        e.printStackTrace();
         throw new ResourceInstantiationException("DocumentImpl.init: " + e);
       }
-
-      if(preserveOriginalContent.booleanValue() && content != null) {
-        String originalContent = new String(
-          ((DocumentContentImpl) content).getOriginalContent());
-        getFeatures().put(GateConstants.ORIGINAL_DOCUMENT_CONTENT_FEATURE_NAME,
-                      originalContent);
-      } // if
     }
 
+    if(preserveOriginalContent.booleanValue() && content != null) {
+      String originalContent = new String(
+        ((DocumentContentImpl) content).getOriginalContent());
+      getFeatures().put(GateConstants.ORIGINAL_DOCUMENT_CONTENT_FEATURE_NAME,
+                    originalContent);
+    } // if
+    
     // set up a DocumentFormat if markup unpacking required
     if(getMarkupAware().booleanValue()) {
       DocumentFormat docFormat =
