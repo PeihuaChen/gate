@@ -46,10 +46,10 @@ Rule: Ldots
 
 Rule: Split1
 (
- (PUNCT|FULLSTOP|THREEDOTS|
- (FULLSTOP {Token.string == "\""})
+ (PUNCT|FULLSTOP|THREEDOTS)
+ ({Token.string == "\""})?
 )
-):split
+:split
 -->
 :split.Split = {kind = "internal"}
 
