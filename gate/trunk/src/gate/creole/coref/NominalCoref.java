@@ -234,9 +234,9 @@ public class NominalCoref extends AbstractCoreferencer
 	String tokenCategory = (String) 
 	  lastToken.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME);
 	// UNCOMMENT FOR SINGULAR PROPER NOUNS (The President, the Pope)
-	if (! tokenCategory.equals("NN") &&
-	! tokenCategory.equals("NNP")) {
-	//if (! tokenCategory.equals("NN")) {
+	//if (! tokenCategory.equals("NN") &&
+	//! tokenCategory.equals("NNP")) {
+	if (! tokenCategory.equals("NN")) {
 	  Out.println("Not a singular noun");
 	  continue;
 	}
@@ -246,18 +246,23 @@ public class NominalCoref extends AbstractCoreferencer
 	  Out.println("overlapping annotation");
 	  continue;
 	}
-	
+
+	Annotation previousToken;
+        String previousValue;
+
 	// Don't associate it if it's proceeded by a generic marker
-	Annotation previousToken = (Annotation) tokens[currentToken - 1];
-	String previousValue = (String) 
-	  previousToken.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-	if (previousValue.equalsIgnoreCase("a") ||
-	    previousValue.equalsIgnoreCase("an") ||
-	    previousValue.equalsIgnoreCase("other") ||
-	    previousValue.equalsIgnoreCase("another")) {
-	    Out.println("indefinite");
+        if (currentToken != 0) {
+          previousToken = (Annotation) tokens[currentToken - 1];
+          previousValue = (String) 
+	    previousToken.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
+          if (previousValue.equalsIgnoreCase("a") ||
+              previousValue.equalsIgnoreCase("an") ||
+              previousValue.equalsIgnoreCase("other") ||
+              previousValue.equalsIgnoreCase("another")) {
+              Out.println("indefinite");
 	    continue;
-	}            
+          }
+        }
 
 	// nominals immediately followed by Person annotations:
 	// BAD:
