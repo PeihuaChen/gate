@@ -102,6 +102,8 @@ public class Editor extends JFrame {
    * Component initialization
    */
   private void jbInit() throws Exception {
+    this.setIconImage(Toolkit.getDefaultToolkit().getImage(
+            guk.Editor.class.getResource("img/gateIcon.gif")));
     java.util.List installedLocales = new ArrayList();
     try{
       //if this fails guk is not present
