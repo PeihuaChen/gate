@@ -113,9 +113,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
     FSMInstance currentFSM;
     //startNode: the node from the current matching attepmt starts.
     //initially startNode = leftMost node
-    gate.Node startNode = doc.getAnnotations().firstNode();
+    gate.Node startNode = annotations.firstNode();
     //The last node: where the parsing will stop
-    gate.Node lastNode = doc.getAnnotations().lastNode();
+    gate.Node lastNode = annotations.lastNode();
     int oldStartNodeOff = 0;
     int lastNodeOff = lastNode.getOffset().intValue();
     int startNodeOff;
@@ -192,7 +192,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
             annType = (String)typesIter.next();
             newAttributes = (FeatureMap)constraintsByType.get(annType);
             offset = currentFSM.getAGPosition().getOffset();
-            matchedHere = doc.getAnnotations().get(annType,
+            matchedHere = annotations.get(annType,
                                                    newAttributes,
                                                    offset);
             if(matchedHere == null || matchedHere.isEmpty()) success = false;
@@ -242,7 +242,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
        //FIRE THE RULE
       if(acceptingFSMInstances.isEmpty()){
         //advance to next relevant node in the Annotation Graph
-        startNode = doc.getAnnotations().nextNode(startNode);
+        startNode = annotations.nextNode(startNode);
       }else if(ruleApplicationStyle == BRILL_STYLE){
         //fire the rules corresponding to all accepting FSM instances
         java.util.Iterator accFSMs = acceptingFSMInstances.iterator();
@@ -341,6 +341,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.13  2000/07/12 11:40:19  valyt
+// *** empty log message ***
+//
 // Revision 1.12  2000/07/04 14:37:39  valyt
 // Added some support for Jape-ing in a different annotations et than the default one;
 // Changed the L&F for the JapeGUI to the System default
