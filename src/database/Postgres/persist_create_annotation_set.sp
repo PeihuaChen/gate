@@ -39,7 +39,7 @@ CREATE OR REPLACE FUNCTION persist_create_annotation_set(int4,varchar) RETURNS i
                               as_name)
       values(nextval(''seq_annot_set''),
              l_doc_id,
-             p_as_name)
+             p_as_name);
 
       return currval(''seq_annot_set'');
 
