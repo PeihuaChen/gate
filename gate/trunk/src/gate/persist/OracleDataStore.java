@@ -261,7 +261,7 @@ public class OracleDataStore extends JDBCDataStore {
    * image.
    */
   public void sync(LanguageResource lr) throws PersistenceException {
-Out.prln("syncing LR...");
+//Out.prln("syncing LR...");
     //0. preconditions
     Assert.assertNotNull(lr);
     if (false == lr instanceof Document &&
@@ -921,7 +921,7 @@ Out.prln("syncing LR...");
   public LanguageResource getLr(String lrClassName, Object lrPersistenceId)
   throws PersistenceException {
 
-    Out.prln("class name" + lrClassName);
+//    Out.prln("class name" + lrClassName);
     if (lrClassName.equals(DBHelper.DOCUMENT_CLASS)) {
       Document docResult = null;
       docResult = readDocument(lrPersistenceId);

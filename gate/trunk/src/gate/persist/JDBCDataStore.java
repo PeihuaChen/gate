@@ -444,7 +444,7 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
 
 
   public void resourceLoaded(CreoleEvent e) {
-System.out.println("resource loaded...");
+//System.out.println("resource loaded...");
   }
 
 
@@ -464,15 +464,15 @@ System.out.println("resource loaded...");
   }
 
   public void datastoreOpened(CreoleEvent e) {
-System.out.println("datastore opened...");
+//System.out.println("datastore opened...");
   }
 
   public void datastoreCreated(CreoleEvent e) {
-System.out.println("datastore created...");
+//System.out.println("datastore created...");
   }
 
   public void datastoreClosed(CreoleEvent e) {
-System.out.println("datastore closed...");
+//System.out.println("datastore closed...");
     //sync all dependent resources
   }
 
