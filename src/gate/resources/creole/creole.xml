@@ -568,6 +568,7 @@
         <RESOURCE_DISPLAYED>gate.Document</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
+
     <RESOURCE>
       <NAME>Corpus Editor</NAME>
       <CLASS>gate.gui.CorpusEditor</CLASS>
@@ -596,6 +597,7 @@
         <RESOURCE_DISPLAYED>gate.persist.SerialDataStore</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
+
     <RESOURCE>
       <NAME>JDBC Datastore Viewer</NAME>
       <CLASS>gate.gui.OracleDatastoreViewer</CLASS>
@@ -605,6 +607,17 @@
         <RESOURCE_DISPLAYED>gate.persist.JDBCDataStore</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
+
+    <RESOURCE>
+      <NAME>Search Results</NAME>
+      <CLASS>gate.gui.SearchPRViewer</CLASS>
+      <!-- type values can be "large" or "small"-->
+      <GUI TYPE="large">
+        <MAIN_VIEWER/>
+        <RESOURCE_DISPLAYED>gate.creole.ir.SearchPR</RESOURCE_DISPLAYED>
+      </GUI>
+    </RESOURCE>
+
     <!-- VR def for gate Syntax Tree Editor/Viewer -->
     <RESOURCE>
       <NAME>Syntax tree viewer</NAME>

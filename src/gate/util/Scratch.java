@@ -23,8 +23,10 @@ import java.util.zip.*;
 
 import gate.*;
 import gate.creole.*;
+import gate.creole.ir.*;
 import gate.creole.tokeniser.*;
 import gate.creole.gazetteer.*;
+import gate.persist.*;
 import gate.gui.*;
 
 import org.xml.sax.*;
@@ -39,16 +41,16 @@ public class Scratch
   private static final boolean DEBUG = false;
 
   public static void main(String args[]) throws Exception {
-    URL anURL = new URL("file:/z:/a/b/c/d.txt");
-//    URL anotherURL = new URL(anURL, "../x/y/z.txt");
-    URL anotherURL = new URL("file:/z:/a/b/c/d.txt");
-    String relPath = gate.util.persistence.PersistenceManager.
-                     getRelativePath(anURL, anotherURL);
-    Out.prln("Context: " + anURL);
-    Out.prln("Target: " + anotherURL);
-    Out.prln("Relative path: " + relPath);
-    Out.prln("Result " + new URL(anURL, relPath));
-    javax.swing.text.FlowView fv;
+    createIndex();
+//    URL anURL = new URL("file:/z:/a/b/c/d.txt");
+//    URL anotherURL = new URL("file:/z:/a/b/c/d.txt");
+//    String relPath = gate.util.persistence.PersistenceManager.
+//                     getRelativePath(anURL, anotherURL);
+//    Out.prln("Context: " + anURL);
+//    Out.prln("Target: " + anotherURL);
+//    Out.prln("Relative path: " + relPath);
+//    Out.prln("Result " + new URL(anURL, relPath));
+//    javax.swing.text.FlowView fv;
 //    javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
 //    Map uidefaults  = (Map)javax.swing.UIManager.getDefaults();
 //    List keys = new ArrayList(uidefaults.keySet());
@@ -275,6 +277,50 @@ public class Scratch
   protected static int random() {
     return randomiser.nextInt(9999);
   } // random
+
+  /**
+   * Generates an index for a corpus in a datastore on Valy's computer in order
+   * to have some test data.
+   */
+  public static void createIndex() throws Exception{
+    String dsURLString = "file:///d:/temp/ds";
+    String indexLocation = "d:/temp/ds.idx";
+
+    Gate.init();
+
+    //open the datastore
+    SerialDataStore sds = (SerialDataStore)Factory.openDataStore(
+                            "gate.persist.SerialDataStore", dsURLString);
+    sds.open();
+    List corporaIds = sds.getLrIds("gate.corpora.SerialCorpusImpl");
+    IndexedCorpus corpus = (IndexedCorpus)
+                           sds.getLr("gate.corpora.SerialCorpusImpl",
+
+                                     corporaIds.get(0));
+    DefaultIndexDefinition did = new DefaultIndexDefinition();
+    did.setIndexType(GateConstants.IR_LUCENE_INVFILE);
+
+    did.setIndexLocation(indexLocation);
+    did.addIndexField(new IndexField("content", new ContentPropertyReader(), false));
+
+    corpus.setIndexDefinition(did);
+
+    Out.prln("removing old index");
+    corpus.getIndexManager().deleteIndex();
+    Out.prln("building new index");
+    corpus.getIndexManager().createIndex();
+    Out.prln("optimising new index");
+    corpus.getIndexManager().optimizeIndex();
+    Out.prln("saving corpus");
+    sds.sync(corpus);
+    Out.prln("done!");
+  }
+
+  public static class ContentPropertyReader implements PropertyReader{
+    public String getRpopertyValue(gate.Document doc){
+      return doc.getContent().toString();
+    }
+  }
 
   /** Random number generator */
   protected static Random randomiser = new Random();
