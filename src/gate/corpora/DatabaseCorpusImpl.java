@@ -25,6 +25,7 @@ import gate.annotation.*;
 import gate.creole.*;
 import gate.event.*;
 import gate.util.*;
+import gate.security.SecurityInfo;
 
 
 public class DatabaseCorpusImpl extends CorpusImpl
@@ -650,4 +651,104 @@ public class DatabaseCorpusImpl extends CorpusImpl
                     "support remove in the iterators");
       }
   }
+
+
+  /**
+   * Unloads the document from memory, but calls sync() first, to store the
+   * changes
+   */
+  public void unloadDocument(int index) {
+
+    //preconditions
+    Assert.assertTrue(index >= 0);
+
+    //1. check whether its been loaded and is a persistent one
+    // if a persistent doc is not loaded, there's nothing we need to do
+    if ( (! isDocumentLoaded(index)) && isPersistentDocument(index)) {
+      return;
+    }
+
+    //2. sync the document before releasing it from memory, because the
+    //creole register garbage collects all LRs which are not used any more
+    Document doc = (Document)this.supportList.get(index);
+    Assert.assertNotNull(doc);
+
+    try {
+
+      //if the document is not already adopted, we need to do that first
+      if (doc.getLRPersistenceId() == null) {
+
+        //3.2 get the security info for the corpus
+        SecurityInfo si = this.getDataStore().getSecurityInfo(this);
+        Document dbDoc = (Document) this.getDataStore().adopt(doc, si);
+      }
+      else {
+        //if it is adopted, just sync it
+        this.getDataStore().sync(doc);
+      }
+
+      //3. remove the document from the memory
+      //do this, only if the saving has succeeded
+      this.supportList.remove(index);
+    }
+    catch (PersistenceException pex) {
+      throw new GateRuntimeException("Error unloading document from corpus"
+                      + "because document sync failed: " + pex.getMessage());
+    }
+    catch (gate.security.SecurityException sex) {
+      throw new GateRuntimeException("Error unloading document from corpus"
+                      + "because of document access error: " + sex.getMessage());
+    }
+
+  }
+
+  /**
+   * Unloads a document from memory
+   */
+  public void unloadDocument(Document doc) {
+
+    Assert.assertNotNull(doc);
+
+    //1. determine the index of the document; if not there, do nothing
+    int index = findDocument(doc);
+
+    if (index == -1) {
+      return;
+    }
+
+    unloadDocument(index);
+  }
+
+
+  /**
+   * This method returns true when the document is already loaded in memory
+   */
+  public boolean isDocumentLoaded(int index) {
+
+    //preconditions
+    Assert.assertTrue(index >= 0);
+
+    if (this.supportList == null || this.supportList.isEmpty()) {
+      return false;
+    }
+
+    return this.supportList.get(index) != null;
+  }
+
+  /**
+   * This method returns true when the document is already stored on disk
+   * i.e., is not transient
+   */
+  public boolean isPersistentDocument(int index) {
+
+    //preconditions
+    Assert.assertTrue(index >= 0);
+
+    if (this.supportList == null || this.supportList.isEmpty()) {
+      return false;
+    }
+
+    return (((DocumentData)this.documentData.get(index)).getPersistentID() != null);
+  }
+
 }
