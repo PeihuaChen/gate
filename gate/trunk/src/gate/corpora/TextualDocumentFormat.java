@@ -73,7 +73,8 @@ public class TextualDocumentFormat extends DocumentFormat
                                 GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
   }//unpackMarkup
 
-  public void unpackMarkup(Document doc, RepositioningInfo repInfo)
+  public void unpackMarkup(Document doc, RepositioningInfo repInfo,
+                            RepositioningInfo ampCodingInfo)
                                       throws DocumentFormatException {
     unpackMarkup(doc);
   } // unpackMarkup

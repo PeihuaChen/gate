@@ -43,6 +43,9 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
   /** Keep the refference to this structure */
   private RepositioningInfo reposInfo = null;
 
+  /** Keep the refference to this structure */
+  private RepositioningInfo ampCodingInfo = null;
+
   /** Set repositioning information structure refference. If you set this
    *  refference to <B>null</B> information wouldn't be collected.
    */
@@ -53,6 +56,18 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
   /** Return current RepositioningInfo object */
   public RepositioningInfo getRepositioningInfo() {
     return reposInfo;
+  } // getRepositioningInfo
+
+  /** Set repositioning information structure refference for ampersand coding.
+   *  If you set this refference to <B>null</B> information wouldn't be used.
+   */
+  public void setAmpCodingInfo(RepositioningInfo info) {
+    ampCodingInfo = info;
+  } // setRepositioningInfo
+
+  /** Return current RepositioningInfo object for ampersand coding. */
+  public RepositioningInfo getAmpCodingInfo() {
+    return ampCodingInfo;
   } // getRepositioningInfo
 
   /**
@@ -305,7 +320,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
          // If we are here it means that a concatenation between the last
          // token in the tmpDocContent and the content(which doesn't start
          // with a white space) will be performed. In order to prevent this,
-         // we will add a " " space char in order to assure taht the 2 tokens
+         // we will add a " " space char in order to assure that the 2 tokens
          // stay apart. Howerver we will except from this rule the most known
          // internal entities like &, <, >, etc
          if (
@@ -342,10 +357,33 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
         reposInfo.addPositionInfo(getRealOffset(), content.length(),
                       tmpDocContent.length()+contentBuffer.length(),
                       content.length());
-      } // if
+      }
       else {
         // unicode char or &xxx; coding
-      }
+        // Reported from the parser offset is 0
+        // The real offset should be found in the ampCodingInfo structure.
+
+        long lastPosition = 0;
+        RepositioningInfo.PositionInfo pi;
+
+        if(reposInfo.size() > 0) {
+          pi =
+            (RepositioningInfo.PositionInfo) reposInfo.get(reposInfo.size()-1);
+          lastPosition = pi.getOriginalPosition();
+        } // if
+
+        for(int i = 0; i < ampCodingInfo.size(); ++i) {
+          pi = (RepositioningInfo.PositionInfo) ampCodingInfo.get(i);
+          if(pi.getOriginalPosition() > lastPosition) {
+            // found
+            reposInfo.addPositionInfo(pi.getOriginalPosition(),
+                          pi.getOriginalLength(),
+                          tmpDocContent.length()+contentBuffer.length(),
+                          content.length());
+            break;
+          } // if
+        } // for
+      } // if
     } // if
 
     // update the document content
