@@ -202,6 +202,7 @@ public class TestGate {
         suite.addTest(TestDocument.suite());
         suite.addTest(TestRBTreeMap.suite());
         suite.addTest(TestCorpus.suite());
+        suite.addTest(TestSerialCorpus.suite());
         suite.addTest(TestDB.suite());
 //no longer needed as replaced by testPR
 //        suite.addTest(TestTokeniser.suite());
