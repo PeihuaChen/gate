@@ -142,6 +142,10 @@ public class ShellSlacFrame extends MainFrame {
     action = new RestoreDefaultApplicationAction();
     fileMenu.add(new XJMenuItem(action, this));
 
+/* Test code is executed here
+    action = new TestStoreAction();
+    fileMenu.add(new XJMenuItem(action, this));
+*/
     fileMenu.addSeparator();
     fileMenu.add(new XJMenuItem(new ExitGateAction(), this));
     retMenuBar.add(fileMenu);
@@ -270,6 +274,7 @@ public class ShellSlacFrame extends MainFrame {
         Factory.deleteResource(application);
       } // if
       application = (SerialAnalyserController) res;
+      
       runAction.setEnabled(true);
       if(corpus != null) 
         application.setCorpus(corpus);
@@ -312,22 +317,28 @@ public class ShellSlacFrame extends MainFrame {
     } // if
   } // showDocument(Document doc)
 
-  /** Called when a {@link gate.DataStore} has been created.
-   *  Save corpus on datastore creation and remove this datastore. */
-  public void datastoreCreated(CreoleEvent e){
-    super.datastoreCreated(e);
+  /** Called when a {@link gate.DataStore} has been opened.
+   *  Save corpus on datastore open. */
+  public void datastoreOpened(CreoleEvent e){
+    super.datastoreOpened(e);
     if(corpus == null) return; 
 
     DataStore ds = e.getDatastore();
     try {
-      // put documents in datastore
-      saveAction.setEnabled(false);
-      ds.adopt(corpus, null);
-      ds.sync(corpus);
       if(dataStore != null) {
         // close old datastore if any
         dataStore.close();
       } // if
+      // put documents in datastore
+      saveAction.setEnabled(false);
+
+      LanguageResource persCorpus = ds.adopt(corpus, null);
+      ds.sync(persCorpus);
+      // change corpus with the new persistent corpus
+      Factory.deleteResource((LanguageResource)corpus);
+      corpus = (Corpus) persCorpus;
+      if(application != null) application.setCorpus(corpus);
+
       dataStore = ds;
       saveAction.setEnabled(true);
     } catch (PersistenceException pex) {
@@ -335,7 +346,7 @@ public class ShellSlacFrame extends MainFrame {
     } catch (gate.security.SecurityException sex) {
       sex.printStackTrace();
     } // catch
-  } // datastoreCreated(CreoleEvent e)
+  } // datastoreOpened(CreoleEvent e)
 
 //------------------------------------------------------------------------------
 //  Inner classes section
@@ -445,20 +456,30 @@ public class ShellSlacFrame extends MainFrame {
     } // StoreAllDocumentAction()
 
     public void actionPerformed(ActionEvent e) {
-      if(dataStore == null) {
-        // should open a datastore
-        dataStore = openSerialDataStore();
+      if(dataStore != null) {
+        // on close all resources will be closed too
+        try {
+          dataStore.close();
+        } catch (PersistenceException pex) {
+          pex.printStackTrace();
+        } // catch
+        dataStore = null;
       } // if
+
+      // should open a datastore
+      dataStore = openSerialDataStore();
       
       if(dataStore != null) {
         // load from datastore
-        Iterator iter = null;
+        List corporaIDList = null;
+        List docIDList = null;
         String docID = "";
         FeatureMap features;
         Document doc;
 
         try {
-          iter = dataStore.getLrIds("gate.corpora.DocumentImpl").iterator();
+          corporaIDList = dataStore.getLrIds("gate.corpora.CorpusImpl");
+          docIDList = dataStore.getLrIds("gate.corpora.DocumentImpl");
         } catch (PersistenceException pex) {
           pex.printStackTrace();
         } // catch
@@ -466,9 +487,9 @@ public class ShellSlacFrame extends MainFrame {
         features = Factory.newFeatureMap();
         features.put(DataStore.LR_ID_FEATURE_NAME, docID);
         features.put(DataStore.DATASTORE_FEATURE_NAME, dataStore);
-        corpus.cleanup();
-        while(iter.hasNext()) {
-          docID = (String) iter.next();
+
+        for(int i=0; i < docIDList.size(); ++i) {
+          docID = (String) docIDList.get(i);
           // read the document back
           features.put(DataStore.LR_ID_FEATURE_NAME, docID);
           doc = null;
@@ -480,10 +501,48 @@ public class ShellSlacFrame extends MainFrame {
           } // catch
 
           if(doc != null) corpus.add(doc);
-        } // while
+        } // for
       } // if
       
     } // actionPerformed(ActionEvent e)
   } // class LoadAllDocumentAction extends AbstractAction
   
+  class TestStoreAction extends AbstractAction {
+    public TestStoreAction() {
+      super("Test Store application");
+      putValue(SHORT_DESCRIPTION,"Store the application");
+    } // TestStoreAction()
+
+    public void actionPerformed(ActionEvent e) {
+      if(application != null) {
+        // load/store test
+        try {
+          File file = new File("D:/temp/tempapplication.tmp");
+          ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file));
+          long startTime = System.currentTimeMillis();
+          oos.writeObject(application);
+          long endTime = System.currentTimeMillis();
+  
+          System.out.println("Storing completed in " +
+            NumberFormat.getInstance().format(
+            (double)(endTime - startTime) / 1000) + " seconds");
+  
+          ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
+          Object object;
+          startTime = System.currentTimeMillis();
+          object = ois.readObject();
+          endTime = System.currentTimeMillis();
+          application = (SerialAnalyserController) object;
+  
+          System.out.println("Loading completed in " +
+            NumberFormat.getInstance().format(
+            (double)(endTime - startTime) / 1000) + " seconds");
+  
+        } catch (Exception ex) {
+          ex.printStackTrace();
+        } // catch
+      } // if
+    } // actionPerformed(ActionEvent e)
+  } // class TestStoreAction extends AbstractAction
+
 } // class ShellSlacFrame
