@@ -16,14 +16,14 @@
         COMMENT="The annotation set to be used for the generated annotations"
         OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="tokeniserRulesURL"
-        DEFAULT="tokeniser/multiTokeniser.rules"
+        DEFAULT="resources/tokeniser/multiTokeniser.rules"
         COMMENT="The URL for the rules file" SUFFIXES="rules" >
         java.net.URL</PARAMETER>     
       <PARAMETER NAME="encoding"
         COMMENT="The encoding used for reading the definitions" DEFAULT="UTF-8">
         java.lang.String</PARAMETER>
        <PARAMETER NAME="transducerGrammarURL"
-        DEFAULT="tokeniser/postprocess.jape"
+        DEFAULT="resources/tokeniser/postprocess.jape"
         COMMENT="The URL for the postprocessing transducer" SUFFIXES="jape">
         java.net.URL</PARAMETER>
       <ICON>shefTokeniser.gif</ICON>
@@ -41,7 +41,7 @@
         COMMENT="The annotation set to be used for the generated annotations"
         OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="listsURL"
-        DEFAULT="gazetteer/lists.def"
+        DEFAULT="resources/gazetteer/lists.def"
         COMMENT="The URL to the file with list of lists" SUFFIXES="def">
         java.net.URL</PARAMETER>
       <PARAMETER DEFAULT="UTF-8"
@@ -73,10 +73,10 @@
         COMMENT="The annotation set to be used as output for the transducer"
         OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="transducerURL" COMMENT="The URL to the grammar file"
-         DEFAULT="grammar/main.jape"
+         DEFAULT="resources/grammar/main.jape"
         SUFFIXES="jape">java.net.URL</PARAMETER>
       <PARAMETER NAME="gazetteerListsURL"
-        DEFAULT="splitter/gazetteer/lists.def"
+        DEFAULT="resources/splitter/gazetteer/lists.def"
         COMMENT="The URL to the file with list of lists" SUFFIXES="def">
         java.net.URL</PARAMETER>
       <PARAMETER NAME="encoding" DEFAULT="UTF-8"
@@ -98,7 +98,7 @@
         COMMENT="The annotation set to be used for the generated annotations"
         OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="listsURL"
-        DEFAULT="tokeniser/lists.def"
+        DEFAULT="resources/tokeniser/lists.def"
         COMMENT="The URL to the file with list of lists" SUFFIXES="def">
         java.net.URL</PARAMETER>
       <PARAMETER DEFAULT="UTF-8"
@@ -130,7 +130,7 @@
         COMMENT="The annotation set to be used as output for the transducer"
         OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="grammarURL" COMMENT="The URL to the grammar file"
-         DEFAULT="grammar/main.jape"
+         DEFAULT="resources/grammar/main.jape"
         SUFFIXES="jape">java.net.URL</PARAMETER>
       <PARAMETER NAME="encoding" DEFAULT="UTF-8"
         COMMENT="The encoding used for reading the grammar">
@@ -153,7 +153,7 @@
         COMMENT="The annotation set to be used as output for the transducer"
         OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="grammarURL" COMMENT="The URL to the grammar file"
-         DEFAULT="tokeniser/join.jape"
+         DEFAULT="resources/tokeniser/join.jape"
         SUFFIXES="jape">java.net.URL</PARAMETER>
       <PARAMETER NAME="encoding" DEFAULT="UTF-8"
         COMMENT="The encoding used for reading the grammar">
@@ -166,7 +166,7 @@
       <JAR>hindi.jar</JAR>
       <CLASS>hindi.HindiOrthoMatcher</CLASS>
       <COMMENT>Hindi Orthomatcher</COMMENT>
-      <PARAMETER DEFAULT="orthomatcher/listsNM.def"
+      <PARAMETER DEFAULT="resources/orthomatcher/listsNM.def"
         COMMENT="The URL for the definition file" SUFFIXES="def"
         NAME="definitionFileURL">java.net.URL</PARAMETER>
       <PARAMETER DEFAULT="UTF-8"
@@ -193,7 +193,7 @@
     <RESOURCE>
       <NAME>Hindi POS Tagger</NAME>
       <COMMENT>Mark Hepple's Brill-style POS tagger, adapted for languages where entries are multiword</COMMENT>
-      <JAR>cebtag.jar</JAR>
+      <JAR>resources/creole/cebtag.jar</JAR>
       <CLASS>cebtag.postag.CebuanoPOSTagger</CLASS>
       <PARAMETER NAME="document"
         COMMENT="The document to be processed"
@@ -201,10 +201,10 @@
       <PARAMETER NAME="inputASName"
         COMMENT="The name of the annotation set used for input"
         RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="lexiconURL" DEFAULT="tagger/hindi_lexicon_new"
+      <PARAMETER NAME="lexiconURL" DEFAULT="resources/tagger/hindi_lexicon_new"
         COMMENT="The URL for the lexicon file"
         >java.net.URL</PARAMETER>
-      <PARAMETER NAME="rulesURL" DEFAULT="tagger/ruleset"
+      <PARAMETER NAME="rulesURL" DEFAULT="resources/tagger/ruleset"
         COMMENT="The URL for the ruleset file"
         >java.net.URL</PARAMETER>
       <PARAMETER NAME="encoding"
