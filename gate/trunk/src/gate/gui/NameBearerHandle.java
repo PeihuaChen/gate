@@ -470,10 +470,16 @@ public class NameBearerHandle implements Handle,
               OutputStreamWriter writer = new OutputStreamWriter(
                                     new FileOutputStream(selectedFile),"UTF-8");
 
-              // Write (test the toXml() method)
-              // This Action is added only when a gate.Document is created.
-              // So, is for sure that the resource is a gate.Document
-              writer.write(((gate.Document)target).toXml(annotationsToDump));
+              //determine if the features need to be saved first
+              Boolean featuresSaved =
+                  Gate.getUserConfig().getBoolean(
+                    GateConstants.SAVE_FEATURES_WHEN_PRESERVING_FORMAT);
+              boolean saveFeatures = true;
+              if (featuresSaved != null)
+                saveFeatures = featuresSaved.booleanValue();
+              // Write with the toXml() method
+              writer.write(
+                ((gate.Document)target).toXml(annotationsToDump, saveFeatures));
               writer.flush();
               writer.close();
             } catch (Exception ex){
