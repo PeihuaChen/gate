@@ -23,6 +23,7 @@ import gate.*;
 import gate.creole.*;
 import gate.creole.gazetteer.*;
 import gate.creole.tokeniser.*;
+import gate.creole.splitter.*;
 import gate.util.*;
 import gate.event.*;
 
@@ -33,82 +34,128 @@ import gate.event.*;
 public class Nerc extends SerialController {
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
-    //init super object
-    super.init();
-    //create all the componets
-    FeatureMap params;
-    FeatureMap features;
-    Map listeners = new HashMap();
-    listeners.put("gate.event.StatusListener", new StatusListener(){
-      public void statusChanged(String text){
-        fireStatusChanged(text);
-      }
-    });
+    try{
+      //init super object
+      super.init();
+      //create all the componets
+      FeatureMap params;
+      FeatureMap features;
+      Map listeners = new HashMap();
+      listeners.put("gate.event.StatusListener", new StatusListener(){
+        public void statusChanged(String text){
+          fireStatusChanged(text);
+        }
+      });
 
-    //tokeniser
-    fireStatusChanged("Creating a tokeniser");
-    params = Factory.newFeatureMap();
-//      rData = (ResourceData)Gate.getCreoleRegister().get(
-//              "gate.creole.tokeniser.DefaultTokeniser");
-//      params.putAll(rData.getParameterList().getInitimeDefaults());
-    if(tokeniserRulesURL != null) params.put("rulesURL",
-                                             tokeniserRulesURL);
-    params.put("encoding", encoding);
-    if(DEBUG) Out.prln("Parameters for the tokeniser: \n" + params);
-    features = Factory.newFeatureMap();
-    Gate.setHiddenAttribute(features, true);
-    tokeniser = (DefaultTokeniser)Factory.createResource(
-                  "gate.creole.tokeniser.DefaultTokeniser",
-                  params, features, listeners);
-    this.add(tokeniser);
-    tokeniser.setName("Tokeniser " + System.currentTimeMillis());
-    fireProgressChanged(10);
-
-    //gazetteer
-    fireStatusChanged("Creating a gazetteer");
-    params = Factory.newFeatureMap();
-//      rData = (ResourceData)Gate.getCreoleRegister().get(
-//              "gate.creole.gazetteer.DefaultGazetteer");
-//      params.putAll(rData.getParameterList().getInitimeDefaults());
-    if(gazetteerListsURL != null) params.put("listsURL",
-                                             gazetteerListsURL);
-    params.put("encoding", encoding);
-    params.put("caseSensitive", caseSensitiveGazetteer);
-    if(DEBUG) Out.prln("Parameters for the gazetteer: \n" + params);
-    features = Factory.newFeatureMap();
-    Gate.setHiddenAttribute(features, true);
-
-    listeners.put("gate.event.ProgressListener",
-                  new CustomProgressListener(11, 50));
-
-    gazetteer = (DefaultGazetteer)Factory.createResource(
-                    "gate.creole.gazetteer.DefaultGazetteer",
+      //tokeniser
+      fireStatusChanged("Creating a tokeniser");
+      params = Factory.newFeatureMap();
+      if(tokeniserRulesURL != null) params.put("rulesURL",
+                                               tokeniserRulesURL);
+      params.put("encoding", encoding);
+      if(DEBUG) Out.prln("Parameters for the tokeniser: \n" + params);
+      features = Factory.newFeatureMap();
+      Gate.setHiddenAttribute(features, true);
+      tokeniser = (DefaultTokeniser)Factory.createResource(
+                    "gate.creole.tokeniser.DefaultTokeniser",
                     params, features, listeners);
-    this.add(gazetteer);
-    gazetteer.setName("Gazetteer " + System.currentTimeMillis());
-    fireProgressChanged(50);
+      this.add(tokeniser);
+      tokeniser.setName("Tokeniser " + System.currentTimeMillis());
+      fireProgressChanged(10);
 
-    //transducer
-    fireStatusChanged("Creating a Jape transducer");
-    params = Factory.newFeatureMap();
-//      rData = (ResourceData)Gate.getCreoleRegister().get(
-//              "gate.creole.Transducer");
-//      params.putAll(rData.getParameterList().getInitimeDefaults());
-    if(japeGrammarURL != null) params.put("grammarURL",
-                                          japeGrammarURL);
-    params.put("encoding", encoding);
-    if(DEBUG) Out.prln("Parameters for the transducer: \n" + params);
-    features = Factory.newFeatureMap();
-    Gate.setHiddenAttribute(features, true);
-    listeners.put("gate.event.ProgressListener",
-                  new CustomProgressListener(11, 50));
-    transducer = (Transducer)Factory.createResource("gate.creole.Transducer",
-                                                    params, features,
-                                                    listeners);
-    fireProgressChanged(100);
-    fireProcessFinished();
-    this.add(transducer);
-    transducer.setName("Transducer " + System.currentTimeMillis());
+      //gazetteer
+      fireStatusChanged("Creating a gazetteer");
+      params = Factory.newFeatureMap();
+      if(gazetteerListsURL != null) params.put("listsURL",
+                                               gazetteerListsURL);
+      params.put("encoding", encoding);
+      params.put("caseSensitive", caseSensitiveGazetteer);
+      if(DEBUG) Out.prln("Parameters for the gazetteer: \n" + params);
+      features = Factory.newFeatureMap();
+      Gate.setHiddenAttribute(features, true);
+
+      listeners.put("gate.event.ProgressListener",
+                    new CustomProgressListener(11, 50));
+
+      gazetteer = (DefaultGazetteer)Factory.createResource(
+                      "gate.creole.gazetteer.DefaultGazetteer",
+                      params, features, listeners);
+      this.add(gazetteer);
+      gazetteer.setName("Gazetteer " + System.currentTimeMillis());
+      fireProgressChanged(50);
+
+      //sentence spliter
+      fireStatusChanged("Creating a sentence splitter");
+      params = Factory.newFeatureMap();
+      if(splitterGazetteerURL != null) params.put("gazetteerListsURL",
+                                               splitterGazetteerURL);
+      if(splitterGrammarURL != null) params.put("transducerURL",
+                                               splitterGrammarURL);
+
+      params.put("encoding", encoding);
+      if(DEBUG) Out.prln("Parameters for the sentence splitter: \n" + params);
+      features = Factory.newFeatureMap();
+      Gate.setHiddenAttribute(features, true);
+
+      listeners.put("gate.event.ProgressListener",
+                    new CustomProgressListener(50, 60));
+
+      splitter = (SentenceSplitter)Factory.createResource(
+                      "gate.creole.splitter.SentenceSplitter",
+                      params, features, listeners);
+      this.add(splitter);
+      splitter.setName("Splitter " + System.currentTimeMillis());
+      fireProgressChanged(60);
+
+      //POS Tagger
+      fireStatusChanged("Creating a POS tagger");
+      params = Factory.newFeatureMap();
+      if(taggerLexiconURL != null) params.put("lexiconURL",
+                                               taggerLexiconURL);
+      if(taggerRulesURL != null) params.put("rulesURL",
+                                               taggerRulesURL);
+
+      if(DEBUG) Out.prln("Parameters for the POS tagger: \n" + params);
+      features = Factory.newFeatureMap();
+      Gate.setHiddenAttribute(features, true);
+
+      listeners.put("gate.event.ProgressListener",
+                    new CustomProgressListener(60, 65));
+
+      tagger = (POSTagger)Factory.createResource(
+                      "gate.creole.POSTagger",
+                      params, features, listeners);
+      this.add(tagger);
+      tagger.setName("Tagger " + System.currentTimeMillis());
+      fireProgressChanged(65);
+
+
+      //transducer
+      fireStatusChanged("Creating a Jape transducer");
+      params = Factory.newFeatureMap();
+  //      rData = (ResourceData)Gate.getCreoleRegister().get(
+  //              "gate.creole.Transducer");
+  //      params.putAll(rData.getParameterList().getInitimeDefaults());
+      if(japeGrammarURL != null) params.put("grammarURL",
+                                            japeGrammarURL);
+      params.put("encoding", encoding);
+      if(DEBUG) Out.prln("Parameters for the transducer: \n" + params);
+      features = Factory.newFeatureMap();
+      Gate.setHiddenAttribute(features, true);
+      listeners.put("gate.event.ProgressListener",
+                    new CustomProgressListener(66, 100));
+      transducer = (Transducer)Factory.createResource("gate.creole.Transducer",
+                                                      params, features,
+                                                      listeners);
+      fireProgressChanged(100);
+      fireProcessFinished();
+      this.add(transducer);
+      transducer.setName("Transducer " + System.currentTimeMillis());
+    }catch(ResourceInstantiationException rie){
+      throw rie;
+    }catch(Exception e){
+      throw new ResourceInstantiationException(e);
+    }
     return this;
   } // init()
 
@@ -120,16 +167,33 @@ public class Nerc extends SerialController {
     if(tempAnnotationSetName.equals("")) tempAnnotationSetName = null;
     try{
       fireProgressChanged(0);
+      //tokeniser
       params = Factory.newFeatureMap();
       params.put("document", document);
       params.put("annotationSetName", tempAnnotationSetName);
       Factory.setResourceRuntimeParameters(tokeniser, params);
 
+      //gazetteer
       params = Factory.newFeatureMap();
       params.put("document", document);
       params.put("annotationSetName", tempAnnotationSetName);
       Factory.setResourceRuntimeParameters(gazetteer, params);
 
+      //sentence splitter
+      params = Factory.newFeatureMap();
+      params.put("document", document);
+      params.put("inputASName", tempAnnotationSetName);
+      params.put("outputASName", tempAnnotationSetName);
+      Factory.setResourceRuntimeParameters(splitter, params);
+
+      //POS tagger
+      params = Factory.newFeatureMap();
+      params.put("document", document);
+      params.put("inputASName", tempAnnotationSetName);
+      params.put("outputASName", tempAnnotationSetName);
+      Factory.setResourceRuntimeParameters(tagger, params);
+
+      //transducer
       params = Factory.newFeatureMap();
       params.put("document", document);
       params.put("inputASName", tempAnnotationSetName);
@@ -146,6 +210,7 @@ public class Nerc extends SerialController {
       }
     };
 
+    //tokeniser
     tokeniser.addProgressListener(pListener);
     tokeniser.addStatusListener(sListener);
     tokeniser.run();
@@ -153,7 +218,8 @@ public class Nerc extends SerialController {
     tokeniser.removeProgressListener(pListener);
     tokeniser.removeStatusListener(sListener);
 
-    pListener = new CustomProgressListener(15, 25);
+    //gazetteer
+    pListener = new CustomProgressListener(10, 20);
     gazetteer.addProgressListener(pListener);
     gazetteer.addStatusListener(sListener);
     gazetteer.run();
@@ -161,7 +227,26 @@ public class Nerc extends SerialController {
     gazetteer.removeProgressListener(pListener);
     gazetteer.removeStatusListener(sListener);
 
-    pListener = new CustomProgressListener(25, 90);
+    //sentence splitter
+    pListener = new CustomProgressListener(20, 35);
+    splitter.addProgressListener(pListener);
+    splitter.addStatusListener(sListener);
+    splitter.run();
+    splitter.check();
+    splitter.removeProgressListener(pListener);
+    splitter.removeStatusListener(sListener);
+
+    //POS tagger
+    pListener = new CustomProgressListener(35, 40);
+    tagger.addProgressListener(pListener);
+    tagger.addStatusListener(sListener);
+    tagger.run();
+    tagger.check();
+    tagger.removeProgressListener(pListener);
+    tagger.removeStatusListener(sListener);
+
+    //transducer
+    pListener = new CustomProgressListener(40, 90);
     transducer.addProgressListener(pListener);
     transducer.addStatusListener(sListener);
     transducer.run();
@@ -247,13 +332,19 @@ public class Nerc extends SerialController {
 
 
 
-  /** XXX */
+  /** The tokeniser used by this NERC */
   protected DefaultTokeniser tokeniser;
 
-  /** XXX */
+  /** The gazetteer used by this NERC */
   protected DefaultGazetteer gazetteer;
 
-  /** XXX */
+  /** The sentence splitter used by this NERC */
+  protected SentenceSplitter splitter;
+
+  /** The POS Tagger used by this NERC */
+  protected POSTagger tagger;
+
+  /** The Jape transducer used by this NERC */
   protected Transducer transducer;
 
 
@@ -267,6 +358,10 @@ public class Nerc extends SerialController {
   private transient Vector statusListeners;
   protected String tempAnnotationSetName = "nercAS";
   private Boolean caseSensitiveGazetteer;
+  private java.net.URL splitterGazetteerURL;
+  private java.net.URL splitterGrammarURL;
+  private java.net.URL taggerRulesURL;
+  private java.net.URL taggerLexiconURL;
 
   protected void fireProgressChanged(int e) {
     if (progressListeners != null) {
@@ -320,6 +415,30 @@ public class Nerc extends SerialController {
   }
   public Boolean getCaseSensitiveGazetteer() {
     return caseSensitiveGazetteer;
+  }
+  public void setSplitterGazetteerURL(java.net.URL newSplitterGazetteerURL) {
+    splitterGazetteerURL = newSplitterGazetteerURL;
+  }
+  public java.net.URL getSplitterGazetteerURL() {
+    return splitterGazetteerURL;
+  }
+  public void setSplitterGrammarURL(java.net.URL newSplitterGrammarURL) {
+    splitterGrammarURL = newSplitterGrammarURL;
+  }
+  public java.net.URL getSplitterGrammarURL() {
+    return splitterGrammarURL;
+  }
+  public void setTaggerRulesURL(java.net.URL newTaggerRulesURL) {
+    taggerRulesURL = newTaggerRulesURL;
+  }
+  public java.net.URL getTaggerRulesURL() {
+    return taggerRulesURL;
+  }
+  public void setTaggerLexiconURL(java.net.URL newTaggerLexiconURL) {
+    taggerLexiconURL = newTaggerLexiconURL;
+  }
+  public java.net.URL getTaggerLexiconURL() {
+    return taggerLexiconURL;
   }
 
   class CustomProgressListener implements ProgressListener{
