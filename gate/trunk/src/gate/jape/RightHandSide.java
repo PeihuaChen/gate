@@ -126,8 +126,6 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       "import gate.util.*;" + nl + nl +
       "public class " + actionClassName + nl +
       "implements java.io.Serializable, RhsAction { " + nl +
-      "  public boolean status;" + nl +
-      "  public Object state;" + nl +
       "  public void doit(Document doc, AnnotationSet annotations, " +
       " java.util.Map bindings) { " + nl
     );
@@ -476,6 +474,9 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.21  2002/02/12 11:39:03  valyt
+// removed sate and status members for Jape generated classes
+//
 // Revision 1.20  2002/02/04 13:59:04  hamish
 // added status and state members to RhsAction
 //
