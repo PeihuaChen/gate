@@ -136,6 +136,7 @@ public class ShellSlacFrame extends MainFrame {
   /** Should check for registered Creole components and populate menu.
    *  <BR> In first version is hardcoded. */  
   private void createToolsMenuItems(JMenu toolsMenu) {
+    toolsMenu.add(new NewAnnotDiffAction());
     toolsMenu.add(
       new AbstractAction("Unicode editor", getIcon("unicode.gif")){
       public void actionPerformed(ActionEvent evt){
