@@ -280,7 +280,7 @@ public class SimpleFeatureMapImpl
           Set subs1;
           try {
             subs1 = c1.getSubClasses(OClass.TRANSITIVE_CLOSURE);
-          } catch (com.ontotext.gate.exception.NoSuchClosureTypeException x) {
+          } catch (gate.creole.ontology.NoSuchClosureTypeException x) {
             throw new gate.creole.ResourceInstantiationException(x);
           }
           if (subs1.contains(c2))

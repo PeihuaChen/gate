@@ -17,7 +17,7 @@ package gate.creole.ontology;
 
 import java.util.*;
 
-import com.ontotext.gate.exception.*;
+
 
 /** represents a single ontology class
  *  @todo: infer methods hidden but always invoked when needed

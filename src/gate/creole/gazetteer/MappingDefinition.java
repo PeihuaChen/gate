@@ -20,7 +20,6 @@ import java.net.*;
 import java.util.*;
 import java.io.*;
 
-import com.ontotext.gate.exception.*;
 import gate.creole.ResourceInstantiationException;
 
 /** represents a mapping definition which maps gazetteer lists to ontology classes */

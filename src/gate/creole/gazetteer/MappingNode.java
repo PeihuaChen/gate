@@ -15,7 +15,7 @@
  */
 package gate.creole.gazetteer;
 
-import com.ontotext.gate.exception.*;
+
 
 /**represents a single node of the mapping definition*/
 public class MappingNode{

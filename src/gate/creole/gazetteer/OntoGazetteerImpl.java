@@ -18,7 +18,7 @@ package gate.creole.gazetteer;
 import gate.*;
 import gate.creole.*;
 
-import com.ontotext.gate.exception.*;
+
 
 import java.io.*;
 
