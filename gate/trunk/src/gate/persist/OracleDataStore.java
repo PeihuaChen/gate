@@ -3464,29 +3464,33 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
   private String getNumberExpresion(Restriction restr){
-    String expr = "";
+
+    StringBuffer expr = new StringBuffer("FEATURE.ft_number_value ");
+
     switch (restr.getOperator()){
       case Restriction.OPERATOR_EQUATION:
-        expr = expr.concat(" FEATURE.ft_number_value  = ? ");
+        expr = expr.append(" = ");
         break;
       case Restriction.OPERATOR_BIGGER:
-        expr = expr.concat(" FEATURE.ft_number_value  < ? ");
+        expr = expr.append("  < ");
         break;
       case Restriction.OPERATOR_LESS:
-        expr = expr.concat(" FEATURE.ft_number_value  > ? ");
+        expr = expr.append(" > ");
         break;
       case Restriction.OPERATOR_EQUATION_OR_BIGGER:
-        expr = expr.concat(" FEATURE.ft_number_value  >= ? ");
+        expr = expr.append(" >= ");
         break;
       case Restriction.OPERATOR_EQUATION_OR_LESS:
-        expr = expr.concat(" FEATURE.ft_number_value  <= ? ");
+        expr = expr.append(" <= ");
         break;
       default:
-        expr = expr.concat(" 0 = 0 ");
-        return expr;
+        return " 0 = 0 ";
     }
+
+    expr.append(" ? ");
     sqlValues.addElement(restr.getValue());
-    return expr;
+
+    return expr.toString();
   }
 
 }
