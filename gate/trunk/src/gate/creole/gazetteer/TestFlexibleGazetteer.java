@@ -38,7 +38,7 @@ public class TestFlexibleGazetteer extends TestCase {
   } // tearDown
 
   /** Tests the flexible gazetteer */
-  public void testDefaultGazetteer() throws Exception {
+  public void testFlexibleGazetteer() throws Exception {
 
     // Display the gui for debugging purposes.
     if (DEBUG) {
@@ -126,7 +126,7 @@ public class TestFlexibleGazetteer extends TestCase {
       Gate.init();
       TestFlexibleGazetteer testGaz = new TestFlexibleGazetteer("");
       testGaz.setUp();
-      testGaz.testDefaultGazetteer();
+      testGaz.testFlexibleGazetteer();
       testGaz.tearDown();
     } catch(Exception e) {
       e.printStackTrace();
