@@ -162,15 +162,89 @@ public class OracleDataStore extends JDBCDataStore {
       throw new IllegalArgumentException();
     }
 
+    if (!lrClassName.equals(DBHelper.DOCUMENT_CLASS) &&
+        !lrClassName.equals(DBHelper.CORPUS_CLASS)) {
+      throw new IllegalArgumentException("Only Corpus and Document classes are supported" +
+                                          " by Database data store");
+    }
+
+    boolean transFailed = false;
+    try {
+      //2.5 autocommit should be FALSE because of LOBs
+      this.jdbcConn.setAutoCommit(false);
+
+      //3. perform changes, if anything goes wrong, rollback
+      if (lrClassName.equals(DBHelper.DOCUMENT_CLASS)) {
+        deleteDocument((Long)lrId);
+      }
+      else {
+        deleteCorpus((Long)lrId);
+      }
+
+      //4. done, commit
+      this.jdbcConn.commit();
+    }
+    catch(SQLException sqle) {
+      transFailed = true;
+      throw new PersistenceException("Cannot start/commit a transaction, ["+sqle.getMessage()+"]");
+    }
+    catch(PersistenceException pe) {
+      transFailed = true;
+      throw(pe);
+    }
+    finally {
+      //problems?
+      if (transFailed) {
+        try {
+          this.jdbcConn.rollback();
+        }
+        catch(SQLException sqle) {
+          throw new PersistenceException(sqle);
+        }
+      }
+   }
+
+  }
+
+  private void deleteDocument(Long lrId)
+  throws PersistenceException {
+
     Long ID = (Long)lrId;
 
     CallableStatement stmt = null;
 
     try {
       stmt = this.jdbcConn.prepareCall(
-                      "{ call "+Gate.DB_OWNER+".persist.delete_lr(?,?) }");
+                      "{ call "+Gate.DB_OWNER+".persist.delete_document(?) }");
       stmt.setLong(1,ID.longValue());
-      stmt.setString(2,lrClassName);
+      stmt.execute();
+
+      //let the world know about it
+      fireResourceDeleted(
+        new DatastoreEvent(this, DatastoreEvent.RESOURCE_DELETED, null, lrId));
+
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't delete LR from DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(stmt);
+    }
+  }
+
+
+
+  private void deleteCorpus(Long lrId)
+  throws PersistenceException {
+
+    Long ID = (Long)lrId;
+
+    CallableStatement stmt = null;
+
+    try {
+      stmt = this.jdbcConn.prepareCall(
+                      "{ call "+Gate.DB_OWNER+".persist.delete_corpus(?) }");
+      stmt.setLong(1,ID.longValue());
       stmt.execute();
 
       //let the world know about it
@@ -186,6 +260,7 @@ public class OracleDataStore extends JDBCDataStore {
     }
 
   }
+
 
   /**
    * Save: synchonise the in-memory image of the LR with the persistent
