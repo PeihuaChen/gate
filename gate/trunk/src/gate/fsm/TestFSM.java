@@ -8,6 +8,7 @@
 package gate.fsm;
 
 import gate.jape.*;
+import gate.util.*;
 
 import java.util.*;
 import java.io.*;
@@ -29,7 +30,9 @@ public class TestFSM extends TestCase {
   public TestFSM(String name) { super(name); }
 
   public void setUp() throws JapeException{
-    batch = new Batch("z:/gate2/src/gate/fsm/fsmtestgrammar.jape");
+    String japeFileName = "/gate/fsm/fsmtestgrammar.jape";
+    InputStream japeFileStream = Class.class.getResourceAsStream(japeFileName);
+    batch = new Batch(japeFileStream);
     transducer = (MultiPhaseTransducer)batch.getTransducer();
     transducer.finish();
   } // setUp
@@ -41,7 +44,9 @@ public class TestFSM extends TestCase {
     Enumeration phases = transducer.getPhases().elements();
     while(phases.hasMoreElements()){
       FSM aFSM = new FSM((SinglePhaseTransducer)phases.nextElement());
-      System.out.println(aFSM.getGML());
+      //System.out.println(aFSM.getGML());
+      String gml = aFSM.getGML();
+      assert(gml.startsWith("graph["));
     }
   }
 
