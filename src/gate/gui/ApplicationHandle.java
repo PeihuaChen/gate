@@ -22,6 +22,9 @@ import java.util.*;
 import gate.*;
 import gate.creole.*;
 
+/**
+ * @deprecated as of 28/03/2001
+ */
 class ApplicationHandle extends CustomResourceHandle {
 
   public ApplicationHandle(SerialController controller, ProjectData project) {

@@ -463,36 +463,41 @@ public class MainFrame extends JFrame
     DefaultResourceHandle handle = new DefaultResourceHandle(res);
     DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
     if(res instanceof ProcessingResource){
-      resourcesTreeModel.insertNodeInto(node, processingResourcesRoot, 0);
+      if(res instanceof Controller){
+        resourcesTreeModel.insertNodeInto(node, applicationsRoot, 0);
+      }else{
+        resourcesTreeModel.insertNodeInto(node, processingResourcesRoot, 0);
+      }
     }else if(res instanceof LanguageResource){
       resourcesTreeModel.insertNodeInto(node, languageResourcesRoot, 0);
     }
-
-/*
-    CustomResourceHandle handle = (CustomResourceHandle)
-                      handleForResourceName.get(res.getFeatures().get("gate.NAME"));
-    if(handle == null) {
-      ResourceData rData = (ResourceData)
-                        Gate.getCreoleRegister().get(res.getClass().getName());
-      if(res instanceof LanguageResource) {
-        handle = new LRHandle((LanguageResource)res, currentProject);
-        handle.setTooltipText("<html><b>Type:</b> " +
-                              rData.getName() + "</html>");
-        handleForResourceName.put(res.getFeatures().get("gate.NAME"), handle);
-      }else if(res instanceof ProcessingResource){
-        handle = new PRHandle((ProcessingResource)res, currentProject);
-        handle.setTooltipText("<html><b>Type:</b> " +
-                              rData.getName() + "</html>");
-        handleForResourceName.put(res.getFeatures().get("gate.NAME"), handle);
-      }
-    }
-    //resourcesTreeModel.treeChanged();
-*/
   }
 
   public void resourceUnloaded(CreoleEvent e) {
-//    handleForResourceName.remove(e.getResource().getFeatures().get("gate.NAME"));
-    //resourcesTreeModel.treeChanged();
+    Resource res = e.getResource();
+    String hidden = (String)res.getFeatures().get("gate.hidden");
+    if(hidden != null && hidden.equalsIgnoreCase("true")) return;
+    DefaultMutableTreeNode node;
+    DefaultMutableTreeNode parent = null;
+    if(res instanceof ProcessingResource){
+      if(res instanceof Controller){
+        parent = applicationsRoot;
+      }else{
+        parent = processingResourcesRoot;
+      }
+    }else if(res instanceof LanguageResource){
+      parent = languageResourcesRoot;
+    }
+    if(parent != null){
+      Enumeration children = parent.children();
+      while(children.hasMoreElements()){
+        node = (DefaultMutableTreeNode)children.nextElement();
+        if(((ResourceHandle)node.getUserObject()).getResource() == res){
+          resourcesTreeModel.removeNodeFromParent(node);
+          return;
+        }
+      }
+    }
   }
 
   /**Called when a {@link gate.Datastore} has been opened*/
@@ -774,7 +779,6 @@ public class MainFrame extends JFrame
       putValue(SHORT_DESCRIPTION,"Create a new Application");
     }
     public void actionPerformed(ActionEvent e) {
-/*
       Object answer = JOptionPane.showInputDialog(
                         MainFrame.this,
                         "Please provide a name for the new application:",
@@ -782,16 +786,13 @@ public class MainFrame extends JFrame
                         JOptionPane.QUESTION_MESSAGE);
       if (answer instanceof String) {
         try{
+          FeatureMap features = Factory.newFeatureMap();
+          features.put("gate.NAME", answer);
           SerialController controller =
                 (SerialController)Factory.createResource(
                                 "gate.creole.SerialController",
-                                Factory.newFeatureMap());
-          FeatureMap fm = controller.getFeatures();
-          if (fm == null){
-            controller.setFeatures(fm = Factory.newFeatureMap());
-          }
-          fm.put("gate.NAME", answer);
-
+                                Factory.newFeatureMap(), features);
+/*
           ApplicationHandle handle = new ApplicationHandle(controller,
                                                            currentProject);
           currentProject.addApplication(handle);
@@ -799,6 +800,7 @@ public class MainFrame extends JFrame
           resourcesTree.expandPath(new TreePath(
                                     new Object[]{resourcesTreeRoot,
                                                  applicationsRoot}));
+*/
         } catch(ResourceInstantiationException rie){
           JOptionPane.showMessageDialog(MainFrame.this,
                                         "Could not create application!\n" +
@@ -806,11 +808,10 @@ public class MainFrame extends JFrame
                                         "Gate", JOptionPane.ERROR_MESSAGE);
         }
       } else{
-        JOptionPane.showMessageDialog(parentFrame,
+        JOptionPane.showMessageDialog(MainFrame.this,
                                       "Unrecognised input!",
                                       "Gate", JOptionPane.ERROR_MESSAGE);
       }
-*/
     }
 
   }
@@ -1059,27 +1060,8 @@ public class MainFrame extends JFrame
             if (fileChooser.showOpenDialog(MainFrame.this) ==
                                                   fileChooser.APPROVE_OPTION){
               try {
-
                 URL dsURL = fileChooser.getSelectedFile().toURL();
                 DataStore ds = Factory.openDataStore(className, dsURL);
-/*
-                if(ds != null){
-                  //make sure he have a name
-                  if(ds.getFeatures() == null) {
-                    FeatureMap features = Factory.newFeatureMap();
-                    features.put("gate.NAME", dsURL.getFile());
-                    ds.setFeatures(features);
-                  } else if(ds.getFeatures().get("gate.NAME") == null){
-                    ds.getFeatures().put("gate.NAME", dsURL.getFile());
-                  }
-                  DSHandle handle = new DSHandle(ds, currentProject);
-                  handleForResourceName.put(ds.getFeatures().get("gate.NAME"),
-                                                                        handle);
-                  //resourcesTreeModel.treeChanged();
-                  //dsRoot.add(new DefaultMutableTreeNode(handle));
-                  //projectTreeModel.nodeStructureChanged(dsRoot);
-                }
-*/
               } catch(MalformedURLException mue) {
                 JOptionPane.showMessageDialog(
                     MainFrame.this, "Invalid location for the datastore\n " +
@@ -1155,60 +1137,8 @@ public class MainFrame extends JFrame
             setIcon(((ResourceHandle)value).getIcon());
             setText(((ResourceHandle)value).getTitle());
             setToolTipText(((ResourceHandle)value).getTooltipText());
-        } else if(value instanceof DataStore) {
-/*
-          ResourceHandle handle = (ResourceHandle)
-          handleForResourceName.get(((DataStore)value).getFeatures().get("gate.NAME"));
-          if(handle != null){
-            setIcon(((ResourceHandle)handle).getIcon());
-            setText(((ResourceHandle)handle).getTitle());
-            setToolTipText(((ResourceHandle)handle).getTooltipText());
-          }
-*/
         }
       }
-/*
-      if(value instanceof Resource) {
-        CustomResourceHandle handle = (CustomResourceHandle)
-        handleForResourceName.get(((Resource)value).getFeatures().get("gate.NAME"));
-        if(handle != null) {
-          setIcon(((CustomResourceHandle)handle).getIcon());
-          setText(((CustomResourceHandle)handle).getTitle());
-          setToolTipText(((CustomResourceHandle)handle).getTooltipText());
-        }
-      } else if(value instanceof CustomResourceHandle) {
-          setIcon(((CustomResourceHandle)value).getIcon());
-          setText(((CustomResourceHandle)value).getTitle());
-          setToolTipText(((CustomResourceHandle)value).getTooltipText());
-      } else if(value instanceof DataStore) {
-        CustomResourceHandle handle = (CustomResourceHandle)
-        handleForResourceName.get(((DataStore)value).getFeatures().get("gate.NAME"));
-        if(handle != null){
-          setIcon(((CustomResourceHandle)handle).getIcon());
-          setText(((CustomResourceHandle)handle).getTitle());
-          setToolTipText(((CustomResourceHandle)handle).getTooltipText());
-        }
-      } else if(value instanceof String) {
-        Icon icon = getIcon();
-        if(value == resourcesTreeRoot) {
-          icon = new ImageIcon(getClass().getResource(
-                                            "/gate/resources/img/project.gif"));
-        } else if(value == applicationsRoot) {
-          icon = new ImageIcon(getClass().getResource(
-                                      "/gate/resources/img/applications.gif"));
-        } else if(value == languageResourcesRoot) {
-          icon = new ImageIcon(getClass().getResource(
-                                                "/gate/resources/img/lrs.gif"));
-        } else if(value == processingResourcesRoot) {
-          icon = new ImageIcon(getClass().getResource(
-                                                "/gate/resources/img/prs.gif"));
-        } else if(value == datastoresRoot) {
-          icon = new ImageIcon(getClass().getResource(
-                                                "/gate/resources/img/dss.gif"));
-        }
-        setIcon(icon);
-      }
-*/
       return this;
     }
 

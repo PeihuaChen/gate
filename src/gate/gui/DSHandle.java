@@ -67,8 +67,8 @@ public class DSHandle extends DefaultResourceHandle {
     smallView = tree;
 
     popup = new JPopupMenu();
+    popup.add(new CloseAction());
     popup.add(new RefreshAction());
-
   }
 
   protected void initListeners(){
