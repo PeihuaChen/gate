@@ -182,80 +182,88 @@ public class AnnotationDiffer {
     if(responseList.size() == 0) {
       return 1.0;
     }
-    return (double)((double)correctMatches / (double)responseList.size());
+    return correctMatches/(double)responseList.size();
   }
 
   public double getRecallStrict(){
     if(keyList.size() == 0) {
       return 1.0;
     }
-    return (double)((double)correctMatches / (double)keyList.size());
+    return correctMatches/(double)keyList.size();
   }
 
   public double getPrecisionLenient(){
     if(responseList.size() == 0) {
       return 1.0;
     }
-    return (double)((double)(correctMatches + partiallyCorrectMatches) / (double)responseList.size());
+    return ((double)correctMatches + partiallyCorrectMatches) / (double)responseList.size();
   }
 
+
   public double getPrecisionAverage() {
-    return (double)((double)((double)getPrecisionLenient() + getPrecisionStrict()) / (double)(2.0));
+    return ((double)getPrecisionLenient() + getPrecisionStrict()) / (double)(2.0);
   }
+
 
   public double getRecallLenient(){
     if(keyList.size() == 0) {
       return 1.0;
     }
-    return (double)((double)(correctMatches + partiallyCorrectMatches) / (double)keyList.size());
+    return ((double)correctMatches + partiallyCorrectMatches) / (double)keyList.size();
   }
 
   public double getRecallAverage() {
-    return (double)((double)((double) getRecallLenient() + getRecallStrict()) / (double)(2.0));
+    return ((double) getRecallLenient() + getRecallStrict()) / (double)(2.0);
   }
 
   public double getFMeasureStrict(double beta){
     double precision = getPrecisionStrict();
     double recall = getRecallStrict();
     double betaSq = beta * beta;
-    double answer = (double)(((betaSq + 1) * precision * recall ) /
-           (double)(betaSq * precision + recall));
-      return answer;
+    double answer = (double)(((double)(betaSq + 1) * precision * recall ) / (double)(betaSq * precision + recall));
+    if(Double.isNaN(answer)) answer = 0.0;
+    return answer;
   }
 
   public double getFMeasureLenient(double beta){
     double precision = getPrecisionLenient();
     double recall = getRecallLenient();
     double betaSq = beta * beta;
-    double answer = (double)(((betaSq + 1) * precision * recall ) /
-           (double)(betaSq * precision + recall));
-      return answer;
+    double answer = (double)(((double)(betaSq + 1) * precision * recall) / ((double)betaSq * precision + recall));
+    if(Double.isNaN(answer)) answer = 0.0;
+    return answer;
   }
 
   public double getFMeasureAverage(double beta) {
-    double answer = (double)(((double)((double) getFMeasureLenient(beta) + getFMeasureStrict(beta)) / (double)(2.0)));
-      return answer;
+    double answer = ((double)getFMeasureLenient(beta) + (double)getFMeasureStrict(beta)) / (double)(2.0);
+    return answer;
   }
+
 
   public int getCorrectMatches(){
     return correctMatches;
   }
 
+
   public int getPartiallyCorrectMatches(){
     return partiallyCorrectMatches;
   }
+
 
   public int getMissing(){
     return missing;
   }
 
+
   public int getSpurious(){
     return spurious;
   }
 
+
   public int getFalsePositivesStrict(){
     return responseList.size() - correctMatches;
   }
+
 
   public int getFalsePositivesLenient(){
     return responseList.size() - correctMatches - partiallyCorrectMatches;
@@ -266,9 +274,11 @@ public class AnnotationDiffer {
     return keyList.size();
   }
 
+
   public int getResponsesCount() {
     return responseList.size();
   }
+
 
   public void printMissmatches(){
     //get the partial correct matches

@@ -41,11 +41,12 @@ public class CorpusBenchmarkTool {
         Out.prln("Application not set!");
       Out.prln("App file is: " + applicationFile.getAbsolutePath());
       application = (Controller) gate.util.persistence.PersistenceManager
-                                   .loadObjectFromFile(applicationFile);
-    } catch (Exception ex) {
-      throw new GateRuntimeException("Corpus Benchmark Tool:"+ex.getMessage());
+                    .loadObjectFromFile(applicationFile);
     }
-  }//initPRs
+    catch (Exception ex) {
+      throw new GateRuntimeException("Corpus Benchmark Tool:" + ex.getMessage());
+    }
+  } //initPRs
 
   public void unloadPRs() {
     //we have nothing to unload if no PRs are loaded
@@ -55,11 +56,6 @@ public class CorpusBenchmarkTool {
   }
 
   public void execute() {
-/*
-    Out.prln("Flags Gen Cln Str Vrb Minf: "
-             + isGenerateMode +" "+ isMarkedClean +" "+ isMarkedStored
-             +" "+ isVerboseMode +" "+ isMoreInfoMode);
-*/
     execute(startDir);
     if (application != null) {
       javax.swing.SwingUtilities.invokeLater(new Runnable() {
@@ -70,8 +66,8 @@ public class CorpusBenchmarkTool {
             Factory.deleteResource( (Resource) iter.next());
 
           Factory.deleteResource(application);
-         }
-       });
+        }
+      });
     }
   }
 
@@ -110,7 +106,8 @@ public class CorpusBenchmarkTool {
           annotTypes = new ArrayList();
           while (strTok.hasMoreTokens())
             annotTypes.add(strTok.nextToken());
-        } else {
+        }
+        else {
           annotTypes = new ArrayList();
           annotTypes.add("Organization");
           annotTypes.add("Person");
@@ -129,21 +126,22 @@ public class CorpusBenchmarkTool {
           java.util.StringTokenizer tok =
               new java.util.StringTokenizer(features, ";");
           String current;
-          while(tok.hasMoreTokens()) {
+          while (tok.hasMoreTokens()) {
             current = tok.nextToken();
             result.add(current);
           } // while
         }
         diffFeaturesSet = result;
-        Out.prln("Features: "+diffFeaturesSet+" <P>\n");
+        Out.prln("Features: " + diffFeaturesSet + " <P>\n");
 
-      } catch (IOException ex) {
+      }
+      catch (IOException ex) {
         //just ignore the file and go on with the defaults
         this.configs = new Properties();
       }
-    } else
+    }
+    else
       this.configs = new Properties();
-
 
     //we only initialise the PRs if they are going to be used
     //for processing unprocessed documents
@@ -165,7 +163,7 @@ public class CorpusBenchmarkTool {
 
     ArrayList subDirs = new ArrayList();
     File[] dirArray = currDir.listFiles();
-    if(dirArray == null) return;
+    if (dirArray == null)return;
     for (int i = 0; i < dirArray.length; i++) {
       if (dirArray[i].isFile() || dirArray[i].getName().equals(CVS_DIR_NAME))
         continue;
@@ -181,7 +179,7 @@ public class CorpusBenchmarkTool {
         subDirs.add(dirArray[i]);
     }
 
-    if(cleanDir == null) return;
+    if (cleanDir == null)return;
     Out.prln("Processing directory: " + currDir + "<P>");
 
     if (this.isGenerateMode)
@@ -189,23 +187,22 @@ public class CorpusBenchmarkTool {
     else
       evaluateCorpus(cleanDir, processedDir, markedDir, errorDir);
 
-    //if no more subdirs left, return
+      //if no more subdirs left, return
     if (subDirs.isEmpty())
       return;
 
     //there are more subdirectories to traverse, so iterate through
     for (int j = 0; j < subDirs.size(); j++)
-      execute((File) subDirs.get(j));
+      execute( (File) subDirs.get(j));
 
-  }//execute(dir)
-
+  } //execute(dir)
 
   public static void main(String[] args) throws GateException {
     Out.prln("<HTML>");
     Out.prln("<HEAD>");
     Out.prln("<TITLE> Corpus benchmark tool: ran with args ");
-    for(int argC=0; argC < args.length; ++argC)
-      Out.pr(args[argC]+" ");
+    for (int argC = 0; argC < args.length; ++argC)
+      Out.pr(args[argC] + " ");
     Out.pr(" on " + new Date() + "</TITLE> </HEAD>");
     Out.prln("<BODY>");
     Out.prln("Please wait while GATE tools are initialised. <P>");
@@ -215,32 +212,37 @@ public class CorpusBenchmarkTool {
     CorpusBenchmarkTool corpusTool = new CorpusBenchmarkTool();
 
     List inputFiles = null;
-    if(args.length < 1) throw new GateException(usage);
+    if (args.length < 1)throw new GateException(usage);
     int i = 0;
     while (i < args.length && args[i].startsWith("-")) {
-      if(args[i].equals("-generate")) {
+      if (args[i].equals("-generate")) {
         Out.prln("Generating the corpus... <P>");
         corpusTool.setGenerateMode(true);
-      } else if (args[i].equals("-marked_clean")) {
+      }
+      else if (args[i].equals("-marked_clean")) {
         Out.prln("Evaluating current grammars against human-annotated...<P>");
         corpusTool.setMarkedClean(true);
-      } else if (args[i].equals("-marked_stored")) {
+      }
+      else if (args[i].equals("-marked_stored")) {
         Out.prln("Evaluating stored documents against human-annotated...<P>");
         corpusTool.setMarkedStored(true);
-      } else if (args[i].equals("-marked_ds")) {
+      }
+      else if (args[i].equals("-marked_ds")) {
         Out.prln("Looking for marked docs in a datastore...<P>");
         corpusTool.setMarkedDS(true);
-      } else if (args[i].equals("-verbose")) {
+      }
+      else if (args[i].equals("-verbose")) {
         Out.prln("Running in verbose mode. Will generate annotation " +
-          "information when precision/recall are lower than " +
-          corpusTool.getThreshold() +"<P>");
+                 "information when precision/recall are lower than " +
+                 corpusTool.getThreshold() + "<P>");
         corpusTool.setVerboseMode(true);
-      } else if (args[i].equals("-moreinfo")) {
+      }
+      else if (args[i].equals("-moreinfo")) {
         Out.prln("Show more details in document table...<P>");
         corpusTool.setMoreInfo(true);
       }
       i++; //just ignore the option, which we do not recognise
-    }//while
+    } //while
 
     String dirName = args[i];
     File dir = new File(dirName);
@@ -259,25 +261,25 @@ public class CorpusBenchmarkTool {
     corpusTool.init();
     corpusWordCount = 0;
 
-    Out.prln("Measuring annotaitions of types: " + CorpusBenchmarkTool.annotTypes + "<P>");
+    Out.prln("Measuring annotaitions of types: " +
+             CorpusBenchmarkTool.annotTypes + "<P>");
 
     corpusTool.setStartDirectory(dir);
     corpusTool.execute();
     //if we're not generating the corpus, then print the precision and recall
     //statistics for the processed corpus
-    if (! corpusTool.getGenerateMode())
+    if (!corpusTool.getGenerateMode())
       corpusTool.printStatistics();
 
     Out.prln("<BR>Overall average precision: " + corpusTool.getPrecisionAverage());
     Out.prln("<BR>Overall average recall: " + corpusTool.getRecallAverage());
     Out.prln("<BR>Overall average fMeasure: " + corpusTool.getFMeasureAverage());
-    if(corpusWordCount == 0)
+    if (corpusWordCount == 0)
       Out.prln("<BR>No Token annotations to count words in the corpus.");
     else
       Out.prln("<BR>Overall word count: " + corpusWordCount);
 
-
-    if(hasProcessed) {
+    if (hasProcessed) {
       Out.prln("<P>Old Processed: ");
       Out.prln("<BR>Overall average precision: "
                + corpusTool.getPrecisionAverageProc());
@@ -292,23 +294,23 @@ public class CorpusBenchmarkTool {
 
     System.exit(0);
 
-  }//main
+  } //main
 
   public void setGenerateMode(boolean mode) {
     isGenerateMode = mode;
-  }//setGenerateMode
+  } //setGenerateMode
 
   public boolean getGenerateMode() {
     return isGenerateMode;
-  }//getGenerateMode
+  } //getGenerateMode
 
   public boolean getVerboseMode() {
     return isVerboseMode;
-  }//getVerboseMode
+  } //getVerboseMode
 
   public void setVerboseMode(boolean mode) {
     isVerboseMode = mode;
-  }//setVerboseMode
+  } //setVerboseMode
 
   public void setMoreInfo(boolean mode) {
     isMoreInfoMode = mode;
@@ -328,28 +330,27 @@ public class CorpusBenchmarkTool {
 
   public void setMarkedStored(boolean mode) {
     isMarkedStored = mode;
-  }// setMarkedStored
-
+  } // setMarkedStored
 
   public boolean getMarkedStored() {
     return isMarkedStored;
-  }// getMarkedStored
+  } // getMarkedStored
 
   public void setMarkedClean(boolean mode) {
     isMarkedClean = mode;
-  }//
+  } //
 
   public boolean getMarkedClean() {
     return isMarkedClean;
-  }//
+  } //
 
   public void setMarkedDS(boolean mode) {
     isMarkedDS = mode;
-  }//
+  } //
 
   public boolean getMarkedDS() {
     return isMarkedDS;
-  }//
+  } //
 
   public void setApplicationFile(File newAppFile) {
     applicationFile = newAppFile;
@@ -366,7 +367,7 @@ public class CorpusBenchmarkTool {
    * the precision will be the average precision on those two sets of documents.
    */
   public double getPrecisionAverage() {
-    return (double)precisionSum/docNumber;
+    return (double) precisionSum / docNumber;
   }
 
   /**
@@ -380,28 +381,29 @@ public class CorpusBenchmarkTool {
    * the recall will be the average recall on those two sets of documents.
    */
   public double getRecallAverage() {
-    return (double)recallSum/docNumber;
+    return (double) recallSum / docNumber;
   }
-
 
   public double getFMeasureAverage() {
-    return (double) fMeasureSum/docNumber;
-  }
-  /** For processed documents */
-  public double getPrecisionAverageProc() {
-    return (double)proc_precisionSum/docNumber;
-  }
-  public double getRecallAverageProc() {
-    return (double)proc_recallSum/docNumber;
-  }
-  public double getFMeasureAverageProc() {
-    return (double)proc_fMeasureSum/docNumber;
+    return (double) fMeasureSum / docNumber;
   }
 
+  /** For processed documents */
+  public double getPrecisionAverageProc() {
+    return (double) proc_precisionSum / docNumber;
+  }
+
+  public double getRecallAverageProc() {
+    return (double) proc_recallSum / docNumber;
+  }
+
+  public double getFMeasureAverageProc() {
+    return (double) proc_fMeasureSum / docNumber;
+  }
 
   public boolean isGenerateMode() {
     return isGenerateMode == true;
-  }//isGenerateMode
+  } //isGenerateMode
 
   public double getThreshold() {
     return threshold;
@@ -413,11 +415,11 @@ public class CorpusBenchmarkTool {
 
   public File getStartDirectory() {
     return startDir;
-  }//getStartDirectory
+  } //getStartDirectory
 
   public void setStartDirectory(File dir) {
     startDir = dir;
-  }//setStartDirectory
+  } //setStartDirectory
 
   protected void generateCorpus(File fileDir, File outputDir) {
     //1. check if we have input files
@@ -427,7 +429,8 @@ public class CorpusBenchmarkTool {
     File outDir = outputDir;
     if (outputDir == null) {
       outDir = new File(currDir, PROCESSED_DIR_NAME);
-    } else {
+    }
+    else {
       // get rid of the directory, coz datastore wants it clean
       if (!Files.rmdir(outDir))
         Out.prln("cannot delete old output directory: " + outDir);
@@ -441,11 +444,11 @@ public class CorpusBenchmarkTool {
       sds.open();
 
       File[] files = fileDir.listFiles();
-      for (int i=0; i < files.length; i++) {
+      for (int i = 0; i < files.length; i++) {
         if (!files[i].isFile())
           continue;
         // create a document
-        Out.prln("Processing and storing document: " + files[i].toURL() +"<P>");
+        Out.prln("Processing and storing document: " + files[i].toURL() + "<P>");
 
         FeatureMap params = Factory.newFeatureMap();
         params.put(Document.DOCUMENT_URL_PARAMETER_NAME, files[i].toURL());
@@ -456,8 +459,8 @@ public class CorpusBenchmarkTool {
 
         // create the document
         final Document doc = (Document) Factory.createResource(
-          "gate.corpora.DocumentImpl", params, features
-        );
+            "gate.corpora.DocumentImpl", params, features
+            );
 
         doc.setName(files[i].getName());
         if (doc == null)
@@ -471,26 +474,31 @@ public class CorpusBenchmarkTool {
             Factory.deleteResource(lr);
           }
         });
-      }//for
+      } //for
       sds.close();
-    } catch (java.net.MalformedURLException ex) {
+    }
+    catch (java.net.MalformedURLException ex) {
       throw new GateRuntimeException("CorpusBenchmark: " + ex.getMessage());
-    } catch (PersistenceException ex1) {
+    }
+    catch (PersistenceException ex1) {
       throw new GateRuntimeException("CorpusBenchmark: " + ex1.getMessage());
-    } catch (ResourceInstantiationException ex2) {
+    }
+    catch (ResourceInstantiationException ex2) {
       throw new GateRuntimeException("CorpusBenchmark: " + ex2.getMessage());
-    } catch (gate.security.SecurityException ex3) {
+    }
+    catch (gate.security.SecurityException ex3) {
       throw new GateRuntimeException("CorpusBenchmark: " + ex3.getMessage());
     }
-  }//generateCorpus
+  } //generateCorpus
 
   protected void evaluateCorpus(File fileDir,
-                    File processedDir, File markedDir,
-                    File errorDir) {
+                                File processedDir, File markedDir,
+                                File errorDir) {
     //1. check if we have input files and the processed Dir
     if (fileDir == null || !fileDir.exists())
       return;
     if (processedDir == null || !processedDir.exists())
+
       //if the user wants evaluation of marked and stored that's not possible
       if (isMarkedStored) {
         Out.prln("Cannot evaluate because no processed documents exist.");
@@ -499,9 +507,9 @@ public class CorpusBenchmarkTool {
       else
         isMarkedClean = true;
 
-    // create the error directory or clean it up if needed
+        // create the error directory or clean it up if needed
     File errDir = null;
-    if(isMoreInfoMode) {
+    if (isMoreInfoMode) {
       errDir = errorDir;
       if (errDir == null) {
         errDir = new File(currDir, ERROR_DIR_NAME);
@@ -518,14 +526,15 @@ public class CorpusBenchmarkTool {
     //looked for marked texts only if the directory exists
     boolean processMarked = markedDir != null && markedDir.exists();
     if (!processMarked && (isMarkedStored || isMarkedClean)) {
-        Out.prln("Cannot evaluate because no human-annotated documents exist.");
-        return;
+      Out.prln("Cannot evaluate because no human-annotated documents exist.");
+      return;
     }
 
     if (isMarkedStored) {
       evaluateMarkedStored(markedDir, processedDir, errDir);
       return;
-    } else if (isMarkedClean) {
+    }
+    else if (isMarkedClean) {
       evaluateMarkedClean(markedDir, fileDir, errDir);
       return;
     }
@@ -542,7 +551,7 @@ public class CorpusBenchmarkTool {
                        processedDir.toURL().toExternalForm());
 
       List lrIDs = sds.getLrIds("gate.corpora.DocumentImpl");
-      for (int i=0; i < lrIDs.size(); i++) {
+      for (int i = 0; i < lrIDs.size(); i++) {
         String docID = (String) lrIDs.get(i);
 
         //read the stored document
@@ -553,65 +562,71 @@ public class CorpusBenchmarkTool {
 //        Gate.setHiddenAttribute(hparams, true);
 
         persDoc = (Document) Factory.createResource(
-                                    "gate.corpora.DocumentImpl",
-                                    features, hparams);
+            "gate.corpora.DocumentImpl",
+            features, hparams);
 
-
-        if(isMoreInfoMode) {
+        if (isMoreInfoMode) {
           StringBuffer errName = new StringBuffer(persDoc.getName());
           errName.replace(
-            persDoc.getName().lastIndexOf("."),
-            persDoc.getName().length(),
-            ".err");
+              persDoc.getName().lastIndexOf("."),
+              persDoc.getName().length(),
+              ".err");
           Out.prln("<H2>" +
                    "<a href=\"err/" + errName.toString() + "\">"
                    + persDoc.getName() + "</a>" + "</H2>");
-        } else
+        }
+        else
           Out.prln("<H2>" + persDoc.getName() + "</H2>");
 
         File cleanDocFile = new File(fileDir, persDoc.getName());
         //try reading the original document from clean
-        if (! cleanDocFile.exists()) {
+        if (!cleanDocFile.exists()) {
           Out.prln("Warning: Cannot find original document " +
                    persDoc.getName() + " in " + fileDir);
-        } else {
+        }
+        else {
           FeatureMap params = Factory.newFeatureMap();
           params.put(Document.DOCUMENT_URL_PARAMETER_NAME, cleanDocFile.toURL());
-          params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, documentEncoding);
+          params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME,
+                     documentEncoding);
 
           // create the document
           cleanDoc = (Document) Factory.createResource(
-                                  "gate.corpora.DocumentImpl", params, hparams);
+              "gate.corpora.DocumentImpl", params, hparams);
           cleanDoc.setName(persDoc.getName());
         }
 
         //try finding the marked document
         StringBuffer docName = new StringBuffer(persDoc.getName());
-        if (! isMarkedDS) {
+        if (!isMarkedDS) {
           docName.replace(
-            persDoc.getName().lastIndexOf("."),
-            docName.length(),
-            ".xml");
+              persDoc.getName().lastIndexOf("."),
+              docName.length(),
+              ".xml");
           File markedDocFile = new File(markedDir, docName.toString());
-          if (! processMarked || ! markedDocFile.exists()) {
+          if (!processMarked || !markedDocFile.exists()) {
             Out.prln("Warning: Cannot find human-annotated document " +
                      markedDocFile + " in " + markedDir);
-          } else {
+          }
+          else {
             FeatureMap params = Factory.newFeatureMap();
-            params.put(Document.DOCUMENT_URL_PARAMETER_NAME, markedDocFile.toURL());
-            params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, documentEncoding);
+            params.put(Document.DOCUMENT_URL_PARAMETER_NAME,
+                       markedDocFile.toURL());
+            params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME,
+                       documentEncoding);
 
             // create the document
             markedDoc = (Document) Factory.createResource(
-                                     "gate.corpora.DocumentImpl", params, hparams);
+                "gate.corpora.DocumentImpl", params, hparams);
             markedDoc.setName(persDoc.getName());
           }
-        } else {
+        }
+        else {
           //open marked from a DS
           //open the data store
           DataStore sds1 = Factory.openDataStore
-                          ("gate.persist.SerialDataStore",
-                           markedDir.toURL().toExternalForm());
+                           ("gate.persist.SerialDataStore",
+                            markedDir.toURL().toExternalForm());
 
           List lrIDs1 = sds1.getLrIds("gate.corpora.DocumentImpl");
           boolean found = false;
@@ -625,57 +640,62 @@ public class CorpusBenchmarkTool {
             features1.put(DataStore.DATASTORE_FEATURE_NAME, sds1);
             features1.put(DataStore.LR_ID_FEATURE_NAME, docID1);
             Document tempDoc = (Document) Factory.createResource(
-                                        "gate.corpora.DocumentImpl",
-                                        features1, hparams);
+                "gate.corpora.DocumentImpl",
+                features1, hparams);
             //check whether this is our doc
-            if ( ((String)tempDoc.getFeatures().get("gate.SourceURL")).
-                 endsWith(persDoc.getName())) {
+            if ( ( (String) tempDoc.getFeatures().get("gate.SourceURL")).
+                endsWith(persDoc.getName())) {
               found = true;
               markedDoc = tempDoc;
-            } else k++;
+            }
+            else k++;
           }
         }
 
         evaluateDocuments(persDoc, cleanDoc, markedDoc, errDir);
 
-          if (persDoc != null) {
-            final gate.Document pd = persDoc;
-            javax.swing.SwingUtilities.invokeLater(new Runnable() {
-              public void run() {
-                Factory.deleteResource(pd);
-              }
-            });
-          }
-          if (cleanDoc != null) {
-            final gate.Document cd = cleanDoc;
-            javax.swing.SwingUtilities.invokeLater(new Runnable() {
-              public void run() {
-                Factory.deleteResource(cd);
-              }
-            });
-          }
-          if (markedDoc != null) {
-            final gate.Document md = markedDoc;
-            javax.swing.SwingUtilities.invokeLater(new Runnable() {
-              public void run() {
-                Factory.deleteResource(md);
-              }
-            });
-          }
+        if (persDoc != null) {
+          final gate.Document pd = persDoc;
+          javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+              Factory.deleteResource(pd);
+            }
+          });
+        }
+        if (cleanDoc != null) {
+          final gate.Document cd = cleanDoc;
+          javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+              Factory.deleteResource(cd);
+            }
+          });
+        }
+        if (markedDoc != null) {
+          final gate.Document md = markedDoc;
+          javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+              Factory.deleteResource(md);
+            }
+          });
+        }
 
-      }//for loop through saved docs
+      } //for loop through saved docs
       sds.close();
-    } catch (java.net.MalformedURLException ex) {
+    }
+    catch (java.net.MalformedURLException ex) {
       throw new GateRuntimeException("CorpusBenchmark: " + ex.getMessage());
-    } catch (PersistenceException ex1) {
+    }
+    catch (PersistenceException ex1) {
       throw new GateRuntimeException("CorpusBenchmark: " + ex1.getMessage());
-    } catch (ResourceInstantiationException ex2) {
+    }
+    catch (ResourceInstantiationException ex2) {
       throw new GateRuntimeException("CorpusBenchmark: " + ex2.getMessage());
     }
 
-  }//evaluateCorpus
+  } //evaluateCorpus
 
-  protected void evaluateMarkedStored(File markedDir, File storedDir, File errDir) {
+  protected void evaluateMarkedStored(File markedDir, File storedDir,
+                                      File errDir) {
     Document persDoc = null;
     Document cleanDoc = null;
     Document markedDoc = null;
@@ -688,7 +708,7 @@ public class CorpusBenchmarkTool {
                        storedDir.toURL().toExternalForm());
 
       List lrIDs = sds.getLrIds("gate.corpora.DocumentImpl");
-      for (int i=0; i < lrIDs.size(); i++) {
+      for (int i = 0; i < lrIDs.size(); i++) {
         String docID = (String) lrIDs.get(i);
 
         //read the stored document
@@ -699,50 +719,54 @@ public class CorpusBenchmarkTool {
         FeatureMap hparams = Factory.newFeatureMap();
 //        Gate.setHiddenAttribute(hparams, true);
 
-
         persDoc = (Document) Factory.createResource(
-                                    "gate.corpora.DocumentImpl",
-                                    features, hparams);
+            "gate.corpora.DocumentImpl",
+            features, hparams);
 
-        if(isMoreInfoMode) {
+        if (isMoreInfoMode) {
           StringBuffer errName = new StringBuffer(persDoc.getName());
           errName.replace(
-            persDoc.getName().lastIndexOf("."),
-            persDoc.getName().length(),
-            ".err");
+              persDoc.getName().lastIndexOf("."),
+              persDoc.getName().length(),
+              ".err");
           Out.prln("<H2>" +
                    "<a href=\"err/" + errName.toString() + "\">"
                    + persDoc.getName() + "</a>" + "</H2>");
-        } else
+        }
+        else
           Out.prln("<H2>" + persDoc.getName() + "</H2>");
 
-        if (! this.isMarkedDS) { //try finding the marked document as file
+        if (!this.isMarkedDS) { //try finding the marked document as file
           StringBuffer docName = new StringBuffer(persDoc.getName());
           docName.replace(
-            persDoc.getName().lastIndexOf("."),
-            docName.length(),
-            ".xml");
+              persDoc.getName().lastIndexOf("."),
+              docName.length(),
+              ".xml");
           File markedDocFile = new File(markedDir, docName.toString());
-          if (! markedDocFile.exists()) {
+          if (!markedDocFile.exists()) {
             Out.prln("Warning: Cannot find human-annotated document " +
                      markedDocFile + " in " + markedDir);
-          } else {
+          }
+          else {
             FeatureMap params = Factory.newFeatureMap();
-            params.put(Document.DOCUMENT_URL_PARAMETER_NAME, markedDocFile.toURL());
-            params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, documentEncoding);
+            params.put(Document.DOCUMENT_URL_PARAMETER_NAME,
+                       markedDocFile.toURL());
+            params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME,
+                       documentEncoding);
 
             // create the document
             markedDoc = (Document) Factory.createResource(
-                                     "gate.corpora.DocumentImpl", params, hparams);
+                "gate.corpora.DocumentImpl", params, hparams);
             markedDoc.setName(persDoc.getName());
-          }//find marked as file
-        } else {
+          } //find marked as file
+        }
+        else {
           try {
             //open marked from a DS
             //open the data store
             DataStore sds1 = Factory.openDataStore
-                            ("gate.persist.SerialDataStore",
-                             markedDir.toURL().toExternalForm());
+                             ("gate.persist.SerialDataStore",
+                              markedDir.toURL().toExternalForm());
 
             List lrIDs1 = sds1.getLrIds("gate.corpora.DocumentImpl");
             boolean found = false;
@@ -756,56 +780,64 @@ public class CorpusBenchmarkTool {
               features1.put(DataStore.DATASTORE_FEATURE_NAME, sds1);
               features1.put(DataStore.LR_ID_FEATURE_NAME, docID1);
               Document tempDoc = (Document) Factory.createResource(
-                                          "gate.corpora.DocumentImpl",
-                                          features1, hparams);
+                  "gate.corpora.DocumentImpl",
+                  features1, hparams);
               //check whether this is our doc
-              if ( ((String)tempDoc.getFeatures().get("gate.SourceURL")).
-                   endsWith(persDoc.getName())) {
+              if ( ( (String) tempDoc.getFeatures().get("gate.SourceURL")).
+                  endsWith(persDoc.getName())) {
                 found = true;
                 markedDoc = tempDoc;
-              } else k++;
+              }
+              else k++;
             }
-          } catch (java.net.MalformedURLException ex) {
-            Out.prln("Error finding marked directory " + markedDir.getAbsolutePath());
-          } catch (gate.persist.PersistenceException ex1) {
-            Out.prln("Error opening marked as a datastore (-marked_ds specified)");
-          } catch (gate.creole.ResourceInstantiationException ex2) {
-            Out.prln("Error opening marked as a datastore (-marked_ds specified)");
+          }
+          catch (java.net.MalformedURLException ex) {
+            Out.prln("Error finding marked directory " +
+                     markedDir.getAbsolutePath());
+          }
+          catch (gate.persist.PersistenceException ex1) {
+            Out.prln(
+                "Error opening marked as a datastore (-marked_ds specified)");
+          }
+          catch (gate.creole.ResourceInstantiationException ex2) {
+            Out.prln(
+                "Error opening marked as a datastore (-marked_ds specified)");
           }
         }
 
         evaluateDocuments(persDoc, cleanDoc, markedDoc, errDir);
-          if (persDoc != null) {
-            final gate.Document pd = persDoc;
-            javax.swing.SwingUtilities.invokeLater(new Runnable() {
-              public void run() {
-                Factory.deleteResource(pd);
-              }
-            });
-          }
-          if (markedDoc != null) {
-            final gate.Document md = markedDoc;
-            javax.swing.SwingUtilities.invokeLater(new Runnable() {
-              public void run() {
-                Factory.deleteResource(md);
-              }
-            });
-          }
+        if (persDoc != null) {
+          final gate.Document pd = persDoc;
+          javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+              Factory.deleteResource(pd);
+            }
+          });
+        }
+        if (markedDoc != null) {
+          final gate.Document md = markedDoc;
+          javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+              Factory.deleteResource(md);
+            }
+          });
+        }
 
-
-      }//for loop through saved docs
+      } //for loop through saved docs
       sds.close();
 
-    } catch (java.net.MalformedURLException ex) {
+    }
+    catch (java.net.MalformedURLException ex) {
       throw new GateRuntimeException("CorpusBenchmark: " + ex.getMessage());
-    } catch (PersistenceException ex1) {
+    }
+    catch (PersistenceException ex1) {
       throw new GateRuntimeException("CorpusBenchmark: " + ex1.getMessage());
-    } catch (ResourceInstantiationException ex2) {
+    }
+    catch (ResourceInstantiationException ex2) {
       throw new GateRuntimeException("CorpusBenchmark: " + ex2.getMessage());
     }
 
-  }//evaluateMarkedStored
-
+  } //evaluateMarkedStored
 
   protected void evaluateMarkedClean(File markedDir, File cleanDir, File errDir) {
     Document persDoc = null;
@@ -813,7 +845,7 @@ public class CorpusBenchmarkTool {
     Document markedDoc = null;
 
     File[] cleanDocs = cleanDir.listFiles();
-    for (int i = 0; i< cleanDocs.length; i++) {
+    for (int i = 0; i < cleanDocs.length; i++) {
       if (!cleanDocs[i].isFile())
         continue;
 
@@ -821,9 +853,10 @@ public class CorpusBenchmarkTool {
       FeatureMap params = Factory.newFeatureMap();
       try {
         params.put(Document.DOCUMENT_URL_PARAMETER_NAME, cleanDocs[i].toURL());
-      } catch (java.net.MalformedURLException ex) {
+      }
+      catch (java.net.MalformedURLException ex) {
         Out.prln("Cannot create document from file: " +
-          cleanDocs[i].getAbsolutePath());
+                 cleanDocs[i].getAbsolutePath());
         continue;
       }
       params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
@@ -834,44 +867,49 @@ public class CorpusBenchmarkTool {
       // create the document
       try {
         cleanDoc = (Document) Factory.createResource(
-                              "gate.corpora.DocumentImpl", params, hparams, cleanDocs[i].getName());
-      } catch (gate.creole.ResourceInstantiationException ex) {
+            "gate.corpora.DocumentImpl", params, hparams, cleanDocs[i].getName());
+      }
+      catch (gate.creole.ResourceInstantiationException ex) {
         Out.prln("Cannot create document from file: " +
-          cleanDocs[i].getAbsolutePath());
+                 cleanDocs[i].getAbsolutePath());
         continue;
       }
 
-      if(isMoreInfoMode) {
+      if (isMoreInfoMode) {
         StringBuffer errName = new StringBuffer(cleanDocs[i].getName());
         errName.replace(
-          cleanDocs[i].getName().lastIndexOf("."),
-          cleanDocs[i].getName().length(),
-          ".err");
+            cleanDocs[i].getName().lastIndexOf("."),
+            cleanDocs[i].getName().length(),
+            ".err");
         Out.prln("<H2>" +
                  "<a href=\"err/" + errName.toString() + "\">"
                  + cleanDocs[i].getName() + "</a>" + "</H2>");
-      } else
+      }
+      else
         Out.prln("<H2>" + cleanDocs[i].getName() + "</H2>");
 
-      //try finding the marked document
-      if (! isMarkedDS) {
+        //try finding the marked document
+      if (!isMarkedDS) {
         StringBuffer docName = new StringBuffer(cleanDoc.getName());
         docName.replace(
-          cleanDoc.getName().lastIndexOf("."),
-          docName.length(),
-          ".xml");
+            cleanDoc.getName().lastIndexOf("."),
+            docName.length(),
+            ".xml");
         File markedDocFile = new File(markedDir, docName.toString());
-        if (! markedDocFile.exists()) {
+        if (!markedDocFile.exists()) {
           Out.prln("Warning: Cannot find human-annotated document " +
                    markedDocFile + " in " + markedDir);
           continue;
-        } else {
+        }
+        else {
           params = Factory.newFeatureMap();
           try {
-            params.put(Document.DOCUMENT_URL_PARAMETER_NAME, markedDocFile.toURL());
-          } catch (java.net.MalformedURLException ex) {
+            params.put(Document.DOCUMENT_URL_PARAMETER_NAME,
+                       markedDocFile.toURL());
+          }
+          catch (java.net.MalformedURLException ex) {
             Out.prln("Cannot create document from file: " +
-              markedDocFile.getAbsolutePath());
+                     markedDocFile.getAbsolutePath());
             continue;
           }
           params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
@@ -879,22 +917,24 @@ public class CorpusBenchmarkTool {
           // create the document
           try {
             markedDoc = (Document) Factory.createResource(
-                                   "gate.corpora.DocumentImpl", params,
-                                   hparams, cleanDoc.getName());
-          } catch (gate.creole.ResourceInstantiationException ex) {
+                "gate.corpora.DocumentImpl", params,
+                hparams, cleanDoc.getName());
+          }
+          catch (gate.creole.ResourceInstantiationException ex) {
             Out.prln("Cannot create document from file: " +
-              markedDocFile.getAbsolutePath());
+                     markedDocFile.getAbsolutePath());
             continue;
           }
 
-        }//if markedDoc exists
-      } else {
+        } //if markedDoc exists
+      }
+      else {
         try {
           //open marked from a DS
           //open the data store
           DataStore sds1 = Factory.openDataStore
-                          ("gate.persist.SerialDataStore",
-                           markedDir.toURL().toExternalForm());
+                           ("gate.persist.SerialDataStore",
+                            markedDir.toURL().toExternalForm());
 
           List lrIDs1 = sds1.getLrIds("gate.corpora.DocumentImpl");
           boolean found = false;
@@ -908,27 +948,33 @@ public class CorpusBenchmarkTool {
             features1.put(DataStore.DATASTORE_FEATURE_NAME, sds1);
             features1.put(DataStore.LR_ID_FEATURE_NAME, docID1);
             Document tempDoc = (Document) Factory.createResource(
-                                        "gate.corpora.DocumentImpl",
-                                        features1, hparams);
+                "gate.corpora.DocumentImpl",
+                features1, hparams);
             //check whether this is our doc
-            if ( ((String)tempDoc.getFeatures().get("gate.SourceURL")).
-                 endsWith(cleanDoc.getName())) {
+            if ( ( (String) tempDoc.getFeatures().get("gate.SourceURL")).
+                endsWith(cleanDoc.getName())) {
               found = true;
               markedDoc = tempDoc;
-            } else k++;
+            }
+            else k++;
           }
-        } catch (java.net.MalformedURLException ex) {
-          Out.prln("Error finding marked directory " + markedDir.getAbsolutePath());
-        } catch (gate.persist.PersistenceException ex1) {
+        }
+        catch (java.net.MalformedURLException ex) {
+          Out.prln("Error finding marked directory " +
+                   markedDir.getAbsolutePath());
+        }
+        catch (gate.persist.PersistenceException ex1) {
           Out.prln("Error opening marked as a datastore (-marked_ds specified)");
-        } catch (gate.creole.ResourceInstantiationException ex2) {
+        }
+        catch (gate.creole.ResourceInstantiationException ex2) {
           Out.prln("Error opening marked as a datastore (-marked_ds specified)");
         }
       } //if using a DS for marked
 
       try {
         evaluateDocuments(persDoc, cleanDoc, markedDoc, errDir);
-      } catch (gate.creole.ResourceInstantiationException ex) {
+      }
+      catch (gate.creole.ResourceInstantiationException ex) {
         ex.printStackTrace();
         Out.prln("Evaluate failed on document: " + cleanDoc.getName());
       }
@@ -957,39 +1003,41 @@ public class CorpusBenchmarkTool {
         });
       }
 
-    }//for loop through clean docs
+    } //for loop through clean docs
 
-
-  }//evaluateMarkedClean
+  } //evaluateMarkedClean
 
   protected void processDocument(Document doc) {
     try {
       if (application instanceof CorpusController) {
         Corpus tempCorpus = Factory.newCorpus("temp");
         tempCorpus.add(doc);
-        ((CorpusController)application).setCorpus(tempCorpus);
+        ( (CorpusController) application).setCorpus(tempCorpus);
         application.execute();
         Factory.deleteResource(tempCorpus);
         tempCorpus = null;
-      } else {
+      }
+      else {
         Iterator iter = application.getPRs().iterator();
         while (iter.hasNext())
-          ((ProcessingResource) iter.next()).setParameterValue("document", doc);
+          ( (ProcessingResource) iter.next()).setParameterValue("document", doc);
         application.execute();
       }
-    } catch (ResourceInstantiationException ex) {
+    }
+    catch (ResourceInstantiationException ex) {
       throw new RuntimeException("Error executing application: "
-                                    + ex.getMessage());
-    } catch (ExecutionException ex) {
+                                 + ex.getMessage());
+    }
+    catch (ExecutionException ex) {
       throw new RuntimeException("Error executing application: "
-                                    + ex.getMessage());
+                                 + ex.getMessage());
     }
   }
 
   protected void evaluateDocuments(Document persDoc,
-                    Document cleanDoc, Document markedDoc,
-                    File errDir)
-                        throws ResourceInstantiationException {
+                                   Document cleanDoc, Document markedDoc,
+                                   File errDir) throws
+      ResourceInstantiationException {
     if (cleanDoc == null && markedDoc == null)
       return;
 
@@ -1001,20 +1049,20 @@ public class CorpusBenchmarkTool {
 
       processDocument(cleanDoc);
 
-
       int wordCount = countWords(cleanDoc);
-      if(wordCount == 0)
+      if (wordCount == 0)
         Out.prln("<BR>No Token annotations to count words in the document.");
       else
         Out.prln("<BR>Word count: " + wordCount);
       corpusWordCount += wordCount;
 
-      if(!isMarkedClean)
+      if (!isMarkedClean)
         evaluateAllThree(persDoc, cleanDoc, markedDoc, errDir);
       else
         evaluateTwoDocs(markedDoc, cleanDoc, errDir);
 
-    } else
+    }
+    else
       evaluateTwoDocs(markedDoc, persDoc, errDir);
 
   }
@@ -1025,17 +1073,17 @@ public class CorpusBenchmarkTool {
   protected int countWords(Document annotDoc) {
     int count = 0;
 
-    if (annotDoc == null) return 0;
+    if (annotDoc == null)return 0;
     // check for Token in outputSetName
     AnnotationSet tokens = annotDoc.getAnnotations(outputSetName).get("Token");
-    if (tokens == null) return 0;
+    if (tokens == null)return 0;
 
     Iterator it = tokens.iterator();
     Annotation currAnnotation;
     while (it.hasNext()) {
       currAnnotation = (Annotation) it.next();
       Object feature = currAnnotation.getFeatures().get("kind");
-      if(feature != null && "word".equalsIgnoreCase((String)feature)) ++count;
+      if (feature != null && "word".equalsIgnoreCase( (String) feature))++count;
     } // while
 
     return count;
@@ -1043,8 +1091,8 @@ public class CorpusBenchmarkTool {
 
   protected void evaluateAllThree(Document persDoc,
                                   Document cleanDoc, Document markedDoc,
-                                  File errDir)
-                                  throws ResourceInstantiationException {
+                                  File errDir) throws
+      ResourceInstantiationException {
     //first start the table and its header
     printTableHeader();
 
@@ -1057,17 +1105,17 @@ public class CorpusBenchmarkTool {
           docName.length(),
           ".err");
       File errFile = new File(errDir, docName.toString());
-      String encoding = ((gate.corpora.DocumentImpl)cleanDoc).getEncoding();
+      String encoding = ( (gate.corpora.DocumentImpl) cleanDoc).getEncoding();
       try {
         errWriter = new FileWriter(errFile, false);
         /*
-        if(encoding == null) {
+                 if(encoding == null) {
           errWriter = new OutputStreamWriter(
               new FileOutputStream(errFile, false));
-        } else {
+                 } else {
           errWriter = new OutputStreamWriter(
               new FileOutputStream(errFile, false), encoding);
-        }*/
+                 }*/
       }
       catch (Exception ex) {
         Out.prln("Exception when creating the error file " + errFile + ": "
@@ -1076,7 +1124,7 @@ public class CorpusBenchmarkTool {
       }
     }
 
-    for (int jj= 0; jj< annotTypes.size(); jj++) {
+    for (int jj = 0; jj < annotTypes.size(); jj++) {
       String annotType = (String) annotTypes.get(jj);
 
       AnnotationDiffer annotDiffer = measureDocs(markedDoc, cleanDoc, annotType);
@@ -1090,20 +1138,21 @@ public class CorpusBenchmarkTool {
       updateStatistics(annotDiffer, annotType);
 
       AnnotationDiffer annotDiffer1 =
-        measureDocs(markedDoc, persDoc, annotType);
+          measureDocs(markedDoc, persDoc, annotType);
 
       Out.prln("<TR>");
 
-      if(isMoreInfoMode && annotDiffer1 != null
-         && (annotDiffer1.getPrecisionAverage() != annotDiffer.getPrecisionAverage()
-         || annotDiffer1.getRecallAverage() != annotDiffer.getRecallAverage())
-         )
-        Out.prln("<TD> " + annotType + "_new"+ "</TD>");
+      if (isMoreInfoMode && annotDiffer1 != null
+          &&
+          (annotDiffer1.getPrecisionAverage() != annotDiffer.getPrecisionAverage()
+           || annotDiffer1.getRecallAverage() != annotDiffer.getRecallAverage())
+          )
+        Out.prln("<TD> " + annotType + "_new" + "</TD>");
       else
         Out.prln("<TD> " + annotType + "</TD>");
 
       if (isMoreInfoMode) {
-        if(annotDiffer1 != null) updateStatisticsProc(annotDiffer1, annotType);
+        if (annotDiffer1 != null) updateStatisticsProc(annotDiffer1, annotType);
 
         Out.prln("<TD>" + annotDiffer.getCorrectMatches() + "</TD>");
         Out.prln("<TD>" + annotDiffer.getPartiallyCorrectMatches() + "</TD>");
@@ -1117,23 +1166,23 @@ public class CorpusBenchmarkTool {
       if (annotDiffer1 != null) {
 
         if (annotDiffer1.getPrecisionAverage()
-              < annotDiffer.getPrecisionAverage()) {
-            Out.prln("<P><Font color=blue> ");
-            Out.prln(annotDiffer.getPrecisionAverage());
+            < annotDiffer.getPrecisionAverage()) {
+          Out.prln("<P><Font color=blue> ");
+          Out.prln(annotDiffer.getPrecisionAverage());
 
-            if(!isMoreInfoMode) {
-              Out.pr("<BR>Precision increase on human-marked from ");
-              Out.pr(annotDiffer1.getPrecisionAverage() + " to ");
-              Out.prln(annotDiffer.getPrecisionAverage());
-            }
-            Out.prln(" </Font></P>");
+          if (!isMoreInfoMode) {
+            Out.pr("<BR>Precision increase on human-marked from ");
+            Out.pr(annotDiffer1.getPrecisionAverage() + " to ");
+            Out.prln(annotDiffer.getPrecisionAverage());
           }
+          Out.prln(" </Font></P>");
+        }
         else if (annotDiffer1.getPrecisionAverage()
-               > annotDiffer.getPrecisionAverage()) {
+                 > annotDiffer.getPrecisionAverage()) {
           Out.prln("<P><Font color=red> ");
           Out.prln(annotDiffer.getPrecisionAverage());
 
-          if(!isMoreInfoMode) {
+          if (!isMoreInfoMode) {
             Out.pr("<BR>Precision decrease on human-marked from ");
             Out.pr(annotDiffer1.getPrecisionAverage() + " to ");
             Out.prln(annotDiffer.getPrecisionAverage());
@@ -1141,7 +1190,8 @@ public class CorpusBenchmarkTool {
           Out.prln(" </Font></P>");
         }
         else
-          Out.prln("<P> " + (double) annotDiffer.getPrecisionAverage() + " </P>");
+          Out.prln("<P> " + (double) annotDiffer.getPrecisionAverage() +
+                   " </P>");
       }
       else
         Out.prln("<P> " + annotDiffer.getPrecisionAverage() + " </P>");
@@ -1157,7 +1207,7 @@ public class CorpusBenchmarkTool {
           Out.prln("<P><Font color=blue> ");
           Out.prln(annotDiffer.getRecallAverage());
 
-          if(!isMoreInfoMode) {
+          if (!isMoreInfoMode) {
             Out.pr("<BR>Recall increase on human-marked from ");
             Out.pr(annotDiffer1.getRecallAverage() + " to ");
             Out.prln(annotDiffer.getRecallAverage());
@@ -1168,7 +1218,7 @@ public class CorpusBenchmarkTool {
           Out.prln("<P><Font color=red> ");
           Out.prln(annotDiffer.getRecallAverage());
 
-          if(!isMoreInfoMode) {
+          if (!isMoreInfoMode) {
             Out.pr("<BR>Recall decrease on human-marked from ");
             Out.pr(annotDiffer1.getRecallAverage() + " to ");
             Out.prln(annotDiffer.getRecallAverage());
@@ -1177,14 +1227,14 @@ public class CorpusBenchmarkTool {
         }
         else
           Out.prln("<P> " + annotDiffer.getRecallAverage() + " </P>");
-      } else
+      }
+      else
         Out.prln("<P> " + annotDiffer.getRecallAverage() + " </P>");
-
 
       Out.prln("</TD>");
 
       //check the recall now
-      if ( isVerboseMode ) {
+      if (isVerboseMode) {
         Out.prln("<TD>");
         if (annotDiffer.getRecallAverage() < threshold) {
           printAnnotations(annotDiffer, markedDoc, cleanDoc);
@@ -1198,10 +1248,11 @@ public class CorpusBenchmarkTool {
       Out.prln("</TR>");
 
       // show one more table line for processed document
-      if(isMoreInfoMode && annotDiffer1 != null
-         && (annotDiffer1.getPrecisionAverage() != annotDiffer.getPrecisionAverage()
-         || annotDiffer1.getRecallAverage() != annotDiffer.getRecallAverage())
-         ) {
+      if (isMoreInfoMode && annotDiffer1 != null
+          &&
+          (annotDiffer1.getPrecisionAverage() != annotDiffer.getPrecisionAverage()
+           || annotDiffer1.getRecallAverage() != annotDiffer.getRecallAverage())
+          ) {
 
         Out.prln("<TR>");
         Out.prln("<TD> " + annotType + "_old" + "</TD>");
@@ -1212,14 +1263,16 @@ public class CorpusBenchmarkTool {
         Out.prln("<TD>" + annotDiffer1.getSpurious() + "</TD>");
 
         Out.prln("<TD>");
-        if (annotDiffer1.getPrecisionAverage() < annotDiffer.getPrecisionAverage())
+        if (annotDiffer1.getPrecisionAverage() <
+            annotDiffer.getPrecisionAverage())
 
-          Out.prln("<P><Font color=blue> "  + annotDiffer1.getPrecisionAverage()
-                + "</Font></P>");
-        else if (annotDiffer1.getPrecisionAverage() > annotDiffer.getPrecisionAverage())
+          Out.prln("<P><Font color=blue> " + annotDiffer1.getPrecisionAverage()
+                   + "</Font></P>");
+        else if (annotDiffer1.getPrecisionAverage() >
+                 annotDiffer.getPrecisionAverage())
           Out.prln(
-             "<P><Font color=red> " + annotDiffer1.getPrecisionAverage()
-             + " </Font></P>");
+              "<P><Font color=red> " + annotDiffer1.getPrecisionAverage()
+              + " </Font></P>");
         else
           Out.prln(annotDiffer1.getPrecisionAverage());
 
@@ -1231,14 +1284,14 @@ public class CorpusBenchmarkTool {
                    + " </Font></P>");
         else if (annotDiffer1.getRecallAverage() > annotDiffer.getRecallAverage())
           Out.prln("<P><Font color=red> " + annotDiffer1.getRecallAverage()
-                    + " </Font></P>");
+                   + " </Font></P>");
         else
-           Out.prln(annotDiffer1.getRecallAverage());
+          Out.prln(annotDiffer1.getRecallAverage());
 
         Out.prln("</TD>");
 
         //check the recall now
-        if ( isVerboseMode ) {
+        if (isVerboseMode) {
           // create error file and start writing
 
           Out.prln("<TD>");
@@ -1255,22 +1308,22 @@ public class CorpusBenchmarkTool {
 
       if (isMoreInfoMode && errDir != null)
         storeAnnotations(annotType, annotDiffer, markedDoc, cleanDoc, errWriter);
-    }//for loop through annotation types
+    } //for loop through annotation types
     Out.prln("</TABLE>");
 
     try {
-      if(errWriter != null)
+      if (errWriter != null)
         errWriter.close();
     }
     catch (Exception ex) {
       Out.prln("Exception on close of error file " + errWriter + ": "
                + ex.getMessage());
     }
-  }//evaluateAllThree
+  } //evaluateAllThree
 
   protected void evaluateTwoDocs(Document keyDoc, Document respDoc,
-                                 File errDir)
-        throws ResourceInstantiationException {
+                                 File errDir) throws
+      ResourceInstantiationException {
 
     //first start the table and its header
     printTableHeader();
@@ -1284,17 +1337,17 @@ public class CorpusBenchmarkTool {
           docName.length(),
           ".err");
       File errFile = new File(errDir, docName.toString());
-      String encoding = ((gate.corpora.DocumentImpl)keyDoc).getEncoding();
+      String encoding = ( (gate.corpora.DocumentImpl) keyDoc).getEncoding();
       try {
         errWriter = new FileWriter(errFile, false);
         /*
-        if(encoding == null) {
+                 if(encoding == null) {
           errWriter = new OutputStreamWriter(
               new FileOutputStream(errFile, false));
-        } else {
+                 } else {
           errWriter = new OutputStreamWriter(
               new FileOutputStream(errFile, false), encoding);
-        }*/
+                 }*/
       }
       catch (Exception ex) {
         Out.prln("Exception when creating the error file " + errFile + ": "
@@ -1303,7 +1356,7 @@ public class CorpusBenchmarkTool {
       }
     }
 
-    for (int jj= 0; jj< annotTypes.size(); jj++) {
+    for (int jj = 0; jj < annotTypes.size(); jj++) {
       String annotType = (String) annotTypes.get(jj);
 
       AnnotationDiffer annotDiff = measureDocs(keyDoc, respDoc, annotType);
@@ -1319,7 +1372,7 @@ public class CorpusBenchmarkTool {
       Out.prln("<TR>");
       Out.prln("<TD>" + annotType + "</TD>");
 
-      if(isMoreInfoMode) {
+      if (isMoreInfoMode) {
         Out.prln("<TD>" + annotDiff.getCorrectMatches() + "</TD>");
         Out.prln("<TD>" + annotDiff.getPartiallyCorrectMatches() + "</TD>");
         Out.prln("<TD>" + annotDiff.getMissing() + "</TD>");
@@ -1329,7 +1382,7 @@ public class CorpusBenchmarkTool {
       Out.prln("<TD>" + annotDiff.getPrecisionAverage() + "</TD>");
       Out.prln("<TD>" + annotDiff.getRecallAverage() + "</TD>");
       //check the recall now
-      if ( isVerboseMode ) {
+      if (isVerboseMode) {
         Out.prln("<TD>");
         if (annotDiff.getRecallAverage() < threshold) {
           printAnnotations(annotDiff, keyDoc, respDoc);
@@ -1343,25 +1396,25 @@ public class CorpusBenchmarkTool {
 
       if (isMoreInfoMode && errDir != null)
         storeAnnotations(annotType, annotDiff, keyDoc, respDoc, errWriter);
-    }//for loop through annotation types
+    } //for loop through annotation types
     Out.prln("</TABLE>");
 
     try {
-      if(errWriter != null)
+      if (errWriter != null)
         errWriter.close();
     }
     catch (Exception ex) {
       Out.prln("Exception on close of error file " + errWriter + ": "
                + ex.getMessage());
     }
-  }//evaluateTwoDocs
+  } //evaluateTwoDocs
 
   protected void printTableHeader() {
     Out.prln("<TABLE BORDER=1");
     Out.pr("<TR> <TD><B>Annotation Type</B></TD> ");
 
-    if(isMoreInfoMode)
-     Out.pr("<TD><B>Correct</B></TD> <TD><B>Partially Correct</B></TD> "
+    if (isMoreInfoMode)
+      Out.pr("<TD><B>Correct</B></TD> <TD><B>Partially Correct</B></TD> "
              + "<TD><B>Missing</B></TD> <TD><B>Spurious<B></TD>");
 
     Out.pr("<TD><B>Precision</B></TD> <TD><B>Recall</B></TD>");
@@ -1372,241 +1425,263 @@ public class CorpusBenchmarkTool {
     Out.prln("</TR>");
   }
 
-  protected void updateStatistics(AnnotationDiffer annotDiffer, String annotType){
-    double precisionAverage = ((double)((double)annotDiffer.getPrecisionLenient() + annotDiffer.getPrecisionStrict()) /
-(double)(2.0));
-    if(precisionAverage == Double.NaN) precisionAverage = 0.0;
+  protected void updateStatistics(AnnotationDiffer annotDiffer,
+                                  String annotType) {
+    double precisionAverage = ( (double) ( (double) annotDiffer.
+                                          getPrecisionLenient() +
+                                          annotDiffer.getPrecisionStrict()) /
+                               (double) (2.0));
+    if (Double.isNaN(precisionAverage)) precisionAverage = 0.0;
     precisionSum += precisionAverage;
 
-    double recallAverage = ((double)(annotDiffer.getRecallLenient() + annotDiffer.getRecallStrict()) / (double) (2.0));
-    if(recallAverage == Double.NaN) recallAverage = 0.0;
+    double recallAverage = ( (double) (annotDiffer.getRecallLenient() +
+                                       annotDiffer.getRecallStrict()) /
+                            (double) (2.0));
+    if (Double.isNaN(recallAverage)) recallAverage = 0.0;
     recallSum += recallAverage;
 
-    double fMeasureAverage = ((double) (annotDiffer.getFMeasureLenient(1.0) + annotDiffer.getFMeasureStrict(1.0)) /
-(double) (2.0));
-    if(fMeasureAverage == Double.NaN) fMeasureAverage = 0.0;
+    double fMeasureAverage = ( (double) (annotDiffer.getFMeasureLenient(1.0) +
+                                         annotDiffer.getFMeasureStrict(1.0)) /
+                              (double) (2.0));
+    if (Double.isNaN(fMeasureAverage)) fMeasureAverage = 0.0;
     fMeasureSum += fMeasureAverage;
 
     Double oldPrecision = (Double) precisionByType.get(annotType);
     if (oldPrecision == null)
-        precisionByType.put(annotType, new Double(precisionAverage));
+      precisionByType.put(annotType, new Double(precisionAverage));
     else
-        precisionByType.put(annotType, new Double(oldPrecision.doubleValue() + precisionAverage));
+      precisionByType.put(annotType,
+                          new Double(oldPrecision.doubleValue() + precisionAverage));
 
     Integer precCount = (Integer) prCountByType.get(annotType);
     if (precCount == null)
-        prCountByType.put(annotType, new Integer(1));
+      prCountByType.put(annotType, new Integer(1));
     else
-       prCountByType.put(annotType, new Integer(precCount.intValue() + 1));
-
+      prCountByType.put(annotType, new Integer(precCount.intValue() + 1));
 
     Double oldFMeasure = (Double) fMeasureByType.get(annotType);
     if (oldFMeasure == null)
-       fMeasureByType.put(annotType, new Double(fMeasureAverage));
+      fMeasureByType.put(annotType, new Double(fMeasureAverage));
     else
-       fMeasureByType.put(annotType, new Double(oldFMeasure.doubleValue() + fMeasureAverage));
+      fMeasureByType.put(annotType,
+                         new Double(oldFMeasure.doubleValue() + fMeasureAverage));
 
     Integer fCount = (Integer) fMeasureCountByType.get(annotType);
     if (fCount == null)
-       fMeasureCountByType.put(annotType, new Integer(1));
+      fMeasureCountByType.put(annotType, new Integer(1));
     else
-       fMeasureCountByType.put(annotType, new Integer(fCount.intValue() + 1));
+      fMeasureCountByType.put(annotType, new Integer(fCount.intValue() + 1));
 
     Double oldRecall = (Double) recallByType.get(annotType);
     if (oldRecall == null)
-       recallByType.put(annotType, new Double(recallAverage));
+      recallByType.put(annotType, new Double(recallAverage));
     else
-       recallByType.put(annotType, new Double(oldRecall.doubleValue() + recallAverage));
+      recallByType.put(annotType,
+                       new Double(oldRecall.doubleValue() + recallAverage));
 
     Integer recCount = (Integer) recCountByType.get(annotType);
     if (recCount == null)
-       recCountByType.put(annotType, new Integer(1));
+      recCountByType.put(annotType, new Integer(1));
     else
-       recCountByType.put(annotType, new Integer(recCount.intValue() + 1));
+      recCountByType.put(annotType, new Integer(recCount.intValue() + 1));
 
-    //Update the missing, spurious, correct, and partial counts
+      //Update the missing, spurious, correct, and partial counts
     Long oldMissingNo = (Long) missingByType.get(annotType);
     if (oldMissingNo == null)
-       missingByType.put(annotType, new Long(annotDiffer.getMissing()));
+      missingByType.put(annotType, new Long(annotDiffer.getMissing()));
     else
-       missingByType.put(annotType, new Long(oldMissingNo.longValue() + annotDiffer.getMissing()));
+      missingByType.put(annotType,
+                        new Long(oldMissingNo.longValue() +
+                                 annotDiffer.getMissing()));
 
     Long oldCorrectNo = (Long) correctByType.get(annotType);
     if (oldCorrectNo == null)
-       correctByType.put(annotType, new Long(annotDiffer.getCorrectMatches()));
+      correctByType.put(annotType, new Long(annotDiffer.getCorrectMatches()));
     else
-       correctByType.put(annotType, new Long(oldCorrectNo.longValue() + annotDiffer.getCorrectMatches()));
+      correctByType.put(annotType,
+                        new Long(oldCorrectNo.longValue() +
+                                 annotDiffer.getCorrectMatches()));
 
     Long oldPartialNo = (Long) partialByType.get(annotType);
     if (oldPartialNo == null)
-       partialByType.put(annotType, new Long(annotDiffer.getPartiallyCorrectMatches()));
+      partialByType.put(annotType,
+                        new Long(annotDiffer.getPartiallyCorrectMatches()));
     else
-       partialByType.put(annotType, new Long(oldPartialNo.longValue() + annotDiffer.getPartiallyCorrectMatches()));
+      partialByType.put(annotType,
+                        new Long(oldPartialNo.longValue() +
+                                 annotDiffer.getPartiallyCorrectMatches()));
 
     Long oldSpuriousNo = (Long) spurByType.get(annotType);
     if (oldSpuriousNo == null)
-       spurByType.put(annotType, new Long(annotDiffer.getSpurious()));
+      spurByType.put(annotType, new Long(annotDiffer.getSpurious()));
     else
-       spurByType.put(annotType, new Long(oldSpuriousNo.longValue() + annotDiffer.getSpurious()));
+      spurByType.put(annotType,
+                     new Long(oldSpuriousNo.longValue() +
+                              annotDiffer.getSpurious()));
   }
 
   /**
    * Update statistics for processed documents
    * The same procedure as updateStatistics with different hashTables
    */
-  protected void updateStatisticsProc(AnnotationDiffer annotDiffer, String annotType){
+  protected void updateStatisticsProc(AnnotationDiffer annotDiffer,
+                                      String annotType) {
     hasProcessed = true;
-    double precisionAverage = ((double)(annotDiffer.getPrecisionLenient() + annotDiffer.getPrecisionStrict()) /
-(double)(2.0));
-    if(precisionAverage == Double.NaN) precisionAverage = 0.0;
+    double precisionAverage = ( (double) (annotDiffer.getPrecisionLenient() +
+                                          annotDiffer.getPrecisionStrict()) /
+                               (double) (2.0));
+    if (Double.isNaN(precisionAverage)) precisionAverage = 0.0;
     proc_precisionSum += precisionAverage;
 
-    double recallAverage = ((double)(annotDiffer.getRecallLenient() + annotDiffer.getRecallStrict()) / (double) (2.0));
-    if(recallAverage == Double.NaN) recallAverage = 0.0;
+    double recallAverage = ( (double) (annotDiffer.getRecallLenient() +
+                                       annotDiffer.getRecallStrict()) /
+                            (double) (2.0));
+    if (Double.isNaN(recallAverage)) recallAverage = 0.0;
     proc_recallSum += recallAverage;
 
-    double fMeasureAverage = ((double) (annotDiffer.getFMeasureLenient(1.0) + annotDiffer.getFMeasureStrict(1.0)) /
-(double) (2.0));
-    if(fMeasureAverage == Double.NaN) fMeasureAverage = 0.0;
-      proc_fMeasureSum += fMeasureAverage;
+    double fMeasureAverage = ( (double) (annotDiffer.getFMeasureLenient(1.0) +
+                                         annotDiffer.getFMeasureStrict(1.0)) /
+                              (double) (2.0));
+    if (Double.isNaN(fMeasureAverage)) fMeasureAverage = 0.0;
+    proc_fMeasureSum += fMeasureAverage;
 
     Double oldPrecision = (Double) proc_precisionByType.get(annotType);
     if (oldPrecision == null)
-        proc_precisionByType.put(annotType, new Double(precisionAverage));
-      else
-        proc_precisionByType.put(annotType,
-                            new Double(oldPrecision.doubleValue() +
-                                       precisionAverage));
-      Integer precCount = (Integer) proc_prCountByType.get(annotType);
-      if (precCount == null)
-        proc_prCountByType.put(annotType, new Integer(1));
-      else
-        proc_prCountByType.put(annotType, new Integer(precCount.intValue() + 1));
+      proc_precisionByType.put(annotType, new Double(precisionAverage));
+    else
+      proc_precisionByType.put(annotType,
+                               new Double(oldPrecision.doubleValue() +
+                                          precisionAverage));
+    Integer precCount = (Integer) proc_prCountByType.get(annotType);
+    if (precCount == null)
+      proc_prCountByType.put(annotType, new Integer(1));
+    else
+      proc_prCountByType.put(annotType, new Integer(precCount.intValue() + 1));
 
+    Double oldFMeasure = (Double) proc_fMeasureByType.get(annotType);
+    if (oldFMeasure == null)
+      proc_fMeasureByType.put(annotType,
+                              new Double(fMeasureAverage));
+    else
+      proc_fMeasureByType.put(annotType,
+                              new Double(oldFMeasure.doubleValue() +
+                                         fMeasureAverage));
+    Integer fCount = (Integer) proc_fMeasureCountByType.get(annotType);
+    if (fCount == null)
+      proc_fMeasureCountByType.put(annotType, new Integer(1));
+    else
+      proc_fMeasureCountByType.put(annotType, new Integer(fCount.intValue() + 1));
 
-      Double oldFMeasure = (Double) proc_fMeasureByType.get(annotType);
-      if (oldFMeasure == null)
-        proc_fMeasureByType.put(annotType,
-                         new Double(fMeasureAverage));
-      else
-        proc_fMeasureByType.put(annotType,
-                         new Double(oldFMeasure.doubleValue() +
-                                    fMeasureAverage));
-      Integer fCount = (Integer) proc_fMeasureCountByType.get(annotType);
-      if (fCount == null)
-        proc_fMeasureCountByType.put(annotType, new Integer(1));
-      else
-        proc_fMeasureCountByType.put(annotType, new Integer(fCount.intValue() + 1));
-
-      Double oldRecall = (Double) proc_recallByType.get(annotType);
-      if (oldRecall == null)
-        proc_recallByType.put(annotType,
+    Double oldRecall = (Double) proc_recallByType.get(annotType);
+    if (oldRecall == null)
+      proc_recallByType.put(annotType,
                             new Double(recallAverage));
-      else
-        proc_recallByType.put(annotType,
+    else
+      proc_recallByType.put(annotType,
                             new Double(oldRecall.doubleValue() +
                                        recallAverage));
-      Integer recCount = (Integer) proc_recCountByType.get(annotType);
-      if (recCount == null)
-        proc_recCountByType.put(annotType, new Integer(1));
-      else
-        proc_recCountByType.put(annotType, new Integer(recCount.intValue() + 1));
+    Integer recCount = (Integer) proc_recCountByType.get(annotType);
+    if (recCount == null)
+      proc_recCountByType.put(annotType, new Integer(1));
+    else
+      proc_recCountByType.put(annotType, new Integer(recCount.intValue() + 1));
 
       //Update the missing, spurious, correct, and partial counts
-      Long oldMissingNo = (Long) proc_missingByType.get(annotType);
-      if (oldMissingNo == null)
-        proc_missingByType.put(annotType, new Long(annotDiffer.getMissing()));
-      else
-        proc_missingByType.put(annotType,
-                        new Long(oldMissingNo.longValue() +
-                                  annotDiffer.getMissing()));
+    Long oldMissingNo = (Long) proc_missingByType.get(annotType);
+    if (oldMissingNo == null)
+      proc_missingByType.put(annotType, new Long(annotDiffer.getMissing()));
+    else
+      proc_missingByType.put(annotType,
+                             new Long(oldMissingNo.longValue() +
+                                      annotDiffer.getMissing()));
 
-      Long oldCorrectNo = (Long) proc_correctByType.get(annotType);
-      if (oldCorrectNo == null)
-        proc_correctByType.put(annotType, new Long(annotDiffer.getCorrectMatches()));
-      else
-        proc_correctByType.put(annotType,
-                        new Long(oldCorrectNo.longValue() +
-                                  annotDiffer.getCorrectMatches()));
+    Long oldCorrectNo = (Long) proc_correctByType.get(annotType);
+    if (oldCorrectNo == null)
+      proc_correctByType.put(annotType, new Long(annotDiffer.getCorrectMatches()));
+    else
+      proc_correctByType.put(annotType,
+                             new Long(oldCorrectNo.longValue() +
+                                      annotDiffer.getCorrectMatches()));
 
-      Long oldPartialNo = (Long) proc_partialByType.get(annotType);
-      if (oldPartialNo == null)
-        proc_partialByType.put(annotType, new Long(annotDiffer.getPartiallyCorrectMatches()));
-      else
-        proc_partialByType.put(annotType,
-                        new Long(oldPartialNo.longValue() +
-                                  annotDiffer.getPartiallyCorrectMatches()));
+    Long oldPartialNo = (Long) proc_partialByType.get(annotType);
+    if (oldPartialNo == null)
+      proc_partialByType.put(annotType,
+                             new Long(annotDiffer.getPartiallyCorrectMatches()));
+    else
+      proc_partialByType.put(annotType,
+                             new Long(oldPartialNo.longValue() +
+                                      annotDiffer.getPartiallyCorrectMatches()));
 
-      Long oldSpuriousNo = (Long) proc_spurByType.get(annotType);
-      if (oldSpuriousNo == null)
-        proc_spurByType.put(annotType, new Long(annotDiffer.getSpurious()));
-      else
-        proc_spurByType.put(annotType,
-                        new Long(oldSpuriousNo.longValue() +
-                                  annotDiffer.getSpurious()));
+    Long oldSpuriousNo = (Long) proc_spurByType.get(annotType);
+    if (oldSpuriousNo == null)
+      proc_spurByType.put(annotType, new Long(annotDiffer.getSpurious()));
+    else
+      proc_spurByType.put(annotType,
+                          new Long(oldSpuriousNo.longValue() +
+                                   annotDiffer.getSpurious()));
   }
 
   public void printStatistics() {
 
     Out.prln("<H2> Statistics </H2>");
 
-/*
-    Out.prln("<H3> Precision </H3>");
-    if (precisionByType != null && !precisionByType.isEmpty()) {
-      Iterator iter = precisionByType.keySet().iterator();
-      while (iter.hasNext()) {
-        String annotType = (String) iter.next();
-        Out.prln(annotType + ": "
-          + ((Double)precisionByType.get(annotType)).doubleValue()
-              /
-              ((Integer)prCountByType.get(annotType)).intValue()
-          + "<P>");
-      }//while
-    }
-    Out.prln("Overall precision: " + getPrecisionAverage() + "<P>");
+    /*
+        Out.prln("<H3> Precision </H3>");
+        if (precisionByType != null && !precisionByType.isEmpty()) {
+          Iterator iter = precisionByType.keySet().iterator();
+          while (iter.hasNext()) {
+            String annotType = (String) iter.next();
+            Out.prln(annotType + ": "
+              + ((Double)precisionByType.get(annotType)).doubleValue()
+                  /
+                  ((Integer)prCountByType.get(annotType)).intValue()
+              + "<P>");
+          }//while
+        }
+        Out.prln("Overall precision: " + getPrecisionAverage() + "<P>");
 
-    Out.prln("<H3> Recall </H3>");
-    if (recallByType != null && !recallByType.isEmpty()) {
-      Iterator iter = recallByType.keySet().iterator();
-      while (iter.hasNext()) {
-        String annotType = (String) iter.next();
-        Out.prln(annotType + ": "
-          + ((Double)recallByType.get(annotType)).doubleValue()
-              /
-              ((Integer)recCountByType.get(annotType)).intValue()
-          + "<P>");
-      }//while
-    }
+        Out.prln("<H3> Recall </H3>");
+        if (recallByType != null && !recallByType.isEmpty()) {
+          Iterator iter = recallByType.keySet().iterator();
+          while (iter.hasNext()) {
+            String annotType = (String) iter.next();
+            Out.prln(annotType + ": "
+              + ((Double)recallByType.get(annotType)).doubleValue()
+                  /
+                  ((Integer)recCountByType.get(annotType)).intValue()
+              + "<P>");
+          }//while
+        }
 
-    Out.prln("Overall recall: " + getRecallAverage()
-             + "<P>");
-*/
+        Out.prln("Overall recall: " + getRecallAverage()
+                 + "<P>");
+     */
     if (annotTypes == null) {
       Out.prln("No types given for evaluation, cannot obtain precision/recall");
       return;
     }
     Out.prln("<table border=1>");
     Out.prln("<TR> <TD><B>Annotation Type</B></TD> <TD><B>Correct</B></TD>" +
-              "<TD><B>Partially Correct</B></TD> <TD><B>Missing</B></TD>" +
-              "<TD><B>Spurious</B></TD> <TD><B>Precision</B></TD>" +
-              "<TD><B>Recall</B></TD> <TD><B>F-Measure</B></TD> </TR>");
+             "<TD><B>Partially Correct</B></TD> <TD><B>Missing</B></TD>" +
+             "<TD><B>Spurious</B></TD> <TD><B>Precision</B></TD>" +
+             "<TD><B>Recall</B></TD> <TD><B>F-Measure</B></TD> </TR>");
     String annotType;
     for (int i = 0; i < annotTypes.size(); i++) {
       annotType = (String) annotTypes.get(i);
       printStatsForType(annotType);
-    }//for
+    } //for
     Out.prln("</table>");
   } // updateStatisticsProc
 
-  protected void printStatsForType(String annotType){
-    long correct = (correctByType.get(annotType) == null)? 0 :
-                      ((Long)correctByType.get(annotType)).longValue();
-    long partial = (partialByType.get(annotType) == null)? 0 :
-                      ((Long)partialByType.get(annotType)).longValue();
-    long spurious = (spurByType.get(annotType) == null)? 0 :
-                      ((Long)spurByType.get(annotType)).longValue();
-    long missing = (missingByType.get(annotType) == null)? 0:
-                      ((Long)missingByType.get(annotType)).longValue();
+  protected void printStatsForType(String annotType) {
+    long correct = (correctByType.get(annotType) == null) ? 0 :
+                   ( (Long) correctByType.get(annotType)).longValue();
+    long partial = (partialByType.get(annotType) == null) ? 0 :
+                   ( (Long) partialByType.get(annotType)).longValue();
+    long spurious = (spurByType.get(annotType) == null) ? 0 :
+                    ( (Long) spurByType.get(annotType)).longValue();
+    long missing = (missingByType.get(annotType) == null) ? 0 :
+                   ( (Long) missingByType.get(annotType)).longValue();
     long actual = correct + partial + spurious;
     long possible = correct + partial + missing;
     //precision strict is correct/actual
@@ -1614,53 +1689,52 @@ public class CorpusBenchmarkTool {
 
     double precision = (correct + 0.5 * partial) / actual;
     //recall strict is correct/possible
-    double recall = (correct + 0.5*partial)/possible;
+    double recall = (correct + 0.5 * partial) / possible;
     //F-measure = ( (beta*beta + 1)*P*R ) / ((beta*beta*P) + R)
     double fmeasure =
-      ((beta*beta + 1)*precision*recall)
-      /
-      ((beta*beta*precision) + recall);
+        ( (beta * beta + 1) * precision * recall)
+        /
+        ( (beta * beta * precision) + recall);
 
+    long proc_correct = 0;
+    long proc_partial = 0;
+    long proc_spurious = 0;
+    long proc_missing = 0;
+    long proc_actual = 0;
+    long proc_possible = 0;
+    double proc_precision = 0;
+    double proc_recall = 0;
+    double proc_fmeasure = 0;
 
-    long proc_correct=0;
-    long proc_partial=0;
-    long proc_spurious=0;
-    long proc_missing=0;
-    long proc_actual=0;
-    long proc_possible=0;
-    double proc_precision=0;
-    double proc_recall=0;
-    double proc_fmeasure=0;
-
-    if(hasProcessed) {
+    if (hasProcessed) {
       // calculate values for processed
-      proc_correct = (proc_correctByType.get(annotType) == null)? 0 :
-                        ((Long)proc_correctByType.get(annotType)).longValue();
-      proc_partial = (proc_partialByType.get(annotType) == null)? 0 :
-                        ((Long)proc_partialByType.get(annotType)).longValue();
-      proc_spurious = (proc_spurByType.get(annotType) == null)? 0 :
-                        ((Long)proc_spurByType.get(annotType)).longValue();
-      proc_missing = (proc_missingByType.get(annotType) == null)? 0:
-                        ((Long)proc_missingByType.get(annotType)).longValue();
+      proc_correct = (proc_correctByType.get(annotType) == null) ? 0 :
+                     ( (Long) proc_correctByType.get(annotType)).longValue();
+      proc_partial = (proc_partialByType.get(annotType) == null) ? 0 :
+                     ( (Long) proc_partialByType.get(annotType)).longValue();
+      proc_spurious = (proc_spurByType.get(annotType) == null) ? 0 :
+                      ( (Long) proc_spurByType.get(annotType)).longValue();
+      proc_missing = (proc_missingByType.get(annotType) == null) ? 0 :
+                     ( (Long) proc_missingByType.get(annotType)).longValue();
       proc_actual = proc_correct + proc_partial + proc_spurious;
       proc_possible = proc_correct + proc_partial + proc_missing;
       //precision strict is correct/actual
       //precision is (correct + 0.5 * partially correct)/actual
-      proc_precision = (proc_correct + 0.5*proc_partial)/proc_actual;
+      proc_precision = (proc_correct + 0.5 * proc_partial) / proc_actual;
       //recall strict is correct/possible
-      proc_recall = (proc_correct + 0.5*proc_partial)/proc_possible;
+      proc_recall = (proc_correct + 0.5 * proc_partial) / proc_possible;
       //F-measure = ( (beta*beta + 1)*P*R ) / ((beta*beta*P) + R)
       proc_fmeasure =
-        ((beta*beta + 1)*proc_precision*proc_recall)
-        /
-        ((beta*beta*proc_precision) + proc_recall);
+          ( (beta * beta + 1) * proc_precision * proc_recall)
+          /
+          ( (beta * beta * proc_precision) + proc_recall);
 
     }
 
     // output data
     Out.prln("<TR>");
-    if(hasProcessed)
-      Out.prln("<TD>" + annotType+ "_new"  + "</TD>");
+    if (hasProcessed)
+      Out.prln("<TD>" + annotType + "_new" + "</TD>");
     else
       Out.prln("<TD>" + annotType + "</TD>");
 
@@ -1669,32 +1743,32 @@ public class CorpusBenchmarkTool {
     Out.prln("<TD>" + missing + "</TD>");
     Out.prln("<TD>" + spurious + "</TD>");
 
-    String strPrec = (isMoreInfoMode)?
-        avgPrint(precision, 4)
-        :Double.toString(precision);
-    String strRec = (isMoreInfoMode)?
-        avgPrint(recall, 4)
-        :Double.toString(recall);
-    String strFmes = (isMoreInfoMode)?
-        avgPrint(fmeasure, 4)
-        :Double.toString(fmeasure);
+    String strPrec = (isMoreInfoMode) ?
+                     avgPrint(precision, 4)
+                     : Double.toString(precision);
+    String strRec = (isMoreInfoMode) ?
+                    avgPrint(recall, 4)
+                    : Double.toString(recall);
+    String strFmes = (isMoreInfoMode) ?
+                     avgPrint(fmeasure, 4)
+                     : Double.toString(fmeasure);
 
-    if(hasProcessed && (precision < proc_precision))
+    if (hasProcessed && (precision < proc_precision))
       Out.prln("<TD><Font color=red>" + strPrec + "</TD>");
-      else if(hasProcessed && (precision > proc_precision))
-        Out.prln("<TD><Font color=blue>" + strPrec + "</TD>");
-        else
-          Out.prln("<TD>" + strPrec + "</TD>");
-    if(hasProcessed && (recall < proc_recall))
+    else if (hasProcessed && (precision > proc_precision))
+      Out.prln("<TD><Font color=blue>" + strPrec + "</TD>");
+    else
+      Out.prln("<TD>" + strPrec + "</TD>");
+    if (hasProcessed && (recall < proc_recall))
       Out.prln("<TD><Font color=red>" + strRec + "</TD>");
-      else if(hasProcessed && (recall > proc_recall))
-        Out.prln("<TD><Font color=blue>" + strRec + "</TD>");
-        else
-          Out.prln("<TD>" + strRec + "</TD>");
+    else if (hasProcessed && (recall > proc_recall))
+      Out.prln("<TD><Font color=blue>" + strRec + "</TD>");
+    else
+      Out.prln("<TD>" + strRec + "</TD>");
     Out.prln("<TD>" + strFmes + "</TD>");
     Out.prln("</TR>");
 
-    if(hasProcessed) {
+    if (hasProcessed) {
       // output data
       Out.prln("<TR>");
       Out.prln("<TD>" + annotType + "_old" + "</TD>");
@@ -1704,41 +1778,40 @@ public class CorpusBenchmarkTool {
       Out.prln("<TD>" + proc_missing + "</TD>");
       Out.prln("<TD>" + proc_spurious + "</TD>");
 
-      String strProcPrec = (isMoreInfoMode)?
-          avgPrint(proc_precision, 4)
-          :Double.toString(proc_precision);
-      String strProcRec = (isMoreInfoMode)?
-          avgPrint(proc_recall, 4)
-          :Double.toString(proc_recall);
-      String strProcFmes = (isMoreInfoMode)?
-          avgPrint(proc_fmeasure, 4)
-          :Double.toString(proc_fmeasure);
+      String strProcPrec = (isMoreInfoMode) ?
+                           avgPrint(proc_precision, 4)
+                           : Double.toString(proc_precision);
+      String strProcRec = (isMoreInfoMode) ?
+                          avgPrint(proc_recall, 4)
+                          : Double.toString(proc_recall);
+      String strProcFmes = (isMoreInfoMode) ?
+                           avgPrint(proc_fmeasure, 4)
+                           : Double.toString(proc_fmeasure);
 
-      if(precision < proc_precision)
+      if (precision < proc_precision)
         Out.prln("<TD><Font color=red>" + strProcPrec + "</TD>");
-        else if(precision > proc_precision)
-          Out.prln("<TD><Font color=blue>" + strProcPrec + "</TD>");
-          else
-            Out.prln("<TD>" + strProcPrec + "</TD>");
-      if(recall < proc_recall)
+      else if (precision > proc_precision)
+        Out.prln("<TD><Font color=blue>" + strProcPrec + "</TD>");
+      else
+        Out.prln("<TD>" + strProcPrec + "</TD>");
+      if (recall < proc_recall)
         Out.prln("<TD><Font color=red>" + strProcRec + "</TD>");
-        else if(recall > proc_recall)
-          Out.prln("<TD><Font color=blue>" + strProcRec + "</TD>");
-          else
-            Out.prln("<TD>" + strProcRec + "</TD>");
+      else if (recall > proc_recall)
+        Out.prln("<TD><Font color=blue>" + strProcRec + "</TD>");
+      else
+        Out.prln("<TD>" + strProcRec + "</TD>");
       Out.prln("<TD>" + strProcFmes + "</TD>");
       Out.prln("</TR>");
     }
-  }//printStatsForType
+  } //printStatsForType
 
   //** Print @param value with @param count digits after decimal point */
   protected String avgPrint(double value, int count) {
     double newvalue;
     double power = Math.pow(10, count);
-    newvalue = Math.round( value * power )/ power;
+    newvalue = Math.round(value * power) / power;
     return Double.toString(newvalue);
   }
-
 
   private double precisionSumCalc = 0;
   private double recallSumCalc = 0;
@@ -1768,52 +1841,52 @@ public class CorpusBenchmarkTool {
     String annotType;
     for (int i = 0; i < annotTypes.size(); i++) {
       annotType = (String) annotTypes.get(i);
-      correct = (correctByType.get(annotType) == null)? 0 :
-                        ((Long)correctByType.get(annotType)).longValue();
-      partial = (partialByType.get(annotType) == null)? 0 :
-                        ((Long)partialByType.get(annotType)).longValue();
-      spurious = (spurByType.get(annotType) == null)? 0 :
-                        ((Long)spurByType.get(annotType)).longValue();
-      missing = (missingByType.get(annotType) == null)? 0:
-                        ((Long)missingByType.get(annotType)).longValue();
+      correct = (correctByType.get(annotType) == null) ? 0 :
+                ( (Long) correctByType.get(annotType)).longValue();
+      partial = (partialByType.get(annotType) == null) ? 0 :
+                ( (Long) partialByType.get(annotType)).longValue();
+      spurious = (spurByType.get(annotType) == null) ? 0 :
+                 ( (Long) spurByType.get(annotType)).longValue();
+      missing = (missingByType.get(annotType) == null) ? 0 :
+                ( (Long) missingByType.get(annotType)).longValue();
       correctSum += correct;
       partialSum += partial;
       spuriousSum += spurious;
       missingSum += missing;
-    }//for
+    } //for
 
     long actual = correctSum + partialSum + spuriousSum;
     long possible = correctSum + partialSum + missingSum;
 
-    if(actual == 0) {
+    if (actual == 0) {
       precisionSumCalc = 0;
     }
     else {
       precisionSumCalc = (correctSum + 0.5 * partialSum) / actual;
     }
 
-    if(possible == 0) {
+    if (possible == 0) {
       recallSumCalc = 0;
     }
     else {
       recallSumCalc = (correctSum + 0.5 * partialSum) / actual;
     }
 
-    if(precisionSumCalc == 0 && recallSumCalc == 0) {
+    if (precisionSumCalc == 0 && recallSumCalc == 0) {
       fMeasureSumCalc = 0;
     }
     else {
       fMeasureSumCalc =
-        ((beta*beta + 1)*precisionSumCalc*recallSumCalc)
-        /
-        ((beta*beta*precisionSumCalc) + recallSumCalc);
+          ( (beta * beta + 1) * precisionSumCalc * recallSumCalc)
+          /
+          ( (beta * beta * precisionSumCalc) + recallSumCalc);
 
     }
   } // calculateAvgTotal
 
   protected AnnotationDiffer measureDocs(
-    Document keyDoc, Document respDoc, String annotType)
-      throws ResourceInstantiationException {
+      Document keyDoc, Document respDoc, String annotType) throws
+      ResourceInstantiationException {
 
     if (keyDoc == null || respDoc == null)
       return null;
@@ -1821,8 +1894,8 @@ public class CorpusBenchmarkTool {
     if (annotSetName != null
         && keyDoc.getAnnotations(annotSetName).get(annotType) == null)
       return null;
-    else if ((annotSetName == null || annotSetName.equals(""))
-        && keyDoc.getAnnotations().get(annotType) == null)
+    else if ( (annotSetName == null || annotSetName.equals(""))
+             && keyDoc.getAnnotations().get(annotType) == null)
       return null;
 
     // create an annotation diff
@@ -1831,22 +1904,24 @@ public class CorpusBenchmarkTool {
     annotDiffer.setSignificantFeaturesSet(diffFeaturesSet);
     // we need to find the sets
     AnnotationSet keys, responses;
-    if(annotSetName == null || annotSetName.equals("")) {
+    if (annotSetName == null || annotSetName.equals("")) {
       keys = keyDoc.getAnnotations().get(annotType);
       responses = respDoc.getAnnotations().get(annotType);
-    } else {
+    }
+    else {
       keys = keyDoc.getAnnotations(annotSetName).get(annotType);
       responses = respDoc.getAnnotations(outputSetName).get(annotType);
     }
 
     // we have annotation sets so call the annotationDiffer
-    List pairings = annotDiffer.calculateDiff(keys,responses);
+    List pairings = annotDiffer.calculateDiff(keys, responses);
     return annotDiffer;
   } // measureDocs
 
   protected void storeAnnotations(String type, AnnotationDiffer annotDiffer,
-                  Document keyDoc, Document respDoc, Writer errFileWriter) {
-    if(errFileWriter == null) return; // exit on "no file"
+                                  Document keyDoc, Document respDoc,
+                                  Writer errFileWriter) {
+    if (errFileWriter == null)return; // exit on "no file"
 
     try {
       // extract and store annotations
@@ -1856,25 +1931,27 @@ public class CorpusBenchmarkTool {
           annotDiffer.getAnnotationsOfType(AnnotationDiffer.MISSING_TYPE);
       sortedSet.clear();
       sortedSet.addAll(missingSet);
-      storeAnnotations(type+".miss", sortedSet, keyDoc, errFileWriter);
+      storeAnnotations(type + ".miss", sortedSet, keyDoc, errFileWriter);
       Set spuriousSet =
           annotDiffer.getAnnotationsOfType(AnnotationDiffer.SPURIOUS_TYPE);
       sortedSet.clear();
       sortedSet.addAll(spuriousSet);
-      storeAnnotations(type+".spur", sortedSet, respDoc, errFileWriter);
+      storeAnnotations(type + ".spur", sortedSet, respDoc, errFileWriter);
       Set partialSet =
-          annotDiffer.getAnnotationsOfType(AnnotationDiffer.PARTIALLY_CORRECT_TYPE);
+          annotDiffer.getAnnotationsOfType(AnnotationDiffer.
+                                           PARTIALLY_CORRECT_TYPE);
       sortedSet.clear();
       sortedSet.addAll(partialSet);
-      storeAnnotations(type+".part", sortedSet, respDoc, errFileWriter);
-    } catch (Exception ex) {
-      Out.prln("Exception on close of error file "+errFileWriter+": "
-               +ex.getMessage());
+      storeAnnotations(type + ".part", sortedSet, respDoc, errFileWriter);
     }
-  }// storeAnnotations
+    catch (Exception ex) {
+      Out.prln("Exception on close of error file " + errFileWriter + ": "
+               + ex.getMessage());
+    }
+  } // storeAnnotations
 
   protected void storeAnnotations(String type, Set set, Document doc,
-                                  Writer file) throws IOException{
+                                  Writer file) throws IOException {
 
     if (set == null || set.isEmpty())
       return;
@@ -1893,26 +1970,26 @@ public class CorpusBenchmarkTool {
       file.write(".");
       file.write(ann.getEndNode().getOffset().toString());
       file.write("\n");
-    }//while
-  }// storeAnnotations
+    } //while
+  } // storeAnnotations
 
   protected void printAnnotations(AnnotationDiffer annotDiff,
-                    Document keyDoc, Document respDoc) {
+                                  Document keyDoc, Document respDoc) {
     Out.pr("MISSING ANNOTATIONS in the automatic texts: ");
     Set missingSet =
-      annotDiff.getAnnotationsOfType(AnnotationDiffer.MISSING_TYPE);
+        annotDiff.getAnnotationsOfType(AnnotationDiffer.MISSING_TYPE);
     printAnnotations(missingSet, keyDoc);
     Out.prln("<BR>");
 
     Out.pr("SPURIOUS ANNOTATIONS in the automatic texts: ");
     Set spuriousSet =
-      annotDiff.getAnnotationsOfType(AnnotationDiffer.SPURIOUS_TYPE);
+        annotDiff.getAnnotationsOfType(AnnotationDiffer.SPURIOUS_TYPE);
     printAnnotations(spuriousSet, respDoc);
     Out.prln("</BR>");
 
     Out.pr("PARTIALLY CORRECT ANNOTATIONS in the automatic texts: ");
     Set partialSet =
-      annotDiff.getAnnotationsOfType(AnnotationDiffer.PARTIALLY_CORRECT_TYPE);
+        annotDiff.getAnnotationsOfType(AnnotationDiffer.PARTIALLY_CORRECT_TYPE);
     printAnnotations(partialSet, respDoc);
   }
 
@@ -1924,16 +2001,16 @@ public class CorpusBenchmarkTool {
     while (iter.hasNext()) {
       Annotation ann = (Annotation) iter.next();
       Out.prln(
-        "<B>" +
-        doc.getContent().toString().substring(
+          "<B>" +
+          doc.getContent().toString().substring(
           ann.getStartNode().getOffset().intValue(),
           ann.getEndNode().getOffset().intValue()) +
-        "</B>: <I>[" + ann.getStartNode().getOffset() +
-        "," + ann.getEndNode().getOffset() + "]</I>"
+          "</B>: <I>[" + ann.getStartNode().getOffset() +
+          "," + ann.getEndNode().getOffset() + "]</I>"
 //        + "; features" + ann.getFeatures()
-        );
-    }//while
-  }//printAnnotations
+          );
+    } //while
+  } //printAnnotations
 
   /**
    * The directory from which we should generate/evaluate the corpus
@@ -2012,6 +2089,7 @@ public class CorpusBenchmarkTool {
    */
   private boolean isMarkedStored = false;
   private boolean isMarkedClean = false;
+
   //whether marked are in a DS, not xml
   private boolean isMarkedDS = false;
 
@@ -2026,7 +2104,7 @@ public class CorpusBenchmarkTool {
 
   /** String to print when wrong command-line args */
   private static String usage =
-    "usage: CorpusBenchmarkTool [-generate|-marked_stored|-marked_clean] "
-    +"[-verbose] [-moreinfo] directory-name application";
+      "usage: CorpusBenchmarkTool [-generate|-marked_stored|-marked_clean] "
+      + "[-verbose] [-moreinfo] directory-name application";
 
 }
