@@ -714,7 +714,8 @@ implements Runnable, ProcessingResource{
     rulesURL = newRulesURL;
   }
   /**
-   * Gets the value of the {@link #rulesURL} property hich holds an URL to the file containing the rules for this tokeniser.
+   * Gets the value of the {@link #rulesURL} property hich holds an
+   * URL to the file containing the rules for this tokeniser.
    *
    */
   public java.net.URL getRulesURL() {
