@@ -44,12 +44,12 @@ public class SerialCorpusImpl extends
 
   static final long serialVersionUID = 3632609241787241616L;
 
-  private transient Vector corpusListeners;
-  private java.util.List docDataList = null;
+  protected transient Vector corpusListeners;
+  protected java.util.List docDataList = null;
 
   //here I keep document index as key (same as the index in docDataList
   //which defines the document order) and Documents as value
-  private transient List documents = null;
+  protected transient List documents = null;
 
   public SerialCorpusImpl() {
   }
