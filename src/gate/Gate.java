@@ -226,12 +226,17 @@ public class Gate
   /** Should we assume we're connected to the net? */
   public static boolean isNetConnected() { return netConnected; }
 
-  /** Tell GATE whether to assume we're connected to the net. */
+  /**
+   * Tell GATE whether to assume we're connected to the net. Has to be
+   * called <B>before</B> {@link #init()}.
+   */
   public static void setNetConnected(boolean b) { netConnected = b; }
 
-  /** Flag controlling whether we should try to access a web server on
-    * localhost, e.g. when setting up a base URL.
-    */
+  /**
+   * Flag controlling whether we should try to access a web server on
+   * localhost, e.g. when setting up a base URL. Has to be
+   * called <B>before</B> {@link #init()}.
+   */
   private static boolean localWebServer = true;
 
   /** Should we assume there's a local web server? */
@@ -281,18 +286,27 @@ public class Gate
 
   /** Try to find GATE files in the local file system */
   protected static boolean tryFileSystem() throws MalformedURLException {
-    String aGateResourceName = "gate/resources/creole/creole.xml";
-    urlBase = Gate.getClassLoader().getResource(aGateResourceName);
-
-    StringBuffer basePath = new StringBuffer(urlBase.toExternalForm());
-    String urlBaseName =
-      basePath.substring(0, basePath.length() - aGateResourceName.length());
-
+    String urlBaseName = locateGateFiles();
     if(DEBUG) Out.prln("tryFileSystem: " + urlBaseName);
 
     urlBase = new URL(urlBaseName + "gate/resources/gate.ac.uk/");
     return urlBase == null;
   } // tryFileSystem()
+
+  /**
+   * Find the location of the GATE binaries (and resources) in the
+   * local file system.
+   */
+  public static String locateGateFiles() {
+    String aGateResourceName = "gate/resources/creole/creole.xml";
+    URL resourcesUrl = Gate.getClassLoader().getResource(aGateResourceName);
+
+    StringBuffer basePath = new StringBuffer(resourcesUrl.toExternalForm());
+    String urlBaseName =
+      basePath.substring(0, basePath.length() - aGateResourceName.length());
+
+    return urlBaseName;
+  } // locateGateFiles
 
   /**Checks whether a given resource is a hidden resource*/
   static public boolean isHidden(Resource res){
