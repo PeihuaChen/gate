@@ -201,9 +201,12 @@ distrib:
 	cvs co gate; rm -rf gate/doc/internal; GN=$${N}--SOURCE; \
 	mv gate $${GN}; $${TARZ} $${GN}.tgz $${GN}; rm -rf $${GN}; \
 	cd ..; GN=$${N}--ALL; cp -R gate $${GN}; \
+	cp sale/tao/tao.pdf $${GN} || :; \
 	rm -r $${GN}/doc/internal; \
 	$${TARZ} $${D}/$${GN}.tgz $${GN}; mv $${GN} xxx; \
 	cp gate/build/gate.jar xxx/bin; cp gate/lib/ext/guk.jar xxx/bin/ext; \
+	cp gate/lib/ext/nl.mpi.lookup.jar xxx/bin/ext; \
+	cp gate/lib/tools1[34].jar xxx/bin; \
 	GN=$${N}--BINARY; mv xxx $${GN}; \
 	$${TARZ} $${D}/$${GN}.tgz $${GN}/bin; mv $${GN} xxx; \
 	GN=$${N}--DOCS; mv xxx $${GN}; \
