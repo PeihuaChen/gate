@@ -1239,7 +1239,7 @@ public class MainFrame extends JFrame
     public void actionPerformed(ActionEvent e) {
       Box messageBox = Box.createHorizontalBox();
       Box leftBox = Box.createVerticalBox();
-      JTextField urlTextField = new JTextField(40);
+      JTextField urlTextField = new JTextField(20);
       leftBox.add(new JLabel("Type an URL"));
       leftBox.add(urlTextField);
       messageBox.add(leftBox);
@@ -1250,8 +1250,8 @@ public class MainFrame extends JFrame
 
       class URLfromFileAction extends AbstractAction{
         URLfromFileAction(JTextField textField){
-          super("Select a directory", getIcon("loadFile.gif"));
-          putValue(SHORT_DESCRIPTION,"Select a directory");
+          super(null, getIcon("loadFile.gif"));
+          putValue(SHORT_DESCRIPTION,"Click to select a directory");
           this.textField = textField;
         }
 
@@ -1273,7 +1273,7 @@ public class MainFrame extends JFrame
       };//class URLfromFileAction extends AbstractAction
 
       Box rightBox = Box.createVerticalBox();
-      rightBox.add(new JLabel("Select a file"));
+      rightBox.add(new JLabel("Select a directory"));
       JButton fileBtn = new JButton(new URLfromFileAction(urlTextField));
       rightBox.add(fileBtn);
       messageBox.add(rightBox);
@@ -1287,11 +1287,23 @@ public class MainFrame extends JFrame
 //                            names[0]);
 
       int res = JOptionPane.showConfirmDialog(
-        MainFrame.this,
-        messageBox,
-        "Enter an URL to the directory containig the \"creole.xml\" file",
-        JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null);
-
+                            MainFrame.this, messageBox,
+                            "Enter an URL to the directory containig the " +
+                            "\"creole.xml\" file", JOptionPane.OK_CANCEL_OPTION,
+                            JOptionPane.QUESTION_MESSAGE, null);
+      if(res == JOptionPane.OK_OPTION){
+        try{
+          URL creoleURL = new URL(urlTextField.getText());
+          Gate.getCreoleRegister().registerDirectories(creoleURL);
+        }catch(Exception ex){
+          JOptionPane.showMessageDialog(
+              MainFrame.this,
+              "There was a problem with your selection:\n" +
+              ex.toString() ,
+              "Gate", JOptionPane.ERROR_MESSAGE);
+          ex.printStackTrace(Err.getPrintWriter());
+        }
+      }
     }
   }//class LoadCreoleRepositoryAction extends AbstractAction
 
