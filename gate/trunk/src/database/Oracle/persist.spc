@@ -131,6 +131,11 @@ create or replace package persist is
   procedure delete_features(p_ent_id        IN number,
                             p_ent_type      IN number);
 
+
+  procedure delete_annotation_set(p_lr_id        IN number,
+                                  p_set_name     IN varchar2);
+
+                            
   procedure lock_lr(p_lr_id     IN  number,
                     p_usr_id    IN number,
                     p_grp_id    IN number,

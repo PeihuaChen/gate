@@ -776,6 +776,46 @@ create or replace package body persist is
           raise error.x_invalid_lr;
      
   end;  
+
+  /*******************************************************************************************/
+  procedure delete_annotation_set(p_lr_id        IN number,
+                                  p_set_name     IN varchar2)
+  is
+    l_as_id number;
+  begin
+    
+    --1. get aset ID
+    select as_id
+    into   l_as_id
+    from   t_annot_set aset,
+           t_document  doc           
+    where  aset.as_name = p_set_name
+           and aset.as_doc_id = doc.doc_id
+           and doc.doc_lr_id = p_lr_id;
+    
+    --1. delete annotations
+    delete
+    from   t_annotation   ann
+    where  exists (select members.asann_id
+                   from   t_as_annotation members
+                   where  members.asann_ann_id = ann.ann_global_id
+                          and members.asann_as_id = l_as_id);
+                          
+    --2. delete mappings
+    delete 
+    from   t_as_annotation
+    where  asann_as_id = l_as_id;
+    
+    --3. delete set itself
+    delete
+    from   t_annot_set
+    where  as_id = l_as_id;
+    
+  end;
+
+
+
+
     
 /*begin
   -- Initialization
