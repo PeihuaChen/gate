@@ -313,9 +313,9 @@ public class MainFrame extends JFrame
     this.getContentPane().add(toolbar, BorderLayout.NORTH);
 
     //extra stuff
-    newResourceDialog = new NewResourceDialog(this,
-                                              "Resource parameters",
-                                              true);
+    newResourceDialog = new NewResourceDialog(
+      this, "Resource parameters", true
+    );
     waitDialog = new WaitDialog(this, "");
 
     //build the Help->About dialog
@@ -337,9 +337,11 @@ public class MainFrame extends JFrame
     splashBox.add(box);
     splashBox.add(Box.createVerticalStrut(10));
 
-    JLabel verLbl = new JLabel("<HTML><FONT color=\"blue\">Version <B>"
-        + Main.version + "</B></FONT>" +
-       ", <FONT color=\"red\">build <B>" + Main.build + "</B></FONT></HTML>");
+    JLabel verLbl = new JLabel(
+      "<HTML><FONT color=\"blue\">Version <B>"
+      + Main.version + "</B></FONT>" +
+      ", <FONT color=\"red\">build <B>" + Main.build + "</B></FONT></HTML>"
+    );
     box = new Box(BoxLayout.X_AXIS);
     box.add(Box.createHorizontalGlue());
     box.add(verLbl);
@@ -347,9 +349,13 @@ public class MainFrame extends JFrame
     splashBox.add(box);
     splashBox.add(Box.createVerticalStrut(10));
 
-    verLbl = new JLabel("<HTML><B>GATE team:</B><BR>" +
-    "Hamish Cunningham, Kalina Bontcheva, Valentin Tablan, Cristian Ursu,<BR>"+
-    "Oana Hamza, Diana Maynard, Yorick Wilks, Robert Gaizauskas.");
+    verLbl = new JLabel(
+      "<HTML><B>GATE contributors:</B><BR>" +
+      "Hamish Cunningham, Valentin Tablan, Cristian Ursu, " +
+      "Kalina Bontcheva,<BR>" +
+      "Oana Hamza, Diana Maynard, Yorick Wilks, Robert Gaizauskas,<BR>" +
+      "Mark Leisher, Kevin Humphreys."
+    );
     box = new Box(BoxLayout.X_AXIS);
     box.add(verLbl);
     box.add(Box.createHorizontalGlue());
