@@ -347,6 +347,7 @@ public class OracleDataStore extends JDBCDataStore {
   public LanguageResource adopt(LanguageResource lr,SecurityInfo secInfo)
   throws PersistenceException,SecurityException {
 
+//System.out.println("adopt called...");
     LanguageResource result = null;
 
     //-1. preconditions
@@ -405,6 +406,7 @@ public class OracleDataStore extends JDBCDataStore {
       //3. perform changes, if anything goes wrong, rollback
       if (lr instanceof Document) {
         result =  createDocument((Document)lr,secInfo);
+//System.out.println("result ID=["+result.getLRPersistenceId()+"]");
       }
       else {
         result =  createCorpus((Corpus)lr,secInfo);
@@ -444,6 +446,7 @@ public class OracleDataStore extends JDBCDataStore {
                            result.getLRPersistenceId())
     );
     // fire also resource written event because it's now saved
+//System.out.println("firing adopt(), ID=["+result.getLRPersistenceId()+"]");
     fireResourceWritten(
       new DatastoreEvent(
         this, DatastoreEvent.RESOURCE_WRITTEN,
@@ -886,13 +889,16 @@ System.out.println();
   throws PersistenceException {
 
     if (lrClassName.equals(DBHelper.DOCUMENT_CLASS)) {
-      Document docResult = null;
+      DatabaseDocumentImpl docResult = null;
       docResult = readDocument(lrPersistenceId);
 
       Assert.assertTrue(docResult instanceof DatabaseDocumentImpl);
       Assert.assertNotNull(docResult.getDataStore());
       Assert.assertTrue(docResult.getDataStore() instanceof DatabaseDataStore);
       Assert.assertNotNull(docResult.getLRPersistenceId());
+
+      //register the read doc as listener for sync events
+      addDatastoreListener(docResult);
 
       return docResult;
     }
@@ -1434,7 +1440,7 @@ System.out.println();
   }
 
 
-  private Document readDocument(Object lrPersistenceId)
+  private DatabaseDocumentImpl readDocument(Object lrPersistenceId)
     throws PersistenceException {
 
     //0. preconditions
@@ -1445,7 +1451,7 @@ System.out.println();
     }
 
     // 1. dummy document to be initialized
-    Document result = new DatabaseDocumentImpl(this.jdbcConn);
+    DatabaseDocumentImpl result = new DatabaseDocumentImpl(this.jdbcConn);
 
     PreparedStatement pstmt = null;
     ResultSet rs = null;
