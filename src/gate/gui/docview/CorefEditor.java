@@ -29,7 +29,8 @@ import gate.event.*;
 import javax.swing.text.Highlighter;
 import javax.swing.text.DefaultHighlighter;
 
-public class CorefEditor extends AbstractDocumentView implements ActionListener, gate.event.FeatureMapListener, gate.event.DocumentListener {
+public class CorefEditor extends AbstractDocumentView 
+    implements ActionListener, FeatureMapListener, gate.event.DocumentListener {
 
   // default AnnotationSet Name
   private final static String DEFAULT_ANNOTSET_NAME = "Default";
@@ -306,6 +307,13 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener,
       annotSets.setSelectedIndex(0);
 
     //annotSetSelectionChanged();
+  }
+
+  /**Called when the content of the document has changed through an edit 
+   * operation.
+   */
+  public void contentEdited(gate.event.DocumentEvent e){
+    //ignore
   }
 
 

@@ -349,6 +349,25 @@ public class AnnotationSetsView extends AbstractDocumentView
     }
   }//public void annotationSetRemoved(DocumentEvent e) 
   
+  /**Called when the content of the document has changed through an edit 
+   * operation.
+   */
+  public void contentEdited(DocumentEvent e){
+    //go through all the type handlers and propagate the event
+    Iterator setIter = setHandlers.iterator();
+    while(setIter.hasNext()){
+      SetHandler sHandler = (SetHandler)setIter.next();
+      Iterator typeIter = sHandler.typeHandlers.iterator();
+      while(typeIter.hasNext()){
+        TypeHandler tHandler = (TypeHandler)typeIter.next();
+        if(tHandler.isSelected()) 
+          tHandler.repairHighlights(e.getEditStart().intValue(), 
+                  e.getEditEnd().intValue());
+      }
+    }
+  }
+  
+  
   public void annotationAdded(AnnotationSetEvent e) {
     AnnotationSet set = (AnnotationSet)e.getSource();
     Annotation ann = e.getAnnotation();
@@ -829,7 +848,7 @@ public class AnnotationSetsView extends AbstractDocumentView
             List tags = textView.addHighlights(annots, setHandler.set, 
                     TypeHandler.this.colour);
             for(int i = 0; i < annots.size(); i++){
-              hghltTagsForAnn.put(annots.get(i), tags.get(i));
+              hghltTagsForAnn.put(((Annotation)annots.get(i)).getId(), tags.get(i));
             }
           }
         };
@@ -862,7 +881,7 @@ public class AnnotationSetsView extends AbstractDocumentView
             //do all operations in one go
             List tags = textView.addHighlights(annots, setHandler.set, colour);
             for(int i = 0; i < annots.size(); i++){
-              hghltTagsForAnn.put(annots.get(i), tags.get(i));
+              hghltTagsForAnn.put(((Annotation)annots.get(i)).getId(), tags.get(i));
             }
           }
         };
@@ -898,7 +917,7 @@ public class AnnotationSetsView extends AbstractDocumentView
      */
     public void annotationAdded(Annotation ann){
       //if selected, add new highlight
-      if(selected) hghltTagsForAnn.put(ann, 
+      if(selected) hghltTagsForAnn.put(ann.getId(), 
               textView.addHighlight(ann, setHandler.set, colour));
     }
     
@@ -908,7 +927,7 @@ public class AnnotationSetsView extends AbstractDocumentView
      */
     public void annotationRemoved(Annotation ann){
       if(selected){
-        Object tag = hghltTagsForAnn.remove(ann);
+        Object tag = hghltTagsForAnn.remove(ann.getId());
         textView.removeHighlight(tag);
       }
       //if this was the last annotation of this type then the handler is no
@@ -918,6 +937,38 @@ public class AnnotationSetsView extends AbstractDocumentView
         setHandler.removeType(this);
       }
     }
+    
+    protected void repairHighlights(int start, int end){
+      //map from tag to annotation
+      List tags = new ArrayList(hghltTagsForAnn.size());
+      List annots = new ArrayList(hghltTagsForAnn.size());
+      Iterator annIter = hghltTagsForAnn.keySet().iterator();
+      while(annIter.hasNext()){
+        Annotation ann = setHandler.set.get((Integer)annIter.next());
+        int annStart = ann.getStartNode().getOffset().intValue();
+        int annEnd = ann.getEndNode().getOffset().intValue();
+        if((annStart <= start && start <= annEnd) ||
+           (start <= annStart && annStart <= end)){
+          if(!hghltTagsForAnn.containsKey(ann.getId())){
+            System.out.println("Error!!!");
+          }
+          tags.add(hghltTagsForAnn.get(ann.getId()));
+          annots.add(ann);
+        }
+      }
+      for(int i = 0; i < tags.size(); i++){
+        Object tag = tags.get(i);
+        Annotation ann = (Annotation)annots.get(i);
+        try{
+          textView.moveHighlight(tag, 
+                  ann.getStartNode().getOffset().intValue(), 
+                  ann.getEndNode().getOffset().intValue());
+        }catch(BadLocationException ble){
+          //this should never happen as the offsets come from an annotation
+        }
+      }
+    }
+    
     
     protected class ChangeColourAction extends AbstractAction{
       public ChangeColourAction(){
@@ -938,6 +989,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     
     ChangeColourAction changeColourAction;
     boolean selected;
+    //Map from annotation ID (which is imuttable) to tag
     Map hghltTagsForAnn;
     String name;
     SetHandler setHandler;
