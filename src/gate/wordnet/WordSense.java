@@ -37,9 +37,9 @@ public interface WordSense {
 
   public boolean isSemcor();
 
-  public List getLexicalRealtions();
+  public List getLexicalRelations() throws WordNetException ;
 
-  public List getLexicalRealtions(int type);
+  public List getLexicalRelations(int type) throws WordNetException ;
 
 }
 
