@@ -14,6 +14,12 @@ ESEDING ==> "es" OR "ed" OR "ing"
 
 
 defineRules
+
+ // words that should not be analysed */
+("his" OR "hers" OR "theirs" OR "ours" OR "yours" OR "as" OR "its" OR "this" OR "during" OR "something" OR "nothing" OR "anything" OR "everything")  ==> null_stem()
+{A}*("us" OR "ss" OR "sis" OR "eed")  ==> null_stem()
+
+
 #misc. irregular exceptions
 
 "aches"                 ==> irreg_stem("ache","s")
@@ -1318,6 +1324,7 @@ defineRules
 ("ablutions" OR "adenoids" OR "aerobatics" OR "afters" OR "astronautics" OR "atmospherics" OR "bagpipes" OR "ballistics" OR "bell-bottoms" OR "belles-lettres" OR "blinders" OR "bloomers" OR "butterfingers" OR "buttocks" OR "bygones" OR "cahoots" OR "cannabis" OR "castanets" OR "clappers" OR "corgi" OR "cross-purposes" OR "dodgems" OR "dregs" OR "duckboards" OR "edibles" OR "envoi" OR "eurythmics" OR "externals" OR "extortions" OR "falsies" OR "fisticuffs" OR "fleshings" OR "fleur-de-lys" OR "fours" OR "gentleman-at-arms" OR "geopolitics" OR "giblets" OR "glassworks" OR "gleanings" OR "handlebars" OR "heartstrings" OR "hi-fi" OR "homiletics" OR "housetops" OR "hunkers" OR "hydroponics" OR "impala" OR "kalends" OR "knickerbockers" OR "kwela" OR "lees" OR "lei" OR "lexis" OR "lieder" OR "literati" OR "loins" OR "meanderings" OR "meths" OR "muesli" OR "muniments" OR "necessaries" OR "nines" OR "ninepins" OR "nippers" OR "nuptials" OR "orthopaedics" OR "paediatrics" OR "phonics" OR "polemics" OR "pontificals" OR "prelims" OR "pyrotechnics" OR "ravioli" OR "rompers" OR "ructions" OR "scampi" OR "scrapings" OR "serjeant-at-arms" OR "sheila" OR "shires" OR "smalls" OR "steelworks" OR "sweepings" OR "toxaemia" OR "ti" OR "v! espers" OR "virginals" OR "waxworks" OR "yeti" OR "zucchini")  ==> null_stem()
 ("mountie" OR "brasserie" OR "cup-tie" OR "grannie" OR "koppie" OR "rotisserie" OR "walkie-talkie")"s"  ==> stem(1,"","s")
 
+
 // missing -uss irregulars */
 
 "busses"  ==> irreg_stem("bus","s")
@@ -1353,10 +1360,6 @@ defineRules
 {A}+"ae"                   ==> stem(1,"","s")
 {A}+"ata"                  ==> stem(2,"","s")
 
-
- // words that should not be analysed */
-("his" OR "hers" OR "theirs" OR "ours" OR "yours" OR "as" OR "its" OR "this" OR "during" OR "something" OR "nothing" OR "anything" OR "everything")  ==> null_stem()
-{A}*("us" OR "ss" OR "sis" OR "eed")  ==> null_stem()
 
 
 // regular expression rules */
