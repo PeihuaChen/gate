@@ -166,4 +166,10 @@ public interface GateConstants {
   /** Property for document new line type. Values {"CR", "LF", "CRLF", "LFCR"}*/
   public static final String DOCUMENT_NEW_LINE_TYPE = "docNewLineType";
 
+  /**
+   * The key for the gate.xml option to specify a compiler type to use to build
+   * the Java files compiled from JAPE grammars.
+   */
+  public static final String COMPILER_TYPE_KEY = "Compiler_type";
+
 } // GateConstants
