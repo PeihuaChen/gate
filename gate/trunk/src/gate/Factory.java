@@ -711,5 +711,4 @@ class CreoleProxy {
   }// fireDatastoreClosed(CreoleEvent e)
 
   private transient Vector creoleListeners;
-
 }//class CreoleProxy

@@ -79,6 +79,13 @@ public class DataStoreRegister extends HashSet {
     }// while
   }// clear()
 
+  /**
+   * Removes a previously registered {@link gate.event.CreoleListener}
+   * from the list of listeners for this DataStoreRegister.
+   * Normally the only listener that is registered with the DataStoreRegister
+   * is the {@link CreoleRegister} which can be obtained through
+   * {@link Gate#getCreoleRegister()}
+   */
   public synchronized void removeCreoleListener(CreoleListener l) {
     if (creoleListeners != null && creoleListeners.contains(l)) {
       Vector v = (Vector) creoleListeners.clone();
@@ -87,6 +94,12 @@ public class DataStoreRegister extends HashSet {
     }
   }// removeCreoleListener(CreoleListener l)
 
+  /**
+   * Registers a new {@link gate.event.CreoleListener} with this
+   * DataStoreRegister. Normally the only listener that is
+   * registered with the DataStoreRegister is the {@link CreoleRegister}
+   * which can be obtained through {@link Gate#getCreoleRegister()}
+   */
   public synchronized void addCreoleListener(CreoleListener l) {
     Vector v =
       creoleListeners == null ? new Vector(2) : (Vector) creoleListeners.clone();
@@ -96,26 +109,12 @@ public class DataStoreRegister extends HashSet {
     }// if
   }// addCreoleListener(CreoleListener l)
 
-  protected void fireResourceLoaded(CreoleEvent e) {
-    if (creoleListeners != null) {
-      Vector listeners = creoleListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((CreoleListener) listeners.elementAt(i)).resourceLoaded(e);
-      }// for
-    }// if
-  }// fireResourceLoaded(CreoleEvent e)
-
-  protected void fireResourceUnloaded(CreoleEvent e) {
-    if (creoleListeners != null) {
-      Vector listeners = creoleListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((CreoleListener) listeners.elementAt(i)).resourceUnloaded(e);
-      }// for
-    }// if
-  }// fireResourceUnloaded(CreoleEvent e)
-
+  /**
+   * Notifies all registered {@link gate.event.CreoleListener}s that a
+   * {@link DataStore} has been opened. Normally the only listener that is
+   * registered with the DataStoreRegister is the {@link CreoleRegister}
+   * which can be obtained through {@link Gate#getCreoleRegister()}
+   */
   protected void fireDatastoreOpened(CreoleEvent e) {
     if (creoleListeners != null) {
       Vector listeners = creoleListeners;
@@ -126,6 +125,12 @@ public class DataStoreRegister extends HashSet {
     }// if
   }// fireDatastoreOpened(CreoleEvent e)
 
+  /**
+   * Notifies all registered {@link gate.event.CreoleListener}s that a new
+   * {@link DataStore} has been created. Normally the only listener that is
+   * registered with the DataStoreRegister is the {@link CreoleRegister}
+   * which can be obtained through {@link Gate#getCreoleRegister()}
+   */
   protected void fireDatastoreCreated(CreoleEvent e) {
     if (creoleListeners != null) {
       Vector listeners = creoleListeners;
@@ -136,6 +141,12 @@ public class DataStoreRegister extends HashSet {
     }// if
   }// fireDatastoreCreated(CreoleEvent e)
 
+  /**
+   * Notifies all registered {@link gate.event.CreoleListener}s that a
+   * {@link DataStore} has been closed. Normally the only listener that is
+   * registered with the DataStoreRegister is the {@link CreoleRegister}
+   * which can be obtained through {@link Gate#getCreoleRegister()}
+   */
   protected void fireDatastoreClosed(CreoleEvent e) {
     if (creoleListeners != null) {
       Vector listeners = creoleListeners;

@@ -15,6 +15,10 @@ package gate.event;
 /**
  * A listener for events fired by the {@link gate.CreoleRegister}
  * ({@link gate.event.CreoleEvent}).
+ * In a Gate system there are many classes that can fire {@link CreoleEvent}s
+ * but all this events are collected and fired back by the
+ * {@link CreoleRegister} that can be obtained with a call to
+ * {@link Gate#getCreoleRegister()}
  */
 public interface CreoleListener extends java.util.EventListener{
 
