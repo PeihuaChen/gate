@@ -586,8 +586,19 @@ public class NameBearerHandle implements Handle,
       DataStore ds = ((LanguageResource)target).getDataStore();
       if(ds != null){
         try {
+          StatusListener sListener = (StatusListener)
+                                     gate.gui.MainFrame.getListeners().
+                                     get("gate.event.StatusListener");
+          if(sListener != null) sListener.statusChanged(
+            "Saving: " + ((LanguageResource)target).getName());
+          double timeBefore = System.currentTimeMillis();
           ((LanguageResource)
                     target).getDataStore().sync((LanguageResource)target);
+          double timeAfter = System.currentTimeMillis();
+          if(sListener != null) sListener.statusChanged(
+            ((LanguageResource)target).getName() + " saved in " +
+            NumberFormat.getInstance().format((timeAfter-timeBefore)/1000)
+            + " seconds");
         } catch(PersistenceException pe) {
           JOptionPane.showMessageDialog(getLargeView(),
                                         "Save failed!\n " +
@@ -696,7 +707,18 @@ public class NameBearerHandle implements Handle,
           }// End if
           DataStore ownDS = ((LanguageResource)target).getDataStore();
           if(ds == ownDS){
+            StatusListener sListener = (StatusListener)
+                                       gate.gui.MainFrame.getListeners().
+                                       get("gate.event.StatusListener");
+            if(sListener != null) sListener.statusChanged(
+              "Saving: " + ((LanguageResource)target).getName());
+            double timeBefore = System.currentTimeMillis();
             ds.sync((LanguageResource)target);
+            double timeAfter = System.currentTimeMillis();
+            if(sListener != null) sListener.statusChanged(
+              ((LanguageResource)target).getName() + " saved in " +
+              NumberFormat.getInstance().format((timeAfter-timeBefore)/1000)
+              + " seconds");
           }else{
             FeatureMap securityData = (FeatureMap)
                          Gate.getDataStoreRegister().getSecurityData(ds);
@@ -714,8 +736,19 @@ public class NameBearerHandle implements Handle,
                                     (User) securityData.get("user"),
                                     (Group) securityData.get("group"));
             }//if security info
+            StatusListener sListener = (StatusListener)
+                                       gate.gui.MainFrame.getListeners().
+                                       get("gate.event.StatusListener");
+            if(sListener != null) sListener.statusChanged(
+              "Saving: " + ((LanguageResource)target).getName());
+            double timeBefore = System.currentTimeMillis();
             LanguageResource lr = ds.adopt((LanguageResource)target,si);
             ds.sync(lr);
+            double timeAfter = System.currentTimeMillis();
+            if(sListener != null) sListener.statusChanged(
+              ((LanguageResource)target).getName() + " saved in " +
+              NumberFormat.getInstance().format((timeAfter-timeBefore)/1000)
+              + " seconds");
 
             //check whether the new LR is different from the transient one and
             //if so, unload the transient LR, so the user realises
