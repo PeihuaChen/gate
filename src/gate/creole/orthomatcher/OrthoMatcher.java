@@ -37,7 +37,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser{
 
   protected static final String LOOKUPNAME = "Lookup";
   protected static final String MATCHES_FEATURE = "matches";
-  protected static final String DOC_MATCHES_FEATURE = "MatchesAnnots";
+  public static final String DOC_MATCHES_FEATURE = "MatchesAnnots";
   protected static final String GENDER_FEATURE = "gender";
   protected static final String KIND_FEATURE = "kind";
   protected static final String STRING_FEATURE = "string";
