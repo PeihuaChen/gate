@@ -1398,7 +1398,7 @@ System.out.println("trans failed ...rollback");
     }
 
     //unload the transient document
-System.out.println("unloading "+doc.getName() +"...");
+//System.out.println("unloading "+doc.getName() +"...");
     Factory.deleteResource(doc);
 
     return dbDoc;
