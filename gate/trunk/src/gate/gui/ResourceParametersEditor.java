@@ -44,6 +44,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
     initLocalData();
     initGuiComponents();
     initListeners();
+//    setSortable(false);
   }
 
   /**
@@ -66,7 +67,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       parameterDisjunctions = null;
     }
     tableModel.fireTableDataChanged();
-    adjustSizes();
+//    adjustSizes();
   }
 
   protected void initLocalData(){
@@ -76,28 +77,19 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
 
   protected void initGuiComponents(){
     setModel(tableModel = new ParametersTableModel());
-
     getColumnModel().getColumn(0).
                      setCellRenderer(new ParameterDisjunctionRenderer());
-
     getColumnModel().getColumn(1).
                      setCellRenderer(new DefaultTableCellRenderer());
-
     getColumnModel().getColumn(2).
                      setCellRenderer(new BooleanRenderer());
-
     getColumnModel().getColumn(3).
                      setCellRenderer(new ParameterValueRenderer());
-
-
     getColumnModel().getColumn(0).
                      setCellEditor(new ParameterDisjunctionEditor());
-
     getColumnModel().getColumn(3).
                      setCellEditor(new ParameterValueEditor());
-
     setIntercellSpacing(new Dimension(5, 5));
-    
     setAutoResizeMode(AUTO_RESIZE_LAST_COLUMN);
 
     setSurrendersFocusOnKeystroke(true);
@@ -450,8 +442,8 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
           if(ResourceParametersEditor.this.isEditable()){
             textButtonBox.removeAll();
             textButtonBox.add(this);
-            this.setMaximumSize(new Dimension(Integer.MAX_VALUE,
-                                              getPreferredSize().height));
+//            this.setMaximumSize(new Dimension(Integer.MAX_VALUE,
+//                                              getPreferredSize().height));
             textButtonBox.add(Box.createHorizontalStrut(5));
             textButtonBox.add(fileButton);
             return textButtonBox;
@@ -465,8 +457,8 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
           if(ResourceParametersEditor.this.isEditable()){
           textButtonBox.removeAll();
           textButtonBox.add(this);
-          this.setMaximumSize(new Dimension(Integer.MAX_VALUE,
-                                            getPreferredSize().height));
+//          this.setMaximumSize(new Dimension(Integer.MAX_VALUE,
+//                                            getPreferredSize().height));
           textButtonBox.add(Box.createHorizontalStrut(5));
           textButtonBox.add(listButton);
           return textButtonBox;
