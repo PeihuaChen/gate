@@ -23,6 +23,7 @@ import hepple.postag.*;
 import java.util.*;
 import java.io.*;
 import java.net.URL;
+import java.text.NumberFormat;
 /**
  * This class is a wrapper for HepTag, Mark Hepple's POS tagger.
  */
@@ -62,6 +63,8 @@ public class POSTagger extends AbstractProcessingResource {
       AnnotationSet outputAS = (outputASName == null) ?
                                document.getAnnotations() :
                                document.getAnnotations(outputASName);
+      fireStatusChanged("tagging for POS " + document.getName());
+      fireProgressChanged(0);
       //prepare the input for HepTag
       //define a comparator for annotations by start offset
       Comparator offsetComparator = new OffsetComparator();
@@ -70,6 +73,9 @@ public class POSTagger extends AbstractProcessingResource {
         List sentences = new ArrayList(as);
         Collections.sort(sentences, offsetComparator);
         Iterator sentIter = sentences.iterator();
+        int sentIndex = 0;
+        int sentCnt = sentences.size();
+        long startTime= System.currentTimeMillis();
         while(sentIter.hasNext()){
           Annotation sentenceAnn = (Annotation)sentIter.next();
           AnnotationSet rangeSet = inputAS.get(
@@ -107,7 +113,13 @@ public class POSTagger extends AbstractProcessingResource {
             Annotation token = (Annotation)tokens.get(i);
             token.getFeatures().put("category", category);
           }//for(i = 0; i<= sentence.size(); i++)
+          fireProgressChanged(sentIndex++ * 100 / sentCnt);
         }//while(sentIter.hasNext())
+        fireProcessFinished();
+        long endTime = System.currentTimeMillis();
+        fireStatusChanged(document.getName() + " tagged in " +
+                          NumberFormat.getInstance().format(
+                          (double)(endTime - startTime) / 1000) + " seconds!");
       }else{
         throw new GateRuntimeException("No sentences to process!\n" +
                                        "Please run a sentence splitter first!");
