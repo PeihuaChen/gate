@@ -62,6 +62,13 @@ public class ApplicationViewer extends AbstractVisualResource
 
   public void setHandle(ResourceHandle handle) {
     this.handle = handle;
+    //add the items to the popup
+    JPopupMenu popup = handle.getPopup();
+    popup.addSeparator();
+    popup.add(runAction);
+    popup.addSeparator();
+    popup.add(addMenu);
+    popup.add(removeMenu);
   }//setHandle
 
   public Resource init() {
@@ -73,8 +80,8 @@ public class ApplicationViewer extends AbstractVisualResource
 
   protected void initLocalData() {
     paramsForPR = new HashMap();
-    addActionForPR = new HashMap();
-    removeActionForPR = new HashMap();
+//    addActionForPR = new HashMap();
+//    removeActionForPR = new HashMap();
     runAction = new RunAction();
 /*
     Iterator prIter = project.getPRList().iterator();
@@ -186,12 +193,12 @@ public class ApplicationViewer extends AbstractVisualResource
 
     this.add(mainBox, BorderLayout.CENTER);
 
-    popup = new JPopupMenu();
-    popup.add(new RunAction());
+//    popup = new JPopupMenu();
+//    popup.add(new RunAction());
     addMenu = new JMenu("Add");
     removeMenu = new JMenu("Remove");
-    popup.add(addMenu);
-    popup.add(removeMenu);
+//    popup.add(addMenu);
+//    popup.add(removeMenu);
   }// initGuiComponents()
 
   protected void initListeners() {
@@ -216,8 +223,10 @@ public class ApplicationViewer extends AbstractVisualResource
         } else {
           List actions = new ArrayList();
           for(int i = 0; i < rows.length; i++) {
-            Action act =(Action)
-                       addActionForPR.get(modulesTable.getValueAt(rows[i], -1));
+//            Action act =(Action)
+//                       addActionForPR.get(modulesTable.getValueAt(rows[i], -1));
+            Action act =(Action)new AddPRAction((ProcessingResource)
+                                     modulesTable.getValueAt(rows[i], -1));
             if(act != null) actions.add(act);
           }
           Iterator actIter = actions.iterator();
@@ -245,8 +254,10 @@ public class ApplicationViewer extends AbstractVisualResource
                                           getPathForRow(rows[i]).
                                           getLastPathComponent();
             Object value = ((DefaultMutableTreeNode)node).getUserObject();
-            if(value instanceof ProcessingResource && controller.contains(value)){
-              Action act = (Action)removeActionForPR.get(value);
+            if(value instanceof ProcessingResource &&
+               controller.contains(value)){
+//              Action act = (Action)removeActionForPR.get(value);
+              Action act = new RemovePRAction((ProcessingResource)value);
               if(act != null){
                 actions.add(act);
                 nodes.add(node);
@@ -386,46 +397,91 @@ public class ApplicationViewer extends AbstractVisualResource
         ApplicationViewer.this.validate();
       }// public void componentShown(ComponentEvent e)
     });
+
+    addMenu.addMenuListener(new MenuListener() {
+      public void menuCanceled(MenuEvent e) {
+
+      }
+
+      public void menuDeselected(MenuEvent e) {
+      }
+
+      public void menuSelected(MenuEvent e) {
+        addMenu.removeAll();
+        Iterator prIter = Gate.getCreoleRegister().getPrInstances().iterator();
+        while(prIter.hasNext()){
+          ProcessingResource pr = (ProcessingResource)prIter.next();
+          if(Gate.getApplicationAttribute(pr.getFeatures()) ||
+             Gate.getHiddenAttribute(pr.getFeatures())){
+            //ignore this resource
+          }else{
+            addMenu.add(new AddPRAction(pr));
+          }
+        }// while
+      }
+    });
+
+    removeMenu.addMenuListener(new MenuListener() {
+      public void menuCanceled(MenuEvent e) {
+      }
+
+      public void menuDeselected(MenuEvent e) {
+      }
+
+      public void menuSelected(MenuEvent e) {
+        removeMenu.removeAll();
+        Iterator prIter = Gate.getCreoleRegister().getPrInstances().iterator();
+        while(prIter.hasNext()){
+          ProcessingResource pr = (ProcessingResource)prIter.next();
+          if(Gate.getApplicationAttribute(pr.getFeatures()) ||
+             Gate.getHiddenAttribute(pr.getFeatures())){
+            //ignore this resource
+          }else{
+            removeMenu.add(new RemovePRAction(pr));
+          }
+        }// while
+      }
+    });
   }//protected void initListeners()
 
-  protected void updateActions(){
-    Iterator prIter = Gate.getCreoleRegister().getPrInstances().iterator();
-    while(prIter.hasNext()){
-      ProcessingResource pr = (ProcessingResource)prIter.next();
-      if(Gate.getApplicationAttribute(pr.getFeatures()) ||
-         Gate.getHiddenAttribute(pr.getFeatures())){
-        //ignore this resource
-      }else{
-        if(!addActionForPR.containsKey(pr)){
-          AddPRAction addAction = new AddPRAction(pr);
-          RemovePRAction remAction = new RemovePRAction(pr);
-          remAction.setEnabled(false);
-          addActionForPR.put(pr, addAction);
-          removeActionForPR.put(pr, remAction);
-        }
-      }
-    }// while
-  }//protected void updateActions()
-
-  public MenuElement[] getPopupElements(){
-    updateActions();
-    popup.removeAll();
-    popup.add(runAction);
-    addMenu = new JMenu("Add");
-    removeMenu = new JMenu("Remove");
-    popup.add(addMenu);
-    popup.add(removeMenu);
-    Iterator addActionsIter = addActionForPR.values().iterator();
-    while(addActionsIter.hasNext()){
-      addMenu.add((Action)addActionsIter.next());
-    }
-
-    Iterator remActionsIter = removeActionForPR.values().iterator();
-    while(remActionsIter.hasNext()){
-      removeMenu.add((Action)remActionsIter.next());
-    }
-    return popup.getSubElements();
-  }//public MenuElement[] getPopupElements()
+//  protected void updateActions(){
+//    Iterator prIter = Gate.getCreoleRegister().getPrInstances().iterator();
+//    while(prIter.hasNext()){
+//      ProcessingResource pr = (ProcessingResource)prIter.next();
+//      if(Gate.getApplicationAttribute(pr.getFeatures()) ||
+//         Gate.getHiddenAttribute(pr.getFeatures())){
+//        //ignore this resource
+//      }else{
+//        if(!addActionForPR.containsKey(pr)){
+//          AddPRAction addAction = new AddPRAction(pr);
+//          RemovePRAction remAction = new RemovePRAction(pr);
+//          remAction.setEnabled(false);
+//          addActionForPR.put(pr, addAction);
+//          removeActionForPR.put(pr, remAction);
+//        }
+//      }
+//    }// while
+//  }//protected void updateActions()
+//
+//  public MenuElement[] getPopupElements(){
+//    updateActions();
+//    popup.removeAll();
+//    popup.add(runAction);
+//    addMenu = new JMenu("Add");
+//    removeMenu = new JMenu("Remove");
+//    popup.add(addMenu);
+//    popup.add(removeMenu);
+//    Iterator addActionsIter = addActionForPR.values().iterator();
+//    while(addActionsIter.hasNext()){
+//      addMenu.add((Action)addActionsIter.next());
+//    }
+//
+//    Iterator remActionsIter = removeActionForPR.values().iterator();
+//    while(remActionsIter.hasNext()){
+//      removeMenu.add((Action)remActionsIter.next());
+//    }
+//    return popup.getSubElements();
+//  }//public MenuElement[] getPopupElements()
 
   protected String getResourceName(Resource res){
     ResourceData rData = (ResourceData)Gate.getCreoleRegister().
@@ -676,6 +732,7 @@ public class ApplicationViewer extends AbstractVisualResource
     AddPRAction(ProcessingResource aPR){
       super(aPR.getName());
       this.pr = aPR;
+      setEnabled(!controller.contains(aPR));
     }
 
     public void actionPerformed(ActionEvent e){
@@ -706,7 +763,7 @@ public class ApplicationViewer extends AbstractVisualResource
 
       modulesTableModel.fireTableDataChanged();
       this.setEnabled(false);
-      ((Action)removeActionForPR.get(pr)).setEnabled(true);
+//      ((Action)removeActionForPR.get(pr)).setEnabled(true);
     }//public void actionPerformed(ActionEvent e)
     ProcessingResource pr;
   }//class AddPRAction extends AbstractAction
@@ -716,6 +773,7 @@ public class ApplicationViewer extends AbstractVisualResource
     RemovePRAction(ProcessingResource pr){
       super(pr.getName());
       this.pr = pr;
+      setEnabled(controller.contains(pr));
     }
 
     public void actionPerformed(ActionEvent e){
@@ -723,7 +781,7 @@ public class ApplicationViewer extends AbstractVisualResource
       paramsForPR.remove(pr);
       modulesTableModel.fireTableDataChanged();
       this.setEnabled(false);
-      ((Action)addActionForPR.get(pr)).setEnabled(true);
+//      ((Action)addActionForPR.get(pr)).setEnabled(true);
     }//public void actionPerformed(ActionEvent e)
     ProcessingResource pr;
   }//class RemovePRAction extends AbstractAction
@@ -924,6 +982,18 @@ public class ApplicationViewer extends AbstractVisualResource
       return names;
     }
 
+    /**
+     * Called when the value used for this parameter has been unloaded.
+     * Will set the value for this param to the default
+     */
+    public void clearValue(){
+      try{
+        values[selectedIndex] = currentParameter.getDefaultValue();
+      }catch(ParameterException pe){
+        values[selectedIndex] = null;
+      }
+    }
+
     public void setValue(Object value){
       Object oldValue = values[selectedIndex];
       if(value instanceof String){
@@ -1115,10 +1185,10 @@ public class ApplicationViewer extends AbstractVisualResource
   ResourceHandle handle;
   JTreeTable mainTreeTable;
   PRsAndParamsTTModel mainTTModel;
-  JPopupMenu popup;
-
+  //JPopupMenu popup;
   JMenu addMenu;
   JMenu removeMenu;
+
   XJTable modulesTable;
   ModulesTableModel modulesTableModel;
   JButton addModuleBtn;
@@ -1132,28 +1202,58 @@ public class ApplicationViewer extends AbstractVisualResource
    * maps from ProcessingResource to List of ParameterDisjunction
    */
   Map paramsForPR;
-  /**
-   * Maps from pr to AddPRAction
-   */
-  Map addActionForPR;
-  Map removeActionForPR;
+//  /**
+//   * Maps from pr to AddPRAction
+//   */
+//  Map addActionForPR;
+//  Map removeActionForPR;
   private transient Vector statusListeners;
   private transient Vector progressListeners;
 
   public void resourceLoaded(CreoleEvent e) {
     if(e.getResource() instanceof ProcessingResource){
-      updateActions();
       modulesTableModel.fireTableDataChanged();
     }else{
+      //this will trigger the seting of the parameters to the new default
       mainTreeTable.repaint();
     }
   }// public void resourceLoaded
 
   public void resourceUnloaded(CreoleEvent e) {
     Resource res = e.getResource();
-    if(Gate.getHiddenAttribute(res.getFeatures())) return;
-    updateActions();
-    modulesTableModel.fireTableDataChanged();
+    if(res instanceof ProcessingResource){
+      if(controller.contains(res)){
+        new RemovePRAction((ProcessingResource)res).actionPerformed(null);
+        Enumeration enum = ((DefaultMutableTreeNode)mainTTModel.getRoot()).
+                           children();
+        if(enum.hasMoreElements()){
+          DefaultMutableTreeNode node =
+            (DefaultMutableTreeNode)enum.nextElement();
+          while(enum.hasMoreElements() && node.getUserObject() != res){
+            node = (DefaultMutableTreeNode)enum.nextElement();
+          }
+          if(node.getUserObject() == res){
+            mainTTModel.removeNodeFromParent(node);
+          }
+        }//(DefaultMutableTreeNode)enum.nextElement();
+      }else{
+        modulesTableModel.fireTableDataChanged();
+      }
+    }//if(res instanceof ProcessingResource)
+    //all types of resources could be parameter values
+    Iterator parListsIter = paramsForPR.values().iterator();
+    while(parListsIter.hasNext()){
+      //each value is a list of ParameterDisjunctions
+      List pdList = (List)parListsIter.next();
+      if(pdList != null){
+        Iterator pdIter = pdList.iterator();
+        while(pdIter.hasNext()){
+          //each value is a ParameterDisjunction
+          ParameterDisjunction pd = (ParameterDisjunction)pdIter.next();
+          if(pd.getValue() == res) pd.clearValue();
+        }//while(pdIter.hasNext())
+      }//if(pdLIst != null)
+    }//while(parListsIter.hasNext())
   }//public void resourceUnloaded(CreoleEvent e)
 
   public void datastoreOpened(CreoleEvent e) {
