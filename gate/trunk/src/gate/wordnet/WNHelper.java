@@ -204,4 +204,28 @@ final class WNHelper {
     }
   }
 
+  public static boolean isValidSemanticPointer(int _type) {
+    return _type == Relation.REL_ATTRIBUTE ||
+          _type == Relation.REL_CAUSE ||
+          _type == Relation.REL_DERIVED_FROM_ADJECTIVE ||
+          _type == Relation.REL_ENTAILMENT ||
+          _type == Relation.REL_HYPERNYM ||
+          _type == Relation.REL_HYPONYM ||
+          _type == Relation.REL_MEMBER_HOLONYM ||
+          _type == Relation.REL_MEMBER_MERONYM ||
+          _type == Relation.REL_PART_HOLONYM ||
+          _type == Relation.REL_PART_MERONYM ||
+          _type == Relation.REL_SIMILAR_TO ||
+          _type == Relation.REL_SUBSTANCE_HOLONYM ||
+          _type == Relation.REL_SUBSTANCE_MERONYM ||
+          _type == Relation.REL_VERB_GROUP;
+  }
+
+  public static boolean isValidLexicalPointer(int _type) {
+        return _type == Relation.REL_ANTONYM ||
+               _type == Relation.REL_PERTAINYM ||
+               _type == Relation.REL_PARTICIPLE_OF_VERB ||
+               _type == Relation.REL_SEE_ALSO;
+  }
+
 }
