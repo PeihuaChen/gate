@@ -50,7 +50,7 @@ public class AccessControllerImpl implements AccessController {
   private Connection  jdbcConn;
   private URL         jdbcURL;
 
-  private Vector      users;
+//private Vector      users;
 //  private Vector      groups;
 
   private HashMap     usersByID;
@@ -59,12 +59,15 @@ public class AccessControllerImpl implements AccessController {
   private HashMap     groupsByID;
   private HashMap     groupsByName;
 
+  private static Random r;
+
   private static long MY_VERY_SECRET_CONSTANT;
+  private static final int RANDOM_MAX = 1024;
 
   static {
-    MY_VERY_SECRET_CONSTANT = Math.round(Math.random()*1024) *
-                                Math.round(Math.random()*1024) +
-                                    Math.round(Math.PI * Math.E);
+    r = new Random();
+    MY_VERY_SECRET_CONSTANT = r.nextInt(RANDOM_MAX) * r.nextInt(RANDOM_MAX)
+                                  + Math.round(Math.PI * Math.E);
   }
 
   /** --- */
@@ -491,7 +494,7 @@ public class AccessControllerImpl implements AccessController {
 
     //need a hint?
     return new Long(((System.currentTimeMillis() << 16) >> 16)*
-                      (Math.round(Math.random()*1024))*
+                      (r.nextInt(RANDOM_MAX))*
                           Runtime.getRuntime().freeMemory()*
                               MY_VERY_SECRET_CONSTANT);
   }
