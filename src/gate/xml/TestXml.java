@@ -104,12 +104,12 @@ public class TestXml extends TestCase
     // get the docFormat that deals with it.
     // the parameter MimeType doesn't affect right now the behaviour
     /*
-    gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
+    gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(doc,
       new MimeType("text","xml")
     );
     */
-    gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
-      doc.getSourceURL()
+    gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
+      doc, doc.getSourceURL()
     );
     assert(docFormat instanceof gate.corpora.XmlDocumentFormat);
     //*

@@ -71,13 +71,13 @@ public class TestSgml extends TestCase
     // the parameter MimeType doesn't affect right now the behaviour
     //*
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
-        new MimeType("text","sgml")
+        doc, new MimeType("text","sgml")
     );
     //*/
 
     /*
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
-      doc.getSourceURL()
+      doc, doc.getSourceURL()
     );
     assert(docFormat instanceof gate.corpora.SgmlDocumentFormat);
     */

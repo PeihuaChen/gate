@@ -71,8 +71,8 @@ public class TestHtml extends TestCase
             //new URL ("http://www.epilot.com/SearchResults.asp?keyword=costume+baie&page=&source=&TokenID=82C7BE897D9643EDB3CB8A28E398A488")
     );
     // get the docFormat that deals with it.
-    gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
-      doc.getSourceURL()
+    gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
+      doc, doc.getSourceURL()
     );
     assert(docFormat instanceof gate.corpora.HtmlDocumentFormat);
     // set's the map

@@ -250,18 +250,41 @@ public abstract class DocumentFormat implements Resource,StatusReporter
   /**
     Find a DocumentFormat implementation that deals with a particular
     MIME type, given that type.
+    @param  aGateDocument this document will receive as a feature
+                          the associated Mime Type. The name of the feature is
+                          MimeType and its value is in the format type/subtype
+    @param  mimeType the mime type that is given as input
   */
-  static public DocumentFormat getDocumentFormat(MimeType mimeType) {
-    DocumentFormat docFormat = null;
-    MimeType mime = null;
-    String classHandler = null;
+  static public DocumentFormat getDocumentFormat(gate.Document aGateDocument,
+                                                            MimeType mimeType){
+    DocumentFormat  docFormat     = null;
+    MimeType        mime          = null;
+    String          classHandler  = null;
+    FeatureMap      aFeatureMap    = null;
+
     if (mimeType != null){
+      // if mime type is not null then try to get from the following map
+      // the mime type wich has the class handler attached as a parameter value
       mime = (MimeType) mimeString2mimeTypeMap.get(mimeType.getType() + "/" +
                                                    mimeType.getSubtype());
       if (mime != null){
+        // here we are in the position to get the class handler
         try{
+          // extract the name of the class handler
           classHandler = mime.getParameterValue("ClassHandler");
+          // create a new instance of the corresponding class handler
           docFormat = (DocumentFormat) Class.forName(classHandler).newInstance();
+          //attach to the Gate Document received as a parameter, the detected
+          // mime type
+
+          // if the Gate Document doesn't have a feature map atached then
+          // we will create and set one.
+          if(aGateDocument.getFeatures() == null){
+            aFeatureMap = new SimpleFeatureMapImpl();
+            aGateDocument.setFeatures(aFeatureMap);
+          }
+          aGateDocument.getFeatures().put("MimeType",mime.getType() + "/" +
+                                          mime.getSubtype());
         }catch (ClassNotFoundException e){
           e.printStackTrace(System.err);
         }catch (IllegalAccessException e){
@@ -269,29 +292,40 @@ public abstract class DocumentFormat implements Resource,StatusReporter
         }catch (InstantiationException e){
           e.printStackTrace(System.err);
         }
-      }
-    }
+      }//if
+    }//if
     return docFormat;
-  } // getDocumentFormat(MimeType)
+  } // getDocumentFormat(aGateDocument, MimeType)
 
   /**
     Find a DocumentFormat implementation that deals with a particular
     MIME type, given the file suffix (e.g. ".txt") that the document came
     from.
+    @param  aGateDocument this document will receive as a feature
+                          the associated Mime Type. The name of the feature is
+                          MimeType and its value is in the format type/subtype
+    @param  fileSuffix the file suffix that is given as input
   */
-  static public DocumentFormat getDocumentFormat(String fileSuffix) {
-    return getDocumentFormat (getMimeType (fileSuffix));
+  static public DocumentFormat getDocumentFormat(gate.Document aGateDocument,
+                                                            String fileSuffix) {
+    return getDocumentFormat(aGateDocument, getMimeType(fileSuffix));
   } // getDocumentFormat(String)
 
-  /** Find a DocumentFormat implementation that deals with a particular
-    * MIME type, given the URL of the Document. If it is an HTTP URL, we
-    * can ask the web server. If it has a recognised file extension, we
-    * can use that. Otherwise we need to use a map of magic numbers
-    * to MIME types to guess the type, and then look up the format using the
-    * type.
+  /**
+    Find a DocumentFormat implementation that deals with a particular
+    MIME type, given the URL of the Document. If it is an HTTP URL, we
+    can ask the web server. If it has a recognised file extension, we
+    can use that. Otherwise we need to use a map of magic numbers
+    to MIME types to guess the type, and then look up the format using the
+    type.
+    @param  aGateDocument this document will receive as a feature
+                          the associated Mime Type. The name of the feature is
+                          MimeType and its value is in the format type/subtype
+    @param  url  the URL that is given as input
     */
-  static public DocumentFormat getDocumentFormat(URL url) {
-    return getDocumentFormat (getMimeType (url));
+  static public DocumentFormat getDocumentFormat(gate.Document aGateDocument,
+                                                                      URL url) {
+    return getDocumentFormat(aGateDocument, getMimeType(url));
   } // getDocumentFormat(URL)
 
   /** Get the feature set */
