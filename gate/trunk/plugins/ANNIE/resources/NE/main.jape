@@ -7,12 +7,12 @@ MultiPhase:	TestTheGrammars
 Phases: 
 
 first
-enamex
-date1
-timex
-numex
-addrex
-identex
+name
+date_pre
+date
+number
+address
+identifier
 final
 unknown
 org_context

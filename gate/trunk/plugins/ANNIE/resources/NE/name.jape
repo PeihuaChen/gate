@@ -18,15 +18,17 @@ Macro: TITLE
 )
 
 Macro: INITIALS
+// one or more initials separated by an optional dot and/or space
 (
-  ({Token.orth == upperInitial, Token.length =="1"}
+ ({Token.orth == upperInitial, Token.length =="1"}
   ({Token.string == "."})?
   (SPACE)?
-  )+
+ )+
 )
 
 Macro: INITIALS2
-
+// initials not separated by a dot or space are tokenised as 
+// allCaps rather than UpperInitial
 (
  {Token.orth == allCaps, Token.length == "2"} |
  {Token.orth == allCaps, Token.length == "3"}
@@ -34,6 +36,7 @@ Macro: INITIALS2
 
 
 Macro: FIRSTNAME
+// first name from gaz, or initials
 (
  {Lookup.majorType == person_first, Lookup.minorType == male}|
  {Lookup.majorType == person_first, Lookup.minorType == female}|
@@ -41,11 +44,13 @@ Macro: FIRSTNAME
 )
 
 Macro: FIRSTNAMEAMBIG
+//ambiguous first name from gaz - some rules might exclude these 
 (
  {Lookup.majorType == person_first, Lookup.minorType == ambig}
 )
 
 Macro: LASTNAME
+// possible single last name beginning with a capital letter
 (
  {Token.orth == upperInitial} |
   {Token.orth == allCaps} |
@@ -61,11 +66,6 @@ Macro: PERSONENDING
  ({Token.string == "sr"} ({Token.string == "."})? ) |
  {Token.string == "II"} |
  {Token.string == "III"}
-)
-
-Macro: DET
-(
- {Token.category == DT}
 )
 
 
@@ -500,12 +500,13 @@ Priority: 100
 // NOTE: not sure if we want this for emails or not
 
 (
- (DET SPACE)?
+ ({Token.category == DT}
+   SPACE)?
 )
 (
  ({Lookup.majorType == country_adj}|
   {Token.orth == lowercase})
- SPACE
+ SPA
  ({Lookup.majorType == org_base}|
   {Lookup.majorType == govern_key})
 )

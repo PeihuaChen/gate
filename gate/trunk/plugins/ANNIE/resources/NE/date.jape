@@ -207,7 +207,7 @@ Rule: TimeAnalogue
   {Token.string == "to"})
  (SPACE)
  {Lookup.minorType == hour}
-)
+) 
 :time 
 -->
  :time.TempTime = {kind = "positive", rule = "TimeAnalogue"}
@@ -342,18 +342,6 @@ Rule: TimeDigitalContextConj
 //////////////////////////////////////////////////////////////////
 
 // Date Rules
-
-//Rule: GazDate
-//(SPACE | {Token.kind == punctuation})
-//(
-// ({Lookup.minorType == day}) |
-// ({Lookup.minorType == month}) |
-// ({Lookup.minorType == festival})
-//)
-//:date
-//(SPACE | {Token.kind == punctuation})
-//-->
-// :date.TempDate = {rule = "GazDate"}
 
 
 Rule:	DateSlash           // UK only
@@ -500,7 +488,7 @@ Rule: ModifierMonth
 
 
 Rule: YearAdBc
-
+Priority: 80
 // 1900 AD
 (
  (YEAR 
@@ -624,13 +612,6 @@ Priority: 10
 (FOUR_DIGIT)
 :date -->
  :date.TempYear = {kind = "positive", rule = "TempYear3"}
-
-//Rule: TempYear4
-// 20
-//
-//(YEAR)
-//:date -->
-// :date.TempYear = {kind = "negative", rule = "TempYear4"}
 
 
 

@@ -61,6 +61,3 @@ Rule: ContextIdentifier
 	 ({Token.kind == number})
 ):ident -->
 :ident.TempIdentifier = {rule = "ContextIdentifier"}
-
-
-
