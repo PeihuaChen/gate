@@ -8,7 +8,7 @@ import gate.util.*;
 /**
  * The handler for the "gate://" URLs.
  * All this class does is to transparently transform a "gate://" URL into
- * an URL of the according type and forward all requests through it.
+ * an URL of the corresponding type and forward all requests through it.
  */
 public class Handler extends URLStreamHandler {
 
