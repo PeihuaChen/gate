@@ -1367,6 +1367,22 @@ public class MainFrame extends JFrame
     guiLock = null;
   }
 
+  /** Flag to protect Frame title to be changed */  
+  private boolean titleChangable = false;
+
+  public void setTitleChangable(boolean isChangable) {
+    titleChangable = isChangable;
+  } // setTitleChangable(boolean isChangable)
+  
+  /** Override to avoid Protege to change Frame title */
+  public synchronized void setTitle(String title) {
+    if(titleChangable) {
+      super.setTitle(title);
+    } // if
+  } // setTitle(String title)
+
+  
+
   /** Method is used in NewDSAction */
   protected DataStore createSerialDataStore() {
     DataStore ds = null;
