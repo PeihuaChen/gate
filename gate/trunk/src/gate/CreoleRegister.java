@@ -93,4 +93,7 @@ public interface CreoleRegister extends Map, Serializable
     */
   public File createCreoleDirectoryFile(File directoryFile, Set jarFileNames);
 
+  /** Get the list of types of LR in the register. */
+  public List getLrTypes();
+
 } // interface CreoleRegister
