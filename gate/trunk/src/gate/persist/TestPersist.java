@@ -221,7 +221,7 @@ public class TestPersist extends TestCase
         features.put("DataStore", sds);
         features.put("DataStoreInstanceId", lrId);
         Resource lr = Factory.createResource(typeName, features);
-        if(lrId.startsWith("GATE cor")) // ensure ordering regardless of OS
+        if(lrId.startsWith("Hamish test cor")) // ensure ordering regardless of OS
           lrsFromDisk.add(0, lr);
         else
           lrsFromDisk.add(lr);
@@ -229,11 +229,12 @@ public class TestPersist extends TestCase
 
     } // for each LR type
 
+//System.out.println("LRs on disk" + lrsFromDisk);
+
     // check that the versions we read back match the originals
     Document diskDoc = (Document) lrsFromDisk.get(1);
     Document diskDoc2 = (Document) lrsFromDisk.get(2);
     Corpus diskCorp = (Corpus) lrsFromDisk.get(0);
-
 
     assert("doc from disk not equal to memory version", doc.equals(diskDoc));
     assert("doc2 from disk not equal to memory version", doc2.equals(diskDoc2));
