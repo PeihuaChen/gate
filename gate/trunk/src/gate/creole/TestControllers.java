@@ -23,6 +23,8 @@ import junit.framework.*;
 import gate.*;
 import gate.creole.*;
 import gate.util.*;
+import gate.creole.tokeniser.*;
+import gate.creole.gazetteer.*;
 
 /** Tests for controller classes
   */
@@ -61,8 +63,8 @@ public class TestControllers extends TestCase
 
     //get a document
     FeatureMap params = Factory.newFeatureMap();
-    params.put("sourceUrl", Gate.getUrl("tests/doc0.html"));
-    params.put("markupAware", "false");
+    params.put(Document.DOCUMENT_URL_PARAMETER_NAME, Gate.getUrl("tests/doc0.html"));
+    params.put(Document.DOCUMENT_MARKUP_AWARE_PARAMETER_NAME, "false");
     Document doc = (Document)Factory.createResource("gate.corpora.DocumentImpl",
                                                     params);
 
@@ -74,20 +76,21 @@ public class TestControllers extends TestCase
 
     //create a default tokeniser
     params = Factory.newFeatureMap();
-    params.put("tokeniserRulesURL",
+    params.put(DefaultTokeniser.DEF_TOK_TOKRULES_URL_PARAMETER_NAME,
                 "gate:/creole/tokeniser/DefaultTokeniser.rules");
-    params.put("transducerGrammarURL",
+    params.put(DefaultTokeniser.DEF_TOK_GRAMRULES_URL_PARAMETER_NAME,
                 "gate:/creole/tokeniser/postprocess.jape");
-    params.put("encoding", "UTF-8");
-    params.put("document", doc);
+    params.put(DefaultTokeniser.DEF_TOK_ENCODING_PARAMETER_NAME, "UTF-8");
+    params.put(DefaultTokeniser.DEF_TOK_DOCUMENT_PARAMETER_NAME, doc);
     ProcessingResource tokeniser = (ProcessingResource) Factory.createResource(
       "gate.creole.tokeniser.DefaultTokeniser", params
     );
 
     //create a default gazetteer
     params = Factory.newFeatureMap();
-    params.put("document", doc);
-    params.put("listsURL", "gate:/creole/gazeteer/default/lists.def");
+    params.put(DefaultGazetteer.DEF_GAZ_DOCUMENT_PARAMETER_NAME, doc);
+    params.put(DefaultGazetteer.DEF_GAZ_LISTS_URL_PARAMETER_NAME,
+      "gate:/creole/gazeteer/default/lists.def");
     ProcessingResource gaz = (ProcessingResource) Factory.createResource(
       "gate.creole.gazetteer.DefaultGazetteer", params
     );

@@ -349,8 +349,9 @@ public class CorpusImpl extends AbstractLanguageResource
             "Reading: " + aFile.getName());
           String docName = aFile.getName() + "_" + Gate.genSym();
           FeatureMap params = Factory.newFeatureMap();
-          params.put("sourceUrl", aFile.toURL());
-          if(encoding != null) params.put("encoding", encoding);
+          params.put(Document.DOCUMENT_URL_PARAMETER_NAME, aFile.toURL());
+          if(encoding != null)
+            params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, encoding);
 
           try {
             corpus.add(

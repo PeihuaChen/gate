@@ -129,6 +129,13 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     implements  Scrollable, ActionListener, MouseListener,
                 AnnotationVisualResource {
 
+  /** The annotation type used to encode each tree node*/
+  public static final String TREE_NODE_ANNOTATION_TYPE = "SyntaxTreeNode";
+  /** The name of the feature that encodes the tree node's category information */
+  public static final String NODE_CAT_FEATURE_NAME = "cat";
+  /** The name of the feature that encodes the subtree annotations */
+  public static final String NODE_CONSISTS_FEATURE_NAME = "consists";
+
   // class members
   // whether to use any layout or not
   protected boolean laidOut = false;
@@ -162,7 +169,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   protected Long utteranceEndOffset = new Long(0);
   protected AnnotationSet currentSet = null;
 
-  protected String tokenType = "Token";
+  protected String tokenType = ANNIEConstants.TOKEN_ANNOTATION_TYPE;
 
   // for internal use only. Set when the utterance is set.
   protected String displayedString = "";
@@ -170,14 +177,14 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   // The name of the annotation type which is used to locate the
   // stereotype with the allowed categories
   // also when reading and creating annotations
-  protected String treeNodeAnnotationType = "SyntaxTreeNode";
+  protected String treeNodeAnnotationType = TREE_NODE_ANNOTATION_TYPE;
 
   // The annotation name of the annotations used to extract the
   // text that appears at the leaves of the tree. For now the viewer
   // supports only one such annotation but might be an idea to extend it
   // so that it gets its text off many token annotations, which do not
   // need to be tokenised or off the syntax tree annotations themselves.
-  protected String textAnnotationType = "utterance";
+  protected String textAnnotationType = ANNIEConstants.SENTENCE_ANNOTATION_TYPE;
 
   // all leaf nodes
   protected HashMap leaves = new HashMap();
@@ -572,7 +579,8 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     while (i.hasNext()) {
       Annotation annot = (Annotation) i.next();
 
-      java.util.List children = (java.util.List) annot.getFeatures().get("consists");
+      java.util.List children =
+        (java.util.List) annot.getFeatures().get(NODE_CONSISTS_FEATURE_NAME);
       //check if it's a leaf
       if (children == null ||
           children.isEmpty())
@@ -591,7 +599,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
         STreeNode node = new STreeNode(annot);
         node.add(leaf);
         node.setLevel(1);
-        node.setUserObject(annot.getFeatures().get("cat"));
+        node.setUserObject(annot.getFeatures().get(NODE_CAT_FEATURE_NAME));
         nonTerminals.put(new Integer(node.getID()), node);
         JButton parentButton = createCentralButton(node);
         addLines(node);
@@ -622,7 +630,8 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   private JButton processChildrenAnnots(Annotation annot, HashMap processed) {
     selection.clear();
     Vector childrenButtons = new Vector();
-    java.util.List children = (java.util.List) annot.getFeatures().get("consists");
+    java.util.List children =
+      (java.util.List) annot.getFeatures().get(NODE_CONSISTS_FEATURE_NAME);
 
     for (Iterator i = children.iterator(); i.hasNext(); ) {
       Integer childId = (Integer) i.next();
@@ -639,7 +648,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
 
     selection = (Vector) childrenButtons.clone();
     STreeNode parent = createParentNode(
-                          (String) annot.getFeatures().get("cat"),
+                          (String) annot.getFeatures().get(NODE_CAT_FEATURE_NAME),
                           annot);
     nonTerminals.put(new Integer(parent.getID()), parent);
     JButton parentButton = createCentralButton(parent);
@@ -1068,9 +1077,12 @@ public class SyntaxTreeViewer extends AbstractVisualResource
       //do nothing if it already has a parent
       if (leaf.getParent() != null) {
         clearSelection();
-        JOptionPane.showMessageDialog(this, "Node already annotated. To delete the existing annotation,select it and press <DEL>.",
-                                      "Syntax Tree Viewer message",
-                                      JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(
+          this,
+          "Node already annotated. To delete the existing annotation, " +
+          "select it and press <DEL>.",
+          "Syntax Tree Viewer message",
+          JOptionPane.INFORMATION_MESSAGE);
         return;
       }
 
@@ -1150,7 +1162,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
       //we have found the right schema
       if (treeNodeAnnotationType.equals(annotSchema.getAnnotationName())) {
         found = true;
-        FeatureSchema categories = annotSchema.getFeatureSchema("cat");
+        FeatureSchema categories = annotSchema.getFeatureSchema(NODE_CAT_FEATURE_NAME);
         //iterate through all categories
         for (Iterator i =
                 categories.getPermissibleValues().iterator(); i.hasNext(); ) {
@@ -1434,6 +1446,11 @@ class FocusButton extends JButton {
 } // class SyntaxTreeViewer
 
 // $Log$
+// Revision 1.21  2002/03/06 17:15:46  kalina
+// Reorganised the source code, so that it now uses constants from
+// ANNIEConstants, GateConstants and parameter constants defined on each PR.
+// Read e-mail to the gate list for an explanation.
+//
 // Revision 1.20  2001/08/08 16:14:26  kalina
 // A minor change to the tree viewer.
 //

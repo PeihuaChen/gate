@@ -32,6 +32,24 @@ import java.util.*;
  */
 public class SentenceSplitter extends AbstractLanguageAnalyser{
 
+  public static final String
+    SPLIT_DOCUMENT_PARAMETER_NAME = "document";
+
+  public static final String
+    SPLIT_INPUT_AS_PARAMETER_NAME = "inputASName";
+
+  public static final String
+    SPLIT_OUTPUT_AS_PARAMETER_NAME = "outputASName";
+
+  public static final String
+    SPLIT_ENCODING_PARAMETER_NAME = "encoding";
+
+  public static final String
+    SPLIT_GAZ_URL_PARAMETER_NAME = "gazetteerListsURL";
+
+  public static final String
+    SPLIT_TRANSD_URL_PARAMETER_NAME = "transducerURL";
+
   public Resource init()throws ResourceInstantiationException{
     //create all the componets
     FeatureMap params;
@@ -40,9 +58,10 @@ public class SentenceSplitter extends AbstractLanguageAnalyser{
     //gazetteer
     fireStatusChanged("Creating the gazetteer");
     params = Factory.newFeatureMap();
-    if(gazetteerListsURL != null) params.put("listsURL",
+    if(gazetteerListsURL != null)
+      params.put(DefaultGazetteer.DEF_GAZ_LISTS_URL_PARAMETER_NAME,
                                              gazetteerListsURL);
-    params.put("encoding", encoding);
+    params.put(DefaultGazetteer.DEF_GAZ_ENCODING_PARAMETER_NAME, encoding);
     features = Factory.newFeatureMap();
     Gate.setHiddenAttribute(features, true);
 
@@ -57,8 +76,9 @@ public class SentenceSplitter extends AbstractLanguageAnalyser{
     fireStatusChanged("Creating the JAPE transducer");
 
     params = Factory.newFeatureMap();
-    if(transducerURL != null) params.put("grammarURL", transducerURL);
-    params.put("encoding", encoding);
+    if(transducerURL != null)
+      params.put(Transducer.TRANSD_GRAMMAR_URL_PARAMETER_NAME, transducerURL);
+    params.put(Transducer.TRANSD_ENCODING_PARAMETER_NAME, encoding);
     features = Factory.newFeatureMap();
     Gate.setHiddenAttribute(features, true);
 
@@ -82,14 +102,14 @@ public class SentenceSplitter extends AbstractLanguageAnalyser{
     try{
       fireProgressChanged(0);
       params = Factory.newFeatureMap();
-      params.put("document", document);
-      params.put("annotationSetName", inputASName);
+      params.put(DefaultGazetteer.DEF_GAZ_DOCUMENT_PARAMETER_NAME, document);
+      params.put(DefaultGazetteer.DEF_GAZ_ANNOT_SET_PARAMETER_NAME, inputASName);
       gazetteer.setParameterValues(params);
 
       params = Factory.newFeatureMap();
-      params.put("document", document);
-      params.put("inputASName", inputASName);
-      params.put("outputASName", inputASName);
+      params.put(Transducer.TRANSD_DOCUMENT_PARAMETER_NAME, document);
+      params.put(Transducer.TRANSD_INPUT_AS_PARAMETER_NAME, inputASName);
+      params.put(Transducer.TRANSD_OUTPUT_AS_PARAMETER_NAME, inputASName);
       transducer.setParameterValues(params);
     }catch(Exception e){
       throw new ExecutionException(e);
@@ -136,24 +156,26 @@ public class SentenceSplitter extends AbstractLanguageAnalyser{
 
     //copy the results to the output set if they are different
     if(inputAS != outputAS){
-      outputAS.addAll(inputAS.get("Sentence"));
+      outputAS.addAll(inputAS.get(SENTENCE_ANNOTATION_TYPE));
     }
 
     //create one big sentence if none were found
-    AnnotationSet sentences = outputAS.get("Sentence");
+    AnnotationSet sentences = outputAS.get(SENTENCE_ANNOTATION_TYPE);
     if(sentences == null || sentences.isEmpty()){
       outputAS.add(outputAS.firstNode(), outputAS.lastNode(),
-                   "Sentence", Factory.newFeatureMap());;
+                   SENTENCE_ANNOTATION_TYPE,
+                   Factory.newFeatureMap());;
     }else{
       //add a sentence covering all the tokens after the last sentence
       Long endSentences = sentences.lastNode().getOffset();
-      AnnotationSet remainingTokens = inputAS.get("Token", endSentences,
+      AnnotationSet remainingTokens = inputAS.get(TOKEN_ANNOTATION_TYPE, endSentences,
                                                   inputAS.lastNode().getOffset());
       if(remainingTokens != null && !remainingTokens.isEmpty()){
         try{
           outputAS.add(remainingTokens.firstNode().getOffset(),
                        remainingTokens.lastNode().getOffset(),
-                       "Sentence", Factory.newFeatureMap());
+                       SENTENCE_ANNOTATION_TYPE,
+                       Factory.newFeatureMap());
         }catch(InvalidOffsetException ioe){
           throw new ExecutionException(ioe);
         }

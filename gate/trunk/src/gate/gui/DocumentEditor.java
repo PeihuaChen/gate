@@ -262,9 +262,10 @@ public class DocumentEditor extends AbstractVisualResource
 
       //get a document
       FeatureMap params = Factory.newFeatureMap();
-      params.put("markupAware", new Boolean(true));
+      params.put(gate.Document.DOCUMENT_MARKUP_AWARE_PARAMETER_NAME,
+        new Boolean(true));
 
-      params.put("sourceUrl",
+      params.put(gate.Document.DOCUMENT_URL_PARAMETER_NAME,
                  "file:///d:/tmp/help-doc.html");
                  //"file:///d:/tmp/F7V.xml");
                  //"http://redmires.dcs.shef.ac.uk/admin/index.html");

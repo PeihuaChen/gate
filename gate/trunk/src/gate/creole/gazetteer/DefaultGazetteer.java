@@ -52,6 +52,21 @@ import gate.*;
 public class DefaultGazetteer extends AbstractLanguageAnalyser
              implements ProcessingResource {
 
+  public static final String
+    DEF_GAZ_DOCUMENT_PARAMETER_NAME = "document";
+
+  public static final String
+    DEF_GAZ_ANNOT_SET_PARAMETER_NAME = "annotationSetName";
+
+  public static final String
+    DEF_GAZ_LISTS_URL_PARAMETER_NAME = "listsURL";
+
+  public static final String
+    DEF_GAZ_ENCODING_PARAMETER_NAME = "encoding";
+
+  public static final String
+    DEF_GAZ_CASE_SENSITIVE_PARAMETER_NAME = "caseSensitive";
+
   /** Debug flag
    */
   private static final boolean DEBUG = false;
@@ -392,16 +407,18 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
           while(lookupIter.hasNext()) {
             currentLookup = (Lookup)lookupIter.next();
             fm = Factory.newFeatureMap();
-            fm.put("majorType", currentLookup.majorType);
+            fm.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME,
+                  currentLookup.majorType);
             if(null != currentLookup.minorType) {
-              fm.put("minorType", currentLookup.minorType);
+              fm.put(LOOKUP_MINOR_TYPE_FEATURE_NAME,
+                    currentLookup.minorType);
               if(null != currentLookup.languages)
                 fm.put("language", currentLookup.languages);
             }
             try {
               annotationSet.add(new Long(matchedRegionStart),
                               new Long(matchedRegionEnd + 1),
-                              "Lookup",
+                              LOOKUP_ANNOTATION_TYPE,
                               fm);
             } catch(InvalidOffsetException ioe) {
               throw new LuckyException(ioe.toString());
@@ -438,16 +455,18 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
             while(lookupIter.hasNext()) {
               currentLookup = (Lookup)lookupIter.next();
               fm = Factory.newFeatureMap();
-              fm.put("majorType", currentLookup.majorType);
+              fm.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME,
+                    currentLookup.majorType);
               if(null != currentLookup.minorType) {
-                fm.put("minorType", currentLookup.minorType);
+                fm.put(LOOKUP_MINOR_TYPE_FEATURE_NAME,
+                      currentLookup.minorType);
                 if(null != currentLookup.languages)
                   fm.put("language", currentLookup.languages);
               }
               try {
                 annotationSet.add(new Long(matchedRegionStart),
                                 new Long(matchedRegionEnd + 1),
-                                "Lookup",
+                                LOOKUP_ANNOTATION_TYPE,
                                 fm);
               } catch(InvalidOffsetException ioe) {
                 throw new LuckyException(ioe.toString());
@@ -476,13 +495,15 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
       while(lookupIter.hasNext()) {
         currentLookup = (Lookup)lookupIter.next();
         fm = Factory.newFeatureMap();
-        fm.put("majorType", currentLookup.majorType);
+        fm.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME,
+               currentLookup.majorType);
         if(null != currentLookup.minorType)
-          fm.put("minorType", currentLookup.minorType);
+          fm.put(LOOKUP_MINOR_TYPE_FEATURE_NAME,
+                 currentLookup.minorType);
         try{
           annotationSet.add(new Long(matchedRegionStart),
                           new Long(matchedRegionEnd + 1),
-                          "Lookup",
+                          LOOKUP_ANNOTATION_TYPE,
                           fm);
         } catch(InvalidOffsetException ioe) {
           throw new GateRuntimeException(ioe.toString());

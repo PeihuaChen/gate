@@ -75,7 +75,8 @@ public class TestSplitterTagger extends TestCase{
     splitter.setOutputASName("testAS");
     splitter.setInputASName("testAS");
     splitter.execute();
-    assertTrue(!doc.getAnnotations("testAS").get("Sentence").isEmpty());
+    assertTrue(!doc.getAnnotations("testAS").
+      get(ANNIEConstants.SENTENCE_ANNOTATION_TYPE).isEmpty());
 
     //now check the tagger
     //create a tagger
@@ -88,12 +89,15 @@ public class TestSplitterTagger extends TestCase{
     tagger.setInputASName("testAS");
     tagger.setOutputASName("testAS");
     tagger.execute();
-    Iterator tokIter =doc.getAnnotations("testAS").get("Token").iterator();
+    Iterator tokIter =doc.getAnnotations("testAS").
+      get(ANNIEConstants.TOKEN_ANNOTATION_TYPE).iterator();
     while(tokIter.hasNext()){
       Annotation token = (Annotation)tokIter.next();
-      String kind = (String)token.getFeatures().get("kind");
-      if(kind.equals("kind"))
-        assertNotNull(token.getFeatures().get("category"));
+      String kind = (String)token.getFeatures().
+        get(ANNIEConstants.TOKEN_KIND_FEATURE_NAME);
+      if(kind.equals(ANNIEConstants.TOKEN_KIND_FEATURE_NAME))
+        assertNotNull(token.getFeatures().
+          get(ANNIEConstants.TOKEN_CATEGORY_FEATURE_NAME));
     }
   }
 }

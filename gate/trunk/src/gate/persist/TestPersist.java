@@ -660,8 +660,10 @@ public class TestPersist extends TestCase
     Assert.assertEquals(cont,((Document)this.sampleDoc).getContent());
 
     //9. encoding
-    String encNew = (String)dbDoc.getParameterValue("encoding");
-    String encOld = (String)((DocumentImpl)this.sampleDoc).getParameterValue("encoding");
+    String encNew = (String)dbDoc.
+      getParameterValue(Document.DOCUMENT_ENCODING_PARAMETER_NAME);
+    String encOld = (String)((DocumentImpl)this.sampleDoc).
+      getParameterValue(Document.DOCUMENT_ENCODING_PARAMETER_NAME);
     Assert.assertEquals(encNew,encOld);
 
     //10. default annotations
@@ -844,11 +846,13 @@ public class TestPersist extends TestCase
     Assert.assertEquals(contNew,doc2.getContent());
 
     //8. encoding
-    String encOld = (String)dbDoc.getParameterValue("encoding");
-    dbDoc.setParameterValue("encoding","XXX");
+    String encOld = (String)dbDoc.
+      getParameterValue(Document.DOCUMENT_ENCODING_PARAMETER_NAME);
+    dbDoc.setParameterValue(Document.DOCUMENT_ENCODING_PARAMETER_NAME,"XXX");
     dbDoc.sync();
     doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
-    String encNew = (String)doc2.getParameterValue("encoding");
+    String encNew = (String)doc2.
+      getParameterValue(Document.DOCUMENT_ENCODING_PARAMETER_NAME);
     Assert.assertEquals(encNew,encOld);
 
 

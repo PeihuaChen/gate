@@ -94,6 +94,18 @@ import gate.util.*;
  *
  */
 public class SimpleTokeniser extends AbstractLanguageAnalyser{
+  public static final String
+    SIMP_TOK_DOCUMENT_PARAMETER_NAME = "document";
+
+  public static final String
+    SIMP_TOK_ANNOT_SET_PARAMETER_NAME = "annotationSetName";
+
+  public static final String
+    SIMP_TOK_RULES_URL_PARAMETER_NAME = "rulesURL";
+
+  public static final String
+    SIMP_TOK_ENCODING_PARAMETER_NAME = "encoding";
+
   /** Debug flag
    */
   private static final boolean DEBUG = false;
@@ -624,8 +636,9 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
         if (null == lastMatchingState) {
           tokenString = content.substring(tokenStart, tokenStart +1);
           newTokenFm.put("type","UNKNOWN");
-          newTokenFm.put("string", tokenString);
-          newTokenFm.put("length", Integer.toString(tokenString.length()));
+          newTokenFm.put(TOKEN_STRING_FEATURE_NAME, tokenString);
+          newTokenFm.put(TOKEN_LENGTH_FEATURE_NAME,
+                         Integer.toString(tokenString.length()));
 
           try {
             annotationSet.add(new Long(tokenStart),
@@ -640,8 +653,9 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
           charIdx  = tokenStart + 1;
         } else {
           tokenString = content.substring(tokenStart, lastMatch + 1);
-          newTokenFm.put("string", tokenString);
-          newTokenFm.put("length", Integer.toString(tokenString.length()));
+          newTokenFm.put(TOKEN_STRING_FEATURE_NAME, tokenString);
+          newTokenFm.put(TOKEN_LENGTH_FEATURE_NAME,
+                         Integer.toString(tokenString.length()));
 
           for(int i = 1; i < lastMatchingState.getTokenDesc().length; i++){
             newTokenFm.put(lastMatchingState.getTokenDesc()[i][0],
@@ -682,8 +696,9 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
     if (null != lastMatchingState) {
       tokenString = content.substring(tokenStart, lastMatch + 1);
       newTokenFm = Factory.newFeatureMap();
-      newTokenFm.put("string", tokenString);
-      newTokenFm.put("length", Integer.toString(tokenString.length()));
+      newTokenFm.put(TOKEN_STRING_FEATURE_NAME, tokenString);
+      newTokenFm.put(TOKEN_LENGTH_FEATURE_NAME,
+                     Integer.toString(tokenString.length()));
 
       for(int i = 1; i < lastMatchingState.getTokenDesc().length; i++){
         newTokenFm.put(lastMatchingState.getTokenDesc()[i][0],

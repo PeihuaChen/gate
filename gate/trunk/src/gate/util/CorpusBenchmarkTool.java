@@ -47,13 +47,15 @@ public class CorpusBenchmarkTool {
       Out.prln("Loading tokeniser <P>");
       String rulesURL = this.configs.getProperty("tokeniserRulesURL");
       if (rulesURL != null && !rulesURL.equals(""))
-        params.put("tokeniserRulesURL", rulesURL);
+        params.put(
+          DefaultTokeniser.DEF_TOK_TOKRULES_URL_PARAMETER_NAME, rulesURL);
       String grammarsURL = this.configs.getProperty("tokeniserGrammarURL");
       if (grammarsURL != null && !grammarsURL.equals(""))
-        params.put("transducerGrammarURL", grammarsURL);
+        params.put(
+          DefaultTokeniser.DEF_TOK_GRAMRULES_URL_PARAMETER_NAME, grammarsURL);
       //the annots are put in temp, as they are going to be transfered to the
       //new set
-      params.put("annotationSetName", "temp");
+      params.put(DefaultTokeniser.DEF_TOK_ANNOT_SET_PARAMETER_NAME, "temp");
       tokeniser = (DefaultTokeniser) Factory.createResource(
                       "gate.creole.tokeniser.DefaultTokeniser", params);
 
@@ -62,23 +64,24 @@ public class CorpusBenchmarkTool {
       params.clear();
       String listsURL = this.configs.getProperty("gazetteerListsURL");
       if (listsURL != null && !listsURL.equals("")) {
-        params.put("listsURL", listsURL);
+        params.put(DefaultGazetteer.DEF_GAZ_LISTS_URL_PARAMETER_NAME, listsURL);
         Out.prln("Running gazetteer on lists in: " + listsURL + "<P>");
       }
       String caseSensitive = this.configs.getProperty("gazetteerCaseSensitive");
       if (caseSensitive != null && !caseSensitive.equals(""))
-        params.put("caseSensitive", new Boolean(caseSensitive));
-      params.put("annotationSetName", "temp");
+        params.put(DefaultGazetteer.DEF_GAZ_CASE_SENSITIVE_PARAMETER_NAME,
+          new Boolean(caseSensitive));
+      params.put(DefaultGazetteer.DEF_GAZ_ANNOT_SET_PARAMETER_NAME, "temp");
       gazetteer = (DefaultGazetteer) Factory.createResource(
                       "gate.creole.gazetteer.DefaultGazetteer", params);
 
       //create the Annotation set transfer
       Out.prln("Loading annotation set transfer <P>");
       params.clear();
-      params.put("inputASName", "temp");
-      params.put("outputASName", annotSetName);
+      params.put(AnnotationSetTransfer.AST_INPUT_AS_PARAMETER_NAME, "temp");
+      params.put(AnnotationSetTransfer.AST_OUTPUT_AS_PARAMETER_NAME, annotSetName);
       //by default make it transfer all annotations
-      params.put("textTagName", "");
+      params.put(AnnotationSetTransfer.AST_TEXT_TAG_PARAMETER_NAME, "");
       setTransfer = (AnnotationSetTransfer) Factory.createResource(
                       "gate.creole.annotransfer.AnnotationSetTransfer", params);
 
@@ -87,12 +90,12 @@ public class CorpusBenchmarkTool {
       params.clear();
       listsURL = this.configs.getProperty("splitterGazetteerURL");
       if (listsURL != null && !listsURL.equals(""))
-        params.put("gazetteerListsURL", listsURL);
+        params.put(SentenceSplitter.SPLIT_GAZ_URL_PARAMETER_NAME, listsURL);
       grammarsURL = this.configs.getProperty("splitterGrammarURL");
       if (grammarsURL != null && !grammarsURL.equals(""))
-        params.put("transducerURL", grammarsURL);
-      params.put("inputASName", annotSetName);
-      params.put("outputASName", annotSetName);
+        params.put(SentenceSplitter.SPLIT_TRANSD_URL_PARAMETER_NAME, grammarsURL);
+      params.put(SentenceSplitter.SPLIT_INPUT_AS_PARAMETER_NAME, annotSetName);
+      params.put(SentenceSplitter.SPLIT_OUTPUT_AS_PARAMETER_NAME, annotSetName);
       splitter = (SentenceSplitter) Factory.createResource(
                       "gate.creole.splitter.SentenceSplitter", params);
 
@@ -101,12 +104,12 @@ public class CorpusBenchmarkTool {
       params.clear();
       String lexiconURL = this.configs.getProperty("taggerLexiconURL");
       if (lexiconURL != null && !lexiconURL.equals(""))
-        params.put("lexiconURL", lexiconURL);
+        params.put(POSTagger.TAG_LEXICON_URL_PARAMETER_NAME, lexiconURL);
       rulesURL = this.configs.getProperty("taggerRulesURL");
       if (rulesURL != null && !rulesURL.equals(""))
-        params.put("rulesURL", rulesURL);
-      params.put("inputASName", annotSetName);
-      params.put("outputASName", annotSetName);
+        params.put(POSTagger.TAG_RULES_URL_PARAMETER_NAME, rulesURL);
+      params.put(POSTagger.TAG_INPUT_AS_PARAMETER_NAME, annotSetName);
+      params.put(POSTagger.TAG_OUTPUT_AS_PARAMETER_NAME, annotSetName);
       tagger = (POSTagger) Factory.createResource(
                       "gate.creole.POSTagger", params);
 
@@ -115,18 +118,18 @@ public class CorpusBenchmarkTool {
       params.clear();
       String grammarURL = this.configs.getProperty("grammarURL");
       if (grammarURL != null && !grammarURL.equals("")) {
-        params.put("grammarURL", grammarURL);
+        params.put(ANNIETransducer.TRANSD_GRAMMAR_URL_PARAMETER_NAME, grammarURL);
         Out.prln("Running transducer on grammars in: " + grammarURL + "<P>");
       }
-      params.put("inputASName", annotSetName);
-      params.put("outputASName", annotSetName);
+      params.put(ANNIETransducer.TRANSD_INPUT_AS_PARAMETER_NAME, annotSetName);
+      params.put(ANNIETransducer.TRANSD_OUTPUT_AS_PARAMETER_NAME, annotSetName);
       transducer = (ANNIETransducer) Factory.createResource(
                       "gate.creole.ANNIETransducer", params);
 
       //create an orthomatcher
       Out.prln("Loading orthomatcher <P>");
       params.clear();
-      params.put("annotationSetName", annotSetName);
+      params.put(OrthoMatcher.OM_ANN_SET_PARAMETER_NAME, annotSetName);
       orthomatcher = (OrthoMatcher) Factory.createResource(
                       "gate.creole.orthomatcher.OrthoMatcher", params);
     } catch (ResourceInstantiationException ex) {
@@ -405,8 +408,8 @@ public class CorpusBenchmarkTool {
         Out.prln("Processing and storing document: " + files[i].toURL() +"<P>");
 
         FeatureMap params = Factory.newFeatureMap();
-        params.put("sourceUrl", files[i].toURL());
-        params.put("encoding", "");
+        params.put(Document.DOCUMENT_URL_PARAMETER_NAME, files[i].toURL());
+        params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
 
         // create the document
         Document doc = (Document) Factory.createResource(
@@ -496,8 +499,8 @@ public class CorpusBenchmarkTool {
                    persDoc.getName() + " in " + fileDir);
         } else {
           FeatureMap params = Factory.newFeatureMap();
-          params.put("sourceUrl", cleanDocFile.toURL());
-          params.put("encoding", "");
+          params.put(Document.DOCUMENT_URL_PARAMETER_NAME, cleanDocFile.toURL());
+          params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
 
           // create the document
           cleanDoc = (Document) Factory.createResource(
@@ -517,8 +520,8 @@ public class CorpusBenchmarkTool {
                    markedDocFile + " in " + markedDir);
         } else {
           FeatureMap params = Factory.newFeatureMap();
-          params.put("sourceUrl", markedDocFile.toURL());
-          params.put("encoding", "");
+          params.put(Document.DOCUMENT_URL_PARAMETER_NAME, markedDocFile.toURL());
+          params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
 
           // create the document
           markedDoc = (Document) Factory.createResource(
@@ -584,8 +587,8 @@ public class CorpusBenchmarkTool {
                    markedDocFile + " in " + markedDir);
         } else {
           FeatureMap params = Factory.newFeatureMap();
-          params.put("sourceUrl", markedDocFile.toURL());
-          params.put("encoding", "");
+          params.put(Document.DOCUMENT_URL_PARAMETER_NAME, markedDocFile.toURL());
+          params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
 
           // create the document
           markedDoc = (Document) Factory.createResource(
@@ -626,13 +629,13 @@ public class CorpusBenchmarkTool {
       //try reading the original document from clean
       FeatureMap params = Factory.newFeatureMap();
       try {
-        params.put("sourceUrl", cleanDocs[i].toURL());
+        params.put(Document.DOCUMENT_URL_PARAMETER_NAME, cleanDocs[i].toURL());
       } catch (java.net.MalformedURLException ex) {
         Out.prln("Cannot create document from file: " +
           cleanDocs[i].getAbsolutePath());
         continue;
       }
-      params.put("encoding", "");
+      params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
 
       // create the document
       try {
@@ -661,13 +664,13 @@ public class CorpusBenchmarkTool {
       } else {
         params = Factory.newFeatureMap();
         try {
-          params.put("sourceUrl", markedDocFile.toURL());
+          params.put(Document.DOCUMENT_URL_PARAMETER_NAME, markedDocFile.toURL());
         } catch (java.net.MalformedURLException ex) {
           Out.prln("Cannot create document from file: " +
             markedDocFile.getAbsolutePath());
           continue;
         }
-        params.put("encoding", "");
+        params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
 
         // create the document
         try {

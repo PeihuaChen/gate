@@ -25,7 +25,7 @@ import gate.event.*;
   * code.
   */
 abstract public class AbstractProcessingResource
-extends AbstractResource implements ProcessingResource
+extends AbstractResource implements ProcessingResource, ANNIEConstants
 {
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {

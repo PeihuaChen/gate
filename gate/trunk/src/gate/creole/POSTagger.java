@@ -29,6 +29,21 @@ import java.text.NumberFormat;
  */
 public class POSTagger extends AbstractLanguageAnalyser {
 
+  public static final String
+    TAG_DOCUMENT_PARAMETER_NAME = "document";
+
+  public static final String
+    TAG_INPUT_AS_PARAMETER_NAME = "inputASName";
+
+  public static final String
+    TAG_OUTPUT_AS_PARAMETER_NAME = "outputASName";
+
+  public static final String
+    TAG_LEXICON_URL_PARAMETER_NAME = "lexiconURL";
+
+  public static final String
+    TAG_RULES_URL_PARAMETER_NAME = "rulesURL";
+
   public POSTagger() {
   }
 
@@ -69,7 +84,7 @@ public class POSTagger extends AbstractLanguageAnalyser {
       //prepare the input for HepTag
       //define a comparator for annotations by start offset
       Comparator offsetComparator = new OffsetComparator();
-      AnnotationSet as = inputAS.get("Sentence");
+      AnnotationSet as = inputAS.get(SENTENCE_ANNOTATION_TYPE);
       if(as != null && as.size() > 0){
         List sentences = new ArrayList(as);
         Collections.sort(sentences, offsetComparator);
@@ -83,7 +98,7 @@ public class POSTagger extends AbstractLanguageAnalyser {
                                     sentenceAnn.getStartNode().getOffset(),
                                     sentenceAnn.getEndNode().getOffset());
           if(rangeSet == null) continue;
-          AnnotationSet tokensSet = rangeSet.get("Token");
+          AnnotationSet tokensSet = rangeSet.get(TOKEN_ANNOTATION_TYPE);
           if(tokensSet == null) continue;
           List tokens = new ArrayList(tokensSet);
           Collections.sort(tokens, offsetComparator);
@@ -93,7 +108,7 @@ public class POSTagger extends AbstractLanguageAnalyser {
           Iterator tokIter = tokens.iterator();
           while(tokIter.hasNext()){
             Annotation token = (Annotation)tokIter.next();
-            String text = (String)token.getFeatures().get("string");
+            String text = (String)token.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
             sentence.add(text);
           }//while(tokIter.hasNext())
 
@@ -119,7 +134,8 @@ public class POSTagger extends AbstractLanguageAnalyser {
           for(int i = 0; i< sentence.size(); i++){
             String category = ((String[])sentenceFromTagger.get(i))[1];
             Annotation token = (Annotation)tokens.get(i);
-            token.getFeatures().put("category", category);
+            token.getFeatures().
+              put(TOKEN_CATEGORY_FEATURE_NAME, category);
           }//for(i = 0; i<= sentence.size(); i++)
           fireProgressChanged(sentIndex++ * 100 / sentCnt);
         }//while(sentIter.hasNext())

@@ -29,6 +29,21 @@ import java.io.*;
  */
 public class Transducer extends AbstractLanguageAnalyser {
 
+  public static final String
+    TRANSD_DOCUMENT_PARAMETER_NAME = "document";
+
+  public static final String
+    TRANSD_INPUT_AS_PARAMETER_NAME = "inputASName";
+
+  public static final String
+    TRANSD_OUTPUT_AS_PARAMETER_NAME = "outputASName";
+
+  public static final String
+    TRANSD_ENCODING_PARAMETER_NAME = "encoding";
+
+  public static final String
+    TRANSD_GRAMMAR_URL_PARAMETER_NAME = "grammarURL";
+
   /**
    * Default constructor. Does nothing apart from calling the default
    * constructor from the super class. The actual object initialisation is done

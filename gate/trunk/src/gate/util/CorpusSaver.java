@@ -76,7 +76,7 @@ public class CorpusSaver {
 //        params.put("transducerGrammarURL", grammarsURL);
       //the annots are put in temp, as they are going to be transfered to the
       //new set
-      params.put("annotationSetName", "temp");
+      params.put(DefaultTokeniser.DEF_TOK_ANNOT_SET_PARAMETER_NAME, "temp");
       tokeniser = (DefaultTokeniser) Factory.createResource(
                       "gate.creole.tokeniser.DefaultTokeniser", params);
 
@@ -89,7 +89,7 @@ public class CorpusSaver {
 //      String caseSensitive = this.configs.getProperty("gazetteerCaseSensitive");
 //      if (caseSensitive != null && !caseSensitive.equals(""))
 //        params.put("caseSensitive", new Boolean(caseSensitive));
-      params.put("annotationSetName", "temp");
+      params.put(DefaultGazetteer.DEF_GAZ_ANNOT_SET_PARAMETER_NAME, "temp");
       gazetteer = (DefaultGazetteer) Factory.createResource(
                       "gate.creole.gazetteer.DefaultGazetteer", params);
 
@@ -111,8 +111,8 @@ public class CorpusSaver {
 //      grammarsURL = this.configs.getProperty("splitterGrammarURL");
 //      if (grammarsURL != null && !grammarsURL.equals(""))
 //        params.put("transducerURL", grammarsURL);
-      params.put("inputASName", annotSetName);
-      params.put("outputASName", annotSetName);
+      params.put(SentenceSplitter.SPLIT_INPUT_AS_PARAMETER_NAME, annotSetName);
+      params.put(SentenceSplitter.SPLIT_OUTPUT_AS_PARAMETER_NAME, annotSetName);
       splitter = (SentenceSplitter) Factory.createResource(
                       "gate.creole.splitter.SentenceSplitter", params);
 
@@ -125,8 +125,8 @@ public class CorpusSaver {
 //      rulesURL = this.configs.getProperty("taggerRulesURL");
 //      if (rulesURL != null && !rulesURL.equals(""))
 //        params.put("rulesURL", rulesURL);
-      params.put("inputASName", annotSetName);
-      params.put("outputASName", annotSetName);
+      params.put(POSTagger.TAG_INPUT_AS_PARAMETER_NAME, annotSetName);
+      params.put(POSTagger.TAG_OUTPUT_AS_PARAMETER_NAME, annotSetName);
       tagger = (POSTagger) Factory.createResource(
                       "gate.creole.POSTagger", params);
 
@@ -136,15 +136,15 @@ public class CorpusSaver {
 //      String grammarURL = this.configs.getProperty("grammarURL");
 //      if (grammarURL != null && !grammarURL.equals(""))
 //        params.put("grammarURL", grammarURL);
-      params.put("inputASName", annotSetName);
-      params.put("outputASName", annotSetName);
+      params.put(ANNIETransducer.TRANSD_INPUT_AS_PARAMETER_NAME, annotSetName);
+      params.put(ANNIETransducer.TRANSD_OUTPUT_AS_PARAMETER_NAME, annotSetName);
       transducer = (ANNIETransducer) Factory.createResource(
                       "gate.creole.ANNIETransducer", params);
 
       //create an orthomatcher
       Out.prln("Loading orthomatcher <P>");
       params.clear();
-      params.put("annotationSetName", annotSetName);
+      params.put(OrthoMatcher.OM_ANN_SET_PARAMETER_NAME, annotSetName);
       orthomatcher = (OrthoMatcher) Factory.createResource(
                       "gate.creole.orthomatcher.OrthoMatcher", params);
 
@@ -314,12 +314,12 @@ public class CorpusSaver {
 
       annotDeletePR.setDocument(doc);
       List annotTypes = new ArrayList();
-      annotTypes.add("Token");
-      annotTypes.add("SpaceToken");
+      annotTypes.add(ANNIEConstants.TOKEN_ANNOTATION_TYPE);
+      annotTypes.add(ANNIEConstants.SPACE_TOKEN_ANNOTATION_TYPE);
       annotTypes.add("Unknown");
       annotTypes.add("TempIdentifier");
       annotTypes.add("Temp");
-      annotTypes.add("Lookup");
+      annotTypes.add(ANNIEConstants.LOOKUP_ANNOTATION_TYPE);
       annotTypes.add("Split");
       annotDeletePR.setAnnotationTypes(annotTypes);
       annotDeletePR.execute();

@@ -29,6 +29,27 @@ import gnu.regexp.*;
 public class OrthoMatcher extends AbstractLanguageAnalyser
                           implements ANNIEConstants{
 
+  public static final String
+    OM_DOCUMENT_PARAMETER_NAME = "document";
+
+  public static final String
+    OM_ANN_SET_PARAMETER_NAME = "annotationSetName";
+
+  public static final String
+    OM_CASE_SENSITIVE_PARAMETER_NAME = "caseSensitive";
+
+  public static final String
+    OM_ANN_TYPES_PARAMETER_NAME = "annotationTypes";
+
+  public static final String
+    OM_ORG_TYPE_PARAMETER_NAME = "organizationType";
+
+  public static final String
+    OM_PERSON_TYPE_PARAMETER_NAME = "personType";
+
+  public static final String
+    OM_EXT_LISTS_PARAMETER_NAME = "extLists";
+
   protected static final String CDGLISTNAME = "cdg";
   protected static final String ALIASLISTNAME = "alias";
   protected static final String ARTLISTNAME = "def_art";
@@ -36,10 +57,6 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
   protected static final String CONNECTORLISTNAME = "connector";
   protected static final String SPURLISTNAME = "spur_match";
 
-  protected static final String LOOKUPNAME = "Lookup";
-  protected static final String GENDER_FEATURE = "gender";
-  protected static final String KIND_FEATURE = "kind";
-  protected static final String STRING_FEATURE = "string";
   protected static final String PUNCTUATION_VALUE = "punctuation";
   protected static final String THE_VALUE = "The";
 
@@ -51,10 +68,10 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
   protected List annotationTypes = new ArrayList(10);
 
   /** the organization type*/
-  protected String organizationType = "Organization";
+  protected String organizationType = ORGANIZATION_ANNOTATION_TYPE;
 
   /** the person type*/
-  protected String personType = "Person";
+  protected String personType = PERSON_ANNOTATION_TYPE;
 
   protected String unknownType = "Unknown";
 
@@ -242,7 +259,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 
         //get the tokens
         List tokens = new ArrayList((Set)
-                        nameAllAnnots.get("Token",
+                        nameAllAnnots.get(TOKEN_ANNOTATION_TYPE,
                           nameAnnot.getStartNode().getOffset(),
                           nameAnnot.getEndNode().getOffset()
                         ));
@@ -323,7 +340,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 
       //get the tokens
       List tokens = new ArrayList((Set)
-                      nameAllAnnots.get("Token",
+                      nameAllAnnots.get(TOKEN_ANNOTATION_TYPE,
                         unknown.getStartNode().getOffset(),
                         unknown.getEndNode().getOffset()
                       ));
@@ -353,7 +370,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
       //check if we should do sub-string matching in case it's hyphenated
       //for example US-led
       if (tokens.size() == 1
-          && "hyphen".equals(unknown.getFeatures().get(this.KIND_FEATURE))) {
+          && "hyphen".equals(unknown.getFeatures().get(TOKEN_KIND_FEATURE_NAME))) {
         if (matchHyphenatedUnknowns(unknown, unknownString, iter))
           continue;
       }//if
@@ -454,8 +471,10 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 
       //now changed to a rule, here we just match by gender
       if (prevAnnot.getType().equals(personType)) {
-        String prevGender = (String) prevAnnot.getFeatures().get(GENDER_FEATURE);
-        String nameGender = (String) nameAnnot.getFeatures().get(GENDER_FEATURE);
+        String prevGender =
+          (String) prevAnnot.getFeatures().get(PERSON_GENDER_FEATURE_NAME);
+        String nameGender =
+          (String) nameAnnot.getFeatures().get(PERSON_GENDER_FEATURE_NAME);
         if (   prevGender != null
             && nameGender != null
             && ( (nameGender.equalsIgnoreCase("female")
@@ -691,14 +710,16 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     newAnnot.getFeatures().put(ANNOTATION_COREF_FEATURE_NAME, matchesList);
     //propagate the gender if two persons are matched
     if (prevAnnot.getType().equals(personType)) {
-      String prevGender = (String) prevAnnot.getFeatures().get(GENDER_FEATURE);
-      String newGender = (String) newAnnot.getFeatures().get(GENDER_FEATURE);
+      String prevGender =
+        (String) prevAnnot.getFeatures().get(PERSON_GENDER_FEATURE_NAME);
+      String newGender =
+        (String) newAnnot.getFeatures().get(PERSON_GENDER_FEATURE_NAME);
       boolean unknownPrevGender = isUnknownGender(prevGender);
       boolean unknownNewGender = isUnknownGender(newGender);
       if (unknownPrevGender && !unknownNewGender)
-        prevAnnot.getFeatures().put(GENDER_FEATURE, newGender);
+        prevAnnot.getFeatures().put(PERSON_GENDER_FEATURE_NAME, newGender);
       else if (unknownNewGender && !unknownPrevGender)
-        newAnnot.getFeatures().put(GENDER_FEATURE, prevGender);
+        newAnnot.getFeatures().put(PERSON_GENDER_FEATURE_NAME, prevGender);
     }//if
   }
 
@@ -795,18 +816,19 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 
     //strip starting The first
     if ( ((String) ((Annotation) tokens.get(0)
-          ).getFeatures().get(STRING_FEATURE)).equalsIgnoreCase(THE_VALUE))
+          ).getFeatures().get(TOKEN_STRING_FEATURE_NAME))
+          .equalsIgnoreCase(THE_VALUE))
       tokens.remove(0);
 
     //no need to check for cdg if there is only 1 token or less
     if (tokens.size()>1 && cdg.contains(((Annotation) tokens.get(tokens.size()-1)
-          ).getFeatures().get(STRING_FEATURE)) )
+          ).getFeatures().get(TOKEN_STRING_FEATURE_NAME)) )
       tokens.remove(tokens.size()-1);
 
     StringBuffer newString = new StringBuffer(50);
     for (int i = 0; i < tokens.size(); i++){
       newString.append((String) ((Annotation) tokens.get(i)
-          ).getFeatures().get(STRING_FEATURE) );
+          ).getFeatures().get(TOKEN_STRING_FEATURE_NAME) );
       if (i != tokens.size()-1)
         newString.append(" ");
     }
@@ -1105,7 +1127,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 
       // now check the second case i.e. "Standard and Poor" == "Standard's"
       String token = (String)
-        ((Annotation) tokensLongAnnot.get(0)).getFeatures().get(STRING_FEATURE);
+        ((Annotation) tokensLongAnnot.get(0)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
 
       if (!token.endsWith("'s")) s2_poss = token.concat("'s");
       else s2_poss = token.concat("'");
@@ -1132,11 +1154,11 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     Iterator tokensShortAnnotIter = tokensShortAnnot.iterator();
     while (tokensLongAnnotIter.hasNext() && tokensShortAnnotIter.hasNext()) {
       Annotation token = (Annotation) tokensLongAnnotIter.next();
-      if (((String)token.getFeatures().get(KIND_FEATURE)).equals(PUNCTUATION_VALUE))
+      if (((String)token.getFeatures().get(TOKEN_KIND_FEATURE_NAME)).equals(PUNCTUATION_VALUE))
         continue;
 //      Out.prln("Matching" + tokensLongAnnot + " with " + tokensShortAnnot);
-      if (! token.getFeatures().get(STRING_FEATURE).equals(
-             ((Annotation) tokensShortAnnotIter.next()).getFeatures().get(STRING_FEATURE))) {
+      if (! token.getFeatures().get(TOKEN_STRING_FEATURE_NAME).equals(
+             ((Annotation) tokensShortAnnotIter.next()).getFeatures().get(TOKEN_STRING_FEATURE_NAME))) {
         allTokensMatch = false;
         break;
       } // if (!tokensLongAnnot.nextToken()
@@ -1180,7 +1202,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
       return false;
     boolean result = matchRule1((String)
                       ((Annotation) tokensLongAnnot.get(0)
-                        ).getFeatures().get(STRING_FEATURE),
+                        ).getFeatures().get(TOKEN_STRING_FEATURE_NAME),
                       s2,
                       caseSensitive);
 
@@ -1211,7 +1233,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 
     for ( ;i < tokensLongAnnot.size(); i++ ) {
       String toAppend = ( (String) ((Annotation) tokensLongAnnot.get(i)
-                         ).getFeatures().get(STRING_FEATURE)).substring(0,1);
+                         ).getFeatures().get(TOKEN_STRING_FEATURE_NAME)).substring(0,1);
       acronym_s1.append(toAppend);
       acronymDot_s1.append(toAppend);
       acronymDot_s1.append(".");
@@ -1247,9 +1269,9 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 
     for (int i = 0;  i < tokensLongAnnot.size(); i++ ) {
       if (connector.containsKey( ((Annotation) tokensLongAnnot.get(i)
-          ).getFeatures().get(STRING_FEATURE) )) {
+          ).getFeatures().get(TOKEN_STRING_FEATURE_NAME) )) {
         previous_token = (String) ((Annotation) tokensLongAnnot.get(i-1)
-                                    ).getFeatures().get(STRING_FEATURE);
+                                    ).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
 
         break;
       }
@@ -1340,7 +1362,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 //      Out.prln("Rule 9 " + s1 + " and " + s2);
     String s1_short = (String)
                       ((Annotation) tokensLongAnnot.get(
-                          tokensLongAnnot.size()-1)).getFeatures().get(STRING_FEATURE);
+                          tokensLongAnnot.size()-1)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
 //    Out.prln("Converted to " + s1_short);
     if (tokensLongAnnot.size()>1) {
       boolean matched = matchRule1(s1_short, s2, caseSensitive);
@@ -1378,7 +1400,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
       int i = 0;
       for (; i< tokensLongAnnot.size(); i++) {
         token = (String)
-                  ((Annotation) tokensLongAnnot.get(i)).getFeatures().get(STRING_FEATURE);
+                  ((Annotation) tokensLongAnnot.get(i)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
         if (prepos.containsKey(token)) {
           invoke_rule=true;
           break;
@@ -1392,13 +1414,13 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
       if (i < tokensLongAnnot.size()
           && previous_token != null)
         next_token= (String)
-                    ((Annotation) tokensLongAnnot.get(i++)).getFeatures().get(STRING_FEATURE);
+                    ((Annotation) tokensLongAnnot.get(i++)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
       else return false;
 
       String s21 = (String)
-                    ((Annotation) tokensShortAnnot.get(0)).getFeatures().get(STRING_FEATURE);
+                    ((Annotation) tokensShortAnnot.get(0)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
       String s22 = (String)
-                    ((Annotation) tokensShortAnnot.get(1)).getFeatures().get(STRING_FEATURE);
+                    ((Annotation) tokensShortAnnot.get(1)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
       // then compare (in reverse) with the first two tokens of s2
       if (matchRule1(next_token,(String) s21,caseSensitive)
           && matchRule1(previous_token, s22,caseSensitive))
@@ -1431,17 +1453,17 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 
     // 1st get the first two tokens of s1
     token11 = (String)
-                ((Annotation) tokensLongAnnot.get(0)).getFeatures().get(STRING_FEATURE);
+                ((Annotation) tokensLongAnnot.get(0)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
     token12 = (String)
-                ((Annotation) tokensLongAnnot.get(1)).getFeatures().get(STRING_FEATURE);
+                ((Annotation) tokensLongAnnot.get(1)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
 
     // now check for the first case i.e. "Pan American" == "Pan Am"
     if (tokensShortAnnot.size() == 2)  {
 
       token21 = (String)
-                  ((Annotation) tokensShortAnnot.get(0)).getFeatures().get(STRING_FEATURE);
+                  ((Annotation) tokensShortAnnot.get(0)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
       token22 = (String)
-                  ((Annotation) tokensShortAnnot.get(0)).getFeatures().get(STRING_FEATURE);
+                  ((Annotation) tokensShortAnnot.get(0)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
 
       if (token11.startsWith(token21)
           && token12.startsWith(token22))
@@ -1483,17 +1505,17 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 
       // get first and last tokens of s1 & s2
       String s1_first = (String)
-                     ((Annotation) tokensLongAnnot.get(0)).getFeatures().get(STRING_FEATURE);
+                     ((Annotation) tokensLongAnnot.get(0)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
       String s2_first = (String)
-                     ((Annotation) tokensShortAnnot.get(0)).getFeatures().get(STRING_FEATURE);
+                     ((Annotation) tokensShortAnnot.get(0)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
 
       if (!matchRule1(s1_first,s2_first,caseSensitive))
         return false;
 
       String s1_last = (String)
-         ((Annotation) tokensLongAnnot.get(tokensLongAnnot.size()-1)).getFeatures().get(STRING_FEATURE);
+         ((Annotation) tokensLongAnnot.get(tokensLongAnnot.size()-1)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
       String s2_last = (String)
-         ((Annotation) tokensShortAnnot.get(tokensShortAnnot.size()-1)).getFeatures().get(STRING_FEATURE);
+         ((Annotation) tokensShortAnnot.get(tokensShortAnnot.size()-1)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
 
       return matchRule1(s1_last,s2_last,caseSensitive);
     } // if (tokensLongAnnot.countTokens()>1
@@ -1535,8 +1557,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 
 //      Out.prln("i = " + i);
 //      Out.prln("j = " + j);
-      if ( ((Annotation) tokensLongAnnot.get(j)).getFeatures().get(STRING_FEATURE).equals(
-           ((Annotation) tokensShortAnnot.get(i)).getFeatures().get(STRING_FEATURE)) ) {
+      if ( ((Annotation) tokensLongAnnot.get(j)).getFeatures().get(TOKEN_STRING_FEATURE_NAME).equals(
+           ((Annotation) tokensShortAnnot.get(i)).getFeatures().get(TOKEN_STRING_FEATURE_NAME)) ) {
         matched_tokens++;
         j++;
       } else
@@ -1563,7 +1585,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 //      Out.prln("Rule 14 " + s1 + " and " + s2);
     String s1_short = (String)
                       ((Annotation) tokensLongAnnot.get(
-                          tokensLongAnnot.size()-1)).getFeatures().get(STRING_FEATURE);
+                          tokensLongAnnot.size()-1)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
 //    Out.prln("Converted to " + s1_short);
     if (tokensLongAnnot.size()>1)
       return matchRule1(s1_short,
@@ -1596,16 +1618,16 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     for (int i=0; i < tokensShortAnnot.size() && matched_tokens == 0; i++) {
       token1 = (Annotation) tokensShortAnnot.get(i);
       //first check if not punctuation, because we need to skip it
-      if (token1.getFeatures().get(KIND_FEATURE).equals(PUNCTUATION_VALUE))
+      if (token1.getFeatures().get(TOKEN_KIND_FEATURE_NAME).equals(PUNCTUATION_VALUE))
         continue;
 
       for (int j=0; j<tokensLongAnnot.size() && matched_tokens ==0; j++) {
 //      Out.prln("i = " + i);
         token2 = (Annotation) tokensLongAnnot.get(j);
-        if (token2.getFeatures().get(KIND_FEATURE).equals(PUNCTUATION_VALUE))
+        if (token2.getFeatures().get(TOKEN_KIND_FEATURE_NAME).equals(PUNCTUATION_VALUE))
           continue;
-        if ( token1.getFeatures().get(STRING_FEATURE).equals(
-             token2.getFeatures().get(STRING_FEATURE)) )
+        if ( token1.getFeatures().get(TOKEN_STRING_FEATURE_NAME).equals(
+             token2.getFeatures().get(TOKEN_STRING_FEATURE_NAME)) )
           matched_tokens++;
       }//for
     } // for
@@ -1633,10 +1655,10 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     // i.e. get cdg from Lookup annotations
       // get all Lookup annotations
       tempMap.clear();
-      tempMap.put("majorType", "cdg");
+      tempMap.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME, "cdg");
       //now get all lookup annotations which are cdg
       AnnotationSet nameAnnots =
-        nameAllAnnots.get(LOOKUPNAME, tempMap);
+        nameAllAnnots.get(LOOKUP_ANNOTATION_TYPE, tempMap);
 
       if ((nameAnnots ==null) || nameAnnots.isEmpty())
         return;

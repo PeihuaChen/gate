@@ -55,8 +55,8 @@ public class TestSgml extends TestCase
     */
 
     FeatureMap params = Factory.newFeatureMap();
-    params.put("sourceUrl", Gate.getUrl("tests/sgml/Hds.sgm"));
-    params.put("markupAware", "false");
+    params.put(Document.DOCUMENT_URL_PARAMETER_NAME, Gate.getUrl("tests/sgml/Hds.sgm"));
+    params.put(Document.DOCUMENT_MARKUP_AWARE_PARAMETER_NAME, "false");
     doc = (Document)Factory.createResource("gate.corpora.DocumentImpl",
                                                     params);
 

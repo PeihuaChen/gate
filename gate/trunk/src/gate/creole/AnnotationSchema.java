@@ -31,6 +31,8 @@ import org.jdom.*;
   * attributes, values and types.
   */
 public class AnnotationSchema extends AbstractLanguageResource{
+  public static final String FILE_URL_PARAM_NAME = "xmlFileUrl";
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 

@@ -29,6 +29,24 @@ import java.io.*;
   */
 public class APFormatExporter extends AbstractLanguageAnalyser
                               implements ANNIEConstants{
+  public static final String
+    APF_EXP_DOCUMENT_PARAMETER_NAME = "document";
+
+  public static final String
+    APF_EXP_SOURCE_PARAMETER_NAME = "source";
+
+  public static final String
+    APF_EXP_DTD_PARAMETER_NAME = "dtdFileName";
+
+  public static final String
+    APF_EXP_PATH_PARAMETER_NAME = "exportFilePath";
+
+  public static final String
+    APF_EXP_TYPES_PARAMETER_NAME = "exportedTypes";
+
+  public static final String
+    APF_EXP_WRITE_SOURCE_PARAMETER_NAME = "isSourceWritten";
+
   /** Debug flag */
   private static final boolean DEBUG = false;
   /** Constructor does nothing. This PR is bean like initialized*/

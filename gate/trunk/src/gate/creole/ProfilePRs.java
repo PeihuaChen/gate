@@ -143,8 +143,8 @@ public class ProfilePRs {
 
       // set the source URL parameter to a "file:..." URL string
       params.clear();
-      params.put("sourceUrl", inFile.toURL().toExternalForm());
-      params.put("encoding", "");
+      params.put(Document.DOCUMENT_URL_PARAMETER_NAME, inFile.toURL().toExternalForm());
+      params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
 
       // create the document
       Document doc = (Document) Factory.createResource(

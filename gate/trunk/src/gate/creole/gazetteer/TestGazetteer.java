@@ -48,7 +48,8 @@ public class TestGazetteer extends TestCase {
 
     //create a default gazetteer
     FeatureMap params = Factory.newFeatureMap();
-    params.put("listsURL", new URL("gate:/creole/gazeteer/default/lists.def"));
+    params.put(DefaultGazetteer.DEF_GAZ_LISTS_URL_PARAMETER_NAME,
+      new URL("gate:/creole/gazeteer/default/lists.def"));
     DefaultGazetteer gaz = (DefaultGazetteer) Factory.createResource(
                           "gate.creole.gazetteer.DefaultGazetteer", params);
 
