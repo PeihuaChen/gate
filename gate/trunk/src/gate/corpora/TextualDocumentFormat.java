@@ -66,6 +66,7 @@ public class TextualDocumentFormat extends DocumentFormat
     */
   public void unpackMarkup(Document doc) throws DocumentFormatException{
     if (doc == null || doc.getContent() == null) return;
+    setNewLineProperty(doc);
     // Create paragraph annotations in the specified annotation set
     int endOffset = doc.getContent().toString().length();
     int startOffset = 0;
@@ -79,6 +80,67 @@ public class TextualDocumentFormat extends DocumentFormat
     unpackMarkup(doc);
   } // unpackMarkup
 
+
+  /**
+   * Check the new line sequence and set document property.
+   * <BR>
+   * Possible values are CRLF, LFCR, CR, LF
+   */
+  protected void setNewLineProperty(Document doc) {
+    String content = doc.getContent().toString();
+    String newLineType = "";
+    
+    char ch = ' ';
+    char lastch = ' ';
+    for(int i=0; i < content.length(); ++i) {
+      ch = content.charAt(i);
+      if(lastch == '\r') {
+        if(ch == '\n') {
+          newLineType = "CRLF";
+          break;
+        }
+        else {
+          newLineType = "CR";
+          break;
+        }
+      }
+      if(lastch == '\n') {
+        if(ch == '\r') {
+          newLineType = "LFCR";
+          break;
+        }
+        else {
+          newLineType = "LF";
+          break;
+        }
+      }
+      lastch = ch;
+    } // for
+    
+    doc.getFeatures().put(GateConstants.DOCUMENT_NEW_LINE_TYPE, newLineType);
+  } // setNewLineProperty()
+  
+  /** Delete '\r' in combination CRLF or LFCR in document content */
+  private void removeExtraNewLine(Document doc) {
+    String content = doc.getContent().toString();
+    StringBuffer buff = new StringBuffer(content);
+    
+    char ch = ' ';
+    char lastch = ' ';
+    for(int i=content.length()-1; i > -1; --i) {
+      ch = content.charAt(i);
+      if(ch == '\n' && lastch == '\r') {
+        buff.deleteCharAt(i+1);
+      }
+      if(ch == '\r' && lastch == '\n') {
+        buff.deleteCharAt(i);
+        ch = lastch;
+      }
+      lastch = ch;
+    } // for
+    
+    doc.setContent(new DocumentContentImpl(buff.toString()));
+  } // removeExtraNewLine(Document doc)
 
   /** This method annotates paragraphs in a GATE document. The investigated text
     * spans beetween start and end offsets and the paragraph annotations are
