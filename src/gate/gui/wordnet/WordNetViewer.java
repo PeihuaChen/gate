@@ -52,7 +52,7 @@ public class WordNetViewer extends AbstractVisualResource
 
   public WordNetViewer(){
     jbInit();
-    //initResources();
+    initResources();
   }
 
   private void initResources(){
@@ -314,6 +314,7 @@ public class WordNetViewer extends AbstractVisualResource
         relHoloMeroHypo(ri.getSenses(), Relation.REL_CAUSE, "=> ");
         break;
       case Relation.REL_DERIVED_FROM_ADJECTIVE:
+        relAntonymSeeAlso(ri.getSenses(), Relation.REL_DERIVED_FROM_ADJECTIVE,"=> ");
         break;
       case Relation.REL_ENTAILMENT:
         relHoloMeroHypo(ri.getSenses(), Relation.REL_ENTAILMENT, "=> ");
