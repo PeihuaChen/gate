@@ -1,3 +1,13 @@
+/*
+ * LRDBWrapper.java
+ *
+ * must have been added by valy; he's the only one who ignores the
+ * coding conventions...
+ *
+ * $Id$
+ */
+
+
 package gate;
 import java.sql.SQLException;
 import gate.util.*;
