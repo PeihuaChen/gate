@@ -172,7 +172,7 @@ public class NameBearerHandle implements Handle,
     popup.add(action);
   } // fillProtegeActions(gate.gui.ProtegeWrapper protege)
 
-  /** Fill Protege save, save as and save in format actions */
+  /** Fill HMM Save and Save As... actions */
   private void fillHMMActions(JPopupMenu popup) {
     Action action;
 
@@ -181,7 +181,6 @@ public class NameBearerHandle implements Handle,
       
     popup.addSeparator();
     action = new com.ontotext.gate.hmm.agent.SaveAction(hmmPR);
-    action.putValue(action.NAME, "Save trained HMM model");
     action.putValue(action.SHORT_DESCRIPTION, 
       "Save trained HMM model into PR URL file");
     // Add Save trained HMM model action
