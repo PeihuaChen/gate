@@ -107,4 +107,12 @@
 
   </CREOLE>
 
+  <!-- metadata for gate.creole.SerialController -->
+  <CREOLE>
+    <RESOURCE>
+      <NAME>GATE sequential control executive</NAME>
+      <CLASS>gate.creole.SerialController</CLASS>
+    </RESOURCE>
+  </CREOLE>
+
 </CREOLE-DIRECTORY>

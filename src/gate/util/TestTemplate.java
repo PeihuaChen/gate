@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- *  
+ *
  *  Hamish Cunningham, 16/Mar/00
  *
  *  $Id$
@@ -39,8 +39,13 @@ public class TestTemplate extends TestCase
   public TestTemplate(String name) { super(name); }
 
   /** Fixture set up */
-  public void setUp() {
+  public void setUp() throws Exception {
   } // setUp
+
+  /** Put things back as they should be after running tests.
+    */
+  public void tearDown() throws Exception {
+  } // tearDown
 
   /** A test */
   public void testSomething() throws Exception {
