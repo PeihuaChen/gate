@@ -73,7 +73,7 @@ create or replace package security is
   procedure login(p_usr_name        IN varchar2,
                   p_usr_pass        IN varchar2,
                   p_pref_grp_id     IN number,
-                  p_is_privileged   OUT boolean);
+                  p_is_privileged   OUT NUMBER);
 
   /*  -- */
   procedure has_access_to_lr(p_lr_id   IN  number,
