@@ -213,41 +213,6 @@ public class AnnotationSetImpl
     return wasPresent;
   } // remove(o)
   
-  /**
-   * Removes from this set all of its elements that are contained in
-   * the specified collection (optional operation).<p>
-   *
-   * This implementation determines which is the smaller of this set
-   * and the specified collection, by invoking the <tt>size</tt>
-   * method on each.  If this set has fewer elements, then the
-   * implementation iterates over this set, checking each element
-   * returned by the iterator in turn to see if it is contained in
-   * the specified collection.  If it is so contained, it is removed
-   * from this set with the iterator's <tt>remove</tt> method.  If
-   * the specified collection has fewer elements, then the
-   * implementation iterates over the specified collection, removing
-   * from this set each element returned by the iterator, using this
-   * set's <tt>remove</tt> method.<p>
-   *
-   * Note that this implementation will throw an
-   * <tt>UnsupportedOperationException</tt> if the iterator returned by the
-   * <tt>iterator</tt> method does not implement the <tt>remove</tt> method.
-   *
-   * @param c elements to be removed from this set.
-   * @return <tt>true</tt> if this set changed as a result of the call.
-   *
-   * @throws    UnsupportedOperationException removeAll is not supported
-   *            by this set.
-   * @throws    NullPointerException if the specified collection is null.
-   * @see #remove(Object)
-   * @see #contains(Object)
-   */
-  public boolean removeAll(Collection c) {
-      boolean modified = false;
-      for (Iterator i = c.iterator(); i.hasNext(); )
-              modified |= remove(i.next());
-      return modified;
-  }  
 
   /** Remove from the ID index. */
   protected boolean removeFromIdIndex(Annotation a) {
