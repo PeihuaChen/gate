@@ -92,6 +92,7 @@ public class MainFrame extends JFrame
   static JFileChooser fileChooser;
 
   ApperanceDialog appearanceDialog;
+  CartoonMinder animator;
   TabBlinker logBlinker;
 //  MainFrame parentFrame;
   NewResourceDialog newResourceDialog;
@@ -218,7 +219,7 @@ public class MainFrame extends JFrame
     };
 
     resourcesTree.setCellRenderer(new ResourceTreeCellRenderer());
-//    resourcesTree.setRowHeight(0);
+    resourcesTree.setRowHeight(0);
     //expand all nodes
     resourcesTree.expandRow(0);
     resourcesTree.expandRow(1);
@@ -229,8 +230,38 @@ public class MainFrame extends JFrame
     resourcesTreeScroll = new JScrollPane(resourcesTree);
 
     lowerScroll = new JScrollPane();
+    JPanel lowerPane = new JPanel();
+    lowerPane.setLayout(new OverlayLayout(lowerPane));
+
+    JPanel animationPane = new JPanel();
+    animationPane.setOpaque(false);
+    animationPane.setLayout(new BoxLayout(animationPane, BoxLayout.X_AXIS));
+
+    JPanel vBox = new JPanel();
+    vBox.setLayout(new BoxLayout(vBox, BoxLayout.Y_AXIS));
+    vBox.setOpaque(false);
+
+    JPanel hBox = new JPanel();
+    hBox.setLayout(new BoxLayout(hBox, BoxLayout.X_AXIS));
+    hBox.setOpaque(false);
+
+    vBox.add(Box.createVerticalGlue());
+    vBox.add(animationPane);
+
+    hBox.add(vBox);
+    hBox.add(Box.createHorizontalGlue());
+
+    lowerPane.add(hBox);
+    lowerPane.add(lowerScroll);
+
+    animator = new CartoonMinder(animationPane);
+    Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                               animator);
+    thread.setPriority(Thread.MIN_PRIORITY);
+    thread.start();
+
     leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                               resourcesTreeScroll, lowerScroll);
+                               resourcesTreeScroll, lowerPane);
 
 
     // Create a new logArea and redirect the Out and Err output to it.
@@ -356,23 +387,29 @@ public class MainFrame extends JFrame
     fileMenu.add(new XJMenuItem(newDSAction, this));
     fileMenu.add(new XJMenuItem(openDSAction, this));
     fileMenu.addSeparator();
-    fileMenu.add(new AbstractAction("Exit"){
+    fileMenu.add(new XJMenuItem(new AbstractAction("Exit"){
+      {
+        putValue(SHORT_DESCRIPTION, "Exits the application");
+      }
       public void actionPerformed(ActionEvent evt){
         System.exit(0);
       }
-    });
+    }, this));
     menuBar.add(fileMenu);
 
 
 
     JMenu optionsMenu = new JMenu("Options");
     appearanceDialog = new ApperanceDialog(this, "Fonts", true, targets);
-    optionsMenu.add(new AbstractAction("Fonts"){
+    optionsMenu.add(new XJMenuItem(new AbstractAction("Fonts"){
+      {
+        putValue(SHORT_DESCRIPTION, "Set the fonts used in the application");
+      }
       public void actionPerformed(ActionEvent evt){
         appearanceDialog.setLocationRelativeTo(MainFrame.this);
         appearanceDialog.show(targets);
       }
-    });
+    }, this));
 
     JMenu lnfMenu = new JMenu("Look & Feel");
     ButtonGroup lnfBg = new ButtonGroup();
@@ -382,6 +419,8 @@ public class MainFrame extends JFrame
       SetLNFAction(UIManager.LookAndFeelInfo info){
         super(info.getName());
         this.info = info;
+        putValue(SHORT_DESCRIPTION, "Switch to " + info.getName() +
+                                   " look-and-feel");
       }
       public void actionPerformed(ActionEvent evt) {
         try{
@@ -662,8 +701,10 @@ public class MainFrame extends JFrame
           Collections.sort(lrNames);
           lrIter = lrNames.iterator();
           while(lrIter.hasNext()){
-            ResourceData rData = (ResourceData)resourcesByName.get(lrIter.next());
-            newLrMenu.add(new NewResourceAction(rData));
+            ResourceData rData = (ResourceData)resourcesByName.
+                                 get(lrIter.next());
+            newLrMenu.add(new XJMenuItem(new NewResourceAction(rData),
+                                         MainFrame.this));
           }
         }
       }
@@ -690,8 +731,10 @@ public class MainFrame extends JFrame
           Collections.sort(lrNames);
           lrIter = lrNames.iterator();
           while(lrIter.hasNext()){
-            ResourceData rData = (ResourceData)resourcesByName.get(lrIter.next());
-            newPrMenu.add(new NewResourceAction(rData));
+            ResourceData rData = (ResourceData)resourcesByName.
+                                 get(lrIter.next());
+            newPrMenu.add(new XJMenuItem(new NewResourceAction(rData),
+                                         MainFrame.this));
           }
         }
       }
@@ -703,6 +746,7 @@ public class MainFrame extends JFrame
     //progressBar.setStringPainted(true);
     int oldValue = progressBar.getValue();
     if(oldValue != i){
+      if(!animator.isActive()) animator.activate();
       SwingUtilities.invokeLater(new ProgressBarUpdater(i));
     }
   }
@@ -714,6 +758,7 @@ public class MainFrame extends JFrame
   public void processFinished() {
     //progressBar.setStringPainted(false);
     SwingUtilities.invokeLater(new ProgressBarUpdater(0));
+    animator.deactivate();
   }
 
   public void statusChanged(String text) {
@@ -997,6 +1042,7 @@ public class MainFrame extends JFrame
   }//protected void setCurrentProject(ProjectData project)
 */
 
+/*
   synchronized void showWaitDialog() {
     Point location = getLocationOnScreen();
     location.translate(10,
@@ -1008,7 +1054,7 @@ public class MainFrame extends JFrame
   synchronized void  hideWaitDialog() {
     waitDialog.goAway();
   }
-
+*/
 
 /*
   class NewProjectAction extends AbstractAction {
@@ -1612,6 +1658,106 @@ public class MainFrame extends JFrame
       statusBar.setText(text);
     }
     String text;
+  }
+
+  /**
+   * During longer operations it is nice to keep the user entertained so
+   * (s)he doesn't fall asleep looking at a progress bar that seems have
+   * stopped. Also there are some operations that do not support progress
+   * reporting so the progress bar would not work at all so we need a way
+   * to let the user know that things are happening. We chose for purpose
+   * to show the user a small cartoon in the form of an animated gif.
+   * This class handles the diplaying and updating of those cartoons.
+   */
+  class CartoonMinder implements Runnable{
+
+    CartoonMinder(JPanel targetPanel){
+      active = false;
+      dying = false;
+      this.targetPanel = targetPanel;
+      try{
+        imageLabel = new JLabel(new ImageIcon(new URL("gate:/img/working.gif")));
+        imageLabel.setOpaque(false);
+        imageLabel.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
+      }catch(MalformedURLException mue){
+        mue.printStackTrace(Err.getPrintWriter());
+      }
+    }
+
+    public boolean isActive(){
+      boolean res;
+      synchronized(lock){
+        res = active;
+      }
+      return res;
+    }
+
+    public void activate(){
+      //add the label in the panel
+      SwingUtilities.invokeLater(new Runnable(){
+        public void run(){
+          targetPanel.add(imageLabel);
+        }
+      });
+      //wake the dorment thread
+      synchronized(lock){
+        active = true;
+      }
+    }
+
+    public void deactivate(){
+      //send the thread to sleep
+      synchronized(lock){
+        active = false;
+      }
+      //clear the panel
+      SwingUtilities.invokeLater(new Runnable(){
+        public void run(){
+          targetPanel.removeAll();
+          targetPanel.paintImmediately(targetPanel.getBounds());
+        }
+      });
+    }
+
+    public void dispose(){
+      synchronized(lock){
+        dying = true;
+      }
+    }
+
+    public void run(){
+      boolean isDying;
+      synchronized(lock){
+        isDying = dying;
+      }
+      while(!isDying){
+        boolean isActive;
+        synchronized(lock){
+          isActive = active;
+        }
+        if(isActive && targetPanel.isVisible()){
+          SwingUtilities.invokeLater(new Runnable(){
+            public void run(){
+              targetPanel.repaint();
+            }
+          });
+        }
+        //sleep
+        try{
+          Thread.sleep(300);
+        }catch(InterruptedException ie){}
+
+        synchronized(lock){
+          isDying = dying;
+        }
+      }//while(!isDying)
+    }
+
+    boolean dying;
+    boolean active;
+    String lock = "lock";
+    JPanel targetPanel;
+    JLabel imageLabel;
   }
 
 /*

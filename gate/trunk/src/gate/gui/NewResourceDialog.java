@@ -93,8 +93,8 @@ public class NewResourceDialog extends JDialog {
                            new CustomEditor());
 
     table.setIntercellSpacing(new Dimension(5, 5));
-    JScrollPane scroll = new JScrollPane(table);
-    this.getContentPane().add(scroll);
+    tableScroll = new JScrollPane(table);
+    this.getContentPane().add(tableScroll);
     this.getContentPane().add(Box.createVerticalStrut(5));
     this.getContentPane().add(Box.createVerticalGlue());
 
@@ -161,6 +161,7 @@ public class NewResourceDialog extends JDialog {
 
   ParametersTableModel tableModel;
   XJTable table;
+  JScrollPane tableScroll;
   JComboBox parametersCombo;
   JButton okBtn, cancelBtn;
   JTextField nameField;
@@ -184,13 +185,22 @@ public class NewResourceDialog extends JDialog {
       params.add(new ParameterDisjunction((List)parIter.next()));
     }
     tableModel.fireTableDataChanged();
+
+    table.setPreferredSize(null);
+
+    Dimension dim = table.getPreferredSize();
+    if(dim != null){
+      dim.height += table.getTableHeader().getPreferredSize().height +
+                    tableScroll.getInsets().top +
+                    tableScroll.getInsets().bottom;
+      dim.width +=  tableScroll.getInsets().left +
+                    tableScroll.getInsets().right;
+      tableScroll.setPreferredSize(dim);
+    }
     pack();
     super.show();
     if(userCanceled) return null;
     else{
-      if(getParent() instanceof MainFrame){
-        ((MainFrame)getParent()).showWaitDialog();
-      }
       //create the new resource
       FeatureMap params = Factory.newFeatureMap();
       for(int i=0; i< tableModel.getRowCount(); i++){
@@ -227,9 +237,6 @@ public class NewResourceDialog extends JDialog {
         if(sListener != null) sListener.statusChanged("Error loading " +
                                                       nameField.getText() +
                                                       "!");
-      }
-      if(getParent() instanceof MainFrame){
-        ((MainFrame)getParent()).hideWaitDialog();
       }
       return res;
     }
@@ -406,8 +413,14 @@ public class NewResourceDialog extends JDialog {
                                                    int row,
                                                    int column) {
       //prepare the renderer
-      super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
-                                          row, column);
+      if(value == null){
+        //ensure a reasonable space is reserved (20 spaces)
+        super.getTableCellRendererComponent(table, "                    ",
+                                            isSelected, hasFocus, row, column);
+      }else{
+        super.getTableCellRendererComponent(table, value, isSelected,
+                                            hasFocus, row, column);
+      }
 
       String type = (String)table.getValueAt(row, 1);
       if(type.equals("java.net.URL")){
@@ -454,7 +467,7 @@ public class NewResourceDialog extends JDialog {
 
   class CustomEditor extends DefaultCellEditor{
     CustomEditor(){
-      super(new JTextField());
+      super(new JTextField(10));
       setClickCountToStart(1);
       textField = (JTextField)getComponent();
       button = new JButton(new ImageIcon(getClass().getResource(

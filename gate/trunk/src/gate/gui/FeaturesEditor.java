@@ -22,7 +22,10 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Color;
+import java.awt.Dimension;
 import javax.swing.table.*;
+import javax.swing.event.*;
+import java.awt.event.*;
 
 import java.util.*;
 
@@ -44,13 +47,63 @@ public class FeaturesEditor extends AbstractVisualResource {
     this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     tableModel = new FeaturesTableModel();
     table = new XJTable(tableModel);
-    table.setDefaultRenderer(String.class, new FeaturesTableRenderer());
-    table.setDefaultRenderer(Object.class, new FeaturesTableRenderer());
+    table.setIntercellSpacing(new Dimension(5,5));
+    table.setDefaultRenderer(String.class, new ObjectRenderer());
+    table.setDefaultRenderer(Object.class, new ObjectRenderer());
+
+    DefaultCellEditor editor = new DefaultCellEditor(new JTextField());
+    editor.setClickCountToStart(0);
+    table.setDefaultEditor(String.class, editor);
+    table.setDefaultEditor(Object.class, editor);
+
     JScrollPane scroll = new JScrollPane(table);
     this.add(scroll, BorderLayout.CENTER);
+    this.add(Box.createVerticalStrut(5));
+
+    Box box = Box.createHorizontalBox();
+    newFeatureField = new JTextField(10);
+    newFeatureField.setMaximumSize(new Dimension(Integer.MAX_VALUE,
+                                                 newFeatureField.
+                                                 getPreferredSize().height));
+
+    Box vBox = Box.createVerticalBox();
+    vBox.add(new JLabel("New feature name"));
+    vBox.add(newFeatureField);
+    box.add(vBox);
+    box.add(Box.createHorizontalStrut(5));
+
+    newValueField = new JTextField(10);
+    newValueField.setMaximumSize(new Dimension(Integer.MAX_VALUE,
+                                                 newValueField.
+                                                 getPreferredSize().height));
+
+    vBox = Box.createVerticalBox();
+    vBox.add(new JLabel("New feature value"));
+    vBox.add(newValueField);
+    box.add(vBox);
+    box.add(Box.createHorizontalStrut(5));
+
+    addNewBtn = new JButton("Add feature");
+    box.add(addNewBtn);
+
+    this.add(box);
+    this.add(Box.createVerticalGlue());
+
   }// protected void initGuiComponents()
 
   protected void initListeners(){
+    addNewBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        String name = newFeatureField.getText();
+        String value = newValueField.getText();
+        if(name != null){
+          features.put(name, value);
+          tableModel.fireTableDataChanged();
+          newFeatureField.setText("");
+          newValueField.setText("");
+        }
+      }
+    });
   }
 
   public void setFeatureBearer(FeatureBearer newResource) {
@@ -67,6 +120,10 @@ public class FeaturesEditor extends AbstractVisualResource {
   FeaturesTableModel tableModel;
   private FeatureBearer resource;
   FeatureMap features;
+  JTextField newFeatureField;
+  JTextField newValueField;
+
+  JButton addNewBtn;
 
   class FeaturesTableModel extends AbstractTableModel{
     public int getColumnCount(){
@@ -74,7 +131,7 @@ public class FeaturesEditor extends AbstractVisualResource {
     }
 
     public int getRowCount(){
-      return features.size() + 1;
+      return features.size();
     }
 
     public String getColumnName(int columnIndex){
@@ -97,7 +154,8 @@ public class FeaturesEditor extends AbstractVisualResource {
                               int columnIndex){
       return rowIndex == features.size()
              ||
-             ((!((String)getValueAt(rowIndex, 0)).startsWith("gate."))
+             ((!((String)table.getModel().getValueAt(rowIndex, 0)).
+              startsWith("gate."))
              );
     }// public boolean isCellEditable
 
@@ -105,19 +163,6 @@ public class FeaturesEditor extends AbstractVisualResource {
                          int columnIndex){
       List keys = new ArrayList(features.keySet());
       Collections.sort(keys);
-      if(rowIndex == keys.size()){
-        switch(columnIndex){
-          case 0:{
-            return newKey;
-          }
-          case 1:{
-            return newValue;
-          }
-          default:{
-            return null;
-          }
-        }
-      }
       Object key = keys.get(rowIndex);
       switch(columnIndex){
         case 0:{
@@ -135,45 +180,24 @@ public class FeaturesEditor extends AbstractVisualResource {
     public void setValueAt(Object aValue,
                        int rowIndex,
                        int columnIndex){
-      if(rowIndex == features.size()){
-        if(columnIndex == 0){
-          newKey = (String)aValue;
-          if(newKey.equals("")) newKey = null;
-        }
-        else if(columnIndex == 1){
-          newValue = aValue;
-          if(newValue.equals("")) newValue = null;
-        }
 
-        if(newKey != null && newValue != null){
-          features.put(newKey, newValue);
-          newKey = null;
-          newValue = null;
+      if(columnIndex == 0) {
+        //the name of the feature changed
+        //if the name is null or empty the feature will be deleted
+        String oldName = (String)getValueAt(rowIndex, 0);
+        Object oldValue = features.remove(oldName);
+        if(aValue != null && !aValue.equals("")){
+          features.put(aValue, oldValue);
         }
       } else {
-        if(columnIndex == 0) {
-          //the name of the feature changed
-          String oldName = (String)getValueAt(rowIndex, 0);
-          Object oldValue = features.remove(oldName);
-          features.put(aValue, oldValue);
-        } else {
-          //the value of a feature changed
-          if(aValue.equals("")) {
-            //remove feature
-            features.remove(getValueAt(rowIndex, 0));
-          } else {
-            //change feature
-            features.put(getValueAt(rowIndex, 0), aValue);
-          }
-        }
+        //the value of a feature changed
+        features.put(getValueAt(rowIndex, 0), aValue);
       }
       fireTableDataChanged();
     }// public void setValueAt
 
-    String newKey;
-    Object newValue;
   }///class FeaturesTableModel extends DefaultTableModel
-
+/*
   class FeaturesTableRenderer extends DefaultTableCellRenderer{
     public Component getTableCellRendererComponent(JTable table,
                                                    Object value,
@@ -189,4 +213,5 @@ public class FeaturesEditor extends AbstractVisualResource {
     }
 
   }// class FeaturesTableRenderer
+*/
 }// class FeaturesEditor
