@@ -874,20 +874,16 @@ fi
 PATH_SEPARATOR="$ac_path_separator"
 rm -f conftest.sh
 
-
-
-
 # Say hello
 echo '***' 1>&2
 echo '*** this is GATE auto-configuration, from GNU autoconf' 1>&2
 echo '*** good luck and all who sail in her' 1>&2
 echo '***' 1>&2
 
-
 # Chumley St. John
 # Extract the first word of "javac javac.exe", so it can be a program name with args.
 set dummy javac javac.exe; ac_word=$2
-echo "$as_me:890: checking for $ac_word" >&5
+echo "$as_me:886: checking for $ac_word" >&5
 echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
 if test "${ac_cv_path_JAVAC+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -904,7 +900,7 @@ for ac_dir in $ac_dummy; do
   test -z "$ac_dir" && ac_dir=.
   if $as_executable_p "$ac_dir/$ac_word"; then
    ac_cv_path_JAVAC="$ac_dir/$ac_word"
-   echo "$as_me:907: found $ac_dir/$ac_word" >&5
+   echo "$as_me:903: found $ac_dir/$ac_word" >&5
    break
 fi
 done
@@ -916,16 +912,16 @@ fi
 JAVAC=$ac_cv_path_JAVAC
 
 if test -n "$JAVAC"; then
-  echo "$as_me:919: result: $JAVAC" >&5
+  echo "$as_me:915: result: $JAVAC" >&5
 echo "${ECHO_T}$JAVAC" >&6
 else
-  echo "$as_me:922: result: no" >&5
+  echo "$as_me:918: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
 
 # Extract the first word of "java java.exe", so it can be a program name with args.
 set dummy java java.exe; ac_word=$2
-echo "$as_me:928: checking for $ac_word" >&5
+echo "$as_me:924: checking for $ac_word" >&5
 echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
 if test "${ac_cv_path_JAVA+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -942,7 +938,7 @@ for ac_dir in $ac_dummy; do
   test -z "$ac_dir" && ac_dir=.
   if $as_executable_p "$ac_dir/$ac_word"; then
    ac_cv_path_JAVA="$ac_dir/$ac_word"
-   echo "$as_me:945: found $ac_dir/$ac_word" >&5
+   echo "$as_me:941: found $ac_dir/$ac_word" >&5
    break
 fi
 done
@@ -954,16 +950,16 @@ fi
 JAVA=$ac_cv_path_JAVA
 
 if test -n "$JAVA"; then
-  echo "$as_me:957: result: $JAVA" >&5
+  echo "$as_me:953: result: $JAVA" >&5
 echo "${ECHO_T}$JAVA" >&6
 else
-  echo "$as_me:960: result: no" >&5
+  echo "$as_me:956: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
 
 # Extract the first word of "jar jar.exe", so it can be a program name with args.
 set dummy jar jar.exe; ac_word=$2
-echo "$as_me:966: checking for $ac_word" >&5
+echo "$as_me:962: checking for $ac_word" >&5
 echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
 if test "${ac_cv_path_JAR+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -980,7 +976,7 @@ for ac_dir in $ac_dummy; do
   test -z "$ac_dir" && ac_dir=.
   if $as_executable_p "$ac_dir/$ac_word"; then
    ac_cv_path_JAR="$ac_dir/$ac_word"
-   echo "$as_me:983: found $ac_dir/$ac_word" >&5
+   echo "$as_me:979: found $ac_dir/$ac_word" >&5
    break
 fi
 done
@@ -992,16 +988,16 @@ fi
 JAR=$ac_cv_path_JAR
 
 if test -n "$JAR"; then
-  echo "$as_me:995: result: $JAR" >&5
+  echo "$as_me:991: result: $JAR" >&5
 echo "${ECHO_T}$JAR" >&6
 else
-  echo "$as_me:998: result: no" >&5
+  echo "$as_me:994: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
 
 # Extract the first word of "javadoc javadoc.exe", so it can be a program name with args.
 set dummy javadoc javadoc.exe; ac_word=$2
-echo "$as_me:1004: checking for $ac_word" >&5
+echo "$as_me:1000: checking for $ac_word" >&5
 echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
 if test "${ac_cv_path_JAVADOC+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -1018,7 +1014,7 @@ for ac_dir in $ac_dummy; do
   test -z "$ac_dir" && ac_dir=.
   if $as_executable_p "$ac_dir/$ac_word"; then
    ac_cv_path_JAVADOC="$ac_dir/$ac_word"
-   echo "$as_me:1021: found $ac_dir/$ac_word" >&5
+   echo "$as_me:1017: found $ac_dir/$ac_word" >&5
    break
 fi
 done
@@ -1030,17 +1026,17 @@ fi
 JAVADOC=$ac_cv_path_JAVADOC
 
 if test -n "$JAVADOC"; then
-  echo "$as_me:1033: result: $JAVADOC" >&5
+  echo "$as_me:1029: result: $JAVADOC" >&5
 echo "${ECHO_T}$JAVADOC" >&6
 else
-  echo "$as_me:1036: result: no" >&5
+  echo "$as_me:1032: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
 
 CYGPATH=echo
 # Extract the first word of "cygpath", so it can be a program name with args.
 set dummy cygpath; ac_word=$2
-echo "$as_me:1043: checking for $ac_word" >&5
+echo "$as_me:1039: checking for $ac_word" >&5
 echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
 if test "${ac_cv_path_CYGPATH+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -1057,7 +1053,7 @@ for ac_dir in $ac_dummy; do
   test -z "$ac_dir" && ac_dir=.
   if $as_executable_p "$ac_dir/$ac_word"; then
    ac_cv_path_CYGPATH="$ac_dir/$ac_word"
-   echo "$as_me:1060: found $ac_dir/$ac_word" >&5
+   echo "$as_me:1056: found $ac_dir/$ac_word" >&5
    break
 fi
 done
@@ -1069,26 +1065,38 @@ fi
 CYGPATH=$ac_cv_path_CYGPATH
 
 if test -n "$CYGPATH"; then
-  echo "$as_me:1072: result: $CYGPATH" >&5
+  echo "$as_me:1068: result: $CYGPATH" >&5
 echo "${ECHO_T}$CYGPATH" >&6
 else
-  echo "$as_me:1075: result: no" >&5
+  echo "$as_me:1071: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
 
 CYGPATHP=$CYGPATH
 
-
 # tools.jar
 JAVAC_DIR=`dirname \`dirname $JAVAC\``
-TOOLSJAR=`find $JAVAC_DIR -follow -name tools.jar -print`
+if test ${JAVAC_DIR} = . -o ${JAVAC_DIR} = /usr/local -o  ${JAVAC_DIR} = /usr -o  ${JAVAC_DIR} = /bin
+then
+  echo "can't find tools.jar in the tree with javac; trying to guess java version"
+  JVER=`${JAVA} -version`
+  case ${JVER} in
+    'java version .1.4*') TVER=tools14.jar ;;
+    'java version .1.3*') TVER=tools13.jar ;;
+    '*1.4*') TVER=tools14.jar ;;
+    '*1.3*') TVER=tools13.jar ;;
+    '*') TVER=tools14.jar ;;
+  esac
+  TOOLSJAR=../bin/${TVER}
+else
+  TOOLSJAR=`find $JAVAC_DIR -follow -name tools.jar -print`
+fi
 if test ! -f "$TOOLSJAR"
 then
   echo "Can't find tools.jar; JAVAC_DIR=${JAVAC_DIR}; TOOLSJAR=${TOOLSJAR}; try setting JAVA_HOME?"
   exit 1
 fi
 echo tools.jar is ${TOOLSJAR}
-
 
 # Just what is this beast we're running on?
 ac_aux_dir=
@@ -1108,7 +1116,7 @@ for ac_dir in $srcdir $srcdir/.. $srcdir/../..; do
   fi
 done
 if test -z "$ac_aux_dir"; then
-  { { echo "$as_me:1111: error: cannot find install-sh or install.sh in $srcdir $srcdir/.. $srcdir/../.." >&5
+  { { echo "$as_me:1119: error: cannot find install-sh or install.sh in $srcdir $srcdir/.. $srcdir/../.." >&5
 echo "$as_me: error: cannot find install-sh or install.sh in $srcdir $srcdir/.. $srcdir/../.." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -1118,11 +1126,11 @@ ac_configure="$SHELL $ac_aux_dir/configure" # This should be Cygnus configure.
 
 # Make sure we can run config.sub.
 $ac_config_sub sun4 >/dev/null 2>&1 ||
-  { { echo "$as_me:1121: error: cannot run $ac_config_sub" >&5
+  { { echo "$as_me:1129: error: cannot run $ac_config_sub" >&5
 echo "$as_me: error: cannot run $ac_config_sub" >&2;}
    { (exit 1); exit 1; }; }
 
-echo "$as_me:1125: checking build system type" >&5
+echo "$as_me:1133: checking build system type" >&5
 echo $ECHO_N "checking build system type... $ECHO_C" >&6
 if test "${ac_cv_build+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -1131,23 +1139,23 @@ else
 test -z "$ac_cv_build_alias" &&
   ac_cv_build_alias=`$ac_config_guess`
 test -z "$ac_cv_build_alias" &&
-  { { echo "$as_me:1134: error: cannot guess build type; you must specify one" >&5
+  { { echo "$as_me:1142: error: cannot guess build type; you must specify one" >&5
 echo "$as_me: error: cannot guess build type; you must specify one" >&2;}
    { (exit 1); exit 1; }; }
 ac_cv_build=`$ac_config_sub $ac_cv_build_alias` ||
-  { { echo "$as_me:1138: error: $ac_config_sub $ac_cv_build_alias failed." >&5
+  { { echo "$as_me:1146: error: $ac_config_sub $ac_cv_build_alias failed." >&5
 echo "$as_me: error: $ac_config_sub $ac_cv_build_alias failed." >&2;}
    { (exit 1); exit 1; }; }
 
 fi
-echo "$as_me:1143: result: $ac_cv_build" >&5
+echo "$as_me:1151: result: $ac_cv_build" >&5
 echo "${ECHO_T}$ac_cv_build" >&6
 build=$ac_cv_build
 build_cpu=`echo $ac_cv_build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
 build_vendor=`echo $ac_cv_build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
 build_os=`echo $ac_cv_build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 
-echo "$as_me:1150: checking host system type" >&5
+echo "$as_me:1158: checking host system type" >&5
 echo $ECHO_N "checking host system type... $ECHO_C" >&6
 if test "${ac_cv_host+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -1156,19 +1164,19 @@ else
 test -z "$ac_cv_host_alias" &&
   ac_cv_host_alias=$ac_cv_build_alias
 ac_cv_host=`$ac_config_sub $ac_cv_host_alias` ||
-  { { echo "$as_me:1159: error: $ac_config_sub $ac_cv_host_alias failed" >&5
+  { { echo "$as_me:1167: error: $ac_config_sub $ac_cv_host_alias failed" >&5
 echo "$as_me: error: $ac_config_sub $ac_cv_host_alias failed" >&2;}
    { (exit 1); exit 1; }; }
 
 fi
-echo "$as_me:1164: result: $ac_cv_host" >&5
+echo "$as_me:1172: result: $ac_cv_host" >&5
 echo "${ECHO_T}$ac_cv_host" >&6
 host=$ac_cv_host
 host_cpu=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
 host_vendor=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
 host_os=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 
-echo "$as_me:1171: checking target system type" >&5
+echo "$as_me:1179: checking target system type" >&5
 echo $ECHO_N "checking target system type... $ECHO_C" >&6
 if test "${ac_cv_target+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -1177,12 +1185,12 @@ else
 test "x$ac_cv_target_alias" = "x" &&
   ac_cv_target_alias=$ac_cv_host_alias
 ac_cv_target=`$ac_config_sub $ac_cv_target_alias` ||
-  { { echo "$as_me:1180: error: $ac_config_sub $ac_cv_target_alias failed" >&5
+  { { echo "$as_me:1188: error: $ac_config_sub $ac_cv_target_alias failed" >&5
 echo "$as_me: error: $ac_config_sub $ac_cv_target_alias failed" >&2;}
    { (exit 1); exit 1; }; }
 
 fi
-echo "$as_me:1185: result: $ac_cv_target" >&5
+echo "$as_me:1193: result: $ac_cv_target" >&5
 echo "${ECHO_T}$ac_cv_target" >&6
 target=$ac_cv_target
 target_cpu=`echo $ac_cv_target | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
@@ -1235,26 +1243,12 @@ then
   echo "don't recognise your OS - please take a day off"
 fi
 
-
 # Create an empty Makefile.dep
 echo '# Makefile.dep - do not edit' >Makefile.dep
-
 
 # Set up the sustitutions for Makefile creation
 ECHON=$ac_n
 ECHOC=$ac_c
-
-
-
-
-
-
-
-
-
-
-
-
 
 # Create the configured Makefile
 ac_config_files="$ac_config_files Makefile"
@@ -1313,7 +1307,7 @@ rm -f confdef2opt.sed
 : ${CONFIG_STATUS=./config.status}
 ac_clean_files_save=$ac_clean_files
 ac_clean_files="$ac_clean_files $CONFIG_STATUS"
-{ echo "$as_me:1316: creating $CONFIG_STATUS" >&5
+{ echo "$as_me:1310: creating $CONFIG_STATUS" >&5
 echo "$as_me: creating $CONFIG_STATUS" >&6;}
 cat >$CONFIG_STATUS <<_ACEOF
 #! $SHELL
@@ -1480,7 +1474,7 @@ cat >>$CONFIG_STATUS <<\EOF
     echo "$ac_cs_version"; exit 0 ;;
   --he | --h)
     # Conflict between --help and --header
-    { { echo "$as_me:1483: error: ambiguous option: $1
+    { { echo "$as_me:1477: error: ambiguous option: $1
 Try \`$0 --help' for more information." >&5
 echo "$as_me: error: ambiguous option: $1
 Try \`$0 --help' for more information." >&2;}
@@ -1499,7 +1493,7 @@ Try \`$0 --help' for more information." >&2;}
     ac_need_defaults=false;;
 
   # This is an error.
-  -*) { { echo "$as_me:1502: error: unrecognized option: $1
+  -*) { { echo "$as_me:1496: error: unrecognized option: $1
 Try \`$0 --help' for more information." >&5
 echo "$as_me: error: unrecognized option: $1
 Try \`$0 --help' for more information." >&2;}
@@ -1535,7 +1529,7 @@ do
   case "$ac_config_target" in
   # Handling of arguments.
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-  *) { { echo "$as_me:1538: error: invalid argument: $ac_config_target" >&5
+  *) { { echo "$as_me:1532: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
    { (exit 1); exit 1; }; };;
   esac
@@ -1746,7 +1740,7 @@ done; }
   esac
 
   if test x"$ac_file" != x-; then
-    { echo "$as_me:1749: creating $ac_file" >&5
+    { echo "$as_me:1743: creating $ac_file" >&5
 echo "$as_me: creating $ac_file" >&6;}
     rm -f "$ac_file"
   fi
@@ -1764,7 +1758,7 @@ echo "$as_me: creating $ac_file" >&6;}
       -) echo $tmp/stdin ;;
       [\\/$]*)
          # Absolute (can't be DOS-style, as IFS=:)
-         test -f "$f" || { { echo "$as_me:1767: error: cannot find input file: $f" >&5
+         test -f "$f" || { { echo "$as_me:1761: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          echo $f;;
@@ -1777,7 +1771,7 @@ echo "$as_me: error: cannot find input file: $f" >&2;}
            echo $srcdir/$f
          else
            # /dev/null tree
-           { { echo "$as_me:1780: error: cannot find input file: $f" >&5
+           { { echo "$as_me:1774: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          fi;;
@@ -1830,7 +1824,6 @@ if test "$no_create" != yes; then
   # would make configure fail if this is the last instruction.
   $ac_cs_success || { (exit 1); exit 1; }
 fi
-
 
 # now go home and have a nice cup of tea
 echo '***' 1>&2
