@@ -68,7 +68,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
     // get the beaninfo for the resource bean, excluding data about Object
     BeanInfo resBeanInf = null;
     try {
-      resBeanInf = Introspector.getBeanInfo(resource.getClass(), Object.class);
+      resBeanInf = getBeanInfo(resource.getClass());
     } catch(Exception e) {
       throw new ResourceInstantiationException(
         "Couldn't get bean info for resource " + resource.getClass().getName()
@@ -196,7 +196,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
     // get the beaninfo for the resource bean, excluding data about Object
     BeanInfo resBeanInf = null;
     try {
-      resBeanInf = Introspector.getBeanInfo(resource.getClass(), Object.class);
+      resBeanInf = getBeanInfo(resource.getClass());
     } catch(Exception e) {
       throw new ResourceInstantiationException(
         "Couldn't get bean info for resource " + resource.getClass().getName()
@@ -225,9 +225,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
     IllegalAccessException, GateException
   {
     // get the beaninfo for the resource bean, excluding data about Object
-    BeanInfo resBeanInfo = Introspector.getBeanInfo(
-      resource.getClass(), Object.class
-    );
+    BeanInfo resBeanInfo = getBeanInfo(resource.getClass());
 
     // get all the events the bean can fire
     EventSetDescriptor[] events = resBeanInfo.getEventSetDescriptors();
@@ -265,9 +263,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
                             IllegalAccessException, GateException{
 
     // get the beaninfo for the resource bean, excluding data about Object
-    BeanInfo resBeanInfo = Introspector.getBeanInfo(
-      resource.getClass(), Object.class
-    );
+    BeanInfo resBeanInfo = getBeanInfo(resource.getClass());
 
     // get all the events the bean can fire
     EventSetDescriptor[] events = resBeanInfo.getEventSetDescriptors();
@@ -352,7 +348,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
     // get the beaninfo for the resource bean, excluding data about Object
     BeanInfo resBeanInf = null;
     try {
-      resBeanInf = Introspector.getBeanInfo(this.getClass(), Object.class);
+      resBeanInf = getBeanInfo(this.getClass());
     } catch(Exception e) {
       throw new ResourceInstantiationException(
         "Couldn't get bean info for resource " + this.getClass().getName()
@@ -373,5 +369,18 @@ extends AbstractFeatureBearer implements Resource, Serializable
     setParameterValues(this, parameters);
   }
 
+  private static int beanCount = 0;
+  private static Hashtable beanInfoCache = new Hashtable();
+
+  public static BeanInfo getBeanInfo (Class c) throws IntrospectionException
+  {
+    beanCount = beanCount + 1;
+    BeanInfo r = ((BeanInfo) beanInfoCache.get(c));
+    if (r == null) {
+      r = Introspector.getBeanInfo(c, Object.class);
+      beanInfoCache.put(c, r);
+    }
+    return r;
+  }
 
 } // class AbstractResource
