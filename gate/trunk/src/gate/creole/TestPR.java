@@ -184,10 +184,8 @@ public class TestPR extends TestCase
 
     assertTrue("Found in "+ doc3.getSourceUrl().getFile()+ " "+
       doc3.getAnnotations().get("Sentence").size() +
-      " Sentence annotations, instead of the expected 65.",
-      doc3.getAnnotations().get("Sentence").size()== 65);
-    if (DEBUG)
-      Out.prln(doc3.getAnnotations().get("Sentence"));
+      " Sentence annotations, instead of the expected 66.",
+      doc3.getAnnotations().get("Sentence").size()== 66);
 
     assertTrue("Found in "+ doc3.getSourceUrl().getFile()+ " "+
       doc3.getAnnotations().get("Split").size() +
@@ -228,8 +226,8 @@ public class TestPR extends TestCase
     tagger.execute();
     annots = doc3.getAnnotations().get("Token", fType);
     assertTrue("Found in "+ doc3.getSourceUrl().getFile()+ " "+ annots.size() +
-      " Token annotations with category feature, instead of the expected 1426.",
-      annots.size() == 1426);
+      " Token annotations with category feature, instead of the expected 1443.",
+      annots.size() == 1443);
     Factory.deleteResource(tagger);
   }//testTagger()
 
@@ -347,8 +345,8 @@ public class TestPR extends TestCase
 
     annots = doc3.getAnnotations().get(null,fType);
     assertTrue("Found in "+doc3.getSourceUrl().getFile()+ " "+ annots.size() +
-      " annotations with matches feature, instead of the expected 20.",
-      annots.size() == 20);
+      " annotations with matches feature, instead of the expected 22.",
+      annots.size() == 22);
     Factory.deleteResource(orthomatcher);
   }//testOrthomatcher
 
@@ -466,10 +464,10 @@ public class TestPR extends TestCase
       if (DEBUG){
         if (annotDiff.getFMeasureAverage() != 1.0) {
           assertTrue("missing annotations " +
-            annotDiff.getAnnotationsOfType(AnnotationDiff.MISSING_TYPE),false);
-          assertTrue("spurious annotations " +
-            annotDiff.getAnnotationsOfType(AnnotationDiff.SPURIOUS_TYPE),false);
-          assertTrue("partially-correct annotations " +
+            annotDiff.getAnnotationsOfType(AnnotationDiff.MISSING_TYPE)
+            + " spurious annotations " +
+            annotDiff.getAnnotationsOfType(AnnotationDiff.SPURIOUS_TYPE)
+            + " partially-correct annotations " +
             annotDiff.getAnnotationsOfType(
                             AnnotationDiff.PARTIALLY_CORRECT_TYPE),false);
         }
