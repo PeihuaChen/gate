@@ -34,7 +34,7 @@ import gate.sgml.*;
 import gate.util.*;
 import gate.config.*;
 import gate.persist.*;
-
+import gate.security.*;
 
 /** Top-level entry point for GATE test suite;
   * "main" will run the JUnit test runner interface.
@@ -180,6 +180,7 @@ public class TestGate {
         suite.addTest(TestPR.suite());
       }else {
         suite.addTest(TestControllers.suite());
+        suite.addTest(TestSecurity.suite());
         suite.addTest(TestPersist.suite());
         suite.addTest(TestAnnotationDiff.suite());
         suite.addTest(TestConfig.suite());
