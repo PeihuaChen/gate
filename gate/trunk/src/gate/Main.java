@@ -799,7 +799,7 @@ public class Main {
     Out.prln(
       "For help on command-line options and other information " + nl +
       "see the user manual in your GATE distribution or at " + nl +
-      "http://gate.ac.uk/gate/doc/userguide.html"
+      "http://gate.ac.uk/sale/tao/"
     );
   } // help()
 
