@@ -54,7 +54,7 @@ RUN=$(JAVA)
 #GUK all: ../classes/guk/Editor.class ../classes/gate/TestGate.class \
 #GUK	  classes resources gukjar TestJdk.jar TestResources.jar
 all: ../classes/gate/TestGate.class \
-	  classes resources TestJdk.jar TestResources.jar
+	  classes resources TestJdk.jar TestResources.jar docs
 
 # build the whole thing
 everything: depend all jar docs internaldocs test
@@ -99,8 +99,6 @@ resources:
 	cd ../src/gate && cp -R resources ../../classes/gate
 	cd ../classes/gate/resources && rm -r `find . -name CVS -print`
 	cp version.txt build.txt ../classes/gate/resources
-	sed 's,gateHeader,img/gateHeader,' ../doc/userguide.html > \
-	  ../classes/gate/resources/userguide.html
 
 # refresh the jar with all the class files
 jarupdate:
@@ -136,8 +134,10 @@ gukdemo:
 ../doc/userguide.html: ../doc/src/userguide.html
 	cp $? $@ && cd ../doc && \
 	$(RUN) -cp `$(CYGPATHP) ../lib/Bib2HTML.jar:../lib/jgl3.1.0.jar` \
-	  Bib2HTML.RunBib2HTML ../../sale/big.bib userguide.html && \
+	  Bib2HTML.RunBib2HTML ../doc/bib/big.bib userguide.html && \
 	rm userguide.html.bak
+	sed 's,gateHeader,img/gateHeader,' ../doc/userguide.html > \
+	  ../classes/gate/resources/userguide.html
 
 # make the javadoc documentation
 docs: ../doc/userguide.html build.txt version.txt
