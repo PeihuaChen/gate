@@ -44,8 +44,11 @@ public class Parameter implements Serializable
   /** Is the parameter optional? */
   public boolean isOptional() { return optional; }
 
-  /** Default value for the parameter */
-  Object defaultValuex;
+  /** The name of the item's class. If the parameter is a collection then
+    * we need  to know the class of its items in order to create them the
+    * way we want.
+    */
+  String itemClassName = null;
 
   /** Calculate and return the default value for this parameter */
   public Object calculateDefaultValue() throws ParameterException {
@@ -68,6 +71,63 @@ public class Parameter implements Serializable
     // get the Class for the parameter via Class.forName or CREOLE register
     Class paramClass = getParameterClass();
 
+    // Test if the paramClass is a collection and if it is, try to
+    // construct the param as a collection of items specified in the
+    // default string value...
+    if (Collection.class.isAssignableFrom(paramClass)){
+      // Create an collection object bellonging to  paramClass
+      Collection colection = null;
+      try{
+        colection = (Collection)paramClass.getConstructor(new Class[]{}).
+                                  newInstance(new Object[]{});
+      } catch(Exception ex){
+          throw new ParameterException("Could not construct an object of "
+            + typeName + " for param " + name);
+      }// End try
+      // If an itemClassName was specified then try to create objects belonging
+      // to this class and add them to the collection. Otherwise add the
+      // string tokens to the collection.
+      if(itemClassName == null){
+        // Read the tokens from the default value and try to create items
+        // belonging to the itemClassName
+        StringTokenizer strTokenizer = new StringTokenizer(
+                                                      defaultValueString,";");
+        while(strTokenizer.hasMoreTokens()){
+          String itemStringValue = strTokenizer.nextToken();
+          colection.add(itemStringValue);
+        }// End while
+      }else{
+        Class itemClass = null;
+        try{
+          itemClass = Class.forName(itemClassName);
+        }catch(ClassNotFoundException e){
+          throw new ParameterException("Could not construct a class object for "
+            + itemClassName + " for param "+ name +
+            ", with type name="+ typeName);
+        }// End try
+        // Read the tokens from the default value and try to create items
+        // belonging to the itemClassName
+        StringTokenizer strTokenizer = new StringTokenizer(
+                                                      defaultValueString,";");
+        while(strTokenizer.hasMoreTokens()){
+          // Read a string item and construct an object belonging to
+          // itemClassName
+          String itemStringValue = strTokenizer.nextToken();
+          Object itemValue = null;
+          try{
+            itemValue = itemClass.getConstructor(new Class[]{String.class}).
+                                  newInstance(new Object[]{itemStringValue});
+          }catch(Exception e){
+            throw new ParameterException("Could not create an object of " +
+            itemClassName + " for param name "+ name + ", with type name ="+
+            typeName);
+          }// End try
+          // Add the item value object to the collection
+          colection.add(itemValue);
+        }// End while
+      }// End if(itemClassName == null)
+      return colection;
+    }// End if (Collection.class.isAssignableFrom(paramClass))
     // java builtin types
     if(typeName.startsWith("java.")) {
       if(typeName.equals("java.lang.Boolean"))

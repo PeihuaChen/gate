@@ -287,7 +287,7 @@ public class TestCreole extends TestCase
     // get some res data from the register
     assert(
       "wrong number of resources in the register: " + reg.size(),
-      reg.size() == 15
+      reg.size() == 16
     );
     ResourceData pr1rd = (ResourceData) reg.get("testpkg.TestPR1");
     ResourceData pr2rd = (ResourceData) reg.get("testpkg.TestPR2");
@@ -355,7 +355,7 @@ public class TestCreole extends TestCase
     Set lrs = reg.getLrTypes();
 
     assert("wrong number vrs in reg: " + vrs.size(), vrs.size() == 8);
-    assert("wrong number prs in reg: " + prs.size(), prs.size() == 4);
+    assert("wrong number prs in reg: " + prs.size(), prs.size() == 5);
     assert("wrong number lrs in reg: " + lrs.size(), lrs.size() == 3);
   } // testTypeLists()
 
@@ -490,6 +490,17 @@ public class TestCreole extends TestCase
     }
 
   } // testParameterDefaults2()
+
+  /** Test param as lists*/
+  public void testParamAsLists() throws Exception{
+    ResourceData rd = (ResourceData) reg.get("testpkg.TestPR3");
+    assertNotNull("Couldn: couldn't find testPR3 res data", rd);
+
+    ParameterList paramList = rd.getParameterList();
+    // runtime params - none for a document
+    List runTime = paramList.getRuntimeParameters();
+    assert("PR3 should have 4 runtime params: " + paramList, runTime.size()==4);
+  }// End testParamAsLists();
 
   /** Test parameters */
   public void testParameters() throws Exception {

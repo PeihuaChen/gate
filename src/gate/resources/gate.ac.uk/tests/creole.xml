@@ -31,6 +31,16 @@
 			<PARAMETER NAME="document" RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
 			<TOOL/>
 		</RESOURCE>
+    		<RESOURCE>
+      		<NAME>Sheffield Test PR 3</NAME>
+      		<JAR>TestResources.jar</JAR>
+      		<CLASS>testpkg.TestPR3</CLASS>
+      		<AUTOLOAD/>
+      		<PARAMETER NAME ="paramList" DEFAULT="Location;Person; String 3;String 4" RUNTIME="true">java.util.LinkedList</PARAMETER>
+      		<PARAMETER NAME ="paramSet" DEFAULT="Location;Person; String 3;String 4" ITEM_CLASS_NAME="java.lang.String" RUNTIME="true">java.util.TreeSet</PARAMETER>
+      		<PARAMETER NAME ="paramArrayList" DEFAULT="123;12;3;34" ITEM_CLASS_NAME="java.lang.Integer" RUNTIME="true">java.util.ArrayList</PARAMETER>
+      		<PARAMETER NAME ="paramHashSet" DEFAULT="string123;12;3;34"  RUNTIME="true">java.util.HashSet</PARAMETER>
+    		</RESOURCE>
 	</CREOLE>
 	<!-- creole.xml for tokeniser -->
 	<CREOLE>
