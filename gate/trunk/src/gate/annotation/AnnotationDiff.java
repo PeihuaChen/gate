@@ -483,15 +483,18 @@ public class AnnotationDiff extends AbstractVisualResource{
     formatter.setMinimumFractionDigits(4);
 
     // Create an Annotation diff table model
-    diffTable = new XJTable();
-    scrollPane = new JScrollPane(diffTable);
-    AnnotationDiffTableModel diffModel= new AnnotationDiffTableModel(diffSet);
-    // Set the model for our table
-    diffTable.setModel(diffModel);
-    // Set the cell renderer.
+    AnnotationDiffTableModel diffModel = new AnnotationDiffTableModel(diffSet);
+    // Create a XJTable based on this model
+    diffTable = new XJTable(diffModel);
+    diffTable.setAlignmentX(Component.LEFT_ALIGNMENT);
+    // Set the cell renderer for this table.
     AnnotationDiffCellRenderer cellRenderer = new AnnotationDiffCellRenderer();
     diffTable.setDefaultRenderer(java.lang.String.class,cellRenderer);
     diffTable.setDefaultRenderer(java.lang.Long.class,cellRenderer);
+    // Put the table into a JScroll
+//    scrollPane = new JScrollPane(diffTable);
+//    scrollPane.getViewport().
+//                    putClientProperty("EnableWindowBlit", new Boolean(true));
 
     // Arange all components on a this JPanel
     SwingUtilities.invokeLater(new Runnable(){
@@ -515,12 +518,19 @@ public class AnnotationDiff extends AbstractVisualResource{
     BoxLayout boxLayout = new BoxLayout(this,BoxLayout.Y_AXIS);
     this.setLayout(boxLayout);
 
+    JTableHeader tableHeader = diffTable.getTableHeader();
+    tableHeader.setAlignmentX(Component.LEFT_ALIGNMENT);
+    this.add(tableHeader);
+    diffTable.setAlignmentX(Component.LEFT_ALIGNMENT);
     // Add the tableScroll to the diffPanel
-    this.add(scrollPane);
+    this.add(diffTable);
 
     // ADD the LEGEND
     //Lay out the JLabels from left to right.
-    Box infoBox = new Box(BoxLayout.X_AXIS);
+    //Box infoBox = new Box(BoxLayout.X_AXIS);
+    JPanel infoBox = new  JPanel();
+    infoBox.setLayout(new BoxLayout(infoBox,BoxLayout.X_AXIS));
+    infoBox.setAlignmentX(Component.LEFT_ALIGNMENT);
     // Keep the components together
     //box.add(Box.createHorizontalGlue());
 
