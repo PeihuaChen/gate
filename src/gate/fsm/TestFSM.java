@@ -14,6 +14,7 @@
  */
 package gate.fsm;
 
+import gate.*;
 import gate.jape.*;
 import gate.util.*;
 

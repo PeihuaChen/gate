@@ -13,13 +13,13 @@
  *  $Id$
  */
 
-package gate.util;
+package gate;
 
 import java.util.*;
 import java.net.*;
 import java.io.*;
 
-import gate.*;
+import gate.util.*;
 import gate.creole.*;
 import gate.config.*;
 import gate.event.*;
@@ -50,10 +50,12 @@ public class Gate
     * @see #initCreoleRegister
     */
   public static void init() throws GateException {
-    //register the URL handler  for the "gate://" URLs
-    System.setProperty("java.protocol.handler.pkgs",
-                       System.getProperty("java.protocol.handler.pkgs" ) + "|" +
-                       "gate.util.protocols");
+    // register the URL handler  for the "gate://" URLs
+    System.setProperty(
+      "java.protocol.handler.pkgs",
+      System.getProperty("java.protocol.handler.pkgs")
+        + "|" + "gate.util.protocols"
+    );
 
     // create class loader and creole register if they're null
     if(classLoader == null)
@@ -71,10 +73,10 @@ public class Gate
     // init the data store register
     initDataStoreRegister();
 
-    //The creoleRegister acts as a proxy for datastore related events
+    // the creoleRegister acts as a proxy for datastore related events
     dataStoreRegister.addCreoleListener(creoleRegister);
 
-    //some of the events are actually fired by the {@link gate.Factory}
+    // some of the events are actually fired by the {@link gate.Factory}
     Factory.addCreoleListener(creoleRegister);
 
     // bring into the system the Default Annotations
@@ -174,15 +176,14 @@ public class Gate
     }// End try/catch
 
     // add Address Schema
-    try{
+    try {
       params.put("xmlFileUrl",Gate.class.getResource(
                            "/gate/resources/creole/schema/AddressSchema.xml"));
       Factory.createResource("gate.creole.AnnotationSchema", params);
-    } catch (ResourceInstantiationException e){
+    } catch(ResourceInstantiationException e) {
       e.printStackTrace(Err.getPrintWriter());
-    }// End try/catch
- }//initDefaultAnnotationSchemas
-
+    } // End try/catch
+  } //initDefaultAnnotationSchemas
 
   /** Reads config data (<TT>gate.xml</TT> files). */
   public static void initConfigData() throws GateException {
@@ -358,13 +359,11 @@ public class Gate
 
 //    return false;
   } // tryNetServer()
+
   /** Try to find GATE files in the local file system */
   protected static boolean tryFileSystem() throws MalformedURLException {
     String aGateResourceName = "gate/resources/creole/creole.xml";
     urlBase = Gate.getClassLoader().getResource(aGateResourceName);
-
-  /*  urlBase = new URL(urlBase, "/gate/resources/gate.ac.uk/");
-    return true;*/
 
     StringBuffer basePath = new StringBuffer(urlBase.toExternalForm());
     String urlBaseName =
@@ -376,12 +375,11 @@ public class Gate
     return urlBase == null;
   } // tryFileSystem()
 
-  /**
-   * Registers a {@link gate.event.CreoleListener} with the Gate system
-   */
+  /** Registers a {@link gate.event.CreoleListener} with the Gate system
+    */
   public static synchronized void addCreoleListener(CreoleListener l){
     creoleRegister.addCreoleListener(l);
-  }
+  } // addCreoleListener
 
   /** Set the URL base for GATE files, e.g. <TT>http://gate.ac.uk/</TT>. */
   public static void setUrlBase(URL urlBase) { Gate.urlBase = urlBase; }

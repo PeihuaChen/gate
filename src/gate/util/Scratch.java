@@ -38,54 +38,28 @@ public class Scratch
     try{
       Gate.init();
       doIt();
-/*
-      URL url = null;
-      url = new URL("file:///d:/tmp/testXml.xml");
-
-        // Load the xml Key Document and unpack it
-        gate.Document keyDocument = null;
-        keyDocument = gate.Factory.newDocument(url);
-
-      gate.DocumentFormat keyDocFormat = null;
-      keyDocFormat = gate.DocumentFormat.getDocumentFormat(
-        keyDocument, keyDocument.getSourceUrl()
-      );
-      Out.prln(keyDocFormat);
-      // Unpack the markup
-      keyDocFormat.unpackMarkup(keyDocument);
-      Out.prln(keyDocument.getContent().toString());
-*/
-    }catch (Exception e){
+    } catch (Exception e) {
       e.printStackTrace(Out.getPrintWriter());
     }
 
   } // main
 
   public static void doIt() throws Exception{
-    String str = new String(
-                 "<psad>bun ma <a>salut</a> <b>cool</b> stuf"
-                 );
-    gate.Document doc = Factory.newDocument(str);
-//    doc.setSourceUrl(null);
-    gate.DocumentFormat keyDocFormat = null;
-    keyDocFormat = gate.DocumentFormat.getDocumentFormat(
-      doc, new MimeType("text/html")
-    );
+    // create a File to store the state in
+    File stateFile = new File("z:\\tmp", "SerialisedGateState.ser");
 
-    // Unpack the markup
-    keyDocFormat.unpackMarkup(doc);
+    // dump the state into the new File
+    try {
+      ObjectOutputStream oos = new ObjectOutputStream(
+        new FileOutputStream(stateFile)
+      );
+      oos.writeObject(Gate.getCreoleRegister());
+      oos.close();
+    } catch(IOException e) {
+      throw new GateException("Couldn't write to state file: " + e);
+    }
 
-
-    // Export the Gate document called keyDocument as  XML, into a temp file,
-    // using UTF-8 encoding
-    File xmlFile = new File("d:/tmp/testXml.xml");
-
-    // Prepare to write into the xmlFile using UTF-8 encoding
-    OutputStreamWriter writer = new OutputStreamWriter(
-                    new FileOutputStream(xmlFile),"UTF-8");
-    // Write (test the toXml() method)
-    writer.write(doc.toXml());
-    writer.flush();
+    Out.prln(System.getProperty("user.home"));
   } // doIt
 
   /** Generate a random integer for file naming. */

@@ -17,6 +17,7 @@ package gate.creole;
 
 import java.util.*;
 import java.net.*;
+import java.io.*;
 
 import gate.*;
 import gate.util.*;
@@ -34,7 +35,8 @@ import gate.util.*;
   * resource's ResourceData.
   * @see CreoleRegister
   */
-public class ResourceData extends AbstractFeatureBearer {
+public class ResourceData extends AbstractFeatureBearer implements Serializable
+{
 
   /** Debug flag */
   protected static final boolean DEBUG = false;
