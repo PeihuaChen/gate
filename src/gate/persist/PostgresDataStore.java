@@ -26,7 +26,7 @@ import gate.util.*;
 public class PostgresDataStore extends JDBCDataStore {
 
   /** Name of this resource */
-  public static final String DS_COMMENT = "GATE PostgreSQL datastore";
+  private static final String DS_COMMENT = "GATE PostgreSQL datastore";
 
   /** the icon for this resource */
   public static final String DS_ICON_NAME = "pgsql_ds.gif";
@@ -35,7 +35,10 @@ public class PostgresDataStore extends JDBCDataStore {
   private static final boolean DEBUG = true;
 
   public PostgresDataStore() {
+
     super();
+    this.datastoreComment = DS_COMMENT;
+    this.iconName = DS_ICON_NAME;
   }
 
   public List getLrIds(String lrType) throws gate.persist.PersistenceException {
@@ -43,10 +46,6 @@ public class PostgresDataStore extends JDBCDataStore {
     throw new MethodNotImplementedException();
   }
 
-  public String getComment() {
-    /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
-    throw new MethodNotImplementedException();
-  }
 
   public boolean canWriteLR(Object lrID) throws gate.security.SecurityException, gate.persist.PersistenceException {
     /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
@@ -54,11 +53,6 @@ public class PostgresDataStore extends JDBCDataStore {
   }
 
   public void setSecurityInfo(LanguageResource parm1, SecurityInfo parm2) throws gate.persist.PersistenceException, gate.security.SecurityException {
-    /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
-    throw new MethodNotImplementedException();
-  }
-
-  public String getIconName() {
     /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
     throw new MethodNotImplementedException();
   }
