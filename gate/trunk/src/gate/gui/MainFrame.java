@@ -313,6 +313,10 @@ while(listIter.hasNext()){
       if(availableLocales != null && availableLocales.length > 1){
         imMenu = new JMenu("Input methods");
         ButtonGroup bg = new ButtonGroup();
+        item = new LocaleSelectorMenuItem(this);
+        imMenu.add(item);
+        imMenu.addSeparator();
+        bg.add(item);
         for(int i = 0; i < availableLocales.length; i++){
           locale = availableLocales[i];
           item = new LocaleSelectorMenuItem(locale, this);
@@ -326,12 +330,6 @@ while(listIter.hasNext()){
 
     JMenu viewMenu = new JMenu("View");
     //fileMenu.add(new JGateMenuItem(newProjectAction));
-    fileMenu.add(new XJMenuItem(newLRAction, this));
-    fileMenu.add(new XJMenuItem(newPRAction, this));
-    fileMenu.add(new XJMenuItem(newDSAction, this));
-    fileMenu.add(new XJMenuItem(openDSAction, this));
-    fileMenu.add(new XJMenuItem(newApplicationAction, this));
-    menuBar.add(fileMenu);
 
 
     JMenu toolsMenu = new JMenu("Tools");
@@ -1525,6 +1523,20 @@ while(listIter.hasNext()){
         }
       });
     }
+
+    public LocaleSelectorMenuItem(JFrame pframe) {
+      super("System default  >>" +
+            Locale.getDefault().getDisplayName() + "<<");
+      this.frame = pframe;
+      me = this;
+      myLocale = Locale.getDefault();
+      this.addActionListener(new ActionListener()  {
+        public void actionPerformed(ActionEvent e) {
+          me.setSelected(frame.getInputContext().selectInputMethod(myLocale));
+        }
+      });
+    }
+
     Locale myLocale;
     JRadioButtonMenuItem me;
     JFrame frame;
