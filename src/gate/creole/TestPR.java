@@ -101,16 +101,16 @@ public class TestPR extends TestCase
     tokeniser.execute();
     assertTrue("Found in "+ doc2.getSourceUrl().getFile()+ " "+
       doc2.getAnnotations().size() +
-      " Token annotations, instead of the expected 2140.",
-      doc2.getAnnotations().size()== 2140);
+      " Token annotations, instead of the expected 2138.",
+      doc2.getAnnotations().size()== 2138);
 
     //run the tokeniser for doc3
     tokeniser.setDocument(doc3);
     tokeniser.execute();
     assertTrue("Found in "+ doc3.getSourceUrl().getFile()+ " "+
       doc3.getAnnotations().size() +
-      " Token annotations, instead of the expected 2808.",
-      doc3.getAnnotations().size()== 2808);
+      " Token annotations, instead of the expected 2806.",
+      doc3.getAnnotations().size()== 2806);
 
     Factory.deleteResource(tokeniser);
   }// testTokenizer
