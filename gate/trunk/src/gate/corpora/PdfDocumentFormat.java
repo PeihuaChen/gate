@@ -72,25 +72,36 @@ public class PdfDocumentFormat extends DocumentFormat{
     if(fileURL == null) throw new DocumentFormatException(
             "Unpacking PDF files requires an URL to the original content!");
     
+    InputStream in = null;
+    PDDocument document = null;
     //Implement the PDF unpacking.
     try {
       // get an Input stream from the gate document
-      InputStream in = fileURL.openStream();
+      in = fileURL.openStream();
       // create a PDF Text Stripper
       PDFTextStripper pdfStripper = new PDFTextStripper();
       
-      PDDocument document = PDDocument.load(in);
+      document = PDDocument.load(in);
       
       String extractedContent = pdfStripper.getText(document);
-      
-      document.close();
-      in.close();
       //set the content on the document
       doc.setContent(new DocumentContentImpl(extractedContent));
     } catch (IOException e){
       throw new DocumentFormatException("I/O exception for " +
                                         doc.getSourceUrl().toExternalForm(), 
                                         e);
+    }finally{
+      try{
+        if(document != null) document.close();
+      }catch(IOException ioe){
+        //give up
+      }
+      try{
+        if(in != null ) in.close();
+      }catch(IOException ioe){
+        //give up
+      }
+      
     }
   }
 
