@@ -106,6 +106,39 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
 
   protected void initListeners(){
     Gate.getCreoleRegister().addCreoleListener(this);
+    addKeyListener(new KeyAdapter() {
+      public void keyTyped(KeyEvent e) {
+        if(e.getKeyCode() == e.VK_ENTER){
+System.out.println(e);
+          if(getEditingColumn() == -1 && getEditingRow() == -1){
+            getParent().dispatchEvent(e);
+          }
+        }
+      }
+
+      public void keyPressed(KeyEvent e) {
+      }
+
+      public void keyReleased(KeyEvent e) {
+      }
+    });
+  }
+
+  /**
+   * Disable key handling for most keys by JTable when not editing.
+   */
+  protected boolean processKeyBinding(KeyStroke ks, KeyEvent e,
+                                      int condition, boolean pressed) {
+    int keyCode = e.getKeyCode();
+    if(isEditing() ||
+       keyCode == KeyEvent.VK_UP ||
+       keyCode == KeyEvent.VK_DOWN ||
+       keyCode == KeyEvent.VK_LEFT ||
+       keyCode == KeyEvent.VK_RIGHT ||
+       keyCode == KeyEvent.VK_TAB) return super.processKeyBinding(ks, e,
+                                                                  condition,
+                                                                  pressed);
+    return false;
   }
 
   /**
