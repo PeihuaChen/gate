@@ -30,6 +30,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
   //JAPE grammars
   private static final String QT_GRAMMAR_URL = "gate://gate/creole/coref/quoted_text.jape";
+  private static final String PLEON_GRAMMAR_URL = "gate://gate/creole/coref/pleonasm.jape";
 
   //annotation types
   private static final String PERSON_TYPE = "Person";
@@ -38,6 +39,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   private static final String TOKEN_TYPE = "Token";
   private static final String SENTENCE_TYPE = "Sentence";
   private static final String QUOTED_TEXT_TYPE = "Quoted Text";
+  private static final String PLEONASTIC_TYPE = "PleonasticIt";
 
   //annotation features
   private static final String PRP_CATEGORY = "PRP";
@@ -54,11 +56,15 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
   private String annotationSetName;
 
+  private Transducer qtTransducer;
+  private Transducer pleonTransducer;
+
   private AnnotationSet defaultAnnotations;
   private Sentence[] textSentences;
   private Quote[] quotedText;
+  private Annotation[] pleonasticIt;
   private HashMap personGender;
-  private Transducer qtTransducer;
+
 
   private static final FeatureMap PRP_RESTRICTION;
 
@@ -72,6 +78,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
     this.personGender = new HashMap();
     this.qtTransducer = new gate.creole.Transducer();
+    this.pleonTransducer = new gate.creole.Transducer();
   }
 
   /** Initialise this resource, and return it. */
@@ -92,7 +99,20 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     this.qtTransducer.setEncoding("UTF-8");
     this.qtTransducer.init();
 
-    //2. delegate
+    //2. initialise pleonastic transducer
+    URL pleonGrammarURL = null;
+    try {
+      pleonGrammarURL = new URL(PLEON_GRAMMAR_URL);
+    }
+    catch(MalformedURLException mue) {
+      throw new ResourceInstantiationException(mue);
+    }
+    this.pleonTransducer.setGrammarURL(pleonGrammarURL);
+    this.pleonTransducer.setEncoding("UTF-8");
+    this.pleonTransducer.init();
+
+
+    //3. delegate
     return super.init();
   } // init()
 
@@ -110,6 +130,10 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       this.qtTransducer.reInit();
     }
 
+    if (null != this.pleonTransducer) {
+      this.pleonTransducer.reInit();
+    }
+
     init();
   } // reInit()
 
@@ -121,8 +145,9 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
     //1. set doc for aggregated components
     this.qtTransducer.setDocument(newDocument);
+    this.pleonTransducer.setDocument(newDocument);
 
-    //2. delegate
+    //3. delegate
     super.setDocument(newDocument);
   }
 
@@ -265,6 +290,46 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   }
 
 
+  boolean isPleonastic(Annotation pronoun) {
+
+    //0. preconditions
+    Assert.assertNotNull(pronoun);
+    String str = (String)pronoun.getFeatures().get(TOKEN_STRING);
+    Assert.assertTrue(str.equalsIgnoreCase("IT"));
+
+    //1. do we have pleonasms in this text?
+    if (this.pleonasticIt.length == 0) {
+      return false;
+    }
+
+    //2. find closest pleonasm index
+    int closestPleonasmIndex = java.util.Arrays.binarySearch(this.pleonasticIt,
+                                                             pronoun,
+                                                             ANNOTATION_OFFSET_COMPARATOR);
+    //normalize index
+    if (closestPleonasmIndex < 0) {
+      closestPleonasmIndex = -closestPleonasmIndex -1 -1;
+    }
+
+    //still not good?
+    if (closestPleonasmIndex < 0) {
+      closestPleonasmIndex = 0;
+    }
+
+    //get closest pleonasm
+    Annotation pleonasm = this.pleonasticIt[closestPleonasmIndex];
+
+System.out.println(pleonasm);
+System.out.println(pronoun);
+
+    //3. return true only if the proboun is contained in pleonastic fragment
+    boolean result =  (pleonasm.getStartNode().getOffset().intValue() <= pronoun.getStartNode().getOffset().intValue()
+            &&
+            pleonasm.getEndNode().getOffset().intValue() >= pronoun.getEndNode().getOffset().intValue());
+System.out.println("is pleon=["+result+"]");
+    return result;
+  }
+
 
   private Annotation _resolve$HE$HIM$HIS$(Annotation pronoun, int sentenceIndex) {
 
@@ -377,6 +442,13 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     String pronounString = (String)pronoun.getFeatures().get(TOKEN_STRING);
     Assert.assertTrue(pronounString.equalsIgnoreCase("IT") ||
                       pronounString.equalsIgnoreCase("ITS"));
+
+    //0.5 check if the IT is pleonastic
+    if (pronounString.equalsIgnoreCase("IT") &&
+        isPleonastic(pronoun)) {
+System.out.println("PLEONASM...");
+      return null;
+    }
 
     //1.
     int scopeFirstIndex = sentenceIndex - 1;
@@ -538,16 +610,25 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     //1.get all annotation in the default set
     this.defaultAnnotations = this.document.getAnnotations();
 
-    //1.5 remove QT annotation sif left from previous execution
+    //2.1 remove QT annotations if left from previous execution
     AnnotationSet qtSet = this.defaultAnnotations.get(QUOTED_TEXT_TYPE);
     if (null != qtSet) {
       qtSet.clear();
     }
 
-    //1.6. run quoted text transducer to generate "Quoted Text" annotations
+    //2.2. run quoted text transducer to generate "Quoted Text" annotations
     this.qtTransducer.execute();
 
-    //2.get all SENTENCE annotations
+    //3.1 remove pleonastic annotations if left from previous execution
+    AnnotationSet pleonSet = this.defaultAnnotations.get(PLEONASTIC_TYPE);
+    if (null != pleonSet) {
+      pleonSet.clear();
+    }
+
+    //3.2 run quoted text transducer to generate "Pleonasm" annotations
+    this.pleonTransducer.execute();
+
+    //4.get all SENTENCE annotations
     AnnotationSet sentenceAnnotations = this.defaultAnnotations.get(SENTENCE_TYPE);
 
     this.textSentences = new Sentence[sentenceAnnotations.size()];
@@ -561,22 +642,22 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       Long sentStartOffset = currSentence.getStartNode().getOffset();
       Long sentEndOffset = currSentence.getEndNode().getOffset();
 
-      //2.1. get PERSOSNS in this sentence
+      //4.1. get PERSOSNS in this sentence
       AnnotationSet sentPersons = this.defaultAnnotations.get(PERSON_TYPE,
                                                               sentStartOffset,
                                                               sentEndOffset);
 
-      //2.2. get ORGANIZATIONS in this sentence
+      //4.2. get ORGANIZATIONS in this sentence
       AnnotationSet sentOrgs = this.defaultAnnotations.get(ORG_TYPE,
                                                               sentStartOffset,
                                                               sentEndOffset);
 
-      //2.3. get LOCATION in this sentence
+      //4.3. get LOCATION in this sentence
       AnnotationSet sentLocs = this.defaultAnnotations.get(LOC_TYPE,
                                                               sentStartOffset,
                                                               sentEndOffset);
 
-      //2.5. create a Sentence for thei SENTENCE annotation
+      //4.5. create a Sentence for thei SENTENCE annotation
       this.textSentences[i] = new Sentence(i,
                                             0,
                                             sentStartOffset,
@@ -586,7 +667,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
                                             sentLocs
                                   );
 
-      //2.6. for all PERSONs in the sentence - find their gender using the
+      //4.6. for all PERSONs in the sentence - find their gender using the
       //orthographic coreferences if the gender of some entity is unknown
       Iterator itPersons = sentPersons.iterator();
       while (itPersons.hasNext()) {
@@ -596,23 +677,41 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       }
     }
 
-    //3. get the quoted text fragments
+    //5. initialise the quoted text fragments
     AnnotationSet sentQuotes = this.defaultAnnotations.get(QUOTED_TEXT_TYPE);
 
     //if none then return
     if (null == sentQuotes) {
       this.quotedText = new Quote[0];
-      return;
+    }
+    else {
+      this.quotedText = new Quote[sentQuotes.size()];
+
+      Object[] quotesArray = sentQuotes.toArray();
+      java.util.Arrays.sort(quotesArray,ANNOTATION_OFFSET_COMPARATOR);
+
+      for (int i =0; i < quotesArray.length; i++) {
+        this.quotedText[i] = new Quote((Annotation)quotesArray[i]);
+      }
     }
 
-    this.quotedText = new Quote[sentQuotes.size()];
+    //6. initialuse the plonastic It annotations
+    AnnotationSet plaonasticSet = this.defaultAnnotations.get(PLEONASTIC_TYPE);
 
-    Object[] quotesArray = sentQuotes.toArray();
-    java.util.Arrays.sort(quotesArray,ANNOTATION_OFFSET_COMPARATOR);
-
-    for (int i =0; i < quotesArray.length; i++) {
-      this.quotedText[i] = new Quote((Annotation)quotesArray[i]);
+    if (null == plaonasticSet) {
+      this.pleonasticIt = new Annotation[0];
     }
+    else {
+      this.pleonasticIt = new Annotation[plaonasticSet.size()];
+
+      Object[] quotesArray = plaonasticSet.toArray();
+      java.util.Arrays.sort(quotesArray,ANNOTATION_OFFSET_COMPARATOR);
+
+      for (int i=0; i< this.pleonasticIt.length; i++) {
+        this.pleonasticIt[i] = (Annotation)quotesArray[i];
+      }
+    }
+
   }
 
 
@@ -1087,6 +1186,5 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       return this.locations;
     }
   }
-
 
 }
