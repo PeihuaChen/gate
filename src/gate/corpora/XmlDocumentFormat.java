@@ -150,33 +150,9 @@ public class XmlDocumentFormat extends TextualDocumentFormat
     }// End if else try
   }// unpackMarkup
 
-  /** Unpack the markup in the document. This converts markup from the
-    * native format (e.g. XML, RTF) into annotations in GATE format.
-    * Uses the markupElementsMap to determine which elements to convert, and
-    * what annotation type names to use.
-    * It uses the same behaviour as
-    * <code>unpackMarkup(Document doc);</code> but the document's old content is
-    * preserved into a feature attached to the doc.
-    *
-    * @param gate.Document doc The gate document you want to parse and create
-    * annotations
-    * @param String originalContentFeatureType The name of a feature that will
-    * preserve the old content of the document.
-    */
-   public void unpackMarkup( Document doc,
-                             String  originalContentFeature)
-                                                throws DocumentFormatException{
-
-     FeatureMap fm = doc.getFeatures ();
-
-     if (fm == null)
-        fm = Factory.newFeatureMap();
-
-     fm.put(originalContentFeature, doc.getContent().toString());
-     doc.setFeatures(fm);
-     unpackMarkup (doc);
-  }// unpackMarkup
-
+  /** Called from unpackMarkup() if the document have been created from a
+   *  string
+   */
   private void parseDocumentWithoutURL(gate.Document aDocument)
                                               throws DocumentFormatException {
 

@@ -190,18 +190,6 @@ public class TextualDocumentFormat extends DocumentFormat
     }// End if
   }// End annotateParagraphs();
 
-  public void unpackMarkup(Document doc,
-                                    String  originalContentFeatureType)
-                                              throws DocumentFormatException{
-     FeatureMap fm = doc.getFeatures ();
-
-     if (fm == null)
-        fm = Factory.newFeatureMap();
-
-     fm.put(originalContentFeatureType, doc.getContent().toString());
-     doc.setFeatures(fm);
-     unpackMarkup(doc);
-  }//unpackMarkup
   public DataStore getDataStore(){ return null;}
 
 } // class TextualDocumentFormat

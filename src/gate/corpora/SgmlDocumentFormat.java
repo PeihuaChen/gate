@@ -127,37 +127,12 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
 
   }// unpackMarkup
 
+  /** This method converts the document's content from SGML 2 XML.*/
   private String sgml2Xml(Document doc) {
     String xmlUri = doc.getSourceUrl().toString ();
 
     return xmlUri;
-  }
-
-  /** Unpack the markup in the document. This converts markup from the
-    * native format (e.g. XML, RTF) into annotations in GATE format.
-    * Uses the markupElementsMap to determine which elements to convert, and
-    * what annotation type names to use.
-    * It uses the same behaviour as
-    * <code>unpackMarkup(Document doc);</code> but the document's old content is
-    * preserved into a feature attached to the doc.
-    *
-    * @param gate.Document doc The gate document you want to parse and create
-    * annotations
-    * @param String originalContentFeatureType The name of a feature that will
-    * preserve the old content of the document.
-    */
-   public void unpackMarkup(Document doc,
-                                    String  originalContentFeatureType)
-                                                throws DocumentFormatException{
-     FeatureMap fm = doc.getFeatures ();
-
-     if (fm == null)
-        fm = Factory.newFeatureMap();
-
-     fm.put(originalContentFeatureType, doc.getContent().toString());
-     doc.setFeatures(fm);
-     unpackMarkup (doc);
-  }// unpackMarkup
+  }// sgml2Xml()
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException{
