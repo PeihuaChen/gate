@@ -37,6 +37,7 @@ import gate.config.*;
 import gate.persist.*;
 import gate.security.*;
 import com.ontotext.gate.gazetteer.*;
+import gate.creole.ir.*;
 
 /** Top-level entry point for GATE test suite;
   * "main" will run the JUnit test runner interface.
@@ -209,6 +210,7 @@ public class TestGate {
       if(! allTests){
         suite.addTest(TestPR.suite());
       } else {
+        suite.addTest(TestIndex.suite());
         suite.addTest(TestPersist.suite());
         suite.addTest(TestBumpyStack.suite());
         suite.addTest(TestControllers.suite());

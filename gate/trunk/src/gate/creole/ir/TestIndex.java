@@ -28,14 +28,24 @@ import java.util.*;
 
 public class TestIndex extends TestCase{
 
-  public static String LOCATION = "c:/temp_index";
+  private static String TEMP_LOCATION = null;
   private Corpus corpus = null;
   private DataStore sds = null;
 
   public TestIndex(String name) throws GateException {
     super(name);
+
     try {
       File storageDir = File.createTempFile("TestIndex__", "__StorageDir");
+
+      if (null == TEMP_LOCATION) {
+        File indexDir = File.createTempFile("LuceneIndex__", "__Dir");
+        TEMP_LOCATION = indexDir.getAbsolutePath();
+      }
+
+//System.out.println("temp=["+TEMP_LOCATION+"]");
+//System.out.println("temp2=["+indexDir.getAbsoluteFile()+"]");
+
       storageDir.delete();
       // create and open a serial data store
       sds = Factory.createDataStore(
@@ -63,6 +73,7 @@ public class TestIndex extends TestCase{
 
   /** Fixture set up */
   public void setUp() throws Exception {
+
   } // setUp
 
   /** Put things back as they should be after running tests
@@ -80,7 +91,8 @@ public class TestIndex extends TestCase{
     IndexedCorpus ic = (IndexedCorpus) corpus;
     DefaultIndexDefinition did = new DefaultIndexDefinition();
     did.setIndexType(GateConstants.IR_LUCENE_INVFILE);
-    did.setIndexLocation(LOCATION);
+
+    did.setIndexLocation(TEMP_LOCATION);
     did.addIndexField(new IndexField("content", new ContentPropertyReader(), false));
     did.addIndexField(new IndexField("author", null, false));
 
@@ -95,7 +107,8 @@ public class TestIndex extends TestCase{
     IndexedCorpus ic = (IndexedCorpus) corpus;
     DefaultIndexDefinition did = new DefaultIndexDefinition();
     did.setIndexType(GateConstants.IR_LUCENE_INVFILE);
-    did.setIndexLocation(LOCATION);
+
+    did.setIndexLocation(TEMP_LOCATION);
 
     ic.setIndexDefinition(did);
 
@@ -106,7 +119,8 @@ public class TestIndex extends TestCase{
     IndexedCorpus ic = (IndexedCorpus) corpus;
     DefaultIndexDefinition did = new DefaultIndexDefinition();
     did.setIndexType(GateConstants.IR_LUCENE_INVFILE);
-    did.setIndexLocation(LOCATION);
+
+    did.setIndexLocation(TEMP_LOCATION);
 
     ic.setIndexDefinition(did);
 
@@ -135,7 +149,8 @@ public class TestIndex extends TestCase{
     IndexedCorpus ic = (IndexedCorpus) corpus;
     DefaultIndexDefinition did = new DefaultIndexDefinition();
     did.setIndexType(GateConstants.IR_LUCENE_INVFILE);
-    did.setIndexLocation(LOCATION);
+
+    did.setIndexLocation(TEMP_LOCATION);
 
     ic.setIndexDefinition(did);
 
