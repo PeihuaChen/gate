@@ -24,12 +24,8 @@ import javax.swing.event.PopupMenuEvent;
 //GATE imports
 import gate.util.*;
 import gate.*;
+import java.net.URL;
 
-//For now the tree viewer only supports one annotation type to be used for encoding
-//annotations and for obtaining information from the stereotype. Later this could
-//easily be changed to be two types - one for leaf node and one for non-terminal
-//nodes. However since this requires a major design, we're leaving it as in old
-//GATE for now. Compatibility at least :-)  (13Aug99 KB, HC)
 
 public class SyntaxTreeViewer extends JPanel
     implements Scrollable, ActionListener, MouseListener{
@@ -37,8 +33,8 @@ public class SyntaxTreeViewer extends JPanel
   //class members
   private boolean laidOut = false;  //whether to use any layout or not
 
-  private int horizButtonGap = 5; //display all buttons 30 pixels apart horizontally
-  private int vertButtonGap = 50; //display buttons at diff layers 80 pixels apart vertically
+  private int horizButtonGap = 5; //display all buttons x pixels apart horizontally
+  private int vertButtonGap = 50; //display buttons at diff layers x pixels apart vertically
   private int extraButtonWidth = 10; //extra width in pixels to be added to each button
   private int maxUnitIncrement = 10; //number of pixels to be used as increment by scroller
 
@@ -58,17 +54,27 @@ public class SyntaxTreeViewer extends JPanel
   //for internal use only. Set when the utterance is set.
   private String displayedString = "";
 
-  //The name of the stereotype we need to look for to retrieve the categories
-  //also when importing and exporting annotations
-  //can be set only at construction time, sorry!
+  //The name of the annotation type which is used to locate the
+  //stereotype with the allowed categories
+  //also when reading and creating annotations
   private String treeNodeAnnotationType = "SyntaxTreeNode";
+
+  //The annotation name of the annotations used to extract the
+  //text that appears at the leaves of the tree. For now the viewer
+  //supports only one such annotation but might be an idea to extend it
+  //so that it gets its text off many token annotations, which do not
+  //need to be tokenised or off the syntax tree annotations themselves.
+  private String textAnnotationType = "utterance";
 
   private HashMap leaves = new HashMap();  //all leaf nodes
   private HashMap nonTerminals = new HashMap(); //all non-terminal nodes
   private HashMap buttons = new HashMap(); //all buttons corresponding to any node
   private Vector selection = new Vector(); //all selected buttons
 	private AnnotationSet treeAnnotations; //all annotations tp be displayed
-  private Document document = null; //the document to which the annotations belong
+  private Document document = null;
+//the document to which the annotations belong
+
+  private static BasicUnicodeButtonUI buttonUI = new BasicUnicodeButtonUI();
 
   private SyntaxTreeViewer() {   //override so we can't be constructed like that!
   }
@@ -115,13 +121,16 @@ public class SyntaxTreeViewer extends JPanel
 
   public static void main(String[] args) throws Exception{
     Gate.init();
-    final String text = "This is a sentence. That is another one.";
+//    final String text = "This is a sentence. That is another one.";
+    final String text = "\u0915\u0932\u094d\u0907\u0928\u0643\u0637\u0628 \u041a\u0430\u043b\u0438\u043d\u0430 Kalina";
     final Document doc = Transients.newDocument(text);
+
+//    final Document doc = Transients.newDocument(new URL("file:///z:/temp/weird.txt"));
 
 
     final SyntaxTreeViewer syntaxTreeViewer1 = new SyntaxTreeViewer("SyntaxTreeNode");
     //need to set the document here!!!!
-
+     
 
 		JFrame frame = new JFrame();
 
@@ -134,11 +143,13 @@ public class SyntaxTreeViewer extends JPanel
     frame.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
         AnnotationSet hs = doc.getAnnotations().get("SyntaxTreeNode");
-        int k = 0;
-				for (Iterator i = hs.iterator(); i.hasNext(); k++) {
-					System.out.println("Tree Annot " + k + ": ");
-          System.out.println(i.next().toString());
-        }
+        if (hs != null && hs.size() == 0) {
+          int k = 0;
+          for (Iterator i = hs.iterator(); i.hasNext(); k++) {
+            System.out.println("Tree Annot " + k + ": ");
+            System.out.println(i.next().toString());
+          }
+        } //if
         System.out.println("Exiting...");
         System.exit(0);
       }
@@ -156,7 +167,7 @@ public class SyntaxTreeViewer extends JPanel
 
     FeatureMap attrs = Transients.newFeatureMap();
     attrs.put("time", new Long(0));
-    attrs.put("text", text);
+    attrs.put("text", doc.getContent().toString());
 
     FeatureMap attrs1 = Transients.newFeatureMap();
     attrs1.put("cat", "N");
@@ -169,9 +180,9 @@ public class SyntaxTreeViewer extends JPanel
     attrs2.put("consists", new Vector());
 
 
-    doc.getAnnotations().add( new Long(0), new Long(text.length()),
+    doc.getAnnotations().add( new Long(0), new Long(doc.getContent().toString().length()),
                               "utterance", attrs);
-    Integer id1 = doc.getAnnotations().add(new Long(0), new Long(4),
+/*    Integer id1 = doc.getAnnotations().add(new Long(0), new Long(4),
                               "SyntaxTreeNode", attrs1);
     Integer id2 = doc.getAnnotations().add(new Long(5), new Long(7),
                               "SyntaxTreeNode", attrs2);
@@ -184,7 +195,7 @@ public class SyntaxTreeViewer extends JPanel
     consists.add(id2);
     attrs3.put("consists", consists);
     doc.getAnnotations().add(new Long(0), new Long(7), "SyntaxTreeNode", attrs3);
-
+*/
     HashSet set = new HashSet();
     set.add("utterance");
     set.add("SyntaxTreeNode");
@@ -271,14 +282,15 @@ public class SyntaxTreeViewer extends JPanel
   	HashMap processed = new HashMap(); //for all processed annotations
 
     AnnotationSet utterances =
-    	treeAnnotations.get("utterance");
+    	treeAnnotations.get(textAnnotationType);
 
-		if (utterances.size() == 0)
-      utterances = treeAnnotations.get("sentence");
-
-		if (utterances.size() > 1) {
+		if (utterances.size() > 1)
     	System.out.println("Tree Viewer can't display more than one utterance/sentence at a time! Using only first annotation");
+    else if (utterances.size() == 0) {
+      System.out.println("No annotations of type " + textAnnotationType + " passed so can't display anything!");
+      return;
     }
+
     //we have our utterance now
     utterance = (Annotation) utterances.iterator().next();
 
@@ -394,9 +406,8 @@ public class SyntaxTreeViewer extends JPanel
   */
   private void utterances2Trees() {
 
-  	if (! utterance.getType().equals("utterance") &&
-    		! utterance.getType().equals("sentence") ) {
-			System.out.println("Can't display annotations other than utterance/sentence!");
+  	if (! utterance.getType().equals(textAnnotationType)) {
+			System.out.println("Can't display annotations other than the specified type:" + textAnnotationType);
       return;
     }
 
@@ -430,7 +441,8 @@ public class SyntaxTreeViewer extends JPanel
 
     }
 
-    this.resize(buttonX, buttonY + 20 + insets.bottom);
+    this.setSize(buttonX, buttonY + 20 + insets.bottom);
+//    this.resize(buttonX, buttonY + 20 + insets.bottom);
     this.setPreferredSize(this.getSize());
 
   } //utterance2Trees
@@ -445,6 +457,7 @@ public class SyntaxTreeViewer extends JPanel
 
     JButton button = new JButton((String) node.getUserObject());
     button.setBorderPainted(false);
+    button.setUI(buttonUI);
 
     FontMetrics fm = button.getFontMetrics(button.getFont());
 
@@ -453,7 +466,7 @@ public class SyntaxTreeViewer extends JPanel
 
 //    System.out.print("Button width " + b1.getWidth() + "; Button height " + b1.getHeight());
 
-    buttonWidth = fm.stringWidth(button.getLabel())
+    buttonWidth = fm.stringWidth(button.getText())
                   + button.getMargin().left + button.getMargin().right
                   + extraButtonWidth;
     buttonHeight = fm.getHeight() + button.getMargin().top + button.getMargin().bottom;
@@ -487,7 +500,7 @@ public class SyntaxTreeViewer extends JPanel
 
 //    System.out.print("Button width " + b1.getWidth() + "; Button height " + b1.getHeight());
 
-    buttonWidth = fm.stringWidth(button.getLabel())
+    buttonWidth = fm.stringWidth(button.getText())
                   + button.getMargin().left + button.getMargin().right
                   + extraButtonWidth;
     buttonHeight = fm.getHeight() + button.getMargin().top + button.getMargin().bottom;
@@ -525,7 +538,7 @@ public class SyntaxTreeViewer extends JPanel
 
     //check if we need to resize the panel
     if (buttonY < 0) {
-    	this.resize(this.getWidth(), this.getHeight() + 5* (- buttonY));
+    	this.setSize(this.getWidth(), this.getHeight() + 5* (- buttonY));
       this.setPreferredSize(this.getSize());
       shiftButtonsDown(5* (-buttonY));
     }
@@ -910,7 +923,7 @@ public class SyntaxTreeViewer extends JPanel
 
     //remove button from everywhere
     buttons.remove(button);
-    button.hide();
+    button.setVisible(false);
     this.remove(button);
 
     recalculateLines();  //recalculate all lines
@@ -985,6 +998,14 @@ public class SyntaxTreeViewer extends JPanel
 		firePropertyChange("treeAnnotations", oldTreeAnnotations, newTreeAnnotations);
 	}
 
+  public void setTreeNodeAnnotationType(String newTreeNodeAnnotationType) {
+    treeNodeAnnotationType = newTreeNodeAnnotationType;
+  }
+
+  public void setTextAnnotationType(String newTextAnnotationType) {
+    textAnnotationType = newTextAnnotationType;
+  }
+
 
 
 
@@ -1034,6 +1055,9 @@ class FocusButton extends JButton {
 } //FocusButton
 
 // $Log$
+// Revision 1.2  2000/09/21 14:17:27  kalina
+// Added Unicode support
+//
 // Revision 1.1  2000/09/20 17:03:37  kalina
 // Added the tree viewer from the prototype. It works now with the new annotation API.
 //
