@@ -1398,11 +1398,23 @@ System.out.println();
       result.setSourceUrl(new URL(url));
 
       //4.6. start offset
-      Long start = new Long(rs.getLong("doc_start"));
+      Long start = null;
+      long longVal = rs.getLong("doc_start");
+      //null?
+      //if NULL is stored in the DB, Oracle returns 0 which is not what we want
+      if (false == rs.wasNull()) {
+        start = new Long(longVal);
+      }
       result.setSourceUrlStartOffset(start);
 
       //4.7. end offset
-      Long end = new Long(rs.getLong("doc_end"));
+      Long end = null;
+      longVal = rs.getLong("doc_end");
+      //null?
+      //if NULL is stored in the DB, Oracle returns 0 which is not what we want
+      if (false == rs.wasNull()) {
+        end = new Long(longVal);
+      }
       result.setSourceUrlEndOffset(end);
 
       //4.8 features
