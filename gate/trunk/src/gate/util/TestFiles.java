@@ -11,6 +11,7 @@ package gate.util;
 import java.util.*;
 import java.io.*;
 import junit.framework.*;
+import java.net.*;
 
 /** Files test class.
   */
@@ -46,7 +47,7 @@ public class TestFiles extends TestCase
     System.out.println(resString);
     System.out.println(resString.length());
     */
-    
+
     char resChars[] = new char[firstLine.length()];
     for(int i=0; i<resChars.length; i++) resChars[i] = (char)resBytes[i];
     resString = new String(resChars);
@@ -56,7 +57,17 @@ public class TestFiles extends TestCase
 
   /** Test the writeTempFile... method. */
   public void testWriteTempFile() throws Exception {
-   
+    assert(true);
+    String japeResName = "jape/combined/testloc.jape";
+    String firstLine = "// testloc.jape";
+
+    File f = Files.writeTempFile(Files.getResourceAsStream(japeResName));
+    BufferedReader bfr = new BufferedReader(new FileReader(f));
+
+    String firstLn = bfr.readLine();
+    assert(firstLine, firstLine.equals(firstLn));
+    
+    f.delete ();
   } // testWriteTempFile()
 
   /** Test suite routine for the test runner */
