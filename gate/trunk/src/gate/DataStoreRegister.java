@@ -35,18 +35,27 @@ public class DataStoreRegister extends HashSet {
 // no plugability here at present.... at some future point there should
 // be a capability to add new data store classes via creole.xml metadata
 // and resource jars
-    names.put(
-      "gate.persist.SerialDataStore",
-      "SerialDataStore: file-based storage using Java serialisation"
-    );
-//    names.put(
-//      "gate.persist.JdbcDataStore",
-//      "JdbcDataStore: generic RDBMS storage over JDBC"
-//    );
+
+    //Oracle
     names.put(
       "gate.persist.OracleDataStore",
       "OracleDataStore: Oracle-specific RDBMS storage over JDBC"
     );
+
+
+    //Postgres
+    names.put(
+      "gate.persist.PostgresDataStore",
+      "PostgresDataStore: PostgreSQL-specific RDBMS storage over JDBC"
+    );
+
+    //filesystem
+    names.put(
+      "gate.persist.SerialDataStore",
+      "SerialDataStore: file-based storage using Java serialisation"
+    );
+
+
 
     return names;
   } // getDataStoreClassNames()
