@@ -176,24 +176,31 @@ public class AnnotationSchema {
       // Parse the document and create the DOM structure
       org.w3c.dom.Document dom =
                 xmlParser.parse(anXSchemaURL.toString());
-      // Create a new jDOM BUILDER
-      DOMBuilder jDomBuilder = new DOMBuilder();
-      // Create a JDOM structure from the dom one
-      org.jdom.Document jDom = jDomBuilder.build(dom);
-      // Don't need dom anymore.
+      org.jdom.Document jDom = buildJdomFromDom(dom);
+      // don't need dom anymore
       dom = null;
-
-      // Work with the jDom structure
-      org.jdom.Element rootElement = jDom.getRootElement();
-      // get all children elements from the rootElement
-      List rootElementChildrenList = rootElement.getChildren("element");
-      Iterator rootElementChildrenIterator =
-                                            rootElementChildrenList.iterator();
-      while (rootElementChildrenIterator.hasNext()){
-        org.jdom.Element childElement =
-              (org.jdom.Element) rootElementChildrenIterator.next();
-        createAnnotationSchemaObject(childElement);
-      }//end while
+      // Use JDOM
+      workWithJDom(jDom);
+    } catch (SAXException e){
+      e.printStackTrace(Err.getPrintWriter());
+    } catch (IOException e) {
+      e.printStackTrace(Err.getPrintWriter());
+    }
+  }// end fromXSchema
+  /**
+    * Creates an AnnotationSchema object from an XSchema file
+    * @param anXSchemaInputStream the Input Stream containing the XSchema file
+    */
+  public void fromXSchema(InputStream anXSchemaInputStream){
+    try {
+      // Parse the document and create the DOM structure
+      org.w3c.dom.Document dom =
+                xmlParser.parse(anXSchemaInputStream);
+      org.jdom.Document jDom = buildJdomFromDom(dom);
+      // don't need dom anymore
+      dom = null;
+      // Use JDOM
+      workWithJDom(jDom);
     } catch (SAXException e){
       e.printStackTrace(Err.getPrintWriter());
     } catch (IOException e) {
@@ -201,6 +208,36 @@ public class AnnotationSchema {
     }
   }// end fromXSchema
 
+  /**
+    * This method builds a JDom structure from a W3C Dom one
+    * @param aDom W3C dom structure
+    * @return org.jdom.Document
+    */
+  private org.jdom.Document buildJdomFromDom(org.w3c.dom.Document aDom){
+    org.jdom.Document jDom = null;
+    // Create a new jDOM BUILDER
+    DOMBuilder jDomBuilder = new DOMBuilder();
+    // Create a JDOM structure from the dom one
+    jDom = jDomBuilder.build(aDom);
+    // Don't need dom anymore.
+    return jDom;
+  }//buildJdomFromDom
+  /**
+    * This method uses the JDom structure for our XSchema needs
+    */
+  private void workWithJDom(org.jdom.Document jDom){
+    // Use the jDom structure the way we want
+    org.jdom.Element rootElement = jDom.getRootElement();
+    // get all children elements from the rootElement
+    List rootElementChildrenList = rootElement.getChildren("element");
+    Iterator rootElementChildrenIterator =
+                                        rootElementChildrenList.iterator();
+    while (rootElementChildrenIterator.hasNext()){
+    org.jdom.Element childElement =
+          (org.jdom.Element) rootElementChildrenIterator.next();
+    createAnnotationSchemaObject(childElement);
+    }//end while
+  }//workWithJdom
   /**
     * This method creates an AnnotationSchema object fom an org.jdom.Element
     * @param anElement is an XSchema element element
