@@ -2,14 +2,14 @@
  *  ResourceDataImpl.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
- * 
+ *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June1991.
- * 
+ *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- * 
+ *
  *  Hamish Cunningham, 1/Sept/2000
  *
  *  $Id$
@@ -18,6 +18,7 @@
 package gate.creole;
 
 import java.util.*;
+import java.net.*;
 
 import gate.*;
 import gate.util.*;
@@ -75,6 +76,26 @@ public class ResourceDataImpl implements ResourceData {
   /** Get method for the resource class name */
   public String getClassName() { return className; }
 
+  /** The class of the resource */
+  private Class resourceClass;
+
+  /** Set method for the resource class */
+  public void setResourceClass(Class resourceClass) {
+    this.resourceClass = resourceClass;
+  } // setResourceClass
+
+  /** Get method for the resource class. Asks the GATE class loader
+    * to load it, if it is not already present.
+    */
+  public Class getResourceClass() throws ClassNotFoundException {
+    if(resourceClass == null) {
+      GateClassLoader classLoader = Gate.getClassLoader();
+      resourceClass = classLoader.loadClass(className);
+    }
+
+    return resourceClass;
+  } // getResourceClass
+
   /** The jar file name of the resource */
   private String jarFileName;
 
@@ -85,6 +106,15 @@ public class ResourceDataImpl implements ResourceData {
 
   /** Get method for the resource jar file name */
   public String getJarFileName() { return jarFileName; }
+
+  /** The jar file URL of the resource */
+  private URL jarFileUrl;
+
+  /** Set method for the resource jar file URL */
+  public void setJarFileUrl(URL jarFileUrl) { this.jarFileUrl = jarFileUrl; }
+
+  /** Get method for the resource jar file URL */
+  public URL getJarFileUrl() { return jarFileUrl; }
 
   /** Autoloading flag */
   private boolean autoLoading;
