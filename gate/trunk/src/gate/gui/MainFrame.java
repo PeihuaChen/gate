@@ -649,10 +649,18 @@ public class MainFrame extends JFrame
     toolbar = new JToolBar(JToolBar.HORIZONTAL);
     toolbar.setFloatable(false);
     toolbar.add(new LoadResourceFromFileAction());
-    toolbar.add(new LoadANNIEWithDefaultsAction());
-    toolbar.add(new LoadANNIEWithoutDefaultsAction());
-    toolbar.addSeparator();
     JMenuBar smallMenuBar = new JMenuBar();
+    smallMenuBar.setBorderPainted(false);
+    smallMenuBar.setAlignmentY(JComponent.CENTER_ALIGNMENT);
+    JMenu annieMenu = new JMenu();
+    annieMenu.setIcon(getIcon("application.gif"));
+    annieMenu.setToolTipText("Load ANNIE System");
+    annieMenu.add(new LoadANNIEWithDefaultsAction());
+    annieMenu.add(new LoadANNIEWithoutDefaultsAction());
+    smallMenuBar.add(annieMenu);
+    toolbar.add(smallMenuBar);
+    toolbar.addSeparator();
+    smallMenuBar = new JMenuBar();
     smallMenuBar.setBorderPainted(false);
     smallMenuBar.setAlignmentY(JComponent.CENTER_ALIGNMENT);
     LiveMenu tbNewLRMenu = new LiveMenu(LiveMenu.LR);
@@ -1359,7 +1367,7 @@ public class MainFrame extends JFrame
   class NewAnnotDiffAction extends AbstractAction {
     public NewAnnotDiffAction() {
       super("Annotation Diff", getIcon("annDiff.gif"));
-      putValue(SHORT_DESCRIPTION,"Create a new Annotation Diff Tool");
+      putValue(SHORT_DESCRIPTION,"Open a new Annotation Diff window");
     }// NewAnnotDiffAction
     public void actionPerformed(ActionEvent e) {
 //      AnnotDiffDialog annotDiffDialog = new AnnotDiffDialog(MainFrame.this);
