@@ -64,7 +64,8 @@ public class TestXml extends TestCase
 
     gate.Document doc = gate.Transients.newDocument(
              // new URL("http://redmires.dcs.shef.ac.uk/gate/tests/xml/xces/xces.xml")
-             // new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/F8F.xml")
+             // new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/J52.xml")
+             //   new URL("file:///d:/tmp/J52.xml")
              // new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/bnc.xml")
                 new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/xces/xces.xml")
              // new URL("http://redmires.dcs.shef.ac.uk/gate/tests/xml/bnc.xml")
@@ -90,26 +91,33 @@ public class TestXml extends TestCase
     */
     // get the docFormat that deals with it.
     // the parameter MimeType doesn't affect right now the behaviour
+    /*
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
       new MimeType("text","xml")
     );
-
-    // set's the map
-    docFormat.setMarkupElementsMap(markupElementsMap);
+    */
+    gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
+      doc.getSourceURL()
+    );
     //*
-    // timing the operation
-    Date startTime = new Date();
-      docFormat.unpackMarkup (doc,"DocumentContent");
-    Date endTime = new Date();
-    // get the size of the doc
-    long  time1 = endTime.getTime () - startTime.getTime ();
-    File f = Files.writeTempFile(doc.getSourceURL().openStream());
-    long docSize = f.length();
-    f.delete();
-    System.out.println("unpacMarkup() time for " + doc.getSourceURL () + "(" +
-      docSize/1024 + "." + docSize % 1024 + " K)" + "=" + time1 / 1000 + "." +
-      time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024 +
-      "." + (docSize/time1*1000)%1024 + " K/second");
+    if (docFormat != null){
+      // set's the map
+      docFormat.setMarkupElementsMap(markupElementsMap);
+
+      // timing the operation
+      Date startTime = new Date();
+        docFormat.unpackMarkup (doc,"DocumentContent");
+      Date endTime = new Date();
+      // get the size of the doc
+      long  time1 = endTime.getTime () - startTime.getTime ();
+      File f = Files.writeTempFile(doc.getSourceURL().openStream());
+      long docSize = f.length();
+      f.delete();
+      System.out.println("unpacMarkup() time for " + doc.getSourceURL () + "(" +
+        docSize/1024 + "." + docSize % 1024 + " K)" + "=" + time1 / 1000 + "." +
+        time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024 +
+        "." + (docSize/time1*1000)%1024 + " K/second");
+    }
     //*/
 
     // graphic visualisation

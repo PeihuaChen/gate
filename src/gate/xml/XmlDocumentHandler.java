@@ -1,5 +1,5 @@
 /**
- *	CustomDocumentHandler.java
+ *	XmlDocumentHandler.java
  *
  *	Cristian URSU,  9/May/2000
  *  $Id$
@@ -7,15 +7,22 @@
 
 package gate.xml;
 
-import org.xml.sax.*;
+import java.util.*;
+
 import gate.corpora.*;
 import gate.util.*;
 import gate.*;
+import gate.gui.*;
+
+
+import org.xml.sax.*;
+
 
 /**
   * Implements the behaviour of the XML reader
   */
-public class CustomDocumentHandler extends HandlerBase{
+public class XmlDocumentHandler extends HandlerBase
+                                           implements ProcessProgressReporter{
 
   // member data
 
@@ -33,22 +40,32 @@ public class CustomDocumentHandler extends HandlerBase{
   private java.util.Stack stack = null;
 
 
-  /** a gate document */
+  // a gate document
   protected gate.Document doc = null;
 
-  /** an annotation set */
+  // an annotation set
   protected gate.AnnotationSet basicAS;
 
+  // listeners for progress
+  protected List myProgressListeners = new LinkedList();
+
+  // listeners for status report
+  protected List myStatusListeners = new LinkedList();
+
+  private int documentSize = 0;
 
   /**
     * Constructor
     */
-  public CustomDocumentHandler(gate.Document doc, java.util.Map markupElementsMap){
+  public XmlDocumentHandler(gate.Document doc, java.util.Map markupElementsMap){
     // init stack, tmpDocContent, doc
     stack = new java.util.Stack();
     tmpDocContent = new String("");
     this.doc = doc ;
     this.markupElementsMap = markupElementsMap;
+
+    documentSize = doc.getContent().size().intValue();
+    if (documentSize == 0) documentSize = 1;
   }
 
   /**
@@ -67,6 +84,7 @@ public class CustomDocumentHandler extends HandlerBase{
   public void endDocument() throws org.xml.sax.SAXException {
     // replace the document content with the one without markups
     doc.setContent(new DocumentContentImpl(tmpDocContent));
+    fireProcessFinishedEvent();
   }
 
   /**
@@ -130,6 +148,7 @@ public class CustomDocumentHandler extends HandlerBase{
   public void characters( char[] text, int start, int length) throws SAXException{
     // some internal objects
     String content = new String(text, start, length);
+    fireProgressChangedEvent(start*100/documentSize);
    /*
     // triming section
     if (content.charAt(content.length() - 1) == '\n')
@@ -257,6 +276,42 @@ public class CustomDocumentHandler extends HandlerBase{
   public void endParsedEntity(String name, boolean included)throws SAXException{
   }
 
+
+  //StatusReporter Implementation
+  public void addStatusListener(StatusListener listener){
+    myStatusListeners.add(listener);
+  }
+  public void removeStatusListener(StatusListener listener){
+    myStatusListeners.remove(listener);
+  }
+  protected void fireStatusChangedEvent(String text){
+    Iterator listenersIter = myStatusListeners.iterator();
+    while(listenersIter.hasNext())
+      ((StatusListener)listenersIter.next()).statusChanged(text);
+  }
+
+  //ProcessProgressReporter implementation
+  public void addProcessProgressListener(ProgressListener listener){
+    myProgressListeners.add(listener);
+  }
+
+  public void removeProcessProgressListener(ProgressListener listener){
+    myProgressListeners.remove(listener);
+  }
+
+  protected void fireProgressChangedEvent(int i){
+    Iterator listenersIter = myProgressListeners.iterator();
+    while(listenersIter.hasNext())
+      ((ProgressListener)listenersIter.next()).progressChanged(i);
+  }
+
+  protected void fireProcessFinishedEvent(){
+    Iterator listenersIter = myProgressListeners.iterator();
+    while(listenersIter.hasNext())
+      ((ProgressListener)listenersIter.next()).processFinished();
+  }
+  //ProcessProgressReporter implementation ends here
+  
 
 } //CustomDocumentHandler
 
