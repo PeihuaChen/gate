@@ -104,11 +104,11 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     CreoleRegister creoleReg = Gate.getCreoleRegister();
     List currentAnnotationSchemaList =
                       creoleReg.getLrInstances("gate.creole.AnnotationSchema");
-    // If there is no Annotation schema loaded the editor can only do nothing
+    // If there is no Annotation schema loaded, the editor can only do nothing
     if (currentAnnotationSchemaList.isEmpty()) return;
     name2annotSchemaMap = new TreeMap();
     Iterator annotSchemaIter = currentAnnotationSchemaList.iterator();
-    // currentAnnotationSchemaList is not empty
+    // currentAnnotationSchemaList is not empty (see the above comment)
     currentAnnotSchema = (AnnotationSchema) currentAnnotationSchemaList.get(0);
     while (annotSchemaIter.hasNext()){
       AnnotationSchema annotSch = (AnnotationSchema)annotSchemaIter.next();
@@ -175,7 +175,6 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
   // The Schema Editor functionality
 
   // Local data
-
   /** The annotation schema present into the system*/
   List currentAnnotationSchemaList = null;
   /** The curent annotation set used by the editor*/
@@ -202,16 +201,26 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
   DefaultListModel listModel = null;
 
   // Gui Components
+  /** Displays the current features of the annotation being editted */
   JTable  featuresTable = null;
+  /** A JScroll for the featuresTable component */
   JScrollPane featuresTableScroll = null;
-  JScrollPane featuresListScroll = null;
-  JButton removeFeatButton = null;
-  JButton addFeatButton = null;
+  /** Displays all possible features of the annotation being
+   *  editted (taken from AnnotationSchema)
+   */
   JList   featureSchemaList = null;
+  /** A JScroll for the featuresTable component */
+  JScrollPane featuresListScroll = null;
+  /** This button removes current features and add them to possible feature list*/
+  JButton removeFeatButton = null;
+  /** This button does the opposite of the above*/
+  JButton addFeatButton = null;
+  /** Displays all possible annotation schema loaded into the system*/
   JComboBox annotSchemaComboBox = null;
-  InnerFeaturesEditor featuresEditor;
+  /** This inner class deals with feature editting*/
+  InnerFeaturesEditor featuresEditor = null;
 
-  /** Init local data*/
+  /** Init local data needed by the GUI components to initialize*/
   protected void initLocalData(){
     // Create the response feature Map
     responseMap = Factory.newFeatureMap();
@@ -301,14 +310,12 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     featuresTableScroll = new JScrollPane(featuresTable);
 
     Box box = Box.createVerticalBox();
-//    box.add(Box.createVerticalStrut(5));
     JLabel currentFeat = new JLabel("Current features");
     currentFeat.setAlignmentX(Component.LEFT_ALIGNMENT);
     box.add(currentFeat);
     box.add(Box.createVerticalStrut(10));
     box.add(featuresTableScroll);
     featuresTableScroll.setAlignmentX(Component.LEFT_ALIGNMENT);
-//    box.add(Box.createVerticalStrut(5));
 
     componentsBox.add(box);
     componentsBox.add(Box.createHorizontalStrut(10));
@@ -337,14 +344,12 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     featuresListScroll = new JScrollPane(featureSchemaList);
 
     box = Box.createVerticalBox();
-//    box.add(Box.createVerticalStrut(5));
     JLabel possibFeaturesLabel = new JLabel("Possible features");
     possibFeaturesLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     box.add(possibFeaturesLabel);
     box.add(Box.createVerticalStrut(10));
     featuresListScroll.setAlignmentX(Component.LEFT_ALIGNMENT);
     box.add(featuresListScroll);
-//    box.add(Box.createVerticalStrut(5));
 
     componentsBox.add(box);
     componentsBox.add(Box.createHorizontalStrut(5));
@@ -374,14 +379,14 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       }// actionPerformed();
     });//addActionListener();
 
-    // -> button
+    // -> removeFeatButton
     removeFeatButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         doRemoveFeatures();
       }//actionPerformed();
     });// addActionListener();
 
-    // <- button
+    // <- addFeatButton
     addFeatButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         doAddFeatures();
@@ -692,12 +697,11 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
        }// End iff
        return new JLabel(value.toString());
     }//getTableCellEditorComponent
-    /** @return the object representing the value stored @ that cell*/
+    /** @return the object representing the value stored at that cell*/
     public Object getCellEditorValue(){
       if (cb != null ) return cb.getSelectedItem();
       if (tf != null ) return tf.getText();
       return new String("");
     }//getCellEditorValue
   }//InnerFeaturesEditor inner class
-
 }// End class SchemaAnnotationEditor
