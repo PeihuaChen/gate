@@ -94,6 +94,41 @@ public class TestReload extends TestCase{
     }
   }
 
+  public void testCache() throws Exception {
+    ReloadingClassLoader loader = new ReloadingClassLoader();
+    long timeFresh = 0;
+    long startTime;
+    long endTime;
+    //load fresh class 100 times
+    URL url = Gate.class.getResource(Files.getResourcePath() +
+                                     "/gate.ac.uk/tests/first.jar");
+    for(int i = 0; i< 100; i++){
+      loader.load(url);
+      startTime = System.currentTimeMillis();
+      //load the class
+      Class c = loader.loadClass("loader.Scratch", true);
+      endTime = System.currentTimeMillis();
+      timeFresh += endTime - startTime;
+      loader.unload(url);
+    }
+
+    //load cached classes 100 times
+    loader.load(url);
+    //load the class
+    Class c = loader.loadClass("loader.Scratch", true);
+    long timeCache = 0;
+    for(int i = 0; i< 100; i++){
+      startTime = System.currentTimeMillis();
+      //load the class
+      c = loader.loadClass("loader.Scratch", true);
+      endTime = System.currentTimeMillis();
+      timeCache += endTime - startTime;
+    }
+    Assert.assertTrue("Cached classes load slower than fresh ones!",
+                      timeCache < timeFresh);
+  }
+
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 }
