@@ -690,11 +690,13 @@ public class NameBearerHandle implements Handle,
             NumberFormat.getInstance().format((timeAfter-timeBefore)/1000)
             + " seconds");
         } catch(PersistenceException pe) {
+          MainFrame.unlockGUI();
           JOptionPane.showMessageDialog(getLargeView(),
                                         "Save failed!\n " +
                                         pe.toString(),
                                         "Gate", JOptionPane.ERROR_MESSAGE);
         } catch(SecurityException se) {
+          MainFrame.unlockGUI();
           JOptionPane.showMessageDialog(getLargeView(),
                                         "Save failed!\n " +
                                         se.toString(),
@@ -857,11 +859,13 @@ public class NameBearerHandle implements Handle,
           }
         }
       } catch(PersistenceException pe) {
+        MainFrame.unlockGUI();
         JOptionPane.showMessageDialog(getLargeView(),
                                       "Save failed!\n " +
                                       pe.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
       }catch(gate.security.SecurityException se) {
+        MainFrame.unlockGUI();
         JOptionPane.showMessageDialog(getLargeView(),
                                       "Save failed!\n " +
                                       se.toString(),
