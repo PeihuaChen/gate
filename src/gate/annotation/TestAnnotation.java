@@ -455,6 +455,6 @@ public class TestAnnotation extends TestCase
   /** Test suite routine for the test runner */
   public static Test suite() {
     return new TestSuite(TestAnnotation.class);
-  } // main
+  } // suite
 
 } // class TestAnnotation

@@ -91,6 +91,6 @@ public class TestDocument extends TestCase
   /** Test suite routine for the test runner */
   public static Test suite() {
     return new TestSuite(TestDocument.class);
-  } // main
+  } // suite
 
 } // class TestDocument
