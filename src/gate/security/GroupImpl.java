@@ -78,8 +78,7 @@ public class GroupImpl implements Group{
 
     try {
       //first check the session and then check whether the user is member of the group
-      if (this.ac.isValidSession(s) == false ||
-          this.users.contains(s.getUser()) == false) {
+      if (this.ac.isValidSession(s) == false) {
         throw new SecurityException("invalid session supplied");
       }
 
