@@ -118,7 +118,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     actionClassString = new StringBuffer(
       "// " + actionClassName + nl +
       "package " + actionsDirName + "; " + nl +
-      "import java.io.*;" + nl + 
+      "import java.io.*;" + nl +
       "import java.util.*;" + nl +
       "import gate.*;" + nl +
       "import gate.jape.*;" + nl +
@@ -128,6 +128,17 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       "implements java.io.Serializable, RhsAction { " + nl +
       "  public void doit(Document doc, java.util.Map bindings) { " + nl
     );
+
+    // initialise various names
+    actionClassJavaFileName =
+      actionsDirName +  File.separator +
+      actionClassName.replace('.', File.separatorChar) + ".java";
+    actionClassQualifiedName =
+      actionsDirName.
+      replace(File.separatorChar, '.').replace('/', '.').replace('\\', '.') +
+      "." + actionClassName;
+    actionClassClassFileName =
+      actionClassQualifiedName.replace('.', File.separatorChar) + ".class";
   } // Construction from lhs
 
   /** Add an anonymous block to the action class */
@@ -170,10 +181,22 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     // call the gate class loader to load the resultant class
     // read in the bytes if the compiled file for later serialisation
     // create an instance of the class
-    writeActionClass();
+/*    writeActionClass();
     compileActionClass();
     loadActionClass();
     readActionClass();
+    instantiateActionClass();
+*/
+    System.out.println(actionClassString);
+    try {
+      actionClassBytes = new Jdk().compile(
+        actionClassString.toString(),
+        actionClassJavaFileName
+      );
+    } catch(GateException e) {
+      throw new JapeException("Couldn't create action class: " + e);
+    }
+    defineActionClass();
     instantiateActionClass();
 
     //Debug.pr(this, "RightHandSide: action class loaded ok");
@@ -181,15 +204,6 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
   /** Write out the action class file. */
   public void writeActionClass() throws JapeException {
-    actionClassJavaFileName =
-      actionsDirName +  File.separator +
-      actionClassName.replace('.', File.separatorChar) + ".java";
-    actionClassQualifiedName =
-      actionsDirName.
-      replace(File.separatorChar, '.').replace('/', '.').replace('\\', '.') +
-      "." + actionClassName;
-    actionClassClassFileName =
-      actionClassQualifiedName.replace('.', File.separatorChar) + ".class";
 
     File actionClassJavaFile = new File(actionClassJavaFileName);
     try {
@@ -424,6 +438,9 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.7  2000/05/16 10:30:33  hamish
+// uses new gate.util.Jdk compiler
+//
 // Revision 1.6  2000/05/05 12:51:12  valyt
 // Got rid of deprecation warnings
 //
