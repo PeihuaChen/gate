@@ -158,6 +158,11 @@ public class DocumentEditor extends AbstractVisualResource
    */
   protected Highlighter selectionHighlighter;
 
+  /**
+   * The object responsible with blinking the selected annotations.
+   */
+  protected SelectionBlinker selectionBlinker;
+
 
   protected Handle myHandle;
 
@@ -544,34 +549,38 @@ public class DocumentEditor extends AbstractVisualResource
           int[] rows = annotationsTable.getSelectedRows();
           synchronized(selectionHighlighter){
             selectionHighlighter.removeAllHighlights();
-            for(int i = 0; i < rows.length; i++){
-              int start = ((Long)annotationsTable.getModel().
-                           getValueAt(rows[i], 2)
-                          ).intValue();
-              int end = ((Long)annotationsTable.getModel().
-                         getValueAt(rows[i], 3)
+          }
+          for(int i = 0; i < rows.length; i++){
+            int start = ((Long)annotationsTable.getModel().
+                         getValueAt(rows[i], 2)
                         ).intValue();
-              //bring the annotation in view
-              try{
-                Rectangle startRect = textPane.modelToView(start);
-                Rectangle endRect = textPane.modelToView(end);
-                SwingUtilities.computeUnion(endRect.x, endRect.y,
-                                            endRect.width, endRect.height,
-                                            startRect);
-                textPane.scrollRectToVisible(startRect);
-                annotationsTable.requestFocus();
-              }catch(BadLocationException ble){
-                throw new GateRuntimeException(ble.toString());
-              }
-              //start blinking the annotation
-              try{
+            int end = ((Long)annotationsTable.getModel().
+                       getValueAt(rows[i], 3)
+                      ).intValue();
+            //bring the annotation in view
+            try{
+              Rectangle startRect = textPane.modelToView(start);
+              Rectangle endRect = textPane.modelToView(end);
+              SwingUtilities.computeUnion(endRect.x, endRect.y,
+                                          endRect.width, endRect.height,
+                                          startRect);
+              textPane.scrollRectToVisible(startRect);
+              annotationsTable.requestFocus();
+            }catch(BadLocationException ble){
+              throw new GateRuntimeException(ble.toString());
+            }
+            //start blinking the annotation
+            try{
+              synchronized (selectionHighlighter){
                 selectionHighlighter.addHighlight(start, end,
                             DefaultHighlighter.DefaultPainter);
-              }catch(BadLocationException ble){
-                throw new GateRuntimeException(ble.toString());
               }
-            }//for(int i = 0; i < rows.length; i++)
-          }//synchronized(highlighter)
+            }catch(BadLocationException ble){
+              throw new GateRuntimeException(ble.toString());
+            }
+          }//for(int i = 0; i < rows.length; i++)
+          //start the blinker
+          selectionBlinker.testAndStart();
         }
       });
 
@@ -924,13 +933,8 @@ public class DocumentEditor extends AbstractVisualResource
 
     selectionHighlighter = new DefaultHighlighter();
     selectionHighlighter.install(textPane);
+    selectionBlinker = new SelectionBlinker();
 
-    Thread thread  = new Thread(Thread.currentThread().getThreadGroup(),
-                                new SelectionBlinker(),
-                                "AnnotationEditor2");
-
-    thread.setPriority(Thread.MIN_PRIORITY);
-    thread.start();
   }//protected void initGuiComponents()
 
 
@@ -1042,48 +1046,6 @@ public class DocumentEditor extends AbstractVisualResource
       }
     }
   }//protected void this_documentChanged()
-
-  /**
-   * Used to register with the GUI a new annotation set on the current document.
-   */
-  protected void addAnnotationSet11(AnnotationSet as, int progressStart,
-                                  int progressEnd){
-    as.addAnnotationSetListener(eventHandler);
-    String setName = as.getName();
-    if(setName == null) setName = "Default";
-    TypeData setData = new TypeData(setName, null, false);
-    setData.setAnnotations(as);
-    DefaultMutableTreeNode setNode = new DefaultMutableTreeNode(setData, true);
-    stylesTreeModel.insertNodeInto(setNode, stylesTreeRoot,
-                                   stylesTreeRoot.getChildCount());
-    stylesTree.expandPath(new TreePath(new Object[]{stylesTreeRoot, setNode}));
-    //((DefaultMutableTreeNode)stylesTreeRoot).add(setNode);
-    ArrayList typesLst = new ArrayList(as.getAllTypes());
-    Collections.sort(typesLst);
-    int size = typesLst.size();
-    int cnt = 0;
-    int value = 0;
-    int lastValue = 0;
-    Iterator typesIter = typesLst.iterator();
-    while(typesIter.hasNext()){
-      String type = (String)typesIter.next();
-      TypeData typeData = new TypeData(setName, type, false);
-      AnnotationSet sameType = as.get(type);
-      typeData.setAnnotations(sameType);
-      DefaultMutableTreeNode typeNode = new DefaultMutableTreeNode(typeData,
-                                                                   false);
-      stylesTreeModel.insertNodeInto(typeNode, setNode,
-                                     setNode.getChildCount());
-      //setNode.add(typeNode);
-      value = progressStart +  (progressEnd - progressStart)* cnt/size;
-      if(value - lastValue >= 5){
-        progressBar.setValue(value);
-        progressBar.paintImmediately(progressBar.getBounds());
-        lastValue = value;
-      }
-      cnt ++;
-    }
-  }//protected void addAnnotationSet
 
   /**
    * Gets the data related to a given annotation type.
@@ -3066,41 +3028,66 @@ Out.prln("NULL size");
    */
   class SelectionBlinker implements Runnable{
     public void run(){
-      while(true){
-        synchronized(selectionHighlighter){
-          SwingUtilities.invokeLater(new Runnable(){
-            public void run(){
-              showHighlights();
-            }
-          });
-          try{
-            Thread.sleep(400);
-          }catch(InterruptedException ie){
-            ie.printStackTrace(Err.getPrintWriter());
+      synchronized(selectionHighlighter){
+        highlights = selectionHighlighter.getHighlights();
+      }
+
+
+      while(highlights != null && highlights.length > 0){
+        SwingUtilities.invokeLater(new Runnable(){
+          public void run(){
+            showHighlights();
           }
-          SwingUtilities.invokeLater(new Runnable(){
-            public void run(){
-              hideHighlights();
-            }
-          });
-        }//synchronized(selectionHighlighter)
+        });
+        try{
+          Thread.sleep(400);
+        }catch(InterruptedException ie){
+          ie.printStackTrace(Err.getPrintWriter());
+        }
+        SwingUtilities.invokeLater(new Runnable(){
+          public void run(){
+            hideHighlights();
+          }
+        });
 
         try{
           Thread.sleep(600);
         }catch(InterruptedException ie){
           ie.printStackTrace(Err.getPrintWriter());
         }
-      }//while(true)
+        synchronized(selectionHighlighter){
+          highlights = selectionHighlighter.getHighlights();
+        }
+      }//while we have highlights
+      //no more highlights; stop the thread by exiting run();
+      synchronized(selectionHighlighter){
+        thread = null;
+      }
     }//run()
 
+    /**
+     * If there is no running thread then starts one and stores it in
+     * the thread member.
+     */
+    public synchronized void testAndStart(){
+      synchronized(selectionHighlighter){
+        if(thread == null){
+          thread  = new Thread(Thread.currentThread().getThreadGroup(),
+                               this, "AnnotationEditor2");
+          thread.setPriority(Thread.MIN_PRIORITY);
+          thread.start();
+        }
+      }
+    }
+
     protected void showHighlights(){
-      Highlighter.Highlight[] highligts = selectionHighlighter.getHighlights();
       actualHighlights.clear();
       try{
-        for(int i = 0; i < highligts.length; i++){
-          actualHighlights.add(highlighter.addHighlight(highligts[i].getStartOffset(),
-                                   highligts[i].getEndOffset(),
-                                   highligts[i].getPainter()));
+        for(int i = 0; i < highlights.length; i++){
+          actualHighlights.add(highlighter.addHighlight(
+                                   highlights[i].getStartOffset(),
+                                   highlights[i].getEndOffset(),
+                                   highlights[i].getPainter()));
         }
       }catch(BadLocationException ble){
         ble.printStackTrace(Err.getPrintWriter());
@@ -3113,6 +3100,8 @@ Out.prln("NULL size");
     }
 
     ArrayList actualHighlights = new ArrayList();
+    Thread thread;
+    Highlighter.Highlight[] highlights;
   }//class SelectionBlinker implements Runnable
 
   /**

@@ -115,7 +115,7 @@ public class MainFrame extends JFrame
   HelpAboutAction helpAboutAction;
   NewAnnotDiffAction newAnnotDiffAction = null;
   NewBootStrapAction newBootStrapAction = null;
-//  NewCorpusEvalAction newCorpusEvalAction = null;
+  NewCorpusEvalAction newCorpusEvalAction = null;
 
   /**
    * Holds all the icons used in the Gate GUI indexed by filename.
@@ -225,7 +225,7 @@ public class MainFrame extends JFrame
     helpAboutAction = new HelpAboutAction();
     newAnnotDiffAction = new NewAnnotDiffAction();
     newBootStrapAction = new NewBootStrapAction();
-//    newCorpusEvalAction = new NewCorpusEvalAction();
+    newCorpusEvalAction = new NewCorpusEvalAction();
   }
 
   protected void initGuiComponents(){
@@ -539,7 +539,7 @@ public class MainFrame extends JFrame
     toolsMenu.add(newBootStrapAction);
     //temporarily disabled till the evaluation tools are made to run within
     //the GUI
-//    toolsMenu.add(newCorpusEvalAction);
+    toolsMenu.add(newCorpusEvalAction);
     toolsMenu.add(
       new AbstractAction("Unicode editor", getIcon("unicode.gif")){
       public void actionPerformed(ActionEvent evt){
@@ -698,7 +698,7 @@ public class MainFrame extends JFrame
         if(done){
           select((Handle)node.getUserObject());
         }else{
-          //the selected item is not a resource (maiber the log area?)
+          //the selected item is not a resource (maybe the log area?)
           lowerScroll.getViewport().setView(null);
         }
       }
@@ -1342,40 +1342,45 @@ public class MainFrame extends JFrame
   /** This class represent an action which brings up the corpus evaluation tool*/
     //DO NOT DELETE. WILL MAKE RUNNING THE EVAL TOOLS FROM GUI WORK IN NOVEMBER
     //NEEDS PUTTING IN A SEPARATE THREAD!!!!
-/*  class NewCorpusEvalAction extends AbstractAction {
+  class NewCorpusEvalAction extends AbstractAction {
     public NewCorpusEvalAction() {
       super("Evaluation Tool");
       putValue(SHORT_DESCRIPTION,"Create a new Evaluation Tool");
     }// newCorpusEvalAction
+
     public void actionPerformed(ActionEvent e) {
-      //NEEDS PUTTING IN A SEPARATE THREAD!!!!
+      Runnable runnable = new Runnable(){
+        public void run(){
+          JFileChooser chooser = MainFrame.getFileChooser();
+          chooser.setDialogTitle("Please select a directory which contains " +
+                                 "the documents to be evaluated");
+          chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+          chooser.setMultiSelectionEnabled(false);
+          int state = chooser.showOpenDialog(MainFrame.this);
+          File startDir = chooser.getSelectedFile();
+          if (state == JFileChooser.CANCEL_OPTION || startDir == null)
+            return;
 
-      JFileChooser chooser = new JFileChooser();
-      chooser.setDialogTitle("Please select a directory which contains " +
-                             "the documents to be evaluated");
-      chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-      chooser.setMultiSelectionEnabled(false);
-      int state = chooser.showDialog(MainFrame.this, "OK");
-      File startDir = chooser.getSelectedFile();
-      if (state == JFileChooser.CANCEL_OPTION || startDir == null)
-        return;
+          //first create the tool and set its parameters
+          CorpusBenchmarkTool theTool = new CorpusBenchmarkTool();
+          theTool.setStartDirectory(startDir);
 
-      //first create the tool and set its parameters
-      CorpusBenchmarkTool theTool = new CorpusBenchmarkTool();
-      theTool.setStartDirectory(startDir);
+          Out.prln("Please wait while GATE tools are initialised.");
+          //initialise the tool
+          theTool.init();
+          //and execute it
+          theTool.execute();
 
-      Out.prln("Please wait while GATE tools are initialised.");
-      //initialise the tool
-      theTool.init();
-      //and execute it
-      theTool.execute();
-
-      Out.prln("Overall average precision: " + theTool.getPrecisionAverage());
-      Out.prln("Overall average recall: " + theTool.getRecallAverage());
-
+          Out.prln("Overall average precision: " + theTool.getPrecisionAverage());
+          Out.prln("Overall average recall: " + theTool.getRecallAverage());
+        }
+      };
+      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                                 runnable, "Eval thread");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
     }// actionPerformed();
   }//class NewCorpusEvalAction
-*/
 
   /** This class represent an action which loads ANNIE with default params*/
   class LoadANNIEWithDefaultsAction extends AbstractAction

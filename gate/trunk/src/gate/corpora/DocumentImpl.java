@@ -187,14 +187,14 @@ extends AbstractLanguageResource implements Document {
 
   /** Clear all the data members of the object. */
   public void cleanup() {
-    if (defaultAnnots != null) defaultAnnots.clear();
+//    if (defaultAnnots != null) defaultAnnots.clear();
     defaultAnnots = null;
     if ( (namedAnnotSets != null) && (!namedAnnotSets.isEmpty())) {
         Iterator iter = namedAnnotSets.values().iterator();
-        while (iter.hasNext()) {
-            AnnotationSet annots = (AnnotationSet) iter.next();
-            annots.clear();
-        }
+//        while (iter.hasNext()) {
+//            AnnotationSet annots = (AnnotationSet) iter.next();
+//            annots.clear();
+//        }
         namedAnnotSets.clear();
     }
 //    namedAnnotSets = null;
