@@ -271,7 +271,14 @@ public class OracleDataStore extends JDBCDataStore {
       return result;
     }
     catch(SQLException sqle) {
-      throw new PersistenceException("can't create LR [step 3] in DB : ["+ sqle.getMessage()+"]");
+
+      switch(sqle.getErrorCode()) {
+        case DBHelper.X_ORACLE_INVALID_LR_TYPE:
+          throw new PersistenceException("can't create LR [step 3] in DB, invalid LR Type");
+        default:
+          throw new PersistenceException(
+                "can't create LR [step 3] in DB : ["+ sqle.getMessage()+"]");
+      }
     }
     finally {
       DBHelper.cleanup(stmt);
@@ -478,7 +485,15 @@ public class OracleDataStore extends JDBCDataStore {
         annID = new Long(stmt.getLong(6));
       }
       catch(SQLException sqle) {
-        throw new PersistenceException("can't create document [step 6] in DB: ["+ sqle.getMessage()+"]");
+        switch(sqle.getErrorCode()) {
+          case DBHelper.X_ORACLE_INVALID_ANNOTATION_TYPE:
+            throw new PersistenceException(
+                "can't create annotation in DB, [invalid annotation type]");
+          default:
+            throw new PersistenceException(
+                "can't create annotation in DB: ["+ sqle.getMessage()+"]");
+      }
+
       }
       finally {
         DBHelper.cleanup(stmt);
@@ -717,13 +732,16 @@ public class OracleDataStore extends JDBCDataStore {
     throws SQLException, IOException {
 
     int readLength = 0;
-    char[] readBuffer = new char[INTERNAL_BUFFER_SIZE];
 
-    //1. empty the buffer
+    //1. empty the dest buffer
     dest.delete(0,dest.length());
 
     //2. get Oracle CLOB
     CLOB clo = (CLOB)src;
+
+    //3. create temp buffer
+    int buffSize = Math.max(INTERNAL_BUFFER_SIZE,clo.getBufferSize());
+    char[] readBuffer = new char[buffSize];
 
     //3. get Unicode stream
     Reader input = clo.getCharacterStream();
