@@ -411,6 +411,39 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
     return result;
   }
 
+  public Iterator iterator() { return new DatabaseAnnotationSetIterator(); }
+
+
+    class DatabaseAnnotationSetIterator extends AnnotationSetImpl.AnnotationSetIterator {
+
+      public void remove() {
+
+        super.remove();
+
+        Annotation annRemoved = (Annotation)lastNext;
+
+        //UNregister as listener for update events from this annotation
+          annRemoved.removeAnnotationListener(DatabaseAnnotationSetImpl.this);
+
+        //1. check if this annot is in the newly created annotations set
+        if (DatabaseAnnotationSetImpl.this.addedAnnotations.contains(annRemoved)) {
+          //a new annotation that was deleted afterwards, remove it from all sets
+            DatabaseAnnotationSetImpl.this.addedAnnotations.remove(annRemoved);
+          }
+          else {
+
+            //2. check if the annotation was updated, if so, remove it from the
+            //update list
+            if (DatabaseAnnotationSetImpl.this.updatedAnnotations.contains(annRemoved)) {
+              DatabaseAnnotationSetImpl.this.updatedAnnotations.remove(annRemoved);
+            }
+
+            //3. add to the list with deleted anns
+            DatabaseAnnotationSetImpl.this.removedAnnotations.add(annRemoved);
+          }
+        }
+
+    }
 
 
 }
