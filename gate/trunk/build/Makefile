@@ -84,7 +84,7 @@ docs:
 # make the developer Javadocs (inc. private members)
 internaldocs: 
 	./jdk.sh \
-	  -s '-link http://redmires.dcs.shef.ac.uk/Java2_docs/api/' \
+	  -s '-link http://bradfield.dcs.shef.ac.uk/Java2_docs/api/' \
 	  javadoc $(SP) $(CP) -private -use \
 	  -d ../doc/javadoc/internal $(PKGS)
 	cp ../src/gate/CookBook.java ../doc/javadoc/internal/gate/CookBook.txt

@@ -16,21 +16,99 @@ import gate.util.*;
 import gate.fsm.TestFSM;
 import EDU.auburn.VGJ.graph.ParseError;
 
+/**
+  *Implementation of a Unicode rule based tokeniser.
+  *The tokeniser gets its rules from a file an {@link java.io.InputStream
+  *InputStream} or a {@link java.io.Reader Reader} which should be sent to one
+  *of the constructors.
+  *The implementations is based on a finite state machine that is built based on
+  *the set of rules.
+  *A rule has two sides, the left hand side (LHS)and the right hand side (RHS)
+  *that are separated by the &quot;&gt;&quot; character. The LHS represents a
+  *regular expression that will be matched against the input while the RHS
+  *describes a Gate2 annotation in terms of annotation type and attribute-value
+  *pairs.
+  *The matching is done using Unicode enumarated types as defined by the {@link
+  *java.lang.Character Character} class. At the time of writing this class the
+  *suported Unicode categories were:
+  *<ul>
+  *<li>UNASSIGNED
+  *<li>UPPERCASE_LETTER
+  *<li>LOWERCASE_LETTER
+  *<li>TITLECASE_LETTER
+  *<li>MODIFIER_LETTER
+  *<li>OTHER_LETTER
+  *<li>NON_SPACING_MARK
+  *<li>ENCLOSING_MARK
+  *<li>COMBINING_SPACING_MARK
+  *<li>DECIMAL_DIGIT_NUMBER
+  *<li>LETTER_NUMBER
+  *<li>OTHER_NUMBER
+  *<li>SPACE_SEPARATOR
+  *<li>LINE_SEPARATOR
+  *<li>PARAGRAPH_SEPARATOR
+  *<li>CONTROL
+  *<li>FORMAT
+  *<li>PRIVATE_USE
+  *<li>SURROGATE
+  *<li>DASH_PUNCTUATION
+  *<li>START_PUNCTUATION
+  *<li>END_PUNCTUATION
+  *<li>CONNECTOR_PUNCTUATION
+  *<li>OTHER_PUNCTUATION
+  *<li>MATH_SYMBOL
+  *<li>CURRENCY_SYMBOL
+  *<li>MODIFIER_SYMBOL
+  *<li>OTHER_SYMBOL
+  *</ul>
+  *The accepted operators for the LHS are "+", "*" and "|" having the usual
+  *interpretations of "1 to n occurences", "0 to n occurences" and "boolean OR".
+  *For instance this is a valid LHS:
+  *<br>"UPPERCASE_LETTER" "LOWERCASE_LETTER"+
+  *<br>meaning an uppercase letter followed by one or more lowercase letters.
+  *
+  *The RHS describes an annotation that is to be created and inserted in the
+  *annotation set provided in case of a match. The new annotation will span the
+  *text that has been recognised. The RHS consists in the annotation type
+  *followed by pairs of attributes and associated values.
+  *E.g. for the LHS above a possible RHS can be:<br>
+  *Token;kind=upperInitial;<br>
+  *representing an annotation of type &quot;Token&quot; having one attribute
+  *named &quot;kind&quot; with the value &quot;upperInitial&quot;<br>
+  *The entire rule willbe:<br>
+  *<pre>"UPPERCASE_LETTER" "LOWERCASE_LETTER"+ > Token;kind=upperInitial;</pre>
+  *<br>
+  *The tokeniser ignores all the empty lines or the ones that start with # or
+  * //.
+ */
 public class DefaultTokeniser implements Runnable, ProcessingResource,
                                          ProcessProgressReporter{
-
+  /**Constructs a DefaultTokeniser from the file with the name specified by
+    *ruleFile
+    *@throws FileNotFoundException if the file cannot be found.
+    *@throws IOException if an I/O error occurs during reading the rules
+    *@throws TokeniserException in case of a malformed rule.
+  */
   public DefaultTokeniser(String rulesFile) throws FileNotFoundException,
                                                    IOException,
                                                    TokeniserException {
     this(new FileReader(rulesFile));
   }
 
-  public DefaultTokeniser(InputStream rulesIOStr) throws FileNotFoundException,
-                                                   IOException,
+  /**Constructs a DefaultTokeniser from an {@link java.io.InputStream
+    *InputStream}.
+    *@throws IOException if an I/O error occurs during reading the rules
+    *@throws TokeniserException in case of a malformed rule.
+  */
+  public DefaultTokeniser(InputStream rulesIOStr) throws IOException,
                                                    TokeniserException {
     this(new InputStreamReader(rulesIOStr));
   }
 
+  /**Constructs a DefaultTokeniser from a {@link java.io.Reader Reader}.
+    *@throws IOException if an I/O error occurs during reading the rules
+    *@throws TokeniserException in case of a malformed rule.
+    */
   public DefaultTokeniser(Reader rulesRdr) throws IOException,
                                                   TokeniserException {
     initialState = new FSMState(this);
@@ -56,7 +134,10 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
 //    }catch(EDU.auburn.VGJ.graph.ParseError pe){pe.printStackTrace(System.err);}
   }
 
-
+  /**Parses one input line containing a tokeniser rule.
+    *This will create the necessary FSMState objects and the links between them.
+    *@param line the string containing the rule
+    */
   void parseRule(String line)throws TokeniserException{
     //ignore comments
     if(line.startsWith("#")) return;
@@ -70,6 +151,18 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     if(rhs.length() > 0)finalState.setRhs(rhs);
   }
 
+  /**Parses a part or the entire LHS.
+    *@param startState a FSMState object representing the initial state for the
+    *small FSM that will recognise the (part of) the rule parsed by this method.
+    *@param st a {@link java.util.StringTokenizer StringTokenizer} that provides
+    *the input
+    *@param until the string that marks the end of the section to be recognised.
+    *This method will first be called by {@link #parseRule(String)} with &quot;
+    *&gt;&quot; in order to parse the entire LHS.
+    *when necessary it will make itself another call to {@link #parseLHS
+    *parseLHS} to parse a region of the LHS (e.g. a &quot;(&quot;,&quot;)&quot;
+    *enclosed part.
+    */
   FSMState parseLHS(FSMState startState, StringTokenizer st, String until)
        throws TokeniserException{
     FSMState currentState = startState;
@@ -142,6 +235,11 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     return currentState;
   }
 
+  /**Parses a quoted string returning all the text up to a given delimiter.
+    *@param st a {@link java.util.StringTokenizer StringTokenizer} that provides
+    *the input
+    *@param until a String representing the end delimiter.
+    */
   String parseQuotedString(StringTokenizer st, String until)
     throws TokeniserException{
     String token;
@@ -156,6 +254,10 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     return type;
   }
 
+  /**Skips the ignorables tokens from the input returning the first significant
+    *token.
+    *The ignorable tokens are defined by {@link #ignoreTokens a set}
+    */
   static String skipIgnoreTokens(StringTokenizer st){
     Iterator ignorables;
     boolean ignorableFound = false;
@@ -293,7 +395,9 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     }//while(!unmarkedDStates.isEmpty())
   }
 
-
+  /**Returns a string representation of the non-deterministic FSM graph using
+    *GML.
+    */
   public String getFSMgml(){
     String res = "graph[ \ndirected 1\n";
     String nodes = "", edges = "";
@@ -313,6 +417,9 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     return res;
   }
 
+  /**Returns a string representation of the deterministic FSM graph using
+    *GML.
+    */
   public String getDFSMgml(){
     String res = "graph[ \ndirected 1\n";
     String nodes = "", edges = "";
@@ -332,6 +439,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     return res;
   }
 
+//no doc required: javadoc will copy it from the interface
   public FeatureMap getFeatures(){
     return features;
   }
@@ -345,6 +453,13 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     * It is the user's responsability to make sure that the annotation set
     * provided belongs to the document as the tokeniser will not make any
     * checks.
+    *@param doc the document to be tokenised
+    *@param annotationSet the AnnotationSet where the new annotations will be
+    *added
+    *@param runInNewThread if <b>true</b> the tokeniser will spawn a new thread
+    *for doing all the processing, if <b>false</b> all the priocessing will
+    *take place in the current thread and this method will block until the
+    *tokenisation is done.
     */
   public void tokenise(Document doc, AnnotationSet annotationSet,
                        boolean runInNewThread){
@@ -363,6 +478,10 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     tokenise(doc, doc.getAnnotations(), runInNewThread);
   }
 
+  /**The method that does the actual tokenisation. This method should not be
+    *explicitly called but the {@link #tokenise tokenise} method should be
+    *used instead.
+    */
   public void run(){
     String content = doc.getContent().toString();
     int length = content.length();
@@ -411,6 +530,8 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
           for(int i = 1; i < lastMatchingState.getTokenDesc().length; i++){
             newTokenFm.put(lastMatchingState.getTokenDesc()[i][0],
                            lastMatchingState.getTokenDesc()[i][1]);
+//System.out.println(lastMatchingState.getTokenDesc()[i][0] + "=" +
+//                           lastMatchingState.getTokenDesc()[i][1]);
           }
           try{
             annotationSet.add(new Long(tokenStart),
@@ -429,7 +550,27 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
         graphPosition = dInitialState;
         tokenStart = charIdx;
       }
+    }//while(charIdx < length)
+
+    if(null != lastMatchingState){
+      tokenString = content.substring(tokenStart, lastMatch + 1);
+      newTokenFm = Transients.newFeatureMap();
+      newTokenFm.put("string", tokenString);
+      for(int i = 1; i < lastMatchingState.getTokenDesc().length; i++){
+        newTokenFm.put(lastMatchingState.getTokenDesc()[i][0],
+                       lastMatchingState.getTokenDesc()[i][1]);
+      }
+      try{
+        annotationSet.add(new Long(tokenStart),
+                          new Long(lastMatch + 1),
+                          lastMatchingState.getTokenDesc()[0][0], newTokenFm);
+      }catch(InvalidOffsetException ioe){
+        //This REALLY shouldn't happen!
+        ioe.printStackTrace(System.err);
+      }
+      charIdx = lastMatch + 1;
     }
+
   }
 
   //ProcessProgressReporter implementation
@@ -456,9 +597,9 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
 
   static public void main(String[] args){
     try{
-      DefaultTokeniser dt = new DefaultTokeniser(Files.getResourceAsStream("creole/tokeniser/DefaultTokeniser.rules"));
+      DefaultTokeniser dt = new DefaultTokeniser(Files.getResourceAsStream(
+                            "creole/tokeniser/DefaultTokeniser.rules"));
       Document doc = Transients.newDocument("Germany England and France   are countries that use ... $$$.");
-System.out.println("Space" + Character.getType(' '));
       dt.tokenise(doc, false);
     }catch(Exception ex){ex.printStackTrace(System.err);}
   }
@@ -472,14 +613,32 @@ System.out.println("Space" + Character.getType(' '));
   private Document doc;
   private AnnotationSet annotationSet;
 
+  /**The initial state of the non deterministic machine*/
   FSMState initialState;
+
+  /**A set containng all the states of the non deterministic machine*/
   Set fsmStates = new HashSet();
+
+  /**The initial state of the deterministic machine*/
   DFSMState dInitialState;
+
+  /**A set containng all the states of the deterministic machine*/
   Set dfsmStates = new HashSet();
-  static Map characterTypes;
-  static String[] typesMnemonics;
+
+  /**Maps from the String description to the int value representing Unicode
+    *categories
+    */
+  public static Map characterTypes;
+
+  /**Maps from the int associated to the unicode category to its name*/
+  public static String[] typesMnemonics;
+
+  /**The separator from LHS to RHS*/
   static String LHStoRHS = ">";
+
+  /**A set of string representing tokens to be ignored (e.g. blanks)*/
   static Set ignoreTokens;
+
   static{
     characterTypes = new HashMap();
     characterTypes.put("UPPERCASE_LETTER", new UnicodeType(Character.UPPERCASE_LETTER));
@@ -546,13 +705,7 @@ System.out.println("Space" + Character.getType(' '));
 
 }//class DefaultTokeniser
 
-/** Used as an object wrapper that holds an Unicode type (the byte value of
-  * the static member of java.lang.Character).
-  */
-class UnicodeType{
-  byte type;
-  UnicodeType(byte type){ this.type = type;}
-}//class UnicodeType
+
 
 
 
