@@ -16,6 +16,7 @@ import java.sql.*;
 import java.util.*;
 import java.net.*;
 import gate.util.*;
+import javax.swing.*;
 
 public class ExportAnnotations
     extends AbstractLanguageAnalyser
@@ -28,7 +29,10 @@ public class ExportAnnotations
   private String annotationSetName;
 
   /** Database Instance Name */
-  private String databaseInstanceName;
+  private String databaseInstanceURL;
+
+  /** Database Instance Name */
+  private String tableName;
 
   /** The date on which the job was posted */
   private String datePosted;
@@ -104,7 +108,7 @@ public class ExportAnnotations
     iterator = tokens.iterator();
 
     // statement
-    PreparedStatement statement = connect(databaseInstanceName);
+    PreparedStatement statement = connect(databaseInstanceURL);
 
     // lets take one annotation at a time and export it
     while (iterator.hasNext()) {
@@ -178,11 +182,11 @@ public class ExportAnnotations
 
 
   /** This method writes the header in the txt file */
-  private PreparedStatement connect(String databaseInstanceName)
+  private PreparedStatement connect(String databaseInstanceURL)
       throws ExecutionException {
 
     // url
-    String url = "jdbc:odbc:" + databaseInstanceName;
+    String url = "jdbc:odbc:" + databaseInstanceURL;
 
     try {
       // load the driver
@@ -191,7 +195,7 @@ public class ExportAnnotations
       // Get the connnection
       Connection conn = DriverManager.getConnection(url);
       PreparedStatement statement = conn.prepareStatement(
-          "INSERT INTO annotations VALUES ( ?, ?, ?, ? )");
+          "INSERT INTO "+tableName+" VALUES ( ?, ?, ?, ? )");
 
       return statement;
     }
@@ -225,12 +229,22 @@ public class ExportAnnotations
   }
 
   /** Sets the databaseInstanceName */
-  public void setDatabaseInstanceName(String databaseInstanceName) {
-    this.databaseInstanceName = databaseInstanceName;
+  public void setDatabaseInstanceURL(String databaseInstanceURL) {
+    this.databaseInstanceURL = databaseInstanceURL;
   }
 
   /** Returns the databaseInstanceName */
-  public String getDatabaseInstanceName() {
-    return this.databaseInstanceName;
+  public String getDatabaseInstanceURL() {
+    return this.databaseInstanceURL;
+  }
+
+  /** Sets the tableName */
+  public void setTableName(String tableName) {
+    this.tableName = tableName;
+  }
+
+  /** gets the tableName */
+  public String getTableName() {
+    return this.tableName;
   }
 }
