@@ -46,12 +46,22 @@ public class TestNamematch extends TestCase
     //get a document
     Document doc = Factory.newDocument(
       new URL(TestDocument.getTestServerName() + "tests/matcher.txt"));
+
+    Set annotationTypes = new HashSet();
+    annotationTypes.add("Organization");
+    annotationTypes.add("Person");
+
     //create a namematcher
     FeatureMap params = Factory.newFeatureMap();
+
+    params.put("annotationTypes",annotationTypes);
+    params.put("organizationType","Organization");
+    params.put("personType","Person");
     Namematch namematch = (Namematch) Factory.createResource(
                           "gate.creole.namematch.Namematch", params);
 
     AnnotationSet annotSetAS = doc.getAnnotations("AnnotationSetAS");
+
     Integer newId;
     FeatureMap fm = Factory.newFeatureMap();
     try {
@@ -59,69 +69,68 @@ public class TestNamematch extends TestCase
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(257), new Long(274), "TTTT", fm);
+      annotSetAS.add(new Long(257), new Long(274), "Organization", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","person");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(275), new Long(293), "TTTT", fm);
+      annotSetAS.add(new Long(275), new Long(293), "Person", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(294), new Long(306), "TTTT", fm);
+      annotSetAS.add(new Long(294), new Long(306), "Person", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(307), new Long(326), "TTTT", fm);
+      annotSetAS.add(new Long(307), new Long(326), "Organization", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(327), new Long(338), "TTTT", fm);
+      annotSetAS.add(new Long(327), new Long(338), "Person", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(339), new Long(349), "TTTT", fm);
+      annotSetAS.add(new Long(339), new Long(349), "Organization", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(350), new Long(365), "TTTT", fm);
+      annotSetAS.add(new Long(350), new Long(365), "Organization", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(386), new Long(389), "TTTT", fm);
+      annotSetAS.add(new Long(386), new Long(389), "Organization", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(390), new Long(394), "TTTT", fm);
+      annotSetAS.add(new Long(390), new Long(394), "Organization", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(395), new Long(422), "TTTT", fm);
+      annotSetAS.add(new Long(395), new Long(422), "Organization", fm);
 
     } catch (InvalidOffsetException ioe) {
       ioe.printStackTrace();
     }
     namematch.setDocument(doc);
     namematch.setAnnotationSetName("AnnotationSetAS");
-    namematch.setAnnotationType("TTTT");
-    namematch.setAttributeType("token");
+    namematch.setPersonType("Person");
     // uses intern cdg list or extern cdg list
     namematch.setIntCdgList(new Boolean(true));
     // uses inter lists or extern lists
@@ -140,6 +149,12 @@ public class TestNamematch extends TestCase
     Iterator i;
 
     // the annotation with Id 0
+    Long offsetStartAnnot = new Long(257);
+    Long offsetEndAnnot = new Long(274);
+    String annotString =
+          doc.getContent().getContent(
+          offsetStartAnnot,offsetEndAnnot).toString();
+
     annot = annotSet.get(new Integer(0));
     fm1 = annot.getFeatures();
     i = fm1.keySet().iterator();
@@ -155,6 +170,12 @@ public class TestNamematch extends TestCase
     } // while
 
     // the annotation with Id 2
+    offsetStartAnnot = new Long(294);
+    offsetEndAnnot = new Long(306);
+    annotString =
+          doc.getContent().getContent(
+          offsetStartAnnot,offsetEndAnnot).toString();
+
     annot = annotSet.get(new Integer(2));
     fm1 = annot.getFeatures();
     i = fm1.keySet().iterator();
@@ -170,6 +191,12 @@ public class TestNamematch extends TestCase
     } // while
 
     // the annotation with Id 3
+    offsetStartAnnot = new Long(307);
+    offsetEndAnnot = new Long(326);
+    annotString =
+          doc.getContent().getContent(
+          offsetStartAnnot,offsetEndAnnot).toString();
+
     annot = annotSet.get(new Integer(3));
     fm1 = annot.getFeatures();
     i = fm1.keySet().iterator();
@@ -185,6 +212,12 @@ public class TestNamematch extends TestCase
     } // while
 
     // the annotation with Id 4
+    offsetStartAnnot = new Long(327);
+    offsetEndAnnot = new Long(338);
+    annotString =
+          doc.getContent().getContent(
+          offsetStartAnnot,offsetEndAnnot).toString();
+
     annot = annotSet.get(new Integer(4));
     fm1 = annot.getFeatures();
     i = fm1.keySet().iterator();
@@ -200,6 +233,12 @@ public class TestNamematch extends TestCase
     } // while
 
     // the annotation with Id 5
+    offsetStartAnnot = new Long(339);
+    offsetEndAnnot = new Long(349);
+    annotString =
+          doc.getContent().getContent(
+          offsetStartAnnot,offsetEndAnnot).toString();
+
     annot = annotSet.get(new Integer(5));
     fm1 = annot.getFeatures();
     i = fm1.keySet().iterator();
@@ -215,6 +254,12 @@ public class TestNamematch extends TestCase
     } // while
 
     // the annotation with Id 6
+    offsetStartAnnot = new Long(350);
+    offsetEndAnnot = new Long(365);
+    annotString =
+          doc.getContent().getContent(
+          offsetStartAnnot,offsetEndAnnot).toString();
+
     annot = annotSet.get(new Integer(6));
     fm1 = annot.getFeatures();
     i = fm1.keySet().iterator();
@@ -230,6 +275,12 @@ public class TestNamematch extends TestCase
     } // while
 
     // the annotation with Id 7
+    offsetStartAnnot = new Long(386);
+    offsetEndAnnot = new Long(389);
+    annotString =
+          doc.getContent().getContent(
+          offsetStartAnnot,offsetEndAnnot).toString();
+
     annot = annotSet.get(new Integer(7));
     fm1 = annot.getFeatures();
     i = fm1.keySet().iterator();
@@ -245,6 +296,12 @@ public class TestNamematch extends TestCase
     } // while
 
     // the annotation with Id 9
+    offsetStartAnnot = new Long(395);
+    offsetEndAnnot = new Long(422);
+    annotString =
+          doc.getContent().getContent(
+          offsetStartAnnot,offsetEndAnnot).toString();
+
     annot = annotSet.get(new Integer(9));
     fm1 = annot.getFeatures();
     i = fm1.keySet().iterator();
@@ -259,6 +316,7 @@ public class TestNamematch extends TestCase
       }// if
     } // while
   }
+
   public static void main(String[] args) {
 
     TestNamematch test = new TestNamematch("");
