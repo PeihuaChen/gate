@@ -20,6 +20,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Graphics;
+import java.awt.Window;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.table.*;
@@ -693,9 +694,10 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
           Set sufixes = param.getSuffixes();
 
           listValue = (List)value;
-          listEditor = new ListEditorDialog(ResourceParametersEditor.this,
-                                            (List)value,
-                                            param.getItemClassName());
+          listEditor = new ListEditorDialog(
+                SwingUtilities.getAncestorOfClass(
+                Window.class, ResourceParametersEditor.this),
+                (List)value, param.getItemClassName());
 
           textField.setEditable(false);
           textField.setText(textForList((List)value));
