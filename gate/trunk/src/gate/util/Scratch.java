@@ -41,6 +41,12 @@ public class Scratch
   private static final boolean DEBUG = false;
 
   public static void main(String args[]) throws Exception {
+//    Gate.init();
+//
+//    List classes = Tools.findSubclasses(gate.creole.ir.Search.class);
+//    if(classes != null) for(int i = 0; i < classes.size(); i++){
+//      Out.prln(classes.get(i).toString());
+//    }
     createIndex();
 //    URL anURL = new URL("file:/z:/a/b/c/d.txt");
 //    URL anotherURL = new URL("file:/z:/a/b/c/d.txt");
@@ -298,10 +304,11 @@ public class Scratch
 
                                      corporaIds.get(0));
     DefaultIndexDefinition did = new DefaultIndexDefinition();
-    did.setIndexType(GateConstants.IR_LUCENE_INVFILE);
+    did.setIrEngineClassName(gate.creole.ir.lucene.
+                             LuceneIREngine.class.getName());
 
     did.setIndexLocation(indexLocation);
-    did.addIndexField(new IndexField("content", new ContentPropertyReader(), false));
+    did.addIndexField(new IndexField("body", new ContentPropertyReader(), false));
 
     corpus.setIndexDefinition(did);
 
@@ -317,7 +324,7 @@ public class Scratch
   }
 
   public static class ContentPropertyReader implements PropertyReader{
-    public String getRpopertyValue(gate.Document doc){
+    public String getPropertyValue(gate.Document doc){
       return doc.getContent().toString();
     }
   }
