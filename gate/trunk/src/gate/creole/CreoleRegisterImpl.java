@@ -166,8 +166,7 @@ public class CreoleRegisterImpl extends HashMap
       throw(new GateException("couldn't open creole.xml: " + e.toString()));
     }
     //add it to the list of known directories
-    if(!Gate.getKnownPlugins().contains(directoryUrl))
-       Gate.getKnownPlugins().add(directoryUrl);
+    Gate.addKnownPlugin(directoryUrl);
   } // registerDirectories(URL)
 
   /** Parse a directory file (represented as an open stream), adding

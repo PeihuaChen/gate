@@ -159,7 +159,8 @@ public class Gate implements GateConstants
       while(strTok.hasMoreTokens()){
         String aKnownPluginPath = strTok.nextToken();
         try{
-          knownPlugins.add(new URL(aKnownPluginPath));
+          URL aPluginURL = new URL(aKnownPluginPath);
+          addKnownPlugin(aPluginURL);
         }catch(MalformedURLException mue){
           Err.prln("Plugin error: " + aKnownPluginPath + " is an invalid URL!");
         }
@@ -200,7 +201,7 @@ public class Gate implements GateConstants
     if(pluginPath == null || pluginPath.length() == 0){
       //value not set -> use the default
       try{
-        pluginPath = new File(pluginsHome, "ANNIE").toURL().toString();
+        pluginPath = new File(pluginsHome, "ANNIE/").toURL().toString();
         getUserConfig().put(LOAD_PLUGIN_PATH_KEY, pluginPath);
       }catch(MalformedURLException mue){
         throw new GateRuntimeException(mue);
@@ -213,8 +214,10 @@ public class Gate implements GateConstants
       String aDir = strTok.nextToken();
       try{
         URL aPluginURL = new URL(aDir);
-        autoloadPlugins.add(aPluginURL);
-        getCreoleRegister().registerDirectories(aPluginURL);
+        if(!autoloadPlugins.contains(aPluginURL)){
+          autoloadPlugins.add(aPluginURL);
+          getCreoleRegister().registerDirectories(aPluginURL);
+        }
       }catch(MalformedURLException mue){
         System.err.println("Cannot load " + aDir + " CREOLE repository.");
         mue.printStackTrace();
@@ -894,8 +897,6 @@ jar/classpath so it's the same as registerBuiltins
   public static void addKnownPlugin(URL pluginURL){
     if(knownPlugins.contains(pluginURL)) return;
     knownPlugins.add(pluginURL);
-    DirectoryInfo dInfo = new DirectoryInfo(pluginURL);
-    pluginData.put(pluginURL, dInfo);
   }
 
   /**
@@ -921,7 +922,13 @@ jar/classpath so it's the same as registerBuiltins
    * @return a {@link DirectoryInfo} value.
    */
   public static DirectoryInfo getDirectoryInfo(URL directory){
-    return (DirectoryInfo)pluginData.get(directory);
+    if(!knownPlugins.contains(directory)) return null;
+    DirectoryInfo dInfo = (DirectoryInfo)pluginData.get(directory);
+    if(dInfo == null){
+      dInfo = new DirectoryInfo(directory);
+      pluginData.put(directory, dInfo);
+    }    
+    return dInfo;
   }
   
   /**
