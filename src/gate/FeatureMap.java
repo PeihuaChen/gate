@@ -1,5 +1,5 @@
 /*
- *	FeatureSet.java
+ *	FeatureMap.java
  *
  *	Hamish Cunningham, Jan/19/2000
  *
@@ -13,7 +13,7 @@ import gate.util.*;
 /** An attribute-value matrix. Represents the content of an annotation, the
   * meta-data on a resource, and anything else we feel like.
   */
-public interface FeatureSet
+public interface FeatureMap extends Map
 {
 
-} // interface FeatureSet
+} // interface FeatureMap
