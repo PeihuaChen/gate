@@ -12,13 +12,20 @@
  */
 package gate.gui.docview;
 
+import java.awt.*;
 import java.awt.Component;
 import java.awt.Point;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
+import javax.swing.text.*;
+import javax.swing.text.Highlighter;
 
+import gate.Annotation;
 import gate.Document;
+import gate.util.GateRuntimeException;
 
 
 /**
@@ -30,6 +37,7 @@ public class TextualDocumentView extends AbstractDocumentView {
   public TextualDocumentView(){
     textView = new JEditorPane();
     scroller = new JScrollPane(textView);
+    hgTagForAnn = new HashMap();
     initListeners();
   }
 
@@ -64,18 +72,29 @@ public class TextualDocumentView extends AbstractDocumentView {
   protected void initGUI() {
     textView.setText(document.getContent().toString());
     scroller.getViewport().setViewPosition(new Point(0, 0));
-////    textView.setSize(textView.getPreferredSize());
-////    scroller.setSize(scroller.getPreferredSize());
-//    try{
-//      Rectangle rect = textView.modelToView(0);
-//Out.prln(rect);      
-//      textView.scrollRectToVisible(rect);
-//    }catch(BadLocationException ble){
-//      //ignore
-//      ble.printStackTrace();
-//    }
-//    scroller.getViewport().setViewPosition(new Point(0,0));
-//    scroller.getViewport().scrollRectToVisible(new Rectangle(0,0,1,1));
-//      JComponent comp;
   }
+  
+  public Object addHighlight(Annotation ann, Color colour){
+    Highlighter highlighter = textView.getHighlighter();
+    try{
+	    return highlighter.addHighlight(
+	            ann.getStartNode().getOffset().intValue(),
+	            ann.getEndNode().getOffset().intValue(),
+	            new DefaultHighlighter.DefaultHighlightPainter(colour));
+    }catch(BadLocationException ble){
+      //the offsets should always be OK as they come from an annotation
+      throw new GateRuntimeException(ble.toString());
+    }
+  }
+  
+  public void removeHighlight(Object tag){
+    Highlighter highlighter = textView.getHighlighter();
+    highlighter.removeHighlight(tag);
+  }
+  
+  
+  /**
+   * Stores the highlighter tags for all the highlighted annotations;
+   */
+  protected Map hgTagForAnn; 
 }
