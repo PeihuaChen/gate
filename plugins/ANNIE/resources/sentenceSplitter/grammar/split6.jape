@@ -1,0 +1,25 @@
+// Valentin Tablan, 17/05/2001
+
+
+Phase:split6
+Input: Token Split
+Options: control = first
+
+//generates the sentence annotations
+
+Rule: r1
+(
+ ({Token})+
+ ({Split.type=="."}|{Split.type=="punctuation"}|{Split.type=="multi"}|{Split.type=="quote"})
+ ) :left
+-->
+:left.Sentence = {}
+
+
+Rule: r2
+(
+ ({Token})+
+ ) :left
+({Split.type=="CR"}|{Split.type=="quote"})
+-->
+:left.Sentence = {}

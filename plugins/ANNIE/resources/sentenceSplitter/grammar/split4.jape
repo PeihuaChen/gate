@@ -2,28 +2,33 @@
 
 
 Phase:split4
-Input: Token Split
-Options: control = first
+Input: Token SpaceToken Split
+Options: control = Appelt
 
-//removes some other false splitters "(!?!?!)"
+//concatenates groups of splitters
 
 
 Rule: r1
-{Token.string=="("}
- (({Split})+):fake
-{Token.string==")"} 
+ (
+ ({Split.type=="."}|{Split.type=="punctuation"})
+ ({Split.type=="."}|{Split.type=="punctuation"})+):left
 -->
 {
-	gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("fake");
+	gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("left");
 	annotations.removeAll(toRemove);
+	gate.FeatureMap features = Factory.newFeatureMap();
+	features.put("type", "multi");
+	annotations.add(toRemove.firstNode(), toRemove.lastNode(), "Split", features);
 }
 
-Rule: r2
-{Token.string=="["}
- (({Split})+):fake
-{Token.string=="]"} 
+Rule: r1
+ ({Split.type=="singleQuote"}{Split.type=="singleQuote"}):left
 -->
 {
-	gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("fake");
+	gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("left");
 	annotations.removeAll(toRemove);
+	gate.FeatureMap features = Factory.newFeatureMap();
+	features.put("type", "quote");
+	annotations.add(toRemove.firstNode(), toRemove.lastNode(), "Split", features);
 }
+

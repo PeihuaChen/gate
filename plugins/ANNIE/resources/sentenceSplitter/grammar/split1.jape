@@ -8,19 +8,12 @@ Options: control = first
 
 Rule: r1
  ({Token.string=="."}):left
- ({Token.orth=="upperInitial"}|{SpaceToken})  
+ ({Token.orth=="upperInitial"}|{SpaceToken}|{Token.string=="\""}|{Token.string=="\'"})  
 -->
 :left.Split = {type="."}
 
 
 Rule: r2
- ({Token.string=="!"}|{Token.string=="?"}):left  
+ ({Token.string=="!"}|{Token.string=="?"}):left
 -->
 :left.Split = {type="punctuation"}
-
-
-Rule: r3
- (({SpaceToken.string=="\n"}|{SpaceToken.string=="\r"})+):left 
- {Token.orth=="upperInitial"}
--->
-:left.Split = {type="CR"}

@@ -1,28 +1,24 @@
 // Valentin Tablan, 17/05/2001
 
+//finds the candidates for splitting (quotes and CRs)
 
 Phase:split2
-Input: Token Lookup Split SpaceToken
-Options: control = Appelt
-
-//removes the abbreviation false splitters
+Input: Token SpaceToken
+Options: control = first
 
 
 Rule: r1
- ({Lookup.majorType=="abbreviation"} ({Split.type=="."}):fake)
+ ({Token.string=="\""}):left  
 -->
-{
-	java.util.Collection toRemove = (java.util.Collection)bindings.get("fake");
-	annotations.removeAll(toRemove);
-}
+:left.Split = {type="quote"}
 
-// A.B.C.
 Rule: r2
- ({Token.orth=="upperInitial", Token.length=="1"} ({Split.type=="."}):fake)+
- ({SpaceToken}|{Split})
+ ({Token.string=="\'"}):left  
 -->
-{
-	java.util.Collection toRemove = (java.util.Collection)bindings.get("fake");
-	annotations.removeAll(toRemove);
-}
+:left.Split = {type="singleQuote"}
 
+Rule: r3
+ (({SpaceToken.string=="\n"}|{SpaceToken.string=="\r"})+):left 
+ ({Token.orth=="upperInitial"}|{Token.orth=="number"})
+-->
+:left.Split = {type="CR"}
