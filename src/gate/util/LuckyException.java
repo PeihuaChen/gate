@@ -2,34 +2,32 @@
  *	LuckyException.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
- *  
+ *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June1991.
- *  
+ *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *  
+ *
  *	Valentin Tablan 06/2000
  *
  *	$Id$
  */
 package gate.util;
-
-/** This exception is intende to be used in places where there definitely
-  * shouldn't be any exceptions thrown but the API requires us to catch some,
-  * eg: <code>
-  *  try{
-  *    if( a != null){
-  *      a.doSomething();
-  *    }
-  *  }catch(NullPointerException npe){
-  *    throw new LuckyException("I found a null pointer!");
-  *  }
-  * </code>
-  * Of course thew system will never require you to catch NullPOinterException
-  * as it derives from RuntimeException, but I couldn't come with a better
-  * example.
+/**This exception is intended to be used in places where there definitely
+  *shouldn't be any exceptions thrown but the API requires us to catch some,
+  *eg: <code>
+  * try{
+  *   if( a != null){
+  *     a.doSomething();
+  *   }
+  * }catch(NullPointerException npe){
+  *   throw new LuckyException("I found a null pointer!");
+  * }
+  *</code>
+  *Of course the system will never require you to catch NullPOinterException as
+  *it derives from RuntimeException, but I couldn't come with a better example.
   */
 public class LuckyException extends RuntimeException {
 
@@ -49,8 +47,9 @@ public class LuckyException extends RuntimeException {
     super(message + "\n" + defaultMessage);
   }
 
-  /** The default message carried by this type of exceptions */
+  /**The default message carried by this type of exceptions*/
   static String defaultMessage =
     "Congratulations, you found the ONLY bug in GATE!";
-    
-} // class LuckyException
+
+}// end class LuckyException
+

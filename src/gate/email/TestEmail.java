@@ -62,20 +62,7 @@ public class TestEmail extends TestCase
     // create the markupElementsMap map
     Map markupElementsMap = null;
     gate.Document doc = null;
-    /*
-    markupElementsMap = new HashMap();
-    // populate it
-    markupElementsMap.put ("S","Sentence");
-    markupElementsMap.put ("s","Sentence");
-    markupElementsMap.put ("W","Word");
-    markupElementsMap.put ("w","Word");
-    markupElementsMap.put ("p","Paragraph");
-    markupElementsMap.put ("h1","Header 1");
-    markupElementsMap.put ("H1","Header 1");
-    markupElementsMap.put ("A","link");
-    markupElementsMap.put ("a","link");
-    */
-
+    Gate.init();
     doc = gate.Factory.newDocument(Gate.getUrl("tests/email/test.eml"));
 
     // get a document format that deals with e-mails
@@ -83,35 +70,8 @@ public class TestEmail extends TestCase
       doc, doc.getSourceUrl()
     );
     assert(docFormat instanceof gate.corpora.EmailDocumentFormat);
-
-    // register a status listener with it
-    /*
-    docFormat.addStatusListener(new StatusListener(){
-          public void statusChanged(String text){
-            Out.println(text);
-          }
-          public void processFinished(){
-          }
-      });
-    */
     //docFormat.unpackMarkup (doc,"DocumentContent");
     docFormat.unpackMarkup(doc);
-    /*
-    // timing the operation
-    Date startTime = new Date();
-      docFormat.unpackMarkup (doc,"DocumentContent");
-    Date endTime = new Date();
-    // get the size of the doc
-    long  time1 = endTime.getTime () - startTime.getTime ();
-    //File f = Files.writeTempFile(doc.getSourceURL().openStream());
-    int docSize = doc.getContent().size().intValue();
-    //f.delete();
-    Out.println("unpacMarkup() time for " + doc.getSourceURL () + "(" +
-      docSize/1024 + "." + docSize % 1024 + " K)" + "=" + time1 / 1000 + "." +
-     time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024+
-      "." + (docSize/time1*1000)%1024 + " K/second");
-    */
-   //*/
   } // testUnpackMarkup()
 
   /**

@@ -22,6 +22,7 @@ import java.net.*;
 
 import gate.util.*;
 import gate.*;
+import gate.creole.*;
 
 import org.w3c.www.mime.*;
 
@@ -43,16 +44,20 @@ public class TextualDocumentFormat extends DocumentFormat
   /** Default construction */
   public TextualDocumentFormat() { super(); }
 
-  /** Construction with a map of what markup elements we want to
-    * convert when doing unpackMarkup(), and what annotation types
-    * to convert them to.
-    */
-  public TextualDocumentFormat(Map markupElementsMap) {
-    super(markupElementsMap);
-  } // construction with map
-
   /** Initialise this resource, and return it. */
-  public Resource init() {
+  public Resource init() throws ResourceInstantiationException{
+    // Register plain text mime type
+    MimeType mime = new MimeType("text","plain");
+    // Register the class handler for this mime type
+    mimeString2ClassHandlerMap.put(mime.getType()+ "/" + mime.getSubtype(),
+                                                                          this);
+    // Register the mime type with mine string
+    mimeString2mimeTypeMap.put(mime.getType() + "/" + mime.getSubtype(), mime);
+    // Register file sufixes for this mime type
+    suffixes2mimeTypeMap.put("txt",mime);
+    suffixes2mimeTypeMap.put("text",mime);
+    // Set the mimeType for this language resource
+    setMimeType(mime);
     return this;
   } // init()
 
@@ -61,13 +66,14 @@ public class TextualDocumentFormat extends DocumentFormat
     * Uses the markupElementsMap to determine which elements to convert, and
     * what annotation type names to use.
     */
-  public void unpackMarkup(Document doc){
-    Out.println("UNPACK called from TextualDocumentFormat");
-  }
+  public void unpackMarkup(Document doc) throws DocumentFormatException{
+  }//unpackMarkup
 
   public void unpackMarkup(Document doc,
-                                    String  originalContentFeatureType){
-    Out.println("UNPACK called from TextualDocumentFormat");
-  }
+                                    String  originalContentFeatureType)
+                                              throws DocumentFormatException{
+
+  }//unpackMarkup
+  public DataStore getDataStore(){ return null;}
 
 } // class TextualDocumentFormat

@@ -2,14 +2,14 @@
  *	EmailDocumentFormat.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
- *  
+ *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June1991.
- *  
+ *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *  
+ *
  *	Cristian URSU, 3/Aug/2000
  *
  *	$Id$
@@ -25,6 +25,7 @@ import gate.util.*;
 import gate.*;
 import gate.email.*;
 import gate.gui.*;
+import gate.creole.*;
 
 import org.w3c.www.mime.*;
 
@@ -45,27 +46,20 @@ public class EmailDocumentFormat extends TextualDocumentFormat
   /** Default construction */
   public EmailDocumentFormat() { super();}
 
-  /** Construction with a map of what markup elements we want to
-    * convert when doing unpackMarkup(), and what annotation types
-    * to convert them to.
-    */
-  public EmailDocumentFormat(Map markupElementsMap) {
-    super(markupElementsMap);
-  } // construction with map
-
   /** Unpack the markup in the document. This converts markup from the
     * native format (e.g. XML, RTF) into annotations in GATE format.
     * Uses the markupElementsMap to determine which elements to convert, and
     * what annotation type names to use.
     */
-  public void unpackMarkup(gate.Document doc) {
 
+  public void unpackMarkup(gate.Document doc) throws DocumentFormatException{
     // create an EmailDocumentHandler
     EmailDocumentHandler emailDocHandler = null;
-    emailDocHandler = new gate.email.EmailDocumentHandler( doc,
-                                                        this.markupElementsMap,
-                                                        this.element2StringMap
-                                                        );
+    emailDocHandler = new
+                      gate.email.EmailDocumentHandler( doc,
+                                                       this.markupElementsMap,
+                                                       this.element2StringMap
+                                                      );
     // register a status listener with it
     emailDocHandler.addStatusListener(new StatusListener() {
       public void statusChanged(String text) {
@@ -75,9 +69,14 @@ public class EmailDocumentFormat extends TextualDocumentFormat
     });
 
     // call the method that creates annotations on the gate document
-    emailDocHandler.annotateMessages();
-
-  } // unpackMarkup
+    try{
+      emailDocHandler.annotateMessages();
+    } catch (IOException e){
+      throw new DocumentFormatException("Couldn't create a buffered reader ",e);
+    } catch (InvalidOffsetException e){
+      throw new DocumentFormatException(e);
+    }
+  }//unpackMarkup(doc)
 
   /** Unpack the markup in the document. This converts markup from the
     * native format (e.g. XML, RTF) into annotations in GATE format.
@@ -87,8 +86,8 @@ public class EmailDocumentFormat extends TextualDocumentFormat
     * content of the Gate document.
     */
    public void unpackMarkup(gate.Document doc,
-                                    String  originalContentFeatureType) {
-
+                                    String  originalContentFeatureType)
+                                               throws DocumentFormatException{
      FeatureMap fm = doc.getFeatures ();
 
      if (fm == null)
@@ -96,7 +95,25 @@ public class EmailDocumentFormat extends TextualDocumentFormat
 
      fm.put(originalContentFeatureType, doc.getContent().toString());
      doc.setFeatures(fm);
-     unpackMarkup (doc);
-  }
+     unpackMarkup (doc, originalContentFeatureType);
+  }// unpackMarkup(doc, originalContentFeatureType)
+
+  /** Initialise this resource, and return it. */
+  public Resource init() throws ResourceInstantiationException{
+    // Register EMAIL mime type
+    MimeType mime = new MimeType("text","email");
+    // Register the class handler for this mime type
+    mimeString2ClassHandlerMap.put(mime.getType()+ "/" + mime.getSubtype(),
+                                                                          this);
+    // Register the mime type with mine string
+    mimeString2mimeTypeMap.put(mime.getType() + "/" + mime.getSubtype(), mime);
+    // Register file sufixes for this mime type
+    suffixes2mimeTypeMap.put("eml",mime);
+    suffixes2mimeTypeMap.put("email",mime);
+    // Set the mimeType for this language resource
+    setMimeType(mime);
+    return this;
+  }// init()
+
 }// class EmailDocumentFormat
 

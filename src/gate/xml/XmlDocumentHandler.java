@@ -145,7 +145,8 @@ public class XmlDocumentHandler extends HandlerBase
             basicAS.add(obj.getStart(),obj.getEnd(),annotationType,obj.getFM());
         }
       }catch (gate.util.InvalidOffsetException e){
-        e.printStackTrace(Err.getPrintWriter());
+        //e.printStackTrace(Err.getPrintWriter());
+        throw new GateSaxException(e);
       }
     }// while
   }

@@ -20,6 +20,7 @@ package gate.xml;
 import java.util.*;
 import java.net.*;
 import java.io.*;
+import java.beans.*;
 
 import gate.util.*;
 import gate.gui.*;
@@ -43,21 +44,8 @@ public class TestXml extends TestCase
   public void setUp() {
   } // setUp
 
-
-  public static void main(String args[]) {
-    TestXml app = new TestXml("TestXml");
-    try {
-      app.testUnpackMarkup();
-    } catch (Exception e) {
-      e.printStackTrace (Err.getPrintWriter());
-    }
-  } // main
-
-
   /** A test */
-  public void testUnpackMarkup() throws Exception {
-    assert(true);
-
+  public void testUnpackMarkup() throws Exception{
     // create the markupElementsMap map
     Map markupElementsMap = null;
     gate.Document doc = null;
@@ -66,77 +54,25 @@ public class TestXml extends TestCase
     // populate it
     markupElementsMap.put ("S","Sentence");
     markupElementsMap.put ("s","Sentence");
-    markupElementsMap.put ("W","Word");
-    markupElementsMap.put ("w","Word");
-    markupElementsMap.put ("p","Paragraph");
-    markupElementsMap.put ("h1","Header 1");
-    markupElementsMap.put ("H1","Header 1");
-    markupElementsMap.put ("A","link");
-    markupElementsMap.put ("a","link");
     */
-    // create the element2String map
+    // Create the element2String map
     Map anElement2StringMap = null;
     anElement2StringMap = new HashMap();
-    // populate it
+    // Populate it
     anElement2StringMap.put("S","\n");
     anElement2StringMap.put("s","\n");
 
-
     doc = gate.Factory.newDocument(Gate.getUrl("tests/xml/xces.xml"));
-    /*
-    gate.Document doc = gate.Factory.newDocument(
-              new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/Sentence.xml")
-    );
-    */
-
-    /*
-  File f = Files.writeTempFile(Files.getResourceAsStream("texts/Sentence.xml"));
-    URL u = f.toURL();
-    gate.Document doc = gate.Factory.newDocument(u);
-    f.delete ();
-    */
-    // get the docFormat that deals with it.
-    // the parameter MimeType doesn't affect right now the behaviour
-    /*
-    gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(doc,
-      new MimeType("text","xml")
-    );
-    */
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
       doc, doc.getSourceUrl()
     );
+    System.out.println(docFormat.getClass().getName());
     assert(docFormat instanceof gate.corpora.XmlDocumentFormat);
-    //*
-    // set's the map
+    // Set the maps
     docFormat.setMarkupElementsMap(markupElementsMap);
     docFormat.setElement2StringMap(anElement2StringMap);
-    // register a progress listener with it
-      /*
-      docFormat.addStatusListener(new StatusListener(){
-          public void statusChanged(String text){
-            Out.println(text);
-          }
-          public void processFinished(){
-          }
-      });
-      */
-      docFormat.unpackMarkup (doc,"DocumentContent");
-      /*
-      // timing the operation
-      Date startTime = new Date();
-        docFormat.unpackMarkup (doc,"DocumentContent");
-      Date endTime = new Date();
-      // get the size of the doc
-      long  time1 = endTime.getTime () - startTime.getTime ();
-      //File f = Files.writeTempFile(doc.getSourceURL().openStream());
-      int docSize = doc.getContent().size().intValue();
-      //f.delete();
-      Out.println("unpacMarkup() time for " + doc.getSourceURL () + "(" +
-       docSize/1024 + "." + docSize % 1024 + " K)" + "=" + time1 / 1000 + "." +
-       time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024+
-        "." + (docSize/time1*1000)%1024 + " K/second");
-      */
-   //*/
+
+    docFormat.unpackMarkup (doc,"DocumentContent");
   } // testUnpackMarkup()
 
   /** Test suite routine for the test runner */
