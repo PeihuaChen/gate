@@ -40,8 +40,8 @@ public class Gate
 
   /** The list of builtin URLs to search for CREOLE resources. */
   private static String builtinCreoleDirectoryUrls[] = {
-    // "http://derwent.dcs.shef.ac.uk/gate.ac.uk/creole/creole.xml"
-     "http://gate.ac.uk/creole/creole.xml"
+    // "http://derwent.dcs.shef.ac.uk/gate.ac.uk/creole/"
+   "http://gate.ac.uk/creole/"
   };
 
   /** Initialisation - must be called by all clients before using
