@@ -510,20 +510,35 @@ Valentin's note: how often do we set parameters on resources? Is it worth the wh
   </TR>
 
   <TR>
-    <TD>00096</TD>
+    <TD>00097</TD>
     <TD>Persistence - Database</TD>
+    <TD>Angel</TD>
     <TD>Marin</TD>
-    <TD>Marin</TD>
-    <TD>07 Jul 2003 Gate 2.1 build 1288</TD>
+    <TD>03 Jul 2003 Gate 2.1 build 128?</TD>
     <TD>NOT FIXED</TD>
-    <TD> Documents are not properly unloaded from a database corpus because the super class intercepts the unload event (caused by improper listener registration)
-    
+    <TD> If you have a Document created from String rather than created by URL
+there is a persistance exception. Exception is:
+
+gate.persist.PersistenceException: can't create document [step 4] in DB:
+[ORA-01400: cannot insert NULL into
+("GATEADMIN"."T_DOCUMENT"."DOC_URL")
+ORA-06512: at "GATEADMIN.PERSIST", line 310
+ORA-06512: at line 1
+]
+
+ at gate.persist.OracleDataStore.createDoc(OracleDataStore.java:530)
+ at gate.persist.JDBCDataStore.createDocument(JDBCDataStore.java:1302)
+ at
+gate.persist.JDBCDataStore.createDocument(JDBCDataStore.java:1258)trans
+failed ...rollback
+ at gate.persist.JDBCDataStore._adopt(JDBCDataStore.java:467)
+ at gate.persist.JDBCDataStore.adopt(JDBCDataStore.java:397)
+
     </TD>
     <TD>-</TD>
     <TD>-</TD>
     <!--<TD>spare1</TD>-->
     <!--<TD>spare2</TD>-->
-  </TR>
 
 
 <!------------------------------------------------------------------------->
@@ -1845,6 +1860,25 @@ gate.corpora.DocumentImpl
     <TD>05 Jul 2003 Gate 2.1 build 1288</TD>
     <TD>Database corpus sync() performance was improved by removing an unnecessary call (for creating a link between a document and a corpus in the database)
     This call was made for every loaded document from the corpus (even for the ones such link already has been created)
+    </TD>
+    <TD>-</TD>
+    <TD>-</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00096</TD>
+    <TD>Persistence - Database</TD>
+    <TD>Marin</TD>
+    <TD>Marin</TD>
+    <TD>07 Jul 2003 Gate 2.1 build 1288</TD>
+    <TD>08 Jul 2003 Gate 2.1 build 1289</TD>
+    <TD> Documents were not properly unloaded from a database corpus because the super class intercepts the unload event (caused by improper listener registration)
+    The actual problem was in the CorpusImpl equals() implementation (which is inherited by DatabaseCorpusImpl) and which makes the two documents (
+    transient and database) look the same just because they contain the same document list. As a result the registry refused to register the database corpus
+    as listener for document unload events. After the fix the peformance of a database corpus sync() is greatly improved
+    
     </TD>
     <TD>-</TD>
     <TD>-</TD>
