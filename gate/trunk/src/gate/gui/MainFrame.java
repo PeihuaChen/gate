@@ -2893,6 +2893,7 @@ public class MainFrame extends JFrame
       try {
         JFrame frame = new JFrame();
         editor.init();
+        frame.setTitle("Ontology Editor");
         frame.getContentPane().add(editor);
         /*
           SET ONTOLOGY LIST AND ONTOLOGY
