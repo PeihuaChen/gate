@@ -33,7 +33,7 @@ public class Namematch extends AbstractProcessingResource
   protected gate.Document document;
 
   /** the annotation set for the document */
-  protected AnnotationSet nameAnnots;
+  protected AnnotationSet nameAnnots ;
 
   // annotation specific variables
   // the type of the annotation
@@ -44,24 +44,94 @@ public class Namematch extends AbstractProcessingResource
 
   protected boolean int_cdg_list;
 
+  protected boolean int_ext_lists;
+
   protected Vector matchesDocument = null;
 
   ExecutionException executionException;
 
   // name lookup tables (used for namematch)
-  protected Hashtable alias;
-  protected Hashtable cdg;
-  protected Hashtable spur_match;
-  protected Hashtable def_art;
-  protected Hashtable connector;
-  protected Hashtable prepos;
+  protected HashMap alias = new HashMap();
+  protected HashMap cdg = new HashMap();
+  protected HashMap spur_match = new HashMap();
+  protected HashMap def_art = new HashMap();
+  protected HashMap connector = new HashMap();
+  protected HashMap prepos = new HashMap();
+
+  /** a buffer in order to read an array of char */
+  private char cbuffer[] = null;
+
+  /** the size of the buffer */
+  private final static int BUFF_SIZE = 65000;
 
   public Namematch () {}
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
+    cbuffer = new char[BUFF_SIZE];
     return this;
   } // init()
+
+  public void createLists() throws IOException {
+    InputStream inputStream = Files.getGateResourceAsStream(
+                                              "creole/namematcher/listsNM.def");
+    InputStreamReader inputStreamReader = new InputStreamReader (
+                                                    inputStream);
+    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+    String lineRead = null;
+    while ((lineRead = bufferedReader.readLine()) != null){
+      int index = lineRead.indexOf(":");
+      if (index != -1){
+        String nameFile = lineRead.substring(0,index);
+        String nameList = lineRead.substring(index+1,lineRead.length());
+        createAnnotList(nameFile,nameList);
+      }// if
+    }//while
+    bufferedReader.close();
+    inputStreamReader.close();
+    inputStream.close();
+  }// createLists()
+
+  public void createAnnotList(String nameFile,String nameList)
+                                                          throws IOException{
+    InputStream inputStream = Files.getGateResourceAsStream(
+                                              "creole/namematcher/"+nameFile);
+    InputStreamReader inputStreamReader = new InputStreamReader (
+                                                    inputStream);
+    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+    String lineRead = null;
+    while ((lineRead = bufferedReader.readLine()) != null){
+
+      if (nameList.compareTo("cdg")==0){
+        cdg.put(lineRead,"cdg");
+      }// if
+      else {
+        int index = lineRead.indexOf("£");
+        if (index != -1){
+          String  expr = lineRead.substring(0,index);
+          String code = lineRead.substring(index+1,lineRead.length());
+          if (nameList.compareTo("alias")==0 )
+                            alias.put(expr, code);
+          else
+          if (nameList.compareTo("def_art")== 0)
+                            def_art.put(expr, code);
+          else
+          if (nameList.compareTo("prepos")== 0)
+                            prepos.put(expr, code);
+          else
+          if (nameList.compareTo("connector")== 0)
+                            connector.put(expr, code);
+          else
+          if (nameList.compareTo("spur_match")== 0)
+                            spur_match.put(expr, code);
+
+      }// if
+
+      }
+    }//while
+  }
 
   /**  Run the resource. It doesn't make sense not to override
     *  this in subclasses so the default implementation signals an
@@ -77,7 +147,13 @@ public class Namematch extends AbstractProcessingResource
       return;
     }
 
-    buildTables(document, int_cdg_list);
+    if (int_ext_lists)
+      buildTables(document, int_cdg_list);
+    else {
+      try {
+      createLists();
+      } catch (IOException ioe) {ioe.printStackTrace();}
+    }
 
     if(nameAnnots == null) nameAnnots = document.getAnnotations();
     else if(nameAnnots.getDocument() != document) {
@@ -130,7 +206,6 @@ public class Namematch extends AbstractProcessingResource
       } catch (InvalidOffsetException ioe) {
         executionException = new ExecutionException
                                ("Invalid offset of the annotation");
-        //ioe.printStackTrace(Err.getPrintWriter());
       }
 
     } // for
@@ -431,9 +506,14 @@ public class Namematch extends AbstractProcessingResource
     document = newDocument;
   }
 
+  /** set the annotations */
+  public void setIntExtLists(boolean newInt_Ext_Lists) {
+    int_ext_lists = newInt_Ext_Lists;
+  }
+
   /** set the annotation set */
   public void setAnnotationSet(gate.AnnotationSet newAnnotationSet) {
-    nameAnnots = newAnnotationSet;
+    nameAnnots = newAnnotationSet;//.addAll(newAnnotationSet);
   }
 
   /** set the type of the annotation*/
@@ -939,7 +1019,7 @@ public class Namematch extends AbstractProcessingResource
   private void buildTables(Document doc, boolean int_cdg_list) {
 
     // aliases table: corresponding aliases have the same value
-    alias = new Hashtable(17);
+    alias = new HashMap(17);
     alias.put("National Aeronautics and Space Administration","1");
     alias.put("NASA","1");
     alias.put("New York Stock Exchange","2");
@@ -960,12 +1040,12 @@ public class Namematch extends AbstractProcessingResource
     alias.put("Big Apple","7");
 
     // spurius matches
-    spur_match= new Hashtable(2);
+    spur_match= new HashMap(2);
     spur_match.put("Eastern Airways","1");
     spur_match.put("Eastern Air","1");
 
     // company designators
-    cdg = new Hashtable();
+    cdg = new HashMap();
     if (!int_cdg_list) {// i.e. get cdg from Lookup annotations
       // get all Lookup annotations
       AnnotationSet nameAnnots =
@@ -1127,12 +1207,12 @@ public class Namematch extends AbstractProcessingResource
     }// else
 
     // definite article - but never used in the program so far!
-    def_art=new Hashtable(2);
+    def_art=new HashMap(2);
     def_art.put("The","def");
     def_art.put("the","def");
 
     // connectors
-    connector=new Hashtable(7);
+    connector=new HashMap(7);
     connector.put("of","con");
     connector.put("for","con");
     connector.put("de","con");
@@ -1142,7 +1222,7 @@ public class Namematch extends AbstractProcessingResource
     connector.put("&","con");
 
     // prepositions
-    prepos = new Hashtable(2);
+    prepos = new HashMap(2);
     prepos.put("of","prepos");
     prepos.put("for","prepos");
   }

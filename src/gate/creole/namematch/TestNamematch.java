@@ -123,7 +123,11 @@ public class TestNamematch extends TestCase
     namematch.setAnnotationSet(annotSetAS);
     namematch.setType("TTTT");
     namematch.setTypeAttr("token");
-    namematch.setIntCdgList(false);
+
+    // uses intern cdg list or extern cdg list
+    namematch.setIntCdgList(true);
+    // uses inter lists or extern lists
+    namematch.setIntExtLists(false);
     namematch.run();
     namematch.check();
 
