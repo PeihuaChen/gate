@@ -24,4 +24,8 @@ public interface DocumentListener extends EventListener {
   /**Called when an {@link gate.AnnotationSet} has been removed*/
   public void annotationSetRemoved(DocumentEvent e);
 
+  /**Called when the content of the document has changed through an edit 
+   * operation.
+   */
+  public void contentEdited(DocumentEvent e);
 }
