@@ -17,8 +17,6 @@
 package gate.util;
 
 // Imports
-import java.lang.String;
-import java.lang.Object;
 import java.io.Serializable;
 
 public class Pair implements Serializable {

@@ -14,12 +14,14 @@
 
 package gate.gui;
 
-import gate.*;
-import gate.creole.*;
-import gate.util.*;
+import java.util.List;
 
-import java.util.*;
-import gate.event.*;
+import gate.Gate;
+import gate.Resource;
+import gate.creole.*;
+import gate.event.CreoleEvent;
+import gate.event.CreoleListener;
+import gate.util.GateRuntimeException;
 
 /**
  * Represents a list of Parameters which are alternative to each other.

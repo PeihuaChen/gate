@@ -12,8 +12,7 @@
  *
  */
 package gate.util;
-import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
 
 /**
  * The purpose of this Map is to combine the functionality found in

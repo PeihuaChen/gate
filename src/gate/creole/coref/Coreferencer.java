@@ -17,11 +17,10 @@ package gate.creole.coref;
 
 import java.util.*;
 
-import junit.framework.*;
-
 import gate.*;
 import gate.creole.*;
-import gate.util.*;
+import gate.util.GateRuntimeException;
+import gate.util.SimpleFeatureMapImpl;
 
 public class Coreferencer extends AbstractLanguageAnalyser
                           implements ProcessingResource{

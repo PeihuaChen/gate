@@ -14,13 +14,13 @@
  */
 package gate.fsm;
 
-import gate.*;
-import gate.annotation.AnnotationSetImpl;
-import gate.util.*;
-import gate.jape.*;
-
+import java.io.Serializable;
 import java.util.*;
-import java.io.*;
+
+import gate.*;
+import gate.jape.RightHandSide;
+import gate.util.Err;
+import gate.util.InvalidOffsetException;
 
 /**
   * The objects of this class represent instances of working Finite State

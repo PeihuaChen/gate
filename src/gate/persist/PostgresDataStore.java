@@ -15,19 +15,20 @@
 
 package gate.persist;
 
-import java.util.*;
-import java.sql.*;
-import java.net.*;
 import java.io.*;
+import java.net.URL;
+import java.sql.*;
+import java.util.*;
 
-import junit.framework.*;
+import junit.framework.Assert;
 
-import gate.LanguageResource;
-import gate.security.*;
-import gate.security.SecurityException;
-import gate.util.*;
-import gate.corpora.*;
 import gate.*;
+import gate.corpora.DatabaseCorpusImpl;
+import gate.corpora.DatabaseDocumentImpl;
+import gate.security.SecurityException;
+import gate.security.SecurityInfo;
+import gate.util.MethodNotImplementedException;
+import gate.util.SimpleFeatureMapImpl;
 
 public class PostgresDataStore extends JDBCDataStore {
 

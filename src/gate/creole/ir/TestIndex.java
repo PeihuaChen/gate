@@ -14,17 +14,16 @@
 
 package gate.creole.ir;
 
-import gate.*;
-import gate.corpora.*;
-import gate.util.*;
-import gate.creole.ir.*;
-import gate.creole.ir.lucene.*;
+import java.io.File;
+import java.net.URL;
+import java.util.Iterator;
 
 import junit.framework.*;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import gate.*;
+import gate.corpora.TestDocument;
+import gate.creole.ir.lucene.LuceneSearch;
+import gate.util.GateException;
 
 public class TestIndex extends TestCase{
 

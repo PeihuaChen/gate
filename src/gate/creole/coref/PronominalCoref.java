@@ -15,15 +15,17 @@
 
 package gate.creole.coref;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
-import java.net.*;
 
-import junit.framework.*;
+import junit.framework.Assert;
 
 import gate.*;
+import gate.annotation.AnnotationSetImpl;
 import gate.creole.*;
-import gate.util.*;
-import gate.annotation.*;
+import gate.util.Err;
+import gate.util.SimpleFeatureMapImpl;
 
 public class PronominalCoref extends AbstractLanguageAnalyser
                               implements ProcessingResource, ANNIEConstants{

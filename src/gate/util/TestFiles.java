@@ -15,10 +15,10 @@
 
 package gate.util;
 
-import java.util.*;
 import java.io.*;
+import java.util.*;
+
 import junit.framework.*;
-import java.net.*;
 
 /** Files test class.
   */

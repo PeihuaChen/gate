@@ -13,21 +13,22 @@
  */
 package gate.gui;
 
-import gate.*;
-import gate.creole.*;
-import gate.util.*;
-import gate.persist.*;
-import gate.security.SecurityException;
+import java.awt.event.*;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.text.NumberFormat;
+import java.util.*;
 
 import javax.swing.*;
-import java.awt.event.*;
 import javax.swing.tree.*;
 
-import java.util.*;
-import java.text.NumberFormat;
-
-import gate.event.*;
-import java.beans.*;
+import gate.*;
+import gate.creole.*;
+import gate.event.DatastoreEvent;
+import gate.event.DatastoreListener;
+import gate.persist.PersistenceException;
+import gate.security.SecurityException;
+import gate.util.*;
 
 public class SerialDatastoreViewer extends JTree
                                    implements VisualResource,

@@ -15,10 +15,13 @@
 
 package gate;
 
-import java.util.*;
-import java.io.*;
-import gate.util.*;
-import gate.event.*;
+import java.io.Serializable;
+import java.util.Iterator;
+import java.util.Set;
+
+import gate.event.AnnotationSetListener;
+import gate.event.GateListener;
+import gate.util.InvalidOffsetException;
 
 /** Annotation sets */
 public interface AnnotationSet extends Set, Cloneable, Serializable

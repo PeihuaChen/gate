@@ -17,16 +17,10 @@ package gate.wordnet;
 
 import java.util.*;
 
-import junit.framework.*;
-import net.didion.jwnl.dictionary.Dictionary;
-import net.didion.jwnl.data.POS;
-import net.didion.jwnl.data.Pointer;
-import net.didion.jwnl.data.PointerType;
-import net.didion.jwnl.data.PointerTarget;
-import net.didion.jwnl.data.IndexWord;
+import junit.framework.Assert;
 import net.didion.jwnl.JWNLException;
-
-import gate.util.*;
+import net.didion.jwnl.data.*;
+import net.didion.jwnl.dictionary.Dictionary;
 
 
 public class WordSenseImpl implements WordSense {

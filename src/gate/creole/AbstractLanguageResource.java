@@ -15,11 +15,9 @@
 
 package gate.creole;
 
-import java.util.*;
-
-import gate.*;
-import gate.util.*;
-import gate.persist.*;
+import gate.DataStore;
+import gate.LanguageResource;
+import gate.persist.PersistenceException;
 import gate.security.SecurityException;
 
 

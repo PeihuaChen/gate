@@ -14,12 +14,9 @@
 package gate.creole;
 
 import java.util.*;
-import java.io.*;
 
 import gate.*;
-import gate.util.*;
-import gate.creole.*;
-import gate.event.*;
+import gate.util.Err;
 
 /**
  * Execute a list of PRs serially. For each PR a running strategy is stored

@@ -15,11 +15,12 @@
 
 package gate;
 
-import java.util.*;
-import java.net.*;
+import java.net.URL;
+import java.util.Map;
+import java.util.Set;
 
-import gate.util.*;
-import gate.event.*;
+import gate.event.DocumentListener;
+import gate.util.InvalidOffsetException;
 
 
 /** Represents the commonalities between all sorts of documents.

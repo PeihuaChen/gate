@@ -16,15 +16,10 @@
 
 package gate.lexicon;
 
-import gate.creole.AbstractLanguageResource;
-import gate.util.*;
-import gate.*;
 import java.util.*;
-import gate.persist.PersistenceException;
-import gate.security.SecurityException;
-import gate.creole.ResourceInstantiationException;
-import java.net.*;
-import java.io.*;
+
+import gate.Resource;
+import gate.creole.AbstractLanguageResource;
 
 public class MutableLexicalKnowledgeBaseImpl extends AbstractLanguageResource
                             implements MutableLexicalKnowledgeBase {

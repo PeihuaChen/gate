@@ -15,7 +15,8 @@
 
 package gate.corpora;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A very basic implementation for a MIME Type.

@@ -32,11 +32,12 @@
 package gate.annotation;
 
 import java.util.*;
-import gate.util.*;
 
 import gate.*;
-import gate.corpora.*;
+import gate.corpora.DocumentImpl;
 import gate.event.*;
+import gate.util.InvalidOffsetException;
+import gate.util.RBTreeMap;
 
 /** Implementation of AnnotationSet. Has a number of indices, all bar one
  * of which are null by default and are only constructed when asked

@@ -14,12 +14,12 @@ package gate.ml;
 
 import java.util.*;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.FastVector;
 
-
-import gate.*;
-import gate.util.*;
+import gate.Annotation;
 import gate.creole.ANNIEConstants;
+import gate.util.Out;
 /**
  * Extracts the POS category of the n-th word inside the instance.
  */

@@ -15,24 +15,19 @@
 
 package gate.persist;
 
+import java.io.File;
+import java.io.Serializable;
+import java.net.URL;
 import java.util.*;
-import java.io.*;
-import java.net.*;
-import java.beans.*;
-import java.lang.reflect.*;
-import junit.framework.*;
-import junit.framework.Test;
-import java.sql.*;
 
-import oracle.sql.*;
-//import oracle.jdbc.driver.*;
+import junit.framework.*;
 
 import gate.*;
-import gate.annotation.*;
-import gate.event.DatastoreListener;
-import gate.util.*;
+import gate.annotation.AnnotationSetImpl;
 import gate.corpora.*;
+import gate.event.DatastoreListener;
 import gate.security.*;
+import gate.util.*;
 
 /** Persistence test class
   */

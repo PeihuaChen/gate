@@ -14,16 +14,21 @@
 package gate.gui;
 
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.net.URL;
+
 import javax.swing.*;
 
+import edu.stanford.smi.protege.model.KnowledgeBase;
+import edu.stanford.smi.protege.model.Project;
+import edu.stanford.smi.protege.ui.ProjectManager;
+import edu.stanford.smi.protege.ui.ProjectToolBar;
+
 import gate.*;
-import gate.creole.*;
+import gate.creole.AbstractVisualResource;
+import gate.creole.ProtegeProjectName;
 import gate.creole.ontology.Ontology;
-// Protege import
-import edu.stanford.smi.protege.ui.*;
-import edu.stanford.smi.protege.model.*;
 
 /**
  *  This class wrap the Protege application to show it as VR in GATE

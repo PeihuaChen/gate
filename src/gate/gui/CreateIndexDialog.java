@@ -14,16 +14,15 @@
 
 package gate.gui;
 
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.util.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.Vector;
+
+import javax.swing.*;
 
 import gate.creole.ir.*;
-import gate.creole.ir.lucene.*;
-import gate.*;
-import gate.gui.*;
 
 public class CreateIndexDialog extends JDialog {
 

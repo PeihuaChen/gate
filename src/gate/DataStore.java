@@ -15,14 +15,14 @@
 
 package gate;
 
-import java.util.*;
-import java.net.*;
+import java.util.List;
 
-import gate.util.*;
-import gate.persist.*;
-import gate.event.*;
+import gate.event.DatastoreListener;
+import gate.persist.PersistenceException;
 import gate.security.*;
 import gate.security.SecurityException;
+import gate.util.FeatureBearer;
+import gate.util.NameBearer;
 
 /** Models all sorts of data storage.
   */

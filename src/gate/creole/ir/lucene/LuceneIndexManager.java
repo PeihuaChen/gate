@@ -14,19 +14,18 @@
 
 package gate.creole.ir.lucene;
 
-import gate.*;
-import gate.util.*;
+import java.io.File;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.lucene.analysis.SimpleAnalyzer;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
+
+import gate.Corpus;
 import gate.creole.ir.*;
-
-import org.apache.lucene.index.*;
-import org.apache.lucene.analysis.*;
-import org.apache.lucene.document.*;
-import org.apache.lucene.search.*;
-import org.apache.lucene.queryParser.*;
-import org.apache.lucene.store.*;
-
-import java.io.*;
-import java.util.*;
+import gate.util.GateRuntimeException;
 
 /** This class represents Lucene implementation of IndexManeager interface.*/
 public class LuceneIndexManager implements IndexManager{

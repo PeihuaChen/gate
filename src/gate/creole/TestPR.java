@@ -15,21 +15,18 @@
 
 package gate.creole;
 
+import java.net.URL;
 import java.util.*;
-import java.io.*;
-import java.net.*;
+
 import junit.framework.*;
-import gnu.regexp.*;
 
 import gate.*;
-import gate.util.*;
 import gate.corpora.TestDocument;
-import gate.creole.tokeniser.*;
-import gate.creole.gazetteer.*;
-import gate.creole.splitter.*;
-import gate.creole.orthomatcher.*;
-import gate.persist.*;
-import gate.creole.ANNIEConstants;
+import gate.creole.gazetteer.DefaultGazetteer;
+import gate.creole.orthomatcher.OrthoMatcher;
+import gate.creole.splitter.SentenceSplitter;
+import gate.creole.tokeniser.DefaultTokeniser;
+import gate.util.AnnotationDiffer;
 
 /** Test the PRs on three documents */
 public class TestPR extends TestCase

@@ -13,12 +13,10 @@
  */
 package gate.util.persistence;
 
-import gate.*;
-import gate.creole.*;
-import gate.util.*;
+import gate.Corpus;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.SerialAnalyserController;
 import gate.persist.PersistenceException;
-
-import java.util.*;
 /**
  * Persistence handler for {@link SerialAnalyserController}.
  * Adds handling of the corpus memeber to the {@link ControllerPersistence}

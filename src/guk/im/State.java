@@ -16,7 +16,8 @@
  */
 package guk.im;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A state of the {@link LocaleHandler} FSM.

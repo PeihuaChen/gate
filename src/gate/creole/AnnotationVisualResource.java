@@ -14,8 +14,9 @@
  */
 package gate.creole;
 
-import gate.*;
-import gate.util.*;
+import gate.Annotation;
+import gate.VisualResource;
+import gate.util.GateException;
 
 /**
  * Visual Resources that display and/or edit annotations.

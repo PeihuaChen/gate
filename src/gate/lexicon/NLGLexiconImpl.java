@@ -17,7 +17,6 @@
 package gate.lexicon;
 
 import java.io.Serializable;
-import java.util.*;
 
 public class NLGLexiconImpl extends MutableLexicalKnowledgeBaseImpl
     implements Serializable {

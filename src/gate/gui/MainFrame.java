@@ -16,10 +16,13 @@ package gate.gui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.beans.*;
-import java.io.*;
-import java.net.*;
-import java.text.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 
@@ -27,18 +30,17 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.tree.*;
 
-//import guk.im.*;
-/**needed in order to register the Ontology Editor Tool
- * ontotext.bp*/
-import com.ontotext.gate.vr.*;
+import junit.framework.Assert;
+
+import com.ontotext.gate.vr.OntologyEditorImpl;
+
 import gate.*;
 import gate.creole.*;
 import gate.event.*;
-import gate.persist.*;
+import gate.persist.PersistenceException;
 import gate.security.*;
 import gate.swing.*;
 import gate.util.*;
-import junit.framework.*;
 
 /**
  * The main Gate GUI frame.

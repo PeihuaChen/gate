@@ -16,18 +16,21 @@
 
 package gate.gui;
 
-import javax.swing.*;
-import javax.swing.event.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
-import junit.framework.*;
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
-import gate.security.*;
+import junit.framework.Assert;
+
 import gate.*;
-import gate.util.*;
+import gate.security.*;
+import gate.util.GateRuntimeException;
+import gate.util.Out;
 
 
 public class UserGroupEditor extends JComponent {

@@ -16,12 +16,12 @@
 
 package gate.jape;
 
-import java.util.Enumeration;
 import java.io.Serializable;
 import java.util.*;
-import gate.annotation.*;
-import gate.util.*;
-import gate.*;
+
+import gate.AnnotationSet;
+import gate.Document;
+import gate.util.Strings;
 
 
 /**
@@ -169,6 +169,10 @@ public class LeftHandSide implements Matcher, JapeConstants, Serializable
 
 
 // $Log$
+// Revision 1.8  2004/03/25 13:01:13  valyt
+// Imports optimisation throughout the Java sources
+// (to get rid of annoying warnings in Eclipse)
+//
 // Revision 1.7  2001/09/12 11:59:33  kalina
 // Changed the old JAPE stuff to use the new Collections API,
 // instead of com.objectspace stuff. Will eliminate that library

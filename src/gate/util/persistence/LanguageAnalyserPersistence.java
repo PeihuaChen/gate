@@ -14,11 +14,8 @@
 package gate.util.persistence;
 
 import gate.*;
-import gate.creole.*;
-import gate.util.*;
+import gate.creole.ResourceInstantiationException;
 import gate.persist.PersistenceException;
-
-import java.util.*;
 /**
  * Provides a persistent equivalent for {@link LanguageAnalyser}s.
  * Adds handling of corpus and document members for PRPersistence.

@@ -14,10 +14,9 @@
 package gate.util.persistence;
 
 import java.util.*;
-import java.io.*;
 
-import gate.persist.PersistenceException;
 import gate.creole.ResourceInstantiationException;
+import gate.persist.PersistenceException;
 
 public class MapPersistence implements Persistence {
   /**

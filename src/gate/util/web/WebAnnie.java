@@ -1,15 +1,16 @@
 package gate.util.web;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.servlet.ServletContext;
 
 import gate.*;
-import gate.creole.*;
-import gate.util.*;
-import gate.gui.*;
-
-import javax.servlet.*;
+import gate.creole.SerialAnalyserController;
+import gate.util.GateException;
 
 /**
  * This class is designed to demonstrate ANNIE in a web context. It should be

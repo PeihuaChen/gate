@@ -1,14 +1,11 @@
 package gate.lexicon;
 
-import gate.DataStore;
-import gate.persist.PersistenceException;
-import gate.security.SecurityException;
-import gate.LanguageResource;
-import gate.Resource;
-import gate.FeatureMap;
 import java.io.Serializable;
 import java.util.*;
-import gate.creole.*;
+
+import gate.Resource;
+import gate.creole.AbstractLanguageResource;
+import gate.creole.ResourceInstantiationException;
 
 public class OntoLexKBImpl extends AbstractLanguageResource
     implements OntoLexLR, Serializable {

@@ -15,9 +15,10 @@
 
 package gate.lexicon;
 
-import gate.LanguageResource;
 import java.util.List;
 import java.util.Set;
+
+import gate.LanguageResource;
 
 /**
  *

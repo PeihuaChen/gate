@@ -16,11 +16,9 @@
 package gate;
 
 import java.util.*;
-import java.net.*;
 
-import gate.util.*;
-import gate.persist.*;
-import gate.event.*;
+import gate.event.CreoleEvent;
+import gate.event.CreoleListener;
 
 /** Records all the open DataStores.
   */

@@ -1,11 +1,12 @@
 package gate.creole;
 
-import gate.creole.gazetteer.*;
-import java.util.*;
-import gate.*;
-import gate.creole.*;
-import gate.util.*;
 import java.io.*;
+import java.util.*;
+
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.creole.gazetteer.*;
+import gate.util.*;
 
 public class GazetteerListsCollector extends AbstractLanguageAnalyser {
   private static String PERSON_ANNOT_NAME = "PER";

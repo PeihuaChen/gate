@@ -16,7 +16,8 @@
 
 package gate.jape;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 
 /**
@@ -126,6 +127,10 @@ public class PrioritisedRuleList extends ArrayList implements java.io.Serializab
 
 
 // $Log$
+// Revision 1.6  2004/03/25 13:01:13  valyt
+// Imports optimisation throughout the Java sources
+// (to get rid of annoying warnings in Eclipse)
+//
 // Revision 1.5  2001/09/13 12:09:50  kalina
 // Removed completely the use of jgl.objectspace.Array and such.
 // Instead all sources now use the new Collections, typically ArrayList.

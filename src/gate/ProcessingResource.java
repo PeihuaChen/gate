@@ -15,10 +15,7 @@
 
 package gate;
 
-import java.util.*;
-
-import gate.util.*;
-import gate.creole.*;
+import gate.creole.ResourceInstantiationException;
 
 /** Models all sorts of processing resources.
   * Because <CODE>run()</CODE> doesn't throw exceptions, we

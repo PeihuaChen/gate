@@ -15,11 +15,12 @@
 
 package gate.creole;
 
-import java.util.*;
+import java.util.Vector;
 
-import gate.*;
-import gate.util.*;
-import gate.event.*;
+import gate.ProcessingResource;
+import gate.Resource;
+import gate.event.ProgressListener;
+import gate.event.StatusListener;
 
 /** A convenience implementation of ProcessingResource with some default
   * code.

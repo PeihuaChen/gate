@@ -13,35 +13,32 @@
  */
 package gate.gui;
 
-import gate.*;
-import gate.util.*;
-import gate.corpora.TestDocument;
-import gate.corpora.DocumentContentImpl;
-import gate.creole.tokeniser.DefaultTokeniser;
-import gate.creole.*;
-import gate.event.*;
-import gate.swing.*;
-import gate.print.*;
-
-import gnu.regexp.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.font.TextAttribute;
+import java.awt.print.*;
+import java.beans.*;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.*;
 
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.table.*;
+import javax.swing.border.Border;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.text.*;
 import javax.swing.tree.*;
-import javax.swing.border.*;
 
-import java.awt.*;
-import java.awt.font.*;
-import java.awt.event.*;
-import java.awt.image.BufferedImage;
-import java.awt.print.*;
+import gate.*;
+import gate.corpora.DocumentContentImpl;
+import gate.creole.*;
+import gate.event.*;
+import gate.print.JComponentPrinter;
+import gate.swing.*;
+import gate.util.*;
 
-import java.beans.*;
-import java.util.*;
-import java.net.*;
-import java.io.*;
+import gnu.regexp.*;
 
 /**
  * This class implements a viewer/editor for the annotations on a document.

@@ -22,16 +22,16 @@
 
 package gate.jape;
 
-import java.util.*;
-import java.util.jar.*;
-import java.io.*;
-import java.net.*;
+import java.net.URL;
+import java.util.Iterator;
+import java.util.Vector;
 
-import gate.annotation.*;
-import gate.util.*;
 import gate.*;
-import gate.event.*;
-import gate.creole.*;
+import gate.creole.ExecutionException;
+import gate.event.ProgressListener;
+import gate.event.StatusListener;
+import gate.util.Err;
+import gate.util.Out;
 
 /** Batch processing of JAPE transducers against documents or collections.
   * Construction will parse or deserialise a transducer as required.

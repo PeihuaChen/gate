@@ -15,14 +15,14 @@
 
 package gate.util;
 
-import java.util.*;
-import java.net.URL;
 import java.io.File;
 import java.net.JarURLConnection;
-import java.util.jar.*;
-import java.util.zip.*;
+import java.net.URL;
+import java.util.*;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 
-import gate.*;
+import gate.Gate;
 
 public class Tools {
 

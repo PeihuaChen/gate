@@ -1,10 +1,10 @@
 package gate.creole.tokeniser;
 
 import gate.*;
-import gate.util.*;
 import gate.creole.*;
-import gate.event.*;
-import java.util.*;
+import gate.event.ProgressListener;
+import gate.event.StatusListener;
+import gate.util.Out;
 
 /**
  * A composed tokeniser containing a {@link SimpleTokeniser} and a

@@ -15,7 +15,9 @@
 package gate.swing;
 
 import java.awt.*;
-import javax.swing.*;
+
+import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 
 
 /**

@@ -1,17 +1,17 @@
 package gate.util.web;
 
-import gate.*;
-import gate.creole.*;
-import gate.util.*;
-import gate.corpora.RepositioningInfo;
-import gate.annotation.*;
-
-import java.util.*;
-import java.net.*;
-import java.util.jar.*;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
 
-import javax.servlet.*;
+import javax.servlet.ServletContext;
+
+import gate.*;
+import gate.annotation.AnnotationSetImpl;
+import gate.corpora.RepositioningInfo;
+import gate.creole.SerialAnalyserController;
+import gate.util.GateException;
 
 
 public class WebCrimeReportAnalyser {

@@ -15,9 +15,10 @@
 package gate.gui;
 
 import java.awt.Component;
-import javax.swing.table.*;
+
 import javax.swing.*;
-import javax.swing.border.*;
+import javax.swing.border.BevelBorder;
+import javax.swing.table.DefaultTableCellRenderer;
 
 public class ObjectRenderer extends DefaultTableCellRenderer{
   public Component getTableCellRendererComponent(JTable table,

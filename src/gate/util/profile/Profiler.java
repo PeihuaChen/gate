@@ -42,8 +42,9 @@ package gate.util.profile;
  *  machine as well as on the other applications running in parallel.
  */
 
-import java.io.*;
-import java.util.*;
+import java.io.PrintStream;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 public class Profiler {
 

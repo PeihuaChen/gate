@@ -15,9 +15,9 @@
 
 package gate;
 
-import java.util.*;
-import java.io.*;
-import gate.util.*;
+import java.io.Serializable;
+
+import gate.util.InvalidOffsetException;
 
 /** The content of Documents.
   */

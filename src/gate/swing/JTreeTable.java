@@ -13,24 +13,16 @@
  */
 package gate.swing;
 
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
 import javax.swing.*;
 import javax.swing.event.*;
-import javax.swing.tree.*;
 import javax.swing.table.*;
-import javax.swing.event.TreeExpansionEvent;
-import javax.swing.event.TreeExpansionListener;
-
-
-import java.awt.Dimension;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Rectangle;
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.awt.event.*;
-import java.util.EventObject;
-
-import java.beans.*;
+import javax.swing.tree.*;
 
 
 /**

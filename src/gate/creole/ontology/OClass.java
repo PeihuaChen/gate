@@ -17,8 +17,8 @@
 */
 package gate.creole.ontology;
 
-import java.util.*;
-import gate.creole.ontology.*;
+import java.util.ArrayList;
+import java.util.Set;
 
 
 /**An Interface representing a single ontology class */

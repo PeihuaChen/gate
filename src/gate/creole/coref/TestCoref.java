@@ -15,19 +15,17 @@
 
 package gate.creole.coref;
 
-import java.util.*;
+import java.util.List;
 
 import junit.framework.*;
 
 import gate.*;
-import gate.util.*;
-import gate.corpora.*;
-import gate.creole.*;
-import gate.creole.tokeniser.*;
-import gate.creole.gazetteer.*;
-import gate.creole.splitter.*;
-import gate.creole.orthomatcher.*;
-import gate.creole.coref.*;
+import gate.creole.ANNIETransducer;
+import gate.creole.POSTagger;
+import gate.creole.gazetteer.DefaultGazetteer;
+import gate.creole.orthomatcher.OrthoMatcher;
+import gate.creole.splitter.SentenceSplitter;
+import gate.creole.tokeniser.DefaultTokeniser;
 
 public class TestCoref extends TestCase {
 

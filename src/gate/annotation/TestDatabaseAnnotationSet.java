@@ -16,13 +16,13 @@
 package gate.annotation;
 
 import java.util.*;
-import java.io.*;
+
 import junit.framework.*;
-import java.net.*;
 
 import gate.*;
-import gate.util.*;
-import gate.corpora.*;
+import gate.corpora.TestDocument;
+import gate.util.Out;
+import gate.util.SimpleFeatureMapImpl;
 
 /** Tests for the DatabaseAnnotationSet class
   */

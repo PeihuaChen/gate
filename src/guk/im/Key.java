@@ -16,7 +16,7 @@
  */
 
 package guk.im;
-import java.awt.event.*;
+import java.awt.event.KeyEvent;
 
 /**
  * This calls describes a keyboard key.

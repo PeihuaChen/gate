@@ -15,10 +15,10 @@
 
 package gate.creole;
 
+import java.io.Serializable;
 import java.util.*;
-import java.io.*;
 
-import gate.*;
+import gate.Gate;
 import gate.util.*;
 
 

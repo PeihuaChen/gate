@@ -16,10 +16,12 @@
 
 package gate.jape;
 
-import java.util.*;
-import gate.annotation.*;
-import gate.util.*;
-import gate.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import gate.FeatureMap;
+import gate.util.SimpleFeatureMapImpl;
+import gate.util.Strings;
 
 
 /**
@@ -190,6 +192,10 @@ implements JapeConstants, java.io.Serializable, Cloneable
 
 
 // $Log$
+// Revision 1.9  2004/03/25 13:01:14  valyt
+// Imports optimisation throughout the Java sources
+// (to get rid of annoying warnings in Eclipse)
+//
 // Revision 1.8  2001/09/13 12:09:49  kalina
 // Removed completely the use of jgl.objectspace.Array and such.
 // Instead all sources now use the new Collections, typically ArrayList.

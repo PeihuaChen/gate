@@ -16,20 +16,21 @@
 package gate.corpora;
 
 
+import java.io.IOException;
+import java.net.URL;
 import java.sql.*;
-import java.io.*;
 import java.util.*;
-import java.net.*;
 
-import oracle.jdbc.driver.*;
-import junit.framework.*;
+import junit.framework.Assert;
+import oracle.jdbc.driver.OraclePreparedStatement;
 
 import gate.*;
-import gate.util.*;
-import gate.persist.*;
-import gate.annotation.*;
-import gate.creole.*;
+import gate.annotation.AnnotationSetImpl;
+import gate.annotation.DatabaseAnnotationSetImpl;
+import gate.creole.ResourceInstantiationException;
 import gate.event.*;
+import gate.persist.*;
+import gate.util.*;
 
 public class DatabaseDocumentImpl extends DocumentImpl
                                   implements  //DatastoreListener,

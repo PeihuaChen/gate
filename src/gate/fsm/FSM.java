@@ -18,7 +18,6 @@ package gate.fsm;
 import java.util.*;
 
 import gate.jape.*;
-import gate.util.*;
 
 /**
   * This class implements a standard Finite State Machine.

@@ -13,8 +13,6 @@
  */
 
  package gate.util;
-import java.util.*;
-import java.io.*;
 
 /**
  * simple cut-off version of the hashmap with native long's as keys

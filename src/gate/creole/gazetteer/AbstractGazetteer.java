@@ -15,11 +15,10 @@
  */
 package gate.creole.gazetteer;
 
-import gate.*;
-import gate.creole.*;
-import gate.util.*;
-
 import java.util.*;
+
+import gate.FeatureMap;
+import gate.creole.ResourceInstantiationException;
 
 /**AbstractGazetteer
  * This class implements the common-for-all methods of the Gazetteer interface*/

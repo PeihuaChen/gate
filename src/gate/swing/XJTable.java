@@ -16,12 +16,14 @@ package gate.swing;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.util.*;
-import javax.swing.*;
-import javax.swing.table.*;
-import javax.swing.event.*;
+import java.util.Date;
+import java.util.Vector;
 
-import gate.util.*;
+import javax.swing.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.*;
+
+import gate.util.Files;
 
 /**
  * A &quot;smarter&quot; JTable. Feaures include:

@@ -16,7 +16,6 @@
 
 package gate.util;
 
-import java.util.*;
 
 /**
  * A specific *partial* implementation of the Set interface used for

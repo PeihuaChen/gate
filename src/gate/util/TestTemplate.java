@@ -15,8 +15,6 @@
 
 package gate.util;
 
-import java.util.*;
-import java.io.*;
 import junit.framework.*;
 
 /** Template test class - to add a new part of the test suite:

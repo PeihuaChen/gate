@@ -12,8 +12,7 @@
  */
 package gate;
 
-import gate.util.*;
-import gate.creole.*;
+import gate.creole.ExecutionException;
 
 /**
  * Describes entities that can be executed such as {@link ProcessingResource}s

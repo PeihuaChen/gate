@@ -15,25 +15,25 @@
 
 package gate.gui.lexicon;
 
+import java.awt.Component;
+import java.awt.GridLayout;
+import java.net.URL;
+import java.util.*;
+
+import javax.swing.*;
+import javax.swing.event.*;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreePath;
+
+import com.ontotext.gate.vr.ClassNode;
+import com.ontotext.gate.vr.OntoTreeModel;
+
+import gate.*;
 import gate.creole.AbstractVisualResource;
-import com.ontotext.gate.vr.*;
+import gate.creole.ontology.*;
+import gate.gui.MainFrame;
 import gate.lexicon.*;
 import gate.util.*;
-import javax.swing.*;
-import gate.creole.ontology.*;
-import java.util.*;
-import gate.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.*;
-import gate.util.GateRuntimeException;
-import java.net.URL;
-import java.awt.GridLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import gate.gui.MainFrame;
 
 public class OntoLexEditorVR extends AbstractVisualResource
     implements ListSelectionListener, TreeSelectionListener {

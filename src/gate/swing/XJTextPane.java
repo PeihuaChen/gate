@@ -14,10 +14,13 @@
 
 package gate.swing;
 
-import javax.swing.*;
+import java.awt.Font;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import javax.swing.JTextPane;
+import javax.swing.UIManager;
 import javax.swing.text.*;
-import java.beans.*;
-import java.awt.*;
 
 /**
  * A custom JTextPane that reinitialises the default font style when th UI

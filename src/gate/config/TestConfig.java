@@ -15,14 +15,15 @@
 
 package gate.config;
 
-import java.util.*;
 import java.io.*;
-import java.net.*;
+import java.net.URL;
+import java.util.Map;
+import java.util.Set;
+
 import junit.framework.*;
 
 import gate.*;
 import gate.util.*;
-import gate.creole.*;
 
 /** CREOLE test class
   */

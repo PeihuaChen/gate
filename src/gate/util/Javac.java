@@ -13,14 +13,14 @@
  */
 package gate.util;
 
-import com.sun.tools.javac.Main;
-
 import java.io.*;
 import java.util.*;
 
-import gate.util.*;
+import com.sun.tools.javac.Main;
+
+import gate.Gate;
+import gate.GateConstants;
 import gate.creole.ExecutionException;
-import gate.*;
 
 /**
  * This class copiles a set of java sources by accessing the java compiler

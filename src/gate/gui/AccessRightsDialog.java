@@ -14,12 +14,11 @@
 
 package gate.gui;
 
+import java.awt.Component;
+
 import javax.swing.*;
-import javax.swing.event.*;
-import java.awt.*;
-import java.awt.event.*;
+
 import gate.security.SecurityInfo;
-import gate.util.Out;
 
 public class AccessRightsDialog {
   protected static JRadioButton gr_gw = new JRadioButton();

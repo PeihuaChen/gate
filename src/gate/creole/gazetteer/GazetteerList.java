@@ -16,10 +16,11 @@
 
 package gate.creole.gazetteer;
 
-import java.util.*;
 import java.io.*;
-import java.net.*;
-import gate.creole.*;
+import java.net.URL;
+import java.util.*;
+
+import gate.creole.ResourceInstantiationException;
 
 
 /** Gazetteer List provides the means for uploading, managing and

@@ -15,11 +15,9 @@
 
 package gate.creole.gazetteer;
 
-import java.util.*;
-import java.io.*;
-
-import gate.creole.tokeniser.*;
-import gate.util.*;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 /** Implements a state of the deterministic finite state machine of the
  * gazetter.

@@ -15,7 +15,7 @@
 
 package gate.event;
 
-import java.util.*;
+import java.util.EventListener;
 
 /**
   * This interface describes a listener that is interested in status events.

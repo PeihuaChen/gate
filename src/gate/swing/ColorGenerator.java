@@ -14,8 +14,8 @@
  */
 package gate.swing;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Color;
+import java.util.LinkedList;
 
 /**
  * This class is used to generate random colours that are evenly distributed in

@@ -15,13 +15,12 @@
 
 package gate.creole;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 
 import org.xml.sax.*;
-import org.xml.sax.helpers.*;
-import javax.xml.parsers.*;
-import java.net.*;
-import java.io.*;
+import org.xml.sax.helpers.DefaultHandler;
 
 import gate.*;
 import gate.util.*;

@@ -14,27 +14,29 @@
 
 package gate.gui;
 
-import javax.swing.*;
-import java.util.*;
-import java.net.*;
-import java.awt.Component;
-import java.awt.Window;
-import java.awt.Frame;
-import java.awt.Dialog;
-import java.awt.event.*;
-import java.text.NumberFormat;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.NumberFormat;
+import java.util.*;
+import java.util.List;
+
+import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 
 import gate.*;
-import gate.util.*;
-import gate.swing.*;
 import gate.creole.*;
 import gate.creole.ir.*;
-import gate.persist.*;
 import gate.event.*;
+import gate.persist.PersistenceException;
 import gate.security.*;
 import gate.security.SecurityException;
+import gate.swing.XJMenuItem;
+import gate.swing.XJPopupMenu;
+import gate.util.*;
 
 /**
  * Class used to store the GUI information about an open entity (resource,

@@ -15,10 +15,10 @@
 
 package gate.corpora;
 
-import java.io.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 
-import gate.util.*;
+import gate.util.Out;
 
 /**
  * RepositioningInfo keep information about correspondence of positions

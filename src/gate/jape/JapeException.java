@@ -15,8 +15,7 @@
 
 package gate.jape;
 
-import gate.annotation.*;
-import gate.util.*;
+import gate.util.GateException;
 
 /** Superclass of all JAPE exceptions. */
 public class JapeException extends GateException {

@@ -14,17 +14,15 @@
  */
 package gate.creole;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.*;
-import java.net.*;
-import java.io.*;
 
-import gate.util.*;
-import gate.*;
+import org.jdom.JDOMException;
+import org.jdom.Namespace;
+import org.jdom.input.SAXBuilder;
 
-import org.xml.sax.*;
-import javax.xml.parsers.*;
-import org.jdom.input.*;
-import org.jdom.*;
+import gate.Resource;
 
 /** This class handles annotation schemas.An annotation schema is a
   * representation of an annotation, together with its types and their

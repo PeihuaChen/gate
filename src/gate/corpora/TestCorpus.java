@@ -15,14 +15,12 @@
 
 package gate.corpora;
 
-import java.util.*;
-import java.net.*;
-import java.io.*;
+import java.net.URL;
+
 import junit.framework.*;
 
 import gate.*;
-import gate.util.*;
-import gate.annotation.*;
+import gate.util.SimpleFeatureMapImpl;
 
 /** Tests for the Corpus classes
   */

@@ -15,21 +15,18 @@
 
 package gate.corpora;
 
-import java.util.*;
 import java.io.*;
-import java.net.*;
+import java.net.URLConnection;
 
-// html tools
-import javax.swing.text.html.*;
-import javax.swing.text.html.parser.*;
-import javax.swing.text.html.HTMLEditorKit.*;
-//import javax.swing.text.*;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.parser.ParserDelegator;
 
-import gate.util.*;
-import gate.*;
-import gate.html.*;
-import gate.event.*;
-import gate.creole.*;
+import gate.Document;
+import gate.Resource;
+import gate.creole.ResourceInstantiationException;
+import gate.event.StatusListener;
+import gate.html.HtmlDocumentHandler;
+import gate.util.DocumentFormatException;
 
 //import org.w3c.www.mime.*;
 

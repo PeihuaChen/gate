@@ -13,16 +13,16 @@
  */
 
 package gate.gui;
-import gate.util.*;
-
 import java.awt.*;
-import java.awt.font.*;
 import java.awt.event.*;
+
 import javax.swing.*;
-import javax.swing.event.*;
+import javax.swing.colorchooser.AbstractColorChooserPanel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.text.*;
-import javax.swing.colorchooser.*;
-import java.util.*;
+
+import gate.util.Out;
 
 /**
  * A dialog used to set the attributes for text display. The attribute set

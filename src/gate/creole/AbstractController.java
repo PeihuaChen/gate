@@ -15,8 +15,8 @@ package gate.creole;
 import java.util.*;
 
 import gate.*;
-import gate.util.*;
-import gate.event.*;
+import gate.event.ProgressListener;
+import gate.event.StatusListener;
 
 
 public abstract class AbstractController extends AbstractResource

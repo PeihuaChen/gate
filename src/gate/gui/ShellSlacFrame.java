@@ -14,45 +14,26 @@
 
 package gate.gui;
 
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.AWTEvent;
-import java.awt.AWTException;
-import java.awt.Font;
-import java.awt.Window;
-import java.awt.Dialog;
-import java.awt.Frame;
-import java.awt.Color;
-import java.awt.Toolkit;
-import java.awt.Dimension;
-import java.awt.BorderLayout;
-import java.awt.Point;
-import java.awt.event.*;
-import java.awt.font.TextAttribute;
-import java.awt.GraphicsEnvironment;
-
-import java.text.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.NumberFormat;
+import java.util.*;
+import java.util.List;
 
 import javax.swing.*;
-import javax.swing.tree.*;
-import javax.swing.event.*;
-import javax.swing.plaf.FontUIResource;
-
-import java.beans.*;
-
-import java.util.*;
-import java.io.*;
-import java.net.*;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 import gate.*;
-
-import gate.creole.*;
-import gate.event.*;
-import gate.persist.*;
+import gate.creole.ResourceData;
+import gate.creole.ResourceInstantiationException;
+import gate.event.CreoleEvent;
+import gate.persist.PersistenceException;
+import gate.swing.XJMenuItem;
 import gate.util.*;
-import gate.swing.*;
-import gate.security.*;
-import junit.framework.*;
 //import guk.im.*;
 
 

@@ -16,16 +16,12 @@
 
 package gate.jape;
 
-import java.util.*;
 import java.io.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
+import java.util.*;
 
-
-import gate.annotation.*;
-import gate.util.*;
-import gate.creole.ontology.Ontology;
 import gate.*;
+import gate.creole.ontology.Ontology;
+import gate.util.Strings;
 
 
 /**
@@ -297,7 +293,12 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.26  2004/03/25 13:01:14  valyt
+// Imports optimisation throughout the Java sources
+// (to get rid of annoying warnings in Eclipse)
+//
 // Revision 1.25  2002/05/14 09:43:17  valyt
+//
 // Ontology Aware JAPE transducers
 //
 // Revision 1.24  2002/02/27 15:11:16  valyt

@@ -13,14 +13,16 @@
  */
 package gate.gui;
 
-import gate.*;
-import gate.creole.*;
+import java.awt.Component;
 
-import java.awt.*;
 import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.table.*;
-import javax.swing.tree.*;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.tree.TreeCellRenderer;
+
+import gate.*;
+import gate.creole.ResourceData;
 
 /**
  * Renders a {@link Resource} for tables, trees and lists.

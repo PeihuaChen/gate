@@ -1,14 +1,15 @@
 package gate.creole.morph;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+
 import junit.framework.*;
-import javax.swing.JOptionPane;
+
 import gate.*;
 import gate.creole.*;
-import java.net.*;
-import gate.creole.tokeniser.*;
-import java.util.*;
-import javax.swing.JFrame;
-import gate.util.*;
+import gate.creole.tokeniser.DefaultTokeniser;
+import gate.util.OffsetComparator;
 
 /**
  * <p>Title: TestMorph </p>

@@ -15,22 +15,13 @@
 
 package gate.swing;
 
-import javax.swing.*;
-import javax.swing.event.*;
+import java.awt.*;
 import java.awt.event.*;
-import java.awt.Font;
 import java.awt.font.TextAttribute;
-import java.awt.Frame;
-import java.awt.Window;
-import java.awt.Dialog;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.GraphicsEnvironment;
-import javax.swing.plaf.FontUIResource;
-import java.beans.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-import gate.util.*;
+import javax.swing.*;
 
 public class JFontChooser extends JPanel {
 

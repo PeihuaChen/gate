@@ -17,14 +17,13 @@ package gate.xml;
 
 import java.util.*;
 
-import gate.corpora.*;
-import gate.util.*;
-import gate.*;
-import gate.event.*;
-
-
 import org.xml.sax.*;
-import org.xml.sax.helpers.*;
+
+import gate.*;
+import gate.corpora.DocumentContentImpl;
+import gate.corpora.RepositioningInfo;
+import gate.event.StatusListener;
+import gate.util.*;
 
 
 /**

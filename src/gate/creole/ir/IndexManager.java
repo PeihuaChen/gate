@@ -15,6 +15,7 @@
 package gate.creole.ir;
 
 import java.util.List;
+
 import gate.Corpus;
 
 public interface IndexManager{

@@ -14,7 +14,8 @@
 package gate.util;
 
 import java.util.*;
-import gate.*;
+
+import gate.Annotation;
 public class AnnotationDiffer {
   /**
    * Computes a diff between two collections of annotations.

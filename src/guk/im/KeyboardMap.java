@@ -19,11 +19,9 @@ package guk.im;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+
 import javax.swing.*;
 import javax.swing.border.*;
-import javax.swing.plaf.LabelUI;
-
-import guk.*;
 
 /**
  * A virtual keyboard map. It uses its own thread do udate the display.

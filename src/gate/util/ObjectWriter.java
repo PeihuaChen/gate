@@ -16,7 +16,8 @@
 package gate.util;
 
 import java.io.*;
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 /** Writes an object to an PipedOutputStream wich can be connected to a
   * PipedInputStream.

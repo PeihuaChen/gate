@@ -13,17 +13,20 @@
  */
 package gate.gui;
 
-import gate.creole.AbstractVisualResource;
-import gate.*;
-import gate.util.*;
-
-
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.*;
+import java.util.Iterator;
+import java.util.Vector;
+
 import javax.swing.*;
-import javax.swing.event.*;
-import java.util.*;
-import gate.event.*;
+
+import gate.*;
+import gate.creole.AbstractVisualResource;
+import gate.event.CorpusEvent;
+import gate.event.CorpusListener;
+import gate.util.GateException;
+import gate.util.GateRuntimeException;
 
 /**
  * A simple viewer/editor for corpora. It will allow the visualisation of the

@@ -15,20 +15,20 @@
 
 package gate.gui;
 
-import java.awt.Frame;
-import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.table.*;
-
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.lang.reflect.Constructor;
 import java.util.*;
-import java.lang.reflect.*;
+
+import javax.swing.*;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellEditor;
 
 import gate.*;
-import gate.annotation.*;
-import gate.util.*;
 import gate.creole.*;
+import gate.util.GateException;
+import gate.util.LuckyException;
 
 /** This class is a viewer which adds/edits features on a GATE annotation.
   * This viewer is {@link gate.creole.AnnotationSchema} driven.

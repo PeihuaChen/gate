@@ -14,8 +14,9 @@
 
 package gate.creole.ir.lucene;
 
-import gate.creole.ir.*;
-import java.util.*;
+import java.util.HashMap;
+
+import gate.creole.ir.IndexStatistics;
 
 public class LuceneIndexStatistics implements IndexStatistics {
 

@@ -15,10 +15,12 @@
  */
 package gate.creole.gazetteer;
 
-import java.net.*;
-import java.util.*;
 import java.io.*;
-import gate.creole.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+
+import gate.creole.ResourceInstantiationException;
 
 
 /** Represents a Linear Definition [lists.def] file <br>

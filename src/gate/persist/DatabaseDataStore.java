@@ -16,7 +16,7 @@
 
 package gate.persist;
 
-import gate.*;
+import gate.DataStore;
 
 public interface DatabaseDataStore extends DataStore {
 

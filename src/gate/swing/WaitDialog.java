@@ -16,8 +16,8 @@
 package gate.swing;
 
 import java.awt.*;
+
 import javax.swing.*;
-import javax.swing.border.*;
 
 /**
  * A small window used to show messages to the user during processing.

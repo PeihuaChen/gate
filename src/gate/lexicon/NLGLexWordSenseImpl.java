@@ -15,8 +15,8 @@
 
 package gate.lexicon;
 
-import java.util.HashMap;
 import java.io.Serializable;
+import java.util.HashMap;
 
 public class NLGLexWordSenseImpl extends MutableLexKBWordSenseImpl
     implements NLGLexWordSense, Serializable {

@@ -15,14 +15,14 @@
 
 package gate;
 
-import java.util.*;
-import java.net.*;
 import java.io.*;
+import java.net.*;
+import java.util.*;
 
+import gate.config.ConfigDataProcessor;
+import gate.creole.CreoleRegisterImpl;
+import gate.event.CreoleListener;
 import gate.util.*;
-import gate.creole.*;
-import gate.config.*;
-import gate.event.*;
 
 /** The class is responsible for initialising the GATE libraries, and
   * providing access to singleton utility objects, such as the GATE class
@@ -571,7 +571,7 @@ jar/classpath so it's the same as registerBuiltins
     else{
       while(getExecutable() != null){
         try{
-          Thread.currentThread().sleep(200);
+          Thread.sleep(200);
         }catch(InterruptedException ie){
           throw new LuckyException(ie.toString());
         }

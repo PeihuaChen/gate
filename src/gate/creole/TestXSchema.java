@@ -15,14 +15,12 @@
 
 package gate.creole;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
+import java.io.ByteArrayInputStream;
 
 import junit.framework.*;
 
 import gate.*;
-import gate.util.*;
+import gate.util.Out;
 
 /** Annotation schemas test class.
   */

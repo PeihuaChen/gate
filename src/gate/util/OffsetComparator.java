@@ -14,7 +14,8 @@
 package gate.util;
 
 import java.util.Comparator;
-import gate.*;
+
+import gate.Annotation;
 
 /**
  * Compares annotations by start offset

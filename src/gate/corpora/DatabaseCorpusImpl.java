@@ -17,15 +17,14 @@ package gate.corpora;
 
 import java.util.*;
 
-import junit.framework.*;
+import junit.framework.Assert;
 
 import gate.*;
-import gate.persist.*;
-import gate.annotation.*;
-import gate.creole.*;
+import gate.creole.ResourceInstantiationException;
 import gate.event.*;
-import gate.util.*;
+import gate.persist.*;
 import gate.security.SecurityInfo;
+import gate.util.*;
 
 
 public class DatabaseCorpusImpl extends CorpusImpl

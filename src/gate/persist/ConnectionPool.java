@@ -13,8 +13,9 @@
 package gate.persist;
 
 
-import java.util.*;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Vector;
 
 /**
    A generic implementation of pool of references to objects of any kind.

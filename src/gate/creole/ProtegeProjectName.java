@@ -16,13 +16,16 @@ package gate.creole;
 import java.net.URL;
 import java.util.*;
 
-import gate.*;
-import gate.creole.ontology.*;
-import gate.gui.ProtegeWrapper;
-import com.ontotext.gate.ontology.*;
-// Protege import
-import edu.stanford.smi.protege.model.*;
+import com.ontotext.gate.ontology.DAMLOntology;
+
 import edu.stanford.smi.protege.event.*;
+import edu.stanford.smi.protege.model.Cls;
+import edu.stanford.smi.protege.model.Frame;
+
+import gate.ProtegeProject;
+import gate.creole.ontology.OClass;
+import gate.creole.ontology.Ontology;
+import gate.gui.ProtegeWrapper;
 
 
 /** Dummy Protege LR. Just keep the Protege project file name */

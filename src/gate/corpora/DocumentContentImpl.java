@@ -15,13 +15,11 @@
 
 package gate.corpora;
 
-import java.util.*;
-import java.net.*;
 import java.io.*;
+import java.net.URL;
 
-import gate.*;
-import gate.annotation.*;
-import gate.util.*;
+import gate.DocumentContent;
+import gate.util.InvalidOffsetException;
 
 /** Represents the commonalities between all sorts of document contents.
   */

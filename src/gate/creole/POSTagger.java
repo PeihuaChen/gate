@@ -13,17 +13,12 @@
 
 package gate.creole;
 
-import gate.*;
-import gate.creole.*;
-import gate.util.*;
-import gate.event.*;
-
-import hepple.postag.*;
-
-import java.util.*;
-import java.io.*;
-import java.net.URL;
 import java.text.NumberFormat;
+import java.util.*;
+
+import gate.*;
+import gate.util.GateRuntimeException;
+import gate.util.OffsetComparator;
 /**
  * This class is a wrapper for HepTag, Mark Hepple's POS tagger.
  */

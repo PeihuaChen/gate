@@ -16,22 +16,13 @@
 package gate.wordnet;
 
 import java.util.*;
-import java.io.*;
 
+import junit.framework.Assert;
 import net.didion.jwnl.JWNLException;
+import net.didion.jwnl.data.*;
 import net.didion.jwnl.dictionary.Dictionary;
-import net.didion.jwnl.data.IndexWord;
-import net.didion.jwnl.data.POS;
-import net.didion.jwnl.data.Pointer;
-import net.didion.jwnl.data.PointerType;
-import net.didion.jwnl.data.PointerTarget;
 
-import junit.framework.*;
-
-import gate.*;
-import gate.util.*;
-import gate.creole.*;
-import gate.persist.PersistenceException;
+import gate.util.GateRuntimeException;
 
 
 public class SynsetImpl implements Synset {

@@ -14,8 +14,6 @@
 package gate.swing;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
 
 public class MenuLayoutTest extends JFrame {
   public MenuLayoutTest() {

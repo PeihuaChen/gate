@@ -14,7 +14,6 @@
 package gate.event;
 
 import gate.*;
-import gate.util.*;
 
 /**
  * Events related to the {@link gate.creole} package. This kind of events will

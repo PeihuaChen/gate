@@ -15,15 +15,12 @@
 
 package gate.xml;
 
-import org.apache.xerces.framework.XMLErrorReporter;
-import org.apache.xerces.utils.ChunkyByteArray;
-import org.apache.xerces.utils.StringPool;
-import org.xml.sax.InputSource;
-import org.apache.xerces.readers.*;
-
 import java.io.*;
-import java.net.URL;
-import java.util.Stack;
+
+import org.apache.xerces.framework.XMLErrorReporter;
+import org.apache.xerces.readers.DefaultReaderFactory;
+import org.apache.xerces.readers.XMLEntityHandler;
+import org.apache.xerces.utils.StringPool;
 
 /**
  * With this class the correct possition in the parsed XML document will be

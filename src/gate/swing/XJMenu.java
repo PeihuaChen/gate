@@ -13,7 +13,8 @@
 
 package gate.swing;
 
-import javax.swing.*;
+import javax.swing.Action;
+import javax.swing.JMenu;
 
 /**
  * A modified version of JMenu that uses {@link MenuLayout} as its layout.

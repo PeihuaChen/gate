@@ -15,21 +15,19 @@
 
 package gate;
 
-import java.util.*;
-import java.awt.Dimension;
-import java.awt.Toolkit;
-import java.awt.Font;
-import java.awt.GraphicsEnvironment;
+import java.awt.*;
 import java.io.*;
-import java.net.*;
-import java.awt.Color;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+import java.util.List;
 
 import javax.swing.*;
 
-import gnu.getopt.*;
-
-import gate.util.*;
 import gate.gui.*;
+import gate.util.*;
+
+import gnu.getopt.Getopt;
 
 
 /** Top-level entry point for the GATE command-line and GUI interfaces.

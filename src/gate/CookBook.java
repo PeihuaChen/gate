@@ -15,18 +15,17 @@
 
 package gate;
 
-import java.util.*;
-import java.net.*;
 import java.io.*;
+import java.util.*;
+
 import junit.framework.*;
 
-import gate.*;
-import gate.util.*;
 import gate.creole.*;
-import gate.creole.tokeniser.*;
-import gate.creole.splitter.*;
-import gate.creole.gazetteer.*;
-import gate.creole.orthomatcher.*;
+import gate.creole.gazetteer.DefaultGazetteer;
+import gate.creole.orthomatcher.OrthoMatcher;
+import gate.creole.splitter.SentenceSplitter;
+import gate.creole.tokeniser.DefaultTokeniser;
+import gate.util.*;
 
 
 /**

@@ -17,10 +17,6 @@
 
 package gate;
 
-import java.util.*;
-import javax.swing.*;
-
-import gate.util.*;
 import gate.gui.Handle;
 
 /** Models all sorts of visual resources.

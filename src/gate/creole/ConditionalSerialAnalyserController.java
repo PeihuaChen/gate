@@ -14,10 +14,11 @@
 
 package gate.creole;
 
-import gate.*;
-import gate.util.*;
-
 import java.util.*;
+
+import gate.*;
+import gate.util.Err;
+import gate.util.GateRuntimeException;
 
 /**
  * This class implements a SerialController that only contains

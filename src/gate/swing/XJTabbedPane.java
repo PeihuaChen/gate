@@ -15,9 +15,9 @@
 
 package gate.swing;
 
-import javax.swing.JTabbedPane;
+import java.awt.Point;
 
-import java.awt.*;
+import javax.swing.JTabbedPane;
 
 /**
  * An extended version of {@link javax.swing.JTabbedPane}.

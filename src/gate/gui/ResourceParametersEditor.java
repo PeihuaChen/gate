@@ -14,30 +14,23 @@
 
 package gate.gui;
 
-import java.awt.Frame;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Insets;
-import java.awt.Graphics;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.table.*;
-import javax.swing.tree.*;
-import javax.swing.event.*;
-import javax.swing.border.*;
-
-import java.util.*;
-import java.net.URL;
 import java.io.IOException;
-import java.text.*;
+import java.util.*;
+import java.util.List;
+
+import javax.swing.*;
+import javax.swing.border.BevelBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.table.*;
 
 import gate.*;
-import gate.util.*;
-import gate.swing.*;
 import gate.creole.*;
-import gate.event.*;
+import gate.event.CreoleEvent;
+import gate.event.CreoleListener;
+import gate.swing.XJTable;
+import gate.util.*;
 
 /**
  * Allows the editing of a set of parameters for a resource. It needs a pointer

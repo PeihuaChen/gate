@@ -14,13 +14,14 @@
 
 package gate.creole.ir;
 
-import gate.*;
-import gate.util.*;
-import gate.creole.*;
-import gate.gui.*;
+import java.util.List;
 
-import java.util.*;
-import javax.swing.*;
+import javax.swing.JOptionPane;
+
+import gate.ProcessingResource;
+import gate.Resource;
+import gate.creole.*;
+import gate.gui.MainFrame;
 
 
 public class SearchPR extends AbstractProcessingResource

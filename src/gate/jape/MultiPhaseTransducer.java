@@ -16,15 +16,18 @@
 
 package gate.jape;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
-
-import gate.annotation.*;
-import gate.event.*;
-import gate.util.*;
-import gate.creole.*;
+import gate.AnnotationSet;
+import gate.Document;
+import gate.creole.ExecutionException;
+import gate.creole.ExecutionInterruptedException;
 import gate.creole.ontology.Ontology;
-import gate.*;
+import gate.event.ProgressListener;
+import gate.event.StatusListener;
+import gate.util.Err;
+import gate.util.Strings;
 
 
 /**
@@ -226,6 +229,10 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.25  2004/03/25 13:01:13  valyt
+// Imports optimisation throughout the Java sources
+// (to get rid of annoying warnings in Eclipse)
+//
 // Revision 1.24  2003/11/14 12:45:47  valyt
 // enableDebugging parameter
 //

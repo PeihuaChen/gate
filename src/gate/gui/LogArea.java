@@ -16,15 +16,17 @@
 
 package gate.gui;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Rectangle;
 import java.awt.event.*;
 import java.io.*;
 
 import javax.swing.*;
 import javax.swing.text.*;
 
-import gate.swing.*;
-import gate.util.*;
+import gate.swing.XJTextPane;
+import gate.util.Err;
+import gate.util.Out;
 
 /**
   * This class is used to log all messages from GATE. When an object of this

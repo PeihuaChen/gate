@@ -15,17 +15,17 @@
 
 package gate.creole;
 
+import java.io.File;
 import java.util.*;
-import java.io.*;
 
 import gate.*;
-import gate.creole.*;
-import gate.util.*;
-import gate.creole.tokeniser.*;
-import gate.creole.gazetteer.*;
-import gate.creole.splitter.*;
-import gate.creole.orthomatcher.*;
-import gate.util.profile.*;
+import gate.creole.gazetteer.DefaultGazetteer;
+import gate.creole.orthomatcher.OrthoMatcher;
+import gate.creole.splitter.SentenceSplitter;
+import gate.creole.tokeniser.DefaultTokeniser;
+import gate.util.GateException;
+import gate.util.Out;
+import gate.util.profile.Profiler;
 //import java.text.NumberFormat;
 
 /**

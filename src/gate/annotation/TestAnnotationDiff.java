@@ -17,18 +17,13 @@
 
 package gate.annotation;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
-import junit.framework.*;
-import javax.swing.*;
-import java.awt.*;
+import java.util.Set;
 
-import gate.util.*;
-import gate.gui.*;
-import gate.creole.*;
-import gate.corpora.*;
+import junit.framework.*;
+
 import gate.*;
+import gate.creole.AnnotationSchema;
+import gate.creole.ResourceData;
 
 
 /**

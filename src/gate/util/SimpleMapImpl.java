@@ -15,8 +15,9 @@
 
 package gate.util;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.*;
-import java.io.*;
 
 /**
  * Implements Map interface in using less memory. Very simple but usefull

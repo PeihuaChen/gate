@@ -13,18 +13,19 @@
  */
 package gate.util.persistence;
 
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.NumberFormat;
+import java.util.*;
+
 import gate.*;
-import gate.util.*;
 import gate.creole.*;
-import gate.event.*;
+import gate.event.ProgressListener;
+import gate.event.StatusListener;
 import gate.gui.MainFrame;
 import gate.persist.PersistenceException;
-
-import java.util.*;
-import java.io.*;
-import java.text.NumberFormat;
-import java.net.URL;
-import java.net.MalformedURLException;
+import gate.util.*;
 
 /**
  * This class provides utility methods for saving resources through

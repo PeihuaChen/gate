@@ -17,7 +17,6 @@ package gate.util;
 /**
  * LaxErrorHandler
  */
-import java.io.*;
 import org.xml.sax.*;
 
 public abstract class LaxErrorHandler implements ErrorHandler {

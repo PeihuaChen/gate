@@ -15,7 +15,7 @@
 
 package gate.creole.gazetteer;
 
-import gate.util.*;
+import gate.util.GateException;
 
 /** Used to signal Gazetteer specific exceptions */
 public class GazetteerException extends GateException {

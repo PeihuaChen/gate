@@ -1,9 +1,9 @@
 package gate.util.protocols.gate;
 
+import java.io.FileNotFoundException;
 import java.net.*;
-import java.io.*;
 
-import gate.util.*;
+import gate.util.Files;
 
 /**
  * The handler for the "gate://" URLs.

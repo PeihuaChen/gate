@@ -15,21 +15,19 @@
 
 package gate.corpora;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
 
-import gate.util.*;
-import gate.*;
-import gate.sgml.*;
-import gate.event.*;
-import gate.xml.*;
-import gate.creole.*;
-
-//import org.w3c.www.mime.*;
-// xml tools
 import javax.xml.parsers.*;
-import org.xml.sax.*;
+
+import org.xml.sax.SAXException;
+
+import gate.Document;
+import gate.Resource;
+import gate.creole.ResourceInstantiationException;
+import gate.event.StatusListener;
+import gate.sgml.Sgml2Xml;
+import gate.util.DocumentFormatException;
+import gate.xml.XmlDocumentHandler;
 
 /** The format of Documents. Subclasses of DocumentFormat know about
   * particular MIME types and how to unpack the information in any

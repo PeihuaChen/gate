@@ -15,8 +15,10 @@
 
 package gate.lexicon;
 
-import java.util.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 import gate.util.Out;
 
 public class MutableWordImpl implements MutableWord, Serializable {

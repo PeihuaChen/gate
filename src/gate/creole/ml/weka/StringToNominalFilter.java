@@ -14,11 +14,11 @@
 
 package gate.creole.ml.weka;
 
-import java.util.*;
 import java.io.Serializable;
+import java.util.*;
 
 import weka.core.*;
-import weka.filters.*;
+import weka.filters.Filter;
 
 /**
  * This filter converts one or more string attributes from the input dataset

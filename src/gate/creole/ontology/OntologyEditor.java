@@ -16,14 +16,13 @@
  */
 package gate.creole.ontology;
 
-import gate.*;
+import java.util.Set;
+import java.util.Vector;
+
+import com.ontotext.gate.vr.ClassNode;
+
+import gate.VisualResource;
 import gate.creole.ResourceInstantiationException;
-
-import com.ontotext.gate.vr.*;
-
-import java.util.*;
-
-import javax.swing.*;
 
 
 /**

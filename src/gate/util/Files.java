@@ -14,7 +14,7 @@
 package gate.util;
 import java.io.*;
 import java.util.*;
-import java.lang.*;
+
 import gnu.regexp.*;
 
 /** Some utilities for use with Files and with resources.

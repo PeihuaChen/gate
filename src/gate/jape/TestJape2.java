@@ -17,15 +17,15 @@
 
 package gate.jape;
 
-import java.util.*;
-import java.io.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
 
-
-import gate.jape.parser.*;
 import gate.*;
-import gate.annotation.*;
-import gate.util.*;
-import gate.creole.*;
+import gate.annotation.AnnotationSetImpl;
+import gate.creole.ResourceInstantiationException;
+import gate.util.Err;
+import gate.util.Out;
 
 /**
   * Second test harness for JAPE.
@@ -254,6 +254,10 @@ public class TestJape2 {
 
 
 // $Log$
+// Revision 1.11  2004/03/25 13:01:14  valyt
+// Imports optimisation throughout the Java sources
+// (to get rid of annoying warnings in Eclipse)
+//
 // Revision 1.10  2001/09/13 12:09:50  kalina
 // Removed completely the use of jgl.objectspace.Array and such.
 // Instead all sources now use the new Collections, typically ArrayList.

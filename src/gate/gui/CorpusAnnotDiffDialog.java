@@ -13,16 +13,16 @@
  */
 package gate.gui;
 
-import gate.*;
-import gate.annotation.*;
-import gate.persist.*;
-import gate.util.*;
-import gate.creole.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
 
 import javax.swing.*;
-import java.awt.event.*;
-import java.awt.*;
-import java.util.*;
+
+import gate.*;
+import gate.annotation.AnnotationDiff;
+import gate.annotation.CorpusAnnotationDiff;
+import gate.creole.*;
 
 /** This class wraps the {@link gate.annotation.CorpusAnnotationDiff} one. It adds the
   * the GUI functionality needed to set up params for CorpusAnnotationDiff and also

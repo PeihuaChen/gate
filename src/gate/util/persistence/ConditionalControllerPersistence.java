@@ -2,8 +2,8 @@ package gate.util.persistence;
 
 import java.util.*;
 
-import gate.*;
-import gate.creole.*;
+import gate.creole.ConditionalController;
+import gate.creole.ResourceInstantiationException;
 import gate.persist.PersistenceException;
 /**
  * Persistence handler for {@link gate.creole.ConditionalController}s

@@ -15,21 +15,12 @@
 
 package gate.gui;
 
-import java.awt.Frame;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.table.*;
-
-import java.util.*;
-import java.lang.reflect.*;
-import java.net.*;
 
 import gate.*;
-import gate.annotation.*;
+import gate.creole.AbstractVisualResource;
+import gate.creole.AnnotationVisualResource;
 import gate.util.*;
-import gate.creole.*;
 
 /** This class visually adds/edits features and annot type of an annotation
   * It does this without using an {@link gate.creole.AnnotationSchema}.

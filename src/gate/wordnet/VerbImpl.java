@@ -15,9 +15,10 @@
 
 package gate.wordnet;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import junit.framework.*;
+import junit.framework.Assert;
 import net.didion.jwnl.dictionary.Dictionary;
 
 /** Represents WordNet verb.

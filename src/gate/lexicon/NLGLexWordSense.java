@@ -16,7 +16,7 @@
 
 package gate.lexicon;
 
-import java.util.*;
+import java.util.HashMap;
 
 public interface NLGLexWordSense extends MutableLexKBWordSense {
 

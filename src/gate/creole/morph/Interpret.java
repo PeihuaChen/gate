@@ -1,7 +1,9 @@
 package gate.creole.morph;
 
 import java.lang.reflect.Method;
-import java.util.regex.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import gate.creole.ResourceInstantiationException;
 
 /**

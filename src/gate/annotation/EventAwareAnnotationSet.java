@@ -16,7 +16,7 @@
 
 package gate.annotation;
 
-import java.util.*;
+import java.util.Collection;
 
 import gate.AnnotationSet;
 

@@ -17,9 +17,11 @@
 package gate.jape;
 
 import java.util.*;
-import gate.annotation.*;
-import gate.util.*;
+
 import gate.*;
+import gate.annotation.AnnotationSetImpl;
+import gate.util.Out;
+import gate.util.Strings;
 
 
 /**

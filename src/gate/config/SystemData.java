@@ -16,12 +16,12 @@
 package gate.config;
 
 import java.util.*;
-import java.net.*;
-import java.io.*;
 
-import gate.*;
-import gate.creole.*;
-import gate.util.*;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.creole.ResourceInstantiationException;
+import gate.util.GateSaxException;
+import gate.util.Strings;
 
 
 /** This class represents and instantiates systems during

@@ -1,9 +1,10 @@
 package gate.swing;
 
 import java.awt.*;
-import java.lang.*;
-import javax.swing.*;
-import java.beans.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import javax.swing.Icon;
 
 /**
  * VTextIcon is an Icon implementation which draws a short string vertically.

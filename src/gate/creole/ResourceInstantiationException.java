@@ -15,7 +15,7 @@
 
 package gate.creole;
 
-import gate.util.*;
+import gate.util.GateException;
 
 /** This exception indicates failure during instantiation of resources,
   * which may be due to a number of causes:

@@ -15,8 +15,9 @@
 
 package gate.gui;
 
+import java.awt.Component;
+
 import javax.swing.*;
-import java.awt.*;
 
 
 public class UserPasswordDialog {

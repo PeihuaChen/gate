@@ -15,10 +15,10 @@
 
 package gate.creole.nerc;
 
-import gate.*;
-
-import java.util.*;
 import java.io.Serializable;
+import java.util.*;
+
+import gate.*;
 
 /** Representing a set of entities found in a single text file.
   * Each member a the set is an EntityDescriptor

@@ -15,15 +15,15 @@
 package gate.gui;
 
 import java.awt.Component;
-import java.awt.event.*;
-import javax.swing.*;
-
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.*;
 
+import javax.swing.*;
 
-import gate.*;
+import gate.Gate;
+import gate.creole.ResourceData;
 import gate.util.*;
-import gate.creole.*;
 
 /**
  * A simple editor for List values.

@@ -15,7 +15,7 @@
 
 package gate.event;
 
-import junit.framework.*;
+import junit.framework.Assert;
 
 public class ObjectModificationEvent extends GateEvent {
 

@@ -14,8 +14,7 @@
 
 package gate.creole.ir;
 
-import java.util.*;
-import gate.Document;
+import java.util.List;
 
 public class QueryResult{
 

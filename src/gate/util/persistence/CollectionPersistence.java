@@ -14,11 +14,10 @@
 package gate.util.persistence;
 
 import java.util.*;
-import java.io.*;
 
-import gate.persist.PersistenceException;
 import gate.creole.ResourceInstantiationException;
-import gate.util.*;
+import gate.persist.PersistenceException;
+import gate.util.Err;
 
 
 public class CollectionPersistence implements Persistence {

@@ -14,10 +14,6 @@
 package gate.util;
 
 import gate.*;
-import gate.annotation.*;
-import gate.corpora.*;
-
-import java.util.*;
 
 /**
  * This class provides some static utility methods such as equality test for

@@ -16,19 +16,17 @@
 
 package gate.creole;
 
+import java.io.FileWriter;
+import java.io.Writer;
+import java.net.URL;
 import java.util.*;
-import java.net.*;
-import java.io.*;
 
-import junit.framework.*;
+import junit.framework.Assert;
+
 import com.hp.hpl.jena.daml.*;
-import com.hp.hpl.jena.daml.common.*;
-import com.hp.hpl.mesa.rdf.jena.model.*;
-import com.hp.hpl.mesa.rdf.jena.common.*;
-import com.hp.hpl.jena.vocabulary.*;
-import com.hp.hpl.mesa.rdf.jena.common.prettywriter.*;
-import com.hp.hpl.mesa.rdf.jena.vocabulary.*;
-import com.hp.hpl.jena.rdf.arp.*;
+import com.hp.hpl.jena.daml.common.DAMLModelImpl;
+import com.hp.hpl.mesa.rdf.jena.common.RDFWriterFImpl;
+import com.hp.hpl.mesa.rdf.jena.model.RDFWriter;
 
 import gate.*;
 

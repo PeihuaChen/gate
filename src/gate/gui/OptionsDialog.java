@@ -13,22 +13,21 @@
  */
 package gate.gui;
 
-import gate.*;
-import gate.util.*;
-import gate.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.*;
+import java.util.List;
 
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.border.*;
-import java.awt.event.*;
-import java.awt.Frame;
-import java.awt.Font;
-import java.awt.Component;
-import java.awt.font.TextAttribute;
 import javax.swing.plaf.FontUIResource;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
-import java.util.*;
+
+import gate.Gate;
+import gate.GateConstants;
+import gate.swing.JFontChooser;
+import gate.util.OptionsMap;
 
 /**
  * The options dialog for Gate.

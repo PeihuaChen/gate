@@ -12,22 +12,22 @@
  */
 package gate.gui;
 
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.text.NumberFormat;
 import java.util.*;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Rectangle;
-import java.awt.Color;
-import java.text.*;
+import java.util.List;
+
 import javax.swing.*;
-import javax.swing.table.*;
-import java.awt.event.*;
-import javax.swing.border.*;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
 
 import gate.*;
-import gate.event.*;
-import gate.creole.*;
-import gate.swing.*;
+import gate.creole.AbstractVisualResource;
 import gate.creole.ir.*;
+import gate.event.ProgressListener;
+import gate.swing.XJTable;
 
 
 /**

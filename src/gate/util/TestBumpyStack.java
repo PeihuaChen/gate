@@ -15,13 +15,12 @@
 
 package gate.util;
 
-import java.util.*;
-import java.io.*;
+import java.util.Collection;
+
 import junit.framework.*;
-import java.net.*;
 
 import gate.*;
-import gate.creole.*;
+import gate.creole.ResourceData;
 
 /** BumpyStack test class.
   */

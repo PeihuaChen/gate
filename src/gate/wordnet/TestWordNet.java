@@ -15,12 +15,14 @@
 
 package gate.wordnet;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.util.Iterator;
+import java.util.List;
 
-import gate.*;
-import gate.util.*;
 import junit.framework.*;
+
+import gate.Gate;
+import gate.GateConstants;
 
 public class TestWordNet extends TestCase {
 

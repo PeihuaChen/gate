@@ -15,7 +15,7 @@
 
 package gate.creole;
 
-import gate.util.*;
+import gate.util.GateException;
 
 /** This exception indicates failure to set a resource parameter.
   */

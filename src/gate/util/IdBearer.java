@@ -14,8 +14,6 @@
  */
 
 package gate.util;
-import java.util.*;
-import gate.*;
 
 /** Classes that have Ids. */
 public interface IdBearer 

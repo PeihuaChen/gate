@@ -15,10 +15,11 @@
 
 package gate.creole.nerc;
 
-import gate.*;
-import gate.util.*;
-
 import java.io.Serializable;
+
+import gate.Annotation;
+import gate.Document;
+import gate.util.InvalidOffsetException;
 
 /** Represents a single named entity */
 public class EntityDescriptor implements Serializable{

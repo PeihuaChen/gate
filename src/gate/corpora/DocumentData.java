@@ -15,7 +15,7 @@
 
 package gate.corpora;
 
-import java.io.*;
+import java.io.Serializable;
 
 public class DocumentData implements Serializable {
 

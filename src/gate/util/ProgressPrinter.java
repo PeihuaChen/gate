@@ -15,9 +15,9 @@
 
 package gate.util;
 
-import java.io.*;
+import java.io.PrintStream;
 
-import gate.event.*;
+import gate.event.ProgressListener;
 
 
 /**

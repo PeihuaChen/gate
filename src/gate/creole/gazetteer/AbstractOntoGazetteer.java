@@ -15,7 +15,6 @@
  */
 package gate.creole.gazetteer;
 
-import java.util.*;
 /**AbstratOntoGazetteer
  * This class implemnents the methods common for all ontology-aware gazetteers.*/
 public abstract class AbstractOntoGazetteer

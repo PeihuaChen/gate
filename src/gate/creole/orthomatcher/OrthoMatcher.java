@@ -16,15 +16,16 @@
 
 package gate.creole.orthomatcher;
 
-import gate.*;
-import gate.util.*;
-import gate.creole.*;
-import gate.corpora.*;
-import gate.annotation.*;
-import java.util.*;
 import java.io.*;
-import java.net.*;
-import gnu.regexp.*;
+import java.net.URL;
+import java.util.*;
+
+import gate.*;
+import gate.creole.*;
+import gate.util.*;
+
+import gnu.regexp.RE;
+import gnu.regexp.REException;
 
 public class OrthoMatcher extends AbstractLanguageAnalyser
                           implements ANNIEConstants{

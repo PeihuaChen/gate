@@ -15,7 +15,7 @@
  */
 package gate.lexicon;
 
-import java.util.*;
+import java.util.List;
 
 public interface Word {
 

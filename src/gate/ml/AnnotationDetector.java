@@ -4,8 +4,7 @@ import java.util.*;
 
 import weka.core.*;
 
-import gate.*;
-import gate.util.*;
+import gate.Annotation;
 
 /**
  * Detects the presence of annotations of given types.

@@ -15,10 +15,7 @@
 
 package gate.creole;
 
-import java.util.*;
-
 import gate.*;
-import gate.util.*;
 
 /**
  * A parent implementation of language analysers with some default code.

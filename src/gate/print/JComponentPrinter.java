@@ -15,12 +15,14 @@ package gate.print;
 
 import java.awt.*;
 import java.awt.print.*;
-import javax.swing.*;
-import javax.swing.text.*;
 
-import gate.event.*;
-import gate.util.*;
+import javax.swing.JComponent;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.JTextComponent;
+
+import gate.event.StatusListener;
 import gate.gui.MainFrame;
+import gate.util.Err;
 
 
 /**

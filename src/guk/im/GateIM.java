@@ -16,23 +16,15 @@
  */
 package guk.im;
 
-import java.awt.im.spi.InputMethodContext;
-import java.util.Locale;
-import java.awt.AWTEvent;
-import java.awt.Window;
-import java.awt.Frame;
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.event.*;
-import java.awt.event.InputEvent;
-import java.awt.Rectangle;
+import java.awt.*;
+import java.awt.event.InputMethodEvent;
+import java.awt.event.KeyEvent;
 import java.awt.im.spi.InputMethod;
+import java.awt.im.spi.InputMethodContext;
+import java.io.IOException;
 import java.lang.Character.Subset;
+import java.text.AttributedString;
 import java.util.*;
-import java.io.*;
-import java.text.*;
-
-import guk.*;
 
 /**
  * The Gate input method

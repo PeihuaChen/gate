@@ -15,13 +15,13 @@
 
 package gate.sgml;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.*;
-import java.io.*;
-import java.net.*;
 
-import gate.corpora.*;
-import gate.util.*;
-import gate.*;
+import gate.Document;
+import gate.util.Files;
 
 
 /**

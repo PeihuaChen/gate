@@ -15,7 +15,7 @@
 
 package gate.wordnet;
 
-import junit.framework.*;
+import junit.framework.Assert;
 
 /** Represents WordNet lexical relation.
  *  implrments LexicalRelation

@@ -16,16 +16,15 @@
 
 package gate.jape;
 
-import java.io.*;
-
-import gate.annotation.*;
-import gate.util.*;
-import gate.*;
-import gate.fsm.*;
-import gate.gui.*;
-import gate.creole.*;
-import gate.event.*;
 import java.util.*;
+
+import gate.*;
+import gate.annotation.AnnotationSetImpl;
+import gate.creole.ExecutionException;
+import gate.creole.ExecutionInterruptedException;
+import gate.event.ProgressListener;
+import gate.fsm.*;
+import gate.util.*;
 
 /**
   * Represents a complete CPSL grammar, with a phase name, options and

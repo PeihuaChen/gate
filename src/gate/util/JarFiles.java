@@ -15,12 +15,9 @@
 
 package gate.util;
 
+import java.io.*;
 import java.util.*;
 import java.util.jar.*;
-import java.util.zip.*;
-
-import java.lang.*;
-import java.io.*;
 
 /** This class is used to merge a set of Jar/Zip Files in a Jar File
   * It is ignored the manifest.

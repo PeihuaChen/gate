@@ -2,12 +2,12 @@ package gate.ml;
 
 import java.util.*;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.FastVector;
 
-
-import gate.*;
-import gate.util.*;
+import gate.Annotation;
 import gate.creole.ANNIEConstants;
+import gate.util.Out;
 /**
  * Detects lookup major and minor types and their location.
  * This attribute detector is used to detect both lookup types (a nominal

@@ -18,23 +18,11 @@ package gate.creole.tokeniser.chinesetokeniser;
  */
 
 import java.util.*;
-import java.net.*;
-import java.io.*;
-import gate.creole.AbstractLanguageAnalyser;
-import gate.ProcessingResource;
+
+import gate.*;
+import gate.creole.*;
 import gate.creole.tokeniser.SimpleTokeniser;
-import gate.Resource;
-import gate.creole.ResourceInstantiationException;
-import gate.creole.ExecutionException;
-import gate.util.GateRuntimeException;
-import gate.FeatureMap;
-import gate.Factory;
-import gate.Gate;
-import gate.Document;
-import gate.AnnotationSet;
-import gate.util.OffsetComparator;
-import gate.Annotation;
-import gate.util.InvalidOffsetException;
+import gate.util.*;
 
 /**
  * <p>Title: ChineseTokeniser.java </p>

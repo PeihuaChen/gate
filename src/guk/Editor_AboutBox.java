@@ -18,8 +18,8 @@ package guk;
 
 import java.awt.*;
 import java.awt.event.*;
+
 import javax.swing.*;
-import javax.swing.border.*;
 
 public class Editor_AboutBox extends JDialog implements ActionListener {
 

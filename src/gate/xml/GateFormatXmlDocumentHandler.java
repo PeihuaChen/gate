@@ -15,18 +15,16 @@
 
 package gate.xml;
 
+import java.lang.reflect.Constructor;
 import java.util.*;
-import java.lang.reflect.*;
-
-import gate.corpora.*;
-import gate.annotation.*;
-import gate.util.*;
-import gate.*;
-import gate.event.*;
-
 
 import org.xml.sax.*;
-import org.xml.sax.helpers.*;
+import org.xml.sax.helpers.DefaultHandler;
+
+import gate.*;
+import gate.corpora.DocumentContentImpl;
+import gate.event.StatusListener;
+import gate.util.*;
 
 
 /**

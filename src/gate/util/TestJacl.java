@@ -15,7 +15,8 @@
 
 package gate.util;
 
-import java.util.*;
+import java.util.List;
+
 import junit.framework.*;
 import tcl.lang.*;
 

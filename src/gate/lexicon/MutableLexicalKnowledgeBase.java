@@ -14,7 +14,6 @@
  */
 package gate.lexicon;
 
-import java.util.*;
 
 public interface MutableLexicalKnowledgeBase extends LexicalKnowledgeBase {
 

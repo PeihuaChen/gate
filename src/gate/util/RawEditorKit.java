@@ -15,9 +15,10 @@
 
 package gate.util;
 
-import javax.swing.text.*;
-import java.io.Reader;
 import java.io.IOException;
+import java.io.Reader;
+
+import javax.swing.text.*;
 
 /** This class provides an editor kit that does not change \n\r to \n but
   * instead it leaves the original text as is.

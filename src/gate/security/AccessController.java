@@ -15,8 +15,7 @@
 
 package gate.security;
 
-import java.net.*;
-import java.util.*;
+import java.util.List;
 
 import gate.persist.PersistenceException;
 

@@ -13,9 +13,9 @@
 
 package gate.creole;
 
-import gate.*;
+import java.util.Collection;
 
-import java.util.*;
+import gate.Controller;
 
 /**
  * A Conditional controller is a controller that keeps a running strategy for

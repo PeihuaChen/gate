@@ -14,14 +14,10 @@
 package gate.creole.coref;
 
 import java.util.*;
-import java.net.*;
-
-import junit.framework.*;
 
 import gate.*;
 import gate.creole.*;
 import gate.util.*;
-import gate.annotation.*;
 
 public class NominalCoref extends AbstractCoreferencer
     implements ProcessingResource, ANNIEConstants {

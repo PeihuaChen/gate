@@ -15,17 +15,13 @@
 
 package gate.security;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
-import java.beans.*;
-import java.lang.reflect.*;
+import java.util.List;
+
 import junit.framework.*;
 
-import gate.*;
+import gate.Factory;
+import gate.Gate;
 import gate.util.*;
-import gate.corpora.*;
-import gate.security.*;
 
 /** Persistence test class
   */

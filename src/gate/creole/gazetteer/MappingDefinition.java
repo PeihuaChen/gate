@@ -16,9 +16,9 @@
 package gate.creole.gazetteer;
 
 
-import java.net.*;
-import java.util.*;
 import java.io.*;
+import java.net.URL;
+import java.util.*;
 
 import gate.creole.ResourceInstantiationException;
 

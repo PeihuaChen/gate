@@ -15,18 +15,14 @@
 
 package gate.corpora;
 
-import java.util.*;
 import java.io.*;
-import java.net.*;
 
-import gate.util.*;
-import gate.*;
-import gate.gui.*;
-import gate.creole.*;
-
-// rtf tools
-import javax.swing.text.rtf.*;
 import javax.swing.text.*;
+import javax.swing.text.rtf.RTFEditorKit;
+
+import gate.Resource;
+import gate.creole.ResourceInstantiationException;
+import gate.util.DocumentFormatException;
 //import org.w3c.www.mime.*;
 
 /** The format of Documents. Subclasses of DocumentFormat know about

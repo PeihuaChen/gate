@@ -18,9 +18,10 @@
 
 package gate.creole.ontology;
 
-import java.net.*;
+import java.net.URL;
 import java.util.*;
-import gate.*;
+
+import gate.LanguageResource;
 import gate.creole.ResourceInstantiationException;
 
 /**Defines the interface of an ontology*/

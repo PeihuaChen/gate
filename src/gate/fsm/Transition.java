@@ -15,10 +15,10 @@
 
 package gate.fsm;
 
-import gate.jape.*;
+import java.io.Serializable;
+import java.util.LinkedList;
 
-import java.util.*;
-import java.io.*;
+import gate.jape.BasicPatternElement;
 
 /**
   * This class implements a Finite State Machine transition.

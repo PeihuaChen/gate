@@ -15,7 +15,6 @@
 
 package gate.security;
 
-import gate.persist.PersistenceException;
 
 public interface Session {
 

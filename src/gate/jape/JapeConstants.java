@@ -16,11 +16,7 @@
 
 package gate.jape;
 
-import gate.*;
-import gate.annotation.*;
-import gate.util.*;
-import java.util.*;
-import java.io.*;
+import java.io.Serializable;
 
 /**
   * Constants interface for the JAPE package.
@@ -70,7 +66,12 @@ public interface JapeConstants extends Serializable
 
 
 // $Log$
+// Revision 1.10  2004/03/25 13:01:14  valyt
+// Imports optimisation throughout the Java sources
+// (to get rid of annoying warnings in Eclipse)
+//
 // Revision 1.9  2002/04/23 10:30:47  valyt
+//
 // bugfix: confusion between "once" and "first" application style
 //
 // Revision 1.8  2002/04/22 11:45:57  valyt

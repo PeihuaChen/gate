@@ -13,18 +13,18 @@
  */
 package gate.util.persistence;
 
+import java.util.Map;
+
+import javax.swing.*;
+
+import junit.framework.Assert;
+
 import gate.*;
-import gate.creole.*;
-import gate.security.*;
-import gate.util.*;
+import gate.creole.ResourceInstantiationException;
 import gate.gui.OkCancelDialog;
 import gate.persist.JDBCDataStore;
 import gate.persist.PersistenceException;
-
-import java.util.*;
-
-import junit.framework.Assert;
-import javax.swing.*;
+import gate.security.*;
 /**
  * Adds security data storage to the DS persistence
  */

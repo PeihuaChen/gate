@@ -15,14 +15,12 @@
 
 package gate.creole;
 
-import gate.*;
-import gate.creole.orthomatcher.*;
-import gate.creole.ANNIEConstants;
-import gate.util.*;
-
-import java.util.*;
-import java.net.*;
 import java.io.*;
+import java.net.URL;
+import java.util.*;
+
+import gate.*;
+import gate.util.*;
 
 /** This class implements a APF xml exporter. It works on documents or corpora
   * to export them in the APF format.

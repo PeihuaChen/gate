@@ -16,10 +16,8 @@
 package gate.persist;
 
 import java.sql.*;
-import java.net.*;
-import java.util.*;
+import java.util.HashMap;
 
-import gate.util.*;
 import gate.Gate;
 
 public class DBHelper {
