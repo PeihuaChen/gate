@@ -444,12 +444,12 @@
   OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="outputASName"
         COMMENT="The name of the annotation set used for output"
-  DEFAULT="Filtered" RUNTIME="true"
+  RUNTIME="true"
   OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="tagASName" DEFAULT="Original markups"
+      <PARAMETER NAME="tagASName"
         COMMENT="The name of the annotation set where the BODY tag is"
   RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="textTagName" DEFAULT="BODY" RUNTIME="true"
+      <PARAMETER NAME="textTagName" RUNTIME="true"
       OPTIONAL="true">java.lang.String</PARAMETER>
     </RESOURCE>
 
