@@ -138,6 +138,12 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
    *  Default value is false to avoid the unnecessary waste of memory */
   private Boolean preserveOriginalContent = new Boolean(false);
 
+  /** If you set this flag to true the repositioning information for
+   *  the document will be kept in the document feature. <br>
+   *  Default value is false to avoid the unnecessary waste of time and memory
+   */
+  private Boolean collectRepositioningInfo = new Boolean(false);
+
   /** Default construction. Content left empty. */
   public DocumentImpl() {
     content = new DocumentContentImpl();
@@ -184,7 +190,19 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
                                       gate.gui.MainFrame.getListeners().
                                       get("gate.event.StatusListener");
           if(sListener != null) docFormat.addStatusListener(sListener);
-          docFormat.unpackMarkup(this);
+
+          // should we collect the repositioning information
+          if(docFormat.getShouldCollectRepositioning().booleanValue()) {
+            // unpack with collectiong of repositioning information
+            RepositioningInfo info = new RepositioningInfo();
+            docFormat.unpackMarkup(this, info);
+            getFeatures().put(
+                GateConstants.DOCUMENT_REPOSITIONING_INFO_FEATURE_NAME, info);
+          }
+          else {
+            // normal old fashioned unpack
+            docFormat.unpackMarkup(this);
+          }
           docFormat.removeStatusListener(sListener);
        } //if format != null
       } catch(DocumentFormatException e) {
@@ -246,6 +264,30 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
   public Boolean getPreserveOriginalContent() {
     return preserveOriginalContent;
   } // getPreserveOriginalContent
+
+  /**
+   *  Allow/disallow collecting of repositioning information.
+   *  If is <B>true</B> information will be retrieved and preserved
+   *  as document feature.<BR>
+   *  Preserving of repositioning information give the possibilities
+   *  for converting of coordinates between the original document content and
+   *  extracted from the document text.
+   */
+  public void setCollectRepositioningInfo(Boolean b) {
+    collectRepositioningInfo = b;
+  } // setCollectRepositioningInfo
+
+  /** Get the collectiong and preserving of repositioning information
+   *  for the Document. <BR>
+   *  Preserving of repositioning information give the possibilities
+   *  for converting of coordinates between the original document content and
+   *  extracted from the document text.
+   *
+   *  @return whether the Document should collect and preserve information.
+   */
+  public Boolean getCollectRepositioningInfo() {
+    return collectRepositioningInfo;
+  } // getCollectRepositioningInfo
 
   /** Documents may be packed within files; in this case an optional pair of
     * offsets refer to the location of the document. This method gets the

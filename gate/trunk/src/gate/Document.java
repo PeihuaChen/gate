@@ -109,6 +109,26 @@ public interface Document extends LanguageResource, Comparable {
    */
   public Boolean getPreserveOriginalContent();
 
+  /**
+   *  Allow/disallow collecting of repositioning information.
+   *  If is <B>true</B> information will be retrieved and preserved
+   *  as document feature.<BR>
+   *  Preserving of repositioning information give the possibilities
+   *  for converting of coordinates between the original document content and
+   *  extracted from the document text.
+   */
+  public void setCollectRepositioningInfo(Boolean b);
+
+  /** Get the collectiong and preserving of repositioning information
+   *  for the Document. <BR>
+   *  Preserving of repositioning information give the possibilities
+   *  for converting of coordinates between the original document content and
+   *  extracted from the document text.
+   *
+   *  @return whether the Document should collect and preserve information.
+   */
+  public Boolean getCollectRepositioningInfo();
+
   /** Returns a GateXml document. This document is actually a serialization of
    *  a Gate Document in XML.
     * @return a string representing a Gate Xml document
