@@ -154,19 +154,20 @@ public class CreoleRegisterImpl extends HashMap
 
     // add the URL
     //if already present do nothing
-    directories.add(directoryUrl);
-    // parse the directory file
-    try {
-      parseDirectory(directoryXmlFileUrl.openStream(), directoryUrl, 
-              directoryXmlFileUrl);
-      System.out.println("CREOLE plugin loaded: " + directoryUrl);
-    } catch(IOException e) {
-      //it failed: remove it
-      directories.remove(directoryUrl);
-      throw(new GateException("couldn't open creole.xml: " + e.toString()));
+    if(directories.add(directoryUrl)){
+      // parse the directory file
+      try {
+        parseDirectory(directoryXmlFileUrl.openStream(), directoryUrl, 
+                directoryXmlFileUrl);
+        System.out.println("CREOLE plugin loaded: " + directoryUrl);
+      } catch(IOException e) {
+        //it failed: remove it
+        directories.remove(directoryUrl);
+        throw(new GateException("couldn't open creole.xml: " + e.toString()));
+      }
+      //add it to the list of known directories
+      Gate.addKnownPlugin(directoryUrl);
     }
-    //add it to the list of known directories
-    Gate.addKnownPlugin(directoryUrl);
   } // registerDirectories(URL)
 
   /** Parse a directory file (represented as an open stream), adding
