@@ -1313,6 +1313,9 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+
+
+
   /** --- */
   public static void writeCLOB(String src,java.sql.Clob dest)
     throws SQLException, IOException {
@@ -1351,6 +1354,34 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** --- */
+  public static Object readBLOB(java.sql.Blob src)
+    throws SQLException, IOException,ClassNotFoundException {
+
+    int readLength = 0;
+    Object result = null;
+
+    //0. preconditions
+    Assert.assertNotNull(src);
+
+    //2. get Oracle BLOB
+    BLOB blo = (BLOB)src;
+
+    //3. get binary stream
+    InputStream input = blo.getBinaryStream();
+    Assert.assertNotNull(input);
+
+    //4. read
+    ObjectInputStream ois = new ObjectInputStream(input);
+    result = ois.readObject();
+
+    //5.close streams
+    ois.close();
+    input.close();
+
+    return result;
+  }
+
+  /** --- */
   public static void writeBLOB(Object src,java.sql.Blob dest)
     throws SQLException, IOException {
 
@@ -1362,20 +1393,18 @@ public class OracleDataStore extends JDBCDataStore {
 
     //2. get Unicode stream
     OutputStream output = blo.getBinaryOutputStream();
-    BufferedOutputStream buffOutput = new BufferedOutputStream(output,INTERNAL_BUFFER_SIZE);
 
     //3. write
-    ObjectOutputStream oos = new ObjectOutputStream(buffOutput);
+    ObjectOutputStream oos = new ObjectOutputStream(output);
     oos.writeObject(src);
-    oos.close();
 
     //4. flushing is a good idea
     //[although ::close() calls it this is implementation specific]
-    buffOutput.flush();
+    oos.flush();
     output.flush();
 
     //5.close streams
-    buffOutput.close();
+    oos.close();
     output.close();
   }
 
@@ -2014,14 +2043,15 @@ public class OracleDataStore extends JDBCDataStore {
             currFeature = null;
             break;
 
-          case DBHelper.VALUE_TYPE_BINARY:
-            throw new MethodNotImplementedException();
-
           case DBHelper.VALUE_TYPE_BOOLEAN:
           case DBHelper.VALUE_TYPE_FLOAT:
           case DBHelper.VALUE_TYPE_INTEGER:
           case DBHelper.VALUE_TYPE_LONG:
             currFeature = numberValue;
+            break;
+
+          case DBHelper.VALUE_TYPE_BINARY:
+            currFeature = readBLOB(blobValue);
             break;
 
           case DBHelper.VALUE_TYPE_STRING:
@@ -2088,6 +2118,9 @@ public class OracleDataStore extends JDBCDataStore {
     }
     catch(IOException ioe) {
       throw new PersistenceException("can't read features from DB: ["+ ioe.getMessage()+"]");
+    }
+    catch(ClassNotFoundException cnfe) {
+      throw new PersistenceException("can't read features from DB: ["+ cnfe.getMessage()+"]");
     }
     finally {
       DBHelper.cleanup(rs);
