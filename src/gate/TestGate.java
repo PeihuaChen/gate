@@ -67,7 +67,7 @@ public class TestGate {
   private static final String
                 defOracleDriver = "jdbc:oracle:thin:@derwent:1521:dbgate";
   private static final String
-                saiOracleDriver = "jdbc:oracle:thin:gateusr/gate@ontotext.sirma.bg:1521:gate02";
+                saiOracleDriver = "jdbc:oracle:thin:GATEUSER/gate@192.168.128.7:1521:GATE04";
   private static final String
                 defPSQLDriver = "jdbc:postgresql://redmires/gate";
   private static final String
@@ -209,6 +209,7 @@ public class TestGate {
 //        suite.addTest(TestGazetteer.suite());
 //        suite.addTest(TestSplitterTagger.suite());
         suite.addTest(TestPR.suite());
+        suite.addTest(TestFeatureMap.suite());
       } // if(allTests)
 
     } catch(Exception e) {
