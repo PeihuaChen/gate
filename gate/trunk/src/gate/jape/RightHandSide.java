@@ -114,7 +114,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     // initialise the class action string
     actionClassString = new StringBuffer(
       "package " + actionsDirName + "; " + nl +
-      "import gate.jdm.*; import java.io.*; import gate.jape.*; " + nl +
+      "import gate.*; import java.io.*; import gate.jape.*; " + nl +
       "import gate.annotation.*; import gate.util.*;.*; import gate.creole.*; " + nl +
       "public class " + actionClassName +
       " implements java.io.Serializable, RhsAction { " + nl +
@@ -402,6 +402,9 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.2  2000/02/24 17:28:48  hamish
+// more porting to new API
+//
 // Revision 1.1  2000/02/23 13:46:11  hamish
 // added
 //

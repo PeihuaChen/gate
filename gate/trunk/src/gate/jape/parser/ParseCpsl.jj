@@ -747,9 +747,9 @@ String[] AssignmentExpression() :
   String existingAttrName = null;
 
   blockBuffer.append("// RHS assignment block" + nl);
-  blockBuffer.append("      JdmSpanSequence spans = null;" + nl);
-  blockBuffer.append("      JdmAttributeSequence attrs = null;" + nl);
-  blockBuffer.append("      JdmAnnotation annot = null;" + nl);
+  //blockBuffer.append("      JdmSpanSequence spans = null;" + nl);
+  blockBuffer.append("      FeatureMap attrs = null;" + nl);
+  blockBuffer.append("      Annotation annot = null;" + nl);
 }
 {
   // the simple/composite span spec
@@ -773,7 +773,7 @@ String[] AssignmentExpression() :
       "\", spans, attrs);" + nl
     );
 
-    if(simpleSpan) 
+    if(simpleSpan)
       blockBuffer.append(
         "      spans.append(new JdmSpan(" +
         annotSetName + ".getLeftmostStart(), " +
@@ -964,6 +964,9 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.2  2000/02/24 17:28:48  hamish
+// more porting to new API
+//
 // Revision 1.1  2000/02/23 13:46:16  hamish
 // added
 //
