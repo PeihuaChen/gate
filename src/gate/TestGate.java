@@ -27,7 +27,6 @@ import gate.creole.tokeniser.*;
 import gate.creole.gazetteer.*;
 import gate.db.*;
 import gate.jape.*;
-import gate.fsm.*;
 import gate.xml.*;
 import gate.email.*;
 import gate.html.*;
@@ -180,7 +179,6 @@ public class TestGate {
         suite.addTest(TestFiles.suite());
         suite.addTest(TestJdk.suite());
         suite.addTest(TestJape.suite());
-        suite.addTest(TestFSM.suite());
         suite.addTest(TestTemplate.suite());
         suite.addTest(TestJacl.suite());
         suite.addTest(TestDocument.suite());
