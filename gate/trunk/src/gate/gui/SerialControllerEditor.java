@@ -867,11 +867,6 @@ public class SerialControllerEditor extends AbstractVisualResource
               "Gate", JOptionPane.ERROR_MESSAGE);
           }catch(ExecutionException ee) {
             ee.printStackTrace(Err.getPrintWriter());
-            Exception exc = ee.getException();
-            if(exc != null){
-              Err.prln("===> from:");
-              exc.printStackTrace(Err.getPrintWriter());
-            }
             JOptionPane.showMessageDialog(
               SerialControllerEditor.this,
               "Execution error while running \"" + controller.getName() +

@@ -18,6 +18,8 @@ package gate;
 import java.util.*;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.io.*;
 import java.net.*;
 import java.awt.Color;
@@ -116,6 +118,7 @@ public class Main {
 
   /** Run the user interface. */
   private static void runGui() throws GateException {
+
     Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
     //show the splash
     SwingUtilities.invokeLater(new Runnable(){
@@ -149,10 +152,18 @@ public class Main {
     Gate.init();
     registerCreoleUrls();
 
-
     //create the main frame, show it and hide the splash
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
+        //this needs to run before any GUI component is constructed.
+        //the initial gate splash is exempted from this rule.
+//        applyUserPreferences();
+
+try{
+  UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+}catch(Exception e){}
+
+        //all the defaults tables have been updated; build the GUI
         frame = new MainFrame();
         if(DEBUG) Out.prln("constructing GUI");
 
@@ -179,6 +190,75 @@ public class Main {
       }
     });
   } // runGui()
+
+  /**
+   * Reads the user config data and applies the required settings.
+   */
+  protected static void applyUserPreferences(){
+    if(true) return;
+    //hardcode for now
+    Gate.getUserConfig().put(GateConstants.SAVE_OPTIONS_ON_EXIT,
+                             new Boolean(true));
+
+    //look and feel
+    String lnfClassName = Gate.getUserConfig().
+                          getString(GateConstants.LOOK_AND_FEEL);
+    if(lnfClassName == null){
+      lnfClassName = UIManager.getSystemLookAndFeelClassName();
+      Gate.getUserConfig().put(GateConstants.LOOK_AND_FEEL, lnfClassName);
+    }
+    try {
+      UIManager.setLookAndFeel(lnfClassName);
+    } catch(Exception e) {
+      throw new gate.util.GateRuntimeException(e.toString());
+    }
+
+    //read the user config data
+    OptionsMap userConfig = Gate.getUserConfig();
+
+    //text font
+    Font font = userConfig.getFont(GateConstants.TEXT_COMPONENTS_FONT);
+    if(font == null){
+      String fontName = Gate.guessUnicodeFont();
+      if(fontName != null){
+        font = new Font(fontName, Font.PLAIN, 12);
+      }
+    }
+
+    if(font != null){
+      OptionsDialog.setTextComponentsFont(font);
+    }
+
+    //menus font
+    font = userConfig.getFont(GateConstants.MENUS_FONT);
+    if(font == null){
+      String fontName = Gate.guessUnicodeFont();
+      if(fontName != null){
+        font = new Font(fontName, Font.PLAIN, 12);
+      }
+    }
+
+    if(font != null){
+      OptionsDialog.setMenuComponentsFont(font);
+    }
+
+    //other gui font
+    font = userConfig.getFont(GateConstants.OTHER_COMPONENTS_FONT);
+    if(font == null){
+      String fontName = Gate.guessUnicodeFont();
+      if(fontName != null){
+        font = new Font(fontName, Font.PLAIN, 12);
+      }
+    }
+
+    if(font != null){
+      OptionsDialog.setComponentsFont(font);
+    }
+
+
+  }
+
+
 
   // find out the version and build numbers
   static {

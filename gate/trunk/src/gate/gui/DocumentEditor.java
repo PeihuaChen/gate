@@ -379,7 +379,7 @@ public class DocumentEditor extends AbstractVisualResource
             }else if( e.getClickCount() == 1 &&
                       clickedComp instanceof JLabel &&
                       isTextSelected()){
-              // Here create an annotation with the selected text into the
+              // Here creates an annotation with the selected text into the
               // target annotation set
 
               if(!editable) return;

@@ -23,6 +23,7 @@ import java.awt.event.*;
 import java.beans.*;
 
 import gate.swing.*;
+import gate.*;
 
 public class AppearanceDialog extends JDialog {
 
@@ -49,10 +50,19 @@ public class AppearanceDialog extends JDialog {
   }
 
   protected void initLocalData() {
-    oldMenusFont = menusFont = UIManager.getFont("Menu.font");
-    oldComponentsFont = componentsFont = UIManager.getFont("Button.font");
+    Font font = Gate.getUserConfig().getFont(GateConstants.MENUS_FONT);
+    oldMenusFont = menusFont = font == null ?
+                               UIManager.getFont("Menu.font") :
+                               font;
+
+    font = Gate.getUserConfig().getFont(GateConstants.OTHER_COMPONENTS_FONT);
+    oldComponentsFont = componentsFont = font == null ?
+                                         UIManager.getFont("Button.font"):
+                                         font;
+
+    font = Gate.getUserConfig().getFont(GateConstants.TEXT_COMPONENTS_FONT);
     oldTextComponentsFont = textComponentsFont =
-                            UIManager.getFont("TextPane.font");
+          font == null ? UIManager.getFont("TextPane.font") : font;
   }// initLocalData()
 
   protected void initGuiComponents() {
@@ -103,35 +113,23 @@ public class AppearanceDialog extends JDialog {
      }
     });
 
-    fontChooser.addPropertyChangeListener("fontValue",
-                                          new PropertyChangeListener() {
-      public void propertyChange(PropertyChangeEvent e) {
-        String selectedButton = bGroup.getSelection().getActionCommand();
-        if(selectedButton.equals("menus")){
-          menusFont = fontChooser.getFontValue();
-        } else if(selectedButton.equals("components")){
-          componentsFont = fontChooser.getFontValue();
-        } else if(selectedButton.equals("text components")){
-          textComponentsFont = fontChooser.getFontValue();
-        }
-      }// propertyChange(PropertyChangeEvent e)
-    });
-
     menusRBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        fontChooser.setFontValue(menusFont);
+        if(menusRBtn.isSelected()) fontChooser.setFontValue(menusFont);
       }// public void actionPerformed(ActionEvent e)
     });
 
     componentsRBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        fontChooser.setFontValue(componentsFont);
+        if(componentsRBtn.isSelected())
+          fontChooser.setFontValue(componentsFont);
       }// public void actionPerformed(ActionEvent e)
     });
 
     textComponentsRBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        fontChooser.setFontValue(textComponentsFont);
+        if(textComponentsRBtn.isSelected())
+          fontChooser.setFontValue(textComponentsFont);
       }// public void actionPerformed(ActionEvent e)
     });
   }// initListeners()
@@ -158,6 +156,8 @@ public class AppearanceDialog extends JDialog {
    */
   public static void setTextComponentsFont(Font textComponentsFont){
     setUIDefaults(textComponentsKeys, new FontUIResource(textComponentsFont));
+    Gate.getUserConfig().put(GateConstants.TEXT_COMPONENTS_FONT,
+                             textComponentsFont);
   }
 
   /**
@@ -166,6 +166,8 @@ public class AppearanceDialog extends JDialog {
    */
   public static void setMenuComponentsFont(Font menuComponentsFont){
     setUIDefaults(menuKeys, new FontUIResource(menuComponentsFont));
+    Gate.getUserConfig().put(GateConstants.MENUS_FONT,
+                             menuComponentsFont);
   }
 
   /**
@@ -174,6 +176,8 @@ public class AppearanceDialog extends JDialog {
    */
   public static void setComponentsFont(Font componentsFont){
     setUIDefaults(componentsKeys, new FontUIResource(componentsFont));
+    Gate.getUserConfig().put(GateConstants.OTHER_COMPONENTS_FONT,
+                             componentsFont);
   }
 
   /**
@@ -224,6 +228,11 @@ public class AppearanceDialog extends JDialog {
   Font oldComponentsFont;
   Font oldTextComponentsFont;
 
+  /**
+   * Which font is being edited now. Possible vlues: "menu", "text",
+   * "components".
+   */
+  String currentFont;
   Component[] targets;
 
   public static String[] menuKeys = new String[]{"CheckBoxMenuItem.acceleratorFont",

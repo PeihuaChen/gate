@@ -35,18 +35,23 @@ public class ExecutionException extends GateException {
   }
 
   public ExecutionException(Exception e) {
-    super(e.toString());
     this.exception = e;
   }
 
   /**
-   * Gets the exception that caused this ExecutionException to be raised.
-   * It is often the case that an ExecutionException is used to wrap another
-   * exception that occured during the execution of a Gate module. This method
-   * gives access to tha initial exception.
+   * Overriden so we can print the enclosed exception's stacktrace too.
    */
-  public Exception getException(){
-    return exception;
+  public void printStackTrace(){
+    printStackTrace(System.err);
+  }
+
+  /**
+   * Overriden so we can print the enclosed exception's stacktrace too.
+   */
+  public void printStackTrace(java.io.PrintStream s) {
+    super.printStackTrace(s);
+    s.print("  Caused by:");
+    if(exception != null) exception.printStackTrace(s);
   }
 
   Exception exception;
