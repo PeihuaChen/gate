@@ -499,6 +499,8 @@ public class PersistenceManager {
       registerPersitentEquivalent(SerialAnalyserController.class,
                                   SerialAnalyserControllerPersistence.class);
 
+      registerPersitentEquivalent(gate.persist.JDBCDataStore.class,
+                                  JDBCDSPersistence.class);
     }catch(PersistenceException pe){
       //builtins shouldn't raise this
       pe.printStackTrace();
