@@ -14,7 +14,7 @@ import java.awt.datatransfer.*;
 
 import gate.*;
 import gate.jape.*;
-
+import org.w3c.www.mime.*;
 
 /**
   * A scratch pad for experimenting.
@@ -23,6 +23,7 @@ public class Scratch
 {
 
   public static void main(String args[]) {
+  /*
     FlavorMap sysFlavors = SystemFlavorMap.getDefaultFlavorMap();
     System.out.println(sysFlavors);
 
@@ -40,13 +41,29 @@ public class Scratch
       System.out.println(flavor);
     }
     System.exit(0);
+   */
+   Map map = new HashMap();
+
+   ExtendedMimeType mime = new ExtendedMimeType("text","xml");
+   map.put(mime,"XML handler");
+   map.put(new ExtendedMimeType("text","html"),"HTML handler");
+
+   System.out.println(map.get(new ExtendedMimeType("text","xml")));
+
   } // main
 
   public int i;
 
+}
 
+class ExtendedMimeType extends MimeType{
+  public ExtendedMimeType(String type, String subtype){super(type,subtype);}
 
-
+  public boolean equals(ExtendedMimeType obj){
+    if (this.toString().equals(obj.toString()))
+          return true;
+    return false;
+  }
 
 
 } // class Scratch

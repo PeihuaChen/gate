@@ -18,6 +18,9 @@ public class CustomDocumentHandler extends HandlerBase implements
 
   // member data
 
+  // the markupElementsMap 
+  private java.util.Map markupElementsMap = null;
+  
   // error handler
   private SimpleErrorHandler _seh = new SimpleErrorHandler();
 
@@ -27,9 +30,6 @@ public class CustomDocumentHandler extends HandlerBase implements
 
   // a stack used to remember elements
   private java.util.Stack stack = null;
-
-  // the name of the XML Document
-  private String xmlDocumentName = null;
 
   private java.io.PrintWriter out = null;
 
@@ -43,11 +43,18 @@ public class CustomDocumentHandler extends HandlerBase implements
   /**
     * Constructor
     */
-  public CustomDocumentHandler(String xmlDocumentname) {
+  public CustomDocumentHandler(gate.Document doc, java.util.Map markupElementsMap)
+     throws NullPointerException {
     // init stack, tmpDocContent and XML doc name
     stack = new java.util.Stack();
     tmpDocContent = new String("");
-    this.xmlDocumentName = xmlDocumentname ;
+
+    if (doc == null) throw new NullPointerException(" Gate document is null.");
+    if (stack == null) throw new NullPointerException("Couldn't create the stack");
+    if (tmpDocContent == null) throw new NullPointerException("Couldn't create a tmp Document");
+
+    this.doc = doc ;
+    this.markupElementsMap = markupElementsMap;
 
   }
 
@@ -56,15 +63,9 @@ public class CustomDocumentHandler extends HandlerBase implements
     * XML document
     */
   public void startDocument() throws org.xml.sax.SAXException {
-    try{
-      // creates a new gate document form the specific XML file
-      doc = new gate.corpora.DocumentImpl(xmlDocumentName);
-      // creates a new AnnotationSet based on the previuos gate document
-      basicAS = new gate.annotation.AnnotationSetImpl(doc);
-    }
-    catch (java.io.IOException e){
-      System.out.println(e);
-    }
+    // gets AnnotationSet based on the gate document
+    // beacause the constructor succeded, I know for sure that doc != null
+    basicAS = doc.getAnnotations();
   }
 
   /**
@@ -72,12 +73,18 @@ public class CustomDocumentHandler extends HandlerBase implements
     * XML document
     */
   public void endDocument() throws org.xml.sax.SAXException {
-    // prints out the document without markup
-    //out.println("====================");
-    //out.println("DOCUMENT CONTENT IS:");
-    //out.println("====================");
-    //out.println(tmpDocContent);
-    //out.flush ();
+    // replace the document content with the markless one
+    try{
+      doc.edit (new Long(0),doc.getContent ().size () ,
+                new gate.corpora.DocumentContentImpl(tmpDocContent));
+
+    //doc.edit (new Long(0),doc.getContent ().size () ,
+    //            new gate.corpora.DocumentContentImpl(tmpDocContent.substring (0,30000)));
+    }catch(Exception e){
+      e.printStackTrace(System.err);
+    }
+
+
   }
 
   /**
@@ -85,30 +92,27 @@ public class CustomDocumentHandler extends HandlerBase implements
     * XML element
     */
   public void startElement(String elemName, AttributeList atts){
-    // prints the element name
-    //out.println("ELEMENT: " + elemName);
     // construct a SimpleFeatureMapImpl from the list of attributes
     gate.util.SimpleFeatureMapImpl fm = new gate.util.SimpleFeatureMapImpl();
-    //out.print("Feature map for element (" + elemName +") :[");
     // for all attributes do
     for (int i = 0; i < atts.getLength(); i++) {
      String name = atts.getName(i);
      //String type = atts.getType(i);
      String value = atts.getValue(i);
-     //out.print(name + "=" + value + " ");
      fm.put(name,value);
     }
-    //out.println("]");
 
     // create the START index
     Long startIndex = new Long(tmpDocContent.length ());
 
     // new custom object
     // initialy the Start index is equal with End index
-    MyCustomObject obj = new MyCustomObject(elemName,fm, startIndex, startIndex );
-    // put it into the stack
-    stack.push (obj);
 
+    MyCustomObject obj = null ;
+    obj = new MyCustomObject(elemName,fm, startIndex, startIndex );
+    if (obj != null)
+      // put it into the stack
+      stack.push (obj);
   }
 
   /**
@@ -123,22 +127,19 @@ public class CustomDocumentHandler extends HandlerBase implements
     if (!stack.isEmpty ()){
       obj = (MyCustomObject) stack.pop ();
     }
-    // if the object is not null then 
-    if (null != obj){
-      // create a new annotation and add it to the annotation set
-      try{
-      /*
-        out.println("Create ANNOTATION :" + "(" +obj.getElemName ()+ ", "
-         + obj.getStart ()+ ", " + obj.getEnd () + ") {" +
-          tmpDocContent.substring (obj.getStart ().intValue (),
-          obj.getEnd ().intValue ()) + "}" );
-         out.println("-----------------------------------------------------------------------");
-       */  
+    // create a new annotation and add it to the annotation set
+    try{
+        // the annotation type will be conforming towith markupElementsMap
         //add the annotation to the Annotation Set
-        basicAS.add(obj.getStart () , obj.getEnd (), obj.getElemName (), obj.GetFM ());
-      }catch (gate.util.InvalidOffsetException e){
-        System.out.println(e);
-      }
+        if (markupElementsMap == null)
+          basicAS.add(obj.getStart (), obj.getEnd(), obj.getElemName(), obj.GetFM ());
+        else {
+          String annotationType = (String ) markupElementsMap.get(obj.getElemName());
+          if (annotationType != null)
+            basicAS.add(obj.getStart (),obj.getEnd(), annotationType, obj.GetFM());
+        }
+    }catch (gate.util.InvalidOffsetException e){
+      System.out.println(e);
     }
   }
 
@@ -149,14 +150,15 @@ public class CustomDocumentHandler extends HandlerBase implements
 
     // some internal objects
     String content = new String(text,start, length);
-    // print out the content
-   // out.println("CALL characters :" + content);
-   // out.println("START=" + start+ " LENGTH=" + content.length ());
+
+    // if u don't want '\n' inside your document decoment the line below
+    //content = content.replace('\n',' ');
+
     // used to deal with the stack content later
     MyCustomObject obj = null;
 
     // calculate the End index for all the elements of the stack
-    // the expression is : End = Current doc length + length 
+    // the expression is : End = Current doc length + length
     Long end = new Long(tmpDocContent.length() + content.length());
 
     // iterate through stack to modify the End index of the existing elements
@@ -178,7 +180,6 @@ public class CustomDocumentHandler extends HandlerBase implements
   * this method is called when the SAX parser encounts white spaces
   */
   public void ignorableWhitespace(char ch[], int start, int length) throws SAXException{
-    //out.println("CALL: ignorableWhitespace");
     // internal String object
     String  text = new String(ch, start, length);
 
@@ -221,7 +222,17 @@ public class CustomDocumentHandler extends HandlerBase implements
   * this method is called when the SAX parser encounts a comment
   */
   public void comment(String text) throws SAXException{
-    //out.println("This is a comment: " + text);
+    // create a FeatureMap and then add the comment to the annotation set.
+    /*
+    gate.util.SimpleFeatureMapImpl fm = new gate.util.SimpleFeatureMapImpl();
+    fm.put ("text_comment",text);
+    Long node = new Long (tmpDocContent.length());
+    try{
+      basicAS.add(node,node, "COMMENT",fm);
+    }catch (gate.util.InvalidOffsetException e){
+      System.out.println(e);
+    }
+    */
   }
 
   /**

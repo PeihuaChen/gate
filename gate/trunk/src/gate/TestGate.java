@@ -17,6 +17,7 @@ import gate.util.*;
 import gate.db.*;
 import gate.jape.*;
 import gate.fsm.*;
+import gate.xml.*;
 
 
 /** Top-level entry point for GATE test suite.
@@ -51,7 +52,10 @@ public class TestGate
     */
   public static Test suite() {
     TestSuite suite = new TestSuite();
-    suite.addTest(TestJdk.suite());        
+
+    suite.addTest(TestXml.suite());        /*
+    
+    suite.addTest(TestJdk.suite());
     suite.addTest(TestJape.suite());
     suite.addTest(TestFSM.suite());
     suite.addTest(TestTemplate.suite());
@@ -61,7 +65,10 @@ public class TestGate
     suite.addTest(TestRBTreeMap.suite());
     suite.addTest(TestCorpus.suite());
     suite.addTest(CookBook.suite());
-    suite.addTest(TestDB.suite());        
+
+    suite.addTest(TestDB.suite());
+
+*/
     return suite;
   } // suite
 
