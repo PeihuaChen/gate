@@ -675,7 +675,7 @@ public class PostgresDataStore extends JDBCDataStore {
     PreparedStatement pstmt = null;
 
     try {
-      String sql = "select persist_create_feature(?,?,?,?,?,?) ";
+      String sql = "select persist_create_feature(?,?,?,?,?,?,?) ";
       pstmt = this.jdbcConn.prepareStatement(sql);
     }
     catch (SQLException sqle) {
@@ -724,8 +724,9 @@ public class PostgresDataStore extends JDBCDataStore {
       pstmt.setInt(2,entityType);
       pstmt.setString(3,key);
       pstmt.setNull(4,java.sql.Types.BIGINT);
-      pstmt.setNull(5,java.sql.Types.VARCHAR);
-      pstmt.setInt(6,valueType);
+      pstmt.setNull(5,java.sql.Types.DOUBLE);
+      pstmt.setNull(6,java.sql.Types.VARCHAR);
+      pstmt.setInt(7,valueType);
 
       //1.2 set proper data
       switch(valueType) {
@@ -752,7 +753,7 @@ public class PostgresDataStore extends JDBCDataStore {
         case DBHelper.VALUE_TYPE_FLOAT:
 
           Double d = (Double)value;
-          pstmt.setDouble(4,d.doubleValue());
+          pstmt.setDouble(5,d.doubleValue());
           break;
 
         case DBHelper.VALUE_TYPE_BINARY:
@@ -764,7 +765,7 @@ public class PostgresDataStore extends JDBCDataStore {
 
           String s = (String)value;
           //does it fin into a varchar2?
-          pstmt.setString(5,s);
+          pstmt.setString(6,s);
           break;
 
         default:
@@ -858,11 +859,12 @@ public class PostgresDataStore extends JDBCDataStore {
 
 
   /** helper for sync() - never call directly */
-  protected void _syncAddedAnnotations(Document doc, AnnotationSet as, Collection changes)
+/*  protected void _syncAddedAnnotations(Document doc, AnnotationSet as, Collection changes)
     throws PersistenceException {
 
     throw new MethodNotImplementedException();
   }
+*/
 
   /** helper for sync() - never call directly */
   protected void _syncRemovedAnnotations(Document doc,AnnotationSet as, Collection changes)
@@ -884,6 +886,172 @@ public class PostgresDataStore extends JDBCDataStore {
    */
   protected FeatureMap readFeatures(Long entityID, int entityType)
     throws PersistenceException {
+
+    //0. preconditions
+    Assert.assertNotNull(entityID);
+    Assert.assertTrue(entityType == DBHelper.FEATURE_OWNER_ANNOTATION ||
+                  entityType == DBHelper.FEATURE_OWNER_CORPUS ||
+                  entityType == DBHelper.FEATURE_OWNER_DOCUMENT);
+
+
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    FeatureMap fm = new SimpleFeatureMapImpl();
+
+    //1. read from DB
+    try {
+      String sql = " select ftkey.fk_string, " +
+                   "        ft.ft_value_type, " +
+                   "        ft.ft_int_value, " +
+                   "        ft.ft_float_value, " +
+                   "        ft.ft_binary_value, " +
+                   "        ft.ft_character_value " +
+                   " from   t_feature ft, " +
+                   "        t_feature_key ftkey " +
+                   " where  ft.ft_entity_id = ? " +
+                   "        and ft.ft_entity_type = ? " +
+                   "        and ft.ft_key_id = ftkey.fk_id " +
+                   " order by ftkey.fk_string,ft.ft_id";
+
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,entityID.longValue());
+      pstmt.setLong(2,entityType);
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      //3. fill feature map
+      Vector arrFeatures = new Vector();
+      String prevKey = null;
+      String currKey = null;
+      Object currFeature = null;
+
+
+      while (rs.next()) {
+        //NOTE: because there are LOBs in the resulset
+        //the columns should be read in the order they appear
+        //in the query
+        currKey = rs.getString("fk_string");
+
+        Long valueType = new Long(rs.getLong("ft_value_type"));
+
+        //we don't quite know what is the type of the NUMBER
+        //stored in DB
+        Object numberValue = null;
+
+        //for all numeric types + boolean -> read from DB as appropriate
+        //Java object
+        switch(valueType.intValue()) {
+
+          case DBHelper.VALUE_TYPE_BOOLEAN:
+            numberValue = new Boolean(rs.getBoolean("ft_int_value"));
+            break;
+
+          case DBHelper.VALUE_TYPE_FLOAT:
+            numberValue = new Double(rs.getDouble("ft_float_value"));
+            break;
+
+          case DBHelper.VALUE_TYPE_INTEGER:
+            numberValue = new Integer(rs.getInt("ft_int_value"));
+            break;
+
+          case DBHelper.VALUE_TYPE_LONG:
+            numberValue = new Long(rs.getLong("ft_int_value"));
+            break;
+        }
+
+        //don't forget to read the rest of the current row
+        Blob blobValue = rs.getBlob("ft_binary_value");
+        String stringValue = rs.getString("ft_character_value");
+
+        switch(valueType.intValue()) {
+
+          case DBHelper.VALUE_TYPE_NULL:
+            currFeature = null;
+            break;
+
+          case DBHelper.VALUE_TYPE_BOOLEAN:
+          case DBHelper.VALUE_TYPE_FLOAT:
+          case DBHelper.VALUE_TYPE_INTEGER:
+          case DBHelper.VALUE_TYPE_LONG:
+            currFeature = numberValue;
+            break;
+
+          case DBHelper.VALUE_TYPE_BINARY:
+            currFeature = readBLOB(blobValue);
+            break;
+
+          case DBHelper.VALUE_TYPE_STRING:
+            currFeature = stringValue;
+            break;
+
+          default:
+            throw new PersistenceException("Invalid feature type found in DB, type is ["+valueType.intValue()+"]");
+        }//switch
+
+        //new feature or part of an array?
+        if (currKey.equals(prevKey) && prevKey != null) {
+          //part of array
+          arrFeatures.add(currFeature);
+        }
+        else {
+          //add prev feature to feature map
+
+          //is the prev feature an array or a single object?
+          if (arrFeatures.size() > 1) {
+            //put a clone, because this is a temp array that will
+            //be cleared in few lines
+            fm.put(prevKey, new Vector(arrFeatures));
+          }
+          else if (arrFeatures.size() == 1) {
+            fm.put(prevKey,arrFeatures.elementAt(0));
+          }
+          else {
+            //do nothing, this is the dummy feature
+            ;
+          }//if
+
+          //now clear the array from previous fesature(s) and put the new
+          //one there
+          arrFeatures.clear();
+
+          prevKey = currKey;
+          arrFeatures.add(currFeature);
+        }//if
+      }//while
+
+      //add the last feature
+      if (arrFeatures.size() > 1) {
+        fm.put(currKey,arrFeatures);
+      }
+      else if (arrFeatures.size() == 1) {
+        fm.put(currKey,arrFeatures.elementAt(0));
+      }
+    }//try
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't read features from DB: ["+ sqle.getMessage()+"]");
+    }
+    catch(IOException ioe) {
+      throw new PersistenceException("can't read features from DB: ["+ ioe.getMessage()+"]");
+    }
+    catch(ClassNotFoundException cnfe) {
+      throw new PersistenceException("can't read features from DB: ["+ cnfe.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+    }
+
+    return fm;
+  }
+
+  /**
+   *  reads the content of the specified BLOB object and returns the object
+   *  contained.
+   *  NOTE: the BLOB is expected to contain serializable objects, not just any
+   *  binary stream
+   */
+  public static Object readBLOB(java.sql.Blob src)
+    throws SQLException, IOException,ClassNotFoundException {
 
     throw new MethodNotImplementedException();
   }
