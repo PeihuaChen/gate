@@ -1,5 +1,5 @@
 Phase: Organization
-Input: Lookup Token
+Input: Lookup Token ORG LOC TreeTaggerToken
 Options: control = appelt
 
 Rule: ORG1
@@ -34,7 +34,9 @@ Rule: Company2
 
 Rule: Guess_Company1
 (
-	({Token.orth == upperInitial})+
+	({TreeTaggerToken.category == NN}|
+	 {TreeTaggerToken.category == NE}
+	)+
 	{Lookup.minorType == "orgtype"}
 
 ):OrgName
@@ -46,7 +48,9 @@ Priority: 20
 
 {Lookup.minorType == "stop"}
 (
-({Token.orth == upperInitial})+
+({TreeTaggerToken.category == NN}|
+ {TreeTaggerToken.category == NE}
+)+
 {Lookup.minorType == "orgtype"}
 
 ):OrgName
@@ -55,7 +59,9 @@ Priority: 20
 
 Rule: Guess_Company1_annie
 (
-	({Token.orth == upperInitial})+
+	({TreeTaggerToken.category == NN}|
+	 {TreeTaggerToken.category == NE}
+	)+
 	{Lookup.minorType == "annie_orgtype"}
 
 ):OrgName
@@ -67,7 +73,9 @@ Priority: 20
 
 {Lookup.minorType == "stop"}
 (
-({Token.orth == upperInitial})+
+({TreeTaggerToken.category == NN}|
+ {TreeTaggerToken.category == NE}
+ )+
 {Lookup.minorType == "annie_orgtype"}
 
 ):OrgName
@@ -79,16 +87,14 @@ Priority: 20
 (
 	{Lookup.minorType == "orgtype_prefix"}
 	(
-	{Token.orth == upperInitial}
-	|
-	{Token.orth == "allCaps"}
+	{TreeTaggerToken.category == NN}|
+	{TreeTaggerToken.category == NE}
 	)
 	(
 	({Token.string == "\-"})?
 	(
-	{Token.orth == upperInitial}
-	|
-	{Token.orth == "allCaps"}
+	{TreeTaggerToken.category == NN}|
+	{TreeTaggerToken.category == NE}
 	)
 	)*
 
@@ -130,8 +136,8 @@ Priority: 20
 Rule: Exception4_to_guess_Organization2
 Priority: 20
 (
-	{Token.orth == "upperInitial"}
-	{Token.orth == "allCaps"}
+	{TreeTaggerToken.category == NN}|
+	 {TreeTaggerToken.category == NE}
 )
 -->
 {}
@@ -161,20 +167,24 @@ Priority: 20
 	{Token.string == "Nähe"}
 
 	)
-	{Token.orth == "upperInitial"}
+	({TreeTaggerToken.category == NN}|
+	 {TreeTaggerToken.category == NE})
 )
 -->
 {}
 
 Rule: Guess_Organization2
 (
-	({Token.orth == upperInitial})+
+	({TreeTaggerToken.category == NN}|
+	 {TreeTaggerToken.category == NE}
+	)+
 	{Lookup.minorType == "city"}
 
 
 ):OrgName3
 -->
 :OrgName3.ORG = {kind = "ORG", rule = "Guess_Organization2"}
+
 
 Rule: Org_by_gesellschaft
 (
@@ -184,13 +194,13 @@ Rule: Org_by_gesellschaft
 	{Token.string == "GESELLSCHAFT"}
 	)
 	(
-	{Token.orth == "allCaps"}
-	|
-	{Token.orth == "upperInitial"}
+	{TreeTaggerToken.category == NN}|
+	{TreeTaggerToken.category == NE}
 	)
 	(
 	({Token.string == "-"})?
-	{Token.orth == "upperInitial"}
+	({TreeTaggerToken.category == NN}|
+	 {TreeTaggerToken.category == NE})
 	)*
 ):ges
 -->
@@ -203,13 +213,35 @@ Rule: Organization_key1
 	{Lookup.minorType == "organization_key"}
 	({Token.string == "\-"})?
 		(
-		{Token.orth == "upperInitial"}
-		|
-		{Token.orth == "allCaps"}
+		{TreeTaggerToken.category == NN}|
+	        {TreeTaggerToken.category == NE}
 		)
 )
 	
 ):key
 -->
 :key.ORG = {kind = "ORG", rule = "organization_key1"}
+
+Rule: Organization_Location
+Priority:100
+
+(
+ {ORG}
+ {LOC}
+ ):key
+ -->
+ {
+//removes old ORG and LOC annotation, adds a new ORG annotation
+gate.AnnotationSet key = (gate.AnnotationSet)bindings.get("key");
+gate.Annotation keyAnn = (gate.Annotation)key.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule", "OrgLoc");
+annotations.add(key.firstNode(), key.lastNode(), "ORG",
+features);
+annotations.removeAll(key);
+}
+ 
+ 
+ 
+
 
