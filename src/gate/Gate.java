@@ -61,15 +61,15 @@ public class Gate
     if(creoleRegister == null)
       creoleRegister = new CreoleRegisterImpl();
 
-    // read gate.xml files; this must come before creole register
-    // initialisation in order for the CREOLE-DIR elements to have and effect
-    initConfigData();
-
     // init the creole register
     initCreoleRegister();
 
     // init the data store register
     initDataStoreRegister();
+
+    // read gate.xml files; this must come before creole register
+    // initialisation in order for the CREOLE-DIR elements to have and effect
+    initConfigData();
 
     // the creoleRegister acts as a proxy for datastore related events
     dataStoreRegister.addCreoleListener(creoleRegister);
