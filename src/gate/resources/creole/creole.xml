@@ -622,6 +622,45 @@
 		 DEFAULT="false" OPTIONAL="false"
 		 RUNTIME="false">java.lang.Boolean</PARAMETER>
     </RESOURCE>
+
+	<!--creole.xml for Flexible Gazetteer -->
+	<RESOURCE>
+      <NAME>Flexible Gazetteer</NAME>
+      <JAR>FlexibleGazetteer.jar</JAR>
+      <CLASS>gate.creole.gazetteer.FlexibleGazetteer</CLASS>
+      <COMMENT>A list lookup component.</COMMENT>
+      <PARAMETER NAME="document" 
+				 RUNTIME="true" 
+				 COMMENT="The document to be processed">gate.Document</PARAMETER>
+      <PARAMETER NAME="annotationSetName" 
+      	         RUNTIME="true" 
+      	         COMMENT="The annotation set to be used for the generated annotations" 
+      	         OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="listsURL" 
+      	         DEFAULT="gate:/creole/gazeteer/default/lists.def" 
+      	         COMMENT="The URL to the file with list of lists" 
+      	         OPTIONAL="false" 
+      	         SUFFIXES="def">java.net.URL</PARAMETER>
+      <PARAMETER DEFAULT="UTF-8" 
+      	         COMMENT="The encoding used for reading the definitions" 
+      	         OPTIONAL="false" 
+      	         NAME="encoding">java.lang.String</PARAMETER>
+      <PARAMETER DEFAULT="true" 
+      	         COMMENT="Should this gazetteer diferentiate on case" 
+      	         OPTIONAL="false" 
+      	         NAME="caseSensitive">java.lang.Boolean</PARAMETER>
+      <PARAMETER DEFAULT="true" 
+      	         COMMENT="Should this gazetteer only match whole words" 
+      	         OPTIONAL="false" 
+      	         NAME="wholeWordsOnly">java.lang.Boolean</PARAMETER>
+      <PARAMETER NAME="inputFeatureNames" 
+      	         COMMENT="Annotation.feature names to be considered for the gazetteer">java.util.List</PARAMETER>
+      <PARAMETER NAME="gazetteerClassName" 
+      	         COMMENT="Gazetteer Class to be used" 
+      	         DEFAULT="gate.creole.gazetteer.DefaultGazetteer">java.lang.String</PARAMETER>
+    </RESOURCE>
+    
+    
   </CREOLE>
 
 
@@ -769,21 +808,6 @@
       <GUI>
         <MAIN_VIEWER/>
       </GUI>
-    </RESOURCE>
-<!--creole.xml for Flexible Gazetteer -->
-	  <RESOURCE>
-      <NAME>Flexible Gazetteer</NAME>
-      <JAR>FlexibleGazetteer.jar</JAR>
-      <CLASS>gate.creole.gazetteer.FlexibleGazetteer</CLASS>
-      <COMMENT>A list lookup component.</COMMENT>
-      <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.Document</PARAMETER>
-      <PARAMETER NAME="annotationSetName" RUNTIME="true" COMMENT="The annotation set to be used for the generated annotations" OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="listsURL" DEFAULT="gate:/creole/gazeteer/default/lists.def" COMMENT="The URL to the file with list of lists" OPTIONAL="false" SUFFIXES="def">java.net.URL</PARAMETER>
-      <PARAMETER DEFAULT="UTF-8" COMMENT="The encoding used for reading the definitions" OPTIONAL="false" NAME="encoding">java.lang.String</PARAMETER>
-      <PARAMETER DEFAULT="true" COMMENT="Should this gazetteer diferentiate on case" OPTIONAL="false" NAME="caseSensitive">java.lang.Boolean</PARAMETER>
-      <PARAMETER DEFAULT="true" COMMENT="Should this gazetteer only match whole words" OPTIONAL="false" NAME="wholeWordsOnly">java.lang.Boolean</PARAMETER>
-      <PARAMETER NAME="inputFeatureNames" COMMENT="Annotation.feature names to be considered for the gazetteer">java.util.List</PARAMETER>
-      <PARAMETER NAME="gazetteerClassName" COMMENT="Gazetteer Class to be used" DEFAULT="gate.creole.gazetteer.DefaultGazetteer">java.lang.String</PARAMETER>
     </RESOURCE>
 
   </CREOLE>
