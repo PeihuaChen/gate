@@ -87,7 +87,7 @@ public interface CreoleRegister extends Map, Serializable
   /** This is a utility method for creating CREOLE directory files
     * (typically called <CODE>creole.xml</CODE>) from a list of Jar
     * files that contain resources. The method concatenates the
-    * <CODE>creole.xml</CODE> files that the Jars contain.
+    * <CODE>resource.xml</CODE> files that the Jars contain.
     * <P>
     * If Java allowed class methods in interfaces this would be static.
     */

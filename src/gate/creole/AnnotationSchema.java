@@ -371,7 +371,7 @@ public class AnnotationSchema extends AbstractLanguageResource
     }// end if else
     schemaString.append("</schema>\n");
     return schemaString.toString();
-  } // toXSchema
+  }// toXSchema
 
 } // AnnotationSchema
 
