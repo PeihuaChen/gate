@@ -50,6 +50,13 @@
   <!-- Documentation directory -->
   <property name="docDir"  location="doc"/>
 
+  <!-- load ant-contrib for the "if" task -->
+  <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+    <classpath>
+      <pathelement location="${libDir}/ant-contrib-0.3.jar"/>
+    </classpath>
+  </taskdef>
+
   <!-- Read version and build numbers -->
   <loadfile property="gate.version" srcFile="${buildDir}/version.txt"/>
   <loadfile property="gate.build" srcFile="${buildDir}/build.txt"/>
@@ -94,10 +101,23 @@
                  type="file"/>
     </and>             
   </condition>  
-  <!-- If that failed, then use the canned version inside GATE_HOME -->          
-  <property name="tools.jar.location" value="bin/tools14.jar"/>
-  <!-- Now store the value as a path -->
-  <path id="tools.jar.path" location="${tools.jar.location}"/>
+
+  <!-- Save tools.jar as a <path>.  If no tools.jar was found, make an empty
+       path -->
+  <if>
+    <isset property="tools.jar.location"/>
+    <then>
+      <path id="tools.jar.path" location="${tools.jar.location}"/>
+      <property name="tools.jar.path.property" refid="tools.jar.path" />
+      <property name="toolsjar.debug"
+                value="Using tools.jar at ${tools.jar.path.property}" />
+    </then>
+    <else>
+      <path id="tools.jar.path" />
+      <property name="toolsjar.debug"
+                value="No tools.jar found - Sun compiler not available" />
+    </else>
+  </if>
   
   <!-- The build CLASSPATH -->
   <path id="build.class.path">
@@ -236,13 +256,12 @@
   
   <!-- Prepares for running GATE -->
   <target name="run-pre">
-    <property name="toolsjar.debug" refid="tools.jar.path"/>
     <property name="class.path.debug" refid="run.class.path"/>
     <echo>
       Starting GATE ${gate.version}, build ${gate.build}
       Using JVM at ${java.home}
       Maximum memory ${run.memory}
-      Using tools.jar at ${toolsjar.debug}
+      ${toolsjar.debug}
       CLASSPATH=${class.path.debug}
     </echo>
     <!-- Find if the platform is MAC -->
