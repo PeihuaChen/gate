@@ -523,6 +523,16 @@ create or replace package body persist is
             doc_is_markup_aware = p_is_mrk_aware
      where  doc_lr_id = p_lr_id;     
   end;
+
+  /*******************************************************************************************/
+  procedure delete_features(p_ent_id        IN number,
+                            p_ent_type      IN number)
+  is
+  begin
+     delete from t_feature
+     where  ft_entity_id = p_ent_id
+     and    ft_entity_type = p_ent_type; 
+  end;
   
 /*begin
   -- Initialization

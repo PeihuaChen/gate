@@ -17,7 +17,7 @@ create or replace package persist is
  */  
 
   ENCODING_UTF constant varchar2(16) := 'UTF8';
-  
+   
   VALUE_TYPE_INTEGER    constant number := 101;
   VALUE_TYPE_LONG       constant number := 102;
   VALUE_TYPE_BOOLEAN    constant number := 103;
@@ -116,6 +116,9 @@ create or replace package persist is
                             p_start_offset IN number,
                             p_end_offset   IN number,
                             p_is_mrk_aware IN number);
+
+  procedure delete_features(p_ent_id        IN number,
+                            p_ent_type      IN number);
                                 
 end persist;
 /
