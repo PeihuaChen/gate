@@ -1238,6 +1238,7 @@ public class MainFrame extends JFrame
       };
       Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
                                  runnable);
+      thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }
 
@@ -1490,8 +1491,11 @@ public class MainFrame extends JFrame
               }
             }
           }else{
-            throw new UnsupportedOperationException("Unimplemented option!\n"+
-                                                    "Use a serial datastore");
+            JOptionPane.showMessageDialog(
+                            MainFrame.this,
+                            "This functionality due in the beta 1 release!\n"+
+                            "For now please use a serial datastore",
+                            "Gate", JOptionPane.ERROR_MESSAGE);
           }
         }
       } else {
