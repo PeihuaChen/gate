@@ -6,15 +6,12 @@
  */
 package gate.gui.docview;
 
-import gate.Document;
-import gate.creole.AbstractResource;
-import gate.gui.Handle;
-
 import java.awt.Component;
-import java.util.List;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+
+import gate.Document;
 
 /**
  * @author valyt
@@ -22,8 +19,8 @@ import javax.swing.JTable;
  * To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Generation - Code and Comments
  */
-public class AnnotationSetsView extends AbstractResource 
-															  implements DocumentView {
+public class AnnotationSetsView extends AbstractDocumentView {
+
   /* (non-Javadoc)
    * @see gate.gui.docview.DocumentView#getGUI()
    */
@@ -35,24 +32,6 @@ public class AnnotationSetsView extends AbstractResource
    */
   public int getType() {
     return VERTICAL;
-  }
-  /* (non-Javadoc)
-   * @see gate.gui.ActionsPublisher#getActions()
-   */
-  public List getActions() {
-    return null;
-  }
-  /* (non-Javadoc)
-   * @see gate.VisualResource#setHandle(gate.gui.Handle)
-   */
-  public void setHandle(Handle handle) {
-  }
-  
-  /* (non-Javadoc)
-   * @see gate.VisualResource#setTarget(java.lang.Object)
-   */
-  public void setTarget(Object target) {
-    // TODO Auto-generated method stub
   }
   
   protected void initGUI() {

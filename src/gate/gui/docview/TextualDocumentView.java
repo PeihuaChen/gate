@@ -12,31 +12,20 @@
  */
 package gate.gui.docview;
 
-import gate.Document;
-import gate.creole.AbstractResource;
-import gate.gui.Handle;
-import gate.util.Out;
-
 import java.awt.Component;
 import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.util.ArrayList;
-import java.util.List;
 
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.text.BadLocationException;
+import javax.swing.JEditorPane;
+import javax.swing.JScrollPane;
 
-import java.awt.event.*;
+import gate.Document;
 
 
 /**
  * This class provides a central view for a textual document.
  */
 
-public class TextualDocumentView extends AbstractResource implements DocumentView{
+public class TextualDocumentView extends AbstractDocumentView {
 
   public TextualDocumentView(){
     textView = new JEditorPane();
@@ -47,9 +36,6 @@ public class TextualDocumentView extends AbstractResource implements DocumentVie
   protected void initListeners(){
   }
 
-  public void setDocument(Document doc) {
-    this.document = doc;
-  }
 
   public Component getGUI() {
     return scroller;
@@ -59,10 +45,6 @@ public class TextualDocumentView extends AbstractResource implements DocumentVie
     return CENTRAL;
   }
 
-  public List getActions() {
-    return new ArrayList();
-  }
-
 
   protected JEditorPane textView;
   protected JScrollPane scroller;
@@ -70,18 +52,18 @@ public class TextualDocumentView extends AbstractResource implements DocumentVie
 
 
   /* (non-Javadoc)
-   * @see gate.VisualResource#setHandle(gate.gui.Handle)
-   */
-  public void setHandle(Handle handle) {
-    // TODO Auto-generated method stub
-  }
-  /* (non-Javadoc)
    * @see gate.VisualResource#setTarget(java.lang.Object)
    */
   public void setTarget(Object target) {
     this.document = (Document)target;
+  }
+
+  /* (non-Javadoc)
+   * @see gate.gui.docview.AbstractDocumentView#initGUI()
+   */
+  protected void initGUI() {
     textView.setText(document.getContent().toString());
-    scroller.getViewport().setViewPosition(new Point(1,1));
+    scroller.getViewport().setViewPosition(new Point(0, 0));
 ////    textView.setSize(textView.getPreferredSize());
 ////    scroller.setSize(scroller.getPreferredSize());
 //    try{
