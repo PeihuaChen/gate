@@ -16,7 +16,7 @@ public class EditURIDialog extends JDialog {
   /**reference to the ontology editor that invoked this*/
   private OntologyEditor editor;
   /** reference to the ontology being renamed */
-  private Ontology ontology;
+  private Taxonomy ontology;
   protected GridBagLayout gridBagLayout1 = new GridBagLayout();
   protected JButton btnOk = new JButton();
   protected JButton btnCancel = new JButton();
@@ -26,7 +26,7 @@ public class EditURIDialog extends JDialog {
   /**construct the dialog
    * @param e the editor
    * @param o the ontology being renamed   */
-  public EditURIDialog(OntologyEditor e, Ontology o) {
+  public EditURIDialog(OntologyEditor e, Taxonomy o) {
     if ( null == e )
       throw new GateRuntimeException("editor is null, on constructing EditURIDialog");
 

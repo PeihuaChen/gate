@@ -10,7 +10,7 @@
  * A copy of this licence is included in the distribution in the file
  * licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
  *
- * Kalina Bontcheva 03/2003
+ * Kalina Bontcheva 11/2003
  *
  *
  *  $Id$
@@ -18,7 +18,9 @@
 
 package gate.creole.ontology;
 
-public interface OInstance {
+import java.util.Set;
+
+public interface OInstance{
 
   /** Gets the class of this instance.
    *  @return the class
@@ -39,4 +41,18 @@ public interface OInstance {
    *  @return the object which is user data
    */
   public Object getUserData();
+
+/*
+  public void setDifferentFrom(OInstance theIndividual);
+
+  public Set getDifferentFrom();
+
+  public void setPropertyValue(Property theProperty, Object theValue);
+
+  public Object getPropertyValue(Property theProperty);
+
+  public void setSameIndividualAs(OInstance theIndividual);
+
+  public Set getSameIndividualAs();
+*/
 }

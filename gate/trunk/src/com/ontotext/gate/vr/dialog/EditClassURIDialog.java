@@ -16,10 +16,10 @@ public class EditClassURIDialog extends JDialog {
   private OntologyEditor editor;
 
   /** reference to the ontology class being edited*/
-  private OClass clas;
+  private TClass clas;
 
   /** reference to the ontology being edited*/
-  private Ontology ontology;
+  private Taxonomy ontology;
 
   protected GridBagLayout gridBagLayout1 = new GridBagLayout();
   protected JButton btnOk = new JButton();
@@ -30,7 +30,7 @@ public class EditClassURIDialog extends JDialog {
   /**
    * @param e the editor
    * @param o the ontology being renamed   */
-  public EditClassURIDialog(OntologyEditor e, OClass c) {
+  public EditClassURIDialog(OntologyEditor e, TClass c) {
     if ( null == e )
       throw new GateRuntimeException("editor is null, on constructing EditClassURIDialog");
 

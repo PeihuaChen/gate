@@ -24,12 +24,12 @@ public class RenameOntologyDialog extends JDialog {
   /**reference to the ontology editor that invoked this*/
   private OntologyEditor editor;
   /** reference to the ontology being renamed */
-  private Ontology ontology;
+  private Taxonomy ontology;
 
   /**construct the dialog
    * @param e the editor
    * @param o the ontology being renamed   */
-  public RenameOntologyDialog(OntologyEditor e, Ontology o) {
+  public RenameOntologyDialog(OntologyEditor e, Taxonomy o) {
     if ( null == e )
       throw new GateRuntimeException("editor is null, on constructing RenameOntologyDialog");
 

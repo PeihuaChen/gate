@@ -1,7 +1,7 @@
 /*
  * OntologyEditor.java
  *
- * Copyright (c) 2002, The University of Sheffield.
+ * Copyright (c) 2002-2004, The University of Sheffield.
  *
  * This file is part of GATE (see http://gate.ac.uk/), and is free
  * software, licenced under the GNU Library General Public License,
@@ -41,11 +41,11 @@ public void createOntology
 
 /**Sets the ontology to be loaded in the editor
  * @param o the ontology to be loaded */
-public void setOntology(Ontology o);
+public void setOntology(Taxonomy o);
 
 /** Gets the loaded ontology
  * @return the current ontology in the editor*/
-public Ontology getOntology();
+public Taxonomy getOntology();
 
 /**Sets the list of ontologies to be loaded in the editor
  * @param list the list of ontologies */
@@ -79,13 +79,13 @@ public void removeClass(ClassNode node);
  * @param n the class node associated with the class
  * @param x coords
  * @param y coords */
-public void renameClass(OClass c, ClassNode n, int x, int y);
+public void renameClass(TClass c, ClassNode n, int x, int y);
 
 /**Selects an ontology.
  * Is called when an ontology has been selecte
  * from the ontology list.
  * @param o the selected ontology */
-public void ontologySelected(Ontology o) ;
+public void ontologySelected(Taxonomy o) ;
 
 /**Saves a list of ontologies.
  * @param list a list of ontologies to be saved*/
@@ -104,29 +104,29 @@ note: these methods could be invoked from within a listener or explicitly*/
 
 /**Saves this ontology
  * @param o the ontology to be saved
- * @throws {@link ResourceInstantiationException}  
+ * @throws {@link ResourceInstantiationException}
  */
-public void saveOntology(Ontology o) throws ResourceInstantiationException ;
+public void saveOntology(Taxonomy o) throws ResourceInstantiationException ;
 
 /**Invokes a Save As dialog for this ontology and saves it
  *  to the specified location.
  *  @param o the ontology to be saved
  *  @param x the x coordinate of the save as dialog
  *  @param y the y coordinate of the save as dialog*/
-public void saveAsOntology(Ontology o, int x, int y) throws ResourceInstantiationException;
+public void saveAsOntology(Taxonomy o, int x, int y) throws ResourceInstantiationException;
 
 /**Renames an ontology
  * @param o the ontology to be renamed
  * @param x the x coordinate of the rename dialog
  * @param y the y coordinate of the rename dialog*/
-public void renameOntology(Ontology o, int x, int y);
+public void renameOntology(Taxonomy o, int x, int y);
 
 /**Deletes an ontology. Invokes AreYouSureDialog if the
  * ontology has been changed.
  * @param o the ontology to be deleted
  * @param x x coordinate of the option pane to be invoked
  * @param y y coordinate of the option pane to be invoked*/
-public void deleteOntology(Ontology o, int x, int y)
+public void deleteOntology(Taxonomy o, int x, int y)
   throws ResourceInstantiationException;
 
 /** Edits the URI of an ontology.
@@ -134,13 +134,13 @@ public void deleteOntology(Ontology o, int x, int y)
  * @param x  coords of the dialog
  * @param y  coords of the dialog
  */
-public void editURI(Ontology o, int x, int y);
+public void editURI(Taxonomy o, int x, int y);
 
 /** Edit the URI of an ontology class
  * @param c class to be edited
  * @param x  coords of the dialog
  * @param y  coords of the dialog */
-public void editClassURI(OClass c, int x, int y);
+public void editClassURI(TClass c, int x, int y);
 
 /**
  * Gets all URIs that are present at the moment as ontology URIs.
@@ -152,14 +152,14 @@ public Set getAllURIs() ;
  * @param o the ontology
  * @return set of all the URIs in the ontology
  */
-public Set getAllURIs(Ontology o) ;
+public Set getAllURIs(Taxonomy o) ;
 
 /**Closes an ontology. Invokes AreYouSureDialog if the
  * ontology has been changed.
  * @param o the ontology to be closed
  * @param x x coordinate of the option pane to be invoked
  * @param y y coordinate of the option pane to be invoked*/
-public void closeOntology(Ontology o, int x, int y)
+public void closeOntology(Taxonomy o, int x, int y)
   throws ResourceInstantiationException;
 
 /*End-------ontologies list popup menu item listeners------------*/
@@ -169,7 +169,7 @@ public void closeOntology(Ontology o, int x, int y)
  * @param x x coordinate of the option pane to be invoked
  * @param y y coordinate of the option pane to be invoked
  * @return the result of the option pane */
-public int AskWannaSave(Ontology o, int x, int y);
+public int AskWannaSave(Taxonomy o, int x, int y);
 
 /*------------- menu bar methods --------------*/
 

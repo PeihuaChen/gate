@@ -23,14 +23,14 @@ import edu.stanford.smi.protege.model.Cls;
 import edu.stanford.smi.protege.model.Frame;
 
 import gate.ProtegeProject;
-import gate.creole.ontology.OClass;
-import gate.creole.ontology.Ontology;
+import gate.creole.ontology.TClass;
+import gate.creole.ontology.Taxonomy;
 import gate.gui.ProtegeWrapper;
 
 
 /** Dummy Protege LR. Just keep the Protege project file name */
 public class ProtegeProjectName extends AbstractLanguageResource
-                                implements ProtegeProject, Ontology {
+                                implements ProtegeProject, Taxonomy {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -41,7 +41,7 @@ public class ProtegeProjectName extends AbstractLanguageResource
   private edu.stanford.smi.protege.model.KnowledgeBase knBase = null;
 
   /** Ontotext Ontology object */
-  private Ontology ontotextOntology = null;
+  private Taxonomy ontotextOntology = null;
   private URL ontotextOntologyUrl = null;
 
   /** Keep visual resource to refresh Ontotext Editor if any */
@@ -103,7 +103,7 @@ public class ProtegeProjectName extends AbstractLanguageResource
     Collection coll = knBase.getRootClses();
     Iterator it = coll.iterator();
     Cls cls;
-    OClass oCls;
+    TClass oCls;
 
     ontotextOntology = new DAMLOntology();
     ontotextOntology.setURL(ontotextOntologyUrl);
@@ -118,9 +118,9 @@ public class ProtegeProjectName extends AbstractLanguageResource
 
   } // fillOntotextOntology()
 
-  private void createSubClasses(Cls protegeClass, OClass ontotextClass) {
+  private void createSubClasses(Cls protegeClass, TClass ontotextClass) {
     Cls cls;
-    OClass oCls;
+    TClass oCls;
 
     Collection coll = protegeClass.getDirectSubclasses();
     Iterator it = coll.iterator();
@@ -130,12 +130,12 @@ public class ProtegeProjectName extends AbstractLanguageResource
       ontotextClass.addSubClass(oCls);
       createSubClasses(cls, oCls);
     }
-  } // createSubClasses(Cls protegeClass, OClass ontotextClass)
+  } // createSubClasses(Cls protegeClass, TClass ontotextClass)
 
 //------------------------------------------------------------------------------
 //  Ontology interface methods
 
-  public Ontology getOntology(URL someUrl)
+  public Taxonomy getOntology(URL someUrl)
         throws ResourceInstantiationException {
     return ontotextOntology.getOntology(someUrl);
   }
@@ -196,19 +196,19 @@ public class ProtegeProjectName extends AbstractLanguageResource
     ontotextOntology.setComment(theComment);
   }
 
-  public OClass createClass(String aName, String aComment) {
+  public TClass createClass(String aName, String aComment) {
     return ontotextOntology.createClass(aName, aComment);
   }
 
-  public void removeClass(OClass theClass) {
+  public void removeClass(TClass theClass) {
     ontotextOntology.removeClass(theClass);
   }
 
-  public void addClass(OClass theClass) {
+  public void addClass(TClass theClass) {
     ontotextOntology.addClass(theClass);
   }
 
-  public OClass getClassByName(String theName) {
+  public TClass getClassByName(String theName) {
     return ontotextOntology.getClassByName(theName);
   }
 
@@ -230,7 +230,7 @@ public class ProtegeProjectName extends AbstractLanguageResource
     else return new HashSet();
   }
 
-  public int getTaxonomicDistance(OClass class1,OClass class2) {
+  public int getTaxonomicDistance(TClass class1,TClass class2) {
     return ontotextOntology.getTaxonomicDistance(class1, class2);
   }
 
