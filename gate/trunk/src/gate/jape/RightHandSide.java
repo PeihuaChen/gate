@@ -113,11 +113,16 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
     // initialise the class action string
     actionClassString = new StringBuffer(
+      "// " + actionClassName + nl +
       "package " + actionsDirName + "; " + nl +
-      "import gate.*; import java.io.*; import gate.jape.*; " + nl +
-      "import gate.annotation.*; import gate.util.*; " + nl +
-      "public class " + actionClassName +
-      " implements java.io.Serializable, RhsAction { " + nl +
+      "import java.io.*;" + nl + 
+      "import java.util.*;" + nl +
+      "import gate.*;" + nl +
+      "import gate.jape.*;" + nl +
+      "import gate.annotation.*;" + nl +
+      "import gate.util.*;" + nl + nl +
+      "public class " + actionClassName + nl +
+      "implements java.io.Serializable, RhsAction { " + nl +
       "  public void doit(Document doc, LeftHandSide lhs) { " + nl
     );
   } // Construction from lhs
@@ -337,7 +342,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       throw new JapeException(
         "couldn't define " + actionClassName + ": " + e
       );
-      
+
     }
     Gate.getClassLoader().resolveGateClass(theActionClass);
   } // defineActionClass
@@ -408,6 +413,9 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.4  2000/05/02 16:54:47  hamish
+// porting to new annotation API
+//
 // Revision 1.3  2000/04/20 13:26:42  valyt
 // Added the graph_drawing library.
 // Creating of the NFSM and DFSM now works.

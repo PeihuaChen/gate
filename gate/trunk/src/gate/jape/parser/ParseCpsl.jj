@@ -741,13 +741,23 @@ String[] AssignmentExpression() :
   String existingAttrName = null;
 
   blockBuffer.append("// RHS assignment block" + nl);
-  //blockBuffer.append("      JdmSpanSequence spans = null;" + nl);
-  blockBuffer.append("      FeatureMap attrs = null;" + nl);
-  blockBuffer.append("      Annotation annot = null;" + nl);
+  blockBuffer.append(
+    "      FeatureMap features = Transients.newFeatureMap();" + nl
+  );
 }
 {
   // the simple/composite span spec
-  ( <colon> { simpleSpan = true; } | <colonplus> { simpleSpan = false; } )
+  (
+    <colon> { simpleSpan = true; }
+  |
+    // we no longer support multi-span, as there is no such thing as a
+    // multi-span annotation any more...
+    <colonplus> {
+      simpleSpan = false;
+      throw new
+        ParseException(":+ not a legal operator (no multi-span annots)");
+    }
+  )
 
   // the name of the bound annotation set we're referencing
   nameTok=<ident> {
@@ -755,34 +765,13 @@ String[] AssignmentExpression() :
     annotSetName = block[0] + "Annots";
   }
 
-  // the name of the new annotation we want to create
+  // the type of the new annotation we want to create
   <period> nameTok=<ident>
   {
     newAnnotType = nameTok.image;
-
-    blockBuffer.append("      spans = new JdmSpanSequence();" + nl);
-    blockBuffer.append("      attrs = new JdmAttributeSequence();" + nl);
     blockBuffer.append(
-      "      annot = new JdmAnnotation(\"" + newAnnotType +
-      "\", spans, attrs);" + nl
+      "      String newAnnotType = \"" + newAnnotType + "\";" + nl
     );
-
-    if(simpleSpan)
-      blockBuffer.append(
-        "      spans.append(new JdmSpan(" +
-        annotSetName + ".getLeftmostStart(), " +
-        annotSetName + ".getRightmostEnd()));" + nl
-      );
-    else
-      blockBuffer.append(
-        "      for(int i=0; i<" + annotSetName + ".length(); i++) {" + nl +
-        "        JdmSpanSequence compositeSpans = " + annotSetName +
-        ".nth(i).getSpans();" + nl +
-        "        for(int j=0; j<compositeSpans.length(); j++)" + nl +
-        "          spans.append(" + nl + "          new JdmSpan(" +
-        "compositeSpans.nth(j).getStart(), " +
-        "compositeSpans.nth(j).getEnd()));" + nl + "      }" + nl
-      );
 
     // start of the attribute stuff
     blockBuffer.append("      Object val = null;" + nl);
@@ -810,7 +799,7 @@ String[] AssignmentExpression() :
             );
             break;
           case integer:
-            blockBuffer.append("      try { " + 
+            blockBuffer.append("      try { " +
               "val = new Long(" + attrVal.second.toString() + "); }" +
               nl + "      catch(NumberFormatException e) { }" + nl
             );
@@ -828,7 +817,7 @@ String[] AssignmentExpression() :
             );
             break;
           case floatingPoint:
-            blockBuffer.append("      try { " + 
+            blockBuffer.append("      try { " +
               "val = new Double(" + attrVal.second.toString() + "); }" + nl +
               "      catch(NumberFormatException e) { }" + nl
             );
@@ -840,12 +829,8 @@ String[] AssignmentExpression() :
             break;
         } // switch
 
-        blockBuffer.append(
-          "      try{attrs.append(new JdmAttribute(\"" +
-          newAttrName + "\", val));}" + nl +
-          // ignore the exception: val type must be ok, came from parser
-          "      catch(JdmException e) { }" + nl
-        );
+        blockBuffer.append("      features.put(\"" + newAttrName + "\", val);");
+        blockBuffer.append(nl);
       } // a static attribute value
 
     |
@@ -863,7 +848,7 @@ String[] AssignmentExpression() :
 
           blockBuffer.append(
             "      { // need a block for the existing annot set" + nl +
-            "        JdmAnnotationSet " + existingAnnotSetName +
+            "        AnnotationSet " + existingAnnotSetName +
             " = lhs.getBoundAnnots(\"" + nameTok.image + "\"); " + nl
           );
         }
@@ -871,24 +856,22 @@ String[] AssignmentExpression() :
         <period> nameTok=<ident> { existingAttrName = nameTok.image; }
 
         // for each existingAnnotType annotation in existingAnnotSetAnnots
-        //   if there is an attribute with existingAnnotName
+        //   if there is an attribute with existingAttrName
         //   add a new attribute copied from that one
         {
-          blockBuffer.append("        " +
-            "JdmAnnotationSet existingAnnots = " + nl + 
-            "        " + existingAnnotSetName +
-            ".selectAnnotations(\"" + existingAnnotType + "\", new " +
-            "JdmAttributeSequence());" + nl +
-            "        for(int i=0; i<" + existingAnnotSetName +
-            ".length(); i++) {" + nl +
-            "          JdmAttribute a = " + existingAnnotSetName +
-            ".nth(i).getAttribute(\"" + existingAttrName + "\");" + nl +
-            "          if(a != null)" +  nl +
-            "            try{attrs.append(new JdmAttribute(a));}" + nl +
-            // ignore the exception: val type must be ok, came from an attr
-            "            catch(JdmException e) { }" + nl +
-            "        } // for" + nl +
-            "      } // block for existing annots" + nl
+          blockBuffer.append(
+"        AnnotationSet existingAnnots = " + nl +
+"        " + existingAnnotSetName + ".get(\"" + existingAnnotType + "\");" + nl +
+"        Iterator iter = existingAnnots.iterator();" + nl +
+"        while(iter.hasNext()) {" + nl +
+"          Annotation existingA = (Annotation) iter.next();" + nl +
+"          Object existingFeatureValue = existingA.getFeatures().get(\"" +
+existingAttrName + "\");" + nl +
+"          if(existingFeatureValue != null) {" + nl +
+"            features.put(\"" + existingAttrName + "\", existingFeatureValue);" + nl +
+"            break;" + nl +
+"          }" + nl + "        } // while" + nl +
+"      } // block for existing annots" + nl
           );
         }
       ) // end of reference to existing annotation(s)
@@ -904,7 +887,11 @@ String[] AssignmentExpression() :
 
   // all done
   {
-    blockBuffer.append("      doc.addAnnotation(annot);");
+    blockBuffer.append("      doc.getAnnotations().add(" + nl);
+    blockBuffer.append("        " + annotSetName + ".firstNode(), ");
+    blockBuffer.append(annotSetName + ".lastNode(), " + nl);
+    blockBuffer.append("        \"" + newAnnotType + "\", features" + nl);
+    blockBuffer.append("      );" + nl);
     blockBuffer.append("      // end of RHS assignment block");
     block[1] = blockBuffer.toString();
     return block;
@@ -958,6 +945,9 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.4  2000/05/02 16:56:10  hamish
+// porting to new annotation API
+//
 // Revision 1.3  2000/03/27 13:28:11  hamish
 // fixed jdmexception bug in .jj
 //
