@@ -55,6 +55,10 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl {
   /** Construction from Collection (which must be an AnnotationSet) */
   public DatabaseAnnotationSetImpl(Collection c) throws ClassCastException {
     super(c);
+
+    //also copy the name, because that super one doesn't
+    this.name = ((AnnotationSet) c).getName();
+
     eventHandler = new EventsHandler();
     this.addAnnotationSetListener(eventHandler);
 
