@@ -240,10 +240,12 @@ public class NewResourceDialog extends JDialog {
                                       "Resource could not be created!\n" +
                                       rie.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
+        rie.printStackTrace(Err.getPrintWriter());
         res = null;
         if(sListener != null) sListener.statusChanged("Error loading " +
                                                       nameField.getText() +
                                                       "!");
+        if(pListener != null) pListener.processFinished();
       }
       return res;
     }

@@ -1,0 +1,27 @@
+// Horacio, Nov.2000
+
+Phase: Split
+//Input: Token SpaceToken Lookup
+Options: control = appelt
+
+
+Rule: Split16
+Priority: 400  
+//  (".") (SPACES)  (<p>)  => sentence boundary 
+//  if a perior is followed by a begin of paragraph (html) the end of sentence
+
+({Token.string == "."})
+
+:split 
+
+(({SpaceToken})* 
+
+ {p})
+
+
+
+-->
+
+:split.Split = { r="16" }
+
+

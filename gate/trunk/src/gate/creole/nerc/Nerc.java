@@ -121,22 +121,23 @@ public class Nerc extends SerialController {
   public void run(){
     try{
       FeatureMap params;
+      if(tempAnnotationSetName.equals("")) tempAnnotationSetName = null;
       try{
         fireProgressChanged(0);
         params = Factory.newFeatureMap();
         params.put("document", document);
-        params.put("annotationSetName", "nercAS");
+        params.put("annotationSetName", tempAnnotationSetName);
         Factory.setResourceParameters(tokeniser, params);
 
         params = Factory.newFeatureMap();
         params.put("document", document);
-        params.put("annotationSetName", "nercAS");
+        params.put("annotationSetName", tempAnnotationSetName);
         Factory.setResourceParameters(gazetteer, params);
 
         params = Factory.newFeatureMap();
         params.put("document", document);
-        params.put("inputASName", "nercAS");
-        params.put("outputASName", "nercAS");
+        params.put("inputASName", tempAnnotationSetName);
+        params.put("outputASName", tempAnnotationSetName);
         Factory.setResourceParameters(transducer, params);
       }catch(Exception e){
         throw new ExecutionException("Couldn't set parameters: " + e);
@@ -176,7 +177,7 @@ public class Nerc extends SerialController {
       EntitySet entitySet =
         new EntitySet(document.getSourceUrl().getFile(),
                       document,
-                      document.getAnnotations("nercAS").
+                      document.getAnnotations(tempAnnotationSetName).
                       get(new HashSet(Arrays.asList(
                         new String[]{"Address", "Date", "Identifier",
                                      "Location", "Organization", "Person"}))));
@@ -186,6 +187,8 @@ public class Nerc extends SerialController {
       fireProcessFinished();
     }catch(ExecutionException ee){
       executionException = ee;
+    }catch(Exception e){
+      executionException = new ExecutionException(e);
     }
   }
 
@@ -248,13 +251,15 @@ public class Nerc extends SerialController {
 
 
   private static final boolean DEBUG = false;
-  private java.net.URL tokeniserRulesURL;
-  private java.net.URL gazetteerListsURL;
-  private java.net.URL japeGrammarURL;
-  private String encoding;
-  private gate.Document document;
+  protected java.net.URL tokeniserRulesURL;
+  protected java.net.URL gazetteerListsURL;
+  protected java.net.URL japeGrammarURL;
+  protected String encoding;
+  protected gate.Document document;
   private transient Vector progressListeners;
   private transient Vector statusListeners;
+  protected String tempAnnotationSetName = "nercAS";
+
   protected void fireProgressChanged(int e) {
     if (progressListeners != null) {
       Vector listeners = progressListeners;
@@ -295,6 +300,12 @@ public class Nerc extends SerialController {
         ((StatusListener) listeners.elementAt(i)).statusChanged(e);
       }
     }
+  }
+  public void setTempAnnotationSetName(String newTempAnnotationSetName) {
+    tempAnnotationSetName = newTempAnnotationSetName;
+  }
+  public String getTempAnnotationSetName() {
+    return tempAnnotationSetName;
   }
 
   class CustomProgressListener implements ProgressListener{
