@@ -28,8 +28,10 @@ public class DBHelper {
 //  private static final String jdbcPostgresDriverName = "postgresql.Driver";
 //  private static final String jdbcSapDBDriverName = "com.sap.dbtech.jdbc.DriverSapDB";
 
-
-  //ACHTUNG!
+  public static final int CHINK_SIZE_SMALL = 30;
+  public static final int CHINK_SIZE_MEDIUM = 60;
+  public static final int CHINK_SIZE_LARGE = 100;
+  //WARNING!
   //DO NOT EDIT THESE CONSTANTS WITHOUT
   //SYNCHRONIZING WITH ERROR.SPC PL/SQL PACKAGE
   //note that while Oracle returns negative error numbers
@@ -137,7 +139,7 @@ public class DBHelper {
   public static final Long DUMMY_ID;
 
 
-  //!!! ACHTUNG !!!
+  //!!! WARNING !!!
   // these 4 constants should *always* be synchronzied with the ones in the
   // related SQL packages/scripts [for Oracle - security.spc]
   // i.e. if u don't have a serious reason do *not* change anything
