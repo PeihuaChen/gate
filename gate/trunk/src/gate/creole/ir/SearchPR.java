@@ -17,7 +17,11 @@ package gate.creole.ir;
 import gate.*;
 import gate.util.*;
 import gate.creole.*;
+import gate.gui.*;
+
 import java.util.*;
+import javax.swing.*;
+
 
 public class SearchPR extends AbstractProcessingResource
                       implements ProcessingResource{
@@ -69,9 +73,17 @@ public class SearchPR extends AbstractProcessingResource
     }
 
     try {
+      if (((IndexedCorpus) corpus).getIndexManager() == null){
+        MainFrame.unlockGUI();
+        JOptionPane.showMessageDialog(null, "Corpus is not indexed!\n"
+                                    +"Please index fisrt this corpus!",
+                       "Search Procesing", JOptionPane.WARNING_MESSAGE);
+        return;
+      }
+
       fireProgressChanged(0);
       resultList = null;
-      searcher.setCorpus(corpus);
+      searcher.setCorpus((IndexedCorpus) corpus);
       resultList = searcher.search(query, limit, fieldNames);
       fireProcessFinished();
     }
