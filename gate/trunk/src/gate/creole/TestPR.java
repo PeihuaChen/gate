@@ -409,6 +409,14 @@ public class TestPR extends TestCase
     AnnotationDiff annotDiff = (AnnotationDiff)
           Factory.createResource("gate.annotation.AnnotationDiff",parameters);
 
+    if (annotDiff.getFMeasureAverage() != 1.0) {
+      Err.prln("missing annotations " +
+        annotDiff.getAnnotationsOfType(AnnotationDiff.MISSING_TYPE));
+      Err.prln("spurious annotations " +
+        annotDiff.getAnnotationsOfType(AnnotationDiff.SPURIOUS_TYPE));
+      Err.prln("partially-correct annotations " +
+        annotDiff.getAnnotationsOfType(AnnotationDiff.PARTIALLY_CORRECT_TYPE));
+    }
     assertTrue("Organization precision average in ft-bt-03-aug-2001.html is "+
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
@@ -594,6 +602,14 @@ public class TestPR extends TestCase
     annotDiff = (AnnotationDiff)
           Factory.createResource("gate.annotation.AnnotationDiff",parameters);
 
+    if (annotDiff.getFMeasureAverage() != 1.0) {
+      Err.prln("missing annotations " +
+        annotDiff.getAnnotationsOfType(AnnotationDiff.MISSING_TYPE));
+      Err.prln("spurious annotations " +
+        annotDiff.getAnnotationsOfType(AnnotationDiff.SPURIOUS_TYPE));
+      Err.prln("partially-correct annotations " +
+        annotDiff.getAnnotationsOfType(AnnotationDiff.PARTIALLY_CORRECT_TYPE));
+    }
     assertTrue("Organization precision average in gu-Am-Brit-4-aug-2001.html is "+
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
@@ -755,7 +771,12 @@ public class TestPR extends TestCase
     features = Factory.newFeatureMap();
     features.put(DataStore.DATASTORE_FEATURE_NAME, ds);
     features.put(DataStore.LR_ID_FEATURE_NAME, lrId);
-    Document doc = (Document) Factory.createResource(
+    //kalina: fixed one more cut&paste error here!
+    //used to be Document doc =
+    //but then document was passed for comparison and of course,
+    //when comparing with a completely doffierent document
+    //nothing matches!!!
+    document = (Document) Factory.createResource(
                                 "gate.corpora.DocumentImpl",
                                 features);
     // get annotation set
@@ -777,6 +798,14 @@ public class TestPR extends TestCase
     annotDiff = (AnnotationDiff)
           Factory.createResource("gate.annotation.AnnotationDiff",parameters);
 
+    if (annotDiff.getFMeasureAverage() != 1.0) {
+      Err.prln("missing annotations " +
+        annotDiff.getAnnotationsOfType(AnnotationDiff.MISSING_TYPE));
+      Err.prln("spurious annotations " +
+        annotDiff.getAnnotationsOfType(AnnotationDiff.SPURIOUS_TYPE));
+      Err.prln("partially-correct annotations " +
+        annotDiff.getAnnotationsOfType(AnnotationDiff.PARTIALLY_CORRECT_TYPE));
+    }
     assertTrue("Organization precision average in in-outlook-09-aug-2001.html is "+
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
