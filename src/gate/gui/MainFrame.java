@@ -814,21 +814,40 @@ public class MainFrame extends JFrame
       }
     });
 
-    addComponentListener(new ComponentAdapter() {
-      public void componentHidden(ComponentEvent e) {
-
-      }
-
-      public void componentMoved(ComponentEvent e) {
-      }
-
-      public void componentResized(ComponentEvent e) {
-      }
-
-      public void componentShown(ComponentEvent e) {
-        leftSplit.setDividerLocation((double)0.7);
-      }
-    });
+    if(isShellSlacGIU) {
+      addComponentListener(new ComponentAdapter() {
+        public void componentHidden(ComponentEvent e) {
+  
+        }
+  
+        public void componentMoved(ComponentEvent e) {
+        }
+  
+        public void componentResized(ComponentEvent e) {
+        }
+  
+        public void componentShown(ComponentEvent e) {
+          mainSplit.setDividerLocation((double)0.0);
+        }
+      });
+    }
+    else {
+      addComponentListener(new ComponentAdapter() {
+        public void componentHidden(ComponentEvent e) {
+  
+        }
+  
+        public void componentMoved(ComponentEvent e) {
+        }
+  
+        public void componentResized(ComponentEvent e) {
+        }
+  
+        public void componentShown(ComponentEvent e) {
+          leftSplit.setDividerLocation((double)0.7);
+        }
+      });
+    }
 
     //blink the messages tab when new information is displayed
     logArea.getDocument().addDocumentListener(new javax.swing.event.DocumentListener(){
