@@ -35,7 +35,7 @@ public class TestJape extends TestCase
   public void testCombined() throws IOException, GateException {
     Corpus c = Transients.newCorpus("TestJape corpus");
     c.add(
-      Transients.newDocument("http://derwent.dcs.shef.ac.uk/tests/doc0.html")
+      Transients.newDocument(Files.getResourceAsString("texts/doc0.html"))
     );
 
     //add some annotations on the first (only) document in corpus c
@@ -63,7 +63,7 @@ public class TestJape extends TestCase
   public void testBatch() throws JapeException, IOException {
     Corpus c = Transients.newCorpus("TestJape corpus");
     c.add(
-      Transients.newDocument("http://derwent.dcs.shef.ac.uk/tests/doc0.html")
+      Transients.newDocument(Files.getResourceAsString("texts/doc0.html"))
     );
     //add some annotations on the first (only) document in corpus c
     Document doc = (Document)c.first();
