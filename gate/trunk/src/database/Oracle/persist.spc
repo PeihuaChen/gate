@@ -1,3 +1,5 @@
+create or replace package persist is
+
 /*
  *  persist.spc
  *
@@ -12,10 +14,7 @@
  *
  *  $Id$
  *
- */
-
-create or replace package persist is
-  
+ */  
   
   procedure get_timestamp(p_timestamp  OUT number);
 

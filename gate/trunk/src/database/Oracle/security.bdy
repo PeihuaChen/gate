@@ -1,3 +1,6 @@
+
+create or replace package body security is
+
 /*
  *  security.bdy
  *
@@ -13,26 +16,6 @@
  *  $Id$
  *
  */
-
-create or replace package body security is
-
-  -- Private type declarations
-/*  type <TypeName> is <Datatype>;
-
-  -- Private constant declarations
-  <ConstantName> constant <Datatype> := <Value>;
-
-  -- Private variable declarations
-  <VariableName> <Datatype>;
-
-  -- Function and procedure implementations
-  function <FunctionName>(<Parameter> <Datatype>) return <Datatype> is
-    <LocalVariable> <Datatype>;
-  begin
-    <Statement>;
-    return(<Result>);
-  end;
-*/
 
   
   READ_ACCESS constant   number := 0;
@@ -79,7 +62,7 @@ create or replace package body security is
        insert into t_user_group(ugrp_id,
                                 ugrp_user_id,
                                 ugrp_group_id)
-       values (gateusr.seq_user_group.nextval,
+       values (seq_user_group.nextval,
                p_user_id,
                p_group_id);                                                                
   end;                                                                                                        
@@ -327,9 +310,9 @@ create or replace package body security is
           else                       
              --not locked but check permissions
              -- write access is granted :
-             -- 1a. permissions are USER_WRITE && OWNER_USER == p_usr_id
-             -- 1b. permissions are GROUP_WRITE && 
-             --       member_of(p_usr_id,OWNER_GROUP) && 
+             -- 1a. permissions are USER_WRITE and OWNER_USER == p_usr_id
+             -- 1b. permissions are GROUP_WRITE and 
+             --       member_of(p_usr_id,OWNER_GROUP) and 
              --       OWNER_GROUP == p_grp_id
              
              --user is owner, and permisssions are OWNER_WRITE
@@ -359,8 +342,8 @@ create or replace package body security is
           -- read access request
           -- check read persmissions
           -- read access is granted :
-          -- 1a. permissions are USER_READ && OWNER_USER == p_usr_id
-          -- 1b. permissions are GROUP_READ && member_of(p_usr_id,OWNER_GROUP)
+          -- 1a. permissions are USER_READ and OWNER_USER == p_usr_id
+          -- 1b. permissions are GROUP_READ and member_of(p_usr_id,OWNER_GROUP)
           -- 1c. permissions are WORLD_READ
           
           if (access_mode = PERM_WR_GW) then
