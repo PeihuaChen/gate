@@ -25,8 +25,6 @@ import java.util.*;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.JTable;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.plaf.FileChooserUI;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import gate.*;
@@ -169,10 +167,10 @@ public class AnnotationDiffGUI extends JFrame{
       }
     };
 
-    diffTable.setComparator(diffTableModel.COL_KEY_START, startEndComparator);
-    diffTable.setComparator(diffTableModel.COL_KEY_END, startEndComparator);
-    diffTable.setComparator(diffTableModel.COL_RES_START, startEndComparator);
-    diffTable.setComparator(diffTableModel.COL_RES_END, startEndComparator);
+    diffTable.setComparator(DiffTableModel.COL_KEY_START, startEndComparator);
+    diffTable.setComparator(DiffTableModel.COL_KEY_END, startEndComparator);
+    diffTable.setComparator(DiffTableModel.COL_RES_START, startEndComparator);
+    diffTable.setComparator(DiffTableModel.COL_RES_END, startEndComparator);
     /* End */
 
     diffTable.setSortable(true);
@@ -272,19 +270,30 @@ public class AnnotationDiffGUI extends JFrame{
     //Finished building the results pane
     //Add it to the dialog
 
+    resultsPane.setBackground(Color.red);
 
     //ROW 4 - the results
     constraints.gridy = 4;
     constraints.gridx = 0;
     constraints.weightx = 0;
     constraints.weighty = 0;
-    constraints.gridwidth = 9;
+    constraints.gridwidth = 8;
     constraints.gridheight = 1;
     constraints.anchor = GridBagConstraints.WEST;
     constraints.fill = GridBagConstraints.NONE;
     getContentPane().add(resultsPane, constraints);
 
+    // the progress bar
+    
+    progressBar = new JProgressBar();
+    constraints.gridx = 8;
+    constraints.weightx = 1;
+    constraints.anchor = GridBagConstraints.SOUTHEAST;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    getContentPane().add(progressBar, constraints);
+    
 
+    
     //set the colours
     Color background = diffTable.getBackground();
     getContentPane().setBackground(background);
@@ -456,38 +465,58 @@ public class AnnotationDiffGUI extends JFrame{
     }
 
     public void actionPerformed(ActionEvent evt){
-      Set keys = keySet.get((String)annTypeCombo.getSelectedItem());
-      Set responses = resSet.get((String)annTypeCombo.getSelectedItem());
-      if(keys == null) keys = new HashSet();
-      if(responses == null) responses = new HashSet();
-      if(someFeaturesBtn.isSelected())
-        differ.setSignificantFeaturesSet(significantFeatures);
-      else if(allFeaturesBtn.isSelected())
-        differ.setSignificantFeaturesSet(null);
-      else differ.setSignificantFeaturesSet(new HashSet());
-      pairings.clear();
-      pairings.addAll(differ.calculateDiff(keys, responses));
-      diffTableModel.fireTableDataChanged();
-      correctLbl.setText(Integer.toString(differ.getCorrectMatches()));
-      partiallyCorrectLbl.setText(
-              Integer.toString(differ.getPartiallyCorrectMatches()));
-      missingLbl.setText(Integer.toString(differ.getMissing()));
-      falsePozLbl.setText(Integer.toString(differ.getSpurious()));
+      //start the progress bar
+      progressBar.setIndeterminate(true);
+      
+      //start a new thread for the processing
+      Runnable runnable = new Runnable(){
+        public void run(){
+          Set keys = keySet.get((String)annTypeCombo.getSelectedItem());
+          Set responses = resSet.get((String)annTypeCombo.getSelectedItem());
+          if(keys == null) keys = new HashSet();
+          if(responses == null) responses = new HashSet();
+          if(someFeaturesBtn.isSelected())
+            differ.setSignificantFeaturesSet(significantFeatures);
+          else if(allFeaturesBtn.isSelected())
+            differ.setSignificantFeaturesSet(null);
+          else differ.setSignificantFeaturesSet(new HashSet());
+          pairings.clear();
+          pairings.addAll(differ.calculateDiff(keys, responses));
+          //return to the Swing thread to update the GUI
+          SwingUtilities.invokeLater(new Runnable(){
+            public void run(){
+              diffTableModel.fireTableDataChanged();
+              correctLbl.setText(Integer.toString(differ.getCorrectMatches()));
+              partiallyCorrectLbl.setText(
+                      Integer.toString(differ.getPartiallyCorrectMatches()));
+              missingLbl.setText(Integer.toString(differ.getMissing()));
+              falsePozLbl.setText(Integer.toString(differ.getSpurious()));
 
-      NumberFormat formatter = NumberFormat.getInstance();
-      formatter.setMaximumFractionDigits(4);
-      formatter.setMinimumFractionDigits(2);
-      recallStrictLbl.setText(formatter.format(differ.getRecallStrict()));
-      recallLenientLbl.setText(formatter.format(differ.getRecallLenient()));
-      recallAveLbl.setText(formatter.format(differ.getRecallAverage()));
-      precisionStrictLbl.setText(formatter.format(differ.getPrecisionStrict()));
-      precisionLenientLbl.setText(formatter.format(differ.getPrecisionLenient()));
-      precisionAveLbl.setText(formatter.format(differ.getPrecisionAverage()));
+              NumberFormat formatter = NumberFormat.getInstance();
+              formatter.setMaximumFractionDigits(4);
+              formatter.setMinimumFractionDigits(2);
+              recallStrictLbl.setText(formatter.format(differ.getRecallStrict()));
+              recallLenientLbl.setText(formatter.format(differ.getRecallLenient()));
+              recallAveLbl.setText(formatter.format(differ.getRecallAverage()));
+              precisionStrictLbl.setText(formatter.format(differ.getPrecisionStrict()));
+              precisionLenientLbl.setText(formatter.format(differ.getPrecisionLenient()));
+              precisionAveLbl.setText(formatter.format(differ.getPrecisionAverage()));
 
-      double weight = Double.parseDouble(weightTxt.getText());
-      fmeasureStrictLbl.setText(formatter.format(differ.getFMeasureStrict(weight)));
-      fmeasureLenientLbl.setText(formatter.format(differ.getFMeasureLenient(weight)));
-      fmeasureAveLbl.setText(formatter.format(differ.getFMeasureAverage(weight)));
+              double weight = Double.parseDouble(weightTxt.getText());
+              fmeasureStrictLbl.setText(formatter.format(differ.getFMeasureStrict(weight)));
+              fmeasureLenientLbl.setText(formatter.format(differ.getFMeasureLenient(weight)));
+              fmeasureAveLbl.setText(formatter.format(differ.getFMeasureAverage(weight)));
+              //stop the progress bar
+              progressBar.setIndeterminate(false);
+            }
+          });  
+        }
+      };
+      Thread thread = new Thread(runnable);
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
+      
+      
     }
   }
 
@@ -761,6 +790,7 @@ public class AnnotationDiffGUI extends JFrame{
   protected JComboBox annTypeCombo;
   protected JComboBox resDocCombo;
   protected JComboBox resSetCombo;
+  protected JProgressBar progressBar;
 
   protected JRadioButton allFeaturesBtn;
   protected JRadioButton someFeaturesBtn;
