@@ -163,8 +163,8 @@ public class Gate implements GateConstants
             //running from gate.jar
             String gateURLStr = gateURL.getFile();
               File gateJarFile = new File(
-                      new URL(gateURLStr.substring(0, gateURLStr.indexOf('!'))).
-                      getFile());
+                      new URI(
+                          gateURLStr.substring(0, gateURLStr.indexOf('!'))));
               gateHome = gateJarFile.getParentFile().getParentFile();
           }else if(gateURL.getProtocol().equals("file")){
             //running from classes directory
