@@ -1034,35 +1034,31 @@ existingAttrName + "\");" + nl +
 
   final private boolean jj_2_1(int xla) {
     jj_la = xla; jj_lastpos = jj_scanpos = token;
-    boolean retval = !jj_3_1();
-    jj_save(0, xla);
-    return retval;
+    try { return !jj_3_1(); }
+    catch(LookaheadSuccess ls) { return true; }
+    finally { jj_save(0, xla); }
   }
 
   final private boolean jj_2_2(int xla) {
     jj_la = xla; jj_lastpos = jj_scanpos = token;
-    boolean retval = !jj_3_2();
-    jj_save(1, xla);
-    return retval;
+    try { return !jj_3_2(); }
+    catch(LookaheadSuccess ls) { return true; }
+    finally { jj_save(1, xla); }
   }
 
   final private boolean jj_3R_19() {
     if (jj_scan_token(leftBrace)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_3R_22()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_14() {
     if (jj_scan_token(ident)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3_1() {
     if (jj_3R_12()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
@@ -1074,9 +1070,8 @@ existingAttrName + "\");" + nl +
     if (jj_3R_15()) {
     jj_scanpos = xsp;
     if (jj_3R_16()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    }
+    }
     return false;
   }
 
@@ -1086,14 +1081,12 @@ existingAttrName + "\");" + nl +
     if (jj_3R_19()) {
     jj_scanpos = xsp;
     if (jj_3R_20()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    }
     return false;
   }
 
   final private boolean jj_3R_24() {
     if (jj_scan_token(pling)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
@@ -1101,74 +1094,60 @@ existingAttrName + "\");" + nl +
     Token xsp;
     xsp = jj_scanpos;
     if (jj_3R_24()) jj_scanpos = xsp;
-    else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_scan_token(ident)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3_2() {
     if (jj_3R_13()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_20() {
     if (jj_scan_token(string)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_23() {
     if (jj_3R_12()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_18() {
     if (jj_scan_token(leftBracket)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_3R_21()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_21() {
     Token xsp;
     if (jj_3R_23()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     while (true) {
       xsp = jj_scanpos;
       if (jj_3R_23()) { jj_scanpos = xsp; break; }
-      if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     }
     return false;
   }
 
   final private boolean jj_3R_16() {
     if (jj_3R_18()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_15() {
     if (jj_3R_17()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   final private boolean jj_3R_13() {
     if (jj_scan_token(colon)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_scan_token(ident)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_scan_token(leftBrace)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
   public ParseCpslTokenManager token_source;
-  ASCII_CharStream jj_input_stream;
+  SimpleCharStream jj_input_stream;
   public Token token, jj_nt;
   private Token jj_scanpos, jj_lastpos;
   private int jj_la;
@@ -1176,14 +1155,24 @@ existingAttrName + "\");" + nl +
   private boolean jj_semLA;
   private int jj_gen;
   final private int[] jj_la1 = new int[31];
-  final private int[] jj_la1_0 = {0x400,0x80000,0x1000,0x80800,0x0,0x100000,0x0,0x0,0x200000,0xc00000,0xc00000,0x1000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4000000,0x8000000,0x0,0x2000000,0x0,0x8000000,0x0,0x0,0x0,0x0,0x8000000,0x0,};
-  final private int[] jj_la1_1 = {0x0,0x0,0x0,0x0,0x10,0x0,0x10,0x18,0x0,0x0,0x0,0x0,0x41090,0x5014,0x400,0x5014,0x5014,0x800,0x1004,0x0,0x10,0x80,0x0,0x200,0x3c,0x800,0x41090,0x40080,0x10,0xbc,0x800,};
+  static private int[] jj_la1_0;
+  static private int[] jj_la1_1;
+  static {
+      jj_la1_0();
+      jj_la1_1();
+   }
+   private static void jj_la1_0() {
+      jj_la1_0 = new int[] {0x400,0x80000,0x1000,0x80800,0x0,0x100000,0x0,0x0,0x200000,0xc00000,0xc00000,0x1000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4000000,0x8000000,0x0,0x2000000,0x0,0x8000000,0x0,0x0,0x0,0x0,0x8000000,0x0,};
+   }
+   private static void jj_la1_1() {
+      jj_la1_1 = new int[] {0x0,0x0,0x0,0x0,0x10,0x0,0x10,0x18,0x0,0x0,0x0,0x0,0x41090,0x5014,0x400,0x5014,0x5014,0x800,0x1004,0x0,0x10,0x80,0x0,0x200,0x3c,0x800,0x41090,0x40080,0x10,0xbc,0x800,};
+   }
   final private JJCalls[] jj_2_rtns = new JJCalls[2];
   private boolean jj_rescan = false;
   private int jj_gc = 0;
 
   public ParseCpsl(java.io.InputStream stream) {
-    jj_input_stream = new ASCII_CharStream(stream, 1, 1);
+    jj_input_stream = new SimpleCharStream(stream, 1, 1);
     token_source = new ParseCpslTokenManager(jj_input_stream);
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
@@ -1203,7 +1192,7 @@ existingAttrName + "\");" + nl +
   }
 
   public ParseCpsl(java.io.Reader stream) {
-    jj_input_stream = new ASCII_CharStream(stream, 1, 1);
+    jj_input_stream = new SimpleCharStream(stream, 1, 1);
     token_source = new ParseCpslTokenManager(jj_input_stream);
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
@@ -1264,6 +1253,8 @@ existingAttrName + "\");" + nl +
     throw generateParseException();
   }
 
+  static private final class LookaheadSuccess extends java.lang.Error { }
+  final private LookaheadSuccess jj_ls = new LookaheadSuccess();
   final private boolean jj_scan_token(int kind) {
     if (jj_scanpos == jj_lastpos) {
       jj_la--;
@@ -1280,7 +1271,9 @@ existingAttrName + "\");" + nl +
       while (tok != null && tok != jj_scanpos) { i++; tok = tok.next; }
       if (tok != null) jj_add_error_token(kind, i);
     }
-    return (jj_scanpos.kind != kind);
+    if (jj_scanpos.kind != kind) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) throw jj_ls;
+    return false;
   }
 
   final public Token getNextToken() {
@@ -1315,8 +1308,8 @@ existingAttrName + "\");" + nl +
         jj_expentry[i] = jj_lasttokens[i];
       }
       boolean exists = false;
-      for (java.util.Enumeration enum = jj_expentries.elements(); enum.hasMoreElements();) {
-        int[] oldentry = (int[])(enum.nextElement());
+      for (java.util.Enumeration e = jj_expentries.elements(); e.hasMoreElements();) {
+        int[] oldentry = (int[])(e.nextElement());
         if (oldentry.length == jj_expentry.length) {
           exists = true;
           for (int i = 0; i < jj_expentry.length; i++) {
@@ -1333,7 +1326,7 @@ existingAttrName + "\");" + nl +
     }
   }
 
-  final public ParseException generateParseException() {
+  public ParseException generateParseException() {
     jj_expentries.removeAllElements();
     boolean[] la1tokens = new boolean[59];
     for (int i = 0; i < 59; i++) {
