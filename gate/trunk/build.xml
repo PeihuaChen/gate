@@ -412,22 +412,22 @@
        Uses JavaCC 0.8pre1 from ../lib for the java, and 0.7 
        from ./JavaCC-071.zip for the HTML to avoid JJDoc bug in 0.8pre1 -->
   <target name="jape">
-    <java classname="COM.sun.labs.javacc.Main" 
+    <java classname="javacc" 
           fork="true"
           spawn="false"
           dir="${srcDir}/gate/jape/parser">
       <classpath>
-        <pathelement location="${libDir}/JavaCC.zip"/>
+        <pathelement location="${libDir}/javacc.jar"/>
       </classpath>
       <arg value="ParseCpsl.jj"/>
     </java>
     
-    <java classname="COM.sun.labs.jjdoc.JJDocMain" 
+    <java classname="jjdoc" 
           fork="true"
           spawn="false"
           dir="${srcDir}/gate/jape/parser">
       <classpath>
-        <pathelement location="${buildDir}/JavaCC-071.zip"/>
+        <pathelement location="${libDir}/javacc.jar"/>
       </classpath>
       <arg value="ParseCpsl.jj"/>
     </java>
@@ -435,12 +435,12 @@
     <move file="${srcDir}/gate/jape/parser/ParseCpsl.html"
           toFile="${srcDir}/gate/jape/parser/ParseCpslPlain.html"/>
           
-    <java classname="COM.sun.labs.jjdoc.JJDocMain" 
+    <java classname="jjdoc" 
           fork="true"
           spawn="false"
           dir="${srcDir}/gate/jape/parser">
       <classpath>
-        <pathelement location="${buildDir}/JavaCC-071.zip"/>
+        <pathelement location="${libDir}/javacc.jar"/>
       </classpath>
       <arg value="-ONE_TABLE=false"/>
       <arg value="ParseCpsl.jj"/>
