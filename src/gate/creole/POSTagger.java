@@ -39,6 +39,19 @@ public class POSTagger extends AbstractLanguageAnalyser {
   public static final String
       TAG_ENCODING_PARAMETER_NAME = "encoding";
 
+  
+  public static final String
+  	BASE_TOKEN_ANNOTATION_TYPE_PARAMETER_NAME = "baseTokenAnnotationType";
+
+  public static final String
+	OUTPUT_ANNOTATION_TYPE_PARAMETER_NAME = "outputAnnotationType";
+  
+  public static final String
+	BASE_SENTENCE_ANNOTATION_TYPE_PARAMETER_NAME = "baseSentenceAnnotationType";
+
+  public static final String
+  	TAG_OUTPUT_AS_PARAMETER_NAME = "outputASName";
+
   public POSTagger() {
   }
 
@@ -70,9 +83,29 @@ public class POSTagger extends AbstractLanguageAnalyser {
                               document.getAnnotations() :
                               document.getAnnotations(inputASName);
 
+      /* Addition by Niraj */
+                              
+      if(baseTokenAnnotationType == null || baseTokenAnnotationType.trim().length()==0) {
+          throw new GateRuntimeException("No base Token Annotation Type provided!");
+      }
 
-      AnnotationSet sentencesAS = inputAS.get(SENTENCE_ANNOTATION_TYPE);
-      AnnotationSet tokensAS = inputAS.get(TOKEN_ANNOTATION_TYPE);
+      if(outputASName != null && outputASName.equals("")) outputASName = null;
+      AnnotationSet outputAS = (outputASName == null) ?
+                              document.getAnnotations() :
+                              document.getAnnotations(outputASName);
+      
+      if(baseSentenceAnnotationType == null || baseSentenceAnnotationType.trim().length()==0) {
+          throw new GateRuntimeException("No base Sentence Annotation Type provided!");
+      }
+      
+      if(outputAnnotationType == null || outputAnnotationType.trim().length()==0) {
+          throw new GateRuntimeException("No AnnotationType provided to store the new feature!");
+      }
+      
+      /* End of addition */
+      
+      AnnotationSet sentencesAS = inputAS.get(baseSentenceAnnotationType);
+      AnnotationSet tokensAS = inputAS.get(baseTokenAnnotationType);
       if(sentencesAS != null && sentencesAS.size() > 0
          && tokensAS != null && tokensAS.size() > 0){
         long startTime = System.currentTimeMillis();
@@ -128,12 +161,15 @@ public class POSTagger extends AbstractLanguageAnalyser {
             Iterator resIter = taggerResults.iterator();
             Iterator tokIter = tokensInCurrentSentence.iterator();
             while(resIter.hasNext()){
-              ((Annotation)tokIter.next()).getFeatures().
-                put(TOKEN_CATEGORY_FEATURE_NAME ,((String[])resIter.next())[1]);
+                /* Addition by Niraj */
+                Annotation annot = (Annotation) tokIter.next();
+                addFeatures(annot, TOKEN_CATEGORY_FEATURE_NAME, ((String[])resIter.next())[1]);
+                /* End */
             }
           }
           fireProgressChanged(sentIndex++ * 100 / sentCnt);
         }//while(sentencesIter.hasNext())
+
         if(currentToken != null){
           //we have remaining tokens after the last sentence
           tokensInCurrentSentence.clear();
@@ -158,8 +194,10 @@ public class POSTagger extends AbstractLanguageAnalyser {
           Iterator resIter = taggerResults.iterator();
           Iterator tokIter = tokensInCurrentSentence.iterator();
           while(resIter.hasNext()){
-            ((Annotation)tokIter.next()).getFeatures().
-              put(TOKEN_CATEGORY_FEATURE_NAME ,((String[])resIter.next())[1]);
+              /* Addition by Niraj */
+              Annotation annot = (Annotation) tokIter.next();
+              addFeatures(annot, TOKEN_CATEGORY_FEATURE_NAME, ((String[])resIter.next())[1]);
+              /* End */
           }
         }//if(currentToken != null)
         fireProcessFinished();
@@ -256,6 +294,58 @@ Out.prln("POS after execution time:" + postTime);
   }
 
 
+  protected void addFeatures(Annotation annot, String featureName, String featureValue) throws GateRuntimeException {
+      String tempIASN = inputASName == null ? "" : inputASName;
+      String tempOASN = outputASName == null ? "" : outputASName;
+      if(outputAnnotationType.equals(baseTokenAnnotationType) && tempIASN.equals(tempOASN)) {
+          annot.getFeatures().put(featureName, featureValue);
+          return;
+      } else {
+          int start = annot.getStartNode().getOffset().intValue();
+          int end = annot.getEndNode().getOffset().intValue();
+          
+          // get the annotations of type outputAnnotationType
+          AnnotationSet outputAS = (outputASName == null) ?
+                  document.getAnnotations() :
+                  document.getAnnotations(outputASName);
+          AnnotationSet annotations = outputAS.get(outputAnnotationType);
+          if(annotations == null || annotations.size() == 0) {
+              // add new annotation
+              FeatureMap features = Factory.newFeatureMap();
+              features.put(featureName, featureValue);
+              try {
+                  outputAS.add(new Long(start), new Long(end), outputAnnotationType, features);
+              } catch(Exception e) {
+                  throw new GateRuntimeException("Invalid Offsets");
+              }
+          } else {
+              // search for the annotation if there is one with the same start and end offsets
+              ArrayList tempList = new ArrayList(annotations.get());
+              boolean found = false;
+              for(int i=0;i<tempList.size();i++) {
+                  Annotation annotation = (Annotation) tempList.get(i);
+                  if(annotation.getStartNode().getOffset().intValue() == start && annotation.getEndNode().getOffset().intValue() == end) {
+                      // this is the one
+                      annotation.getFeatures().put(featureName, featureValue);
+                      found = true;
+                      break;
+                  }
+              }
+              
+              if(!found) {
+                  // add new annotation
+                  FeatureMap features = Factory.newFeatureMap();
+                  features.put(featureName, featureValue);
+                  try {
+                      outputAS.add(new Long(start), new Long(end), outputAnnotationType, features);
+                  } catch(Exception e) {
+                      throw new GateRuntimeException("Invalid Offsets");
+                  }
+              }
+          }
+      }
+  }
+  
   public void setLexiconURL(java.net.URL newLexiconURL) {
     lexiconURL = newLexiconURL;
   }
@@ -282,9 +372,47 @@ Out.prln("POS after execution time:" + postTime);
     return this.encoding;
   }
 
+  public String getBaseTokenAnnotationType() {
+      return this.baseTokenAnnotationType;
+  }
+  
+  public String getBaseSentenceAnnotationType() {
+      return this.baseSentenceAnnotationType;
+  }
+  
+  public String getOutputAnnotationType() {
+      return this.outputAnnotationType;
+  }
+  
+  public void setBaseTokenAnnotationType(String baseTokenAnnotationType) {
+      this.baseTokenAnnotationType = baseTokenAnnotationType;
+  }
+  
+  public void setBaseSentenceAnnotationType(String baseSentenceAnnotationtype) {
+      this.baseSentenceAnnotationType = baseSentenceAnnotationtype;
+  }
+  
+  public void setOutputAnnotationType(String outputAnnotationType) {
+      this.outputAnnotationType = outputAnnotationType;
+  }
+  
+  public String getOutputASName() {
+      return this.outputASName;
+  }
+  
+  public void setOutputASName(String outputASName) {
+      this.outputASName = outputASName;
+  }
+  
   protected hepple.postag.POSTagger tagger;
   private java.net.URL lexiconURL;
   private java.net.URL rulesURL;
   private String inputASName;
   private String encoding;
+  /* Addition by Niraj */
+  private String baseTokenAnnotationType;
+  private String baseSentenceAnnotationType;
+  private String outputAnnotationType;
+  private String outputASName;
+  /* End of Addition */
 }

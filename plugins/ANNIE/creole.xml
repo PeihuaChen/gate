@@ -181,6 +181,9 @@
       <PARAMETER NAME="inputASName"
         COMMENT="The name of the annotation set used for input" RUNTIME="true"
         OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="outputASName"
+        COMMENT="The name of the annotation set used for output" RUNTIME="true"
+        OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="encoding" COMMENT="Encoding to use to read rules and lexicons"
         OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="lexiconURL" DEFAULT="resources/heptag/lexicon"
@@ -189,6 +192,15 @@
       <PARAMETER NAME="rulesURL" DEFAULT="resources/heptag/ruleset"
         COMMENT="The URL for the ruleset file" OPTIONAL="true">
         java.net.URL</PARAMETER>
+      <PARAMETER NAME="baseTokenAnnotationType"
+        COMMENT="The name of the base Token annotation type" RUNTIME="true"
+        OPTIONAL="false" DEFAULT="Token">java.lang.String</PARAMETER>
+      <PARAMETER NAME="baseSentenceAnnotationType"
+        COMMENT="The name of the base Sentence annotation type" RUNTIME="true"
+        OPTIONAL="false" DEFAULT="Sentence">java.lang.String</PARAMETER>
+      <PARAMETER NAME="outputAnnotationType"
+        COMMENT="The name of the annotation type where the new features should be added" RUNTIME="true"
+        OPTIONAL="false" DEFAULT="Token">java.lang.String</PARAMETER>
     </RESOURCE>
 
     <!-- creole.xml for namematch -->
