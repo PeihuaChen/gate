@@ -83,6 +83,7 @@ public class LuceneIndexManager implements IndexManager{
         writer.addDocument(getLuceneDoc(gateDoc));
         if (!isLoaded) {
           corpus.unloadDocument(gateDoc);
+          gate.Factory.deleteResource(gateDoc);
         }
       }//for (all documents)
 
