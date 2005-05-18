@@ -231,8 +231,13 @@ public class RDFFormatExporter extends AbstractLanguageAnalyser {
       while (itTypes.hasNext()) {
 
         String type = (String)itTypes.next();
-        AnnotationSet as = this.document.getAnnotations().get(type);
+        AnnotationSet as = 
+            (this.annotationSetName != null && 
+             this.annotationSetName.length() > 0) ?
+            this.document.getAnnotations(this.annotationSetName).get(type) :
+            this.document.getAnnotations().get(type);
 
+        
         if (null == as || true == as.isEmpty()) {
           continue;
         }
