@@ -16,6 +16,10 @@
 
 package gate.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+
 
 /**
  * A specific *partial* implementation of the Set interface used for
@@ -28,6 +32,17 @@ public class SimpleArraySet
    * The array storing the elements
    */
   Object[] theArray = null;
+
+  public int size()
+  {
+      return theArray == null ? 0 : theArray.length;
+  }
+
+  public Collection asCollection()
+  {
+      if (theArray == null) return new ArrayList();
+      return Arrays.asList(theArray);
+  }
 
   public boolean add(Object tr)
   {
