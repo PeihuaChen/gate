@@ -426,7 +426,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
       if(acceptingFSMInstances.isEmpty()){
         //no rule to fire, advance to the next input offset
         lastAGPosition = startNodeOff + 1;
-      } else if(ruleApplicationStyle == BRILL_STYLE) {
+      } else if(ruleApplicationStyle == BRILL_STYLE || 
+                ruleApplicationStyle == ALL_STYLE) {
         // fire the rules corresponding to all accepting FSM instances
         java.util.Iterator accFSMIter = acceptingFSMInstances.iterator();
         FSMInstance currentAcceptor;
@@ -465,11 +466,18 @@ extends Transducer implements JapeConstants, java.io.Serializable
             }
           }
           // by Shafirin Andrey end
-
-          long currentAGPosition = currentAcceptor.getAGPosition().getOffset().longValue();
-          if(currentAGPosition > lastAGPosition)
-            lastAGPosition = currentAGPosition;
+          if(ruleApplicationStyle == BRILL_STYLE){
+            //find the maximal next position
+            long currentAGPosition = currentAcceptor.getAGPosition().getOffset().longValue();
+            if(currentAGPosition > lastAGPosition)
+              lastAGPosition = currentAGPosition;
+          }
         }
+        if(ruleApplicationStyle ==ALL_STYLE){
+          //simply advance to next offset
+          lastAGPosition = lastAGPosition + 1;
+        }
+        
       } else if(ruleApplicationStyle == APPELT_STYLE ||
                 ruleApplicationStyle == FIRST_STYLE ||
                 ruleApplicationStyle == ONCE_STYLE) {
