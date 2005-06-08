@@ -236,10 +236,12 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
             t.setRuleApplicationStyle(BRILL_STYLE);
           else if(optionValueTok.image.equalsIgnoreCase("once"))
             t.setRuleApplicationStyle(ONCE_STYLE);
+          else if(optionValueTok.image.equalsIgnoreCase("all"))
+            t.setRuleApplicationStyle(ALL_STYLE);
           else
             System.err.println(
               "ignoring unknown control strategy " + option +
-              " (should be brill, appelt or first)"
+              " (should be brill, appelt, first, once or all)"
             );
         } // control
         else if(optionNameTok.image.equalsIgnoreCase("debug")) {
@@ -1046,19 +1048,18 @@ existingAttrName + "\");" + nl +
     finally { jj_save(1, xla); }
   }
 
-  final private boolean jj_3R_19() {
-    if (jj_scan_token(leftBrace)) return true;
-    if (jj_3R_22()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_14() {
-    if (jj_scan_token(ident)) return true;
-    return false;
-  }
-
   final private boolean jj_3_1() {
     if (jj_3R_12()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_17() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_19()) {
+    jj_scanpos = xsp;
+    if (jj_3R_20()) return true;
+    }
     return false;
   }
 
@@ -1071,16 +1072,6 @@ existingAttrName + "\");" + nl +
     jj_scanpos = xsp;
     if (jj_3R_16()) return true;
     }
-    }
-    return false;
-  }
-
-  final private boolean jj_3R_17() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_19()) {
-    jj_scanpos = xsp;
-    if (jj_3R_20()) return true;
     }
     return false;
   }
@@ -1143,6 +1134,17 @@ existingAttrName + "\");" + nl +
     if (jj_scan_token(colon)) return true;
     if (jj_scan_token(ident)) return true;
     if (jj_scan_token(leftBrace)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_19() {
+    if (jj_scan_token(leftBrace)) return true;
+    if (jj_3R_22()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_14() {
+    if (jj_scan_token(ident)) return true;
     return false;
   }
 

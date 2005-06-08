@@ -51,6 +51,8 @@ public interface JapeConstants extends Serializable
   public int FIRST_STYLE = 3;
   /** The phase finishes on the first match */
   public int ONCE_STYLE = 4;
+  /** The phase finishes on the first match */
+  public int ALL_STYLE = 5;
 
 
   /** The default priority of a rule. */
@@ -66,6 +68,9 @@ public interface JapeConstants extends Serializable
 
 
 // $Log$
+// Revision 1.13  2005/06/08 16:33:20  valyt
+// Support for ALL matching style
+//
 // Revision 1.12  2005/01/11 13:51:36  ian
 // Updating copyrights to 1998-2005 in preparation for v3.0
 //
