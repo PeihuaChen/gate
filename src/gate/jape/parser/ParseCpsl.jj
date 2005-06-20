@@ -32,7 +32,6 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import gate.util.*;
-import gate.*;
 import gate.jape.*;
 import gate.event.*;
 
@@ -54,10 +53,14 @@ public class ParseCpsl implements JapeConstants {
   public ParseCpsl(URL url, String encoding, HashMap existingMacros) throws IOException {
     this(new InputStreamReader(
            new BufferedInputStream(url.openStream()),
-           encoding));
-    macrosMap = existingMacros;
+           encoding), existingMacros);
     baseURL = url;
     this.encoding = encoding;
+  }
+  
+  public ParseCpsl(java.io.Reader stream, HashMap existingMacros) {
+    this(stream);
+    macrosMap = existingMacros;
   }
 
   //StatusReporter Implementation
@@ -72,7 +75,43 @@ public class ParseCpsl implements JapeConstants {
     while(listenersIter.hasNext())
       ((StatusListener)listenersIter.next()).statusChanged(text);
   }
+  
+  protected SinglePhaseTransducer createSinglePhaseTransducer(String name){
+    return new SinglePhaseTransducer(name);
+  }
+  
+  protected ParseCpsl spawn(URL sptURL) throws IOException{
+    return new ParseCpsl(sptURL, encoding, macrosMap);
+  }
+  
+  protected void finishSPT(SinglePhaseTransducer t) throws ParseException {
+    if(ruleNumber == 0)
+      throw(new ParseException("no rules defined in transducer " + t.getName()));
+    t.setBaseURL(baseURL);
+  }
+  
+  protected void finishBPE(BasicPatternElement bpe) {
+  }
+  
+  protected void appendAnnotationAdd(StringBuffer blockBuffer, String newAnnotType, String annotSetName)
+  {
+      String nl = Strings.getNl();
+      blockBuffer.append("      annotations.add(" + nl);
+      blockBuffer.append("        " + annotSetName + ".firstNode(), ");
+      blockBuffer.append(annotSetName + ".lastNode(), " + nl);
+      blockBuffer.append("        \"" + newAnnotType + "\", features" + nl);
+      blockBuffer.append("      );" + nl);
+      blockBuffer.append("      // end of RHS assignment block");
+  }
 
+  public void setBaseURL (URL newURL) {
+    baseURL = newURL;
+  }
+  
+  public void setEncoding (String newEncoding) {
+    encoding = newEncoding;
+  }
+  
   private transient java.util.List myStatusListeners = new java.util.LinkedList();
 
   /** Position of the current rule */
@@ -84,12 +123,10 @@ public class ParseCpsl implements JapeConstants {
   private HashSet bindingNameSet = null;
 
   /** A table of macro definitions. */
-  private HashMap macrosMap;
+  protected HashMap macrosMap;
 
-  URL baseURL;
-  String encoding;
-
-
+  protected URL baseURL;
+  protected String encoding;
 } // class ParseCpsl
 
 PARSER_END(ParseCpsl)
@@ -291,7 +328,7 @@ MultiPhaseTransducer MultiPhaseTransducer() :
             // construct a parser and parse it
             fireStatusChangedEvent("Reading " + phaseNameTok.image + "...");
             try {
-              parser = new ParseCpsl(sptURL, encoding, macrosMap);
+              parser = spawn(sptURL);
             } catch (IOException e) {
               throw(
                 new ParseException(
@@ -330,11 +367,10 @@ SinglePhaseTransducer SinglePhaseTransducer() :
   bindingNameSet = new HashSet();
   Token optionNameTok = null;
   Token optionValueTok = null;
-  Object newMacro = null;
 }
 {
   <phase> phaseNameTok=<ident>
-  { t = new SinglePhaseTransducer(phaseNameTok.image); }
+  { t = createSinglePhaseTransducer(phaseNameTok.image); }
 
   (
     <input>
@@ -391,11 +427,7 @@ SinglePhaseTransducer SinglePhaseTransducer() :
     MacroDef()
   )*
   {
-    if(ruleNumber == 0)
-      throw(new ParseException("no rules defined in transducer "
-                               + t.getName()));
-    t.finish(); // swap the various JGL types for Java arrays
-    t.setBaseURL(baseURL);
+    finishSPT(t);
     return t;
   }
 
@@ -560,8 +592,6 @@ PatternElement PatternElement(LeftHandSide lhs) :
 BasicPatternElement BasicPatternElement() :
 {
   Token shortTok = null; // string shorthand token
-  ArrayList constraints = new ArrayList();
-  Token constrTok = null;
   Constraint c = null;
   BasicPatternElement bpe = new BasicPatternElement();
 }
@@ -585,7 +615,10 @@ BasicPatternElement BasicPatternElement() :
       );
     }
   )
-  { return bpe; }
+  { 
+    finishBPE(bpe);
+    return bpe;
+  }
 
 } // BasicPatternElement
 
@@ -824,7 +857,6 @@ String[] AssignmentExpression() :
 {
   String[] block = new String[2];
   StringBuffer blockBuffer = new StringBuffer();
-  boolean simpleSpan = true;
   Token nameTok = null;
   String newAnnotType = null;
   String newAttrName = null;
@@ -843,12 +875,11 @@ String[] AssignmentExpression() :
 {
   // the simple/composite span spec
   (
-    <colon> { simpleSpan = true; }
+    <colon>
   |
     // we no longer support multi-span, as there is no such thing as a
     // multi-span annotation any more...
     <colonplus> {
-      simpleSpan = false;
       throw new
         ParseException(":+ not a legal operator (no multi-span annots)");
     }
@@ -864,9 +895,6 @@ String[] AssignmentExpression() :
   <period> nameTok=<ident>
   {
     newAnnotType = nameTok.image;
-    blockBuffer.append(
-      "      String newAnnotType = \"" + newAnnotType + "\";" + nl
-    );
 
     // start of the attribute stuff
     blockBuffer.append("      Object val = null;" + nl);
@@ -982,12 +1010,7 @@ existingAttrName + "\");" + nl +
 
   // all done
   {
-    blockBuffer.append("      annotations.add(" + nl);
-    blockBuffer.append("        " + annotSetName + ".firstNode(), ");
-    blockBuffer.append(annotSetName + ".lastNode(), " + nl);
-    blockBuffer.append("        \"" + newAnnotType + "\", features" + nl);
-    blockBuffer.append("      );" + nl);
-    blockBuffer.append("      // end of RHS assignment block");
+    appendAnnotationAdd(blockBuffer, newAnnotType, annotSetName);
     block[1] = blockBuffer.toString();
     return block;
   }
@@ -1040,6 +1063,9 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.30  2005/06/20 10:34:20  valyt
+// Ken Williams's patch for ParseCpsl.jj
+//
 // Revision 1.29  2005/06/08 16:32:25  valyt
 // Support for ALL matching style
 //
