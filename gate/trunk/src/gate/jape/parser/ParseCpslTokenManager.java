@@ -4,7 +4,6 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import gate.util.*;
-import gate.*;
 import gate.jape.*;
 import gate.event.*;
 

@@ -5,7 +5,6 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import gate.util.*;
-import gate.*;
 import gate.jape.*;
 import gate.event.*;
 
@@ -27,10 +26,14 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   public ParseCpsl(URL url, String encoding, HashMap existingMacros) throws IOException {
     this(new InputStreamReader(
            new BufferedInputStream(url.openStream()),
-           encoding));
-    macrosMap = existingMacros;
+           encoding), existingMacros);
     baseURL = url;
     this.encoding = encoding;
+  }
+
+  public ParseCpsl(java.io.Reader stream, HashMap existingMacros) {
+    this(stream);
+    macrosMap = existingMacros;
   }
 
   //StatusReporter Implementation
@@ -46,6 +49,42 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       ((StatusListener)listenersIter.next()).statusChanged(text);
   }
 
+  protected SinglePhaseTransducer createSinglePhaseTransducer(String name){
+    return new SinglePhaseTransducer(name);
+  }
+
+  protected ParseCpsl spawn(URL sptURL) throws IOException{
+    return new ParseCpsl(sptURL, encoding, macrosMap);
+  }
+
+  protected void finishSPT(SinglePhaseTransducer t) throws ParseException {
+    if(ruleNumber == 0)
+      throw(new ParseException("no rules defined in transducer " + t.getName()));
+    t.setBaseURL(baseURL);
+  }
+
+  protected void finishBPE(BasicPatternElement bpe) {
+  }
+
+  protected void appendAnnotationAdd(StringBuffer blockBuffer, String newAnnotType, String annotSetName)
+  {
+      String nl = Strings.getNl();
+      blockBuffer.append("      annotations.add(" + nl);
+      blockBuffer.append("        " + annotSetName + ".firstNode(), ");
+      blockBuffer.append(annotSetName + ".lastNode(), " + nl);
+      blockBuffer.append("        \"" + newAnnotType + "\", features" + nl);
+      blockBuffer.append("      );" + nl);
+      blockBuffer.append("      // end of RHS assignment block");
+  }
+
+  public void setBaseURL (URL newURL) {
+    baseURL = newURL;
+  }
+
+  public void setEncoding (String newEncoding) {
+    encoding = newEncoding;
+  }
+
   private transient java.util.List myStatusListeners = new java.util.LinkedList();
 
   /** Position of the current rule */
@@ -57,10 +96,10 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   private HashSet bindingNameSet = null;
 
   /** A table of macro definitions. */
-  private HashMap macrosMap;
+  protected HashMap macrosMap;
 
-  URL baseURL;
-  String encoding;
+  protected URL baseURL;
+  protected String encoding;
 
 //////////////
 // the grammar
@@ -125,7 +164,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
             // construct a parser and parse it
             fireStatusChangedEvent("Reading " + phaseNameTok.image + "...");
             try {
-              parser = new ParseCpsl(sptURL, encoding, macrosMap);
+              parser = spawn(sptURL);
             } catch (IOException e) {
               {if (true) throw(
                 new ParseException(
@@ -172,10 +211,9 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   bindingNameSet = new HashSet();
   Token optionNameTok = null;
   Token optionValueTok = null;
-  Object newMacro = null;
     jj_consume_token(phase);
     phaseNameTok = jj_consume_token(ident);
-    t = new SinglePhaseTransducer(phaseNameTok.image);
+    t = createSinglePhaseTransducer(phaseNameTok.image);
     switch (jj_nt.kind) {
     case input:
       jj_consume_token(input);
@@ -289,11 +327,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         throw new ParseException();
       }
     }
-    if(ruleNumber == 0)
-      {if (true) throw(new ParseException("no rules defined in transducer "
-                               + t.getName()));}
-    t.finish(); // swap the various JGL types for Java arrays
-    t.setBaseURL(baseURL);
+    finishSPT(t);
     {if (true) return t;}
     throw new Error("Missing return statement in function");
   }
@@ -501,8 +535,6 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   // PatternElement
   final public BasicPatternElement BasicPatternElement() throws ParseException {
   Token shortTok = null; // string shorthand token
-  ArrayList constraints = new ArrayList();
-  Token constrTok = null;
   Constraint c = null;
   BasicPatternElement bpe = new BasicPatternElement();
     switch (jj_nt.kind) {
@@ -538,6 +570,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       jj_consume_token(-1);
       throw new ParseException();
     }
+    finishBPE(bpe);
     {if (true) return bpe;}
     throw new Error("Missing return statement in function");
   }
@@ -820,7 +853,6 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   final public String[] AssignmentExpression() throws ParseException {
   String[] block = new String[2];
   StringBuffer blockBuffer = new StringBuffer();
-  boolean simpleSpan = true;
   Token nameTok = null;
   String newAnnotType = null;
   String newAttrName = null;
@@ -838,11 +870,9 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     switch (jj_nt.kind) {
     case colon:
       jj_consume_token(colon);
-              simpleSpan = true;
       break;
     case colonplus:
       jj_consume_token(colonplus);
-      simpleSpan = false;
       {if (true) throw new
         ParseException(":+ not a legal operator (no multi-span annots)");}
       break;
@@ -858,9 +888,6 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     jj_consume_token(period);
     nameTok = jj_consume_token(ident);
     newAnnotType = nameTok.image;
-    blockBuffer.append(
-      "      String newAnnotType = \"" + newAnnotType + "\";" + nl
-    );
 
     // start of the attribute stuff
     blockBuffer.append("      Object val = null;" + nl);
@@ -981,12 +1008,7 @@ existingAttrName + "\");" + nl +
       }
     }
     jj_consume_token(rightBrace);
-    blockBuffer.append("      annotations.add(" + nl);
-    blockBuffer.append("        " + annotSetName + ".firstNode(), ");
-    blockBuffer.append(annotSetName + ".lastNode(), " + nl);
-    blockBuffer.append("        \"" + newAnnotType + "\", features" + nl);
-    blockBuffer.append("      );" + nl);
-    blockBuffer.append("      // end of RHS assignment block");
+    appendAnnotationAdd(blockBuffer, newAnnotType, annotSetName);
     block[1] = blockBuffer.toString();
     {if (true) return block;}
     throw new Error("Missing return statement in function");
@@ -1048,59 +1070,18 @@ existingAttrName + "\");" + nl +
     finally { jj_save(1, xla); }
   }
 
-  final private boolean jj_3_1() {
-    if (jj_3R_12()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_17() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_19()) {
-    jj_scanpos = xsp;
-    if (jj_3R_20()) return true;
-    }
-    return false;
-  }
-
-  final private boolean jj_3R_12() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_14()) {
-    jj_scanpos = xsp;
-    if (jj_3R_15()) {
-    jj_scanpos = xsp;
-    if (jj_3R_16()) return true;
-    }
-    }
-    return false;
-  }
-
-  final private boolean jj_3R_24() {
-    if (jj_scan_token(pling)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_22() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_24()) jj_scanpos = xsp;
-    if (jj_scan_token(ident)) return true;
-    return false;
-  }
-
   final private boolean jj_3_2() {
     if (jj_3R_13()) return true;
     return false;
   }
 
-  final private boolean jj_3R_20() {
-    if (jj_scan_token(string)) return true;
+  final private boolean jj_3R_23() {
+    if (jj_3R_12()) return true;
     return false;
   }
 
-  final private boolean jj_3R_23() {
-    if (jj_3R_12()) return true;
+  final private boolean jj_3R_20() {
+    if (jj_scan_token(string)) return true;
     return false;
   }
 
@@ -1125,15 +1106,25 @@ existingAttrName + "\");" + nl +
     return false;
   }
 
+  final private boolean jj_3R_13() {
+    if (jj_scan_token(colon)) return true;
+    if (jj_scan_token(ident)) return true;
+    if (jj_scan_token(leftBrace)) return true;
+    return false;
+  }
+
   final private boolean jj_3R_15() {
     if (jj_3R_17()) return true;
     return false;
   }
 
-  final private boolean jj_3R_13() {
-    if (jj_scan_token(colon)) return true;
+  final private boolean jj_3R_14() {
     if (jj_scan_token(ident)) return true;
-    if (jj_scan_token(leftBrace)) return true;
+    return false;
+  }
+
+  final private boolean jj_3_1() {
+    if (jj_3R_12()) return true;
     return false;
   }
 
@@ -1143,7 +1134,38 @@ existingAttrName + "\");" + nl +
     return false;
   }
 
-  final private boolean jj_3R_14() {
+  final private boolean jj_3R_12() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_14()) {
+    jj_scanpos = xsp;
+    if (jj_3R_15()) {
+    jj_scanpos = xsp;
+    if (jj_3R_16()) return true;
+    }
+    }
+    return false;
+  }
+
+  final private boolean jj_3R_24() {
+    if (jj_scan_token(pling)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_17() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_19()) {
+    jj_scanpos = xsp;
+    if (jj_3R_20()) return true;
+    }
+    return false;
+  }
+
+  final private boolean jj_3R_22() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_24()) jj_scanpos = xsp;
     if (jj_scan_token(ident)) return true;
     return false;
   }
