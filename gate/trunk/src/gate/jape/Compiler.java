@@ -19,6 +19,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import gate.Factory;
 import gate.jape.parser.ParseCpsl;
 import gate.util.Err;
 import gate.util.Out;
@@ -94,7 +95,7 @@ public class Compiler {
     Transducer transducer = null;
 
     try {
-      ParseCpsl cpslParser = new ParseCpsl(new File(japeFileName).toURL(),
+      ParseCpsl cpslParser = Factory.newJapeParser(new File(japeFileName).toURL(),
                                            encoding);
       transducer = cpslParser.MultiPhaseTransducer();
     } catch(gate.jape.parser.ParseException e) {
@@ -143,6 +144,9 @@ public class Compiler {
 
 
 // $Log$
+// Revision 1.11  2005/06/21 14:09:51  valyt
+// Ken Williams's patch for Factory and JAPE tranducers
+//
 // Revision 1.10  2005/01/11 13:51:36  ian
 // Updating copyrights to 1998-2005 in preparation for v3.0
 //
