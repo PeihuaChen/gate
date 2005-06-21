@@ -15,13 +15,19 @@
 
 package gate;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.*;
 
 import gate.creole.*;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
+import gate.jape.parser.ParseCpsl;
 import gate.persist.PersistenceException;
 import gate.persist.SerialDataStore;
 import gate.security.*;
@@ -160,7 +166,7 @@ public abstract class Factory {
       //ask the datastore to create our object
       if(dataStore instanceof SerialDataStore) {
         // SDS doesn't need a wrapper class; just check for serialisability
-        if(! (resClass instanceof Serializable))
+        if(! Serializable.class.isAssignableFrom(resClass))
           throw new ResourceInstantiationException(
             "Resource cannot be (de-)serialized: " + resClass.getName()
           );
@@ -396,6 +402,44 @@ public abstract class Factory {
     return doc;
   } // newDocument(String)
 
+  static Class japeParserClass = ParseCpsl.class;
+  public static Class getJapeParserClass() {
+      return japeParserClass;
+  }
+  public static void setJapeParserClass(Class newClass) {
+      if (! ParseCpsl.class.isAssignableFrom(newClass))
+          throw new IllegalArgumentException("Parser class must inherit from " + ParseCpsl.class);
+      japeParserClass = newClass;
+  }
+  
+  public static ParseCpsl newJapeParser(java.io.Reader stream, HashMap existingMacros) {
+      try {
+          Constructor c = japeParserClass.getConstructor
+              (new Class[] {java.io.Reader.class, existingMacros.getClass()});
+          return (ParseCpsl) c.newInstance(new Object[] {stream, existingMacros});
+      } catch (NoSuchMethodException e) { // Shouldn't happen
+          throw new RuntimeException(e);
+      } catch (IllegalArgumentException e) { // Shouldn't happen
+          throw new RuntimeException(e);
+      } catch (InstantiationException e) { // Shouldn't happen
+          throw new RuntimeException(e);
+      } catch (IllegalAccessException e) { // Shouldn't happen
+          throw new RuntimeException(e);
+      } catch (InvocationTargetException e) { // Happens if the constructor throws an exception
+          throw new RuntimeException(e);
+      }
+  }
+  
+  public static ParseCpsl newJapeParser(URL japeURL, String encoding) throws IOException {
+      java.io.Reader stream = new InputStreamReader
+        (new BufferedInputStream(japeURL.openStream()), encoding);
+      
+      ParseCpsl parser = newJapeParser(stream, new HashMap());
+      parser.setBaseURL(japeURL);
+      parser.setEncoding(encoding);
+      return parser;
+  }
+  
   /** Create a new FeatureMap. */
   public static FeatureMap newFeatureMap() {
     return new SimpleFeatureMapImpl();

@@ -196,8 +196,7 @@ public class Batch implements JapeConstants {
   /** Parse a jape file from {@link #japeURL} and store the transducer. */
   private void parseJape() throws JapeException {
     try {
-      gate.jape.parser.ParseCpsl parser =
-        new gate.jape.parser.ParseCpsl(japeURL, encoding);
+      gate.jape.parser.ParseCpsl parser = Factory.newJapeParser(japeURL, encoding);
 
       StatusListener listener = null;
       listener = new StatusListener(){
