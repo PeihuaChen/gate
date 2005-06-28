@@ -48,7 +48,7 @@ public class DumpingPR extends AbstractLanguageAnalyser
     DPR_DUMP_TYPES_PARAMETER_NAME = "dumpTypes";
 
   public static final String
-    DPR_OUTPUR_URL_PARAMETER_NAME = "outputFileUrl";
+    DPR_OUTPUT_URL_PARAMETER_NAME = "outputDirectoryUrl";
 
   public static final String
     DPR_INCLUDE_FEAT_PARAMETER_NAME = "includeFeatures";
