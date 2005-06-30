@@ -19,7 +19,9 @@ import gate.creole.*;
 import gate.creole.gazetteer.DefaultGazetteer;
 import gate.event.ProgressListener;
 import gate.event.StatusListener;
+import gate.util.GateRuntimeException;
 import gate.util.InvalidOffsetException;
+import gate.util.LuckyException;
 /**
  * A sentence splitter. This is module contains a tokeniser, a
  * gazetteer and a Jape grammar. This class is used so we can have a different
@@ -159,9 +161,13 @@ public class SentenceSplitter extends AbstractLanguageAnalyser{
     //create one big sentence if none were found
     AnnotationSet sentences = outputAS.get(SENTENCE_ANNOTATION_TYPE);
     if(sentences == null || sentences.isEmpty()){
-      outputAS.add(outputAS.firstNode(), outputAS.lastNode(),
-                   SENTENCE_ANNOTATION_TYPE,
-                   Factory.newFeatureMap());;
+      //create an annotation covering the entire content
+      try{
+        outputAS.add(new Long(0), document.getContent().size(), 
+                SENTENCE_ANNOTATION_TYPE, Factory.newFeatureMap());
+      }catch(InvalidOffsetException ioe){
+        throw new GateRuntimeException(ioe);
+      }
     }else{
       //add a sentence covering all the tokens after the last sentence
       Long endSentences = sentences.lastNode().getOffset();
