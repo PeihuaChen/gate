@@ -108,6 +108,16 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   } // addConstraint
 
 
+  /**
+   * Indicates whether this constraint deals with only one type of annotation or
+   * multiple types.
+   */
+  public boolean isMultiType() {
+      return constraints2 != null ? constraints2.length > 1 :
+             constraints1 != null ? constraints1.size() > 1 :
+             false;
+  }
+
   /** Finish: replace dynamic data structures with Java arrays; called
     * after parsing.
     */
