@@ -54,14 +54,11 @@ public class Transition implements Serializable, Comparable {
     * @param state the target state of this transition
     */
   public Transition(BasicPatternElement constraints, State state) {
-    this();
-    this.constraints = constraints;
-    target = state;
-    bindings = new LinkedList();
+    this(constraints, state, new LinkedList());
   }
 
   /**
-    * Ctreates a new transition from a set of constraints, a target state and a
+    * Creates a new transition from a set of constraints, a target state and a
     * list of labels to be bound with the recognized input symbols
     * (aka annotations).
     */
@@ -71,6 +68,15 @@ public class Transition implements Serializable, Comparable {
     this.constraints = constraints;
     target = state;
     this.bindings = bindings;
+  }
+
+  /**
+    * Creates a new transition to the given State with the same 
+    * bindings as this one.
+    */
+  public Transition spawn(State s)
+  {
+      return new Transition(constraints, s, bindings);
   }
 
   /**
@@ -84,6 +90,23 @@ public class Transition implements Serializable, Comparable {
     */
   public BasicPatternElement getConstraints(){ return constraints; }
 
+  /**
+    * Returns a boolean value indicating whether this Transition 
+    * has any constraints on it.
+    */
+  public boolean hasConstraints()
+  {
+      return constraints != null;
+  }
+
+  /**
+    * Returns a boolean value indicating whether this Transition 
+    * deals with multiple types of annotations.
+    */
+  public boolean isMultiType() {
+      return constraints != null && constraints.isMultiType();
+  }
+  
   /**
     * Returns a textual desciption of this transition.
     * @return a String
