@@ -27,7 +27,7 @@ import gate.creole.*;
   * the GUI functionality needed to set up params for AnnotationDiff and also
   * adds the AnnotationDiff as a tool in GATE.
   * @deprecated This functionality is now provided by the 
-  * @link{gate.gui.AnnotationDiffGUI} class.
+  * {@link gate.gui.AnnotationDiffGUI} class.
   */
 class AnnotDiffDialog extends JFrame {
   // Local data needed in initLocalData() method
