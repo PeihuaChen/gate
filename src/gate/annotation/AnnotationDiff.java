@@ -31,8 +31,8 @@ import gate.util.*;
   * This class compare two annotation sets on annotation type given by the
   * AnnotationSchema object. It also deals with graphic representation of the
   * result.
-  * @deprecated This functionality is now provided by the 
-  * {@link gate.util.AnnotationDiffer} class.
+  * @deprecated This functionality is provided by the 
+  * {@link gate.util.AnnotationDiffer} class as of GATE version 3.0.
   */
 public class AnnotationDiff extends AbstractVisualResource
   implements  Scrollable{
