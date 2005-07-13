@@ -17,19 +17,58 @@ import java.util.*;
 
 import gate.Annotation;
 
+/**
+ * This class provides the logic used by the Annotation Diff tool. It starts 
+ * with two collections of annotation objects, one of key annotations
+ * (representing the gold standard) and one of response annotations 
+ * (representing the system's responses). It will then pair the keys and 
+ * responses in a way that maximises the score. Each key - response pair gets a 
+ * score of {@link #CORRECT} (2), {@link #PARTIALLY_CORRECT} (1) or 
+ * {@link #WRONG} (0)depending on whether the two annotations match are 
+ * overlapping or completely unmatched. Each pairing also has a type of 
+ * {@link #CORRECT_TYPE}, {@link #PARTIALLY_CORRECT_TYPE}, 
+ * {@link #SPURIOUS_TYPE} or {@link #MISSING_TYPE} further detailing the type of
+ * error for the wrong matches (<i>missing</i> being the keys that weren't 
+ * matched to a response while  <i>spurious</i> are the responses that were 
+ * over-generated and are not matching any key.
+ *   
+ * Precision, recall and f-measure are also calculated.
+ */
 public class AnnotationDiffer {
 
 
+  /**
+   * Interface representing a pairing between a key annotation and a response 
+   * one.
+   */
   public static interface Pairing{
+    /**
+     * Gets the key annotation of the pairing. Can be <tt>null</tt> (for 
+     * spurious matches).
+     * @return an {@link Annotation} object.
+     */
     public Annotation getKey();
+
+    /**
+     * Gets the response annotation of the pairing. Can be <tt>null</tt> (for 
+     * missing matches).
+     * @return an {@link Annotation} object.
+     */
     public Annotation getResponse();
+    
+    /**
+     * Gets the type of the pairing, one of {@link #CORRECT_TYPE}, 
+     * {@link #PARTIALLY_CORRECT_TYPE}, {@link #SPURIOUS_TYPE} or 
+     * {@link #MISSING_TYPE},
+     * @return an <tt>int</tt> value.
+     */
     public int getType();
   }
 
   /**
    * Computes a diff between two collections of annotations.
-   * @param key
-   * @param response
+   * @param key the colelction of key annotations.
+   * @param response the collection of response annotations.
    * @return a list of {@link Pairing} objects representing the pairing set
    * that results in the best score.
    */
@@ -178,6 +217,11 @@ public class AnnotationDiffer {
     return finalChoices;
   }
 
+  /**
+   * Gets the strict precision (the ratio of correct responses out of all the 
+   * provided responses).
+   * @return a <tt>double</tt> value.
+   */
   public double getPrecisionStrict(){
     if(responseList.size() == 0) {
       return 1.0;
@@ -185,6 +229,11 @@ public class AnnotationDiffer {
     return correctMatches/(double)responseList.size();
   }
 
+  /**
+   * Gets the strict recall (the ratio of key matched to a response out of all 
+   * the keys).
+   * @return a <tt>double</tt> value.
+   */  
   public double getRecallStrict(){
     if(keyList.size() == 0) {
       return 1.0;
@@ -192,6 +241,11 @@ public class AnnotationDiffer {
     return correctMatches/(double)keyList.size();
   }
 
+  /**
+   * Gets the lenient precision (where the partial matches are considered as
+   * correct).
+   * @return a <tt>double</tt> value.
+   */
   public double getPrecisionLenient(){
     if(responseList.size() == 0) {
       return 1.0;
@@ -199,12 +253,19 @@ public class AnnotationDiffer {
     return ((double)correctMatches + partiallyCorrectMatches) / (double)responseList.size();
   }
 
-
+  /**
+   * Gets the average of the strict and lenient precision values.
+   * @return a <tt>double</tt> value.
+   */
   public double getPrecisionAverage() {
     return ((double)getPrecisionLenient() + getPrecisionStrict()) / (double)(2.0);
   }
 
-
+  /**
+   * Gets the lenient recall (where the partial matches are considered as
+   * correct).
+   * @return a <tt>double</tt> value.
+   */
   public double getRecallLenient(){
     if(keyList.size() == 0) {
       return 1.0;
@@ -212,10 +273,23 @@ public class AnnotationDiffer {
     return ((double)correctMatches + partiallyCorrectMatches) / (double)keyList.size();
   }
 
+  /**
+   * Gets the average of the strict and lenient recall values.
+   * @return a <tt>double</tt> value.
+   */
   public double getRecallAverage() {
     return ((double) getRecallLenient() + getRecallStrict()) / (double)(2.0);
   }
 
+  /**
+   * Gets the strict F-Measure (the harmonic weighted mean of the strict
+   * precision and the strict recall) using the provided parameter as relative 
+   * weight. 
+   * @param beta The relative weight of precision and recall. A value of 1 
+   * gives equal weights to precision and recall. A value of 0 takes the recall 
+   * value completely out of the equation.
+   * @return a <tt>double</tt>value.
+   */
   public double getFMeasureStrict(double beta){
     double precision = getPrecisionStrict();
     double recall = getRecallStrict();
@@ -225,6 +299,14 @@ public class AnnotationDiffer {
     return answer;
   }
 
+  /**
+   * Gets the lenient F-Measure (F-Measure where the lenient precision and 
+   * recall values are used) using the provided parameter as relative weight. 
+   * @param beta The relative weight of precision and recall. A value of 1 
+   * gives equal weights to precision and recall. A value of 0 takes the recall 
+   * value completely out of the equation.
+   * @return a <tt>double</tt>value.
+   */
   public double getFMeasureLenient(double beta){
     double precision = getPrecisionLenient();
     double recall = getRecallLenient();
@@ -234,52 +316,86 @@ public class AnnotationDiffer {
     return answer;
   }
 
+  /**
+   * Gets the average of strict and lenient F-Measure values.
+   * @param beta The relative weight of precision and recall. A value of 1 
+   * gives equal weights to precision and recall. A value of 0 takes the recall 
+   * value completely out of the equation.
+   * @return a <tt>double</tt>value.
+   */  
   public double getFMeasureAverage(double beta) {
     double answer = ((double)getFMeasureLenient(beta) + (double)getFMeasureStrict(beta)) / (double)(2.0);
     return answer;
   }
 
-
+  /**
+   * Gets the number of correct matches.
+   * @return an <tt>int<tt> value.
+   */
   public int getCorrectMatches(){
     return correctMatches;
   }
 
-
+  /**
+   * Gets the number of partially correct matches.
+   * @return an <tt>int<tt> value.
+   */
   public int getPartiallyCorrectMatches(){
     return partiallyCorrectMatches;
   }
 
-
+  /**
+   * Gets the number of pairings of type {@link #MISSING_TYPE}.
+   * @return an <tt>int<tt> value.
+   */
   public int getMissing(){
     return missing;
   }
 
-
+  /**
+   * Gets the number of pairings of type {@link #SPURIOUS_TYPE}.
+   * @return an <tt>int<tt> value.
+   */
   public int getSpurious(){
     return spurious;
   }
 
-
+  /**
+   * Gets the number of pairings of type {@link #SPURIOUS_TYPE}.
+   * @return an <tt>int<tt> value.
+   */
   public int getFalsePositivesStrict(){
     return responseList.size() - correctMatches;
   }
 
-
+  /**
+   * Gets the number of responses that aren't either correct or partially 
+   * correct.
+   * @return an <tt>int<tt> value.
+   */
   public int getFalsePositivesLenient(){
     return responseList.size() - correctMatches - partiallyCorrectMatches;
   }
 
-
+  /**
+   * Gets the number of keys provided.
+   * @return an <tt>int<tt> value.
+   */
   public int getKeysCount() {
     return keyList.size();
   }
 
-
+  /**
+   * Gets the number of responses provided.
+   * @return an <tt>int<tt> value.
+   */
   public int getResponsesCount() {
     return responseList.size();
   }
 
-
+  /**
+   * Prints to System.out the pairings that are not correct.
+   */
   public void printMissmatches(){
     //get the partial correct matches
     Iterator iter = finalChoices.iterator();
@@ -363,8 +479,9 @@ public class AnnotationDiffer {
       }
     }
   }
+  
   /**
-   *
+   * Adds a new pairing to the internal data structures.
    * @param pairing the pairing to be added
    * @param index the index in the list of pairings
    * @param listOfPairings the list of {@link Pairing}s where the
@@ -379,10 +496,22 @@ public class AnnotationDiffer {
     existingChoices.add(pairing);
   }
 
+  /**
+   * Gets the set of features considered significant for the matching algorithm.
+   * @return a Set.
+   */
   public java.util.Set getSignificantFeaturesSet() {
     return significantFeaturesSet;
   }
 
+  /**
+   * Set the set of features considered significant for the matching algorithm.
+   * A <tt>null</tt> value means that all features are significant, an empty 
+   * set value means that no features are significant while a set of String 
+   * values specifies that only features with names included in the set are 
+   * significant. 
+   * @param significantFeaturesSet a Set of String values or <tt>null<tt>.
+   */
   public void setSignificantFeaturesSet(java.util.Set significantFeaturesSet) {
     this.significantFeaturesSet = significantFeaturesSet;
   }
@@ -483,6 +612,12 @@ public class AnnotationDiffer {
     boolean scoreCalculated;
   }
 
+   /**
+    * Compares two pairings:
+    * the better score is preferred;
+    * for the same score the better type is preferred (exact matches are
+    * preffered to partial ones).
+    */   
 	protected static class PairingScoreComparator implements Comparator{
     /**
      * Compares two choices:
@@ -512,7 +647,10 @@ public class AnnotationDiffer {
 	  }
 	}
 
-
+    /**
+     * Compares two choices based on start offset of key (or response
+     * if key not present) and type if offsets are equal.
+     */
 	public static class PairingOffsetComparator implements Comparator{
     /**
      * Compares two choices based on start offset of key (or response
@@ -596,31 +734,68 @@ public class AnnotationDiffer {
   }
 
 
-  public HashSet correctAnnotations, partiallyCorrectAnnotations, missingAnnotations, spuriousAnnotations;
+  public HashSet correctAnnotations, partiallyCorrectAnnotations, 
+                 missingAnnotations, spuriousAnnotations;
 
 
-  /** A correct type when all annotation are correct represented by Green color*/
+  /** Type for correct pairings (when the key and response match completely)*/
   public static final int CORRECT_TYPE = 1;
-  /** A partially correct type when all annotation are corect represented
-   *  by Blue color*/
+  
+  /** 
+   * Type for partially correct pairings (when the key and response match 
+   * in type and significant features but the spans are just overlapping and 
+   * not identical.
+   */
   public static final int PARTIALLY_CORRECT_TYPE = 2;
-  /** A spurious type when annotations in response were not present in key.
-   *  Represented by Red color*/
+  
+  /** 
+   * Type for spurious pairings (where the response is not matching any key).
+   */
   public static final int SPURIOUS_TYPE = 3;
-  /** A missing type when annotations in key were not present in response
-   *  Represented by Yellow color*/
+  
+  /** 
+   * Type for missing pairings (where the key was not matched to a response).
+   */
   public static final int MISSING_TYPE = 4;
 
-
+  /**
+   * Score for a correct pairing.
+   */
   public static final int CORRECT = 2;
+
+  /**
+   * Score for a partially correct pairing.
+   */
   public static final int PARTIALLY_CORRECT = 1;
+  
+  /**
+   * Score for a wrong (missing or spurious) pairing.
+   */  
   public static final int WRONG = 0;
 
+  /**
+   * The set of significant features used for matching.
+   */
   private java.util.Set significantFeaturesSet;
 
+  /**
+   * The number of correct matches.
+   */
   protected int correctMatches;
+
+  /**
+   * The number of partially correct matches.
+   */
   protected int partiallyCorrectMatches;
+  
+  /**
+   * The number of missing matches.
+   */
   protected int missing;
+  
+  /**
+   * The number of spurious matches.
+   */  
   protected int spurious;
 
   /**
