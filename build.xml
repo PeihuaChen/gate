@@ -223,6 +223,7 @@
            source="1.4"
            encoding="UTF-8"
            debug="true"
+    			 deprecation="true"
            debuglevel="lines,source"
            includes="gate/**,com/**,debugger/**"
 					 classpathref="build.class.path"/>
@@ -238,6 +239,7 @@
            encoding="UTF-8"
            source="1.4"
            debug="true"
+           deprecation="true"    	
            includes="gate/**,com/**,debugger/**"
 					 classpathref="build.class.path"/>
   </target>
