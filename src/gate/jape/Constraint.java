@@ -17,11 +17,11 @@
 package gate.jape;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import gate.FeatureMap;
 import gate.util.SimpleFeatureMapImpl;
-import gate.util.Strings;
 
 
 /**
@@ -148,31 +148,11 @@ implements JapeConstants, java.io.Serializable, Cloneable
 
   /** Create a string representation of the object. */
   public String toString(String pad) {
-    String newline = Strings.getNl();
-
-    StringBuffer buf = new StringBuffer(
-      pad + "Constraint: annotType(" + annotType + "); attrs(" + newline + pad
-    );
-
-    // constraints
-    /*
-    for(int i=0; i<attrs.length(); i++)
-      buf.append(" " + attrs.nth(i));
-    for (Enumeration e = attrs.getElements(); e.hasMoreElements(); )
-      buf.append(" " + ((JdmAttribute) e.nextElement() ).toString());
-    buf.append(newline + pad + ") Constraint." + newline);
-     */
-    // constraints
-    if(attrs1 == null) {
-      for(int i=0; i<attrs2.length; i++)
-        buf.append(" " + attrs2[i]);
-    } else {
-      //for (Enumeration e = attrs1.getElements(); e.hasMoreElements(); )
-      //  buf.append(" " + ((JdmAttribute) e.nextElement() ).toString());
-      buf.append(attrs1.toString());
-    }
-    buf.append(newline + pad + ") Constraint." + newline);
-
+    StringBuffer buf = new StringBuffer
+	(pad + "Constraint: " + annotType + (negated ? "!=" : "="));
+    buf.append(attrs1 == null ? 
+	       Arrays.asList(attrs2).toString() : 
+	       attrs1.toString());
     return buf.toString();
   } // toString
 
@@ -192,6 +172,9 @@ implements JapeConstants, java.io.Serializable, Cloneable
 
 
 // $Log$
+// Revision 1.12  2005/07/15 15:37:32  valyt
+// New toString() method from Ken Williams
+//
 // Revision 1.11  2005/01/11 13:51:36  ian
 // Updating copyrights to 1998-2005 in preparation for v3.0
 //
