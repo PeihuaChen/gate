@@ -15,3 +15,4 @@ find gate2 -print | \
   grep -v 'CVS' | \
   sed 's,gate2/bin/images,gate2/bin/images/...,' | \
   sort
+
