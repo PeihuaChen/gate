@@ -457,12 +457,34 @@ public class MachineLearningPR extends AbstractLanguageAnalyser
         //type data was null -> nothing known about this type of annotations
         //get the insformation; update the cache and return the right value
         Annotation instanceAnnot = (Annotation)annotations.get(instanceIndex);
-        AnnotationSet coverSubset = annotationSet.get(
-                                      annType,
-                                      instanceAnnot.getStartNode().getOffset(),
-                                      instanceAnnot.getEndNode().getOffset());
+       
         typeData = new HashMap();
         cache.put(annType, typeData);
+        // The annotation retrieved by its index is in a default type
+    	// (default : Token). We need to search for overlapping types
+    	// only if the Type needed is not the one we already have
+    	// (which seems quite reasonable given that most Attributes are
+    	// likely to be based on Token informations)
+    	
+    	if (instanceAnnot.getType().equals(annType)){
+    		typeData.putAll(instanceAnnot.getFeatures());
+    		typeData.put(null, "true");
+    		
+    		String stringvalue = (String)typeData.get(featureName);
+    		if(featureName == null) return "true";
+    		return stringvalue;
+    	}
+    	
+    	// here we search for annotations of another type
+    	// first restrict to the needed type
+    	// then limit to those covering the current token
+    	AnnotationSet typeSubset = annotationSet.get(annType);
+    	AnnotationSet coverSubset = null;
+    	if (typeSubset!=null) coverSubset =	typeSubset.get(
+                annType,
+                instanceAnnot.getStartNode().getOffset(),
+                instanceAnnot.getEndNode().getOffset());
+    	
         if(coverSubset == null || coverSubset.isEmpty()){
           //no such annotations at given location
           typeData.put(null, "false");
