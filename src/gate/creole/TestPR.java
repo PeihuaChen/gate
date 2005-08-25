@@ -369,7 +369,7 @@ public class TestPR extends TestCase
 //    urlBaseName = re1.substituteAll( urlBaseName,"classes");
 //    urlBaseName = re2.substituteAll( urlBaseName,"");
 
-    if (urlBaseName.endsWith("/gate/bin/gate.jar!/")) {
+    if (urlBaseName.endsWith("/bin/gate.jar!/")) {
       StringBuffer buff = new StringBuffer(
                             urlBaseName.substring(
                               0,
