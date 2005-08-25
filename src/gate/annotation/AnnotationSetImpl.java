@@ -479,7 +479,6 @@ public class AnnotationSetImpl
     if (annotsByStartNode == null)
       indexByStartOffset();
     AnnotationSet resultSet = new AnnotationSetImpl(doc);
-    Iterator nodesIter;
     Iterator annotsIter;
     Node currentNode;
     Annotation currentAnnot;
@@ -580,9 +579,7 @@ public class AnnotationSetImpl
       indexByStartOffset();
     AnnotationSet resultSet = new AnnotationSetImpl(doc);
     Iterator nodesIter;
-    Iterator annotsIter;
     Node currentNode;
-    Annotation currentAnnot;
     //find all the annots that start at or after the start offset but strictly
     //before the end offset
     nodesIter = nodesByOffset.subMap(startOffset, endOffset).values().iterator();
@@ -633,6 +630,21 @@ public class AnnotationSetImpl
         new Long(node.getOffset().longValue() + 1)
         );
   }
+  
+  protected static AnnotationFactory annFactory;
+
+  /**
+   * Set the annotation factory used to create annotation objects.  The default
+   * factory is {@link DefaultAnnotationFactory}.
+   */
+  public static void setAnnotationFactory (AnnotationFactory newFactory) {
+    annFactory = newFactory;
+  }
+
+  static {
+    // set the default factory to always create AnnotationImpl objects
+    setAnnotationFactory(new DefaultAnnotationFactory());
+  }
 
   /** Create and add an annotation with pre-existing nodes,
    * and return its id
@@ -641,9 +653,7 @@ public class AnnotationSetImpl
     // the id of the new annotation
     Integer id = doc.getNextAnnotationId();
     // construct an annotation
-    Annotation a = new AnnotationImpl(id, start, end, type, features);
-    // delegate to the method that adds existing annotations
-    add(a);
+    annFactory.createAnnotationInSet(this, id, start, end, type, features);
     return id;
   } // add(Node, Node, String, FeatureMap)
 
@@ -775,8 +785,7 @@ public class AnnotationSetImpl
     if (endNode == null || !endNode.getOffset().equals(end))
       endNode = new NodeImpl(doc.getNextNodeId(), end);
       // construct an annotation
-    Annotation a = new AnnotationImpl(id, startNode, endNode, type, features);
-    add(a);
+    annFactory.createAnnotationInSet(this, id, startNode, endNode, type, features);
   } // add(id, start, end, type, features)
 
   /** Construct the positional index. */
@@ -784,7 +793,6 @@ public class AnnotationSetImpl
     if (annotsByType != null)
       return;
     annotsByType = new HashMap(Gate.HASH_STH_SIZE);
-    Annotation a;
     Iterator annotIter = annotsById.values().iterator();
     while (annotIter.hasNext())
       addToTypeIndex( (Annotation) annotIter.next());
@@ -807,7 +815,6 @@ public class AnnotationSetImpl
     if (nodesByOffset == null)
       nodesByOffset = new RBTreeMap();
     annotsByEndNode = new HashMap(Gate.HASH_STH_SIZE);
-    Annotation a;
     Iterator annotIter = annotsById.values().iterator();
     while (annotIter.hasNext())
       addToEndOffsetIndex( (Annotation) annotIter.next());
@@ -841,9 +848,7 @@ public class AnnotationSetImpl
    */
   void addToStartOffsetIndex(Annotation a) {
     Node startNode = a.getStartNode();
-    Node endNode = a.getEndNode();
     Long start = startNode.getOffset();
-    Long end = endNode.getOffset();
     // add a's nodes to the offset index
     if (nodesByOffset != null)
       nodesByOffset.put(start, startNode);
@@ -865,9 +870,7 @@ public class AnnotationSetImpl
    * index doesn't exist.
    */
   void addToEndOffsetIndex(Annotation a) {
-    Node startNode = a.getStartNode();
     Node endNode = a.getEndNode();
-    Long start = startNode.getOffset();
     Long end = endNode.getOffset();
     // add a's nodes to the offset index
     if (nodesByOffset != null)

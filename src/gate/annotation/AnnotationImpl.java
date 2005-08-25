@@ -46,7 +46,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
    * @param type The type of the new annotation;
    * @param features The features of the annotation.
    */
-  AnnotationImpl(
+  protected AnnotationImpl(
     Integer id, Node start, Node end, String type, FeatureMap features
   ) {
     this.id       = id;
@@ -56,7 +56,6 @@ public class AnnotationImpl extends AbstractFeatureBearer
     this.features = features;
 
   } // AnnotationImpl
-
 
   /** The ID of the annotation.
    */
@@ -436,13 +435,13 @@ public class AnnotationImpl extends AbstractFeatureBearer
   /**
    * The start node
    */
-  Node start;
+  protected Node start;
 
   /**
    *  The end node
    */
-  Node end;
-
+  protected Node end;
+  
   /** @link dependency */
   /*#AnnotationImpl lnkAnnotationImpl;*/
 
