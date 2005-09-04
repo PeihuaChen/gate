@@ -395,4 +395,4 @@ public class DumpingPR extends AbstractLanguageAnalyser
       this.useSuffixForDumpFiles = useOrNot.booleanValue();
   }
 
-} // class AnnotationSetTransfer
+} // class DumpingPR
