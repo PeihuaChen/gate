@@ -39,6 +39,7 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
     OInstance newInstance = new OInstanceImpl(name, theClass);
     instancesByName.put(name, newInstance);
     instances.add(newInstance);
+    fireObjectModificationEvent(this);
     return newInstance;
   }
 
@@ -47,6 +48,7 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
       return;
     instancesByName.put(theInstance.getName(), theInstance);
     instances.add(theInstance);
+    fireObjectModificationEvent(this);
   }
 
   public void removeInstance(OInstance theInstance) {
