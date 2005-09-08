@@ -18,17 +18,19 @@
 
 package gate.creole.ontology;
 
-import java.util.Set;
+import java.util.*;
 
 public class OInstanceImpl implements OInstance {
 
   protected Object userData;
   protected OClass instanceClass;
   protected String instanceName;
+  protected HashMap instanceProperties;
 
   public OInstanceImpl(String aName, OClass aClass) {
       instanceName = aName;
       instanceClass = aClass;
+      instanceProperties = new HashMap();
     }
 
 
@@ -63,13 +65,19 @@ public class OInstanceImpl implements OInstance {
     return null;
   }
 
-  public void setPropertyValue(Property theProperty, Object theValue){
-    System.out.println("setPropertyValue not supported yet");
+  public void setPropertyValue(String propertyName, Object theValue){
+    if (propertyName == null || instanceClass == null)
+      return;
+    Set propSet = instanceClass.getPropertiesByName(propertyName);
+    if (propSet == null || propSet.isEmpty())
+      return;
+    this.instanceProperties.put(propertyName, theValue);
   }
 
-  public Object getPropertyValue(Property theProperty){
-    System.out.println("getPropertyValue not supported yet");
-    return null;
+  public Object getPropertyValue(String propertyName){
+    if (instanceProperties == null || instanceProperties.isEmpty())
+      return null;
+    return instanceProperties.get(propertyName);
   }
 
   public void setSameIndividualAs(OInstance theIndividual){
