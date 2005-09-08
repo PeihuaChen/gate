@@ -16,6 +16,7 @@ import java.awt.dnd.peer.*;
 
 import java.io.*;
 import java.util.*;
+import java.util.List;
 
 import gate.creole.ontology.*;
 import gate.util.GateRuntimeException;
@@ -618,9 +619,18 @@ public class EditableTreeView extends JTree
           Iterator iter = props.iterator();
           while (iter.hasNext()) {
             gate.creole.ontology.Property prop = (Property) iter.next();
-            Out.println("[" + prop.getName() + "=" +
-                            theInstance.getPropertyValue(prop.getName()) 
-                         + "]");
+            //iterate over the values
+            List values = theInstance.getPropertyValues(prop.getName());
+            if(values != null){
+              Iterator valIter = values.iterator();
+              while(valIter.hasNext()){
+                Out.println("[" + prop.getName() + "=" +
+                        valIter.next().toString() 
+                     + "]");
+                
+              }
+            }
+             
           }
         }         
       }
