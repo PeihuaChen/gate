@@ -71,8 +71,43 @@ public class OInstanceImpl implements OInstance {
     return null;
   }
 
+  
+  public boolean addPropertyValue(String propertyName, Object theValue){
+    //this means that we look for a property with the same name 
+    //in the class. If such cannot be found, i.e. the propSet is 
+    //is empty, then we just return without adding the value
+    Set propSet = instanceClass.getPropertiesByName(propertyName);
+    if (propSet == null || propSet.isEmpty()) return false;
+    
+    List values = (List)instanceProperties.get(propertyName);
+    if(values == null){
+      values = new ArrayList();
+      instanceProperties.put(propertyName, values);
+    }
+    values.add(theValue);
+    return true;
+  }
+
+
+  public List getPropertyValues(String propertyName){
+    return (List)instanceProperties.get(propertyName);
+  }
+  
+  public boolean removePropertyValue(String propertyName, Object theValue){
+    List values = (List)instanceProperties.get(propertyName);
+    if(values != null){
+      return values.remove(theValue);
+    }else return false;
+  }
+
+
+  public void removePropertyValues(String propertyName){
+    instanceProperties.remove(propertyName);
+  }
+
   public void setPropertyValue(String propertyName, Object theValue){
     if (propertyName == null || instanceClass == null)
+      
       return;
     //this means that we look for a property with the same name 
     //in the class. If such cannot be found, i.e. the propSet is 
