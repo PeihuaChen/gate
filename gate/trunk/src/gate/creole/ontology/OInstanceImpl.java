@@ -42,6 +42,12 @@ public class OInstanceImpl implements OInstance {
     return instanceName;
   }
 
+  
+  public String toString(){
+    return getName() + "(" + getOClass().getName() + ")";
+  }
+
+
   /** Sets the user data of this instance. To be used to
    * store arbitrary data on instances.
    */
