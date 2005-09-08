@@ -610,6 +610,17 @@ public class EditableTreeView extends JTree
         while (ip.hasNext())
           Out.println( ip.next().toString());
 
+      } else if (obj instanceof OInstance) {
+        OInstance theInstance = (OInstance) obj;
+        OClass instClass = theInstance.getOClass();
+        Iterator iter = instClass.getProperties().iterator();
+        while (iter.hasNext()) {
+          gate.creole.ontology.Property prop = (Property) iter.next();
+          Out.println("[" + prop.getName() + "=" +
+                          theInstance.getPropertyValue(prop.getName()) 
+                       + "]");
+        }
+         
       }
 
     } // actionPerformed
