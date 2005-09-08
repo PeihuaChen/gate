@@ -18,6 +18,7 @@
 
 package gate.creole.ontology;
 
+import java.util.List;
 import java.util.Set;
 
 public interface OInstance{
@@ -46,9 +47,36 @@ public interface OInstance{
 
   public Set getDifferentFrom();
 
-  public void setPropertyValue(String propertyName, Object theValue);
+  /**
+   * Adds a new property with the given name and value.
+   * @param propertyName the name of the property
+   * @param theValue the value for the property
+   * @return <tt>true</tt> if the property name is valid for this type of 
+   * instance and the new value has been added, <tt>false</tt> otherwise.
+   */
+  public boolean addPropertyValue(String propertyName, Object theValue);
 
-  public Object getPropertyValue(String propertyName);
+  /**
+   * Gets the list of values for a given property name.
+   * @param propertyName the name of the property
+   * @return a List of values.
+   */
+  public List getPropertyValues(String propertyName);
+  
+  /**
+   * Removes one of the values for a given property.
+   * @param propertyName the name of the property
+   * @param theValue the value to be removed.
+   * @return <tt>true</tt> if the value was foudn and removed, <tt>false</tt> 
+   * otherwise.
+   */
+  public boolean removePropertyValue(String propertyName, Object theValue);
+  
+  /**
+   * Removes all values for a named property.
+   * @param propertyName the property name.
+   */
+  public void removePropertyValues(String propertyName);
   
   public void setSameIndividualAs(OInstance theIndividual);
 
