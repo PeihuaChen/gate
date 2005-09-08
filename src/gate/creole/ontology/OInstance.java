@@ -46,10 +46,10 @@ public interface OInstance{
 
   public Set getDifferentFrom();
 
-  public void setPropertyValue(Property theProperty, Object theValue);
+  public void setPropertyValue(String propertyName, Object theValue);
 
-  public Object getPropertyValue(Property theProperty);
-
+  public Object getPropertyValue(String propertyName);
+  
   public void setSameIndividualAs(OInstance theIndividual);
 
   public Set getSameIndividualAs();
