@@ -68,6 +68,9 @@ public class OInstanceImpl implements OInstance {
   public void setPropertyValue(String propertyName, Object theValue){
     if (propertyName == null || instanceClass == null)
       return;
+    //this means that we look for a property with the same name 
+    //in the class. If such cannot be found, i.e. the propSet is 
+    //is empty, then we just return without adding the value
     Set propSet = instanceClass.getPropertiesByName(propertyName);
     if (propSet == null || propSet.isEmpty())
       return;
