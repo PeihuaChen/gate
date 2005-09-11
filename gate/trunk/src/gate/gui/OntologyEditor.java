@@ -1,22 +1,13 @@
 package gate.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTree;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
+import javax.swing.*;
+import javax.swing.tree.*;
 import com.ontotext.gate.ontology.TaxonomyImpl;
 import gate.Resource;
 import gate.creole.AbstractVisualResource;
@@ -81,6 +72,8 @@ public class OntologyEditor extends AbstractVisualResource
     tree.setRootVisible(false);
     tree.setShowsRootHandles(true);
     tree.setCellRenderer(new OntoTreeCellRenderer());
+    tree.getSelectionModel().setSelectionMode(
+            TreeSelectionModel.SINGLE_TREE_SELECTION);
     JScrollPane scroller = new JScrollPane(tree);
     
     mainSplit.setTopComponent(scroller);
@@ -101,10 +94,16 @@ public class OntologyEditor extends AbstractVisualResource
     Collections.sort(rootClasses, comparator);
     
     addChidrenRec(rootNode, rootClasses, comparator);
-    //expand the root
-    tree.expandPath(new TreePath(rootNode));
-    //expand the entire tree
-    for(int i = 0; i < tree.getRowCount(); i++) tree.expandRow(i);
+    
+    SwingUtilities.invokeLater(new Runnable(){
+      public void run(){
+        treeModel.reload();
+        //expand the root
+        tree.expandPath(new TreePath(rootNode));
+        //expand the entire tree
+        for(int i = 0; i < tree.getRowCount(); i++) tree.expandRow(i);
+      }
+    });
   }
   
   /**
@@ -164,6 +163,7 @@ public class OntologyEditor extends AbstractVisualResource
   }
 
   public void objectModified(ObjectModificationEvent e){
+//System.out.println("Ontology updated");    
     rebuildModel();
   }
   
@@ -187,20 +187,42 @@ public class OntologyEditor extends AbstractVisualResource
             boolean leaf,
             int row,
             boolean hasFocus){
-      Component res = super.getTreeCellRendererComponent(tree, value, sel, 
-              expanded, leaf, row, hasFocus);
+      
+      String text = null;
+      Icon icon = null;
       TreePath path = tree.getPathForRow(row);
       if(path!= null){
-        value = ((DefaultMutableTreeNode)path.getLastPathComponent())
-            .getUserObject();
-        if(value instanceof TClass){
-          setIcon(MainFrame.getIcon("Class.gif"));
-        }else if(value instanceof OInstance){
-          setIcon(MainFrame.getIcon("Instance.gif"));
+        Object nodeObject = ((DefaultMutableTreeNode)path.
+                getLastPathComponent()).getUserObject();
+        if(nodeObject instanceof TClass){
+          icon = MainFrame.getIcon("Class.gif");
+          text = ((TClass)nodeObject).getName();
+        }else if(nodeObject instanceof OInstance){
+          icon = MainFrame.getIcon("Instance.gif");
+          text = ((OInstance)nodeObject).getName();
         }
       }
+      
+      
+      if(icon != null){
+        if(expanded) setOpenIcon(icon);
+        else setClosedIcon(icon);
+        if(leaf) setLeafIcon(icon);
+      }
+      Component res = super.getTreeCellRendererComponent(tree, 
+              (text == null ? value : text), sel, expanded, leaf, row, 
+              hasFocus);
+      
       return res;
     }
+    
+//    public Dimension getPreferredSize() {
+//      Dimension retDimension = super.getPreferredSize();
+//      if(retDimension != null)
+//        retDimension = new Dimension(retDimension.width + 10,
+//                retDimension.height);
+//      return retDimension;
+//    }
   }
   
   /**
@@ -227,7 +249,7 @@ public class OntologyEditor extends AbstractVisualResource
   /**
    * The mode, for the tree.
    */
-  protected TreeModel treeModel;
+  protected DefaultTreeModel treeModel;
   
   /**
    * The main split
