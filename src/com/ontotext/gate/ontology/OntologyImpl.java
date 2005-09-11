@@ -1,28 +1,26 @@
 package com.ontotext.gate.ontology;
 
-import gate.creole.ontology.*;
-import java.util.List;
-import java.net.URL;
-import gate.creole.ResourceInstantiationException;
-import java.util.Set;
+import gate.creole.ontology.DatatypeProperty;
+import gate.creole.ontology.DatatypePropertyImpl;
+import gate.creole.ontology.FunctionalProperty;
+import gate.creole.ontology.NoSuchClosureTypeException;
+import gate.creole.ontology.OClass;
+import gate.creole.ontology.OClassImpl;
+import gate.creole.ontology.OInstance;
+import gate.creole.ontology.OInstanceImpl;
+import gate.creole.ontology.ObjectProperty;
+import gate.creole.ontology.ObjectPropertyImpl;
+import gate.creole.ontology.Ontology;
+import gate.creole.ontology.SymmetricProperty;
+import gate.creole.ontology.TClass;
+import gate.creole.ontology.TransitiveProperty;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Comparator;
-import gate.DataStore;
-import gate.persist.PersistenceException;
-import gate.security.SecurityException;
-import gate.LanguageResource;
-import gate.Resource;
-import gate.FeatureMap;
-
-import java.util.*;
-import com.hp.hpl.jena.daml.*;
-import com.hp.hpl.jena.daml.common.*;
-import com.hp.hpl.mesa.rdf.jena.model.*;
-import com.hp.hpl.mesa.rdf.jena.common.*;
-import com.hp.hpl.jena.vocabulary.*;
-import com.hp.hpl.mesa.rdf.jena.common.prettywriter.*;
-import com.hp.hpl.mesa.rdf.jena.vocabulary.*;
-import com.hp.hpl.jena.rdf.arp.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 public class OntologyImpl extends TaxonomyImpl implements Ontology {

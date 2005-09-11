@@ -2,6 +2,7 @@ package com.ontotext.gate.vr;
 
 import gate.gui.*;
 import gate.creole.ontology.*;
+import gate.creole.ontology.OntologyEditor;
 import gate.creole.*;
 import gate.event.*;
 import gate.*;
@@ -62,7 +63,7 @@ public class OntologyEditorImpl
     this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     this.add(panel);
     gate.Gate.addCreoleListener(OntologyEditorImpl.this);
-    OntologyImpl.addObjectModificationListener(this);
+    
   }//constructor
 
   /**Is called when an ontology has been selected from the ontology list
@@ -296,6 +297,9 @@ public void createOntology (
 public void setOntology(Taxonomy o) {
   ontology = o;
   ontologySelected(o);
+  if(ontology instanceof TaxonomyImpl){
+    ((TaxonomyImpl)ontology).addObjectModificationListener(this);
+  }
 } // setOntology();
 
 public Taxonomy getOntology() {
