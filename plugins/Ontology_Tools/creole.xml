@@ -60,6 +60,7 @@
 
   <!-- creole.xml for Visual Resources -->
   <CREOLE>
+    
     <!-- VR Ontology Editor -->
     <RESOURCE>
       <NAME>Ontology Editor</NAME>
@@ -70,6 +71,16 @@
       </GUI>
     </RESOURCE>
 
+    <!-- VR NEW Ontology Editor -->
+    <RESOURCE>
+      <NAME>GATE Ontology Editor</NAME>
+      <CLASS>gate.gui.OntologyEditor</CLASS>
+      <GUI TYPE="large">
+        <MAIN_VIEWER/>
+        <RESOURCE_DISPLAYED>gate.creole.ontology.Taxonomy</RESOURCE_DISPLAYED>
+      </GUI>
+    </RESOURCE>
+    
     <!-- VR Protege -->
     <RESOURCE>
       <NAME>Protege</NAME>
