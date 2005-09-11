@@ -25,7 +25,7 @@ extends gate.creole.AbstractLanguageResource implements Taxonomy {
   public static final byte TRANSITIVE_CLOSURE = 1;
 
   /** Object Modification Listeners */
-  private static Set listeners = new HashSet();
+  private Set listeners = new HashSet();
 
   private String label;
   private URL url;
@@ -43,7 +43,7 @@ extends gate.creole.AbstractLanguageResource implements Taxonomy {
    * Adds an object modification listener.
    * @param listener listener to be added.
    */
-  public static void addObjectModificationListener(ObjectModificationListener listener) {
+  public void addObjectModificationListener(ObjectModificationListener listener) {
     if ( null==listener )
       throw new IllegalArgumentException(
         "The object modification listener should not be [null].");
@@ -52,7 +52,7 @@ extends gate.creole.AbstractLanguageResource implements Taxonomy {
 
   /**Fires an object modification event.
    * @param event the event to be fired   */
-  protected static void fireObjectModificationEvent(Object source) {
+  protected void fireObjectModificationEvent(Object source) {
     ObjectModificationEvent event = new ObjectModificationEvent(source,
       ObjectModificationEvent.OBJECT_MODIFIED,ObjectModificationEvent.OBJECT_MODIFIED);
     ArrayList ll = new ArrayList(listeners);
