@@ -72,6 +72,7 @@ public class OntologyEditor extends AbstractVisualResource
     tree.setRootVisible(false);
     tree.setShowsRootHandles(true);
     tree.setCellRenderer(new OntoTreeCellRenderer());
+//    tree.setCellRenderer(new DefaultTreeCellRenderer());
     tree.getSelectionModel().setSelectionMode(
             TreeSelectionModel.SINGLE_TREE_SELECTION);
     JScrollPane scroller = new JScrollPane(tree);
@@ -188,41 +189,34 @@ public class OntologyEditor extends AbstractVisualResource
             int row,
             boolean hasFocus){
       
-      String text = null;
-      Icon icon = null;
-      TreePath path = tree.getPathForRow(row);
-      if(path!= null){
-        Object nodeObject = ((DefaultMutableTreeNode)path.
-                getLastPathComponent()).getUserObject();
+        
+      if(value != null && value instanceof DefaultMutableTreeNode){
+        Icon icon = null;
+        String itemName = null;
+        Object nodeObject = ((DefaultMutableTreeNode)value).getUserObject();
         if(nodeObject instanceof TClass){
           icon = MainFrame.getIcon("Class.gif");
-          text = ((TClass)nodeObject).getName();
+          itemName = ((TClass)nodeObject).getName();
         }else if(nodeObject instanceof OInstance){
           icon = MainFrame.getIcon("Instance.gif");
-          text = ((OInstance)nodeObject).getName();
+          itemName = ((OInstance)nodeObject).getName();
         }
+        if(icon != null){
+          if(expanded) setOpenIcon(icon);
+          else setClosedIcon(icon);
+          if(leaf) setLeafIcon(icon);
+        }
+        super.getTreeCellRendererComponent(tree, 
+                itemName, sel, expanded, leaf, row, 
+                hasFocus);
+      }else{
+        super.getTreeCellRendererComponent(tree, 
+                value, sel, expanded, leaf, row, 
+                hasFocus);
       }
-      
-      
-      if(icon != null){
-        if(expanded) setOpenIcon(icon);
-        else setClosedIcon(icon);
-        if(leaf) setLeafIcon(icon);
-      }
-      Component res = super.getTreeCellRendererComponent(tree, 
-              (text == null ? value : text), sel, expanded, leaf, row, 
-              hasFocus);
-      
-      return res;
+      return this;
     }
-    
-//    public Dimension getPreferredSize() {
-//      Dimension retDimension = super.getPreferredSize();
-//      if(retDimension != null)
-//        retDimension = new Dimension(retDimension.width + 10,
-//                retDimension.height);
-//      return retDimension;
-//    }
+
   }
   
   /**
