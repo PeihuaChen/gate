@@ -19,6 +19,9 @@ import gate.util.GateException;
 import gate.creole.ExecutionException;
 import java.util.List;
 
+import java.io.File;
+import java.io.IOException;
+
 /**
  * Wrapper class for the SVM Light support vector machine learning algorithm.
  * The executable files, SVM_Learn and SVM_Classify must be placed on your path
@@ -1191,17 +1194,7 @@ public class SVMLightWrapper
             java.io.File file = fileChooser.getSelectedFile();
             try {
               gate.gui.MainFrame.lockGUI("Saving ML model...");
-              save(new java.util.zip.GZIPOutputStream(
-                  new java.io.FileOutputStream(
-                  file.getCanonicalPath(), false)));
-
-              // If we've got an up to date model trained, then save that too,
-              // in a file with the same name but with .NativePart appended.
-              // N.B. As models are always stored on the disk anyway, this
-              // really just involves copying a file to the location given
-              // by the user.
-              if (datasetChanged==false && modelTrained)
-                copyModelFromTempFile(file.getCanonicalPath()+".NativePart");
+              saveModel(file);
             }
             catch (java.io.IOException ioe) {
               javax.swing.JOptionPane.showMessageDialog(null,
@@ -1253,18 +1246,7 @@ public class SVMLightWrapper
             java.io.File file = fileChooser.getSelectedFile();
             try {
               gate.gui.MainFrame.lockGUI("Loading model...");
-
-              load(new java.util.zip.GZIPInputStream(
-                  new java.io.FileInputStream(file)));
-
-              // If an up to date svm_model was saved when the model was saved,
-             // load that back in too, from a separate file,
-              // with the same name but with .NativePart appended. As we want
-              // to end up with the model in a file, we don't need to actually
-              // load it, instead we just copy the file to the modelFile.
-              if (datasetChanged==false && modelTrained) {
-                copyModelToTempFile(file.getAbsolutePath() + ".NativePart");
-              }
+              loadModel(file);
             } catch (java.io.IOException ioe) {
               javax.swing.JOptionPane.showMessageDialog(null,
                   "Error!\n" +
@@ -1393,6 +1375,63 @@ public class SVMLightWrapper
     }
   }
 
+  /**
+   * Load a previously saved state of the engine.  If the saved state includes
+   * an up-to-date trained model, this is also reloaded.
+   *
+   * @param file the file from which the state is to be loaded.  If the state
+   * indicates that a trained model should be loaded, this should be in
+   * <i>file</i>.NativePart.
+   */
+  public void loadModel(File file) throws IOException {
+    load(new java.util.zip.GZIPInputStream(
+        new java.io.FileInputStream(file)));
+
+    // If an up to date svm_model was saved when the model was saved,
+    // load that back in too, from a separate file,
+    // with the same name but with .NativePart appended. As we want
+    // to end up with the model in a file, we don't need to actually
+    // load it, instead we just copy the file to the modelFile.
+    if (datasetChanged==false && modelTrained) {
+      copyModelToTempFile(file.getAbsolutePath() + ".NativePart");
+    }
+  }
+
+  /**
+   * Saves the state of the engine for reuse at a later time. optionsElement is
+   * not saved so as to make this code consistent with wekaWrapper.  If an
+   * up-to-date trained model exists, it will be saved in
+   * <i>file</i>.NativePart.
+   */
+  public void saveModel(File file) throws IOException {
+    save(new java.util.zip.GZIPOutputStream(
+        new java.io.FileOutputStream(
+        file.getCanonicalPath(), false)));
+
+    // If we've got an up to date model trained, then save that too,
+    // in a file with the same name but with .NativePart appended.
+    // N.B. As models are always stored on the disk anyway, this
+    // really just involves copying a file to the location given
+    // by the user.
+    if (datasetChanged==false && modelTrained)
+      copyModelFromTempFile(file.getCanonicalPath()+".NativePart");
+  }
+
+
+  /**
+   * Has the dataset changed since the model was last trained?
+   */
+  public boolean isDatasetChanged() {
+    return datasetChanged;
+  }
+
+  /**
+   * Is there a trained model available (whether or not it is up to date)?
+   */
+  public boolean isModelTrained() {
+    return modelTrained;
+  }
+  
   public boolean supportsBatchMode(){
     return true;
   }
