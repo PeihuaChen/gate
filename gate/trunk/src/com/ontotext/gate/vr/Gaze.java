@@ -208,9 +208,6 @@ public class Gaze extends AbstractVisualResource
       linearPopupEdit.addActionListener(new LinearPopupEditListener());
       linearPopupRemove.addActionListener(new LinearPopupRemoveListener());
       linearPopupInsert.addActionListener(new LinearPopupInsertListener());
-
-      OntologyImpl.addObjectModificationListener(this);
-
     } catch(Exception e) {
       e.printStackTrace(gate.util.Err.getPrintWriter());
     }
@@ -421,6 +418,9 @@ public class Gaze extends AbstractVisualResource
               // get te ontology
               try {
                 ontology = new OntologyImpl().getOntology(ourl);
+                if(ontology instanceof TaxonomyImpl)
+                  ((TaxonomyImpl)ontology).
+                  addObjectModificationListener(Gaze.this);
               } catch (ResourceInstantiationException x) {
                 x.printStackTrace(Err.getPrintWriter());
               }
@@ -1835,6 +1835,9 @@ public class Gaze extends AbstractVisualResource
               URL ourl = new URL("file:///"+selected.getAbsolutePath());
               try {
                 ontology = new OntologyImpl().getOntology(ourl);
+                if(ontology instanceof TaxonomyImpl)
+                  ((TaxonomyImpl)ontology).
+                  addObjectModificationListener(Gaze.this);
               } catch (ResourceInstantiationException x) {
                 x.printStackTrace(Err.getPrintWriter());
               }
