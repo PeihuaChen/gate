@@ -88,6 +88,10 @@ public class OInstanceImpl implements OInstance {
     return true;
   }
 
+  public Set getSetPropertiesNames(){
+    return instanceProperties.keySet();
+  }
+
 
   public List getPropertyValues(String propertyName){
     return (List)instanceProperties.get(propertyName);

@@ -78,6 +78,11 @@ public interface OInstance{
    */
   public void removePropertyValues(String propertyName);
   
+  /**
+   * Gets the names of the properties that have set values for this instance.
+   * @return a set of String values.
+   */
+  public Set getSetPropertiesNames();
   public void setSameIndividualAs(OInstance theIndividual);
 
   public Set getSameIndividualAs();
