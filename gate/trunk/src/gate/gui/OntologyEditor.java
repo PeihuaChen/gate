@@ -1,12 +1,20 @@
 package gate.gui;
 
 import java.awt.*;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import javax.swing.*;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.tree.*;
 import com.ontotext.gate.ontology.TaxonomyImpl;
 import gate.Resource;
@@ -16,11 +24,13 @@ import gate.creole.ontology.NoSuchClosureTypeException;
 import gate.creole.ontology.OClass;
 import gate.creole.ontology.OInstance;
 import gate.creole.ontology.Ontology;
+import gate.creole.ontology.Property;
 import gate.creole.ontology.TClass;
 import gate.creole.ontology.Taxonomy;
 import gate.event.GateEvent;
 import gate.event.ObjectModificationEvent;
 import gate.event.ObjectModificationListener;
+import gate.swing.XJTable;
 import gate.util.GateRuntimeException;
 import gate.util.LuckyException;
 
@@ -55,14 +65,13 @@ public class OntologyEditor extends AbstractVisualResource
 
   
   protected void initLocalData(){
-    
+    itemComparator = new OntologyItemComparator();
   }
   
   protected void initGUIComponents(){
     this.setLayout(new BorderLayout());
     
     mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-    
     this.add(mainSplit, BorderLayout.CENTER);
     
     
@@ -72,17 +81,66 @@ public class OntologyEditor extends AbstractVisualResource
     tree.setRootVisible(false);
     tree.setShowsRootHandles(true);
     tree.setCellRenderer(new OntoTreeCellRenderer());
-//    tree.setCellRenderer(new DefaultTreeCellRenderer());
     tree.getSelectionModel().setSelectionMode(
             TreeSelectionModel.SINGLE_TREE_SELECTION);
     JScrollPane scroller = new JScrollPane(tree);
     
-    mainSplit.setTopComponent(scroller);
+    mainSplit.setLeftComponent(scroller);
+    
+    detailsTableModel = new DetailsTableModel();
+    detailsTable = new XJTable(detailsTableModel);
+    ((XJTable)detailsTable).setSortable(false);
+    DetailsTableCellRenderer renderer = new DetailsTableCellRenderer();
+    detailsTable.getColumnModel().getColumn(DetailsTableModel.EXPANDED_COLUMN).
+      setCellRenderer(renderer);
+    detailsTable.getColumnModel().getColumn(DetailsTableModel.LABEL_COLUMN).
+      setCellRenderer(renderer);
+    detailsTable.setShowGrid(false);
+    detailsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    detailsTable.setColumnSelectionAllowed(false);
+    detailsTable.setRowSelectionAllowed(true);
+    
+    detailsTable.setTableHeader(null);
+    detailsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+    
+    scroller = new JScrollPane(detailsTable);
+    scroller.getViewport().setOpaque(true);
+    scroller.getViewport().setBackground(detailsTable.getBackground());
+    
+    mainSplit.setRightComponent(scroller);
     
   }
   
   protected void initListeners(){
+    tree.getSelectionModel().addTreeSelectionListener(
+      new TreeSelectionListener(){
+        public void valueChanged(TreeSelectionEvent e){
+          int[] selectedRows = tree.getSelectionRows();
+          if(selectedRows != null && selectedRows.length > 0){
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+                tree.getPathForRow(selectedRows[0]).
+                getLastPathComponent();
+            detailsTableModel.setItem(node.getUserObject());
+          }
+        }
+    });
     
+    mainSplit.addComponentListener(new ComponentListener(){
+      public void componentHidden(ComponentEvent e){
+      }
+
+      public void componentMoved(ComponentEvent e){
+      }
+
+      public void componentResized(ComponentEvent e){
+        mainSplit.setDividerLocation(0.7); 
+      }
+
+      public void componentShown(ComponentEvent e){
+        
+      }
+      
+    });
   }
   
   /**
@@ -90,15 +148,15 @@ public class OntologyEditor extends AbstractVisualResource
    */
   protected void rebuildModel(){
     rootNode.removeAllChildren();
-    Comparator comparator = new EntityComparator();
     List rootClasses = new ArrayList(taxonomy.getTopClasses());
-    Collections.sort(rootClasses, comparator);
+    Collections.sort(rootClasses, itemComparator);
     
-    addChidrenRec(rootNode, rootClasses, comparator);
+    addChidrenRec(rootNode, rootClasses, itemComparator);
     
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
-        treeModel.reload();
+        treeModel.nodeStructureChanged(rootNode);
+        tree.setSelectionInterval(0, 0);
         //expand the root
         tree.expandPath(new TreePath(rootNode));
         //expand the entire tree
@@ -164,18 +222,21 @@ public class OntologyEditor extends AbstractVisualResource
   }
 
   public void objectModified(ObjectModificationEvent e){
-//System.out.println("Ontology updated");    
-    rebuildModel();
+//System.out.println("Ontology updated");   
+    rebuildModel(); 
   }
   
   
-  protected static class EntityComparator implements Comparator{
+  protected static class OntologyItemComparator implements Comparator{
 
     public int compare(Object o1, Object o2){
       if(o1 instanceof TClass && o2 instanceof TClass)
         return ((TClass)o1).getName().compareTo(((TClass)o2).getName());
       else if(o1 instanceof OInstance && o2 instanceof OInstance)
         return ((OInstance)o1).getName().compareTo(((OInstance)o2).getName());
+      else if(o1 instanceof Property && o2 instanceof Property)
+        return ((Property)o1).getName().compareTo(((Property)o2).getName());
+      
       else return 0;
     }
   }
@@ -220,6 +281,331 @@ public class OntologyEditor extends AbstractVisualResource
   }
   
   /**
+   * A model for the list object displaying the item details.
+   */
+  protected class DetailsTableModel extends AbstractTableModel{
+
+    public DetailsTableModel(){
+      superClasses = new DetailsGroup("Super Classes", true, null);
+      subClasses = new DetailsGroup("Sub Classes", true, null);
+      instances = new DetailsGroup("Instances", true, null);
+      properties = new DetailsGroup("Properties", true, null);
+      detailGroups = new DetailsGroup[]{};
+
+    }
+    
+    
+    public int getColumnCount(){
+      return COLUMN_COUNT;
+    }
+
+    public int getRowCount(){
+      int size = detailGroups.length;
+      for(int i = 0; i < detailGroups.length; i++)
+        if(detailGroups[i].isExpanded()) size += detailGroups[i].getSize();
+      return size;
+    }
+
+    
+    public String getColumnName(int column){
+      switch(column){
+        case EXPANDED_COLUMN : return "";
+        case LABEL_COLUMN: return "";
+        default: return "";
+      }
+    }
+
+    public Class getColumnClass(int columnIndex){
+      switch(columnIndex){
+        case EXPANDED_COLUMN : return Boolean.class;
+        case LABEL_COLUMN: return Object.class;
+        default: return Object.class;
+      }
+    }
+
+
+    /* (non-Javadoc)
+     * @see javax.swing.table.AbstractTableModel#isCellEditable(int, int)
+     */
+    public boolean isCellEditable(int rowIndex, int columnIndex){
+      Object value = getItemForRow(rowIndex);
+      return columnIndex == EXPANDED_COLUMN && value instanceof DetailsGroup;
+    }
+
+
+    /* (non-Javadoc)
+     * @see javax.swing.table.AbstractTableModel#setValueAt(java.lang.Object, int, int)
+     */
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex){
+      Object oldValue = getItemForRow(rowIndex);
+      if(columnIndex == EXPANDED_COLUMN && oldValue instanceof DetailsGroup){
+        //set the expanded state
+        DetailsGroup aGroup = (DetailsGroup)oldValue;
+        aGroup.setExpanded(((Boolean)aValue).booleanValue());
+      }
+      fireTableDataChanged();
+    }
+
+
+    protected Object getItemForRow(int rowIndex){
+      int currentIndex = 0;
+      int groupIndex = 0;
+      while(currentIndex <= rowIndex){
+        if(currentIndex == rowIndex) {
+          //the item is a DetailsGroup
+          return detailGroups[groupIndex];
+        }
+        //find the increment required to point to the next group
+        int increment = 1 + 
+            (detailGroups[groupIndex].isExpanded() ? 
+             detailGroups[groupIndex].getSize() : 0);
+        if(currentIndex + increment > rowIndex){
+          //the value is from the current group
+          return detailGroups[groupIndex].getValueAt(rowIndex - currentIndex -1);
+        }else{
+          currentIndex += increment;
+          groupIndex++;
+        }
+      }
+      return null;
+    }
+    
+    public Object getValueAt(int rowIndex, int columnIndex){
+      Object value = getItemForRow(rowIndex);
+      switch(columnIndex){
+        case EXPANDED_COLUMN:
+          return value instanceof DetailsGroup ?
+                 new Boolean(((DetailsGroup)value).isExpanded()) :
+                 null;
+        case LABEL_COLUMN:
+          return value;
+        default:
+          return null;
+      }
+    }
+
+    
+    /**
+     * Used to set the current ontology item for which the details are shown.
+     * @param item the item to be displayed.
+     */
+    public void setItem(Object item){
+      if(item instanceof TClass){
+        detailGroups = new DetailsGroup[]{
+                superClasses, subClasses, instances, properties};
+
+        //displaying a class
+        TClass aClass = (TClass)item;
+        try{
+          //set the superClasses
+          Set classes = aClass. getSuperClasses(TClass.DIRECT_CLOSURE);
+          superClasses.getValues().clear();
+          if(classes != null){
+            superClasses.getValues().addAll(classes);
+            Collections.sort(superClasses.getValues(), itemComparator);
+          }
+
+          //set the subclasses
+          classes = aClass. getSubClasses(TClass.DIRECT_CLOSURE);
+          subClasses.getValues().clear();
+          if(classes != null){
+            subClasses.getValues().addAll(classes);
+            Collections.sort(subClasses.getValues(), itemComparator);
+          }
+        }catch(NoSuchClosureTypeException nse){
+          //this should never happen
+          throw new GateRuntimeException(nse);
+        }
+        
+        //set the instances
+        if(ontologyMode){
+          List instanceList = ontology.getDirectInstances((OClass)aClass);
+          instances.getValues().clear();
+          if(instanceList != null){
+            instances.getValues().addAll(instanceList);
+            Collections.sort(instances.getValues(), itemComparator);
+          }
+          
+          //set the properties
+          properties.getValues().clear();
+          Set props = ((OClass)aClass).getProperties();
+          if(props != null){
+            properties.getValues().addAll(props);
+            Collections.sort(properties.getValues(), itemComparator);
+          }
+        }
+        
+        
+      }else if(item instanceof OInstance){
+        //displaying an instance
+        detailGroups = new DetailsGroup[]{properties};
+        properties.getValues().clear();
+        OInstance anInstance = (OInstance)item;
+        Set propNames = anInstance.getSetPropertiesNames();
+        if(propNames != null){
+          Iterator propIter = propNames.iterator();
+          while(propIter.hasNext()){
+            String propertyName = (String)propIter.next();
+            List propValues = anInstance.getPropertyValues(propertyName);
+            if(propValues != null){
+              Iterator propValIter = propValues.iterator();
+              while(propValIter.hasNext()){
+                StringBuffer propText = new StringBuffer(propertyName);
+                propText.append("(");
+                Object propValue = propValIter.next();
+                propText.append(propValue instanceof OInstance ?
+                        ((OInstance)propValue).getName() :
+                         propValue.toString());
+                propText.append(")");
+                properties.getValues().add(propText.toString());
+              }
+            }
+          }
+          Collections.sort(properties.getValues());
+        }
+      }
+      
+      fireTableDataChanged();
+    }
+    protected DetailsGroup superClasses;
+    protected DetailsGroup subClasses;
+    protected DetailsGroup instances;
+    protected DetailsGroup properties;
+    protected DetailsGroup[] detailGroups;
+    
+    public static final int COLUMN_COUNT = 2;
+    public static final int EXPANDED_COLUMN = 0;
+    public static final int LABEL_COLUMN = 1;
+  }
+  
+  
+  protected class DetailsTableCellRenderer extends DefaultTableCellRenderer{
+    
+    public Component getTableCellRendererComponent(JTable table, 
+            Object value, boolean isSelected, boolean hasFocus, 
+            int row, int column){
+      //prepare the renderer
+      Component res = super.getTableCellRendererComponent(table, value, 
+              isSelected,hasFocus, row, column);
+      
+      //set the text and icon
+      if(column == DetailsTableModel.EXPANDED_COLUMN){
+        setText(null);
+        if(value == null) setIcon(null);
+        else{
+          Object actualValue = detailsTableModel.
+              getValueAt(row, DetailsTableModel.LABEL_COLUMN);
+          setIcon(MainFrame.getIcon(
+                ((Boolean)value).booleanValue() ?
+                "expanded.gif" :
+                "closed.gif"));
+          setEnabled(((DetailsGroup)actualValue).getSize() > 0);
+        }
+      }else if(column == DetailsTableModel.LABEL_COLUMN){
+        if(value instanceof DetailsGroup){
+          DetailsGroup aGroup = (DetailsGroup)value;
+          setIcon(null);
+          setFont(getFont().deriveFont(Font.BOLD));
+          setText(aGroup.getName());
+          setEnabled(aGroup.getSize() > 0);
+        }else if(value instanceof TClass){
+          TClass aClass = (TClass)value;
+          setIcon(MainFrame.getIcon("Class.gif"));
+          setFont(getFont().deriveFont(Font.PLAIN));
+          setText(aClass.getName());
+          setEnabled(true);
+        }else if(value instanceof OInstance){
+          OInstance anInstance = (OInstance)value;
+          setIcon(MainFrame.getIcon("Instance.gif"));
+          setFont(getFont().deriveFont(Font.PLAIN));
+          setText(anInstance.getName());
+          setEnabled(true);
+        }else if(value instanceof Property){
+          Property aProperty = (Property)value;
+          setIcon(MainFrame.getIcon("param.gif"));
+          setFont(getFont().deriveFont(Font.PLAIN));
+          String text = aProperty.getName() + " -> ";
+          Object range = aProperty.getRange();
+          text += range instanceof TClass ?
+                  ((TClass)range).getName() :
+                  range.toString();
+          setText(text);
+          setEnabled(true);
+        }else{
+          setIcon(null);
+          setFont(getFont().deriveFont(Font.PLAIN));
+          setText(value.toString());
+          setEnabled(true);
+        }
+      }
+      
+      return res;
+      
+    }
+
+  }
+  /**
+   * An object that holds one type of details (i.e. the super classes, or the 
+   * properties) of an ontology item (class or instance).
+   * @author Valentin Tablan
+   */
+  protected static class DetailsGroup{
+    public DetailsGroup(String name, boolean expanded, Collection values){
+      this.name = name;
+      this.expanded = expanded;
+      this.values = values == null ? new ArrayList() : new ArrayList(values);
+    }
+    
+    public String getName(){
+     return name; 
+    }
+    
+    /**
+     * @return Returns the expanded.
+     */
+    public boolean isExpanded(){
+      return expanded;
+    }
+    /**
+     * @param expanded The expanded to set.
+     */
+    public void setExpanded(boolean expanded){
+      this.expanded = expanded;
+    }
+    /**
+     * @param name The name to set.
+     */
+    public void setName(String name){
+      this.name = name;
+    }
+    
+    public int getSize(){
+      return values.size();
+    }
+    
+    public Object getValueAt(int index){
+      return values.get(index);
+    }
+
+    /**
+     * @return Returns the values.
+     */
+    public List getValues(){
+      return values;
+    }
+
+    /**
+     * @param values The values to set.
+     */
+    public void setValues(List values){
+      this.values = values;
+    }
+        
+    boolean expanded;
+    String name;
+    List values;
+  }
+  /**
    * The taxonomy that this editor displays
    */
   protected Taxonomy taxonomy;
@@ -235,6 +621,8 @@ public class OntologyEditor extends AbstractVisualResource
    */
   protected boolean ontologyMode;
   
+  
+  protected OntologyItemComparator itemComparator;
   /**
    * The tree view.
    */
@@ -244,6 +632,14 @@ public class OntologyEditor extends AbstractVisualResource
    * The mode, for the tree.
    */
   protected DefaultTreeModel treeModel;
+  
+  
+  /**
+   * The list view used to display item details
+   */
+  protected JTable detailsTable;
+  
+  DetailsTableModel detailsTableModel;
   
   /**
    * The main split
