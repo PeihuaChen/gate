@@ -62,7 +62,7 @@
   <CREOLE>
     
     <!-- VR Ontology Editor -->
-    <RESOURCE>
+<!--    <RESOURCE>
       <NAME>Ontology Editor</NAME>
       <CLASS>com.ontotext.gate.vr.OntologyEditorImpl</CLASS>
       <GUI TYPE="large">
@@ -70,7 +70,7 @@
         <RESOURCE_DISPLAYED>gate.creole.ontology.Taxonomy</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
-
+-->
     <!-- VR NEW Ontology Editor -->
     <RESOURCE>
       <NAME>GATE Ontology Editor</NAME>
