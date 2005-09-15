@@ -6,3 +6,4 @@ classes.jar
 config.log
 config.status
 gate.jar
+depcache
