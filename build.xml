@@ -193,7 +193,7 @@
 
 	<!-- This target compiles the GUK classes which are required by the main  
        GATE compile task -->  
-  <target name="guk">
+  <target name="guk" depends="depend">
     <mkdir dir="${outputDir}"/>
     <javac classpathref="build.class.path"
            destdir="${outputDir}" 
