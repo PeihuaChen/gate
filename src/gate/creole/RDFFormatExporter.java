@@ -20,13 +20,12 @@ import java.io.FileWriter;
 import java.io.Writer;
 import java.net.URL;
 import java.util.*;
+import com.hp.hpl.jena.ontology.daml.*;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.RDFWriter;
+import com.hp.hpl.jena.rdf.model.impl.RDFWriterFImpl;
 
 import junit.framework.Assert;
-
-import com.hp.hpl.jena.daml.*;
-import com.hp.hpl.jena.daml.common.DAMLModelImpl;
-import com.hp.hpl.mesa.rdf.jena.common.RDFWriterFImpl;
-import com.hp.hpl.mesa.rdf.jena.model.RDFWriter;
 
 import gate.*;
 
@@ -179,8 +178,8 @@ public class RDFFormatExporter extends AbstractLanguageAnalyser {
     HashMap instanceMatches = new HashMap();
     HashSet instanceNames = new HashSet();
 
-      ontologyModel = new DAMLModelImpl();
-      instanceModel = new DAMLModelImpl();
+      ontologyModel = ModelFactory.createDAMLModel();;
+      instanceModel = ModelFactory.createDAMLModel();
 
       Assert.assertNotNull(ontologyModel);
       Assert.assertNotNull(instanceModel);
@@ -276,7 +275,7 @@ public class RDFFormatExporter extends AbstractLanguageAnalyser {
               //3. add it to hashmap
 
               //1.
-              DAMLModel model = new DAMLModelImpl();
+              DAMLModel model = ModelFactory.createDAMLModel();
               model.read(annOntology);
 
               //2.
@@ -328,9 +327,8 @@ public class RDFFormatExporter extends AbstractLanguageAnalyser {
       }//while
 
       //print the model into file
-      RDFWriter rdfWriter = new RDFWriterFImpl().getWriter("RDF/XML-ABBREV");
-      rdfWriter.setNsPrefix("gate",this.ontologyLocation.toString()+"#");
-      rdfWriter.write(instanceModel,output,null);
+      instanceModel.setNsPrefix("gate",this.ontologyLocation.toString()+"#");
+      instanceModel.writeAll(output, "RDF/XML-ABBREV", null);
   }
 
   private HashMap ontology2hashmap(DAMLModel ontology) throws Exception {
