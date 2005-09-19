@@ -185,14 +185,11 @@ public class EditableTreeView extends JTree
     editURI_item =  new JMenuItem("Edit URI");
     editURI_item.addActionListener(new EditURIListener());
 
-    view_properties_item = new JMenuItem("View Properties");
-    view_properties_item.addActionListener(new ViewPropertiesListener());
 
     m_popUpMenu.add(add_item);
     m_popUpMenu.add(rename_item);
     m_popUpMenu.add(editURI_item);
     m_popUpMenu.add(remove_item);
-    m_popUpMenu.add(view_properties_item);
 
     /* ------- DnD --------- */
     /* in order to keep track of selecteNode and selectedPAth*/
@@ -574,68 +571,5 @@ public class EditableTreeView extends JTree
 
   } // class RemoveActListener
 
-  /**Listener for choosing [view Properties] from the popup menu */
-  private class ViewPropertiesListener implements ActionListener{
-    public void actionPerformed(ActionEvent e) {
-      JMenuItem item = (JMenuItem)e.getSource();
-      JPopupMenu popup = (JPopupMenu)item.getParent();
-      EditableTreeView tree = (EditableTreeView)popup.getInvoker();
-      ClassNode node = (ClassNode)tree.getLastSelectedPathComponent();
-      OEMainPanel panel = tree.getmainPanel();
-
-      if (null == panel) {
-        throw new GateRuntimeException(
-        "the main panel of the editor is not reachable\n "+
-        "upon rename class from the popup");
-      }// if null
-
-      OntologyEditor oe = panel.getOntologyEditor();
-
-      if (null == oe) {
-        throw new GateRuntimeException(
-        "the ontology editor of the main panel is not reachable\n "+
-        "upon rename class from the popup");
-      }// if null
-
-      Object obj = node.getSource();
-      if ( null == obj ) {
-        throw new GateRuntimeException(
-          "the class/ontology is null; in EditURIListener");
-      }
-      if (obj instanceof OClass) {
-        OClass theClass = (OClass) obj;
-        if (theClass.getProperties() == null)
-          return;
-        Out.println("Properties for class " + theClass.getName());
-        Iterator ip = theClass.getProperties().iterator();
-        while (ip.hasNext())
-          Out.println( ip.next().toString());
-
-      } else if (obj instanceof OInstance) {
-        OInstance theInstance = (OInstance) obj;
-        OClass instClass = theInstance.getOClass();
-        Set props = instClass.getProperties();
-        if(props != null && !props.isEmpty()){
-          Iterator iter = props.iterator();
-          while (iter.hasNext()) {
-            gate.creole.ontology.Property prop = (Property) iter.next();
-            //iterate over the values
-            List values = theInstance.getPropertyValues(prop.getName());
-            if(values != null){
-              Iterator valIter = values.iterator();
-              while(valIter.hasNext()){
-                Out.println("[" + prop.getName() + "=" +
-                        valIter.next().toString() 
-                     + "]");
-                
-              }
-            }
-             
-          }
-        }         
-      }
-
-    } // actionPerformed
-  } //class ViewPropertiesListener
 
 } // class EditableTreeView

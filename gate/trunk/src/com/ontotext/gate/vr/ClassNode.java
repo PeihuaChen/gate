@@ -44,66 +44,62 @@ public class ClassNode
     if (null == o)
       throw new gate.util.LazyProgrammerException("ontology is null.");
 
-    try {
-      ClassNode root = new ClassNode(o);
-      Iterator itops = o.getTopClasses().iterator();
-      Vector kids = new Vector();
-      while (itops.hasNext()) {
-        ClassNode node = new ClassNode((TClass)itops.next());
-        kids.add(node);
-      } // while
+    ClassNode root = new ClassNode(o);
+    Iterator itops = o.getTopClasses().iterator();
+    Vector kids = new Vector();
+    while (itops.hasNext()) {
+      ClassNode node = new ClassNode((TClass)itops.next());
+      kids.add(node);
+    } // while
 
-      root.source = o;
-      root.setChildren(kids);
-      Vector parents = kids;
-      Vector allKids;
-      do {
-        allKids = new Vector();
-        for ( int i= 0 ; i < parents.size() ; i++ ) {
-          ClassNode parent = (ClassNode)parents.get(i);
-          kids = new Vector();
+    root.source = o;
+    root.setChildren(kids);
+    Vector parents = kids;
+    Vector allKids;
+    do {
+      allKids = new Vector();
+      for ( int i= 0 ; i < parents.size() ; i++ ) {
+        ClassNode parent = (ClassNode)parents.get(i);
+        kids = new Vector();
 
-          //skip this one if it's an instance
-          if(parent.getSource() instanceof OInstance)
-            continue;
+        //skip this one if it's an instance
+        if(parent.getSource() instanceof OInstance)
+          continue;
 
-          TClass ocl = (TClass) parent.getSource();
+        TClass ocl = (TClass) parent.getSource();
 
-          //if we include instances, then get them too
-          if (includeInstances && (o instanceof Ontology)) {
-            Ontology kb = (Ontology) o;
-            List instances = kb.getDirectInstances((OClass)ocl);
-            if (instances != null && !instances.isEmpty()) {
-              Iterator insti = instances.iterator();
-              while (insti.hasNext())
-                kids.add(new ClassNode( (OInstance) insti.next()));
-            }
+        //if we include instances, then get them too
+        if (includeInstances && (o instanceof Ontology)) {
+          Ontology kb = (Ontology) o;
+          Set instances = kb.getDirectInstances((OClass)ocl);
+          if (instances != null && !instances.isEmpty()) {
+            Iterator insti = instances.iterator();
+            while (insti.hasNext())
+              kids.add(new ClassNode( (OInstance) insti.next()));
           }
+        }
 
-          if (0 == ocl.getSubClasses(TClass.DIRECT_CLOSURE).size()) {
-            if (! kids.isEmpty())
-              //add the instances as children, but do not add them for future
-              //traversal to allKids
-              parent.setChildren(kids);
-            continue;
-          }  // if 0 children
+        if (0 == ocl.getSubClasses(TClass.DIRECT_CLOSURE).size()) {
+          if (! kids.isEmpty())
+            //add the instances as children, but do not add them for future
+            //traversal to allKids
+            parent.setChildren(kids);
+          continue;
+        }  // if 0 children
 
-          Iterator kidsi = ocl.getSubClasses(TClass.DIRECT_CLOSURE).iterator();
+        Iterator kidsi = ocl.getSubClasses(TClass.DIRECT_CLOSURE).iterator();
 
-          while ( kidsi.hasNext()) {
-            kids.add(new ClassNode((TClass)kidsi.next()));
-          } // while kidsi
-          parent.setChildren(kids);
-          allKids.addAll(kids);
+        while ( kidsi.hasNext()) {
+          kids.add(new ClassNode((TClass)kidsi.next()));
+        } // while kidsi
+        parent.setChildren(kids);
+        allKids.addAll(kids);
 
-        }   // for i
-        parents = allKids;
-      } while (0 < allKids.size());
+      }   // for i
+      parents = allKids;
+    } while (0 < allKids.size());
 
-      return root;
-    } catch (NoSuchClosureTypeException x) {
-      throw new GateRuntimeException(x.toString());
-    }
+    return root;
   }//createRootNode()
 
   /** Creates a structure representing the class hierarchy of an ontology
@@ -118,74 +114,70 @@ public class ClassNode
   public static ClassNode createRootNode(Taxonomy o, MappingDefinition mapping, Map nameVsNode) {
     if (null == o || null == nameVsNode || null == mapping)
       throw new gate.util.LazyProgrammerException("mapping, nameVsNode or ontology-o is null.");
-    try {
-      ClassNode root = new ClassNode(o);
-      Iterator itops = o.getTopClasses().iterator();
-      Vector kids = new Vector();
-      while (itops.hasNext()) {
-        ClassNode node = new ClassNode((TClass)itops.next());
-        nameVsNode.put(node.toString(),node);
-        kids.add(node);
-      } // while
+    ClassNode root = new ClassNode(o);
+    Iterator itops = o.getTopClasses().iterator();
+    Vector kids = new Vector();
+    while (itops.hasNext()) {
+      ClassNode node = new ClassNode((TClass)itops.next());
+      nameVsNode.put(node.toString(),node);
+      kids.add(node);
+    } // while
 
-      root.source = o;
-      root.setChildren(kids);
-      Vector parents = kids;
-      Vector allKids;
-      do {
-        allKids = new Vector();
-        for ( int i= 0 ; i < parents.size() ; i++ ) {
-          ClassNode parent = (ClassNode)parents.get(i);
+    root.source = o;
+    root.setChildren(kids);
+    Vector parents = kids;
+    Vector allKids;
+    do {
+      allKids = new Vector();
+      for ( int i= 0 ; i < parents.size() ; i++ ) {
+        ClassNode parent = (ClassNode)parents.get(i);
 
-          TClass ocl = (TClass) parent.getSource();
-          if (0 == ocl.getSubClasses(TClass.DIRECT_CLOSURE).size()) {
-            continue;
-          }  // if 0 children
+        TClass ocl = (TClass) parent.getSource();
+        if (0 == ocl.getSubClasses(TClass.DIRECT_CLOSURE).size()) {
+          continue;
+        }  // if 0 children
 
-          Iterator kidsi = ocl.getSubClasses(TClass.DIRECT_CLOSURE).iterator();
+        Iterator kidsi = ocl.getSubClasses(TClass.DIRECT_CLOSURE).iterator();
 
-          kids = new Vector();
-          while ( kidsi.hasNext()) {
-            ClassNode cn = new ClassNode((TClass)kidsi.next());
-            kids.add(cn);
-            nameVsNode.put(cn.toString(),cn);
-          } // while kidsi
-          parent.setChildren(kids);
-          allKids.addAll(kids);
+        kids = new Vector();
+        while ( kidsi.hasNext()) {
+          ClassNode cn = new ClassNode((TClass)kidsi.next());
+          kids.add(cn);
+          nameVsNode.put(cn.toString(),cn);
+        } // while kidsi
+        parent.setChildren(kids);
+        allKids.addAll(kids);
 
-        }   // for i
-        parents = allKids;
-      } while (0 < allKids.size());
+      }   // for i
+      parents = allKids;
+    } while (0 < allKids.size());
 
-      // display mapping
-      Iterator inodes = mapping.iterator();
-      MappingNode mn;
-      while (inodes.hasNext()) {
-        mn = (MappingNode)inodes.next();
-        URL turl = null;
-        try { turl = new URL(mn.getOntologyID());
-        } catch (java.net.MalformedURLException x) {
+    // display mapping
+    Iterator inodes = mapping.iterator();
+    MappingNode mn;
+    while (inodes.hasNext()) {
+      mn = (MappingNode)inodes.next();
+      URL turl = null;
+      try { turl = new URL(mn.getOntologyID());
+      } catch (java.net.MalformedURLException x) {
+      }
+      if ( null != turl ){
+        Taxonomy o2 = null;
+        try { o2 = o.getOntology(turl);
+        } catch (gate.creole.ResourceInstantiationException x) {
         }
-        if ( null != turl ){
-          Taxonomy o2 = null;
-          try { o2 = o.getOntology(turl);
-          } catch (gate.creole.ResourceInstantiationException x) {
+        if ( o2 != null && o2.equals(o) ) {
+          ClassNode cmn = new ClassNode(mn);
+          ClassNode cn = (ClassNode)nameVsNode.get(mn.getClassID());
+          if (null!= cn) {
+            cn.children.add(cn.children.size(),cmn);
           }
-          if ( o2 != null && o2.equals(o) ) {
-            ClassNode cmn = new ClassNode(mn);
-            ClassNode cn = (ClassNode)nameVsNode.get(mn.getClassID());
-            if (null!= cn) {
-              cn.children.add(cn.children.size(),cmn);
-            }
-          }// if from the same ontology
-        } // turl != null
-      }// while inodes
+        }// if from the same ontology
+      } // turl != null
+    }// while inodes
 
 
-      return root;
-    } catch (NoSuchClosureTypeException x) {
-      throw new GateRuntimeException(x.toString());
-    }
+    return root;
   }//createRootNode()
 
   /**Constructs a root class node from an ontology

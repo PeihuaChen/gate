@@ -254,7 +254,7 @@ public void createOntology (
   String name, String sourceURI, String theURL, String comment)
   throws ResourceInstantiationException {
   try {
-    Taxonomy o = new DAMLOntology();
+    Taxonomy o = new OntologyImpl();
     o.setComment(comment);
 
     URL localurl=null;
