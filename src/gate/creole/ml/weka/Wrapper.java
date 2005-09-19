@@ -331,7 +331,10 @@ public class Wrapper implements AdvancedMLEngine, ActionsPublisher {
               ((OptionHandler)aFilter).setOptions(options);
             }
             //apply the filter to the classifier
-            classifier = new FilteredClassifier(classifier, aFilter);
+            FilteredClassifier Fclassifier = new FilteredClassifier();
+            Fclassifier.setClassifier(classifier);
+            Fclassifier.setFilter(aFilter);
+            classifier = Fclassifier;
           }catch(Exception e){
             throw new ResourceInstantiationException(e);
           }
