@@ -146,15 +146,13 @@ public interface Taxonomy extends LanguageResource{
    * @param cls1 the first class
    * @param cls2 the second class
    */
-  public boolean isSubClassOf(String cls1, String cls2)
-      throws gate.creole.ontology.NoSuchClosureTypeException;
+  public boolean isSubClassOf(String cls1, String cls2);
 
   /** Check for subclass relation with direct closure
    * @param cls1 the first class
    * @param cls2 the second class
   */
-  public boolean isDirectSubClassOf(String cls1, String cls2)
-      throws gate.creole.ontology.NoSuchClosureTypeException;
+  public boolean isDirectSubClassOf(String cls1, String cls2);
 
   /**
    * Checks the equality of two ontologies.

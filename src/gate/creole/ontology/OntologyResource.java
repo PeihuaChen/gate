@@ -1,0 +1,67 @@
+/*
+ * OntologyResource.java
+ *
+ * Copyright (c) 2005, The University of Sheffield.
+ *
+ * This file is part of GATE (see http://gate.ac.uk/), and is free
+ * software, licenced under the GNU Library General Public License,
+ * Version 2, June1991.
+ *
+ * A copy of this licence is included in the distribution in the file
+ * licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *
+ * Valentin Tablan 15-Sep-2005
+ *
+ *
+ *  $Id$
+ */
+package gate.creole.ontology;
+
+/**
+ * This is the top level interface for all ontology resources such as classes, 
+ * instances and properties.
+ */
+public interface OntologyResource {
+  /**
+   * Gets the URI of the resource.
+   * @return the URI.
+   */
+  public String getURI() ;
+
+  /**
+   * Sets the URI of the resource.
+   * @param theURI the new URI to be set
+   */
+  public void setURI(String theURI) ;
+
+  /** Gets the comment of the resource.
+   *  @return the comment of the resource
+   */
+  public String getComment();
+
+  /** Sets the resource comment.
+   * @param aComment the comment to be set.
+   */
+  public void setComment(String aComment) ;
+
+  /** Gets resource name.
+   *  @return the name of the resource.
+   */
+  public String getName() ;
+
+  /** Sets the resource name.
+    * @param aName the new name of the resource.
+    */
+  public void setName(String aName) ;
+
+  /**Gets the ontology to which the resource belongs.
+   * @return  the ontology to which the resource belongs
+   */
+  public Ontology getOntology() ;
+
+  /**Gets the taxonomy to which the resource belongs.
+   * @return  the taxonomy to which the resource belongs
+   */
+  public Taxonomy getTaxonomy() ;
+  
+}

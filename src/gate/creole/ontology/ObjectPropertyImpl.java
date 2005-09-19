@@ -15,48 +15,78 @@
  *
  *  $Id$
  */
-
 package gate.creole.ontology;
 
+import java.util.*;
 import java.util.HashSet;
 import java.util.Set;
 
 public class ObjectPropertyImpl extends PropertyImpl implements ObjectProperty {
-
-  private OClass range;
+  private Set range;
   private Set inversePropertiesSet;
 
-  public ObjectPropertyImpl(String aName, OClass aDomain, OClass aRange,
-                              Ontology aKB) {
-    super(aName, aDomain, aKB);
-    range = aRange;
+  /**
+   * Convenience constructor for simple cases where the domain and range are
+   * sungle classes. 
+   * @param aName the name of the property.
+   * @param aDomainClass the class representing the domain.
+   * @param aRange the class representing the range.
+   * @param anOntology the ontology this property belongs to.
+   */
+  public ObjectPropertyImpl(String name, String comment, OClass aDomainClass, 
+          OClass aRange, Ontology anOntology) {
+    super(name, comment, aDomainClass, anOntology);
+    range = new HashSet();
+    range.add(aRange);
     inversePropertiesSet = new HashSet();
   }
-
-  public boolean isValueCompatible(Object value) {
-    if (value instanceof OClass)
-      return true;
-    return false;
+  
+  /**
+   * Constructor for this property.
+   * @param aName the name of the property.
+   * @param aDomain the set of domain restrictions for this property. A set of 
+   * {@link OClass} values.
+   * @param aRange the set of range restrictions for this property. A set of 
+   * {@link OClass} values. 
+   * @param anOntology the ontology this property belongs to.
+   */
+  public ObjectPropertyImpl(String name, String comment, Set aDomain, Set aRange, 
+          Ontology anOntology) {
+    super(name, comment, aDomain, anOntology);
+    range = new HashSet();
+    range.addAll(aRange);
+    inversePropertiesSet = new HashSet();
   }
-
-  public Object getRange() {
+  
+  
+  /**
+   *  Checks whether a provided instance can be a range value for this 
+   *  property. For an instance to be a valid range value it needs to be a 
+   *  member of <b>all</b> the classes defined as members of the range of this
+   *  property. The range of this property is defined recursively based on its
+   *  super-properties as well.  
+   * @param instance the instance to be checked.
+   * @return <tt>true</tt> if the provided instance can be a range value for 
+   * this property.
+   */
+  public boolean isValidRange(OInstance instance) {
+    Set rangeClasses = new HashSet(getRange());
+    Iterator superPropIter = superPropertiesSet.iterator();
+    while(superPropIter.hasNext()) 
+      rangeClasses.addAll(((ObjectProperty)superPropIter.next()).getRange());
+    return instance.getOClasses().containsAll(rangeClasses);
+  }
+  
+  public Set getRange() {
     return range;
   }
-
+  
   public Set getInverseProperties() {
     return this.inversePropertiesSet;
   }
-
+  
   public void setInverseOf(Property theInverse) {
     this.inversePropertiesSet.add(theInverse);
   }
-
-  public String toString() {
-    return this.getName() + "(" + this.getDomain() + "," + this.range + ")" +
-            "\n sub-propertyOf "
-            + this.getSubPropertyOf().toString() +
-            "\n samePropertyAs " +
-            this.getSamePropertyAs().toString();
-  }
-
+  
 }

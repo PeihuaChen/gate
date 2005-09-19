@@ -22,54 +22,13 @@ import java.util.Set;
 
 
 /**An Interface representing a single ontology class */
-public interface TClass {
-
-  /**denotes a direct closure(no transitivity)*/
-  public static final byte DIRECT_CLOSURE = 0;
-
-  /**denotes atransitive closure */
-  public static final byte TRANSITIVE_CLOSURE = 1;
+public interface TClass extends OntologyResource, OntologyConstants {
 
   /**Gets the id.
    * @return the id of the class
    */
   public String getId();
 
-  /**Gets the ontology to which the class belongs.
-   * @return  the ontology to which the class belongs
-   */
-  public Taxonomy getOntology() ;
-
-  /**Gets the URI of the class.
-   * @return the URI of the class
-   */
-  public String getURI() ;
-
-  /**
-   * Sets the URI of the class.
-   * @param theURI the new URI to be set
-   */
-  public void setURI(String theURI) ;
-
-  /** Gets the comment of the class.
-   *  @return the comment of the class
-   */
-  public String getComment();
-
-  /** Sets the class comment.
-   * @param aComment the comment to be set
-   */
-  public void setComment(String aComment) ;
-
-  /** Gets class name.
-   *  @return the name of the class
-   */
-  public String getName() ;
-
-  /** Sets the class name.
-    * @param aName the new name of the class
-    */
-  public void setName(String aName) ;
 
   /**
    * Adds a sub class to this class.
@@ -100,7 +59,7 @@ public interface TClass {
    * @return the set of subclasses
    * @throws NoSuchClosureTypeException if an unknown closure is specified.
    */
-  public Set getSubClasses(byte closure) throws NoSuchClosureTypeException;
+  public Set getSubClasses(byte closure);
 
   /**
    * Gets the super classes according to the desired closure.
@@ -108,7 +67,7 @@ public interface TClass {
    * @return the set of super classes
    * @throws NoSuchClosureTypeException if an unknown closure is specified.
    */
-  public Set getSuperClasses(byte closure)throws NoSuchClosureTypeException ;
+  public Set getSuperClasses(byte closure);
 
   /**
    * Infers the sub classes transitive closure.

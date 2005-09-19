@@ -18,38 +18,43 @@
 
 package gate.creole.ontology;
 
+import java.util.Set;
+
 public class DatatypePropertyImpl extends PropertyImpl
                                     implements DatatypeProperty{
-  private Object range;
+  /**
+   * The range for this property. Datatype properties take Java objects as 
+   * values so the range is a {@link Class} object.
+   * If this is set to <tt>null</tt> then any type of Java Object is a valid
+   * value.
+   */
+  protected Class range;
 
-  public DatatypePropertyImpl(String aName, OClass aDomain, String aString, Ontology aKB) {
-    super(aName, aDomain, aKB);
-    range = aString;
+  public DatatypePropertyImpl(String name, String comment,  OClass aDomainClass,
+          Ontology anOntology) {
+    super(name, comment, aDomainClass, anOntology);
+    range = null;
   }
 
-  public DatatypePropertyImpl(String aName, OClass aDomain, Number number, Ontology aKB) {
-    super(aName, aDomain, aKB);
-    range = number;
+  public DatatypePropertyImpl(String name, String comment, Set domain, 
+          Ontology ontology) {
+    super(name, comment, domain, ontology);
+    range = null;
+  }
+  
+  public DatatypePropertyImpl(String name, String comment, Set domain, 
+          Class range, Ontology ontology) {
+    super(name, comment, domain, ontology);
+    this.range = range;
+  }
+  
+
+  public boolean isValidRange(Object value) {
+    return range == null || range.isAssignableFrom(value.getClass());
   }
 
-  public boolean isValueCompatible(Object value) {
-    if (value instanceof String)
-      return true;
-    else if (value instanceof Number)
-      return true;
-    return false;
-  }
-
-  public Object getRange() {
+  public Class getRange() {
     return range;
-  }
-
-  public String toString() {
-    return this.getName() + "(" + this.getDomain() + "," + this.range + ")" +
-            "\n sub-propertyOf "
-            + this.getSubPropertyOf().toString() +
-            "\n samePropertyAs " +
-            this.getSamePropertyAs().toString();
   }
 
 }

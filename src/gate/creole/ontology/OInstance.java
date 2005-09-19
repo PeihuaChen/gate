@@ -21,17 +21,13 @@ package gate.creole.ontology;
 import java.util.List;
 import java.util.Set;
 
-public interface OInstance{
+public interface OInstance extends OntologyResource {
 
-  /** Gets the class of this instance.
-   *  @return the class
+  /** Gets the set of classes this instance belongs to.
+   *  @return a set of {@link OClass} objects.
    */
-  public OClass getOClass();
+  public Set getOClasses();
 
-  /** Gets the name of this instance.
-   *  @return the name
-   */
-  public String getName();
 
   /** Sets the user data of this instance. To be used to
    * store arbitrary data on instances.
@@ -67,7 +63,7 @@ public interface OInstance{
    * Removes one of the values for a given property.
    * @param propertyName the name of the property
    * @param theValue the value to be removed.
-   * @return <tt>true</tt> if the value was foudn and removed, <tt>false</tt> 
+   * @return <tt>true</tt> if the value was found and removed, <tt>false</tt> 
    * otherwise.
    */
   public boolean removePropertyValue(String propertyName, Object theValue);
@@ -83,6 +79,7 @@ public interface OInstance{
    * @return a set of String values.
    */
   public Set getSetPropertiesNames();
+  
   public void setSameIndividualAs(OInstance theIndividual);
 
   public Set getSameIndividualAs();

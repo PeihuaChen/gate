@@ -1,7 +1,7 @@
 /*
  * Property.java
  *
- * Copyright (c) 2002, The University of Sheffield.
+ * Copyright (c) 2005, The University of Sheffield.
  *
  * This file is part of GATE (see http://gate.ac.uk/), and is free
  * software, licenced under the GNU Library General Public License,
@@ -15,81 +15,125 @@
  *
  *  $Id$
  */
-
 package gate.creole.ontology;
 
 import java.util.Set;
 
-public interface Property {
-
+/**
+ * This interface defines an ontology property and is the top level interface 
+ * for all types of ontological properties.
+ */
+public interface Property extends OntologyResource, OntologyConstants {
+  
   /**
-   * @return the name of the property within the ontology's namespace
-   */
-  public String getName();
-
-  /**
-   * Returns the URI of this property.
-   */
-  public String getURI();
-
-  /**
-   * Sets the URI of the property
-   * @param theURI
-   */
-  public void setURI(String theURI);
-
-  /**
-   * Add a samePropertyAs relation between the two properties.
-   * Each property has a set of these, so it is possible to
-   * have samePropertyAs relation between more than two properties.
+   * Add a samePropertyAs relation between the two properties. Each property has
+   * a set of these, so it is possible to have samePropertyAs relation between
+   * more than two properties.
+   * 
    * @param theProperty
    */
   public void setSamePropertyAs(Property theProperty);
 
   /**
-   * Returns a set of all KBProperty instances that are in
-   * SamePropertyAs relation with this property. Or null if
-   * there are no such properties.
+   * Returns a set of all KBProperty instances that are in SamePropertyAs
+   * relation with this property. Or null if there are no such properties.
+   * 
    * @return a {@link Set} value.
    */
   public Set getSamePropertyAs();
 
   /**
-   * Add a SubPropertyOf relation between the given property and this.
-   * @param propertyName
+   * Adds a SubPropertyOf relation between the given property and this.
+   * 
+   * @param property
    */
-  public void setSubPropertyOf(String propertyName);
+  public void addSuperProperty(Property property);
 
   /**
-   * Return a set of all local names of properties that are in a
-   * subPropertyOf relation with this property. Null if no
-   * such properties. This is not a transitive closure. To obtain
-   * the full depth of the property hierarchy, one needs then to
-   * get the sub-properties of the sub-properties of this, etc.
-   * @return a {@link Set} value.
+   * Removes a SubPropertyOf relation between the given property and this.
+   * 
+   * @param property
    */
-  public Set getSubPropertyOf();
+  public void removeSuperProperty(Property property);
+  
+  /**
+   * Add a SuperPropertyOf relation between the given property and this.
+   * 
+   * @param property
+   */
+  public void addSubProperty(Property property);
 
   /**
-   * Returns the domain of a property. There is no corresponding set
-   * method, because the property is created at knowledge base level
-   * by specifying its domain and range
+   * Removes a SuperPropertyOf relation between the given property and this.
+   * 
+   * @param property
    */
-  public OClass getDomain();
+  public void removeSubProperty(Property property);
+  
+  
+  /**
+   * Returns the set of domain restrictions for this property.
+   */
+  public Set getDomain();
+  
+  
+  /**
+   * Checks whether this property can apply to the provided instance
+   * @param instance the instance
+   * @return <tt>true</tt> if the property is valid for the instance.
+   */
+  public boolean isValidDomain(OInstance instance);
+  
 
   /**
-   *
-   * @param value
-   * @return true if this value is compatible with the range
-   * restrictions on the property. False otherwise.
+   * Answers whether this property is a functional property. Functional
+   * properties are the ones that can have at most one value for any given value
+   * from the domain. Both object properties and datatype properties can be
+   * functional.
+   * 
+   * @return <tt>true</tt> if this property is functional.
    */
-  public boolean isValueCompatible(Object value);
-
-  /**Gets the ontology to which the class belongs.
-   * @return  the ontology to which the class belongs
+  public boolean isFunctional();
+  
+  /**
+   * Sets the functional property flag on this property.
+   * @param functional <tt>true</tt> iff the property should be marked as 
+   * functional. 
    */
-  public Ontology getOntology() ;
+  public void setFunctional(boolean functional);
 
-  public Object getRange();
-
+  /**
+   * Answers whether this property is an inverse functional property. Inverse
+   * functional properties are the ones that for any given domain value there
+   * can be at most one range value that is valid for this property. Both object
+   * properties and datatype properties can be inverse functional.
+   * 
+   * @return <tt>true</tt> if this property is inverse functional.
+   */
+  public boolean isInverseFunctional();
+  
+  /**
+   * Sets the inverse functional property flag on this property.
+   * @param inverseFunctional <tt>true</tt> iff the property should be marked as 
+   * inverse functional. 
+   */
+  public void setInverseFunctional(boolean inverseFunctional);
+  
+  /**
+   * Gets the set of super-properties for this property.
+   * @param {@link OntologyConstants#DIRECT_CLOSURE} for direct super-properties 
+   * only or {@link OntologyConstants#TRANSITIVE_CLOSURE} for all the 
+   * super-properties.
+   * @return a set of {@link Property} values.
+   */
+  public Set getSuperProperties(byte closure);
+ 
+  /**
+   * Gets the set of sub-properties for this property.
+   * @param {@link OntologyConstants#DIRECT_CLOSURE} for direct sub-properties 
+   * only or {@link OntologyConstants#TRANSITIVE_CLOSURE} for all the 
+   * sub-properties.
+   * @return a set of {@link Property} values.
+   */
+  public Set getSubProperties(byte closure);  
 }

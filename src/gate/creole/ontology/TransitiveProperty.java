@@ -18,5 +18,8 @@
 
 package gate.creole.ontology;
 
+/**
+ * Interface for transitive properties.
+ */
 public interface TransitiveProperty extends ObjectProperty {
 }
