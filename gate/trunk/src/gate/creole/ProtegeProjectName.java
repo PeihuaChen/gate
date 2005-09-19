@@ -15,8 +15,7 @@ package gate.creole;
 
 import java.net.URL;
 import java.util.*;
-
-import com.ontotext.gate.ontology.DAMLOntology;
+import com.ontotext.gate.ontology.OntologyImpl;
 
 import edu.stanford.smi.protege.event.*;
 import edu.stanford.smi.protege.model.Cls;
@@ -105,7 +104,7 @@ public class ProtegeProjectName extends AbstractLanguageResource
     Cls cls;
     TClass oCls;
 
-    ontotextOntology = new DAMLOntology();
+    ontotextOntology = new OntologyImpl();
     ontotextOntology.setURL(ontotextOntologyUrl);
 
     while(it.hasNext()) {
@@ -259,13 +258,11 @@ public class ProtegeProjectName extends AbstractLanguageResource
     return ontotextOntology.isModified();
   }
 
-  public boolean isSubClassOf(String cls1, String cls2)
-      throws gate.creole.ontology.NoSuchClosureTypeException {
+  public boolean isSubClassOf(String cls1, String cls2) {
     return ontotextOntology.isSubClassOf(cls1, cls2);
   }
 
-  public boolean isDirectSubClassOf(String cls1, String cls2)
-      throws gate.creole.ontology.NoSuchClosureTypeException {
+  public boolean isDirectSubClassOf(String cls1, String cls2) {
     return ontotextOntology.isSubClassOf(cls1, cls2);
   }
 
