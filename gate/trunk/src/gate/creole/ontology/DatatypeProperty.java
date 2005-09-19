@@ -15,9 +15,31 @@
  *
  *  $Id$
  */
-
 package gate.creole.ontology;
 
+import java.util.Set;
+
+/**
+ * Interface for datatype properties. Datatype properties have as range values
+ * datatype values (different from object properties which have instances as
+ * values). Values are Java objects.
+ */
 public interface DatatypeProperty extends Property {
-  public Object getRange();
+  
+  /**
+   * Gets the range for this property. If no range has been set it returns
+   * <tt>null</tt>.
+   * 
+   * @return a {@link Class} object.
+   */
+  public Class getRange();
+ 
+  /**
+   * 
+   * @param value
+   * @return true if this value is compatible with the range restrictions on the
+   *         property. False otherwise.
+   */
+  public boolean isValidRange(Object value);
+      
 }

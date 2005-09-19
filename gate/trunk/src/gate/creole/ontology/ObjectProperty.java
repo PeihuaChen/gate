@@ -23,6 +23,14 @@ import java.util.Set;
 public interface ObjectProperty extends Property {
 
   /**
+   * Gets the set of range restrictions for this property. If no range has been
+   * set it returns an empty set.
+   * 
+   * @return a set of {@link OClass} objects.
+   */
+  public Set getRange();
+  
+  /**
    * Returns the set of inverse properties for this property. Null if no
    * such properties. The set contains objects of KBProperty instances.
    * @return a {@link Set} value.
@@ -34,4 +42,14 @@ public interface ObjectProperty extends Property {
    * @param theInverse
    */
   public void setInverseOf(Property theInverse);
+  
+  /**
+   * 
+   * @param instance
+   * @return true if this value is compatible with the range restrictions on the
+   *         property. False otherwise.
+   */
+  public boolean isValidRange(OInstance instance);
+    
+  
 }

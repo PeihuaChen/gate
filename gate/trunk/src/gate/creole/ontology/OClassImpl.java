@@ -24,7 +24,6 @@ public class OClassImpl extends TClassImpl implements OClass  {
 
   private Set disjointClassesSet;
   private Set sameClassesSet;
-  private Set propertiesSet;
 
   /**
    * Creates a new class given id,name,comment and ontology.
@@ -37,7 +36,6 @@ public class OClassImpl extends TClassImpl implements OClass  {
     super(anId, aName, aComment, anOntology);
     disjointClassesSet = new HashSet();
     sameClassesSet = new HashSet();
-    propertiesSet = new HashSet();
   }
 
   public void setDisjointWith(OClass theClass) {
@@ -62,54 +60,6 @@ public class OClassImpl extends TClassImpl implements OClass  {
     if (this.sameClassesSet.isEmpty())
       return null;
     return this.sameClassesSet;
-  }
-
-  public Set getProperties() {
-    if (this.propertiesSet.isEmpty())
-      return null;
-    return this.propertiesSet;
-  }
-
-  public Set getPropertiesByName(String name) {
-    HashSet resultSet = new HashSet();
-    if (this.propertiesSet.isEmpty())
-      return resultSet;
-    if (name == null)
-      return resultSet;
-    Iterator iter = this.propertiesSet.iterator();
-    while (iter.hasNext()) {
-      Property property = (Property) iter.next();
-      if (name.equals(property.getName()))
-        resultSet.add(property);
-    }
-    return resultSet;
-  }
-
-  public Set getInheritedProperties() {
-    Set superClasses = null;
-    try {
-      this.getSuperClasses(OClass.TRANSITIVE_CLOSURE);
-    } catch (NoSuchClosureTypeException ex) {};
-
-    Set inheritedProperties = new HashSet();
-    if (superClasses == null || superClasses.isEmpty())
-      return inheritedProperties;
-    Iterator iter = superClasses.iterator();
-    while (iter.hasNext()) {
-      Set classProperties = ((OClass)iter.next()).getProperties();
-      if (classProperties != null)
-        inheritedProperties.addAll(classProperties);
-    }//while
-    return inheritedProperties;
-  }
-
-  public boolean addProperty(Property theProperty) {
-    if (this.propertiesSet == null)
-      this.propertiesSet = new HashSet();
-    if (! this.equals(theProperty.getDomain()))
-      return false;
-    this.propertiesSet.add(theProperty);
-    return true;
   }
 
   public String toString() {

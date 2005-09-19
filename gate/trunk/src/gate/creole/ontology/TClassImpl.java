@@ -22,22 +22,10 @@ import java.util.*;
 
 
 /** Represents a single ontology class.*/
-public class TClassImpl implements TClass{
-
-  /** the ontology to which the class belongs*/
-  Taxonomy ontology;
-
-  /** the URI of the class */
-  String uri;
+public class TClassImpl extends OntologyResourceImpl implements TClass{
 
   /** the id of the class */
   String id;
-
-  /**the name of the class */
-  String name;
-
-  /**the comment of the class*/
-  String comment;
 
   /** the set of direct sub classes of this class */
   Set directSubClasses = new HashSet();
@@ -59,10 +47,8 @@ public class TClassImpl implements TClass{
    * @param anOntology the ontology to which the new class belongs
    */
   public TClassImpl(String anId, String aName, String aComment, Taxonomy anOntology) {
+    super(aName, aComment, anOntology);
     id = anId;
-    name = aName;
-    comment = aComment;
-    ontology = anOntology;
   }
 
   /**
@@ -71,18 +57,6 @@ public class TClassImpl implements TClass{
    */
   public String getId(){
     return id;
-  }
-
-  /**
-   * Gets the ontology to which this class is associated.
-   * @return the ontology to which this class is associated.
-   */
-  public Taxonomy getOntology() {
-    return ontology;
-  }
-
-  public String getURI() {
-    return uri;
   }
 
   public void setURI(String theURI) {
@@ -114,65 +88,48 @@ public class TClassImpl implements TClass{
   public void addSubClass(TClass subClass) {
     this.directSubClasses.add(subClass);
     Set set;
-    try {
-      if (null != (set = subClass.getSuperClasses(TClass.DIRECT_CLOSURE))) {
-        if (!set.contains(this)) {
-          subClass.addSuperClass(this);
-        }
+    if (null != (set = subClass.getSuperClasses(TClass.DIRECT_CLOSURE))) {
+      if (!set.contains(this)) {
+        subClass.addSuperClass(this);
       }
-      ontology.setModified(true);
-    } catch (NoSuchClosureTypeException x) {
-      throw new gate.util.GateRuntimeException(x.getMessage());
     }
+    ontology.setModified(true);
   } // addSubClass();
 
   public void addSuperClass(TClass superClass) {
-    try {
-      directSuperClasses.add(superClass);
-      Set set;
-      if (null != (set = superClass.getSubClasses(TClass.DIRECT_CLOSURE))) {
-        if (!set.contains(this)) {
-          superClass.addSubClass(this);
-        }
+    directSuperClasses.add(superClass);
+    Set set;
+    if (null != (set = superClass.getSubClasses(TClass.DIRECT_CLOSURE))) {
+      if (!set.contains(this)) {
+        superClass.addSubClass(this);
       }
-      ontology.setModified(true);
-    } catch (NoSuchClosureTypeException x) {
-      throw new gate.util.GateRuntimeException(x.getMessage());
     }
-
+    ontology.setModified(true);
   }
 
   public void removeSubClass(TClass subClass) {
-    try {
-      directSubClasses.remove(subClass);
-      Set set;
-      if (null!=(set=subClass.getSuperClasses(TClass.DIRECT_CLOSURE))){
-        if ( set.contains(this) ) {
-          subClass.removeSuperClass(this);
-        }
+    directSubClasses.remove(subClass);
+    Set set;
+    if (null!=(set=subClass.getSuperClasses(TClass.DIRECT_CLOSURE))){
+      if ( set.contains(this) ) {
+        subClass.removeSuperClass(this);
       }
-      ontology.setModified(true);
-    } catch (NoSuchClosureTypeException x) {
-      throw new gate.util.GateRuntimeException(x.getMessage());
     }
+    ontology.setModified(true);
   }
 
   public void removeSuperClass(TClass superClass) {
-    try {
-      directSuperClasses.remove(superClass);
-      Set set;
-      if ( null != (set = superClass.getSubClasses(TClass.DIRECT_CLOSURE))) {
-        if ( set.contains(this) ) {
-          superClass.removeSubClass(this);
-        }
+    directSuperClasses.remove(superClass);
+    Set set;
+    if ( null != (set = superClass.getSubClasses(TClass.DIRECT_CLOSURE))) {
+      if ( set.contains(this) ) {
+        superClass.removeSubClass(this);
       }
-      ontology.setModified(true);
-    } catch (NoSuchClosureTypeException x) {
-      throw new gate.util.GateRuntimeException(x.getMessage());
     }
+    ontology.setModified(true);
   }
 
-  public Set getSubClasses(byte closure) throws NoSuchClosureTypeException {
+  public Set getSubClasses(byte closure) {
     Set result;
     switch (closure) {
       case DIRECT_CLOSURE : {
@@ -190,14 +147,14 @@ public class TClassImpl implements TClass{
         break;
       }
       default : {
-        throw new NoSuchClosureTypeException(closure);
+        throw new IllegalArgumentException("Unknown closure type " + closure);
       }
     } //switch
 
     return new HashSet(result);
   } // getSubClasses()
 
-  public Set getSuperClasses(byte closure) throws NoSuchClosureTypeException{
+  public Set getSuperClasses(byte closure) {
     Set result;
     switch (closure) {
       case DIRECT_CLOSURE : {
@@ -214,7 +171,7 @@ public class TClassImpl implements TClass{
         break;
       }
       default : {
-        throw new NoSuchClosureTypeException(closure);
+        throw new IllegalArgumentException("Unknown closure type: " + closure);
       }
     } //switch
 
@@ -222,40 +179,31 @@ public class TClassImpl implements TClass{
   } // getSuperClasses()
 
   public void inferSubClassesTransitiveClosure(){
-    try {
-
-      List bag = new ArrayList(directSubClasses);
-      subClassesTransitiveClosure = new HashSet();
-      TClass currentClass;
-      while (bag.size()>0) {
-        currentClass = (TClass) bag.get(0);
-        bag.remove(0);
-        subClassesTransitiveClosure.add(currentClass);
-        bag.addAll(currentClass.getSubClasses(TClass.DIRECT_CLOSURE));
-      } //while bag is not empty
-
-    } catch (NoSuchClosureTypeException x) {
-      throw new gate.util.GateRuntimeException(x.getMessage());
-    }
-
+    List bag = new ArrayList(directSubClasses);
+    subClassesTransitiveClosure = new HashSet();
+    TClass currentClass;
+    while (bag.size()>0) {
+      currentClass = (TClass) bag.get(0);
+      bag.remove(0);
+      subClassesTransitiveClosure.add(currentClass);
+      bag.addAll(currentClass.getSubClasses(TClass.DIRECT_CLOSURE));
+      //avoid infinite loops
+      bag.removeAll(subClassesTransitiveClosure);
+    } //while bag is not empty
   } // inferSubClassesTransitiveClosure();
 
   public void inferSuperClassesTransitiveClosure(){
-    try {
-      List bag = new ArrayList(directSuperClasses);
-      superClassesTransitiveClosure = new HashSet();
-      TClass currentClass;
-      while (bag.size()>0) {
-        currentClass = (TClass) bag.get(0);
-        bag.remove(0);
-        superClassesTransitiveClosure.add(currentClass);
-        bag.addAll(currentClass.getSuperClasses(TClass.DIRECT_CLOSURE));
-      } //while bag is not empty
-    } catch (NoSuchClosureTypeException x) {
-      throw new gate.util.GateRuntimeException(x.getMessage());
-    }
-
-
+    List bag = new ArrayList(directSuperClasses);
+    superClassesTransitiveClosure = new HashSet();
+    TClass currentClass;
+    while (bag.size()>0) {
+      currentClass = (TClass) bag.get(0);
+      bag.remove(0);
+      superClassesTransitiveClosure.add(currentClass);
+      bag.addAll(currentClass.getSuperClasses(TClass.DIRECT_CLOSURE));
+      //avoid infinite cycles
+      bag.removeAll(superClassesTransitiveClosure);
+    } //while bag is not empty
   } // inferSuperClassesTransitiveClosure();
 
   public boolean isTopClass(){
@@ -266,109 +214,84 @@ public class TClassImpl implements TClass{
     return name;
   }
 
-
-
-
   public static Set getSubClasses(byte closure,Set classes) {
-    try {
-      Set result = new HashSet();
-      Iterator ci = classes.iterator();
-      TClass c;
-      while (ci.hasNext()) {
-
-        c = (TClass) ci.next();
-        result.addAll(c.getSubClasses(closure));
-
-      }// while classes
-      return result;
-    } catch (NoSuchClosureTypeException x) {
-      throw new gate.util.GateRuntimeException(x.getMessage());
-    }
-
+    Set result = new HashSet();
+    Iterator ci = classes.iterator();
+    TClass c;
+    while (ci.hasNext()) {
+      c = (TClass) ci.next();
+      result.addAll(c.getSubClasses(closure));
+    }// while classes
+    return result;
   } // getSubClasses()
 
 
   public static Set getSuperClasses(byte closure,Set classes) {
-    try {
-      Set result = new HashSet();
-      Iterator ci = classes.iterator();
-      TClass c;
-      while (ci.hasNext()) {
+    Set result = new HashSet();
+    Iterator ci = classes.iterator();
+    TClass c;
+    while (ci.hasNext()) {
 
-        c = (TClass) ci.next();
-        result.addAll(c.getSuperClasses(closure));
+      c = (TClass) ci.next();
+      result.addAll(c.getSuperClasses(closure));
 
-      }// while classes
-      return result;
-    } catch (NoSuchClosureTypeException x) {
-      throw new gate.util.GateRuntimeException(x.getMessage());
-    }
-
+    }// while classes
+    return result;
   } // getSuperClasses()
 
 
   public ArrayList getSubClassesVSDistance() {
-    try {
-      ArrayList result = new ArrayList();
-      Set set;
-      int level = 0;
-      TClass c;
-      Set levelSet = new HashSet();
-      levelSet.add(this);
-      boolean rollon = (0 < this.getSubClasses(TClass.DIRECT_CLOSURE).size());
+    ArrayList result = new ArrayList();
+    Set set;
+    int level = 0;
+    TClass c;
+    Set levelSet = new HashSet();
+    levelSet.add(this);
+    boolean rollon = (0 < this.getSubClasses(TClass.DIRECT_CLOSURE).size());
 
-      while (rollon) {
-        /* iterate over all the classes in levelSet and infre their subclasses in set*/
-        set = new HashSet();
-        Iterator li = levelSet.iterator();
-        while (li.hasNext()) {
-          c = (TClass) li.next();
-          set.addAll(c.getSubClasses(TClass.DIRECT_CLOSURE));
-        } //while leveset
-        if ( 0 < set.size() ) {
-          result.add(level++,set);
-        }
-        levelSet = set;
-        rollon = 0 < levelSet.size();
-      } // while sublcasses
-      return result;
-    } catch (NoSuchClosureTypeException x) {
-      throw new gate.util.GateRuntimeException(x.getMessage());
-    }
-
+    while (rollon) {
+      /* iterate over all the classes in levelSet and infre their subclasses in set*/
+      set = new HashSet();
+      Iterator li = levelSet.iterator();
+      while (li.hasNext()) {
+        c = (TClass) li.next();
+        set.addAll(c.getSubClasses(TClass.DIRECT_CLOSURE));
+      } //while leveset
+      if ( 0 < set.size() ) {
+        result.add(level++,set);
+      }
+      levelSet = set;
+      rollon = 0 < levelSet.size();
+    } // while sublcasses
+    return result;
   } // getSubClassesVSDistance()
 
 
 
   public ArrayList getSuperClassesVSDistance() {
-    try {
-      ArrayList result = new ArrayList();
-      Set set;
-      int level = 0;
-      TClass c;
-      Set levelSet = new HashSet();
-      levelSet.add(this);
-      boolean rollon = (0 < this.getSuperClasses(TClass.DIRECT_CLOSURE).size());
+    ArrayList result = new ArrayList();
+    Set set;
+    int level = 0;
+    TClass c;
+    Set levelSet = new HashSet();
+    levelSet.add(this);
+    boolean rollon = (0 < this.getSuperClasses(TClass.DIRECT_CLOSURE).size());
 
-      while (rollon) {
-        /* iterate over all the classes in levelSet and infre their subclasses in set*/
-        set = new HashSet();
-        Iterator li = levelSet.iterator();
-        while (li.hasNext()) {
-          c = (TClass) li.next();
-          set.addAll(c.getSuperClasses(TClass.DIRECT_CLOSURE));
-        } //while leveset
-        if ( 0 < set.size() ) {
-          result.add(level++,set);
-        }
-        levelSet = set;
-        rollon = 0 < levelSet.size();
-      } // while superlcasses
-      return result;
-    } catch (NoSuchClosureTypeException x) {
-      throw new gate.util.GateRuntimeException(x.getMessage());
-    }
-
+    while (rollon) {
+      /* iterate over all the classes in levelSet and infre their subclasses in set*/
+      set = new HashSet();
+      Iterator li = levelSet.iterator();
+      while (li.hasNext()) {
+        c = (TClass) li.next();
+        set.addAll(c.getSuperClasses(TClass.DIRECT_CLOSURE));
+      } //while leveset
+      if ( 0 < set.size() ) {
+        result.add(level++,set);
+      }
+      levelSet = set;
+      rollon = 0 < levelSet.size();
+    } // while superlcasses
+    return result;
   } // getSuperClassesVSDistance()
 
 
