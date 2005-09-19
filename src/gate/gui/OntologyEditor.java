@@ -1,15 +1,18 @@
 package gate.gui;
 
+import gate.Resource;
+import gate.creole.AbstractVisualResource;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.ontology.*;
+import gate.event.*;
+import gate.swing.XJTable;
+import gate.util.Err;
+import gate.util.GateRuntimeException;
 import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -17,22 +20,6 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.tree.*;
 import com.ontotext.gate.ontology.TaxonomyImpl;
-import gate.Resource;
-import gate.creole.AbstractVisualResource;
-import gate.creole.ResourceInstantiationException;
-import gate.creole.ontology.NoSuchClosureTypeException;
-import gate.creole.ontology.OClass;
-import gate.creole.ontology.OInstance;
-import gate.creole.ontology.Ontology;
-import gate.creole.ontology.Property;
-import gate.creole.ontology.TClass;
-import gate.creole.ontology.Taxonomy;
-import gate.event.GateEvent;
-import gate.event.ObjectModificationEvent;
-import gate.event.ObjectModificationListener;
-import gate.swing.XJTable;
-import gate.util.GateRuntimeException;
-import gate.util.LuckyException;
 
 public class OntologyEditor extends AbstractVisualResource 
                             implements ResizableVisualResource, 
@@ -183,19 +170,14 @@ public class OntologyEditor extends AbstractVisualResource
         childNode.setAllowsChildren(true);
         //add all the subclasses
         TClass aClass = (TClass)aChild;
-        try{
-          List childList = 
-            new ArrayList(aClass.getSubClasses(TClass.DIRECT_CLOSURE));
-          Collections.sort(childList, comparator);
-          addChidrenRec(childNode, childList, comparator);
-        }catch(NoSuchClosureTypeException nsce){
-          throw new GateRuntimeException(nsce);
-        }
+        List childList = 
+          new ArrayList(aClass.getSubClasses(TClass.DIRECT_CLOSURE));
+        Collections.sort(childList, comparator);
+        addChidrenRec(childNode, childList, comparator);
 
         //add all the instances
         if(ontologyMode){
-          List childList = 
-            new ArrayList(ontology.getDirectInstances((OClass)aClass));
+          childList = new ArrayList(ontology.getDirectInstances((OClass)aClass));
           Collections.sort(childList, comparator);
           addChidrenRec(childNode, childList, comparator);
         }
@@ -286,10 +268,14 @@ public class OntologyEditor extends AbstractVisualResource
   protected class DetailsTableModel extends AbstractTableModel{
 
     public DetailsTableModel(){
-      superClasses = new DetailsGroup("Super Classes", true, null);
-      subClasses = new DetailsGroup("Sub Classes", true, null);
+      directSuperClasses = new DetailsGroup("Direct Super Classes", true, null);
+      allSuperClasses = new DetailsGroup("All Super Classes", true, null);
+      directSubClasses = new DetailsGroup("Direct Sub Classes", true, null);
+      allSubClasses = new DetailsGroup("All Sub Classes", true, null);
       instances = new DetailsGroup("Instances", true, null);
       properties = new DetailsGroup("Properties", true, null);
+      directTypes = new DetailsGroup("Direct Types", true, null);
+      directTypes = new DetailsGroup("All Types", true, null);
       detailGroups = new DetailsGroup[]{};
 
     }
@@ -391,56 +377,101 @@ public class OntologyEditor extends AbstractVisualResource
      */
     public void setItem(Object item){
       if(item instanceof TClass){
-        detailGroups = new DetailsGroup[]{
-                superClasses, subClasses, instances, properties};
+        detailGroups = ontologyMode ? 
+          new DetailsGroup[]{
+                directSuperClasses, allSuperClasses, 
+                directSubClasses, allSubClasses,
+                properties, instances} :
+          new DetailsGroup[]{
+                directSuperClasses, allSuperClasses, 
+                directSubClasses, allSubClasses};
 
         //displaying a class
         TClass aClass = (TClass)item;
-        try{
-          //set the superClasses
-          Set classes = aClass. getSuperClasses(TClass.DIRECT_CLOSURE);
-          superClasses.getValues().clear();
-          if(classes != null){
-            superClasses.getValues().addAll(classes);
-            Collections.sort(superClasses.getValues(), itemComparator);
-          }
+        //set the direct superClasses
+        Set classes = aClass. getSuperClasses(TClass.DIRECT_CLOSURE);
+        directSuperClasses.getValues().clear();
+        if(classes != null){
+          directSuperClasses.getValues().addAll(classes);
+          Collections.sort(directSuperClasses.getValues(), itemComparator);
+        }
 
-          //set the subclasses
-          classes = aClass. getSubClasses(TClass.DIRECT_CLOSURE);
-          subClasses.getValues().clear();
-          if(classes != null){
-            subClasses.getValues().addAll(classes);
-            Collections.sort(subClasses.getValues(), itemComparator);
-          }
-        }catch(NoSuchClosureTypeException nse){
-          //this should never happen
-          throw new GateRuntimeException(nse);
+        //set the direct superClasses
+        classes = aClass. getSuperClasses(TClass.TRANSITIVE_CLOSURE);
+        allSuperClasses.getValues().clear();
+        if(classes != null){
+          allSuperClasses.getValues().addAll(classes);
+          Collections.sort(allSuperClasses.getValues(), itemComparator);
         }
         
-        //set the instances
-        if(ontologyMode){
-          List instanceList = ontology.getDirectInstances((OClass)aClass);
-          instances.getValues().clear();
-          if(instanceList != null){
-            instances.getValues().addAll(instanceList);
-            Collections.sort(instances.getValues(), itemComparator);
-          }
-          
+        //set the subclasses
+        classes = aClass. getSubClasses(TClass.DIRECT_CLOSURE);
+        directSubClasses.getValues().clear();
+        if(classes != null){
+          directSubClasses.getValues().addAll(classes);
+          Collections.sort(directSubClasses.getValues(), itemComparator);
+        }
+
+        //set the subclasses
+        classes = aClass. getSubClasses(TClass.TRANSITIVE_CLOSURE);
+        allSubClasses.getValues().clear();
+        if(classes != null){
+          allSubClasses.getValues().addAll(classes);
+          Collections.sort(allSubClasses.getValues(), itemComparator);
+        }
+        
+        if(ontologyMode) {
+    
           //set the properties
           properties.getValues().clear();
-          Set props = ((OClass)aClass).getProperties();
-          if(props != null){
-            properties.getValues().addAll(props);
-            Collections.sort(properties.getValues(), itemComparator);
+          Iterator propIter = ontology.getPropertyDefinitions().iterator();
+          while(propIter.hasNext()) {
+            Property prop = (Property)propIter.next();
+            if(mightPropertyApplyToClass(prop, (OClass)aClass)) {
+              properties.getValues().add(prop);
+            }
           }
-        }
-        
-        
+          Collections.sort(properties.getValues(), itemComparator);
+          
+          //set the instances
+          if(ontologyMode){
+            Set instanceSet = ontology.getDirectInstances((OClass)aClass);
+            instances.getValues().clear();
+            if(instanceSet != null){
+              instances.getValues().addAll(instanceSet);
+              Collections.sort(instances.getValues(), itemComparator);
+            }
+          }
+        }        
       }else if(item instanceof OInstance){
         //displaying an instance
-        detailGroups = new DetailsGroup[]{properties};
-        properties.getValues().clear();
         OInstance anInstance = (OInstance)item;
+        detailGroups = new DetailsGroup[]{directTypes, allTypes, properties};
+        
+        //set the direct types
+        Set classes = anInstance.getOClasses();
+        directTypes.getValues().clear();
+        if(classes != null){
+          directTypes.getValues().addAll(classes);
+          Collections.sort(directTypes.getValues(), itemComparator);
+        }
+
+        //set all superClasses
+        Set allClasses = new HashSet();
+        classes = anInstance.getOClasses();
+        allClasses.addAll(classes);
+        for(Iterator classIter = classes.iterator(); classIter.hasNext();) {
+          OClass aClass = (OClass)classIter.next();
+          allClasses.addAll(
+                  aClass.getSuperClasses(OntologyConstants.TRANSITIVE_CLOSURE));
+        }
+        allTypes.getValues().clear();
+        if(allClasses != null){
+          allTypes.getValues().addAll(allClasses);
+          Collections.sort(allTypes.getValues(), itemComparator);
+        }
+        
+        properties.getValues().clear();
         Set propNames = anInstance.getSetPropertiesNames();
         if(propNames != null){
           Iterator propIter = propNames.iterator();
@@ -467,10 +498,38 @@ public class OntologyEditor extends AbstractVisualResource
       
       fireTableDataChanged();
     }
-    protected DetailsGroup superClasses;
-    protected DetailsGroup subClasses;
+    
+    
+    /**
+     * Checks whether a property might apply to an instance of the provided
+     * class. This is indicative only as the correct decision can only be taken
+     * based on the actual instances (in case the property requires domain values
+     * to be members of several classes).
+     * @param instance the instance
+     * @return <tt>true</tt> if the property is valid for the instance.
+     */
+    protected boolean mightPropertyApplyToClass(Property property, OClass aClass) {
+      Set domainClasses = new HashSet(property.getDomain());
+      Iterator superPropIter = property.
+        getSuperProperties(OntologyConstants.TRANSITIVE_CLOSURE).iterator();
+      while(superPropIter.hasNext()) {
+        Property aProp = (Property)superPropIter.next();
+        if(aProp == null)Err.prln("Null superProp for " + property.getName());
+        if(aProp.getDomain() == null) Err.prln("Null domain for " + aProp.getName());
+        else domainClasses.addAll(aProp.getDomain());
+      }
+      
+      return domainClasses.contains(aClass);
+    }
+
+    protected DetailsGroup directSuperClasses;
+    protected DetailsGroup allSuperClasses;
+    protected DetailsGroup directSubClasses;
+    protected DetailsGroup allSubClasses;
     protected DetailsGroup instances;
     protected DetailsGroup properties;
+    protected DetailsGroup directTypes;
+    protected DetailsGroup allTypes;
     protected DetailsGroup[] detailGroups;
     
     public static final int COLUMN_COUNT = 2;
@@ -485,9 +544,11 @@ public class OntologyEditor extends AbstractVisualResource
             Object value, boolean isSelected, boolean hasFocus, 
             int row, int column){
       //prepare the renderer
-      Component res = super.getTableCellRendererComponent(table, value, 
-              isSelected,hasFocus, row, column);
       
+      
+      Component res = super.getTableCellRendererComponent(table, "", 
+              isSelected,hasFocus, row, column);
+
       //set the text and icon
       if(column == DetailsTableModel.EXPANDED_COLUMN){
         setText(null);
@@ -520,8 +581,8 @@ public class OntologyEditor extends AbstractVisualResource
           setFont(getFont().deriveFont(Font.PLAIN));
           setText(anInstance.getName());
           setEnabled(true);
-        }else if(value instanceof Property){
-          Property aProperty = (Property)value;
+        }else if(value instanceof ObjectProperty){
+          ObjectProperty aProperty = (ObjectProperty)value;
           setIcon(MainFrame.getIcon("param.gif"));
           setFont(getFont().deriveFont(Font.PLAIN));
           String text = aProperty.getName() + " -> ";
@@ -529,6 +590,15 @@ public class OntologyEditor extends AbstractVisualResource
           text += range instanceof TClass ?
                   ((TClass)range).getName() :
                   range.toString();
+          setText(text);
+          setEnabled(true);
+        }else if(value instanceof DatatypeProperty){
+          DatatypeProperty aProperty = (DatatypeProperty)value;
+          setIcon(MainFrame.getIcon("param.gif"));
+          setFont(getFont().deriveFont(Font.PLAIN));
+          String text = aProperty.getName() + " -> ";
+          Class range = aProperty.getRange();
+          text += range == null ? "" : range.getName();
           setText(text);
           setEnabled(true);
         }else{
@@ -540,7 +610,6 @@ public class OntologyEditor extends AbstractVisualResource
       }
       
       return res;
-      
     }
 
   }
