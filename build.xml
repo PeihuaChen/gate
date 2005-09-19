@@ -19,7 +19,8 @@
   <!-- <property name="tools.jar.location" value="w:/jdk/jdk1.5.0/lib/tools.jar"/> -->
 
   <!-- RUNTIME MEMORY -->
-  <property name="run.memory" value="900M"/>
+  <property name="run.max.memory" value="900M"/>
+  <property name="run.start.memory" value="200M"/>
   
   <!-- ******************************************************************* 
        ****************  USER OPTIONS END HERE! ************************** 
@@ -290,7 +291,8 @@
     <echo>
       Starting GATE ${gate.version}, build ${gate.build}
       Using JVM at ${java.home}
-      Maximum memory ${run.memory}
+      Initial memory ${run.start.memory}
+      Maximum memory ${run.max.memory}
       ${toolsjar.debug}
       CLASSPATH=${class.path.debug}
     </echo>
@@ -308,7 +310,8 @@
           spawn="false"
           dir="." 
           logError="true"
-          maxmemory="${run.memory}">
+          maxmemory="${run.max.memory}">
+<!--	     <jvmarg value="-Xms${run.start.memory}"/> -->
        <jvmarg value="-Dgate.home=${basedir}"/>   
        <jvmarg value="-Djava.ext.dirs=${extDir}"/>
        <jvmarg value="-Dsun.java2d.opengl=true"/>
@@ -323,7 +326,8 @@
           spawn="false"
           dir="." 
           logError="true"
-          maxmemory="${run.memory}">
+          maxmemory="${run.max.memory}">
+<!--	     <jvmarg value="-Xms${run.start.memory}"/> -->
        <jvmarg value="-Dgate.home=${basedir}"/>   
        <jvmarg value="-Djava.ext.dirs=${extDir}"/>
        <jvmarg value="-Dsun.java2d.opengl=true"/>
