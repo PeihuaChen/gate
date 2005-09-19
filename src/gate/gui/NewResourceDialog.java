@@ -216,6 +216,17 @@ public class NewResourceDialog extends JDialog {
                                                           nameField.getText() +
                                                           "!");
             if(pListener != null) pListener.processFinished();
+          }catch(Throwable thr){
+            JOptionPane.showMessageDialog(getOwner(),
+                    "Unhandled error!\n" +
+                    thr.toString(),
+                    "GATE", JOptionPane.ERROR_MESSAGE);
+            thr.printStackTrace(Err.getPrintWriter());
+            res = null;
+            if(sListener != null) sListener.statusChanged("Error loading " +
+                                                nameField.getText() +
+                                                "!");
+            if(pListener != null) pListener.processFinished();
           }
         }//public void run()
       };
