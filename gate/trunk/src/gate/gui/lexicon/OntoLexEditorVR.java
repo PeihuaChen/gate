@@ -101,16 +101,12 @@ public class OntoLexEditorVR extends AbstractVisualResource
     while( !found && theTopsIter.hasNext()) {
       ClassNode theTopNode = (ClassNode) theTopsIter.next();
       TClass theTop = (TClass) theTopNode.getSource();
-      try {
-        //check if our class is a subtype of this top
-        if (theTop.getSubClasses(TClass.TRANSITIVE_CLOSURE).contains(theClass)) {
-          //if yes, let's find the full path
-          thePathList.add(theTopNode);
-          getRemainingPath(theTopNode, theClass, thePathList);
-          found = true;
-        }
-      } catch (NoSuchClosureTypeException ex) {
-        throw new GateRuntimeException(ex.getMessage());
+      //check if our class is a subtype of this top
+      if (theTop.getSubClasses(TClass.TRANSITIVE_CLOSURE).contains(theClass)) {
+        //if yes, let's find the full path
+        thePathList.add(theTopNode);
+        getRemainingPath(theTopNode, theClass, thePathList);
+        found = true;
       }
     }//while loop through the top concepts
 
@@ -118,10 +114,8 @@ public class OntoLexEditorVR extends AbstractVisualResource
     return thePath;
   }
 
-  protected void getRemainingPath(
-      ClassNode theParent, TClass theTarget, List thePath)
-      throws NoSuchClosureTypeException
-  {
+  protected void getRemainingPath(ClassNode theParent, TClass theTarget, 
+          List thePath) {
     Iterator theChildrenIter = theParent.getChildren();
     while (theChildrenIter.hasNext()) {
       ClassNode childNode = (ClassNode) theChildrenIter.next();

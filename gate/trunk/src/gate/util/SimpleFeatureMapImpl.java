@@ -380,8 +380,6 @@ public class SimpleFeatureMapImpl
 
     } catch  (gate.creole.ResourceInstantiationException x) {
       x.printStackTrace(Err.getPrintWriter());
-    } catch (gate.creole.ontology.NoSuchClosureTypeException clex) {
-      clex.printStackTrace(Err.getPrintWriter());
     }
     return result;
   } // ontologySubsume
