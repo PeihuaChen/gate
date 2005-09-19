@@ -275,7 +275,7 @@ public class OntologyEditor extends AbstractVisualResource
       instances = new DetailsGroup("Instances", true, null);
       properties = new DetailsGroup("Properties", true, null);
       directTypes = new DetailsGroup("Direct Types", true, null);
-      directTypes = new DetailsGroup("All Types", true, null);
+      allTypes = new DetailsGroup("All Types", true, null);
       detailGroups = new DetailsGroup[]{};
 
     }
