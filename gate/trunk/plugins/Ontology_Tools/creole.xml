@@ -4,7 +4,7 @@
 <CREOLE-DIRECTORY> 
   <CREOLE>
     <!-- Taxonomy -->
-    <RESOURCE>
+<!--    <RESOURCE>
       <NAME>Taxonomy</NAME>
       <CLASS>com.ontotext.gate.ontology.DAMLOntology</CLASS>
       <INTERFACE>gate.creole.ontology.Taxonomy</INTERFACE>
@@ -12,10 +12,25 @@
       <PARAMETER NAME="URL" DEFAULT="resources/demo.daml" COMMENT="The URL of the Ontology">java.net.URL</PARAMETER>
       <ICON>controller.gif</ICON>
     </RESOURCE>
-
+-->
   <!-- Ontology -->
-
   <RESOURCE>
+    <NAME>Jena Ontology</NAME>
+    <CLASS>gate.creole.ontology.jena.JenaOntologyImpl</CLASS>
+    <INTERFACE>gate.creole.ontology.Ontology</INTERFACE>
+    <COMMENT>An ontology implementation using Jena for I/O.</COMMENT>
+    <PARAMETER NAME="owlFileURL"
+      DEFAULT="file:/D:/tmp/JENA/protonu.xml"
+      REQUIRED="true"
+      COMMENT="The URL of the OWL file">java.net.URL</PARAMETER>
+    <PARAMETER NAME="language" DEFAULT=""
+      COMMENT="The language to be used for labels and comments"
+      REQUIRED="true"
+      >java.lang.String</PARAMETER>
+    <ICON>lrs.gif</ICON>
+  </RESOURCE>
+    
+<!--  <RESOURCE>
     <NAME>Ontology</NAME>
     <CLASS>com.ontotext.gate.ontology.DAMLKnowledgeBaseImpl</CLASS>
     <INTERFACE>gate.creole.ontology.Ontology</INTERFACE>
@@ -24,7 +39,7 @@
        COMMENT="The URL of the Knowledge Base">java.net.URL</PARAMETER>
     <ICON>lrs.gif</ICON>
   </RESOURCE>
-
+-->
     <!-- Protege project name -->
     <RESOURCE>
       <NAME>Protege project</NAME>
@@ -80,8 +95,8 @@
         <RESOURCE_DISPLAYED>gate.creole.ontology.Taxonomy</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
-    
-    <!-- VR Protege -->
+
+      <!-- VR Protege -->
     <RESOURCE>
       <NAME>Protege</NAME>
       <CLASS>gate.gui.ProtegeWrapper</CLASS>
