@@ -43,7 +43,7 @@ public abstract class PropertyImpl extends OntologyResourceImpl
    * @param name the name of the property
    * @param aDomain the ontology class representing the domain for this 
    * property.
-   * @param ontology the ontolgoy this property is defined in.
+   * @param ontology the ontology this property is defined in.
    */
   public PropertyImpl(String name, String comment, Set domain, 
           Ontology ontology) {
