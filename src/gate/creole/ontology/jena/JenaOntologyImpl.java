@@ -3,18 +3,15 @@ package gate.creole.ontology.jena;
 import gate.Resource;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.ontology.*;
+import gate.creole.ontology.ObjectProperty;
 import gate.util.Err;
 import gate.util.Out;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import com.hp.hpl.jena.ontology.*;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
-import com.hp.hpl.jena.ontology.OntClass;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.ontology.OntProperty;
-import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.ontotext.gate.ontology.OntologyImpl;
@@ -90,6 +87,7 @@ public class JenaOntologyImpl extends OntologyImpl {
           gateDomain.add(aGateClass);
         }
       }
+      //convert the range to GATE classes
       Set gateRange = new HashSet();
       for(Iterator rangIter = range.iterator(); rangIter.hasNext();) {
         OntClass aJenaClass = (OntClass)rangIter.next();
@@ -103,62 +101,37 @@ public class JenaOntologyImpl extends OntologyImpl {
       }
       
       //reduce the domain to the most specific classes
-      Map superClassesForClass = new HashMap();
-      for(Iterator classIter = gateDomain.iterator(); classIter.hasNext();) {
-        OClass aGateClass = (OClass)classIter.next();
-        superClassesForClass.put(aGateClass, 
-                aGateClass.getSuperClasses(OClass.TRANSITIVE_CLOSURE));
-      }
-      Set classesToRemove = new HashSet();
-      List domainList = new ArrayList(gateDomain);
-      for(int i = 0; i < domainList.size() -1; i++)
-        for(int j = 1; j< domainList.size(); j++) {
-          OClass aClass = (OClass)domainList.get(i);
-          OClass anotherClass = (OClass)domainList.get(j);
-          if(((Set)superClassesForClass.get(aClass)).contains(anotherClass))
-            classesToRemove.add(anotherClass);
-          else if(((Set)superClassesForClass.get(anotherClass)).contains(aClass))
-            classesToRemove.add(aClass);
-        }
-      gateDomain.removeAll(classesToRemove);
+      eliminateMoreGenericClasses(gateDomain);
 
       //reduce the range to the most specific classes
-      superClassesForClass.clear();
-      for(Iterator classIter = gateRange.iterator(); classIter.hasNext();) {
-        OClass aGateClass = (OClass)classIter.next();
-        superClassesForClass.put(aGateClass, 
-                aGateClass.getSuperClasses(OClass.TRANSITIVE_CLOSURE));
-      }
-      classesToRemove.clear();
-      List rangeList = new ArrayList(gateRange);
-      for(int i = 0; i < rangeList.size() -1; i++)
-        for(int j = 1; j< rangeList.size(); j++) {
-          OClass aClass = (OClass)rangeList.get(i);
-          OClass anotherClass = (OClass)rangeList.get(j);
-          if(((Set)superClassesForClass.get(aClass)).contains(anotherClass))
-            classesToRemove.add(anotherClass);
-          else if(((Set)superClassesForClass.get(anotherClass)).contains(aClass))
-            classesToRemove.add(aClass);
-        }
-      gateRange.removeAll(classesToRemove);
+      eliminateMoreGenericClasses(gateRange);
       
-      
-      // add the property      
-      ObjectProperty theProp = addObjectProperty(propertyName, propertyComment,
+      // add the property
+      ObjectProperty theProp = null;
+      if(aJenaProperty.isTransitiveProperty()) {
+        theProp = addTransitiveProperty(propertyName, propertyComment,
+                gateDomain, gateRange);
+      }else if(aJenaProperty.isSymmetricProperty()) {
+        theProp = addSymmetricProperty(propertyName, propertyComment,
+                gateDomain, gateRange);
+      }else {
+        theProp = addObjectProperty(propertyName, propertyComment,
               gateDomain, gateRange);
+      }
       theProp.setURI(aJenaProperty.getURI());
       theProp.setFunctional(aJenaProperty.isFunctionalProperty());
       theProp.setInverseFunctional(aJenaProperty.isInverseFunctionalProperty());
     }
+    
     //create the properties hierarchy
     propIter = jenaModel.listObjectProperties();
     while(propIter.hasNext()) {
       OntProperty aJenaProp = (OntProperty)propIter.next();
-      Property aGateProp = getPropertyDefinitionByName(aJenaProp.getLocalName());
+      gate.creole.ontology.Property aGateProp = getPropertyDefinitionByName(aJenaProp.getLocalName());
       for(Iterator superIter = aJenaProp.listSuperProperties(); 
           superIter.hasNext();) {
         OntProperty aJenaSuperProp = (OntProperty)superIter.next();
-        Property aGateSuperProp = 
+        gate.creole.ontology.Property aGateSuperProp = 
           getPropertyDefinitionByName(aJenaSuperProp.getLocalName());
         if(aGateSuperProp == null) {
           Err.prln("WARNING: Unknown super property \"" + 
@@ -169,19 +142,9 @@ public class JenaOntologyImpl extends OntologyImpl {
           aGateSuperProp.addSubProperty(aGateProp);          
         }
       }
-//      for(Iterator subIter = aJenaProp.listSubProperties(); 
-//          subIter.hasNext();) {
-//        OntProperty aJenaSubProp = (OntProperty)subIter.next();
-//        Property aGateSubProp = 
-//          getPropertyDefinitionByName(aJenaSubProp.getLocalName());
-//        if(aGateProp == null) 
-//          throw new ResourceInstantiationException("Unknown sub property \"" + 
-//                  aJenaSubProp.getLocalName() + "\" for property \"" +
-//                  aJenaProp.getLocalName() + "\"!");
-//        aGateProp.addSubProperty(aGateSubProp);
-//      }
     }
     
+    //add the datatype properties
     propIter = jenaModel.listDatatypeProperties();
     while(propIter.hasNext()){
       DatatypeProperty aProp = (DatatypeProperty)propIter.next();
@@ -201,6 +164,57 @@ public class JenaOntologyImpl extends OntologyImpl {
     }
     
   }
+  
+  protected Set buildPropertyDomain(OntModel jenaModel, 
+          OntProperty jenaProperty) throws ResourceInstantiationException{
+    Set domain = new HashSet();
+    // add the direct domain entries
+    for(Iterator domIter = jenaProperty.listDomain(); domIter.hasNext();)
+      domain.add(domIter.next());
+    //convert the domain to GATE classes
+    Set gateDomain = new HashSet();
+    for(Iterator domIter = domain.iterator(); domIter.hasNext();) {
+      OntClass aJenaClass = (OntClass)domIter.next();
+      OClass aGateClass = (OClass)getClassByName(aJenaClass.getLocalName());
+      if(aGateClass == null) {
+        throw new ResourceInstantiationException("Class not found " +
+                aJenaClass.getLocalName());
+      }else {
+        gateDomain.add(aGateClass);
+      }
+    }
+    
+    //reduce the domain to the most specific classes
+    eliminateMoreGenericClasses(gateDomain);
+    return gateDomain;
+  }
+  
+  /**
+   * Eliminates the more general classes from a set, keeping only the most 
+   * specific ones. The changes are made to the set provided as a parameter.
+   * @param classSet a set of {@link OClass} objects.
+   */
+  protected void eliminateMoreGenericClasses(Set classSet) {
+    Map superClassesForClass = new HashMap();
+    for(Iterator classIter = classSet.iterator(); classIter.hasNext();) {
+      OClass aGateClass = (OClass)classIter.next();
+      superClassesForClass.put(aGateClass, 
+              aGateClass.getSuperClasses(OClass.TRANSITIVE_CLOSURE));
+    }
+    Set classesToRemove = new HashSet();
+    List resultList = new ArrayList(classSet);
+    for(int i = 0; i < resultList.size() -1; i++)
+      for(int j = i + 1; j< resultList.size(); j++) {
+        OClass aClass = (OClass)resultList.get(i);
+        OClass anotherClass = (OClass)resultList.get(j);
+        if(((Set)superClassesForClass.get(aClass)).contains(anotherClass))
+          classesToRemove.add(anotherClass);
+        else if(((Set)superClassesForClass.get(anotherClass)).contains(aClass))
+          classesToRemove.add(aClass);
+      }
+    classSet.removeAll(classesToRemove);
+  }
+  
   /**
    * Adds a class and all its subclasses recursively.
    * 
