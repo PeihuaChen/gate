@@ -18,14 +18,11 @@
 
  package gate.creole.ontology;
 
- import gate.util.Err;
 import java.util.*;
-import sun.security.krb5.internal.ccache.an;
 
 /**
- * 
- * @author Valentin Tablan
- *
+ * This class provides implementations for methods common to all types of 
+ * ontological properties.
  */
 public abstract class PropertyImpl extends OntologyResourceImpl 
       implements Property {
