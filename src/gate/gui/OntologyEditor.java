@@ -421,15 +421,20 @@ public class OntologyEditor extends AbstractVisualResource
         }
         
         if(ontologyMode) {
-    
           //set the properties
           properties.getValues().clear();
           Iterator propIter = ontology.getPropertyDefinitions().iterator();
+          //create a local instance to check for properties 
+          OInstanceImpl aFakeInstance = new OInstanceImpl("", "", 
+                  (OClass)aClass, ontology);
+          
           while(propIter.hasNext()) {
             Property prop = (Property)propIter.next();
-            if(mightPropertyApplyToClass(prop, (OClass)aClass)) {
+            if(prop.isValidDomain(aFakeInstance))
               properties.getValues().add(prop);
-            }
+//            if(mightPropertyApplyToClass(prop, (OClass)aClass)) {
+//              properties.getValues().add(prop);
+//            }
           }
           Collections.sort(properties.getValues(), itemComparator);
           
@@ -544,8 +549,6 @@ public class OntologyEditor extends AbstractVisualResource
             Object value, boolean isSelected, boolean hasFocus, 
             int row, int column){
       //prepare the renderer
-      
-      
       Component res = super.getTableCellRendererComponent(table, "", 
               isSelected,hasFocus, row, column);
 
@@ -586,10 +589,8 @@ public class OntologyEditor extends AbstractVisualResource
           setIcon(MainFrame.getIcon("param.gif"));
           setFont(getFont().deriveFont(Font.PLAIN));
           String text = aProperty.getName() + " -> ";
-          Object range = aProperty.getRange();
-          text += range instanceof TClass ?
-                  ((TClass)range).getName() :
-                  range.toString();
+          Set range = aProperty.getRange();
+          text += range.toString();
           setText(text);
           setEnabled(true);
         }else if(value instanceof DatatypeProperty){
