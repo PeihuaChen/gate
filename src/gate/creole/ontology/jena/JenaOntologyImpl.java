@@ -61,8 +61,7 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
    * @see gate.gui.ActionsPublisher#getActions()
    */
   public List getActions() {
-    // TODO Auto-generated method stub
-    return null;
+    return actionsList;
   }
 
   /**
