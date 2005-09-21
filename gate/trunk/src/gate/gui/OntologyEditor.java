@@ -423,7 +423,8 @@ public class OntologyEditor extends AbstractVisualResource
         if(ontologyMode) {
           //set the properties
           properties.getValues().clear();
-          Iterator propIter = ontology.getPropertyDefinitions().iterator();
+          Iterator propIter = new HashSet(ontology.getPropertyDefinitions())
+              .iterator();
           //create a local instance to check for properties 
           OInstanceImpl aFakeInstance = new OInstanceImpl("", "", 
                   (OClass)aClass, ontology);
