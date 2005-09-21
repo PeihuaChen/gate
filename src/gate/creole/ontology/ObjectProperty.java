@@ -50,6 +50,5 @@ public interface ObjectProperty extends Property {
    *         property. False otherwise.
    */
   public boolean isValidRange(OInstance instance);
-    
   
 }

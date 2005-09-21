@@ -183,12 +183,9 @@ public class TClassImpl extends OntologyResourceImpl implements TClass{
     subClassesTransitiveClosure = new HashSet();
     TClass currentClass;
     while (bag.size()>0) {
-      currentClass = (TClass) bag.get(0);
-      bag.remove(0);
-      subClassesTransitiveClosure.add(currentClass);
-      bag.addAll(currentClass.getSubClasses(TClass.DIRECT_CLOSURE));
-      //avoid infinite loops
-      bag.removeAll(subClassesTransitiveClosure);
+      currentClass = (TClass) bag.remove(0);
+      if(subClassesTransitiveClosure.add(currentClass))
+        bag.addAll(currentClass.getSubClasses(TClass.DIRECT_CLOSURE));
     } //while bag is not empty
   } // inferSubClassesTransitiveClosure();
 
@@ -197,12 +194,9 @@ public class TClassImpl extends OntologyResourceImpl implements TClass{
     superClassesTransitiveClosure = new HashSet();
     TClass currentClass;
     while (bag.size()>0) {
-      currentClass = (TClass) bag.get(0);
-      bag.remove(0);
-      superClassesTransitiveClosure.add(currentClass);
-      bag.addAll(currentClass.getSuperClasses(TClass.DIRECT_CLOSURE));
-      //avoid infinite cycles
-      bag.removeAll(superClassesTransitiveClosure);
+      currentClass = (TClass) bag.remove(0);
+      if(superClassesTransitiveClosure.add(currentClass))
+        bag.addAll(currentClass.getSuperClasses(TClass.DIRECT_CLOSURE));
     } //while bag is not empty
   } // inferSuperClassesTransitiveClosure();
 

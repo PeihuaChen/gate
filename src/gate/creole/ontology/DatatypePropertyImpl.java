@@ -33,13 +33,13 @@ public class DatatypePropertyImpl extends PropertyImpl
   public DatatypePropertyImpl(String name, String comment,  OClass aDomainClass,
           Ontology anOntology) {
     super(name, comment, aDomainClass, anOntology);
-    range = null;
+    range = Object.class;
   }
 
   public DatatypePropertyImpl(String name, String comment, Set domain, 
           Ontology ontology) {
     super(name, comment, domain, ontology);
-    range = null;
+    range = Object.class;
   }
   
   public DatatypePropertyImpl(String name, String comment, Set domain, 
@@ -50,7 +50,7 @@ public class DatatypePropertyImpl extends PropertyImpl
   
 
   public boolean isValidRange(Object value) {
-    return range == null || range.isAssignableFrom(value.getClass());
+    return range.isAssignableFrom(value.getClass());
   }
 
   public Class getRange() {

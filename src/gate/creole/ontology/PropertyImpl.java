@@ -19,6 +19,7 @@
  package gate.creole.ontology;
 
 import java.util.*;
+import com.ontotext.gate.ontology.OntologyImpl;
 
 /**
  * This class provides implementations for methods common to all types of 
@@ -26,7 +27,20 @@ import java.util.*;
  */
 public abstract class PropertyImpl extends OntologyResourceImpl 
       implements Property {
+  
+  /**
+   * The set of domain restrictions (i.e. {@link OClass} objects} for this 
+   * property. This is composed from the {@link #directDomain} plus all the 
+   * domain restrictions from the super-properties. Once calculated this value 
+   * is cached.
+   */
   protected Set domain;
+  
+  /**
+   * The set of domain restrictions (i.e. {@link OClass} objects} set as domain
+   * directly for this property. 
+   */
+  protected Set directDomain;
   protected Set samePropertiesSet;
   protected Set superPropertiesSet;
   protected Set subPropertiesSet;
@@ -48,8 +62,8 @@ public abstract class PropertyImpl extends OntologyResourceImpl
   public PropertyImpl(String name, String comment, Set domain, 
           Ontology ontology) {
     super(name, comment, ontology);
-    this.domain = new HashSet();
-    this.domain.addAll(domain);
+    this.directDomain = new HashSet(domain);
+    this.domain = new HashSet(directDomain);
     samePropertiesSet = new HashSet();
     superPropertiesSet = new HashSet();
     subPropertiesSet = new HashSet();
@@ -62,6 +76,7 @@ public abstract class PropertyImpl extends OntologyResourceImpl
   public PropertyImpl(String name, String comment, OClass aDomainClass, 
           Ontology ontology) {
     this(name, comment, new HashSet(), ontology);
+    this.directDomain.add(aDomainClass);
     this.domain.add(aDomainClass);
   }  
   
@@ -97,8 +112,33 @@ public abstract class PropertyImpl extends OntologyResourceImpl
 
   public void addSuperProperty(Property property) {
     this.superPropertiesSet.add(property);
+    //add restrictions from super-property to the domain set
+    domain.addAll(property.getDomain());
+    OntologyImpl.reduceToMostSpecificClasses(domain);
+    //propagate the changes to sub properties
+    Iterator subPropIter = getSubProperties(TRANSITIVE_CLOSURE).iterator();
+    while(subPropIter.hasNext()) {
+      Property aSubProperty = (Property)subPropIter.next();
+      if(aSubProperty instanceof PropertyImpl) {
+        ((PropertyImpl)aSubProperty).recalculateDomain();
+      }
+    }
   }
-
+  
+  /**
+   * Notifies this property that it should recalculate the range set (because 
+   * the range of a super-property has changed).
+   */
+  protected void recalculateDomain() {
+    domain.clear();
+    domain.addAll(directDomain);
+    Iterator superPropIter = getSuperProperties(TRANSITIVE_CLOSURE).iterator();
+    while(superPropIter.hasNext()) {
+      domain.addAll(((Property)superPropIter.next()).getDomain());
+    }
+    OntologyImpl.reduceToMostSpecificClasses(domain);
+  }
+  
   public void removeSuperProperty(Property property) {
     this.superPropertiesSet.remove(property);
   }
@@ -167,9 +207,6 @@ public abstract class PropertyImpl extends OntologyResourceImpl
    */
   public boolean isValidDomain(OInstance instance) {
     Set domainClasses = new HashSet(getDomain());
-    Iterator superPropIter = getSuperProperties(TRANSITIVE_CLOSURE).iterator();
-    while(superPropIter.hasNext()) 
-      domainClasses.addAll(((Property)superPropIter.next()).getDomain());
     boolean result = true;
     Iterator instanceClassIter = instance.getOClasses().iterator();
     while(result && instanceClassIter.hasNext()) {
