@@ -170,8 +170,22 @@ public abstract class PropertyImpl extends OntologyResourceImpl
     Iterator superPropIter = getSuperProperties(TRANSITIVE_CLOSURE).iterator();
     while(superPropIter.hasNext()) 
       domainClasses.addAll(((Property)superPropIter.next()).getDomain());
-    
-    return instance.getOClasses().containsAll(domainClasses);
+    boolean result = true;
+    Iterator instanceClassIter = instance.getOClasses().iterator();
+    while(result && instanceClassIter.hasNext()) {
+      OClass anInstanceClass = (OClass)instanceClassIter.next();
+      //first do the simple test
+      if(!domainClasses.contains(anInstanceClass)) {
+        //the class is not directly contained in the domain,
+        //maybe one super class is?
+        Set superClasses = anInstanceClass.
+            getSuperClasses(OntologyConstants.TRANSITIVE_CLOSURE);
+        Set intersection = new HashSet(superClasses);
+        intersection.retainAll(domainClasses);
+        if(intersection.isEmpty()) result = false;
+      }
+    }
+    return result;
   }
   
 

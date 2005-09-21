@@ -71,10 +71,26 @@ public class ObjectPropertyImpl extends PropertyImpl implements ObjectProperty {
    */
   public boolean isValidRange(OInstance instance) {
     Set rangeClasses = new HashSet(getRange());
-    Iterator superPropIter = superPropertiesSet.iterator();
+    Iterator superPropIter = getSuperProperties(TRANSITIVE_CLOSURE).iterator();
     while(superPropIter.hasNext()) 
       rangeClasses.addAll(((ObjectProperty)superPropIter.next()).getRange());
-    return instance.getOClasses().containsAll(rangeClasses);
+    
+    boolean result = true;
+    Iterator instanceClassIter = instance.getOClasses().iterator();
+    while(result && instanceClassIter.hasNext()) {
+      OClass anInstanceClass = (OClass)instanceClassIter.next();
+      //first do the simple test
+      if(!rangeClasses.contains(anInstanceClass)) {
+        //the class is not directly contained in the range,
+        //maybe one super class is?
+        Set superClasses = anInstanceClass.
+            getSuperClasses(OntologyConstants.TRANSITIVE_CLOSURE);
+        Set intersection = new HashSet(superClasses);
+        intersection.retainAll(rangeClasses);
+        if(intersection.isEmpty()) result = false;
+      }
+    }
+    return result;    
   }
   
   public Set getRange() {
