@@ -179,4 +179,32 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
     return null;
   }
 
+  
+  /**
+   * Eliminates the more general classes from a set, keeping only the most
+   * specific ones. The changes are made to the set provided as a parameter.
+   * This is a utility method for ontologies.
+   * @param classSet
+   *          a set of {@link OClass} objects.
+   */
+  public static void reduceToMostSpecificClasses(Set classSet) {
+    Map superClassesForClass = new HashMap();
+    for(Iterator classIter = classSet.iterator(); classIter.hasNext();){
+      OClass aGateClass = (OClass)classIter.next();
+      superClassesForClass.put(aGateClass, aGateClass
+              .getSuperClasses(OClass.TRANSITIVE_CLOSURE));
+    }
+    Set classesToRemove = new HashSet();
+    List resultList = new ArrayList(classSet);
+    for(int i = 0; i < resultList.size() - 1; i++)
+      for(int j = i + 1; j < resultList.size(); j++){
+        OClass aClass = (OClass)resultList.get(i);
+        OClass anotherClass = (OClass)resultList.get(j);
+        if(((Set)superClassesForClass.get(aClass)).contains(anotherClass))
+          classesToRemove.add(anotherClass);
+        else if(((Set)superClassesForClass.get(anotherClass)).contains(aClass))
+          classesToRemove.add(aClass);
+      }
+    classSet.removeAll(classesToRemove);
+  }
 }
