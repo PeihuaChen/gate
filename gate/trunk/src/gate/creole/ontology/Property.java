@@ -135,5 +135,6 @@ public interface Property extends OntologyResource, OntologyConstants {
    * sub-properties.
    * @return a set of {@link Property} values.
    */
-  public Set getSubProperties(byte closure);  
+  public Set getSubProperties(byte closure); 
+  
 }
