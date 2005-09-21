@@ -19,10 +19,23 @@
     <CLASS>gate.creole.ontology.jena.JenaOntologyImpl</CLASS>
     <INTERFACE>gate.creole.ontology.Ontology</INTERFACE>
     <COMMENT>An ontology implementation using Jena for I/O.</COMMENT>
-    <PARAMETER NAME="owlFileURL"
-      DEFAULT="file:/D:/tmp/JENA/protonu.xml"
-      REQUIRED="true"
-      COMMENT="The URL of the OWL file">java.net.URL</PARAMETER>
+    <OR>
+      <PARAMETER NAME="owlLiteFileURL"
+        REQUIRED="false"
+        COMMENT="The URL of a OWL-Lite file">java.net.URL</PARAMETER>
+      <PARAMETER NAME="owlDlFileURL"
+        REQUIRED="false"
+        COMMENT="The URL of a OWL-DL file">java.net.URL</PARAMETER>      
+      <PARAMETER NAME="owlFullFileURL"
+        REQUIRED="false"
+        COMMENT="The URL of a OWL-Full file">java.net.URL</PARAMETER>      
+      <PARAMETER NAME="rdfsFileURL"
+        REQUIRED="false"
+        COMMENT="The URL of a RDF(S) file">java.net.URL</PARAMETER>      
+      <PARAMETER NAME="damlFileURL"
+        REQUIRED="false"
+        COMMENT="The URL of a DAML file">java.net.URL</PARAMETER>      
+    </OR>
     <PARAMETER NAME="language" DEFAULT=""
       COMMENT="The language to be used for labels and comments"
       REQUIRED="true"
