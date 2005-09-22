@@ -77,6 +77,8 @@ public class OInstanceImpl extends OntologyResourceImpl implements OInstance {
     // is empty, then we just return without adding the value
     Property prop = ((Ontology)ontology)
             .getPropertyDefinitionByName(propertyName);
+    if(prop == null) return false;
+    
     if(prop.isValidDomain(this)){
       List values = (List)instanceProperties.get(propertyName);
       if(values == null){
