@@ -34,6 +34,9 @@ public interface GateConstants {
   public static final String
     ORIGINAL_MARKUPS_ANNOT_SET_NAME = "Original markups";
 
+  /** The option name for the last filechooser location. */
+  public static final String 
+    LAST_FILECHOOSER_LOCATION = "Last_filechooser_location";
 
   /** The look and feel option name*/
   public static final String LOOK_AND_FEEL = "Look_and_Feel";
