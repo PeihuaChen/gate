@@ -10,17 +10,14 @@ import gate.util.Err;
 import gate.util.Out;
 import java.awt.event.ActionEvent;
 import java.io.*;
-import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
 import javax.swing.*;
-import javax.swing.AbstractAction;
-import javax.swing.JFileChooser;
 import com.hp.hpl.jena.ontology.*;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.*;
+import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.ontotext.gate.ontology.OntologyImpl;
 
@@ -147,32 +144,63 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
       OntClass aTopClass = (OntClass)topClassIter.next();
       addClassRec(aTopClass, null);
     }
+    
     // create the properties
-    ExtendedIterator propIter = jenaModel.listObjectProperties();
-    propwhile: while(propIter.hasNext()){
+    Iterator propIter = jenaModel.listOntProperties();
+    while(propIter.hasNext()) {
       OntProperty aJenaProperty = (OntProperty)propIter.next();
+      if(aJenaProperty.isOntLanguageTerm()) continue;
+      
       String propertyName = aJenaProperty.getLocalName();
       String propertyComment = aJenaProperty.getComment(language);
-      Set gateDomain = buildPropertyDomain(jenaModel, aJenaProperty);
-      Set gateRange = buildPropertyRange(jenaModel, aJenaProperty);
-      // add the property
-      ObjectProperty theProp = null;
-      if(aJenaProperty.isTransitiveProperty()){
-        theProp = addTransitiveProperty(propertyName, propertyComment,
+      Set gateDomain = convertoToGateClasses(aJenaProperty.listDomain());
+      reduceToMostSpecificClasses(gateDomain);
+      
+      gate.creole.ontology.Property theProp = null;
+      if(ontologyType != RDFS && aJenaProperty.isObjectProperty()) {
+        Set gateRange = convertoToGateClasses(aJenaProperty.listRange());
+        reduceToMostSpecificClasses(gateRange);
+        if(aJenaProperty.isTransitiveProperty()){
+          theProp = addTransitiveProperty(propertyName, propertyComment,
+                  gateDomain, gateRange);
+        }else if(ontologyType != DAML && aJenaProperty.isSymmetricProperty()){
+          theProp = addSymmetricProperty(propertyName, propertyComment,
+                  gateDomain, gateRange);
+        }else{
+          theProp = addObjectProperty(propertyName, propertyComment, gateDomain,
+                  gateRange);
+        }
+      }else if(ontologyType != RDFS && aJenaProperty.isDatatypeProperty()) {
+        Iterator rangeIter = aJenaProperty.listRange();
+        Set range = new HashSet();
+        while(rangeIter.hasNext())
+          range.add(rangeIter.next());
+        if(!range.isEmpty()){
+          Out.prln("WARNING: Support for datatype properties ranges is not "
+                  + "implemented!\nRange " + range.toString() + " for property "
+                  + aJenaProperty.getLocalName() + " has been ignored!");
+        }
+        
+        theProp = addDatatypeProperty(
+                propertyName, propertyComment, gateDomain, Object.class);
+      }else {
+        //generic type of property
+        Err.prln("WARNING: Unknown property type \"" + 
+                 aJenaProperty.getClass().getName()  + "\" for property \"" + 
+                 aJenaProperty.toString() + "\"!");
+        Set gateRange = convertoToGateClasses(aJenaProperty.listRange());
+        theProp = addObjectProperty(propertyName, propertyComment,
                 gateDomain, gateRange);
-      }else if(aJenaProperty.isSymmetricProperty()){
-        theProp = addSymmetricProperty(propertyName, propertyComment,
-                gateDomain, gateRange);
-      }else{
-        theProp = addObjectProperty(propertyName, propertyComment, gateDomain,
-                gateRange);
       }
       theProp.setURI(aJenaProperty.getURI());
-      theProp.setFunctional(aJenaProperty.isFunctionalProperty());
-      theProp.setInverseFunctional(aJenaProperty.isInverseFunctionalProperty());
+      if(ontologyType != RDFS) {
+        theProp.setFunctional(aJenaProperty.isFunctionalProperty());
+        theProp.setInverseFunctional(aJenaProperty.isInverseFunctionalProperty());
+      }
     }
+    
     // create the properties hierarchy
-    propIter = jenaModel.listObjectProperties();
+    propIter = jenaModel.listOntProperties();
     while(propIter.hasNext()){
       OntProperty aJenaProp = (OntProperty)propIter.next();
       gate.creole.ontology.Property aGateProp = getPropertyDefinitionByName(aJenaProp
@@ -192,75 +220,82 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
         }
       }
     }
-    // add the datatype properties
-    propIter = jenaModel.listDatatypeProperties();
-    while(propIter.hasNext()){
-      DatatypeProperty aJenaProperty = (DatatypeProperty)propIter.next();
-      String propertyName = aJenaProperty.getLocalName();
-      String propertyComment = aJenaProperty.getComment(language);
-      Set gateDomain = buildPropertyDomain(jenaModel, aJenaProperty);
-      Iterator rangeIter = aJenaProperty.listRange();
-      Set range = new HashSet();
-      while(rangeIter.hasNext())
-        range.add(rangeIter.next());
-      if(!range.isEmpty()){
-        Out.prln("WARNING: Support for datatype properties ranges is not "
-                + "implemented!\nRange " + range.toString() + " for property "
-                + aJenaProperty.getLocalName() + " has been ignored!");
+    
+    //read the instances
+    Iterator instanceIter = jenaModel.listIndividuals();
+    while(instanceIter.hasNext()) {
+      Individual aJenaInstance = (Individual)instanceIter.next();
+      Set jenaClasses = new HashSet();
+      Iterator classIter = aJenaInstance.listRDFTypes(true);
+      while(classIter.hasNext()) {
+        OntClass aClass = (OntClass)
+            ((com.hp.hpl.jena.rdf.model.Resource)classIter.next()).
+            as(OntClass.class);
+        jenaClasses.add(aClass);
       }
-      gate.creole.ontology.DatatypeProperty theProp = addDatatypeProperty(
-              propertyName, propertyComment, gateDomain, Object.class);
-      theProp.setFunctional(aJenaProperty.isFunctionalProperty());
-      theProp.setInverseFunctional(aJenaProperty.isInverseFunctionalProperty());
-      theProp.setURI(aJenaProperty.getURI());
-    }
-  }
-
-  protected Set buildPropertyDomain(OntModel jenaModel, OntProperty jenaProperty)
-          throws ResourceInstantiationException {
-    Set domain = new HashSet();
-    // add the direct domain entries
-    for(Iterator domIter = jenaProperty.listDomain(); domIter.hasNext();)
-      domain.add(domIter.next());
-    // convert the domain to GATE classes
-    Set gateDomain = new HashSet();
-    for(Iterator domIter = domain.iterator(); domIter.hasNext();){
-      OntClass aJenaClass = (OntClass)domIter.next();
-      OClass aGateClass = (OClass)getClassByName(aJenaClass.getLocalName());
-      if(aGateClass == null){
-        throw new ResourceInstantiationException("Class not found "
-                + aJenaClass.getLocalName());
-      }else{
-        gateDomain.add(aGateClass);
-      }
-    }
-    // reduce the domain to the most specific classes
-    reduceToMostSpecificClasses(gateDomain);
-    return gateDomain;
-  }
-
-  protected Set buildPropertyRange(OntModel jenaModel, OntProperty jenaProperty)
-          throws ResourceInstantiationException {
-    Set range = new HashSet();
-    // add the direct domain entries
-    for(Iterator rangeIter = jenaProperty.listRange(); rangeIter.hasNext();)
-      range.add(rangeIter.next());
-    // convert the domain to GATE classes
-    Set gateRange = new HashSet();
-    for(Iterator rangeIter = range.iterator(); rangeIter.hasNext();){
-      OntClass aJenaClass = (OntClass)rangeIter.next();
-      OClass aGateClass = (OClass)getClassByName(aJenaClass.getLocalName());
-      if(aGateClass == null){
-        throw new ResourceInstantiationException("Class not found "
-                + aJenaClass.getLocalName());
-      }else{
-        gateRange.add(aGateClass);
+      Set gateClasses = convertoToGateClasses(jenaClasses.iterator());
+      OInstance gateInstance = new OInstanceImpl(
+              aJenaInstance.getLocalName(),
+              aJenaInstance.getComment(language),
+              gateClasses, this);
+      addInstance(gateInstance);
+      //add the property values
+      propIter = aJenaInstance.listProperties();
+      while(propIter.hasNext()) {
+        Property aProperty = ((Statement)propIter.next()).getPredicate();
+        NodeIterator valIter = aJenaInstance.listPropertyValues(aProperty);
+        while(valIter.hasNext()) {
+          RDFNode aValue = valIter.nextNode();
+          if(aValue.canAs(Individual.class)) {
+            //object value
+              Individual individual = (Individual)aValue.as(Individual.class);
+              try {
+                OInstance gateValue = getInstanceByName(individual.getLocalName());
+                boolean success = gateInstance.
+                    addPropertyValue(aProperty.getLocalName(), gateValue);
+                if(!success) Err.prln("Could not set value \"" + gateValue +
+                        "\" for property \"" + aProperty + 
+                        "\" on instance " + gateInstance.getName());
+              }catch(UnsupportedOperationException uoe) {
+                Err.prln("Could not set value \"" + individual +
+                        "\" for property \"" + aProperty + 
+                        "\" on instance " + gateInstance.getName());
+              }
+          }else if (aValue.canAs(Literal.class)){
+            //datatype value
+            Literal literalValue = (Literal) aValue.as(Literal.class);
+            Object value = literalValue.getDatatype().
+                parse(literalValue.getLexicalForm());
+            boolean success = gateInstance.addPropertyValue(
+                    aProperty.getLocalName(), value);
+            if(!success) Err.prln("Could not set value \"" + value +
+                    "\" for property \"" + aProperty + 
+                    "\" on instance " + gateInstance.getName());
+          }
+        }
       }
     }
-    // reduce the range to the most specific classes
-    reduceToMostSpecificClasses(gateRange);
-    return gateRange;
   }
+  
+  protected Set convertoToGateClasses(Iterator jenaIterator) {
+    Set result = new HashSet();
+    while(jenaIterator.hasNext()) {
+      com.hp.hpl.jena.rdf.model.Resource aResource = 
+          (com.hp.hpl.jena.rdf.model.Resource)jenaIterator.next();
+      if(aResource.canAs(OntClass.class)) {
+        OntClass aJenaClass = (OntClass)aResource.as(OntClass.class);
+        OClass aGateClass = (OClass)getClassByName(aJenaClass.getLocalName());
+        if(aGateClass == null){
+          Err.prln("WARNING: class \"" + aJenaClass.getLocalName() +
+                  "\" not found!");
+        }else{
+          result.add(aGateClass);
+        }        
+      }
+    }
+    return result;
+  }
+  
 
   /**
    * Adds a class and all its subclasses recursively.
@@ -280,7 +315,7 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
     if(aClass == null){
       // if class not found, create a new one
       aClass = new OClassImpl(uri, name, comment, this);
-      aClass.setURI(uri);
+      if(uri != null) aClass.setURI(uri);
       addClass(aClass);
     }
     // create the hierachy
