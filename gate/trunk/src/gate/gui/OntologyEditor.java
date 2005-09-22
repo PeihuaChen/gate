@@ -212,14 +212,15 @@ public class OntologyEditor extends AbstractVisualResource
   protected static class OntologyItemComparator implements Comparator{
 
     public int compare(Object o1, Object o2){
-      if(o1 instanceof TClass && o2 instanceof TClass)
-        return ((TClass)o1).getName().compareTo(((TClass)o2).getName());
-      else if(o1 instanceof OInstance && o2 instanceof OInstance)
-        return ((OInstance)o1).getName().compareTo(((OInstance)o2).getName());
-      else if(o1 instanceof Property && o2 instanceof Property)
-        return ((Property)o1).getName().compareTo(((Property)o2).getName());
-      
-      else return 0;
+      if(o1 == null) return o2 == null ? 0 : -1;
+      if(o2 == null) return o1 == null ? 0 : 1;
+      if(o1 instanceof OntologyResource && o2 instanceof OntologyResource) {
+        String s1 = ((OntologyResource)o1).getName();
+        String s2 = ((OntologyResource)o2).getName();
+        if(s1 == null) return s2 == null ? 0 : -1;
+        if(s2 == null) return s1 == null ? 0 : 1;
+        return s1.compareTo(s2);
+      }else return 0;
     }
   }
   
