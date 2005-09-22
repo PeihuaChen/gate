@@ -215,6 +215,13 @@ public class MainFrame extends JFrame
     if(fileChooser == null){
       fileChooser = new JFileChooser();
       fileChooser.setMultiSelectionEnabled(false);
+      String lastUsedDir = Gate.getUserConfig()
+          .getString(GateConstants.LAST_FILECHOOSER_LOCATION);
+      if(lastUsedDir != null && lastUsedDir.length() > 0) {
+        File lastDir = new File(lastUsedDir);
+        if(lastDir.exists() && lastDir.isDirectory())
+          fileChooser.setCurrentDirectory(new File(lastUsedDir));
+      }
       guiRoots.add(fileChooser);
 
       //the JFileChooser seems to size itself better once it's been added to a
@@ -2120,6 +2127,14 @@ public class MainFrame extends JFrame
             Integer height = new Integer(MainFrame.this.getHeight());
             userConfig.put(GateConstants.MAIN_FRAME_WIDTH, width);
             userConfig.put(GateConstants.MAIN_FRAME_HEIGHT, height);
+            try {
+              File lastCurrentDirectory = fileChooser.getCurrentDirectory();
+              userConfig.put(GateConstants.LAST_FILECHOOSER_LOCATION,
+                      lastCurrentDirectory == null ? "" : 
+                      lastCurrentDirectory.getCanonicalPath());
+            }catch(IOException ioe) {
+              //ignore
+            }
             try{
               Gate.writeUserConfig();
             }catch(GateException ge){
