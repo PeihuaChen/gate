@@ -40,7 +40,6 @@
 	<classpathentry kind="lib" path="lib/tm-extractors-0.4.jar"/>
 	<classpathentry kind="lib" path="lib/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
-	<classpathentry kind="lib" path="C:/apps/jdk/j2sdk1.4.2_08/lib/tools.jar"/>
 	<classpathentry kind="lib" path="lib/PDFBox-0.7.2.jar"/>
 	<classpathentry kind="lib" path="lib/weka-3.4.5.jar"/>
 	<classpathentry kind="output" path="classes"/>
