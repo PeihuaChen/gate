@@ -219,6 +219,7 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
     this.modified = true;
     TClass theClass = new TClassImpl(Long.toString(++lastGeneratedId), aName,
             aComment, this);
+    theClass.setURI(getSourceURI() + aName);
     addClass(theClass);
     nullBuffers = true;
     fireObjectModificationEvent(this);
