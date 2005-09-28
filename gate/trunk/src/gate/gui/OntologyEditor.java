@@ -71,7 +71,8 @@ public class OntologyEditor extends AbstractVisualResource
     tree.getSelectionModel().setSelectionMode(
             TreeSelectionModel.SINGLE_TREE_SELECTION);
     JScrollPane scroller = new JScrollPane(tree);
-    
+    //enable tooltips for the tree
+    ToolTipManager.sharedInstance().registerComponent(tree);
     mainSplit.setLeftComponent(scroller);
     
     detailsTableModel = new DetailsTableModel();
@@ -241,9 +242,11 @@ public class OntologyEditor extends AbstractVisualResource
         if(nodeObject instanceof TClass){
           icon = MainFrame.getIcon("Class.gif");
           itemName = ((TClass)nodeObject).getName();
+          setToolTipText(((TClass)nodeObject).getURI());
         }else if(nodeObject instanceof OInstance){
           icon = MainFrame.getIcon("Instance.gif");
           itemName = ((OInstance)nodeObject).getName();
+          setToolTipText(((OInstance)nodeObject).getURI());
         }
         if(icon != null){
           if(expanded) setOpenIcon(icon);
@@ -579,12 +582,14 @@ public class OntologyEditor extends AbstractVisualResource
           setIcon(MainFrame.getIcon("Class.gif"));
           setFont(getFont().deriveFont(Font.PLAIN));
           setText(aClass.getName());
+          setToolTipText(aClass.getURI());
           setEnabled(true);
         }else if(value instanceof OInstance){
           OInstance anInstance = (OInstance)value;
           setIcon(MainFrame.getIcon("Instance.gif"));
           setFont(getFont().deriveFont(Font.PLAIN));
           setText(anInstance.getName());
+          setToolTipText(anInstance.getURI());
           setEnabled(true);
         }else if(value instanceof ObjectProperty){
           ObjectProperty aProperty = (ObjectProperty)value;
@@ -594,6 +599,7 @@ public class OntologyEditor extends AbstractVisualResource
           Set range = aProperty.getRange();
           text += range.toString();
           setText(text);
+          setToolTipText(aProperty.getURI());
           setEnabled(true);
         }else if(value instanceof DatatypeProperty){
           DatatypeProperty aProperty = (DatatypeProperty)value;
@@ -603,6 +609,7 @@ public class OntologyEditor extends AbstractVisualResource
           Class range = aProperty.getRange();
           text += range == null ? "" : range.getName();
           setText(text);
+          setToolTipText(aProperty.getURI());
           setEnabled(true);
         }else{
           setIcon(null);
