@@ -97,6 +97,7 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
           Set domain, Class range) {
     DatatypeProperty theProperty = new DatatypePropertyImpl(name, 
             comment, domain, this);
+    theProperty.setURI(getSourceURI() + name);
     addPropertyDefinition(theProperty);
     return theProperty;
   }
@@ -105,6 +106,7 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
           OClass domain, Class range){
     DatatypeProperty theProperty = new DatatypePropertyImpl(name, 
             comment, domain, this);
+    theProperty.setURI(getSourceURI() + name);
     addPropertyDefinition(theProperty);
     return theProperty;
   }
@@ -114,6 +116,7 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
           Set domain, Set range) {
     ObjectProperty theProperty = new ObjectPropertyImpl(name, comment, domain, 
             range, this);
+    theProperty.setURI(getSourceURI() + name);
     addPropertyDefinition(theProperty);
     return theProperty;
   }
@@ -122,6 +125,7 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
           OClass domain, OClass range){
     ObjectProperty theProperty = new ObjectPropertyImpl(name, comment, domain, 
             range, this);
+    theProperty.setURI(getSourceURI() + name);
     addPropertyDefinition(theProperty);
     return theProperty;
   }
@@ -130,6 +134,7 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
           Set domain, Set range) {
     SymmetricProperty theProperty = new SymmetricPropertyImpl(name, comment, 
             domain, range, this);
+    theProperty.setURI(getSourceURI() + name);
     addPropertyDefinition(theProperty);
     return theProperty;
   }
@@ -138,6 +143,7 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
           OClass domain, OClass range){
     SymmetricProperty theProperty = new SymmetricPropertyImpl(name, comment, 
             domain, range, this);
+    theProperty.setURI(getSourceURI() + name);
     addPropertyDefinition(theProperty);
     return theProperty;
   }  
@@ -146,6 +152,7 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
           Set domain, Set range) {
     TransitiveProperty theProperty = new TransitivePropertyImpl(name, comment, 
             domain, range, this);
+    theProperty.setURI(getSourceURI() + name);
     addPropertyDefinition(theProperty);
     return theProperty;
   }
@@ -154,6 +161,7 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
           OClass domain, OClass range){
     TransitiveProperty theProperty = new TransitivePropertyImpl(name, comment, 
             domain, range, this);
+    theProperty.setURI(getSourceURI() + name);
     addPropertyDefinition(theProperty);
     return theProperty;
   }  

@@ -36,6 +36,7 @@ public class OClassImpl extends TClassImpl implements OClass  {
     super(anId, aName, aComment, anOntology);
     disjointClassesSet = new HashSet();
     sameClassesSet = new HashSet();
+    setURI(ontology.getSourceURI() + name);
   }
 
   public void setDisjointWith(OClass theClass) {
