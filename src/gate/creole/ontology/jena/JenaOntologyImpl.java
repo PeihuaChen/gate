@@ -7,6 +7,7 @@ import gate.creole.ontology.ObjectProperty;
 import gate.gui.ActionsPublisher;
 import gate.gui.MainFrame;
 import gate.util.Err;
+import gate.util.GateRuntimeException;
 import gate.util.Out;
 import java.awt.event.ActionEvent;
 import java.io.*;
@@ -47,6 +48,9 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
             DAML));
     actionsList.add(null);
     actionsList.add(new CleanUpAction());
+    actionsList.add(null);
+    actionsList.add(new SaveOntologyAction("Save to file", 
+            "Saves the ontology to a file", OWL_LITE));
   }
   
   public Resource init() throws ResourceInstantiationException {
@@ -133,8 +137,15 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
     if(inputURL != null){
       try{
         jenaModel.read(new BufferedInputStream(inputURL.openStream()), "");
+        //get the default name space
+        String defaultURIPrefix = jenaModel.getNsPrefixURI("");
+        if(defaultURIPrefix != null) setSourceURI(defaultURIPrefix);        
       }catch(IOException ioe){
         throw new ResourceInstantiationException(ioe);
+      }
+    }else{
+      if(defaultNameSpace != null && defaultNameSpace.trim().length() > 0){
+        setSourceURI(defaultNameSpace);
       }
     }
     // convert the Jena model into a GATE ontology
@@ -142,7 +153,7 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
     ExtendedIterator topClassIter = jenaModel.listHierarchyRootClasses();
     while(topClassIter.hasNext()){
       OntClass aTopClass = (OntClass)topClassIter.next();
-      addClassRec(aTopClass, null);
+      toGateClassRec(aTopClass, null);
     }
     
     // create the properties
@@ -208,6 +219,7 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
       for(Iterator superIter = aJenaProp.listSuperProperties(); superIter
               .hasNext();){
         OntProperty aJenaSuperProp = (OntProperty)superIter.next();
+        if(aJenaSuperProp.isOntLanguageTerm()) continue;
         gate.creole.ontology.Property aGateSuperProp = getPropertyDefinitionByName(aJenaSuperProp
                 .getLocalName());
         if(aGateSuperProp == null){
@@ -277,6 +289,85 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
     }
   }
   
+  /**
+   * Saves the ontology to a file.
+   * @param outputFile the file to write to.
+   * @param ontologyType the output format to write.
+   */
+  public void save(File outputFile, int ontologyType){
+    OntModel jenaModel = null;
+    switch(ontologyType){
+      case OWL_LITE:
+        jenaModel = ModelFactory.
+          createOntologyModel(OntModelSpec.OWL_LITE_MEM_RDFS_INF);
+        break;
+      default:
+        throw new IllegalArgumentException("Ontology type " + ontologyType +
+                " is not supported!");
+    }
+    //set the default URI
+    jenaModel.setNsPrefix("", getSourceURI());
+    //create the class hierarchy
+    Iterator topClassIter = getTopClasses().iterator();
+    while(topClassIter.hasNext()){
+      OClass aGateClass = (OClass)topClassIter.next();
+      toJenaClassRec(aGateClass, jenaModel, null);
+    }
+    
+    //create the properties
+    Iterator propIter = getPropertyDefinitions().iterator();
+    while(propIter.hasNext()){
+      gate.creole.ontology.Property aGateProp =
+          (gate.creole.ontology.Property)propIter.next();
+      OntProperty aJenaProp = null;
+      if(aGateProp instanceof ObjectProperty){
+        aJenaProp = jenaModel.createObjectProperty(aGateProp.getURI());
+      }else if(aGateProp instanceof gate.creole.ontology.DatatypeProperty){
+        aJenaProp = jenaModel.createDatatypeProperty(aGateProp.getURI());
+      }
+      aJenaProp.setLabel(aGateProp.getName(), language);
+      String comment = aGateProp.getComment();
+      if(comment != null) aJenaProp.setComment(comment, language);
+    }
+    
+    //create the properties hierarchy
+    propIter = jenaModel.listObjectProperties();
+    while(propIter.hasNext()){
+      com.hp.hpl.jena.ontology.ObjectProperty aJenaProp = 
+        (com.hp.hpl.jena.ontology.ObjectProperty)propIter.next();
+    }
+    //create the instances
+    
+    //save to the file
+    try{
+      jenaModel.write(new FileOutputStream(outputFile));
+    }catch(IOException ioe){
+      throw new GateRuntimeException(ioe);
+    }
+  }
+  
+  /**
+   * Converts a GATE class and all its subclasses (recursively) to Jena classes
+   * and adds them to the Jena model provided.
+   * @param aClass the GATE class to be converted.
+   * @param jenaModel the Jena model to be populated.
+   * @param parentClass the parent of the GATE class in the Jena model. If 
+   * <tt>null</tt> then the created Jena class will be marked as a top class.
+   */
+  protected void toJenaClassRec(OClass aGateClass, OntModel jenaModel, 
+          OntClass parentClass){
+    OntClass jenaClass = jenaModel.createClass(aGateClass.getURI());
+    jenaClass.setLabel(aGateClass.getName(), language);
+    if(parentClass != null) jenaClass.addSuperClass(parentClass);
+    String comment = aGateClass.getComment();
+    if(comment != null) jenaClass.setComment(comment, language);
+    //make the recursive calls
+    Iterator subClassIter = aGateClass.getSubClasses(DIRECT_CLOSURE).iterator();
+    while(subClassIter.hasNext()){
+      toJenaClassRec((OClass)subClassIter.next(), jenaModel, jenaClass);
+    }
+  }
+  
   protected Set convertoToGateClasses(Iterator jenaIterator) {
     Set result = new HashSet();
     while(jenaIterator.hasNext()) {
@@ -298,14 +389,13 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
   
 
   /**
-   * Adds a class and all its subclasses recursively.
+   * Converts a Jena class and all its subclasses to GATE classes and adds them
+   * to this ontology.  
    * 
-   * @param aClass
-   *          the Class in Jena model
-   * @param parent
-   *          the parent class for the class to be added in this ontology.
+   * @param aClass the Class in Jena model
+   * @param parent the parent class for the class to be added in this ontology.
    */
-  protected void addClassRec(OntClass jenaClass, OClass parent) {
+  protected void toGateClassRec(OntClass jenaClass, OClass parent) {
     // create the class
     String uri = jenaClass.getURI();
     String name = jenaClass.getLocalName();
@@ -327,7 +417,7 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
     ExtendedIterator subClassIter = jenaClass.listSubClasses(true);
     while(subClassIter.hasNext()){
       OntClass subJenaClass = (OntClass)subClassIter.next();
-      addClassRec(subJenaClass, aClass);
+      toGateClassRec(subJenaClass, aClass);
     }
   }
 
@@ -481,6 +571,45 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
     protected int ontologyType;
   }
   
+  protected class SaveOntologyAction extends AbstractAction{
+    public SaveOntologyAction(String name, String description, 
+            int ontologyType) {
+      super(name);
+      putValue(SHORT_DESCRIPTION, description);
+      this.ontologyType = ontologyType;
+    }
+    
+    public void actionPerformed(ActionEvent e) {
+      Runnable runnable = new Runnable(){
+        public void run(){
+          JFileChooser fileChooser = MainFrame.getFileChooser();
+          fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
+          fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          fileChooser.setMultiSelectionEnabled(false);
+          if(fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION){
+            File file = fileChooser.getSelectedFile();
+            try{
+              MainFrame.lockGUI("Saving model...");
+              save(file, ontologyType);
+            }catch(Exception e){
+              JOptionPane.showMessageDialog(null,
+                              "Error!\n"+
+                               e.toString(),
+                               "GATE", JOptionPane.ERROR_MESSAGE);
+              e.printStackTrace(Err.getPrintWriter());
+            }finally{
+              MainFrame.unlockGUI();
+            }
+          }
+        }
+      };
+      Thread thread = new Thread(runnable, "Ontology Loader");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
+    }
+    protected int ontologyType;
+  }  
+  
   protected class CleanUpAction extends AbstractAction{
     public CleanUpAction() {
       super("Clean ontology");
@@ -510,12 +639,15 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
     }
   }
 
+  
+  
   protected URL owlLiteFileURL;
   protected URL owlDlFileURL;
   protected URL owlFullFileURL;
   protected URL rdfsFileURL;
   protected URL damlFileURL;
   protected String language;
+  protected String defaultNameSpace;
   
   protected List actionsList;
   /**
@@ -538,4 +670,17 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
    * Constant for DAML ontology type.
    */
   protected static final int DAML = 13;
+  /**
+   * @return Returns the defaultNameSpace.
+   */
+  public String getDefaultNameSpace() {
+    return defaultNameSpace;
+  }
+
+  /**
+   * @param defaultNameSpace The defaultNameSpace to set.
+   */
+  public void setDefaultNameSpace(String defaultNameSpace) {
+    this.defaultNameSpace = defaultNameSpace;
+  }
 }
