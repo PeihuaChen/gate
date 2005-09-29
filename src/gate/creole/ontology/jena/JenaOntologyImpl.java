@@ -267,38 +267,58 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
               aJenaInstance.getComment(language),
               gateClasses, this);
       addInstance(gateInstance);
-      //add the property values
+    }
+    
+    //add the property values
+    instanceIter = jenaModel.listIndividuals();
+    while(instanceIter.hasNext()) {
+      Individual aJenaInstance = (Individual)instanceIter.next();
+      OInstance aGateInstance = getInstanceByName(aJenaInstance.getLocalName());
       propIter = aJenaInstance.listProperties();
       while(propIter.hasNext()) {
-        com.hp.hpl.jena.rdf.model.Property aProperty = ((Statement)propIter.next()).getPredicate();
-        NodeIterator valIter = aJenaInstance.listPropertyValues(aProperty);
-        while(valIter.hasNext()) {
-          RDFNode aValue = valIter.nextNode();
-          if(aValue.canAs(Individual.class)) {
-            //object value
-              Individual individual = (Individual)aValue.as(Individual.class);
-              try {
-                OInstance gateValue = getInstanceByName(individual.getLocalName());
-                boolean success = gateInstance.
-                    addPropertyValue(aProperty.getLocalName(), gateValue);
-                if(!success) Err.prln("Could not set value \"" + gateValue +
-                        "\" for property \"" + aProperty + 
-                        "\" on instance " + gateInstance.getName());
-              }catch(UnsupportedOperationException uoe) {
-                Err.prln("Could not set value \"" + individual +
-                        "\" for property \"" + aProperty + 
-                        "\" on instance " + gateInstance.getName());
-              }
-          }else if (aValue.canAs(Literal.class)){
-            //datatype value
-            Literal literalValue = (Literal) aValue.as(Literal.class);
-            Object value = literalValue.getDatatype().
-                parse(literalValue.getLexicalForm());
-            boolean success = gateInstance.addPropertyValue(
-                    aProperty.getLocalName(), value);
-            if(!success) Err.prln("Could not set value \"" + value +
+        Statement propStatement = (Statement)propIter.next();
+        com.hp.hpl.jena.rdf.model.Property aProperty = 
+          (com.hp.hpl.jena.rdf.model.Property)(propStatement).getPredicate();
+//        //ignore basic properties
+//        if(!(aProperty instanceof OntProperty)) continue;
+        
+        RDFNode objectNode = propStatement.getObject();
+        Property aGateProperty = getPropertyDefinitionByName(
+                aProperty.getLocalName());
+        if(aGateProperty == null){
+          Err.prln("Property not found " + aProperty.getURI() + " type: " +
+                  aProperty.getClass().getName());
+          continue;
+        }
+        if(aGateProperty instanceof ObjectProperty){
+          if(objectNode.canAs(Individual.class)){
+            Individual aJenaValue = (Individual)objectNode.as(Individual.class);
+            OInstance gateValue = getInstanceByName(aJenaValue.getLocalName());
+            boolean success = aGateInstance.
+                addPropertyValue(aProperty.getLocalName(), gateValue);
+            if(!success) Err.prln("Could not set value \"" + gateValue +
                     "\" for property \"" + aProperty + 
-                    "\" on instance " + gateInstance.getName());
+                    "\" on instance " + aGateInstance.getName());
+          }else{
+            Err.prln("WARNING: object property " + aGateProperty.getName() +
+                    " has a value which is not an object " + 
+                    objectNode.toString());
+          }
+        }else{
+          //datatype property
+          if(objectNode.canAs(Literal.class)){
+            Literal aJenaValue = (Literal)objectNode.as(Literal.class);
+            Object aGateValue = aJenaValue.getDatatype().parse(
+                    aJenaValue.getLexicalForm());
+            boolean success = aGateInstance.addPropertyValue(
+                    aGateProperty.getName(), aGateValue);
+            if(!success) Err.prln("Could not set value \"" + 
+                    aGateValue.toString() + "\" for property \"" + aProperty + 
+                    "\" on instance " + aGateInstance.getName());
+          }else{
+            Err.prln("WARNING: datatype property " + aGateProperty.getName() +
+                    " has a value which is not an RDF literal " + 
+                    objectNode.toString());
           }
         }
       }
