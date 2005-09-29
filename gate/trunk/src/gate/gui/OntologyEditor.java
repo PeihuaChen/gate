@@ -494,9 +494,10 @@ public class OntologyEditor extends AbstractVisualResource
                 StringBuffer propText = new StringBuffer(propertyName);
                 propText.append("(");
                 Object propValue = propValIter.next();
-                propText.append(propValue instanceof OInstance ?
-                        ((OInstance)propValue).getName() :
-                         propValue.toString());
+                if(propValue != null)
+                  propText.append(propValue instanceof OInstance ?
+                          ((OInstance)propValue).getName() :
+                           propValue.toString());
                 propText.append(")");
                 properties.getValues().add(propText.toString());
               }
@@ -599,7 +600,8 @@ public class OntologyEditor extends AbstractVisualResource
           Set range = aProperty.getRange();
           text += range.toString();
           setText(text);
-          setToolTipText(aProperty.getURI());
+          setToolTipText("<HTML><b>Object Property</b><br>" +
+                  aProperty.getURI() + "</html>");
           setEnabled(true);
         }else if(value instanceof DatatypeProperty){
           DatatypeProperty aProperty = (DatatypeProperty)value;
@@ -609,7 +611,8 @@ public class OntologyEditor extends AbstractVisualResource
           Class range = aProperty.getRange();
           text += range == null ? "" : range.getName();
           setText(text);
-          setToolTipText(aProperty.getURI());
+          setToolTipText("<HTML><b>Datatype Property</b><br>" +
+                  aProperty.getURI() + "</html>");
           setEnabled(true);
         }else{
           setIcon(null);
