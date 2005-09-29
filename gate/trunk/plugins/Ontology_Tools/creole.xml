@@ -36,6 +36,10 @@
         REQUIRED="false"
         COMMENT="The URL of a DAML file">java.net.URL</PARAMETER>      
     </OR>
+    <PARAMETER NAME="defaultNameSpace"
+      COMMENT="The default namespace to be used for local URIs"
+	  REQUIRED="false">java.lang.String</PARAMETER>      
+	  
     <PARAMETER NAME="language" DEFAULT=""
       COMMENT="The language to be used for labels and comments"
       REQUIRED="true"
