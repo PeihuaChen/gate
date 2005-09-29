@@ -230,13 +230,13 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
     propIter = jenaModel.listOntProperties();
     while(propIter.hasNext()){
       OntProperty aJenaProp = (OntProperty)propIter.next();
-      gate.creole.ontology.Property aGateProp = getPropertyDefinitionByName(aJenaProp
+      Property aGateProp = getPropertyDefinitionByName(aJenaProp
               .getLocalName());
       for(Iterator superIter = aJenaProp.listSuperProperties(); superIter
               .hasNext();){
         OntProperty aJenaSuperProp = (OntProperty)superIter.next();
         if(aJenaSuperProp.isOntLanguageTerm()) continue;
-        gate.creole.ontology.Property aGateSuperProp = getPropertyDefinitionByName(aJenaSuperProp
+        Property aGateSuperProp = getPropertyDefinitionByName(aJenaSuperProp
                 .getLocalName());
         if(aGateSuperProp == null){
           Err.prln("WARNING: Unknown super property \""
@@ -333,17 +333,31 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
     //create the properties
     Iterator propIter = getPropertyDefinitions().iterator();
     while(propIter.hasNext()){
-      gate.creole.ontology.Property aGateProp =
-          (gate.creole.ontology.Property)propIter.next();
+      Property aGateProp = (Property)propIter.next();
       OntProperty aJenaProp = null;
       if(aGateProp instanceof ObjectProperty){
         aJenaProp = jenaModel.createObjectProperty(aGateProp.getURI());
-      }else if(aGateProp instanceof gate.creole.ontology.DatatypeProperty){
+        Iterator rangIter = ((ObjectProperty)aGateProp).getRange().iterator();
+        while(rangIter.hasNext()){
+          OClass aGateRangeClass = (OClass)rangIter.next();
+          OntClass aJenaRangeClass = jenaModel.getOntClass(
+                  aGateRangeClass.getURI());
+          aJenaProp.addRange(aJenaRangeClass);
+        }
+      }else if(aGateProp instanceof DatatypeProperty){
         aJenaProp = jenaModel.createDatatypeProperty(aGateProp.getURI());
       }
       aJenaProp.setLabel(aGateProp.getName(), language);
       String comment = aGateProp.getComment();
       if(comment != null) aJenaProp.setComment(comment, language);
+      //set the domain
+      Iterator domainIter = aGateProp.getDomain().iterator();
+      while(domainIter.hasNext()){
+        OClass aGateDomainClass = (OClass)domainIter.next();
+        OntClass aJenaDomainClass = jenaModel.getOntClass(
+                aGateDomainClass.getURI());
+        aJenaProp.addDomain(aJenaDomainClass);
+      }
     }
     
     //create the properties hierarchy
@@ -351,10 +365,73 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
     while(propIter.hasNext()){
       com.hp.hpl.jena.ontology.ObjectProperty aJenaProp = 
         (com.hp.hpl.jena.ontology.ObjectProperty)propIter.next();
-      
+      Property aGateProp = getPropertyDefinitionByName(aJenaProp.getLocalName());
+      Iterator superPropIter = aGateProp.getSuperProperties(DIRECT_CLOSURE).
+          iterator();
+      while(superPropIter.hasNext()){
+        Property aGateSuperProp = (Property)superPropIter.next();
+        OntProperty aJenaSuperProp = jenaModel.getOntProperty(
+                aGateSuperProp.getURI());
+        aJenaProp.addSuperProperty(aJenaSuperProp);
+      }
     }
-    //create the instances
     
+    //create the instances
+    //we need to keep track of anonymous nodes - use two synchronised lists
+    List gateInstances = new ArrayList(getInstances());
+    List jenaInstances = new ArrayList(gateInstances.size());
+    for(int i = 0; i < gateInstances.size(); i++){
+      OInstance aGateInstace = (OInstance)gateInstances.get(i);
+      String instanceURI = aGateInstace.getURI();
+      Set types = aGateInstace.getOClasses();
+      Iterator typeIter = types.iterator();
+      //get the first type and use for creation
+      OClass aGateType = (OClass)typeIter.next();
+      OntClass aJenaType = jenaModel.getOntClass(aGateType.getURI());
+      Individual aJenaIndiv = instanceURI == null ? 
+              jenaModel.createIndividual(aJenaType) : 
+              jenaModel.createIndividual(instanceURI, aJenaType);
+      jenaInstances.add(aJenaIndiv);
+      //add all the remaining types, if any
+      while(typeIter.hasNext()){
+        aGateType = (OClass)typeIter.next();
+        aJenaType = jenaModel.getOntClass(aGateType.getURI());
+        aJenaIndiv.addRDFType(aJenaType);
+      }
+    }
+    //add the property values for all instances
+    for(int i = 0; i < gateInstances.size(); i++){
+      OInstance aGateInstace = (OInstance)gateInstances.get(i);
+      Individual aJenaIndiv = (Individual)jenaInstances.get(i);
+      
+      Iterator propNameIter = aGateInstace.getSetPropertiesNames().iterator();
+      while(propNameIter.hasNext()){
+        String propertyName = (String)propNameIter.next();
+        Property aProperty = getPropertyDefinitionByName(propertyName);
+        OntProperty aJenaProp = jenaModel.getOntProperty(aProperty.getURI());
+        Iterator valuesIter = aGateInstace.getPropertyValues(propertyName).
+            iterator();
+        while(valuesIter.hasNext()){
+          Object value = valuesIter.next();
+          if(value instanceof OInstance){
+            //object value
+            OInstance instanceValue = (OInstance)value;
+            String instURI = instanceValue.getURI();
+            Individual jenaInstValue = null;
+            if(instURI != null){
+              jenaInstValue = jenaModel.getIndividual(instURI);
+            }else{
+              jenaInstValue = (Individual)jenaInstances.get(
+                      gateInstances.indexOf(instanceValue));
+            }
+            aJenaIndiv.addProperty(aJenaProp, jenaInstValue);
+          }else{
+            //datatype value
+            aJenaIndiv.addProperty(aJenaProp, value);
+          }
+        }
+      }
+    }
     //save to the file
     try{
       jenaModel.write(new FileOutputStream(outputFile));
