@@ -1,9 +1,28 @@
+/*
+ * JenaOntologyImpl.java
+ *
+ * Copyright (c) 2005, The University of Sheffield.
+ *
+ * This file is part of GATE (see http://gate.ac.uk/), and is free
+ * software, licenced under the GNU Library General Public License,
+ * Version 2, June1991.
+ *
+ * A copy of this licence is included in the distribution in the file
+ * licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *
+ * Valentin Tablan 09/2005
+ *
+ *
+ *  $Id$
+ */
 package gate.creole.ontology.jena;
 
 import gate.Resource;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.ontology.*;
+import gate.creole.ontology.Property;
 import gate.creole.ontology.ObjectProperty;
+import gate.creole.ontology.DatatypeProperty;
 import gate.gui.ActionsPublisher;
 import gate.gui.MainFrame;
 import gate.util.Err;
@@ -13,12 +32,9 @@ import java.awt.event.ActionEvent;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
-import java.util.zip.GZIPInputStream;
 import javax.swing.*;
 import com.hp.hpl.jena.ontology.*;
-import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.rdf.model.*;
-import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.ontotext.gate.ontology.OntologyImpl;
 
@@ -167,7 +183,7 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
       Set gateDomain = convertoToGateClasses(aJenaProperty.listDomain());
       reduceToMostSpecificClasses(gateDomain);
       
-      gate.creole.ontology.Property theProp = null;
+      Property theProp = null;
       if(ontologyType != RDFS && aJenaProperty.isObjectProperty()) {
         Set gateRange = convertoToGateClasses(aJenaProperty.listRange());
         reduceToMostSpecificClasses(gateRange);
@@ -254,7 +270,7 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
       //add the property values
       propIter = aJenaInstance.listProperties();
       while(propIter.hasNext()) {
-        Property aProperty = ((Statement)propIter.next()).getPredicate();
+        com.hp.hpl.jena.rdf.model.Property aProperty = ((Statement)propIter.next()).getPredicate();
         NodeIterator valIter = aJenaInstance.listPropertyValues(aProperty);
         while(valIter.hasNext()) {
           RDFNode aValue = valIter.nextNode();
@@ -335,6 +351,7 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
     while(propIter.hasNext()){
       com.hp.hpl.jena.ontology.ObjectProperty aJenaProp = 
         (com.hp.hpl.jena.ontology.ObjectProperty)propIter.next();
+      
     }
     //create the instances
     
