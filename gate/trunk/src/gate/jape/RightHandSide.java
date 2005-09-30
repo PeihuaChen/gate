@@ -141,7 +141,11 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
   /** Add an anonymous block to the action class */
   public void addBlock(String anonymousBlock) {
+    actionClassString.append(nl);
+    actionClassString.append("{");
     actionClassString.append(anonymousBlock);
+    actionClassString.append(nl);
+    actionClassString.append("}");
     actionClassString.append(nl);
   } // addBlock(anon)
 
@@ -293,6 +297,10 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.29  2005/09/30 16:01:04  valyt
+// BUGFIX:
+// RHS Java blocks now have braces around them (to reduce visibility of local variables)
+//
 // Revision 1.28  2005/01/11 13:51:36  ian
 // Updating copyrights to 1998-2005 in preparation for v3.0
 //
