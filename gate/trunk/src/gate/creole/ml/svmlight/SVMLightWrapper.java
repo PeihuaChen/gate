@@ -468,7 +468,7 @@ public class SVMLightWrapper
    *
    * @throws gate.creole.ExecutionException
    */
-  private void initialiseAndTrainClassifier() throws gate.creole.
+  public void initialiseAndTrainClassifier() throws gate.creole.
       ExecutionException, java.io.IOException {
 
     if (DEBUG)
