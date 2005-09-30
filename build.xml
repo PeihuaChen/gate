@@ -234,7 +234,7 @@
            debug="true"
     			 deprecation="true"
            debuglevel="lines,source"
-           includes="gate/**,com/**,debugger/**"
+           includes="gate/**,com/**,debugger/**,hepple/**"
 					 classpathref="build.class.path"/>
   </target>
 
@@ -249,7 +249,7 @@
            source="1.4"
            debug="true"
            deprecation="true"    	
-           includes="gate/**,com/**,debugger/**"
+           includes="gate/**,com/**,debugger/**,hepple/**"
 					 classpathref="build.class.path"/>
   </target>
 
@@ -260,7 +260,7 @@
          update="false"
          index="true">
       <fileset dir="${outputDir}/"
-               includes="gate/**,com/**,debugger/**"/>
+               includes="gate/**,com/**,debugger/**,hepple/**"/>
 <!--    <zipgroupfileset refid="libs"/> -->
     </jar>
 	</target>
@@ -271,7 +271,7 @@
          update="false"
          index="true">
       <fileset dir="${outputDir}/"
-               includes="gate/**,com/**,debugger/**"/>
+               includes="gate/**,com/**,debugger/**,hepple/**"/>
       <zipgroupfileset refid="libs"/>
     </jar>
 	</target>
