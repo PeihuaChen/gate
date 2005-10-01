@@ -279,15 +279,13 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
         Statement propStatement = (Statement)propIter.next();
         com.hp.hpl.jena.rdf.model.Property aProperty = 
           (com.hp.hpl.jena.rdf.model.Property)(propStatement).getPredicate();
-//        //ignore basic properties
-//        if(!(aProperty instanceof OntProperty)) continue;
         
         RDFNode objectNode = propStatement.getObject();
         Property aGateProperty = getPropertyDefinitionByName(
                 aProperty.getLocalName());
         if(aGateProperty == null){
-          Err.prln("Property not found " + aProperty.getURI() + " type: " +
-                  aProperty.getClass().getName());
+//          Err.prln("Property not found " + aProperty.getURI() + " type: " +
+//                  aProperty.getClass().getName());
           continue;
         }
         if(aGateProperty instanceof ObjectProperty){
