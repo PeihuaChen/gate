@@ -16,7 +16,6 @@
 	<classpathentry kind="lib" path="lib/jwnl.jar"/>
 	<classpathentry kind="lib" path="lib/protege.jar"/>
 	<classpathentry kind="lib" path="lib/jena.jar"/>
-	<classpathentry kind="lib" path="lib/heptag.jar"/>
 	<classpathentry kind="lib" path="lib/GnuGetOpt.jar"/>
 	<classpathentry kind="lib" path="lib/ontotext.jar"/>
 	<classpathentry kind="lib" path="lib/gateHmm.jar"/>
