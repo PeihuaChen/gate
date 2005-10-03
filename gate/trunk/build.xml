@@ -11,6 +11,23 @@
        
        Make changes to this section of the build file to customise your 
        GATE start-up and build script -->    
+
+  <!-- Load user properties from build.properties.  If you need to override
+       any of the properties set in this build file, you should create
+       build.properties in the same directory.  Property definitions in
+       the properties file will override those in the build file.
+       
+       Also, if you need to pass specific system properties when you run
+       the GATE GUI, you should set them in build.properties, prefixed with
+       "run.", for example to override the default directory for GATE to
+       create temporary files (java.io.tmpdir), you should put the following
+       line in build.properties:
+
+       run.java.io.tmpdir=${user.home}/tmp
+
+       note that Ant properties are expanded in this file, this can be a
+       very powerful tool. -->
+    <property file="build.properties" />
   
   <!-- TOOLS.JAR -->
   <!-- GATE will normally try to guess which tools.jar library to use based on
@@ -19,8 +36,8 @@
   <!-- <property name="tools.jar.location" value="w:/jdk/jdk1.5.0/lib/tools.jar"/> -->
 
   <!-- RUNTIME MEMORY -->
-  <property name="run.max.memory" value="900M"/>
-  <property name="run.start.memory" value="200M"/>
+  <property name="runtime.max.memory" value="900M"/>
+  <property name="runtime.start.memory" value="200M"/>
   
   <!-- ******************************************************************* 
        ****************  USER OPTIONS END HERE! ************************** 
@@ -291,11 +308,16 @@
     <echo>
       Starting GATE ${gate.version}, build ${gate.build}
       Using JVM at ${java.home}
-      Initial memory ${run.start.memory}
-      Maximum memory ${run.max.memory}
+      Initial memory ${runtime.start.memory}
+      Maximum memory ${runtime.max.memory}
       ${toolsjar.debug}
       CLASSPATH=${class.path.debug}
     </echo>
+    <!-- Prepare any user-specified "run." properties -->
+    <propertyset id="run.properties">
+      <propertyref prefix="run." />
+      <mapper type="glob" from="run.*" to="*" />
+    </propertyset>
     <!-- Find if the platform is MAC -->
     <condition property="running.on.mac">
       <os family="mac"/>
@@ -310,11 +332,12 @@
           spawn="false"
           dir="." 
           logError="true"
-          maxmemory="${run.max.memory}">
-<!--	     <jvmarg value="-Xms${run.start.memory}"/> -->
-       <jvmarg value="-Dgate.home=${basedir}"/>   
-       <jvmarg value="-Djava.ext.dirs=${extDir}"/>
-       <jvmarg value="-Dsun.java2d.opengl=true"/>
+          maxmemory="${runtime.max.memory}">
+<!--	     <jvmarg value="-Xms${runtime.start.memory}"/> -->
+       <sysproperty key="gate.home" value="${basedir}"/>   
+       <sysproperty key="java.ext.dirs" value="${extDir}"/>
+       <sysproperty key="sun.java2d.opengl" value="true"/>
+       <syspropertyset refid="run.properties" />
      </java>
   </target>
   
@@ -326,15 +349,16 @@
           spawn="false"
           dir="." 
           logError="true"
-          maxmemory="${run.max.memory}">
-<!--	     <jvmarg value="-Xms${run.start.memory}"/> -->
-       <jvmarg value="-Dgate.home=${basedir}"/>   
-       <jvmarg value="-Djava.ext.dirs=${extDir}"/>
-       <jvmarg value="-Dsun.java2d.opengl=true"/>
-       <jvmarg value="-Dapple.laf.useScreenMenuBar=true"/>
-       <jvmarg value="-Dcom.apple.mrj.application.growbox.intrudes=false"/>
-       <jvmarg value="-Dcom.apple.mrj.application.live-resize=true"/>
+          maxmemory="${runtime.max.memory}">
+<!--	     <jvmarg value="-Xms${runtime.start.memory}"/> -->
+       <sysproperty key="gate.home" value="${basedir}"/>   
+       <sysproperty key="java.ext.dirs" value="${extDir}"/>
+       <sysproperty key="sun.java2d.opengl" value="true"/>
+       <sysproperty key="apple.laf.useScreenMenuBar" value="true"/>
+       <sysproperty key="com.apple.mrj.application.growbox.intrudes" value="false"/>
+       <sysproperty key="com.apple.mrj.application.live-resize" value="true"/>
        <jvmarg value="-Xdock:name=GATE 3.0"/>
+       <syspropertyset refid="run.properties" />
      </java>
   </target>
   
@@ -343,7 +367,7 @@
     <java classname="guk.Editor" 
           fork="true"
           spawn="false">
-      <jvmarg value="-Djava.ext.dirs=${extDir}"/>
+      <sysproperty key="java.ext.dirs" value="${extDir}"/>
      </java>
   </target>
   
@@ -396,7 +420,7 @@
     <java jar="${buildDir}/lib/j2h.jar"
           fork="true"
           spawn="false">
-      <jvmarg value="-Dfile.encoding=UTF-8"/>
+      <sysproperty key="file.encoding" value="UTF-8"/>
       <arg value="-d"/> <arg file="${docDir}/java2html/"/>
       <arg value="-js"/> <arg file="${srcDir}"/>
       <arg value="-jd"/> <arg file="${docDir}/javadoc"/>
@@ -471,7 +495,7 @@
       <sysproperty key="gate.config" value="${buildDir}/gate.xml"/>
       <sysproperty key="gate.home" value="${basedir}"/>
       <sysproperty key="load.plugin.path" value="file:${basedir}/plugins/ANNIE;file:${basedir}/plugins/Information_Retrieval;file:${basedir}/plugins/Machine_Learning;file:${basedir}/plugins/Obsolete;file:${basedir}/plugins/Ontology_Tools;file:${basedir}/plugins/Tools;file:${basedir}/plugins/WordNet"/>      
-      <jvmarg value="-Djava.ext.dirs=${extDir}"/>
+      <sysproperty key="java.ext.dirs" value="${extDir}"/>
       <formatter type="plain"
                  usefile="false"/>
       <formatter type="xml"
