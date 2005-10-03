@@ -246,11 +246,7 @@ public class Gate implements GateConstants
       }
       //if still not set, use the user's home as a base directory
       if(userConfigFile == null){
-        userConfigFile = new File(
-            System.getProperty("user.home") + 
-            Strings.getFileSep() + 
-            (runningOnUnix() ? "." : "") +
-            GATE_DOT_XML);
+        userConfigFile = new File(getDefaultUserConfigFileName());
       }
       System.out.println("Using " + userConfigFile + " as user configuration file");
     }
@@ -925,8 +921,9 @@ jar/classpath so it's the same as registerBuiltins
     getUserConfig().put(AUTOLOAD_PLUGIN_PATH_KEY, loadPluginPath);
     
     // the user's config file
-    String configFileName = getUserConfigFileName();
-    File configFile = new File(configFileName);
+    //String configFileName = getUserConfigFileName();
+    //File configFile = new File(configFileName);
+    File configFile = getUserConfigFile();
 
     // create if not there, then update
     try {
@@ -939,7 +936,7 @@ jar/classpath so it's the same as registerBuiltins
 
       // update the config element of the file
       Files.updateXmlElement(
-        new File(configFileName), userConfigElement, userConfig
+        configFile, userConfigElement, userConfig
       );
 
     } catch(IOException e) {
@@ -952,8 +949,21 @@ jar/classpath so it's the same as registerBuiltins
   /**
    * Get the name of the user's <TT>gate.xml</TT> config file (this
    * doesn't guarantee that file exists!).
+   *
+   * @deprecated Use {@link #getUserConfigFile} instead.
    */
   public static String getUserConfigFileName() {
+    return getDefaultUserConfigFileName();
+  } // getUserConfigFileName
+
+  /**
+   * Get the default path to the user's config file, which is used unless an
+   * alternative name has been specified via system properties or
+   * {@link #setUserConfigFile}.
+   *
+   * @return the default user config file path.
+   */
+  public static String getDefaultUserConfigFileName() {
     String filePrefix = "";
     if(runningOnUnix()) filePrefix = ".";
 
@@ -961,7 +971,7 @@ jar/classpath so it's the same as registerBuiltins
       System.getProperty("user.home") + Strings.getFileSep() +
       filePrefix + GATE_DOT_XML;
     return userConfigName;
-  } // getUserConfigFileName
+  } // getDefaultUserConfigFileName
 
   /**
    * Get the name of the user's <TT>gate.ser</TT> session state file (this
@@ -1282,6 +1292,16 @@ jar/classpath so it's the same as registerBuiltins
       throw new IllegalStateException("userConfigFile has already been set");
     }
     Gate.userConfigFile = userConfigFile;
+  }
+
+  /**
+   * Get the location of the user's config file.
+   *
+   * @return the user config file, or null if this has not yet been set (i.e.
+   * <code>Gate.init()</code> has not yet been called).
+   */
+  public static File getUserConfigFile() {
+    return userConfigFile;
   }
   
   /**

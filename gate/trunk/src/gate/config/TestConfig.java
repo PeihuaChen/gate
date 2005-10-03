@@ -127,8 +127,10 @@ public class TestConfig extends TestCase
     configMap.clear();
 
     // if user config file exists, save it and remember the name
-    String configName = Gate.getUserConfigFileName();
-    File userConfigFile = new File(configName);
+    //String configName = Gate.getUserConfigFileName();
+    //File userConfigFile = new File(configName);
+    File userConfigFile = Gate.getUserConfigFile();
+    String configName = userConfigFile.getAbsolutePath();
     File savedConfigFile = null;
     if(userConfigFile.exists()) {
       if(DEBUG) {
@@ -205,12 +207,12 @@ public class TestConfig extends TestCase
     if(Gate.runningOnUnix()) {
       assertTrue(fileSep.equals("/"));
       assertTrue(
-        Gate.getUserConfigFileName().endsWith("."+GateConstants.GATE_DOT_XML)
+        Gate.getDefaultUserConfigFileName().endsWith("."+GateConstants.GATE_DOT_XML)
       );
     } else {
       assertTrue(! fileSep.equals("/"));
       assertTrue(
-        ! Gate.getUserConfigFileName().endsWith("."+GateConstants.GATE_DOT_XML)
+        ! Gate.getDefaultUserConfigFileName().endsWith("."+GateConstants.GATE_DOT_XML)
       );
     }
 
