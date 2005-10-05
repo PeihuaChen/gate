@@ -78,11 +78,27 @@ public interface Property extends OntologyResource, OntologyConstants {
   
   
   /**
+   * Gets the set of range restrictions for this property. If no range has been
+   * set it returns an empty set.
+   * 
+   * @return a set of {@link OClass} or {@link Class} objects.
+   */
+  public Set getRange();  
+  
+  /**
    * Checks whether this property can apply to the provided instance
    * @param instance the instance
    * @return <tt>true</tt> if the property is valid for the instance.
    */
   public boolean isValidDomain(OInstance instance);
+  
+  /**
+   * 
+   * @param value
+   * @return true if this value is compatible with the range restrictions on the
+   *         property. False otherwise.
+   */
+  public boolean isValidRange(Object value);
   
 
   /**

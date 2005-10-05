@@ -18,43 +18,39 @@
 
 package gate.creole.ontology;
 
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 public class DatatypePropertyImpl extends PropertyImpl
                                     implements DatatypeProperty{
-  /**
-   * The range for this property. Datatype properties take Java objects as 
-   * values so the range is a {@link Class} object.
-   * If this is set to <tt>null</tt> then any type of Java Object is a valid
-   * value.
-   */
-  protected Class range;
 
   public DatatypePropertyImpl(String name, String comment,  OClass aDomainClass,
-          Ontology anOntology) {
-    super(name, comment, aDomainClass, anOntology);
-    range = Object.class;
+          Class aRangeType, Ontology anOntology) {
+    super(name, comment, aDomainClass, aRangeType, anOntology);
   }
 
   public DatatypePropertyImpl(String name, String comment, Set domain, 
-          Ontology ontology) {
-    super(name, comment, domain, ontology);
-    range = Object.class;
+          Set range, Ontology ontology) {
+    super(name, comment, domain, range, ontology);
   }
   
   public DatatypePropertyImpl(String name, String comment, Set domain, 
           Class range, Ontology ontology) {
-    super(name, comment, domain, ontology);
-    this.range = range;
+    super(name, comment, domain, new HashSet(), ontology);
+    this.directRange.add(range);
+    this.range.add(range);
   }
   
 
   public boolean isValidRange(Object value) {
-    return range.isAssignableFrom(value.getClass());
+    Iterator rangIter = getRange().iterator();
+    while(rangIter.hasNext()){
+      if(!((Class)rangIter.next()).isAssignableFrom(value.getClass())) 
+        return false;
+    }
+    return true;
   }
 
-  public Class getRange() {
-    return range;
-  }
 
 }
