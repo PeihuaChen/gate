@@ -21,19 +21,6 @@ import java.util.*;
 import com.ontotext.gate.ontology.OntologyImpl;
 
 public class ObjectPropertyImpl extends PropertyImpl implements ObjectProperty {
-  /**
-   * The set of range restrictions (i.e. {@link OClass} objects} for this 
-   * property. This is composed from the {@link #directRange} plus all the 
-   * range restrictions from the super-properties. Once calculated this value 
-   * is cached.
-   */  
-  protected Set range;
-  
-  /**
-   * The set of range restrictions (i.e. {@link OClass} objects} set as range
-   * directly for this property. 
-   */  
-  protected Set directRange;
   protected Set inversePropertiesSet;
 
   /**
@@ -46,10 +33,7 @@ public class ObjectPropertyImpl extends PropertyImpl implements ObjectProperty {
    */
   public ObjectPropertyImpl(String name, String comment, OClass aDomainClass, 
           OClass aRange, Ontology anOntology) {
-    super(name, comment, aDomainClass, anOntology);
-    directRange = new HashSet();
-    directRange.add(aRange);
-    range = new HashSet(directRange);
+    super(name, comment, aDomainClass, aRange, anOntology);
     inversePropertiesSet = new HashSet();
   }
   
@@ -64,9 +48,7 @@ public class ObjectPropertyImpl extends PropertyImpl implements ObjectProperty {
    */
   public ObjectPropertyImpl(String name, String comment, Set aDomain, Set aRange, 
           Ontology anOntology) {
-    super(name, comment, aDomain, anOntology);
-    this.directRange = new HashSet(aRange);
-    this.range = new HashSet(directRange);
+    super(name, comment, aDomain, aRange, anOntology);
     inversePropertiesSet = new HashSet();
   }
   
@@ -86,18 +68,14 @@ public class ObjectPropertyImpl extends PropertyImpl implements ObjectProperty {
   }
   
   /**
-   * Notifies this property that it should recalculate the range set (because 
-   * the range of a super-property has changed).
+   * @param instance
+   * @return true if this value is compatible with the range restrictions on the
+   *         property. False otherwise.
    */
-  protected void recalculateRange() {
-    range.clear();
-    range.addAll(directRange);
-    Iterator superPropIter = getSuperProperties(TRANSITIVE_CLOSURE).iterator();
-    while(superPropIter.hasNext()) {
-      range.addAll(((ObjectProperty)superPropIter.next()).getRange());
-    }
-    OntologyImpl.reduceToMostSpecificClasses(range);
+  public boolean isValidRange(OInstance instance){
+    return isValidRange((Object)instance);
   }
+
 
   /**
    *  Checks whether a provided instance can be a range value for this 
@@ -109,7 +87,8 @@ public class ObjectPropertyImpl extends PropertyImpl implements ObjectProperty {
    * @return <tt>true</tt> if the provided instance can be a range value for 
    * this property.
    */
-  public boolean isValidRange(OInstance instance) {
+  public boolean isValidRange(Object value) {
+    OInstance instance = (OInstance)value;
     Set rangeClasses = new HashSet(getRange());
     
     boolean result = true;

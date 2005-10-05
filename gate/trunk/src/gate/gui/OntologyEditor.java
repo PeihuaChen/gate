@@ -592,7 +592,7 @@ public class OntologyEditor extends AbstractVisualResource
           setText(anInstance.getName());
           setToolTipText(anInstance.getURI());
           setEnabled(true);
-        }else if(value instanceof ObjectProperty){
+        }else if(value instanceof Property){
           ObjectProperty aProperty = (ObjectProperty)value;
           setIcon(MainFrame.getIcon("param.gif"));
           setFont(getFont().deriveFont(Font.PLAIN));
@@ -601,17 +601,6 @@ public class OntologyEditor extends AbstractVisualResource
           text += range.toString();
           setText(text);
           setToolTipText("<HTML><b>Object Property</b><br>" +
-                  aProperty.getURI() + "</html>");
-          setEnabled(true);
-        }else if(value instanceof DatatypeProperty){
-          DatatypeProperty aProperty = (DatatypeProperty)value;
-          setIcon(MainFrame.getIcon("param.gif"));
-          setFont(getFont().deriveFont(Font.PLAIN));
-          String text = aProperty.getName() + " -> ";
-          Class range = aProperty.getRange();
-          text += range == null ? "" : range.getName();
-          setText(text);
-          setToolTipText("<HTML><b>Datatype Property</b><br>" +
                   aProperty.getURI() + "</html>");
           setEnabled(true);
         }else{

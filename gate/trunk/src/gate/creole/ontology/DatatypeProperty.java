@@ -26,13 +26,6 @@ import java.util.Set;
  */
 public interface DatatypeProperty extends Property {
   
-  /**
-   * Gets the range for this property. If no range has been set it returns
-   * <tt>null</tt>.
-   * 
-   * @return a {@link Class} object.
-   */
-  public Class getRange();
  
   /**
    * 

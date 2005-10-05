@@ -41,6 +41,23 @@ public abstract class PropertyImpl extends OntologyResourceImpl
    * directly for this property. 
    */
   protected Set directDomain;
+  
+
+  /**
+   * The set of range restrictions (i.e. {@link OClass} or {@link Class} objects)
+   * for this property. This is composed from the {@link #directRange} plus all
+   * the range restrictions from the super-properties. Once calculated this 
+   * value is cached.
+   */
+  protected Set range;
+  
+  /**
+   * The set of range restrictions (i.e. {@link OClass} or {@link Class} 
+   * objects) set as range directly for this property. 
+   */
+  protected Set directRange;
+  
+  
   protected Set samePropertiesSet;
   protected Set superPropertiesSet;
   protected Set subPropertiesSet;
@@ -57,13 +74,18 @@ public abstract class PropertyImpl extends OntologyResourceImpl
    * @param name the name of the property
    * @param aDomain the ontology class representing the domain for this 
    * property.
+   * @param range a set containing range restrictions. These can either be 
+   * {@link OClass} or {@link Class} objects depending on the types of the 
+   * values that are permitted.
    * @param ontology the ontology this property is defined in.
    */
-  public PropertyImpl(String name, String comment, Set domain, 
+  public PropertyImpl(String name, String comment, Set domain, Set range,
           Ontology ontology) {
     super(name, comment, ontology);
     this.directDomain = new HashSet(domain);
     this.domain = new HashSet(directDomain);
+    this.directRange = new HashSet(range);
+    this.range = new HashSet(directRange);
     samePropertiesSet = new HashSet();
     superPropertiesSet = new HashSet();
     subPropertiesSet = new HashSet();
@@ -73,11 +95,13 @@ public abstract class PropertyImpl extends OntologyResourceImpl
     this.inverseFunctional = false;    
   }
   
-  public PropertyImpl(String name, String comment, OClass aDomainClass, 
-          Ontology ontology) {
-    this(name, comment, new HashSet(), ontology);
+  public PropertyImpl(String name, String comment, OClass aDomainClass,
+          Object aRangeType, Ontology ontology) {
+    this(name, comment, new HashSet(), new HashSet(), ontology);
     this.directDomain.add(aDomainClass);
     this.domain.add(aDomainClass);
+    this.directRange.add(aRangeType);
+    this.range.add(aRangeType);
   }  
   
 
@@ -121,6 +145,7 @@ public abstract class PropertyImpl extends OntologyResourceImpl
       Property aSubProperty = (Property)subPropIter.next();
       if(aSubProperty instanceof PropertyImpl) {
         ((PropertyImpl)aSubProperty).recalculateDomain();
+        ((PropertyImpl)aSubProperty).recalculateRange();
       }
     }
   }
@@ -138,6 +163,22 @@ public abstract class PropertyImpl extends OntologyResourceImpl
     }
     OntologyImpl.reduceToMostSpecificClasses(domain);
   }
+  
+  
+  /**
+   * Notifies this property that it should recalculate the range set (because 
+   * the range of a super-property has changed).
+   */
+  protected void recalculateRange() {
+    range.clear();
+    range.addAll(directRange);
+    Iterator superPropIter = getSuperProperties(TRANSITIVE_CLOSURE).iterator();
+    while(superPropIter.hasNext()) {
+      range.addAll(((ObjectProperty)superPropIter.next()).getRange());
+    }
+    OntologyImpl.reduceToMostSpecificClasses(range);
+  }  
+
   
   public void removeSuperProperty(Property property) {
     this.superPropertiesSet.remove(property);
@@ -157,14 +198,25 @@ public abstract class PropertyImpl extends OntologyResourceImpl
   }
   
   /**
-   * Returns the set of domain classes for this property. This only includes
-   * the classes directly defined as domain members for this property (not the
-   * ones from the super-properties).
+   * Returns the set of domain classes for this property. This is composed from 
+   * the classes declared as domain restriction for this property plus all the 
+   * domain restrictions from the super-properties.
    */
   public Set getDomain() {
     return this.domain;
   }
 
+  
+  /**
+   * Returns the set of range classes for this property. This is composed from 
+   * the classes declared as range restriction for this property plus all the 
+   * range restrictions from the super-properties.
+   */
+  public Set getRange() {
+    return this.range;
+  }  
+  
+  
   /* (non-Javadoc)
    * @see gate.creole.ontology.Property#isFunctional()
    */

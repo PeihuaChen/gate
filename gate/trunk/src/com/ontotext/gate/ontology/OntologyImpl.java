@@ -96,7 +96,7 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
   public DatatypeProperty addDatatypeProperty(String name, String comment, 
           Set domain, Class range) {
     DatatypeProperty theProperty = new DatatypePropertyImpl(name, 
-            comment, domain, this);
+            comment, domain,range, this);
     theProperty.setURI(getSourceURI() + name);
     addPropertyDefinition(theProperty);
     return theProperty;
@@ -105,7 +105,7 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
   public DatatypeProperty addDatatypeProperty(String name, String comment, 
           OClass domain, Class range){
     DatatypeProperty theProperty = new DatatypePropertyImpl(name, 
-            comment, domain, this);
+            comment, domain, range, this);
     theProperty.setURI(getSourceURI() + name);
     addPropertyDefinition(theProperty);
     return theProperty;
