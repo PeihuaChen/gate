@@ -187,16 +187,19 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
       if(ontologyType != RDFS && aJenaProperty.isObjectProperty()) {
         Set gateRange = convertoToGateClasses(aJenaProperty.listRange());
         reduceToMostSpecificClasses(gateRange);
-        if(aJenaProperty.isTransitiveProperty()){
+        theProp = addObjectProperty(propertyName, propertyComment, gateDomain,
+                gateRange);
+      }else if(ontologyType != RDFS && aJenaProperty.isTransitiveProperty()){
+        Set gateRange = convertoToGateClasses(aJenaProperty.listRange());
+        reduceToMostSpecificClasses(gateRange);
           theProp = addTransitiveProperty(propertyName, propertyComment,
                   gateDomain, gateRange);
-        }else if(ontologyType != DAML && aJenaProperty.isSymmetricProperty()){
-          theProp = addSymmetricProperty(propertyName, propertyComment,
-                  gateDomain, gateRange);
-        }else{
-          theProp = addObjectProperty(propertyName, propertyComment, gateDomain,
-                  gateRange);
-        }
+      }else if(ontologyType != RDFS && ontologyType != DAML && 
+              aJenaProperty.isSymmetricProperty()){
+        Set gateRange = convertoToGateClasses(aJenaProperty.listRange());
+        reduceToMostSpecificClasses(gateRange);        
+        theProp = addSymmetricProperty(propertyName, propertyComment,
+                gateDomain, gateRange);
       }else if(ontologyType != RDFS && aJenaProperty.isDatatypeProperty()) {
         Iterator rangeIter = aJenaProperty.listRange();
         Set range = new HashSet();
