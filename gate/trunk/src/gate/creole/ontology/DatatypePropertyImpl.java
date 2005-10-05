@@ -42,15 +42,4 @@ public class DatatypePropertyImpl extends PropertyImpl
     this.range.add(range);
   }
   
-
-  public boolean isValidRange(Object value) {
-    Iterator rangIter = getRange().iterator();
-    while(rangIter.hasNext()){
-      if(!((Class)rangIter.next()).isAssignableFrom(value.getClass())) 
-        return false;
-    }
-    return true;
-  }
-
-
 }

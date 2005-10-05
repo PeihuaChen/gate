@@ -88,6 +88,10 @@ public interface Ontology extends Taxonomy {
   public DatatypeProperty addDatatypeProperty(String name, String comment,
           Set domain, Class range); 
 
+  public Property addProperty(String name, String comment, Set domain, Set range);
+  
+  public Property addProperty(String name, String comment, OClass domain, Class range);
+  
   public ObjectProperty addObjectProperty(String name, String comment, 
           Set domain, Set range);
   

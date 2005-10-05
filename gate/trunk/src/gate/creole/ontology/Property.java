@@ -90,7 +90,7 @@ public interface Property extends OntologyResource, OntologyConstants {
    * @param instance the instance
    * @return <tt>true</tt> if the property is valid for the instance.
    */
-  public boolean isValidDomain(OInstance instance);
+  public boolean isValidDomain(OntologyResource instance);
   
   /**
    * 

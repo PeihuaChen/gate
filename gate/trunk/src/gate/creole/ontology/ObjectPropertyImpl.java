@@ -55,7 +55,7 @@ public class ObjectPropertyImpl extends PropertyImpl implements ObjectProperty {
   public void addSuperProperty(Property property) {
     super.addSuperProperty(property);
     //add restrictions from super-property to the range set
-    range.addAll(((ObjectProperty)property).getRange());
+    range.addAll(property.getRange());
     OntologyImpl.reduceToMostSpecificClasses(range);
     //propagate the changes to sub properties
     Iterator subPropIter = getSubProperties(TRANSITIVE_CLOSURE).iterator();
@@ -73,41 +73,10 @@ public class ObjectPropertyImpl extends PropertyImpl implements ObjectProperty {
    *         property. False otherwise.
    */
   public boolean isValidRange(OInstance instance){
-    return isValidRange((Object)instance);
+    return super.isValidRange(instance);
   }
 
 
-  /**
-   *  Checks whether a provided instance can be a range value for this 
-   *  property. For an instance to be a valid range value it needs to be a 
-   *  member of <b>all</b> the classes defined as members of the range of this
-   *  property. The range of this property is defined recursively based on its
-   *  super-properties as well.  
-   * @param instance the instance to be checked.
-   * @return <tt>true</tt> if the provided instance can be a range value for 
-   * this property.
-   */
-  public boolean isValidRange(Object value) {
-    OInstance instance = (OInstance)value;
-    Set rangeClasses = new HashSet(getRange());
-    
-    boolean result = true;
-    Iterator instanceClassIter = instance.getOClasses().iterator();
-    while(result && instanceClassIter.hasNext()) {
-      OClass anInstanceClass = (OClass)instanceClassIter.next();
-      //first do the simple test
-      if(!rangeClasses.contains(anInstanceClass)) {
-        //the class is not directly contained in the range,
-        //maybe one super class is?
-        Set superClasses = anInstanceClass.
-            getSuperClasses(OntologyConstants.TRANSITIVE_CLOSURE);
-        Set intersection = new HashSet(superClasses);
-        intersection.retainAll(rangeClasses);
-        if(intersection.isEmpty()) result = false;
-      }
-    }
-    return result;    
-  }
   
   public Set getRange() {
     return range;

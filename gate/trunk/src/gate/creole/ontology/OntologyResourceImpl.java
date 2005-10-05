@@ -17,6 +17,11 @@
  */
 package gate.creole.ontology;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+
 /**
  * This is an implementation for ontology resource. It provides implementations
  * for the methods on the {@link gate.creole.ontology.OntologyResource}
@@ -29,6 +34,8 @@ public class OntologyResourceImpl implements OntologyResource {
   protected String name;
   protected Taxonomy taxonomy;
   protected Ontology ontology;
+  protected HashMap instanceProperties;
+
 
   public OntologyResourceImpl(String uri, String name, String comment,
           Taxonomy taxonomy) {
@@ -50,6 +57,49 @@ public class OntologyResourceImpl implements OntologyResource {
     this(name, name, comment, taxonomy);
   }
     
+  public boolean addPropertyValue(String propertyName, Object theValue) {
+    // this means that we look for a property with the same name
+    // in the class. If such cannot be found, i.e. the propSet is
+    // is empty, then we just return without adding the value
+    Property prop = ((Ontology)ontology)
+            .getPropertyDefinitionByName(propertyName);
+    if(prop == null) return false;
+    
+    if(prop.isValidDomain(this)){
+      List values = (List)instanceProperties.get(propertyName);
+      if(values == null){
+        values = new ArrayList();
+        instanceProperties.put(propertyName, values);
+      }
+      values.add(theValue);
+      return true;
+    }else return false;
+  }
+
+  public Set getSetPropertiesNames() {
+    return instanceProperties.keySet();
+  }
+
+  public List getPropertyValues(String propertyName) {
+    return (List)instanceProperties.get(propertyName);
+  }
+
+  public boolean removePropertyValue(String propertyName, Object theValue) {
+    List values = (List)instanceProperties.get(propertyName);
+    if(values != null){
+      return values.remove(theValue);
+    }else return false;
+  }
+
+  public void removePropertyValues(String propertyName) {
+    instanceProperties.remove(propertyName);
+  }
+
+  public Object getPropertyValue(String propertyName) {
+    if(instanceProperties == null || instanceProperties.isEmpty()) return null;
+    return instanceProperties.get(propertyName);
+  }  
+  
   /**
    * @return Returns the comment.
    */

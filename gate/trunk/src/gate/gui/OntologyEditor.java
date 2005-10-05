@@ -593,7 +593,7 @@ public class OntologyEditor extends AbstractVisualResource
           setToolTipText(anInstance.getURI());
           setEnabled(true);
         }else if(value instanceof Property){
-          ObjectProperty aProperty = (ObjectProperty)value;
+          Property aProperty = (Property)value;
           setIcon(MainFrame.getIcon("param.gif"));
           setFont(getFont().deriveFont(Font.PLAIN));
           String text = aProperty.getName() + " -> ";

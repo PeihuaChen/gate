@@ -212,11 +212,13 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
                 propertyName, propertyComment, gateDomain, Object.class);
       }else {
         //generic type of property
-        Err.prln("WARNING: Unknown property type \"" + 
-                 aJenaProperty.getClass().getName()  + "\" for property \"" + 
-                 aJenaProperty.toString() + "\"!");
+        if(ontologyType == OWL_LITE || ontologyType == OWL_DL ||
+           ontologyType == OWL_FULL){
+          Err.prln("WARNING: Property: \"" + aJenaProperty.toString() + "\"" +
+                  " is neither an object or a datatype property!");
+        }
         Set gateRange = convertoToGateClasses(aJenaProperty.listRange());
-        theProp = addObjectProperty(propertyName, propertyComment,
+        theProp = addProperty(propertyName, propertyComment,
                 gateDomain, gateRange);
       }
       theProp.setURI(aJenaProperty.getURI());
