@@ -112,6 +112,21 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
   }
 
 
+  public Property addProperty(String name, String comment, Set domain, 
+          Set range) {
+    Property theProperty = new PropertyImpl(name, comment, domain, range, this);
+    theProperty.setURI(getSourceURI() + name);
+    addPropertyDefinition(theProperty);
+    return theProperty;
+  }  
+  
+  public Property addProperty(String name, String comment, OClass domain, Class range){
+    Property theProperty = new PropertyImpl(name, comment, domain, range, this);
+    theProperty.setURI(getSourceURI() + name);
+    addPropertyDefinition(theProperty);
+    return theProperty;    
+  }
+  
   public ObjectProperty addObjectProperty(String name, String comment, 
           Set domain, Set range) {
     ObjectProperty theProperty = new ObjectPropertyImpl(name, comment, domain, 
@@ -198,7 +213,9 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
   public static void reduceToMostSpecificClasses(Set classSet) {
     Map superClassesForClass = new HashMap();
     for(Iterator classIter = classSet.iterator(); classIter.hasNext();){
-      OClass aGateClass = (OClass)classIter.next();
+      Object aGateClassValue = classIter.next();
+      if(!(aGateClassValue instanceof OClass)) continue;
+      OClass aGateClass = (OClass)aGateClassValue;
       superClassesForClass.put(aGateClass, aGateClass
               .getSuperClasses(OClass.TRANSITIVE_CLOSURE));
     }
