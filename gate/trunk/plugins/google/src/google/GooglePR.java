@@ -21,6 +21,7 @@ import gate.gui.MainFrame;
 import gate.corpora.*;
 import gate.util.*;
 import gate.*;
+import java.util.*;
 
 import com.google.soap.search.*;
 
@@ -32,7 +33,9 @@ public class GooglePR extends AbstractLanguageAnalyser implements
 	private String key = null;
 	private Corpus google = null;
 	private Boolean corpusAppendMode;
-
+	private final static boolean DEBUG = false;
+	private ArrayList pagesToExclude;
+	
 	/** Constructor of the class*/
 	public GooglePR() {
 	}
@@ -107,7 +110,14 @@ public class GooglePR extends AbstractLanguageAnalyser implements
 				if (rs != null) {
 					for (int i = 0; i < rs.length; i++) {
 						GoogleSearchResultElement rElement = rs[i];
-						Err.println(index + i + ") " + rElement.getURL());
+						if(DEBUG)
+							Err.println(index + i + ") " + rElement.getURL());
+						
+						String urlString = rElement.getURL();
+						if(pagesToExclude != null && pagesToExclude.contains(urlString)) {
+							continue;
+						}
+						
 						String docName = rElement.getURL() + "_"
 								+ Gate.genSym();
 						FeatureMap params = Factory.newFeatureMap();
@@ -121,9 +131,11 @@ public class GooglePR extends AbstractLanguageAnalyser implements
 
 						} catch (ResourceInstantiationException e) {
 							String nl = Strings.getNl();
-							Err.prln("WARNING: could not intantiate document"
+							Err.prln("WARNING: could not intantiate document :"+e.getMessage());
+							/*Err.prln("WARNING: could not intantiate document"
 									+ nl + "  Document name was: " + docName
 									+ nl + "  Exception was: " + e + nl + nl);
+							*/
 						}
 					}
 				}
@@ -131,8 +143,8 @@ public class GooglePR extends AbstractLanguageAnalyser implements
 				index += 10;
 			}
 		} catch (Exception gsf) {
-			Err.println("Google Search Fault: " + gsf);
-			gsf.printStackTrace();
+			Err.println("Google Search Fault: " + gsf.getMessage());
+			//gsf.printStackTrace();
 		}
 	}
 
@@ -176,4 +188,18 @@ public class GooglePR extends AbstractLanguageAnalyser implements
 		return this.corpusAppendMode;
 	}
 	
+	public void setPagesToExclude(List pagesToExclude) {
+		this.pagesToExclude = new ArrayList();
+		Iterator iterator = pagesToExclude.iterator();
+		while(iterator.hasNext()) {
+			String page = (String) iterator.next();
+			page = page.toLowerCase();
+			this.pagesToExclude.add(page);
+		}
+	}
+	
+	public List getPagesToExclude() {
+		return this.pagesToExclude;
+	}
+	 
 }
