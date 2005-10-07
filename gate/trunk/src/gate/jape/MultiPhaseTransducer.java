@@ -223,12 +223,23 @@ implements JapeConstants, java.io.Serializable
 
   //needed by FSM
   public ArrayList getPhases(){ return phases; }
+  
+  /**
+   * Sets the phases
+   * @param phases
+   */
+  public void setPhases(ArrayList phases) {
+	  this.phases = phases;
+  }
 
 } // class MultiPhaseTransducer
 
 
 
 // $Log$
+// Revision 1.28  2005/10/07 16:06:47  nirajaswani
+// Transducer Serialization added
+//
 // Revision 1.27  2005/01/11 13:51:36  ian
 // Updating copyrights to 1998-2005 in preparation for v3.0
 //

@@ -13,37 +13,56 @@
 
 package gate.creole;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.zip.GZIPOutputStream;
+
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+
 import gate.Resource;
+import gate.gui.ActionsPublisher;
+import gate.gui.MainFrame;
 import gate.jape.Batch;
 import gate.jape.JapeException;
+import gate.jape.MultiPhaseTransducer;
+import gate.util.Err;
 
 /**
  * A cascaded multi-phase transducer using the Jape language which is a
  * variant of the CPSL language.
  */
-public class Transducer extends AbstractLanguageAnalyser {
+public class Transducer extends AbstractLanguageAnalyser implements gate.gui.ActionsPublisher {
 
-  public static final String
-    TRANSD_DOCUMENT_PARAMETER_NAME = "document";
+  public static final String TRANSD_DOCUMENT_PARAMETER_NAME = "document";
 
-  public static final String
-    TRANSD_INPUT_AS_PARAMETER_NAME = "inputASName";
+  public static final String TRANSD_INPUT_AS_PARAMETER_NAME = "inputASName";
 
-  public static final String
-    TRANSD_OUTPUT_AS_PARAMETER_NAME = "outputASName";
+  public static final String TRANSD_OUTPUT_AS_PARAMETER_NAME = "outputASName";
 
-  public static final String
-    TRANSD_ENCODING_PARAMETER_NAME = "encoding";
+  public static final String TRANSD_ENCODING_PARAMETER_NAME = "encoding";
 
-  public static final String
-    TRANSD_GRAMMAR_URL_PARAMETER_NAME = "grammarURL";
+  public static final String TRANSD_GRAMMAR_URL_PARAMETER_NAME = "grammarURL";
 
+  public static final String TRANSD_BINARY_GRAMMAR_URL_PARAMETER_NAME = "binaryGrammarURL";
+  
+  protected List actionList;
+  
   /**
    * Default constructor. Does nothing apart from calling the default
    * constructor from the super class. The actual object initialisation is done
    * via the {@link #init} method.
    */
   public Transducer() {
+	    actionList = new ArrayList();
+	    actionList.add(null);
+		actionList.add(new SerializeTransducerAction());
   }
 
   /*
@@ -61,24 +80,39 @@ public class Transducer extends AbstractLanguageAnalyser {
    *@return a reference to <b>this</b>
    */
   public Resource init() throws ResourceInstantiationException {
-    if(grammarURL != null && encoding != null){
+	  if(grammarURL == null && binaryGrammarURL == null) {
+		  throw new ResourceInstantiationException("Both - the grammarURL and binaryGrammarURL were null");
+	  }
+	  
+      if(encoding != null){
       try{
         fireProgressChanged(0);
-        batch = new Batch(grammarURL, encoding, new InternalStatusListener());
-        if(enableDebugging != null) {
-          batch.setEnableDebugging(enableDebugging.booleanValue());
-        } else {
-          batch.setEnableDebugging(false);
-        }
-        batch.setOntology(ontology);
-        fireProcessFinished();
+		
+		if(grammarURL != null) {
+			batch = new Batch(grammarURL, encoding, new InternalStatusListener());
+			if(enableDebugging != null) {
+				batch.setEnableDebugging(enableDebugging.booleanValue());
+			} else {
+				batch.setEnableDebugging(false);
+			}
+			batch.setOntology(ontology);
+		} else {
+			ObjectInputStream s = new ObjectInputStream(binaryGrammarURL.openStream());
+			batch = (gate.jape.Batch) s.readObject();
+			int size = s.readInt();
+			ArrayList phases = new ArrayList();
+			for(int i=0;i<size;i++) {
+				phases.add(s.readObject());
+			}
+			((MultiPhaseTransducer)batch.getTransducer()).setPhases(phases);
+		}
+		fireProcessFinished();
       }catch(Exception e){
         throw new ResourceInstantiationException(e);
       }
     } else
       throw new ResourceInstantiationException (
-        "Both the URL (was " + grammarURL + ") and the encoding (was " +
-        encoding + ") are needed to create a JapeTransducer!"
+        "enconding is not set!"
       );
 
       batch.addProgressListener(new IntervalProgressListener(0, 100));
@@ -109,7 +143,67 @@ public class Transducer extends AbstractLanguageAnalyser {
     }
   }
 
+  /**
+   * Gets the list of actions that can be performed on this resource.
+   * @return a List of Action objects (or null values)
+   */
+  public List getActions() {
+	    List result = new ArrayList();
+	    result.addAll(actionList);
+	    return result;
+  }
 
+  
+  /**
+   * Saves the Jape Transuder to the binary file.
+   * @author niraj
+   */
+  protected class SerializeTransducerAction extends javax.swing.AbstractAction{
+	    public SerializeTransducerAction(){
+	      super("Serialize Transducer");
+	      putValue(SHORT_DESCRIPTION, "Serializes the Transducer as binary file");
+	    }
+
+	    public void actionPerformed(java.awt.event.ActionEvent evt){
+	      Runnable runnable = new Runnable(){
+	        public void run(){
+	          JFileChooser fileChooser = MainFrame.getFileChooser();
+	          fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
+	          fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+	          fileChooser.setMultiSelectionEnabled(false);
+	          if(fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION){
+	            File file = fileChooser.getSelectedFile();
+	            try{
+	              MainFrame.lockGUI("Serializing JAPE Transducer...");
+					FileOutputStream out = new FileOutputStream(file);
+					ObjectOutputStream s = new ObjectOutputStream(out);
+					s.writeObject(batch);
+					ArrayList phases = ((MultiPhaseTransducer) batch.getTransducer()).getPhases();
+					s.writeInt(phases.size());
+					for(int i=0;i<phases.size();i++) {
+						s.writeObject(phases.get(i));
+					}
+					s.flush();
+					s.close();
+					out.close();
+				}catch(IOException ioe){
+	              JOptionPane.showMessageDialog(null,
+	                              "Error!\n"+
+	                               ioe.toString(),
+	                               "GATE", JOptionPane.ERROR_MESSAGE);
+	              ioe.printStackTrace(Err.getPrintWriter());
+	            }finally{
+	              MainFrame.unlockGUI();
+	            }
+	          }
+	        }
+	      };
+	      Thread thread = new Thread(runnable, "Transduer Serialization");
+	      thread.setPriority(Thread.MIN_PRIORITY);
+	      thread.start();
+	    }
+	  }
+  
   /**
    * Notifies all the PRs in this controller that they should stop their
    * execution as soon as possible.
@@ -198,7 +292,11 @@ public class Transducer extends AbstractLanguageAnalyser {
    */
   private java.net.URL grammarURL;
 
-
+  /**
+   * The URL to the serialized jape file used as grammar by this transducer.
+   */
+  private java.net.URL binaryGrammarURL;
+  
   /**
    * The actual JapeTransducer used for processing the document(s).
    */
@@ -245,4 +343,21 @@ public class Transducer extends AbstractLanguageAnalyser {
    * A switch used to activate the JAPE debugger.
    */
   private Boolean enableDebugging;
+
+  /**
+   * Return the Batch Object
+   * @return
+   */
+  public Batch getBatch() {
+	return batch;
+  }
+
+public java.net.URL getBinaryGrammarURL() {
+	return binaryGrammarURL;
+}
+
+public void setBinaryGrammarURL(java.net.URL binaryGrammarURL) {
+	this.binaryGrammarURL = binaryGrammarURL;
+}
+
 }
