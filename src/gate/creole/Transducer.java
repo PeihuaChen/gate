@@ -62,7 +62,7 @@ public class Transducer extends AbstractLanguageAnalyser implements gate.gui.Act
   public Transducer() {
 	    actionList = new ArrayList();
 	    actionList.add(null);
-		actionList.add(new SerializeTransducerAction());
+		//actionList.add(new SerializeTransducerAction());
   }
 
   /*
@@ -81,7 +81,7 @@ public class Transducer extends AbstractLanguageAnalyser implements gate.gui.Act
    */
   public Resource init() throws ResourceInstantiationException {
 	  if(grammarURL == null && binaryGrammarURL == null) {
-		  throw new ResourceInstantiationException("Both - the grammarURL and binaryGrammarURL were null");
+		  throw new ResourceInstantiationException("grammarURL is null");
 	  }
 	  
       if(encoding != null){
@@ -102,7 +102,8 @@ public class Transducer extends AbstractLanguageAnalyser implements gate.gui.Act
 			int size = s.readInt();
 			ArrayList phases = new ArrayList();
 			for(int i=0;i<size;i++) {
-				phases.add(s.readObject());
+				Object t = s.readObject();
+				phases.add(t);
 			}
 			((MultiPhaseTransducer)batch.getTransducer()).setPhases(phases);
 		}
