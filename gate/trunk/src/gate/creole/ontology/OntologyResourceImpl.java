@@ -44,10 +44,11 @@ public class OntologyResourceImpl implements OntologyResource {
     this.taxonomy = taxonomy;
     this.ontology = taxonomy instanceof Ontology ? (Ontology)taxonomy : null;
     this.uri = uri;
+    this.instanceProperties = new HashMap();
   }
 
   /**
-   * Constructor variant using the name as the local URI. 
+   * Constructor variant using the name as the local URI.
    * @param name
    * @param comment
    * @param ontology
@@ -56,7 +57,7 @@ public class OntologyResourceImpl implements OntologyResource {
           Taxonomy taxonomy) {
     this(name, name, comment, taxonomy);
   }
-    
+
   public boolean addPropertyValue(String propertyName, Object theValue) {
     // this means that we look for a property with the same name
     // in the class. If such cannot be found, i.e. the propSet is
@@ -64,7 +65,7 @@ public class OntologyResourceImpl implements OntologyResource {
     Property prop = ((Ontology)ontology)
             .getPropertyDefinitionByName(propertyName);
     if(prop == null) return false;
-    
+
     if(prop.isValidDomain(this)){
       List values = (List)instanceProperties.get(propertyName);
       if(values == null){
@@ -98,8 +99,8 @@ public class OntologyResourceImpl implements OntologyResource {
   public Object getPropertyValue(String propertyName) {
     if(instanceProperties == null || instanceProperties.isEmpty()) return null;
     return instanceProperties.get(propertyName);
-  }  
-  
+  }
+
   /**
    * @return Returns the comment.
    */
@@ -143,7 +144,7 @@ public class OntologyResourceImpl implements OntologyResource {
   public Ontology getOntology() {
     return ontology;
   }
-  
+
   /**
    * @param ontology
    *          The ontology to set.

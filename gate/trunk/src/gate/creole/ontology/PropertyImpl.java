@@ -60,7 +60,7 @@ public class PropertyImpl extends OntologyResourceImpl implements
 
   /**
    * Creates a property.
-   * 
+   *
    * @param name
    *          the name of the property
    * @param aDomain
@@ -91,8 +91,10 @@ public class PropertyImpl extends OntologyResourceImpl implements
   public PropertyImpl(String name, String comment, OClass aDomainClass,
           Object aRangeType, Ontology ontology) {
     this(name, comment, new HashSet(), new HashSet(), ontology);
-    this.directDomain.add(aDomainClass);
-    this.domain.add(aDomainClass);
+    if (aDomainClass != null) {
+      this.directDomain.add(aDomainClass);
+      this.domain.add(aDomainClass);
+    }
     this.directRange.add(aRangeType);
     this.range.add(aRangeType);
   }
@@ -175,7 +177,7 @@ public class PropertyImpl extends OntologyResourceImpl implements
 
   /**
    * Add a SuperPropertyOf relation between the given property and this.
-   * 
+   *
    * @param property
    */
   public void addSubProperty(Property property) {
@@ -206,7 +208,7 @@ public class PropertyImpl extends OntologyResourceImpl implements
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see gate.creole.ontology.Property#isFunctional()
    */
   public boolean isFunctional() {
@@ -215,7 +217,7 @@ public class PropertyImpl extends OntologyResourceImpl implements
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see gate.creole.ontology.Property#isInverseFunctional()
    */
   public boolean isInverseFunctional() {
@@ -224,7 +226,7 @@ public class PropertyImpl extends OntologyResourceImpl implements
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see gate.creole.ontology.Property#setFunctional(boolean)
    */
   public void setFunctional(boolean functional) {
@@ -233,7 +235,7 @@ public class PropertyImpl extends OntologyResourceImpl implements
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see gate.creole.ontology.Property#setInverseFunctional(boolean)
    */
   public void setInverseFunctional(boolean inverseFunctional) {
@@ -247,7 +249,7 @@ public class PropertyImpl extends OntologyResourceImpl implements
    * of the domain of this property. The domain of this property is defined
    * recursively based on its super-properties as well.
    * For any other types of values it returns <tt>true</tt>.
-   * 
+   *
    * @param instance
    *          the instance to be checked.
    * @return <tt>true</tt> if the provided instance can be a domain value for
@@ -258,6 +260,9 @@ public class PropertyImpl extends OntologyResourceImpl implements
       OInstance instance = (OInstance)resource;
       Set domainClasses = new HashSet(getDomain());
       boolean result = true;
+      //if there are no restrictions on the domain, then any domain is valid
+      if(domainClasses.isEmpty())
+        return true;
       Iterator instanceClassIter = instance.getOClasses().iterator();
       while(result && instanceClassIter.hasNext()) {
         OClass anInstanceClass = (OClass)instanceClassIter.next();
@@ -277,13 +282,13 @@ public class PropertyImpl extends OntologyResourceImpl implements
   }
 
   /**
-   *  Checks whether a provided instance can be a range value for this 
-   *  property. For an instance to be a valid range value it needs to be a 
+   *  Checks whether a provided instance can be a range value for this
+   *  property. For an instance to be a valid range value it needs to be a
    *  member of <b>all</b> the classes defined as members of the range of this
    *  property. The range of this property is defined recursively based on its
-   *  super-properties as well.  
+   *  super-properties as well.
    * @param instance the instance to be checked.
-   * @return <tt>true</tt> if the provided instance can be a range value for 
+   * @return <tt>true</tt> if the provided instance can be a range value for
    * this property.
    */
   public boolean isValidRange(Object value) {
@@ -291,7 +296,7 @@ public class PropertyImpl extends OntologyResourceImpl implements
       //implementation for ObjectProperties
       OInstance instance = (OInstance)value;
       Set rangeClasses = new HashSet(getRange());
-      
+
       boolean result = true;
       Iterator instanceClassIter = instance.getOClasses().iterator();
       while(result && instanceClassIter.hasNext()) {
@@ -316,20 +321,20 @@ public class PropertyImpl extends OntologyResourceImpl implements
       //implementation for DataType properties
       Iterator rangIter = getRange().iterator();
       while(rangIter.hasNext()){
-        if(!((Class)rangIter.next()).isAssignableFrom(value.getClass())) 
+        if(!((Class)rangIter.next()).isAssignableFrom(value.getClass()))
           return false;
       }
-      return true;      
+      return true;
     }
-  }  
-  
+  }
+
   public String toString() {
     return getName();
   }
 
   /**
    * Gets the set of super-properties for this property.
-   * 
+   *
    * @param {@link OntologyConstants#DIRECT_CLOSURE}
    *          for direct super-properties only or
    *          {@link OntologyConstants#TRANSITIVE_CLOSURE} for all the
@@ -364,7 +369,7 @@ public class PropertyImpl extends OntologyResourceImpl implements
 
   /**
    * Gets the set of sub-properties for this property.
-   * 
+   *
    * @param {@link OntologyConstants#DIRECT_CLOSURE}
    *          for direct sub-properties only or
    *          {@link OntologyConstants#TRANSITIVE_CLOSURE} for all the
