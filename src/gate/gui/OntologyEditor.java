@@ -21,8 +21,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.tree.*;
 import com.ontotext.gate.ontology.TaxonomyImpl;
 
-public class OntologyEditor extends AbstractVisualResource 
-                            implements ResizableVisualResource, 
+public class OntologyEditor extends AbstractVisualResource
+                            implements ResizableVisualResource,
                                        ObjectModificationListener{
 
   /* (non-Javadoc)
@@ -41,7 +41,7 @@ public class OntologyEditor extends AbstractVisualResource
       ((TaxonomyImpl)taxonomy).addObjectModificationListener(this);
     }
   }
-  
+
   public Resource init() throws ResourceInstantiationException{
     super.init();
     initLocalData();
@@ -50,18 +50,18 @@ public class OntologyEditor extends AbstractVisualResource
     return this;
   }
 
-  
+
   protected void initLocalData(){
     itemComparator = new OntologyItemComparator();
   }
-  
+
   protected void initGUIComponents(){
     this.setLayout(new BorderLayout());
-    
+
     mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
     this.add(mainSplit, BorderLayout.CENTER);
-    
-    
+
+
     rootNode = new DefaultMutableTreeNode(null, true);
     treeModel = new DefaultTreeModel(rootNode);
     tree = new JTree(treeModel);
@@ -74,7 +74,7 @@ public class OntologyEditor extends AbstractVisualResource
     //enable tooltips for the tree
     ToolTipManager.sharedInstance().registerComponent(tree);
     mainSplit.setLeftComponent(scroller);
-    
+
     detailsTableModel = new DetailsTableModel();
     detailsTable = new XJTable(detailsTableModel);
     ((XJTable)detailsTable).setSortable(false);
@@ -87,18 +87,18 @@ public class OntologyEditor extends AbstractVisualResource
     detailsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     detailsTable.setColumnSelectionAllowed(false);
     detailsTable.setRowSelectionAllowed(true);
-    
+
     detailsTable.setTableHeader(null);
     detailsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-    
+
     scroller = new JScrollPane(detailsTable);
     scroller.getViewport().setOpaque(true);
     scroller.getViewport().setBackground(detailsTable.getBackground());
-    
+
     mainSplit.setRightComponent(scroller);
-    
+
   }
-  
+
   protected void initListeners(){
     tree.getSelectionModel().addTreeSelectionListener(
       new TreeSelectionListener(){
@@ -112,7 +112,7 @@ public class OntologyEditor extends AbstractVisualResource
           }
         }
     });
-    
+
     mainSplit.addComponentListener(new ComponentListener(){
       public void componentHidden(ComponentEvent e){
       }
@@ -121,16 +121,16 @@ public class OntologyEditor extends AbstractVisualResource
       }
 
       public void componentResized(ComponentEvent e){
-        mainSplit.setDividerLocation(0.7); 
+        mainSplit.setDividerLocation(0.7);
       }
 
       public void componentShown(ComponentEvent e){
-        
+
       }
-      
+
     });
   }
-  
+
   /**
    * Called when the target of this editor has changed
    */
@@ -138,9 +138,9 @@ public class OntologyEditor extends AbstractVisualResource
     rootNode.removeAllChildren();
     List rootClasses = new ArrayList(taxonomy.getTopClasses());
     Collections.sort(rootClasses, itemComparator);
-    
+
     addChidrenRec(rootNode, rootClasses, itemComparator);
-    
+
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
         treeModel.nodeStructureChanged(rootNode);
@@ -152,9 +152,9 @@ public class OntologyEditor extends AbstractVisualResource
       }
     });
   }
-  
+
   /**
-   * Adds the children nodes to a node using values from a list of classes and 
+   * Adds the children nodes to a node using values from a list of classes and
    * instances.
    * @param parent the parent node.
    * @param children the lsit of children objects.
@@ -171,7 +171,7 @@ public class OntologyEditor extends AbstractVisualResource
         childNode.setAllowsChildren(true);
         //add all the subclasses
         TClass aClass = (TClass)aChild;
-        List childList = 
+        List childList =
           new ArrayList(aClass.getSubClasses(TClass.DIRECT_CLOSURE));
         Collections.sort(childList, comparator);
         addChidrenRec(childNode, childList, comparator);
@@ -185,13 +185,13 @@ public class OntologyEditor extends AbstractVisualResource
       }else if(aChild instanceof OInstance){
         childNode.setAllowsChildren(false);
       }else{
-        throw new GateRuntimeException("Unknown ontology item: " + 
+        throw new GateRuntimeException("Unknown ontology item: " +
                 aChild.getClass().getName() + "!");
       }
-      
+
     }
   }
-  
+
   public void processGateEvent(GateEvent e){
     //ignore
   }
@@ -205,11 +205,11 @@ public class OntologyEditor extends AbstractVisualResource
   }
 
   public void objectModified(ObjectModificationEvent e){
-//System.out.println("Ontology updated");   
-    rebuildModel(); 
+//System.out.println("Ontology updated");
+    rebuildModel();
   }
-  
-  
+
+
   protected static class OntologyItemComparator implements Comparator{
 
     public int compare(Object o1, Object o2){
@@ -224,7 +224,7 @@ public class OntologyEditor extends AbstractVisualResource
       }else return 0;
     }
   }
-  
+
   protected static class OntoTreeCellRenderer extends DefaultTreeCellRenderer{
     public Component getTreeCellRendererComponent(JTree tree,
             Object value,
@@ -233,8 +233,8 @@ public class OntologyEditor extends AbstractVisualResource
             boolean leaf,
             int row,
             boolean hasFocus){
-      
-        
+
+
       if(value != null && value instanceof DefaultMutableTreeNode){
         Icon icon = null;
         String itemName = null;
@@ -253,19 +253,19 @@ public class OntologyEditor extends AbstractVisualResource
           else setClosedIcon(icon);
           if(leaf) setLeafIcon(icon);
         }
-        super.getTreeCellRendererComponent(tree, 
-                itemName, sel, expanded, leaf, row, 
+        super.getTreeCellRendererComponent(tree,
+                itemName, sel, expanded, leaf, row,
                 hasFocus);
       }else{
-        super.getTreeCellRendererComponent(tree, 
-                value, sel, expanded, leaf, row, 
+        super.getTreeCellRendererComponent(tree,
+                value, sel, expanded, leaf, row,
                 hasFocus);
       }
       return this;
     }
 
   }
-  
+
   /**
    * A model for the list object displaying the item details.
    */
@@ -283,8 +283,8 @@ public class OntologyEditor extends AbstractVisualResource
       detailGroups = new DetailsGroup[]{};
 
     }
-    
-    
+
+
     public int getColumnCount(){
       return COLUMN_COUNT;
     }
@@ -296,7 +296,7 @@ public class OntologyEditor extends AbstractVisualResource
       return size;
     }
 
-    
+
     public String getColumnName(int column){
       switch(column){
         case EXPANDED_COLUMN : return "";
@@ -346,8 +346,8 @@ public class OntologyEditor extends AbstractVisualResource
           return detailGroups[groupIndex];
         }
         //find the increment required to point to the next group
-        int increment = 1 + 
-            (detailGroups[groupIndex].isExpanded() ? 
+        int increment = 1 +
+            (detailGroups[groupIndex].isExpanded() ?
              detailGroups[groupIndex].getSize() : 0);
         if(currentIndex + increment > rowIndex){
           //the value is from the current group
@@ -359,7 +359,7 @@ public class OntologyEditor extends AbstractVisualResource
       }
       return null;
     }
-    
+
     public Object getValueAt(int rowIndex, int columnIndex){
       Object value = getItemForRow(rowIndex);
       switch(columnIndex){
@@ -374,20 +374,20 @@ public class OntologyEditor extends AbstractVisualResource
       }
     }
 
-    
+
     /**
      * Used to set the current ontology item for which the details are shown.
      * @param item the item to be displayed.
      */
     public void setItem(Object item){
       if(item instanceof TClass){
-        detailGroups = ontologyMode ? 
+        detailGroups = ontologyMode ?
           new DetailsGroup[]{
-                directSuperClasses, allSuperClasses, 
+                directSuperClasses, allSuperClasses,
                 directSubClasses, allSubClasses,
                 properties, instances} :
           new DetailsGroup[]{
-                directSuperClasses, allSuperClasses, 
+                directSuperClasses, allSuperClasses,
                 directSubClasses, allSubClasses};
 
         //displaying a class
@@ -407,7 +407,7 @@ public class OntologyEditor extends AbstractVisualResource
           allSuperClasses.getValues().addAll(classes);
           Collections.sort(allSuperClasses.getValues(), itemComparator);
         }
-        
+
         //set the subclasses
         classes = aClass. getSubClasses(TClass.DIRECT_CLOSURE);
         directSubClasses.getValues().clear();
@@ -423,16 +423,16 @@ public class OntologyEditor extends AbstractVisualResource
           allSubClasses.getValues().addAll(classes);
           Collections.sort(allSubClasses.getValues(), itemComparator);
         }
-        
+
         if(ontologyMode) {
           //set the properties
           properties.getValues().clear();
           Iterator propIter = new HashSet(ontology.getPropertyDefinitions())
               .iterator();
-          //create a local instance to check for properties 
-          OInstanceImpl aFakeInstance = new OInstanceImpl("", "", 
+          //create a local instance to check for properties
+          OInstanceImpl aFakeInstance = new OInstanceImpl("", "",
                   (OClass)aClass, ontology);
-          
+
           while(propIter.hasNext()) {
             Property prop = (Property)propIter.next();
             if(prop.isValidDomain(aFakeInstance))
@@ -441,8 +441,34 @@ public class OntologyEditor extends AbstractVisualResource
 //              properties.getValues().add(prop);
 //            }
           }
+
+          //display the set properties names and their values, example
+          //properties for classes are label
+          Set setPropNames = aClass.getSetPropertiesNames();
+          if (setPropNames != null) {
+            Iterator setPropNamesIter = setPropNames.iterator();
+            while (setPropNamesIter.hasNext()) {
+              String propName = (String) setPropNamesIter.next();
+              List propValues = aClass.getPropertyValues(propName);
+              if (propValues != null) {
+                Iterator propValIter = propValues.iterator();
+                while (propValIter.hasNext()) {
+                  StringBuffer propText = new StringBuffer(propName);
+                  propText.append("(");
+                  Object propValue = propValIter.next();
+                  if (propValue != null)
+                    propText.append(propValue instanceof OInstance ?
+                                    ( (OInstance) propValue).getName() :
+                                    propValue.toString());
+                  propText.append(")");
+                  properties.getValues().add(propText.toString());
+                }//while
+              }//if
+
+            }//while
+          }//if
           Collections.sort(properties.getValues(), itemComparator);
-          
+
           //set the instances
           if(ontologyMode){
             Set instanceSet = ontology.getDirectInstances((OClass)aClass);
@@ -452,12 +478,12 @@ public class OntologyEditor extends AbstractVisualResource
               Collections.sort(instances.getValues(), itemComparator);
             }
           }
-        }        
+        }
       }else if(item instanceof OInstance){
         //displaying an instance
         OInstance anInstance = (OInstance)item;
         detailGroups = new DetailsGroup[]{directTypes, allTypes, properties};
-        
+
         //set the direct types
         Set classes = anInstance.getOClasses();
         directTypes.getValues().clear();
@@ -480,7 +506,7 @@ public class OntologyEditor extends AbstractVisualResource
           allTypes.getValues().addAll(allClasses);
           Collections.sort(allTypes.getValues(), itemComparator);
         }
-        
+
         properties.getValues().clear();
         Set propNames = anInstance.getSetPropertiesNames();
         if(propNames != null){
@@ -506,11 +532,11 @@ public class OntologyEditor extends AbstractVisualResource
           Collections.sort(properties.getValues());
         }
       }
-      
+
       fireTableDataChanged();
     }
-    
-    
+
+
     /**
      * Checks whether a property might apply to an instance of the provided
      * class. This is indicative only as the correct decision can only be taken
@@ -529,7 +555,7 @@ public class OntologyEditor extends AbstractVisualResource
         if(aProp.getDomain() == null) Err.prln("Null domain for " + aProp.getName());
         else domainClasses.addAll(aProp.getDomain());
       }
-      
+
       return domainClasses.contains(aClass);
     }
 
@@ -542,20 +568,20 @@ public class OntologyEditor extends AbstractVisualResource
     protected DetailsGroup directTypes;
     protected DetailsGroup allTypes;
     protected DetailsGroup[] detailGroups;
-    
+
     public static final int COLUMN_COUNT = 2;
     public static final int EXPANDED_COLUMN = 0;
     public static final int LABEL_COLUMN = 1;
   }
-  
-  
+
+
   protected class DetailsTableCellRenderer extends DefaultTableCellRenderer{
-    
-    public Component getTableCellRendererComponent(JTable table, 
-            Object value, boolean isSelected, boolean hasFocus, 
+
+    public Component getTableCellRendererComponent(JTable table,
+            Object value, boolean isSelected, boolean hasFocus,
             int row, int column){
       //prepare the renderer
-      Component res = super.getTableCellRendererComponent(table, "", 
+      Component res = super.getTableCellRendererComponent(table, "",
               isSelected,hasFocus, row, column);
 
       //set the text and icon
@@ -610,13 +636,13 @@ public class OntologyEditor extends AbstractVisualResource
           setEnabled(true);
         }
       }
-      
+
       return res;
     }
 
   }
   /**
-   * An object that holds one type of details (i.e. the super classes, or the 
+   * An object that holds one type of details (i.e. the super classes, or the
    * properties) of an ontology item (class or instance).
    * @author Valentin Tablan
    */
@@ -626,11 +652,11 @@ public class OntologyEditor extends AbstractVisualResource
       this.expanded = expanded;
       this.values = values == null ? new ArrayList() : new ArrayList(values);
     }
-    
+
     public String getName(){
-     return name; 
+     return name;
     }
-    
+
     /**
      * @return Returns the expanded.
      */
@@ -649,11 +675,11 @@ public class OntologyEditor extends AbstractVisualResource
     public void setName(String name){
       this.name = name;
     }
-    
+
     public int getSize(){
       return values.size();
     }
-    
+
     public Object getValueAt(int index){
       return values.get(index);
     }
@@ -671,7 +697,7 @@ public class OntologyEditor extends AbstractVisualResource
     public void setValues(List values){
       this.values = values;
     }
-        
+
     boolean expanded;
     String name;
     List values;
@@ -680,43 +706,43 @@ public class OntologyEditor extends AbstractVisualResource
    * The taxonomy that this editor displays
    */
   protected Taxonomy taxonomy;
-  
+
   /**
    * If the taxonomy being edited is an ontology (i.e. has instances as well)
    * then this member stores it as well.
    */
   protected Ontology ontology;
-  
+
   /**
    * Flag that indicates whether the object beiong edited is an ontology.
    */
   protected boolean ontologyMode;
-  
-  
+
+
   protected OntologyItemComparator itemComparator;
   /**
    * The tree view.
    */
   protected JTree tree;
-  
+
   /**
    * The mode, for the tree.
    */
   protected DefaultTreeModel treeModel;
-  
-  
+
+
   /**
    * The list view used to display item details
    */
   protected JTable detailsTable;
-  
+
   DetailsTableModel detailsTableModel;
-  
+
   /**
    * The main split
    */
   protected JSplitPane mainSplit;
-  
+
   /**
    * The root node of the tree.
    */
