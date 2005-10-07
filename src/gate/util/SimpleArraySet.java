@@ -16,6 +16,7 @@
 
 package gate.util;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,7 +27,7 @@ import java.util.Collection;
  * high performance and memory reduction on small sets. Used in
  * gate.fsm.State, for example
  */
-public class SimpleArraySet
+public class SimpleArraySet implements Serializable
 {
   /**
    * The array storing the elements

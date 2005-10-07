@@ -625,7 +625,7 @@ public class Batch implements JapeConstants {
     if(transducer != null) transducer.setEnableDebugging(enableDebugging);
   }
 
-
+  
   /*
   private void writeObject(ObjectOutputStream oos) throws IOException {
     Out.prln("writing batch");

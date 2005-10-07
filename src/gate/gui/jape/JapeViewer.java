@@ -80,15 +80,18 @@ public class JapeViewer extends AbstractVisualResource implements ANNIEConstants
     japeFileURL = transducer.getGrammarURL();
     // reading japeFile
     try {
-      BufferedReader br = new BufferedReader(new InputStreamReader(japeFileURL.
-          openStream()));
-      String content = br.readLine();
-      while(content != null) {
-        japeFileContents += content + "\n";
-        content = br.readLine();
-      }
-      textArea.setText(japeFileContents);
-      br.close();
+		if(japeFileURL != null) {
+			BufferedReader br = new BufferedReader(new InputStreamReader(japeFileURL.openStream()));
+			String content = br.readLine();
+			while(content != null) {
+				japeFileContents += content + "\n";
+				content = br.readLine();
+			}
+			textArea.setText(japeFileContents);
+			br.close();
+		} else {
+			textArea.setText("The JAPE Transducer Object was loaded from a serialised tranducer and therefore cannot show any text!");
+		}
     } catch (IOException ioe) {
     }
   }
