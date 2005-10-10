@@ -21,6 +21,7 @@ import java.util.*;
 
 import gate.*;
 import gate.creole.ontology.Ontology;
+import gate.util.GateRuntimeException;
 import gate.util.Strings;
 
 
@@ -221,7 +222,25 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     tempFiles.clear();
   } // cleanUp
 
-
+  private void writeObject(java.io.ObjectOutputStream out)
+  throws IOException{
+    out.defaultWriteObject();
+    //now we need to save the class for the action
+    try{
+      out.writeObject(Gate.getClassLoader().loadClass(actionClassQualifiedName));
+    }catch(ClassNotFoundException cnfe){
+      throw new GateRuntimeException(cnfe);
+    }
+  }
+  
+  private void readObject(java.io.ObjectInputStream in)
+  throws IOException, ClassNotFoundException{
+    in.defaultReadObject();
+    //now read the class
+    Class classObject = (Class)in.readObject();
+//    Gate.getClassLoader().resolveGateClass(classObject);
+  }
+  
   /** Makes changes to the document, using LHS bindings. */
   public void transduce(Document doc, java.util.Map bindings,
                         AnnotationSet inputAS, AnnotationSet outputAS,
@@ -297,6 +316,9 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.30  2005/10/10 10:29:38  valyt
+// Serialisatoin to savwe the RHS action class object as well.
+//
 // Revision 1.29  2005/09/30 16:01:04  valyt
 // BUGFIX:
 // RHS Java blocks now have braces around them (to reduce visibility of local variables)
