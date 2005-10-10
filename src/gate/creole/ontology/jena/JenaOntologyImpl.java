@@ -786,23 +786,23 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
   /**
    * Constant for Owl-Lite ontology type.
    */
-  protected static final int OWL_LITE = 0;
+  public static final int OWL_LITE = 0;
   /**
    * Constant for Owl-DL ontology type.
    */
-  protected static final int OWL_DL = 1;
+  public static final int OWL_DL = 1;
   /**
    * Constant for Owl-Full ontology type.
    */
-  protected static final int OWL_FULL = 2;
+  public static final int OWL_FULL = 2;
   /**
    * Constant for RDF-S ontology type.
    */
-  protected static final int RDFS = 3;
+  public static final int RDFS = 3;
   /**
    * Constant for DAML ontology type.
    */
-  protected static final int DAML = 13;
+  public static final int DAML = 13;
   /**
    * @return Returns the defaultNameSpace.
    */
