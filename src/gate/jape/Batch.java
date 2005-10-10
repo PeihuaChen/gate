@@ -22,6 +22,7 @@
 
 package gate.jape;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Vector;
@@ -67,24 +68,7 @@ public class Batch implements JapeConstants {
     this.japeURL = url;
     this.encoding =  encoding;
     parseJape();
-    if(transducer != null){
-      transducer.addStatusListener(new StatusListener(){
-        public void statusChanged(String text){
-          fireStatusChanged(text);
-        }
-      });
-
-      transducer.addProgressListener(new ProgressListener(){
-        public void progressChanged(int value){
-          fireProgressChanged(value);
-        }
-
-        public void processFinished(){
-          fireProcessFinished();
-        }
-      });
-    }
-
+    linkListeners();
   } // full init constructor
 
   public Batch(URL url, String encoding, StatusListener sListener)
@@ -94,6 +78,21 @@ public class Batch implements JapeConstants {
     this.japeURL = url;
     this.encoding =  encoding;
     parseJape();
+    linkListeners();
+  } // full init constructor
+
+  private void readObject(java.io.ObjectInputStream in)
+  throws IOException, ClassNotFoundException{
+    in.defaultReadObject();
+    //now recreate the listeners
+    linkListeners();
+  }
+  
+  /**
+   * Creates inner listeners that forward events from the transducer object 
+   *  to our own listeners.
+   */
+  protected void linkListeners(){
     if(transducer != null){
       transducer.addStatusListener(new StatusListener(){
         public void statusChanged(String text){
@@ -110,9 +109,9 @@ public class Batch implements JapeConstants {
           fireProcessFinished();
         }
       });
-    }
-  } // full init constructor
-
+    }    
+  }
+  
   /**
    * Notifies this PR that it should stop its execution as soon as possible.
    */
