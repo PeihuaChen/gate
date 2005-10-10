@@ -1380,50 +1380,52 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   }
 */
 
-
+  private static class FocusButton extends JButton {
+  
+    public FocusButton(String text) {
+      super(text);
+    }
+  
+    public FocusButton() {
+      super();
+    }
+  
+    public FocusButton(Icon icon) {
+      super(icon);
+    }
+  
+    public FocusButton(String text, Icon icon) {
+      super(text, icon);
+    }// public FocusButton
+    
+  //  public boolean isManagingFocus() {
+  //    return true;
+  //  }// public boolean isManagingFocus()
+  
+    public void processComponentKeyEvent(KeyEvent e) {
+      super.processComponentKeyEvent(e);
+  
+      //I need that cause I get all events here, so I only want to process
+      //when it's a release event. The reason is that for keys like <DEL>
+      //key_typed never happens
+      if (e.getID() != KeyEvent.KEY_RELEASED)
+        return;
+  
+      if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+        SyntaxTreeViewer viewer = (SyntaxTreeViewer) ((JButton) e.getSource()).getParent();
+        viewer.removeNode((JButton) e.getSource());
+      }
+    }// public void processComponentKeyEvent(KeyEvent e)
+  
+  }
 }// class SyntaxTreeViewer
 
 
-class FocusButton extends JButton {
-
-  public FocusButton(String text) {
-    super(text);
-  }
-
-  public FocusButton() {
-    super();
-  }
-
-  public FocusButton(Icon icon) {
-    super(icon);
-  }
-
-  public FocusButton(String text, Icon icon) {
-    super(text, icon);
-  }// public FocusButton
-
-//  public boolean isManagingFocus() {
-//    return true;
-//  }// public boolean isManagingFocus()
-
-  public void processComponentKeyEvent(KeyEvent e) {
-    super.processComponentKeyEvent(e);
-
-    //I need that cause I get all events here, so I only want to process
-    //when it's a release event. The reason is that for keys like <DEL>
-    //key_typed never happens
-    if (e.getID() != KeyEvent.KEY_RELEASED)
-      return;
-
-    if (e.getKeyCode() == KeyEvent.VK_DELETE) {
-      SyntaxTreeViewer viewer = (SyntaxTreeViewer) ((JButton) e.getSource()).getParent();
-      viewer.removeNode((JButton) e.getSource());
-    }
-  }// public void processComponentKeyEvent(KeyEvent e)
-
-} // class SyntaxTreeViewer
 
 // $Log$
+// Revision 1.28  2005/10/10 10:47:08  valyt
+// Converted FocusButton from a phantom class to a static innner class (to make the dependency checker's life easier)
+//
 // Revision 1.27  2005/01/11 13:51:34  ian
 // Updating copyrights to 1998-2005 in preparation for v3.0
 //
