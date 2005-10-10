@@ -114,8 +114,12 @@
       <PARAMETER NAME="outputASName" RUNTIME="true"
         COMMENT="The annotation set to be used as output for the transducer"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      	<PARAMETER NAME="grammarURL" COMMENT="The URL to the grammar file"
+      <OR>
+	   	  <PARAMETER NAME="grammarURL" COMMENT="The URL to the grammar file"
         	SUFFIXES="jape">java.net.URL</PARAMETER>
+          <PARAMETER NAME="binaryGrammarURL" COMMENT="The URL to the grammar file"
+        	SUFFIXES="jape">java.net.URL</PARAMETER>
+      </OR>
       <PARAMETER NAME="encoding" DEFAULT="UTF-8"
         COMMENT="The encoding used for reading the grammar">
         java.lang.String</PARAMETER>

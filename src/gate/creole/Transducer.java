@@ -26,12 +26,14 @@ import java.util.zip.GZIPOutputStream;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
+import gate.Gate;
 import gate.Resource;
 import gate.gui.ActionsPublisher;
 import gate.gui.MainFrame;
 import gate.jape.Batch;
 import gate.jape.JapeException;
 import gate.jape.MultiPhaseTransducer;
+import gate.jape.SinglePhaseTransducer;
 import gate.util.Err;
 
 /**
@@ -62,7 +64,7 @@ public class Transducer extends AbstractLanguageAnalyser implements gate.gui.Act
   public Transducer() {
 	    actionList = new ArrayList();
 	    actionList.add(null);
-		//actionList.add(new SerializeTransducerAction());
+		actionList.add(new SerializeTransducerAction());
   }
 
   /*
@@ -99,13 +101,6 @@ public class Transducer extends AbstractLanguageAnalyser implements gate.gui.Act
 		} else {
 			ObjectInputStream s = new ObjectInputStream(binaryGrammarURL.openStream());
 			batch = (gate.jape.Batch) s.readObject();
-			int size = s.readInt();
-			ArrayList phases = new ArrayList();
-			for(int i=0;i<size;i++) {
-				Object t = s.readObject();
-				phases.add(t);
-			}
-			((MultiPhaseTransducer)batch.getTransducer()).setPhases(phases);
 		}
 		fireProcessFinished();
       }catch(Exception e){
@@ -121,6 +116,7 @@ public class Transducer extends AbstractLanguageAnalyser implements gate.gui.Act
     return this;
   }
 
+ 
   /**
    * Implementation of the run() method from {@link java.lang.Runnable}.
    * This method is responsible for doing all the processing of the input
@@ -179,11 +175,6 @@ public class Transducer extends AbstractLanguageAnalyser implements gate.gui.Act
 					FileOutputStream out = new FileOutputStream(file);
 					ObjectOutputStream s = new ObjectOutputStream(out);
 					s.writeObject(batch);
-					ArrayList phases = ((MultiPhaseTransducer) batch.getTransducer()).getPhases();
-					s.writeInt(phases.size());
-					for(int i=0;i<phases.size();i++) {
-						s.writeObject(phases.get(i));
-					}
 					s.flush();
 					s.close();
 					out.close();

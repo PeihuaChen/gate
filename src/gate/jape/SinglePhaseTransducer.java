@@ -143,7 +143,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
       rule.finish();
       actionClasses.put(rule.getRHS().getActionClassName(),
                         rule.getRHS().getActionClassString());
-    }
+    } 
     try{
       gate.util.Javac.loadClasses(actionClasses);
     }catch(Exception e){
