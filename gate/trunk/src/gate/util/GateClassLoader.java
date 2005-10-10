@@ -73,6 +73,12 @@ public class GateClassLoader extends URLClassLoader {
     */
   public void resolveGateClass(Class c) { super.resolveClass(c); }
 
+  /**
+   * Given a fully qualified class name, this method returns the instance of Class if it is already loaded using the ClassLoader
+   * or it returns null.
+   * @param name
+   * @return
+   */
   public Class findExistingClass(String name) {
 	  return findLoadedClass(name);
   }
