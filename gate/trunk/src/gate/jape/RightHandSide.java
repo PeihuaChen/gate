@@ -227,7 +227,9 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     out.defaultWriteObject();
     //now we need to save the class for the action
     try{
-      out.writeObject(Gate.getClassLoader().loadClass(actionClassQualifiedName));
+		Class class1 = Gate.getClassLoader().loadClass(actionClassQualifiedName);
+		System.out.println(class1.getName());
+		out.writeObject(class1);
     }catch(ClassNotFoundException cnfe){
       throw new GateRuntimeException(cnfe);
     }
@@ -237,8 +239,16 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   throws IOException, ClassNotFoundException{
     in.defaultReadObject();
     //now read the class
-    Class classObject = (Class)in.readObject();
-//    Gate.getClassLoader().resolveGateClass(classObject);
+	String className = getActionClassName();
+	if(Gate.getClassLoader().findExistingClass(getActionClassName()) == null) {
+		try{
+			Map actionClasses = new HashMap();
+			actionClasses.put(getActionClassName(), getActionClassString());
+			gate.util.Javac.loadClasses(actionClasses);
+		}catch(Exception e1){
+			throw new GateRuntimeException (e1);
+		}
+	}
   }
   
   /** Makes changes to the document, using LHS bindings. */
@@ -316,6 +326,9 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.31  2005/10/10 14:59:15  nirajaswani
+// bug fixed - reenabled JAPE serialization
+//
 // Revision 1.30  2005/10/10 10:29:38  valyt
 // Serialisatoin to savwe the RHS action class object as well.
 //
