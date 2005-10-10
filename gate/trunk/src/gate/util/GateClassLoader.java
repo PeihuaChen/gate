@@ -73,6 +73,10 @@ public class GateClassLoader extends URLClassLoader {
     */
   public void resolveGateClass(Class c) { super.resolveClass(c); }
 
+  public Class findExistingClass(String name) {
+	  return findLoadedClass(name);
+  }
+  
   /** Reload a class. This works on the assumption that all classes that
     * we are asked to reload will have been loaded by a GateClassLoader
     * and not the system class loader. If this is not the case, this
