@@ -1547,7 +1547,7 @@ public class CorefEditor
         }
         else if (ke.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
         }
-        else if (Character.isJavaLetterOrDigit(ke.getKeyChar()) ||
+        else if (Character.isJavaIdentifierPart(ke.getKeyChar()) ||
                  Character.isSpaceChar(ke.getKeyChar()) ||
                  Character.isDefined(ke.getKeyChar())) {
         }
