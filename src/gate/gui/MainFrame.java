@@ -25,6 +25,9 @@ import java.net.URL;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
+import java.lang.reflect.Proxy;
+import java.lang.reflect.Method;
+import java.lang.reflect.InvocationHandler;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -980,7 +983,113 @@ public class MainFrame extends JFrame
 
    listeners.put("gate.event.StatusListener", MainFrame.this);
    listeners.put("gate.event.ProgressListener", MainFrame.this);
+   if(System.getProperty("mrj.version") != null) {
+     // mac-specific initialisation
+     initMacListeners();
+   }
   }//protected void initListeners()
+
+  /**
+   * Set up the handlers to support the Macintosh Application menu.  This makes
+   * the About, Quit and Preferences menu items map to their equivalents in
+   * GATE.  If an exception occurs during this process we print a warning.
+   */
+  protected void initMacListeners() {
+    // What this method effectively does is:
+    // 
+    // com.apple.eawt.Application app = Application.getApplication();
+    // app.addApplicationListener(new ApplicationAdapter() {
+    //   public void handleAbout(ApplicationEvent e) {
+    //     e.setHandled(true);
+    //     new HelpAboutAction().actionPerformed(null);
+    //   }
+    //   public void handleQuit(ApplicationEvent e) {
+    //     e.setHandled(false);
+    //     new ExitGateAction().actionPerformed(null);
+    //   }
+    //   public void handlePreferences(ApplicationEvent e) {
+    //     e.setHandled(true);
+    //     optionsDialog.show();
+    //   }
+    // });
+    // 
+    // app.setEnabledPreferencesMenu(true);
+    //
+    // except that it does it all by reflection so as not to compile-time
+    // depend on Apple classes.
+    try {
+      // load the Apple classes
+      final Class eawtApplicationClass =
+        Gate.getClassLoader().loadClass("com.apple.eawt.Application");
+      final Class eawtApplicationListenerInterface =
+        Gate.getClassLoader().loadClass("com.apple.eawt.ApplicationListener");
+      final Class eawtApplicationEventClass =
+        Gate.getClassLoader().loadClass("com.apple.eawt.ApplicationEvent");
+
+      // method used in the InvocationHandler
+      final Method appEventSetHandledMethod =
+        eawtApplicationEventClass.getMethod("setHandled",
+                                            new Class[] {boolean.class});
+
+      // Invocation handler used to process Apple application events
+      InvocationHandler handler = new InvocationHandler() {
+        private Action aboutAction = new HelpAboutAction();
+        private Action exitAction = new ExitGateAction();
+
+        public Object invoke(Object proxy, Method method,
+                             Object[] args) throws Throwable {
+          Object appEvent = args[0];
+          if("handleAbout".equals(method.getName())) {
+            appEventSetHandledMethod.invoke(appEvent,
+                                            new Object[] {Boolean.TRUE});
+            aboutAction.actionPerformed(null);
+          }
+          else if("handleQuit".equals(method.getName())) {
+            appEventSetHandledMethod.invoke(appEvent,
+                                            new Object[] {Boolean.FALSE});
+            exitAction.actionPerformed(null);
+          }
+          else if("handlePreferences".equals(method.getName())) {
+            appEventSetHandledMethod.invoke(appEvent,
+                                            new Object[] {Boolean.TRUE});
+            optionsDialog.show();
+          }
+
+          return null;
+        }
+      };
+
+      // Create an ApplicationListener proxy instance
+      Object applicationListenerObject = Proxy.newProxyInstance(
+        Gate.getClassLoader(), new Class[] {eawtApplicationListenerInterface},
+        handler);
+
+      // get hold of the Application object
+      Method getApplicationMethod = eawtApplicationClass.getMethod(
+        "getApplication", new Class[0]);
+      Object applicationObject =
+        getApplicationMethod.invoke(null, new Object[0]);
+
+      // enable the preferences menu item
+      Method setEnabledPreferencesMenuMethod = eawtApplicationClass.getMethod(
+        "setEnabledPreferencesMenu", new Class[] {boolean.class});
+      setEnabledPreferencesMenuMethod.invoke(applicationObject,
+        new Object[] {Boolean.TRUE});
+
+      // Register our proxy instance as an ApplicationListener
+      Method addApplicationListenerMethod = eawtApplicationClass.getMethod(
+        "addApplicationListener",
+        new Class[] {eawtApplicationListenerInterface});
+      addApplicationListenerMethod.invoke(applicationObject,
+        new Object[] {applicationListenerObject});
+    }
+    catch(Throwable t) {
+      // oh well, we tried
+      System.out.println("Warning: there was a problem setting up the Mac "
+        + "application\nmenu.  Your options/session will not be saved if "
+        + "you exit\nwith command-Q, use \"File/Exit GATE\" instead");
+    }
+  }
 
   public void progressChanged(int i) {
     //progressBar.setStringPainted(true);
