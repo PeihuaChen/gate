@@ -14,6 +14,19 @@
  *  $Id$
  */
 
+/*
+ * INSTRUCTIONS for STAND-ALONE USE
+ * 
+ * SYNOPSIS
+ *     java hepple.postag.POSTagger [options] file1 [file2 ...]
+ * OPTIONS:
+ *     -h, --help : displays this message
+ *     -l, --lexicon <lexicon file> : uses specified lexicon
+ *     -r, --rules <rules file> : uses specified rules
+ * 
+ * NOTE: requires gnu.getopt package
+ */
+
 /**
  * Title:        HepTag
  * Description:  Mark Hepple's POS tagger
@@ -44,8 +57,6 @@ import hepple.postag.rules.*;
  * Output: Same text with each token tagged, i.e. "token" -> "token/tag".
  *        Output is just streamed to std-output, so commonly will direct
  *        into some target file.
- *
- * Useage: java Tagger <LEXICONFILE> <RULEFILE> <INPUT-TEXT>
  *
  * Revision: 13/9/00. Version 1.0.
  *
@@ -156,32 +167,20 @@ public class POSTagger {
       Iterator wordsIter = sentence.iterator();
       while(wordsIter.hasNext()){
         String newWord = (String)wordsIter.next();
-        if(oneStep(newWord, taggedSentence)){
-          //we have a new finished sentence
-          output.add(taggedSentence);
-          taggedSentence = new ArrayList();
-        }
+        oneStep(newWord, taggedSentence);
       }//while(wordsIter.hasNext())
-
-      //finished adding all the words from a sentence, add two more staarts
-      for(int i = 0; i < 2; i++){
-        if(oneStep(staart, taggedSentence)){
-          //we have a new finished sentence
-          output.add(taggedSentence);
-          taggedSentence = new ArrayList();
-        }
-      }//for(int i = 0; i < 2; i++)
-    }//while(sentencesIter.hasNext())
-    //no more sentences, add 4 more staarts to make sure we read all the results
-    for(int i = 0; i < 4; i++){
-      if(oneStep(staart, taggedSentence)){
-        //we have a new finished sentence
-        output.add(taggedSentence);
-        taggedSentence = new ArrayList();
+      //finished adding all the words from a sentence, add six more 
+      //staarts to flush all words out of the tagging buffer
+      for(int i = 0; i < 6; i++){
+        oneStep(staart, taggedSentence);
       }
-    }//for(int i = 0; i < 2; i++)
+      //we have a new finished sentence
+      output.add(taggedSentence);
+      taggedSentence = new ArrayList();
+    }//while(sentencesIter.hasNext())
     return output;
   }
+
 
   /**
    * This method sets the encoding that POS tagger uses to read rules and the
@@ -443,7 +442,7 @@ public class POSTagger {
       "NAME\n" +
       "HepTag - a Part-of-Speech tagger\n" +
       "see http://www.dcs.shef.ac.uk/~hepple/papers/acl00/abstract.html \n\n" +
-      "SYNOPSIS\n\tjava -jar heptag.jar [options] file1 [file2 ...]\n\n" +
+      "SYNOPSIS\n\tjava hepple.postag.POSTagger [options] file1 [file2 ...]\n\n" +
       "OPTIONS:\n" +
       "-h, --help \n\tdisplays this message\n" +
       "-l, --lexicon <lexicon file>\n\tuses specified lexicon\n" +
