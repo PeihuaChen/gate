@@ -96,6 +96,92 @@ public class Attribute implements Serializable{
     return res.toString();
   }
 
+  /**  
+   * This method is a clone of gate.creole.mi.Attribute.parseSerie method with minor 
+   * changes to make it compatible with ML API. It basically given an attribute element
+   * first locates all required variable and creates multiple attributes for the given RANGE.
+   */
+  public static java.util.List parseSeries(Element jdomElement) throws GateException {
+      //find the name
+      Element anElement = jdomElement.getChild("NAME");
+      if(anElement == null) throw new GateException(
+        "Required element \"NAME\" not present in attribute:\n" +
+        jdomElement.toString() + "!");
+      
+      String name = anElement.getTextTrim();
+
+	  //find the type
+      anElement = jdomElement.getChild("TYPE");
+      if(anElement == null) throw new GateException(
+        "Required element \"TYPE\" not present in attribute:\n" +
+        jdomElement.toString() + "!");
+      
+      String type = anElement.getTextTrim();
+
+	  String feature = null;
+      
+      //find the feature if present
+      anElement = jdomElement.getChild("FEATURE");
+      if(anElement != null)feature = anElement.getTextTrim();
+
+      int minpos = 0;
+      int maxpos = 0;
+      
+      //find the range of this element (e.g. from - to)
+      anElement = jdomElement.getChild("RANGE");
+      try {
+      minpos = Integer.parseInt(anElement.getAttributeValue("from").trim());
+      maxpos = Integer.parseInt(anElement.getAttributeValue("to").trim());
+      } catch (Exception e){
+        throw new GateException(
+                "Range element is uncorrect:\n" +
+                jdomElement.toString() + "!");
+      }
+      
+      double weighting = 1.0;
+      
+      // find the weighting if present
+      anElement = jdomElement.getChild("WEIGHTING");
+      if (anElement != null) weighting = Double.parseDouble(anElement.getTextTrim());
+
+      //find the class if present
+      boolean isClass = jdomElement.getChild("CLASS") != null;
+      if (isClass){
+        throw new GateException(
+                "Cannot define the class in a serie:\n" +
+                jdomElement.toString() + "!");
+      }
+
+	
+	  java.util.List values = null;
+      //find the allowed values if present
+	  anElement = jdomElement.getChild("VALUES");
+	  if(anElement == null) values = null;
+	  else{
+	    values = new ArrayList();
+	    Iterator valuesIter = anElement.getChildren("VALUE").iterator();
+	    while(valuesIter.hasNext()){
+	      values.add(((Element)valuesIter.next()).getTextTrim());
+	    }
+	  }
+	  
+      // Create a list of Attributes
+      ArrayList attributes = new ArrayList();  
+      for (int position =minpos; position<maxpos+1;position++ ){
+        Attribute attribute = new Attribute();
+        attribute.setClass(false);
+        attribute.setFeature(feature);
+        attribute.setName(name+"_"+position);
+        attribute.setPosition(position);
+        attribute.setType(type);
+        attribute.setWeighting(weighting);
+		attribute.setValues(values);
+        attributes.add(attribute);
+      }
+      return attributes;
+  }
+  
+  
   public boolean isClass(){
     return isClass;
   }

@@ -16,6 +16,7 @@ package gate.creole.ml;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.jdom.Element;
 
@@ -56,7 +57,19 @@ public class DatasetDefintion implements Serializable{
       attributes.add(attribute);
       attrIndex ++;
     }
-
+	
+	// parsing ATTRIBUTELIST to support range
+	List attributeList = domElement.getChildren("ATTRIBUTELIST");
+	if(attributeList != null) {
+		Iterator childrenSerieIter = attributeList.iterator();
+		while(childrenSerieIter.hasNext()){
+			Element child = (Element)childrenSerieIter.next();
+			List attributelist = Attribute.parseSeries(child);
+			attributes.addAll(attributelist);
+			attrIndex += attributelist.size();
+		}
+	}
+	
     if(classAttribute == null) throw new GateException(
       "No class attribute defined!");
   }
