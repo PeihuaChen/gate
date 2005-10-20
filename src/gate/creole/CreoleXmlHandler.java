@@ -342,7 +342,9 @@ public class CreoleXmlHandler extends DefaultHandler {
 
       // add jar file name
       String jarFileName = (String) contentStack.pop();
-      resourceData.setJarFileName(jarFileName);
+      if(resourceData != null) {
+        resourceData.setJarFileName(jarFileName);
+      }
 
       // add jar file URL if there is one
       if(sourceUrl != null) {
@@ -355,7 +357,9 @@ public class CreoleXmlHandler extends DefaultHandler {
 
         try {
           jarFileUrl = new URL(sourceUrlName + separator + jarFileName);
-          resourceData.setJarFileUrl(jarFileUrl);
+          if(resourceData != null) {
+            resourceData.setJarFileUrl(jarFileUrl);
+          }
 
           // add the jar URL to the class loader
           if(DEBUG) Out.prln("adding URL to classloader: " + jarFileUrl);
