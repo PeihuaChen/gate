@@ -294,7 +294,6 @@ public class MaxentWrapper
    */
   private void initialiseAndTrainClassifier() {
     opennlp.maxent.GIS.PRINT_MESSAGES = verbose;
-    opennlp.maxent.GIS.SMOOTHING = smoothing;
     opennlp.maxent.GIS.SMOOTHING_OBSERVATION = smoothingObservation;
 
     // Actually create and train the model, and store it for later use.
@@ -314,7 +313,7 @@ public class MaxentWrapper
     }
     maxentClassifier = opennlp.maxent.GIS.trainModel(
         new GateEventStream(trainingData, datasetDefinition.getClassIndex()),
-        iterations, cutoff);
+        iterations, cutoff,smoothing,verbose);
   }
 
   /**
