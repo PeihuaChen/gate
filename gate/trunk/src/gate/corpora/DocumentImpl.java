@@ -2325,7 +2325,8 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     Iterator iterator = anAnnotationSet.iterator();
     while (iterator.hasNext()){
       Annotation annot = (Annotation) iterator.next();
-      str.append("<Annotation " + "Type=\"" + annot.getType() +
+      str.append("<Annotation " + "Id=\"" + annot.getId() +
+                  "\" Type=\"" + annot.getType() +
                   "\" StartNode=\"" + annot.getStartNode().getOffset() +
                    "\" EndNode=\"" + annot.getEndNode().getOffset() + "\">\n");
       str.append(featuresToXml(annot.getFeatures()));
