@@ -107,7 +107,7 @@ Priority: 1000
 Rule:	GazPerson
 Priority: 50
 (
- {Lookup.majorType == person_full, Lookup.minorType == normal}
+ {Lookup.majorType == person_full}
 )
 :person -->
 {
