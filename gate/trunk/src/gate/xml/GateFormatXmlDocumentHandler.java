@@ -209,10 +209,21 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
         iterator.remove();
         // Create a new annotation and add it to the annotation set
         try{
-          currentAnnotationSet.add(annot.getStart(),
-                                   annot.getEnd(),
-                                   annot.getElemName(),
-                                   annot.getFM());
+          // This if is the result of a code-fix.The XML writter has been modified
+          // to serialize the annotation id.In order to keep backwards compatibility
+          // with previously saved documents we had to keep the old code(where the id
+          // is not added) in place.
+          if (annot.getId() == null)
+            currentAnnotationSet.add( annot.getStart(),
+                                      annot.getEnd(),
+                                      annot.getElemName(),
+                                      annot.getFM());
+          else
+            currentAnnotationSet.add( annot.getId(),
+                                      annot.getStart(),
+                                      annot.getEnd(),
+                                      annot.getElemName(),
+                                      annot.getFM());
         }catch (gate.util.InvalidOffsetException e){
           throw new GateSaxException(e);
         }// End try
@@ -334,6 +345,9 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
        // Extract name and value
        String attName  = atts.getLocalName(i);
        String attValue = atts.getValue(i);
+
+       if ("Id".equals(attName))
+         currentAnnot.setId(new Integer(attValue));
 
        if ("Type".equals(attName))
          currentAnnot.setElemName(attValue);
@@ -744,6 +758,7 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
   class  AnnotationObject {
     /** Constructor */
     public AnnotationObject(){}//AnnotationObject
+
     /** Accesor for the annotation type modeled here as ElemName */
     public String getElemName(){
       return elemName;
@@ -776,18 +791,29 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
     public void setEnd(Long anEnd){
       end = anEnd;
     }// setEnd();
+    /** Accesor for the id*/
+    public Integer getId() {
+      return id;
+    }// End of getId()
+    /** Mutator for the id*/
+    public void setId(Integer anId) {
+      id = anId;
+    }// End of setId()
 
     public String toString(){
-      return " [type=" + elemName +
+      return " [id =" + id +
+      " type=" + elemName +
       " startNode=" + start+
       " endNode=" + end+
       " features="+ fm +"] ";
     }
+
     // Data fields
     private String elemName = null;
     private FeatureMap fm = null;
     private Long start = null;
     private Long end  = null;
+    private Integer id = null;
   } // AnnotationObject
 }//GateFormatXmlDocumentHandler
 
