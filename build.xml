@@ -46,6 +46,7 @@
   <!-- set global properties for this build -->
   
   <!-- Directories -->
+  <property name="gate.home" location="${basedir}" />
   
   <!-- Sources -->
   <property name="srcDir" location="src"/>
@@ -69,9 +70,9 @@
   <property name="docDir"  location="doc"/>
 
   <!-- load ant-contrib for the "if" task -->
-  <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+  <taskdef resource="net/sf/antcontrib/antlib.xml" >
     <classpath>
-      <pathelement location="${libDir}/ant-contrib-0.6.jar"/>
+      <pathelement location="${libDir}/ant-contrib-1.0b2.jar"/>
     </classpath>
   </taskdef>
 
@@ -293,9 +294,50 @@
     </jar>
 	</target>
 
-  
+
+  <!-- Plugins -->
+  <filelist id="plugins.to.build" dir="plugins"
+    files="Minipar TreeTagger arabic cebuano chinese crawl google hindi
+           probability rasp romanian" />
+
+  <target name="plugins.build" depends="jar" >
+    <for param="plugin">
+      <path>
+        <filelist refid="plugins.to.build" />
+      </path>
+      <sequential>
+        <echo>Building plugin @{plugin}</echo>
+        <ant dir="@{plugin}" inheritAll="false" target="build" />
+      </sequential>
+    </for>
+  </target>
+
+  <target name="plugins.test" depends="jar" >
+    <for param="plugin">
+      <path>
+        <filelist refid="plugins.to.build" />
+      </path>
+      <sequential>
+        <echo>Running tests for plugin @{plugin}</echo>
+        <ant dir="@{plugin}" inheritAll="false" target="test" />
+      </sequential>
+    </for>
+  </target>
+
+  <target name="plugins.distro.prepare">
+    <for param="plugin">
+      <path>
+        <filelist refid="plugins.to.build" />
+      </path>
+      <sequential>
+        <echo>Preparing plugin @{plugin} for distribution</echo>
+        <ant dir="@{plugin}" inheritAll="false" target="distro.prepare" />
+      </sequential>
+    </for>
+  </target>
+
   <!-- Everything! -->
-	<target name="all" depends="jar">
+	<target name="all" depends="jar, plugins.build">
 	</target>
   
   <!-- Run the beast -->
@@ -486,7 +528,7 @@
   </target>
   
   
-  <target name="test" depends="jar">
+  <target name="test.gate" depends="jar">
     <junit fork="true" 
            showoutput="false"
            printsummary="yes"
@@ -505,10 +547,12 @@
             todir="${buildDir}"/>
     </junit>
   </target>
+
+  <target name="test" depends="test.gate, plugins.test" />
   
   <!-- Make the archives for the GATE Distribution -->
   <target name="distro"
-          depends="compile, jar, doc">
+          depends="compile, jar, doc, plugins.build, plugins.distro.prepare">
     <property name="gate.full.name" 
               value="gate-${gate.version}-build${gate.build}"/>
     <property name="distDirname"
