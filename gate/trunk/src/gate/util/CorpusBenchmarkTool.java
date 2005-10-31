@@ -81,26 +81,31 @@ public class CorpusBenchmarkTool {
         this.configs.load(inputStream);
         String thresholdString = this.configs.getProperty("threshold");
         if (thresholdString != null && !thresholdString.equals("")) {
+          thresholdString=thresholdString.trim();
           this.threshold = (new Double(thresholdString)).doubleValue();
           Out.prln("New threshold is: " + this.threshold + "<P>\n");
         }
         String setName = this.configs.getProperty("annotSetName");
         if (setName != null && !setName.equals("")) {
+          setName=setName.trim();
           Out.prln("Annotation set in marked docs is: " + setName + " <P>\n");
           this.annotSetName = setName;
         }
         setName = this.configs.getProperty("outputSetName");
         if (setName != null && !setName.equals("")) {
+          setName=setName.trim();
           Out.prln("Annotation set in processed docs is: " + setName + " <P>\n");
           this.outputSetName = setName;
         }
         String encodingString = this.configs.getProperty("encoding");
         if (encodingString != null && !encodingString.equals("")) {
+          encodingString=encodingString.trim();
           this.documentEncoding = encodingString;
           Out.prln("New encoding is: " + this.documentEncoding + "<P>\n");
         }
         String types = this.configs.getProperty("annotTypes");
         if (types != null && !types.equals("")) {
+          types=types.trim();
           Out.prln("Using annotation types from the properties file. <P>\n");
           StringTokenizer strTok = new StringTokenizer(types, ";");
           annotTypes = new ArrayList();
@@ -122,6 +127,7 @@ public class CorpusBenchmarkTool {
         String features = this.configs.getProperty("annotFeatures");
         HashSet result = new HashSet();
         if (features != null && !features.equals("")) {
+          features=features.trim();
           Out.pr("Using annotation features from the properties file. \n");
           java.util.StringTokenizer tok =
               new java.util.StringTokenizer(features, ";");
