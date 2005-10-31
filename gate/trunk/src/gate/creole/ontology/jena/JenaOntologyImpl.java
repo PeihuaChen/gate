@@ -167,9 +167,9 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
 
     if (this.getPropertyDefinitionByName("label") == null) {
       //add labels as properties of everything
-      addDatatypeProperty("label", "label property",  new HashSet()
-                          /*(OClass)null*/,
-                          String.class);
+      Set range = new HashSet();
+      range.add(String.class);
+      addProperty("label", "label property",  new HashSet(), range);
     }
     // convert the Jena model into a GATE ontology
     // create the class hierarchy
