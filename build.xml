@@ -548,7 +548,7 @@
     </junit>
   </target>
 
-  <target name="test" depends="test.gate, plugins.test" />
+  <target name="test" depends="test.gate, plugins.build, plugins.test" />
   
   <!-- Make the archives for the GATE Distribution -->
   <target name="distro"
