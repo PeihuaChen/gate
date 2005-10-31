@@ -7,10 +7,19 @@
   <property name="build" location="build"/>
   <property name="dist"  location="dist"/>
 
+  <property name="gate.home" location="../.." />
+  <property name="gate.jar" location="${gate.home}/bin/gate.jar" />
+  <property name="gate.lib" location="${gate.home}/lib" />
+
   <path id="classpath">
-  <fileset dir="lib"> 
-    <include name="*.jar"/>
-  </fileset>
+    <pathelement location="${gate.jar}" />
+    <fileset dir="${gate.lib}">
+      <include name="**/*.jar" />
+      <include name="**/*.zip" />
+    </fileset>
+    <fileset dir="lib"> 
+      <include name="*.jar"/>
+    </fileset>
   </path> 
 
 
@@ -44,5 +53,12 @@
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
   </target>
+
+
+  <!-- Targets used by the main GATE build file -->
+  <target name="build" depends="dist" />
+  <target name="test" />
+  <target name="distro.prepare" depends="clean" />
+
 </project>
 
