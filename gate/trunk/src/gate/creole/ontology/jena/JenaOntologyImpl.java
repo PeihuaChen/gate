@@ -108,7 +108,8 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
       inputURL = null;
       ontologyType = OWL_LITE;
     }
-    load(inputURL, ontologyType);
+	super.setURL(inputURL);
+	load(inputURL, ontologyType);
   }
 
   /**
