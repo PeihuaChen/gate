@@ -17,7 +17,7 @@ package gate.creole;
 import java.util.*;
 
 import gate.*;
-import gate.util.GateRuntimeException;
+import gate.util.*;
 
 /**
  * This class implements a SerialController that only contains
@@ -27,6 +27,9 @@ import gate.util.GateRuntimeException;
  */
 public class SerialAnalyserController extends SerialController
               implements CorpusController{
+
+  /** Debug flag */
+  private static final boolean DEBUG = false;
 
   public gate.Corpus getCorpus() {
     return corpus;
@@ -58,7 +61,11 @@ public class SerialAnalyserController extends SerialController
       }
 
 //      try{
+      if (DEBUG) 
+        Out.pr("SerialAnalyserController processing doc=" + doc.getName()+ "...");      
       super.execute();
+      if (DEBUG) 
+        Out.prln("done.");      
 //      }catch(Exception e){
 //        e.printStackTrace(Err.getPrintWriter());
 //      }
