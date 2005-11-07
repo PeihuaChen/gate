@@ -134,13 +134,18 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
 
   public void setURL(URL aUrl) {
     url = aUrl;
-    if(null == url){ throw new GateRuntimeException("Ontology URL set to null."); }
-    /* unpack the gate:path urls to absolute form */
-    if(-1 != url.getProtocol().indexOf("gate")){
-      url = gate.util.protocols.gate.Handler.class.getResource(Files
-              .getResourcePath()
-              + url.getPath());
-    }// if
+    //null URL is now OK - used to create an empty ontology
+//    if(null == url){
+//      throw new GateRuntimeException("Ontology URL set to null."); 
+//    }
+    if(url != null){
+      /* unpack the gate:path urls to absolute form */
+      if(-1 != url.getProtocol().indexOf("gate")){
+        url = gate.util.protocols.gate.Handler.class.getResource(Files
+                .getResourcePath()
+                + url.getPath());
+      }// if
+    }
   }// void setURL(URL)
 
   /**
