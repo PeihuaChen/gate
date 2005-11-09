@@ -341,7 +341,14 @@ public class AnnotationListView extends AbstractDocumentView
   public void annotationUpdated(AnnotationEvent e){
     //update all occurrences of this annotation
     //save selection
-    int[] selection = table.getSelectedRows();
+    
+	// if annotations tab has not been set to visible state
+	// table will be null.
+	if(table == null) {
+		return;
+	}
+	
+	int[] selection = table.getSelectedRows();
     Annotation ann = (Annotation)e.getSource();
     for(int i = 0; i < tagList.size(); i++){
       Object tag = tagList.get(i);
