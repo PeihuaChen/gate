@@ -318,7 +318,7 @@ extends AbstractFeatureBearer implements DataStore {
     // check that this LR is one of ours (i.e. has been adopted)
     if(lr.getDataStore() == null || ! lr.getDataStore().equals(this))
       throw new PersistenceException(
-        "This LR is not stored in this DataStore"
+        "LR " + lr.getName() + " has not been adopted by this DataStore"
       );
 
     // find the resource data for this LR
