@@ -6,6 +6,7 @@
   <property name="src" location="src"/>
   <property name="build" location="build"/>
   <property name="dist"  location="dist"/>
+  <property name="jar.location" location="probability.jar" />
 
   <property name="gate.home" location="../.." />
   <property name="gate.jar" location="${gate.home}/bin/gate.jar" />
@@ -41,14 +42,19 @@
     <mkdir dir="${dist}/lib"/>
 
     <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
-    <jar jarfile="${basedir}/probability.jar" basedir="${build}"/>
+    <jar jarfile="${jar.location}" basedir="${build}"/>
   </target>
 
-  <target name="clean"
+  <target name="clean.classes"
         description="clean up" >
     <!-- Delete the ${build} and ${dist} directory trees -->
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
+  </target>
+
+  <target name="clean" depends="clean.classes" >
+    <!-- full clean also removes the generated JAR file -->
+    <delete file="${jar.location}" />
   </target>
 
   <!-- Targets used by the main GATE build file -->

@@ -98,7 +98,7 @@
   
   <!-- tools.jar path -->
   
-  <!-- GATE will attemt to guess which tools.jar file to use. -->
+  <!-- GATE will attempt to guess where the Sun Javac classes live -->
   <!-- First try the two variants of $JAVA_HOME/lib/tools.jar -->
   <condition property="tools.jar.location"
             value="${java.home}/../lib/tools.jar">
@@ -161,7 +161,8 @@
   <echo level="info">
     This is the ANT build script for GATE (http://gate.ac.uk).
     Type &quot;ant help&quot; for details about the targets available.
-    GATE ${gate.version}, build ${gate.build}</echo>
+    GATE ${gate.version}, build ${gate.build}
+    Java version ${java.version}</echo>
     
   <!-- Prints out details about the targets -->
   <target name="help">
@@ -336,6 +337,18 @@
     </for>
   </target>
 
+  <target name="plugins.clean">
+    <for param="plugin">
+      <path>
+        <filelist refid="plugins.to.build" />
+      </path>
+      <sequential>
+        <echo>Cleaning plugin @{plugin}</echo>
+        <ant dir="@{plugin}" inheritAll="false" target="clean" />
+      </sequential>
+    </for>
+  </target>
+
   <!-- Everything! -->
 	<target name="all" depends="jar, plugins.build">
 	</target>
@@ -414,11 +427,14 @@
   </target>
   
   <!-- Clear all build output -->
-  <target name="clean">
+  <target name="clean.gate">
     <delete includeemptydirs="true">
       <fileset dir="${outputDir}" excludes="**/CVS,**/CVS/**,**/.cvsignore"/>
     </delete>
   </target>
+
+  <!-- Clean everything (including buildable plugins) -->
+  <target name="clean" depends="clean.gate, plugins.clean" />
   
   <!-- Make documentation -->
   <target name="javadoc">
