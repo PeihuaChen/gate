@@ -121,6 +121,21 @@
     </and>             
   </condition>  
 
+  <!-- Maybe this is a Mac?  The following should work for a typical Mac OS X
+       java.home like:
+          /System/Library/Frameworks/JavaVM.framework[/Versions/x.y.z]/Home
+  -->
+  <condition property="tools.jar.location"
+             value="${java.home}/../Classes/classes.jar">
+    <and>
+      <not>
+        <isset property="tools.jar.location"/>
+      </not>
+      <available file="${java.home}/../Classes/classes.jar"
+                 type="file"/>
+    </and>             
+  </condition>
+
   <!-- Save tools.jar as a <path>.  If no tools.jar was found, make an empty
        path -->
   <if>
