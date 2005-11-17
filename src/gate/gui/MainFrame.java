@@ -1561,10 +1561,10 @@ public class MainFrame extends JFrame
           theTool.execute();
           theTool.printStatistics();
 
-          Out.prln("Overall average precision: " + theTool.getPrecisionAverage());
-          Out.prln("Overall average recall: " + theTool.getRecallAverage());
-          Out.prln("Overall average fMeasure : "+theTool.getFMeasureAverage());
-          Out.prln("Finished!");
+          Out.prln("<BR>Overall average precision: " + theTool.getPrecisionAverage());
+          Out.prln("<BR>Overall average recall: " + theTool.getRecallAverage());
+          Out.prln("<BR>Overall average fMeasure : "+theTool.getFMeasureAverage());
+          Out.prln("<BR>Finished!");
           theTool.unloadPRs();
         }
       };
@@ -1611,10 +1611,10 @@ public class MainFrame extends JFrame
           theTool.execute();
           theTool.printStatistics();
 
-          Out.prln("Overall average precision: " + theTool.getPrecisionAverage());
-          Out.prln("Overall average recall: " + theTool.getRecallAverage());
-          Out.prln("Overall average fMeasure : "+theTool.getFMeasureAverage());
-          Out.prln("Finished!");
+          Out.prln("<BR>Overall average precision: " + theTool.getPrecisionAverage());
+          Out.prln("<BR>Overall average recall: " + theTool.getRecallAverage());
+          Out.prln("<BR>Overall average fMeasure : "+theTool.getFMeasureAverage());
+          Out.prln("<BR>Finished!");
           theTool.unloadPRs();
         }
       };
