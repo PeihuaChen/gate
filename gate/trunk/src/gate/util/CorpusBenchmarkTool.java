@@ -1692,15 +1692,23 @@ public class CorpusBenchmarkTool {
     long possible = correct + partial + missing;
     //precision strict is correct/actual
     //precision is (correct + 0.5 * partially correct)/actual
-
-    double precision = (correct + 0.5 * partial) / actual;
+    double precision = 0d;
+    if (actual!=0)
+      precision = (correct + 0.5 * partial) / actual;
+    
     //recall strict is correct/possible
-    double recall = (correct + 0.5 * partial) / possible;
+    double recall = 0d;
+    if (possible!=0)
+      recall = (correct + 0.5 * partial) / possible;
+    
     //F-measure = ( (beta*beta + 1)*P*R ) / ((beta*beta*P) + R)
-    double fmeasure =
+    double fmeasure = 0d;
+    if ((beta * beta * precision) + recall !=0){
+      fmeasure =
         ( (beta * beta + 1) * precision * recall)
         /
         ( (beta * beta * precision) + recall);
+    }
 
     long proc_correct = 0;
     long proc_partial = 0;
