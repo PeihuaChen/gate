@@ -532,6 +532,7 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher{
     String name = jenaClass.getLocalName();
     String comment = jenaClass.getComment(language);
     String classLabel = jenaClass.getLabel(language);
+Out.prln("Reding " + name + " class");    
     // check whether the class exists already
     OClass aClass = (OClass)getClassByName(name);
     if(aClass == null){
