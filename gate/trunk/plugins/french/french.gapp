@@ -23,10 +23,6 @@
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
                 <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
-                <entry>
                   <string>setsToKeep</string>
                   <gate.util.persistence.CollectionPersistence>
                     <localList>
@@ -59,10 +55,6 @@
             <runtimeParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
-                <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
                 <entry>
                   <string>annotationSetName</string>
                   <string>NE</string>
@@ -98,10 +90,6 @@
             <runtimeParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
-                <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
                 <entry>
                   <string>outputASName</string>
                   <string>NE</string>
@@ -145,10 +133,6 @@
             <runtimeParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
-                <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
                 <entry>
                   <string>outputASName</string>
                   <string>NE</string>
@@ -195,10 +179,6 @@
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
                 <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
-                <entry>
                   <string>annotationSetName</string>
                   <string>NE</string>
                 </entry>
@@ -242,10 +222,6 @@
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
                 <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
-                <entry>
                   <string>outputASName</string>
                   <string>NE</string>
                 </entry>
@@ -284,10 +260,6 @@
             <runtimeParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
-                <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
                 <entry>
                   <string>annotationSetName</string>
                   <string>NE</string>

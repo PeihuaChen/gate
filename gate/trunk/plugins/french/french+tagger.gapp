@@ -2,9 +2,6 @@
   <urlList class="gate.util.persistence.CollectionPersistence">
     <localList>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../Tools</urlString>
-      </gate.util.persistence.PersistenceManager-URLHolder>
-      <gate.util.persistence.PersistenceManager-URLHolder>
         <urlString>$relpath$../ANNIE</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
@@ -12,12 +9,6 @@
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
         <urlString>$relpath$../TreeTagger</urlString>
-      </gate.util.persistence.PersistenceManager-URLHolder>
-      <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../TreeTagger</urlString>
-      </gate.util.persistence.PersistenceManager-URLHolder>
-      <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../ANNIE</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
     </localList>
     <collectionType>java.util.ArrayList</collectionType>
@@ -32,10 +23,6 @@
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
                 <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
-                <entry>
                   <string>setsToKeep</string>
                   <gate.util.persistence.CollectionPersistence>
                     <localList>
@@ -43,10 +30,6 @@
                     </localList>
                     <collectionType>java.util.ArrayList</collectionType>
                   </gate.util.persistence.CollectionPersistence>
-                </entry>
-                <entry>
-                  <string>annotationTypes</string>
-                  <null/>
                 </entry>
               </localMap>
             </runtimeParams>
@@ -68,10 +51,6 @@
             <runtimeParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
-                <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
                 <entry>
                   <string>annotationSetName</string>
                   <string>NE</string>
@@ -107,10 +86,6 @@
             <runtimeParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
-                <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
                 <entry>
                   <string>outputASName</string>
                   <string>NE</string>
@@ -154,10 +129,6 @@
             <runtimeParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
-                <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
                 <entry>
                   <string>outputASName</string>
                   <string>NE</string>
@@ -204,17 +175,13 @@
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
                 <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
-                <entry>
                   <string>annotationSetName</string>
                   <string>NE</string>
                 </entry>
                 <entry>
                   <string>treeTaggerBinary</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$../../../sins/thirdparty/FCTagger/cmd/tree-tagger-french</urlString>
+                    <urlString>$relpath$../TreeTagger/resources/tree-tagger-french-gate</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
               </localMap>
@@ -237,10 +204,6 @@
             <runtimeParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
-                <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
                 <entry>
                   <string>annotationSetName</string>
                   <string>NE</string>
@@ -285,10 +248,6 @@
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
                 <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
-                <entry>
                   <string>outputASName</string>
                   <string>NE</string>
                 </entry>
@@ -327,10 +286,6 @@
             <runtimeParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
-                <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
                 <entry>
                   <string>annotationSetName</string>
                   <string>NE</string>

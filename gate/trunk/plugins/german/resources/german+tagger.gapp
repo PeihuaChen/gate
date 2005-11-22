@@ -23,10 +23,6 @@
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
                 <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
-                <entry>
                   <string>setsToKeep</string>
                   <gate.util.persistence.CollectionPersistence>
                     <localList>
@@ -60,10 +56,6 @@
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
                 <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
-                <entry>
                   <string>annotationSetName</string>
                   <string>NE</string>
                 </entry>
@@ -73,18 +65,7 @@
             <resourceName>tokeniser</resourceName>
             <initParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-              <localMap>
-                <entry>
-                  <string>rulesURL</string>
-                  <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$../../ANNIE/resources/tokeniser/DefaultTokeniser.rules</urlString>
-                  </gate.util.persistence.PersistenceManager-URLHolder>
-                </entry>
-                <entry>
-                  <string>encoding</string>
-                  <string>UTF-8</string>
-                </entry>
-              </localMap>
+              <localMap/>
             </initParams>
             <features class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
@@ -98,10 +79,6 @@
             <runtimeParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
-                <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
                 <entry>
                   <string>outputASName</string>
                   <string>NE</string>
@@ -146,10 +123,6 @@
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
                 <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
-                <entry>
                   <string>outputASName</string>
                   <string>NE</string>
                 </entry>
@@ -163,24 +136,7 @@
             <resourceName>splitter</resourceName>
             <initParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-              <localMap>
-                <entry>
-                  <string>encoding</string>
-                  <string>UTF-8</string>
-                </entry>
-                <entry>
-                  <string>gazetteerListsURL</string>
-                  <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$../../ANNIE/resources/sentenceSplitter/gazetteer/lists.def</urlString>
-                  </gate.util.persistence.PersistenceManager-URLHolder>
-                </entry>
-                <entry>
-                  <string>transducerURL</string>
-                  <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$../../ANNIE/resources/sentenceSplitter/grammar/main.jape</urlString>
-                  </gate.util.persistence.PersistenceManager-URLHolder>
-                </entry>
-              </localMap>
+              <localMap/>
             </initParams>
             <features class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
@@ -195,17 +151,13 @@
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
                 <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
-                <entry>
                   <string>annotationSetName</string>
                   <string>NE</string>
                 </entry>
                 <entry>
                   <string>treeTaggerBinary</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$../../../../sins/thirdparty/FCTagger/cmd/tree-tagger-german</urlString>
+                    <urlString>$relpath$../../TreeTagger/resources/tree-tagger-german-gate</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
               </localMap>
@@ -228,10 +180,6 @@
             <runtimeParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
-                <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
                 <entry>
                   <string>annotationSetName</string>
                   <string>NE</string>
@@ -276,10 +224,6 @@
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
                 <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
-                <entry>
                   <string>annotationSetName</string>
                   <string>NE</string>
                 </entry>
@@ -323,10 +267,6 @@
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
                 <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
-                <entry>
                   <string>outputASName</string>
                   <string>NE</string>
                 </entry>
@@ -369,10 +309,6 @@
             <runtimeParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
-                <entry>
-                  <string>document</string>
-                  <null/>
-                </entry>
                 <entry>
                   <string>annotationSetName</string>
                   <string>NE</string>
