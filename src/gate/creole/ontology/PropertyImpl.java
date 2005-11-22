@@ -63,7 +63,7 @@ public class PropertyImpl extends OntologyResourceImpl implements
    *
    * @param name
    *          the name of the property
-   * @param aDomain
+   * @param domain
    *          the ontology class representing the domain for this property.
    * @param range
    *          a set containing range restrictions. These can either be
