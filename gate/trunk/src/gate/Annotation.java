@@ -40,7 +40,7 @@ extends SimpleAnnotation, Serializable {
     * Compatible means that they hit the same possition and the FeatureMap of
     * <b>this</b> is incuded into aAnnot FeatureMap.
     * @param anAnnot a gate Annotation.
-    * @return <code>true</code> if aAnnot is compatible with <b>this</> and
+    * @return <code>true</code> if aAnnot is compatible with <b>this</b> and
     * <code>false</code> otherwise.
     */
   public boolean isCompatible(Annotation anAnnot);
