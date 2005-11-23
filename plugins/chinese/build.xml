@@ -6,7 +6,7 @@
   <property name="src" location="src"/>
   <property name="build" location="build"/>
   <property name="dist"  location="dist"/>
-  <property name="jar.location" location="arabic.jar" />
+  <property name="jar.location" location="chinese.jar" />
 
   <property name="gate.home" location="../.." />
   <property name="gate.jar" location="${gate.home}/bin/gate.jar" />
