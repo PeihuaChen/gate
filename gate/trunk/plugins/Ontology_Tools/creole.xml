@@ -13,7 +13,7 @@
       <ICON>controller.gif</ICON>
     </RESOURCE>
 -->
-  <!-- Ontology -->
+  <!-- Ontology -->	  
   <RESOURCE>
     <NAME>Jena Ontology</NAME>
     <CLASS>gate.creole.ontology.jena.JenaOntologyImpl</CLASS>
@@ -21,28 +21,28 @@
     <COMMENT>An ontology implementation using Jena for I/O.</COMMENT>
     <OR>
       <PARAMETER NAME="owlLiteFileURL"
-        REQUIRED="false"
+        OPTIONAL="true"
         COMMENT="The URL of a OWL-Lite file">java.net.URL</PARAMETER>
       <PARAMETER NAME="owlDlFileURL"
-        REQUIRED="false"
+        OPTIONAL="true"
         COMMENT="The URL of a OWL-DL file">java.net.URL</PARAMETER>      
       <PARAMETER NAME="owlFullFileURL"
-        REQUIRED="false"
+        OPTIONAL="true"
         COMMENT="The URL of a OWL-Full file">java.net.URL</PARAMETER>      
       <PARAMETER NAME="rdfsFileURL"
-        REQUIRED="false"
+        OPTIONAL="true"
         COMMENT="The URL of a RDF(S) file">java.net.URL</PARAMETER>      
       <PARAMETER NAME="damlFileURL"
-        REQUIRED="false"
+        OPTIONAL="true"
         COMMENT="The URL of a DAML file">java.net.URL</PARAMETER>      
     </OR>
     <PARAMETER NAME="defaultNameSpace"
       COMMENT="The default namespace to be used for local URIs"
-	  REQUIRED="false">java.lang.String</PARAMETER>      
+	  OPTIONAL="true">java.lang.String</PARAMETER>      
 	  
     <PARAMETER NAME="language" DEFAULT=""
       COMMENT="The language to be used for labels and comments"
-      REQUIRED="false"
+      OPTIONAL="true"
       >java.lang.String</PARAMETER>
     <ICON>lrs.gif</ICON>
   </RESOURCE>
