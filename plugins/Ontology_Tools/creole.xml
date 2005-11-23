@@ -42,7 +42,7 @@
 	  
     <PARAMETER NAME="language" DEFAULT=""
       COMMENT="The language to be used for labels and comments"
-      REQUIRED="true"
+      REQUIRED="false"
       >java.lang.String</PARAMETER>
     <ICON>lrs.gif</ICON>
   </RESOURCE>
