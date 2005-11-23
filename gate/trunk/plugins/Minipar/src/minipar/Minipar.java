@@ -25,394 +25,484 @@ import gate.util.*;
 import gate.event.*;
 import gate.gui.MainFrame;
 
-
 /**
  * This class is the implementation of the resource Minipar
  */
-public class Minipar extends AbstractLanguageAnalyser
-  implements ProcessingResource {
+public class Minipar extends AbstractLanguageAnalyser implements
+		ProcessingResource {
 
-  public static final String GATETEXTFILE = "GATESentences";
-  private URL miniparDataDir;
-  private URL miniparBinary;
-  private String annotationTypeName;
-  private String annotationInputSetName, annotationOutputSetName;
-  private gate.Document document;
+	/**
+	 * Name of the temporary file, which is populated with the text of GATE
+	 * document in order to process it with Minipar
+	 */
+	public static final String GATETEXTFILE = "GATESentences";
 
-  /**
-   * Get the MiniparDataDir value.
-   */
-  public URL getMiniparDataDir() {
-    return miniparDataDir;
-  }
+	/**
+	 * URL of the minipar Data Directory that contains lexicons etc.
+	 */
+	private URL miniparDataDir;
 
-  /**
-   * Get the Document to process.
-   */
-  public gate.Document getDocument() {
-    return this.document;
-  }
+	/**
+	 * URL of the minipar Binary file, it can be either exe or linux,
+	 * distributed along with Minipar in GATE.
+	 */
+	private URL miniparBinary;
 
-  /**
-   * Set the Document to process
-   */
-  public void setDocument(gate.Document document) {
-    this.document = document;
-  }
+	/**
+	 * Minipar creates tokens. This variable provides the type name for it.
+	 */
+	private String annotationTypeName;
 
- /**
- * Get the AnnotationTypeName, new annotations are created with this name
- */
-  public String getAnnotationTypeName() {
-    return this.annotationTypeName;
-  }
+	/**
+	 * Name of the inputAnnotationSet
+	 */
+	private String annotationInputSetName;
 
-  /**
-  * Set the AnnotationTypeName, new annotations are created with this name
-  */
-  public void setAnnotationTypeName(String aTypeName) {
-    this.annotationTypeName = aTypeName;
-  }
+	/**
+	 * Name of the outputAnnotationSet
+	 */
+	private String annotationOutputSetName;
 
-  /**
-  * Get the AnnotationInputSetName, source of the annotations to be taken from and to work on
-  */
-  public String getAnnotationInputSetName() {
-    return this.annotationInputSetName;
-  }
+	/**
+	 * Get the MiniparDataDir value.
+	 */
+	public URL getMiniparDataDir() {
+		return miniparDataDir;
+	}
 
-  /**
-  * Get the AnnotationOutputSetName, annotations to be created under this annotationSet
-  */
-  public String getAnnotationOutputSetName() {
-    return this.annotationOutputSetName;
-  }
+	/**
+	 * Get the AnnotationTypeName, new annotations are created with this name
+	 */
+	public String getAnnotationTypeName() {
+		return this.annotationTypeName;
+	}
 
-  /**
-  * Get the AnnotationInputSetName, source of the annotations to be taken from and to work on
-  */
-  public void setAnnotationInputSetName(String inputSet) {
-    this.annotationInputSetName = inputSet;
-  }
+	/**
+	 * Set the AnnotationTypeName, new annotations are created with this name
+	 */
+	public void setAnnotationTypeName(String aTypeName) {
+		this.annotationTypeName = aTypeName;
+	}
 
-  /**
-  * Get the AnnotationOutputSetName, annotations to be created under this annotationSet
-  */
-  public void getAnnotationOutputSetName(String outputSet) {
-    this.annotationOutputSetName = outputSet;
-  }
+	/**
+	 * Get the AnnotationInputSetName, source of the annotations to be taken
+	 * from and to work on
+	 */
+	public String getAnnotationInputSetName() {
+		return this.annotationInputSetName;
+	}
 
+	/**
+	 * Get the AnnotationOutputSetName, annotations to be created under this
+	 * annotationSet
+	 */
+	public String getAnnotationOutputSetName() {
+		return this.annotationOutputSetName;
+	}
 
-  /**
-  * Set the MiniparDataDirectory.. This is the directory that Minipar uses to collect the data for
-  * its internal processing. Default location is minipar_home/data
-  */
-  public void setMiniparDataDir(URL newMiniparDataDir) {
-    this.miniparDataDir = newMiniparDataDir;
-  }
+	/**
+	 * Get the AnnotationInputSetName, source of the annotations to be taken
+	 * from and to work on
+	 */
+	public void setAnnotationInputSetName(String inputSet) {
+		this.annotationInputSetName = inputSet;
+	}
 
-  /**
-   * This is the url of MiniparBinary
-   * It should be somewhere located on the drive where the user has execution rights
-   */
-  public URL getMiniparBinary() {
-    return miniparBinary;
-  }
+	/**
+	 * Get the AnnotationOutputSetName, annotations to be created under this
+	 * annotationSet
+	 */
+	public void setAnnotationOutputSetName(String outputSet) {
+		this.annotationOutputSetName = outputSet;
+	}
 
-  /**
-   * This is the url of MiniparBinary
-   * It should be somewhere located on the drive where the user has execution rights
-   */
-  public void setMiniparBinary(URL newMiniparBinary) {
-    this.miniparBinary = newMiniparBinary;
-  }
+	/**
+	 * Set the MiniparDataDirectory.. This is the directory that Minipar uses to
+	 * collect the data for its internal processing. Default location is
+	 * minipar_home/data
+	 */
+	public void setMiniparDataDir(URL newMiniparDataDir) {
+		this.miniparDataDir = newMiniparDataDir;
+	}
 
+	/**
+	 * This is the url of MiniparBinary It should be somewhere located on the
+	 * drive where the user has execution rights
+	 */
+	public URL getMiniparBinary() {
+		return miniparBinary;
+	}
 
-  public Resource init() throws ResourceInstantiationException {
-    // we need to check the operating system
-    //And to detect the underlying Operating system
-    String osName = System.getProperty("os.name").toLowerCase();
-    System.out.println(osName);
-    // Detecting Linux
-    if(osName.toLowerCase().indexOf("linux") == -1) {
-      throw new ResourceInstantiationException("This PR can only be instantiated on Linux Machine");
-    }
+	/**
+	 * This is the url of MiniparBinary It should be somewhere located on the
+	 * drive where the user has execution rights
+	 */
+	public void setMiniparBinary(URL newMiniparBinary) {
+		this.miniparBinary = newMiniparBinary;
+	}
 
-    return super.init();
-  }
+	/**
+	 * Init method is called when the resource is instantiated in GATE. This
+	 * checks for the supported operating systems and the mandotary init-time
+	 * parameters.
+	 */
+	public Resource init() throws ResourceInstantiationException {
+		// we need to check the operating system
+		// And to detect the underlying Operating system
+		String osName = System.getProperty("os.name").toLowerCase();
+		// Detecting Linux and Windows
+		if (osName.toLowerCase().indexOf("linux") == -1
+				&& osName.toLowerCase().indexOf("windows") == -1) {
+			throw new ResourceInstantiationException(
+					"This PR can only be instantiated on Windows/Linux Machine");
+		}
+		return super.init();
+	}
 
-  public void reInit()
-    throws ResourceInstantiationException {}
+	/**
+	 * Minipar Binary file takes a file as an argument, which has one sentence
+	 * written on one line. It takes one sentence at a time and parses them one
+	 * by one.
+	 * 
+	 * @return The list containing annotations of type *Sentence*
+	 * @throws ExecutionException
+	 */
+	private ArrayList saveGateSentences() throws ExecutionException {
 
+		AnnotationSet allAnnotations;
 
-/**
- * Minipar Binary file takes a file as an argument, which has one sentence written
- * on one line.  It takes one sentence at a time and parses them one by one.
- * @return The list containing annotations of type *Sentence*
- * @throws ExecutionException
- */
-  private ArrayList saveGateSentences() throws ExecutionException {
+		// get sentences from document
+		allAnnotations = (annotationInputSetName == null || annotationInputSetName
+				.equals("")) ? document.getAnnotations() : document
+				.getAnnotations(annotationInputSetName);
 
-    AnnotationSet allAnnotations;
+		if (allAnnotations == null || allAnnotations.size() == 0) {
+			throw new ExecutionException(
+					"Document doesn't have sentence annotations. "
+							+ "please run tokenizer, sentence splitter "
+							+ "and then Minipar");
+		}
 
-    // get sentences from document
-    allAnnotations = (annotationInputSetName == null || annotationInputSetName.equals("")) ?
-        document.getAnnotations() :
-        document.getAnnotations(annotationInputSetName);
+		// Get all "sentences"
+		List sentences = new ArrayList((Set) allAnnotations
+				.get(SENTENCE_ANNOTATION_TYPE));
 
-    if(allAnnotations == null || allAnnotations.size() == 0) {
-      throw new ExecutionException("Document doesn't have sentence annotations. please run tokenizer, sentence splitter and then Minipar");
-    }
+		// create an ArrayList to hold all sentences
+		ArrayList allSentences = new ArrayList(sentences);
 
-    // Get all "sentences"
-    List sentences = new ArrayList((Set)allAnnotations.get(SENTENCE_ANNOTATION_TYPE));
+		// sort all sentences by start offset
+		Collections.sort(allSentences, new gate.util.OffsetComparator());
 
-    // create an ArrayList to hold all sentences
-    ArrayList allSentences = new ArrayList( sentences );
+		// save sentence strings to file for Minipar
+		ListIterator sentenceIterator = allSentences.listIterator();
+		try {
+			String sentenceString = null;
+			File gateTextFile = new File(GATETEXTFILE);
+			FileWriter fw = new FileWriter(gateTextFile);
+			PrintWriter pw = new PrintWriter(fw, true);
+			while (sentenceIterator.hasNext()) {
+				Annotation sentence = (Annotation) sentenceIterator.next();
+				sentenceString = null;
+				try {
+					sentenceString = getDocument().getContent().getContent(
+							sentence.getStartNode().getOffset(),
+							sentence.getEndNode().getOffset()).toString();
+				} catch (InvalidOffsetException ioe) {
+					throw new GateRuntimeException(
+							"Invalid offset of the annotation");
+				}
+				sentenceString = sentenceString.replaceAll("\r", " ");
+				sentenceString = sentenceString.replaceAll("\n", " ");
+				pw.println(sentenceString);
+			}
+			fw.close();
+		} catch (java.io.IOException except) {
+			throw new ExecutionException(except);
+		}
 
-    // sort all sentences by start offset
-    Collections.sort( allSentences, new gate.util.OffsetComparator() );
+		return allSentences;
+	}
 
-    // save sentence strings to file for Minipar
-    ListIterator sentenceIterator = allSentences.listIterator();
-    try {
-      String sentenceString = null;
-      File gateTextFile = new File( GATETEXTFILE );
-      FileWriter fw = new FileWriter ( gateTextFile );
-      PrintWriter pw = new PrintWriter( fw, true );
-      while( sentenceIterator.hasNext() ) {
-        Annotation sentence = (Annotation) sentenceIterator.next();
-        sentenceString = null;
-        try {
-          sentenceString = getDocument().getContent().getContent(
-                                 sentence.getStartNode().getOffset(),
-                                 sentence.getEndNode().getOffset()).toString();
-        } catch (InvalidOffsetException ioe) {
-          throw new GateRuntimeException("Invalid offset of the annotation");
-        }
-        sentenceString = sentenceString.replaceAll("\r","");
-        sentenceString = sentenceString.replaceAll("\n","");
-        pw.println( sentenceString );
-      }
-      fw.close();
-    } catch (java.io.IOException except) {
-      System.out.println( "File error: " + except );
-    }
+	/**
+	 * Core of the wrapper. GATETEXTFILE is processed with Minipar. Minipar
+	 * given a text file, binary executable and the location of data directory,
+	 * returns a parse, which is then mapped over the GATE document.
+	 * 
+	 * @param allSentences -
+	 *            GATE sentence annotations
+	 * @throws ExecutionException
+	 */
+	private void runMinipar(ArrayList allSentences) throws ExecutionException {
 
-    return allSentences;
-  }
+		// this should be the miniparBinary + "-p " + getMiniparDataDir +
+		// GATETEXTFILE
+		File gateTextFile = new File(GATETEXTFILE);
+		File binary = new File(getMiniparBinary().getFile());
+		File dataFile = new File(getMiniparDataDir().getFile());
+		String cmdline = binary.getAbsolutePath() + " -p "
+				+ dataFile.getAbsolutePath() + " -file "
+				+ gateTextFile.getAbsolutePath();
+		// run minipar and save output
+		try {
+			String line;
+			Process p = Runtime.getRuntime().exec(cmdline);
+			BufferedReader input = new BufferedReader(new InputStreamReader(p
+					.getInputStream()));
 
-  // run Minipar
-  // cmdline consists of the file
-  private void runMinipar(ArrayList allSentences) {
+			// this has ArrayList as its each element
+			// this element consists of all annotations for that particular
+			// sentence
+			ArrayList sentenceTokens = new ArrayList();
 
-    // this should be the miniparBinary + "-p " + getMiniparDataDir + GATETEXTFILE
-    File gateTextFile = new File( GATETEXTFILE );
-    // each file url starts with file:
-    // we need to take this out
-    String binary = getMiniparBinary().toString();
-    int indexL = binary.indexOf("file:");
-    if(indexL != -1) {
-      binary = binary.substring(indexL+5, binary.length());
-    }
+			// this will have an annotation for each line begining with a number
+			ArrayList tokens = new ArrayList();
+			outer: while ((line = input.readLine()) != null) {
+				WordToken wt = new WordToken();
+				// so here whatever we get in line
+				// is of our interest only if it begins with any number
+				// each line is deliminated with a tab sign
+				String[] output = line.split("\t");
+				if (output.length < 5)
+					continue;
+				for (int i = 0; i < output.length; i++) {
+					// we ignore case 2 and 3 and 6 and after.. because we don't
+					// want
+					// that information
+					switch (i) {
+					case 0:
+						// this is a word number
+						try {
+							int number = Integer.parseInt(output[i].trim());
+							// yes this is correct line
+							// we need to check if the line number is 1
+							// it may be the begining of new sentence
+							if (number == 1 && tokens.size() > 0) {
+								// we need to add tokens to the sentenceTokens
+								sentenceTokens.add(tokens);
+								tokens = new ArrayList();
+							}
+						} catch (NumberFormatException infe) {
+							// if we are here, there is something wrong with
+							// number
+							// ignore this line and continue with next line
+							continue outer;
+						}
+						break;
+					case 1:
+						// this is the actual word (Token.string)
+						wt.word = output[i];
+						break;
+					case 4:
+						// this should be the number and if it is not
+						// then we leave it and do not add any head
+						try {
+							int head = Integer.parseInt(output[i].trim());
+							// yes this is the correct head number
+							wt.headNumber = head;
+						} catch (NumberFormatException nfe) {
+							// if we are here, there is something wrong with
+							// number
+							// ignore this and make headNumber -1 letter on to
+							// remember that we don't want headnumber to be
+							// inserted as a
+							// feature
+							wt.headNumber = -1;
+						}
+						break;
+					case 5:
+						// this is the relation between head and the current
+						// node
+						wt.relationWithHead = output[i];
+						break;
+					default:
+						break;
+					}
+				}
 
-    String dataFile = getMiniparDataDir().toString();
-    indexL = dataFile.indexOf("file:");
-    if(indexL != -1) {
-      dataFile = dataFile.substring(indexL+5, dataFile.length());
-    }
-    String cmdline = binary + " -p " + dataFile + " -file " + gateTextFile.getAbsolutePath();
+				// here we have parsed the one line and thus now we should add
+				// it to the
+				// tokens for letter use
+				tokens.add(wt);
+			}
+			if (tokens.size() > 0) {
+				sentenceTokens.add(tokens);
+			}
+			input.close();
 
-    // run minipar and save output
-    try {
-      String line;
-      Process p = Runtime.getRuntime().exec(cmdline);
-      BufferedReader input =
-        new BufferedReader
-        (new InputStreamReader(p.getInputStream()));
+			// ok so here we have all the information we need from the minipar
+			// in
+			// local variables
+			// ok so first we would create annotation for each word Token
 
-      // this has ArrayList as its each element
-      // this element consists of all annotations for that particular sentence
-      ArrayList sentenceTokens = new ArrayList();
+			AnnotationSet annotSet = (annotationOutputSetName == null || annotationOutputSetName
+					.equals("")) ? document.getAnnotations() : document
+					.getAnnotations(annotationOutputSetName);
 
-      // this will have an annotation for each line begining with a number
-      ArrayList tokens = new ArrayList();
-      outer:while ((line = input.readLine()) != null) {
-        WordToken wt = new WordToken();
-        // so here whatever we get in line
-        // is of our interest only if it begins with any number
-        // each line is deliminated with a tab sign
-        String [] output = line.split("\t");
-        for(int i=0;i<output.length;i++) {
-          // we ignore case 2 and 3 and 6 and after.. because we don't want that information
-          switch(i) {
-            case 0:
-              // this is a word number
-              try {
-                int number = Integer.parseInt(output[i].trim());
-                // yes this is correct line
-                // we need to check if the line number is 1
-                // it may be the begining of new sentence
-                if(number == 1 && tokens.size() > 0) {
-                  // we need to add tokens to the sentenceTokens
-                  sentenceTokens.add(tokens);
-                  tokens = new ArrayList();
-                }
-              } catch(NumberFormatException infe) {
-                // if we are here, there is something wrong with number
-                // ignore this line and continue with next line
-                continue outer;
-              }
-              break;
-            case 1:
-              // this is the actual word which
-              wt.word = output[i];
-              break;
-            case 4:
-              // this should be the number and if it is not
-              // then we leave it and do not add any head
-              try {
-                int head = Integer.parseInt(output[i].trim());
-                // yes this is the correct head number
-                wt.headNumber = head;
-              } catch(NumberFormatException nfe) {
-                // if we are here, there is something wrong with number
-                // ignore this and make headNumber -1 letter on to
-                // remember that we don't want headnumber to be inserted as a
-                // feature
-                wt.headNumber = -1;
-              }
-              break;
-            case 5:
-              // this is the relation between head and the current node
-              wt.relationWithHead = output[i];
-              break;
-            default:
-              break;
-          }
-        }
+			// size of the sentenceTokens and the allSentences would be always
+			// same
+			for (int i = 0; i < sentenceTokens.size(); i++) {
+				tokens = (ArrayList) sentenceTokens.get(i);
 
-        // here we have parsed the one line and thus now we should add it to the
-        // tokens for letter use
-        tokens.add(wt);
-      }
-      if(tokens.size() > 0) {
-        sentenceTokens.add(tokens);
-      }
-      input.close();
+				// we need this to generate the offsets
+				Annotation sentence = (Annotation) allSentences.get(i);
+				String sentenceString = document.getContent().getContent(
+						sentence.getStartNode().getOffset(),
+						sentence.getEndNode().getOffset()).toString();
 
-      // ok so here we have all the information we need from the minipar in local variables
-      // ok so first we would create annotation for each word Token
+				sentenceString = sentenceString.replaceAll("\r", " ");
+				sentenceString = sentenceString.replaceAll("\n", " ");
 
-      AnnotationSet annotSet = (annotationOutputSetName == null || annotationOutputSetName.equals("")) ?
-          document.getAnnotations() :
-          document.getAnnotations(annotationOutputSetName);
+				// this will hold the position from where it should start
+				// searching for
+				// the token text
+				int startOffset = sentence.getStartNode().getOffset()
+						.intValue();
 
-      // size of the sentenceTokens and the allSentences would be always same
-      for(int i=0;i<sentenceTokens.size();i++) {
-        tokens = (ArrayList) sentenceTokens.get(i);
+				int index = -1;
+				for (int j = 0; j < tokens.size(); j++) {
+					// each item here is a separate word token
+					WordToken wt = (WordToken) tokens.get(j);
+					// ok so find out the offsets
+					int stOffset = sentenceString.toLowerCase().indexOf(
+							wt.word.toLowerCase(), index)
+							+ startOffset;
+					int enOffset = stOffset + wt.word.length();
+					FeatureMap map = Factory.newFeatureMap();
+					map.put("word", wt.word);
+					Integer id = annotSet.add(new Long(stOffset), new Long(
+							enOffset), annotationTypeName, map);
+					wt.annotation = annotSet.get(id);
+					index = enOffset - startOffset;
+				}
+			}
 
-        // we need this to generate the generate the offsets
-        Annotation sentence = (Annotation) allSentences.get(i);
-        int startOffset = sentence.getStartNode().getOffset().intValue();
-        String sentenceString = document.getContent().getContent(sentence.getStartNode().getOffset(), sentence.getEndNode().getOffset()).toString();
-        // this will hold the position from where it should start searching for the token text
-        int index = 0;
-        for(int j=0;j<tokens.size();j++) {
-          // each item here is a separate word token
-          WordToken wt = (WordToken) tokens.get(j);
-          // ok so find out the offsets
-          int stOffset = sentenceString.toLowerCase().indexOf(wt.word.toLowerCase(),index) + startOffset;
-          int enOffset = stOffset + wt.word.length();
-          FeatureMap map = Factory.newFeatureMap();
-          map.put("word", wt.word);
-          Integer id = annotSet.add(new Long(stOffset), new Long(enOffset), annotationTypeName, map);
-          wt.annotation = annotSet.get(id);
-          index = enOffset - startOffset;
-        }
-      }
+			// now we need to create the children nodes
+			for (int i = 0; i < sentenceTokens.size(); i++) {
+				tokens = (ArrayList) sentenceTokens.get(i);
 
-      // now we need to create the children nodes
-      for(int i=0;i<sentenceTokens.size();i++) {
-        tokens = (ArrayList) sentenceTokens.get(i);
+				for (int j = 0; j < tokens.size(); j++) {
+					WordToken wt = (WordToken) tokens.get(j);
+					// read the head node
+					// find out the respective word token for that head node
+					// and add the current node as its child
+					if (wt.headNumber > 0) {
+						WordToken headToken = (WordToken) tokens
+								.get(wt.headNumber - 1);
+						headToken.children.add(wt.annotation.getId());
+					}
+				}
+			}
 
-        for(int j=0;j<tokens.size();j++) {
-          WordToken wt = (WordToken) tokens.get(j);
-          // read the head node
-          // find out the respective word token for that head node
-          // and add the current node as its child
-          if(wt.headNumber > 0) {
-            WordToken headToken = (WordToken) tokens.get(wt.headNumber - 1);
-            headToken.children.add(wt.annotation.getId());
-          }
-        }
-      }
+			// and finally we need to add features to the annotations
+			// now we need to create the children nodes
+			for (int i = 0; i < sentenceTokens.size(); i++) {
+				tokens = (ArrayList) sentenceTokens.get(i);
 
-      // and finally we need to add features to the annotations
-      // now we need to create the children nodes
-      for(int i=0;i<sentenceTokens.size();i++) {
-        tokens = (ArrayList) sentenceTokens.get(i);
+				for (int j = 0; j < tokens.size(); j++) {
+					// for every wordtoken,
+					// we look for its head
+					// and create annotations
+					// the annotation will have the type of relation string
+					// and as a features
+					// it will have one head ID and one child ID
+					// head ID is the id of head
+					// and child ID is the id of wt
+					WordToken wt = (WordToken) tokens.get(j);
+					FeatureMap map = Factory.newFeatureMap();
+					if (wt.headNumber > 0) {
+						Annotation headAnn = ((WordToken) tokens
+								.get(wt.headNumber - 1)).annotation;
+						map.put("head_id", headAnn.getId());
+						map.put("child_id", wt.annotation.getId());
+						map.put("head_word", ((WordToken) tokens
+								.get(wt.headNumber - 1)).word);
+						map.put("child_word", wt.word);
+						// so create the new annotation
+						int stOffset1 = headAnn.getStartNode().getOffset()
+								.intValue();
+						int stOffset2 = wt.annotation.getStartNode()
+								.getOffset().intValue();
+						int enOffset1 = headAnn.getEndNode().getOffset()
+								.intValue();
+						int enOffset2 = wt.annotation.getEndNode().getOffset()
+								.intValue();
+						stOffset1 = stOffset1 < stOffset2 ? stOffset1
+								: stOffset2;
+						enOffset1 = enOffset1 > enOffset2 ? enOffset1
+								: enOffset2;
+						annotSet.add(new Long(stOffset1), new Long(enOffset1),
+								wt.relationWithHead, map);
+					}
+				}
+			}
 
-        for(int j=0;j<tokens.size();j++) {
-          // for every wordtoken,
-          // we look for its head
-          // and create annotations
-          // the annotation will have the type of relation string
-          // and as a features
-          // it will have one head ID and one child ID
-          // head ID is the id of head
-          // and child ID is the id of wt
-          WordToken wt = (WordToken) tokens.get(j);
-          FeatureMap map = Factory.newFeatureMap();
-          if(wt.headNumber > 0) {
-            Annotation headAnn = ((WordToken) tokens.get(wt.headNumber - 1)).annotation;
-            map.put("head_id",headAnn.getId());
-            map.put("child_id",wt.annotation.getId());
-            map.put("head_word",((WordToken) tokens.get(wt.headNumber - 1)).word);
-            map.put("child_word",wt.word);
-            // so create the new annotation
-            int stOffset1 = headAnn.getStartNode().getOffset().intValue();
-            int stOffset2 = wt.annotation.getStartNode().getOffset().intValue();
-            int enOffset1 = headAnn.getEndNode().getOffset().intValue();
-            int enOffset2 = wt.annotation.getEndNode().getOffset().intValue();
-            stOffset1 = stOffset1 < stOffset2 ? stOffset1 : stOffset2;
-            enOffset1 = enOffset1 > enOffset2 ? enOffset1 : enOffset2;
-            annotSet.add(new Long(stOffset1), new Long(enOffset1), wt.relationWithHead, map);
-          }
-        }
-      }
+			// and finally make the sentenceTokens and tokens to null
+			tokens = null;
+			sentenceTokens = null;
+		} catch (Exception exception) {
+			exception.printStackTrace();
+			throw new ExecutionException(exception);
+		}
+	} // end of runMinipar()
 
-      // and finally make the sentenceTokens and tokens to null
-      tokens = null;
-      sentenceTokens = null;
-    }
-    catch (Exception err) {
-      err.printStackTrace();
-    }
-  }
+	/**
+	 * Execute method is called whenever user clicks on the "RUN" button in GATE
+	 * GUI. It should be called after the instantiation of the resource. This
+	 * method first checks for all mandatory runtime parameters, if not provided
+	 * prompts user by throwing an executionexception. For optional parameters
+	 * it considers the default values. this method initially given a document,
+	 * converts the document text into a text file. This text file is then sent
+	 * to runMinipar function in order to parse it with Minipar.
+	 */
+	public void execute() throws ExecutionException {
+		if (document == null)
+			throw new ExecutionException("No document to process!");
+		if (getMiniparBinary() == null)
+			throw new ExecutionException(
+					"Please provide the URL for Minipar Binary");
+		if (getMiniparDataDir() == null)
+			throw new ExecutionException(
+					"Minipar requires the location of its data directory "
+							+ "(By default it is %Minipar_Home%/data");
 
-  public void execute() throws ExecutionException {
-    if(document == null)
-      throw new GateRuntimeException("No document to process!");
-    if(getMiniparBinary() == null)
-      throw new GateRuntimeException("Please provide the URL for Minipar Binary");
-    if(getMiniparDataDir() == null)
-      throw new GateRuntimeException("Minipar requires the location of its data directory (By default it is %Minipar_Home%/data");
+		// obtain GATE sentence annotations as a list
+		ArrayList allSentences = saveGateSentences();
+		// finally runMinipar
+		runMinipar(allSentences);
+	}
 
-    ArrayList allSentences = saveGateSentences();
-    runMinipar(allSentences);
-  }
+	/**
+	 * WorkToken subclass is used as an internal data structure to hold
+	 * temporary information returned by the minipar parser. This information is
+	 * then mapped over the GATE annotations.
+	 */
+	private class WordToken {
+		/**
+		 * Word is the string, that represents the token in minipar
+		 */
+		String word;
 
-  /**
-   * Sub class we use to store the annotation before defining its relation with other wordtoken
-   */
-  private class WordToken {
-    String word;
-    int headNumber;
-    String relationWithHead;
-    ArrayList children = new ArrayList();
-    gate.Annotation annotation;
-  }
+		/**
+		 * Each token in minipar is given a number. This contains the number of
+		 * the headToken
+		 */
+		int headNumber;
+
+		/**
+		 * This stores the relation of head word with its children
+		 */
+		String relationWithHead;
+
+		/**
+		 * Contains other instances of WordTokens which have been identified as
+		 * children of the headword
+		 */
+		ArrayList children = new ArrayList();
+
+		/**
+		 * GATE annotation that represents the WordToken in GATE
+		 */
+		gate.Annotation annotation;
+	}
 
 }
-
