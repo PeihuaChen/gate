@@ -7,34 +7,528 @@
 </style>
 </head>
 <body>
-<center><a href="http://gate.ac.uk/"><img src="http://www.gate.ac.uk/gateHeader.gif"/></a></center>
+<center>
+	<a href="http://gate.ac.uk/"><img src="http://www.gate.ac.uk/gateHeader.gif" alt="GATE" height="76" width="356"/></a>
+</center>
 <br/>
-<p>This page lists the plugins that are currently shipped with GATE.</p>
-<h3>ANNIE</h3><table border='1'><tr><td>GATE Unicode Tokeniser</td><td>A customisable Unicode tokeniser.</td><td>gate.creole.tokeniser.SimpleTokeniser</td></tr><tr><td>ANNIE English Tokeniser</td><td>A customisable English tokeniser.</td><td>gate.creole.tokeniser.DefaultTokeniser</td></tr><tr><td>ANNIE Gazetteer</td><td>A list lookup component.</td><td>gate.creole.gazetteer.DefaultGazetteer</td></tr><tr><td>Hash Gazetteer</td><td><html>A list lookup component implemented by OntoText
+<p>This page lists the plugins that are currently available with GATE:</p>
+<ul>
+	<li><a href="#internal-plugins">plugins shipped with GATE</a></li>
+	<li><a href="#external-plugins">remotely hosted and managed plugins</a></li>
+</ul>
+<p>If you are working on a project that involves GATE, please <a
+href="http://www.gate.ac.uk/submitProject.html">let us know</a> and we will add a
+link to your project on this page.</p>
+<hr/>
+<a name="internal-plugins"/>
+<h2>Projects with Sheffield involvement</h2>
+<h3>ANNIE</h3>
+<table border='1'>
+	<tr>
+		<td>GATE Unicode Tokeniser</td>
+		<td>A customisable Unicode tokeniser.</td>
+		<td>gate.creole.tokeniser.SimpleTokeniser</td>
+	</tr>
+	<tr>
+		<td>ANNIE English Tokeniser</td>
+		<td>A customisable English tokeniser.</td>
+		<td>gate.creole.tokeniser.DefaultTokeniser</td>
+	</tr>
+	<tr>
+		<td>ANNIE Gazetteer</td>
+		<td>A list lookup component.</td>
+		<td>gate.creole.gazetteer.DefaultGazetteer</td>
+	</tr>
+	<tr>
+		<td>Hash Gazetteer</td>
+		<td><html>A list lookup component implemented by OntoText
         Lab (www.ontotext.com).<br> For documentation, download and license
         agreement please refer to
         (www.ontotext.com/downloads/index.html#gazetteer).<br>
         The licence information is also available in licence.ontotext.html in the lib
-        folder of GATE</html></td><td>com.ontotext.gate.gazetteer.HashGazetteer</td></tr><tr><td>Jape Transducer</td><td>A module for executing Jape grammars</td><td>gate.creole.Transducer</td></tr><tr><td>ANNIE NE Transducer</td><td>ANNIE named entity grammar</td><td>gate.creole.ANNIETransducer</td></tr><tr><td>ANNIE Sentence Splitter</td><td>ANNIE sentence splitter</td><td>gate.creole.splitter.SentenceSplitter</td></tr><tr><td>ANNIE POS Tagger</td><td>Mark Hepple's Brill-style POS tagger</td><td>gate.creole.POSTagger</td></tr><tr><td>ANNIE OrthoMatcher</td><td>ANNIE orthographical coreference component</td><td>gate.creole.orthomatcher.OrthoMatcher</td></tr><tr><td>ANNIE Pronominal Coreferencer</td><td>Pronominal Coreference resolution component</td><td>gate.creole.coref.Coreferencer</td></tr><tr><td>ANNIE Nominal Coreferencer</td><td>Nominal Coreference resolution component</td><td>gate.creole.coref.NominalCoref</td></tr><tr><td>Document Reset PR</td><td>Document cleaner</td><td>gate.creole.annotdelete.AnnotationDeletePR</td></tr><tr><td>Jape Viewer</td><td><i>no data available</i></td><td>gate.gui.jape.JapeViewer</td></tr><tr><td>Gaze</td><td><i>no data available</i></td><td>com.ontotext.gate.vr.Gaze</td></tr></table><h3>arabic</h3><table border='1'><tr><td>Arabic Tokeniser</td><td>A customisable Arabictokeniser.</td><td>arabic.ArabicTokeniser</td></tr><tr><td>Arabic Gazetteer</td><td>A list lookup component.</td><td>arabic.ArabicGazetteer</td></tr><tr><td>Arabic Infered Gazetteer</td><td>A list lookup component.</td><td>arabic.ArabicInferedGazetteer</td></tr><tr><td>Arabic Main Grammar</td><td>A module for executing Jape grammars</td><td>arabic.ArabicTransducer</td></tr><tr><td>Arabic OrthoMatcher</td><td>Arabic Orthomatcher</td><td>arabic.ArabicOrthoMatcher</td></tr></table><h3>Buchart</h3><table border='1'><tr><td>Bottom-Up Chart Parser</td><td><i>no data available</i></td><td>shef.nlp.buchart.Buchart</td></tr></table><h3>cebuano</h3><table border='1'><tr><td>Cebuano Tokeniser</td><td>A customisable Cebuano tokeniser.</td><td>cebuano.CebuanoTokeniser</td></tr><tr><td>Cebuano Gazetteer</td><td>A list lookup component.</td><td>cebuano.CebuanoGazetteer</td></tr><tr><td>Cebuano Gazetteer Tokeniser</td><td>A list lookup component.</td><td>cebuano.CebuanoGazetteerTokeniser</td></tr><tr><td>Cebuano Transducer</td><td>A module for executing Jape grammars</td><td>cebuano.CebuanoTransducer</td></tr><tr><td>Cebuano Transducer Postprocessor</td><td>A module for executing Jape grammars</td><td>cebuano.CebuanoTransducerPost</td></tr><tr><td>Cebuano POS Tagger</td><td>Mark Hepple's Brill-style POS tagger, adapted for languages where entries are multiword</td><td>cebtag.postag.CebuanoPOSTagger</td></tr></table><h3>Chemistry_Tagger</h3><table border='1'><tr><td>Chemistry Tagger</td><td><i>no data available</i></td><td>mark.chemistry.Tagger</td></tr></table><h3>crawl</h3><table border='1'><tr><td>CrawlerPR</td><td>provides interface to the webspinx API</td><td>crawl.CrawlPR</td></tr></table><h3>google</h3><table border='1'><tr><td>GooglePR</td><td>provides interface to Google API</td><td>google.GooglePR</td></tr></table><h3>hindi</h3><table border='1'><tr><td>Hindi Tokeniser</td><td>A customisable Arabictokeniser.</td><td>hindi.HindiTokeniser</td></tr><tr><td>Hindi Gazetteer</td><td>A list lookup component.</td><td>hindi.HindiGazetteer</td></tr><tr><td>Hindi Splitter</td><td>A Sentence Splitter.</td><td>hindi.HindiSplitter</td></tr><tr><td>Hindi Tokeniser Gazetteer</td><td>A list lookup component.</td><td>hindi.HindiTokeniserGazetteer</td></tr><tr><td>Hindi Main Grammar</td><td>A module for executing Jape grammars</td><td>hindi.HindiTransducer</td></tr><tr><td>Hindi Tokeniser Postprocessor</td><td>A module for executing Jape grammars</td><td>hindi.HindiTokeniserPostprocessor</td></tr><tr><td>Hindi OrthoMatcher</td><td>Hindi Orthomatcher</td><td>hindi.HindiOrthoMatcher</td></tr><tr><td>Hindi POS Tagger</td><td>Mark Hepple's Brill-style POS tagger, adapted for languages where entries are multiword</td><td>cebtag.postag.CebuanoPOSTagger</td></tr></table><h3>Information_Retrieval</h3><table border='1'><tr><td>SearchPR</td><td>provides IR functionality</td><td>gate.creole.ir.SearchPR</td></tr><tr><td>Search Results</td><td><i>no data available</i></td><td>gate.gui.SearchPRViewer</td></tr></table><h3>Kea</h3><table border='1'><tr><td>KEA Keyphrase Extractor</td><td><HTML>A Keyphrase Extractor by Eibe Frank<br>
-    See <A href="http://www.nzdl.org/Kea/">http://www.nzdl.org/Kea/</A> for details.</HTML></td><td>gate.creole.kea.Kea</td></tr><tr><td>KEA Corpus Importer</td><td>Imports a KEA-style corpus into GATE</td><td>gate.creole.kea.CorpusImporter</td></tr></table><h3>Machine_Learning</h3><table border='1'><tr><td>Machine Learning PR</td><td>Trains a machine learning algorithm from a corpus</td><td>gate.creole.ml.MachineLearningPR</td></tr></table><h3>Minipar</h3><table border='1'><tr><td>Minipar Wrapper</td><td><i>no data available</i></td><td>minipar.Minipar</td></tr></table><h3>Minorthird</h3><table border='1'><tr><td>CMU Minorthird</td><td><i>no data available</i></td><td>gate.minorthird.RunMixupWrapper</td></tr></table><h3>Montreal_Transducer</h3><table border='1'><tr><td>Montreal Transducer</td><td>
+        folder of GATE</html></td>
+		<td>com.ontotext.gate.gazetteer.HashGazetteer</td>
+	</tr>
+	<tr>
+		<td>Jape Transducer</td>
+		<td>A module for executing Jape grammars</td>
+		<td>gate.creole.Transducer</td>
+	</tr>
+	<tr>
+		<td>ANNIE NE Transducer</td>
+		<td>ANNIE named entity grammar</td>
+		<td>gate.creole.ANNIETransducer</td>
+	</tr>
+	<tr>
+		<td>ANNIE Sentence Splitter</td>
+		<td>ANNIE sentence splitter</td>
+		<td>gate.creole.splitter.SentenceSplitter</td>
+	</tr>
+	<tr>
+		<td>ANNIE POS Tagger</td>
+		<td>Mark Hepple's Brill-style POS tagger</td>
+		<td>gate.creole.POSTagger</td>
+	</tr>
+	<tr>
+		<td>ANNIE OrthoMatcher</td>
+		<td>ANNIE orthographical coreference component</td>
+		<td>gate.creole.orthomatcher.OrthoMatcher</td>
+	</tr>
+	<tr>
+		<td>ANNIE Pronominal Coreferencer</td>
+		<td>Pronominal Coreference resolution component</td>
+		<td>gate.creole.coref.Coreferencer</td>
+	</tr>
+	<tr>
+		<td>ANNIE Nominal Coreferencer</td>
+		<td>Nominal Coreference resolution component</td>
+		<td>gate.creole.coref.NominalCoref</td>
+	</tr>
+	<tr>
+		<td>Document Reset PR</td>
+		<td>Document cleaner</td>
+		<td>gate.creole.annotdelete.AnnotationDeletePR</td>
+	</tr>
+	<tr>
+		<td>Jape Viewer</td>
+		<td><i>no data available</i></td>
+		<td>gate.gui.jape.JapeViewer</td>
+	</tr>
+	<tr>
+		<td>Gaze</td>
+		<td><i>no data available</i></td>
+		<td>com.ontotext.gate.vr.Gaze</td>
+	</tr>
+</table>
+<h3>arabic</h3>
+<table border='1'>
+	<tr>
+		<td>Arabic Tokeniser</td>
+		<td>A customisable Arabictokeniser.</td>
+		<td>arabic.ArabicTokeniser</td>
+	</tr>
+	<tr>
+		<td>Arabic Gazetteer</td>
+		<td>A list lookup component.</td>
+		<td>arabic.ArabicGazetteer</td>
+	</tr>
+	<tr>
+		<td>Arabic Infered Gazetteer</td>
+		<td>A list lookup component.</td>
+		<td>arabic.ArabicInferedGazetteer</td>
+	</tr>
+	<tr>
+		<td>Arabic Main Grammar</td>
+		<td>A module for executing Jape grammars</td>
+		<td>arabic.ArabicTransducer</td>
+	</tr>
+	<tr>
+		<td>Arabic OrthoMatcher</td>
+		<td>Arabic Orthomatcher</td>
+		<td>arabic.ArabicOrthoMatcher</td>
+	</tr>
+</table>
+<h3>Buchart</h3>
+<table border='1'>
+	<tr>
+		<td>Bottom-Up Chart Parser</td>
+		<td><i>no data available</i></td>
+		<td>shef.nlp.buchart.Buchart</td>
+	</tr>
+</table>
+<h3>cebuano</h3>
+<table border='1'>
+	<tr>
+		<td>Cebuano Tokeniser</td>
+		<td>A customisable Cebuano tokeniser.</td>
+		<td>cebuano.CebuanoTokeniser</td>
+	</tr>
+	<tr>
+		<td>Cebuano Gazetteer</td>
+		<td>A list lookup component.</td>
+		<td>cebuano.CebuanoGazetteer</td>
+	</tr>
+	<tr>
+		<td>Cebuano Gazetteer Tokeniser</td>
+		<td>A list lookup component.</td>
+		<td>cebuano.CebuanoGazetteerTokeniser</td>
+	</tr>
+	<tr>
+		<td>Cebuano Transducer</td>
+		<td>A module for executing Jape grammars</td>
+		<td>cebuano.CebuanoTransducer</td>
+	</tr>
+	<tr>
+		<td>Cebuano Transducer Postprocessor</td>
+		<td>A module for executing Jape grammars</td>
+		<td>cebuano.CebuanoTransducerPost</td>
+	</tr>
+	<tr>
+		<td>Cebuano POS Tagger</td>
+		<td>Mark Hepple's Brill-style POS tagger, adapted for languages where entries are multiword</td>
+		<td>cebtag.postag.CebuanoPOSTagger</td>
+	</tr>
+</table>
+<h3>Chemistry_Tagger</h3>
+<table border='1'>
+	<tr>
+		<td>Chemistry Tagger</td>
+		<td><i>no data available</i></td>
+		<td>mark.chemistry.Tagger</td>
+	</tr>
+</table>
+<h3>crawl</h3>
+<table border='1'>
+	<tr>
+		<td>CrawlerPR</td>
+		<td>provides interface to the webspinx API</td>
+		<td>crawl.CrawlPR</td>
+	</tr>
+</table>
+<h3>google</h3>
+<table border='1'>
+	<tr>
+		<td>GooglePR</td>
+		<td>provides interface to Google API</td>
+		<td>google.GooglePR</td>
+	</tr>
+</table>
+<h3>hindi</h3>
+<table border='1'>
+	<tr>
+		<td>Hindi Tokeniser</td>
+		<td>A customisable Arabictokeniser.</td>
+		<td>hindi.HindiTokeniser</td>
+	</tr>
+	<tr>
+		<td>Hindi Gazetteer</td>
+		<td>A list lookup component.</td>
+		<td>hindi.HindiGazetteer</td>
+	</tr>
+	<tr>
+		<td>Hindi Splitter</td>
+		<td>A Sentence Splitter.</td>
+		<td>hindi.HindiSplitter</td>
+	</tr>
+	<tr>
+		<td>Hindi Tokeniser Gazetteer</td>
+		<td>A list lookup component.</td>
+		<td>hindi.HindiTokeniserGazetteer</td>
+	</tr>
+	<tr>
+		<td>Hindi Main Grammar</td>
+		<td>A module for executing Jape grammars</td>
+		<td>hindi.HindiTransducer</td>
+	</tr>
+	<tr>
+		<td>Hindi Tokeniser Postprocessor</td>
+		<td>A module for executing Jape grammars</td>
+		<td>hindi.HindiTokeniserPostprocessor</td>
+	</tr>
+	<tr>
+		<td>Hindi OrthoMatcher</td>
+		<td>Hindi Orthomatcher</td>
+		<td>hindi.HindiOrthoMatcher</td>
+	</tr>
+	<tr>
+		<td>Hindi POS Tagger</td>
+		<td>Mark Hepple's Brill-style POS tagger, adapted for languages where entries are multiword</td>
+		<td>cebtag.postag.CebuanoPOSTagger</td>
+	</tr>
+</table>
+<h3>Information_Retrieval</h3>
+<table border='1'>
+	<tr>
+		<td>SearchPR</td>
+		<td>provides IR functionality</td>
+		<td>gate.creole.ir.SearchPR</td>
+	</tr>
+	<tr>
+		<td>Search Results</td>
+		<td><i>no data available</i></td>
+		<td>gate.gui.SearchPRViewer</td>
+	</tr>
+</table>
+<h3>Kea</h3>
+<table border='1'>
+	<tr>
+		<td>KEA Keyphrase Extractor</td>
+		<td><HTML>A Keyphrase Extractor by Eibe Frank<br>
+    See <A href="http://www.nzdl.org/Kea/">http://www.nzdl.org/Kea/</A> for details.</HTML></td>
+		<td>gate.creole.kea.Kea</td>
+	</tr>
+	<tr>
+		<td>KEA Corpus Importer</td>
+		<td>Imports a KEA-style corpus into GATE</td>
+		<td>gate.creole.kea.CorpusImporter</td>
+	</tr>
+</table>
+<h3>Machine_Learning</h3>
+<table border='1'>
+	<tr>
+		<td>Machine Learning PR</td>
+		<td>Trains a machine learning algorithm from a corpus</td>
+		<td>gate.creole.ml.MachineLearningPR</td>
+	</tr>
+</table>
+<h3>Minipar</h3>
+<table border='1'>
+	<tr>
+		<td>Minipar Wrapper</td>
+		<td><i>no data available</i></td>
+		<td>minipar.Minipar</td>
+	</tr>
+</table>
+<h3>Minorthird</h3>
+<table border='1'>
+	<tr>
+		<td>CMU Minorthird</td>
+		<td><i>no data available</i></td>
+		<td>gate.minorthird.RunMixupWrapper</td>
+	</tr>
+</table>
+<h3>Montreal_Transducer</h3>
+<table border='1'>
+	<tr>
+		<td>Montreal Transducer</td>
+		<td>
 <html>
 A module for executing augmented Jape grammars.<br>
 Written by Luc Plamondon, Universit� de Montr�al<br>
 <a href="http://www.iro.umontreal.ca/~plamondl/mtltransducer/">http://www.iro.umontreal.ca/~plamondl/mtltransducer/</a>
 </html>
-    </td><td>ca.umontreal.iro.rali.gate.creole.MtlTransducer</td></tr></table><h3>NLG_Tools</h3><table border='1'><tr><td>GATE OntoLex Mapping</td><td>GATE OntoLex mapping</td><td>gate.lexicon.OntoLexKBImpl</td></tr><tr><td>GATE NLG Lexicon</td><td>GATE NLG Lexicon</td><td>gate.lexicon.NLGLexiconImpl</td></tr><tr><td>NLG Lexicon Editor</td><td><i>no data available</i></td><td>gate.gui.lexicon.NLGLexiconVR</td></tr><tr><td>OntoLex Mapping Editor</td><td><i>no data available</i></td><td>gate.gui.lexicon.OntoLexEditorVR</td></tr></table><h3>NP_Chunking</h3><table border='1'><tr><td>Noun Phrase Chunker</td><td><i>no data available</i></td><td>mark.chunking.GATEWrapper</td></tr></table><h3>Obsolete</h3><table border='1'><tr><td>OLD Document Editor</td><td><i>no data available</i></td><td>gate.gui.DocumentEditor</td></tr><tr><td>Unrestricted annotation editor</td><td><i>no data available</i></td><td>gate.gui.UnrestrictedAnnotationEditor</td></tr><tr><td>Schema annotation editor</td><td><i>no data available</i></td><td>gate.gui.SchemaAnnotationEditor</td></tr><tr><td>Features Editor</td><td><i>no data available</i></td><td>gate.gui.FeaturesEditor</td></tr></table><h3>Ontology_Tools</h3><table border='1'><tr><td>Jena Ontology</td><td>An ontology implementation using Jena for I/O.</td><td>gate.creole.ontology.jena.JenaOntologyImpl</td></tr><tr><td>Protege project</td><td>Protege project file name</td><td>gate.creole.ProtegeProjectName</td></tr><tr><td>OntoGazetteer</td><td>A list lookup component based on mapping between ontology classes and gazetteer lists</td><td>gate.creole.gazetteer.OntoGazetteerImpl</td></tr><tr><td>GATE Ontology Editor</td><td><i>no data available</i></td><td>gate.gui.OntologyEditor</td></tr><tr><td>Protege</td><td><i>no data available</i></td><td>gate.gui.ProtegeWrapper</td></tr></table><h3>probability</h3><table border='1'><tr><td>ProbabilityPR</td><td>A plugin to calculate the probability of the annotations</td><td>probability.ProbabilityPR</td></tr></table><h3>rasp</h3><table border='1'><tr><td>RASP Parser</td><td><i>no data available</i></td><td>gate.rasp.rasp</td></tr></table><h3>romanian</h3><table border='1'><tr><td>Romanian Tokeniser</td><td>A customisable Romanian tokeniser.</td><td>romanian.RomanianTokeniser</td></tr><tr><td>Romanian Gazetteer</td><td>A list lookup component.</td><td>romanian.RomanianGazetteer</td></tr><tr><td>Romanian Transducer</td><td>A module for executing Jape grammars</td><td>romanian.RomanianTransducer</td></tr></table><h3>spanish</h3><table border='1'><tr><td>Keywords</td><td><i>no data available</i></td><td>com.isoco.gate.keywords.KeywordsDetector</td></tr></table><h3>Stemmer</h3><table border='1'><tr><td>Stemmer PR</td><td>Snowball stemmers integrated</td><td>stemmer.SnowballStemmer</td></tr></table><h3>Tools</h3><table border='1'><tr><td>Gazetteer List Collector</td><td>A gazetteer lists collector</td><td>gate.creole.GazetteerListsCollector</td></tr><tr><td>GATE APF exporter</td><td>An APF exporter .</td><td>gate.creole.APFormatExporter</td></tr><tr><td>ANNIE VP Chunker</td><td>ANNIE VP Chunker component</td><td>gate.creole.VPChunker</td></tr><tr><td>Annotation Set Transfer</td><td>Annotation set transfer component</td><td>gate.creole.annotransfer.AnnotationSetTransfer</td></tr><tr><td>Flexible Exporter</td><td>Exports a document with GATE annotations to its original
-        format</td><td>gate.creole.dumpingPR.DumpingPR</td></tr><tr><td>DAML+OIL exporter</td><td>A DAML+OIL exporter</td><td>gate.creole.RDFFormatExporter</td></tr><tr><td>GATE Morphological analyser</td><td>Morphological Analyzer for the English Language</td><td>gate.creole.morph.Morph</td></tr><tr><td>Flexible Gazetteer</td><td>A list lookup component.</td><td>gate.creole.gazetteer.FlexibleGazetteer</td></tr><tr><td>Syntax tree viewer</td><td><i>no data available</i></td><td>gate.gui.SyntaxTreeViewer</td></tr></table><h3>TreeTagger</h3><table border='1'><tr><td>TreeTagger</td><td><i>no data available</i></td><td>gate.treetagger.TreeTagger</td></tr></table><h3>uima</h3><table border='1'><tr><td>UIMA Analysis Engine</td><td><i>no data available</i></td><td>gate.uima.AnalysisEnginePR</td></tr></table><h3>WordNet</h3><table border='1'><tr><td>WordNet 1.6</td><td>Princeton WordNet 1.6</td><td>gate.wordnet.IndexFileWordNetImpl</td></tr><tr><td>WordNet 1.6</td><td><i>no data available</i></td><td>gate.gui.wordnet.WordNetViewer</td></tr></table></table>
-<br/>
+    </td>
+		<td>ca.umontreal.iro.rali.gate.creole.MtlTransducer</td>
+	</tr>
+</table>
+<h3>NLG_Tools</h3>
+<table border='1'>
+	<tr>
+		<td>GATE OntoLex Mapping</td>
+		<td>GATE OntoLex mapping</td>
+		<td>gate.lexicon.OntoLexKBImpl</td>
+	</tr>
+	<tr>
+		<td>GATE NLG Lexicon</td>
+		<td>GATE NLG Lexicon</td>
+		<td>gate.lexicon.NLGLexiconImpl</td>
+	</tr>
+	<tr>
+		<td>NLG Lexicon Editor</td>
+		<td><i>no data available</i></td>
+		<td>gate.gui.lexicon.NLGLexiconVR</td>
+	</tr>
+	<tr>
+		<td>OntoLex Mapping Editor</td>
+		<td><i>no data available</i></td>
+		<td>gate.gui.lexicon.OntoLexEditorVR</td>
+	</tr>
+</table>
+<h3>NP_Chunking</h3>
+<table border='1'>
+	<tr>
+		<td>Noun Phrase Chunker</td>
+		<td><i>no data available</i></td>
+		<td>mark.chunking.GATEWrapper</td>
+	</tr>
+</table>
+<h3>Obsolete</h3>
+<table border='1'>
+	<tr>
+		<td>OLD Document Editor</td>
+		<td><i>no data available</i></td>
+		<td>gate.gui.DocumentEditor</td>
+	</tr>
+	<tr>
+		<td>Unrestricted annotation editor</td>
+		<td><i>no data available</i></td>
+		<td>gate.gui.UnrestrictedAnnotationEditor</td>
+	</tr>
+	<tr>
+		<td>Schema annotation editor</td>
+		<td><i>no data available</i></td>
+		<td>gate.gui.SchemaAnnotationEditor</td>
+	</tr>
+	<tr>
+		<td>Features Editor</td>
+		<td><i>no data available</i></td>
+		<td>gate.gui.FeaturesEditor</td>
+	</tr>
+</table>
+<h3>Ontology_Tools</h3>
+<table border='1'>
+	<tr>
+		<td>Jena Ontology</td>
+		<td>An ontology implementation using Jena for I/O.</td>
+		<td>gate.creole.ontology.jena.JenaOntologyImpl</td>
+	</tr>
+	<tr>
+		<td>Protege project</td>
+		<td>Protege project file name</td>
+		<td>gate.creole.ProtegeProjectName</td>
+	</tr>
+	<tr>
+		<td>OntoGazetteer</td>
+		<td>A list lookup component based on mapping between ontology classes and gazetteer lists</td>
+		<td>gate.creole.gazetteer.OntoGazetteerImpl</td>
+	</tr>
+	<tr>
+		<td>GATE Ontology Editor</td>
+		<td><i>no data available</i></td>
+		<td>gate.gui.OntologyEditor</td>
+	</tr>
+	<tr>
+		<td>Protege</td>
+		<td><i>no data available</i></td>
+		<td>gate.gui.ProtegeWrapper</td>
+	</tr>
+</table>
+<h3>probability</h3>
+<table border='1'>
+	<tr>
+		<td>ProbabilityPR</td>
+		<td>A plugin to calculate the probability of the annotations</td>
+		<td>probability.ProbabilityPR</td>
+	</tr>
+</table>
+<h3>rasp</h3>
+<table border='1'>
+	<tr>
+		<td>RASP Parser</td>
+		<td><i>no data available</i></td>
+		<td>gate.rasp.rasp</td>
+	</tr>
+</table>
+<h3>romanian</h3>
+<table border='1'>
+	<tr>
+		<td>Romanian Tokeniser</td>
+		<td>A customisable Romanian tokeniser.</td>
+		<td>romanian.RomanianTokeniser</td>
+	</tr>
+	<tr>
+		<td>Romanian Gazetteer</td>
+		<td>A list lookup component.</td>
+		<td>romanian.RomanianGazetteer</td>
+	</tr>
+	<tr>
+		<td>Romanian Transducer</td>
+		<td>A module for executing Jape grammars</td>
+		<td>romanian.RomanianTransducer</td>
+	</tr>
+</table>
+<h3>spanish</h3>
+<table border='1'>
+	<tr>
+		<td>Keywords</td>
+		<td><i>no data available</i></td>
+		<td>com.isoco.gate.keywords.KeywordsDetector</td>
+	</tr>
+</table>
+<h3>Stemmer</h3>
+<table border='1'>
+	<tr>
+		<td>Stemmer PR</td>
+		<td>Snowball stemmers integrated</td>
+		<td>stemmer.SnowballStemmer</td>
+	</tr>
+</table>
+<h3>Tools</h3>
+<table border='1'>
+	<tr>
+		<td>Gazetteer List Collector</td>
+		<td>A gazetteer lists collector</td>
+		<td>gate.creole.GazetteerListsCollector</td>
+	</tr>
+	<tr>
+		<td>GATE APF exporter</td>
+		<td>An APF exporter .</td>
+		<td>gate.creole.APFormatExporter</td>
+	</tr>
+	<tr>
+		<td>ANNIE VP Chunker</td>
+		<td>ANNIE VP Chunker component</td>
+		<td>gate.creole.VPChunker</td>
+	</tr>
+	<tr>
+		<td>Annotation Set Transfer</td>
+		<td>Annotation set transfer component</td>
+		<td>gate.creole.annotransfer.AnnotationSetTransfer</td>
+	</tr>
+	<tr>
+		<td>Flexible Exporter</td>
+		<td>Exports a document with GATE annotations to its original
+        format</td>
+		<td>gate.creole.dumpingPR.DumpingPR</td>
+	</tr>
+	<tr>
+		<td>DAML+OIL exporter</td>
+		<td>A DAML+OIL exporter</td>
+		<td>gate.creole.RDFFormatExporter</td>
+	</tr>
+	<tr>
+		<td>GATE Morphological analyser</td>
+		<td>Morphological Analyzer for the English Language</td>
+		<td>gate.creole.morph.Morph</td>
+	</tr>
+	<tr>
+		<td>Flexible Gazetteer</td>
+		<td>A list lookup component.</td>
+		<td>gate.creole.gazetteer.FlexibleGazetteer</td>
+	</tr>
+	<tr>
+		<td>Syntax tree viewer</td>
+		<td><i>no data available</i></td>
+		<td>gate.gui.SyntaxTreeViewer</td>
+	</tr>
+</table>
+<h3>TreeTagger</h3>
+<table border='1'>
+	<tr>
+		<td>TreeTagger</td>
+		<td><i>no data available</i></td>
+		<td>gate.treetagger.TreeTagger</td>
+	</tr>
+</table>
+<h3>uima</h3>
+<table border='1'>
+	<tr>
+		<td>UIMA Analysis Engine</td>
+		<td><i>no data available</i></td>
+		<td>gate.uima.AnalysisEnginePR</td>
+	</tr>
+</table>
+<h3>WordNet</h3>
+<table border='1'>
+	<tr>
+		<td>WordNet 1.6</td>
+		<td>Princeton WordNet 1.6</td>
+		<td>gate.wordnet.IndexFileWordNetImpl</td>
+	</tr>
+	<tr>
+		<td>WordNet 1.6</td>
+		<td><i>no data available</i></td>
+		<td>gate.gui.wordnet.WordNetViewer</td>
+	</tr>
+</table>
 <hr/>
-<table width="100%">
-<tr>
-<td><a href="http://nlp.shef.ac.uk/"><img src="http://www.gate.ac.uk/revNlpLogo.jpg"/></a></td>
-<td align="right">
-	<img src="http://www.gate.ac.uk/nlpTitle.gif">
-	<br/>
-	<img src="http://www.gate.ac.uk/redline.jpg">
-</td>
-</tr>
+<a name="external-plugins"/>
+<h2>Projects outside of Sheffield</h2>
+<i>
+	<p>This section here is pulled in from the manually edited page <b>GATE/doc/external-plugins.html</b>.</p>
+	<p>The way it will look, depends on what we decide the automatically generated section (i.e. above) should look like. Best to be consistent I think.<p>
+</i>
+<hr/><table width="100%">
+	<tr>
+		<td>
+			<a href="http://nlp.shef.ac.uk/"><img src="http://www.gate.ac.uk/revNlpLogo.jpg" width="164" height="60" alt="NLP group"/></a>
+		</td>
+		<td align="right">
+			<img src="http://www.gate.ac.uk/nlpTitle.gif" width="250" height="18"/>
+			<br/>
+			<img src="http://www.gate.ac.uk/redline.jpg" width="500" height="17"/>
+		</td>
+	</tr>
 </table>	
 </body>
 </html>
