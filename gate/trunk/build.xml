@@ -313,8 +313,8 @@
 
   <!-- Plugins -->
   <filelist id="plugins.to.build" dir="plugins"
-    files="Minipar TreeTagger arabic cebuano chinese crawl google hindi
-           probability rasp romanian uima" />
+    files="Chemistry_Tagger Minipar TreeTagger arabic cebuano chinese crawl
+           google hindi probability rasp romanian uima" />
 
   <target name="plugins.build" depends="jar" >
     <for param="plugin">

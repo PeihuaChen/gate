@@ -1,14 +1,24 @@
+<!-- creole.xml for Chemistry Tagger -->
 <CREOLE-DIRECTORY>
-	<CREOLE>
-		
-		<RESOURCE>
-			<NAME>Chemistry Tagger</NAME>
-			<JAR>ChemTagger.jar</JAR>
-			<CLASS>mark.chemistry.Tagger</CLASS>
-			<PARAMETER NAME="document"
-				COMMENT="The document to be analysed."
-				RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
-		</RESOURCE>
-	
-	</CREOLE>
+  <CREOLE>
+    <RESOURCE>
+      <NAME>Chemistry Tagger</NAME>
+      <COMMENT>A tagger for chemical names</COMMENT>
+      <JAR>ChemTagger.jar</JAR>
+      <CLASS>mark.chemistry.Tagger</CLASS>
+      <PARAMETER NAME="document"
+        COMMENT="The document to be analysed."
+        RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
+      <PARAMETER NAME="compoundListsURL"
+        COMMENT="The gazetteer lists definition for spotting element symbols as part of compounds"
+        DEFAULT="resources/compound.def">java.net.URL</PARAMETER>
+      <PARAMETER NAME="elementListsURL"
+        COMMENT="The gazetteer lists definition for spotting element symbols and names alone"
+        DEFAULT="resources/element.def">java.net.URL</PARAMETER>
+      <PARAMETER NAME="transducerGrammarURL"
+        COMMENT="The JAPE grammar"
+        DEFAULT="resources/main.jape">java.net.URL</PARAMETER>
+    </RESOURCE>
+  
+  </CREOLE>
 </CREOLE-DIRECTORY>
