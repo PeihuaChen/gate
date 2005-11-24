@@ -1,22 +1,22 @@
-NP Chunker v1.0_01
-Copyright (C) 2003 The University of Sheffield
+NP Chunker v1.1
+Copyright (C) 2003-2005 The University of Sheffield
 
 =======================================================================
 COPYRIGHT AND WARRANTY INFORMATION
 =======================================================================
 
 This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+it under the terms of the GNU Lesser General Public License as
+published by the Free Software Foundation; either version 2.1 of the
+License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
+You should have received a copy of the GNU Lesser General Public
+License along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 =======================================================================
@@ -48,33 +48,29 @@ DIFFERENCES FROM THE ORIGINAL
 The major difference is the assumption is made that if a POS tag is
 is not in the mapping file then it is tagged as 'I'. The original
 version simply failed if an unknown POS tag was encountered.
-When using the GATE wrapper the chunk tag can be changed from 'I'
-to any other legal tag (B or O).
+When using the GATE wrapper the unknown chunk tag can be changed from
+'I' to any other legal tag (B or O).
 
 =======================================================================
 OBTAINING THE SOFTWARE
 =======================================================================
 
-This version of the chunker is available by following the appropriate
-links from http://www.dcs.shef.ac.uk/~mark/phd/software/
-
-Please send me an e-mail <m.greenwood@dcs.shef.ac.uk> if you use the
-software so I can keep you informed of any updates/changes.
+This version of the chunker is distributed as part of GATE, in the
+NP_Chunking plugin.
 
 =======================================================================
 USING THE CHUNKER
 =======================================================================
 
-Hopefully you should be able to use the supplied scripts to build and
-use the chunker (note that building will require a copy of GATE whereas
-using the chunker as a standalone app does not).
+To build the chunker, use the supplied Ant build file.  A copy of GATE
+is required to build but not to run the chunker standalone.
 
 The only requirement is an installed copy of JDK 1.4 or above as some
 of the new packages introduced with that release are used by the
 chunker.
 
-Simply open a shell in the same directory as this file then issue the
-command (under Windows the script is chunker.bat):
+To run the standalone chunker, simply open a shell in the same directory as
+this file then issue the command (under Windows the script is chunker.bat):
     chunker.sh < sample_input > sample_output
 Which should produce a copy of sample_input with the noun phrases
 enclosed in brackets.
@@ -84,10 +80,11 @@ USING THE CHUNKER WITHIN GATE
 =======================================================================
 
 Using the GATE wrapper should be really simple.  When you run the
-GATE GUI register this directory (use the '-d URL' command line switch)
-and then simply add the "Noun Phrase Chunker" to you pipeline. The two
-mandatory options are simply urls pointing at the two files in the
-resources directory. For anybody who has used GATE before the rest
+GATE GUI register this directory (use the '-d URL' command line switch
+or the plugin management console) and then simply add the "Noun Phrase
+Chunker" to you pipeline. The two mandatory options are simply urls
+pointing at the required resource files.  The default parameter values
+should work in 99.9% of cases. For anybody who has used GATE before the rest
 should be straightforward.
 
 To use the chunker once created it has to be part of a pipeline in which
