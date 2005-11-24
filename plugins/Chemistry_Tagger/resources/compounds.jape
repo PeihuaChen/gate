@@ -1,0 +1,106 @@
+/************************************************************************
+ *         Chemistry Tagger - A GATE Processing Resource                *
+ *         Copyright (C) 2004 The University of Sheffield               *
+ *       Developed by Mark Greenwood <m.greenwood@dcs.shef.ac.uk>       *
+ *                                                                      *
+ * This program is free software; you can redistribute it and/or modify *
+ * it under the terms of the GNU Lesser General Public License as       *
+ * published by the Free Software Foundation; either version 2.1 of the *
+ * License, or (at your option) any later version.                      *
+ *                                                                      *
+ * This program is distributed in the hope that it will be useful,      *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+ * GNU General Public License for more details.                         *
+ *                                                                      *
+ * You should have received a copy of the GNU Lesser General Public     *
+ * License along with this program; if not, write to the Free Software  *
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.            *
+ ************************************************************************/
+
+Phase:	Compounds
+Input:  Token Lookup
+Options: control = appelt
+
+Rule:Compound
+(
+	({Lookup.majorType == chemTaggerSymbols}
+	({Token.kind == number})?)+
+):compound -->
+{
+	FeatureMap params = Factory.newFeatureMap();
+	params.put("rule","Compound");
+	params.put("kind","symbol");
+		
+	gate.AnnotationSet compSet = (gate.AnnotationSet)bindings.get("compound");
+	
+	if (compSet.size() > 1)
+	{
+		gate.AnnotationSet toks = (gate.AnnotationSet)annotations.get("Token",compSet.firstNode().getOffset(),compSet.lastNode().getOffset());
+
+		try
+		{
+			Long start = compSet.firstNode().getOffset();
+			Long end = compSet.lastNode().getOffset();
+
+			String compound = doc.getContent().getContent(start,end).toString();
+			
+			java.util.regex.Pattern p = java.util.regex.Pattern.compile("\\S+");
+			java.util.regex.Matcher m = p.matcher(compound);
+			
+			while (m.find())
+			{
+				String formula = compound.substring(m.start(), m.end());
+				
+				Long begin = new Long(start.longValue() + m.start());
+				Long finish = new Long(start.longValue() + m.end());
+				
+				boolean endsInDigit = formula.matches(".*\\p{Digit}");
+				
+				if (endsInDigit) finish = new Long(finish.longValue()-1);
+				
+				gate.AnnotationSet lookups = compSet.get("Lookup",begin,finish);
+				gate.AnnotationSet tokens = annotations.get("Token",begin,finish);
+				
+				
+				if (!formula.matches("\\p{Upper}+")) //this is a bit nasty as things like carbon monoxide, CO, aren't tagged
+				{
+					if (tokens.firstNode().getOffset().equals(begin) && tokens.lastNode().getOffset().equals(finish))
+					{
+						if (lookups.firstNode().getOffset().equals(begin) && lookups.lastNode().getOffset().equals(finish))
+						{
+							if (!(!endsInDigit && lookups.size() == 1))
+							{
+								if (endsInDigit) finish = new Long(finish.longValue()+1);
+
+								if (begin.longValue() != 0) begin = new Long(begin.longValue()-1);
+								if (finish != doc.getContent().size()) finish = new Long(finish.longValue()+1);
+
+								String context = doc.getContent().getContent(begin,finish).toString();
+
+								boolean before = context.matches("\\p{Alnum}"+compound+".*");
+								boolean after = context.matches(".*"+compound+"\\p{Alnum}");
+								boolean within = formula.matches("\\p{Alnum}+");
+
+								if ((!before && !after) && within)
+								{
+									annotations.add(new Long(start.longValue() + m.start()),new Long(start.longValue() + m.end()),"ChemicalCompound",params);
+								}
+								else
+								{
+									annotations.add(new Long(start.longValue() + m.start()),new Long(start.longValue() + m.end()),"NotACompound",params);
+								}			
+							}
+						}
+					}
+				}
+			}
+
+		}
+		catch (Exception e)
+		{
+			//we couldn't select the text so we will assume it's not a valid
+			//compound name
+		}
+	}
+}

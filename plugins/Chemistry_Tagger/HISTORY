@@ -1,3 +1,9 @@
+Version 1.2 (Released 24/11/2005)
+=================================
+Now loads resources from the plugin directory rather thhan from inside the JAR
+file.  Also now explicitly releases references to the current document after
+processing, which should help when working with a corpus in a datastore.
+
 Version 1.1 (Released 26/03/2004)
 =================================
 This release is to fix a mistake I made in the clean up process which
