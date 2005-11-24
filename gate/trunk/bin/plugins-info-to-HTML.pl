@@ -31,7 +31,17 @@ print HTMLFILE <<ENDHTML;
 	<a href="http://gate.ac.uk/"><img src="http://www.gate.ac.uk/gateHeader.gif" alt="GATE" height="76" width="356"/></a>
 </center>
 <br/>
-<p>This page lists the plugins that are currently shipped with GATE.</p>
+<p>This page lists the plugins that are currently available with GATE:</p>
+<ul>
+	<li><a href="#internal-plugins">plugins shipped with GATE</a></li>
+	<li><a href="#external-plugins">remotely hosted and managed plugins</a></li>
+</ul>
+<p>If you are working on a project that involves GATE, please <a
+href="http://www.gate.ac.uk/submitProject.html">let us know</a> and we will add a
+link to your project on this page.</p>
+<hr/>
+<a name="internal-plugins"/>
+<h2>Projects with Sheffield involvement</h2>
 ENDHTML
 
 # foreach plugin creole.xml file...
@@ -60,9 +70,19 @@ foreach my $creoleFileName (@creoleFileList)
 }
 
 print HTMLFILE <<ENDHTML;
-</table>
-<br/>
 <hr/>
+<a name="external-plugins"/>
+ENDHTML
+
+# include external-plugins.html page
+my $externalPluginsFilename = '../doc/external-plugins.html';
+open(EXTERNALHTMLFILE , "<$externalPluginsFilename") || die("Cannot Open File $externalPluginsFilename");
+while(<EXTERNALHTMLFILE>)
+{
+	print HTMLFILE;
+}
+
+print HTMLFILE <<ENDHTML;
 <table width="100%">
 	<tr>
 		<td>
