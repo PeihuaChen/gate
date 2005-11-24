@@ -27,7 +27,9 @@ print HTMLFILE <<ENDHTML;
 </style>
 </head>
 <body>
-<center><a href="http://gate.ac.uk/"><img src="http://www.gate.ac.uk/gateHeader.gif"/></a></center>
+<center>
+	<a href="http://gate.ac.uk/"><img src="http://www.gate.ac.uk/gateHeader.gif" alt="GATE" height="76" width="356"/></a>
+</center>
 <br/>
 <p>This page lists the plugins that are currently shipped with GATE.</p>
 ENDHTML
@@ -37,24 +39,24 @@ foreach my $creoleFileName (@creoleFileList)
 {
 	$creoleFileName =~ /plugins\/(\w+)\/creole.xml/;
 	print "$1\n";
-	print HTMLFILE "<h3>$1</h3>";
+	print HTMLFILE "<h3>$1</h3>\n";
 	# parse the XML file
    	my $xp = XML::XPath->new(filename => $creoleFileName);
 	# find all resources in this creole.xml file..
     my $nodeset = $xp->find('//RESOURCE');
     
-	print HTMLFILE "<table border='1'>";
+	print HTMLFILE "<table border='1'>\n";
     foreach my $node ($nodeset->get_nodelist) 
 	{
 		my $creoleFragment = XML::XPath::XMLParser::as_string($node);
-		print HTMLFILE "<tr>";
+		print HTMLFILE "\t<tr>\n";
 		printElement($creoleFragment, 'NAME');
 		printElement($creoleFragment, 'COMMENT');
 		printElement($creoleFragment, 'CLASS');
-		print HTMLFILE "</tr>";
+		print HTMLFILE "\t</tr>\n";
 	}
 	
-	print HTMLFILE "</table>";
+	print HTMLFILE "</table>\n";
 }
 
 print HTMLFILE <<ENDHTML;
@@ -62,14 +64,16 @@ print HTMLFILE <<ENDHTML;
 <br/>
 <hr/>
 <table width="100%">
-<tr>
-<td><a href="http://nlp.shef.ac.uk/"><img src="http://www.gate.ac.uk/revNlpLogo.jpg"/></a></td>
-<td align="right">
-	<img src="http://www.gate.ac.uk/nlpTitle.gif">
-	<br/>
-	<img src="http://www.gate.ac.uk/redline.jpg">
-</td>
-</tr>
+	<tr>
+		<td>
+			<a href="http://nlp.shef.ac.uk/"><img src="http://www.gate.ac.uk/revNlpLogo.jpg" width="164" height="60" alt="NLP group"/></a>
+		</td>
+		<td align="right">
+			<img src="http://www.gate.ac.uk/nlpTitle.gif" width="250" height="18"/>
+			<br/>
+			<img src="http://www.gate.ac.uk/redline.jpg" width="500" height="17"/>
+		</td>
+	</tr>
 </table>	
 </body>
 </html>
@@ -85,7 +89,7 @@ sub printElement {
 
 	my $creoleFragment = XMLin($_[0], ForceArray => 1);
 	my $elementValue = $creoleFragment->{$_[1]}->[0];
-	print HTMLFILE "<td>";
+	print HTMLFILE "\t\t<td>";
 	print HTMLFILE $elementValue ? $elementValue : "<i>no data available</i>";
-	print HTMLFILE "</td>";
+	print HTMLFILE "</td>\n";
 }
