@@ -1,9 +1,9 @@
-
 <html>
 <head>
 <title>List of plugins available to GATE</title>
 <style>
 	a img {border: none;}
+	th {background-color: #00CCFF;}
 </style>
 </head>
 <body>
@@ -13,17 +13,48 @@
 <br/>
 <p>This page lists the plugins that are currently available with GATE:</p>
 <ul>
-	<li><a href="#internal-plugins">plugins shipped with GATE</a></li>
-	<li><a href="#external-plugins">remotely hosted and managed plugins</a></li>
+	<li><a href="#internal-plugins">
+Plugins included in the GATE distribution</a></li>
+<ul type='circle'><li><a href='#ANNIE'>ANNIE</a></li>
+<li><a href='#arabic'>arabic</a></li>
+<li><a href='#Buchart'>Buchart</a></li>
+<li><a href='#cebuano'>cebuano</a></li>
+<li><a href='#Chemistry_Tagger'>Chemistry_Tagger</a></li>
+<li><a href='#crawl'>crawl</a></li>
+<li><a href='#google'>google</a></li>
+<li><a href='#hindi'>hindi</a></li>
+<li><a href='#Information_Retrieval'>Information_Retrieval</a></li>
+<li><a href='#Kea'>Kea</a></li>
+<li><a href='#Machine_Learning'>Machine_Learning</a></li>
+<li><a href='#Minipar'>Minipar</a></li>
+<li><a href='#Minorthird'>Minorthird</a></li>
+<li><a href='#Montreal_Transducer'>Montreal_Transducer</a></li>
+<li><a href='#NLG_Tools'>NLG_Tools</a></li>
+<li><a href='#NP_Chunking'>NP_Chunking</a></li>
+<li><a href='#Obsolete'>Obsolete</a></li>
+<li><a href='#Ontology_Tools'>Ontology_Tools</a></li>
+<li><a href='#probability'>probability</a></li>
+<li><a href='#rasp'>rasp</a></li>
+<li><a href='#romanian'>romanian</a></li>
+<li><a href='#spanish'>spanish</a></li>
+<li><a href='#Stemmer'>Stemmer</a></li>
+<li><a href='#Tools'>Tools</a></li>
+<li><a href='#TreeTagger'>TreeTagger</a></li>
+<li><a href='#uima'>uima</a></li>
+<li><a href='#WordNet'>WordNet</a></li>
+		</ul>
+	</li>
+	<li><a href="#external-plugins">
+Other contributed plugins	
+	</a></li>
 </ul>
-<p>If you are working on a project that involves GATE, please <a
-href="http://www.gate.ac.uk/submitProject.html">let us know</a> and we will add a
-link to your project on this page.</p>
 <hr/>
-<a name="internal-plugins"/>
-<h2>Projects with Sheffield involvement</h2>
-<h3>ANNIE</h3>
+<a name='internal-plugins'/>
+<h2>Plugins included in the GATE distribution</h2>
 <table border='1'>
+	<tr>
+		<th colspan='3'><a name='ANNIE'>ANNIE</a></th>
+	</tr>
 	<tr>
 		<td>GATE Unicode Tokeniser</td>
 		<td>A customisable Unicode tokeniser.</td>
@@ -91,17 +122,17 @@ link to your project on this page.</p>
 	</tr>
 	<tr>
 		<td>Jape Viewer</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>gate.gui.jape.JapeViewer</td>
 	</tr>
 	<tr>
 		<td>Gaze</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>com.ontotext.gate.vr.Gaze</td>
 	</tr>
-</table>
-<h3>arabic</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='arabic'>arabic</a></th>
+	</tr>
 	<tr>
 		<td>Arabic Tokeniser</td>
 		<td>A customisable Arabictokeniser.</td>
@@ -127,17 +158,17 @@ link to your project on this page.</p>
 		<td>Arabic Orthomatcher</td>
 		<td>arabic.ArabicOrthoMatcher</td>
 	</tr>
-</table>
-<h3>Buchart</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='Buchart'>Buchart</a></th>
+	</tr>
 	<tr>
 		<td>Bottom-Up Chart Parser</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>shef.nlp.buchart.Buchart</td>
 	</tr>
-</table>
-<h3>cebuano</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='cebuano'>cebuano</a></th>
+	</tr>
 	<tr>
 		<td>Cebuano Tokeniser</td>
 		<td>A customisable Cebuano tokeniser.</td>
@@ -168,33 +199,33 @@ link to your project on this page.</p>
 		<td>Mark Hepple's Brill-style POS tagger, adapted for languages where entries are multiword</td>
 		<td>cebtag.postag.CebuanoPOSTagger</td>
 	</tr>
-</table>
-<h3>Chemistry_Tagger</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='Chemistry_Tagger'>Chemistry_Tagger</a></th>
+	</tr>
 	<tr>
 		<td>Chemistry Tagger</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>mark.chemistry.Tagger</td>
 	</tr>
-</table>
-<h3>crawl</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='crawl'>crawl</a></th>
+	</tr>
 	<tr>
 		<td>CrawlerPR</td>
 		<td>provides interface to the webspinx API</td>
 		<td>crawl.CrawlPR</td>
 	</tr>
-</table>
-<h3>google</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='google'>google</a></th>
+	</tr>
 	<tr>
 		<td>GooglePR</td>
 		<td>provides interface to Google API</td>
 		<td>google.GooglePR</td>
 	</tr>
-</table>
-<h3>hindi</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='hindi'>hindi</a></th>
+	</tr>
 	<tr>
 		<td>Hindi Tokeniser</td>
 		<td>A customisable Arabictokeniser.</td>
@@ -235,9 +266,9 @@ link to your project on this page.</p>
 		<td>Mark Hepple's Brill-style POS tagger, adapted for languages where entries are multiword</td>
 		<td>cebtag.postag.CebuanoPOSTagger</td>
 	</tr>
-</table>
-<h3>Information_Retrieval</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='Information_Retrieval'>Information_Retrieval</a></th>
+	</tr>
 	<tr>
 		<td>SearchPR</td>
 		<td>provides IR functionality</td>
@@ -245,12 +276,12 @@ link to your project on this page.</p>
 	</tr>
 	<tr>
 		<td>Search Results</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>gate.gui.SearchPRViewer</td>
 	</tr>
-</table>
-<h3>Kea</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='Kea'>Kea</a></th>
+	</tr>
 	<tr>
 		<td>KEA Keyphrase Extractor</td>
 		<td><HTML>A Keyphrase Extractor by Eibe Frank<br>
@@ -262,33 +293,33 @@ link to your project on this page.</p>
 		<td>Imports a KEA-style corpus into GATE</td>
 		<td>gate.creole.kea.CorpusImporter</td>
 	</tr>
-</table>
-<h3>Machine_Learning</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='Machine_Learning'>Machine_Learning</a></th>
+	</tr>
 	<tr>
 		<td>Machine Learning PR</td>
 		<td>Trains a machine learning algorithm from a corpus</td>
 		<td>gate.creole.ml.MachineLearningPR</td>
 	</tr>
-</table>
-<h3>Minipar</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='Minipar'>Minipar</a></th>
+	</tr>
 	<tr>
 		<td>Minipar Wrapper</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>minipar.Minipar</td>
 	</tr>
-</table>
-<h3>Minorthird</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='Minorthird'>Minorthird</a></th>
+	</tr>
 	<tr>
 		<td>CMU Minorthird</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>gate.minorthird.RunMixupWrapper</td>
 	</tr>
-</table>
-<h3>Montreal_Transducer</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='Montreal_Transducer'>Montreal_Transducer</a></th>
+	</tr>
 	<tr>
 		<td>Montreal Transducer</td>
 		<td>
@@ -300,9 +331,9 @@ Written by Luc Plamondon, Universit� de Montr�al<br>
     </td>
 		<td>ca.umontreal.iro.rali.gate.creole.MtlTransducer</td>
 	</tr>
-</table>
-<h3>NLG_Tools</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='NLG_Tools'>NLG_Tools</a></th>
+	</tr>
 	<tr>
 		<td>GATE OntoLex Mapping</td>
 		<td>GATE OntoLex mapping</td>
@@ -315,48 +346,48 @@ Written by Luc Plamondon, Universit� de Montr�al<br>
 	</tr>
 	<tr>
 		<td>NLG Lexicon Editor</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>gate.gui.lexicon.NLGLexiconVR</td>
 	</tr>
 	<tr>
 		<td>OntoLex Mapping Editor</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>gate.gui.lexicon.OntoLexEditorVR</td>
 	</tr>
-</table>
-<h3>NP_Chunking</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='NP_Chunking'>NP_Chunking</a></th>
+	</tr>
 	<tr>
 		<td>Noun Phrase Chunker</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>mark.chunking.GATEWrapper</td>
 	</tr>
-</table>
-<h3>Obsolete</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='Obsolete'>Obsolete</a></th>
+	</tr>
 	<tr>
 		<td>OLD Document Editor</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>gate.gui.DocumentEditor</td>
 	</tr>
 	<tr>
 		<td>Unrestricted annotation editor</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>gate.gui.UnrestrictedAnnotationEditor</td>
 	</tr>
 	<tr>
 		<td>Schema annotation editor</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>gate.gui.SchemaAnnotationEditor</td>
 	</tr>
 	<tr>
 		<td>Features Editor</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>gate.gui.FeaturesEditor</td>
 	</tr>
-</table>
-<h3>Ontology_Tools</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='Ontology_Tools'>Ontology_Tools</a></th>
+	</tr>
 	<tr>
 		<td>Jena Ontology</td>
 		<td>An ontology implementation using Jena for I/O.</td>
@@ -374,33 +405,33 @@ Written by Luc Plamondon, Universit� de Montr�al<br>
 	</tr>
 	<tr>
 		<td>GATE Ontology Editor</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>gate.gui.OntologyEditor</td>
 	</tr>
 	<tr>
 		<td>Protege</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>gate.gui.ProtegeWrapper</td>
 	</tr>
-</table>
-<h3>probability</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='probability'>probability</a></th>
+	</tr>
 	<tr>
 		<td>ProbabilityPR</td>
 		<td>A plugin to calculate the probability of the annotations</td>
 		<td>probability.ProbabilityPR</td>
 	</tr>
-</table>
-<h3>rasp</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='rasp'>rasp</a></th>
+	</tr>
 	<tr>
 		<td>RASP Parser</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>gate.rasp.rasp</td>
 	</tr>
-</table>
-<h3>romanian</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='romanian'>romanian</a></th>
+	</tr>
 	<tr>
 		<td>Romanian Tokeniser</td>
 		<td>A customisable Romanian tokeniser.</td>
@@ -416,25 +447,25 @@ Written by Luc Plamondon, Universit� de Montr�al<br>
 		<td>A module for executing Jape grammars</td>
 		<td>romanian.RomanianTransducer</td>
 	</tr>
-</table>
-<h3>spanish</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='spanish'>spanish</a></th>
+	</tr>
 	<tr>
 		<td>Keywords</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>com.isoco.gate.keywords.KeywordsDetector</td>
 	</tr>
-</table>
-<h3>Stemmer</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='Stemmer'>Stemmer</a></th>
+	</tr>
 	<tr>
 		<td>Stemmer PR</td>
 		<td>Snowball stemmers integrated</td>
 		<td>stemmer.SnowballStemmer</td>
 	</tr>
-</table>
-<h3>Tools</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='Tools'>Tools</a></th>
+	</tr>
 	<tr>
 		<td>Gazetteer List Collector</td>
 		<td>A gazetteer lists collector</td>
@@ -478,28 +509,28 @@ Written by Luc Plamondon, Universit� de Montr�al<br>
 	</tr>
 	<tr>
 		<td>Syntax tree viewer</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>gate.gui.SyntaxTreeViewer</td>
 	</tr>
-</table>
-<h3>TreeTagger</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='TreeTagger'>TreeTagger</a></th>
+	</tr>
 	<tr>
 		<td>TreeTagger</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>gate.treetagger.TreeTagger</td>
 	</tr>
-</table>
-<h3>uima</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='uima'>uima</a></th>
+	</tr>
 	<tr>
 		<td>UIMA Analysis Engine</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>gate.uima.AnalysisEnginePR</td>
 	</tr>
-</table>
-<h3>WordNet</h3>
-<table border='1'>
+	<tr>
+		<th colspan='3'><a name='WordNet'>WordNet</a></th>
+	</tr>
 	<tr>
 		<td>WordNet 1.6</td>
 		<td>Princeton WordNet 1.6</td>
@@ -507,14 +538,13 @@ Written by Luc Plamondon, Universit� de Montr�al<br>
 	</tr>
 	<tr>
 		<td>WordNet 1.6</td>
-		<td><i>no data available</i></td>
+		<td>&nbsp;</td>
 		<td>gate.gui.wordnet.WordNetViewer</td>
 	</tr>
 </table>
 <hr/>
-<a name="external-plugins"/>
-<h2>Projects outside of Sheffield</h2>
-<i>
+<a name='external-plugins'/>
+<h2>Other contributed plugins</h2><i>
 	<p>This section here is pulled in from the manually edited page <b>GATE/doc/external-plugins.html</b>.</p>
 	<p>The way it will look, depends on what we decide the automatically generated section (i.e. above) should look like. Best to be consistent I think.<p>
 </i>
