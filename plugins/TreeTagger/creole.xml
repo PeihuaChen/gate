@@ -38,6 +38,14 @@
         DEFAULT="ISO-8859-1">
         java.lang.String
     </PARAMETER>
+
+    <PARAMETER
+        NAME="failOnUnmappableChar"
+        RUNTIME="true"
+        COMMENT="Should the tagger fail if it encounters a character which is not mappable into the specified encoding?"
+        DEFAULT="true">
+        java.lang.Boolean
+    </PARAMETER>
     
   </RESOURCE>
 </CREOLE>
