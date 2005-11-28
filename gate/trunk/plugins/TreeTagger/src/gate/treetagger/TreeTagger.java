@@ -47,6 +47,8 @@ public class TreeTagger
    */
   private Charset charset;
 
+  private boolean failOnUnmappableChar;
+  
   /**
    * Initialize this resource.  This method mostly consists of sanity checks on
    * the user's environment to ensure that the tree tagger binary will work.
@@ -60,11 +62,9 @@ public class TreeTagger
           + "suitable value.");
     }
 
-    //the TreeTagger is only for Linux
+    //the TreeTagger is only for Linux or Mac OS X
     String osName = System.getProperty("os.name").toLowerCase();
-    //or Mac OS X - mrj.version != null => Mac
-    String mrjVersion = System.getProperty("mrj.version");
-    if (osName.indexOf("linux") == -1 && mrjVersion == null)
+    if (osName.indexOf("linux") == -1 && !osName.startsWith("mac os x"))
       throw new ResourceInstantiationException(
           "The Tree Tagger can only be run on Linux or Mac OS X.");
 
@@ -108,9 +108,12 @@ public class TreeTagger
     File gateTextFile = null;
     try {
       gateTextFile = File.createTempFile("treetagger", ".txt");
-      // Make OSW fail if the document cannot be transcoded
+      // depending on the failOnUnmappableChar parameter, we either make the
+      // output stream writer fail or replace the unmappable character with '?'
       CharsetEncoder charsetEncoder = charset.newEncoder()
-          .onUnmappableCharacter(CodingErrorAction.REPORT);
+          .onUnmappableCharacter(
+              failOnUnmappableChar ? CodingErrorAction.REPORT
+                                   : CodingErrorAction.REPLACE);
       FileOutputStream fos = new FileOutputStream(gateTextFile);
       OutputStreamWriter osw = new OutputStreamWriter(fos, charsetEncoder);
       BufferedWriter bw = new BufferedWriter(osw);
@@ -300,5 +303,21 @@ public class TreeTagger
    */
   public String getEncoding() {
     return encoding;
+  }
+
+  /**
+   * Set the flag for whether we should fail if an unmappable character is
+   * found.
+   */
+  public void setFailOnUnmappableChar(Boolean newValue) {
+    failOnUnmappableChar = (newValue == null) ? true : newValue.booleanValue();
+  }
+
+  /**
+   * Get the flag for whether we should fail if an unmappable character is
+   * found.
+   */
+  public Boolean getFailOnUnmappableChar() {
+    return Boolean.valueOf(failOnUnmappableChar);
   }
 } // class TreeTagger
