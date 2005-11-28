@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w -C
 
 # Script to read all the creole.xml files for every plugin
 # to produce a summary HTML page (GATE/doc/plugins.html)
@@ -30,6 +30,7 @@ print HTMLFILE <<ENDHTML;
 <html>
 <head>
 <title>List of plugins available to GATE</title>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
 <style>
 	a img {border: none;}
 	th {background-color: #00CCFF;}
@@ -140,7 +141,16 @@ print "done. ($htmlFilename created)\n";
 # $_[1] is the element name
 sub getElement {
 
-	my $creoleFragment = XMLin($_[0], ForceArray => 1);
-	my $elementValue = $creoleFragment->{$_[1]}->[0];
-	return $elementValue ? $elementValue : "&nbsp;";
+	if($_[0] =~ /<$_[1]>(.*)<\/$_[1]>/s)
+	{
+		my $elementValue = $1;
+		# The above regular expression converts &gt; to >
+		# so I need to convert the less-than-sign too.
+		$elementValue =~ s/&lt;/</g;
+		return $elementValue;
+	}
+	else 
+	{
+		return "&nbsp;";
+	}
 }
