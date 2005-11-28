@@ -21,6 +21,9 @@ public class TreeTagger
     extends AbstractLanguageAnalyser
     implements ProcessingResource {
 
+  public static final String TREE_TAGGER_STRING_FEATURE_NAME
+      = "treeTaggerString";
+
   /**
    * The document to be processed.
    */
@@ -139,6 +142,20 @@ public class TreeTagger
           bw.newLine();
       }
       bw.close();
+
+      // now read the temp file back in and iterate over tokens pulling the
+      // string that has been passed to the tree tagger into a feature of the
+      // Token
+      CharsetDecoder charsetDecoder = charset.newDecoder();
+      FileInputStream fis = new FileInputStream(gateTextFile);
+      InputStreamReader isr = new InputStreamReader(fis, charsetDecoder);
+      BufferedReader br = new BufferedReader(isr);
+
+      for(int i=0;i<tokens.size();i++) {
+        FeatureMap features = ((Annotation) tokens.get(i)).getFeatures();
+        features.put(TREE_TAGGER_STRING_FEATURE_NAME, br.readLine());
+      }
+      
     }
     catch (CharacterCodingException cce) {
       throw (ExecutionException)new ExecutionException(
@@ -211,10 +228,11 @@ public class TreeTagger
           lemma = null;
           word = st.nextToken();
 
-          // check if the word matches with the string feature of the token
-          String tokenString = (String) features.get(ANNIEConstants.TOKEN_STRING_FEATURE_NAME);
-          if(tokenString == null) throw new GateException("Invalid Token in GATE document");
-          if(!word.toLowerCase().equals(tokenString.toLowerCase())) {
+          // check if the word matches with the expected string (stored in the
+          // treeTaggerString feature of the token).
+          String expectedTokenString = (String) features.get(TREE_TAGGER_STRING_FEATURE_NAME);
+          if(expectedTokenString == null) throw new GateException("Invalid Token in GATE document");
+          if(!word.equals(expectedTokenString)) {
             throw new GateRuntimeException("Document does not have the expected number/sequence of tokens created by the treeTaggerBinary file");
           }
 
@@ -230,6 +248,12 @@ public class TreeTagger
         } else {
           throw new GateRuntimeException("Document does not have the expected number of tokens created by the treeTaggerBinary file");
         }
+      }
+
+      // clean up the treeTaggerString features
+      for(int i=0;i<tokens.size();i++) {
+        FeatureMap features = ((Annotation) tokens.get(i)).getFeatures();
+        features.remove(TREE_TAGGER_STRING_FEATURE_NAME);
       }
     }
     catch (Exception err) {
