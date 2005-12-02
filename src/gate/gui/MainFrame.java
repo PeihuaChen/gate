@@ -1377,7 +1377,14 @@ public class MainFrame extends JFrame
     //check whether GUI is up
     if(getGuiRoots() == null || getGuiRoots().isEmpty()) return;
 
-    if(guiLock != null) guiLock.setVisible(false);
+    if(guiLock != null){
+      guiLock.setVisible(false);
+      //completely dispose the dialog (causes it to dissapear even if
+      //displayed on a non-visible virtual display on Linux)
+      //fix for bug 1369096 
+      //(http://sourceforge.net/tracker/index.php?func=detail&aid=1369096&group_id=143829&atid=756796)
+      guiLock.dispose();
+    }
     guiLock = null;
   }
 
