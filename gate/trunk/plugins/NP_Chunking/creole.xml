@@ -3,6 +3,7 @@
     
     <RESOURCE>
       <NAME>Noun Phrase Chunker</NAME>
+      <COMMENT>Implementation of the Ramshaw and Marcus base noun phrase chunker</COMMENT>
       <JAR>Chunker.jar</JAR>
       <CLASS>mark.chunking.GATEWrapper</CLASS>
       <PARAMETER NAME="document"
