@@ -135,6 +135,9 @@ public class Buchart  extends AbstractLanguageAnalyser implements ProcessingReso
 
    public Resource init() throws ResourceInstantiationException
    {
+      Err.println("WARNING: BuChart has been deprecated and will be removed from future versions of GATE");
+      Err.println("Applications should be updated to use the new SUPPLE parser instead of BuChart");
+
       /** Check the specified prolog **/
       try
       {
