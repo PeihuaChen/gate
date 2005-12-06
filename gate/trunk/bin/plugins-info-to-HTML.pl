@@ -19,7 +19,8 @@ my @creoleFileList = glob("../plugins/*/creole.xml");
 my @elementsToGet = ("NAME", "COMMENT", "CLASS");
 # **************************************************
 
-print "Extracting info on GATE plugins...\n";
+print "Extracting information on GATE plugins\n";
+print "--------------------------------------\n\n";
 
 # ********** Write HTML for the top of the plugins page **********
 # Open file handle to the HTML file we are creating
@@ -46,18 +47,10 @@ print HTMLFILE <<ENDHTML;
 	<li><a href="#internal-plugins">
 ENDHTML
 
-print HTMLFILE "$internalPluginsTitle</a></li>\n",
-				"<ul type='circle'>";
-
-foreach my $creoleFileName (@creoleFileList)
-{
-	$creoleFileName =~ /plugins\/(\w+)\/creole.xml/;
-	print HTMLFILE "<li><a href='#$1'>$1</a></li>\n";
-}
+print HTMLFILE "$internalPluginsTitle";
 
 print HTMLFILE <<ENDHTML;
-		</ul>
-	</li>
+	</a></li>
 	<li><a href="#external-plugins">
 ENDHTML
 
@@ -71,8 +64,18 @@ ENDHTML
 # **************************************************
 
 # ********** Write internal plugin information to the HTML file **********
+print "Extracting internal plugins information..\n";
 print HTMLFILE "<a name='internal-plugins'/>\n",
 				"<h2>$internalPluginsTitle</h2>\n",
+				"<ul type='circle'>";
+
+foreach my $creoleFileName (@creoleFileList)
+{
+	$creoleFileName =~ /plugins\/(\w+)\/creole.xml/;
+	print HTMLFILE "<li><a href='#$1'>$1</a></li>\n";
+}
+
+print HTMLFILE "</ul>\n",
 				"<table border='1'>\n";
 
 # foreach plugin creole.xml file...
@@ -98,11 +101,13 @@ foreach my $creoleFileName (@creoleFileList)
 
 print HTMLFILE "</table>\n",
 				"<hr/>\n";    
+print ".. all internal plugin information extracted.\n\n";
 # **************************************************
 
 # ********** Include external-plugins.html page **********
+print "Importing external external plugins information ... ";
 print HTMLFILE "<a name='external-plugins'/>\n",
-	"<h2>$externalPluginsTitle</h2>";
+	"<h2>$externalPluginsTitle</h2>\n";
 my $externalPluginsFilename = '../doc/external-plugins.html';
 open(EXTERNALHTMLFILE , "<$externalPluginsFilename") || die("Cannot Open File $externalPluginsFilename");
 while(<EXTERNALHTMLFILE>)
@@ -110,6 +115,7 @@ while(<EXTERNALHTMLFILE>)
 	print HTMLFILE;
 }
 close(EXTERNALHTMLFILE);
+print "done!\n";
 # **************************************************
 
 # ********** Write the footer images of the plugins page **********
@@ -134,7 +140,7 @@ ENDHTML
 close(HTMLFILE);
 # **************************************************
 
-print "done. ($htmlFilename created)\n";
+print "\nAll done. ($htmlFilename created)\n";
 
 # Get the value of an element
 # $_[0] is the resource node
