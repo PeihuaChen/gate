@@ -28,11 +28,13 @@ my $htmlFilename = '../doc/plugins.html';
 open(HTMLFILE , ">$htmlFilename") || die("Cannot Open File $htmlFilename");
 
 print HTMLFILE <<ENDHTML;
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
+
 <head>
 <title>List of plugins available to GATE</title>
 <META http-equiv="Content-Type" content="text/html; charset=utf-8">
-<style>
+<style type="text/css">
 	a img {border: none;}
 	th {background-color: #00CCFF;}
 </style>
@@ -65,7 +67,7 @@ ENDHTML
 
 # ********** Write internal plugin information to the HTML file **********
 print "Extracting internal plugins information..\n";
-print HTMLFILE "<a name='internal-plugins'/>\n",
+print HTMLFILE "<a name='internal-plugins'></a>\n",
 				"<h2>$internalPluginsTitle</h2>\n",
 				"<ul type='circle'>";
 
@@ -106,7 +108,7 @@ print ".. all internal plugin information extracted.\n\n";
 
 # ********** Include external-plugins.html page **********
 print "Importing external external plugins information ... ";
-print HTMLFILE "<a name='external-plugins'/>\n",
+print HTMLFILE "<a name='external-plugins'></a>\n",
 	"<h2>$externalPluginsTitle</h2>\n";
 my $externalPluginsFilename = '../doc/external-plugins.html';
 open(EXTERNALHTMLFILE , "<$externalPluginsFilename") || die("Cannot Open File $externalPluginsFilename");
