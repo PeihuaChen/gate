@@ -61,6 +61,9 @@ print HTMLFILE $externalPluginsTitle,
 	
 	</a></li>
 </ul>
+
+<p>For more information on how the plugins work, see the online user guide "<a href="http://gate.ac.uk/sale/tao/#sec:howto:plugins">Developing Language Processing Components with GATE</a>".</p>
+
 <hr/>
 ENDHTML
 # **************************************************
