@@ -77,12 +77,12 @@
     <RESOURCE>
       <NAME>Hash Gazetteer</NAME>
       <CLASS>com.ontotext.gate.gazetteer.HashGazetteer</CLASS>
-      <COMMENT>&lt;html&gt;A list lookup component implemented by OntoText
-        Lab (www.ontotext.com).&lt;br&gt; For documentation, download and license
+      <COMMENT>A list lookup component implemented by OntoText
+        Lab (www.ontotext.com). For documentation, download and license
         agreement please refer to
-        (www.ontotext.com/downloads/index.html#gazetteer).&lt;br&gt;
+        (www.ontotext.com/downloads/index.html#gazetteer).
         The licence information is also available in licence.ontotext.html in the lib
-        folder of GATE&lt;/html&gt;</COMMENT>
+        folder of GATE</COMMENT>
       <PARAMETER NAME="document" RUNTIME="true"
         COMMENT="The document to be processed">gate.Document</PARAMETER>
       <PARAMETER NAME="annotationSetName" RUNTIME="true"

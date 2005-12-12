@@ -10,11 +10,9 @@
     <JAR>MtlTransducer.jar</JAR>
     <CLASS>ca.umontreal.iro.rali.gate.creole.MtlTransducer</CLASS>
     <COMMENT>
-&lt;html&gt;
-A module for executing augmented Jape grammars.&lt;br&gt;
-Written by Luc Plamondon, Université de Montréal&lt;br&gt;
-&lt;a href=&quot;http://www.iro.umontreal.ca/~plamondl/mtltransducer/&quot;&gt;http://www.iro.umontreal.ca/~plamondl/mtltransducer/&lt;/a&gt;
-&lt;/html&gt;
+A module for executing augmented Jape grammars.
+Written by Luc Plamondon, Université de Montréal
+http://www.iro.umontreal.ca/~plamondl/mtltransducer/
     </COMMENT>
     <PARAMETER NAME="document" RUNTIME="true"
       COMMENT="The document to be processed">gate.Document</PARAMETER>
