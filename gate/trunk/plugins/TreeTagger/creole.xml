@@ -7,7 +7,7 @@
     <NAME>TreeTagger</NAME>
     <JAR>TreeTagger.jar</JAR>
     <CLASS>gate.treetagger.TreeTagger</CLASS>
-        
+    <COMMENT>The TreeTagger is a language-independent part-of-speech tagger, which currently supports English, French, German, and Italian (see http://gate.ac.uk/sale/tao/#sec:misc-creole:treetagger)</COMMENT>
     <PARAMETER 
         NAME="document" 
         RUNTIME="true"
