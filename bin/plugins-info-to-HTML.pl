@@ -155,9 +155,8 @@ sub getElement {
 	if($_[0] =~ /<$_[1]>(.*)<\/$_[1]>/s)
 	{
 		my $elementValue = $1;
-		# The above regular expression converts &gt; to >
-		# so I need to convert the less-than-sign too.
-		$elementValue =~ s/&lt;/</g;
+		# Finds all urls and converts them to links.
+		$elementValue =~ s|(http://[^\s)]+)|<a href="$1">$1</a>|g;
 		return $elementValue;
 	}
 	else 
