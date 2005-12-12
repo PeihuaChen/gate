@@ -7,7 +7,7 @@
     <NAME>RASP Parser</NAME>
     <JAR>rasp.jar</JAR>
     <CLASS>gate.rasp.rasp</CLASS>
-        
+    <COMMENT>RASP (Robust Accurate Statistical Parsing) is a robust parsing system for English (see http://gate.ac.uk/sale/tao/#sec:misc-creole:rasp) </COMMENT>
     <PARAMETER 
         NAME="document" 
         RUNTIME="true"
