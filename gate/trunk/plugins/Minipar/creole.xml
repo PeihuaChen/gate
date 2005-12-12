@@ -8,6 +8,7 @@
     <NAME>Minipar Wrapper</NAME>
     <JAR>MiniparWrapper.jar</JAR>
     <CLASS>minipar.Minipar</CLASS>
+    <COMMENT>MiniPar is a shallow parser. It determines the dependency relationships between the words of a sentence </COMMENT>
     <PARAMETER NAME="document"
 	  RUNTIME="true"
 	  COMMENT="document to process">gate.Document</PARAMETER>
