@@ -282,6 +282,7 @@
     <RESOURCE>
       <NAME>Jape Viewer</NAME>
       <CLASS>gate.gui.jape.JapeViewer</CLASS>
+      <COMMENT>A JAPE grammar file viewer</COMMENT>
       <!-- type values can be "large" or "small"-->
       <GUI TYPE="large">
         <MAIN_VIEWER/>
