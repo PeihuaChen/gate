@@ -22,6 +22,9 @@ Plugins included in the GATE distribution	</a></li>
 Other contributed plugins	
 	</a></li>
 </ul>
+
+<p>For more information on how the plugins work, see the online user guide "<a href="http://gate.ac.uk/sale/tao/#sec:howto:plugins">Developing Language Processing Components with GATE</a>".</p>
+
 <hr/>
 <a name='internal-plugins'></a>
 <h2>Plugins included in the GATE distribution</h2>
@@ -48,6 +51,7 @@ Other contributed plugins
 <li><a href='#romanian'>romanian</a></li>
 <li><a href='#spanish'>spanish</a></li>
 <li><a href='#Stemmer'>Stemmer</a></li>
+<li><a href='#SUPPLE'>SUPPLE</a></li>
 <li><a href='#Tools'>Tools</a></li>
 <li><a href='#TreeTagger'>TreeTagger</a></li>
 <li><a href='#uima'>uima</a></li>
@@ -466,6 +470,14 @@ Written by Luc Plamondon, Université de Montréal<br>
 		<td>stemmer.SnowballStemmer</td>
 	</tr>
 	<tr>
+		<th colspan='3'><a name='SUPPLE'>SUPPLE</a></th>
+	</tr>
+	<tr>
+		<td>SUPPLE Parser</td>
+		<td>&nbsp;</td>
+		<td>shef.nlp.supple.SUPPLE</td>
+	</tr>
+	<tr>
 		<th colspan='3'><a name='Tools'>Tools</a></th>
 	</tr>
 	<tr>
@@ -549,7 +561,7 @@ Written by Luc Plamondon, Université de Montréal<br>
 <h2>Other contributed plugins</h2>
 <ul type='circle'>
 	<li><a href='#npe'>Multi-lingual Noun Phrase Extractor</a></li>
-	<li><a href='#kaon2ontology'>Kaon2ontology</a></li>
+	<li><a href='#kaon2ontology'>KAON Ontology</a></li>
 </ul>
 
 <table border='1'>
@@ -558,29 +570,18 @@ Written by Luc Plamondon, Université de Montréal<br>
 	</tr>
 	<tr>
 		<td>NPE</td>
-		<td>NPE is a multi-lingual noun phrase (NP) extraction component developed for the GATE architecture, implemented in JAPE. It currently supports English, German, and French. See <a href="http://www.ipd.uka.de/~durm/tm/npe/">http://www.ipd.uka.de/~durm/tm/npe/</a></td>
-		<td>?? JAPE grammar</td>
+		<td>NPE is a multi-lingual noun phrase (NP) extraction component developed for the GATE architecture, implemented in JAPE. It currently supports English, German, and French. To download and for more information, see <a href="http://www.ipd.uka.de/~durm/tm/npe/">http://www.ipd.uka.de/~durm/tm/npe/</a></td>
+		<td>en-np_main.jape</td>
 	</tr>
 	<tr>
-		<th colspan='3'><a name="kaon2ontology"/>kaon2ontology</th>
+		<th colspan='3'><a name="kaon2ontology"/>KAON Ontology</th>
 	</tr>
 	<tr>
-		<td>kaon2ontology</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
+		<td>KAON Ontology</td>
+		<td>An ontology implementation using KAON2 for I/O.</td>
+		<td>gate.creole.ontology.kaon2.KAON2OntologyImpl</td>
 	</tr>
 </table>
-<hr/>
-
-<b><i>ideas</i></b>
-<ul>
-        <li>Keep short description, but also link to full documentation</li>
-        <li>Where to download it the external plugins? Quick download link,
-        as well as mentioning the download location in the full
-        documentation</li>
-        <li>Class important? .. too much info?</li>
-</ul>
-
 <hr/>
 <table width="100%">
 	<tr>
