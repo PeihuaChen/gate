@@ -6,8 +6,8 @@
     <JAR>kea.jar</JAR>
     <NAME>KEA Keyphrase Extractor</NAME>
     <CLASS>gate.creole.kea.Kea</CLASS>
-    <COMMENT>&lt;HTML&gt;A Keyphrase Extractor by Eibe Frank&lt;br&gt;
-    See &lt;A href=&quot;http://www.nzdl.org/Kea/&quot;&gt;http://www.nzdl.org/Kea/&lt;/A&gt; for details.&lt;/HTML&gt;</COMMENT>
+    <COMMENT>A Keyphrase Extractor by Eibe Frank
+    See http://www.nzdl.org/Kea/ for details.</COMMENT>
     <PARAMETER NAME="document"
       COMMENT="The document to be analysed"
       RUNTIME="true">gate.Document</PARAMETER>
