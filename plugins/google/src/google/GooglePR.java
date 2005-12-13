@@ -10,6 +10,8 @@
  *
  *  Google API and other sources subject to Google License. Please
  *  see http://www.google.com/apis/
+ *  
+ *  $Id$  
  */
 
 package google;
@@ -189,7 +191,10 @@ public class GooglePR extends AbstractLanguageAnalyser implements
 	}
 	
 	public void setPagesToExclude(List pagesToExclude) {
-		this.pagesToExclude = new ArrayList();
+    this.pagesToExclude = new ArrayList();
+    // pagesToExclude is an optional param.
+    // If it is null, the list should be empty.
+    if (pagesToExclude == null) return ;
 		Iterator iterator = pagesToExclude.iterator();
 		while(iterator.hasNext()) {
 			String page = (String) iterator.next();
