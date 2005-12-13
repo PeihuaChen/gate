@@ -239,9 +239,15 @@ public class Minipar extends AbstractLanguageAnalyser implements
 		File gateTextFile = new File(GATETEXTFILE);
 		File binary = new File(getMiniparBinary().getFile());
 		File dataFile = new File(getMiniparDataDir().getFile());
-		String cmdline = binary.getAbsolutePath() + " -p "
-				+ dataFile.getAbsolutePath() + " -file "
-				+ gateTextFile.getAbsolutePath();
+		//String cmdline = binary.getAbsolutePath() + " -p "
+		//		+ dataFile.getAbsolutePath() + " -file "
+		//		+ gateTextFile.getAbsolutePath();
+		String[] cmdline = new String[5];
+		cmdline[0] = binary.getAbsolutePath();
+		cmdline[1] = "-p";
+		cmdline[2] = dataFile.getAbsolutePath();
+		cmdline[3] = "-file";
+		cmdline[4] = gateTextFile.getAbsolutePath();
 		// run minipar and save output
 		try {
 			String line;
