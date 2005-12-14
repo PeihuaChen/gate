@@ -15,7 +15,6 @@
  *
  *  $Id$
  */
-
 package gate.creole.ontology;
 
 /**

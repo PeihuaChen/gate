@@ -20,14 +20,13 @@ package gate.creole.ontology;
 /**
  * This interface holds some constants used by several other intrfaces and
  * classes in the GATE ontology API.
+ * 
  * @author Valentin Tablan
- *
+ * 
  */
 public interface OntologyConstants {
-  /**denotes a direct closure(no transitivity)*/
+  /** denotes a direct closure(no transitivity) */
   public static final byte DIRECT_CLOSURE = 0;
-
-  /**denotes atransitive closure */
+  /** denotes atransitive closure */
   public static final byte TRANSITIVE_CLOSURE = 1;
-  
 }

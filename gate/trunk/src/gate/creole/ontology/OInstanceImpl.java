@@ -17,13 +17,15 @@
  */
 package gate.creole.ontology;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class OInstanceImpl extends OntologyResourceImpl implements OInstance {
   protected Object userData;
   protected Set instanceClasses;
 
-  public OInstanceImpl(String name, String comment, Set classes, 
+  public OInstanceImpl(String name, String comment, Set classes,
           Ontology ontology) {
     super(name, comment, ontology);
     this.instanceClasses = new HashSet(classes);
@@ -31,12 +33,12 @@ public class OInstanceImpl extends OntologyResourceImpl implements OInstance {
     setURI(ontology.getSourceURI() + name);
   }
 
-  public OInstanceImpl(String name, String comment, OClass aClass, 
+  public OInstanceImpl(String name, String comment, OClass aClass,
           Ontology ontology) {
     this(name, comment, new HashSet(), ontology);
     instanceClasses.add(aClass);
   }
-  
+
   public Set getOClasses() {
     return instanceClasses;
   }
@@ -70,7 +72,6 @@ public class OInstanceImpl extends OntologyResourceImpl implements OInstance {
     System.out.println("getDifferentFrom not supported yet");
     return null;
   }
-
 
   public void setSameIndividualAs(OInstance theIndividual) {
     System.out.println("setSameIndividualAs not supported yet");

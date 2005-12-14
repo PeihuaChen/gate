@@ -25,25 +25,30 @@ public interface Ontology extends Taxonomy {
   /**
    * Adds an instance to the ontology.
    * 
-   * @param name the name for the new instance
-   * @param theClass the class to which the instance belongs
+   * @param name
+   *          the name for the new instance
+   * @param theClass
+   *          the class to which the instance belongs
    * @return the OInstance that has been added to the ontology
    */
   public OInstance addInstance(String name, OClass theClass);
-  
-  /** 
-   * Adds a preconstructed instance to the ontology. 
+
+  /**
+   * Adds a preconstructed instance to the ontology.
    */
   public void addInstance(OInstance theInstance);
 
   /**
    * Removes the instance from the ontology.
-   * @param theInstance to be removed
+   * 
+   * @param theInstance
+   *          to be removed
    */
   public void removeInstance(OInstance theInstance);
 
   /**
    * Gets all instances in the ontology.
+   * 
    * @return a {@link Set} of OInstance objects
    */
   public Set getInstances();
@@ -53,7 +58,8 @@ public interface Ontology extends Taxonomy {
    * instances of sub-classes. If only the instances of the given class are
    * needed, then use getDirectInstances.
    * 
-   * @param theClass the class of the instances
+   * @param theClass
+   *          the class of the instances
    * @return {@link Set} of OInstance objects
    */
   public Set getInstances(OClass theClass);
@@ -61,14 +67,17 @@ public interface Ontology extends Taxonomy {
   /**
    * Gets all instances in the ontology, which belong to the given class only.
    * 
-   * @param theClass the class of the instances
+   * @param theClass
+   *          the class of the instances
    * @return {@link Set} of OInstance objects
    */
   public Set getDirectInstances(OClass theClass);
 
   /**
    * Gets the instance with the given name.
-   * @param instanceName the instance name
+   * 
+   * @param instanceName
+   *          the instance name
    * @return the OInstance object with this name
    */
   public OInstance getInstanceByName(String instanceName);
@@ -76,11 +85,16 @@ public interface Ontology extends Taxonomy {
   /**
    * Creates a new Datatype property in this ontology where the domain consists
    * of a single {@link OClass}.
-   * @param name the name for the new property.
-   * @param comment the comment for the new property.
-   * @param domain the {@link OClass} to which this property applies.
-   * @param range the {@link Class} specifying the types of Java objects
-   * that this property has as values.
+   * 
+   * @param name
+   *          the name for the new property.
+   * @param comment
+   *          the comment for the new property.
+   * @param domain
+   *          the {@link OClass} to which this property applies.
+   * @param range
+   *          the {@link Class} specifying the types of Java objects that this
+   *          property has as values.
    * @return the newly created property.
    */
   public DatatypeProperty addDatatypeProperty(String name, String comment,
@@ -88,138 +102,191 @@ public interface Ontology extends Taxonomy {
 
   /**
    * Create a DatatypeProperty with the given domain and range.
-   * @param name the name for the new property.
-   * @param comment the comment for the new property.
-   * @param domain the set of ontology classes (i.e. {@link OClass} objects} 
-   * that constitutes the range for the new property. The property only applies
-   * to instances that belong to <b>all</b> classes included in its domain.
-   * An empty set means that the property applies to instances of any class.
-   * @param range the {@link Class} specifying the types of Java objects
-   * that this property has as values.
+   * 
+   * @param name
+   *          the name for the new property.
+   * @param comment
+   *          the comment for the new property.
+   * @param domain
+   *          the set of ontology classes (i.e. {@link OClass} objects} that
+   *          constitutes the range for the new property. The property only
+   *          applies to instances that belong to <b>all</b> classes included
+   *          in its domain. An empty set means that the property applies to
+   *          instances of any class.
+   * @param range
+   *          the {@link Class} specifying the types of Java objects that this
+   *          property has as values.
    * @return the newly created property.
    */
   public DatatypeProperty addDatatypeProperty(String name, String comment,
-          Set domain, Class range); 
+          Set domain, Class range);
 
   /**
    * Creates a new generic property that is neither datatype or object property.
    * This can be for instance a RDF property.
-   * @param name the name for the new property.
-   * @param comment the comment for the new property.
-   * @param domain the set of ontology classes (i.e. {@link OClass} objects} 
-   * that constitutes the range for the new property. The property only applies
-   * to instances that belong to <b>all</b> classes included in its domain.
-   * An empty set means that the property applies to instances of any class.
-   * @param range the set of ontology classes (i.e. {@link OClass} objects} 
-   * that constitutes the range for the new property.
+   * 
+   * @param name
+   *          the name for the new property.
+   * @param comment
+   *          the comment for the new property.
+   * @param domain
+   *          the set of ontology classes (i.e. {@link OClass} objects} that
+   *          constitutes the range for the new property. The property only
+   *          applies to instances that belong to <b>all</b> classes included
+   *          in its domain. An empty set means that the property applies to
+   *          instances of any class.
+   * @param range
+   *          the set of ontology classes (i.e. {@link OClass} objects} that
+   *          constitutes the range for the new property.
    * @return the newly created property.
    */
   public Property addProperty(String name, String comment, Set domain, Set range);
-  
+
   /**
    * Creates a new generic property that is neither datatype or object property.
    * This can be for instance a RDF property.
-   * @param name the name for the new property.
-   * @param comment the comment for the new property.
-   * @param domain the {@link OClass} defining the type of instances this 
-   * property can apply to.
-   * @param range Java {@link Class} defining the type of values this proeprty 
-   * can take.
+   * 
+   * @param name
+   *          the name for the new property.
+   * @param comment
+   *          the comment for the new property.
+   * @param domain
+   *          the {@link OClass} defining the type of instances this property
+   *          can apply to.
+   * @param range
+   *          Java {@link Class} defining the type of values this proeprty can
+   *          take.
    * @return the newly created property.
    */
-  public Property addProperty(String name, String comment, OClass domain, 
+  public Property addProperty(String name, String comment, OClass domain,
           Class range);
-  
+
   /**
    * Creates a new object property (a property that takes instances as values).
-   * @param name the name for the new property.
-   * @param comment the comment for the new property.
-   * @param domain the set of ontology classes (i.e. {@link OClass} objects} 
-   * that constitutes the range for the new property. The property only applies
-   * to instances that belong to <b>all</b> classes included in its domain.
-   * An empty set means that the property applies to instances of any class.
-   * @param range the set of ontology classes (i.e. {@link OClass} objects} 
-   * that constitutes the range for the new property.
+   * 
+   * @param name
+   *          the name for the new property.
+   * @param comment
+   *          the comment for the new property.
+   * @param domain
+   *          the set of ontology classes (i.e. {@link OClass} objects} that
+   *          constitutes the range for the new property. The property only
+   *          applies to instances that belong to <b>all</b> classes included
+   *          in its domain. An empty set means that the property applies to
+   *          instances of any class.
+   * @param range
+   *          the set of ontology classes (i.e. {@link OClass} objects} that
+   *          constitutes the range for the new property.
    * @return the newly created property.
    */
-  public ObjectProperty addObjectProperty(String name, String comment, 
+  public ObjectProperty addObjectProperty(String name, String comment,
           Set domain, Set range);
-  
+
   /**
    * Creates a new object property (a property that takes instances as values).
-   * @param name the name for the new property.
-   * @param comment the comment for the new property.
-   * @param domain the {@link OClass} to which this property applies.
-   * @param range the {@link OClass} specifying the types of instances that this
-   * property can take as values.
+   * 
+   * @param name
+   *          the name for the new property.
+   * @param comment
+   *          the comment for the new property.
+   * @param domain
+   *          the {@link OClass} to which this property applies.
+   * @param range
+   *          the {@link OClass} specifying the types of instances that this
+   *          property can take as values.
    * @return the newly created property.
    */
-  public ObjectProperty addObjectProperty(String name, String comment, 
+  public ObjectProperty addObjectProperty(String name, String comment,
           OClass domain, OClass range);
 
   /**
    * Creates a new symmetric property (an object property that is symmetric).
-   * @param name the name for the new property.
-   * @param comment the comment for the new property.
-   * @param domain the set of ontology classes (i.e. {@link OClass} objects} 
-   * that constitutes the range for the new property. The property only applies
-   * to instances that belong to <b>all</b> classes included in its domain.
-   * An empty set means that the property applies to instances of any class.
-   * @param range the set of ontology classes (i.e. {@link OClass} objects} 
-   * that constitutes the range for the new property.
+   * 
+   * @param name
+   *          the name for the new property.
+   * @param comment
+   *          the comment for the new property.
+   * @param domain
+   *          the set of ontology classes (i.e. {@link OClass} objects} that
+   *          constitutes the range for the new property. The property only
+   *          applies to instances that belong to <b>all</b> classes included
+   *          in its domain. An empty set means that the property applies to
+   *          instances of any class.
+   * @param range
+   *          the set of ontology classes (i.e. {@link OClass} objects} that
+   *          constitutes the range for the new property.
    * @return the newly created property.
    */
-  public SymmetricProperty addSymmetricProperty(String name, String comment, 
+  public SymmetricProperty addSymmetricProperty(String name, String comment,
           Set domain, Set range);
 
   /**
    * Creates a new symmetric property.
-   * @param name the name for the new property.
-   * @param comment the comment for the new property.
-   * @param domain the {@link OClass} to which this property applies.
-   * @param range the {@link OClass} specifying the types of instances that this
-   * property can take as values.
+   * 
+   * @param name
+   *          the name for the new property.
+   * @param comment
+   *          the comment for the new property.
+   * @param domain
+   *          the {@link OClass} to which this property applies.
+   * @param range
+   *          the {@link OClass} specifying the types of instances that this
+   *          property can take as values.
    * @return the newly created property.
    */
-  public SymmetricProperty addSymmetricProperty(String name, String comment, 
+  public SymmetricProperty addSymmetricProperty(String name, String comment,
           OClass domain, OClass range);
-  
+
   /**
    * Creates a new transitive property (an object property that is transitive).
-   * @param name the name for the new property.
-   * @param comment the comment for the new property.
-   * @param domain the set of ontology classes (i.e. {@link OClass} objects} 
-   * that constitutes the range for the new property. The property only applies
-   * to instances that belong to <b>all</b> classes included in its domain.
-   * An empty set means that the property applies to instances of any class.
-   * @param range the set of ontology classes (i.e. {@link OClass} objects} 
-   * that constitutes the range for the new property.
+   * 
+   * @param name
+   *          the name for the new property.
+   * @param comment
+   *          the comment for the new property.
+   * @param domain
+   *          the set of ontology classes (i.e. {@link OClass} objects} that
+   *          constitutes the range for the new property. The property only
+   *          applies to instances that belong to <b>all</b> classes included
+   *          in its domain. An empty set means that the property applies to
+   *          instances of any class.
+   * @param range
+   *          the set of ontology classes (i.e. {@link OClass} objects} that
+   *          constitutes the range for the new property.
    * @return the newly created property.
-   */  
+   */
   public TransitiveProperty addTransitiveProperty(String name, String comment,
           Set domain, Set range);
 
   /**
    * Creates a new transitive property.
-   * @param name the name for the new property.
-   * @param comment the comment for the new property.
-   * @param domain the {@link OClass} to which this property applies.
-   * @param range the {@link OClass} specifying the types of instances that this
-   * property can take as values.
+   * 
+   * @param name
+   *          the name for the new property.
+   * @param comment
+   *          the comment for the new property.
+   * @param domain
+   *          the {@link OClass} to which this property applies.
+   * @param range
+   *          the {@link OClass} specifying the types of instances that this
+   *          property can take as values.
    * @return the newly created property.
    */
   public TransitiveProperty addTransitiveProperty(String name, String comment,
           OClass domain, OClass range);
-  
+
   /**
    * Gets the set of all known property definitions in this ontology.
+   * 
    * @return a {@link Set} of {@link Property} objects.
    */
   public Set getPropertyDefinitions();
-  
+
   /**
    * Returns the property definition for a given property.
-   * @param name the name for which the definition is sought.
+   * 
+   * @param name
+   *          the name for which the definition is sought.
    * @return a{@link Property} object.
    */
   public Property getPropertyDefinitionByName(String name);

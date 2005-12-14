@@ -15,24 +15,29 @@
  *
  *  $Id$
  */
-
 package gate.creole.ontology;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
-public class OClassImpl extends TClassImpl implements OClass  {
-
+public class OClassImpl extends TClassImpl implements OClass {
   private Set disjointClassesSet;
   private Set sameClassesSet;
 
   /**
    * Creates a new class given id,name,comment and ontology.
-   * @param anId the id of the new class
-   * @param aName the name of the new class
-   * @param aComment the comment of the new class
-   * @param anOntology the ontology to which the new class belongs
+   * 
+   * @param anId
+   *          the id of the new class
+   * @param aName
+   *          the name of the new class
+   * @param aComment
+   *          the comment of the new class
+   * @param anOntology
+   *          the ontology to which the new class belongs
    */
-  public OClassImpl(String anId, String aName, String aComment, Ontology anOntology) {
+  public OClassImpl(String anId, String aName, String aComment,
+          Ontology anOntology) {
     super(anId, aName, aComment, anOntology);
     disjointClassesSet = new HashSet();
     sameClassesSet = new HashSet();
@@ -40,26 +45,22 @@ public class OClassImpl extends TClassImpl implements OClass  {
   }
 
   public void setDisjointWith(OClass theClass) {
-    if (theClass == null)
-      return;
+    if(theClass == null) return;
     disjointClassesSet.add(theClass);
   }
 
   public void setSameClassAs(OClass theClass) {
-    if (theClass == null)
-      return;
+    if(theClass == null) return;
     this.sameClassesSet.add(theClass);
   }
 
   public Set getDisjointClasses() {
-    if (this.disjointClassesSet.isEmpty())
-      return null;
+    if(this.disjointClassesSet.isEmpty()) return null;
     return this.disjointClassesSet;
   }
 
   public Set getSameClasses() {
-    if (this.sameClassesSet.isEmpty())
-      return null;
+    if(this.sameClassesSet.isEmpty()) return null;
     return this.sameClassesSet;
   }
 

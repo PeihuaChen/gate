@@ -24,7 +24,7 @@ import java.util.Set;
  * 
  */
 public class TransitivePropertyImpl extends ObjectPropertyImpl implements
-                                                             TransitiveProperty {
+                                                              TransitiveProperty {
   /**
    * @param name
    * @param comment

@@ -14,27 +14,26 @@
  *
  *  $Id$*
  */
+package gate.creole.ontology;
 
- package gate.creole.ontology;
-
- import java.util.Set;
+import java.util.Set;
 
 public interface OClass extends TClass {
-
   /** Indicates that these are disjoint classes */
   public void setDisjointWith(OClass theClass);
 
   /** Indicates that these classes are the same */
   public void setSameClassAs(OClass theClass);
 
-  /** Returns a set of all classes that are disjoint with ours. Null if
-   *  no such classes.
+  /**
+   * Returns a set of all classes that are disjoint with ours. Null if no such
+   * classes.
    */
   public Set getDisjointClasses();
 
-  /** Returns a set of all classes that are the same as ours. Null if
-   *  no such classes.
+  /**
+   * Returns a set of all classes that are the same as ours. Null if no such
+   * classes.
    */
   public Set getSameClasses();
-
 }

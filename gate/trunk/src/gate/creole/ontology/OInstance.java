@@ -15,36 +15,36 @@
  *
  *  $Id$
  */
-
 package gate.creole.ontology;
 
-import java.util.List;
 import java.util.Set;
 
 public interface OInstance extends OntologyResource {
-
-  /** Gets the set of classes this instance belongs to.
-   *  @return a set of {@link OClass} objects.
+  /**
+   * Gets the set of classes this instance belongs to.
+   * 
+   * @return a set of {@link OClass} objects.
    */
   public Set getOClasses();
 
-
-  /** Sets the user data of this instance. To be used to
-   * store arbitrary data on instances.
+  /**
+   * Sets the user data of this instance. To be used to store arbitrary data on
+   * instances.
    */
   public void setUserData(Object theUserData);
 
-  /** Gets the user data of this instance.
-   *  @return the object which is user data
+  /**
+   * Gets the user data of this instance.
+   * 
+   * @return the object which is user data
    */
   public Object getUserData();
 
   public void setDifferentFrom(OInstance theIndividual);
 
   public Set getDifferentFrom();
-  
+
   public void setSameIndividualAs(OInstance theIndividual);
 
   public Set getSameIndividualAs();
-
 }
