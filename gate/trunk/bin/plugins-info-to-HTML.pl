@@ -156,7 +156,7 @@ sub getElement {
 	{
 		my $elementValue = $1;
 		# Finds all urls and converts them to links.
-		$elementValue =~ s|(http://[^\s)]+)|<a href="$1">$1</a>|g;
+		$elementValue =~ s|(http://[^\s)]+)|<a href="$1">(docs)</a>|g;
 		return $elementValue;
 	}
 	else 
