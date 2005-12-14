@@ -12,7 +12,7 @@
     <COMMENT>
 A module for executing augmented Jape grammars.
 Written by Luc Plamondon, Université de Montréal
-http://www.iro.umontreal.ca/~plamondl/mtltransducer/
+(http://gate.ac.uk/sale/tao/#sec:misc-creole:montrealtransducer)
     </COMMENT>
     <PARAMETER NAME="document" RUNTIME="true"
       COMMENT="The document to be processed">gate.Document</PARAMETER>

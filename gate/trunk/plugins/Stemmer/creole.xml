@@ -8,7 +8,7 @@
       <NAME>Stemmer PR</NAME>
       <JAR>stemmer.jar</JAR>
       <CLASS>stemmer.SnowballStemmer</CLASS>
-      <COMMENT>Snowball stemmers integrated</COMMENT>
+      <COMMENT>Wrapper for the Snowball stemmer (http://gate.ac.uk/sale/tao/#sec:misc-creole:stemmer)</COMMENT>
  <PARAMETER
         NAME="document"
         RUNTIME="true"

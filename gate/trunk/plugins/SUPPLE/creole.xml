@@ -4,6 +4,7 @@
 
     <RESOURCE>
       <NAME>SUPPLE Parser</NAME>
+      <COMMENT>SUPPLE bottom-up chart parser (http://gate.ac.uk/sale/tao/#sec:misc-creole:supple)</COMMENT>
       <CLASS>shef.nlp.supple.SUPPLE</CLASS>
       <!-- core SUPPLE classes -->
       <JAR>SUPPLE.jar</JAR>

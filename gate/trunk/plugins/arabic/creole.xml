@@ -9,7 +9,7 @@
       <NAME>Arabic Tokeniser</NAME>
  <JAR>arabic.jar</JAR>
       <CLASS>arabic.ArabicTokeniser</CLASS>
-      <COMMENT>A customisable Arabictokeniser.</COMMENT>
+      <COMMENT>A customisable Arabic tokeniser.</COMMENT>
       <PARAMETER NAME="document" COMMENT="The document to be tokenised"
         RUNTIME="true">gate.Document</PARAMETER>
       <PARAMETER NAME="annotationSetName" RUNTIME="true"
