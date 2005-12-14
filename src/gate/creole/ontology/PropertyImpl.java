@@ -17,15 +17,17 @@
  */
 package gate.creole.ontology;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Set;
 import com.ontotext.gate.ontology.OntologyImpl;
 
 /**
  * This class provides implementations for methods common to all types of
  * ontological properties.
  */
-public class PropertyImpl extends OntologyResourceImpl implements
-                                                               Property {
+public class PropertyImpl extends OntologyResourceImpl implements Property {
   /**
    * The set of domain restrictions (i.e. {@link OClass} objects} for this
    * property. This is composed from the {@link #directDomain} plus all the
@@ -60,7 +62,7 @@ public class PropertyImpl extends OntologyResourceImpl implements
 
   /**
    * Creates a property.
-   *
+   * 
    * @param name
    *          the name of the property
    * @param domain
@@ -91,7 +93,7 @@ public class PropertyImpl extends OntologyResourceImpl implements
   public PropertyImpl(String name, String comment, OClass aDomainClass,
           Object aRangeType, Ontology ontology) {
     this(name, comment, new HashSet(), new HashSet(), ontology);
-    if (aDomainClass != null) {
+    if(aDomainClass != null) {
       this.directDomain.add(aDomainClass);
       this.domain.add(aDomainClass);
     }
@@ -177,7 +179,7 @@ public class PropertyImpl extends OntologyResourceImpl implements
 
   /**
    * Add a SuperPropertyOf relation between the given property and this.
-   *
+   * 
    * @param property
    */
   public void addSubProperty(Property property) {
@@ -208,7 +210,7 @@ public class PropertyImpl extends OntologyResourceImpl implements
 
   /*
    * (non-Javadoc)
-   *
+   * 
    * @see gate.creole.ontology.Property#isFunctional()
    */
   public boolean isFunctional() {
@@ -217,7 +219,7 @@ public class PropertyImpl extends OntologyResourceImpl implements
 
   /*
    * (non-Javadoc)
-   *
+   * 
    * @see gate.creole.ontology.Property#isInverseFunctional()
    */
   public boolean isInverseFunctional() {
@@ -226,7 +228,7 @@ public class PropertyImpl extends OntologyResourceImpl implements
 
   /*
    * (non-Javadoc)
-   *
+   * 
    * @see gate.creole.ontology.Property#setFunctional(boolean)
    */
   public void setFunctional(boolean functional) {
@@ -235,7 +237,7 @@ public class PropertyImpl extends OntologyResourceImpl implements
 
   /*
    * (non-Javadoc)
-   *
+   * 
    * @see gate.creole.ontology.Property#setInverseFunctional(boolean)
    */
   public void setInverseFunctional(boolean inverseFunctional) {
@@ -244,12 +246,12 @@ public class PropertyImpl extends OntologyResourceImpl implements
 
   /**
    * Checks whether a provided value can be a domain value for this property. If
-   * the value is an {@link OInstance} then, in order to be a valid domain
-   * value it needs to be a member of <b>all</b> the classes defined as members
-   * of the domain of this property. The domain of this property is defined
-   * recursively based on its super-properties as well.
-   * For any other types of values it returns <tt>true</tt>.
-   *
+   * the value is an {@link OInstance} then, in order to be a valid domain value
+   * it needs to be a member of <b>all</b> the classes defined as members of
+   * the domain of this property. The domain of this property is defined
+   * recursively based on its super-properties as well. For any other types of
+   * values it returns <tt>true</tt>.
+   * 
    * @param instance
    *          the instance to be checked.
    * @return <tt>true</tt> if the provided instance can be a domain value for
@@ -260,9 +262,8 @@ public class PropertyImpl extends OntologyResourceImpl implements
       OInstance instance = (OInstance)resource;
       Set domainClasses = new HashSet(getDomain());
       boolean result = true;
-      //if there are no restrictions on the domain, then any domain is valid
-      if(domainClasses.isEmpty())
-        return true;
+      // if there are no restrictions on the domain, then any domain is valid
+      if(domainClasses.isEmpty()) return true;
       Iterator instanceClassIter = instance.getOClasses().iterator();
       while(result && instanceClassIter.hasNext()) {
         OClass anInstanceClass = (OClass)instanceClassIter.next();
@@ -282,45 +283,44 @@ public class PropertyImpl extends OntologyResourceImpl implements
   }
 
   /**
-   *  Checks whether a provided instance can be a range value for this
-   *  property. For an instance to be a valid range value it needs to be a
-   *  member of <b>all</b> the classes defined as members of the range of this
-   *  property. The range of this property is defined recursively based on its
-   *  super-properties as well.
-   * @param instance the instance to be checked.
+   * Checks whether a provided instance can be a range value for this property.
+   * For an instance to be a valid range value it needs to be a member of <b>all</b>
+   * the classes defined as members of the range of this property. The range of
+   * this property is defined recursively based on its super-properties as well.
+   * 
+   * @param instance
+   *          the instance to be checked.
    * @return <tt>true</tt> if the provided instance can be a range value for
-   * this property.
+   *         this property.
    */
   public boolean isValidRange(Object value) {
-    if(value instanceof OInstance){
-      //implementation for ObjectProperties
+    if(value instanceof OInstance) {
+      // implementation for ObjectProperties
       OInstance instance = (OInstance)value;
       Set rangeClasses = new HashSet(getRange());
-
       boolean result = true;
       Iterator instanceClassIter = instance.getOClasses().iterator();
       while(result && instanceClassIter.hasNext()) {
         OClass anInstanceClass = (OClass)instanceClassIter.next();
-        //first do the simple test
+        // first do the simple test
         if(!rangeClasses.contains(anInstanceClass)) {
-          //the class is not directly contained in the range,
-          //maybe one super class is?
-          Set superClasses = anInstanceClass.
-              getSuperClasses(OntologyConstants.TRANSITIVE_CLOSURE);
+          // the class is not directly contained in the range,
+          // maybe one super class is?
+          Set superClasses = anInstanceClass
+                  .getSuperClasses(OntologyConstants.TRANSITIVE_CLOSURE);
           Set intersection = new HashSet(superClasses);
           intersection.retainAll(rangeClasses);
           if(intersection.isEmpty()) result = false;
         }
       }
       return result;
-    }else if(value instanceof OntologyResource){
-      //implementation for generic (a.k.a. RDF) properties
+    } else if(value instanceof OntologyResource) {
+      // implementation for generic (a.k.a. RDF) properties
       return true;
-    }
-    else{
-      //implementation for DataType properties
+    } else {
+      // implementation for DataType properties
       Iterator rangIter = getRange().iterator();
-      while(rangIter.hasNext()){
+      while(rangIter.hasNext()) {
         if(!((Class)rangIter.next()).isAssignableFrom(value.getClass()))
           return false;
       }
@@ -334,7 +334,7 @@ public class PropertyImpl extends OntologyResourceImpl implements
 
   /**
    * Gets the set of super-properties for this property.
-   *
+   * 
    * @param {@link OntologyConstants#DIRECT_CLOSURE}
    *          for direct super-properties only or
    *          {@link OntologyConstants#TRANSITIVE_CLOSURE} for all the
@@ -369,7 +369,7 @@ public class PropertyImpl extends OntologyResourceImpl implements
 
   /**
    * Gets the set of sub-properties for this property.
-   *
+   * 
    * @param {@link OntologyConstants#DIRECT_CLOSURE}
    *          for direct sub-properties only or
    *          {@link OntologyConstants#TRANSITIVE_CLOSURE} for all the

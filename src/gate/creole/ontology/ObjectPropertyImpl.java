@@ -17,7 +17,9 @@
  */
 package gate.creole.ontology;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import com.ontotext.gate.ontology.OntologyImpl;
 
 public class ObjectPropertyImpl extends PropertyImpl implements ObjectProperty {
@@ -25,39 +27,49 @@ public class ObjectPropertyImpl extends PropertyImpl implements ObjectProperty {
 
   /**
    * Convenience constructor for simple cases where the domain and range are
-   * single classes. 
-   * @param aName the name of the property.
-   * @param aDomainClass the class representing the domain.
-   * @param aRange the class representing the range.
-   * @param anOntology the ontology this property belongs to.
+   * single classes.
+   * 
+   * @param aName
+   *          the name of the property.
+   * @param aDomainClass
+   *          the class representing the domain.
+   * @param aRange
+   *          the class representing the range.
+   * @param anOntology
+   *          the ontology this property belongs to.
    */
-  public ObjectPropertyImpl(String name, String comment, OClass aDomainClass, 
+  public ObjectPropertyImpl(String name, String comment, OClass aDomainClass,
           OClass aRange, Ontology anOntology) {
     super(name, comment, aDomainClass, aRange, anOntology);
     inversePropertiesSet = new HashSet();
   }
-  
+
   /**
    * Constructor for this property.
-   * @param aName the name of the property.
-   * @param aDomain the set of domain restrictions for this property. A set of 
-   * {@link OClass} values.
-   * @param aRange the set of range restrictions for this property. A set of 
-   * {@link OClass} values. 
-   * @param anOntology the ontology this property belongs to.
+   * 
+   * @param aName
+   *          the name of the property.
+   * @param aDomain
+   *          the set of domain restrictions for this property. A set of
+   *          {@link OClass} values.
+   * @param aRange
+   *          the set of range restrictions for this property. A set of
+   *          {@link OClass} values.
+   * @param anOntology
+   *          the ontology this property belongs to.
    */
-  public ObjectPropertyImpl(String name, String comment, Set aDomain, Set aRange, 
-          Ontology anOntology) {
+  public ObjectPropertyImpl(String name, String comment, Set aDomain,
+          Set aRange, Ontology anOntology) {
     super(name, comment, aDomain, aRange, anOntology);
     inversePropertiesSet = new HashSet();
   }
-  
+
   public void addSuperProperty(Property property) {
     super.addSuperProperty(property);
-    //add restrictions from super-property to the range set
+    // add restrictions from super-property to the range set
     range.addAll(property.getRange());
     OntologyImpl.reduceToMostSpecificClasses(range);
-    //propagate the changes to sub properties
+    // propagate the changes to sub properties
     Iterator subPropIter = getSubProperties(TRANSITIVE_CLOSURE).iterator();
     while(subPropIter.hasNext()) {
       Property aSubProperty = (Property)subPropIter.next();
@@ -66,28 +78,25 @@ public class ObjectPropertyImpl extends PropertyImpl implements ObjectProperty {
       }
     }
   }
-  
+
   /**
    * @param instance
    * @return true if this value is compatible with the range restrictions on the
    *         property. False otherwise.
    */
-  public boolean isValidRange(OInstance instance){
+  public boolean isValidRange(OInstance instance) {
     return super.isValidRange(instance);
   }
 
-
-  
   public Set getRange() {
     return range;
   }
-  
+
   public Set getInverseProperties() {
     return this.inversePropertiesSet;
   }
-  
+
   public void setInverseOf(Property theInverse) {
     this.inversePropertiesSet.add(theInverse);
   }
-  
 }

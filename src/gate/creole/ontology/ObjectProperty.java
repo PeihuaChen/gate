@@ -15,31 +15,30 @@
  *
  *  $Id$
  */
-
 package gate.creole.ontology;
 
 import java.util.Set;
 
 public interface ObjectProperty extends Property {
-  
   /**
-   * Returns the set of inverse properties for this property. Null if no
-   * such properties. The set contains objects of KBProperty instances.
+   * Returns the set of inverse properties for this property. Null if no such
+   * properties. The set contains objects of KBProperty instances.
+   * 
    * @return a {@link Set} value.
    */
   public Set getInverseProperties();
 
   /**
    * Set theInverse as inverse property to this property.
+   * 
    * @param theInverse
    */
   public void setInverseOf(Property theInverse);
-  
+
   /**
    * @param instance
    * @return true if this value is compatible with the range restrictions on the
    *         property. False otherwise.
    */
   public boolean isValidRange(OInstance instance);
-  
 }

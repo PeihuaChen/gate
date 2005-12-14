@@ -36,7 +36,6 @@ public class OntologyResourceImpl implements OntologyResource {
   protected Ontology ontology;
   protected HashMap instanceProperties;
 
-
   public OntologyResourceImpl(String uri, String name, String comment,
           Taxonomy taxonomy) {
     this.comment = comment;
@@ -49,12 +48,12 @@ public class OntologyResourceImpl implements OntologyResource {
 
   /**
    * Constructor variant using the name as the local URI.
+   * 
    * @param name
    * @param comment
    * @param ontology
    */
-  public OntologyResourceImpl(String name, String comment,
-          Taxonomy taxonomy) {
+  public OntologyResourceImpl(String name, String comment, Taxonomy taxonomy) {
     this(name, name, comment, taxonomy);
   }
 
@@ -65,16 +64,15 @@ public class OntologyResourceImpl implements OntologyResource {
     Property prop = ((Ontology)ontology)
             .getPropertyDefinitionByName(propertyName);
     if(prop == null) return false;
-
-    if(prop.isValidDomain(this)){
+    if(prop.isValidDomain(this)) {
       List values = (List)instanceProperties.get(propertyName);
-      if(values == null){
+      if(values == null) {
         values = new ArrayList();
         instanceProperties.put(propertyName, values);
       }
       values.add(theValue);
       return true;
-    }else return false;
+    } else return false;
   }
 
   public Set getSetPropertiesNames() {
@@ -87,9 +85,9 @@ public class OntologyResourceImpl implements OntologyResource {
 
   public boolean removePropertyValue(String propertyName, Object theValue) {
     List values = (List)instanceProperties.get(propertyName);
-    if(values != null){
+    if(values != null) {
       return values.remove(theValue);
-    }else return false;
+    } else return false;
   }
 
   public void removePropertyValues(String propertyName) {

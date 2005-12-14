@@ -20,11 +20,10 @@ package gate.creole.ontology;
 import java.util.Set;
 
 /**
- * This interface defines an ontology property and is the top level interface 
+ * This interface defines an ontology property and is the top level interface
  * for all types of ontological properties.
  */
 public interface Property extends OntologyResource, OntologyConstants {
-  
   /**
    * Add a samePropertyAs relation between the two properties. Each property has
    * a set of these, so it is possible to have samePropertyAs relation between
@@ -55,7 +54,7 @@ public interface Property extends OntologyResource, OntologyConstants {
    * @param property
    */
   public void removeSuperProperty(Property property);
-  
+
   /**
    * Add a SuperPropertyOf relation between the given property and this.
    * 
@@ -69,29 +68,29 @@ public interface Property extends OntologyResource, OntologyConstants {
    * @param property
    */
   public void removeSubProperty(Property property);
-  
-  
+
   /**
    * Returns the set of domain restrictions for this property.
    */
   public Set getDomain();
-  
-  
+
   /**
    * Gets the set of range restrictions for this property. If no range has been
    * set it returns an empty set.
    * 
    * @return a set of {@link OClass} or {@link Class} objects.
    */
-  public Set getRange();  
-  
+  public Set getRange();
+
   /**
    * Checks whether this property can apply to the provided instance
-   * @param instance the instance
+   * 
+   * @param instance
+   *          the instance
    * @return <tt>true</tt> if the property is valid for the instance.
    */
   public boolean isValidDomain(OntologyResource instance);
-  
+
   /**
    * 
    * @param value
@@ -99,7 +98,6 @@ public interface Property extends OntologyResource, OntologyConstants {
    *         property. False otherwise.
    */
   public boolean isValidRange(Object value);
-  
 
   /**
    * Answers whether this property is a functional property. Functional
@@ -110,11 +108,12 @@ public interface Property extends OntologyResource, OntologyConstants {
    * @return <tt>true</tt> if this property is functional.
    */
   public boolean isFunctional();
-  
+
   /**
    * Sets the functional property flag on this property.
-   * @param functional <tt>true</tt> iff the property should be marked as 
-   * functional. 
+   * 
+   * @param functional
+   *          <tt>true</tt> iff the property should be marked as functional.
    */
   public void setFunctional(boolean functional);
 
@@ -127,30 +126,35 @@ public interface Property extends OntologyResource, OntologyConstants {
    * @return <tt>true</tt> if this property is inverse functional.
    */
   public boolean isInverseFunctional();
-  
+
   /**
    * Sets the inverse functional property flag on this property.
-   * @param inverseFunctional <tt>true</tt> iff the property should be marked as 
-   * inverse functional. 
+   * 
+   * @param inverseFunctional
+   *          <tt>true</tt> iff the property should be marked as inverse
+   *          functional.
    */
   public void setInverseFunctional(boolean inverseFunctional);
-  
+
   /**
    * Gets the set of super-properties for this property.
-   * @param {@link OntologyConstants#DIRECT_CLOSURE} for direct super-properties 
-   * only or {@link OntologyConstants#TRANSITIVE_CLOSURE} for all the 
-   * super-properties.
+   * 
+   * @param {@link OntologyConstants#DIRECT_CLOSURE}
+   *          for direct super-properties only or
+   *          {@link OntologyConstants#TRANSITIVE_CLOSURE} for all the
+   *          super-properties.
    * @return a set of {@link Property} values.
    */
   public Set getSuperProperties(byte closure);
- 
+
   /**
    * Gets the set of sub-properties for this property.
-   * @param {@link OntologyConstants#DIRECT_CLOSURE} for direct sub-properties 
-   * only or {@link OntologyConstants#TRANSITIVE_CLOSURE} for all the 
-   * sub-properties.
+   * 
+   * @param {@link OntologyConstants#DIRECT_CLOSURE}
+   *          for direct sub-properties only or
+   *          {@link OntologyConstants#TRANSITIVE_CLOSURE} for all the
+   *          sub-properties.
    * @return a set of {@link Property} values.
    */
-  public Set getSubProperties(byte closure); 
-  
+  public Set getSubProperties(byte closure);
 }
