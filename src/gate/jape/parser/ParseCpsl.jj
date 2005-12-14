@@ -16,7 +16,7 @@ options {
   DEBUG_LOOKAHEAD = false;
   ERROR_REPORTING = true;
   JAVA_UNICODE_ESCAPE = false;
-  UNICODE_INPUT = false;
+  UNICODE_INPUT = true;
   USER_TOKEN_MANAGER = false;
   USER_CHAR_STREAM = false;
   BUILD_PARSER = true;
@@ -1063,6 +1063,9 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.31  2005/12/14 15:58:23  ian_roberts
+// Fixes for JAPE grammars that contain non-Latin1 characters.
+//
 // Revision 1.30  2005/06/20 10:34:20  valyt
 // Ken Williams's patch for ParseCpsl.jj
 //
