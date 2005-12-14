@@ -25,7 +25,7 @@ print "--------------------------------------\n\n";
 # ********** Write HTML for the top of the plugins page **********
 # Open file handle to the HTML file we are creating
 my $htmlFilename = '../doc/plugins.html';
-open(HTMLFILE , ">$htmlFilename") || die("Cannot Open File $htmlFilename");
+open(HTMLFILE , ">:utf8", $htmlFilename) || die("Cannot Open File $htmlFilename");
 
 print HTMLFILE <<ENDHTML;
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
