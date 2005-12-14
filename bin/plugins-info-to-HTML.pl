@@ -38,6 +38,7 @@ print HTMLFILE <<ENDHTML;
 	a img {border: none;}
 	th {background-color: #00CCFF;}
 </style>
+<script src="boxover.js"/>
 </head>
 <body>
 <center>
