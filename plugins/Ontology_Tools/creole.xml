@@ -18,7 +18,7 @@
     <NAME>Jena Ontology</NAME>
     <CLASS>gate.creole.ontology.jena.JenaOntologyImpl</CLASS>
     <INTERFACE>gate.creole.ontology.Ontology</INTERFACE>
-    <COMMENT>An ontology implementation using Jena for I/O.</COMMENT>
+    <COMMENT>An ontology implementation using Jena for I/O (http://gate.ac.uk/sale/tao/#sec:ontologies:lr).</COMMENT>
     <OR>
       <PARAMETER NAME="owlLiteFileURL"
         OPTIONAL="true"
@@ -106,6 +106,7 @@
     <!-- VR NEW Ontology Editor -->
     <RESOURCE>
       <NAME>GATE Ontology Editor</NAME>
+      <COMMENT>Ontology editing tool (http://gate.ac.uk/sale/tao/#sec:ontologies:vr)</COMMENT>
       <CLASS>gate.gui.OntologyEditor</CLASS>
       <GUI TYPE="large">
         <MAIN_VIEWER/>

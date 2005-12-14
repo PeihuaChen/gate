@@ -7,7 +7,7 @@
       <JAR>ir.jar</JAR>
       <NAME>SearchPR</NAME>
       <CLASS>gate.creole.ir.SearchPR</CLASS>
-      <COMMENT>provides IR functionality</COMMENT>
+      <COMMENT>Provides IR functionality (http://gate.ac.uk/sale/tao/#sect:ir)</COMMENT>
       <PARAMETER NAME="corpus" RUNTIME="true"
         COMMENT="The indexed  corpus to be searched">
         gate.creole.ir.IndexedCorpus</PARAMETER>
@@ -27,6 +27,7 @@
     <RESOURCE>
       <NAME>Search Results</NAME>
       <CLASS>gate.gui.SearchPRViewer</CLASS>
+      <COMMENT>Viewer for IR search results</COMMENT>
       <!-- type values can be "large" or "small"-->
       <GUI TYPE="large">
         <MAIN_VIEWER/>

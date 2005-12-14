@@ -4,7 +4,7 @@
 
 		<RESOURCE>
 			<NAME>Bottom-Up Chart Parser</NAME>
-      <COMMENT>This plugin is deprecated, and has been replaced by SUPPLE</COMMENT>
+      <COMMENT>This plugin is deprecated, and has been replaced by SUPPLE (http://gate.ac.uk/sale/tao/#sec:misc-creole:supple)</COMMENT>
 			<CLASS>shef.nlp.buchart.Buchart</CLASS>
 			<JAR>BuChart.jar</JAR>
 			<JAR>lib/plcafe.jar</JAR>

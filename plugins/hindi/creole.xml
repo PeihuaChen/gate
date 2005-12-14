@@ -9,7 +9,7 @@
       <NAME>Hindi Tokeniser</NAME>
  <JAR>hindi.jar</JAR>
       <CLASS>hindi.HindiTokeniser</CLASS>
-      <COMMENT>A customisable Arabictokeniser.</COMMENT>
+      <COMMENT>A customisable Hindi tokeniser.</COMMENT>
       <PARAMETER NAME="document" COMMENT="The document to be tokenised"
         RUNTIME="true">gate.Document</PARAMETER>
       <PARAMETER NAME="annotationSetName" RUNTIME="true"

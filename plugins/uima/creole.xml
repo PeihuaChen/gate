@@ -3,7 +3,7 @@
 <CREOLE>
   <RESOURCE>
     <NAME>UIMA Analysis Engine</NAME>
-    <COMMENT>Wrapper for a Text Analysis Engine from UIMA (http://www.research.ibm.com/UIMA)</COMMENT>
+    <COMMENT>Wrapper for a Text Analysis Engine from UIMA (http://gate.ac.uk/sale/tao/#chap:uima)</COMMENT>
     <CLASS>gate.uima.AnalysisEnginePR</CLASS>
     <JAR>uima-gate.jar</JAR>
     <JAR>lib/uima_core.jar</JAR>

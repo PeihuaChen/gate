@@ -7,7 +7,7 @@
       <JAR>probability.jar</JAR>
       <NAME>ProbabilityPR</NAME>
       <CLASS>probability.ProbabilityPR</CLASS>
-      <COMMENT>A plugin to calculate the probability of the annotations</COMMENT>
+      <COMMENT>A plugin to calculate the probability of annotations (http://gate.ac.uk/sale/tao/#sec:misc-creole:probability)</COMMENT>
         <PARAMETER NAME="corpus" RUNTIME="true" COMMENT="The corpus for which the prob are to be calculated.">gate.Corpus</PARAMETER>
         <PARAMETER NAME="annotationType" RUNTIME="true" COMMENT="The Annotation Type that is to be used." OPTIONAL="false">java.lang.String</PARAMETER>
     </RESOURCE>
