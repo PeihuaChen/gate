@@ -36,7 +36,7 @@ print HTMLFILE <<ENDHTML;
 <META http-equiv="Content-Type" content="text/html; charset=utf-8">
 <style type="text/css">
 	a img {border: none;}
-	th {background-color: #00CCFF;}
+	th {background-color: #A0D0F0;}
 </style>
 <script src="boxover.js"/>
 </head>
@@ -157,7 +157,7 @@ sub getElement {
 	{
 		my $elementValue = $1;
 		# Finds all urls and converts them to links.
-		$elementValue =~ s|(http://[^\s)]+)|<a href="$1">(docs)</a>|g;
+		$elementValue =~ s|(http://[^\s)]+)|<a href="$1">docs</a>|g;
 		return $elementValue;
 	}
 	else 
