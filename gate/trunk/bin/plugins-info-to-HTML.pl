@@ -38,7 +38,6 @@ print HTMLFILE <<ENDHTML;
 	a img {border: none;}
 	th {background-color: #A0D0F0;}
 </style>
-<script src="boxover.js"/>
 </head>
 <body>
 <center>
@@ -132,9 +131,9 @@ print HTMLFILE <<ENDHTML;
 			<a href="http://nlp.shef.ac.uk/"><img src="http://www.gate.ac.uk/revNlpLogo.jpg" width="164" height="60" alt="NLP group"/></a>
 		</td>
 		<td align="right">
-			<img src="http://www.gate.ac.uk/nlpTitle.gif" width="250" height="18"/>
+			<img src="http://www.gate.ac.uk/nlpTitle.gif" width="250" height="18" alt="NLP Group"/>
 			<br/>
-			<img src="http://www.gate.ac.uk/redline.jpg" width="500" height="17"/>
+			<img src="http://www.gate.ac.uk/redline.jpg" width="500" height="17" alt="kewl red line"/>
 		</td>
 	</tr>
 </table>	
