@@ -26,18 +26,6 @@ import java.util.Set;
 
 /** Defines the interface of an ontology */
 public interface Taxonomy extends LanguageResource {
-  /**
-   * Gets taxonomy by URL. The taxonomy will be searched first among the LRs and
-   * afterwards loaded by the URL if not found
-   * 
-   * @param someUrl
-   *          the url of the taxonomy
-   * @return the retrieved or loaded taxonomy
-   * @throws ResourceInstantiationException
-   *           if something gets wrong with the loading
-   */
-  public Taxonomy getOntology(URL someUrl)
-          throws ResourceInstantiationException;
 
   /**
    * Gets the label.
