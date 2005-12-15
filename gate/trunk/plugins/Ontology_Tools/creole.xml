@@ -32,9 +32,9 @@
       <PARAMETER NAME="rdfsFileURL"
         OPTIONAL="true"
         COMMENT="The URL of a RDF(S) file">java.net.URL</PARAMETER>      
-      <PARAMETER NAME="damlFileURL"
+<!--      <PARAMETER NAME="damlFileURL"
         OPTIONAL="true"
-        COMMENT="The URL of a DAML file">java.net.URL</PARAMETER>      
+        COMMENT="The URL of a DAML file">java.net.URL</PARAMETER>      -->
     </OR>
     <PARAMETER NAME="defaultNameSpace"
       COMMENT="The default namespace to be used for local URIs"
