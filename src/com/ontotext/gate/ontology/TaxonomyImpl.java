@@ -9,6 +9,7 @@ import java.util.*;
 import java.net.*;
 import gate.creole.*;
 import gate.creole.ontology.*;
+import gate.creole.ontology.jena.JenaOntologyImpl;
 import gate.*;
 import gate.event.*;
 import gate.util.*;
@@ -69,46 +70,53 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
     }
   }
 
-  /*
-   * this method might cause performance problems and should be updated when
-   * naso's idea with the ids associated with documents is realized.
+  /**
+   * Gets a taxonomy by URL. The taxonomy will be searched first among the 
+   * existing LRs and afterwards loaded by the URL if not found
+   * 
+   * @param someUrl the url of the taxonomy
+   * @return the retrieved or loaded taxonomy
+   * @throws ResourceInstantiationException
+   *           if something gets wrong with the loading
    */
-  public Taxonomy getOntology(URL someUrl)
-          throws ResourceInstantiationException {
-    List lrs = Gate.getCreoleRegister().getLrInstances(
-            "com.ontotext.gate.ontology.DAMLOntology");
+  public static Taxonomy getOntology(URL someUrl) 
+      throws ResourceInstantiationException {
+    //This is the type of taxonomy that gets created when a previously loaded 
+    //one was not found.
+    //This would normally be a constant, but as this method is a horrible hack 
+    //and will be removed at the first opportunity, it was preferred to store
+    //this value here to insulate the hacky code from the rest of this class.
+    String DEFAULT_ONTOLOGY_TYPE = "gate.creole.ontology.jena.JenaOntologyImpl";
+    
+    //first try and find an appropriate already loaded taxonomy
+    List loadedTaxonomies = null;
+    try{
+       loadedTaxonomies = Gate.getCreoleRegister().getAllInstances(
+               Taxonomy.class.getName());
+    }catch(GateException ge){
+      throw new ResourceInstantiationException("Cannot list loaded taxonomies", 
+              ge);
+    }
+    
     Taxonomy result = null;
-    Taxonomy tempo = null;
-    /* unpack the gate:path urls to absolute form */
-    if(-1 != someUrl.getProtocol().indexOf("gate")){
-      someUrl = gate.util.protocols.gate.Handler.class.getResource(Files
-              .getResourcePath()
-              + someUrl.getPath());
-    }// if
-    /*
-     * iterate through the list of lrs and search for the wanted url :this is a
-     * temporary solution
-     */
-    for(int i = 0; i < lrs.size(); i++){
-      tempo = (Taxonomy)lrs.get(i);
-      if(tempo.getURL().equals(someUrl)){
-        result = tempo;
-        break;
-      }
+    Iterator taxIter = loadedTaxonomies.iterator();
+    while(result == null && taxIter.hasNext()){
+      Taxonomy aTaxonomy = (Taxonomy)taxIter.next();
+      if(aTaxonomy.getURL().equals(someUrl)) result = aTaxonomy;
     }
-    if(null == result){
-      FeatureMap fm = Factory.newFeatureMap();
-      fm.put("URL", someUrl);
-      try{
-        result = (Taxonomy)Factory.createResource(
-                "com.ontotext.gate.ontology.DAMLOntology", fm);
-      }catch(Exception e){
-        throw new ResourceInstantiationException(e);
-      }
+    
+    //if not found, load it
+    if(result == null){
+      //hardcoded to use OWL as the ontology type
+      FeatureMap params = Factory.newFeatureMap();
+      params.put("owlLiteFileURL", someUrl);
+      
+      result = (Taxonomy)Factory.createResource(DEFAULT_ONTOLOGY_TYPE, params);
     }
+    
     return result;
-  }// getOntology(url)
-
+  }
+  
   /**
    * Whether the ontology has been modified switches to true when null-ing and
    * reinfering the subclasses and super classes and tops
