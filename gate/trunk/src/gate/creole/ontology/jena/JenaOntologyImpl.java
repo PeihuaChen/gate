@@ -60,8 +60,8 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
             OWL_FULL));
     actionsList.add(new LoadOntologyDataAction("Load RDF(S) data",
             "Reads RDF(S) data from a file and populates the ontology.", RDFS));
-    actionsList.add(new LoadOntologyDataAction("Load DAML data",
-            "Reads DAML data from a file and populates the ontology.", DAML));
+//    actionsList.add(new LoadOntologyDataAction("Load DAML data",
+//            "Reads DAML data from a file and populates the ontology.", DAML));
     actionsList.add(null);
     actionsList.add(new CleanUpAction());
     actionsList.add(null);
