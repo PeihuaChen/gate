@@ -8,7 +8,7 @@
     <RESOURCE>
       <NAME>Gazetteer List Collector</NAME>
       <CLASS>gate.creole.GazetteerListsCollector</CLASS>
-      <COMMENT>A gazetteer lists collector</COMMENT>
+      <COMMENT>Gazetteer lists collector (http://gate.ac.uk/sale/tao/#sec:misc-creole:listscollector)</COMMENT>
       <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
       <PARAMETER NAME="markupASName" DEFAULT="Key" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="annotationTypes" DEFAULT="Organization;Person;Location;Date" RUNTIME="true" OPTIONAL="true">java.util.ArrayList</PARAMETER>
