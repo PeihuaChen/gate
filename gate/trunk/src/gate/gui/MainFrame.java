@@ -611,7 +611,9 @@ public class MainFrame extends JFrame
 
     /*add the ontology editor to the tools menu
     ontotext.bp */
-    toolsMenu.add(new NewOntologyEditorAction());
+    //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    //Removed as it is now obsolete.
+//    toolsMenu.add(new NewOntologyEditorAction());
 
     if(Gate.isEnableJapeDebug()) {
       // by Shafirin Andrey start
