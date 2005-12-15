@@ -61,7 +61,7 @@
     <RESOURCE>
       <NAME>Protege project</NAME>
       <CLASS>gate.creole.ProtegeProjectName</CLASS>
-      <COMMENT>Protege project file name</COMMENT>
+      <COMMENT>Protege project file name (http://gate.ac.uk/sale/tao/#sect:protege:).</COMMENT>
       <INTERFACE>gate.ProtegeProject</INTERFACE>
       <PARAMETER
         NAME="projectName"
