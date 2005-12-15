@@ -3,6 +3,7 @@ package com.ontotext.gate.vr;
 import java.util.*;
 
 
+import com.ontotext.gate.ontology.TaxonomyImpl;
 import com.ontotext.gate.vr.*;
 import gate.creole.ontology.*;
 
@@ -163,7 +164,7 @@ public class ClassNode
       }
       if ( null != turl ){
         Taxonomy o2 = null;
-        try { o2 = o.getOntology(turl);
+        try { o2 = TaxonomyImpl.getOntology(turl);
         } catch (gate.creole.ResourceInstantiationException x) {
         }
         if ( o2 != null && o2.equals(o) ) {

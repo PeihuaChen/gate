@@ -16,6 +16,7 @@ package gate.creole;
 import java.net.URL;
 import java.util.*;
 import com.ontotext.gate.ontology.OntologyImpl;
+import com.ontotext.gate.ontology.TaxonomyImpl;
 
 import edu.stanford.smi.protege.event.*;
 import edu.stanford.smi.protege.model.Cls;
@@ -136,7 +137,7 @@ public class ProtegeProjectName extends AbstractLanguageResource
 
   public Taxonomy getOntology(URL someUrl)
         throws ResourceInstantiationException {
-    return ontotextOntology.getOntology(someUrl);
+    return TaxonomyImpl.getOntology(someUrl);
   }
 
   public String getLabel() {
