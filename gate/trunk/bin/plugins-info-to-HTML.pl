@@ -33,7 +33,8 @@ print HTMLFILE <<ENDHTML;
 
 <head>
 <title>List of plugins available to GATE</title>
-<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="gate.css">
 <style type="text/css">
 	a img {border: none;}
 	th {background-color: #A0D0F0;}
@@ -44,6 +45,11 @@ print HTMLFILE <<ENDHTML;
 	<a href="http://gate.ac.uk/"><img src="http://www.gate.ac.uk/gateHeader.gif" alt="GATE" height="76" width="356"/></a>
 </center>
 <br/>
+<!-- top banner ****************************************************** -->
+<div class="banner">
+	<p>Plugins for GATE</p>
+</div>
+
 <p>This page lists the plugins that are currently available with GATE:</p>
 <ul>
 	<li><a href="#internal-plugins">
@@ -125,6 +131,7 @@ print "done!\n";
 
 # ********** Write the footer images of the plugins page **********
 print HTMLFILE <<ENDHTML;
+<div class="banner">| <a href="../../index.html">gate home</a> |</div>
 <table width="100%">
 	<tr>
 		<td>
