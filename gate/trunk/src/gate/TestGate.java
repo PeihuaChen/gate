@@ -43,6 +43,7 @@ import gate.util.*;
 import gate.wordnet.TestWordNet;
 import gate.xml.TestXml;
 import gate.creole.ml.maxent.*;
+import gate.creole.ontology.TestOntologyAPI;
 import gate.xml.TestRepositioningInfo;
 
 import gnu.getopt.Getopt;
@@ -243,6 +244,7 @@ public class TestGate {
         suite.addTest(TestConfig.suite());
         suite.addTest(TestAnnotation.suite());
         suite.addTest(TestEmail.suite());
+        suite.addTest(TestOntologyAPI.suite());
         
         suite.addTest(TestXml.suite());
         suite.addTest(TestHtml.suite());
