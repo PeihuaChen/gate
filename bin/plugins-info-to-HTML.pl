@@ -116,7 +116,7 @@ print ".. all internal plugin information extracted.\n\n";
 # **************************************************
 
 # ********** Include external-plugins.html page **********
-print "Importing external external plugins information ... ";
+print "Importing external plugins information ... ";
 print HTMLFILE "<a name='external-plugins'></a>\n",
 	"<h2>$externalPluginsTitle</h2>\n";
 my $externalPluginsFilename = '../doc/external-plugins.html';
