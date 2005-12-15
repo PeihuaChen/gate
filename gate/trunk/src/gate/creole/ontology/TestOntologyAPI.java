@@ -4,9 +4,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Set;
+import gate.annotation.TestAnnotation;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.ontology.jena.JenaOntologyImpl;
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 /**
  * Simple test class that load an ontology available online and 
@@ -60,4 +63,9 @@ public class TestOntologyAPI extends TestCase {
     List subclasses = aClass.getSubClassesVSDistance();
     assertEquals(subclasses.size(), 2);
   }
+  /** Test suite routine for the test runner */
+  public static Test suite() {
+    return new TestSuite(TestOntologyAPI.class);
+  } // suite
+  
 }
