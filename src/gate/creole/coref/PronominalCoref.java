@@ -1182,13 +1182,19 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       switch(type) {
 
         case ANTEC_AFTER:
-          return this.antecedentsAfter;
+          return null != this.antecedentsAfter ? 
+                         this.antecedentsAfter : 
+                         new AnnotationSetImpl(document);
 
         case ANTEC_BEFORE:
-          return this.antecedentsBefore;
+          return null != this.antecedentsBefore ? 
+                         this.antecedentsBefore : 
+                         new AnnotationSetImpl(document);
 
         case ANTEC_BACK:
-          return this.antecedentsBackInContext;
+          return null != this.antecedentsBackInContext ? 
+                  this.antecedentsBackInContext : 
+                  new AnnotationSetImpl(document);
 
         default:
           throw new IllegalArgumentException();
