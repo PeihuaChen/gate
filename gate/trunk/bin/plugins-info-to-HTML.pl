@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w -C
+#!/usr/bin/perl -w -CDS
 
 # Script to read all the creole.xml files for every plugin
 # to produce a summary HTML page (GATE/doc/plugins.html)
