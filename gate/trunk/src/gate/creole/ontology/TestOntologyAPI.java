@@ -12,12 +12,12 @@ import junit.framework.TestCase;
  * Simple test class that load an ontology available online and 
  * accesses its content via the ontology API 
  **/
-public class testOntologyAPI extends TestCase {
+public class TestOntologyAPI extends TestCase {
   public static void main(String[] args) {
-    junit.textui.TestRunner.run(testOntologyAPI.class);
+    junit.textui.TestRunner.run(TestOntologyAPI.class);
   }
 
-  public testOntologyAPI(String arg0) {
+  public TestOntologyAPI(String arg0) {
     super(arg0);
   }
 
