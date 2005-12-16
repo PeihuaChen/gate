@@ -63,6 +63,7 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
       
 //      classesDir = new File(workDir, "classes");
       srcDir = new File(workDir, "src");
+      srcDir.deleteOnExit();
         
       grammarFile = new File(URI.create(grammarURL.toExternalForm()));
       
@@ -147,16 +148,26 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
                                                         "--package", packageName,
                                                         "--temp-names"
                                                        });
-    BufferedReader input = 
+
+    BufferedReader error = 
       new BufferedReader(new InputStreamReader(p.getErrorStream()));
     String line;
+    while ((line = error.readLine()) != null) {
+      Err.prln(line);
+    }
+    error.close();
+
+    BufferedReader input = 
+      new BufferedReader(new InputStreamReader(p.getInputStream()));
     while ((line = input.readLine()) != null) {
       Err.prln(line);
     }
     input.close();
     
+    
+    
     //compile the generated classes and load the classes into the classloader
-    Map sources = new HashMap();
+    Map sources = new LinkedHashMap();
     //read the phases file
     File phasesFile = new File(srcDir, "phases");
     phasesFile.deleteOnExit();
