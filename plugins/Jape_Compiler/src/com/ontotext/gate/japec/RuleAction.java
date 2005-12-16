@@ -1,3 +1,9 @@
+/*
+* AnnotationsByOffset.java
+* Copyright:    Copyright (c) 2005, Ontotext Lab.
+* Company:      Ontotext Lab.
+* Krasimir Angelov 12/2005 */
+
 package com.ontotext.gate.japec;
 
 import java.io.*;
