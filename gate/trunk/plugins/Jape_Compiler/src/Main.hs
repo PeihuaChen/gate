@@ -45,7 +45,7 @@ main = do
            else mapM_ (processGrammar flags) files
 
 processGrammar flags fpath = do
-  hPutStr stderr ("Reading "++fpath++" ...")
+--  hPutStr stderr ("Reading "++fpath++" ...")
   s <- SB.readFile fpath
   case runAlex s parseJapeGrammar of
     Left s         -> do hPutStrLn stderr ("\n\n"++s)
@@ -67,14 +67,14 @@ processGrammar flags fpath = do
                            else hPutStrLn stderr (show missing)
 
 readGrammar dir fname time (MultiPhase_ name phases) = do
-  hPutStrLn stderr (" ("++KS.unpack name++")")
+--  hPutStrLn stderr (" ("++KS.unpack name++")")
   gs <- loop [] phases
   return (MultiPhase ("Grammar_"++fname) gs)
   where
     loop gs []             = return (reverse gs)
     loop gs (gname:gnames) = do
       let fpath = dir `joinFileName` (KS.unpack gname) `joinFileExt` "jape"
-      hPutStr stderr ("Reading "++fpath++" ...")
+--      hPutStr stderr ("Reading "++fpath++" ...")
       s <- SB.readFile fpath
       case runAlex s parseJapeGrammar of
         Left s         -> do hPutStrLn stderr ("\n\n"++s)
@@ -84,16 +84,16 @@ readGrammar dir fname time (MultiPhase_ name phases) = do
                              g <- readGrammar dir fname time jgrammar
                              loop (g:gs) gnames
 readGrammar dir fname time (SinglePhase_ name input control debug match rules) = do
-  hPutStrLn stderr (" ("++KS.unpack name++")")
+--  hPutStrLn stderr (" ("++KS.unpack name++")")
   return (SinglePhase ("Phase_"++fname++time) input control debug match rules)
 
 dumpTransducerPhase flags@(CmdFlags{outputFormat=Dot}) g@(TransducerPhase name input control debug match tgraph) = do  
   let fpath = (outputDir flags) `joinFileName` name `joinFileExt` "dot"
-  hPutStr stderr ("\nWritting "++fpath++" ...")
+--  hPutStr stderr ("\nWritting "++fpath++" ...")
   writeFile fpath (render (ppTransitionGraph g))
 dumpTransducerPhase flags@(CmdFlags{outputFormat=PS}) g@(TransducerPhase name input control debug match tgraph) = do
   let fpath = (outputDir flags) `joinFileName` name `joinFileExt` "ps"
-  hPutStr stderr ("\nWritting "++fpath++" ...")
+--  hPutStr stderr ("\nWritting "++fpath++" ...")
   (hIn,hOut,hErr,pid) <- runInteractiveProcess "dot" ["-Tps","-o",fpath] Nothing Nothing
   hPutStr hIn (render (ppTransitionGraph g))
   hFlush hIn
@@ -101,7 +101,7 @@ dumpTransducerPhase flags@(CmdFlags{outputFormat=PS}) g@(TransducerPhase name in
   return ()
 dumpTransducerPhase flags@(CmdFlags{outputFormat=Jpeg}) g@(TransducerPhase name input control debug match tgraph) = do
   let fpath = (outputDir flags) `joinFileName` name `joinFileExt` "jpeg"
-  hPutStr stderr ("\nWritting "++fpath++" ...")
+--  hPutStr stderr ("\nWritting "++fpath++" ...")
   (hIn,hOut,hErr,pid) <- runInteractiveProcess "dot" ["-Tjpeg","-o",fpath] Nothing Nothing
   hPutStr hIn (render (ppTransitionGraph g))
   hFlush hIn
@@ -109,9 +109,9 @@ dumpTransducerPhase flags@(CmdFlags{outputFormat=Jpeg}) g@(TransducerPhase name 
   return ()
 dumpTransducerPhase flags@(CmdFlags{outputFormat=Japec}) g@(TransducerPhase name input control debug match tgraph) = do
   let fpath = (outputDir flags) `joinFileName` name `joinFileExt` "japec"
-  hPutStr stderr ("\nWritting "++fpath++" ...")
+--  hPutStr stderr ("\nWritting "++fpath++" ...")
   writeFile fpath (render (ppStateSwitch (codeGen g)))
 dumpTransducerPhase flags@(CmdFlags{outputFormat=Java}) g@(TransducerPhase name input control debug match tgraph) = do
   let fpath = (outputDir flags) `joinFileName` name `joinFileExt` "java"
-  hPutStr stderr ("\nWritting "++fpath++" ...")
+--  hPutStr stderr ("\nWritting "++fpath++" ...")
   writeFile fpath (render (ppTransducerPhaseJavaCode flags g))
