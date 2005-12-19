@@ -428,7 +428,7 @@
        <sysproperty key="apple.laf.useScreenMenuBar" value="true"/>
        <sysproperty key="com.apple.mrj.application.growbox.intrudes" value="false"/>
        <sysproperty key="com.apple.mrj.application.live-resize" value="true"/>
-       <jvmarg value="-Xdock:name=GATE 3.0"/>
+       <jvmarg value="-Xdock:name=GATE 3.1b1"/>
        <syspropertyset refid="run.properties" />
      </java>
   </target>
