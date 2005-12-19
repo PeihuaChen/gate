@@ -82,16 +82,9 @@ public class NameBearerHandle implements Handle,
 
     if(target instanceof ActionsPublisher) actionPublishers.add(target);
 
-    buildViews();
-    // Add the CTRL +F4 key & action combination to the resource
-    JComponent largeView = this.getLargeView();
-    if (largeView != null){
-      largeView.getActionMap().put("Close resource",
-                        new CloseAction());
-      if (target instanceof gate.TextualDocument){
-        largeView.getActionMap().put("Save As XML", new SaveAsXmlAction());
-      }// End if
-    }// End if
+    buildStaticPopupItems();
+    
+    viewsBuilt = false;
   }//public DefaultResourceHandle(FeatureBearer res)
 
   public Icon getIcon(){
@@ -115,6 +108,7 @@ public class NameBearerHandle implements Handle,
    * the main tree in the Gate GUI for the selected resource
    */
   public JComponent getSmallView() {
+    if(!viewsBuilt)buildViews();
     return smallView;
   }
 
@@ -123,6 +117,7 @@ public class NameBearerHandle implements Handle,
    * display area.
    */
   public JComponent getLargeView() {
+    if(!viewsBuilt) buildViews();
     return largeView;
   }
 
@@ -293,9 +288,59 @@ public class NameBearerHandle implements Handle,
 //    return popup;
 //  }
 
+  protected void buildStaticPopupItems(){
+    //build the static part of the popup
+    staticPopupItems = new ArrayList();
+
+    XJMenuItem closeItem = new XJMenuItem(new CloseAction(), sListenerProxy);
+    closeItem.setAccelerator(KeyStroke.getKeyStroke(
+                                KeyEvent.VK_F4, ActionEvent.CTRL_MASK));
+    staticPopupItems.add(closeItem);
+
+    if(target instanceof ProcessingResource){
+      staticPopupItems.add(null);
+      staticPopupItems.add(new XJMenuItem(new ReloadAction(), sListenerProxy));
+      if(target instanceof com.ontotext.gate.hmm.agent.AlternativeHMMAgent) {
+        fillHMMActions(staticPopupItems);
+      } // if
+    }else if(target instanceof LanguageResource) {
+      //Language Resources
+      staticPopupItems.add(null);
+      staticPopupItems.add(new XJMenuItem(new SaveAction(), sListenerProxy));
+      staticPopupItems.add(new XJMenuItem(new SaveToAction(), sListenerProxy));
+      if(target instanceof gate.TextualDocument){
+        XJMenuItem saveAsXmlItem =
+                         new XJMenuItem(new SaveAsXmlAction(), sListenerProxy);
+        saveAsXmlItem.setAccelerator(KeyStroke.getKeyStroke(
+                                        KeyEvent.VK_X, ActionEvent.CTRL_MASK));
+
+        staticPopupItems.add(saveAsXmlItem);
+      }else if(target instanceof Corpus){
+        staticPopupItems.add(null);
+        corpusFiller = new CorpusFillerComponent();
+        staticPopupItems.add(new XJMenuItem(new PopulateCorpusAction(), sListenerProxy));
+        staticPopupItems.add(null);
+        staticPopupItems.add(new XJMenuItem(new SaveCorpusAsXmlAction(false), sListenerProxy));
+//        staticPopupItems.add(new XJMenuItem(new SaveCorpusAsXmlAction(true), sListenerProxy));
+        if (target instanceof IndexedCorpus){
+          staticPopupItems.add(null);
+          staticPopupItems.add(new XJMenuItem(new CreateIndexAction(), sListenerProxy));
+          staticPopupItems.add(new XJMenuItem(new OptimizeIndexAction(), sListenerProxy));
+          staticPopupItems.add(new XJMenuItem(new DeleteIndexAction(), sListenerProxy));
+        }
+      }
+      if (target instanceof gate.creole.ProtegeProjectName){
+        fillProtegeActions(staticPopupItems);
+      }// End if
+    }else if(target instanceof Controller){
+      //Applications
+      staticPopupItems.add(null);
+      staticPopupItems.add(new XJMenuItem(new DumpToFileAction(), sListenerProxy));
+    }    
+  }
 
   protected void buildViews() {
-
+    viewsBuilt = true;
     fireStatusChanged("Building views...");
 
     //build the large views
@@ -366,54 +411,16 @@ public class NameBearerHandle implements Handle,
     }
     fireStatusChanged("Views built!");
 
-    //build the static part of the popup
-    staticPopupItems = new ArrayList();
-
-    XJMenuItem closeItem = new XJMenuItem(new CloseAction(), sListenerProxy);
-    closeItem.setAccelerator(KeyStroke.getKeyStroke(
-                                KeyEvent.VK_F4, ActionEvent.CTRL_MASK));
-    staticPopupItems.add(closeItem);
-
-    if(target instanceof ProcessingResource){
-      staticPopupItems.add(null);
-      staticPopupItems.add(new XJMenuItem(new ReloadAction(), sListenerProxy));
-      if(target instanceof com.ontotext.gate.hmm.agent.AlternativeHMMAgent) {
-        fillHMMActions(staticPopupItems);
-      } // if
-    }else if(target instanceof LanguageResource) {
-      //Language Resources
-      staticPopupItems.add(null);
-      staticPopupItems.add(new XJMenuItem(new SaveAction(), sListenerProxy));
-      staticPopupItems.add(new XJMenuItem(new SaveToAction(), sListenerProxy));
-      if(target instanceof gate.TextualDocument){
-        XJMenuItem saveAsXmlItem =
-                         new XJMenuItem(new SaveAsXmlAction(), sListenerProxy);
-        saveAsXmlItem.setAccelerator(KeyStroke.getKeyStroke(
-                                        KeyEvent.VK_X, ActionEvent.CTRL_MASK));
-
-        staticPopupItems.add(saveAsXmlItem);
-      }else if(target instanceof Corpus){
-        staticPopupItems.add(null);
-        corpusFiller = new CorpusFillerComponent();
-        staticPopupItems.add(new XJMenuItem(new PopulateCorpusAction(), sListenerProxy));
-        staticPopupItems.add(null);
-        staticPopupItems.add(new XJMenuItem(new SaveCorpusAsXmlAction(false), sListenerProxy));
-//        staticPopupItems.add(new XJMenuItem(new SaveCorpusAsXmlAction(true), sListenerProxy));
-        if (target instanceof IndexedCorpus){
-          staticPopupItems.add(null);
-          staticPopupItems.add(new XJMenuItem(new CreateIndexAction(), sListenerProxy));
-          staticPopupItems.add(new XJMenuItem(new OptimizeIndexAction(), sListenerProxy));
-          staticPopupItems.add(new XJMenuItem(new DeleteIndexAction(), sListenerProxy));
-        }
-      }
-      if (target instanceof gate.creole.ProtegeProjectName){
-        fillProtegeActions(staticPopupItems);
+    
+    // Add the CTRL +F4 key & action combination to the resource
+    JComponent largeView = this.getLargeView();
+    if (largeView != null){
+      largeView.getActionMap().put("Close resource",
+                        new CloseAction());
+      if (target instanceof gate.TextualDocument){
+        largeView.getActionMap().put("Save As XML", new SaveAsXmlAction());
       }// End if
-    }else if(target instanceof Controller){
-      //Applications
-      staticPopupItems.add(null);
-      staticPopupItems.add(new XJMenuItem(new DumpToFileAction(), sListenerProxy));
-    }
+    }// End if
   }//protected void buildViews
 
   public String toString(){ return title;}
@@ -458,6 +465,8 @@ public class NameBearerHandle implements Handle,
   Icon icon;
   JComponent smallView;
   JComponent largeView;
+  
+  protected boolean viewsBuilt = false;
 
   /**
    * Component used to select the options for corpus populating
