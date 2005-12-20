@@ -74,6 +74,7 @@
     <javac srcdir="${srcDir}" 
 		       destdir="${outputDir}"
            includes="gate/**"
+           source="1.4"
 					 classpathref="build.class.path"/>
   </target>
 	
