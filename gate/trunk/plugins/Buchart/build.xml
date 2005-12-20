@@ -99,7 +99,7 @@ path to your tools.jar here.  If you don't know what this means, leave it alone
 
 <target name="plcafe.compile">
         <mkdir dir="${classes}"/>
-	<javac extdirs="${lib}" srcdir="${prolog}" destdir="${classes}"/>
+	<javac extdirs="${lib}" srcdir="${prolog}" destdir="${classes}" source="1.4"/>
 	<!--<delete>
 	    <fileset dir="${prolog}" includes="**/*.java"/>
   	</delete>-->
@@ -107,7 +107,7 @@ path to your tools.jar here.  If you don't know what this means, leave it alone
 
 <target name="buchart.compile">
         <mkdir dir="${classes}"/>
-	<javac destdir="${classes}">
+	<javac destdir="${classes}" source="1.4">
 		<src>
 			<pathelement path="${src}/shef/nlp/buchart"/>
 		</src>

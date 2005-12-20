@@ -141,7 +141,7 @@
        but not the translated PrologCafe predicates) -->
   <target name="supple.compile" depends="supple.prepare">
     <javac destdir="${classes.dir}" classpathref="compile.classpath"
-           srcdir="${src.dir}"/>
+           srcdir="${src.dir}" source="1.4"/>
   </target>
 
   <!-- Build the core SUPPLE JAR file -->
@@ -200,6 +200,7 @@
   <target name="plcafe.compile"
           depends="supple.jar, plcafe.prepare, plcafe.checkdepends, plcafe.translate">
     <javac destdir="${plcafe.classes.dir}"
+           source="1.4"
            classpathref="prologimpl.compile.classpath">
       <src>
         <pathelement location="${plcafe.src.dir}" />
@@ -256,6 +257,7 @@
   <target name="sicstus.compile" depends="supple.jar, sicstus.prepare">
     <javac destdir="${sicstus.classes.dir}"
            srcdir="${sicstus.src.dir}"
+           source="1.4"
            classpathref="prologimpl.compile.classpath"/>
   </target>
 
@@ -303,6 +305,7 @@
   <target name="swi.compile" depends="supple.jar, swi.prepare">
     <javac destdir="${swi.classes.dir}"
            srcdir="${swi.src.dir}"
+           source="1.4"
            classpathref="prologimpl.compile.classpath"/>
   </target>
 
