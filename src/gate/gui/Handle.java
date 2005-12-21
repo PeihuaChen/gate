@@ -44,6 +44,17 @@ public interface Handle extends ProgressListener, StatusListener {
    */
   public JComponent getLargeView();
 
+  /**
+   * Returns <tt>true</tt> if the views have already been built for this handle.
+   * @return a <tt>boolean</tt> value.
+   */
+  public boolean viewsBuilt();
+  
+  /**
+   * Called when this handle is not required any more.
+   */
+  public void cleanup();
+  
   public JPopupMenu getPopup();
 
   public String getTooltipText();
