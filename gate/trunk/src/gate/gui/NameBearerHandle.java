@@ -104,6 +104,15 @@ public class NameBearerHandle implements Handle,
   }
 
   /**
+   * Returns <tt>true</tt> if the views have already been built for this handle.
+   * @return a <tt>boolean</tt> value.
+   */
+  public boolean viewsBuilt(){
+    return viewsBuilt;
+  }
+  
+  
+  /**
    * Returns a GUI component to be used as a small viewer/editor, e.g. below
    * the main tree in the Gate GUI for the selected resource
    */
@@ -1387,7 +1396,7 @@ if(preserveFormat) System.out.println("Preserve option set!");
    * Releases the memory, removes the listeners, cleans up.
    * Will get called when the target resource is unloaded from the system
    */
-  protected void cleanup(){
+  public void cleanup(){
     //delete all the VRs that were created
     if(largeView != null){
       if(largeView instanceof VisualResource){
@@ -1490,8 +1499,6 @@ if(preserveFormat) System.out.println("Preserve option set!");
   }
 
   public void resourceUnloaded(CreoleEvent e) {
-    if(getTarget() == e.getResource()) cleanup();
-
   }
 
   public void resourceRenamed(Resource resource, String oldName,
