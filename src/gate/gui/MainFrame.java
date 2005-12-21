@@ -126,6 +126,7 @@ public class MainFrame extends JFrame
    * are the actual listeners (e.g "gate.event.StatusListener" -> this).
    */
   private static java.util.Map listeners = new HashMap();
+  
   protected static java.util.Collection guiRoots = new ArrayList();
 
   private static JDialog guiLock = null;
@@ -179,17 +180,12 @@ public class MainFrame extends JFrame
   }
 
   protected void select(Handle handle){
-    if(mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1) {
+    if(handle.viewsBuilt() &&
+       mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1) {
       //select
       JComponent largeView = handle.getLargeView();
       if(largeView != null) {
         mainTabbedPane.setSelectedComponent(largeView);
-      }
-      JComponent smallView = handle.getSmallView();
-      if(smallView != null) {
-        lowerScroll.getViewport().setView(smallView);
-      } else {
-        lowerScroll.getViewport().setView(null);
       }
     } else {
       //show
@@ -199,12 +195,13 @@ public class MainFrame extends JFrame
                               largeView, handle.getTooltipText());
         mainTabbedPane.setSelectedComponent(handle.getLargeView());
       }
-      JComponent smallView = handle.getSmallView();
-      if(smallView != null) {
-        lowerScroll.getViewport().setView(smallView);
-      } else {
-        lowerScroll.getViewport().setView(null);
-      }
+    }
+    //show the small view
+    JComponent smallView = handle.getSmallView();
+    if(smallView != null) {
+      lowerScroll.getViewport().setView(smallView);
+    } else {
+      lowerScroll.getViewport().setView(null);
     }
   }//protected void select(ResourceHandle handle)
 
@@ -766,20 +763,21 @@ public class MainFrame extends JFrame
             popup.show(resourcesTree, e.getX(), e.getY());
           }else if(popup != null){
             if(handle != null){
-              // Create a CloseViewAction and a menu item based on it
-              CloseViewAction cva = new CloseViewAction(handle);
-              XJMenuItem menuItem = new XJMenuItem(cva, MainFrame.this);
-              popup.insert(menuItem, 1);
-              popup.insert(new JPopupMenu.Separator(), 2);
+//              // Create a CloseViewAction and a menu item based on it
+//              CloseViewAction cva = new CloseViewAction(handle);
+//              XJMenuItem menuItem = new XJMenuItem(cva, MainFrame.this);
+//              popup.insert(menuItem, 1);
 
+              //add a rename action
+              popup.insert(new JPopupMenu.Separator(), 2);
               popup.insert(new XJMenuItem(new RenameResourceAction(path),
                                           MainFrame.this), 3);
 
               // Put the action command in the component's action map
-              if (handle.getLargeView() != null){
-                handle.getLargeView().getActionMap().
-                                      put("Hide current view",cva);
-              }
+//              if (handle.getLargeView() != null){
+//                handle.getLargeView().getActionMap().
+//                                      put("Hide current view",cva);
+//              }
             }
 
 
@@ -850,6 +848,8 @@ public class MainFrame extends JFrame
 
     mainTabbedPane.getModel().addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
+        //use this to synchronise the selection in the tabbed pane with the one
+        //in the resources tree
         JComponent largeView = (JComponent)mainTabbedPane.getSelectedComponent();
         Enumeration nodesEnum = resourcesTreeRoot.preorderEnumeration();
         boolean done = false;
@@ -857,11 +857,15 @@ public class MainFrame extends JFrame
         while(!done && nodesEnum.hasMoreElements()){
           node = (DefaultMutableTreeNode)nodesEnum.nextElement();
           done = node.getUserObject() instanceof Handle &&
-                 ((Handle)node.getUserObject()).getLargeView()
-                  == largeView;
+                 ((Handle)node.getUserObject()).viewsBuilt() &&
+                 ((Handle)node.getUserObject()).getLargeView() == largeView;
         }
         if(done){
-          select((Handle)node.getUserObject());
+          Handle handle = (Handle)node.getUserObject();
+          TreePath nodePath = new TreePath(node.getPath());
+          resourcesTree.setSelectionPath(nodePath);
+          resourcesTree.scrollPathToVisible(nodePath);
+          lowerScroll.getViewport().setView(handle.getSmallView());
         }else{
           //the selected item is not a resource (maybe the log area?)
           lowerScroll.getViewport().setView(null);
@@ -881,8 +885,8 @@ public class MainFrame extends JFrame
             while(!done && nodesEnum.hasMoreElements()){
               node = (DefaultMutableTreeNode)nodesEnum.nextElement();
               done = node.getUserObject() instanceof Handle &&
-                     ((Handle)node.getUserObject()).getLargeView()
-                      == view;
+                     ((Handle)node.getUserObject()).viewsBuilt() &&
+                     ((Handle)node.getUserObject()).getLargeView() == view;
             }
             if(done){
               Handle handle = (Handle)node.getUserObject();
@@ -1174,34 +1178,40 @@ public class MainFrame extends JFrame
 
 
   public void resourceUnloaded(CreoleEvent e) {
-    Resource res = e.getResource();
+    final Resource res = e.getResource();
     if(Gate.getHiddenAttribute(res.getFeatures())) return;
-    DefaultMutableTreeNode node;
-    DefaultMutableTreeNode parent = null;
-    if(res instanceof ProcessingResource){
-      parent = processingResourcesRoot;
-    }else if(res instanceof LanguageResource){
-      parent = languageResourcesRoot;
-    }else if(res instanceof Controller){
-      parent = applicationsRoot;
-    }
-    if(parent != null){
-      Enumeration children = parent.children();
-      while(children.hasMoreElements()){
-        node = (DefaultMutableTreeNode)children.nextElement();
-        if(((NameBearerHandle)node.getUserObject()).getTarget() == res){
-          resourcesTreeModel.removeNodeFromParent(node);
-          Handle handle = (Handle)node.getUserObject();
-          if(mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1){
-            mainTabbedPane.remove(handle.getLargeView());
+    Runnable runner = new Runnable(){
+      public void run(){
+        DefaultMutableTreeNode node;
+        DefaultMutableTreeNode parent = null;
+        if(res instanceof ProcessingResource){
+          parent = processingResourcesRoot;
+        }else if(res instanceof LanguageResource){
+          parent = languageResourcesRoot;
+        }else if(res instanceof Controller){
+          parent = applicationsRoot;
+        }
+        if(parent != null){
+          Enumeration children = parent.children();
+          while(children.hasMoreElements()){
+            node = (DefaultMutableTreeNode)children.nextElement();
+            if(((NameBearerHandle)node.getUserObject()).getTarget() == res){
+              resourcesTreeModel.removeNodeFromParent(node);
+              Handle handle = (Handle)node.getUserObject();
+              if(handle.viewsBuilt()){
+                if(mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1)
+                  mainTabbedPane.remove(handle.getLargeView());
+                if(lowerScroll.getViewport().getView() == handle.getSmallView())
+                  lowerScroll.getViewport().setView(null);
+              }
+              handle.cleanup();
+              return;
+            }
           }
-          if(lowerScroll.getViewport().getView() == handle.getSmallView()){
-            lowerScroll.getViewport().setView(null);
-          }
-          return;
         }
       }
-    }
+    };
+    SwingUtilities.invokeLater(runner);
   }
 
   /**Called when a {@link gate.DataStore} has been opened*/
@@ -1249,7 +1259,9 @@ public class MainFrame extends JFrame
           resourcesTreeModel.removeNodeFromParent(node);
           NameBearerHandle handle = (NameBearerHandle)
                                           node.getUserObject();
-          if(mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1){
+          
+          if(handle.viewsBuilt() && 
+             mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1){
             mainTabbedPane.remove(handle.getLargeView());
           }
           if(lowerScroll.getViewport().getView() == handle.getSmallView()){
@@ -2210,14 +2222,21 @@ public class MainFrame extends JFrame
     }
 
     public void actionPerformed(ActionEvent e) {
-      TreePath[] paths = resourcesTree.getSelectionPaths();
-      for(int i = 0; i < paths.length; i++){
-        Object userObject = ((DefaultMutableTreeNode)paths[i].
-                            getLastPathComponent()).getUserObject();
-        if(userObject instanceof NameBearerHandle){
-          ((NameBearerHandle)userObject).getCloseAction().actionPerformed(null);
+      Runnable runner = new Runnable(){
+        public void run(){
+          TreePath[] paths = resourcesTree.getSelectionPaths();
+          for(int i = 0; i < paths.length; i++){
+            Object userObject = ((DefaultMutableTreeNode)paths[i].
+                                getLastPathComponent()).getUserObject();
+            if(userObject instanceof NameBearerHandle){
+              ((NameBearerHandle)userObject).getCloseAction().actionPerformed(null);
+            }
+          }
         }
-      }
+      };
+      Thread thread = new Thread(runner);
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
     }
   }
 
