@@ -14,6 +14,8 @@ import gate.util.*;
 import gate.creole.*;
 
 public class JapecTransducer extends AbstractLanguageAnalyser {
+  private static final boolean DEBUG = false;
+  
   private File grammarFile;
   private URL grammarURL;
   private File workDir;
@@ -138,18 +140,54 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
     if (srcDir.exists()) clearDir(srcDir);
 
     String osname = System.getProperty("os.name").toLowerCase();
-    String suffix = null;
-    if (osname.indexOf("windows") >= 0) suffix = "-windows.exe";
-    else if (osname.indexOf("linux") >= 0) suffix = "-linux";
-    else if (osname.indexOf("mac") >= 0) suffix = "-mac";
-    else throw new ResourceInstantiationException(
-            "Unsupported host platform: " + osname);
-    
-    
-    File japecPath = new File (
-            new File(Gate.getGateHome(), "plugins/Jape_Compiler"), 
-            "japec" + suffix);
 
+    // Find Jape_Compiler plugin directory from plugin ResourceData
+    ResourceData japecRD =
+      (ResourceData)Gate.getCreoleRegister().get(this.getClass().getName());
+    URL japecCreoleXML = japecRD.getXmlFileUrl();
+    if(!"file".equals(japecCreoleXML.getProtocol())) {
+      throw new ResourceInstantiationException(
+          "Jape_Compiler plugin must be loaded from a file: URL");
+    }
+    File japecCreoleXMLFile =
+      new File(URI.create(japecCreoleXML.toExternalForm()));
+
+    // search for Japec compiler binary.  We look first for japec (.exe on
+    // Windows) in the Jape_Compiler plugin directory.  If that does not exist,
+    // we try the OS-specific name (japec-windows.exe, japec-mac, etc).  If
+    // neither of these exist, throw an exception.  Searching this way round
+    // means a locally compiled japec will be found before the default
+    // japec-platform version.
+    File japecDir = japecCreoleXMLFile.getParentFile();
+    String japecBinary = "japec";
+    if(osname.indexOf("windows") >= 0) japecBinary += ".exe";
+
+    File plainJapecPath = new File(japecDir, japecBinary);
+    File japecPath;
+    if(plainJapecPath.exists()) {
+      japecPath = plainJapecPath;
+    }
+    else {
+      String suffix = null;
+      if (osname.indexOf("windows") >= 0) suffix = "-windows.exe";
+      else if (osname.indexOf("linux") >= 0) suffix = "-linux";
+      else if (osname.indexOf("mac") >= 0) suffix = "-mac";
+      else throw new ResourceInstantiationException(
+          "Could not find Japec compiler - should be at " + plainJapecPath);
+
+      japecPath = new File(japecDir, "japec" + suffix);
+
+      if(!japecPath.exists()) {
+        throw new ResourceInstantiationException(
+            "Could not find Japec compiler - should be at either "
+            + plainJapecPath + " or " + japecPath);
+      }
+    }
+
+    if(DEBUG) {
+      Out.prln("Using compiler at " + japecPath);
+    }
+    
     Process p = Runtime.getRuntime().exec(new String[] {japecPath.getPath(),
                                                         grammarFile.getPath(),
                                                         "--odir", srcDir.getPath(),
