@@ -20,7 +20,6 @@ import java.util.*;
 import junit.framework.*;
 
 import gate.*;
-import gate.corpora.TestDocument;
 import gate.util.*;
 
 /** Tests for the Annotation classes
@@ -45,8 +44,8 @@ public class TestAnnotation extends TestCase
   /** Fixture set up */
   public void setUp() throws Exception
   {
-    String server = TestDocument.getTestServerName();
-    assertNotNull(server);
+	Gate.setNetConnected(false);
+    Gate.init();
     FeatureMap params = Factory.newFeatureMap();
     params.put(Document.DOCUMENT_URL_PARAMETER_NAME, Gate.getUrl("tests/doc0.html"));
     params.put(Document.DOCUMENT_MARKUP_AWARE_PARAMETER_NAME, "false");
@@ -200,7 +199,6 @@ public class TestAnnotation extends TestCase
                                                     params);
     AnnotationSet as = new AnnotationSetImpl(doc);
     AnnotationSet asBuf;
-    Integer newId;
     FeatureMap fm = new SimpleFeatureMapImpl();
     Annotation a;
     Node startNode;
@@ -336,13 +334,7 @@ public class TestAnnotation extends TestCase
 
   /** Test complex get (with type, offset and feature contraints) */
   public void testComplexGet() throws InvalidOffsetException {
-    AnnotationSet as = basicAS;
     AnnotationSet asBuf;
-    Integer newId;
-    FeatureMap fm = new SimpleFeatureMapImpl();
-    Annotation a;
-    Node startNode;
-    Node endNode;
 
     FeatureMap constraints = new SimpleFeatureMapImpl();
     constraints.put("pos", "NN");
@@ -653,7 +645,6 @@ public class TestAnnotation extends TestCase
   public void testOverlapsAndCoextensive() throws InvalidOffsetException {
     Node node1 = new NodeImpl(new Integer(1),new Long(10));
     Node node2 = new NodeImpl(new Integer(2),new Long(20));
-    Node node3 = new NodeImpl(new Integer(3),new Long(15));
     Node node4 = new NodeImpl(new Integer(4),new Long(15));
     Node node5 = new NodeImpl(new Integer(5),new Long(20));
     Node node6 = new NodeImpl(new Integer(6),new Long(30));
@@ -680,43 +671,43 @@ public class TestAnnotation extends TestCase
     fm3.put("best",new Boolean(true));
 
     // Start=10, End = 20
-    Annotation annot1 = new AnnotationImpl(new Integer(1),
+    Annotation annot1 = createAnnotation(new Integer(1),
                                            node1,
                                            node2,
                                            "pos",
                                            null);
     // Start=20, End = 30
-    Annotation annot2 = new AnnotationImpl (new Integer(2),
+    Annotation annot2 = createAnnotation (new Integer(2),
                                             node2,
                                             node6,
                                             "pos",
                                             null);
     // Start=20, End = 30
-    Annotation annot3 = new AnnotationImpl (new Integer(3),
+    Annotation annot3 = createAnnotation (new Integer(3),
                                             node5,
                                             node6,
                                             "pos",
                                             null);
     // Start=20, End = 20
-    Annotation annot4 = new AnnotationImpl (new Integer(4),
+    Annotation annot4 = createAnnotation (new Integer(4),
                                             node2,
                                             node5,
                                             "pos",
                                             null);
     // Start=10, End = 30
-    Annotation annot5 = new AnnotationImpl (new Integer(5),
+    Annotation annot5 = createAnnotation (new Integer(5),
                                             node1,
                                             node6,
                                             "pos",
                                             null);
     // Start=10, End = 15
-    Annotation annot6 = new AnnotationImpl (new Integer(6),
+    Annotation annot6 = createAnnotation (new Integer(6),
                                             node1,
                                             node4,
                                             "pos",
                                             null);
     // Start=null, End = null
-    Annotation annot7 = new AnnotationImpl (new Integer(7),
+    Annotation annot7 = createAnnotation (new Integer(7),
                                             null,
                                             null,
                                             "pos",
@@ -769,7 +760,6 @@ public class TestAnnotation extends TestCase
                                                 throws InvalidOffsetException {
     Node node1 = new NodeImpl(new Integer(1),new Long(10));
     Node node2 = new NodeImpl(new Integer(2),new Long(20));
-    Node node3 = new NodeImpl(new Integer(3),new Long(15));
     Node node4 = new NodeImpl(new Integer(4),new Long(15));
     Node node5 = new NodeImpl(new Integer(5),new Long(20));
     Node node6 = new NodeImpl(new Integer(6),new Long(30));
@@ -796,47 +786,41 @@ public class TestAnnotation extends TestCase
     fm3.put("best",new Boolean(true));
 
     // Start=10, End = 20
-    Annotation annot1 = new AnnotationImpl(new Integer(1),
+    Annotation annot1 = createAnnotation(new Integer(1),
                                            node1,
                                            node2,
                                            "pos",
                                            fm1);
     // Start=20, End = 30
-    Annotation annot2 = new AnnotationImpl (new Integer(2),
+    Annotation annot2 = createAnnotation (new Integer(2),
                                             node2,
                                             node6,
                                             "pos",
                                             fm2);
     // Start=20, End = 30
-    Annotation annot3 = new AnnotationImpl (new Integer(3),
+    Annotation annot3 = createAnnotation (new Integer(3),
                                             node5,
                                             node6,
                                             "pos",
                                             fm3);
     // Start=20, End = 20
-    Annotation annot4 = new AnnotationImpl (new Integer(4),
+    Annotation annot4 = createAnnotation (new Integer(4),
                                             node2,
                                             node5,
                                             "pos",
                                             fm4);
     // Start=10, End = 30
-    Annotation annot5 = new AnnotationImpl (new Integer(5),
+    Annotation annot5 = createAnnotation (new Integer(5),
                                             node1,
                                             node6,
                                             "pos",
                                             fm3);
     // Start=10, End = 15
-    Annotation annot6 = new AnnotationImpl (new Integer(6),
+    Annotation annot6 = createAnnotation (new Integer(6),
                                             node1,
                                             node4,
                                             "pos",
                                             fm1);
-    // Start=null, End = null
-    Annotation annot7 = new AnnotationImpl (new Integer(7),
-                                            null,
-                                            null,
-                                            "pos",
-                                            null);
 
 // MAP
   /*
@@ -995,10 +979,14 @@ public class TestAnnotation extends TestCase
 
   }// testFeatureSubsumeMethods();
 
+  protected Annotation createAnnotation
+    (Integer id, Node start, Node end, String type, FeatureMap features) {
+      return new AnnotationImpl(id, start, end, type, features);
+  }
+  
   public static void main(String[] args){
 
     try{
-      Gate.init();
       TestAnnotation testAnnot = new TestAnnotation("");
       testAnnot.setUp();
       testAnnot.testIterator();
