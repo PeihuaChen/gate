@@ -57,5 +57,45 @@
   <target name="build" depends="dist" />
   <target name="test" />
   <target name="distro.prepare" depends="clean.classes" />
+
+
+
+  <!--*********************************************************
+                 Targets to rebuild the Haskell code
+      ********************************************************* -->
+
+  <!-- If runghc is not on your PATH, set the full path here -->
+  <property name="runghc.executable" value="runghc" />
+
+  <!-- Add any extra arguments to the configure and build commands here -->
+  <property name="configure.extra.args" value="" />
+  <property name="build.extra.args" value="" />
+  
+  <!-- add a .exe extension to the file name if running on Windows -->
+  <condition property="extension" value=".exe" else="">
+    <os family="windows" />
+  </condition>
+  
+  <!-- remove the intermediate files -->
+  <target name="japec.clean">
+    <delete dir="dist" />
+  </target>
+
+  <!-- Build the Japec compiler -->
+  <target name="japec">
+    <exec executable="${runghc.executable}">
+      <arg value="Setup.lhs" />
+      <arg value="configure" />
+      <arg line="${configure.extra.args}" />
+    </exec>
+
+    <exec executable="${runghc.executable}">
+      <arg value="Setup.lhs" />
+      <arg value="build" />
+      <arg line="${build.extra.args}" />
+    </exec>
+
+    <move file="dist/build/src/japec${extension}" tofile="japec${extension}" />
+  </target>
 </project>
 
