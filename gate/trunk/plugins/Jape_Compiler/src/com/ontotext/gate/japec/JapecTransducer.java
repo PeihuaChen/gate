@@ -97,6 +97,8 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
 //        phases.add(phase);
 //      }
 //      reader.close();
+    } catch(ResourceInstantiationException rie) {
+      throw rie;
     }catch(Exception e){
       throw new ResourceInstantiationException(e);
     }
