@@ -105,6 +105,8 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
     {
       SinglePhaseTransducer phase = (SinglePhaseTransducer) phases.get(i);
       phase.setDocument(document);
+      phase.setInputASName(inputASName);
+      phase.setOutputASName(outputASName);
       phase.execute();
     }
   }
@@ -208,8 +210,6 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
       String phaseClassName = (String)phaseClassNameIter.next();
       Class phaseClass = Gate.getClassLoader().loadClass(phaseClassName);
       SinglePhaseTransducer phase = (SinglePhaseTransducer) phaseClass.newInstance();
-      phase.setInputASName(inputASName);
-      phase.setOutputASName(outputASName);
       phase.setOntology(ontology);
       phases.add(phase);
     }
