@@ -637,7 +637,7 @@ jar/classpath so it's the same as registerBuiltins
   public static boolean tryNetServer(
     String hostName, int serverPort, String path
   ) throws MalformedURLException {
-    Socket socket = null;
+
     if(DEBUG)
       Out.prln(
         "tryNetServer(hostName=" + hostName + ", serverPort=" + serverPort +
