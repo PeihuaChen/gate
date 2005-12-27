@@ -97,7 +97,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
     */
   protected PrioritisedRuleList rules;
 
-  FSM fsm;
+  protected FSM fsm;
 
   public FSM getFSM(){
     return fsm;
