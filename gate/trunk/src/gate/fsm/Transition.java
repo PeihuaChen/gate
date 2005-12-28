@@ -100,6 +100,43 @@ public class Transition implements Serializable, Comparable {
   }
 
   /**
+    * Returns true if all the constraints on this transition are satisfied
+    * by the given Annotations, false otherwise.  The given Annotations
+    * should be the set of Annotations beginning at a single point in the
+    * document.
+    */
+  public boolean satisfiedBy(Annotation[] coIncidentAnnos) {
+      Constraint[] allConstraints = getConstraints().getConstraints();
+      
+      processAllConstraints:
+      for (int i = 0; i < allConstraints.length; i++)
+      {
+          Constraint c = allConstraints[i];
+          boolean negated = c.isNegated();
+          
+          for (int j = 0; j < coIncidentAnnos.length; j++)
+          {
+              if (coIncidentAnnos[j].getType().equals(c.getAnnotType())
+                  &&
+                  coIncidentAnnos[j].getFeatures().subsumes(c.getAttributeSeq()))
+              {
+                  // One of these puppies being satisfied invalidates the whole transition
+                  if (negated) return false;
+                  
+                  // This constraint is satisfied, go on to the next one
+                  continue processAllConstraints;
+              }
+          }
+          
+          // No matching annotations found for this constraint
+          if (!negated) return false;
+      }
+      
+      // All constraints satisfied
+      return true;
+  }
+
+  /**
     * Returns a boolean value indicating whether this Transition 
     * deals with multiple types of annotations.
     */
