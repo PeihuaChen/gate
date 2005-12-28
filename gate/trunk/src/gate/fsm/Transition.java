@@ -18,7 +18,9 @@ package gate.fsm;
 import java.io.Serializable;
 import java.util.LinkedList;
 
+import gate.Annotation;
 import gate.jape.BasicPatternElement;
+import gate.jape.Constraint;
 
 /**
   * This class implements a Finite State Machine transition.
