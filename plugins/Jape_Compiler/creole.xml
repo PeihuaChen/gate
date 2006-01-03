@@ -8,7 +8,7 @@
       <JAR>japec.jar</JAR>		
       <NAME>Ontotext Japec Transducer</NAME>
       <CLASS>com.ontotext.gate.japec.JapecTransducer</CLASS>
-      <COMMENT>JAPE compiler.</COMMENT>
+      <COMMENT>JAPE compiler (http://gate.ac.uk/sale/tao/#sec:misc-creole:japec).</COMMENT>
       <PARAMETER NAME="document" RUNTIME="true"
         COMMENT="The document to be processed">gate.Document</PARAMETER>
       <PARAMETER NAME="inputASName" RUNTIME="true"
