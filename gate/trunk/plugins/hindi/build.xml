@@ -58,6 +58,6 @@
   <!-- Targets used by the main GATE build file -->
   <target name="build" depends="dist" />
   <target name="test" />
-  <target name="distro.prepare" depends="clean" />
+  <target name="distro.prepare" depends="clean.classes" />
 </project>
 
