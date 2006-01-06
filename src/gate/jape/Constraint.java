@@ -38,8 +38,7 @@ implements JapeConstants, java.io.Serializable, Cloneable
 
   /** Construction from annot type string */
   public Constraint(String annotType) {
-    this.annotType = annotType;
-    attrs1 = new SimpleFeatureMapImpl();
+    this(annotType, new SimpleFeatureMapImpl());
   } // Construction from annot type
 
   /** Construction from annot type and attribute sequence */
@@ -50,8 +49,7 @@ implements JapeConstants, java.io.Serializable, Cloneable
 
   /** Construction from annot type and array of attributes */
   public Constraint(String annotType, ArrayList attrsArray) {
-    this.annotType = annotType;
-    attrs1 = new SimpleFeatureMapImpl();
+    this(annotType, new SimpleFeatureMapImpl());
     for ( Iterator i = attrsArray.iterator(); i.hasNext(); )
       attrs1.put(((JdmAttribute) i.next()).getName(),
                                           ((JdmAttribute) i.next()).getValue());
@@ -172,6 +170,9 @@ implements JapeConstants, java.io.Serializable, Cloneable
 
 
 // $Log$
+// Revision 1.13  2006/01/06 22:03:04  kwilliams
+// Define other constructors in terms of Constraint(String,FeatureMap)
+//
 // Revision 1.12  2005/07/15 15:37:32  valyt
 // New toString() method from Ken Williams
 //
