@@ -113,6 +113,28 @@ implements JapeConstants, java.io.Serializable, Cloneable
     return newC;
   } // clone
 
+  /** Returns a boolean value indicating whether this Constraint is
+    * equivalent to the given Constraint.  If the given object is not
+    * a Constraint, compares the two objects using
+    * <CODE>Object.equals()</CODE>.
+    */
+  public boolean equals(Object other) {
+    if (!(other instanceof Constraint)) return super.equals(other);
+    Constraint o = (Constraint) other;
+    
+    return (o.negated == negated &&
+	    o.annotType.equals(annotType) &&
+	    o.attrs1.toString().equals(attrs1.toString()));
+  }
+
+  /** Returns an integer hash code for this object.
+    */
+  public int hashCode() {
+    int hashCode = negated ? 0 : 37 * 17;
+    hashCode = 37 * hashCode + annotType.hashCode();
+    hashCode = 37 * hashCode + attrs1.hashCode();
+    return hashCode;
+  }
 
  /** Finish: replace dynamic data structures with Java arrays; called
     * after parsing.
@@ -170,6 +192,9 @@ implements JapeConstants, java.io.Serializable, Cloneable
 
 
 // $Log$
+// Revision 1.14  2006/01/06 22:37:24  kwilliams
+// Implement equals(Object) and hashCode() so we can usefully be put into Sets, HashMaps, etc.
+//
 // Revision 1.13  2006/01/06 22:03:04  kwilliams
 // Define other constructors in terms of Constraint(String,FeatureMap)
 //
