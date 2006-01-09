@@ -50,7 +50,7 @@ print HTMLFILE <<ENDHTML;
 	<p>Plugins for GATE</p>
 </div>
 
-<p>This page lists the plugins that are currently available with GATE:</p>
+<p>This page lists some of the plugins that are currently available with GATE:</p>
 <ul>
 	<li><a href="#internal-plugins">
 ENDHTML
