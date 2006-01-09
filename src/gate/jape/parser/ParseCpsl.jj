@@ -991,7 +991,7 @@ String[] AssignmentExpression() :
 "          Object existingFeatureValue = existingA.getFeatures().get(\"" +
 existingAttrName + "\");" + nl +
 "          if(existingFeatureValue != null) {" + nl +
-"            features.put(\"" + existingAttrName + "\", existingFeatureValue);" + nl +
+"            features.put(\"" + newAttrName + "\", existingFeatureValue);" + nl +
 "            break;" + nl +
 "          }" + nl + "        } // while" + nl +
 "      } // block for existing annots" + nl
@@ -1063,6 +1063,17 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.32  2006/01/09 14:06:35  ian_roberts
+// Fixed feature value copying (bug #1398837).
+//
+// Rule: rule
+// ( {OldAnnot.feat = "something"} ):binding
+// -->
+// :binding.NewAnnot = { myFeature = :binding.OldAnnot.feat }
+//
+// now correctly creates a NewAnnot with myFeature="something" instead of the
+// previous behavior of feat="something".
+//
 // Revision 1.31  2005/12/14 15:58:23  ian_roberts
 // Fixes for JAPE grammars that contain non-Latin1 characters.
 //

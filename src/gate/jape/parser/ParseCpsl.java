@@ -987,7 +987,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
 "          Object existingFeatureValue = existingA.getFeatures().get(\"" +
 existingAttrName + "\");" + nl +
 "          if(existingFeatureValue != null) {" + nl +
-"            features.put(\"" + existingAttrName + "\", existingFeatureValue);" + nl +
+"            features.put(\"" + newAttrName + "\", existingFeatureValue);" + nl +
 "            break;" + nl +
 "          }" + nl + "        } // while" + nl +
 "      } // block for existing annots" + nl
