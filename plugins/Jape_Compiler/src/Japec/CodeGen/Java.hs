@@ -188,17 +188,19 @@ ppAssigment (JapeAssigment name value) =
      BooleanValue     val -> text (if val then "Boolean.TRUE" else "Boolean.FALSE")
      FloatValue       val -> text "new Double" <> parens (double val)) <> semi
 ppAssigment (JapeRefAssigment name binding annType feature) =
-  text "AnnotationSet" <+> existingAnnotSetName <+> text "= (AnnotationSet) bindings.get" <> parens (text (show binding)) <> semi $$
-  text "AnnotationSet existingAnnots =" <+> existingAnnotSetName <> text ".get" <> parens (text (show annType)) <> semi $$
-  text "Iterator iter = existingAnnots.iterator();" $$
-  text "while (iter.hasNext()) {" $$
-  text "  Annotation existingA = (Annotation) iter.next();" $$
-  text "  Object existingFeatureValue = existingA.getFeatures().get" <> parens(text (show feature)) <> semi $$
-  text "  if (existingFeatureValue != null) {" $$
-  text "    features.put" <> parens(text (show name) <> text ", existingFeatureValue") <> semi $$
-  text "    break;" $$
-  text "  }" $$
-  text "} // while"
+  text "{ // need a block for the existing annot set" $$
+  text "  AnnotationSet" <+> existingAnnotSetName <+> text "= (AnnotationSet) bindings.get" <> parens (text (show binding)) <> semi $$
+  text "  AnnotationSet existingAnnots =" <+> existingAnnotSetName <> text ".get" <> parens (text (show annType)) <> semi $$
+  text "  Iterator iter = existingAnnots.iterator();" $$
+  text "  while (iter.hasNext()) {" $$
+  text "    Annotation existingA = (Annotation) iter.next();" $$
+  text "    Object existingFeatureValue = existingA.getFeatures().get" <> parens(text (show feature)) <> semi $$
+  text "    if (existingFeatureValue != null) {" $$
+  text "      features.put" <> parens(text (show name) <> text ", existingFeatureValue") <> semi $$
+  text "      break;" $$
+  text "    }" $$
+  text "  } // while" $$
+  text "} // block for existing annots"
   where
     existingAnnotSetName = text (KS.unpack binding ++ "ExistingAnnots")
 
@@ -206,7 +208,10 @@ ppJapeActions []                                     bindings = empty
 ppJapeActions (JavaAction mb_name content : actions) bindings =
   let (bindings',doc) = 
         case mb_name of
-          Nothing   -> (bindings,text (PS.unpack content))
+          Nothing   -> (bindings,
+              char '{' $$
+              nest 4 (text (PS.unpack content)) $$
+              char '}')
           Just name -> ppBindingsGet name bindings (text (PS.unpack content))
   in doc $$ ppJapeActions actions bindings'
 ppJapeActions (AssigmentAction name annType assigments : actions) bindings =
