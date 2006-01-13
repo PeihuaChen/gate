@@ -1283,6 +1283,16 @@ jar/classpath so it's the same as registerBuiltins
   }
 
   /**
+   * Get the location of the plugins directory.
+   *
+   * @return the plugins drectory, or null if this has not yet been set (i.e.
+   * <code>Gate.init()</code> has not yet been called).
+   */
+  public static File getPluginsHome() {
+    return pluginsHome;
+  }
+
+  /**
    * Set the location of the user's config file.
    *
    * @throws IllegalStateException if the value has already been set.
