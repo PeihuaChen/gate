@@ -3,8 +3,8 @@ package shef.nlp.supple;
 
 /**
  *
- * <p>Title: BuChart</p>
- * <p>Copyright: Copyright (c) 2003</p>
+ * <p>Title: SUPPLE</p>
+ * <p>Copyright: Copyright (c) 2003-2006</p>
  * @version 1.0
  */
 
@@ -148,18 +148,24 @@ public class SUPPLE extends AbstractLanguageAnalyser implements ProcessingResour
    private Hashtable buchartCategories;
    /** priorities associated with the buchart categories if longest match to be used */
    public Hashtable priorityList;
-   
+
    private static final String CAT_DELIMITER=";";
    private static final String ATT_DELIMITER=";";
    private static final String GATE_LINE="Gate";
    private static final String SUPPLE_LINE="SUPPLE";
    private static final String SUPPLE_CAT="category";
-  
+
    public static final String CONFIG_FILE_PAR="configFile";
    public static final String FEATURE_FILE_PAR="featureFile";
 
    public Resource init() throws ResourceInstantiationException
    {
+      /** Check the specified prolog saved state **/
+      if (!suppleFile.exists() || !suppleFile.isFile())
+      {
+			throw new ResourceInstantiationException("SUPPLEFile parameter does not point to a file");
+		}
+
       /** Check the specified prolog **/
       try
       {
