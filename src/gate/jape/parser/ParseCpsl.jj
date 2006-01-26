@@ -983,18 +983,22 @@ String[] AssignmentExpression() :
         //   add a new attribute copied from that one
         {
           blockBuffer.append(
-"        AnnotationSet existingAnnots = " + nl +
-"        " + existingAnnotSetName + ".get(\"" + existingAnnotType + "\");" + nl +
-"        Iterator iter = existingAnnots.iterator();" + nl +
-"        while(iter.hasNext()) {" + nl +
-"          Annotation existingA = (Annotation) iter.next();" + nl +
-"          Object existingFeatureValue = existingA.getFeatures().get(\"" +
+"        if (" + existingAnnotSetName + " !> null) {" + nl +                  
+"          AnnotationSet existingAnnots = " + nl +
+"          " + existingAnnotSetName + ".get(\"" + existingAnnotType + "\");" + nl +
+"          if (existingAnnots !> null) {" + nl +
+"            Iterator iter = existingAnnots.iterator();" + nl +
+"            while(iter.hasNext()) {" + nl +
+"              Annotation existingA = (Annotation) iter.next();" + nl +
+"              Object existingFeatureValue = existingA.getFeatures().get(\"" +
 existingAttrName + "\");" + nl +
-"          if(existingFeatureValue != null) {" + nl +
-"            features.put(\"" + newAttrName + "\", existingFeatureValue);" + nl +
-"            break;" + nl +
-"          }" + nl + "        } // while" + nl +
-"      } // block for existing annots" + nl
+"              if(existingFeatureValue != null) {" + nl +
+"                features.put(\"" + newAttrName + "\", existingFeatureValue);" + nl +
+"                break;" + nl +
+"              }" + nl + "        } // while" + nl +
+"            } // if not null" + nl +
+"          } // if not null" + nl +
+"        } // block for existing annots" + nl
           );
         }
       ) // end of reference to existing annotation(s)
@@ -1063,6 +1067,9 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.33  2006/01/26 09:15:33  valyt
+// NPE Guards for shortcut :bindingSet.AnnotationType.featureName used to set feature values.
+//
 // Revision 1.32  2006/01/09 14:06:35  ian_roberts
 // Fixed feature value copying (bug #1398837).
 //
