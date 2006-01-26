@@ -979,18 +979,22 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         nameTok = jj_consume_token(ident);
                                    existingAttrName = nameTok.image;
           blockBuffer.append(
-"        AnnotationSet existingAnnots = " + nl +
-"        " + existingAnnotSetName + ".get(\"" + existingAnnotType + "\");" + nl +
-"        Iterator iter = existingAnnots.iterator();" + nl +
-"        while(iter.hasNext()) {" + nl +
-"          Annotation existingA = (Annotation) iter.next();" + nl +
-"          Object existingFeatureValue = existingA.getFeatures().get(\"" +
+"        if (" + existingAnnotSetName + " !> null) {" + nl +
+"          AnnotationSet existingAnnots = " + nl +
+"          " + existingAnnotSetName + ".get(\"" + existingAnnotType + "\");" + nl +
+"          if (existingAnnots !> null) {" + nl +
+"            Iterator iter = existingAnnots.iterator();" + nl +
+"            while(iter.hasNext()) {" + nl +
+"              Annotation existingA = (Annotation) iter.next();" + nl +
+"              Object existingFeatureValue = existingA.getFeatures().get(\"" +
 existingAttrName + "\");" + nl +
-"          if(existingFeatureValue != null) {" + nl +
-"            features.put(\"" + newAttrName + "\", existingFeatureValue);" + nl +
-"            break;" + nl +
-"          }" + nl + "        } // while" + nl +
-"      } // block for existing annots" + nl
+"              if(existingFeatureValue != null) {" + nl +
+"                features.put(\"" + newAttrName + "\", existingFeatureValue);" + nl +
+"                break;" + nl +
+"              }" + nl + "        } // while" + nl +
+"            } // if not null" + nl +
+"          } // if not null" + nl +
+"        } // block for existing annots" + nl
           );
         break;
       default:
