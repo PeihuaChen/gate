@@ -979,10 +979,10 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         nameTok = jj_consume_token(ident);
                                    existingAttrName = nameTok.image;
           blockBuffer.append(
-"        if (" + existingAnnotSetName + " !> null) {" + nl +
+"        if (" + existingAnnotSetName + " != null) {" + nl +
 "          AnnotationSet existingAnnots = " + nl +
 "          " + existingAnnotSetName + ".get(\"" + existingAnnotType + "\");" + nl +
-"          if (existingAnnots !> null) {" + nl +
+"          if (existingAnnots != null) {" + nl +
 "            Iterator iter = existingAnnots.iterator();" + nl +
 "            while(iter.hasNext()) {" + nl +
 "              Annotation existingA = (Annotation) iter.next();" + nl +
