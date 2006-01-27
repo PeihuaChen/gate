@@ -190,16 +190,20 @@ ppAssigment (JapeAssigment name value) =
 ppAssigment (JapeRefAssigment name binding annType feature) =
   text "{ // need a block for the existing annot set" $$
   text "  AnnotationSet" <+> existingAnnotSetName <+> text "= (AnnotationSet) bindings.get" <> parens (text (show binding)) <> semi $$
-  text "  AnnotationSet existingAnnots =" <+> existingAnnotSetName <> text ".get" <> parens (text (show annType)) <> semi $$
-  text "  Iterator iter = existingAnnots.iterator();" $$
-  text "  while (iter.hasNext()) {" $$
-  text "    Annotation existingA = (Annotation) iter.next();" $$
-  text "    Object existingFeatureValue = existingA.getFeatures().get" <> parens(text (show feature)) <> semi $$
-  text "    if (existingFeatureValue != null) {" $$
-  text "      features.put" <> parens(text (show name) <> text ", existingFeatureValue") <> semi $$
-  text "      break;" $$
-  text "    }" $$
-  text "  } // while" $$
+  text "  if" <> parens (existingAnnotSetName <+> text "!= null") <+> char '{' $$
+  text "    AnnotationSet existingAnnots =" <+> existingAnnotSetName <> text ".get" <> parens (text (show annType)) <> semi $$
+  text "    if(existingAnnots != null) {" $$
+  text "      Iterator iter = existingAnnots.iterator();" $$
+  text "      while (iter.hasNext()) {" $$
+  text "        Annotation existingA = (Annotation) iter.next();" $$
+  text "        Object existingFeatureValue = existingA.getFeatures().get" <> parens(text (show feature)) <> semi $$
+  text "        if (existingFeatureValue != null) {" $$
+  text "          features.put" <> parens(text (show name) <> text ", existingFeatureValue") <> semi $$
+  text "          break;" $$
+  text "        }" $$
+  text "      } // while" $$
+  text "    } // if existingAnnots != null" $$
+  text "  } // if" <+> existingAnnotSetName <+> text "!= null" $$
   text "} // block for existing annots"
   where
     existingAnnotSetName = text (KS.unpack binding ++ "ExistingAnnots")
