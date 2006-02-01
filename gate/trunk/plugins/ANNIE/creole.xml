@@ -125,7 +125,8 @@
         java.lang.String</PARAMETER>
       <PARAMETER NAME="ontology"
         COMMENT="The ontology to be used by this transducer"
-        OPTIONAL="true">gate.creole.ontology.Ontology</PARAMETER>
+        OPTIONAL="true" 
+		RUNTIME="true">gate.creole.ontology.Ontology</PARAMETER>
     </RESOURCE>
     
     <!-- creole.xml for ANNIE Transducer -->
