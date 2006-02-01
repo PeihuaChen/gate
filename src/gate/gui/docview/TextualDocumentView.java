@@ -13,11 +13,7 @@
 package gate.gui.docview;
 
 import java.awt.*;
-import java.awt.Component;
-import java.awt.Point;
 import java.awt.event.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.*;
@@ -26,15 +22,15 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.text.*;
-import javax.swing.text.Highlighter;
 
 
 import gate.Annotation;
 import gate.AnnotationSet;
+import gate.Document;
 import gate.corpora.DocumentContentImpl;
+import gate.event.DocumentEvent;
+import gate.event.DocumentListener;
 import gate.util.*;
-import gate.util.GateRuntimeException;
-import gate.util.RawEditorKit;
 
 
 /**
@@ -45,6 +41,7 @@ public class TextualDocumentView extends AbstractDocumentView {
 
   public TextualDocumentView(){
     blinkingTagsForAnnotations = new HashMap();
+    gateDocListener = new GateDocumentListener();
   }
   
   public Object addHighlight(Annotation ann, AnnotationSet set, Color colour){
@@ -234,7 +231,20 @@ public class TextualDocumentView extends AbstractDocumentView {
     return CENTRAL;
   }
 
-  
+  /**
+   * Stores the target (which should always be a {@link Document}) into the 
+   * {@link #document} field.
+   */
+  public void setTarget(Object target) {
+    if(document != null){
+      //remove the old listener
+      document.removeDocumentListener(gateDocListener);
+    }
+    super.setTarget(target);
+    //register the new listener
+    this.document.addDocumentListener(gateDocListener);
+  }
+
   
   /* (non-Javadoc)
    * @see gate.gui.docview.AbstractDocumentView#initGUI()
@@ -334,10 +344,33 @@ public class TextualDocumentView extends AbstractDocumentView {
     protected boolean highlightsShown = false;
   }
     
+  class GateDocumentListener implements DocumentListener{
+
+    public void annotationSetAdded(DocumentEvent e) {
+    }
+
+    public void annotationSetRemoved(DocumentEvent e) {
+    }
+
+    public void contentEdited(DocumentEvent e) {
+      if(active){
+        //reload the content.
+        textView.setText(document.getContent().toString());
+      }
+    }
+    
+    public void setActive(boolean active){
+      this.active = active;
+    }
+    private boolean active = true;
+  }
+  
   class SwingDocumentListener implements javax.swing.event.DocumentListener{
     public void insertUpdate(final javax.swing.event.DocumentEvent e) {
       //propagate the edit to the document
       try{
+        //deactivate our own listener so we don't get cycles
+        gateDocListener.setActive(false);
         document.edit(new Long(e.getOffset()), new Long(e.getOffset()),
                       new DocumentContentImpl(
                         e.getDocument().getText(e.getOffset(), e.getLength())));
@@ -345,6 +378,9 @@ public class TextualDocumentView extends AbstractDocumentView {
         ble.printStackTrace(Err.getPrintWriter());
       }catch(InvalidOffsetException ioe){
         ioe.printStackTrace(Err.getPrintWriter());
+      }finally{
+        //reactivate our listener
+        gateDocListener.setActive(true);
       }
       //update the offsets in the list
       Component listView = annotationListView.getGUI();
@@ -354,11 +390,16 @@ public class TextualDocumentView extends AbstractDocumentView {
     public void removeUpdate(final javax.swing.event.DocumentEvent e) {
       //propagate the edit to the document
       try{
+        //deactivate our own listener so we don't get cycles
+        gateDocListener.setActive(false);        
         document.edit(new Long(e.getOffset()),
                       new Long(e.getOffset() + e.getLength()),
                       new DocumentContentImpl(""));
       }catch(InvalidOffsetException ioe){
         ioe.printStackTrace(Err.getPrintWriter());
+      }finally{
+        //reactivate our listener
+        gateDocListener.setActive(true);
       }
       //update the offsets in the list
       Component listView = annotationListView.getGUI();
@@ -404,6 +445,8 @@ public class TextualDocumentView extends AbstractDocumentView {
   
   protected JScrollPane scroller;
   protected AnnotationListView annotationListView;
+  
+  protected GateDocumentListener gateDocListener;
 
   /**
    * The annotations used for blinking highlights and their tags. A map from 
