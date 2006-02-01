@@ -14,6 +14,7 @@
 
 package gate.gui;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.*;
@@ -52,10 +53,10 @@ public class SerialControllerEditor extends AbstractVisualResource
     analyserMode = controller instanceof SerialAnalyserController ||
                    controller instanceof ConditionalSerialAnalyserController;
     conditionalMode = controller instanceof ConditionalController;
+    loadedPRsTableModel.fireTableDataChanged();
+    memberPRsTableModel.fireTableDataChanged();
+//    parametersEditor.
     
-    initLocalData();
-    initGuiComponents();
-    initListeners();
   }//setController
 
 
@@ -83,6 +84,9 @@ public class SerialControllerEditor extends AbstractVisualResource
 
   public Resource init() throws ResourceInstantiationException{
     super.init();
+    initLocalData();
+    initGuiComponents();
+    initListeners();
     return this;
   }//init
 
@@ -112,10 +116,15 @@ public class SerialControllerEditor extends AbstractVisualResource
 
 //    loadedPRsTable.setIntercellSpacing(new Dimension(5, 5));
     final int width1 = new JLabel("Loaded Processing resources").
-                getPreferredSize().width + 10;
+                getPreferredSize().width + 30;
     JScrollPane scroller = new JScrollPane(){
       public Dimension getPreferredSize(){
         Dimension dim = super.getPreferredSize();
+        dim.width = Math.max(dim.width, width1);
+        return dim;
+      }
+      public Dimension getMinimumSize(){
+        Dimension dim = super.getMinimumSize();
         dim.width = Math.max(dim.width, width1);
         return dim;
       }
@@ -151,13 +160,18 @@ public class SerialControllerEditor extends AbstractVisualResource
 //    memberPRsTable.setIntercellSpacing(new Dimension(5, 5));
 
     final int width2 = new JLabel("Selected Processing resources").
-                           getPreferredSize().width + 10;
+                           getPreferredSize().width + 30;
     scroller = new JScrollPane(){
       public Dimension getPreferredSize(){
         Dimension dim = super.getPreferredSize();
         dim.width = Math.max(dim.width, width2);
         return dim;
       }
+      public Dimension getMinimumSize(){
+        Dimension dim = super.getMinimumSize();
+        dim.width = Math.max(dim.width, width2);
+        return dim;
+      }      
     };
     scroller.getViewport().setView(memberPRsTable);
     scroller.setBorder(BorderFactory.
@@ -875,7 +889,7 @@ public class SerialControllerEditor extends AbstractVisualResource
   class LoadedPRsTableModel extends AbstractTableModel{
     public int getRowCount(){
       List loadedPRs = new ArrayList(Gate.getCreoleRegister().getPrInstances());
-      loadedPRs.removeAll(controller.getPRs());
+      if(controller != null) loadedPRs.removeAll(controller.getPRs());
       Iterator prsIter = loadedPRs.iterator();
       while(prsIter.hasNext()){
         ProcessingResource aPR = (ProcessingResource)prsIter.next();
@@ -887,7 +901,7 @@ public class SerialControllerEditor extends AbstractVisualResource
 
     public Object getValueAt(int row, int column){
       List loadedPRs = new ArrayList(Gate.getCreoleRegister().getPrInstances());
-      loadedPRs.removeAll(controller.getPRs());
+      if(controller != null) loadedPRs.removeAll(controller.getPRs());
       Iterator prsIter = loadedPRs.iterator();
       while(prsIter.hasNext()){
         ProcessingResource aPR = (ProcessingResource)prsIter.next();
@@ -1023,7 +1037,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       yellow = new JLabel(MainFrame.getIcon("yellowBall.gif"));
     }
     public int getRowCount(){
-      return controller.getPRs().size();
+      return controller == null ? 0 : controller.getPRs().size();
     }
 
     public Object getValueAt(int row, int column){
