@@ -325,6 +325,9 @@ public class Transducer extends AbstractLanguageAnalyser
    */
   public void setOntology(gate.creole.ontology.Ontology ontology) {
     this.ontology = ontology;
+    //ontology is now a run-time param so we need to propagate it down to the 
+    //actual SPTs included in this transducer.
+    batch.setOntology(ontology);
   }
 
   /**
