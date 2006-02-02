@@ -327,7 +327,7 @@ public class Transducer extends AbstractLanguageAnalyser
     this.ontology = ontology;
     //ontology is now a run-time param so we need to propagate it down to the 
     //actual SPTs included in this transducer.
-    batch.setOntology(ontology);
+    if(batch!= null) batch.setOntology(ontology);
   }
 
   /**
