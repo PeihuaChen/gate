@@ -53,6 +53,11 @@ public class SerialControllerEditor extends AbstractVisualResource
     analyserMode = controller instanceof SerialAnalyserController ||
                    controller instanceof ConditionalSerialAnalyserController;
     conditionalMode = controller instanceof ConditionalController;
+    
+    initLocalData();
+    initGuiComponents();
+    initListeners();
+
     loadedPRsTableModel.fireTableDataChanged();
     memberPRsTableModel.fireTableDataChanged();
 //    parametersEditor.
@@ -84,9 +89,6 @@ public class SerialControllerEditor extends AbstractVisualResource
 
   public Resource init() throws ResourceInstantiationException{
     super.init();
-    initLocalData();
-    initGuiComponents();
-    initListeners();
     return this;
   }//init
 
