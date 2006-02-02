@@ -346,7 +346,7 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
     switch(ontologyType){
       case OWL_LITE:
         jenaModel = ModelFactory
-                .createOntologyModel(OntModelSpec.OWL_LITE_MEM_RDFS_INF);
+                .createOntologyModel(OntModelSpec.OWL_LITE_MEM);
         break;
       default:
         throw new IllegalArgumentException("Ontology type " + ontologyType
@@ -461,7 +461,7 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
     }
     // save to the file
     try {
-      jenaModel.write(new FileOutputStream(outputFile));
+      jenaModel.write(new FileOutputStream(outputFile), "RDF/XML-ABBREV");
     } catch(IOException ioe) {
       throw new GateRuntimeException(ioe);
     }
