@@ -73,30 +73,20 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
       srcDir = new File(workDir, "src");
       srcDir.deleteOnExit();
         
-      grammarFile = new File(URI.create(grammarURL.toExternalForm()));
+      grammarFile = fileFromURL(grammarURL);
+      if(DEBUG) {
+        System.err.println("Loading grammar from file " + grammarFile);
+      }
       
-      packageName = "com.ontotext.gate.japec." + 
-          grammarFile.getParentFile().getName() + Gate.genSym();
+      packageName = "com.ontotext.gate.japec.grammar" + Gate.genSym();
+
+      if(DEBUG) {
+        System.err.println("Generating classes into package " + packageName);
+      }
   
       compileGrammar();
       
       Files.rmdir(workDir);
-  
-//      loadAllClasses(classesDir, null);
-//  
-//      phases.clear();
-//  
-//      String line;
-//      BufferedReader reader = new BufferedReader(new FileReader(new File(srcDir, "phases")));
-//      while ((line = reader.readLine()) != null) {
-//        Class phaseClass = Gate.getClassLoader().loadClass(packageName+"."+line);
-//        SinglePhaseTransducer phase = (SinglePhaseTransducer) phaseClass.newInstance();
-//        phase.setInputASName(inputASName);
-//        phase.setOutputASName(outputASName);
-//        phase.setOntology(ontology);
-//        phases.add(phase);
-//      }
-//      reader.close();
     } catch(ResourceInstantiationException rie) {
       throw rie;
     }catch(Exception e){
@@ -151,8 +141,7 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
       throw new ResourceInstantiationException(
           "Jape_Compiler plugin must be loaded from a file: URL");
     }
-    File japecCreoleXMLFile =
-      new File(URI.create(japecCreoleXML.toExternalForm()));
+    File japecCreoleXMLFile = fileFromURL(japecCreoleXML);
 
     // search for Japec compiler binary.  We look first for japec (.exe on
     // Windows) in the Jape_Compiler plugin directory.  If that does not exist,
@@ -216,6 +205,11 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
     
     //compile the generated classes and load the classes into the classloader
     Map sources = new LinkedHashMap();
+
+    // phase class names are stored in a List to allow the same phase to be
+    // used more than once in a multiphase transducer.
+    List allPhaseClassNames = new ArrayList();
+
     //read the phases file
     File phasesFile = new File(srcDir, "phases");
     phasesFile.deleteOnExit();
@@ -239,94 +233,20 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
       }
       
       sources.put(phaseClassName, source.toString());
+      allPhaseClassNames.add(phaseClassName);
     }
     //call the Java compiler
     Javac.loadClasses(sources);
     
     // create the phases
     phases.clear();
-    for(Iterator phaseClassNameIter = sources.keySet().iterator();
+    for(Iterator phaseClassNameIter = allPhaseClassNames.iterator();
         phaseClassNameIter.hasNext();){
       String phaseClassName = (String)phaseClassNameIter.next();
       Class phaseClass = Gate.getClassLoader().loadClass(phaseClassName);
       SinglePhaseTransducer phase = (SinglePhaseTransducer) phaseClass.newInstance();
       phase.setOntology(ontology);
       phases.add(phase);
-    }
-    
-    
-    
-    
-    
-//    
-//    File[] sources = srcDir.listFiles();
-//    String[] args = new String[sources.length+5];
-//    int count = 0;
-//    args[count++] = "-sourcepath";
-//    args[count++] = srcDir.getAbsolutePath();
-//    args[count++] = "-encoding";
-//    args[count++] = encoding;
-//    args[count++] = "-d";
-//    args[count++] = classesDir.getAbsolutePath();
-//
-//    for (int i = 0; i < sources.length; i++)
-//    {
-//      if (!sources[i].getName().equals("phases"))
-//        args[count++] = sources[i].getAbsolutePath();
-//    }
-//
-//    if (classesDir.exists())
-//    {
-//      if (!clearDir(classesDir))
-//        throw new GateRuntimeException("Cannot clear " + classesDir.getPath() + " directory!");
-//    }
-//    else
-//    {
-//      if (!classesDir.mkdir())
-//        throw new GateRuntimeException("Cannot create " + classesDir.getPath() + " directory!");
-//    }
-//
-//    Out.prln("Compiling...");
-//    com.sun.tools.javac.Main.compile(args);
-  }
-
-  protected void loadAllClasses(File classesDirectory,
-                                       String packageName) throws IOException {
-    File[] files = classesDirectory.listFiles();
-    //adjust the package name
-    if(packageName == null)
-    {
-        //top level directory -> not a package name
-        packageName = "";
-    }
-    else
-    {
-        //internal directory -> a package name
-        packageName += packageName.length() == 0 ?
-            classesDirectory.getName() : "." + classesDirectory.getName();
-    }
-
-    for(int i = 0; i < files.length; i++)
-    {
-      if (files[i].isDirectory())
-        loadAllClasses(files[i], packageName);
-      else
-      {
-        String filename = files[i].getName();
-        if (filename.endsWith(".class"))
-        {
-          String className = packageName + "." +
-                             filename.substring(0, filename.length() - 6);
-
-          if (Gate.getClassLoader().findExistingClass(className) == null)
-          {
-            //load the class from the file
-            byte[] bytes = Files.getByteArray(files[i]);
-            Gate.getClassLoader().defineGateClass(className,
-                                                  bytes, 0, bytes.length);
-          }
-        }
-      }
     }
   }
 
@@ -383,5 +303,29 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
 
   public void setOntology(gate.creole.ontology.Ontology newOntology) {
     this.ontology = newOntology;
+  }
+
+  /**
+   * Convert a file: URL to a File path.  First tries to parse the URL's
+   * toExternalForm as a URI and create the File object from that URI.  If this
+   * fails, just uses the path part of the URL.
+   *
+   * @exception IllegalArgumentException if the URL is not convertable into a
+   * File.
+   */
+  private File fileFromURL(URL theURL) throws IllegalArgumentException {
+    try {
+      URI uri = new URI(theURL.toExternalForm());
+      return new File(uri);
+    }
+    catch(URISyntaxException use) {
+      try {
+        URI uri = new URI(theURL.getProtocol(), null, theURL.getPath(), null, null);
+        return new File(uri);
+      }
+      catch(URISyntaxException use2) {
+        throw new IllegalArgumentException("Cannot convert " + theURL + " to a file path");
+      }
+    }
   }
 }
