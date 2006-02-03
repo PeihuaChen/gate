@@ -426,7 +426,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
           if(feature.isSchemaFeature()){
             Set permValues = schema.getFeatureSchema(feature.name).
               getPermissibleValues();
-            fValues.addAll(permValues);
+            if(permValues != null) fValues.addAll(permValues);
           }
           if(!fValues.contains(feature.value)) fValues.add(feature.value);
           Collections.sort(fValues, defaultComparator);
