@@ -805,6 +805,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       if(expanded){
         tableRows.remove(setRow + pos + 1);
         tableModel.fireTableRowsDeleted(setRow + pos + 1, setRow + pos + 1);
+        if(row >= (setRow + pos + 1)) row--;
       }
       if(typeHandlers.isEmpty()){
         //the set has no more handlers
