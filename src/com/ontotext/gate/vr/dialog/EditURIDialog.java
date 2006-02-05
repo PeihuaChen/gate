@@ -61,7 +61,7 @@ public class EditURIDialog extends JDialog {
     jLabel1.setText("URI ");
 
     comboURI = new JComboBox(new Vector(editor.getAllURIs()));
-    comboURI.setSelectedItem(ontology.getSourceURI());
+    comboURI.setSelectedItem(ontology.getDefaultNameSpace());
     comboURI.setEditable(true);
 
     this.getContentPane().add(jLabel1,                  new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0
@@ -97,7 +97,7 @@ public class EditURIDialog extends JDialog {
             throw new GateRuntimeException("reference to the ontology not set \n"
             +"in EditURIDialog");
 
-        ontology.setSourceURI(
+        ontology.setDefaultNameSpace(
           (String)EditURIDialog.this.comboURI.getModel().getSelectedItem());
 
         EditURIDialog.this.setVisible(false);
@@ -120,7 +120,7 @@ public class EditURIDialog extends JDialog {
           "reference to the ontolgy to be renamed is null \n"
           +"in EditURIDialog");
 
-          ontology.setSourceURI(
+          ontology.setDefaultNameSpace(
             (String)EditURIDialog.this.comboURI.getModel().getSelectedItem());
 
           EditURIDialog.this.setVisible(false);

@@ -158,13 +158,9 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
         jenaModel.read(new BufferedInputStream(inputURL.openStream()), "");
         // get the default name space
         String defaultURIPrefix = jenaModel.getNsPrefixURI("");
-        if(defaultURIPrefix != null) setSourceURI(defaultURIPrefix);
+        if(defaultURIPrefix != null) setDefaultNameSpace(defaultURIPrefix);
       } catch(IOException ioe) {
         throw new ResourceInstantiationException(ioe);
-      }
-    } else {
-      if(defaultNameSpace != null && defaultNameSpace.trim().length() > 0) {
-        setSourceURI(defaultNameSpace);
       }
     }
     if(this.getPropertyDefinitionByName("label") == null) {
@@ -353,7 +349,7 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
                 + " is not supported!");
     }
     // set the default URI
-    jenaModel.setNsPrefix("", getSourceURI());
+    jenaModel.setNsPrefix("", getDefaultNameSpace());
     // create the class hierarchy
     Iterator topClassIter = getTopClasses().iterator();
     while(topClassIter.hasNext()) {
@@ -763,7 +759,6 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
   protected URL rdfsFileURL;
   protected URL damlFileURL;
   protected String language;
-  protected String defaultNameSpace;
   protected List actionsList;
   /**
    * Constant for Owl-Lite ontology type.
@@ -786,18 +781,4 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
    */
   public static final int DAML = 13;
 
-  /**
-   * @return Returns the defaultNameSpace.
-   */
-  public String getDefaultNameSpace() {
-    return defaultNameSpace;
-  }
-
-  /**
-   * @param defaultNameSpace
-   *          The defaultNameSpace to set.
-   */
-  public void setDefaultNameSpace(String defaultNameSpace) {
-    this.defaultNameSpace = defaultNameSpace;
-  }
 }

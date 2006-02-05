@@ -159,11 +159,11 @@ public class ProtegeProjectName extends AbstractLanguageResource
       visualResource.refreshOntoeditor(ontotextOntology);
     } // if
   }
-  public void setSourceURI(String theURI) {
-    ontotextOntology.setSourceURI(theURI);
+  public void setDefaultNameSpace(String theURI) {
+    ontotextOntology.setDefaultNameSpace(theURI);
   }
-  public String getSourceURI() {
-    return ontotextOntology.getSourceURI();
+  public String getDefaultNameSpace() {
+    return ontotextOntology.getDefaultNameSpace();
   }
   public void setVersion(String theVersion) {
     ontotextOntology.setVersion(theVersion);

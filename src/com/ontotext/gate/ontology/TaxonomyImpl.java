@@ -31,7 +31,7 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
   private Set listeners = new HashSet();
   private String label;
   private URL url;
-  private String sourceURI;
+  private String defaultNameSpace;
   private String version;
   private String id;
   private String comment;
@@ -185,17 +185,18 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
             "OntologyImpl does not support store().\nRefer to DAMLOntology.");
   }
 
-  public void setSourceURI(String theURI) {
+  public void setDefaultNameSpace(String theURI) {
     this.modified = true;
-    sourceURI = theURI;
-    if(-1 == sourceURI.indexOf('#')){
-      sourceURI = sourceURI + '#';
+    defaultNameSpace = theURI;
+    if(defaultNameSpace != null &&
+       -1 == defaultNameSpace.indexOf('#')){
+      defaultNameSpace = defaultNameSpace + '#';
     }
     fireObjectModificationEvent(this);
   }
 
-  public String getSourceURI() {
-    return sourceURI;
+  public String getDefaultNameSpace() {
+    return defaultNameSpace;
   }
 
   public void setVersion(String theVersion) {
@@ -232,7 +233,7 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
     this.modified = true;
     TClass theClass = new TClassImpl(Long.toString(++lastGeneratedId), aName,
             aComment, this);
-    theClass.setURI(getSourceURI() + aName);
+    theClass.setURI(getDefaultNameSpace() + aName);
     addClass(theClass);
     nullBuffers = true;
     fireObjectModificationEvent(this);
@@ -390,9 +391,9 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
       if(null != this.getURL() & null != onto.getURL())
         result &= this.getURL().equals(onto.getURL());
       else result = this.getURL() == onto.getURL();
-      if(null != this.getSourceURI() & null != onto.getSourceURI())
-        result &= this.getSourceURI().equals(onto.getSourceURI());
-      else result = this.getSourceURI() == onto.getSourceURI();
+      if(null != this.getDefaultNameSpace() & null != onto.getDefaultNameSpace())
+        result &= this.getDefaultNameSpace().equals(onto.getDefaultNameSpace());
+      else result = this.getDefaultNameSpace() == onto.getDefaultNameSpace();
     }
     return result;
   } // equals

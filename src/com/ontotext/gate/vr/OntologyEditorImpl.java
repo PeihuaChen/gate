@@ -128,8 +128,8 @@ public void addSubClass(ClassNode root, String className, String classComment) {
   if ( o instanceof Taxonomy) {
     Taxonomy onto = (Taxonomy) o;
     TClass clas = onto.createClass(className,classComment);
-    clas.setURI(onto.getSourceURI().substring(0,
-        onto.getSourceURI().lastIndexOf("#")+1)+className);
+    clas.setURI(onto.getDefaultNameSpace().substring(0,
+        onto.getDefaultNameSpace().lastIndexOf("#")+1)+className);
     ClassNode subNode = new ClassNode(clas);
     Vector kids = root.children();
     kids.add(subNode);
@@ -266,7 +266,7 @@ public void createOntology (
     } // catch
 
     o.setName(name);
-    o.setSourceURI(sourceURI);
+    o.setDefaultNameSpace(sourceURI);
 
     try {
       Main.getMainFrame().resourceLoaded(
@@ -546,7 +546,7 @@ public void editClassURI(TClass c, int x, int y){
 public Set getAllURIs() {
   Set result = new HashSet();
   for ( int i = 0 ; i < ontoList.size(); i++ ) {
-    String u = ((Taxonomy)ontoList.get(i)).getSourceURI();
+    String u = ((Taxonomy)ontoList.get(i)).getDefaultNameSpace();
 
     result.add(u);
   }

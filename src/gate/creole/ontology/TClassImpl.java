@@ -65,7 +65,7 @@ public class TClassImpl extends OntologyResourceImpl implements TClass {
 
   public void setURI(String theURI) {
     if(-1 == theURI.indexOf('#')) {
-      theURI = getOntology().getSourceURI() + '#' + theURI;
+      theURI = getOntology().getDefaultNameSpace() + '#' + theURI;
     }
     uri = theURI;
     ontology.setModified(true);
