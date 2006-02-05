@@ -77,14 +77,15 @@ public interface Taxonomy extends LanguageResource {
    * @param theURI
    *          the URI to be set
    */
-  public void setSourceURI(String theURI);
+  public void setDefaultNameSpace(String theURI);
 
   /**
-   * Gets the source URI.
+   * Gets the default name space for this ontology. This value is prepended
+   * to local URIs (the ones not containing '#'.
    * 
-   * @return the URI of this ontology
+   * @return a String value.
    */
-  public String getSourceURI();
+  public String getDefaultNameSpace();
 
   /**
    * Sets version to this ontology.

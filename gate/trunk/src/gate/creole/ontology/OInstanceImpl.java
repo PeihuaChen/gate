@@ -30,7 +30,7 @@ public class OInstanceImpl extends OntologyResourceImpl implements OInstance {
     super(name, comment, ontology);
     this.instanceClasses = new HashSet(classes);
     this.instanceProperties = new HashMap();
-    setURI(ontology.getSourceURI() + name);
+    setURI(ontology.getDefaultNameSpace() + name);
   }
 
   public OInstanceImpl(String name, String comment, OClass aClass,
