@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# Set these paths appropriately
+
+BIN=/usr/local/clactools/TreeTagger/bin
+CMD=/usr/local/clactools/TreeTagger/cmd
+LIB=/usr/local/clactools/TreeTagger/lib
+
+MWL=${CMD}/mwl-lookup.perl
+TAGGER=${BIN}/tree-tagger
+ABBR_LIST=${LIB}/spanish-abbreviations
+PARFILE=${LIB}/spanish.par
+
+cat $* |
+# remove empty lines
+grep -v '^$' |
+# recognition of MWLs
+$MWL -f ${LIB}/spanish-mwls |
+# tagging
+$TAGGER $PARFILE -token -lemma -sgml
