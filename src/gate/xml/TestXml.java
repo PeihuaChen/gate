@@ -26,6 +26,7 @@ import java.text.NumberFormat;
 import junit.framework.*;
 
 import gate.*;
+import gate.corpora.DocumentImpl;
 import gate.creole.SerialAnalyserController;
 import gate.util.Files;
 import gate.util.Err;
@@ -120,6 +121,10 @@ public class TestXml extends TestCase
     // Verfy if all annotations from the default annotation set are consistent
     gate.corpora.TestDocument.verifyNodeIdConsistency(keyDocument);
 
+    // Verifies if the maximum annotation ID on the GATE doc is less than the
+    // Annotation ID generator of the document.
+    verifyAnnotationIDGenerator(keyDocument);
+
     // Save the size of the document and the number of annotations
     long keyDocumentSize = keyDocument.getContent().size().longValue();
     int keyDocumentAnnotationSetSize = keyDocument.getAnnotations().size();
@@ -130,15 +135,7 @@ public class TestXml extends TestCase
     File xmlFile = null;
     xmlFile = Files.writeTempFile(keyDocument.toXml(),"UTF-8");
     assertTrue("The temp GATE XML file is null. Can't continue.",xmlFile != null);
-/*
-    // Prepare to write into the xmlFile using UTF-8 encoding
-    OutputStreamWriter writer = new OutputStreamWriter(
-                    new FileOutputStream(xmlFile),"UTF-8");
-    // Write (test the toXml() method)
-    writer.write(keyDocument.toXml());
-    writer.flush();
-    writer.close();
-*/
+
     // Load the XML Gate document form the tmp file into memory
     gate.Document gateDoc = null;
     gateDoc = gate.Factory.newDocument(xmlFile.toURL());
@@ -171,6 +168,10 @@ public class TestXml extends TestCase
       Math.abs(keyDocumentAnnotationSetSize - gateDocAnnotationSetSize),
       keyDocumentAnnotationSetSize == gateDocAnnotationSetSize);
 
+    // Verifies if the maximum annotation ID on the GATE doc is less than the
+    // Annotation ID generator of the document.
+    verifyAnnotationIDGenerator(gateDoc);
+
     //Don't need tmp Gate XML file.
     xmlFile.delete();
   }//runCompleteTestWithAFormat
@@ -202,6 +203,11 @@ public class TestXml extends TestCase
     " should be:758",758,annotSet.size());
 
     gate.corpora.TestDocument.verifyNodeIdConsistency(doc);
+
+    // Verifies if the maximum annotation ID on the GATE doc is less than the
+    // Annotation ID generator of the document.
+    verifyAnnotationIDGenerator(doc);
+
   } // testUnpackMarkup()
 
   /*
@@ -217,6 +223,9 @@ public class TestXml extends TestCase
     String testDoc = gate.util.Files.getGateResourceAsString("gate.ac.uk/tests/xml/gateTestSaveAsXML.xml");
     Document origDoc = gate.Factory.newDocument(testDoc);
 
+    // Verifies if the maximum annotation ID on the origDoc is less than the
+    // Annotation ID generator of the document.
+    verifyAnnotationIDGenerator(origDoc);
 
     // Load ANNIE with defaults and run it on the document
     SerialAnalyserController annie = loadANNIEWithDefaults();
@@ -230,9 +239,12 @@ public class TestXml extends TestCase
     // Export the Gate document called origDoc as XML, into a temp file,
     // using UTF-8 encoding
     File xmlFile = Files.writeTempFile(origDoc.toXml(),"UTF-8");
+    System.out.println("Saved to temp file :" + xmlFile.toURL());
 
     Document reloadedDoc = gate.Factory.newDocument(xmlFile.toURL());
-    System.out.println("Saving to temp file :" + xmlFile.toURL());
+    // Verifies if the maximum annotation ID on the origDoc is less than the
+    // Annotation ID generator of the document.
+    verifyAnnotationIDGenerator(reloadedDoc);
 
     // Verify if the annotations are identical in the two docs.
     Map origAnnotMap = buildID2AnnotMap(origDoc);
@@ -265,7 +277,8 @@ public class TestXml extends TestCase
         compareAnnot(origA, reloadedA);
       }// End for
     }// End for
-
+    // Clean up the XMl file
+    xmlFile.delete();
   }// End testAnnotationIDConsistencyForSaveAsXml
 
   /**
@@ -313,6 +326,39 @@ public class TestXml extends TestCase
 
   }// End of helperBuildMatchesMap()
 
+  /**
+   * This method tests if the generator for new Annotation IDs is greather than the
+   * maximum Annotation ID present in the GATE document. In oter words, it ensures that
+   * new Annotations will receive an UNIQUE ID.
+   *
+   * @param aDoc The GATE document being tested
+   */
+  protected void verifyAnnotationIDGenerator(gate.Document aDoc){
+    // Creates a MAP containing all the annotations of the document.
+    // In doing so, it also tests if there are annotations with the same ID.
+    Map id2AnnotationMap = buildID2AnnotMap(aDoc);
+
+    if (id2AnnotationMap == null || id2AnnotationMap.isEmpty()){
+      //System.out.println("No annotations found on the document! Nothing to test.");
+      return;
+    }
+
+    // Get the key set of the Map and sort them
+    Set keysSet = id2AnnotationMap.keySet();
+    TreeSet sortedSet = new TreeSet(keysSet);
+    // Get the highest Annotation ID
+    Integer maxAnnotId =  (Integer) sortedSet.last();
+    // Compare its value to the one hold by the document's ID generator
+    Integer generatorId = ((DocumentImpl)aDoc).getNextAnnotationId();
+
+//    System.out.println("maxAnnotid = " + maxAnnotId + " generatorID = " + generatorId);
+
+    assertTrue("Annotation ID generator["+generatorId+"] on document [" + aDoc.getSourceUrl() +
+            "] was equal or less than the MAX Annotation ID["+maxAnnotId+"] on the document."+
+            " This may lead to Annotation ID conflicts.", generatorId.intValue() > maxAnnotId.intValue());
+
+
+  }// End of verifyAnnotationIDGenerator()
 
   /**
    * Verifies if the two maps hold annotations with the same ID. The only thing not checked
