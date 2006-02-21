@@ -23,6 +23,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import gate.*;
 import gate.corpora.DocumentContentImpl;
+import gate.corpora.DocumentImpl;
 import gate.event.StatusListener;
 import gate.util.*;
 
@@ -40,6 +41,26 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
 
   /** This is a variable that shows if characters have been read */
   private boolean readCharacterStatus = false;
+
+
+  /** An OLD GATE XML format is the one in which Annotations IDs are not present */
+  private static final int OLD = 1;
+  /** A NEW GATE XML format is the one in which Annotations IDs are present */
+  private static final int NEW = 2;
+  /** This value signifies that the document being read can be either OLD or NEW*/
+  private static final int UNDEFINED = 0;
+
+  /** In the beginning we don't know the type of GATE XML format that we read.
+   * We need to be able to read both types, but not a mixture of them
+   */
+  private int gateXmlFormatType = UNDEFINED;
+
+  /** A Set recording every annotation ID read from the XML file.
+   * It is used to check the consistency of the annotations being read.
+   * At the end we need the maximum ID in order to set the annotation
+   * ID generator on the document. This is why we need a TreeSet.
+   */
+  private TreeSet annotationIdSet = new TreeSet();
 
   /**
     */
@@ -75,7 +96,19 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
 
     // replace the document content with the one without markups
     doc.setContent(new DocumentContentImpl(tmpDocContent.toString()));
-    long docSize = doc.getContent().size().longValue();
+    //long docSize = doc.getContent().size().longValue();
+
+    // If annotations were present in the NEW GATE XML document format,
+    // set the document generator to start from th next MAX Annot ID value
+    if (gateXmlFormatType == NEW && !annotationIdSet.isEmpty()){
+      // Because  annotationIdSet is a TreeSet its elements are already sorted.
+      // The last element will contain the maximum value
+      Integer maxAnnotID = (Integer) annotationIdSet.last();
+      // Set the document generator to start from the maxAnnotID value
+      ((DocumentImpl)doc).setNextAnnotationId(maxAnnotID.intValue() + 1);
+      // Dispose of the annotationIdSet
+      annotationIdSet = null;
+    }//fi
 
     // fire the status listener
     fireStatusChangedEvent("Total elements: " + elements);
@@ -207,23 +240,62 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
         AnnotationObject annot = (AnnotationObject) iterator.next();
         // Clear the annot from the colector
         iterator.remove();
+
         // Create a new annotation and add it to the annotation set
         try{
-          // This if is the result of a code-fix.The XML writter has been modified
-          // to serialize the annotation id.In order to keep backwards compatibility
+
+          // This is the result of a code-fix.The XML writter has been modified
+          // to serialize the annotation ID.In order to keep backward compatibility
           // with previously saved documents we had to keep the old code(where the id
           // is not added) in place.
-          if (annot.getId() == null)
+          // If the document presents a mixture of the two formats, then error is signaled
+
+          // Check if the Annotation ID is present or not
+          if (annot.getId() == null){
+            //Annotation without ID. We assume the OLD format.
+
+            // If we previously detected a NEW format, then we have a mixture of the two
+            if (gateXmlFormatType == NEW)
+              // Signal the error to the user
+              throw new GateSaxException("Found an annotation without ID while " +
+                      "previous annotations had one." + "The NEW GATE XML document format requires" +
+                      " all annotations to have an UNIQUE ID." +
+                      " The offending annotation was of [type=" + annot.getElemName() +
+                      ", startOffset=" + annot.getStart() +
+                      ", endOffset=" + annot.getEnd() + "]");
+
+            // We are reading OLD format document
+            gateXmlFormatType = OLD;
             currentAnnotationSet.add( annot.getStart(),
                                       annot.getEnd(),
                                       annot.getElemName(),
                                       annot.getFM());
-          else
+          }else{
+            // Annotation with ID. We assume the NEW format
+
+            // If we previously detected an OLD format, then it means we have a mixture of the two
+            if (gateXmlFormatType == OLD)
+              // Signal the error to the user
+              throw new GateSaxException("Found an annotation with ID while " +
+                    "previous annotations didn't have one." + "The OLD GATE XML" +
+                     "document format requires all annotations NOT to have an ID." +
+                    " The offending annotation was of [Id=" + annot.getId() +
+                    ", type=" + annot.getElemName() +
+                    ", startOffset=" + annot.getStart() +
+                    ", endOffset=" + annot.getEnd() + "]");
+
+            gateXmlFormatType = NEW;
+            // Test for the unicity of the annotation ID being used
+            // If the ID is not Unique, the method will throw an exception
+            testAnnotationIdUnicity(annot.getId());
+
+            // Add the annotation
             currentAnnotationSet.add( annot.getId(),
                                       annot.getStart(),
                                       annot.getEnd(),
                                       annot.getElemName(),
                                       annot.getFM());
+          }
         }catch (gate.util.InvalidOffsetException e){
           throw new GateSaxException(e);
         }// End try
@@ -624,6 +696,21 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
       return aFeatStringRepresentation;
     }// End try
   }// createFeatObject()
+
+  /**
+   * This method tests if the Annotation ID has been used previously (in which case
+   * will rase an exception) and also adds the ID being tested to the annotationIdSet
+   * @param anAnnotId An Integer representing an annotation ID to be tested
+   * @throws GateSaxException if there is already an annotation wit the same ID
+   */
+  private void testAnnotationIdUnicity(Integer anAnnotId) throws GateSaxException{
+
+    if (annotationIdSet.contains(anAnnotId))
+      throw new GateSaxException("Found two or possibly more annotations with" +
+              " the same ID! The offending ID was " + anAnnotId );
+    else  annotationIdSet.add(anAnnotId);
+  }// End of testAnnotationIdUnicity()
+
 
   /**
     * This method is called when the SAX parser encounts a comment
