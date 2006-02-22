@@ -268,6 +268,7 @@ public class AnnotationEditor{
    
    featuresEditor.setSchema((AnnotationSchema)schemasByType.get(annType));
    featuresEditor.setTargetFeatures(ann.getFeatures());
+   bottomWindow.doLayout();
   }
   
   public boolean isShowing(){
