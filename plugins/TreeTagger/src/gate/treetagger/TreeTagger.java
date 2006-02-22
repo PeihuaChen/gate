@@ -3,6 +3,7 @@ package gate.treetagger;
 import java.io.*;
 import java.nio.charset.*;
 import java.util.*;
+import java.net.URI;
 import java.net.URL;
 import java.lang.*;
 
@@ -66,10 +67,10 @@ public class TreeTagger
     }
 
     //the TreeTagger is only for Linux or Mac OS X
-    String osName = System.getProperty("os.name").toLowerCase();
-    if (osName.indexOf("linux") == -1 && !osName.startsWith("mac os x"))
-      throw new ResourceInstantiationException(
-          "The Tree Tagger can only be run on Linux or Mac OS X.");
+//    String osName = System.getProperty("os.name").toLowerCase();
+//    if (osName.indexOf("linux") == -1 && !osName.startsWith("mac os x"))
+//      throw new ResourceInstantiationException(
+//          "The Tree Tagger can only be run on Linux or Mac OS X.");
 
     return this;
   }
@@ -93,10 +94,15 @@ public class TreeTagger
 
     //get current text from GATE for the TreeTagger
     File textfile = getCurrentText();
-
+    
+    // check that the file exists
+    File scriptfile = new File(URI.create(treeTaggerBinary.toExternalForm()));
+    if (scriptfile.exists()==false)
+      throw new ExecutionException("Script "+scriptfile.getAbsolutePath()+" does not exist");
+    
     //generate TreeTagger command line
     String[] treeTaggerCmd = new String[] {
-        treeTaggerBinary.getFile().toString(),
+        scriptfile.getAbsolutePath(),
         textfile.getAbsolutePath()
     };
 
@@ -191,9 +197,11 @@ public class TreeTagger
           (new InputStreamReader(p.getInputStream(), charsetDecoder));
 
       // let us store all tagged data in lines
+      // there must be at leat the original form a tab a POS
+      // and possibly a lemma preceded by a tab
       ArrayList lines = new ArrayList();
       while( (line = input.readLine()) != null) {
-        if(line.split("\t").length==3)
+        if(line.split("\t").length>1)
           lines.add(line);
       }
 
@@ -238,7 +246,7 @@ public class TreeTagger
 
           if (st.hasMoreTokens())
             tag = st.nextToken();
-          if (tag != null)
+          if (tag != null && st.hasMoreTokens())
             lemma = st.nextToken();
 
           // finally add features on the top of tokens
