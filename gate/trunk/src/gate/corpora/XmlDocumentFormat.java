@@ -194,7 +194,7 @@ Angel */
 
     } catch (IOException e){
         throw new DocumentFormatException("I/O exception for " +
-                                      doc.getSourceUrl().toString());
+                                      doc.getSourceUrl().toString(), e);
     }finally{
       if(gateXmlHandler != null)
         gateXmlHandler.removeStatusListener(statusListener);
