@@ -43,6 +43,9 @@ public class TestXml extends TestCase
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+  /** The encoding used in our tests*/
+  private static String workingEncoding="UTF-8";
+
   /** Construction */
   public TestXml(String name) { super(name); }
 
@@ -131,14 +134,14 @@ public class TestXml extends TestCase
 
 
     // Export the Gate document called keyDocument as  XML, into a temp file,
-    // using UTF-8 encoding
+    // using the working encoding
     File xmlFile = null;
-    xmlFile = Files.writeTempFile(keyDocument.toXml(),"UTF-8");
+    xmlFile = Files.writeTempFile(keyDocument.toXml(), workingEncoding );
     assertTrue("The temp GATE XML file is null. Can't continue.",xmlFile != null);
 
     // Load the XML Gate document form the tmp file into memory
     gate.Document gateDoc = null;
-    gateDoc = gate.Factory.newDocument(xmlFile.toURL());
+    gateDoc = gate.Factory.newDocument(xmlFile.toURL(), workingEncoding);
 
     assertTrue("Coudn't create a GATE document instance for " +
                 xmlFile.toURL().toString() +
@@ -194,8 +197,7 @@ public class TestXml extends TestCase
     anElement2StringMap.put("S","\n");
     anElement2StringMap.put("s","\n");
 
-    doc = gate.Factory.newDocument(Gate.getUrl("tests/xml/xces.xml"));
- //doc = gate.Factory.newDocument(new URL("file:///z:/gu.xml"));
+    doc = gate.Factory.newDocument(Gate.getUrl("tests/xml/xces.xml"), workingEncoding);
 
     AnnotationSet annotSet = doc.getAnnotations(
                         GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
@@ -237,11 +239,11 @@ public class TestXml extends TestCase
 
     // SaveAS XML and reload the document into another GATE doc
     // Export the Gate document called origDoc as XML, into a temp file,
-    // using UTF-8 encoding
-    File xmlFile = Files.writeTempFile(origDoc.toXml(),"UTF-8");
+    // using the working encoding
+    File xmlFile = Files.writeTempFile(origDoc.toXml(),workingEncoding);
     System.out.println("Saved to temp file :" + xmlFile.toURL());
 
-    Document reloadedDoc = gate.Factory.newDocument(xmlFile.toURL());
+    Document reloadedDoc = gate.Factory.newDocument(xmlFile.toURL(), workingEncoding);
     // Verifies if the maximum annotation ID on the origDoc is less than the
     // Annotation ID generator of the document.
     verifyAnnotationIDGenerator(reloadedDoc);
