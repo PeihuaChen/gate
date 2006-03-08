@@ -245,7 +245,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
        } //if format != null
       } catch(DocumentFormatException e) {
         throw new ResourceInstantiationException(
-          "Couldn't unpack markup in document " + sourceUrl.toExternalForm() +
+          "Couldn't unpack markup in document " + (sourceUrl != null ? sourceUrl.toExternalForm() : "") +
           "!", e);
       }
     } // if markup aware
