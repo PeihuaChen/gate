@@ -779,7 +779,8 @@ public class SerialCorpusImpl extends
     if (definition != null){
       String className = definition.getIrEngineClassName();
       try{
-        Class aClass = Class.forName(className);
+        //Class aClass = Class.forName(className);
+        Class aClass = Class.forName(className, true, Gate.getClassLoader());
         IREngine engine = (IREngine)aClass.newInstance();
         this.indexManager = engine.getIndexmanager();
         this.indexManager.setIndexDefinition(definition);
@@ -807,7 +808,8 @@ public class SerialCorpusImpl extends
 
       String className = definition.getIrEngineClassName();
       try{
-        Class aClass = Class.forName(className);
+        //Class aClass = Class.forName(className);
+        Class aClass = Class.forName(className, true, Gate.getClassLoader());
         IREngine engine = (IREngine)aClass.newInstance();
         this.indexManager = engine.getIndexmanager();
         this.indexManager.setIndexDefinition(definition);

@@ -22,6 +22,7 @@ import gate.ProcessingResource;
 import gate.Resource;
 import gate.creole.*;
 import gate.gui.MainFrame;
+import gate.Gate;
 
 
 public class SearchPR extends AbstractProcessingResource
@@ -125,7 +126,10 @@ public class SearchPR extends AbstractProcessingResource
   public void setSearcherClassName(String name){
     this.searcherClassName = name;
     try {
-      searcher = (Search) Class.forName(searcherClassName).newInstance();
+      // load searcher class through GATE classloader
+      searcher = (Search)
+        Class.forName(searcherClassName, true, Gate.getClassLoader())
+        .newInstance();
     }
     catch(Exception e){
       e.printStackTrace();

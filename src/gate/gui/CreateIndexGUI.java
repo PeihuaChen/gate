@@ -91,7 +91,8 @@ public class CreateIndexGUI extends JPanel {
     for(int i = 0; i < irEngines.size(); i++){
       String anIREngineClassName = (String)irEngines.get(i);
       try{
-        Class aClass = Class.forName(anIREngineClassName);
+        Class aClass =
+          Class.forName(anIREngineClassName, true, Gate.getClassLoader());
         IREngine engine = (IREngine)aClass.newInstance();
         engineByName.put(engine.getName(), engine);
       }catch(ClassNotFoundException cnfe){

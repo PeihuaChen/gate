@@ -560,7 +560,8 @@ jar/classpath so it's the same as registerBuiltins
 
   /**
    * Registers a new IR engine. The class named should implement
-   * {@link gate.creole.ir.IREngine}.
+   * {@link gate.creole.ir.IREngine} and be accessible via the GATE class
+   * loader.
    * @param className the fully qualified name of the class to be registered
    * @throws GateException if the class does not implement the
    * {@link gate.creole.ir.IREngine} interface.
@@ -568,7 +569,7 @@ jar/classpath so it's the same as registerBuiltins
    */
   public static void registerIREngine(String className)
     throws GateException, ClassNotFoundException{
-    Class aClass = Class.forName(className);
+    Class aClass = Class.forName(className, true, Gate.getClassLoader());
     if(gate.creole.ir.IREngine.class.isAssignableFrom(aClass)){
       registeredIREngines.add(className);
     }else{
@@ -695,7 +696,7 @@ jar/classpath so it's the same as registerBuiltins
     boolean res = getCreoleRegister().containsKey(classname);
     if(!res){
       try{
-        Class aClass = Class.forName(classname);
+        Class aClass = Class.forName(classname, true, Gate.getClassLoader());
         res = Resource.class.isAssignableFrom(aClass) ||
               Controller.class.isAssignableFrom(aClass) ||
               DataStore.class.isAssignableFrom(aClass);

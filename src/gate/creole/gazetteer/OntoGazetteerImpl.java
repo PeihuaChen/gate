@@ -38,7 +38,8 @@ public class OntoGazetteerImpl extends AbstractOntoGazetteer {
     try {
       checkParameters();
 
-      Class cl = Class.forName(gazetteerName);
+      // load gazetteer class from GATE classloader
+      Class cl = Class.forName(gazetteerName, true, Gate.getClassLoader());
 
       FeatureMap params = Factory.newFeatureMap();
 
