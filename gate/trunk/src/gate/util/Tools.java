@@ -87,7 +87,8 @@ public class Tools {
               String classname = files[j].substring(0, files[j].length() - 6);
               try {
                 // Try to create an instance of the object
-                Class aClass = Class.forName(packages[i] + "." + classname);
+                Class aClass = Class.forName(packages[i] + "." + classname,
+                                             true, Gate.getClassLoader());
                 if(parentClass.isAssignableFrom(aClass)) result.add(aClass);
               }catch(ClassNotFoundException cnfex){}
             }
@@ -110,7 +111,8 @@ public class Tools {
                 classname = classname.replace('/','.');
                 try {
                   // Try to create an instance of the object
-                  Class aClass = Class.forName(packages[i] + "." + classname);
+                  Class aClass = Class.forName(packages[i] + "." + classname,
+                                               true, Gate.getClassLoader());
                   if(parentClass.isAssignableFrom(aClass)) result.add(aClass);
                 }catch(ClassNotFoundException cnfex){}
               }

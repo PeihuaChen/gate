@@ -100,7 +100,9 @@ public class MachineLearningPR extends AbstractLanguageAnalyser
       "No ML engine class provided!");
     String engineClassName = engineClassElement.getTextTrim();
     try{
-      Class engineClass = Class.forName(engineClassName);
+      // load MLEngine class from GATE Classloader
+      Class engineClass =
+        Class.forName(engineClassName, true, Gate.getClassLoader());
       engine = (MLEngine)engineClass.newInstance();
     }catch(ClassNotFoundException cnfe){
       throw new ResourceInstantiationException(
