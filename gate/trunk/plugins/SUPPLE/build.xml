@@ -351,7 +351,9 @@
         <pathelement location="${sicstus-impl.jar}" />
       </classpath>
       <jvmarg value="-Xmx512m"/>
-      <jvmarg value="-Dgate.home=${gate.home}"/> 
+      <sysproperty key="gate.home" value="${gate.home}"/> 
+      <!-- use the executable specified above -->
+      <sysproperty key="supple.sicstus.executable" value="${sicstus.executable}"/> 
       <arg value="${basedir}"/>
       <arg value="${config.dir}/mapping.config"/>
       <arg value="${config.dir}/feature_table.config"/>
@@ -368,7 +370,7 @@
         <pathelement location="${plcafe-impl.jar}"/>
       </classpath>
       <jvmarg value="-Xmx512m"/>
-      <jvmarg value="-Dgate.home=${gate.home}"/> 
+      <sysproperty key="gate.home" value="${gate.home}"/> 
       <arg value="${basedir}"/>
       <arg value="${config.dir}/mapping.config"/>
       <arg value="${config.dir}/feature_table.config"/>
@@ -385,7 +387,9 @@
         <pathelement location="${swi-impl.jar}"/>
       </classpath>
       <jvmarg value="-Xmx512m"/>
-      <jvmarg value="-Dgate.home=${gate.home}"/> 
+      <sysproperty key="gate.home" value="${gate.home}"/> 
+      <!-- use the executable specified above -->
+      <sysproperty key="supple.swi.executable" value="${swi.executable}"/> 
       <arg value="${basedir}"/>
       <arg value="${config.dir}/mapping.config"/>
       <arg value="${config.dir}/feature_table.config"/>
@@ -401,7 +405,7 @@
         <pathelement location="${swi-impl.jar}"/>
       </classpath>
       <jvmarg value="-Xmx512m"/>
-      <jvmarg value="-Dgate.home=${gate.home}"/> 
+      <sysproperty key="gate.home" value="${gate.home}"/> 
       <arg value="${basedir}"/>
       <arg value="${config.dir}/mapping.config"/>
       <arg value="${config.dir}/feature_table.config"/>
