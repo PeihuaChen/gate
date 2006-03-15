@@ -18,12 +18,13 @@ package gate.creole.gazetteer;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
+import gate.creole.gazetteer.DefaultGazetteer.CharMap;
 
 /** Implements a state of the deterministic finite state machine of the
  * gazetter.
  *
  */
-class FSMState implements Serializable {
+public class FSMState implements Serializable {
 
   /** Debug flag
    */
@@ -41,7 +42,7 @@ class FSMState implements Serializable {
 
   /** Adds a new value to the transition function
    */
-// >>> DAM: was - to use charMap
+// >>> DAM: was - to use CharMap
 /*
   void put(Character chr, FSMState state) {
     transitionFunction.put(chr,state);
@@ -70,7 +71,7 @@ class FSMState implements Serializable {
   /** Returns a GML (Graph Modelling Language) representation of the edges
    * emerging from this state.
    */
-//<<< DAM: was - to use new char Iter returned by the charMap iteratior
+//<<< DAM: was - to use new char Iter returned by the CharMap iteratior
 /*
   String getEdgesGML() {
     String res = "";
@@ -151,7 +152,7 @@ class FSMState implements Serializable {
 // >>> NASO, hash4 optimization
 //  Map transitionFunction = new HashMap(4);
 // >>> DAM, TransArray
-charMap transitionFunction = new charMap();
+  CharMap transitionFunction = new CharMap();
 // >>> end
 
   /**    *
