@@ -549,96 +549,94 @@ public class DefaultGazetteer extends AbstractGazetteer {
     return true;
   }
 
+//>>> DAM: TransArray optimization, new CharMap implementation
+  public static interface Iter
+  {
+      public boolean hasNext();
+      public char next();
+  } // iter class
 
+  /**
+   * class implementing the map using binary serach by char as key
+   * to retrive the coresponding object.
+   */
+  public static class CharMap
+  {
+      char[] itemsKeys = null;
+      Object[] itemsObjs = null;
+
+      /**
+       * resize the containers by one leavaing empty elemant at position 'index'
+       */
+      void resize(int index)
+      {
+          int newsz = itemsKeys.length + 1;
+          char[] tempKeys = new char[newsz];
+          Object[] tempObjs = new Object[newsz];
+          int i;
+          for (i= 0; i < index; i++)
+          {
+              tempKeys[i] = itemsKeys[i];
+              tempObjs[i] = itemsObjs[i];
+          }
+          for (i= index+1; i < newsz; i++)
+          {
+              tempKeys[i] = itemsKeys[i-1];
+              tempObjs[i] = itemsObjs[i-1];
+          }
+
+          itemsKeys = tempKeys;
+          itemsObjs = tempObjs;
+      } // resize
+
+  /**
+   * get the object from the map using the char key
+   */
+      Object get(char key)
+      {
+          if (itemsKeys == null) return null;
+          int index = Arrays.binarySearch(itemsKeys, key);
+          if (index<0)
+              return null;
+          return itemsObjs[index];
+      }
+  /**
+   * put the object into the char map using the chat as the key
+   */
+      Object put(char key, Object value)
+      {
+          if (itemsKeys == null)
+          {
+              itemsKeys = new char[1];
+              itemsKeys[0] = key;
+              itemsObjs = new Object[1];
+              itemsObjs[0] = value;
+              return value;
+          }// if first time
+          int index = Arrays.binarySearch(itemsKeys, key);
+          if (index<0)
+          {
+              index = ~index;
+              resize(index);
+              itemsKeys[index] = key;
+              itemsObjs[index] = value;
+          }
+          return itemsObjs[index];
+      } // put
+  /**
+   * the keys itereator
+   * /
+      public Iter iter()
+      {
+          return new Iter()
+          {
+              int counter = 0;
+              public boolean hasNext() {return counter < itemsKeys.length;}
+              public char next() { return itemsKeys[counter];}
+          };
+      } // iter()
+   */
+
+  }// class CharMap
+  
 } // DefaultGazetteer
-
-// >>> DAM: TransArray optimization, new charMap implementation
-interface Iter
-{
-    public boolean hasNext();
-    public char next();
-} // iter class
-
-/**
- * class implementing the map using binary serach by char as key
- * to retrive the coresponding object.
- */
-class charMap
-{
-    char[] itemsKeys = null;
-    Object[] itemsObjs = null;
-
-    /**
-     * resize the containers by one leavaing empty elemant at position 'index'
-     */
-    void resize(int index)
-    {
-        int newsz = itemsKeys.length + 1;
-        char[] tempKeys = new char[newsz];
-        Object[] tempObjs = new Object[newsz];
-        int i;
-        for (i= 0; i < index; i++)
-        {
-            tempKeys[i] = itemsKeys[i];
-            tempObjs[i] = itemsObjs[i];
-        }
-        for (i= index+1; i < newsz; i++)
-        {
-            tempKeys[i] = itemsKeys[i-1];
-            tempObjs[i] = itemsObjs[i-1];
-        }
-
-        itemsKeys = tempKeys;
-        itemsObjs = tempObjs;
-    } // resize
-
-/**
- * get the object from the map using the char key
- */
-    Object get(char key)
-    {
-        if (itemsKeys == null) return null;
-        int index = Arrays.binarySearch(itemsKeys, key);
-        if (index<0)
-            return null;
-        return itemsObjs[index];
-    }
-/**
- * put the object into the char map using the chat as the key
- */
-    Object put(char key, Object value)
-    {
-        if (itemsKeys == null)
-        {
-            itemsKeys = new char[1];
-            itemsKeys[0] = key;
-            itemsObjs = new Object[1];
-            itemsObjs[0] = value;
-            return value;
-        }// if first time
-        int index = Arrays.binarySearch(itemsKeys, key);
-        if (index<0)
-        {
-            index = ~index;
-            resize(index);
-            itemsKeys[index] = key;
-            itemsObjs[index] = value;
-        }
-        return itemsObjs[index];
-    } // put
-/**
- * the keys itereator
- * /
-    public Iter iter()
-    {
-        return new Iter()
-        {
-            int counter = 0;
-            public boolean hasNext() {return counter < itemsKeys.length;}
-            public char next() { return itemsKeys[counter];}
-        };
-    } // iter()
- */
-
-} // class charMap
-// >>> DAM, end, new charMap instead MAP for transition function in the FSMState
