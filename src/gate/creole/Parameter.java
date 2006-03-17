@@ -147,20 +147,33 @@ public class Parameter implements Serializable
       }// End if(itemClassName == null)
       return colection;
     }// End if (Collection.class.isAssignableFrom(paramClass))
-    // java builtin types
+    // java builtin types - for numeric types, we don't attempt to parse an
+    // empty string value, but just leave value as null
     if(typeName.startsWith("java.")) {
       if(typeName.equals("java.lang.Boolean"))
         value = Boolean.valueOf(stringValue);
-      else if(typeName.equals("java.lang.Long"))
-        value = Long.valueOf(stringValue);
-      else if(typeName.equals("java.lang.Integer"))
-        value = Integer.valueOf(stringValue);
+      else if(typeName.equals("java.lang.Long")) {
+        if(stringValue != null && !stringValue.equals("")) {
+          value = Long.valueOf(stringValue);
+        }
+      }
+      else if(typeName.equals("java.lang.Integer")) {
+        if(stringValue != null && !stringValue.equals("")) {
+          value = Integer.valueOf(stringValue);
+        }
+      }
       else if(typeName.equals("java.lang.String"))
         value = stringValue;
-      else if(typeName.equals("java.lang.Double"))
-        value = Double.valueOf(stringValue);
-      else if(typeName.equals("java.lang.Float"))
-        value = Float.valueOf(stringValue);
+      else if(typeName.equals("java.lang.Double")) {
+        if(stringValue != null && !stringValue.equals("")) {
+          value = Double.valueOf(stringValue);
+        }
+      }
+      else if(typeName.equals("java.lang.Float")) {
+        if(stringValue != null && !stringValue.equals("")) {
+          value = Float.valueOf(stringValue);
+        }
+      }
       else if(typeName.equals("java.net.URL"))
         try{
           value = new URL(baseURL, stringValue);
