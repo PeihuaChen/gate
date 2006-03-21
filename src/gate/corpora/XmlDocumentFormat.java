@@ -130,8 +130,13 @@ public class XmlDocumentFormat extends TextualDocumentFormat
         gateXmlHandler = new GateFormatXmlDocumentHandler(doc);
         // Register a status listener
         gateXmlHandler.addStatusListener(statusListener);
-        // Parse the Gate Document
-        xmlParser.parse(doc.getSourceUrl().toString(), gateXmlHandler);
+        // Parse the Gate Document with the appropriate encoding
+        InputSource is = new InputSource(doc.getSourceUrl().toString());
+        if(doc instanceof TextualDocument){
+          is.setEncoding(((TextualDocument)doc).getEncoding());
+        }
+        
+        xmlParser.parse(is, gateXmlHandler);
         gateXmlHandler.removeStatusListener(statusListener);
       }else{
         // Create a new Xml document handler
