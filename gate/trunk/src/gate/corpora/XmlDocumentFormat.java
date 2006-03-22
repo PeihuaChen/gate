@@ -172,7 +172,12 @@ Angel */
       newxmlParser.setErrorHandler(xmlDocHandler);
       newxmlParser.setDTDHandler(xmlDocHandler);
       newxmlParser.setEntityResolver(xmlDocHandler);
-      newxmlParser.parse(doc.getSourceUrl().toString());
+      // Parse the XML Document with the appropriate encoding
+      InputSource is = new InputSource(doc.getSourceUrl().toString());
+      if(doc instanceof TextualDocument){
+        is.setEncoding(((TextualDocument)doc).getEncoding());
+      }
+      newxmlParser.parse(is);
 // Angel - end
         ((DocumentImpl) doc).setNextAnnotationId(
                                           xmlDocHandler.getCustomObjectsId());
