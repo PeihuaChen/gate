@@ -49,7 +49,7 @@ public class FSMState implements Serializable {
   }
 */
 // >>> DAM: TransArray optimization
-  void put(char chr, FSMState state) {
+  public void put(char chr, FSMState state) {
     transitionFunction.put(chr,state);
   }
 // >>> DAM: end
@@ -63,7 +63,7 @@ public class FSMState implements Serializable {
   }
   */
 // >>> DAM: TransArray optimization
-  FSMState next(char chr) {//UnicodeType type){
+  public FSMState next(char chr) {//UnicodeType type){
     return (FSMState)transitionFunction.get(chr);
   }
 // >>> DAM: end
@@ -88,7 +88,7 @@ public class FSMState implements Serializable {
     }
 */
 // DAM, TransArray optimization
-  String getEdgesGML() {
+  public String getEdgesGML() {
     String res = "";
     char currentChar;
     FSMState nextState;
@@ -107,7 +107,7 @@ public class FSMState implements Serializable {
 
   /** Checks whether this state is a final one
    */
-  boolean isFinal() {
+  public boolean isFinal() {
 // >>> was
 //    return !lookupSet.isEmpty();
 // >>> BOBI, Lookup opitimization
@@ -120,11 +120,11 @@ public class FSMState implements Serializable {
   /** Returns a set of {@link Lookup} objects describing the types of lookups
    * the phrase for which this state is the final one belongs to
    */
-  Set getLookupSet(){return lookupSet;}
+  public Set getLookupSet(){return lookupSet;}
 
   /** Adds a new looup description to this state's lookup descriptions set
    */
-  void addLookup(Lookup lookup) {
+  public void addLookup(Lookup lookup) {
 // >>> was nothing
 // >>> BOBI, Lookup opitimization
     if (lookupSet == null)
@@ -136,13 +136,13 @@ public class FSMState implements Serializable {
 
   /** Removes a looup description from this state's lookup descriptions set
    */
-  void removeLookup(Lookup lookup) {
+  public void removeLookup(Lookup lookup) {
     lookupSet.remove(lookup);
   } // removeLookup
 
   /** Returns the unique ID of this state.
    */
-  int getIndex(){ return myIndex; }
+  public int getIndex(){ return myIndex; }
 
 
   /** The transition function of this state.
@@ -152,7 +152,7 @@ public class FSMState implements Serializable {
 // >>> NASO, hash4 optimization
 //  Map transitionFunction = new HashMap(4);
 // >>> DAM, TransArray
-  CharMap transitionFunction = new CharMap();
+  protected CharMap transitionFunction = new CharMap();
 // >>> end
 
   /**    *
@@ -162,20 +162,20 @@ public class FSMState implements Serializable {
 // >>> NASO, hash4 optimization
 //  Set lookupSet = new HashSet(4);
 // >>> BOBI, Lookup opitimization
-  Set lookupSet;
+  protected Set lookupSet;
 // >>> end
 
   /**
    * The unique id of this state. This value is never used by the algorithms but
    * it can be useful for graphical representations.
    */
-  int myIndex;
+  protected int myIndex;
 
   /**
-   * Class memebre used to generate unique ids for the instances
+   * Class member used to generate unique ids for the instances
    *
    */
-  static int index;
+  private static int index;
 
   static{
     index = 0;
