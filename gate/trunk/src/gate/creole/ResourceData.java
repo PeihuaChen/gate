@@ -42,6 +42,9 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   /** Debug flag */
   protected static final boolean DEBUG = false;
 
+  protected static final String DEFAULT_LR_ICON = "lr.gif";
+  protected static final String DEFAULT_PR_ICON = "pr.gif";
+  protected static final String DEFAULT_OTHER_ICON = "controller.gif";
   /** Construction */
   public ResourceData() {  }// ResourceData
 
@@ -100,8 +103,32 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   public void setIcon(String icon) { this.icon = icon; }
 
   /** Get method for the resource icon */
-  public String getIcon() { return icon; }
+  public String getIcon() { 
+    //if icon not set try and guess it
+    if(icon == null){
+      icon = guessIcon();
+    }
+    return icon; 
+  }
 
+  /**
+   * Makes the best attempt of guessing an appropriate icon for this resource 
+   * type based on whether it is a Language Resource, a Processing Resource, or
+   * something else.
+   * @return a String representing the file name for most appropriate icon for 
+   * this resource type.
+   */
+  protected String guessIcon(){
+    //if no class set we can't do any guessing
+    if(className == null) return DEFAULT_OTHER_ICON;
+    if(resourceClass == null) return DEFAULT_OTHER_ICON;
+    if(LanguageResource.class.isAssignableFrom(resourceClass)) 
+      return DEFAULT_LR_ICON;
+    if(ProcessingResource.class.isAssignableFrom(resourceClass)) 
+      return DEFAULT_PR_ICON;
+    return DEFAULT_OTHER_ICON;
+  }
+  
   /** The stack of instantiations */
   protected WeakBumpyStack instantiationStack = new WeakBumpyStack();
 
