@@ -69,7 +69,7 @@ public class DefaultGazetteer extends AbstractGazetteer {
 
 
   /** a map of nodes vs gaz lists */
-  private Map listsByNode;
+  protected Map listsByNode;
 
   /** 
    * Build a gazetter using the default lists from the gate resources
@@ -115,7 +115,8 @@ public class DefaultGazetteer extends AbstractGazetteer {
    *     list will be removed from the list of phrases recognised by this
    *     gazetteer.
    */
-  void readList(LinearNode node, boolean add) throws ResourceInstantiationException{
+   protected void readList(LinearNode node, boolean add) 
+       throws ResourceInstantiationException{
     String listName, majorType, minorType, languages;
     if ( null == node ) {
       throw new ResourceInstantiationException(" LinearNode node is null ");
@@ -497,11 +498,11 @@ public class DefaultGazetteer extends AbstractGazetteer {
 
   /** The initial state of the FSM that backs this gazetteer
    */
-  FSMState initialState;
+  protected FSMState initialState;
 
   /** A set containing all the states of the FSM backing the gazetteer
    */
-  Set fsmStates;
+  protected Set fsmStates;
 
   /**lookup <br>
    * @param singleItem a single string to be looked up by the gazetteer
