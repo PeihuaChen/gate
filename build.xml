@@ -32,8 +32,11 @@
   <!-- TOOLS.JAR -->
   <!-- GATE will normally try to guess which tools.jar library to use based on
        your Java installation.
-       If you want to set this manually uncomment the line below & edit it -->
-  <!-- <property name="tools.jar.location" value="w:/jdk/jdk1.5.0/lib/tools.jar"/> -->
+       If you want to set this manually, put a line such as the following in
+       your build.properties:
+
+       tools.jar.location=w:/jdk/jdk1.5.0/lib/tools.jar
+  -->
 
   <!-- RUNTIME MEMORY -->
   <property name="runtime.max.memory" value="900M"/>
@@ -611,6 +614,26 @@
               location="${distDir}/${all.dirname}.zip"/>
     <delete dir="${distDir}"/>    
     <mkdir dir="${distDir}"/>
+
+    <!-- Files in plugins that should be stored in the zip files with execute
+         permissions.  We assume for safety that anything except .java, .xml,
+         .txt and README files may need execute permission -->
+    <patternset id="plugins.exec">
+      <include name="plugins/**" />
+      <exclude name="**/*.java" />
+      <exclude name="**/*.xml" />
+      <exclude name="**/*.txt" />
+      <exclude name="**/*README*" />
+    </patternset>
+
+    <!-- This pattern should match everything in plugins that is not covered by
+         the previous set -->
+    <patternset id="plugins.nonexec">
+      <include name="plugins/**/*.java" />
+      <include name="plugins/**/*.xml" />
+      <include name="plugins/**/*.txt" />
+      <include name="plugins/**/*README*" />
+    </patternset>
     
     <!-- Build the DOC archive -->
     <zip destfile="${doc.archive}" 
@@ -627,11 +650,24 @@
     <!-- Build the SRC archive -->
     <zip destfile="${src.archive}" 
          update="false"
+         duplicate="preserve"
          compress="true">
+      <!-- files in bin need execute permissions -->
+      <zipfileset dir="${basedir}"
+                  prefix="${src.dirname}"
+                  includes="bin/**"
+                  filemode="755" />
+      <!-- Certain files in plugins may need execute permission too -->
+      <zipfileset dir="${basedir}"
+                  prefix="${src.dirname}"
+                  filemode="755">
+        <patternset refid="plugins.exec" />
+      </zipfileset>
+
+      <!-- everything else gets the default non-executable permissions -->
       <zipfileset dir="${basedir}"
                   prefix="${src.dirname}">
         <include name="*"/>
-        <include name="bin/**"/>
         <include name="build/**"/>
         <exclude name="build/*.jar"/>
         <exclude name="build/deploy/**"/>
@@ -641,7 +677,8 @@
         <exclude name="doc/javadoc/"/>
         <include name="lib/**"/>
         <include name="src/**"/>
-        <include name="plugins/**"/>
+        <!-- include everything from plugins that wasn't included above -->
+        <patternset refid="plugins.nonexec" />
       </zipfileset>
       <zipfileset dir="${basedir}"
                   prefix="${src.dirname}/doc/"
@@ -654,17 +691,31 @@
     <!-- Build the BIN archive -->
     <zip destfile="${bin.archive}" 
          update="false"
+         duplicate="preserve"
          compress="true">
+      <!-- files in bin need execute permissions -->
+      <zipfileset dir="${basedir}"
+                  prefix="${bin.dirname}"
+                  includes="bin/**"
+                  filemode="755" />
+      <!-- Certain files in plugins may need execute permission too -->
+      <zipfileset dir="${basedir}"
+                  prefix="${bin.dirname}"
+                  filemode="755">
+        <patternset refid="plugins.exec" />
+      </zipfileset>
+
+      <!-- everything else gets the default non-executable permissions -->
       <zipfileset dir="${basedir}" prefix="${bin.dirname}">
-                  <include name="licence.html"/>
-                  <include name="build.xml"/>
-                  <include name="gate.xml"/>
-                  <include name="bin/**"/>
-                  <include name="build/version.txt"/>
-                  <include name="build/persist/**"/>
-                  <include name="build/build.txt"/>
-                  <include name="lib/**"/>
-                  <include name="plugins/**"/>
+        <include name="licence.html"/>
+        <include name="build.xml"/>
+        <include name="gate.xml"/>
+        <include name="build/version.txt"/>
+        <include name="build/persist/**"/>
+        <include name="build/build.txt"/>
+        <include name="lib/**"/>
+        <!-- include everything from plugins that wasn't included above -->
+        <patternset refid="plugins.nonexec" />
       </zipfileset>
       <zipfileset dir="${basedir}"
                   prefix="${bin.dirname}"
@@ -674,10 +725,32 @@
     <!-- Build the ALL archive -->
     <zip destfile="${all.archive}" 
          update="false"
+         duplicate="preserve"
          compress="true">
+      <!-- files in bin need execute permissions -->
       <zipfileset dir="${basedir}"
                   prefix="${all.dirname}"
-                  excludes="${distDirname},${distDirname}/**"/>
+                  includes="bin/**"
+                  filemode="755" />
+      <!-- Certain files in plugins may need execute permission too -->
+      <zipfileset dir="${basedir}"
+                  prefix="${all.dirname}"
+                  filemode="755">
+        <patternset refid="plugins.exec" />
+      </zipfileset>
+
+      <!-- everything else gets the default non-executable permissions -->
+      <zipfileset dir="${basedir}"
+                  prefix="${all.dirname}">
+        <patternset refid="plugins.nonexec" />
+      </zipfileset>
+      <zipfileset dir="${basedir}"
+                  prefix="${all.dirname}">
+        <exclude name="${distDirname}" />
+        <exclude name="${distDirname}/**" />
+        <exclude name="plugins/**" />
+        <exclude name="bin/**" />
+      </zipfileset>
     </zip>
   </target>
   
