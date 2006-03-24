@@ -289,11 +289,18 @@ gatepackages:
 # report lines of code in GATE
 loc:
 	@cd ../src; \
-	echo -n sql code:; wc -l database/Oracle/[a-z]* |grep total; \
-	echo -n java code:; \
+	echo -n sql code:; \
+	wc -l `find database -type f -print` |grep -v CVS |grep total; \
+	echo -n core java code:; \
 	wc -l `find . -name '*.java' -print` |grep total; \
+	echo -n plugin java code:; \
+	wc -l `find ../plugins -name '*.java' -print` |grep total; \
 	echo -n test code:; \
-	wc -l `find . -name 'Test*.java' -print` |grep total;
+	wc -l `find . -name 'Test*.java' -print` |grep total; \
+	echo -n plugin jape code:; \
+	wc -l `find ../plugins -name '*.jape' -print` |grep total; \
+	echo -n core jape code:; \
+	wc -l `find . -name '*.jape' -print` |grep total;
 
 # rebuild bib2html parser
 ../src/gate/util/Bib2HTML/Bib2HTML.java: ../src/gate/util/Bib2HTML/Bib2HTML.jj
