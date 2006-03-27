@@ -720,11 +720,11 @@ extends Transducer implements JapeConstants, java.io.Serializable
 	  }
       }
     // by Shafirin Andrey start (according to Vladimir Karasev)
-    if(gate.Gate.isEnableJapeDebug()) {
-      if (null != phaseController) {
-        phaseController.TraceTransit(rulesTrace);
-      }
-    }
+    //if(gate.Gate.isEnableJapeDebug()) {
+    //  if (null != phaseController) {
+    //    phaseController.TraceTransit(rulesTrace);
+    //  }
+    //}
     // by Shafirin Andrey end
 
       state.oldStartNodeOff = oldStartNodeOff;
