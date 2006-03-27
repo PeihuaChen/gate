@@ -69,8 +69,9 @@ print HTMLFILE $externalPluginsTitle,
 </ul>
 
 <p>For more information on how the plugins work, see the online user guide "<a href="http://gate.ac.uk/sale/tao/#sec:howto:plugins">Developing Language Processing Components with GATE</a>".</p>
-<p>To submit a plugin, put your plugin on a website and <a href="mailto: gate\@dcs.shef.ac.uk">email
-us</a> that link together with a brief description of your plugin.</p>
+<p>To submit a plugin, please contact us via the <a
+href="http://www.gate.ac.uk/mail/index.html">gate-users mailing
+list</a>.</p>
 <hr/>
 ENDHTML
 # **************************************************
