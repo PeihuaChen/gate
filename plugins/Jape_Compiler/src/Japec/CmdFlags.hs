@@ -30,7 +30,6 @@ data CmdFlags
       , showHelp     :: Bool
       , outputDir    :: FilePath
       , package      :: String
-      , tempNames    :: Bool
       }
 
 data OutputFormat
@@ -49,7 +48,7 @@ data FinalPhase
   deriving Eq
 
 parseCmdFlags :: [String] -> (CmdFlags,[String],[String])
-parseCmdFlags args = (foldr ($) (CmdFlags Java Minimized False "." "" False) fs, non_opts, errs)
+parseCmdFlags args = (foldr ($) (CmdFlags Java Minimized False "." "") fs, non_opts, errs)
   where
     (fs, non_opts, errs)      = getOpt Permute options args
 
@@ -74,7 +73,6 @@ options =
   
     -- File options
   , Option ['d'] ["odir"]       (ReqArg setDir "<dir>")        "Specify the output directory"
-  , Option ['t'] ["temp-names"] (NoArg (setTmpN True))         "Generate classes with temporary (unique) names"
 
     -- Code generation
   , Option ['p'] ["package"]    (ReqArg setPkg "<package>")    "Set Java package"
@@ -85,4 +83,3 @@ options =
     setHelp   help   flags = flags{showHelp    =help  }
     setDir    dir    flags = flags{outputDir   =dir   }
     setPkg    pkg    flags = flags{package     =pkg   }
-    setTmpN   tmp    flags = flags{tempNames   =tmp   }

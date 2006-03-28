@@ -15,12 +15,10 @@ import gate.creole.*;
 
 public class JapecTransducer extends AbstractLanguageAnalyser {
   private static final boolean DEBUG = false;
-  
+
   private File grammarFile;
   private URL grammarURL;
   private File workDir;
-//  private File classesDir;
-  private File srcDir;
   private String packageName;
   private String encoding;
   private String inputASName;
@@ -31,8 +29,6 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
   public JapecTransducer() {
     grammarURL   = null;
     workDir      = null;
-//    classesDir   = null;
-    srcDir       = null;
     packageName  = null;
     encoding     = null;
     inputASName  = null;
@@ -47,10 +43,10 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
     if(grammarURL == null) throw new ResourceInstantiationException(
             "No URL provided for the grammar!");
     //Japec can only read file: URLs
-    if(!grammarURL.getProtocol().equals("file")) 
+    if(!grammarURL.getProtocol().equals("file"))
       throw new ResourceInstantiationException(
               "Japec JAPE Compiler only supports file URLs for input!");
-    
+
     loadGrammar();
     return this;
   }
@@ -63,29 +59,27 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
   protected void loadGrammar() throws ResourceInstantiationException
   {
     try{
+      String gateSym = Gate.genSym();
+
       //create the temporary work directory
-      workDir = File.createTempFile("japec-workdir", Gate.genSym());
+      workDir = File.createTempFile("japec-workdir", gateSym);
       workDir.delete();
       workDir.mkdir();
       workDir.deleteOnExit();
-      
-//      classesDir = new File(workDir, "classes");
-      srcDir = new File(workDir, "src");
-      srcDir.deleteOnExit();
-        
-      grammarFile = fileFromURL(grammarURL);
+
+      grammarFile = Files.fileFromURL(grammarURL);
       if(DEBUG) {
         System.err.println("Loading grammar from file " + grammarFile);
       }
-      
-      packageName = "com.ontotext.gate.japec.grammar" + Gate.genSym();
+
+      packageName = "com.ontotext.gate.japec.grammar" + gateSym;
 
       if(DEBUG) {
         System.err.println("Generating classes into package " + packageName);
       }
-  
+
       compileGrammar();
-      
+
       Files.rmdir(workDir);
     } catch(ResourceInstantiationException rie) {
       throw rie;
@@ -105,31 +99,11 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
     }
   }
 
-  private static boolean clearDir(File dir)
-  {
-    File[] files = dir.listFiles();
-    for (int i = 0; i < files.length; i++)
-    {
-      if (files[i].isDirectory())
-      {
-        if (!clearDir(files[i]))
-          return false;
-      }
-      else
-      {
-        if (!files[i].delete())
-          return false;
-      }
-    }
-    return true;
-  }
-
-  protected void compileGrammar() throws IOException, 
-      ResourceInstantiationException, ClassNotFoundException, GateException, 
+  protected void compileGrammar() throws IOException,
+      ResourceInstantiationException, ClassNotFoundException, GateException,
       InstantiationException, IllegalAccessException
   {
     //compile the JAPE file(s) to Java
-    if (srcDir.exists()) clearDir(srcDir);
 
     String osname = System.getProperty("os.name").toLowerCase();
 
@@ -141,7 +115,7 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
       throw new ResourceInstantiationException(
           "Jape_Compiler plugin must be loaded from a file: URL");
     }
-    File japecCreoleXMLFile = fileFromURL(japecCreoleXML);
+    File japecCreoleXMLFile = Files.fileFromURL(japecCreoleXML);
 
     // search for Japec compiler binary.  We look first for japec (.exe on
     // Windows) in the Jape_Compiler plugin directory.  If that does not exist,
@@ -178,15 +152,14 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
     if(DEBUG) {
       Out.prln("Using compiler at " + japecPath);
     }
-    
+
     Process p = Runtime.getRuntime().exec(new String[] {japecPath.getPath(),
                                                         grammarFile.getPath(),
-                                                        "--odir", srcDir.getPath(),
-                                                        "--package", packageName,
-                                                        "--temp-names"
+                                                        "--odir", workDir.getPath(),
+                                                        "--package", packageName
                                                        });
 
-    BufferedReader error = 
+    BufferedReader error =
       new BufferedReader(new InputStreamReader(p.getErrorStream()));
     String line;
     while ((line = error.readLine()) != null) {
@@ -194,15 +167,15 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
     }
     error.close();
 
-    BufferedReader input = 
+    BufferedReader input =
       new BufferedReader(new InputStreamReader(p.getInputStream()));
     while ((line = input.readLine()) != null) {
       Err.prln(line);
     }
     input.close();
-    
-    
-    
+
+
+
     //compile the generated classes and load the classes into the classloader
     Map sources = new LinkedHashMap();
 
@@ -211,33 +184,33 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
     List allPhaseClassNames = new ArrayList();
 
     //read the phases file
-    File phasesFile = new File(srcDir, "phases");
+    File phasesFile = new File(workDir, "phases");
     phasesFile.deleteOnExit();
     BufferedReader phasesReader = new BufferedReader(
             new FileReader(phasesFile));
     for(line = phasesReader.readLine();
         line != null;
-        line = phasesReader.readLine()){  
+        line = phasesReader.readLine()){
       String phaseName = line.trim();
       String phaseClassName = packageName + "." + phaseName;
-      File phaseFile = new File(srcDir, phaseName + ".java");
+      File phaseFile = new File(workDir, phaseName + ".java");
       phaseFile.deleteOnExit();
       BufferedReader sourceReader = new BufferedReader(new FileReader(
               phaseFile));
       StringBuffer source = new StringBuffer();
       for(String sourceLine = sourceReader.readLine();
-          sourceLine != null; 
+          sourceLine != null;
           sourceLine = sourceReader.readLine()){
         source.append(sourceLine);
         source.append(Strings.getNl());
       }
-      
+
       sources.put(phaseClassName, source.toString());
       allPhaseClassNames.add(phaseClassName);
     }
     //call the Java compiler
     Javac.loadClasses(sources);
-    
+
     // create the phases
     phases.clear();
     for(Iterator phaseClassNameIter = allPhaseClassNames.iterator();
@@ -303,29 +276,5 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
 
   public void setOntology(gate.creole.ontology.Ontology newOntology) {
     this.ontology = newOntology;
-  }
-
-  /**
-   * Convert a file: URL to a File path.  First tries to parse the URL's
-   * toExternalForm as a URI and create the File object from that URI.  If this
-   * fails, just uses the path part of the URL.
-   *
-   * @exception IllegalArgumentException if the URL is not convertable into a
-   * File.
-   */
-  private File fileFromURL(URL theURL) throws IllegalArgumentException {
-    try {
-      URI uri = new URI(theURL.toExternalForm());
-      return new File(uri);
-    }
-    catch(URISyntaxException use) {
-      try {
-        URI uri = new URI(theURL.getProtocol(), null, theURL.getPath(), null, null);
-        return new File(uri);
-      }
-      catch(URISyntaxException use2) {
-        throw new IllegalArgumentException("Cannot convert " + theURL + " to a file path");
-      }
-    }
   }
 }

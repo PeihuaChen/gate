@@ -58,7 +58,7 @@ tokens :-
   ","                                   { token (const TComma)  }
   $digit+				{ token (\sb -> TInteger (read (lexemeToString sb))) }
   $digit+\.$digit+			{ token (\sb -> TFloat   (read (lexemeToString sb))) }
-  $alpha [$alpha $digit \_ \']*		{ \sb ->
+  $alpha [$alpha $digit \- \_ \']*	{ \sb ->
                                             if currentChar sb == ':'
                                               then let tk  = lexemeToPackedString sb
                                                        kwd = KS.keyString keyStringScope (PS.map toLower tk)
