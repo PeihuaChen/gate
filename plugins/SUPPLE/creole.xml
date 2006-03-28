@@ -28,8 +28,9 @@
          COMMENT="Features File"
          RUNTIME="false">java.net.URL</PARAMETER>
       <PARAMETER NAME="SUPPLEFile"
-         COMMENT="The parsing program"
-         RUNTIME="false">java.io.File</PARAMETER>
+         COMMENT="The parsing program - this MUST be a file: URL"
+         DEFAULT="supple.plcafe"
+         RUNTIME="false">java.net.URL</PARAMETER>
       <PARAMETER NAME="semanticsSetName"
          COMMENT="The annotation set for semantic information"
          OPTIONAL="true"

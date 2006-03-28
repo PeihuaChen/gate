@@ -16,6 +16,8 @@ import java.util.Set;
 import shef.nlp.supple.prolog.cafe.PRED_parse_3;
 import shef.nlp.supple.prolog.cafe.PRED_best_parse_cats_2;
 
+import gate.creole.ExecutionException;
+
 import jp.ac.kobe_u.cs.prolog.builtin.PRED_consult_1;
 import jp.ac.kobe_u.cs.prolog.lang.JavaObjectTerm;
 import jp.ac.kobe_u.cs.prolog.lang.ListTerm;
@@ -24,6 +26,9 @@ import jp.ac.kobe_u.cs.prolog.lang.PrologControl;
 import jp.ac.kobe_u.cs.prolog.lang.SymbolTerm;
 import jp.ac.kobe_u.cs.prolog.lang.Term;
 
+/**
+ * Prolog wrapper for SUPPLE running on PrologCafe.
+ */
 public class PrologCafe extends Prolog
 {
    private Hashtable database = null;
@@ -57,9 +62,8 @@ public class PrologCafe extends Prolog
 
    }
 
-   public boolean parse(File in, File out)
-   {
-
+   public void parse(File in, File out, boolean debugMode)
+                   throws ExecutionException {
       PrologControl p = new PrologControl();
 
       Term t = SymbolTerm.makeSymbol("[]");
@@ -67,29 +71,28 @@ public class PrologCafe extends Prolog
 
       Predicate code = new PRED_parse_3();
 
-      Predicate test = new PRED_best_parse_cats_2();
+      //Predicate test = new PRED_best_parse_cats_2();
 
       Term hash = new JavaObjectTerm(database);
 
-      try
-      {
+      boolean success = false;
+
+      try {
          PrintWriter pout = new PrintWriter(new FileWriter(out));
 
          Term writeOut = new JavaObjectTerm(pout);
 
-
-         boolean success = p.execute(code,new Term[]{writeOut,hash,t});
-
+         success = p.execute(code,new Term[]{writeOut,hash,t});
 
          pout.flush();
          pout.close();
 
-         return success;
       }
-      catch(Exception e)
-      {
-         e.printStackTrace();
-         return false;
+      catch(Exception e) {
+         throw new ExecutionException(e);
+      }
+      if(!success) {
+        throw new ExecutionException("PrologCafe execution failed");
       }
    }
 

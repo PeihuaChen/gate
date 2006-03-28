@@ -24,6 +24,7 @@ import gate.gui.STreeNode;
 import gate.util.InvalidOffsetException;
 import gate.util.OffsetComparator;
 import gate.util.SimpleFeatureMapImpl;
+import gate.util.Files;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -68,9 +69,10 @@ public class SUPPLE extends AbstractLanguageAnalyser implements ProcessingResour
 
 
    /** The name of the executable BuChart **/
+   private URL suppleFileUrl;
    private File suppleFile;
-   public void setSUPPLEFile(File suppleFile) { this.suppleFile = suppleFile; }
-   public File getSUPPLEFile() { return suppleFile; }
+   public void setSUPPLEFile(URL suppleFile) { suppleFileUrl = suppleFile; }
+   public URL getSUPPLEFile() { return suppleFileUrl; }
 
 /*
      protected String syntaxSetName;
@@ -111,6 +113,7 @@ public class SUPPLE extends AbstractLanguageAnalyser implements ProcessingResour
    public String getPrologImplementation() { return prologImpl;}
    public void setPrologImplementation(String prologImpl) { this.prologImpl=prologImpl; }
 
+   /** Debug flag */
    private Boolean debug;
    public Boolean getDebug() { return debug; }
    public void setDebug(Boolean debug) { this.debug = debug; }
@@ -160,6 +163,13 @@ public class SUPPLE extends AbstractLanguageAnalyser implements ProcessingResour
 
    public Resource init() throws ResourceInstantiationException
    {
+      try {
+        suppleFile = Files.fileFromURL(suppleFileUrl);
+      }
+      catch(IllegalArgumentException iae) {
+        throw new ResourceInstantiationException(
+            "SUPPLEFile parameter must be a valid file: URL");
+      }
       /** Check the specified prolog saved state **/
       if (!suppleFile.exists() || !suppleFile.isFile())
       {
@@ -585,7 +595,7 @@ public class SUPPLE extends AbstractLanguageAnalyser implements ProcessingResour
       out.close();
 
       /** Mark **/
-      prolog.parse(InTempFile,OutTempFile);
+      prolog.parse(InTempFile,OutTempFile, debug.booleanValue());
       /** Horacio **/
       //  callParser(InTempFile,OutTempFile,SemTempFile,"flag");
 

@@ -1,10 +1,14 @@
 package shef.nlp.supple.prolog;
 
 import java.io.File;
+import gate.creole.ExecutionException;
 
 import jpl.JPL;
 import jpl.Query;
 
+/**
+ * Prolog implementation using the JPL Java interface to SWI Prolog.
+ */
 public class SWIJavaProlog extends Prolog
 {
 	private File parserFile = null;
@@ -26,8 +30,8 @@ public class SWIJavaProlog extends Prolog
 
 	}
 
-	public boolean parse(File in, File out)
-	{
+	public void parse(File in, File out, boolean debugMode)
+                  throws ExecutionException {
 		String oFile = out.getAbsolutePath();
 		String iFile = in.getAbsolutePath();
 
@@ -39,6 +43,8 @@ public class SWIJavaProlog extends Prolog
 
 		Query query = new Query("parse(['-o','"+oFile+"','"+iFile+"'])");
 
-		return query.hasSolution();
+		if(!query.hasSolution()) {
+      throw new ExecutionException("SWIJavaProlog: parser failed");
+    }
 	}
 }
