@@ -147,7 +147,7 @@ public class TestSuite
             FeatureMap fm=Factory.newFeatureMap();
             fm.put(SUPPLE.CONFIG_FILE_PAR,(new File(configURL)).toURL());
             fm.put(SUPPLE.FEATURE_FILE_PAR,(new File(tableURL)).toURL());
-            fm.put("SUPPLEFile",new File(parserFile));
+            fm.put("SUPPLEFile",new File(parserFile).toURL());
             fm.put("prologImplementation",implementation);
 
             ProcessingResource supple=(ProcessingResource)Factory.createResource("shef.nlp.supple.SUPPLE",fm);

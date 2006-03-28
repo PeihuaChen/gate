@@ -2,6 +2,8 @@ package shef.nlp.supple.prolog;
 
 import java.io.File;
 
+import gate.creole.ExecutionException;
+
 /**
  * This abstract class allows for the easy changing of the
  * Prolog implementation being used to host the parser.
@@ -31,8 +33,10 @@ public abstract class Prolog
 	 * @param in the file containing the initial chart which
 	 *        the parser will run over.
 	 * @param out the file containing the output of the parser.
-	 * @return true if the parser succedded (the out file should
-	 *         be valid), false otherwise.
+   * @param debugMode whether the parser should output
+   *        debugging information.
+   * @throws ExecutionException if a problem occurs during parsing.
 	 **/
-	public abstract boolean parse(File in, File out);
+	public abstract void parse(File in, File out, boolean debugMode)
+      throws ExecutionException;
 }

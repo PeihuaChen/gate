@@ -231,6 +231,7 @@
       <classpath>
         <pathelement location="${supple.jar}"/>
         <pathelement location="${plcafe-impl.jar}"/>
+        <pathelement location="${gate.jar}" /><!-- for ExecutionException -->
         <fileset refid="local.libs"/>
       </classpath>
       <jvmarg value="-Xmx512m"/>
