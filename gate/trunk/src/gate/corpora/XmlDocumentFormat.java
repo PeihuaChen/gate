@@ -220,7 +220,7 @@ Angel */
                                         RepositioningInfo repInfo,
                                         RepositioningInfo ampCodingInfo)
                                               throws DocumentFormatException {
-
+	  GateFormatXmlDocumentHandler gateXmlHandler = null;
     XmlDocumentHandler xmlDocHandler = null;
     // Create a status listener
     StatusListener statusList = new StatusListener(){
@@ -251,7 +251,22 @@ Angel */
       saxParserFactory.setNamespaceAware(true);
       // create it
       SAXParser xmlParser = saxParserFactory.newSAXParser();
-
+      
+    // Andrey Shafirin
+    // added support for GateXML format for documents without URL
+	if (isGateXmlDocument){
+		// Construct the appropiate xml handler for the job.
+		gateXmlHandler = new GateFormatXmlDocumentHandler(aDocument);
+		// Register a status listener
+		gateXmlHandler.addStatusListener(statusList);
+		// Parse the Gate Document with the appropriate encoding
+//		InputSource is = new InputSource(aDocument.getSourceUrl().toString());
+//		if(doc instanceof TextualDocument){
+//			is.setEncoding(((TextualDocument)doc).getEncoding());
+//		}
+		xmlParser.parse(is, gateXmlHandler);
+		gateXmlHandler.removeStatusListener(statusList);
+	}else{
       // create a new Xml document handler
       xmlDocHandler =  new XmlDocumentHandler(aDocument,
                                               this.markupElementsMap,
@@ -289,6 +304,7 @@ Angel */
 
       ((DocumentImpl) aDocument).setNextAnnotationId(
                                           xmlDocHandler.getCustomObjectsId());
+    }
     } catch (ParserConfigurationException e){
         throw new DocumentFormatException(
                         "XML parser configuration exception ", e);
@@ -298,7 +314,10 @@ Angel */
         throw new DocumentFormatException(e);
     }finally{
       // Remove the statusListener with xmlDocHandler
-      xmlDocHandler.removeStatusListener(statusList);
+      // Andrey xmlDocHandler.removeStatusListener(statusList);
+    	if(gateXmlHandler != null) gateXmlHandler.removeStatusListener(statusList);
+    	if (xmlDocHandler != null) xmlDocHandler.removeStatusListener(statusList);
+
     }// End try
   }// End parseDocumentWithoutURL()
 
