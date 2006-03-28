@@ -16,6 +16,9 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 
 /** Some utilities for use with Files and with resources.
@@ -486,5 +489,32 @@ public class Files {
 
     return newXml;
   } // updateXmlElement(File...)
+
+
+  /**
+   * Convert a file: URL to a <code>java.io.File</code>.  First tries to parse
+   * the URL's toExternalForm as a URI and create the File object from that
+   * URI.  If this fails, just uses the path part of the URL.  This handles
+   * URLs that contain spaces or other unusual characters, both as literals and
+   * when encoded as (e.g.) %20.
+   *
+   * @exception IllegalArgumentException if the URL is not convertable into a
+   * File.
+   */
+  public static File fileFromURL(URL theURL) throws IllegalArgumentException {
+    try {
+      URI uri = new URI(theURL.toExternalForm());
+      return new File(uri);
+    }
+    catch(URISyntaxException use) {
+      try {
+        URI uri = new URI(theURL.getProtocol(), null, theURL.getPath(), null, null);
+        return new File(uri);
+      }
+      catch(URISyntaxException use2) {
+        throw new IllegalArgumentException("Cannot convert " + theURL + " to a file path");
+      }
+    }
+  }
 
 } // class Files
