@@ -167,7 +167,7 @@ Angel */
       // namesapace aware one
       // http://xml.org/sax/features/namespaces set to true
       newxmlParser.setFeature("http://xml.org/sax/features/namespaces", true);
-	newxmlParser.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
+      newxmlParser.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
       newxmlParser.setContentHandler(xmlDocHandler);
       newxmlParser.setErrorHandler(xmlDocHandler);
       newxmlParser.setDTDHandler(xmlDocHandler);
@@ -252,59 +252,52 @@ Angel */
       // create it
       SAXParser xmlParser = saxParserFactory.newSAXParser();
       
-    // Andrey Shafirin
-    // added support for GateXML format for documents without URL
-	if (isGateXmlDocument){
-		// Construct the appropiate xml handler for the job.
-		gateXmlHandler = new GateFormatXmlDocumentHandler(aDocument);
-		// Register a status listener
-		gateXmlHandler.addStatusListener(statusList);
-		// Parse the Gate Document with the appropriate encoding
-//		InputSource is = new InputSource(aDocument.getSourceUrl().toString());
-//		if(doc instanceof TextualDocument){
-//			is.setEncoding(((TextualDocument)doc).getEncoding());
-//		}
-		xmlParser.parse(is, gateXmlHandler);
-		gateXmlHandler.removeStatusListener(statusList);
-	}else{
-      // create a new Xml document handler
-      xmlDocHandler =  new XmlDocumentHandler(aDocument,
-                                              this.markupElementsMap,
-                                              this.element2StringMap);
-      // Regsiter the statusListener with xmlDocHandler
-      xmlDocHandler.addStatusListener(statusList);
-      // set repositioning object
-      xmlDocHandler.setRepositioningInfo(repInfo);
-      // set the object with ampersand coding positions
-      xmlDocHandler.setAmpCodingInfo(ampCodingInfo);
-      // Parse the document handler
-/* Angel
-//      xmlParser.parse(is, xmlDocHandler);
-Angel */
-
-// Angel - start
-      // try to choose concret parser
-      org.xml.sax.XMLReader newxmlParser = xmlParser.getXMLReader();
-      // Niraj org.apache.xerces.parsers.SAXParser newxmlParser =
-          // Niraj new org.apache.xerces.parsers.SAXParser();
-      // Set up the factory to create the appropriate type of parser
-      // non validating one
-      // http://xml.org/sax/features/validation set to false
-      newxmlParser.setFeature("http://xml.org/sax/features/validation", false);
-      // namesapace aware one
-      // http://xml.org/sax/features/namespaces set to true
-      newxmlParser.setFeature("http://xml.org/sax/features/namespaces", true);
-      newxmlParser.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
-      newxmlParser.setContentHandler(xmlDocHandler);
-      newxmlParser.setErrorHandler(xmlDocHandler);
-      newxmlParser.setDTDHandler(xmlDocHandler);
-      newxmlParser.setEntityResolver(xmlDocHandler);
-      newxmlParser.parse(is);
-// Angel - end
-
-      ((DocumentImpl) aDocument).setNextAnnotationId(
-                                          xmlDocHandler.getCustomObjectsId());
-    }
+      // Andrey Shafirin
+      // added support for GateXML format for documents without URL
+    	if (isGateXmlDocument){
+    		// Construct the appropiate xml handler for the job.
+    		gateXmlHandler = new GateFormatXmlDocumentHandler(aDocument);
+    		// Register a status listener
+    		gateXmlHandler.addStatusListener(statusList);
+    		// Parse the Gate Document with the appropriate encoding
+        // InputSource is = new InputSource(aDocument.getSourceUrl().toString());
+        // if(doc instanceof TextualDocument){
+        // is.setEncoding(((TextualDocument)doc).getEncoding());
+        // }
+    		xmlParser.parse(is, gateXmlHandler);
+    		gateXmlHandler.removeStatusListener(statusList);
+    	}else{
+        // create a new Xml document handler
+        xmlDocHandler =  new XmlDocumentHandler(aDocument,
+                                                this.markupElementsMap,
+                                                this.element2StringMap);
+        // Regsiter the statusListener with xmlDocHandler
+        xmlDocHandler.addStatusListener(statusList);
+        // set repositioning object
+        xmlDocHandler.setRepositioningInfo(repInfo);
+        // set the object with ampersand coding positions
+        xmlDocHandler.setAmpCodingInfo(ampCodingInfo);
+        // Parse the document handler
+        // try to choose concret parser
+        org.xml.sax.XMLReader newxmlParser = xmlParser.getXMLReader();
+        // Niraj org.apache.xerces.parsers.SAXParser newxmlParser =
+            // Niraj new org.apache.xerces.parsers.SAXParser();
+        // Set up the factory to create the appropriate type of parser
+        // non validating one
+        // http://xml.org/sax/features/validation set to false
+        newxmlParser.setFeature("http://xml.org/sax/features/validation", false);
+        // namesapace aware one
+        // http://xml.org/sax/features/namespaces set to true
+        newxmlParser.setFeature("http://xml.org/sax/features/namespaces", true);
+        newxmlParser.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
+        newxmlParser.setContentHandler(xmlDocHandler);
+        newxmlParser.setErrorHandler(xmlDocHandler);
+        newxmlParser.setDTDHandler(xmlDocHandler);
+        newxmlParser.setEntityResolver(xmlDocHandler);
+        newxmlParser.parse(is);
+        ((DocumentImpl) aDocument).setNextAnnotationId(
+                                            xmlDocHandler.getCustomObjectsId());
+        }
     } catch (ParserConfigurationException e){
         throw new DocumentFormatException(
                         "XML parser configuration exception ", e);
