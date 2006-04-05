@@ -316,7 +316,8 @@
 
   <!-- Plugins -->
   <filelist id="plugins.to.build" dir="plugins"
-    files="Chemistry_Tagger Jape_Compiler Minipar NP_Chunking TreeTagger
+    files="Chemistry_Tagger Jape_Compiler Minipar Montreal_Transducer
+  	   NP_Chunking TreeTagger
            arabic cebuano chinese crawl google hindi probability rasp
            romanian uima" />
 
