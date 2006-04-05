@@ -35,9 +35,7 @@ import gate.creole.*;
  * <p> using an externally provided gazetteer. It is important to use an </p>
  * <p> external gazetteer as this allows the use of any type of gazetteer </p>
  * <p> (e.g. an Ontological gazetteer). </p>
- * <p>Copyright: Copyright (c) 2003</p>
- * <p>Company: </p>
- * @author not attributable
+ * @author niraj aswani
  * @version 1.0
  */
 
@@ -56,19 +54,11 @@ public class FlexibleGazetteer
    * called before the gazetteer can be used
    */
   public Resource init() throws ResourceInstantiationException {
+	  // check for parameters
+	  if(gazetteerInst == null)
+		  throw new ResourceInstantiationException("No Gazetteer Provided!");
 
-    /*
-    if (listsURL == null) {
-      throw new ResourceInstantiationException(
-          "No URL provided for gazetteer creation!");
-    }
-
-    if (gazetteerClassName == null) {
-      throw new ResourceInstantiationException(
-          "No Gazetter Name provided");
-    }
-    */
-    return this;
+	  return this;
   }
 
   /**
