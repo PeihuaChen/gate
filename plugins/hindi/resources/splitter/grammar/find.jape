@@ -15,12 +15,12 @@
 
 Phase:	find
 Input: Token SpaceToken Lookup
-Options: control = appelt
+Options: control = all
 
 Macro: FULLSTOP
 (
- {Token.string=="."}|
- {Token.string =="।"}
+ ({Token.string=="."} |
+ {Token.string=="।"})
 )
 
 Macro: THREEDOTS
@@ -47,12 +47,13 @@ Rule: Ldots
 
 Rule: Split1
 (
- (PUNCT|FULLSTOP|THREEDOTS)
+ (PUNCT | FULLSTOP | THREEDOTS)
  ({Token.string == "\""})?
 )
 :split
 -->
 :split.Split = {kind = "internal"}
+
 
 //
 Rule: CR
@@ -90,8 +91,4 @@ Rule: Abbrev2
 :fake
 -->
 {}
-
-
-
-
 

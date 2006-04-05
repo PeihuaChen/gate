@@ -73,7 +73,7 @@
         COMMENT="The annotation set to be used as output for the transducer"
         OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="transducerURL" COMMENT="The URL to the grammar file"
-         DEFAULT="resources/grammar/main.jape"
+         DEFAULT="resources/splitter/grammar/main.jape"
         SUFFIXES="jape">java.net.URL</PARAMETER>
       <PARAMETER NAME="gazetteerListsURL"
         DEFAULT="resources/splitter/gazetteer/lists.def"

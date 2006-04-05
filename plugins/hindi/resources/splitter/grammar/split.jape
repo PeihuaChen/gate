@@ -59,6 +59,3 @@ Rule: r2
 ({Split.kind == "external"})
 -->
 :sentence.Sentence = {}
-
-
-
