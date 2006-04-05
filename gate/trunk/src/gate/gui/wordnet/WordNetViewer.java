@@ -47,8 +47,8 @@ public class WordNetViewer extends AbstractVisualResource
   private static final String propertiesFile = "file://D:/Gate/temp/file_properties.xml";
   private WordNet wnMain = null;
 
-  private boolean senatnceFrames = false;
-  public final static int SENTANCE_FAMES = 33001;
+  private boolean sentenceFrames = false;
+  public final static int SENTENCE_FRAMES = 33001;
 
   public WordNetViewer(){
     jbInit();
@@ -251,10 +251,10 @@ public class WordNetViewer extends AbstractVisualResource
           }
           break;
         case WordNet.POS_VERB:
-          //commented because problem with WN API and Sentance Frames
-          if (!senatnceFrames){
-            verbPopup.add(new RelationItem("Senatnce Frames", SENTANCE_FAMES, senses));
-            senatnceFrames = true;
+          //commented because problem with WN API and Sentence Frames
+          if (!sentenceFrames){
+            verbPopup.add(new RelationItem("Sentence Frames", SENTENCE_FRAMES, senses));
+            sentenceFrames = true;
           }
           if (false == existInPopup(verbPopup, getLabel(relation)) ){
             verbPopup.add(new RelationItem(getLabel(relation), relation.getType(), senses));
@@ -360,8 +360,8 @@ public class WordNetViewer extends AbstractVisualResource
       case Relation.REL_VERB_GROUP:
         relAtributeSimilarTo(ri.getSenses(), Relation.REL_VERB_GROUP, "=> ");
         break;
-      case SENTANCE_FAMES:
-        sentanceFrames(ri.getSenses());
+      case SENTENCE_FRAMES:
+        sentenceFrames(ri.getSenses());
         break;
     }
   }
@@ -560,7 +560,7 @@ public class WordNetViewer extends AbstractVisualResource
     return wordsString.toString();
   }
 
-  private void sentanceFrames(java.util.List senses){
+  private void sentenceFrames(java.util.List senses){
     StringBuffer display = new StringBuffer("");
     for (int i=0; i<senses.size(); i++) {
       WordSense currSense = (WordSense) senses.get(i);
