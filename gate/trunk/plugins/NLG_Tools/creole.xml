@@ -6,7 +6,7 @@
   <!-- Language Resources -->
   <CREOLE>
 
-  <!-- OntoLexImpl -->
+<!--  <!-- OntoLexImpl
 
     <RESOURCE>
       <NAME>GATE OntoLex Mapping</NAME>
@@ -20,7 +20,8 @@
         <PARAMETER NAME="lexKBIdentifier"
     COMMENT="Lexicon Id">java.lang.String</PARAMETER>
     </RESOURCE>
-
+    -->
+    
   <!-- NLG Lexicon -->
 
     <RESOURCE>
@@ -46,17 +47,18 @@
       </GUI>
     </RESOURCE>
 
+    <!--
     <RESOURCE>
       <NAME>OntoLex Mapping Editor</NAME>
       <COMMENT>An Editor for mapping between NLG lexicon entries and ontology classes (http://gate.ac.uk/sale/tao/#sec:misc-creole:nlg).</COMMENT>
       <CLASS>gate.gui.lexicon.OntoLexEditorVR</CLASS>
-      <!-- type values can be "large" or "small"-->
 	<JAR>miakt.jar</JAR>
       <GUI TYPE="large">
         <MAIN_VIEWER/>
         <RESOURCE_DISPLAYED>gate.lexicon.OntoLexLR</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
+    -->
   </CREOLE>
 
 
