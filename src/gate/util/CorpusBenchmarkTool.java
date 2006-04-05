@@ -44,7 +44,9 @@ public class CorpusBenchmarkTool {
                     .loadObjectFromFile(applicationFile);
     }
     catch (Exception ex) {
-      throw new GateRuntimeException("Corpus Benchmark Tool:" + ex.getMessage());
+      throw (GateRuntimeException)
+        new GateRuntimeException("Corpus Benchmark Tool:" + ex.getMessage())
+        .initCause(ex);
     }
   } //initPRs
 
@@ -484,16 +486,24 @@ public class CorpusBenchmarkTool {
       sds.close();
     }
     catch (java.net.MalformedURLException ex) {
-      throw new GateRuntimeException("CorpusBenchmark: " + ex.getMessage());
+      throw (GateRuntimeException)
+        new GateRuntimeException("CorpusBenchmark: " + ex.getMessage())
+        .initCause(ex);
     }
     catch (PersistenceException ex1) {
-      throw new GateRuntimeException("CorpusBenchmark: " + ex1.getMessage());
+      throw (GateRuntimeException)
+        new GateRuntimeException("CorpusBenchmark: " + ex1.getMessage())
+        .initCause(ex1);
     }
     catch (ResourceInstantiationException ex2) {
-      throw new GateRuntimeException("CorpusBenchmark: " + ex2.getMessage());
+      throw (GateRuntimeException)
+        new GateRuntimeException("CorpusBenchmark: " + ex2.getMessage())
+        .initCause(ex2);
     }
     catch (gate.security.SecurityException ex3) {
-      throw new GateRuntimeException("CorpusBenchmark: " + ex3.getMessage());
+      throw (GateRuntimeException)
+        new GateRuntimeException("CorpusBenchmark: " + ex3.getMessage())
+        .initCause(ex3);
     }
   } //generateCorpus
 
@@ -689,13 +699,19 @@ public class CorpusBenchmarkTool {
       sds.close();
     }
     catch (java.net.MalformedURLException ex) {
-      throw new GateRuntimeException("CorpusBenchmark: " + ex.getMessage());
+      throw (GateRuntimeException)
+        new GateRuntimeException("CorpusBenchmark: " + ex.getMessage())
+        .initCause(ex);
     }
     catch (PersistenceException ex1) {
-      throw new GateRuntimeException("CorpusBenchmark: " + ex1.getMessage());
+      throw (GateRuntimeException)
+        new GateRuntimeException("CorpusBenchmark: " + ex1.getMessage())
+        .initCause(ex1);
     }
     catch (ResourceInstantiationException ex2) {
-      throw new GateRuntimeException("CorpusBenchmark: " + ex2.getMessage());
+      throw (GateRuntimeException)
+        new GateRuntimeException("CorpusBenchmark: " + ex2.getMessage())
+        .initCause(ex2);
     }
 
   } //evaluateCorpus
@@ -834,13 +850,19 @@ public class CorpusBenchmarkTool {
 
     }
     catch (java.net.MalformedURLException ex) {
-      throw new GateRuntimeException("CorpusBenchmark: " + ex.getMessage());
+      throw (GateRuntimeException)
+        new GateRuntimeException("CorpusBenchmark: " + ex.getMessage())
+        .initCause(ex);
     }
     catch (PersistenceException ex1) {
-      throw new GateRuntimeException("CorpusBenchmark: " + ex1.getMessage());
+      throw (GateRuntimeException)
+        new GateRuntimeException("CorpusBenchmark: " + ex1.getMessage())
+        .initCause(ex1);
     }
     catch (ResourceInstantiationException ex2) {
-      throw new GateRuntimeException("CorpusBenchmark: " + ex2.getMessage());
+      throw (GateRuntimeException)
+        new GateRuntimeException("CorpusBenchmark: " + ex2.getMessage())
+        .initCause(ex2);
     }
 
   } //evaluateMarkedStored
@@ -865,7 +887,8 @@ public class CorpusBenchmarkTool {
                  cleanDocs[i].getAbsolutePath());
         continue;
       }
-      params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
+      //params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
+      params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, documentEncoding);
 
       FeatureMap hparams = Factory.newFeatureMap();
 //      Gate.setHiddenAttribute(hparams, true);
@@ -918,7 +941,8 @@ public class CorpusBenchmarkTool {
                      markedDocFile.getAbsolutePath());
             continue;
           }
-          params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
+          //params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
+          params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, documentEncoding);
 
           // create the document
           try {
@@ -1031,12 +1055,16 @@ public class CorpusBenchmarkTool {
       }
     }
     catch (ResourceInstantiationException ex) {
-      throw new RuntimeException("Error executing application: "
-                                 + ex.getMessage());
+      throw (RuntimeException)
+        new RuntimeException("Error executing application: "
+                                 + ex.getMessage())
+        .initCause(ex);
     }
     catch (ExecutionException ex) {
-      throw new RuntimeException("Error executing application: "
-                                 + ex.getMessage());
+      throw (RuntimeException)
+        new RuntimeException("Error executing application: "
+                                 + ex.getMessage())
+        .initCause(ex);
     }
   }
 
