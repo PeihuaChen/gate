@@ -130,10 +130,17 @@ public class XmlDocumentFormat extends TextualDocumentFormat
         gateXmlHandler = new GateFormatXmlDocumentHandler(doc);
         // Register a status listener
         gateXmlHandler.addStatusListener(statusListener);
+        InputSource is;
         // Parse the Gate Document with the appropriate encoding
-        InputSource is = new InputSource(doc.getSourceUrl().toString());
         if(doc instanceof TextualDocument){
-          is.setEncoding(((TextualDocument)doc).getEncoding());
+          String docEncoding = ((TextualDocument)doc).getEncoding();
+          Reader docReader = new InputStreamReader(
+              doc.getSourceUrl().openStream(), docEncoding);
+          is = new InputSource(docReader);
+          is.setSystemId(doc.getSourceUrl().toString());
+        }
+        else {
+          is = new InputSource(doc.getSourceUrl().toString());
         }
         
         xmlParser.parse(is, gateXmlHandler);
@@ -173,9 +180,17 @@ Angel */
       newxmlParser.setDTDHandler(xmlDocHandler);
       newxmlParser.setEntityResolver(xmlDocHandler);
       // Parse the XML Document with the appropriate encoding
-      InputSource is = new InputSource(doc.getSourceUrl().toString());
+      InputSource is;
       if(doc instanceof TextualDocument){
-        is.setEncoding(((TextualDocument)doc).getEncoding());
+        String docEncoding = ((TextualDocument)doc).getEncoding();
+        Reader docReader = new InputStreamReader(
+            doc.getSourceUrl().openStream(), docEncoding);
+        is = new InputSource(docReader);
+        // must set system ID to allow relative URLs (e.g. to a DTD) to work
+        is.setSystemId(doc.getSourceUrl().toString());
+      }
+      else {
+        is = new InputSource(doc.getSourceUrl().toString());
       }
       newxmlParser.parse(is);
 // Angel - end
