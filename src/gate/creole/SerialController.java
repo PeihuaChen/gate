@@ -20,6 +20,7 @@ import java.util.*;
 import gate.*;
 import gate.event.*;
 import gate.util.Err;
+import gate.util.GateRuntimeException;
 import gate.util.profile.Profiler;
 
 /** Execute a list of PRs serially.
@@ -40,6 +41,7 @@ public class SerialController extends AbstractController
       prof.enableGCCalling(false);
       prof.printToSystemOut(true);
     }
+    Gate.getCreoleRegister().addCreoleListener(this);
   }
 
   /**
@@ -195,6 +197,7 @@ public class SerialController extends AbstractController
           prIter.hasNext(); 
           Factory.deleteResource((Resource)prIter.next()));
     }
+    Gate.getCreoleRegister().removeCreoleListener(this);
   }
 
   /** The list of contained PRs*/
@@ -204,10 +207,37 @@ public class SerialController extends AbstractController
   protected StatusListener sListener;
   public void resourceLoaded(CreoleEvent e) {
   }
+  
   public void resourceUnloaded(CreoleEvent e) {
     //remove all occurences of the resource from this controller
     if(e.getResource() instanceof ProcessingResource)
       while(prList.remove(e.getResource()));
+    //remove links in parameters
+    for(int i = 0; i < prList.size(); i++){
+      ProcessingResource aPr = (ProcessingResource)prList.get(i);
+      ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(
+              aPr.getClass().getName());
+      if(rData != null){
+        Iterator rtParamDisjIter = rData.getParameterList().
+            getRuntimeParameters().iterator();
+        while(rtParamDisjIter.hasNext()){
+          List aDisjunction = (List)rtParamDisjIter.next();
+          Iterator rtParamIter = aDisjunction.iterator();
+          while(rtParamIter.hasNext()){
+            Parameter aParam = (Parameter)rtParamIter.next();
+            String paramName = aParam.getName();
+            try{
+              if(aPr.getParameterValue(paramName) == e.getResource()){
+                aPr.setParameterValue(paramName, null);
+              }
+            }catch(ResourceInstantiationException rie){
+              //nothing to do - this should never happen
+              throw new GateRuntimeException(rie);
+            }
+          }
+        }
+      }
+    }
   }
 
   public void resourceRenamed(Resource resource, String oldName,
