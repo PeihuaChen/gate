@@ -17,6 +17,7 @@ package gate.creole;
 import java.util.*;
 
 import gate.*;
+import gate.event.CreoleEvent;
 import gate.util.*;
 
 /**
@@ -160,4 +161,14 @@ public class SerialAnalyserController extends SerialController
 
 
   private gate.Corpus corpus;
+
+  /**
+   * Overridden to also clean up the corpus value.
+   */
+  public void resourceUnloaded(CreoleEvent e) {
+    super.resourceUnloaded(e);    
+    if(e.getResource() == corpus){
+      setCorpus(null);
+    }
+  }
 }
