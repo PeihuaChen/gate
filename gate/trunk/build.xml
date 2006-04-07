@@ -753,6 +753,9 @@
         <exclude name="plugins/**" />
         <exclude name="bin/**" />
       </zipfileset>
+      <zipfileset dir="${basedir}"
+                  prefix="${all.dirname}"
+                  file="../sale/tao/tao.pdf"/>        
     </zip>
   </target>
   
