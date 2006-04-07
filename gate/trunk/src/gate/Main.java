@@ -292,7 +292,14 @@ public class Main {
     String lnfClassName = Gate.getUserConfig().
                           getString(GateConstants.LOOK_AND_FEEL);
     if(lnfClassName == null){
-      lnfClassName = UIManager.getSystemLookAndFeelClassName();
+      //if running on Linux, default to Metal rather than GTK because GTK LnF
+      //doesn't play nicely with most Gnome themes
+      if(System.getProperty("os.name").toLowerCase().indexOf("linux") != -1){
+        //running on Linux
+        lnfClassName = UIManager.getCrossPlatformLookAndFeelClassName();
+      }else{
+        lnfClassName = UIManager.getSystemLookAndFeelClassName();
+      }
       Gate.getUserConfig().put(GateConstants.LOOK_AND_FEEL, lnfClassName);
     }
     try {
