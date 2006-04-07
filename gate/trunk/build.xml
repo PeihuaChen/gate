@@ -669,6 +669,7 @@
       <zipfileset dir="${basedir}"
                   prefix="${src.dirname}">
         <include name="*"/>
+        <exclude name="${distDirname}" />
         <include name="build/**"/>
         <exclude name="build/*.jar"/>
         <exclude name="build/deploy/**"/>
