@@ -6,7 +6,7 @@ GATE Version 3.1 release (April 2006)
 
 UIMA (http://www.research.ibm.com/UIMA/) is a language processing framework
 developed by IBM. UIMA and GATE share some functionality but are
-complimentary in most respects. GATE now provides an interoperability layer
+complementary in most respects. GATE now provides an interoperability layer
 to allow UIMA applications to include GATE components in their processing
 and vice-versa. For full information, see chapter 14 of the User Guide.
 
@@ -16,9 +16,7 @@ The ontology layer has been rewritten in order to provide an abstraction
 layer between the model representation and the tools used for input and
 output of the various representation formats. An implementation that uses
 Jena 2 (http://jena.sourceforge.net/ontology) for reading and writing OWL
-and RDF(S) is provided. Note that there may be a few more changes to this
-API before the ﬁnal 3.1 release, so its current state should not be
-considered completely stable.
+and RDF(S) is provided.
 
 %2 Ontotext Japec Compiler
 
