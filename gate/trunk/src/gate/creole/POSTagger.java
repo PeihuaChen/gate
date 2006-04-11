@@ -74,119 +74,85 @@ public class POSTagger extends AbstractLanguageAnalyser {
 
 
   public void execute() throws ExecutionException{
-    try{
-      //check the parameters
-      if(document == null) throw new GateRuntimeException(
-        "No document to process!");
-      if(inputASName != null && inputASName.equals("")) inputASName = null;
-      AnnotationSet inputAS = (inputASName == null) ?
-                              document.getAnnotations() :
-                              document.getAnnotations(inputASName);
+    //check the parameters
+    if(document == null) throw new ExecutionException(
+      "No document to process!");
+    if(inputASName != null && inputASName.equals("")) inputASName = null;
+    AnnotationSet inputAS = (inputASName == null) ?
+                            document.getAnnotations() :
+                            document.getAnnotations(inputASName);
 
-      /* Addition by Niraj */
-                              
-      if(baseTokenAnnotationType == null || baseTokenAnnotationType.trim().length()==0) {
-          throw new GateRuntimeException("No base Token Annotation Type provided!");
-      }
+    /* Addition by Niraj */
+                            
+    if(baseTokenAnnotationType == null || baseTokenAnnotationType.trim().length()==0) {
+        throw new ExecutionException("No base Token Annotation Type provided!");
+    }
 
-      if(outputASName != null && outputASName.equals("")) outputASName = null;
-      AnnotationSet outputAS = (outputASName == null) ?
-                              document.getAnnotations() :
-                              document.getAnnotations(outputASName);
-      
-      if(baseSentenceAnnotationType == null || baseSentenceAnnotationType.trim().length()==0) {
-          throw new GateRuntimeException("No base Sentence Annotation Type provided!");
-      }
-      
-      if(outputAnnotationType == null || outputAnnotationType.trim().length()==0) {
-          throw new GateRuntimeException("No AnnotationType provided to store the new feature!");
-      }
-      
-      /* End of addition */
-      
-      AnnotationSet sentencesAS = inputAS.get(baseSentenceAnnotationType);
-      AnnotationSet tokensAS = inputAS.get(baseTokenAnnotationType);
-      if(sentencesAS != null && sentencesAS.size() > 0
-         && tokensAS != null && tokensAS.size() > 0){
-        long startTime = System.currentTimeMillis();
-        fireStatusChanged("POS tagging " + document.getName());
-        fireProgressChanged(0);
-        //prepare the input for HepTag
-        List sentenceForTagger = new ArrayList();
-        List sentencesForTagger = new ArrayList(1);
-        sentencesForTagger.add(sentenceForTagger);
+    if(outputASName != null && outputASName.equals("")) outputASName = null;
+    AnnotationSet outputAS = (outputASName == null) ?
+                            document.getAnnotations() :
+                            document.getAnnotations(outputASName);
+    
+    if(baseSentenceAnnotationType == null || baseSentenceAnnotationType.trim().length()==0) {
+        throw new ExecutionException("No base Sentence Annotation Type provided!");
+    }
+    
+    if(outputAnnotationType == null || outputAnnotationType.trim().length()==0) {
+        throw new ExecutionException("No AnnotationType provided to store the new feature!");
+    }
+    
+    /* End of addition */
+    
+    AnnotationSet sentencesAS = inputAS.get(baseSentenceAnnotationType);
+    AnnotationSet tokensAS = inputAS.get(baseTokenAnnotationType);
+    if(sentencesAS != null && sentencesAS.size() > 0
+       && tokensAS != null && tokensAS.size() > 0){
+      long startTime = System.currentTimeMillis();
+      fireStatusChanged("POS tagging " + document.getName());
+      fireProgressChanged(0);
+      //prepare the input for HepTag
+      List sentenceForTagger = new ArrayList();
+      List sentencesForTagger = new ArrayList(1);
+      sentencesForTagger.add(sentenceForTagger);
 
-        //define a comparator for annotations by start offset
-        Comparator offsetComparator = new OffsetComparator();
+      //define a comparator for annotations by start offset
+      Comparator offsetComparator = new OffsetComparator();
 
-        //read all the tokens and all the sentences
-        List sentencesList = new ArrayList(sentencesAS);
-        Collections.sort(sentencesList, offsetComparator);
-        List tokensList = new ArrayList(tokensAS);
-        Collections.sort(tokensList, offsetComparator);
+      //read all the tokens and all the sentences
+      List sentencesList = new ArrayList(sentencesAS);
+      Collections.sort(sentencesList, offsetComparator);
+      List tokensList = new ArrayList(tokensAS);
+      Collections.sort(tokensList, offsetComparator);
 
-        Iterator sentencesIter = sentencesList.iterator();
-        ListIterator tokensIter = tokensList.listIterator();
+      Iterator sentencesIter = sentencesList.iterator();
+      ListIterator tokensIter = tokensList.listIterator();
 
-        List tokensInCurrentSentence = new ArrayList();
-        Annotation currentToken = (Annotation)tokensIter.next();
-        int sentIndex = 0;
-        int sentCnt = sentencesAS.size();
-        while(sentencesIter.hasNext()){
-          Annotation currentSentence = (Annotation)sentencesIter.next();
-          tokensInCurrentSentence.clear();
-          sentenceForTagger.clear();
-          while(currentToken != null
-                &&
-                currentToken.getEndNode().getOffset().compareTo(
-                currentSentence.getEndNode().getOffset()) <= 0){
-            tokensInCurrentSentence.add(currentToken);
-            sentenceForTagger.add(currentToken.getFeatures().
-                                  get(TOKEN_STRING_FEATURE_NAME));
-            currentToken = (Annotation)(tokensIter.hasNext() ?
-                                       tokensIter.next() : null);
-          }
-          //run the POS tagger
-          List taggerList = tagger.runTagger(sentencesForTagger);
-          if(taggerList != null && taggerList.size() > 0){
-            List taggerResults = (List) taggerList.get(0);
-            //add the results
-            //make sure no malfunction occurred
-            if(taggerResults.size() != tokensInCurrentSentence.size())
-              throw new GateRuntimeException(
-                  "POS Tagger malfunction: the output size (" +
-                  taggerResults.size() +
-                  ") is different from the input size (" +
-                  tokensInCurrentSentence.size() + ")!");
-            Iterator resIter = taggerResults.iterator();
-            Iterator tokIter = tokensInCurrentSentence.iterator();
-            while(resIter.hasNext()){
-                /* Addition by Niraj */
-                Annotation annot = (Annotation) tokIter.next();
-                addFeatures(annot, TOKEN_CATEGORY_FEATURE_NAME, ((String[])resIter.next())[1]);
-                /* End */
-            }
-          }
-          fireProgressChanged(sentIndex++ * 100 / sentCnt);
-        }//while(sentencesIter.hasNext())
-
-        if(currentToken != null){
-          //we have remaining tokens after the last sentence
-          tokensInCurrentSentence.clear();
-          sentenceForTagger.clear();
-          while(currentToken != null){
-            tokensInCurrentSentence.add(currentToken);
-            sentenceForTagger.add(currentToken.getFeatures().
-                                  get(TOKEN_STRING_FEATURE_NAME));
-            currentToken = (Annotation)(tokensIter.hasNext() ?
-                                        tokensIter.next() : null);
-          }
-          //run the POS tagger
-          List taggerResults = (List)tagger.runTagger(sentencesForTagger).get(0);
+      List tokensInCurrentSentence = new ArrayList();
+      Annotation currentToken = (Annotation)tokensIter.next();
+      int sentIndex = 0;
+      int sentCnt = sentencesAS.size();
+      while(sentencesIter.hasNext()){
+        Annotation currentSentence = (Annotation)sentencesIter.next();
+        tokensInCurrentSentence.clear();
+        sentenceForTagger.clear();
+        while(currentToken != null
+              &&
+              currentToken.getEndNode().getOffset().compareTo(
+              currentSentence.getEndNode().getOffset()) <= 0){
+          tokensInCurrentSentence.add(currentToken);
+          sentenceForTagger.add(currentToken.getFeatures().
+                                get(TOKEN_STRING_FEATURE_NAME));
+          currentToken = (Annotation)(tokensIter.hasNext() ?
+                                     tokensIter.next() : null);
+        }
+        //run the POS tagger
+        List taggerList = tagger.runTagger(sentencesForTagger);
+        if(taggerList != null && taggerList.size() > 0){
+          List taggerResults = (List) taggerList.get(0);
           //add the results
-          //make sure no malfunction accured
+          //make sure no malfunction occurred
           if(taggerResults.size() != tokensInCurrentSentence.size())
-            throw new GateRuntimeException(
+            throw new ExecutionException(
                 "POS Tagger malfunction: the output size (" +
                 taggerResults.size() +
                 ") is different from the input size (" +
@@ -199,98 +165,128 @@ public class POSTagger extends AbstractLanguageAnalyser {
               addFeatures(annot, TOKEN_CATEGORY_FEATURE_NAME, ((String[])resIter.next())[1]);
               /* End */
           }
-        }//if(currentToken != null)
-        fireProcessFinished();
-        fireStatusChanged(
-          document.getName() + " tagged in " +
-          NumberFormat.getInstance().format(
-          (double)(System.currentTimeMillis() - startTime) / 1000) +
-          " seconds!");
-      }else{
-        throw new GateRuntimeException("No sentences or tokens to process!\n" +
-                                       "Please run a sentence splitter "+
-                                       "and tokeniser first!");
-      }
+        }
+        fireProgressChanged(sentIndex++ * 100 / sentCnt);
+      }//while(sentencesIter.hasNext())
+
+      if(currentToken != null){
+        //we have remaining tokens after the last sentence
+        tokensInCurrentSentence.clear();
+        sentenceForTagger.clear();
+        while(currentToken != null){
+          tokensInCurrentSentence.add(currentToken);
+          sentenceForTagger.add(currentToken.getFeatures().
+                                get(TOKEN_STRING_FEATURE_NAME));
+          currentToken = (Annotation)(tokensIter.hasNext() ?
+                                      tokensIter.next() : null);
+        }
+        //run the POS tagger
+        List taggerResults = (List)tagger.runTagger(sentencesForTagger).get(0);
+        //add the results
+        //make sure no malfunction accured
+        if(taggerResults.size() != tokensInCurrentSentence.size())
+          throw new ExecutionException(
+              "POS Tagger malfunction: the output size (" +
+              taggerResults.size() +
+              ") is different from the input size (" +
+              tokensInCurrentSentence.size() + ")!");
+        Iterator resIter = taggerResults.iterator();
+        Iterator tokIter = tokensInCurrentSentence.iterator();
+        while(resIter.hasNext()){
+            /* Addition by Niraj */
+            Annotation annot = (Annotation) tokIter.next();
+            addFeatures(annot, TOKEN_CATEGORY_FEATURE_NAME, ((String[])resIter.next())[1]);
+            /* End */
+        }
+      }//if(currentToken != null)
+      fireProcessFinished();
+      fireStatusChanged(
+        document.getName() + " tagged in " +
+        NumberFormat.getInstance().format(
+        (double)(System.currentTimeMillis() - startTime) / 1000) +
+        " seconds!");
+    }else{
+      throw new ExecutionException("No sentences or tokens to process!\n" +
+                                     "Please run a sentence splitter "+
+                                     "and tokeniser first!");
+    }
 
 //OLD version
 /*
-      AnnotationSet as = inputAS.get(SENTENCE_ANNOTATION_TYPE);
-      if(as != null && as.size() > 0){
-        List sentences = new ArrayList(as);
-        Collections.sort(sentences, offsetComparator);
-        Iterator sentIter = sentences.iterator();
-        int sentIndex = 0;
-        int sentCnt = sentences.size();
-        long startTime= System.currentTimeMillis();
-        while(sentIter.hasNext()){
+    AnnotationSet as = inputAS.get(SENTENCE_ANNOTATION_TYPE);
+    if(as != null && as.size() > 0){
+      List sentences = new ArrayList(as);
+      Collections.sort(sentences, offsetComparator);
+      Iterator sentIter = sentences.iterator();
+      int sentIndex = 0;
+      int sentCnt = sentences.size();
+      long startTime= System.currentTimeMillis();
+      while(sentIter.hasNext()){
 start = System.currentTimeMillis();
-          Annotation sentenceAnn = (Annotation)sentIter.next();
-          AnnotationSet rangeSet = inputAS.get(
-                                    sentenceAnn.getStartNode().getOffset(),
-                                    sentenceAnn.getEndNode().getOffset());
-          if(rangeSet == null) continue;
-          AnnotationSet tokensSet = rangeSet.get(TOKEN_ANNOTATION_TYPE);
-          if(tokensSet == null) continue;
-          List tokens = new ArrayList(tokensSet);
-          Collections.sort(tokens, offsetComparator);
+        Annotation sentenceAnn = (Annotation)sentIter.next();
+        AnnotationSet rangeSet = inputAS.get(
+                                  sentenceAnn.getStartNode().getOffset(),
+                                  sentenceAnn.getEndNode().getOffset());
+        if(rangeSet == null) continue;
+        AnnotationSet tokensSet = rangeSet.get(TOKEN_ANNOTATION_TYPE);
+        if(tokensSet == null) continue;
+        List tokens = new ArrayList(tokensSet);
+        Collections.sort(tokens, offsetComparator);
 
 //          List tokens = (List)sentenceAnn.getFeatures().get("tokens");
-          List sentence = new ArrayList(tokens.size());
-          Iterator tokIter = tokens.iterator();
-          while(tokIter.hasNext()){
-            Annotation token = (Annotation)tokIter.next();
-            String text = (String)token.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-            sentence.add(text);
-          }//while(tokIter.hasNext())
+        List sentence = new ArrayList(tokens.size());
+        Iterator tokIter = tokens.iterator();
+        while(tokIter.hasNext()){
+          Annotation token = (Annotation)tokIter.next();
+          String text = (String)token.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
+          sentence.add(text);
+        }//while(tokIter.hasNext())
 
-          //run the POSTagger over this sentence
-          List sentences4tagger = new ArrayList(1);
-          sentences4tagger.add(sentence);
+        //run the POSTagger over this sentence
+        List sentences4tagger = new ArrayList(1);
+        sentences4tagger.add(sentence);
 prepTime += System.currentTimeMillis() - start;
 start = System.currentTimeMillis();
-          List taggerResults = tagger.runTagger(sentences4tagger);
+        List taggerResults = tagger.runTagger(sentences4tagger);
 posTime += System.currentTimeMillis() - start;
 start = System.currentTimeMillis();
-          //add the results to the output annotation set
-          //we only get one sentence
-          List sentenceFromTagger = (List)taggerResults.get(0);
-          if(sentenceFromTagger.size() != sentence.size()){
-            String taggerResult = "";
-            for(int i = 0; i< sentenceFromTagger.size(); i++){
-              taggerResult += ((String[])sentenceFromTagger.get(i))[1] + ", ";
-            }
-            throw new GateRuntimeException(
-              "POS Tagger malfunction: the output size (" +
-              sentenceFromTagger.size() +
-              ") is different from the input size (" +
-              sentence.size() + ")!" +
-              "\n Input: " + sentence + "\nOutput: " + taggerResult);
+        //add the results to the output annotation set
+        //we only get one sentence
+        List sentenceFromTagger = (List)taggerResults.get(0);
+        if(sentenceFromTagger.size() != sentence.size()){
+          String taggerResult = "";
+          for(int i = 0; i< sentenceFromTagger.size(); i++){
+            taggerResult += ((String[])sentenceFromTagger.get(i))[1] + ", ";
           }
-          for(int i = 0; i< sentence.size(); i++){
-            String category = ((String[])sentenceFromTagger.get(i))[1];
-            Annotation token = (Annotation)tokens.get(i);
-            token.getFeatures().
-              put(TOKEN_CATEGORY_FEATURE_NAME, category);
-          }//for(i = 0; i<= sentence.size(); i++)
+          throw new GateRuntimeException(
+            "POS Tagger malfunction: the output size (" +
+            sentenceFromTagger.size() +
+            ") is different from the input size (" +
+            sentence.size() + ")!" +
+            "\n Input: " + sentence + "\nOutput: " + taggerResult);
+        }
+        for(int i = 0; i< sentence.size(); i++){
+          String category = ((String[])sentenceFromTagger.get(i))[1];
+          Annotation token = (Annotation)tokens.get(i);
+          token.getFeatures().
+            put(TOKEN_CATEGORY_FEATURE_NAME, category);
+        }//for(i = 0; i<= sentence.size(); i++)
 postTime += System.currentTimeMillis() - start;
-          fireProgressChanged(sentIndex++ * 100 / sentCnt);
-        }//while(sentIter.hasNext())
+        fireProgressChanged(sentIndex++ * 100 / sentCnt);
+      }//while(sentIter.hasNext())
 Out.prln("POS preparation time:" + prepTime);
 Out.prln("POS execution time:" + posTime);
 Out.prln("POS after execution time:" + postTime);
-          fireProcessFinished();
-          long endTime = System.currentTimeMillis();
-          fireStatusChanged(document.getName() + " tagged in " +
-                          NumberFormat.getInstance().format(
-                          (double)(endTime - startTime) / 1000) + " seconds!");
-      }else{
-        throw new GateRuntimeException("No sentences to process!\n" +
-                                       "Please run a sentence splitter first!");
-      }//if(as != null && as.size() > 0)
+        fireProcessFinished();
+        long endTime = System.currentTimeMillis();
+        fireStatusChanged(document.getName() + " tagged in " +
+                        NumberFormat.getInstance().format(
+                        (double)(endTime - startTime) / 1000) + " seconds!");
+    }else{
+      throw new GateRuntimeException("No sentences to process!\n" +
+                                     "Please run a sentence splitter first!");
+    }//if(as != null && as.size() > 0)
 */
-    }catch(Exception e){
-      throw new ExecutionException(e);
-    }
   }
 
 
