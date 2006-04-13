@@ -1,6 +1,7 @@
 package debugger;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 /**
  * Copyright (c) Ontos AG (http://www.ontosearch.com).
@@ -38,6 +39,38 @@ public class ClassRipper {
                 field.setAccessible(true);
                 return field;
             } catch (NoSuchFieldException e) {
+                // will try to search in superclass
+                //cls = classInstance.getClass().getSuperclass();
+                cls = cls.getSuperclass();
+            } catch (SecurityException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    /** Obtains field from given class instance
+     * regardless either this field private or not
+     * @param classInstance class instance which value to extract
+     * @param fieldName field name
+     * @return fileld
+     * */
+    public  static Method getMethod(Object classInstance, String methodName, Class[] args) {
+        if (DebugLevel >= 5) {
+            System.out.print("DEBUG [" + ClassRipper.class.getName() + "]:");
+            System.out.print(" getMethod: ");
+            System.out.print(" classInstance = [" + classInstance.getClass().getName() + "]");
+            System.out.print(" methodName = [" + methodName + "]");
+            System.out.print("\n");
+        }
+        Method field = null;
+        Class cls = classInstance.getClass();
+        while (!cls.getName().equals("java.lang.Object")) {
+            try {
+                field = cls.getDeclaredMethod(methodName, args);
+                field.setAccessible(true);
+                return field;
+            } catch (NoSuchMethodException e) {
                 // will try to search in superclass
                 //cls = classInstance.getClass().getSuperclass();
                 cls = cls.getSuperclass();
