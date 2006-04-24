@@ -344,20 +344,11 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>Montreal Transducer</td>
-		<td>
-A module for executing augmented Jape grammars.
-Written by Luc Plamondon, Université de Montréal
-(<a href="http://gate.ac.uk/sale/tao/#sec:misc-creole:montrealtransducer">docs</a>)
-    </td>
+		<td>A module for executing augmented Jape grammars</td>
 		<td>ca.umontreal.iro.rali.gate.creole.MtlTransducer</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='NLG_Tools'>NLG_Tools</a></th>
-	</tr>
-	<tr>
-		<td>GATE OntoLex Mapping</td>
-		<td>GATE OntoLex mapping (<a href="http://gate.ac.uk/sale/tao/#sec:misc-creole:nlg">docs</a>).</td>
-		<td>gate.lexicon.OntoLexKBImpl</td>
 	</tr>
 	<tr>
 		<td>GATE NLG Lexicon</td>
@@ -368,11 +359,6 @@ Written by Luc Plamondon, Université de Montréal
 		<td>NLG Lexicon Editor</td>
 		<td>NLG Lexicon Editor (<a href="http://gate.ac.uk/sale/tao/#sec:misc-creole:nlg">docs</a>).</td>
 		<td>gate.gui.lexicon.NLGLexiconVR</td>
-	</tr>
-	<tr>
-		<td>OntoLex Mapping Editor</td>
-		<td>An Editor for mapping between NLG lexicon entries and ontology classes (<a href="http://gate.ac.uk/sale/tao/#sec:misc-creole:nlg">docs</a>).</td>
-		<td>gate.gui.lexicon.OntoLexEditorVR</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='NP_Chunking'>NP_Chunking</a></th>
@@ -404,6 +390,16 @@ Written by Luc Plamondon, Université de Montréal
 		<td>Features Editor</td>
 		<td>&nbsp;</td>
 		<td>gate.gui.FeaturesEditor</td>
+	</tr>
+	<tr>
+		<td>GATE APF exporter</td>
+		<td>An APF exporter .</td>
+		<td>gate.creole.APFormatExporter</td>
+	</tr>
+	<tr>
+		<td>DAML+OIL exporter</td>
+		<td>A DAML+OIL exporter</td>
+		<td>gate.creole.RDFFormatExporter</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Ontology_Tools'>Ontology_Tools</a></th>
@@ -500,11 +496,6 @@ Written by Luc Plamondon, Université de Montréal
 		<td>gate.creole.GazetteerListsCollector</td>
 	</tr>
 	<tr>
-		<td>GATE APF exporter</td>
-		<td>An APF exporter .</td>
-		<td>gate.creole.APFormatExporter</td>
-	</tr>
-	<tr>
 		<td>ANNIE VP Chunker</td>
 		<td>ANNIE VP Chunker component (<a href="http://gate.ac.uk/sale/tao/#sec:misc-creole:vgchunker">docs</a>)</td>
 		<td>gate.creole.VPChunker</td>
@@ -519,11 +510,6 @@ Written by Luc Plamondon, Université de Montréal
 		<td>Exports a document with GATE annotations to its original
         format (<a href="http://gate.ac.uk/sale/tao/#sec:misc-creole:flexexport">docs</a>)</td>
 		<td>gate.creole.dumpingPR.DumpingPR</td>
-	</tr>
-	<tr>
-		<td>DAML+OIL exporter</td>
-		<td>A DAML+OIL exporter</td>
-		<td>gate.creole.RDFFormatExporter</td>
 	</tr>
 	<tr>
 		<td>GATE Morphological analyser</td>
@@ -577,6 +563,7 @@ Written by Luc Plamondon, Université de Montréal
 	<li><a href='#npe'>Multi-lingual Noun Phrase Extractor</a></li>
 	<li><a href='#kaon2ontology'>KAON Ontology</a></li>
 	<li><a href='#anc'>XCES tools</a></li>
+	<li><a href='#sen'><i>Sen</i> wrapper (Japanese morphological analyser)</a></li>
 </ul>
 
 <table border='1'>
@@ -621,6 +608,15 @@ Written by Luc Plamondon, Université de Montréal
 		<td>ANC Save Standoff</td>
 		<td>Saves annotations from a Document to an XCES-compliant standoff markup file.</td>
 		<td>org.xces.creole.SaveStandoff</td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name="sen"></a><i>Sen</i> wrapper (Japanese morphological analyser)<br/><a href="http://gate.ac.uk/sale/gateplugins/SenWrapper/">website (in Japanese)</a></th>
+	</tr>g
+	<tr><td colspan='3'><center><i><a href="http://ultimania.org/sen/">Sen</a> is a morphological analyser for Japanese.  This is a wrapper to allow it to be used from GATE, you must also install sen itself.  See the <a href="http://gate.ac.uk/sale/gateplugins/SenWrapper/">documentation</a> (in Japanese) for details.</i></center></td></tr>
+	<tr>
+		<td>Sen Wrapper</td>
+		<td>Morphological analyser for Japanese</td>
+		<td>jp.co.ditlab.jgate.SenWrapper</td>
 	</tr>
 </table>
 <hr/>
