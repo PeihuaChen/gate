@@ -11,6 +11,8 @@ Agence
 Agences
 Agency
 Association
+Assoc.
+Assoc
 Authority
 Autorité
 BANK
@@ -42,6 +44,7 @@ Caisse
 Cathedral
 Center
 Centre
+Choir
 Church
 Clinic
 Clinique
@@ -51,21 +54,23 @@ Collège
 Commission
 Committee
 Community
+Confederation
 Conseil
 Corporation
 Council
+Crew
 DEPARTEMENT
 DEPARTMENT
 DIRECTORATE
 DIVISION
 Department
 Directorate
-Division
 Département
 EGLISE
 ESTATE
 ETAT
 Eglise
+Ensemble
 Estate
 Etat
 FEDERATION
@@ -127,6 +132,7 @@ OFFICE
 Observatoire
 Observatory
 Office
+Orchestra
 PARTENAIRES
 PARTENARIAT
 PARTNERS
@@ -140,6 +146,7 @@ Partnership
 Party
 Plant
 Polytechnic
+Quartet
 REGIONAL AUTHORITY
 REGIONAL HEALTH AUTHORITY
 Regional Authority
@@ -160,6 +167,7 @@ Squadron
 State University
 Subcommittee
 Syndicat
+Tribunal
 TRUST
 Trust
 UNION
@@ -173,14 +181,11 @@ WORKERS
 Ware
 Workers
 clinique
-community
 federation
 ministère
 state university
 syndicat
 université
 état
-
-
-
-
+department
+departments
