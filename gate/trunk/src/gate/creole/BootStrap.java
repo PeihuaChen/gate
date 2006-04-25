@@ -409,6 +409,19 @@ public class BootStrap {
       System.getProperty("path.separator") +
         System.getProperty("java.class.path")
     );
+    // ___GATEHOME___ is the GATE home dir, in the form suitable for an Ant
+    // property
+    File gateHome = gate.Gate.getGateHome();
+    if(gateHome == null) {
+      // put a fake gate home location in here if we can't get the real one
+      names.put("___GATEHOME___",
+          gate.Gate.runningOnUnix() ? "/path/to/gate"
+                                    : "C:/Program Files/GATE");
+    }
+    else {
+      names.put("___GATEHOME___",
+          gateHome.getPath().replace('\\', '/'));
+    }
 
     if (packages.length() == 0){
       names.put("import ___packages___.*;", "");
