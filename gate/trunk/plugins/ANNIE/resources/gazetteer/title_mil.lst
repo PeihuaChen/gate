@@ -44,18 +44,18 @@ Captain
 Cdr
 Cdr.
 Cdre
-Cdre ( 1ST Class )
-Cdre ( 1ST class )
-Cdre ( 1st Class )
-Cdre ( 1st class )
-Cdre ( 2ND Class )
-Cdre ( 2ND class )
-Cdre ( 2nd Class )
-Cdre ( 2nd class )
-Cdre ( First Class )
-Cdre ( Second Class )
-Cdre ( Second class )
-Cdre ( first class )
+Cdre (1ST Class)
+Cdre (1ST class)
+Cdre (1st Class)
+Cdre (1st class)
+Cdre (2ND Class)
+Cdre (2ND class)
+Cdre (2nd Class)
+Cdre (2nd class)
+Cdre (First Class)
+Cdre (Second Class)
+Cdre (Second class)
+Cdre (first class)
 Cdre 1ST Class
 Cdre 1ST class
 Cdre 1st Class
@@ -82,18 +82,18 @@ Colour Serjeant
 Comdr.
 Commander
 Commodore
-Commodore ( 1ST Class )
-Commodore ( 1ST class )
-Commodore ( 1st Class )
-Commodore ( 1st class )
-Commodore ( 2ND Class )
-Commodore ( 2ND class )
-Commodore ( 2nd Class )
-Commodore ( 2nd class )
-Commodore ( First Class )
-Commodore ( Second Class )
-Commodore ( Second class )
-Commodore ( first class )
+Commodore (1ST Class)
+Commodore (1ST class)
+Commodore (1st Class)
+Commodore (1st class)
+Commodore (2ND Class)
+Commodore (2ND class)
+Commodore (2nd Class)
+Commodore (2nd class)
+Commodore (First Class)
+Commodore (Second Class)
+Commodore (Second class)
+Commodore (first class)
 Commodore 1ST Class
 Commodore 1ST class
 Commodore 1st Class
@@ -236,6 +236,8 @@ Sub Lt
 Sub-Lieutenant
 Sub-Lt
 Sub. Lt.
+Tech Sgt
+Tech. Sgt.
 Vice Adm
 Vice Adm.
 Vice Admiral
@@ -257,3 +259,5 @@ commandant
 commander
 lieutenant
 sergeant
+sergent
+serjeant

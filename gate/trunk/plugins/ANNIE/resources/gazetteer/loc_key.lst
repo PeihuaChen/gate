@@ -1,5 +1,6 @@
 sea
 ocean
+Wall
 Village
 Valley
 Trail
@@ -12,7 +13,6 @@ Springs
 Sea
 Sands
 River
-Region
 Republic
 Province
 Plains
@@ -44,6 +44,7 @@ Creek
 County
 City
 Channel
+Castle
 Canal
 Boulevard
 Blvd.
