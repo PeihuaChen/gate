@@ -1,13 +1,14 @@
 package debugger;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
  * Copyright (c) Ontos AG (http://www.ontosearch.com). This class is part of
  * JAPE Debugger component for GATE (Copyright (c) "The University of Sheffield"
  * see http://gate.ac.uk/) <br>
- * Contains helper static methods to access private class fields
+ * Contains helper static methods to access private class fields and methods.
  * 
  * @author Andrey Shafirin
  */
@@ -24,10 +25,9 @@ public class ClassRipper {
 	 * private or not
 	 * 
 	 * @param classInstance
-	 *            class instance which value to extract
+	 *          class instance which field to take
 	 * @param fieldName
-	 *            field name
-	 * @return fileld
+	 *          field name
 	 */
 	private static Field getField(Object classInstance, String fieldName) {
 		if (DebugLevel >= 5) {
@@ -60,12 +60,11 @@ public class ClassRipper {
 	 * private or not.
 	 * 
 	 * @param classInstance
-	 *            class instance which value to extract
-	 * @param fieldName
-	 *            field name
-	 * @return fileld
+	 *          class instance which method to take
+	 * @param methodName
+	 *          method name
 	 */
-	public static Method getMethod(Object classInstance, String methodName, Class[] args) {
+	private static Method getMethod(Object classInstance, String methodName, Class[] args) {
 		if (DebugLevel >= 5) {
 			System.out.print("DEBUG [" + ClassRipper.class.getName() + "]:");
 			System.out.print(" getMethod: ");
@@ -73,16 +72,21 @@ public class ClassRipper {
 			System.out.print(" methodName = [" + methodName + "]");
 			System.out.print("\n");
 		}
-		Method field = null;
 		Class cls = classInstance.getClass();
 		while (!cls.getName().equals("java.lang.Object")) {
 			try {
-				field = cls.getDeclaredMethod(methodName, args);
-				field.setAccessible(true);
-				return field;
-			} catch (NoSuchMethodException e) {
+				Method[] methods = cls.getDeclaredMethods();
+				lbl_methods: for (int i = 0; i < methods.length; i++) {
+					if (!methods[i].getName().equals(methodName)) continue;
+					Class[] c = methods[i].getParameterTypes();
+					if (c.length != args.length) continue;
+					for (int j = 0; j < c.length; j++) {
+						if (args[j] != null && !c[j].isAssignableFrom(args[j])) continue lbl_methods;
+					}
+					methods[i].setAccessible(true);
+					return methods[i];
+				}
 				// will try to search in superclass
-				// cls = classInstance.getClass().getSuperclass();
 				cls = cls.getSuperclass();
 			} catch (SecurityException e) {
 				e.printStackTrace();
@@ -92,13 +96,13 @@ public class ClassRipper {
 	}
 
 	/**
-	 * Obtains field value from given class instance regardless either this
-	 * field private or not
+	 * Obtains field value from given class instance regardless either this field
+	 * private or not
 	 * 
 	 * @param classInstance
-	 *            class instance which value to extract
+	 *          class instance which value to extract
 	 * @param fieldName
-	 *            field name
+	 *          field name
 	 * @return fileld value
 	 */
 	public static Object getFieldValue(Object classInstance, String fieldName) throws IllegalAccessException {
@@ -155,5 +159,17 @@ public class ClassRipper {
 		double d = field.getDouble(classInstance);
 		field.setAccessible(false);
 		return d;
+	}
+
+	public static Object invokeMethod(Object classInstance, String methodName, Object[] args)
+			throws InvocationTargetException, IllegalAccessException {
+		Class[] c = new Class[args.length];
+		for (int i = 0; i < args.length; i++) {
+			c[i] = (args[i] == null) ? null : args[i].getClass();
+		}
+		Method method = getMethod(classInstance, methodName, c);
+		Object result = method.invoke(classInstance, args);
+		method.setAccessible(false);
+		return result;
 	}
 }
