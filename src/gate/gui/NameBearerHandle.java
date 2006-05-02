@@ -61,14 +61,16 @@ public class NameBearerHandle implements Handle,
       if(rData != null){
         iconName = rData.getIcon();
         if(iconName == null){
-          if(target instanceof LanguageResource) iconName = "lr.gif";
-          else if(target instanceof ProcessingResource) iconName = "pr.gif";
-          else if(target instanceof Controller) iconName = "controller.gif";
+          if(target instanceof LanguageResource) iconName = "lr";
+          else if(target instanceof ProcessingResource) iconName = "pr";
+          else if(target instanceof Controller) iconName = "application";
         }
+        if(target instanceof Controller && 
+                target.getName().startsWith("ANNIE")) iconName = "annie";
         tooltipText = "<HTML> <b>" + rData.getComment() + "</b><br>(<i>" +
                       rData.getClassName() + "</i>)</HTML>";
       } else {
-        this.icon = MainFrame.getIcon("lr.gif");
+        iconName = "lr";
       }
     }else if(target instanceof DataStore){
       iconName = ((DataStore)target).getIconName();

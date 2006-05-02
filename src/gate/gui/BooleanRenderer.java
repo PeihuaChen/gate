@@ -35,8 +35,8 @@ public class BooleanRenderer extends DefaultTableCellRenderer {
     if(value instanceof Boolean &&
        value != null &&
        ((Boolean)value).booleanValue()){
-      setIcon(MainFrame.getIcon("tick.gif"));
-//      setIcon(MainFrame.getIcon((isSelected) ? "tick_white.gif" : "tick.gif"));
+      setIcon(MainFrame.getIcon("tick"));
+//      setIcon(MainFrame.getIcon((isSelected) ? "tick_white" : "tick"));
     } else {
       setIcon(null);
     }

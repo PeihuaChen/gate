@@ -387,7 +387,7 @@ public class AnnotationEditor{
   protected class StartOffsetLeftAction extends AnnotationAction{
     public StartOffsetLeftAction(){
       super("<html><b>Extend</b><br><small>SHIFT = 5 characters, CTRL-SHIFT = 10 characters</small></html>", 
-              MainFrame.getIcon("extend-left.gif"));
+              MainFrame.getIcon("extend-left"));
     }
     
     public void actionPerformed(ActionEvent evt){
@@ -415,7 +415,7 @@ public class AnnotationEditor{
     public StartOffsetRightAction(){
       super("<html><b>Shrink</b><br><small>SHIFT = 5 characters, " +
             "CTRL-SHIFT = 10 characters</small></html>", 
-            MainFrame.getIcon("extend-right.gif"));
+            MainFrame.getIcon("extend-right"));
     }
     
     public void actionPerformed(ActionEvent evt){
@@ -444,7 +444,7 @@ public class AnnotationEditor{
     public EndOffsetLeftAction(){
       super("<html><b>Shrink</b><br><small>SHIFT = 5 characters, " +
             "CTRL-SHIFT = 10 characters</small></html>",
-            MainFrame.getIcon("extend-left.gif"));
+            MainFrame.getIcon("extend-left"));
     }
     
     public void actionPerformed(ActionEvent evt){
@@ -473,7 +473,7 @@ public class AnnotationEditor{
     public EndOffsetRightAction(){
       super("<html><b>Extend</b><br><small>SHIFT = 5 characters, " +
             "CTRL-SHIFT = 10 characters</small></html>", 
-            MainFrame.getIcon("extend-right.gif"));
+            MainFrame.getIcon("extend-right"));
     }
     
     public void actionPerformed(ActionEvent evt){
@@ -502,7 +502,7 @@ public class AnnotationEditor{
   
   protected class DeleteAnnotationAction extends AnnotationAction{
     public DeleteAnnotationAction(){
-      super("Delete", MainFrame.getIcon("delete.gif"));
+      super("Delete", MainFrame.getIcon("delete"));
     }
     
     public void actionPerformed(ActionEvent evt){
@@ -515,7 +515,7 @@ public class AnnotationEditor{
     public DismissAction(){
       super("");
       Icon icon = UIManager.getIcon("InternalFrame.closeIcon");
-      if(icon == null) icon = MainFrame.getIcon("exit.gif");
+      if(icon == null) icon = MainFrame.getIcon("exit");
       putValue(SMALL_ICON, icon);
       putValue(SHORT_DESCRIPTION, "Dismiss");
     }

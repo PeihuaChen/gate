@@ -308,7 +308,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
                 													Object newValue){}
         
       };
-      requiredIconLabel.setIcon(MainFrame.getIcon("r.gif"));
+      requiredIconLabel.setIcon(MainFrame.getIcon("r"));
       requiredIconLabel.setOpaque(false);
       requiredIconLabel.setToolTipText("Required feature");
       
@@ -322,11 +322,11 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
                                           Object newValue){}
         
       };
-      optionalIconLabel.setIcon(MainFrame.getIcon("o.gif"));
+      optionalIconLabel.setIcon(MainFrame.getIcon("o"));
       optionalIconLabel.setOpaque(false);
       optionalIconLabel.setToolTipText("Optional feature");
 
-      nonSchemaIconLabel = new JLabel(MainFrame.getIcon("c.gif")){
+      nonSchemaIconLabel = new JLabel(MainFrame.getIcon("c")){
         public void repaint(long tm, int x, int y, int width, int height){}
         public void repaint(Rectangle r){}
         public void validate(){}
@@ -339,7 +339,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
       nonSchemaIconLabel.setToolTipText("Custom feature");
       nonSchemaIconLabel.setOpaque(false);
       
-      deleteButton = new JButton(MainFrame.getIcon("delete.gif"));
+      deleteButton = new JButton(MainFrame.getIcon("delete"));
       deleteButton.setMargin(new Insets(0,0,0,0));
       deleteButton.setBorderPainted(false);
       deleteButton.setContentAreaFilled(false);

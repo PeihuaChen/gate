@@ -129,14 +129,24 @@ public class MainFrame extends JFrame
   
   protected static java.util.Collection guiRoots = new ArrayList();
 
+  /**
+   * Extensions for icon files to be tried in this order.
+   */
+  protected static final String[] ICON_EXTENSIONS = {".gif", ".png"};
+  
   private static JDialog guiLock = null;
 
-  static public Icon getIcon(String filename){
-    Icon result = (Icon)iconByName.get(filename);
-    if(result == null){
-      result = new ImageIcon(MainFrame.class.
-              getResource(Files.getResourcePath() + "/img/" + filename));
-      iconByName.put(filename, result);
+  static public Icon getIcon(String baseName){
+    Icon result = (Icon)iconByName.get(baseName);
+    for(int i = 0; i < ICON_EXTENSIONS.length && result == null; i++){
+      String extension = ICON_EXTENSIONS[i];
+      String fileName = baseName + extension;
+      URL iconURL = MainFrame.class.getResource(Files.getResourcePath() + 
+              "/img/" + fileName);
+      if(iconURL != null){
+        result = new ImageIcon(iconURL);
+        iconByName.put(baseName, result);
+      }
     }
     return result;
   }
@@ -273,12 +283,9 @@ public class MainFrame extends JFrame
     this.setIconImage(Toolkit.getDefaultToolkit().getImage(
           MainFrame.class.getResource(Files.getResourcePath() +
                   "/img/gateIcon.gif")));
-    resourcesTree = new JTree(resourcesTreeModel){
-      public void updateUI(){
-        super.updateUI();
-        setRowHeight(0);
-      }
-    };
+    resourcesTree = new ResourcesTree(); 
+    resourcesTree.setModel(resourcesTreeModel);
+    resourcesTree.setRowHeight(0);
 
     resourcesTree.setEditable(true);
     ResourcesTreeCellRenderer treeCellRenderer =
@@ -410,7 +417,7 @@ public class MainFrame extends JFrame
     constraints.gridy = 0;
     constraints.gridwidth = 2;
     constraints.fill = GridBagConstraints.NONE;
-    JLabel gifLbl = new JLabel(getIcon("gateHeader.gif"));
+    JLabel gifLbl = new JLabel(getIcon("gateHeader"));
     splashBox.add(gifLbl, constraints);
 
     constraints.gridy = 1;
@@ -419,10 +426,10 @@ public class MainFrame extends JFrame
     constraints.gridwidth = 1;
     constraints.gridheight = 1;
     
-    gifLbl = new JLabel(getIcon("gateSplash.gif"));
+    gifLbl = new JLabel(getIcon("gateSplash"));
     splashBox.add(gifLbl, constraints);
     
-    gifLbl = new JLabel(getIcon("sponsors.gif"));
+    gifLbl = new JLabel(getIcon("sponsors"));
     splashBox.add(gifLbl, constraints);
     constraints.gridy = 2;
     constraints.gridwidth = 2;
@@ -475,21 +482,21 @@ public class MainFrame extends JFrame
 
     LiveMenu newAPPMenu = new LiveMenu(LiveMenu.APP);
     newAPPMenu.setText("New application");
-    newAPPMenu.setIcon(getIcon("applications.gif"));
+    newAPPMenu.setIcon(getIcon("applications"));
     fileMenu.add(newAPPMenu);
 
     LiveMenu newLRMenu = new LiveMenu(LiveMenu.LR);
     newLRMenu.setText("New language resource");
-    newLRMenu.setIcon(getIcon("lrs.gif"));
+    newLRMenu.setIcon(getIcon("lrs"));
     fileMenu.add(newLRMenu);
 
     LiveMenu newPRMenu = new LiveMenu(LiveMenu.PR);
     newPRMenu.setText("New processing resource");
-    newPRMenu.setIcon(getIcon("prs.gif"));
+    newPRMenu.setIcon(getIcon("prs"));
     fileMenu.add(newPRMenu);
 
     JMenu dsMenu = new JMenu("Datastores");
-    dsMenu.setIcon(getIcon("dss.gif"));
+    dsMenu.setIcon(getIcon("dss"));
     dsMenu.add(new XJMenuItem(new NewDSAction(), this));
     dsMenu.add(new XJMenuItem(new OpenDSAction(), this));
     fileMenu.add(dsMenu);
@@ -499,7 +506,7 @@ public class MainFrame extends JFrame
 
     fileMenu.addSeparator();
     JMenu loadANNIEMenu = new JMenu("Load ANNIE system");
-    loadANNIEMenu.setIcon(getIcon("application.gif"));
+    loadANNIEMenu.setIcon(getIcon("annie"));
     loadANNIEMenu.add(new XJMenuItem(new LoadANNIEWithDefaultsAction(), this));
     loadANNIEMenu.add(new XJMenuItem(new LoadANNIEWithoutDefaultsAction(), this));
     fileMenu.add(loadANNIEMenu);
@@ -584,7 +591,7 @@ public class MainFrame extends JFrame
     //temporarily disabled till the evaluation tools are made to run within
     //the GUI
     JMenu corpusEvalMenu = new JMenu("Corpus Benchmark Tools");
-    corpusEvalMenu.setIcon(getIcon("annDiff.gif"));
+    corpusEvalMenu.setIcon(getIcon("corpus-benchmark"));
     toolsMenu.add(corpusEvalMenu);
     corpusEvalMenu.add(new NewCorpusEvalAction());
     corpusEvalMenu.addSeparator();
@@ -600,7 +607,7 @@ public class MainFrame extends JFrame
 //      new JCheckBoxMenuItem(datastoreModeCorpusEvalToolAction);
 //    corpusEvalMenu.add(datastoreModeItem);
     toolsMenu.add(
-      new AbstractAction("Unicode editor", getIcon("unicode.gif")){
+      new AbstractAction("Unicode editor", getIcon("unicode")){
       public void actionPerformed(ActionEvent evt){
         new guk.Editor();
       }
@@ -615,7 +622,7 @@ public class MainFrame extends JFrame
     if(Gate.isEnableJapeDebug()) {
       // by Shafirin Andrey start
       toolsMenu.add(
-          new AbstractAction("JAPE Debugger", getIcon("application.gif")) {
+          new AbstractAction("JAPE Debugger", getIcon("application")) {
         public void actionPerformed(ActionEvent evt) {
           System.out.println("Creating Jape Debugger");
           new debugger.JapeDebugger();
@@ -670,7 +677,7 @@ public class MainFrame extends JFrame
     smallMenuBar.setBorderPainted(false);
     smallMenuBar.setAlignmentY(JComponent.CENTER_ALIGNMENT);
     JMenu annieMenu = new JMenu();
-    annieMenu.setIcon(getIcon("application.gif"));
+    annieMenu.setIcon(getIcon("annie"));
     annieMenu.setToolTipText("Load ANNIE System");
     annieMenu.add(new LoadANNIEWithDefaultsAction());
     annieMenu.add(new LoadANNIEWithoutDefaultsAction());
@@ -682,7 +689,7 @@ public class MainFrame extends JFrame
     smallMenuBar.setAlignmentY(JComponent.CENTER_ALIGNMENT);
     LiveMenu tbNewLRMenu = new LiveMenu(LiveMenu.LR);
     tbNewLRMenu.setToolTipText("New Language Resource");
-    tbNewLRMenu.setIcon(getIcon("lrs.gif"));
+    tbNewLRMenu.setIcon(getIcon("lrs"));
     smallMenuBar.add(tbNewLRMenu);
     toolbar.add(smallMenuBar);
 
@@ -691,7 +698,7 @@ public class MainFrame extends JFrame
     smallMenuBar.setAlignmentY(JComponent.CENTER_ALIGNMENT);
     LiveMenu tbNewPRMenu = new LiveMenu(LiveMenu.PR);
     tbNewPRMenu.setToolTipText("New Processing Resource");
-    tbNewPRMenu.setIcon(getIcon("prs.gif"));
+    tbNewPRMenu.setIcon(getIcon("prs"));
     smallMenuBar.add(tbNewPRMenu);
     toolbar.add(smallMenuBar);
 
@@ -700,7 +707,7 @@ public class MainFrame extends JFrame
     smallMenuBar.setAlignmentY(JComponent.CENTER_ALIGNMENT);
     LiveMenu tbNewAppMenu = new LiveMenu(LiveMenu.APP);
     tbNewAppMenu.setToolTipText("New Application");
-    tbNewAppMenu.setIcon(getIcon("applications.gif"));
+    tbNewAppMenu.setIcon(getIcon("applications"));
     smallMenuBar.add(tbNewAppMenu);
     toolbar.add(smallMenuBar);
 
@@ -709,7 +716,7 @@ public class MainFrame extends JFrame
     smallMenuBar.setAlignmentY(JComponent.CENTER_ALIGNMENT);
     JMenu tbDsMenu = new JMenu();
     tbDsMenu.setToolTipText("Datastores");
-    tbDsMenu.setIcon(getIcon("dss.gif"));
+    tbDsMenu.setIcon(getIcon("dss"));
     tbDsMenu.add(new NewDSAction());
     tbDsMenu.add(new OpenDSAction());
     smallMenuBar.add(tbDsMenu);
@@ -1495,7 +1502,7 @@ public class MainFrame extends JFrame
   class NewProjectAction extends AbstractAction {
     public NewProjectAction(){
       super("New Project", new ImageIcon(MainFrame.class.getResource(
-                                        "/gate/resources/img/newProject.gif")));
+                                        "/gate/resources/img/newProject")));
       putValue(SHORT_DESCRIPTION,"Create a new project");
     }
     public void actionPerformed(ActionEvent e){
@@ -1513,7 +1520,7 @@ public class MainFrame extends JFrame
   /** This class represent an action which brings up the Annot Diff tool*/
   class NewAnnotDiffAction extends AbstractAction {
     public NewAnnotDiffAction() {
-      super("Annotation Diff", getIcon("annDiff.gif"));
+      super("Annotation Diff", getIcon("annDiff"));
       putValue(SHORT_DESCRIPTION,"Open a new Annotation Diff window");
     }// NewAnnotDiffAction
     public void actionPerformed(ActionEvent e) {
@@ -1522,7 +1529,7 @@ public class MainFrame extends JFrame
 //      annotDiffDialog.setVisible(true);
       AnnotationDiffGUI frame = new AnnotationDiffGUI("Annotation Diff Tool");
       frame.pack();
-      frame.setIconImage(((ImageIcon)getIcon("annDiff.gif")).getImage());
+      frame.setIconImage(((ImageIcon)getIcon("annDiff")).getImage());
       frame.setLocationRelativeTo(MainFrame.this);
       frame.setVisible(true);
     }// actionPerformed();
@@ -1531,7 +1538,7 @@ public class MainFrame extends JFrame
   /** This class represent an action which brings up the Corpus Annot Diff tool*/
   class NewCorpusAnnotDiffAction extends AbstractAction {
     public NewCorpusAnnotDiffAction() {
-      super("Corpus Annotation Diff", getIcon("annDiff.gif"));
+      super("Corpus Annotation Diff", getIcon("annDiff"));
       putValue(SHORT_DESCRIPTION,"Create a new Corpus Annotation Diff Tool");
     }// NewCorpusAnnotDiffAction
     public void actionPerformed(ActionEvent e) {
@@ -1547,6 +1554,7 @@ public class MainFrame extends JFrame
     public NewCorpusEvalAction() {
       super("Default mode");
       putValue(SHORT_DESCRIPTION,"Run the Benchmark Tool in its default mode");
+      putValue(SMALL_ICON, getIcon("corpus-benchmark"));
     }// newCorpusEvalAction
 
     public void actionPerformed(ActionEvent e) {
@@ -1601,6 +1609,7 @@ public class MainFrame extends JFrame
     public StoredMarkedCorpusEvalAction() {
       super("Human marked against stored processing results");
       putValue(SHORT_DESCRIPTION,"Run the Benchmark Tool -stored_clean");
+      putValue(SMALL_ICON, getIcon("corpus-benchmark"));
     }// newCorpusEvalAction
 
     public void actionPerformed(ActionEvent e) {
@@ -1651,6 +1660,7 @@ public class MainFrame extends JFrame
     public CleanMarkedCorpusEvalAction() {
       super("Human marked against current processing results");
       putValue(SHORT_DESCRIPTION,"Run the Benchmark Tool -marked_clean");
+      putValue(SMALL_ICON, getIcon("corpus-benchmark"));
     }// newCorpusEvalAction
 
     public void actionPerformed(ActionEvent e) {
@@ -1707,6 +1717,7 @@ public class MainFrame extends JFrame
     public GenerateStoredCorpusEvalAction() {
       super("Store corpus for future evaluation");
       putValue(SHORT_DESCRIPTION,"Run the Benchmark Tool -generate");
+      putValue(SMALL_ICON, getIcon("corpus-benchmark"));
     }// newCorpusEvalAction
 
     public void actionPerformed(ActionEvent e) {
@@ -1793,7 +1804,7 @@ public class MainFrame extends JFrame
     public LoadANNIEWithDefaultsAction() {
       super("With defaults");
       putValue(SHORT_DESCRIPTION, "Load ANNIE system using defaults");
-      putValue(SMALL_ICON, getIcon("application.gif"));
+      putValue(SMALL_ICON, getIcon("annie"));
     }// NewAnnotDiffAction
     public void actionPerformed(ActionEvent e) {
       // Loads ANNIE with defaults
@@ -1841,7 +1852,7 @@ public class MainFrame extends JFrame
     public LoadANNIEWithoutDefaultsAction() {
       super("Without defaults");
       putValue(SHORT_DESCRIPTION, "Load ANNIE system without defaults");
-      putValue(SMALL_ICON, getIcon("application.gif"));
+      putValue(SMALL_ICON, getIcon("annie"));
     }// NewAnnotDiffAction
     public void actionPerformed(ActionEvent e) {
       // Loads ANNIE with defaults
@@ -1929,7 +1940,7 @@ public class MainFrame extends JFrame
 
   class NewBootStrapAction extends AbstractAction {
     public NewBootStrapAction() {
-      super("BootStrap Wizard", getIcon("application.gif"));
+      super("BootStrap Wizard", getIcon("application"));
     }// NewBootStrapAction
     public void actionPerformed(ActionEvent e) {
       BootStrapDialog bootStrapDialog = new BootStrapDialog(MainFrame.this);
@@ -1942,7 +1953,7 @@ public class MainFrame extends JFrame
     public ManagePluginsAction(){
       super("Manage CREOLE plugins");
       putValue(SHORT_DESCRIPTION,"Manage CREOLE plugins");
-      putValue(SMALL_ICON, getIcon("param.gif"));
+      putValue(SMALL_ICON, getIcon("param"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -1993,7 +2004,7 @@ public class MainFrame extends JFrame
 
       class URLfromFileAction extends AbstractAction{
         URLfromFileAction(JTextField textField){
-          super(null, getIcon("loadFile.gif"));
+          super(null, getIcon("loadFile"));
           putValue(SHORT_DESCRIPTION,"Click to select a directory");
           this.textField = textField;
         }
@@ -2059,6 +2070,7 @@ public class MainFrame extends JFrame
       super(rData.getName());
       putValue(SHORT_DESCRIPTION, rData.getComment());
       this.rData = rData;
+      putValue(SMALL_ICON, getIcon(rData.getIcon()));
     } // NewResourceAction(ResourceData rData)
 
     public void actionPerformed(ActionEvent evt) {
@@ -2095,7 +2107,7 @@ public class MainFrame extends JFrame
     public NewDSAction(){
       super("Create datastore");
       putValue(SHORT_DESCRIPTION,"Create a new Datastore");
-      putValue(SMALL_ICON, getIcon("ds.gif"));
+      putValue(SMALL_ICON, getIcon("ds"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -2147,7 +2159,7 @@ public class MainFrame extends JFrame
     public LoadResourceFromFileAction(){
       super("Restore application from file");
       putValue(SHORT_DESCRIPTION,"Restores a previously saved application");
-      putValue(SMALL_ICON, getIcon("controller.gif"));
+      putValue(SMALL_ICON, getIcon("load-app"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -2249,7 +2261,7 @@ public class MainFrame extends JFrame
     public ExitGateAction() {
       super("Exit GATE");
       putValue(SHORT_DESCRIPTION, "Closes the application");
-      putValue(SMALL_ICON, getIcon("exit.gif"));
+      putValue(SMALL_ICON, getIcon("exit"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -2336,7 +2348,7 @@ public class MainFrame extends JFrame
     public OpenDSAction() {
       super("Open datastore");
       putValue(SHORT_DESCRIPTION,"Open a datastore");
-      putValue(SMALL_ICON, getIcon("ds.gif"));
+      putValue(SMALL_ICON, getIcon("ds"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -2610,6 +2622,123 @@ public class MainFrame extends JFrame
   }
 
 
+  /**
+   * Overrides default JTree behaviour for tooltips.
+   */
+  class ResourcesTree extends JTree{
+    
+    public ResourcesTree(){
+      myToolTip = new ResourceToolTip();
+    }
+    
+    /**
+     * Overrides <code>JTree</code>'s <code>getToolTipText</code>
+     * method in order to allow custom tips to be used.
+     * 
+     * @param event the <code>MouseEvent</code> that initiated the 
+     *    <code>ToolTip</code> display
+     * @return a string containing the  tooltip or <code>null</code>
+     *    if <code>event</code> is null
+     */
+    public String getToolTipText(MouseEvent event) {
+      String res = super.getToolTipText(event);
+      if(event != null) {
+        Point p = event.getPoint();
+        int selRow = getRowForLocation(p.x, p.y);
+        if(selRow != -1) {
+          TreePath path = getPathForRow(selRow);
+          Object lastPath = path.getLastPathComponent();
+          Object value = ((DefaultMutableTreeNode)lastPath).getUserObject();
+          myToolTip.setValue(value);
+        }
+      }
+      //if we always return the same text, the tooltip manager thinks the
+      //size and location don't need changing.      
+      return res;
+    }    
+    
+    public JToolTip createToolTip(){
+      return myToolTip;
+    }
+    
+    ResourceToolTip myToolTip;
+  }
+  
+  /**
+   * Implementation of a custom tool tip to be used for showing extended 
+   * information about CREOLE resources.
+   *
+   */
+  class ResourceToolTip extends JToolTip{
+    public ResourceToolTip(){
+      this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+      
+      tipComponent = new JPanel();
+      tipComponent.setOpaque(false);
+      tipComponent.setLayout(new BoxLayout(tipComponent, BoxLayout.X_AXIS));
+      tipComponent.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+      
+      iconLabel = new JLabel(getIcon("annie"));
+      iconLabel.setText(null);
+      iconLabel.setOpaque(false);
+      tipComponent.add(iconLabel);
+      
+      textLabel = new JLabel();
+      textLabel.setOpaque(false);
+      tipComponent.add(Box.createHorizontalStrut(10));
+      tipComponent.add(textLabel);
+
+      add(tipComponent);
+    }
+    
+    /**
+     * Label used for the icon
+     */
+    JLabel iconLabel;
+    /**
+     * Label used for the text
+     */
+    JLabel textLabel;
+    
+    /**
+     * The actual component displaying the tooltip. 
+     */
+    JPanel tipComponent;
+  
+    public void setTipText(String tipText) {
+//      textLabel.setText(tipText);
+    }
+    
+    /**
+     * Sets the value to be displayed
+     * @param value
+     */
+    public void setValue(Object value){
+      if(value != null){
+        if(value instanceof String){
+          textLabel.setText((String)value);
+          iconLabel.setIcon(null);
+        }else if(value instanceof NameBearerHandle){
+          NameBearerHandle handle = (NameBearerHandle)value;
+          textLabel.setText(handle.getTooltipText());
+          iconLabel.setIcon(handle.getIcon());
+        }else{
+          textLabel.setText(null);
+          iconLabel.setIcon(null);
+        }
+      }      
+    }
+    
+    public Dimension getPreferredSize() {
+      Dimension d = tipComponent.getPreferredSize();
+      Insets ins = getInsets();
+      return new Dimension(d.width+ins.left+ins.right,
+                           d.height+ins.top+ins.bottom);
+    }
+  
+  }
+  
+  
   class HelpAboutAction extends AbstractAction {
     public HelpAboutAction(){
       super("About");
@@ -2667,19 +2796,19 @@ public class MainFrame extends JFrame
       super.getTreeCellRendererComponent(tree, value, sel, expanded,
                                          leaf, row, hasFocus);
       if(value == resourcesTreeRoot) {
-        setIcon(MainFrame.getIcon("project.gif"));
+        setIcon(MainFrame.getIcon("project"));
         setToolTipText("GATE");
       } else if(value == applicationsRoot) {
-        setIcon(MainFrame.getIcon("applications.gif"));
+        setIcon(MainFrame.getIcon("applications"));
         setToolTipText("GATE applications");
       } else if(value == languageResourcesRoot) {
-        setIcon(MainFrame.getIcon("lrs.gif"));
+        setIcon(MainFrame.getIcon("lrs"));
         setToolTipText("Language Resources");
       } else if(value == processingResourcesRoot) {
-        setIcon(MainFrame.getIcon("prs.gif"));
+        setIcon(MainFrame.getIcon("prs"));
         setToolTipText("Processing Resources");
       } else if(value == datastoresRoot) {
-        setIcon(MainFrame.getIcon("dss.gif"));
+        setIcon(MainFrame.getIcon("dss"));
         setToolTipText("GATE Datastores");
       }else{
         //not one of the default root nodes
@@ -2710,6 +2839,7 @@ public class MainFrame extends JFrame
       }
       return this;
     }
+    
   }
 
   protected class ResourcesTreeCellEditor extends DefaultTreeCellEditor {
@@ -2812,7 +2942,7 @@ public class MainFrame extends JFrame
       active = false;
       dying = false;
       this.targetPanel = targetPanel;
-      imageLabel = new JLabel(getIcon("working.gif"));
+      imageLabel = new JLabel(getIcon("working"));
       imageLabel.setOpaque(false);
       imageLabel.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
     }
@@ -2984,7 +3114,7 @@ public class MainFrame extends JFrame
    * This class represent an action which brings up the Ontology Editor tool*/
   class NewOntologyEditorAction extends AbstractAction {
     public NewOntologyEditorAction(){
-      super("Ontology Editor", getIcon("controller.gif"));
+      super("Ontology Editor", getIcon("controller"));
       putValue(SHORT_DESCRIPTION,"Start the Ontology Editor");
     }// NewAnnotDiffAction
 
@@ -3016,7 +3146,7 @@ public class MainFrame extends JFrame
   /** This class represent an action which brings up the Gazetteer Editor tool*/
   class NewGazetteerEditorAction extends AbstractAction {
     public NewGazetteerEditorAction(){
-      super("Gazetteer Editor", getIcon("controller.gif"));
+      super("Gazetteer Editor", getIcon("controller"));
       putValue(SHORT_DESCRIPTION,"Start the Gazetteer Editor");
     }
 

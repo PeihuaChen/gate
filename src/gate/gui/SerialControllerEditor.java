@@ -139,8 +139,8 @@ public class SerialControllerEditor extends AbstractVisualResource
     topBox.add(scroller);
     topBox.add(Box.createHorizontalGlue());
 
-    addButon = new JButton(MainFrame.getIcon("right.gif"));
-    removeButton = new JButton(MainFrame.getIcon("left.gif"));
+    addButon = new JButton(MainFrame.getIcon("right"));
+    removeButton = new JButton(MainFrame.getIcon("left"));
 
     Box buttonsBox =Box.createVerticalBox();
     buttonsBox.add(Box.createVerticalGlue());
@@ -183,8 +183,8 @@ public class SerialControllerEditor extends AbstractVisualResource
 
     topBox.add(scroller);
 
-    moveUpButton = new JButton(MainFrame.getIcon("moveup.gif"));
-    moveDownButton = new JButton(MainFrame.getIcon("movedown.gif"));
+    moveUpButton = new JButton(MainFrame.getIcon("moveup"));
+    moveDownButton = new JButton(MainFrame.getIcon("movedown"));
 
     buttonsBox =Box.createVerticalBox();
     buttonsBox.add(Box.createVerticalGlue());
@@ -224,15 +224,15 @@ public class SerialControllerEditor extends AbstractVisualResource
                                          featureValueTextField.getPreferredSize().
                                          height));
 
-      strategyPanel.add(new JLabel(MainFrame.getIcon("greenBall.gif")));
+      strategyPanel.add(new JLabel(MainFrame.getIcon("greenBall")));
       strategyPanel.add(yes_RunRBtn);
       strategyPanel.add(Box.createHorizontalStrut(5));
 
-      strategyPanel.add(new JLabel(MainFrame.getIcon("redBall.gif")));
+      strategyPanel.add(new JLabel(MainFrame.getIcon("redBall")));
       strategyPanel.add(no_RunRBtn);
       strategyPanel.add(Box.createHorizontalStrut(5));
 
-      strategyPanel.add(new JLabel(MainFrame.getIcon("yellowBall.gif")));
+      strategyPanel.add(new JLabel(MainFrame.getIcon("yellowBall")));
       strategyPanel.add(conditional_RunRBtn);
       strategyPanel.add(Box.createHorizontalStrut(5));
 
@@ -1034,9 +1034,9 @@ public class SerialControllerEditor extends AbstractVisualResource
    */
   class MemberPRsTableModel extends AbstractTableModel{
     MemberPRsTableModel(){
-      green = new JLabel(MainFrame.getIcon("greenBall.gif"));
-      red = new JLabel(MainFrame.getIcon("redBall.gif"));
-      yellow = new JLabel(MainFrame.getIcon("yellowBall.gif"));
+      green = new JLabel(MainFrame.getIcon("greenBall"));
+      red = new JLabel(MainFrame.getIcon("redBall"));
+      yellow = new JLabel(MainFrame.getIcon("yellowBall"));
     }
     public int getRowCount(){
       return controller == null ? 0 : controller.getPRs().size();

@@ -24,7 +24,7 @@ import com.ontotext.gate.vr.*;
  * borislav popov 18/04/2002 */
 public class MappingTreeView extends JTree {
   /**the name of the default gazetteer icon*/
-  private final static String GAZ_ICON = "lr.gif";
+  private final static String GAZ_ICON = "lr";
 
   /**Mapping Node Edit Action */
   private final static int EDIT_ACTION = 1;

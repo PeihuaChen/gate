@@ -55,7 +55,7 @@
 			<PARAMETER NAME="encoding" COMMENT="The encoding used for reading the definitions" DEFAULT="UTF-8">java.lang.String</PARAMETER>
 			<PARAMETER NAME="document" COMMENT="The document to be tokenised" RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
 			<PARAMETER NAME="annotationSetName" RUNTIME="true" COMMENT="The annotation set to be used for the generated annotations" OPTIONAL="true">java.lang.String</PARAMETER>
-			<ICON>shefTokeniser.gif</ICON>
+			<ICON>shefTokeniser</ICON>
 		</RESOURCE>
 	</CREOLE>
 	<!-- creole.xml for doc formats -->

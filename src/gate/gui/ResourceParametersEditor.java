@@ -358,7 +358,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       ParameterDisjunction pDisj = (ParameterDisjunction)value;
       text = pDisj.getName();
       String type = pDisj.getType();
-      iconName = "param.gif";
+      iconName = "param";
       if(Gate.isGateType(type)){
         ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(type);
         if(rData != null) iconName = rData.getIcon();
@@ -389,9 +389,9 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
    */
   class ParameterValueRenderer extends ObjectRenderer {
     ParameterValueRenderer() {
-      fileButton = new JButton(MainFrame.getIcon("loadFile.gif"));
+      fileButton = new JButton(MainFrame.getIcon("loadFile"));
       fileButton.setToolTipText("Set from file...");
-      listButton = new JButton(MainFrame.getIcon("editList.gif"));
+      listButton = new JButton(MainFrame.getIcon("editList"));
       listButton.setToolTipText("Edit the list");
       textField = new JTextField();
       textButtonBox = new JPanel();
@@ -540,7 +540,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
 
           setText((String)value);
 
-          String iconName = "param.gif";
+          String iconName = "param";
           Parameter[] params = pDisj.getParameters();
           for(int i = 0; i < params.length; i++){
             Parameter param = (Parameter)params[i];
@@ -600,7 +600,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       textField = new JTextField();
 
       fileChooser = MainFrame.getFileChooser();
-      fileButton = new JButton(MainFrame.getIcon("loadFile.gif"));
+      fileButton = new JButton(MainFrame.getIcon("loadFile"));
       fileButton.setToolTipText("Set from file...");
       fileButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -619,7 +619,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
         }
       });
 
-      listButton = new JButton(MainFrame.getIcon("editList.gif"));
+      listButton = new JButton(MainFrame.getIcon("editList"));
       listButton.setToolTipText("Edit the list");
       listButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {

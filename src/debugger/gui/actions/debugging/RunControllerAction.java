@@ -31,7 +31,7 @@ public class RunControllerAction extends AbstractAction {
     private RunControllerAction() {
         super();
         putValue(Action.SHORT_DESCRIPTION, new String("Run controller"));
-        putValue(Action.SMALL_ICON, new ImageIcon(JapeDebugger.class.getResource("gui/icons/controller.gif")));
+        putValue(Action.SMALL_ICON, new ImageIcon(JapeDebugger.class.getResource("gui/icons/controller")));
         setEnabled(false);
     }
 

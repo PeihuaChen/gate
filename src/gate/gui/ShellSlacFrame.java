@@ -212,7 +212,7 @@ public class ShellSlacFrame extends MainFrame {
   private void createToolsMenuItems(JMenu toolsMenu) {
     toolsMenu.add(new NewAnnotDiffAction());
     toolsMenu.add(
-      new AbstractAction("Unicode editor", getIcon("unicode.gif")){
+      new AbstractAction("Unicode editor", getIcon("unicode")){
       public void actionPerformed(ActionEvent evt){
         new guk.Editor();
       }
@@ -448,7 +448,7 @@ public class ShellSlacFrame extends MainFrame {
   /** Run the current application SLAC */
   class RunApplicationAction extends AbstractAction {
     public RunApplicationAction() {
-      super("Analyse All", getIcon("menu_controller.gif"));
+      super("Analyse All", getIcon("menu_controller"));
       putValue(SHORT_DESCRIPTION, "Run the application to process documents");
     } // RunApplicationAction()
 
@@ -465,7 +465,7 @@ public class ShellSlacFrame extends MainFrame {
   /** Run the current application SLAC on current document */
   class RunApplicationOneDocumentAction extends AbstractAction {
     public RunApplicationOneDocumentAction() {
-      super("Analyse", getIcon("menu_controller.gif"));
+      super("Analyse", getIcon("menu_controller"));
       putValue(SHORT_DESCRIPTION,
           "Run the application to process current document");
     } // RunApplicationOneDocumentAction()

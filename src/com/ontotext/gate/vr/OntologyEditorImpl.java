@@ -930,9 +930,9 @@ public int AskWannaSave(Taxonomy o, int x, int y) {
         return this;
       ClassNode theNode = (ClassNode) value;
       if(theNode.getSource() instanceof TClass) {
-        setIcon(MainFrame.getIcon("Class.gif"));
+        setIcon(MainFrame.getIcon("Class"));
       } else if(theNode.getSource() instanceof OInstance) {
-        setIcon(MainFrame.getIcon("Instance.gif"));
+        setIcon(MainFrame.getIcon("Instance"));
       }
       return this;
     }

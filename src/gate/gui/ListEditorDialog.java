@@ -115,10 +115,10 @@ public class ListEditorDialog extends JDialog {
     //up down buttons
     Box verBox = Box.createVerticalBox();
     verBox.add(Box.createVerticalGlue());
-    moveUpBtn = new JButton(MainFrame.getIcon("moveup.gif"));
+    moveUpBtn = new JButton(MainFrame.getIcon("moveup"));
     verBox.add(moveUpBtn);
     verBox.add(Box.createVerticalStrut(5));
-    moveDownBtn = new JButton(MainFrame.getIcon("movedown.gif"));
+    moveDownBtn = new JButton(MainFrame.getIcon("movedown"));
     verBox.add(moveDownBtn);
     verBox.add(Box.createVerticalGlue());
     horBox.add(Box.createHorizontalStrut(3));

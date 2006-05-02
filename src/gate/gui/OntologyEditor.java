@@ -240,11 +240,11 @@ public class OntologyEditor extends AbstractVisualResource
         String itemName = null;
         Object nodeObject = ((DefaultMutableTreeNode)value).getUserObject();
         if(nodeObject instanceof TClass){
-          icon = MainFrame.getIcon("Class.gif");
+          icon = MainFrame.getIcon("Class");
           itemName = ((TClass)nodeObject).getName();
           setToolTipText(((TClass)nodeObject).getURI());
         }else if(nodeObject instanceof OInstance){
-          icon = MainFrame.getIcon("Instance.gif");
+          icon = MainFrame.getIcon("Instance");
           itemName = ((OInstance)nodeObject).getName();
           setToolTipText(((OInstance)nodeObject).getURI());
         }
@@ -593,8 +593,8 @@ public class OntologyEditor extends AbstractVisualResource
               getValueAt(row, DetailsTableModel.LABEL_COLUMN);
           setIcon(MainFrame.getIcon(
                 ((Boolean)value).booleanValue() ?
-                "expanded.gif" :
-                "closed.gif"));
+                "expanded" :
+                "closed"));
           setEnabled(((DetailsGroup)actualValue).getSize() > 0);
         }
       }else if(column == DetailsTableModel.LABEL_COLUMN){
@@ -606,21 +606,21 @@ public class OntologyEditor extends AbstractVisualResource
           setEnabled(aGroup.getSize() > 0);
         }else if(value instanceof TClass){
           TClass aClass = (TClass)value;
-          setIcon(MainFrame.getIcon("Class.gif"));
+          setIcon(MainFrame.getIcon("Class"));
           setFont(getFont().deriveFont(Font.PLAIN));
           setText(aClass.getName());
           setToolTipText(aClass.getURI());
           setEnabled(true);
         }else if(value instanceof OInstance){
           OInstance anInstance = (OInstance)value;
-          setIcon(MainFrame.getIcon("Instance.gif"));
+          setIcon(MainFrame.getIcon("Instance"));
           setFont(getFont().deriveFont(Font.PLAIN));
           setText(anInstance.getName());
           setToolTipText(anInstance.getURI());
           setEnabled(true);
         }else if(value instanceof Property){
           Property aProperty = (Property)value;
-          setIcon(MainFrame.getIcon("param.gif"));
+          setIcon(MainFrame.getIcon("Property"));
           setFont(getFont().deriveFont(Font.PLAIN));
           String text = aProperty.getName() + " -> ";
           Set range = aProperty.getRange();
