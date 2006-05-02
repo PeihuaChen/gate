@@ -596,8 +596,8 @@ public class AnnotationSetsView extends AbstractDocumentView
                 													Object oldValue,
                 													Object newValue){}
       };
-      setChk.setSelectedIcon(MainFrame.getIcon("expanded.gif"));
-      setChk.setIcon(MainFrame.getIcon("closed.gif"));
+      setChk.setSelectedIcon(MainFrame.getIcon("expanded"));
+      setChk.setIcon(MainFrame.getIcon("closed"));
       setChk.setMaximumSize(setChk.getMinimumSize());
       setChk.setOpaque(true);
       
@@ -665,8 +665,8 @@ public class AnnotationSetsView extends AbstractDocumentView
                                       implements TableCellEditor{
     public SetsTableCellEditor(){
       setChk = new JCheckBox();
-      setChk.setSelectedIcon(MainFrame.getIcon("expanded.gif"));
-      setChk.setIcon(MainFrame.getIcon("closed.gif"));
+      setChk.setSelectedIcon(MainFrame.getIcon("expanded"));
+      setChk.setIcon(MainFrame.getIcon("closed"));
 //      setChk.setMaximumSize(setChk.getMinimumSize());
       setChk.setOpaque(true);
       setChk.addActionListener(new ActionListener(){

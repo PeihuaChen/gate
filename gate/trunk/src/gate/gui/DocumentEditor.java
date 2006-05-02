@@ -3445,7 +3445,7 @@ Out.prln("NULL size");
     public SearchAction(){
       super("Search");
       putValue(SHORT_DESCRIPTION, "Search within the text");
-      putValue(SMALL_ICON, MainFrame.getIcon("search.gif"));
+      putValue(SMALL_ICON, MainFrame.getIcon("search"));
     }
 
     public void actionPerformed(ActionEvent evt){

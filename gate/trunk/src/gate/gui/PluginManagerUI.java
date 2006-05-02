@@ -165,9 +165,9 @@ public class PluginManagerUI extends JDialog implements GateConstants{
   
   protected class MainTableModel extends AbstractTableModel{
     public MainTableModel(){
-      localIcon = MainFrame.getIcon("loadFile.gif");
-      remoteIcon = MainFrame.getIcon("internet.gif");
-      invalidIcon = MainFrame.getIcon("param.gif");
+      localIcon = MainFrame.getIcon("loadFile");
+      remoteIcon = MainFrame.getIcon("internet");
+      invalidIcon = MainFrame.getIcon("param");
     }
     public int getRowCount(){
       return Gate.getKnownPlugins().size();
@@ -280,7 +280,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     
     public DeleteColumnCellRendererEditor(){
       label = new JLabel();
-      rendererDeleteButton = new JButton(MainFrame.getIcon("delete.gif"));
+      rendererDeleteButton = new JButton(MainFrame.getIcon("delete"));
       rendererDeleteButton.setMaximumSize(rendererDeleteButton.getPreferredSize());
       rendererDeleteButton.setMargin(new Insets(2, 5, 2, 5));
       rendererBox = new JPanel();
@@ -297,7 +297,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       constraints.weightx = 1;
       rendererBox.add(Box.createGlue(), constraints);
       
-      editorDeleteButton = new JButton(MainFrame.getIcon("delete.gif"));
+      editorDeleteButton = new JButton(MainFrame.getIcon("delete"));
       editorDeleteButton.setMargin(new Insets(2, 5, 2, 5));
       editorDeleteButton.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent evt){
@@ -475,7 +475,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
 
       class URLfromFileAction extends AbstractAction{
         URLfromFileAction(JTextField textField){
-          super(null, MainFrame.getIcon("loadFile.gif"));
+          super(null, MainFrame.getIcon("loadFile"));
           putValue(SHORT_DESCRIPTION,"Click to select a directory");
           this.textField = textField;
         }

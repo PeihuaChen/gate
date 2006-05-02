@@ -119,7 +119,7 @@ public class CreateIndexGUI extends JPanel {
 
   protected class SelectDirAction extends AbstractAction{
     public SelectDirAction(){
-      super(null, MainFrame.getIcon("loadFile.gif"));
+      super(null, MainFrame.getIcon("loadFile"));
       putValue(SHORT_DESCRIPTION, "Click to open a file chooser!");
     }
 
@@ -136,7 +136,7 @@ public class CreateIndexGUI extends JPanel {
 
   protected class EditFeatureListAction extends AbstractAction{
     public EditFeatureListAction(){
-      super(null, MainFrame.getIcon("editList.gif"));
+      super(null, MainFrame.getIcon("editList"));
       putValue(SHORT_DESCRIPTION, "Click to edit list!");
     }
 

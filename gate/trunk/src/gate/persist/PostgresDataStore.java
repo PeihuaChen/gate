@@ -36,7 +36,7 @@ public class PostgresDataStore extends JDBCDataStore {
   private static final String DS_COMMENT = "GATE PostgreSQL datastore";
 
   /** the icon for this resource */
-  public static final String DS_ICON_NAME = "pgsql_ds.gif";
+  public static final String DS_ICON_NAME = "pgsql_ds";
 
   /** Debug flag */
   private static final boolean DEBUG = true;

@@ -33,7 +33,7 @@
       <PARAMETER NAME="collectRepositioningInfo"
         COMMENT="Should the document collect repositioning information"
         DEFAULT="false">java.lang.Boolean</PARAMETER>
-      <ICON>lr.gif</ICON>
+      <ICON>document</ICON>
     </RESOURCE>
     <!-- Corpora -->
     <RESOURCE>
@@ -44,14 +44,14 @@
       <PARAMETER NAME="documentsList" COMMENT="A list of GATE documents"
         OPTIONAL="true" ITEM_CLASS_NAME="gate.Document" >
         java.util.List</PARAMETER>
-      <ICON>lrs.gif</ICON>
+      <ICON>corpus-trans</ICON>
     </RESOURCE>
     <RESOURCE>
       <NAME>GATE Database Document</NAME>
       <CLASS>gate.corpora.DatabaseDocumentImpl</CLASS>
       <COMMENT>GATE persistent document (Oracle or PostgreSQL)</COMMENT>
       <INTERFACE>gate.Document</INTERFACE>
-      <ICON>lr.gif</ICON>
+      <ICON>document</ICON>
       <PRIVATE/>
     </RESOURCE>
     <RESOURCE>
@@ -59,7 +59,7 @@
       <CLASS>gate.corpora.SerialCorpusImpl</CLASS>
       <COMMENT>GATE persistent corpus (serialisation)</COMMENT>
       <INTERFACE>gate.Corpus</INTERFACE>
-      <ICON>lrs.gif</ICON>
+      <ICON>corpus</ICON>
       <PRIVATE/>
     </RESOURCE>
     <RESOURCE>
@@ -67,7 +67,7 @@
       <CLASS>gate.corpora.DatabaseCorpusImpl</CLASS>
       <COMMENT>GATE persistent corpus (Oracle or PostgreSQL)</COMMENT>
       <INTERFACE>gate.Corpus</INTERFACE>
-      <ICON>lrs.gif</ICON>
+      <ICON>corpus</ICON>
       <PRIVATE/>
     </RESOURCE>
     <RESOURCE>
@@ -176,26 +176,26 @@
       <NAME>Pipeline</NAME>
       <COMMENT>A simple serial controller for PR pipelines</COMMENT>
       <CLASS>gate.creole.SerialController</CLASS>
-      <ICON>controller.gif</ICON>
+      <ICON>controller</ICON>
     </RESOURCE>
     <RESOURCE>
       <NAME>Corpus Pipeline</NAME>
       <COMMENT>A serial controller for PR pipelines over corpora</COMMENT>
       <CLASS>gate.creole.SerialAnalyserController</CLASS>
-      <ICON>controller.gif</ICON>
+      <ICON>application</ICON>
     </RESOURCE>
     <RESOURCE>
       <NAME>Conditional Pipeline</NAME>
       <COMMENT>A simple serial controller for conditionally run PRs</COMMENT>
       <CLASS>gate.creole.ConditionalSerialController</CLASS>
-      <ICON>controller.gif</ICON>
+      <ICON>application</ICON>
     </RESOURCE>
     <RESOURCE>
       <NAME>Conditional Corpus Pipeline</NAME>
       <COMMENT>A serial controller for conditionally run PR pipelines over
         corpora</COMMENT>
       <CLASS>gate.creole.ConditionalSerialAnalyserController</CLASS>
-      <ICON>controller.gif</ICON>
+      <ICON>application</ICON>
     </RESOURCE>
   </CREOLE>
   

@@ -143,21 +143,21 @@ public class Main {
         String splashName =
           System.getProperty(GateConstants.APP_SPLASH_JAVA_PROPERTY_NAME);
         if(splashName == null) {
-          splashName = "gateSplash.gif";
+          splashName = "gateSplash";
         } // if
 
         constraints.gridy = 0;
         constraints.gridwidth = 2;
         constraints.fill = GridBagConstraints.NONE;
         constraints.anchor = GridBagConstraints.CENTER;
-        JLabel gifLbl = new JLabel(MainFrame.getIcon("gateHeader.gif"));
+        JLabel gifLbl = new JLabel(MainFrame.getIcon("gateHeader"));
         splashBox.add(gifLbl, constraints);
         
         constraints.gridy = 1;
         constraints.gridwidth = 1;
         gifLbl = new JLabel(MainFrame.getIcon(splashName));
         splashBox.add(gifLbl, constraints);
-        gifLbl = new JLabel(MainFrame.getIcon("sponsors.gif"));
+        gifLbl = new JLabel(MainFrame.getIcon("sponsors"));
         splashBox.add(gifLbl, constraints);
         
         splash = new Splash(splashBox);
@@ -218,7 +218,7 @@ public class Main {
         frame.setTitleChangable(false);
 
         // Set icon from Java properties
-        // iconName could be absolute or "gate:/img/....gif"
+        // iconName could be absolute or "gate:/img/..."
         String iconName =
           System.getProperty(GateConstants.APP_ICON_JAVA_PROPERTY_NAME);
         if(iconName != null) {

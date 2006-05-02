@@ -117,9 +117,9 @@ public class ResourceRenderer extends JLabel
       toolTipText = "<HTML>Type: <b>" + rData.getName() + "</b></HTML>";
       String iconName = rData.getIcon();
       if(iconName == null){
-        if(value instanceof LanguageResource) iconName = "lr.gif";
-        else if(value instanceof ProcessingResource) iconName = "pr.gif";
-        else if(value instanceof Controller) iconName = "controller.gif";
+        if(value instanceof LanguageResource) iconName = "lr";
+        else if(value instanceof ProcessingResource) iconName = "pr";
+        else if(value instanceof Controller) iconName = "controller";
       }
       icon = (iconName == null) ? null : MainFrame.getIcon(iconName);
     }else{

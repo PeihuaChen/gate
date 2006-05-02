@@ -100,7 +100,7 @@ public class XJEditorPane extends JEditorPane {
 
   class ForwardAction extends AbstractAction{
     private ForwardAction() throws IOException{
-      super("Forward", MainFrame.getIcon("forward.gif"));
+      super("Forward", MainFrame.getIcon("forward"));
     }
 
     public void actionPerformed(ActionEvent e){
@@ -115,7 +115,7 @@ public class XJEditorPane extends JEditorPane {
 
   class BackAction extends AbstractAction{
     private BackAction() throws IOException{
-      super("Back", new ImageIcon(new URL("gate:/img/back.gif")));
+      super("Back", new ImageIcon(new URL("gate:/img/back")));
     }
 
     public void actionPerformed(ActionEvent e){

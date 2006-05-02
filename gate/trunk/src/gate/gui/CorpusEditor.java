@@ -177,7 +177,7 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
       String docName = (String)value;
       super.getListCellRendererComponent(list, docName, index,
                                          isSelected, cellHasFocus);
-      setIcon(MainFrame.getIcon("lr.gif"));
+      setIcon(MainFrame.getIcon("document"));
       return this;
     }
   }
@@ -185,7 +185,7 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
 
   class NewDocumentAction extends AbstractAction{
     public NewDocumentAction(){
-      super("Add document", MainFrame.getIcon("add.gif"));
+      super("Add document", MainFrame.getIcon("add"));
       putValue(SHORT_DESCRIPTION, "Add a new document to this corpus");
     }
 
@@ -233,7 +233,7 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
 
   class RemoveDocumentsAction extends AbstractAction{
     public RemoveDocumentsAction(){
-      super("Remove documents", MainFrame.getIcon("remove.gif"));
+      super("Remove documents", MainFrame.getIcon("remove"));
       putValue(SHORT_DESCRIPTION, "Removes selected documents from this corpus");
     }
 

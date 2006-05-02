@@ -158,7 +158,7 @@ public class CorpusImporter extends AbstractVisualResource {
     public SelectDirectoryAction(){
       super("");
       putValue(SHORT_DESCRIPTION, "Opens a file chooser");
-      putValue(SMALL_ICON, MainFrame.getIcon("loadFile.gif"));
+      putValue(SMALL_ICON, MainFrame.getIcon("loadFile"));
     }
 
     public void actionPerformed(ActionEvent evt){
