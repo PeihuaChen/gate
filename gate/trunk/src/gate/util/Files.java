@@ -96,12 +96,30 @@ public class Files {
   } // getByteArray(File)
 
   /** Get a resource from the classpath as a String.
+    * @param resourceName The resource to input.
     */
   public static String getResourceAsString(String resourceName)
   throws IOException {
+    return getResourceAsString(resourceName, null);
+  }
+
+  /** Get a resource from the classpath as a String.
+    * @param encoding The encoding of the reader used to input the file
+    * (may be null in which case the default encoding is used).
+    * @param resourceName The resource to input.
+    */
+  public static String
+    getResourceAsString(String resourceName, String encoding)
+    throws IOException
+  {
     InputStream resourceStream = getResourceAsStream(resourceName);
-    BufferedReader resourceReader =
-      new BufferedReader(new InputStreamReader(resourceStream));
+    BufferedReader resourceReader;
+    if(encoding == null)
+      resourceReader =
+        new BufferedReader(new InputStreamReader(resourceStream));
+    else
+      resourceReader =
+        new BufferedReader(new InputStreamReader(resourceStream, encoding));
     StringBuffer resourceBuffer = new StringBuffer();
 
     int i;
