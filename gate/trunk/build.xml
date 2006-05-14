@@ -411,7 +411,7 @@
 <!--	     <jvmarg value="-Xms${runtime.start.memory}"/> -->
        <sysproperty key="gate.home" value="${basedir}"/>   
        <sysproperty key="java.ext.dirs" value="${extDir}"/>
-       <sysproperty key="sun.java2d.opengl" value="true"/>
+ <!--	  <sysproperty key="sun.java2d.opengl" value="true"/>-->
        <syspropertyset refid="run.properties" />
      </java>
   </target>
