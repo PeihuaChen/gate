@@ -15,7 +15,7 @@
       <PARAMETER NAME="corpusAppendMode" DEFAULT="false" RUNTIME="true" COMMENT="If corpus should reinit itself">java.lang.Boolean</PARAMETER>
       <PARAMETER NAME="limit" RUNTIME="true" DEFAULT="10" COMMENT="The number of results returned">java.lang.Integer</PARAMETER> 
       <PARAMETER NAME="pagesToExclude" OPTIONAL="true" RUNTIME="true" COMMENT="Pages will be excluded from the result">java.util.ArrayList</PARAMETER>
-      <ICON>binoculars.gif</ICON>
+      <ICON>google.gif</ICON>
     </RESOURCE>
    </CREOLE>
 </CREOLE-DIRECTORY>
