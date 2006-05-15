@@ -419,6 +419,8 @@ extends AbstractFeatureBearer implements DataStore {
 
   /** Create a persistent store Id from the name of a resource. */
   protected String constructPersistenceId(String lrName) {
+    // change the persistence ID so that it can be used as a filename
+    lrName=lrName.replaceAll("[\\/:\\*\\?\"<>|]","_");
     return lrName + "___" + new Date().getTime() + "___" + random();
   } // constructPersistenceId
 
