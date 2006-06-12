@@ -560,19 +560,25 @@ list</a>.</p>
 <a name='external-plugins'></a>
 <h2>Other contributed plugins</h2>
 <ul type='circle'>
-	<li><a href='#npe'>Multi-lingual Noun Phrase Extractor</a></li>
+	<li><a href='#munpex'>Multi-lingual Noun Phrase Extractor (MuNPEx)</a></li>
 	<li><a href='#kaon2ontology'>KAON Ontology</a></li>
 	<li><a href='#anc'>XCES tools</a></li>
 	<li><a href='#sen'><i>Sen</i> wrapper (Japanese morphological analyser)</a></li>
+	<li><a href='#russianprs'>Russian morph tagger</a></li>
+	<li><a href='#ofai'>OFAI List Gazetteer</a></li>
 </ul>
 
 <table border='1'>
 	<tr>
-		<th colspan='3'><a name="npe"></a>Multi-lingual Noun Phrase Extractor (NPE)<br/><a href="http://www.ipd.uka.de/~durm/tm/npe/">website</a> <a href="http://www.ipd.uka.de/~durm/tm/npe/npe-0.1.tar.gz">download</a></th>
+		<th colspan='3'><a name="munpex"></a>Multi-lingual Noun Phrase Extractor (MuNPEx)<br/><a
+                href="http://www.ipd.uni-karlsruhe.de/~durm/tm/munpex/">website</a> <a
+                href="http://www.ipd.uni-karlsruhe.de/~durm/tm/munpex/MuNPEx-0.2.tar.gz">download</a></th>
 	</tr>
 	<tr>
-		<td>NPE</td>
-		<td>NPE is a multi-lingual noun phrase (NP) extraction component developed for the GATE architecture, implemented in JAPE. It currently supports English, German, and French.</td>
+		<td>Munpex</td>
+		<td>MuNPEx is a multi-lingual noun phrase (NP) extraction component developed for the GATE
+                architecture, implemented in JAPE. It currently supports English, German, French, and
+                Spanish (in beta).</td>
 		<td>en-np_main.jape</td>
 	</tr>
 	<tr>
@@ -611,12 +617,36 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<th colspan='3'><a name="sen"></a><i>Sen</i> wrapper (Japanese morphological analyser)<br/><a href="http://gate.ac.uk/sale/gateplugins/SenWrapper/">website (in Japanese)</a></th>
-	</tr>g
+	</tr>
 	<tr><td colspan='3'><center><i><a href="http://ultimania.org/sen/">Sen</a> is a morphological analyser for Japanese.  This is a wrapper to allow it to be used from GATE, you must also install sen itself.  See the <a href="http://gate.ac.uk/sale/gateplugins/SenWrapper/">documentation</a> (in Japanese) for details.</i></center></td></tr>
 	<tr>
 		<td>Sen Wrapper</td>
 		<td>Morphological analyser for Japanese</td>
 		<td>jp.co.ditlab.jgate.SenWrapper</td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name="russianprs"></a>Russian morph tagger<br/><a
+                href="http://dvsekhvalnov.itbrains.ru/index.php/Russian_PRs">website</a> <a
+                href="http://dvsekhvalnov.itbrains.ru/images/3/35/Ru-morph-tagger.zip">download</a></th>
+	</tr>
+	<tr><td colspan='3'><center><i>Provides GATE wrapper for mystem russian morphological parser.
+        Allows to execute native analyzer, parse output, and assign morpho features as GATE annotations
+        for the document.</i></center></td></tr>
+	<tr>
+		<td>Russian MorphTagger</td>
+		<td>MorphTagger for russian language, based on MyStem Yandex' parser</td>
+		<td>ru.itbrains.gate.morph.MorphTagger</td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name="ofai"></a>OFAI List Gazetteer<br/><a
+                href="http://www.ofai.at/research/nlu/aurex/">website</a> <a
+                href="http://www.ofai.at/research/nlu/aurex/ofaiplugin.zip">download</a></th>
+	</tr>
+	<tr><td colspan='3'><center><i>This plugin provides an extended version of the original GATE ListGazetteer. In addition to the features of the original, built-in version of the List Gazetteer, this version provides features for more powerful matching of partial words.</i></center></td></tr>
+	<tr>
+		<td>OFAI List Gazetteer</td>
+		<td>Extended version of the transducer-based List Gazetteer</td>
+		<td>at.ofai.gate.ListGazetteer</td>
 	</tr>
 </table>
 <hr/>
