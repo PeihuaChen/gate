@@ -2346,7 +2346,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
   /** Returns a set of all named annotation sets in existence
   */
   public Set getAnnotationSetNames(){
-    return namedAnnotSets.keySet();
+  	return (namedAnnotSets == null) ? null : namedAnnotSets.keySet();
   }
 
 
