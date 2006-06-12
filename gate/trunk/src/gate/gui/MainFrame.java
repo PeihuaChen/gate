@@ -132,7 +132,7 @@ public class MainFrame extends JFrame
   /**
    * Extensions for icon files to be tried in this order.
    */
-  protected static final String[] ICON_EXTENSIONS = {".gif", ".png"};
+  protected static final String[] ICON_EXTENSIONS = {"", ".gif", ".png"};
   
   private static JDialog guiLock = null;
 
