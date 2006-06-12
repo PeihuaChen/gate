@@ -1483,6 +1483,22 @@ public class MainFrame extends JFrame
     return ds;
   } // openSerialDataStore()
 
+  /** Method is used in ....OpenDSAction */
+  protected DataStore openDocServiceDataStore() {
+    DataStore ds = null;
+	try {
+		String DSLocation = JOptionPane.showInputDialog(MainFrame.this,
+				"Enter document service URL",
+				"http://localhost:8080/docservice/services/docservice");
+		//System.out.println("DEBUG: MainFrame.openDocServiceDataStore() DSLocation='" + DSLocation + "'");
+		ds = Factory.openDataStore("gleam.docservice.gate.DocServiceDataStore", DSLocation);
+	} catch(Exception pe) {
+		pe.printStackTrace();
+		JOptionPane.showMessageDialog(MainFrame.this, "Datastore opening error!\n " +
+                            pe.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
+    }
+    return ds;
+  } // openWSDataStore()
 
 /*
   synchronized void showWaitDialog() {
@@ -2373,6 +2389,8 @@ public class MainFrame extends JFrame
           String className = (String)dsTypeByName.get(answer);
           if(className.indexOf("SerialDataStore") != -1){
             openSerialDataStore();
+          } else if(className.indexOf("DocServiceDataStore") != -1){
+            openDocServiceDataStore();
           } else if(className.equals("gate.persist.OracleDataStore") ||
                     className.equals("gate.persist.PostgresDataStore")
                    ) {
