@@ -688,6 +688,10 @@ if(preserveFormat) System.out.println("Preserve option set!");
                 if(fileName == null || fileName.length() == 0){
                   fileName = currentDoc.getName();
                 }
+                // makes sure that the filename does not contain any
+                // forbidden character
+                fileName=fileName.replaceAll("[\\/:\\*\\?\"<>|]","_");
+                
                 if(!fileName.toLowerCase().endsWith(".xml")) fileName += ".xml";
                 File docFile = null;
                 boolean nameOK = false;
