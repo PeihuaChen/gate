@@ -121,8 +121,8 @@ public class TestJape extends TestCase
     if(japeFileStream == null)
       throw new JapeException("couldn't open " + japeFileName);
 */
-    Batch batch = new Batch(TestJape.class.getResource(
-              Files.getResourcePath() + "/jape/TestABC.jape"), "UTF-8");
+    Batch batch = new Batch(
+            Files.getGateResource("/jape/TestABC.jape"), "UTF-8");
     // test code: print the first line of the jape stream
     // Out.println(
     //   new BufferedReader(new InputStreamReader(japeFileStream)).readLine()
@@ -233,8 +233,8 @@ public class TestJape extends TestCase
 
     try {
       Out.print("Opening Jape grammar... ");
-      Batch batch = new Batch(TestJape.class.getResource(
-        Files.getResourcePath() + "/jape/combined/main.jape"), "UTF-8");
+      Batch batch = new Batch(
+              Files.getGateResource("/jape/combined/main.jape"), "UTF-8");
       /*
       Batch batch = new Batch("jape/combined/", "brian-soc-loc1.jape");
       Batch batch =

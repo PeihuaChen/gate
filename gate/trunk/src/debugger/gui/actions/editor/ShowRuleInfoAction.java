@@ -114,7 +114,8 @@ public class ShowRuleInfoAction
         URL japeURL = spt.getBaseURL();
         if(!japeURL.toString().startsWith("file"))
         {
-           japeURL = PhaseController.class.getResource(Files.getResourcePath() + japeURL.getPath());
+           //japeURL = PhaseController.class.getResource(Files.getResourcePath() + japeURL.getPath());
+          japeURL = Files.getGateResource(japeURL.getPath());
         }
         if(japeURL == null)
         {

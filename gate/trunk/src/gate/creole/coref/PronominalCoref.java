@@ -39,11 +39,9 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   private static final boolean DEBUG = false;
 
   //JAPE grammars
-  private static final String QT_GRAMMAR_URL = Gate.class.
-      getResource(Files.getResourcePath() +
+  private static final String QT_GRAMMAR_URL = Files.getGateResource(
               "/creole/coref/quoted_text.jape").toString();
-  private static final String PLEON_GRAMMAR_URL = Gate.class.getResource(
-          Files.getResourcePath() +
+  private static final String PLEON_GRAMMAR_URL = Files.getGateResource(
           "/creole/coref/pleonasm.jape").toString();
 
   //annotation types
