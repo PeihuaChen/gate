@@ -12,6 +12,8 @@
  */
 
 package gate.util;
+import gate.Gate;
+
 import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -95,7 +97,7 @@ public class Files {
     return bytes;
   } // getByteArray(File)
 
-  /** Get a resource from the classpath as a String.
+  /** Get a resource from the GATE ClassLoader as a String.
     * @param resourceName The resource to input.
     */
   public static String getResourceAsString(String resourceName)
@@ -103,7 +105,7 @@ public class Files {
     return getResourceAsString(resourceName, null);
   }
 
-  /** Get a resource from the classpath as a String.
+  /** Get a resource from the GATE ClassLoader as a String.
     * @param encoding The encoding of the reader used to input the file
     * (may be null in which case the default encoding is used).
     * @param resourceName The resource to input.
@@ -252,7 +254,7 @@ public class Files {
   }// writeTempFile()
 
 
-  /** Get a resource from the classpath as a byte array.
+  /** Get a resource from the GATE ClassLoader as a byte array.
     */
   public static byte[] getResourceAsByteArray(String resourceName)
     throws IOException, IndexOutOfBoundsException, ArrayStoreException {
@@ -324,12 +326,27 @@ public class Files {
   } // getResourceGateAsByteArray(String)
 
 
-  /** Get a resource from the classpath as an InputStream.
+  /** Get a resource from the GATE ClassLoader as an InputStream.
     */
   public static InputStream getResourceAsStream(String resourceName)
     throws IOException {
-
-    return  Files.class.getResourceAsStream(resourceName);
+    // Strip any leading '/'
+    if(resourceName.charAt(0) == '/') {
+      resourceName = resourceName.substring(1);
+    }
+    
+    ClassLoader gcl = Gate.getClassLoader();
+    if(gcl == null) {
+      // if the GATE ClassLoader has not been initialised yet (i.e. this
+      // method was called before Gate.init) then fall back to the current
+      // classloader
+      return  Files.class.getClassLoader().getResourceAsStream(resourceName);
+    }
+    else {
+      // if we can, get the resource through the GATE ClassLoader to allow
+      // loading of resources from plugin JARs as well as gate.jar
+      return gcl.getResourceAsStream(resourceName);      
+    }
     //return  ClassLoader.getSystemResourceAsStream(resourceName);
   } // getResourceAsStream(String)
 
@@ -347,6 +364,45 @@ public class Files {
     else return getResourceAsStream(resourcePath + "/" + resourceName);
   } // getResourceAsStream(String)
 
+  /** 
+   * Get a resource from the GATE ClassLoader.  The return value is a
+   * {@link java.net.URL} that can be used to retrieve the contents of the
+   * resource.
+   */
+  public static URL getResource(String resourceName) {
+    // Strip any leading '/'
+    if(resourceName.charAt(0) == '/') {
+      resourceName = resourceName.substring(1);
+    }
+    
+    ClassLoader gcl = Gate.getClassLoader();
+    if(gcl == null) {
+      // if the GATE ClassLoader has not been initialised yet (i.e. this
+      // method was called before Gate.init) then fall back to the current
+      // classloader
+      return Files.class.getClassLoader().getResource(resourceName);
+    }
+    else {
+      // if we can, get the resource through the GATE ClassLoader to allow
+      // loading of resources from plugin JARs as well as gate.jar
+      return gcl.getResource(resourceName);
+    }
+  }
+  
+  /** 
+   * Get a resource from the GATE resources directory.  The return value is a
+   * {@link java.net.URL} that can be used to retrieve the contents of the
+   * resource.
+   * The resource name should be relative to <code>resourcePath<code> which
+   * is equal with <TT>gate/resources</TT>; e.g.
+   * for a resource stored as <TT>gate/resources/jape/Test11.jape</TT>,
+   * this method should be passed the name <TT>jape/Test11.jape</TT>.
+   */
+  public static URL getGateResource(String resourceName) {
+    if(resourceName.startsWith("/") || resourceName.startsWith("\\") )
+      return getResource(resourcePath + resourceName);
+    else return getResource(resourcePath + "/" + resourceName);    
+  }
 
   /** This method takes a regular expression and a directory name and returns
     * the set of Files that match the pattern under that directory.

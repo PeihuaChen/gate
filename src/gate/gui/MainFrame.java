@@ -141,8 +141,16 @@ public class MainFrame extends JFrame
     for(int i = 0; i < ICON_EXTENSIONS.length && result == null; i++){
       String extension = ICON_EXTENSIONS[i];
       String fileName = baseName + extension;
-      URL iconURL = MainFrame.class.getResource(Files.getResourcePath() + 
-              "/img/" + fileName);
+      URL iconURL = null;
+      // if the ICON is an absolute path starting with '/', then just load
+      // it from that path.  If it does not start with '/', treat it as
+      // relative to gate/resources/img for backwards compatibility
+      if(fileName.charAt(0) == '/') {
+        iconURL = Files.getResource(fileName);
+      }
+      else {
+        iconURL = Files.getGateResource("/img/" + fileName);
+      }
       if(iconURL != null){
         result = new ImageIcon(iconURL);
         iconByName.put(baseName, result);
@@ -281,8 +289,7 @@ public class MainFrame extends JFrame
                                height == null ? 600 : height.intValue()));
 
     this.setIconImage(Toolkit.getDefaultToolkit().getImage(
-          MainFrame.class.getResource(Files.getResourcePath() +
-                  "/img/gateIcon.gif")));
+          Files.getGateResource("/img/gateIcon.gif")));
     resourcesTree = new ResourcesTree(); 
     resourcesTree.setModel(resourcesTreeModel);
     resourcesTree.setRowHeight(0);

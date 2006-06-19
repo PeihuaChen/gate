@@ -221,11 +221,9 @@ public class CreoleRegisterImpl extends HashMap
   public void registerBuiltins() throws GateException {
 
     try {
-      URL creoleFileURL = Gate.class.getResource(Files.getResourcePath() + 
-              "/creole/creole.xml");
+      URL creoleFileURL = Files.getGateResource("/creole/creole.xml");
       parseDirectory(creoleFileURL.openStream(), 
-              Gate.class.getResource(Files.getResourcePath() + 
-              "/creole"),
+              Files.getGateResource("/creole"),
               creoleFileURL);
     } catch(IOException e) {
       if (DEBUG) Out.println(e);

@@ -56,17 +56,13 @@ public class TestMorph
         throw new GateRuntimeException(e);
       }
       // creating documents
-      verbDocumentToTest = Factory.newDocument(
-        Gate.class.getResource(Files.getResourcePath() +
+      verbDocumentToTest = Factory.newDocument(Files.getGateResource(
         "/gate.ac.uk/tests/morph/verbTest.dat"));
-      verbDocumentWithAnswers = Factory.newDocument(
-              Gate.class.getResource(Files.getResourcePath() +
+      verbDocumentWithAnswers = Factory.newDocument(Files.getGateResource(
               "/gate.ac.uk/tests/morph/verbAnswer.dat"));
-      nounDocumentToTest = Factory.newDocument(
-              Gate.class.getResource(Files.getResourcePath() +
+      nounDocumentToTest = Factory.newDocument(Files.getGateResource(
               "/gate.ac.uk/tests/morph/nounTest.dat"));
-      nounDocumentWithAnswers = Factory.newDocument(
-              Gate.class.getResource(Files.getResourcePath() +
+      nounDocumentWithAnswers = Factory.newDocument(Files.getGateResource(
               "/gate.ac.uk/tests/morph/nounAnswer.dat"));
       // create the instance of (Morphological analyzer)
       morpher = (Morph)Factory.createResource("gate.creole.morph.Morph");

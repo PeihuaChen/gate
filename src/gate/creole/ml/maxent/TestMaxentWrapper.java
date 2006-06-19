@@ -91,8 +91,7 @@ public class TestMaxentWrapper extends TestCase {
     // Create the Maxent ML Processing resource.
     // First set up the parameters
     FeatureMap maxentParameters = Factory.newFeatureMap();
-    maxentParameters.put("configFileURL",
-                         Gate.class.getResource(Files.getResourcePath() +  
+    maxentParameters.put("configFileURL", Files.getGateResource( 
                                  "/gate.ac.uk/tests/TestMaxentConfigFile.xml"));
     // Then actually make the PR
     gate.creole.ml.MachineLearningPR maxentPR =
