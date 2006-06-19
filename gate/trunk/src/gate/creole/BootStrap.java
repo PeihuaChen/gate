@@ -501,7 +501,7 @@ public class BootStrap {
   }// executableFile
 
   /**  Creates the resource and dumps out a project structure using the
-    *  structure from gate/resource/creole/templateproject/Template and the
+    *  structure from gate/resource/creole/bootstrap/Template and the
     *  information provided by the user
     * @param resourceName is the name of the resource
     * @param packageName is the name of the new resource
