@@ -15,6 +15,7 @@ package gate.creole;
 
 import java.net.URL;
 import java.util.*;
+
 import com.ontotext.gate.ontology.OntologyImpl;
 import com.ontotext.gate.ontology.TaxonomyImpl;
 
@@ -25,6 +26,8 @@ import edu.stanford.smi.protege.model.Frame;
 import gate.ProtegeProject;
 import gate.creole.ontology.TClass;
 import gate.creole.ontology.Taxonomy;
+import gate.event.ObjectModificationEvent;
+import gate.event.ObjectModificationListener;
 import gate.gui.ProtegeWrapper;
 
 
@@ -43,6 +46,8 @@ public class ProtegeProjectName extends AbstractLanguageResource
   /** Ontotext Ontology object */
   private Taxonomy ontotextOntology = null;
   private URL ontotextOntologyUrl = null;
+	/** Object Modification Listeners */
+	private Set listeners = new HashSet();
 
   /** Keep visual resource to refresh Ontotext Editor if any */
   ProtegeWrapper visualResource = null;
@@ -267,4 +272,33 @@ public class ProtegeProjectName extends AbstractLanguageResource
     return ontotextOntology.isSubClassOf(cls1, cls2);
   }
 
+	/**
+	 * Adds an object modification listener.
+	 * 
+	 * @param listener
+	 *            listener to be added.
+	 */
+	public void addObjectModificationListener(
+			ObjectModificationListener listener) {
+		if (null == listener)
+			throw new IllegalArgumentException(
+					"The object modification listener should not be [null].");
+		listeners.add(listener);
+	}
+  
+	/**
+	 * Fires an object modification event.
+	 * 
+	 * @param event
+	 *            the event to be fired
+	 */
+	protected void fireObjectModificationEvent(Object source) {
+		ObjectModificationEvent event = new ObjectModificationEvent(source,
+				ObjectModificationEvent.OBJECT_MODIFIED,
+				ObjectModificationEvent.OBJECT_MODIFIED);
+		ArrayList ll = new ArrayList(listeners);
+		for (int i = 0; i < ll.size(); i++) {
+			((ObjectModificationListener) ll.get(i)).objectModified(event);
+		}
+	}	
 } // class ProtegeProjectName extends AbstractLanguageResource
