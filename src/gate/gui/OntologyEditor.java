@@ -37,9 +37,10 @@ public class OntologyEditor extends AbstractVisualResource
       ontologyMode = false;
     }
     rebuildModel();
-    if(taxonomy instanceof TaxonomyImpl){
-      ((TaxonomyImpl)taxonomy).addObjectModificationListener(this);
-    }
+    taxonomy.addObjectModificationListener(this);
+//    if(taxonomy instanceof TaxonomyImpl){
+//      ((TaxonomyImpl)taxonomy).addObjectModificationListener(this);
+//    }
   }
 
   public Resource init() throws ResourceInstantiationException{
