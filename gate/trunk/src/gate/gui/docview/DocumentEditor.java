@@ -73,6 +73,7 @@ public class DocumentEditor extends AbstractVisualResource
       public void componentMoved(ComponentEvent e) {
       }
       public void componentResized(ComponentEvent e) {
+        if(!viewsInited) initViews();
       }
       //lazily build the GUI only when needed
       public void componentShown(ComponentEvent e) {
