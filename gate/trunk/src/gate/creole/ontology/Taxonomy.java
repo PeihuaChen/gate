@@ -19,6 +19,8 @@ package gate.creole.ontology;
 
 import gate.LanguageResource;
 import gate.creole.ResourceInstantiationException;
+import gate.event.ObjectModificationListener;
+
 import java.net.URL;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -256,4 +258,6 @@ public interface Taxonomy extends LanguageResource {
    * @return whether the ontology has been modified after the loading
    */
   public boolean isModified();
+  
+  public void addObjectModificationListener(ObjectModificationListener listener);
 }// interface Taxonomy
