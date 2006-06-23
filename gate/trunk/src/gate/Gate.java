@@ -250,6 +250,35 @@ public class Gate implements GateConstants
       }
       System.out.println("Using " + userConfigFile + " as user configuration file");
     }
+
+    // builtin creole dir
+    if(builtinCreoleDir == null) {
+      String builtinCreoleDirPropertyValue =
+        System.getProperty(BUILTIN_CREOLE_DIR_PROPERTY_NAME);
+      if(builtinCreoleDirPropertyValue == null) {
+        // default to /gate/resources/creole in gate.jar
+        builtinCreoleDir = Files.getGateResource("/creole/");
+      }
+      else {
+        String builtinCreoleDirPath = builtinCreoleDirPropertyValue;
+        // add a slash onto the end of the path if it doesn't have one already -
+        // a creole directory URL should always end with a forward slash
+        if(!builtinCreoleDirPath.endsWith("/")) {
+          builtinCreoleDirPath += "/";
+        }
+        try {
+          builtinCreoleDir = new URL(builtinCreoleDirPath);
+        }
+        catch(MalformedURLException mue) {
+          // couldn't parse as a File either, so throw an exception
+          throw new GateRuntimeException(BUILTIN_CREOLE_DIR_PROPERTY_NAME
+              + " value \"" + builtinCreoleDirPropertyValue + "\" could"
+              + " not be parsed as either a URL or a file path.");
+        }
+        System.out.println("Using " + builtinCreoleDir + " as built-in CREOLE"
+            + " directory URL");
+      }
+    }
   }
   
   /**
@@ -1260,6 +1289,12 @@ jar/classpath so it's the same as registerBuiltins
   protected static File pluginsHome;
 
   /**
+   * The "builtin" creole directory URL, where the creole.xml that defines
+   * things like DocumentImpl can be found.
+   */
+  protected static URL builtinCreoleDir;
+
+  /**
    * Set the location of the GATE home directory.
    *
    * @throws IllegalStateException if the value has already been set.
@@ -1313,6 +1348,28 @@ jar/classpath so it's the same as registerBuiltins
    */
   public static File getUserConfigFile() {
     return userConfigFile;
+  }
+
+  /**
+   * Set the URL to the "builtin" creole directory.  The URL must point to a
+   * directory, and must end with a forward slash.
+   *
+   * @throws IllegalStateException if the value has already been set.
+   */
+  public static void setBuiltinCreoleDir(URL builtinCreoleDir) {
+    if(Gate.builtinCreoleDir != null) {
+      throw new IllegalStateException("builtinCreoleDir has already been set");
+    }
+    Gate.builtinCreoleDir = builtinCreoleDir;
+  }
+
+  /**
+   * Get the URL to the "builtin" creole directory, i.e. the directory that
+   * contains the creole.xml file that defines things like DocumentImpl, the
+   * Controllers, etc.
+   */
+  public static URL getBuiltinCreoleDir() {
+    return builtinCreoleDir;
   }
   
   /**

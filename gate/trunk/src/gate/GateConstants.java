@@ -110,6 +110,11 @@ public interface GateConstants {
    */
   public static final String GATE_USER_CONFIG_PROPERTY_NAME = "gate.user.config";
   
+  /**
+   * The name of the built-in creole directory URL property
+   */
+  public static final String BUILTIN_CREOLE_DIR_PROPERTY_NAME =
+    "gate.builtin.creole.dir";
     
   /** The key for the feature keeping the original content of the document */
   public static final String
