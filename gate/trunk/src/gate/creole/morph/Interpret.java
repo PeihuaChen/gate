@@ -4,8 +4,6 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import gate.creole.ResourceInstantiationException;
 
 /**
@@ -85,20 +83,15 @@ public class Interpret {
 
       // proceed only iof the pattern is not null
       if (myPatInst != null) {
-
-        // find the actual pattern
-        Pattern pat = myPatInst.getPattern();
-        Matcher m = pat.matcher(word);
-
+    	  
+    	  Matcher m = myPatInst.getMatcher();
+    	  m = m.reset(word);
+    	  
         // check if this pattern can accomodate the given word
         if (m.matches()) {
-          // yes it can, so find the name of the function which should be
-          // called to find it's root word
-          String function = myPatInst.getFunction();
-
           // call the appropriate function
-          String methodName = getMethodName(function);
-          String[] parameters = getParameterValues(function);
+          String methodName = myPatInst.getMethodName();
+          String[] parameters = myPatInst.getParameters();
 
           // check all the available in built methods and run the
           // appropriate one
@@ -160,67 +153,6 @@ public class Interpret {
     affix = null;
     return word;
 
-  }
-
-  /**
-   * This method is used to find the method definition
-   * But it can recognize only String, boolean and int types
-   * for Example: stem(2,"ed","d") ==>
-   *              stem(int,java.lang.String,java.lang.String);
-   * @param method
-   * @return the definition of the method
-   */
-  private String getMethodName(String method) {
-    // find the first index of '('
-    int index = method.indexOf('(');
-    String methodName = method.substring(0, index) + "(";
-
-    // now get the parameter types
-    String[] parameters =
-        method.substring(index + 1, method.length() - 1).split(",");
-
-    // find the approapriate type
-    for (int i = 0; i < parameters.length; i++) {
-      if (parameters[i].startsWith("\"") && parameters[i].endsWith("\"")) {
-        methodName = methodName + "java.lang.String";
-      }
-      else if (ParsingFunctions.isBoolean(parameters[i])) {
-        methodName = methodName + "boolean";
-      }
-      else if (ParsingFunctions.isInteger(parameters[i])) {
-        methodName = methodName + "int";
-      }
-      if ( (i + 1) < parameters.length) {
-        methodName = methodName + ",";
-      }
-    }
-    methodName = methodName + ")";
-    return methodName;
-  }
-
-  /**
-   * This method finds the actual parameter values
-   * @param method from which parameters are required to be found
-   * @return parameter values
-   */
-  private String[] getParameterValues(String method) {
-    // now first find the name of the method
-    // their parameters and their types
-    int index = method.indexOf("(");
-
-    // now get the parameters
-    String[] parameters =
-        method.substring(index + 1, method.length() - 1).split(",");
-
-    // process each parameter
-    for (int i = 0; i < parameters.length; i++) {
-      // we need to remove " from String
-      if (parameters[i].startsWith("\"") && parameters[i].endsWith("\"")) {
-        parameters[i] = parameters[i].substring(1, parameters[i].length() - 1);
-        continue;
-      }
-    }
-    return parameters;
   }
 
   /**
