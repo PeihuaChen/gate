@@ -160,7 +160,7 @@ public class SerialAnalyserController extends SerialController
   }
 
 
-  private gate.Corpus corpus;
+  protected gate.Corpus corpus;
 
   /**
    * Overridden to also clean up the corpus value.
