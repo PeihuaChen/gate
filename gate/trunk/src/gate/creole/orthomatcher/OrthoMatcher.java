@@ -177,72 +177,73 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     *  exception.
     */
   public void execute() throws ExecutionException{
-
-    //check the input
-    if(document == null) {
-      throw new ExecutionException(
-        "No document for namematch!"
-      );
-    }
-
-    // get the annotations from document
-    if ((annotationSetName == null)|| (annotationSetName.equals("")))
-      nameAllAnnots = document.getAnnotations();
-    else
-      nameAllAnnots = document.getAnnotations(annotationSetName);
-
-    //if none found, print warning and exit
-    if ((nameAllAnnots == null) || nameAllAnnots.isEmpty()) {
-      Out.prln("OrthoMatcher Warning: No annotations found for processing");
-      return;
-    }
-
-    //check if we've been run on this document before
-    //and clean the doc if needed
-    docCleanup();
-    Map matchesMap = (Map)document.getFeatures().
-                     get(DOCUMENT_COREF_FEATURE_NAME);
-
-    // creates the cdg list from the document
-    //no need to create otherwise, coz already done in init()
-    if (!extLists)
-      buildTables(nameAllAnnots);
-
-    //first match all name annotations
-    matchNameAnnotations();
-
-    //then match the unknown ones to all name ones
-    if (matchingUnknowns)
-      matchUnknown();
-
-    // set the matches of the document
-//    determineMatchesDocument();
-    if (! matchesDocFeature.isEmpty()) {
-      if(matchesMap == null){
-        matchesMap = new HashMap();
+    try{
+      //check the input
+      if(document == null) {
+        throw new ExecutionException(
+          "No document for namematch!"
+        );
       }
-      matchesMap.put(nameAllAnnots.getName(), matchesDocFeature);
-      //we need to put it even if it was already present in order to triger
-      //the update events
-      document.getFeatures().put(DOCUMENT_COREF_FEATURE_NAME, matchesMap);
-
-      //cannot do clear() as this has already been put on the document
-      //so I need a new one for the next run of matcher
-      matchesDocFeature = new ArrayList();
-    }
-
+  
+      // get the annotations from document
+      if ((annotationSetName == null)|| (annotationSetName.equals("")))
+        nameAllAnnots = document.getAnnotations();
+      else
+        nameAllAnnots = document.getAnnotations(annotationSetName);
+  
+      //if none found, print warning and exit
+      if ((nameAllAnnots == null) || nameAllAnnots.isEmpty()) {
+        Out.prln("OrthoMatcher Warning: No annotations found for processing");
+        return;
+      }
+  
+      //check if we've been run on this document before
+      //and clean the doc if needed
+      docCleanup();
+      Map matchesMap = (Map)document.getFeatures().
+                       get(DOCUMENT_COREF_FEATURE_NAME);
+  
+      // creates the cdg list from the document
+      //no need to create otherwise, coz already done in init()
+      if (!extLists)
+        buildTables(nameAllAnnots);
+  
+      //first match all name annotations
+      matchNameAnnotations();
+  
+      //then match the unknown ones to all name ones
+      if (matchingUnknowns)
+        matchUnknown();
+  
+      // set the matches of the document
+  //    determineMatchesDocument();
+      if (! matchesDocFeature.isEmpty()) {
+        if(matchesMap == null){
+          matchesMap = new HashMap();
+        }
+        matchesMap.put(nameAllAnnots.getName(), matchesDocFeature);
+        //we need to put it even if it was already present in order to triger
+        //the update events
+        document.getFeatures().put(DOCUMENT_COREF_FEATURE_NAME, matchesMap);
+  
+        //cannot do clear() as this has already been put on the document
+        //so I need a new one for the next run of matcher
+        matchesDocFeature = new ArrayList();
+      }
+    }finally{
+      //make sure the cleanup happens even if there are errors.
 //    Out.prln("Processed strings" + processedAnnots.values());
-    //clean-up the internal data structures for next run
-    nameAllAnnots = null;
-    processedAnnots.clear();
-    annots2Remove.clear();
-    tokensMap.clear();
-    matchesDocFeature = new ArrayList();
-    longAnnot = null;
-    shortAnnot = null;
-    tokensLongAnnot = null;
-    tokensShortAnnot = null;
-
+      //clean-up the internal data structures for next run
+      nameAllAnnots = null;
+      processedAnnots.clear();
+      annots2Remove.clear();
+      tokensMap.clear();
+      matchesDocFeature = new ArrayList();
+      longAnnot = null;
+      shortAnnot = null;
+      tokensLongAnnot = null;
+      tokensShortAnnot = null;
+    }
   } // run()
 
   protected void matchNameAnnotations() throws ExecutionException{
