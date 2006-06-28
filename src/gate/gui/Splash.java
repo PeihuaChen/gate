@@ -28,10 +28,10 @@ import javax.swing.border.EtchedBorder;
 public class Splash extends JWindow {
 
   /**
-   * Constructor from owner and content.
+   * Constructor from owner, GraphicsConfiguration and content.
    */
-  public Splash(Window owner, JComponent content) {
-    super(owner);
+  public Splash(Window owner, GraphicsConfiguration gc, JComponent content) {
+    super(owner, gc);
     getContentPane().setLayout(new BorderLayout());
     content.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
     getContentPane().add(content, BorderLayout.CENTER);
@@ -39,6 +39,10 @@ public class Splash extends JWindow {
     pack();
   }// public Splash(Window owner, JComponent content)
 
+  public Splash(Window owner,  JComponent content) {
+    this(owner, null, content);
+  }
+  
   /**
    * Contructor from image.
    */
@@ -50,12 +54,7 @@ public class Splash extends JWindow {
    * Constructor from content.
    */
   public Splash(JComponent content) {
-    super();
-    getContentPane().setLayout(new BorderLayout());
-    content.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
-    getContentPane().add(content, BorderLayout.CENTER);
-    validate();
-    pack();
+    this(null, content);
   }// public Splash(JComponent content)
 
   /**
@@ -73,17 +72,18 @@ public class Splash extends JWindow {
   public void showSplash(){
     Dimension ownerSize;
     Point ownerLocation;
+    Rectangle screenBounds = getGraphicsConfiguration().getBounds();
     if(getOwner() == null){
-      ownerSize = Toolkit.getDefaultToolkit().getScreenSize();
-      ownerLocation = new Point(0, 0);
+      ownerSize = screenBounds.getSize();
+      ownerLocation = screenBounds.getLocation();
     }else{
       ownerSize = getOwner().getSize();
       ownerLocation = getOwner().getLocation();
       if(ownerSize.height == 0 ||
          ownerSize.width == 0 ||
          !getOwner().isVisible()){
-        ownerSize = Toolkit.getDefaultToolkit().getScreenSize();
-        ownerLocation = new Point(0, 0);
+        ownerSize = screenBounds.getSize();
+        ownerLocation = screenBounds.getLocation();        
       }
     }
     //Center the window

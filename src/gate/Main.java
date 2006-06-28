@@ -159,8 +159,11 @@ public class Main {
         splashBox.add(gifLbl, constraints);
         gifLbl = new JLabel(MainFrame.getIcon("sponsors"));
         splashBox.add(gifLbl, constraints);
+        GraphicsConfiguration gc = GraphicsEnvironment.
+          getLocalGraphicsEnvironment().getDefaultScreenDevice().
+          getDefaultConfiguration();
         
-        splash = new Splash(splashBox);
+        splash = new Splash(null, gc, splashBox);
         splash.showSplash();
       }
     });
@@ -234,7 +237,12 @@ public class Main {
         frame.validate();
 
         // Center the window
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        GraphicsConfiguration gc = GraphicsEnvironment.
+            getLocalGraphicsEnvironment().getDefaultScreenDevice().
+            getDefaultConfiguration();
+        
+        Rectangle screenBounds = gc.getBounds();
+        Dimension screenSize = screenBounds.getSize();
         Dimension frameSize = frame.getSize();
         if (frameSize.height > screenSize.height) {
           frameSize.height = screenSize.height;
