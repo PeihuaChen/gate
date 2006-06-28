@@ -363,12 +363,12 @@ public class CorpusImpl extends AbstractLanguageResource
               corpus.unloadDocument(doc);
               Factory.deleteResource(doc);
             }
-          } catch(ResourceInstantiationException e) {
+          } catch(Throwable t) {
             String nl = Strings.getNl();
             Err.prln(
               "WARNING: Corpus.populate could not intantiate document" + nl +
               "  Document name was: " + docName + nl +
-              "  Exception was: " + e + nl + nl
+              "  Exception was: " + t + nl + nl
             );
           }
           if(sListener != null) sListener.statusChanged(
