@@ -75,7 +75,7 @@ public class CorpusFillerComponent extends JPanel {
     constraints.gridy = 0;
     constraints.gridwidth = 1;
     constraints.anchor = GridBagConstraints.NORTHWEST;
-    add(filerBtn = new JButton(MainFrame.getIcon("loadFile")), constraints);
+    add(filerBtn = new JButton(MainFrame.getIcon("open-file")), constraints);
 
     //second row
     constraints = new GridBagConstraints();
@@ -102,7 +102,7 @@ public class CorpusFillerComponent extends JPanel {
     constraints.gridy = 1;
     constraints.gridwidth = 1;
     constraints.anchor = GridBagConstraints.NORTHWEST;
-    add(listEditBtn = new JButton(MainFrame.getIcon("editList")), constraints);
+    add(listEditBtn = new JButton(MainFrame.getIcon("edit-list")), constraints);
 
     //third row
     constraints = new GridBagConstraints();

@@ -289,7 +289,7 @@ public class MainFrame extends JFrame
                                height == null ? 600 : height.intValue()));
 
     this.setIconImage(Toolkit.getDefaultToolkit().getImage(
-          Files.getGateResource("/img/gateIcon.gif")));
+          Files.getGateResource("/img/gate-icon.png")));
     resourcesTree = new ResourcesTree(); 
     resourcesTree.setModel(resourcesTreeModel);
     resourcesTree.setRowHeight(0);
@@ -503,7 +503,7 @@ public class MainFrame extends JFrame
     fileMenu.add(newPRMenu);
 
     JMenu dsMenu = new JMenu("Datastores");
-    dsMenu.setIcon(getIcon("dss"));
+    dsMenu.setIcon(getIcon("datastores"));
     dsMenu.add(new XJMenuItem(new NewDSAction(), this));
     dsMenu.add(new XJMenuItem(new OpenDSAction(), this));
     fileMenu.add(dsMenu);
@@ -513,7 +513,7 @@ public class MainFrame extends JFrame
 
     fileMenu.addSeparator();
     JMenu loadANNIEMenu = new JMenu("Load ANNIE system");
-    loadANNIEMenu.setIcon(getIcon("annie"));
+    loadANNIEMenu.setIcon(getIcon("annie-application"));
     loadANNIEMenu.add(new XJMenuItem(new LoadANNIEWithDefaultsAction(), this));
     loadANNIEMenu.add(new XJMenuItem(new LoadANNIEWithoutDefaultsAction(), this));
     fileMenu.add(loadANNIEMenu);
@@ -684,7 +684,7 @@ public class MainFrame extends JFrame
     smallMenuBar.setBorderPainted(false);
     smallMenuBar.setAlignmentY(JComponent.CENTER_ALIGNMENT);
     JMenu annieMenu = new JMenu();
-    annieMenu.setIcon(getIcon("annie"));
+    annieMenu.setIcon(getIcon("annie-application"));
     annieMenu.setToolTipText("Load ANNIE System");
     annieMenu.add(new LoadANNIEWithDefaultsAction());
     annieMenu.add(new LoadANNIEWithoutDefaultsAction());
@@ -723,7 +723,7 @@ public class MainFrame extends JFrame
     smallMenuBar.setAlignmentY(JComponent.CENTER_ALIGNMENT);
     JMenu tbDsMenu = new JMenu();
     tbDsMenu.setToolTipText("Datastores");
-    tbDsMenu.setIcon(getIcon("dss"));
+    tbDsMenu.setIcon(getIcon("datastores"));
     tbDsMenu.add(new NewDSAction());
     tbDsMenu.add(new OpenDSAction());
     smallMenuBar.add(tbDsMenu);
@@ -1543,7 +1543,7 @@ public class MainFrame extends JFrame
   /** This class represent an action which brings up the Annot Diff tool*/
   class NewAnnotDiffAction extends AbstractAction {
     public NewAnnotDiffAction() {
-      super("Annotation Diff", getIcon("annDiff"));
+      super("Annotation Diff", getIcon("annotation-diff"));
       putValue(SHORT_DESCRIPTION,"Open a new Annotation Diff window");
     }// NewAnnotDiffAction
     public void actionPerformed(ActionEvent e) {
@@ -1552,7 +1552,7 @@ public class MainFrame extends JFrame
 //      annotDiffDialog.setVisible(true);
       AnnotationDiffGUI frame = new AnnotationDiffGUI("Annotation Diff Tool");
       frame.pack();
-      frame.setIconImage(((ImageIcon)getIcon("annDiff")).getImage());
+      frame.setIconImage(((ImageIcon)getIcon("annotation-diff")).getImage());
       frame.setLocationRelativeTo(MainFrame.this);
       frame.setVisible(true);
     }// actionPerformed();
@@ -1561,7 +1561,7 @@ public class MainFrame extends JFrame
   /** This class represent an action which brings up the Corpus Annot Diff tool*/
   class NewCorpusAnnotDiffAction extends AbstractAction {
     public NewCorpusAnnotDiffAction() {
-      super("Corpus Annotation Diff", getIcon("annDiff"));
+      super("Corpus Annotation Diff", getIcon("annotation-diff"));
       putValue(SHORT_DESCRIPTION,"Create a new Corpus Annotation Diff Tool");
     }// NewCorpusAnnotDiffAction
     public void actionPerformed(ActionEvent e) {
@@ -1827,7 +1827,7 @@ public class MainFrame extends JFrame
     public LoadANNIEWithDefaultsAction() {
       super("With defaults");
       putValue(SHORT_DESCRIPTION, "Load ANNIE system using defaults");
-      putValue(SMALL_ICON, getIcon("annie"));
+      putValue(SMALL_ICON, getIcon("annie-application"));
     }// NewAnnotDiffAction
     public void actionPerformed(ActionEvent e) {
       // Loads ANNIE with defaults
@@ -1875,7 +1875,7 @@ public class MainFrame extends JFrame
     public LoadANNIEWithoutDefaultsAction() {
       super("Without defaults");
       putValue(SHORT_DESCRIPTION, "Load ANNIE system without defaults");
-      putValue(SMALL_ICON, getIcon("annie"));
+      putValue(SMALL_ICON, getIcon("annie-application"));
     }// NewAnnotDiffAction
     public void actionPerformed(ActionEvent e) {
       // Loads ANNIE with defaults
@@ -1976,7 +1976,7 @@ public class MainFrame extends JFrame
     public ManagePluginsAction(){
       super("Manage CREOLE plugins");
       putValue(SHORT_DESCRIPTION,"Manage CREOLE plugins");
-      putValue(SMALL_ICON, getIcon("param"));
+      putValue(SMALL_ICON, getIcon("creole-plugins"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -2027,7 +2027,7 @@ public class MainFrame extends JFrame
 
       class URLfromFileAction extends AbstractAction{
         URLfromFileAction(JTextField textField){
-          super(null, getIcon("loadFile"));
+          super(null, getIcon("open-file"));
           putValue(SHORT_DESCRIPTION,"Click to select a directory");
           this.textField = textField;
         }
@@ -2130,7 +2130,7 @@ public class MainFrame extends JFrame
     public NewDSAction(){
       super("Create datastore");
       putValue(SHORT_DESCRIPTION,"Create a new Datastore");
-      putValue(SMALL_ICON, getIcon("ds"));
+      putValue(SMALL_ICON, getIcon("datastore"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -2182,7 +2182,7 @@ public class MainFrame extends JFrame
     public LoadResourceFromFileAction(){
       super("Restore application from file");
       putValue(SHORT_DESCRIPTION,"Restores a previously saved application");
-      putValue(SMALL_ICON, getIcon("load-app"));
+      putValue(SMALL_ICON, getIcon("open-application"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -2371,7 +2371,7 @@ public class MainFrame extends JFrame
     public OpenDSAction() {
       super("Open datastore");
       putValue(SHORT_DESCRIPTION,"Open a datastore");
-      putValue(SMALL_ICON, getIcon("ds"));
+      putValue(SMALL_ICON, getIcon("datastore"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -2703,7 +2703,7 @@ public class MainFrame extends JFrame
       tipComponent.setLayout(new BoxLayout(tipComponent, BoxLayout.X_AXIS));
       tipComponent.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
       
-      iconLabel = new JLabel(getIcon("annie"));
+      iconLabel = new JLabel(getIcon("annie-application"));
       iconLabel.setText(null);
       iconLabel.setOpaque(false);
       tipComponent.add(iconLabel);
@@ -2821,7 +2821,7 @@ public class MainFrame extends JFrame
       super.getTreeCellRendererComponent(tree, value, sel, expanded,
                                          leaf, row, hasFocus);
       if(value == resourcesTreeRoot) {
-        setIcon(MainFrame.getIcon("project"));
+        setIcon(MainFrame.getIcon("root"));
         setToolTipText("GATE");
       } else if(value == applicationsRoot) {
         setIcon(MainFrame.getIcon("applications"));
@@ -2833,7 +2833,7 @@ public class MainFrame extends JFrame
         setIcon(MainFrame.getIcon("prs"));
         setToolTipText("Processing Resources");
       } else if(value == datastoresRoot) {
-        setIcon(MainFrame.getIcon("dss"));
+        setIcon(MainFrame.getIcon("datastores"));
         setToolTipText("GATE Datastores");
       }else{
         //not one of the default root nodes
@@ -3139,7 +3139,7 @@ public class MainFrame extends JFrame
    * This class represent an action which brings up the Ontology Editor tool*/
   class NewOntologyEditorAction extends AbstractAction {
     public NewOntologyEditorAction(){
-      super("Ontology Editor", getIcon("controller"));
+      super("Ontology Editor", getIcon("ontology"));
       putValue(SHORT_DESCRIPTION,"Start the Ontology Editor");
     }// NewAnnotDiffAction
 
@@ -3171,7 +3171,7 @@ public class MainFrame extends JFrame
   /** This class represent an action which brings up the Gazetteer Editor tool*/
   class NewGazetteerEditorAction extends AbstractAction {
     public NewGazetteerEditorAction(){
-      super("Gazetteer Editor", getIcon("controller"));
+      super("Gazetteer Editor", getIcon("gazetteer"));
       putValue(SHORT_DESCRIPTION,"Start the Gazetteer Editor");
     }
 

@@ -461,9 +461,9 @@ protected class KnowledgeBaseTreeCellRenderer extends DefaultTreeCellRenderer {
       return this;
     ClassNode theNode = (ClassNode) value;
     if(theNode.getSource() instanceof OClass) {
-      setIcon(MainFrame.getIcon("Class"));
+      setIcon(MainFrame.getIcon("ontology-class"));
     } else if(theNode.getSource() instanceof OInstance) {
-      setIcon(MainFrame.getIcon("Instance"));
+      setIcon(MainFrame.getIcon("ontology-instance"));
     }
     return this;
   }

@@ -241,11 +241,11 @@ public class OntologyEditor extends AbstractVisualResource
         String itemName = null;
         Object nodeObject = ((DefaultMutableTreeNode)value).getUserObject();
         if(nodeObject instanceof TClass){
-          icon = MainFrame.getIcon("Class");
+          icon = MainFrame.getIcon("ontology-class");
           itemName = ((TClass)nodeObject).getName();
           setToolTipText(((TClass)nodeObject).getURI());
         }else if(nodeObject instanceof OInstance){
-          icon = MainFrame.getIcon("Instance");
+          icon = MainFrame.getIcon("ontology-instance");
           itemName = ((OInstance)nodeObject).getName();
           setToolTipText(((OInstance)nodeObject).getURI());
         }
@@ -607,21 +607,21 @@ public class OntologyEditor extends AbstractVisualResource
           setEnabled(aGroup.getSize() > 0);
         }else if(value instanceof TClass){
           TClass aClass = (TClass)value;
-          setIcon(MainFrame.getIcon("Class"));
+          setIcon(MainFrame.getIcon("ontology-class"));
           setFont(getFont().deriveFont(Font.PLAIN));
           setText(aClass.getName());
           setToolTipText(aClass.getURI());
           setEnabled(true);
         }else if(value instanceof OInstance){
           OInstance anInstance = (OInstance)value;
-          setIcon(MainFrame.getIcon("Instance"));
+          setIcon(MainFrame.getIcon("ontology-instance"));
           setFont(getFont().deriveFont(Font.PLAIN));
           setText(anInstance.getName());
           setToolTipText(anInstance.getURI());
           setEnabled(true);
         }else if(value instanceof Property){
           Property aProperty = (Property)value;
-          setIcon(MainFrame.getIcon("Property"));
+          setIcon(MainFrame.getIcon("ontology-property"));
           setFont(getFont().deriveFont(Font.PLAIN));
           String text = aProperty.getName() + " -> ";
           Set range = aProperty.getRange();
