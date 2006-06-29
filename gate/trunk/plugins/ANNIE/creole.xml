@@ -20,7 +20,7 @@
       <PARAMETER DEFAULT="UTF-8"
         COMMENT="The encoding used for reading the definitions" NAME="encoding">
         java.lang.String</PARAMETER>
-      <ICON>shefTokeniser.gif</ICON>
+      <ICON>tokeniser</ICON>
     </RESOURCE>
     
     <!-- creole.xml for the Englishtokeniser -->
@@ -44,7 +44,7 @@
       <PARAMETER NAME="encoding"
         COMMENT="The encoding used for reading the definitions" DEFAULT="UTF-8">
         java.lang.String</PARAMETER>
-      <ICON>shefTokeniser.gif</ICON>
+      <ICON>tokeniser</ICON>
     </RESOURCE>
     
     <!-- creole.xml for gazetteer -->
@@ -70,7 +70,7 @@
       <PARAMETER DEFAULT="true"
         COMMENT="Should this gazetteer only match whole words"
         NAME="wholeWordsOnly">java.lang.Boolean</PARAMETER>
-      <ICON>shefGazetteer.gif</ICON>
+      <ICON>gazetteer</ICON>
     </RESOURCE>
     
     <!-- creole.xml for Hash Gazetteer (ex Natural)-->
@@ -98,7 +98,7 @@
       <PARAMETER DEFAULT="true" NAME="caseSensitive"
         COMMENT="Should this gazetteer diferentiate on case. Currently the Gazetteer works only in case sensitive mode.">
         java.lang.Boolean</PARAMETER>
-      <ICON>shefGazetteer.gif</ICON>
+      <ICON>gazetteer</ICON>
     </RESOURCE>
     
     <!-- creole.xml for JapeTransducer -->
@@ -127,6 +127,7 @@
         COMMENT="The ontology to be used by this transducer"
         OPTIONAL="true" 
 		RUNTIME="true">gate.creole.ontology.Ontology</PARAMETER>
+      <ICON>jape</ICON>
     </RESOURCE>
     
     <!-- creole.xml for ANNIE Transducer -->
@@ -148,6 +149,7 @@
       <PARAMETER NAME="encoding" DEFAULT="UTF-8"
         COMMENT="The encoding used for reading the grammar">
         java.lang.String</PARAMETER>
+      <ICON>ne-transducer</ICON>
     </RESOURCE>
     
     <!-- creole.xml for Sentence splitter-->
@@ -174,6 +176,7 @@
         DEFAULT="resources/sentenceSplitter/grammar/main.jape"
         COMMENT="The URL to the custom Jape grammar file" OPTIONAL="true"
         SUFFIXES="jape">java.net.URL</PARAMETER>
+      <ICON>sentence-splitter</ICON>
     </RESOURCE>
 
     <!-- creole.xml for HepTag (Mark Hepple's POS tagger)-->
@@ -206,6 +209,7 @@
       <PARAMETER NAME="outputAnnotationType"
         COMMENT="The name of the annotation type where the new features should be added" RUNTIME="true"
         OPTIONAL="false" DEFAULT="Token">java.lang.String</PARAMETER>
+      <ICON>pos-tagger</ICON>
     </RESOURCE>
 
     <!-- creole.xml for namematch -->
@@ -235,6 +239,7 @@
         java.lang.String</PARAMETER>
       <PARAMETER NAME="extLists" DEFAULT="true" OPTIONAL="true">
         java.lang.Boolean</PARAMETER>
+      <ICON>ortho-matcher</ICON>
     </RESOURCE>
 
     <!--  creole.xml for the coreferencer -->
@@ -250,7 +255,7 @@
       <PARAMETER NAME="resolveIt" RUNTIME="true"
         COMMENT="Whether or not to resolve it pronouns" DEFAULT="false"
         OPTIONAL="true">java.lang.Boolean</PARAMETER>
-      <ICON>shefGazetteer.gif</ICON>
+      <ICON>pronominal-coreferencer</ICON>
     </RESOURCE>
 
     <!--  creole.xml for the coreferencer -->
@@ -263,7 +268,7 @@
       <PARAMETER NAME="annotationSetName" RUNTIME="true"
         COMMENT="The annotation set to be used for the generated annotations"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <ICON>shefGazetteer.gif</ICON>
+      <ICON>nominal-coreferencer</ICON>
     </RESOURCE>
 
     <RESOURCE>
@@ -275,6 +280,7 @@
         ITEM_CLASS_NAME="java.lang.String"> java.util.ArrayList</PARAMETER>
       <PARAMETER NAME="setsToKeep" RUNTIME="true" OPTIONAL="true"
         ITEM_CLASS_NAME="java.lang.String"> java.util.ArrayList</PARAMETER>
+      <ICON>document-reset</ICON>
     </RESOURCE>
   </CREOLE>
 

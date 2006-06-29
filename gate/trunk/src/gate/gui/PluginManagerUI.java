@@ -165,7 +165,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
   
   protected class MainTableModel extends AbstractTableModel{
     public MainTableModel(){
-      localIcon = MainFrame.getIcon("loadFile");
+      localIcon = MainFrame.getIcon("open-file");
       remoteIcon = MainFrame.getIcon("internet");
       invalidIcon = MainFrame.getIcon("param");
     }
@@ -475,7 +475,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
 
       class URLfromFileAction extends AbstractAction{
         URLfromFileAction(JTextField textField){
-          super(null, MainFrame.getIcon("loadFile"));
+          super(null, MainFrame.getIcon("open-file"));
           putValue(SHORT_DESCRIPTION,"Click to select a directory");
           this.textField = textField;
         }

@@ -502,7 +502,7 @@ public class AnnotationEditor{
   
   protected class DeleteAnnotationAction extends AnnotationAction{
     public DeleteAnnotationAction(){
-      super("Delete", MainFrame.getIcon("delete"));
+      super("Delete", MainFrame.getIcon("remove-annotation"));
     }
     
     public void actionPerformed(ActionEvent evt){

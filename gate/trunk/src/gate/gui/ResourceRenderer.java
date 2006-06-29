@@ -119,7 +119,7 @@ public class ResourceRenderer extends JLabel
       if(iconName == null){
         if(value instanceof LanguageResource) iconName = "lr";
         else if(value instanceof ProcessingResource) iconName = "pr";
-        else if(value instanceof Controller) iconName = "controller";
+        else if(value instanceof Controller) iconName = "application";
       }
       icon = (iconName == null) ? null : MainFrame.getIcon(iconName);
     }else{

@@ -389,9 +389,9 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
    */
   class ParameterValueRenderer extends ObjectRenderer {
     ParameterValueRenderer() {
-      fileButton = new JButton(MainFrame.getIcon("loadFile"));
+      fileButton = new JButton(MainFrame.getIcon("open-file"));
       fileButton.setToolTipText("Set from file...");
-      listButton = new JButton(MainFrame.getIcon("editList"));
+      listButton = new JButton(MainFrame.getIcon("edit-list"));
       listButton.setToolTipText("Edit the list");
       textField = new JTextField();
       textButtonBox = new JPanel();
@@ -600,7 +600,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       textField = new JTextField();
 
       fileChooser = MainFrame.getFileChooser();
-      fileButton = new JButton(MainFrame.getIcon("loadFile"));
+      fileButton = new JButton(MainFrame.getIcon("open-file"));
       fileButton.setToolTipText("Set from file...");
       fileButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -619,7 +619,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
         }
       });
 
-      listButton = new JButton(MainFrame.getIcon("editList"));
+      listButton = new JButton(MainFrame.getIcon("edit-list"));
       listButton.setToolTipText("Edit the list");
       listButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {

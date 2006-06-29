@@ -139,8 +139,8 @@ public class SerialControllerEditor extends AbstractVisualResource
     topBox.add(scroller);
     topBox.add(Box.createHorizontalGlue());
 
-    addButon = new JButton(MainFrame.getIcon("right"));
-    removeButton = new JButton(MainFrame.getIcon("left"));
+    addButon = new JButton(MainFrame.getIcon("rightarrow"));
+    removeButton = new JButton(MainFrame.getIcon("leftarrow"));
 
     Box buttonsBox =Box.createVerticalBox();
     buttonsBox.add(Box.createVerticalGlue());
@@ -183,8 +183,8 @@ public class SerialControllerEditor extends AbstractVisualResource
 
     topBox.add(scroller);
 
-    moveUpButton = new JButton(MainFrame.getIcon("moveup"));
-    moveDownButton = new JButton(MainFrame.getIcon("movedown"));
+    moveUpButton = new JButton(MainFrame.getIcon("up"));
+    moveDownButton = new JButton(MainFrame.getIcon("down"));
 
     buttonsBox =Box.createVerticalBox();
     buttonsBox.add(Box.createVerticalGlue());

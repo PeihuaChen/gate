@@ -66,7 +66,7 @@ public class NameBearerHandle implements Handle,
           else if(target instanceof Controller) iconName = "application";
         }
         if(target instanceof Controller && 
-                target.getName().startsWith("ANNIE")) iconName = "annie";
+                target.getName().startsWith("ANNIE")) iconName = "annie-application";
         tooltipText = "<HTML> <b>" + rData.getComment() + "</b><br>(<i>" +
                       rData.getClassName() + "</i>)</HTML>";
       } else {
