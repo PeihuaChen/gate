@@ -224,11 +224,16 @@ public class MainFrame extends JFrame
   }//protected void select(ResourceHandle handle)
 
   public MainFrame() {
-    this(false);
+    this(null);
+  }
+  
+  public MainFrame(GraphicsConfiguration gc) {
+    this(false, gc);
   } // MainFrame
 
   /**Construct the frame*/
-  public MainFrame(boolean isShellSlacGIU) {
+  public MainFrame(boolean isShellSlacGIU, GraphicsConfiguration gc) {
+    super(gc);
     guiRoots.add(this);
     if(fileChooser == null){
       fileChooser = new JFileChooser();
