@@ -632,7 +632,7 @@ extends AbstractFeatureBearer implements DataStore {
    * in the GUI
    */
   public String getIconName(){
-    return "ds";
+    return "datastore";
   }
 
   /**

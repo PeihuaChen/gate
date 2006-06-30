@@ -139,8 +139,8 @@ public class SerialControllerEditor extends AbstractVisualResource
     topBox.add(scroller);
     topBox.add(Box.createHorizontalGlue());
 
-    addButon = new JButton(MainFrame.getIcon("rightarrow"));
-    removeButton = new JButton(MainFrame.getIcon("leftarrow"));
+    addButon = new JButton(MainFrame.getIcon("right-arrow"));
+    removeButton = new JButton(MainFrame.getIcon("left-arrow"));
 
     Box buttonsBox =Box.createVerticalBox();
     buttonsBox.add(Box.createVerticalGlue());
