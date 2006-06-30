@@ -189,6 +189,10 @@ public class Main {
     //create the main frame, show it and hide the splash
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
+        GraphicsConfiguration gc = GraphicsEnvironment.
+        getLocalGraphicsEnvironment().getDefaultScreenDevice().
+        getDefaultConfiguration();
+        
         //this needs to run before any GUI component is constructed.
         //the initial gate splash is exempted from this rule.
         applyUserPreferences();
@@ -199,7 +203,7 @@ public class Main {
           if(DEBUG) Out.prln("constructing SLUG GUI");
         }
         else {
-          frame = new MainFrame();
+          frame = new MainFrame(gc);
           if(DEBUG) Out.prln("constructing GUI");
         } // if - SLUG
 
@@ -237,10 +241,6 @@ public class Main {
         frame.validate();
 
         // Center the window
-        GraphicsConfiguration gc = GraphicsEnvironment.
-            getLocalGraphicsEnvironment().getDefaultScreenDevice().
-            getDefaultConfiguration();
-        
         Rectangle screenBounds = gc.getBounds();
         Dimension screenSize = screenBounds.getSize();
         Dimension frameSize = frame.getSize();
