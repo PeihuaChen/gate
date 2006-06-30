@@ -284,11 +284,6 @@ public class OptionsDialog extends JDialog {
     textBtn.setSelected(true);
   }
 
-  public void dispose(){
-    MainFrame.getGuiRoots().remove(this);
-    super.dispose();
-  }
-
   protected void selectedFontChanged(){
     if(selectedFontBtn != null){
       //save the old font
@@ -302,15 +297,15 @@ public class OptionsDialog extends JDialog {
     }
   }
 
-  public void show(){
+  public void showDialog(){
     initLocalData();
     initGuiComponents();
     textBtn.setSelected(true);
-    fontChooser.setFontValue(textComponentsFont);
+//    fontChooser.setFontValue(textComponentsFont);
     initListeners();
     pack();
     setLocationRelativeTo(getOwner());
-    super.show();
+    setVisible(true);
   }
 
   public static void main(String args[]){
@@ -326,7 +321,7 @@ public class OptionsDialog extends JDialog {
       public void actionPerformed(ActionEvent e) {
         OptionsDialog dialog = new OptionsDialog(frame);
         dialog.pack();
-        dialog.show();
+        dialog.showDialog();
       }
     });
     frame.getContentPane().add(btn);
