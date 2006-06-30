@@ -14,35 +14,28 @@
 
 package gate.gui;
 
+import gate.*;
+import gate.creole.ResourceData;
+import gate.creole.ResourceInstantiationException;
+import gate.util.Err;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.NumberFormat;
-
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
-
-import gate.*;
-import gate.creole.ResourceData;
-import gate.creole.ResourceInstantiationException;
-import gate.util.Err;
 
 public class NewResourceDialog extends JDialog {
 
   public NewResourceDialog(Frame frame, String title, boolean modal) {
-    super(frame, title, modal);
+    super(frame, title, modal/*, frame.getGraphicsConfiguration()*/);
     MainFrame.getGuiRoots().add(this);
     initLocalData();
     initGuiComponents();
     initListeners();
-    setLocationRelativeTo(frame);
   }// public NewResourceDialog(Frame frame, String title, boolean modal)
 
-  public void dispose(){
-    MainFrame.getGuiRoots().remove(this);
-    super.dispose();
-  }
 
   protected void initLocalData(){
   }// protected void initLocalData()
@@ -88,7 +81,10 @@ public class NewResourceDialog extends JDialog {
     setSize(400, 300);
 
     getRootPane().setDefaultButton(okBtn);
-    getRootPane().setWindowDecorationStyle(JRootPane.QUESTION_DIALOG);
+//    getRootPane().setWindowDecorationStyle(JRootPane.QUESTION_DIALOG);
+//    //let the Window manager provide decorations
+//    setDefaultLookAndFeelDecorated(false);
+////    setUndecorated(true);
   }// protected void initGuiComponents()
 
 
@@ -133,14 +129,13 @@ public class NewResourceDialog extends JDialog {
     nameField.setText("");
     parametersEditor.init(null,
                           rData.getParameterList().getInitimeParameters());
-
-    validate();
     pack();
     nameField.requestFocusInWindow();
     userCanceled = true;
     setModal(true);
+    setLocationRelativeTo(getOwner());
     super.setVisible(true);
-    setLocationRelativeTo(getParent());
+    dispose();
     if(userCanceled) return false;
     else return true;
   }//show();
@@ -160,16 +155,14 @@ public class NewResourceDialog extends JDialog {
     nameField.setText("");
     parametersEditor.init(null,
                           rData.getParameterList().getInitimeParameters());
-
-    validate();
     pack();
-
-    requestFocus();
-    nameField.requestFocus();
+    setLocationRelativeTo(getOwner());
+    //default case when the dialog just gets closed 
     userCanceled = true;
-//    setModal(true);
-    super.setVisible(true);
-    setLocationRelativeTo(getParent());
+    //show the dialog
+    setVisible(true);
+    //release resources
+    dispose();
     if(userCanceled) return;
     else{
       Runnable runnable = new Runnable(){
