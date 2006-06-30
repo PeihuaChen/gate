@@ -67,7 +67,7 @@ public class ShellSlacFrame extends MainFrame {
 
   /** New frame */
   public ShellSlacFrame() {
-    super(true);
+    super(true, null);
 //    guiRoots.clear();
 //    guiRoots.add(this);
 
