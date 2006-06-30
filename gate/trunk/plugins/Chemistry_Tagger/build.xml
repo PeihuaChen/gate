@@ -1,4 +1,4 @@
-<project name="TreeTagger" basedir="." >
+<project name="ChemistryTagger" basedir="." >
   <property file="build.properties" />
 
   <property name="gate.home" location="../.." />
@@ -34,6 +34,9 @@
 
   <!-- create the JAR file -->
   <target name="jar" depends="compile" >
+    <copy todir="${classes.dir}/gate/resources/img" includeEmptyDirs="true" >
+	<fileset dir="${src.dir}/gate/resources/img" />
+	</copy>
     <jar destfile="${jar.location}"
          update="false"
          basedir="${classes.dir}" />

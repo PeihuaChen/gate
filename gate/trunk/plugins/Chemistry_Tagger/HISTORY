@@ -1,6 +1,18 @@
+Version 2.0 (Released 30/06/2006)
+=================================
+This version is an almost complete rewrite of the original code. While
+the old version worked I got a lot of feedback from one kind user showing
+me places where it failed miserably or didn't do as expected. These
+problems led to drastic rewrites and hence this version. The major new
+features include: the option to leave element annotations in the document
+when they are also part of a compound, a uri feature, and a mapping between
+element names and symbols (the kind feature tells you which was actually
+found and so the other is inferred and should not necessarily be relied
+upon to be accurate).
+
 Version 1.2 (Released 24/11/2005)
 =================================
-Now loads resources from the plugin directory rather thhan from inside the JAR
+Now loads resources from the plugin directory rather than from inside the JAR
 file.  Also now explicitly releases references to the current document after
 processing, which should help when working with a corpus in a datastore.
 
