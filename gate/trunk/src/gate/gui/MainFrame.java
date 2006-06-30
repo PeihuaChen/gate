@@ -536,7 +536,8 @@ public class MainFrame extends JFrame
         putValue(SHORT_DESCRIPTION, "Edit gate options");
       }
       public void actionPerformed(ActionEvent evt){
-        optionsDialog.show();
+        optionsDialog.showDialog();
+        optionsDialog.dispose();
       }
     }, this));
 
@@ -1072,7 +1073,7 @@ public class MainFrame extends JFrame
           else if("handlePreferences".equals(method.getName())) {
             appEventSetHandledMethod.invoke(appEvent,
                                             new Object[] {Boolean.TRUE});
-            optionsDialog.show();
+            optionsDialog.showDialog();
           }
 
           return null;
@@ -1987,7 +1988,8 @@ public class MainFrame extends JFrame
         getGuiRoots().add(pluginManager);
         pluginManager.pack();
         //size the window so that it doesn't go off-screen
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        Dimension screenSize = /*Toolkit.getDefaultToolkit().getScreenSize();*/
+        getGraphicsConfiguration().getBounds().getSize();
         Dimension dialogSize = pluginManager.getPreferredSize();
         int width = dialogSize.width > screenSize.width ?
                 screenSize.width * 3 /4 :
@@ -2003,6 +2005,8 @@ public class MainFrame extends JFrame
         pluginManager.setLocation(x, y);
       }
       pluginManager.setVisible(true);
+      //free resources after the dialog is hidden
+      pluginManager.dispose();
     }
   }
 
