@@ -103,7 +103,7 @@ public class Editor extends JFrame {
    */
   private void jbInit() throws Exception {
     this.setIconImage(Toolkit.getDefaultToolkit().getImage(
-            guk.Editor.class.getResource("img/gateIcon")));
+            guk.Editor.class.getResource("img/gateIcon.gif")));
     java.util.List installedLocales = new ArrayList();
     try{
       //if this fails guk is not present
@@ -149,7 +149,7 @@ public class Editor extends JFrame {
     undoManager.setLimit(1000);
     //OPEN ACTION
     openAction = new AbstractAction("Open", new ImageIcon(
-            guk.Editor.class.getResource("img/openFile"))){
+            guk.Editor.class.getResource("img/openFile.gif"))){
       public void actionPerformed(ActionEvent e){
         int res = JOptionPane.OK_OPTION;
         if(docChanged){
@@ -229,7 +229,7 @@ public class Editor extends JFrame {
 
     //SAVE ACTION
     saveAction = new AbstractAction("Save", new ImageIcon(
-            guk.Editor.class.getResource("img/saveFile"))) {
+            guk.Editor.class.getResource("img/saveFile.gif"))) {
       public void actionPerformed(ActionEvent e){
         if(docChanged){
           if(file == null) saveAsAction.actionPerformed(null);
@@ -280,7 +280,7 @@ public class Editor extends JFrame {
 
     //SAVE AS ACTION
     saveAsAction = new AbstractAction("Save as...", new ImageIcon(
-            guk.Editor.class.getResource("img/saveFile"))){
+            guk.Editor.class.getResource("img/saveFile.gif"))){
       public void actionPerformed(ActionEvent e) {
           filer.setMultiSelectionEnabled(false);
           filer.setDialogTitle("Select file to save to...");
@@ -311,7 +311,7 @@ public class Editor extends JFrame {
 
     //CLOSE ACTION
     closeAction = new AbstractAction("Close", new ImageIcon(
-            guk.Editor.class.getResource("img/closeFile"))){
+            guk.Editor.class.getResource("img/closeFile.gif"))){
       public void actionPerformed(ActionEvent e){
         int res = JOptionPane.OK_OPTION;
         if(docChanged){
@@ -337,7 +337,7 @@ public class Editor extends JFrame {
 
     //EXIT ACTION
     exitAction = new AbstractAction("Exit", new ImageIcon(
-            guk.Editor.class.getResource("img/exit"))){
+            guk.Editor.class.getResource("img/exit.gif"))){
       public void actionPerformed(ActionEvent e){
         int res = JOptionPane.OK_OPTION;
         if(docChanged){
@@ -360,7 +360,7 @@ public class Editor extends JFrame {
 
     //UNDO ACTION
     undoAction = new AbstractAction("Undo", new ImageIcon(
-            guk.Editor.class.getResource("img/undo"))){
+            guk.Editor.class.getResource("img/undo.gif"))){
       public void actionPerformed(ActionEvent e){
         if(undoManager.canUndo()) undoManager.undo();
       }
@@ -370,7 +370,7 @@ public class Editor extends JFrame {
 
     //REDO ACTION
     redoAction = new AbstractAction("Redo", new ImageIcon(
-            guk.Editor.class.getResource("img/redo"))){
+            guk.Editor.class.getResource("img/redo.gif"))){
       public void actionPerformed(ActionEvent e){
         if(undoManager.canRedo()) undoManager.redo();
       }
@@ -380,7 +380,7 @@ public class Editor extends JFrame {
 
     //COPY ACTION
     copyAction = new AbstractAction("Copy", new ImageIcon(
-            guk.Editor.class.getResource("img/copy"))){
+            guk.Editor.class.getResource("img/copy.gif"))){
       public void actionPerformed(ActionEvent e){
         textPane.copy();
       }
@@ -389,7 +389,7 @@ public class Editor extends JFrame {
 
     //CUT ACTION
     cutAction = new AbstractAction("Cut", new ImageIcon(
-            guk.Editor.class.getResource("img/cut"))){
+            guk.Editor.class.getResource("img/cut.gif"))){
       public void actionPerformed(ActionEvent e){
         textPane.cut();
       }
@@ -398,7 +398,7 @@ public class Editor extends JFrame {
 
     //PASTE ACTION
     pasteAction = new AbstractAction("Paste", new ImageIcon(
-            guk.Editor.class.getResource("img/paste"))){
+            guk.Editor.class.getResource("img/paste.gif"))){
       public void actionPerformed(ActionEvent e){
         textPane.paste();
       }
