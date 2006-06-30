@@ -314,6 +314,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       switch(columnIndex){
         case 0:{
           pDisj.setSelectedIndex(((Integer)aValue).intValue());
+          tableModel.fireTableRowsUpdated(rowIndex, rowIndex);
           break;
         }
         case 1:{
