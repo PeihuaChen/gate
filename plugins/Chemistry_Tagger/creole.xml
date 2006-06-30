@@ -18,6 +18,14 @@
       <PARAMETER NAME="transducerGrammarURL"
         COMMENT="The JAPE grammar"
         DEFAULT="resources/main.jape">java.net.URL</PARAMETER>
+      <PARAMETER NAME="removeElements"
+        COMMENT="Remove elements which are part of a larger compound or ion"
+        DEFAULT="true"
+        RUNTIME="true">java.lang.Boolean</PARAMETER>
+      <PARAMETER NAME="elementMapURL"
+        COMMENT="File which contains the mapping between element symbols and names"
+        DEFAULT="resources/element_map.txt">java.net.URL</PARAMETER>
+      <ICON>chemistry</ICON>
     </RESOURCE>
   
   </CREOLE>
