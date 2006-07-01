@@ -50,10 +50,9 @@ public class ReadFile {
         data.add(text);
         text = br.readLine();
       }
-
+      text = null;
       // file has been read, close it
       br.close();
-
       // now set the pointer to 0
       pointer = 0;
 
