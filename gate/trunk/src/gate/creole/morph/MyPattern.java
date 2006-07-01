@@ -10,19 +10,14 @@ import java.util.regex.Pattern;
 
 public class MyPattern implements Comparable {
 
-	private String category;
-
 	private String methodName;
-
 	private Matcher matcher;
-
 	private String[] parameters;
-
-	public MyPattern(Pattern pattern, String function, String category) {
+	
+	public MyPattern(Pattern pattern, String function) {
 		this.matcher = pattern.matcher("");
-		methodName = getMethodName(function);
+		methodName = getMethodName(function).intern();
 		parameters = getParameterValues(function);
-		this.category = category;
 	}
 
 	/**
@@ -80,7 +75,7 @@ public class MyPattern implements Comparable {
 			// we need to remove " from String
 			if (parameters[i].startsWith("\"") && parameters[i].endsWith("\"")) {
 				parameters[i] = parameters[i].substring(1, parameters[i]
-						.length() - 1);
+						.length() - 1).intern();
 				continue;
 			}
 		}
@@ -92,46 +87,8 @@ public class MyPattern implements Comparable {
 		return 1;
 	}
 
-	public String getCategory() {
-		return category;
-	}
-
-	public boolean isSameCategory(String category) {
-		if (this.category.equals("*") || category.equals("*")) {
-			return true;
-		} else {
-			if (this.category.equals("verb")) {
-				if (category.equals("VB") || category.equals("VBD")
-						|| category.equals("VBG") || category.equals("VBN")
-						|| category.equals("VBP") || category.equals("VBZ")) {
-					return true;
-				} else {
-					return false;
-				}
-			} else if (this.category.equals("noun")) {
-				if (category.equals("NN") || category.equals("NNP")
-						|| category.equals("NNPS") || category.equals("NNS")
-						|| category.equals("NP") || category.equals("NPS")) {
-					return true;
-				} else {
-					return false;
-				}
-			} else {
-				return false;
-			}
-		}
-	}
-
-	public void setCategory(String cat) {
-		this.category = cat;
-	}
-
 	public Matcher getMatcher() {
 		return matcher;
-	}
-
-	public void setMatcher(Matcher matcher) {
-		this.matcher = matcher;
 	}
 
 	public String getMethodName() {
