@@ -6,6 +6,7 @@
     <!-- creole.xml for MLTrainer -->
     <RESOURCE>
       <NAME>Machine Learning PR</NAME>
+      <JAR>lib/weka-3.4.6</JAR>
       <COMMENT>Trains a machine learning algorithm from a corpus (http://gate.ac.uk/sale/tao/#sect:ml)</COMMENT>
       <CLASS>gate.creole.ml.MachineLearningPR</CLASS>
       <PARAMETER NAME="document" COMMENT="The document to be processed"
