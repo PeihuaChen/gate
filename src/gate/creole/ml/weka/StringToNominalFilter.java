@@ -301,7 +301,8 @@ System.out.println("Atribute \"" + newAttribute.name() + "\":" + values.size());
    * @return a <tt>boolean</tt> value.
    */
   protected boolean isString(int index){
-    int[] stringIndices = getInputStringIndex();
+    
+    int[] stringIndices = m_InputStringAtts.getAttributeIndices();
     for(int i = 0; i < stringIndices.length; i++)
       if(stringIndices[i] == index) return true;
     return false;
@@ -440,4 +441,6 @@ System.out.print(": " + maxCnt);
     "A", 1, "-A <index>,<max count>[,<method>] ...");
     optionsDesc.add(option);
   }
+  
+  
 }
