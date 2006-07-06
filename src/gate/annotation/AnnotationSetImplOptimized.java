@@ -30,13 +30,13 @@
  */
 package gate.annotation;
 
+import java.io.IOException;
 import java.util.*;
 import gate.*;
 import gate.corpora.DocumentImpl;
 import gate.event.*;
 import gate.util.InvalidOffsetException;
 import gate.util.RBTreeMap;
-import gnu.trove.THashSet;
 
 /**
  * Implementation of AnnotationSet. Has a number of indices, all bar one of
@@ -56,9 +56,8 @@ import gnu.trove.THashSet;
  * by indexByType(), or calling a get method that selects on type. The id index
  * is always present.
  */
-public class AnnotationSetImplOptimized extends AbstractSet implements
-                                                           AnnotationSet {
-  private static final long serialVersionUID = 11753098590941174L;
+public class AnnotationSetImplOptimized extends AbstractSet implements AnnotationSet {
+  private static final long serialVersionUID = 738056790476228257L;
 
   /** The name of this set */
   String name = null;
@@ -67,19 +66,19 @@ public class AnnotationSetImplOptimized extends AbstractSet implements
   DocumentImpl doc;
 
   /** Maps annotation ids (Integers) to Annotations */
-  protected HashMap annotsById;
-
-  /** Maps annotation types (Strings) to AnnotationSets */
-  Map annotsByType = null;
+  transient protected HashMap annotsById;
 
   /** Maps offsets (Longs) to nodes */
-  RBTreeMap nodesByOffset = null;
+  transient RBTreeMap nodesByOffset = null;
+
+  /** Maps annotation types (Strings) to AnnotationSets */
+  transient Map annotsByType = null;
 
   /**
    * Maps node ids (Integers) to Annotations or a Collection of Annotations that
    * start from that node
    */
-  Map annotsByStartNode;
+  transient Map annotsByStartNode;
 
   protected transient Vector annotationSetListeners;
 
@@ -145,8 +144,7 @@ public class AnnotationSetImplOptimized extends AbstractSet implements
       removeFromOffsetIndex(lastNext);
       // that's the second way of removing annotations from a set
       // apart from calling remove() on the set itself
-      fireAnnotationRemoved(new AnnotationSetEvent(
-              AnnotationSetImplOptimized.this,
+      fireAnnotationRemoved(new AnnotationSetEvent(AnnotationSetImplOptimized.this,
               AnnotationSetEvent.ANNOTATION_REMOVED, getDocument(),
               (Annotation)lastNext));
     } // remove()
@@ -166,8 +164,7 @@ public class AnnotationSetImplOptimized extends AbstractSet implements
       removeFromOffsetIndex(a);
     }
     // fire the event
-    fireAnnotationRemoved(new AnnotationSetEvent(
-            AnnotationSetImplOptimized.this,
+    fireAnnotationRemoved(new AnnotationSetEvent(AnnotationSetImplOptimized.this,
             AnnotationSetEvent.ANNOTATION_REMOVED, getDocument(), a));
     return wasPresent;
   } // remove(o)
@@ -767,7 +764,7 @@ public class AnnotationSetImplOptimized extends AbstractSet implements
         // we need to create a set - we have more than one annotation starting
         // at this Node
         if(thisNodeObject.equals(a)) return;
-        newCollection = new THashSet(3);
+        newCollection = new HashSet(3);
         newCollection.add(thisNodeObject);
         annotsByStartNode.put(startNode.getId(), newCollection);
       } else newCollection = (Set)thisNodeObject;
@@ -1007,6 +1004,48 @@ public class AnnotationSetImplOptimized extends AbstractSet implements
       for(int i = 0; i < count; i++) {
         ((GateListener)listeners.elementAt(i)).processGateEvent(e);
       }
+    }
+  }
+
+  // how to serialize this object?
+  // there is no need to serialize the indices
+  // so it's probably as fast to just recreate them
+  // if required
+  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+    out.writeObject(this.name);
+    out.writeObject(this.doc);
+    // save only the annotations
+    // in an array that will prevent the need for casting
+    // when deserializing
+    Annotation[] annotations = new Annotation[this.annotsById.size()];
+    annotations = (Annotation[]) this.annotsById.values().toArray(annotations);
+    out.writeObject(annotations);
+    boolean isIndexedByType = (this.annotsByType != null);
+    boolean isIndexedByStartNode = (this.annotsByStartNode != null);
+    out.writeBoolean(isIndexedByType);
+    out.writeBoolean(isIndexedByStartNode);
+  }
+
+  private void readObject(java.io.ObjectInputStream in) throws IOException,
+          ClassNotFoundException {
+    this.name = (String)in.readObject();
+    this.doc = (DocumentImpl)in.readObject();
+    Annotation[] annotations = (Annotation[])in.readObject();
+    // do we need to create the indices?
+    boolean isIndexedByType = in.readBoolean();
+    boolean isIndexedByStartNode = in.readBoolean();
+    this.annotsById = new HashMap(annotations.length);
+    // rebuilds the indices if required
+    if(isIndexedByType) {
+      annotsByType = new HashMap(Gate.HASH_STH_SIZE);
+    }
+    if(isIndexedByStartNode) {
+      nodesByOffset = new RBTreeMap();
+      annotsByStartNode = new HashMap(annotations.length);
+    }
+    // add all the annotations one by one
+    for (int i=0;i<annotations.length;i++) {
+      add(annotations[i]);
     }
   }
 } // AnnotationSetImpl
