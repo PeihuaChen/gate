@@ -42,6 +42,18 @@
   <property name="runtime.max.memory" value="900M"/>
   <property name="runtime.start.memory" value="200M"/>
   
+  <!-- OS specific properties
+       To set a system property for GATE running on a specific platform, define
+       it here:
+
+       <property name="os.Windows XP.prop.name" value="something" />
+
+       will set the system property prop.name to the value "something" when
+       GATE is run on Windows XP.
+  -->
+  <!-- Use to motif toolkit on Linux for compatibility reasons -->
+  <property name="os.Linux.awt.toolkit" value="sun.awt.motif.MToolkit"/>    	
+
   <!-- ******************************************************************* 
        ****************  USER OPTIONS END HERE! ************************** 
        ******************************************************************* -->
@@ -392,6 +404,11 @@
       <propertyref prefix="run." />
       <mapper type="glob" from="run.*" to="*" />
     </propertyset>
+    <!-- gather os-specific properties together -->
+    <propertyset id="os.properties">
+      <propertyref prefix="os.${os.name}." />
+      <mapper type="glob" from="os.${os.name}.*" to="*" />
+    </propertyset>
     <!-- Find if the platform is MAC -->
     <condition property="running.on.mac">
       <os family="mac"/>
@@ -410,9 +427,10 @@
 <!--	     <jvmarg value="-Xms${runtime.start.memory}"/> -->
        <sysproperty key="gate.home" value="${basedir}"/>   
        <sysproperty key="java.ext.dirs" value="${extDir}"/>
-    	<sysproperty key="awt.toolkit" value="sun.awt.motif.MToolkit"/>    	
+   	   <!--<sysproperty key="awt.toolkit" value="sun.awt.motif.MToolkit"/>-->
  <!--	  <sysproperty key="sun.java2d.opengl" value="true"/>-->
        <syspropertyset refid="run.properties" />
+       <syspropertyset refid="os.properties" />
      </java>
   </target>
   
@@ -434,6 +452,7 @@
        <sysproperty key="com.apple.mrj.application.live-resize" value="true"/>
        <jvmarg value="-Xdock:name=GATE ${gate.version}"/>
        <syspropertyset refid="run.properties" />
+       <syspropertyset refid="os.properties" />
      </java>
   </target>
   
