@@ -302,7 +302,7 @@ System.out.println("Atribute \"" + newAttribute.name() + "\":" + values.size());
    */
   protected boolean isString(int index){
     
-    int[] stringIndices = m_InputStringAtts.getAttributeIndices();
+    int[] stringIndices = getInputStringIndex();
     for(int i = 0; i < stringIndices.length; i++)
       if(stringIndices[i] == index) return true;
     return false;
