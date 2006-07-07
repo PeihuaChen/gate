@@ -42,7 +42,6 @@ import gate.sgml.TestSgml;
 import gate.util.*;
 import gate.wordnet.TestWordNet;
 import gate.xml.TestXml;
-import gate.creole.ml.maxent.*;
 import gate.creole.ontology.TestOntologyAPI;
 import gate.xml.TestRepositioningInfo;
 
