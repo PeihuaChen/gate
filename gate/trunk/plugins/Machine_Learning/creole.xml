@@ -6,6 +6,10 @@
     <!-- creole.xml for MLTrainer -->
     <RESOURCE>
       <NAME>Machine Learning PR</NAME>
+      <JAR>lib/maxent-2.4.0.jar</JAR>
+      <JAR>lib/troveForMaxent.jar</JAR>
+      <JAR>lib/weka-3.4.6.jar</JAR>
+      <JAR>machinelearning.jar</JAR>
       <COMMENT>Trains a machine learning algorithm from a corpus (http://gate.ac.uk/sale/tao/#sect:ml)</COMMENT>
       <CLASS>gate.creole.ml.MachineLearningPR</CLASS>
       <PARAMETER NAME="document" COMMENT="The document to be processed"
