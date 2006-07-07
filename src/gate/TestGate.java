@@ -274,7 +274,7 @@ public class TestGate {
         suite.addTest(TestFeatureMap.suite());
         suite.addTest(TestPR.suite());
         suite.addTest(TestMorph.suite());
-        suite.addTest(TestMaxentWrapper.suite());
+        // suite.addTest(TestMaxentWrapper.suite());
 
         //test ontotext gazetteer
         suite.addTest(TestHashGazetteer.suite());

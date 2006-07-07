@@ -23,11 +23,9 @@
 	<classpathentry kind="lib" path="lib/javacc.jar"/>
 	<classpathentry kind="lib" path="lib/servlet-2_3.zip"/>
 	<classpathentry kind="lib" path="lib/orajdbc9i.zip"/>
-	<classpathentry kind="lib" path="lib/troveForMaxent.jar"/>
 	<classpathentry kind="lib" path="lib/xpp3-1.1.3.3_min.jar"/>
 	<classpathentry kind="lib" path="lib/xstream-1.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/jasper-compiler-jdt.jar"/>
-	<classpathentry kind="lib" path="lib/kea.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging.jar"/>
 	<classpathentry kind="lib" path="lib/concurrent.jar"/>
 	<classpathentry kind="lib" path="lib/icu4j.jar"/>
@@ -38,7 +36,5 @@
 	<classpathentry kind="lib" path="lib/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
 	<classpathentry kind="lib" path="lib/PDFBox-0.7.2.jar"/>
-	<classpathentry kind="lib" path="lib/maxent-2.4.0.jar"/>
-	<classpathentry kind="lib" path="lib/weka3.5.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
