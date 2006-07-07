@@ -3,6 +3,7 @@
 
 <CREOLE>
   <RESOURCE>
+    <JAR>lib/weka-3.4.6.jar</JAR>
     <JAR>kea.jar</JAR>
     <NAME>KEA Keyphrase Extractor</NAME>
     <CLASS>gate.creole.kea.Kea</CLASS>
@@ -63,6 +64,7 @@
   </RESOURCE>
   
     <RESOURCE>
+      <JAR>lib/weka-3.4.6.jar</JAR>
       <JAR>kea.jar</JAR>
       <NAME>KEA Corpus Importer</NAME>
       <COMMENT>Imports a KEA-style corpus into GATE</COMMENT>
