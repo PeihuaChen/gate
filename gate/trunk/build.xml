@@ -593,7 +593,7 @@
       <classpath refid="run.class.path"/>
       <sysproperty key="gate.config" value="${buildDir}/gate.xml"/>
       <sysproperty key="gate.home" value="${basedir}"/>
-      <sysproperty key="load.plugin.path" value="file:${basedir}/plugins/ANNIE;file:${basedir}/plugins/Information_Retrieval;file:${basedir}/plugins/Machine_Learning;file:${basedir}/plugins/Obsolete;file:${basedir}/plugins/Ontology_Tools;file:${basedir}/plugins/Tools;file:${basedir}/plugins/WordNet"/>      
+      <sysproperty key="load.plugin.path" value="file:${basedir}/plugins/ANNIE;file:${basedir}/plugins/Information_Retrieval;file:${basedir}/plugins/Obsolete;file:${basedir}/plugins/Ontology_Tools;file:${basedir}/plugins/Tools;file:${basedir}/plugins/WordNet"/>      
       <sysproperty key="java.ext.dirs" value="${extDir}"/>
       <formatter type="plain"
                  usefile="false"/>
