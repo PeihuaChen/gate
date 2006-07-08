@@ -41,10 +41,12 @@ public class TestMaxentWrapper extends TestCase {
     if(!gateInited) {
       File gateHome = new File(System.getProperty("gate.home.location"));
       Gate.setGateHome(gateHome);
-      File pluginsHome = new File(gateHome, "plugins");
       Gate.init();
-      Gate.getCreoleRegister().registerDirectories(
-              new File(pluginsHome, "Machine_Learning").toURL());
+
+      File anniePlugin = new File(System.getProperty("annie.plugin"));
+      Gate.getCreoleRegister().registerDirectories(anniePlugin.toURL());
+      File mlPlugin = new File(System.getProperty("machinelearning.plugin"));
+      Gate.getCreoleRegister().registerDirectories(mlPlugin.toURL());
       gateInited = true;
     }
   }
@@ -86,13 +88,13 @@ public class TestMaxentWrapper extends TestCase {
     );
 
     // Get a tokeniser - just use all the default settings.
-    gate.creole.tokeniser.DefaultTokeniser tokeniser=
-        (gate.creole.tokeniser.DefaultTokeniser) Factory.createResource(
+    LanguageAnalyser tokeniser=
+        (LanguageAnalyser) Factory.createResource(
         "gate.creole.tokeniser.DefaultTokeniser");
 
     // Get a default gazetteer, again just use all the default settings
-    gate.creole.gazetteer.Gazetteer gazetteerInst =
-        (gate.creole.gazetteer.DefaultGazetteer) Factory.createResource(
+    LanguageAnalyser gazetteerInst =
+        (LanguageAnalyser) Factory.createResource(
         "gate.creole.gazetteer.DefaultGazetteer");
 
     // Create the Maxent ML Processing resource.
@@ -101,8 +103,8 @@ public class TestMaxentWrapper extends TestCase {
     maxentParameters.put("configFileURL", Files.getGateResource( 
                                  "/gate.ac.uk/tests/TestMaxentConfigFile.xml"));
     // Then actually make the PR
-    gate.creole.ml.MachineLearningPR maxentPR =
-        (gate.creole.ml.MachineLearningPR)
+    LanguageAnalyser maxentPR =
+        (LanguageAnalyser)
         Factory.createResource("gate.creole.ml.MachineLearningPR",
                                maxentParameters);
 
@@ -116,7 +118,7 @@ public class TestMaxentWrapper extends TestCase {
     maxentPR.execute();
 
     // Now run the trained maxent model.
-    maxentPR.setTraining(new Boolean(false));
+    maxentPR.setParameterValue("training", Boolean.FALSE);
     maxentPR.execute();
 
     // Now clean up so we don't get a memory leak.
