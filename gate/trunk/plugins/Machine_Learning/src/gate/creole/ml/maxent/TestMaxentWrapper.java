@@ -32,19 +32,26 @@ public class TestMaxentWrapper extends TestCase {
     super(name);
   }
 
-  /** Fixture set up - does nothing */
-  public void setUp() throws Exception {
-    //make sure the right plugin is loaded
-    File pluginsHome = new File(System.getProperty(
-            GateConstants.GATE_HOME_PROPERTY_NAME), 
-            "plugins");
-    try{
+  /**
+   * Flag to ensure Gate.init is only called once.
+   */
+  private static boolean gateInited = false;
+  
+  private static synchronized void initGate() throws Exception {
+    if(!gateInited) {
+      File gateHome = new File(System.getProperty("gate.home.location"));
+      Gate.setGateHome(gateHome);
+      File pluginsHome = new File(gateHome, "plugins");
+      Gate.init();
       Gate.getCreoleRegister().registerDirectories(
               new File(pluginsHome, "Machine_Learning").toURL());
-    }catch(Exception e){
-      throw new GateRuntimeException(e);
+      gateInited = true;
     }
-    
+  }
+  
+  /** Fixture set up - init GATE*/
+  public void setUp() throws Exception {
+    initGate();
   }
 
   /** Fixture tear down - does nothing */

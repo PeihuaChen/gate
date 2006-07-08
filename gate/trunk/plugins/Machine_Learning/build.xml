@@ -61,8 +61,27 @@
     <delete file="${jar.location}" />
   </target>
 
+  <target name="test" depends="dist">
+    <junit fork="true" showoutput="yes" printsummary="yes">
+      <classpath>
+        <path refid="classpath" />
+        <!-- include the compiled JAR on the classpath, so the test can make
+        static reference to MLPR methods -->
+        <pathelement location="${jar.location}" />
+      </classpath>
+      <sysproperty key="gate.home.location" value="${gate.home}" />
+      <formatter type="xml" />
+      <test name="gate.creole.ml.maxent.TestMaxentWrapper" />
+    </junit>
+  </target>
+  
   <!-- Targets used by the main GATE build file -->
   <target name="build" depends="dist" />
-  <target name="test" />
-  <target name="distro.prepare" depends="clean.classes" />
+
+  <target name="distro.prepare" depends="clean.classes">
+    <!-- also remove JUnit test reports -->
+    <delete>
+      <fileset dir="." includes="TEST*.xml" />
+    </delete>
+  </target>
 </project>
