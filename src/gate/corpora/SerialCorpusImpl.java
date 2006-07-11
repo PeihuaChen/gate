@@ -105,6 +105,23 @@ public class SerialCorpusImpl extends
   }
 
   /**
+   * Gets the persistent IDs of the documents in this corpus.
+   * @return a {@link List} of Objects representing the persistent IDs of the documents
+   * in this corpus.
+   */
+  public List getDocumentPersistentIDs(){
+    List docsIDs = new ArrayList();
+    if(docDataList == null)
+      return docsIDs;
+    Iterator iter = docDataList.iterator();
+    while (iter.hasNext()) {
+      DocumentData data = (DocumentData) iter.next();
+      docsIDs.add(data.getPersistentID());
+    }
+    return docsIDs;
+  }
+
+  /**
    * This method should only be used by the Serial Datastore to set
    */
   public void setDocumentPersistentID(int index, Object persID){
