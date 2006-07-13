@@ -1952,7 +1952,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
     if((0x10000 <= ch) && (ch <= 0x10FFFF)) return true;
     return false;
   }// End isXmlChar()
-
+  
   /**
    * This method saves a FeatureMap as XML elements.
    * 
@@ -1988,9 +1988,9 @@ public class DocumentImpl extends AbstractLanguageResource implements
         // Features and values that are not Strings, Numbers or collections
         // will be discarded.
         if(keyClassName == null || valueClassName == null) continue;
-        // If key is collection serialize the colection in a specific format
+        // If key is collection serialize the collection in a specific format
         if(key instanceof java.util.Collection) {
-          StringBuffer keyStrBuff = new StringBuffer(256);
+          StringBuffer keyStrBuff = new StringBuffer();
           Iterator iter = ((Collection)key).iterator();
           if(iter.hasNext()) {
             item = iter.next();
@@ -2007,7 +2007,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
         }// End if
         // If key is collection serialize the colection in a specific format
         if(value instanceof java.util.Collection) {
-          StringBuffer valueStrBuff = new StringBuffer(256);
+          StringBuffer valueStrBuff = new StringBuffer();
           Iterator iter = ((Collection)value).iterator();
           if(iter.hasNext()) {
             item = iter.next();
@@ -2029,7 +2029,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
           buffer.append(" itemClassName=\"").append(keyItemClassName).append(
                   "\"");
         buffer.append(">");
-        buffer.append(filterNonXmlChars(replaceCharsWithEntities(key2String)));
+        buffer.append(combinedNormalisation(key2String));
         buffer.append("</Name>\n  <Value");
         if(valueClassName != null)
           buffer.append(" className=\"").append(valueClassName).append("\"");
@@ -2037,8 +2037,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
           buffer.append(" itemClassName=\"").append(valueItemClassName).append(
                   "\"");
         buffer.append(">");
-        buffer
-                .append(filterNonXmlChars(replaceCharsWithEntities(value2String)));
+        buffer.append(combinedNormalisation(value2String));
         buffer.append("</Value>\n</Feature>\n");
       }// End if
     }// end While
@@ -2064,6 +2063,25 @@ public class DocumentImpl extends AbstractLanguageResource implements
     return strBuff;
   }// replaceCharsWithEntities()
 
+  /**
+   * Combines replaceCharsWithEntities and filterNonXmlChars in a single method
+   **/
+  private StringBuffer combinedNormalisation(String inputString){
+    if(inputString == null) return new StringBuffer("");
+    StringBuffer buffer = new StringBuffer(inputString);
+    for (int i=buffer.length()-1; i>=0; i--){
+      char currentchar = buffer.charAt(i);
+      // is the current character an xml char which needs replacing?
+      if(!isXmlChar(currentchar)) buffer.replace(i,i+1," ");
+      // is the current character an xml char which needs replacing?
+      else if(currentchar == '<' || currentchar == '>' || currentchar == '&'|| currentchar == '\''|| currentchar == '\"'|| currentchar == 0xA0 || currentchar == 0xA0 || currentchar == 0xA9){
+        buffer.replace(i,i+1,(String) entitiesMap.get(new Character(currentchar)));
+      }
+    }
+    return buffer;
+  }
+  
+  
   private String textWithNodes(String aText) {
     // filterNonXmlChars
     // getoffsets for Nodes
