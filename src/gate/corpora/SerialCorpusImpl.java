@@ -143,6 +143,17 @@ public class SerialCorpusImpl extends
   }
 
   /**
+   * Gets the persistent ID of a document in this corpus.
+   * @param index the index of the document
+   * @return a value representing the persistent ID of the document at
+   * <tt>index</tt> in this corpus.<P>
+   */
+  public Object getDocumentPersistentID(int index){
+    if (index >= docDataList.size()) return null;
+    return ((DocumentData) docDataList.get(index)).getPersistentID();
+  }
+  
+  /**
    * Unloads the document from memory, but calls sync() first, to store the
    * changes
    */
