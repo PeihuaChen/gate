@@ -1880,7 +1880,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
     xmlContent.append("<GateDocument>\n");
     xmlContent.append("<!-- The document's features-->\n\n");
     xmlContent.append("<GateDocumentFeatures>\n");
-    xmlContent.append(featuresToXml(this.getFeatures()));
+    xmlContent.append(featuresToXml(this.getFeatures(),null));
     xmlContent.append("</GateDocumentFeatures>\n");
     xmlContent.append("<!-- The document content area with serialized"
             + " nodes -->\n\n");
@@ -1960,7 +1960,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    *          the feature map that has to be saved as XML.
    * @return a String like this: <Feature><Name>...</Name> <Value>...</Value></Feature><Feature>...</Feature>
    */
-  private StringBuffer featuresToXml(FeatureMap aFeatureMap) {
+  private StringBuffer featuresToXml(FeatureMap aFeatureMap, Map normalizedFeatureNames) {
     if(aFeatureMap == null) return new StringBuffer();
     StringBuffer buffer = new StringBuffer(1024);
     Set keySet = aFeatureMap.keySet();
@@ -2029,7 +2029,21 @@ public class DocumentImpl extends AbstractLanguageResource implements
           buffer.append(" itemClassName=\"").append(keyItemClassName).append(
                   "\"");
         buffer.append(">");
-        buffer.append(combinedNormalisation(key2String));
+        
+        // use a map of keys already checked for XML validity
+        StringBuffer normalizedKey = new StringBuffer(key2String);
+        if (normalizedFeatureNames!=null){
+          // has this key been already converted ?
+          normalizedKey = (StringBuffer)normalizedFeatureNames.get(key2String);
+          if (normalizedKey==null){
+            // never seen so far!
+            normalizedKey= combinedNormalisation(key2String);
+            normalizedFeatureNames.put(key2String,normalizedKey);
+          }
+        }
+        else normalizedKey = combinedNormalisation(key2String);
+        
+        buffer.append(normalizedKey);
         buffer.append("</Name>\n  <Value");
         if(valueClassName != null)
           buffer.append(" className=\"").append(valueClassName).append("\"");
@@ -2074,10 +2088,9 @@ public class DocumentImpl extends AbstractLanguageResource implements
       // is the current character an xml char which needs replacing?
       if(!isXmlChar(currentchar)) buffer.replace(i,i+1," ");
       // is the current character an xml char which needs replacing?
-      else if(currentchar == '<' || currentchar == '>' || currentchar == '&'|| currentchar == '\''|| currentchar == '\"'|| currentchar == 0xA0 || currentchar == 0xA0 || currentchar == 0xA9){
+      else if(currentchar == '<' || currentchar == '>' || currentchar == '&'|| currentchar == '\''|| currentchar == '\"' || currentchar == 0xA0 || currentchar == 0xA9)
         buffer.replace(i,i+1,(String) entitiesMap.get(new Character(currentchar)));
       }
-    }
     return buffer;
   }
   
@@ -2183,6 +2196,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
       buffer.append(anAnnotationSet.getName());
       buffer.append("\" >\n");
     }
+    HashMap convertedKeys = new HashMap();
     // Iterate through AnnotationSet and save each Annotation as XML
     Iterator iterator = anAnnotationSet.iterator();
     while(iterator.hasNext()) {
@@ -2196,7 +2210,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
       buffer.append("\" EndNode=\"");
       buffer.append(annot.getEndNode().getOffset());
       buffer.append("\">\n");
-      buffer.append(featuresToXml(annot.getFeatures()));
+      buffer.append(featuresToXml(annot.getFeatures(),convertedKeys));
       buffer.append("</Annotation>\n");
     }// End while
     buffer.append("</AnnotationSet>\n");
