@@ -83,7 +83,7 @@ public class Interpret {
 	 */
 	public void init(URL ruleFileURL) throws ResourceInstantiationException {
 		vPat = Pattern.compile("(VB)[DGNPZ]?");
-		nPat = Pattern.compile("(NN)[.]*");
+		nPat = Pattern.compile("(NN)(.)*");
 		variables = new Storage();
 		prepareListOfMorphMethods();
 		patterns = new ArrayList();
