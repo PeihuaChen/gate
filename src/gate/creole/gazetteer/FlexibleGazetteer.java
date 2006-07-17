@@ -66,7 +66,8 @@ public class FlexibleGazetteer
    * are set. If they are not, an exception will be fired.
    */
   public void execute() throws ExecutionException {
-    fireProgressChanged(0);
+    changedNodes = new ArrayList();
+	fireProgressChanged(0);
     fireStatusChanged("Checking Document...");
     if (document == null) {
       throw new ExecutionException(
@@ -83,6 +84,7 @@ public class FlexibleGazetteer
       inputFeatureNames = new ArrayList();
     }
 
+	// The method getTokenIterator returns the sorted iterator 
     Iterator tokenIter = getTokenIterator(document, inputAnnotationSetName);
     long totalDeductedSpaces = 0;
     fireStatusChanged("Replacing contents with the feature value...");
@@ -162,6 +164,7 @@ public class FlexibleGazetteer
               // so lets find the new startOffset and endOffset
               long newStartOffset = startOffset - totalDeductedSpaces;
               long newEndOffset = newStartOffset + newTokenValue.length();
+              totalDeductedSpaces += lengthDifference;
 
               // and make the entry for this
               NodePosition newNode = new NodePosition(startOffset,
@@ -170,7 +173,6 @@ public class FlexibleGazetteer
               changedNodes.add(newNode);
               // how many spaces have been added or removed till the current
               // position of the token
-              totalDeductedSpaces += lengthDifference;
 
               // and finally replace the actual string in the document
               // with the new document
@@ -215,139 +217,63 @@ public class FlexibleGazetteer
                              document.getAnnotations(outputAnnotationSetName);
     long totalSpaceAdded = 0;
     long difference = 0;
-
-    int foundNode = -1;
+	int foundnode = 0;
     while (tokensIter != null && tokensIter.hasNext()) {
       Annotation currentToken = (Annotation) (tokensIter.next());
       long startOffset = currentToken.getStartNode().getOffset().longValue();
       long endOffset = currentToken.getEndNode().getOffset().longValue();
 
-      // search through the changedNodes and if it is found we will have to
-      // find the new offsets
-      int i = foundNode + 1;
-      boolean found = false;
-      inner1:for (; i < changedNodes.size(); i++) {
+	  // if there was any change node before the startOffset
+	  long spacesToAddToSO = 0;
+	  long spacesToAddToEO = 0;
+	  int i=0;
+	  for(;i<changedNodes.size();i++) {
+		NodePosition np = (NodePosition) changedNodes.get(i);
 
-        NodePosition tempNode = (NodePosition) (changedNodes.get(i));
-
-        // all the nodes are in the sorted order based on there offsets
-        // so if we reach beyond the position of the current text
-        // under consideration, simply terminate the loop
-        if (tempNode.getNewStartNode() > startOffset) {
-          // so we lets point to the node whose startOffset
-          // is less than the startOffset of the current node
-          // this will allow us to find out how many
-          // extra spaces were added or removed before the current token
-          i = i - 1;
-          break inner1;
-        }
-
-        // how do we know if we want to change the offset
-        if (tempNode.getNewStartNode() == startOffset) {
-          // yes it is available
-
-          // lets find the end node
-          int k = i;
-          for (;
-               k >= 0 && k < changedNodes.size() &&
-               endOffset >
-               ( (NodePosition) changedNodes.get(k)).getNewStartNode(); k++)
-            ;
-          long spacesToAdd = 0;
-          if (k - 1 == i && k - 1 >= 0) {
-            spacesToAdd = (tempNode.getOldEndNode() - tempNode.getNewEndNode());
-          }
-          else if (k - 1 < 0) {
-            spacesToAdd = 0;
-          }
-          else {
-            spacesToAdd = ( (NodePosition) changedNodes.get(k - 1)).
-                          getOldEndNode() -
-                          ( (NodePosition) changedNodes.get(k - 1)).
-                          getNewEndNode();
-          }
-
-          // and how many to be added before the endnode
-          // as any look up notation can be for the text with one or more tokens
-          FeatureMap newFeatureMap = currentToken.getFeatures();
-          try {
-
-            original.add(new Long(startOffset +
-                                  (tempNode.getOldStartNode() -
-                                   tempNode.getNewStartNode())),
-                         new Long(endOffset + spacesToAdd),
-                         //new Long(endOffset + (tempNode.getOldEndNode()
-                         //          - tempNode.getNewEndNode())),
-                         ANNIEConstants.LOOKUP_ANNOTATION_TYPE,
-                         newFeatureMap);
-
-          }
-          catch (InvalidOffsetException ioe) {
-            throw new ExecutionException("Offset Error");
-          }
-          found = true;
-          foundNode = i;
-          break inner1;
-        }
-      }
-
-      if (!found) {
-        long totalStartSpaces = 0;
-        long totalEndSpaces = 0;
-
-        // check if we have reached at the end of the changedNodes
-        // if yes we need to find the last node
-        i = (changedNodes.size() == i) ? i - 1 : i;
-
-        // lets find the end node
-        int k = i;
-        for (;
-             k > 0 && k < changedNodes.size() &&
-             endOffset > ( (NodePosition) changedNodes.get(k)).getNewStartNode();
-             k++)
-          ;
-        long spacesToAdd = 0;
-        if (k - 1 == i && k - 1 >= 0) {
-          spacesToAdd = ( ( (NodePosition) changedNodes.get(i)).getOldEndNode() -
-                         ( (NodePosition) changedNodes.get(i)).getNewEndNode());
-        }
-        else if (k - 1 < 0) {
-          spacesToAdd = 0;
-        }
-        else {
-          spacesToAdd = ( (NodePosition) changedNodes.get(k - 1)).
-                        getOldEndNode() -
-                        ( (NodePosition) changedNodes.get(k - 1)).getNewEndNode();
-        }
-
-        if (i >= 0) {
-          //totalStartSpaces = ((NodePosition)
-          // changedNodes.get(i)).getOldStartNode()
-          // - ((NodePosition) changedNodes.get(i)).getNewStartNode();
-          totalStartSpaces = ( (NodePosition) changedNodes.get(i)).
-                             getOldEndNode() -
-                             ( (NodePosition) changedNodes.get(i)).
-                             getNewEndNode();
-          //totalEndSpaces = ((NodePosition)
-          // changedNodes.get(i)).getOldEndNode() -
-          // ((NodePosition) changedNodes.get(i)).getNewEndNode();
-          totalEndSpaces = spacesToAdd;
-          foundNode = i;
-        }
-
-        // no it is not available
-        FeatureMap newFeatureMap = currentToken.getFeatures();
-        try {
-          original.add(new Long(startOffset + totalStartSpaces),
-                       new Long(endOffset + totalEndSpaces),
-                       ANNIEConstants.LOOKUP_ANNOTATION_TYPE,
-                       newFeatureMap);
-        }
-        catch (InvalidOffsetException ioe) {
-          throw new ExecutionException("Offset Error");
-        }
-
-      }
+		if(np.getNewEndNode() < startOffset) {
+			continue;
+		} else if(np.getNewStartNode() == startOffset) { 
+			foundnode = i;
+			i--;
+			if(i >= 0) {
+				spacesToAddToSO = ((NodePosition) changedNodes.get(i)).getDeductedSpaces();
+			} else {
+				spacesToAddToSO = 0;
+			}
+			spacesToAddToEO = np.getDeductedSpaces();
+			break;
+		} else {
+			foundnode = i;
+			i--;
+			if(i >= 0) {
+				spacesToAddToSO = ((NodePosition) changedNodes.get(i)).getDeductedSpaces();
+				spacesToAddToEO = spacesToAddToSO;
+			} else {
+				spacesToAddToSO = 0;
+				spacesToAddToEO = 0;
+			}
+			break;
+		}
+	  }
+	  
+	  if(i == changedNodes.size()) {
+		  foundnode = i;
+		  i--;
+		  if(i >= 0) {
+			spacesToAddToSO = ((NodePosition) changedNodes.get(i)).getDeductedSpaces();
+			spacesToAddToEO = spacesToAddToSO;
+		  } else {
+			spacesToAddToSO = 0;
+			spacesToAddToEO = 0;
+		  }
+	  }
+	  
+	  try {
+		  original.add(new Long(startOffset + spacesToAddToSO), new Long(endOffset + spacesToAddToEO), currentToken.getType(), currentToken.getFeatures());
+	  } catch(InvalidOffsetException ioe) {
+		  throw new ExecutionException(ioe);
+	  }
+	  
     }
 
     // now remove the newDoc
@@ -452,7 +378,7 @@ public class FlexibleGazetteer
 
     Comparator offsetComparator = new OffsetComparator();
     Collections.sort(tokens, offsetComparator);
-    Iterator tokenIter = tokens.iterator();
+    Iterator tokenIter = tokens.listIterator();
     return tokenIter;
   }
 
