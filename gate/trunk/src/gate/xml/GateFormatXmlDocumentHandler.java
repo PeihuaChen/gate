@@ -61,6 +61,12 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
    * ID generator on the document. This is why we need a TreeSet.
    */
   private TreeSet annotationIdSet = new TreeSet();
+  
+  /** 
+   * Instead of creating a new Class object for every Feature object
+   * we store them in a map with a String as a key.
+   ***/
+  private Map classCache = new HashMap();  
 
   /**
     */
@@ -623,11 +629,17 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
     if (aFeatClassName == null) aFeatClassName = "java.lang.String";
     if (aFeatItemClassName == null) aFeatItemClassName = "java.lang.String";
     Class currentFeatClass = null;
-    try{
-      currentFeatClass = Gate.getClassLoader().loadClass(aFeatClassName);
-    }catch (ClassNotFoundException cnfex){
-      return aFeatStringRepresentation;
-    }// End try
+    // look in the cache for existing
+    // Class objects instead of recreating them
+    currentFeatClass = (Class)classCache.get(aFeatClassName);
+    if(currentFeatClass == null) {
+      try {
+        currentFeatClass = Gate.getClassLoader().loadClass(aFeatClassName);
+      } catch(ClassNotFoundException cnfex) {
+        return aFeatStringRepresentation;
+      }// End try
+      classCache.put(aFeatClassName,currentFeatClass);
+    }
     if (java.util.Collection.class.isAssignableFrom(currentFeatClass)){
       Class itemClass = null;
       Collection featObject = null;
