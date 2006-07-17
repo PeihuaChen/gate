@@ -73,7 +73,7 @@ public class MorphFunctions {
 
     /* look for -es, -ed, -ing; cannot be anything else */
     if(input.charAt(inputLength-1) == 's' || input.charAt(inputLength-1) == 'S') {
-      stem_length-=1;
+      stem_length-=2;
       this.affix = "s";
     }
 
