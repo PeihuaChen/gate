@@ -43,6 +43,9 @@ public interface Document extends SimpleDocument {
     DOCUMENT_STRING_CONTENT_PARAMETER_NAME = "stringContent";
 
   public static final String
+    DOCUMENT_MIME_TYPE_PARAMETER_NAME = "mimeType";
+  
+  public static final String
     DOCUMENT_REPOSITIONING_PARAMETER_NAME = "collectRepositioningInfo";
 
   public static final String

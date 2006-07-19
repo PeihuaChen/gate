@@ -192,8 +192,23 @@ public class DocumentImpl extends AbstractLanguageResource implements
     } // if
     // set up a DocumentFormat if markup unpacking required
     if(getMarkupAware().booleanValue()) {
-      DocumentFormat docFormat = DocumentFormat.getDocumentFormat(this,
-              sourceUrl);
+      DocumentFormat docFormat = null;
+      // if a specific MIME type has been given, use it
+      if(this.mimeType != null && this.mimeType.length() > 0) {
+        int indexOfSlash = this.mimeType.indexOf('/');
+        if(indexOfSlash < 0) {
+          throw new ResourceInstantiationException("Invalid mimeType \""
+              + this.mimeType + "\", MIME type must contain a '/' character");
+        }
+        MimeType theType = new MimeType(
+            this.mimeType.substring(0, indexOfSlash),
+            this.mimeType.substring(indexOfSlash + 1));
+
+        docFormat = DocumentFormat.getDocumentFormat(this, theType);
+      }
+      else {
+        docFormat = DocumentFormat.getDocumentFormat(this, sourceUrl);
+      }
       try {
         if(docFormat != null) {
           StatusListener sListener = (StatusListener)gate.gui.MainFrame
@@ -419,6 +434,17 @@ public class DocumentImpl extends AbstractLanguageResource implements
       this.getDataStore().removeDatastoreListener(this);
   } // cleanup()
 
+
+  /** Get the specific MIME type for this document, if set */
+  public String getMimeType() {
+    return mimeType;
+  }
+  
+  /** Set the specific MIME type for this document */
+  public void setMimeType(String newMimeType) {
+    this.mimeType = newMimeType;
+  }
+  
   /** Documents are identified by URLs */
   public URL getSourceUrl() {
     return sourceUrl;
@@ -2327,6 +2353,12 @@ public class DocumentImpl extends AbstractLanguageResource implements
 
   /** The source URL */
   protected URL sourceUrl;
+
+  /** The document's MIME type.  Only relevant if the document is markup aware,
+   * and if omitted, DocumentFormat will attempt to determine the format to use
+   * heuristically.
+   */
+  protected String mimeType;
 
   /** The document's URL name. */
   /** The content of the document */

@@ -237,6 +237,94 @@ public class TestDocument extends TestCase
     }// End while
   }//verifyNodeIdConsistency();
 
+  /**
+   * Test to verify behaviour of the mimeType init parameter.
+   */
+  public void testExplicitMimeType() throws Exception {
+    // override the user config to make sure we DON'T add extra space on
+    // unpackMarkup when parsing XML, whatever is set in the user config file.
+    Object savedAddSpaceValue = Gate.getUserConfig().get(
+        GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME);
+    Gate.getUserConfig().put(
+        GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME, "false");
+
+    try {
+      String testXmlString = "<p>This is a <strong>TEST</strong>.</p>";
+      String xmlParsedContent = "This is a TEST.";
+      String htmlParsedContent = "This is a TEST .\n";
+
+      // if we create a Document from this string WITHOUT setting a mime type,
+      // it should be treated as plain text and not parsed.
+      FeatureMap docParams = Factory.newFeatureMap();
+      docParams.put(Document.DOCUMENT_STRING_CONTENT_PARAMETER_NAME,
+          testXmlString);
+      docParams.put(Document.DOCUMENT_MARKUP_AWARE_PARAMETER_NAME,
+          Boolean.TRUE);
+
+      Document noMimeTypeDoc = (Document)Factory.createResource(
+          DocumentImpl.class.getName(), docParams);
+
+      assertEquals("Document created with no explicit mime type should have "
+          + "unparsed XML as content.", testXmlString,
+          noMimeTypeDoc.getContent().toString());
+
+      assertEquals("Document created with no explicit mime type should not "
+          + "have any Original markups annotations.", 0,
+          noMimeTypeDoc.getAnnotations(
+            GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME).size());
+
+      Factory.deleteResource(noMimeTypeDoc);
+      noMimeTypeDoc = null;
+
+      // if we create the same document with an explicit mime type of text/xml,
+      // it should be parsed properly, and have two original markups
+      // annotations.
+      docParams.put(Document.DOCUMENT_MIME_TYPE_PARAMETER_NAME, "text/xml");
+
+      Document xmlDoc = (Document)Factory.createResource(
+          DocumentImpl.class.getName(), docParams);
+
+      assertEquals("Document created with explicit mime type should have been "
+          + "parsed as XML.", xmlParsedContent,
+          xmlDoc.getContent().toString());
+
+      assertEquals("Document created with explicit mime type has wrong number "
+          + "of Original markups annotations.", 2,
+          xmlDoc.getAnnotations(
+            GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME).size());
+
+      Factory.deleteResource(xmlDoc);
+      xmlDoc = null;
+
+      // if we create the same document with an explicit mime type of text/html,
+      // it should be parsed properly and have *4* original markups
+      // annotations, as the HTML parser creates enclosing <html> and <body>
+      // elements and a zero-length <head> annotation.
+      docParams.put(Document.DOCUMENT_MIME_TYPE_PARAMETER_NAME, "text/html");
+
+      Document htmlDoc = (Document)Factory.createResource(
+          DocumentImpl.class.getName(), docParams);
+
+      assertEquals("Document created with explicit mime type should have been "
+          + "parsed as HTML.", htmlParsedContent,
+          htmlDoc.getContent().toString());
+
+      assertEquals("Document created with explicit mime type has wrong number "
+          + "of Original markups annotations.", 5,
+          htmlDoc.getAnnotations(
+            GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME).size());
+
+      Factory.deleteResource(htmlDoc);
+      htmlDoc = null;
+    }
+    finally {
+      // restore the saved value for ADD_SPACE_ON_MARKUP_UNPACK
+      Gate.getUserConfig().put(
+          GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME,
+          savedAddSpaceValue);
+    }
+  }
+
   /** Test suite routine for the test runner */
   public static Test suite() {
     return new TestSuite(TestDocument.class);
