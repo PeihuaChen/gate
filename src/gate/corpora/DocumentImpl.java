@@ -726,7 +726,8 @@ public class DocumentImpl extends AbstractLanguageResource implements
     // Here we go.
     if(sListener != null)
       sListener.statusChanged("Dumping annotations as XML");
-    StringBuffer xmlDoc = new StringBuffer(DOC_SIZE_MULTIPLICATION_FACTOR
+    StringBuffer xmlDoc = new StringBuffer(
+            DocumentXmlUtils.DOC_SIZE_MULTIPLICATION_FACTOR
             * (this.getContent().size().intValue()));
     // Add xml header if original format was xml
     String mimeType = getFeatures() == null ? null : (String)getFeatures().get(
@@ -887,7 +888,8 @@ public class DocumentImpl extends AbstractLanguageResource implements
     if(this.getContent() == null)
       content = new String("");
     else content = this.getContent().toString();
-    StringBuffer docContStrBuff = filterNonXmlChars(new StringBuffer(content));
+    StringBuffer docContStrBuff =
+      DocumentXmlUtils.filterNonXmlChars(new StringBuffer(content));
     if(aDumpAnnotSet == null) return docContStrBuff.toString();
     TreeMap offsets2CharsMap = new TreeMap();
     if(this.getContent().size().longValue() != 0) {
@@ -992,7 +994,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
           // Replace the char at offsChar with its corresponding entity form
           // the entitiesMap.
           docContStrBuff.replace(offsChar.intValue(), offsChar.intValue() + 1,
-                  (String)entitiesMap.get((Character)offsets2CharsMap
+                  (String)DocumentXmlUtils.entitiesMap.get((Character)offsets2CharsMap
                           .get(offsChar)));
           // Discard the offsChar after it was used.
           offsets2CharsMap.remove(offsChar);
@@ -1011,7 +1013,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
       Long offsChar = (Long)offsets2CharsMap.lastKey();
       // Replace the char with its entity
       docContStrBuff.replace(offsChar.intValue(), offsChar.intValue() + 1,
-              (String)entitiesMap
+              (String)DocumentXmlUtils.entitiesMap
                       .get((Character)offsets2CharsMap.get(offsChar)));
       // remove the offset from the map
       offsets2CharsMap.remove(offsChar);
@@ -1025,7 +1027,8 @@ public class DocumentImpl extends AbstractLanguageResource implements
     if(this.getContent() == null)
       content = new String("");
     else content = this.getContent().toString();
-    StringBuffer docContStrBuff = filterNonXmlChars(new StringBuffer(content));
+    StringBuffer docContStrBuff =
+      DocumentXmlUtils.filterNonXmlChars(new StringBuffer(content));
     if(aDumpAnnotList == null) return docContStrBuff.toString();
     StringBuffer resultStrBuff = new StringBuffer(
             DOC_SIZE_MULTIPLICATION_FACTOR_AS
@@ -1159,7 +1162,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
       // if there are chars to be replaced in range
       if(!offsetsInRange.isEmpty()) {
         tmpOffset = (Long)offsetsInRange.firstKey();
-        replacement = (String)entitiesMap.get((Character)offsets2CharsMap
+        replacement = (String)DocumentXmlUtils.entitiesMap.get((Character)offsets2CharsMap
                 .get(tmpOffset));
         partText.append(docContStrBuff.substring(tmpLastOffset.intValue(),
                 tmpOffset.intValue()));
@@ -1186,7 +1189,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
     // they need to be replaced
     if(!offsetsInRange.isEmpty()) {
       tmpOffset = (Long)offsetsInRange.firstKey();
-      replacement = (String)entitiesMap.get((Character)offsets2CharsMap
+      replacement = (String)DocumentXmlUtils.entitiesMap.get((Character)offsets2CharsMap
               .get(tmpOffset));
       partText.append(docContStrBuff.substring(tmpLastOffset.intValue(),
               tmpOffset.intValue()));
@@ -1758,12 +1761,12 @@ public class DocumentImpl extends AbstractLanguageResource implements
    */
   private void buildEntityMapFromString(String aScanString, TreeMap aMapToFill) {
     if(aScanString == null || aMapToFill == null) return;
-    if(entitiesMap == null || entitiesMap.isEmpty()) {
+    if(DocumentXmlUtils.entitiesMap == null || DocumentXmlUtils.entitiesMap.isEmpty()) {
       Err.prln("WARNING: Entities map was not initialised !");
       return;
     }// End if
     // Fill the Map with the offsets of the special chars
-    Iterator entitiesMapIterator = entitiesMap.keySet().iterator();
+    Iterator entitiesMapIterator = DocumentXmlUtils.entitiesMap.keySet().iterator();
     Character c;
     int fromIndex;
     while(entitiesMapIterator.hasNext()) {
@@ -1847,15 +1850,15 @@ public class DocumentImpl extends AbstractLanguageResource implements
           }
           // strBuff.append(key);
           // replace non XML chars in attribute name
-          strBuff.append(filterNonXmlChars(replaceCharsWithEntities(key
-                  .toString())));
+          strBuff.append(DocumentXmlUtils.combinedNormalisation(key
+                  .toString()));
           strBuff.append("=\"");
         } else {
           strBuff.append(" ");
           // strBuff.append(key);
           // replace non XML chars in attribute name
-          strBuff.append(filterNonXmlChars(replaceCharsWithEntities(key
-                  .toString())));
+          strBuff.append(DocumentXmlUtils.combinedNormalisation(key
+                  .toString()));
           strBuff.append("=\"");
         }
         if(java.util.Collection.class.isAssignableFrom(value.getClass())) {
@@ -1866,8 +1869,8 @@ public class DocumentImpl extends AbstractLanguageResource implements
                     .isAssignableFrom(item.getClass()))) continue;
             // strBuff.append(item);
             // replace non XML chars in collection item
-            strBuff.append(filterNonXmlChars(replaceCharsWithEntities(item
-                    .toString())));
+            strBuff.append(DocumentXmlUtils.combinedNormalisation(item
+                    .toString()));
             strBuff.append(";");
           }// End while
           if(strBuff.charAt(strBuff.length() - 1) == ';')
@@ -1875,8 +1878,8 @@ public class DocumentImpl extends AbstractLanguageResource implements
         } else {
           // strBuff.append(value);
           // replace non XML chars in attribute value
-          strBuff.append(filterNonXmlChars(replaceCharsWithEntities(value
-                  .toString())));
+          strBuff.append(DocumentXmlUtils.combinedNormalisation(value
+                  .toString()));
         }// End if
         strBuff.append("\"");
       }// End if
@@ -1889,319 +1892,18 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * reader inside GATE called gate.xml.GateFormatXmlHandler. What it does is to
    * serialize a GATE document in an XML format.
    * 
+   * Implementation note: this method simply delegates to the static {@link
+   * DocumentXmlUtils.toXml(Document)} method
+   * 
    * @return a string representing a Gate Xml document.
    */
   public String toXml() {
-    // Initialize the xmlContent several time the size of the current document.
-    // This is because of the tags size. This measure is made to increase the
-    // performance of StringBuffer.
-    StringBuffer xmlContent = new StringBuffer(DOC_SIZE_MULTIPLICATION_FACTOR
-            * (getContent().size().intValue()));
-    // Add xml header
-    xmlContent.append("<?xml version=\"1.0\" encoding=\"");
-    xmlContent.append(getEncoding());
-    xmlContent.append("\" ?>");
-    xmlContent.append(Strings.getNl());
-    // Add the root element
-    xmlContent.append("<GateDocument>\n");
-    xmlContent.append("<!-- The document's features-->\n\n");
-    xmlContent.append("<GateDocumentFeatures>\n");
-    xmlContent.append(featuresToXml(this.getFeatures(),null));
-    xmlContent.append("</GateDocumentFeatures>\n");
-    xmlContent.append("<!-- The document content area with serialized"
-            + " nodes -->\n\n");
-    // Add plain text element
-    xmlContent.append("<TextWithNodes>");
-    xmlContent.append(textWithNodes(this.getContent().toString()));
-    xmlContent.append("</TextWithNodes>\n");
-    // Serialize as XML all document's annotation sets
-    // Serialize the default AnnotationSet
-    StatusListener sListener = (StatusListener)gate.gui.MainFrame
-            .getListeners().get("gate.event.StatusListener");
-    if(sListener != null)
-      sListener.statusChanged("Saving the default annotation set ");
-    xmlContent.append("<!-- The default annotation set -->\n\n");
-    annotationSetToXml(this.getAnnotations(), xmlContent);
-    // Serialize all others AnnotationSets
-    // namedAnnotSets is a Map containing all other named Annotation Sets.
-    if(namedAnnotSets != null) {
-      Iterator iter = namedAnnotSets.values().iterator();
-      while(iter.hasNext()) {
-        AnnotationSet annotSet = (AnnotationSet)iter.next();
-        xmlContent.append("<!-- Named annotation set -->\n\n");
-        // Serialize it as XML
-        if(sListener != null)
-          sListener.statusChanged("Saving " + annotSet.getName()
-                  + " annotation set ");
-        annotationSetToXml(annotSet, xmlContent);
-      }// End while
-    }// End if
-    // Add the end of GateDocument
-    xmlContent.append("</GateDocument>");
-    if(sListener != null) sListener.statusChanged("Done !");
-    // return the XmlGateDocument
-    return xmlContent.toString();
+    return DocumentXmlUtils.toXml(this);
   }// toXml
 
   /**
-   * This method filters any non XML char see:
-   * http://www.w3c.org/TR/2000/REC-xml-20001006#charsets All non XML chars will
-   * be replaced with 0x20 (space char) This assures that the next time the
-   * document is loaded there won't be any problems.
-   * 
-   * @param aStrBuffer
-   *          represents the input String that is filtred. If the aStrBuffer is
-   *          null then an empty string will be returend
-   * @return the "purified" StringBuffer version of the aStrBuffer
-   */
-  private StringBuffer filterNonXmlChars(StringBuffer aStrBuffer) {
-    if(aStrBuffer == null) return new StringBuffer("");
-    // String space = new String(" ");
-    char space = ' ';
-    for(int i = aStrBuffer.length() - 1; i >= 0; i--) {
-      if(!isXmlChar(aStrBuffer.charAt(i))) aStrBuffer.setCharAt(i, space);
-    }// End for
-    return aStrBuffer;
-  }// filterNonXmlChars()
-
-  /**
-   * This method decide if a char is a valid XML one or not
-   * 
-   * @param ch
-   *          the char to be tested
-   * @return true if is a valid XML char and fals if is not.
-   */
-  public static boolean isXmlChar(char ch) {
-    if(ch == 0x9 || ch == 0xA || ch == 0xD) return true;
-    if((0x20 <= ch) && (ch <= 0xD7FF)) return true;
-    if((0xE000 <= ch) && (ch <= 0xFFFD)) return true;
-    if((0x10000 <= ch) && (ch <= 0x10FFFF)) return true;
-    return false;
-  }// End isXmlChar()
-  
-  /**
-   * This method saves a FeatureMap as XML elements.
-   * 
-   * @param aFeatureMap
-   *          the feature map that has to be saved as XML.
-   * @return a String like this: <Feature><Name>...</Name> <Value>...</Value></Feature><Feature>...</Feature>
-   */
-  private StringBuffer featuresToXml(FeatureMap aFeatureMap, Map normalizedFeatureNames) {
-    if(aFeatureMap == null) return new StringBuffer();
-    StringBuffer buffer = new StringBuffer(1024);
-    Set keySet = aFeatureMap.keySet();
-    Iterator keyIterator = keySet.iterator();
-    while(keyIterator.hasNext()) {
-      Object key = keyIterator.next();
-      Object value = aFeatureMap.get(key);
-      if((key != null) && (value != null)) {
-        String keyClassName = null;
-        String keyItemClassName = null;
-        String valueClassName = null;
-        String valueItemClassName = null;
-        String key2String = key.toString();
-        String value2String = value.toString();
-        Object item = null;
-        // Test key if it is String, Number or Collection
-        if(key instanceof java.lang.String || key instanceof java.lang.Number
-                || key instanceof java.util.Collection)
-          keyClassName = key.getClass().getName();
-        // Test value if it is String, Number or Collection
-        if(value instanceof java.lang.String
-                || value instanceof java.lang.Number
-                || value instanceof java.util.Collection)
-          valueClassName = value.getClass().getName();
-        // Features and values that are not Strings, Numbers or collections
-        // will be discarded.
-        if(keyClassName == null || valueClassName == null) continue;
-        // If key is collection serialize the collection in a specific format
-        if(key instanceof java.util.Collection) {
-          StringBuffer keyStrBuff = new StringBuffer();
-          Iterator iter = ((Collection)key).iterator();
-          if(iter.hasNext()) {
-            item = iter.next();
-            if(item instanceof java.lang.Number)
-              keyItemClassName = item.getClass().getName();
-            else keyItemClassName = String.class.getName();
-            keyStrBuff.append(item.toString());
-          }// End if
-          while(iter.hasNext()) {
-            item = iter.next();
-            keyStrBuff.append(";").append(item.toString());
-          }// End while
-          key2String = keyStrBuff.toString();
-        }// End if
-        // If key is collection serialize the colection in a specific format
-        if(value instanceof java.util.Collection) {
-          StringBuffer valueStrBuff = new StringBuffer();
-          Iterator iter = ((Collection)value).iterator();
-          if(iter.hasNext()) {
-            item = iter.next();
-            if(item instanceof java.lang.Number)
-              valueItemClassName = item.getClass().getName();
-            else valueItemClassName = String.class.getName();
-            valueStrBuff.append(item.toString());
-          }// End if
-          while(iter.hasNext()) {
-            item = iter.next();
-            valueStrBuff.append(";").append(item.toString());
-          }// End while
-          value2String = valueStrBuff.toString();
-        }// End if
-        buffer.append("<Feature>\n  <Name");
-        if(keyClassName != null)
-          buffer.append(" className=\"").append(keyClassName).append("\"");
-        if(keyItemClassName != null)
-          buffer.append(" itemClassName=\"").append(keyItemClassName).append(
-                  "\"");
-        buffer.append(">");
-        
-        // use a map of keys already checked for XML validity
-        StringBuffer normalizedKey = new StringBuffer(key2String);
-        if (normalizedFeatureNames!=null){
-          // has this key been already converted ?
-          normalizedKey = (StringBuffer)normalizedFeatureNames.get(key2String);
-          if (normalizedKey==null){
-            // never seen so far!
-            normalizedKey= combinedNormalisation(key2String);
-            normalizedFeatureNames.put(key2String,normalizedKey);
-          }
-        }
-        else normalizedKey = combinedNormalisation(key2String);
-        
-        buffer.append(normalizedKey);
-        buffer.append("</Name>\n  <Value");
-        if(valueClassName != null)
-          buffer.append(" className=\"").append(valueClassName).append("\"");
-        if(valueItemClassName != null)
-          buffer.append(" itemClassName=\"").append(valueItemClassName).append(
-                  "\"");
-        buffer.append(">");
-        buffer.append(combinedNormalisation(value2String));
-        buffer.append("</Value>\n</Feature>\n");
-      }// End if
-    }// end While
-    return buffer;
-  }// featuresToXml
-
-  /** This method replace all chars that appears in the anInputString and also
-    * that are in the entitiesMap with their corresponding entity
-    * @param anInputString the string analyzed. If it is null then returns the
-    *  empty string
-    * @return a string representing the input string with chars replaced with
-    *  entities
-    */
-  private StringBuffer replaceCharsWithEntities(String anInputString){
-    if (anInputString == null) return new StringBuffer("");
-    StringBuffer strBuff = new StringBuffer(anInputString);
-    for (int i=strBuff.length()-1; i>=0; i--){
-      Character ch = new Character(strBuff.charAt(i));
-      if (entitiesMap.keySet().contains(ch)){
-        strBuff.replace(i,i+1,(String) entitiesMap.get(ch));
-      }// End if
-    }// End for
-    return strBuff;
-  }// replaceCharsWithEntities()
-
-  /**
-   * Combines replaceCharsWithEntities and filterNonXmlChars in a single method
-   **/
-  private StringBuffer combinedNormalisation(String inputString){
-    if(inputString == null) return new StringBuffer("");
-    StringBuffer buffer = new StringBuffer(inputString);
-    for (int i=buffer.length()-1; i>=0; i--){
-      char currentchar = buffer.charAt(i);
-      // is the current character an xml char which needs replacing?
-      if(!isXmlChar(currentchar)) buffer.replace(i,i+1," ");
-      // is the current character an xml char which needs replacing?
-      else if(currentchar == '<' || currentchar == '>' || currentchar == '&'|| currentchar == '\''|| currentchar == '\"' || currentchar == 0xA0 || currentchar == 0xA9)
-        buffer.replace(i,i+1,(String) entitiesMap.get(new Character(currentchar)));
-      }
-    return buffer;
-  }
-  
-  
-  private String textWithNodes(String aText) {
-    // filterNonXmlChars
-    // getoffsets for Nodes
-    // getoffsets for XML entities
-    if(aText == null) return new String("");
-    StringBuffer textWithNodes = filterNonXmlChars(new StringBuffer(aText));
-    // Construct a map from offsets to Chars ()
-    TreeMap offsets2CharsMap = new TreeMap();
-    if(aText.length() != 0) {
-      // Fill the offsets2CharsMap with all the indices where special chars
-      // appear
-      buildEntityMapFromString(aText, offsets2CharsMap);
-    }// End if
-    // Construct the offsetsSet for all nodes belonging to this document
-    TreeSet offsetsSet = new TreeSet();
-    Iterator annotSetIter = this.getAnnotations().iterator();
-    while(annotSetIter.hasNext()) {
-      Annotation annot = (Annotation)annotSetIter.next();
-      offsetsSet.add(annot.getStartNode().getOffset());
-      offsetsSet.add(annot.getEndNode().getOffset());
-    }// end While
-    // Get the nodes from all other named annotation sets.
-    if(namedAnnotSets != null) {
-      Iterator iter = namedAnnotSets.values().iterator();
-      while(iter.hasNext()) {
-        AnnotationSet annotSet = (AnnotationSet)iter.next();
-        Iterator iter2 = annotSet.iterator();
-        while(iter2.hasNext()) {
-          Annotation annotTmp = (Annotation)iter2.next();
-          offsetsSet.add(annotTmp.getStartNode().getOffset());
-          offsetsSet.add(annotTmp.getEndNode().getOffset());
-        }// End while
-      }// End while
-    }// End if
-    // offsetsSet is ordered in ascending order because the structure
-    // is a TreeSet
-    if(offsetsSet.isEmpty()) { return replaceCharsWithEntities(aText)
-            .toString(); }// End if
-    
-    // create a large StringBuffer
-    StringBuffer modifiedBuffer = new StringBuffer(textWithNodes.length() * 2);
-    
-    // last character copied from the original String
-    int lastCharactercopied = 0;
-    
-    // append to buffer all text up to next offset
-    // for node or entity
-    // we need to iterate on offsetSet and offsets2CharsMap
-    Set allOffsets = new TreeSet();
-    allOffsets.addAll(offsetsSet);
-    allOffsets.addAll(offsets2CharsMap.keySet());
-    Iterator allOffsetsIterator = allOffsets.iterator();
-    while (allOffsetsIterator.hasNext()){
-      Long nextOffset = (Long)allOffsetsIterator.next();
-      int nextOffsetint = nextOffset.intValue();
-      // is there some text to add since last time?
-      if (nextOffsetint>lastCharactercopied){
-        modifiedBuffer.append(textWithNodes.substring(lastCharactercopied,nextOffsetint));
-        lastCharactercopied=nextOffsetint;
-      }
-      // do we need to add a node information here?
-      if (offsetsSet.contains(nextOffset))
-        modifiedBuffer.append("<Node id=\"").append(nextOffsetint).append("\"/>");
-      
-      // do we need to convert an XML entity?
-      if (offsets2CharsMap.containsKey(nextOffset)){
-       String entityString = (String)entitiesMap.get((Character)offsets2CharsMap.get(nextOffset));
-       // skip the character in the original String
-       lastCharactercopied++;
-       // append the corresponding entity
-       modifiedBuffer.append(entityString);
-      }
-    }
-    // copies the remaining text
-    modifiedBuffer.append(textWithNodes.substring(lastCharactercopied,textWithNodes.length()));
-    
-    return modifiedBuffer.toString();
-  }
-
-  /**
    * This method saves an AnnotationSet as XML.
+   * May be removed once GLEAM doc-service is updated.
    * 
    * @param anAnnotationSet
    *          The annotation set that has to be saved as XML.
@@ -2210,36 +1912,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    */
   private void annotationSetToXml(AnnotationSet anAnnotationSet,
           StringBuffer buffer) {
-    if(anAnnotationSet == null) {
-      buffer.append("<AnnotationSet>\n");
-      buffer.append("</AnnotationSet>\n");
-      return;
-    }// End if
-    if(anAnnotationSet.getName() == null)
-      buffer.append("<AnnotationSet>\n");
-    else {
-      buffer.append("<AnnotationSet Name=\"");
-      buffer.append(anAnnotationSet.getName());
-      buffer.append("\" >\n");
-    }
-    HashMap convertedKeys = new HashMap();
-    // Iterate through AnnotationSet and save each Annotation as XML
-    Iterator iterator = anAnnotationSet.iterator();
-    while(iterator.hasNext()) {
-      Annotation annot = (Annotation)iterator.next();
-      buffer.append("<Annotation Id=\"");
-      buffer.append(annot.getId());
-      buffer.append("\" Type=\"");
-      buffer.append(annot.getType());
-      buffer.append("\" StartNode=\"");
-      buffer.append(annot.getStartNode().getOffset());
-      buffer.append("\" EndNode=\"");
-      buffer.append(annot.getEndNode().getOffset());
-      buffer.append("\">\n");
-      buffer.append(featuresToXml(annot.getFeatures(),convertedKeys));
-      buffer.append("</Annotation>\n");
-    }// End while
-    buffer.append("</AnnotationSet>\n");
+    DocumentXmlUtils.annotationSetToXml(anAnnotationSet, buffer);
   }// annotationSetToXml
 
   /**
@@ -2380,18 +2053,11 @@ public class DocumentImpl extends AbstractLanguageResource implements
   private Annotation theRootAnnotation = null;
 
   /**
-   * This field is used when creating StringBuffers for toXml() methods. The
-   * size of the StringBuffer will be docDonctent.size() multiplied by this
-   * value. It is aimed to improve the performance of StringBuffer
-   */
-  private final int DOC_SIZE_MULTIPLICATION_FACTOR = 40;
-
-  /**
    * This field is used when creating StringBuffers for saveAnnotationSetAsXML()
    * methods. The size of the StringBuffer will be docDonctent.size() multiplied
    * by this value. It is aimed to improve the performance of StringBuffer
    */
-  private final int DOC_SIZE_MULTIPLICATION_FACTOR_AS = 3;
+  private static final int DOC_SIZE_MULTIPLICATION_FACTOR_AS = 3;
 
   /**
    * Constant used in the inner class AnnotationComparator to order annotations
@@ -2422,23 +2088,6 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * descending
    */
   private final int DESC = -3;
-
-  /**
-   * A map initialized in init() containing entities that needs to be replaced
-   * in strings
-   */
-  private static Map entitiesMap = null;
-  // Initialize the entities map use when saving as xml
-  static {
-    entitiesMap = new HashMap();
-    entitiesMap.put(new Character('<'), "&lt;");
-    entitiesMap.put(new Character('>'), "&gt;");
-    entitiesMap.put(new Character('&'), "&amp;");
-    entitiesMap.put(new Character('\''), "&apos;");
-    entitiesMap.put(new Character('"'), "&quot;");
-    entitiesMap.put(new Character((char)160), "&#160;");
-    entitiesMap.put(new Character((char)169), "&#169;");
-  }// static
 
   /**
    * The range that the content comes from at the source URL (or null if none).
