@@ -319,9 +319,15 @@ public class TestDocument extends TestCase
     }
     finally {
       // restore the saved value for ADD_SPACE_ON_MARKUP_UNPACK
-      Gate.getUserConfig().put(
-          GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME,
-          savedAddSpaceValue);
+      if(savedAddSpaceValue == null) {
+        Gate.getUserConfig().remove(
+            GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME);
+      }
+      else {
+        Gate.getUserConfig().put(
+            GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME,
+            savedAddSpaceValue);
+      }
     }
   }
 
