@@ -594,9 +594,9 @@ public class KEAFilter extends Filter implements OptionHandler {
       return false;
     } else {
       FastVector vector = convertInstance(instance, false);
-      Enumeration enum = vector.elements();
-      while (enum.hasMoreElements()) {
-	Instance inst = (Instance)enum.nextElement();
+      Enumeration enumeration = vector.elements();
+      while (enumeration.hasMoreElements()) {
+	Instance inst = (Instance)enumeration.nextElement();
 	push(inst);
       }
       return true;
@@ -854,9 +854,9 @@ public class KEAFilter extends Filter implements OptionHandler {
     for(int i = 0; i < getInputFormat().numInstances(); i++) {
       Instance current = getInputFormat().instance(i);
       FastVector vector = convertInstance(current, true);
-      Enumeration enum = vector.elements();
-      while (enum.hasMoreElements()) {
-	Instance inst = (Instance)enum.nextElement();
+      Enumeration enumeration = vector.elements();
+      while (enumeration.hasMoreElements()) {
+	Instance inst = (Instance)enumeration.nextElement();
 	push(inst);
       }
     }

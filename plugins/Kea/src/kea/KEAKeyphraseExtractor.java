@@ -528,9 +528,9 @@ public class KEAKeyphraseExtractor implements OptionHandler {
       e.printStackTrace();
       System.err.println(e.getMessage());
       System.err.println("\nOptions:\n");
-      Enumeration enum = kmb.listOptions();
-      while (enum.hasMoreElements()) {
-	Option option = (Option) enum.nextElement();
+      Enumeration enumeration = kmb.listOptions();
+      while (enumeration.hasMoreElements()) {
+	Option option = (Option) enumeration.nextElement();
 	System.err.println(option.synopsis());
 	System.err.println(option.description());
       }
