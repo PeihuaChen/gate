@@ -1,5 +1,5 @@
 /*
- *  DocumentImpl.java
+ *  DocumentXmlUtils.java
  *
  *  Copyright (c) 1998-2006, The University of Sheffield.
  *
@@ -10,7 +10,7 @@
  *
  *  Ian Roberts, 20/Jul/2006
  *
- *  $Id: DocumentImpl.java 7549 2006-07-19 12:42:27Z ian_roberts $
+ *  $Id$
  */
 package gate.corpora;
 
