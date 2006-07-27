@@ -4,7 +4,10 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.regex.Pattern;
 
 import gate.creole.ResourceInstantiationException;
@@ -37,44 +40,24 @@ public class Interpret {
 	/** This variables keeps the record of available methods for the morphing */
 	private Method[] methods;
 
-	/** This varilable stores the compiles versions of rules */
-	private ArrayList patterns;
-
-	private MyPattern[] rules;
-
 	/** This variables holds the affix */
 	private String affix;
 
-	private ArrayList vis, nis;
-
-	private int vindices[], nindices[];
-
 	private Pattern vPat;
+
 	private Pattern nPat;
+
 	MorphFunctions morphInst;
 
+	ArrayList patterns = new ArrayList();
+	ArrayList fsms = new ArrayList();
+	
 	/**
-	 * Constructor
+	 * The initial state of the FSM that backs this morpher
 	 */
-	public Interpret() {
+	protected FSMState initialState;
 
-	}
-
-	public int[] getIndices(String category) {
-		if (category.equals("*")) {
-			return null;
-		}
-
-		if(vPat.matcher(category).matches()) {
-			return vindices;
-		}
-		
-		if(nPat.matcher(category).matches()) {
-			return nindices;
-		}
-
-		return null;
-	}
+	protected HashSet lastStates;
 
 	/**
 	 * It starts the actual program
@@ -82,13 +65,11 @@ public class Interpret {
 	 * @param ruleFileName
 	 */
 	public void init(URL ruleFileURL) throws ResourceInstantiationException {
+		RHS.patIndex = 0;
 		vPat = Pattern.compile("(VB)[DGNPZ]?");
 		nPat = Pattern.compile("(NN)(.)*");
 		variables = new Storage();
 		prepareListOfMorphMethods();
-		patterns = new ArrayList();
-		vis = new ArrayList();
-		nis = new ArrayList();
 		file = new ReadFile(ruleFileURL);
 		affix = null;
 		isDefineRulesSession = false;
@@ -96,123 +77,206 @@ public class Interpret {
 		morphInst = new MorphFunctions();
 
 		readProgram();
+		initialState = new FSMState(-1);
+		
+		lastStates = new HashSet();
 		interpretProgram();
 
 		variables = null;
 		file = null;
-		rules = new MyPattern[patterns.size()];
-		for (int i = 0; i < patterns.size(); i++) {
-			rules[i] = (MyPattern) patterns.get(i);
-		}
-		patterns = null;
-		vindices = new int[vis.size()];
-		nindices = new int[nis.size()];
-
-		for (int i = 0; i < vis.size(); i++) {
-			vindices[i] = Integer.parseInt((String) vis.get(i));
-		}
-		vis = null;
-
-		for (int i = 0; i < nis.size(); i++) {
-			nindices[i] = Integer.parseInt((String) nis.get(i));
-		}
-		nis = null;
-		System.gc();
+		lastStates = null;
 	}
 
-	/**
-	 * Once all the rules have been loaded in the system, now its time to start
-	 * the morpher, which will find out the base word rule
-	 * 
-	 * @param word
-	 *            input to the program
-	 * @return root word
-	 */
-	public String runMorpher(String word, String category) {
-		affix = null;
-		int[] indices = getIndices(category);
-		if (indices == null) {
-			for (int i = 0; i < rules.length; i++) {
-				if (rules[i] != null) {
-					String answer = executeRule(word, rules[i]);
-					if (answer != null) {
-						indices = null;
-						return answer;
-					}
-				}
+	class CharClass {
+		char ch;
+		FSMState st;
+	}
+	
+	public void addState(char ch, FSMState fsm, int index) {
+		if(index == fsms.size()) {
+			fsms.add(new ArrayList());
+		}
+		
+		ArrayList fs = (ArrayList) fsms.get(index);
+		for(int i=0;i<fs.size();i++) {
+			CharClass cc = (CharClass) fs.get(i);
+			if(cc.ch == ch)
+				return;
+		}
+		
+		CharClass cc = new CharClass();
+		cc.ch = ch;
+		cc.st = fsm;
+		fs.add(cc);
+	}
+
+	
+	public FSMState getState(char ch, int index) {
+		if(index >= fsms.size()) return null;
+		ArrayList fs = (ArrayList) fsms.get(index);
+		for(int i=0;i<fs.size();i++) {
+			CharClass cc = (CharClass) fs.get(i);
+			if(cc.ch == ch)
+				return cc.st;
+		}
+		return null;
+	}
+	
+	private HashSet getStates(char ch, HashSet states) {
+		HashSet newStates = new HashSet();
+		Iterator iter = states.iterator();
+		while (iter.hasNext()) {
+			FSMState st = (FSMState) iter.next();
+			FSMState chState = st.next(ch, FSMState.CHILD_STATE);
+			if (chState != null) {
+				newStates.add(chState);
 			}
-		} else {
-			for (int i = 0; i < indices.length; i++) {
-				if (rules[indices[i]] != null) {
-					String answer = executeRule(word, rules[indices[i]]);
-					if (answer != null) {
-						indices = null;
-						return answer;
-					}
-				}
+
+			FSMState adState = st.next(ch, FSMState.ADJ_STATE);
+			if (adState != null) {
+				newStates.add(adState);
 			}
 		}
-		indices = null;
+		return newStates;
+	}
+
+	private boolean validCategory(String category) {
+		//System.out.println(category);
+		if (category.equals("*")) {
+			return true;
+		} else if (vPat.matcher(category).matches()) {
+			return true;
+		} else if (nPat.matcher(category).matches()) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * lookup <br>
+	 * 
+	 * @param singleItem
+	 *            a single string to be looked up by the gazetteer
+	 * @return set of the Lookups associated with the parameter
+	 */
+	public String runMorpher(String word, String category) {
+		//System.out.println("=========="+word);
+		affix = null;
+		if(!validCategory(category)) {
+			return word;
+		}
+		
+		foundRule = false;
+		HashSet states = new HashSet();
+		states.add(initialState);
+		for (int i = 0; i < word.length(); i++) {
+			char ch = word.charAt(i);
+			states = getStates(ch, states);
+			if (states.isEmpty()) {
+				//System.out.println("No state found!");
+				return word;
+			}
+
+		}
+
+		// we have all states here
+		// we obtain all RHSes
+		HashSet rhses = new HashSet();
+		Iterator iter = states.iterator();
+		while (iter.hasNext()) {
+			FSMState st = (FSMState) iter.next();
+			rhses.addAll(st.getRHSes());
+		}
+
+		if (rhses.isEmpty()) {
+			//System.out.println("No RHS found!");
+			return word;
+		}
+
+		// we have all rhses
+		// we need to sort them
+		ArrayList rl = new ArrayList();
+		rl.addAll(rhses);
+		Collections.sort(rl, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				RHS r1 = (RHS) o1;
+				RHS r2 = (RHS) o2;
+				return r1.getPatternIndex() - r2.getPatternIndex();
+			}
+		});
+
+		foundRule = false;
+		// rhses are in sorted order
+		// we need to check if the word is compatible with pattern
+		for (int i = 0; i < rl.size(); i++) {
+			RHS r1 = (RHS) rl.get(i);
+			//System.out.println(r1.getPatternIndex());
+			String answer = executeRHS(word, category, r1);
+			if (foundRule) {
+				//System.out.println("Found!");
+				return answer;
+			}
+		}
 		return word;
 	}
 
-	private String executeRule(String word, MyPattern myPatInst) {
-		Matcher m = myPatInst.getMatcher();
+	boolean foundRule = false;
 
-		// check if this pattern can accomodate the given word
-		if (m.reset(word).matches()) {
-			// call the appropriate function
-			String methodName = myPatInst.getMethodName();
-			String[] parameters = myPatInst.getParameters();
-
-			// check all the available in built methods and run the
-			// appropriate one
-			for (int i = 0; i < methods.length; i++) {
-
-				// preparing paramters for the comparision of two
-				// methods
-				int len = methodName.length();
-				String currentMethod = methods[i].toString();
-				int len1 = currentMethod.length();
-
-				if (len < len1) {
-					currentMethod = currentMethod.substring(len1 - len + 1,
-							len1);
-					if (currentMethod.trim().equals(methodName.trim())) {
-
-						// set the given word in that morph program
-						morphInst.setInput(word);
-
-						// and finally call the appropriate method to
-						// find the root
-						// word and the affix
-						if (methods[i].getName().equals("irreg_stem")) {
-							String answer = morphInst.irreg_stem(parameters[0],
-									parameters[1]);
-							this.affix = morphInst.getAffix();
-							return answer;
-						} else if (methods[i].getName().equals("null_stem")) {
-							// return word;
-							String answer = morphInst.null_stem();
-							this.affix = morphInst.getAffix();
-							return answer;
-						} else if (methods[i].getName().equals("semi_reg_stem")) {
-							String answer = morphInst.semi_reg_stem(Integer
-									.parseInt(parameters[0]), parameters[1]);
-							this.affix = morphInst.getAffix();
-							return answer;
-						} else if (methods[i].getName().equals("stem")) {
-							String answer = morphInst.stem(Integer
-									.parseInt(parameters[0]), parameters[1],
-									parameters[2]);
-							this.affix = morphInst.getAffix();
-							return answer;
-						}
-					}
-				}
-			}
+	private String executeRHS(String word, String category, RHS rhs) {
+		if (category.equals("*")) {
+			return executeRule(word, rhs);
+		} else if (rhs.isVerb() && vPat.matcher(category).matches()) {
+			return executeRule(word, rhs);
+		} else if (rhs.isNoun() && nPat.matcher(category).matches()) {
+			return executeRule(word, rhs);
 		}
-		return null;
+		return word;
+	}
+
+	private String executeRule(String word, RHS rhs) {
+		Pattern p = (Pattern) patterns.get(rhs.getPatternIndex());
+		//System.out.println(p.toString());	
+		short methodIndex = rhs.getMethodIndex();
+		if (!p.matcher(word).matches()) {
+			//System.out.println("Nope!!!!!");
+			foundRule = false;
+			return word;
+		}
+
+		// call the appropriate function
+		String[] parameters = rhs.getParameters();
+
+		// set the given word in that morph program
+		morphInst.setInput(word);
+		String answer = null;
+		switch (methodIndex) {
+		case ParsingFunctions.IRREG_STEM:
+			answer = morphInst.irreg_stem(parameters[0], parameters[1]);
+			break;
+		case ParsingFunctions.NULL_STEM:
+			answer = morphInst.null_stem();
+			break;
+		case ParsingFunctions.SEMIREG_STEM:
+			answer = morphInst.semi_reg_stem(Integer.parseInt(parameters[0]),
+					parameters[1]);
+			break;
+		case ParsingFunctions.STEM:
+			answer = morphInst.stem(Integer.parseInt(parameters[0]),
+					parameters[1], parameters[2]);
+			break;
+		default:
+			answer = null;
+			break;
+		}
+		
+		if(answer != null) {
+			this.affix = morphInst.getAffix();
+			foundRule = true;
+			return answer;
+		} else {
+			foundRule = false;
+			return word;
+		}
 	}
 
 	/**
@@ -362,7 +426,8 @@ public class Interpret {
 		String varValue = (line.split("==>"))[1].trim();
 
 		// find the type of variable it is
-		int valueType = ParsingFunctions.findVariableType(varValue.trim());
+		int valueType = ParsingFunctions.findVariableType(varValue
+				.trim());
 		if (valueType == Codes.ERROR_CODE) {
 			generateError(varName + " - Variable Syntax Error - see " + "line"
 					+ file.getPointer() + " : " + line);
@@ -437,39 +502,86 @@ public class Interpret {
 				break;
 			category = category + ruleParts[0].charAt(i);
 		}
+
 		if (i >= ruleParts[0].length()) {
 			generateError("Syntax error - pattern not written properly - see "
 					+ "line " + file.getPointer() + " : " + line);
 		}
 
-		ruleParts[0] = ruleParts[0].substring(i + 1, ruleParts[0].length());
-		String newPattern = ParsingFunctions.convertToRegExp(ruleParts[0],
-				variables);
-		
-		if (newPattern == null) {
-			generateError("Syntax error - pattern not written properly - see "
-					+ "line " + file.getPointer() + " : " + line);
-		}
-
-		// we need to compile this pattern and finally add into the
-		// compiledRules
-		try {	
-			Pattern p = Pattern.compile(newPattern.trim());
-			MyPattern mp = new MyPattern(p, ruleParts[1]);
-			if (category.equals("*")) {
-				vis.add("" + patterns.size());
-				nis.add("" + patterns.size());
-			} else if (category.equals("verb")) {
-				vis.add("" + patterns.size());
-			} else {
-				nis.add("" + patterns.size());
+		RHS rhs = new RHS(ruleParts[1], category);
+		ruleParts[0] = ruleParts[0].substring(i + 1, ruleParts[0].length())
+				.trim();
+		String regExp = ParsingFunctions.convertToRegExp(
+				ruleParts[0], variables);
+		patterns.add(Pattern.compile(regExp));
+		String[] rules = ParsingFunctions.normlizePattern(regExp);
+		for (int m = 0; m < rules.length; m++) {
+			HashSet lss = new HashSet();
+			lss.clear();
+			HashSet newSet = new HashSet();
+			newSet.add(initialState);
+			lss.add(newSet);
+			// lastStates.add(initialState);
+			PatternPart parts[] = ParsingFunctions
+					.getPatternParts(rules[m].trim());
+			for (int j = 0; j < parts.length; j++) {
+				lss = ParsingFunctions.createFSMs(parts[j].getPartString(), parts[j].getType(), lss, this);
 			}
-			patterns.add(mp);
-		} catch (Exception e) {
-			e.printStackTrace();
-			// there was some error in the expression so generate the error
-			generateError("Syntax error - pattern not declared properly - see"
-					+ "line " + file.getPointer() + " : " + line);
+			// for all lastStates, we need to add RHS
+			// Iterator iter = lastStates.iterator();
+			// while (iter.hasNext()) {
+			// FSMState st = (FSMState) iter.next();
+			// st.addRHS(rhs);
+			// }
+			Iterator iter = lss.iterator();
+			while (iter.hasNext()) {
+				HashSet set = (HashSet) iter.next();
+				Iterator subIter = set.iterator();
+				while (subIter.hasNext()) {
+					FSMState st = (FSMState) subIter.next();
+					st.addRHS(rhs);
+				}
+			}
+		}
+		//drawFSM();
+	}
+
+	private HashSet intersect(HashSet a, HashSet b) {
+		HashSet result = new HashSet();
+		Iterator iter = a.iterator();
+		while (iter.hasNext()) {
+			FSMState st = (FSMState) iter.next();
+			if (b.contains(st)) {
+				result.add(st);
+			}
+		}
+		return result;
+	}
+
+	private void drawFSM() {
+		// we start with initialState
+		System.out.println("Initial:");
+		String space = "";
+		drawFSM(initialState, space);
+	}
+
+	private void drawFSM(FSMState st, String space) {
+		CharMap map = st.getTransitionFunction();
+		char[] keys = map.getItemsKeys();
+		if (keys != null) {
+			System.out.println(space + "Child:");
+			for (int i = 0; i < keys.length; i++) {
+				System.out.println(space + "'" + keys[i] + "':");
+				drawFSM(map.get(keys[i], FSMState.CHILD_STATE), space + "  ");
+			}
+		}
+		keys = map.getAdjitemsKeys();
+		if (keys != null) {
+			System.out.println("ADJ:");
+			for (int i = 0; i < keys.length; i++) {
+				System.out.println(space + "'" + keys[i] + "' :");
+				// drawFSM(map.get(keys[i], FSMState.ADJ_STATE), space+" ");
+			}
 		}
 	}
 
@@ -611,5 +723,9 @@ public class Interpret {
 	 */
 	public String getAffix() {
 		return this.affix;
+	}
+
+	public FSMState getInitialState() {
+		return initialState;
 	}
 }

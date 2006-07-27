@@ -1,266 +1,195 @@
 package gate.creole.morph;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
-
 import junit.framework.*;
-
 import gate.*;
 import gate.creole.*;
 import gate.creole.tokeniser.DefaultTokeniser;
-import gate.util.*;
 import gate.util.Files;
 import gate.util.OffsetComparator;
 
 /**
- * <p>Title: TestMorph </p>
- * <p>Description: </p>
- * <p>Copyright: Copyright (c) 2000</p>
- * <p>Company: University Of Sheffield</p>
+ * <p>
+ * Title: TestMorph
+ * </p>
+ * <p>
+ * Description:
+ * </p>
+ * <p>
+ * Copyright: Copyright (c) 2000
+ * </p>
+ * <p>
+ * Company: University Of Sheffield
+ * </p>
+ * 
  * @author not attributable
  * @version 1.0
  */
 
-public class TestMorph
-    extends TestCase {
+public class TestMorph extends TestCase {
 
-  private Morph morpher;
-  private Document verbDocumentToTest, verbDocumentWithAnswers,
-      nounDocumentToTest, nounDocumentWithAnswers;
-  private FeatureMap params;
-  private DefaultTokeniser tokeniser;
-  private int counter = 0;
-  private int outOf = 0;
+	private Morph morpher;
 
-  public TestMorph(String dummy) {
-    super(dummy);
-  }
+	private Document verbDocumentToTest, verbDocumentWithAnswers,
+			nounDocumentToTest, nounDocumentWithAnswers;
 
-  /**
-   * This method sets up the parameters for the files to be testes
-   * It initialises the Tokenizer and sets up the other parameters for
-   * the morph program
-   */
-  protected void setUp() {
-    try{
-      //make sure the right plugin is loaded
-      File pluginsHome = new File(System.getProperty(
-              GateConstants.GATE_HOME_PROPERTY_NAME), 
-              "plugins");
-      try{
-        Gate.getCreoleRegister().registerDirectories(
-                new File(pluginsHome, "Tools").toURL());
-      }catch(Exception e){
-        throw new GateRuntimeException(e);
-      }
-      // creating documents
-      verbDocumentToTest = Factory.newDocument(Files.getGateResource(
-        "/gate.ac.uk/tests/morph/verbTest.dat"));
-      verbDocumentWithAnswers = Factory.newDocument(Files.getGateResource(
-              "/gate.ac.uk/tests/morph/verbAnswer.dat"));
-      nounDocumentToTest = Factory.newDocument(Files.getGateResource(
-              "/gate.ac.uk/tests/morph/nounTest.dat"));
-      nounDocumentWithAnswers = Factory.newDocument(Files.getGateResource(
-              "/gate.ac.uk/tests/morph/nounAnswer.dat"));
-      // create the instance of (Morphological analyzer)
-      morpher = (Morph)Factory.createResource("gate.creole.morph.Morph");
-    }catch (ResourceInstantiationException rie) {
-      throw new GateRuntimeException(rie);
-//      fail("Resources cannot be created for the test and the answer file");
-    }
+	public static int count = 0;
+
+	private DefaultTokeniser tokeniser;
+
+	public TestMorph(String dummy) {
+		super(dummy);
+	}
+
+	/**
+	 * This method sets up the parameters for the files to be testes It
+	 * initialises the Tokenizer and sets up the other parameters for the morph
+	 * program
+	 */
+	protected void setUp() {
+		try {
+			// make sure the right plugin is loaded
+			File pluginsHome = new File(System
+					.getProperty(GateConstants.GATE_HOME_PROPERTY_NAME),
+					"plugins");
+			Gate.getCreoleRegister().registerDirectories(new File(pluginsHome, "Tools").toURL());
+			// creating documents
+			verbDocumentToTest = Factory.newDocument(Files
+					.getGateResource("/gate.ac.uk/tests/morph/verbTest.dat"));
+			verbDocumentWithAnswers = Factory.newDocument(Files
+					.getGateResource("/gate.ac.uk/tests/morph/verbAnswer.dat"));
+			nounDocumentToTest = Factory.newDocument(Files
+					.getGateResource("/gate.ac.uk/tests/morph/nounTest.dat"));
+			nounDocumentWithAnswers = Factory.newDocument(Files
+					.getGateResource("/gate.ac.uk/tests/morph/nounAnswer.dat"));
+			morpher = (Morph) Factory.createResource("gate.creole.morph.Morph");
+			morpher.setAffixFeatureName("affix");
+			morpher.setRootFeatureName("root");
+			tokeniser = (DefaultTokeniser) Factory
+					.createResource("gate.creole.tokeniser.DefaultTokeniser");
+		} catch (Exception rie) {
+			fail("Resources cannot be created");
+		}
+	}
+
+	/**
+	 * Test the morpher on verbs, if their roots are identified correctly or not
+	 */
+	public void testAll() {
+
+		// run the tokenizer on the verbTestDocument
+		tokeniser.setDocument(verbDocumentToTest);
+		tokeniser.setAnnotationSetName("TokeniserAS");
+		try {
+			tokeniser.execute();
+		} catch (ExecutionException ee) {
+			fail("Error while executing Tokenizer on the test document");
+		}
+
+		// run the tokenizer on the verbAnswerDocument
+		tokeniser.setDocument(verbDocumentWithAnswers);
+		tokeniser.setAnnotationSetName("TokeniserAS");
+		try {
+			tokeniser.execute();
+		} catch (ExecutionException ee) {
+			fail("Error while executing Tokenizer on the test document");
+		}
+
+		// now check if the tokenizer was run properly on the document
+		List queryTokens = new ArrayList(verbDocumentToTest.getAnnotations(
+				"TokeniserAS").get("Token"));
+		Collections.sort(queryTokens, new OffsetComparator());
+
+		// same procedure with the answer document
+		List answerTokens = new ArrayList(verbDocumentWithAnswers
+				.getAnnotations("TokeniserAS").get("Token"));
+		Collections.sort(answerTokens, new OffsetComparator());
+
+		// create iterator to get access to each and every individual token
+		Iterator queryTokensIter = queryTokens.iterator();
+		Iterator answerTokensIter = answerTokens.iterator();
+
+		while (queryTokensIter.hasNext() && answerTokensIter.hasNext()) {
+
+			// get the word to test
+			Annotation currentQueryToken = (Annotation) queryTokensIter.next();
+			String queryTokenValue = (String) (currentQueryToken.getFeatures()
+					.get(ANNIEConstants.TOKEN_STRING_FEATURE_NAME));
+
+			// get the answer of this word
+			Annotation currentAnswerToken = (Annotation) answerTokensIter
+					.next();
+			String answerTokenValue = (String) (currentAnswerToken
+					.getFeatures()
+					.get(ANNIEConstants.TOKEN_STRING_FEATURE_NAME));
+			// run the morpher
+			String rootWord = morpher.findBaseWord(queryTokenValue, "VB");
+			// compare it with the answerTokenValue
+			assertEquals(rootWord, answerTokenValue);
+		}
+
+		// run the tokenizer on the nounTestDocument
+		tokeniser.setDocument(nounDocumentToTest);
+		tokeniser.setAnnotationSetName("TokeniserAS");
+		try {
+			tokeniser.execute();
+		} catch (ExecutionException ee) {
+			fail("Error while executing Tokenizer on the test document");
+		}
+
+		// run the tokenizer on the nounAnswerDocument
+		tokeniser.setDocument(nounDocumentWithAnswers);
+		tokeniser.setAnnotationSetName("TokeniserAS");
+		try {
+			tokeniser.execute();
+		} catch (ExecutionException ee) {
+			fail("Error while executing Tokenizer on the test document");
+		}
+
+		// check both documents are processed correctly by tokeniser
+		assertTrue(!nounDocumentToTest.getAnnotations("TokeniserAS").isEmpty());
+		assertTrue(!nounDocumentWithAnswers.getAnnotations("TokeniserAS")
+				.isEmpty());
 
 
+		// now check if the tokenizer was run properly on the document
+		queryTokens = new ArrayList(nounDocumentToTest.getAnnotations(
+				"TokeniserAS").get("Token"));
+		Comparator offsetComparator = new OffsetComparator();
+		Collections.sort(queryTokens, offsetComparator);
 
-    // set the parameters for the morpher, feature names
-    morpher.setAffixFeatureName("affix");
-    morpher.setRootFeatureName("root");
+		// same procedure with the answer document
+		answerTokens = new ArrayList(nounDocumentWithAnswers
+				.getAnnotations("TokeniserAS").get("Token"));
+		Collections.sort(answerTokens, offsetComparator);
 
+		// create iterator to get access to each and every individual token
+		queryTokensIter = queryTokens.iterator();
+		answerTokensIter = answerTokens.iterator();
 
-    try {
-      // finally create the Tokenizer
-      tokeniser = (DefaultTokeniser) Factory.createResource(
-          "gate.creole.tokeniser.DefaultTokeniser");
-    }
-    catch (ResourceInstantiationException rie) {
-      fail("Resources cannot be created fpr tokenizers");
-    }
-  }
+		while (queryTokensIter.hasNext() && answerTokensIter.hasNext()) {
 
-  /**
-   * Test the morpher on verbs, if their roots are identified correctly or not
-   */
-  public void testVerbs() {
+			// get the word to test
+			Annotation currentQueryToken = (Annotation) queryTokensIter.next();
+			String queryTokenValue = (String) (currentQueryToken.getFeatures()
+					.get(ANNIEConstants.TOKEN_STRING_FEATURE_NAME));
 
-    // run the tokenizer on the verbTestDocument
-    tokeniser.setDocument(verbDocumentToTest);
-    tokeniser.setAnnotationSetName("TokeniserAS");
-    try {
-      tokeniser.execute();
-    }
-    catch (ExecutionException ee) {
-      fail("Error while executing Tokenizer on the test document");
-    }
+			// get the answer of this word
+			Annotation currentAnswerToken = (Annotation) answerTokensIter
+					.next();
+			String answerTokenValue = (String) (currentAnswerToken
+					.getFeatures()
+					.get(ANNIEConstants.TOKEN_STRING_FEATURE_NAME));
+			// run the morpher
+			String rootWord = morpher.findBaseWord(queryTokenValue, "NN");
 
-    // run the tokenizer on the verbAnswerDocument
-    tokeniser.setDocument(verbDocumentWithAnswers);
-    tokeniser.setAnnotationSetName("TokeniserAS");
-    try {
-      tokeniser.execute();
-    }
-    catch (ExecutionException ee) {
-      fail("Error while executing Tokenizer on the test document");
-    }
+			// compare it with the answerTokenValue
+			assertEquals(rootWord, answerTokenValue);
+		}
+	}
 
-    // check both documents are processed correctly by tokeniser
-    assertTrue(!verbDocumentToTest.getAnnotations("TokeniserAS").isEmpty());
-    assertTrue(!verbDocumentWithAnswers.getAnnotations("TokeniserAS").isEmpty());
-
-
-    // so we have finished running the tokenizer, now we need to test the
-    // morph program to test the document
-    morpher.setDocument(verbDocumentToTest);
-
-    // compile the rules
-    // and check that the resource is being created successfully
-    try {
-      ProcessingResource pr = (ProcessingResource) (morpher.init());
-      assertTrue(pr != null);
-    }
-    catch (ResourceInstantiationException rie) {
-      fail("Error occured while compiling rules for morphological analyser" +
-           " using the default.rul file");
-    }
-
-    // now check if the tokenizer was run properly on the document
-    AnnotationSet inputAs = verbDocumentToTest.getAnnotations("TokeniserAS");
-    List queryTokens = new ArrayList(inputAs.get(ANNIEConstants.
-                                                 TOKEN_ANNOTATION_TYPE));
-    Comparator offsetComparator = new OffsetComparator();
-    Collections.sort(queryTokens, offsetComparator);
-
-    // same procedure with the answer document
-    AnnotationSet inputAs1 = verbDocumentWithAnswers.getAnnotations(
-        "TokeniserAS");
-    List answerTokens = new ArrayList(inputAs1.get(ANNIEConstants.
-        TOKEN_ANNOTATION_TYPE));
-    Collections.sort(answerTokens, offsetComparator);
-
-    // create iterator to get access to each and every individual token
-    Iterator queryTokensIter = queryTokens.iterator();
-    Iterator answerTokensIter = answerTokens.iterator();
-
-    while (queryTokensIter.hasNext() && answerTokensIter.hasNext()) {
-
-      // get the word to test
-      Annotation currentQueryToken = (Annotation) queryTokensIter.next();
-      String queryTokenValue = (String) (currentQueryToken.getFeatures().
-                                         get(ANNIEConstants.
-                                             TOKEN_STRING_FEATURE_NAME));
-
-      // get the answer of this word
-      Annotation currentAnswerToken = (Annotation) answerTokensIter.next();
-      String answerTokenValue = (String) (currentAnswerToken.getFeatures().
-                                          get(ANNIEConstants.
-                                              TOKEN_STRING_FEATURE_NAME));
-      // run the morpher
-      String rootWord = morpher.findBaseWord(queryTokenValue, "VB");
-
-      // compare it with the answerTokenValue
-      assertEquals(rootWord, answerTokenValue);
-    }
-  }
-
-  /**
-   * Test the morpher on nouns, if their roots are identified correctly or not
-   */
-  public void testNouns() {
-
-    // run the tokenizer on the nounTestDocument
-    tokeniser.setDocument(nounDocumentToTest);
-    tokeniser.setAnnotationSetName("TokeniserAS");
-    try {
-      tokeniser.execute();
-    }
-    catch (ExecutionException ee) {
-      fail("Error while executing Tokenizer on the test document");
-    }
-
-    // run the tokenizer on the nounAnswerDocument
-    tokeniser.setDocument(nounDocumentWithAnswers);
-    tokeniser.setAnnotationSetName("TokeniserAS");
-    try {
-      tokeniser.execute();
-    }
-    catch (ExecutionException ee) {
-      fail("Error while executing Tokenizer on the test document");
-    }
-
-    // check both documents are processed correctly by tokeniser
-    assertTrue(!nounDocumentToTest.getAnnotations("TokeniserAS").isEmpty());
-    assertTrue(!nounDocumentWithAnswers.getAnnotations("TokeniserAS").isEmpty());
-
-    // so we have finished running the tokenizer
-    // now we need to test the morph program
-
-    // document to test
-    morpher.setDocument(nounDocumentToTest);
-
-    // compile the rules
-    // and check that the resource is being created successfully
-    try {
-      ProcessingResource pr = (ProcessingResource) (morpher.init());
-      assertTrue(pr != null);
-    }
-    catch (ResourceInstantiationException rie) {
-      fail("Error occured while compiling rules for morphological analyser" +
-           " using the default.rul file");
-    }
-
-    // now check if the tokenizer was run properly on the document
-    AnnotationSet inputAs = nounDocumentToTest.getAnnotations("TokeniserAS");
-    List queryTokens = new ArrayList(inputAs.get(ANNIEConstants.
-                                                 TOKEN_ANNOTATION_TYPE));
-    Comparator offsetComparator = new OffsetComparator();
-    Collections.sort(queryTokens, offsetComparator);
-
-    // same procedure with the answer document
-    AnnotationSet inputAs1 = nounDocumentWithAnswers.getAnnotations(
-        "TokeniserAS");
-    List answerTokens = new ArrayList(inputAs1.get(ANNIEConstants.
-        TOKEN_ANNOTATION_TYPE));
-    Collections.sort(answerTokens, offsetComparator);
-
-    // create iterator to get access to each and every individual token
-    Iterator queryTokensIter = queryTokens.iterator();
-    Iterator answerTokensIter = answerTokens.iterator();
-
-    while (queryTokensIter.hasNext() && answerTokensIter.hasNext()) {
-
-      // get the word to test
-      Annotation currentQueryToken = (Annotation) queryTokensIter.next();
-      String queryTokenValue = (String) (currentQueryToken.getFeatures().
-                                         get(ANNIEConstants.
-                                             TOKEN_STRING_FEATURE_NAME));
-
-      // get the answer of this word
-      Annotation currentAnswerToken = (Annotation) answerTokensIter.next();
-      String answerTokenValue = (String) (currentAnswerToken.getFeatures().
-                                          get(ANNIEConstants.
-                                              TOKEN_STRING_FEATURE_NAME));
-      //String category = (String) (currentAnswerToken.getFeatures().get(ANNIEConstants.TOKEN_CATEGORY_FEATURE_NAME));
-//      System.out.println(morpher+"  "+queryTokenValue);
-      // run the morpher
-      String rootWord = morpher.findBaseWord(queryTokenValue, "NN");
-
-      // compare it with the answerTokenValue
-      assertEquals(rootWord, answerTokenValue);
-    }
-
-  }
-
-  public static Test suite() {
-    return new TestSuite(TestMorph.class);
-  }
+	public static Test suite() {
+		return new TestSuite(TestMorph.class);
+	}
 }

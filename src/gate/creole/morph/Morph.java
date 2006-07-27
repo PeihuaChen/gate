@@ -76,9 +76,11 @@ public class Morph
       throw new ResourceInstantiationException("\n\n No Rule File Provided");
     }
 
+    fireStatusChanged("Reading Rule File...");
     // compile the rules
     interpret.init(rulesFile);
-
+    fireStatusChanged("Morpher created!");
+    fireProcessFinished();
     return this;
   }
 
