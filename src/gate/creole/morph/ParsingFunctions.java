@@ -329,9 +329,9 @@ public class ParsingFunctions {
 		for (int i = 0; i < parameters.length; i++) {
 			if (parameters[i].startsWith("\"") && parameters[i].endsWith("\"")) {
 				methodName = methodName + "java.lang.String";
-			} else if (ParsingFunctionsOldVersion.isBoolean(parameters[i])) {
+			} else if (ParsingFunctions.isBoolean(parameters[i])) {
 				methodName = methodName + "boolean";
-			} else if (ParsingFunctionsOldVersion.isInteger(parameters[i])) {
+			} else if (ParsingFunctions.isInteger(parameters[i])) {
 				methodName = methodName + "int";
 			}
 			if ((i + 1) < parameters.length) {
