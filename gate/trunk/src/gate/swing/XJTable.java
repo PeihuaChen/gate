@@ -77,7 +77,8 @@ public class XJTable extends JTable{
    */
   public void updateUI() {
     super.updateUI();
-    getTableHeader().addMouseListener(new HeaderMouseListener());
+    JTableHeader tHeader = getTableHeader();
+    if(tHeader != null) tHeader.addMouseListener(new HeaderMouseListener());
     adjustSizes();
   }
   
