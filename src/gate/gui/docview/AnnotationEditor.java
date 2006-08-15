@@ -47,7 +47,7 @@ public class AnnotationEditor{
   public AnnotationEditor(TextualDocumentView textView,
                           AnnotationSetsView setsView){
     this.textView = textView;
-    textPane = (JEditorPane)((JScrollPane)textView.getGUI())
+    textPane = (JTextArea)((JScrollPane)textView.getGUI())
     			.getViewport().getView();
     this.setsView = setsView;
     initGUI();
@@ -565,7 +565,7 @@ public class AnnotationEditor{
   
   protected TextualDocumentView textView;
   protected AnnotationSetsView setsView;
-  protected JEditorPane textPane;
+  protected JTextArea textPane;
   protected Annotation ann;
   protected AnnotationSet set;
 }

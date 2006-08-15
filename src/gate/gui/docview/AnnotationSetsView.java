@@ -84,7 +84,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       if(aView instanceof TextualDocumentView) 
         textView = (TextualDocumentView)aView;
     }
-    textPane = (JEditorPane)((JScrollPane)textView.getGUI())
+    textPane = (JTextArea)((JScrollPane)textView.getGUI())
             .getViewport().getView();
     
     //get a pointer to the list view
@@ -1404,7 +1404,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   
   TextualDocumentView textView;
   AnnotationListView listView;
-  JEditorPane textPane;
+  JTextArea textPane;
   AnnotationEditor annotationEditor;
   NewAnnotationSetAction newSetAction;
   

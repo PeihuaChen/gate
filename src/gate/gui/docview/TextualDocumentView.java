@@ -250,9 +250,10 @@ public class TextualDocumentView extends AbstractDocumentView {
    * @see gate.gui.docview.AbstractDocumentView#initGUI()
    */
   protected void initGUI() {
-    textView = new JEditorPane();
-    textView.setContentType("text/plain");
-    textView.setEditorKit(new RawEditorKit());
+//    textView = new JEditorPane();
+//    textView.setContentType("text/plain");
+//    textView.setEditorKit(new RawEditorKit());
+    textView = new JTextArea();
     textView.setAutoscrolls(false);
     scroller = new JScrollPane(textView);
 
@@ -456,7 +457,7 @@ public class TextualDocumentView extends AbstractDocumentView {
   
   protected Timer blinker;
   
-  protected JEditorPane textView;
+  protected JTextArea textView;
   
   /**
    * The delay used by the blinker.
