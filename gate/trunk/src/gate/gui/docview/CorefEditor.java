@@ -70,7 +70,7 @@ public class CorefEditor
 
   private ColorGenerator colorGenerator;
   private TextualDocumentView textView;
-  private JEditorPane textPane;
+  private JTextArea textPane;
 
   /* ChainNode --> (HighlightedTags) */
   private HashMap highlightedTags;
@@ -113,7 +113,7 @@ public class CorefEditor
       if (aView instanceof TextualDocumentView)
         textView = (TextualDocumentView) aView;
     }
-    textPane = (JEditorPane) ( (JScrollPane) textView.getGUI()).getViewport().
+    textPane = (JTextArea) ( (JScrollPane) textView.getGUI()).getViewport().
                getView();
     highlighter = textPane.getHighlighter();
     chainToolTipAction = new ChainToolTipAction();
