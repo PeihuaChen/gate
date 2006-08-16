@@ -52,7 +52,9 @@
        GATE is run on Windows XP.
   -->
   <!-- Use to motif toolkit on Linux for compatibility reasons -->
-  <property name="os.Linux.awt.toolkit" value="sun.awt.motif.MToolkit"/>    	
+  <!-- Turns out the Motif toolkit causes its own problems, so commenting it
+  out for now -->	
+<!--  <property name="os.Linux.awt.toolkit" value="sun.awt.motif.MToolkit"/>  -->
 
   <!-- ******************************************************************* 
        ****************  USER OPTIONS END HERE! ************************** 
@@ -427,8 +429,8 @@
 <!--	     <jvmarg value="-Xms${runtime.start.memory}"/> -->
        <sysproperty key="gate.home" value="${basedir}"/>   
        <sysproperty key="java.ext.dirs" value="${extDir}"/>
-   	   <!--<sysproperty key="awt.toolkit" value="sun.awt.motif.MToolkit"/>-->
- <!--	  <sysproperty key="sun.java2d.opengl" value="true"/>-->
+ <!--<sysproperty key="awt.toolkit" value="sun.awt.motif.MToolkit"/>-->
+ <!-- <sysproperty key="sun.java2d.opengl" value="true"/>-->
        <syspropertyset refid="run.properties" />
        <syspropertyset refid="os.properties" />
      </java>
