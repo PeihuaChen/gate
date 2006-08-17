@@ -51,9 +51,9 @@
        will set the system property prop.name to the value "something" when
        GATE is run on Windows XP.
   -->
-  <!-- Use to motif toolkit on Linux for compatibility reasons -->
-  <!-- Turns out the Motif toolkit causes its own problems, so commenting it
-  out for now -->	
+  <!-- If you use a 3D accelerated web server, such as Xgl or Aiglx and
+       your windows are not resizing properly, then you need to uncomment
+       the following line -->	
 <!--  <property name="os.Linux.awt.toolkit" value="sun.awt.motif.MToolkit"/>  -->
 
   <!-- ******************************************************************* 
