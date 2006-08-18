@@ -877,7 +877,7 @@ jar/classpath so it's the same as registerBuiltins
 
   /** An empty config data file. */
   private static String emptyConfigFile =
-    "<?xml version=\"1.0\"?>" + nl +
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + nl +
     "<!-- " + GATE_DOT_XML + ": GATE configuration data -->" + nl +
     "<GATE>" + nl +
     "" + nl +
@@ -959,7 +959,8 @@ jar/classpath so it's the same as registerBuiltins
     try {
       // if the file doesn't exist, create one with an empty GATECONFIG
       if(! configFile.exists()) {
-        FileWriter writer = new FileWriter(configFile);
+        FileOutputStream fos = new FileOutputStream(configFile);
+        OutputStreamWriter writer = new OutputStreamWriter(fos, "UTF-8");
         writer.write(emptyConfigFile);
         writer.close();
       }
