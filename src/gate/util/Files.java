@@ -21,6 +21,10 @@ import java.util.regex.Pattern;
 import java.net.URL;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.CharacterCodingException;
 
 
 /** Some utilities for use with Files and with resources.
@@ -543,6 +547,10 @@ public class Files {
    * This method updates an XML element in an XML file
    * with a new set of attributes. If the element is not found the XML
    * file is unchanged. The attributes keys and values must all be Strings.
+   * We first try to read the file using UTF-8 encoding.  If an error occurs we
+   * fall back to the platform default encoding (for backwards-compatibility
+   * reasons) and try again.  The file is written back in UTF-8, with an
+   * updated encoding declaration.
    *
    * @param xmlFile An XML file.
    * @param elementName The name of the element to update.
@@ -553,11 +561,48 @@ public class Files {
   public static String updateXmlElement(
     File xmlFile, String elementName, Map newAttrs
   ) throws IOException {
-    BufferedReader fileReader = new BufferedReader(new FileReader(xmlFile));
-    String newXml = updateXmlElement(fileReader, elementName, newAttrs);
-    fileReader.close();
+    String newXml = null;
+    BufferedReader utfFileReader = null;
+    BufferedReader platformFileReader = null;
+    Charset utfCharset = Charset.forName("UTF-8");
+    try {
+      FileInputStream fis = new FileInputStream(xmlFile);
+      // try reading with UTF-8, make sure any errors throw an exception
+      CharsetDecoder decoder = utfCharset.newDecoder()
+        .onUnmappableCharacter(CodingErrorAction.REPORT)
+        .onMalformedInput(CodingErrorAction.REPORT);
+      InputStreamReader isr = new InputStreamReader(fis, decoder);
+      utfFileReader = new BufferedReader(isr);
+      newXml = updateXmlElement(utfFileReader, elementName, newAttrs);
+    }
+    catch(CharacterCodingException cce) {
+      // File not readable as UTF-8, so try the platform default encoding
+      if(utfFileReader != null) {
+        utfFileReader.close();
+        utfFileReader = null;
+      }
+      if(DEBUG) {
+        Err.prln("updateXmlElement: could not read " + xmlFile + " as UTF-8, "
+            + "trying platform default");
+      }
+      platformFileReader = new BufferedReader(new FileReader(xmlFile));
+      newXml = updateXmlElement(platformFileReader, elementName, newAttrs);
+    }
+    finally {
+      if(utfFileReader != null) {
+        utfFileReader.close();
+      }
+      if(platformFileReader != null) {
+        platformFileReader.close();
+      }
+    }
 
-    FileWriter fileWriter = new FileWriter(xmlFile);
+    // write the updated file in UTF-8, fixing the encoding declaration
+    newXml = newXml.replaceFirst(
+        "\\A<\\?xml (.*)encoding=(?:\"[^\"]*\"|'[^']*')",
+        "<?xml $1encoding=\"UTF-8\"");
+    FileOutputStream fos = new FileOutputStream(xmlFile);
+    OutputStreamWriter fileWriter = new OutputStreamWriter(fos, utfCharset);
     fileWriter.write(newXml);
     fileWriter.close();
 
