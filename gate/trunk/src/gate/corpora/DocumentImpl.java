@@ -195,14 +195,11 @@ public class DocumentImpl extends AbstractLanguageResource implements
       DocumentFormat docFormat = null;
       // if a specific MIME type has been given, use it
       if(this.mimeType != null && this.mimeType.length() > 0) {
-        int indexOfSlash = this.mimeType.indexOf('/');
-        if(indexOfSlash < 0) {
-          throw new ResourceInstantiationException("Invalid mimeType \""
-              + this.mimeType + "\", MIME type must contain a '/' character");
+        MimeType theType = DocumentFormat.getMimeTypeForString(mimeType);
+        if(theType == null) {
+          throw new ResourceInstantiationException("MIME type \""
+              + this.mimeType + " has no registered DocumentFormat");
         }
-        MimeType theType = new MimeType(
-            this.mimeType.substring(0, indexOfSlash),
-            this.mimeType.substring(indexOfSlash + 1));
 
         docFormat = DocumentFormat.getDocumentFormat(this, theType);
       }
@@ -1898,6 +1895,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * @return a string representing a Gate Xml document.
    */
   public String toXml() {
+    //return DocumentStaxUtils.toXml(this);
     return DocumentXmlUtils.toXml(this);
   }// toXml
 
