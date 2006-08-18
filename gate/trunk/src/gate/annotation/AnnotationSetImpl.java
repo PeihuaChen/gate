@@ -369,7 +369,7 @@ public class AnnotationSetImpl extends AbstractSet implements AnnotationSet {
 
   /**
    * Select annotations by offset. This returns the set of annotations that
-   * overlap totaly or partially with the interval defined by the two provided
+   * overlap totally or partially with the interval defined by the two provided
    * offsets.The result will include all the annotations that either:
    * <ul>
    * <li>start before the start offset and end strictly after it</li>
