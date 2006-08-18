@@ -13,8 +13,9 @@
  */
 package gate.util.persistence;
 
-import gate.DataStore;
-import gate.Factory;
+import java.util.Iterator;
+
+import gate.*;
 import gate.creole.ResourceInstantiationException;
 import gate.persist.PersistenceException;
 
@@ -46,6 +47,13 @@ public class DSPersistence implements Persistence{
    */
   public Object createObject()throws PersistenceException,
                                      ResourceInstantiationException{
+    //check if the same datastore is not already open
+    Iterator dsIter = Gate.getDataStoreRegister().iterator();
+    while(dsIter.hasNext()){
+      DataStore aDS = (DataStore)dsIter.next();
+      if(aDS.getStorageUrl().equals(storageUrlString)) return aDS;
+    }
+    //if we got this far, then it's a new datastore that needs opening
     return Factory.openDataStore(className, storageUrlString);
   }
 
