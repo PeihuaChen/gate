@@ -527,6 +527,14 @@ extends AbstractLanguageResource implements LanguageResource{
   /** Gets the mime Type*/
   public MimeType getMimeType(){return mimeType;}
 
+
+  /**
+   * Utility method to get a {@link MimeType} given the type string.
+   */
+  public static MimeType getMimeTypeForString(String typeString) {
+    return (MimeType)mimeString2mimeTypeMap.get(typeString);
+  }
+
   //StatusReporter Implementation
 
 
