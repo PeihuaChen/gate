@@ -19,6 +19,8 @@
 	<classpathentry kind="lib" path="lib/GnuGetOpt.jar"/>
 	<classpathentry kind="lib" path="lib/ontotext.jar"/>
 	<classpathentry kind="lib" path="lib/gateHmm.jar"/>
+	<classpathentry kind="lib" path="lib/stax-api-1.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/wstx-lgpl-2.0.6.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/javacc.jar"/>
 	<classpathentry kind="lib" path="lib/servlet-2_3.zip"/>
