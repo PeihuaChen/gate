@@ -1233,8 +1233,8 @@ public class AnnotationSetsView extends AbstractDocumentView
         Iterator shIter = setHandlers.iterator();
         while(shIter.hasNext()){
           SetHandler sHandler = (SetHandler)shIter.next();
-          Iterator annIter = sHandler.set.get(new Long(textLocation),
-                                              new Long(textLocation)).iterator();
+          Iterator annIter = sHandler.set.get(new Long(textLocation - 1),
+                                              new Long(textLocation + 1)).iterator();
           while(annIter.hasNext()){
             Annotation ann = (Annotation)annIter.next();
             if(sHandler.getTypeHandler(ann.getType()).isSelected()){
