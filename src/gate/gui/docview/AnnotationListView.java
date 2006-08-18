@@ -244,13 +244,15 @@ public class AnnotationListView extends AbstractDocumentView
 
   protected void showHighlights(){
     int[] rows = table.getSelectedRows();
+    AnnotationHandler aHandler = null;
     for(int i = 0; i < rows.length; i++){
       Object tag = tagList.get(table.rowViewToModel(rows[i]));
-      AnnotationHandler aHandler = (AnnotationHandler)
-        annotationHandlerByTag.get(tag);
+      aHandler = (AnnotationHandler) annotationHandlerByTag.get(tag);
       textView.addBlinkingHighlight(aHandler.ann);
-      textView.scrollAnnotationToVisible(aHandler.ann);
     }    
+    //scroll to show the last highlight
+    if(aHandler != null && aHandler.ann != null)
+        textView.scrollAnnotationToVisible(aHandler.ann);
   }
 
   public void addAnnotation(Object tag, Annotation ann, AnnotationSet set){
