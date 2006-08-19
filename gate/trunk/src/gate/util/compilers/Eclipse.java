@@ -36,8 +36,6 @@ import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 
 import gate.util.*;
 import gate.Gate;
-import gate.GateConstants;
-import gate.creole.ExecutionException;
 
 /**
  * This class copiles a set of java sources using the JDT compiler from the
@@ -52,6 +50,8 @@ import gate.creole.ExecutionException;
  * @author Ian Roberts
  */
 public class Eclipse extends gate.util.Javac {
+
+  public static final boolean DEBUG = false;
 
   /**
    * Compiles a set of java sources using the Eclipse Java compiler and loads
@@ -161,18 +161,29 @@ public class Eclipse extends gate.util.Javac {
        * Find the type referenced by the given name.
        */
       private NameEnvironmentAnswer findType(String className) {
+        if(DEBUG) {
+          System.err.println("NameEnvironment.findType(" + className +")");
+        }
         try {
           if (sources.containsKey(className)) {
+            if(DEBUG) {
+              System.err.println("Found " + className + " as one of the "
+                  + "sources, returning it as a compilation unit");
+            }
             // if it's one of the sources we were given to compile,
             // return that as a CompilationUnit.
             ICompilationUnit compilationUnit = new CompilationUnit(className);
-            return new NameEnvironmentAnswer(compilationUnit);
+            return new NameEnvironmentAnswer(compilationUnit, null);
           }
 
           // otherwise, try and load the class from the GATE classloader.
           String resourceName = className.replace('.', '/') + ".class";
           InputStream is = classLoader.getResourceAsStream(resourceName);
           if (is != null) {
+            if(DEBUG) {
+              System.err.println("Found " + className + " in GATE classloader, "
+                  + "returning it as a class file reader");
+            }
             byte[] classBytes;
             byte[] buf = new byte[8192];
             ByteArrayOutputStream baos = 
@@ -187,7 +198,7 @@ public class Eclipse extends gate.util.Javac {
             ClassFileReader classFileReader = 
               new ClassFileReader(classBytes, fileName, 
                                   true);
-            return new NameEnvironmentAnswer(classFileReader);
+            return new NameEnvironmentAnswer(classFileReader, null);
           }
         }
         catch (IOException exc) {
@@ -202,6 +213,9 @@ public class Eclipse extends gate.util.Javac {
         // if no class found by that name, either as a source of in the
         // GATE classloader, return null.  This will cause a compiler
         // error.
+        if(DEBUG) {
+          System.err.println("Class " + className + " not found");
+        }
         return null;
       }
 
@@ -263,10 +277,32 @@ public class Eclipse extends gate.util.Javac {
                  CompilerOptions.GENERATE);
     settings.put(CompilerOptions.OPTION_ReportDeprecation,
                  CompilerOptions.IGNORE);
-    // ignore unused imports - otherwise every JAPE action class would generate
-    // warnings...
+    // ignore unused imports, missing serial version UIDs and unused local
+    // variables - otherwise every JAPE action class would generate warnings...
     settings.put(CompilerOptions.OPTION_ReportUnusedImport,
                  CompilerOptions.IGNORE);
+    settings.put(CompilerOptions.OPTION_ReportMissingSerialVersion,
+                 CompilerOptions.IGNORE);
+    settings.put(CompilerOptions.OPTION_ReportUnusedLocal,
+                 CompilerOptions.IGNORE);
+    settings.put(CompilerOptions.OPTION_ReportUncheckedTypeOperation,
+                 CompilerOptions.IGNORE);
+
+    // source and target - default to 1.4 on 1.4, 1.5 otherwise.  Note that
+    // GATE only works on 1.4 or later.
+    String javaVersion = System.getProperty("java.version", "1.4");
+    if(javaVersion.startsWith("1.4")) {
+      settings.put(CompilerOptions.OPTION_Source,
+                   CompilerOptions.VERSION_1_4);
+      settings.put(CompilerOptions.OPTION_TargetPlatform,
+                   CompilerOptions.VERSION_1_4);
+    }
+    else {
+      settings.put(CompilerOptions.OPTION_Source,
+                   CompilerOptions.VERSION_1_5);
+      settings.put(CompilerOptions.OPTION_TargetPlatform,
+                   CompilerOptions.VERSION_1_5);
+    }
 
     final IProblemFactory problemFactory = 
       new DefaultProblemFactory(Locale.getDefault());
@@ -330,7 +366,7 @@ public class Eclipse extends gate.util.Javac {
     // create the compiler
     Compiler compiler = new Compiler(env,
                                      policy,
-                                     settings,
+                                     new CompilerOptions(settings),
                                      requestor,
                                      problemFactory);
 
