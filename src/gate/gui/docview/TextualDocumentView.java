@@ -255,6 +255,8 @@ public class TextualDocumentView extends AbstractDocumentView {
 //    textView.setEditorKit(new RawEditorKit());
     textView = new JTextArea();
     textView.setAutoscrolls(false);
+    textView.setLineWrap(true);
+    textView.setWrapStyleWord(true);
     scroller = new JScrollPane(textView);
 
     textView.setText(document.getContent().toString());
