@@ -62,13 +62,32 @@ public class DocumentStaxUtils {
    * the reader will be left positioned on the corresponding closing
    * tag.
    * 
-   * @param xsr
-   * @param doc
-   * @return
+   * @param xsr the source of the XML to parse
+   * @param doc the document to update
    * @throws XMLStreamException
    */
   public static void readGateXmlDocument(XMLStreamReader xsr, Document doc)
           throws XMLStreamException {
+    readGateXmlDocument(xsr, doc, null);
+  }
+
+  /**
+   * Reads GATE XML format data from the given XMLStreamReader and puts
+   * the content and annotation sets into the given Document, replacing
+   * its current content. The reader must be positioned on the opening
+   * GateDocument tag (i.e. the last event was a START_ELEMENT for which
+   * getLocalName returns "GateDocument"), and when the method returns
+   * the reader will be left positioned on the corresponding closing
+   * tag.
+   * 
+   * @param xsr the source of the XML to parse
+   * @param doc the document to update
+   * @param statusListener optional status listener to receive status
+   *          messages
+   * @throws XMLStreamException
+   */
+  public static void readGateXmlDocument(XMLStreamReader xsr, Document doc,
+          StatusListener statusListener) throws XMLStreamException {
     DocumentContent savedContent = null;
 
     // check the precondition
@@ -78,6 +97,9 @@ public class DocumentStaxUtils {
     xsr.nextTag();
     xsr.require(XMLStreamConstants.START_ELEMENT, null, "GateDocumentFeatures");
 
+    if(statusListener != null) {
+      statusListener.statusChanged("Reading document features");
+    }
     FeatureMap documentFeatures = readFeatureMap(xsr);
 
     // read document text, building the map of node IDs to offsets
@@ -85,6 +107,9 @@ public class DocumentStaxUtils {
     xsr.require(XMLStreamConstants.START_ELEMENT, null, "TextWithNodes");
 
     Map nodeIdToOffsetMap = new HashMap();
+    if(statusListener != null) {
+      statusListener.statusChanged("Reading document content");
+    }
     String documentText = readTextWithNodes(xsr, nodeIdToOffsetMap);
 
     // save the content, in case anything goes wrong later
@@ -104,9 +129,16 @@ public class DocumentStaxUtils {
         String annotationSetName = xsr.getAttributeValue(null, "Name");
         AnnotationSet annotationSet = null;
         if(annotationSetName == null) {
+          if(statusListener != null) {
+            statusListener.statusChanged("Reading default annotation set");
+          }
           annotationSet = doc.getAnnotations();
         }
         else {
+          if(statusListener != null) {
+            statusListener.statusChanged("Reading \"" + annotationSetName
+                    + "\" annotation set");
+          }
           annotationSet = doc.getAnnotations(annotationSetName);
         }
         annotationSet.clear();
@@ -127,6 +159,10 @@ public class DocumentStaxUtils {
       if(doc instanceof DocumentImpl && allAnnotIds.size() > 0) {
         ((DocumentImpl)doc).setNextAnnotationId(((Integer)allAnnotIds.last())
                 .intValue() + 1);
+      }
+      if(statusListener != null) {
+        statusListener.statusChanged("Finished.  " + allAnnotIds.size()
+                + " annotation(s) processed");
       }
     }
     // in case of exception, reset document content to the unparsed XML
@@ -198,8 +234,8 @@ public class DocumentStaxUtils {
       }
 
       try {
-        int endNodeId = Integer.parseInt(xsr.getAttributeValue(null,
-                "EndNode"));
+        int endNodeId = Integer
+                .parseInt(xsr.getAttributeValue(null, "EndNode"));
         if(nodeIdToOffsetMap != null) {
           Long endOffset = (Long)nodeIdToOffsetMap.get(new Integer(endNodeId));
           if(endOffset != null) {
@@ -289,8 +325,8 @@ public class DocumentStaxUtils {
       catch(InvalidOffsetException ioe) {
         // really shouldn't happen, but could if we're not using an id
         // to offset map
-        throw new XMLStreamException("Invalid offset when creating annotation " + annObj,
-                ioe);
+        throw new XMLStreamException("Invalid offset when creating annotation "
+                + annObj, ioe);
       }
     }
     return requireAnnotationIds;
@@ -314,7 +350,8 @@ public class DocumentStaxUtils {
     while((eventType = xsr.next()) != XMLStreamConstants.END_ELEMENT) {
       switch(eventType) {
         case XMLStreamConstants.CHARACTERS:
-          textBuf.append(xsr.getTextCharacters(), xsr.getTextStart(), xsr.getTextLength());
+          textBuf.append(xsr.getTextCharacters(), xsr.getTextStart(), xsr
+                  .getTextLength());
           break;
 
         case XMLStreamConstants.START_ELEMENT:
@@ -409,7 +446,8 @@ public class DocumentStaxUtils {
     while((eventType = xsr.next()) != XMLStreamConstants.END_ELEMENT) {
       switch(eventType) {
         case XMLStreamConstants.CHARACTERS:
-          stringRep.append(xsr.getTextCharacters(), xsr.getTextStart(), xsr.getTextLength());
+          stringRep.append(xsr.getTextCharacters(), xsr.getTextStart(), xsr
+                  .getTextLength());
           break;
 
         case XMLStreamConstants.START_ELEMENT:
