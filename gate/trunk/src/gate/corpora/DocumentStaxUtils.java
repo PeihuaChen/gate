@@ -630,7 +630,7 @@ public class DocumentStaxUtils {
         xsw.writeStartDocument("1.0");
       }
       newLine(xsw);
-      
+
       writeDocument(doc, xsw, namespaceURI);
     }
     finally {
@@ -712,7 +712,8 @@ public class DocumentStaxUtils {
 
   /**
    * Writes the given annotation set to an XMLStreamWriter as GATE XML
-   * format.
+   * format. The Name attribute of the generated AnnotationSet element
+   * is set to the default value, i.e. <code>annotations.getName</code>.
    * 
    * @param annotations the annotation set to write
    * @param xsw the writer to use for output
@@ -721,6 +722,24 @@ public class DocumentStaxUtils {
    */
   public static void writeAnnotationSet(AnnotationSet annotations,
           XMLStreamWriter xsw, String namespaceURI) throws XMLStreamException {
+    writeAnnotationSet(annotations, annotations.getName(), xsw, namespaceURI);
+  }
+
+  /**
+   * Writes the given annotation set to an XMLStreamWriter as GATE XML
+   * format. The value for the Name attribute of the generated
+   * AnnotationSet element is given by <code>asName</code>.
+   * 
+   * @param annotations the annotation set to write
+   * @param asName the name under which to write the annotation set.
+   *          <code>null</code> means that no name will be used.
+   * @param xsw the writer to use for output
+   * @param namespaceURI
+   * @throws XMLStreamException
+   */
+  public static void writeAnnotationSet(AnnotationSet annotations,
+          String asName, XMLStreamWriter xsw, String namespaceURI)
+          throws XMLStreamException {
     if(annotations == null) {
       // write an empty AnnotationSet element
       xsw.writeStartElement(namespaceURI, "AnnotationSet");
@@ -730,9 +749,8 @@ public class DocumentStaxUtils {
     }
 
     xsw.writeStartElement(namespaceURI, "AnnotationSet");
-    String setName = annotations.getName();
-    if(setName != null) {
-      xsw.writeAttribute("Name", setName);
+    if(asName != null) {
+      xsw.writeAttribute("Name", asName);
     }
     newLine(xsw);
 
