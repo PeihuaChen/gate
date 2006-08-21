@@ -14,6 +14,10 @@
  */
 package gate.corpora;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -569,7 +573,7 @@ public class DocumentStaxUtils {
    * 
    * @param doc the document
    */
-  public static String toXml(TextualDocument doc) {
+  public static String toXml(Document doc) {
     try {
       if(outputFactory == null) {
         outputFactory = XMLOutputFactory.newInstance();
@@ -579,7 +583,12 @@ public class DocumentStaxUtils {
       XMLStreamWriter xsw = outputFactory.createXMLStreamWriter(sw);
 
       // start the document
-      xsw.writeStartDocument(doc.getEncoding(), "1.0");
+      if(doc instanceof TextualDocument) {
+        xsw.writeStartDocument(((TextualDocument)doc).getEncoding(), "1.0");
+      }
+      else {
+        xsw.writeStartDocument("1.0");
+      }
       newLine(xsw);
       writeDocument(doc, xsw, "");
       xsw.close();
@@ -588,6 +597,47 @@ public class DocumentStaxUtils {
     }
     catch(XMLStreamException xse) {
       throw new GateRuntimeException("Error converting document to XML", xse);
+    }
+  }
+
+  /**
+   * Write the specified GATE document to a File.
+   * 
+   * @param doc the document to write
+   * @param file the file to write it to
+   * @param namespaceURI the namespace URI to use for the XML elements.
+   *          Must not be null, but can be the empty string if no
+   *          namespace is desired.
+   * @throws XMLStreamException
+   * @throws IOException
+   */
+  public static void writeDocument(Document doc, File file, String namespaceURI)
+          throws XMLStreamException, IOException {
+    if(outputFactory == null) {
+      outputFactory = XMLOutputFactory.newInstance();
+    }
+
+    XMLStreamWriter xsw = null;
+    OutputStream outputStream = new FileOutputStream(file);
+    try {
+      if(doc instanceof TextualDocument) {
+        xsw = outputFactory.createXMLStreamWriter(outputStream,
+                ((TextualDocument)doc).getEncoding());
+        xsw.writeStartDocument(((TextualDocument)doc).getEncoding(), "1.0");
+      }
+      else {
+        xsw = outputFactory.createXMLStreamWriter(outputStream);
+        xsw.writeStartDocument("1.0");
+      }
+      newLine(xsw);
+      
+      writeDocument(doc, xsw, namespaceURI);
+    }
+    finally {
+      if(xsw != null) {
+        xsw.close();
+      }
+      outputStream.close();
     }
   }
 
@@ -610,6 +660,7 @@ public class DocumentStaxUtils {
     newLine(xsw);
     // features
     xsw.writeComment(" The document's features");
+    newLine(xsw);
     newLine(xsw);
     xsw.writeStartElement(namespaceURI, "GateDocumentFeatures");
     newLine(xsw);
