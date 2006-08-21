@@ -1895,8 +1895,8 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * @return a string representing a Gate Xml document.
    */
   public String toXml() {
-    //return DocumentStaxUtils.toXml(this);
-    return DocumentXmlUtils.toXml(this);
+    return DocumentStaxUtils.toXml(this);
+    //return DocumentXmlUtils.toXml(this);
   }// toXml
 
   /**
