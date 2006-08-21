@@ -39,12 +39,6 @@ extends AbstractLanguageResource implements LanguageResource{
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  /** This fields indicates whether the document being processed is in a
-    * Gate XML custom format.
-    * Detection is done in runMagicNumbers().
-    */
-  protected static boolean isGateXmlDocument = false;
-
   /** The MIME type of this format. */
   private MimeType mimeType = null;
 
@@ -387,11 +381,12 @@ extends AbstractLanguageResource implements LanguageResource{
   private static MimeType getTypeFromContent(String aContent){
     MimeType detectedMimeType = null;
     // Detect whether or not is a GateXmlDocument
-    if (  aContent.indexOf("<GateDocument") != -1  ||
-          aContent.indexOf(" GateDocument") != -1)
-      isGateXmlDocument = true;
-    else
-      isGateXmlDocument = false;
+    // ian_roberts - moved to XmlDocumentFormat where it belongs
+    //if (  aContent.indexOf("<GateDocument") != -1  ||
+    //      aContent.indexOf(" GateDocument") != -1)
+    //  isGateXmlDocument = true;
+    //else
+    //  isGateXmlDocument = false;
 
     // Run the magic numbers test
     Set magicSet = magic2mimeTypeMap.keySet();
