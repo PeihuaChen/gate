@@ -605,6 +605,20 @@ public class DocumentStaxUtils {
    * 
    * @param doc the document to write
    * @param file the file to write it to
+   * @throws XMLStreamException
+   * @throws IOException
+   */
+  public static void writeDocument(Document doc, File file) throws
+          XMLStreamException, IOException {
+    writeDocument(doc, file, "");
+  }
+  
+  /**
+   * Write the specified GATE document to a File, optionally putting the XML in
+   * a namespace.
+   * 
+   * @param doc the document to write
+   * @param file the file to write it to
    * @param namespaceURI the namespace URI to use for the XML elements.
    *          Must not be null, but can be the empty string if no
    *          namespace is desired.

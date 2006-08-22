@@ -644,7 +644,7 @@ public class NameBearerHandle implements Handle, StatusListener,
               
               // write directly to the file using StAX
               DocumentStaxUtils.writeDocument((gate.Document)target,
-                      selectedFile, "");
+                      selectedFile);
             }
             catch(Exception ex) {
               ex.printStackTrace(Out.getPrintWriter());
@@ -839,7 +839,7 @@ public class NameBearerHandle implements Handle, StatusListener,
                   }
                   else {
                     // for GATE XML format, use the direct StAX writer
-                    DocumentStaxUtils.writeDocument(currentDoc, docFile, "");
+                    DocumentStaxUtils.writeDocument(currentDoc, docFile);
                   } // if
                 }
                 catch(Exception ioe) {
