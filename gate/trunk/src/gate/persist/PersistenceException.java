@@ -35,6 +35,12 @@ public class PersistenceException extends GateException {
     this.exception = e;
   }
 
+  /** Construction from both string and exception */
+  public PersistenceException(String s, Exception e) {
+    super(s);
+    this.exception = e;
+  }
+
   /**
    * Overridden so we can print the enclosed exception's stacktrace too.
    */

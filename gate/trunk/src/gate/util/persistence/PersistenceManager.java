@@ -13,11 +13,18 @@
  */
 package gate.util.persistence;
 
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.io.xml.*;
+
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.*;
+
+import javax.xml.stream.*;
 
 import gate.*;
 import gate.creole.*;
@@ -445,7 +452,7 @@ public class PersistenceManager {
     // but the xstream and filewriter are used for XML serialization.
     ObjectOutputStream oos = null;
     com.thoughtworks.xstream.XStream xstream = null;
-    FileWriter fileWriter = null;
+    HierarchicalStreamWriter writer = null;
     persistenceFile = file;
     try {
       // insure a clean start
@@ -455,8 +462,10 @@ public class PersistenceManager {
       if(Gate.getUseXMLSerialization()) {
         // Just create the xstream and the filewriter that will later be
         // used to serialize objects.
-        xstream = new com.thoughtworks.xstream.XStream();
-        fileWriter = new FileWriter(file);
+        xstream = new XStream();
+        FileWriter fileWriter = new FileWriter(file);
+        writer = new PrettyPrintWriter(fileWriter,
+            new XmlFriendlyReplacer("-", "_"));
       }
       else {
         oos = new ObjectOutputStream(new FileOutputStream(file));
@@ -476,7 +485,7 @@ public class PersistenceManager {
         gateApplication.application = persistentObject;
 
         // Then do the actual serialization.
-        xstream.toXML(gateApplication, fileWriter);
+        xstream.marshal(gateApplication, writer);
       }
       else {
         // This is for native serialization.
@@ -493,11 +502,11 @@ public class PersistenceManager {
         oos.flush();
         oos.close();
       }
-      if(fileWriter != null) {
+      if(writer != null) {
         // Just make sure that all the xml is written, and the file
         // closed.
-        fileWriter.flush();
-        fileWriter.close();
+        writer.flush();
+        writer.close();
       }
       long endTime = System.currentTimeMillis();
       if(sListener != null)
@@ -530,14 +539,24 @@ public class PersistenceManager {
     // serializations.
     boolean xmlStream = isXmlApplicationFile(url);
     ObjectInputStream ois = null;
-    java.io.Reader reader = null;
-    com.thoughtworks.xstream.XStream xstream = null;
+    HierarchicalStreamReader reader = null;
+    XStream xstream = null;
     // Make the appropriate kind of streams that will be used, depending
     // on
     // whether serialization is native or xml.
     if(xmlStream) {
-      reader = new java.io.InputStreamReader(url.openStream());
-      xstream = new com.thoughtworks.xstream.XStream();
+      Reader inputReader = new java.io.InputStreamReader(url.openStream());
+      try {
+        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+        XMLStreamReader xsr = inputFactory.createXMLStreamReader(
+            url.toExternalForm(), inputReader);
+        reader = new StaxReader(new QNameMap(), xsr);
+      }
+      catch(XMLStreamException xse) {
+        throw new PersistenceException("Error creating reader", xse);
+      }
+      
+      xstream = new XStream(new StaxDriver());
     }
     else {
       ois = new ObjectInputStream(url.openStream());
@@ -551,7 +570,7 @@ public class PersistenceManager {
       if(xmlStream) {
         if(DEBUG) System.out.println("About to load application");
         // Actually load the application
-        gateApplication = (GateApplication)xstream.fromXML(reader);
+        gateApplication = (GateApplication)xstream.unmarshal(reader);
         reader.close();
         if(DEBUG) System.out.println("About to extract url list");
         // Extract an iterator to the URLs.
