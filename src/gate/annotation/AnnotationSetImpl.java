@@ -193,6 +193,7 @@ public class AnnotationSetImpl extends AbstractSet implements AnnotationSet {
     return wasPresent;
   } // remove(o)
 
+  
   /** Remove from the ID index. */
   protected boolean removeFromIdIndex(Annotation a) {
     if(annotsById.remove(a.getId()) == null) return false;
@@ -832,9 +833,9 @@ public class AnnotationSetImpl extends AbstractSet implements AnnotationSet {
           AnnotationSet annSet = (AnnotationSet)annotsByStartNode.get(aNode
                   .getId());
           if(annSet != null) startingAnnotations.addAll(annSet);
-          // remove the node
-          nodesByOffset.remove(aNode.getOffset());
-          annotsByStartNode.remove(aNode);
+//          // remove the node
+//          nodesByOffset.remove(aNode.getOffset());
+//          annotsByStartNode.remove(aNode);
         }
         // modify the annotations so they point to the saved node
         Iterator annIter = startingAnnotations.iterator();
@@ -848,6 +849,7 @@ public class AnnotationSetImpl extends AbstractSet implements AnnotationSet {
             addToStartOffsetIndex(anAnnot);
           }
         }
+        
         annIter = endingAnnotations.iterator();
         while(annIter.hasNext()) {
           AnnotationImpl anAnnot = (AnnotationImpl)annIter.next();
@@ -857,6 +859,12 @@ public class AnnotationSetImpl extends AbstractSet implements AnnotationSet {
             remove(anAnnot);
           }
         }
+        // remove the unused nodes inside the area
+        for(int i = 1; i < affectedNodes.size(); i++) {
+          Node aNode = (Node)affectedNodes.get(i);          
+          nodesByOffset.remove(aNode.getOffset());
+          annotsByStartNode.remove(aNode);
+        }        
         // repair the first node
         // remove from offset index
         nodesByOffset.remove(firstNode.getOffset());
