@@ -841,12 +841,21 @@ public class AnnotationSetImpl extends AbstractSet implements AnnotationSet {
         while(annIter.hasNext()) {
           AnnotationImpl anAnnot = (AnnotationImpl)annIter.next();
           anAnnot.start = firstNode;
-          addToStartOffsetIndex(anAnnot);
+          //remove the modified annotation if it has just become zero-length
+          if(anAnnot.start == anAnnot.end){
+            remove(anAnnot);
+          }else{
+            addToStartOffsetIndex(anAnnot);
+          }
         }
         annIter = endingAnnotations.iterator();
         while(annIter.hasNext()) {
           AnnotationImpl anAnnot = (AnnotationImpl)annIter.next();
           anAnnot.end = firstNode;
+          //remove the modified annotation if it has just become zero-length
+          if(anAnnot.start == anAnnot.end){
+            remove(anAnnot);
+          }
         }
         // repair the first node
         // remove from offset index
