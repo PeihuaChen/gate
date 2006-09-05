@@ -252,7 +252,7 @@ public class DocumentStaxUtils {
         }
         else {
           // no offset map, so just use the ID as an offset
-          annObj.setStart(new Long(endNodeId));
+          annObj.setEnd(new Long(endNodeId));
         }
       }
       catch(NumberFormatException nfe) {
