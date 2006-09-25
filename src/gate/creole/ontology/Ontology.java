@@ -82,6 +82,13 @@ public interface Ontology extends Taxonomy {
    */
   public OInstance getInstanceByName(String instanceName);
 
+  
+  /**
+   * A method to remove the existing propertyDefinition
+   * @param property
+   */
+  public void removePropertyDefinition(Property property);
+  
   /**
    * Creates a new Datatype property in this ontology where the domain consists
    * of a single {@link OClass}.

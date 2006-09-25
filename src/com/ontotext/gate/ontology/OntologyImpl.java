@@ -50,6 +50,13 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
     instances.remove(theInstance);
   }
 
+  public void removePropertyDefinition(Property property) {
+    if(propertyDefinitionSet.remove(property)) {
+      setModified(true);
+      fireObjectModificationEvent(this);
+    }
+  }
+  
   public Set getInstances() {
     return instances;
   }
