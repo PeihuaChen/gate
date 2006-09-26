@@ -187,8 +187,16 @@ public class AnnotationSetsView extends AbstractDocumentView
     int rgba = rgb | (alpha << 24);
     prefRoot.putInt(annotationType, rgba);
   }
-  
+
   /**
+   * Enables or disables creation of the new annotation set.
+   */
+  public void setNewAnnSetCreationEnabled(boolean b) {
+		newSetAction.setEnabled(b);
+		newSetNameTextField.setEnabled(b);
+	}
+
+	/**
    * This method will be called whenever the view becomes active. Implementers 
    * should use this to add hooks (such as mouse listeners) to the other views
    * as required by their functionality. 
