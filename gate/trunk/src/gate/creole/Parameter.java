@@ -110,7 +110,7 @@ public class Parameter implements Serializable
         // Read the tokens from the default value and try to create items
         // belonging to the itemClassName
         StringTokenizer strTokenizer = new StringTokenizer(
-                                                      defaultValueString,";");
+                                                      stringValue,";");
         while(strTokenizer.hasMoreTokens()){
           String itemStringValue = strTokenizer.nextToken();
           colection.add(itemStringValue);
@@ -127,7 +127,7 @@ public class Parameter implements Serializable
         // Read the tokens from the default value and try to create items
         // belonging to the itemClassName
         StringTokenizer strTokenizer = new StringTokenizer(
-                                                      defaultValueString,";");
+                                                      stringValue,";");
         while(strTokenizer.hasMoreTokens()){
           // Read a string item and construct an object belonging to
           // itemClassName
