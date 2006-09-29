@@ -502,15 +502,24 @@ public class SerialCorpusImpl extends
       return false;
 
     if(index < docDataList.size()) { //we found it, so remove it
+      // by Andrey Shafirin: this part of code can produce an exception if document wasn't loaded
+    	String docName = ((DocumentData)docDataList.get(index)).getDocumentName();
       docDataList.remove(index);
-      Document oldDoc =  (Document) documents.remove(index);
-      if (DEBUG) Out.prln("documents after remove of " + oldDoc.getName()
-                          + " are " + documents);
-      documentRemoved(oldDoc.getLRPersistenceId().toString());
+      //Document oldDoc =  (Document) documents.remove(index);
+      documents.remove(index);
+      //if (DEBUG) Out.prln("documents after remove of " + oldDoc.getName()
+      //                    + " are " + documents);
+      if (DEBUG) Out.prln("documents after remove of " + docName + " are " + documents);
+      //documentRemoved(oldDoc.getLRPersistenceId().toString());
+      documentRemoved(getDocumentPersistentID(index).toString());
+      //fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
+      //                                    oldDoc,
+      //                                    index,
+      //                                    CorpusEvent.DOCUMENT_REMOVED));
       fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
-                                          oldDoc,
-                                          index,
-                                          CorpusEvent.DOCUMENT_REMOVED));
+          (Document)o,
+          index,
+          CorpusEvent.DOCUMENT_REMOVED));
     }
 
     return true;
