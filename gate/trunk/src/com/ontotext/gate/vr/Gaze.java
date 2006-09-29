@@ -29,7 +29,7 @@ import java.io.*;
  *  and mapping definitions (mappings between ontology classes and gazetteer lists).
  *  I.e. capable of visualizing and editing both linear and ontology-aware gazetteers. */
 public class Gaze extends AbstractVisualResource
-  implements GazetteerListener, ObjectModificationListener {
+  implements GazetteerListener, OntologyModificationListener {
 
   /** size x when running from the tools menu */
   public final static int SIZE_X = 700;
@@ -419,8 +419,7 @@ public class Gaze extends AbstractVisualResource
               try {
                 ontology = new OntologyImpl().getOntology(ourl);
                 if(ontology instanceof TaxonomyImpl)
-                  ((TaxonomyImpl)ontology).
-                  addObjectModificationListener(Gaze.this);
+                  ((TaxonomyImpl)ontology).addOntologyModificationListener(Gaze.this);
               } catch (ResourceInstantiationException x) {
                 x.printStackTrace(Err.getPrintWriter());
               }
@@ -824,17 +823,11 @@ public class Gaze extends AbstractVisualResource
   } // processGazetteerEvent(GazetteerEvent)
 /*---------implementation of GazetteerListener interface--------------*/
 
-/*->->->---implementation of ObjectModificationListener interface--------------*/
+/*->->->---implementation of OntologyModificationListener interface--------------*/
   public void processGateEvent(GateEvent e) {
   }
 
-  public void objectCreated(ObjectModificationEvent e) {
-  }
-
-  public void objectDeleted(ObjectModificationEvent e) {
-  }
-
-  public void objectModified(ObjectModificationEvent e) {
+  public void ontologyModified(OntologyModificationEvent e) {
     Object source = e.getSource();
     if ( source instanceof Taxonomy ) {
 
@@ -859,7 +852,7 @@ public class Gaze extends AbstractVisualResource
     }
   }
 
-/*-<-<-<---implementation of ObjectModificationListener interface--------------*/
+/*-<-<-<---implementation of OntologyModificationListener interface--------------*/
 
 
   /* --- inner classes ----*/
@@ -1837,7 +1830,7 @@ public class Gaze extends AbstractVisualResource
                 ontology = new OntologyImpl().getOntology(ourl);
                 if(ontology instanceof TaxonomyImpl)
                   ((TaxonomyImpl)ontology).
-                  addObjectModificationListener(Gaze.this);
+                  addOntologyModificationListener(Gaze.this);
               } catch (ResourceInstantiationException x) {
                 x.printStackTrace(Err.getPrintWriter());
               }

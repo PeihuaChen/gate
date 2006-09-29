@@ -6,6 +6,7 @@
 package com.ontotext.gate.ontology;
 
 import gate.creole.ontology.*;
+
 import java.util.*;
 
 /**
@@ -20,51 +21,60 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
   private static final boolean DEBUG = false;
 
   protected Map instancesByName = new HashMap();
+
   protected Set instances = new HashSet();
+
   protected Set propertyDefinitionSet = new HashSet();
 
   public OInstance addInstance(String name, OClass theClass) {
-    if (instancesByName.containsKey(name))
-      return (OInstance) instancesByName.get(name);
+    if(instancesByName.containsKey(name))
+      return (OInstance)instancesByName.get(name);
+
     OInstance newInstance = new OInstanceImpl(name, null, theClass, this);
     instancesByName.put(name, newInstance);
     instances.add(newInstance);
     setModified(true);
-    fireObjectModificationEvent(this);
+    fireOntologyResourceAdded(newInstance);
     return newInstance;
   }
 
   public void addInstance(OInstance theInstance) {
-    if (instancesByName.containsKey(theInstance.getName()))
-      return;
+    if(instancesByName.containsKey(theInstance.getName())) return;
+
     instancesByName.put(theInstance.getName(), theInstance);
     instances.add(theInstance);
     setModified(true);
-    fireObjectModificationEvent(this);
+    fireOntologyResourceAdded(theInstance);
   }
 
   public void removeInstance(OInstance theInstance) {
-    if (! instancesByName.containsKey(theInstance.getName()))
-      return;
+    if(!instancesByName.containsKey(theInstance.getName())) return;
+
     instancesByName.remove(theInstance.getName());
     instances.remove(theInstance);
+    setModified(true);
+    fireOntologyResourceRemoved(theInstance);
   }
 
+  /**
+   * To Remove an existing property definition
+   */
   public void removePropertyDefinition(Property property) {
-    if(propertyDefinitionSet.remove(property)) {
+    if(getPropertyDefinitions().remove(property)) {
       setModified(true);
-      fireObjectModificationEvent(this);
+      fireOntologyResourceRemoved(property);
+      return;
     }
   }
-  
+
   public Set getInstances() {
     return instances;
   }
 
   public Set getInstances(OClass aClass) {
     Set theInstances = getDirectInstances(aClass);
-    Iterator classIter = aClass.
-      getSuperClasses(OClass.TRANSITIVE_CLOSURE).iterator();
+    Iterator classIter = aClass.getSuperClasses(OClass.TRANSITIVE_CLOSURE)
+            .iterator();
     while(classIter.hasNext())
       theInstances.addAll(getDirectInstances((OClass)classIter.next()));
     return theInstances;
@@ -73,153 +83,170 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
   public Set getDirectInstances(OClass aClass) {
     Set theInstances = new HashSet();
 
-    //iterate through all instances and only include those
-    //that either have the same class or their class is a subclass
-    //of the given class; not an efficient implementation but fine for now
+    // iterate through all instances and only include those
+    // that either have the same class or their class is a subclass
+    // of the given class; not an efficient implementation but fine for
+    // now
     Iterator instIter = instances.iterator();
     while(instIter.hasNext()) {
-      OInstance anInstance = (OInstance)instIter.next(); 
-      if(anInstance.getOClasses().contains(aClass)) 
+      OInstance anInstance = (OInstance)instIter.next();
+      if(anInstance.getOClasses().contains(aClass))
         theInstances.add(anInstance);
-    }//for
+    }// for
     return theInstances;
   }
 
   public OInstance getInstanceByName(String aName) {
-    return (OInstance) instancesByName.get(aName);
+    return (OInstance)instancesByName.get(aName);
   }
 
-
   public TClass createClass(String aName, String aComment) {
-    this.modified = true;
-    TClass theClass
-      = new OClassImpl(Long.toString(++lastGeneratedId),aName,aComment,this);
+    TClass theClass = new OClassImpl(Long.toString(++lastGeneratedId), aName,
+            aComment, this);
     addClass(theClass);
     nullBuffers = true;
-    fireObjectModificationEvent(this);
     return theClass;
   }
 
-  public DatatypeProperty addDatatypeProperty(String name, String comment, 
+  public DatatypeProperty addDatatypeProperty(String name, String comment,
           Set domain, Class range) {
-    DatatypeProperty theProperty = new DatatypePropertyImpl(name, 
-            comment, domain,range, this);
-    theProperty.setURI(getDefaultNameSpace() + name);
-    addPropertyDefinition(theProperty);
-    return theProperty;
-  }
-    
-  public DatatypeProperty addDatatypeProperty(String name, String comment, 
-          OClass domain, Class range){
-    DatatypeProperty theProperty = new DatatypePropertyImpl(name, 
-            comment, domain, range, this);
+    DatatypeProperty theProperty = new DatatypePropertyImpl(name, comment,
+            domain, range, this);
     theProperty.setURI(getDefaultNameSpace() + name);
     addPropertyDefinition(theProperty);
     return theProperty;
   }
 
+  public DatatypeProperty addDatatypeProperty(String name, String comment,
+          OClass domain, Class range) {
+    DatatypeProperty theProperty = new DatatypePropertyImpl(name, comment,
+            domain, range, this);
+    theProperty.setURI(getDefaultNameSpace() + name);
+    addPropertyDefinition(theProperty);
+    return theProperty;
+  }
 
-  public Property addProperty(String name, String comment, Set domain, 
-          Set range) {
+  public void addDatatypeProperty(DatatypeProperty property) {
+    addPropertyDefinition(property);
+    return;
+  }
+
+  public Property addProperty(String name, String comment, Set domain, Set range) {
     Property theProperty = new PropertyImpl(name, comment, domain, range, this);
     theProperty.setURI(getDefaultNameSpace() + name);
     addPropertyDefinition(theProperty);
     return theProperty;
-  }  
-  
-  public Property addProperty(String name, String comment, OClass domain, Class range){
+  }
+
+  public Property addProperty(String name, String comment, OClass domain,
+          Class range) {
     Property theProperty = new PropertyImpl(name, comment, domain, range, this);
     theProperty.setURI(getDefaultNameSpace() + name);
     addPropertyDefinition(theProperty);
-    return theProperty;    
+    return theProperty;
   }
-  
-  public ObjectProperty addObjectProperty(String name, String comment, 
+
+  public void addProperty(Property property) {
+    addPropertyDefinition(property);
+  }
+
+  public ObjectProperty addObjectProperty(String name, String comment,
           Set domain, Set range) {
-    ObjectProperty theProperty = new ObjectPropertyImpl(name, comment, domain, 
+    ObjectProperty theProperty = new ObjectPropertyImpl(name, comment, domain,
             range, this);
     theProperty.setURI(getDefaultNameSpace() + name);
     addPropertyDefinition(theProperty);
     return theProperty;
   }
 
-  public ObjectProperty addObjectProperty(String name, String comment, 
-          OClass domain, OClass range){
-    ObjectProperty theProperty = new ObjectPropertyImpl(name, comment, domain, 
+  public ObjectProperty addObjectProperty(String name, String comment,
+          OClass domain, OClass range) {
+    ObjectProperty theProperty = new ObjectPropertyImpl(name, comment, domain,
             range, this);
     theProperty.setURI(getDefaultNameSpace() + name);
     addPropertyDefinition(theProperty);
     return theProperty;
   }
 
-  public SymmetricProperty addSymmetricProperty(String name, String comment, 
+  public void addObjectProperty(ObjectProperty property) {
+    addPropertyDefinition(property);
+  }
+
+  public SymmetricProperty addSymmetricProperty(String name, String comment,
           Set domain, Set range) {
-    SymmetricProperty theProperty = new SymmetricPropertyImpl(name, comment, 
+    SymmetricProperty theProperty = new SymmetricPropertyImpl(name, comment,
             domain, range, this);
     theProperty.setURI(getDefaultNameSpace() + name);
     addPropertyDefinition(theProperty);
     return theProperty;
   }
 
-  public SymmetricProperty addSymmetricProperty(String name, String comment, 
-          OClass domain, OClass range){
-    SymmetricProperty theProperty = new SymmetricPropertyImpl(name, comment, 
-            domain, range, this);
-    theProperty.setURI(getDefaultNameSpace() + name);
-    addPropertyDefinition(theProperty);
-    return theProperty;
-  }  
-
-  public TransitiveProperty addTransitiveProperty(String name, String comment, 
-          Set domain, Set range) {
-    TransitiveProperty theProperty = new TransitivePropertyImpl(name, comment, 
+  public SymmetricProperty addSymmetricProperty(String name, String comment,
+          OClass domain, OClass range) {
+    SymmetricProperty theProperty = new SymmetricPropertyImpl(name, comment,
             domain, range, this);
     theProperty.setURI(getDefaultNameSpace() + name);
     addPropertyDefinition(theProperty);
     return theProperty;
   }
 
-  public TransitiveProperty addTransitiveProperty(String name, String comment, 
-          OClass domain, OClass range){
-    TransitiveProperty theProperty = new TransitivePropertyImpl(name, comment, 
+  public void addSymmetricProperty(SymmetricProperty property) {
+    addPropertyDefinition(property);
+  }
+
+  public TransitiveProperty addTransitiveProperty(String name, String comment,
+          Set domain, Set range) {
+    TransitiveProperty theProperty = new TransitivePropertyImpl(name, comment,
             domain, range, this);
     theProperty.setURI(getDefaultNameSpace() + name);
     addPropertyDefinition(theProperty);
     return theProperty;
-  }  
-  
+  }
+
+  public TransitiveProperty addTransitiveProperty(String name, String comment,
+          OClass domain, OClass range) {
+    TransitiveProperty theProperty = new TransitivePropertyImpl(name, comment,
+            domain, range, this);
+    theProperty.setURI(getDefaultNameSpace() + name);
+    addPropertyDefinition(theProperty);
+    return theProperty;
+  }
+
+  public void addTransitiveProperty(TransitiveProperty property) {
+    addPropertyDefinition(property);
+  }
+
   protected void addPropertyDefinition(gate.creole.ontology.Property theProperty) {
     this.propertyDefinitionSet.add(theProperty);
     setModified(true);
+    fireOntologyResourceAdded(theProperty);
   }
 
   public Set getPropertyDefinitions() {
     return this.propertyDefinitionSet;
   }
 
-  public gate.creole.ontology.Property getPropertyDefinitionByName(String name){
-    if (name == null)
-      return null;
+  public gate.creole.ontology.Property getPropertyDefinitionByName(String name) {
+    if(name == null) return null;
     Iterator iter = this.propertyDefinitionSet.iterator();
-    while (iter.hasNext()) {
-      gate.creole.ontology.Property theProperty = (gate.creole.ontology.Property) iter.next();
-      if (name.equals(theProperty.getName()))
-        return theProperty;
+    while(iter.hasNext()) {
+      gate.creole.ontology.Property theProperty = (gate.creole.ontology.Property)iter
+              .next();
+      if(name.equals(theProperty.getName())) return theProperty;
     }
     return null;
   }
 
-  
   /**
-   * Eliminates the more general classes from a set, keeping only the most
-   * specific ones. The changes are made to the set provided as a parameter.
-   * This is a utility method for ontologies.
-   * @param classSet
-   *          a set of {@link OClass} objects.
+   * Eliminates the more general classes from a set, keeping only the
+   * most specific ones. The changes are made to the set provided as a
+   * parameter. This is a utility method for ontologies.
+   * 
+   * @param classSet a set of {@link OClass} objects.
    */
   public static void reduceToMostSpecificClasses(Set classSet) {
     Map superClassesForClass = new HashMap();
-    for(Iterator classIter = classSet.iterator(); classIter.hasNext();){
+    for(Iterator classIter = classSet.iterator(); classIter.hasNext();) {
       Object aGateClassValue = classIter.next();
       if(!(aGateClassValue instanceof OClass)) continue;
       OClass aGateClass = (OClass)aGateClassValue;
@@ -229,7 +256,7 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
     Set classesToRemove = new HashSet();
     List resultList = new ArrayList(classSet);
     for(int i = 0; i < resultList.size() - 1; i++)
-      for(int j = i + 1; j < resultList.size(); j++){
+      for(int j = i + 1; j < resultList.size(); j++) {
         OClass aClass = (OClass)resultList.get(i);
         OClass anotherClass = (OClass)resultList.get(j);
         if(((Set)superClassesForClass.get(aClass)).contains(anotherClass))
@@ -239,4 +266,149 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
       }
     classSet.removeAll(classesToRemove);
   }
+  
+
+  /**
+   * This method is invoked whenever a resource in ontology is modified
+   */
+  public void ontologyModified(OntologyModificationEvent ome) {
+    // first we call the super ontology Modified method
+    super.ontologyModified(ome);
+    
+    if(ome.getEventType() == OntologyModificationEvent.ONTOLOGY_RESOURCE_REMOVED) {
+      Ontology ontology = (Ontology) ome.getSource();
+      
+      // if the deleted resource is an instanceof OClass
+      if(ome.getResource() instanceof OClass) {
+        OClass deleted = (OClass) ome.getResource();
+
+        // delete all disjoint entries
+        Set disjointClasses = deleted.getDisjointClasses();
+        if(disjointClasses != null) {
+          Iterator iter = disjointClasses.iterator();
+          while(iter.hasNext()) {
+            OClass disjointClass = (OClass) iter.next();
+            disjointClass.getDisjointClasses().remove(deleted);
+          }
+        }
+        
+        // delete all sameas entries
+        Set sameAsClasses = deleted.getSameClasses();
+        if(sameAsClasses != null) {
+          Iterator iter = sameAsClasses.iterator();
+          while(iter.hasNext()) {
+            OClass sameAsClass = (OClass) iter.next();
+            sameAsClass.getSameClasses().remove(deleted);
+          }
+        }
+        
+        // delete entry of the current class from all its super classes
+        // done in super.ontologyModified Method
+        
+        // delete all its subclasses
+        // done in super.ontologyModified method
+        
+        // delete all its instances
+        Set instances = ontology.getInstances(deleted);
+        if(instances != null) {
+          Iterator iter = instances.iterator();
+          while(iter.hasNext()) {
+            OInstance instance = (OInstance) iter.next();
+            ontology.removeInstance(instance);
+          }
+        }
+        
+        // we need to go through all properties check their domain and range
+        // if properties have this class registered as one of them
+        // the properties should be deleted
+        Set properties = ontology.getPropertyDefinitions();
+        if(properties != null) {
+          ArrayList toDelete = new ArrayList();
+          Iterator iter = properties.iterator();
+          while(iter.hasNext()) {
+            Property p = (Property) iter.next();
+            Set domain = p.getDomain();
+            if(domain != null) {
+              if(domain.contains(deleted)) {
+               toDelete.add(p);
+               continue;
+              }
+            }
+            
+            if(p instanceof ObjectProperty) {
+              Set range = p.getRange();
+              if(range.contains(deleted)) {
+                toDelete.add(p);
+                continue;
+              }
+            }
+          }
+          
+          for(int i=0;i<toDelete.size();i++) {
+            Property p = (Property) toDelete.get(i);
+            ontology.removePropertyDefinition(p);
+          }
+        }
+      } else if(ome.getResource() instanceof OInstance) {
+        // we need to go though all ontology resources of the ontology
+        // check if they have property with value the current resource
+        // we need to delete it
+        // get classes = done in super.ontologyModified 
+        // get instances = done below
+        Set allInstances = ontology.getInstances();
+        if(allInstances != null) {
+          Iterator iter = allInstances.iterator();
+          while(iter.hasNext()) {
+            OInstance anInstance = (OInstance) iter.next();
+            Set setPropertyNames = anInstance.getSetPropertiesNames();
+            if(setPropertyNames != null) {
+              Iterator subIter = setPropertyNames.iterator();
+              while(subIter.hasNext()) {
+                String property = (String) subIter.next();
+                anInstance.removePropertyValue(property, ome.getResource());
+              }
+            }
+          }
+        }
+      } else if(ome.getResource() instanceof Property) {
+        // need to remove the deleted property from all instances
+        Property deleted = (Property) ome.getResource();
+        Set allInstances = ontology.getInstances();
+        if(allInstances != null) {
+          Iterator iter = allInstances.iterator();
+          while(iter.hasNext()) {
+            OInstance anInstance = (OInstance) iter.next();
+            anInstance.removePropertyValues(deleted.getName());
+          }
+        }
+        
+        Set sameAsProperties = deleted.getSamePropertyAs();
+        if(sameAsProperties != null) {
+          Iterator iter = sameAsProperties.iterator();
+          while(iter.hasNext()) {
+            Property sameAsProperty = (Property) iter.next();
+            sameAsProperty.getSamePropertyAs().remove(deleted);
+          }
+        }
+        
+        Set superProperties = deleted.getSuperProperties(Property.DIRECT_CLOSURE);
+        if(superProperties != null) {
+          Iterator iter = superProperties.iterator();
+          while(iter.hasNext()) {
+            Property superProperty = (Property) iter.next();
+            superProperty.removeSubProperty(deleted);
+          }
+        }
+        
+        Set subProperties = deleted.getSubProperties(Property.DIRECT_CLOSURE);
+        if(subProperties != null) {
+          Iterator iter = subProperties.iterator();
+          while(iter.hasNext()) {
+            Property subProperty = (Property) iter.next();
+            ontology.removePropertyDefinition(subProperty);
+          }
+        }
+      }
+    }    
+  }  
 }
