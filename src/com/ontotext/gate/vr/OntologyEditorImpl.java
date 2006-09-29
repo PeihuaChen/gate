@@ -21,7 +21,7 @@ import java.awt.Component;
 /** Implementation of an ontology editor */
 public class OntologyEditorImpl
   extends AbstractVisualResource
-  implements OntologyEditor, CreoleListener, ObjectModificationListener
+  implements OntologyEditor, CreoleListener, OntologyModificationListener
 {
   /**the size of the editor (x)  */
   public final static int SIZE_X = 500;
@@ -298,7 +298,7 @@ public void setOntology(Taxonomy o) {
   ontology = o;
   ontologySelected(o);
   if(ontology instanceof TaxonomyImpl){
-    ((TaxonomyImpl)ontology).addObjectModificationListener(this);
+    ((TaxonomyImpl)ontology).addOntologyModificationListener(this);
   }
 } // setOntology();
 
@@ -852,17 +852,11 @@ public int AskWannaSave(Taxonomy o, int x, int y) {
   }
 /*---------implementation of CreoleListener interface--------------*/
 
-/*->->->---implementation of ObjectModificationListener interface--------------*/
+/*->->->---implementation of OntologyModificationListener interface--------------*/
   public void processGateEvent(GateEvent e) {
   }
 
-  public void objectCreated(ObjectModificationEvent e) {
-  }
-
-  public void objectDeleted(ObjectModificationEvent e) {
-  }
-
-  public void objectModified(ObjectModificationEvent e) {
+  public void ontologyModified(OntologyModificationEvent e) {
     Object source = e.getSource();
     EditableTreeView view = null;
     if ( source instanceof Taxonomy ) {
@@ -912,7 +906,7 @@ public int AskWannaSave(Taxonomy o, int x, int y) {
     }
   }
 
-/*-<-<-<---implementation of ObjectModificationListener interface--------------*/
+/*-<-<-<---implementation of OntologyModificationListener interface--------------*/
 
   protected class KnowledgeBaseTreeCellRenderer extends DefaultTreeCellRenderer {
     public KnowledgeBaseTreeCellRenderer() {
