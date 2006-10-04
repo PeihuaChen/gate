@@ -2,10 +2,8 @@
 // Home Page : http://members.fortunecity.com/neshkov/dj.html  - Check often for new version!
 // Decompiler options: packimports(3) 
 // Source File Name:   KeyAction.java
-
 package gate.gui.ontology;
 
 public interface KeyAction {
-
-	public abstract void keyActionPerformed(int i);
+  public abstract void keyActionPerformed(int i);
 }

@@ -21,7 +21,6 @@ import gate.util.*;
 public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
                                                                       implements
                                                                       Taxonomy {
-
   /** denotes a direct closure(no transitivity) */
   public static final byte DIRECT_CLOSURE = 0;
 
@@ -66,13 +65,14 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
   }
 
   /**
-   * Gets a taxonomy by URL. The taxonomy will be searched first among
-   * the existing LRs and afterwards loaded by the URL if not found
+   * Gets a taxonomy by URL. The taxonomy will be searched first among the
+   * existing LRs and afterwards loaded by the URL if not found
    * 
-   * @param someUrl the url of the taxonomy
+   * @param someUrl
+   *          the url of the taxonomy
    * @return the retrieved or loaded taxonomy
-   * @throws ResourceInstantiationException if something gets wrong with
-   *           the loading
+   * @throws ResourceInstantiationException
+   *           if something gets wrong with the loading
    */
   public static Taxonomy getOntology(URL someUrl)
           throws ResourceInstantiationException {
@@ -85,25 +85,21 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
     // this
     // class.
     String DEFAULT_ONTOLOGY_TYPE = "gate.creole.ontology.jena.JenaOntologyImpl";
-
     // first try and find an appropriate already loaded taxonomy
     List loadedTaxonomies = null;
     try {
       loadedTaxonomies = Gate.getCreoleRegister().getAllInstances(
               Taxonomy.class.getName());
-    }
-    catch(GateException ge) {
+    } catch(GateException ge) {
       throw new ResourceInstantiationException("Cannot list loaded taxonomies",
               ge);
     }
-
     Taxonomy result = null;
     Iterator taxIter = loadedTaxonomies.iterator();
     while(result == null && taxIter.hasNext()) {
       Taxonomy aTaxonomy = (Taxonomy)taxIter.next();
       if(aTaxonomy.getURL().equals(someUrl)) result = aTaxonomy;
     }
-
     // if not found, load it
     if(result == null) {
       // hardcoded to use OWL as the ontology type
@@ -111,19 +107,18 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
       params.put("owlLiteFileURL", someUrl);
       result = (Taxonomy)Factory.createResource(DEFAULT_ONTOLOGY_TYPE, params);
     }
-
     return result;
   }
 
   /**
-   * Whether the ontology has been modified switches to true when
-   * null-ing and reinfering the subclasses and super classes and tops
+   * Whether the ontology has been modified switches to true when null-ing and
+   * reinfering the subclasses and super classes and tops
    */
   protected boolean nullBuffers = false;
 
   /**
-   * Whether the ontology has been modified after loading. once it
-   * became true it stays true till a save takes place
+   * Whether the ontology has been modified after loading. once it became true
+   * it stays true till a save takes place
    */
   protected boolean modified = false;
 
@@ -154,7 +149,8 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
   /**
    * Sets the label of the ontology
    * 
-   * @param theLabel the label to be set
+   * @param theLabel
+   *          the label to be set
    */
   public void setLabel(String theLabel) {
     label = theLabel;
@@ -234,11 +230,12 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
   }
 
   /**
-   * note: if a class is deleted and there aresome subclasses of this
-   * class which lack any other super classes : then they become top
-   * classes. this could be changed on request or made optional.
+   * note: if a class is deleted and there aresome subclasses of this class
+   * which lack any other super classes : then they become top classes. this
+   * could be changed on request or made optional.
    * 
-   * @param theClass the class to be removed
+   * @param theClass
+   *          the class to be removed
    */
   public void removeClass(TClass theClass) {
     classesByName.remove(theClass.getName());
@@ -252,9 +249,9 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
 
   public void addClass(TClass theClass) {
     setModified(true);
+    if(classesByName.containsKey(theClass.getName())) return;
     classes.add(theClass);
     if(DEBUG) System.out.println("Class Added :" + theClass.getName());
-
     classesByName.put(theClass.getName(), theClass);
     nullBuffers = true;
     fireOntologyResourceAdded(theClass);
@@ -300,13 +297,15 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
   }
 
   /**
-   * calculates the taxonomic distance between two classes. note that
-   * the method is relatively big, but in case similar methods are
-   * developed for graph traversal, some parts of this method would
-   * naturally become separate methods/members.
+   * calculates the taxonomic distance between two classes. note that the method
+   * is relatively big, but in case similar methods are developed for graph
+   * traversal, some parts of this method would naturally become separate
+   * methods/members.
    * 
-   * @param class1 the first class
-   * @param class2 the second class
+   * @param class1
+   *          the first class
+   * @param class2
+   *          the second class
    */
   public int getTaxonomicDistance(TClass class1, TClass class2) {
     int result = 0;
@@ -353,7 +352,8 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
   /**
    * Compares the id,uri and url of the ontology.
    * 
-   * @param o another ontology to compare with
+   * @param o
+   *          another ontology to compare with
    * @return true if id,uri and url match
    */
   public boolean equals(Object o) {
@@ -365,8 +365,8 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
         result &= this.getId().equals(onto.getId());
       else {
         /*
-         * check if both ids are null; if so, consider the ontologies
-         * partially equal
+         * check if both ids are null; if so, consider the ontologies partially
+         * equal
          */
         result = this.getId() == onto.getId();
       }
@@ -386,9 +386,9 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
   }
 
   /**
-   * Called when the ontology has been modified to re-infer all
-   * sub/super classes, tops, etc. currently could be implemented
-   * simpler but this implementation could be useful in the future
+   * Called when the ontology has been modified to re-infer all sub/super
+   * classes, tops, etc. currently could be implemented simpler but this
+   * implementation could be useful in the future
    */
   protected void reinfer() {
     tops = null;
@@ -405,8 +405,10 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
   /**
    * Check for subclass relation with transitive closure
    * 
-   * @param cls1 the first class
-   * @param cls2 the second class
+   * @param cls1
+   *          the first class
+   * @param cls2
+   *          the second class
    */
   public boolean isSubClassOf(String cls1, String cls2) {
     boolean result = false;
@@ -415,8 +417,7 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
     if(null != c1 && null != c2) {
       if(c1.equals(c2)) {
         result = true;
-      }
-      else {
+      } else {
         Set subs1;
         subs1 = c1.getSubClasses(TClass.TRANSITIVE_CLOSURE);
         if(subs1.contains(c2)) result = true;
@@ -428,8 +429,10 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
   /**
    * Check for subclass relation with direct closure
    * 
-   * @param cls1 the first class
-   * @param cls2 the second class
+   * @param cls1
+   *          the first class
+   * @param cls2
+   *          the second class
    */
   public boolean isDirectSubClassOf(String cls1, String cls2) {
     boolean result = false;
@@ -438,8 +441,7 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
     if(null != c1 && null != c2) {
       if(c1.equals(c2)) {
         result = true;
-      }
-      else {
+      } else {
         Set subs1;
         subs1 = c1.getSubClasses(TClass.DIRECT_CLOSURE);
         if(subs1.contains(c2)) result = true;
@@ -450,22 +452,24 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
 
   /**
    * A Method to invoke an event for newly added ontology resource
+   * 
    * @param resource
    */
   protected void fireOntologyResourceAdded(OntologyResource resource) {
     OntologyModificationEvent ome = new OntologyModificationEvent(this,
             resource, OntologyModificationEvent.ONTOLOGY_RESOURCE_ADDED);
-    fireOntologyModified(ome);
+    fireOntologyModificationEvent(ome);
   }
 
   /**
    * A Method to invoke an event for a removed ontology resource
+   * 
    * @param resource
    */
   protected void fireOntologyResourceRemoved(OntologyResource resource) {
     OntologyModificationEvent ome = new OntologyModificationEvent(this,
             resource, OntologyModificationEvent.ONTOLOGY_RESOURCE_REMOVED);
-    fireOntologyModified(ome);
+    fireOntologyModificationEvent(ome);
   }
 
   /**
@@ -473,8 +477,8 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
    */
   protected void fireOntologyLabelChanged() {
     OntologyModificationEvent ome = new OntologyModificationEvent(this, this,
-            OntologyModificationEvent.ONTOLOGY_LABEL_CHANGED);
-    fireOntologyModified(ome);
+            OntologyModificationEvent.LABEL_CHANGED_EVENT);
+    fireOntologyModificationEvent(ome);
   }
 
   /**
@@ -482,8 +486,8 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
    */
   protected void fireOntologyDefaultNameSpaceChanged() {
     OntologyModificationEvent ome = new OntologyModificationEvent(this, this,
-            OntologyModificationEvent.ONTOLOGY_DEFAULT_NAMESPACE_CHANGED);
-    fireOntologyModified(ome);
+            OntologyModificationEvent.DEFAULT_NAMESPACE_CHANGED_EVENT);
+    fireOntologyModificationEvent(ome);
   }
 
   /**
@@ -491,8 +495,8 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
    */
   protected void fireOntologyVersionChanged() {
     OntologyModificationEvent ome = new OntologyModificationEvent(this, this,
-            OntologyModificationEvent.ONTOLOGY_VERSION_CHANGED);
-    fireOntologyModified(ome);
+            OntologyModificationEvent.VERSION_CHANGED_EVENT);
+    fireOntologyModificationEvent(ome);
   }
 
   /**
@@ -500,8 +504,8 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
    */
   protected void fireOntologyIDChanged() {
     OntologyModificationEvent ome = new OntologyModificationEvent(this, this,
-            OntologyModificationEvent.ONTOLOGY_ID_CHANGED);
-    fireOntologyModified(ome);
+            OntologyModificationEvent.ID_CHANGED_EVENT);
+    fireOntologyModificationEvent(ome);
   }
 
   /**
@@ -509,19 +513,19 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
    */
   protected void fireOntologyCommentChanged() {
     OntologyModificationEvent ome = new OntologyModificationEvent(this, this,
-            OntologyModificationEvent.ONTOLOGY_COMMENT_CHANGED);
-    fireOntologyModified(ome);
+            OntologyModificationEvent.COMMENT_CHANGED_EVENT);
+    fireOntologyModificationEvent(ome);
   }
 
   /**
-   * This method fires the ontology modified event to all registered listeners 
+   * This method fires the ontology modified event to all registered listeners
    * for the given ontology modification event
+   * 
    * @param ome
    */
-  protected void fireOntologyModified(OntologyModificationEvent ome) {
+  public void fireOntologyModificationEvent(OntologyModificationEvent ome) {
     // before firing this event, we make necessary changes in the ontology
     ontologyModified(ome);
-    
     for(int i = ontologyModificationListeners.size() - 1; i > -1; i--) {
       ((OntologyModificationListener)ontologyModificationListeners.get(i))
               .ontologyModified(ome);
@@ -546,7 +550,7 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
           OntologyModificationListener oml) {
     this.ontologyModificationListeners.remove(oml);
   }
-  
+
   /**
    * This method is invoked whenever a resource in ontology is modified
    */
@@ -554,27 +558,26 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
     if(ome.getEventType() == OntologyModificationEvent.ONTOLOGY_RESOURCE_REMOVED) {
       Taxonomy taxonomy = ome.getSource();
       if(ome.getResource() instanceof TClass) {
-        TClass deleted = (TClass) ome.getResource();
+        TClass deleted = (TClass)ome.getResource();
         // we need to delete this class as a sub class of all its super classes
         Set superClasses = deleted.getSuperClasses(TClass.DIRECT_CLOSURE);
         if(superClasses != null) {
           Iterator iter = superClasses.iterator();
           while(iter.hasNext()) {
-            TClass superClass = (TClass) iter.next();
+            TClass superClass = (TClass)iter.next();
             superClass.removeSubClass(deleted);
           }
         }
-        
         // we need to delete all its subclasses as well as instances
         Set subClasses = deleted.getSubClasses(TClass.DIRECT_CLOSURE);
         if(subClasses != null) {
           Iterator iter = subClasses.iterator();
           while(iter.hasNext()) {
-            TClass subClass = (TClass) iter.next();
+            TClass subClass = (TClass)iter.next();
             taxonomy.removeClass(subClass);
           }
         }
       }
-    }    
+    }
   }
 } // Taxonomy

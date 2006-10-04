@@ -6,7 +6,6 @@
 package com.ontotext.gate.ontology;
 
 import gate.creole.ontology.*;
-
 import java.util.*;
 
 /**
@@ -17,7 +16,6 @@ import java.util.*;
  * @author Valentin Tablan
  */
 public class OntologyImpl extends TaxonomyImpl implements Ontology {
-
   private static final boolean DEBUG = false;
 
   protected Map instancesByName = new HashMap();
@@ -29,7 +27,6 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
   public OInstance addInstance(String name, OClass theClass) {
     if(instancesByName.containsKey(name))
       return (OInstance)instancesByName.get(name);
-
     OInstance newInstance = new OInstanceImpl(name, null, theClass, this);
     instancesByName.put(name, newInstance);
     instances.add(newInstance);
@@ -40,7 +37,6 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
 
   public void addInstance(OInstance theInstance) {
     if(instancesByName.containsKey(theInstance.getName())) return;
-
     instancesByName.put(theInstance.getName(), theInstance);
     instances.add(theInstance);
     setModified(true);
@@ -49,7 +45,6 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
 
   public void removeInstance(OInstance theInstance) {
     if(!instancesByName.containsKey(theInstance.getName())) return;
-
     instancesByName.remove(theInstance.getName());
     instances.remove(theInstance);
     setModified(true);
@@ -82,7 +77,6 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
 
   public Set getDirectInstances(OClass aClass) {
     Set theInstances = new HashSet();
-
     // iterate through all instances and only include those
     // that either have the same class or their class is a subclass
     // of the given class; not an efficient implementation but fine for
@@ -238,11 +232,12 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
   }
 
   /**
-   * Eliminates the more general classes from a set, keeping only the
-   * most specific ones. The changes are made to the set provided as a
-   * parameter. This is a utility method for ontologies.
+   * Eliminates the more general classes from a set, keeping only the most
+   * specific ones. The changes are made to the set provided as a parameter.
+   * This is a utility method for ontologies.
    * 
-   * @param classSet a set of {@link OClass} objects.
+   * @param classSet
+   *          a set of {@link OClass} objects.
    */
   public static void reduceToMostSpecificClasses(Set classSet) {
     Map superClassesForClass = new HashMap();
@@ -266,7 +261,6 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
       }
     classSet.removeAll(classesToRemove);
   }
-  
 
   /**
    * This method is invoked whenever a resource in ontology is modified
@@ -274,50 +268,42 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
   public void ontologyModified(OntologyModificationEvent ome) {
     // first we call the super ontology Modified method
     super.ontologyModified(ome);
-    
     if(ome.getEventType() == OntologyModificationEvent.ONTOLOGY_RESOURCE_REMOVED) {
-      Ontology ontology = (Ontology) ome.getSource();
-      
+      Ontology ontology = (Ontology)ome.getSource();
       // if the deleted resource is an instanceof OClass
       if(ome.getResource() instanceof OClass) {
-        OClass deleted = (OClass) ome.getResource();
-
+        OClass deleted = (OClass)ome.getResource();
         // delete all disjoint entries
         Set disjointClasses = deleted.getDisjointClasses();
         if(disjointClasses != null) {
           Iterator iter = disjointClasses.iterator();
           while(iter.hasNext()) {
-            OClass disjointClass = (OClass) iter.next();
+            OClass disjointClass = (OClass)iter.next();
             disjointClass.getDisjointClasses().remove(deleted);
           }
         }
-        
         // delete all sameas entries
         Set sameAsClasses = deleted.getSameClasses();
         if(sameAsClasses != null) {
           Iterator iter = sameAsClasses.iterator();
           while(iter.hasNext()) {
-            OClass sameAsClass = (OClass) iter.next();
+            OClass sameAsClass = (OClass)iter.next();
             sameAsClass.getSameClasses().remove(deleted);
           }
         }
-        
         // delete entry of the current class from all its super classes
         // done in super.ontologyModified Method
-        
         // delete all its subclasses
         // done in super.ontologyModified method
-        
         // delete all its instances
         Set instances = ontology.getInstances(deleted);
         if(instances != null) {
           Iterator iter = instances.iterator();
           while(iter.hasNext()) {
-            OInstance instance = (OInstance) iter.next();
+            OInstance instance = (OInstance)iter.next();
             ontology.removeInstance(instance);
           }
         }
-        
         // we need to go through all properties check their domain and range
         // if properties have this class registered as one of them
         // the properties should be deleted
@@ -326,15 +312,14 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
           ArrayList toDelete = new ArrayList();
           Iterator iter = properties.iterator();
           while(iter.hasNext()) {
-            Property p = (Property) iter.next();
+            Property p = (Property)iter.next();
             Set domain = p.getDomain();
             if(domain != null) {
               if(domain.contains(deleted)) {
-               toDelete.add(p);
-               continue;
+                toDelete.add(p);
+                continue;
               }
             }
-            
             if(p instanceof ObjectProperty) {
               Set range = p.getRange();
               if(range.contains(deleted)) {
@@ -343,9 +328,8 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
               }
             }
           }
-          
-          for(int i=0;i<toDelete.size();i++) {
-            Property p = (Property) toDelete.get(i);
+          for(int i = 0; i < toDelete.size(); i++) {
+            Property p = (Property)toDelete.get(i);
             ontology.removePropertyDefinition(p);
           }
         }
@@ -353,18 +337,18 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
         // we need to go though all ontology resources of the ontology
         // check if they have property with value the current resource
         // we need to delete it
-        // get classes = done in super.ontologyModified 
+        // get classes = done in super.ontologyModified
         // get instances = done below
         Set allInstances = ontology.getInstances();
         if(allInstances != null) {
           Iterator iter = allInstances.iterator();
           while(iter.hasNext()) {
-            OInstance anInstance = (OInstance) iter.next();
+            OInstance anInstance = (OInstance)iter.next();
             Set setPropertyNames = anInstance.getSetPropertiesNames();
             if(setPropertyNames != null) {
               Iterator subIter = setPropertyNames.iterator();
               while(subIter.hasNext()) {
-                String property = (String) subIter.next();
+                String property = (String)subIter.next();
                 anInstance.removePropertyValue(property, ome.getResource());
               }
             }
@@ -372,43 +356,41 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
         }
       } else if(ome.getResource() instanceof Property) {
         // need to remove the deleted property from all instances
-        Property deleted = (Property) ome.getResource();
+        Property deleted = (Property)ome.getResource();
         Set allInstances = ontology.getInstances();
         if(allInstances != null) {
           Iterator iter = allInstances.iterator();
           while(iter.hasNext()) {
-            OInstance anInstance = (OInstance) iter.next();
+            OInstance anInstance = (OInstance)iter.next();
             anInstance.removePropertyValues(deleted.getName());
           }
         }
-        
         Set sameAsProperties = deleted.getSamePropertyAs();
         if(sameAsProperties != null) {
           Iterator iter = sameAsProperties.iterator();
           while(iter.hasNext()) {
-            Property sameAsProperty = (Property) iter.next();
+            Property sameAsProperty = (Property)iter.next();
             sameAsProperty.getSamePropertyAs().remove(deleted);
           }
         }
-        
-        Set superProperties = deleted.getSuperProperties(Property.DIRECT_CLOSURE);
+        Set superProperties = deleted
+                .getSuperProperties(Property.DIRECT_CLOSURE);
         if(superProperties != null) {
           Iterator iter = superProperties.iterator();
           while(iter.hasNext()) {
-            Property superProperty = (Property) iter.next();
+            Property superProperty = (Property)iter.next();
             superProperty.removeSubProperty(deleted);
           }
         }
-        
         Set subProperties = deleted.getSubProperties(Property.DIRECT_CLOSURE);
         if(subProperties != null) {
           Iterator iter = subProperties.iterator();
           while(iter.hasNext()) {
-            Property subProperty = (Property) iter.next();
+            Property subProperty = (Property)iter.next();
             ontology.removePropertyDefinition(subProperty);
           }
         }
       }
-    }    
-  }  
+    }
+  }
 }

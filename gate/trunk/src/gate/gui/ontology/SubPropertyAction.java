@@ -16,7 +16,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
  */
 public class SubPropertyAction extends AbstractAction implements
                                                      TreeNodeSelectionListener {
-
   public SubPropertyAction(String s, Icon icon) {
     super(s, icon);
     dataTypeRange = "java.lang.String";
@@ -30,54 +29,46 @@ public class SubPropertyAction extends AbstractAction implements
     domainAction = new ValuesSelectionAction();
     rangeAction = new ValuesSelectionAction();
     domainB.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent actionevent) {
-        String as[] = new String[ontologyClasses.size()];
+        String as[] = new String[ontologyClassesNames.size()];
         for(int i = 0; i < as.length; i++)
-          as[i] = ((TClass)ontologyClasses.get(i)).getName();
-
-        Object userObject = ((DefaultMutableTreeNode) selectedNodes.get(0)).getUserObject();
-        Set domain = ((Property) userObject).getDomain();
+          as[i] = ((String)ontologyClassesNames.get(i));
+        Object userObject = ((DefaultMutableTreeNode)selectedNodes.get(0))
+                .getUserObject();
+        Set domain = ((Property)userObject).getDomain();
         Iterator iter = domain.iterator();
         String as1[] = new String[domain.size()];
         for(int k = 0; k < as1.length; k++)
-          as1[k] = ((TClass) iter.next()).getName();
-
+          as1[k] = ((TClass)iter.next()).getName();
         domainAction.showGUI("New Property", as, as1);
       }
 
       final SubPropertyAction this$0;
-
       {
         this$0 = SubPropertyAction.this;
       }
     });
-
     rangeB.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent actionevent) {
-        Object userObject = ((DefaultMutableTreeNode) selectedNodes.get(0)).getUserObject();
+        Object userObject = ((DefaultMutableTreeNode)selectedNodes.get(0))
+                .getUserObject();
         if(userObject instanceof ObjectProperty) {
-          String as[] = new String[ontologyClasses.size()];
+          String as[] = new String[ontologyClassesNames.size()];
           for(int i = 0; i < as.length; i++)
-            as[i] = ((TClass)ontologyClasses.get(i)).getName();
-
-          Set range = ((Property) userObject).getRange();
+            as[i] = ((String)ontologyClassesNames.get(i));
+          Set range = ((Property)userObject).getRange();
           Iterator iter = range.iterator();
           String as1[] = new String[range.size()];
           for(int k = 0; k < as1.length; k++)
-            as1[k] = ((TClass) iter.next()).getName();
-          
-          
+            as1[k] = ((TClass)iter.next()).getName();
           rangeAction.showGUI("New Property", as, as1);
-        }
-        else {
+        } else {
           dataTypeRange = JOptionPane.showInputDialog(null, dataTypeRange,
                   "range Class", 3);
         }
       }
 
       final SubPropertyAction this$0;
-
       {
         this$0 = SubPropertyAction.this;
       }
@@ -100,27 +91,26 @@ public class SubPropertyAction extends AbstractAction implements
 
   private boolean validSelection(Set superDomain, Set subDomain) {
     Iterator iter = subDomain.iterator();
-    outer:while(iter.hasNext()) {
-      TClass tc = (TClass) iter.next();
+    outer: while(iter.hasNext()) {
+      TClass tc = (TClass)iter.next();
       Iterator subIter = superDomain.iterator();
       while(subIter.hasNext()) {
-        TClass stc = (TClass) subIter.next();
+        TClass stc = (TClass)subIter.next();
         if(stc == tc) continue outer;
-        if(ontology.isSubClassOf(stc.getName(), tc.getName()))
-          continue outer;
+        if(ontology.isSubClassOf(stc.getName(), tc.getName())) continue outer;
       }
       // if we are here
       return false;
     }
     return true;
   }
-  
+
   public void actionPerformed(ActionEvent actionevent) {
-    Object userObject = ((DefaultMutableTreeNode) selectedNodes.get(0)).getUserObject();
+    Object userObject = ((DefaultMutableTreeNode)selectedNodes.get(0))
+            .getUserObject();
     nameSpace.setText(ontology.getDefaultNameSpace());
     int i = JOptionPane.showOptionDialog(null, panel, "New Property", 2, 3,
-            null, new String[] {"OK", "Cancel"}, "OK");
-    
+            null, new String[]{"OK", "Cancel"}, "OK");
     if(i == 0) {
       String s = nameSpace.getText();
       if(!Utils.isValidNameSpace(s)) {
@@ -129,26 +119,22 @@ public class SubPropertyAction extends AbstractAction implements
                 "\n example: http://gate.ac.uk/example#").toString());
         return;
       }
-      
       if(!Utils.isValidOntologyResourceName(propertyName.getText())) {
         JOptionPane.showMessageDialog(null, "Invalid Property Name");
         return;
       }
-      
       if(ontology.getPropertyDefinitionByName(propertyName.getText()) != null) {
         JOptionPane.showMessageDialog(null, (new StringBuilder()).append(
                 "Property :").append(propertyName.getText()).append(
                 " already exists").toString());
         return;
       }
-      
       String as[] = domainAction.getSelectedValues();
       HashSet hashset = new HashSet();
       if(as == null || as.length == 0) {
         JOptionPane.showMessageDialog(null, "Invalid Domain");
         return;
       }
-      
       for(int j = 0; j < as.length; j++) {
         OClass oclass = (OClass)ontology.getClassByName((String)as[j]);
         if(oclass == null) {
@@ -158,36 +144,28 @@ public class SubPropertyAction extends AbstractAction implements
         }
         hashset.add(oclass);
       }
-
       // we need to check for its validity
       if(!validSelection(((Property)userObject).getDomain(), hashset)) {
-        JOptionPane.showMessageDialog(null, (new StringBuilder()).append(
-        "Invalid Domain"));
+        JOptionPane.showMessageDialog(null, (new StringBuilder())
+                .append("Invalid Domain"));
         return;
       }
-      
-      
       if(userObject instanceof DatatypeProperty) {
         Class class1 = null;
         try {
           class1 = Class.forName(dataTypeRange.trim());
-        }
-        catch(Exception exception) {
+        } catch(Exception exception) {
           JOptionPane.showMessageDialog(null, (new StringBuilder()).append(
                   "Invalid Range :").append(dataTypeRange).toString());
           return;
         }
-
         DatatypePropertyImpl datatypepropertyimpl = new DatatypePropertyImpl(
                 propertyName.getText(), comment.getText(), hashset, class1,
                 ontology);
-        
         ((DatatypeProperty)userObject).addSubProperty(datatypepropertyimpl);
         datatypepropertyimpl.addSuperProperty((DatatypeProperty)userObject);
         ontology.addDatatypeProperty(datatypepropertyimpl);
-        
-      }
-      else {
+      } else {
         String as1[] = rangeAction.getSelectedValues();
         HashSet hashset1 = new HashSet();
         if(as1 == null || as1.length == 0) {
@@ -203,15 +181,12 @@ public class SubPropertyAction extends AbstractAction implements
           }
           hashset1.add(oclass1);
         }
-
         // we need to check for its validity
         if(!validSelection(((Property)userObject).getRange(), hashset1)) {
-          JOptionPane.showMessageDialog(null, (new StringBuilder()).append(
-          "Invalid Range"));
+          JOptionPane.showMessageDialog(null, (new StringBuilder())
+                  .append("Invalid Range"));
           return;
         }
-        
-        
         if(userObject instanceof TransitiveProperty) {
           TransitivePropertyImpl transitivepropertyimpl = new TransitivePropertyImpl(
                   propertyName.getText(), comment.getText(), hashset, hashset1,
@@ -219,8 +194,7 @@ public class SubPropertyAction extends AbstractAction implements
           transitivepropertyimpl.addSuperProperty((Property)userObject);
           ((Property)userObject).addSubProperty(transitivepropertyimpl);
           ontology.addTransitiveProperty(transitivepropertyimpl);
-        }
-        else if(userObject instanceof SymmetricProperty) {
+        } else if(userObject instanceof SymmetricProperty) {
           SymmetricPropertyImpl symmetricpropertyimpl = new SymmetricPropertyImpl(
                   propertyName.getText(), comment.getText(), hashset, hashset1,
                   ontology);
@@ -251,12 +225,12 @@ public class SubPropertyAction extends AbstractAction implements
     selectedNodes = arraylist;
   }
 
-  public ArrayList getOntologyClasses() {
-    return ontologyClasses;
+  public ArrayList getOntologyClassesNames() {
+    return ontologyClassesNames;
   }
 
-  public void setOntologyClasses(ArrayList arraylist) {
-    ontologyClasses = arraylist;
+  public void setOntologyClassesNames(ArrayList arraylist) {
+    ontologyClassesNames = arraylist;
   }
 
   protected JPanel nsPanel;
@@ -282,8 +256,8 @@ public class SubPropertyAction extends AbstractAction implements
   protected ValuesSelectionAction rangeAction;
 
   protected String dataTypeRange;
-  
-  protected ArrayList ontologyClasses;
+
+  protected ArrayList ontologyClassesNames;
 
   protected ArrayList selectedNodes;
 

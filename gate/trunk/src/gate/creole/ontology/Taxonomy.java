@@ -19,7 +19,6 @@ package gate.creole.ontology;
 
 import gate.LanguageResource;
 import gate.creole.ResourceInstantiationException;
-
 import java.net.URL;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -27,7 +26,6 @@ import java.util.Set;
 
 /** Defines the interface of an ontology */
 public interface Taxonomy extends LanguageResource {
-
   /**
    * Gets the label.
    * 
@@ -81,8 +79,8 @@ public interface Taxonomy extends LanguageResource {
   public void setDefaultNameSpace(String theURI);
 
   /**
-   * Gets the default name space for this ontology. This value is prepended
-   * to local URIs (the ones not containing '#'.
+   * Gets the default name space for this ontology. This value is prepended to
+   * local URIs (the ones not containing '#'.
    * 
    * @return a String value.
    */
@@ -257,17 +255,26 @@ public interface Taxonomy extends LanguageResource {
    * @return whether the ontology has been modified after the loading
    */
   public boolean isModified();
-  
+
   /**
    * Register the Ontology Modification Listeners
+   * 
    * @param oml
    */
   public void addOntologyModificationListener(OntologyModificationListener oml);
-  
+
   /**
    * Removed the registered ontology modification listeners
+   * 
    * @param oml
    */
-  public void removeOntologyModificationListener(OntologyModificationListener oml);
-  
+  public void removeOntologyModificationListener(
+          OntologyModificationListener oml);
+
+  /**
+   * Fires the ontologyModificationEvent
+   * 
+   * @param ome
+   */
+  public void fireOntologyModificationEvent(OntologyModificationEvent ome);
 }// interface Taxonomy

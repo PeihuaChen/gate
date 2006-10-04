@@ -23,8 +23,10 @@ import java.net.URL;
 public class InvalidFormatException extends GateException {
   /** the ontology file */
   private String file;
+
   /** the url of the file */
   private URL url;
+
   /** The basic exception message */
   private final static String MSG = "Invalid format of file is detected; file: ";
 
