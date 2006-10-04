@@ -27,6 +27,7 @@ package gate.creole.ontology;
 public interface OntologyConstants {
   /** denotes a direct closure(no transitivity) */
   public static final byte DIRECT_CLOSURE = 0;
+
   /** denotes atransitive closure */
   public static final byte TRANSITIVE_CLOSURE = 1;
 }

@@ -24,6 +24,7 @@ import edu.stanford.smi.protege.model.Cls;
 import edu.stanford.smi.protege.model.Frame;
 
 import gate.ProtegeProject;
+import gate.creole.ontology.OntologyModificationEvent;
 import gate.creole.ontology.OntologyModificationListener;
 import gate.creole.ontology.TClass;
 import gate.creole.ontology.Taxonomy;
@@ -49,7 +50,7 @@ public class ProtegeProjectName extends AbstractLanguageResource
   private URL ontotextOntologyUrl = null;
 
   /** Ontology Modification Listeners */
-	private Set listeners = new HashSet();
+	private List listeners = new ArrayList();
 
   /** Keep visual resource to refresh Ontotext Editor if any */
   ProtegeWrapper visualResource = null;
@@ -298,4 +299,17 @@ public class ProtegeProjectName extends AbstractLanguageResource
       OntologyModificationListener listener) {
       listeners.remove(listener);
   }
+  
+  /**
+   * This method fires the ontology modified event to all registered listeners 
+   * for the given ontology modification event
+   * @param ome
+   */
+  public void fireOntologyModificationEvent(OntologyModificationEvent ome) {
+    for(int i = listeners.size() - 1; i > -1; i--) {
+      ((OntologyModificationListener)listeners.get(i))
+              .ontologyModified(ome);
+    }
+  }
+  
 } // class ProtegeProjectName extends AbstractLanguageResource

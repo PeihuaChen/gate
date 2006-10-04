@@ -12,9 +12,9 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Simple test class that load an ontology available online and 
- * accesses its content via the ontology API 
- **/
+ * Simple test class that load an ontology available online and accesses its
+ * content via the ontology API
+ */
 public class TestOntologyAPI extends TestCase {
   public static void main(String[] args) {
     junit.textui.TestRunner.run(TestOntologyAPI.class);
@@ -63,9 +63,9 @@ public class TestOntologyAPI extends TestCase {
     List subclasses = aClass.getSubClassesVSDistance();
     assertEquals(subclasses.size(), 2);
   }
+
   /** Test suite routine for the test runner */
   public static Test suite() {
     return new TestSuite(TestOntologyAPI.class);
   } // suite
-  
 }

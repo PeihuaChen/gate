@@ -556,11 +556,15 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
     while(instIter.hasNext()) {
       removeInstance((OInstance)instIter.next());
     }
+    ArrayList properties = new ArrayList(propertyDefinitionSet);
+    for(int i=0;i<properties.size();i++) {
+      removePropertyDefinition((Property)properties.get(i));
+    }
+
     Iterator classIter = new ArrayList(getClasses()).iterator();
     while(classIter.hasNext()) {
       removeClass((TClass)classIter.next());
     }
-    propertyDefinitionSet.clear();
   }
 
   /**

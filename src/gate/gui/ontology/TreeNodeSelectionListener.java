@@ -2,12 +2,10 @@
 // Home Page : http://members.fortunecity.com/neshkov/dj.html  - Check often for new version!
 // Decompiler options: packimports(3) 
 // Source File Name:   TreeNodeSelectionListener.java
-
 package gate.gui.ontology;
 
 import java.util.ArrayList;
 
 public interface TreeNodeSelectionListener {
-
-	public abstract void selectionChanged(ArrayList arraylist);
+  public abstract void selectionChanged(ArrayList arraylist);
 }

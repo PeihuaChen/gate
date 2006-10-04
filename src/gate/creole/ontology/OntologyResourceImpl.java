@@ -30,10 +30,15 @@ import java.util.Set;
  */
 public class OntologyResourceImpl implements OntologyResource {
   protected String uri;
+
   protected String comment;
+
   protected String name;
+
   protected Taxonomy taxonomy;
+
   protected Ontology ontology;
+
   protected HashMap instanceProperties;
 
   public OntologyResourceImpl(String uri, String name, String comment,
@@ -71,6 +76,9 @@ public class OntologyResourceImpl implements OntologyResource {
         instanceProperties.put(propertyName, values);
       }
       values.add(theValue);
+      OntologyModificationEvent ome = new OntologyModificationEvent(ontology,
+              this, OntologyModificationEvent.PROPERTY_VALUE_ADDED_EVENT);
+      ontology.fireOntologyModificationEvent(ome);
       return true;
     } else return false;
   }
@@ -86,12 +94,22 @@ public class OntologyResourceImpl implements OntologyResource {
   public boolean removePropertyValue(String propertyName, Object theValue) {
     List values = (List)instanceProperties.get(propertyName);
     if(values != null) {
-      return values.remove(theValue);
+      boolean removed = values.remove(theValue);
+      if(removed) {
+        OntologyModificationEvent ome = new OntologyModificationEvent(ontology,
+                this, OntologyModificationEvent.PROPERTY_VALUE_REMOVED_EVENT);
+        ontology.fireOntologyModificationEvent(ome);
+      }
+      return removed;
     } else return false;
   }
 
   public void removePropertyValues(String propertyName) {
-    instanceProperties.remove(propertyName);
+    if(instanceProperties.remove(propertyName) != null) {
+      OntologyModificationEvent ome = new OntologyModificationEvent(ontology,
+              this, OntologyModificationEvent.PROPERTY_VALUE_REMOVED_EVENT);
+      ontology.fireOntologyModificationEvent(ome);
+    }
   }
 
   public Object getPropertyValue(String propertyName) {

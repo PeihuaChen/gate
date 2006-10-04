@@ -84,10 +84,11 @@ public interface Ontology extends Taxonomy {
 
   /**
    * A method to remove the existing propertyDefinition
+   * 
    * @param property
    */
   public void removePropertyDefinition(Property property);
-  
+
   /**
    * Creates a new Datatype property in this ontology where the domain consists
    * of a single {@link OClass}.
@@ -127,13 +128,13 @@ public interface Ontology extends Taxonomy {
   public DatatypeProperty addDatatypeProperty(String name, String comment,
           Set domain, Class range);
 
-  
   /**
    * Add a Datatype Property
+   * 
    * @author niraj
    * @param properity
    */
-   public void addDatatypeProperty(DatatypeProperty properity);
+  public void addDatatypeProperty(DatatypeProperty properity);
 
   /**
    * Creates a new generic property that is neither datatype or object property.
@@ -175,13 +176,13 @@ public interface Ontology extends Taxonomy {
   public Property addProperty(String name, String comment, OClass domain,
           Class range);
 
-  
   /**
    * Add a Property
+   * 
    * @author niraj
    * @param properity
    */
-   public void addProperty(Property properity);
+  public void addProperty(Property properity);
 
   /**
    * Creates a new object property (a property that takes instances as values).
@@ -223,12 +224,12 @@ public interface Ontology extends Taxonomy {
 
   /**
    * Add an Object Property
+   * 
    * @author niraj
    * @param properity
    */
-   public void addObjectProperty(ObjectProperty properity);
+  public void addObjectProperty(ObjectProperty properity);
 
-  
   /**
    * Creates a new symmetric property (an object property that is symmetric).
    * 
@@ -269,10 +270,11 @@ public interface Ontology extends Taxonomy {
 
   /**
    * Add a Transitive Property
+   * 
    * @author niraj
    * @param properity
    */
-   public void addSymmetricProperty(SymmetricProperty properity);
+  public void addSymmetricProperty(SymmetricProperty properity);
 
   /**
    * Creates a new transitive property (an object property that is transitive).
@@ -312,14 +314,14 @@ public interface Ontology extends Taxonomy {
   public TransitiveProperty addTransitiveProperty(String name, String comment,
           OClass domain, OClass range);
 
-  
   /**
    * Add a Transitive Property
+   * 
    * @author niraj
    * @param properity
    */
-   public void addTransitiveProperty(TransitiveProperty properity);
-   
+  public void addTransitiveProperty(TransitiveProperty properity);
+
   /**
    * Gets the set of all known property definitions in this ontology.
    * 
