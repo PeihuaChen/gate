@@ -179,7 +179,7 @@
       <NAME>Pipeline</NAME>
       <COMMENT>A simple serial controller for PR pipelines</COMMENT>
       <CLASS>gate.creole.SerialController</CLASS>
-      <ICON>controller</ICON>
+      <ICON>application</ICON>
     </RESOURCE>
     <RESOURCE>
       <NAME>Corpus Pipeline</NAME>
