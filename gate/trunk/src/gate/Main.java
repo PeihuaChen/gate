@@ -142,22 +142,14 @@ public class Main {
         
         String splashName =
           System.getProperty(GateConstants.APP_SPLASH_JAVA_PROPERTY_NAME);
-        if(splashName == null) {
-          splashName = "gateSplash";
-        } // if
+        if(splashName == null)
+          splashName = "splash";
 
-        constraints.gridy = 0;
-        constraints.gridwidth = 2;
         constraints.fill = GridBagConstraints.NONE;
         constraints.anchor = GridBagConstraints.CENTER;
-        JLabel gifLbl = new JLabel(MainFrame.getIcon("gateHeader"));
-        splashBox.add(gifLbl, constraints);
-        
         constraints.gridy = 1;
         constraints.gridwidth = 1;
-        gifLbl = new JLabel(MainFrame.getIcon(splashName));
-        splashBox.add(gifLbl, constraints);
-        gifLbl = new JLabel(MainFrame.getIcon("sponsors"));
+        JLabel gifLbl = new JLabel(MainFrame.getIcon(splashName));
         splashBox.add(gifLbl, constraints);
         GraphicsConfiguration gc = GraphicsEnvironment.
           getLocalGraphicsEnvironment().getDefaultScreenDevice().

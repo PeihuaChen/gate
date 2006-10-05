@@ -420,42 +420,32 @@ public class MainFrame extends JFrame
     
     splashBox.setLayout(new GridBagLayout());
     GridBagConstraints constraints = new GridBagConstraints();
-    constraints.weightx = 0;
+    constraints.weightx = 1;
     constraints.weighty = 0;
     constraints.insets = new Insets(2, 2, 2, 2);
-    constraints.fill = GridBagConstraints.NONE;
-    constraints.anchor = GridBagConstraints.CENTER;
-
     constraints.gridy = 0;
-    constraints.gridwidth = 2;
-    constraints.fill = GridBagConstraints.NONE;
-    JLabel gifLbl = new JLabel(getIcon("gateHeader"));
-    splashBox.add(gifLbl, constraints);
-
-    constraints.gridy = 1;
-    constraints.fill = GridBagConstraints.NONE;
-    constraints.gridx = GridBagConstraints.RELATIVE;
+    constraints.fill = GridBagConstraints.BOTH;
+//    constraints.gridx = GridBagConstraints.RELATIVE;
+    constraints.anchor = GridBagConstraints.CENTER;
     constraints.gridwidth = 1;
     constraints.gridheight = 1;
     
-    gifLbl = new JLabel(getIcon("gateSplash"));
+    JLabel gifLbl = new JLabel(getIcon("splash"));
     splashBox.add(gifLbl, constraints);
     
-    gifLbl = new JLabel(getIcon("sponsors"));
-    splashBox.add(gifLbl, constraints);
     constraints.gridy = 2;
     constraints.gridwidth = 2;
     constraints.anchor = GridBagConstraints.CENTER;
     constraints.fill = GridBagConstraints.HORIZONTAL;
-    JLabel htmlLbl = new JLabel(
-            "<HTML><CENTER>" +
-            "<B>Hamish Cunningham, Valentin Tablan, Kalina Bontcheva, Diana Maynard,</B>" +
-            "<BR>Niraj Aswani, Mike Dowman, Marin Dimitrov, Bobby Popov, Yaoyong Li, Akshay Java," +
-            "<BR>Wim Peters, Ian Roberts, Mark Greenwood, Angus Roberts, Andrey Shafirin," +
-            "<BR>Horacio Saggion, Cristian Ursu, Atanas Kiryakov, Angel Kirilov, Damyan Ognyanoff," +
-            "<BR>Dimitar Manov, Milena Yankova, Oana Hamza, Robert Gaizauskas, Mark Hepple," +
-            "<BR>Mark Leisher, Fang Huang, Kevin Humphreys, Yorick Wilks." +            
-            "</CENTER></HTML>");
+    String splashHtml;
+    try {
+      splashHtml = Files.getGateResourceAsString("splash.html");
+    }
+    catch(IOException e1) {
+      splashHtml = "GATE";
+      Err.prln("couldn't get splash.html resource: " + e1);
+    }
+    JLabel htmlLbl = new JLabel(splashHtml);
     htmlLbl.setHorizontalAlignment(SwingConstants.CENTER);
     splashBox.add(htmlLbl, constraints);
     
