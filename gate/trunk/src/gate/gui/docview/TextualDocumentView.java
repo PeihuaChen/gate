@@ -245,6 +245,9 @@ public class TextualDocumentView extends AbstractDocumentView {
     this.document.addDocumentListener(gateDocListener);
   }
 
+  public void setEditable(boolean editable) {
+  	textView.setEditable(editable);
+  }
   
   /* (non-Javadoc)
    * @see gate.gui.docview.AbstractDocumentView#initGUI()
