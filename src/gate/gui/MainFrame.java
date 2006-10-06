@@ -25,6 +25,7 @@ import java.net.URL;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationHandler;
@@ -2124,58 +2125,201 @@ public class MainFrame extends JFrame
     }
   }
 
+  /** Method is used in NewDSAction */
+  protected DataStore createSearchableDataStore() {
+    try {
+      JPanel mainPanel = new JPanel(new GridLayout(5,1));
+      JPanel panel1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+      JPanel panel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+      JPanel panel3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+      JPanel panel4 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+      JPanel panel5 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+      
+      mainPanel.add(panel1);
+      mainPanel.add(panel2);
+      mainPanel.add(panel3);
+      mainPanel.add(panel4);
+      mainPanel.add(panel5);
+      
+      panel1.add(new JLabel("DataStore Location:"));
+      panel2.add(new JLabel("Index Location:"));
+      panel3.add(new JLabel("Input Annotation Set Name:"));
+      panel4.add(new JLabel("Base Token Annotation Type:"));
+      panel5.add(new JLabel("Index Unit Annotation Type:"));
+
+      final JTextField dsLocation = new JTextField("", 25);
+      final JTextField indexLocation = new JTextField("", 25);
+      JTextField btat = new JTextField("Token",25);
+      JTextField iuat = new JTextField("Sentence",25);
+      JTextField inputAS = new JTextField("Key",25);
+      panel1.add(dsLocation);
+      panel2.add(indexLocation);
+      panel3.add(inputAS);
+      panel4.add(btat);
+      panel5.add(iuat);
+      
+
+      JButton dsBrowse = new JButton("Browse");
+      JButton indexBrowse = new JButton("Browse");
+      dsBrowse.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent ae) {
+          // first we need to ask for a new empty directory
+          fileChooser
+              .setDialogTitle("Please create a new empty directory for datastore");
+          fileChooser
+              .setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+          if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
+            try {
+              dsLocation.setText(fileChooser.getSelectedFile().toURL().toExternalForm());
+            } catch(Exception e) {
+              dsLocation.setText("");
+            }
+          }
+        }
+      });
+
+      indexBrowse.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent ae) {
+          // first we need to ask for a new empty directory
+          fileChooser
+              .setDialogTitle("Please create a new empty directory for datastore");
+          fileChooser
+              .setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+          if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
+            try {
+              indexLocation.setText(fileChooser.getSelectedFile().toURL().toExternalForm());
+            } catch(Exception e) {
+              indexLocation.setText("");
+            }
+          }
+        }
+      }); 
+
+      panel1.add(dsBrowse);
+      panel2.add(indexBrowse);
+
+      int returnValue = JOptionPane.showOptionDialog(MainFrame.this, mainPanel, "SearchableDataStore", JOptionPane.INFORMATION_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, new String[]{"OK", "Cancel"}, "OK");
+      if(returnValue == JOptionPane.OK_OPTION) {
+        
+        DataStore ds = Factory.createDataStore("gate.persist.LuceneDataStoreImpl", dsLocation.getText());
+        
+        // we need to set Indexer
+        Class[] consParam = new Class[1];
+        consParam[0] = URL.class;
+        Constructor constructor = Class.forName("annic.gate.lucene.LuceneIndexer",true, Gate.getClassLoader()).getConstructor(consParam);
+        Object indexer = constructor.newInstance(new URL(indexLocation.getText()));
+        
+        Map parameters = new HashMap();
+        parameters.put("INDEX_LOCATION_URL", new URL(indexLocation.getText()));
+        parameters.put("BASE_TOKEN_ANNOTATION_TYPE", btat.getText());
+        parameters.put("INDEX_UNIT_ANNOTATION_TYPE", iuat.getText());
+        parameters.put("FEATURES_TO_EXCLUDE", new ArrayList());
+        parameters.put("ANNOTATION_SET_NAME", inputAS.getText());
+        
+        
+        Class[] params = new Class[2];
+        params[0] = Class.forName("annic.Indexer",true, Gate.getClassLoader());
+        params[1] = Map.class;
+        Method indexerMethod = ds.getClass().getMethod("setIndexer", params);
+        indexerMethod.invoke(ds, indexer, parameters);
+        
+        //Class[] searchConsParams = new Class[0];
+        Constructor searcherConst = Class.forName("annic.gate.lucene.LuceneSearcher",true, Gate.getClassLoader()).getConstructor();
+        Object searcher = searcherConst.newInstance();
+        Class [] searchParams = new Class[1];
+        searchParams[0] = Class.forName("annic.Searcher",true, Gate.getClassLoader());
+        Method searcherMethod = ds.getClass().getMethod("setSearcher", searchParams);
+        searcherMethod.invoke(ds, searcher);
+        return ds;
+      }
+      return null;
+    } catch (Exception e) {
+      throw new GateRuntimeException(e);
+    }
+  } // createSearchableDataStore()
+
+
+  /** Method is used in OpenDSAction */
+  protected DataStore openSearchableDataStore() {
+    DataStore ds = null;
+
+    // get the URL (a file in this case)
+    fileChooser.setDialogTitle("Select the datastore directory");
+    fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+    if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
+      try {
+        URL dsURL = fileChooser.getSelectedFile().toURL();
+        ds = Factory.openDataStore("gate.persist.LuceneDataStoreImpl",
+            dsURL.toExternalForm());
+      } catch (MalformedURLException mue) {
+        JOptionPane.showMessageDialog(MainFrame.this,
+            "Invalid location for the datastore\n "
+                + mue.toString(), "GATE",
+            JOptionPane.ERROR_MESSAGE);
+      } catch (PersistenceException pe) {
+        JOptionPane.showMessageDialog(MainFrame.this,
+            "Datastore opening error!\n " + pe.toString(), "GATE",
+            JOptionPane.ERROR_MESSAGE);
+      } // catch
+    } // if
+
+    return ds;
+  } // openSerialDataStore()
 
   class NewDSAction extends AbstractAction {
-    public NewDSAction(){
+    public NewDSAction() {
       super("Create datastore");
-      putValue(SHORT_DESCRIPTION,"Create a new Datastore");
+      putValue(SHORT_DESCRIPTION, "Create a new Datastore");
       putValue(SMALL_ICON, getIcon("datastore"));
     }
+
 
     public void actionPerformed(ActionEvent e) {
       DataStoreRegister reg = Gate.getDataStoreRegister();
       Map dsTypes = DataStoreRegister.getDataStoreClassNames();
       HashMap dsTypeByName = new HashMap();
       Iterator dsTypesIter = dsTypes.entrySet().iterator();
-      while(dsTypesIter.hasNext()){
-        Map.Entry entry = (Map.Entry)dsTypesIter.next();
+      while (dsTypesIter.hasNext()) {
+        Map.Entry entry = (Map.Entry) dsTypesIter.next();
         dsTypeByName.put(entry.getValue(), entry.getKey());
       }
 
-      if(!dsTypeByName.isEmpty()) {
+      if (!dsTypeByName.isEmpty()) {
         Object[] names = dsTypeByName.keySet().toArray();
-        Object answer = JOptionPane.showInputDialog(
-                            MainFrame.this,
-                            "Select type of Datastore",
-                            "GATE", JOptionPane.QUESTION_MESSAGE,
-                            null, names,
-                            names[0]);
-        if(answer != null) {
-          String className = (String)dsTypeByName.get(answer);
-          if(className.equals("gate.persist.SerialDataStore")){
+        Object answer = JOptionPane.showInputDialog(MainFrame.this,
+            "Select type of Datastore", "GATE",
+            JOptionPane.QUESTION_MESSAGE, null, names, names[0]);
+        if (answer != null) {
+          String className = (String) dsTypeByName.get(answer);
+          if (className.equals("gate.persist.SerialDataStore")) {
             createSerialDataStore();
-          } else if(className.equals("gate.persist.OracleDataStore")) {
-              JOptionPane.showMessageDialog(
-                    MainFrame.this, "Oracle datastores can only be created " +
-                                    "by your Oracle administrator!",
-                                    "GATE", JOptionPane.ERROR_MESSAGE);
-          }  else {
+          } else if (className
+              .equals("gate.persist.LuceneDataStoreImpl")) {
+            createSearchableDataStore();
+          } else if (className.equals("gate.persist.OracleDataStore")) {
+            JOptionPane.showMessageDialog(MainFrame.this,
+                "Oracle datastores can only be created "
+                    + "by your Oracle administrator!",
+                "GATE", JOptionPane.ERROR_MESSAGE);
+          } else {
 
-            throw new UnsupportedOperationException("Unimplemented option!\n"+
-                                                    "Use a serial datastore");
+            throw new UnsupportedOperationException(
+                "Unimplemented option!\n"
+                    + "Use a serial datastore");
           }
         }
       } else {
-        //no ds types
+        // no ds types
         JOptionPane.showMessageDialog(MainFrame.this,
-                                      "Could not find any registered types " +
-                                      "of datastores...\n" +
-                                      "Check your GATE installation!",
-                                      "GATE", JOptionPane.ERROR_MESSAGE);
+            "Could not find any registered types "
+                + "of datastores...\n"
+                + "Check your GATE installation!", "GATE",
+            JOptionPane.ERROR_MESSAGE);
 
       }
     }
-  }//class NewDSAction extends AbstractAction
+  }// class NewDSAction extends AbstractAction
+
 
   class LoadResourceFromFileAction extends AbstractAction {
     public LoadResourceFromFileAction(){
@@ -2369,206 +2513,216 @@ public class MainFrame extends JFrame
   class OpenDSAction extends AbstractAction {
     public OpenDSAction() {
       super("Open datastore");
-      putValue(SHORT_DESCRIPTION,"Open a datastore");
+      putValue(SHORT_DESCRIPTION, "Open a datastore");
       putValue(SMALL_ICON, getIcon("datastore"));
     }
+
 
     public void actionPerformed(ActionEvent e) {
       DataStoreRegister reg = Gate.getDataStoreRegister();
       Map dsTypes = DataStoreRegister.getDataStoreClassNames();
       HashMap dsTypeByName = new HashMap();
       Iterator dsTypesIter = dsTypes.entrySet().iterator();
-      while(dsTypesIter.hasNext()){
-        Map.Entry entry = (Map.Entry)dsTypesIter.next();
+      while (dsTypesIter.hasNext()) {
+        Map.Entry entry = (Map.Entry) dsTypesIter.next();
         dsTypeByName.put(entry.getValue(), entry.getKey());
       }
 
-      if(!dsTypeByName.isEmpty()) {
+      if (!dsTypeByName.isEmpty()) {
         Object[] names = dsTypeByName.keySet().toArray();
-        Object answer = JOptionPane.showInputDialog(
-                            MainFrame.this,
-                            "Select type of Datastore",
-                            "GATE", JOptionPane.QUESTION_MESSAGE,
-                            null, names,
-                            names[0]);
-        if(answer != null) {
-          String className = (String)dsTypeByName.get(answer);
-          if(className.indexOf("SerialDataStore") != -1){
+        Object answer = JOptionPane.showInputDialog(MainFrame.this,
+            "Select type of Datastore", "GATE",
+            JOptionPane.QUESTION_MESSAGE, null, names, names[0]);
+        if (answer != null) {
+          String className = (String) dsTypeByName.get(answer);
+          if (className.indexOf("SerialDataStore") != -1) {
             openSerialDataStore();
-          } else if(className.indexOf("DocServiceDataStore") != -1){
+          } else if(className.indexOf("LuceneDataStoreImpl") != -1) {
+            openSearchableDataStore();
+          } else if (className.indexOf("DocServiceDataStore") != -1) {
             openDocServiceDataStore();
-          } else if(className.equals("gate.persist.OracleDataStore") ||
-                    className.equals("gate.persist.PostgresDataStore")
-                   ) {
-              List dbPaths = new ArrayList();
-              Iterator keyIter = DataStoreRegister.getConfigData().keySet().iterator();
-              while (keyIter.hasNext()) {
-                String keyName = (String) keyIter.next();
-                if (keyName.startsWith("url"))
-                  dbPaths.add(DataStoreRegister.getConfigData().get(keyName));
-              }
-              if (dbPaths.isEmpty())
-                throw new
-                  GateRuntimeException("JDBC URL not configured in gate.xml");
-              //by default make it the first
-              String storageURL = (String)dbPaths.get(0);
-              if (dbPaths.size() > 1) {
-                Object[] paths = dbPaths.toArray();
-                answer = JOptionPane.showInputDialog(
-                                    MainFrame.this,
-                                    "Select a database",
-                                    "GATE", JOptionPane.QUESTION_MESSAGE,
-                                    null, paths,
-                                    paths[0]);
-                if (answer != null)
-                  storageURL = (String) answer;
-                else
-                  return;
-              }
-              DataStore ds = null;
-              AccessController ac = null;
+          } else if (className.equals("gate.persist.OracleDataStore")
+              || className
+                  .equals("gate.persist.PostgresDataStore")) {
+            List dbPaths = new ArrayList();
+            Iterator keyIter = DataStoreRegister.getConfigData()
+                .keySet().iterator();
+            while (keyIter.hasNext()) {
+              String keyName = (String) keyIter.next();
+              if (keyName.startsWith("url"))
+                dbPaths.add(DataStoreRegister.getConfigData()
+                    .get(keyName));
+            }
+            if (dbPaths.isEmpty())
+              throw new GateRuntimeException(
+                  "JDBC URL not configured in gate.xml");
+            // by default make it the first
+            String storageURL = (String) dbPaths.get(0);
+            if (dbPaths.size() > 1) {
+              Object[] paths = dbPaths.toArray();
+              answer = JOptionPane.showInputDialog(
+                  MainFrame.this, "Select a database",
+                  "GATE", JOptionPane.QUESTION_MESSAGE, null,
+                  paths, paths[0]);
+              if (answer != null)
+                storageURL = (String) answer;
+              else
+                return;
+            }
+            DataStore ds = null;
+            AccessController ac = null;
+            try {
+              // 1. login the user
+              // ac = new AccessControllerImpl(storageURL);
+              ac = Factory.createAccessController(storageURL);
+              Assert.assertNotNull(ac);
+              ac.open();
+
+              Session mySession = null;
+              User usr = null;
+              Group grp = null;
               try {
-                //1. login the user
-//                ac = new AccessControllerImpl(storageURL);
-                ac = Factory.createAccessController(storageURL);
-                Assert.assertNotNull(ac);
-                ac.open();
+                String userName = "";
+                String userPass = "";
+                String group = "";
 
-                Session mySession = null;
-                User usr = null;
-                Group grp = null;
-                try {
-                  String userName = "";
-                  String userPass = "";
-                  String group = "";
+                JPanel listPanel = new JPanel();
+                listPanel.setLayout(new BoxLayout(listPanel,
+                    BoxLayout.X_AXIS));
 
-                  JPanel listPanel = new JPanel();
-                  listPanel.setLayout(new BoxLayout(listPanel,BoxLayout.X_AXIS));
+                JPanel panel1 = new JPanel();
+                panel1.setLayout(new BoxLayout(panel1,
+                    BoxLayout.Y_AXIS));
+                panel1.add(new JLabel("User name: "));
+                panel1.add(new JLabel("Password: "));
+                panel1.add(new JLabel("Group: "));
 
-                  JPanel panel1 = new JPanel();
-                  panel1.setLayout(new BoxLayout(panel1,BoxLayout.Y_AXIS));
-                  panel1.add(new JLabel("User name: "));
-                  panel1.add(new JLabel("Password: "));
-                  panel1.add(new JLabel("Group: "));
+                JPanel panel2 = new JPanel();
+                panel2.setLayout(new BoxLayout(panel2,
+                    BoxLayout.Y_AXIS));
+                JTextField usrField = new JTextField(30);
+                panel2.add(usrField);
+                JPasswordField pwdField = new JPasswordField(30);
+                panel2.add(pwdField);
+                JComboBox grpField = new JComboBox(ac
+                    .listGroups().toArray());
+                grpField.setSelectedIndex(0);
+                panel2.add(grpField);
 
-                  JPanel panel2 = new JPanel();
-                  panel2.setLayout(new BoxLayout(panel2,BoxLayout.Y_AXIS));
-                  JTextField usrField = new JTextField(30);
-                  panel2.add(usrField);
-                  JPasswordField pwdField = new JPasswordField(30);
-                  panel2.add(pwdField);
-                  JComboBox grpField = new JComboBox(ac.listGroups().toArray());
-                  grpField.setSelectedIndex(0);
-                  panel2.add(grpField);
+                listPanel.add(panel1);
+                listPanel.add(Box.createHorizontalStrut(20));
+                listPanel.add(panel2);
 
-                  listPanel.add(panel1);
-                  listPanel.add(Box.createHorizontalStrut(20));
-                  listPanel.add(panel2);
+                if (OkCancelDialog.showDialog(MainFrame.this
+                    .getContentPane(), listPanel,
+                    "Please enter login details")) {
 
-                  if(OkCancelDialog.showDialog(MainFrame.this.getContentPane(),
-                                                listPanel,
-                                                "Please enter login details")){
+                  userName = usrField.getText();
+                  userPass = new String(pwdField
+                      .getPassword());
+                  group = (String) grpField.getSelectedItem();
 
-                    userName = usrField.getText();
-                    userPass = new String(pwdField.getPassword());
-                    group = (String) grpField.getSelectedItem();
-
-                    if(userName.equals("") || userPass.equals("") || group.equals("")) {
-                      JOptionPane.showMessageDialog(
-                        MainFrame.this,
-                        "You must provide non-empty user name, password and group!",
-                        "Login error",
-                        JOptionPane.ERROR_MESSAGE
-                        );
-                      return;
-                    }
+                  if (userName.equals("")
+                      || userPass.equals("")
+                      || group.equals("")) {
+                    JOptionPane
+                        .showMessageDialog(
+                            MainFrame.this,
+                            "You must provide non-empty user name, password and group!",
+                            "Login error",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
                   }
-                  else if(OkCancelDialog.userHasPressedCancel) {
-                      return;
-                  }
-
-                  grp = ac.findGroup(group);
-                  usr = ac.findUser(userName);
-                  mySession = ac.login(userName, userPass, grp.getID());
-
-                  //save here the user name, pass and group in local gate.xml
-
-                } catch (gate.security.SecurityException ex) {
-                    JOptionPane.showMessageDialog(
-                      MainFrame.this,
-                      ex.getMessage(),
-                      "Login error",
-                      JOptionPane.ERROR_MESSAGE
-                      );
-                  ac.close();
+                } else if (OkCancelDialog.userHasPressedCancel) {
                   return;
                 }
 
-                if (! ac.isValidSession(mySession)){
-                  JOptionPane.showMessageDialog(
-                    MainFrame.this,
-                    "Incorrect session obtained. "
-                      + "Probably there is a problem with the database!",
-                    "Login error",
-                    JOptionPane.ERROR_MESSAGE
-                    );
-                  ac.close();
-                  return;
-                }
+                grp = ac.findGroup(group);
+                usr = ac.findUser(userName);
+                mySession = ac.login(userName, userPass, grp
+                    .getID());
 
-                //2. open the oracle datastore
-                ds = Factory.openDataStore(className, storageURL);
-                //set the session, so all get/adopt/etc work
-                ds.setSession(mySession);
+                // save here the user name, pass and group in
+                // local gate.xml
 
-                //3. add the security data for this datastore
-                //this saves the user and group information, so it can
-                //be used later when resources are created with certain rights
-                FeatureMap securityData = Factory.newFeatureMap();
-                securityData.put("user", usr);
-                securityData.put("group", grp);
-                DataStoreRegister.addSecurityData(ds, securityData);
-              } catch(PersistenceException pe) {
-                JOptionPane.showMessageDialog(
-                    MainFrame.this, "Datastore open error!\n " +
-                                      pe.toString(),
-                                      "GATE", JOptionPane.ERROR_MESSAGE);
-              } catch(gate.security.SecurityException se) {
-                JOptionPane.showMessageDialog(
-                    MainFrame.this, "User identification error!\n " +
-                                      se.toString(),
-                                      "GATE", JOptionPane.ERROR_MESSAGE);
-                try {
-                  if (ac != null)
-                    ac.close();
-                  if (ds != null)
-                    ds.close();
-                } catch (gate.persist.PersistenceException ex) {
-                  JOptionPane.showMessageDialog(
-                      MainFrame.this, "Persistence error!\n " +
-                                        ex.toString(),
-                                        "GATE", JOptionPane.ERROR_MESSAGE);
-                }
+              } catch (gate.security.SecurityException ex) {
+                JOptionPane.showMessageDialog(MainFrame.this,
+                    ex.getMessage(), "Login error",
+                    JOptionPane.ERROR_MESSAGE);
+                ac.close();
+                return;
               }
 
-          }else{
-            JOptionPane.showMessageDialog(
-                MainFrame.this,
-                "Support for this type of datastores is not implemenented!\n",
-                "GATE", JOptionPane.ERROR_MESSAGE);
+              if (!ac.isValidSession(mySession)) {
+                JOptionPane
+                    .showMessageDialog(
+                        MainFrame.this,
+                        "Incorrect session obtained. "
+                            + "Probably there is a problem with the database!",
+                        "Login error",
+                        JOptionPane.ERROR_MESSAGE);
+                ac.close();
+                return;
+              }
+
+              // 2. open the oracle datastore
+              ds = Factory.openDataStore(className, storageURL);
+              // set the session, so all get/adopt/etc work
+              ds.setSession(mySession);
+
+              // 3. add the security data for this datastore
+              // this saves the user and group information, so it
+              // can
+              // be used later when resources are created with
+              // certain rights
+              FeatureMap securityData = Factory.newFeatureMap();
+              securityData.put("user", usr);
+              securityData.put("group", grp);
+              DataStoreRegister.addSecurityData(ds, securityData);
+            } catch (PersistenceException pe) {
+              JOptionPane.showMessageDialog(MainFrame.this,
+                  "Datastore open error!\n " + pe.toString(),
+                  "GATE", JOptionPane.ERROR_MESSAGE);
+            } catch (gate.security.SecurityException se) {
+              JOptionPane.showMessageDialog(MainFrame.this,
+                  "User identification error!\n "
+                      + se.toString(), "GATE",
+                  JOptionPane.ERROR_MESSAGE);
+              try {
+                if (ac != null)
+                  ac.close();
+                if (ds != null)
+                  ds.close();
+              } catch (gate.persist.PersistenceException ex) {
+                JOptionPane
+                    .showMessageDialog(MainFrame.this,
+                        "Persistence error!\n "
+                            + ex.toString(),
+                        "GATE",
+                        JOptionPane.ERROR_MESSAGE);
+              }
+            }
+
+          } else {
+            JOptionPane
+                .showMessageDialog(
+                    MainFrame.this,
+                    "Support for this type of datastores is not implemenented!\n",
+                    "GATE", JOptionPane.ERROR_MESSAGE);
           }
         }
       } else {
-        //no ds types
+        // no ds types
         JOptionPane.showMessageDialog(MainFrame.this,
-                                      "Could not find any registered types " +
-                                      "of datastores...\n" +
-                                      "Check your GATE installation!",
-                                      "GATE", JOptionPane.ERROR_MESSAGE);
+            "Could not find any registered types "
+                + "of datastores...\n"
+                + "Check your GATE installation!", "GATE",
+            JOptionPane.ERROR_MESSAGE);
 
       }
     }
-  }//class OpenDSAction extends AbstractAction
+  }// class OpenDSAction extends AbstractAction
+
 
   /**
    * A menu that self populates based on CREOLE register data before being

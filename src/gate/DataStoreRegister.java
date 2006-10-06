@@ -53,6 +53,13 @@ public class DataStoreRegister extends HashSet {
       }
     } catch (ClassNotFoundException e) {
     }
+    
+    try {
+    	if(Class.forName("gate.persist.LuceneDataStoreImpl", true, Gate.getClassLoader()) != null) {
+    		names.put("gate.persist.LuceneDataStoreImpl", "Lucene Based Searchable DataStore");
+    	}
+    } catch(ClassNotFoundException e) {
+    }
 
     return names;
   } // getDataStoreClassNames()
