@@ -2128,35 +2128,40 @@ public class MainFrame extends JFrame
   /** Method is used in NewDSAction */
   protected DataStore createSearchableDataStore() {
     try {
-      JPanel mainPanel = new JPanel(new GridLayout(5,1));
+      JPanel mainPanel = new JPanel(new GridLayout(6,1));
       JPanel panel1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
       JPanel panel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
       JPanel panel3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
       JPanel panel4 = new JPanel(new FlowLayout(FlowLayout.LEFT));
       JPanel panel5 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+      JPanel panel6 = new JPanel(new FlowLayout(FlowLayout.LEFT));
       
       mainPanel.add(panel1);
       mainPanel.add(panel2);
       mainPanel.add(panel3);
       mainPanel.add(panel4);
       mainPanel.add(panel5);
+      mainPanel.add(panel6);
       
       panel1.add(new JLabel("DataStore Location:"));
       panel2.add(new JLabel("Index Location:"));
       panel3.add(new JLabel("Input Annotation Set Name:"));
       panel4.add(new JLabel("Base Token Annotation Type:"));
       panel5.add(new JLabel("Index Unit Annotation Type:"));
-
+      panel6.add(new JLabel("Features To Exclude:"));
+      
       final JTextField dsLocation = new JTextField("", 25);
       final JTextField indexLocation = new JTextField("", 25);
       JTextField btat = new JTextField("Token",25);
       JTextField iuat = new JTextField("Sentence",25);
       JTextField inputAS = new JTextField("Key",25);
+      JTextField fte = new JTextField("SpaceToken;Split;Person.matches", 25);
       panel1.add(dsLocation);
       panel2.add(indexLocation);
       panel3.add(inputAS);
       panel4.add(btat);
       panel5.add(iuat);
+      panel6.add(fte);
       
 
       JButton dsBrowse = new JButton("Browse");
@@ -2215,7 +2220,14 @@ public class MainFrame extends JFrame
         parameters.put("INDEX_UNIT_ANNOTATION_TYPE", iuat.getText());
         parameters.put("FEATURES_TO_EXCLUDE", new ArrayList());
         parameters.put("ANNOTATION_SET_NAME", inputAS.getText());
-        
+        String[] fteArray = fte.getText().split(";");
+        if(fteArray != null && fteArray.length > 0) {
+          ArrayList fteList = new ArrayList();
+          for(int k=0;k<fteArray.length;k++) {
+            fteList.add(fteArray[k]);
+          }
+          parameters.put("FEATURES_TO_EXCLUDE", fteList);
+        }
         
         Class[] params = new Class[2];
         params[0] = Class.forName("annic.Indexer",true, Gate.getClassLoader());
