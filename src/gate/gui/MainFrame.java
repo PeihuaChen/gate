@@ -1555,19 +1555,6 @@ public class MainFrame extends JFrame
     }// actionPerformed();
   }//class NewAnnotDiffAction
 
-  /** This class represent an action which brings up the Corpus Annot Diff tool*/
-  class NewCorpusAnnotDiffAction extends AbstractAction {
-    public NewCorpusAnnotDiffAction() {
-      super("Corpus Annotation Diff", getIcon("annotation-diff"));
-      putValue(SHORT_DESCRIPTION,"Create a new Corpus Annotation Diff Tool");
-    }// NewCorpusAnnotDiffAction
-    public void actionPerformed(ActionEvent e) {
-      CorpusAnnotDiffDialog annotDiffDialog =
-        new CorpusAnnotDiffDialog(MainFrame.this);
-      annotDiffDialog.setTitle("Corpus Annotation Diff Tool");
-      annotDiffDialog.setVisible(true);
-    }// actionPerformed();
-  }//class NewCorpusAnnotDiffAction
 
   /** This class represent an action which brings up the corpus evaluation tool*/
   class NewCorpusEvalAction extends AbstractAction {
