@@ -685,30 +685,39 @@ public class AnnotationDiffGUI extends JFrame{
     public Color getBackgroundAt(int row, int column){
       AnnotationDiffer.Pairing pairing =
         (AnnotationDiffer.Pairing)pairings.get(row);
-      Color colKey = pairing.getType() == AnnotationDiffer.CORRECT ?
-                     diffTable.getBackground() :
-                       (pairing.getType() == AnnotationDiffer.PARTIALLY_CORRECT ?
-                       PARTIALLY_CORRECT_BG :
-                         MISSING_BG);
-      if(pairing.getKey() == null) colKey = diffTable.getBackground();
-      Color colRes = pairing.getType() == AnnotationDiffer.CORRECT ?
-                     diffTable.getBackground() :
-                       (pairing.getType() == AnnotationDiffer.PARTIALLY_CORRECT ?
-                       PARTIALLY_CORRECT_BG :
-                         FALSE_POZITIVE_BG);
-      if(pairing.getResponse() == null) colRes = diffTable.getBackground();
-      switch(column){
-        case COL_KEY_START: return colKey;
-        case COL_KEY_END: return colKey;
-        case COL_KEY_STRING: return colKey;
-        case COL_KEY_FEATURES: return colKey;
-        case COL_MATCH: return diffTable.getBackground();
-        case COL_RES_START: return colRes;
-        case COL_RES_END: return colRes;
-        case COL_RES_STRING: return colRes;
-        case COL_RES_FEATURES: return colRes;
+      switch(pairing.getType()){
+        case(AnnotationDiffer.CORRECT_TYPE): return diffTable.getBackground();
+        case(AnnotationDiffer.PARTIALLY_CORRECT_TYPE): return PARTIALLY_CORRECT_BG;
+        case(AnnotationDiffer.MISSING_TYPE): return MISSING_BG;
+        case(AnnotationDiffer.SPURIOUS_TYPE): return FALSE_POZITIVE_BG;
         default: return diffTable.getBackground();
       }
+//      
+//      Color colKey = pairing.getType() == 
+//          AnnotationDiffer.CORRECT_TYPE ?
+//          diffTable.getBackground() :
+//          (pairing.getType() == AnnotationDiffer.PARTIALLY_CORRECT_TYPE ?
+//           PARTIALLY_CORRECT_BG : MISSING_BG);
+//      if(pairing.getKey() == null) colKey = diffTable.getBackground();
+//      
+//      Color colRes = pairing.getType() == AnnotationDiffer.CORRECT_TYPE ?
+//                     diffTable.getBackground() :
+//                       (pairing.getType() == AnnotationDiffer.PARTIALLY_CORRECT_TYPE ?
+//                       PARTIALLY_CORRECT_BG :
+//                         FALSE_POZITIVE_BG);
+//      if(pairing.getResponse() == null) colRes = diffTable.getBackground();
+//      switch(column){
+//        case COL_KEY_START: return colKey;
+//        case COL_KEY_END: return colKey;
+//        case COL_KEY_STRING: return colKey;
+//        case COL_KEY_FEATURES: return colKey;
+//        case COL_MATCH: return diffTable.getBackground();
+//        case COL_RES_START: return colRes;
+//        case COL_RES_END: return colRes;
+//        case COL_RES_STRING: return colRes;
+//        case COL_RES_FEATURES: return colRes;
+//        default: return diffTable.getBackground();
+//      }
     }
 
     public Object getValueAt(int row, int column){
@@ -818,9 +827,10 @@ public class AnnotationDiffGUI extends JFrame{
   protected static final Color FALSE_POZITIVE_BG = new Color(255,231,173);
   protected static final String[] matchLabel;
   static{
-    matchLabel = new String[3];
-    matchLabel[AnnotationDiffer.CORRECT] = "=";
-    matchLabel[AnnotationDiffer.PARTIALLY_CORRECT] = "~";
-    matchLabel[AnnotationDiffer.WRONG] = "!=";
+    matchLabel = new String[4];
+    matchLabel[AnnotationDiffer.CORRECT_TYPE] = "=";
+    matchLabel[AnnotationDiffer.PARTIALLY_CORRECT_TYPE] = "~";
+    matchLabel[AnnotationDiffer.SPURIOUS_TYPE] = "!>";
+    matchLabel[AnnotationDiffer.MISSING_TYPE] = "<!";
   }
 }
