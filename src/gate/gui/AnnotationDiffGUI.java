@@ -830,7 +830,7 @@ public class AnnotationDiffGUI extends JFrame{
     matchLabel = new String[4];
     matchLabel[AnnotationDiffer.CORRECT_TYPE] = "=";
     matchLabel[AnnotationDiffer.PARTIALLY_CORRECT_TYPE] = "~";
-    matchLabel[AnnotationDiffer.SPURIOUS_TYPE] = "!>";
-    matchLabel[AnnotationDiffer.MISSING_TYPE] = "<!";
+    matchLabel[AnnotationDiffer.SPURIOUS_TYPE] = "?-";
+    matchLabel[AnnotationDiffer.MISSING_TYPE] = "-?";
   }
 }
