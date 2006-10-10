@@ -26,7 +26,6 @@ import junit.framework.TestSuite;
 import com.ontotext.gate.gazetteer.TestHashGazetteer;
 
 import gate.annotation.TestAnnotation;
-import gate.annotation.TestAnnotationDiff;
 import gate.config.TestConfig;
 import gate.corpora.*;
 import gate.creole.*;
@@ -239,7 +238,6 @@ public class TestGate {
         suite.addTest(TestBumpyStack.suite());
         suite.addTest(TestControllers.suite());
         suite.addTest(TestSecurity.suite());
-        suite.addTest(TestAnnotationDiff.suite());
         suite.addTest(TestConfig.suite());
         suite.addTest(TestAnnotation.suite());
         suite.addTest(TestEmail.suite());
