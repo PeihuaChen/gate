@@ -23,8 +23,8 @@ import gate.Annotation;
  * (representing the gold standard) and one of response annotations 
  * (representing the system's responses). It will then pair the keys and 
  * responses in a way that maximises the score. Each key - response pair gets a 
- * score of {@link #CORRECT} (2), {@link #PARTIALLY_CORRECT} (1) or 
- * {@link #WRONG} (0)depending on whether the two annotations match are 
+ * score of {@link #CORRECT_VALUE} (2), {@link #PARTIALLY_CORRECT_VALUE} (1) or 
+ * {@link #WRONG_VALUE} (0)depending on whether the two annotations match are 
  * overlapping or completely unmatched. Each pairing also has a type of 
  * {@link #CORRECT_TYPE}, {@link #PARTIALLY_CORRECT_TYPE}, 
  * {@link #SPURIOUS_TYPE} or {@link #MISSING_TYPE} further detailing the type of
@@ -67,7 +67,7 @@ public class AnnotationDiffer {
 
   /**
    * Computes a diff between two collections of annotations.
-   * @param key the colelction of key annotations.
+   * @param key the collection of key annotations.
    * @param response the collection of response annotations.
    * @return a list of {@link Pairing} objects representing the pairing set
    * that results in the best score.
@@ -101,38 +101,20 @@ public class AnnotationDiffer {
           //we have full overlap -> CORRECT or WRONG
           if(keyAnn.isCompatible(resAnn, significantFeaturesSet)){
             //we have a full match
-            choice = new PairingImpl(i, j, CORRECT);
+            choice = new PairingImpl(i, j, CORRECT_VALUE);
           }else{
             //the two annotations are coextensive but don't match
             //we have a missmatch
-            choice = new PairingImpl(i, j, WRONG);
+            choice = new PairingImpl(i, j, WRONG_VALUE);
           }
         }else if(keyAnn.overlaps(resAnn)){
           //we have partial overlap -> PARTIALLY_CORRECT or WRONG
           if(keyAnn.isPartiallyCompatible(resAnn, significantFeaturesSet)){
-            choice = new PairingImpl(i, j, PARTIALLY_CORRECT);
+            choice = new PairingImpl(i, j, PARTIALLY_CORRECT_VALUE);
           }else{
-            choice = new PairingImpl(i, j, WRONG);
+            choice = new PairingImpl(i, j, WRONG_VALUE);
           }
         }
-
-//        // >>>>>>
-//        if(significantFeaturesSet == null){
-//          //full comaptibility required
-//          if(keyAnn.isCompatible(resAnn)){
-//            choice = new PairingImpl(i, j, CORRECT);
-//          }else if(keyAnn.isPartiallyCompatible(resAnn)){
-//            choice = new PairingImpl(i, j, PARTIALLY_CORRECT);
-//          }
-//        }else{
-//          //compatibility tests restricted to a set of features
-//          if(keyAnn.isCompatible(resAnn, significantFeaturesSet)){
-//            choice = new PairingImpl(i, j, CORRECT);
-//          }else if(keyAnn.isPartiallyCompatible(resAnn, significantFeaturesSet)){
-//            choice = new PairingImpl(i, j, PARTIALLY_CORRECT);
-//          }
-//        }
-//        // <<<<<<
 
         //add the new choice if any
         if (choice != null) {
@@ -157,37 +139,41 @@ public class AnnotationDiffer {
       PairingImpl bestChoice = (PairingImpl)possibleChoices.remove(0);
       bestChoice.consume();
       finalChoices.add(bestChoice);
-      switch(bestChoice.type){
-        case CORRECT:{
+      switch(bestChoice.value){
+        case CORRECT_VALUE:{
           if(correctAnnotations == null) correctAnnotations = new HashSet();
           correctAnnotations.add(bestChoice.getResponse());
           correctMatches++;
+          bestChoice.setType(CORRECT_TYPE);
           break;
         }
-        case PARTIALLY_CORRECT:{
+        case PARTIALLY_CORRECT_VALUE:{
           if(partiallyCorrectAnnotations == null) partiallyCorrectAnnotations = new HashSet();
           partiallyCorrectAnnotations.add(bestChoice.getResponse());
           partiallyCorrectMatches++;
+          bestChoice.setType(PARTIALLY_CORRECT_TYPE);
           break;
         }
-        case WRONG:{
+        case WRONG_VALUE:{
           if(bestChoice.getKey() != null){
             //we have a missed key
             if(missingAnnotations == null) missingAnnotations = new HashSet();
             missingAnnotations.add(bestChoice.getKey());
             missing ++;
+            bestChoice.setType(MISSING_TYPE);
           }
           if(bestChoice.getResponse() != null){
             //we have a spurious response
             if(spuriousAnnotations == null) spuriousAnnotations = new HashSet();
             spuriousAnnotations.add(bestChoice.getResponse());
             spurious ++;
+            bestChoice.setType(SPURIOUS_TYPE);
           }
           break;
         }
         default:{
           throw new GateRuntimeException("Invalid pairing type: " +
-                  bestChoice.type);
+                  bestChoice.value);
         }
       }
     }
@@ -198,7 +184,9 @@ public class AnnotationDiffer {
       if(aList == null || aList.isEmpty()){
         if(missingAnnotations == null) missingAnnotations = new HashSet();
         missingAnnotations.add((Annotation)(keyList.get(i)));
-        finalChoices.add(new PairingImpl(i, -1, WRONG));
+        PairingImpl choice = new PairingImpl(i, -1, WRONG_VALUE);
+        choice.setType(MISSING_TYPE);
+        finalChoices.add(choice);
         missing ++;
       }
     }
@@ -209,7 +197,9 @@ public class AnnotationDiffer {
       if(aList == null || aList.isEmpty()){
         if(spuriousAnnotations == null) spuriousAnnotations = new HashSet();
         spuriousAnnotations.add((Annotation)(responseList.get(i)));
-        finalChoices.add(new PairingImpl(-1, i, WRONG));
+        PairingImpl choice = new PairingImpl(-1, i, WRONG_VALUE);
+        choice.setType(SPURIOUS_TYPE);
+        finalChoices.add(choice);
         spurious ++;
       }
     }
@@ -401,8 +391,8 @@ public class AnnotationDiffer {
     Iterator iter = finalChoices.iterator();
     while(iter.hasNext()){
       PairingImpl aChoice = (PairingImpl)iter.next();
-      switch(aChoice.type){
-        case PARTIALLY_CORRECT:{
+      switch(aChoice.value){
+        case PARTIALLY_CORRECT_VALUE:{
           System.out.println("Missmatch (partially correct):");
           System.out.println("Key: " + keyList.get(aChoice.keyIndex).toString());
           System.out.println("Response: " + responseList.get(aChoice.responseIndex).toString());
@@ -521,10 +511,10 @@ public class AnnotationDiffer {
    * the associated score for that pairing.
    */
    public class PairingImpl implements Pairing{
-    PairingImpl(int keyIndex, int responseIndex, int type) {
+    PairingImpl(int keyIndex, int responseIndex, int value) {
       this.keyIndex = keyIndex;
       this.responseIndex = responseIndex;
-      this.type = type;
+      this.value = value;
       scoreCalculated = false;
 	    }
 
@@ -547,6 +537,11 @@ public class AnnotationDiffer {
 
     public int getType(){
       return type;
+    }
+    
+
+    public void setType(int type) {
+      this.type = type;
     }
 
     /**
@@ -599,15 +594,36 @@ public class AnnotationDiffer {
       conflictSet.addAll((List)keyChoices.get(keyIndex));
       //remove this choice from the conflict set
       conflictSet.remove(this);
-      score = type;
+      score = value;
       Iterator conflictIter = conflictSet.iterator();
-      while(conflictIter.hasNext()) score -= ((PairingImpl)conflictIter.next()).type;
+      while(conflictIter.hasNext()) score -= ((PairingImpl)conflictIter.next()).value;
       scoreCalculated = true;
     }
 
+    /**
+     * The index in the key collection of the key annotation for this pairing
+     */
     int keyIndex;
+    /**
+     * The index in the response collection of the response annotation for this
+     * pairing
+     */
     int responseIndex;
+    
+    /**
+     * The type of this pairing.
+     */
     int type;
+    
+    /**
+     * The value for this pairing. This value depends only on this pairing, not
+     * on the conflict set.
+     */
+    int value;
+    
+    /**
+     * The score of this pairing (calculated based on value and conflict set).
+     */
     int score;
     boolean scoreCalculated;
   }
@@ -739,39 +755,39 @@ public class AnnotationDiffer {
 
 
   /** Type for correct pairings (when the key and response match completely)*/
-  public static final int CORRECT_TYPE = 1;
+  public static final int CORRECT_TYPE = 0;
   
   /** 
    * Type for partially correct pairings (when the key and response match 
    * in type and significant features but the spans are just overlapping and 
    * not identical.
    */
-  public static final int PARTIALLY_CORRECT_TYPE = 2;
+  public static final int PARTIALLY_CORRECT_TYPE = 1;
   
   /** 
    * Type for spurious pairings (where the response is not matching any key).
    */
-  public static final int SPURIOUS_TYPE = 3;
+  public static final int SPURIOUS_TYPE = 2;
   
   /** 
    * Type for missing pairings (where the key was not matched to a response).
    */
-  public static final int MISSING_TYPE = 4;
+  public static final int MISSING_TYPE = 3;
 
   /**
    * Score for a correct pairing.
    */
-  public static final int CORRECT = 2;
+  private static final int CORRECT_VALUE = 2;
 
   /**
    * Score for a partially correct pairing.
    */
-  public static final int PARTIALLY_CORRECT = 1;
+  private static final int PARTIALLY_CORRECT_VALUE = 1;
   
   /**
    * Score for a wrong (missing or spurious) pairing.
    */  
-  public static final int WRONG = 0;
+  private static final int WRONG_VALUE = 0;
 
   /**
    * The set of significant features used for matching.
