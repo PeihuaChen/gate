@@ -75,12 +75,15 @@ public class OntologyResourceImpl implements OntologyResource {
         values = new ArrayList();
         instanceProperties.put(propertyName, values);
       }
-      values.add(theValue);
-      OntologyModificationEvent ome = new OntologyModificationEvent(ontology,
+      if(!values.contains(theValue)) {
+        values.add(theValue);
+        OntologyModificationEvent ome = new OntologyModificationEvent(ontology,
               this, OntologyModificationEvent.PROPERTY_VALUE_ADDED_EVENT);
-      ontology.fireOntologyModificationEvent(ome);
+        ontology.fireOntologyModificationEvent(ome);
+      }
       return true;
-    } else return false;
+    } 
+    return false;
   }
 
   public Set getSetPropertiesNames() {
