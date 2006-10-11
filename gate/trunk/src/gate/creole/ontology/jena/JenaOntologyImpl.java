@@ -60,8 +60,8 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
             OWL_FULL));
     actionsList.add(new LoadOntologyDataAction("Load RDF(S) data",
             "Reads RDF(S) data from a file and populates the ontology.", RDFS));
-//    actionsList.add(new LoadOntologyDataAction("Load DAML data",
-//            "Reads DAML data from a file and populates the ontology.", DAML));
+    // actionsList.add(new LoadOntologyDataAction("Load DAML data",
+    // "Reads DAML data from a file and populates the ontology.", DAML));
     actionsList.add(null);
     actionsList.add(new CleanUpAction());
     actionsList.add(null);
@@ -163,12 +163,13 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
         throw new ResourceInstantiationException(ioe);
       }
     }
+    
     if(this.getPropertyDefinitionByName("label") == null) {
-      // add labels as properties of everything
-      Set range = new HashSet();
-      range.add(String.class);
-      addProperty("label", "label property", new HashSet(), range);
+      // add labels as datatype properties of everything
+      addDatatypeProperty("label", "label property", new HashSet(),
+              String.class);
     }
+    
     // convert the Jena model into a GATE ontology
     // create the class hierarchy
     ExtendedIterator topClassIter = jenaModel.listHierarchyRootClasses();
@@ -270,9 +271,8 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
               aJenaInstance.getComment(language), gateClasses, this);
       addInstance(gateInstance);
       String label = aJenaInstance.getLabel(language);
-      // if(label!=null)
-      // gateInstance.addPropertyValue("label", label);
     }
+
     // add the property values
     instanceIter = jenaModel.listIndividuals();
     while(instanceIter.hasNext()) {
@@ -327,6 +327,73 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
         }
       }
     }
+
+    // add the property values for classes as well
+    Iterator classIter = jenaModel.listClasses();
+    while(classIter.hasNext()) {
+      OntClass aJenaClass = (OntClass)classIter.next();
+      TClass aGateClass = getClassByName(aJenaClass.getLocalName());
+      propIter = aJenaClass.listProperties();
+      while(propIter.hasNext()) {
+        Statement propStatement = (Statement)propIter.next();
+        com.hp.hpl.jena.rdf.model.Property aProperty = (com.hp.hpl.jena.rdf.model.Property)(propStatement)
+                .getPredicate();
+        RDFNode objectNode = propStatement.getObject();
+        Property aGateProperty = getPropertyDefinitionByName(aProperty.getLocalName());
+        if(aGateProperty == null) {
+          continue;
+        }
+        if(aGateProperty instanceof ObjectProperty) {
+          continue;
+        } else {
+          // datatype property
+          if(objectNode.canAs(Literal.class)) {
+            Literal aJenaValue = (Literal)objectNode.as(Literal.class);
+            Object aGateValue = aJenaValue.getDatatype() == null ? aJenaValue
+                    .getLexicalForm() : aJenaValue.getDatatype().parse(
+                    aJenaValue.getLexicalForm());
+            boolean success = aGateClass.addPropertyValue(aGateProperty
+                    .getName(), aGateValue);
+            if(!success)
+              Err.prln("Could not set value \"" + aGateValue.toString()
+                      + "\" for property \"" + aProperty + "\" on instance "
+                      + aGateClass.getName());
+          } else {
+            Err.prln("WARNING: datatype property " + aGateProperty.getName()
+                    + " has a value which is not an RDF literal "
+                    + objectNode.toString());
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * export the property values for the given class
+   * 
+   * @param aGateClass
+   * @param jenaModel
+   */
+  protected void exportPropertyValues(OClass aGateClass, OntModel jenaModel) {
+    // add the property values for all instances
+    OntClass aJenaClass = jenaModel.getOntClass(aGateClass.getURI());
+    Iterator propNameIter = aGateClass.getSetPropertiesNames().iterator();
+    while(propNameIter.hasNext()) {
+      String propertyName = (String)propNameIter.next();
+      Property aProperty = getPropertyDefinitionByName(propertyName);
+      OntProperty aJenaProp = jenaModel.getOntProperty(aProperty.getURI());
+      Iterator valuesIter = aGateClass.getPropertyValues(propertyName)
+              .iterator();
+      while(valuesIter.hasNext()) {
+        Object value = valuesIter.next();
+        aJenaClass.addProperty(aJenaProp, value);
+      }
+    }
+    // make the recursive calls
+    Iterator subClassIter = aGateClass.getSubClasses(DIRECT_CLOSURE).iterator();
+    while(subClassIter.hasNext()) {
+      exportPropertyValues((OClass)subClassIter.next(), jenaModel);
+    }
   }
 
   /**
@@ -341,8 +408,7 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
     OntModel jenaModel = null;
     switch(ontologyType){
       case OWL_LITE:
-        jenaModel = ModelFactory
-                .createOntologyModel(OntModelSpec.OWL_LITE_MEM);
+        jenaModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
         break;
       default:
         throw new IllegalArgumentException("Ontology type " + ontologyType
@@ -356,6 +422,7 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
       OClass aGateClass = (OClass)topClassIter.next();
       toJenaClassRec(aGateClass, jenaModel, null);
     }
+    
     // create the properties
     Iterator propIter = getPropertyDefinitions().iterator();
     while(propIter.hasNext()) {
@@ -454,6 +521,13 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
           }
         }
       }
+    }
+
+    // export class' set properties
+    topClassIter = getTopClasses().iterator();
+    while(topClassIter.hasNext()) {
+      OClass aGateClass = (OClass)topClassIter.next();
+      exportPropertyValues(aGateClass, jenaModel);
     }
     // save to the file
     try {
@@ -557,14 +631,15 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
       removeInstance((OInstance)instIter.next());
     }
     ArrayList properties = new ArrayList(propertyDefinitionSet);
-    for(int i=0;i<properties.size();i++) {
+    for(int i = 0; i < properties.size(); i++) {
       removePropertyDefinition((Property)properties.get(i));
     }
-
     Iterator classIter = new ArrayList(getClasses()).iterator();
     while(classIter.hasNext()) {
       removeClass((TClass)classIter.next());
     }
+    // adding a label datatype property after clean up
+    addDatatypeProperty("label", "label property", new HashSet(), String.class);
   }
 
   /**
@@ -694,6 +769,7 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
 
     protected int ontologyType;
   }
+
   protected class SaveOntologyAction extends AbstractAction {
     public SaveOntologyAction(String name, String description, int ontologyType) {
       super(name);
@@ -730,6 +806,7 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
 
     protected int ontologyType;
   }
+
   protected class CleanUpAction extends AbstractAction {
     public CleanUpAction() {
       super("Clean ontology");
@@ -758,31 +835,41 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
   }
 
   protected URL owlLiteFileURL;
+
   protected URL owlDlFileURL;
+
   protected URL owlFullFileURL;
+
   protected URL rdfsFileURL;
+
   protected URL damlFileURL;
+
   protected String language;
+
   protected List actionsList;
+
   /**
    * Constant for Owl-Lite ontology type.
    */
   public static final int OWL_LITE = 0;
+
   /**
    * Constant for Owl-DL ontology type.
    */
   public static final int OWL_DL = 1;
+
   /**
    * Constant for Owl-Full ontology type.
    */
   public static final int OWL_FULL = 2;
+
   /**
    * Constant for RDF-S ontology type.
    */
   public static final int RDFS = 3;
+
   /**
    * Constant for DAML ontology type.
    */
   public static final int DAML = 13;
-
 }
