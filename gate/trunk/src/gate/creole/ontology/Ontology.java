@@ -23,6 +23,17 @@ import java.util.Set;
  */
 public interface Ontology extends Taxonomy {
   /**
+   * Creates a new OClass and returns it.
+   * 
+   * @param aName
+   *          the name of this class
+   * @param aComment
+   *          the comment of this class
+   * @return the newly created class
+   */
+  public OClass createClass(String aName, String aComment);
+
+  /**
    * Adds an instance to the ontology.
    * 
    * @param name
