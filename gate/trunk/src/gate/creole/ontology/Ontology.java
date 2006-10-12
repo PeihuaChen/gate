@@ -36,7 +36,7 @@ public interface Ontology extends Taxonomy {
   /**
    * Adds a preconstructed instance to the ontology.
    */
-  public void addInstance(OInstance theInstance);
+  public OInstance addInstance(OInstance theInstance);
 
   /**
    * Removes the instance from the ontology.
@@ -134,7 +134,7 @@ public interface Ontology extends Taxonomy {
    * @author niraj
    * @param properity
    */
-  public void addDatatypeProperty(DatatypeProperty properity);
+  public DatatypeProperty addDatatypeProperty(DatatypeProperty properity);
 
   /**
    * Creates a new generic property that is neither datatype or object property.
@@ -182,7 +182,7 @@ public interface Ontology extends Taxonomy {
    * @author niraj
    * @param properity
    */
-  public void addProperty(Property properity);
+  public Property addProperty(Property properity);
 
   /**
    * Creates a new object property (a property that takes instances as values).
@@ -228,7 +228,7 @@ public interface Ontology extends Taxonomy {
    * @author niraj
    * @param properity
    */
-  public void addObjectProperty(ObjectProperty properity);
+  public ObjectProperty addObjectProperty(ObjectProperty properity);
 
   /**
    * Creates a new symmetric property (an object property that is symmetric).
@@ -274,7 +274,7 @@ public interface Ontology extends Taxonomy {
    * @author niraj
    * @param properity
    */
-  public void addSymmetricProperty(SymmetricProperty properity);
+  public SymmetricProperty addSymmetricProperty(SymmetricProperty properity);
 
   /**
    * Creates a new transitive property (an object property that is transitive).
@@ -320,7 +320,7 @@ public interface Ontology extends Taxonomy {
    * @author niraj
    * @param properity
    */
-  public void addTransitiveProperty(TransitiveProperty properity);
+  public TransitiveProperty addTransitiveProperty(TransitiveProperty properity);
 
   /**
    * Gets the set of all known property definitions in this ontology.

@@ -247,14 +247,15 @@ public class TaxonomyImpl extends gate.creole.AbstractLanguageResource
     fireOntologyResourceRemoved(theClass);
   }
 
-  public void addClass(TClass theClass) {
+  public TClass addClass(TClass theClass) {
     setModified(true);
-    if(classesByName.containsKey(theClass.getName())) return;
+    if(classesByName.containsKey(theClass.getName())) return theClass;
     classes.add(theClass);
     if(DEBUG) System.out.println("Class Added :" + theClass.getName());
     classesByName.put(theClass.getName(), theClass);
     nullBuffers = true;
     fireOntologyResourceAdded(theClass);
+    return theClass;
   }
 
   public TClass getClassByName(String theName) {

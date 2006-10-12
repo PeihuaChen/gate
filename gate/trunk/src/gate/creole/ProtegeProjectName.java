@@ -28,8 +28,6 @@ import gate.creole.ontology.OntologyModificationEvent;
 import gate.creole.ontology.OntologyModificationListener;
 import gate.creole.ontology.TClass;
 import gate.creole.ontology.Taxonomy;
-import gate.event.ObjectModificationEvent;
-import gate.event.ObjectModificationListener;
 import gate.gui.ProtegeWrapper;
 
 
@@ -212,8 +210,8 @@ public class ProtegeProjectName extends AbstractLanguageResource
     ontotextOntology.removeClass(theClass);
   }
 
-  public void addClass(TClass theClass) {
-    ontotextOntology.addClass(theClass);
+  public TClass addClass(TClass theClass) {
+    return ontotextOntology.addClass(theClass);
   }
 
   public TClass getClassByName(String theName) {

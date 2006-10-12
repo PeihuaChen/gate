@@ -113,6 +113,9 @@ public class PropertyImpl extends OntologyResourceImpl implements Property {
 
   public void setSamePropertyAs(Property theProperty) {
     this.samePropertiesSet.add(theProperty);
+    OntologyModificationEvent ome = new OntologyModificationEvent(taxonomy,
+      this, OntologyModificationEvent.SAME_AS_EVENT);
+    taxonomy.fireOntologyModificationEvent(ome);
   }
 
   public Set getSamePropertyAs() {

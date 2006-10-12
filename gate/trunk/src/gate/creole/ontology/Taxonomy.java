@@ -156,7 +156,7 @@ public interface Taxonomy extends LanguageResource {
    * @param theClass
    *          the class to be added
    */
-  public void addClass(TClass theClass);
+  public TClass addClass(TClass theClass);
 
   /**
    * Retrieves a class by its name.

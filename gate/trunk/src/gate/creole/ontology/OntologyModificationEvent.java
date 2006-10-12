@@ -59,6 +59,8 @@ public class OntologyModificationEvent extends EventObject {
   public static final int FUNCTIONAL_EVENT = 22;
 
   public static final int INVERSE_FUNCTIONAL_EVENT = 23;
+  
+  public static final int DIFFERENT_FROM_EVENT = 24;
 
   /**
    * Constructor
