@@ -42,7 +42,7 @@ import com.ontotext.gate.ontology.OntologyImpl;
  * An implementation for GATE Ontologies based on Jena2
  * 
  * @author Valentin Tablan
- * 
+ *  
  */
 public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
   public JenaOntologyImpl() {

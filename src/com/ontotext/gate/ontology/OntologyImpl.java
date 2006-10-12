@@ -95,8 +95,8 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
     return (OInstance)instancesByName.get(aName);
   }
 
-  public TClass createClass(String aName, String aComment) {
-    TClass theClass = new OClassImpl(Long.toString(++lastGeneratedId), aName,
+  public OClass createClass(String aName, String aComment) {
+    OClass theClass = new OClassImpl(Long.toString(++lastGeneratedId), aName,
             aComment, this);
     addClass(theClass);
     nullBuffers = true;
