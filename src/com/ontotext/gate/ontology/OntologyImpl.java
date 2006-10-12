@@ -35,12 +35,13 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
     return newInstance;
   }
 
-  public void addInstance(OInstance theInstance) {
-    if(instancesByName.containsKey(theInstance.getName())) return;
+  public OInstance addInstance(OInstance theInstance) {
+    if(instancesByName.containsKey(theInstance.getName())) return theInstance;
     instancesByName.put(theInstance.getName(), theInstance);
     instances.add(theInstance);
     setModified(true);
     fireOntologyResourceAdded(theInstance);
+    return theInstance;
   }
 
   public void removeInstance(OInstance theInstance) {
@@ -120,9 +121,9 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
     return theProperty;
   }
 
-  public void addDatatypeProperty(DatatypeProperty property) {
+  public DatatypeProperty addDatatypeProperty(DatatypeProperty property) {
     addPropertyDefinition(property);
-    return;
+    return property;
   }
 
   public Property addProperty(String name, String comment, Set domain, Set range) {
@@ -140,8 +141,9 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
     return theProperty;
   }
 
-  public void addProperty(Property property) {
+  public Property addProperty(Property property) {
     addPropertyDefinition(property);
+    return property;
   }
 
   public ObjectProperty addObjectProperty(String name, String comment,
@@ -162,8 +164,9 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
     return theProperty;
   }
 
-  public void addObjectProperty(ObjectProperty property) {
+  public ObjectProperty addObjectProperty(ObjectProperty property) {
     addPropertyDefinition(property);
+    return property;
   }
 
   public SymmetricProperty addSymmetricProperty(String name, String comment,
@@ -184,8 +187,9 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
     return theProperty;
   }
 
-  public void addSymmetricProperty(SymmetricProperty property) {
+  public SymmetricProperty addSymmetricProperty(SymmetricProperty property) {
     addPropertyDefinition(property);
+    return property;
   }
 
   public TransitiveProperty addTransitiveProperty(String name, String comment,
@@ -206,8 +210,9 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
     return theProperty;
   }
 
-  public void addTransitiveProperty(TransitiveProperty property) {
+  public TransitiveProperty addTransitiveProperty(TransitiveProperty property) {
     addPropertyDefinition(property);
+    return property;
   }
 
   protected void addPropertyDefinition(gate.creole.ontology.Property theProperty) {
