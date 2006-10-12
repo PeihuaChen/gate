@@ -29,12 +29,6 @@ public class InstanceAction extends AbstractAction implements
   }
 
   public void actionPerformed(ActionEvent actionevent) {
-    HashSet hashset = new HashSet();
-    for(int i = 0; i < selectedNodes.size(); i++) {
-      Object obj = ((DefaultMutableTreeNode)selectedNodes.get(i))
-              .getUserObject();
-      if(obj instanceof TClass) hashset.add(obj);
-    }
     nameSpace.setText(ontology.getDefaultNameSpace());
     int j = JOptionPane.showOptionDialog(null, panel, "New Instance: ", 2, 3,
             null, new String[]{"OK", "Cancel"}, "OK");
@@ -56,11 +50,16 @@ public class InstanceAction extends AbstractAction implements
                 " already exists").toString());
         return;
       }
-      OInstanceImpl oinstanceimpl = new OInstanceImpl(instanceName.getText(),
-              comment.getText(), hashset, ontology);
-      oinstanceimpl.setURI((new StringBuilder()).append(s).append(
-              instanceName.getText()).toString());
-      ontology.addInstance(oinstanceimpl);
+
+      for(int i = 0; i < selectedNodes.size(); i++) {
+        Object obj = ((DefaultMutableTreeNode)selectedNodes.get(i))
+                .getUserObject();
+        if(obj instanceof OClass) {
+          OInstance instance = ontology.addInstance(instanceName.getText(),
+                  (OClass)obj);
+          instance.setComment(comment.getText());
+        }
+      }
     }
   }
 

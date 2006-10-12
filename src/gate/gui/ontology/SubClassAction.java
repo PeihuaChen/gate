@@ -1,7 +1,3 @@
-// Decompiled by DJ v3.9.9.91 Copyright 2005 Atanas Neshkov  Date: 19/09/2006 10:21:06
-// Home Page : http://members.fortunecity.com/neshkov/dj.html  - Check often for new version!
-// Decompiler options: packimports(3) 
-// Source File Name:   SubClassAction.java
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
@@ -12,8 +8,6 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-// Referenced classes of package gate.gui.ontology:
-//            TreeNodeSelectionListener, Utils
 public class SubClassAction extends AbstractAction implements
                                                   TreeNodeSelectionListener {
   public SubClassAction(String s, Icon icon) {
@@ -62,15 +56,12 @@ public class SubClassAction extends AbstractAction implements
                 .append(" already exists").toString());
         return;
       }
-      OClassImpl oclassimpl = new OClassImpl(Calendar.getInstance().getTime()
-              .toString(), className.getText(), comment.getText(), ontology);
-      oclassimpl.setURI((new StringBuilder()).append(nameSpace.getText())
-              .append(oclassimpl.getName()).toString());
+      
+      OClass oclassimpl = ontology.createClass(className.getText(), comment.getText());
       for(int k = 0; k < arraylist.size(); k++) {
-        oclassimpl.addSuperClass((TClass)arraylist.get(k));
-        ((TClass)arraylist.get(k)).addSubClass(oclassimpl);
+        oclassimpl.addSuperClass((OClass)arraylist.get(k));
+        ((OClass)arraylist.get(k)).addSubClass(oclassimpl);
       }
-      ontology.addClass(oclassimpl);
     }
   }
 

@@ -1,7 +1,3 @@
-// Decompiled by DJ v3.9.9.91 Copyright 2005 Atanas Neshkov  Date: 19/09/2006 10:13:51
-// Home Page : http://members.fortunecity.com/neshkov/dj.html  - Check often for new version!
-// Decompiler options: packimports(3) 
-// Source File Name:   PropertyAction.java
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
@@ -13,8 +9,6 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-// Referenced classes of package gate.gui.ontology:
-//            ValuesSelectionAction, TreeNodeSelectionListener, Utils
 public class PropertyAction extends AbstractAction implements
                                                   TreeNodeSelectionListener {
   public PropertyAction(String s, Icon icon) {
@@ -181,10 +175,8 @@ public class PropertyAction extends AbstractAction implements
                   "Invalid Range :").append(dataTypeRange).toString());
           return;
         }
-        DatatypePropertyImpl datatypepropertyimpl = new DatatypePropertyImpl(
-                propertyName.getText(), comment.getText(), hashset, class1,
-                ontology);
-        ontology.addDatatypeProperty(datatypepropertyimpl);
+        ontology.addDatatypeProperty(propertyName.getText(), comment.getText(),
+                hashset, class1);
       } else {
         String as1[] = rangeAction.getSelectedValues();
         HashSet hashset1 = new HashSet();
@@ -202,20 +194,14 @@ public class PropertyAction extends AbstractAction implements
           hashset1.add(oclass1);
         }
         if(none.isSelected()) {
-          ObjectPropertyImpl objectpropertyimpl = new ObjectPropertyImpl(
-                  propertyName.getText(), comment.getText(), hashset, hashset1,
-                  ontology);
-          ontology.addObjectProperty(objectpropertyimpl);
+          ontology.addObjectProperty(propertyName.getText(), comment.getText(),
+                  hashset, hashset1);
         } else if(transitiveProperty.isSelected()) {
-          TransitivePropertyImpl transitivepropertyimpl = new TransitivePropertyImpl(
-                  propertyName.getText(), comment.getText(), hashset, hashset1,
-                  ontology);
-          ontology.addTransitiveProperty(transitivepropertyimpl);
+          ontology.addTransitiveProperty(propertyName.getText(), comment
+                  .getText(), hashset, hashset1);
         } else {
-          SymmetricPropertyImpl symmetricpropertyimpl = new SymmetricPropertyImpl(
-                  propertyName.getText(), comment.getText(), hashset, hashset1,
-                  ontology);
-          ontology.addSymmetricProperty(symmetricpropertyimpl);
+          ontology.addSymmetricProperty(propertyName.getText(), comment
+                  .getText(), hashset, hashset1);
         }
       }
     }

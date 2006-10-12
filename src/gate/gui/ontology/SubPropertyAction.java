@@ -159,12 +159,10 @@ public class SubPropertyAction extends AbstractAction implements
                   "Invalid Range :").append(dataTypeRange).toString());
           return;
         }
-        DatatypePropertyImpl datatypepropertyimpl = new DatatypePropertyImpl(
-                propertyName.getText(), comment.getText(), hashset, class1,
-                ontology);
+
+        DatatypeProperty datatypepropertyimpl = ontology.addDatatypeProperty(propertyName.getText(), comment.getText(), hashset, class1);
         ((DatatypeProperty)userObject).addSubProperty(datatypepropertyimpl);
         datatypepropertyimpl.addSuperProperty((DatatypeProperty)userObject);
-        ontology.addDatatypeProperty(datatypepropertyimpl);
       } else {
         String as1[] = rangeAction.getSelectedValues();
         HashSet hashset1 = new HashSet();
@@ -188,26 +186,20 @@ public class SubPropertyAction extends AbstractAction implements
           return;
         }
         if(userObject instanceof TransitiveProperty) {
-          TransitivePropertyImpl transitivepropertyimpl = new TransitivePropertyImpl(
-                  propertyName.getText(), comment.getText(), hashset, hashset1,
-                  ontology);
+          TransitiveProperty transitivepropertyimpl = ontology.addTransitiveProperty(
+                  propertyName.getText(), comment.getText(), hashset, hashset1);
           transitivepropertyimpl.addSuperProperty((Property)userObject);
           ((Property)userObject).addSubProperty(transitivepropertyimpl);
-          ontology.addTransitiveProperty(transitivepropertyimpl);
         } else if(userObject instanceof SymmetricProperty) {
-          SymmetricPropertyImpl symmetricpropertyimpl = new SymmetricPropertyImpl(
-                  propertyName.getText(), comment.getText(), hashset, hashset1,
-                  ontology);
+          SymmetricProperty symmetricpropertyimpl = ontology.addSymmetricProperty(
+                  propertyName.getText(), comment.getText(), hashset, hashset1);
           symmetricpropertyimpl.addSuperProperty((Property)userObject);
           ((Property)userObject).addSubProperty(symmetricpropertyimpl);
-          ontology.addSymmetricProperty(symmetricpropertyimpl);
         } else {
-          ObjectPropertyImpl objectpropertyimpl = new ObjectPropertyImpl(
-                  propertyName.getText(), comment.getText(), hashset, hashset1,
-                  ontology);
+          ObjectProperty objectpropertyimpl = ontology.addObjectProperty(
+                  propertyName.getText(), comment.getText(), hashset, hashset1);
           objectpropertyimpl.addSuperProperty((Property)userObject);
           ((Property)userObject).addSubProperty(objectpropertyimpl);
-          ontology.addObjectProperty(objectpropertyimpl);
         }
       }
     }

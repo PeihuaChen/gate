@@ -1,18 +1,11 @@
-// Decompiled by DJ v3.9.9.91 Copyright 2005 Atanas Neshkov  Date: 19/09/2006 10:19:55
-// Home Page : http://members.fortunecity.com/neshkov/dj.html  - Check often for new version!
-// Decompiler options: packimports(3) 
-// Source File Name:   PropertyDetailsTableCellRenderer.java
 package gate.gui.ontology;
 
 import gate.creole.ontology.Property;
 import gate.gui.MainFrame;
 import java.awt.Component;
-import java.awt.Font;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
-// Referenced classes of package gate.gui.ontology:
-//            DetailsGroup, PropertyDetailsTableModel
 public class PropertyDetailsTableCellRenderer extends DefaultTableCellRenderer {
   public PropertyDetailsTableCellRenderer(
           PropertyDetailsTableModel propertydetailstablemodel) {
