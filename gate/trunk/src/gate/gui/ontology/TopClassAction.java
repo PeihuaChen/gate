@@ -4,7 +4,6 @@ import gate.creole.ontology.*;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.util.Calendar;
 import javax.swing.*;
 
 public class TopClassAction extends AbstractAction {
@@ -42,17 +41,13 @@ public class TopClassAction extends AbstractAction {
         JOptionPane.showMessageDialog(null, "Invalid Classname");
         return;
       }
-      OClassImpl oclassimpl = new OClassImpl(Calendar.getInstance().getTime()
-              .toString(), className.getText(), comment.getText(), ontology);
+      OClass oclassimpl = ontology.createClass(className.getText(), comment.getText());
       oclassimpl.setURI((new StringBuilder()).append(nameSpace.getText())
               .append(oclassimpl.getName()).toString());
       TClass topClass = ontology.getClassByName("Thing");
       if(topClass != null && topClass.isTopClass()) {
         topClass.addSubClass(oclassimpl);
         oclassimpl.addSuperClass(topClass);
-        ontology.addClass(oclassimpl);
-      } else {
-        ontology.addClass(oclassimpl);
       }
     }
   }

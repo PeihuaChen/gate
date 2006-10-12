@@ -1,7 +1,3 @@
-// Decompiled by DJ v3.9.9.91 Copyright 2005 Atanas Neshkov  Date: 19/09/2006 10:19:12
-// Home Page : http://members.fortunecity.com/neshkov/dj.html  - Check often for new version!
-// Decompiler options: packimports(3) 
-// Source File Name:   OntoTreeCellRenderer.java
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;

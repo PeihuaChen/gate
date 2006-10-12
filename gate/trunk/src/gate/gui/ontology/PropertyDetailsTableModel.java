@@ -1,15 +1,9 @@
-// Decompiled by DJ v3.9.9.91 Copyright 2005 Atanas Neshkov  Date: 19/09/2006 10:20:28
-// Home Page : http://members.fortunecity.com/neshkov/dj.html  - Check often for new version!
-// Decompiler options: packimports(3) 
-// Source File Name:   PropertyDetailsTableModel.java
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
 import java.util.*;
 import javax.swing.table.AbstractTableModel;
 
-// Referenced classes of package gate.gui.ontology:
-//            DetailsGroup, OntologyItemComparator
 public class PropertyDetailsTableModel extends AbstractTableModel {
   public PropertyDetailsTableModel() {
     directSuperProps = new DetailsGroup("Direct Super Properties", true, null);
