@@ -81,6 +81,13 @@ Rule:Fake
 -->
 {}
 
+Rule:DotNetStop
+(
+ {Token.string == "."}
+ ({Token.string == "NET"}|{Token.string == "net"}|{Token.string == "Net"})
+):fake
+-->
+{}
 
 Rule: Abbrev1
 (
