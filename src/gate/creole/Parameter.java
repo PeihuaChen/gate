@@ -147,9 +147,25 @@ public class Parameter implements Serializable
       }// End if(itemClassName == null)
       return colection;
     }// End if (Collection.class.isAssignableFrom(paramClass))
+    
+    // Java 5.0 enum types
+    if(paramClass.isEnum()) {
+      if(stringValue == null) {
+        value = null;
+      }
+      else {
+        try {
+          value = Enum.valueOf(paramClass, stringValue);
+        }
+        catch(IllegalArgumentException e) {
+          throw new ParameterException("Invalid enum constant name "
+              + stringValue + " for type " + typeName);
+        }
+      }
+    }
     // java builtin types - for numeric types, we don't attempt to parse an
     // empty string value, but just leave value as null
-    if(typeName.startsWith("java.")) {
+    else if(typeName.startsWith("java.")) {
       if(typeName.equals("java.lang.Boolean"))
         value = Boolean.valueOf(stringValue);
       else if(typeName.equals("java.lang.Long")) {
