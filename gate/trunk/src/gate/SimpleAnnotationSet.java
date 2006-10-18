@@ -22,7 +22,7 @@ import java.util.Set;
 import gate.util.InvalidOffsetException;
 
 /** Annotation sets */
-public interface SimpleAnnotationSet extends Set, Cloneable, Serializable
+public interface SimpleAnnotationSet extends Set<Annotation>, Cloneable, Serializable
 {
   /** Create and add an annotation with pre-existing nodes,
     * and return its id
@@ -34,10 +34,10 @@ public interface SimpleAnnotationSet extends Set, Cloneable, Serializable
     throws InvalidOffsetException;
 
   /** Add an existing annotation. Returns true when the set is modified. */
-  public boolean add(Object o);
+  public boolean add(Annotation a);
 
   /** Get an iterator for this set */
-  public Iterator iterator();
+  public Iterator<Annotation> iterator();
 
   /** The size of this set */
   public int size();
@@ -55,7 +55,7 @@ public interface SimpleAnnotationSet extends Set, Cloneable, Serializable
   public AnnotationSet get(String type);
 
   /** Select annotations by a set of types. Expects a Set of String. */
-  public AnnotationSet get(Set types);
+  public AnnotationSet get(Set<String> types);
 
   /** Get the name of this set. */
   public String getName();
@@ -63,7 +63,7 @@ public interface SimpleAnnotationSet extends Set, Cloneable, Serializable
   /** Get a set of java.lang.String objects representing all the annotation
     * types present in this annotation set.
     */
-  public Set getAllTypes();
+  public Set<String> getAllTypes();
 
   /** Get the document this set is attached to. */
   public Document getDocument();

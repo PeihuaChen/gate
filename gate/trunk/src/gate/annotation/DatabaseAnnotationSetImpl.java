@@ -35,9 +35,9 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
    */
 //=  protected EventsHandler eventHandler;
 
-  protected HashSet addedAnnotations = new HashSet();
-  protected HashSet removedAnnotations = new HashSet();
-  protected HashSet updatedAnnotations = new HashSet();
+  protected HashSet<Annotation> addedAnnotations = new HashSet<Annotation>();
+  protected HashSet<Annotation> removedAnnotations = new HashSet<Annotation>();
+  protected HashSet<Annotation> updatedAnnotations = new HashSet<Annotation>();
 
   private boolean validating = false;
 
@@ -91,7 +91,7 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
 
 
   /** Construction from Document and name. */
-  public DatabaseAnnotationSetImpl(Document doc, Collection c) {
+  public DatabaseAnnotationSetImpl(Document doc, Collection<? extends Annotation> c) {
     this(c);
     this.doc = (DocumentImpl) doc;
     //add self as listener for sync events from the document's datastore
@@ -100,7 +100,7 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
   } // construction from document and name
 
   /** Construction from Document and name. */
-  public DatabaseAnnotationSetImpl(Document doc, String name, Collection c) {
+  public DatabaseAnnotationSetImpl(Document doc, String name, Collection<? extends Annotation> c) {
     this(doc,c);
     this.name = name;
     //add self as listener for sync events from the document's datastore
@@ -110,7 +110,7 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
 
 
   /** Construction from Collection (which must be an AnnotationSet) */
-  public DatabaseAnnotationSetImpl(Collection c) throws ClassCastException {
+  public DatabaseAnnotationSetImpl(Collection<? extends Annotation> c) throws ClassCastException {
 
     super(c);
 
@@ -121,9 +121,9 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
 //=    eventHandler = new EventsHandler();
 //=    this.addAnnotationSetListener(eventHandler);
 
-    Iterator iter = this.iterator();
+    Iterator<Annotation> iter = this.iterator();
     while(iter.hasNext())
-      ((Annotation) iter.next()).addAnnotationListener(this);
+      iter.next().addAnnotationListener(this);
 
     Document doc = as.getDocument();
     //add self as listener for sync events from the document's datastore
@@ -300,27 +300,27 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
     }
   }
 
-  public Collection getAddedAnnotations() {
+  public Collection<Annotation> getAddedAnnotations() {
 //System.out.println("getAddedIDs() called");
-    HashSet result = new HashSet();
+    HashSet<Annotation> result = new HashSet<Annotation>();
     result.addAll(this.addedAnnotations);
 
     return result;
   }
 
 
-  public Collection getChangedAnnotations() {
+  public Collection<Annotation> getChangedAnnotations() {
 //System.out.println("getChangedIDs() called");
-    HashSet result = new HashSet();
+    HashSet<Annotation> result = new HashSet<Annotation>();
     result.addAll(this.updatedAnnotations);
 
     return result;
   }
 
 
-  public Collection getRemovedAnnotations() {
+  public Collection<Annotation> getRemovedAnnotations() {
 //System.out.println("getremovedIDs() called...");
-    HashSet result = new HashSet();
+    HashSet<Annotation> result = new HashSet<Annotation>();
     result.addAll(this.removedAnnotations);
 
     return result;
@@ -343,7 +343,7 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
 
 
   /** Add an existing annotation. Returns true when the set is modified. */
-  public boolean add(Object o) throws ClassCastException {
+  public boolean add(Annotation o) throws ClassCastException {
 
     //check if this annotation was removed beforehand
     //if so then just delete it from the list of annotations waiting for persistent removal
@@ -355,11 +355,10 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
 
     if (true == result) {
       //register as listener for update events from this annotation
-      Annotation ann = (Annotation)o;
-      ann.addAnnotationListener(this);
+      o.addAnnotationListener(this);
 
       //add to the newly created annotations set
-      this.addedAnnotations.add(ann);
+      this.addedAnnotations.add(o);
     }
 
     return result;
@@ -411,7 +410,7 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
     return result;
   }
 
-  public Iterator iterator() { return new DatabaseAnnotationSetIterator(); }
+  public Iterator<Annotation> iterator() { return new DatabaseAnnotationSetIterator(); }
 
 
     class DatabaseAnnotationSetIterator extends AnnotationSetImpl.AnnotationSetIterator {
@@ -420,7 +419,7 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
 
         super.remove();
 
-        Annotation annRemoved = (Annotation)lastNext;
+        Annotation annRemoved = lastNext;
 
         //UNregister as listener for update events from this annotation
           annRemoved.removeAnnotationListener(DatabaseAnnotationSetImpl.this);
