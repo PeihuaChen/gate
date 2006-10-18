@@ -87,7 +87,7 @@
            destdir="${classes.dir}"
            debug="true"
            debuglevel="lines,source"
-           source="1.4" />
+           source="1.5" />
   </target>
 
   <!-- copy resources (anything non-.java) from src to classes -->
@@ -125,11 +125,11 @@
              classpathref="compile.classpath"
              encoding="UTF-8"
              windowtitle="${plugin.name} JavaDoc"
-             source="1.4">
+             source="1.5">
       <sourcepath>
         <pathelement location="${src.dir}" />
       </sourcepath>
-      <link href="http://java.sun.com/j2se/1.4.2/docs/api/" />
+      <link href="http://java.sun.com/j2se/1.5.0/docs/api/" />
       <link href="http://gate.ac.uk/gate/doc/javadoc/" />
     </javadoc>
   </target>
