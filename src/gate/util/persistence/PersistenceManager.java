@@ -557,35 +557,22 @@ public class PersistenceManager {
       }
       
       xstream = new XStream(new StaxDriver());
+      // make XStream load classes through the GATE ClassLoader
+      xstream.setClassLoader(Gate.getClassLoader());
+      // make the XML stream appear as a normal ObjectInputStream
+      ois = xstream.createObjectInputStream(reader);
     }
     else {
       ois = new ObjectInputStream(url.openStream());
     }
     Object res = null;
     try {
-      Iterator urlIter;
-      // If we're using xml serialization, first read everything from
-      // the file.
-      GateApplication gateApplication = null;
-      if(xmlStream) {
-        if(DEBUG) System.out.println("About to load application");
-        // Actually load the application
-        gateApplication = (GateApplication)xstream.unmarshal(reader);
-        reader.close();
-        if(DEBUG) System.out.println("About to extract url list");
-        // Extract an iterator to the URLs.
-        urlIter = ((Collection)getTransientRepresentation(gateApplication.urlList))
-                .iterator();
-        if(DEBUG) System.out.println("URL list loaded");
-      }
-      else {
-        // first read the list of creole URLs. This is for when we are
-        // using
-        // native serialization.
-        urlIter = ((Collection)
-
-        getTransientRepresentation(ois.readObject())).iterator();
-      }
+      // first read the list of creole URLs.
+      Iterator urlIter = 
+        ((Collection)getTransientRepresentation(ois.readObject()))
+        .iterator();
+      
+      // and re-register them
       while(urlIter.hasNext()) {
         URL anUrl = (URL)urlIter.next();
         try {
@@ -596,20 +583,11 @@ public class PersistenceManager {
                   + anUrl.toExternalForm());
         }
       }
-
-      // now we can read the saved object
-      if(xmlStream) {
-        if(DEBUG) System.out.println("About to load application itself");
-        // With an xml stream, we already read the object, so we just
-        // have to extract it.
-        res = gateApplication.application;
-        if(DEBUG) System.out.println("Application loaded");
-      }
-      else {
-        // With a native stream just read the object from it.
-        res = ois.readObject();
-        ois.close();
-      }
+      
+      // now we can read the saved object in the presence of all
+      // the right plugins
+      res = ois.readObject();
+      ois.close();
 
       // ensure a fresh start
       existingTransientValues.clear();
