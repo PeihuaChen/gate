@@ -348,7 +348,7 @@ extends AbstractFeatureBearer implements DataStore {
       lr.setLRPersistenceId(lrPersistenceId);
     }
 
-    //we're saving a corpus. I need to save it's documents first
+    //we're saving a corpus. I need to save its documents first
     if (lr instanceof Corpus) {
       //check if the corpus is the one we support. CorpusImpl cannot be saved!
       if (! (lr instanceof SerialCorpusImpl))
