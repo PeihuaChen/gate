@@ -65,14 +65,12 @@ public class NoDupAnnotationSetImpl extends gate.annotation.AnnotationSetImpl {
 
 
   /** Add an existing annotation. Returns true when the set is modified. */
-  public boolean add(Object o) throws ClassCastException {
+  public boolean add(Annotation a) throws ClassCastException {
 
     if (authoriseDuplicates.booleanValue()) {
-      return super.add(o);
+      return super.add(a);
     }
     else {
-      Annotation a = (Annotation) o;
-
       AnnotationSet subset = getStrict(a.getStartNode().getOffset(),
 				       a.getEndNode().getOffset());
       
@@ -91,10 +89,10 @@ public class NoDupAnnotationSetImpl extends gate.annotation.AnnotationSetImpl {
 	  }
 	}
       }
-      return super.add(o);
+      return super.add(a);
     }
 
-  } // add(o)
+  } // add(a)
 
 
   /**
