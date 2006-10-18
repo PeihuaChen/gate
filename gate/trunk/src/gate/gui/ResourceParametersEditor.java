@@ -17,6 +17,7 @@ package gate.gui;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.List;
 
@@ -474,11 +475,23 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
           textButtonBox.add(Box.createHorizontalStrut(5));
           textButtonBox.add(listButton);
           return textButtonBox;
-          }else{
-//            return this;
+          }
+        }else if(typeClass != null && typeClass.isEnum()) {
+          if(ResourceParametersEditor.this.isEditable()) {
+            combo.setModel(new DefaultComboBoxModel(new Object[] {
+                  value == null ?  "<none>" : value }));
+            return combo;
+          }
+          else {
             return textField;
           }
-        }else return textField;
+        }else{
+//            return this;
+          return textField;
+        }
+
+        // not actually reachable, but keeps the compiler happy
+        return textField;
       }
     }// public Component getTableCellRendererComponent
 
@@ -758,6 +771,24 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
           textButtonBox.add(Box.createHorizontalStrut(5));
           textButtonBox.add(listButton);
           return textButtonBox;
+        }else if(typeClass != null && typeClass.isEnum()){
+          comboUsed = true;
+          try {
+            // extract list of allowable values by reflection - every enum
+            // type has a values method returning an array of values
+            Method getValuesMethod = typeClass.getMethod("values");
+            Object[] enumValues = (Object[])getValuesMethod.invoke(null);
+            Object[] comboValues = new Object[enumValues.length + 1];
+            comboValues[0] = "<none>";
+            System.arraycopy(enumValues, 0, comboValues, 1, enumValues.length);
+            combo.setModel(new DefaultComboBoxModel(comboValues));
+            combo.setSelectedItem(value == null ? "<none>" : value);
+            return combo;
+          }
+          catch(Exception ex) {
+            throw new LuckyException("Error calling \"values\" method of an "
+                + "enum type");
+          }
         }else{
           textField.setEditable(true);
           return textField;
