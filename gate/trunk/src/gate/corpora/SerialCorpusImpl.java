@@ -689,14 +689,8 @@ public class SerialCorpusImpl extends
 
   public Object remove(int index){
     if (DEBUG) Out.prln("Remove index called");
-
-    boolean isLoaded = isDocumentLoaded(index);
-    Document removed = (Document) get(index);
-    documentRemoved(removed.getLRPersistenceId().toString());
-    if (!isLoaded){
-      unloadDocument(removed);
-    }
-
+    documentRemoved(((DocumentData)docDataList.get(index)).
+            persistentID.toString());
     docDataList.remove(index);
     Document res = (Document) documents.remove(index);
     fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
@@ -704,7 +698,6 @@ public class SerialCorpusImpl extends
                                         index,
                                         CorpusEvent.DOCUMENT_REMOVED));
     return res;
-
   }
 
   public int indexOf(Object o){
