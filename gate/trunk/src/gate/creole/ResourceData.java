@@ -130,16 +130,16 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   }
   
   /** The stack of instantiations */
-  protected WeakBumpyStack instantiationStack = new WeakBumpyStack();
+  protected WeakBumpyStack<Resource> instantiationStack = new WeakBumpyStack<Resource>();
 
   /** This list contains all instances loaded from creole.xml with
    *  AUTOINSTANCE tag. The idea is that we don't want to loose them from the
    *  system, because of the WeakBumpyStack
    */
-  protected List persistantInstantiationList = new ArrayList();
+  protected List<Resource> persistantInstantiationList = new ArrayList<Resource>();
 
   /** Get the list of instantiations of resources */
-  public WeakBumpyStack getInstantiations() {
+  public WeakBumpyStack<Resource> getInstantiations() {
     return instantiationStack;
   } // getInstantiations
 
@@ -188,20 +188,20 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   public String getInterfaceName() { return interfaceName; }
 
   /** The class of the resource */
-  protected Class resourceClass;
+  protected Class<? extends Resource> resourceClass;
 
   /** Set method for the resource class */
-  public void setResourceClass(Class resourceClass) {
+  public void setResourceClass(Class<? extends Resource> resourceClass) {
     this.resourceClass = resourceClass;
   } // setResourceClass
 
   /** Get method for the resource class. Asks the GATE class loader
     * to load it, if it is not already present.
     */
-  public Class getResourceClass() throws ClassNotFoundException {
+  public Class<? extends Resource> getResourceClass() throws ClassNotFoundException {
     if(resourceClass == null) {
       GateClassLoader classLoader = Gate.getClassLoader();
-      resourceClass = classLoader.loadClass(className);
+      resourceClass = classLoader.loadClass(className).asSubclass(Resource.class);
     }
 
     return resourceClass;
