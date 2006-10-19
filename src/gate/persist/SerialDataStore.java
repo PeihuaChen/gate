@@ -386,7 +386,7 @@ extends AbstractFeatureBearer implements DataStore {
           throw new PersistenceException("Error while saving corpus: "
                                          + corpus
                                          + "because of an error storing document "
-                                         + ex.getMessage());
+                                         + ex.getMessage(), ex);
         }
       }//for loop through documents
     }
