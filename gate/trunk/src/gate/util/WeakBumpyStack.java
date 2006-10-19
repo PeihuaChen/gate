@@ -18,6 +18,7 @@
 
 package gate.util;
 
+import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.*;
@@ -36,15 +37,15 @@ import java.util.*;
  * turn DEBUG on on TestBumpyStack</B> in order to run the tests in a
  * meaningfull way.
  */
-public class WeakBumpyStack extends AbstractList
+public class WeakBumpyStack<T> extends AbstractList<T>
 {
 
   /**
    * Creates a new empty stack.
    */
   public WeakBumpyStack(){
-    supportStack = new Stack();
-    refQueue = new ReferenceQueue();
+    supportStack = new Stack<WeakReference<T>>();
+    refQueue = new ReferenceQueue<T>();
   }
 
   /**
@@ -56,8 +57,8 @@ public class WeakBumpyStack extends AbstractList
    * @param   item   the item to be pushed onto this stack.
    * @return  the <code>item</code> argument.
    */
-  public Object push(Object item){
-    supportStack.push(new WeakReference(item,refQueue));
+  public T push(T item){
+    supportStack.push(new WeakReference<T>(item,refQueue));
     return item;
   }
 
@@ -68,12 +69,12 @@ public class WeakBumpyStack extends AbstractList
    * @return     The object at the top of this stack.
    * @exception  EmptyStackException  if this stack is empty.
    */
-  public synchronized Object pop(){
+  public synchronized T pop(){
     processQueue();
     //we need to check for null in case the top reference has just been cleared
-    Object res = null;
+    T res = null;
     while(res == null){
-      res = ((WeakReference)supportStack.pop()).get();
+      res = supportStack.pop().get();
     }
     return res;
   }
@@ -86,12 +87,12 @@ public class WeakBumpyStack extends AbstractList
    * @return     the object at the top of this stack.
    * @exception  EmptyStackException  if this stack is empty.
    */
-  public synchronized Object peek(){
+  public synchronized T peek(){
     processQueue();
     //we need to check for null in case the top reference has just been cleared
-    Object res = null;
+    T res = null;
     while(res == null){
-      res = ((WeakReference)supportStack.peek()).get();
+      res = supportStack.peek().get();
     }
     return res;
   }
@@ -122,7 +123,7 @@ public class WeakBumpyStack extends AbstractList
     else if(itemIndex == 1) // at the front already
       return true;
 
-    WeakReference wr = (WeakReference)supportStack.remove(itemIndex - 1);
+    WeakReference<T> wr = supportStack.remove(itemIndex - 1);
     supportStack.push(wr);
     return true;
   } // bump
@@ -161,8 +162,8 @@ public class WeakBumpyStack extends AbstractList
    * internal logic.
    */
   protected void processQueue(){
-    WeakReference wr;
-    while ((wr = (WeakReference)refQueue.poll()) != null) {
+    Reference<? extends T> wr = null;
+    while ((wr = refQueue.poll()) != null) {
       supportStack.remove(wr);
     }
   }
@@ -175,12 +176,12 @@ public class WeakBumpyStack extends AbstractList
    * @throws    IndexOutOfBoundsException if index is out of range <tt>(index
    * 		  &lt; 0 || index &gt;= size())</tt>.
    */
-  public Object get(int index) {
+  public T get(int index) {
     processQueue();
     //we need to check for null in case the top reference has just been cleared
-    Object res = null;
+    T res = null;
     while(res == null){
-      res = ((WeakReference)supportStack.get(index)).get();
+      res = supportStack.get(index).get();
     }
     return res;
   }
@@ -205,11 +206,10 @@ public class WeakBumpyStack extends AbstractList
    * @throws    IndexOutOfBoundsException if index out of range
    *		  <tt>(index &lt; 0 || index &gt;= size())</tt>.
    */
-  public Object set(int index, Object element) {
+  public T set(int index, T element) {
     processQueue();
-    WeakReference ref = (WeakReference)
-                        supportStack.set(index,
-                                         new WeakReference(element, refQueue));
+    WeakReference<T> ref = supportStack.set(index,
+                                         new WeakReference<T>(element, refQueue));
     return ref.get();
   }
 
@@ -223,9 +223,9 @@ public class WeakBumpyStack extends AbstractList
    * @throws    IndexOutOfBoundsException if index is out of range
    *		  <tt>(index &lt; 0 || index &gt; size())</tt>.
    */
-  public void add(int index, Object element) {
+  public void add(int index, T element) {
     processQueue();
-    supportStack.add(index, new WeakReference(element, refQueue));
+    supportStack.add(index, new WeakReference<T>(element, refQueue));
   }
 
   /**
@@ -238,21 +238,21 @@ public class WeakBumpyStack extends AbstractList
    * @throws    IndexOutOfBoundsException if index out of range <tt>(index
    * 		  &lt; 0 || index &gt;= size())</tt>.
    */
-  public Object remove(int index) {
+  public T remove(int index) {
     processQueue();
     //we need to check for null in case the top reference has just been cleared
-    Object res = null;
+    T res = null;
     while(res == null){
-      res = ((WeakReference)supportStack.remove(index)).get();
+      res = supportStack.remove(index).get();
     }
     return res;
   }
 
-  ReferenceQueue refQueue;
+  ReferenceQueue<T> refQueue;
 
   /**
    * This is the underlying stack object for this weak stack. It holds weak
    * references to the objects that are the actual contents of this stack.
    */
-  Stack supportStack;
+  Stack<WeakReference<T>> supportStack;
 } // class BumpyStack
