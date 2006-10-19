@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.*;
 
+import gate.creole.ResourceData;
 import gate.event.CreoleListener;
 import gate.util.GateException;
 
@@ -62,7 +63,7 @@ import gate.util.GateException;
   * @see gate.Gate
   * @see gate.creole.ResourceData
   */
-public interface CreoleRegister extends Map, Serializable, CreoleListener
+public interface CreoleRegister extends Map<String, ResourceData>, Serializable, CreoleListener
 {
   /** Add a CREOLE directory URL. The directory is <B>not</B> registered. */
   public void addDirectory(URL directoryUrl);
@@ -106,96 +107,96 @@ public interface CreoleRegister extends Map, Serializable, CreoleListener
   public File createCreoleDirectoryFile(File directoryFile, Set jarFileNames);
 
   /** Get the list of types of LR in the register. */
-  public Set getLrTypes();
+  public Set<String> getLrTypes();
 
   /** Get the list of types of PR in the register. */
-  public Set getPrTypes();
+  public Set<String> getPrTypes();
 
   /** Get the list of types of VR in the register. */
-  public Set getVrTypes();
+  public Set<String> getVrTypes();
 
   /** Get the list of types of VR in the register. */
-  public Set getControllerTypes();
+  public Set<String> getControllerTypes();
 
   /** Get a list of all instantiations of LR in the register. */
-  public List getLrInstances();
+  public List<LanguageResource> getLrInstances();
 
   /** Get a list of all instantiations of PR in the register. */
-  public List getPrInstances();
+  public List<ProcessingResource> getPrInstances();
 
   /** Get a list of all instantiations of VR in the register. */
-  public List getVrInstances();
+  public List<VisualResource> getVrInstances();
 
   /** Get a list of instantiations of a type of LR in the register. */
-  public List getLrInstances(String resourceTypeName);
+  public List<LanguageResource> getLrInstances(String resourceTypeName);
 
   /** Get a list of instantiations of a type of PR in the register. */
-  public List getPrInstances(String resourceTypeName);
+  public List<ProcessingResource> getPrInstances(String resourceTypeName);
 
   /** Get a list of instantiations of a type of VR in the register. */
-  public List getVrInstances(String resourceTypeName);
+  public List<VisualResource> getVrInstances(String resourceTypeName);
 
   /** Get a list of all non-private instantiations of LR in the register. */
-  public List getPublicLrInstances();
+  public List<LanguageResource> getPublicLrInstances();
 
   /** Get a list of all non-private instantiations of PR in the register. */
-  public List getPublicPrInstances();
+  public List<ProcessingResource> getPublicPrInstances();
 
   /** Get a list of all non-private instantiations of VR in the register. */
-  public List getPublicVrInstances();
+  public List<VisualResource> getPublicVrInstances();
 
   /** Get a list of all non-private types of LR in the register. */
-  public List getPublicLrTypes();
+  public List<String> getPublicLrTypes();
 
   /** Get a list of all non-private types of PR in the register. */
-  public List getPublicPrTypes();
+  public List<String> getPublicPrTypes();
 
   /** Get a list of all non-private types of VR in the register. */
-  public List getPublicVrTypes();
+  public List<String> getPublicVrTypes();
 
   /** Get a list of all non-private types of Controller in the register. */
-  public List getPublicControllerTypes();
+  public List<String> getPublicControllerTypes();
 
   /**
    * Gets all the instantiations of a given type and all its derivate types;
    * It doesn't return instances that have the hidden attribute set to "true"
    */
-  public List getAllInstances(String type) throws GateException;
+  public List<Resource> getAllInstances(String type) throws GateException;
 
   /**
    * Returns a list of strings representing class names for large VRs valid
    * for a given type of language/processing resource.
    * The default VR will be the first in the returned list.
    */
-  public List getLargeVRsForResource(String resourceClassName);
+  public List<String> getLargeVRsForResource(String resourceClassName);
 
   /**
    * Returns a list of strings representing class names for small VRs valid
    * for a given type of language/processing resource
    * The default VR will be the first in the returned list.
    */
-  public List getSmallVRsForResource(String resourceClassName);
+  public List<String> getSmallVRsForResource(String resourceClassName);
 
   /**
     * Returns a list of strings representing class names for annotation VRs
     * that are able to display/edit all types of annotations.
     * The default VR will be the first in the returned list.
     */
-   public List getAnnotationVRs();
+   public List<String> getAnnotationVRs();
 
   /**
     * Returns a list of strings representing class names for annotation VRs
     * that are able to display/edit a given annotation type
     * The default VR will be the first in the returned list.
     */
-   public List getAnnotationVRs(String annotationType);
+   public List<String> getAnnotationVRs(String annotationType);
 
 
   /**
     * Returns a list of strings representing annotations types for which
     * there are custom viewers/editor registered.
     */
-   public List getVREnabledAnnotationTypes();
+   public List<String> getVREnabledAnnotationTypes();
 
    /**
     * Renames an existing resource.

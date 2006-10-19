@@ -15,27 +15,48 @@
 
 package gate.creole;
 
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
-
-import javax.swing.Icon;
-import javax.xml.parsers.*;
-
-import org.jdom.*;
-import org.jdom.input.SAXBuilder;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
-
-import gate.*;
+import gate.Controller;
+import gate.CreoleRegister;
+import gate.Gate;
+import gate.LanguageResource;
+import gate.ProcessingResource;
+import gate.Resource;
+import gate.VisualResource;
 import gate.Gate.DirectoryInfo;
 import gate.Gate.ResourceInfo;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
-import gate.gui.MainFrame;
-import gate.swing.XJTable;
-import gate.util.*;
+import gate.util.Err;
+import gate.util.GateClassLoader;
+import gate.util.GateException;
+import gate.util.GateRuntimeException;
+import gate.util.LazyProgrammerException;
+import gate.util.LuckyException;
+import gate.util.Out;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.Vector;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 
 /** This class implements the CREOLE register interface. DO NOT
@@ -49,14 +70,14 @@ import gate.util.*;
   * the class name of the resource.
   * @see gate.CreoleRegister
   */
-public class CreoleRegisterImpl extends HashMap
+public class CreoleRegisterImpl extends HashMap<String, ResourceData>
           implements CreoleRegister, CreoleListener
 {
   /** Debug flag */
   protected static final boolean DEBUG = false;
 
   /** The set of CREOLE directories (URLs). */
-  protected Set directories;
+  protected Set<URL> directories;
 
   /** The parser for the CREOLE directory files */
   protected transient SAXParser parser = null;
@@ -68,11 +89,11 @@ public class CreoleRegisterImpl extends HashMap
   public CreoleRegisterImpl() throws GateException {
 
     // initialise the various maps
-    directories = new HashSet();
-    lrTypes = new HashSet();
-    prTypes = new HashSet();
-    vrTypes = new LinkedList();
-    toolTypes = new HashSet();
+    directories = new HashSet<URL>();
+    lrTypes = new HashSet<String>();
+    prTypes = new HashSet<String>();
+    vrTypes = new LinkedList<String>();
+    toolTypes = new HashSet<String>();
 
     // construct a SAX parser for parsing the CREOLE directory files
     try {
@@ -255,11 +276,10 @@ public class CreoleRegisterImpl extends HashMap
     * types of LR in the register, and a list of tool types. The key is
     * the resource type, the value its data.
     */
-  public Object put(Object key, Object value) {
-    ResourceData rd = (ResourceData) value;
+  public ResourceData put(String key, ResourceData rd) {
 
     // get the resource implementation class
-    Class resClass = null;
+    Class<? extends Resource> resClass = null;
     try {
       resClass = rd.getResourceClass();
     } catch(ClassNotFoundException e) {
@@ -271,7 +291,7 @@ public class CreoleRegisterImpl extends HashMap
     // add class names to the type lists
     if(LanguageResource.class.isAssignableFrom(resClass)) {
       if(DEBUG) Out.prln("LR: " + resClass);
-      if(lrTypes == null) lrTypes = new HashSet(); // for deserialisation
+      if(lrTypes == null) lrTypes = new HashSet<String>(); // for deserialisation
       lrTypes.add(rd.getClassName());
     } else if(ProcessingResource.class.isAssignableFrom(resClass)) {
       if(DEBUG) {
@@ -279,26 +299,26 @@ public class CreoleRegisterImpl extends HashMap
         //Out.prln("prTypes: " + prTypes);
         //Out.prln("rd.getClassName(): " + rd.getClassName());
       }
-      if(prTypes == null) prTypes = new HashSet(); // for deserialisation
+      if(prTypes == null) prTypes = new HashSet<String>(); // for deserialisation
       prTypes.add(rd.getClassName());
     } else if(VisualResource.class.isAssignableFrom(resClass)) {
       if(DEBUG) Out.prln("VR: " + resClass);
-      if(vrTypes == null) vrTypes = new LinkedList(); // for deserialisation
+      if(vrTypes == null) vrTypes = new LinkedList<String>(); // for deserialisation
       //we have to simulate Set behaviour as this is a list
       if(!vrTypes.contains(rd.getClassName())) vrTypes.add(rd.getClassName());
     }else if(Controller.class.isAssignableFrom(resClass)) {
       if(DEBUG) Out.prln("Controller: " + resClass);
-      if(controllerTypes == null) controllerTypes = new HashSet(); // for deserialisation
+      if(controllerTypes == null) controllerTypes = new HashSet<String>(); // for deserialisation
       controllerTypes.add(rd.getClassName());
     }
 
     // maintain tool types list
     if(rd.isTool()) {
-      if(toolTypes == null) toolTypes = new HashSet(); // for deserialisation
+      if(toolTypes == null) toolTypes = new HashSet<String>(); // for deserialisation
       toolTypes.add(rd.getClassName());
     }
 
-    return super.put(key, value);
+    return super.put(key, rd);
   } // put(key, value)
 
   /**
@@ -322,8 +342,8 @@ public class CreoleRegisterImpl extends HashMap
   /** Overide HashMap's delete method to update the lists of types
     * in the register.
     */
-  public Object remove(Object key) {
-    ResourceData rd = (ResourceData) get(key);
+  public ResourceData remove(Object key) {
+    ResourceData rd = get(key);
     if(rd == null) return null;
 
     if(DEBUG) {
@@ -357,43 +377,43 @@ public class CreoleRegisterImpl extends HashMap
   } // clear()
 
   /** Get the list of types of LR in the register. */
-  public Set getLrTypes() { return Collections.unmodifiableSet(lrTypes);}
+  public Set<String> getLrTypes() { return Collections.unmodifiableSet(lrTypes);}
 
   /** Get the list of types of PR in the register. */
-  public Set getPrTypes() { return Collections.unmodifiableSet(prTypes);}
+  public Set<String> getPrTypes() { return Collections.unmodifiableSet(prTypes);}
 
   /** Get the list of types of VR in the register. */
-  public Set getVrTypes() { return Collections.unmodifiableSet(new HashSet(vrTypes));}
+  public Set<String> getVrTypes() { return Collections.unmodifiableSet(new HashSet<String>(vrTypes));}
 
   /** Get the list of types of VR in the register. */
-  public Set getControllerTypes() {
+  public Set<String> getControllerTypes() {
     return Collections.unmodifiableSet(controllerTypes);
   }
 
   /** Get the list of types of TOOL respurces in the register. */
-  public Set getToolTypes() { return Collections.unmodifiableSet(toolTypes);}
+  public Set<String> getToolTypes() { return Collections.unmodifiableSet(toolTypes);}
 
   /** Get a list of all instantiations of LR in the register. */
-  public List getLrInstances() {
-    Set lrTypeSet = getLrTypes();
-    List instances = new ArrayList();
+  public List<LanguageResource> getLrInstances() {
+    Set<String> lrTypeSet = getLrTypes();
+    List<LanguageResource> instances = new ArrayList<LanguageResource>();
 
-    Iterator iter = lrTypeSet.iterator();
+    Iterator<String> iter = lrTypeSet.iterator();
     while(iter.hasNext()) {
-      String type = (String) iter.next();
+      String type = iter.next();
       instances.addAll(getLrInstances(type));
     }// End while
     return Collections.unmodifiableList(instances);
   } // getLrInstances()
 
   /** Get a list of all instantiations of PR in the register. */
-  public List getPrInstances() {
-    Set prTypeSet = getPrTypes();
-    List instances = new ArrayList();
+  public List<ProcessingResource> getPrInstances() {
+    Set<String> prTypeSet = getPrTypes();
+    List<ProcessingResource> instances = new ArrayList<ProcessingResource>();
 
-    Iterator iter = prTypeSet.iterator();
+    Iterator<String> iter = prTypeSet.iterator();
     while(iter.hasNext()) {
-      String type = (String) iter.next();
+      String type = iter.next();
       instances.addAll(getPrInstances(type));
     }// End while
 
@@ -401,13 +421,13 @@ public class CreoleRegisterImpl extends HashMap
   } // getPrInstances()
 
   /** Get a list of all instantiations of VR in the register. */
-  public List getVrInstances() {
-    Set vrTypeSet = getVrTypes();
-    List instances = new ArrayList();
+  public List<VisualResource> getVrInstances() {
+    Set<String> vrTypeSet = getVrTypes();
+    List<VisualResource> instances = new ArrayList<VisualResource>();
 
-    Iterator iter = vrTypeSet.iterator();
+    Iterator<String> iter = vrTypeSet.iterator();
     while(iter.hasNext()) {
-      String type = (String) iter.next();
+      String type = iter.next();
       instances.addAll(getVrInstances(type));
     }// End while
 
@@ -415,64 +435,67 @@ public class CreoleRegisterImpl extends HashMap
   } // getVrInstances()
 
   /** Get a list of instantiations of a type of LR in the register. */
-  public List getLrInstances(String resourceTypeName) {
-    ResourceData resData = (ResourceData) get(resourceTypeName);
+  public List<LanguageResource> getLrInstances(String resourceTypeName) {
+    ResourceData resData = get(resourceTypeName);
     if(resData == null)
-      return Collections.unmodifiableList(new ArrayList());
+      return Collections.emptyList();
 
-    return Collections.unmodifiableList(resData.getInstantiations());
+    return new TypedResourceList<LanguageResource>(resData.getInstantiations(),
+            LanguageResource.class);
   } // getLrInstances
 
   /** Get a list of instantiations of a type of PR in the register. */
-  public List getPrInstances(String resourceTypeName) {
-    ResourceData resData = (ResourceData) get(resourceTypeName);
+  public List<ProcessingResource> getPrInstances(String resourceTypeName) {
+    ResourceData resData = get(resourceTypeName);
     if(resData == null)
-      return Collections.unmodifiableList(new ArrayList());
+      return Collections.emptyList();
 
-    return Collections.unmodifiableList(resData.getInstantiations());
+    return new TypedResourceList<ProcessingResource>(resData.getInstantiations(),
+            ProcessingResource.class);
   } // getPrInstances
 
   /** Get a list of instantiations of a type of VR in the register. */
-  public List getVrInstances(String resourceTypeName) {
-    ResourceData resData = (ResourceData) get(resourceTypeName);
+  public List<VisualResource> getVrInstances(String resourceTypeName) {
+    ResourceData resData = get(resourceTypeName);
     if(resData == null)
-      return Collections.unmodifiableList(new ArrayList());
+      return Collections.emptyList();
 
-    return Collections.unmodifiableList(resData.getInstantiations());
+    return new TypedResourceList<VisualResource>(resData.getInstantiations(),
+            VisualResource.class);
   } // getVrInstances
 
   /** Get a list of all non-private instantiations of LR in the register. */
-  public List getPublicLrInstances() {
+  public List<LanguageResource> getPublicLrInstances() {
     return Collections.unmodifiableList(getPublics(getLrInstances()));
   }// getPublicLrInstances()
 
   /** Get a list of all non-private instantiations of PR in the register. */
-  public List getPublicPrInstances() {
+  public List<ProcessingResource> getPublicPrInstances() {
     return Collections.unmodifiableList(getPublics(getPrInstances()));
   }// getPublicPrInstances()
 
   /** Get a list of all non-private instantiations of VR in the register. */
-  public List getPublicVrInstances() {
+  public List<VisualResource> getPublicVrInstances() {
     return Collections.unmodifiableList(getPublics(getVrInstances()));
   }//getPublicVrInstances()
 
   /** Get a list of all non-private types of LR in the register. */
-  public List getPublicLrTypes() {
+  public List<String> getPublicLrTypes() {
     return Collections.unmodifiableList(getPublicTypes(getLrTypes()));
   }//getPublicLrTypes()
 
   /** Get a list of all non-private types of PR in the register. */
-  public List getPublicPrTypes() {
+  public List<String> getPublicPrTypes() {
     return Collections.unmodifiableList(getPublicTypes(getPrTypes()));
   }//getPublicPrTypes()
 
   /** Get a list of all non-private types of VR in the register. */
-  public List getPublicVrTypes() {
+  public List<String> getPublicVrTypes() {
     return Collections.unmodifiableList(getPublicTypes(getVrTypes()));
   }//getPublicVrTypes()
 
   /** Get a list of all non-private types of controller in the register. */
-  public List getPublicControllerTypes() {
+  public List<String> getPublicControllerTypes() {
     return Collections.unmodifiableList(getPublicTypes(getControllerTypes()));
   }//getPublicPrTypes()
 
@@ -481,26 +504,26 @@ public class CreoleRegisterImpl extends HashMap
    * Gets all the instantiations of a given type and all its derivate types;
    * It doesn't return instances that have the hidden attribute set to "true"
    */
-  public List getAllInstances(String type) throws GateException{
-    Iterator typesIter = keySet().iterator();
-    List res = new ArrayList();
-    Class targetClass;
+  public List<Resource> getAllInstances(String type) throws GateException{
+    Iterator<String> typesIter = keySet().iterator();
+    List<Resource> res = new ArrayList<Resource>();
+    Class<? extends Resource> targetClass;
     try{
-      targetClass = Gate.getClassLoader().loadClass(type);
+      targetClass = Gate.getClassLoader().loadClass(type)
+        .asSubclass(Resource.class);
     }catch(ClassNotFoundException cnfe){
       throw new GateException("Invalid type " + type);
     }
     while(typesIter.hasNext()){
-      String aType = (String)typesIter.next();
-      Class aClass;
+      String aType = typesIter.next();
+      Class<?> aClass;
       try{
         aClass = Gate.getClassLoader().loadClass(aType);
         if(targetClass.isAssignableFrom(aClass)){
           //filter out hidden instances
-          Iterator newInstancesIter = ((ResourceData)get(aType)).
-                                      getInstantiations().iterator();
+          Iterator<? extends Resource> newInstancesIter = get(aType).getInstantiations().iterator();
           while(newInstancesIter.hasNext()){
-            Resource instance = (Resource)newInstancesIter.next();
+            Resource instance = newInstancesIter.next();
             if(!Gate.getHiddenAttribute(instance.getFeatures())){
               res.add(instance);
             }
@@ -525,7 +548,7 @@ public class CreoleRegisterImpl extends HashMap
    * @return a list with Strings representing the large VRs for the
    * resourceClassName
    */
-  public List getLargeVRsForResource(String resourceClassName){
+  public List<String> getLargeVRsForResource(String resourceClassName){
     return getVRsForResource(resourceClassName, ResourceData.LARGE_GUI);
   }// getLargeVRsForResource()
 
@@ -538,7 +561,7 @@ public class CreoleRegisterImpl extends HashMap
    * @return a list with Strings representing the large VRs for the
    * resourceClassName
    */
-  public List getSmallVRsForResource(String resourceClassName){
+  public List<String> getSmallVRsForResource(String resourceClassName){
     return getVRsForResource(resourceClassName, ResourceData.SMALL_GUI);
   }// getSmallVRsForResource
 
@@ -552,12 +575,12 @@ public class CreoleRegisterImpl extends HashMap
    * @return a list with Strings representing the large VRs for the
    * resourceClassName
    */
-  private List getVRsForResource(String resourceClassName, int guiType){
+  private List<String> getVRsForResource(String resourceClassName, int guiType){
     // If resurceClassName is null return a simply list
     if (resourceClassName == null)
-      return Collections.unmodifiableList(new ArrayList());
+      return Collections.unmodifiableList(new ArrayList<String>());
     // create a Class object for the resource
-    Class resourceClass = null;
+    Class<?> resourceClass = null;
     GateClassLoader classLoader = Gate.getClassLoader();
     try{
       resourceClass = classLoader.loadClass(resourceClassName);
@@ -566,14 +589,14 @@ public class CreoleRegisterImpl extends HashMap
         "Couldn't get resource class from the resource name:" + ex
       );
     }// End try
-    LinkedList responseList = new LinkedList();
+    LinkedList<String> responseList = new LinkedList<String>();
     String defaultVR = null;
     // Take all VRs and for each large one, test if
     // resourceClassName is asignable form VR's RESOURCE_DISPLAYED
-    Iterator vrIterator = vrTypes.iterator();
+    Iterator<String> vrIterator = vrTypes.iterator();
     while (vrIterator.hasNext()){
-      String vrClassName = (String) vrIterator.next();
-      ResourceData vrResourceData = (ResourceData) this.get(vrClassName);
+      String vrClassName = vrIterator.next();
+      ResourceData vrResourceData = this.get(vrClassName);
       if (vrResourceData == null)
         throw new GateRuntimeException(
           "Couldn't get resource data for VR called " + vrClassName
@@ -581,7 +604,7 @@ public class CreoleRegisterImpl extends HashMap
       if (vrResourceData.getGuiType() == guiType){
         String resourceDisplayed = vrResourceData.getResourceDisplayed();
         if (resourceDisplayed != null){
-          Class resourceDisplayedClass = null;
+          Class<?> resourceDisplayedClass = null;
           try{
             resourceDisplayedClass = classLoader.loadClass(resourceDisplayed);
           } catch (ClassNotFoundException ex){
@@ -611,18 +634,18 @@ public class CreoleRegisterImpl extends HashMap
    * The default VR will be the first in the returned list.
    * @return a list with all VRs that can display all annotation types
    */
-  public List getAnnotationVRs(){
-    LinkedList responseList = new LinkedList();
+  public List<String> getAnnotationVRs(){
+    LinkedList<String> responseList = new LinkedList<String>();
     String defaultVR = null;
-    Iterator vrIterator = vrTypes.iterator();
+    Iterator<String> vrIterator = vrTypes.iterator();
     while (vrIterator.hasNext()){
-      String vrClassName = (String) vrIterator.next();
-      ResourceData vrResourceData = (ResourceData) this.get(vrClassName);
+      String vrClassName = vrIterator.next();
+      ResourceData vrResourceData = this.get(vrClassName);
       if (vrResourceData == null)
         throw new GateRuntimeException(
           "Couldn't get resource data for VR called " + vrClassName
         );
-      Class vrResourceClass = null;
+      Class<?> vrResourceClass = null;
       try{
         vrResourceClass = vrResourceData.getResourceClass();
       } catch(ClassNotFoundException ex){
@@ -654,20 +677,20 @@ public class CreoleRegisterImpl extends HashMap
    * that are able to display/edit a given annotation type
    * The default VR will be the first in the returned list.
    */
-  public List getAnnotationVRs(String annotationType){
+  public List<String> getAnnotationVRs(String annotationType){
     if (annotationType == null)
-      return Collections.unmodifiableList(new ArrayList());
-    LinkedList responseList = new LinkedList();
+      return Collections.unmodifiableList(new ArrayList<String>());
+    LinkedList<String> responseList = new LinkedList<String>();
     String defaultVR = null;
-    Iterator vrIterator = vrTypes.iterator();
+    Iterator<String> vrIterator = vrTypes.iterator();
     while (vrIterator.hasNext()){
-      String vrClassName = (String) vrIterator.next();
-      ResourceData vrResourceData = (ResourceData) this.get(vrClassName);
+      String vrClassName = vrIterator.next();
+      ResourceData vrResourceData = this.get(vrClassName);
       if (vrResourceData == null)
         throw new GateRuntimeException(
           "Couldn't get resource data for VR called " + vrClassName
         );
-      Class vrResourceClass = null;
+      Class<?> vrResourceClass = null;
       try{
         vrResourceClass = vrResourceData.getResourceClass();
       } catch(ClassNotFoundException ex){
@@ -711,12 +734,12 @@ public class CreoleRegisterImpl extends HashMap
    * Returns a list of strings representing annotations types for which
    * there are custom viewers/editor registered.
    */
-  public List getVREnabledAnnotationTypes(){
-    LinkedList responseList = new LinkedList();
-    Iterator vrIterator = vrTypes.iterator();
+  public List<String> getVREnabledAnnotationTypes(){
+    LinkedList<String> responseList = new LinkedList<String>();
+    Iterator<String> vrIterator = vrTypes.iterator();
     while (vrIterator.hasNext()){
-      String vrClassName = (String) vrIterator.next();
-      ResourceData vrResourceData = (ResourceData) this.get(vrClassName);
+      String vrClassName = vrIterator.next();
+      ResourceData vrResourceData = this.get(vrClassName);
       if (vrResourceData == null)
         throw new GateRuntimeException(
           "Couldn't get resource data for VR called " + vrClassName
@@ -736,15 +759,15 @@ public class CreoleRegisterImpl extends HashMap
 
 
   /** Get a list of all non-private instantiations. */
-  protected List getPublics(List instances) {
-    Iterator iter = instances.iterator();
-    List publics = new ArrayList();
+  protected <T> List<T> getPublics(List<T> instances) {
+    Iterator<T> iter = instances.iterator();
+    List<T> publics = new ArrayList<T>();
 
     // for each instance, if resource data specifies it isn't private,
     // add to the publics list
     while(iter.hasNext()) {
-      Resource res = (Resource) iter.next();
-      ResourceData rd = (ResourceData) get(res.getClass().getName());
+      T res = iter.next();
+      ResourceData rd = get(res.getClass().getName());
       if(! rd.isPrivate()) publics.add(res);
     }
 
@@ -752,12 +775,12 @@ public class CreoleRegisterImpl extends HashMap
   } // getPublics
 
   /** Gets a list of all non private types from alist of types*/
-  protected List getPublicTypes(Collection types){
-    Iterator iter = types.iterator();
-    List publics = new ArrayList();
+  protected List<String> getPublicTypes(Collection<String> types){
+    Iterator<String> iter = types.iterator();
+    List<String> publics = new ArrayList<String>();
     while(iter.hasNext()){
-      String oneType = (String)iter.next();
-      ResourceData rData = (ResourceData)get(oneType);
+      String oneType = iter.next();
+      ResourceData rData = get(oneType);
       if(rData != null && !rData.isPrivate()) publics.add(oneType);
     }
     return Collections.unmodifiableList(publics);
@@ -802,19 +825,19 @@ public class CreoleRegisterImpl extends HashMap
   
 
   /** A list of the types of LR in the register. */
-  protected Set lrTypes;
+  protected Set<String> lrTypes;
 
   /** A list of the types of PR in the register. */
-  protected Set prTypes;
+  protected Set<String> prTypes;
 
   /** A list of the types of VR in the register. */
-  protected List vrTypes;
+  protected List<String> vrTypes;
 
   /** A list of the types of VR in the register. */
-  protected Set controllerTypes;
+  protected Set<String> controllerTypes;
 
   /** A list of the types of TOOL in the register. */
-  protected Set toolTypes;
+  protected Set<String> toolTypes;
 
   private transient Vector creoleListeners;
   protected void fireResourceLoaded(CreoleEvent e) {
@@ -905,4 +928,26 @@ public class CreoleRegisterImpl extends HashMap
   }
 
   /**The lists of listeners registered with this CreoleRegister*/
+  
+  /**
+   * Type-safe read-only list used by getLrInstances, getPrInstances, etc.
+   */
+  private static class TypedResourceList<T extends Resource> extends AbstractList<T> {
+    private List<Resource> backingList;
+    
+    private Class<T> realType;
+    
+    TypedResourceList(List<Resource> backingList, Class<T> realType) {
+      this.backingList = backingList;
+      this.realType = realType;
+    }
+    
+    public T get(int i) {
+      return realType.cast(backingList.get(i)); 
+    }
+    
+    public int size() {
+      return backingList.size();
+    }
+  }
 } // class CreoleRegisterImpl
