@@ -794,7 +794,32 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   public void addInput(String ident) {
     input.add(ident);
   }
-
+  
+  /**
+   * Checks if this Phase has the annotation type as input. This is the 
+   * case if either no input annotation types were specified, in which case
+   * all annotation types will be used, or if the annotation type was
+   * specified.
+   * 
+   * @param ident the type of an annotation to be checked
+   * @return true if the annotation type will be used in this phase
+   */
+  public boolean hasInput(String ident) {
+    return input.isEmpty() || input.contains(ident);
+  }
+  
+  /** 
+   * Check if there is a restriction on the input annotation types
+   * for this SPT, i.e. if there were annotation types specified for
+   * the "Input:" declaration of this phase.
+   * 
+   * @return true if only certain annotation types are considered in this
+   *   phase, false if all are considered.
+   */
+  public boolean isInputRestricted() {
+    return !input.isEmpty();
+  }
+  
   public synchronized void removeProgressListener(ProgressListener l) {
     if(progressListeners != null && progressListeners.contains(l)) {
       Vector v = (Vector)progressListeners.clone();
