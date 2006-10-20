@@ -18,6 +18,7 @@ package gate.jape;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.HashSet;
 
 import gate.AnnotationSet;
 import gate.Document;
@@ -26,7 +27,7 @@ import gate.util.Strings;
 
 
 /**
-  * A sequence of conjunctions of PatternElement that form a
+  * A sequence of conjunctions of PatternElements that form a
   * disjunction.
   */
 public class ConstraintGroup
@@ -136,6 +137,39 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     return cpes.iterator();
   } // getCPEs
 
+  /**
+   * Populate the HashSet passed as a parameter with all the annotation
+   * types that occur in this and recursively contained pattern elements.
+   */
+  public void getContainedAnnotationTypes(HashSet<String> set) {
+    // for each (conjunction) member of the pattern element discjunction
+    for(
+      Iterator disjunction = patternElementDisjunction1.iterator();
+      disjunction.hasNext();
+      ) {
+      // for each pattern element making up this conjunction
+      for(
+        Iterator conjunction = ((ArrayList) disjunction.next()).iterator();
+        conjunction.hasNext();
+      ) {
+        PatternElement pat = (PatternElement) conjunction.next();
+        if(pat instanceof BasicPatternElement) {
+          ArrayList<Constraint> constraints = 
+            ((BasicPatternElement)pat).getUnfinishedConstraints();
+          for (Constraint c : constraints) {
+            set.add(c.getAnnotType());
+          }
+        } else if(pat instanceof ComplexPatternElement) {
+          ((ComplexPatternElement)pat)
+            .getConstraintGroup().getContainedAnnotationTypes(set);
+        } else if(pat instanceof ConstraintGroup) {
+          ((ConstraintGroup)pat)
+            .getContainedAnnotationTypes(set);
+        }
+      } // for each pattern element making up this conjunction
+    } // for each (conjunction) member of the pattern element discjunction
+  } // method getContainedAnnotationTypes(String<String>)
+  
   /** Finish: replace dynamic data structures with Java arrays; called
     * after parsing.
     */
