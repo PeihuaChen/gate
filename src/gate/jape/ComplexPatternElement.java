@@ -25,7 +25,7 @@ import gate.util.Strings;
 
 /**
   * A pattern element enclosed in round brackets. Has a
-  * ConstraintGroups, Kleene operator and binding name.
+  * ConstraintGroup, optional Kleene operator and optional binding name.
   */
 public class ComplexPatternElement extends PatternElement
 implements JapeConstants, java.io.Serializable
