@@ -689,14 +689,27 @@ public class SerialCorpusImpl extends
 
   public Object remove(int index){
     if (DEBUG) Out.prln("Remove index called");
-    documentRemoved(((DocumentData)docDataList.get(index)).
-            persistentID.toString());
+    boolean isLoaded = isDocumentLoaded(index);
+
+    // if it is loaded, it won't be reloaded again
+    Document res = (Document) get(index);
+    documentRemoved(((DocumentData)docDataList.get(index)).persistentID.toString());
+    // if it wasn't loaded we need to unload it
     docDataList.remove(index);
-    Document res = (Document) documents.remove(index);
+    documents.remove(index);
+
+    /*
+     * Please donot change this sequence: Niraj
+     * First the event must be fired and then the document should be deleted using the following method
+     */
     fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
                                         res,
                                         index,
                                         CorpusEvent.DOCUMENT_REMOVED));
+    if(!isLoaded) {
+      Factory.deleteResource(res);
+    }
+
     return res;
   }
 
