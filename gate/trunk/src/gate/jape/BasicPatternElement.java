@@ -36,7 +36,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   private static final boolean DEBUG = false;
 
   /** A set of Constraint. Used during parsing. */
-  private ArrayList constraints1;
+  private ArrayList<Constraint> constraints1;
 
   /** A set of Constraint. Used during matching. */
   private Constraint[] constraints2;
@@ -61,7 +61,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   /** Construction. */
   public BasicPatternElement() {
     constraintsMap = new HashMap();
-    constraints1 = new ArrayList();
+    constraints1 = new ArrayList<Constraint>();
     lastFailurePoint = -1;
     //nextAvailable = new MutableInteger();
     matchedAnnots = new AnnotationSetImpl((Document) null);
@@ -73,11 +73,11 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   public Object clone() {
     BasicPatternElement newPE = (BasicPatternElement) super.clone();
     newPE.constraintsMap = (HashMap) constraintsMap.clone();
-    newPE.constraints1 = new ArrayList();
+    newPE.constraints1 = new ArrayList<Constraint>();
     int consLen = constraints1.size();
     for(int i = 0; i < consLen; i++)
       newPE.constraints1.add(
-        ((Constraint) constraints1.get(i)).clone()
+        (Constraint)constraints1.get(i).clone()
       );
 //    newPE.matchedAnnots = new AnnotationSetImpl((Document) null);
 //    newPE.matchedAnnots.addAll(matchedAnnots);
@@ -124,8 +124,8 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   public void finish() {
     int j=0;
     constraints2 = new Constraint[constraints1.size()];
-    for(Iterator i=constraints1.iterator(); i.hasNext(); ) {
-      constraints2[j] = (Constraint) i.next();
+    for(Constraint c : constraints1 ) {
+      constraints2[j] = c;
       constraints2[j++].finish();
     }
     constraints1 = null;
@@ -317,7 +317,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     if(constraints1 != null) {
       for(int len = constraints1.size(), i = 0; i < len; i++)
         buf.append(
-          newline + ((Constraint) constraints1.get(i)).toString(newPad)
+          newline + constraints1.get(i).toString(newPad)
         );
     } else {
       for(int len = constraints2.length, i = 0; i < len; i++)
@@ -340,7 +340,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     String res = "";
     if(constraints1 != null) {
       for(int len = constraints1.size(), i = 0; i < len; i++)
-        res += ((Constraint) constraints1.get(i)).toString();
+        res += constraints1.get(i).toString();
     } else {
       for(int len = constraints2.length, i = 0; i < len; i++)
         res += constraints2[i].shortDesc();
@@ -348,6 +348,22 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     return res;
   }
 
+  /**
+   * Get the current list of unfinished Constraint objects. This
+   * can only be used before the finish() method is used.
+   * @return the array list of constraint objects. Will be null after
+   * the finish() method has been used.
+   */
+  public ArrayList<Constraint> getUnfinishedConstraints() {
+    return constraints1;
+  }
+  
+  /**
+   * Get the finished Constraint objects. Can only be used after the
+   * finish() method has been used. 
+   * @return an array of constraint objects. Will be null before the
+   * finish() method has been used. 
+   */
   public Constraint[] getConstraints(){
     return constraints2;
   }
