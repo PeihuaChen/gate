@@ -1425,14 +1425,12 @@ StringBuffer image;
 int jjimageLen;
 int lengthOfMatch;
 protected char curChar;
-public ParseCpslTokenManager(SimpleCharStream stream)
-{
+public ParseCpslTokenManager(SimpleCharStream stream){
    if (SimpleCharStream.staticFlag)
       throw new Error("ERROR: Cannot use a static CharStream class with a non-static lexical analyzer.");
    input_stream = stream;
 }
-public ParseCpslTokenManager(SimpleCharStream stream, int lexState)
-{
+public ParseCpslTokenManager(SimpleCharStream stream, int lexState){
    this(stream);
    SwitchTo(lexState);
 }
@@ -1632,33 +1630,29 @@ void MoreLexicalActions()
    {
       case 29 :
          if (image == null)
-              image = new StringBuffer(new String(input_stream.GetSuffix(jjimageLen)));
-         else
-            image.append(new String(input_stream.GetSuffix(jjimageLen)));
+            image = new StringBuffer();
+         image.append(input_stream.GetSuffix(jjimageLen));
          jjimageLen = 0;
                image.setLength(image.length() - 2); image.append("\n");
          break;
       case 30 :
          if (image == null)
-              image = new StringBuffer(new String(input_stream.GetSuffix(jjimageLen)));
-         else
-            image.append(new String(input_stream.GetSuffix(jjimageLen)));
+            image = new StringBuffer();
+         image.append(input_stream.GetSuffix(jjimageLen));
          jjimageLen = 0;
                image.setLength(image.length() - 2); image.append("\r");
          break;
       case 31 :
          if (image == null)
-              image = new StringBuffer(new String(input_stream.GetSuffix(jjimageLen)));
-         else
-            image.append(new String(input_stream.GetSuffix(jjimageLen)));
+            image = new StringBuffer();
+         image.append(input_stream.GetSuffix(jjimageLen));
          jjimageLen = 0;
                image.setLength(image.length() - 2); image.append("\t");
          break;
       case 32 :
          if (image == null)
-              image = new StringBuffer(new String(input_stream.GetSuffix(jjimageLen)));
-         else
-            image.append(new String(input_stream.GetSuffix(jjimageLen)));
+            image = new StringBuffer();
+         image.append(input_stream.GetSuffix(jjimageLen));
          jjimageLen = 0;
                 image.setLength(image.length() - 2); image.append("\"");
          break;
@@ -1672,9 +1666,8 @@ void TokenLexicalActions(Token matchedToken)
    {
       case 34 :
         if (image == null)
-            image = new StringBuffer(new String(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1))));
-         else
-            image.append(new String(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1))));
+            image = new StringBuffer();
+            image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
         // image.setLength(image.length() - 1);
          matchedToken.image = image.toString();
          break;

@@ -85,6 +85,12 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     encoding = newEncoding;
   }
 
+  private String errorMsgPrefix(Token t) {
+    return ((baseURL != null) ? baseURL.toExternalForm() : "(No URL)")+
+      ( (t == null) ? " " :
+          ":"+t.beginLine+":"+t.beginColumn+": ");
+   }
+
   private transient java.util.List myStatusListeners = new java.util.LinkedList();
 
   /** Position of the current rule */
@@ -100,6 +106,8 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
 
   protected URL baseURL;
   protected String encoding;
+
+  protected SinglePhaseTransducer curSPT;
 
 //////////////
 // the grammar
@@ -151,11 +159,12 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
             try{
               sptURL = new URL(baseURL, sptPath);
             }catch(MalformedURLException mue){
-              {if (true) throw(new ParseException("Read error " + mue.toString()));}
+              {if (true) throw(new ParseException(errorMsgPrefix(phaseNameTok)+
+                "Read error " + mue.toString()));}
             }
 
             if(sptURL == null){
-              {if (true) throw(new ParseException(
+              {if (true) throw(new ParseException(errorMsgPrefix(phaseNameTok)+
                 "Resource not found: base = " + baseURL.toString() +
                 " path = " + sptPath
               ));}
@@ -167,7 +176,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
               parser = spawn(sptURL);
             } catch (IOException e) {
               {if (true) throw(
-                new ParseException(
+                new ParseException(errorMsgPrefix(phaseNameTok)+
                   "Cannot open URL " + sptURL.toExternalForm()
                 )
               );}
@@ -175,9 +184,20 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
 
           // adding the resultant spt to m
           if(parser != null) {
-            s = parser.SinglePhaseTransducer();
-            if(s != null)
-              m.addPhase(s.getName(), s);
+                ArrayList phases = parser.MultiPhaseTransducer().getPhases();
+
+            //s = parser.SinglePhaseTransducer();
+            //if(s != null)
+            //  m.addPhase(s.getName(), s);
+
+            if(phases != null) {
+              for(int i=0; i < phases.size(); i++) {
+                m.addPhase(
+                  ((Transducer)phases.get(i)).getName(),
+                  (Transducer)phases.get(i)
+                  );
+              }
+            }
           }
         switch (jj_nt.kind) {
         case path:
@@ -213,7 +233,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   Token optionValueTok = null;
     jj_consume_token(phase);
     phaseNameTok = jj_consume_token(ident);
-    t = createSinglePhaseTransducer(phaseNameTok.image);
+    t = createSinglePhaseTransducer(phaseNameTok.image); curSPT = t;
     switch (jj_nt.kind) {
     case input:
       jj_consume_token(input);
@@ -277,7 +297,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
           else if(optionValueTok.image.equalsIgnoreCase("all"))
             t.setRuleApplicationStyle(ALL_STYLE);
           else
-            System.err.println(
+            System.err.println(errorMsgPrefix(optionValueTok)+
               "ignoring unknown control strategy " + option +
               " (should be brill, appelt, first, once or all)"
             );
@@ -350,8 +370,9 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       priorityTok = jj_consume_token(integer);
       try { rulePriority=Integer.parseInt(priorityTok.image); }
       catch(NumberFormatException e) {
-        System.err.println("bad priority spec(" + priorityTok.image +
-                           "), rule(" + ruleName + ") - treating as 0");
+        System.err.println(errorMsgPrefix(priorityTok)+
+          "bad priority spec(" + priorityTok.image +
+          "), rule(" + ruleName + ") - treating as 0");
         rulePriority=0;
       }
       break;
@@ -362,15 +383,31 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     lhs = LeftHandSide();
     jj_consume_token(58);
     rhs = RightHandSide(phaseName, ruleName, lhs);
-    try { rhs.createActionClass(); } catch(JapeException e)
-    {
+    try {
+      rhs.createActionClass();
+    } catch(JapeException e) {
       /*Debug.pr(
         this, "ParseCpsl.Rule, FAILED rhs: " + rhs.getActionClassString()
       );*/
-      {if (true) throw new ParseException("couldn't create rule RHS: " + e.toString());}
+      {if (true) throw new ParseException(errorMsgPrefix(null)+
+        "couldn't create rule RHS: " + e.toString());}
     }
     /*Debug.pr(this, "ParseCpsl.Rule, done rhs: " + rhs.getActionClassString());*/
     newRule = new Rule(ruleName, ruleNumber, rulePriority, lhs, rhs);
+        // if there were "Input:" annotation types specified ...
+        if(curSPT.isInputRestricted()) {
+      // find all the different annotation types used in the 
+      // LHS of the rule
+      HashSet<String> set = new HashSet<String>();
+          lhs.getConstraintGroup().getContainedAnnotationTypes(set);
+          // and check if each of them is mentioned in the list
+          for (String type : set) {
+                if(!curSPT.hasInput(type)) {
+                  System.err.println(errorMsgPrefix(null)+
+                    "Rule "+ruleName+" contains unlisted annotation type " + type);
+                }
+          }
+        }
     ruleNumber++;
     {if (true) return newRule;}
     throw new Error("Missing return statement in function");
@@ -476,17 +513,18 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       macroRef = true;
       Object macro = macrosMap.get(macroRefTok.image);
       if(macro == null)
-        {if (true) throw(new ParseException("unknown macro name " + macroRefTok.image));}
+        {if (true) throw(new ParseException(errorMsgPrefix(macroRefTok)+
+          "unknown macro name " + macroRefTok.image));}
       else if(macro instanceof String[])
         {if (true) throw(
-          new ParseException(
+          new ParseException(errorMsgPrefix(macroRefTok)+
             "macro " + macroRefTok.image +
             " references an Action, not a PatternElement"
           )
         );}
       else if(! (macro instanceof PatternElement)) // this should never happen
         {if (true) throw(
-          new ParseException(
+          new ParseException(errorMsgPrefix(macroRefTok)+
             "macro " + macroRefTok.image +
             " doesn't reference a PatternElement!"
           )
@@ -519,7 +557,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
             bindingName, (ComplexPatternElement) pat, bindingNameSet, macroRef
           );
         } catch(JapeException e) {
-          System.err.println(
+          System.err.println(errorMsgPrefix(null)+
             "duplicate binding name " + bindingName +
             " - ignoring this binding! exception was: " + e.toString()
           );
@@ -561,7 +599,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     case string:
       // string shorthand
             shortTok = jj_consume_token(string);
-      System.err.println(
+      System.err.println(errorMsgPrefix(shortTok)+
         "string shorthand not supported yet, ignoring: " + shortTok.image
       );
       break;
@@ -618,7 +656,8 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       else if(k.equals("?"))    kleeneOp = KLEENE_QUERY;
       else if(k.equals("+"))    kleeneOp = KLEENE_PLUS;
       else
-        System.err.println("ignoring uninterpretable Kleene op " + k);
+        System.err.println(errorMsgPrefix(kleeneOpTok)+
+          "ignoring uninterpretable Kleene op " + k);
     }
 
     String bindingName = null;
@@ -709,8 +748,9 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         try {
           val.second = Long.valueOf(attrValTok.image);
         } catch(NumberFormatException e) {
-          System.err.println("couldn't parse integer " +
-                             attrValTok.image + " - treating as 0");
+          System.err.println(errorMsgPrefix(attrValTok)+
+            "couldn't parse integer " +
+            attrValTok.image + " - treating as 0");
           val.second = new Long(0);
         }
         break;
@@ -724,13 +764,14 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         try {
           val.second = Double.valueOf(attrValTok.image);
         } catch(NumberFormatException e) {
-          System.err.println("couldn't parse float " +
-                             attrValTok.image + " - treating as 0.0");
+          System.err.println(errorMsgPrefix(attrValTok)+
+            "couldn't parse float " +
+            attrValTok.image + " - treating as 0.0");
           val.second = new Double(0.0);
         }
         break;
       default:
-        System.err.println(
+        System.err.println(errorMsgPrefix(attrValTok)+
           "didn't understand type of " + attrValTok.image + ": ignoring"
         );
         val.second = new String("");
@@ -748,7 +789,8 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     // did we get a non-existent block name?
     if(block[0] != null)
       if(! bindingNameSet.contains(block[0])) {
-        {if (true) throw(new ParseException("unknown label in RHS action: " + block[0]));}
+        {if (true) throw(new ParseException(errorMsgPrefix(null)+
+          "unknown label in RHS action: " + block[0]));}
       }
     rhs.addBlock(block[0], block[1]);
     label_10:
@@ -766,7 +808,8 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       // did we get a non-existent block name?
       if(block[0] != null)
         if(! bindingNameSet.contains(block[0])) {
-          {if (true) throw(new ParseException("unknown label in RHS action: " + block[0]));}
+          {if (true) throw(new ParseException(errorMsgPrefix(null)+
+            "unknown label in RHS action: " + block[0]));}
         }
       rhs.addBlock(block[0], block[1]);
     }
@@ -798,17 +841,18 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         macroRefTok = jj_consume_token(ident);
       Object macro = macrosMap.get(macroRefTok.image);
       if(macro == null)
-        {if (true) throw(new ParseException("unknown macro name " + macroRefTok.image));}
+        {if (true) throw(new ParseException(errorMsgPrefix(macroRefTok)+
+          "unknown macro name " + macroRefTok.image));}
       else if(macro instanceof PatternElement)
         {if (true) throw(
-          new ParseException(
+          new ParseException(errorMsgPrefix(macroRefTok)+
             "macro " + macroRefTok.image +
             " references a PatternElement, not an Action"
           )
         );}
       else if(! (macro instanceof String[])) // this should never happen
         {if (true) throw(
-          new ParseException(
+          new ParseException(errorMsgPrefix(macroRefTok)+
             "macro " + macroRefTok.image + " doesn't reference an Action!"
           )
         );}
@@ -962,7 +1006,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
           existingAnnotSetName = nameTok.image + "ExistingAnnots";
           if(! bindingNameSet.contains(nameTok.image))
             {if (true) throw(
-              new ParseException(
+              new ParseException(errorMsgPrefix(nameTok)+
                 "unknown label in RHS action(2): " + nameTok.image
               )
             );}
@@ -1074,56 +1118,9 @@ existingAttrName + "\");" + nl +
     finally { jj_save(1, xla); }
   }
 
-  final private boolean jj_3_2() {
-    if (jj_3R_13()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_23() {
-    if (jj_3R_12()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_20() {
-    if (jj_scan_token(string)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_18() {
-    if (jj_scan_token(leftBracket)) return true;
-    if (jj_3R_21()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_21() {
-    Token xsp;
-    if (jj_3R_23()) return true;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_23()) { jj_scanpos = xsp; break; }
-    }
-    return false;
-  }
-
-  final private boolean jj_3R_16() {
-    if (jj_3R_18()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_13() {
-    if (jj_scan_token(colon)) return true;
-    if (jj_scan_token(ident)) return true;
+  final private boolean jj_3R_19() {
     if (jj_scan_token(leftBrace)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_15() {
-    if (jj_3R_17()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_14() {
-    if (jj_scan_token(ident)) return true;
+    if (jj_3R_22()) return true;
     return false;
   }
 
@@ -1132,9 +1129,8 @@ existingAttrName + "\");" + nl +
     return false;
   }
 
-  final private boolean jj_3R_19() {
-    if (jj_scan_token(leftBrace)) return true;
-    if (jj_3R_22()) return true;
+  final private boolean jj_3R_24() {
+    if (jj_scan_token(pling)) return true;
     return false;
   }
 
@@ -1151,8 +1147,11 @@ existingAttrName + "\");" + nl +
     return false;
   }
 
-  final private boolean jj_3R_24() {
-    if (jj_scan_token(pling)) return true;
+  final private boolean jj_3R_22() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_24()) jj_scanpos = xsp;
+    if (jj_scan_token(ident)) return true;
     return false;
   }
 
@@ -1166,10 +1165,55 @@ existingAttrName + "\");" + nl +
     return false;
   }
 
-  final private boolean jj_3R_22() {
+  final private boolean jj_3_2() {
+    if (jj_3R_13()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_13() {
+    if (jj_scan_token(colon)) return true;
+    if (jj_scan_token(ident)) return true;
+    if (jj_scan_token(leftBrace)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_20() {
+    if (jj_scan_token(string)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_18() {
+    if (jj_scan_token(leftBracket)) return true;
+    if (jj_3R_21()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_23() {
+    if (jj_3R_12()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_16() {
+    if (jj_3R_18()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_21() {
     Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_24()) jj_scanpos = xsp;
+    if (jj_3R_23()) return true;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_23()) { jj_scanpos = xsp; break; }
+    }
+    return false;
+  }
+
+  final private boolean jj_3R_15() {
+    if (jj_3R_17()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_14() {
     if (jj_scan_token(ident)) return true;
     return false;
   }
@@ -1200,7 +1244,10 @@ existingAttrName + "\");" + nl +
   private int jj_gc = 0;
 
   public ParseCpsl(java.io.InputStream stream) {
-    jj_input_stream = new SimpleCharStream(stream, 1, 1);
+     this(stream, null);
+  }
+  public ParseCpsl(java.io.InputStream stream, String encoding) {
+    try { jj_input_stream = new SimpleCharStream(stream, encoding, 1, 1); } catch(java.io.UnsupportedEncodingException e) { throw new RuntimeException(e); }
     token_source = new ParseCpslTokenManager(jj_input_stream);
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
@@ -1210,7 +1257,10 @@ existingAttrName + "\");" + nl +
   }
 
   public void ReInit(java.io.InputStream stream) {
-    jj_input_stream.ReInit(stream, 1, 1);
+     ReInit(stream, null);
+  }
+  public void ReInit(java.io.InputStream stream, String encoding) {
+    try { jj_input_stream.ReInit(stream, encoding, 1, 1); } catch(java.io.UnsupportedEncodingException e) { throw new RuntimeException(e); }
     token_source.ReInit(jj_input_stream);
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
@@ -1402,6 +1452,7 @@ existingAttrName + "\");" + nl +
   final private void jj_rescan_token() {
     jj_rescan = true;
     for (int i = 0; i < 2; i++) {
+    try {
       JJCalls p = jj_2_rtns[i];
       do {
         if (p.gen > jj_gen) {
@@ -1413,6 +1464,7 @@ existingAttrName + "\");" + nl +
         }
         p = p.next;
       } while (p != null);
+      } catch(LookaheadSuccess ls) { }
     }
     jj_rescan = false;
   }
