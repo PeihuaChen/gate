@@ -14,7 +14,7 @@
 */
 
 Phase:	Unknown
-Input: Location Person Date Organization Address Money Percent Token Jobtitle Lookup
+Input: Location Person Date Organization Address Money Percent Token JobTitle Lookup
 Options: control = appelt
 
 
