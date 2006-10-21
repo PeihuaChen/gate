@@ -68,7 +68,9 @@ Priority: 10
 
 (
  {Token.string == "from"}
- ({Organization} | {Location})
+ ({Organization} 
+// | {Location}
+ )
 )
 -->
   :person.Person = {rule = "PersonContext1"}
@@ -85,7 +87,9 @@ Priority: 20
 
 (
  {Token.string == "from"}
- ({Organization} | {Location})
+ ({Organization} 
+// | {Location}
+ )
 )
 -->
   {}
