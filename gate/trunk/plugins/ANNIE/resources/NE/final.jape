@@ -24,8 +24,8 @@ Options: control = appelt
 
 Rule: PersonFinal
 Priority: 30
-({JobTitle}
-)?
+//({JobTitle}
+//)?
 (
  {TempPerson.kind == personName}
 )
@@ -620,31 +620,31 @@ annotations.removeAll(spec);
 
 //////////////////////////////////////////////////////
 
-Rule: UnknownPerson
-Priority: 5
-( 
- {Token.category == NNP}
- ((SPACE|{Token.string == "-"})
-  {Token.category == NNP})?
- (SPACE {Token.category == NNP})?
- (SPACE {Token.category == NNP})?
-):unknown
- (SPACE)
-(
- {TempPerson}
-):person
--->
-:unknown.Unknown = {kind = "PN", rule = UnknownTempPerson},
-{
+//Rule: UnknownPerson
+//Priority: 5
+//( 
+// {Token.category == NNP}
+// ((SPACE|{Token.string == "-"})
+//  {Token.category == NNP})?
+// (SPACE {Token.category == NNP})?
+// (SPACE {Token.category == NNP})?
+//):unknown
+// (SPACE)
+//(
+// {TempPerson}
+//):person
+//-->
+//:unknown.Unknown = {kind = "PN", rule = UnknownTempPerson},
+//{
 //removes TempPerson annotation, gets the rule feature and adds a new Person annotation
-gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
-gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
-gate.FeatureMap features = Factory.newFeatureMap();
-features.put("gender", personAnn.getFeatures().get("gender"));
-features.put("rule1", personAnn.getFeatures().get("rule"));
-features.put("rule2", "UnknownPerson");
-annotations.add(person.firstNode(), person.lastNode(), "Person",
-features);
-annotations.removeAll(person);
-}
+//gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+//gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+//gate.FeatureMap features = Factory.newFeatureMap();
+//features.put("gender", personAnn.getFeatures().get("gender"));
+//features.put("rule1", personAnn.getFeatures().get("rule"));
+//features.put("rule2", "UnknownPerson");
+//annotations.add(person.firstNode(), person.lastNode(), "Person",
+//features);
+//annotations.removeAll(person);
+//}
 
