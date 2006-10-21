@@ -354,15 +354,15 @@ Rule: TimeDigitalContextConj
 
 // Date Rules
 
-Rule: IgnoreDatePerson
-Priority: 500
-(
- {Date}
- {Person}
-)
-:date
--->
-{}
+//Rule: IgnoreDatePerson
+//Priority: 500
+//(
+// {Date}
+// {Person}
+//)
+//:date
+//-->
+//{}
 
 
 
