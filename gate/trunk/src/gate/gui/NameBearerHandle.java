@@ -360,6 +360,13 @@ public class NameBearerHandle implements Handle, StatusListener,
                   sListenerProxy));
         }
       }
+      
+      if(target instanceof Document) {
+        staticPopupItems.add(null);
+        staticPopupItems.add(new XJMenuItem(new CreateCorpusForDocAction(),
+                sListenerProxy));
+      }
+      
       if(target instanceof gate.creole.ProtegeProjectName) {
         fillProtegeActions(staticPopupItems);
       }// End if
@@ -1453,6 +1460,23 @@ public class NameBearerHandle implements Handle, StatusListener,
         catch(gate.creole.ir.IndexException ie) {
           ie.printStackTrace();
         }
+      }
+    }
+  }
+  
+  class CreateCorpusForDocAction extends AbstractAction {
+    public CreateCorpusForDocAction() {
+      super("New corpus with this document");
+    }
+    
+    public void actionPerformed(ActionEvent e) {
+      try {
+        Corpus corpus = Factory.newCorpus("Corpus for " + target.getName());
+        corpus.add(target);
+      }
+      catch(ResourceInstantiationException rie) {
+        Err.println("Exception creating corpus");
+        rie.printStackTrace(Err.getPrintWriter());
       }
     }
   }
