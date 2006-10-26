@@ -18,6 +18,7 @@ package gate.creole;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import gate.*;
@@ -130,41 +131,53 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   }
   
   /** The stack of instantiations */
-  protected WeakBumpyStack<Resource> instantiationStack = new WeakBumpyStack<Resource>();
+  protected LinkedList<Resource> instantiationStack = new LinkedList<Resource>();
 
   /** This list contains all instances loaded from creole.xml with
-   *  AUTOINSTANCE tag. The idea is that we don't want to loose them from the
-   *  system, because of the WeakBumpyStack
+   *  AUTOINSTANCE tag.
+   *  
+   *  @deprecated No longer necessary as we don't use weak references
+   *  for the instantiations.
    */
+  @Deprecated
   protected List<Resource> persistantInstantiationList = new ArrayList<Resource>();
 
   /** Get the list of instantiations of resources */
-  public WeakBumpyStack<Resource> getInstantiations() {
+  public List<Resource> getInstantiations() {
     return instantiationStack;
   } // getInstantiations
 
   /** Add an instantiation of the resource to the register of these */
   public void addInstantiation(Resource resource) {
-    instantiationStack.push(resource);
+    instantiationStack.addFirst(resource);
   } // addInstantiation
 
   /** This method makes a certain resource persistent by adding it into a
     * persistantInstantiationList. It is used especially with AUTOINSTANCE tag
     * in creole xml.
+    * 
+    * @deprecated No longer needed as we don't use weak references in the
+    * instantiations stack.  Left for compatibility as a no-op.
     */
+  @Deprecated
   public void makeInstantiationPersistant(Resource resource) {
-    persistantInstantiationList.add(resource);
+    //persistantInstantiationList.add(resource);
   } // makeInstantiationPersistant
 
   /** Remove an instantiation of the resource from the register of these */
   public void removeInstantiation(Resource resource) {
     instantiationStack.remove(resource);
-    persistantInstantiationList.remove(resource);
+    //persistantInstantiationList.remove(resource);
   } // removeInstantiation
 
-  /** Bump an instantiation to the top of the instantiation stack */
+  /**
+   * Bump an instantiation to the top of the instantiation stack
+   * 
+   * @deprecated This operation is no longer supported, and does nothing.
+   */
+  @Deprecated
   public void bumpInstantiation(Resource resource) {
-    instantiationStack.bump(resource);
+    // do nothing
   } // bumpInstantiation
 
   /** The class name of the resource */

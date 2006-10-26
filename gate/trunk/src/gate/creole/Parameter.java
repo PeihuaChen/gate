@@ -217,8 +217,8 @@ public class Parameter implements Serializable
         return null;
       }
 
-      WeakBumpyStack instantiations = resData.getInstantiations();
-      if(! instantiations.isEmpty()) value = instantiations.peek();
+      List instantiations = resData.getInstantiations();
+      if(! instantiations.isEmpty()) value = instantiations.get(0);
     }
 
     return value;

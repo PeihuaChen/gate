@@ -235,7 +235,6 @@ public class TestGate {
         suite.addTest(TestWordNet.suite());
         suite.addTest(TestIndex.suite());
         suite.addTest(TestPersist.suite());
-        suite.addTest(TestBumpyStack.suite());
         suite.addTest(TestControllers.suite());
         suite.addTest(TestSecurity.suite());
         suite.addTest(TestConfig.suite());
