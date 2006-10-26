@@ -308,9 +308,11 @@ public class CreoleXmlHandler extends DefaultHandler {
           iter.remove();
           // Try to create the resource.
           try {
-            Resource res = Factory.createResource(
+            // Resource res = 
+            Factory.createResource(
                               resourceData.getClassName(), autoinstanceParams);
-            resourceData.makeInstantiationPersistant(res);
+            //resourceData.makeInstantiationPersistant(res);
+            // all resource instantiations are persistent
           } catch(ResourceInstantiationException e) {
             throw new GateSaxException(
               "Couldn't auto-instantiate resource: " +
