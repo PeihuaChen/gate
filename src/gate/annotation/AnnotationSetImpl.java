@@ -115,9 +115,10 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
         annotsByStartNode = new HashMap<Integer, Object>(Gate.HASH_STH_SIZE);
         annotsByStartNode.putAll(theC.annotsByStartNode);
       }
-      if(theC.annotsByType != null)
+      if(theC.annotsByType != null){
         annotsByType = new HashMap<String, AnnotationSet>(Gate.HASH_STH_SIZE);
         annotsByType.putAll(theC.annotsByType);
+      }
       if(theC.nodesByOffset != null) {
         nodesByOffset = (RBTreeMap)theC.nodesByOffset.clone();
       }
