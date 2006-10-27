@@ -49,51 +49,42 @@ import gate.util.RBTreeMap;
  * convention, there is no no-arg constructor, as this would leave the set in an
  * inconsistent state.
  * <P>
- * There are five indices: annotation by id, annotations by type, annotations by
- * start/end node and nodes by offset. The last three jointly provide positional
- * indexing; construction of these is triggered by indexByStart/EndOffset(), or
+ * There are four indices: annotation by id, annotations by type, annotations by
+ * start node and nodes by offset. The last two jointly provide positional
+ * indexing; construction of these is triggered by indexByStart(), or
  * by calling a get method that selects on offset. The type index is triggered
  * by indexByType(), or calling a get method that selects on type. The id index
  * is always present.
  */
-public class AnnotationSetImpl extends AbstractSet<Annotation> implements AnnotationSet {
-  
+public class AnnotationSetImpl extends AbstractSet<Annotation> implements
+                                                              AnnotationSet {
   /** Freeze the serialization UID. */
   static final long serialVersionUID = 1479426765310434166L;
   /** The name of this set */
   String name = null;
-
   /** The document this set belongs to */
   DocumentImpl doc;
-
   /** Maps annotation ids (Integers) to Annotations */
   transient protected HashMap<Integer, Annotation> annotsById;
-
   /** Maps offsets (Longs) to nodes */
   transient RBTreeMap nodesByOffset = null;
-
   /**
-   * This field is used temporarily during serialisation to store all the 
+   * This field is used temporarily during serialisation to store all the
    * annotations that need to be saved. At all other times, this will be null;
    */
   private Annotation[] annotations;
-  
   /** Maps annotation types (Strings) to AnnotationSets */
   transient Map<String, AnnotationSet> annotsByType = null;
-
   /**
    * Maps node ids (Integers) to Annotations or a Collection of Annotations that
    * start from that node
    */
   transient Map<Integer, Object> annotsByStartNode;
-
   protected transient Vector annotationSetListeners;
-
   private transient Vector gateListeners;
 
   /** Construction from Document. */
   public AnnotationSetImpl(Document doc) {
-    // annotsById = new VerboseHashMap();
     annotsById = new HashMap<Integer, Annotation>();
     this.doc = (DocumentImpl)doc;
   } // construction from document
@@ -104,9 +95,10 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
     this.name = name;
   } // construction from document and name
 
-  /** Construction from Collection (which must be an AnnotationSet) */
-  public AnnotationSetImpl(Collection<? extends Annotation> c) throws ClassCastException {
-    this(((AnnotationSet)c).getDocument(), ((AnnotationSet)c).getName());
+  /** Construction from an existing AnnotationSet */
+  public AnnotationSetImpl(AnnotationSet c) throws ClassCastException {
+    this(c.getDocument(), c.getName());
+    // the original annotationset is of the same implementation
     if(c instanceof AnnotationSetImpl) {
       AnnotationSetImpl theC = (AnnotationSetImpl)c;
       annotsById = new HashMap<Integer, Annotation>();
@@ -115,23 +107,29 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
         annotsByStartNode = new HashMap<Integer, Object>(Gate.HASH_STH_SIZE);
         annotsByStartNode.putAll(theC.annotsByStartNode);
       }
-      if(theC.annotsByType != null){
+      if(theC.annotsByType != null) {
         annotsByType = new HashMap<String, AnnotationSet>(Gate.HASH_STH_SIZE);
         annotsByType.putAll(theC.annotsByType);
       }
       if(theC.nodesByOffset != null) {
         nodesByOffset = (RBTreeMap)theC.nodesByOffset.clone();
       }
-    } else addAll(c);
-  } // construction from collection
+    } 
+    // the implementation is not the default one
+    // let's add the annotations one by one
+    else {
+      Iterator iterannots = c.iterator();
+      while (iterannots.hasNext()){
+        add((Annotation)iterannots.next());
+      }
+    }
+  } 
 
-  // >>>dam: end
   /**
    * This inner class serves as the return value from the iterator() method.
    */
   class AnnotationSetIterator implements Iterator<Annotation> {
     private Iterator<Annotation> iter;
-
     protected Annotation lastNext = null;
 
     AnnotationSetIterator() {
@@ -209,7 +207,8 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
       // might be an annotation or an annotationset
       Object objectAtNode = annotsByStartNode.get(id);
       if(objectAtNode instanceof Annotation) {
-        annotsByStartNode.remove(id); // no annotations start here any more
+        annotsByStartNode.remove(id); // no annotations start here any
+        // more
         return;
       }
       // otherwise it is a Collection
@@ -232,7 +231,9 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
     return annotsById.get(id);
   } // get(id)
 
-  /** Get all annotations */
+  /**
+   * Get all annotations.
+   */
   public AnnotationSet get() {
     AnnotationSetImpl resultSet = new AnnotationSetImpl(doc);
     resultSet.addAllKeepIDs(annotsById.values());
@@ -244,7 +245,8 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
   public AnnotationSet get(String type) {
     if(annotsByType == null) indexByType();
     // the aliasing that happens when returning a set directly from the
-    // types index can cause concurrent access problems; but the fix below
+    // types index can cause concurrent access problems; but the fix
+    // below
     // breaks the tests....
     // AnnotationSet newSet =
     // new AnnotationSetImpl((Collection) annotsByType.get(type));
@@ -304,7 +306,8 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
       // we check for matching constraints by simple equality. a
       // feature map satisfies the constraints if it contains all the
       // key/value pairs from the constraints map
-      // if (a.getFeatures().entrySet().containsAll(constraints.entrySet()))
+      // if
+      // (a.getFeatures().entrySet().containsAll(constraints.entrySet()))
       if(a.getFeatures().subsumes(constraints)) resultSet.add(a);
     } // while
     if(resultSet.isEmpty()) return null;
@@ -345,7 +348,8 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
    */
   public AnnotationSet get(Long offset) {
     if(annotsByStartNode == null) indexByStartOffset();
-    // find the next node at or after offset; get the annots starting there
+    // find the next node at or after offset; get the annots starting
+    // there
     Node nextNode = (Node)nodesByOffset.getNextOf(offset);
     if(nextNode == null) // no nodes at or beyond this offset
       return null;
@@ -388,12 +392,14 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
     Iterator<Annotation> annotsIter;
     Node currentNode;
     Annotation currentAnnot;
-    // find all the annots that start strictly before the start offset and end
+    // find all the annots that start strictly before the start offset
+    // and end
     // strictly after it
     nodesIter = nodesByOffset.headMap(startOffset).values().iterator();
     while(nodesIter.hasNext()) {
       currentNode = (Node)nodesIter.next();
-      Collection<Annotation> objectAtNode = getAnnotsByStartNode(currentNode.getId());
+      Collection<Annotation> objectAtNode = getAnnotsByStartNode(currentNode
+              .getId());
       if(objectAtNode == null) continue;
       annotsIter = objectAtNode.iterator();
       while(annotsIter.hasNext()) {
@@ -403,13 +409,15 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
         }
       }
     }
-    // find all the annots that start at or after the start offset but strictly
+    // find all the annots that start at or after the start offset but
+    // strictly
     // before the end offset
     nodesIter = nodesByOffset.subMap(startOffset, endOffset).values()
             .iterator();
     while(nodesIter.hasNext()) {
       currentNode = (Node)nodesIter.next();
-      Collection<Annotation> objectAtNode = getAnnotsByStartNode(currentNode.getId());
+      Collection<Annotation> objectAtNode = getAnnotsByStartNode(currentNode
+              .getId());
       if(objectAtNode == null) continue;
       resultSet.addAllKeepIDs(objectAtNode);
     }
@@ -433,7 +441,8 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
     // find all the annots that start at the start offset
     currentNode = (Node)nodesByOffset.get(startOffset);
     if(currentNode != null) {
-      Collection<Annotation> objFromPoint = getAnnotsByStartNode(currentNode.getId());
+      Collection<Annotation> objFromPoint = getAnnotsByStartNode(currentNode
+              .getId());
       if(objFromPoint != null) {
         annotsIter = objFromPoint.iterator();
         while(annotsIter.hasNext()) {
@@ -468,12 +477,14 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
     Iterator<Annotation> annotsIter;
     Node currentNode;
     Annotation currentAnnot;
-    // find all the annots that start strictly before the start offset and end
+    // find all the annots that start strictly before the start offset
+    // and end
     // strictly after it
     nodesIter = nodesByOffset.headMap(startOffset).values().iterator();
     while(nodesIter.hasNext()) {
       currentNode = (Node)nodesIter.next();
-      Collection<Annotation> objFromPoint = getAnnotsByStartNode(currentNode.getId());
+      Collection<Annotation> objFromPoint = getAnnotsByStartNode(currentNode
+              .getId());
       if(objFromPoint == null) continue;
       annotsIter = objFromPoint.iterator();
       while(annotsIter.hasNext()) {
@@ -484,13 +495,15 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
         } // if
       } // while
     }
-    // find all the annots that start at or after the start offset but strictly
+    // find all the annots that start at or after the start offset but
+    // strictly
     // before the end offset
     nodesIter = nodesByOffset.subMap(startOffset, endOffset).values()
             .iterator();
     while(nodesIter.hasNext()) {
       currentNode = (Node)nodesIter.next();
-      Collection<Annotation> objFromPoint = getAnnotsByStartNode(currentNode.getId());
+      Collection<Annotation> objFromPoint = getAnnotsByStartNode(currentNode
+              .getId());
       if(objFromPoint == null) continue;
       annotsIter = objFromPoint.iterator();
       while(annotsIter.hasNext()) {
@@ -518,19 +531,22 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
    */
   public AnnotationSet getContained(Long startOffset, Long endOffset) {
     // the result will include all the annotations that either:
-    // start at a position between the start and end before the end offsets
+    // start at a position between the start and end before the end
+    // offsets
     if(annotsByStartNode == null) indexByStartOffset();
     AnnotationSet resultSet = new AnnotationSetImpl(doc);
     Iterator nodesIter;
     Node currentNode;
     Iterator<Annotation> annotIter;
-    // find all the annots that start at or after the start offset but strictly
+    // find all the annots that start at or after the start offset but
+    // strictly
     // before the end offset
     nodesIter = nodesByOffset.subMap(startOffset, endOffset).values()
             .iterator();
     while(nodesIter.hasNext()) {
       currentNode = (Node)nodesIter.next();
-      Collection<Annotation> objFromPoint = getAnnotsByStartNode(currentNode.getId());
+      Collection<Annotation> objFromPoint = getAnnotsByStartNode(currentNode
+              .getId());
       if(objFromPoint == null) continue;
       // loop through the annotations and find only those that
       // also end before endOffset
@@ -671,7 +687,8 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
     if(nodesByOffset == null) {
       indexByStartOffset();
     }
-    // find existing nodes if appropriate nodes don't already exist, create them
+    // find existing nodes if appropriate nodes don't already exist,
+    // create them
     Node startNode = (Node)nodesByOffset.getNextOf(start);
     if(startNode == null || !startNode.getOffset().equals(start))
       startNode = new NodeImpl(doc.getNextNodeId(), start);
@@ -698,7 +715,8 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
     if(nodesByOffset == null) {
       indexByStartOffset();
     }
-    // find existing nodes if appropriate nodes don't already exist, create them
+    // find existing nodes if appropriate nodes don't already exist,
+    // create them
     Node startNode = (Node)nodesByOffset.getNextOf(start);
     if(startNode == null || !startNode.getOffset().equals(start))
       startNode = new NodeImpl(doc.getNextNodeId(), start);
@@ -763,15 +781,18 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
     }
     // if there's no appropriate index give up
     if(annotsByStartNode == null) return;
-    // get the annotations that start at the same node, or create new set
+    // get the annotations that start at the same node, or create new
+    // set
     Object thisNodeObject = annotsByStartNode.get(startNode.getId());
     if(thisNodeObject == null) {
       // put directly the annotation
       annotsByStartNode.put(startNode.getId(), a);
-    } else { // already something there : a single Annotation or a Collection
+    } else { // already something there : a single Annotation or a
+      // Collection
       Set<Annotation> newCollection = null;
       if(thisNodeObject instanceof Annotation) {
-        // we need to create a set - we have more than one annotation starting
+        // we need to create a set - we have more than one annotation
+        // starting
         // at this Node
         if(thisNodeObject.equals(a)) return;
         newCollection = new HashSet<Annotation>(3);
@@ -794,12 +815,15 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
     // make sure we have the indices computed
     indexByStartOffset();
     if(end.compareTo(start) > 0) {
-      // get the nodes that need to be processed (the nodes internal to the
+      // get the nodes that need to be processed (the nodes internal to
+      // the
       // removed section plus the marginal ones
       List affectedNodes = new ArrayList(nodesByOffset.subMap(start,
               new Long(end.longValue() + 1)).values());
-      // if we have more than 1 node we need to delete all apart from the first
-      // and move the annotations so that they refer to the one we keep (the
+      // if we have more than 1 node we need to delete all apart from
+      // the first
+      // and move the annotations so that they refer to the one we keep
+      // (the
       // first)
       NodeImpl firstNode = null;
       if(!affectedNodes.isEmpty()) {
@@ -843,10 +867,11 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
         while(annIter.hasNext()) {
           AnnotationImpl anAnnot = (AnnotationImpl)annIter.next();
           anAnnot.start = firstNode;
-          // remove the modified annotation if it has just become zero-length
-          if(anAnnot.start == anAnnot.end){
+          // remove the modified annotation if it has just become
+          // zero-length
+          if(anAnnot.start == anAnnot.end) {
             remove(anAnnot);
-          }else{
+          } else {
             addToStartOffsetIndex(anAnnot);
           }
         }
@@ -854,17 +879,18 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
         while(annIter.hasNext()) {
           AnnotationImpl anAnnot = (AnnotationImpl)annIter.next();
           anAnnot.end = firstNode;
-          //remove the modified annotation if it has just become zero-length
-          if(anAnnot.start == anAnnot.end){
+          // remove the modified annotation if it has just become
+          // zero-length
+          if(anAnnot.start == anAnnot.end) {
             remove(anAnnot);
           }
         }
         // remove the unused nodes inside the area
         for(int i = 1; i < affectedNodes.size(); i++) {
-          Node aNode = (Node)affectedNodes.get(i);          
+          Node aNode = (Node)affectedNodes.get(i);
           nodesByOffset.remove(aNode.getOffset());
           annotsByStartNode.remove(aNode);
-        } 
+        }
         // repair the first node
         // remove from offset index
         nodesByOffset.remove(firstNode.getOffset());
@@ -874,14 +900,16 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
         nodesByOffset.put(firstNode.getOffset(), firstNode);
       }
     }
-    // now handle the insert and/or update the rest of the nodes' position
+    // now handle the insert and/or update the rest of the nodes'
+    // position
     // get the user selected behaviour (defaults to append)
     boolean shouldPrepend = Gate.getUserConfig().getBoolean(
             GateConstants.DOCEDIT_INSERT_PREPEND).booleanValue();
     long s = start.longValue(), e = end.longValue();
     long rlen = // length of the replacement value
     ((replacement == null) ? 0 : replacement.size().longValue());
-    // update the offsets and the index by offset for the rest of the nodes
+    // update the offsets and the index by offset for the rest of the
+    // nodes
     List nodesAfterReplacement = new ArrayList(nodesByOffset.tailMap(start)
             .values());
     // remove from the index by offset
@@ -1040,15 +1068,15 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
     ObjectOutputStream.PutField pf = out.putFields();
     pf.put("name", this.name);
     pf.put("doc", this.doc);
-//    
-//    out.writeObject(this.name);
-//    out.writeObject(this.doc);
+    //    
+    // out.writeObject(this.name);
+    // out.writeObject(this.doc);
     // save only the annotations
     // in an array that will prevent the need for casting
     // when deserializing
     annotations = new Annotation[this.annotsById.size()];
     annotations = this.annotsById.values().toArray(annotations);
-//    out.writeObject(annotations);
+    // out.writeObject(annotations);
     pf.put("annotations", this.annotations);
     out.writeFields();
     annotations = null;
@@ -1066,27 +1094,26 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
     boolean isIndexedByType = false;
     boolean isIndexedByStartNode = false;
     this.annotations = (Annotation[])gf.get("annotations", null);
-    if(this.annotations == null){
-      //old style serialised version
-      Map<Integer, Annotation> annotsByIdMap = (Map<Integer, Annotation>)
-        gf.get("annotsById", null);
-      if(annotsByIdMap == null) throw new IOException(
-              "Invalid serialised data: neither annotations array or map by id" +
-              " are present.");
+    if(this.annotations == null) {
+      // old style serialised version
+      Map<Integer, Annotation> annotsByIdMap = (Map<Integer, Annotation>)gf
+              .get("annotsById", null);
+      if(annotsByIdMap == null)
+        throw new IOException(
+                "Invalid serialised data: neither annotations array or map by id"
+                        + " are present.");
       annotations = annotsByIdMap.values().toArray(new Annotation[]{});
-    }else{
-      //new style serialised version
+    } else {
+      // new style serialised version
       isIndexedByType = in.readBoolean();
       isIndexedByStartNode = in.readBoolean();
     }
-    
-    
-//    this.name = (String)in.readObject();
-//    this.doc = (DocumentImpl)in.readObject();
-//    Annotation[] annotations = (Annotation[])in.readObject();
+    // this.name = (String)in.readObject();
+    // this.doc = (DocumentImpl)in.readObject();
+    // Annotation[] annotations = (Annotation[])in.readObject();
     // do we need to create the indices?
-//    boolean isIndexedByType = in.readBoolean();
-//    boolean isIndexedByStartNode = in.readBoolean();
+    // boolean isIndexedByType = in.readBoolean();
+    // boolean isIndexedByStartNode = in.readBoolean();
     this.annotsById = new HashMap<Integer, Annotation>(annotations.length);
     // rebuilds the indices if required
     if(isIndexedByType) {
@@ -1097,7 +1124,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements Annota
       annotsByStartNode = new HashMap<Integer, Object>(annotations.length);
     }
     // add all the annotations one by one
-    for (int i=0;i<annotations.length;i++) {
+    for(int i = 0; i < annotations.length; i++) {
       add(annotations[i]);
     }
     annotations = null;
