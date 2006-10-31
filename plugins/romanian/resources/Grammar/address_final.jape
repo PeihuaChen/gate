@@ -1,7 +1,7 @@
 // address_final.jape
 
 Phase:	address_final
-Input:  Token SpaceToken Lookup Street Block Scara Etaj Apart TempLocation Url Ip Email
+Input:  Token SpaceToken Lookup Street Block Scara Etaj Apart TempLocation Url Ip Email Phone
 Options: control = appelt
 
 ////////////////////////////////////////////////////////////
