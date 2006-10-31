@@ -11,6 +11,10 @@ Rule: Number1
 -->
 :NumberName.NMB = {kind = "number", subtype= "number", rule = "Number1"}
 
+/*
+// commented this rule out as it uses TIME and DATE not specified in input
+// headers, and I have no idea if adding them will mess other rules up
+
 Rule: Number1_exception
 Priority: 50
 (
@@ -23,6 +27,7 @@ Priority: 50
 )
 -->
 {}
+*/
 
 Rule: Number2
 (
