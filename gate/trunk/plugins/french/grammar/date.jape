@@ -356,6 +356,10 @@ Rule: TimeDigitalContextConj
 
 // Date Rules
 
+// commented out this rule because Date and Person are not included in the 
+// Input headers and I have no idea if adding them will mess up other rules
+
+/*
 Rule: IgnoreDatePerson
 Priority: 500
 (
@@ -365,7 +369,7 @@ Priority: 500
 :date
 -->
 {}
-
+*/
 
 
 Rule:	DateSlash           // UK only

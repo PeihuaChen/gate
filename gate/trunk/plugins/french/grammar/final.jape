@@ -16,7 +16,7 @@
 //note: organization should be included as part of the address ??
 
 Phase:	Final
-Input: Token Lookup Jobtitle TempPerson TempLocation TempOrganization TempDate TempTime TempYear TempZone Street Postcode Email Url Phone Ip TempIdentifier TempSpecs
+Input: Token Lookup JobTitle TempPerson TempLocation TempOrganization TempDate TempTime TempYear TempZone Street Postcode Email Url Phone Ip TempIdentifier TempSpecs
 Options: control = appelt
 
 
@@ -624,12 +624,12 @@ Rule: UnknownPerson
 Priority: 5
 ( 
  {Token.category == NNP}
- ((SPACE|{Token.string == "-"})
+ (({Token.string == "-"})?
   {Token.category == NNP})?
- (SPACE {Token.category == NNP})?
- (SPACE {Token.category == NNP})?
+ ( {Token.category == NNP})?
+ ( {Token.category == NNP})?
 ):unknown
- (SPACE)
+ 
 (
  {TempPerson}
 ):person

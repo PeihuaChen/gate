@@ -14,7 +14,7 @@
 */
 
 Phase:	NameContext
-Input: Lookup Unknown Person Token Organization
+Input: Lookup Unknown Person Token Organization Location
 Options: control = appelt
 
 Rule: Jobtitle1
