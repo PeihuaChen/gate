@@ -37,51 +37,17 @@ Rule: MoneyNumberCurrency
 ):tag
 -->
 :tag.Money = {rule = MoneyNumberCurrencyTest}
-/* {
- gate.AnnotationSet tagAS = (gate.AnnotationSet)bindings.get("tag");
- 
- // get Token info associated with the tag found
- 
-gate.AnnotationSet tokenAS = inputAS.get("Token", 
-tagAS.firstNode().getOffset(),tagAS.lastNode().getOffset());
- 
-//create new annotation									     
-	gate.FeatureMap features = Factory.newFeatureMap();
-	features.put("rule", "MoneyNumberCurrency");
-	outputAS.add(tokenAS.firstNode(),
-	                       tokenAS.lastNode(), 
-			       "Money", features);
-}
-*/
 
 
 Rule: MoneyNumberUnitCurrency
 // e.g. millions of pounds
 (
  (DIGIT)?
- //{Lookup.majorType == number_unit}
- ({SpaceToken})?
  {Lookup.majorType == currency_unit}
 ):tag
 -->
 :tag.Money = {rule = MoneyNumberUnitCurrencyTest}
-/*
- {
- gate.AnnotationSet tagAS = (gate.AnnotationSet)bindings.get("tag");
- 
- // get Token info associated with the tag found
- 
-gate.AnnotationSet tokenAS = inputAS.get("Token", 
-tagAS.firstNode().getOffset(),tagAS.lastNode().getOffset());
- 
-//create new annotation									     
-	gate.FeatureMap features = Factory.newFeatureMap();
-	features.put("rule", "MoneyNumberUnitCurrency");
-	outputAS.add(tokenAS.firstNode(),
-	                       tokenAS.lastNode(), 
-			       "Money", features);
-}
-*/
+
 
 Rule: MoneyPrefixNumber
 (
