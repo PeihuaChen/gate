@@ -14,7 +14,7 @@
 */
 
 Phase:	NameContext
-Input: LookupUnknown Lookup Unknown Person Token Organization JobTitle Break Control
+Input: LookupUnknown Lookup Unknown Person Token Location Organization JobTitle Break Control
 Options: control = appelt
 
 Rule: Jobtitle1
