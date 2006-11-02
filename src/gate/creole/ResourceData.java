@@ -18,6 +18,7 @@ package gate.creole;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -132,6 +133,14 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   
   /** The stack of instantiations */
   protected LinkedList<Resource> instantiationStack = new LinkedList<Resource>();
+  
+  /**
+   * Unmodifiable view of the instantiation stack, returned by
+   * getInstantiations to ensure that the only way to modify the list is
+   * through the add/removeInstantiation methods of this class.
+   */
+  protected List<Resource> unmodifiableInstantiationStack =
+          Collections.unmodifiableList(instantiationStack);
 
   /** This list contains all instances loaded from creole.xml with
    *  AUTOINSTANCE tag.
@@ -144,12 +153,14 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
 
   /** Get the list of instantiations of resources */
   public List<Resource> getInstantiations() {
-    return instantiationStack;
+    return unmodifiableInstantiationStack;
   } // getInstantiations
 
   /** Add an instantiation of the resource to the register of these */
   public void addInstantiation(Resource resource) {
-    instantiationStack.addFirst(resource);
+    synchronized(instantiationStack) {
+      instantiationStack.addFirst(resource);
+    }
   } // addInstantiation
 
   /** This method makes a certain resource persistent by adding it into a
@@ -166,7 +177,9 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
 
   /** Remove an instantiation of the resource from the register of these */
   public void removeInstantiation(Resource resource) {
-    instantiationStack.remove(resource);
+    synchronized(instantiationStack) {
+      instantiationStack.remove(resource);
+    }
     //persistantInstantiationList.remove(resource);
   } // removeInstantiation
 
