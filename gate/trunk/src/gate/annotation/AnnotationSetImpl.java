@@ -240,10 +240,10 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   /**
    * Get all annotations.
    * 
-   * @return an ImmutableAnnotationSet
+   * @return an ImmutableAnnotationSet, empty or not
    */
   public AnnotationSet get() {
-    if (annotsById.isEmpty()) return null;
+    if (annotsById.isEmpty()) return emptyAnnotationSet;
     return new ImmutableAnnotationSetImpl(doc, annotsById.values());
   } // get()
 
@@ -255,8 +255,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   public AnnotationSet get(String type) {
     if(annotsByType == null) indexByType();
     AnnotationSet byType = annotsByType.get(type);
-    // if null return null?
-    if (byType==null)return null;    
+    if (byType==null)return emptyAnnotationSet;    
     // convert the mutable AS into an immutable one
     return byType.get();
   } // get(type)
@@ -280,7 +279,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
         }
       }
     } // while
-    if(annotations.isEmpty()) return null;
+    if(annotations.isEmpty()) return emptyAnnotationSet;
     return new ImmutableAnnotationSetImpl(doc, annotations);
   } // get(types)
 
@@ -325,7 +324,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       // (a.getFeatures().entrySet().containsAll(constraints.entrySet()))
       if(a.getFeatures().subsumes(constraints)) annotationsToAdd.add(a);
     } // while
-    if(annotationsToAdd.isEmpty()) return null;
+    if(annotationsToAdd.isEmpty()) return emptyAnnotationSet;
     return new ImmutableAnnotationSetImpl(doc, annotationsToAdd);
   } // get(type, constraints)
 
@@ -352,7 +351,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       if(a.getFeatures().keySet().containsAll(featureNames))
         annotationsToAdd.add(a);
     } // while
-    if(annotationsToAdd.isEmpty()) return null;
+    if(annotationsToAdd.isEmpty()) return emptyAnnotationSet;
     return new ImmutableAnnotationSetImpl(doc, annotationsToAdd);
   } // get(type, featureNames)
 
@@ -368,7 +367,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     // there
     Node nextNode = (Node)nodesByOffset.getNextOf(offset);
     if(nextNode == null) // no nodes at or beyond this offset
-      return null;
+      return emptyAnnotationSet;
     Collection<Annotation> annotationsToAdd = getAnnotsByStartNode(nextNode
             .getId());
     // get ready for next test
@@ -381,7 +380,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
               .longValue() + 1));
     }
     // res it either null (no suitable node found) or the correct result
-    if(annotationsToAdd == null) return null;
+    if(annotationsToAdd == null) return emptyAnnotationSet;
     // otherwise it is a collection - which we'll convert to an
     // ImmutableAnnotationSet
     return new ImmutableAnnotationSetImpl(doc, annotationsToAdd);
@@ -538,7 +537,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   public AnnotationSet get(String type, FeatureMap constraints, Long offset) {
     // select by offset
     AnnotationSet nextAnnots = (AnnotationSet)get(offset);
-    if(nextAnnots == null) return null;
+    if(nextAnnots == null) return emptyAnnotationSet;
     // select by type and constraints from the next annots
     return nextAnnots.get(type, constraints);
   } // get(type, constraints, offset)

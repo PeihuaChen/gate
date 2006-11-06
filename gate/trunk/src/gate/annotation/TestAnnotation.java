@@ -332,7 +332,7 @@ public class TestAnnotation extends TestCase
     as.add(new Long(10), new Long(20), "T1", fm);    // 10
 
     asBuf = as.get("T");
-    assertEquals(null, asBuf);
+    assertEquals(0, asBuf.size());
 
     asBuf = as.get("T1");
     assertEquals(7, asBuf.size());
@@ -406,7 +406,7 @@ public class TestAnnotation extends TestCase
     as.add(startNode, endNode, "T1", fm);    // 10
 
     asBuf = as.get("T");
-    assertEquals(null, asBuf);
+    assertEquals(0, asBuf.size());
 
     asBuf = as.get("T1");
     assertEquals(7, asBuf.size());
@@ -471,24 +471,24 @@ public class TestAnnotation extends TestCase
     constraints.put("pos", "JJ");
     //Out.println(constraints);
     asBuf = basicAS.get("T1", constraints, new Long(0));
-    assertEquals(null, asBuf);
+    assertEquals(0, asBuf.size());
     asBuf = basicAS.get("T1", constraints, new Long(14));
     assertEquals(2, asBuf.size());
 
     constraints.put("author", "valentin");
     asBuf = basicAS.get("T1", constraints, new Long(14));
-    assertEquals(null, asBuf);
+    assertEquals(0, asBuf.size());
 
     constraints.put("author", "the devil himself");
     asBuf = basicAS.get("T1", constraints, new Long(14));
     assertEquals(2, asBuf.size());
 
     asBuf = basicAS.get("T1", constraints, new Long(5));
-    assertEquals(null, asBuf);
+    assertEquals(0, asBuf.size());
 
     constraints.put("this feature isn't", "there at all");
     asBuf = basicAS.get("T1", constraints, new Long(14));
-    assertEquals(null, asBuf);
+    assertEquals(0, asBuf.size());
 
   } // testComplexGet()
 
@@ -509,12 +509,13 @@ public class TestAnnotation extends TestCase
 
     asBuf = basicAS.get(new Long(9));
     assertEquals(4, asBuf.size());
+    
     assertEquals(null, basicAS.get(new Integer(0)));
     basicAS.remove(basicAS.get(new Integer(8)));
     assertEquals(9, basicAS.size());
     basicAS.removeAll(basicAS);
-    assertEquals(null, basicAS.get());
-    assertEquals(null, basicAS.get("T1"));
+    assertEquals(0, basicAS.get().size());
+    assertEquals(0, basicAS.get("T1").size());
     assertEquals(null, basicAS.get(new Integer(0)));
   } // testRemove()
 
