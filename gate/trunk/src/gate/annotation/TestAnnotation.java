@@ -126,6 +126,119 @@ public class TestAnnotation extends TestCase
 
   } // testOffsetIndex()
 
+  public void testImmutability() {
+    Long l0= new Long(0);
+    Long l1= new Long(20);
+    FeatureMap fm = new SimpleFeatureMapImpl();
+    
+    // simple get
+    AnnotationSet immutable = basicAS.get();
+    assertTrue(_subtestImmutability(immutable));
+    
+    // get Long
+    immutable = basicAS.get(l0);
+    assertTrue(_subtestImmutability(immutable));
+    
+    // get two Longs
+    immutable = basicAS.get(l0, l1);
+    assertTrue(_subtestImmutability(immutable));
+    
+    // get Type
+    immutable = basicAS.get("T1");
+    assertTrue(_subtestImmutability(immutable));
+    
+    // get Types
+    Set<String> types = new HashSet();
+    types.add ("T1");
+    types.add ("T2");
+    immutable = basicAS.get(types);
+    assertTrue(_subtestImmutability(immutable));
+    
+    // get type + constraint
+    immutable = basicAS.get("T1", fm);
+    assertTrue(_subtestImmutability(immutable));
+    
+    // get type + constraint + Long
+    immutable = basicAS.get("T1", fm, l0);
+    assertTrue(_subtestImmutability(immutable));
+    
+    // type + Long + Long
+    immutable = basicAS.get("T1", l0, l1);
+    assertTrue(_subtestImmutability(immutable));
+    
+    // type + Set of feature names
+    Set annotset = new HashSet();
+    annotset.add("pos");
+    immutable = basicAS.get("T3",annotset);
+    assertTrue(_subtestImmutability(immutable));
+  }
+  
+  // try all possible sorts of changes to an immutable AS
+  private final boolean _subtestImmutability(AnnotationSet immutable){
+    boolean threwException  = false;
+    Node startNode = null;
+    
+    try {
+      immutable.add(null, null, null, null, null);
+    } 
+    catch(InvalidOffsetException e) {}
+    catch(UnsupportedOperationException e) {threwException=true;}
+    
+    if (threwException==false)return false;
+    
+    try {
+    immutable.add(startNode, null, null, null);
+    }
+    catch(UnsupportedOperationException e){threwException=true;}
+    
+    if (threwException==false)return false;
+    
+    try {
+      immutable.add(new Long(0), null, null, null);
+    } 
+    catch(InvalidOffsetException e) {}
+    catch(UnsupportedOperationException e){threwException=true;}
+    
+    if (threwException==false)return false;
+    
+    try {
+    immutable.add(null);}
+    catch(UnsupportedOperationException e){threwException=true;}
+    
+    if (threwException==false)return false;
+    
+    try {
+    immutable.removeAll(null);}
+    catch(UnsupportedOperationException e){threwException=true;}
+    
+    if (threwException==false)return false;
+    
+    try {
+    immutable.addAll(null);}
+    catch(UnsupportedOperationException e){threwException=true;}
+    
+    if (threwException==false)return false;
+    
+    try {
+    immutable.remove(null);}
+    catch(UnsupportedOperationException e){threwException=true;}
+    
+    if (threwException==false)return false;
+    
+    try {
+    immutable.retainAll(null);}
+    catch(UnsupportedOperationException e){threwException=true;}
+    
+    if (threwException==false)return false;
+    
+    try {
+    immutable.clear();}
+    catch(UnsupportedOperationException e){threwException=true;}
+    
+    return threwException;
+  }
+  
+  
   /** Test exception throwing */
   public void testExceptions() {
     AnnotationSet as = new AnnotationSetImpl(doc1);

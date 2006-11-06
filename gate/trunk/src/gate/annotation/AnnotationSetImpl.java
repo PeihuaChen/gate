@@ -51,10 +51,10 @@ import gate.util.RBTreeMap;
  * <P>
  * There are four indices: annotation by id, annotations by type, annotations by
  * start node and nodes by offset. The last two jointly provide positional
- * indexing; construction of these is triggered by indexByStart(), or
- * by calling a get method that selects on offset. The type index is triggered
- * by indexByType(), or calling a get method that selects on type. The id index
- * is always present.
+ * indexing; construction of these is triggered by indexByStart(), or by calling
+ * a get method that selects on offset. The type index is triggered by
+ * indexByType(), or calling a get method that selects on type. The id index is
+ * always present.
  */
 public class AnnotationSetImpl extends AbstractSet<Annotation> implements
                                                               AnnotationSet {
@@ -83,6 +83,13 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   protected transient Vector annotationSetListeners;
   private transient Vector gateListeners;
 
+  // Empty AnnotationSet to be returned instead of null
+   public static AnnotationSet emptyAnnotationSet;
+  
+   static {
+   emptyAnnotationSet = new ImmutableAnnotationSetImpl(null,null);
+   }
+  
   /** Construction from Document. */
   public AnnotationSetImpl(Document doc) {
     annotsById = new HashMap<Integer, Annotation>();
@@ -101,7 +108,6 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     // the original annotationset is of the same implementation
     if(c instanceof AnnotationSetImpl) {
       AnnotationSetImpl theC = (AnnotationSetImpl)c;
-      annotsById = new HashMap<Integer, Annotation>();
       annotsById.putAll(theC.annotsById);
       if(theC.annotsByStartNode != null) {
         annotsByStartNode = new HashMap<Integer, Object>(Gate.HASH_STH_SIZE);
@@ -114,16 +120,16 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       if(theC.nodesByOffset != null) {
         nodesByOffset = (RBTreeMap)theC.nodesByOffset.clone();
       }
-    } 
+    }
     // the implementation is not the default one
     // let's add the annotations one by one
     else {
       Iterator iterannots = c.iterator();
-      while (iterannots.hasNext()){
+      while(iterannots.hasNext()) {
         add((Annotation)iterannots.next());
       }
     }
-  } 
+  }
 
   /**
    * This inner class serves as the return value from the iterator() method.
@@ -233,40 +239,49 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
 
   /**
    * Get all annotations.
+   * 
+   * @return an ImmutableAnnotationSet
    */
   public AnnotationSet get() {
-    AnnotationSetImpl resultSet = new AnnotationSetImpl(doc);
-    resultSet.addAllKeepIDs(annotsById.values());
-    if(resultSet.isEmpty()) return null;
-    return resultSet;
+    if (annotsById.isEmpty()) return null;
+    return new ImmutableAnnotationSetImpl(doc, annotsById.values());
   } // get()
 
-  /** Select annotations by type */
+  /**
+   * Select annotations by type
+   * 
+   * @return an ImmutableAnnotationSet
+   */
   public AnnotationSet get(String type) {
     if(annotsByType == null) indexByType();
-    // the aliasing that happens when returning a set directly from the
-    // types index can cause concurrent access problems; but the fix
-    // below
-    // breaks the tests....
-    // AnnotationSet newSet =
-    // new AnnotationSetImpl((Collection) annotsByType.get(type));
-    // return newSet;
-    return annotsByType.get(type);
+    AnnotationSet byType = annotsByType.get(type);
+    // if null return null?
+    if (byType==null)return null;    
+    // convert the mutable AS into an immutable one
+    return byType.get();
   } // get(type)
 
-  /** Select annotations by a set of types. Expects a Set of String. */
+  /**
+   * Select annotations by a set of types. Expects a Set of String.
+   * 
+   * @return an ImmutableAnnotationSet
+   */
   public AnnotationSet get(Set<String> types) throws ClassCastException {
     if(annotsByType == null) indexByType();
     Iterator<String> iter = types.iterator();
-    AnnotationSetImpl resultSet = new AnnotationSetImpl(doc);
+    List<Annotation> annotations = new ArrayList<Annotation>();
     while(iter.hasNext()) {
       String type = iter.next();
       AnnotationSet as = annotsByType.get(type);
-      if(as != null) resultSet.addAllKeepIDs(as);
-      // need an addAllOfOneType method
+      if(as != null) {
+        Iterator iterAnnot = as.iterator();
+        while(iterAnnot.hasNext()) {
+          annotations.add((Annotation)iterAnnot.next());
+        }
+      }
     } // while
-    if(resultSet.isEmpty()) return null;
-    return resultSet;
+    if(annotations.isEmpty()) return null;
+    return new ImmutableAnnotationSetImpl(doc, annotations);
   } // get(types)
 
   /**
@@ -299,8 +314,8 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     if(annotsByType == null) indexByType();
     AnnotationSet typeSet = get(type);
     if(typeSet == null) return null;
-    AnnotationSet resultSet = new AnnotationSetImpl(doc);
     Iterator<Annotation> iter = typeSet.iterator();
+    List<Annotation> annotationsToAdd = new ArrayList<Annotation>();
     while(iter.hasNext()) {
       Annotation a = iter.next();
       // we check for matching constraints by simple equality. a
@@ -308,10 +323,10 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       // key/value pairs from the constraints map
       // if
       // (a.getFeatures().entrySet().containsAll(constraints.entrySet()))
-      if(a.getFeatures().subsumes(constraints)) resultSet.add(a);
+      if(a.getFeatures().subsumes(constraints)) annotationsToAdd.add(a);
     } // while
-    if(resultSet.isEmpty()) return null;
-    return resultSet;
+    if(annotationsToAdd.isEmpty()) return null;
+    return new ImmutableAnnotationSetImpl(doc, annotationsToAdd);
   } // get(type, constraints)
 
   /** Select annotations by type and feature names */
@@ -324,7 +339,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       // if none exist, then return coz nothing left to do
       if(typeSet == null) return null;
     }
-    AnnotationSet resultSet = new AnnotationSetImpl(doc);
+    List<Annotation> annotationsToAdd = new ArrayList<Annotation>();
     Iterator<Annotation> iter = null;
     if(type != null)
       iter = typeSet.iterator();
@@ -334,17 +349,18 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       // we check for matching constraints by simple equality. a
       // feature map satisfies the constraints if it contains all the
       // key/value pairs from the constraints map
-      if(a.getFeatures().keySet().containsAll(featureNames)) resultSet.add(a);
+      if(a.getFeatures().keySet().containsAll(featureNames))
+        annotationsToAdd.add(a);
     } // while
-    if(resultSet.isEmpty()) return null;
-    return resultSet;
+    if(annotationsToAdd.isEmpty()) return null;
+    return new ImmutableAnnotationSetImpl(doc, annotationsToAdd);
   } // get(type, featureNames)
 
   /**
    * Select annotations by offset. This returns the set of annotations whose
    * start node is the least such that it is less than or equal to offset. If a
    * positional index doesn't exist it is created. If there are no nodes at or
-   * beyond the offset param then it will return null.
+   * beyond the offset param then it will return an empty annotationset.
    */
   public AnnotationSet get(Long offset) {
     if(annotsByStartNode == null) indexByStartOffset();
@@ -353,23 +369,22 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     Node nextNode = (Node)nodesByOffset.getNextOf(offset);
     if(nextNode == null) // no nodes at or beyond this offset
       return null;
-    Collection<Annotation> res = getAnnotsByStartNode(nextNode.getId());
+    Collection<Annotation> annotationsToAdd = getAnnotsByStartNode(nextNode
+            .getId());
     // get ready for next test
     nextNode = (Node)nodesByOffset.getNextOf(new Long(offset.longValue() + 1));
     // skip all the nodes that have no starting annotations
-    while(res == null && nextNode != null) {
-      res = getAnnotsByStartNode(nextNode.getId());
+    while(annotationsToAdd == null && nextNode != null) {
+      annotationsToAdd = getAnnotsByStartNode(nextNode.getId());
       // get ready for next test
       nextNode = (Node)nodesByOffset.getNextOf(new Long(nextNode.getOffset()
               .longValue() + 1));
     }
     // res it either null (no suitable node found) or the correct result
-    if(res == null) return null;
-    // otherwise it is a collection - which we'll convert to a normal
-    // AnnotationSet
-    AnnotationSetImpl as = new AnnotationSetImpl(doc);
-    as.addAll(res);
-    return as;
+    if(annotationsToAdd == null) return null;
+    // otherwise it is a collection - which we'll convert to an
+    // ImmutableAnnotationSet
+    return new ImmutableAnnotationSetImpl(doc, annotationsToAdd);
   } // get(offset)
 
   /**
@@ -380,6 +395,8 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * <li>start before the start offset and end strictly after it</li>
    * <li>OR</li>
    * <li>start at a position between the start and the end offsets</li>
+   * 
+   * @return an ImmutableAnnotationSet
    */
   public AnnotationSet get(Long startOffset, Long endOffset) {
     // the result will include all the annotations that either:
@@ -387,7 +404,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     // or
     // -start at a position between the start and the end offsets
     if(annotsByStartNode == null) indexByStartOffset();
-    AnnotationSetImpl resultSet = new AnnotationSetImpl(doc);
+    List<Annotation> annotationsToAdd = new ArrayList<Annotation>();
     Iterator nodesIter;
     Iterator<Annotation> annotsIter;
     Node currentNode;
@@ -405,7 +422,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       while(annotsIter.hasNext()) {
         currentAnnot = annotsIter.next();
         if(currentAnnot.getEndNode().getOffset().compareTo(startOffset) > 0) {
-          resultSet.add(currentAnnot);
+          annotationsToAdd.add(currentAnnot);
         }
       }
     }
@@ -419,9 +436,9 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       Collection<Annotation> objectAtNode = getAnnotsByStartNode(currentNode
               .getId());
       if(objectAtNode == null) continue;
-      resultSet.addAllKeepIDs(objectAtNode);
+      annotationsToAdd.addAll(objectAtNode);
     }
-    return resultSet;
+    return new ImmutableAnnotationSetImpl(doc, annotationsToAdd);
   } // get(startOfset, endOffset)
 
   /**
@@ -434,7 +451,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     // the result will include all the annotations that
     // start at the start offset and end strictly at the end offset
     if(annotsByStartNode == null) indexByStartOffset();
-    AnnotationSet resultSet = new AnnotationSetImpl(doc);
+    List<Annotation> annotationsToAdd = null;
     Iterator<Annotation> annotsIter;
     Node currentNode;
     Annotation currentAnnot;
@@ -448,12 +465,13 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
         while(annotsIter.hasNext()) {
           currentAnnot = annotsIter.next();
           if(currentAnnot.getEndNode().getOffset().compareTo(endOffset) == 0) {
-            resultSet.add(currentAnnot);
+            if(annotationsToAdd == null) annotationsToAdd = new ArrayList<Annotation>();
+            annotationsToAdd.add(currentAnnot);
           } // if
         } // while
       } // if
     } // if
-    return resultSet;
+    return new ImmutableAnnotationSetImpl(doc, annotationsToAdd);
   } // getStrict(startOfset, endOffset)
 
   /**
@@ -472,7 +490,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     // or
     // -start at a position between the start and the end offsets
     if(annotsByStartNode == null) indexByStartOffset();
-    AnnotationSet resultSet = new AnnotationSetImpl(doc);
+    List<Annotation> annotationsToAdd = new ArrayList<Annotation>();
     Iterator nodesIter;
     Iterator<Annotation> annotsIter;
     Node currentNode;
@@ -491,7 +509,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
         currentAnnot = annotsIter.next();
         if(currentAnnot.getType().equals(neededType)
                 && currentAnnot.getEndNode().getOffset().compareTo(startOffset) > 0) {
-          resultSet.add(currentAnnot);
+          annotationsToAdd.add(currentAnnot);
         } // if
       } // while
     }
@@ -509,11 +527,11 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       while(annotsIter.hasNext()) {
         currentAnnot = annotsIter.next();
         if(currentAnnot.getType().equals(neededType)) {
-          resultSet.add(currentAnnot);
+          annotationsToAdd.add(currentAnnot);
         } // if
       } // while
     }
-    return resultSet;
+    return new ImmutableAnnotationSetImpl(doc, annotationsToAdd);
   } // get(type, startOfset, endOffset)
 
   /** Select annotations by type, features and offset */
@@ -534,7 +552,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     // start at a position between the start and end before the end
     // offsets
     if(annotsByStartNode == null) indexByStartOffset();
-    AnnotationSet resultSet = new AnnotationSetImpl(doc);
+    List<Annotation> annotationsToAdd = null;
     Iterator nodesIter;
     Node currentNode;
     Iterator<Annotation> annotIter;
@@ -553,11 +571,13 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       annotIter = objFromPoint.iterator();
       while(annotIter.hasNext()) {
         Annotation annot = annotIter.next();
-        if(annot.getEndNode().getOffset().compareTo(endOffset) <= 0)
-          resultSet.add(annot);
+        if(annot.getEndNode().getOffset().compareTo(endOffset) <= 0) {
+          if(annotationsToAdd == null) annotationsToAdd = new ArrayList<Annotation>();
+          annotationsToAdd.add(annot);
+        }
       }
     }
-    return resultSet;
+    return new ImmutableAnnotationSetImpl(doc, annotationsToAdd);
   } // get(startOfset, endOffset)
 
   /** Get the node with the smallest offset */
