@@ -1522,7 +1522,7 @@ Rule: PARTPrePas
 // being VBN
 
 (
-{token.string == "being"}
+{Token.string == "being"}
 (ADVS)
 {Token.category == VBN}
 
