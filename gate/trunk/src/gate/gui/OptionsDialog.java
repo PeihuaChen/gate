@@ -302,8 +302,7 @@ public class OptionsDialog extends JDialog {
     initLocalData();
     initGuiComponents();
     initListeners();
-    textBtn.setSelected(false);
-    fontChooser.setFontValue(textComponentsFont);
+    textBtn.doClick();
     
     pack();
     setLocationRelativeTo(getOwner());
