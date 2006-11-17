@@ -25,9 +25,13 @@ public class OntologyImpl extends TaxonomyImpl implements Ontology {
   protected Set propertyDefinitionSet = new HashSet();
 
   public OInstance addInstance(String name, OClass theClass) {
-    if(instancesByName.containsKey(name))
-      return (OInstance)instancesByName.get(name);
-    OInstance newInstance = new OInstanceImpl(name, null, theClass, this);
+    OInstance newInstance = null;
+    if(instancesByName.containsKey(name)) 
+      newInstance = (OInstance)instancesByName.get(name);
+    else
+      newInstance = new OInstanceImpl(name, null, theClass, this);
+    
+    newInstance.getOClasses().add(theClass);
     instancesByName.put(name, newInstance);
     instances.add(newInstance);
     setModified(true);

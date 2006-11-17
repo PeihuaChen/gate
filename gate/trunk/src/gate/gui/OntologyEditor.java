@@ -1,5 +1,6 @@
 package gate.gui;
 
+import gate.Gate;
 import gate.Resource;
 import gate.creole.AbstractVisualResource;
 import gate.creole.ResourceInstantiationException;
@@ -40,6 +41,7 @@ public class OntologyEditor extends AbstractVisualResource
                                                           implements
                                                           ResizableVisualResource,
                                                           OntologyModificationListener {
+  
   /*
    * (non-Javadoc)
    * 
@@ -61,12 +63,11 @@ public class OntologyEditor extends AbstractVisualResource
     } else {
       ontologyMode = false;
     }
-    
     taxonomy.removeOntologyModificationListener(this);
     rebuildModel();
     taxonomy.addOntologyModificationListener(this);
   }
-  
+
   /**
    * Init method, that creates this object and returns this object as a resource
    */
@@ -211,7 +212,7 @@ public class OntologyEditor extends AbstractVisualResource
    * Initializes various listeners
    */
   protected void initListeners() {
-      tree.getSelectionModel().addTreeSelectionListener(
+    tree.getSelectionModel().addTreeSelectionListener(
             new TreeSelectionListener() {
               public void valueChanged(TreeSelectionEvent e) {
                 int[] selectedRows = tree.getSelectionRows();
@@ -452,10 +453,10 @@ public class OntologyEditor extends AbstractVisualResource
   }
 
   protected void expandNode(JTree tree) {
-      for(int i=0;i<tree.getRowCount();i++) {
-        tree.expandRow(i);
-      }
-      //tree.updateUI();
+    for(int i = 0; i < tree.getRowCount(); i++) {
+      tree.expandRow(i);
+    }
+    // tree.updateUI();
   }
 
   /**
@@ -515,17 +516,12 @@ public class OntologyEditor extends AbstractVisualResource
    */
   protected void rebuildModel() {
     rootNode.removeAllChildren();
-    
     if(ontologyClassesNames == null)
       ontologyClassesNames = new ArrayList();
-    else 
-        ontologyClassesNames.clear();
-    
+    else ontologyClassesNames.clear();
     treeNode2OntoResourceMap = new HashMap();
     reverseMap = new HashMap();
-
     List rootClasses = new ArrayList(taxonomy.getTopClasses());
-    
     Collections.sort(rootClasses, itemComparator);
     addChidrenRec(rootNode, rootClasses, itemComparator);
     propertyRootNode.removeAllChildren();
@@ -542,10 +538,8 @@ public class OntologyEditor extends AbstractVisualResource
     }
     Collections.sort(subList, itemComparator);
     addPropertyChidrenRec(propertyRootNode, subList, itemComparator);
-
     propertyAction.setOntologyClassesNames(ontologyClassesNames);
     subPropertyAction.setOntologyClassesNames(ontologyClassesNames);
-    
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         treeModel.nodeStructureChanged(rootNode);
@@ -586,21 +580,21 @@ public class OntologyEditor extends AbstractVisualResource
       Object aChild = childIter.next();
       DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(aChild);
       parent.add(childNode);
-      
       // we maintain a map of ontology resources and their representing
       // tree nodes
-      ArrayList list = (ArrayList)treeNode2OntoResourceMap.get(aChild);
+      ArrayList list = (ArrayList)treeNode2OntoResourceMap
+              .get(((OntologyResource)aChild).getName());
       if(list == null) {
         list = new ArrayList();
-        treeNode2OntoResourceMap.put(aChild, list);
+        treeNode2OntoResourceMap
+                .put(((OntologyResource)aChild).getName(), list);
       }
       list.add(childNode);
-      reverseMap.put(childNode, aChild);
+      reverseMap.put(childNode, ((OntologyResource)aChild).getName());
       
       if(aChild instanceof TClass) {
         if(!ontologyClassesNames.contains(aChild.toString()))
-            ontologyClassesNames.add(aChild.toString());
-        
+          ontologyClassesNames.add(aChild.toString());
         childNode.setAllowsChildren(true);
         // add all the subclasses
         TClass aClass = (TClass)aChild;
@@ -641,18 +635,18 @@ public class OntologyEditor extends AbstractVisualResource
       Object aChild = childIter.next();
       DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(aChild);
       parent.add(childNode);
-
-    // we maintain a map of ontology resources and their representing
-    // tree nodes
-    ArrayList list = (ArrayList)treeNode2OntoResourceMap.get(aChild);
-    if(list == null) {
-      list = new ArrayList();
-      treeNode2OntoResourceMap.put(aChild, list);
-    }
-    list.add(childNode);
-    reverseMap.put(childNode, aChild);
-
-    if(aChild instanceof Property) {
+      // we maintain a map of ontology resources and their representing
+      // tree nodes
+      ArrayList list = (ArrayList)treeNode2OntoResourceMap
+              .get(((OntologyResource)aChild).getName());
+      if(list == null) {
+        list = new ArrayList();
+        treeNode2OntoResourceMap
+                .put(((OntologyResource)aChild).getName(), list);
+      }
+      list.add(childNode);
+      reverseMap.put(childNode, ((OntologyResource)aChild).getName());
+      if(aChild instanceof Property) {
         childNode.setAllowsChildren(true);
         // add all the subclasses
         Property aProperty = (Property)aChild;
@@ -682,7 +676,6 @@ public class OntologyEditor extends AbstractVisualResource
     Set superClasses = aClass.getSuperClasses(TClass.DIRECT_CLOSURE);
     List list = new ArrayList();
     list.add(aClass);
-    
     if(superClasses == null || superClasses.isEmpty()) {
       // this is a root node
       addChidrenRec(rootNode, list, itemComparator);
@@ -690,11 +683,13 @@ public class OntologyEditor extends AbstractVisualResource
     } else {
       Iterator iter = superClasses.iterator();
       while(iter.hasNext()) {
-        ArrayList superNodeList = (ArrayList) treeNode2OntoResourceMap.get(iter.next());
-        for(int i=0;i<superNodeList.size();i++) {
-         DefaultMutableTreeNode node = (DefaultMutableTreeNode) superNodeList.get(i);
-         addChidrenRec(node, list, itemComparator);
-         treeModel.nodeStructureChanged(node);
+        ArrayList superNodeList = (ArrayList)treeNode2OntoResourceMap
+                .get(((OntologyResource)iter.next()).getName());
+        for(int i = 0; i < superNodeList.size(); i++) {
+          DefaultMutableTreeNode node = (DefaultMutableTreeNode)superNodeList
+                  .get(i);
+          addChidrenRec(node, list, itemComparator);
+          treeModel.nodeStructureChanged(node);
         }
       }
     }
@@ -718,9 +713,11 @@ public class OntologyEditor extends AbstractVisualResource
     } else {
       Iterator iter = superProperties.iterator();
       while(iter.hasNext()) {
-        ArrayList superNodeList = (ArrayList) treeNode2OntoResourceMap.get(iter.next());
-        for(int i=0;i<superNodeList.size();i++) {
-          DefaultMutableTreeNode node = (DefaultMutableTreeNode)superNodeList.get(i);
+        ArrayList superNodeList = (ArrayList)treeNode2OntoResourceMap
+                .get(((OntologyResource)iter.next()).getName());
+        for(int i = 0; i < superNodeList.size(); i++) {
+          DefaultMutableTreeNode node = (DefaultMutableTreeNode)superNodeList
+                  .get(i);
           addPropertyChidrenRec(node, list, itemComparator);
           propertyTreeModel.nodeStructureChanged(node);
         }
@@ -736,14 +733,26 @@ public class OntologyEditor extends AbstractVisualResource
   protected void instanceIsAdded(OntologyModificationEvent e) {
     // we first obtain its superClasses
     OInstance anInstance = (OInstance)e.getResource();
+    // it might be available in gui
+    // we remove it first
+    ArrayList newList = (ArrayList)treeNode2OntoResourceMap
+            .get(((OntologyResource)anInstance).getName());
+    if(newList != null) {
+      for(int i = 0; i < newList.size(); i++) {
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode)newList.get(i);
+        removeFromMap(treeModel, node);
+      }
+    }
     Set superClasses = anInstance.getOClasses();
     List list = new ArrayList();
     list.add(anInstance);
     Iterator iter = superClasses.iterator();
     while(iter.hasNext()) {
-      ArrayList superNodeList = (ArrayList) treeNode2OntoResourceMap.get(iter.next());
-      for(int i=0;i<superNodeList.size();i++) {
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode)superNodeList.get(i);
+      ArrayList superNodeList = (ArrayList)treeNode2OntoResourceMap
+              .get(((OntologyResource)iter.next()).getName());
+      for(int i = 0; i < superNodeList.size(); i++) {
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode)superNodeList
+                .get(i);
         addChidrenRec(node, list, itemComparator);
         treeModel.nodeStructureChanged(node);
       }
@@ -755,7 +764,8 @@ public class OntologyEditor extends AbstractVisualResource
    */
   protected void ontologyResourceIsRemoved(OntologyModificationEvent e) {
     ontologyClassesNames.remove(e.getResource().toString());
-    ArrayList nodeList = (ArrayList)treeNode2OntoResourceMap.get(e.getResource());
+    ArrayList nodeList = (ArrayList)treeNode2OntoResourceMap
+            .get(((OntologyResource)e.getResource()).getName());
     if(nodeList != null) {
       DefaultTreeModel modelToUse = null;
       JTree treeToUse = null;
@@ -774,7 +784,6 @@ public class OntologyEditor extends AbstractVisualResource
     }
   }
 
-  
   private void removeFromMap(DefaultTreeModel model, MutableTreeNode node) {
     if(!node.isLeaf()) {
       Enumeration enumeration = node.children();
@@ -782,21 +791,18 @@ public class OntologyEditor extends AbstractVisualResource
       while(enumeration.hasMoreElements()) {
         children.add(enumeration.nextElement());
       }
-      for(int i=0;i<children.size();i++) {
-        removeFromMap(model, (MutableTreeNode) children.get(i));    
+      for(int i = 0; i < children.size(); i++) {
+        removeFromMap(model, (MutableTreeNode)children.get(i));
       }
     }
-
-    Object resource = reverseMap.get(node);
+    String rName = (String)reverseMap.get(node);
     reverseMap.remove(node);
-    ArrayList list = (ArrayList) treeNode2OntoResourceMap.get(resource);
+    ArrayList list = (ArrayList)treeNode2OntoResourceMap.get(rName);
     list.remove(node);
-    if(list.isEmpty())
-        treeNode2OntoResourceMap.remove(resource);
-
+    if(list.isEmpty()) treeNode2OntoResourceMap.remove(rName);
     model.removeNodeFromParent(node);
   }
-  
+
   /**
    * Should be invoked when a super property is added or deleted
    * 
@@ -804,8 +810,8 @@ public class OntologyEditor extends AbstractVisualResource
    */
   protected void superPropertyAffected(OntologyModificationEvent e) {
     Property p = (Property)e.getResource();
-    ArrayList nodesList = (ArrayList)treeNode2OntoResourceMap.get(p);
-    
+    ArrayList nodesList = (ArrayList)treeNode2OntoResourceMap
+            .get(((OntologyResource)p).getName());
     // we don't know which super property is added or removed
     // so we remove all nodes and add them again
     for(int i = 0; i < nodesList.size(); i++) {
@@ -813,7 +819,6 @@ public class OntologyEditor extends AbstractVisualResource
       removeFromMap(propertyTreeModel, node);
       propertyTreeModel.nodeStructureChanged(node.getParent());
     }
-
     List list = new ArrayList();
     list.add(p);
     // and now add them again
@@ -823,11 +828,11 @@ public class OntologyEditor extends AbstractVisualResource
       while(iter.hasNext()) {
         Property superProperty = (Property)iter.next();
         ArrayList superNodesList = (ArrayList)treeNode2OntoResourceMap
-                .get(superProperty);
+                .get(((OntologyResource)superProperty).getName());
         if(superNodesList != null) {
           for(int i = 0; i < superNodesList.size(); i++) {
             DefaultMutableTreeNode superNode = (DefaultMutableTreeNode)superNodesList
-            .get(i);
+                    .get(i);
             addPropertyChidrenRec(superNode, list, itemComparator);
             propertyTreeModel.nodeStructureChanged(superNode);
           }
@@ -843,8 +848,8 @@ public class OntologyEditor extends AbstractVisualResource
    */
   protected void subPropertyIsAdded(OntologyModificationEvent e) {
     Property p = (Property)e.getResource();
-    ArrayList nodesList = (ArrayList)treeNode2OntoResourceMap.get(e
-            .getResource());
+    ArrayList nodesList = (ArrayList)treeNode2OntoResourceMap
+            .get(((OntologyResource)e.getResource()).getName());
     // p is a property where the subProperty is added
     // the property which is added as a subProperty might not have any
     // super Property before
@@ -853,7 +858,8 @@ public class OntologyEditor extends AbstractVisualResource
     Iterator iter = props.iterator();
     while(iter.hasNext()) {
       Property subP = (Property)iter.next();
-      ArrayList subNodesList = (ArrayList)treeNode2OntoResourceMap.get(subP);
+      ArrayList subNodesList = (ArrayList)treeNode2OntoResourceMap
+              .get(((OntologyResource)subP).getName());
       if(subNodesList != null) {
         for(int i = 0; i < subNodesList.size(); i++) {
           DefaultMutableTreeNode node = (DefaultMutableTreeNode)subNodesList
@@ -881,12 +887,12 @@ public class OntologyEditor extends AbstractVisualResource
    */
   protected void subPropertyIsDeleted(OntologyModificationEvent e) {
     Property p = (Property)e.getResource();
-    ArrayList nodeList = (ArrayList)treeNode2OntoResourceMap.get(p);
+    ArrayList nodeList = (ArrayList)treeNode2OntoResourceMap
+            .get(((OntologyResource)p).getName());
     if(nodeList == null || nodeList.isEmpty()) {
       // this is already deleted
       return;
     }
-
     // p is a property where the subProperty is deleted
     // we don't know which property is deleted
     // so we remove the property p from the tree and add it again
@@ -903,7 +909,8 @@ public class OntologyEditor extends AbstractVisualResource
       Iterator iter = superProperties.iterator();
       while(iter.hasNext()) {
         Property superP = (Property)iter.next();
-        nodeList = (ArrayList)treeNode2OntoResourceMap.get(superP);
+        nodeList = (ArrayList)treeNode2OntoResourceMap
+                .get(((OntologyResource)superP).getName());
         for(int i = 0; i < nodeList.size(); i++) {
           DefaultMutableTreeNode superNode = (DefaultMutableTreeNode)nodeList
                   .get(i);
@@ -919,12 +926,13 @@ public class OntologyEditor extends AbstractVisualResource
 
   /**
    * Should be invoked when a sub class is Added
+   * 
    * @param e
    */
   protected void subClassIsAdded(OntologyModificationEvent e) {
     TClass c = (TClass)e.getResource();
-    ArrayList nodesList = (ArrayList)treeNode2OntoResourceMap.get(e
-            .getResource());
+    ArrayList nodesList = (ArrayList)treeNode2OntoResourceMap
+            .get(((OntologyResource)e.getResource()).getName());
     // c is a class where the subClass is added
     // the class which is added as a subClass might not have any
     // super Class before
@@ -933,7 +941,8 @@ public class OntologyEditor extends AbstractVisualResource
     Iterator iter = classes.iterator();
     while(iter.hasNext()) {
       TClass subC = (TClass)iter.next();
-      ArrayList subNodesList = (ArrayList)treeNode2OntoResourceMap.get(subC);
+      ArrayList subNodesList = (ArrayList)treeNode2OntoResourceMap
+              .get(((OntologyResource)subC).getName());
       if(subNodesList != null) {
         for(int i = 0; i < subNodesList.size(); i++) {
           DefaultMutableTreeNode node = (DefaultMutableTreeNode)subNodesList
@@ -942,7 +951,6 @@ public class OntologyEditor extends AbstractVisualResource
           treeModel.nodeStructureChanged(node.getParent());
         }
       }
-
       if(subNodesList != null && nodesList != null) {
         // and each of this node needs to be added again
         List list = new ArrayList();
@@ -964,12 +972,12 @@ public class OntologyEditor extends AbstractVisualResource
    */
   protected void subClassIsDeleted(OntologyModificationEvent e) {
     TClass c = (TClass)e.getResource();
-    ArrayList nodeList = (ArrayList)treeNode2OntoResourceMap.get(c);
+    ArrayList nodeList = (ArrayList)treeNode2OntoResourceMap
+            .get(((OntologyResource)c).getName());
     if(nodeList == null || nodeList.isEmpty()) {
       // this is already deleted
       return;
     }
-
     // c is a class where the subClass is deleted
     // we don't know which class is deleted
     // so we remove the class c from the tree and add it again
@@ -978,7 +986,6 @@ public class OntologyEditor extends AbstractVisualResource
       removeFromMap(treeModel, node);
       treeModel.nodeStructureChanged(node.getParent());
     }
-    
     // now we need to add it again
     Set superClasses = c.getSuperClasses(TClass.DIRECT_CLOSURE);
     List list = new ArrayList();
@@ -987,7 +994,8 @@ public class OntologyEditor extends AbstractVisualResource
       Iterator iter = superClasses.iterator();
       while(iter.hasNext()) {
         TClass superC = (TClass)iter.next();
-        nodeList = (ArrayList)treeNode2OntoResourceMap.get(superC);
+        nodeList = (ArrayList)treeNode2OntoResourceMap
+                .get(((OntologyResource)superC).getName());
         for(int i = 0; i < nodeList.size(); i++) {
           DefaultMutableTreeNode superNode = (DefaultMutableTreeNode)nodeList
                   .get(i);
@@ -1003,11 +1011,13 @@ public class OntologyEditor extends AbstractVisualResource
 
   /**
    * Should be invoked when a super class is added or deleted
+   * 
    * @param e
    */
   protected void superClassAffected(OntologyModificationEvent e) {
     TClass c = (TClass)e.getResource();
-    ArrayList nodesList = (ArrayList)treeNode2OntoResourceMap.get(c);
+    ArrayList nodesList = (ArrayList)treeNode2OntoResourceMap
+            .get(((OntologyResource)c).getName());
     if(nodesList == null || nodesList.isEmpty()) return;
     // we don't know which super clss is added or removed
     // so we remove all nodes and add them again
@@ -1016,7 +1026,6 @@ public class OntologyEditor extends AbstractVisualResource
       removeFromMap(treeModel, node);
       treeModel.nodeStructureChanged(node.getParent());
     }
-
     List list = new ArrayList();
     list.add(c);
     // and now add them again
@@ -1026,11 +1035,11 @@ public class OntologyEditor extends AbstractVisualResource
       while(iter.hasNext()) {
         TClass superClass = (TClass)iter.next();
         ArrayList superNodesList = (ArrayList)treeNode2OntoResourceMap
-                .get(superClass);
+                .get(((OntologyResource)superClass).getName());
         if(superNodesList != null) {
           for(int i = 0; i < superNodesList.size(); i++) {
             DefaultMutableTreeNode superNode = (DefaultMutableTreeNode)superNodesList
-                  .get(i);
+                    .get(i);
             addChidrenRec(superNode, list, itemComparator);
             treeModel.nodeStructureChanged(superNode);
           }
@@ -1044,6 +1053,14 @@ public class OntologyEditor extends AbstractVisualResource
    */
   public void ontologyModified(OntologyModificationEvent e) {
     if(e.getSource() != ontology) { return; }
+
+    // if the resource is null, we are not sure which resource was affected
+    // so we have to rebuild everything
+    if(e.getResource() == null) {
+      rebuildModel();
+      return;
+    }
+    
     // if resource is added
     if(e.getEventType() == OntologyModificationEvent.ONTOLOGY_RESOURCE_ADDED) {
       if(e.getResource() instanceof TClass) {
@@ -1060,6 +1077,7 @@ public class OntologyEditor extends AbstractVisualResource
       subPropertyAction.setOntologyClassesNames(ontologyClassesNames);
       return;
     }
+    
     switch(e.getEventType()){
       case OntologyModificationEvent.ONTOLOGY_RESOURCE_REMOVED:
         ontologyResourceIsRemoved(e);
@@ -1085,7 +1103,6 @@ public class OntologyEditor extends AbstractVisualResource
         subClassIsDeleted(e);
         break;
     }
-
     switch(e.getEventType()){
       case OntologyModificationEvent.ONTOLOGY_RESOURCE_REMOVED:
         expandNode(tree);
@@ -1104,7 +1121,6 @@ public class OntologyEditor extends AbstractVisualResource
         expandNode(tree);
         break;
     }
-
     propertyAction.setOntologyClassesNames(ontologyClassesNames);
     subPropertyAction.setOntologyClassesNames(ontologyClassesNames);
   }
@@ -1230,5 +1246,6 @@ public class OntologyEditor extends AbstractVisualResource
   protected ArrayList listeners;
 
   protected HashMap treeNode2OntoResourceMap;
+
   protected HashMap reverseMap;
 }
