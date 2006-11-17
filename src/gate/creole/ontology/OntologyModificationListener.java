@@ -10,5 +10,10 @@ import java.util.EventListener;
  * 
  */
 public interface OntologyModificationListener extends EventListener {
-  public void ontologyModified(OntologyModificationEvent ome);
+    /**
+     * This method is invoked whenever the respective ontology is modified
+     * @param ome provides information about the source of the event, affected resource and the
+     * type of modification.
+     */
+    public void ontologyModified(OntologyModificationEvent ome);
 }

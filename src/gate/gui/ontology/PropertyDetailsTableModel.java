@@ -39,9 +39,9 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
 
   public Class getColumnClass(int i) {
     switch(i){
-      case 0: // '\0'
+      case 0: 
         return Boolean.class;
-      case 1: // '\001'
+      case 1: 
         return Object.class;
     }
     return Object.class;
@@ -75,10 +75,10 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
   public Object getValueAt(int i, int j) {
     Object obj = getItemForRow(i);
     switch(j){
-      case 0: // '\0'
+      case 0: 
         return (obj instanceof DetailsGroup) ? new Boolean(((DetailsGroup)obj)
                 .isExpanded()) : null;
-      case 1: // '\001'
+      case 1: 
         return obj;
     }
     return null;
@@ -88,25 +88,25 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
     detailGroups = (new DetailsGroup[]{directSuperProps, allSuperProps,
         directSubProps, allSubProps, domain, range});
     Property property = (Property)obj;
-    Set set = property.getSuperProperties((byte)0);
+    Set set = property.getSuperProperties(Property.DIRECT_CLOSURE);
     directSuperProps.getValues().clear();
     if(set != null) {
       directSuperProps.getValues().addAll(set);
       Collections.sort(directSuperProps.getValues(), itemComparator);
     }
-    set = property.getSuperProperties((byte)1);
+    set = property.getSuperProperties(Property.TRANSITIVE_CLOSURE);
     allSuperProps.getValues().clear();
     if(set != null) {
       allSuperProps.getValues().addAll(set);
       Collections.sort(allSuperProps.getValues(), itemComparator);
     }
-    set = property.getSubProperties((byte)0);
+    set = property.getSubProperties(Property.DIRECT_CLOSURE);
     directSubProps.getValues().clear();
     if(set != null) {
       directSubProps.getValues().addAll(set);
       Collections.sort(directSubProps.getValues(), itemComparator);
     }
-    set = property.getSubProperties((byte)1);
+    set = property.getSubProperties(Property.TRANSITIVE_CLOSURE);
     allSubProps.getValues().clear();
     if(set != null) {
       allSubProps.getValues().addAll(set);
@@ -125,8 +125,7 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
     range.getValues().clear();
     if(set2 != null) {
       Iterator iterator1 = set2.iterator();
-      do {
-        if(!iterator1.hasNext()) break;
+      while(iterator1.hasNext()) {
         if(property instanceof ObjectProperty) {
           OClass oclass1 = (OClass)iterator1.next();
           range.getValues().add(oclass1.getName());
@@ -134,7 +133,7 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
           Class class1 = (Class)iterator1.next();
           range.getValues().add(class1.getName());
         }
-      } while(true);
+      }
     }
     fireTableDataChanged();
   }

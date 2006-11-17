@@ -59,7 +59,7 @@ public class OntologyModificationEvent extends EventObject {
   public static final int FUNCTIONAL_EVENT = 22;
 
   public static final int INVERSE_FUNCTIONAL_EVENT = 23;
-  
+
   public static final int DIFFERENT_FROM_EVENT = 24;
 
   /**
@@ -76,14 +76,27 @@ public class OntologyModificationEvent extends EventObject {
     this.eventType = eventType;
   }
 
+  /**
+   * Source of the event, typically an instance of ontology or taxonomy
+   */
   public Taxonomy getSource() {
     return this.source;
   }
 
+  /**
+   * The resource affected. If it is null, it indicates the the affected
+   * resource couldn't be identified and user should handle this accordingly.
+   * @return
+   */
   public Object getResource() {
     return this.resource;
   }
 
+  /**
+   * Type of the event, see the static constants of this class for more details
+   * 
+   * @return
+   */
   public int getEventType() {
     return this.eventType;
   }
