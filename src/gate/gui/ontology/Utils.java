@@ -8,7 +8,7 @@ public class Utils {
 
   public static boolean isValidNameSpace(String s) {
     String s1 = new String(
-            "[a-zA-Z]+(:)(/)+[a-zA-Z0-9]+((\\.)[a-zA-Z0-9]+)+((/)[a-zA-Z0-9]+)*(#)");
+            "[a-zA-Z]+(:)(/)+[a-zA-Z0-9\\-]+((\\.)[a-zA-Z0-9\\-]+)+((/)[a-zA-Z0-9\\.\\-_]+)*(#)");
     Pattern pattern = Pattern.compile(s1);
     return pattern.matcher(s).matches();
   }
