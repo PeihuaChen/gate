@@ -67,7 +67,9 @@ public class DefaultGazetteer extends AbstractGazetteer {
   public static final String
     DEF_GAZ_CASE_SENSITIVE_PARAMETER_NAME = "caseSensitive";
 
-
+  /** The separator used for gazetteer entry features */
+  protected String gazetteerFeatureSeparator;
+  
   /** a map of nodes vs gaz lists */
   protected Map listsByNode;
 
@@ -76,7 +78,7 @@ public class DefaultGazetteer extends AbstractGazetteer {
    */
   public DefaultGazetteer(){
   }
-
+  
   /** Does the actual loading and parsing of the lists. This method must be
    * called before the gazetteer can be used
    */
@@ -88,6 +90,7 @@ public class DefaultGazetteer extends AbstractGazetteer {
             "No URL provided for gazetteer creation!");
     }
     definition = new LinearDefinition();
+    definition.setSeparator(Strings.unescape(gazetteerFeatureSeparator));
     definition.setURL(listsURL);
     definition.load();
     int linesCnt = definition.size();
@@ -132,22 +135,43 @@ public class DefaultGazetteer extends AbstractGazetteer {
     }
 
     Iterator iline = gazList.iterator();
-
-    Lookup lookup = new Lookup(listName,majorType, minorType, languages);
-    lookup.list = node.getList();
+    
+    // create default lookup for entries with no arbitary features
+    Lookup defaultLookup = new Lookup(listName,majorType, minorType, languages);
+    defaultLookup.list = node.getList();
     if ( null != mappingDefinition){
-      MappingNode mnode = mappingDefinition.getNodeByList(lookup.list);
+      MappingNode mnode = mappingDefinition.getNodeByList(defaultLookup.list);
       if (null!=mnode){
-        lookup.oClass = mnode.getClassID();
-        lookup.ontology = mnode.getOntologyID();
+        defaultLookup.oClass = mnode.getClassID();
+        defaultLookup.ontology = mnode.getOntologyID();
       }
     }//if mapping def
-
-    String line;
+    
+    Lookup lookup;
+    String entry; // the actual gazetteer entry text
     while(iline.hasNext()){
-      line = iline.next().toString();
-      if(add)addLookup(line, lookup);
-      else removeLookup(line, lookup);
+      GazetteerNode gazNode = (GazetteerNode)iline.next();
+      entry = gazNode.getEntry();
+      
+      Map features = gazNode.getFeatureMap();
+      if (features == null) {
+        lookup = defaultLookup;
+      } else {
+        // create a new Lookup object with features
+        lookup = new Lookup(listName, majorType, minorType, languages);
+        lookup.list = node.getList();
+        if(null != mappingDefinition) {
+          MappingNode mnode = mappingDefinition.getNodeByList(lookup.list);
+          if(null != mnode) {
+            lookup.oClass = mnode.getClassID();
+            lookup.ontology = mnode.getOntologyID();
+          }
+        }// if mapping def
+        lookup.features = features;
+      } 
+      
+      if(add)addLookup(entry, lookup);
+      else removeLookup(entry, lookup);
     }
   } // void readList(String listDesc)
 
@@ -385,6 +409,9 @@ public class DefaultGazetteer extends AbstractGazetteer {
               if(null != currentLookup.languages)
                 fm.put("language", currentLookup.languages);
             }
+            if(null != currentLookup.features) {
+              fm.putAll(currentLookup.features);
+            }
             try {
               annotationSet.add(new Long(matchedRegionStart),
                               new Long(matchedRegionEnd + 1),
@@ -441,6 +468,9 @@ public class DefaultGazetteer extends AbstractGazetteer {
                 if(null != currentLookup.languages)
                   fm.put("language", currentLookup.languages);
               }
+              if(null != currentLookup.features) {
+                fm.putAll(currentLookup.features);
+              }
               try {
                 annotationSet.add(new Long(matchedRegionStart),
                                 new Long(matchedRegionEnd + 1),
@@ -481,6 +511,9 @@ public class DefaultGazetteer extends AbstractGazetteer {
 
         if(null != currentLookup.minorType)
           fm.put(LOOKUP_MINOR_TYPE_FEATURE_NAME, currentLookup.minorType);
+        if(null != currentLookup.features) {
+          fm.putAll(currentLookup.features);
+        }
         try{
           annotationSet.add(new Long(matchedRegionStart),
                           new Long(matchedRegionEnd + 1),
@@ -639,5 +672,19 @@ public class DefaultGazetteer extends AbstractGazetteer {
    */
 
   }// class CharMap
+
+  /**
+   * @return the gazetteerFeatureSeparator
+   */
+  public String getGazetteerFeatureSeparator() {
+    return gazetteerFeatureSeparator;
+  }
+
+  /**
+   * @param gazetteerFeatureSeparator the gazetteerFeatureSeparator to set
+   */
+  public void setGazetteerFeatureSeparator(String gazetteerFeatureSeparator) {
+    this.gazetteerFeatureSeparator = gazetteerFeatureSeparator;
+  }
   
 } // DefaultGazetteer

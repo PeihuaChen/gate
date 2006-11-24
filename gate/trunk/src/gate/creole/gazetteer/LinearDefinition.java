@@ -57,7 +57,10 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
 
   /** flag whether the definition has been modified after loading */
   private boolean isModified = false;
-
+  
+  /** the separator used to delimit feature name-value pairs in gazetteer lists */
+  private String separator;
+  
   public LinearDefinition() {
   }
 
@@ -86,6 +89,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
         LinearNode node = (LinearNode)inodes.next();
 
         GazetteerList list = new GazetteerList();
+        list.setSeparator(separator);
         URL lurl = new URL(url,node.getList());
         list.setURL(lurl);
         list.setEncoding(encoding);
@@ -106,6 +110,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   public GazetteerList loadSingleList(String listName)
   throws ResourceInstantiationException {
     GazetteerList list = new GazetteerList();
+    list.setSeparator(separator);
     try {
       URL turl = url;
       if (-1 != url.getProtocol().indexOf("gate")) {
@@ -533,6 +538,20 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     } // remove
 
   } // class SafeIterator
+
+  /**
+   * @return the separator
+   */
+  public String getSeparator() {
+    return separator;
+  }
+  
+  /**
+   * @param separator the separator to set
+   */
+  public void setSeparator(String separator) {
+    this.separator = separator;
+  }
 
 
 } // class LinearDefinition
