@@ -485,23 +485,26 @@ public class DocumentStaxUtils {
       Collection featObject = null;
 
       boolean addItemAsString = false;
+
+      // construct the collection object to use as the feature value
+      try {
+        featObject = (Collection)theClass.newInstance();
+      }
+      // if we can't instantiate the collection class at all, give up
+      // and return the value as a string
+      catch(IllegalAccessException iae) {
+        return stringRep.toString();
+      }
+      catch(InstantiationException ie) {
+        return stringRep.toString();
+      }
+
       // common case - itemClass *is* java.lang.String, so we can
       // avoid all the reflection
       if("java.lang.String".equals(itemClassName)) {
         addItemAsString = true;
       }
       else {
-        try {
-          featObject = (Collection)theClass.newInstance();
-        }
-        // if we can't instantiate the collection class at all, give up
-        // and return the value as a string
-        catch(IllegalAccessException iae) {
-          return stringRep.toString();
-        }
-        catch(InstantiationException ie) {
-          return stringRep.toString();
-        }
         try {
           itemClass = Class.forName(itemClassName, true, Gate.getClassLoader());
           // Let's detect if itemClass takes a constructor with a String
