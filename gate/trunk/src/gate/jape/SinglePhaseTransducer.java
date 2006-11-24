@@ -290,7 +290,6 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
         // if we're only looking for the shortest stop here
         if(isFinal && ruleApplicationStyle == FIRST_STYLE) break;
       }
-
       boolean keepGoing = fireRule(acceptingFSMInstances, state, lastNodeOff,
               offsets, inputAS, outputAS, doc, annotationsByOffset);
       if(!keepGoing) return;
@@ -683,14 +682,13 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     else throw new RuntimeException("Unknown rule application style!");
 
     // advance on input
-    SimpleSortedSet OffsetsTailSet = offsets.tailSet(lastAGPosition);
-    long theFirst = OffsetsTailSet.first();
+    SimpleSortedSet offsetsTailSet = offsets.tailSet(lastAGPosition);
+    long theFirst = offsetsTailSet.first();
     if(theFirst < 0) {
       // no more input, phew! :)
       startNodeOff = -1;
       fireProcessFinished();
-    }
-    else {
+    } else {
       long nextKey = theFirst;
       startNode = ((Annotation)((ArrayList)annotationsByOffset.get(nextKey))
               .get(0)). // nextKey
@@ -701,8 +699,8 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       if(oldStartNodeOff == startNodeOff) {
         // we are about to step twice in the same place, ...skip ahead
         lastAGPosition = startNodeOff + 1;
-        OffsetsTailSet = offsets.tailSet(lastAGPosition);
-        theFirst = OffsetsTailSet.first();
+        offsetsTailSet = offsets.tailSet(lastAGPosition);
+        theFirst = offsetsTailSet.first();
         if(theFirst < 0) {
           // no more input, phew! :)
           startNodeOff = -1;
