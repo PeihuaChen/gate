@@ -52,6 +52,9 @@ implements List {
 
   /** the content of this list */
   private String content = null;
+  
+  /** the separator used to delimit feature name-value pairs in gazetteer lists */
+  private String separator;
 
   /** create a new gazetteer list */
   public GazetteerList() {
@@ -125,7 +128,7 @@ implements List {
                               (url).openStream(), encoding));
       String line;
       while (null != (line = listReader.readLine())) {
-        entries.add(line);
+        entries.add(new GazetteerNode(line,separator));
       } //while
 
       listReader.close();
@@ -189,6 +192,22 @@ implements List {
     return url;
   }
 
+  
+  /**
+   * @return the seperator
+   */
+  public String getSeparator() {
+    return separator;
+  }
+
+  /**
+   * @param seperator the seperator to set
+   */
+  public void setSeparator(String separator) {
+    this.separator = separator;
+  }
+
+  
 /*--------------implementation of java.util.List--------------------*/
   public int size() {
     return entries.size();
@@ -349,10 +368,15 @@ implements List {
       case LIST_MODE : {
         StringBuffer result = new StringBuffer();
         String entry = null;
-        for ( int i = 0 ; i < entries.size() ; i++) {
-          entry = ((String)entries.get(i)).trim();
-          if (entry.length()>0) {
+        for(int i = 0; i < entries.size(); i++) {
+          GazetteerNode node = (GazetteerNode)entries.get(i);
+          entry = node.getEntry().trim();
+          if(entry.length() > 0) {
             result.append(entry);
+            Map featureMap = node.getFeatureMap();
+            if(featureMap != null && (featureMap.size() > 0)) {
+              result.append(node.featureMapToString(featureMap));
+            }
             result.append("\n");
           }// if
         }// for
@@ -393,7 +417,7 @@ implements List {
         List tempEntries = new ArrayList();
         try {
           while (null != (line = listReader.readLine())) {
-            tempEntries.add(line);
+            tempEntries.add(new GazetteerNode(line,separator));
           } //while
           listReader.close();
         } catch (IOException x) {
@@ -414,4 +438,5 @@ implements List {
     } // switch mode
   } // updateContent(String)
 
+  
 } // Class GazetteerList

@@ -71,5 +71,86 @@ public class Strings {
 
     return result.toString();
   } // addLineNumbers
+  
+  /**
+   * A method to unescape Java strings, returning a string containing escape
+   * sequences into the respective character. i.e. "\" followed by "t" is turned
+   * into the tab character.
+   * 
+   * @param str the string to unescape
+   * @return a new unescaped string of the one passed in
+   */
+  public static String unescape(String str) {
+    if (str == null) return str;
+    
+    StringBuilder sb = new StringBuilder(); // string to build
+    
+    StringBuilder unicodeStr = new StringBuilder(4); // store unicode sequences
+    
+    boolean inUnicode = false;
+    boolean hadSlash = false;
+    
+    for (char ch: str.toCharArray()) {
+      if (inUnicode) {
+        unicodeStr.append(ch);
+        if (unicodeStr.length() == 4) {
+          try {
+            int unicodeValue = Integer.parseInt(unicodeStr.toString(), 16);
+            sb.append((char) unicodeValue);
+            unicodeStr.setLength(0);
+            inUnicode = false;
+            hadSlash = false;
+          } catch (NumberFormatException e) {
+            throw new RuntimeException("Couldn't parse unicode value: " + unicodeStr, e);
+          }
+        }
+        continue;
+      }
+      if (hadSlash) {
+        hadSlash = false;
+        switch (ch) {
+          case '\\':
+            sb.append('\\');
+            break;
+          case '\'':
+            sb.append('\'');
+            break;
+          case '\"':
+            sb.append('"');
+            break;
+          case 'r':
+            sb.append('\r');
+            break;
+          case 'f':
+            sb.append('\f');
+              break;
+          case 't':
+            sb.append('\t');
+            break;
+          case 'n':
+            sb.append('\n');
+            break;
+          case 'b':
+            sb.append('\b');
+            break;
+          case 'u':
+            inUnicode = true;
+            break;
+          default :
+            sb.append(ch);
+            break;
+        }
+        continue;
+      } else if (ch == '\\') {
+        hadSlash = true;
+        continue;
+      }
+      sb.append(ch);
+    }
+    if (hadSlash) {
+      sb.append('\\');
+    }
+    return sb.toString();
+  }
 
 } // class Strings

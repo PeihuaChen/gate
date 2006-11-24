@@ -16,19 +16,31 @@
 
 package gate.creole.gazetteer;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Used to describe a type of lookup annotations. A lookup is described by a
  * major type a minor type and a list of languages. Added members are :
  * ontologyClass and list.
  * All these values are strings (the list of languages is a string and it is
  * intended to represesnt a comma separated list).
+ * 
+ * An optional features field stores arbitary features as part of the lookup 
+ * annotation. This can be used to set meta-data for a gazetteer entry.
  */
 public class Lookup implements java.io.Serializable {
 
   /** Debug flag
    */
   private static final boolean DEBUG = false;
-
+  
+  /** a map of arbitary features */
+  public Map features = null;
+  
   /**
    * Creates a new Lookup value with the given major and minor types and
    * languages.
@@ -72,8 +84,13 @@ public class Lookup implements java.io.Serializable {
   public String toString(){
     StringBuffer b = new StringBuffer();
     boolean longVersion = false;
+    boolean hasArbitaryFeatures = false;
     if (null!=ontology && null!=oClass){
       longVersion = true;
+    }
+    
+    if(null != features) {
+      hasArbitaryFeatures = true;
     }
 
     if ( longVersion ) {
@@ -94,6 +111,22 @@ public class Lookup implements java.io.Serializable {
       b.append(ontology);
       b.append(":");
       b.append(oClass);
+    }
+    
+    if(hasArbitaryFeatures) {
+      // as the ordering of the featureMap is undefined, create a new list of 
+      // keys and sort it to ensure the string returned is always the same
+      List sortedKeys = new ArrayList(features.keySet()); 
+      Collections.sort(sortedKeys);
+      
+      for(Iterator it = sortedKeys.iterator(); it.hasNext(); ) {
+        String key = (String)it.next();
+        b.append("|");
+        b.append(key);
+        b.append(":");
+        b.append((String)features.get(key));
+        
+      }
     }
     return b.toString();
   }

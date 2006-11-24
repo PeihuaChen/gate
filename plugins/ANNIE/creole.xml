@@ -70,6 +70,10 @@
       <PARAMETER DEFAULT="true"
         COMMENT="Should this gazetteer only match whole words"
         NAME="wholeWordsOnly">java.lang.Boolean</PARAMETER>
+	  <PARAMETER
+        COMMENT="The character used to separate features for entries in gazetteer lists. Accepts strings like &quot;\t&quot; and will unescape it to the relevant character. If not specified, this gazetteer does not support extra features." 
+        NAME="gazetteerFeatureSeparator"
+        OPTIONAL="true">java.lang.String</PARAMETER>
       <ICON>gazetteer</ICON>
     </RESOURCE>
     
