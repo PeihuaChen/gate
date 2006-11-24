@@ -137,8 +137,8 @@ public class SimpleSortedSet {
     {
         // small speedup opt. because most of the queries are about to the same
         // or the next element in the array
-        if (tsindex < theArray.length && elValue != theArray[tsindex])
-        {
+//        if (tsindex < theArray.length && elValue != theArray[tsindex])
+//        {
             if (tsindex<(size-1) && elValue > theArray[tsindex] &&
                 elValue <= theArray[tsindex+1])
                 {
@@ -149,7 +149,7 @@ public class SimpleSortedSet {
             if (index < 0)
                 index = ~index;
             tsindex = index;
-        }
+//        }
         return this;
     } // tailSet()
 
