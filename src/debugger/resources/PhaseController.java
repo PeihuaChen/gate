@@ -149,7 +149,14 @@ public class PhaseController implements AnnotationSetListener {
             if (rule.isStopOnMatch()) {
 //                DebugController.getInstance().getRuleController().addCreatedAnnotations(spt, rhs, this.ruleAnnotations.get());
                 RuleModel rm = rule;//DebugController.getInstance().getResourceController().getResourceModel().getPRResource(spt).getPhase(spt).getRule(rhs);
-                rm.getAnnotationHistory().addAnnotationSet(this.ruleAnnotations.get());
+                // by Andrey Shafirin
+                // changed to fix "java.lang.UnsupportedOperationException"
+                // The Jape debugger falis because of the new immutable annotation sets
+                // returned by AnnotationSetImpl.getXXX methods.
+                
+                //rm.getAnnotationHistory().addAnnotationSet(this.ruleAnnotations.get());
+                rm.getAnnotationHistory().addAnnotationSet(this.ruleAnnotations);
+                
                 document.getAnnotations().removeAnnotationSetListener(this);
             }
             if (this.isStopAfterRHSExec) {
