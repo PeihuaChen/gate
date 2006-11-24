@@ -67,6 +67,9 @@ public class DefaultGazetteer extends AbstractGazetteer {
   public static final String
     DEF_GAZ_CASE_SENSITIVE_PARAMETER_NAME = "caseSensitive";
 
+  public static final String
+    DEF_GAZ_FEATURE_SEPARATOR_PARAMETER_NAME = "gazetteerFeatureSeparator";
+
   /** The separator used for gazetteer entry features */
   protected String gazetteerFeatureSeparator;
   
