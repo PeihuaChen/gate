@@ -211,7 +211,11 @@ public class SerialController extends AbstractController
   public void resourceUnloaded(CreoleEvent e) {
     //remove all occurences of the resource from this controller
     if(e.getResource() instanceof ProcessingResource)
-      while(prList.remove(e.getResource()));
+//      while(prList.remove(e.getResource()));
+      //remove all occurrences of this PR from the controller
+      //Use the controller's remove method (rather than prList's so that
+      //subclasses of this controller type can add their own functionality
+      while(remove((ProcessingResource)e.getResource()));
     //remove links in parameters
     for(int i = 0; i < prList.size(); i++){
       ProcessingResource aPr = (ProcessingResource)prList.get(i);
