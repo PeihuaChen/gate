@@ -144,23 +144,16 @@ public class FlexibleGazetteer
                                  longValue();
               long endOffset = currentToken.getEndNode().getOffset().
                                longValue();
-
-              // what is the actual string
-              String actualString = (String) (features.get(ANNIEConstants.
-                  TOKEN_STRING_FEATURE_NAME));
-
-              // if the feature value and the actual string both are same
-              // we don't need to replace it
-              if (actualString.equals(newTokenValue)) {
-                // there is no need to change anything for this
-                break inner;
-              }
-
+              
+              // replacement code start
+              long actualLength = endOffset - startOffset;
+              
               // let us find the difference between the lengths of the
               // actual string and the newTokenValue
-              long lengthDifference = actualString.length() -
+              long lengthDifference = actualLength -
                                       newTokenValue.length();
-
+              // replacement code end
+              
               // so lets find the new startOffset and endOffset
               long newStartOffset = startOffset - totalDeductedSpaces;
               long newEndOffset = newStartOffset + newTokenValue.length();
@@ -178,7 +171,8 @@ public class FlexibleGazetteer
               // with the new document
               newdocString = newdocString.replace( (int) newStartOffset,
                                                   (int) newStartOffset +
-                                                  actualString.length(),
+                                                  // actualString.length(), // original code
+                                                  (int) actualLength, // replacement code
                                                   newTokenValue);
               break inner;
             }
@@ -394,3 +388,4 @@ public class FlexibleGazetteer
   // parameters required within the program
   private ArrayList changedNodes;
 }
+ 	  	 
