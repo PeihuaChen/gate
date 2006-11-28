@@ -154,56 +154,74 @@ public class SerialCorpusImpl extends
   }
   
   /**
-   * Unloads the document from memory, but calls sync() first, to store the
-   * changes
+   * Unloads a document from memory.
+   * @param index the index of the document to be unloaded.
+   * @param sync should the document be sync'ed (i.e. saved) before unloading.
    */
-  public void unloadDocument(int index) {
+  public void unloadDocument(int index, boolean sync) {
     //1. check whether its been loaded and is a persistent one
     // if a persistent doc is not loaded, there's nothing we need to do
     if ( (! isDocumentLoaded(index)) && isPersistentDocument(index))
       return;
-
-    //2. sync the document before releasing it from memory, because the
-    //creole register garbage collects all LRs which are not used any more
-    Document doc = (Document) documents.get(index);
-    try {
-      //if the document is not already adopted, we need to do that first
-      if (doc.getLRPersistenceId() == null) {
-        doc = (Document) this.getDataStore().adopt(doc, null);
-        this.getDataStore().sync(doc);
-        this.setDocumentPersistentID(index, doc.getLRPersistenceId());
-      } else //if it is adopted, just sync it
-        this.getDataStore().sync(doc);
-
-      //3. remove the document from the memory
-      //do this, only if the saving has succeeded
-      documents.set(index, null);
-
-    } catch (PersistenceException ex) {
+    //2. If requested, sync the document before releasing it from memory, 
+    //because the creole register garbage collects all LRs which are not used 
+    //any more
+    if(sync){
+      Document doc = (Document) documents.get(index);
+      try {
+        //if the document is not already adopted, we need to do that first
+        if (doc.getLRPersistenceId() == null) {
+          doc = (Document) this.getDataStore().adopt(doc, null);
+          this.getDataStore().sync(doc);
+          this.setDocumentPersistentID(index, doc.getLRPersistenceId());
+        } else //if it is adopted, just sync it
+          this.getDataStore().sync(doc);
+      } catch (PersistenceException ex) {
         throw new GateRuntimeException("Error unloading document from corpus"
                       + "because document sync failed: " + ex.getMessage());
-    } catch (gate.security.SecurityException ex1) {
+      } catch (gate.security.SecurityException ex1) {
         throw new GateRuntimeException("Error unloading document from corpus"
                       + "because of document access error: " + ex1.getMessage());
+      }
     }
-
+    //3. remove the document from the memory
+    //do this, only if the saving has succeeded
+    documents.set(index, null);
   }
 
   /**
    * Unloads a document from memory
+   * @param doc the document to be unloaded
+   * @param sync should the document be sync'ed (i.e. saved) before unloading.
    */
-  public void unloadDocument(Document doc) {
+  public void unloadDocument(Document doc, boolean sync) {
     if (DEBUG) Out.prln("Document to be unloaded :" + doc.getName());
     //1. determine the index of the document; if not there, do nothing
     int index = findDocument(doc);
-    if (index == -1)
-      return;
+    if (index == -1) return;
     if (DEBUG) Out.prln("Index of doc: " + index);
     if (DEBUG) Out.prln("Size of corpus: " + documents.size());
-    unloadDocument(index);
+    unloadDocument(index, sync);
 //    documents.remove(new Integer(index));
   }
 
+  /**
+   * Unloads a document from memory
+   * @param doc the document to be unloaded.
+   */
+  public void unloadDocument(Document doc) {
+    unloadDocument(doc, true);
+  }
+  
+  /**
+   * Unloads the document from memory, calling sync() first, to store the
+   * changes.
+   * @param index the index of the document to be unloaded.
+   */
+  public void unloadDocument(int index) {
+    unloadDocument(index, true);
+  }
+  
   /**
    * This method returns true when the document is already loaded in memory
    */
