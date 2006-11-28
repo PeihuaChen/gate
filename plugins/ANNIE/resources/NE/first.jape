@@ -15,7 +15,7 @@
 
 Phase:	First
 Input: Token Lookup
-Options: control = appelt
+Options: control = once
 
 // this has to be run first of all 
 // contains any macros etc needed only for standard grammars
@@ -45,16 +45,4 @@ Macro: SPACE
 Rule: Silly
 // we have to have a rule here, so we'll just have something silly
 
-(
- {Token.string == "afguahughaegarth"}
-)
-:silly
--->
- {}
-
-
-
-
-
-
-
+{Token} --> {}
