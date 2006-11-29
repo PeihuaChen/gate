@@ -25,8 +25,6 @@ import gate.*;
 import gate.annotation.AnnotationSetImpl;
 import gate.creole.*;
 import gate.util.*;
-import gate.util.Err;
-import gate.util.SimpleFeatureMapImpl;
 
 public class PronominalCoref extends AbstractLanguageAnalyser
                               implements ProcessingResource, ANNIEConstants{
@@ -222,16 +220,17 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     AnnotationSet possesivePronouns = this.defaultAnnotations.get(TOKEN_ANNOTATION_TYPE,constraintPRP$);
 
     //5.combine them
-    AnnotationSet pronouns = personalPronouns;
-    if (null == personalPronouns) {
-      pronouns = possesivePronouns;
+    List pronouns = new ArrayList();
+    if (personalPronouns != null && !personalPronouns.isEmpty()) {
+      pronouns.addAll(personalPronouns);
     }
-    else if (null != possesivePronouns) {
+
+    if (possesivePronouns != null && !possesivePronouns.isEmpty()) {
       pronouns.addAll(possesivePronouns);
     }
 
     //6.do we have pronouns at all?
-    if (null == pronouns) {
+    if (pronouns.isEmpty()) {
       //do nothing
       return;
     }
@@ -241,7 +240,9 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     java.util.Arrays.sort(arrPronouns,ANNOTATION_OFFSET_COMPARATOR);
 
     //8.cleanup - ease the GC
-    pronouns = personalPronouns = possesivePronouns = null;
+    pronouns = null;
+    personalPronouns = null;
+    possesivePronouns = null;
 
     int prnSentIndex = 0;
 
@@ -500,7 +501,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       AnnotationSet org = currSentence.getOrganizations();
       AnnotationSet loc = currSentence.getLocations();
       //combine them
-      AnnotationSet org_loc = org;
+      Set<Annotation> org_loc = new HashSet<Annotation>(org);
       org_loc.addAll(loc);
 
       Iterator it = org_loc.iterator();
@@ -590,7 +591,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
     //try [1]
     //get the succeeding Persons/pronouns
-    AnnotationSet succCandidates = quoteContext.getAntecedentCandidates(Quote.ANTEC_AFTER);
+    Set<Annotation> succCandidates = quoteContext.getAntecedentCandidates(Quote.ANTEC_AFTER);
     if (false == succCandidates.isEmpty()) {
       //cool, we have candidates, pick up the one closest to the end quote
       Iterator it = succCandidates.iterator();
@@ -607,7 +608,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     //try [2]
     //get the preceding Persons/pronouns
     if (null == bestAntecedent) {
-      AnnotationSet precCandidates = quoteContext.getAntecedentCandidates(Quote.ANTEC_BEFORE);
+      Set<Annotation> precCandidates = quoteContext.getAntecedentCandidates(Quote.ANTEC_BEFORE);
       if (false == precCandidates.isEmpty()) {
         //cool, we have candidates, pick up the one closest to the end quote
         Iterator it = precCandidates.iterator();
@@ -625,7 +626,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     //try [3]
     //get the Persons/pronouns back in context
     if (null == bestAntecedent) {
-      AnnotationSet precCandidates = quoteContext.getAntecedentCandidates(Quote.ANTEC_BACK);
+      Set<Annotation> precCandidates = quoteContext.getAntecedentCandidates(Quote.ANTEC_BACK);
       if (false == precCandidates.isEmpty()) {
         //cool, we have candidates, pick up the one closest to the end quote
         Iterator it = precCandidates.iterator();
@@ -669,8 +670,8 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
     //2.1 remove QT annotations if left from previous execution
     AnnotationSet qtSet = this.defaultAnnotations.get(QUOTED_TEXT_TYPE);
-    if (null != qtSet) {
-      qtSet.clear();
+    if (qtSet != null && !qtSet.isEmpty()) {
+      this.defaultAnnotations.removeAll(qtSet);
     }
 
     //2.2. run quoted text transducer to generate "Quoted Text" annotations
@@ -678,8 +679,8 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
     //3.1 remove pleonastic annotations if left from previous execution
     AnnotationSet pleonSet = this.defaultAnnotations.get(PLEONASTIC_TYPE);
-    if (null != pleonSet) {
-      pleonSet.clear();
+    if (pleonSet != null && !pleonSet.isEmpty()) {
+      this.defaultAnnotations.removeAll(pleonSet);
     }
 
     //3.2 run quoted text transducer to generate "Pleonasm" annotations
@@ -970,11 +971,11 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     /** --- */
     public static final int ANTEC_BACK = 3;
     /** --- */
-    private AnnotationSet antecedentsBefore;
+    private Set<Annotation> antecedentsBefore;
     /** --- */
-    private AnnotationSet antecedentsAfter;
+    private Set<Annotation> antecedentsAfter;
     /** --- */
-    private AnnotationSet antecedentsBackInContext;
+    private Set<Annotation> antecedentsBackInContext;
     /** --- */
     private Annotation quoteAnnotation;
     /** --- */
@@ -1050,7 +1051,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
 
     /** --- */
-    private AnnotationSet generateAntecedentCandidates(int sentenceNumber,
+    private Set<Annotation> generateAntecedentCandidates(int sentenceNumber,
                                                         int quoteNumber ,
                                                         int mode) {
 
@@ -1065,7 +1066,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
      Sentence sentence = textSentences[sentenceNumber];
 
       //2. get the persons
-      AnnotationSet antecedents = new AnnotationSetImpl(sentence.getPersons());
+      Set<Annotation> antecedents = new HashSet<Annotation>(sentence.getPersons());
 
       //4. now get the he/she pronouns in the relevant context
       AnnotationSet annotations = null;
@@ -1175,24 +1176,24 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     }
 
     /** --- */
-    public AnnotationSet getAntecedentCandidates(int type) {
+    public Set<Annotation> getAntecedentCandidates(int type) {
 
       switch(type) {
 
         case ANTEC_AFTER:
           return null != this.antecedentsAfter ? 
                          this.antecedentsAfter : 
-                         new AnnotationSetImpl(document);
+                         new HashSet<Annotation>();
 
         case ANTEC_BEFORE:
           return null != this.antecedentsBefore ? 
                          this.antecedentsBefore : 
-                         new AnnotationSetImpl(document);
+                         new HashSet<Annotation>();
 
         case ANTEC_BACK:
           return null != this.antecedentsBackInContext ? 
                   this.antecedentsBackInContext : 
-                  new AnnotationSetImpl(document);
+                  new HashSet<Annotation>();
 
         default:
           throw new IllegalArgumentException();
