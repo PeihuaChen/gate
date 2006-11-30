@@ -36,6 +36,12 @@ public class Minipar extends AbstractLanguageAnalyser implements
 	 * document in order to process it with Minipar
 	 */
 	public static final String GATETEXTFILE = "GATESentences";
+  
+  /**
+   * The Minipar executable limits the length of a sentence to 1024 characters.
+   * If a sentence is longer than the maximal length it is not sent to MINIPAR7
+   */
+  public static final long maxSentenceLength = 1024;
 
 	/**
 	 * URL of the minipar Data Directory that contains lexicons etc.
@@ -193,6 +199,9 @@ public class Minipar extends AbstractLanguageAnalyser implements
 		// sort all sentences by start offset
 		Collections.sort(allSentences, new gate.util.OffsetComparator());
 
+    // only the sentences shorter than maxSentenceLength are sent to Minipar
+    ArrayList sentencesSent =  new ArrayList(allSentences.size());
+    
 		// save sentence strings to file for Minipar
 		ListIterator sentenceIterator = allSentences.listIterator();
 		try {
@@ -202,10 +211,14 @@ public class Minipar extends AbstractLanguageAnalyser implements
 			while (sentenceIterator.hasNext()) {
 				Annotation sentence = (Annotation) sentenceIterator.next();
 				sentenceString = null;
+        Long startOffset = sentence.getStartNode().getOffset();
+        Long endOffset = sentence.getEndNode().getOffset();
+        // check that the length is inferior to the limit
+        long length = endOffset.longValue()-startOffset.longValue();
+        if (length>=maxSentenceLength) continue;
 				try {
 					sentenceString = getDocument().getContent().getContent(
-							sentence.getStartNode().getOffset(),
-							sentence.getEndNode().getOffset()).toString();
+                  startOffset,endOffset).toString();
 				} catch (InvalidOffsetException ioe) {
 					throw new GateRuntimeException(
 							"Invalid offset of the annotation");
@@ -213,13 +226,14 @@ public class Minipar extends AbstractLanguageAnalyser implements
 				sentenceString = sentenceString.replaceAll("\r", " ");
 				sentenceString = sentenceString.replaceAll("\n", " ");
 				pw.println(sentenceString);
+        sentencesSent.add(sentence);
 			}
 			fw.close();
 		} catch (java.io.IOException except) {
 			throw new ExecutionException(except);
 		}
 
-		return allSentences;
+		return sentencesSent;
 	}
 
 	/**
