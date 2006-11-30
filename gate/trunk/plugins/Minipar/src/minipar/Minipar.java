@@ -167,7 +167,7 @@ public class Minipar extends AbstractLanguageAnalyser implements
 	 * @return The list containing annotations of type *Sentence*
 	 * @throws ExecutionException
 	 */
-	private ArrayList saveGateSentences() throws ExecutionException {
+	private ArrayList saveGateSentences(File gateTextFile) throws ExecutionException {
 
 		AnnotationSet allAnnotations;
 
@@ -197,7 +197,6 @@ public class Minipar extends AbstractLanguageAnalyser implements
 		ListIterator sentenceIterator = allSentences.listIterator();
 		try {
 			String sentenceString = null;
-			File gateTextFile = new File(GATETEXTFILE);
 			FileWriter fw = new FileWriter(gateTextFile);
 			PrintWriter pw = new PrintWriter(fw, true);
 			while (sentenceIterator.hasNext()) {
@@ -232,11 +231,10 @@ public class Minipar extends AbstractLanguageAnalyser implements
 	 *            GATE sentence annotations
 	 * @throws ExecutionException
 	 */
-	private void runMinipar(ArrayList allSentences) throws ExecutionException {
+	private void runMinipar(ArrayList allSentences, File gateTextFile) throws ExecutionException {
 
 		// this should be the miniparBinary + "-p " + getMiniparDataDir +
 		// GATETEXTFILE
-		File gateTextFile = new File(GATETEXTFILE);
 		File binary = new File(getMiniparBinary().getFile());
 		File dataFile = new File(getMiniparDataDir().getFile());
 		//String cmdline = binary.getAbsolutePath() + " -p "
@@ -471,10 +469,19 @@ public class Minipar extends AbstractLanguageAnalyser implements
 					"Minipar requires the location of its data directory "
 							+ "(By default it is %Minipar_Home%/data");
 
+    // generate a temporary file for the current document
+    File gateTempFile = null;
+    try {
+    gateTempFile =  File.createTempFile( GATETEXTFILE, ".txt");
+    gateTempFile.deleteOnExit();
+    }
+    catch ( java.io.IOException e){
+      throw new ExecutionException("Impossible to generate temp file!");
+    }
 		// obtain GATE sentence annotations as a list
-		ArrayList allSentences = saveGateSentences();
+		ArrayList allSentences = saveGateSentences(gateTempFile);
 		// finally runMinipar
-		runMinipar(allSentences);
+		runMinipar(allSentences,gateTempFile);
 	}
 
 	/**
