@@ -41,14 +41,18 @@
 
   <!-- default port for the Vinci name service -->
   <property name="vns.port" value="9000" />
+  <property name="vns.tmpdir" location="vns-tmp" />
 
   <!-- start the Vinci name service.  This target will not terminate, so should
   be run in another terminal. -->
   <target name="vns">
+    <!-- mak sure we have a clean start after any previous run -->
+    <delete includeemptydirs="true" dir="${vns.tmpdir}" />
+    <mkdir dir="${vns.tmpdir}" />
     <echo>Starting the Vinci Name Service on port ${vns.port}</echo>
-    <echo>Temporary files will be written to ${java.io.tmpdir}</echo>
+    <echo>Temporary files will be written to ${vns.tmpdir}</echo>
     <java classname="com.ibm.vinci.transport.vns.service.VNS"
-          fork="true" dir="${java.io.tmpdir}">
+          fork="true" dir="${vns.tmpdir}">
       <classpath>
         <pathelement location="${lib.dir}/xml.jar" />
         <pathelement location="${lib.dir}/jVinci_vns.jar" />
@@ -217,6 +221,7 @@
       </classpath>
       <sysproperty key="VNS_PORT" value="${vns.port}"/>
       <sysproperty key="VNS_HOST" value="localhost"/>
+      <sysproperty key="java.awt.headless" value="true" />
       <arg value="${examples.conf.dir}/Deploy_TokenHandler.xml" />
     </java>
   </target>
@@ -308,6 +313,7 @@
           <sysproperty key="gate.uima.plugin.location" file="." />
           <sysproperty key="VNS_PORT" value="${vns.port}"/>
           <sysproperty key="VNS_HOST" value="localhost"/>
+          <sysproperty key="java.awt.headless" value="true" />
           <formatter type="xml" />
           <test name="gate.uima.test.TestUIMAInGATE" />
         </junit>
@@ -323,6 +329,7 @@
       <sysproperty key="gate.home.location" value="${gate.home}" />
       <sysproperty key="gate.uima.plugin.location" file="." />
       <sysproperty key="uima.datapath" value="${test.conf.dir}"/>
+      <sysproperty key="java.awt.headless" value="true" />
       <formatter type="xml" />
       <test name="gate.uima.test.TestGATEInUIMA" />
     </junit>
