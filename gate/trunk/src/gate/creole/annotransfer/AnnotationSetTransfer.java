@@ -100,16 +100,20 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
     //if we want to transfer only some types, then select only annotations
     //from these types
 
+    AnnotationSet annotsToTransfer = null;
     if (annotationTypes != null && annotationTypes.size() > 0)
-      inputAS = inputAS.get(new HashSet(annotationTypes));
+      //inputAS = inputAS.get(new HashSet(annotationTypes));
+      annotsToTransfer = inputAS.get(new HashSet(annotationTypes));
 
     // in case of no one annotation from some of annotationTypes
-    if(inputAS == null) return;
+    //if(inputAS == null) return;
+    if(annotsToTransfer == null) return;
 
     //check if we have a BODY annotation
     //if not, just copy all
     if (textTagName == null || textTagName.equals("")) {
-      outputAS.addAll(inputAS);
+      //outputAS.addAll(inputAS);
+      outputAS.addAll(annotsToTransfer);
       return;
     }
 
@@ -121,7 +125,8 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
                  + "' in document '" + document.getName()
                  + "' found, so transferring all annotations to the target set");
       }
-      outputAS.addAll(inputAS);
+      //outputAS.addAll(inputAS);
+      outputAS.addAll(annotsToTransfer);
       return;
     }
 
@@ -133,7 +138,8 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
       Long end = bodyAnn.getEndNode().getOffset();
 
       //get all annotations we want transferred
-      AnnotationSet annots2Copy = inputAS.getContained(start, end);
+      //AnnotationSet annots2Copy = inputAS.getContained(start, end);
+      AnnotationSet annots2Copy = annotsToTransfer.getContained(start, end);
       //copy them to the new set and delete them from the old one
       annots2Move.addAll(annots2Copy);
     }
