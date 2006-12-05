@@ -49,7 +49,7 @@ public class DataStoreRegister extends HashSet {
     try {
       if (Class.forName("gleam.docservice.gate.DocServiceDataStore", true, Gate.getClassLoader()) != null) {
         names.put("gleam.docservice.gate.DocServiceDataStore",
-            "ServiceDataStore: document service storage using Web Services");
+            "SAFE DocService DataStore");
       }
     } catch (ClassNotFoundException e) {
     }
