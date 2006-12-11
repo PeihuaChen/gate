@@ -59,13 +59,13 @@ public class NekoHtmlDocumentFormat extends TextualDocumentFormat {
   public NekoHtmlDocumentFormat() {
     super();
   }
-  
+
   private HashSet<String> ignorableTags = null;
-  
+
   public void setIgnorableTags(HashSet<String> newTags) {
     this.ignorableTags = newTags;
   }
-  
+
   public HashSet<String> getIgnorableTags() {
     return ignorableTags;
   }
@@ -119,6 +119,12 @@ public class NekoHtmlDocumentFormat extends TextualDocumentFormat {
     try {
       org.cyberneko.html.parsers.SAXParser saxParser = new SAXParser();
 
+      // convert element and attribute names to lower case
+      saxParser.setProperty("http://cyberneko.org/html/properties/names/elems",
+              "lower");
+      saxParser.setProperty("http://cyberneko.org/html/properties/names/attrs",
+              "lower");
+
       // Create a new Xml document handler
       handler = new NekoHtmlDocumentHandler(doc, null, ignorableTags);
       // Register a status listener with it
@@ -131,12 +137,14 @@ public class NekoHtmlDocumentFormat extends TextualDocumentFormat {
       // Set up the factory to create the appropriate type of parser
       // non validating one
       // http://xml.org/sax/features/validation set to false
-      //newxmlParser.setFeature("http://xml.org/sax/features/validation", false);
+      // newxmlParser.setFeature("http://xml.org/sax/features/validation",
+      // false);
       // namesapace aware one
       // http://xml.org/sax/features/namespaces set to true
-      //newxmlParser.setFeature("http://xml.org/sax/features/namespaces", true);
-      //newxmlParser.setFeature("http://xml.org/sax/features/namespace-prefixes",
-      //        true);
+      // newxmlParser.setFeature("http://xml.org/sax/features/namespaces",
+      // true);
+      // newxmlParser.setFeature("http://xml.org/sax/features/namespace-prefixes",
+      // true);
       saxParser.setContentHandler(handler);
       saxParser.setErrorHandler(handler);
       saxParser.setDTDHandler(handler);
@@ -157,6 +165,13 @@ public class NekoHtmlDocumentFormat extends TextualDocumentFormat {
         // must set system ID to allow relative URLs (e.g. to a DTD) to
         // work
         is.setSystemId(doc.getSourceUrl().toString());
+
+        // since we control the encoding, tell the parser to ignore any
+        // http-equiv hints
+        saxParser
+                .setFeature(
+                        "http://cyberneko.org/html/features/scanner/ignore-specified-charset",
+                        true);
       }
       else {
         // let the parser decide the encoding
@@ -164,8 +179,7 @@ public class NekoHtmlDocumentFormat extends TextualDocumentFormat {
       }
       saxParser.parse(is);
       // Angel - end
-      ((DocumentImpl)doc).setNextAnnotationId(handler
-              .getCustomObjectsId());
+      ((DocumentImpl)doc).setNextAnnotationId(handler.getCustomObjectsId());
     }
     catch(SAXException e) {
       doc.getFeatures().put("parsingError", Boolean.TRUE);
@@ -190,8 +204,7 @@ public class NekoHtmlDocumentFormat extends TextualDocumentFormat {
               + doc.getSourceUrl().toString(), e);
     }
     finally {
-      if(handler != null)
-        handler.removeStatusListener(statusListener);
+      if(handler != null) handler.removeStatusListener(statusListener);
     }// End if else try
 
   }
@@ -230,17 +243,17 @@ public class NekoHtmlDocumentFormat extends TextualDocumentFormat {
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
     // Register HTML mime type
-    MimeType mime = new MimeType("text","html");
+    MimeType mime = new MimeType("text", "html");
     // Register the class handler for this mime type
-    mimeString2ClassHandlerMap.put(mime.getType()+ "/" + mime.getSubtype(),
-                                                                          this);
+    mimeString2ClassHandlerMap.put(mime.getType() + "/" + mime.getSubtype(),
+            this);
     // Register the mime type with mine string
     mimeString2mimeTypeMap.put(mime.getType() + "/" + mime.getSubtype(), mime);
     // Register file sufixes for this mime type
-    suffixes2mimeTypeMap.put("html",mime);
-    suffixes2mimeTypeMap.put("htm",mime);
+    suffixes2mimeTypeMap.put("html", mime);
+    suffixes2mimeTypeMap.put("htm", mime);
     // Register magic numbers for this mime type
-    magic2mimeTypeMap.put("<html",mime);
+    magic2mimeTypeMap.put("<html", mime);
     // Set the mimeType for this language resource
     setMimeType(mime);
     return this;

@@ -9,6 +9,7 @@ import gate.event.StatusListener;
 import gate.html.HtmlDocumentHandler.CustomObject;
 import gate.util.Err;
 import gate.util.InvalidOffsetException;
+import gate.util.Out;
 
 import java.util.Collections;
 import java.util.Enumeration;
@@ -29,6 +30,8 @@ import org.xml.sax.helpers.DefaultHandler;
 public class NekoHtmlDocumentHandler
                                     extends
                                       gate.xml.XmlPositionCorrectionHandler {
+  private static final boolean DEBUG = false;
+
   /**
    * Constructor initialises all the private memeber data
    * 
@@ -41,6 +44,13 @@ public class NekoHtmlDocumentHandler
    */
   public NekoHtmlDocumentHandler(gate.Document aDocument,
           gate.AnnotationSet anAnnotationSet, Set<String> ignorableTags) {
+    if(ignorableTags == null) {
+      ignorableTags = new HashSet<String>();
+    }
+    if(DEBUG) {
+      Out.println("Created NekoHtmlDocumentHandler.  ignorableTags = "
+              + ignorableTags);
+    }
     // init stack
     stack = new java.util.Stack<CustomObject>();
 
@@ -62,11 +72,10 @@ public class NekoHtmlDocumentHandler
     this.ignorableTags = ignorableTags;
   }// HtmlDocumentHandler
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.xml.sax.helpers.DefaultHandler#startElement(java.lang.String,
-   *      java.lang.String, java.lang.String, org.xml.sax.Attributes)
+  /**
+   * Called when the parser encounters the start of an HTML element.
+   * Empty elements also trigger this method, followed immediately by an
+   * {@link #endElement}.
    */
   @Override
   public void startElement(String uri, String localName, String qName,
@@ -77,15 +86,21 @@ public class NekoHtmlDocumentHandler
       charactersAction(new String(contentBuffer).toCharArray(), 0,
               contentBuffer.length());
     }
-    localName = localName.toLowerCase();
+    // localName = localName.toLowerCase();
+    if(DEBUG) {
+      Out.println("startElement: " + localName);
+    }
     // Fire the status listener if the elements processed exceded the
     // rate
     if(0 == (++elements % ELEMENTS_RATE))
       fireStatusChangedEvent("Processed elements : " + elements);
 
-    // Start of STYLE tag
+    // Start of ignorable tag
     if(ignorableTags.contains(localName)) {
-      isInsideIgnorableTag = true;
+      ignorableTagLevels++;
+      if(DEBUG) {
+        Out.println("  ignorable tag: levels = " + ignorableTagLevels);
+      }
     } // if
 
     // Construct a feature map from the attributes list
@@ -93,7 +108,11 @@ public class NekoHtmlDocumentHandler
 
     // Take all the attributes an put them into the feature map
     for(int i = 0; i < attributes.getLength(); i++) {
-      fm.put(attributes.getLocalName(i).toLowerCase(), attributes.getValue(i));
+      if(DEBUG) {
+        Out.println("  attribute: " + attributes.getLocalName(i) + " = "
+                + attributes.getValue(i));
+      }
+      fm.put(attributes.getLocalName(i), attributes.getValue(i));
     }
 
     // Just analize the tag t and add some\n chars and spaces to the
@@ -126,11 +145,10 @@ public class NekoHtmlDocumentHandler
 
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.xml.sax.helpers.DefaultHandler#characters(char[], int,
-   *      int)
+  /**
+   * Called when the parser encounters character or CDATA content.
+   * Characters may be reported in more than one chunk, so we gather all
+   * contiguous chunks together and process them in one block.
    */
   @Override
   public void characters(char[] ch, int start, int length) throws SAXException {
@@ -148,11 +166,19 @@ public class NekoHtmlDocumentHandler
    */
   public void charactersAction(char[] ch, int start, int length)
           throws SAXException {
+    if(DEBUG) {
+      Out.println("charactersAction: " + new String(ch, start, length));
+    }
     // position correction
     super.characters(ch, start, length);
 
-    // Skip the STYLE tag content
-    if(isInsideIgnorableTag) return;
+    // Skip ignorable tag content
+    if(ignorableTagLevels > 0) {
+      if(DEBUG) {
+        Out.println("  inside ignorable tag, skipping");
+      }
+      return;
+    }
 
     // create a string object based on the reported text
     String content = new String(ch, start, length);
@@ -202,10 +228,10 @@ public class NekoHtmlDocumentHandler
     // Iterate through stack to modify the End index of the existing
     // elements
 
-    java.util.Iterator anIterator = stack.iterator();
+    java.util.Iterator<CustomObject> anIterator = stack.iterator();
     while(anIterator.hasNext()) {
       // get the object and move to the next one
-      obj = (CustomObject)anIterator.next();
+      obj = anIterator.next();
       if(incrementStartIndex && obj.getStart().equals(obj.getEnd())) {
         obj.setStart(new Long(obj.getStart().longValue() + 1));
       }// End if
@@ -217,11 +243,8 @@ public class NekoHtmlDocumentHandler
 
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String,
-   *      java.lang.String, java.lang.String)
+  /**
+   * Called when the parser encounters the end of an HTML element.
    */
   @Override
   public void endElement(String uri, String localName, String qName)
@@ -233,14 +256,20 @@ public class NekoHtmlDocumentHandler
               contentBuffer.length());
     }
 
-    localName = localName.toLowerCase();
+    // localName = localName.toLowerCase();
+    if(DEBUG) {
+      Out.println("endElement: " + localName);
+    }
 
     // obj is for internal use
     CustomObject obj = null;
 
-    // end of STYLE tag
+    // end of ignorable tag
     if(ignorableTags.contains(localName)) {
-      isInsideIgnorableTag = false;
+      ignorableTagLevels--;
+      if(DEBUG) {
+        Out.println("  end of ignorable tag.  levels = " + ignorableTagLevels);
+      }
     } // if
 
     // If the stack is not empty then we get the object from the stack
@@ -264,13 +293,16 @@ public class NekoHtmlDocumentHandler
       customizeAppearanceOfDocumentWithEndTag(localName);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.xml.sax.helpers.DefaultHandler#endDocument()
+  /**
+   * Called when the parser reaches the end of the document. Here we
+   * store the new content and construct the Original markups
+   * annotations.
    */
   @Override
   public void endDocument() throws SAXException {
+    if(DEBUG) {
+      Out.println("endDocument");
+    }
     CustomObject obj = null;
     // replace the old content with the new one
     doc.setContent(new DocumentContentImpl(tmpDocContent.toString()));
@@ -303,25 +335,12 @@ public class NekoHtmlDocumentHandler
     fireStatusChangedEvent("Total elements : " + elements);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.xml.sax.helpers.DefaultHandler#error(org.xml.sax.SAXParseException)
+  /**
+   * Non-fatal error, print the stack trace but continue processing.
    */
   @Override
   public void error(SAXParseException e) throws SAXException {
     e.printStackTrace(Err.getPrintWriter());
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.xml.sax.helpers.DefaultHandler#fatalError(org.xml.sax.SAXParseException)
-   */
-  @Override
-  public void fatalError(SAXParseException e) throws SAXException {
-    // TODO Auto-generated method stub
-    super.fatalError(e);
   }
 
   /**
@@ -508,9 +527,22 @@ public class NekoHtmlDocumentHandler
 
   // HtmlDocumentHandler member data
 
-  // flag to say whether we are inside an ignorable tag (and so text
-  // content should be ignored)
-  boolean isInsideIgnorableTag = false;
+  // counter for the number of levels of ignorable tag we are inside.
+  // For example, if we configured "ul" as an ignorable tag name then
+  // this variable would have the following values:
+  //
+  // 0: <p>
+  // 0: This is some text
+  // 1: <ul>
+  // 1: <li>
+  // 1: some more text
+  // 2: <ul> ...
+  // 1: </ul>
+  // 1: </li>
+  // 0: </ul>
+  //
+  // this allows us to support nested ignorables
+  int ignorableTagLevels = 0;
 
   // this constant indicates when to fire the status listener
   // this listener will add an overhead and we don't want a big overhead
@@ -547,7 +579,7 @@ public class NekoHtmlDocumentHandler
   private int elements = 0;
 
   protected int customObjectsId = 0;
-  
+
   public int getCustomObjectsId() {
     return customObjectsId;
   }
