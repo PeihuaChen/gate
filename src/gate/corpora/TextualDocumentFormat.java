@@ -15,6 +15,8 @@
 
 package gate.corpora;
 
+import java.io.IOException;
+
 import gate.*;
 import gate.creole.ResourceInstantiationException;
 import gate.util.DocumentFormatException;
@@ -76,6 +78,36 @@ public class TextualDocumentFormat extends DocumentFormat
                                       throws DocumentFormatException {
     unpackMarkup(doc);
   } // unpackMarkup
+  
+  /**
+   * This is a test to see if the GATE document has a valid URL or a
+   * valid content.
+   * 
+   * @param doc
+   * @throws DocumentFormatException
+   */
+  protected static boolean hasContentButNoValidUrl(Document doc)
+          throws DocumentFormatException {
+    try {
+      if(doc.getSourceUrl() == null && doc.getContent() != null) {
+        // The doc's url is null but there is a content.
+        return true;
+      }
+      else {
+        doc.getSourceUrl().openConnection();
+      }
+    }
+    catch(IOException ex1) {
+      // The URL is not null but is not valid.
+      if(doc.getContent() == null)
+      // The document content is also null. There is nothing we can do.
+        throw new DocumentFormatException("The document doesn't have a"
+                + " valid URL and also no content");
+      return true;
+    }// End try
+
+    return false;
+  }
 
 
   /**
