@@ -254,6 +254,7 @@
            debug="true"
            debuglevel="lines,source"
            source="1.5"
+           target="1.5"
            srcdir="${srcDir}"/>
 		<jar destfile="${libDir}/ext/guk.jar" 
          update="false"
@@ -281,6 +282,7 @@
     <javac srcdir="${srcDir}" 
 		       destdir="${outputDir}"
            source="1.5"
+           target="1.5"
            encoding="UTF-8"
            debug="true"
     			 deprecation="true"
@@ -298,6 +300,7 @@
 		       destdir="${outputDir}"
            encoding="UTF-8"
            source="1.5"
+           target="1.5"
            debug="true"
            deprecation="true"    	
            includes="gate/**,com/**,debugger/**,hepple/**"
@@ -796,6 +799,5 @@
                   file="../sale/tao/tao.pdf"/>        
     </zip>
   </target>
-  
 </project>
 
