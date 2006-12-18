@@ -154,11 +154,13 @@
   <target name="jcasgen" depends="examples.prepare, jcasgen.checkdepends"
           unless="jcas.uptodate">
     <echo level="info">Generating JCas classes for Token examples</echo>
+    <property name="jcasgen.xml-jar" location="${lib.dir}/xml.jar" />
     <java classname="com.ibm.uima.jcas.jcasgen_gen.Jg"
           fork="true">
       <classpath>
         <fileset refid="uima.libs" />
       </classpath>
+      <jvmarg value="-Xbootclasspath/p:${jcasgen.xml-jar}" />
       <sysproperty key="java.util.logging.config.file"
                    value="JCasGenFileConsoleLogger" />
       <arg value="-jcasgeninput"/>
