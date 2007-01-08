@@ -395,6 +395,8 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       fileButton.setToolTipText("Set from file...");
       listButton = new JButton(MainFrame.getIcon("edit-list"));
       listButton.setToolTipText("Edit the list");
+      fmButton = new JButton(MainFrame.getIcon("edit-list"));
+      fmButton.setToolTipText("Edit the feature map");
       textField = new JTextField();
       textButtonBox = new JPanel();
       textButtonBox.setLayout(new BoxLayout(textButtonBox, BoxLayout.X_AXIS));
@@ -476,6 +478,16 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
           textButtonBox.add(listButton);
           return textButtonBox;
           }
+        }else if(typeClass != null &&
+                FeatureMap.class.isAssignableFrom(typeClass)) {
+          textField.setText(textForFeatureMap((FeatureMap)value));
+          if(ResourceParametersEditor.this.isEditable()){
+            textButtonBox.removeAll();
+            textButtonBox.add(textField);
+            textButtonBox.add(Box.createHorizontalStrut(5));
+            textButtonBox.add(fmButton);
+            return textButtonBox;
+          }
         }else if(typeClass != null && typeClass.isEnum()) {
           if(ResourceParametersEditor.this.isEditable()) {
             combo.setModel(new DefaultComboBoxModel(new Object[] {
@@ -512,9 +524,17 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       res.append("]");
       return res.toString();
     }
+    
+    /**
+     * Get a string representation for a FeatureMap value.
+     */
+    protected String textForFeatureMap(FeatureMap fm) {
+      return (fm == null) ? "" : fm.toString();
+    }
 
     JButton fileButton;
     JButton listButton;
+    JButton fmButton;
     JComboBox combo;
     JPanel textButtonBox;
     JTextField textField;
@@ -647,6 +667,20 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
         }
       });
 
+      fmButton = new JButton(MainFrame.getIcon("edit-list"));
+      fmButton.setToolTipText("Edit the feature map");
+      fmButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          FeatureMap returnedFM = fmEditor.showDialog();
+          if(returnedFM != null){
+            fmValue = returnedFM;
+            fireEditingStopped();
+          }else{
+            fireEditingCanceled();
+          }
+        }
+      });
+
       textButtonBox = new JPanel();
       textButtonBox.setLayout(new BoxLayout(textButtonBox, BoxLayout.X_AXIS));
       textButtonBox.setOpaque(false);
@@ -695,6 +729,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
                                                  int column){
       comboUsed = false;
       listUsed = false;
+      fmUsed = false;
       ParameterDisjunction pDisj = (ParameterDisjunction)
                                    table.getValueAt(row, 0);
       type = pDisj.getType();
@@ -771,6 +806,26 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
           textButtonBox.add(Box.createHorizontalStrut(5));
           textButtonBox.add(listButton);
           return textButtonBox;
+        }else if(typeClass != null &&
+                      FeatureMap.class.isAssignableFrom(typeClass)){
+          //List value
+          fmUsed = true;
+          Parameter param = pDisj.getParameter();
+          Set sufixes = param.getSuffixes();
+
+          fmValue = (FeatureMap)value;
+          fmEditor = new FeatureMapEditorDialog(
+                SwingUtilities.getAncestorOfClass(
+                Window.class, ResourceParametersEditor.this),
+                (FeatureMap)value);
+
+          textField.setEditable(false);
+          textField.setText(textForFeatureMap((FeatureMap)value));
+          textButtonBox.removeAll();
+          textButtonBox.add(textField);
+          textButtonBox.add(Box.createHorizontalStrut(5));
+          textButtonBox.add(fmButton);
+          return textButtonBox;
         }else if(typeClass != null && typeClass.isEnum()){
           comboUsed = true;
           try {
@@ -813,6 +868,13 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       res.append("]");
       return res.toString();
     }
+    
+    /**
+     * Gets a string representation for a FeatureMap value.
+     */
+    protected String textForFeatureMap(FeatureMap fm) {
+      return (fm == null) ? "" : fm.toString();
+    }
 
     public Object getCellEditorValue(){
       if(comboUsed){
@@ -821,6 +883,9 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       }
       else if(listUsed){
         return listValue;
+      }
+      else if(fmUsed){
+        return fmValue;
       }else{
         if(type.equals("java.lang.Boolean")){
           //get the value from the label
@@ -865,11 +930,16 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
 
     ListEditorDialog listEditor = null;
     List listValue;
+    
+    FeatureMapEditorDialog fmEditor = null;
+    FeatureMap fmValue;
 
     boolean comboUsed;
     boolean listUsed;
+    boolean fmUsed;
     JButton fileButton;
     JButton listButton;
+    JButton fmButton;
     JPanel textButtonBox;
   }///class ParameterValueEditor
 }//class NewResourceDialog
