@@ -20,6 +20,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
+import gate.Factory;
+import gate.FeatureMap;
 import gate.Gate;
 import gate.util.*;
 
@@ -147,6 +149,45 @@ public class Parameter implements Serializable
       }// End if(itemClassName == null)
       return colection;
     }// End if (Collection.class.isAssignableFrom(paramClass))
+    
+    if(FeatureMap.class.isAssignableFrom(paramClass)) {
+      FeatureMap fm = null;
+      // if the type is an interface type (not a concrete implementation)
+      // then just create a normal feature map using the factory
+      if(paramClass.isInterface()) {
+        fm = Factory.newFeatureMap();
+      }
+      else {
+        try{
+          fm = (FeatureMap)paramClass.getConstructor(new Class[]{}).
+                                    newInstance(new Object[]{});
+        } catch(Exception ex){
+            throw new ParameterException("Could not construct an object of type "
+              + typeName + " for param " + name +
+              "\nProblem was: " + ex.toString());
+        }
+      }
+      
+      // Read the tokens from the default value and try to create items
+      // belonging to the itemClassName
+      StringTokenizer strTokenizer = new StringTokenizer(
+                                                    stringValue,";");
+      while(strTokenizer.hasMoreTokens()) {
+        String keyAndValue = strTokenizer.nextToken();
+        int indexOfEquals = keyAndValue.indexOf('=');
+        if(indexOfEquals == -1) {
+          throw new ParameterException("Error parsing string \""
+                  + stringValue + "\" for parameter " + name + " of type "
+                  + typeName + ". Value string must be of the form "
+                  + "name1=value1;name2=value2;...");
+        }
+        String featName = keyAndValue.substring(0, indexOfEquals);
+        String featValue = keyAndValue.substring(indexOfEquals + 1);
+        fm.put(featName, featValue);
+      }
+      
+      return fm;
+    }
     
     // Java 5.0 enum types
     if(paramClass.isEnum()) {
