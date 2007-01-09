@@ -151,6 +151,8 @@ public class Parameter implements Serializable
     }// End if (Collection.class.isAssignableFrom(paramClass))
     
     if(FeatureMap.class.isAssignableFrom(paramClass)) {
+      // a null string value means a null FeatureMap
+      if(stringValue == null) return null;
       FeatureMap fm = null;
       // if the type is an interface type (not a concrete implementation)
       // then just create a normal feature map using the factory
