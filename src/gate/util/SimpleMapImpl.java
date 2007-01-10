@@ -24,7 +24,8 @@ import java.util.*;
  * for small number of items on it.
  */
 
-class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
+class SimpleMapImpl implements Map<Object, Object>,
+      java.lang.Cloneable, java.io.Serializable {
 
   /**
    * The capacity of the map
