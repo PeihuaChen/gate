@@ -22,6 +22,6 @@ import java.util.Map;
   * The event code is needed so a persistent annotation can fire updated events
   * when its features are updated
   */
-public interface SimpleFeatureMap extends Map
+public interface SimpleFeatureMap extends Map<Object, Object>
 {
 } // interface SimpleFeatureMap
