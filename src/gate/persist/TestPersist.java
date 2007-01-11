@@ -1407,48 +1407,48 @@ public class TestPersist extends TestCase
 //      System.out.println("<< 103");
 //  }
 
-  public void testPostgres_01() throws Exception {
-
-    prepareDB("postgres");
-    _testDB_UseCase01();
-  }
-
-  public void testPostgres_02() throws Exception {
-
-    prepareDB("postgres");
-    _testDB_UseCase02();
-  }
-
-  public void testPostgres_03() throws Exception {
-
-    prepareDB("postgres");
-    _testDB_UseCase03();
-  }
-
-  public void testPostgres_04() throws Exception {
-
-    prepareDB("postgres");
-    _testDB_UseCase04();
-  }
-
-  public void testPostgres_101() throws Exception {
-
-    prepareDB("postgres");
-    _testDB_UseCase101();
-  }
-
-  public void testPostgres_102() throws Exception {
-
-    prepareDB("postgres");
-    _testDB_UseCase102();
-  }
-
-  public void testPostgres_103() throws Exception {
-
-    prepareDB("postgres");
-    _testDB_UseCase103();
-  }
-
+//  public void testPostgres_01() throws Exception {
+//
+//    prepareDB("postgres");
+//    _testDB_UseCase01();
+//  }
+//
+//  public void testPostgres_02() throws Exception {
+//
+//    prepareDB("postgres");
+//    _testDB_UseCase02();
+//  }
+//
+//  public void testPostgres_03() throws Exception {
+//
+//    prepareDB("postgres");
+//    _testDB_UseCase03();
+//  }
+//
+//  public void testPostgres_04() throws Exception {
+//
+//    prepareDB("postgres");
+//    _testDB_UseCase04();
+//  }
+//
+//  public void testPostgres_101() throws Exception {
+//
+//    prepareDB("postgres");
+//    _testDB_UseCase101();
+//  }
+//
+//  public void testPostgres_102() throws Exception {
+//
+//    prepareDB("postgres");
+//    _testDB_UseCase102();
+//  }
+//
+//  public void testPostgres_103() throws Exception {
+//
+//    prepareDB("postgres");
+//    _testDB_UseCase103();
+//  }
+//
 
 
   public static void main(String[] args){
@@ -1508,34 +1508,36 @@ public class TestPersist extends TestCase
 
       /* postgres */
 
-      test.setUp();
-      test.testPostgres_01();
-      test.tearDown();
+//      test.setUp();
+//      test.testPostgres_01();
+//      test.tearDown();
+//
+//      test.setUp();
+//      test.testPostgres_02();
+//      test.tearDown();
+//
+//      test.setUp();
+//      test.testPostgres_03();
+//      test.tearDown();
+//
+//      test.setUp();
+//      test.testPostgres_04();
+//      test.tearDown();
+//
+//      test.setUp();
+//      test.testPostgres_101();
+//      test.tearDown();
+//
+//      test.setUp();
+//      test.testPostgres_102();
+//      test.tearDown();
+//
+//      test.setUp();
+//      test.testPostgres_103();
+//      test.tearDown();
 
-      test.setUp();
-      test.testPostgres_02();
-      test.tearDown();
-
-      test.setUp();
-      test.testPostgres_03();
-      test.tearDown();
-
-      test.setUp();
-      test.testPostgres_04();
-      test.tearDown();
-
-      test.setUp();
-      test.testPostgres_101();
-      test.tearDown();
-
-      test.setUp();
-      test.testPostgres_102();
-      test.tearDown();
-
-      test.setUp();
-      test.testPostgres_103();
-      test.tearDown();
-
+      /* SerialDS */
+      
       test.setUp();
       test.testDelete();
       test.tearDown();
