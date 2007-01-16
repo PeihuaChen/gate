@@ -370,21 +370,16 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       return emptyAnnotationSet;
     Collection<Annotation> annotationsToAdd = getAnnotsByStartNode(nextNode
             .getId());
-    // get ready for next test
-    nextNode = (Node)nodesByOffset.getNextOf(new Long(offset.longValue() + 1));
     // skip all the nodes that have no starting annotations
-    while(annotationsToAdd == null && nextNode != null) {
-      annotationsToAdd = getAnnotsByStartNode(nextNode.getId());
-      // get ready for next test
+    while(annotationsToAdd == null) {
       nextNode = (Node)nodesByOffset.getNextOf(new Long(nextNode.getOffset()
               .longValue() + 1));
+      if (nextNode==null) return emptyAnnotationSet;
+      annotationsToAdd = getAnnotsByStartNode(nextNode.getId());
     }
-    // res it either null (no suitable node found) or the correct result
     if(annotationsToAdd == null) return emptyAnnotationSet;
-    // otherwise it is a collection - which we'll convert to an
-    // ImmutableAnnotationSet
     return new ImmutableAnnotationSetImpl(doc, annotationsToAdd);
-  } // get(offset)
+  }
 
   /**
    * Select annotations by offset. This returns the set of annotations that
@@ -696,9 +691,11 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     return changed;
   }
 
-  /** Create and add an annotation and return its id */
-  public Integer add(Long start, Long end, String type, FeatureMap features)
-          throws InvalidOffsetException {
+  /** Returns the nodes corresponding to the Longs. The Nodes are created if
+   * they don't exist. 
+   **/
+  private final Node[] getNodes(Long start, Long end) throws InvalidOffsetException
+  {
     // are the offsets valid?
     if(!doc.isValidOffsetRange(start, end)) throw new InvalidOffsetException();
     // the set has to be indexed by position in order to add, as we need
@@ -708,17 +705,30 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     }
     // find existing nodes if appropriate nodes don't already exist,
     // create them
-    Node startNode = (Node)nodesByOffset.getNextOf(start);
-    if(startNode == null || !startNode.getOffset().equals(start))
+    Node startNode = (Node)nodesByOffset.get(start);
+    if(startNode == null)
       startNode = new NodeImpl(doc.getNextNodeId(), start);
+    
     Node endNode = null;
-    if(start.equals(end))
+    if(start.equals(end)){
       endNode = startNode;
-    else endNode = (Node)nodesByOffset.getNextOf(end);
-    if(endNode == null || !endNode.getOffset().equals(end))
-      endNode = new NodeImpl(doc.getNextNodeId(), end);
+      return new Node[]{startNode,endNode};
+    }
+    
+    endNode = (Node)nodesByOffset.get(end);
+    if(endNode == null)
+      endNode = new NodeImpl(doc.getNextNodeId(), end);    
+    
+    return new Node[]{startNode,endNode};
+  }
+  
+  
+  /** Create and add an annotation and return its id */
+  public Integer add(Long start, Long end, String type, FeatureMap features)
+          throws InvalidOffsetException {
+    Node[] nodes = getNodes(start,end);
     // delegate to the method that adds annotations with existing nodes
-    return add(startNode, endNode, type, features);
+    return add(nodes[0], nodes[1], type, features);
   } // add(start, end, type, features)
 
   /**
@@ -727,26 +737,9 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    */
   public void add(Integer id, Long start, Long end, String type,
           FeatureMap features) throws InvalidOffsetException {
-    // are the offsets valid?
-    if(!doc.isValidOffsetRange(start, end)) throw new InvalidOffsetException();
-    // the set has to be indexed by position in order to add, as we need
-    // to find out if nodes need creating or if they exist already
-    if(nodesByOffset == null) {
-      indexByStartOffset();
-    }
-    // find existing nodes if appropriate nodes don't already exist,
-    // create them
-    Node startNode = (Node)nodesByOffset.getNextOf(start);
-    if(startNode == null || !startNode.getOffset().equals(start))
-      startNode = new NodeImpl(doc.getNextNodeId(), start);
-    Node endNode = null;
-    if(start.equals(end))
-      endNode = startNode;
-    else endNode = (Node)nodesByOffset.getNextOf(end);
-    if(endNode == null || !endNode.getOffset().equals(end))
-      endNode = new NodeImpl(doc.getNextNodeId(), end);
+    Node[] nodes = getNodes(start,end);
     // construct an annotation
-    annFactory.createAnnotationInSet(this, id, startNode, endNode, type,
+    annFactory.createAnnotationInSet(this, id, nodes[0], nodes[1], type,
             features);
   } // add(id, start, end, type, features)
 
