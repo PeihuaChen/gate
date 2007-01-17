@@ -299,12 +299,12 @@
     <parallel>
       <daemons>
         <ant target="vns" />
-        <sequential>
-          <!-- wait for vns to start before starting service -->
-          <sleep seconds="10" />
-          <ant target="vinciservice" />
-        </sequential>
       </daemons>
+      <sequential>
+        <!-- wait for vns to start before starting service -->
+        <sleep seconds="10" />
+        <ant target="vinciservice" />
+      </sequential>
       <sequential>
         <!-- wait for vns and service to start before running tests -->
         <sleep seconds="20" />
@@ -319,6 +319,16 @@
           <formatter type="xml" />
           <test name="gate.uima.test.TestUIMAInGATE" />
         </junit>
+        <java fork="true" classname="com.ibm.uima.reference_impl.analysis_engine.service.vinci.util.Shutdown">
+          <classpath>
+            <path refid="test.uimaingate.classpath"/>
+            <fileset refid="uima.libs" />
+          </classpath>
+          <sysproperty key="VNS_PORT" value="${vns.port}"/>
+          <sysproperty key="VNS_HOST" value="localhost"/>
+          <sysproperty key="java.awt.headless" value="true" />
+          <arg value="gate.uima.TokenHandlerService" />
+        </java>
       </sequential>
     </parallel>
   </target>
