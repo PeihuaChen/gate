@@ -40,7 +40,8 @@ public class TagHighlighter {
             }
             
             String closing = "(</" + tag + ">)";
-            text = text.replaceAll(closing,closing+"</B>");
+            String closingReplacement = "</" + tag + "></B>";
+            text = text.replaceAll(closing,closingReplacement);
         }
 
         return text;
