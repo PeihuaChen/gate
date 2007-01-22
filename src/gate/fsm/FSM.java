@@ -29,13 +29,27 @@ public class FSM implements JapeConstants {
   private static final boolean DEBUG = false;
 
   /**
+   * The constructor that all the other constructors should call.
+   */
+  protected FSM() {
+    initialState = new State();
+  } 
+
+  /**
     * Builds a standalone FSM starting from a single phase transducer.
     * @param spt the single phase transducer to be used for building this FSM.
     */
   public FSM(SinglePhaseTransducer spt){
-    initialState = new State();
-    transducerName = spt.getName();
-    Iterator rulesEnum = spt.getRules().iterator();
+    this();
+    addRules(spt.getRules());
+  }  
+  
+  /**
+   * Do the work involved in creating an FSM from a PrioritisedRuleList.
+   */
+  protected void addRules(PrioritisedRuleList rules) {
+    Iterator rulesEnum = rules.iterator();
+
     Rule currentRule;
 
     while(rulesEnum.hasNext()){
@@ -53,8 +67,6 @@ public class FSM implements JapeConstants {
     }
 
     eliminateVoidTransitions();
-//Out.prln("Transducer " + spt.getName() + " converted to " + allStates.size() + " states");
-
   }
 
   /**
@@ -65,8 +77,16 @@ public class FSM implements JapeConstants {
     * @param rule the rule to be used for the building process.
     */
   public FSM(Rule rule) {
+    this();
+    setRule(rule);
+  }
 
-    initialState = new State();
+
+  /**
+   * Do the work involved in creating an FSM from a Rule.
+   */
+  protected void setRule(Rule rule) {
+
     LeftHandSide lhs = rule.getLHS();
 
     //added by Karter start
@@ -509,7 +529,6 @@ public class FSM implements JapeConstants {
   private transient Map newStates = new HashMap();
   private transient Set dStates = new HashSet();
 
-  private String transducerName;
 
   //added by Karter start
   private String currentBinding(ComplexPatternElement cpe, int indent) {
