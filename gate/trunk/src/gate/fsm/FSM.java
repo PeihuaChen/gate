@@ -90,7 +90,7 @@ public class FSM implements JapeConstants {
     LeftHandSide lhs = rule.getLHS();
 
     //added by Karter start
-    LinkedList ll = new LinkedList();
+    LinkedList<String> ll = new LinkedList<String>();
     if(gate.Gate.isEnableJapeDebug()) {
       String label = currentLHSBinding(lhs);
       ll.add(label);
@@ -136,7 +136,7 @@ public class FSM implements JapeConstants {
           nextRowState = new State();
 
           //added by Karter start
-          LinkedList sll = new LinkedList();
+          LinkedList<String> sll = new LinkedList<String>();
           if(gate.Gate.isEnableJapeDebug()) {
             sll.add(currentBasicBinding( (BasicPatternElement) currentPattern));
             currentRowState.addTransition(
@@ -165,7 +165,7 @@ public class FSM implements JapeConstants {
             currentRowState =  convertComplexPE(
                                 currentRowState,
                                 (ComplexPatternElement)currentPattern,
-                                new LinkedList());
+                                new LinkedList<String>());
 
           }
           // Angel debugger cut
@@ -208,9 +208,9 @@ public class FSM implements JapeConstants {
     * as described in the pattern
     */
   private State convertComplexPE(State startState,
-                                ComplexPatternElement cpe, LinkedList labels){
+                                ComplexPatternElement cpe, LinkedList<String> labels){
     //create a copy
-    LinkedList newBindings = (LinkedList)labels.clone();
+    LinkedList<String> newBindings = (LinkedList<String>)labels.clone();
     String localLabel = cpe.getBindingName ();
 
     if(localLabel != null)newBindings.add(localLabel);
@@ -324,8 +324,8 @@ public class FSM implements JapeConstants {
   public void eliminateVoidTransitions() {
 
     dStates.clear(); //kalina: replaced from new HashSet()
-    LinkedList unmarkedDStates = new LinkedList();
-    AbstractSet currentDState = new HashSet();
+    LinkedList<AbstractSet<State>> unmarkedDStates = new LinkedList<AbstractSet<State>>();
+    AbstractSet<State> currentDState = new HashSet<State>();
     //kalina: prefer clear coz faster than init()
     newStates.clear();
 
@@ -355,7 +355,7 @@ public class FSM implements JapeConstants {
     }
 
     while(!unmarkedDStates.isEmpty()) {
-      currentDState = (AbstractSet)unmarkedDStates.removeFirst();
+      currentDState = unmarkedDStates.removeFirst();
       Iterator insideStatesIter = currentDState.iterator();
 
       while(insideStatesIter.hasNext()) {
@@ -367,7 +367,7 @@ public class FSM implements JapeConstants {
 
           if(currentTrans.getConstraints() !=null) {
             State target = currentTrans.getTarget();
-            AbstractSet newDState = new HashSet();
+            AbstractSet<State> newDState = new HashSet<State>();
             newDState.add(target);
             newDState = lambdaClosure(newDState);
 
@@ -434,12 +434,12 @@ public class FSM implements JapeConstants {
     * @return a set containing all the states accessible from this state via
     * transitions that bear no restrictions.
     */
-  private AbstractSet lambdaClosure(AbstractSet s) {
+  private AbstractSet<State> lambdaClosure(AbstractSet<State> s) {
     // the stack/queue used by the algorithm
-    LinkedList list = new LinkedList(s);
+    LinkedList<State> list = new LinkedList<State>(s);
 
     // the set to be returned
-    AbstractSet lambdaClosure = new HashSet(s);
+    AbstractSet<State> lambdaClosure = new HashSet<State>(s);
     State top;
     Iterator transIter;
     Transition currentTransition;
@@ -526,8 +526,8 @@ public class FSM implements JapeConstants {
   private transient Collection allStates =  new HashSet();
 
   //kalina: added this member here to minimise HashMap allocation
-  private transient Map newStates = new HashMap();
-  private transient Set dStates = new HashSet();
+  private transient Map<AbstractSet,State> newStates = new HashMap<AbstractSet,State>();
+  private transient Set<AbstractSet> dStates = new HashSet<AbstractSet>();
 
 
   //added by Karter start
@@ -657,6 +657,6 @@ public class FSM implements JapeConstants {
   }
 
   int bpeId = 0;
-  public HashMap ruleHash = new HashMap();
+  public HashMap<String,String> ruleHash = new HashMap<String,String>();
   //added by Karter end
 } // FSM
