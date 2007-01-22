@@ -430,7 +430,8 @@
           logError="true"
           maxmemory="${runtime.max.memory}">
 <!--	     <jvmarg value="-Xms${runtime.start.memory}"/> -->
-       <sysproperty key="gate.home" value="${basedir}"/>   
+      <jvmarg value="-server"/> 
+    	<sysproperty key="gate.home" value="${basedir}"/>   
        <sysproperty key="java.ext.dirs" value="${extDir}"/>
  <!--<sysproperty key="awt.toolkit" value="sun.awt.motif.MToolkit"/>-->
  <!-- <sysproperty key="sun.java2d.opengl" value="true"/>-->
