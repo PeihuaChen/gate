@@ -18,6 +18,7 @@ package gate.fsm;
 import java.util.*;
 
 import gate.jape.*;
+import gate.util.SimpleArraySet;
 
 /**
   * This class implements a standard Finite State Machine.
@@ -465,6 +466,149 @@ public class FSM implements JapeConstants {
     return lambdaClosure;
   } // lambdaClosure
 
+  
+  /**
+   * Two members used by forEachState().
+   */
+  protected State currentState;
+  protected Transition currentTransition;
+  
+  /**
+   * Iterates over all the states in this FSM, setting currentState and
+   * currentTransition, then calling the given Runnable callback.
+   */
+  protected void forEachState (java.lang.Runnable r) {
+    Set<State> stackToProcess = new HashSet<State>();
+    Set<State> processed = new HashSet<State>();
+
+    stackToProcess.add(initialState);
+    while (!stackToProcess.isEmpty()) {
+      currentState = (State) stackToProcess.iterator().next();
+      stackToProcess.remove(currentState);
+      processed.add(currentState);
+
+      for(Transition t : currentState.getTransitions()) {
+        currentTransition = t;
+        State target = currentTransition.getTarget();
+        if (processed.contains(target) || stackToProcess.contains(target)) continue;
+        stackToProcess.add(target);
+
+        r.run();
+      }
+    }
+  }
+
+  /**
+   * @return a Map whose keys contain the states of this FSM, and whose values
+   *         contain their corresponding transitions. This method actually walks
+   *         the FSM, so it may be called before the FSM is finalized with
+   *         compactTransitions().
+   */
+  public Map<State,SimpleArraySet<Transition>> getAllStates() {
+    /*
+     * This method can't use the allStates data member, since it's sometimes
+     * called before allStates is populated.
+     */
+
+    Map<State,SimpleArraySet<Transition>> statesToReturn = new HashMap<State,SimpleArraySet<Transition>>();
+    Set<State> stackToProcess = new HashSet<State>();
+    Set<State> processed = new HashSet<State>();
+
+    stackToProcess.add(initialState);
+    while (!stackToProcess.isEmpty()) {
+      currentState = (State) stackToProcess.iterator().next();
+      stackToProcess.remove(currentState);
+      processed.add(currentState);
+
+
+      SimpleArraySet<Transition> transitions = currentState.getTransitions();
+      statesToReturn.put(currentState, transitions);
+      for (Iterator<Transition> iter = transitions.iterator(); iter.hasNext();) {
+        currentTransition = iter.next();
+        State target = currentTransition.getTarget();
+        if (processed.contains(target) || stackToProcess.contains(target)) continue;
+        stackToProcess.add(target);
+      }
+    }
+
+    return statesToReturn;
+  }
+  
+  /**
+   * Returns a representation of this FSM in the GraphViz graph-visualization
+   * language. We use the "digraph" (directed graph) format. Nodes are labeled
+   * by their numerical indexes. A node's shape is a diamond if it's the initial
+   * state, and round otherwise. A node is green if it's an initial state, red
+   * if it's a final state, and black otherwise. Final states are also marked
+   * with a double-line outline.
+   * 
+   * @see <a href="http://www.graphviz.org/">the GraphViz web site </a> for
+   *      software to translate the output of this method into pretty pictures.
+   * 
+   * @param includeConstraints
+   *            whether to include a stringified representation of each
+   *            transition object as part of its label. The default is false.
+   * @return
+   */
+  public String asGraphViz(boolean includeConstraints) {
+    StringBuffer result = new StringBuffer();
+
+    result.append("digraph G {\n");
+
+    for(State currentState : getAllStates().keySet()) {
+      int stateIndex = currentState.getIndex();
+      Map<String,String> opts = new HashMap<String,String>();
+      opts.put("shape", currentState == initialState ? "diamond" : "circle");
+      opts.put("color", currentState == initialState ? "green" : currentState.isFinal() ? "red" : "black");
+      if (currentState.isFinal()) {
+        opts.put("peripheries", "2");
+        if (DEBUG) {
+          opts.put("shape", "rectangle");
+          opts.put("label", "" + stateIndex + "-" + currentState.getAction());
+        }
+      }
+
+      result.append("  " + stateIndex + " [" + encodeForGraphViz(opts) + "]" + ";\n");
+
+      for(Transition t : currentState.getTransitions()) {
+        String extraText = includeConstraints
+        ? " [label=\"" + t.toString(false) + "\"]"
+                : "";
+        result.append("  " + stateIndex + " -> " + t.getTarget().getIndex()
+                + extraText + ";\n");
+      }
+    }
+
+    result.append("}\n");
+
+    return result.toString();
+  }
+
+  /**
+   * Given a Map, encodes its keys and values as strings suitable for use as a
+   * GraphViz label. Embedded "\r\n" sequences are replaced by "\\l" to create
+   * line feeds, and embedded backslashes are escaped. The returned String takes
+   * the form "key1=value1, key2=value2, ...".
+   */
+  String encodeForGraphViz (Map<String,String> m) {
+    ArrayList<String> temp = new ArrayList<String>(m.size());
+    for(String k : m.keySet()) {
+      String v = m.get(k);
+      v = v.replaceAll("\r\n", "\\\\l");
+      v = v.replaceAll("\"", "\\\\\"");
+      temp.add(k + "=\"" + v + "\"");
+    }
+
+    StringBuffer toReturn = new StringBuffer();
+    for (int i = 0; i < temp.size(); i++)
+    {
+      if (i != 0) toReturn.append(",");
+      toReturn.append(temp.get(i));
+    }
+    return toReturn.toString();
+  }
+  
+
   /**
     * Returns a GML (Graph Modelling Language) representation of the transition
     * graph of this FSM.
@@ -472,7 +616,7 @@ public class FSM implements JapeConstants {
   public String getGML() {
 
     String res = "graph[ \ndirected 1\n";
-///    String nodes = "", edges = "";
+    
     StringBuffer nodes = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE),
                  edges = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
 
@@ -480,23 +624,15 @@ public class FSM implements JapeConstants {
     while (stateIter.hasNext()){
       State currentState = (State)stateIter.next();
       int stateIndex = currentState.getIndex();
-/*      nodes += "node[ id " + stateIndex +
-               " label \"" + stateIndex;
-*/
         nodes.append("node[ id ");
         nodes.append(stateIndex);
         nodes.append(" label \"");
         nodes.append(stateIndex);
 
              if(currentState.isFinal()){
-/*              nodes += ",F";
-              nodes += "\\n" + currentState.getAction().shortDesc();
-*/
               nodes.append(",F\\n" + currentState.getAction().shortDesc());
              }
-///             nodes +=  "\"  ]\n";
              nodes.append("\"  ]\n");
-///      edges += currentState.getEdgesGML();
       edges.append(currentState.getEdgesGML());
     }
     res += nodes.toString() + edges.toString() + "]\n";

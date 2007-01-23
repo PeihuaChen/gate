@@ -151,8 +151,15 @@ public class Transition implements Serializable, Comparable {
     * @return a String
     */
   public String toString(){
-    String res = "If: " + constraints + " then ->: " + target.getIndex();
-    return res;
+    return toString(true);
+  }
+
+  public String toString(boolean includeTarget){
+    StringBuffer toReturn = new StringBuffer();
+    if (includeTarget) toReturn.append("If: ");
+    toReturn.append(constraints);
+    if (includeTarget) toReturn.append(" then ->: " + target.getIndex());
+    return toReturn.toString();
   }
 
   /**
