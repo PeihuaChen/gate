@@ -45,9 +45,7 @@ Rule: Ldots
 {}
 
 Rule: Split1
-(
- (PUNCT|FULLSTOP|THREEDOTS)
-)
+(PUNCT|FULLSTOP|THREEDOTS)+
 :split
 -->
 :split.Split = {kind = "internal"}
