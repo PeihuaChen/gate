@@ -27,7 +27,7 @@ import java.util.Collection;
  * high performance and memory reduction on small sets. Used in
  * gate.fsm.State, for example
  */
-public class SimpleArraySet implements Serializable
+public class SimpleArraySet<T> implements Serializable, Iterable<T>
 {
   /**
    * The array storing the elements
@@ -45,7 +45,7 @@ public class SimpleArraySet implements Serializable
       return Arrays.asList(theArray);
   }
 
-  public boolean add(Object tr)
+  public boolean add(T tr)
   {
     if (theArray == null)
     {
@@ -79,17 +79,17 @@ public class SimpleArraySet implements Serializable
   /**
    * iterator
    */
-  public java.util.Iterator iterator()
+  public java.util.Iterator<T> iterator()
   {
     if (theArray == null)
-      return new java.util.Iterator()
+      return new java.util.Iterator<T>()
         {
           public boolean hasNext() {return false;}
-          public Object next() { return null; }
+          public T next() { return null; }
           public void remove() {}
         };
     else
-      return new java.util.Iterator()
+      return new java.util.Iterator<T>()
         {
           int count = 0;
           public boolean hasNext()
@@ -98,10 +98,10 @@ public class SimpleArraySet implements Serializable
               throw new RuntimeException("");
             return count < theArray.length;
           }
-          public Object next() {
+          public T next() {
             if (theArray == null)
               throw new RuntimeException("");
-            return theArray[count++];
+            return (T) theArray[count++];
           }
           public void remove() {}
         }; // anonymous iterator
