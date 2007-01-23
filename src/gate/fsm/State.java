@@ -58,7 +58,7 @@ public class State implements JapeConstants {
   }
 */
 // >>> DAM, TransArray optimization
-  public SimpleArraySet getTransitions() {
+  public SimpleArraySet<Transition> getTransitions() {
     return transitions;
   }
 // >>> DAM, end
