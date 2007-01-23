@@ -202,7 +202,7 @@ public class State implements JapeConstants {
   private Set transitions = new HashSet();
 */
 // >>> DAM, TransArray optimization
-  private SimpleArraySet transitions = new SimpleArraySet();
+  private SimpleArraySet<Transition> transitions = new SimpleArraySet<Transition>();
 // >>> DAM, end
 
   /**
