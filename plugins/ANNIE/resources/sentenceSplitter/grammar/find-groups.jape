@@ -1,0 +1,31 @@
+/*
+*  cr.jape
+*
+* Copyright (c) 1998-2004, The University of Sheffield.
+*
+*  This file is part of GATE (see http://gate.ac.uk/), and is free
+*  software, licenced under the GNU Library General Public License,
+*  Version 2, June 1991 (in the distribution as file licence.html,
+*  and also available at http://gate.ac.uk/gate/licence.html).
+*
+*  Valentin Tablan, 23 Jan 2007
+* 
+*  $Id: find.jape 7712 2006-10-17 20:46:49 +0000 (Tue, 17 Oct 2006) valyt $
+*/
+
+Phase:	findGroups
+Input: Token Split
+Options: control = appelt
+
+//Find groups of internal splits that are not separated by other tokens
+Rule: InternalGroup
+(
+  ({Split.kind=="internal"})+:split
+  ({Token.string == "\""})?
+):group
+-->
+:group.Split = {kind = "internal"},
+{
+  //delete old splits
+  inputAS.removeAll((AnnotationSet)bindings.get("split"));
+}
