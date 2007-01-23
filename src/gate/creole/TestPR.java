@@ -178,9 +178,9 @@ public class TestPR extends TestCase
     splitter.execute();
     assertTrue("Found in "+ doc2.getSourceUrl().getFile()+ " "+
       doc2.getAnnotations().get(ANNIEConstants.SENTENCE_ANNOTATION_TYPE).size() +
-      " Sentence annotations, instead of the expected 52.",
-      doc2.getAnnotations().get(ANNIEConstants.SENTENCE_ANNOTATION_TYPE).size()== 52);
-
+      " Sentence annotations, instead of the expected 51.",
+      doc2.getAnnotations().get(ANNIEConstants.SENTENCE_ANNOTATION_TYPE).size()== 51);
+    
     assertTrue("Found in "+ doc2.getSourceUrl().getFile()+ " "+
       doc2.getAnnotations().get("Split").size() +
       " Split annotations, instead of the expected 72.",
