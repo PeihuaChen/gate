@@ -17,10 +17,13 @@ Phase:split
 Input: Token Split TempNoSplitText
 Options: control = first
 
+
 //sentence that consumes a split
 Rule: internalSplits
 (
- ({Token})+ {Split.kind == "internal"}
+  {Token.kind == "word"}  
+  ({Token})* 
+  {Split.kind == "internal"}
 ) :sentence
 -->
 :sentence.Sentence = {}
@@ -29,7 +32,33 @@ Rule: internalSplits
 //sentence that doesn't consume a split
 Rule: externalSplits
 (
- ({Token})+
+  {Token.kind == "word"}  
+  ({Token})* 
+):sentence
+{Split.kind == "external"}
+-->
+:sentence.Sentence = {}
+
+//quoted sentence that consumes a split
+Rule: quotedInternalSplits
+(
+  {Token.string == "\""}      
+  {Token.kind == "word"}  
+  ({Token})* 
+  ({Split.kind == "internal"})+
+  {Token.string == "\""}
+) :sentence
+-->
+:sentence.Sentence = {}
+
+ 
+//quoted sentence that doesn't consume a split
+Rule: quotedExternalSplits
+(
+  {Token.string == "\""}      
+  {Token.kind == "word"}  
+  ({Token})*
+  {Token.string == "\""}
 ):sentence
 {Split.kind == "external"}
 -->
