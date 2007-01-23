@@ -7,5 +7,7 @@ MultiPhase:	main
 Phases: 
 
 find
+find-groups
+no-splits
 split
 removelookup
