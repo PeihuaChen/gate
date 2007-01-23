@@ -47,7 +47,6 @@ Rule: Ldots
 Rule: Split1
 (
  (PUNCT|FULLSTOP|THREEDOTS)
- ({Token.string == "\""})?
 )
 :split
 -->
