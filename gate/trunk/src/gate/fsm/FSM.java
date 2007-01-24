@@ -51,11 +51,8 @@ public class FSM implements JapeConstants {
   protected void addRules(PrioritisedRuleList rules) {
     Iterator rulesEnum = rules.iterator();
 
-    Rule currentRule;
-
     while(rulesEnum.hasNext()){
-      currentRule = (Rule) rulesEnum.next();
-      FSM ruleFSM = new FSM(currentRule);
+      FSM ruleFSM = spawn((Rule) rulesEnum.next());
 
       //added by Karter start
       if(gate.Gate.isEnableJapeDebug()) {
@@ -188,6 +185,35 @@ public class FSM implements JapeConstants {
     } // for i
   }
 
+  /**
+   * Builds a FSM starting from a ComplexPatternElement. This FSM is usually
+   * part of a larger FSM based on the Rule that contains the
+   * ComplexPatternElement.
+   * 
+   * @param cpe
+   *            the ComplexPatternElement to be used for the building process.
+   */
+  protected FSM(ComplexPatternElement cpe) {
+      this();
+      finalState = convertComplexPE(initialState, cpe, new LinkedList<String>());
+      finalState.isFinal = true;
+  }
+
+  /**
+   * A factory method for new FSMs like this one, given a Rule object.
+   */ 
+  protected FSM spawn(Rule r) {
+    return new FSM(r);
+  }
+  
+  /**
+   * A factory method for new FSMs like this one, given a ComplexPatternElement
+   * object.
+   */ 
+  protected FSM spawn(ComplexPatternElement currentPattern) {
+      return new FSM(currentPattern);
+  }
+  
   /**
     * Gets the initial state of this FSM
     * @return an object of type gate.fsm.State representing the initial state.
@@ -655,6 +681,11 @@ public class FSM implements JapeConstants {
     * The initial state of this FSM.
     */
   private State initialState;
+  
+ /**
+   * The final state of this FSM (usually only valid during construction).
+   */
+  protected State finalState;
 
   /**
     * The set of states for this FSM
