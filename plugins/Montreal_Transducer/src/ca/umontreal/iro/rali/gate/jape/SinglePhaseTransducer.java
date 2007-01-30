@@ -432,9 +432,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
 	      // newSet.addAll(tuple);  Ok with Gate 2.1, but buggy with 2.2!!!
 	      // So call newSet.add one at a time so that annots keep their IDs
-	      for (ListIterator<Annotation> annotsInTupleIter = tuple.listIterator();
+	      for (ListIterator annotsInTupleIter = tuple.listIterator();
 		   annotsInTupleIter.hasNext(); ) {
-		newSet.add(annotsInTupleIter.next());
+		newSet.add((Annotation) annotsInTupleIter.next());
 	      }
 
 	      binds.put(oneLabel, newSet);
