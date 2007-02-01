@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- *  $Id: YahooPR.java 3854 2006-12-20 16:41:11Z kalina $  
+ *  $Id$  
  */
 package gate.yahoo;
 
