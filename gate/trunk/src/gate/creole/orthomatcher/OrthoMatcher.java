@@ -255,9 +255,12 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
       AnnotationSet nameAnnots = nameAllAnnots.get(annotationType);
 
       // continue if no such annotations exist
-      if ((nameAnnots == null) || nameAnnots.isEmpty())
-        continue;
-
+      if (nameAnnots.isEmpty()) continue;
+      
+      AnnotationSet tokensNameAS = nameAllAnnots.get(TOKEN_ANNOTATION_TYPE);
+      if (tokensNameAS.isEmpty()) continue;
+      
+      
       Iterator iterNames = nameAnnots.iterator();
       while (iterNames.hasNext()) {
         Annotation nameAnnot = (Annotation) iterNames.next();
@@ -282,11 +285,16 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
           annotString = annotString.toLowerCase();
 
         //get the tokens
-        List tokens = new ArrayList((Set)
-                        nameAllAnnots.get(TOKEN_ANNOTATION_TYPE,
-                          nameAnnot.getStartNode().getOffset(),
-                          nameAnnot.getEndNode().getOffset()
-                        ));
+//        List tokens = new ArrayList((Set)
+//                        nameAllAnnots.get(TOKEN_ANNOTATION_TYPE,
+//                          nameAnnot.getStartNode().getOffset(),
+//                          nameAnnot.getEndNode().getOffset()
+//                        ));
+        
+        // get the tokens
+        List tokens = new ArrayList(tokensNameAS.getContained(nameAnnot.getStartNode().getOffset(),
+                nameAnnot.getEndNode().getOffset()));
+        
         //if no tokens to match, do nothing
         if (tokens.isEmpty())
           continue;
@@ -336,9 +344,10 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
   protected void matchUnknown() throws ExecutionException {
     //get all Unknown annotations
     AnnotationSet unknownAnnots = nameAllAnnots.get(unknownType);
-
-    if ((unknownAnnots == null) || unknownAnnots.isEmpty())
-      return;
+    if (unknownAnnots.isEmpty()) return;
+    
+    AnnotationSet nameAllTokens = nameAllAnnots.get(TOKEN_ANNOTATION_TYPE); 
+    if (nameAllTokens.isEmpty()) return;
 
     Iterator iter = unknownAnnots.iterator();
     //loop through the unknown annots
@@ -364,7 +373,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 
       //get the tokens
       List tokens = new ArrayList((Set)
-                      nameAllAnnots.get(TOKEN_ANNOTATION_TYPE,
+              nameAllTokens.getContained(
                         unknown.getStartNode().getOffset(),
                         unknown.getEndNode().getOffset()
                       ));
@@ -785,7 +794,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     // determine "Lookup" annotation set
     queryFM.clear();
     queryFM.put("majorType", "title");
-    AnnotationSet as1 = nameAllAnnots.get(startAnnot,endAnnot);
+    AnnotationSet as1 = nameAllAnnots.getContained(startAnnot,endAnnot);
     if (as1 == null || as1.isEmpty())
       return annotString;
     AnnotationSet as =
