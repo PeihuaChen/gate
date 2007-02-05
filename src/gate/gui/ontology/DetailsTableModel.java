@@ -173,13 +173,29 @@ public class DetailsTableModel extends AbstractTableModel {
         directTypes.getValues().addAll(set1);
         Collections.sort(directTypes.getValues(), itemComparator);
       }
+      Set tempSet = new HashSet();
+      Iterator iter2 = set1.iterator();
+      while(iter2.hasNext()) {
+        tempSet.add(((OClass) iter2.next()).getURI());
+      }
+      
       HashSet hashset = new HashSet();
       set1 = oinstance.getOClasses();
       hashset.addAll(set1);
       OClass oclass;
-      for(Iterator iterator1 = set1.iterator(); iterator1.hasNext(); hashset
-              .addAll(oclass.getSuperClasses((byte)1)))
-        oclass = (OClass)iterator1.next();
+      Iterator iterator1 = set1.iterator();
+      while(iterator1.hasNext()) {
+          oclass = (OClass)iterator1.next();
+          Set superClasses = oclass.getSuperClasses((byte)1);
+          Iterator supIter = superClasses.iterator();
+          while(supIter.hasNext()) {
+              OClass tempSClass = (OClass) supIter.next();
+              if(!tempSet.contains(tempSClass.getURI())) {
+                hashset.add(tempSClass);
+                tempSet.add(tempSClass.getURI());
+              }
+          }
+      }
       allTypes.getValues().clear();
       if(hashset != null) {
         allTypes.getValues().addAll(hashset);
