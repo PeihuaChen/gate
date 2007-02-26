@@ -26,6 +26,8 @@ import java.io.*;
 import java.awt.event.*;
 import gate.swing.*;
 import gate.event.*;
+import gate.gui.MainFrame;
+
 import javax.swing.text.Highlighter;
 import javax.swing.text.DefaultHighlighter;
 
@@ -118,9 +120,10 @@ public class CorefEditor
     highlighter = textPane.getHighlighter();
     chainToolTipAction = new ChainToolTipAction();
     chainToolTipTimer = new javax.swing.Timer(500, chainToolTipAction);
-
+    chainToolTipTimer.setRepeats(false);
     newCorefAction = new NewCorefAction();
     newCorefActionTimer = new javax.swing.Timer(500, newCorefAction);
+    newCorefActionTimer.setRepeats(false);
 
     colorGenerator = new ColorGenerator();
 
@@ -821,7 +824,7 @@ public class CorefEditor
       String type = (String) annotTypes.getSelectedItem();
       if (type == null) {
         try {
-          JOptionPane.showMessageDialog(Main.getMainFrame(),
+          JOptionPane.showMessageDialog(MainFrame.getInstance(),
                                         "No annotation type found to display");
         }
         catch (Exception e) {
@@ -1589,7 +1592,7 @@ public class CorefEditor
         else if (ae.getSource() == add) {
           if (field.length() == 0) {
             try {
-              JOptionPane.showMessageDialog(Main.getMainFrame(),
+              JOptionPane.showMessageDialog(MainFrame.getInstance(),
                                             "No Chain Selected",
                                             "New Chain - Error",
                                             JOptionPane.ERROR_MESSAGE);
@@ -1615,7 +1618,7 @@ public class CorefEditor
               CorefTreeNode chainNode = findOutChainNode(getString(ann), (String) annotSets.getSelectedItem());
               if (chainNode != null) {
                 try {
-                  JOptionPane.showMessageDialog(Main.getMainFrame(),
+                  JOptionPane.showMessageDialog(MainFrame.getInstance(),
                                                 "Chain with " + getString(ann) +
                                                 " title already exists",
                                                 "New Chain - Error",
@@ -1663,7 +1666,7 @@ public class CorefEditor
                 annotSets.getSelectedItem()));
             if (chainNode == null) {
               try {
-                JOptionPane.showMessageDialog(Main.getMainFrame(),
+                JOptionPane.showMessageDialog(MainFrame.getInstance(),
                                               "Incorrect Chain Title",
                                               "New Chain - Error",
                                               JOptionPane.ERROR_MESSAGE);
@@ -1763,7 +1766,7 @@ public class CorefEditor
           deleteButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
               try {
-                int confirm = JOptionPane.showConfirmDialog(Main.getMainFrame(),
+                int confirm = JOptionPane.showConfirmDialog(MainFrame.getInstance(),
                     "Are you sure?", "Removing reference...",
                     JOptionPane.YES_NO_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
