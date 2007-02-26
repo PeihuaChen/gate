@@ -24,6 +24,7 @@ import java.util.Iterator;
 
 import gate.*;
 import gate.creole.*;
+import gate.gui.MainFrame;
 import gate.util.GateRuntimeException;
 
 /**
@@ -118,7 +119,7 @@ public class Morph
     if (tokens == null || tokens.isEmpty()) {
       fireProcessFinished();
       throw new ExecutionException("Either "+document.getName()+" does not have any contents or \n run the POS Tagger first and then Morpher");
-      //javax.swing.JOptionPane.showMessageDialog(null, "Either "+document.getName()+" does not have any contents or \n run the POS Tagger first and then Morpher"); ;
+      //javax.swing.JOptionPane.showMessageDialog(MainFrame.getInstance(), "Either "+document.getName()+" does not have any contents or \n run the POS Tagger first and then Morpher"); ;
       //return;
     }
 
@@ -138,7 +139,7 @@ public class Morph
       if(considerPOSTag != null && considerPOSTag.booleanValue() && !currentToken.getFeatures().containsKey(TOKEN_CATEGORY_FEATURE_NAME)) {
         fireProcessFinished();
         throw new ExecutionException("please run the POS Tagger first and then Morpher");
-        //javax.swing.JOptionPane.showMessageDialog(null, "please run the POS Tagger first and then Morpher"); ;
+        //javax.swing.JOptionPane.showMessageDialog(MainFrame.getInstance(), "please run the POS Tagger first and then Morpher"); ;
         //return;
       }
 

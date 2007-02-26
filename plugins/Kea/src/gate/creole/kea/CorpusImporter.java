@@ -169,7 +169,7 @@ public class CorpusImporter extends AbstractVisualResource {
         try{
           sourceDirTField.setText(chooser.getSelectedFile().getCanonicalPath());
         }catch(IOException ioe){
-          JOptionPane.showMessageDialog(null,
+          JOptionPane.showMessageDialog(MainFrame.getInstance(),
                           "Error!\n"+
                            ioe.toString(),
                            "Gate", JOptionPane.ERROR_MESSAGE);
@@ -301,7 +301,7 @@ public class CorpusImporter extends AbstractVisualResource {
             }
           }catch(Exception e){
             MainFrame.unlockGUI();
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(MainFrame.getInstance(),
                             "Error!\n"+
                              e.toString(),
                              "Gate", JOptionPane.ERROR_MESSAGE);
@@ -339,7 +339,7 @@ public class CorpusImporter extends AbstractVisualResource {
             executable.execute();
           }catch(ExecutionException ee){
             MainFrame.unlockGUI();
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(MainFrame.getInstance(),
                             "Error!\n"+
                              ee.toString(),
                              "Gate", JOptionPane.ERROR_MESSAGE);

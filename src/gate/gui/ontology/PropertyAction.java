@@ -1,6 +1,8 @@
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
+import gate.gui.MainFrame;
+
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -55,7 +57,7 @@ public class PropertyAction extends AbstractAction implements
             as[i] = ((String)ontologyClassesNames.get(i));
           rangeAction.showGUI("New Property", as, new String[0]);
         } else {
-          dataTypeRange = JOptionPane.showInputDialog(null, dataTypeRange,
+          dataTypeRange = JOptionPane.showInputDialog(MainFrame.getInstance(), dataTypeRange,
                   "range Class", 3);
         }
       }
@@ -131,22 +133,22 @@ public class PropertyAction extends AbstractAction implements
 
   public void actionPerformed(ActionEvent actionevent) {
     nameSpace.setText(ontology.getDefaultNameSpace());
-    int i = JOptionPane.showOptionDialog(null, panel, "New Property", 2, 3,
+    int i = JOptionPane.showOptionDialog(MainFrame.getInstance(), panel, "New Property", 2, 3,
             null, new String[]{"OK", "Cancel"}, "OK");
     if(i == 0) {
       String s = nameSpace.getText();
       if(!Utils.isValidNameSpace(s)) {
-        JOptionPane.showMessageDialog(null, (new StringBuilder()).append(
+        JOptionPane.showMessageDialog(MainFrame.getInstance(), (new StringBuilder()).append(
                 "Invalid NameSpace:").append(s).append(
                 "\n example: http://gate.ac.uk/example#").toString());
         return;
       }
       if(!Utils.isValidOntologyResourceName(propertyName.getText())) {
-        JOptionPane.showMessageDialog(null, "Invalid Property Name");
+        JOptionPane.showMessageDialog(MainFrame.getInstance(), "Invalid Property Name");
         return;
       }
       if(ontology.getPropertyDefinitionByName(propertyName.getText()) != null) {
-        JOptionPane.showMessageDialog(null, (new StringBuilder()).append(
+        JOptionPane.showMessageDialog(MainFrame.getInstance(), (new StringBuilder()).append(
                 "Property :").append(propertyName.getText()).append(
                 " already exists").toString());
         return;
@@ -154,13 +156,13 @@ public class PropertyAction extends AbstractAction implements
       String as[] = domainAction.getSelectedValues();
       HashSet hashset = new HashSet();
       if(as == null || as.length == 0) {
-        JOptionPane.showMessageDialog(null, "Invalid Domain");
+        JOptionPane.showMessageDialog(MainFrame.getInstance(), "Invalid Domain");
         return;
       }
       for(int j = 0; j < as.length; j++) {
         OClass oclass = (OClass)ontology.getClassByName((String)as[j]);
         if(oclass == null) {
-          JOptionPane.showMessageDialog(null, (new StringBuilder()).append(
+          JOptionPane.showMessageDialog(MainFrame.getInstance(), (new StringBuilder()).append(
                   "Invalid Domain :").append((String)as[j]).toString());
           return;
         }
@@ -171,7 +173,7 @@ public class PropertyAction extends AbstractAction implements
         try {
           class1 = Class.forName(dataTypeRange.trim());
         } catch(Exception exception) {
-          JOptionPane.showMessageDialog(null, (new StringBuilder()).append(
+          JOptionPane.showMessageDialog(MainFrame.getInstance(), (new StringBuilder()).append(
                   "Invalid Range :").append(dataTypeRange).toString());
           return;
         }
@@ -181,13 +183,13 @@ public class PropertyAction extends AbstractAction implements
         String as1[] = rangeAction.getSelectedValues();
         HashSet hashset1 = new HashSet();
         if(as1 == null || as1.length == 0) {
-          JOptionPane.showMessageDialog(null, "Invalid Range");
+          JOptionPane.showMessageDialog(MainFrame.getInstance(), "Invalid Range");
           return;
         }
         for(int k = 0; k < as1.length; k++) {
           OClass oclass1 = (OClass)ontology.getClassByName((String)as1[k]);
           if(oclass1 == null) {
-            JOptionPane.showMessageDialog(null, (new StringBuilder()).append(
+            JOptionPane.showMessageDialog(MainFrame.getInstance(), (new StringBuilder()).append(
                     "Invalid Range :").append((String)as1[k]).toString());
             return;
           }

@@ -17,6 +17,8 @@ package gate.creole.ml.svmlight;
 import gate.creole.ml.*;
 import gate.util.GateException;
 import gate.creole.ExecutionException;
+import gate.gui.MainFrame;
+
 import java.util.List;
 
 import java.io.File;
@@ -789,7 +791,7 @@ public class SVMLightWrapper
               reader.close();
             }
             catch (Exception e) {
-              javax.swing.JOptionPane.showMessageDialog(null,
+              javax.swing.JOptionPane.showMessageDialog(MainFrame.getInstance(),
                   "Error!\n" + e.toString(), "Gate",
                   javax.swing.JOptionPane.ERROR_MESSAGE);
               e.printStackTrace(gate.util.Err.getPrintWriter());
@@ -833,7 +835,7 @@ public class SVMLightWrapper
               fw.close();
             }
             catch (java.io.IOException ioe) {
-              javax.swing.JOptionPane.showMessageDialog(null,
+              javax.swing.JOptionPane.showMessageDialog(MainFrame.getInstance(),
                   "Error!\n" + ioe.toString(),
                   "Gate", javax.swing.JOptionPane.ERROR_MESSAGE);
               ioe.printStackTrace(gate.util.Err.getPrintWriter());
@@ -1197,7 +1199,7 @@ public class SVMLightWrapper
               saveModel(file);
             }
             catch (java.io.IOException ioe) {
-              javax.swing.JOptionPane.showMessageDialog(null,
+              javax.swing.JOptionPane.showMessageDialog(MainFrame.getInstance(),
                   "Error!\n" +
                   ioe.toString(),
                   "Gate", javax.swing.JOptionPane.ERROR_MESSAGE);
@@ -1248,7 +1250,7 @@ public class SVMLightWrapper
               gate.gui.MainFrame.lockGUI("Loading model...");
               loadModel(file);
             } catch (java.io.IOException ioe) {
-              javax.swing.JOptionPane.showMessageDialog(null,
+              javax.swing.JOptionPane.showMessageDialog(MainFrame.getInstance(),
                   "Error!\n" +
                   ioe.toString(),
                   "Gate", javax.swing.JOptionPane.ERROR_MESSAGE);

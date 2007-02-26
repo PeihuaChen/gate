@@ -21,6 +21,7 @@ import junit.framework.Assert;
 
 import gate.*;
 import gate.creole.ResourceInstantiationException;
+import gate.gui.MainFrame;
 import gate.gui.OkCancelDialog;
 import gate.persist.JDBCDataStore;
 import gate.persist.PersistenceException;
@@ -125,7 +126,7 @@ public class JDBCDSPersistence extends DSPersistence {
               if (ds != null)
                 ds.close();
             } catch (gate.persist.PersistenceException ex) {
-              JOptionPane.showMessageDialog(null, "Persistence error!\n " +
+              JOptionPane.showMessageDialog(MainFrame.getInstance(), "Persistence error!\n " +
                                             ex.toString(),
                                             "GATE", JOptionPane.ERROR_MESSAGE);
             }
@@ -158,7 +159,7 @@ public class JDBCDSPersistence extends DSPersistence {
           continue securityLoop;
         }
       }catch(gate.security.SecurityException se) {
-        JOptionPane.showMessageDialog(null, "User identification error!\n " +
+        JOptionPane.showMessageDialog(MainFrame.getInstance(), "User identification error!\n " +
                                       se.toString(),
                                       "GATE", JOptionPane.ERROR_MESSAGE);
         securityOK = false;
@@ -186,7 +187,7 @@ public class JDBCDSPersistence extends DSPersistence {
       DataStoreRegister.addSecurityData(ds, securityData);
 
     } catch(PersistenceException pe) {
-      JOptionPane.showMessageDialog(null, "Datastore open error!\n " +
+      JOptionPane.showMessageDialog(MainFrame.getInstance(), "Datastore open error!\n " +
                                     pe.toString(),
                                     "GATE", JOptionPane.ERROR_MESSAGE);
     }

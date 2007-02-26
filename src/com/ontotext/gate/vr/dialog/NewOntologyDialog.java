@@ -13,6 +13,7 @@ import com.ontotext.gate.vr.*;
 
 import gate.util.*;
 import gate.creole.ontology.*;
+import gate.gui.MainFrame;
 
 
 /**New Ontology Dialog. Creates a new ontology.
@@ -144,13 +145,13 @@ public class NewOntologyDialog extends JDialog {
             NewOntologyDialog.this.setVisible(false);
 
           } catch (java.net.MalformedURLException ux) {
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(MainFrame.getInstance(),
               "This is not a valid URL:\n"+
               url.getText(),"Create Ontology Failure",
               JOptionPane.ERROR_MESSAGE);
           }//catch
            catch (IOException ioe) {
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(MainFrame.getInstance(),
               "Cannot Create New Ontology \n Due to :"+
               ioe.getMessage(),"Create Ontology Failure",
               JOptionPane.ERROR_MESSAGE);
@@ -202,13 +203,13 @@ public class NewOntologyDialog extends JDialog {
             NewOntologyDialog.this.setVisible(false);
 
           } catch (java.net.MalformedURLException ux) {
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(MainFrame.getInstance(),
               "This is not a valid URL:\n"+
               url.getText(),"Create Ontology Failure",
               JOptionPane.ERROR_MESSAGE);
           }//catch
            catch (IOException ioe) {
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(MainFrame.getInstance(),
               "Cannot Create New Ontology \n Due to :"+
               ioe.getMessage(),"Create Ontology Failure",
               JOptionPane.ERROR_MESSAGE);

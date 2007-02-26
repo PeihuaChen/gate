@@ -163,7 +163,7 @@ public class Transducer extends AbstractLanguageAnalyser
               s.close();
               out.close();
             } catch(IOException ioe) {
-              JOptionPane.showMessageDialog(null, "Error!\n" + ioe.toString(),
+              JOptionPane.showMessageDialog(MainFrame.getInstance(), "Error!\n" + ioe.toString(),
                       "GATE", JOptionPane.ERROR_MESSAGE);
               ioe.printStackTrace(Err.getPrintWriter());
             } finally {

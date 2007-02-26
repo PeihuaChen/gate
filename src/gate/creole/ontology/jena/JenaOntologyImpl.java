@@ -753,7 +753,7 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
               MainFrame.lockGUI("Loading model...");
               load(file.toURL(), ontologyType);
             } catch(Exception e) {
-              JOptionPane.showMessageDialog(null, "Error!\n" + e.toString(),
+              JOptionPane.showMessageDialog(MainFrame.getInstance(), "Error!\n" + e.toString(),
                       "GATE", JOptionPane.ERROR_MESSAGE);
               e.printStackTrace(Err.getPrintWriter());
             } finally {
@@ -790,7 +790,7 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
               MainFrame.lockGUI("Saving model...");
               save(file, ontologyType);
             } catch(Exception e) {
-              JOptionPane.showMessageDialog(null, "Error!\n" + e.toString(),
+              JOptionPane.showMessageDialog(MainFrame.getInstance(), "Error!\n" + e.toString(),
                       "GATE", JOptionPane.ERROR_MESSAGE);
               e.printStackTrace(Err.getPrintWriter());
             } finally {
@@ -820,7 +820,7 @@ public class JenaOntologyImpl extends OntologyImpl implements ActionsPublisher {
             MainFrame.lockGUI("Cleaning up...");
             cleanup();
           } catch(Exception e) {
-            JOptionPane.showMessageDialog(null, "Error!\n" + e.toString(),
+            JOptionPane.showMessageDialog(MainFrame.getInstance(), "Error!\n" + e.toString(),
                     "GATE", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace(Err.getPrintWriter());
           } finally {

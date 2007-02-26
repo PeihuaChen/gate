@@ -252,7 +252,7 @@ public class Kea extends AbstractLanguageAnalyser implements ActionsPublisher{
               oos = null;
             }catch(Exception e){
               MainFrame.unlockGUI();
-              JOptionPane.showMessageDialog(null,
+              JOptionPane.showMessageDialog(this,
                               "Error!\n"+
                                e.toString(),
                                "Gate", JOptionPane.ERROR_MESSAGE);
@@ -260,7 +260,7 @@ public class Kea extends AbstractLanguageAnalyser implements ActionsPublisher{
               if(oos != null) try{
                 oos.close();
               }catch(IOException ioe){
-                JOptionPane.showMessageDialog(null,
+                JOptionPane.showMessageDialog(this,
                                 "Error!\n"+
                                  ioe.toString(),
                                  "Gate", JOptionPane.ERROR_MESSAGE);
@@ -311,7 +311,7 @@ public class Kea extends AbstractLanguageAnalyser implements ActionsPublisher{
               trainingFinished = true;
             }catch(Exception e){
               MainFrame.unlockGUI();
-              JOptionPane.showMessageDialog(null,
+              JOptionPane.showMessageDialog(this,
                               "Error!\n"+
                                e.toString(),
                                "Gate", JOptionPane.ERROR_MESSAGE);
@@ -319,7 +319,7 @@ public class Kea extends AbstractLanguageAnalyser implements ActionsPublisher{
               if(ois != null) try{
                 ois.close();
               }catch(IOException ioe){
-                JOptionPane.showMessageDialog(null,
+                JOptionPane.showMessageDialog(MainFrame.getInstance(),
                                 "Error!\n"+
                                  ioe.toString(),
                                  "Gate", JOptionPane.ERROR_MESSAGE);

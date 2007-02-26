@@ -1,6 +1,8 @@
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
+import gate.gui.MainFrame;
+
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import javax.swing.*;
@@ -14,7 +16,7 @@ public class DeleteOntologyResourceAction extends AbstractAction implements
   }
 
   public void actionPerformed(ActionEvent actionevent) {
-    int i = JOptionPane.showConfirmDialog(null, "Are you sure?");
+    int i = JOptionPane.showConfirmDialog(MainFrame.getInstance(), "Are you sure?");
     if(i != 0) return;
     for(int j = 0; j < selectedNodes.size(); j++) {
       DefaultMutableTreeNode defaultmutabletreenode = (DefaultMutableTreeNode)selectedNodes
