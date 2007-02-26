@@ -2502,31 +2502,6 @@ public class MainFrame extends JFrame
           System.setOut(logArea.getOriginalOut());
           //now we need to dispose all GUI roots
           List<Window> roots = new ArrayList<Window>(getGuiRoots());
-
-List<Window> allroots = new ArrayList<Window>(Arrays.asList(Frame.getFrames()));          
-try {
-  PrintStream logger = new PrintStream("gate.log");     
-  logger.println("Roots:");
-  for(Window window : allroots){
-    logger.print(window.getName() + "[" + 
-            window.getClass().getCanonicalName() + "].");
-    if(roots.contains(window)) logger.println("(G)");
-    else {
-      logger.println("(!!)");
-      Window[] children = window.getOwnedWindows();
-      for(Window child : children){
-        logger.println("  " + child.getName() + "[" + 
-                child.getClass().getCanonicalName() + "].");
-      }
-    }
-  }
-  logger.close();
-  JOptionPane jop;
-}
-catch(FileNotFoundException e) {
-  // TODO Auto-generated catch block
-  e.printStackTrace();
-}
           while(!roots.isEmpty()){
             Object aRoot = roots.remove(0);
             if(aRoot instanceof Window){
