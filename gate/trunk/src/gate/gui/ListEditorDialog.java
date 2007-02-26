@@ -40,6 +40,7 @@ public class ListEditorDialog extends JDialog {
    * fully qualified class name
    */
   public ListEditorDialog(Component owner, List data, String itemType) {
+    super(MainFrame.getInstance());
     this.itemType = itemType == null ? "java.lang.String" : itemType;
     setLocationRelativeTo(owner);
     initLocalData(data);
