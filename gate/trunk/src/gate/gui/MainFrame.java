@@ -18,8 +18,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.NumberFormat;
@@ -101,6 +100,7 @@ public class MainFrame extends JFrame
   protected JScrollPane logScroll;
   protected JToolBar toolbar;
   static JFileChooser fileChooser;
+  static private MainFrame instance;
 
   protected AppearanceDialog appearanceDialog;
   protected OptionsDialog optionsDialog;
@@ -161,12 +161,11 @@ public class MainFrame extends JFrame
   }
 
 
-/*
+
   static public MainFrame getInstance(){
     if(instance == null) instance = new MainFrame();
     return instance;
   }
-*/
 
   static public JFileChooser getFileChooser(){
     return fileChooser;
@@ -235,9 +234,10 @@ public class MainFrame extends JFrame
   /**Construct the frame*/
   public MainFrame(boolean isShellSlacGIU, GraphicsConfiguration gc) {
     super(gc);
+    instance = this;
     guiRoots.add(this);
     if(fileChooser == null){
-      fileChooser = new JFileChooser();
+      fileChooser = new GateFileChooser();
       fileChooser.setMultiSelectionEnabled(false);
       String lastUsedDir = Gate.getUserConfig()
           .getString(GateConstants.LAST_FILECHOOSER_LOCATION);
@@ -350,6 +350,7 @@ public class MainFrame extends JFrame
     Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
                                animator,
                                "MainFrame1");
+    thread.setDaemon(true);
     thread.setPriority(Thread.MIN_PRIORITY);
     thread.start();
 
@@ -1404,7 +1405,7 @@ public class MainFrame extends JFrame
 
     if(guiLock != null){
       guiLock.setVisible(false);
-      //completely dispose the dialog (causes it to dissapear even if
+      //completely dispose the dialog (causes it to disappear even if
       //displayed on a non-visible virtual display on Linux)
       //fix for bug 1369096 
       //(http://sourceforge.net/tracker/index.php?func=detail&aid=1369096&group_id=143829&atid=756796)
@@ -2496,13 +2497,49 @@ public class MainFrame extends JFrame
             //we don't want to save the session
             if(sessionFile.exists()) sessionFile.delete();
           }
-          setVisible(false);
-          dispose();
-          System.exit(0);
+          //restore out and err streams as we're about to hide the windows
+          System.setErr(logArea.getOriginalErr());
+          System.setOut(logArea.getOriginalOut());
+          //now we need to dispose all GUI roots
+          List<Window> roots = new ArrayList<Window>(getGuiRoots());
+
+List<Window> allroots = new ArrayList<Window>(Arrays.asList(Frame.getFrames()));          
+try {
+  PrintStream logger = new PrintStream("gate.log");     
+  logger.println("Roots:");
+  for(Window window : allroots){
+    logger.print(window.getName() + "[" + 
+            window.getClass().getCanonicalName() + "].");
+    if(roots.contains(window)) logger.println("(G)");
+    else {
+      logger.println("(!!)");
+      Window[] children = window.getOwnedWindows();
+      for(Window child : children){
+        logger.println("  " + child.getName() + "[" + 
+                child.getClass().getCanonicalName() + "].");
+      }
+    }
+  }
+  logger.close();
+  JOptionPane jop;
+}
+catch(FileNotFoundException e) {
+  // TODO Auto-generated catch block
+  e.printStackTrace();
+}
+          while(!roots.isEmpty()){
+            Object aRoot = roots.remove(0);
+            if(aRoot instanceof Window){
+              Window window = (Window)aRoot;
+              roots.addAll(Arrays.asList(window.getOwnedWindows()));
+              window.setVisible(false);
+              window.dispose();
+            }
+          }
         }//run
       };//Runnable
       Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-                                 runnable, "Session loader");
+                                 runnable, "Shutdown thread");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }
@@ -3079,7 +3116,24 @@ public class MainFrame extends JFrame
   }
 
 
-
+  /**
+   * Extends {@link JFileChooser} to make sure the shared {@link MainFrame} 
+   * instance is used as a parent.
+   */
+  public static class GateFileChooser extends JFileChooser{
+    /**
+     * Overridden to make sure the shared MainFrame instance is used as a
+     * parent when no parent is specified
+     */
+    public int showDialog(Component parent, String approveButtonText) 
+    throws HeadlessException {
+      if(parent == null) 
+        return super.showDialog(getInstance(), approveButtonText);
+      else
+        return super.showDialog(parent, approveButtonText);
+    }
+  }
+  
   class ProgressBarUpdater implements Runnable{
     ProgressBarUpdater(int newValue){
       value = newValue;
