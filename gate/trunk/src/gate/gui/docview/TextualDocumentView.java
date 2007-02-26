@@ -18,9 +18,9 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.*;
 import java.util.List;
+import java.util.Timer;
 
 import javax.swing.*;
-import javax.swing.Timer;
 import javax.swing.text.*;
 
 
@@ -274,9 +274,14 @@ public class TextualDocumentView extends AbstractDocumentView {
       if(aView instanceof AnnotationListView) 
         annotationListView = (AnnotationListView)aView;
     }
-    blinker = new Timer(BLINK_DELAY, new BlinkAction());
-    blinker.setRepeats(true);
-    blinker.start();
+    blinker = new Timer(this.getClass().getCanonicalName() + "_blink_timer", 
+            true);
+    final BlinkAction blinkAction = new BlinkAction();
+    blinker.scheduleAtFixedRate(new TimerTask(){
+      public void run() {
+        blinkAction.actionPerformed(null);
+      }
+    }, 0, BLINK_DELAY);
     initListeners();
   }
   
@@ -294,9 +299,12 @@ public class TextualDocumentView extends AbstractDocumentView {
         }catch(BadLocationException ble){
           //ignore
         }
-      }
+      }      
     });
   }
+  
+  
+
   protected void unregisterHooks(){}
   protected void registerHooks(){}
   
