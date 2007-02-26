@@ -1,5 +1,7 @@
 package gate.gui.ontology;
 
+import gate.gui.MainFrame;
+
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -58,7 +60,7 @@ public class ValuesSelectionAction {
       public void actionPerformed(ActionEvent actionevent) {
         String s = (String)domainBox.getSelectedItem();
         if(((DefaultListModel)list.getModel()).contains(s)) {
-          JOptionPane.showMessageDialog(null, "Already added!");
+          JOptionPane.showMessageDialog(MainFrame.getInstance(), "Already added!");
           return;
         } else {
           ((DefaultListModel)list.getModel()).addElement(s);
@@ -95,7 +97,7 @@ public class ValuesSelectionAction {
     for(int i = 0; i < as1.length; i++)
       defaultlistmodel.addElement(as1[i]);
     list.setModel(defaultlistmodel);
-    JOptionPane.showOptionDialog(null, panel, s, 0, 3, null,
+    JOptionPane.showOptionDialog(MainFrame.getInstance(), panel, s, 0, 3, null,
             new String[]{"OK"}, "OK");
   }
 

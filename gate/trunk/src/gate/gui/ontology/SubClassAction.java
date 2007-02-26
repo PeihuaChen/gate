@@ -1,6 +1,8 @@
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
+import gate.gui.MainFrame;
+
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -36,22 +38,22 @@ public class SubClassAction extends AbstractAction implements
       if(obj instanceof TClass) arraylist.add(obj);
     }
     nameSpace.setText(ontology.getDefaultNameSpace());
-    int j = JOptionPane.showOptionDialog(null, panel, "Sub Class Action: ", 2,
+    int j = JOptionPane.showOptionDialog(MainFrame.getInstance(), panel, "Sub Class Action: ", 2,
             3, null, new String[]{"OK", "Cancel"}, "OK");
     if(j == 0) {
       String s = nameSpace.getText();
       if(!Utils.isValidNameSpace(s)) {
-        JOptionPane.showMessageDialog(null, (new StringBuilder()).append(
+        JOptionPane.showMessageDialog(MainFrame.getInstance(), (new StringBuilder()).append(
                 "Invalid NameSpace:").append(s).append(
                 "\n example: http://gate.ac.uk/example#").toString());
         return;
       }
       if(!Utils.isValidOntologyResourceName(className.getText())) {
-        JOptionPane.showMessageDialog(null, "Invalid Classname");
+        JOptionPane.showMessageDialog(MainFrame.getInstance(), "Invalid Classname");
         return;
       }
       if(ontology.getClassByName(className.getText()) != null) {
-        JOptionPane.showMessageDialog(null, (new StringBuilder()).append(
+        JOptionPane.showMessageDialog(MainFrame.getInstance(), (new StringBuilder()).append(
                 "Class :").append(className.getText())
                 .append(" already exists").toString());
         return;

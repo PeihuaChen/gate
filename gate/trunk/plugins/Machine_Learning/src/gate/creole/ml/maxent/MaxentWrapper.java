@@ -17,6 +17,8 @@ package gate.creole.ml.maxent;
 import gate.creole.ml.*;
 import gate.util.GateException;
 import gate.creole.ExecutionException;
+import gate.gui.MainFrame;
+
 import java.util.List;
 import java.util.Iterator;
 
@@ -539,7 +541,7 @@ public class MaxentWrapper
                   file.getCanonicalPath(), false)));
             }
             catch (java.io.IOException ioe) {
-              javax.swing.JOptionPane.showMessageDialog(null,
+              javax.swing.JOptionPane.showMessageDialog(MainFrame.getInstance(),
                   "Error!\n" +
                   ioe.toString(),
                   "GATE", javax.swing.JOptionPane.ERROR_MESSAGE);
@@ -592,7 +594,7 @@ public class MaxentWrapper
                   new java.io.FileInputStream(file)));
             }
             catch (java.io.IOException ioe) {
-              javax.swing.JOptionPane.showMessageDialog(null,
+              javax.swing.JOptionPane.showMessageDialog(MainFrame.getInstance(),
                   "Error!\n" +
                   ioe.toString(),
                   "GATE", javax.swing.JOptionPane.ERROR_MESSAGE);

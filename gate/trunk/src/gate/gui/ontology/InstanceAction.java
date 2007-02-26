@@ -1,6 +1,8 @@
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
+import gate.gui.MainFrame;
+
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -30,22 +32,22 @@ public class InstanceAction extends AbstractAction implements
 
   public void actionPerformed(ActionEvent actionevent) {
     nameSpace.setText(ontology.getDefaultNameSpace());
-    int j = JOptionPane.showOptionDialog(null, panel, "New Instance: ", 2, 3,
+    int j = JOptionPane.showOptionDialog(MainFrame.getInstance(), panel, "New Instance: ", 2, 3,
             null, new String[]{"OK", "Cancel"}, "OK");
     if(j == 0) {
       String s = nameSpace.getText();
       if(!Utils.isValidNameSpace(s)) {
-        JOptionPane.showMessageDialog(null, (new StringBuilder()).append(
+        JOptionPane.showMessageDialog(MainFrame.getInstance(), (new StringBuilder()).append(
                 "Invalid NameSpace:").append(s).append(
                 "\n example: http://gate.ac.uk/example#").toString());
         return;
       }
       if(!Utils.isValidOntologyResourceName(instanceName.getText())) {
-        JOptionPane.showMessageDialog(null, "Invalid Instance Name");
+        JOptionPane.showMessageDialog(MainFrame.getInstance(), "Invalid Instance Name");
         return;
       }
       if(ontology.getInstanceByName(instanceName.getText()) != null) {
-        JOptionPane.showMessageDialog(null, (new StringBuilder()).append(
+        JOptionPane.showMessageDialog(MainFrame.getInstance(), (new StringBuilder()).append(
                 "Instance :").append(instanceName.getText()).append(
                 " already exists").toString());
         return;

@@ -86,9 +86,9 @@ public class SearchPR extends AbstractProcessingResource
     try {
       if (((IndexedCorpus) corpus).getIndexManager() == null){
         MainFrame.unlockGUI();
-        JOptionPane.showMessageDialog(null, "Corpus is not indexed!\n"
-                                    +"Please index fisrt this corpus!",
-                       "Search Procesing", JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(MainFrame.getInstance(), "Corpus is not indexed!\n"
+                                    +"Please index first this corpus!",
+                       "Search Processing", JOptionPane.WARNING_MESSAGE);
         return;
       }
 

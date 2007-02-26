@@ -1,6 +1,8 @@
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
+import gate.gui.MainFrame;
+
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -27,18 +29,18 @@ public class TopClassAction extends AbstractAction {
 
   public void actionPerformed(ActionEvent actionevent) {
     nameSpace.setText(ontology.getDefaultNameSpace());
-    int i = JOptionPane.showOptionDialog(null, panel, "New Top Class", 2, 3,
+    int i = JOptionPane.showOptionDialog(MainFrame.getInstance(), panel, "New Top Class", 2, 3,
             null, new String[]{"OK", "Cancel"}, "OK");
     if(i == 0) {
       String s = nameSpace.getText();
       if(!Utils.isValidNameSpace(s)) {
-        JOptionPane.showMessageDialog(null, (new StringBuilder()).append(
+        JOptionPane.showMessageDialog(MainFrame.getInstance(), (new StringBuilder()).append(
                 "Invalid NameSpace:").append(s).append(
                 "\n example: http://gate.ac.uk/example#").toString());
         return;
       }
       if(!Utils.isValidOntologyResourceName(className.getText())) {
-        JOptionPane.showMessageDialog(null, "Invalid Classname");
+        JOptionPane.showMessageDialog(MainFrame.getInstance(), "Invalid Classname");
         return;
       }
       OClass oclassimpl = ontology.createClass(className.getText(), comment.getText());

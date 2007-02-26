@@ -517,7 +517,7 @@ public class Wrapper implements AdvancedMLEngine, ActionsPublisher {
               saveDatasetAsARFF(fw);
               fw.close();
             }catch(IOException ioe){
-              JOptionPane.showMessageDialog(null, "Error!\n" + ioe.toString(), "Gate", JOptionPane.ERROR_MESSAGE);
+              JOptionPane.showMessageDialog(MainFrame.getInstance(), "Error!\n" + ioe.toString(), "Gate", JOptionPane.ERROR_MESSAGE);
               ioe.printStackTrace(Err.getPrintWriter());
             }finally{
               MainFrame.unlockGUI();
@@ -551,7 +551,7 @@ public class Wrapper implements AdvancedMLEngine, ActionsPublisher {
               loadDatasetFromArff(reader);
               reader.close();
             }catch(Exception e){
-              JOptionPane.showMessageDialog(null, "Error!\n" + e.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
+              JOptionPane.showMessageDialog(MainFrame.getInstance(), "Error!\n" + e.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
               e.printStackTrace(Err.getPrintWriter());
             }finally{
               MainFrame.unlockGUI();
@@ -582,7 +582,7 @@ public class Wrapper implements AdvancedMLEngine, ActionsPublisher {
               MainFrame.lockGUI("Saving ML model...");
               save(new GZIPOutputStream(new FileOutputStream(file.getCanonicalPath(), false)));
             }catch(IOException ioe){
-              JOptionPane.showMessageDialog(null, "Error!\n" + ioe.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
+              JOptionPane.showMessageDialog(MainFrame.getInstance(), "Error!\n" + ioe.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
               ioe.printStackTrace(Err.getPrintWriter());
             }finally{
               MainFrame.unlockGUI();
@@ -613,7 +613,7 @@ public class Wrapper implements AdvancedMLEngine, ActionsPublisher {
               MainFrame.lockGUI("Loading model...");
               load(new GZIPInputStream(new FileInputStream(file)));
             }catch(IOException ioe){
-              JOptionPane.showMessageDialog(null, "Error!\n" + ioe.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
+              JOptionPane.showMessageDialog(MainFrame.getInstance(), "Error!\n" + ioe.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
               ioe.printStackTrace(Err.getPrintWriter());
             }finally{
               MainFrame.unlockGUI();
