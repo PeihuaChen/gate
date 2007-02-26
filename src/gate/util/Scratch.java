@@ -17,23 +17,21 @@
 package gate.util;
 
 import java.awt.Color;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.*;
 import java.net.*;
-import java.net.URI;
-import java.net.URL;
 import java.util.*;
 import java.util.prefs.Preferences;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import javax.swing.UIManager;
+import javax.swing.*;
 import org.pdfbox.pdmodel.PDDocument;
 import org.pdfbox.util.PDFTextStripper;
 
 import gate.*;
 import gate.creole.*;
-import gate.creole.ANNIEConstants;
-import gate.creole.Transducer;
 import gate.creole.gazetteer.DefaultGazetteer;
 import gate.creole.ir.*;
 import gate.creole.tokeniser.DefaultTokeniser;
@@ -75,6 +73,23 @@ public class Scratch
   
     
   public static void main(String args[]) throws Exception {   
+    
+    final JFrame aFrame = new JFrame("Scratch");
+    aFrame.addWindowListener(new WindowAdapter(){
+      @Override
+      public void windowClosing(WindowEvent e) {
+        aFrame.dispose();
+      }
+      
+    });
+    aFrame.setSize(800, 600);
+    aFrame.setVisible(true);
+    Gate.init();
+    MainFrame mf = MainFrame.getInstance();
+    mf.setSize(800, 600);
+    mf.setVisible(true);
+    
+    if(true) return;
     
     File file = new File("Z:/gate/bin");
     System.out.println("Canonical path: " + file.getCanonicalPath());
