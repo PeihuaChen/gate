@@ -281,7 +281,7 @@ public class OntologyEditor extends AbstractVisualResource
                                 .getName(), byName);
                       }
                     } else {
-                      String value = JOptionPane.showInputDialog(null,
+                      String value = JOptionPane.showInputDialog(MainFrame.getInstance(),
                               "Enter Value for property :" + p.getName());
                       ((OInstance)((DefaultMutableTreeNode)selectedNodes.get(0))
                               .getUserObject()).addPropertyValue(p.getName(),
@@ -403,7 +403,7 @@ public class OntologyEditor extends AbstractVisualResource
                 }
                 properties.add(p);
               }
-              if(showMessage) JOptionPane.showMessageDialog(null, cantbeAdded);
+              if(showMessage) JOptionPane.showMessageDialog(MainFrame.getInstance(), cantbeAdded);
               for(counter = 0; counter < properties.size(); counter++) {
                 Property p1 = (Property)properties.get(counter);
                 if(p1 == null) continue;
