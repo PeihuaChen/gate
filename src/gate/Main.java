@@ -246,7 +246,10 @@ public class Main {
                           (screenSize.height - frameSize.height) / 2);
 
         frame.setVisible(true);
-        if(splash != null) splash.setVisible(false);
+        if(splash != null) {
+          splash.setVisible(false);
+          splash.dispose();
+        }
 
         if(!Gate.isSlugGui()) {
           //load session if required and available;
