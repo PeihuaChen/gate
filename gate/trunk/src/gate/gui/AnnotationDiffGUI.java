@@ -18,18 +18,13 @@ package gate.gui;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.io.File;
-import java.io.FileWriter;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
-import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import gate.*;
-import gate.Annotation;
-import gate.Document;
 import gate.swing.XJTable;
 import gate.util.*;
 
@@ -39,6 +34,8 @@ public class AnnotationDiffGUI extends JFrame{
 
   public AnnotationDiffGUI(String title){
     super(title);
+    MainFrame.getGuiRoots().add(this);
+    setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     initLocalData();
     initGUI();
     initListeners();
@@ -308,6 +305,15 @@ public class AnnotationDiffGUI extends JFrame{
   }
 
   protected void initListeners(){
+    addWindowListener(new WindowAdapter(){
+
+      @Override
+      public void windowClosing(WindowEvent e) {
+        super.windowClosing(e);
+        MainFrame.getGuiRoots().remove(AnnotationDiffGUI.this);
+        dispose();
+      }
+    });
     keyDocCombo.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent evt){
         Document newDoc = (Document)documents.get(keyDocCombo.getSelectedIndex());
