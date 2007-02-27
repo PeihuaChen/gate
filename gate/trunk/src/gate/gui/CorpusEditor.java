@@ -376,8 +376,13 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
 
     public void actionPerformed(ActionEvent e){
       int[] selectedIndexes = docTable.getSelectedRows();
-      for(int i = selectedIndexes.length-1; i >= 0; i--){
-        corpus.remove(docTable.rowViewToModel(selectedIndexes[i]));
+      int[] corpusIndexes = new int[selectedIndexes.length];
+      for(int i = 0; i < selectedIndexes.length; i++)
+        corpusIndexes[i] = docTable.rowViewToModel(selectedIndexes[i]);
+      Arrays.sort(corpusIndexes);
+      //remove the document starting with the one with the highest index
+      for(int i = corpusIndexes.length-1; i >= 0; i--){
+        corpus.remove(corpusIndexes[i]);
       }
 //      documentsList.clearSelection();
     }
