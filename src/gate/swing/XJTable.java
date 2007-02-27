@@ -6,7 +6,7 @@
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *
- *  XXJTable.java
+ *  XJTable.java
  *
  *  Valentin Tablan, 25-Jun-2004
  *
@@ -18,22 +18,16 @@ package gate.swing;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.*;
-import java.util.ArrayList;
-import java.util.List;
 import javax.swing.*;
-import javax.swing.Timer;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.*;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableModel;
+
 import gate.util.ObjectComparator;
 
 /**
- * A &quot;smarter&quot; JTable. Feaures include:
+ * A &quot;smarter&quot; JTable. Features include:
  * <ul>
  * <li>sorting the table using the values from a column as keys</li>
  * <li>updating the widths of the columns so they accommodate the contents to
@@ -42,7 +36,7 @@ import gate.util.ObjectComparator;
  * <li>ability to hide columns</li>
  * </ul>
  * It uses a custom made model that stands between the table model set by the
- * user and the gui component. This middle model is responsible for sorting the
+ * user and the GUI component. This middle model is responsible for sorting the
  * rows.
  */
 public class XJTable extends JTable{
@@ -66,48 +60,104 @@ public class XJTable extends JTable{
    * Called when the columns have changed.
    */
   protected void newColumns(){
-    columnData = new ArrayList(dataModel.getColumnCount());
+    columnData = new ArrayList<ColumnData>(dataModel.getColumnCount());
     for(int i = 0; i < dataModel.getColumnCount(); i++)
       columnData.add(new ColumnData(i));
-    adjustSizes();
   }
   
-  /**
-   * This is called whenever the UI is initialised or changed
-   */
-  public void updateUI() {
-    super.updateUI();
-    JTableHeader tHeader = getTableHeader();
-    if(tHeader != null) tHeader.addMouseListener(new HeaderMouseListener());
-    adjustSizes();
-  }
   
-  public Dimension getPreferredSize(){
-    int width = 0;
-    for(int i = 0; i < getColumnModel().getColumnCount(); i++)
-      width += getColumnModel().getColumn(i).getPreferredWidth();
-    int height = 0;
-    for(int i = 0; i < getRowCount(); i++)
-      height += getRowHeight(i);
-    return new Dimension(width, height);
+  public void setTableHeader(JTableHeader newTableHeader) {
+    //first remove the old listener from the old header
+    JTableHeader oldHeader = getTableHeader();
+    if(oldHeader != null && headerMouseListener != null)
+      oldHeader.removeMouseListener(headerMouseListener);
+    // set the new header
+    super.setTableHeader(newTableHeader);
+    //add the mouse listener to the new header
+    if(headerMouseListener == null) headerMouseListener = 
+      new HeaderMouseListener();
+    if(newTableHeader != null) 
+      newTableHeader.addMouseListener(headerMouseListener);
   }
   
   public Dimension getPreferredScrollableViewportSize(){
     return getPreferredSize();
   }
   
-  /**
-   * Sets the preferred widths for the columns and rows based or the preferred
-   * sizes of the renderers.
-   *
-   */
-  public void adjustSizes(){
-    Iterator colIter = columnData.iterator();
-    while(colIter.hasNext()){
-      ((ColumnData)colIter.next()).adjustColumnWidth();
+  protected void calculatePreferredSize(){
+    //start with all columns at default size
+    int colCount = getColumnModel().getColumnCount();
+    for(int col = 0; col < colCount; col++){
+      TableColumn tCol = getColumnModel().getColumn(col);
+      if(tCol.getHeaderRenderer() == null){
+        TableCellRenderer defaultRenderer = getDefaultRenderer(Object.class);
+        if(defaultRenderer != null){
+          Component c = defaultRenderer.getTableCellRendererComponent(
+                  XJTable.this, tCol.getHeaderValue(), false, false, 0, 0);
+          tCol.setMinWidth(c.getMinimumSize().width);
+          tCol.setPreferredWidth(c.getPreferredSize().width);
+        }else{
+          tCol.setMinWidth(1);
+          tCol.setPreferredWidth(1);          
+        }
+      }else{
+        tCol.sizeWidthToFit();
+      }
     }
-    repaint();
+    //start with all rows of size 1
+    for(int row = 0; row < getRowCount(); row++)
+      setRowHeight(row, 1);
+    for(int row = 0; row < getRowCount(); row++)
+      for(int column = 0; column < getColumnCount(); column ++){
+        prepareRenderer(getCellRenderer(row, column), row, column);
+      }
+    componentSizedProperly = true;
   }
+  @Override
+  /**
+   * Overridden so that the preferred size can be calculated properly
+   */
+  public Dimension getPreferredSize() {
+    //the first time the component is sized, calculate the actual preferred size
+    if(!componentSizedProperly){
+      calculatePreferredSize();
+    }
+    return super.getPreferredSize();
+  }
+
+  private boolean componentSizedProperly = false;
+  @Override
+  /**
+   * Overridden to capture the preferred size while painting the cells
+   */  
+  public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+    Component cellComponent =  super.prepareRenderer(renderer, row, column);
+    TableColumn tColumn = getColumnModel().getColumn(column);
+    column = convertColumnIndexToModel(column);
+    ColumnData cData = columnData.get(column);
+    Dimension spacing = getIntercellSpacing();
+    
+    if(cData.isHidden()){
+      //do nothing - the sizes are already fixed
+      tColumn.setMinWidth(ColumnData.HIDDEN_WIDTH + spacing.width);
+      tColumn.setPreferredWidth(ColumnData.HIDDEN_WIDTH + spacing.width);
+    }else{
+      //fix the minimum size
+      Dimension dim = cellComponent.getMinimumSize();
+      if(tColumn.getMinWidth() < (dim.width + spacing.width))
+              tColumn.setMinWidth(dim.width + spacing.width);
+      //now fix the preferred size
+      dim = cellComponent.getPreferredSize();
+      if(tColumn.getPreferredWidth() < (dim.width + spacing.width))
+        tColumn.setPreferredWidth(dim.width + spacing.width);
+    }
+    //now fix the row height
+    Dimension dim = cellComponent.getPreferredSize();
+    if(getRowHeight(row) < (dim.height + spacing.height)) 
+            setRowHeight(row, dim.height + spacing.height);
+    return cellComponent;
+  }
+
   
   /**
    * Converts a row number from the model co-ordinates system to the view's. 
@@ -131,7 +181,7 @@ public class XJTable extends JTable{
    * @return the hidden state
    */
   public boolean isColumnHidden(int columnIndex){
-    return ((ColumnData)columnData.get(columnIndex)).isHidden();
+    return columnData.get(columnIndex).isHidden();
   }
   
   /**
@@ -156,7 +206,7 @@ public class XJTable extends JTable{
    * @param comparator the comparator to be used.
    */
   public void setComparator(int column, Comparator comparator){
-    ((ColumnData)columnData.get(column)).comparator = comparator;
+    columnData.get(column).comparator = comparator;
   }
     
   /**
@@ -217,6 +267,7 @@ public class XJTable extends JTable{
       }
       sourceModel.addTableModelListener(this);
       if(isSortable() && sortedColumn == -1) setSortedColumn(0);
+      componentSizedProperly = false;
     }
     
     /**
@@ -228,7 +279,7 @@ public class XJTable extends JTable{
       int lastRow = e.getLastRow();
       int column = e.getColumn();
       
-      //now deal with the changes in the data
+      //deal with the changes in the data
       //we have no way to "repair" the sorting on data updates so we will need
       //to rebuild the order every time
       
@@ -240,13 +291,11 @@ public class XJTable extends JTable{
             fireTableStructureChanged();
             if(isSortable()) sort();
             newColumns();
-            adjustSizes();
           }else if(lastRow == Integer.MAX_VALUE){
             //all data changed (including the number of rows)
             init(sourceModel);
             fireTableDataChanged();
             if(isSortable()) sort();
-            adjustSizes();
           }else{
             //the rows should have normal values
             //if the sortedColumn is not affected we don't care
@@ -261,18 +310,12 @@ public class XJTable extends JTable{
                       sourceToTarget(lastRow), column, type));
               
             }
-            //resize the updated column(s)
-            if(column == TableModelEvent.ALL_COLUMNS){
-              adjustSizes();
-            }else{
-              ((ColumnData)columnData.get(column)).adjustColumnWidth();
-            }
           }
           break;
         case TableModelEvent.INSERT:
           //rows were inserted -> we need to rebuild
           init(sourceModel);
-          if(firstRow == lastRow){  
+          if(firstRow != TableModelEvent.HEADER_ROW && firstRow == lastRow){  
             fireTableChanged(new TableModelEvent(this,  
                     sourceToTarget(firstRow), 
                     sourceToTarget(lastRow), column, type));
@@ -281,9 +324,6 @@ public class XJTable extends JTable{
             fireTableDataChanged();
           }
           if(isSortable()) sort();
-          //resize the updated column(s)
-          if(column == TableModelEvent.ALL_COLUMNS) adjustSizes();
-          else ((ColumnData)columnData.get(column)).adjustColumnWidth();
           break;
         case TableModelEvent.DELETE:
           //rows were deleted -> we need to rebuild
@@ -294,7 +334,8 @@ public class XJTable extends JTable{
     }
     
     public int getRowCount(){
-      return sourceModel.getRowCount();
+      return sourceToTarget.length;
+//      return sourceModel.getRowCount();
     }
     
     public int getColumnCount(){
@@ -329,17 +370,24 @@ public class XJTable extends JTable{
       //save the selection
       int[] rows = getSelectedRows();
       //convert to model co-ordinates
-      for(int i = 0; i < rows.length; i++) rows[i] = rowViewToModel(rows[i]);
+      for(int i = 0; i < rows.length; i++) {
+        //if the underlying model has changed size, bail out - we'll get another
+        //event later 
+        if(sourceModel.getRowCount() != targetToSource.length) return;
+        rows[i] = rowViewToModel(rows[i]);
+      }
       clearSelection();
       
       List sourceData = new ArrayList(sourceModel.getRowCount());
       //get the data in the source order
       for(int i = 0; i < sourceModel.getRowCount(); i++){
+        //if the underlying model has changed size, bail out - we'll get another
+        //event later 
+        if(sourceModel.getRowCount() != targetToSource.length) return;
         sourceData.add(sourceModel.getValueAt(i, sortedColumn));
       }
       //get an appropriate comparator
-      Comparator comparator = ((ColumnData)columnData.
-              get(sortedColumn)).comparator;
+      Comparator comparator = columnData.get(sortedColumn).comparator;
       if(comparator == null){
         //use the default comparator
         if(defaultComparator == null) 
@@ -348,12 +396,21 @@ public class XJTable extends JTable{
       }
       for(int i = 0; i < sourceData.size() - 1; i++){
         for(int j = i + 1; j < sourceData.size(); j++){
+          //if the underlying model has changed size, bail out - we'll get another
+          //event later 
+          if(sourceModel.getRowCount() != targetToSource.length) return;
           Object o1 = sourceData.get(targetToSource(i));
+          //if the underlying model has changed size, bail out - we'll get another
+          //event later 
+          if(sourceModel.getRowCount() != targetToSource.length) return;          
           Object o2 = sourceData.get(targetToSource(j));
           boolean swap = ascending ?
                   (comparator.compare(o1, o2) > 0) :
                   (comparator.compare(o1, o2) < 0);
           if(swap){
+            //if the underlying model has changed size, bail out - we'll get another
+            //event later 
+            if(sourceModel.getRowCount() != targetToSource.length) return;
             int aux = targetToSource[i];
             targetToSource[i] = targetToSource[j];
             targetToSource[j] = aux;
@@ -417,9 +474,6 @@ public class XJTable extends JTable{
   }
   
   protected class HeaderMouseListener extends MouseAdapter{
-    public HeaderMouseListener(){
-    }
-    
     public void mouseClicked(MouseEvent e){
       process(e);
     }
@@ -427,53 +481,24 @@ public class XJTable extends JTable{
     public void mousePressed(MouseEvent e){
       process(e);
     }
-    
-    public void mouseReleased(MouseEvent e){
-      process(e);
-    }
-    
+
     protected void process(MouseEvent e){
       int viewColumn = columnModel.getColumnIndexAtX(e.getX());
-      final int column = convertColumnIndexToModel(viewColumn);
-      ColumnData cData = (ColumnData)columnData.get(column);
-      if((e.getID() == MouseEvent.MOUSE_PRESSED || 
-          e.getID() == MouseEvent.MOUSE_RELEASED) && 
-         e.isPopupTrigger()){
+      int column = convertColumnIndexToModel(viewColumn);
+      ColumnData cData = columnData.get(column);
+      if(e.isPopupTrigger()){
         //show pop-up
         cData.popup.show(e.getComponent(), e.getX(), e.getY());
       }else if(e.getID() == MouseEvent.MOUSE_CLICKED &&
-               e.getButton() == MouseEvent.BUTTON1){
-        //normal click 
-        if(e.getClickCount() >= 2){
-          //double click -> resize
-          if(singleClickTimer != null){
-            singleClickTimer.stop();
-            singleClickTimer = null;
-          }
-          cData.adjustColumnWidth();
-        }else {
-          //possible single click -> resort
-          singleClickTimer = new Timer(CLICK_DELAY, new ActionListener(){
-            public void actionPerformed(ActionEvent evt){
-              //this is the action to be done for single click.
-              if(sortable && column != -1) {
-                ascending = (column == sortedColumn) ? !ascending : true;
-                sortedColumn = column;
-                sortingModel.sort();
-              }
-            }
-          });
-          singleClickTimer.setRepeats(false);
-          singleClickTimer.start();
+             e.getButton() == MouseEvent.BUTTON1){
+        //normal click -> re-sort
+        if(sortable && column != -1) {
+          ascending = (column == sortedColumn) ? !ascending : true;
+          sortedColumn = column;
+          sortingModel.sort();
         }
       }
     }
-    /**
-     * How long should we wait for a second click until deciding the it's 
-     * actually a single click.
-     */
-    private static final int CLICK_DELAY = 300;
-    protected Timer singleClickTimer;
   }
   
   protected class ColumnData{
@@ -482,8 +507,6 @@ public class XJTable extends JTable{
       popup = new JPopupMenu();
       hideMenuItem = new JCheckBoxMenuItem("Hide", false);
       popup.add(hideMenuItem);
-      autoSizeMenuItem = new JCheckBoxMenuItem("Autosize", true);
-//      popup.add(autoSizeMenuItem);
       hidden = false;
       initListeners();
     }
@@ -494,92 +517,41 @@ public class XJTable extends JTable{
           TableColumn tCol = getColumnModel().getColumn(column);
           if(hideMenuItem.isSelected()){
             //hide column
-            colWidth = tCol.getWidth();
-            colPreferredWidth = tCol.getPreferredWidth();
-            colMaxWidth = tCol.getMaxWidth();
-            tCol.setPreferredWidth(HIDDEN_WIDTH);
-            tCol.setMaxWidth(HIDDEN_WIDTH);
-            tCol.setWidth(HIDDEN_WIDTH);
+            //the state has already changed to hidden, the sizes will change
+            //accordingly automatically
           }else{
             //show column
-            tCol.setMaxWidth(colMaxWidth);
-            tCol.setPreferredWidth(colPreferredWidth);
-            tCol.setWidth(colWidth);
+            if(tCol.getHeaderRenderer() == null){
+              TableCellRenderer defaultRenderer = getDefaultRenderer(Object.class);
+              if(defaultRenderer != null){
+                Component c = defaultRenderer.getTableCellRendererComponent(
+                        XJTable.this, tCol.getHeaderValue(), false, false, 0, 0);
+                tCol.setMinWidth(c.getMinimumSize().width);
+                tCol.setPreferredWidth(c.getPreferredSize().width);
+              }else{
+                tCol.setMinWidth(1);
+                tCol.setPreferredWidth(1);          
+              }
+            }else{
+              tCol.sizeWidthToFit();
+            }
           }
         }
       });
-      
-      autoSizeMenuItem.addActionListener(new ActionListener(){
-        public void actionPerformed(ActionEvent evt){
-          if(autoSizeMenuItem.isSelected()){
-            //adjust the size for this column
-            adjustColumnWidth();
-          }
-        }
-      });
-      
     }
     
     public boolean isHidden(){
       return hideMenuItem.isSelected();
     }
-    
-    public void adjustColumnWidth(){
-      int viewColumn = convertColumnIndexToView(column);
-      TableColumn tCol = getColumnModel().getColumn(column);
-      Dimension dim;
-      int width, height;
-      TableCellRenderer renderer;
-      //compute the sizes
-      if(getTableHeader() != null){
-        renderer = tCol.getHeaderRenderer();
-        if(renderer == null) renderer = getTableHeader().getDefaultRenderer();
-        dim = renderer.getTableCellRendererComponent(XJTable.this, 
-                tCol.getHeaderValue(), true, true ,0 , viewColumn).
-                getPreferredSize(); 
-        width = dim.width;
-        //make sure the table header gets sized correctly
-        height = dim.height;
-        if(height + getRowMargin() > getTableHeader().getPreferredSize().height){
-          getTableHeader().setPreferredSize(
-                  new Dimension(getTableHeader().getPreferredSize().width, 
-                  height));
-        }
-        int marginWidth = getColumnModel().getColumnMargin(); 
-        if(marginWidth > 0) width += marginWidth;         
-      }else{
-        width = 0;
-      }
-      renderer = tCol.getCellRenderer();
-      if(renderer == null) renderer = getDefaultRenderer(getColumnClass(column));
-      for(int row = 0; row < getRowCount(); row ++){
-        if(renderer != null){
-          dim = renderer. getTableCellRendererComponent(XJTable.this, 
-                  getValueAt(row, column), false, false, row, viewColumn).
-                  getPreferredSize();
-          width = Math.max(width, dim.width);
-          height = dim.height;
-          if((height + getRowMargin()) > getRowHeight(row)){
-            setRowHeight(row, height + getRowMargin());
-           }          
-        }
-      }
 
-      int marginWidth = getColumnModel().getColumnMargin(); 
-      if(marginWidth > 0) width += marginWidth; 
-      tCol.setPreferredWidth(width);
-    }
-    
     JCheckBoxMenuItem autoSizeMenuItem;
     JCheckBoxMenuItem hideMenuItem;
     JPopupMenu popup;
     int column;
+    int columnWidth;
     boolean hidden;
-    int colPreferredWidth;
-    int colMaxWidth;
-    int colWidth;
     Comparator comparator;
-    private static final int HIDDEN_WIDTH = 5;
+    private static final int HIDDEN_WIDTH = 10;
   }
   
   protected SortingModel sortingModel;
@@ -602,5 +574,7 @@ public class XJTable extends JTable{
   /**
    * A list of {@link ColumnData} objects.
    */
-  protected List columnData;
+  protected List<ColumnData> columnData;
+  
+  protected HeaderMouseListener headerMouseListener;
 }
