@@ -222,14 +222,6 @@ public class AnnotationSetsView extends AbstractDocumentView
   
   protected void initListeners(){
     document.addDocumentListener(this);
-    mainTable.addComponentListener(new ComponentAdapter(){
-      public void componentResized(ComponentEvent e){
-        //trigger a resize for the columns
-        mainTable.adjustSizes();
-//        tableModel.fireTableRowsUpdated(0, 0);
-      }
-    });
-    
     mainTable.addMouseListener(new MouseAdapter(){
       public void mouseClicked(MouseEvent evt){
         int row =  mainTable.rowAtPoint(evt.getPoint());
