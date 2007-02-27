@@ -16,15 +16,17 @@ package gate.gui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.*;
-import java.util.Iterator;
-import java.util.Vector;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 import javax.swing.*;
+import javax.swing.table.*;
 
 import gate.*;
 import gate.creole.AbstractVisualResource;
 import gate.event.CorpusEvent;
 import gate.event.CorpusListener;
+import gate.swing.XJTable;
 import gate.util.GateException;
 import gate.util.GateRuntimeException;
 
@@ -44,54 +46,45 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
 
 
   protected void initLocalData(){
-    docListModel = new DefaultListModel();
+    docTableModel = new DocumentTableModel();
   }
 
   protected void initGuiComponents(){
     setLayout(new BorderLayout());
+    renderer = new DocumentNameRenderer();
+    
+    docTable = new XJTable(docTableModel);
+    docTable.setSortable(true);
+    docTable.setSortedColumn(DocumentTableModel.COL_INDEX);
+    docTable.setAutoResizeMode(XJTable.AUTO_RESIZE_OFF);
+    docTable.getColumnModel().getColumn(DocumentTableModel.COL_NAME).
+        setCellRenderer(renderer);
+//    docTable.setShowGrid(false);
 
-    documentsList = new JList(docListModel);
-    documentsList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-    listRenderer = new DocumentListCellRenderer();
-    documentsList.setCellRenderer(listRenderer);
-    JScrollPane listScroll = new JScrollPane(documentsList);
-
-//    featuresEditor = new FeaturesEditor();
-//    JScrollPane fEdScroll = new JScrollPane(featuresEditor);
-//
-//    JSplitPane mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-//                                          listScroll, fEdScroll);
-//    mainSplit.setDividerLocation(0.30);
-//    add(mainSplit, BorderLayout.CENTER);
-
-    add(listScroll, BorderLayout.CENTER);
+    JScrollPane scroller = new JScrollPane(docTable);
+    scroller.setHorizontalScrollBarPolicy(
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    scroller.getViewport().setBackground(docTable.getBackground());
+    add(scroller);
 
     toolbar = new JToolBar();
     toolbar.setFloatable(false);
     toolbar.add(new NewDocumentAction());
     toolbar.add(new RemoveDocumentsAction());
+    toolbar.addSeparator();
+    toolbar.add(new MoveUpAction());
+    toolbar.add(new MoveDownAction());
 
     add(toolbar, BorderLayout.NORTH);
   }
 
   protected void initListeners(){
-/*
-//kalina: I commented it, because we want the corpus viewer to show only the
-//document names and not add the documents to memory
-    documentsList.addListSelectionListener(new ListSelectionListener(){
-      public void valueChanged(ListSelectionEvent e){
-        featuresEditor.setTarget(
-          (docListModel.isEmpty() || documentsList.getSelectedIndex() == -1) ?
-          null : docListModel.get(documentsList.getSelectedIndex())
-        );
-      }
-    });
-*/
-    documentsList.addMouseListener(new MouseAdapter() {
+    docTable.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2){
-          int row = documentsList.locationToIndex(e.getPoint());
+          int row = docTable.rowAtPoint(e.getPoint());
           if(row != -1){
+            row = docTable.rowViewToModel(row);
             Document doc = (Document) corpus.get(row);
             //try to select the document in the main frame
             Component root = SwingUtilities.getRoot(CorpusEditor.this);
@@ -124,6 +117,10 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
   }
 
   public void setTarget(Object target){
+    if(corpus != null && corpus != target){
+      //we already had a different corpus
+      corpus.removeCorpusListener(this);
+    }
     if(!(target instanceof Corpus)){
       throw new IllegalArgumentException(
         "The GATE corpus editor can only be used with a GATE corpus!\n" +
@@ -131,58 +128,198 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
     }
     this.corpus = (Corpus)target;
     corpus.addCorpusListener(this);
-
-    docListModel.clear();
-    java.util.List docNamesList = corpus.getDocumentNames();
-    Iterator namesIter = docNamesList.iterator();
-    while(namesIter.hasNext()){
-      String docName = (String) namesIter.next();
-      docListModel.addElement(docName);
-    }
-
-    if(!docListModel.isEmpty())
-      SwingUtilities.invokeLater(new Runnable(){
-        public void run(){
-          documentsList.setSelectedIndex(0);
-        }
-      });
+    docTableModel.dataChanged();
+    SwingUtilities.invokeLater(new Runnable(){
+      public void run(){
+        docTableModel.fireTableDataChanged();
+      }
+    });
   }
 
   public void documentAdded(final CorpusEvent e) {
+    docTableModel.dataChanged();
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
-        //a new document has been added to the corpus
-        Document doc = e.getDocument();
-        docListModel.addElement(doc.getName());
+        docTableModel.fireTableRowsInserted(e.getDocumentIndex(), 
+                e.getDocumentIndex());
       }
     });
   }
 
   public void documentRemoved(final CorpusEvent e) {
+    docTableModel.dataChanged();
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
-        docListModel.removeElementAt(e.getDocumentIndex());
+        docTableModel.fireTableRowsDeleted(e.getDocumentIndex(), 
+                e.getDocumentIndex());
       }
     });
   }
 
-
-  class DocumentListCellRenderer extends DefaultListCellRenderer{
-    public Component getListCellRendererComponent(JList list,
-                                              Object value,
-                                              int index,
-                                              boolean isSelected,
-                                              boolean cellHasFocus){
-      //prepare the renderer
-      String docName = (String)value;
-      super.getListCellRendererComponent(list, docName, index,
-                                         isSelected, cellHasFocus);
-      setIcon(MainFrame.getIcon("document"));
-      return this;
+  class DocumentTableModel extends AbstractTableModel{
+    public DocumentTableModel(){
+      documentNames = new ArrayList<String>();
     }
+    
+    /**
+     * Called externally when the underlying corpus has changed.
+     */
+    private void dataChanged(){
+      List<String> newDocs = new ArrayList<String>();
+      if(corpus != null){
+        newDocs.addAll((List<String>)corpus.getDocumentNames());
+     }
+      List<String> oldDocs = documentNames;
+      documentNames = newDocs;
+      oldDocs.clear();
+    }
+    
+    public int getColumnCount() {
+      return COLUMN_COUNT;
+    }
+
+    public int getRowCount() {
+      return documentNames.size();
+    }
+
+    public Object getValueAt(int rowIndex, int columnIndex) {
+      //invalid indexes might appear when update events are slow to act 
+      if(rowIndex < 0 || rowIndex >= documentNames.size() || 
+         columnIndex < 0 || columnIndex > COLUMN_COUNT) return null;
+      switch(columnIndex) {
+        case COL_INDEX:
+          return new Integer(rowIndex);
+        case COL_NAME:
+          return documentNames.get(rowIndex);
+        default:
+          return null;
+      }
+    }
+
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+      switch(columnIndex) {
+        case COL_INDEX:
+          return Integer.class;
+        case COL_NAME:
+          return String.class;
+        default:
+          return String.class;
+      }
+    }
+
+    @Override
+    public String getColumnName(int column) {
+      return COLUMN_NAMES[column];
+    }
+
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+      return false;
+    }
+    
+    private List<String> documentNames;
+    private final String[] COLUMN_NAMES = {"Index", "Name"}; 
+    private static final int COL_INDEX = 0;
+    private static final int COL_NAME = 1;
+    private static final int COLUMN_COUNT = 2;
   }
 
+  class DocumentNameRenderer extends DefaultTableCellRenderer implements 
+      ListCellRenderer{
+    public DocumentNameRenderer(){
+      super();
+      setIcon(MainFrame.getIcon("document"));
+    }
+    
+    public Component getListCellRendererComponent(JList list, Object value,
+            int index, boolean isSelected, boolean cellHasFocus) {
+      // prepare the renderer
 
+      return getTableCellRendererComponent(docTable, value, isSelected, 
+              cellHasFocus, index, docTableModel.COL_NAME);
+    }
+  }
+  
+  class MoveUpAction extends AbstractAction{
+    public MoveUpAction(){
+      super("Move up", MainFrame.getIcon("up"));
+      putValue(SHORT_DESCRIPTION, "Moves selected document(s) up.");
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      int[] rowsTable = docTable.getSelectedRows();
+      int[] rowsCorpus = new int[rowsTable.length];
+      for(int i = 0; i < rowsTable.length; i++)
+        rowsCorpus[i] = docTable.rowViewToModel(rowsTable[i]);
+      Arrays.sort(rowsCorpus);
+      //starting from the smallest one, move each element up
+      for(int i = 0; i < rowsCorpus.length; i++){
+        if(rowsCorpus[i] > 0){
+          //swap the doc with the one before
+          Object doc = corpus.remove(rowsCorpus[i]);
+          rowsCorpus[i] = rowsCorpus[i] - 1;
+          corpus.add(rowsCorpus[i], doc);
+        }
+      }
+      //restore selection
+      //the remove / add events will cause the table to be updated
+      //we need to only restore the selection after that happened
+      final int[] selectedRowsCorpus = new int[rowsCorpus.length];
+      System.arraycopy(rowsCorpus, 0, selectedRowsCorpus, 0, rowsCorpus.length);
+      SwingUtilities.invokeLater(new Runnable(){
+        public void run(){
+          docTable.clearSelection();
+          for(int i = 0; i < selectedRowsCorpus.length; i++){
+            int rowTable = docTable.rowModelToView(selectedRowsCorpus[i]);
+            docTable.getSelectionModel().addSelectionInterval(rowTable, 
+                    rowTable);
+          }                
+        }
+      });
+    }
+    
+  }
+
+  class MoveDownAction extends AbstractAction{
+    public MoveDownAction(){
+      super("Move down", MainFrame.getIcon("down"));
+      putValue(SHORT_DESCRIPTION, "Moves selected document(s) down.");
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      int[] rowsTable = docTable.getSelectedRows();
+      int[] rowsCorpus = new int[rowsTable.length];
+      for(int i = 0; i < rowsTable.length; i++)
+        rowsCorpus[i] = docTable.rowViewToModel(rowsTable[i]);
+      Arrays.sort(rowsCorpus);
+      //starting from the largest one, move each element down
+      for(int i = rowsCorpus.length -1; i >=0; i--){
+        if(rowsCorpus[i] < corpus.size() -1){
+          //swap the doc with the one before
+          Object doc = corpus.remove(rowsCorpus[i]);
+          rowsCorpus[i]++;
+          corpus.add(rowsCorpus[i], doc);
+        }
+      }
+      //restore selection
+      //the remove / add events will cause the table to be updated
+      //we need to only restore the selection after that happened
+      final int[] selectedRowsCorpus = new int[rowsCorpus.length];
+      System.arraycopy(rowsCorpus, 0, selectedRowsCorpus, 0, rowsCorpus.length);
+      SwingUtilities.invokeLater(new Runnable(){
+        public void run(){
+          docTable.clearSelection();
+          for(int i = 0; i < selectedRowsCorpus.length; i++){
+            int rowTable = docTable.rowModelToView(selectedRowsCorpus[i]);
+            docTable.getSelectionModel().addSelectionInterval(rowTable, 
+                    rowTable);
+          }                
+        }
+      });
+    }
+    
+  }
   class NewDocumentAction extends AbstractAction{
     public NewDocumentAction(){
       super("Add document", MainFrame.getIcon("add-document"));
@@ -208,7 +345,7 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
           docNames.add(((Document)loadedDocuments.get(i)).getName());
         }
         JList docList = new JList(docNames);
-        docList.setCellRenderer(listRenderer);
+        docList.setCellRenderer(renderer);
 
         JOptionPane dialog = new JOptionPane(new JScrollPane(docList),
                                              JOptionPane.QUESTION_MESSAGE,
@@ -238,19 +375,19 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
     }
 
     public void actionPerformed(ActionEvent e){
-      int[] selectedIndexes = documentsList.getSelectedIndices();
+      int[] selectedIndexes = docTable.getSelectedRows();
       for(int i = selectedIndexes.length-1; i >= 0; i--){
-        corpus.remove(selectedIndexes[i]);
+        corpus.remove(docTable.rowViewToModel(selectedIndexes[i]));
       }
-      documentsList.clearSelection();
+//      documentsList.clearSelection();
     }
   }//class RemoveDocumentsAction extends AbstractAction
 
 
-  JList documentsList;
-  DocumentListCellRenderer listRenderer;
-  FeaturesEditor featuresEditor;
-  JToolBar toolbar;
-  Corpus corpus;
-  DefaultListModel docListModel;
+//  protected JList documentsList;
+  protected XJTable docTable;
+  protected DocumentTableModel docTableModel;
+  protected DocumentNameRenderer renderer;
+  protected JToolBar toolbar;
+  protected Corpus corpus;
 }
