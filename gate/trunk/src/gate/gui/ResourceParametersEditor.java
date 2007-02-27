@@ -70,7 +70,6 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       parameterDisjunctions = null;
     }
     tableModel.fireTableDataChanged();
-//    adjustSizes();
   }
 
   protected void initLocalData(){
