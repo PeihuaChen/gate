@@ -367,69 +367,58 @@ public class XJTable extends JTable{
      * @param ascending the sorting order.
      */
     public void sort(){
-      //save the selection
-      int[] rows = getSelectedRows();
-      //convert to model co-ordinates
-      for(int i = 0; i < rows.length; i++) {
-        //if the underlying model has changed size, bail out - we'll get another
-        //event later 
-        if(sourceModel.getRowCount() != targetToSource.length) return;
-        rows[i] = rowViewToModel(rows[i]);
-      }
-      clearSelection();
-      
-      List sourceData = new ArrayList(sourceModel.getRowCount());
-      //get the data in the source order
-      for(int i = 0; i < sourceModel.getRowCount(); i++){
-        //if the underlying model has changed size, bail out - we'll get another
-        //event later 
-        if(sourceModel.getRowCount() != targetToSource.length) return;
-        sourceData.add(sourceModel.getValueAt(i, sortedColumn));
-      }
-      //get an appropriate comparator
-      Comparator comparator = columnData.get(sortedColumn).comparator;
-      if(comparator == null){
-        //use the default comparator
-        if(defaultComparator == null) 
-          defaultComparator = new ObjectComparator();
-        comparator = defaultComparator;
-      }
-      for(int i = 0; i < sourceData.size() - 1; i++){
-        for(int j = i + 1; j < sourceData.size(); j++){
-          //if the underlying model has changed size, bail out - we'll get another
-          //event later 
-          if(sourceModel.getRowCount() != targetToSource.length) return;
-          Object o1 = sourceData.get(targetToSource(i));
-          //if the underlying model has changed size, bail out - we'll get another
-          //event later 
-          if(sourceModel.getRowCount() != targetToSource.length) return;          
-          Object o2 = sourceData.get(targetToSource(j));
-          boolean swap = ascending ?
-                  (comparator.compare(o1, o2) > 0) :
-                  (comparator.compare(o1, o2) < 0);
-          if(swap){
-            //if the underlying model has changed size, bail out - we'll get another
-            //event later 
-            if(sourceModel.getRowCount() != targetToSource.length) return;
-            int aux = targetToSource[i];
-            targetToSource[i] = targetToSource[j];
-            targetToSource[j] = aux;
-            
-            sourceToTarget[targetToSource[i]] = i;
-            sourceToTarget[targetToSource[j]] = j;
+      try {
+        //save the selection
+        int[] rows = getSelectedRows();
+        //convert to model co-ordinates
+        for(int i = 0; i < rows.length; i++) {
+          rows[i] = rowViewToModel(rows[i]);
+        }
+        clearSelection();
+        
+        List sourceData = new ArrayList(sourceModel.getRowCount());
+        //get the data in the source order
+        for(int i = 0; i < sourceModel.getRowCount(); i++){
+          sourceData.add(sourceModel.getValueAt(i, sortedColumn));
+        }
+        //get an appropriate comparator
+        Comparator comparator = columnData.get(sortedColumn).comparator;
+        if(comparator == null){
+          //use the default comparator
+          if(defaultComparator == null) 
+            defaultComparator = new ObjectComparator();
+          comparator = defaultComparator;
+        }
+        for(int i = 0; i < sourceData.size() - 1; i++){
+          for(int j = i + 1; j < sourceData.size(); j++){
+            Object o1 = sourceData.get(targetToSource(i));
+            Object o2 = sourceData.get(targetToSource(j));
+            boolean swap = ascending ?
+                    (comparator.compare(o1, o2) > 0) :
+                    (comparator.compare(o1, o2) < 0);
+            if(swap){
+              int aux = targetToSource[i];
+              targetToSource[i] = targetToSource[j];
+              targetToSource[j] = aux;
+              
+              sourceToTarget[targetToSource[i]] = i;
+              sourceToTarget[targetToSource[j]] = j;
+            }
           }
         }
+        fireTableRowsUpdated(0, sourceData.size() -1);
+        //restore selection
+        //convert to model co-ordinates
+        for(int i = 0; i < rows.length; i++){
+          rows[i] = rowModelToView(rows[i]);
+          getSelectionModel().addSelectionInterval(rows[i], rows[i]);
+        }
       }
-      fireTableRowsUpdated(0, sourceData.size() -1);
-      //restore selection
-      //convert to model co-ordinates
-      for(int i = 0; i < rows.length; i++){
-        rows[i] = rowModelToView(rows[i]);
-        getSelectionModel().addSelectionInterval(rows[i], rows[i]);
+      catch(ArrayIndexOutOfBoundsException aioob) {
+        //this can happen when update events get behind
+        //just ignore - we'll get another event later to cause the sorting
       }
     }
-
-    
     /**
      * Converts an index from the source coordinates to the target ones.
      * Used to propagate events from the data source (table model) to the view. 
