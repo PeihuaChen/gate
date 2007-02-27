@@ -36,6 +36,7 @@ import gate.creole.gazetteer.DefaultGazetteer;
 import gate.creole.ir.*;
 import gate.creole.tokeniser.DefaultTokeniser;
 import gate.gui.MainFrame;
+import gate.gui.OkCancelDialog;
 import gate.gui.docview.AnnotationSetsView;
 import gate.persist.SerialDataStore;
 import gate.util.persistence.PersistenceManager;
@@ -74,6 +75,10 @@ public class Scratch
     
   public static void main(String args[]) throws Exception {   
     
+    boolean value = OkCancelDialog.showDialog(null, new JLabel("OK?"), "Answer please!");
+    System.out.println(value ? "Yes!" : "No!");
+    
+    if(true) return;
     final JFrame aFrame = new JFrame("Scratch");
     aFrame.addWindowListener(new WindowAdapter(){
       @Override
