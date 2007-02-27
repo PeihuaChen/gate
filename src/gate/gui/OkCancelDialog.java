@@ -98,14 +98,6 @@ public class OkCancelDialog extends JDialog {
     super.dispose();
   }
 
-
-  public void show(){
-    setModal(true);
-    userHasPressedOK = false;
-    userHasPressedCancel = false;
-    super.show();
-  }
-
   /**
    * @return true if the user has selected the "OK" button.
    */
@@ -140,7 +132,12 @@ public class OkCancelDialog extends JDialog {
     //end kalina
 
     //show the dialog
-    dialog.show();
+    dialog.setModal(true);
+    dialog.userHasPressedOK = false;
+    dialog.userHasPressedCancel = false;
+    dialog.setVisible(true);
+//    
+//    dialog.show();
     return dialog.userHasPressedOK;
   }
 
