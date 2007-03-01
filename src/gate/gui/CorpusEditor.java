@@ -59,7 +59,6 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
     docTable.setAutoResizeMode(XJTable.AUTO_RESIZE_OFF);
     docTable.getColumnModel().getColumn(DocumentTableModel.COL_NAME).
         setCellRenderer(renderer);
-//    docTable.setShowGrid(false);
 
     JScrollPane scroller = new JScrollPane(docTable);
     scroller.setHorizontalScrollBarPolicy(
