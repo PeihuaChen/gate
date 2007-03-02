@@ -801,5 +801,18 @@
                   file="../sale/tao/tao.pdf"/>        
     </zip>
   </target>
+	
+	<!-- define the IzPack Ant task -->
+	<taskdef name="izpack" classname="com.izforge.izpack.ant.IzPackTask">
+		<classpath>
+			<pathelement path="${build.class.path}"/>
+			<pathelement location="${buildDir}/lib/standalone-izpack-installer-compiler.jar"/>
+		</classpath>
+	</taskdef>
+	
+	<target name="installer">
+		<izpack input="${buildDir}/deploy/gate-installer.xml"
+		        output="${basedir}/gate-installer.jar"
+		        basedir="${basedir}"/>
+	</target>
 </project>
-
