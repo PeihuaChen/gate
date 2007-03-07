@@ -7,6 +7,5 @@ MultiPhase:	main
 Phases: 
 
 find
-no-splits
 split
-removelookup
+cleanup

@@ -8,69 +8,98 @@
 *  Version 2, June 1991 (in the distribution as file licence.html,
 *  and also available at http://gate.ac.uk/gate/licence.html).
 *
-*  Diana Maynard, 11 Oct 2001
+*  Valentin Tablan, March 7th, 2007
 *
 *  $Id$
 */
 
 Phase:split
-Input: Token Split TempNoSplitText
+Input: Split TempNoSplitText
 Options: control = first
 
 
 //sentence that consumes a split
 Rule: internalSplits
-(
-  {Token.kind == "word"}  
-  ({Token})* 
-  {Split.kind == "internal"}
-) :sentence
+({Split.kind == "internal"}):isplit
 -->
-:sentence.Sentence = {}
+{
+  Long endOffset = ((AnnotationSet)bindings.get("isplit")).
+      lastNode().getOffset();
+  //find the end offset of previous sentences
+  Long lastOffset = (Long)doc.getFeatures().get("temp-last-sentence-end");
+  if(lastOffset == null) lastOffset = new Long(0);
+//  
+//  AnnotationSet sentences = outputAS.get("Sentence");
+//  Long lastOffset = sentences == null || sentences.isEmpty() ?
+//          new Long(0) :
+//          sentences.lastNode().getOffset();  
+  //get the start offset of the first token.kind==word
+  AnnotationSet tokens = inputAS.getContained(lastOffset, endOffset);
+  if(tokens != null) tokens = tokens.get("Token");
+  if(tokens != null && tokens.size() > 0){
+    List<Annotation> tokList = new ArrayList<Annotation>(tokens);
+    Collections.sort(tokList, new OffsetComparator());
+    for(Annotation token : tokList){
+      String tokenKind = (String)token.getFeatures().get("kind");
+      if("word".equals(tokenKind)){
+        Long startOffset = token.getStartNode().getOffset();
+        if(startOffset.compareTo(endOffset) < 0){
+          //create the new sentence
+          try{
+            outputAS.add(startOffset, endOffset, "Sentence", 
+                    Factory.newFeatureMap());
+            //save the new end offset
+            doc.getFeatures().put("temp-last-sentence-end", endOffset);
+          }catch( InvalidOffsetException ioe){
+            throw new GateRuntimeException(ioe);
+          }
+        }
+        return;
+      }
+    }
+  }
+}
 
- 
 //sentence that doesn't consume a split
 Rule: externalSplits
-(
-  {Token.kind == "word"}  
-  ({Token})* 
-):sentence
-{Split.kind == "external"}
+({Split.kind == "external"}):esplit
 -->
-:sentence.Sentence = {}
-
-//quoted sentence that consumes a split
-Rule: quotedInternalSplits
-(
-  {Token.string == "\""}      
-  {Token.kind == "word"}  
-  ({Token})* 
-  ({Split.kind == "internal"})+
-  {Token.string == "\""}
-) :sentence
--->
-:sentence.Sentence = {}
-
- 
-//quoted sentence that doesn't consume a split
-Rule: quotedExternalSplits
-(
-  {Token.string == "\""}      
-  {Token.kind == "word"}  
-  ({Token})*
-  {Token.string == "\""}
-):sentence
-{Split.kind == "external"}
--->
-:sentence.Sentence = {}
-
-
-//whole document text with no splits
-Rule: noSplits
-({TempNoSplitText}):sentence
--->
-:sentence.Sentence = {},
 {
-  //delete the temporary annotation
-  inputAS.removeAll((AnnotationSet)bindings.get("sentence"));
+  Long endOffset = ((AnnotationSet)bindings.get("esplit")).
+      firstNode().getOffset();
+//  //get the end offset of the previous sentence
+//  AnnotationSet sentences = outputAS.get("Sentence");
+//  Long lastOffset = sentences == null || sentences.isEmpty() ?
+//          new Long(0) :
+//          sentences.lastNode().getOffset();  
+  //find the end offset of previous sentences
+  Long lastOffset = (Long)doc.getFeatures().get("temp-last-sentence-end");
+  if(lastOffset == null) lastOffset = new Long(0);
+  
+  //get the start offset of the first token.kind==word
+  AnnotationSet tokens = inputAS.getContained(lastOffset, endOffset);
+  if(tokens != null) tokens = tokens.get("Token");
+  if(tokens != null && tokens.size() > 0){
+    //we have a more precise end offset
+    endOffset = tokens.lastNode().getOffset();
+    List<Annotation> tokList = new ArrayList<Annotation>(tokens);
+    Collections.sort(tokList, new OffsetComparator());
+    for(Annotation token : tokList){
+      String tokenKind = (String)token.getFeatures().get("kind");
+      if("word".equals(tokenKind)){
+        Long startOffset = token.getStartNode().getOffset();
+        if(startOffset.compareTo(endOffset) < 0){
+          //create the new sentence
+          try{
+            outputAS.add(startOffset, endOffset, "Sentence", 
+                    Factory.newFeatureMap());
+            doc.getFeatures().put("temp-last-sentence-end", endOffset);
+          }catch( InvalidOffsetException ioe){
+            throw new GateRuntimeException(ioe);
+          }
+        }
+        return;
+      }
+    }
+  }
 }
