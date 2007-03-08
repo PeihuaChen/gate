@@ -473,18 +473,20 @@ public class XJTable extends JTable{
 
     protected void process(MouseEvent e){
       int viewColumn = columnModel.getColumnIndexAtX(e.getX());
-      int column = convertColumnIndexToModel(viewColumn);
-      ColumnData cData = columnData.get(column);
-      if(e.isPopupTrigger()){
-        //show pop-up
-        cData.popup.show(e.getComponent(), e.getX(), e.getY());
-      }else if(e.getID() == MouseEvent.MOUSE_CLICKED &&
-             e.getButton() == MouseEvent.BUTTON1){
-        //normal click -> re-sort
-        if(sortable && column != -1) {
-          ascending = (column == sortedColumn) ? !ascending : true;
-          sortedColumn = column;
-          sortingModel.sort();
+      if(viewColumn != -1){
+        int column = convertColumnIndexToModel(viewColumn);
+        ColumnData cData = columnData.get(column);
+        if(e.isPopupTrigger()){
+          //show pop-up
+          cData.popup.show(e.getComponent(), e.getX(), e.getY());
+        }else if(e.getID() == MouseEvent.MOUSE_CLICKED &&
+               e.getButton() == MouseEvent.BUTTON1){
+          //normal click -> re-sort
+          if(sortable && column != -1) {
+            ascending = (column == sortedColumn) ? !ascending : true;
+            sortedColumn = column;
+            sortingModel.sort();
+          }
         }
       }
     }
