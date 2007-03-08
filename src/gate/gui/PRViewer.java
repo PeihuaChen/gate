@@ -22,6 +22,7 @@ import gate.Gate;
 import gate.Resource;
 import gate.creole.AbstractVisualResource;
 import gate.creole.ResourceData;
+import gate.swing.XJTable;
 import gate.util.GateRuntimeException;
 
 
@@ -40,6 +41,7 @@ public class PRViewer extends AbstractVisualResource {
     setLayout(new BorderLayout());
     editor = new ResourceParametersEditor();
     editor.setEditable(false);
+    editor.setAutoResizeMode(XJTable.AUTO_RESIZE_OFF);
     JScrollPane scroller = new JScrollPane(editor);
     scroller.setAlignmentX(Component.LEFT_ALIGNMENT);
     scroller.setAlignmentY(Component.TOP_ALIGNMENT);
