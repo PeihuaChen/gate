@@ -15,9 +15,6 @@
 
 package gate.util;
 
-import java.io.PrintStream;
-import java.io.PrintWriter;
-
 /** A superclass for exceptions in the GATE packages. Can be used
   * to catch any internal exception thrown by the GATE libraries.
   * (Of course
@@ -29,8 +26,6 @@ public class GateException extends Exception {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  protected Throwable e;
-
   public GateException() {
     super();
   }
@@ -40,45 +35,10 @@ public class GateException extends Exception {
   }
 
   public GateException(Throwable e) {
-    super(e.toString());
-    this.e = e;
+    super(e);
   }
 
   public GateException(String message, Throwable e) {
-    super(message);
-    this.e = e;
+    super(message, e);
   }
-  
-  
-  /**
-   * Overridden so we can print the enclosed exception's stack trace too.
-   */
-  public void printStackTrace(){
-    printStackTrace(System.err);
-  }
-
-  /**
-   * Overridden so we can print the enclosed exception's stack trace too.
-   */
-  public void printStackTrace(PrintStream s) {
-    s.flush();
-    super.printStackTrace(s);
-    if(e != null){
-      s.print("  Caused by:\n");
-      e.printStackTrace(s);
-    }
-  }
-
-  /**
-   * Overridden so we can print the enclosed exception's stack trace too.
-   */
-  public void printStackTrace(PrintWriter s) {
-    s.flush();
-    super.printStackTrace(s);
-    if(e != null){
-      s.print("  Caused by:\n");
-      e.printStackTrace(s);
-    }
-  }
-
 } // GateException

@@ -20,8 +20,7 @@ public class WordNetException extends GateException {
   }
 
   public WordNetException(Throwable e) {
-    super(e.toString());
-    this.e = e;
+    super(e);
   }
 
 }
