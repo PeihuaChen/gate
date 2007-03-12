@@ -5,19 +5,15 @@ package com.ontotext.gate.vr;
 
 import javax.swing.*;
 import javax.swing.event.*;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
 
 import gate.creole.*;
 import gate.creole.gazetteer.*;
 import gate.creole.ontology.*;
 import gate.util.*;
-import gate.event.ObjectModificationListener;
 import gate.event.GateEvent;
-import gate.event.ObjectModificationEvent;
 import gate.gui.MainFrame;
-import gate.*;
-
-import com.ontotext.gate.ontology.*;
-
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
@@ -74,10 +70,10 @@ public class Gaze extends AbstractVisualResource
   private MappingNode mappingNode = null;
 
   /** the ontology that is currently displayed */
-  private Taxonomy ontology = null;
+  private Ontology ontology = null;
 
   /** map of ontologies vs trees */
-  private Map ontologyTrees = new HashMap();
+  private Map<Ontology, JTree> ontologyTrees = new HashMap<Ontology, JTree>();
 
   /*manually added gui components */
 
@@ -310,11 +306,11 @@ public class Gaze extends AbstractVisualResource
   /**Gets all classes.
    * @return a list of all the classes from all the ontologies known to this VR*/
   java.util.List getClasses() {
-    java.util.List result = null;
+    java.util.List<OClass> result = null;
     if ( null == ontology)
-      result = new ArrayList();
+      result = new ArrayList<OClass>();
     else {
-      result = new ArrayList (ontology.getClasses());
+      result = new ArrayList<OClass>(ontology.getOClasses(false));
     }
     return result;
   }
@@ -417,9 +413,8 @@ public class Gaze extends AbstractVisualResource
               }
               // get te ontology
               try {
-                ontology = new OntologyImpl().getOntology(ourl);
-                if(ontology instanceof TaxonomyImpl)
-                  ((TaxonomyImpl)ontology).addOntologyModificationListener(Gaze.this);
+                ontology = OntologyUtilities.getOntology(ourl);
+                ontology.addOntologyModificationListener(Gaze.this);
               } catch (ResourceInstantiationException x) {
                 x.printStackTrace(Err.getPrintWriter());
               }
@@ -827,31 +822,116 @@ public class Gaze extends AbstractVisualResource
   public void processGateEvent(GateEvent e) {
   }
 
-  public void ontologyModified(OntologyModificationEvent e) {
-    Object source = e.getSource();
-    if ( source instanceof Taxonomy ) {
-
-      JTree tree = (JTree)ontologyTrees.get((Taxonomy)source);
+  public void resourceAdded(Ontology ontology, OResource resource) {
+    ontologyModified(ontology, null, -1);
+  }
+  
+  public void resourcesRemoved(Ontology ontology, String[] resourcesURIs) {
+    ontologyModified(ontology, null, -1);
+  }
+  
+  public void ontologyModified(Ontology ontology, OResource resource, int eventType) {
+      JTree tree = ontologyTrees.get(ontology);
       if (tree!=null) {
-        ontologyTrees.remove((Taxonomy)source);
-        Map namesVsNodes = new HashMap();
-        ClassNode root = ClassNode.createRootNode((Taxonomy)source,mapping,namesVsNodes);
+        ontologyTrees.remove(ontology);
+        Map<String, ClassNode> namesVsNodes = new HashMap<String, ClassNode>();
+        ClassNode root = ClassNode.createRootNode(ontology,mapping,namesVsNodes);
         OntoTreeModel model = new OntoTreeModel(root);
         MappingTreeView view = new MappingTreeView(model,mapping,Gaze.this);
 
         /* synchronize the expansion of the old and new trees */
-        EditableTreeView.synchronizeTreeExpansion(tree,view);
+        synchronizeTreeExpansion(tree,view);
 
-        if ( ontology.equals((Taxonomy)ontology)) {
+        if (ontology.equals(ontology)) {
           oTree = view;
           ontologyScroll.getViewport().add(oTree,null);
           oTree.setVisible(true);
         }
         ontologyTrees.put(ontology,oTree);
       }
-    }
   }
 
+  /**
+   * Synchronizes the expansion of the given trees.
+   * @param orig the original tree
+   * @param mirror the tree to mimic the expansion of the original
+   */
+  public static void synchronizeTreeExpansion(JTree orig, JTree mirror) {
+    /*create a Set of expanded node names*/
+    /*below will :
+      iterate all nodes of the tree
+      accumulate the path for each node as an arraylist
+      check for each passed node whether the treepath is expanded
+      and if expanded add it to the expanded list as a string.
+    */
+    Set expanded = new HashSet();
+    TreeModel model =  orig.getModel();
+
+    ArrayList remains = new ArrayList();
+    ArrayList remainPaths = new ArrayList();
+
+    remains.add(model.getRoot());
+    ArrayList rootPath = new ArrayList();
+    rootPath.add(model.getRoot());
+    remainPaths.add(rootPath);
+
+    while (remains.size() > 0 ) {
+      Object node = remains.get(0);
+      int cc = model.getChildCount(node);
+      ArrayList parentPath = (ArrayList)remainPaths.get(0);
+      for ( int c = 0 ; c < cc ; c++) {
+        Object child = model.getChild(node,c);
+        remains.add(child);
+        ArrayList pp = new ArrayList(parentPath);
+        pp.add(child);
+        remainPaths.add(pp);
+      }
+      TreePath tp = new TreePath(parentPath.toArray());
+      if (orig.isExpanded(tp)) {
+        expanded.add(node.toString());
+      }
+      remains.remove(0);
+      remainPaths.remove(0);
+    }
+
+    /*expand the mirror tree according to the expanded nodes set*/
+    /*
+      iterate all the nodes and keep their paths
+      if a node is found as a string then expand it
+    */
+
+    remains = new ArrayList();
+    remainPaths = new ArrayList();
+
+    model = mirror.getModel();
+    remains.add(model.getRoot());
+    rootPath = new ArrayList();
+    rootPath.add(model.getRoot());
+    remainPaths.add(rootPath);
+
+    while (remains.size() > 0 ) {
+      Object node = remains.get(0);
+      int cc = model.getChildCount(node);
+      ArrayList parentPath = (ArrayList)remainPaths.get(0);
+      for ( int c = 0 ; c < cc ; c++) {
+        Object child = model.getChild(node,c);
+        remains.add(child);
+        ArrayList pp = new ArrayList(parentPath);
+        pp.add(child);
+        remainPaths.add(pp);
+      }
+
+      if (expanded.contains(node.toString()) ) {
+        TreePath tp = new TreePath(parentPath.toArray());
+        mirror.expandPath(tp);
+      }
+      remains.remove(0);
+      remainPaths.remove(0);
+    } // while nodes remain
+
+  } // synchronizeTreeExpansion(JTree,JTree)
+  
+  
 /*-<-<-<---implementation of OntologyModificationListener interface--------------*/
 
 
@@ -862,6 +942,8 @@ public class Gaze extends AbstractVisualResource
    *  distinct the modifed gazetteer lists and still
    *  look like the default one.*/
   class LinearCR extends DefaultListCellRenderer {
+
+    private static final long serialVersionUID = 3690752878255943737L;
 
     public LinearCR() {
       super();
@@ -1827,10 +1909,8 @@ public class Gaze extends AbstractVisualResource
             try {
               URL ourl = new URL("file:///"+selected.getAbsolutePath());
               try {
-                ontology = new OntologyImpl().getOntology(ourl);
-                if(ontology instanceof TaxonomyImpl)
-                  ((TaxonomyImpl)ontology).
-                  addOntologyModificationListener(Gaze.this);
+                ontology = OntologyUtilities.getOntology(ourl);
+                ontology.addOntologyModificationListener(Gaze.this);
               } catch (ResourceInstantiationException x) {
                 x.printStackTrace(Err.getPrintWriter());
               }

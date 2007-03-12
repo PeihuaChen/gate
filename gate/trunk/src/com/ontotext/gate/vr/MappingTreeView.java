@@ -2,19 +2,14 @@ package com.ontotext.gate.vr;
 
 import javax.swing.*;
 import javax.swing.tree.*;
-import javax.swing.event.*;
-
 import java.awt.*;
 import java.awt.event.*;
-
 import java.util.*;
-
 import gate.gui.*;
 import gate.util.*;
 import gate.creole.gazetteer.*;
 import gate.creole.ontology.*;
 
-import com.ontotext.gate.vr.*;
 
 
 /**
@@ -23,6 +18,9 @@ import com.ontotext.gate.vr.*;
  * To be used with Gaze.
  * borislav popov 18/04/2002 */
 public class MappingTreeView extends JTree {
+
+    private static final long serialVersionUID = 3257568420999410744L;
+
   /**the name of the default gazetteer icon*/
   private final static String GAZ_ICON = "lr";
 
@@ -92,6 +90,9 @@ public class MappingTreeView extends JTree {
   /** Mapping Tree Cell Renderer distinguishes nodes, originating from ontology classes from
    *  nodes, originating from gazetteer lists. */
   class MappingTreeCR extends DefaultTreeCellRenderer {
+
+     private static final long serialVersionUID = 3546924666926085169L;
+
     /**
      * Sets the value of the current tree cell to <code>value</code>.
      * If <code>selected</code> is true, the cell will be drawn as if
@@ -202,9 +203,8 @@ public class MappingTreeView extends JTree {
                           null,lists.toArray(),null);
         if (null != result) {
           OClass oc = (OClass) source;
-          oc.getOntology().getURL();
           MappingNode mn = new MappingNode((String)result,
-              oc.getOntology().getURL().toString(),
+              oc.getOntology().getOntologyURL().toString(),
               node.toString());
           mapping.add(mn);
           ClassNode cn = new ClassNode(mn);
