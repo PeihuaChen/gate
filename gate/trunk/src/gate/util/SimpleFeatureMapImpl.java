@@ -20,25 +20,18 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Set;
 import java.util.Vector;
-
-import com.ontotext.gate.ontology.OntologyImpl;
-
 import gate.FeatureMap;
-import gate.creole.ontology.Taxonomy;
+import gate.creole.ontology.OClass;
+import gate.creole.ontology.OConstants;
+import gate.creole.ontology.Ontology;
+import gate.creole.ontology.OntologyUtilities;
 import gate.event.FeatureMapListener;
 
 /** Simple case of features. */
-//>>> DAM: was (derived from HashMap)
-/*
-public class SimpleFeatureMapImpl  extends HashMap implements FeatureMap
-*/
-//=== DAM: FeatArray optimization, now derived from SimpleMapImpl
-public class SimpleFeatureMapImpl
+public class SimpleFeatureMapImpl 
     extends SimpleMapImpl
-//    extends HashMap
     implements FeatureMap, java.io.Serializable, java.lang.Cloneable,
     gate.creole.ANNIEConstants
-//>>> DAM: end
 {
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -132,7 +125,7 @@ public class SimpleFeatureMapImpl
    * @return <code>true</code> if <b>this</b> includes aFeatureMap
    * and <code>false</code> if not.
    */
-  public boolean subsumes(Taxonomy ontologyLR, FeatureMap aFeatureMap) {
+  public boolean subsumes(Ontology ontologyLR, FeatureMap aFeatureMap) {
 
     if (ontologyLR == null) {
       return this.subsumes(aFeatureMap);
@@ -172,16 +165,16 @@ public class SimpleFeatureMapImpl
 
           try {
 
+            // lets first find out the classes with the names
+            OClass superClass = (OClass) ontologyLR.getOResourceByName(keyValueFromAFeatureMap.toString());
+            OClass subClass = (OClass) ontologyLR.getOResourceByName(keyValueFromThis.toString());
             if (DEBUG) {
               Out.prln("\nClass in rule: " + keyValueFromAFeatureMap.toString());
               Out.prln("\nClass in annotation: " + keyValueFromThis.toString());
-              Out.prln("\nisSubClassOf: " +
-                       ontologyLR.isSubClassOf(keyValueFromAFeatureMap.toString(),
-                                               keyValueFromThis.toString()));
+              Out.prln("\nisSubClassOf: " + subClass.isSubClassOf(superClass, OConstants.TRANSITIVE_CLOSURE));
             }
 
-            return ontologyLR.isSubClassOf(keyValueFromAFeatureMap.toString(),
-                                           keyValueFromThis.toString());
+            return subClass.isSubClassOf(superClass, OConstants.TRANSITIVE_CLOSURE);
           } catch (Exception ex) {
             throw new gate.util.GateRuntimeException(ex);
           }
@@ -374,9 +367,10 @@ public class SimpleFeatureMapImpl
       since the behaviour behind the getOntology method is
       certainly static.
       : should be temporary */
-      Taxonomy o = new OntologyImpl().getOntology(url);
-
-      result = o.isSubClassOf(value1, value2);
+      Ontology o = OntologyUtilities.getOntology(url);
+      OClass superClass = (OClass) o.getOResourceByName(value1);
+      OClass subClass = (OClass) o.getOResourceByName(value2);
+      result = subClass.isSubClassOf(superClass, OConstants.TRANSITIVE_CLOSURE);
 
     } catch  (gate.creole.ResourceInstantiationException x) {
       x.printStackTrace(Err.getPrintWriter());
