@@ -37,8 +37,6 @@ import gate.creole.ontology.*;
 import gate.util.*;
 import gate.*;
 
-import com.ontotext.gate.ontology.*;
-
 /**
   * An individual annotation/attributes/values/operator expression. 
   * It doesn't extend PatternElement, even though it has to "match", because a 
@@ -709,17 +707,17 @@ implements JapeConstants, gate.creole.ANNIEConstants, java.io.Serializable, Clon
       since the behaviour behind the getOntology method is
       certainly static.
       : should be temporary */
-      Taxonomy o = new OntologyImpl().getOntology(url);
+      Ontology o = OntologyUtilities.getOntology(url);
 
-      TClass c1 = o.getClassByName(value1);
-      TClass c2 = o.getClassByName(value2);
+      OClass c1 = (OClass) o.getResourceByName(value1);
+      OClass c2 = (OClass) o.getResourceByName(value2);
 
       if (null!= c1 && null!= c2) {
         if (c1.equals(c2)) {
           result = true;
         } else {
           Set subs1;
-          subs1 = c1.getSubClasses(OClass.TRANSITIVE_CLOSURE);
+          subs1 = c1.getSubClasses(OConstants.TRANSITIVE_CLOSURE);
           if (subs1.contains(c2))
             result = true;
         } // else
