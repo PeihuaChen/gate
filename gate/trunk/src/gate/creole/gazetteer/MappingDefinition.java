@@ -26,20 +26,22 @@ import gate.creole.ResourceInstantiationException;
 public class MappingDefinition extends gate.creole.AbstractLanguageResource
                               implements List {
 
+  private static final long serialVersionUID = 3617291212063848503L;
+
   /** the default encoding of the mapping */
   private final static String ENCODING = "UTF-8";
 
   /** the list of nodes */
-  private List nodes = new ArrayList();
+  private List<MappingNode> nodes = new ArrayList<MappingNode>();
 
   /** the url of the mapping definition */
   private URL url;
 
   /** set of gaz lists */
-  private Set lists = new HashSet();
+  private Set<String> lists = new HashSet<String>();
 
   /** mapping between a list and a node */
-  private Map nodesByList = new HashMap();
+  private Map<String, MappingNode> nodesByList = new HashMap<String, MappingNode>();
 
 
   /** Creates a new mapping definition */
@@ -48,12 +50,12 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
 
   /**Gets the urls from this definition
    * @return a list of all the ontology urls present in this mapping def   */
-  public List getUrls() {
-    Set result = new HashSet();
+  public List<String> getUrls() {
+    Set<String> result = new HashSet<String>();
     for ( int i = 0 ; i < nodes.size() ; i++ ) {
-      result.add(((MappingNode)nodes.get(i)).getOntologyID());
+      result.add(nodes.get(i).getOntologyID());
     } // for
-    return new ArrayList(result);
+    return new ArrayList<String>(result);
   }  // getUrls()
 
   /** Gets the url of this definition
@@ -125,8 +127,8 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
    * Gets the gaz lists.
    * @return set of the gazetteer lists
    */
-  public Set getLists() {
-    return new HashSet(lists);
+  public Set<String> getLists() {
+    return new HashSet<String>(lists);
   }
 
   /**
@@ -135,7 +137,7 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
    * @return the mapping node that matches the list
    */
   public MappingNode getNodeByList(String list) {
-    return (MappingNode)nodesByList.get(list);
+    return nodesByList.get(list);
   }
 
   /*---implementation of interface java.util.List---*/
@@ -174,8 +176,8 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
     if (o instanceof MappingNode) {
       String list = ((MappingNode)o).getList();
       if (!nodesByList.containsKey(list)) {
-        result = nodes.add(o);
-        nodesByList.put(list,o);
+        result = nodes.add((MappingNode)o);
+        nodesByList.put(list,(MappingNode)o);
         lists.add(list);
       } // if unique
     } // if a linear node
@@ -191,8 +193,8 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
     if (o instanceof MappingNode) {
       String list = ((MappingNode)o).getList();
       if (!nodesByList.containsKey(list)) {
-        nodes.add(index,o);
-        nodesByList.put(list,o);
+        nodes.add(index,(MappingNode)o);
+        nodesByList.put(list,(MappingNode)o);
         lists.add(list);
       } // if unique
     } // if a linear node

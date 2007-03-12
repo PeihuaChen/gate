@@ -34,6 +34,8 @@ import gate.creole.ResourceInstantiationException;
 public class LinearDefinition extends gate.creole.AbstractLanguageResource
                               implements List {
 
+  private static final long serialVersionUID = 4050479036709221175L;
+
   /** the default encoding of the definition */
   private final static String ENCODING = "UTF-8";
 
