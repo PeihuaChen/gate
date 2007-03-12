@@ -1,351 +1,621 @@
-/* Ontology.java
+/*
+ *  Ontology.java
  *
- * Copyright (c) 1998-2005, The University of Sheffield.
- *
- * This file is part of GATE (see http://gate.ac.uk/), and is free
- * software, licenced under the GNU Library General Public License,
- * Version 2, June1991.
- *
- * A copy of this licence is included in the distribution in the file
- * licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *
- * Kalina Bontcheva 03/2003
- *
+ *  Niraj Aswani, 09/March/07
  *
  *  $Id$
  */
 package gate.creole.ontology;
 
+import gate.LanguageResource;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
+import java.net.URL;
+import java.util.List;
 import java.util.Set;
+import org.openrdf.sesame.repository.SesameRepository;
 
 /**
- * This is the base interface for all concrete implementations of ontologies.
+ * This is the base interface for all concrete implementations of
+ * ontologies.
  */
-public interface Ontology extends Taxonomy {
+public interface Ontology extends LanguageResource {
+  // *****************************
+  // Ontology related methods and not specific to its members (e.g.
+  // classes,
+  // properties and so on)
+  // *****************************
   /**
-   * Creates a new OClass and returns it.
-   * 
-   * @param aName
-   *          the name of this class
-   * @param aComment
-   *          the comment of this class
-   * @return the newly created class
+   * This method removes the entire data from the ontology and emptys
+   * it.
    */
-  public OClass createClass(String aName, String aComment);
+  public void cleanOntology();
 
   /**
-   * Adds an instance to the ontology.
+   * The data from ontology repository is retrieved in the specified
+   * format. (@see OntologyConstants)
    * 
-   * @param name
-   *          the name for the new instance
+   * @param format
+   * @return
+   */
+  public String getOntologyData(byte format);
+
+  /**
+   * Exports the ontology data into the provided format to the provided
+   * output stream.
+   * 
+   * @param out
+   * @param format <@see OConstants>
+   */
+  public void writeOntologyData(OutputStream out, byte format);
+
+  /**
+   * Exports the ontology data into the provided format using the
+   * provided writer.
+   * 
+   * @param out
+   * @param format
+   */
+  public void writeOntologyData(Writer out, byte format);
+
+  /**
+   * Gets the url of this ontology
+   * 
+   * @return the url of this ontology
+   */
+  public URL getOntologyURL();
+
+  /**
+   * Set the url of this ontology
+   * 
+   * @param aUrl the url to be set
+   */
+  public void setOntologyURL(URL aUrl);
+
+  /**
+   * Saves the ontology in the provided File
+   */
+  public void store(File newOntology) throws IOException;
+
+  /**
+   * Sets the default name space, which is (by default) used for the
+   * newly created resources.
+   * 
+   * @param theURI the URI to be set
+   */
+  public void setDefaultNameSpace(String aNameSpace);
+
+  /**
+   * Gets the default name space for this ontology. The defaultNameSpace
+   * is (by default) used for the newly created resources.
+   * 
+   * @return a String value.
+   */
+  public String getDefaultNameSpace();
+
+  /**
+   * Sets version to this ontology.
+   * 
+   * @param theVersion the version to be set
+   */
+  public void setVersion(String theVersion);
+
+  /**
+   * Gets the version of this ontology.
+   * 
+   * @return the version of this ontology
+   */
+  public String getVersion();
+
+  // *****************************
+  // OClass methods
+  // *****************************
+  /**
+   * Creates a new OClass and adds it the ontology.
+   * 
+   * @param aURI URI of this class
+   * @return the newly created class or an existing class if available
+   *         with the same URI.
+   */
+  public OClass addOClass(URI aURI);
+
+  /**
+   * Retrieves a class by its URI.
+   * 
+   * @param theClassURI the URI of the class
+   * @return the class matching the name or null if no matches.
+   */
+  public OClass getOClass(URI theClassURI);
+
+  /**
+   * Removes a class from this ontology.
+   * 
+   * @param theClass the class to be removed
+   * @return
+   */
+  public void removeOClass(OClass theClass);
+
+  /**
+   * Checks whether the provided URI is a type of RDFS.CLASS or
+   * OWL.CLASS and that the ontology contains this class.
+   * 
+   * @param theURI
+   * @return true, if the class exists and is a type of RDFS.CLASS or
+   *         OWL.CLASS, otherwise - false.
+   */
+  public boolean containsOClass(URI theURI);
+
+  /**
+   * Checks whether the ontology contains this class or not.
+   * 
    * @param theClass
-   *          the class to which the instance belongs
-   * @return the OInstance that has been added to the ontology
+   * @return true, if the class exists, otherwise - false.
    */
-  public OInstance addInstance(String name, OClass theClass);
+  public boolean containsOClass(OClass theClass);
 
   /**
-   * Adds a preconstructed instance to the ontology.
+   * Retrieves all classes as a set.
+   * 
+   * @param top If set to true, only returns those classes with no super
+   *          classes, otherwise - a set of all classes.
+   * @return set of all the classes in this ontology
    */
-  public OInstance addInstance(OInstance theInstance);
+  public Set<OClass> getOClasses(boolean top);
+
+  /**
+   * Gets the taxonomic distance between 2 classes.
+   * 
+   * @param class1 the first class
+   * @param class2 the second class
+   * @return the taxonomic distance between the 2 classes
+   */
+  public int getDistance(OClass class1, OClass class2);
+
+  // *****************************
+  // OInstance methods
+  // *****************************
+  /**
+   * Creates a new OInstance and returns it.
+   * 
+   * @param theURI the URI for the new instance.
+   * @param theClass the class to which the instance belongs.
+   * @return the OInstance that has been added to the ontology.
+   */
+  public OInstance addOInstance(URI theInstanceURI, OClass theClass);
 
   /**
    * Removes the instance from the ontology.
    * 
-   * @param theInstance
-   *          to be removed
+   * @param theInstance to be removed
    */
-  public void removeInstance(OInstance theInstance);
+  public void removeOInstance(OInstance theInstance);
 
   /**
    * Gets all instances in the ontology.
    * 
    * @return a {@link Set} of OInstance objects
    */
-  public Set getInstances();
+  public Set<OInstance> getOInstances();
 
   /**
-   * Gets all instances in the ontology, which belong to this class, including
-   * instances of sub-classes. If only the instances of the given class are
-   * needed, then use getDirectInstances.
+   * Gets instances in the ontology, which belong to this class. If only
+   * the instances of the given class are needed, then the value of
+   * direct should be set to true.
    * 
-   * @param theClass
-   *          the class of the instances
+   * @param theClass the class of the instances
+   * @param closure either DIRECT_CLOSURE or TRANSITIVE_CLOSURE of
+   *          {@link OConstants}
+   * 
    * @return {@link Set} of OInstance objects
    */
-  public Set getInstances(OClass theClass);
+  public Set<OInstance> getOInstances(OClass theClass, byte closure);
 
   /**
-   * Gets all instances in the ontology, which belong to the given class only.
+   * Gets the instance with the given URI.
    * 
-   * @param theClass
-   *          the class of the instances
-   * @return {@link Set} of OInstance objects
+   * @param theInstanceURI the instance URI
+   * @return the OInstance object with this URI. If there is no such
+   *         instance then null.
    */
-  public Set getDirectInstances(OClass theClass);
+  public OInstance getOInstance(URI theInstanceURI);
 
   /**
-   * Gets the instance with the given name.
+   * Checks whether the provided Instance exists in the ontology.
    * 
-   * @param instanceName
-   *          the instance name
-   * @return the OInstance object with this name
+   * @param theInstance
+   * @return true, if the Instance exists in ontology, otherwise -
+   *         false.
    */
-  public OInstance getInstanceByName(String instanceName);
+  public boolean containsOInstance(OInstance theInstance);
 
   /**
-   * A method to remove the existing propertyDefinition
+   * Checks whether the provided URI refers to an Instance that exists
+   * in the ontology.
    * 
-   * @param property
+   * @param theInstanceURI
+   * @return true, if the URI exists in ontology and refers to an
+   *         Instance, otherwise - false.
    */
-  public void removePropertyDefinition(Property property);
+  public boolean containsOInstance(URI theInstanceURI);
+
+  // *****************************
+  // Property definitions methods
+  // *****************************
+  /**
+   * Creates a new RDFProperty.
+   * 
+   * @param aPropertyURI URI of the property to be added into the
+   *          ontology.
+   * @param domain a set of {@link OResource} (e.g. a Class, a Property
+   *          etc.).
+   * @param range a set of {@link OResource} (e.g. a Class, a Property
+   *          etc.).
+   */
+  public RDFProperty addRDFProperty(URI aPropertyURI, Set<OResource> domain,
+          Set<OResource> range);
 
   /**
-   * Creates a new Datatype property in this ontology where the domain consists
-   * of a single {@link OClass}.
+   * Gets the set of RDF Properties in the ontology where for a property
+   * there exists a statement <theProperty, RDF:Type, RDF:Property>.
    * 
-   * @param name
-   *          the name for the new property.
-   * @param comment
-   *          the comment for the new property.
-   * @param domain
-   *          the {@link OClass} to which this property applies.
-   * @param range
-   *          the {@link Class} specifying the types of Java objects that this
-   *          property has as values.
-   * @return the newly created property.
+   * @return a {@link Set} of {@link Property}.
    */
-  public DatatypeProperty addDatatypeProperty(String name, String comment,
-          OClass domain, Class range);
+  public Set<RDFProperty> getRDFProperties();
+
+  /**
+   * Checkes whether there exists a statement <thePropertyURI, RDF:Type,
+   * RDF:Property> in the ontology or not.
+   * 
+   * @param thePropertyURI
+   * @return true, only if there exists the above statement, otherwise -
+   *         false.
+   */
+  public boolean isRDFProperty(URI thePropertyURI);
+
+  /**
+   * Creates a new AnnotationProperty.
+   * 
+   * @param aPropertyURI URI of the property to be added into the
+   *          ontology.
+   */
+  public AnnotationProperty addAnnotationProperty(URI aPropertyURI);
+
+  /**
+   * Gets the set of Annotation Properties in the ontology where for a
+   * property there exists a statement <theProperty, RDF:Type,
+   * OWL:AnnotationProperty>.
+   * 
+   * @return a {@link Set} of {@link AnnotationProperty}.
+   */
+  public Set<AnnotationProperty> getAnnotationProperties();
+
+  /**
+   * Checkes whether there exists a statement <thePropertyURI, RDF:Type,
+   * OWL:AnnotationProperty> in the ontology or not.
+   * 
+   * @param thePropertyURI
+   * @return true, only if there exists the above statement, otherwise -
+   *         false.
+   */
+  public boolean isAnnotationProperty(URI thePropertyURI);
 
   /**
    * Create a DatatypeProperty with the given domain and range.
    * 
-   * @param name
-   *          the name for the new property.
-   * @param comment
-   *          the comment for the new property.
-   * @param domain
-   *          the set of ontology classes (i.e. {@link OClass} objects} that
-   *          constitutes the range for the new property. The property only
-   *          applies to instances that belong to <b>all</b> classes included
-   *          in its domain. An empty set means that the property applies to
-   *          instances of any class.
-   * @param range
-   *          the {@link Class} specifying the types of Java objects that this
-   *          property has as values.
+   * @param aPropertyURI the URI for the new property.
+   * @param domain the set of ontology classes (i.e. {@link OClass}
+   *          objects} that constitutes the range for the new property.
+   *          The property only applies to instances that belong to
+   *          <b>all</b> classes included in its domain. An empty set
+   *          means that the property applies to instances of any class.
+   * @param range the range specifying the {@link DataType} of a value
+   *          that this property can have.
    * @return the newly created property.
    */
-  public DatatypeProperty addDatatypeProperty(String name, String comment,
-          Set domain, Class range);
+  public DatatypeProperty addDatatypeProperty(URI aPropertyURI,
+          Set<OClass> domain, DataType aDatatype);
 
   /**
-   * Add a Datatype Property
+   * Gets the set of Datatype Properties in the ontology.
    * 
-   * @author niraj
-   * @param properity
+   * @return a {@link Set} of {@link DatatypeProperty}.
    */
-  public DatatypeProperty addDatatypeProperty(DatatypeProperty properity);
+  public Set<DatatypeProperty> getDatatypeProperties();
 
   /**
-   * Creates a new generic property that is neither datatype or object property.
-   * This can be for instance a RDF property.
+   * Checkes whether there exists a statement <thePropertyURI, RDF:Type,
+   * OWL:DatatypeProperty> in the ontology or not.
    * 
-   * @param name
-   *          the name for the new property.
-   * @param comment
-   *          the comment for the new property.
-   * @param domain
-   *          the set of ontology classes (i.e. {@link OClass} objects} that
-   *          constitutes the range for the new property. The property only
-   *          applies to instances that belong to <b>all</b> classes included
-   *          in its domain. An empty set means that the property applies to
-   *          instances of any class.
-   * @param range
-   *          the set of ontology classes (i.e. {@link OClass} objects} that
-   *          constitutes the range for the new property.
+   * @param thePropertyURI
+   * @return true, only if there exists the above statement, otherwise -
+   *         false.
+   */
+  public boolean isDatatypeProperty(URI thePropertyURI);
+
+  /**
+   * Creates a new object property (a property that takes instances as
+   * values).
+   * 
+   * @param aPropertyURI the URI for the new property.
+   * @param domain the set of ontology classes (i.e. {@link OClass}
+   *          objects} that constitutes the range for the new property.
+   *          The property only applies to instances that belong to
+   *          <b>all</b> classes included in its domain. An empty set
+   *          means that the property applies to instances of any class.
+   * @param range the set of ontology classes (i.e. {@link OClass}
+   *          objects} that constitutes the range for the new property.
    * @return the newly created property.
    */
-  public Property addProperty(String name, String comment, Set domain, Set range);
+  public ObjectProperty addObjectProperty(URI aPropertyURI, Set<OClass> domain,
+          Set<OClass> range);
 
   /**
-   * Creates a new generic property that is neither datatype or object property.
-   * This can be for instance a RDF property.
+   * Gets the set of Object Properties in the ontology.
    * 
-   * @param name
-   *          the name for the new property.
-   * @param comment
-   *          the comment for the new property.
-   * @param domain
-   *          the {@link OClass} defining the type of instances this property
-   *          can apply to.
-   * @param range
-   *          Java {@link Class} defining the type of values this proeprty can
-   *          take.
+   * @return a {@link Set} of {@link ObjectProperty}.
+   */
+  public Set<ObjectProperty> getObjectProperties();
+
+  /**
+   * Checkes whether there exists a statement <thePropertyURI, RDF:Type,
+   * OWL:ObjectProperty> in the ontology or not.
+   * 
+   * @param thePropertyURI
+   * @return true, only if there exists the above statement, otherwise -
+   *         false.
+   */
+  public boolean isObjectProperty(URI thePropertyURI);
+
+  /**
+   * Creates a new symmetric property (an object property that is
+   * symmetric).
+   * 
+   * @param aPropertyURI the URI for the new property.
+   * @param domainAndRange the set of ontology classes (i.e.
+   *          {@link OClass} objects} that constitutes the domain and
+   *          the range for the new property. The property only applies
+   *          to instances that belong to <b>all</b> classes included
+   *          in its domain. An empty set means that the property
+   *          applies to instances of any class.
    * @return the newly created property.
    */
-  public Property addProperty(String name, String comment, OClass domain,
-          Class range);
+  public SymmetricProperty addSymmetricProperty(URI aPropertyURI,
+          Set<OClass> domainAndRange);
 
   /**
-   * Add a Property
+   * Gets the set of Symmetric Properties in the ontology.
    * 
-   * @author niraj
-   * @param properity
+   * @return a {@link Set} of {@link SymmetricProperty}.
    */
-  public Property addProperty(Property properity);
+  public Set<SymmetricProperty> getSymmetricProperties();
 
   /**
-   * Creates a new object property (a property that takes instances as values).
+   * Checkes whether there exists a statement <thePropertyURI, RDF:Type,
+   * OWL:SymmetricProperty> in the ontology or not.
    * 
-   * @param name
-   *          the name for the new property.
-   * @param comment
-   *          the comment for the new property.
-   * @param domain
-   *          the set of ontology classes (i.e. {@link OClass} objects} that
-   *          constitutes the range for the new property. The property only
-   *          applies to instances that belong to <b>all</b> classes included
-   *          in its domain. An empty set means that the property applies to
-   *          instances of any class.
-   * @param range
-   *          the set of ontology classes (i.e. {@link OClass} objects} that
-   *          constitutes the range for the new property.
+   * @param thePropertyURI
+   * @return true, only if there exists the above statement, otherwise -
+   *         false.
+   */
+  public boolean isSymmetricProperty(URI thePropertyURI);
+
+  /**
+   * Creates a new transitive property (an object property that is
+   * transitive).
+   * 
+   * @param aPropertyURI the URI for the new property.
+   * @param domain the set of ontology classes (i.e. {@link OClass}
+   *          objects} that constitutes the range for the new property.
+   *          The property only applies to instances that belong to
+   *          <b>all</b> classes included in its domain. An empty set
+   *          means that the property applies to instances of any class.
+   * @param range the set of ontology classes (i.e. {@link OClass}
+   *          objects} that constitutes the range for the new property.
    * @return the newly created property.
    */
-  public ObjectProperty addObjectProperty(String name, String comment,
-          Set domain, Set range);
+  public TransitiveProperty addTransitiveProperty(URI aPropertyURI,
+          Set<OClass> domain, Set<OClass> range);
 
   /**
-   * Creates a new object property (a property that takes instances as values).
+   * Gets the set of Transitive Properties in the ontology.
    * 
-   * @param name
-   *          the name for the new property.
-   * @param comment
-   *          the comment for the new property.
-   * @param domain
-   *          the {@link OClass} to which this property applies.
-   * @param range
-   *          the {@link OClass} specifying the types of instances that this
-   *          property can take as values.
-   * @return the newly created property.
+   * @return a {@link Set} of {@link TransitiveProperty}.
    */
-  public ObjectProperty addObjectProperty(String name, String comment,
-          OClass domain, OClass range);
+  public Set<TransitiveProperty> getTransitiveProperties();
 
   /**
-   * Add an Object Property
+   * Checkes whether there exists a statement <thePropertyURI, RDF:Type,
+   * OWL:TransitiveProperty> in the ontology or not.
    * 
-   * @author niraj
-   * @param properity
+   * @param thePropertyURI
+   * @return true, only if there exists the above statement, otherwise -
+   *         false.
    */
-  public ObjectProperty addObjectProperty(ObjectProperty properity);
+  public boolean isTransitiveProperty(URI thePropertyURI);
 
   /**
-   * Creates a new symmetric property (an object property that is symmetric).
+   * Gets the set of RDF, Object, Datatype, Symmetric and Transitive
+   * property definitions in this ontology.
    * 
-   * @param name
-   *          the name for the new property.
-   * @param comment
-   *          the comment for the new property.
-   * @param domain
-   *          the set of ontology classes (i.e. {@link OClass} objects} that
-   *          constitutes the range for the new property. The property only
-   *          applies to instances that belong to <b>all</b> classes included
-   *          in its domain. An empty set means that the property applies to
-   *          instances of any class.
-   * @param range
-   *          the set of ontology classes (i.e. {@link OClass} objects} that
-   *          constitutes the range for the new property.
-   * @return the newly created property.
+   * @return a {@link Set} of {@link RDFProperty},
+   *         {@link DatatypeProperty}, {@link ObjectProperty},
+   *         {@link TransitiveProperty} and , {@link SymmetricProperty}
+   *         objects. <B>Please note that the method does not include
+   *         annotation properties</B>.
    */
-  public SymmetricProperty addSymmetricProperty(String name, String comment,
-          Set domain, Set range);
+  public Set<RDFProperty> getPropertyDefinitions();
 
   /**
-   * Creates a new symmetric property.
+   * Returns the property definition for a given property. This does not
+   * include Annotation properties.
    * 
-   * @param name
-   *          the name for the new property.
-   * @param comment
-   *          the comment for the new property.
-   * @param domain
-   *          the {@link OClass} to which this property applies.
-   * @param range
-   *          the {@link OClass} specifying the types of instances that this
-   *          property can take as values.
-   * @return the newly created property.
+   * @param thePropertyURI the URI for which the definition is sought.
+   * @return a {@link Property} object.
    */
-  public SymmetricProperty addSymmetricProperty(String name, String comment,
-          OClass domain, OClass range);
+  public RDFProperty getProperty(URI thePropertyURI);
 
   /**
-   * Add a Transitive Property
+   * A method to remove the existing propertyDefinition (exclusive of
+   * Annotation Property).
    * 
-   * @author niraj
-   * @param properity
+   * @param theProperty
    */
-  public SymmetricProperty addSymmetricProperty(SymmetricProperty properity);
+  public void removeProperty(RDFProperty theProperty);
+
+  // *****************************
+  // Ontology Modification Events
+  // *****************************
+  /**
+   * Sets the modified flag.
+   * 
+   * @param isModified sets this param as a value of the modified
+   *          property of the ontology
+   */
+  public void setModified(boolean isModified);
 
   /**
-   * Creates a new transitive property (an object property that is transitive).
+   * Checks the modified flag.
    * 
-   * @param name
-   *          the name for the new property.
-   * @param comment
-   *          the comment for the new property.
-   * @param domain
-   *          the set of ontology classes (i.e. {@link OClass} objects} that
-   *          constitutes the range for the new property. The property only
-   *          applies to instances that belong to <b>all</b> classes included
-   *          in its domain. An empty set means that the property applies to
-   *          instances of any class.
-   * @param range
-   *          the set of ontology classes (i.e. {@link OClass} objects} that
-   *          constitutes the range for the new property.
-   * @return the newly created property.
+   * @return whether the ontology has been modified after the loading
    */
-  public TransitiveProperty addTransitiveProperty(String name, String comment,
-          Set domain, Set range);
+  public boolean isModified();
 
   /**
-   * Creates a new transitive property.
+   * Register the Ontology Modification Listeners
    * 
-   * @param name
-   *          the name for the new property.
-   * @param comment
-   *          the comment for the new property.
-   * @param domain
-   *          the {@link OClass} to which this property applies.
-   * @param range
-   *          the {@link OClass} specifying the types of instances that this
-   *          property can take as values.
-   * @return the newly created property.
+   * @param oml
    */
-  public TransitiveProperty addTransitiveProperty(String name, String comment,
-          OClass domain, OClass range);
+  public void addOntologyModificationListener(OntologyModificationListener oml);
 
   /**
-   * Add a Transitive Property
+   * Removed the registered ontology modification listeners
    * 
-   * @author niraj
-   * @param properity
+   * @param oml
    */
-  public TransitiveProperty addTransitiveProperty(TransitiveProperty properity);
+  public void removeOntologyModificationListener(
+          OntologyModificationListener oml);
 
   /**
-   * Gets the set of all known property definitions in this ontology.
+   * A method to invoke when the ontology is modified
    * 
-   * @return a {@link Set} of {@link Property} objects.
+   * @param resource
+   * @param eventType
    */
-  public Set getPropertyDefinitions();
+  public void fireOntologyModificationEvent(OResource resource, int eventType);
 
   /**
-   * Returns the property definition for a given property.
+   * A Method to invoke an event for newly added ontology resource
    * 
-   * @param name
-   *          the name for which the definition is sought.
-   * @return a{@link Property} object.
+   * @param resource
    */
-  public Property getPropertyDefinitionByName(String name);
+  public void fireOntologyResourceAdded(OResource resource);
+
+  /**
+   * A Method to invoke an event for a removed ontology resource
+   * 
+   * @param resource
+   */
+  public void fireOntologyResourcesRemoved(String[] resources);
+
+  // *************************
+  // Sesame Repository methods
+  // *************************
+  /**
+   * Start the transaction before additing statements.
+   */
+  public void startTransaction();
+
+  /**
+   * Commits all the transaction (so far included after the call to
+   * start transaction) into the repository.
+   */
+  public void commitTransaction();
+
+  /**
+   * Checks whether the transation is already started.
+   * 
+   * @return
+   */
+  public boolean transationStarted();
+
+  /**
+   * Returns the repository created for this particular instance of the
+   * ontology.
+   * 
+   * @return
+   */
+  public SesameRepository getSesameRepository();
+
+  /**
+   * Returns the ID of a Sesame Repository created for this particular
+   * instance of the ontology.
+   * 
+   * @return
+   */
+  public String getSesameRepositoryID();
+
+  /**
+   * Given a URI object, this method returns its equivalent object
+   * 
+   * @param uri
+   * @return
+   */
+  public OResource getOResourceFromMap(String uri);
+
+  /**
+   * Adds the resource to central map
+   * 
+   * @param uri
+   * @param resource
+   */
+  public void addOResourceToMap(String uri, OResource resource);
+
+  /**
+   * Removes the resource from the central map
+   * 
+   * @param uri
+   */
+  public void removeOResourceFromMap(String uri);
+
+  /**
+   * This method checks in its cache to find out the OResource for the
+   * given resource name. However, It is also possible for two resources
+   * to have a same name but different name spaces. This method returns
+   * the first found OResource (without gurantteeing the order) from its
+   * list. If user wants to retrieve a list of resources, he/she must
+   * use the getOResourcesByName(String resourceName).
+   * 
+   * @param resourceName
+   * @return
+   */
+  public OResource getOResourceByName(String resourceName);
+
+  /**
+   * This method checks in its cache to find out the OResources for the
+   * given resource name. It is possible for two resources to have a
+   * same name but different name spaces. This method returns a list of
+   * resources with the common name. Please note that deleting an
+   * instance from this list (e.g. list.remove(int/Object)) does not
+   * delete the resource from an ontology. One must use appropriate
+   * method from the Ontology interface to delete such resources.
+   * 
+   * @param resourceName
+   * @return
+   */
+  public List<OResource> getOResourcesByName(String resourceName);
+
+  /**
+   * This method returns a list of OResources from the
+   * ontology. Please note that deleting an instance from this list
+   * (e.g. list.remove(int/Object)) does not delete the resource from an
+   * ontology. One must use appropriate method from the Ontology
+   * interface to delete such resources.
+   * 
+   * @return
+   */
+  public List<OResource> getAllResources();
+
 }
