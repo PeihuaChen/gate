@@ -1,3 +1,10 @@
+/*
+ *  DeleteOntologyResourceAction.java
+ *
+ *  Niraj Aswani, 09/March/07
+ *
+ *  $Id: DeleteOntologyResourceAction.html,v 1.0 2007/03/09 16:13:01 niraj Exp $
+ */
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
@@ -8,34 +15,51 @@ import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+/**
+ * Action to delete a resource from ontology.
+ * @author niraj
+ *
+ */
 public class DeleteOntologyResourceAction extends AbstractAction implements
                                                                 TreeNodeSelectionListener {
+  private static final long serialVersionUID = 3257289136439439920L;
+
   public DeleteOntologyResourceAction(String caption, Icon icon) {
     super(caption, icon);
-    selectedNodes = new ArrayList();
+    selectedNodes = new ArrayList<DefaultMutableTreeNode>();
   }
 
   public void actionPerformed(ActionEvent actionevent) {
-    int i = JOptionPane.showConfirmDialog(MainFrame.getInstance(), "Are you sure?");
+    ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(
+            this.selectedNodes);
+
+    int i = JOptionPane.showConfirmDialog(MainFrame.getInstance(), "Are you sure?",
+            "Resource deleting action", JOptionPane.YES_NO_OPTION);
     if(i != 0) return;
     for(int j = 0; j < selectedNodes.size(); j++) {
       DefaultMutableTreeNode defaultmutabletreenode = (DefaultMutableTreeNode)selectedNodes
               .get(j);
       Object obj = defaultmutabletreenode.getUserObject();
-      if(obj instanceof TClass) {
-        if(ontology.containsClassByName(((TClass)obj).getName()))
-          ontology.removeClass((TClass)obj);
-        continue;
+      try {
+        if(obj instanceof OClass) {
+          if(ontology.containsOClass(((OClass)obj).getURI()))
+            ontology.removeOClass((OClass)obj);
+          continue;
+        }
+        if(obj instanceof OInstance) {
+          if(ontology.getOInstance(((OInstance)obj).getURI()) != null)
+            ontology.removeOInstance((OInstance)obj);
+          continue;
+        }
+        if((obj instanceof RDFProperty)
+                && ontology.getProperty(((RDFProperty)obj).getURI()) != null)
+          ontology.removeProperty((RDFProperty)obj);
       }
-      if(obj instanceof OInstance) {
-        if(ontology.getInstanceByName(((OInstance)obj).getName()) != null)
-          ontology.removeInstance((OInstance)obj);
-        continue;
+      catch(Exception re) {
+        JOptionPane.showMessageDialog(MainFrame.getInstance(), "The Resource "
+                + ((OResource)obj).getURI() + " could not be deleted \n"
+                + "because : \n" + "It is not an explicit resource!");
       }
-      if((obj instanceof Property)
-              && ontology
-                      .getPropertyDefinitionByName(((Property)obj).getName()) != null)
-        ontology.removePropertyDefinition((Property)obj);
     }
   }
 
@@ -47,11 +71,11 @@ public class DeleteOntologyResourceAction extends AbstractAction implements
     ontology = ontology1;
   }
 
-  public void selectionChanged(ArrayList arraylist) {
+  public void selectionChanged(ArrayList<DefaultMutableTreeNode> arraylist) {
     selectedNodes = arraylist;
   }
 
   protected Ontology ontology;
 
-  protected ArrayList selectedNodes;
+  protected ArrayList<DefaultMutableTreeNode> selectedNodes;
 }

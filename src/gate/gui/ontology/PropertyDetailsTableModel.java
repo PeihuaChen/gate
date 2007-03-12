@@ -1,15 +1,33 @@
+/*
+ *  PropertyDetailsTableModel.java
+ *
+ *  Niraj Aswani, 09/March/07
+ *
+ *  $Id: PropertyDetailsTableModel.html,v 1.0 2007/03/09 16:13:01 niraj Exp $
+ */
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
 import java.util.*;
 import javax.swing.table.AbstractTableModel;
 
+/**
+ * A DataModel that is created when a node is selected in the ontology property
+ * tree. It contains information such as direct/all sub/super properties,
+ * equivalent properties, domain/range of each property and property values and so on.
+ * The information from this model is then shown in the right hand side
+ * panel of the ontology editor.
+ * 
+ * @author niraj
+ * 
+ */
 public class PropertyDetailsTableModel extends AbstractTableModel {
   public PropertyDetailsTableModel() {
     directSuperProps = new DetailsGroup("Direct Super Properties", true, null);
     allSuperProps = new DetailsGroup("All Super Properties", true, null);
     directSubProps = new DetailsGroup("Direct Sub Properties", true, null);
     allSubProps = new DetailsGroup("All Sub Properties", true, null);
+    equivalentProps = new DetailsGroup("Equivalent Properties", true, null);
     domain = new DetailsGroup("Domain", true, null);
     range = new DetailsGroup("Range", true, null);
     detailGroups = new DetailsGroup[0];
@@ -39,9 +57,9 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
 
   public Class getColumnClass(int i) {
     switch(i){
-      case 0: 
+      case 0:
         return Boolean.class;
-      case 1: 
+      case 1:
         return Object.class;
     }
     return Object.class;
@@ -75,10 +93,10 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
   public Object getValueAt(int i, int j) {
     Object obj = getItemForRow(i);
     switch(j){
-      case 0: 
+      case 0:
         return (obj instanceof DetailsGroup) ? new Boolean(((DetailsGroup)obj)
                 .isExpanded()) : null;
-      case 1: 
+      case 1:
         return obj;
     }
     return null;
@@ -86,54 +104,72 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
 
   public void setItem(Object obj) {
     detailGroups = (new DetailsGroup[]{directSuperProps, allSuperProps,
-        directSubProps, allSubProps, domain, range});
-    Property property = (Property)obj;
-    Set set = property.getSuperProperties(Property.DIRECT_CLOSURE);
+        directSubProps, allSubProps, equivalentProps, domain, range});
+    RDFProperty property = (RDFProperty)obj;
     directSuperProps.getValues().clear();
+    allSuperProps.getValues().clear();
+    directSubProps.getValues().clear();
+    allSubProps.getValues().clear();
+    equivalentProps.getValues().clear();
+    domain.getValues().clear();
+    range.getValues().clear();
+    if(property instanceof AnnotationProperty) {
+      fireTableDataChanged();
+      return;
+    }
+    Set<RDFProperty> set = property
+            .getSuperProperties(OConstants.DIRECT_CLOSURE);
     if(set != null) {
       directSuperProps.getValues().addAll(set);
       Collections.sort(directSuperProps.getValues(), itemComparator);
     }
-    set = property.getSuperProperties(Property.TRANSITIVE_CLOSURE);
-    allSuperProps.getValues().clear();
+    set = property.getSuperProperties(OConstants.TRANSITIVE_CLOSURE);
     if(set != null) {
       allSuperProps.getValues().addAll(set);
       Collections.sort(allSuperProps.getValues(), itemComparator);
     }
-    set = property.getSubProperties(Property.DIRECT_CLOSURE);
-    directSubProps.getValues().clear();
+    set = property.getSubProperties(OConstants.DIRECT_CLOSURE);
     if(set != null) {
       directSubProps.getValues().addAll(set);
       Collections.sort(directSubProps.getValues(), itemComparator);
     }
-    set = property.getSubProperties(Property.TRANSITIVE_CLOSURE);
-    allSubProps.getValues().clear();
+    set = property.getSubProperties(OConstants.TRANSITIVE_CLOSURE);
     if(set != null) {
       allSubProps.getValues().addAll(set);
       Collections.sort(allSubProps.getValues(), itemComparator);
     }
+    
+    set = property.getEquivalentPropertyAs();
+    if(set != null) {
+      equivalentProps.getValues().addAll(set);
+      Collections.sort(equivalentProps.getValues(), itemComparator);
+    }
+    
     Set set1 = property.getDomain();
-    domain.getValues().clear();
     if(set1 != null) {
-      OClass oclass;
-      for(Iterator iterator = set1.iterator(); iterator.hasNext(); domain
-              .getValues().add(oclass.getName()))
-        oclass = (OClass)iterator.next();
+      Iterator iterator = set1.iterator();
+      while(iterator.hasNext()) {
+        OResource resource = (OResource)iterator.next();
+        domain.getValues().add(resource);
+      }
       Collections.sort(domain.getValues(), itemComparator);
     }
+    
+    if(property instanceof DatatypeProperty) {
+        range.getValues().add(
+              ((DatatypeProperty)property).getDataType().getXmlSchemaURI());
+      fireTableDataChanged();
+      return;
+    }
+    
     Set set2 = property.getRange();
-    range.getValues().clear();
     if(set2 != null) {
-      Iterator iterator1 = set2.iterator();
-      while(iterator1.hasNext()) {
-        if(property instanceof ObjectProperty) {
-          OClass oclass1 = (OClass)iterator1.next();
-          range.getValues().add(oclass1.getName());
-        } else if(property instanceof DatatypeProperty) {
-          Class class1 = (Class)iterator1.next();
-          range.getValues().add(class1.getName());
-        }
+      Iterator iterator = set2.iterator();
+      while(iterator.hasNext()) {
+        OResource resource = (OResource)iterator.next();
+        range.getValues().add(resource.toString());
       }
+      Collections.sort(range.getValues(), itemComparator);
     }
     fireTableDataChanged();
   }
@@ -144,6 +180,8 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
 
   protected DetailsGroup directSubProps;
 
+  protected DetailsGroup equivalentProps;
+  
   protected DetailsGroup allSubProps;
 
   protected DetailsGroup domain;

@@ -1,3 +1,10 @@
+/*
+ *  SubClassAction.java
+ *
+ *  Niraj Aswani, 09/March/07
+ *
+ *  $Id: SubClassAction.html,v 1.0 2007/03/09 16:13:01 niraj Exp $
+ */
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
@@ -10,15 +17,21 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+/**
+ * Action to create a new subclass.
+ * @author niraj
+ *
+ */
 public class SubClassAction extends AbstractAction implements
                                                   TreeNodeSelectionListener {
+  private static final long serialVersionUID = 3258409543049359926L;
+
   public SubClassAction(String s, Icon icon) {
     super(s, icon);
     nameSpace = new JTextField(20);
     className = new JTextField(20);
-    comment = new JTextField(20);
-    labelPanel = new JPanel(new GridLayout(3, 1));
-    textFieldsPanel = new JPanel(new GridLayout(3, 1));
+    labelPanel = new JPanel(new GridLayout(2, 1));
+    textFieldsPanel = new JPanel(new GridLayout(2, 1));
     panel = new JPanel(new FlowLayout(0));
     panel.add(labelPanel);
     panel.add(textFieldsPanel);
@@ -26,19 +39,18 @@ public class SubClassAction extends AbstractAction implements
     textFieldsPanel.add(nameSpace);
     labelPanel.add(new JLabel("Sub Class Name :"));
     textFieldsPanel.add(className);
-    labelPanel.add(new JLabel("Comment :"));
-    textFieldsPanel.add(comment);
   }
 
   public void actionPerformed(ActionEvent actionevent) {
-    ArrayList arraylist = new ArrayList();
+    ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(this.selectedNodes);
+    ArrayList<OClass> arraylist = new ArrayList<OClass>();
     for(int i = 0; i < selectedNodes.size(); i++) {
       Object obj = ((DefaultMutableTreeNode)selectedNodes.get(i))
               .getUserObject();
-      if(obj instanceof TClass) arraylist.add(obj);
+      if(obj instanceof OClass) arraylist.add((OClass) obj);
     }
-    nameSpace.setText(ontology.getDefaultNameSpace());
-    int j = JOptionPane.showOptionDialog(MainFrame.getInstance(), panel, "Sub Class Action: ", 2,
+    
+    int j = JOptionPane.showOptionDialog(MainFrame.getInstance(), panel, "New Sub Class: ", 2,
             3, null, new String[]{"OK", "Cancel"}, "OK");
     if(j == 0) {
       String s = nameSpace.getText();
@@ -52,14 +64,15 @@ public class SubClassAction extends AbstractAction implements
         JOptionPane.showMessageDialog(MainFrame.getInstance(), "Invalid Classname");
         return;
       }
-      if(ontology.getClassByName(className.getText()) != null) {
+      
+      if(ontology.getOResourceFromMap(s + className.getText()) != null) {
         JOptionPane.showMessageDialog(MainFrame.getInstance(), (new StringBuilder()).append(
                 "Class :").append(className.getText())
                 .append(" already exists").toString());
         return;
       }
       
-      OClass oclassimpl = ontology.createClass(className.getText(), comment.getText());
+      OClass oclassimpl = ontology.addOClass(new URI(s+ className.getText(), false));
       for(int k = 0; k < arraylist.size(); k++) {
         oclassimpl.addSuperClass((OClass)arraylist.get(k));
         ((OClass)arraylist.get(k)).addSubClass(oclassimpl);
@@ -75,7 +88,7 @@ public class SubClassAction extends AbstractAction implements
     ontology = ontology1;
   }
 
-  public void selectionChanged(ArrayList arraylist) {
+  public void selectionChanged(ArrayList<DefaultMutableTreeNode> arraylist) {
     selectedNodes = arraylist;
   }
 
@@ -83,15 +96,13 @@ public class SubClassAction extends AbstractAction implements
 
   protected JTextField className;
 
-  protected JTextField comment;
-
   protected JPanel labelPanel;
 
   protected JPanel textFieldsPanel;
 
   protected JPanel panel;
 
-  protected ArrayList selectedNodes;
+  protected ArrayList<DefaultMutableTreeNode> selectedNodes;
 
   protected Ontology ontology;
 }

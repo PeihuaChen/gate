@@ -1,3 +1,10 @@
+/*
+ *  InstanceAction.java
+ *
+ *  Niraj Aswani, 09/March/07
+ *
+ *  $Id: InstanceAction.html,v 1.0 2007/03/09 16:13:01 niraj Exp $
+ */
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
@@ -10,15 +17,21 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+/**
+ * Action to create a new Instance in the ontology
+ * @author niraj
+ *
+ */
 public class InstanceAction extends AbstractAction implements
                                                   TreeNodeSelectionListener {
+  private static final long serialVersionUID = 3257844402729529651L;
+
   public InstanceAction(String caption, Icon icon) {
     super(caption, icon);
     nameSpace = new JTextField(20);
     instanceName = new JTextField(20);
-    comment = new JTextField(20);
-    labelPanel = new JPanel(new GridLayout(3, 1));
-    textFieldsPanel = new JPanel(new GridLayout(3, 1));
+    labelPanel = new JPanel(new GridLayout(2, 1));
+    textFieldsPanel = new JPanel(new GridLayout(2, 1));
     panel = new JPanel(new FlowLayout(0));
     panel.add(labelPanel);
     panel.add(textFieldsPanel);
@@ -26,11 +39,10 @@ public class InstanceAction extends AbstractAction implements
     textFieldsPanel.add(nameSpace);
     labelPanel.add(new JLabel("Instance Name :"));
     textFieldsPanel.add(instanceName);
-    labelPanel.add(new JLabel("Comment :"));
-    textFieldsPanel.add(comment);
   }
 
   public void actionPerformed(ActionEvent actionevent) {
+    ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(this.selectedNodes);
     nameSpace.setText(ontology.getDefaultNameSpace());
     int j = JOptionPane.showOptionDialog(MainFrame.getInstance(), panel, "New Instance: ", 2, 3,
             null, new String[]{"OK", "Cancel"}, "OK");
@@ -46,20 +58,19 @@ public class InstanceAction extends AbstractAction implements
         JOptionPane.showMessageDialog(MainFrame.getInstance(), "Invalid Instance Name");
         return;
       }
-      if(ontology.getInstanceByName(instanceName.getText()) != null) {
+      
+      if(ontology.getOResourceFromMap(nameSpace.getText()+instanceName.getText()) != null) {
         JOptionPane.showMessageDialog(MainFrame.getInstance(), (new StringBuilder()).append(
-                "Instance :").append(instanceName.getText()).append(
-                " already exists").toString());
+                "An instance with name \"").append(nameSpace.getText()+instanceName.getText()).append(
+                "\" already exists").toString());
         return;
       }
 
       for(int i = 0; i < selectedNodes.size(); i++) {
-        Object obj = ((DefaultMutableTreeNode)selectedNodes.get(i))
-                .getUserObject();
+        Object obj = selectedNodes.get(i).getUserObject();
         if(obj instanceof OClass) {
-          OInstance instance = ontology.addInstance(instanceName.getText(),
+          OInstance instance = ontology.addOInstance(new URI(nameSpace.getText()+instanceName.getText(), false),
                   (OClass)obj);
-          instance.setComment(comment.getText());
         }
       }
     }
@@ -73,15 +84,13 @@ public class InstanceAction extends AbstractAction implements
     ontology = ontology1;
   }
 
-  public void selectionChanged(ArrayList arraylist) {
+  public void selectionChanged(ArrayList<DefaultMutableTreeNode> arraylist) {
     selectedNodes = arraylist;
   }
 
   JTextField nameSpace;
 
   JTextField instanceName;
-
-  JTextField comment;
 
   JPanel labelPanel;
 
@@ -91,5 +100,5 @@ public class InstanceAction extends AbstractAction implements
 
   Ontology ontology;
 
-  ArrayList selectedNodes;
+  ArrayList<DefaultMutableTreeNode> selectedNodes;
 }

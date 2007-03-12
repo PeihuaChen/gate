@@ -31,7 +31,7 @@ public class ValuesSelectionAction {
         String s = ((JTextComponent)domainBox.getEditor().getEditorComponent())
                 .getText();
         if(s != null) {
-          ArrayList arraylist = new ArrayList();
+          ArrayList<String> arraylist = new ArrayList<String>();
           for(int i = 0; i < ontologyClasses.length; i++) {
             String s1 = ontologyClasses[i];
             if(s1.toLowerCase().startsWith(s.toLowerCase())) {

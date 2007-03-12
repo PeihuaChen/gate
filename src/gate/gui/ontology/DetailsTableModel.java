@@ -1,19 +1,40 @@
+/*
+ *  DetailsTableModel.java
+ *
+ *  Niraj Aswani, 09/March/07
+ *
+ *  $Id: DetailsTableModel.html,v 1.0 2007/03/09 16:13:01 niraj Exp $
+ */
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
-import gate.util.Err;
 import java.util.*;
 import javax.swing.table.AbstractTableModel;
 
+/**
+ * A DataModel that is created when a node is selected in the ontology
+ * tree. It contains information such as direct/all sub/super classes,
+ * equivalent classes, instances, properties/ property values and so on.
+ * The information from this model is then shown in the right hand side
+ * panel of the ontology editor.
+ * 
+ * @author niraj
+ * 
+ */
 public class DetailsTableModel extends AbstractTableModel {
+  private static final long serialVersionUID = 3834870286880618035L;
+
   public DetailsTableModel() {
     ontologyMode = false;
     directSuperClasses = new DetailsGroup("Direct Super Classes", true, null);
     allSuperClasses = new DetailsGroup("All Super Classes", true, null);
     directSubClasses = new DetailsGroup("Direct Sub Classes", true, null);
     allSubClasses = new DetailsGroup("All Sub Classes", true, null);
+    equivalentClasses = new DetailsGroup("Equivalent Classes", true, null);
+    sameAsInstances = new DetailsGroup("Same Instances", true, null);
     instances = new DetailsGroup("Instances", true, null);
-    properties = new DetailsGroup("Properties", true, null);
+    propertyTypes = new DetailsGroup("Property Types", true, null);
+    propertyValues = new DetailsGroup("Property Values", true, null);
     directTypes = new DetailsGroup("Direct Types", true, null);
     allTypes = new DetailsGroup("All Types", true, null);
     detailGroups = new DetailsGroup[0];
@@ -32,7 +53,7 @@ public class DetailsTableModel extends AbstractTableModel {
   }
 
   public String getColumnName(int i) {
-    switch(i){
+    switch(i) {
       case 0:
         return "";
       case 1:
@@ -42,7 +63,7 @@ public class DetailsTableModel extends AbstractTableModel {
   }
 
   public Class getColumnClass(int i) {
-    switch(i){
+    switch(i) {
       case 0:
         return Boolean.class;
       case 1:
@@ -78,7 +99,7 @@ public class DetailsTableModel extends AbstractTableModel {
 
   public Object getValueAt(int i, int j) {
     Object obj = getItemForRow(i);
-    switch(j){
+    switch(j) {
       case 0:
         return (obj instanceof DetailsGroup) ? new Boolean(((DetailsGroup)obj)
                 .isExpanded()) : null;
@@ -89,161 +110,192 @@ public class DetailsTableModel extends AbstractTableModel {
   }
 
   public void setItem(Object obj) {
-    if(obj instanceof TClass) {
-      detailGroups = ontologyMode ? (new DetailsGroup[]{directSuperClasses,
-          allSuperClasses, directSubClasses, allSubClasses, properties,
-          instances}) : (new DetailsGroup[]{directSuperClasses,
-          allSuperClasses, directSubClasses, allSubClasses});
-      TClass tclass = (TClass)obj;
-      Set set = tclass.getSuperClasses((byte)0);
+    if(obj instanceof OClass) {
+      detailGroups = new DetailsGroup[] {directSuperClasses, allSuperClasses,
+          directSubClasses, allSubClasses, equivalentClasses, propertyTypes,
+          propertyValues, instances};
+      OClass tclass = (OClass)obj;
+      Set<OClass> set = tclass.getSuperClasses(OConstants.DIRECT_CLOSURE);
       directSuperClasses.getValues().clear();
       if(set != null) {
         directSuperClasses.getValues().addAll(set);
         Collections.sort(directSuperClasses.getValues(), itemComparator);
       }
-      set = tclass.getSuperClasses((byte)1);
+      Set<OClass> set1 = tclass.getSuperClasses(OConstants.TRANSITIVE_CLOSURE);
       allSuperClasses.getValues().clear();
-      if(set != null) {
-        allSuperClasses.getValues().addAll(set);
+      if(set1 != null) {
+        allSuperClasses.getValues().addAll(set1);
         Collections.sort(allSuperClasses.getValues(), itemComparator);
       }
-      set = tclass.getSubClasses((byte)0);
+      Set<OClass> set2 = tclass.getSubClasses(OConstants.DIRECT_CLOSURE);
       directSubClasses.getValues().clear();
-      if(set != null) {
-        directSubClasses.getValues().addAll(set);
+      if(set2 != null) {
+        directSubClasses.getValues().addAll(set2);
         Collections.sort(directSubClasses.getValues(), itemComparator);
       }
-      set = tclass.getSubClasses((byte)1);
+      Set<OClass> set3 = tclass.getSubClasses(OConstants.TRANSITIVE_CLOSURE);
       allSubClasses.getValues().clear();
-      if(set != null) {
-        allSubClasses.getValues().addAll(set);
+      if(set3 != null) {
+        allSubClasses.getValues().addAll(set3);
         Collections.sort(allSubClasses.getValues(), itemComparator);
       }
-      if(ontologyMode) {
-        properties.getValues().clear();
-        Iterator iterator = (new HashSet(ontology.getPropertyDefinitions()))
-                .iterator();
-        OInstanceImpl oinstanceimpl = new OInstanceImpl("", "", (OClass)tclass,
-                ontology);
-        do {
-          if(!iterator.hasNext()) break;
-          Property property = (Property)iterator.next();
-          if(property.isValidDomain(oinstanceimpl))
-            properties.getValues().add(property);
-        } while(true);
-        Set set3 = tclass.getSetPropertiesNames();
-        if(set3 != null) {
-          Iterator iterator3 = set3.iterator();
-          do {
-            if(!iterator3.hasNext()) break;
-            String s1 = (String)iterator3.next();
-            List list1 = tclass.getPropertyValues(s1);
-            if(list1 != null) {
-              Iterator iterator5 = list1.iterator();
-              while(iterator5.hasNext()) {
-                StringBuffer stringbuffer1 = new StringBuffer(s1);
-                stringbuffer1.append("(");
-                Object obj2 = iterator5.next();
-                if(obj2 != null)
-                  stringbuffer1.append((obj2 instanceof OInstance)
-                          ? ((OInstance)obj2).getName()
-                          : obj2.toString());
-                stringbuffer1.append(")");
-                properties.getValues().add(stringbuffer1.toString());
-              }
-            }
-          } while(true);
+      Set<OClass> set4 = tclass.getEquivalentClasses();
+      equivalentClasses.getValues().clear();
+      if(set4 != null) {
+        equivalentClasses.getValues().addAll(set4);
+        Collections.sort(equivalentClasses.getValues(), itemComparator);
+      }
+
+      propertyTypes.getValues().clear();
+      propertyValues.getValues().clear();
+      Set<RDFProperty> rdfProps = ontology.getPropertyDefinitions();
+      if(rdfProps != null) {
+        Iterator<RDFProperty> iterator = rdfProps.iterator();
+        while(iterator.hasNext()) {
+          RDFProperty property = iterator.next();
+          if(property instanceof AnnotationProperty) {
+            propertyTypes.getValues().add(property);
+            continue;
+          }
+
+          List domain = new ArrayList(property.getDomain());
+          if(domain.size() == 0) {
+            propertyTypes.getValues().add(property);
+            continue;
+          }
+
+          for(int i = 0; i < domain.size(); i++) {
+            domain.set(i, ((OResource)domain.get(i)).getURI().toString());
+            // System.out.println("\t"+(domain.get(i)).toString());
+          }
+
+          if(domain.contains(tclass.getURI().toString())) {
+            propertyTypes.getValues().add(property);
+            continue;
+          }
+
+          List superClasses = new ArrayList(allSuperClasses.getValues());
+          for(int i = 0; i < superClasses.size(); i++) {
+            superClasses.set(i, ((OResource)superClasses.get(i)).getURI()
+                    .toString());
+          }
+
+          if(!Collections.disjoint(domain, superClasses)) {
+            propertyTypes.getValues().add(property);
+            continue;
+          }
         }
-        Collections.sort(properties.getValues(), itemComparator);
-        if(ontologyMode) {
-          Set set4 = ontology.getDirectInstances((OClass)tclass);
-          instances.getValues().clear();
-          if(set4 != null) {
-            instances.getValues().addAll(set4);
-            Collections.sort(instances.getValues(), itemComparator);
+
+        Set<AnnotationProperty> props = tclass.getAnnotationProperties();
+        if(props != null) {
+          Iterator<AnnotationProperty> apIter = props.iterator();
+          while(apIter.hasNext()) {
+            AnnotationProperty ap = apIter.next();
+            List<Literal> literals = tclass.getAnnotationPropertyValues(ap);
+            for(int i = 0; i < literals.size(); i++) {
+              PropertyValue pv = new PropertyValue(ap, literals.get(i));
+              propertyValues.getValues().add(pv);
+            }
           }
         }
       }
-    } else if(obj instanceof OInstance) {
+      Collections.sort(propertyTypes.getValues(), itemComparator);
+      Set<OInstance> set5 = ontology.getOInstances(tclass,
+              OConstants.DIRECT_CLOSURE);
+      instances.getValues().clear();
+      if(set5 != null) {
+        instances.getValues().addAll(set5);
+        Collections.sort(instances.getValues(), itemComparator);
+      }
+    }
+    else if(obj instanceof OInstance) {
       OInstance oinstance = (OInstance)obj;
-      detailGroups = (new DetailsGroup[]{directTypes, allTypes, properties});
-      Set set1 = oinstance.getOClasses();
+      detailGroups = (new DetailsGroup[] {directTypes, allTypes,
+          sameAsInstances, propertyTypes, propertyValues});
+      Set<OClass> set1 = oinstance.getOClasses(OConstants.DIRECT_CLOSURE);
       directTypes.getValues().clear();
       if(set1 != null) {
         directTypes.getValues().addAll(set1);
         Collections.sort(directTypes.getValues(), itemComparator);
       }
-      Set tempSet = new HashSet();
-      Iterator iter2 = set1.iterator();
-      while(iter2.hasNext()) {
-        tempSet.add(((OClass) iter2.next()).getURI());
-      }
-      
-      HashSet hashset = new HashSet();
-      set1 = oinstance.getOClasses();
-      hashset.addAll(set1);
-      OClass oclass;
-      Iterator iterator1 = set1.iterator();
-      while(iterator1.hasNext()) {
-          oclass = (OClass)iterator1.next();
-          Set superClasses = oclass.getSuperClasses((byte)1);
-          Iterator supIter = superClasses.iterator();
-          while(supIter.hasNext()) {
-              OClass tempSClass = (OClass) supIter.next();
-              if(!tempSet.contains(tempSClass.getURI())) {
-                hashset.add(tempSClass);
-                tempSet.add(tempSClass.getURI());
-              }
-          }
-      }
+      Set<OClass> set2 = oinstance.getOClasses(OConstants.TRANSITIVE_CLOSURE);
       allTypes.getValues().clear();
-      if(hashset != null) {
-        allTypes.getValues().addAll(hashset);
+      if(set2 != null) {
+        allTypes.getValues().addAll(set2);
         Collections.sort(allTypes.getValues(), itemComparator);
       }
-      properties.getValues().clear();
-      Set set2 = oinstance.getSetPropertiesNames();
-      if(set2 != null) {
-        Iterator iterator2 = set2.iterator();
-        do {
-          if(!iterator2.hasNext()) break;
-          String s = (String)iterator2.next();
-          List list = oinstance.getPropertyValues(s);
-          if(list != null) {
-            Iterator iterator4 = list.iterator();
-            while(iterator4.hasNext()) {
-              StringBuffer stringbuffer = new StringBuffer(s);
-              stringbuffer.append("(");
-              Object obj1 = iterator4.next();
-              if(obj1 != null)
-                stringbuffer.append((obj1 instanceof OInstance)
-                        ? ((OInstance)obj1).getName()
-                        : obj1.toString());
-              stringbuffer.append(")");
-              properties.getValues().add(stringbuffer.toString());
-            }
-          }
-        } while(true);
-        Collections.sort(properties.getValues());
+
+      Set<OInstance> set3 = oinstance.getSameInstance();
+      sameAsInstances.getValues().clear();
+      if(set3 != null) {
+        sameAsInstances.getValues().addAll(set3);
+        Collections.sort(sameAsInstances.getValues(), itemComparator);
+      }
+
+      propertyTypes.getValues().clear();
+      propertyValues.getValues().clear();
+      Set<AnnotationProperty> apProps = oinstance.getAnnotationProperties();
+      Set<DatatypeProperty> dtProps = ontology.getDatatypeProperties();
+      Set<ObjectProperty> obProps = ontology.getObjectProperties();
+      Set<SymmetricProperty> stProps = ontology.getSymmetricProperties();
+      Set<TransitiveProperty> tpProps = ontology.getTransitiveProperties();
+      Set<RDFProperty> rdfProp = ontology.getRDFProperties();
+      Iterator<AnnotationProperty> apIter = apProps.iterator();
+      while(apIter.hasNext()) {
+        AnnotationProperty ap = apIter.next();
+        List<Literal> literals = oinstance.getAnnotationPropertyValues(ap);
+        for(int i = 0; i < literals.size(); i++) {
+          PropertyValue pv = new PropertyValue(ap, literals.get(i));
+          propertyValues.getValues().add(pv);
+        }
+      }
+      Iterator<DatatypeProperty> dtIter = dtProps.iterator();
+      while(dtIter.hasNext()) {
+        DatatypeProperty dt = dtIter.next();
+        List<Literal> literals = oinstance.getDatatypePropertyValues(dt);
+        for(int i = 0; i < literals.size(); i++) {
+          PropertyValue pv = new PropertyValue(dt, literals.get(i));
+          propertyValues.getValues().add(pv);
+        }
+      }
+      Iterator<ObjectProperty> obIter = obProps.iterator();
+      while(obIter.hasNext()) {
+        ObjectProperty ob = obIter.next();
+        List<OInstance> oinstances = oinstance.getObjectPropertyValues(ob);
+        for(int i = 0; i < oinstances.size(); i++) {
+          PropertyValue pv = new PropertyValue(ob, oinstances.get(i));
+          propertyValues.getValues().add(pv);
+        }
+      }
+      Iterator<TransitiveProperty> tpIter = tpProps.iterator();
+      while(tpIter.hasNext()) {
+        TransitiveProperty tp = tpIter.next();
+        List<OInstance> oinstances = oinstance.getObjectPropertyValues(tp);
+        for(int i = 0; i < oinstances.size(); i++) {
+          PropertyValue pv = new PropertyValue(tp, oinstances.get(i));
+          propertyValues.getValues().add(pv);
+        }
+      }
+      Iterator<SymmetricProperty> stIter = stProps.iterator();
+      while(stIter.hasNext()) {
+        SymmetricProperty st = stIter.next();
+        List<OInstance> oinstances = oinstance.getObjectPropertyValues(st);
+        for(int i = 0; i < oinstances.size(); i++) {
+          PropertyValue pv = new PropertyValue(st, oinstances.get(i));
+          propertyValues.getValues().add(pv);
+        }
+      }
+      Iterator<RDFProperty> rdIter = rdfProp.iterator();
+      while(rdIter.hasNext()) {
+        RDFProperty rd = rdIter.next();
+        List<OResource> oinstances = oinstance.getRDFPropertyValues(rd);
+        for(int i = 0; i < oinstances.size(); i++) {
+          PropertyValue pv = new PropertyValue(rd, oinstances.get(i));
+          propertyValues.getValues().add(pv);
+        }
       }
     }
     fireTableDataChanged();
-  }
-
-  protected boolean mightPropertyApplyToClass(Property property, OClass oclass) {
-    HashSet hashset = new HashSet(property.getDomain());
-    for(Iterator iterator = property.getSuperProperties((byte)1).iterator(); iterator
-            .hasNext();) {
-      Property property1 = (Property)iterator.next();
-      if(property1 == null)
-        Err.prln((new StringBuilder()).append("Null superProp for ").append(
-                property.getName()).toString());
-      if(property1.getDomain() == null)
-        Err.prln((new StringBuilder()).append("Null domain for ").append(
-                property1.getName()).toString());
-      else hashset.addAll(property1.getDomain());
-    }
-    return hashset.contains(oclass);
   }
 
   public Ontology getOntology() {
@@ -254,14 +306,6 @@ public class DetailsTableModel extends AbstractTableModel {
     ontology = ontology1;
   }
 
-  public boolean isOntologyMode() {
-    return ontologyMode;
-  }
-
-  public void setOntologyMode(boolean flag) {
-    ontologyMode = flag;
-  }
-
   protected DetailsGroup directSuperClasses;
 
   protected DetailsGroup allSuperClasses;
@@ -270,9 +314,15 @@ public class DetailsTableModel extends AbstractTableModel {
 
   protected DetailsGroup allSubClasses;
 
+  protected DetailsGroup equivalentClasses;
+
+  protected DetailsGroup sameAsInstances;
+
   protected DetailsGroup instances;
 
-  protected DetailsGroup properties;
+  protected DetailsGroup propertyTypes;
+
+  protected DetailsGroup propertyValues;
 
   protected DetailsGroup directTypes;
 
