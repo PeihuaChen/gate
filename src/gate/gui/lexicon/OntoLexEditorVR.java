@@ -36,7 +36,9 @@ import gate.lexicon.*;
 import gate.util.*;
 
 public class OntoLexEditorVR extends AbstractVisualResource
-    implements ListSelectionListener, TreeSelectionListener {
+                                                           implements
+                                                           ListSelectionListener,
+                                                           TreeSelectionListener {
 
   public OntoLexEditorVR() {
     initLocalData();
@@ -45,13 +47,13 @@ public class OntoLexEditorVR extends AbstractVisualResource
   }
 
   public void valueChanged(ListSelectionEvent e) {
-    Object source = ((JList) e.getSource()).getSelectedValue();
-    if (source == null || ! (source instanceof LexKBSynset)) {
+    Object source = ((JList)e.getSource()).getSelectedValue();
+    if(source == null || !(source instanceof LexKBSynset)) {
       ontoEditor.setSelectionRow(0);
       selectedSynset = null;
       return;
     }
-    LexKBSynset theSynset = (LexKBSynset) source;
+    LexKBSynset theSynset = (LexKBSynset)source;
     this.selectedSynset = theSynset;
     updateOntologySelection();
   }
@@ -62,79 +64,79 @@ public class OntoLexEditorVR extends AbstractVisualResource
   }
 
   protected void updateOntologySelection() {
-    if (selectedSynset == null) {
+    if(selectedSynset == null) {
       ontoEditor.setSelectionRow(0);
       return;
     }
 
     List conceptIDs = ontoLex.getConceptIds(selectedSynset.getId());
-    if (conceptIDs == null || conceptIDs.isEmpty()) {
-      //select the top of the ontology, since there is no corresponding concept
+    if(conceptIDs == null || conceptIDs.isEmpty()) {
+      // select the top of the ontology, since there is no corresponding
+      // concept
       ontoEditor.setSelectionRow(0);
       return;
     }
 
-    if (theOntology == null)
-      return;
+    if(theOntology == null) return;
 
-    //select the given conceptIDs in the ontology editor
-    for (int i=0; i < conceptIDs.size(); i++) {
+    // select the given conceptIDs in the ontology editor
+    for(int i = 0; i < conceptIDs.size(); i++) {
       Object conceptID = conceptIDs.get(i);
-      TClass theClass = theOntology.getClassByName((String) conceptID);
+      OClass theClass = (OClass)theOntology
+              .getOResourceByName((String)conceptID);
       TreePath thePath = treePath4Class(theClass);
-      if (thePath == null)
+      if(thePath == null)
         ontoEditor.setSelectionRow(0);
-      else if (i==0)
+      else if(i == 0)
         ontoEditor.getSelectionModel().setSelectionPath(thePath);
-      else
-        ontoEditor.getSelectionModel().addSelectionPath(thePath);
-    }//for
+      else ontoEditor.getSelectionModel().addSelectionPath(thePath);
+    }// for
 
   }
 
-  protected TreePath treePath4Class(TClass theClass) {
+  protected TreePath treePath4Class(OClass theClass) {
     List thePathList = new ArrayList();
     thePathList.add(ontoModel.getRoot());
     TreePath thePath = null;
     Iterator theTopsIter = ((ClassNode)ontoModel.getRoot()).getChildren();
     boolean found = false;
-    while( !found && theTopsIter.hasNext()) {
-      ClassNode theTopNode = (ClassNode) theTopsIter.next();
-      TClass theTop = (TClass) theTopNode.getSource();
-      //check if our class is a subtype of this top
-      if (theTop.getSubClasses(TClass.TRANSITIVE_CLOSURE).contains(theClass)) {
-        //if yes, let's find the full path
+    while(!found && theTopsIter.hasNext()) {
+      ClassNode theTopNode = (ClassNode)theTopsIter.next();
+      OClass theTop = (OClass)theTopNode.getSource();
+      // check if our class is a subtype of this top
+      if(theTop.getSubClasses(OConstants.TRANSITIVE_CLOSURE).contains(theClass)) {
+        // if yes, let's find the full path
         thePathList.add(theTopNode);
         getRemainingPath(theTopNode, theClass, thePathList);
         found = true;
       }
-    }//while loop through the top concepts
+    }// while loop through the top concepts
 
     thePath = new TreePath(thePathList.toArray());
     return thePath;
   }
 
-  protected void getRemainingPath(ClassNode theParent, TClass theTarget, 
+  protected void getRemainingPath(ClassNode theParent, OClass theTarget,
           List thePath) {
     Iterator theChildrenIter = theParent.getChildren();
-    while (theChildrenIter.hasNext()) {
-      ClassNode childNode = (ClassNode) theChildrenIter.next();
-      TClass theChild = (TClass) childNode.getSource();
-      if (theChild.equals(theTarget)) {
+    while(theChildrenIter.hasNext()) {
+      ClassNode childNode = (ClassNode)theChildrenIter.next();
+      OClass theChild = (OClass)childNode.getSource();
+      if(theChild.equals(theTarget)) {
         thePath.add(childNode);
         break;
       }
-      if (!theChild.getSubClasses(TClass.TRANSITIVE_CLOSURE).contains(theTarget))
+      if(!theChild.getSubClasses(OClass.TRANSITIVE_CLOSURE).contains(theTarget))
         continue;
       thePath.add(childNode);
       getRemainingPath(childNode, theTarget, thePath);
     }
   }
 
-  protected void initLocalData(){
+  protected void initLocalData() {
   }
 
-  protected void initGuiComponents(){
+  protected void initGuiComponents() {
     mainBox = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
     leftBox = Box.createVerticalBox();
     rightBox = Box.createVerticalBox();
@@ -146,17 +148,15 @@ public class OntoLexEditorVR extends AbstractVisualResource
     mainBox.add(rightBox);
 
     JScrollPane ontoScroller = new JScrollPane(ontoEditor);
-//    ontoScroller.setMinimumSize(new Dimension(300, 400));
+    // ontoScroller.setMinimumSize(new Dimension(300, 400));
     rightBox.add(ontoScroller, null);
     ontoEditor.setVisible(false);
     ontoEditor.addTreeSelectionListener(this);
     ontoEditor.getSelectionModel().setSelectionMode(
-        javax.swing.tree.TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+            javax.swing.tree.TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
 
-    KnowledgeBaseTreeCellRenderer kbTreeCellRenderer =
-                              new KnowledgeBaseTreeCellRenderer();
+    KnowledgeBaseTreeCellRenderer kbTreeCellRenderer = new KnowledgeBaseTreeCellRenderer();
     ontoEditor.setCellRenderer(kbTreeCellRenderer);
-
 
     synsetScroller = new JScrollPane();
     leftBox.add(synsetScroller, null);
@@ -176,44 +176,45 @@ public class OntoLexEditorVR extends AbstractVisualResource
 
   }
 
-  protected void initListeners(){
+  protected void initListeners() {
   }
 
- /**
- * Called by the GUI when this viewer/editor has to initialise itself for a
- * specific object.
- * @param target the object (be it a {@link gate.Resource},
- * {@link gate.DataStore} or whatever) this viewer has to display
- */
+  /**
+   * Called by the GUI when this viewer/editor has to initialise itself
+   * for a specific object.
+   * 
+   * @param target the object (be it a {@link gate.Resource},
+   *          {@link gate.DataStore} or whatever) this viewer has to
+   *          display
+   */
   public void setTarget(Object target) {
     if(target == null) return;
-    if(!(target instanceof gate.lexicon.OntoLexLR)){
-      throw new GateRuntimeException(this.getClass().getName() +
-                                     " can only be used to display " +
-                                     gate.lexicon.OntoLexLR.class.getName() +
-                                     "\n" + target.getClass().getName() +
-                                     " is not a " +
-                                     gate.lexicon.OntoLexLR.class.getName() + "!");
+    if(!(target instanceof gate.lexicon.OntoLexLR)) {
+      throw new GateRuntimeException(this.getClass().getName()
+              + " can only be used to display "
+              + gate.lexicon.OntoLexLR.class.getName() + "\n"
+              + target.getClass().getName() + " is not a "
+              + gate.lexicon.OntoLexLR.class.getName() + "!");
     }
-    this.ontoLex = (gate.lexicon.OntoLexLR) target;
+    this.ontoLex = (gate.lexicon.OntoLexLR)target;
 
     updateGUI();
   }
 
-  protected void updateGUI(){
-    Taxonomy ontology = loadOntology(ontoLex.getOntologyIdentifier());
+  protected void updateGUI() {
+    Ontology ontology = loadOntology(ontoLex.getOntologyIdentifier());
     ClassNode root = ClassNode.createRootNode(ontology, true);
     this.ontoModel = new OntoTreeModel(root);
     this.ontoEditor.setModel(ontoModel);
     ontoEditor.setVisible(true);
 
-    //remove myself from the listeners first, so there are no memory leaks
-    if (chooseSynsetPanel != null)
+    // remove myself from the listeners first, so there are no memory
+    // leaks
+    if(chooseSynsetPanel != null)
       chooseSynsetPanel.removeSynsetSelectionListener(this);
 
     LexicalKnowledgeBase lexKB = loadLexicon(ontoLex.getLexKBIdentifier());
-    if (lexKB == null)
-      return;
+    if(lexKB == null) return;
     chooseSynsetPanel = new ChooseSynsetPanel(lexKB, false);
     chooseSynsetPanel.addSynsetSelectionListener(this);
     selectedSynset = chooseSynsetPanel.getSelectedSynset();
@@ -221,44 +222,27 @@ public class OntoLexEditorVR extends AbstractVisualResource
     synsetScroller.setVisible(true);
   }
 
-  private Taxonomy loadOntology(Object ontoId) {
+  private Ontology loadOntology(Object ontoId) {
 
-    //first if the ontoId is a URL with a gate:// location, this needs to be
-    //converted to an absolute URL, coz otherwise this ontology's URL will
-    //not be found among the already loaded ones, because they are converted
-    if ((ontoId instanceof URL) &&
-        (((URL)ontoId).getProtocol().indexOf("gate")>=0) )
-      ontoId = gate.util.protocols.gate.Handler.class.getResource(
-                    Files.getResourcePath() + ((URL)ontoId).getPath());
+    // first if the ontoId is a URL with a gate:// location, this needs
+    // to be
+    // converted to an absolute URL, coz otherwise this ontology's URL
+    // will
+    // not be found among the already loaded ones, because they are
+    // converted
+    if((ontoId instanceof URL)
+            && (((URL)ontoId).getProtocol().indexOf("gate") >= 0))
+      ontoId = gate.util.protocols.gate.Handler.class.getResource(Files
+              .getResourcePath()
+              + ((URL)ontoId).getPath());
 
-    List lrs = Gate.getCreoleRegister().getPublicLrInstances();
-    Iterator iter1 = lrs.iterator();
-    while (iter1.hasNext()) {
-      gate.LanguageResource lr = (LanguageResource) iter1.next();
-      if (! (lr instanceof Taxonomy))
-        continue;
-      Taxonomy currentOntology = (Taxonomy) lr;
-      if (currentOntology.getURL().equals(ontoId)) {
-        theOntology = currentOntology;
-        break;
-      }
-    }//while
-
-    //the ontology is not loaded, we must do that
-    if (theOntology == null) {
-      try {
-        FeatureMap fm = Factory.newFeatureMap();
-        fm.put("URL", ontoId);
-
-        theOntology = (Taxonomy)Factory.createResource(
-            "com.ontotext.gate.ontology.DAMLKnowledgeBaseImpl",
-            fm
-          );
-      } catch (gate.creole.ResourceInstantiationException ex) {
-        throw new GateRuntimeException(
-            "Cannot load the ontology used in this OntoLex mapping!");
-      }
-    }//if
+    try {
+      theOntology = OntologyUtilities.getOntology((URL) ontoId);
+    }
+    catch(gate.creole.ResourceInstantiationException ex) {
+      throw new GateRuntimeException(
+              "Cannot load the ontology used in this OntoLex mapping!");
+    }
 
     return theOntology;
   }
@@ -268,129 +252,137 @@ public class OntoLexEditorVR extends AbstractVisualResource
 
     List lrs = Gate.getCreoleRegister().getPublicLrInstances();
     Iterator iter1 = lrs.iterator();
-    while (iter1.hasNext()) {
-      gate.LanguageResource lr = (LanguageResource) iter1.next();
-      if (! (lr instanceof LexicalKnowledgeBase))
-        continue;
-      LexicalKnowledgeBase currentLexicon = (LexicalKnowledgeBase) lr;
-      if (currentLexicon.getLexiconId().equals(lexId)) {
+    while(iter1.hasNext()) {
+      gate.LanguageResource lr = (LanguageResource)iter1.next();
+      if(!(lr instanceof LexicalKnowledgeBase)) continue;
+      LexicalKnowledgeBase currentLexicon = (LexicalKnowledgeBase)lr;
+      if(currentLexicon.getLexiconId().equals(lexId)) {
         theLexicon = currentLexicon;
         break;
       }
-    }//while
+    }// while
 
-    //the ontology is not loaded, we must do that
-    if (theLexicon == null) {
+    // the ontology is not loaded, we must do that
+    if(theLexicon == null) {
       throw new GateRuntimeException(
-        "Please load the lexicon first before trying to use/define a mapping for it!");
-    }//if
+              "Please load the lexicon first before trying to use/define a mapping for it!");
+    }// if
 
     return theLexicon;
   }
 
   protected JTree ontoEditor = new JTree();
+
   protected OntoTreeModel ontoModel;
+
   protected ChooseSynsetPanel synsetEditor;
+
   protected OntoLexLR ontoLex;
-  protected Taxonomy theOntology;
-  protected GridLayout gridLayout1 = new GridLayout(2,1);
+
+  protected Ontology theOntology;
+
+  protected GridLayout gridLayout1 = new GridLayout(2, 1);
+
   protected JSplitPane mainBox;
+
   protected Box leftBox;
+
   protected Box rightBox;
+
   protected ChooseSynsetPanel chooseSynsetPanel;
+
   protected JScrollPane synsetScroller;
+
   protected LexKBSynset selectedSynset = null;
+
   protected JButton addMappingButton;
+
   protected JButton removeMappingButton;
 
   /**
    */
-  protected class AddMappingAction extends AbstractAction{
-    AddMappingAction(){
+  protected class AddMappingAction extends AbstractAction {
+    AddMappingAction() {
       super("AddMapping");
       putValue(SHORT_DESCRIPTION, "Add a new mapping");
     }
-    public void actionPerformed(java.awt.event.ActionEvent e){
-      if (selectedSynset == null) {
-        JOptionPane.showMessageDialog(
-        OntoLexEditorVR.this,
-        "Please choose a synset and a corresponding concept first");
+
+    public void actionPerformed(java.awt.event.ActionEvent e) {
+      if(selectedSynset == null) {
+        JOptionPane.showMessageDialog(OntoLexEditorVR.this,
+                "Please choose a synset and a corresponding concept first");
         return;
       }
       TreePath[] selectedPaths = ontoEditor.getSelectionPaths();
-      if (selectedPaths == null || selectedPaths.length == 0) {
-        JOptionPane.showMessageDialog(
-        OntoLexEditorVR.this,
-        "Please choose a synset and a corresponding concept first");
+      if(selectedPaths == null || selectedPaths.length == 0) {
+        JOptionPane.showMessageDialog(OntoLexEditorVR.this,
+                "Please choose a synset and a corresponding concept first");
         return;
       }
 
-      for (int i=0; i< selectedPaths.length; i++) {
-        ClassNode selectedNode = (ClassNode) selectedPaths[i].getLastPathComponent();
-        if (! (selectedNode.getSource() instanceof TClass))
-          continue;
-        ontoLex.add(((TClass)selectedNode.getSource()).getName(),
-                    selectedSynset.getId());
-      }//for loop
+      for(int i = 0; i < selectedPaths.length; i++) {
+        ClassNode selectedNode = (ClassNode)selectedPaths[i]
+                .getLastPathComponent();
+        if(!(selectedNode.getSource() instanceof OClass)) continue;
+        ontoLex.add(((OClass)selectedNode.getSource()).getName(),
+                selectedSynset.getId());
+      }// for loop
       updateOntologySelection();
 
-    }//actionPerformed
+    }// actionPerformed
   }
 
   /**
    */
-  protected class RemoveMappingAction extends AbstractAction{
-    RemoveMappingAction(){
+  protected class RemoveMappingAction extends AbstractAction {
+    RemoveMappingAction() {
       super("RemoveMapping");
       putValue(SHORT_DESCRIPTION, "Remove the selected mapping");
     }
-    public void actionPerformed(java.awt.event.ActionEvent e){
-      if (selectedSynset == null) {
+
+    public void actionPerformed(java.awt.event.ActionEvent e) {
+      if(selectedSynset == null) {
         Out.prln("Select a synset first");
         return;
       }
       TreePath[] selectedPaths = ontoEditor.getSelectionPaths();
-      if (selectedPaths == null || selectedPaths.length == 0) {
+      if(selectedPaths == null || selectedPaths.length == 0) {
         Out.prln("Select an ontology concept first");
         return;
       }
 
-      for (int i=0; i< selectedPaths.length; i++) {
-        ClassNode selectedNode = (ClassNode) selectedPaths[i].getLastPathComponent();
-        if (! (selectedNode.getSource() instanceof TClass))
-          continue;
-        ontoLex.remove(((TClass)selectedNode.getSource()).getName(),
-                       selectedSynset.getId());
+      for(int i = 0; i < selectedPaths.length; i++) {
+        ClassNode selectedNode = (ClassNode)selectedPaths[i]
+                .getLastPathComponent();
+        if(!(selectedNode.getSource() instanceof OClass)) continue;
+        ontoLex.remove(((OClass)selectedNode.getSource()).getName(),
+                selectedSynset.getId());
         ontoEditor.getSelectionModel().removeSelectionPath(selectedPaths[i]);
-      }//for loop
+      }// for loop
 
       updateOntologySelection();
-    }//actionPerformed
+    }// actionPerformed
   }
 
   protected class KnowledgeBaseTreeCellRenderer extends DefaultTreeCellRenderer {
     public KnowledgeBaseTreeCellRenderer() {
     }
-    public Component getTreeCellRendererComponent(JTree tree,
-                                              Object value,
-                                              boolean sel,
-                                              boolean expanded,
-                                              boolean leaf,
-                                              int row,
-                                              boolean hasFocus){
-      super.getTreeCellRendererComponent(tree, value, sel, expanded,
-                                         leaf, row, hasFocus);
-      if (! (value instanceof ClassNode))
-        return this;
-      ClassNode theNode = (ClassNode) value;
-      if(theNode.getSource() instanceof TClass) {
+
+    public Component getTreeCellRendererComponent(JTree tree, Object value,
+            boolean sel, boolean expanded, boolean leaf, int row,
+            boolean hasFocus) {
+      super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row,
+              hasFocus);
+      if(!(value instanceof ClassNode)) return this;
+      ClassNode theNode = (ClassNode)value;
+      if(theNode.getSource() instanceof OClass) {
         setIcon(MainFrame.getIcon("ontology-class"));
-      } else if(theNode.getSource() instanceof OInstance) {
+      }
+      else if(theNode.getSource() instanceof OInstance) {
         setIcon(MainFrame.getIcon("ontology-instance"));
       }
       return this;
     }
   }
-
 
 }
