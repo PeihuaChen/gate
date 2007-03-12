@@ -709,8 +709,8 @@ implements JapeConstants, gate.creole.ANNIEConstants, java.io.Serializable, Clon
       : should be temporary */
       Ontology o = OntologyUtilities.getOntology(url);
 
-      OClass c1 = (OClass) o.getResourceByName(value1);
-      OClass c2 = (OClass) o.getResourceByName(value2);
+      OClass c1 = (OClass) o.getOResourceByName(value1);
+      OClass c2 = (OClass) o.getOResourceByName(value2);
 
       if (null!= c1 && null!= c2) {
         if (c1.equals(c2)) {
