@@ -184,34 +184,6 @@ public class NameBearerHandle implements Handle, StatusListener,
     return new CloseAction();
   }
 
-  /** Fill Protege save, save as and save in format actions */
-  private void fillProtegeActions(List popupItems) {
-    Action action;
-
-    popupItems.add(null);
-
-    action = new edu.stanford.smi.protege.action.SaveProject();
-    action.putValue(Action.NAME, "Save Protege");
-    action.putValue(Action.SHORT_DESCRIPTION, "Save protege project");
-    // Add Save Protege action
-    popupItems.add(new XJMenuItem(action, this));
-
-    action = new edu.stanford.smi.protege.action.SaveAsProject();
-    action.putValue(Action.NAME, "Save Protege As...");
-    action.putValue(Action.SHORT_DESCRIPTION, "Save protege project as");
-    // Add Save as... Protege action
-    popupItems.add(new XJMenuItem(action, this));
-
-    action = new edu.stanford.smi.protege.action.ChangeProjectStorageFormat();
-    // Add Save in format... Protege action
-    popupItems.add(new XJMenuItem(action, this));
-
-    popupItems.add(null);
-    action = new edu.stanford.smi.protege.action.BuildProject();
-    // Add Import... Protege action
-    popupItems.add(new XJMenuItem(action, this));
-  } // fillProtegeActions(gate.gui.ProtegeWrapper protege)
-
   /** Fill HMM Save and Save As... actions */
   private void fillHMMActions(List popupItems) {
     Action action;
@@ -367,9 +339,6 @@ public class NameBearerHandle implements Handle, StatusListener,
                 sListenerProxy));
       }
       
-      if(target instanceof gate.creole.ProtegeProjectName) {
-        fillProtegeActions(staticPopupItems);
-      }// End if
     }
     else if(target instanceof Controller) {
       // Applications

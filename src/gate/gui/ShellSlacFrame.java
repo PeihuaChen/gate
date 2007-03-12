@@ -218,9 +218,6 @@ public class ShellSlacFrame extends MainFrame {
       }
     });
 
-    /*add the ontology editor to the tools menu ontotext.bp */
-    toolsMenu.add(new NewOntologyEditorAction());
-
     if (System.getProperty("gate.slug.gazetteer") != null)
       toolsMenu.add(new NewGazetteerEditorAction());
 

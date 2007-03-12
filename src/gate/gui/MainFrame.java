@@ -36,7 +36,6 @@ import javax.swing.tree.*;
 import junit.framework.Assert;
 
 import com.ontotext.gate.vr.Gaze;
-import com.ontotext.gate.vr.OntologyEditorImpl;
 
 import gate.*;
 import gate.creole.*;
@@ -3316,38 +3315,6 @@ public class MainFrame extends JFrame
     JRadioButtonMenuItem me;
   }////class LocaleSelectorMenuItem extends JRadioButtonMenuItem
 
-  /**ontotext.bp
-   * This class represent an action which brings up the Ontology Editor tool*/
-  class NewOntologyEditorAction extends AbstractAction {
-    public NewOntologyEditorAction(){
-      super("Ontology Editor", getIcon("ontology"));
-      putValue(SHORT_DESCRIPTION,"Start the Ontology Editor");
-    }// NewAnnotDiffAction
-
-    public void actionPerformed(ActionEvent e) {
-      OntologyEditorImpl editor = new OntologyEditorImpl();
-      try {
-        JFrame frame = new JFrame();
-        editor.init();
-        frame.setTitle("Ontology Editor");
-        frame.getContentPane().add(editor);
-        /*
-          SET ONTOLOGY LIST AND ONTOLOGY
-        */
-        Set ontologies = new HashSet(Gate.getCreoleRegister().getLrInstances(
-          "gate.creole.ontology.Ontology"));
-
-        editor.setOntologyList(new Vector(ontologies));
-
-        frame.setSize(OntologyEditorImpl.SIZE_X,OntologyEditorImpl.SIZE_Y);
-        frame.setLocation(OntologyEditorImpl.POSITION_X,OntologyEditorImpl.POSITION_Y);
-        frame.setVisible(true);
-        editor.visualize();
-      } catch ( ResourceInstantiationException ex ) {
-        ex.printStackTrace(Err.getPrintWriter());
-      }
-    }// actionPerformed();
-  }//class NewOntologyEditorAction
 
   /** This class represent an action which brings up the Gazetteer Editor tool*/
   class NewGazetteerEditorAction extends AbstractAction {
