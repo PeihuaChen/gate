@@ -1,0 +1,678 @@
+/*
+ *  OntologyViewer.java
+ *
+ *  Niraj Aswani, 12/March/07
+ *
+ *  $Id: OntologyViewer.html,v 1.0 2007/03/12 16:13:01 niraj Exp $
+ */
+package gate.creole.ontology.ocat;
+
+import gate.gui.docview.AbstractDocumentView;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
+import gate.*;
+import gate.creole.ontology.OResource;
+import gate.creole.ontology.Ontology;
+import gate.creole.ontology.OntologyModificationListener;
+import gate.event.*;
+import gate.gui.docview.*;
+
+/**
+ * In this class we implement the basic structure of the ontology viewer Which
+ * includes the total ontologies that has been loaded in the system option for
+ * the new ontology, if someone wishes to load it into the system the ontology
+ * viewer (which displays all the conetps) Ontology instance viewer and the
+ * instance attribute viewer
+ * 
+ * @author niraj
+ */
+public class OntologyViewer extends AbstractDocumentView implements
+		CreoleListener, AnnotationSetListener, AnnotationListener,
+		OntologyModificationListener {
+	/**
+	 * Serial version ID
+	 */
+	private static final long serialVersionUID = 3977303230621759543L;
+
+	/** Main panel which holds all different components */
+	private JPanel mainPanel;
+
+	/** This stores all the available instances of Ontologies in GATE */
+	private ArrayList<Ontology> ontologies;
+
+	/** ComboBox used to display the ontology instances */
+	private JComboBox ontologyCB;
+
+	/** Panel to display ComboBox */
+	private JPanel ontologyCBPanel;
+
+	/**
+	 * Instance of JTabbedPane to show the ontology Viewer and the
+	 * OntologyViewerOptions
+	 */
+	private JTabbedPane tabbedPane;
+
+	/** Instance of OntologyTreePanel */
+	private OntologyTreePanel ontologyTreePanel;
+
+	/**
+	 * AnnotationMap which stores all the relavant annotations (i.e. annotation
+	 * with class feature) in the following way className --> ArrayList (which
+	 * contains all the annotations)
+	 * </p>
+	 */
+	private HashMap<String, ArrayList<Annotation>> className2AnnotationList;
+
+	/** TextualDocument View instance */
+	protected TextualDocumentView documentTextualDocumentView;
+
+	/**
+	 * This is where the actual document text is being displayed.
+	 */
+	protected JTextArea documentTextArea;
+
+	/**
+	 * This object provides a functionality to add/remove/change the annotations
+	 */
+	protected AnnotationAction annotationAction;
+
+	/**
+	 * Each Annotation Set is given a unique ID, which is used later in the
+	 * annotationsID2ASID map.
+	 */
+	protected HashMap<Integer, String> asID2ASName = new HashMap<Integer, String>();
+
+	/**
+	 * The highest Annotation Set ID
+	 */
+	private int highestASID = 0;
+
+	/**
+	 * We store the ID of each annotation and the ID of annotation set the
+	 * annotation belongs to.
+	 */
+	private HashMap<Integer, Integer> annotationsID2ASID = new HashMap<Integer, Integer>();
+
+	/**
+	 * Given an annotation, this method tells which selectedAnnotationSetName it
+	 * belongs to.
+	 * 
+	 * @param ann
+	 * @return the name of the annotation set.
+	 */
+	public String getAnnotationSet(Annotation ann) {
+		Integer setId = annotationsID2ASID.get(ann.getId());
+		return asID2ASName.get(setId);
+	}
+
+	/** Initialises the GUI */
+	public void initGUI() {
+		// first lets find out all the annotations
+		// which have ontology and a class feature in it
+		document.getAnnotations().addAnnotationSetListener(this);
+		initLocalData();
+
+		// get a pointer to the textual view used for highlights
+		Iterator centralViewsIter = owner.getCentralViews().iterator();
+		while (documentTextualDocumentView == null
+				&& centralViewsIter.hasNext()) {
+			DocumentView aView = (DocumentView) centralViewsIter.next();
+			if (aView instanceof TextualDocumentView)
+				documentTextualDocumentView = (TextualDocumentView) aView;
+		}
+		documentTextArea = (JTextArea) ((JScrollPane) documentTextualDocumentView
+				.getGUI()).getViewport().getView();
+		// first creating ontologyCB GUI
+		ontologyCB = new JComboBox();
+		ontologyCBPanel = new JPanel();
+		ontologyCBPanel.setLayout(new FlowLayout());
+		ontologyCBPanel.add(ontologyCB);
+
+		// lets create the OntologyTree Component
+		ontologyTreePanel = new OntologyTreePanel(this);
+
+		// then lets create main panel design
+		mainPanel = new JPanel();
+		mainPanel.setLayout(new BorderLayout());
+		mainPanel.add(ontologyCBPanel, BorderLayout.NORTH);
+		mainPanel.add(ontologyTreePanel.getGUI(), BorderLayout.CENTER);
+		mainPanel.setBackground(Color.white);
+		int width = ontologyCB.getWidth() > ontologyTreePanel.getWidth() ? ontologyCB
+				.getWidth()
+				: ontologyTreePanel.getWidth();
+		mainPanel.setMaximumSize(new Dimension(width, mainPanel.getHeight()));
+		tabbedPane = new JTabbedPane();
+		tabbedPane.addTab("Ontology Tree(s)", mainPanel);
+		tabbedPane.addTab("Options", ontologyTreePanel.ontologyViewerOptions
+				.getGUI());
+
+		// load ontologies from the Gate environment
+		loadOntologies();
+		// add various listeners, such as annotationAction,
+		// selectionChangeAction and so on.
+		addListeners();
+		if (ontologies != null && ontologies.size() > 0) {
+			ontologyTreePanel.showOntologyInOntologyTreeGUI(ontologies.get(0),
+					className2AnnotationList);
+		} else {
+			ontologyTreePanel.showEmptyOntologyTree();
+		}
+	}
+
+	/** ReIntializes all Maps used for local uses */
+	protected void initLocalData() {
+		className2AnnotationList = new HashMap<String, ArrayList<Annotation>>();
+		HashMap<String, ArrayList<Annotation>> temp = getAnnotationsWithClassFeature(document
+				.getAnnotations(), null);
+		if (temp != null) {
+			className2AnnotationList.putAll(temp);
+		}
+
+		Map<String, AnnotationSet> annotSetMap = document
+				.getNamedAnnotationSets();
+		if (annotSetMap != null) {
+			java.util.List<String> setNames = new ArrayList<String>(annotSetMap
+					.keySet());
+			Collections.sort(setNames);
+			Iterator<String> setsIter = setNames.iterator();
+			while (setsIter.hasNext()) {
+				temp = getAnnotationsWithClassFeature(document
+						.getAnnotations(setsIter.next()), null);
+				if (temp != null) {
+					Iterator<String> keyIter = temp.keySet().iterator();
+					while (keyIter.hasNext()) {
+						String key = keyIter.next();
+						if (className2AnnotationList.containsKey(key)
+								&& temp.get(key) != null) {
+							className2AnnotationList.get(key).addAll(
+									temp.get(key));
+							continue;
+						} else {
+							className2AnnotationList.put(key, temp.get(key));
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * This method is called by respective selectedAnnotationSetName from where
+	 * an annotation is removed
+	 */
+	public void annotationRemoved(AnnotationSetEvent ase) {
+		Annotation currentAnnot = ase.getAnnotation();
+		currentAnnot.removeAnnotationListener(this);
+
+		// checks if it was of our interest
+		FeatureMap map = currentAnnot.getFeatures();
+		String ontoClassName = gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME;
+		if (map.containsKey(ontoClassName)) {
+			// yes this is of our interest we need to remove this from our
+			// className2AnnotationList if it exists
+			Set<String> keySet = ontologyTreePanel.currentClassName2AnnotationsListMap
+					.keySet();
+			Iterator<String> iter = keySet.iterator();
+			String className = "";
+			ArrayList<Annotation> annots = null;
+			outer: while (iter.hasNext()) {
+				className = iter.next();
+				annots = className2AnnotationList.get(className);
+				if (annots != null) {
+					for (int i = 0; i < annots.size(); i++) {
+						if (currentAnnot.getId().equals(annots.get(i).getId())) {
+							annots.remove(currentAnnot);
+							break outer;
+						}
+					}
+				}
+			}
+
+			ontologyTreePanel.currentClassName2AnnotationsListMap.put(
+					className, annots);
+			// remove this from annotationsID2ASID
+			annotationsID2ASID.remove(currentAnnot.getId());
+			// and finally we need to highlight annotations
+			ontologyTreePanel.ontoTreeListener.refreshHighlights();
+		}
+	}
+
+	public void annotationUpdated(AnnotationEvent ae) {
+		Annotation currentAnnot = (Annotation) ae.getSource();
+		// what we need to do is to add this to className2AnnotationList if
+		// it is relavant to our stuff
+		FeatureMap map = currentAnnot.getFeatures();
+		String ontoFeatureName = gate.creole.ANNIEConstants.LOOKUP_ONTOLOGY_FEATURE_NAME;
+		String ontoClassName = gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME;
+		if (map.containsKey(ontoClassName)) {
+			String className = (String) map.get(ontoClassName);
+			String ontologyURL = "";
+			String classValue = "";
+			if (map.containsKey(ontoFeatureName)) {
+				classValue = className;
+			} else {
+				int index = className.lastIndexOf("#");
+				if (index < 0)
+					index = className.lastIndexOf(":");
+				if (index < 0)
+					index = className.lastIndexOf("/");
+				if (index >= 0) {
+					classValue = className.substring(index + 1, className
+							.length());
+				} else {
+					classValue = className;
+				}
+			}
+
+			if (className2AnnotationList.containsKey(classValue)) {
+				ArrayList<Annotation> annotList = className2AnnotationList
+						.get(classValue);
+				if (!annotList.contains(currentAnnot)) {
+					annotList.add(currentAnnot);
+					className2AnnotationList.put(classValue, annotList);
+				}
+			} else {
+				ArrayList<Annotation> annotList = new ArrayList<Annotation>();
+				annotList.add(currentAnnot);
+				className2AnnotationList.put(classValue, annotList);
+			}
+
+			AnnotationSet set = null;
+			// find out the selectedAnnotationSetName that contains this
+			// annotation
+			if (document.getAnnotations().get(currentAnnot.getId()) != null) {
+				set = document.getAnnotations();
+			} else {
+				Collection sets = document.getNamedAnnotationSets().values();
+				Iterator iter = sets.iterator();
+				while (iter.hasNext()) {
+					AnnotationSet set1 = (AnnotationSet) iter.next();
+					if (set1.get(currentAnnot.getId()) != null) {
+						set = set1;
+						break;
+					}
+				}
+			}
+
+			Integer setId = null;
+			if (asID2ASName.values() != null
+					&& asID2ASName.values().contains(set)) {
+				Iterator<Integer> iter = asID2ASName.keySet().iterator();
+				while (iter.hasNext()) {
+					Integer tempId = iter.next();
+					String setString = asID2ASName.get(tempId);
+					if (setString.equals(set.getName())) {
+						setId = tempId;
+						break;
+					}
+				}
+			} else {
+				setId = new Integer(highestASID);
+				highestASID++;
+				asID2ASName.put(setId, set.getName());
+			}
+			annotationsID2ASID.put(currentAnnot.getId(), setId);
+			// done entry
+		}
+		// we have added the annotation to the annotation Map
+		// so we would call the
+		ontologyTreePanel.showOntologyInOntologyTreeGUI(ontologyTreePanel
+				.getCurrentOntology(), className2AnnotationList);
+		ontologyTreePanel.ontoTreeListener.refreshHighlights();
+	}
+
+	/**
+	 * This method is invoked whenever a new annotation is added
+	 */
+	public void annotationAdded(AnnotationSetEvent ase) {
+		Annotation currentAnnot = ase.getAnnotation();
+		currentAnnot.addAnnotationListener(this);
+		// what we need to do is to add this to className2AnnotationList if
+		// it is relavant to our stuff
+		FeatureMap map = currentAnnot.getFeatures();
+		String ontoFeatureName = gate.creole.ANNIEConstants.LOOKUP_ONTOLOGY_FEATURE_NAME;
+		String ontoClassName = gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME;
+		if (map.containsKey(ontoClassName)) {
+			String className = (String) map.get(ontoClassName);
+			String ontologyURL = "";
+			String classValue = "";
+			if (map.containsKey(ontoFeatureName)) {
+				classValue = className;
+			} else {
+				int index = className.lastIndexOf("#");
+				if (index < 0)
+					index = className.lastIndexOf(":");
+				if (index < 0)
+					index = className.lastIndexOf("/");
+				if (index >= 0) {
+					classValue = className.substring(index + 1, className
+							.length());
+				} else {
+					classValue = className;
+				}
+			}
+
+			if (className2AnnotationList.containsKey(classValue)) {
+				ArrayList<Annotation> annotList = className2AnnotationList
+						.get(classValue);
+				annotList.add(currentAnnot);
+				className2AnnotationList.put(classValue, annotList);
+			} else {
+				ArrayList<Annotation> annotList = new ArrayList<Annotation>();
+				annotList.add(currentAnnot);
+				className2AnnotationList.put(classValue, annotList);
+			}
+
+			// make entry in annotationsID2ASID
+			AnnotationSet set = (AnnotationSet) ase.getSource();
+			Integer setId = null;
+			if (asID2ASName.values() != null
+					&& asID2ASName.values().contains(set)) {
+				Iterator<Integer> iter = asID2ASName.keySet().iterator();
+				while (iter.hasNext()) {
+					Integer tempId = iter.next();
+					String setString = asID2ASName.get(tempId);
+					if (setString.equals(set.getName())) {
+						setId = tempId;
+						break;
+					}
+				}
+			} else {
+				setId = new Integer(highestASID);
+				highestASID++;
+				asID2ASName.put(setId, set.getName());
+			}
+			annotationsID2ASID.put(currentAnnot.getId(), setId);
+		}
+
+		// we have added the annotation to the annotation Map
+		// so we would call the
+		ontologyTreePanel.showOntologyInOntologyTreeGUI(ontologyTreePanel
+				.getCurrentOntology(), className2AnnotationList);
+		ontologyTreePanel.ontoTreeListener.refreshHighlights();
+	}
+
+	/**
+	 * This method iterates through annotations and find out the ones with
+	 * ontology and class features and returns the map<String, ArrayList<Annotation>>
+	 */
+	private HashMap<String, ArrayList<Annotation>> getAnnotationsWithClassFeature(
+			AnnotationSet set, String aClassName) {
+		Integer setId = null;
+		if (asID2ASName.values() != null
+				&& asID2ASName.values().contains(set.getName())) {
+			Iterator<Integer> iter = asID2ASName.keySet().iterator();
+			while (iter.hasNext()) {
+				Integer tempId = iter.next();
+				String setString = asID2ASName.get(tempId);
+				if (setString.equals(set.getName())) {
+					setId = tempId;
+					break;
+				}
+			}
+		} else {
+			setId = new Integer(highestASID);
+			highestASID++;
+			asID2ASName.put(setId, set.getName());
+		}
+
+		HashMap<String, ArrayList<Annotation>> subMap = new HashMap<String, ArrayList<Annotation>>();
+		// now lets find out all the annotations which have ontology as a
+		// feature
+		Iterator<Annotation> setIter = set.iterator();
+		String ontoFeatureName = gate.creole.ANNIEConstants.LOOKUP_ONTOLOGY_FEATURE_NAME;
+		String ontoClassName = gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME;
+		while (setIter.hasNext()) {
+			Annotation currentAnnot = setIter.next();
+			currentAnnot.removeAnnotationListener(this);
+			currentAnnot.addAnnotationListener(this);
+			FeatureMap map = currentAnnot.getFeatures();
+			if (map.containsKey(ontoClassName)) {
+				String className = (String) map.get(ontoClassName);
+				String classValue = "";
+				if (map.containsKey(ontoFeatureName)) {
+					classValue = className;
+				} else {
+					int index = className.lastIndexOf("#");
+					if (index < 0)
+						index = className.lastIndexOf(":");
+					if (index < 0)
+						index = className.lastIndexOf("/");
+					if (index >= 0) {
+						classValue = className.substring(index + 1, className
+								.length());
+					} else {
+						classValue = className;
+					}
+				}
+
+				if (aClassName == null || classValue.equals(aClassName)) {
+					if (subMap.containsKey(classValue)) {
+						ArrayList<Annotation> annotList = subMap
+								.get(classValue);
+						annotList.add(currentAnnot);
+						subMap.put(classValue, annotList);
+					} else {
+						ArrayList<Annotation> annotList = new ArrayList<Annotation>();
+						annotList.add(currentAnnot);
+						subMap.put(classValue, annotList);
+					}
+				}
+				annotationsID2ASID.put(currentAnnot.getId(), setId);
+			}
+		}
+		return subMap;
+	}
+
+	public void registerHooks() {
+		documentTextArea.addMouseListener(annotationAction);
+		documentTextArea.addMouseMotionListener(annotationAction);
+	}
+
+	public void unregisterHooks() {
+		documentTextArea.removeMouseListener(annotationAction);
+		documentTextArea.removeMouseMotionListener(annotationAction);
+	}
+
+	public int getType() {
+		return VERTICAL;
+	}
+
+	/**
+	 * gets the main tabbed pane that will be displayed as the OCAT component
+	 */
+	public Component getGUI() {
+		return tabbedPane;
+	}
+
+	/**
+	 * Adds various listeners to the different components
+	 */
+	private void addListeners() {
+		Gate.getCreoleRegister().addCreoleListener(this);
+		ontologyCB.addActionListener(new OntologySelectionChangeAction());
+		annotationAction = new AnnotationAction(ontologyTreePanel);
+	}
+
+	/**
+	 * Releases all resources and listeners
+	 */
+	public void cleanup() {
+		Gate.getCreoleRegister().removeCreoleListener(this);
+		// and we need to remove the annotationSetListener as well
+		AnnotationSet set = document.getAnnotations();
+		set.removeAnnotationSetListener(this);
+		Map annotSetMap = document.getNamedAnnotationSets();
+		if (annotSetMap != null) {
+			java.util.List<String> setNames = new ArrayList<String>(annotSetMap
+					.keySet());
+			Collections.sort(setNames);
+			Iterator<String> setsIter = setNames.iterator();
+			while (setsIter.hasNext()) {
+				set = document.getAnnotations(setsIter.next());
+				set.removeAnnotationSetListener(this);
+			}
+		}
+	}
+
+	/**
+	 * Searches within the GATE system to find out all the loaded ontologies
+	 */
+	private void loadOntologies() {
+		if (ontologies == null) {
+			ontologies = new ArrayList<Ontology>();
+			java.util.List lrs = gate.Gate.getCreoleRegister()
+					.getPublicLrInstances();
+			Iterator iter1 = lrs.iterator();
+			while (iter1.hasNext()) {
+				gate.LanguageResource lr = (LanguageResource) iter1.next();
+				if (!(lr instanceof Ontology))
+					continue;
+				((Ontology)lr).addOntologyModificationListener(this);
+				ontologies.add((Ontology) lr);
+				ontologyCB.addItem(((Ontology) lr).getName());
+			}
+		}
+	}
+
+	/**
+	 * Refresh the comboBox.. in case new ontology is loaded or one is removed
+	 * 
+	 * @param ontology
+	 *            this could be either newly added ontology or that removed one
+	 * @param removed
+	 *            if true instance is removed otherwise added
+	 */
+	private void refreshOntologyCB(Ontology ontology, boolean removed) {
+		if (removed) {
+			// first we need to see if there exists any instance in the system
+			// that has the same id, if so, we don't want to remove this
+			ontologyCB.removeItem(ontology.getName());
+			ontologies.remove(ontology);
+			ontologyCB.invalidate();
+			boolean wasCurrentlySelected = false;
+			if (ontologyTreePanel.getCurrentOntology() == ontology)
+				wasCurrentlySelected = true;
+			ontologyTreePanel.removeOntologyTreeModel(ontology,
+					wasCurrentlySelected);
+			if (wasCurrentlySelected)
+				if (ontologyCB.getItemCount() > 0) {
+					ontologyCB.setSelectedIndex(0);
+				}
+		} else {
+			ontologies.add(ontology);
+			ontologyCB.addItem(ontology.getName());
+			if (ontologyCB.getItemCount() == 1) {
+				ontologyTreePanel.currentOntologyTree.setVisible(true);
+				ontologyCB.setSelectedIndex(0);
+			}
+		}
+	}
+
+	/**
+	 * Description: an internal OntologySelectionChangeAction used to handle the
+	 * ontology selection changes
+	 * 
+	 * @author Niraj Aswani
+	 * @version 1.0
+	 */
+	private class OntologySelectionChangeAction implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			/** gets executed when user changes his/her selection of ontology */
+			if (e.getSource() == ontologyCB) {
+				int index = ontologyCB.getSelectedIndex();
+				if (index >= 0) {
+					ontologyTreePanel.showOntologyInOntologyTreeGUI(ontologies
+							.get(index), className2AnnotationList);
+				} else {
+					ontologyTreePanel.showEmptyOntologyTree();
+				}
+				ontologyTreePanel.ontoTreeListener.refreshHighlights();
+			}
+		}
+	}
+
+	// ***************************
+	/** CreoleListener methods */
+	// ****************************
+	/**
+	 * Gets executed whenever new resource is loaded in the GATE system
+	 * 
+	 * @param creoleEvent
+	 */
+	public void resourceLoaded(CreoleEvent creoleEvent) {
+		Resource rs = creoleEvent.getResource();
+		if (rs instanceof Ontology) {
+			((Ontology)rs).addOntologyModificationListener(this);
+			refreshOntologyCB((Ontology) rs, false);
+		}
+	}
+
+	/**
+	 * Gets executed whenever existing resource is unloaded in the GATE system
+	 * 
+	 * @param creoleEvent
+	 */
+	public void resourceUnloaded(CreoleEvent creoleEvent) {
+		Resource rs = creoleEvent.getResource();
+		if (rs instanceof Ontology) {
+			// we are interested
+			((Ontology)rs).removeOntologyModificationListener(this);
+			refreshOntologyCB((Ontology) rs, true);
+		}
+	}
+
+	public void datastoreOpened(CreoleEvent creoleEvent) {
+	}
+
+	public void datastoreCreated(CreoleEvent creoleEvent) {
+	}
+
+	public void datastoreClosed(CreoleEvent creoleEvent) {
+	}
+
+	/**
+	 * Gets executed whenever resource name is changed
+	 * 
+	 * @param resource
+	 * @param string
+	 * @param string2
+	 */
+	public void resourceRenamed(Resource resource, String string, String string2) {
+		if (resource instanceof Ontology) {
+			int index = ontologies.indexOf((Ontology) resource);
+			ontologyCB.remove(index);
+			ontologyCB.insertItemAt(((Ontology) resource).getName(), index);
+			ontologyCB.invalidate();
+		}
+	}
+
+	public void resourcesRemoved(Ontology ontology, String[] deletedResources) {
+		boolean shouldSelectAgain = false;
+		if(((String)ontologyCB.getSelectedItem()).equals(ontology.getName())) {
+			shouldSelectAgain = true;
+		}
+		refreshOntologyCB(ontology, true);
+		refreshOntologyCB(ontology, false);
+		if(shouldSelectAgain)
+			ontologyCB.setSelectedItem(ontology.getName());
+	}
+
+	public void ontologyModified(Ontology ontology, OResource resource,
+			int eventType) {
+		// we don't do anything here
+	}
+
+	public void resourceAdded(Ontology ontology, OResource resource) {
+		boolean shouldSelectAgain = false;
+		if(((String)ontologyCB.getSelectedItem()).equals(ontology.getName())) {
+			shouldSelectAgain = true;
+		}
+		refreshOntologyCB(ontology, true);
+		refreshOntologyCB(ontology, false);
+		if(shouldSelectAgain)
+			ontologyCB.setSelectedItem(ontology.getName());
+	}
+}
