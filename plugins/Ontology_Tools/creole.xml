@@ -81,5 +81,13 @@
         <RESOURCE_DISPLAYED>gate.creole.ontology.Ontology</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
+
+    <!-- Ontology Corpus Annotation Tool -->    
+    <RESOURCE>
+      <NAME>OCAT</NAME>
+      <JAR>ontology_tools.jar</JAR>
+      <CLASS>gate.creole.ontology.ocat.OntologyViewer</CLASS>
+    </RESOURCE>
+    
   </CREOLE>
 </CREOLE-DIRECTORY>
