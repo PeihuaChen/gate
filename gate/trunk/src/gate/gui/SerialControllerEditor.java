@@ -835,6 +835,9 @@ public class SerialControllerEditor extends AbstractVisualResource
         Corpus c = (Corpus)e.getResource();
         if(controller instanceof CorpusController) {
           if(c == ((CorpusController)controller).getCorpus()) {
+            // setCorpus(null) is also called in the controller's
+            // resourceUnloaded(), but we can't be sure which handler is
+            // called first...
             ((CorpusController)controller).setCorpus(null);
           }
         }
