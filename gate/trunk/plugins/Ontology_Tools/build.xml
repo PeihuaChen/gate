@@ -51,6 +51,13 @@
   <target name="clean" depends="clean.classes" >
     <!-- full clean also removes the generated JAR file -->
     <delete file="${jar.location}" />
+    
   </target>
+  
+  <!-- Targets used by the main GATE build file -->
+  <target name="build" depends="jar" />
+  <target name="test" />
+  <target name="distro.prepare" depends="clean.classes" />
+  
 </project>
 
