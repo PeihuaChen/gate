@@ -16,9 +16,9 @@
       <include name="**/*.jar" />
       <include name="**/*.zip" />
     </fileset>
-    <fileset dir="lib"> 
+    <!--<fileset dir="lib"> 
       <include name="*.jar"/>
-    </fileset>
+    </fileset>-->
   </path> 
 
 
