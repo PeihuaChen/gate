@@ -830,6 +830,22 @@ public class SerialControllerEditor extends AbstractVisualResource
       memberPRsTableModel.fireTableDataChanged();
 //      repaint(100);
     }
+    else if(e.getResource() instanceof LanguageResource) {
+      if(e.getResource() instanceof Corpus && analyserMode) {
+        Corpus c = (Corpus)e.getResource();
+        if(controller instanceof CorpusController) {
+          if(c == ((CorpusController)controller).getCorpus()) {
+            ((CorpusController)controller).setCorpus(null);
+          }
+        }
+        else {
+          throw new GateRuntimeException("Controller editor in analyser mode " +
+                                         "but the target controller is not an " +
+                                         "analyser!");
+        }
+        corpusComboModel.fireDataChanged();
+      }
+    }
   }//public void resourceUnloaded(CreoleEvent e)
 
   public void resourceRenamed(Resource resource, String oldName,
