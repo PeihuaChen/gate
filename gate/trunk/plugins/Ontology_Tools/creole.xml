@@ -9,27 +9,6 @@
       <NAME>OWLIM Ontology LR</NAME>
       <CLASS>gate.creole.ontology.owlim.OWLIMOntologyLR</CLASS>
       <INTERFACE>gate.creole.ontology.Ontology</INTERFACE>
-      <JAR>lib/owlim-2.8.4.jar</JAR>
-      <JAR>lib/owlim.jar</JAR>
-      <JAR>lib/activation.jar</JAR>
-      <JAR>lib/axis-ant.jar</JAR>
-      <JAR>lib/axis-schema.jar</JAR>
-      <JAR>lib/axis.jar</JAR>
-      <JAR>lib/commons-discovery-0.2.jar</JAR>
-      <JAR>lib/commons-fileupload-1.0.jar</JAR>
-      <JAR>lib/jaxrpc.jar</JAR>
-      <JAR>lib/lubm.jar</JAR>
-      <JAR>lib/mail.jar</JAR>
-      <JAR>lib/openrdf-model.jar</JAR>
-      <JAR>lib/openrdf-util.jar</JAR>
-      <JAR>lib/rio.jar</JAR>
-      <JAR>lib/saaj.jar</JAR>
-      <JAR>lib/servlet-api.jar</JAR>
-      <JAR>lib/sesame.jar</JAR>
-      <JAR>lib/soap.jar</JAR>
-      <JAR>lib/trree-2.8.4.jar</JAR>
-      <JAR>lib/wsdl4j-1.5.1.jar</JAR>
-      <JAR>lib/xpp3-1.1.3.3_min.jar</JAR>
       
       <COMMENT>Ontology which connects to Sesame Repository via OWLIM SAIL</COMMENT>
 	 <OR>
