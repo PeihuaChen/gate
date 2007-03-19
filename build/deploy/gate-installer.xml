@@ -20,6 +20,7 @@
     
     <variables>
       <variable name="app-version" value="4.0-alpha1"/>
+      <variable name="InstallerFrame.logfilePath" value="default"/>
     </variables>
     
     <!-- 
@@ -49,7 +50,10 @@
         The ids must be these ones if you want to use the LicencePanel and/or the InfoPanel.
     -->
     <resources>
-        <res id="LicencePanel.licence" src="licence.html"/>
+        <res id="splash.png" src="src/gate/resources/img/splash.png" />
+        <res id="HTMLInfoPanel.info" src="build/deploy/installer-text-0.html"/>        
+        <res id="HTMLLicencePanel.licence" src="licence.html"/>
+        <res id="Unix_shortcutSpec.xml" src="build/deploy/unix-shortcuts.xml"/>
     </resources>
     
     <!-- 
@@ -57,12 +61,12 @@
         We indicate here which panels we want to use. The order will be respected.
     -->
     <panels>
-        <panel classname="HelloPanel"/>
-        <panel classname="InfoPanel"/>
-        <panel classname="LicencePanel"/>
-        <panel classname="TargetPanel"/> 
+        <panel classname="HTMLInfoPanel"/>
+        <panel classname="HTMLLicencePanel"/>
+        <panel classname="TargetPanel"/>
         <panel classname="PacksPanel"/>
         <panel classname="InstallPanel"/>
+        <panel classname="ShortcutPanel"/>        
         <panel classname="FinishPanel"/>
     </panels>
     
@@ -78,6 +82,14 @@
             <file src="bin" targetdir="$INSTALL_PATH"/>
             <file src="lib" targetdir="$INSTALL_PATH"/>
             <file src="licence.html" targetdir="$INSTALL_PATH"/>
+            <file src="index.html" targetdir="$INSTALL_PATH"/>
+            <file src="build.xml" targetdir="$INSTALL_PATH"/>          
+            <file src="gate.xml" targetdir="$INSTALL_PATH"/>
+            <executable targetfile="$INSTALL_PATH/bin/ant" type="bin" keep="true"/>
+            <executable targetfile="$INSTALL_PATH/bin/antRun" type="bin" keep="true"/>
+            <executable targetfile="$INSTALL_PATH/bin/antRun" type="bin" keep="true"/>
+            <executable targetfile="$INSTALL_PATH/bin/gate.sh" type="bin" keep="true"/>
+            <executable targetfile="$INSTALL_PATH/bin/real-ant" type="bin" keep="true"/>
         </pack>
         <pack name="doc" 
               required="no"

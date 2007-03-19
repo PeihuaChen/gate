@@ -813,6 +813,7 @@
 	<target name="installer">
 		<izpack input="${buildDir}/deploy/gate-installer.xml"
 		        output="${basedir}/gate-installer.jar"
-		        basedir="${basedir}"/>
+		        basedir="${basedir}">			
+		</izpack>
 	</target>
 </project>
