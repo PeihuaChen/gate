@@ -45,6 +45,8 @@ public class DataStoreRegister extends HashSet {
     // filesystem
     names.put("gate.persist.SerialDataStore", "SerialDataStore: file-based storage using Java serialisation");
 
+    names.put("gate.persist.LuceneDataStoreImpl", "Lucene Based Searchable DataStore");
+    
     // docservice
     try {
       if (Class.forName("gleam.docservice.gate.DocServiceDataStore", true, Gate.getClassLoader()) != null) {
@@ -54,13 +56,6 @@ public class DataStoreRegister extends HashSet {
     } catch (ClassNotFoundException e) {
     }
     
-    try {
-    	if(Class.forName("gate.persist.LuceneDataStoreImpl", true, Gate.getClassLoader()) != null) {
-    		names.put("gate.persist.LuceneDataStoreImpl", "Lucene Based Searchable DataStore");
-    	}
-    } catch(ClassNotFoundException e) {
-    }
-
     return names;
   } // getDataStoreClassNames()
 
