@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+
+<shortcuts>
+
+  <programGroup defaultName="GATE $APP_VER" location="applications"/>
+
+   <shortcut
+     name="GATE $APP_VER GUI"
+     programGroup="yes"
+     target="$INSTALL_PATH/bin/gate.bat"
+     workingDirectory="$INSTALL_PATH"
+     description="Starts the GATE $APP_VER GUI"
+     initialState="normal"
+     desktop="no"
+		 type="Application"
+     encoding="UTF-8">
+     <createForPack name="bin"/>
+   </shortcut>
+</shortcuts>
