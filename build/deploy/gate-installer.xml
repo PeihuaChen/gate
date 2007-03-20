@@ -17,7 +17,8 @@
         <url>http://gate.ac.uk/</url>
         <javaversion>1.5</javaversion>
     </info>
-    
+    <!--  Load the native library used for generating Windows shortcuts -->
+    <native type="izpack" name="ShellLink.dll"/>
     <variables>
       <variable name="app-version" value="4.0-alpha1"/>
       <variable name="InstallerFrame.logfilePath" value="default"/>
@@ -54,6 +55,7 @@
         <res id="HTMLInfoPanel.info" src="build/deploy/installer-text-0.html"/>        
         <res id="HTMLLicencePanel.licence" src="licence.html"/>
         <res id="Unix_shortcutSpec.xml" src="build/deploy/unix-shortcuts.xml"/>
+        <res id="shortcutSpec.xml" src="build/deploy/windows-shortcuts.xml"/>
     </resources>
     
     <!-- 
