@@ -11,7 +11,7 @@
      workingDirectory="$INSTALL_PATH"
      description="Starts the GATE $APP_VER GUI"
      initialState="normal"
-     desktop="no"
+     desktop="yes"
 		 type="Application"
      encoding="UTF-8">
      <createForPack name="bin"/>
