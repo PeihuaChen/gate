@@ -1,0 +1,344 @@
+/*
+ *  HTMLGenerator.java
+ *
+ *  Niraj Aswani, 19/March/07
+ *
+ *  $Id: HTMLGenerator.html,v 1.0 2007/03/19 16:22:01 niraj Exp $
+ */
+package gate.creole.annic;
+
+import java.util.*;
+
+/**
+ * This class provides methods to export the annic patterns to HTML. The
+ * HTML provides a way to look at various annotations that span across
+ * the found annic pattern.
+ * 
+ * @author niraj
+ */
+public class HTMLGenerator {
+
+  /**
+   * This method exports the annic pattern to HTML. The HTML provides a
+   * way to look at various annotations that span across the found annic
+   * pattern.
+   * 
+   * @param pattern
+   * @return
+   */
+  public static String generateHTMLTable(Pattern pattern) {
+    PatternAnnotation[] patternAnnotations = pattern.getPatternAnnotations();
+
+    // for each table we create a separate html code
+    String html = "<table cellpadding=\"0\" cellspacing=\"0\" border=\"1\" width=\"100%\" style=\"border-collapse: collapse; border: medium none; background: #E6E6E6\">";
+
+    // at the begining we find out number of rows we need to create for
+    // this
+    ArrayList rows = getRowData(patternAnnotations);
+    Collections.sort(rows);
+
+    // find out the number of columns
+    ArrayList colPositions = getColsPositions(patternAnnotations);
+    Collections.sort(colPositions, new Comparator() {
+      public int compare(Object a, Object b) {
+        int aVal = Integer.parseInt((String)a);
+        int bVal = Integer.parseInt((String)b);
+        return aVal - bVal;
+      }
+    });
+
+    patternAnnotations = sort(patternAnnotations);
+
+    html += "\n"
+            + "<tr> <td style=\"width: 85.25pt; border-left: medium none; border-right: 1.0pt dashed blue; border-top: 1.0pt dashed blue; border-bottom: 1.0pt dashed blue; padding-left: 5.4pt; padding-right: 5.4pt; padding-top: 0cm; padding-bottom: 0cm\"><p class=\"MsoNormal\" align=\"center\">Pattern Text : </td>";
+    int endPos = patternAnnotations[0].getStartOffset();
+    int startPos = 0;
+    for(int j = 1; j < colPositions.size(); j++) {
+      startPos = endPos;
+      endPos = Integer.parseInt((String)colPositions.get(j));
+      String text = pattern.getPatternText(startPos, endPos);
+      html += "\n"
+              + "<td style=\"border: 1.0pt dashed blue;\" align=\"center\">"
+              + text + "</td>";
+    }
+
+    // and now for each type we create a new Row
+    for(int j = 0; j < rows.size(); j++) {
+
+      // first column is the annotation Type
+      html += "\n" + "<tr width=\"100%\" height=\"19\"> <td>"
+              + (String)rows.get(j) + "</td>";
+      ArrayList rowAnnotations = findOutAnnotationsOfType(patternAnnotations,
+              (String)rows.get(j));
+
+      int columnsDrawn = 0;
+      for(int k = 0; k < rowAnnotations.size(); k++) {
+        // for each annotation we will create a column
+        PatternAnnotation annot = (PatternAnnotation)rowAnnotations.get(k);
+
+        // we may need to draw few columns before this annotations
+        html += "\n"
+                + columnsToDraw(patternAnnotations, rowAnnotations, k,
+                        colPositions);
+        columnsDrawn += noOfColumnsToDraw;
+
+        // now lets find out the annotations at the same starting
+        // positions
+        ArrayList tempList = new ArrayList();
+        tempList.add(annot);
+
+        int maxEndOffset = annot.getEndOffset();
+        int m = k + 1;
+        for(; m < rowAnnotations.size(); m++) {
+          PatternAnnotation annot1 = (PatternAnnotation)rowAnnotations.get(m);
+          if(annot.getStartOffset() == annot1.getStartOffset()) {
+            tempList.add(annot1);
+            if(annot1.getEndOffset() > maxEndOffset) {
+              maxEndOffset = annot1.getEndOffset();
+            }
+          }
+          else {
+            m--;
+            break;
+          }
+        }
+
+        if(k != m) {
+          k = m;
+        }
+
+        int colSpan = getColSpan(annot.getStartOffset(), maxEndOffset,
+                colPositions);
+
+        if(colSpan > 0) {
+          html += "\n"
+                  + "<td style=\"border: 1.0pt dashed blue;\" align=\"center\" colspan=\""
+                  + colSpan + "\" <p align=\"center\">";
+          columnsDrawn += colSpan;
+        }
+        else {
+          html += "\n"
+                  + "<td style=\"border: 1.0pt dashed blue;\" align=\"center\"> <p align=\"center\">";
+          columnsDrawn += 1;
+        }
+
+        for(m = 0; m < tempList.size(); m++) {
+          html += addFeatures(((PatternAnnotation)tempList.get(m))
+                  .getFeatures())
+                  + "<br>";
+        }
+
+        html += "</td>";
+      }
+
+      // now see how many columns are yet to be drawn
+      for(int k = 0; k < colPositions.size() - columnsDrawn; k++) {
+        html += "\n" + "<td style=\"border: 1.0pt dashed blue;\">&nbsp;</td>";
+      }
+      html += "\n" + "</tr>";
+    }
+
+    // and finally we need to add all the annotations at the end
+    html += "\n" + "</table>";
+    return html;
+  }
+
+  /**
+   * This method is used for sorting the pattern annotations.
+   * 
+   * @param annots
+   * @return
+   */
+  private static PatternAnnotation[] sort(PatternAnnotation[] annots) {
+
+    for(int i = 0; i < annots.length; i++) {
+      for(int j = 0; j < annots.length - 1; j++) {
+        if(annots[j].getStartOffset() > annots[j + 1].getStartOffset()) {
+          PatternAnnotation temp = annots[j + 1];
+          annots[j + 1] = annots[j];
+          annots[j] = temp;
+          break;
+        }
+
+        if(annots[j].getEndOffset() > annots[j + 1].getEndOffset()) {
+          PatternAnnotation temp = annots[j + 1];
+          annots[j + 1] = annots[j];
+          annots[j] = temp;
+          break;
+        }
+      }
+    }
+    return annots;
+  }
+
+  /**
+   * Number of columns to draw in the html table.
+   */
+  private static int noOfColumnsToDraw = 0;
+
+  private static String columnsToDraw(
+          PatternAnnotation[] currentTableAnnotations,
+          ArrayList rowAnnotations, int currentPos, ArrayList colPositions) {
+
+    // if currentPos == 0
+    // this is the first annotation in this row
+    int startPoint = 0;
+    if(currentPos == 0) {
+      startPoint = ((PatternAnnotation)currentTableAnnotations[0])
+              .getStartOffset();
+    }
+    else {
+      startPoint = ((PatternAnnotation)rowAnnotations.get(currentPos - 1))
+              .getEndOffset();
+    }
+
+    noOfColumnsToDraw = noOfColumnsToDraw(startPoint,
+            ((PatternAnnotation)rowAnnotations.get(currentPos))
+                    .getStartOffset(), colPositions);
+    String html = "";
+    for(int i = 0; i < noOfColumnsToDraw; i++) {
+      html += "\n" + "<td style=\"border: 1.0pt dashed blue;\">&nbsp;</td>";
+    }
+    return html;
+  }
+
+  private static int noOfColumnsToDraw(int start, int end,
+          ArrayList colPositions) {
+    if(start == end) return 0;
+
+    int counter = 0;
+    int i = 0;
+    for(; i < colPositions.size(); i++) {
+      if(Integer.parseInt((String)colPositions.get(i)) == start) {
+        i++;
+        break;
+      }
+    }
+
+    if(i == colPositions.size() || i < 0) i = 0;
+
+    for(; i < colPositions.size(); i++) {
+      if(end == Integer.parseInt((String)colPositions.get(i))) {
+        counter++;
+        break;
+      }
+      counter++;
+    }
+
+    return counter;
+  }
+
+  /**
+   * From given an array of pattern annotations, this method finds out
+   * the annotations of the given type.
+   * 
+   * @param annotations
+   * @param type
+   * @return
+   */
+  private static ArrayList findOutAnnotationsOfType(
+          PatternAnnotation[] annotations, String type) {
+    ArrayList annots = new ArrayList();
+    for(int i = 0; i < annotations.length; i++) {
+      if(annotations[i].getType().equals(type)) {
+        annots.add(annotations[i]);
+      }
+    }
+    return annots;
+  }
+
+  private static int getColSpan(int startOffset, int endOffset,
+          ArrayList colPositions) {
+    // given startOffset and endOffset
+    // we need to find out how many columns this particular annotations
+    // needs to span
+    int counter = 0;
+
+    // lets find out the starting position
+    int i = 0;
+    for(; i < colPositions.size(); i++) {
+      if(Integer.parseInt((String)colPositions.get(i)) == startOffset) {
+        i++;
+        break;
+      }
+    }
+
+    if(i == colPositions.size() || i < 0) {
+      // because this is the first annotation, it cannot satisfy the
+      // condition startOffset > colVal
+      // and therefore it simply reached here
+      // we will set it back to the 0
+      i = 0;
+    }
+
+    // now we need to start the counter until we find out the end
+    // position
+    // in the col Positions
+    for(; i < colPositions.size(); i++) {
+      if(endOffset == Integer.parseInt((String)colPositions.get(i))) {
+        counter++;
+        break;
+      }
+      counter++;
+    }
+    return counter;
+  }
+
+  private static ArrayList getColsPositions(PatternAnnotation[] annotations) {
+    // the logic is:
+    // find out the unique number of endOffsets
+    ArrayList offsets = new ArrayList();
+    for(int i = 0; i < annotations.length; i++) {
+      int endOffset = annotations[i].getEndOffset();
+      int startOffset = annotations[i].getStartOffset();
+
+      if(offsets.contains("" + endOffset)) {
+        // do nothing
+      }
+      else {
+        offsets.add("" + endOffset);
+      }
+
+      if(offsets.contains("" + startOffset)) {
+        // do nothing
+      }
+      else {
+        offsets.add("" + startOffset);
+      }
+
+    }
+    return offsets;
+  }
+
+  /**
+   * This method return the unique rows. Each row refers to a different
+   * annotation type
+   * 
+   * @param annotations
+   * @return a list of string objects referring to the annotation types
+   */
+  private static ArrayList getRowData(PatternAnnotation[] annotations) {
+    ArrayList types = new ArrayList();
+    for(int i = 0; i < annotations.length; i++) {
+      String type = annotations[i].getType();
+      if(types.contains(type))
+        continue;
+      else types.add(type);
+    }
+    return types;
+  }
+
+  // this method takes the features of a particular annotations
+  // and returns the equivalent html code
+  private static String addFeatures(HashMap features) {
+    String html = "<select size=\"1\" >";
+    Iterator fIter = features.keySet().iterator();
+    while(fIter.hasNext()) {
+      String key = (String)fIter.next();
+      String value = features.get(key).toString();
+      html += "\n" + "<option>" + key + " = \"" + value + "\"</option>";
+    }
+    html += "\n" + "</select>";
+    return html;
+  }
+}
