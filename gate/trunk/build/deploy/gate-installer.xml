@@ -87,6 +87,8 @@
             <file src="index.html" targetdir="$INSTALL_PATH"/>
             <file src="build.xml" targetdir="$INSTALL_PATH"/>          
             <file src="gate.xml" targetdir="$INSTALL_PATH"/>
+            <file src="build/*" targetdir="$INSTALL_PATH/build"/>
+            <file src="build/deploy/gate-icon.ico" targetdir="$INSTALL_PATH/icons" os="windows"/>
             <executable targetfile="$INSTALL_PATH/bin/ant" type="bin" keep="true"/>
             <executable targetfile="$INSTALL_PATH/bin/antRun" type="bin" keep="true"/>
             <executable targetfile="$INSTALL_PATH/bin/antRun" type="bin" keep="true"/>
