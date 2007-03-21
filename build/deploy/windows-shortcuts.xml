@@ -7,10 +7,12 @@
    <shortcut
      name="GATE $APP_VER GUI"
      programGroup="yes"
-     target="$INSTALL_PATH/bin/gate.bat"
+     target="$JAVA_HOME/bin/java.exe"
+     commandLine='-classpath "$INSTALL_PATH\lib\ant-launcher.jar" -Dant.home="$INSTALL_PATH" -nouserlib -noclasspath org.apache.tools.ant.launch.Launcher run'
      workingDirectory="$INSTALL_PATH"
      description="Starts the GATE $APP_VER GUI"
      initialState="normal"
+     iconFile="$INSTALL_PATH/icons/gate-icon.ico"
      desktop="no"
 		 type="Application"
      encoding="UTF-8">
