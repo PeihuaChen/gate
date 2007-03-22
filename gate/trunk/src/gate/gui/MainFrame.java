@@ -2606,15 +2606,15 @@ public class MainFrame extends JFrame implements ProgressListener,
             // resources
             for(Resource aResource : resources) {
               try {
-                System.out.print("Cleaning up :" + aResource.getName());
+                //System.out.print("Cleaning up :" + aResource.getName());
                 aResource.cleanup();
-                System.out.println(" Done!");
+                //System.out.println(" Done!");
               }
               catch(Throwable e) {
                 // this may throw somekind of exception
                 // but we just ignore it as anyway we are closing
                 // everything
-                System.err.println(" Some problem! " + e.getMessage());
+                System.err.println(" Some problem cleaning up the resource " + e.getMessage());
               }
             }
           }
