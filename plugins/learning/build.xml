@@ -16,7 +16,7 @@
 
 	<!-- Location of GATE - by default assume it's checked out at the same
        level as sins -->
-	<property name="gate.home" location="../../../gate" />
+	<property name="gate.home" location="../.." />
 
 	<!-- TOOLS.JAR -->
 	<!-- GATE will normally try to guess which tools.jar library to use based on
@@ -79,25 +79,27 @@
 	<!-- This target compiles all the classes -->
 	<target name="compile" description="compile the source " depends="prepare">
 		<!-- Compile the java code from ${srcDir} into ${buildDir} -->
-		<javac srcdir="${srcDir}" destdir="${buildDir}" source="1.5" encoding="UTF-8" debug="true" debuglevel="lines,source" classpathref="build.class.path" />
+		<javac srcdir="${srcDir}" destdir="${buildDir}" source="1.5" target="1.5" encoding="UTF-8" debug="true" debuglevel="lines,source" classpathref="build.class.path" />
 	</target>
 
 	<target name="jar" depends="compile">
 		<jar destfile="learningapi.jar" update="false" index="true">
 			<fileset dir="${buildDir}/" />
 		</jar>
-		<delete dir="${buildDir}" />
 	</target>
 
 	<!-- Everything! -->
-	<target name="all" depends="clean,jar">
+	<target name="all" depends="jar">
 	</target>
 
 	<!-- Clear all build output -->
-	<target name="clean">
+	<target name="clean.classes">
 		<delete dir="${buildDir}" />
-		<delete file="learningapi.jar" />
 	</target>
+
+        <target name="clean" depends="clean.classes">
+		<delete file="learningapi.jar" />
+        </target>
 
 	<!-- Run (some) of the junit tests -->
 	<target name="test" depends="jar">
@@ -115,7 +117,7 @@
 
 	<!-- Targets used by the main GATE build file -->
 	<target name="build" depends="jar" />
-	<target name="distro.prepare" depends="clean" />
+	<target name="distro.prepare" depends="clean.classes" />
 	
     
 </project>
