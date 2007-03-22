@@ -8,6 +8,7 @@ import gate.Corpus;
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
+import gate.learningLightWeight.ConstantParameters;
 import gate.learningLightWeight.EvaluationBasedOnDocs;
 import gate.learningLightWeight.LearningAPIMain;
 import gate.util.ExtensionFileFilter;
@@ -29,7 +30,8 @@ public class TestLearningAPI extends TestCase {
     super(arg0);
     if(!initialized) {
       Gate.init();
-      learningHome = new File(new File(Gate.getGateHome(),"plugins") ,"learning");
+      learningHome = new File(new File(Gate.getGateHome(), "plugins"),
+        "learning");
       Gate.getCreoleRegister().addDirectory(learningHome.toURL());
       initialized = true;
     }
@@ -52,8 +54,8 @@ public class TestLearningAPI extends TestCase {
 
   void loadSettings(String configFileName, String corpusDirName, String inputasN)
     throws GateException, IOException {
-	    System.out.println("Learning Home : "+learningHome.getAbsolutePath());
-	    FeatureMap parameters = Factory.newFeatureMap();
+    System.out.println("Learning Home : " + learningHome.getAbsolutePath());
+    FeatureMap parameters = Factory.newFeatureMap();
     URL configFileURL = new File(configFileName).toURL();
     parameters.put("configFileURL", configFileURL);
     learningApi = (LearningAPIMain)Factory.createResource(
@@ -81,13 +83,18 @@ public class TestLearningAPI extends TestCase {
     Factory.deleteResource(controller);
   }
 
-  
   public void testSVMChunkLearnng() throws IOException, GateException {
     // Initialisation
-    File chunklearningHome = new File(new File(learningHome, "test") , "chunklearning");
-    String configFileURL = new File(chunklearningHome, "engines-svm.xml").getAbsolutePath();
-    String corpusDirName = new File(chunklearningHome, "data-ontonews").getAbsolutePath();
-
+    File chunklearningHome = new File(new File(learningHome, "test"),
+      "chunklearning");
+    String configFileURL = new File(chunklearningHome, "engines-svm.xml")
+      .getAbsolutePath();
+    String corpusDirName = new File(chunklearningHome, "data-ontonews")
+      .getAbsolutePath();
+    //Remove the label list file, feature list file and chunk length files. 
+    String wdResults = new File(chunklearningHome, 
+      ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
+    emptySavedFiles(wdResults);
     String inputASN = "Key";
     loadSettings(configFileURL, corpusDirName, inputASN);
     // Set the evaluation mode
@@ -100,16 +107,22 @@ public class TestLearningAPI extends TestCase {
     assertEquals(evaluation.macroMeasuresOfResults.partialCor, 13);
     assertEquals(evaluation.macroMeasuresOfResults.spurious, 32);
     assertEquals(evaluation.macroMeasuresOfResults.missing, 31);
-    //Remove the resources
+    // Remove the resources
     clearOneTest();
   }
-  
+
   public void testNBChunkLearnng() throws IOException, GateException {
     // Initialisation
-    File chunklearningHome = new File(new File(learningHome, "test") , "chunklearning");
-    String configFileURL = new File(chunklearningHome, "engines-naivebayesweka.xml").getAbsolutePath();
-    String corpusDirName = new File(chunklearningHome, "data-ontonews").getAbsolutePath();
-
+    File chunklearningHome = new File(new File(learningHome, "test"),
+      "chunklearning");
+    String configFileURL = new File(chunklearningHome,
+      "engines-naivebayesweka.xml").getAbsolutePath();
+    String corpusDirName = new File(chunklearningHome, "data-ontonews")
+      .getAbsolutePath();
+    //Remove the label list file, feature list file and chunk length files. 
+    String wdResults = new File(chunklearningHome, 
+      ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
+    emptySavedFiles(wdResults);
     String inputASN = "Key";
     loadSettings(configFileURL, corpusDirName, inputASN);
     // Set the evaluation mode
@@ -118,19 +131,25 @@ public class TestLearningAPI extends TestCase {
     // Using the evaluation mode for testing
     EvaluationBasedOnDocs evaluation = learningApi.getEvaluation();
     // Compare the overall results with the correct numbers
-    assertEquals(evaluation.macroMeasuresOfResults.correct, 6);
-    assertEquals(evaluation.macroMeasuresOfResults.partialCor, 3);
-    assertEquals(evaluation.macroMeasuresOfResults.spurious, 74);
-    assertEquals(evaluation.macroMeasuresOfResults.missing, 63);
-    //Remove the resources
+    assertEquals(evaluation.macroMeasuresOfResults.correct, 3);
+    assertEquals(evaluation.macroMeasuresOfResults.partialCor, 1);
+    assertEquals(evaluation.macroMeasuresOfResults.spurious, 19);
+    assertEquals(evaluation.macroMeasuresOfResults.missing, 68);
+    // Remove the resources
     clearOneTest();
   }
 
   public void testSVMClassification() throws GateException, IOException {
     // Initialisation
-    File scHome = new File(new File(learningHome, "test") , "sentence-classification");
-    String configFileURL = new File(scHome,"engines-svm.xml").getAbsolutePath();
-    String corpusDirName = new File(scHome,"data-h").getAbsolutePath();
+    File scHome = new File(new File(learningHome, "test"),
+      "sentence-classification");
+    String configFileURL = new File(scHome, "engines-svm.xml")
+      .getAbsolutePath();
+    String corpusDirName = new File(scHome, "data-h").getAbsolutePath();
+    //Remove the label list file, feature list file and chunk length files. 
+    String wdResults = new File(scHome, 
+      ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
+    emptySavedFiles(wdResults);
     String inputASN = null;
     loadSettings(configFileURL, corpusDirName, inputASN);
     // Set the evaluation mode
@@ -141,18 +160,23 @@ public class TestLearningAPI extends TestCase {
     // Compare the overall results with the correct numbers
     assertEquals(evaluation.macroMeasuresOfResults.correct, 24);
     assertEquals(evaluation.macroMeasuresOfResults.partialCor, 0);
-    assertEquals(evaluation.macroMeasuresOfResults.spurious, 34);
+    assertEquals(evaluation.macroMeasuresOfResults.spurious, 33);
     assertEquals(evaluation.macroMeasuresOfResults.missing, 41);
-    //Remove the resources
+    // Remove the resources
     clearOneTest();
   }
-  
+
   public void testSVMKernelClassification() throws GateException, IOException {
     // Initialisation
-    File scHome = new File(new File(learningHome, "test") , "sentence-classification");
-    String configFileURL = new File(scHome,"engines-svm-quadratickernel.xml").getAbsolutePath();
-    String corpusDirName = new File(scHome,"data-h").getAbsolutePath();
-
+    File scHome = new File(new File(learningHome, "test"),
+      "sentence-classification");
+    String configFileURL = new File(scHome, "engines-svm-quadratickernel.xml")
+      .getAbsolutePath();
+    String corpusDirName = new File(scHome, "data-h").getAbsolutePath();
+    //Remove the label list file, feature list file and chunk length files. 
+    String wdResults = new File(scHome, 
+      ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
+    emptySavedFiles(wdResults);
     String inputASN = null;
     loadSettings(configFileURL, corpusDirName, inputASN);
     // Set the evaluation mode
@@ -161,20 +185,25 @@ public class TestLearningAPI extends TestCase {
     // Using the evaluation mode for testing
     EvaluationBasedOnDocs evaluation = learningApi.getEvaluation();
     // Compare the overall results with the correct numbers
-    assertEquals(evaluation.macroMeasuresOfResults.correct, 27);
+    assertEquals(evaluation.macroMeasuresOfResults.correct, 28);
     assertEquals(evaluation.macroMeasuresOfResults.partialCor, 0);
-    assertEquals(evaluation.macroMeasuresOfResults.spurious, 39);
+    assertEquals(evaluation.macroMeasuresOfResults.spurious, 41);
     assertEquals(evaluation.macroMeasuresOfResults.missing, 38);
-    //Remove the resources
+    // Remove the resources
     clearOneTest();
   }
-  
+
   public void testKNNClassification() throws GateException, IOException {
     // Initialisation
-    File scHome = new File(new File(learningHome, "test") , "sentence-classification");
-    String configFileURL = new File(scHome,"engines-knnweka.xml").getAbsolutePath();
-    String corpusDirName = new File(scHome,"data-h").getAbsolutePath();
-
+    File scHome = new File(new File(learningHome, "test"),
+      "sentence-classification");
+    String configFileURL = new File(scHome, "engines-knnweka.xml")
+      .getAbsolutePath();
+    String corpusDirName = new File(scHome, "data-h").getAbsolutePath();
+    //Remove the label list file, feature list file and chunk length files. 
+    String wdResults = new File(scHome, 
+      ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
+    emptySavedFiles(wdResults);
     String inputASN = null;
     loadSettings(configFileURL, corpusDirName, inputASN);
     // Set the evaluation mode
@@ -183,20 +212,25 @@ public class TestLearningAPI extends TestCase {
     // Using the evaluation mode for testing
     EvaluationBasedOnDocs evaluation = learningApi.getEvaluation();
     // Compare the overall results with the correct numbers
-    assertEquals(evaluation.macroMeasuresOfResults.correct, 11);
+    assertEquals(evaluation.macroMeasuresOfResults.correct, 12);
     assertEquals(evaluation.macroMeasuresOfResults.partialCor, 0);
     assertEquals(evaluation.macroMeasuresOfResults.spurious, 62);
-    assertEquals(evaluation.macroMeasuresOfResults.missing, 54);
-    //Remove the resources
+    assertEquals(evaluation.macroMeasuresOfResults.missing, 53);
+    // Remove the resources
     clearOneTest();
   }
-  
+
   public void testC45Classification() throws GateException, IOException {
     // Initialisation
-    File scHome = new File(new File(learningHome, "test") , "sentence-classification");
-    String configFileURL = new File(scHome,"engines-c45weka.xml").getAbsolutePath();
-    String corpusDirName = new File(scHome,"data-h").getAbsolutePath();
-
+    File scHome = new File(new File(learningHome, "test"),
+      "sentence-classification");
+    String configFileURL = new File(scHome, "engines-c45weka.xml")
+      .getAbsolutePath();
+    String corpusDirName = new File(scHome, "data-h").getAbsolutePath();
+    //Remove the label list file, feature list file and chunk length files. 
+    String wdResults = new File(scHome, 
+      ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
+    emptySavedFiles(wdResults);
     String inputASN = null;
     loadSettings(configFileURL, corpusDirName, inputASN);
     // Set the evaluation mode
@@ -209,16 +243,21 @@ public class TestLearningAPI extends TestCase {
     assertEquals(evaluation.macroMeasuresOfResults.partialCor, 0);
     assertEquals(evaluation.macroMeasuresOfResults.spurious, 63);
     assertEquals(evaluation.macroMeasuresOfResults.missing, 40);
-    //Remove the resources
+    // Remove the resources
     clearOneTest();
   }
-  
+
   public void testSVMRelationLearning() throws GateException, IOException {
     // Initialisation relation-learning
-    File scHome = new File(new File(learningHome, "test") , "relation-learning");
-    String configFileURL = new File(scHome,"engines-svm.xml").getAbsolutePath();
-    String corpusDirName = new File(scHome,"data-acerelation").getAbsolutePath();
-
+    File scHome = new File(new File(learningHome, "test"), "relation-learning");
+    String configFileURL = new File(scHome, "engines-svm.xml")
+      .getAbsolutePath();
+    String corpusDirName = new File(scHome, "data-acerelation")
+      .getAbsolutePath();
+    //Remove the label list file, feature list file and chunk length files. 
+    String wdResults = new File(scHome, 
+      ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
+    emptySavedFiles(wdResults);
     String inputASN = "Key";
     loadSettings(configFileURL, corpusDirName, inputASN);
     // Set the evaluation mode
@@ -231,8 +270,14 @@ public class TestLearningAPI extends TestCase {
     assertEquals(evaluation.macroMeasuresOfResults.partialCor, 0);
     assertEquals(evaluation.macroMeasuresOfResults.spurious, 27);
     assertEquals(evaluation.macroMeasuresOfResults.missing, 110);
-    //Remove the resources
+    // Remove the resources
     clearOneTest();
+  }
+  
+  private void emptySavedFiles(String savedFilesDir) {
+    (new File(savedFilesDir, ConstantParameters.FILENAMEOFNLPFeatureList)).delete();
+    (new File(savedFilesDir, ConstantParameters.FILENAMEOFLabelList)).delete();
+    (new File(savedFilesDir, ConstantParameters.FILENAMEOFChunkLenStats)).delete();
   }
 
   /** Test suite routine for the test runner */
