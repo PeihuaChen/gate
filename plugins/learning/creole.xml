@@ -18,14 +18,9 @@
       <PARAMETER NAME="corpus" COMMENT="Corpus to be processed"
         RUNTIME="true" OPTIONAL="false">gate.Corpus</PARAMETER>
 
-      <PARAMETER NAME="trainingMode"
-        COMMENT="Train or classify the documents" RUNTIME="true" DEFAULT="true"
-        OPTIONAL="false">java.lang.Boolean</PARAMETER>
-
-	<PARAMETER NAME="evaluationMode"
-        COMMENT="Train or classify the documents" RUNTIME="true" DEFAULT="false"
-        OPTIONAL="true">java.lang.Boolean</PARAMETER>
-
+      <PARAMETER NAME="learningMode"
+        COMMENT="Train or classify the documents" RUNTIME="true" DEFAULT="TRAINING"
+        OPTIONAL="false">gate.learningLightWeight.RunMode</PARAMETER>
 
       <PARAMETER NAME="inputASName"
         COMMENT="The name of the annotation set used for input" RUNTIME="true"
