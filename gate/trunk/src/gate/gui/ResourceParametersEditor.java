@@ -790,7 +790,6 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
           //List value
           listUsed = true;
           Parameter param = pDisj.getParameter();
-          Set sufixes = param.getSuffixes();
 
           listValue = (List)value;
           listEditor = new ListEditorDialog(
@@ -809,8 +808,6 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
                       FeatureMap.class.isAssignableFrom(typeClass)){
           //List value
           fmUsed = true;
-          Parameter param = pDisj.getParameter();
-          Set sufixes = param.getSuffixes();
 
           fmValue = (FeatureMap)value;
           fmEditor = new FeatureMapEditorDialog(
@@ -832,9 +829,17 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
             // type has a values method returning an array of values
             Method getValuesMethod = typeClass.getMethod("values");
             Object[] enumValues = (Object[])getValuesMethod.invoke(null);
-            Object[] comboValues = new Object[enumValues.length + 1];
-            comboValues[0] = "<none>";
-            System.arraycopy(enumValues, 0, comboValues, 1, enumValues.length);
+            Object[] comboValues = null;
+            Parameter param = pDisj.getParameter();
+            // only allow selection of "<none>" for optional parameters
+            if(param.isOptional()) {
+              comboValues = new Object[enumValues.length + 1];
+              comboValues[0] = "<none>";
+              System.arraycopy(enumValues, 0, comboValues, 1, enumValues.length);
+            }
+            else {
+              comboValues = enumValues;
+            }
             combo.setModel(new DefaultComboBoxModel(comboValues));
             combo.setSelectedItem(value == null ? "<none>" : value);
             return combo;
