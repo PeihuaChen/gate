@@ -11,6 +11,7 @@ import gate.Gate;
 import gate.learningLightWeight.ConstantParameters;
 import gate.learningLightWeight.EvaluationBasedOnDocs;
 import gate.learningLightWeight.LearningAPIMain;
+import gate.learningLightWeight.RunMode;
 import gate.util.ExtensionFileFilter;
 import gate.util.GateException;
 import junit.framework.Test;
@@ -98,7 +99,8 @@ public class TestLearningAPI extends TestCase {
     String inputASN = "Key";
     loadSettings(configFileURL, corpusDirName, inputASN);
     // Set the evaluation mode
-    learningApi.setEvaluationMode(true);
+    RunMode runM=RunMode.EVALUATION;
+    learningApi.setLearningMode(runM);
     controller.execute();
     // Using the evaluation mode for testing
     EvaluationBasedOnDocs evaluation = learningApi.getEvaluation();
@@ -126,7 +128,8 @@ public class TestLearningAPI extends TestCase {
     String inputASN = "Key";
     loadSettings(configFileURL, corpusDirName, inputASN);
     // Set the evaluation mode
-    learningApi.setEvaluationMode(true);
+    RunMode runM=RunMode.EVALUATION;
+    learningApi.setLearningMode(runM);
     controller.execute();
     // Using the evaluation mode for testing
     EvaluationBasedOnDocs evaluation = learningApi.getEvaluation();
@@ -153,7 +156,8 @@ public class TestLearningAPI extends TestCase {
     String inputASN = null;
     loadSettings(configFileURL, corpusDirName, inputASN);
     // Set the evaluation mode
-    learningApi.setEvaluationMode(true);
+    RunMode runM=RunMode.EVALUATION;
+    learningApi.setLearningMode(runM);
     controller.execute();
     // Using the evaluation mode for testing
     EvaluationBasedOnDocs evaluation = learningApi.getEvaluation();
@@ -180,7 +184,8 @@ public class TestLearningAPI extends TestCase {
     String inputASN = null;
     loadSettings(configFileURL, corpusDirName, inputASN);
     // Set the evaluation mode
-    learningApi.setEvaluationMode(true);
+    RunMode runM=RunMode.EVALUATION;
+    learningApi.setLearningMode(runM);
     controller.execute();
     // Using the evaluation mode for testing
     EvaluationBasedOnDocs evaluation = learningApi.getEvaluation();
@@ -207,7 +212,8 @@ public class TestLearningAPI extends TestCase {
     String inputASN = null;
     loadSettings(configFileURL, corpusDirName, inputASN);
     // Set the evaluation mode
-    learningApi.setEvaluationMode(true);
+    RunMode runM=RunMode.EVALUATION;
+    learningApi.setLearningMode(runM);
     controller.execute();
     // Using the evaluation mode for testing
     EvaluationBasedOnDocs evaluation = learningApi.getEvaluation();
@@ -234,7 +240,8 @@ public class TestLearningAPI extends TestCase {
     String inputASN = null;
     loadSettings(configFileURL, corpusDirName, inputASN);
     // Set the evaluation mode
-    learningApi.setEvaluationMode(true);
+    RunMode runM=RunMode.EVALUATION;
+    learningApi.setLearningMode(runM);
     controller.execute();
     // Using the evaluation mode for testing
     EvaluationBasedOnDocs evaluation = learningApi.getEvaluation();
@@ -261,7 +268,8 @@ public class TestLearningAPI extends TestCase {
     String inputASN = "Key";
     loadSettings(configFileURL, corpusDirName, inputASN);
     // Set the evaluation mode
-    learningApi.setEvaluationMode(true);
+    RunMode runM=RunMode.EVALUATION;
+    learningApi.setLearningMode(runM);
     controller.execute();
     // Using the evaluation mode for testing
     EvaluationBasedOnDocs evaluation = learningApi.getEvaluation();
