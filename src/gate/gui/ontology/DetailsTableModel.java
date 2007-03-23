@@ -288,6 +288,9 @@ public class DetailsTableModel extends AbstractTableModel {
       Iterator<RDFProperty> rdIter = rdfProp.iterator();
       while(rdIter.hasNext()) {
         RDFProperty rd = rdIter.next();
+        if(rd instanceof ObjectProperty || rd instanceof AnnotationProperty || rd instanceof DatatypeProperty)
+            continue;
+        
         List<OResource> oinstances = oinstance.getRDFPropertyValues(rd);
         for(int i = 0; i < oinstances.size(); i++) {
           PropertyValue pv = new PropertyValue(rd, oinstances.get(i));
