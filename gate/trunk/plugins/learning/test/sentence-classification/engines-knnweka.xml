@@ -16,7 +16,7 @@
 
   <FILTERING ratio="0.0" dis="near"/>
 
-  <ENGINE nickname="KNN" implementationName="KNNWeka"/>
+  <ENGINE nickname="KNN" implementationName="KNNWeka" options = "-k 1"/>
 
   <DATASET>
      <INSTANCE-TYPE>Sentence</INSTANCE-TYPE>
