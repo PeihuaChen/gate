@@ -1,6 +1,18 @@
 /*
- * Created on 26-May-2005
- * Attribute.java 
+ *  Copyright (c) 1998-2005, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Valentin Tablan 19/11/2002
+ *  semantic type added by Mike Dowman 31-03-2004
+ *  Weightings added by Mike Dowman 24-5-2004
+ *  
+ *
+ *  $Id: Attribute.java 6974 2005-10-18 11:52:16 +0000 (Tue, 18 Oct 2005) nirajaswani $
+ *
  */
 package gate.learningLightWeight;
 
@@ -9,35 +21,23 @@ import java.util.ArrayList;
 import org.jdom.Element;
 
 /**
- * Same as existing gate.ml.Attribute. Different from Attributes in ML
- * frameworks because we specify information about things in GATE (like
- * relative position,etc.)
+ * Desribe and read the ATTRIBUTE, one type of features in the dataset definition.  
  */
 public class Attribute {
   // These constants are used only for returning values from
   // semanticType
   public static final int NOMINAL = 1;
-
   public static final int NUMERIC = 2;
-
   public static final int BOOLEAN = 3;
-
   boolean isClass = false;
-
   String name;
-
   String type;
-
   String feature;
-
   int position;
-
   // Create a feature on an annotation generated
   // by an UniEngine with the confidence as value
   String confidence_feature;
-
   int semantic_type = Attribute.NOMINAL;
-
   // The SVMLightWrapper allows weighting for attributes to be specified
   // in
   // the configuration file, and those weightings are stored in this
@@ -46,20 +46,23 @@ public class Attribute {
   // wrappers.
   double weighting;
 
+  /** Constuctor
+   *  Create an Attribute object from an xml element.
+   */
   public Attribute(Element jdomElement) throws GateException {
     // find the name
     Element anElement = jdomElement.getChild("NAME");
     if(anElement == null)
       throw new GateException(
-              "Required element \"NAME\" not present in attribute:\n"
-                      + jdomElement.toString() + "!");
+        "Required element \"NAME\" not present in attribute:\n"
+          + jdomElement.toString() + "!");
     else name = anElement.getTextTrim();
     // find the semantic type
     anElement = jdomElement.getChild("SEMTYPE");
     if(anElement == null)
       throw new GateException(
-              "Required element \"SEMTYPE\" not present in attribute:\n"
-                      + jdomElement.toString() + "!");
+        "Required element \"SEMTYPE\" not present in attribute:\n"
+          + jdomElement.toString() + "!");
     else {
       if(anElement.getTextTrim().equalsIgnoreCase("NOMINAL"))
         this.semantic_type = Attribute.NOMINAL;
@@ -72,8 +75,8 @@ public class Attribute {
     anElement = jdomElement.getChild("TYPE");
     if(anElement == null)
       throw new GateException(
-              "Required element \"TYPE\" not present in attribute:\n"
-                      + jdomElement.toString() + "!");
+        "Required element \"TYPE\" not present in attribute:\n"
+          + jdomElement.toString() + "!");
     else type = anElement.getTextTrim();
     // find the feature if present
     anElement = jdomElement.getChild("FEATURE");
@@ -184,8 +187,7 @@ public class Attribute {
   }
 
   /**
-   * This method reports whether the attribute is nominal, numeric or
-   * boolean.
+   * This method reports whether the attribute is nominal, numeric or boolean.
    * 
    * @return Attribute.NOMINAL, Attribute.NUMERIC or Attribute.BOOLEAN
    */
@@ -207,31 +209,35 @@ public class Attribute {
     sb.append("      ").append("<TYPE>").append(this.type).append("</TYPE>\n");
     if(feature != null) {
       sb.append("      ").append("<FEATURE>").append(this.feature).append(
-              "</FEATURE>\n");
+        "</FEATURE>\n");
     }
     sb.append("      ").append("<POSITION>").append(this.position).append(
-            "</POSITION>\n");
+      "</POSITION>\n");
     if(isClass) sb.append("      ").append("<CLASS/>\n");
     sb.append("     ").append("</ATTRIBUTE>\n");
     return sb.toString();
   }
 
-  /** * */
+  /**  
+   * This method is a clone of gate.creole.mi.Attribute.parseSerie method with minor 
+   * changes to make it compatible with ML API. It basically given an attribute element
+   * first locates all required variable and creates multiple attributes for the given RANGE.
+   */
   public static java.util.List parseSerie(Element jdomElement)
-          throws GateException {
+    throws GateException {
     // find the name
     Element anElement = jdomElement.getChild("NAME");
     if(anElement == null)
       throw new GateException(
-              "Required element \"NAME\" not present in attribute:\n"
-                      + jdomElement.toString() + "!");
+        "Required element \"NAME\" not present in attribute:\n"
+          + jdomElement.toString() + "!");
     String name = anElement.getTextTrim();
     // find the semantic type
     anElement = jdomElement.getChild("SEMTYPE");
     if(anElement == null)
       throw new GateException(
-              "Required element \"SEMTYPE\" not present in attribute:\n"
-                      + jdomElement.toString() + "!");
+        "Required element \"SEMTYPE\" not present in attribute:\n"
+          + jdomElement.toString() + "!");
     int semantic_type = Attribute.NOMINAL;
     if(anElement.getTextTrim().equalsIgnoreCase("NUMERIC"))
       semantic_type = Attribute.NUMERIC;
@@ -241,8 +247,8 @@ public class Attribute {
     anElement = jdomElement.getChild("TYPE");
     if(anElement == null)
       throw new GateException(
-              "Required element \"TYPE\" not present in attribute:\n"
-                      + jdomElement.toString() + "!");
+        "Required element \"TYPE\" not present in attribute:\n"
+          + jdomElement.toString() + "!");
     String type = anElement.getTextTrim();
     String feature = null;
     // find the feature if present
@@ -255,10 +261,9 @@ public class Attribute {
     try {
       minpos = Integer.parseInt(anElement.getAttributeValue("from").trim());
       maxpos = Integer.parseInt(anElement.getAttributeValue("to").trim());
-    }
-    catch(Exception e) {
+    } catch(Exception e) {
       throw new GateException("Range element is uncorrect:\n"
-              + jdomElement.toString() + "!");
+        + jdomElement.toString() + "!");
     }
     double weighting = 1.0;
     // find the weighting if present
@@ -267,10 +272,8 @@ public class Attribute {
       weighting = Double.parseDouble(anElement.getTextTrim());
     // find the class if present
     boolean isClass = jdomElement.getChild("CLASS") != null;
-    if(isClass) {
-      throw new GateException("Cannot define the class in a serie:\n"
-              + jdomElement.toString() + "!");
-    }
+    if(isClass) { throw new GateException(
+      "Cannot define the class in a serie:\n" + jdomElement.toString() + "!"); }
     // Create a list of Attributes
     ArrayList attributes = new ArrayList();
     for(int position = minpos; position < maxpos + 1; position++) {

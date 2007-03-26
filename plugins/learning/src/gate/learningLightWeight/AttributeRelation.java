@@ -1,31 +1,41 @@
+/*
+ *  AttributeRelation.java
+ * 
+ *  Yaoyong Li 22/03/2007
+ *
+ *  $Id: AttributeRelation.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
+ */
 package gate.learningLightWeight;
 
 import gate.util.GateException;
 import java.util.ArrayList;
 import org.jdom.Element;
-
+/**
+ * Extend the Attribute class a bit in order to accommodate the two
+ * arguments of one relation.
+ */
 public class AttributeRelation extends Attribute {
-  // These constants are used only for returning values from
-  // semanticType
-
+  /** Annotation feature for argument 1.*/
   private String arg1;
-
+  /** Annotation feature for argument 2.*/
   private String arg2;
-
+  /** Constuctor
+   *  Create an AttributeRelation object from an xml element.
+   */
   public AttributeRelation(Element jdomElement) throws GateException {
     // find the name
     Element anElement = jdomElement.getChild("NAME");
     if(anElement == null)
       throw new GateException(
-              "Required element \"NAME\" not present in attribute:\n"
-                      + jdomElement.toString() + "!");
+        "Required element \"NAME\" not present in attribute:\n"
+          + jdomElement.toString() + "!");
     else name = anElement.getTextTrim();
     // find the semantic type
     anElement = jdomElement.getChild("SEMTYPE");
     if(anElement == null)
       throw new GateException(
-              "Required element \"SEMTYPE\" not present in attribute:\n"
-                      + jdomElement.toString() + "!");
+        "Required element \"SEMTYPE\" not present in attribute:\n"
+          + jdomElement.toString() + "!");
     else {
       if(anElement.getTextTrim().equalsIgnoreCase("NOMINAL"))
         this.semantic_type = Attribute.NOMINAL;
@@ -38,8 +48,8 @@ public class AttributeRelation extends Attribute {
     anElement = jdomElement.getChild("TYPE");
     if(anElement == null)
       throw new GateException(
-              "Required element \"TYPE\" not present in attribute:\n"
-                      + jdomElement.toString() + "!");
+        "Required element \"TYPE\" not present in attribute:\n"
+          + jdomElement.toString() + "!");
     else type = anElement.getTextTrim();
     // find the feature if present
     anElement = jdomElement.getChild("FEATURE");
@@ -107,13 +117,6 @@ public class AttributeRelation extends Attribute {
     return arg2;
   }
 
-  /**
-   * This method reports whether the attribute is nominal, numeric or
-   * boolean.
-   * 
-   * @return Attribute.NOMINAL, Attribute.NUMERIC or Attribute.BOOLEAN
-   */
-
   public String toXML() {
     StringBuffer sb = new StringBuffer();
     sb.append("     ").append("<ATTRIBUTE>\n");
@@ -128,93 +131,21 @@ public class AttributeRelation extends Attribute {
     sb.append("      ").append("<TYPE>").append(this.type).append("</TYPE>\n");
     if(feature != null) {
       sb.append("      ").append("<FEATURE>").append(this.feature).append(
-              "</FEATURE>\n");
+        "</FEATURE>\n");
     }
     if(arg1 != null) {
       sb.append("      ").append("<ARG1>").append(this.arg1)
-              .append("</ARG1>\n");
+        .append("</ARG1>\n");
     }
     if(arg2 != null) {
       sb.append("      ").append("<ARG2>").append(this.arg2)
-              .append("</ARG2>\n");
+        .append("</ARG2>\n");
     }
     sb.append("      ").append("<POSITION>").append(this.position).append(
-            "</POSITION>\n");
+      "</POSITION>\n");
     if(isClass) sb.append("      ").append("<CLASS/>\n");
     sb.append("     ").append("</ATTRIBUTE>\n");
     return sb.toString();
   }
 
-  /** * */
-  public static java.util.List parseSerie(Element jdomElement)
-          throws GateException {
-    // find the name
-    Element anElement = jdomElement.getChild("NAME");
-    if(anElement == null)
-      throw new GateException(
-              "Required element \"NAME\" not present in attribute:\n"
-                      + jdomElement.toString() + "!");
-    String name = anElement.getTextTrim();
-    // find the semantic type
-    anElement = jdomElement.getChild("SEMTYPE");
-    if(anElement == null)
-      throw new GateException(
-              "Required element \"SEMTYPE\" not present in attribute:\n"
-                      + jdomElement.toString() + "!");
-    int semantic_type = Attribute.NOMINAL;
-    if(anElement.getTextTrim().equalsIgnoreCase("NUMERIC"))
-      semantic_type = Attribute.NUMERIC;
-    else if(anElement.getTextTrim().equalsIgnoreCase("BOOLEAN"))
-      semantic_type = Attribute.BOOLEAN;
-    // find the type
-    anElement = jdomElement.getChild("TYPE");
-    if(anElement == null)
-      throw new GateException(
-              "Required element \"TYPE\" not present in attribute:\n"
-                      + jdomElement.toString() + "!");
-    String type = anElement.getTextTrim();
-    String feature = null;
-    // find the feature if present
-    anElement = jdomElement.getChild("FEATURE");
-    if(anElement != null) feature = anElement.getTextTrim();
-    int minpos = 0;
-    int maxpos = 0;
-    // find the range of this element (e.g. from - to)
-    anElement = jdomElement.getChild("RANGE");
-    try {
-      minpos = Integer.parseInt(anElement.getAttributeValue("from").trim());
-      maxpos = Integer.parseInt(anElement.getAttributeValue("to").trim());
-    }
-    catch(Exception e) {
-      throw new GateException("Range element is uncorrect:\n"
-              + jdomElement.toString() + "!");
-    }
-    double weighting = 1.0;
-    // find the weighting if present
-    anElement = jdomElement.getChild("WEIGHTING");
-    if(anElement != null)
-      weighting = Double.parseDouble(anElement.getTextTrim());
-    // find the class if present
-    boolean isClass = jdomElement.getChild("CLASS") != null;
-    if(isClass) {
-      throw new GateException("Cannot define the class in a serie:\n"
-              + jdomElement.toString() + "!");
-    }
-    // Create a list of Attributes
-    ArrayList attributes = new ArrayList();
-    for(int position = minpos; position < maxpos + 1; position++) {
-      AttributeRelation attribute = new AttributeRelation();
-      attribute.setClass(false);
-      attribute.setFeature(feature);
-      // attribute.setArg1(arg1);
-      // attribute.setArg2(arg2);
-      attribute.setName(name);
-      attribute.setPosition(position);
-      attribute.setSemanticType(semantic_type);
-      attribute.setType(type);
-      attribute.setWeighting(weighting);
-      attributes.add(attribute);
-    }
-    return attributes;
-  }
 }

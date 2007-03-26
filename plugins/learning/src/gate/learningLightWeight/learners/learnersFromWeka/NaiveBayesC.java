@@ -1,16 +1,26 @@
+/*
+ *  NaiveBayesC.java
+ * 
+ *  Yaoyong Li 22/03/2007
+ *
+ *  $Id: NaiveBayesC.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
+ */
 package gate.learningLightWeight.learners.learnersFromWeka;
 
-import gate.learningLightWeight.LabelsOfFV;
-import gate.learningLightWeight.LabelsOfFeatureVectorDoc;
 import weka.classifiers.bayes.NaiveBayes;
-import weka.core.Attribute;
-import weka.core.Instances;
-
-public class NaiveBayesC extends WekaLearner{
+/**
+ * Naive Nayes classifier from Weka.
+ */
+public class NaiveBayesC extends WekaLearner {
+  /** serialVersionUID for Serializable class*/
+  private static final long serialVersionUID = 1L;
+  /** Constructor.*/
+  public NaiveBayesC() {
+    wekaCl = new NaiveBayes();
+    learnerName = "NaiveBayes";
+  }
+  /** Get the parameters of the Naive Bayes (do nothing). */
+  public void getParametersFromOptionsLine(String options) {
     
-    public NaiveBayesC() {
-      wekaCl = new NaiveBayes();
-      learnerName = "NaiveBayes";
-    }
-
+  }
 }

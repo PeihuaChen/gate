@@ -1,3 +1,10 @@
+/*
+ *  NLPFeaturesList.java
+ * 
+ *  Yaoyong Li 22/03/2007
+ *
+ *  $Id: NLPFeaturesList.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
+ */
 package gate.learningLightWeight;
 
 import java.io.BufferedReader;
@@ -11,130 +18,106 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-
+/**
+ *  NLP feature list. Read it from a file, update it
+ *  using the new documents, and write back into the file.
+ */
 public class NLPFeaturesList {
-  public Hashtable featuresList = null; // the features with ids, maybe
-                                        // accessed by multiple threads
-
-  public Hashtable idfFeatures = null; // the document frequence of
-                                        // each term, useful for
-                                        // document or passage
-                                        // classification
-
+  /** the features with ids, can be accessed by multiple threads. */
+  public Hashtable featuresList = null;
+  /** Document frequence of each term, 
+   * useful for document or passage classification
+   */
+  public Hashtable idfFeatures = null;
+  /** Total number of documents used for forming the list. */
   int totalNumDocs;
-
+  /** The unique sysmbol used for the N-gram feature. */
   public final static String SYMBOLNGARM = "<>";
-
+  /** Constructor, get the two hashtables. */
   public NLPFeaturesList() {
     featuresList = new Hashtable();
     idfFeatures = new Hashtable();
     totalNumDocs = 1;
   }
-
+  /** Loading the list from a file. */
   public void loadFromFile(File parentDir, String filename) {
-
     File fileFeaturesList = new File(parentDir, filename);
-
     if(fileFeaturesList.exists()) {
-
       try {
         BufferedReader in = new BufferedReader(new FileReader(fileFeaturesList));
         // featuresList = new Hashtable();
         String line;
         if((line = in.readLine()) != null)
           totalNumDocs = (new Integer(line.substring(line.lastIndexOf("=") + 1)))
-                  .intValue();
-
+            .intValue();
         while((line = in.readLine()) != null) {
           String[] st = line.split(" ");
           featuresList.put(st[0], st[1]);
           idfFeatures.put(st[0], st[2]);
         }
         in.close();
-
+      } catch(IOException e) {
       }
-      catch(IOException e) {
-      }
-    }
-    else {
-      System.out.println("No feature list file in initialisation phrase.");
+    } else {
+      if(LogService.debug>0)
+        System.out.println("No feature list file in initialisation phrase.");
     }
   }
-
+  /** Write back the list into the file, with updated information. */
   public void writeListIntoFile(File parentDir, String filename) {
-
     File fileFeaturesList = new File(parentDir, filename);
-    System.out.println("Lengh of List = " + featuresList.size());
+    if(LogService.debug>0)
+      System.out.println("Lengh of List = " + featuresList.size());
     try {
       PrintWriter out = new PrintWriter(new FileWriter(fileFeaturesList));
-      // featuresList = new Hashtable()
       // for the total number of docs
       out.println("totalNumDocs=" + new Integer(totalNumDocs));
-
       List keys = new ArrayList(featuresList.keySet());
       Collections.sort(keys);
-
       // write the features list into the output file
       Iterator iterator = keys.iterator();
       while(iterator.hasNext()) {
         Object key = iterator.next();
         out.println(key + " " + featuresList.get(key) + " "
-                + idfFeatures.get(key));
+          + idfFeatures.get(key));
         // System.out.println(key+ " " + featuresList.get(key));
       }
       out.close();
-
-    }
-    catch(IOException e) {
+    } catch(IOException e) {
     }
   }
-
+  /** Update the NLP features from new documents. */
   public void addFeaturesFromDoc(NLPFeaturesOfDoc fd) {
-
     long size = featuresList.size();
     for(int i = 0; i < fd.numInstances; ++i) {
       String[] features = fd.featuresInLine[i].toString().split(
-              ConstantParameters.ITEMSEPARATOR);
+        ConstantParameters.ITEMSEPARATOR);
       for(int j = 0; j < features.length; ++j) {
         String feat = features[j];
         if(feat.contains(SYMBOLNGARM))
           feat = feat.substring(0, feat.lastIndexOf(SYMBOLNGARM));
         if(!feat.equals(ConstantParameters.NAMENONFEATURE)) {
-          if(size < ConstantParameters.MAXIMUMFEATURES) { // if the
-                                                          // featureName
-                                                          // is not in
-                                                          // the feature
-                                                          // list
+          //If the featureName is not in the feature list
+          if(size < ConstantParameters.MAXIMUMFEATURES) { 
             if(!featuresList.containsKey(feat)) {
               ++size;
-              featuresList.put(feat, new Long(size)); // the index of
-                                                      // features is
-                                                      // from 1 (not
-                                                      // zero), in the
-                                                      // SVM-light
-                                                      // format
+              //features is from 1 (not zero), in the SVM-light format
+              featuresList.put(feat, new Long(size));
               idfFeatures.put(feat, new Long(1));
-            }
-            else {
+            } else {
               idfFeatures.put(feat, new Long((new Long(idfFeatures.get(feat)
-                      .toString())).longValue() + 1));
+                .toString())).longValue() + 1));
             }
-          }
-          else {
-            System.out
-                    .println("There are more NLP features from the training docuemnts");
+          } else {
+            System.out.println("There are more NLP features from the training docuemnts");
             System.out.println(" than the pre-defined maximal number"
-                    + new Long(ConstantParameters.MAXIMUMFEATURES));
+              + new Long(ConstantParameters.MAXIMUMFEATURES));
             return;
           }
         }
-
       }
     }// end of the loop on the instances
-
     // update the total number of docs
     totalNumDocs += fd.numInstances;
-
   }
-
 }
