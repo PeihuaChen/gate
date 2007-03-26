@@ -7,6 +7,9 @@
  */
 package gate.gui.ontology;
 
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
 import gate.Resource;
 import gate.creole.AbstractVisualResource;
 import gate.creole.ResourceInstantiationException;
@@ -21,6 +24,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
@@ -590,7 +594,7 @@ public class OntologyEditor extends AbstractVisualResource
       subClass.setEnabled(true);
       instance.setEnabled(true);
       rdfProperty.setEnabled(true);
-      annotationProperty.setEnabled(false);
+      annotationProperty.setEnabled(true);
       datatypeProperty.setEnabled(true);
       objectProperty.setEnabled(true);
       symmetricProperty.setEnabled(true);
@@ -601,7 +605,7 @@ public class OntologyEditor extends AbstractVisualResource
       subClass.setEnabled(false);
       instance.setEnabled(false);
       rdfProperty.setEnabled(true);
-      annotationProperty.setEnabled(false);
+      annotationProperty.setEnabled(true);
       datatypeProperty.setEnabled(false);
       objectProperty.setEnabled(false);
       symmetricProperty.setEnabled(false);
@@ -622,8 +626,8 @@ public class OntologyEditor extends AbstractVisualResource
       topClass.setEnabled(false);
       subClass.setEnabled(false);
       instance.setEnabled(false);
-      rdfProperty.setEnabled(false);
-      annotationProperty.setEnabled(false);
+      rdfProperty.setEnabled(true);
+      annotationProperty.setEnabled(true);
       datatypeProperty.setEnabled(false);
       objectProperty.setEnabled(false);
       symmetricProperty.setEnabled(false);
