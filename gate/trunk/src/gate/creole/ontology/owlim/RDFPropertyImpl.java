@@ -15,9 +15,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import service.client.OWLIM;
-import service.client.Property;
-import service.client.ResourceInfo;
 import gate.creole.ontology.AnnotationProperty;
 import gate.creole.ontology.OClass;
 import gate.creole.ontology.OConstants;
@@ -42,7 +39,7 @@ public class RDFPropertyImpl extends OResourceImpl implements RDFProperty {
    * @param owlimPort
    */
   public RDFPropertyImpl(URI aURI, Ontology ontology, String repositoryID,
-          OWLIM owlimPort) {
+          OWLIMServiceImpl owlimPort) {
     super(aURI, ontology, repositoryID, owlimPort);
   }
 

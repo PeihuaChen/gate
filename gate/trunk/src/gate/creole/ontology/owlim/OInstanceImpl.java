@@ -13,10 +13,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import service.client.OWLIM;
-import service.client.Property;
-import service.client.PropertyValue;
-import service.client.ResourceInfo;
 import gate.creole.ontology.DatatypeProperty;
 import gate.creole.ontology.InvalidValueException;
 import gate.creole.ontology.Literal;
@@ -45,8 +41,8 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @param owlimPort
    */
   public OInstanceImpl(URI aURI, Ontology ontology, String repositoryID,
-          OWLIM owlimPort) {
-    super(aURI, ontology, repositoryID, owlimPort);
+          OWLIMServiceImpl owlimPort) {
+    super(aURI, ontology, repositoryID, owlimPort); 
   }
 
   /*

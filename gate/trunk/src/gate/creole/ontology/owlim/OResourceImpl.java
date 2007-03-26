@@ -13,9 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.openrdf.vocabulary.RDFS;
-import service.client.OWLIM;
-import service.client.Property;
-import service.client.PropertyValue;
 import gate.creole.ontology.AnnotationProperty;
 import gate.creole.ontology.Literal;
 import gate.creole.ontology.OConstants;
@@ -39,7 +36,7 @@ public class OResourceImpl implements OResource {
   /**
    * instance of the OWLIMServices
    */
-  protected OWLIM owlim;
+  protected OWLIMServiceImpl owlim;
 
   /**
    * URI of the resource
@@ -59,7 +56,7 @@ public class OResourceImpl implements OResource {
    * @param owlimPort
    */
   public OResourceImpl(URI aURI, Ontology ontology, String repositoryID,
-          OWLIM owlimPort) {
+          OWLIMServiceImpl owlimPort) {
     this.uri = aURI;
     this.repositoryID = repositoryID;
     this.owlim = owlimPort;
