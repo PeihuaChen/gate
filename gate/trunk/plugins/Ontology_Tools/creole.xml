@@ -19,12 +19,8 @@
       <PARAMETER NAME="turtleURL"
           COMMENT="Ontology URL" RUNTIME="FALSE" OPTIONAL="TRUE">java.net.URL</PARAMETER>
 	</OR>
-      <PARAMETER NAME="persistLocation"
-          COMMENT="Where to persist the ontology" RUNTIME="FALSE" OPTIONAL="TRUE">java.net.URL</PARAMETER>
       <PARAMETER NAME="defaultNameSpace" OPTIONAL="true" COMMENT="defaultNameSpace" RUNTIME="FALSE">
         java.lang.String</PARAMETER>
-      <PARAMETER NAME="persistRepository" DEFAULT="FALSE" OPTIONAL="false" COMMENT="defaultNameSpace" RUNTIME="false">
-        java.lang.Boolean</PARAMETER>
       <ICON>lr.gif</ICON>
     </RESOURCE>
   </CREOLE>  
