@@ -1,3 +1,10 @@
+/*
+ *  LearningAPIMain.java
+ * 
+ *  Yaoyong Li 22/03/2007
+ *
+ *  $Id: LearningAPIMain.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
+ */
 package gate.learningLightWeight;
 
 import gate.Document;
@@ -14,22 +21,26 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 
+/**
+ * The main object of the ML Api. It does initialiation, read parameter values
+ * from GUI, and run the selected learning mode. It can also be called by java
+ * code, as an API (an GATE class), for using this learning api.
+ */
 public class LearningAPIMain extends AbstractLanguageAnalyser implements
                                                              ProcessingResource {
   /** This is where the model(s) should be saved */
   private URL configFileURL;
   /**
-   * The annotationSet that contains annotations to be considered in dataset
+   * Name of the AnnotationSet contains annotations specified in the DATASET
+   * element of configuration file.
    */
   private String inputASName;
-  
-  /** 
-   * Run-time parameter learningMode, having three modes: 
-   * training, application, and evaluation.
+  /**
+   * Run-time parameter learningMode, having three modes: training, application,
+   * and evaluation.
    */
   private RunMode learningMode;
-  
-  /** The learning setting object. */
+  /** Learning settings specified in the configuration file. */
   private LearningEngineSettings learningSettings;
   /**
    * The lightweight learning object for getting the features, training and
@@ -38,20 +49,21 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
   LightWeightLearningApi lightWeightApi = null;
   /** The File for NLP learning Log. */
   private File logFile;
-  boolean isTraining;
-  // DataSetDefinition datasetDefinitionLW = null;
-  File wdResults = null;
-  boolean isLabelUpdatable;
-  ArrayList docsName = new ArrayList();
+  /** Used by lightWeightApi, specifying training or application. */
+  private boolean isTraining;
+  /** Subdirectory for storing the data file produced by learning api. */
+  private File wdResults = null;
+  /** Doing evaluation. */
   private EvaluationBasedOnDocs evaluation;
 
+  /** Trivial constructor. */
   public LearningAPIMain() {
     // do nothing
   }
 
   /** Initialise this resource, and return it. */
   public gate.Resource init() throws ResourceInstantiationException {
-    fireStatusChanged("Checking for parameters!");
+    fireStatusChanged("Checking and reading learning settings!");
     // here all parameters are needs to be checked
     // check for the model storage directory
     if(configFileURL == null)
@@ -60,20 +72,22 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
     // it is not null, check it is a file: URL
     if(!"file".equals(configFileURL.getProtocol())) { throw new ResourceInstantiationException(
       "WorkingDirectory must be a file: URL"); }
+    // Get the working directory which the configuration
+    // file reside in.
     File wd = new File(configFileURL.getFile()).getParentFile();
     // it must be a directory
     if(!wd.isDirectory()) { throw new ResourceInstantiationException(wd
       + " must be a reference to directory"); }
     try {
       // Load the learning setting file
-      // Read the learning setting file engines.xml
+      // by reading the configuration file
       learningSettings = LearningEngineSettings
         .loadLearningSettingsFromFile(configFileURL);
     } catch(Exception e) {
       throw new ResourceInstantiationException(e);
     }
     try {
-      // Creat a sub-directory of the workingdirectroy where the data
+      // Creat the sub-directory of the workingdirectroy where the data
       // files will be stored in
       wdResults = new File(wd,
         gate.learningLightWeight.ConstantParameters.SUBDIRFORRESULTS);
@@ -93,13 +107,13 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
       // more initialisation
       lightWeightApi.furtherInit(wdResults, learningSettings);
       logFileIn.println("Learner name: "
-        + learningSettings.learners.getLearnerName());
+        + learningSettings.learnerSettings.getLearnerName());
       logFileIn.println("Learner nick name: "
-        + learningSettings.learners.getLearnerNickName());
+        + learningSettings.learnerSettings.getLearnerNickName());
       logFileIn.println("Learner parameter settings: "
-        + learningSettings.getParamsOfLearning());
+        + learningSettings.learnerSettings.learnerName);
       logFileIn.println("Surroud mode (or chunk learning): "
-        + learningSettings.getSurround());
+        + learningSettings.surround);
       logFileIn.println();
       logFileIn.close();
     } catch(Exception e) {
@@ -125,17 +139,19 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
     // first, get the NLP features from the documents, according to the
     // feature types specified in DataSetDefinition file
     int positionDoc = corpus.indexOf(document);
-    docsName.add(positionDoc, document.getName());
+    // docsName.add(positionDoc, document.getName());
     if(positionDoc == 0) {
+      if(LogService.debug >= 0)
+        System.out.println("Pre-processing the "+corpus.size()+" documents...");
       try {
         PrintWriter logFileIn = new PrintWriter(new FileWriter(logFile, true));
         logFileIn.println("\n*** A new run starts.");
         logFileIn
           .println("\nThe execution time (pre-processing the first document): "
             + new Date().toString());
-        //logFileIn.println("EvaluationMode: " + evaluationMode);
-        //logFileIn.println("TrainingMode: " + trainingMode);
-        //logFileIn.println("InputAS: " + inputASName);
+        // logFileIn.println("EvaluationMode: " + evaluationMode);
+        // logFileIn.println("TrainingMode: " + trainingMode);
+        // logFileIn.println("InputAS: " + inputASName);
         logFileIn.close();
       } catch(IOException e) {
         // TODO Auto-generated catch block
@@ -146,6 +162,12 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
       // first select the training data and test data according to the
       // learning setting
       // set the inputASName in here, because it is a runtime parameter
+      if(LogService.debug >= 0) {
+        System.out.println("Learning starts.");
+        System.out.println("For the information about this leanring see the log file "+
+        wdResults.getAbsolutePath()+File.separator+
+        ConstantParameters.FILENAMEOFLOGFILE);
+      }
       lightWeightApi.inputASName = inputASName;
       int numDoc = corpus.size();
       try {
@@ -161,16 +183,17 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               wdResults, isTraining, learningSettings);
           lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
             learningSettings);
-          displayDataFilesInformation();
+          if(LogService.debug >= 0) displayDataFilesInformation();
         } else { // run the whole procedure of learning
-          switch(learningMode) {
+          switch(learningMode){
             case TRAINING:
               // empty the data file
               EvaluationBasedOnDocs.emptyDatafile(wdResults, lightWeightApi);
-              System.out.println("Training mode");
+              if(LogService.debug >= 0) System.out.println("Training mode");
               logFileIn.println("Training mode.");
               isTraining = true;
-              System.out.println("Training lightweight, wdResults="
+              if(LogService.debug>0)
+                System.out.println("Training lightweight, wdResults="
                 + wdResults.toString() + ".");
               for(int i = 0; i < numDoc; ++i)
                 lightWeightApi.annotations2FVs((Document)corpus.get(i), i,
@@ -188,28 +211,30 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               break;
             case APPLICATION:
               // if application
-                System.out.println("Application mode");
-                logFileIn.println("Application mode.");
-                isTraining = false;
-                String classTypeOriginal = learningSettings.datasetDefinition
+              if(LogService.debug >= 0) System.out.println("Application mode");
+              logFileIn.println("Application mode.");
+              isTraining = false;
+              String classTypeOriginal = learningSettings.datasetDefinition
                 .getClassAttribute().getType();
-                for(int i = 0; i < numDoc; ++i)
-                  lightWeightApi.annotations2FVs((Document)corpus.get(i), i,
-                    wdResults, isTraining, learningSettings);
-                lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
-                  learningSettings);
-                // Applying th model
-                lightWeightApi.applyModelInJava(corpus, classTypeOriginal,
-                  logFileIn, learningSettings);
-                break;
+              for(int i = 0; i < numDoc; ++i)
+                lightWeightApi.annotations2FVs((Document)corpus.get(i), i,
+                  wdResults, isTraining, learningSettings);
+              lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
+                learningSettings);
+              // Applying th model
+              lightWeightApi.applyModelInJava(corpus, classTypeOriginal,
+                logFileIn, learningSettings);
+              break;
             case EVALUATION:
-              System.out.println("Evaluation mode");
+              if(LogService.debug>=0) System.out.println("Evaluation mode");
               logFileIn.println("Evaluation mode.");
               evaluation = new EvaluationBasedOnDocs(corpus, wdResults,
                 inputASName);
-              evaluation.evaluation(learningSettings, lightWeightApi, logFileIn);
+              evaluation
+                .evaluation(learningSettings, lightWeightApi, logFileIn);
               break;
-            default: throw new GateException("The learning mode is not defined!"); 
+            default:
+              throw new GateException("The learning mode is not defined!");
           }
         }
       } catch(IOException e) {
@@ -219,9 +244,14 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
+      if(LogService.debug >= 0)
+        System.out.println("This learning session finished!.");
     } // end of learning (position=corpus.size()-1)
+    
+    
   }
 
+  /** Print out the information for featureData only option. */
   private void displayDataFilesInformation() {
     System.out.println("The NLP features for all the documents are in the file"
       + wdResults.getAbsolutePath() + File.pathSeparator
@@ -256,7 +286,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
   public String getInputASName() {
     return this.inputASName;
   }
-  
+
   public RunMode getLearningMode() {
     return this.learningMode;
   }

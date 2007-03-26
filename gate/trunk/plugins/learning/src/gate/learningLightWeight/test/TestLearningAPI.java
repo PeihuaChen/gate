@@ -1,3 +1,10 @@
+/*
+ *  TestLearningAPI.java
+ * 
+ *  Yaoyong Li 22/03/2007
+ *
+ *  $Id: TestLearningAPI.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
+ */
 package gate.learningLightWeight.test;
 
 import java.io.File;
@@ -11,21 +18,23 @@ import gate.Gate;
 import gate.learningLightWeight.ConstantParameters;
 import gate.learningLightWeight.EvaluationBasedOnDocs;
 import gate.learningLightWeight.LearningAPIMain;
+import gate.learningLightWeight.LogService;
 import gate.learningLightWeight.RunMode;
 import gate.util.ExtensionFileFilter;
 import gate.util.GateException;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
+/**
+ * Test the three types of NLP learning implemented in
+ *  ML Api by using the test methods and small datasets.
+ */
 public class TestLearningAPI extends TestCase {
-  // public static void main(String[] args) {
-  // TestLearningAPI test1 = new TestLearningAPI("aa");
-  // test1.testSVMChunkLearnng();
-  // }
+  /** Use it to do initialisation only once. */
   private static boolean initialized = false;
+  /** Learning home for reading the data and configuration file. */
   private static File learningHome;
-
+  /** Constructor, setting the home directory. */
   public TestLearningAPI(String arg0) throws GateException,
     MalformedURLException {
     super(arg0);
@@ -37,25 +46,30 @@ public class TestLearningAPI extends TestCase {
       initialized = true;
     }
   }
-
+  /** The ML Api object to be tested. */
   LearningAPIMain learningApi;
+  /** Corpus used for testing. */
   Corpus corpus;
+  /** The controller include the ML Api as one PR. */
   gate.creole.SerialAnalyserController controller;
-
+  /** Set up method (does nothing because it may have
+   * different behaviour in different enviroment. 
+   */
   protected void setUp() throws Exception {
     super.setUp();
-    // load your plugin and do all necessary one time loading here
-    // copy code from init();
-    // Configuration file
   }
-
+  /**  Release some resources.*/
   protected void tearDown() throws Exception {
     super.tearDown();
   }
-
+  /** Loading the configurationg file and corpus for testing. 
+   * And make settings as in the GATE Gui. 
+   */
   void loadSettings(String configFileName, String corpusDirName, String inputasN)
     throws GateException, IOException {
-    System.out.println("Learning Home : " + learningHome.getAbsolutePath());
+    LogService.debug = -1;
+    if(LogService.debug>0)
+      System.out.println("Learning Home : " + learningHome.getAbsolutePath());
     FeatureMap parameters = Factory.newFeatureMap();
     URL configFileURL = new File(configFileName).toURL();
     parameters.put("configFileURL", configFileURL);
@@ -74,7 +88,7 @@ public class TestLearningAPI extends TestCase {
     controller.setCorpus(corpus);
     controller.add(learningApi);
   }
-
+  /** Clear up the resources used after one test. */
   private void clearOneTest() {
     corpus.clear();
     Factory.deleteResource(corpus);
@@ -83,9 +97,12 @@ public class TestLearningAPI extends TestCase {
     controller.cleanup();
     Factory.deleteResource(controller);
   }
-
+  /** Test the chunk learning by using the SVM with linear kernel and
+   * a small part of the OntoNews corpus. 
+   */
   public void testSVMChunkLearnng() throws IOException, GateException {
     // Initialisation
+    System.out.print("Testing the SVM with liner kernenl on chunk learning...");
     File chunklearningHome = new File(new File(learningHome, "test"),
       "chunklearning");
     String configFileURL = new File(chunklearningHome, "engines-svm.xml")
@@ -109,12 +126,16 @@ public class TestLearningAPI extends TestCase {
     assertEquals(evaluation.macroMeasuresOfResults.partialCor, 13);
     assertEquals(evaluation.macroMeasuresOfResults.spurious, 32);
     assertEquals(evaluation.macroMeasuresOfResults.missing, 31);
+    
+    System.out.println("completed");
     // Remove the resources
     clearOneTest();
   }
-
+  /** Test the chunk learning by using the Naive Bayes method and
+   * a small part of the OntoNews corpus. */
   public void testNBChunkLearnng() throws IOException, GateException {
     // Initialisation
+    System.out.print("Testing the Naive Bayes method on chunk learning...");
     File chunklearningHome = new File(new File(learningHome, "test"),
       "chunklearning");
     String configFileURL = new File(chunklearningHome,
@@ -140,10 +161,14 @@ public class TestLearningAPI extends TestCase {
     assertEquals(evaluation.macroMeasuresOfResults.missing, 68);
     // Remove the resources
     clearOneTest();
+    System.out.println("completed");
   }
-
+  /** Test the text classification by using the SVM with linear kernel
+   * and the data for sentence classification. 
+   */
   public void testSVMClassification() throws GateException, IOException {
     // Initialisation
+    System.out.print("Testing the SVM with linear kernel on text classification...");
     File scHome = new File(new File(learningHome, "test"),
       "sentence-classification");
     String configFileURL = new File(scHome, "engines-svm.xml")
@@ -168,9 +193,13 @@ public class TestLearningAPI extends TestCase {
     assertEquals(evaluation.macroMeasuresOfResults.missing, 41);
     // Remove the resources
     clearOneTest();
+    System.out.println("completed");
   }
-
+  /** Test the text classification by using the SVM with quadratic kernel
+   * and the data for sentence classification. 
+   */
   public void testSVMKernelClassification() throws GateException, IOException {
+    System.out.print("Testing the SVM with quadratic kernel on text classification...");
     // Initialisation
     File scHome = new File(new File(learningHome, "test"),
       "sentence-classification");
@@ -196,9 +225,13 @@ public class TestLearningAPI extends TestCase {
     assertEquals(evaluation.macroMeasuresOfResults.missing, 38);
     // Remove the resources
     clearOneTest();
+    System.out.println("completed");
   }
-
+  /** Test the text classification by using the KNN
+   * and the data for sentence classification. 
+   */
   public void testKNNClassification() throws GateException, IOException {
+    System.out.print("Testing the KNN on text classification...");
     // Initialisation
     File scHome = new File(new File(learningHome, "test"),
       "sentence-classification");
@@ -224,9 +257,13 @@ public class TestLearningAPI extends TestCase {
     assertEquals(evaluation.macroMeasuresOfResults.missing, 53);
     // Remove the resources
     clearOneTest();
+    System.out.println("completed");
   }
-
+  /** Test the text classification by using the C4.5 algorithm
+   * and the data for sentence classification. 
+   */
   public void testC45Classification() throws GateException, IOException {
+    System.out.print("Testing the C4.5 on text classification...");
     // Initialisation
     File scHome = new File(new File(learningHome, "test"),
       "sentence-classification");
@@ -252,9 +289,13 @@ public class TestLearningAPI extends TestCase {
     assertEquals(evaluation.macroMeasuresOfResults.missing, 40);
     // Remove the resources
     clearOneTest();
+    System.out.println("completed");
   }
-
+  /** Test the relation extraction by using the SVM with linear kernel
+   * and a small part of data from ACE-04 relation extraction. 
+   */
   public void testSVMRelationLearning() throws GateException, IOException {
+    System.out.print("Testing the SVM with linear kernel on relation extraction...");
     // Initialisation relation-learning
     File scHome = new File(new File(learningHome, "test"), "relation-learning");
     String configFileURL = new File(scHome, "engines-svm.xml")
@@ -280,8 +321,11 @@ public class TestLearningAPI extends TestCase {
     assertEquals(evaluation.macroMeasuresOfResults.missing, 110);
     // Remove the resources
     clearOneTest();
+    System.out.println("completed");
   }
-  
+  /** Empty the label list, NLP feature list and the chunk lenght list file
+   * before each test in order to obtain the consistent results of each test.
+   */
   private void emptySavedFiles(String savedFilesDir) {
     (new File(savedFilesDir, ConstantParameters.FILENAMEOFNLPFeatureList)).delete();
     (new File(savedFilesDir, ConstantParameters.FILENAMEOFLabelList)).delete();

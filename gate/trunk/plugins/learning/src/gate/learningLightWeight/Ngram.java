@@ -1,95 +1,92 @@
+/*
+ *  Ngram.java
+ * 
+ *  Yaoyong Li 22/03/2007
+ *
+ *  $Id: Ngram.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
+ */
 package gate.learningLightWeight;
 
 import gate.util.GateException;
-
 import org.jdom.Element;
-
-/* 
- For the NGAM as features
+/** 
+ *  Desribing the NGAM features defined in the DATASET
+ *  element of the configuration file.
  */
 public class Ngram {
-
+  /** Name of the Ngram feature. */
   private String name;
-
+  /** The N in the N-gram. */
   private short number;
-
+  /** How many GATE features used for the N-gram. */
   private short consnum;
-
+  /** The GATE types of the features used in the N-gram. */
   private String[] typesGate = null;
-
+  /** The GATE features used in the N-gram.  */
   private String[] featuresGate = null;
-
+  /** Load the N-gram definition from an XML element of 
+   * configuration file. */
   public Ngram(Element jdomElement) throws GateException {
     // find the name
     Element anElement = jdomElement.getChild("NAME");
     if(anElement == null)
       throw new GateException(
-              "Required element \"NAME\" not present in attribute:\n"
-                      + jdomElement.toString() + "!");
+        "Required element \"NAME\" not present in attribute:\n"
+          + jdomElement.toString() + "!");
     else name = anElement.getTextTrim();
-
+    name = name.replaceAll(ConstantParameters.ITEMSEPARATOR, 
+      ConstantParameters.ITEMSEPREPLACEMENT);
     // find how many tokens (N) are used for the Ngram
     anElement = jdomElement.getChild("NUMBER");
     if(anElement == null)
       throw new GateException(
-              "Required element \"NUMBER\" not present in attribute:\n"
-                      + jdomElement.toString() + "!");
+        "Required element \"NUMBER\" not present in attribute:\n"
+          + jdomElement.toString() + "!");
     else number = (new Short(anElement.getTextTrim())).shortValue();
-
     // find how many constituents are used for the each token
     anElement = jdomElement.getChild("CONSNUM");
     if(anElement == null)
       throw new GateException(
-              "Required element \"CONSNUM\" not present in attribute:\n"
-                      + jdomElement.toString() + "!");
+        "Required element \"CONSNUM\" not present in attribute:\n"
+          + jdomElement.toString() + "!");
     else consnum = (new Short(anElement.getTextTrim())).shortValue();
-
     // allocate memory for the types and features for all the
     // constituents
     typesGate = new String[consnum];
     featuresGate = new String[consnum];
-
     for(int i = 0; i < consnum; ++i) {
-
       // find the type
       anElement = jdomElement.getChild("CONS-" + new Integer(i + 1));
       if(anElement == null)
         throw new GateException(
-                "Required element \"TYPE\" not present in attribute:\n"
-                        + jdomElement.toString() + "!");
+          "Required element \"TYPE\" not present in attribute:\n"
+            + jdomElement.toString() + "!");
       else {
         obtainTypeAndFeat(anElement, typesGate, featuresGate, i);
-
-        // test to ensure that the types of the two or more annotations
-        // are the same.
-        // if(i>0 && !typesGate[i].equals(typesGate[i-1]))
-        // throw new GateException(
-        // "The annotation types in one Ngram should be the same: \n"
-        // + jdomElement.toString() + "!");
-
       }
     }
-
   }
-
+  /** Obtain the types and features of one N-gram definition. */
   private void obtainTypeAndFeat(Element anElement, String[] typesGate,
-          String[] featuresGate, int i) throws GateException {
+    String[] featuresGate, int i) throws GateException {
     Element lowerElement = anElement.getChild("TYPE");
-
-    if(anElement != null)
+    if(anElement != null) {
       typesGate[i] = lowerElement.getTextTrim();
+      typesGate[i] = typesGate[i].replaceAll(ConstantParameters.ITEMSEPARATOR,
+        ConstantParameters.ITEMSEPREPLACEMENT);
+    }
     else throw new GateException(
-            "Required element \"TYPE\" not present in attribute:\n"
-                    + anElement.toString() + "!");
-
+      "Required element \"TYPE\" not present in attribute:\n"
+        + anElement.toString() + "!");
     lowerElement = anElement.getChild("FEATURE");
-
-    if(anElement != null)
+    if(anElement != null) {
       featuresGate[i] = lowerElement.getTextTrim();
+      featuresGate[i] = featuresGate[i].replaceAll(ConstantParameters.ITEMSEPARATOR,
+        ConstantParameters.ITEMSEPREPLACEMENT);
+    }
     else throw new GateException(
-            "Required element \"FEATURE\" not present in attribute:\n"
-                    + anElement.toString() + "!");
-
+      "Required element \"FEATURE\" not present in attribute:\n"
+        + anElement.toString() + "!");
   }
 
   public Ngram() {
@@ -152,5 +149,4 @@ public class Ngram {
     }
     return res.toString();
   }
-
 }

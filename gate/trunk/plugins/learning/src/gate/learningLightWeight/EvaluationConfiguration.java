@@ -1,88 +1,67 @@
 /*
- * Created on 2005-5-25
- * EvaluationConfiguration.java 
+ *  EvaluationConfiguration.java
+ * 
+ *  Yaoyong Li 22/03/2007
+ *
+ *  $Id: EvaluationConfiguration.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
  */
 package gate.learningLightWeight;
 
-import java.io.Serializable;
 import org.jdom.Element;
 
-/***********************************************************************
- * This object is used by the LearningEngine and specifies how the
- * Evaluation is done. It just stores the appropriate values which are
- * used internally by the LearningEngine.
- **********************************************************************/
-public class EvaluationConfiguration implements Serializable {
+/**
+ * Store the spefications of evaluation method and the details.
+ */
+public class EvaluationConfiguration {
+  /** k-fold. */
   public static final int kfold = 1;
-
+  /** Hold-out test*/
   public static final int split = 2;
-
+  /** Evaluation method used. */
   public int mode = EvaluationConfiguration.split;
-
+  /** Ratio of training data in the whole data for hold-out test. */
   public double ratio = 0.66d;
-
-  public int k = 10;
-
+  /** k for the k-fold and the number of runs for the hold-out test. */
   public int kk = 1;
 
   /** Creates an EvaluationConfiguration with the default values * */
   public EvaluationConfiguration() {
   }
 
-  /** Uses K fold cross validation with a random seed. * */
-  public EvaluationConfiguration(int k) {
+  /** Uses K-fold cross validation. */
+  public EvaluationConfiguration(int kk) {
     mode = EvaluationConfiguration.kfold;
-    this.k = k;
+    this.kk = kk;
   }
 
   /**
-   * Does a simple hold-out evaluation. Ratio has a value between 0 and
-   * 1 and indicates the ratio of instances to be used for training. A
-   * typical value is 0.66, indicating that one third of the instances
-   * are used for testing and not for training.
+   * Hold-out evaluation. Ratio has a value between 0 and 1 and
+   * indicates the ratio of instances to be used for training. A typical value
+   * is 0.66. kk is the number of runs for the random selection.
    */
   public EvaluationConfiguration(double ratio, int kk) {
     this.mode = EvaluationConfiguration.split;
     this.ratio = ratio;
     this.kk = kk;
   }
-
+  /** Constructor just using the ratio. */
   public EvaluationConfiguration(double ratio) {
-    this.mode = EvaluationConfiguration.split;
-    this.ratio = ratio;
-    this.kk = 1;
-  }
+	    this.mode = EvaluationConfiguration.split;
+	    this.ratio = ratio;
+	    this.kk = 1;
+	  }
 
-  // ex : <EVALUATION method="holdout">0.7</EVALUATION>
-  public String toXML() {
-    StringBuffer sb = new StringBuffer();
-    sb.append("<EVALUATION method=\"");
-    if(mode == kfold)
-      sb.append("kfold");
-    else sb.append("split");
-    sb.append("\">");
-    if(mode == kfold)
-      sb.append(this.k);
-    else sb.append(this.ratio);
-    sb.append("</EVALUATION>");
-    return sb.toString();
-  }
-
-  // ex : <EVALUATION method="holdout">0.7</EVALUATION>
+  /** Create an object from an  XML element in configuration file. */
   public static EvaluationConfiguration fromXML(Element domElement) {
     String method = domElement.getAttributeValue("method");
     String kk = domElement.getAttributeValue("runs");
     String value = domElement.getAttributeValue("ratio");
     boolean kfold = method.equalsIgnoreCase("kfold");
-    if(kfold) {
-      return new EvaluationConfiguration(Integer.parseInt(kk));
-    }
-    if(kk == null) {
-      return new EvaluationConfiguration(Double.parseDouble(value));
-    }
-    else {
-      return new EvaluationConfiguration(Double.parseDouble(value), Integer
-              .parseInt(kk));
+    if(kfold) { return new EvaluationConfiguration(Integer.parseInt(kk)); }
+    if(kk==null) {
+    	return new EvaluationConfiguration(Double.parseDouble(value));
+    } else {
+    	return new EvaluationConfiguration(Double.parseDouble(value), Integer.parseInt(kk));
     }
   }
 }

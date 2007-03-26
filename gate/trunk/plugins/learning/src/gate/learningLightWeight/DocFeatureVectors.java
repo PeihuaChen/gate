@@ -1,3 +1,10 @@
+/*
+ *  DocFeatureVectors.java
+ * 
+ *  Yaoyong Li 22/03/2007
+ *
+ *  $Id: DocFeatureVectors.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
+ */
 package gate.learningLightWeight;
 
 import java.io.BufferedReader;
@@ -6,38 +13,43 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
-
+/**
+ * Convert the NLP features into a sparse feature vector for each instance
+ * of one document.
+ */
 public class DocFeatureVectors {
+  /** Document ID. */
   String docId = null;
-
+  /** Number of instance in the document. */
   int numInstances;
-
+  /** 
+   * Array containing all sparse feature vectors of instances
+   * in the documents. 
+   */
   SparseFeatureVector[] fvs;
-
+  /** Default value of one component of feature vector. */
   final static float DEFAULTVALUE = 1.0f;
-
+  /** Constructor in trival case. */
   public DocFeatureVectors() {
     numInstances = 0;
   }
-
+  /** 
+   * The main method for obtaining the sparse feature vector
+   * and label(s) from the NLP features of each instance in 
+   * the documents.
+   */
   public void obtainFVsFromNLPFeatures(NLPFeaturesOfDoc nlpDoc,
-          NLPFeaturesList featList, int[] featurePosition, int maxNegPosition,
-          int numDocs) {
+    NLPFeaturesList featList, int[] featurePosition, int maxNegPosition,
+    int numDocs) {
     numInstances = nlpDoc.numInstances;
     docId = new String(nlpDoc.getDocId());
     fvs = new SparseFeatureVector[numInstances];
-
+    //For each istance
     for(int i = 0; i < numInstances; ++i) {
-      // fvs[i] = new SparseFeatureVector(nlpDoc.featuresCounted[i]);
       Hashtable indexValues = new Hashtable();
-      // List indexes = new ArrayList();
       int n = 0;
       String[] feat = nlpDoc.featuresInLine[i].toString().split(
-              ConstantParameters.ITEMSEPARATOR);
-
-      // System.out.println("i=" + new Integer(i) + " feature length="+
-      // new Integer(feat.length));
-
+        ConstantParameters.ITEMSEPARATOR);
       for(int j = 0; j < feat.length; ++j) {
         String featCur = feat[j];
         String featVal = null;
@@ -48,60 +60,45 @@ public class DocFeatureVectors {
           featVal = feat[j].substring(kk + 2);
         }
         if(featCur.length() > 0) { // if there is any feature
-
           if(featList.featuresList.containsKey(featCur)) {
-            if(kk > -3) {
+            if(featCur.contains(NLPFeaturesList.SYMBOLNGARM)) {
               // for only the presence of Ngram in the sentence
-              // indexValues.put(featList.featuresList.get(featCur),
-              // "1");
+              // indexValues.put(featList.featuresList.get(featCur),"1");
               // for tf representation
-              // indexValues.put(featList.featuresList.get(featCur),
-              // featVal);
-              // for tf*idf representation
-              double val = ((new Long(featVal)).doubleValue() + 1)
-                      * Math.log((double)numDocs
-                              / (new Long(featList.idfFeatures.get(featCur)
-                                      .toString())).doubleValue());
+              //indexValues.put(featList.featuresList.get(featCur),
+               //featVal);
+              //for tf*idf representation
+              double val = (Long.parseLong(featVal)+ 1)*Math.log((double)numDocs/
+                  (Long.parseLong(featList.idfFeatures.get(featCur).toString())));
               indexValues.put(featList.featuresList.get(featCur),
-                      new Float(val));
-            }
-            else if(kk == -3) {
+                new Float(val));
+            } else {
               if(featurePosition[j] == 0)
                 indexValues.put(featList.featuresList.get(feat[j]), "1");
               else if(featurePosition[j] < 0)
                 indexValues.put(new Long((Long.parseLong(featList.featuresList
-                        .get(feat[j]).toString()) - featurePosition[j]
-                        * ConstantParameters.MAXIMUMFEATURES)), new Float(-1.0
-                        / (double)featurePosition[j]));
-              else indexValues
-                      .put(
-                              new Long(
-                                      (Long.parseLong(featList.featuresList
-                                              .get(feat[j]).toString()) + (featurePosition[j] + maxNegPosition)
-                                              * ConstantParameters.MAXIMUMFEATURES)),
-                              new Float(1.0 / (double)featurePosition[j]));
+                  .get(feat[j]).toString()) - featurePosition[j]
+                  * ConstantParameters.MAXIMUMFEATURES)), new Float(-1.0
+                  / (double)featurePosition[j]));
+              else indexValues.put(
+                new Long((Long.parseLong(featList.featuresList.get(feat[j])
+                  .toString()) + (featurePosition[j] + maxNegPosition)
+                  * ConstantParameters.MAXIMUMFEATURES)), new Float(
+                  1.0 / (double)featurePosition[j]));
             }
             ++n;
-            // System.out.println(new Integer(n) +" feat=*"+feat +"*
-            // index=*" + featList.featuresList.get(feat)+"*");
           }
         }
       } // end of the loop on the types
-      if(n != nlpDoc.featuresCounted[i]) {
-        // System.out.println("Error: the number of features (" + new
-        // Integer(n)+
-        // ") is not the same as the number recorded (" + new
-        // Integer(nlpDoc.featuresCounted[i]) + ")in document "+ docId);
-      }
-      // for(int j=0; j<n; ++j) {
-      // System.out.println("before " + new Integer(j) + " " +
-      // indexes.get(j));
-      // /}
-      // System.out.println("before " + indexes.toString());
+      if(LogService.debug>1)
+        if(n != nlpDoc.featuresCounted[i]) {
+          System.out.println("Error: the number of features (" + n +
+            ") is not the same as the number recorded (" +
+            nlpDoc.featuresCounted[i] + ")in document "+ docId);
+        }
       // sort the indexes in ascending order
       List indexes = new ArrayList(indexValues.keySet());
       Collections.sort(indexes, new LongCompactor());
-
       // Iterator iterator = indexes.iterator();
       // n = 0;
       // while(iterator.hasNext()) {
@@ -117,29 +114,27 @@ public class DocFeatureVectors {
         // fvs[i].values[j] = DEFAULTVALUE;
         // for the tf or tf*idf value
         fvs[i].values[j] = Float.parseFloat(indexValues.get(indexes.get(j))
-                .toString());
+          .toString());
       }
-
     } // end of the loop on the instances
   }
 
+  /** A static class for comparing two long numbers.*/
   public static class LongCompactor implements java.util.Comparator {
-
     public int compare(Object l1, Object l2) {
       // return (new Long((new Long(l1.toString()).longValue()- new
       // Long(l2.toString()).longValue()))).intValue();
       return (int)(Long.parseLong(l1.toString()) - Long
-              .parseLong(l2.toString()));
+        .parseLong(l2.toString()));
     }
   }
 
-  /** Read the feature vectors of a document from a file. */
+  /** Read the feature vectors of a document from the feature vector file. */
   public void readDocFVFromFile(BufferedReader dataFile, int num,
-          LabelsOfFeatureVectorDoc labelsDoc) {
+    LabelsOfFeatureVectorDoc labelsDoc) {
     numInstances = num;
     fvs = new SparseFeatureVector[numInstances];
     labelsDoc.multiLabels = new LabelsOfFV[numInstances];
-    labelsDoc.labels = new int[numInstances];
     try {
       String line;
       for(int i = 0; i < num; ++i) {
@@ -148,23 +143,6 @@ public class DocFeatureVectors {
         String[] items = line.split(ConstantParameters.ITEMSEPARATOR);
         // get the label from the line
         int iEndLabel;
-        // get the simple label
-        /*
-         * iEndLabel = obtainSimpleLabels(items, labelsDoc, i);
-         * //convert the label of 1-3 into 1-2 or multi-label
-         * if(labelsDoc.labels[i]>0) { if(labelsDoc.labels[i]%3==0) {
-         * int lenL = 2; labelsDoc.multiLabels[i] = new
-         * LabelsOfFV(lenL); labelsDoc.multiLabels[i].labels = new
-         * String[lenL]; labelsDoc.multiLabels[i].labels[0] = new
-         * Integer((labelsDoc.labels[i]/3)*2-2).toString();
-         * labelsDoc.multiLabels[i].labels[1] = new
-         * Integer((labelsDoc.labels[i]/3)*2-1).toString(); } else { int
-         * lenL = 1; labelsDoc.multiLabels[i] = new LabelsOfFV(lenL);
-         * labelsDoc.multiLabels[i].labels = new String[lenL];
-         * labelsDoc.multiLabels[i].labels[0] = new Integer(
-         * (labelsDoc.labels[i]/3)*2+labelsDoc.labels[i]%3-1).toString(); }
-         *  } else { labelsDoc.multiLabels[i] = new LabelsOfFV(0); }
-         */
         // get the multilabel directly
         iEndLabel = obtainMultiLabels(items, labelsDoc.multiLabels, i);
         // get the feature vector
@@ -172,22 +150,11 @@ public class DocFeatureVectors {
         fvs[i] = new SparseFeatureVector(len);
         obtainFVs(items, iEndLabel, len, fvs[i]);
       }
-    }
-    catch(IOException e) {
+    } catch(IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-
     return;
-  }
-
-  /** Get the simple (one) label(s) from one line of feature vector. */
-  private int obtainSimpleLabels(String[] items,
-          LabelsOfFeatureVectorDoc labelsDoc, int ifv) {
-    int kk = 1;// because the first item is the index of this instance
-    labelsDoc.labels[ifv] = (new Integer(items[kk])).intValue();
-    ++kk;
-    return kk;
   }
 
   /** Get the multi label(s) from one line of feature vector. */
@@ -204,13 +171,13 @@ public class DocFeatureVectors {
     return kk;
   }
 
-  /** Get the feature vector in parse format. */
+  /** Get the feature vector in parse format from a String arrays. */
   private void obtainFVs(String[] items, int iEndLabel, int len,
-          SparseFeatureVector fv) {
+    SparseFeatureVector fv) {
     String[] indexValue;
     for(int i = 0; i < len; ++i) {
       indexValue = items[i + iEndLabel]
-              .split(ConstantParameters.INDEXVALUESEPARATOR);
+        .split(ConstantParameters.INDEXVALUESEPARATOR);
       if(indexValue.length <= 1) {
         System.out.println("i=" + i + " item=" + items[i + iEndLabel]);
       }
@@ -229,5 +196,4 @@ public class DocFeatureVectors {
   public SparseFeatureVector[] getFvs() {
     return fvs;
   }
-
 }
