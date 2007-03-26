@@ -11,9 +11,6 @@ import java.rmi.RemoteException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import service.client.OWLIM;
-import service.client.Property;
-import service.client.ResourceInfo;
 import gate.creole.ontology.OClass;
 import gate.creole.ontology.OConstants;
 import gate.creole.ontology.OInstance;
@@ -38,8 +35,8 @@ public class ObjectPropertyImpl extends RDFPropertyImpl implements
    * @param owlimPort
    */
   public ObjectPropertyImpl(URI aURI, Ontology ontology, String repositoryID,
-          OWLIM owlimPort) {
-    super(aURI, ontology, repositoryID, owlimPort);
+          OWLIMServiceImpl owlimPort) {
+    super(aURI, ontology, repositoryID, owlimPort); 
   }
 
   /*

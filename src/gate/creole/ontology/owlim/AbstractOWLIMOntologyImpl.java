@@ -24,9 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.openrdf.sesame.repository.SesameRepository;
-import service.client.OWLIM;
-import service.client.Property;
-import service.client.ResourceInfo;
 import gate.creole.AbstractLanguageResource;
 import gate.creole.ontology.AnnotationProperty;
 import gate.creole.ontology.DataType;
@@ -66,7 +63,7 @@ public abstract class AbstractOWLIMOntologyImpl
   /**
    * instance of the OWLIMServices
    */
-  protected OWLIM owlim;
+  protected OWLIMServiceImpl owlim;
 
   /**
    * URL of the ontology
@@ -116,6 +113,7 @@ public abstract class AbstractOWLIMOntologyImpl
     modificationListeners = new ArrayList<OntologyModificationListener>();
     urisToOResouceMap = new HashMap<String, OResource>();
     resourceNamesToOResourcesMap = new HashMap<String, List<OResource>>();
+    persistRepository = new Boolean(false);
   }
 
   /*
@@ -1135,7 +1133,7 @@ public abstract class AbstractOWLIMOntologyImpl
    * 
    * @return
    */
-  public OWLIM getOwlim() {
+  public OWLIMServiceImpl getOwlim() {
     return owlim;
   }
 
@@ -1144,7 +1142,7 @@ public abstract class AbstractOWLIMOntologyImpl
    * 
    * @param owlim
    */
-  public void setOwlim(OWLIM owlim) {
+  public void setOwlim(OWLIMServiceImpl owlim) {
     this.owlim = owlim;
   }
 

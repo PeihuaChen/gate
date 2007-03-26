@@ -8,7 +8,6 @@
 package gate.creole.ontology.owlim;
 
 import java.util.Set;
-import service.client.OWLIM;
 import gate.creole.ontology.AnnotationProperty;
 import gate.creole.ontology.OResource;
 import gate.creole.ontology.Ontology;
@@ -31,16 +30,16 @@ public class AnnotationPropertyImpl extends RDFPropertyImpl implements
    * @param owlimPort
    */
   public AnnotationPropertyImpl(URI aURI, Ontology ontology,
-          String repositoryID, OWLIM owlimPort) {
+          String repositoryID, OWLIMServiceImpl owlimPort) {
     super(aURI, ontology, repositoryID, owlimPort);
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.RDFProperty#setSamePropertyAs(gate.creole.ontology.RDFProperty)
+   * @see gate.creole.ontology.RDFProperty#setEquivalentPropertyAs(gate.creole.ontology.RDFProperty)
    */
-  public void setSamePropertyAs(RDFProperty theProperty) {
+  public void setEquivalentPropertyAs(RDFProperty theProperty) {
     throw new GateRuntimeException(
             "This operation is not valid for AnnotationProperties.");
   }
@@ -48,9 +47,9 @@ public class AnnotationPropertyImpl extends RDFPropertyImpl implements
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.RDFProperty#getSamePropertyAs()
+   * @see gate.creole.ontology.RDFProperty#getEquivalentPropertyAs()
    */
-  public Set<RDFProperty> getSamePropertyAs() {
+  public Set<RDFProperty> getEquivalentPropertyAs() {
     throw new GateRuntimeException(
             "This operation is not valid for AnnotationProperties.");
   }
@@ -58,9 +57,9 @@ public class AnnotationPropertyImpl extends RDFPropertyImpl implements
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.RDFProperty#isSamePropertyAs(gate.creole.ontology.RDFProperty)
+   * @see gate.creole.ontology.RDFProperty#isEquivalentPropertyAs(gate.creole.ontology.RDFProperty)
    */
-  public boolean isSamePropertyAs(RDFProperty theProperty) {
+  public boolean isEquivalentPropertyAs(RDFProperty theProperty) {
     throw new GateRuntimeException(
             "This operation is not valid for AnnotationProperties.");
   }

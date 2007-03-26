@@ -7,7 +7,6 @@
  */
 package gate.creole.ontology.owlim;
 
-import service.client.OWLIM;
 import gate.creole.ontology.AnonymousClass;
 import gate.creole.ontology.Ontology;
 import gate.creole.ontology.URI;
@@ -25,7 +24,7 @@ public class AnonymousClassImpl extends OClassImpl implements AnonymousClass {
    * @param owlimPort
    */
   public AnonymousClassImpl(URI aURI, Ontology ontology, String repositoryID,
-          OWLIM owlimPort) {
+          OWLIMServiceImpl owlimPort) {
     super(aURI, ontology, repositoryID, owlimPort);
   }
 }

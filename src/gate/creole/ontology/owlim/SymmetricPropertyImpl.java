@@ -7,7 +7,6 @@
  */
 package gate.creole.ontology.owlim;
 
-import service.client.OWLIM;
 import gate.creole.ontology.Ontology;
 import gate.creole.ontology.SymmetricProperty;
 import gate.creole.ontology.URI;
@@ -27,7 +26,7 @@ public class SymmetricPropertyImpl extends ObjectPropertyImpl implements
    * @param owlimPort
    */
   public SymmetricPropertyImpl(URI aURI, Ontology ontology,
-          String repositoryID, OWLIM owlimPort) {
+          String repositoryID, OWLIMServiceImpl owlimPort) {
     super(aURI, ontology, repositoryID, owlimPort);
   }
 }

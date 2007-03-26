@@ -32,7 +32,7 @@ import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.xml.rpc.ServiceException;
 import org.openrdf.sesame.repository.SesameRepository;
-import service.client.OWLIMServiceImpl;
+
 
 /**
  * This LR provides an implementation of Ontology interface and uses
@@ -134,6 +134,7 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
       String ontoURLString = ontologyURL == null ? "" : ontologyURL
               .toExternalForm();
       owlim = new OWLIMServiceImpl();
+      
       ((OWLIMServiceImpl)owlim).init((ServletContext)null);
       ((OWLIMServiceImpl)owlim).login("admin", "admin");
 
@@ -162,6 +163,7 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
                 + this.hashCode(), "admin", "admin", ontoURLString,
                 defaultNameSpace, type, persistLocationPath, persistRepository
                         .booleanValue(), false);
+        
       }
       if(sesameRepositoryID == null) {
         throw new ResourceInstantiationException(

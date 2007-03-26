@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import service.client.OWLIM;
-import service.client.ResourceInfo;
 import gate.creole.ontology.OClass;
 import gate.creole.ontology.OConstants;
 import gate.creole.ontology.Ontology;
@@ -34,8 +32,8 @@ public class OClassImpl extends OResourceImpl implements OClass {
    * @param owlimPort 
    */
   public OClassImpl(URI aURI, Ontology ontology, String repositoryID,
-          OWLIM owlimPort) {
-    super(aURI, ontology, repositoryID, owlimPort);
+          OWLIMServiceImpl owlimPort) {
+    super(aURI, ontology, repositoryID, owlimPort); 
   }
 
   /*
