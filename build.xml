@@ -825,7 +825,7 @@
 	<taskdef name="izpack" classname="com.izforge.izpack.ant.IzPackTask">
 		<classpath>
 			<pathelement path="${build.class.path}"/>
-			<pathelement location="${buildDir}/lib/standalone-izpack-installer-compiler.jar"/>
+			<pathelement location="${buildDir}/deploy/lib/standalone-izpack-installer-compiler.jar"/>
 		</classpath>
 	</taskdef>
 	
