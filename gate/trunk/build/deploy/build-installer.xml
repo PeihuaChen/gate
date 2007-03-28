@@ -1,3 +1,17 @@
+<project name="gate-deploy" default="installer">
+  <property name="extra.xml.plugins" value="" />
+
+  <target name="installer">
+    <!-- define the IzPack Ant task -->
+    <taskdef name="izpack" classname="com.izforge.izpack.ant.IzPackTask">
+      <classpath>
+        <pathelement location="lib/standalone-izpack-installer-compiler.jar"/>
+      </classpath>
+    </taskdef>
+    <property name="gate.home" location="../.." />
+    <izpack output="${gate.home}/gate-installer.jar"
+            basedir="${gate.home}">			
+      <config><![CDATA[
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <!-- 
 	This is the izPack script for building the GATE installer
@@ -81,32 +95,49 @@
               required="yes"
               preselected="yes">
             <description>The binaries</description>
-            <file src="bin" targetdir="$INSTALL_PATH"/>
-            <file src="lib" targetdir="$INSTALL_PATH"/>
+            <fileset dir="bin" targetdir="$INSTALL_PATH/bin"/>
+            <fileset dir="lib" targetdir="$INSTALL_PATH/lib"/>
             <file src="licence.html" targetdir="$INSTALL_PATH"/>
             <file src="index.html" targetdir="$INSTALL_PATH"/>
             <file src="build.xml" targetdir="$INSTALL_PATH"/>          
             <file src="gate.xml" targetdir="$INSTALL_PATH"/>
-            <file src="build/*" targetdir="$INSTALL_PATH/build"/>
+            <file src="gate.exe" targetdir="$INSTALL_PATH" os="windows"/>
+            <fileset dir="GATE.app" targetdir="$INSTALL_PATH/GATE.app" os="mac"/>
+            <fileset dir="build" targetdir="$INSTALL_PATH/build">
+              <exclude name="deploy/**" />
+            </fileset>
             <file src="build/deploy/gate-icon.ico" targetdir="$INSTALL_PATH/icons" os="windows"/>
             <executable targetfile="$INSTALL_PATH/bin/ant" type="bin" keep="true"/>
             <executable targetfile="$INSTALL_PATH/bin/antRun" type="bin" keep="true"/>
             <executable targetfile="$INSTALL_PATH/bin/antRun" type="bin" keep="true"/>
             <executable targetfile="$INSTALL_PATH/bin/gate.sh" type="bin" keep="true"/>
             <executable targetfile="$INSTALL_PATH/bin/real-ant" type="bin" keep="true"/>
+            <executable targetfile="$INSTALL_PATH/GATE.app/Contents/MacOS/GATE" stage="never" keep="true" os="mac"/>
+        </pack>
+        <pack name="plugins"
+              required="yes"
+              preselected="yes">
+          <description>Included plugins</description>
+          <fileset dir="plugins" targetdir="$INSTALL_PATH/plugins" />
+          @{extra.xml.plugins}
         </pack>
         <pack name="doc" 
               required="no"
               preselected="yes">
             <description>The documentation</description>
-            <file src="doc" targetdir="$INSTALL_PATH"/> <!-- Reccursive adding -->
+            <fileset dir="doc" targetdir="$INSTALL_PATH/doc"/> <!-- Reccursive adding -->
         </pack>
         
         <pack name="src" 
               required="no"
               preselected="no">
             <description>The sources</description>
-            <file src="src" targetdir="$INSTALL_PATH"/>
+            <fileset dir="src" targetdir="$INSTALL_PATH/src"/>
         </pack>
     </packs>
 </installation>
+      ]]></config>
+    </izpack>
+    
+  </target>
+</project>

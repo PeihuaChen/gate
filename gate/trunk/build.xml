@@ -651,6 +651,30 @@
      </java>
   </target>
 	
+  <!-- Files in plugins that should be stored in the zip files with execute
+       permissions.  We assume for safety that anything except .java, .xml,
+       .txt and README files may need execute permission -->
+  <patternset id="plugins.exec">
+    <include name="plugins/**" />
+    <exclude name="**/*.java" />
+    <exclude name="**/*.xml" />
+    <exclude name="**/*.txt" />
+    <exclude name="**/*README*" />
+    <exclude name="**/*LICEN*" />
+    <exclude name="**/*COPYING*" />
+  </patternset>
+
+  <!-- This pattern should match everything in plugins that is not covered by
+       the previous set -->
+  <patternset id="plugins.nonexec">
+    <include name="plugins/**/*.java" />
+    <include name="plugins/**/*.xml" />
+    <include name="plugins/**/*.txt" />
+    <include name="plugins/**/*README*" />
+    <include name="plugins/**/*LICEN*" />
+    <include name="plugins/**/*COPYING*" />
+  </patternset>
+
   <!-- Make the archives for the GATE Distribution -->
   <target name="distro"
           depends="compile, jar, doc, plugins.build, plugins.distro.prepare">
@@ -679,26 +703,6 @@
     <delete dir="${distDir}"/>    
     <mkdir dir="${distDir}"/>
 
-    <!-- Files in plugins that should be stored in the zip files with execute
-         permissions.  We assume for safety that anything except .java, .xml,
-         .txt and README files may need execute permission -->
-    <patternset id="plugins.exec">
-      <include name="plugins/**" />
-      <exclude name="**/*.java" />
-      <exclude name="**/*.xml" />
-      <exclude name="**/*.txt" />
-      <exclude name="**/*README*" />
-    </patternset>
-
-    <!-- This pattern should match everything in plugins that is not covered by
-         the previous set -->
-    <patternset id="plugins.nonexec">
-      <include name="plugins/**/*.java" />
-      <include name="plugins/**/*.xml" />
-      <include name="plugins/**/*.txt" />
-      <include name="plugins/**/*README*" />
-    </patternset>
-    
     <!-- Build the DOC archive -->
     <zip destfile="${doc.archive}" 
          update="false"
@@ -821,18 +825,50 @@
     </zip>
   </target>
 	
-	<!-- define the IzPack Ant task -->
-	<taskdef name="izpack" classname="com.izforge.izpack.ant.IzPackTask">
-		<classpath>
-			<pathelement path="${build.class.path}"/>
-			<pathelement location="${buildDir}/deploy/lib/standalone-izpack-installer-compiler.jar"/>
-		</classpath>
-	</taskdef>
 	
-	<target name="installer">
-		<izpack input="${buildDir}/deploy/gate-installer.xml"
-		        output="${basedir}/gate-installer.jar"
-		        basedir="${basedir}">			
-		</izpack>
-	</target>
+  <target name="installer">
+    <!-- build the <executable> XML elements that need to go into the installer
+         configuration -->
+    <path id="path.plugins.exec">
+      <fileset dir=".">
+        <patternset refid="plugins.exec" />
+      </fileset>
+    </path>
+
+    <property name="property.plugins.exec" refid="path.plugins.exec" />
+
+    <!-- change backslashes to forward slashes in ${basedir} -->
+    <propertyregex property="basedir.forwardslashes"
+                   input="${basedir}"
+                   regexp="\\"
+                   replace="/"
+                   global="true"
+                   defaultValue="${basedir}" />
+    <!-- first replace the path separator with newline to split the path into
+         multiple lines -->
+    <propertyregex property="translated.plugins.exec.1"
+                   input="${property.plugins.exec}"
+                   regexp="${path.separator}"
+                   replace="${line.separator}"
+                   global="true" />
+    <!-- next convert all backslashes to forward slashes -->
+    <propertyregex property="translated.plugins.exec.2"
+                   input="${translated.plugins.exec.1}"
+                   regexp="\\"
+                   replace="/"
+                   global="true"
+                   defaultValue="${translated.plugins.exec.1}" />
+    <!-- next strip off the directories leading up to this one from each file
+         and wrap them up in the right XML for izpack -->
+    <propertyregex property="translated.plugins.exec"
+                   input="${translated.plugins.exec.2}"
+                   regexp="(?m)^\Q${basedir.forwardslashes}\E/(.*)$"
+                   replace="&lt;executable targetfile=&quot;$INSTALL_PATH/\1&quot; stage=&quot;never&quot; keep=&quot;true&quot;/&gt;"
+                   global="true" />
+
+    <ant dir="build/deploy" antfile="build-installer.xml" target="installer">
+      <property name="extra.xml.plugins" value="${translated.plugins.exec}" />
+    </ant>
+
+  </target>
 </project>
