@@ -16,8 +16,6 @@
 
 BIN=/usr/local/clactools/TreeTagger/bin
 LIB=/usr/local/clactools/TreeTagger/lib
-BIN='D:\apps\TreeTagger\bin'
-LIB='D:\apps\TreeTagger\lib'
 
 # set your default options for the Tree Tagger
 TAGGEROPTS="-token -lemma -sgml"
