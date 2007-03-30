@@ -107,6 +107,10 @@
               <exclude name="deploy/**" />
             </fileset>
             <file src="build/deploy/gate-icon.ico" targetdir="$INSTALL_PATH/icons" os="windows"/>
+            <!-- required by ontology API, these should move into
+                 ontology_tools plugin before the 4.0 release -->
+            <file src="owl.rdfs" targetdir="$INSTALL_PATH"/>
+            <file src="system.conf" targetdir="$INSTALL_PATH"/>
             <executable targetfile="$INSTALL_PATH/bin/ant" type="bin" keep="true"/>
             <executable targetfile="$INSTALL_PATH/bin/antRun" type="bin" keep="true"/>
             <executable targetfile="$INSTALL_PATH/bin/antRun" type="bin" keep="true"/>
@@ -126,6 +130,7 @@
               preselected="yes">
             <description>The documentation</description>
             <fileset dir="doc" targetdir="$INSTALL_PATH/doc"/> <!-- Reccursive adding -->
+            <file src="../sale/tao/tao.pdf" targetdir="$INSTALL_PATH" />
         </pack>
         
         <pack name="src" 

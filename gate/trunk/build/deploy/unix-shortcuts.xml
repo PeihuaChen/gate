@@ -16,4 +16,13 @@
      encoding="UTF-8">
      <createForPack name="bin"/>
    </shortcut>
+
+   <shortcut
+     name="GATE User Guide"
+     programGroup="yes"
+     target="$INSTALL_PATH/tao.pdf"
+     description="The GATE User Guide"
+     type="Link">
+     <createForPack name="doc"/>
+   </shortcut>
 </shortcuts>
