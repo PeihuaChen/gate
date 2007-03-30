@@ -874,7 +874,7 @@
          and wrap them up in the right XML for izpack -->
     <propertyregex property="translated.plugins.exec"
                    input="${translated.plugins.exec.2}"
-                   regexp="(?m)^\Q${basedir.forwardslashes}\E/(.*)$"
+                   regexp="(?m)^\Q${basedir.forwardslashes}\E/(.*?)\r?$"
                    replace="&lt;executable targetfile=&quot;$INSTALL_PATH/\1&quot; stage=&quot;never&quot; keep=&quot;true&quot;/&gt;"
                    global="true" />
 
