@@ -167,8 +167,20 @@
       <path id="tools.jar.path" />
       <property name="toolsjar.debug"
                 value="No tools.jar found - Sun compiler not available" />
+      <!-- no tools.jar means we're running on a JRE rather than a JDK.
+           On Windows, this means that only the client VM is available -->
+      <if>
+        <os family="windows" />
+        <then>
+          <property name="server.or.client" value="-client" />
+        </then>
+      </if>
     </else>
   </if>
+
+  <!-- Default to the server VM (slower startup but faster running) unless
+       overridden above -->
+  <property name="server.or.client" value="-server" />
   
   <!-- The build CLASSPATH -->
   <path id="build.class.path">
@@ -430,7 +442,7 @@
           logError="true"
           maxmemory="${runtime.max.memory}">
 <!--	     <jvmarg value="-Xms${runtime.start.memory}"/> -->
-      <jvmarg value="-server"/> 
+      <jvmarg value="${server.or.client}"/> 
     	<sysproperty key="gate.home" value="${basedir}"/>   
        <sysproperty key="java.ext.dirs" value="${extDir}"/>
  <!--<sysproperty key="awt.toolkit" value="sun.awt.motif.MToolkit"/>-->
