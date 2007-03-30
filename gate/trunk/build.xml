@@ -837,46 +837,34 @@
     </zip>
   </target>
 	
-	
   <target name="installer">
     <!-- build the <executable> XML elements that need to go into the installer
          configuration -->
-    <path id="path.plugins.exec">
-      <fileset dir=".">
-        <patternset refid="plugins.exec" />
-      </fileset>
-    </path>
+    <property name="executable.line.prefix"
+              value='&lt;executable targetfile="'/>
+    <property name="executable.line.suffix"
+              value='" stage="never" keep="true" />'/>
+    <pathconvert dirsep="/" pathsep="${executable.line.suffix}${line.separator}${executable.line.prefix}" property="converted.plugins.exec">
+      <path>
+        <fileset dir=".">
+          <patternset refid="plugins.exec" />
+        </fileset>
+      </path>
+      <map from="${basedir}" to="$INSTALL_PATH" />
+    </pathconvert>
 
-    <property name="property.plugins.exec" refid="path.plugins.exec" />
-
-    <!-- change backslashes to forward slashes in ${basedir} -->
-    <propertyregex property="basedir.forwardslashes"
-                   input="${basedir}"
-                   regexp="\\"
-                   replace="/"
-                   global="true"
-                   defaultValue="${basedir}" />
-    <!-- first replace the path separator with newline to split the path into
-         multiple lines -->
-    <propertyregex property="translated.plugins.exec.1"
-                   input="${property.plugins.exec}"
-                   regexp="${path.separator}"
-                   replace="${line.separator}"
-                   global="true" />
-    <!-- next convert all backslashes to forward slashes -->
-    <propertyregex property="translated.plugins.exec.2"
-                   input="${translated.plugins.exec.1}"
-                   regexp="\\"
-                   replace="/"
-                   global="true"
-                   defaultValue="${translated.plugins.exec.1}" />
-    <!-- next strip off the directories leading up to this one from each file
-         and wrap them up in the right XML for izpack -->
-    <propertyregex property="translated.plugins.exec"
-                   input="${translated.plugins.exec.2}"
-                   regexp="(?m)^\Q${basedir.forwardslashes}\E/(.*?)\r?$"
-                   replace="&lt;executable targetfile=&quot;$INSTALL_PATH/\1&quot; stage=&quot;never&quot; keep=&quot;true&quot;/&gt;"
-                   global="true" />
+    <if>
+      <isset property="converted.plugins.exec" />
+      <then>
+        <!-- The pathconvert puts the right stuff between pairs of file paths,
+             so we just need to put the first prefix and last suffix around the
+             whole converted string -->
+        <property name="translated.plugins.exec" value="${executable.line.prefix}${converted.plugins.exec}${executable.line.suffix}" />
+      </then>
+      <else>
+        <property name="translated.plugins.exec" value="" />
+      </else>
+    </if>
 
     <ant dir="build/deploy" antfile="build-installer.xml" target="installer">
       <property name="extra.xml.plugins" value="${translated.plugins.exec}" />
