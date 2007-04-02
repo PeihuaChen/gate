@@ -33,6 +33,8 @@ import gate.Corpus;
  */
 public class LuceneIndexer implements Indexer {
 
+  protected boolean DEBUG = false;
+  
   /** An corpus for indexing */
   protected Corpus corpus;
 
@@ -87,7 +89,11 @@ public class LuceneIndexer implements Indexer {
             .get(Constants.BASE_TOKEN_ANNOTATION_TYPE);
     String indexUnitAnnotationType = (String)parameters
             .get(Constants.INDEX_UNIT_ANNOTATION_TYPE);
-
+    if(DEBUG) {
+      System.out.println("BTAT : "+baseTokenAnnotationType);
+      System.out.println("IUAT : "+indexUnitAnnotationType);
+    }
+    
     if(baseTokenAnnotationType == null
             || baseTokenAnnotationType.trim().length() == 0) {
       throw new IndexException("Base Token Annotation Type not set properly");
@@ -229,11 +235,11 @@ public class LuceneIndexer implements Indexer {
 
       if(added != null) {
         for(int i = 0; i < added.size(); i++) {
-
+          
           gate.Document gateDoc = added.get(i);
+          
           String idToUse = gateDoc.getLRPersistenceId() == null ? gateDoc
                   .getName() : gateDoc.getLRPersistenceId().toString();
-
           gate.creole.annic.apache.lucene.document.Document[] docs = getLuceneDoc(
                   corpusPersistenceID, gateDoc, location);
           if(docs == null) continue;
@@ -337,6 +343,7 @@ public class LuceneIndexer implements Indexer {
     String idToUse = gateDoc.getLRPersistenceId() == null
             ? gateDoc.getName()
             : gateDoc.getLRPersistenceId().toString();
+    
     return new gate.creole.annic.lucene.LuceneDocument().createDocument(
             corpusPersistenceID, gateDoc, idToUse, set, featuresToExclude,
             location, baseTokenAnnotationType, indexUnitAnnotationType);

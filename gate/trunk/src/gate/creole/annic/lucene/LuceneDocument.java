@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashSet;
 
 import gate.Annotation;
+import gate.Factory;
 import gate.FeatureMap;
 import gate.creole.annic.apache.lucene.analysis.Token;
 import java.util.Iterator;
@@ -190,13 +191,14 @@ public class LuceneDocument {
 
     HashSet<OffsetGroup> unitOffsetsSet = new HashSet<OffsetGroup>();
     AnnotationSet unitSet = inputAs.get(indexUnitAnnotationType);
-    if(unitSet == null) {
+    if(indexUnitAnnotationType == null || indexUnitAnnotationType.trim().length() == 0 || unitSet == null) {
       // the index Unit Annotation Type is not specified
       // therefore we consider the entire document as a single unit
       OffsetGroup group = new OffsetGroup();
       group.startOffset = new Long(0);
       group.endOffset = document.getContent().size();
       unitOffsetsSet.add(group); 
+      
     }
     else {
       Iterator<Annotation> iter = unitSet.iterator();
