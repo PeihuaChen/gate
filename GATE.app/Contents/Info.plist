@@ -9,7 +9,7 @@
 	<key>CFBundleGetInfoString</key>
 	<string>GATE 4.0 alpha - http://gate.ac.uk/</string>
 	<key>CFBundleIconFile</key>
-	<string>gate-icon.icns</string>
+	<string>gate-launcher.icns</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>8.0</string>
 	<key>CFBundleName</key>
