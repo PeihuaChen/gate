@@ -288,21 +288,11 @@ public class Eclipse extends gate.util.Javac {
     settings.put(CompilerOptions.OPTION_ReportUncheckedTypeOperation,
                  CompilerOptions.IGNORE);
 
-    // source and target - default to 1.4 on 1.4, 1.5 otherwise.  Note that
-    // GATE only works on 1.4 or later.
-    String javaVersion = System.getProperty("java.version", "1.4");
-    if(javaVersion.startsWith("1.4")) {
-      settings.put(CompilerOptions.OPTION_Source,
-                   CompilerOptions.VERSION_1_4);
-      settings.put(CompilerOptions.OPTION_TargetPlatform,
-                   CompilerOptions.VERSION_1_4);
-    }
-    else {
-      settings.put(CompilerOptions.OPTION_Source,
-                   CompilerOptions.VERSION_1_5);
-      settings.put(CompilerOptions.OPTION_TargetPlatform,
-                   CompilerOptions.VERSION_1_5);
-    }
+    // source and target - force 1.5 as GATE only works on 1.5 or later.
+    settings.put(CompilerOptions.OPTION_Source,
+                 CompilerOptions.VERSION_1_5);
+    settings.put(CompilerOptions.OPTION_TargetPlatform,
+                 CompilerOptions.VERSION_1_5);
 
     final IProblemFactory problemFactory = 
       new DefaultProblemFactory(Locale.getDefault());
