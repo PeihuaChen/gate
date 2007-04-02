@@ -437,9 +437,8 @@
     <java classname="gate.Main" 
           classpathref="run.class.path" 
           fork="true"
-          spawn="false"
+          spawn="true"
           dir="." 
-          logError="true"
           maxmemory="${runtime.max.memory}">
 <!--	     <jvmarg value="-Xms${runtime.start.memory}"/> -->
       <jvmarg value="${server.or.client}"/> 
@@ -454,12 +453,13 @@
   
   <!-- Starts GATE on MAC platforms -->
   <target name="run-mac" if="running.on.mac">
+    <property name="gate.icon.location"
+              location="GATE.app/Contents/Resources/gate-icon.icns" />
     <java classname="gate.Main" 
           classpathref="run.class.path" 
           fork="true"
-          spawn="false"
+          spawn="true"
           dir="." 
-          logError="true"
           maxmemory="${runtime.max.memory}">
 <!--	     <jvmarg value="-Xms${runtime.start.memory}"/> -->
        <sysproperty key="gate.home" value="${basedir}"/>   
@@ -469,6 +469,7 @@
        <sysproperty key="com.apple.mrj.application.growbox.intrudes" value="false"/>
        <sysproperty key="com.apple.mrj.application.live-resize" value="true"/>
        <jvmarg value="-Xdock:name=GATE ${gate.version}"/>
+       <jvmarg value="-Xdock:icon=${gate.icon.location}"/>
        <syspropertyset refid="run.properties" />
        <syspropertyset refid="os.properties" />
      </java>
