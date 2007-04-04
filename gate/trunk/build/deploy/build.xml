@@ -1,0 +1,387 @@
+<?xml version="1.0"?>
+<!-- Ant build file to build the GATE distribution ZIP files and the izPack
+installers.  Note !!basedir="../.."!! - although this ant file is in
+build/deploy all paths are relative to the top-level GATE directory -->
+<project name="GATE-deploy" default="usage" basedir="../..">
+
+  <target name="usage">
+    <echo>This build file contains targets that are called by the</echo>
+    <echo>top-level GATE build file, and cannot be used separately.</echo>
+    <echo>To build the distribution ZIP files, run "ant distro-zips"</echo>
+    <echo>in the top GATE directory.  To build the installer, use</echo>
+    <echo>"ant installer", again from the top-level directory.</echo>
+    <fail />
+  </target>
+
+  <property name="gate.full.name" 
+            value="gate-${gate.version}-build${gate.build}"/>
+  <property name="distDirname"
+            value="DISTRIBUTION"/>          
+  <property name="distDir" 
+            location="${distDirname}"/>
+
+  <!-- Find all the files in GATE that have the svn:executable property set.
+  These are the files that will be put into the installers and zip files with
+  executable permissions -->
+  <target name="find-executables">
+    <echo>Finding executable files from SVN properties</echo>
+    <property name="svn.output" location="build/deploy/find-executables.out" />
+    <delete file="${svn.output}" />
+    <exec executable="svn" dir="${basedir}"
+          output="${svn.output}" logError="true" failonerror="true">
+      <arg value="propget" />
+      <arg value="svn:executable" />
+      <arg value="--recursive" />
+    </exec>
+
+    <!-- remove the " - *" (the property value) off the end of each line, to
+    leave just the filenames -->
+    <property name="executable.files"
+              location="build/deploy/executable-files" />
+    <delete file="${executable.files}" />
+    <copy file="${svn.output}" tofile="${executable.files}">
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern=" - \*$" replace="" />
+        </tokenfilter>
+      </filterchain>
+    </copy>
+
+    <delete file="${svn.output}" />
+  </target>
+
+  <!-- build the distribution zip files -->
+  <target name="make-zips" depends="find-executables">
+    <property name="doc.dirname"
+              value="${gate.full.name}-DOC"/>
+    <property name="doc.archive"
+              location="${distDir}/${doc.dirname}.zip"/>
+    <property name="src.dirname"
+              value="${gate.full.name}-SRC"/>
+    <property name="src.archive"
+              location="${distDir}/${src.dirname}.zip"/>
+    <property name="bin.dirname"
+              value="${gate.full.name}-BIN"/>
+    <property name="bin.archive"
+              location="${distDir}/${bin.dirname}.zip"/>
+    <property name="all.dirname"
+              value="${gate.full.name}-ALL"/>
+    <property name="all.archive"
+              location="${distDir}/${all.dirname}.zip"/>
+    <delete dir="${distDir}"/>    
+    <mkdir dir="${distDir}"/>
+
+    <!-- Build the DOC archive -->
+    <selector id="DOC.files">
+      <or>
+        <filename name="doc/**" />
+        <filename name="licence.html" />
+        <filename name="index.html" />
+      </or>
+    </selector>
+    <zip destfile="${doc.archive}" 
+         update="false"
+         compress="true">
+      <zipfileset dir="${basedir}" prefix="${doc.dirname}" filemode="755">
+        <includesfile name="${executable.files}" />
+        <selector refid="DOC.files" />
+      </zipfileset>
+      <zipfileset dir="${basedir}" prefix="${doc.dirname}">
+        <excludesfile name="${executable.files}" />
+        <selector refid="DOC.files" />
+      </zipfileset>
+      <!-- include tao.pdf -->
+      <zipfileset dir="${basedir}"
+                  prefix="${doc.dirname}"
+                  file="../sale/tao/tao.pdf"/>
+    </zip>
+    
+    <!-- Build the SRC archive -->
+    <selector id="SRC.files">
+      <and>
+        <or>
+          <filename name="bin/**" />
+          <filename name="plugins/**" />
+          <filename name="*" />
+          <filename name="build/**" />
+          <filename name="classes" />
+          <filename name="doc/**" />
+          <filename name="lib/**" />
+          <filename name="src/**" />
+        </or>
+        <none>
+          <filename name="${distDirname}" />
+          <filename name="build/*.jar" />
+          <filename name="build/deploy/**" />
+          <filename name="doc/javadoc/" />
+        </none>
+      </and>
+    </selector>
+    <zip destfile="${src.archive}" 
+         update="false"
+         duplicate="preserve"
+         compress="true">
+      <zipfileset dir="${basedir}" prefix="${src.dirname}" filemode="755">
+        <includesfile name="${executable.files}" />
+        <selector refid="SRC.files" />
+      </zipfileset>
+      <zipfileset dir="${basedir}" prefix="${src.dirname}">
+        <excludesfile name="${executable.files}" />
+        <selector refid="SRC.files" />
+      </zipfileset>
+      <!-- include empty javadoc and javadoc/internal directories -->
+      <zipfileset dir="${basedir}"
+                  prefix="${src.dirname}/doc/"
+                  file="doc/javadoc"/>
+      <zipfileset dir="${basedir}"
+                  prefix="${src.dirname}/doc/javadoc/"
+                  file="doc/javadoc/internal"/>
+    </zip>
+
+    <!-- Build the BIN archive -->
+    <selector id="BIN.files">
+      <or>
+        <filename name="bin/**" />
+        <filename name="gate.exe" />
+        <filename name="GATE.app/**" />
+        <filename name="plugins/**" />
+        <filename name="licence.html"/>
+        <filename name="build.xml"/>
+        <filename name="gate.xml"/>
+        <filename name="build/version.txt"/>
+        <filename name="build/persist/**"/>
+        <filename name="build/build.txt"/>
+        <filename name="lib/**"/>
+      </or>
+    </selector>
+    <zip destfile="${bin.archive}" 
+         update="false"
+         duplicate="preserve"
+         compress="true">
+      <zipfileset dir="${basedir}" prefix="${bin.dirname}" filemode="755">
+        <includesfile name="${executable.files}" />
+        <selector refid="BIN.files" />
+      </zipfileset>
+      <zipfileset dir="${basedir}" prefix="${bin.dirname}">
+        <excludesfile name="${executable.files}" />
+        <selector refid="BIN.files" />
+      </zipfileset>
+      <!-- include tao.pdf -->
+      <zipfileset dir="${basedir}"
+                  prefix="${bin.dirname}"
+                  file="../sale/tao/tao.pdf"/>
+    </zip>
+    
+    <!-- Build the ALL archive -->
+    <selector id="ALL.files">
+      <none>
+        <filename name="${distDirname}" />
+        <filename name="${distDirname}/**" />
+      </none>
+    </selector>
+    <zip destfile="${all.archive}" 
+         update="false"
+         duplicate="preserve"
+         compress="true">
+      <zipfileset dir="${basedir}" prefix="${all.dirname}" filemode="755">
+        <includesfile name="${executable.files}" />
+        <selector refid="ALL.files" />
+      </zipfileset>
+      <zipfileset dir="${basedir}" prefix="${all.dirname}">
+        <excludesfile name="${executable.files}" />
+        <selector refid="ALL.files" />
+      </zipfileset>
+      <!-- include tao.pdf -->
+      <zipfileset dir="${basedir}"
+                  prefix="${all.dirname}"
+                  file="../sale/tao/tao.pdf"/>        
+    </zip>
+  </target>
+
+  <property name="exec.line.prefix" value='&lt;executable targetfile="' />
+  <property name="exec.line.suffix" value='" stage="never" keep="true"/&gt;' />
+
+  <!-- A macro to create the necessary set of <executable> entries for the
+  files that have executable permission in subversion and match a particular
+  file selector. -->
+  <macrodef name="create-executable-entries">
+    <attribute name="property" />
+    <element name="theSelector" implicit="true" />
+    <sequential>
+      <pathconvert property="@{property}.converted" dirsep="/"
+          pathsep="${exec.line.suffix}${line.separator}${exec.line.prefix}">
+        <map from="${basedir}" to="$INSTALL_PATH" />
+        <path>
+          <fileset dir="${basedir}">
+            <includesfile name="${executable.files}" />
+            <theSelector/>
+          </fileset>
+        </path>
+      </pathconvert>
+
+      <if>
+        <isset property="@{property}.converted" />
+        <then>
+          <property name="@{property}" value="${exec.line.prefix}${@{property}.converted}${exec.line.suffix}" />
+        </then>
+        <else>
+          <property name="@{property}" value="" />
+        </else>
+      </if>
+    </sequential>
+  </macrodef>
+  
+  <!-- Build the installer JAR -->
+  <target name="build-installer" depends="find-executables">
+    <delete>
+      <fileset file="${distDir}/${gate.full.name}-installer.jar" />
+    </delete>
+    <mkdir dir="${distDir}" />
+    <create-executable-entries property="bin.executables">
+      <filename name="bin/**" />
+    </create-executable-entries>
+    <create-executable-entries property="plugins.executables">
+      <filename name="plugins/**" />
+    </create-executable-entries>
+
+    <!-- define the IzPack Ant task -->
+    <taskdef name="izpack" classname="com.izforge.izpack.ant.IzPackTask">
+      <classpath>
+        <pathelement location="build/deploy/lib/standalone-izpack-installer-compiler.jar"/>
+      </classpath>
+    </taskdef>
+    <izpack output="${distDir}/${gate.full.name}-installer.jar"
+            basedir="${basedir}">			
+      <config><![CDATA[
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<!-- 
+	This is the izPack script for building the GATE installer
+-->
+
+<installation version="1.0">
+    <info>
+        <appname>GATE</appname>
+        <appversion>4.0 alpha1</appversion>
+        <appsubpath>GATE 4.0-alpha1</appsubpath>
+<!--
+        <authors>
+            <author name="JPz" email="jpz@superman.org"/>
+            <author name="Hidden Man" email="hidden@hisdomain.com"/>
+        </authors>
+ -->        
+        <url>http://gate.ac.uk/</url>
+        <javaversion>1.5</javaversion>
+    </info>
+    <!--  Load the native library used for generating Windows shortcuts -->
+    <native type="izpack" name="ShellLink.dll"/>
+    <variables>
+      <variable name="app-version" value="4.0-alpha1"/>
+      <variable name="InstallerFrame.logfilePath" value="default"/>
+    </variables>
+    
+    <!-- 
+        The gui preferences indication.
+        Sets the installer window to 640x480. It will not be able to change the size.
+    -->
+    <guiprefs width="640" height="480" resizable="no">
+      <laf name="metouia">
+        <os family="unix" />
+      </laf>
+      <laf name="looks">
+        <os family="windows" />
+        <param name="variant" value="extwin" />
+      </laf>
+    </guiprefs>
+    
+    <!-- 
+        The locale section.
+        Asks here to include the English and French langpacks.
+    -->
+    <locale>
+        <langpack iso3="eng"/>
+    </locale>
+    
+    <!-- 
+        The resources section.
+        The ids must be these ones if you want to use the LicencePanel and/or the InfoPanel.
+    -->
+    <resources>
+        <res id="splash.png" src="src/gate/resources/img/splash.png" />
+        <res id="HTMLInfoPanel.info" src="build/deploy/installer-text-0.html"/>        
+        <res id="HTMLLicencePanel.licence" src="licence.html"/>
+        <res id="Unix_shortcutSpec.xml" src="build/deploy/unix-shortcuts.xml"/>
+        <res id="shortcutSpec.xml" src="build/deploy/windows-shortcuts.xml"/>
+    </resources>
+    
+    <!-- 
+        The panels section.
+        We indicate here which panels we want to use. The order will be respected.
+    -->
+    <panels>
+        <panel classname="HTMLInfoPanel"/>
+        <panel classname="HTMLLicencePanel"/>
+        <panel classname="TargetPanel"/>
+        <panel classname="PacksPanel"/>
+        <panel classname="InstallPanel"/>
+        <panel classname="ShortcutPanel"/>        
+        <panel classname="FinishPanel"/>
+    </panels>
+    
+    <!-- 
+        The packs section.
+        We specify here our packs.
+    -->
+    <packs>
+        <pack name="bin" 
+              required="yes"
+              preselected="yes">
+            <description>The binaries</description>
+            <fileset dir="bin" targetdir="$INSTALL_PATH/bin"/>
+            <fileset dir="lib" targetdir="$INSTALL_PATH/lib"/>
+            <file src="licence.html" targetdir="$INSTALL_PATH"/>
+            <file src="index.html" targetdir="$INSTALL_PATH"/>
+            <file src="build.xml" targetdir="$INSTALL_PATH"/>          
+            <file src="gate.xml" targetdir="$INSTALL_PATH"/>
+            <file src="gate.exe" targetdir="$INSTALL_PATH" os="windows"/>
+            <fileset dir="GATE.app" targetdir="$INSTALL_PATH/GATE.app" os="mac"/>
+            <fileset dir="build" targetdir="$INSTALL_PATH/build">
+              <exclude name="deploy/**" />
+            </fileset>
+            <file src="build/deploy/gate-icon.ico" targetdir="$INSTALL_PATH/icons" os="windows"/>
+            <!-- required by ontology API, these should move into
+                 ontology_tools plugin before the 4.0 release -->
+            <file src="owl.rdfs" targetdir="$INSTALL_PATH"/>
+            <file src="system.conf" targetdir="$INSTALL_PATH"/>
+            @{bin.executables}
+            <executable targetfile="$INSTALL_PATH/GATE.app/Contents/MacOS/GATE" stage="never" keep="true" os="mac"/>
+        </pack>
+        <pack name="plugins"
+              required="yes"
+              preselected="yes">
+          <description>Included plugins</description>
+          <fileset dir="plugins" targetdir="$INSTALL_PATH/plugins" />
+          @{plugins.executables}
+        </pack>
+        <pack name="doc" 
+              required="no"
+              preselected="yes">
+            <description>The documentation</description>
+            <fileset dir="doc" targetdir="$INSTALL_PATH/doc">
+              <exclude name="**/src-html/**" />
+            </fileset>
+            <file src="../sale/tao/tao.pdf" targetdir="$INSTALL_PATH" />
+        </pack>
+        
+        <pack name="src" 
+              required="no"
+              preselected="no">
+            <description>The sources</description>
+            <fileset dir="src" targetdir="$INSTALL_PATH/src"/>
+        </pack>
+    </packs>
+</installation>
+      ]]></config>
+    </izpack>
+    
+  </target>
+</project>
