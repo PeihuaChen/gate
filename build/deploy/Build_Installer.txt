@@ -1,35 +1,11 @@
-Installer build
+Building the GATE Installer
+---------------------------
 
-make distrib
+The GATE installer is now created by ant.  Run "bin/ant installer" from the
+top-level GATE directory.
 
-create u:\gate
-
-copy all from BIN|DOCS distrib into u:\gate
-remove all CVS dirs
-
-
-create u:\gate\misc
-copy gate\src\gate\resources\img\gate[Icon|Splash].gif into u:\gate\misc
-copy gate\build\deploy\GateInstall.jar into u:\gate\misc
-
-
-make sure *.sh are in unix format
-make sure *.bat are in DOS format
-
-
-build installers using gate\build\deploy\gate2.iap
-replace the install.htm page with the one from build/deploy
-
-
-TEST THE INSTALLERS ON WINDOWS AND LINUX (at least)
-
-- for Windows - make sure u're installing it in a directory *with* spaces
-- for Linux - make sure u're *not* installing as root
-
-make the following 4 tests:
-
-1. win/web install
-2. win - executable install
-3. linux/web install
-4. linux/shell script install
-
+The resulting installer is a JAR with a Main-Class manifest attribute, and
+should launch on double-click on most platforms.  If it doesn't launch with a
+double click it will run with "java -jar".  For release builds we may consider
+packaging the JAR installer up as an .exe for Windows (using launch4j) and a
+.dmg for Mac OS.
