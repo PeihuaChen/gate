@@ -262,7 +262,7 @@ build/deploy all paths are relative to the top-level GATE directory -->
     <info>
         <appname>GATE</appname>
         <appversion>4.0 alpha1</appversion>
-        <appsubpath>GATE 4.0-alpha1</appsubpath>
+        <appsubpath>GATE-4.0-alpha1</appsubpath>
 <!--
         <authors>
             <author name="JPz" email="jpz@superman.org"/>
