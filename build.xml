@@ -513,7 +513,8 @@
               source="1.5"
               useexternalfile="yes"
               breakiterator="true"
-    	        linksource="yes">
+    	        linksource="yes"
+              maxmemory="${runtime.max.memory}">
       <fileset dir="${srcDir}"/>        
     </javadoc>
   	<!-- Now replace the ugly Java-html files with a better version -->
@@ -550,7 +551,8 @@
               source="1.5"
               useexternalfile="yes"
               breakiterator="true"
-              linksource="yes">
+              linksource="yes"
+              maxmemory="${runtime.max.memory}">
       <fileset dir="${srcDir}"/>        
     </javadoc>
   	<delete dir="${docDir}/javadoc/internal/src-html"/>
@@ -663,213 +665,18 @@
       <arg value="gate.TestGate"/>
      </java>
   </target>
-	
-  <!-- Files in plugins that should be stored in the zip files with execute
-       permissions.  We assume for safety that anything except .java, .xml,
-       .txt and README files may need execute permission -->
-  <patternset id="plugins.exec">
-    <include name="plugins/**" />
-    <exclude name="**/*.java" />
-    <exclude name="**/*.xml" />
-    <exclude name="**/*.txt" />
-    <exclude name="**/*README*" />
-    <exclude name="**/*LICEN*" />
-    <exclude name="**/*COPYING*" />
-  </patternset>
-
-  <!-- This pattern should match everything in plugins that is not covered by
-       the previous set -->
-  <patternset id="plugins.nonexec">
-    <include name="plugins/**/*.java" />
-    <include name="plugins/**/*.xml" />
-    <include name="plugins/**/*.txt" />
-    <include name="plugins/**/*README*" />
-    <include name="plugins/**/*LICEN*" />
-    <include name="plugins/**/*COPYING*" />
-  </patternset>
 
   <!-- Make the archives for the GATE Distribution -->
-  <target name="distro"
+  <target name="distro-zips"
           depends="compile, jar, doc, plugins.build, plugins.distro.prepare">
-    <property name="gate.full.name" 
-              value="gate-${gate.version}-build${gate.build}"/>
-    <property name="distDirname"
-              value="DISTRIBUTION"/>          
-    <property name="distDir" 
-              location="${distDirname}"/>
-    <property name="doc.dirname"
-              value="${gate.full.name}-DOC"/>
-    <property name="doc.archive"
-              location="${distDir}/${doc.dirname}.zip"/>
-    <property name="src.dirname"
-              value="${gate.full.name}-SRC"/>
-    <property name="src.archive"
-              location="${distDir}/${src.dirname}.zip"/>
-    <property name="bin.dirname"
-              value="${gate.full.name}-BIN"/>
-    <property name="bin.archive"
-              location="${distDir}/${bin.dirname}.zip"/>
-    <property name="all.dirname"
-              value="${gate.full.name}-ALL"/>
-    <property name="all.archive"
-              location="${distDir}/${all.dirname}.zip"/>
-    <delete dir="${distDir}"/>    
-    <mkdir dir="${distDir}"/>
-
-    <!-- Build the DOC archive -->
-    <zip destfile="${doc.archive}" 
-         update="false"
-         compress="true">
-      <zipfileset dir="${basedir}"
-                  prefix="${doc.dirname}"
-                  includes="licence.html,index.html,doc/**"/>
-      <zipfileset dir="${basedir}"
-                  prefix="${doc.dirname}"
-                  file="../sale/tao/tao.pdf"/>
-    </zip>
-    
-    <!-- Build the SRC archive -->
-    <zip destfile="${src.archive}" 
-         update="false"
-         duplicate="preserve"
-         compress="true">
-      <!-- files in bin need execute permissions -->
-      <zipfileset dir="${basedir}"
-                  prefix="${src.dirname}"
-                  includes="bin/**"
-                  filemode="755" />
-      <!-- Certain files in plugins may need execute permission too -->
-      <zipfileset dir="${basedir}"
-                  prefix="${src.dirname}"
-                  filemode="755">
-        <patternset refid="plugins.exec" />
-      </zipfileset>
-
-      <!-- everything else gets the default non-executable permissions -->
-      <zipfileset dir="${basedir}"
-                  prefix="${src.dirname}">
-        <include name="*"/>
-        <exclude name="${distDirname}" />
-        <include name="build/**"/>
-        <exclude name="build/*.jar"/>
-        <exclude name="build/deploy/**"/>
-        <include name="classes"/>
-        <include name="doc/**"/>
-        <exclude name="doc/javadoc/"/>
-        <include name="lib/**"/>
-        <include name="src/**"/>
-        <!-- include everything from plugins that wasn't included above -->
-        <patternset refid="plugins.nonexec" />
-      </zipfileset>
-      <zipfileset dir="${basedir}"
-                  prefix="${src.dirname}/doc/"
-                  file="doc/javadoc"/>
-      <zipfileset dir="${basedir}"
-                  prefix="${src.dirname}/doc/javadoc/"
-                  file="doc/javadoc/internal"/>
-    </zip>
-
-    <!-- Build the BIN archive -->
-    <zip destfile="${bin.archive}" 
-         update="false"
-         duplicate="preserve"
-         compress="true">
-      <!-- files in bin need execute permissions -->
-      <zipfileset dir="${basedir}"
-                  prefix="${bin.dirname}"
-                  includes="bin/**"
-                  filemode="755" />
-      <!-- Certain files in plugins may need execute permission too -->
-      <zipfileset dir="${basedir}"
-                  prefix="${bin.dirname}"
-                  filemode="755">
-        <patternset refid="plugins.exec" />
-      </zipfileset>
-
-      <!-- everything else gets the default non-executable permissions -->
-      <zipfileset dir="${basedir}" prefix="${bin.dirname}">
-        <include name="licence.html"/>
-        <include name="build.xml"/>
-        <include name="gate.xml"/>
-        <include name="build/version.txt"/>
-        <include name="build/persist/**"/>
-        <include name="build/build.txt"/>
-        <include name="lib/**"/>
-        <!-- include everything from plugins that wasn't included above -->
-        <patternset refid="plugins.nonexec" />
-      </zipfileset>
-      <zipfileset dir="${basedir}"
-                  prefix="${bin.dirname}"
-                  file="../sale/tao/tao.pdf"/>
-    </zip>
-    
-    <!-- Build the ALL archive -->
-    <zip destfile="${all.archive}" 
-         update="false"
-         duplicate="preserve"
-         compress="true">
-      <!-- files in bin need execute permissions -->
-      <zipfileset dir="${basedir}"
-                  prefix="${all.dirname}"
-                  includes="bin/**"
-                  filemode="755" />
-      <!-- Certain files in plugins may need execute permission too -->
-      <zipfileset dir="${basedir}"
-                  prefix="${all.dirname}"
-                  filemode="755">
-        <patternset refid="plugins.exec" />
-      </zipfileset>
-
-      <!-- everything else gets the default non-executable permissions -->
-      <zipfileset dir="${basedir}"
-                  prefix="${all.dirname}">
-        <patternset refid="plugins.nonexec" />
-      </zipfileset>
-      <zipfileset dir="${basedir}"
-                  prefix="${all.dirname}">
-        <exclude name="${distDirname}" />
-        <exclude name="${distDirname}/**" />
-        <exclude name="plugins/**" />
-        <exclude name="bin/**" />
-      </zipfileset>
-      <zipfileset dir="${basedir}"
-                  prefix="${all.dirname}"
-                  file="../sale/tao/tao.pdf"/>        
-    </zip>
+    <ant antfile="build/deploy/build.xml" target="make-zips" />
   </target>
 	
-  <target name="installer">
-    <!-- build the <executable> XML elements that need to go into the installer
-         configuration -->
-    <property name="executable.line.prefix"
-              value='&lt;executable targetfile="'/>
-    <property name="executable.line.suffix"
-              value='" stage="never" keep="true" />'/>
-    <pathconvert dirsep="/" pathsep="${executable.line.suffix}${line.separator}${executable.line.prefix}" property="converted.plugins.exec">
-      <path>
-        <fileset dir=".">
-          <patternset refid="plugins.exec" />
-        </fileset>
-      </path>
-      <map from="${basedir}" to="$INSTALL_PATH" />
-    </pathconvert>
-
-    <if>
-      <isset property="converted.plugins.exec" />
-      <then>
-        <!-- The pathconvert puts the right stuff between pairs of file paths,
-             so we just need to put the first prefix and last suffix around the
-             whole converted string -->
-        <property name="translated.plugins.exec" value="${executable.line.prefix}${converted.plugins.exec}${executable.line.suffix}" />
-      </then>
-      <else>
-        <property name="translated.plugins.exec" value="" />
-      </else>
-    </if>
-
-    <ant dir="build/deploy" antfile="build-installer.xml" target="installer">
-      <property name="extra.xml.plugins" value="${translated.plugins.exec}" />
-    </ant>
-
+  <!-- build the installer .jar -->
+  <target name="installer"
+          depends="compile, jar, doc, plugins.build, plugins.distro.prepare">
+    <ant antfile="build/deploy/build.xml" target="build-installer" />
   </target>
+
+  <target name="distro" depends="distro-zips, installer" />
 </project>
