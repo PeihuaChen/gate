@@ -158,4 +158,20 @@ public class OntologyUtilities {
     return datatypeMap.get(datatypeURI);
   }
 
+  /**
+   * This method by using the default name space and the provided ontology resource name, creates a new instance of
+   * URI.  If isAnonymousResource is set to true, an  anonymous URI only using the resource name is created.
+   * @param ontology
+   * @param aResourceName
+   * @param isAnonymousResource
+   * @return an instance of URI
+   */
+  public static URI createURI(Ontology ontology, String aResourceName, boolean isAnonymousResource) {
+     if(isAnonymousResource) {
+       return new URI(aResourceName, true);
+     }
+     
+     String uri = ontology.getDefaultNameSpace() + aResourceName;
+     return new URI(uri, false);
+  }
 }
