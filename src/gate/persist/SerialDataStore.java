@@ -455,7 +455,8 @@ extends AbstractFeatureBearer implements DataStore {
       if(! currentProtocolVersion.equals("1.0"))
         is = new GZIPInputStream(is);
 
-      ObjectInputStream ois = new ObjectInputStream(is);
+      // Use an input stream that is aware of the GATE classloader
+      ObjectInputStream ois = new GateAwareObjectInputStream(is);
       lr = (LanguageResource) ois.readObject();
       ois.close();
     } catch(IOException e) {
