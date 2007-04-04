@@ -1,0 +1,52 @@
+/*
+ *  GateAwareObjectInputStream.java
+ *
+ *  Copyright (c) 1998-2005, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Ian Roberts, 04/Apr/2007
+ *
+ *  $Id$
+ */
+
+package gate.persist;
+
+import java.io.*;
+import gate.Gate;
+
+/**
+ * An ObjectInputStream that attempts to resolve the classes of objects loaded
+ * from the stream via the GateClassLoader if they cannot be found by the usual
+ * means.  This allows LRs to be loaded successfully from a serial datastore
+ * when they have features (or annotations with features) whose class is
+ * defined in a plugin.
+ */
+public class GateAwareObjectInputStream extends ObjectInputStream {
+  /**
+   * Creates a GATE aware object input stream to read from the given source.
+   */
+  public GateAwareObjectInputStream(InputStream source) throws IOException {
+    super(source);
+  }
+
+  /**
+   * Resolve the class of an object read from the stream.  First attempts to
+   * use the default resolution method provided by ObjectInputStream.  If that
+   * fails with a ClassNotFoundException then tries to resolve the class via
+   * the GATE classloader instead.
+   */
+  protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException,
+            ClassNotFoundException {
+    try {
+      return super.resolveClass(desc);
+    }
+    catch(ClassNotFoundException cnfe) {
+      // try the GATE classloader instead
+      return Class.forName(desc.getName(), false, Gate.getClassLoader());
+    }
+  }
+}
