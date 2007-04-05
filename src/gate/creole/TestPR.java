@@ -169,8 +169,8 @@ public class TestPR extends TestCase
 
     assertTrue("Found in "+ doc1.getSourceUrl().getFile()+ " "+
       doc1.getAnnotations().get("Split").size() +
-      " Split annotations, instead of the expected 34.",
-      doc1.getAnnotations().get("Split").size()== 34);
+      " Split annotations, instead of the expected 39.",
+      doc1.getAnnotations().get("Split").size()== 39);
 
 
     //run splitter for doc2
@@ -183,8 +183,8 @@ public class TestPR extends TestCase
     
     assertTrue("Found in "+ doc2.getSourceUrl().getFile()+ " "+
       doc2.getAnnotations().get("Split").size() +
-      " Split annotations, instead of the expected 69.",
-      doc2.getAnnotations().get("Split").size()== 69);
+      " Split annotations, instead of the expected 74.",
+      doc2.getAnnotations().get("Split").size()== 74);
 
     //run splitter for doc3
     splitter.setDocument(doc3);
