@@ -15,7 +15,7 @@
      desktop="no"
 		 type="Application"
      encoding="UTF-8">
-     <createForPack name="bin"/>
+     <createForPack name="Core"/>
    </shortcut>
    <shortcut
      name="GATE User Guide"
@@ -23,6 +23,6 @@
      target="$INSTALL_PATH/tao.pdf"
      description="The GATE User Guide"
      desktop="no">
-     <createForPack name="doc"/>
+     <createForPack name="User guide"/>
    </shortcut>
 </shortcuts>

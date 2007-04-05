@@ -233,9 +233,7 @@ build/deploy all paths are relative to the top-level GATE directory -->
   
   <!-- Build the installer JAR -->
   <target name="build-installer" depends="find-executables">
-    <delete>
-      <fileset file="${distDir}/${gate.full.name}-installer.jar" />
-    </delete>
+    <delete file="${distDir}/${gate.full.name}-installer.jar" quiet="true"/>
     <mkdir dir="${distDir}" />
     <create-executable-entries property="bin.executables">
       <filename name="bin/**" />
@@ -261,8 +259,8 @@ build/deploy all paths are relative to the top-level GATE directory -->
 <installation version="1.0">
     <info>
         <appname>GATE</appname>
-        <appversion>4.0 alpha1</appversion>
-        <appsubpath>GATE-4.0-alpha1</appsubpath>
+        <appversion>@{gate.version}-b@{gate.build}</appversion>
+        <appsubpath>GATE-@{gate.version}-b@{gate.build}</appsubpath>
 <!--
         <authors>
             <author name="JPz" email="jpz@superman.org"/>
@@ -275,7 +273,7 @@ build/deploy all paths are relative to the top-level GATE directory -->
     <!--  Load the native library used for generating Windows shortcuts -->
     <native type="izpack" name="ShellLink.dll"/>
     <variables>
-      <variable name="app-version" value="4.0-alpha1"/>
+      <variable name="app-version" value="@{gate.version}"/>
       <variable name="InstallerFrame.logfilePath" value="default"/>
     </variables>
     
@@ -332,10 +330,10 @@ build/deploy all paths are relative to the top-level GATE directory -->
         We specify here our packs.
     -->
     <packs>
-        <pack name="bin" 
+        <pack name="Core" 
               required="yes"
               preselected="yes">
-            <description>The binaries</description>
+            <description>The binaries and required libraries for GATE.</description>
             <fileset dir="bin" targetdir="$INSTALL_PATH/bin"/>
             <fileset dir="lib" targetdir="$INSTALL_PATH/lib"/>
             <file src="licence.html" targetdir="$INSTALL_PATH"/>
@@ -346,6 +344,7 @@ build/deploy all paths are relative to the top-level GATE directory -->
             <fileset dir="GATE.app" targetdir="$INSTALL_PATH/GATE.app" os="mac"/>
             <fileset dir="build" targetdir="$INSTALL_PATH/build">
               <exclude name="deploy/**" />
+              <exclude name="depcache/**" />
             </fileset>
             <file src="build/deploy/gate-icon.ico" targetdir="$INSTALL_PATH/icons" os="windows"/>
             <!-- required by ontology API, these should move into
@@ -355,27 +354,32 @@ build/deploy all paths are relative to the top-level GATE directory -->
             @{bin.executables}
             <executable targetfile="$INSTALL_PATH/GATE.app/Contents/MacOS/GATE" stage="never" keep="true" os="mac"/>
         </pack>
-        <pack name="plugins"
+        <pack name="Plugins"
               required="yes"
               preselected="yes">
-          <description>Included plugins</description>
+          <description>The core set of GATE plugins.</description>
           <fileset dir="plugins" targetdir="$INSTALL_PATH/plugins" />
           @{plugins.executables}
         </pack>
-        <pack name="doc" 
+        <pack name="User guide"
               required="no"
               preselected="yes">
-            <description>The documentation</description>
+            <description>The GATE User Guide (PDF version).  The latest user guide is always available at http://gate.ac.uk/sale/tao/ but may describe features added since this version of GATE.</description>
+            <file src="../sale/tao/tao.pdf" targetdir="$INSTALL_PATH" />
+        </pack>
+        <pack name="Developer documentation" 
+              required="no"
+              preselected="no">
+            <description>Javadoc API documentation and other miscellaneous documentation for developers.  Install this if you will be developing applications using the GATE API.</description>
             <fileset dir="doc" targetdir="$INSTALL_PATH/doc">
               <exclude name="**/src-html/**" />
             </fileset>
-            <file src="../sale/tao/tao.pdf" targetdir="$INSTALL_PATH" />
         </pack>
         
-        <pack name="src" 
+        <pack name="Source code" 
               required="no"
               preselected="no">
-            <description>The sources</description>
+            <description>The full source code for GATE.  You should only need to install this if you want to modify and rebuild the core GATE code.</description>
             <fileset dir="src" targetdir="$INSTALL_PATH/src"/>
         </pack>
     </packs>
