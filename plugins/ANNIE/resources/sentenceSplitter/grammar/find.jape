@@ -58,16 +58,14 @@ Rule: Split1
 -->
 :split.Split = {kind = "internal"}
 
-//2 or more new lines generate an external split
+//2 new lines generate an external split
 //must be at least 2 CRs or Newlines plus optional spaces to generate a split
 Rule: CR
 (
   NEWLINE 
   ({SpaceToken.kind == space})*
-  (
-    NEWLINE
-    ({SpaceToken.kind == space})*
-  )+
+  NEWLINE
+  ({SpaceToken.kind == space})*
 ):cr
 -->
 :cr.Split = {kind = "external"}
