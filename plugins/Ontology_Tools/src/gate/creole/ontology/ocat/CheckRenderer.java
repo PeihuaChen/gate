@@ -41,6 +41,16 @@ public class CheckRenderer extends JPanel implements TreeCellRenderer {
 	 */
 	private JLabel label;
 
+  /**
+   * ICon label
+   */
+  private JLabel iconLabel;
+
+  /**
+   * Label Panel
+   */
+  private JPanel iconPanel, labelPanel;
+  
 	/**
 	 * The instance of ontologyTreePanel
 	 */
@@ -56,9 +66,23 @@ public class CheckRenderer extends JPanel implements TreeCellRenderer {
 		check = new JCheckBox();
 		check.setBackground(Color.white);
 		label = new JLabel();
-		setLayout(new BorderLayout(5, 10));
-		add(check, BorderLayout.WEST);
-		add(label, BorderLayout.CENTER);
+    iconLabel = new JLabel();
+    
+    iconPanel = new JPanel(new BorderLayout(5,10));
+    ((BorderLayout) iconPanel.getLayout()).setHgap(0);
+    iconPanel.setOpaque(true);
+    iconPanel.add(check, BorderLayout.WEST);
+    iconPanel.add(iconLabel, BorderLayout.EAST);
+
+    labelPanel = new JPanel(new BorderLayout(5,10));
+    ((BorderLayout) labelPanel.getLayout()).setHgap(0);
+    //labelPanel.setOpaque(true);
+    labelPanel.add(label);
+    
+    setLayout(new BorderLayout(5,10));
+    ((BorderLayout)getLayout()).setHgap(1);
+    add(iconPanel, BorderLayout.WEST);
+    add(labelPanel, BorderLayout.EAST);
 	}
 
 	/**
@@ -81,23 +105,25 @@ public class CheckRenderer extends JPanel implements TreeCellRenderer {
     if (row == 0) {
 			// this is the ontology name
 			check.setVisible(false);
-			this.setBackground(Color.white);
+      iconLabel.setVisible(false);
       label.setText(conceptName);
-      label.setIcon(null);
-			return this;
+      labelPanel.setBackground(Color.white);
+      iconPanel.setBackground(Color.WHITE);
+      return this;
 		} else {
 			check.setVisible(true);
+      iconLabel.setVisible(true);
 		}
 
 		// if node should be selected
 		boolean selected = ontologyTreePanel.currentClass2IsSelectedMap.get(conceptName).booleanValue();
 		check.setSelected(selected);
     if(node.getSource() instanceof OClass) {
-        label.setIcon(MainFrame.getIcon("ontology-class"));
+      iconLabel.setIcon(MainFrame.getIcon("ontology-class"));
     } else if(node.getSource() instanceof OInstance){
-        label.setIcon(MainFrame.getIcon("ontology-instance"));
+      iconLabel.setIcon(MainFrame.getIcon("ontology-instance"));
     } else {
-      label.setIcon(null);
+      iconLabel.setIcon(null);
     }
      
 		label.setText(conceptName);
@@ -109,8 +135,8 @@ public class CheckRenderer extends JPanel implements TreeCellRenderer {
 		if (ontologyTreePanel.currentOResource2ColorMap.containsKey(conceptName)) {
 			Color color = (Color) ontologyTreePanel.currentOResource2ColorMap.get(
 					conceptName);
-			this.setBackground(color);
-			check.setBackground(Color.white);
+			labelPanel.setBackground(color);
+			iconPanel.setBackground(Color.WHITE);
 		}
 		return this;
 	}
