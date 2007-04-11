@@ -7,9 +7,16 @@
  */
 package gate.creole.ontology.ocat;
 
+import gate.creole.ontology.OClass;
+import gate.creole.ontology.OInstance;
+import gate.creole.ontology.OResource;
+import gate.gui.MainFrame;
+
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.tree.*;
+
+import com.ontotext.gate.vr.ClassNode;
 import com.ontotext.gate.vr.IFolder;
 
 /**
@@ -62,19 +69,21 @@ public class CheckRenderer extends JPanel implements TreeCellRenderer {
 			boolean hasFocus) {
 
 		Object userObject = value;
-
 		if (!(userObject instanceof IFolder)) {
 			label.setBackground(Color.white);
 			return this;
 		}
-
-		IFolder node = (IFolder) userObject;
+    
+    javax.swing.Icon icon = null;
+		ClassNode node = (ClassNode) userObject;
 		String conceptName = node.toString();
-		if (row == 0) {
+
+    if (row == 0) {
 			// this is the ontology name
 			check.setVisible(false);
 			this.setBackground(Color.white);
-			label.setText(conceptName);
+      label.setText(conceptName);
+      label.setIcon(null);
 			return this;
 		} else {
 			check.setVisible(true);
@@ -83,15 +92,22 @@ public class CheckRenderer extends JPanel implements TreeCellRenderer {
 		// if node should be selected
 		boolean selected = ontologyTreePanel.currentClass2IsSelectedMap.get(conceptName).booleanValue();
 		check.setSelected(selected);
-
+    if(node.getSource() instanceof OClass) {
+        label.setIcon(MainFrame.getIcon("ontology-class"));
+    } else if(node.getSource() instanceof OInstance){
+        label.setIcon(MainFrame.getIcon("ontology-instance"));
+    } else {
+      label.setIcon(null);
+    }
+     
 		label.setText(conceptName);
 		label.setFont(tree.getFont());
 
 		// We assign the automatically generated random colors to the concept,
 		// but randomly generation of colors for different classes takes place
 		// only once when that ontology is loaded for the first time
-		if (ontologyTreePanel.currentClass2ColorMap.containsKey(conceptName)) {
-			Color color = (Color) ontologyTreePanel.currentClass2ColorMap.get(
+		if (ontologyTreePanel.currentOResource2ColorMap.containsKey(conceptName)) {
+			Color color = (Color) ontologyTreePanel.currentOResource2ColorMap.get(
 					conceptName);
 			this.setBackground(color);
 			check.setBackground(Color.white);
