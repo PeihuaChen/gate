@@ -15,6 +15,7 @@ import java.util.*;
 import gate.*;
 import gate.creole.ontology.OClass;
 import gate.creole.ontology.OInstance;
+import gate.creole.ontology.OResource;
 import gate.creole.ontology.Ontology;
 import gate.creole.ontology.OntologyUtilities;
 import gate.creole.ontology.URI;
@@ -142,13 +143,30 @@ public class OntologyTreeListener extends MouseAdapter {
         String selectedText = ontologyTreePanel.ontoViewer.documentTextArea.getSelectedText();
         if(selectedText != null && selectedText.length() > 0) {
           ontologyTreePanel.ontoViewer.annotationAction.hideAllWindows();
-          ontologyTreePanel.showingNewClassAnnotationWindow = false;
           // lets find out if the instance lookup is enabled
           // if so, we need to add the instance feature
           // the last parameter in addNewAnnotation indicates if it is a class or instance feature
-          if(ontologyTreePanel.instances.isSelected())
+          if(ontologyTreePanel.instances.isSelected()) {
+
+            // lets check if the resource exists with the newInstanceName
+            String newInstanceString = selectedText.replaceAll(" ", "_");
+            
+            ClassNode aNode = ontologyTreePanel.getNode(newInstanceString);
+            newInstanceString = aNode == null ? newInstanceString : aNode.toString();
+            
+            URI aURI = OntologyUtilities.createURI(ontologyTreePanel
+                    .getCurrentOntology(), newInstanceString, false);
+
+            if(aNode == null || (!(aNode.getSource() instanceof OClass))) {
+               ontologyTreePanel.getCurrentOntology().addOInstance(aURI, (OClass)node.getSource());
+            }
+         
+            if(aNode == null) {
+              aNode = ontologyTreePanel.getNode(newInstanceString);
+            }
+            
             addNewAnnotation(node, false, null, false);
-          else
+          } else
             addNewAnnotation(node, false, null, true);
           return;
         }
