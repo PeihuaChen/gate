@@ -1150,7 +1150,6 @@ public class OntologyEditor extends AbstractVisualResource
             // this is not in the swing thread
             // update the tree...
             ontologyClassesURIs.removeAll(Arrays.asList(resources));
-            ArrayList nodesToRemove = new ArrayList();
             for(int i = 0; i < resources.length; i++) {
               ArrayList<DefaultMutableTreeNode> nodeList = uri2TreeNodesListMap
                       .get(resources[i]);
