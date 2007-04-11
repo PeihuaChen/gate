@@ -37,6 +37,11 @@ public class OntologyViewerOptions implements DocumentListener {
   private JCheckBox dCChBox;
 
   /**
+   * Indicates whether to be case-sensitive or not when annotating text in the add All option
+   */
+  private JCheckBox addAllFeatureCaseSensitiveChBox;
+  
+  /**
    * Default AnnotationSEt or otherAnnotationSets 
    */
   private JRadioButton exSet, defaultSet;
@@ -152,6 +157,9 @@ public class OntologyViewerOptions implements DocumentListener {
   private void initGUI() {
     cFChBox = new JCheckBox("Disable Child Feature");
     dCChBox = new JCheckBox("Enable confirm deletion");
+    addAllFeatureCaseSensitiveChBox = new JCheckBox("Case Sensitive \"Annotate All\" Feature");
+    addAllFeatureCaseSensitiveChBox.setSelected(true);
+    
     annotationSetsNamesCB = new JComboBox();
     annotationTypesCB = new JComboBox();
 
@@ -189,9 +197,10 @@ public class OntologyViewerOptions implements DocumentListener {
     annotationTypesCB.addActionListener(new OntologyViewerOptionsActions());
 
     optionPanel = new JPanel();
-    optionPanel.setLayout(new GridLayout(8, 1));
+    optionPanel.setLayout(new GridLayout(9, 1));
     optionPanel.add(cFChBox);
     optionPanel.add(dCChBox);
+    optionPanel.add(addAllFeatureCaseSensitiveChBox);
 
     optionPanel.add(new JLabel("Annotation Set : "));
     defaultSet = new JRadioButton();
@@ -425,6 +434,14 @@ public class OntologyViewerOptions implements DocumentListener {
     return dCChBox.isSelected();
   }
 
+  /**
+   * Returns if case sensitive option is set to ON/OFF
+   * @return
+   */
+  public boolean isAddAllOptionCaseSensitive() {
+    return addAllFeatureCaseSensitiveChBox.isSelected();
+  }
+  
   // DocumentListener Methods
   public void annotationSetAdded(DocumentEvent de) {
     // we need to update our annotationSetsNamesCB List
