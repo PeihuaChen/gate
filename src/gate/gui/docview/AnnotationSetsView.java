@@ -957,8 +957,11 @@ public class AnnotationSetsView extends AbstractDocumentView
         Runnable runnable = new Runnable(){
           public void run(){
             //do all operations in one go
-            textView.removeHighlights(hghltTagsForAnn.values());
-            hghltTagsForAnn.clear();
+            try{
+              textView.removeHighlights(hghltTagsForAnn.values());
+            }finally{
+              hghltTagsForAnn.clear();
+            }
           }
         };
         Thread thread = new Thread(runnable);

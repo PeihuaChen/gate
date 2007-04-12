@@ -328,10 +328,11 @@ public class AnnotationListView extends AbstractDocumentView
       int row = tagList.indexOf(tag);
       if(row >= 0){
         tagList.remove(row);
-        AnnotationHandler aHandler = (AnnotationHandler)
-            annotationHandlerByTag.remove(tag);
-        if(aHandler != null)aHandler.ann.removeAnnotationListener(this);
       }
+      AnnotationHandler aHandler = (AnnotationHandler)
+          annotationHandlerByTag.remove(tag);
+      if(aHandler != null)aHandler.ann.removeAnnotationListener(this);
+
     }
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
@@ -418,6 +419,7 @@ public class AnnotationListView extends AbstractDocumentView
     }
 
     public Object getValueAt(int row, int column){
+      if(row >= tagList.size()) return null;
       AnnotationHandler aHandler = (AnnotationHandler)annotationHandlerByTag.
       	get(tagList.get(row));
       switch(column){
