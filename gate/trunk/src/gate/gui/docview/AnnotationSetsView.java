@@ -58,8 +58,9 @@ public class AnnotationSetsView extends AbstractDocumentView
 
   
   public AnnotationSetsView(){
-    setHandlers = new ArrayList();
+    setHandlers = new ArrayList<SetHandler>();
     tableRows = new ArrayList();
+    visibleAnnotationTypes = new ArrayList();
     colourGenerator = new ColorGenerator();
     actions = new ArrayList();
     actions.add(new SavePreserveFormatAction());
@@ -205,6 +206,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     textPane.addMouseListener(textMouseListener);
     textPane.addMouseMotionListener(textMouseListener);
     textPane.addAncestorListener(textAncestorListener);
+    restoreSelectedTypes();
   }
 
   /**
@@ -217,9 +219,39 @@ public class AnnotationSetsView extends AbstractDocumentView
     textPane.removeMouseListener(textMouseListener);
     textPane.removeMouseMotionListener(textMouseListener);
     textPane.removeAncestorListener(textAncestorListener);
+    storeSelectedTypes();
   }
   
+
+  /**
+   * Populates the {@link #visibleAnnotationTypes} structure based on the 
+   * current selection
+   *
+   */
+  protected void storeSelectedTypes(){
+    visibleAnnotationTypes.clear();
+    for(SetHandler sHandler:setHandlers){
+      for(TypeHandler tHandler: sHandler.typeHandlers){
+        if(tHandler.isSelected()){
+          visibleAnnotationTypes.add(new String[]{sHandler.set.getName(), 
+            tHandler.name});
+          tHandler.setSelected(false);
+        }
+      }
+    }
+  }
   
+  /**
+   * Restores the selected types based on the state saved in the 
+   * {@link #visibleAnnotationTypes} data structure.
+   */
+  protected void restoreSelectedTypes(){
+    for(String[] typeSpec: visibleAnnotationTypes){
+      TypeHandler tHandler = getTypeHandler(typeSpec[0], typeSpec[1]);
+      tHandler.setSelected(true);
+    }
+  }
+
   protected void initListeners(){
     document.addDocumentListener(this);
     mainTable.addMouseListener(new MouseAdapter(){
@@ -745,7 +777,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected class SetHandler{
     SetHandler(AnnotationSet set){
       this.set = set;
-      typeHandlers = new ArrayList();
+      typeHandlers = new ArrayList<TypeHandler>();
       typeHandlersByType = new HashMap();
       List typeNames = new ArrayList(set.getAllTypes());
       Collections.sort(typeNames);
@@ -850,7 +882,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     
     
     AnnotationSet set;
-    List typeHandlers;
+    List<TypeHandler> typeHandlers;
     Map typeHandlersByType;
     private boolean expanded = false;
   }
@@ -1394,7 +1426,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     }
   }  
   
-  List setHandlers;
+  List<SetHandler> setHandlers;
   List tableRows; 
   XJTable mainTable;
   SetsTableModel tableModel;
@@ -1412,6 +1444,13 @@ public class AnnotationSetsView extends AbstractDocumentView
    * The listener for mouse and mouse motion events in the text view.
    */
   protected TextMouseListener textMouseListener;
+  
+  /**
+   * Stores the list of visible annotation types when the view is inactivated 
+   * so that the selection can be restored when the view is made active again.
+   * The values are String[2] pairs of form <set name, type>.
+   */
+  protected List<String[]> visibleAnnotationTypes;
   
   protected javax.swing.Timer mouseMovementTimer;
   private static final int MOUSE_MOVEMENT_TIMER_DELAY = 500;
