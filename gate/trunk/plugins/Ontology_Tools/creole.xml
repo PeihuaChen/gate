@@ -21,7 +21,7 @@
 	</OR>
       <PARAMETER NAME="defaultNameSpace" OPTIONAL="true" COMMENT="defaultNameSpace" RUNTIME="FALSE">
         java.lang.String</PARAMETER>
-      <ICON>lr.gif</ICON>
+      <ICON>ontology</ICON>
     </RESOURCE>
   </CREOLE>  
   
@@ -39,7 +39,7 @@
       <PARAMETER DEFAULT="true" NAME="caseSensitive" COMMENT="Should this gazetteer diferentiate on case. Currently the Gazetteer works only in case sensitive mode.">java.lang.Boolean</PARAMETER>
       <PARAMETER NAME="mappingURL" DEFAULT="../ANNIE/resources/gazetteer/mapping.def" COMMENT="The URL to the file with mappings of lists vs classes" SUFFIXES="def">java.net.URL</PARAMETER>
       <PARAMETER NAME="gazetteerName" DEFAULT="com.ontotext.gate.gazetteer.HashGazetteer" COMMENT="The gazetteer tobe used with this ontogazetteer. should implement Gazetteer interface">java.lang.String</PARAMETER>
-      <ICON>gazetteer.png</ICON>
+      <ICON>gazetteer</ICON>
     </RESOURCE>
   </CREOLE>
 
