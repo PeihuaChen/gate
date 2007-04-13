@@ -32,7 +32,6 @@ Rule: simpleJoin
   |
   //ma'am
   (({Token.string=="ma"}|{Token.string=="Ma"}){Token.string=="'"} {Token.string=="am"})
-
  ):left
 -->
 {
@@ -54,6 +53,40 @@ Rule: simpleJoin
   features.put("orth", "apostrophe");
   annotations.add(toRemove.firstNode(), toRemove.lastNode(), "Token", features);
 }
+
+
+Rule: ordinals
+  //3rd, 1st, 22nd
+  (
+   ({Token.kind=="number"}):number
+   ({Token.string=="st"}|{Token.string=="nd"}|{Token.string=="rd"}|{Token.string=="th"}):ending
+  ):left
+-->
+{
+  Annotation numberAnn = (Annotation)((AnnotationSet)bindings.get("number")).
+	iterator().next();	
+  Annotation endingAnn = (Annotation)((AnnotationSet)bindings.get("ending")).
+	iterator().next();
+  
+  String numberStr = (String)numberAnn.getFeatures().get("string");
+  String endingStr = (String)endingAnn.getFeatures().get("string");
+  if((numberStr.endsWith("1") && endingStr.equals("st"))
+     |
+     (numberStr.endsWith("2") && endingStr.equals("nd"))
+     |
+     (numberStr.endsWith("3") && endingStr.equals("rd"))){
+    //remove old tokens
+    gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("left");
+    inputAS.removeAll(toRemove);
+    //create the new token
+    FeatureMap features = Factory.newFeatureMap();
+    features.put("kind", "word");
+    features.put("string", numberStr + endingStr);
+    features.put("length", (numberStr + endingStr).length());
+    outputAS.add(toRemove.firstNode(), toRemove.lastNode(), "Token", features);
+  }
+}
+
 
 //?n't
 Rule: VBneg
@@ -123,3 +156,4 @@ Rule: NewLine
   features.put("length", Integer.toString(text.length()));
   annotations.add(toRemove.firstNode(), toRemove.lastNode(), "SpaceToken", features);
 }
+
