@@ -24,6 +24,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.*;
 
+import gate.swing.XJTable.SortingModel.ValueHolder;
 import gate.util.ObjectComparator;
 
 /**
@@ -250,7 +251,36 @@ public class XJTable extends JTable{
       implements TableModelListener{
     
     public SortingModel(TableModel sourceModel){
+      compWrapper = new ValueHolderComparator();
       init(sourceModel);
+    }
+    
+    protected class ValueHolder{
+      private Object value;
+      private int index;
+      public ValueHolder(Object value, int index) {
+        super();
+        this.value = value;
+        this.index = index;
+      }
+    }
+    
+    protected class ValueHolderComparator implements Comparator<ValueHolder>{
+      private Comparator comparator;
+      
+      protected Comparator getComparator() {
+        return comparator;
+      }
+
+      protected void setComparator(Comparator comparator) {
+        this.comparator = comparator;
+      }
+
+      public int compare(ValueHolder o1, ValueHolder o2) {
+        // TODO Auto-generated method stub
+        return ascending ? comparator.compare(o1.value, o2.value) :
+          comparator.compare(o1.value, o2.value) * -1;
+      }
     }
     
     protected void init(TableModel sourceModel){
@@ -288,14 +318,14 @@ public class XJTable extends JTable{
           if(firstRow == TableModelEvent.HEADER_ROW){
             //complete structure change -> reallocate the data
             init(sourceModel);
+            newColumns();
             fireTableStructureChanged();
             if(isSortable()) sort();
-            newColumns();
           }else if(lastRow == Integer.MAX_VALUE){
             //all data changed (including the number of rows)
             init(sourceModel);
-            fireTableDataChanged();
             if(isSortable()) sort();
+//            fireTableDataChanged();
           }else{
             //the rows should have normal values
             //if the sortedColumn is not affected we don't care
@@ -315,20 +345,21 @@ public class XJTable extends JTable{
         case TableModelEvent.INSERT:
           //rows were inserted -> we need to rebuild
           init(sourceModel);
-          if(firstRow != TableModelEvent.HEADER_ROW && firstRow == lastRow){  
-            fireTableChanged(new TableModelEvent(this,  
+          if(firstRow != TableModelEvent.HEADER_ROW && firstRow == lastRow){
+            //single row insertion
+            if(isSortable()) sort();
+            else fireTableChanged(new TableModelEvent(this,  
                     sourceToTarget(firstRow), 
                     sourceToTarget(lastRow), column, type));
           }else{
             //the real rows are not in sequence
-            fireTableDataChanged();
+            if(isSortable()) sort();
+            else fireTableDataChanged();
           }
-          if(isSortable()) sort();
           break;
         case TableModelEvent.DELETE:
           //rows were deleted -> we need to rebuild
           init(sourceModel);
-          fireTableDataChanged();
           if(isSortable()) sort();
       }
     }
@@ -369,52 +400,65 @@ public class XJTable extends JTable{
     public void sort(){
       try {
         //save the selection
-        int[] rows = getSelectedRows();
+        final int[] rows = getSelectedRows();
         //convert to model co-ordinates
         for(int i = 0; i < rows.length; i++) {
           rows[i] = rowViewToModel(rows[i]);
         }
         clearSelection();
-        
-        List sourceData = new ArrayList(sourceModel.getRowCount());
+        //create a list of ValueHolder objects for the source data that needs
+        //sorting
+        List<ValueHolder> sourceData = 
+            new ArrayList<ValueHolder>(sourceModel.getRowCount());
         //get the data in the source order
         for(int i = 0; i < sourceModel.getRowCount(); i++){
-          sourceData.add(sourceModel.getValueAt(i, sortedColumn));
+          Object value = sourceModel.getValueAt(i, sortedColumn);
+          sourceData.add(new ValueHolder(value, i));
         }
+        
         //get an appropriate comparator
         Comparator comparator = columnData.get(sortedColumn).comparator;
         if(comparator == null){
           //use the default comparator
-          if(defaultComparator == null) 
-            defaultComparator = new ObjectComparator();
+          if(defaultComparator == null) defaultComparator = new ObjectComparator();
           comparator = defaultComparator;
         }
-        for(int i = 0; i < sourceData.size() - 1; i++){
-          for(int j = i + 1; j < sourceData.size(); j++){
-            Object o1 = sourceData.get(targetToSource(i));
-            Object o2 = sourceData.get(targetToSource(j));
-            boolean swap = ascending ?
-                    (comparator.compare(o1, o2) > 0) :
-                    (comparator.compare(o1, o2) < 0);
-            if(swap){
-              int aux = targetToSource[i];
-              targetToSource[i] = targetToSource[j];
-              targetToSource[j] = aux;
-              
-              sourceToTarget[targetToSource[i]] = i;
-              sourceToTarget[targetToSource[j]] = j;
-            }
+        compWrapper.setComparator(comparator);
+//          for(int i = 0; i < sourceData.size() - 1; i++){
+//            for(int j = i + 1; j < sourceData.size(); j++){
+//              Object o1 = sourceData.get(targetToSource(i));
+//              Object o2 = sourceData.get(targetToSource(j));
+//              boolean swap = ascending ?
+//                      (comparator.compare(o1, o2) > 0) :
+//                      (comparator.compare(o1, o2) < 0);
+//              if(swap){
+//                int aux = targetToSource[i];
+//                targetToSource[i] = targetToSource[j];
+//                targetToSource[j] = aux;
+//                
+//                sourceToTarget[targetToSource[i]] = i;
+//                sourceToTarget[targetToSource[j]] = j;
+//              }
+//            }
+//          }
+          //perform the actual sorting
+          Collections.sort(sourceData, compWrapper);
+          //extract the new order
+          for(int i = 0; i < sourceData.size(); i++){
+            int targetIndex = i;
+            int sourceIndex = sourceData.get(i).index;
+            sourceToTarget[sourceIndex] = targetIndex;
+            targetToSource[targetIndex] = sourceIndex;
           }
-        }
-        fireTableRowsUpdated(0, sourceData.size() -1);
-        //restore selection
-        //convert to model co-ordinates
-        for(int i = 0; i < rows.length; i++){
-          rows[i] = rowModelToView(rows[i]);
-          getSelectionModel().addSelectionInterval(rows[i], rows[i]);
-        }
-      }
-      catch(ArrayIndexOutOfBoundsException aioob) {
+          sourceData.clear();
+          fireTableDataChanged();
+          //restore selection
+          //convert to model co-ordinates
+          for(int i = 0; i < rows.length; i++){
+            rows[i] = rowModelToView(rows[i]);
+            getSelectionModel().addSelectionInterval(rows[i], rows[i]);
+          }
+      }catch(ArrayIndexOutOfBoundsException aioob) {
         //this can happen when update events get behind
         //just ignore - we'll get another event later to cause the sorting
       }
@@ -460,6 +504,8 @@ public class XJTable extends JTable{
     protected int[] targetToSource;
     
     protected TableModel sourceModel;
+    
+    protected ValueHolderComparator compWrapper;
   }
   
   protected class HeaderMouseListener extends MouseAdapter{
