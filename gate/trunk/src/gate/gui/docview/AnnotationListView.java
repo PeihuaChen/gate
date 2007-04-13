@@ -16,30 +16,18 @@
 package gate.gui.docview;
 
 import gate.*;
-import gate.Annotation;
-import gate.AnnotationSet;
 import gate.creole.*;
-import gate.creole.AnnotationVisualResource;
 import gate.event.AnnotationEvent;
 import gate.event.AnnotationListener;
 import gate.gui.ResizableVisualResource;
 import gate.swing.XJTable;
 import gate.util.*;
-import gate.util.Err;
-import gate.util.GateRuntimeException;
 import java.awt.*;
-import java.awt.Component;
-import java.awt.GridBagLayout;
 import java.awt.event.*;
 import java.util.*;
 import java.util.List;
-import java.util.Map;
 import javax.swing.*;
-import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 import javax.swing.event.*;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 
 /**
@@ -50,8 +38,17 @@ import javax.swing.table.AbstractTableModel;
 public class AnnotationListView extends AbstractDocumentView
 		implements AnnotationListener{
   public AnnotationListView(){
-    tagList = new ArrayList();
-    annotationHandlerByTag = new HashMap();
+    annHandlersList = new AnnHandlerList();
+  }
+  
+  private static class AnnHandlerList
+    extends ArrayList<AnnotationHandler>{
+    public int indexOfTag(Object tag) {
+      for(int i = 0; i < size(); i++){
+        if(get(i).tag == tag) return i;
+      }
+      return -1;
+    }
   }
 
   /* (non-Javadoc)
@@ -155,19 +152,16 @@ public class AnnotationListView extends AbstractDocumentView
                 rows = new int[]{modelRow};
               }
 
-              ArrayList handlers = new ArrayList();
+              ArrayList<AnnotationHandler> handlers = 
+                new ArrayList<AnnotationHandler>();
 
               for(int i = 0; i < rows.length; i++){
-                Object tag = tagList.get(table.rowViewToModel(rows[i]));
-                handlers.add(tag);
+                handlers.add(annHandlersList.get(table.rowViewToModel(rows[i])));
               }
 
-              for(int i=0;i<handlers.size();i++) {
-                Object tag = handlers.get(i);
-                AnnotationHandler aHandler = (AnnotationHandler)
-                                             annotationHandlerByTag.get(tag);
+              for(AnnotationHandler aHandler : handlers) {
                 aHandler.set.remove(aHandler.ann);
-                removeAnnotation(tag);
+                removeAnnotation(aHandler.tag);
               }
             }
           };
@@ -175,8 +169,7 @@ public class AnnotationListView extends AbstractDocumentView
           
           //add the custom edit actions
           if(modelRow != -1){
-            AnnotationHandler aHandler = (AnnotationHandler)
-            annotationHandlerByTag.get(tagList.get(modelRow));
+            AnnotationHandler aHandler = annHandlersList.get(modelRow);
             List editorClasses = Gate.getCreoleRegister().
               getAnnotationVRs(aHandler.ann.getType());
             if(editorClasses != null && editorClasses.size() > 0){
@@ -246,8 +239,7 @@ public class AnnotationListView extends AbstractDocumentView
     int[] rows = table.getSelectedRows();
     AnnotationHandler aHandler = null;
     for(int i = 0; i < rows.length; i++){
-      Object tag = tagList.get(table.rowViewToModel(rows[i]));
-      aHandler = (AnnotationHandler) annotationHandlerByTag.get(tag);
+      aHandler = annHandlersList.get(table.rowViewToModel(rows[i]));
       textView.addBlinkingHighlight(aHandler.ann);
     }    
     //scroll to show the last highlight
@@ -256,29 +248,19 @@ public class AnnotationListView extends AbstractDocumentView
   }
 
   public void addAnnotation(Object tag, Annotation ann, AnnotationSet set){
-    AnnotationHandler aHandler = new AnnotationHandler(set, ann);
-    Object oldValue = annotationHandlerByTag.put(tag, aHandler);
-    if(oldValue == null){
-      //new value
-      tagList.add(tag);
-      int row = tagList.size() -1;
-      if(tableModel != null) tableModel.fireTableRowsInserted(row, row);
-    }else{
-      //update old value
-      int row = tagList.indexOf(tag);
-      if(tableModel != null) tableModel.fireTableRowsUpdated(row,row);
-    }
+    AnnotationHandler aHandler = new AnnotationHandler(set, ann, tag);
+    annHandlersList.add(aHandler);
+    int row = annHandlersList.size() -1;
+    if(tableModel != null) tableModel.fireTableRowsInserted(row, row);
     //listen for the new annotation's events
     ann.addAnnotationListener(this);
   }
 
   public void removeAnnotation(Object tag){
-    int row = tagList.indexOf(tag);
+    int row = annHandlersList.indexOfTag(tag);
     if(row >= 0){
-      tagList.remove(row);
-      AnnotationHandler aHandler = (AnnotationHandler)
-      		annotationHandlerByTag.remove(tag);
-      if(aHandler != null)aHandler.ann.removeAnnotationListener(this);
+      AnnotationHandler aHandler = annHandlersList.get(row);
+      aHandler.ann.removeAnnotationListener(this);
       if(tableModel != null) tableModel.fireTableRowsDeleted(row, row);
     }
   }
@@ -301,62 +283,40 @@ public class AnnotationListView extends AbstractDocumentView
     while(tagIter.hasNext()){
       Object tag = tagIter.next();
       Annotation ann = (Annotation)annIter.next();
-      AnnotationHandler aHandler = new AnnotationHandler(set, ann);
-      Object oldValue = annotationHandlerByTag.put(tag, aHandler);
-      if(oldValue == null){
-        //new value
-        tagList.add(tag);
-        int row = tagList.size() -1;
-      }else{
-        //update old value
-        int row = tagList.indexOf(tag);
-      }
+      AnnotationHandler aHandler = new AnnotationHandler(set, ann, tag);
+      annHandlersList.add(aHandler);
       //listen for the new annotation's events
       ann.addAnnotationListener(this);
     }
-    SwingUtilities.invokeLater(new Runnable(){
-      public void run(){
-        if(tableModel != null) tableModel.fireTableDataChanged();
-      }
-    });
+    if(tableModel != null) tableModel.fireTableDataChanged();
   }
 
   public void removeAnnotations(Collection tags){
     Iterator tagIter = tags.iterator();
     while(tagIter.hasNext()){
       Object tag = tagIter.next();
-      int row = tagList.indexOf(tag);
+      int row = annHandlersList.indexOfTag(tag);
       if(row >= 0){
-        tagList.remove(row);
+        AnnotationHandler aHandler = annHandlersList.get(row);
+        aHandler.ann.removeAnnotationListener(this);
+        annHandlersList.remove(row);
       }
-      AnnotationHandler aHandler = (AnnotationHandler)
-          annotationHandlerByTag.remove(tag);
-      if(aHandler != null)aHandler.ann.removeAnnotationListener(this);
-
     }
-    SwingUtilities.invokeLater(new Runnable(){
-      public void run(){
-        if(tableModel != null) tableModel.fireTableDataChanged();
-      }
-    });
+    if(tableModel != null) tableModel.fireTableDataChanged();
   }
 
   public void annotationUpdated(AnnotationEvent e){
     //update all occurrences of this annotation
+   // if annotations tab has not been set to visible state
+  	// table will be null.
+  	if(table == null)	return;
     //save selection
-    
-	// if annotations tab has not been set to visible state
-	// table will be null.
-	if(table == null) {
-		return;
-	}
-	
-	int[] selection = table.getSelectedRows();
+  	int[] selection = table.getSelectedRows();
     Annotation ann = (Annotation)e.getSource();
-    for(int i = 0; i < tagList.size(); i++){
-      Object tag = tagList.get(i);
-      if(((AnnotationHandler)annotationHandlerByTag.get(tag)).ann == ann){
-        if(tableModel != null)tableModel.fireTableRowsUpdated(i, i);
+    if(tableModel != null){
+      for(int i = 0; i < annHandlersList.size(); i++){
+        AnnotationHandler aHandler = annHandlersList.get(i);
+        if(aHandler.ann == ann)tableModel.fireTableRowsUpdated(i, i);
       }
     }
     //restore selection
@@ -374,7 +334,8 @@ public class AnnotationListView extends AbstractDocumentView
    * @param tag the tag of the annotation to be selected.
    */
   public void selectAnnotationForTag(Object tag){
-    int modelPosition = tagList.indexOf(tag);
+    int modelPosition = annHandlersList.indexOfTag(tag);
+    
     if(modelPosition != -1){
       int tablePosition = table.rowModelToView(modelPosition);
       table.getSelectionModel().setSelectionInterval(tablePosition, 
@@ -385,7 +346,7 @@ public class AnnotationListView extends AbstractDocumentView
   
   class AnnotationTableModel extends AbstractTableModel{
     public int getRowCount(){
-      return tagList.size();
+      return annHandlersList.size();
     }
 
     public int getColumnCount(){
@@ -419,9 +380,8 @@ public class AnnotationListView extends AbstractDocumentView
     }
 
     public Object getValueAt(int row, int column){
-      if(row >= tagList.size()) return null;
-      AnnotationHandler aHandler = (AnnotationHandler)annotationHandlerByTag.
-      	get(tagList.get(row));
+      if(row >= annHandlersList.size()) return null;
+      AnnotationHandler aHandler = annHandlersList.get(row);
       switch(column){
         case TYPE_COL: return aHandler.ann.getType();
         case SET_COL: return aHandler.set.getName();
@@ -456,12 +416,27 @@ public class AnnotationListView extends AbstractDocumentView
   }
 
   protected static class AnnotationHandler{
-    public AnnotationHandler(AnnotationSet set, Annotation ann){
+    public AnnotationHandler(AnnotationSet set, Annotation ann, Object tag){
       this.ann = ann;
       this.set = set;
+      this.tag = tag;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if(obj instanceof AnnotationHandler) obj = ((AnnotationHandler)obj).tag;
+      return tag == null ?
+             obj == null :
+             tag.equals(obj);
+    }
+    
+    @Override
+    public int hashCode() {
+      return tag.hashCode();
     }
     Annotation ann;
     AnnotationSet set;
+    Object tag;
   }
 
   protected class EditAnnotationAction extends AbstractAction{
@@ -512,8 +487,13 @@ public class AnnotationListView extends AbstractDocumentView
   protected XJTable table;
   protected AnnotationTableModel tableModel;
   protected JScrollPane scroller;
-  protected Map annotationHandlerByTag;
-  protected List tagList;
+
+  /**
+   * Stores the {@link AnnotationHandler} objects representing the annotations
+   * displayed by this view.
+   */
+  protected AnnHandlerList annHandlersList;
+  
   protected JPanel mainPanel;
   protected JLabel statusLabel;
   protected TextualDocumentView textView;

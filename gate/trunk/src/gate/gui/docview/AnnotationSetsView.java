@@ -940,33 +940,33 @@ public class AnnotationSetsView extends AbstractDocumentView
         hghltTagsForAnn.clear();
         Iterator annIter = annots.iterator();
         //we're doing a lot of operations so let's get out of the UI thread
-        Runnable runnable = new Runnable(){
-          public void run(){
+//        Runnable runnable = new Runnable(){
+//          public void run(){
             //do all operations in one go
             List tags = textView.addHighlights(annots, setHandler.set, colour);
             for(int i = 0; i < annots.size(); i++){
               hghltTagsForAnn.put(((Annotation)annots.get(i)).getId(), tags.get(i));
             }
-          }
-        };
-        Thread thread = new Thread(runnable);
-        thread.setPriority(Thread.MIN_PRIORITY);
-        thread.start();
+//          }
+//        };
+//        Thread thread = new Thread(runnable);
+//        thread.setPriority(Thread.MIN_PRIORITY);
+//        thread.start();
       }else{
       	//hide highlights
-        Runnable runnable = new Runnable(){
-          public void run(){
+//        Runnable runnable = new Runnable(){
+//          public void run(){
             //do all operations in one go
             try{
               textView.removeHighlights(hghltTagsForAnn.values());
             }finally{
               hghltTagsForAnn.clear();
             }
-          }
-        };
-        Thread thread = new Thread(runnable);
-        thread.setPriority(Thread.MIN_PRIORITY);
-        thread.start();
+//          }
+//        };
+//        Thread thread = new Thread(runnable);
+//        thread.setPriority(Thread.MIN_PRIORITY);
+//        thread.start();
       }
       //update the table display
       int row = tableRows.indexOf(this);
@@ -995,7 +995,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     public void annotationRemoved(Annotation ann){
       if(selected){
         Object tag = hghltTagsForAnn.remove(ann.getId());
-        textView.removeHighlight(tag);
+        if(tag != null) textView.removeHighlight(tag);
       }
       //if this was the last annotation of this type then the handler is no
       //longer required

@@ -103,7 +103,7 @@ public class TextualDocumentView extends AbstractDocumentView {
   
   /**
    * Ads several highlights in one go. 
-   * This method should <b>not</b> be called from within the UI thread.
+   * This method should be called from within the UI thread.
    * @param annotations the collection of annotations for which highlights 
    * are to be added.
    * @param set the annotation set all the annotations belong to.
@@ -115,19 +115,20 @@ public class TextualDocumentView extends AbstractDocumentView {
   public List addHighlights(Collection annotations, 
           AnnotationSet set, Color colour){
     //hide the text pane to speed up rendering.
-    SwingUtilities.invokeLater(new Runnable(){
-      public void run(){
+//    SwingUtilities.invokeLater(new Runnable(){
+//      public void run(){
+    Point viewPosition = scroller.getViewport().getViewPosition();
         textView.setVisible(false);
         scroller.getViewport().setView(new JLabel("Updating"));
-      }
-    });
-    //wait for the textual view to be hidden
-    while(textView.isVisible()) 
-      try{
-        Thread.sleep(30);
-      }catch(InterruptedException ie){
-        //ignore
-      }
+//      }
+//    });
+//    //wait for the textual view to be hidden
+//    while(textView.isVisible()) 
+//      try{
+//        Thread.sleep(30);
+//      }catch(InterruptedException ie){
+//        //ignore
+//      }
     
     Highlighter highlighter = textView.getHighlighter();
     
@@ -147,35 +148,36 @@ public class TextualDocumentView extends AbstractDocumentView {
       }
     }
     annotationListView.addAnnotations(tagsList, annotations, set);
-    SwingUtilities.invokeLater(new Runnable(){
-      public void run(){
+//    SwingUtilities.invokeLater(new Runnable(){
+//      public void run(){
         scroller.getViewport().setView(textView);
         textView.setVisible(true);
-      }
-    });
+        scroller.getViewport().setViewPosition(viewPosition);
+//      }
+//    });
     return tagsList;
   }
   
   /**
    * Removes several highlights in one go. 
-   * This method should <b>not</b> be called from within the UI thread.
    * @param tags the tags for the highlights to be removed
    */
-  public void removeHighlights(Collection tags){
+  public void removeHighlights(final Collection tags){
     //hide the text pane to speed up rendering.
-    SwingUtilities.invokeLater(new Runnable(){
-      public void run(){
-        textView.setVisible(false);
+//    SwingUtilities.invokeLater(new Runnable(){
+//      public void run(){
+    Point viewPosition = scroller.getViewport().getViewPosition();
+    textView.setVisible(false);
         scroller.getViewport().setView(new JLabel("Updating"));
-      }
-    });
-    //wait for the textual view to be hidden.
-    while(textView.isVisible()) 
-      try{
-        Thread.sleep(30);
-      }catch(InterruptedException ie){
-        //ignore
-      }
+//      }
+//    });
+//    //wait for the textual view to be hidden.
+//    while(textView.isVisible()) 
+//      try{
+//        Thread.sleep(30);
+//      }catch(InterruptedException ie){
+//        //ignore
+//      }
     
     Highlighter highlighter = textView.getHighlighter();
     
@@ -184,12 +186,13 @@ public class TextualDocumentView extends AbstractDocumentView {
       highlighter.removeHighlight(tagIter.next());
     }
     annotationListView.removeAnnotations(tags);
-    SwingUtilities.invokeLater(new Runnable(){
-      public void run(){
+//    SwingUtilities.invokeLater(new Runnable(){
+//      public void run(){
         scroller.getViewport().setView(textView);
         textView.setVisible(true);
-      }
-    });
+        scroller.getViewport().setViewPosition(viewPosition);
+//      }
+//    });
   }
 
   
