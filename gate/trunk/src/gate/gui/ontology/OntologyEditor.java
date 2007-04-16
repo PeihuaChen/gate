@@ -1132,6 +1132,9 @@ public class OntologyEditor extends AbstractVisualResource
           }
         }
       }
+    } else {
+      addChidrenRec(rootNode, list, itemComparator);
+      treeModel.nodeStructureChanged(rootNode);
     }
   }
 
