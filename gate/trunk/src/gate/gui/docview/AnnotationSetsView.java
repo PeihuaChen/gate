@@ -1000,23 +1000,14 @@ public class AnnotationSetsView extends AbstractDocumentView
       if(SwingUtilities.isEventDispatchThread()){
         runner.run();
       }else{
-        try {
-          SwingUtilities.invokeAndWait(runner);
-        }
-        catch(InterruptedException e) {
-          //ignore
-        }
-        catch(InvocationTargetException e) {
-          //ignore
-        }
+        SwingUtilities.invokeLater(runner);
       }
-        //if this was the last annotation of this type then the handler is no
-        //longer required
-        Set remainingAnns = setHandler.set.get(name); 
-        if(remainingAnns == null || remainingAnns.isEmpty()){
-          setHandler.removeType(TypeHandler.this);
-        }          
-
+      //if this was the last annotation of this type then the handler is no
+      //longer required
+      Set remainingAnns = setHandler.set.get(name); 
+      if(remainingAnns == null || remainingAnns.isEmpty()){
+        setHandler.removeType(TypeHandler.this);    
+      }          
     }
     
     protected void repairHighlights(int start, int end){
