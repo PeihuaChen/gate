@@ -89,15 +89,15 @@ public class ValuesSelectionAction {
     });
   }
 
-  public void showGUI(String s, String as[], String as1[]) {
-    this.ontologyClasses = as;
-    DefaultComboBoxModel defaultcomboboxmodel = new DefaultComboBoxModel(as);
+  public void showGUI(String windowTitle, String inDropDownList[], String alreadySelected[]) {
+    this.ontologyClasses = inDropDownList;
+    DefaultComboBoxModel defaultcomboboxmodel = new DefaultComboBoxModel(inDropDownList);
     domainBox.setModel(defaultcomboboxmodel);
     DefaultListModel defaultlistmodel = new DefaultListModel();
-    for(int i = 0; i < as1.length; i++)
-      defaultlistmodel.addElement(as1[i]);
+    for(int i = 0; i < alreadySelected.length; i++)
+      defaultlistmodel.addElement(alreadySelected[i]);
     list.setModel(defaultlistmodel);
-    JOptionPane.showOptionDialog(MainFrame.getInstance(), panel, s, 0, 3, null,
+    JOptionPane.showOptionDialog(MainFrame.getInstance(), panel, windowTitle, 0, 3, null,
             new String[]{"OK"}, "OK");
   }
 
