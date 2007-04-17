@@ -325,7 +325,7 @@ public class XJTable extends JTable{
             //all data changed (including the number of rows)
             init(sourceModel);
             if(isSortable()) sort();
-//            fireTableDataChanged();
+            else fireTableDataChanged();
           }else{
             //the rows should have normal values
             //if the sortedColumn is not affected we don't care
