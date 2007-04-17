@@ -2454,6 +2454,8 @@ public class MainFrame extends JFrame implements ProgressListener,
     public void actionPerformed(ActionEvent e) {
       mainTabbedPane.remove(handle.getLargeView());
       mainTabbedPane.setSelectedIndex(mainTabbedPane.getTabCount() - 1);
+      //remove all GUI resources used by this handle
+      handle.removeViews();
     }// public void actionPerformed(ActionEvent e)
 
     Handle handle;

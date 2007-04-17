@@ -55,6 +55,13 @@ public interface Handle extends ProgressListener, StatusListener {
    */
   public void cleanup();
   
+  /**
+   * A call to this method will cause the handle to destroy all the views built
+   * for the target resource.
+   *
+   */
+  public void removeViews();
+  
   public JPopupMenu getPopup();
 
   public String getTooltipText();
