@@ -261,6 +261,7 @@ public class AnnotationListView extends AbstractDocumentView
     if(row >= 0){
       AnnotationHandler aHandler = annHandlersList.get(row);
       aHandler.ann.removeAnnotationListener(this);
+      annHandlersList.remove(row);
       if(tableModel != null) tableModel.fireTableRowsDeleted(row, row);
     }
   }
