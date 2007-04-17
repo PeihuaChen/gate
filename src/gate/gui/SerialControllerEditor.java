@@ -110,6 +110,7 @@ public class SerialControllerEditor extends AbstractVisualResource
 
     loadedPRsTableModel = new LoadedPRsTableModel();
     loadedPRsTable = new XJTable();
+    loadedPRsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
     loadedPRsTable.setSortable(false);
     loadedPRsTable.setModel(loadedPRsTableModel);
 
@@ -156,6 +157,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     memberPRsTable = new XJTable();
     memberPRsTable.setSortable(false);
     memberPRsTable.setModel(memberPRsTableModel);
+    memberPRsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
     memberPRsTable.setDefaultRenderer(ProcessingResource.class,
                                       new ResourceRenderer());
     memberPRsTable.setDefaultRenderer(JLabel.class, new LabelRenderer());
@@ -449,22 +451,24 @@ public class SerialControllerEditor extends AbstractVisualResource
     loadedPRsTable.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         int row = loadedPRsTable.rowAtPoint(e.getPoint());
-        //load modules on double click
-        ProcessingResource pr = (ProcessingResource)
-                                loadedPRsTableModel.getValueAt(row, 0);
-        if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2){
-          new AddPRAction(pr).actionPerformed(null);
-        }else if(SwingUtilities.isRightMouseButton(e)){
-            JPopupMenu popup = new XJPopupMenu();
-            popup.add(new AddPRAction(pr){
-              {
-                putValue(NAME, "Add \"" + this.pr.getName() +
-                               "\" to the \"" + controller.getName() +
-                               "\" application");
-              }
-            });
-            popup.show(loadedPRsTable, e.getPoint().x, e.getPoint().y);
-          }
+        if(row != -1){
+          //load modules on double click
+          ProcessingResource pr = (ProcessingResource)
+                                  loadedPRsTableModel.getValueAt(row, 0);
+          if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2){
+            new AddPRAction(pr).actionPerformed(null);
+          }else if(SwingUtilities.isRightMouseButton(e)){
+              JPopupMenu popup = new XJPopupMenu();
+              popup.add(new AddPRAction(pr){
+                {
+                  putValue(NAME, "Add \"" + this.pr.getName() +
+                                 "\" to the \"" + controller.getName() +
+                                 "\" application");
+                }
+              });
+              popup.show(loadedPRsTable, e.getPoint().x, e.getPoint().y);
+            }
+        }
       }
 
       public void mousePressed(MouseEvent e) {
@@ -689,7 +693,7 @@ public class SerialControllerEditor extends AbstractVisualResource
   }
 
   /**
-   * Called when a PR has been selected in the memeber PRs table;
+   * Called when a PR has been selected in the member PRs table;
    */
   protected void selectPR(int index){
     ProcessingResource pr = (ProcessingResource)
@@ -751,8 +755,8 @@ public class SerialControllerEditor extends AbstractVisualResource
   }
 
   /**
-   * Stops the current edits for parameters; sets the paarmeters for the
-   * resource currently being edited and diplays the editor for the new
+   * Stops the current edits for parameters; sets the parameters for the
+   * resource currently being edited and displays the editor for the new
    * resource
    * @param pr the new resource
    */
