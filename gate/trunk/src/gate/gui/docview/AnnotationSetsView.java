@@ -7,44 +7,27 @@
 package gate.gui.docview;
 
 import java.awt.*;
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.event.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.List;
 import java.util.prefs.Preferences;
 
 import javax.swing.*;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.border.Border;
 import javax.swing.event.*;
-import javax.swing.event.MouseInputListener;
-import javax.swing.event.PopupMenuListener;
 import javax.swing.table.*;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.text.*;
-import javax.swing.text.BadLocationException;
 
 import gate.*;
-import gate.Annotation;
-import gate.AnnotationSet;
 import gate.event.*;
-import gate.event.AnnotationSetEvent;
-import gate.event.AnnotationSetListener;
 import gate.event.DocumentEvent;
 import gate.event.DocumentListener;
 import gate.gui.*;
-import gate.gui.MainFrame;
 import gate.swing.ColorGenerator;
 import gate.swing.XJTable;
 import gate.util.*;
-import gate.util.GateRuntimeException;
-import gate.util.InvalidOffsetException;
 
 /**
  * @author valyt
@@ -830,22 +813,24 @@ public class AnnotationSetsView extends AbstractDocumentView
     public void removeType(TypeHandler tHandler){
       int setRow = tableRows.indexOf(this);
       int pos = typeHandlers.indexOf(tHandler);
-      typeHandlers.remove(pos);
-      typeHandlersByType.remove(tHandler.name);
-      //preserve table selection
-      int row = mainTable.getSelectedRow();
-      if(expanded){
-        tableRows.remove(setRow + pos + 1);
-        tableModel.fireTableRowsDeleted(setRow + pos + 1, setRow + pos + 1);
-        if(row >= (setRow + pos + 1)) row--;
+      if(setRow != -1 && pos != -1){
+        typeHandlers.remove(pos);
+        typeHandlersByType.remove(tHandler.name);
+        //preserve table selection
+        int row = mainTable.getSelectedRow();
+        if(expanded){
+          tableRows.remove(setRow + pos + 1);
+          tableModel.fireTableRowsDeleted(setRow + pos + 1, setRow + pos + 1);
+          if(row >= (setRow + pos + 1)) row--;
+        }
+        if(typeHandlers.isEmpty()){
+          //the set has no more handlers
+          setExpanded(false);
+          tableModel.fireTableRowsUpdated(setRow, setRow);
+        }
+        //restore selection if any
+        if(row != -1) mainTable.getSelectionModel().setSelectionInterval(row, row);
       }
-      if(typeHandlers.isEmpty()){
-        //the set has no more handlers
-        setExpanded(false);
-        tableModel.fireTableRowsUpdated(setRow, setRow);
-      }
-      //restore selection if any
-      if(row != -1) mainTable.getSelectionModel().setSelectionInterval(row, row);
     }
     
     public void removeType(String type){
@@ -982,27 +967,56 @@ public class AnnotationSetsView extends AbstractDocumentView
      * right type
      * @param ann
      */
-    public void annotationAdded(Annotation ann){
-      //if selected, add new highlight
-      if(selected) hghltTagsForAnn.put(ann.getId(), 
-              textView.addHighlight(ann, setHandler.set, colour));
+    public void annotationAdded(final Annotation ann){
+      if(selected){
+        Runnable runner = new Runnable(){
+          public void run(){
+            //add new highlight
+            hghltTagsForAnn.put(ann.getId(), 
+                    textView.addHighlight(ann, setHandler.set, colour));
+          }
+        };
+        if(SwingUtilities.isEventDispatchThread()){
+          runner.run();
+        }else{
+          SwingUtilities.invokeLater(runner);
+        }
+      }
     }
     
     /**
      * Notifies this type handler that an annotation has been removed
      * @param ann the removed annotation
      */
-    public void annotationRemoved(Annotation ann){
-      if(selected){
-        Object tag = hghltTagsForAnn.remove(ann.getId());
-        if(tag != null) textView.removeHighlight(tag);
+    public void annotationRemoved(final Annotation ann){
+      Runnable runner = new Runnable(){
+        public void run(){
+          if(selected){
+            Object tag = hghltTagsForAnn.remove(ann.getId());
+            if(tag != null) textView.removeHighlight(tag);
+          }
+        }
+      };
+      if(SwingUtilities.isEventDispatchThread()){
+        runner.run();
+      }else{
+        try {
+          SwingUtilities.invokeAndWait(runner);
+        }
+        catch(InterruptedException e) {
+          //ignore
+        }
+        catch(InvocationTargetException e) {
+          //ignore
+        }
       }
-      //if this was the last annotation of this type then the handler is no
-      //longer required
-      Set remainingAnns = setHandler.set.get(name); 
-      if(remainingAnns == null || remainingAnns.isEmpty()){
-        setHandler.removeType(this);
-      }
+        //if this was the last annotation of this type then the handler is no
+        //longer required
+        Set remainingAnns = setHandler.set.get(name); 
+        if(remainingAnns == null || remainingAnns.isEmpty()){
+          setHandler.removeType(TypeHandler.this);
+        }          
+
     }
     
     protected void repairHighlights(int start, int end){
