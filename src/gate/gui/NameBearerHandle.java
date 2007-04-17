@@ -1450,42 +1450,58 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
   }
 
-  /**
-   * Releases the memory, removes the listeners, cleans up. Will get
-   * called when the target resource is unloaded from the system
-   */
-  public void cleanup() {
+  
+  public void removeViews() {
     // delete all the VRs that were created
     if(largeView != null) {
       if(largeView instanceof VisualResource) {
         // we only had a view so no tabbed pane was used
+        if(largeView instanceof ActionsPublisher) 
+            actionPublishers.remove(largeView);
         Factory.deleteResource((VisualResource)largeView);
       }
       else {
         Component vrs[] = ((JTabbedPane)largeView).getComponents();
         for(int i = 0; i < vrs.length; i++) {
           if(vrs[i] instanceof VisualResource) {
+            if(vrs[i] instanceof ActionsPublisher) 
+              actionPublishers.remove(vrs[i]);
             Factory.deleteResource((VisualResource)vrs[i]);
           }
         }
       }
+      largeView = null;
     }
 
     if(smallView != null) {
       if(smallView instanceof VisualResource) {
         // we only had a view so no tabbed pane was used
+        if(smallView instanceof ActionsPublisher) 
+          actionPublishers.remove(smallView);
         Factory.deleteResource((VisualResource)smallView);
       }
       else {
         Component vrs[] = ((JTabbedPane)smallView).getComponents();
         for(int i = 0; i < vrs.length; i++) {
           if(vrs[i] instanceof VisualResource) {
+            if(vrs[i] instanceof ActionsPublisher) 
+                actionPublishers.remove(vrs[i]);
             Factory.deleteResource((VisualResource)vrs[i]);
           }
         }
       }
+      smallView = null;
     }
+    viewsBuilt = false;
+  }
 
+  /**
+   * Releases the memory, removes the listeners, cleans up. Will get
+   * called when the target resource is unloaded from the system
+   */
+  public void cleanup() {
+
+    removeViews();
     Gate.getCreoleRegister().removeCreoleListener(this);
     target = null;
   }

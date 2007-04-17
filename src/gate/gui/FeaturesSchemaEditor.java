@@ -47,13 +47,24 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
   }
   
   public void setTargetFeatures(FeatureMap features){
-    if(features != null) features.removeFeatureMapListener(this);
+    if(targetFeatures != null) targetFeatures.removeFeatureMapListener(this);
     this.targetFeatures = features;
     populate();
-    if(features != null) features.addFeatureMapListener(this);
+    if(targetFeatures != null) targetFeatures.addFeatureMapListener(this);
   }
   
   
+  @Override
+  public void cleanup() {
+    super.cleanup();
+    if(targetFeatures != null){
+      targetFeatures.removeFeatureMapListener(this);
+      targetFeatures = null;
+    }
+    target = null;
+    schema = null;
+  }
+
   /* (non-Javadoc)
    * @see gate.VisualResource#setTarget(java.lang.Object)
    */
@@ -75,7 +86,11 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
    * @see gate.event.FeatureMapListener#featureMapUpdated()
    */
   public void featureMapUpdated(){
-    populate();
+    SwingUtilities.invokeLater(new Runnable(){
+      public void run(){
+        populate();    
+      }
+    });
   }
   
   
