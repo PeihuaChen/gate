@@ -389,7 +389,15 @@ public class XJTable extends JTable{
               columnIndex);
     }
     public Object getValueAt(int row, int column){
-      return sourceModel.getValueAt(targetToSource(row), column);
+      try{
+        return sourceModel.getValueAt(targetToSource(row), column);
+      }catch(IndexOutOfBoundsException iobe){
+        //this can occur because of multithreaded access -> some threads empties 
+        //the data while some other thread tries to update the display.
+        //this error is safe to ignore as the GUI will get updated by another 
+        //event once the change to the data has been effected
+        return null;
+      }
     }
     
     /**
