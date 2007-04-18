@@ -15,12 +15,11 @@ package gate.gui.docview;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
-import java.io.Reader;
 import java.util.*;
 import java.util.List;
-import java.util.Timer;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.text.*;
 
 
@@ -40,18 +39,61 @@ import gate.util.*;
 public class TextualDocumentView extends AbstractDocumentView {
 
   public TextualDocumentView(){
-    blinkingTagsForAnnotations = new HashMap();
+    blinkingTagsForAnnotations = new HashMap<Integer, HighlightData>();
+    //use linked lists as they grow and shrink in constant time and direct access
+    //is not required.
+    highlightsToAdd = new LinkedList<HighlightData>();
+    highlightsToRemove = new LinkedList<HighlightData>();
     gateDocListener = new GateDocumentListener();
   }
   
+  @Override
+  public void cleanup() {
+    super.cleanup();
+    highlightsMinder.stop();
+  }
+
   public Object addHighlight(Annotation ann, AnnotationSet set, Color colour){
+    HighlightData hData = new HighlightData(ann, set, colour);
+    synchronized(TextualDocumentView.this) {
+      highlightsToAdd.add(hData);
+    }
+    highlightsMinder.restart();
+    return hData;
+  }
+  
+  public List addHighlights(Collection<Annotation> annotations, 
+          AnnotationSet set, Color colour){
+    List tags = new ArrayList();
+    for(Annotation ann : annotations) tags.add(addHighlight(ann, set, colour));
+    return tags;
+  }
+  
+  public void removeHighlight(Object tag){
+    synchronized(TextualDocumentView.this) {
+      highlightsToRemove.add((HighlightData)tag);
+    }
+    highlightsMinder.restart();
+  }
+  
+  public void removeHighlights(Collection tags){
+    for(Object tag : tags) removeHighlight(tag);
+  }
+  
+  public void removeHighlight1(Object tag){
+    Highlighter highlighter = textView.getHighlighter();
+    highlighter.removeHighlight(tag);
+//    annotationListView.removeAnnotation(tag);
+  }
+  
+  public Object addHighlight1(Annotation ann, AnnotationSet set, Color colour){
     Highlighter highlighter = textView.getHighlighter();
     try{
       Object tag = highlighter.addHighlight(
 	            ann.getStartNode().getOffset().intValue(),
 	            ann.getEndNode().getOffset().intValue(),
 	            new DefaultHighlighter.DefaultHighlightPainter(colour));
-      annotationListView.addAnnotation(tag, ann, set);
+//      annotationListView.addAnnotation(tag, ann, set);
       return tag;
     }catch(BadLocationException ble){
       //the offsets should always be OK as they come from an annotation
@@ -82,11 +124,7 @@ public class TextualDocumentView extends AbstractDocumentView {
     }
   }
   
-  public void removeHighlight(Object tag){
-    Highlighter highlighter = textView.getHighlighter();
-    highlighter.removeHighlight(tag);
-    annotationListView.removeAnnotation(tag);
-  }
+
 
   /**
    * Gives access to the highliter's change highlight operation. Can be used to 
@@ -112,7 +150,7 @@ public class TextualDocumentView extends AbstractDocumentView {
    * elements corresponds to the order defined by the iterator of the 
    * collection of annotations provided. 
    */
-  public List addHighlights(Collection annotations, 
+  public List addHighlights1(Collection annotations, 
           AnnotationSet set, Color colour){
     //hide the text pane to speed up rendering.
 //    SwingUtilities.invokeLater(new Runnable(){
@@ -147,7 +185,7 @@ public class TextualDocumentView extends AbstractDocumentView {
         throw new GateRuntimeException(ble.toString());
       }
     }
-    annotationListView.addAnnotations(tagsList, annotations, set);
+//    annotationListView.addAnnotations(annotations, set);
 //    SwingUtilities.invokeLater(new Runnable(){
 //      public void run(){
         scroller.getViewport().setView(textView);
@@ -162,7 +200,7 @@ public class TextualDocumentView extends AbstractDocumentView {
    * Removes several highlights in one go. 
    * @param tags the tags for the highlights to be removed
    */
-  public void removeHighlights(final Collection tags){
+  public void removeHighlights1(final Collection tags){
     //hide the text pane to speed up rendering.
 //    SwingUtilities.invokeLater(new Runnable(){
 //      public void run(){
@@ -185,7 +223,7 @@ public class TextualDocumentView extends AbstractDocumentView {
     while(tagIter.hasNext()){
       highlighter.removeHighlight(tagIter.next());
     }
-    annotationListView.removeAnnotations(tags);
+//    annotationListView.removeAnnotations(tags);
 //    SwingUtilities.invokeLater(new Runnable(){
 //      public void run(){
         scroller.getViewport().setView(textView);
@@ -198,16 +236,15 @@ public class TextualDocumentView extends AbstractDocumentView {
   
   public void addBlinkingHighlight(Annotation ann){
     synchronized(blinkingTagsForAnnotations){
-      blinkingTagsForAnnotations.put(ann.getId(), new AnnotationTag(ann, null));
+      blinkingTagsForAnnotations.put(ann.getId(), new HighlightData(ann, null, null));
     }
   }
   
   public void removeBlinkingHighlight(Annotation ann){
     synchronized(blinkingTagsForAnnotations){
-      AnnotationTag annTag = (AnnotationTag)blinkingTagsForAnnotations.
-          remove(ann.getId()); 
-      if(annTag != null && annTag.getTag() != null)
-          textView.getHighlighter().removeHighlight(annTag.getTag());
+      HighlightData annTag = blinkingTagsForAnnotations.remove(ann.getId()); 
+      if(annTag != null && annTag.tag != null)
+          textView.getHighlighter().removeHighlight(annTag.tag);
     }
   }
   
@@ -217,10 +254,9 @@ public class TextualDocumentView extends AbstractDocumentView {
       Iterator annIdIter = new ArrayList(blinkingTagsForAnnotations.keySet()).
         iterator();
       while(annIdIter.hasNext()){
-        AnnotationTag annTag = (AnnotationTag)
-            blinkingTagsForAnnotations.remove(annIdIter.next());
-        Annotation ann = annTag.getAnnotation();
-        Object tag = annTag.getTag();
+        HighlightData annTag = blinkingTagsForAnnotations.remove(annIdIter.next());
+        Annotation ann = annTag.annotation;
+        Object tag = annTag.tag;
         if(tag != null){
           Highlighter highlighter = textView.getHighlighter();
           highlighter.removeHighlight(tag);
@@ -269,22 +305,29 @@ public class TextualDocumentView extends AbstractDocumentView {
     textView.getDocument().addDocumentListener(new SwingDocumentListener());
     scroller.getViewport().setViewPosition(new Point(0, 0));
     
-    //get a pointer to the annotation list view used to display
-    //the highlighted annotations 
-    Iterator horizViewsIter = owner.getHorizontalViews().iterator();
-    while(annotationListView == null && horizViewsIter.hasNext()){
-      DocumentView aView = (DocumentView)horizViewsIter.next();
-      if(aView instanceof AnnotationListView) 
-        annotationListView = (AnnotationListView)aView;
-    }
-    blinker = new Timer(this.getClass().getCanonicalName() + "_blink_timer", 
-            true);
-    final BlinkAction blinkAction = new BlinkAction();
-    blinker.scheduleAtFixedRate(new TimerTask(){
-      public void run() {
-        blinkAction.actionPerformed(null);
-      }
-    }, 0, BLINK_DELAY);
+//    //get a pointer to the annotation list view used to display
+//    //the highlighted annotations 
+//    Iterator horizViewsIter = owner.getHorizontalViews().iterator();
+//    while(annotationListView == null && horizViewsIter.hasNext()){
+//      DocumentView aView = (DocumentView)horizViewsIter.next();
+//      if(aView instanceof AnnotationListView) 
+//        annotationListView = (AnnotationListView)aView;
+//    }
+    highlightsMinder = new Timer(BLINK_DELAY, new UpdateHighlightsAction());
+    highlightsMinder.setInitialDelay(HIGHLIGHT_DELAY);
+    highlightsMinder.setDelay(BLINK_DELAY);
+    highlightsMinder.setRepeats(true);
+    highlightsMinder.setCoalesce(true);
+    highlightsMinder.start();
+    
+//    blinker = new Timer(this.getClass().getCanonicalName() + "_blink_timer", 
+//            true);
+//    final BlinkAction blinkAction = new BlinkAction();
+//    blinker.scheduleAtFixedRate(new TimerTask(){
+//      public void run() {
+//        blinkAction.actionPerformed(null);
+//      }
+//    }, 0, BLINK_DELAY);
     initListeners();
   }
   
@@ -315,8 +358,14 @@ public class TextualDocumentView extends AbstractDocumentView {
   /**
    * Blinks the blinking highlights if any.
    */
-  protected class BlinkAction extends AbstractAction{
+  protected class UpdateHighlightsAction extends AbstractAction{
     public void actionPerformed(ActionEvent evt){
+      updateBlinkingHighlights();
+      updateNormalHighlights();
+    }
+    
+    
+    protected void updateBlinkingHighlights(){
       //this needs to either add or remove the highlights
       synchronized(blinkingTagsForAnnotations){
         //get out as quickly as possible if nothing to do
@@ -327,27 +376,27 @@ public class TextualDocumentView extends AbstractDocumentView {
         if(highlightsShown){
           //hide current highlights
           while(annIdIter.hasNext()){
-            AnnotationTag annTag = (AnnotationTag)
-              blinkingTagsForAnnotations.get(annIdIter.next());
-            Annotation ann = annTag.getAnnotation();
-            Object tag = annTag.getTag();
+            HighlightData annTag = 
+                blinkingTagsForAnnotations.get(annIdIter.next());
+            Annotation ann = annTag.annotation;
+            Object tag = annTag.tag;
             if(tag != null) highlighter.removeHighlight(tag);
-            annTag.setTag(null);
+            annTag.tag = null;
           }
           highlightsShown = false;
         }else{
           //show highlights
           while(annIdIter.hasNext()){
-            AnnotationTag annTag = (AnnotationTag)
-              blinkingTagsForAnnotations.get(annIdIter.next());
-            Annotation ann = annTag.getAnnotation();
+            HighlightData annTag = 
+                blinkingTagsForAnnotations.get(annIdIter.next());
+            Annotation ann = annTag.annotation;
             try{
               Object tag = highlighter.addHighlight(
                       ann.getStartNode().getOffset().intValue(),
                       ann.getEndNode().getOffset().intValue(),
                       new DefaultHighlighter.DefaultHighlightPainter(
                               textView.getSelectionColor()));
-              annTag.setTag(tag);
+              annTag.tag = tag;
 //              scrollAnnotationToVisible(ann);
             }catch(BadLocationException ble){
               //this should never happen
@@ -358,10 +407,64 @@ public class TextualDocumentView extends AbstractDocumentView {
         }
       }
     }
+    
+    protected void updateNormalHighlights(){
+      synchronized(TextualDocumentView.this) {
+        if((highlightsToRemove.size() + highlightsToAdd.size()) > 0){
+          Point viewPosition = scroller.getViewport().getViewPosition();
+          Highlighter highlighter = textView.getHighlighter();
+          textView.setVisible(false);
+          scroller.getViewport().setView(new JLabel("Updating"));
+          //add all new highlights
+          while(highlightsToAdd.size() > 0){
+            HighlightData hData = highlightsToAdd.remove(0);
+            try{
+              hData.tag = highlighter.addHighlight(
+                      hData.annotation.getStartNode().getOffset().intValue(),
+                      hData.annotation.getEndNode().getOffset().intValue(),
+                      new DefaultHighlighter.DefaultHighlightPainter(hData.colour));
+            }catch(BadLocationException ble){
+              //the offsets should always be OK as they come from an annotation
+              ble.printStackTrace();
+            }            
+//            annotationListView.addAnnotation(hData, hData.annotation, 
+//                    hData.set);
+          }
+          
+          //remove all the highlights that need removing
+          while(highlightsToRemove.size() > 0){
+            HighlightData hData = highlightsToRemove.remove(0);
+            if(hData.tag != null){
+              highlighter.removeHighlight(hData.tag);
+            }
+//            annotationListView.removeAnnotation(hData);
+          }
+          
+          
+          //restore the updated view
+          scroller.getViewport().setView(textView);
+          textView.setVisible(true);
+          scroller.getViewport().setViewPosition(viewPosition);
+        }
+      }
+    }
     protected boolean highlightsShown = false;
   }
     
-  class GateDocumentListener implements DocumentListener{
+  private class HighlightData{
+    Annotation annotation;
+    AnnotationSet set;
+    Color colour;
+    Object tag;
+
+    public HighlightData(Annotation annotation, AnnotationSet set, Color colour) {
+      this.annotation = annotation;
+      this.set = set;
+      this.colour = colour;
+    }
+  }
+  
+  protected class GateDocumentListener implements DocumentListener{
 
     public void annotationSetAdded(DocumentEvent e) {
     }
@@ -382,7 +485,7 @@ public class TextualDocumentView extends AbstractDocumentView {
     private boolean active = true;
   }
   
-  class SwingDocumentListener implements javax.swing.event.DocumentListener{
+  protected class SwingDocumentListener implements javax.swing.event.DocumentListener{
     public void insertUpdate(final javax.swing.event.DocumentEvent e) {
       //propagate the edit to the document
       try{
@@ -399,9 +502,9 @@ public class TextualDocumentView extends AbstractDocumentView {
         //reactivate our listener
         gateDocListener.setActive(true);
       }
-      //update the offsets in the list
-      Component listView = annotationListView.getGUI();
-      if(listView != null) listView.repaint();
+//      //update the offsets in the list
+//      Component listView = annotationListView.getGUI();
+//      if(listView != null) listView.repaint();
     }
 
     public void removeUpdate(final javax.swing.event.DocumentEvent e) {
@@ -418,9 +521,9 @@ public class TextualDocumentView extends AbstractDocumentView {
         //reactivate our listener
         gateDocListener.setActive(true);
       }
-      //update the offsets in the list
-      Component listView = annotationListView.getGUI();
-      if(listView != null) listView.repaint();
+//      //update the offsets in the list
+//      Component listView = annotationListView.getGUI();
+//      if(listView != null) listView.repaint();
     }
 
     public void changedUpdate(javax.swing.event.DocumentEvent e) {
@@ -428,40 +531,10 @@ public class TextualDocumentView extends AbstractDocumentView {
     }
   }//class SwingDocumentListener implements javax.swing.event.DocumentListener
 
-  /**
-   * A structure that holds an annotation and its tag.
-   */
-  class AnnotationTag{
-    
-    /**
-     * @param tag The tag to set.
-     */
-    public void setTag(Object tag){
-      this.tag = tag;
-    }
-    public AnnotationTag(Annotation annotation, Object tag){
-      this.annotation = annotation;
-      this.tag = tag;
-    }
-    
-    /**
-     * @return Returns the annotation.
-     */
-    public Annotation getAnnotation(){
-      return annotation;
-    }
-    /**
-     * @return Returns the tag.
-     */
-    public Object getTag(){
-      return tag;
-    }
-    Annotation annotation;
-    Object tag;
-  }
+
   
   protected JScrollPane scroller;
-  protected AnnotationListView annotationListView;
+//  protected AnnotationListView annotationListView;
   
   protected GateDocumentListener gateDocListener;
 
@@ -469,9 +542,27 @@ public class TextualDocumentView extends AbstractDocumentView {
    * The annotations used for blinking highlights and their tags. A map from 
    * {@link Annotation} ID to tag(i.e. {@link Object}).
    */
-  protected Map blinkingTagsForAnnotations;
+  protected Map<Integer, HighlightData> blinkingTagsForAnnotations;
   
-  protected Timer blinker;
+  /**
+   * This map stores the highlight tags from the text view's highlighter 
+   * indexed by the corresponding {@link HighlightData} objects. 
+   */
+  protected Map tagsForHighlights;
+  
+  /**
+   * This list stores the {@link HighlightData} values for annotations pending
+   * highlighting
+   */
+  protected List<HighlightData> highlightsToAdd;
+  
+  /**
+   * This list stores the {@link HighlightData} values for highlights that need
+   * to be removed
+   */
+  protected List<HighlightData> highlightsToRemove;
+  
+  protected Timer highlightsMinder;
   
   protected JTextArea textView;
   
@@ -479,4 +570,9 @@ public class TextualDocumentView extends AbstractDocumentView {
    * The delay used by the blinker.
    */
   protected final static int BLINK_DELAY = 400;
+  
+  /**
+   * The delay used by the highlights minder.
+   */
+  protected final static int HIGHLIGHT_DELAY = 100;
 }
