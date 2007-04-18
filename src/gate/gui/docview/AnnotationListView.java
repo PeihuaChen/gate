@@ -29,6 +29,7 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.AbstractTableModel;
+import org.omg.PortableServer.AdapterActivator;
 
 /**
  * A tabular view for a list of annotations.
@@ -38,17 +39,17 @@ import javax.swing.table.AbstractTableModel;
 public class AnnotationListView extends AbstractDocumentView
 		implements AnnotationListener{
   public AnnotationListView(){
-    annHandlersList = new AnnHandlerList();
+    annDataList = new ArrayList<AnnotationData>();
   }
-  
-  private static class AnnHandlerList
-    extends ArrayList<AnnotationHandler>{
-    public int indexOfTag(Object tag) {
-      for(int i = 0; i < size(); i++){
-        if(get(i).tag == tag) return i;
-      }
-      return -1;
+
+  @Override
+  public void cleanup() {
+    super.cleanup();
+    for(AnnotationData aData : annDataList){
+      aData.ann.removeAnnotationListener(this);
     }
+    annDataList.clear();
+    textView = null;
   }
 
   /* (non-Javadoc)
@@ -99,13 +100,6 @@ public class AnnotationListView extends AbstractDocumentView
     return mainPanel;
   }
   protected void initListeners(){
-//    table.addComponentListener(new ComponentAdapter(){
-//      public void componentShown(ComponentEvent e){
-//        //trigger a resize for the columns
-//        table.adjustSizes();
-//      }
-//    });
-
     tableModel.addTableModelListener(new TableModelListener(){
       public void tableChanged(TableModelEvent e){
         statusLabel.setText(
@@ -133,35 +127,43 @@ public class AnnotationListView extends AbstractDocumentView
     });
 
     table.addMouseListener(new MouseListener() {
-      public void mouseClicked(final MouseEvent me) {
+      public void mouseClicked(MouseEvent me) {
+        processMouseEvent(me);
+      }
+      public void mouseReleased(MouseEvent me) {
+        processMouseEvent(me);
+      }
+      public void mouseEntered(MouseEvent me) {
+        processMouseEvent(me);
+      }
+      public void mouseExited(MouseEvent me) { 
+        processMouseEvent(me);
+      }
+      public void mousePressed(MouseEvent me) {
+        processMouseEvent(me);
+      }
+      protected void processMouseEvent(MouseEvent me){
         int viewRow = table.rowAtPoint(me.getPoint());
         final int modelRow = viewRow == -1 ?
                              viewRow : 
                              table.rowViewToModel(viewRow);
         
         // right click
-        if(javax.swing.SwingUtilities.isRightMouseButton(me)) {
+        if(me.isPopupTrigger()) {
           JPopupMenu popup = new JPopupMenu();
-          
           Action deleteAction = new AbstractAction("Delete"){
             public void actionPerformed(ActionEvent evt){
               int[] rows = table.getSelectedRows();
+              table.clearSelection();
               if(rows == null || rows.length == 0){
                 //no selection -> use row under cursor
                 if(modelRow == -1) return;
                 rows = new int[]{modelRow};
               }
-
-              ArrayList<AnnotationHandler> handlers = 
-                new ArrayList<AnnotationHandler>();
-
               for(int i = 0; i < rows.length; i++){
-                handlers.add(annHandlersList.get(table.rowViewToModel(rows[i])));
-              }
-
-              for(AnnotationHandler aHandler : handlers) {
-                aHandler.set.remove(aHandler.ann);
-                removeAnnotation(aHandler.tag);
+                AnnotationData aData = annDataList.
+                    get(table.rowViewToModel(rows[i]));
+                aData.set.remove(aData.ann);
               }
             }
           };
@@ -169,7 +171,7 @@ public class AnnotationListView extends AbstractDocumentView
           
           //add the custom edit actions
           if(modelRow != -1){
-            AnnotationHandler aHandler = annHandlersList.get(modelRow);
+            AnnotationData aHandler = annDataList.get(modelRow);
             List editorClasses = Gate.getCreoleRegister().
               getAnnotationVRs(aHandler.ann.getType());
             if(editorClasses != null && editorClasses.size() > 0){
@@ -194,16 +196,9 @@ public class AnnotationListView extends AbstractDocumentView
               }
             }
           }
-          
-          
-          
           popup.show(table, me.getX(), me.getY());
-        }
+        } 
       }
-      public void mouseReleased(MouseEvent me) { }
-      public void mouseEntered(MouseEvent me) { }
-      public void mouseExited(MouseEvent me) { }
-      public void mousePressed(MouseEvent me) { }
     });
     /* End */
 
@@ -237,9 +232,9 @@ public class AnnotationListView extends AbstractDocumentView
 
   protected void showHighlights(){
     int[] rows = table.getSelectedRows();
-    AnnotationHandler aHandler = null;
+    AnnotationData aHandler = null;
     for(int i = 0; i < rows.length; i++){
-      aHandler = annHandlersList.get(table.rowViewToModel(rows[i]));
+      aHandler = annDataList.get(table.rowViewToModel(rows[i]));
       textView.addBlinkingHighlight(aHandler.ann);
     }    
     //scroll to show the last highlight
@@ -247,63 +242,75 @@ public class AnnotationListView extends AbstractDocumentView
         textView.scrollAnnotationToVisible(aHandler.ann);
   }
 
-  public void addAnnotation(Object tag, Annotation ann, AnnotationSet set){
-    AnnotationHandler aHandler = new AnnotationHandler(set, ann, tag);
-    annHandlersList.add(aHandler);
-    int row = annHandlersList.size() -1;
+  /**
+   * Adds an annotation to be displayed in the list.
+   * @param ann the annotation
+   * @param set the set containing the annotation
+   * @return a tag that can be used to refer to this annotation for future 
+   * operations, e.g. when removing the annotation from display.
+   */
+  public AnnotationData addAnnotation(Annotation ann, AnnotationSet set){
+    AnnotationData aData = new AnnotationData(set, ann);
+    annDataList.add(aData);
+    int row = annDataList.size() -1;
     if(tableModel != null) tableModel.fireTableRowsInserted(row, row);
     //listen for the new annotation's events
-    ann.addAnnotationListener(this);
+    aData.ann.addAnnotationListener(AnnotationListView.this);
+    return aData;
   }
 
-  public void removeAnnotation(Object tag){
-    int row = annHandlersList.indexOfTag(tag);
+  public void removeAnnotation(AnnotationData tag){
+    int row = annDataList.indexOf(tag);
     if(row >= 0){
-      AnnotationHandler aHandler = annHandlersList.get(row);
-      aHandler.ann.removeAnnotationListener(this);
-      annHandlersList.remove(row);
+      int viewRow = table.rowModelToView(row);
+      if(table.isRowSelected(viewRow)){
+        table.getSelectionModel().removeIndexInterval(viewRow, viewRow);
+      }
+      AnnotationData aHandler = annDataList.get(row);
+      aHandler.ann.removeAnnotationListener(AnnotationListView.this);
+      annDataList.remove(row);
       if(tableModel != null) tableModel.fireTableRowsDeleted(row, row);
     }
   }
+  
+  public void removeAnnotations(Collection<AnnotationData> tags){
+    for(AnnotationData aData : (Collection<AnnotationData>)tags)
+      removeAnnotation(aData);
+//    for(AnnotationData aData : (Collection<AnnotationData>)tags){
+//      annDataList.remove(aData);
+//      aData.ann.removeAnnotationListener(AnnotationListView.this);
+//    }
+//    if(tableModel != null) tableModel.fireTableDataChanged();        
+  }
 
   /**
-   * Adds a batch of annotations in one go. The tags and annotations collections
-   * are accessed through their iterators which are expected to return the
-   * corresponding tag for the right annotation.
+   * Adds a batch of annotations in one go. 
+   * For each annotation, a tag object will be created. The return value is 
+   * list that returns the tags in the same order as the collection used
+   * for the input annotations.
    * This method does not assume it was called from the UI Thread.
-   * @param tags a collection of tags
+   * @return a collection of tags corresponding to the annotations.
    * @param annotations a collection of annotations
    * @param set the annotation set to which all the annotations belong.
    */
-  public void addAnnotations(Collection tags, Collection annotations,
+  public List<AnnotationData> addAnnotations(List<Annotation> annotations,
           AnnotationSet set){
-    if(tags.size() != annotations.size()) throw new GateRuntimeException(
-            "Invalid invocation - different numbers of annotations and tags!");
-    Iterator tagIter = tags.iterator();
-    Iterator annIter = annotations.iterator();
-    while(tagIter.hasNext()){
-      Object tag = tagIter.next();
-      Annotation ann = (Annotation)annIter.next();
-      AnnotationHandler aHandler = new AnnotationHandler(set, ann, tag);
-      annHandlersList.add(aHandler);
-      //listen for the new annotation's events
-      ann.addAnnotationListener(this);
-    }
+    List<AnnotationData> tags = new ArrayList<AnnotationData>();
+    for(Annotation ann : annotations) tags.add(new AnnotationData(set, ann));
+    annDataList.addAll(tags);
+    for(AnnotationData aData : tags) aData.ann.addAnnotationListener(
+            AnnotationListView.this);
     if(tableModel != null) tableModel.fireTableDataChanged();
+    return tags;
   }
 
-  public void removeAnnotations(Collection tags){
-    Iterator tagIter = tags.iterator();
-    while(tagIter.hasNext()){
-      Object tag = tagIter.next();
-      int row = annHandlersList.indexOfTag(tag);
-      if(row >= 0){
-        AnnotationHandler aHandler = annHandlersList.get(row);
-        aHandler.ann.removeAnnotationListener(this);
-        annHandlersList.remove(row);
-      }
-    }
-    if(tableModel != null) tableModel.fireTableDataChanged();
+
+  /**
+   * Returns the tags for all the annotations currently displayed
+   * @return a list of {@link AnnotationData}.
+   */
+  public List<AnnotationData> getAllAnnotations(){
+    return annDataList;
   }
 
   public void annotationUpdated(AnnotationEvent e){
@@ -315,8 +322,8 @@ public class AnnotationListView extends AbstractDocumentView
   	int[] selection = table.getSelectedRows();
     Annotation ann = (Annotation)e.getSource();
     if(tableModel != null){
-      for(int i = 0; i < annHandlersList.size(); i++){
-        AnnotationHandler aHandler = annHandlersList.get(i);
+      for(int i = 0; i < annDataList.size(); i++){
+        AnnotationData aHandler = annDataList.get(i);
         if(aHandler.ann == ann)tableModel.fireTableRowsUpdated(i, i);
       }
     }
@@ -335,7 +342,7 @@ public class AnnotationListView extends AbstractDocumentView
    * @param tag the tag of the annotation to be selected.
    */
   public void selectAnnotationForTag(Object tag){
-    int modelPosition = annHandlersList.indexOfTag(tag);
+    int modelPosition = annDataList.indexOf(tag);
     
     if(modelPosition != -1){
       int tablePosition = table.rowModelToView(modelPosition);
@@ -347,7 +354,7 @@ public class AnnotationListView extends AbstractDocumentView
   
   class AnnotationTableModel extends AbstractTableModel{
     public int getRowCount(){
-      return annHandlersList.size();
+      return annDataList.size();
     }
 
     public int getColumnCount(){
@@ -381,16 +388,16 @@ public class AnnotationListView extends AbstractDocumentView
     }
 
     public Object getValueAt(int row, int column){
-      if(row >= annHandlersList.size()) return null;
-      AnnotationHandler aHandler = annHandlersList.get(row);
+      if(row >= annDataList.size()) return null;
+      AnnotationData aData = annDataList.get(row);
       switch(column){
-        case TYPE_COL: return aHandler.ann.getType();
-        case SET_COL: return aHandler.set.getName();
-        case START_COL: return aHandler.ann.getStartNode().getOffset();
-        case END_COL: return aHandler.ann.getEndNode().getOffset();
+        case TYPE_COL: return aData.ann.getType();
+        case SET_COL: return aData.set.getName();
+        case START_COL: return aData.ann.getStartNode().getOffset();
+        case END_COL: return aData.ann.getEndNode().getOffset();
         case FEATURES_COL:
           //sort the features by name
-          FeatureMap features = aHandler.ann.getFeatures();
+          FeatureMap features = aData.ann.getFeatures();
           List keyList = new ArrayList(features.keySet());
           Collections.sort(keyList);
           StringBuffer strBuf = new StringBuffer("{");
@@ -416,28 +423,13 @@ public class AnnotationListView extends AbstractDocumentView
 
   }
 
-  protected static class AnnotationHandler{
-    public AnnotationHandler(AnnotationSet set, Annotation ann, Object tag){
+  public static class AnnotationData{
+    public AnnotationData(AnnotationSet set, Annotation ann){
       this.ann = ann;
       this.set = set;
-      this.tag = tag;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if(obj instanceof AnnotationHandler) obj = ((AnnotationHandler)obj).tag;
-      return tag == null ?
-             obj == null :
-             tag.equals(obj);
-    }
-    
-    @Override
-    public int hashCode() {
-      return tag.hashCode();
     }
     Annotation ann;
     AnnotationSet set;
-    Object tag;
   }
 
   protected class EditAnnotationAction extends AbstractAction{
@@ -490,10 +482,10 @@ public class AnnotationListView extends AbstractDocumentView
   protected JScrollPane scroller;
 
   /**
-   * Stores the {@link AnnotationHandler} objects representing the annotations
+   * Stores the {@link AnnotationData} objects representing the annotations
    * displayed by this view.
    */
-  protected AnnHandlerList annHandlersList;
+  protected List<AnnotationData> annDataList;
   
   protected JPanel mainPanel;
   protected JLabel statusLabel;
