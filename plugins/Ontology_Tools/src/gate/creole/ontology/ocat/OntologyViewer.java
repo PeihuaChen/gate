@@ -741,4 +741,32 @@ public class OntologyViewer extends AbstractDocumentView implements
     
   }
   
+  public void ontologyReset(Ontology ontology) {
+    boolean shouldSelectAgain = false;
+    int index = ontologies.indexOf(ontology);
+    if(index < 0) return;
+    if(ontologyCB.getSelectedIndex() == index) {
+      shouldSelectAgain = true;
+    }
+
+    // lets traverse through the ontology and find out the classes which
+    // are selected
+    HashMap<String, Boolean> selectionMap = ontologyTreePanel.ontologyName2ClassSelectionMap
+            .get(ontology);
+    refreshOntologyCB(ontology, true);
+    refreshOntologyCB(ontology, false);
+    if(shouldSelectAgain) ontologyCB.setSelectedIndex(index);
+    HashMap<String, Boolean> newMap = ontologyTreePanel.ontologyName2ClassSelectionMap
+            .get(ontology);
+    for(String key : selectionMap.keySet()) {
+      Boolean val = selectionMap.get(key);
+      if(newMap.containsKey(key)) {
+        newMap.put(key, val);
+      }
+    }
+
+    documentTextArea.requestFocus();
+
+  }  
+  
 }
