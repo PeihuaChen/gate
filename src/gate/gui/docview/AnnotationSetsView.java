@@ -49,6 +49,10 @@ public class AnnotationSetsView extends AbstractDocumentView
     actions = new ArrayList();
     actions.add(new SavePreserveFormatAction());
     pendingEvents = new LinkedList<GateEvent>();
+    eventMinder = new Timer(EVENTS_HANDLE_DELAY, 
+            new HandleDocumentEventsAction());
+    eventMinder.setRepeats(true);
+    eventMinder.setCoalesce(true);    
   }
   
   public List getActions() {
@@ -129,10 +133,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     populateUI();
     tableModel.fireTableDataChanged();
     
-    eventMinder = new Timer(EVENTS_HANDLE_DELAY, 
-            new HandleDocumentEventsAction());
-    eventMinder.setRepeats(true);
-    eventMinder.setCoalesce(true);
+    
     eventMinder.start();    
     initListeners();
   }
@@ -339,6 +340,9 @@ public class AnnotationSetsView extends AbstractDocumentView
    */
   public void cleanup() {
     document.removeDocumentListener(this);
+    for(SetHandler sHandler : setHandlers){
+      sHandler.set.removeAnnotationSetListener(AnnotationSetsView.this);
+    }    
     eventMinder.stop();
     synchronized(this) {
       pendingEvents.clear();  
