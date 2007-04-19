@@ -62,6 +62,17 @@ public class TextualDocumentView extends AbstractDocumentView {
     return hData;
   }
   
+  /**
+   * Adds several highlights in one go. 
+   * This method should be called from within the UI thread.
+   * @param annotations the collection of annotations for which highlights 
+   * are to be added.
+   * @param set the annotation set all the annotations belong to.
+   * @param colour the colour for the highlights.
+   * @return the list of tags for the added highlights. The order of the 
+   * elements corresponds to the order defined by the iterator of the 
+   * collection of annotations provided. 
+   */
   public List addHighlights(Collection<Annotation> annotations, 
           AnnotationSet set, Color colour){
     List tags = new ArrayList();
@@ -76,30 +87,14 @@ public class TextualDocumentView extends AbstractDocumentView {
     highlightsMinder.restart();
   }
   
+  /**
+   * Removes several highlights in one go. 
+   * @param tags the tags for the highlights to be removed
+   */  
   public void removeHighlights(Collection tags){
     for(Object tag : tags) removeHighlight(tag);
   }
   
-  public void removeHighlight1(Object tag){
-    Highlighter highlighter = textView.getHighlighter();
-    highlighter.removeHighlight(tag);
-//    annotationListView.removeAnnotation(tag);
-  }
-  
-  public Object addHighlight1(Annotation ann, AnnotationSet set, Color colour){
-    Highlighter highlighter = textView.getHighlighter();
-    try{
-      Object tag = highlighter.addHighlight(
-	            ann.getStartNode().getOffset().intValue(),
-	            ann.getEndNode().getOffset().intValue(),
-	            new DefaultHighlighter.DefaultHighlightPainter(colour));
-//      annotationListView.addAnnotation(tag, ann, set);
-      return tag;
-    }catch(BadLocationException ble){
-      //the offsets should always be OK as they come from an annotation
-      throw new GateRuntimeException(ble.toString());
-    }
-  }
 
   
   public void scrollAnnotationToVisible(Annotation ann){
@@ -138,102 +133,7 @@ public class TextualDocumentView extends AbstractDocumentView {
     throws BadLocationException{
     textView.getHighlighter().changeHighlight(tag, newStart, newEnd);
   }
-  
-  /**
-   * Ads several highlights in one go. 
-   * This method should be called from within the UI thread.
-   * @param annotations the collection of annotations for which highlights 
-   * are to be added.
-   * @param set the annotation set all the annotations belong to.
-   * @param colour the colour for the highlights.
-   * @return the list of tags for the added highlights. The order of the 
-   * elements corresponds to the order defined by the iterator of the 
-   * collection of annotations provided. 
-   */
-  public List addHighlights1(Collection annotations, 
-          AnnotationSet set, Color colour){
-    //hide the text pane to speed up rendering.
-//    SwingUtilities.invokeLater(new Runnable(){
-//      public void run(){
-    Point viewPosition = scroller.getViewport().getViewPosition();
-        textView.setVisible(false);
-        scroller.getViewport().setView(new JLabel("Updating"));
-//      }
-//    });
-//    //wait for the textual view to be hidden
-//    while(textView.isVisible()) 
-//      try{
-//        Thread.sleep(30);
-//      }catch(InterruptedException ie){
-//        //ignore
-//      }
-    
-    Highlighter highlighter = textView.getHighlighter();
-    
-    Iterator annIter = annotations.iterator();
-    List tagsList = new ArrayList(annotations.size());
-    while(annIter.hasNext()){
-      Annotation ann = (Annotation)annIter.next();
-      try{
-        Object tag = highlighter.addHighlight(
-                ann.getStartNode().getOffset().intValue(),
-                ann.getEndNode().getOffset().intValue(),
-                new DefaultHighlighter.DefaultHighlightPainter(colour));
-        tagsList.add(tag);
-      }catch(BadLocationException ble){
-        //the offsets should always be OK as they come from an annotation
-        throw new GateRuntimeException(ble.toString());
-      }
-    }
-//    annotationListView.addAnnotations(annotations, set);
-//    SwingUtilities.invokeLater(new Runnable(){
-//      public void run(){
-        scroller.getViewport().setView(textView);
-        textView.setVisible(true);
-        scroller.getViewport().setViewPosition(viewPosition);
-//      }
-//    });
-    return tagsList;
-  }
-  
-  /**
-   * Removes several highlights in one go. 
-   * @param tags the tags for the highlights to be removed
-   */
-  public void removeHighlights1(final Collection tags){
-    //hide the text pane to speed up rendering.
-//    SwingUtilities.invokeLater(new Runnable(){
-//      public void run(){
-    Point viewPosition = scroller.getViewport().getViewPosition();
-    textView.setVisible(false);
-        scroller.getViewport().setView(new JLabel("Updating"));
-//      }
-//    });
-//    //wait for the textual view to be hidden.
-//    while(textView.isVisible()) 
-//      try{
-//        Thread.sleep(30);
-//      }catch(InterruptedException ie){
-//        //ignore
-//      }
-    
-    Highlighter highlighter = textView.getHighlighter();
-    
-    Iterator tagIter = tags.iterator();
-    while(tagIter.hasNext()){
-      highlighter.removeHighlight(tagIter.next());
-    }
-//    annotationListView.removeAnnotations(tags);
-//    SwingUtilities.invokeLater(new Runnable(){
-//      public void run(){
-        scroller.getViewport().setView(textView);
-        textView.setVisible(true);
-        scroller.getViewport().setViewPosition(viewPosition);
-//      }
-//    });
-  }
 
-  
   public void addBlinkingHighlight(Annotation ann){
     synchronized(blinkingTagsForAnnotations){
       blinkingTagsForAnnotations.put(ann.getId(), new HighlightData(ann, null, null));
