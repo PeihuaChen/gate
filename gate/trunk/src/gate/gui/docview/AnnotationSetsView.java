@@ -125,7 +125,6 @@ public class AnnotationSetsView extends AbstractDocumentView
     constraints.weightx = 0;
     newSetAction = new NewAnnotationSetAction();
     mainPanel.add(new JButton(newSetAction), constraints);
-    initListeners();
 
     populateUI();
     tableModel.fireTableDataChanged();
@@ -135,6 +134,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     eventMinder.setRepeats(true);
     eventMinder.setCoalesce(true);
     eventMinder.start();    
+    initListeners();
   }
   
   protected void populateUI(){
@@ -1323,24 +1323,26 @@ public class AnnotationSetsView extends AbstractDocumentView
                 SetHandler sHandler = new SetHandler(document.getAnnotations(newSetName));
                 //find the right location for the new set
                 //this is a named set and the first one is always the default one
-                int i = 1;
-                for(;
-                    i < setHandlers.size() && 
-                    ((SetHandler)setHandlers.get(i)).set.
+                int i = 0;
+                if(newSetName != null){
+                  for(i = 1;
+                      i < setHandlers.size() && 
+                      ((SetHandler)setHandlers.get(i)).set.
                       getName().compareTo(newSetName) <= 0;
-                    i++);
+                      i++);
+                }
                 setHandlers.add(i, sHandler);
                 //update the tableRows list
-                SetHandler previousHandler = (SetHandler)setHandlers.get(i -1);
-                //find the index for the previous handler - which is guaranteed to exist
                 int j = 0;
-                for(;
-                  tableRows.get(j) != previousHandler;
-                  j++);
-                if(previousHandler.isExpanded()){
-                  j += previousHandler.typeHandlers.size();
+                if(i > 0){
+                  SetHandler previousHandler = (SetHandler)setHandlers.get(i -1);
+                  //find the index for the previous handler - which is guaranteed to exist
+                  for(; tableRows.get(j) != previousHandler; j++);
+                  if(previousHandler.isExpanded()){
+                    j += previousHandler.typeHandlers.size();
+                  }
+                  j++;
                 }
-                j++;
                 tableRows.add(j, sHandler);
                 //update the table view
                 tableModel.fireTableRowsInserted(j, j);
