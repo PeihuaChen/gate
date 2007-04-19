@@ -262,9 +262,12 @@ public class AnnotationListView extends AbstractDocumentView
   public void removeAnnotation(AnnotationData tag){
     int row = annDataList.indexOf(tag);
     if(row >= 0){
-      int viewRow = table.rowModelToView(row);
-      if(table.isRowSelected(viewRow)){
-        table.getSelectionModel().removeIndexInterval(viewRow, viewRow);
+      //remove from selection, if the table is built
+      if(table != null){
+        int viewRow = table.rowModelToView(row);
+        if(table.isRowSelected(viewRow)){
+          table.getSelectionModel().removeIndexInterval(viewRow, viewRow);
+        }
       }
       AnnotationData aHandler = annDataList.get(row);
       aHandler.ann.removeAnnotationListener(AnnotationListView.this);
@@ -276,11 +279,6 @@ public class AnnotationListView extends AbstractDocumentView
   public void removeAnnotations(Collection<AnnotationData> tags){
     for(AnnotationData aData : (Collection<AnnotationData>)tags)
       removeAnnotation(aData);
-//    for(AnnotationData aData : (Collection<AnnotationData>)tags){
-//      annDataList.remove(aData);
-//      aData.ann.removeAnnotationListener(AnnotationListView.this);
-//    }
-//    if(tableModel != null) tableModel.fireTableDataChanged();        
   }
 
   /**
