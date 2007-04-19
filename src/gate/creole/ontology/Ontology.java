@@ -66,14 +66,14 @@ public interface Ontology extends LanguageResource {
    * 
    * @return the url of this ontology
    */
-  public URL getOntologyURL();
+  public URL getURL();
 
   /**
    * Set the url of this ontology
    * 
    * @param aUrl the url to be set
    */
-  public void setOntologyURL(URL aUrl);
+  public void setURL(URL aUrl);
 
   /**
    * Saves the ontology in the provided File
@@ -519,6 +519,12 @@ public interface Ontology extends LanguageResource {
    * @param resource
    */
   public void fireOntologyResourcesRemoved(String[] resources);
+  
+  /**
+   * A method to invoke when the ontology is reset. 
+   *
+   */
+  public void fireOntologyReset();
 
   // *************************
   // Sesame Repository methods
@@ -608,14 +614,37 @@ public interface Ontology extends LanguageResource {
   public List<OResource> getOResourcesByName(String resourceName);
 
   /**
-   * This method returns a list of OResources from the
-   * ontology. Please note that deleting an instance from this list
-   * (e.g. list.remove(int/Object)) does not delete the resource from an
+   * This method returns a list of OResources from the ontology. Please
+   * note that deleting an instance from this list (e.g.
+   * list.remove(int/Object)) does not delete the resource from an
    * ontology. One must use appropriate method from the Ontology
    * interface to delete such resources.
    * 
    * @return
    */
   public List<OResource> getAllResources();
+
+  /**
+   * This method given a property (either an annotation or datatype),
+   * retrieves a list of resources which have the provided literal set
+   * as a value.
+   * 
+   * @param aProperty
+   * @param aValue
+   * @return
+   */
+  public List<OResource> getOResourcesWith(RDFProperty aProperty, Literal aValue);
+
+  /**
+   * This method given a property (either object, transitive, symmetric
+   * or rdf), retrieves a list of resources which have the provided
+   * resource set as a value.
+   * 
+   * @param aProperty
+   * @param aValue
+   * @return
+   */
+  public List<OResource> getOResourcesWith(RDFProperty aProperty,
+          OResource aValue);
 
 }

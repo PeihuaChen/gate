@@ -57,7 +57,7 @@ public class OntologyUtilities {
     Iterator<Resource> ontIter = loadedOntologies.iterator();
     while(ontology == null && ontIter.hasNext()) {
       Ontology anOntology = (Ontology)ontIter.next();
-      if(anOntology.getOntologyURL().equals(url)) {
+      if(anOntology.getURL().equals(url)) {
         ontology = anOntology;
         break;
       }

@@ -119,6 +119,21 @@ public interface OInstance extends OResource {
   public List<OResource> getRDFPropertyValues(RDFProperty aProperty);
 
   /**
+   * This method returns the RDF properties set on this resource.
+   * @return
+   */
+  public Set<RDFProperty> getSetRDFProperties();
+
+  /**
+   * Checks if the resource has the provided annotation property set on it with the specified value.
+   * @param aProperty
+   * @param aValue
+   * @return
+   */
+  public boolean hasRDFPropertyWithValue(RDFProperty aProperty, OResource aResource);
+
+  
+  /**
    * Removes all property values set for the current property.
    * 
    * @param aProperty
@@ -210,4 +225,34 @@ public interface OInstance extends OResource {
    */
   public void removeObjectPropertyValues(ObjectProperty aProperty);
 
+  /**
+   * This method returns the datatype properties set on this resource.
+   * @return
+   */
+  public Set<DatatypeProperty> getSetDatatypeProperties();
+  
+  
+  /**
+   * This method returns the object properties set on this resource.
+   * @return
+   */
+  public Set<ObjectProperty> getSetObjectProperties();
+  
+  
+  /**
+   * Checks if the resource has the provided datatype property set on it with the specified value.
+   * @param aProperty
+   * @param aValue
+   * @return
+   */
+  public boolean hasDatatypePropertyWithValue(DatatypeProperty aProperty, Literal aValue);
+  
+  /**
+   * Checks if the resource has the provided object property set on it with the specified value.
+   * @param aProperty
+   * @param aValue
+   * @return
+   */
+  public boolean hasObjectPropertyWithValue(ObjectProperty aProperty, OInstance aValue);
+  
 }

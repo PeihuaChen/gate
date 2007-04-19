@@ -7,9 +7,6 @@
  */
 package gate.gui.ontology;
 
-import gate.Factory;
-import gate.FeatureMap;
-import gate.Gate;
 import gate.Resource;
 import gate.creole.AbstractVisualResource;
 import gate.creole.ResourceInstantiationException;
@@ -24,7 +21,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
@@ -507,8 +503,6 @@ public class OntologyEditor extends AbstractVisualResource
           final Set<RDFProperty> props = new HashSet<RDFProperty>();
           if(candidate instanceof ObjectProperty) {
             props.addAll(ontology.getObjectProperties());
-            props.addAll(ontology.getSymmetricProperties());
-            props.addAll(ontology.getTransitiveProperties());
             functional.setSelected(((ObjectProperty)candidate).isFunctional());
             inverseFunctional.setSelected(((ObjectProperty)candidate)
                     .isInverseFunctional());
@@ -905,43 +899,6 @@ public class OntologyEditor extends AbstractVisualResource
   }
 
   /**
-   * Should be invoked when a super property is added or deleted
-   * 
-   * @param e
-   */
-  protected void superPropertyAffected(RDFProperty p) {
-    ArrayList<DefaultMutableTreeNode> nodesList = uri2TreeNodesListMap.get(p
-            .getURI().toString());
-    // we don't know which super property is added or removed
-    // so we remove all nodes and add them again
-    for(int i = 0; i < nodesList.size(); i++) {
-      DefaultMutableTreeNode node = nodesList.get(i);
-      removeFromMap(propertyTreeModel, node);
-      propertyTreeModel.nodeStructureChanged(node.getParent());
-    }
-    List<RDFProperty> list = new ArrayList<RDFProperty>();
-    list.add(p);
-    // and now add them again
-    Set<RDFProperty> superProperties = p
-            .getSuperProperties(OConstants.DIRECT_CLOSURE);
-    if(superProperties != null) {
-      Iterator<RDFProperty> iter = superProperties.iterator();
-      while(iter.hasNext()) {
-        RDFProperty superProperty = iter.next();
-        ArrayList<DefaultMutableTreeNode> superNodesList = uri2TreeNodesListMap
-                .get(superProperty.getURI().toString());
-        if(superNodesList != null) {
-          for(int i = 0; i < superNodesList.size(); i++) {
-            DefaultMutableTreeNode superNode = superNodesList.get(i);
-            addPropertyChidrenRec(superNode, list, itemComparator);
-            propertyTreeModel.nodeStructureChanged(superNode);
-          }
-        }
-      }
-    }
-  }
-
-  /**
    * Should be invoked when a sub property is added
    * 
    * @param e
@@ -1069,18 +1026,51 @@ public class OntologyEditor extends AbstractVisualResource
       // this is already deleted
       return;
     }
-    // c is a class where the subClass is deleted
+    
+    
+    List<OResource> toAdd = new ArrayList<OResource>();
+    
+    // c is a class whose subClass is deleted
     // we don't know which class is deleted
     // so we remove the class c from the tree and add it again
+    boolean firstTime = true;
     for(int i = 0; i < nodeList.size(); i++) {
       DefaultMutableTreeNode node = nodeList.get(i);
+      if(firstTime) {
+        OClass parentClass = (OClass) this.ontology.getOResourceFromMap(reverseMap.get(node).toString());
+        firstTime = false;
+        // find out which class is deleted
+        Enumeration e = node.children();
+        if(e != null) {
+          while(e.hasMoreElements()) {
+            DefaultMutableTreeNode aNode = (DefaultMutableTreeNode) e.nextElement();
+            URI rURI = reverseMap.get(aNode);
+            // lets check with the ontology if this instance is still there
+            OResource res = this.ontology.getOResourceFromMap(rURI.toString());
+            if(res != null) {
+              // lets check if its parents is the current node
+              if(res instanceof OClass) {
+                if(((OClass) res).isSubClassOf(parentClass, OConstants.DIRECT_CLOSURE)) {
+                  // continue;
+                } else {
+                  // that's it this is the class which should be added at the top of tree
+                  toAdd.add((OClass) res);
+                  break;
+                }
+              }
+            }
+          }
+        }
+      }
       removeFromMap(treeModel, node);
       treeModel.nodeStructureChanged(node.getParent());
     }
+    
     // now we need to add it again
     Set<OClass> superClasses = c.getSuperClasses(OClass.DIRECT_CLOSURE);
     List<OResource> list = new ArrayList<OResource>();
     list.add(c);
+    
     if(superClasses != null && !superClasses.isEmpty()) {
       Iterator<OClass> iter = superClasses.iterator();
       while(iter.hasNext()) {
@@ -1096,44 +1086,9 @@ public class OntologyEditor extends AbstractVisualResource
       addChidrenRec(rootNode, list, itemComparator);
       treeModel.nodeStructureChanged(rootNode);
     }
-  }
-
-  /**
-   * Should be invoked when a super class is added or deleted
-   * 
-   * @param e
-   */
-  protected void superClassAffected(OClass c) {
-    ArrayList<DefaultMutableTreeNode> nodesList = uri2TreeNodesListMap.get(c
-            .getURI().toString());
-    if(nodesList == null || nodesList.isEmpty()) return;
-    // we don't know which super clss is added or removed
-    // so we remove all nodes and add them again
-    for(int i = 0; i < nodesList.size(); i++) {
-      DefaultMutableTreeNode node = nodesList.get(i);
-      removeFromMap(treeModel, node);
-      treeModel.nodeStructureChanged(node.getParent());
-    }
-    List<OResource> list = new ArrayList<OResource>();
-    list.add(c);
-    // and now add them again
-    Set<OClass> superClasses = c.getSuperClasses(OConstants.DIRECT_CLOSURE);
-    if(superClasses != null) {
-      Iterator<OClass> iter = superClasses.iterator();
-      while(iter.hasNext()) {
-        OClass superClass = iter.next();
-        ArrayList<DefaultMutableTreeNode> superNodesList = uri2TreeNodesListMap
-                .get(superClass.getURI().toString());
-        if(superNodesList != null) {
-          for(int i = 0; i < superNodesList.size(); i++) {
-            DefaultMutableTreeNode superNode = superNodesList.get(i);
-            addChidrenRec(superNode, list, itemComparator);
-            treeModel.nodeStructureChanged(superNode);
-          }
-        }
-      }
-    } else {
-      addChidrenRec(rootNode, list, itemComparator);
+    
+    if(!toAdd.isEmpty()) {
+      addChidrenRec(rootNode, toAdd, itemComparator);
       treeModel.nodeStructureChanged(rootNode);
     }
   }
@@ -1236,14 +1191,6 @@ public class OntologyEditor extends AbstractVisualResource
       case OConstants.SUB_PROPERTY_REMOVED_EVENT:
         subPropertyIsDeleted((RDFProperty)resource);
         break;
-      case OConstants.SUPER_PROPERTY_ADDED_EVENT:
-      case OConstants.SUPER_PROPERTY_REMOVED_EVENT:
-        superPropertyAffected((RDFProperty)resource);
-        break;
-      case OConstants.SUPER_CLASS_ADDED_EVENT:
-      case OConstants.SUPER_CLASS_REMOVED_EVENT:
-        superClassAffected((OClass)resource);
-        break;
       case OConstants.SUB_CLASS_ADDED_EVENT:
         subClassIsAdded((OClass)resource);
         break;
@@ -1254,8 +1201,6 @@ public class OntologyEditor extends AbstractVisualResource
     switch(eventType){
       case OConstants.SUB_PROPERTY_ADDED_EVENT:
       case OConstants.SUB_PROPERTY_REMOVED_EVENT:
-      case OConstants.SUPER_PROPERTY_ADDED_EVENT:
-      case OConstants.SUPER_PROPERTY_REMOVED_EVENT:
         expandNode(propertyTree);
         break;
       default:
@@ -1272,6 +1217,16 @@ public class OntologyEditor extends AbstractVisualResource
     } else {
       propertyTree.setSelectionPath(path);
     }
+  }
+  
+  /**
+   * This method is called whenever ontology is reset.  In other words
+   * when all resources of the ontology are deleted using the ontology.cleanup method.
+   * @param ontology
+   */
+  public void ontologyReset(Ontology ontology) {
+      if(this.ontology != ontology) { return; }
+      rebuildModel();
   }
 
   public void addTreeNodeSelectionListener(TreeNodeSelectionListener listener) {

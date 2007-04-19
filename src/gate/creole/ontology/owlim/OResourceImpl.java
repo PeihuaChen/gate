@@ -18,6 +18,7 @@ import gate.creole.ontology.Literal;
 import gate.creole.ontology.OConstants;
 import gate.creole.ontology.OResource;
 import gate.creole.ontology.Ontology;
+import gate.creole.ontology.RDFProperty;
 import gate.creole.ontology.URI;
 import gate.util.GateRuntimeException;
 
@@ -248,12 +249,12 @@ public class OResourceImpl implements OResource {
     }
   }
 
-  /*
-   * (non-Javadoc)
+  /**
+   * This method returns the annotation properties set on this resource.
    * 
-   * @see gate.creole.ontology.OResource#getAnnotationProperties()
+   * @return
    */
-  public Set<AnnotationProperty> getAnnotationProperties() {
+  public Set<AnnotationProperty> getSetAnnotationProperties() {
     try {
       Property[] properties = owlim.getAnnotationProperties(this.repositoryID,
               this.uri.toString());
@@ -282,8 +283,58 @@ public class OResourceImpl implements OResource {
   }
 
   /**
-   * String representation of the resource: its name and not
-   * the URI.
+   * Checks if the resource has the provided annotation property set on
+   * it with the specified value.
+   * 
+   * @param aProperty
+   * @param aValue
+   * @return
+   */
+  public boolean hasAnnotationPropertyWithValue(AnnotationProperty aProperty,
+          Literal aValue) {
+    List<Literal> literals = getAnnotationPropertyValues(aProperty);
+    for(Literal l : literals) {
+      if(l.getValue().equals(aValue.getValue())) {
+        if(l.getDataType() == null) {
+          if(aValue.getDataType() != null) continue;
+        }
+        else {
+          if(aValue.getDataType() == null)
+            continue;
+          else if(!aValue.getDataType().getXmlSchemaURI().equals(
+                  l.getDataType().getXmlSchemaURI())) continue;
+        }
+
+        if(l.getLanguage() == null) {
+          if(aValue.getLanguage() != null) continue;
+        }
+        else {
+          if(aValue.getLanguage() == null)
+            continue;
+          else if(!aValue.getLanguage().equals(l.getLanguage())) continue;
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+  
+
+  /**
+   * This method returns all the set properties set on this resource.
+   * 
+   * @return
+   */
+  public Set<RDFProperty> getAllSetProperties() {
+    Set<RDFProperty> toReturn = new HashSet<RDFProperty>();
+    toReturn.addAll(getSetAnnotationProperties());
+    return toReturn;
+  }
+
+
+
+  /**
+   * String representation of the resource: its name and not the URI.
    */
   public String toString() {
     return this.getName();

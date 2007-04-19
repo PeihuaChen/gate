@@ -96,38 +96,6 @@ public class RDFPropertyImpl extends OResourceImpl implements RDFProperty {
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.RDFProperty#addSuperProperty(gate.creole.ontology.RDFProperty)
-   */
-  public void addSuperProperty(RDFProperty theProperty) {
-    try {
-      owlim.addSuperProperty(this.repositoryID,
-              theProperty.getURI().toString(), uri.toString());
-      ontology.fireOntologyModificationEvent(this,
-              OConstants.SUPER_PROPERTY_ADDED_EVENT);
-    } catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see gate.creole.ontology.RDFProperty#removeSuperProperty(gate.creole.ontology.RDFProperty)
-   */
-  public void removeSuperProperty(RDFProperty theProperty) {
-    try {
-      owlim.removeSuperProperty(this.repositoryID, theProperty.getURI()
-              .toString(), uri.toString());
-      ontology.fireOntologyModificationEvent(this,
-              OConstants.SUPER_PROPERTY_REMOVED_EVENT);
-    } catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
    * @see gate.creole.ontology.RDFProperty#getSuperProperties(byte)
    */
   public Set<RDFProperty> getSuperProperties(byte closure) {

@@ -48,21 +48,6 @@ public interface RDFProperty extends OResource {
   public boolean isEquivalentPropertyAs(RDFProperty theProperty);
 
   /**
-   * Adds a SubPropertyOf relation between the given property and this.
-   * 
-   * @param property
-   */
-  public void addSuperProperty(RDFProperty property);
-
-  /**
-   * Removes a SubPropertyOf relation between the given property and
-   * this.
-   * 
-   * @param property
-   */
-  public void removeSuperProperty(RDFProperty property);
-
-  /**
    * Gets the set of super-properties for this property.
    * 
    * @param {@link OConstants#DIRECT_CLOSURE} for direct

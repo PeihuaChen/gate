@@ -81,19 +81,9 @@ public interface OConstants {
   public static final int SUB_CLASS_ADDED_EVENT = 0;
 
   /**
-   * denotes the addition of super class event
-   */
-  public static final int SUPER_CLASS_ADDED_EVENT = 1;
-
-  /**
    * denotes the removal of sub class event
    */
   public static final int SUB_CLASS_REMOVED_EVENT = 2;
-
-  /**
-   * denotes the removal of super class event
-   */
-  public static final int SUPER_CLASS_REMOVED_EVENT = 3;
 
   /**
    * denotes the event of two classes set as equivalent
@@ -181,21 +171,9 @@ public interface OConstants {
   public static final int SUB_PROPERTY_ADDED_EVENT = 18;
 
   /**
-   * denotes the event when a super property is added to an existing
-   * property
-   */
-  public static final int SUPER_PROPERTY_ADDED_EVENT = 19;
-
-  /**
    * denotes the event when a sub property is removed from an existing
    * property
    */
   public static final int SUB_PROPERTY_REMOVED_EVENT = 20;
-
-  /**
-   * denotes the event when a super property is removed from an existing
-   * property
-   */
-  public static final int SUPER_PROPERTY_REMOVED_EVENT = 21;
 
 }

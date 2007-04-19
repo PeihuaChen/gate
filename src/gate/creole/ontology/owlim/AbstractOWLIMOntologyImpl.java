@@ -28,6 +28,7 @@ import gate.creole.AbstractLanguageResource;
 import gate.creole.ontology.AnnotationProperty;
 import gate.creole.ontology.DataType;
 import gate.creole.ontology.DatatypeProperty;
+import gate.creole.ontology.Literal;
 import gate.creole.ontology.OClass;
 import gate.creole.ontology.OConstants;
 import gate.creole.ontology.OInstance;
@@ -126,6 +127,7 @@ public abstract class AbstractOWLIMOntologyImpl
       owlim.cleanOntology(sesameRepositoryID);
       urisToOResouceMap.clear();
       resourceNamesToOResourcesMap.clear();
+      fireOntologyReset();
     }
     catch(RemoteException re) {
       throw new GateRuntimeException(re);
@@ -167,7 +169,7 @@ public abstract class AbstractOWLIMOntologyImpl
    * 
    * @see gate.creole.ontology.Ontology#getURL()
    */
-  public URL getOntologyURL() {
+  public URL getURL() {
     return ontologyURL;
   }
 
@@ -176,7 +178,7 @@ public abstract class AbstractOWLIMOntologyImpl
    * 
    * @see gate.creole.ontology.Ontology#setURL(java.net.URL)
    */
-  public void setOntologyURL(URL aUrl) {
+  public void setURL(URL aUrl) {
     this.ontologyURL = aUrl;
   }
 
@@ -918,8 +920,6 @@ public abstract class AbstractOWLIMOntologyImpl
     Set<RDFProperty> set = new HashSet<RDFProperty>();
     set.addAll(getAnnotationProperties());
     set.addAll(getDatatypeProperties());
-    set.addAll(getSymmetricProperties());
-    set.addAll(getTransitiveProperties());
     set.addAll(getObjectProperties());
     set.addAll(getRDFProperties());
     return set;
@@ -1006,6 +1006,12 @@ public abstract class AbstractOWLIMOntologyImpl
     for(int i = 0; i < this.modificationListeners.size(); i++) {
       this.modificationListeners.get(i).ontologyModified(this, resource,
               eventType);
+    }
+  }
+
+  public void fireOntologyReset() {
+    for(int i = 0; i < this.modificationListeners.size(); i++) {
+      this.modificationListeners.get(i).ontologyReset(this);
     }
   }
 
@@ -1208,9 +1214,9 @@ public abstract class AbstractOWLIMOntologyImpl
   }
 
   /**
-   * This method returns a list of OResources from the
-   * ontology. Please note that deleting an instance from this list
-   * (e.g. list.remove(int/Object)) does not delete the resource from an
+   * This method returns a list of OResources from the ontology. Please
+   * note that deleting an instance from this list (e.g.
+   * list.remove(int/Object)) does not delete the resource from an
    * ontology. One must use appropriate method from the Ontology
    * interface to delete such resources.
    * 
@@ -1251,4 +1257,99 @@ public abstract class AbstractOWLIMOntologyImpl
 
   }
 
+  /**
+   * This method given a property (either an annotation or datatype),
+   * retrieves a list of resources which have the provided literal set
+   * as a value.
+   * 
+   * @param aProperty
+   * @param aValue
+   * @return
+   */
+  public List<OResource> getOResourcesWith(RDFProperty aProperty, Literal aValue) {
+    List<OResource> toReturn = new ArrayList<OResource>();
+
+    int propType = 1;
+
+    if(aProperty instanceof AnnotationProperty) {
+      propType = 1;
+    }
+    else if(aProperty instanceof DatatypeProperty) {
+      propType = 2;
+    }
+    else {
+      return toReturn;
+    }
+
+    // here the first thing is to obtain all the resources
+    List<OResource> resources = getAllResources();
+
+    // and on each resource we need to check if it has the above
+    // property set on it
+    for(OResource aResource : resources) {
+      switch(propType) {
+        case 1:
+          if(aResource.hasAnnotationPropertyWithValue(
+                  (AnnotationProperty)aProperty, aValue))
+            toReturn.add(aResource);
+          break;
+        case 2:
+          if(aResource instanceof OInstance
+                  && ((OInstance)aResource).hasDatatypePropertyWithValue(
+                          (DatatypeProperty)aProperty, aValue))
+            toReturn.add(aResource);
+          break;
+      }
+    }
+    return toReturn;
+  }
+
+  /**
+   * This method given a property (either object, transitive, symmetric
+   * or rdf), retrieves a list of resources which have the provided
+   * resource set as a value.
+   * 
+   * @param aProperty
+   * @param aValue
+   * @return
+   */
+  public List<OResource> getOResourcesWith(RDFProperty aProperty,
+          OResource aValue) {
+    List<OResource> toReturn = new ArrayList<OResource>();
+
+    int propType = 1;
+
+    if(aProperty instanceof ObjectProperty) {
+      propType = 1;
+    }
+    else if(!(aProperty instanceof DatatypeProperty)) {
+      propType = 2;
+    }
+    else {
+      return toReturn;
+    }
+
+    // here the first thing is to obtain all the resources
+    List<OResource> resources = getAllResources();
+
+    // and on each resource we need to check if it has the above
+    // property set on it
+    for(OResource aResource : resources) {
+      switch(propType) {
+        case 1:
+          if(aResource instanceof OInstance
+                  && aValue instanceof OInstance
+                  && ((OInstance)aResource).hasObjectPropertyWithValue(
+                          (ObjectProperty)aProperty, (OInstance)aValue))
+            toReturn.add(aResource);
+          break;
+        case 2:
+          if(aResource instanceof OInstance
+                  && ((OInstance)aResource).hasRDFPropertyWithValue(aProperty,
+                          aValue)) toReturn.add(aResource);
+          break;
+      }
+    }
+    return toReturn;
+  }
 }

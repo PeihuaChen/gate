@@ -74,7 +74,6 @@ public class SubClassAction extends AbstractAction implements
       
       OClass oclassimpl = ontology.addOClass(new URI(s+ className.getText(), false));
       for(int k = 0; k < arraylist.size(); k++) {
-        oclassimpl.addSuperClass((OClass)arraylist.get(k));
         ((OClass)arraylist.get(k)).addSubClass(oclassimpl);
       }
     }

@@ -56,4 +56,11 @@ public interface OntologyModificationListener extends EventListener {
    *          result of addition of a resource.
    */
   public void resourceAdded(Ontology ontology, OResource resource);
+  
+  /**
+   * This method is called whenever ontology is reset.  In other words
+   * when all resources of the ontology are deleted using the ontology.cleanup method.
+   * @param ontology
+   */
+  public void ontologyReset(Ontology ontology);
 }

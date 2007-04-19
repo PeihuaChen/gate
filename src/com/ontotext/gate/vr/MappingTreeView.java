@@ -204,7 +204,7 @@ public class MappingTreeView extends JTree {
         if (null != result) {
           OClass oc = (OClass) source;
           MappingNode mn = new MappingNode((String)result,
-              oc.getOntology().getOntologyURL().toString(),
+              oc.getOntology().getURL().toString(),
               node.toString());
           mapping.add(mn);
           ClassNode cn = new ClassNode(mn);
