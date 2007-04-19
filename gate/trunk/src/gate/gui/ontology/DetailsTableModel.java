@@ -149,6 +149,7 @@ public class DetailsTableModel extends AbstractTableModel {
       propertyTypes.getValues().clear();
       propertyValues.getValues().clear();
       Set<RDFProperty> rdfProps = ontology.getPropertyDefinitions();
+      
       if(rdfProps != null) {
         Iterator<RDFProperty> iterator = rdfProps.iterator();
         while(iterator.hasNext()) {
@@ -166,7 +167,6 @@ public class DetailsTableModel extends AbstractTableModel {
 
           for(int i = 0; i < domain.size(); i++) {
             domain.set(i, ((OResource)domain.get(i)).getURI().toString());
-            // System.out.println("\t"+(domain.get(i)).toString());
           }
 
           if(domain.contains(tclass.getURI().toString())) {
@@ -186,7 +186,7 @@ public class DetailsTableModel extends AbstractTableModel {
           }
         }
 
-        Set<AnnotationProperty> props = tclass.getAnnotationProperties();
+        Set<AnnotationProperty> props = tclass.getSetAnnotationProperties();
         if(props != null) {
           Iterator<AnnotationProperty> apIter = props.iterator();
           while(apIter.hasNext()) {
@@ -234,63 +234,36 @@ public class DetailsTableModel extends AbstractTableModel {
 
       propertyTypes.getValues().clear();
       propertyValues.getValues().clear();
-      Set<AnnotationProperty> apProps = oinstance.getAnnotationProperties();
-      Set<DatatypeProperty> dtProps = ontology.getDatatypeProperties();
-      Set<ObjectProperty> obProps = ontology.getObjectProperties();
-      Set<SymmetricProperty> stProps = ontology.getSymmetricProperties();
-      Set<TransitiveProperty> tpProps = ontology.getTransitiveProperties();
-      Set<RDFProperty> rdfProp = ontology.getRDFProperties();
-      Iterator<AnnotationProperty> apIter = apProps.iterator();
-      while(apIter.hasNext()) {
-        AnnotationProperty ap = apIter.next();
+      Set<AnnotationProperty> apProps = oinstance.getSetAnnotationProperties();
+      Set<DatatypeProperty> dtProps = oinstance.getSetDatatypeProperties();
+      Set<ObjectProperty> obProps = oinstance.getSetObjectProperties();
+      Set<RDFProperty> rdfProp = oinstance.getSetRDFProperties();
+      
+      for(AnnotationProperty ap : apProps) {
         List<Literal> literals = oinstance.getAnnotationPropertyValues(ap);
         for(int i = 0; i < literals.size(); i++) {
           PropertyValue pv = new PropertyValue(ap, literals.get(i));
           propertyValues.getValues().add(pv);
         }
       }
-      Iterator<DatatypeProperty> dtIter = dtProps.iterator();
-      while(dtIter.hasNext()) {
-        DatatypeProperty dt = dtIter.next();
+      
+      for(DatatypeProperty dt : dtProps) {
         List<Literal> literals = oinstance.getDatatypePropertyValues(dt);
         for(int i = 0; i < literals.size(); i++) {
           PropertyValue pv = new PropertyValue(dt, literals.get(i));
           propertyValues.getValues().add(pv);
         }
       }
-      Iterator<ObjectProperty> obIter = obProps.iterator();
-      while(obIter.hasNext()) {
-        ObjectProperty ob = obIter.next();
+      
+      for(ObjectProperty ob : obProps) {
         List<OInstance> oinstances = oinstance.getObjectPropertyValues(ob);
         for(int i = 0; i < oinstances.size(); i++) {
           PropertyValue pv = new PropertyValue(ob, oinstances.get(i));
           propertyValues.getValues().add(pv);
         }
       }
-      Iterator<TransitiveProperty> tpIter = tpProps.iterator();
-      while(tpIter.hasNext()) {
-        TransitiveProperty tp = tpIter.next();
-        List<OInstance> oinstances = oinstance.getObjectPropertyValues(tp);
-        for(int i = 0; i < oinstances.size(); i++) {
-          PropertyValue pv = new PropertyValue(tp, oinstances.get(i));
-          propertyValues.getValues().add(pv);
-        }
-      }
-      Iterator<SymmetricProperty> stIter = stProps.iterator();
-      while(stIter.hasNext()) {
-        SymmetricProperty st = stIter.next();
-        List<OInstance> oinstances = oinstance.getObjectPropertyValues(st);
-        for(int i = 0; i < oinstances.size(); i++) {
-          PropertyValue pv = new PropertyValue(st, oinstances.get(i));
-          propertyValues.getValues().add(pv);
-        }
-      }
-      Iterator<RDFProperty> rdIter = rdfProp.iterator();
-      while(rdIter.hasNext()) {
-        RDFProperty rd = rdIter.next();
-        if(rd instanceof ObjectProperty || rd instanceof AnnotationProperty || rd instanceof DatatypeProperty)
-            continue;
-        
+
+      for(RDFProperty rd : rdfProp) {
         List<OResource> oinstances = oinstance.getRDFPropertyValues(rd);
         for(int i = 0; i < oinstances.size(); i++) {
           PropertyValue pv = new PropertyValue(rd, oinstances.get(i));

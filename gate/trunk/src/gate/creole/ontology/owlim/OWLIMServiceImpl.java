@@ -54,7 +54,8 @@ import org.openrdf.vocabulary.RDFS;
 
 /**
  * Implementation of the GATE Ontology Services. This class provides an
- * implementation of each and every service defined under the OWLIM interface.
+ * implementation of each and every service defined under the OWLIM
+ * interface.
  * 
  * @author niraj
  */
@@ -62,25 +63,27 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   private HashMap<String, RepositoryDetails> mapToRepositoryDetails = new HashMap<String, RepositoryDetails>();
 
   /**
-   * Debug parameter, if set to true, shows various messages when different
-   * methods are invoked
+   * Debug parameter, if set to true, shows various messages when
+   * different methods are invoked
    */
   private static boolean DEBUG = false;
 
   /**
-   * Certain operations should be invoked only once. The variable is set to true
-   * after the invocation of such operations.
+   * Certain operations should be invoked only once. The variable is set
+   * to true after the invocation of such operations.
    */
   private static boolean initiated = false;
 
   /**
-   * OWLIMSchemaRepository is used as an interaction layer on top of Sesame
-   * server. The class provides various methods of manipulating ontology data.
+   * OWLIMSchemaRepository is used as an interaction layer on top of
+   * Sesame server. The class provides various methods of manipulating
+   * ontology data.
    */
   private OWLIMSchemaRepository sail;
 
   /**
-   * The reference of currently selected repository is stored in this variable
+   * The reference of currently selected repository is stored in this
+   * variable
    */
   private SesameRepository currentRepository;
 
@@ -90,7 +93,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   private final String OWLIM_LOG_FILE = "log.html";
 
   /**
-   * The class that provides an implementation of the OWLIM_SCHEMA_REPOSITORY
+   * The class that provides an implementation of the
+   * OWLIM_SCHEMA_REPOSITORY
    */
   private final String OWLIM_SCHEMA_REPOSITORY_CLASS = "org.openrdf.sesame.sailimpl.OWLIMSchemaRepository";
 
@@ -102,8 +106,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   private static File owlRDFS = null;
 
   /**
-   * AdminListener that listens to activities related to the manipulation of
-   * ontological data
+   * AdminListener that listens to activities related to the
+   * manipulation of ontological data
    */
   private HtmlAdminMsgWriter adminListener = null;
 
@@ -130,15 +134,16 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
     try {
       adminListener = new HtmlAdminMsgWriter(new FileOutputStream(
               OWLIM_LOG_FILE));
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
     }
   }
 
   /**
-   * This method intializes the OWLIMService. It tries to locate the system
-   * configuration file. The system configuration file contains various
-   * parameters/settings such as available repositories and users with their
-   * rights on each repository
+   * This method intializes the OWLIMService. It tries to locate the
+   * system configuration file. The system configuration file contains
+   * various parameters/settings such as available repositories and
+   * users with their rights on each repository
    * 
    * @param context
    * @throws ServiceException
@@ -156,22 +161,26 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
           File gosJarFile = new File(classURLStr.substring(0, classURLStr
                   .indexOf('!')));
           gosHome = gosJarFile.getParentFile();
-        } else if(classURL.getProtocol().equals("file")) {
+        }
+        else if(classURL.getProtocol().equals("file")) {
           // running from classes directory (e.g.inside Eclipse)
           gosHome = new File(classURL.getFile()).getParentFile()
                   .getParentFile().getParentFile().getParentFile();
-        } else {
+        }
+        else {
           // this should not happen and will cause a JUnit error if it
           // does.
           gosHome = null;
         }
-        
-        systemConf = new File(new URL(gosHome.getParent() + "/system.conf").getFile());
+
+        systemConf = new File(new URL(gosHome.getParent() + "/system.conf")
+                .getFile());
         owlRDFS = new File(new URL(gosHome.getParent() + "/owl.rdfs").getFile());
         SesameServer.setSystemConfig(readConfiguration());
         initiated = true;
       }
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       System.err.println("OWLIMServiceImpl Problem with initialisation");
       if(DEBUG) throw new ServiceException(e);
     }
@@ -187,14 +196,16 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   }
 
   /**
-   * Gets the default name space for this ontology. The defaultNameSpace is (by
-   * default) used for the newly created resources.
+   * Gets the default name space for this ontology. The defaultNameSpace
+   * is (by default) used for the newly created resources.
    * 
    * @return a String value.
    */
   public String getDefaultNameSpace(String repositoryID) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     NamespaceIterator iter = sail.getNamespaces();
     while(iter.hasNext()) {
       iter.next();
@@ -207,6 +218,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
 
   /**
    * Adds the ontology data
+   * 
    * @param repositoryID
    * @param data
    * @param baseURI
@@ -215,29 +227,34 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public void addOntologyData(String repositoryID, String data, String baseURI,
           byte format) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     try {
       currentRepository.addData(data, baseURI, getRDFFormat(format), true,
               adminListener);
-    } catch(Exception ioe) {
+    }
+    catch(Exception ioe) {
       throw new RemoteException(ioe.getMessage());
     }
   }
 
   /**
-   * Exports the ontology data into the provided format to the provided output
-   * stream.
+   * Exports the ontology data into the provided format to the provided
+   * output stream.
    * 
    * @param out
    * @param format
    */
   public void writeOntologyData(String repositoryID, OutputStream out,
           byte format) throws Exception {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     RdfDocumentWriter writer = null;
-    switch(format){
+    switch(format) {
       case Constants.ONTOLOGY_FORMAT_N3:
         writer = new N3Writer(out);
         break;
@@ -253,7 +270,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
     }
     writer.startDocument();
     writeData(writer);
-    switch(format){
+    switch(format) {
       case Constants.ONTOLOGY_FORMAT_N3:
         ((N3Writer)writer).endDocument();
         break;
@@ -270,18 +287,20 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   }
 
   /**
-   * Exports the ontology data into the provided format using the provided
-   * writer.
+   * Exports the ontology data into the provided format using the
+   * provided writer.
    * 
    * @param out
    * @param format
    */
   public void writeOntologyData(String repositoryID, Writer out, byte format)
           throws Exception {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     RdfDocumentWriter writer = null;
-    switch(format){
+    switch(format) {
       case Constants.ONTOLOGY_FORMAT_N3:
         writer = new N3Writer(out);
         break;
@@ -297,7 +316,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
     }
     writer.startDocument();
     writeData(writer);
-    switch(format){
+    switch(format) {
       case Constants.ONTOLOGY_FORMAT_N3:
         ((N3Writer)writer).endDocument();
         break;
@@ -340,8 +359,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public boolean isSuperClassOf(String repositoryID, String theSuperClassURI,
           String theSubClassURI, byte direct) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     if(direct == Constants.DIRECT_CLOSURE)
       return sail.getDirectSubClassOf(getResource(theSubClassURI),
               getResource(theSuperClassURI)).hasNext();
@@ -375,8 +396,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public Property getPropertyFromOntology(String repositoryID,
           String thePropertyURI) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     // here we need to check which type of property it is
     return createPropertyObject(repositoryID, thePropertyURI);
   }
@@ -391,8 +414,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public boolean isEquivalentClassAs(String repositoryID, String theClassURI1,
           String theClassURI2) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     return sail.hasStatement(getResource(theClassURI1),
             getURI(OWL.EQUIVALENTCLASS), getResource(theClassURI2));
   }
@@ -406,13 +431,15 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   /**
    * Creates a new AnnotationProperty.
    * 
-   * @param aPropertyURI
-   *          URI of the property to be added into the ontology. Done
+   * @param aPropertyURI URI of the property to be added into the
+   *          ontology. Done
    */
   public void addAnnotationProperty(String repositoryID, String aPropertyURI)
           throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     addUUUStatement(aPropertyURI, RDF.TYPE, OWL.ANNOTATIONPROPERTY);
   }
 
@@ -426,15 +453,18 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public Property[] getAnnotationProperties(String repositoryID,
           String theResourceURI) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     List<Property> list = new ArrayList<Property>();
     StatementIterator iter = sail.getStatements(null, getURI(RDF.TYPE),
             getResource(OWL.ANNOTATIONPROPERTY));
     while(iter.hasNext()) {
       Statement stmt = (Statement)iter.next();
       Resource anAnnProp = stmt.getSubject();
-      // for this property, check if there is any value available for the
+      // for this property, check if there is any value available for
+      // the
       // given resource
       if(sail.getStatements(getResource(theResourceURI),
               getURI(anAnnProp.toString()), null).hasNext()) {
@@ -459,11 +489,14 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public Property[] getRDFProperties(String repositoryID, String theResourceURI)
           throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     List<Property> list = new ArrayList<Property>();
     StatementIterator iter = sail.getStatements(null, getURI(RDF.TYPE),
             getResource(RDF.PROPERTY));
+
     ResourceInfo[] superClasses = new ResourceInfo[0];
     if(hasClass(repositoryID, theResourceURI)) {
       superClasses = getSuperClasses(repositoryID, theResourceURI,
@@ -472,7 +505,16 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
     while(iter.hasNext()) {
       Statement stmt = (Statement)iter.next();
       Resource anAnnProp = stmt.getSubject();
-      // for this property, check if there is any value available for the
+      // lets check if the property is indeed an rdf property and not
+      // any other
+      if(isAnnotationProperty(repositoryID, anAnnProp.toString()))
+        continue;
+      else if(isDatatypeProperty(repositoryID, anAnnProp.toString()))
+        continue;
+      else if(isObjectProperty(repositoryID, anAnnProp.toString())) continue;
+
+      // for this property, check if there is any value available for
+      // the
       // given resource
       if(sail.getStatements(getResource(theResourceURI),
               getURI(anAnnProp.toString()), null).hasNext()) {
@@ -498,8 +540,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public Property[] getDatatypeProperties(String repositoryID,
           String theResourceURI) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     List<Property> list = new ArrayList<Property>();
     StatementIterator iter = sail.getStatements(null, getURI(RDF.TYPE),
             getResource(OWL.DATATYPEPROPERTY));
@@ -511,7 +555,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
     while(iter.hasNext()) {
       Statement stmt = (Statement)iter.next();
       Resource anAnnProp = stmt.getSubject();
-      // for this property, check if there is any value available for the
+      // for this property, check if there is any value available for
+      // the
       // given resource
       if(sail.getStatements(getResource(theResourceURI),
               getURI(anAnnProp.toString()), null).hasNext()) {
@@ -540,8 +585,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public Property[] getObjectProperties(String repositoryID,
           String theResourceURI) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     List<Property> list = new ArrayList<Property>();
     StatementIterator iter = sail.getStatements(null, getURI(RDF.TYPE),
             getResource(OWL.OBJECTPROPERTY));
@@ -553,7 +600,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
     while(iter.hasNext()) {
       Statement stmt = (Statement)iter.next();
       Resource anAnnProp = stmt.getSubject();
-      // for this property, check if there is any value available for the
+      // for this property, check if there is any value available for
+      // the
       // given resource
       if(sail.getStatements(getResource(theResourceURI),
               getURI(anAnnProp.toString()), null).hasNext()) {
@@ -581,8 +629,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public Property[] getTransitiveProperties(String repositoryID,
           String theResourceURI) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     List<Property> list = new ArrayList<Property>();
     StatementIterator iter = sail.getStatements(null, getURI(RDF.TYPE),
             getResource(OWL.TRANSITIVEPROPERTY));
@@ -594,7 +644,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
     while(iter.hasNext()) {
       Statement stmt = (Statement)iter.next();
       Resource anAnnProp = stmt.getSubject();
-      // for this property, check if there is any value available for the
+      // for this property, check if there is any value available for
+      // the
       // given resource
       if(sail.getStatements(getResource(theResourceURI),
               getURI(anAnnProp.toString()), null).hasNext()) {
@@ -622,8 +673,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public Property[] getSymmetricProperties(String repositoryID,
           String theResourceURI) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     List<Property> list = new ArrayList<Property>();
     StatementIterator iter = sail.getStatements(null, getURI(RDF.TYPE),
             getResource(OWL.SYMMETRICPROPERTY));
@@ -635,7 +688,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
     while(iter.hasNext()) {
       Statement stmt = (Statement)iter.next();
       Resource anAnnProp = stmt.getSubject();
-      // for this property, check if there is any value available for the
+      // for this property, check if there is any value available for
+      // the
       // given resource
       if(sail.getStatements(getResource(theResourceURI),
               getURI(anAnnProp.toString()), null).hasNext()) {
@@ -661,8 +715,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public boolean isAnnotationProperty(String repositoryID, String aPropertyURI)
           throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     return sail.hasStatement(getResource(aPropertyURI), getURI(RDF.TYPE),
             getResource(OWL.ANNOTATIONPROPERTY));
   }
@@ -670,10 +726,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   /**
    * Adds a new annotation property value and specifies the language.
    * 
-   * @param theAnnotationProperty
-   *          the annotation property
-   * @param value
-   *          the value containing some value
+   * @param theAnnotationProperty the annotation property
+   * @param value the value containing some value
    * @return
    */
   public void addAnnotationPropertyValue(String repositoryID,
@@ -681,9 +735,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
           String language) throws RemoteException {
     // isAnnotationProperty also checks for the correct repository so no
     // need to give a call to it
-    if(!isAnnotationProperty(repositoryID, theAnnotationPropertyURI)) { throw new RemoteException(
-            "No annotation property found with the URI :"
-                    + theAnnotationPropertyURI); }
+    if(!isAnnotationProperty(repositoryID, theAnnotationPropertyURI)) {
+      throw new RemoteException("No annotation property found with the URI :"
+              + theAnnotationPropertyURI);
+    }
     addUULStatement(theResourceURI, theAnnotationPropertyURI, value, language);
   }
 
@@ -700,9 +755,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
           throws RemoteException {
     // isAnnotationProperty also checks for the correct repository so no
     // need to give a call to it
-    if(!isAnnotationProperty(repositoryID, theAnnotationPropertyURI)) { throw new RemoteException(
-            "No annotation property found with the URI :"
-                    + theAnnotationPropertyURI); }
+    if(!isAnnotationProperty(repositoryID, theAnnotationPropertyURI)) {
+      throw new RemoteException("No annotation property found with the URI :"
+              + theAnnotationPropertyURI);
+    }
     ArrayList<PropertyValue> list = new ArrayList<PropertyValue>();
     StatementIterator iter = sail.getStatements(getResource(theResourceURI),
             getURI(theAnnotationPropertyURI), null);
@@ -730,9 +786,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
           String language) throws RemoteException {
     // isAnnotationProperty also checks for the correct repository so no
     // need to give a call to it
-    if(!isAnnotationProperty(repositoryID, theAnnotationPropertyURI)) { throw new RemoteException(
-            "No annotation property found with the URI :"
-                    + theAnnotationPropertyURI); }
+    if(!isAnnotationProperty(repositoryID, theAnnotationPropertyURI)) {
+      throw new RemoteException("No annotation property found with the URI :"
+              + theAnnotationPropertyURI);
+    }
     StatementIterator iter = sail.getStatements(getResource(theResourceURI),
             getURI(theAnnotationPropertyURI), null);
     while(iter.hasNext()) {
@@ -744,8 +801,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   }
 
   /**
-   * For the current resource, the method removes the given literal for the
-   * given property.
+   * For the current resource, the method removes the given literal for
+   * the given property.
    * 
    * @param theAnnotationProperty
    * @param literal
@@ -755,9 +812,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
           String language) throws RemoteException {
     // isAnnotationProperty also checks for the correct repository so no
     // need to give a call to it
-    if(!isAnnotationProperty(repositoryID, theAnnotationPropertyURI)) { throw new RemoteException(
-            "No annotation property found with the URI :"
-                    + theAnnotationPropertyURI); }
+    if(!isAnnotationProperty(repositoryID, theAnnotationPropertyURI)) {
+      throw new RemoteException("No annotation property found with the URI :"
+              + theAnnotationPropertyURI);
+    }
     removeUULStatement(theResourceURI, theAnnotationPropertyURI, value,
             language);
   }
@@ -765,21 +823,23 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   /**
    * Removes all values for a named property.
    * 
-   * @param theProperty
-   *          the property
+   * @param theProperty the property
    */
   public void removeAnnotationPropertyValues(String repositoryID,
           String theResourceURI, String theAnnotationPropertyURI)
           throws RemoteException {
     try {
-      // isAnnotationProperty also checks for the correct repository so no
+      // isAnnotationProperty also checks for the correct repository so
+      // no
       // need to give a call to it
-      if(!isAnnotationProperty(repositoryID, theAnnotationPropertyURI)) { throw new RemoteException(
-              "No annotation property found with the URI :"
-                      + theAnnotationPropertyURI); }
+      if(!isAnnotationProperty(repositoryID, theAnnotationPropertyURI)) {
+        throw new RemoteException("No annotation property found with the URI :"
+                + theAnnotationPropertyURI);
+      }
       sail.removeStatements(getResource(theResourceURI),
               getURI(theAnnotationPropertyURI), null);
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       throw new RemoteException(e.getMessage());
     }
   }
@@ -788,19 +848,20 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   // RDFProperties
   // *************
   /**
-   * The method adds a generic property specifiying domain and range for the
-   * same. All classes specified in domain and range must exist.
+   * The method adds a generic property specifiying domain and range for
+   * the same. All classes specified in domain and range must exist.
    * 
    * @param aPropertyURI
    * @param domainClassesURIs
-   * @param rangeClassesTypes
-   *          Done
+   * @param rangeClassesTypes Done
    */
   public void addRDFProperty(String repositoryID, String aPropertyURI,
           String[] domainClassesURIs, String[] rangeClassesTypes)
           throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository with id : " + repositoryID + " does not exists"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository with id : " + repositoryID
+              + " does not exists");
+    }
     addUUUStatement(aPropertyURI, RDF.TYPE, RDF.PROPERTY);
     if(domainClassesURIs != null) {
       for(int i = 0; i < domainClassesURIs.length; i++) {
@@ -822,8 +883,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public boolean isRDFProperty(String repositoryID, String aPropertyURI)
           throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository with id : " + repositoryID + " does not exists"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository with id : " + repositoryID
+              + " does not exists");
+    }
     return sail.hasStatement(getResource(aPropertyURI), getURI(RDF.TYPE),
             getResource(RDF.PROPERTY));
   }
@@ -832,19 +895,20 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   // Datatype Properties
   // *************
   /**
-   * The method adds a data type property specifiying domain and range for the
-   * same. All classes specified in domain and range must exist.
+   * The method adds a data type property specifiying domain and range
+   * for the same. All classes specified in domain and range must exist.
    * 
    * @param aPropertyURI
    * @param domainClassesURIs
-   * @param dataTypeURI
-   *          Done
+   * @param dataTypeURI Done
    */
   public void addDataTypeProperty(String repositoryID, String aPropertyURI,
           String[] domainClassesURIs, String dataTypeURI)
           throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository with id : " + repositoryID + " does not exists"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository with id : " + repositoryID
+              + " does not exists");
+    }
     addUUUStatement(aPropertyURI, RDF.TYPE, OWL.DATATYPEPROPERTY);
     addUUUStatement(aPropertyURI, RDFS.DATATYPE, dataTypeURI);
     if(domainClassesURIs != null) {
@@ -866,12 +930,15 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
           throws RemoteException {
     // isAnnotationProperty also checks for the correct repository so no
     // need to give a call to it
-    if(!isDatatypeProperty(repositoryID, theDatatypePropertyURI)) { throw new RemoteException(
-            "No Datatype property found with the URI :"
-                    + theDatatypePropertyURI); }
+    if(!isDatatypeProperty(repositoryID, theDatatypePropertyURI)) {
+      throw new RemoteException("No Datatype property found with the URI :"
+              + theDatatypePropertyURI);
+    }
     StatementIterator iter = sail.getStatements(
             getResource(theDatatypePropertyURI), getURI(RDFS.DATATYPE), null);
-    if(iter.hasNext()) { return iter.next().getObject().toString(); }
+    if(iter.hasNext()) {
+      return iter.next().getObject().toString();
+    }
     return null;
   }
 
@@ -879,18 +946,19 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   // Symmetric Properties
   // *************
   /**
-   * The method adds a symmetric property specifiying domain and range for the
-   * same. All classes specified in domain and range must exist.
+   * The method adds a symmetric property specifiying domain and range
+   * for the same. All classes specified in domain and range must exist.
    * 
    * @param aPropertyURI
-   * @param domainAndRangeClassesURIs
-   *          Done
+   * @param domainAndRangeClassesURIs Done
    */
   public void addSymmetricProperty(String repositoryID, String aPropertyURI,
           String[] domainAndRangeClassesURIs) throws RemoteException {
     if(DEBUG) print("addSymmetricProperty");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     addUUUStatement(aPropertyURI, RDF.TYPE, OWL.SYMMETRICPROPERTY);
     if(domainAndRangeClassesURIs != null) {
       for(int i = 0; i < domainAndRangeClassesURIs.length; i++) {
@@ -910,8 +978,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public boolean isEquivalentPropertyAs(String repositoryID,
           String aPropertyURI1, String aPropertyURI2) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     return sail.hasStatement(getResource(aPropertyURI1),
             getURI(OWL.EQUIVALENTPROPERTY), getResource(aPropertyURI2));
   }
@@ -925,18 +995,25 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public Property[] getSuperProperties(String repositoryID,
           String aPropertyURI, byte direct) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     StatementIterator iter = null;
     if(direct == Constants.DIRECT_CLOSURE) {
       iter = sail.getDirectSubPropertyOf(getResource(aPropertyURI), null);
-    } else {
+    }
+    else {
       iter = sail.getSubPropertyOf(getResource(aPropertyURI), null);
     }
     ArrayList<Property> properties = new ArrayList<Property>();
     while(iter.hasNext()) {
       Statement stmt = iter.next();
       String aSuperProperty = stmt.getObject().toString();
+      if(aSuperProperty.equals(aPropertyURI)) {
+        continue;
+      }
+
       byte type = getPropertyType(repositoryID, aSuperProperty);
       properties.add(new Property(type, aSuperProperty));
     }
@@ -952,18 +1029,25 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public Property[] getSubProperties(String repositoryID, String aPropertyURI,
           byte direct) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     StatementIterator iter = null;
     if(direct == Constants.DIRECT_CLOSURE) {
       iter = sail.getDirectSubPropertyOf(null, getResource(aPropertyURI));
-    } else {
+    }
+    else {
       iter = sail.getSubPropertyOf(null, getResource(aPropertyURI));
     }
     ArrayList<Property> properties = new ArrayList<Property>();
     while(iter.hasNext()) {
       Statement stmt = iter.next();
       String aSubProperty = stmt.getSubject().toString();
+      if(aSubProperty.equals(aPropertyURI)) {
+        continue;
+      }
+      
       byte type = getPropertyType(repositoryID, aSubProperty);
       properties.add(new Property(type, aSubProperty));
     }
@@ -983,13 +1067,16 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public boolean isSuperPropertyOf(String repositoryID,
           String aSuperPropertyURI, String aSubPropertyURI, byte direct)
           throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     StatementIterator iter = null;
     if(direct == Constants.DIRECT_CLOSURE) {
       iter = sail.getDirectSubPropertyOf(getResource(aSubPropertyURI),
               getResource(aSuperPropertyURI));
-    } else {
+    }
+    else {
       iter = sail.getSubPropertyOf(getResource(aSubPropertyURI),
               getResource(aSuperPropertyURI));
     }
@@ -1013,9 +1100,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   }
 
   /**
-   * Given a class and instance URIs, the method checks if the latter is a
-   * member of former. If the boolean parameter direct is set to true, the
-   * method also checks if the literal is a direct instance of the class.
+   * Given a class and instance URIs, the method checks if the latter is
+   * a member of former. If the boolean parameter direct is set to true,
+   * the method also checks if the literal is a direct instance of the
+   * class.
    * 
    * @param aSuperClassURI
    * @param individualURI
@@ -1023,8 +1111,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public boolean hasIndividual(String repositoryID, String aSuperClassURI,
           String individualURI, byte direct) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     StatementIterator iter = null;
     if(direct == Constants.DIRECT_CLOSURE)
       iter = sail.getDirectType(getResource(individualURI),
@@ -1045,8 +1135,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public boolean isDifferentIndividualFrom(String repositoryID,
           String theInstanceURI1, String theInstanceURI2)
           throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     return sail.hasStatement(getResource(theInstanceURI1),
             getURI(OWL.DIFFERENTFROM), getResource(theInstanceURI2));
   }
@@ -1063,8 +1155,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public boolean isSameIndividualAs(String repositoryID,
           String theInstanceURI1, String theInstanceURI2)
           throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     return sail.hasStatement(getResource(theInstanceURI1),
             getURI(OWL.DIFFERENTFROM), getResource(theInstanceURI2));
   }
@@ -1083,8 +1177,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public void addRDFPropertyValue(String repositoryID, String anInstanceURI,
           String anRDFPropertyURI, String aResourceURI) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     addUUUStatement(anInstanceURI, anRDFPropertyURI, aResourceURI);
   }
 
@@ -1098,8 +1194,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public void removeRDFPropertyValue(String repositoryID, String anInstanceURI,
           String anRDFPropertyURI, String aResourceURI) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     removeUUUStatement(anInstanceURI, anRDFPropertyURI, aResourceURI);
   }
 
@@ -1113,8 +1211,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public ResourceInfo[] getRDFPropertyValues(String repositoryID,
           String anInstanceURI, String anRDFPropertyURI) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     StatementIterator iter = sail.getStatements(getResource(anInstanceURI),
             getURI(anRDFPropertyURI), null);
     ArrayList<Value> list = new ArrayList<Value>();
@@ -1135,11 +1235,14 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void removeRDFPropertyValues(String repositoryID,
           String anInstanceURI, String anRDFPropertyURI) throws RemoteException {
     try {
-      if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-              "Repository :" + repositoryID + " does not exist"); }
+      if(!loadRepositoryDetails(repositoryID)) {
+        throw new RemoteException("Repository :" + repositoryID
+                + " does not exist");
+      }
       sail.removeStatements(getResource(anInstanceURI),
               getURI(anRDFPropertyURI), null);
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       throw new RemoteException(e.getMessage());
     }
   }
@@ -1160,8 +1263,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void addDatatypePropertyValue(String repositoryID,
           String anInstanceURI, String aDatatypePropertyURI,
           String datatypeURI, String value) throws RemoteException {
-    if(!isDatatypeProperty(repositoryID, aDatatypePropertyURI)) { throw new RemoteException(
-            "No datatype property exists with URI :" + aDatatypePropertyURI); }
+    if(!isDatatypeProperty(repositoryID, aDatatypePropertyURI)) {
+      throw new RemoteException("No datatype property exists with URI :"
+              + aDatatypePropertyURI);
+    }
     addUUDStatement(anInstanceURI, aDatatypePropertyURI, value, datatypeURI);
   }
 
@@ -1177,8 +1282,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void removeDatatypePropertyValue(String repositoryID,
           String anInstanceURI, String aDatatypePropertyURI,
           String datatypeURI, String value) throws RemoteException {
-    if(!isDatatypeProperty(repositoryID, aDatatypePropertyURI)) { throw new RemoteException(
-            "No datatype property exists with URI :" + aDatatypePropertyURI); }
+    if(!isDatatypeProperty(repositoryID, aDatatypePropertyURI)) {
+      throw new RemoteException("No datatype property exists with URI :"
+              + aDatatypePropertyURI);
+    }
     removeUUDStatement(anInstanceURI, aDatatypePropertyURI, value, datatypeURI);
   }
 
@@ -1193,8 +1300,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public PropertyValue[] getDatatypePropertyValues(String repositoryID,
           String anInstanceURI, String aDatatypePropertyURI)
           throws RemoteException {
-    if(!isDatatypeProperty(repositoryID, aDatatypePropertyURI)) { throw new RemoteException(
-            "No datatype property exists with URI :" + aDatatypePropertyURI); }
+    if(!isDatatypeProperty(repositoryID, aDatatypePropertyURI)) {
+      throw new RemoteException("No datatype property exists with URI :"
+              + aDatatypePropertyURI);
+    }
     ArrayList<PropertyValue> propValues = new ArrayList<PropertyValue>();
     StatementIterator iter = sail.getStatements(getResource(anInstanceURI),
             getURI(aDatatypePropertyURI), null);
@@ -1211,8 +1320,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   }
 
   /**
-   * Removes all property values set on the provided instance for the current
-   * property.
+   * Removes all property values set on the provided instance for the
+   * current property.
    * 
    * @param repositoryID
    * @param anInstanceURI
@@ -1221,8 +1330,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void removeDatatypePropertyValues(String repositoryID,
           String anInstanceURI, String aDatatypePropertyURI)
           throws RemoteException {
-    if(!isDatatypeProperty(repositoryID, aDatatypePropertyURI)) { throw new RemoteException(
-            "No datatype property exists with URI :" + aDatatypePropertyURI); }
+    if(!isDatatypeProperty(repositoryID, aDatatypePropertyURI)) {
+      throw new RemoteException("No datatype property exists with URI :"
+              + aDatatypePropertyURI);
+    }
     removeUUUStatement(anInstanceURI, aDatatypePropertyURI, null);
   }
 
@@ -1230,7 +1341,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   // Object, Symmetric and Transitive Properties
   // *****************
   /**
-   * Adds the value for the given property (Object, Symmetric and Transitive).
+   * Adds the value for the given property (Object, Symmetric and
+   * Transitive).
    * 
    * @param repositoryID
    * @param sourceInstanceURI
@@ -1241,17 +1353,21 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void addObjectPropertyValue(String repositoryID,
           String sourceInstanceURI, String anObjectPropertyURI,
           String theValueInstanceURI) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     if(!sail.hasStatement(getResource(anObjectPropertyURI), getURI(RDF.TYPE),
-            getResource(OWL.OBJECTPROPERTY))) { throw new RemoteException(
-            "No object property exists with URI :" + anObjectPropertyURI); }
+            getResource(OWL.OBJECTPROPERTY))) {
+      throw new RemoteException("No object property exists with URI :"
+              + anObjectPropertyURI);
+    }
     addUUUStatement(sourceInstanceURI, anObjectPropertyURI, theValueInstanceURI);
   }
 
   /**
-   * Remove the provided value for the given property (Object, Symmetric and
-   * Transitive).
+   * Remove the provided value for the given property (Object, Symmetric
+   * and Transitive).
    * 
    * @param repositoryID
    * @param sourceInstanceURI
@@ -1262,8 +1378,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void removeObjectPropertyValue(String repositoryID,
           String sourceInstanceURI, String anObjectPropertyURI,
           String theValueInstanceURI) throws RemoteException {
-    if(!isObjectProperty(repositoryID, anObjectPropertyURI)) { throw new RemoteException(
-            "No object property exists with URI :" + anObjectPropertyURI); }
+    if(!isObjectProperty(repositoryID, anObjectPropertyURI)) {
+      throw new RemoteException("No object property exists with URI :"
+              + anObjectPropertyURI);
+    }
     removeUUUStatement(sourceInstanceURI, anObjectPropertyURI,
             theValueInstanceURI);
   }
@@ -1282,9 +1400,11 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
           throws RemoteException {
     if(!isObjectProperty(repositoryID, anObjectPropertyURI)
             && !isTransitiveProperty(repositoryID, anObjectPropertyURI)
-            && !isSymmetricProperty(repositoryID, anObjectPropertyURI)) { throw new RemoteException(
-            "No object/transitive/symmetric property exists with URI :"
-                    + anObjectPropertyURI); }
+            && !isSymmetricProperty(repositoryID, anObjectPropertyURI)) {
+      throw new RemoteException(
+              "No object/transitive/symmetric property exists with URI :"
+                      + anObjectPropertyURI);
+    }
     ArrayList<String> propValues = new ArrayList<String>();
     StatementIterator iter = sail.getStatements(getResource(sourceInstanceURI),
             getURI(anObjectPropertyURI), null);
@@ -1296,8 +1416,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   }
 
   /**
-   * Removes all property values set for the current property (Object, Symmetric
-   * and Transitive).
+   * Removes all property values set for the current property (Object,
+   * Symmetric and Transitive).
    * 
    * @param repositoryID
    * @param sourceInstanceURI
@@ -1306,8 +1426,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void removeObjectPropertyValues(String repositoryID,
           String sourceInstanceURI, String anObjectPropertyURI)
           throws RemoteException {
-    if(!isObjectProperty(repositoryID, anObjectPropertyURI)) { throw new RemoteException(
-            "No object property exists with URI :" + anObjectPropertyURI); }
+    if(!isObjectProperty(repositoryID, anObjectPropertyURI)) {
+      throw new RemoteException("No object property exists with URI :"
+              + anObjectPropertyURI);
+    }
     removeUUUStatement(sourceInstanceURI, anObjectPropertyURI, null);
   }
 
@@ -1322,11 +1444,12 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   // user management methods
   // ****************************************************************************
   /**
-   * Call to this method is necessary in order to login in to the Sesame server.
-   * Unless user is registered with Sesame server, he/she cannot have write or
-   * modify access to any of the repositories (unless given write access to
-   * world users) available on the server. However, unregistered users are and
-   * will be allowed to have read access on all repositories.
+   * Call to this method is necessary in order to login in to the Sesame
+   * server. Unless user is registered with Sesame server, he/she cannot
+   * have write or modify access to any of the repositories (unless
+   * given write access to world users) available on the server.
+   * However, unregistered users are and will be allowed to have read
+   * access on all repositories.
    * 
    * @param username
    * @param password
@@ -1337,9 +1460,12 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
       if(DEBUG) print("login");
       SesameServer.getLocalService().login(username, password);
       int id = getUserID(username, password);
-      if(id == -1) { return false; }
+      if(id == -1) {
+        return false;
+      }
       return true;
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       throw new RemoteException("" + e.getMessage());
     }
   }
@@ -1388,11 +1514,14 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
       }
       LocalRepository lr = (LocalRepository)SesameServer.getLocalService()
               .getRepository(repositoryID);
-      if(lr == null) { throw new Exception("Repository ID " + repositoryID
-              + " does not exist!"); }
-      if(!(lr.getSail() instanceof OWLIMSchemaRepository)) { throw new Exception(
-              "Repository ID " + repositoryID
-                      + "is not an OWLIMSchemaRepository!"); }
+      if(lr == null) {
+        throw new Exception("Repository ID " + repositoryID
+                + " does not exist!");
+      }
+      if(!(lr.getSail() instanceof OWLIMSchemaRepository)) {
+        throw new Exception("Repository ID " + repositoryID
+                + "is not an OWLIMSchemaRepository!");
+      }
       currentRepository = lr;
       sail = (OWLIMSchemaRepository)lr.getSail();
       RepositoryDetails rd = mapToRepositoryDetails.get(repositoryID);
@@ -1403,10 +1532,12 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
         rd.ontologyUrl = ontologyUrl;
         rd.returnSystemStatements = returnSystemStatements;
         mapToRepositoryDetails.put(repositoryID, rd);
-      } else {
+      }
+      else {
         ontologyUrl = rd.ontologyUrl;
       }
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       throw new RemoteException(e.getMessage());
     }
   }
@@ -1420,16 +1551,18 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   }
 
   /**
-   * Users are allowed to create new repositories and add data into it. In order
-   * to create new repository, they don’t necessarily need to be registered. The
-   * username and password parameters are used to assign access rights over the
-   * repository. Apart from the owner of repository, administrator also gets the
-   * full rights over the repository. All other users are given read access.
-   * User is also asked to provide a URL, or the RDF data from the ontology.
-   * Incase if the url is null or an empty string, an empty graph is created
-   * allowing users to add more data into it. Otherwise the graph is populated
-   * with the given ontology. The user is also asked to provide the RDF format
-   * information (i.e. ''N3'', ''TURTLE'', ''NTRIPLES'' or ''RDFXML'') .
+   * Users are allowed to create new repositories and add data into it.
+   * In order to create new repository, they don’t necessarily need to
+   * be registered. The username and password parameters are used to
+   * assign access rights over the repository. Apart from the owner of
+   * repository, administrator also gets the full rights over the
+   * repository. All other users are given read access. User is also
+   * asked to provide a URL, or the RDF data from the ontology. Incase
+   * if the url is null or an empty string, an empty graph is created
+   * allowing users to add more data into it. Otherwise the graph is
+   * populated with the given ontology. The user is also asked to
+   * provide the RDF format information (i.e. ''N3'', ''TURTLE'',
+   * ''NTRIPLES'' or ''RDFXML'') .
    * 
    * @param repositoryID
    * @param username
@@ -1453,7 +1586,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
     this.returnSystemStatements = returnSystemStatements;
     boolean found = setRepository(repositoryID, ontoData, true, baseURI,
             format, absolutePersistLocation, persist);
-    if(found) { return repositoryID; }
+    if(found) {
+      return repositoryID;
+    }
     // we create a new repository
     RepositoryConfig repConfig = createNewRepository(repositoryID, ontoData,
             true, baseURI, persist, absolutePersistLocation, username,
@@ -1466,16 +1601,17 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   }
 
   /**
-   * Users are allowed to create new repositories and add data into it. In order
-   * to create new repository, they don’t necessarily need to be registered. The
-   * username and password parameters are used to assign access rights over the
-   * repository. Apart from the owner of repository, administrator also gets the
-   * full rights over the repository. All other users are given read access.
-   * User is also asked to provide a URL for the ontology. Incase if the url is
-   * null or an empty string, an empty graph is created allowing user to add
-   * more data into it. Otherwise the graph is populated with the given ontology
-   * URL. The user is also asked to provide the RDF format information (i.e.
-   * ''N3'', ''TURTLE'', ''NTRIPLES'' or ''RDFXML'') .
+   * Users are allowed to create new repositories and add data into it.
+   * In order to create new repository, they don’t necessarily need to
+   * be registered. The username and password parameters are used to
+   * assign access rights over the repository. Apart from the owner of
+   * repository, administrator also gets the full rights over the
+   * repository. All other users are given read access. User is also
+   * asked to provide a URL for the ontology. Incase if the url is null
+   * or an empty string, an empty graph is created allowing user to add
+   * more data into it. Otherwise the graph is populated with the given
+   * ontology URL. The user is also asked to provide the RDF format
+   * information (i.e. ''N3'', ''TURTLE'', ''NTRIPLES'' or ''RDFXML'') .
    * 
    * @param repositoryID
    * @param username
@@ -1499,7 +1635,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
     this.returnSystemStatements = returnSystemStatements;
     boolean found = setRepository(repositoryID, ontoFileUrl, false, baseURI,
             format, absolutePersistLocation, persist);
-    if(found) { return repositoryID; }
+    if(found) {
+      return repositoryID;
+    }
     RepositoryConfig repConfig = createNewRepository(repositoryID, ontoFileUrl,
             false, baseURI, persist, absolutePersistLocation, username,
             password, format, false);
@@ -1519,7 +1657,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public void removeRepository(String repositoryID) throws RemoteException {
     try {
-      if(!loadRepositoryDetails(repositoryID)) { return; }
+      if(!loadRepositoryDetails(repositoryID)) {
+        return;
+      }
       startTransaction(null);
       if(currentRepository == null) return;
       sail.clearRepository();
@@ -1528,7 +1668,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
       saveConfiguration();
       endTransaction(null);
       mapToRepositoryDetails.remove(repositoryID);
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       throw new RemoteException("" + e.getMessage());
     }
   }
@@ -1542,7 +1683,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void cleanOntology(String repositoryID) throws RemoteException {
     try {
       if(DEBUG) print("cleanOntology");
-      if(!loadRepositoryDetails(repositoryID)) { return; }
+      if(!loadRepositoryDetails(repositoryID)) {
+        return;
+      }
       if(currentRepository == null) return;
       RepositoryConfig rc = SesameServer.getSystemConfig().getRepositoryConfig(
               currentRepository.getRepositoryId());
@@ -1550,16 +1693,17 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
       startTransaction(repositoryID);
       sail.clearRepository();
       endTransaction(repositoryID);
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       throw new RemoteException("" + e.getMessage());
     }
   }
 
   /**
-   * This method is useful to export results. Given one of the four RDFFormat
-   * parameters (i.e. ''N3'', ''TURTLE'', ''NTRIPLES'' or ''RDFXML'') , the
-   * method returns an equivalent string representation of the data in the
-   * supplied format.
+   * This method is useful to export results. Given one of the four
+   * RDFFormat parameters (i.e. ''N3'', ''TURTLE'', ''NTRIPLES'' or
+   * ''RDFXML'') , the method returns an equivalent string
+   * representation of the data in the supplied format.
    * 
    * @param format
    * @return
@@ -1568,7 +1712,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
           throws RemoteException {
     try {
       if(DEBUG) print("getOntologyData");
-      if(!loadRepositoryDetails(repositoryID)) { return null; }
+      if(!loadRepositoryDetails(repositoryID)) {
+        return null;
+      }
       InputStream stream = currentRepository.extractRDF(getRDFFormat(format),
               true, true, true, false);
       BufferedReader br = new BufferedReader(new InputStreamReader(stream));
@@ -1579,7 +1725,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
         line = br.readLine();
       }
       return sb.toString();
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       throw new RemoteException("" + e.getMessage());
     }
   }
@@ -1591,8 +1738,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public void setVersion(String repositoryID, String versionInfo)
           throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     if(DEBUG) print("setVersion");
     addUULStatement(this.ontologyUrl, OWL.VERSIONINFO, versionInfo, null);
   }
@@ -1604,8 +1753,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public String getVersion(String repositoryID) throws RemoteException {
     if(DEBUG) print("getVersion");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     StatementIterator iter = sail.getStatements(getResource(this.ontologyUrl),
             getURI(OWL.VERSIONINFO), null);
     while(iter.hasNext()) {
@@ -1625,8 +1776,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public void addClass(String repositoryID, String classURI)
           throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     if(DEBUG) print("addClass");
     addUUUStatement(classURI, RDF.TYPE, OWL.CLASS);
   }
@@ -1635,18 +1788,21 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    * Given a class to delete, it removes it from the repository.
    * 
    * @param classURI
-   * @return a list of other resources, which got removed as a result of this
-   *         deletion
+   * @return a list of other resources, which got removed as a result of
+   *         this deletion
    */
   public String[] removeClass(String repositoryID, String classURI)
           throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     if(DEBUG) print("removeClass");
     List<String> deletedResources = new ArrayList<String>();
     if(removeUUUStatement(classURI, RDF.TYPE, null) == 0) {
       throw new RemoteException(classURI + " is not an explicit Class");
-    } else {
+    }
+    else {
       deletedResources.add(classURI);
     }
     try {
@@ -1654,7 +1810,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
       sail.removeStatements(getResource(classURI), getURI(RDFS.SUBCLASSOF),
               null);
       endTransaction(repositoryID);
-    } catch(SailUpdateException sue) {
+    }
+    catch(SailUpdateException sue) {
       throw new RemoteException(sue.getMessage());
     }
     ResourceInfo[] subClasses = getSubClasses(repositoryID, classURI,
@@ -1695,23 +1852,25 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   }
 
   /**
-   * The method returns if the current repository has a class with URI that
-   * matches with the class parameter.
+   * The method returns if the current repository has a class with URI
+   * that matches with the class parameter.
    * 
    * @return
    */
   public boolean hasClass(String repositoryID, String classURI)
           throws RemoteException {
     if(DEBUG) print("hasClass");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     return sail.isClass(getResource(classURI));
   }
 
   /**
-   * if top set to true, the method returns only the top classes (i.e. classes
-   * with no super class). Otherwise it returns all classes available in
-   * repository.
+   * if top set to true, the method returns only the top classes (i.e.
+   * classes with no super class). Otherwise it returns all classes
+   * available in repository.
    * 
    * @param top
    * @return
@@ -1719,8 +1878,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public ResourceInfo[] getClasses(String repositoryID, boolean top)
           throws RemoteException {
     if(DEBUG) print("getClasses");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     StatementIterator iter = sail.getClasses();
     ArrayList<Value> list = new ArrayList<Value>();
     while(iter.hasNext()) {
@@ -1756,8 +1917,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public boolean isTopClass(String repositoryID, String classURI)
           throws RemoteException {
     if(DEBUG) print("isTopClass");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     StatementIterator iter = sail.getSubClassOf(getResource(classURI), null);
     boolean result = true;
     while(iter.hasNext()) {
@@ -1774,9 +1937,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   // relations among classes
   // ****************************************************************************
   /**
-   * The method creates a new class with the URI as specified in className and
-   * adds it as a subClassOf the parentClass. It also adds the provided comment
-   * on the subClass.
+   * The method creates a new class with the URI as specified in
+   * className and adds it as a subClassOf the parentClass. It also adds
+   * the provided comment on the subClass.
    * 
    * @param superClassURI
    * @param subClassURI
@@ -1784,15 +1947,17 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void addSubClass(String repositoryID, String superClassURI,
           String subClassURI) throws RemoteException {
     if(DEBUG) print("addSubClass");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     addUUUStatement(subClassURI, RDFS.SUBCLASSOF, superClassURI);
   }
 
   /**
-   * The method creates a new class with the URI as specified in className and
-   * adds it as a superClassOf the parentClass. It also adds the provided
-   * comment on the subClass.
+   * The method creates a new class with the URI as specified in
+   * className and adds it as a superClassOf the parentClass. It also
+   * adds the provided comment on the subClass.
    * 
    * @param superClassURI
    * @param subClassURI
@@ -1800,8 +1965,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void addSuperClass(String repositoryID, String superClassURI,
           String subClassURI) throws RemoteException {
     if(DEBUG) print("addSuperClass");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     addUUUStatement(subClassURI, RDFS.SUBCLASSOF, superClassURI);
   }
 
@@ -1814,8 +1981,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void removeSubClass(String repositoryID, String superClassURI,
           String subClassURI) throws RemoteException {
     if(DEBUG) print("removeSubClass");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     removeUUUStatement(subClassURI, RDFS.SUBCLASSOF, superClassURI);
   }
 
@@ -1827,8 +1996,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public void removeSuperClass(String repositoryID, String superClassURI,
           String subClassURI) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     if(DEBUG) print("removeSuperClass");
     removeUUUStatement(subClassURI, RDFS.SUBCLASSOF, superClassURI);
   }
@@ -1843,12 +2014,15 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public ResourceInfo[] getSubClasses(String repositoryID,
           String superClassURI, byte direct) throws RemoteException {
     if(DEBUG) print("getSubClasses");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     StatementIterator iter = null;
     if(direct == Constants.DIRECT_CLOSURE) {
       iter = sail.getDirectSubClassOf(null, getResource(superClassURI));
-    } else {
+    }
+    else {
       iter = sail.getSubClassOf(null, getResource(superClassURI));
     }
     List<Value> list = new ArrayList<Value>();
@@ -1871,13 +2045,16 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public ResourceInfo[] getSuperClasses(String repositoryID,
           String subClassURI, byte direct) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     if(DEBUG) print("getSuperClasses");
     StatementIterator iter = null;
     if(direct == Constants.DIRECT_CLOSURE) {
       iter = sail.getDirectSubClassOf(getResource(subClassURI), null);
-    } else {
+    }
+    else {
       iter = sail.getSubClassOf(getResource(subClassURI), null);
     }
     List<Value> list = new ArrayList<Value>();
@@ -1900,8 +2077,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void setDisjointClassWith(String repositoryID, String class1URI,
           String class2URI) throws RemoteException {
     if(DEBUG) print("setDisjointWith");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     addUUUStatement(class1URI, OWL.DISJOINTWITH, class2URI);
   }
 
@@ -1914,14 +2093,16 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void setEquivalentClassAs(String repositoryID, String class1URI,
           String class2URI) throws RemoteException {
     if(DEBUG) print("setEquivalentClassAs");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     addUUUStatement(class1URI, OWL.EQUIVALENTCLASS, class2URI);
   }
 
   /**
-   * returns an array of classes which are marked as disjoint for the given
-   * class
+   * returns an array of classes which are marked as disjoint for the
+   * given class
    * 
    * @param classURI
    * @return
@@ -1929,8 +2110,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public String[] getDisjointClasses(String repositoryID, String classURI)
           throws RemoteException {
     if(DEBUG) print("setDisjointClasses");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     StatementIterator iter = sail.getStatements(getResource(classURI),
             getURI(OWL.DISJOINTWITH), null);
     List<String> list = new ArrayList<String>();
@@ -1950,8 +2133,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public ResourceInfo[] getEquivalentClasses(String repositoryID,
           String aClassURI) throws RemoteException {
     if(DEBUG) print("getSameClasses");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     StatementIterator iter = sail.getStatements(getResource(aClassURI),
             getURI(OWL.EQUIVALENTCLASS), null);
     List<Value> list = new ArrayList<Value>();
@@ -1970,12 +2155,15 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public String[] removePropertyFromOntology(String repositoryID,
           String aPropertyURI) throws RemoteException {
     if(DEBUG) print("removePropertyWithName");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     List<String> deletedResources = new ArrayList<String>();
     if(removeUUUStatement(aPropertyURI, RDF.TYPE, null) == 0) {
       throw new RemoteException(aPropertyURI + " is not an explicit Property");
-    } else {
+    }
+    else {
       deletedResources.add(aPropertyURI);
     }
     if(sail.hasExplicitStatement(getResource(aPropertyURI), getURI(RDF.TYPE),
@@ -1988,7 +2176,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
       sail.removeStatements(getResource(aPropertyURI),
               getURI(RDFS.SUBPROPERTYOF), null);
       endTransaction(repositoryID);
-    } catch(SailUpdateException sue) {
+    }
+    catch(SailUpdateException sue) {
       throw new RemoteException(sue.getMessage());
     }
     Property[] subProps = getSubProperties(repositoryID, aPropertyURI,
@@ -2008,8 +2197,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   }
 
   /**
-   * The method adds an object property specifiying domain and range for the
-   * same. All classes specified in domain and range must exist.
+   * The method adds an object property specifiying domain and range for
+   * the same. All classes specified in domain and range must exist.
    * 
    * @param aPropertyURI
    * @param domainClassesURIs
@@ -2019,8 +2208,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
           String[] domainClassesURIs, String[] rangeClassesTypes)
           throws RemoteException {
     if(DEBUG) print("addObjectProperty");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     addUUUStatement(aPropertyURI, RDF.TYPE, OWL.OBJECTPROPERTY);
     if(domainClassesURIs != null) {
       for(int i = 0; i < domainClassesURIs.length; i++) {
@@ -2035,8 +2226,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   }
 
   /**
-   * The method adds a transitive property specifiying domain and range for the
-   * same. All classes specified in domain and range must exist.
+   * The method adds a transitive property specifiying domain and range
+   * for the same. All classes specified in domain and range must exist.
    * 
    * @param aPropertyURI
    * @param domainClassesURIs
@@ -2046,8 +2237,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
           String[] domainClassesURIs, String[] rangeClassesTypes)
           throws RemoteException {
     if(DEBUG) print("addTransitiveProperty");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     addUUUStatement(aPropertyURI, RDF.TYPE, OWL.TRANSITIVEPROPERTY);
     if(domainClassesURIs != null) {
       for(int i = 0; i < domainClassesURIs.length; i++) {
@@ -2062,8 +2255,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   }
 
   /**
-   * The method returns an array of properties. Property is a complex structure,
-   * which contains name, comment, information about its domain and range.
+   * The method returns an array of properties. Property is a complex
+   * structure, which contains name, comment, information about its
+   * domain and range.
    * 
    * @return
    */
@@ -2074,6 +2268,14 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
             getResource(RDF.PROPERTY));
     while(iter.hasNext()) {
       Statement stmt = (Statement)iter.next();
+      // we also need to check that the property is neither of the
+      // annotation, datatype or object property
+      if(isObjectProperty(repositoryID, stmt.getSubject().toString())
+              || isAnnotationProperty(repositoryID, stmt.getSubject()
+                      .toString())
+              || isDatatypeProperty(repositoryID, stmt.getSubject().toString()))
+        continue;
+
       Property prop = new Property(Constants.RDF_PROPERTY, stmt.getSubject()
               .toString());
       list.add(prop);
@@ -2082,8 +2284,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   }
 
   /**
-   * The method returns an array of properties. Property is a complex structure,
-   * which contains name, comment, information about its domain and range.
+   * The method returns an array of properties. Property is a complex
+   * structure, which contains name, comment, information about its
+   * domain and range.
    * 
    * @return
    */
@@ -2098,12 +2301,31 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
               .toString());
       list.add(prop);
     }
+
+    iter = sail.getStatements(null, getURI(RDF.TYPE),
+            getResource(OWL.SYMMETRICPROPERTY));
+    while(iter.hasNext()) {
+      Statement stmt = (Statement)iter.next();
+      Property prop = new Property(Constants.SYMMETRIC_PROPERTY, stmt
+              .getSubject().toString());
+      list.add(prop);
+    }
+
+    iter = sail.getStatements(null, getURI(RDF.TYPE),
+            getResource(OWL.TRANSITIVEPROPERTY));
+    while(iter.hasNext()) {
+      Statement stmt = (Statement)iter.next();
+      Property prop = new Property(Constants.TRANSITIVE_PROPERTY, stmt
+              .getSubject().toString());
+      list.add(prop);
+    }
     return listToPropertyArray(list);
   }
 
   /**
-   * The method returns an array of properties. Property is a complex structure,
-   * which contains name, comment, information about its domain and range.
+   * The method returns an array of properties. Property is a complex
+   * structure, which contains name, comment, information about its
+   * domain and range.
    * 
    * @return
    */
@@ -2122,8 +2344,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   }
 
   /**
-   * The method returns an array of properties. Property is a complex structure,
-   * which contains name, comment, information about its domain and range.
+   * The method returns an array of properties. Property is a complex
+   * structure, which contains name, comment, information about its
+   * domain and range.
    * 
    * @return
    */
@@ -2142,8 +2365,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   }
 
   /**
-   * The method returns an array of properties. Property is a complex structure,
-   * which contains name, comment, information about its domain and range.
+   * The method returns an array of properties. Property is a complex
+   * structure, which contains name, comment, information about its
+   * domain and range.
    * 
    * @return
    */
@@ -2162,8 +2386,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   }
 
   /**
-   * The method returns an array of properties. Property is a complex structure,
-   * which contains name, comment, information about its domain and range.
+   * The method returns an array of properties. Property is a complex
+   * structure, which contains name, comment, information about its
+   * domain and range.
    * 
    * @return
    */
@@ -2194,8 +2419,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public ResourceInfo[] getDomain(String repositoryID, String aPropertyURI)
           throws RemoteException {
     if(DEBUG) print("getDomain");
-    if(isAnnotationProperty(repositoryID, aPropertyURI)) { throw new RemoteException(
-            "AnnotationProperties do no specify any domain or range"); }
+    if(isAnnotationProperty(repositoryID, aPropertyURI)) {
+      throw new RemoteException(
+              "AnnotationProperties do no specify any domain or range");
+    }
     StatementIterator iter = sail.getDomain(getResource(aPropertyURI), null);
     List<ResourceInfo> list = new ArrayList<ResourceInfo>();
     while(iter.hasNext()) {
@@ -2216,10 +2443,14 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public ResourceInfo[] getRange(String repositoryID, String aPropertyURI)
           throws RemoteException {
     if(DEBUG) print("getRange");
-    if(isAnnotationProperty(repositoryID, aPropertyURI)) { throw new RemoteException(
-            "AnnotationProperties do no specify any domain or range"); }
-    if(isDatatypeProperty(repositoryID, aPropertyURI)) { throw new RemoteException(
-            "Please use getDatatype(String repositoryID, String theDatatypeProerptyURI) method instead"); }
+    if(isAnnotationProperty(repositoryID, aPropertyURI)) {
+      throw new RemoteException(
+              "AnnotationProperties do no specify any domain or range");
+    }
+    if(isDatatypeProperty(repositoryID, aPropertyURI)) {
+      throw new RemoteException(
+              "Please use getDatatype(String repositoryID, String theDatatypeProerptyURI) method instead");
+    }
     StatementIterator iter = sail.getRange(getResource(aPropertyURI), null);
     List<ResourceInfo> list = new ArrayList<ResourceInfo>();
     while(iter.hasNext()) {
@@ -2240,8 +2471,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public boolean isFunctional(String repositoryID, String aPropertyURI)
           throws RemoteException {
     if(DEBUG) print("isFunctional");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     return sail.hasStatement(getResource(aPropertyURI), getURI(RDF.TYPE),
             getResource(OWL.FUNCTIONALPROPERTY));
   }
@@ -2255,11 +2488,14 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void setFunctional(String repositoryID, String aPropertyURI,
           boolean isFunctional) throws RemoteException {
     if(DEBUG) print("setFunctional");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     if(isFunctional) {
       addUUUStatement(aPropertyURI, RDF.TYPE, OWL.FUNCTIONALPROPERTY);
-    } else {
+    }
+    else {
       removeUUUStatement(aPropertyURI, RDF.TYPE, OWL.FUNCTIONALPROPERTY);
     }
   }
@@ -2273,8 +2509,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public boolean isInverseFunctional(String repositoryID, String aPropertyURI)
           throws RemoteException {
     if(DEBUG) print("isInverseFunctional");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     return sail.hasStatement(getResource(aPropertyURI), getURI(RDF.TYPE),
             getResource(OWL.INVERSEFUNCTIONALPROPERTY));
   }
@@ -2288,11 +2526,14 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void setInverseFunctional(String repositoryID, String aPropertyURI,
           boolean isInverseFunctional) throws RemoteException {
     if(DEBUG) print("setInverseFunctional");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     if(isInverseFunctional) {
       addUUUStatement(aPropertyURI, RDF.TYPE, OWL.INVERSEFUNCTIONALPROPERTY);
-    } else {
+    }
+    else {
       removeUUUStatement(aPropertyURI, RDF.TYPE, OWL.INVERSEFUNCTIONALPROPERTY);
     }
   }
@@ -2306,8 +2547,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public boolean isSymmetricProperty(String repositoryID, String aPropertyURI)
           throws RemoteException {
     if(DEBUG) print("isSymmetricProperty");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     return sail.hasStatement(getResource(aPropertyURI), getURI(RDF.TYPE),
             getResource(OWL.SYMMETRICPROPERTY));
   }
@@ -2321,8 +2564,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public boolean isTransitiveProperty(String repositoryID, String aPropertyURI)
           throws RemoteException {
     if(DEBUG) print("isTransitiveProperty");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     return sail.hasStatement(getResource(aPropertyURI), getURI(RDF.TYPE),
             getResource(OWL.TRANSITIVEPROPERTY));
   }
@@ -2336,8 +2581,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public boolean isDatatypeProperty(String repositoryID, String aPropertyURI)
           throws RemoteException {
     if(DEBUG) print("isDatatypeProperty");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     return sail.hasStatement(getResource(aPropertyURI), getURI(RDF.TYPE),
             getResource(OWL.DATATYPEPROPERTY));
   }
@@ -2351,10 +2598,18 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public boolean isObjectProperty(String repositoryID, String aPropertyURI)
           throws RemoteException {
     if(DEBUG) print("isObjectProperty");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
-    return sail.hasStatement(getResource(aPropertyURI), getURI(RDF.TYPE),
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
+    
+    boolean reply = sail.hasStatement(getResource(aPropertyURI), getURI(RDF.TYPE),
             getResource(OWL.OBJECTPROPERTY));
+    if(!reply) reply = sail.hasStatement(getResource(aPropertyURI), getURI(RDF.TYPE),
+      getResource(OWL.SYMMETRICPROPERTY));
+    if(!reply) reply = sail.hasStatement(getResource(aPropertyURI), getURI(RDF.TYPE),
+      getResource(OWL.TRANSITIVEPROPERTY));
+    return reply;
   }
 
   // *************************************
@@ -2369,14 +2624,16 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void setEquivalentPropertyAs(String repositoryID, String property1URI,
           String property2URI) throws RemoteException {
     if(DEBUG) print("setEquivalentPropertyAs");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     addUUUStatement(property1URI, OWL.EQUIVALENTPROPERTY, property2URI);
   }
 
   /**
-   * For the given property, this method returns all properties marked as
-   * Equivalent as it
+   * For the given property, this method returns all properties marked
+   * as Equivalent as it
    * 
    * @param aPropertyURI
    * @return
@@ -2384,8 +2641,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public Property[] getEquivalentPropertyAs(String repositoryID,
           String aPropertyURI) throws RemoteException {
     if(DEBUG) print("getEquivalentPropertyAs");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     StatementIterator iter = sail.getStatements(getResource(aPropertyURI),
             getURI(OWL.EQUIVALENTPROPERTY), null);
     List<Property> list = new ArrayList<Property>();
@@ -2397,7 +2656,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   }
 
   /**
-   * For the given properties, this method registers the super, sub relation
+   * For the given properties, this method registers the super, sub
+   * relation
    * 
    * @param superPropertyURI
    * @param subPropertyURI
@@ -2405,13 +2665,16 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void addSuperProperty(String repositoryID, String superPropertyURI,
           String subPropertyURI) throws RemoteException {
     if(DEBUG) print("addSuperProperty");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     addUUUStatement(subPropertyURI, RDFS.SUBPROPERTYOF, superPropertyURI);
   }
 
   /**
-   * For the given properties, this method removes the super, sub relation
+   * For the given properties, this method removes the super, sub
+   * relation
    * 
    * @param superPropertyURI
    * @param subPropertyURI
@@ -2419,13 +2682,16 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void removeSuperProperty(String repositoryID, String superPropertyURI,
           String subPropertyURI) throws RemoteException {
     if(DEBUG) print("removeSuperProperty");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     removeUUUStatement(subPropertyURI, RDFS.SUBPROPERTYOF, superPropertyURI);
   }
 
   /**
-   * For the given properties, this method registers the super, sub relation
+   * For the given properties, this method registers the super, sub
+   * relation
    * 
    * @param superPropertyURI
    * @param subPropertyURI
@@ -2433,13 +2699,16 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void addSubProperty(String repositoryID, String superPropertyURI,
           String subPropertyURI) throws RemoteException {
     if(DEBUG) print("addSubProperty");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     addUUUStatement(subPropertyURI, RDFS.SUBPROPERTYOF, superPropertyURI);
   }
 
   /**
-   * For the given properties, this method removes the super, sub relation
+   * For the given properties, this method removes the super, sub
+   * relation
    * 
    * @param superPropertyURI
    * @param subPropertyURI
@@ -2447,8 +2716,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void removeSubProperty(String repositoryID, String superPropertyURI,
           String subPropertyURI) throws RemoteException {
     if(DEBUG) print("removeSubProperty");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     removeUUUStatement(subPropertyURI, RDFS.SUBPROPERTYOF, superPropertyURI);
   }
 
@@ -2462,8 +2733,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public Property[] getSuperProperties(String repositoryID,
           String aPropertyURI, boolean direct) throws RemoteException {
     if(DEBUG) print("getSuperProperties");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     StatementIterator iter = null;
     if(direct)
       iter = sail.getDirectSubPropertyOf(getResource(aPropertyURI), null);
@@ -2487,8 +2760,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public Property[] getSubProperties(String repositoryID, String aPropertyURI,
           boolean direct) throws RemoteException {
     if(DEBUG) print("getSubProperties");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     StatementIterator iter = null;
     if(direct)
       iter = sail.getDirectSubPropertyOf(null, getResource(aPropertyURI));
@@ -2505,7 +2780,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   }
 
   /**
-   * for the given property, the method returns all its inverse properties
+   * for the given property, the method returns all its inverse
+   * properties
    * 
    * @param aPropertyURI
    * @return
@@ -2513,8 +2789,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public Property[] getInverseProperties(String repositoryID,
           String aPropertyURI) throws RemoteException {
     if(DEBUG) print("getInverseProperties");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     StatementIterator iter = sail.getStatements(getResource(aPropertyURI),
             getURI(OWL.INVERSEOF), null);
     List<Property> list = new ArrayList<Property>();
@@ -2534,8 +2812,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void setInverseOf(String repositoryID, String propertyURI1,
           String propertyURI2) throws RemoteException {
     if(DEBUG) print("setInverseOf");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     addUUUStatement(propertyURI1, OWL.INVERSEOF, propertyURI2);
   }
 
@@ -2543,8 +2823,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   // *************************** Instance Methods **********************
   // *******************************************************************
   /**
-   * The method adds a new instance (literal) into the repository. It then
-   * creates a statement indicating membership relation with the provided class.
+   * The method adds a new instance (literal) into the repository. It
+   * then creates a statement indicating membership relation with the
+   * provided class.
    * 
    * @param superClassURI
    * @param individualURI
@@ -2552,8 +2833,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void addIndividual(String repositoryID, String superClassURI,
           String individualURI) throws RemoteException {
     if(DEBUG) print("addIndividual");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     addUUUStatement(individualURI, RDF.TYPE, superClassURI);
   }
 
@@ -2566,8 +2849,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public String[] removeIndividual(String repositoryID, String individualURI)
           throws RemoteException {
     if(DEBUG) print("removeIndividual");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     int no = removeUUUStatement(individualURI, RDF.TYPE, null);
     if(no == 0)
       throw new RemoteException(individualURI
@@ -2577,8 +2862,6 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
     // we need to delete it
     List<Property> properties = new ArrayList<Property>();
     properties.addAll(Arrays.asList(getObjectProperties(repositoryID)));
-    properties.addAll(Arrays.asList(getSymmetricProperties(repositoryID)));
-    properties.addAll(Arrays.asList(getTransitiveProperties(repositoryID)));
     try {
       startTransaction(repositoryID);
       for(int i = 0; i < properties.size(); i++) {
@@ -2586,17 +2869,19 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
                 getResource(individualURI));
       }
       endTransaction(repositoryID);
-    } catch(SailUpdateException sue) {
+    }
+    catch(SailUpdateException sue) {
       throw new RemoteException(sue.getMessage());
     }
     removeUUUStatement(individualURI, null, null);
     removeUUUStatement(null, null, individualURI);
-    return new String[]{individualURI};
+    return new String[] {individualURI};
   }
 
   /**
-   * The method returns all member instances of the provided class. It returns
-   * only the direct instances if the boolean parameter direct is set to true.
+   * The method returns all member instances of the provided class. It
+   * returns only the direct instances if the boolean parameter direct
+   * is set to true.
    * 
    * @param superClassURI
    * @param direct
@@ -2604,8 +2889,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public String[] getIndividuals(String repositoryID, String superClassURI,
           byte direct) throws RemoteException {
     if(DEBUG) print("getIndividulas");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     StatementIterator iter = null;
     if(direct == Constants.DIRECT_CLOSURE)
       iter = sail.getDirectType(null, getResource(superClassURI));
@@ -2626,8 +2913,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public String[] getIndividuals(String repositoryID) throws RemoteException {
     if(DEBUG) print("getIndividuals");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     ResourceInfo[] classes = getClasses(repositoryID, false);
     List<String> list = new ArrayList<String>();
     for(int i = 0; i < classes.length; i++) {
@@ -2642,9 +2931,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   }
 
   /**
-   * Given a class and instance URIs, the method checks if the latter is a
-   * member of former. If the boolean parameter direct is set to true, the
-   * method also checks if the literal is a direct instance of the class.
+   * Given a class and instance URIs, the method checks if the latter is
+   * a member of former. If the boolean parameter direct is set to true,
+   * the method also checks if the literal is a direct instance of the
+   * class.
    * 
    * @param aSuperClassURI
    * @param individualURI
@@ -2653,32 +2943,38 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public boolean hasIndividual(String repositoryID, String aSuperClassURI,
           String individualURI, boolean direct) throws RemoteException {
     if(DEBUG) print("hasIndividual");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     if(direct) {
       return sail.isDirectType(getResource(individualURI),
               getResource(aSuperClassURI));
-    } else {
+    }
+    else {
       return sail.isType(getResource(individualURI),
               getResource(aSuperClassURI));
     }
   }
 
   /**
-   * For the given individual, the method returns a set of classes for which the
-   * individual is registered as instance of
+   * For the given individual, the method returns a set of classes for
+   * which the individual is registered as instance of
    * 
    * @param individualURI
    */
   public ResourceInfo[] getClassesOfIndividual(String repositoryID,
           String individualURI, byte direct) throws RemoteException {
     if(DEBUG) print("getClassesOfIndividual");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     StatementIterator iter = null;
     if(direct == Constants.DIRECT_CLOSURE) {
       iter = sail.getDirectType(getResource(individualURI), null);
-    } else {
+    }
+    else {
       iter = sail.getType(getResource(individualURI), null);
     }
     List<Value> list = new ArrayList<Value>();
@@ -2701,14 +2997,16 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void setDifferentIndividualFrom(String repositoryID,
           String individual1URI, String individual2URI) throws RemoteException {
     if(DEBUG) print("setDifferentIndividualFrom");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     addUUUStatement(individual1URI, OWL.DIFFERENTFROM, individual2URI);
   }
 
   /**
-   * for the given individual, the method returns all individuals registered as
-   * different from the given individual
+   * for the given individual, the method returns all individuals
+   * registered as different from the given individual
    * 
    * @param individualURI
    * @return
@@ -2716,8 +3014,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public String[] getDifferentIndividualFrom(String repositoryID,
           String individualURI) throws RemoteException {
     if(DEBUG) print("getDifferentIndividualFrom");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     StatementIterator iter = sail.getStatements(getResource(individualURI),
             getURI(OWL.DIFFERENTFROM), null);
     List<String> list = new ArrayList<String>();
@@ -2736,14 +3036,16 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public void setSameIndividualAs(String repositoryID, String individual1URI,
           String individual2URI) throws RemoteException {
     if(DEBUG) print("setSameIndividualAs");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     addUUUStatement(individual1URI, OWL.SAMEAS, individual2URI);
   }
 
   /**
-   * for the given individual, the method returns all individuals which are
-   * registered as same as the provided individual
+   * for the given individual, the method returns all individuals which
+   * are registered as same as the provided individual
    * 
    * @param inidividualURI
    * @return
@@ -2751,8 +3053,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   public String[] getSameIndividualAs(String repositoryID, String individualURI)
           throws RemoteException {
     if(DEBUG) print("getSameIndividualAs");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     StatementIterator iter = sail.getStatements(getResource(individualURI),
             getURI(OWL.SAMEAS), null);
     List<String> list = new ArrayList<String>();
@@ -2763,9 +3067,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   }
 
   /**
-   * The method is useful for adding statements into the graph. All three values
-   * must exist in repository. These values are cast in Resources and then added
-   * into the graph of repository.
+   * The method is useful for adding statements into the graph. All
+   * three values must exist in repository. These values are cast in
+   * Resources and then added into the graph of repository.
    * 
    * @param subjectURI
    * @param predicateURI
@@ -2773,15 +3077,18 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public void addStatement(String repositoryID, String subjectURI,
           String predicateURI, String objectURI) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     addUUUStatement(subjectURI, predicateURI, objectURI);
   }
 
   /**
-   * The method is useful for removing statements from the graph of repository.
-   * All three values must exist in repository. these values are cast in
-   * Resources and then removed from teh graph of repository.
+   * The method is useful for removing statements from the graph of
+   * repository. All three values must exist in repository. these values
+   * are cast in Resources and then removed from teh graph of
+   * repository.
    * 
    * @param subjectURI
    * @param predicateURI
@@ -2789,8 +3096,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    */
   public void removeStatement(String repositoryID, String subjectURI,
           String predicateURI, String objectURI) throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     removeUUUStatement(subjectURI, predicateURI, objectURI);
   }
 
@@ -2808,7 +3117,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
       Resource o = object != null ? getResource(object) : null;
       sail.addStatement(s, p, o);
       endTransaction(null);
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       e.printStackTrace();
       throw new RemoteException(e.getMessage());
     }
@@ -2831,7 +3141,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
               language) : null;
       sail.addStatement(s, p, o);
       endTransaction(null);
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       throw new RemoteException(e.getMessage());
     }
   }
@@ -2849,7 +3160,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
               d) : null;
       sail.addStatement(s, p, l);
       endTransaction(null);
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       throw new RemoteException(e.getMessage());
     }
   }
@@ -2866,7 +3178,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
       int no = sail.removeStatements(s, p, o);
       endTransaction(null);
       return no;
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       throw new RemoteException(e.getMessage());
     }
   }
@@ -2884,13 +3197,15 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
         l = object != null
                 ? sail.getValueFactory().createLiteral(object)
                 : null;
-      } else {
+      }
+      else {
         l = object != null ? sail.getValueFactory().createLiteral(object,
                 language) : null;
       }
       sail.removeStatements(s, p, l);
       endTransaction(null);
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       throw new RemoteException(e.getMessage());
     }
   }
@@ -2908,32 +3223,41 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
               d) : null;
       sail.removeStatements(s, p, l);
       endTransaction(null);
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       throw new RemoteException(e.getMessage());
     }
   }
 
   public void startTransaction(String repositoryID) throws RemoteException {
-    if(repositoryID != null && !loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(repositoryID != null && !loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     if(!sail.transactionStarted()) sail.startTransaction();
   }
 
   public void endTransaction(String repositoryID) throws RemoteException {
-    if(repositoryID != null && !loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(repositoryID != null && !loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     if(sail.transactionStarted()) sail.commitTransaction();
   }
 
   public boolean transactionStarted(String repositoryID) throws RemoteException {
-    if(repositoryID != null && !loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(repositoryID != null && !loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     return sail.transactionStarted();
   }
 
   public void commitTransaction(String repositoryID) throws RemoteException {
-    if(repositoryID != null && !loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(repositoryID != null && !loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     if(sail != null && sail.transactionStarted()) {
       // we need to commit all changes
       sail.commitTransaction();
@@ -2971,7 +3295,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
       if(hasSystemNameSpace(list.get(i).toString())) continue;
       if(list.get(i) instanceof BNodeImpl) {
         subList.add(new ResourceInfo(true, list.get(i).toString()));
-      } else {
+      }
+      else {
         subList.add(new ResourceInfo(false, list.get(i).toString()));
       }
     }
@@ -3004,7 +3329,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   private Resource getResource(String string) {
     try {
       return sail.getValueFactory().createURI(string);
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       return sail.getValueFactory().createBNode(string);
     }
   }
@@ -3014,8 +3340,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
     for(int i = 0; i < userInfos.size(); i++) {
       UserInfo userInfo = (UserInfo)userInfos.get(i);
       if(userInfo.getLogin().equals(username)
-              && userInfo.getPassword().equals(password)) { return userInfo
-              .getID(); }
+              && userInfo.getPassword().equals(password)) {
+        return userInfo.getID();
+      }
     }
     return -1;
   }
@@ -3035,7 +3362,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
       SystemConfigFileHandler.writeConfiguration(
               SesameServer.getSystemConfig(), writer);
       writer.close();
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       throw new RemoteException(e.getMessage());
     }
   }
@@ -3047,7 +3375,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
       SystemConfig config = SystemConfigFileHandler.readConfiguration(reader);
       reader.close();
       return config;
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       throw new RemoteException(e.getMessage());
     }
   }
@@ -3059,7 +3388,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
    * @return
    */
   private RDFFormat getRDFFormat(byte format) {
-    switch((int)format){
+    switch((int)format) {
       case Constants.ONTOLOGY_FORMAT_N3:
         return RDFFormat.N3;
       case Constants.ONTOLOGY_FORMAT_NTRIPLES:
@@ -3076,13 +3405,17 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
     byte type = Constants.ANNOTATION_PROPERTY;
     if(isObjectProperty(repositoryID, uri)) {
       type = Constants.OBJECT_PROPERTY;
-    } else if(isDatatypeProperty(repositoryID, uri)) {
+    }
+    else if(isDatatypeProperty(repositoryID, uri)) {
       type = Constants.DATATYPE_PROPERTY;
-    } else if(isTransitiveProperty(repositoryID, uri)) {
+    }
+    else if(isTransitiveProperty(repositoryID, uri)) {
       type = Constants.TRANSITIVE_PROPERTY;
-    } else if(isSymmetricProperty(repositoryID, uri)) {
+    }
+    else if(isSymmetricProperty(repositoryID, uri)) {
       type = Constants.SYMMETRIC_PROPERTY;
-    } else if(sail.isProperty(getResource(uri))) {
+    }
+    else if(sail.isProperty(getResource(uri))) {
       type = Constants.RDF_PROPERTY;
     }
     return new Property(type, uri);
@@ -3112,7 +3445,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
       RepositoryConfig repConfig = SesameServer.getSystemConfig()
               .getRepositoryConfig(repositoryID);
       if(repConfig != null) {
-        // lets find out the new import values those have come through the new
+        // lets find out the new import values those have come through
+        // the new
         // ontoFileUrl
         ArrayList<String> importValues = getImportValues(repositoryID,
                 ontoFileUrl, baseURI, format, absolutePersistLocation,
@@ -3120,7 +3454,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
         SailConfig syncSail = repConfig.getSail(OWLIM_SCHEMA_REPOSITORY_CLASS);
         if(syncSail != null) {
           String formatToUse = "ntriples";
-          switch(format){
+          switch(format) {
             case Constants.ONTOLOGY_FORMAT_N3:
               formatToUse = "n3";
               break;
@@ -3148,7 +3482,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
               imports += ";" + importValues.get(i);
               defaultNS += ";" + importValues.get(i) + "#";
             }
-          } else {
+          }
+          else {
             imports = owlRDFS.getAbsolutePath();
             defaultNS = "http://www.w3.org/2002/07/owl#";
           }
@@ -3174,7 +3509,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
         if(DEBUG) System.out.println("Data added!");
       }
       found = true;
-    } catch(Exception exception) {
+    }
+    catch(Exception exception) {
       // repository doesn't exist
       // lets create one
       if(DEBUG) exception.printStackTrace();
@@ -3200,12 +3536,14 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
           this.currentRepository.addData(ontoFileUrl, baseURI,
                   getRDFFormat(format), true, adminListener);
           findURL = true;
-        } else if(ontoFileUrl.startsWith("file:")) {
+        }
+        else if(ontoFileUrl.startsWith("file:")) {
           this.currentRepository.addData(new File(new URL(ontoFileUrl)
                   .getFile()), baseURI, getRDFFormat(format), true,
                   adminListener);
           findURL = true;
-        } else {
+        }
+        else {
           this.currentRepository.addData(new URL(ontoFileUrl), baseURI,
                   getRDFFormat(format), true, adminListener);
         }
@@ -3214,7 +3552,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
         if(si.hasNext()) {
           ontoFileUrl = si.next().getSubject().toString();
           this.ontologyUrl = ontoFileUrl;
-        } else {
+        }
+        else {
           ontoFileUrl = null;
         }
         if(ontoFileUrl != null) {
@@ -3228,7 +3567,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
               new URL(fileName).openStream();
               toReturn.add(fileName);
               continue;
-            } catch(Exception e) {
+            }
+            catch(Exception e) {
             }
             int m = 0;
             boolean allFound = true;
@@ -3263,7 +3603,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
       }
       removeRepository(dummyRepository);
       if(currentRepository != null) loadRepositoryDetails(currentRepository);
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       // do not do anything
       e.printStackTrace();
     }
@@ -3317,7 +3658,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
         map = new HashMap();
       }
       String formatToUse = "ntriples";
-      switch(format){
+      switch(format) {
         case Constants.ONTOLOGY_FORMAT_N3:
           formatToUse = "n3";
           break;
@@ -3374,7 +3715,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
                 true);
       }
       return repConfig;
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       e.printStackTrace();
       throw new RemoteException(e.getMessage());
     }
@@ -3398,11 +3740,13 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
           currentRepository.addData(ontoFileUrl, baseURI, getRDFFormat(format),
                   true, adminListener);
           findURL = true;
-        } else if(ontoFileUrl.startsWith("file:")) {
+        }
+        else if(ontoFileUrl.startsWith("file:")) {
           currentRepository.addData(new File(new URL(ontoFileUrl).getFile()),
                   baseURI, getRDFFormat(format), true, adminListener);
           findURL = true;
-        } else {
+        }
+        else {
           currentRepository.addData(new URL(ontoFileUrl), baseURI,
                   getRDFFormat(format), true, adminListener);
         }
@@ -3411,11 +3755,13 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
         if(si.hasNext()) {
           ontoFileUrl = si.next().getSubject().toString();
           this.ontologyUrl = ontoFileUrl;
-        } else {
+        }
+        else {
           ontoFileUrl = null;
         }
         // if(ontoFileUrl != null) {
-        // PropertyValue[] values = getPropertyValues(repositoryID, ontoFileUrl,
+        // PropertyValue[] values = getPropertyValues(repositoryID,
+        // ontoFileUrl,
         // OWL.IMPORTS);
         // for(int i = 0; i < values.length; i++) {
         // String baseURIToUse = values[i].getValue() + "#";
@@ -3425,7 +3771,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
         // }
         if(DEBUG) System.out.println("Data added!");
       }
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       throw new RemoteException(e.getMessage());
     }
   }
@@ -3495,8 +3842,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
   private PropertyValue[] getPropertyValues(String repositoryID,
           String aResourceURI, String aPropertyURI) throws RemoteException {
     if(DEBUG) print("getPropertyValues");
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     StatementIterator iter = sail.getStatements(getResource(aResourceURI),
             getURI(aPropertyURI), null);
     List<PropertyValue> list = new ArrayList<PropertyValue>();
@@ -3528,13 +3877,15 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
 
   class RepositoryDetails {
     /**
-     * OWLIMSchemaRepository is used as an interaction layer on top of Sesame
-     * server. The class provides various methods of manipulating ontology data.
+     * OWLIMSchemaRepository is used as an interaction layer on top of
+     * Sesame server. The class provides various methods of manipulating
+     * ontology data.
      */
     OWLIMSchemaRepository sail;
 
     /**
-     * The reference of currently selected repository is stored in this variable
+     * The reference of currently selected repository is stored in this
+     * variable
      */
     SesameRepository repository;
 
@@ -3551,8 +3902,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
 
   public SesameRepository getSesameRepository(String repositoryID)
           throws RemoteException {
-    if(!loadRepositoryDetails(repositoryID)) { throw new RemoteException(
-            "Repository :" + repositoryID + " does not exist"); }
+    if(!loadRepositoryDetails(repositoryID)) {
+      throw new RemoteException("Repository :" + repositoryID
+              + " does not exist");
+    }
     return currentRepository;
   }
 }

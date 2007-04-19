@@ -830,6 +830,10 @@ public class Gaze extends AbstractVisualResource
     ontologyModified(ontology, null, -1);
   }
   
+  public void ontologyReset(Ontology ontology) {
+      ontologyModified(ontology, null, -1);
+  }
+  
   public void ontologyModified(Ontology ontology, OResource resource, int eventType) {
       JTree tree = ontologyTrees.get(ontology);
       if (tree!=null) {

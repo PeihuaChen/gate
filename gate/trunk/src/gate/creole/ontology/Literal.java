@@ -99,4 +99,5 @@ public class Literal {
   public String getLanguage() {
     return language;
   }
+  
 }

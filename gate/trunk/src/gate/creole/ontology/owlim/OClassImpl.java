@@ -54,21 +54,6 @@ public class OClassImpl extends OResourceImpl implements OClass {
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.OClass#addSuperClass(gate.creole.ontology.OClass)
-   */
-  public void addSuperClass(OClass superClass) {
-    try {
-      owlim.addSuperClass(this.repositoryID, superClass.getURI().toString(),
-              this.uri.toString());
-      ontology.fireOntologyModificationEvent(this, OConstants.SUPER_CLASS_ADDED_EVENT);
-    } catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
    * @see gate.creole.ontology.OClass#removeSubClass(gate.creole.ontology.OClass)
    */
   public void removeSubClass(OClass subClass) {
@@ -76,21 +61,6 @@ public class OClassImpl extends OResourceImpl implements OClass {
       owlim.removeSubClass(this.repositoryID, this.uri.toString(), subClass
               .getURI().toString());
       ontology.fireOntologyModificationEvent(this, OConstants.SUB_CLASS_REMOVED_EVENT);
-    } catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see gate.creole.ontology.OClass#removeSuperClass(gate.creole.ontology.OClass)
-   */
-  public void removeSuperClass(OClass superClass) {
-    try {
-      owlim.removeSuperClass(this.repositoryID, superClass.getURI().toString(),
-              this.uri.toString());
-      ontology.fireOntologyModificationEvent(this, OConstants.SUPER_CLASS_REMOVED_EVENT);
     } catch(RemoteException re) {
       throw new GateRuntimeException(re);
     }

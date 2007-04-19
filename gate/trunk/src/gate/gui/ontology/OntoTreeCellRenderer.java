@@ -72,7 +72,7 @@ public class OntoTreeCellRenderer extends DefaultTreeCellRenderer {
         setToolTipText(((ObjectProperty)obj1).getURI().toString());
       }
       else if(obj1 instanceof RDFProperty) {
-        icon = MainFrame.getIcon("ontology-property");
+        icon = MainFrame.getIcon("ontology-rdf-property");
         s = ((RDFProperty)obj1).getName();
         setToolTipText(((RDFProperty)obj1).getURI().toString());
       }

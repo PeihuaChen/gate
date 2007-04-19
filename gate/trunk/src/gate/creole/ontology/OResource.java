@@ -97,6 +97,29 @@ public interface OResource {
           AnnotationProperty theAnnotationProperty);
 
   /**
+   * This method returns the annotation properties set on this resource.
+   * @return
+   */
+  public Set<AnnotationProperty> getSetAnnotationProperties();
+
+  
+  /**
+   * This method returns all the set properties set on this resource.
+   * @return
+   */
+  public Set<RDFProperty> getAllSetProperties();
+  
+  /**
+   * Checks if the resource has the provided annotation property set on it with the specified value.
+   * @param aProperty
+   * @param aValue
+   * @return
+   */
+  public boolean hasAnnotationPropertyWithValue(AnnotationProperty aProperty, Literal aValue);
+  
+
+  
+  /**
    * For the current resource, the method removes the given literal for
    * the given property.
    * 
@@ -114,11 +137,4 @@ public interface OResource {
    */
   public void removeAnnotationPropertyValues(AnnotationProperty theProperty);
 
-  /**
-   * Gets the names of the properties that have set values for this
-   * instance.
-   * 
-   * @return a set of AnnotationProperties.
-   */
-  public Set<AnnotationProperty> getAnnotationProperties();
 }

@@ -27,25 +27,11 @@ public interface OClass extends OResource, OConstants {
   public void addSubClass(OClass subClass);
 
   /**
-   * Adds a super class to this class.
-   * 
-   * @param superClass the super class to be added
-   */
-  public void addSuperClass(OClass superClass);
-
-  /**
    * Removes a sub class.
    * 
    * @param subClass the sub class to be removed
    */
   public void removeSubClass(OClass subClass);
-
-  /**
-   * Removes a super class.
-   * 
-   * @param superClass the super class to be removed
-   */
-  public void removeSuperClass(OClass superClass);
 
   /**
    * Gets the subclasses according to the desired closure.
