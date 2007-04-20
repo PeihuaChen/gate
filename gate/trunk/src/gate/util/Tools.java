@@ -168,6 +168,10 @@ public class Tools {
    */
   public static Constructor getMostSpecificConstructor(Class targetClass,
           Class paramClass) throws NoSuchMethodException {
+    if(targetClass.isInterface()) {
+      throw new NoSuchMethodException(targetClass.getName() +
+              " is an interface, so cannot have constructors");
+    }
     Constructor[] targetClassConstructors =
         targetClass.getConstructors();
     List<Constructor> applicableConstructors =
