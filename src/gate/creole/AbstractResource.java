@@ -17,13 +17,12 @@ package gate.creole;
 
 import java.beans.*;
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
 import gate.*;
-import gate.FeatureMap;
-import gate.Resource;
 import gate.util.*;
 
 
@@ -151,11 +150,11 @@ extends AbstractFeatureBearer implements Resource, Serializable
           Class propertyType = prop.getPropertyType();
           Class paramType = parameterValue.getClass();
           if(!propertyType.isAssignableFrom(paramType)) {
-            //first try to find an appropriate constructor
             try {
-              parameterValue = propertyType.getConstructor(
-                  new Class[]{paramType}
-                ).newInstance( new Object[]{parameterValue} );
+              Constructor mostSpecificConstructor =
+                Tools.getMostSpecificConstructor(propertyType, paramType);
+              parameterValue = mostSpecificConstructor
+                 .newInstance( new Object[]{parameterValue} );
             } catch(Exception e) {
               //this didn't work; if the parameter value is String
               //try to use the Parameter implementation for finding the 
