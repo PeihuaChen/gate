@@ -47,7 +47,7 @@ public class RDFPropertyAction extends AbstractAction implements
         String as[] = new String[resoucesList.size()];
         for(int i = 0; i < as.length; i++)
           as[i] = resoucesList.get(i).getURI().toString();
-        domainAction.showGUI("Domain", as, new String[0]);
+        domainAction.showGUI("Domain", as, new String[0], false);
       }
 
       final RDFPropertyAction this$0;
@@ -60,7 +60,7 @@ public class RDFPropertyAction extends AbstractAction implements
         String as[] = new String[resoucesList.size()];
         for(int i = 0; i < as.length; i++)
           as[i] = resoucesList.get(i).getURI().toString();
-        rangeAction.showGUI("Range", as, new String[0]);
+        rangeAction.showGUI("Range", as, new String[0], false);
       }
 
       final RDFPropertyAction this$0;

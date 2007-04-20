@@ -73,7 +73,7 @@ public class DatatypePropertyAction extends AbstractAction implements
         String as1[] = new String[arraylist.size()];
         for(int k = 0; k < as1.length; k++)
           as1[k] = (String)arraylist.get(k);
-        domainAction.showGUI("Domain", as, as1);
+        domainAction.showGUI("Domain", as, as1, false);
       }
 
       final DatatypePropertyAction this$0;
