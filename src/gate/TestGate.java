@@ -268,6 +268,7 @@ public class TestGate {
 //        suite.addTest(TestGazetteer.suite());
 //        suite.addTest(TestSplitterTagger.suite());
         suite.addTest(TestFeatureMap.suite());
+        suite.addTest(TestTools.suite());
         suite.addTest(TestPR.suite());
         suite.addTest(TestMorph.suite());
         // suite.addTest(TestMaxentWrapper.suite());
