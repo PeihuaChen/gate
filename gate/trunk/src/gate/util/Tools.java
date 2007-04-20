@@ -16,6 +16,7 @@
 package gate.util;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.*;
@@ -122,5 +123,112 @@ public class Tools {
       }
     }
     return result;
+  }
+  
+  /**
+   * <p>Find the constructor to use to create an instance of
+   * <code>targetClass</code> from one of <code>paramClass</code>.
+   * We use the same rules as Java in finding the constructor
+   * to call, i.e. we find the constructor that javac would call for
+   * the expression
+   * <code>parameterValue = new PropertyType(parameterValue)</code>:</p>
+   * <ol>
+   * <li>find all the single-argument constructors for propertyType
+   * whose argument type <code>T1</code> is assignable from
+   * <code>paramType</code></li>
+   * <li>from these, choose the one whose argument type <code>T2</code>
+   * is more specific than the argument type <code>S</code> of every
+   * other one i.e.
+   * for all S, <code>S.isAssignableFrom(T2)</code></li>
+   * </ol>
+   * <p>If there is no applicable single argument constructor that is
+   * more specific than all the others, then the above expression
+   * would be a compile error (constructor <code>ParamType(X)</code> is
+   * ambiguous).</p>
+   *
+   * <p>(The "most specific" check is to catch situations such as
+   * paramClass implements <code>SortedSet</code>,
+   * targetClass = <code>TreeSet</code>.  Here both 
+   * <code>TreeSet(SortedSet)</code> and <code>TreeSet(Collection)</code>
+   * are applicable but the former is more specific.  However, if
+   * paramType also implements <code>Comparator</code> then there are
+   * three applicable constructors, taking <code>SortedSet</code>,
+   * <code>Collection</code> and <code>Comparator</code> respectively
+   * and none of these types is assignable to both the others.  This
+   * is ambiguous according to the Java Language Specification,
+   * 2nd edition, section 15.12.2)</p>
+   *
+   * @param targetClass the class we wish to construct
+   * @param paramClass the type of the object to pass as a parameter to
+   *         the constructor.
+   * @return the most specific constructor of <code>targetClass</code>
+   *         that is applicable to an argument of <code>paramClass</code>
+   * @throws NoSuchMethodException if there are no applicable constructors,
+   *         or if there is no single most-specific one.
+   */
+  public static Constructor getMostSpecificConstructor(Class targetClass,
+          Class paramClass) throws NoSuchMethodException {
+    Constructor[] targetClassConstructors =
+        targetClass.getConstructors();
+    List<Constructor> applicableConstructors =
+        new ArrayList<Constructor>();
+    // find all applicable constructors
+    for(Constructor c : targetClassConstructors) {
+      Class[] constructorParams = c.getParameterTypes();
+      if(constructorParams.length == 1
+              && constructorParams[0].isAssignableFrom(paramClass)) {
+        applicableConstructors.add(c);
+      }
+    }
+    // simple cases - none applicable
+    if(applicableConstructors.size() == 0) {
+      throw new NoSuchMethodException(
+              "No applicable constructors for "
+              + targetClass.getName() + "("
+              + paramClass.getName() + ")");
+    }
+    Constructor mostSpecificConstructor = null;
+    // other simple case - only one applicable
+    if(applicableConstructors.size() == 1) {
+      mostSpecificConstructor = applicableConstructors.get(0);
+    }
+    else {
+      // complicated case - need to find the most specific.
+      // since the constructor parameter types are all assignable
+      // from paramType there can be at most one that is assignable
+      // from *all* others
+      C1: for(Constructor c1 : applicableConstructors) {
+        Class c1ParamType = c1.getParameterTypes()[0];
+        C2: for(Constructor c2 : applicableConstructors) {
+          Class c2ParamType = c2.getParameterTypes()[0];
+          if(!c2ParamType.isAssignableFrom(c1ParamType)) {
+            continue C1;
+          }
+        }
+        mostSpecificConstructor = c1;
+        break C1;
+      }
+    }
+    // we tried all the constructors and didn't find the most-specific
+    // one
+    if(mostSpecificConstructor == null) {
+      if(DEBUG) {
+        Out.println("Ambiguous constructors for "
+              + targetClass.getName() + "("
+              + paramClass.getName() + ")");
+        Out.println("Choice was between " + applicableConstructors);
+      }
+      throw new NoSuchMethodException(
+              "Ambiguous constructors for "
+              + targetClass.getName() + "("
+              + paramClass.getName() + ")");
+    }
+    
+    if(DEBUG) {
+      Out.println("Most specific constructor for " +
+              targetClass.getName() + "(" + paramClass.getName() + ") is "
+              + mostSpecificConstructor);
+    }
+    return mostSpecificConstructor;
   }
 } // class Tools
