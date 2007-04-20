@@ -168,6 +168,7 @@ public class SimpleFeatureMapImpl
             // lets first find out the classes with the names
             OClass superClass = (OClass) ontologyLR.getOResourceByName(keyValueFromAFeatureMap.toString());
             OClass subClass = (OClass) ontologyLR.getOResourceByName(keyValueFromThis.toString());
+            if(superClass == null || subClass == null) return false;
             if (DEBUG) {
               Out.prln("\nClass in rule: " + keyValueFromAFeatureMap.toString());
               Out.prln("\nClass in annotation: " + keyValueFromThis.toString());
