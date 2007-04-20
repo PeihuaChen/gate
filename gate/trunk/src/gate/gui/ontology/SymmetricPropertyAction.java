@@ -50,7 +50,7 @@ public class SymmetricPropertyAction extends AbstractAction implements
         String as1[] = new String[arraylist.size()];
         for(int k = 0; k < as1.length; k++)
           as1[k] = arraylist.get(k);
-        domainAction.showGUI("Domain And Range", as, as1);
+        domainAction.showGUI("Domain And Range", as, as1, false);
       }
 
       final SymmetricPropertyAction this$0;

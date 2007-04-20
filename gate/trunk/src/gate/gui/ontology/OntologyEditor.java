@@ -335,7 +335,7 @@ public class OntologyEditor extends AbstractVisualResource
                   classArray[i] = classList.get(i).getURI().toString();
                 }
                 vsa.showGUI(candidate.getName() + " is equivalent to :",
-                        classArray, new String[0]);
+                        classArray, new String[0], false);
                 String[] selectedValues = vsa.getSelectedValues();
                 for(int i = 0; i < selectedValues.length; i++) {
                   OClass byName = (OClass)ontology
@@ -367,7 +367,7 @@ public class OntologyEditor extends AbstractVisualResource
                   instancesArray[i] = instancesList.get(i).getURI().toString();
                 }
                 vsa.showGUI(candidate.getName() + " is same As :",
-                        instancesArray, new String[0]);
+                        instancesArray, new String[0], false);
                 String[] selectedValues = vsa.getSelectedValues();
                 for(int i = 0; i < selectedValues.length; i++) {
                   OInstance byName = (OInstance)ontology
@@ -458,7 +458,7 @@ public class OntologyEditor extends AbstractVisualResource
                     instArray[i] = instList.get(i).getURI().toString();
                   }
                   vsa.showGUI("Select Values for the " + p.getName(),
-                          instArray, new String[0]);
+                          instArray, new String[0], false);
                   String[] selectedValues = vsa.getSelectedValues();
                   for(int i = 0; i < selectedValues.length; i++) {
                     OInstance byName = (OInstance)ontology
@@ -535,7 +535,7 @@ public class OntologyEditor extends AbstractVisualResource
                 propArray[i] = iter.next().getURI().toString();
               }
               vsa.showGUI(candidate.getName() + " is equivalent to :",
-                      propArray, new String[0]);
+                      propArray, new String[0], false);
               String[] selectedValues = vsa.getSelectedValues();
               for(int i = 0; i < selectedValues.length; i++) {
                 RDFProperty byName = (RDFProperty)ontology

@@ -50,7 +50,7 @@ public class TransitivePropertyAction extends AbstractAction implements
         String as1[] = new String[arraylist.size()];
         for(int k = 0; k < as1.length; k++)
           as1[k] = arraylist.get(k);
-        domainAction.showGUI("Domain", as, as1);
+        domainAction.showGUI("Domain", as, as1, false);
       }
 
       final TransitivePropertyAction this$0;
@@ -63,7 +63,7 @@ public class TransitivePropertyAction extends AbstractAction implements
         String as[] = new String[ontologyClassesURIs.size()];
         for(int i = 0; i < as.length; i++)
           as[i] = ((String)ontologyClassesURIs.get(i));
-        rangeAction.showGUI("Range", as, new String[0]);
+        rangeAction.showGUI("Range", as, new String[0], false);
       }
 
       final TransitivePropertyAction this$0;

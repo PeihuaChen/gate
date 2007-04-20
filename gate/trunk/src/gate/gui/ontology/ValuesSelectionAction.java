@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
@@ -31,20 +32,25 @@ public class ValuesSelectionAction {
         String s = ((JTextComponent)domainBox.getEditor().getEditorComponent())
                 .getText();
         if(s != null) {
-          ArrayList<String> arraylist = new ArrayList<String>();
-          for(int i = 0; i < ontologyClasses.length; i++) {
-            String s1 = ontologyClasses[i];
-            if(s1.toLowerCase().startsWith(s.toLowerCase())) {
-              arraylist.add(s1);
+          if(keyevent.getKeyCode() != KeyEvent.VK_ENTER) {
+            ArrayList<String> arraylist = new ArrayList<String>();
+            for(int i = 0; i < ontologyClasses.length; i++) {
+              String s1 = ontologyClasses[i];
+              if(s1.toLowerCase().startsWith(s.toLowerCase())) {
+                arraylist.add(s1);
+              }
             }
-          }
-          Collections.sort(arraylist);
-          DefaultComboBoxModel defaultcomboboxmodel = new DefaultComboBoxModel(
-                  arraylist.toArray());
-          domainBox.setModel(defaultcomboboxmodel);
-          try {
-            domainBox.showPopup();
-          } catch(Exception exception) {
+            Collections.sort(arraylist);
+            DefaultComboBoxModel defaultcomboboxmodel = new DefaultComboBoxModel(
+                    arraylist.toArray());
+            domainBox.setModel(defaultcomboboxmodel);
+            
+            try {
+              if(!arraylist.isEmpty())
+                domainBox.showPopup();
+            }
+            catch(Exception exception) {
+            }
           }
           ((JTextComponent)domainBox.getEditor().getEditorComponent())
                   .setText(s);
@@ -59,10 +65,20 @@ public class ValuesSelectionAction {
     add.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent actionevent) {
         String s = (String)domainBox.getSelectedItem();
+        if(!allowValueOutsideDropDownList) {
+          if(!Arrays.asList(ontologyClasses).contains(s)) {
+            JOptionPane.showMessageDialog(MainFrame.getInstance(),
+            "The value \""+s+"\" is not in the drop down list!");
+            return;
+          }
+        }
+        
         if(((DefaultListModel)list.getModel()).contains(s)) {
-          JOptionPane.showMessageDialog(MainFrame.getInstance(), "Already added!");
+          JOptionPane.showMessageDialog(MainFrame.getInstance(),
+                  "Already added!");
           return;
-        } else {
+        }
+        else {
           ((DefaultListModel)list.getModel()).addElement(s);
           return;
         }
@@ -89,16 +105,19 @@ public class ValuesSelectionAction {
     });
   }
 
-  public void showGUI(String windowTitle, String inDropDownList[], String alreadySelected[]) {
+  public void showGUI(String windowTitle, String inDropDownList[],
+          String alreadySelected[], boolean allowValueOutsideDropDownList) {
     this.ontologyClasses = inDropDownList;
-    DefaultComboBoxModel defaultcomboboxmodel = new DefaultComboBoxModel(inDropDownList);
+    this.allowValueOutsideDropDownList = allowValueOutsideDropDownList;
+    DefaultComboBoxModel defaultcomboboxmodel = new DefaultComboBoxModel(
+            inDropDownList);
     domainBox.setModel(defaultcomboboxmodel);
     DefaultListModel defaultlistmodel = new DefaultListModel();
     for(int i = 0; i < alreadySelected.length; i++)
       defaultlistmodel.addElement(alreadySelected[i]);
     list.setModel(defaultlistmodel);
-    JOptionPane.showOptionDialog(MainFrame.getInstance(), panel, windowTitle, 0, 3, null,
-            new String[]{"OK"}, "OK");
+    JOptionPane.showOptionDialog(MainFrame.getInstance(), panel, windowTitle,
+            0, 3, null, new String[] {"OK"}, "OK");
   }
 
   public String[] getSelectedValues() {
@@ -120,4 +139,6 @@ public class ValuesSelectionAction {
   protected JPanel panel;
 
   protected String[] ontologyClasses;
+  
+  protected boolean allowValueOutsideDropDownList = true;
 }
