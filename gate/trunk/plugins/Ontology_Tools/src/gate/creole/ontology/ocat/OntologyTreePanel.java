@@ -10,6 +10,7 @@ package gate.creole.ontology.ocat;
 import javax.swing.*;
 import javax.swing.tree.*;
 import java.awt.*;
+
 import gate.*;
 import gate.creole.ontology.AnnotationProperty;
 import gate.creole.ontology.DatatypeProperty;
@@ -53,31 +54,37 @@ public class OntologyTreePanel extends JPanel {
   /** ToolBars that displays the different options */
   private JToolBar leftToolBar;
 
-  /** Toggle Buttons used to display instances and the attributes */
-  protected JToggleButton instances;
-
   /** OntologyViewerOptions instance */
   protected OntologyViewerOptions ontologyViewerOptions;
 
-  /** Stores all the various ontologyTreeModels for different ontologies */
-  protected HashMap<Ontology, OntoTreeModel> ontologyTreeModels;
+  /**
+   * Stores all the various ontology2OntoTreeModels for different
+   * ontologies
+   */
+  protected HashMap<Ontology, OntoTreeModel> ontology2OntoTreeModels;
 
   /** Stores various color schemes for different ontology classes */
-  protected HashMap<Ontology, HashMap<String, Color>> ontologyName2ColorSchemesMap;
+  protected HashMap<Ontology, HashMap<String, Color>> ontology2ColorSchemesMap;
 
   /** Current ontologyColorScheme */
   protected HashMap<String, Color> currentOResource2ColorMap;
 
   /** This stores Class selection map for each individual loaded ontology */
-  protected HashMap<Ontology, HashMap<String, Boolean>> ontologyName2ClassSelectionMap;
+  protected HashMap<Ontology, HashMap<String, Boolean>> ontology2OResourceSelectionMap;
 
   /** Class Selection map for the current ontology */
-  protected HashMap<String, Boolean> currentClass2IsSelectedMap;
+  protected HashMap<String, Boolean> currentOResource2IsSelectedMap;
+
+  /** This stores Class selection map for each individual loaded ontology */
+  protected HashMap<Ontology, Set<RDFProperty>> ontology2PropertiesMap;
+
+  /** Class Selection map for the current ontology */
+  protected Set<RDFProperty> currentProperties;
 
   /**
    * This stores instances and the classes that instance belongs to
    */
-  protected HashMap<Ontology, HashMap<String, Set<OClass>>> ontologyName2PropValuesAndInstances2ClassesMap;
+  protected HashMap<Ontology, HashMap<String, Set<OClass>>> ontology2PropValuesAndInstances2ClassesMap;
 
   /**
    * instances of the ontology and their classes
@@ -109,39 +116,22 @@ public class OntologyTreePanel extends JPanel {
   protected OntologyViewer ontoViewer;
 
   /**
-   * Instance Lookup Action - when clicked adds highlights and collects the offsets of the possible strings
-   * that are eligible to become instances
+   * Indicates whether the annotation window is being shown or not
    */
-  protected InstanceLookupAction instanceLookupAction;
-  
-  /**
-   * Indicates whether the editClasswindow is being shown or not.
-   */
-  protected boolean showingEditOResourceWindow = false;
-  
-  /**
-   * Indicates whether the new annotation windows is being shown or not.
-   */
-  protected boolean showingNewClassAnnotationWindow = false;
-  
-  /**
-   * Indicates whether the new instance annotation window is being shown or not.
-   */
-  protected boolean showingNewInstanceAnnotationWindow = false;
-  
+  protected boolean showingAnnotationWindow = false;
+
   /** Constructor */
   public OntologyTreePanel(OntologyViewer ontoViewer) {
     this.ontoViewer = ontoViewer;
     this.textView = ontoViewer.documentTextualDocumentView;
     this.ontologyViewerOptions = new OntologyViewerOptions(this);
-    this.instanceLookupAction = new InstanceLookupAction(this);
-    ontologyName2ColorSchemesMap = new HashMap<Ontology, HashMap<String, Color>>();
-    ontologyName2PropValuesAndInstances2ClassesMap = new HashMap<Ontology, HashMap<String, Set<OClass>>>();
-    ontologyTreeModels = new HashMap<Ontology, OntoTreeModel>();
+    ontology2ColorSchemesMap = new HashMap<Ontology, HashMap<String, Color>>();
+    ontology2PropValuesAndInstances2ClassesMap = new HashMap<Ontology, HashMap<String, Set<OClass>>>();
+    ontology2OntoTreeModels = new HashMap<Ontology, OntoTreeModel>();
     currentOResource2ColorMap = new HashMap<String, Color>();
-    ontologyName2ClassSelectionMap = new HashMap<Ontology, HashMap<String, Boolean>>();
-    currentClass2IsSelectedMap = new HashMap<String, Boolean>();
-
+    ontology2OResourceSelectionMap = new HashMap<Ontology, HashMap<String, Boolean>>();
+    currentOResource2IsSelectedMap = new HashMap<String, Boolean>();
+    ontology2PropertiesMap = new HashMap<Ontology, Set<RDFProperty>>();
     colorGenerator = new ColorGenerator();
     initGUI();
   }
@@ -154,6 +144,14 @@ public class OntologyTreePanel extends JPanel {
    * @return
    */
   public ClassNode getNode(String classValue) {
+    // lets first convert this classValue into the className
+    int index = classValue.lastIndexOf("#");
+    if(index < 0) index = classValue.lastIndexOf("/");
+    if(index < 0) index = classValue.lastIndexOf(":");
+    if(index >= 0) {
+      classValue = classValue.substring(index + 1, classValue.length());
+    }
+    
     ClassNode currentNode = (ClassNode)currentOntologyTree.getModel().getRoot();
     return getClassNode(currentNode, classValue);
   }
@@ -181,8 +179,7 @@ public class OntologyTreePanel extends JPanel {
     }
     return null;
   }
-  
-  
+
   /** Deletes the Annotations from the document */
   public void deleteAnnotation(Annotation annot) {
     // and now removing from the actual document
@@ -220,7 +217,6 @@ public class OntologyTreePanel extends JPanel {
     return (Color)currentOResource2ColorMap.get(classVal);
   }
 
-  
   /** Initialize the GUI */
   private void initGUI() {
     currentOntologyTree = new JTree();
@@ -232,13 +228,8 @@ public class OntologyTreePanel extends JPanel {
     this.add(new JScrollPane(currentOntologyTree), BorderLayout.CENTER);
 
     leftToolBar = new JToolBar(JToolBar.VERTICAL);
-    instances = new JToggleButton("New Instance Lookup");
-    instances = new JToggleButton(new VerticalTextIcon(instances, "New Instance Lookup",  VerticalTextIcon.ROTATE_LEFT));
-    instances.addActionListener(this.instanceLookupAction);
-    instances.setSelected(false);
     leftToolBar.setFloatable(false);
-    leftToolBar.add(instances);
-    this.add(leftToolBar, BorderLayout.WEST);
+    // this.add(leftToolBar, BorderLayout.WEST);
 
     ontoTreeListener = new OntologyTreeListener(this);
     currentOntologyTree.addMouseListener(ontoTreeListener);
@@ -252,7 +243,8 @@ public class OntologyTreePanel extends JPanel {
     currentOntology = null;
     currentOntologyTreeModel = null;
     currentOResource2ColorMap = null;
-    currentClass2IsSelectedMap = null;
+    currentOResource2IsSelectedMap = null;
+    currentProperties = null;
     currentOntologyTree.setVisible(false);
     ontoTreeListener.removeHighlights();
   }
@@ -263,11 +255,12 @@ public class OntologyTreePanel extends JPanel {
    */
   public void removeOntologyTreeModel(Ontology ontology,
           boolean wasCurrentlySelected) {
-    this.ontologyTreeModels.remove(ontology);
-    this.ontologyName2ColorSchemesMap.remove(ontology);
-    this.ontologyName2ClassSelectionMap.remove(ontology);
-    this.ontologyName2PropValuesAndInstances2ClassesMap.remove(ontology);
-    if(ontologyTreeModels == null || ontologyTreeModels.size() == 0) {
+    this.ontology2OntoTreeModels.remove(ontology);
+    this.ontology2ColorSchemesMap.remove(ontology);
+    this.ontology2OResourceSelectionMap.remove(ontology);
+    this.ontology2PropValuesAndInstances2ClassesMap.remove(ontology);
+    this.ontology2PropertiesMap.remove(ontology);
+    if(ontology2OntoTreeModels == null || ontology2OntoTreeModels.size() == 0) {
       showEmptyOntologyTree();
     }
   }
@@ -286,54 +279,82 @@ public class OntologyTreePanel extends JPanel {
 
     this.currentOResourceName2AnnotationsListMap = annotMap;
     if(currentOntology != null && currentOResource2ColorMap != null)
-      ontologyName2ColorSchemesMap.put(currentOntology,
-              currentOResource2ColorMap);
+      ontology2ColorSchemesMap.put(currentOntology, currentOResource2ColorMap);
 
-    if(currentOntology != null && currentClass2IsSelectedMap != null)
-      ontologyName2ClassSelectionMap.put(currentOntology,
-              currentClass2IsSelectedMap);
+    if(currentOntology != null && currentOResource2IsSelectedMap != null)
+      ontology2OResourceSelectionMap.put(currentOntology,
+              currentOResource2IsSelectedMap);
 
     if(currentOntology != null && currentOntologyTreeModel != null
-            && ontologyTreeModels.containsKey(currentOntology))
-      ontologyTreeModels.put(currentOntology,
-              currentOntologyTreeModel);
+            && ontology2OntoTreeModels.containsKey(currentOntology))
+      ontology2OntoTreeModels.put(currentOntology, currentOntologyTreeModel);
 
-    if(currentOntology != null && currentPropValuesAndInstances2ClassesMap != null
-            && ontologyTreeModels.containsKey(currentOntology))
-      ontologyName2PropValuesAndInstances2ClassesMap.put(currentOntology,
+    if(currentOntology != null
+            && currentPropValuesAndInstances2ClassesMap != null
+            && ontology2OntoTreeModels.containsKey(currentOntology))
+      ontology2PropValuesAndInstances2ClassesMap.put(currentOntology,
               currentPropValuesAndInstances2ClassesMap);
+
+    if(currentOntology != null && currentProperties != null
+            && ontology2OntoTreeModels.containsKey(currentOntology))
+      ontology2PropertiesMap.put(currentOntology, currentProperties);
 
     currentOntology = ontology;
     ClassNode root = null;
     // lets create the new model for this new selected ontology
-    if(ontologyTreeModels != null
-            && ontologyTreeModels.containsKey(ontology)) {
-      currentOntologyTreeModel = ontologyTreeModels.get(ontology);
-      currentOResource2ColorMap = ontologyName2ColorSchemesMap.get(ontology);
-      currentClass2IsSelectedMap = ontologyName2ClassSelectionMap.get(ontology);
-      currentPropValuesAndInstances2ClassesMap = ontologyName2PropValuesAndInstances2ClassesMap.get(ontology);
+    if(ontology2OntoTreeModels != null
+            && ontology2OntoTreeModels.containsKey(ontology)) {
+      currentOntologyTreeModel = ontology2OntoTreeModels.get(ontology);
+      currentOResource2ColorMap = ontology2ColorSchemesMap.get(ontology);
+      currentOResource2IsSelectedMap = ontology2OResourceSelectionMap
+              .get(ontology);
+      currentPropValuesAndInstances2ClassesMap = ontology2PropValuesAndInstances2ClassesMap
+              .get(ontology);
+      currentProperties = ontology2PropertiesMap.get(ontology);
     }
     else {
       root = ClassNode.createRootNode(ontology, true);
       HashMap<String, Color> newColorScheme = new HashMap<String, Color>();
       setColorScheme(root, newColorScheme);
       currentOResource2ColorMap = newColorScheme;
-      ontologyName2ColorSchemesMap.put(ontology, newColorScheme);
+      ontology2ColorSchemesMap.put(ontology, newColorScheme);
       currentOntologyTreeModel = new OntoTreeModel(root);
-      ontologyTreeModels.put(ontology, currentOntologyTreeModel);
+      ontology2OntoTreeModels.put(ontology, currentOntologyTreeModel);
       HashMap<String, Boolean> newClassSelection = new HashMap<String, Boolean>();
       setOntoTreeClassSelection(root, newClassSelection);
-      currentClass2IsSelectedMap = newClassSelection;
-      ontologyName2ClassSelectionMap
-              .put(ontology, newClassSelection);
+      currentOResource2IsSelectedMap = newClassSelection;
+      ontology2OResourceSelectionMap.put(ontology, newClassSelection);
       currentPropValuesAndInstances2ClassesMap = obtainPVnInst2ClassesMap(ontology);
-      ontologyName2PropValuesAndInstances2ClassesMap.put(ontology, currentPropValuesAndInstances2ClassesMap);
+      ontology2PropValuesAndInstances2ClassesMap.put(ontology,
+              currentPropValuesAndInstances2ClassesMap);
+      currentProperties = obtainProperties(ontology);
+      ontology2PropertiesMap.put(ontology, currentProperties);
     }
     currentOntologyTree.setModel(currentOntologyTreeModel);
     // update the GUI part of the Tree
     currentOntologyTree.invalidate();
   }
 
+  /**
+   * This method returns the properties available in the ontology
+   * @param ontology
+   * @return
+   */
+  private Set<RDFProperty> obtainProperties(Ontology ontology) {
+   Set<RDFProperty> toReturn = new HashSet<RDFProperty>();
+   // lets add all properties
+   Set<RDFProperty> props = ontology.getPropertyDefinitions();
+   Iterator<RDFProperty> iter = props.iterator();
+   while(iter.hasNext()) {
+     final RDFProperty p = iter.next();
+     if(p instanceof AnnotationProperty || p instanceof DatatypeProperty || p instanceof ObjectProperty) {
+       toReturn.add(p);
+       continue;
+     }
+   }
+   return toReturn;
+  }
+  
   /**
    * This method iterates through each instance of the ontology and
    * obtains its all set properties. For each set property, obtains its
@@ -370,10 +391,10 @@ public class OntologyTreePanel extends JPanel {
       else {
         map.put(anInstName.toLowerCase(), classes);
       }
-      
+
       Iterator<RDFProperty> propertyIter = propertySet.iterator();
       while(propertyIter.hasNext()) {
-          
+
         RDFProperty anRDFProp = propertyIter.next();
         Set<String> stringValues = new HashSet<String>();
 
@@ -510,30 +531,29 @@ public class OntologyTreePanel extends JPanel {
    * @param value
    */
   public void setSelected(String className, boolean value) {
-    currentClass2IsSelectedMap.put(className, new Boolean(value));
-    ontologyName2ClassSelectionMap.put(currentOntology,
-            currentClass2IsSelectedMap);
+    currentOResource2IsSelectedMap.put(className, new Boolean(value));
+    ontology2OResourceSelectionMap.put(currentOntology,
+            currentOResource2IsSelectedMap);
   }
 
   public void setColor(String className, Color col) {
     currentOResource2ColorMap.put(className, col);
-    ontologyName2ColorSchemesMap.put(currentOntology,
-            currentOResource2ColorMap);
+    ontology2ColorSchemesMap.put(currentOntology, currentOResource2ColorMap);
   }
-  
+
   public Set<String> getAllClassNames() {
     Set<String> toReturn = new HashSet<String>();
-    for(String aResource : currentClass2IsSelectedMap.keySet()) {
+    for(String aResource : currentOResource2IsSelectedMap.keySet()) {
       if(currentOntology.getOResourceByName(aResource) instanceof OClass) {
         toReturn.add(aResource);
       }
     }
     return toReturn;
   }
-  
+
   public Set<String> getAllInstanceNames() {
     Set<String> toReturn = new HashSet<String>();
-    for(String aResource : currentClass2IsSelectedMap.keySet()) {
+    for(String aResource : currentOResource2IsSelectedMap.keySet()) {
       if(currentOntology.getOResourceByName(aResource) instanceof OInstance) {
         toReturn.add(aResource);
       }

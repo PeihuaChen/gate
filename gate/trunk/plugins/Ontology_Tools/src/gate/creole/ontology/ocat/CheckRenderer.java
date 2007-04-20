@@ -9,7 +9,6 @@ package gate.creole.ontology.ocat;
 
 import gate.creole.ontology.OClass;
 import gate.creole.ontology.OInstance;
-import gate.creole.ontology.OResource;
 import gate.gui.MainFrame;
 
 import java.awt.*;
@@ -116,7 +115,7 @@ public class CheckRenderer extends JPanel implements TreeCellRenderer {
 		}
 
 		// if node should be selected
-		boolean selected = ontologyTreePanel.currentClass2IsSelectedMap.get(conceptName).booleanValue();
+		boolean selected = ontologyTreePanel.currentOResource2IsSelectedMap.get(conceptName).booleanValue();
 		check.setSelected(selected);
     if(node.getSource() instanceof OClass) {
       iconLabel.setIcon(MainFrame.getIcon("ontology-class"));
