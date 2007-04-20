@@ -33,7 +33,7 @@ public class OntologyViewer extends AbstractDocumentView implements
                                                         CreoleListener,
                                                         AnnotationSetListener,
                                                         AnnotationListener,
-                                                        OntologyModificationListener, DocumentListener {
+                                                        OntologyModificationListener {
   /**
    * Serial version ID
    */
@@ -266,13 +266,12 @@ public class OntologyViewer extends AbstractDocumentView implements
     else {
       return;
     }
-    
-    if(aName == null)
-        return;
+
+    if(aName == null) return;
 
     int index = aName.lastIndexOf("#");
-    if(index < 0) index = aName.lastIndexOf(":");
     if(index < 0) index = aName.lastIndexOf("/");
+    if(index < 0) index = aName.lastIndexOf(":");
     if(index >= 0) {
       aValue = aName.substring(index + 1, aName.length());
     }
@@ -346,6 +345,7 @@ public class OntologyViewer extends AbstractDocumentView implements
 
     Annotation currentAnnot = ase.getAnnotation();
     currentAnnot.addAnnotationListener(this);
+
     // what we need to do is to add this to className2AnnotationList if
     // it is relavant to our stuff
     FeatureMap map = currentAnnot.getFeatures();
@@ -364,19 +364,20 @@ public class OntologyViewer extends AbstractDocumentView implements
     else {
       return;
     }
-    
-    if(aName == null)
-      return;
+
+    if(aName == null) return;
 
     int index = aName.lastIndexOf("#");
-    if(index < 0) index = aName.lastIndexOf(":");
     if(index < 0) index = aName.lastIndexOf("/");
+    if(index < 0) index = aName.lastIndexOf(":");
     if(index >= 0) {
       aValue = aName.substring(index + 1, aName.length());
     }
     else {
       aValue = aName;
     }
+
+    System.out.println(aValue);
 
     if(className2AnnotationList.containsKey(aValue)) {
       ArrayList<Annotation> annotList = className2AnnotationList.get(aValue);
@@ -467,8 +468,8 @@ public class OntologyViewer extends AbstractDocumentView implements
       }
 
       int index = aName.lastIndexOf("#");
-      if(index < 0) index = aName.lastIndexOf(":");
       if(index < 0) index = aName.lastIndexOf("/");
+      if(index < 0) index = aName.lastIndexOf(":");
       if(index >= 0) {
         aValue = aName.substring(index + 1, aName.length());
       }
@@ -584,8 +585,9 @@ public class OntologyViewer extends AbstractDocumentView implements
         boolean wasCurrentlySelected = false;
         if(ontologyTreePanel.getCurrentOntology() == ontology)
           wasCurrentlySelected = true;
-      
-        ontologyTreePanel.removeOntologyTreeModel(ontology, wasCurrentlySelected);
+
+        ontologyTreePanel.removeOntologyTreeModel(ontology,
+                wasCurrentlySelected);
         if(wasCurrentlySelected) if(ontologyCB.getItemCount() > 0) {
           ontologyCB.setSelectedIndex(0);
         }
@@ -685,62 +687,58 @@ public class OntologyViewer extends AbstractDocumentView implements
     boolean shouldSelectAgain = false;
     int index = ontologies.indexOf(ontology);
     if(index < 0) return;
-    
+
     if(ontologyCB.getSelectedIndex() == index) {
       shouldSelectAgain = true;
     }
+    HashMap<String, Boolean> selectionMap = ontologyTreePanel.ontology2OResourceSelectionMap
+            .get(ontology);
+
     refreshOntologyCB(ontology, true);
     refreshOntologyCB(ontology, false);
     if(shouldSelectAgain) ontologyCB.setSelectedIndex(index);
+    HashMap<String, Boolean> newMap = ontologyTreePanel.ontology2OResourceSelectionMap
+            .get(ontology);
+    for(String key : selectionMap.keySet()) {
+      Boolean val = selectionMap.get(key);
+      if(newMap.containsKey(key)) {
+        newMap.put(key, val);
+      }
+    }
+
+    documentTextArea.requestFocus();
   }
 
   public void ontologyModified(Ontology ontology, OResource resource,
           int eventType) {
-    boolean shouldSelectAgain = false;
-    int index = ontologies.indexOf(ontology);
-    if(index < 0) return;
-    
-    if(ontologyCB.getSelectedIndex() == index) {
-      shouldSelectAgain = true;
-    }
-    refreshOntologyCB(ontology, true);
-    refreshOntologyCB(ontology, false);
-    if(shouldSelectAgain) ontologyCB.setSelectedIndex(index);
+    // boolean shouldSelectAgain = false;
+    // int index = ontologies.indexOf(ontology);
+    // if(index < 0) return;
+    //
+    // if(ontologyCB.getSelectedIndex() == index) {
+    // shouldSelectAgain = true;
+    // }
+    // HashMap<String, Boolean> selectionMap =
+    // ontologyTreePanel.ontologyName2ClassSelectionMap
+    // .get(ontology);
+    // refreshOntologyCB(ontology, true);
+    // refreshOntologyCB(ontology, false);
+    // if(shouldSelectAgain) ontologyCB.setSelectedIndex(index);
+    //    
+    // HashMap<String, Boolean> newMap =
+    // ontologyTreePanel.ontologyName2ClassSelectionMap
+    // .get(ontology);
+    // for(String key : selectionMap.keySet()) {
+    // Boolean val = selectionMap.get(key);
+    // if(newMap.containsKey(key)) {
+    // newMap.put(key, val);
+    // }
+    // }
+    //
+    // documentTextArea.requestFocus();
+
   }
 
-  public void resourceAdded(Ontology ontology, OResource resource) {
-    boolean shouldSelectAgain = false;
-    int index = ontologies.indexOf(ontology);
-    if(index < 0) return;
-    if(ontologyCB.getSelectedIndex() == index) {
-      shouldSelectAgain = true;
-    }
-    refreshOntologyCB(ontology, true);
-    refreshOntologyCB(ontology, false);
-    if(shouldSelectAgain) ontologyCB.setSelectedIndex(index);
-  }
-  
-  /**Called when a new {@link gate.AnnotationSet} has been added*/
-  public void annotationSetAdded(DocumentEvent e) {
-    // do nothing
-  }
-
-  /**Called when an {@link gate.AnnotationSet} has been removed*/
-  public void annotationSetRemoved(DocumentEvent e) {
-    // do nothing
-  }
-
-  /**Called when the content of the document has changed through an edit 
-   * operation.
-   */
-  public void contentEdited(DocumentEvent e) {
-    // we need to update our offsets in the instance lookup action
-    if(!ontologyTreePanel.instances.isVisible())
-      return;
-    
-    
-  }
-  
   public void ontologyReset(Ontology ontology) {
     boolean shouldSelectAgain = false;
     int index = ontologies.indexOf(ontology);
@@ -751,12 +749,12 @@ public class OntologyViewer extends AbstractDocumentView implements
 
     // lets traverse through the ontology and find out the classes which
     // are selected
-    HashMap<String, Boolean> selectionMap = ontologyTreePanel.ontologyName2ClassSelectionMap
+    HashMap<String, Boolean> selectionMap = ontologyTreePanel.ontology2OResourceSelectionMap
             .get(ontology);
     refreshOntologyCB(ontology, true);
     refreshOntologyCB(ontology, false);
     if(shouldSelectAgain) ontologyCB.setSelectedIndex(index);
-    HashMap<String, Boolean> newMap = ontologyTreePanel.ontologyName2ClassSelectionMap
+    HashMap<String, Boolean> newMap = ontologyTreePanel.ontology2OResourceSelectionMap
             .get(ontology);
     for(String key : selectionMap.keySet()) {
       Boolean val = selectionMap.get(key);
@@ -767,6 +765,33 @@ public class OntologyViewer extends AbstractDocumentView implements
 
     documentTextArea.requestFocus();
 
-  }  
-  
+  }
+
+  public void resourceAdded(Ontology ontology, OResource resource) {
+    boolean shouldSelectAgain = false;
+    int index = ontologies.indexOf(ontology);
+    if(index < 0) return;
+    if(ontologyCB.getSelectedIndex() == index) {
+      shouldSelectAgain = true;
+    }
+
+    // lets traverse through the ontology and find out the classes which
+    // are selected
+    HashMap<String, Boolean> selectionMap = ontologyTreePanel.ontology2OResourceSelectionMap
+            .get(ontology);
+    refreshOntologyCB(ontology, true);
+    refreshOntologyCB(ontology, false);
+    if(shouldSelectAgain) ontologyCB.setSelectedIndex(index);
+    HashMap<String, Boolean> newMap = ontologyTreePanel.ontology2OResourceSelectionMap
+            .get(ontology);
+    for(String key : selectionMap.keySet()) {
+      Boolean val = selectionMap.get(key);
+      if(newMap.containsKey(key)) {
+        newMap.put(key, val);
+      }
+    }
+
+    documentTextArea.requestFocus();
+  }
+
 }

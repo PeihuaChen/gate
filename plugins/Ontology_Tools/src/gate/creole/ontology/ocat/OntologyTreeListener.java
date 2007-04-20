@@ -14,9 +14,7 @@ import java.awt.event.*;
 import java.util.*;
 import gate.*;
 import gate.creole.ontology.OClass;
-import gate.creole.ontology.OInstance;
 import gate.creole.ontology.OResource;
-import gate.creole.ontology.Ontology;
 import gate.creole.ontology.OntologyUtilities;
 import gate.creole.ontology.URI;
 import gate.util.GateRuntimeException;
@@ -136,43 +134,23 @@ public class OntologyTreeListener extends MouseAdapter {
         });
         popup.setVisible(true);
         popup.show(ontologyTreePanel, x, y);
+        ontologyTreePanel.ontoViewer.documentTextArea.requestFocus();
         return;
       }
+      
+      String selectedText = ontologyTreePanel.ontoViewer.documentTextArea.getSelectedText();
+      ontologyTreePanel.ontoViewer.annotationAction.hideAllWindows();
 
-      if(node.getSource() instanceof OClass) {
-        String selectedText = ontologyTreePanel.ontoViewer.documentTextArea.getSelectedText();
-        if(selectedText != null && selectedText.length() > 0) {
-          ontologyTreePanel.ontoViewer.annotationAction.hideAllWindows();
-          // lets find out if the instance lookup is enabled
-          // if so, we need to add the instance feature
-          // the last parameter in addNewAnnotation indicates if it is a class or instance feature
-          if(ontologyTreePanel.instances.isSelected()) {
-
-            // lets check if the resource exists with the newInstanceName
-            String newInstanceString = selectedText.replaceAll(" ", "_");
-            
-            ClassNode aNode = ontologyTreePanel.getNode(newInstanceString);
-            newInstanceString = aNode == null ? newInstanceString : aNode.toString();
-            
-            URI aURI = OntologyUtilities.createURI(ontologyTreePanel
-                    .getCurrentOntology(), newInstanceString, false);
-
-            if(aNode == null || (!(aNode.getSource() instanceof OClass))) {
-               ontologyTreePanel.getCurrentOntology().addOInstance(aURI, (OClass)node.getSource());
-            }
-         
-            if(aNode == null) {
-              aNode = ontologyTreePanel.getNode(newInstanceString);
-            }
-            
-            addNewAnnotation(node, false, null, false);
-          } else
-            addNewAnnotation(node, false, null, true);
-          return;
+      if(selectedText != null && selectedText.length() > 0) {
+        if(node.getSource() instanceof OClass) {
+          addNewAnnotation(node, false, null, false, false);
+        } else {
+          addNewAnnotation(node, false, null, true, false);
         }
+        ontologyTreePanel.ontoViewer.documentTextArea.requestFocus();
       }
 
-      boolean isSelected = !ontologyTreePanel.currentClass2IsSelectedMap.get(
+      boolean isSelected = !ontologyTreePanel.currentOResource2IsSelectedMap.get(
               node.toString()).booleanValue();
 
       // now if the sibling feature is ON we need to reflect our changes
@@ -185,7 +163,6 @@ public class OntologyTreeListener extends MouseAdapter {
           Object[] paths = path.getPath();
           expandChildren(paths, node);
         }
-
       }
       else {
         ontologyTreePanel.setSelected(node.toString(), isSelected);
@@ -194,6 +171,7 @@ public class OntologyTreeListener extends MouseAdapter {
 
       // so now we need to highlight all the stuff
       refreshHighlights();
+      ontologyTreePanel.ontoViewer.documentTextArea.requestFocus();
     }
   }
 
@@ -292,7 +270,7 @@ public class OntologyTreeListener extends MouseAdapter {
    * @param all
    */
   public ArrayList<Annotation> addNewAnnotation(ClassNode node, boolean all,
-          FeatureMap map, boolean isClassFeature) {
+          FeatureMap map, boolean isClassFeature, boolean shouldCreateInstance) {
 
     ArrayList<Annotation> toReturn = new ArrayList<Annotation>();
     
@@ -345,17 +323,31 @@ public class OntologyTreeListener extends MouseAdapter {
       set = ontologyTreePanel.ontoViewer.getDocument().getAnnotations(
               annotationSet);
     }
-    if(map == null) map = Factory.newFeatureMap();
+    
+    
+    FeatureMap newMap = Factory.newFeatureMap();
+    if(map != null)
+      newMap.putAll(map);
+    
+    newMap.remove(gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME);
+    newMap.remove(gate.creole.ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME);
+    
     if(isClassFeature) {
-      map.put(gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME, node
-              .toString());
+      newMap.put(gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME, ((OResource) node.getSource()).getURI().toString());
+      if(shouldCreateInstance) {
+        if(ontologyTreePanel.getCurrentOntology().getOResourceByName(selectedText) == null) {
+          URI uri = OntologyUtilities.createURI(ontologyTreePanel.getCurrentOntology(), selectedText, false);
+          ontologyTreePanel.getCurrentOntology().addOInstance(uri, (OClass) node.getSource());
+        }
+      }
+      
     }
     else {
-        map.put(gate.creole.ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME, selectedText);
+        newMap.put(gate.creole.ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME, ((OResource) node.getSource()).getURI().toString());
     }
 
     String dns = ontologyTreePanel.getCurrentOntology().getDefaultNameSpace();
-    map.put(gate.creole.ANNIEConstants.LOOKUP_ONTOLOGY_FEATURE_NAME, dns
+    newMap.put(gate.creole.ANNIEConstants.LOOKUP_ONTOLOGY_FEATURE_NAME, dns
             .substring(0, dns.length() - 1));
 
     for(int i = 0; i < offsets.size(); i++) {
@@ -382,7 +374,7 @@ public class OntologyTreeListener extends MouseAdapter {
         // and we need to add new annotation
         Integer id = set.add(new Long(start), new Long(end),
                 ontologyTreePanel.ontologyViewerOptions
-                        .getSelectedAnnotationType(), map);
+                        .getSelectedAnnotationType(), newMap);
         toReturn.add(set.get(id));
 
       }
@@ -421,13 +413,12 @@ public class OntologyTreeListener extends MouseAdapter {
       }
     }
     highlightedTags = new ArrayList<Object>();
-
     highlightedAnnotations = new ArrayList<Annotation>();
 
     HashMap<String, ArrayList<Annotation>> currentClassName2AnnotationsListMap = ontologyTreePanel.currentOResourceName2AnnotationsListMap;
     if(currentClassName2AnnotationsListMap == null) return;
 
-    HashMap<String, Boolean> currentClass2IsSelectedMap = ontologyTreePanel.currentClass2IsSelectedMap;
+    HashMap<String, Boolean> currentClass2IsSelectedMap = ontologyTreePanel.currentOResource2IsSelectedMap;
 
     // if there is no class selected we donot need to highlight anything
     if(currentClass2IsSelectedMap == null
@@ -441,7 +432,7 @@ public class OntologyTreeListener extends MouseAdapter {
       if(!currentClass2IsSelectedMap.get(className).booleanValue()) {
         continue;
       }
-
+      
       ArrayList<Annotation> annotationsList = currentClassName2AnnotationsListMap
               .get(className);
 

@@ -28,19 +28,7 @@ public class AnnotationAction extends MouseInputAdapter {
   /**
    * Timer object
    */
-  private javax.swing.Timer newClassAnnotationWindowTimer;
-  
-  /**
-   * An instance of editClassWindowTimer, that is used for waiting for
-   * sometime.
-   */
-  private javax.swing.Timer editClassWindowTimer;
-
-  /**
-   * An instance of editClassWindowTimer, that is used for waiting for
-   * sometime.
-   */
-  private javax.swing.Timer newInstanceAnnotationWindowTimer;
+  private javax.swing.Timer annotationWindowTimer;
 
   /**
    * How long we should wait before showing a new annotation/change
@@ -52,20 +40,7 @@ public class AnnotationAction extends MouseInputAdapter {
    * Action that is performed when user decides to create a new
    * annotation.
    */
-  private NewClassAnnotationAction newClassAnnotationAction;
-  
-  /**
-   * Action that tells what to do whan a mouse is moved.
-   */
-  private EditClassAction editClassAction;
-
-  /**
-   * Action that is performed when user decides to create a new
-   * Instance annotation.
-   */
-  private NewInstanceAnnotationAction newInstanceAnnotationAction;
-
-
+  private AnnotationEditor annotationEditor;
 
   /**
    * Constructor
@@ -75,17 +50,10 @@ public class AnnotationAction extends MouseInputAdapter {
    */
   public AnnotationAction(OntologyTreePanel ontoTreePanel) {
     this.ontologyTreePanel = ontoTreePanel;
-    editClassAction = new EditClassAction(ontoTreePanel);
-    editClassWindowTimer = new javax.swing.Timer(DELAY, editClassAction);
-    editClassWindowTimer.setRepeats(false);
-    newClassAnnotationAction = new NewClassAnnotationAction(ontoTreePanel);
-    newClassAnnotationWindowTimer = new javax.swing.Timer(DELAY, newClassAnnotationAction);
-    newClassAnnotationWindowTimer.setRepeats(false);
-    newInstanceAnnotationAction = new NewInstanceAnnotationAction(ontoTreePanel);
-    newInstanceAnnotationWindowTimer = new javax.swing.Timer(DELAY, newInstanceAnnotationAction);
-    newInstanceAnnotationWindowTimer.setRepeats(false);
+    annotationEditor = new AnnotationEditor(ontoTreePanel);
+    annotationWindowTimer = new javax.swing.Timer(DELAY, annotationEditor);
+    annotationWindowTimer.setRepeats(false);
   }
-
 
   /**
    * Grabs the current location of mouse pointers
@@ -101,19 +69,9 @@ public class AnnotationAction extends MouseInputAdapter {
    * This method to hide all the popup windows
    */
   public void hideAllWindows() {
-    if(ontologyTreePanel.showingNewClassAnnotationWindow) {
-      ontologyTreePanel.showingNewClassAnnotationWindow = false;
-      newClassAnnotationAction.hideWindow();
-      ontologyTreePanel.ontoViewer.documentTextArea.requestFocus();
-    }
-    if(ontologyTreePanel.showingEditOResourceWindow) {
-      ontologyTreePanel.showingEditOResourceWindow = false;
-      editClassAction.hideWindow();
-      ontologyTreePanel.ontoViewer.documentTextArea.requestFocus();
-    }
-    if(ontologyTreePanel.showingNewInstanceAnnotationWindow) {
-      ontologyTreePanel.showingNewInstanceAnnotationWindow = false;
-      newInstanceAnnotationAction.hideWindow();
+    if(ontologyTreePanel.showingAnnotationWindow) {
+      ontologyTreePanel.showingAnnotationWindow = false;
+      annotationEditor.hideWindow();
       ontologyTreePanel.ontoViewer.documentTextArea.requestFocus();
     }
   }
@@ -124,20 +82,12 @@ public class AnnotationAction extends MouseInputAdapter {
    * @param e
    */
   public void mouseMoved(MouseEvent e) {
+    if(ontologyTreePanel.currentOntologyTree == null) return;
     // mouse is moved so simply activate the timer
-    newClassAnnotationAction
-            .setTextLocation(ontologyTreePanel.ontoViewer.documentTextArea
+    annotationEditor.setTextLocation(ontologyTreePanel.ontoViewer.documentTextArea
                     .viewToModel(e.getPoint()));
-    newClassAnnotationWindowTimer.restart();
-    editClassAction
-            .setTextLocation(ontologyTreePanel.ontoViewer.documentTextArea
-                    .viewToModel(e.getPoint()));
-    editClassAction.setMousePoint(e.getPoint());
-    editClassWindowTimer.restart();
-    newInstanceAnnotationAction
-    .setTextLocation(ontologyTreePanel.ontoViewer.documentTextArea
-          .viewToModel(e.getPoint()));
-    newInstanceAnnotationWindowTimer.restart();
+    annotationWindowTimer.restart();
+    annotationEditor.setMousePoint(e.getPoint());
   }
 
   /**

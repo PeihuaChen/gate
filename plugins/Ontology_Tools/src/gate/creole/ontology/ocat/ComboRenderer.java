@@ -3,7 +3,7 @@
  *
  *  Niraj Aswani, 12/March/07
  *
- *  $Id: CheckRenderer.html,v 1.0 2007/03/12 16:13:01 niraj Exp $
+ *  $Id$
  */
 package gate.creole.ontology.ocat;
 
@@ -13,7 +13,6 @@ import gate.gui.MainFrame;
 
 import java.awt.*;
 import javax.swing.*;
-import javax.swing.tree.*;
 
 import com.ontotext.gate.vr.ClassNode;
 import com.ontotext.gate.vr.IFolder;
@@ -23,17 +22,12 @@ import com.ontotext.gate.vr.IFolder;
  * @author Niraj Aswani
  * @version 1.0
  */
-public class CheckRenderer extends JPanel implements TreeCellRenderer {
+public class ComboRenderer extends JPanel implements ListCellRenderer {
 
 	/**
 	 * Serial Version ID
 	 */
 	private static final long serialVersionUID = 3257004371551204912L;
-
-	/**
-	 * Allows user to select/deselect class in the ontology Tree
-	 */
-	private JCheckBox check;
 
 	/**
 	 * Class label is shown using this label
@@ -48,7 +42,7 @@ public class CheckRenderer extends JPanel implements TreeCellRenderer {
   /**
    * Label Panel
    */
-  private JPanel iconPanel, labelPanel;
+  private JPanel labelPanel;
   
 	/**
 	 * The instance of ontologyTreePanel
@@ -60,73 +54,62 @@ public class CheckRenderer extends JPanel implements TreeCellRenderer {
 	 * 
 	 * @param owner
 	 */
-	public CheckRenderer(OntologyTreePanel owner) {
+	public ComboRenderer(OntologyTreePanel owner) {
 		this.ontologyTreePanel = owner;
-		check = new JCheckBox();
-		check.setBackground(Color.white);
 		label = new JLabel();
     iconLabel = new JLabel();
     
-    iconPanel = new JPanel(new BorderLayout(5,10));
-    ((BorderLayout) iconPanel.getLayout()).setHgap(0);
-    iconPanel.setOpaque(true);
-    iconPanel.add(check, BorderLayout.WEST);
-    iconPanel.add(iconLabel, BorderLayout.EAST);
-
     labelPanel = new JPanel(new BorderLayout(5,10));
     ((BorderLayout) labelPanel.getLayout()).setHgap(0);
-    //labelPanel.setOpaque(true);
     labelPanel.add(label);
     
     setLayout(new BorderLayout(5,10));
     ((BorderLayout)getLayout()).setHgap(1);
-    add(iconPanel, BorderLayout.WEST);
-    add(labelPanel, BorderLayout.EAST);
+    add(iconLabel, BorderLayout.WEST);
+    add(labelPanel, BorderLayout.CENTER);
+    this.setOpaque(true);
 	}
 
 	/**
 	 * Renderer method
 	 */
-	public Component getTreeCellRendererComponent(JTree tree, Object value,
-			boolean isSelected, boolean expanded, boolean leaf, int row,
-			boolean hasFocus) {
+	public Component getListCellRendererComponent(JList list, Object value,
+			int row, boolean isSelected, boolean hasFocus) {
 
 		Object userObject = value;
-		if (!(userObject instanceof IFolder)) {
+    ClassNode item = (ClassNode) userObject;
+    
+		if (!(item instanceof IFolder)) {
 			label.setBackground(Color.white);
 			return this;
 		}
     
     javax.swing.Icon icon = null;
-		ClassNode node = (ClassNode) userObject;
-		String conceptName = node.toString();
+		String conceptName = item.getSource().toString();
 
     if (row == 0) {
 			// this is the ontology name
-			check.setVisible(false);
       iconLabel.setVisible(false);
       label.setText(conceptName);
       labelPanel.setBackground(Color.white);
-      iconPanel.setBackground(Color.WHITE);
+      iconLabel.setBackground(Color.WHITE);
       return this;
 		} else {
-			check.setVisible(true);
       iconLabel.setVisible(true);
 		}
 
 		// if node should be selected
 		boolean selected = ontologyTreePanel.currentOResource2IsSelectedMap.get(conceptName).booleanValue();
-		check.setSelected(selected);
-    if(node.getSource() instanceof OClass) {
+    if(item.getSource() instanceof OClass) {
       iconLabel.setIcon(MainFrame.getIcon("ontology-class"));
-    } else if(node.getSource() instanceof OInstance){
+    } else if(item.getSource() instanceof OInstance){
       iconLabel.setIcon(MainFrame.getIcon("ontology-instance"));
     } else {
       iconLabel.setIcon(null);
     }
      
 		label.setText(conceptName);
-		label.setFont(tree.getFont());
+		label.setFont(list.getFont());
 
 		// We assign the automatically generated random colors to the concept,
 		// but randomly generation of colors for different classes takes place
@@ -135,7 +118,7 @@ public class CheckRenderer extends JPanel implements TreeCellRenderer {
 			Color color = (Color) ontologyTreePanel.currentOResource2ColorMap.get(
 					conceptName);
 			labelPanel.setBackground(color);
-			iconPanel.setBackground(Color.WHITE);
+			iconLabel.setBackground(Color.WHITE);
 		}
 		return this;
 	}
