@@ -127,7 +127,10 @@ public abstract class AbstractOWLIMOntologyImpl
       owlim.cleanOntology(sesameRepositoryID);
       urisToOResouceMap.clear();
       resourceNamesToOResourcesMap.clear();
-      fireOntologyReset();
+      if(!callFromCleanup)
+        fireOntologyReset();
+      else
+          callFromCleanup = false;
     }
     catch(RemoteException re) {
       throw new GateRuntimeException(re);
@@ -1116,6 +1119,8 @@ public abstract class AbstractOWLIMOntologyImpl
     resourceNamesToOResourcesMap.remove(resourceName);
   }
 
+  private boolean callFromCleanup = false;
+  
   /*
    * (non-Javadoc)
    * 
@@ -1123,7 +1128,8 @@ public abstract class AbstractOWLIMOntologyImpl
    */
   public void cleanup() {
     if(owlim != null && !getPersistRepository().booleanValue()) {
-      cleanOntology();
+      callFromCleanup = true;
+        cleanOntology();
       try {
         owlim.removeRepository(this.sesameRepositoryID);
       }
