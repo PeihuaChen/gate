@@ -16,11 +16,14 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import javax.servlet.ServletContext;
 import javax.xml.rpc.ServiceException;
-import org.openrdf.model.BNode;
+import org.openrdf.model.BNode; 
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
@@ -3448,9 +3451,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
         // lets find out the new import values those have come through
         // the new
         // ontoFileUrl
-        ArrayList<String> importValues = getImportValues(repositoryID,
+        Set<String> importValues = getImportValues(repositoryID,
                 ontoFileUrl, baseURI, format, absolutePersistLocation,
-                isOntologyData);
+                isOntologyData, new HashSet<String>());
         SailConfig syncSail = repConfig.getSail(OWLIM_SCHEMA_REPOSITORY_CLASS);
         if(syncSail != null) {
           String formatToUse = "ntriples";
@@ -3478,9 +3481,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
           if(imports == null) imports = "";
           if(defaultNS == null) defaultNS = "";
           if(imports.length() > 0) {
-            for(int i = 0; i < importValues.size(); i++) {
-              imports += ";" + importValues.get(i);
-              defaultNS += ";" + importValues.get(i) + "#";
+            for(String imValue : importValues) {
+              imports += ";" + imValue;
+              defaultNS += ";" + imValue + "#";
             }
           }
           else {
@@ -3519,29 +3522,27 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
     return found;
   }
 
-  private ArrayList<String> getImportValues(String currentRepository,
+  private HashSet<String> getImportValues(String currentRepository,
           String ontoFileUrl, String baseURI, byte format,
-          String absolutePersistLocation, boolean isOntologyData) {
+          String absolutePersistLocation, boolean isOntologyData, Set<String> parsedValues) {
     String baseURL = ontoFileUrl;
+    System.out.println(baseURL);
     ArrayList<String> toReturn = new ArrayList<String>();
     try {
       String dummyRepository = "dummy" + Math.random();
-      RepositoryConfig repConfig = createNewRepository(dummyRepository,
+      createNewRepository(dummyRepository,
               ontoFileUrl, isOntologyData, baseURI, false,
               absolutePersistLocation, "admin", "admin", format, true);
       setCurrentRepositoryID(dummyRepository);
       if(ontoFileUrl != null && ontoFileUrl.trim().length() != 0) {
-        boolean findURL = false;
         if(isOntologyData) {
           this.currentRepository.addData(ontoFileUrl, baseURI,
                   getRDFFormat(format), true, adminListener);
-          findURL = true;
         }
         else if(ontoFileUrl.startsWith("file:")) {
           this.currentRepository.addData(new File(new URL(ontoFileUrl)
                   .getFile()), baseURI, getRDFFormat(format), true,
                   adminListener);
-          findURL = true;
         }
         else {
           this.currentRepository.addData(new URL(ontoFileUrl), baseURI,
@@ -3559,17 +3560,24 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
         if(ontoFileUrl != null) {
           PropertyValue[] values = getPropertyValues(dummyRepository,
                   ontoFileUrl, OWL.IMPORTS);
+
           for(int i = 0; i < values.length; i++) {
             String fileName = values[i].getValue();
+            
             // here we check what user has provided is a valid URL or
             // a relative path
             try {
               new URL(fileName).openStream();
+              if(parsedValues.contains(fileName))
+                continue;
+              
               toReturn.add(fileName);
               continue;
             }
             catch(Exception e) {
             }
+            
+            
             int m = 0;
             boolean allFound = true;
             for(m = 0; m < fileName.length() && m < baseURI.length(); m++) {
@@ -3578,24 +3586,52 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
                 break;
               }
             }
+            
             if(!allFound) {
+              
+              String newBaseURL = baseURL;
+              int lastIndex = newBaseURL.lastIndexOf("/");
+              if(lastIndex > 0)
+                newBaseURL = newBaseURL.substring(0, lastIndex);
+              else newBaseURL = newBaseURL;
+              
               fileName = fileName.substring(m, fileName.length());
               String newBaseURI = baseURI.substring(m, baseURI.length());
+              
               int atLeast = 0;
               int index = 0;
+              
               while(true) {
                 index = newBaseURI.indexOf('/', index);
                 if(index == -1) break;
                 index++;
                 atLeast++;
               }
+              
               for(m = 0; m < atLeast; m++) {
-                fileName = "../" + fileName;
+                int newIndex = newBaseURL.lastIndexOf("/");
+                if(newIndex > 0) {
+                  newBaseURL = newBaseURL.substring(0,newIndex);
+                } else {
+                  throw new RemoteException("Invalid Import :"+fileName);
+                }
               }
-              int lastIndex = baseURL.lastIndexOf("/");
-              if(lastIndex > 0)
-                fileName = baseURL.substring(0, lastIndex + 1) + fileName;
-              else fileName = baseURL + "/" + fileName;
+
+              while(true) {
+                int newIndex = fileName.indexOf("..");
+                if(newIndex == 0) {
+                  fileName = fileName.substring(newIndex + 3, fileName.length());
+                  newIndex = newBaseURL.lastIndexOf("/");
+                  newBaseURL = newBaseURL.substring(0, newIndex + 1);
+                } else {
+                  break;
+                }
+              }
+              
+              fileName = newBaseURL + (newBaseURL.endsWith("/") ? "" : "/") + fileName;
+              if(parsedValues.contains(fileName))
+                continue;
+
               toReturn.add(fileName);
             }
           }
@@ -3608,7 +3644,15 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
       // do not do anything
       e.printStackTrace();
     }
-    return toReturn;
+    
+    HashSet<String> finallyToReturn = new HashSet<String>();
+    finallyToReturn.addAll(toReturn);
+    parsedValues.addAll(toReturn);
+    for(String value : toReturn) {
+      finallyToReturn.addAll(getImportValues(currentRepository, value, baseURI, format, absolutePersistLocation, isOntologyData, parsedValues));
+    }
+    
+    return finallyToReturn;
   }
 
   /**
@@ -3675,11 +3719,11 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle {
       String imports = owlRDFS.getAbsolutePath();
       String defaultNS = "http://www.w3.org/2002/07/owl#";
       if(!isDummyRepository) {
-        ArrayList<String> importValues = getImportValues(null, ontoFileUrl,
-                baseURI, format, absolutePersistLocation, isOntologyData);
-        for(int i = 0; i < importValues.size(); i++) {
-          imports += ";" + importValues.get(i);
-          defaultNS += ";" + importValues.get(i) + "#";
+        Set<String> importValues = getImportValues(null, ontoFileUrl,
+                baseURI, format, absolutePersistLocation, isOntologyData, new HashSet<String>());
+        for(String imValue : importValues) {
+          imports += ";" + imValue;
+          defaultNS += ";" + imValue + "#";
         }
       }
       map.put("imports", imports);
