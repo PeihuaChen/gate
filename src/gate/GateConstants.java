@@ -111,6 +111,11 @@ public interface GateConstants {
   public static final String GATE_USER_CONFIG_PROPERTY_NAME = "gate.user.config";
   
   /**
+   * The name of the property for setting the user session file name
+   */
+  public static final String GATE_USER_SESSION_PROPERTY_NAME = "gate.user.session";
+  
+  /**
    * The name of the built-in creole directory URL property
    */
   public static final String BUILTIN_CREOLE_DIR_PROPERTY_NAME =
