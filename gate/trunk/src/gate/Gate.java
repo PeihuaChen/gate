@@ -154,7 +154,7 @@ public class Gate implements GateConstants
       }
       //if failed, try to guess
       if(gateHome == null || !gateHome.exists()){
-        System.err.println("GATE home system property (\"" + 
+        Err.println("GATE home system property (\"" + 
                 GATE_HOME_PROPERTY_NAME + "\") not set.\nAttempting to guess...");
         URL gateURL = Thread.currentThread().getContextClassLoader().
           getResource("gate/Gate.class");
@@ -172,7 +172,7 @@ public class Gate implements GateConstants
             gateHome = gateClassFile.getParentFile().
               getParentFile().getParentFile();
           }
-          System.err.println("Using \"" + 
+          Err.println("Using \"" + 
                   gateHome.getCanonicalPath() + 
                   "\" as GATE Home.\nIf this is not correct please set it manually" + 
                   " using the -D" + GATE_HOME_PROPERTY_NAME + 
@@ -183,7 +183,7 @@ public class Gate implements GateConstants
         }          
       }
     }
-    System.out.println("Using " + gateHome.toString() + " as GATE home");
+    Out.println("Using " + gateHome.toString() + " as GATE home");
     
     //Plugins home
     if(pluginsHome == null){
@@ -209,7 +209,7 @@ public class Gate implements GateConstants
                 PLUGINS_HOME_PROPERTY_NAME + " option in your start-up script.");
       }
     }
-    System.out.println("Using " + pluginsHome.toString() + 
+    Out.println("Using " + pluginsHome.toString() + 
             " as installed plug-ins directory.");
     
     //site config
@@ -234,7 +234,7 @@ public class Gate implements GateConstants
             SITE_CONFIG_PROPERTY_NAME + " option in your start-up script!");
       }
     }
-    System.out.println("Using " + siteConfigFile.toString() + 
+    Out.println("Using " + siteConfigFile.toString() + 
     " as site configuration file.");
     
     //user config
@@ -247,10 +247,22 @@ public class Gate implements GateConstants
       //if still not set, use the user's home as a base directory
       if(userConfigFile == null){
         userConfigFile = new File(getDefaultUserConfigFileName());
-      }
-      System.out.println("Using " + userConfigFile + " as user configuration file");
+      }  
     }
-
+    Out.println("Using " + userConfigFile + " as user configuration file");
+    
+    //user session
+    if(userSessionFile == null){
+      String userSessionStr = 
+        System.getProperty(GATE_USER_SESSION_PROPERTY_NAME);
+      if(userSessionStr != null && userSessionStr.length() > 0){
+        userSessionFile = new File(userSessionStr);
+      } else {
+        userSessionFile = new File(getDefaultUserSessionFileName());
+      }
+    }//if(userSessionFile == null)
+    Out.println("Using " + userSessionFile + " as user session file");
+    
     // builtin creole dir
     if(builtinCreoleDir == null) {
       String builtinCreoleDirPropertyValue =
@@ -275,7 +287,7 @@ public class Gate implements GateConstants
               + " value \"" + builtinCreoleDirPropertyValue + "\" could"
               + " not be parsed as either a URL or a file path.");
         }
-        System.out.println("Using " + builtinCreoleDir + " as built-in CREOLE"
+        Out.println("Using " + builtinCreoleDir + " as built-in CREOLE"
             + " directory URL");
       }
     }
@@ -317,7 +329,7 @@ public class Gate implements GateConstants
       File creoleFile = new File(dirs[i], "creole.xml");
       if(creoleFile.exists()){
         try{
-          URL pluginURL = dirs[i].toURL();
+          URL pluginURL = dirs[i].toURI().toURL();
           addKnownPlugin(pluginURL);
         }catch(MalformedURLException mue){
           //this shoulod never happen
@@ -335,7 +347,7 @@ public class Gate implements GateConstants
     if(pluginPath == null || pluginPath.length() == 0){
       //value not set -> use the default
       try{
-        pluginPath = new File(pluginsHome, "ANNIE/").toURL().toString();
+        pluginPath = new File(pluginsHome, "ANNIE/").toURI().toURL().toString();
         getUserConfig().put(AUTOLOAD_PLUGIN_PATH_KEY, pluginPath);
       }catch(MalformedURLException mue){
         throw new GateRuntimeException(mue);
@@ -351,7 +363,7 @@ public class Gate implements GateConstants
         URL aPluginURL = new URL(aDir);
         addAutoloadPlugin(aPluginURL);
       }catch(MalformedURLException mue){
-        System.err.println("Cannot load " + aDir + " CREOLE repository.");
+        Err.println("Cannot load " + aDir + " CREOLE repository.");
         mue.printStackTrace();
       }
       try{
@@ -360,7 +372,7 @@ public class Gate implements GateConstants
           getCreoleRegister().registerDirectories((URL)loadPluginsIter.next());
         }
       }catch(GateException ge){
-        System.err.println("Cannot load " + aDir + " CREOLE repository.");
+        Err.println("Cannot load " + aDir + " CREOLE repository.");
         ge.printStackTrace();
       }
     }
@@ -416,7 +428,7 @@ jar/classpath so it's the same as registerBuiltins
     //parse the site configuration file
     URL configURL;
     try{
-      configURL = siteConfigFile.toURL();
+      configURL = siteConfigFile.toURI().toURL();
     }catch(MalformedURLException mue){
       //this should never happen
       throw new GateRuntimeException(mue);
@@ -433,7 +445,7 @@ jar/classpath so it's the same as registerBuiltins
     //parse the user configuration data if present
     if(userConfigFile != null && userConfigFile.exists()){
       try{
-        configURL = userConfigFile.toURL();
+        configURL = userConfigFile.toURI().toURL();
       }catch(MalformedURLException mue){
         //this should never happen
         throw new GateRuntimeException(mue);
@@ -1005,16 +1017,20 @@ jar/classpath so it's the same as registerBuiltins
   } // getDefaultUserConfigFileName
 
   /**
-   * Get the name of the user's <TT>gate.ser</TT> session state file (this
-   * doesn't guarantee that file exists!).
+   * Get the default path to the user's session file, which is used unless an
+   * alternative name has been specified via system properties or 
+   * {@link #setUserSessionFile(File)}
+   * 
+   * @return the default user session file path.
    */
-  public static String getUserSessionFileName() {
+  public static String getDefaultUserSessionFileName() {
     String filePrefix = "";
     if(runningOnUnix()) filePrefix = ".";
 
     String userSessionName =
-      System.getProperty("user.home") + Strings.getFileSep() +
-      filePrefix + GATE_DOT_SER;
+        System.getProperty("user.home") + Strings.getFileSep() +
+        filePrefix + GATE_DOT_SER;
+
     return userSessionName;
   } // getUserSessionFileName
 
@@ -1275,14 +1291,12 @@ jar/classpath so it's the same as registerBuiltins
    * The top level directory of the GATE installation.
    */
   protected static File gateHome;
-
-  
+ 
   /** Site config file */
   private static File siteConfigFile;
 
   /** User config file */
   private static File userConfigFile;
-
 
   /**
    * The top level directory for GATE installed plugins.
@@ -1295,6 +1309,11 @@ jar/classpath so it's the same as registerBuiltins
    */
   protected static URL builtinCreoleDir;
 
+  /**
+   * The user session file to use. 
+   */
+  protected static File userSessionFile;
+  
   /**
    * Set the location of the GATE home directory.
    *
@@ -1372,7 +1391,31 @@ jar/classpath so it's the same as registerBuiltins
   public static URL getBuiltinCreoleDir() {
     return builtinCreoleDir;
   }
-  
+
+  /**
+   * Set the user session file. This can only done prior to calling Gate.init()
+   * which will set the file to either the OS-specific default 
+   * or whatever has been set by the property gate.user.session
+   *
+   * @throws IllegalStateException if the value has already been set.
+   */
+  public static void setUserSessionFile(File newUserSessionFile) {
+    if(Gate.userSessionFile != null) {
+      throw new IllegalStateException("userSessionFile has already been set");
+    }
+    Gate.userSessionFile = newUserSessionFile;
+  }
+
+  /**
+   * Get the user session file.
+   *
+   * @return the file corresponding to the user session file or null, 
+   * if not yet set.
+   */
+  public static File getUserSessionFile() {
+    return userSessionFile;
+  }
+
   /**
    * The list of plugins (aka CREOLE directories) the system knows about.
    * This list contains URL objects.
