@@ -2559,7 +2559,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
 
           // save the session;
-          File sessionFile = new File(Gate.getUserSessionFileName());
+          File sessionFile = Gate.getUserSessionFile();
           if(userConfig.getBoolean(GateConstants.SAVE_SESSION_ON_EXIT)
                   .booleanValue()) {
             // save all the open applications

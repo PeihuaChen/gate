@@ -257,7 +257,7 @@ public class Main {
           Runnable runnable = new Runnable(){
             public void run(){
               try{
-                File sessionFile = new File(Gate.getUserSessionFileName());
+                File sessionFile = Gate.getUserSessionFile();
                 if(sessionFile.exists()){
                   MainFrame.lockGUI("Loading saved session...");
                   gate.util.persistence.PersistenceManager.loadObjectFromFile(sessionFile);
