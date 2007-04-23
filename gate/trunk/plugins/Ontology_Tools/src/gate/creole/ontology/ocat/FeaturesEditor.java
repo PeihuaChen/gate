@@ -25,7 +25,6 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.JLabel;
 import javax.swing.JTable;
-import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import gate.*;
@@ -44,30 +43,15 @@ import gate.util.GateRuntimeException;
 
 /**
  */
-public class FeaturesEditor extends AbstractVisualResource
-                                                          implements
-                                                          ResizableVisualResource,
-                                                          FeatureMapListener {
+public class FeaturesEditor extends JPanel {
 
   public FeaturesEditor() {
     setBackground(UIManager.getDefaults().getColor("Table.background"));
   }
 
   public void setTargetFeatures(FeatureMap features) {
-    if(features != null) features.removeFeatureMapListener(this);
     this.targetFeatures = features;
     populate();
-    if(features != null) features.addFeatureMapListener(this);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see gate.VisualResource#setTarget(java.lang.Object)
-   */
-  public void setTarget(Object target) {
-    this.target = (FeatureBearer)target;
-    setTargetFeatures(this.target.getFeatures());
   }
 
   public void setSchema(AnnotationSchema schema) {
@@ -79,22 +63,12 @@ public class FeaturesEditor extends AbstractVisualResource
     return mainTable;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see gate.event.FeatureMapListener#featureMapUpdated()
-   */
-  public void featureMapUpdated() {
-    populate();
-  }
-
   /** Initialise this resource, and return it. */
-  public Resource init() throws ResourceInstantiationException {
+  public void init()  {
     featureList = new ArrayList<Feature>();
     emptyFeature = new Feature("", null);
     featureList.add(emptyFeature);
     initGUI();
-    return this;
   }// init()
 
   protected void initGUI() {
@@ -164,8 +138,6 @@ public class FeaturesEditor extends AbstractVisualResource
   }
 
   FeatureMap targetFeatures;
-
-  FeatureBearer target;
 
   Feature emptyFeature;
 
@@ -258,8 +230,7 @@ public class FeaturesEditor extends AbstractVisualResource
       Feature feature = (Feature)featureList.get(rowIndex);
       if(targetFeatures == null) {
         targetFeatures = Factory.newFeatureMap();
-        target.setFeatures(targetFeatures);
-        setTargetFeatures(targetFeatures);
+        populate();
       }
       switch(columnIndex) {
         case VALUE_COL:
@@ -353,9 +324,11 @@ public class FeaturesEditor extends AbstractVisualResource
             for(int i=0;i<selectedValues.length;i++) {
               list.add(selectedValues[i]);
             }
-            targetFeatures.put(feature.name, list);
-            setTargetFeatures(targetFeatures);
-            //featuresModel.fireTableRowsUpdated(row, row);
+
+            feature.value = list;
+            targetFeatures.put(feature.name, feature.value);
+            System.out.println(targetFeatures);
+            populate();
           }
         }
       });
@@ -468,6 +441,7 @@ public class FeaturesEditor extends AbstractVisualResource
           else {
             featureList.remove(row);
             targetFeatures.remove(feature.name);
+            System.out.println(targetFeatures);
             populate();
           }
         }
