@@ -186,12 +186,12 @@ public class TestConfig extends TestCase
     if(Gate.runningOnUnix()) {
       assertTrue(fileSep.equals("/"));
       assertTrue(
-        Gate.getUserSessionFileName().endsWith("."+GateConstants.GATE_DOT_SER)
+        Gate.getUserSessionFile().toString().endsWith("."+GateConstants.GATE_DOT_SER)
       );
     } else {
       assertTrue(! fileSep.equals("/"));
       assertTrue(
-        ! Gate.getUserSessionFileName().endsWith("."+GateConstants.GATE_DOT_SER)
+        ! Gate.getUserSessionFile().toString().endsWith("."+GateConstants.GATE_DOT_SER)
       );
     }
 
