@@ -1,6 +1,3 @@
-/**
- * 
- */
 package gate.creole.ontology.ocat;
 
 import gate.Annotation;
@@ -10,7 +7,6 @@ import gate.Main;
 import gate.creole.ANNIEConstants;
 import gate.creole.AnnotationSchema;
 import gate.creole.FeatureSchema;
-import gate.creole.ResourceInstantiationException;
 import gate.creole.ontology.AnnotationProperty;
 import gate.creole.ontology.DatatypeProperty;
 import gate.creole.ontology.OClass;
@@ -111,6 +107,8 @@ public class AnnotationEditor extends AbstractAction {
   private Point mousePoint;
 
   private boolean newAnnotationMode = false;
+
+  private AddChangeAnnotationAction addChangeAnnotationAction;
 
   private int selectedAnnotationIndex = 0;
 
@@ -226,17 +224,13 @@ public class AnnotationEditor extends AbstractAction {
     constraints.insets = insets0;
 
     typeCombo = new JComboBox();
+    addChangeAnnotationAction = new AddChangeAnnotationAction();
+    typeCombo.addItemListener(addChangeAnnotationAction);
     typeCombo.setRenderer(new ComboRenderer(ontologyTreePanel));
     typeCombo.setEditable(true);
     typeCombo.setBackground(UIManager.getLookAndFeelDefaults().getColor(
             "ToolTip.background"));
-    typeCombo.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent ae) {
-        if(typeCombo.getSelectedItem() instanceof ClassNode)
-          addChangeAnnotationAction();
-      }
-    });
-
+    
     typeCombo.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
       public void keyReleased(KeyEvent keyevent) {
         String s = ((JTextComponent)typeCombo.getEditor().getEditorComponent())
@@ -277,12 +271,7 @@ public class AnnotationEditor extends AbstractAction {
     featuresEditor = new FeaturesEditor();
     featuresEditor.setBackground(UIManager.getLookAndFeelDefaults().getColor(
             "ToolTip.background"));
-    try {
-      featuresEditor.init();
-    }
-    catch(ResourceInstantiationException rie) {
-      throw new GateRuntimeException(rie);
-    }
+    featuresEditor.init();
 
     scrollerPanel = new JPanel(new BorderLayout());
     scrollerPanel.add(featuresEditor.getTable(), BorderLayout.CENTER);
@@ -292,7 +281,6 @@ public class AnnotationEditor extends AbstractAction {
     constraints.weighty = 1;
     constraints.fill = GridBagConstraints.BOTH;
     pane.add(scroller, constraints);
-
   }
 
   protected class CustomScroller extends JScrollPane {
@@ -469,7 +457,7 @@ public class AnnotationEditor extends AbstractAction {
     if(!newAnnotationMode) {
       gate.Annotation tempAnnot = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
               .get(selectedAnnotationIndex);
-      if(tempAnnot != null) {
+      if(tempAnnot != null) { 
         x1 = tempAnnot.getStartNode().getOffset().intValue();
         y1 = tempAnnot.getEndNode().getOffset().intValue();
 
@@ -813,83 +801,87 @@ public class AnnotationEditor extends AbstractAction {
     }
   }
 
-  private void addChangeAnnotationAction() {
-    if(newAnnotationMode) {
-      ClassNode item = (ClassNode)typeCombo.getSelectedItem();
-      boolean isClassAnnotation = item.getSource() instanceof OClass;
-      boolean shouldCreateInstance = isClassAnnotation ? (createInstance
-              .isSelected() ? true : false) : false;
-      Annotation addedAnnotation = ontologyTreePanel.ontoTreeListener
-              .addNewAnnotation(item, applyToAll.isSelected(), null,
-                      isClassAnnotation, shouldCreateInstance).get(0);
-
-      selectedAnnotationIndex = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
-              .indexOf(addedAnnotation);
-
-      newAnnotationMode = false;
-      annotationWindow.setVisible(false);
-      ontologyTreePanel.ontoViewer.documentTextArea.requestFocus();
-      return;
-    }
-    else {
-      gate.Annotation annot1 = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
-              .get(selectedAnnotationIndex);
-      int cStartOffset = annot1.getStartNode().getOffset().intValue();
-      int cEndOffset = annot1.getEndNode().getOffset().intValue();
-
-      ArrayList<Annotation> annotations = new ArrayList<Annotation>();
-      if(applyToAll.isSelected()) {
-        annotations = getSimilarAnnotations(annot1);
-      }
-      else {
-        annotations.add(annot1);
-      }
-
-      for(int i = 0; i < annotations.size(); i++) {
-
-        boolean updateIndex = false;
-        Annotation annot = annotations.get(i);
-
-        if(annot == annot1) {
-          updateIndex = true;
-        }
-
-        int startOffset = annot.getStartNode().getOffset().intValue();
-        int endOffset = annot.getEndNode().getOffset().intValue();
-
-        ontologyTreePanel.deleteAnnotation(annot);
-
-        FeatureMap features = annot.getFeatures();
-        String value = (String)features
-                .get(ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME);
-        boolean isClassFeature = true;
-        if(value == null) {
-          isClassFeature = false;
-        }
-
-        ontologyTreePanel.ontoViewer.documentTextArea
-                .setSelectionStart(startOffset);
-        ontologyTreePanel.ontoViewer.documentTextArea
-                .setSelectionEnd(endOffset);
+  protected class AddChangeAnnotationAction implements ItemListener {
+    public void itemStateChanged(ItemEvent ie) {
+      if(ie.getStateChange() != 1) return;
+      if(explicitCall) return;
+      if(newAnnotationMode) {
         ClassNode item = (ClassNode)typeCombo.getSelectedItem();
         boolean isClassAnnotation = item.getSource() instanceof OClass;
         boolean shouldCreateInstance = isClassAnnotation ? (createInstance
                 .isSelected() ? true : false) : false;
         Annotation addedAnnotation = ontologyTreePanel.ontoTreeListener
-                .addNewAnnotation(item, false, features, isClassAnnotation,
-                        shouldCreateInstance).get(0);
+                .addNewAnnotation(item, applyToAll.isSelected(), null,
+                        isClassAnnotation, shouldCreateInstance).get(0);
 
-        if(updateIndex) {
-          selectedAnnotationIndex = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
-                  .indexOf(addedAnnotation);
-          updateIndex = false;
-        }
+        selectedAnnotationIndex = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
+                .indexOf(addedAnnotation);
+
+        newAnnotationMode = false;
+        annotationWindow.setVisible(false);
+        ontologyTreePanel.ontoViewer.documentTextArea.requestFocus();
+        return;
       }
-      ontologyTreePanel.ontoViewer.documentTextArea
-              .setSelectionStart(cStartOffset);
-      ontologyTreePanel.ontoViewer.documentTextArea.setSelectionEnd(cEndOffset);
-    }
+      else {
+        gate.Annotation annot1 = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
+                .get(selectedAnnotationIndex);
+        int cStartOffset = annot1.getStartNode().getOffset().intValue();
+        int cEndOffset = annot1.getEndNode().getOffset().intValue();
 
+        ArrayList<Annotation> annotations = new ArrayList<Annotation>();
+        if(applyToAll.isSelected()) {
+          annotations = getSimilarAnnotations(annot1);
+        }
+        else {
+          annotations.add(annot1);
+        }
+
+        for(int i = 0; i < annotations.size(); i++) {
+
+          boolean updateIndex = false;
+          Annotation annot = annotations.get(i);
+
+          if(annot == annot1) {
+            updateIndex = true;
+          }
+
+          int startOffset = annot.getStartNode().getOffset().intValue();
+          int endOffset = annot.getEndNode().getOffset().intValue();
+
+          ontologyTreePanel.deleteAnnotation(annot);
+
+          FeatureMap features = annot.getFeatures();
+          String value = (String)features
+                  .get(ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME);
+          boolean isClassFeature = true;
+          if(value == null) {
+            isClassFeature = false;
+          }
+
+          ontologyTreePanel.ontoViewer.documentTextArea
+                  .setSelectionStart(startOffset);
+          ontologyTreePanel.ontoViewer.documentTextArea
+                  .setSelectionEnd(endOffset);
+          ClassNode item = (ClassNode)typeCombo.getSelectedItem();
+          boolean isClassAnnotation = item.getSource() instanceof OClass;
+          boolean shouldCreateInstance = isClassAnnotation ? (createInstance
+                  .isSelected() ? true : false) : false;
+          Annotation addedAnnotation = ontologyTreePanel.ontoTreeListener
+                  .addNewAnnotation(item, false, features, isClassAnnotation,
+                          shouldCreateInstance).get(0);
+
+          if(updateIndex) {
+            selectedAnnotationIndex = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
+                    .indexOf(addedAnnotation);
+            updateIndex = false;
+          }
+        }
+        ontologyTreePanel.ontoViewer.documentTextArea
+                .setSelectionStart(cStartOffset);
+        ontologyTreePanel.ontoViewer.documentTextArea
+                .setSelectionEnd(cEndOffset);
+      }
+    }
   }
 
   public void setTextLocation(int textLocation) {
