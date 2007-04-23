@@ -206,7 +206,8 @@ public class SerialCorpusImpl extends
   }
 
   /**
-   * Unloads a document from memory
+   * Unloads a document from memory, calling sync() first, to store the 
+   * changes.
    * @param doc the document to be unloaded.
    */
   public void unloadDocument(Document doc) {
