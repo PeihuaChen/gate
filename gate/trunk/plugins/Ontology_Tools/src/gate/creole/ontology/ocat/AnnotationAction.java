@@ -82,7 +82,7 @@ public class AnnotationAction extends MouseInputAdapter {
    * @param e
    */
   public void mouseMoved(MouseEvent e) {
-    if(ontologyTreePanel.currentOntologyTree == null) return;
+    if(ontologyTreePanel.currentOntologyTree == null || ontologyTreePanel.showingAnnotationWindow) return;
     // mouse is moved so simply activate the timer
     annotationEditor.setTextLocation(ontologyTreePanel.ontoViewer.documentTextArea
                     .viewToModel(e.getPoint()));
