@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!-- $Id$ -->
-<project name="uima-gate" default="jar">
+<project name="uima-gate" default="build">
   <property file="build.properties" />
 
   <!-- default property values - to override, create a build.properties file in
