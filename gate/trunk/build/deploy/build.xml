@@ -424,4 +424,35 @@ build/deploy all paths are relative to the top-level GATE directory -->
       <arg file="${distDir}/${gate.full.name}-installer-mac.dmg" />
     </exec>
   </target>
+
+  <!-- Build the Windows-specific installer EXE.  This task will work on any
+  platform with a copy of launch4j installed (http://launch4j.sourceforge.net)
+  You must specify the location of your launch4j installation as the property
+  launch4j.home -->
+  <target name="win-installer">
+    <available file="${launch4j.home}/launch4j.jar" 
+               property="launch4j.available" />
+    <fail message="Please set the property launch4j.home to point to your launch4j installation"
+          unless="launch4j.available" />
+
+    <taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask">
+      <classpath>
+        <pathelement location="${launch4j.home}/launch4j.jar" />
+        <fileset dir="${launch4j.home}/lib" includes="*.jar" />
+      </classpath>
+    </taskdef>
+
+    <launch4j>
+      <config headerType="gui"
+              outfile="${distDir}/${gate.full.name}-installer-win.exe"
+              jar="${distDir}/${gate.full.name}-installer.jar"
+              downloadUrl="http://java.sun.com/javase/downloads/"
+              supportUrl="http://gate.ac.uk"
+              icon="build/deploy/gate-installer.ico">
+        <jre minVersion="1.5.0" />
+        <splash file="build/deploy/splash.bmp" waitForWindow="true" />
+      </config>
+    </launch4j>
+
+  </target>
 </project>
