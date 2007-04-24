@@ -100,11 +100,29 @@ public class TreeTagger
     if (scriptfile.exists()==false)
       throw new ExecutionException("Script "+scriptfile.getAbsolutePath()+" does not exist");
     
+    // build the command line.
+    // If the system property treetagger.sh.path is set, use this as the path
+    // to the bourne shell interpreter and place it as the first item on the
+    // command line.  If not, then just pass the script as the first item.  The
+    // system property is useful on platforms that don't support shell scripts
+    // with #! lines natively, e.g.  on Windows you can set the property to
+    // c:\cygwin\bin\sh.exe (or whatever is appropriate on your system) to
+    // invoke the script via Cygwin sh
+    int index = 0;
+    String[] treeTaggerCmd;
+    String shPath = null;
+    if((shPath = System.getProperty("treetagger.sh.path")) != null) {
+      treeTaggerCmd = new String[3];
+      treeTaggerCmd[0] = shPath;
+      index = 1;
+    }
+    else {
+      treeTaggerCmd = new String[2];
+    }
+    
     //generate TreeTagger command line
-    String[] treeTaggerCmd = new String[] {
-        scriptfile.getAbsolutePath(),
-        textfile.getAbsolutePath()
-    };
+    treeTaggerCmd[index] = scriptfile.getAbsolutePath();
+    treeTaggerCmd[index+1] = textfile.getAbsolutePath();
 
     //run TreeTagger
     runTreeTagger(treeTaggerCmd);
