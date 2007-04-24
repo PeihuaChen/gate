@@ -31,11 +31,11 @@ import gate.learningLightWeight.learners.ChunkOrEntity;
 import gate.learningLightWeight.learners.MultiClassLearning;
 import gate.learningLightWeight.learners.PostProcessing;
 import gate.learningLightWeight.learners.SupervisedLearner;
-import gate.learningLightWeight.learners.learnersFromWeka.C45;
-import gate.learningLightWeight.learners.learnersFromWeka.KNNIBK;
-import gate.learningLightWeight.learners.learnersFromWeka.NaiveBayesC;
-import gate.learningLightWeight.learners.learnersFromWeka.WekaLearner;
-import gate.learningLightWeight.learners.learnersFromWeka.WekaLearning;
+import gate.learningLightWeight.learners.weka.C45;
+import gate.learningLightWeight.learners.weka.KNNIBK;
+import gate.learningLightWeight.learners.weka.NaiveBayesC;
+import gate.learningLightWeight.learners.weka.WekaLearner;
+import gate.learningLightWeight.learners.weka.WekaLearning;
 import gate.util.GateException;
 import gate.util.OffsetComparator;
 /**

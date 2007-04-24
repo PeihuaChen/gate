@@ -1,4 +1,4 @@
-package gate.learningLightWeight.learners.libSVM;
+package gate.learningLightWeight.learners.svm;
 public class svm_parameter implements Cloneable,java.io.Serializable
 {
 	/* svm_type */

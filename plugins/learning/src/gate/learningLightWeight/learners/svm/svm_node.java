@@ -1,4 +1,4 @@
-package gate.learningLightWeight.learners.libSVM;
+package gate.learningLightWeight.learners.svm;
 public class svm_node implements java.io.Serializable
 {
 	public int index;

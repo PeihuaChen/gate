@@ -5,7 +5,7 @@
  *
  *  $Id: WekaLearning.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
  */
-package gate.learningLightWeight.learners.learnersFromWeka;
+package gate.learningLightWeight.learners.weka;
 
 import java.io.BufferedReader;
 import java.io.File;

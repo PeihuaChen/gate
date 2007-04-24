@@ -11,11 +11,12 @@ import gate.learningLightWeight.LabelsOfFV;
 import gate.learningLightWeight.LogService;
 import gate.learningLightWeight.SparseFeatureVector;
 import gate.learningLightWeight.UsefulFunctions;
-import gate.learningLightWeight.learners.libSVM.svm;
-import gate.learningLightWeight.learners.libSVM.svm_node;
-import gate.learningLightWeight.learners.libSVM.svm_parameter;
-import gate.learningLightWeight.learners.libSVM.svm_problem;
-import gate.learningLightWeight.learners.libSVM.svm.decision_function;
+import gate.learningLightWeight.learners.svm.svm;
+import gate.learningLightWeight.learners.svm.svm_node;
+import gate.learningLightWeight.learners.svm.svm_parameter;
+import gate.learningLightWeight.learners.svm.svm_problem;
+import gate.learningLightWeight.learners.svm.svm.decision_function;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;

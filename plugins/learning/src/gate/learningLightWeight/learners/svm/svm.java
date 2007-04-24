@@ -1,4 +1,4 @@
-package gate.learningLightWeight.learners.libSVM;
+package gate.learningLightWeight.learners.svm;
 import java.io.*;
 import java.util.*;
 

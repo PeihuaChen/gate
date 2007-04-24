@@ -13,7 +13,7 @@ import java.io.IOException;
 import gate.learningLightWeight.DocFeatureVectors;
 import gate.learningLightWeight.LabelsOfFeatureVectorDoc;
 import gate.learningLightWeight.SparseFeatureVector;
-import gate.learningLightWeight.learners.libSVM.svm_node;
+import gate.learningLightWeight.learners.svm.svm_node;
 /**
  * Data used for learning, read from the feature vector file.
  */
