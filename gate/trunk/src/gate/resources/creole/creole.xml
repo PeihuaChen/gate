@@ -120,56 +120,6 @@
       <CLASS>gate.corpora.MSWordDocumentFormat</CLASS>
       <AUTOINSTANCE/>
       <PRIVATE/>
-    </RESOURCE>       
-    <!-- Annotation schema -->
-    <RESOURCE>
-      <NAME>Annotation schema</NAME>
-      <CLASS>gate.creole.AnnotationSchema</CLASS>
-      <COMMENT>An annotation type and its features</COMMENT>
-      <PARAMETER NAME="xmlFileUrl" COMMENT="The url to the definition file"
-        SUFFIXES="xml;xsd">java.net.URL</PARAMETER>
-      <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE="schema/AddressSchema.xml" />
-      </AUTOINSTANCE>
-      <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE="schema/DateSchema.xml" />
-      </AUTOINSTANCE>
-      <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE="schema/FacilitySchema.xml" />
-      </AUTOINSTANCE>
-      <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE ="schema/GpeSchema.xml" />
-      </AUTOINSTANCE>
-      <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE="schema/IdentifierSchema.xml" />
-      </AUTOINSTANCE>
-      <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE ="schema/PersonSchema.xml"/>
-      </AUTOINSTANCE>
-      <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE="schema/LocationSchema.xml" />
-      </AUTOINSTANCE>
-      <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE ="schema/MoneySchema.xml"/>
-      </AUTOINSTANCE>
-      <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE="schema/OrganizationSchema.xml"/>
-      </AUTOINSTANCE>
-      <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE="schema/PercentSchema.xml"/>
-      </AUTOINSTANCE>
-      <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE ="schema/PersonSchema.xml"/>
-      </AUTOINSTANCE>
-      <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE ="schema/TokenSchema.xml"/>
-      </AUTOINSTANCE>
-      <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE="schema/SyntaxTreeNodeSchema.xml"/>
-      </AUTOINSTANCE>
-      <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE ="schema/CorefSchema.xml"/>
-      </AUTOINSTANCE>
     </RESOURCE>
   </CREOLE>
 
