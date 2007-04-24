@@ -227,15 +227,11 @@ build/deploy all paths are relative to the top-level GATE directory -->
         </path>
       </pathconvert>
 
-      <if>
+      <condition property="@{property}"
+        value="${exec.line.prefix}${@{property}.converted}${exec.line.suffix}"
+        else="">
         <isset property="@{property}.converted" />
-        <then>
-          <property name="@{property}" value="${exec.line.prefix}${@{property}.converted}${exec.line.suffix}" />
-        </then>
-        <else>
-          <property name="@{property}" value="" />
-        </else>
-      </if>
+      </condition>
     </sequential>
   </macrodef>
   
