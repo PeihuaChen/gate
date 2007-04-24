@@ -3,7 +3,6 @@ package gate.treetagger;
 import java.io.*;
 import java.nio.charset.*;
 import java.util.*;
-import java.net.URI;
 import java.net.URL;
 import java.lang.*;
 
@@ -96,7 +95,7 @@ public class TreeTagger
     File textfile = getCurrentText();
     
     // check that the file exists
-    File scriptfile = new File(URI.create(treeTaggerBinary.toExternalForm()));
+    File scriptfile = Files.fileFromURL(treeTaggerBinary);
     if (scriptfile.exists()==false)
       throw new ExecutionException("Script "+scriptfile.getAbsolutePath()+" does not exist");
     
