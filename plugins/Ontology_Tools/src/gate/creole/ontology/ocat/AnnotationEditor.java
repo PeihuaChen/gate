@@ -225,7 +225,7 @@ public class AnnotationEditor extends AbstractAction {
 
     typeCombo = new JComboBox();
     addChangeAnnotationAction = new AddChangeAnnotationAction();
-    typeCombo.addItemListener(addChangeAnnotationAction);
+    typeCombo.addActionListener(addChangeAnnotationAction);
     typeCombo.setRenderer(new ComboRenderer(ontologyTreePanel));
     typeCombo.setEditable(true);
     typeCombo.setBackground(UIManager.getLookAndFeelDefaults().getColor(
@@ -801,9 +801,9 @@ public class AnnotationEditor extends AbstractAction {
     }
   }
 
-  protected class AddChangeAnnotationAction implements ItemListener {
-    public void itemStateChanged(ItemEvent ie) {
-      if(ie.getStateChange() != 1) return;
+  protected class AddChangeAnnotationAction implements ActionListener {
+    public void actionPerformed(ActionEvent ie) {
+      //if(ie.getStateChange() != 1) return;
       if(explicitCall) return;
       if(newAnnotationMode) {
         ClassNode item = (ClassNode)typeCombo.getSelectedItem();
@@ -819,7 +819,7 @@ public class AnnotationEditor extends AbstractAction {
 
         newAnnotationMode = false;
         annotationWindow.setVisible(false);
-        ontologyTreePanel.ontoViewer.documentTextArea.requestFocus();
+        //ontologyTreePanel.ontoViewer.documentTextArea.requestFocus();
         return;
       }
       else {
@@ -900,7 +900,7 @@ public class AnnotationEditor extends AbstractAction {
   public void hideWindow() {
     if(annotationWindow != null) annotationWindow.setVisible(false);
     ontologyTreePanel.showingAnnotationWindow = false;
-    ontologyTreePanel.ontoViewer.documentTextArea.requestFocus();
+    //ontologyTreePanel.ontoViewer.documentTextArea.requestFocus();
   }
 
   /**
