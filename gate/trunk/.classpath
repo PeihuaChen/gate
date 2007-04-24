@@ -9,7 +9,6 @@
 	<classpathentry kind="lib" path="lib/lucene-1.3-final.jar"/>
 	<classpathentry kind="lib" path="lib/plugins/rdf_backend.jar"/>
 	<classpathentry kind="lib" path="lib/plugins/query_tab.jar"/>
-	<classpathentry kind="lib" path="lib/jacl.jar"/>
 	<classpathentry kind="lib" path="lib/plugins/standard_extensions.jar"/>
 	<classpathentry kind="lib" path="lib/pg73jdbc3.jar"/>
 	<classpathentry kind="lib" path="lib/plugins/rdf-api.jar"/>
@@ -17,7 +16,6 @@
 	<classpathentry kind="lib" path="lib/junit.jar"/>
 	<classpathentry kind="lib" path="lib/ext/guk.jar"/>
 	<classpathentry kind="lib" path="lib/jwnl.jar"/>
-	<classpathentry kind="lib" path="lib/protege.jar"/>
 	<classpathentry kind="lib" path="lib/jena.jar"/>
 	<classpathentry kind="lib" path="lib/GnuGetOpt.jar"/>
 	<classpathentry kind="lib" path="lib/ontotext.jar"/>
