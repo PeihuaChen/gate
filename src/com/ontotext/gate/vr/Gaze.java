@@ -238,7 +238,7 @@ public class Gaze extends AbstractVisualResource
     /**disable the ontology and mapping areas */
     if (!isOntoGaz) {
       mappingSplit.setVisible(false);
-      mappingList.disable();
+      mappingList.setEnabled(false);
     }
 
     /* display linear definition */
