@@ -751,7 +751,7 @@ jar/classpath so it's the same as registerBuiltins
   /** Returns the value for the HIDDEN attribute of a feature map */
   static public boolean getHiddenAttribute(FeatureMap fm){
     if(fm == null) return false;
-    Object value = fm.get("gate.HIDDEN");
+    Object value = fm.get(HIDDEN_FEATURE_KEY);
     return value != null &&
            value instanceof String &&
            ((String)value).equals("true");
@@ -760,9 +760,9 @@ jar/classpath so it's the same as registerBuiltins
   /** Sets the value for the HIDDEN attribute of a feature map */
   static public void setHiddenAttribute(FeatureMap fm, boolean hidden){
     if(hidden){
-      fm.put("gate.HIDDEN", "true");
+      fm.put(HIDDEN_FEATURE_KEY, "true");
     }else{
-      fm.remove("gate.HIDDEN");
+      fm.remove(HIDDEN_FEATURE_KEY);
     }
   }
 
