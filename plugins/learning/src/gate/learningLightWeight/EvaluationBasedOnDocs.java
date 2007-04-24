@@ -297,8 +297,8 @@ public class EvaluationBasedOnDocs {
     HashMap uniqueLabels = new HashMap();
     for(int i = 0; i < corpusOn.size(); ++i)
       if(isUsedForTraining[i]) {
-        AnnotationSet keyAnns = ((Document)corpusOn.get(i)).getAnnotations(
-          inputASName).get(classTypeOriginal);
+        AnnotationSet keyAnns = getInputAS((Document)corpusOn.get(i))
+          .get(classTypeOriginal);
         for(Object obj : keyAnns) {
           if(((Annotation)obj).getFeatures().get(classFeature) != null) {
             String label = ((Annotation)obj).getFeatures().get(classFeature)
@@ -377,8 +377,7 @@ public class EvaluationBasedOnDocs {
       classTypeOriginal);
     for(int i = 0; i < corpusOn.size(); ++i) {
       if(!isUsedForTraining[i]) {
-        AnnotationSet annsInput = ((Document)corpusOn.get(i))
-          .getAnnotations(inputASName);
+        AnnotationSet annsInput = getInputAS((Document)corpusOn.get(i));
         AnnotationSet anns = annsInput.get(classTypeTest);
         Iterator iter = anns.iterator();
         while(iter.hasNext())
@@ -450,9 +449,8 @@ public class EvaluationBasedOnDocs {
   public void evaluateAnnDiff(Document doc, String classTypeOriginal,
     String classTypeTest, String classFeat, Set labelSet, HashMap labels2MR) {
     // for each label
-    AnnotationSet annsOriginal = doc.getAnnotations(inputASName).get(
-      classTypeOriginal);
-    AnnotationSet annsTest = doc.getAnnotations(inputASName).get(classTypeTest);
+    AnnotationSet annsOriginal = getInputAS(doc).get(classTypeOriginal);
+    AnnotationSet annsTest = getInputAS(doc).get(classTypeTest);
     HashSet annsKey = new HashSet();
     HashSet annsRes = new HashSet();
     HashSet signSet = new HashSet();
@@ -487,9 +485,8 @@ public class EvaluationBasedOnDocs {
    */
   public void evaluateAnnotations(Document doc, String classTypeOriginal,
     String classTypeTest, String classFeat, Set labelSet, HashMap labels2MR) {
-    AnnotationSet annsOriginal = doc.getAnnotations(inputASName).get(
-      classTypeOriginal);
-    AnnotationSet annsTest = doc.getAnnotations(inputASName).get(classTypeTest);
+    AnnotationSet annsOriginal = getInputAS(doc).get(classTypeOriginal);
+    AnnotationSet annsTest = getInputAS(doc).get(classTypeTest);
     HashSet annsKey = new HashSet();
     HashSet annsRes = new HashSet();
     // For each label
@@ -536,9 +533,8 @@ public class EvaluationBasedOnDocs {
   public void evaluateAnnotationsRel(Document doc, String classTypeOriginal,
     String classTypeTest, String classFeat, String arg1F, String arg2F,
     Set labelSet, HashMap labels2MR) {
-    AnnotationSet annsOriginal = doc.getAnnotations(inputASName).get(
-      classTypeOriginal);
-    AnnotationSet annsTest = doc.getAnnotations(inputASName).get(classTypeTest);
+    AnnotationSet annsOriginal = getInputAS(doc).get(classTypeOriginal);
+    AnnotationSet annsTest = getInputAS(doc).get(classTypeTest);
     HashSet annsKey = new HashSet();
     HashSet annsRes = new HashSet();
     // For each label
@@ -583,6 +579,15 @@ public class EvaluationBasedOnDocs {
         }
         if(!isMatch) measuresOfResults.spurious++;
       }
+    }
+  }
+
+  private AnnotationSet getInputAS(Document doc) {
+    if(inputASName == null || inputASName.trim().length() == 0) {
+      return doc.getAnnotations();
+    }
+    else {
+      return doc.getAnnotations(inputASName);
     }
   }
 }
