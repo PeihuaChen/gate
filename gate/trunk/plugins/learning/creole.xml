@@ -7,7 +7,7 @@
     <RESOURCE>
       <NAME>Batch Learning ALL PR</NAME>
     
-      <CLASS>gate.learningLightWeight.LearningAPIMain</CLASS>
+      <CLASS>gate.learning.LearningAPIMain</CLASS>
       <JAR>learningapi.jar</JAR>
       <JAR>lib/weka.jar</JAR>
 
@@ -20,7 +20,7 @@
 
       <PARAMETER NAME="learningMode"
         COMMENT="Train or classify the documents" RUNTIME="true" DEFAULT="TRAINING"
-        OPTIONAL="false">gate.learningLightWeight.RunMode</PARAMETER>
+        OPTIONAL="false">gate.learning.RunMode</PARAMETER>
 
       <PARAMETER NAME="inputASName"
         COMMENT="The name of the annotation set used for input" RUNTIME="true"
