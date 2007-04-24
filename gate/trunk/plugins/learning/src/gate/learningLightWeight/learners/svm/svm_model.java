@@ -1,7 +1,7 @@
 //
 // svm_model
 //
-package gate.learningLightWeight.learners.libSVM;
+package gate.learningLightWeight.learners.svm;
 
 public class svm_model implements java.io.Serializable
 {
