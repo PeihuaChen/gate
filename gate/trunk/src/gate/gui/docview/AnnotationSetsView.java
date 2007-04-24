@@ -225,13 +225,15 @@ public class AnnotationSetsView extends AbstractDocumentView
    *
    */
   protected void storeSelectedTypes(){
-    visibleAnnotationTypes.clear();
-    for(SetHandler sHandler:setHandlers){
-      for(TypeHandler tHandler: sHandler.typeHandlers){
-        if(tHandler.isSelected()){
-          visibleAnnotationTypes.add(new String[]{sHandler.set.getName(), 
-            tHandler.name});
-          tHandler.setSelected(false);
+    synchronized(AnnotationSetsView.this) {
+//    visibleAnnotationTypes.clear();
+      for(SetHandler sHandler:setHandlers){
+        for(TypeHandler tHandler: sHandler.typeHandlers){
+          if(tHandler.isSelected()){
+            visibleAnnotationTypes.add(new TypeSpec(sHandler.set.getName(), 
+              tHandler.name));
+            tHandler.setSelected(false);
+          }
         }
       }
     }
@@ -242,9 +244,12 @@ public class AnnotationSetsView extends AbstractDocumentView
    * {@link #visibleAnnotationTypes} data structure.
    */
   protected void restoreSelectedTypes(){
-    for(String[] typeSpec: visibleAnnotationTypes){
-      TypeHandler tHandler = getTypeHandler(typeSpec[0], typeSpec[1]);
-      tHandler.setSelected(true);
+    synchronized(AnnotationSetsView.this) {
+      for(TypeSpec typeSpec: visibleAnnotationTypes){
+        TypeHandler tHandler = getTypeHandler(typeSpec.setName, typeSpec.type);
+        tHandler.setSelected(true);
+      }
+      visibleAnnotationTypes.clear();
     }
   }
 
@@ -517,14 +522,20 @@ public class AnnotationSetsView extends AbstractDocumentView
   public void setTypeSelected(final String setName, 
                               final String typeName, 
                               final boolean selected){
-    
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
         TypeHandler tHandler = getTypeHandler(setName, typeName);
-        tHandler.setSelected(selected);
-        int row = tableRows.indexOf(tHandler);
-        tableModel.fireTableRowsUpdated(row, row);
-        mainTable.getSelectionModel().setSelectionInterval(row, row);
+        if(tHandler != null){
+          tHandler.setSelected(selected);
+          int row = tableRows.indexOf(tHandler);
+          tableModel.fireTableRowsUpdated(row, row);
+          mainTable.getSelectionModel().setSelectionInterval(row, row);
+        }else{
+          //type handler not created yet
+          synchronized(AnnotationSetsView.this) {
+            visibleAnnotationTypes.add(new TypeSpec(setName, typeName));  
+          }
+        }
       }
     });
   }
@@ -874,6 +885,13 @@ public class AnnotationSetsView extends AbstractDocumentView
       }
       //restore selection if any
       if(row != -1) mainTable.getSelectionModel().setSelectionInterval(row, row);
+      //select the newly created type if previously requested
+      TypeSpec typeSpec = new TypeSpec(set.getName(), type);
+      synchronized(AnnotationSetsView.this) {
+        if(visibleAnnotationTypes.remove(typeSpec)){
+          tHandler.setSelected(true);
+        }
+      }
       return tHandler;
     }
     
@@ -1019,10 +1037,12 @@ public class AnnotationSetsView extends AbstractDocumentView
       annotationCount++;
       if(selected){
         //add new highlight
-        hghltTagsForAnn.put(ann.getId(), 
-                textView.addHighlight(ann, setHandler.set, colour));
-        annListTagsForAnn.put(ann.getId(), 
-                listView.addAnnotation(ann, setHandler.set));
+        if(!hghltTagsForAnn.containsKey(ann.getId())) 
+            hghltTagsForAnn.put(ann.getId(), 
+            textView.addHighlight(ann, setHandler.set, colour));
+        if(!annListTagsForAnn.containsKey(ann.getId())) 
+            annListTagsForAnn.put(ann.getId(), 
+            listView.addAnnotation(ann, setHandler.set));
       }
     }
     
@@ -1113,6 +1133,51 @@ public class AnnotationSetsView extends AbstractDocumentView
     Color colour;
     int annotationCount;
   }
+  
+  /**
+   * A class storing the identifying information for an annotation type (i.e.
+   * the set name and the type).
+   * @author Valentin Tablan (valyt)
+   *
+   */
+  private static class TypeSpec{
+    private String setName;
+    
+    private String type;
+
+    public TypeSpec(String setName, String type) {
+      super();
+      this.setName = setName;
+      this.type = type;
+    }
+
+    @Override
+    public int hashCode() {
+      final int PRIME = 31;
+      int result = 1;
+      result = PRIME * result + ((setName == null) ? 0 : setName.hashCode());
+      result = PRIME * result + ((type == null) ? 0 : type.hashCode());
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if(this == obj) return true;
+      if(obj == null) return false;
+      if(getClass() != obj.getClass()) return false;
+      final TypeSpec other = (TypeSpec)obj;
+      if(setName == null) {
+        if(other.setName != null) return false;
+      }
+      else if(!setName.equals(other.setName)) return false;
+      if(type == null) {
+        if(other.type != null) return false;
+      }
+      else if(!type.equals(other.type)) return false;
+      return true;
+    }
+  }
+  
   
   protected static class AnnotationHandler{
     public AnnotationHandler(AnnotationSet set, Annotation ann){
@@ -1211,7 +1276,7 @@ public class AnnotationSetsView extends AbstractDocumentView
 	        Integer annId =  set.add(new Long(start), new Long(end), 
 	                lastAnnotationType, Factory.newFeatureMap());
 	        Annotation ann = set.get(annId);
-	        //make sure new annotaion is visible
+	        //make sure new annotation is visible
 	        setTypeSelected(set.getName(), ann.getType(), true);
 	        //show the editor
 	        annotationEditor.setAnnotation(ann, set);
@@ -1421,17 +1486,9 @@ public class AnnotationSetsView extends AbstractDocumentView
           pendingEvents.clear();
         }
         //store selection state
-        Set<String> selectedAnnotationTypes = new HashSet<String>();
+        storeSelectedTypes();
+        //release all resources
         for(SetHandler sHandler : setHandlers){
-          for(TypeHandler tHandler : sHandler.typeHandlers){
-            if(tHandler.isSelected()){
-              selectedAnnotationTypes.add(sHandler.set.getName() + 
-                      ":" + tHandler.name);
-              //hide highlights, annotations listed
-              tHandler.setSelected(false);
-            }
-//            sHandler.removeType(tHandler);                      
-          }
           sHandler.typeHandlers.clear();
           sHandler.typeHandlersByType.clear();
           sHandler.set.removeAnnotationSetListener(AnnotationSetsView.this);
@@ -1439,24 +1496,17 @@ public class AnnotationSetsView extends AbstractDocumentView
         setHandlers.clear();
         tableRows.clear();
         listView.removeAnnotations(listView.getAllAnnotations());
-        textView.removeAllBlinkingHighlights();
+//        textView.removeAllBlinkingHighlights();
         //rebuild the UI
         populateUI();
         
         //restore the selection
-        for(SetHandler sHandler : setHandlers){
-          for(TypeHandler tHandler : sHandler.typeHandlers){
-            if(selectedAnnotationTypes.remove(sHandler.set.getName() + 
-                    ":" + tHandler.name)) {
-              tHandler.setSelected(true);
-            }
-          }
-        }
+        restoreSelectedTypes();
         tableModel.fireTableDataChanged();
       }catch(Throwable t){
         //something happened, we need to give up
         uiDirty = true;
-t.printStackTrace();        
+//        t.printStackTrace();        
       }
     }
     
@@ -1672,7 +1722,7 @@ t.printStackTrace();
    * so that the selection can be restored when the view is made active again.
    * The values are String[2] pairs of form <set name, type>.
    */
-  protected List<String[]> visibleAnnotationTypes;
+  protected List<TypeSpec> visibleAnnotationTypes;
   
   protected Timer mouseMovementTimer;
   /**
