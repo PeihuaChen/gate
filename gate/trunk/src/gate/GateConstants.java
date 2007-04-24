@@ -185,4 +185,8 @@ public interface GateConstants {
    */
   public static final String COMPILER_TYPE_KEY = "Compiler_type";
 
+  /**
+   * Key used in resource features for hiding the resource fromthe GUI.
+   */
+  public static final String HIDDEN_FEATURE_KEY = "gate.HIDDEN"; 
 } // GateConstants
