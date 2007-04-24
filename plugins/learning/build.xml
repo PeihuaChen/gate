@@ -111,7 +111,7 @@
 			</classpath>
 			<formatter type="xml" />
 
-			<test name="gate.learningLightWeight.test.TestLearningAPI" />
+			<test name="gate.learning.test.TestLearningAPI" />
 		</junit>
 	</target>
 
