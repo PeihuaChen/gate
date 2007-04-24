@@ -19,6 +19,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
+import javax.swing.text.html.HTMLDocument.HTMLReader.HiddenAction;
+
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -165,6 +167,13 @@ public class CreoleXmlHandler extends DefaultHandler {
       currentAutoinstanceParams = Factory.newFeatureMap();
     }// End if AUTOINSTANCE
 
+    //When an HIDDEN-AUTOINSTANCE element is found a params FeatureMap will
+    // be prepared in order for the resource to be instantiated
+    if (elementName.toUpperCase().equals("HIDDEN-AUTOINSTANCE")){
+      currentAutoinstanceParams = Factory.newFeatureMap();
+      Gate.setHiddenAttribute(currentAutoinstanceParams, true);
+    }// End if AUTOINSTANCE
+    
     // When a PARAN start element is found, the parameter would be instantiated
     // with a value and added to the autoinstanceParams
     if (elementName.toUpperCase().equals("PARAM")){
@@ -306,11 +315,20 @@ public class CreoleXmlHandler extends DefaultHandler {
         while (iter.hasNext()){
           FeatureMap autoinstanceParams = (FeatureMap) iter.next();
           iter.remove();
+          FeatureMap autoinstanceFeatures = null;
+          //if the hidden attribute was set in the parameters, create a feature 
+          //map and move the hidden attribute there.
+          if(Gate.getHiddenAttribute(autoinstanceParams)){
+            autoinstanceFeatures = Factory.newFeatureMap();
+            Gate.setHiddenAttribute(autoinstanceFeatures, true);
+            autoinstanceParams.remove(GateConstants.HIDDEN_FEATURE_KEY);
+          }
           // Try to create the resource.
           try {
             // Resource res = 
             Factory.createResource(
-                              resourceData.getClassName(), autoinstanceParams);
+                              resourceData.getClassName(), autoinstanceParams, 
+                              autoinstanceFeatures);
             //resourceData.makeInstantiationPersistant(res);
             // all resource instantiations are persistent
           } catch(ResourceInstantiationException e) {
@@ -324,7 +342,8 @@ public class CreoleXmlHandler extends DefaultHandler {
       currentAutoinstances = null;
     // End RESOURCE processing
     //////////////////////////////////////////////////////////////////
-    } else if(elementName.toUpperCase().equals("AUTOINSTANCE")) {
+    } else if(elementName.toUpperCase().equals("AUTOINSTANCE") ||
+            elementName.toUpperCase().equals("HIDDEN-AUTOINSTANCE")) {
       //checkStack("endElement", "AUTOINSTANCE");
       // Cache the auto-instance into the autoins
       if (currentAutoinstanceParams != null)
