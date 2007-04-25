@@ -8,7 +8,8 @@
 		<RESOURCE>
 			<NAME>Annotation schema</NAME>
 			<CLASS>gate.creole.AnnotationSchema</CLASS>
-			<COMMENT>An annotation type and its features</COMMENT>
+			<COMMENT>An annotation type and its features
+                        (http://gate.ac.uk/sale/tao/#sec:schemas)</COMMENT>
 			<PARAMETER NAME="xmlFileUrl"
 				COMMENT="The url to the definition file" SUFFIXES="xml;xsd">
 				java.net.URL

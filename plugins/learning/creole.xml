@@ -6,7 +6,9 @@
     <!-- creole.xml for the Learning PR -->
     <RESOURCE>
       <NAME>Batch Learning ALL PR</NAME>
-    
+      <COMMENT>Supports training, application and evaluation of machine
+      learning models for NLP tasks
+      (http://gate.ac.uk/sale/tao/#chapt:mlapi)</COMMENT>
       <CLASS>gate.learning.LearningAPIMain</CLASS>
       <JAR>learningapi.jar</JAR>
       <JAR>lib/weka.jar</JAR>
