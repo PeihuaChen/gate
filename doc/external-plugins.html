@@ -1,10 +1,11 @@
 <ul type='circle'>
 	<li><a href='#munpex'>Multi-lingual Noun Phrase Extractor (MuNPEx)</a></li>
-	<li><a href='#kaon2ontology'>KAON Ontology</a></li>
 	<li><a href='#anc'>XCES tools</a></li>
 	<li><a href='#sen'><i>Sen</i> wrapper (Japanese morphological analyser)</a></li>
 	<li><a href='#russianprs'>Russian morph tagger</a></li>
 	<li><a href='#ofai'>OFAI List Gazetteer</a></li>
+	<li><a href='#bwp'>BWP Gazetteer</a></li>
+	<li><a href='#apolda'>Apolda</a></li>
 </ul>
 
 <table border='1'>
@@ -19,16 +20,6 @@
                 architecture, implemented in JAPE. It currently supports English, German, French, and
                 Spanish (in beta).</td>
 		<td>en-np_main.jape</td>
-	</tr>
-	<tr>
-		<th colspan='3'><a name="kaon2ontology"></a>KAON Ontology<br/><a
-                href="http://www.gate.ac.uk/sale/gateplugins/kaon2/">website</a></th>
-	</tr>
-	<tr><td colspan='3'><center><i>KAON2Ontology can be accessed from http://gate.ac.uk/sale/gateplugins/kaon2.  In order to use it from GATE, user should register the above URL as a creole repository. (i.e. If using it from GUI, select the "Add a new Creole repository" in GATE Plugin Manager and provide this URL or  Gate.getCreoleRegister().registerDirectories(new URL("http://gate.ac.uk/sale/gateplugins/kaon2") if used programmatically)</i></center></td></tr>
-	<tr>
-		<td>KAON Ontology</td>
-		<td>An ontology implementation using KAON2 for I/O.</td>
-		<td>gate.creole.ontology.kaon2.KAON2OntologyImpl</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name="anc"></a>XCES tools<br/><a href="http://americannationalcorpus.org/tools/index.html#gate-tools">website</a> <a href="http://americannationalcorpus.org/tools/ANC.zip">download</a></th>
@@ -86,6 +77,30 @@
 		<td>OFAI List Gazetteer</td>
 		<td>Extended version of the transducer-based List Gazetteer</td>
 		<td>at.ofai.gate.ListGazetteer</td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name="bwp"></a>BWP Gazetteer<br/>
+		<a href="http://paginas.terra.com.br/arte/lua/?content=Software/BWPGazetteer.html">website</a>
+	       	<a href="http://paginas.terra.com.br/arte/lua/?content=Software/BWPGazetteer.html">download</a></th>
+	</tr>
+	<tr><td colspan='3'><center><i>This plugin provides an approximate gazetteer for GATE, based on Levenshtein's Edit Distance for strings. Its goal is to handle texts with noise and errors, in which GATE's default gazetteers may have difficulties.</i></center></td></tr>
+	<tr>
+		<td>BWP Gazetteer</td>
+		<td>Extended version of the transducer-based List Gazetteer</td>
+		<td></td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name="apolda"></a>Apolda<br/>
+		<a href="http://apolda.sourceforge.net">website</a>
+		<a href="http://sourceforge.net/project/showfiles.php?group_id=189547">download</a></th>
+	</tr>
+	<tr>
+		<td colspan='3'><center><i>Annotates documents like a gazetteer, but takes the terms from OWL annotation properties in an ontology, rather than from a separate list of terms.</i></center></td>
+	</tr>
+	<tr>
+		<td>Apolda Ontology Annotator</td>
+		<td>Ontology-based lookup taking terms from properties in the ontology.</td>
+		<td>telin.Apolda</td>
 	</tr>
 </table>
 <hr/>

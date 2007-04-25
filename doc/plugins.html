@@ -38,7 +38,6 @@ list</a>.</p>
 <h2>Plugins included in the GATE distribution</h2>
 <ul type='circle'><li><a href='#ANNIE'>ANNIE</a></li>
 <li><a href='#arabic'>arabic</a></li>
-<li><a href='#Buchart'>Buchart</a></li>
 <li><a href='#cebuano'>cebuano</a></li>
 <li><a href='#Chemistry_Tagger'>Chemistry_Tagger</a></li>
 <li><a href='#crawl'>crawl</a></li>
@@ -47,6 +46,7 @@ list</a>.</p>
 <li><a href='#Information_Retrieval'>Information_Retrieval</a></li>
 <li><a href='#Jape_Compiler'>Jape_Compiler</a></li>
 <li><a href='#Kea'>Kea</a></li>
+<li><a href='#learning'>learning</a></li>
 <li><a href='#Machine_Learning'>Machine_Learning</a></li>
 <li><a href='#Minipar'>Minipar</a></li>
 <li><a href='#Minorthird'>Minorthird</a></li>
@@ -55,7 +55,6 @@ list</a>.</p>
 <li><a href='#NP_Chunking'>NP_Chunking</a></li>
 <li><a href='#Obsolete'>Obsolete</a></li>
 <li><a href='#Ontology_Tools'>Ontology_Tools</a></li>
-<li><a href='#probability'>probability</a></li>
 <li><a href='#rasp'>rasp</a></li>
 <li><a href='#romanian'>romanian</a></li>
 <li><a href='#spanish'>spanish</a></li>
@@ -65,64 +64,100 @@ list</a>.</p>
 <li><a href='#TreeTagger'>TreeTagger</a></li>
 <li><a href='#uima'>uima</a></li>
 <li><a href='#WordNet'>WordNet</a></li>
+<li><a href='#yahoo'>yahoo</a></li>
 </ul>
 <table border='1'>
 	<tr>
 		<th colspan='3'><a name='ANNIE'>ANNIE</a></th>
 	</tr>
 	<tr>
+		<td>Annotation schema</td>
+		<td>An annotation type and its features
+                        (<a href="http://gate.ac.uk/sale/tao/#sec:schemas">docs</a>)</td>
+		<td>gate.creole.AnnotationSchema</td>
+	</tr>
+	<tr>
 		<td>GATE Unicode Tokeniser</td>
-		<td>A customisable Unicode tokeniser (<a href="http://gate.ac.uk/sale/tao/#sec:tokeniser">docs</a>).</td>
+		<td>
+				A customisable Unicode tokeniser
+				(<a href="http://gate.ac.uk/sale/tao/#sec:tokeniser">docs</a>).
+			</td>
 		<td>gate.creole.tokeniser.SimpleTokeniser</td>
 	</tr>
 	<tr>
 		<td>ANNIE English Tokeniser</td>
-		<td>A customisable English tokeniser (<a href="http://gate.ac.uk/sale/tao/#sec:en-tokeniser">docs</a>).</td>
+		<td>
+				A customisable English tokeniser
+				(<a href="http://gate.ac.uk/sale/tao/#sec:en-tokeniser">docs</a>).
+			</td>
 		<td>gate.creole.tokeniser.DefaultTokeniser</td>
 	</tr>
 	<tr>
 		<td>ANNIE Gazetteer</td>
-		<td>A list lookup component (<a href="http://gate.ac.uk/sale/tao/#sec:gazetteer">docs</a>).</td>
+		<td>
+				A list lookup component
+				(<a href="http://gate.ac.uk/sale/tao/#sec:gazetteer">docs</a>).
+			</td>
 		<td>gate.creole.gazetteer.DefaultGazetteer</td>
 	</tr>
 	<tr>
 		<td>Hash Gazetteer</td>
-		<td>A list lookup component implemented by OntoText
-        Lab. For documentation, download and license
-        agreement please refer to
-        <a href="http://www.ontotext.com/downloads/index.html#gazetteer.">docs</a>
-        The licence information is also available in licence.ontotext.html in the lib
-        folder of GATE</td>
+		<td>
+				A list lookup component implemented by OntoText Lab. For
+				documentation, download and license agreement please
+				refer to
+				<a href="http://www.ontotext.com/downloads/index.html#gazetteer.">docs</a>
+				The licence information is also available in
+				licence.ontotext.html in the lib folder of GATE
+			</td>
 		<td>com.ontotext.gate.gazetteer.HashGazetteer</td>
 	</tr>
 	<tr>
 		<td>Jape Transducer</td>
-		<td>A module for executing Jape grammars (<a href="http://gate.ac.uk/sale/tao/#chap:jape">docs</a>).</td>
+		<td>
+				A module for executing Jape grammars
+				(<a href="http://gate.ac.uk/sale/tao/#chap:jape">docs</a>).
+			</td>
 		<td>gate.creole.Transducer</td>
 	</tr>
 	<tr>
 		<td>ANNIE NE Transducer</td>
-		<td>ANNIE named entity grammar (<a href="http://gate.ac.uk/sale/tao/#sec:semantic-tagger">docs</a>)</td>
+		<td>
+				ANNIE named entity grammar
+				(<a href="http://gate.ac.uk/sale/tao/#sec:semantic-tagger">docs</a>)
+			</td>
 		<td>gate.creole.ANNIETransducer</td>
 	</tr>
 	<tr>
 		<td>ANNIE Sentence Splitter</td>
-		<td>ANNIE sentence splitter (<a href="http://gate.ac.uk/sale/tao/#sec:splitter">docs</a>)</td>
+		<td>
+				ANNIE sentence splitter
+				(<a href="http://gate.ac.uk/sale/tao/#sec:splitter">docs</a>)
+			</td>
 		<td>gate.creole.splitter.SentenceSplitter</td>
 	</tr>
 	<tr>
 		<td>ANNIE POS Tagger</td>
-		<td>Mark Hepple's Brill-style POS tagger (<a href="http://gate.ac.uk/sale/tao/#sec:tagger">docs</a>)</td>
+		<td>
+				Mark Hepple's Brill-style POS tagger
+				(<a href="http://gate.ac.uk/sale/tao/#sec:tagger">docs</a>)
+			</td>
 		<td>gate.creole.POSTagger</td>
 	</tr>
 	<tr>
 		<td>ANNIE OrthoMatcher</td>
-		<td>ANNIE orthographical coreference component (<a href="http://gate.ac.uk/sale/tao/#sec:annie:orthomatcher">docs</a>)</td>
+		<td>
+				ANNIE orthographical coreference component
+				(<a href="http://gate.ac.uk/sale/tao/#sec:annie:orthomatcher">docs</a>)
+			</td>
 		<td>gate.creole.orthomatcher.OrthoMatcher</td>
 	</tr>
 	<tr>
 		<td>ANNIE Pronominal Coreferencer</td>
-		<td>Pronominal Coreference resolution component (<a href="http://gate.ac.uk/sale/tao/#sec:annie:pronom-coref">docs</a>)</td>
+		<td>
+				Pronominal Coreference resolution component
+				(<a href="http://gate.ac.uk/sale/tao/#sec:annie:pronom-coref">docs</a>)
+			</td>
 		<td>gate.creole.coref.Coreferencer</td>
 	</tr>
 	<tr>
@@ -132,7 +167,10 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>Document Reset PR</td>
-		<td>Document cleaner (<a href="http://gate.ac.uk/sale/tao/#sec:misc-creole:reset">docs</a>)</td>
+		<td>
+				Document cleaner
+				(<a href="http://gate.ac.uk/sale/tao/#sec:misc-creole:reset">docs</a>)
+			</td>
 		<td>gate.creole.annotdelete.AnnotationDeletePR</td>
 	</tr>
 	<tr>
@@ -142,7 +180,10 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>Gaze</td>
-		<td>Gazetteer viewer and editor (<a href="http://gate.ac.uk/sale/tao/#sect:gaze">docs</a>)</td>
+		<td>
+				Gazetteer viewer and editor
+				(<a href="http://gate.ac.uk/sale/tao/#sect:gaze">docs</a>)
+			</td>
 		<td>com.ontotext.gate.vr.Gaze</td>
 	</tr>
 	<tr>
@@ -172,14 +213,6 @@ list</a>.</p>
 		<td>Arabic OrthoMatcher</td>
 		<td>Arabic Orthomatcher</td>
 		<td>arabic.ArabicOrthoMatcher</td>
-	</tr>
-	<tr>
-		<th colspan='3'><a name='Buchart'>Buchart</a></th>
-	</tr>
-	<tr>
-		<td>Bottom-Up Chart Parser</td>
-		<td>This plugin is deprecated, and has been replaced by SUPPLE (<a href="http://gate.ac.uk/sale/tao/#sec:misc-creole:supple">docs</a>)</td>
-		<td>shef.nlp.buchart.Buchart</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='cebuano'>cebuano</a></th>
@@ -316,11 +349,21 @@ list</a>.</p>
 		<td>gate.creole.kea.CorpusImporter</td>
 	</tr>
 	<tr>
+		<th colspan='3'><a name='learning'>learning</a></th>
+	</tr>
+	<tr>
+		<td>Batch Learning ALL PR</td>
+		<td>Supports training, application and evaluation of machine
+      learning models for NLP tasks
+      (<a href="http://gate.ac.uk/sale/tao/#chapt:mlapi">docs</a>)</td>
+		<td>gate.learning.LearningAPIMain</td>
+	</tr>
+	<tr>
 		<th colspan='3'><a name='Machine_Learning'>Machine_Learning</a></th>
 	</tr>
 	<tr>
 		<td>Machine Learning PR</td>
-		<td>Trains a machine learning algorithm from a corpus (<a href="http://gate.ac.uk/sale/tao/#sect:ml">docs</a>)</td>
+		<td>Trains a machine learning algorithm from a corpus (<a href="http://gate.ac.uk/sale/tao/#sect:ml">docs</a>).  For new code, consider using the "learning" plugin unstead.</td>
 		<td>gate.creole.ml.MachineLearningPR</td>
 	</tr>
 	<tr>
@@ -405,37 +448,25 @@ list</a>.</p>
 		<th colspan='3'><a name='Ontology_Tools'>Ontology_Tools</a></th>
 	</tr>
 	<tr>
-		<td>Jena Ontology</td>
-		<td>An ontology implementation using Jena for I/O (<a href="http://gate.ac.uk/sale/tao/#sec:ontologies:lr">docs</a>).</td>
-		<td>gate.creole.ontology.jena.JenaOntologyImpl</td>
-	</tr>
-	<tr>
-		<td>Protege project</td>
-		<td>Protege project file name (<a href="http://gate.ac.uk/sale/tao/#sect:protege:">docs</a>).</td>
-		<td>gate.creole.ProtegeProjectName</td>
+		<td>OWLIM Ontology LR</td>
+		<td>Ontology which connects to Sesame Repository via OWLIM SAIL
+      (<a href="http://gate.ac.uk/sale/tao/#sec:ontologies:lr">docs</a>)</td>
+		<td>gate.creole.ontology.owlim.OWLIMOntologyLR</td>
 	</tr>
 	<tr>
 		<td>OntoGazetteer</td>
-		<td>A list lookup component based on mapping between ontology classes and gazetteer lists</td>
+		<td>A list lookup component based on mapping between ontology classes and gazetteer lists (<a href="http://gate.ac.uk/sale/tao/#sect:misc-creole:ontotext">docs</a>)</td>
 		<td>gate.creole.gazetteer.OntoGazetteerImpl</td>
 	</tr>
 	<tr>
 		<td>GATE Ontology Editor</td>
 		<td>Ontology editing tool (<a href="http://gate.ac.uk/sale/tao/#sec:ontologies:vr">docs</a>)</td>
-		<td>gate.gui.OntologyEditor</td>
+		<td>gate.gui.ontology.OntologyEditor</td>
 	</tr>
 	<tr>
-		<td>Protege</td>
-		<td>&nbsp;</td>
-		<td>gate.gui.ProtegeWrapper</td>
-	</tr>
-	<tr>
-		<th colspan='3'><a name='probability'>probability</a></th>
-	</tr>
-	<tr>
-		<td>ProbabilityPR</td>
-		<td>A plugin to calculate the probability of annotations (<a href="http://gate.ac.uk/sale/tao/#sec:misc-creole:probability">docs</a>)</td>
-		<td>probability.ProbabilityPR</td>
+		<td>OCAT</td>
+		<td>Ontology-based Corpus Annotation Tool (<a href="http://gate.ac.uk/sale/tao/#sec:ontologies:ocat">docs</a>)</td>
+		<td>gate.creole.ontology.ocat.OntologyViewer</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='rasp'>rasp</a></th>
@@ -523,7 +554,7 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>Syntax tree viewer</td>
-		<td>&nbsp;</td>
+		<td>Viewer for syntax trees generated by a parser (<a href="http://gate.ac.uk/sale/tao/#sec:supple:treeviewer">docs</a>)</td>
 		<td>gate.gui.SyntaxTreeViewer</td>
 	</tr>
 	<tr>
@@ -555,18 +586,26 @@ list</a>.</p>
 		<td>WordNet viewer</td>
 		<td>gate.gui.wordnet.WordNetViewer</td>
 	</tr>
+	<tr>
+		<th colspan='3'><a name='yahoo'>yahoo</a></th>
+	</tr>
+	<tr>
+		<td>YahooPR</td>
+		<td>Provides an interface to Yahoo API (<a href="http://gate.ac.uk/sale/tao/#sec:misc-creole:yahoo">docs</a>)</td>
+		<td>gate.yahoo.YahooPR</td>
+	</tr>
 </table>
 <hr/>
 <a name='external-plugins'></a>
 <h2>Other contributed plugins</h2>
 <ul type='circle'>
 	<li><a href='#munpex'>Multi-lingual Noun Phrase Extractor (MuNPEx)</a></li>
-	<li><a href='#kaon2ontology'>KAON Ontology</a></li>
 	<li><a href='#anc'>XCES tools</a></li>
 	<li><a href='#sen'><i>Sen</i> wrapper (Japanese morphological analyser)</a></li>
 	<li><a href='#russianprs'>Russian morph tagger</a></li>
 	<li><a href='#ofai'>OFAI List Gazetteer</a></li>
-        <li><a href='#bwp'>BWP Gazetteer</a></li>
+	<li><a href='#bwp'>BWP Gazetteer</a></li>
+	<li><a href='#apolda'>Apolda</a></li>
 </ul>
 
 <table border='1'>
@@ -581,16 +620,6 @@ list</a>.</p>
                 architecture, implemented in JAPE. It currently supports English, German, French, and
                 Spanish (in beta).</td>
 		<td>en-np_main.jape</td>
-	</tr>
-	<tr>
-		<th colspan='3'><a name="kaon2ontology"></a>KAON Ontology<br/><a
-                href="http://www.gate.ac.uk/sale/gateplugins/kaon2/">website</a></th>
-	</tr>
-	<tr><td colspan='3'><center><i>KAON2Ontology can be accessed from http://gate.ac.uk/sale/gateplugins/kaon2.  In order to use it from GATE, user should register the above URL as a creole repository. (i.e. If using it from GUI, select the "Add a new Creole repository" in GATE Plugin Manager and provide this URL or  Gate.getCreoleRegister().registerDirectories(new URL("http://gate.ac.uk/sale/gateplugins/kaon2") if used programmatically)</i></center></td></tr>
-	<tr>
-		<td>KAON Ontology</td>
-		<td>An ontology implementation using KAON2 for I/O.</td>
-		<td>gate.creole.ontology.kaon2.KAON2OntologyImpl</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name="anc"></a>XCES tools<br/><a href="http://americannationalcorpus.org/tools/index.html#gate-tools">website</a> <a href="http://americannationalcorpus.org/tools/ANC.zip">download</a></th>
@@ -649,21 +678,30 @@ list</a>.</p>
 		<td>Extended version of the transducer-based List Gazetteer</td>
 		<td>at.ofai.gate.ListGazetteer</td>
 	</tr>
-
-<tr>
-		<th colspan='3'><a name="bwp"></a>BWP Gazetteer<br/><a
-                href="http://paginas.terra.com.br/arte/lua/?content=Software/BWPGazetteer.html">website</a> <a
-                href="http://paginas.terra.com.br/arte/lua/?content=Software/BWPGazetteer.html">download</a></th>
+	<tr>
+		<th colspan='3'><a name="bwp"></a>BWP Gazetteer<br/>
+		<a href="http://paginas.terra.com.br/arte/lua/?content=Software/BWPGazetteer.html">website</a>
+	       	<a href="http://paginas.terra.com.br/arte/lua/?content=Software/BWPGazetteer.html">download</a></th>
 	</tr>
-	<tr><td colspan='3'><center><i>This plugin provides an approximate gazetteer for GATE, based on Levenshtein's Edit Distance for strings. Its goal is to handle texts with noise and errors, in which GATE's default gazetteers may have difficulties.
-</i></center></td></tr>
-
+	<tr><td colspan='3'><center><i>This plugin provides an approximate gazetteer for GATE, based on Levenshtein's Edit Distance for strings. Its goal is to handle texts with noise and errors, in which GATE's default gazetteers may have difficulties.</i></center></td></tr>
 	<tr>
 		<td>BWP Gazetteer</td>
 		<td>Extended version of the transducer-based List Gazetteer</td>
 		<td></td>
 	</tr>
-
+	<tr>
+		<th colspan='3'><a name="apolda"></a>Apolda<br/>
+		<a href="http://apolda.sourceforge.net">website</a>
+		<a href="http://sourceforge.net/project/showfiles.php?group_id=189547">download</a></th>
+	</tr>
+	<tr>
+		<td colspan='3'><center><i>Annotates documents like a gazetteer, but takes the terms from OWL annotation properties in an ontology, rather than from a separate list of terms.</i></center></td>
+	</tr>
+	<tr>
+		<td>Apolda Ontology Annotator</td>
+		<td>Ontology-based lookup taking terms from properties in the ontology.</td>
+		<td>telin.Apolda</td>
+	</tr>
 </table>
 <hr/>
 <div class="banner">| <a href="../../index.html">gate home</a> |</div>
