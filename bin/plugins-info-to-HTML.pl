@@ -29,6 +29,12 @@ open(HTMLFILE , ">:utf8", $htmlFilename) || die("Cannot Open File $htmlFilename"
 
 print HTMLFILE <<ENDHTML;
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+****** This page is generated automatically by plugins-info-to-HTML.pl. ******
+****** Do not edit it manually.  To modify the external plugins list at ******
+****** the bottom of this page edit external-plugins.html, change into  ******
+****** ../bin and run ./plugins-info-to-HTML.pl                         ******
+-->
 <html>
 
 <head>
