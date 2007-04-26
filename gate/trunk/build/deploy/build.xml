@@ -429,11 +429,7 @@ build/deploy all paths are relative to the top-level GATE directory -->
     </exec>
   </target>
 
-  <!-- Build the Windows-specific installer EXE.  This task will work on any
-  platform with a copy of launch4j installed (http://launch4j.sourceforge.net)
-  You must specify the location of your launch4j installation as the property
-  launch4j.home -->
-  <target name="win-installer">
+  <target name="launch4j-taskdef">
     <available file="${launch4j.home}/launch4j.jar" 
                property="launch4j.available" />
     <fail message="Please set the property launch4j.home to point to your launch4j installation"
@@ -445,10 +441,28 @@ build/deploy all paths are relative to the top-level GATE directory -->
         <fileset dir="${launch4j.home}/lib" includes="*.jar" />
       </classpath>
     </taskdef>
+  </target>
+
+  <!-- Build the Windows-specific installer EXE.  This task will work on any
+  platform with a copy of launch4j installed (http://launch4j.sourceforge.net)
+  You must specify the location of your launch4j installation as the property
+  launch4j.home -->
+  <target name="win-installer" depends="launch4j-taskdef">
 
     <launch4j configFile="build/deploy/launch4j-installer.xml"
               outfile="${distDir}/${gate.full.name}-installer-win.exe"
               jar="${distDir}/${gate.full.name}-installer.jar" />
 
+  </target>
+
+  <!-- rebuild the Windows-specific exe launcher for GATE.  This should very
+  rarely be necessary, probably only when new features are added to launch4j.
+  Currently this target requires a version of launch4j patched according to
+  https://sourceforge.net/support/tracker.php?aid=1707827 - if and when this
+  patch is accepted into launch4j proper I will update this launcher config
+  to match -->
+  <target name="gate.exe" depends="launch4j-taskdef">
+    <launch4j configFile="build/deploy/launch4j-gate.xml"
+              outfile="gate.exe" />
   </target>
 </project>
