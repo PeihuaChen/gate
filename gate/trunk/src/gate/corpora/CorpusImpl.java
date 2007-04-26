@@ -366,10 +366,11 @@ public class CorpusImpl extends AbstractLanguageResource
           } catch(Throwable t) {
             String nl = Strings.getNl();
             Err.prln(
-              "WARNING: Corpus.populate could not intantiate document" + nl +
+              "WARNING: Corpus.populate could not instantiate document" + nl +
               "  Document name was: " + docName + nl +
               "  Exception was: " + t + nl + nl
             );
+            t.printStackTrace();
           }
           if(sListener != null) sListener.statusChanged(
             aFile.getName() + " read");
