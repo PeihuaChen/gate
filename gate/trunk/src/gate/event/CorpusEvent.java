@@ -52,7 +52,7 @@ public class CorpusEvent extends GateEvent {
   }
 
   /**
-   * Gets the index of the dcument this event refers to
+   * Gets the index of the document this event refers to
    */
   public int getDocumentIndex() {
     return this.documentIndex;
