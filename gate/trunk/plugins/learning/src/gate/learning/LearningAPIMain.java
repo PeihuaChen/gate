@@ -237,6 +237,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               throw new GateException("The learning mode is not defined!");
           }
         }
+        logFileIn.close();
       } catch(IOException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
