@@ -197,28 +197,7 @@ public class SerialDatastoreViewer extends JScrollPane implements
     datastore.addDatastoreListener(this);
     mainTree.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
-        processEvent(e);
-      }// public void mouseClicked(MouseEvent e)
-
-      @Override
-      public void mousePressed(MouseEvent e) {
-        processEvent(e);
-      }
-
-      @Override
-      public void mouseReleased(MouseEvent e) {
-        processEvent(e);
-      }
-
-      protected void processEvent(MouseEvent e) {
-        if(e.isPopupTrigger()) {
-          // where inside the tree?
-          TreePath path = mainTree.getPathForLocation(e.getX(), e.getY());
-          deleteAction.setLocation(path);
-          loadAction.setLocation(path);
-          popup.show(SerialDatastoreViewer.this, e.getX(), e.getY());
-        }
-        else if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
+        if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
           // double click -> just load the resource
           TreePath path = mainTree.getPathForLocation(e.getX(), e.getY());
           Object value = null;
@@ -231,31 +210,29 @@ public class SerialDatastoreViewer extends JScrollPane implements
             loadAction.actionPerformed(null);
           }
         }
+      }// public void mouseClicked(MouseEvent e)
+
+      @Override
+      public void mousePressed(MouseEvent e) {
+        if(e.isPopupTrigger()) {
+          // where inside the tree?
+          TreePath path = mainTree.getPathForLocation(e.getX(), e.getY());
+          deleteAction.setLocation(path);
+          loadAction.setLocation(path);
+          popup.show(SerialDatastoreViewer.this, e.getX(), e.getY());
+        }
       }
 
-//      protected void processEvent1(MouseEvent e) {
-//        // where inside the tree?
-//        TreePath path = mainTree.getPathForLocation(e.getX(), e.getY());
-//        Object value = null;
-//        if(path != null)
-//          value = ((DefaultMutableTreeNode)path.getLastPathComponent())
-//                  .getUserObject();
-//
-//        if(SwingUtilities.isRightMouseButton(e)) {
-//          // right click
-//          if(value != null && value instanceof DSEntry) {
-//            JPopupMenu popup = ((DSEntry)value).getPopup();
-//            popup.show(SerialDatastoreViewer.this, e.getX(), e.getY());
-//          }
-//        }
-//        else if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
-//          // double click -> just load the resource
-//          if(value != null && value instanceof DSEntry) {
-//            new LoadAction1((DSEntry)value).actionPerformed(null);
-//          }
-//        }
-//
-//      }
+      @Override
+      public void mouseReleased(MouseEvent e) {
+        if(e.isPopupTrigger()) {
+          // where inside the tree?
+          TreePath path = mainTree.getPathForLocation(e.getX(), e.getY());
+          deleteAction.setLocation(path);
+          loadAction.setLocation(path);
+          popup.show(SerialDatastoreViewer.this, e.getX(), e.getY());
+        }
+      }
     });
   }// protected void initListeners()
 
