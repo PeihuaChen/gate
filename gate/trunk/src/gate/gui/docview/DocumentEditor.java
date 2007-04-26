@@ -508,11 +508,11 @@ public class DocumentEditor extends AbstractVisualResource
                 setRightView(verticalViews.indexOf(view));
                 break;
               case DocumentView.HORIZONTAL:
-                if(ViewButton.this.getParent() == topBar){
-                  setTopView(horizontalViews.indexOf(view));
-                }else{
+//                if(ViewButton.this.getParent() == topBar){
+//                  setTopView(horizontalViews.indexOf(view));
+//                }else{
                   setBottomView(horizontalViews.indexOf(view));
-                }
+//                }
                 break;
             }
           }else{
@@ -525,11 +525,11 @@ public class DocumentEditor extends AbstractVisualResource
                 setRightView(-1);
                 break;
               case DocumentView.HORIZONTAL:
-                if(ViewButton.this.getParent() == topBar){
-                  setTopView(-1);
-                }else{
+//                if(ViewButton.this.getParent() == topBar){
+//                  setTopView(-1);
+//                }else{
                   setBottomView(-1);
-                }
+//                }
                 break;
             }
           }
@@ -546,11 +546,11 @@ public class DocumentEditor extends AbstractVisualResource
           setSelected(getRightView() == view);
           break;
         case DocumentView.HORIZONTAL:
-          if(ViewButton.this.getParent() == topBar){
-            setSelected(getTopView() == view);
-          }else{
+//          if(ViewButton.this.getParent() == topBar){
+//            setSelected(getTopView() == view);
+//          }else{
             setSelected(getBottomView() == view);
-          }
+//          }
           break;
       }
     }
