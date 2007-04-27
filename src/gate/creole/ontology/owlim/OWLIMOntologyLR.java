@@ -33,7 +33,6 @@ import javax.swing.JFileChooser;
 import javax.xml.rpc.ServiceException;
 import org.openrdf.sesame.repository.SesameRepository;
 
-
 /**
  * This LR provides an implementation of Ontology interface and uses
  * OWLIM as a SAIL to store and interact with SESAME. All data is stored
@@ -134,7 +133,7 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
       String ontoURLString = ontologyURL == null ? "" : ontologyURL
               .toExternalForm();
       owlim = new OWLIMServiceImpl();
-      
+
       ((OWLIMServiceImpl)owlim).init((ServletContext)null);
       ((OWLIMServiceImpl)owlim).login("admin", "admin");
 
@@ -163,7 +162,7 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
                 + this.hashCode(), "admin", "admin", ontoURLString,
                 defaultNameSpace, type, persistLocationPath, persistRepository
                         .booleanValue(), false);
-        
+
       }
       if(sesameRepositoryID == null) {
         throw new ResourceInstantiationException(
@@ -229,16 +228,28 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
    */
   public void resourceUnloaded(CreoleEvent ce) {
     if(ce.getResource() == this) {
-      try {
-        if(!getPersistRepository().booleanValue()) {
-          owlim.removeRepository(getSesameRepositoryID());
-          owlim.logout(sesameRepositoryID);
-          Gate.getCreoleRegister().removeCreoleListener(this);
-        }
+      unload();
+      Gate.getCreoleRegister().removeCreoleListener(this);
+    }
+  }
+
+  /**
+   * This method deletes the repository from memory and releases all
+   * resources occupied by the ontology. Please note that after calling
+   * this method, any call to any method of the ontology will throw an
+   * exception complaining that the repository does not exist. So this
+   * should be the last call to this ontology when you decide to discard
+   * this instance of ontology.
+   */
+  public void unload() {
+    try {
+      if(!getPersistRepository().booleanValue()) {
+        owlim.removeRepository(getSesameRepositoryID());
+        owlim.logout(sesameRepositoryID);
       }
-      catch(RemoteException re) {
-        throw new GateRuntimeException(re);
-      }
+    }
+    catch(RemoteException re) {
+      throw new GateRuntimeException(re);
     }
   }
 
