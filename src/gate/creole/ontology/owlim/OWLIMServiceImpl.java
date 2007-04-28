@@ -926,7 +926,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
               getURI(theAnnotationPropertyURI), null);
     }
     catch(Exception e) {
-      throw new RemoteException(e.getMessage());
+      throw new RemoteException(e.getMessage(), e);
     }
   }
 
@@ -1329,7 +1329,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
               getURI(anRDFPropertyURI), null);
     }
     catch(Exception e) {
-      throw new RemoteException(e.getMessage());
+      throw new RemoteException(e.getMessage(), e);
     }
   }
 
@@ -1624,7 +1624,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       }
     }
     catch(Exception e) {
-      throw new RemoteException(e.getMessage());
+      throw new RemoteException(e.getMessage(), e);
     }
   }
 
@@ -3208,7 +3208,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
     }
     catch(Exception e) {
       e.printStackTrace();
-      throw new RemoteException(e.getMessage());
+      throw new RemoteException(e.getMessage(), e);
     }
   }
 
@@ -3231,7 +3231,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       endTransaction(null);
     }
     catch(Exception e) {
-      throw new RemoteException(e.getMessage());
+      throw new RemoteException(e.getMessage(), e);
     }
   }
 
@@ -3250,7 +3250,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       endTransaction(null);
     }
     catch(Exception e) {
-      throw new RemoteException(e.getMessage());
+      throw new RemoteException(e.getMessage(), e);
     }
   }
 
@@ -3268,7 +3268,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       return no;
     }
     catch(Exception e) {
-      throw new RemoteException(e.getMessage());
+      throw new RemoteException(e.getMessage(), e);
     }
   }
 
@@ -3294,7 +3294,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       endTransaction(null);
     }
     catch(Exception e) {
-      throw new RemoteException(e.getMessage());
+      throw new RemoteException(e.getMessage(), e);
     }
   }
 
@@ -3313,7 +3313,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       endTransaction(null);
     }
     catch(Exception e) {
-      throw new RemoteException(e.getMessage());
+      throw new RemoteException(e.getMessage(), e);
     }
   }
 
@@ -3452,7 +3452,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       writer.close();
     }
     catch(Exception e) {
-      throw new RemoteException(e.getMessage());
+      throw new RemoteException(e.getMessage(), e);
     }
   }
 
@@ -3465,7 +3465,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       return config;
     }
     catch(Exception e) {
-      throw new RemoteException(e.getMessage());
+      throw new RemoteException(e.getMessage(), e);
     }
   }
 
@@ -3849,8 +3849,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       return repConfig;
     }
     catch(Exception e) {
-      e.printStackTrace();
-      throw new RemoteException(e.getMessage());
+      throw new RemoteException(e.getMessage(), e);
     }
   }
 
@@ -3906,7 +3905,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       }
     }
     catch(Exception e) {
-      throw new RemoteException(e.getMessage());
+      throw new RemoteException(e.getMessage(), e);
     }
   }
 
