@@ -1131,7 +1131,8 @@ public abstract class AbstractOWLIMOntologyImpl
       callFromCleanup = true;
         cleanOntology();
       try {
-        owlim.removeRepository(this.sesameRepositoryID);
+        owlim.removeRepository(this.sesameRepositoryID,
+                getPersistRepository().booleanValue());
       }
       catch(Exception e) {
         throw new GateRuntimeException(e);

@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -107,9 +108,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
   /**
    * The file that stores the various configuration parameters
    */
-  private static File systemConf = null;
+  private static URL systemConf = null;
 
-  private static File owlRDFS = null;
+  private static URL owlRDFS = null;
 
   /**
    * Ontology URL
@@ -124,7 +125,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
   /**
    * GOS Home
    */
-  private static File gosHome;
+  private static URL gosHome;
 
   /**
    * Constructor
@@ -244,14 +245,17 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
         if(classURL.getProtocol().equals("jar")) {
           // running from annic.jar
           String classURLStr = classURL.getFile();
-          File gosJarFile = new File(classURLStr.substring(0, classURLStr
+          URL gosJarURL = new URL(classURLStr.substring(0, classURLStr
                   .indexOf('!')));
-          gosHome = gosJarFile.getParentFile();
+          // gosURLJar is "file:/path/to/gos/lib/file.jar"
+          gosHome = new URL(gosJarURL, "..");
+          // gosHome is "file:/path/to/gos/"
         }
         else if(classURL.getProtocol().equals("file")) {
           // running from classes directory (e.g.inside Eclipse)
-          gosHome = new File(classURL.getFile()).getParentFile()
-                  .getParentFile().getParentFile().getParentFile();
+          // classURL is "file:/path/to/gos/classes/gate/creole/ontology/owlim/OWLIMServiceImpl.class"
+          gosHome = new URL(classURL, "../../../../..");
+          // gosHome is "file:/path/to/gos/"
         }
         else {
           // this should not happen and will cause a JUnit error if it
@@ -259,9 +263,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
           gosHome = null;
         }
 
-        systemConf = new File(new URL(gosHome.getParent() + "/system.conf")
-                .getFile());
-        owlRDFS = new File(new URL(gosHome.getParent() + "/owl.rdfs").getFile());
+        systemConf = new URL(gosHome, "system.conf");
+        owlRDFS = new URL(gosHome, "owl.rdfs");
         SesameServer.setSystemConfig(readConfiguration());
         initiated = true;
       }
@@ -270,6 +273,35 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       System.err.println("OWLIMServiceImpl Problem with initialisation");
       if(DEBUG) throw new ServiceException(e);
     }
+  }
+  
+  /**
+   * This method intializes the OWLIMService. It locates the
+   * system configuration file in the directory whose URL is passed in.
+   * The system configuration file contains various parameters/settings
+   * such as available repositories and users with their rights on
+   * each repository
+   * 
+   * @param gosHomeURL the URL to the GOS home directory.  This must
+   *         point to a directory, i.e. it must end in a forward slash.
+   * @throws ServiceException
+   */
+  public void init(URL gosHomeURL) throws ServiceException {
+    try {
+      if(!initiated) {
+        if(DEBUG) System.out.println("Initiating OWLIMService...");
+        gosHome = gosHomeURL;
+        
+        systemConf = new URL(gosHome, "system.conf");
+        owlRDFS = new URL(gosHome, "owl.rdfs");
+        SesameServer.setSystemConfig(readConfiguration());
+        initiated = true;
+      }
+    }
+    catch(Exception e) {
+      System.err.println("OWLIMServiceImpl Problem with initialisation");
+      if(DEBUG) throw new ServiceException(e);
+    }    
   }
 
   /** This is called by axis before calling the operation* */
@@ -1552,7 +1584,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       return true;
     }
     catch(Exception e) {
-      throw new RemoteException("" + e.getMessage());
+      throw new RemoteException(e.getMessage(), e);
     }
   }
 
@@ -1664,8 +1696,15 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
           String absolutePersistLocation, boolean persist,
           boolean returnSystemStatements) throws RemoteException {
     if(DEBUG) print("createRepository");
-    if(absolutePersistLocation == null)
-      absolutePersistLocation = gosHome.getAbsolutePath();
+    if(absolutePersistLocation == null) {
+      try {
+        absolutePersistLocation = new File(gosHome.toURI()).getAbsolutePath();
+      }
+      catch(URISyntaxException e) {
+        throw new RemoteException("Cannot construct persistence location " +
+            "from gosHome", e);
+      }        
+    }
     // check if user exists
     if(password == null) password = "";
     createNewUser(username, password);
@@ -1713,8 +1752,15 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
           String absolutePersistLocation, boolean persist,
           boolean returnSystemStatements) throws RemoteException {
     if(DEBUG) print("createRepository");
-    if(absolutePersistLocation == null)
-      absolutePersistLocation = gosHome.getAbsolutePath();
+    if(absolutePersistLocation == null) {
+      try {
+        absolutePersistLocation = new File(gosHome.toURI()).getAbsolutePath();
+      }
+      catch(URISyntaxException e) {
+        throw new RemoteException("Cannot construct persistence location " +
+            "from gosHome", e);
+      }        
+    }
     // check if user exists
     if(password == null) password = "";
     createNewUser(username, password);
@@ -1741,7 +1787,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
    * @param repositoryID
    * @return
    */
-  public void removeRepository(String repositoryID) throws RemoteException {
+  public void removeRepository(String repositoryID, boolean persist) throws RemoteException {
     try {
       if(!loadRepositoryDetails(repositoryID)) {
         return;
@@ -1751,7 +1797,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       sail.clearRepository();
       SesameServer.getSystemConfig().removeRepository(
               currentRepository.getRepositoryId());
-      saveConfiguration();
+      if(persist) saveConfiguration();
       endTransaction(null);
       mapToRepositoryDetails.remove(repositoryID);
     }
@@ -3446,7 +3492,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
   private void saveConfiguration() throws RemoteException {
     try {
       if(DEBUG) System.out.println("System conf : " + systemConf);
-      Writer writer = new BufferedWriter(new FileWriter(systemConf));
+      Writer writer = new BufferedWriter(new FileWriter(new File(systemConf.toURI())));
       SystemConfigFileHandler.writeConfiguration(
               SesameServer.getSystemConfig(), writer);
       writer.close();
@@ -3459,7 +3505,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
   private SystemConfig readConfiguration() throws RemoteException {
     try {
       Reader reader = new BufferedReader(new InputStreamReader(systemConf
-              .toURL().openStream()));
+              .openStream()));
       SystemConfig config = SystemConfigFileHandler.readConfiguration(reader);
       reader.close();
       return config;
@@ -3572,7 +3618,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
             }
           }
           else {
-            imports = owlRDFS.getAbsolutePath();
+            imports = owlRDFS.toExternalForm();
             defaultNS = "http://www.w3.org/2002/07/owl#";
           }
           map.put("imports", imports);
@@ -3593,7 +3639,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       if(ontoFileUrl != null && ontoFileUrl.trim().length() != 0) {
         currentRepository.addData(ontoFileUrl, baseURI, getRDFFormat(format),
                 true, this);
-        saveConfiguration();
+        if(persist) saveConfiguration();
         if(DEBUG) System.out.println("Data added!");
       }
       found = true;
@@ -3723,7 +3769,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
           }
         }
       }
-      removeRepository(dummyRepository);
+      removeRepository(dummyRepository, false);
       if(currentRepository != null) loadRepositoryDetails(currentRepository);
     }
     catch(Exception e) {
@@ -3803,7 +3849,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
           formatToUse = "rdfxml";
           break;
       }
-      String imports = owlRDFS.getAbsolutePath();
+      String imports = owlRDFS.toExternalForm();
       String defaultNS = "http://www.w3.org/2002/07/owl#";
       if(!isDummyRepository) {
         Set<String> importValues = getImportValues(null, ontoFileUrl, baseURI,
