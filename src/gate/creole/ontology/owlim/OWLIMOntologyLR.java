@@ -9,6 +9,7 @@ package gate.creole.ontology.owlim;
 
 import gate.Gate;
 import gate.Resource;
+import gate.creole.ResourceData;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.ontology.OConstants;
 import gate.event.CreoleEvent;
@@ -133,8 +134,14 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
       String ontoURLString = ontologyURL == null ? "" : ontologyURL
               .toExternalForm();
       owlim = new OWLIMServiceImpl();
+      
+      // determine the URL to the Ontology_Tools plugin directory
+      ResourceData myResourceData = (ResourceData)Gate.getCreoleRegister()
+              .get(this.getClass().getName());
+      URL creoleXml = myResourceData.getXmlFileUrl();
+      URL gosHomeURL = new URL(creoleXml, ".");
 
-      ((OWLIMServiceImpl)owlim).init((ServletContext)null);
+      ((OWLIMServiceImpl)owlim).init(gosHomeURL);
       ((OWLIMServiceImpl)owlim).login("admin", "admin");
 
       String persistLocationPath = null;
@@ -244,7 +251,8 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
   public void unload() {
     try {
       if(!getPersistRepository().booleanValue()) {
-        owlim.removeRepository(getSesameRepositoryID());
+        owlim.removeRepository(getSesameRepositoryID(),
+                getPersistRepository().booleanValue());
         owlim.logout(sesameRepositoryID);
       }
     }
