@@ -351,8 +351,6 @@ build/deploy all paths are relative to the top-level GATE directory -->
               <exclude name="depcache/**" />
             </fileset>
             <file src="build/deploy/gate-icon.ico" targetdir="$INSTALL_PATH/icons" os="windows"/>
-            <!-- required by ontology API, these should move into
-                 ontology_tools plugin before the 4.0 release -->
             @{bin.executables}
             <executable targetfile="$INSTALL_PATH/GATE.app/Contents/MacOS/GATE" stage="never" keep="true" os="mac"/>
         </pack>
