@@ -23,6 +23,25 @@
 	<classpathentry kind="lib" path="lib/wstx-lgpl-2.0.6.jar"/>
 	<classpathentry kind="lib" path="lib/sesame.jar"/>
 	<classpathentry kind="lib" path="lib/rio.jar"/>
+	<classpathentry kind="lib" path="lib/xpp3-1.1.3.3_min.jar"/>
+	<classpathentry kind="lib" path="lib/wsdl4j-1.5.1.jar"/>
+	<classpathentry kind="lib" path="lib/trree-2.8.4.jar"/>
+	<classpathentry kind="lib" path="lib/soap.jar"/>
+	<classpathentry kind="lib" path="lib/saaj.jar"/>
+	<classpathentry kind="lib" path="lib/mail.jar"/>
+	<classpathentry kind="lib" path="lib/lubm.jar"/>
+	<classpathentry kind="lib" path="lib/commons-fileupload-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/commons-discovery-0.2.jar"/>
+	<classpathentry kind="lib" path="lib/axis.jar"/>
+	<classpathentry kind="lib" path="lib/axis-schema.jar"/>
+	<classpathentry kind="lib" path="lib/axis-ant.jar"/>
+	<classpathentry kind="lib" path="lib/antlr.jar"/>
+	<classpathentry kind="lib" path="lib/ant.jar"/>
+	<classpathentry kind="lib" path="lib/ant-nodeps.jar"/>
+	<classpathentry kind="lib" path="lib/ant-launcher.jar"/>
+	<classpathentry kind="lib" path="lib/ant-junit.jar"/>
+	<classpathentry kind="lib" path="lib/ant-contrib-1.0b2.jar"/>
+	<classpathentry kind="lib" path="lib/activation.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/javacc.jar"/>
 	<classpathentry kind="lib" path="lib/servlet-2_3.zip"/>
