@@ -387,6 +387,17 @@ public class SerialCorpusImpl extends
       //we've found the correct document
       //don't break the loop, because it might appear more than once
       if (docID.equals(docData.getPersistentID())) {
+        if(evt.getResource() == null) {
+          // instead of calling remove() which tries to load the document
+          // remove it from the documents and docDataList
+          documentRemoved(((DocumentData)docDataList.get(i)).persistentID.toString());
+          docDataList.remove(i);
+          documents.remove(i);
+          isDirty = true;
+          i--;
+          continue;
+        }
+
         remove(i);
         isDirty = true;
       }//if
