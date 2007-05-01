@@ -186,6 +186,7 @@ public class LuceneSearcher implements Searcher {
     luceneSearchThreadIndex = 0;
     success = false;
     fwdIterationEnded = false;
+    wasDeleteQuery = false;
 
     if(parameters == null)
       throw new SearchException("Parameters cannot be null");

@@ -142,6 +142,7 @@ public class LuceneIndexer implements Indexer {
           gate.Document gateDoc = (gate.Document)corpus.get(i);
           String idToUse = gateDoc.getLRPersistenceId() == null ? gateDoc
                   .getName() : gateDoc.getLRPersistenceId().toString();
+          System.out.print("Indexing : "+idToUse+" ...");
           String corpusName = corpus.getLRPersistenceId() == null ? corpus
                   .getName() : corpus.getLRPersistenceId().toString();
           gate.creole.annic.apache.lucene.document.Document[] luceneDocs = getLuceneDoc(
@@ -166,6 +167,7 @@ public class LuceneIndexer implements Indexer {
           if(gateDoc.getLRPersistenceId() != null) {
             gate.Factory.deleteResource(gateDoc);
           }
+          System.out.println("Done");
         }
       }// for (all documents)
       writer.close();
@@ -187,7 +189,7 @@ public class LuceneIndexer implements Indexer {
       writer.close();
     }
     catch(java.io.IOException ioe) {
-      throw new IndexException(ioe.getMessage());
+      throw new IndexException(ioe);
     }
   }
 
@@ -240,6 +242,7 @@ public class LuceneIndexer implements Indexer {
           
           String idToUse = gateDoc.getLRPersistenceId() == null ? gateDoc
                   .getName() : gateDoc.getLRPersistenceId().toString();
+          System.out.print("Indexing : "+idToUse+ " ...");
           gate.creole.annic.apache.lucene.document.Document[] docs = getLuceneDoc(
                   corpusPersistenceID, gateDoc, location);
           if(docs == null) continue;
@@ -247,12 +250,12 @@ public class LuceneIndexer implements Indexer {
             writer.addDocument(docs[j]);
           }
           noOfIndexUnitsPerDocument.put(idToUse, new Integer(docs.length));
+          System.out.println("Done");
         }// for (add all added documents)
       }
-
     }
     catch(java.io.IOException ioe) {
-      throw new IndexException(ioe.getMessage());
+      throw new IndexException(ioe);
     }
     finally {
       // whatever happens we need to try to close the writer
@@ -261,7 +264,7 @@ public class LuceneIndexer implements Indexer {
         writeParametersToDisk();
       }
       catch(java.io.IOException ioe) {
-        throw new IndexException(ioe.getMessage());
+        throw new IndexException(ioe);
       }
     }
   }
@@ -292,7 +295,7 @@ public class LuceneIndexer implements Indexer {
           if(size == null) {
             continue;
           }
-          // System.out.print("Removing => " + id + "...");
+          System.out.print("Removing => " + id + "...");
 
           for(int j = 0; j < size.intValue(); j++) {
             String tempID = id + "-" + j;
@@ -305,6 +308,7 @@ public class LuceneIndexer implements Indexer {
             if(file.exists()) file.delete();
           }
           noOfIndexUnitsPerDocument.remove(id);
+          System.out.println("Done ");
         }// for (remove all removed documents)
       }
 
@@ -312,7 +316,7 @@ public class LuceneIndexer implements Indexer {
       writeParametersToDisk();
     }
     catch(java.io.IOException ioe) {
-      throw new IndexException(ioe.getMessage());
+      throw new IndexException(ioe);
     }
 
   }
