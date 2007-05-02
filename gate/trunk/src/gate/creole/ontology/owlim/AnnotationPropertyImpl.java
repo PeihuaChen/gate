@@ -206,7 +206,7 @@ public class AnnotationPropertyImpl extends RDFPropertyImpl implements
 
   /*
    * (non-Javadoc)
-   * 
+   *  
    * @see gate.creole.ontology.RDFProperty#getDomain()
    */
   public Set<OResource> getDomain() {

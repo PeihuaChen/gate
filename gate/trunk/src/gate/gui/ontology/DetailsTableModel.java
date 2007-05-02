@@ -147,58 +147,22 @@ public class DetailsTableModel extends AbstractTableModel {
       }
 
       propertyTypes.getValues().clear();
+      propertyTypes.getValues().addAll(tclass.getProperties());
+
       propertyValues.getValues().clear();
-      Set<RDFProperty> rdfProps = ontology.getPropertyDefinitions();
-      
-      if(rdfProps != null) {
-        Iterator<RDFProperty> iterator = rdfProps.iterator();
-        while(iterator.hasNext()) {
-          RDFProperty property = iterator.next();
-          if(property instanceof AnnotationProperty) {
-            propertyTypes.getValues().add(property);
-            continue;
-          }
-
-          List domain = new ArrayList(property.getDomain());
-          if(domain.size() == 0) {
-            propertyTypes.getValues().add(property);
-            continue;
-          }
-
-          for(int i = 0; i < domain.size(); i++) {
-            domain.set(i, ((OResource)domain.get(i)).getURI().toString());
-          }
-
-          if(domain.contains(tclass.getURI().toString())) {
-            propertyTypes.getValues().add(property);
-            continue;
-          }
-
-          List superClasses = new ArrayList(allSuperClasses.getValues());
-          for(int i = 0; i < superClasses.size(); i++) {
-            superClasses.set(i, ((OResource)superClasses.get(i)).getURI()
-                    .toString());
-          }
-
-          if(!Collections.disjoint(domain, superClasses)) {
-            propertyTypes.getValues().add(property);
-            continue;
-          }
-        }
-
-        Set<AnnotationProperty> props = tclass.getSetAnnotationProperties();
-        if(props != null) {
-          Iterator<AnnotationProperty> apIter = props.iterator();
-          while(apIter.hasNext()) {
-            AnnotationProperty ap = apIter.next();
-            List<Literal> literals = tclass.getAnnotationPropertyValues(ap);
-            for(int i = 0; i < literals.size(); i++) {
-              PropertyValue pv = new PropertyValue(ap, literals.get(i));
-              propertyValues.getValues().add(pv);
-            }
+      Set<AnnotationProperty> props = tclass.getSetAnnotationProperties();
+      if(props != null) {
+        Iterator<AnnotationProperty> apIter = props.iterator();
+        while(apIter.hasNext()) {
+          AnnotationProperty ap = apIter.next();
+          List<Literal> literals = tclass.getAnnotationPropertyValues(ap);
+          for(int i = 0; i < literals.size(); i++) {
+            PropertyValue pv = new PropertyValue(ap, literals.get(i));
+            propertyValues.getValues().add(pv);
           }
         }
       }
+      
       Collections.sort(propertyTypes.getValues(), itemComparator);
       Set<OInstance> set5 = ontology.getOInstances(tclass,
               OConstants.DIRECT_CLOSURE);
@@ -233,6 +197,8 @@ public class DetailsTableModel extends AbstractTableModel {
       }
 
       propertyTypes.getValues().clear();
+      propertyTypes.getValues().addAll(oinstance.getProperties());
+      
       propertyValues.getValues().clear();
       Set<AnnotationProperty> apProps = oinstance.getSetAnnotationProperties();
       Set<DatatypeProperty> dtProps = oinstance.getSetDatatypeProperties();
