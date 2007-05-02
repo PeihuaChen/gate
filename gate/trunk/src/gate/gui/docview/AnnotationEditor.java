@@ -55,16 +55,12 @@ public class AnnotationEditor{
   
   protected void initData(){
     schemasByType = new HashMap();
-    try{
-	    java.util.List schemas = Gate.getCreoleRegister().
-	    	getAllInstances("gate.creole.AnnotationSchema");
-	    for(Iterator schIter = schemas.iterator(); 
-	        schIter.hasNext();){
-	      AnnotationSchema aSchema = (AnnotationSchema)schIter.next();
-	      schemasByType.put(aSchema.getAnnotationName(), aSchema);
-	    }
-    }catch(GateException ge){
-      throw new GateRuntimeException(ge);
+    java.util.List schemas = Gate.getCreoleRegister().
+        getLrInstances("gate.creole.AnnotationSchema");
+    for(Iterator schIter = schemas.iterator(); 
+        schIter.hasNext();){
+      AnnotationSchema aSchema = (AnnotationSchema)schIter.next();
+      schemasByType.put(aSchema.getAnnotationName(), aSchema);
     }
     
     CreoleListener creoleListener = new CreoleListener(){
