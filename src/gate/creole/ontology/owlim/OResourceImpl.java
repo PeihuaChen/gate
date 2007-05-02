@@ -14,12 +14,17 @@ import java.util.List;
 import java.util.Set;
 import org.openrdf.vocabulary.RDFS;
 import gate.creole.ontology.AnnotationProperty;
+import gate.creole.ontology.DatatypeProperty;
 import gate.creole.ontology.Literal;
+import gate.creole.ontology.OClass;
 import gate.creole.ontology.OConstants;
+import gate.creole.ontology.OInstance;
 import gate.creole.ontology.OResource;
+import gate.creole.ontology.ObjectProperty;
 import gate.creole.ontology.Ontology;
 import gate.creole.ontology.RDFProperty;
 import gate.creole.ontology.URI;
+import gate.creole.ontology.owlim.PropertyValue;
 import gate.util.GateRuntimeException;
 
 /**
@@ -81,6 +86,51 @@ public class OResourceImpl implements OResource {
   public void setURI(URI uri) {
     throw new GateRuntimeException(
             "This operation is not allowed in this version!");
+  }
+
+  /**
+   * This method returns a set of labels specified on this resource.
+   * 
+   * @return
+   */
+  public Set<Literal> getLabels() {
+    try {
+      PropertyValue[] pvalues = owlim.getAnnotationPropertyValues(
+              this.repositoryID, this.uri.toString(), RDFS.LABEL);
+
+      Set<Literal> toReturn = new HashSet<Literal>();
+      for(PropertyValue pv : pvalues) {
+        toReturn.add(new Literal(pv.getValue(), pv.getDatatype()));
+      }
+
+      return toReturn;
+    }
+    catch(RemoteException re) {
+      throw new GateRuntimeException(re);
+    }
+
+  }
+
+  /**
+   * This method returns a set of comments specified on this resource.
+   * 
+   * @return
+   */
+  public Set<Literal> getComments() {
+    try {
+      PropertyValue[] pvalues = owlim.getAnnotationPropertyValues(
+              this.repositoryID, this.uri.toString(), RDFS.COMMENT);
+
+      Set<Literal> toReturn = new HashSet<Literal>();
+      for(PropertyValue pv : pvalues) {
+        toReturn.add(new Literal(pv.getValue(), pv.getDatatype()));
+      }
+
+      return toReturn;
+    }
+    catch(RemoteException re) {
+      throw new GateRuntimeException(re);
+    }
   }
 
   /*
@@ -318,7 +368,6 @@ public class OResourceImpl implements OResource {
     }
     return false;
   }
-  
 
   /**
    * This method returns all the set properties set on this resource.
@@ -331,7 +380,64 @@ public class OResourceImpl implements OResource {
     return toReturn;
   }
 
+  /**
+   * This method returns a set of all applicable properties on this
+   * resource. Please note that this method is different from the
+   * getAllSetProperties() method which returns a set of properties set
+   * on the resource. For each property in the ontology, this method
+   * checks if the current resource is valid domain. If so, the property
+   * is said to be applicable, and otherwise not.
+   * 
+   * @return
+   */
+  public Set<RDFProperty> getProperties() {
+    Set<RDFProperty> toReturn = new HashSet<RDFProperty>();
 
+    // obtain all property definitions
+    Set<RDFProperty> rdfProps = ontology.getPropertyDefinitions();
+    if(rdfProps != null) {
+      outer: for(RDFProperty property : rdfProps) {
+        if(property instanceof AnnotationProperty) {
+          toReturn.add(property);
+          continue;
+        }
+
+        if(property instanceof ObjectProperty
+                || property instanceof DatatypeProperty) {
+          if(this instanceof OClass) {
+            Set<OResource> domain = property.getDomain();
+            if(domain.size() == 0) {
+              toReturn.add(property);
+              continue;
+            }
+
+            for(OResource r : domain) {
+              OClass c = (OClass)r;
+              if(c.equals(this)
+                      || ((OClass)this).isSubClassOf(c,
+                              OConstants.TRANSITIVE_CLOSURE)) {
+                toReturn.add(property);
+                continue outer;
+              }
+            }
+          }
+          else if(this instanceof OInstance) {
+            if(property.isValidDomain((OInstance)this)) {
+              toReturn.add(property);
+              continue;
+            }
+          }
+        }
+        else {
+          if(property.isValidDomain(this)) {
+            toReturn.add(property);
+            continue;
+          }
+        }
+      }
+    }
+    return toReturn;
+  }
 
   /**
    * String representation of the resource: its name and not the URI.

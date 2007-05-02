@@ -29,6 +29,19 @@ public interface OResource {
    */
   public void setURI(URI uri);
 
+  
+  /**
+   * This method returns a set of labels specified on this resource.
+   * @return
+   */
+  public Set<Literal> getLabels();
+  
+  /**
+   * This method returns a set of comments specified on this resource.
+   * @return
+   */
+  public Set<Literal> getComments();
+  
   /**
    * Gets the comment set on the resource in the specified language.
    * Returns null if no comment found for the specified language.
@@ -108,6 +121,13 @@ public interface OResource {
    * @return
    */
   public Set<RDFProperty> getAllSetProperties();
+  
+  
+  /**
+   * This method returns a set of all applicable properties on this resource.
+   * @return
+   */
+  public Set<RDFProperty> getProperties();
   
   /**
    * Checks if the resource has the provided annotation property set on it with the specified value.
