@@ -8,6 +8,7 @@
 package gate.creole.ontology;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -46,18 +47,18 @@ public interface OResource {
    * Gets the comment set on the resource in the specified language.
    * Returns null if no comment found for the specified language.
    * 
-   * @param language
+   * @param language (@see OConstants for available locales)
    * @return the comment of the resource
    */
-  public String getComment(String language);
+  public String getComment(Locale language);
 
   /**
    * Sets the comment for the resource with the specified language.
    * 
    * @param aComment the comment to be set.
-   * @param language the language of the comment.
+   * @param language the language of the comment (@see OConstants for available locales)
    */
-  public void setComment(String aComment, String language);
+  public void setComment(String aComment, Locale Locale);
 
   /**
    * Gets the comment set on the resource in the specified language.
@@ -66,15 +67,15 @@ public interface OResource {
    * @param language
    * @return the label of the resource
    */
-  public String getLabel(String language);
+  public String getLabel(Locale language);
 
   /**
    * Sets the label for the resource with the specified language.
    * 
    * @param aLabel the label to be set.
-   * @param language the anguage of the label.
+   * @param language the anguage of the label. (@see OConstants for available locales)
    */
-  public void setLabel(String aLabel, String language);
+  public void setLabel(String aLabel, Locale language);
 
   /**
    * Gets resource name. Typically a string after the last '#' or '/'
