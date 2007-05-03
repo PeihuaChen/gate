@@ -913,7 +913,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
     while(iter.hasNext()) {
       Statement stmt = iter.next();
       Literal literal = (Literal)stmt.getObject();
-      if(literal.getLanguage().equals(language)) return literal.getLabel();
+      if(language == null || literal.getLanguage().equals(language)) return literal.getLabel();
     }
     return null;
   }
