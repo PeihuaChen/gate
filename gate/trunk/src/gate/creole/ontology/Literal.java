@@ -7,6 +7,8 @@
  */
 package gate.creole.ontology;
 
+import java.util.Locale;
+
 /**
  * Literal represents a single value or a value with language used for
  * annotation properties, or a value with datatype used for the datatype
@@ -23,7 +25,7 @@ public class Literal {
   /**
    * Specified language for the literal.
    */
-  private String language;
+  private Locale language;
 
   /**
    * Assigned Datatype to this instance of literal
@@ -45,7 +47,7 @@ public class Literal {
    * @param value
    * @param language
    */
-  public Literal(String value, String language) {
+  public Literal(String value, Locale language) {
     this.value = value;
     this.language = language;
   }
@@ -96,7 +98,7 @@ public class Literal {
    * 
    * @return
    */
-  public String getLanguage() {
+  public Locale getLanguage() {
     return language;
   }
   
