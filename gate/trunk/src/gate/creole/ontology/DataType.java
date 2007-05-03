@@ -367,8 +367,8 @@ class DoubleDT extends DataType {
    */
   public boolean isValidValue(String value) {
     try {
-      if((Double.parseDouble(value)+"").equalsIgnoreCase(value)) return true;
-      return false;
+      Double.parseDouble(value);
+      return true;
     } catch(Exception e) {
       return false;
     }
@@ -413,8 +413,8 @@ class FloatDT extends DataType {
    */
   public boolean isValidValue(String value) {
     try {
-      if((Float.parseFloat(value)+"").equalsIgnoreCase(value)) return true;;
-      return false;
+      Float.parseFloat(value);
+      return true;
     } catch(Exception e) {
       return false;
     }
