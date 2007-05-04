@@ -107,7 +107,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     scroller.getViewport().setOpaque(true);
     scroller.getViewport().setBackground(mainTable.getBackground());
     
-    annotationEditor = new AnnotationEditor(textView, this);
+    annotationEditor = createAnnotationEditor(textView, this);
     
     mainPanel = new JPanel();
     mainPanel.setLayout(new GridBagLayout());
@@ -136,6 +136,19 @@ public class AnnotationSetsView extends AbstractDocumentView
     
     eventMinder.start();    
     initListeners();
+  }
+  
+  /**
+   * Create the annotation editor (responsible for creating the window
+   * used to edit individual annotations).
+   * 
+   * @param textView
+   * @param asView
+   * @return
+   */
+  protected AnnotationEditor createAnnotationEditor(TextualDocumentView textView,
+          AnnotationSetsView asView) {
+    return new AnnotationEditor(textView, asView);
   }
   
   protected void populateUI(){
