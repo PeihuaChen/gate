@@ -25,8 +25,8 @@ public class OntologyItemComparator implements Comparator {
     if(obj == null) return obj1 != null ? -1 : 0;
     if(obj1 == null) return obj != null ? 1 : 0;
     if((obj instanceof OResource) && (obj1 instanceof OResource)) {
-      String s = ((OResource)obj).getURI().toString();
-      String s1 = ((OResource)obj1).getURI().toString();
+      String s = ((OResource)obj).getURI().getResourceName();
+      String s1 = ((OResource)obj1).getURI().getResourceName();
       if(s == null) return s1 != null ? -1 : 0;
       if(s1 == null)
         return s != null ? 1 : 0;

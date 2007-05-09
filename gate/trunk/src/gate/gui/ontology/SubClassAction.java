@@ -43,6 +43,11 @@ public class SubClassAction extends AbstractAction implements
 
   public void actionPerformed(ActionEvent actionevent) {
     ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(this.selectedNodes);
+    if(selectedNodes.size() == 0) {
+      JOptionPane.showMessageDialog(MainFrame.getInstance(), "Please select a class for which you want to create a new subclass");
+      return;
+    }
+    nameSpace.setText(((OClass) selectedNodes.get(0).getUserObject()).getURI().getNameSpace());
     ArrayList<OClass> arraylist = new ArrayList<OClass>();
     for(int i = 0; i < selectedNodes.size(); i++) {
       Object obj = ((DefaultMutableTreeNode)selectedNodes.get(i))
