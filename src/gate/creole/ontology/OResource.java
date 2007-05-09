@@ -30,19 +30,20 @@ public interface OResource {
    */
   public void setURI(URI uri);
 
-  
   /**
    * This method returns a set of labels specified on this resource.
+   * 
    * @return
    */
   public Set<Literal> getLabels();
-  
+
   /**
    * This method returns a set of comments specified on this resource.
+   * 
    * @return
    */
   public Set<Literal> getComments();
-  
+
   /**
    * Gets the comment set on the resource in the specified language.
    * Returns null if no comment found for the specified language.
@@ -56,7 +57,8 @@ public interface OResource {
    * Sets the comment for the resource with the specified language.
    * 
    * @param aComment the comment to be set.
-   * @param language the language of the comment (@see OConstants for available locales)
+   * @param language the language of the comment (@see OConstants for
+   *          available locales)
    */
   public void setComment(String aComment, Locale Locale);
 
@@ -73,7 +75,8 @@ public interface OResource {
    * Sets the label for the resource with the specified language.
    * 
    * @param aLabel the label to be set.
-   * @param language the anguage of the label. (@see OConstants for available locales)
+   * @param language the anguage of the label. (@see OConstants for
+   *          available locales)
    */
   public void setLabel(String aLabel, Locale language);
 
@@ -112,34 +115,45 @@ public interface OResource {
 
   /**
    * This method returns the annotation properties set on this resource.
+   * 
    * @return
    */
   public Set<AnnotationProperty> getSetAnnotationProperties();
 
-  
   /**
    * This method returns all the set properties set on this resource.
+   * 
    * @return
    */
   public Set<RDFProperty> getAllSetProperties();
-  
-  
+
   /**
-   * This method returns a set of all applicable properties on this resource.
+   * This method returns a set of all properties where the current
+   * resource has been specified as one of the domain resources.
+   * 
    * @return
    */
-  public Set<RDFProperty> getProperties();
-  
+  public Set<RDFProperty> getPropertiesWithResourceAsDomain();
+
   /**
-   * Checks if the resource has the provided annotation property set on it with the specified value.
+   * This method returns a set of all properties where the current
+   * resource has been specified as one of the range resources.
+   * 
+   * @return
+   */
+  public Set<RDFProperty> getPropertiesWithResourceAsRange();
+
+  /**
+   * Checks if the resource has the provided annotation property set on
+   * it with the specified value.
+   * 
    * @param aProperty
    * @param aValue
    * @return
    */
-  public boolean hasAnnotationPropertyWithValue(AnnotationProperty aProperty, Literal aValue);
-  
+  public boolean hasAnnotationPropertyWithValue(AnnotationProperty aProperty,
+          Literal aValue);
 
-  
   /**
    * For the current resource, the method removes the given literal for
    * the given property.
