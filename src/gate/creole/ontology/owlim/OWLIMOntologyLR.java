@@ -27,6 +27,8 @@ import java.io.Writer;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import javax.servlet.ServletContext;
 import javax.swing.AbstractAction;
@@ -134,10 +136,10 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
       String ontoURLString = ontologyURL == null ? "" : ontologyURL
               .toExternalForm();
       owlim = new OWLIMServiceImpl();
-      
+
       // determine the URL to the Ontology_Tools plugin directory
-      ResourceData myResourceData = (ResourceData)Gate.getCreoleRegister()
-              .get(this.getClass().getName());
+      ResourceData myResourceData = (ResourceData)Gate.getCreoleRegister().get(
+              this.getClass().getName());
       URL creoleXml = myResourceData.getXmlFileUrl();
       URL gosHomeURL = new URL(creoleXml, ".");
 
@@ -251,8 +253,8 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
   public void unload() {
     try {
       if(!getPersistRepository().booleanValue()) {
-        owlim.removeRepository(getSesameRepositoryID(),
-                getPersistRepository().booleanValue());
+        owlim.removeRepository(getSesameRepositoryID(), getPersistRepository()
+                .booleanValue());
         owlim.logout(sesameRepositoryID);
       }
     }
@@ -624,5 +626,28 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
    */
   public void setPersistLocation(URL persistLocation) {
     this.persistLocation = persistLocation;
+  }
+
+  /**
+   * This method returns the ontology output in ntripples format.
+   */
+  public String toString() {
+    try {
+      String output = owlim.getOntologyData(sesameRepositoryID,
+              OConstants.ONTOLOGY_FORMAT_NTRIPLES);
+      List<String> outputList = Arrays.asList(output.split(System
+              .getProperty("line.separator")));
+      Collections.sort(outputList);
+      output = null;
+      StringBuffer toReturn = new StringBuffer();
+      for(String line : outputList) {
+        toReturn = toReturn.append(line).append(
+                System.getProperty("line.separator"));
+      }
+      return toReturn.toString();
+    }
+    catch(RemoteException re) {
+      throw new GateRuntimeException(re.getMessage(), re);
+    }
   }
 }

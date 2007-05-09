@@ -102,7 +102,8 @@ public class OResourceImpl implements OResource {
 
       Set<Literal> toReturn = new HashSet<Literal>();
       for(PropertyValue pv : pvalues) {
-        toReturn.add(new Literal(pv.getValue(), OntologyUtilities.getLocale(pv.getDatatype())));
+        toReturn.add(new Literal(pv.getValue(), OntologyUtilities.getLocale(pv
+                .getDatatype())));
       }
 
       return toReturn;
@@ -125,7 +126,8 @@ public class OResourceImpl implements OResource {
 
       Set<Literal> toReturn = new HashSet<Literal>();
       for(PropertyValue pv : pvalues) {
-        toReturn.add(new Literal(pv.getValue(), OntologyUtilities.getLocale(pv.getDatatype())));
+        toReturn.add(new Literal(pv.getValue(), OntologyUtilities.getLocale(pv
+                .getDatatype())));
       }
 
       return toReturn;
@@ -143,7 +145,8 @@ public class OResourceImpl implements OResource {
   public String getComment(Locale language) {
     try {
       return owlim.getAnnotationPropertyValue(this.repositoryID, this.uri
-              .toString(), RDFS.COMMENT, language != null ? language.getLanguage() : null);
+              .toString(), RDFS.COMMENT, language != null ? language
+              .getLanguage() : null);
     }
     catch(RemoteException re) {
       throw new GateRuntimeException(re);
@@ -159,7 +162,9 @@ public class OResourceImpl implements OResource {
   public void setComment(String aComment, Locale language) {
     try {
       owlim.addAnnotationPropertyValue(this.repositoryID, this.uri.toString(),
-              RDFS.COMMENT, aComment, language != null ? language.getLanguage() : null);
+              RDFS.COMMENT, aComment, language != null
+                      ? language.getLanguage()
+                      : null);
       ontology.fireOntologyModificationEvent(this,
               OConstants.COMMENT_CHANGED_EVENT);
     }
@@ -173,10 +178,11 @@ public class OResourceImpl implements OResource {
    * 
    * @see gate.creole.ontology.OResource#getLabel(java.lang.String)
    */
-  public String getLabel(Locale language) { 
+  public String getLabel(Locale language) {
     try {
       return owlim.getAnnotationPropertyValue(this.repositoryID, this.uri
-              .toString(), RDFS.LABEL, language != null ? language.getLanguage() : null);
+              .toString(), RDFS.LABEL, language != null ? language
+              .getLanguage() : null);
     }
     catch(RemoteException re) {
       throw new GateRuntimeException(re);
@@ -192,7 +198,9 @@ public class OResourceImpl implements OResource {
   public void setLabel(String aLabel, Locale language) {
     try {
       owlim.addAnnotationPropertyValue(this.repositoryID, this.uri.toString(),
-              RDFS.LABEL, aLabel, language != null ? language.getLanguage() : null);
+              RDFS.LABEL, aLabel, language != null
+                      ? language.getLanguage()
+                      : null);
       ontology.fireOntologyModificationEvent(this,
               OConstants.LABEL_CHANGED_EVENT);
     }
@@ -230,7 +238,8 @@ public class OResourceImpl implements OResource {
     try {
       owlim.addAnnotationPropertyValue(this.repositoryID, this.uri.toString(),
               theAnnotationProperty.getURI().toString(), literal.getValue(),
-              literal.getLanguage() != null ? literal.getLanguage().getLanguage() : null);
+              literal.getLanguage() != null ? literal.getLanguage()
+                      .getLanguage() : null);
       ontology.fireOntologyModificationEvent(this,
               OConstants.ANNOTATION_PROPERTY_VALUE_ADDED_EVENT);
     }
@@ -252,8 +261,8 @@ public class OResourceImpl implements OResource {
                       .getURI().toString());
       List<Literal> list = new ArrayList<Literal>();
       for(int i = 0; i < propValues.length; i++) {
-        Literal l = new Literal(propValues[i].getValue(), OntologyUtilities.getLocale(propValues[i]
-                .getDatatype()));
+        Literal l = new Literal(propValues[i].getValue(), OntologyUtilities
+                .getLocale(propValues[i].getDatatype()));
         list.add(l);
       }
       return list;
@@ -274,7 +283,8 @@ public class OResourceImpl implements OResource {
     try {
       owlim.removeAnnotationPropertyValue(this.repositoryID, this.uri
               .toString(), theAnnotationProperty.getURI().toString(), literal
-              .getValue(), literal.getLanguage() != null ? literal.getLanguage().getLanguage() : null);
+              .getValue(), literal.getLanguage() != null ? literal
+              .getLanguage().getLanguage() : null);
       ontology.fireOntologyModificationEvent(this,
               OConstants.ANNOTATION_PROPERTY_VALUE_REMOVED_EVENT);
     }
@@ -383,16 +393,17 @@ public class OResourceImpl implements OResource {
   }
 
   /**
-   * This method returns a set of all applicable properties on this
-   * resource. Please note that this method is different from the
-   * getAllSetProperties() method which returns a set of properties set
-   * on the resource. For each property in the ontology, this method
-   * checks if the current resource is valid domain. If so, the property
-   * is said to be applicable, and otherwise not.
+   * This method returns a set of all properties where the current
+   * resource has been specified as one of the domain resources. Please
+   * note that this method is different from the getAllSetProperties()
+   * method which returns a set of properties set on the resource. For
+   * each property in the ontology, this method checks if the current
+   * resource is valid domain. If so, the property is said to be
+   * applicable, and otherwise not..
    * 
    * @return
    */
-  public Set<RDFProperty> getProperties() {
+  public Set<RDFProperty> getPropertiesWithResourceAsDomain() {
     Set<RDFProperty> toReturn = new HashSet<RDFProperty>();
 
     // obtain all property definitions
@@ -432,6 +443,64 @@ public class OResourceImpl implements OResource {
         }
         else {
           if(property.isValidDomain(this)) {
+            toReturn.add(property);
+            continue;
+          }
+        }
+      }
+    }
+    return toReturn;
+
+  }
+
+  /**
+   * This method returns a set of all properties where the current
+   * resource has been specified as one of the range resources. Please
+   * note that this method is different from the getAllSetProperties()
+   * method which returns a set of properties set on the resource. For
+   * each property in the ontology, this method checks if the current
+   * resource is valid range. If so, the property is said to be
+   * applicable, and otherwise not.
+   * 
+   * @return
+   */
+  public Set<RDFProperty> getPropertiesWithResourceAsRange() {
+    Set<RDFProperty> toReturn = new HashSet<RDFProperty>();
+    // obtain all property definitions
+    Set<RDFProperty> rdfProps = ontology.getPropertyDefinitions();
+    if(rdfProps != null) {
+      outer: for(RDFProperty property : rdfProps) {
+        if(property instanceof AnnotationProperty) {
+          toReturn.add(property);
+          continue;
+        }
+        if(property instanceof ObjectProperty) {
+          if(this instanceof OClass) {
+            Set<OResource> range = property.getRange();
+            if(range.size() == 0) {
+              toReturn.add(property);
+              continue;
+            }
+            for(OResource r : range) {
+              OClass c = (OClass)r;
+              if(c.equals(this)
+                      || ((OClass)this).isSubClassOf(c,
+                              OConstants.TRANSITIVE_CLOSURE)) {
+                toReturn.add(property);
+                continue outer;
+              }
+            }
+          }
+          else if(this instanceof OInstance) {
+            if(property.isValidRange((OInstance)this)) {
+              toReturn.add(property);
+              continue;
+            }
+          }
+        }
+        else {
+          if(!(property instanceof DatatypeProperty)
+                  && property.isValidRange(this)) {
             toReturn.add(property);
             continue;
           }
