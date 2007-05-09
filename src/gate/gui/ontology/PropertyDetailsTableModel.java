@@ -121,7 +121,7 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
     propertyTypes.getValues().clear();
     propertyValues.getValues().clear();
 
-    propertyTypes.getValues().addAll(property.getProperties());
+    propertyTypes.getValues().addAll(property.getPropertiesWithResourceAsDomain());
     Set<AnnotationProperty> props = property.getSetAnnotationProperties();
     if(props != null) {
       Iterator<AnnotationProperty> apIter = props.iterator();

@@ -43,7 +43,12 @@ public class InstanceAction extends AbstractAction implements
 
   public void actionPerformed(ActionEvent actionevent) {
     ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(this.selectedNodes);
-    nameSpace.setText(ontology.getDefaultNameSpace());
+    if(selectedNodes.size() == 0) {
+        JOptionPane.showMessageDialog(MainFrame.getInstance(), "Please select a class for which you want to create a new instance");
+        return;
+    }
+    nameSpace.setText(((OClass) selectedNodes.get(0).getUserObject()).getURI().getNameSpace());
+    
     int j = JOptionPane.showOptionDialog(MainFrame.getInstance(), panel, "New Instance: ", 2, 3,
             null, new String[]{"OK", "Cancel"}, "OK");
     if(j == 0) {

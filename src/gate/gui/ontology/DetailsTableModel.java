@@ -147,7 +147,7 @@ public class DetailsTableModel extends AbstractTableModel {
       }
 
       propertyTypes.getValues().clear();
-      propertyTypes.getValues().addAll(tclass.getProperties());
+      propertyTypes.getValues().addAll(tclass.getPropertiesWithResourceAsDomain());
 
       propertyValues.getValues().clear();
       Set<AnnotationProperty> props = tclass.getSetAnnotationProperties();
@@ -197,7 +197,7 @@ public class DetailsTableModel extends AbstractTableModel {
       }
 
       propertyTypes.getValues().clear();
-      propertyTypes.getValues().addAll(oinstance.getProperties());
+      propertyTypes.getValues().addAll(oinstance.getPropertiesWithResourceAsDomain());
       
       propertyValues.getValues().clear();
       Set<AnnotationProperty> apProps = oinstance.getSetAnnotationProperties();
