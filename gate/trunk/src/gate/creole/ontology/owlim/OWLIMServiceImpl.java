@@ -3,7 +3,6 @@ package gate.creole.ontology.owlim;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,8 +36,6 @@ import org.openrdf.rio.ntriples.NTriplesWriter;
 import org.openrdf.rio.rdfxml.RdfXmlWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
 import org.openrdf.sesame.admin.AdminListener;
-import org.openrdf.sesame.admin.HtmlAdminMsgWriter;
-import org.openrdf.sesame.admin.StdOutAdminListener;
 import org.openrdf.sesame.config.RepositoryConfig;
 import org.openrdf.sesame.config.RepositoryInfo;
 import org.openrdf.sesame.config.SailConfig;
@@ -253,7 +250,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
         }
         else if(classURL.getProtocol().equals("file")) {
           // running from classes directory (e.g.inside Eclipse)
-          // classURL is "file:/path/to/gos/classes/gate/creole/ontology/owlim/OWLIMServiceImpl.class"
+          // classURL is
+          // "file:/path/to/gos/classes/gate/creole/ontology/owlim/OWLIMServiceImpl.class"
           gosHome = new URL(classURL, "../../../../..");
           // gosHome is "file:/path/to/gos/"
         }
@@ -274,16 +272,16 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       if(DEBUG) throw new ServiceException(e);
     }
   }
-  
+
   /**
-   * This method intializes the OWLIMService. It locates the
-   * system configuration file in the directory whose URL is passed in.
-   * The system configuration file contains various parameters/settings
-   * such as available repositories and users with their rights on
-   * each repository
+   * This method intializes the OWLIMService. It locates the system
+   * configuration file in the directory whose URL is passed in. The
+   * system configuration file contains various parameters/settings such
+   * as available repositories and users with their rights on each
+   * repository
    * 
-   * @param gosHomeURL the URL to the GOS home directory.  This must
-   *         point to a directory, i.e. it must end in a forward slash.
+   * @param gosHomeURL the URL to the GOS home directory. This must
+   *          point to a directory, i.e. it must end in a forward slash.
    * @throws ServiceException
    */
   public void init(URL gosHomeURL) throws ServiceException {
@@ -291,7 +289,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       if(!initiated) {
         if(DEBUG) System.out.println("Initiating OWLIMService...");
         gosHome = gosHomeURL;
-        
+
         systemConf = new URL(gosHome, "system.conf");
         owlRDFS = new URL(gosHome, "owl.rdfs");
         SesameServer.setSystemConfig(readConfiguration());
@@ -301,7 +299,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
     catch(Exception e) {
       System.err.println("OWLIMServiceImpl Problem with initialisation");
       if(DEBUG) throw new ServiceException(e);
-    }    
+    }
   }
 
   /** This is called by axis before calling the operation* */
@@ -882,9 +880,14 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
             getURI(theAnnotationPropertyURI), null);
     while(iter.hasNext()) {
       Statement stmt = iter.next();
-      Literal literal = (Literal)stmt.getObject();
-      PropertyValue pv = new PropertyValue(literal.getLanguage(), literal
-              .getLabel());
+      PropertyValue pv;
+      if(stmt.getObject() instanceof Literal) {
+        Literal literal = (Literal)stmt.getObject();
+        pv = new PropertyValue(literal.getLanguage(), literal.getLabel());
+      }
+      else {
+        pv = new PropertyValue(null, stmt.getObject().toString());
+      }
       list.add(pv);
     }
     return listToPropertyValueArray(list);
@@ -913,7 +916,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
     while(iter.hasNext()) {
       Statement stmt = iter.next();
       Literal literal = (Literal)stmt.getObject();
-      if(language == null || literal.getLanguage().equals(language)) return literal.getLabel();
+      if(language == null || literal.getLanguage().equals(language))
+        return literal.getLabel();
     }
     return null;
   }
@@ -1338,6 +1342,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
     ArrayList<Value> list = new ArrayList<Value>();
     while(iter.hasNext()) {
       Statement stmt = iter.next();
+      if(stmt.getObject() instanceof BNode) continue;
       list.add(stmt.getObject());
     }
     return listToResourceInfoArray(list);
@@ -1528,6 +1533,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
             getURI(anObjectPropertyURI), null);
     while(iter.hasNext()) {
       Statement stmt = iter.next();
+      if(stmt.getObject() instanceof BNode) continue;
       propValues.add(stmt.getObject().toString());
     }
     return listToArray(propValues);
@@ -1701,9 +1707,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
         absolutePersistLocation = new File(gosHome.toURI()).getAbsolutePath();
       }
       catch(URISyntaxException e) {
-        throw new RemoteException("Cannot construct persistence location " +
-            "from gosHome", e);
-      }        
+        throw new RemoteException("Cannot construct persistence location "
+                + "from gosHome", e);
+      }
     }
     // check if user exists
     if(password == null) password = "";
@@ -1757,9 +1763,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
         absolutePersistLocation = new File(gosHome.toURI()).getAbsolutePath();
       }
       catch(URISyntaxException e) {
-        throw new RemoteException("Cannot construct persistence location " +
-            "from gosHome", e);
-      }        
+        throw new RemoteException("Cannot construct persistence location "
+                + "from gosHome", e);
+      }
     }
     // check if user exists
     if(password == null) password = "";
@@ -1787,7 +1793,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
    * @param repositoryID
    * @return
    */
-  public void removeRepository(String repositoryID, boolean persist) throws RemoteException {
+  public void removeRepository(String repositoryID, boolean persist)
+          throws RemoteException {
     try {
       if(!loadRepositoryDetails(repositoryID)) {
         return;
@@ -2020,18 +2027,15 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       Statement statement = iter.next();
       Resource uri = null;
       uri = getResource(statement.getSubject().toString());
-      if(uri instanceof BNode
-              && (statement.getSubject().toString().equals("node0") || statement
-                      .getSubject().toString().equals("node1"))) {
-        continue;
+      if(uri instanceof BNode) {
+        // if the resource is an instance of BNode it must not be
+        // returned
+        continue;   
       }
+
       if(top) {
-        StatementIterator stIter = sail.getSubClassOf(uri, null);
-        if(stIter.hasNext()) {
-          Statement st = stIter.next();
-          if(!(st.getSubject().equals(st.getObject()))) {
-            continue;
-          }
+        if(!isTopClass(repositoryID, uri.toString())) {
+          continue;
         }
       }
       list.add(uri);
@@ -2041,7 +2045,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
   }
 
   /**
-   * Returns if the given class is a top class
+   * Returns if the given class is a top class. It also returns false if
+   * the class is an instance of BNode
    * 
    * @param classURI
    * @return
@@ -2053,11 +2058,16 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       throw new RemoteException("Repository :" + repositoryID
               + " does not exist");
     }
-    StatementIterator iter = sail.getSubClassOf(getResource(classURI), null);
+    Resource resource = getResource(classURI);
+    StatementIterator iter = sail.getSubClassOf(resource, null);
     boolean result = true;
     while(iter.hasNext()) {
       Statement stmt = iter.next();
       if(stmt.getObject().toString().equalsIgnoreCase(classURI)) continue;
+
+      // if the parent class is an instance of BNode we still consider
+      // the object to be a top class
+      if(stmt.getObject() instanceof BNode) continue;
       result = false;
       break;
     }
@@ -2160,6 +2170,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
     List<Value> list = new ArrayList<Value>();
     while(iter.hasNext()) {
       Statement stmt = (Statement)iter.next();
+      if(stmt.getSubject() instanceof BNode) continue;
       if(stmt.getSubject().toString().equals(superClassURI)) {
         continue;
       }
@@ -2192,6 +2203,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
     List<Value> list = new ArrayList<Value>();
     while(iter.hasNext()) {
       Statement stmt = (Statement)iter.next();
+      if(stmt.getObject() instanceof BNode) continue;
       if(stmt.getObject().toString().equals(subClassURI)) {
         continue;
       }
@@ -2251,6 +2263,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
     List<String> list = new ArrayList<String>();
     while(iter.hasNext()) {
       Statement stmt = (Statement)iter.next();
+      if(stmt.getObject() instanceof BNode) continue;
       list.add(stmt.getObject().toString());
     }
     return listToArray(list);
@@ -2274,6 +2287,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
     List<Value> list = new ArrayList<Value>();
     while(iter.hasNext()) {
       Statement stmt = (Statement)iter.next();
+      if(stmt.getObject() instanceof BNode) continue;
       list.add(stmt.getObject());
     }
     return listToResourceInfoArray(list);
@@ -2559,9 +2573,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
     List<ResourceInfo> list = new ArrayList<ResourceInfo>();
     while(iter.hasNext()) {
       Statement stmt = (Statement)iter.next();
-      if(stmt.getObject() instanceof BNodeImpl)
-        list.add(new ResourceInfo(true, stmt.getObject().toString()));
-      else list.add(new ResourceInfo(false, stmt.getObject().toString()));
+      if(stmt.getObject() instanceof BNode) continue;
+      list.add(new ResourceInfo(false, stmt.getObject().toString()));
     }
     return reduceToMostSpecificClasses(repositoryID, list);
   }
@@ -2587,9 +2600,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
     List<ResourceInfo> list = new ArrayList<ResourceInfo>();
     while(iter.hasNext()) {
       Statement stmt = (Statement)iter.next();
-      if(stmt.getObject() instanceof BNodeImpl)
-        list.add(new ResourceInfo(true, stmt.getObject().toString()));
-      else list.add(new ResourceInfo(false, stmt.getObject().toString()));
+      if(stmt.getObject() instanceof BNode) continue;
+      list.add(new ResourceInfo(false, stmt.getObject().toString()));
     }
     return reduceToMostSpecificClasses(repositoryID, list);
   }
@@ -3033,7 +3045,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
     else iter = sail.getType(null, getResource(superClassURI));
     List<String> list = new ArrayList<String>();
     while(iter.hasNext()) {
-      String subjectString = iter.next().getSubject().toString();
+      Resource res = iter.next().getSubject();
+      if(res instanceof BNode) continue;
+      String subjectString = res.toString();
       if(hasClass(repositoryID, subjectString)) continue;
       list.add(subjectString);
     }
@@ -3114,6 +3128,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
     List<Value> list = new ArrayList<Value>();
     while(iter.hasNext()) {
       Statement stmt = iter.next();
+      if(stmt.getObject() instanceof BNode) continue;
       list.add(stmt.getObject());
     }
     return listToResourceInfoArray(list);
@@ -3195,7 +3210,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
             getURI(OWL.SAMEAS), null);
     List<String> list = new ArrayList<String>();
     while(iter.hasNext()) {
-      list.add(((Statement)iter.next()).getObject().toString());
+        Value res = iter.next().getObject();
+        if(res instanceof BNode) continue;
+        
+      list.add(res.toString());
     }
     return listToArray(list);
   }
@@ -3492,7 +3510,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
   private void saveConfiguration() throws RemoteException {
     try {
       if(DEBUG) System.out.println("System conf : " + systemConf);
-      Writer writer = new BufferedWriter(new FileWriter(new File(systemConf.toURI())));
+      Writer writer = new BufferedWriter(new FileWriter(new File(systemConf
+              .toURI())));
       SystemConfigFileHandler.writeConfiguration(
               SesameServer.getSystemConfig(), writer);
       writer.close();
@@ -4029,6 +4048,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
     List<PropertyValue> list = new ArrayList<PropertyValue>();
     while(iter.hasNext()) {
       Statement stmt = (Statement)iter.next();
+      if(stmt.getObject() instanceof BNode) continue;
       PropertyValue prop = new PropertyValue(String.class.getName(), stmt
               .getObject().toString());
       list.add(prop);

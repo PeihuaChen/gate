@@ -254,7 +254,12 @@ public abstract class AbstractOWLIMOntologyImpl
       owlim.addClass(this.sesameRepositoryID, aURI.toString());
       OClass oClass = Utils.createOClass(this.sesameRepositoryID, this, owlim,
               aURI.toString(), aURI.isAnonymousResource());
+      
       fireOntologyResourceAdded(oClass);
+      
+      // we need to add a label on this but only after the new class addition event has been fired
+      oClass.setLabel(aURI.getResourceName(), null);
+
       return oClass;
     }
     catch(RemoteException re) {
@@ -400,6 +405,10 @@ public abstract class AbstractOWLIMOntologyImpl
       OInstance oInst = Utils.createOInstance(this.sesameRepositoryID, this,
               owlim, theInstanceURI.toString());
       fireOntologyResourceAdded(oInst);
+      
+      // we need to add a label on this but after the new class addition event has been fired
+      oInst.setLabel(theInstanceURI.getResourceName(), null);
+
       return oInst;
     }
     catch(RemoteException re) {
@@ -538,6 +547,10 @@ public abstract class AbstractOWLIMOntologyImpl
       RDFProperty rp = Utils.createOProperty(this.sesameRepositoryID, this,
               owlim, aPropertyURI.toString(), OConstants.RDF_PROPERTY);
       fireOntologyResourceAdded(rp);
+      
+      // we need to add a label on this but after the new resource addition event has been fired
+      rp.setLabel(aPropertyURI.getResourceName(), null);
+
       return rp;
     }
     catch(RemoteException re) {
@@ -593,6 +606,10 @@ public abstract class AbstractOWLIMOntologyImpl
               this.sesameRepositoryID, this, owlim, aPropertyURI.toString(),
               OConstants.ANNOTATION_PROPERTY);
       fireOntologyResourceAdded(ap);
+      
+      // we need to add a label on this but after the new resource addition event has been fired
+      ap.setLabel(aPropertyURI.getResourceName(), null);
+
       return ap;
     }
     catch(RemoteException re) {
@@ -658,6 +675,10 @@ public abstract class AbstractOWLIMOntologyImpl
               this.sesameRepositoryID, this, owlim, aPropertyURI.toString(),
               OConstants.DATATYPE_PROPERTY);
       fireOntologyResourceAdded(dp);
+      
+      // we need to add a label on this but after the new resource addition event has been fired
+      dp.setLabel(aPropertyURI.getResourceName(), null);
+
       return dp;
     }
     catch(RemoteException re) {
@@ -731,6 +752,10 @@ public abstract class AbstractOWLIMOntologyImpl
               this.sesameRepositoryID, this, owlim, aPropertyURI.toString(),
               OConstants.OBJECT_PROPERTY);
       fireOntologyResourceAdded(op);
+      
+      // we need to add a label on this but after the new resource addition event has been fired
+      op.setLabel(aPropertyURI.getResourceName(), null);
+
       return op;
     }
     catch(RemoteException re) {
@@ -796,6 +821,10 @@ public abstract class AbstractOWLIMOntologyImpl
               this.sesameRepositoryID, this, owlim, aPropertyURI.toString(),
               OConstants.SYMMETRIC_PROPERTY);
       fireOntologyResourceAdded(sp);
+      
+      // we need to add a label on this but after the new resource addition event has been fired
+      sp.setLabel(aPropertyURI.getResourceName(), null);
+
       return sp;
     }
     catch(RemoteException re) {
@@ -869,6 +898,10 @@ public abstract class AbstractOWLIMOntologyImpl
               this.sesameRepositoryID, this, owlim, aPropertyURI.toString(),
               OConstants.TRANSITIVE_PROPERTY);
       fireOntologyResourceAdded(tp);
+      
+      // we need to add a label on this but after the new resource addition event has been fired
+      tp.setLabel(aPropertyURI.getResourceName(), null);
+
       return tp;
     }
     catch(RemoteException re) {
