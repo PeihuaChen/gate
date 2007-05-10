@@ -507,7 +507,7 @@ public class OntologyTreePanel extends JPanel {
   private void setOntoTreeClassSelection(IFolder root,
           HashMap<String, Boolean> classSelection) {
     if(!classSelection.containsKey(root.toString())) {
-      classSelection.put(root.toString(), new Boolean(false));
+      classSelection.put(root.toString(), new Boolean(true));
       Iterator children = root.getChildren();
       while(children.hasNext()) {
         setOntoTreeClassSelection((IFolder)children.next(), classSelection);

@@ -497,11 +497,21 @@ public class OntologyViewer extends AbstractDocumentView implements
   public void registerHooks() {
     documentTextArea.addMouseListener(annotationAction);
     documentTextArea.addMouseMotionListener(annotationAction);
+    if(ontologyTreePanel != null) {
+      if(ontologyTreePanel.ontoTreeListener != null) {
+        ontologyTreePanel.ontoTreeListener.refreshHighlights();
+      }
+    }
   }
 
   public void unregisterHooks() {
     documentTextArea.removeMouseListener(annotationAction);
     documentTextArea.removeMouseMotionListener(annotationAction);
+    if(ontologyTreePanel != null) {
+      if(ontologyTreePanel.ontoTreeListener != null) {
+        ontologyTreePanel.ontoTreeListener.removeHighlights();
+      }
+    }
   }
 
   public int getType() {
