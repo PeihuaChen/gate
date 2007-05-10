@@ -1292,6 +1292,7 @@ public class OntologyEditor extends AbstractVisualResource
       isItTree = false;
       path = propertyTree.getSelectionPath();
     }
+    
     switch(eventType) {
       case OConstants.SUB_PROPERTY_ADDED_EVENT:
         subPropertyIsAdded((RDFProperty)resource);
@@ -1322,11 +1323,13 @@ public class OntologyEditor extends AbstractVisualResource
     symmetricPropertyAction.setOntologyClassesURIs(ontologyClassesURIs);
     transitivePropertyAction.setOntologyClassesURIs(ontologyClassesURIs);
     if(isItTree) {
-      DefaultMutableTreeNode aNode = uri2TreeNodesListMap.get(
+      tree.setSelectionPath(path);
+        DefaultMutableTreeNode aNode = uri2TreeNodesListMap.get(
               resource.getURI().toString()).get(0);
       tree.setSelectionPath(new TreePath(aNode.getPath()));
     }
     else {
+        propertyTree.setSelectionPath(path);
       DefaultMutableTreeNode aNode = uri2TreeNodesListMap.get(
               resource.getURI().toString()).get(0);
       propertyTree.setSelectionPath(new TreePath(aNode.getPath()));

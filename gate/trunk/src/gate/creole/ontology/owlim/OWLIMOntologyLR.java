@@ -94,7 +94,7 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
     actionsList = new ArrayList<AbstractAction>();
     actionsList.add(new SaveAsNTRIPLESAction("Save in NTRIPLES format"));
     actionsList.add(new SaveAsRDFXMLAction("Save in RDFXML format"));
-    actionsList.add(new SaveAsN3Action("Save in N3 format"));
+    //actionsList.add(new SaveAsN3Action("Save in N3 format"));
     actionsList.add(new SaveAsTURTLEAction("Save in TURTLE format"));
   }
 

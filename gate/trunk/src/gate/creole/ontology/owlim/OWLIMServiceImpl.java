@@ -54,6 +54,7 @@ import org.openrdf.sesame.server.SesameServer;
 import org.openrdf.vocabulary.OWL;
 import org.openrdf.vocabulary.RDF;
 import org.openrdf.vocabulary.RDFS;
+import org.openrdf.vocabulary.XmlSchema;
 
 /**
  * Implementation of the GATE Ontology Services. This class provides an
@@ -348,8 +349,10 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
               + " does not exist");
     }
     try {
+      startTransaction(repositoryID);
       currentRepository
               .addData(data, baseURI, getRDFFormat(format), true, this);
+      endTransaction(repositoryID);
     }
     catch(Exception ioe) {
       throw new RemoteException(ioe.getMessage());
@@ -369,6 +372,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       throw new RemoteException("Repository :" + repositoryID
               + " does not exist");
     }
+
+    if(sail.transactionStarted()) sail.commitTransaction();
+
     RdfDocumentWriter writer = null;
     switch(format) {
       case Constants.ONTOLOGY_FORMAT_N3:
@@ -415,6 +421,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       throw new RemoteException("Repository :" + repositoryID
               + " does not exist");
     }
+
+    if(sail.transactionStarted()) sail.commitTransaction();
+
     RdfDocumentWriter writer = null;
     switch(format) {
       case Constants.ONTOLOGY_FORMAT_N3:
@@ -1032,7 +1041,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
               + " does not exists");
     }
     addUUUStatement(aPropertyURI, RDF.TYPE, OWL.DATATYPEPROPERTY);
-    addUUUStatement(aPropertyURI, RDFS.DATATYPE, dataTypeURI);
+    if(!dataTypeURI.equals(XmlSchema.STRING))
+      addUUUStatement(aPropertyURI, RDFS.RANGE, dataTypeURI);
+
     if(domainClassesURIs != null) {
       for(int i = 0; i < domainClassesURIs.length; i++) {
         addUUUStatement(aPropertyURI, RDFS.DOMAIN, domainClassesURIs[i]);
@@ -1057,7 +1068,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
               + theDatatypePropertyURI);
     }
     StatementIterator iter = sail.getStatements(
-            getResource(theDatatypePropertyURI), getURI(RDFS.DATATYPE), null);
+            getResource(theDatatypePropertyURI), getURI(RDFS.RANGE), null);
     if(iter.hasNext()) {
       return iter.next().getObject().toString();
     }
@@ -1648,6 +1659,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       }
       currentRepository = lr;
       sail = (OWLIMSchemaRepository)lr.getSail();
+
       RepositoryDetails rd = mapToRepositoryDetails.get(repositoryID);
       if(rd == null) {
         rd = new RepositoryDetails();
@@ -1724,6 +1736,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
     RepositoryConfig repConfig = createNewRepository(repositoryID, ontoData,
             true, baseURI, persist, absolutePersistLocation, username,
             password, format, false);
+
     addOntologyData(repositoryID, ontoData, true, baseURI, format);
     SesameServer.getSystemConfig().addRepositoryConfig(repConfig);
     if(persist) saveConfiguration();
@@ -1854,8 +1867,13 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       if(!loadRepositoryDetails(repositoryID)) {
         return null;
       }
+
+      // before we extract anything
+      // lets coming all our changes
+      if(sail.transactionStarted()) sail.commitTransaction();
+
       InputStream stream = currentRepository.extractRDF(getRDFFormat(format),
-              true, true, true, false);
+              true, true, true, true);
       BufferedReader br = new BufferedReader(new InputStreamReader(stream));
       String line = br.readLine();
       StringBuffer sb = new StringBuffer(1028);
@@ -1987,6 +2005,19 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
               resource.toString());
       deletedResources.addAll(Arrays.asList(removedResources));
     }
+    // finaly remove all statements concerning this resource
+    try {
+      startTransaction(repositoryID);
+      sail.removeStatements(getResource(classURI), null, null);
+      sail.removeStatements(null, getURI(classURI), null);
+      sail.removeStatements(null, null, getResource(classURI));
+
+      endTransaction(repositoryID);
+    }
+    catch(SailUpdateException sue) {
+      throw new RemoteException(sue.getMessage());
+    }
+
     return listToArray(deletedResources);
   }
 
@@ -2030,7 +2061,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       if(uri instanceof BNode) {
         // if the resource is an instance of BNode it must not be
         // returned
-        continue;   
+        continue;
       }
 
       if(top) {
@@ -2339,6 +2370,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
     // todo convert name into full uri
     // removeUUUStatement(aPropertyURI, RDF.TYPE, null);
     removeUUUStatement(aPropertyURI, null, null);
+    removeUUUStatement(null,aPropertyURI, null);
+    removeUUUStatement(null,null,aPropertyURI);
     return listToArray(deletedResources);
   }
 
@@ -3021,6 +3054,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
     }
     removeUUUStatement(individualURI, null, null);
     removeUUUStatement(null, null, individualURI);
+    removeUUUStatement(null, individualURI, null);
     return new String[] {individualURI};
   }
 
@@ -3210,9 +3244,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
             getURI(OWL.SAMEAS), null);
     List<String> list = new ArrayList<String>();
     while(iter.hasNext()) {
-        Value res = iter.next().getObject();
-        if(res instanceof BNode) continue;
-        
+      Value res = iter.next().getObject();
+      if(res instanceof BNode) continue;
+
       list.add(res.toString());
     }
     return listToArray(list);
