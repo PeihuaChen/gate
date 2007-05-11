@@ -803,5 +803,17 @@ public class OntologyViewer extends AbstractDocumentView implements
 
     documentTextArea.requestFocus();
   }
+  
+  /**
+   * A method that returns the instance of ontology viewer options.
+   * @return
+   */
+  public OntologyViewerOptions getOntologyViewerOptions() {
+    /*
+     * Do not delete this method, as it is used by Annotator GUI
+     */
+    
+    return ontologyTreePanel.ontologyViewerOptions;
+  }
 
 }
