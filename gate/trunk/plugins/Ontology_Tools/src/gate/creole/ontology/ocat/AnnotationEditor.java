@@ -245,8 +245,11 @@ public class AnnotationEditor extends AbstractAction {
             // the class and instances
             ArrayList<ClassNode> items = getClassesAndInstances(rootNode, s
                     .toLowerCase());
-            DefaultComboBoxModel defaultcomboboxmodel = new DefaultComboBoxModel(
-                    items.toArray());
+            ClassNode[] nodes = new ClassNode[items.size()];
+            for(int i=0;i<items.size();i++) {
+              nodes[i] = items.get(i);
+            }
+            DefaultComboBoxModel defaultcomboboxmodel = new DefaultComboBoxModel(nodes);
             typeCombo.setModel(defaultcomboboxmodel);
 
             try {
@@ -443,7 +446,11 @@ public class AnnotationEditor extends AbstractAction {
     if(items.isEmpty()) return;
 
     // lets populate the typeCombo
-    model = new DefaultComboBoxModel(items.toArray());
+    ClassNode[] nodes = new ClassNode[items.size()];
+    for(int i=0;i<items.size();i++) {
+      nodes[i] = items.get(i);
+    }
+    model = new DefaultComboBoxModel(nodes);
     typeCombo.setModel(model);
 
     // and lets show it
@@ -856,7 +863,7 @@ public class AnnotationEditor extends AbstractAction {
           boolean isClassFeature = true;
           if(value == null) {
             isClassFeature = false;
-          }
+          } 
 
           ontologyTreePanel.ontoViewer.documentTextArea
                   .setSelectionStart(startOffset);
