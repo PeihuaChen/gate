@@ -813,7 +813,19 @@ public class AnnotationEditor extends AbstractAction {
       //if(ie.getStateChange() != 1) return;
       if(explicitCall) return;
       if(newAnnotationMode) {
-        ClassNode item = (ClassNode)typeCombo.getSelectedItem();
+        Object selectedItem = typeCombo.getSelectedItem();
+        ClassNode item = null;
+        if(selectedItem instanceof String) {
+          item = ontologyTreePanel.getNode((String)selectedItem);
+        } else {
+            item = (ClassNode) selectedItem;    
+        }
+        
+        if(item == null) {
+          JOptionPane.showMessageDialog(MainFrame.getInstance(), "No resource found with value : "+selectedItem.toString());
+          return;
+        }
+        
         boolean isClassAnnotation = item.getSource() instanceof OClass;
         boolean shouldCreateInstance = isClassAnnotation ? (createInstance
                 .isSelected() ? true : false) : false;
@@ -826,10 +838,23 @@ public class AnnotationEditor extends AbstractAction {
 
         newAnnotationMode = false;
         annotationWindow.setVisible(false);
-        //ontologyTreePanel.ontoViewer.documentTextArea.requestFocus();
         return;
       }
       else {
+
+        Object selectedItem = typeCombo.getSelectedItem();
+        ClassNode item = null;
+        if(selectedItem instanceof String) {
+          item = ontologyTreePanel.getNode((String)selectedItem);
+        } else {
+          item = (ClassNode) selectedItem;    
+        }
+    
+        if(item == null) {
+          JOptionPane.showMessageDialog(MainFrame.getInstance(), "No resource found with value : "+selectedItem.toString());
+          return;
+        }
+          
         gate.Annotation annot1 = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
                 .get(selectedAnnotationIndex);
         int cStartOffset = annot1.getStartNode().getOffset().intValue();
@@ -869,7 +894,6 @@ public class AnnotationEditor extends AbstractAction {
                   .setSelectionStart(startOffset);
           ontologyTreePanel.ontoViewer.documentTextArea
                   .setSelectionEnd(endOffset);
-          ClassNode item = (ClassNode)typeCombo.getSelectedItem();
           boolean isClassAnnotation = item.getSource() instanceof OClass;
           boolean shouldCreateInstance = isClassAnnotation ? (createInstance
                   .isSelected() ? true : false) : false;
@@ -907,7 +931,6 @@ public class AnnotationEditor extends AbstractAction {
   public void hideWindow() {
     if(annotationWindow != null) annotationWindow.setVisible(false);
     ontologyTreePanel.showingAnnotationWindow = false;
-    //ontologyTreePanel.ontoViewer.documentTextArea.requestFocus();
   }
 
   /**
