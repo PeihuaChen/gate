@@ -22,6 +22,7 @@ import gate.util.GateRuntimeException;
 
 /**
  * Implementation of the ObjectProperty
+ * 
  * @author niraj
  * 
  */
@@ -29,14 +30,15 @@ public class ObjectPropertyImpl extends RDFPropertyImpl implements
                                                        ObjectProperty {
   /**
    * Constructor
+   * 
    * @param aURI
    * @param ontology
    * @param repositoryID
    * @param owlimPort
    */
   public ObjectPropertyImpl(URI aURI, Ontology ontology, String repositoryID,
-          OWLIMServiceImpl owlimPort) {
-    super(aURI, ontology, repositoryID, owlimPort); 
+          OWLIM owlimPort) {
+    super(aURI, ontology, repositoryID, owlimPort);
   }
 
   /*
@@ -61,7 +63,8 @@ public class ObjectPropertyImpl extends RDFPropertyImpl implements
                 properties[i].getType()));
       }
       return set;
-    } catch(RemoteException re) {
+    }
+    catch(RemoteException re) {
       throw new GateRuntimeException(re);
     }
   }
@@ -73,9 +76,17 @@ public class ObjectPropertyImpl extends RDFPropertyImpl implements
    */
   public void setInverseOf(ObjectProperty theInverse) {
     try {
+
+      if(this == theInverse) {
+        Utils
+                .warning("setInverseOf(ObjectProperty) : The source and the argument properties are referring to the same property");
+        return;
+      }
+
       owlim.setInverseOf(this.repositoryID, uri.toString(), theInverse.getURI()
               .toString());
-    } catch(RemoteException re) {
+    }
+    catch(RemoteException re) {
       throw new GateRuntimeException(re);
     }
   }
@@ -113,7 +124,8 @@ public class ObjectPropertyImpl extends RDFPropertyImpl implements
         listOfICs.add(instanceOClasses[i].getUri());
       }
       return listOfOClasses.containsAll(listOfICs);
-    } catch(RemoteException re) {
+    }
+    catch(RemoteException re) {
       throw new GateRuntimeException(re);
     }
   }
@@ -151,7 +163,8 @@ public class ObjectPropertyImpl extends RDFPropertyImpl implements
         listOfICs.add(instanceOClasses[i].getUri());
       }
       return listOfOClasses.containsAll(listOfICs);
-    } catch(RemoteException re) {
+    }
+    catch(RemoteException re) {
       throw new GateRuntimeException(re);
     }
   }
@@ -188,13 +201,15 @@ public class ObjectPropertyImpl extends RDFPropertyImpl implements
       ResourceInfo[] list = owlim.getDomain(this.repositoryID, uri.toString());
       // this is a list of classes
       Set<OResource> domain = new HashSet<OResource>();
-      // these resources can be anything - an instance, a property, or a class
+      // these resources can be anything - an instance, a property, or a
+      // class
       for(int i = 0; i < list.length; i++) {
         domain.add(Utils.createOClass(this.repositoryID, this.ontology,
                 this.owlim, list[i].getUri(), list[i].isAnonymous()));
       }
       return domain;
-    } catch(RemoteException re) {
+    }
+    catch(RemoteException re) {
       throw new GateRuntimeException(re);
     }
   }
@@ -209,13 +224,15 @@ public class ObjectPropertyImpl extends RDFPropertyImpl implements
       ResourceInfo[] list = owlim.getRange(this.repositoryID, uri.toString());
       // this is a list of classes
       Set<OResource> domain = new HashSet<OResource>();
-      // these resources can be anything - an instance, a property, or a class
+      // these resources can be anything - an instance, a property, or a
+      // class
       for(int i = 0; i < list.length; i++) {
         domain.add(Utils.createOClass(this.repositoryID, this.ontology,
                 this.owlim, list[i].getUri(), list[i].isAnonymous()));
       }
       return domain;
-    } catch(RemoteException re) {
+    }
+    catch(RemoteException re) {
       throw new GateRuntimeException(re);
     }
   }

@@ -62,9 +62,9 @@ public abstract class AbstractOWLIMOntologyImpl
   protected String sesameRepositoryID;
 
   /**
-   * instance of the OWLIMServices
+   * instance of the OWLIM
    */
-  protected OWLIMServiceImpl owlim;
+  protected OWLIM owlim;
 
   /**
    * URL of the ontology
@@ -129,8 +129,7 @@ public abstract class AbstractOWLIMOntologyImpl
       resourceNamesToOResourcesMap.clear();
       if(!callFromCleanup)
         fireOntologyReset();
-      else
-          callFromCleanup = false;
+      else callFromCleanup = false;
     }
     catch(RemoteException re) {
       throw new GateRuntimeException(re);
@@ -254,10 +253,11 @@ public abstract class AbstractOWLIMOntologyImpl
       owlim.addClass(this.sesameRepositoryID, aURI.toString());
       OClass oClass = Utils.createOClass(this.sesameRepositoryID, this, owlim,
               aURI.toString(), aURI.isAnonymousResource());
-      
+
       fireOntologyResourceAdded(oClass);
-      
-      // we need to add a label on this but only after the new class addition event has been fired
+
+      // we need to add a label on this but only after the new class
+      // addition event has been fired
       oClass.setLabel(aURI.getResourceName(), null);
 
       return oClass;
@@ -296,6 +296,12 @@ public abstract class AbstractOWLIMOntologyImpl
    */
   public void removeOClass(OClass theClass) {
     try {
+
+      if(!containsOClass(theClass.getURI())) {
+        Utils.warning(theClass.getURI().toString() + " does not exist");
+        return;
+      }
+
       String[] deletedResources = owlim.removeClass(this.sesameRepositoryID,
               theClass.getURI().toString());
       fireOntologyResourcesRemoved(deletedResources);
@@ -355,6 +361,17 @@ public abstract class AbstractOWLIMOntologyImpl
    *      gate.creole.ontology.OClass)
    */
   public int getDistance(OClass class1, OClass class2) {
+
+    if(!containsOClass(class1.getURI())) {
+      Utils.warning(class1.getURI().toString() + " does not exist");
+      return -1;
+    }
+
+    if(!containsOClass(class2.getURI())) {
+      Utils.warning(class2.getURI().toString() + " does not exist");
+      return -1;
+    }
+
     int result = 0;
     OClass c;
     ArrayList<Set<OClass>> supers1 = class1.getSuperClassesVSDistance();
@@ -400,13 +417,36 @@ public abstract class AbstractOWLIMOntologyImpl
    */
   public OInstance addOInstance(URI theInstanceURI, OClass theClass) {
     try {
+
+      if(!containsOClass(theClass.getURI())) {
+        Utils.error(theClass.getURI().toString() + " does not exist");
+        return null;
+      }
+
+      OResource anInst = getOResourceFromMap(theInstanceURI.toString());
+      if(anInst != null && !(anInst instanceof OInstance)) {
+        Utils.error(anInst.getURI().toString() + " already exists but "
+                + " is not an ontology instance!");
+        return null;
+      }
+
+      if(anInst != null
+              && ((OInstance)anInst).getOClasses(OConstants.TRANSITIVE_CLOSURE)
+                      .contains(theClass)) {
+        Utils.warning(theInstanceURI.toString()
+                + " is already registered as an instanceof "
+                + theClass.getURI().toString());
+        return (OInstance)anInst;
+      }
+
       owlim.addIndividual(this.sesameRepositoryID,
               theClass.getURI().toString(), theInstanceURI.toString());
       OInstance oInst = Utils.createOInstance(this.sesameRepositoryID, this,
               owlim, theInstanceURI.toString());
       fireOntologyResourceAdded(oInst);
-      
-      // we need to add a label on this but after the new class addition event has been fired
+
+      // we need to add a label on this but after the new class addition
+      // event has been fired
       oInst.setLabel(theInstanceURI.getResourceName(), null);
 
       return oInst;
@@ -423,6 +463,12 @@ public abstract class AbstractOWLIMOntologyImpl
    */
   public void removeOInstance(OInstance theInstance) {
     try {
+
+      if(!containsOInstance(theInstance.getURI())) {
+        Utils.warning(theInstance.getURI().toString() + " does not exist");
+        return;
+      }
+
       String[] deletedResources = owlim.removeIndividual(
               this.sesameRepositoryID, theInstance.getURI().toString());
       fireOntologyResourcesRemoved(deletedResources);
@@ -463,6 +509,12 @@ public abstract class AbstractOWLIMOntologyImpl
       String[] oInsts = owlim.getIndividuals(this.sesameRepositoryID, theClass
               .getURI().toString(), closure);
       Set<OInstance> set = new HashSet<OInstance>();
+
+      if(!containsOClass(theClass.getURI())) {
+        Utils.warning(theClass.getURI().toString() + " does not exist");
+        return set;
+      }
+
       for(int i = 0; i < oInsts.length; i++) {
         set.add(Utils.createOInstance(this.sesameRepositoryID, this,
                 this.owlim, oInsts[i]));
@@ -530,6 +582,20 @@ public abstract class AbstractOWLIMOntologyImpl
   public RDFProperty addRDFProperty(URI aPropertyURI, Set<OResource> domain,
           Set<OResource> range) {
     try {
+
+      OResource res = getOResourceFromMap(aPropertyURI.toString());
+      if(res != null) {
+        if(res instanceof RDFProperty) {
+          Utils.warning(aPropertyURI.toString() + " already exists");
+          return (RDFProperty)res;
+        }
+        else {
+          Utils.error(aPropertyURI.toString()
+                  + " already exists but it is not an RDFProperty");
+          return null;
+        }
+      }
+
       String[] domainURIs = new String[domain.size()];
       String[] rangeURIs = new String[range.size()];
       Iterator<OResource> iter = domain.iterator();
@@ -547,8 +613,9 @@ public abstract class AbstractOWLIMOntologyImpl
       RDFProperty rp = Utils.createOProperty(this.sesameRepositoryID, this,
               owlim, aPropertyURI.toString(), OConstants.RDF_PROPERTY);
       fireOntologyResourceAdded(rp);
-      
-      // we need to add a label on this but after the new resource addition event has been fired
+
+      // we need to add a label on this but after the new resource
+      // addition event has been fired
       rp.setLabel(aPropertyURI.getResourceName(), null);
 
       return rp;
@@ -600,14 +667,29 @@ public abstract class AbstractOWLIMOntologyImpl
    */
   public AnnotationProperty addAnnotationProperty(URI aPropertyURI) {
     try {
+
+      OResource res = getOResourceFromMap(aPropertyURI.toString());
+      if(res != null) {
+        if(res instanceof AnnotationProperty) {
+          Utils.warning(aPropertyURI.toString() + " already exists");
+          return (AnnotationProperty)res;
+        }
+        else {
+          Utils.error(aPropertyURI.toString()
+                  + " already exists but it is not an AnnotationProperty");
+          return null;
+        }
+      }
+
       owlim.addAnnotationProperty(this.sesameRepositoryID, aPropertyURI
               .toString());
       AnnotationProperty ap = (AnnotationProperty)Utils.createOProperty(
               this.sesameRepositoryID, this, owlim, aPropertyURI.toString(),
               OConstants.ANNOTATION_PROPERTY);
       fireOntologyResourceAdded(ap);
-      
-      // we need to add a label on this but after the new resource addition event has been fired
+
+      // we need to add a label on this but after the new resource
+      // addition event has been fired
       ap.setLabel(aPropertyURI.getResourceName(), null);
 
       return ap;
@@ -663,6 +745,20 @@ public abstract class AbstractOWLIMOntologyImpl
   public DatatypeProperty addDatatypeProperty(URI aPropertyURI,
           Set<OClass> domain, DataType aDatatype) {
     try {
+
+      OResource res = getOResourceFromMap(aPropertyURI.toString());
+      if(res != null) {
+        if(res instanceof DatatypeProperty) {
+          Utils.warning(aPropertyURI.toString() + " already exists");
+          return (DatatypeProperty)res;
+        }
+        else {
+          Utils.error(aPropertyURI.toString()
+                  + " already exists but it is not a DatatypeProperty");
+          return null;
+        }
+      }
+
       String[] domainURIs = new String[domain.size()];
       Iterator<OClass> iter = domain.iterator();
       int counter = 0;
@@ -675,8 +771,9 @@ public abstract class AbstractOWLIMOntologyImpl
               this.sesameRepositoryID, this, owlim, aPropertyURI.toString(),
               OConstants.DATATYPE_PROPERTY);
       fireOntologyResourceAdded(dp);
-      
-      // we need to add a label on this but after the new resource addition event has been fired
+
+      // we need to add a label on this but after the new resource
+      // addition event has been fired
       dp.setLabel(aPropertyURI.getResourceName(), null);
 
       return dp;
@@ -732,6 +829,19 @@ public abstract class AbstractOWLIMOntologyImpl
   public ObjectProperty addObjectProperty(URI aPropertyURI, Set<OClass> domain,
           Set<OClass> range) {
     try {
+      OResource res = getOResourceFromMap(aPropertyURI.toString());
+      if(res != null) {
+        if(res instanceof ObjectProperty) {
+          Utils.warning(aPropertyURI.toString() + " already exists");
+          return (ObjectProperty)res;
+        }
+        else {
+          Utils.error(aPropertyURI.toString()
+                  + " already exists but it is not an ObjectProperty");
+          return null;
+        }
+      }
+
       String[] domainURIs = new String[domain.size()];
       String[] rangeURIs = new String[range.size()];
       Iterator<OClass> iter = domain.iterator();
@@ -752,8 +862,9 @@ public abstract class AbstractOWLIMOntologyImpl
               this.sesameRepositoryID, this, owlim, aPropertyURI.toString(),
               OConstants.OBJECT_PROPERTY);
       fireOntologyResourceAdded(op);
-      
-      // we need to add a label on this but after the new resource addition event has been fired
+
+      // we need to add a label on this but after the new resource
+      // addition event has been fired
       op.setLabel(aPropertyURI.getResourceName(), null);
 
       return op;
@@ -808,6 +919,19 @@ public abstract class AbstractOWLIMOntologyImpl
   public SymmetricProperty addSymmetricProperty(URI aPropertyURI,
           Set<OClass> domainAndRange) {
     try {
+      OResource res = getOResourceFromMap(aPropertyURI.toString());
+      if(res != null) {
+        if(res instanceof SymmetricProperty) {
+          Utils.warning(aPropertyURI.toString() + " already exists");
+          return (SymmetricProperty)res;
+        }
+        else {
+          Utils.error(aPropertyURI.toString()
+                  + " already exists but it is not an SymmetricProperty");
+          return null;
+        }
+      }
+
       String[] domainURIs = new String[domainAndRange.size()];
       Iterator<OClass> iter = domainAndRange.iterator();
       int counter = 0;
@@ -821,8 +945,9 @@ public abstract class AbstractOWLIMOntologyImpl
               this.sesameRepositoryID, this, owlim, aPropertyURI.toString(),
               OConstants.SYMMETRIC_PROPERTY);
       fireOntologyResourceAdded(sp);
-      
-      // we need to add a label on this but after the new resource addition event has been fired
+
+      // we need to add a label on this but after the new resource
+      // addition event has been fired
       sp.setLabel(aPropertyURI.getResourceName(), null);
 
       return sp;
@@ -839,6 +964,7 @@ public abstract class AbstractOWLIMOntologyImpl
    */
   public Set<SymmetricProperty> getSymmetricProperties() {
     try {
+
       Property[] properties = owlim
               .getSymmetricProperties(this.sesameRepositoryID);
       Set<SymmetricProperty> set = new HashSet<SymmetricProperty>();
@@ -878,6 +1004,19 @@ public abstract class AbstractOWLIMOntologyImpl
   public TransitiveProperty addTransitiveProperty(URI aPropertyURI,
           Set<OClass> domain, Set<OClass> range) {
     try {
+      OResource res = getOResourceFromMap(aPropertyURI.toString());
+      if(res != null) {
+        if(res instanceof TransitiveProperty) {
+          Utils.warning(aPropertyURI.toString() + " already exists");
+          return (TransitiveProperty)res;
+        }
+        else {
+          Utils.error(aPropertyURI.toString()
+                  + " already exists but it is not a TransitiveProperty");
+          return null;
+        }
+      }
+
       String[] domainURIs = new String[domain.size()];
       String[] rangeURIs = new String[range.size()];
       Iterator<OClass> iter = domain.iterator();
@@ -898,8 +1037,9 @@ public abstract class AbstractOWLIMOntologyImpl
               this.sesameRepositoryID, this, owlim, aPropertyURI.toString(),
               OConstants.TRANSITIVE_PROPERTY);
       fireOntologyResourceAdded(tp);
-      
-      // we need to add a label on this but after the new resource addition event has been fired
+
+      // we need to add a label on this but after the new resource
+      // addition event has been fired
       tp.setLabel(aPropertyURI.getResourceName(), null);
 
       return tp;
@@ -986,6 +1126,13 @@ public abstract class AbstractOWLIMOntologyImpl
    */
   public void removeProperty(RDFProperty theProperty) {
     try {
+
+      OResource res = getOResourceFromMap(theProperty.getURI().toString());
+      if(res == null) {
+        Utils.warning(theProperty.getURI().toString() + " does not exist");
+        return;
+      }
+
       String[] deletedResources = owlim.removePropertyFromOntology(
               this.sesameRepositoryID, theProperty.getURI().toString());
       fireOntologyResourcesRemoved(deletedResources);
@@ -1153,7 +1300,7 @@ public abstract class AbstractOWLIMOntologyImpl
   }
 
   private boolean callFromCleanup = false;
-  
+
   /*
    * (non-Javadoc)
    * 
@@ -1162,10 +1309,10 @@ public abstract class AbstractOWLIMOntologyImpl
   public void cleanup() {
     if(owlim != null && !getPersistRepository().booleanValue()) {
       callFromCleanup = true;
-        cleanOntology();
+      cleanOntology();
       try {
-        owlim.removeRepository(this.sesameRepositoryID,
-                getPersistRepository().booleanValue());
+        owlim.removeRepository(this.sesameRepositoryID, getPersistRepository()
+                .booleanValue());
       }
       catch(Exception e) {
         throw new GateRuntimeException(e);
@@ -1179,7 +1326,7 @@ public abstract class AbstractOWLIMOntologyImpl
    * 
    * @return
    */
-  public OWLIMServiceImpl getOwlim() {
+  public OWLIM getOwlim() {
     return owlim;
   }
 
@@ -1188,7 +1335,7 @@ public abstract class AbstractOWLIMOntologyImpl
    * 
    * @param owlim
    */
-  public void setOwlim(OWLIMServiceImpl owlim) {
+  public void setOwlim(OWLIM owlim) {
     this.owlim = owlim;
   }
 

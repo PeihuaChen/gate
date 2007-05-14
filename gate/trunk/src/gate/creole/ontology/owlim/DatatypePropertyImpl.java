@@ -37,7 +37,7 @@ public class DatatypePropertyImpl extends RDFPropertyImpl implements
    * @param owlimPort
    */
   public DatatypePropertyImpl(URI aURI, Ontology ontology, String repositoryID,
-          OWLIMServiceImpl owlimPort) {
+          OWLIM owlimPort) {
     super(aURI, ontology, repositoryID, owlimPort); 
   }
 

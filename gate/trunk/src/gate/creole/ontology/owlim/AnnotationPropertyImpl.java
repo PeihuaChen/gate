@@ -7,6 +7,7 @@
  */
 package gate.creole.ontology.owlim;
 
+import java.util.HashSet;
 import java.util.Set;
 import gate.creole.ontology.AnnotationProperty;
 import gate.creole.ontology.OResource;
@@ -30,7 +31,7 @@ public class AnnotationPropertyImpl extends RDFPropertyImpl implements
    * @param owlimPort
    */
   public AnnotationPropertyImpl(URI aURI, Ontology ontology,
-          String repositoryID, OWLIMServiceImpl owlimPort) {
+          String repositoryID, OWLIM owlimPort) {
     super(aURI, ontology, repositoryID, owlimPort);
   }
 
@@ -210,8 +211,7 @@ public class AnnotationPropertyImpl extends RDFPropertyImpl implements
    * @see gate.creole.ontology.RDFProperty#getDomain()
    */
   public Set<OResource> getDomain() {
-    throw new GateRuntimeException(
-            "This operation is not valid for AnnotationProperties.");
+    return new HashSet<OResource>();
   }
 
   /*
@@ -220,7 +220,6 @@ public class AnnotationPropertyImpl extends RDFPropertyImpl implements
    * @see gate.creole.ontology.RDFProperty#getRange()
    */
   public Set<OResource> getRange() {
-    throw new GateRuntimeException(
-            "This operation is not valid for AnnotationProperties.");
+     return new HashSet<OResource>();
   }
 }
