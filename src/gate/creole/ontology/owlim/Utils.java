@@ -29,7 +29,7 @@ public class Utils {
    * @return
    */
   public static RDFProperty createOProperty(String repositoryID,
-          Ontology ontology, OWLIMServiceImpl owlim, String uri, byte type) {
+          Ontology ontology, OWLIM owlim, String uri, byte type) {
     RDFProperty prop = (RDFProperty)ontology.getOResourceFromMap(uri);
     if(prop != null) return prop;
     switch(type){
@@ -73,7 +73,7 @@ public class Utils {
    * @return
    */
   public static OClass createOClass(String repositoryID, Ontology ontology,
-          OWLIMServiceImpl owlim, String uri, boolean isAnonymousClass) {
+          OWLIM owlim, String uri, boolean isAnonymousClass) {
     OClass aClass = (OClass)ontology.getOResourceFromMap(uri);
     if(aClass != null) return aClass;
     if(isAnonymousClass) {
@@ -97,7 +97,7 @@ public class Utils {
    * @return
    */
   public static OInstance createOInstance(String repositoryID,
-          Ontology ontology, OWLIMServiceImpl owlim, String uri) {
+          Ontology ontology, OWLIM owlim, String uri) {
     OInstance anInstance = (OInstance)ontology.getOResourceFromMap(uri);
     if(anInstance != null) return anInstance;
     anInstance = new OInstanceImpl(new URI(uri, false), ontology,

@@ -36,6 +36,7 @@ import gate.util.GateRuntimeException;
  * 
  */
 public class OResourceImpl implements OResource {
+
   /**
    * ID of the repository
    */
@@ -44,7 +45,7 @@ public class OResourceImpl implements OResource {
   /**
    * instance of the OWLIMServices
    */
-  protected OWLIMServiceImpl owlim;
+  protected OWLIM owlim;
 
   /**
    * URI of the resource
@@ -64,7 +65,7 @@ public class OResourceImpl implements OResource {
    * @param owlimPort
    */
   public OResourceImpl(URI aURI, Ontology ontology, String repositoryID,
-          OWLIMServiceImpl owlimPort) {
+          OWLIM owlimPort) {
     this.uri = aURI;
     this.repositoryID = repositoryID;
     this.owlim = owlimPort;
@@ -236,6 +237,21 @@ public class OResourceImpl implements OResource {
   public void addAnnotationPropertyValue(
           AnnotationProperty theAnnotationProperty, Literal literal) {
     try {
+
+      OResource res = ontology.getOResourceFromMap(theAnnotationProperty
+              .getURI().toString());
+      if(res == null) {
+        Utils.error(theAnnotationProperty.getURI().toString()
+                + " does not exist");
+        return;
+      }
+
+      if(!(res instanceof AnnotationProperty)) {
+        Utils.error(theAnnotationProperty.getURI().toString()
+                + " is not a registered annotation property");
+        return;
+      }
+
       owlim.addAnnotationPropertyValue(this.repositoryID, this.uri.toString(),
               theAnnotationProperty.getURI().toString(), literal.getValue(),
               literal.getLanguage() != null ? literal.getLanguage()
@@ -534,4 +550,5 @@ public class OResourceImpl implements OResource {
     }
     return false;
   }
+
 }

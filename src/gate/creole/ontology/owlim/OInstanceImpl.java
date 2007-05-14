@@ -45,7 +45,7 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @param owlimPort
    */
   public OInstanceImpl(URI aURI, Ontology ontology, String repositoryID,
-          OWLIMServiceImpl owlimPort) {
+          OWLIM owlimPort) {
     super(aURI, ontology, repositoryID, owlimPort);
   }
 
@@ -93,6 +93,12 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    */
   public void setDifferentFrom(OInstance theInstance) {
     try {
+      if(this == theInstance) {
+        Utils
+                .warning("setDifferentFrom(theInstance) : the source and the argument instances refer to the same instance and therefore cannot be set as different from each other");
+        return;
+      }
+
       owlim.setDifferentIndividualFrom(this.repositoryID, this.uri.toString(),
               theInstance.getURI().toString());
       ontology.fireOntologyModificationEvent(this,
@@ -144,10 +150,16 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * 
    * @see gate.creole.ontology.OInstance#setSameInstanceAs(gate.creole.ontology.OInstance)
    */
-  public void setSameInstanceAs(OInstance theIndividual) {
+  public void setSameInstanceAs(OInstance theInstance) {
     try {
+      if(this == theInstance) {
+        Utils
+                .warning("setDifferentFrom(theInstance) : the source and the argument instances refer to the same instance and therefore cannot be set as same");
+        return;
+      }
+
       owlim.setSameIndividualAs(this.repositoryID, this.uri.toString(),
-              theIndividual.getURI().toString());
+              theInstance.getURI().toString());
       ontology.fireOntologyModificationEvent(this,
               OConstants.SAME_INSTANCE_EVENT);
     }
@@ -201,6 +213,25 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
   public void addRDFPropertyValue(RDFProperty aProperty, OResource value)
           throws InvalidValueException {
     try {
+
+      // we need to check if the current instance is a valid domain for
+      // the property
+      if(!aProperty.isValidDomain(this)) {
+        Utils.error(this.getURI().toString()
+                + " is not a valid domain for the property "
+                + aProperty.getURI().toString());
+        return;
+      }
+
+      // we need to check if the current instance is a valid domain for
+      // the property
+      if(!aProperty.isValidRange(value)) {
+        Utils.error(value.getURI().toString()
+                + " is not a valid range for the property "
+                + aProperty.getURI().toString());
+        return;
+      }
+
       owlim.addRDFPropertyValue(this.repositoryID, this.uri.toString(),
               aProperty.getURI().toString(), value.getURI().toString());
       ontology.fireOntologyModificationEvent(this,
@@ -351,6 +382,15 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
   public void addDatatypePropertyValue(DatatypeProperty aProperty, Literal value)
           throws InvalidValueException {
     try {
+      // we need to check if the current instance is a valid domain for
+      // the property
+      if(!aProperty.isValidDomain(this)) {
+        Utils.error(this.getURI().toString()
+                + " is not a valid domain for the property "
+                + aProperty.getURI().toString());
+        return;
+      }
+
       DataType type = aProperty.getDataType();
       if(value.getDataType() == null) {
         type = aProperty.getDataType();
@@ -365,7 +405,8 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
       }
 
       owlim.addDatatypePropertyValue(this.repositoryID, this.uri.toString(),
-              aProperty.getURI().toString(), type.getXmlSchemaURI().toString(), value.getValue());
+              aProperty.getURI().toString(), type.getXmlSchemaURI().toString(),
+              value.getValue());
       ontology.fireOntologyModificationEvent(this,
               OConstants.DATATYPE_PROPERTY_VALUE_ADDED_EVENT);
     }
@@ -516,6 +557,25 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
   public void addObjectPropertyValue(ObjectProperty aProperty, OInstance value)
           throws InvalidValueException {
     try {
+
+      // we need to check if the current instance is a valid domain for
+      // the property
+      if(!aProperty.isValidDomain(this)) {
+        Utils.error(this.getURI().toString()
+                + " is not a valid domain for the property "
+                + aProperty.getURI().toString());
+        return;
+      }
+
+      // we need to check if the current instance is a valid domain for
+      // the property
+      if(!aProperty.isValidRange(value)) {
+        Utils.error(value.getURI().toString()
+                + " is not a valid range for the property "
+                + aProperty.getURI().toString());
+        return;
+      }
+
       owlim.addObjectPropertyValue(this.repositoryID, this.uri.toString(),
               aProperty.getURI().toString(), value.getURI().toString());
       ontology.fireOntologyModificationEvent(this,

@@ -63,7 +63,7 @@ import org.openrdf.vocabulary.XmlSchema;
  * 
  * @author niraj
  */
-public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
+public class OWLIMServiceImpl implements OWLIM, javax.xml.rpc.server.ServiceLifecycle,
                              AdminListener {
   private HashMap<String, RepositoryDetails> mapToRepositoryDetails = new HashMap<String, RepositoryDetails>();
 

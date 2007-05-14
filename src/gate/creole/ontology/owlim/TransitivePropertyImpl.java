@@ -27,7 +27,7 @@ public class TransitivePropertyImpl extends ObjectPropertyImpl implements
    * @param owlimPort
    */
   public TransitivePropertyImpl(URI aURI, Ontology ontology,
-          String repositoryID, OWLIMServiceImpl owlimPort) {
+          String repositoryID, OWLIM owlimPort) {
     super(aURI, ontology, repositoryID, owlimPort);
   }
 }

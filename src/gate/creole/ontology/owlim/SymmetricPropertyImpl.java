@@ -26,7 +26,7 @@ public class SymmetricPropertyImpl extends ObjectPropertyImpl implements
    * @param owlimPort
    */
   public SymmetricPropertyImpl(URI aURI, Ontology ontology,
-          String repositoryID, OWLIMServiceImpl owlimPort) {
+          String repositoryID, OWLIM owlimPort) {
     super(aURI, ontology, repositoryID, owlimPort);
   }
 }

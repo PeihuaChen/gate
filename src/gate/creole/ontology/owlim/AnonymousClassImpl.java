@@ -24,7 +24,7 @@ public class AnonymousClassImpl extends OClassImpl implements AnonymousClass {
    * @param owlimPort
    */
   public AnonymousClassImpl(URI aURI, Ontology ontology, String repositoryID,
-          OWLIMServiceImpl owlimPort) {
+          OWLIM owlimPort) {
     super(aURI, ontology, repositoryID, owlimPort);
   }
 }
