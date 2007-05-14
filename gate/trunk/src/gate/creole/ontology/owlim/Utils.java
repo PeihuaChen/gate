@@ -9,6 +9,7 @@ import gate.creole.ontology.OInstance;
 import gate.creole.ontology.Ontology;
 import gate.creole.ontology.RDFProperty;
 import gate.creole.ontology.URI;
+import gate.util.GateRuntimeException;
 
 /**
  * @author niraj
@@ -104,6 +105,22 @@ public class Utils {
     ontology.addOResourceToMap(uri, anInstance);
     return anInstance;
   }
+
+  /**
+   * Utility method that shows warning to the user.
+   * @param warningMsg - message to be displayed to the user
+   */
+  public static void warning(String warningMsg) {
+      System.err.println("WARNING :"+warningMsg);
+  } 
+  
+  /**
+   * Utility method that throws a GateRuntimeException to the user.
+   * @param warningMsg - message to be displayed to the user
+   */
+  public static void error(String errorMsg) {
+      throw new GateRuntimeException("ERROR :"+errorMsg);
+  } 
   
   
   
