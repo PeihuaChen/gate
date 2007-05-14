@@ -1611,6 +1611,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
   public void logout(String repositoryID) throws RemoteException {
     if(DEBUG) print("logout");
     SesameServer.getLocalService().logout();
+    SesameServer.getLocalService().shutDown();
     mapToRepositoryDetails.remove(repositoryID);
     currentRepository = null;
     sail = null;
@@ -1845,6 +1846,7 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       startTransaction(repositoryID);
       sail.clearRepository();
       endTransaction(repositoryID);
+      
     }
     catch(Exception e) {
       throw new RemoteException("" + e.getMessage());
@@ -2158,8 +2160,9 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
       throw new RemoteException("Repository :" + repositoryID
               + " does not exist");
     }
+    
     removeUUUStatement(subClassURI, RDFS.SUBCLASSOF, superClassURI);
-  }
+  }    
 
   /**
    * Removes the superclass relationship
@@ -3604,6 +3607,8 @@ public class OWLIMServiceImpl implements javax.xml.rpc.server.ServiceLifecycle,
     }
     else if(sail.isProperty(getResource(uri))) {
       type = Constants.RDF_PROPERTY;
+    } else {
+      return null;
     }
     return new Property(type, uri);
   }
