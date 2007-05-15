@@ -89,6 +89,8 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
     mainSplit.setResizeWeight(.75);
     JScrollPane scroller = new JScrollPane(mainTable);
+    scroller.setVerticalScrollBarPolicy(
+        ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
     scroller.setBorder(BorderFactory.createTitledBorder(
             scroller.getBorder(), 
             "Known CREOLE directories", 

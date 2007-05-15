@@ -141,7 +141,8 @@ public class XJTable extends JTable{
       Container parent = this.getParent();
       if(parent instanceof JViewport) {
         // only track the viewport width if it is big enough.
-        return parent.getWidth() > this.getMinimumSize().width;
+        return ((JViewport)parent).getExtentSize().width
+                    >= this.getMinimumSize().width;
       }
       else {
         return true;
