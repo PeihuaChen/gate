@@ -44,10 +44,9 @@ public class ValuesSelectionAction {
             DefaultComboBoxModel defaultcomboboxmodel = new DefaultComboBoxModel(
                     arraylist.toArray());
             domainBox.setModel(defaultcomboboxmodel);
-            
+
             try {
-              if(!arraylist.isEmpty())
-                domainBox.showPopup();
+              if(!arraylist.isEmpty()) domainBox.showPopup();
             }
             catch(Exception exception) {
             }
@@ -68,11 +67,11 @@ public class ValuesSelectionAction {
         if(!allowValueOutsideDropDownList) {
           if(!Arrays.asList(ontologyClasses).contains(s)) {
             JOptionPane.showMessageDialog(MainFrame.getInstance(),
-            "The value \""+s+"\" is not in the drop down list!");
+                    "The value \"" + s + "\" is not in the drop down list!");
             return;
           }
         }
-        
+
         if(((DefaultListModel)list.getModel()).contains(s)) {
           JOptionPane.showMessageDialog(MainFrame.getInstance(),
                   "Already added!");
@@ -139,6 +138,6 @@ public class ValuesSelectionAction {
   protected JPanel panel;
 
   protected String[] ontologyClasses;
-  
+
   protected boolean allowValueOutsideDropDownList = true;
 }

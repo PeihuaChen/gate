@@ -15,6 +15,22 @@ import gate.event.*;
 import gate.gui.*;
 import gate.swing.XJTable;
 import java.awt.*;
+import java.awt.datatransfer.Transferable;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DragGestureEvent;
+import java.awt.dnd.DragGestureListener;
+import java.awt.dnd.DragGestureRecognizer;
+import java.awt.dnd.DragSource;
+import java.awt.dnd.DragSourceContext;
+import java.awt.dnd.DragSourceDragEvent;
+import java.awt.dnd.DragSourceDropEvent;
+import java.awt.dnd.DragSourceEvent;
+import java.awt.dnd.DragSourceListener;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
+import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -39,6 +55,7 @@ public class OntologyEditor extends AbstractVisualResource
                                                           implements
                                                           ResizableVisualResource,
                                                           OntologyModificationListener {
+
   private static final long serialVersionUID = 3257847701214345265L;
 
   /*
@@ -48,6 +65,7 @@ public class OntologyEditor extends AbstractVisualResource
    */
   public void setTarget(Object target) {
     this.ontology = (Ontology)target;
+    selectedNodes = new ArrayList<DefaultMutableTreeNode>();
     detailsTableModel.setOntology(ontology);
     topClassAction.setOntology(ontology);
     subClassAction.setOntology(ontology);
@@ -95,7 +113,7 @@ public class OntologyEditor extends AbstractVisualResource
     mainSplit.setLeftComponent(subSplit);
     rootNode = new DefaultMutableTreeNode(null, true);
     treeModel = new DefaultTreeModel(rootNode);
-    tree = new JTree(treeModel);
+    tree = new DnDJTree(treeModel);
     tree.setRootVisible(false);
     tree.setShowsRootHandles(true);
     tree.setCellRenderer(new OntoTreeCellRenderer());
@@ -109,7 +127,7 @@ public class OntologyEditor extends AbstractVisualResource
     // ----------------------------------------------
     propertyRootNode = new DefaultMutableTreeNode(null, true);
     propertyTreeModel = new DefaultTreeModel(propertyRootNode);
-    propertyTree = new JTree(propertyTreeModel);
+    propertyTree = new DnDJTree(propertyTreeModel);
     propertyTree.setRootVisible(false);
     propertyTree.setShowsRootHandles(true);
     propertyTree.setCellRenderer(new OntoTreeCellRenderer());
@@ -238,7 +256,7 @@ public class OntologyEditor extends AbstractVisualResource
               public void valueChanged(TreeSelectionEvent e) {
                 int[] selectedRows = tree.getSelectionRows();
                 if(selectedRows != null && selectedRows.length > 0) {
-                  selectedNodes = new ArrayList<DefaultMutableTreeNode>();
+                  selectedNodes.clear();
                   for(int i = 0; i < selectedRows.length; i++) {
                     DefaultMutableTreeNode node1 = (DefaultMutableTreeNode)tree
                             .getPathForRow(selectedRows[i])
@@ -246,8 +264,8 @@ public class OntologyEditor extends AbstractVisualResource
                     selectedNodes.add(node1);
                   }
                   detailsTableModel
-                          .setItem(((DefaultMutableTreeNode)selectedNodes
-                                  .get(0)).getUserObject());
+                          .setItem(((OResourceNode)((DefaultMutableTreeNode)selectedNodes
+                                  .get(0)).getUserObject()).getResource());
                   enableDisableToolBarComponents();
                   fireTreeNodeSelectionChanged(selectedNodes);
                   propertyTree.clearSelection();
@@ -261,7 +279,7 @@ public class OntologyEditor extends AbstractVisualResource
               public void valueChanged(TreeSelectionEvent e) {
                 int[] selectedRows = propertyTree.getSelectionRows();
                 if(selectedRows != null && selectedRows.length > 0) {
-                  selectedNodes = new ArrayList<DefaultMutableTreeNode>();
+                  selectedNodes.clear();
                   for(int i = 0; i < selectedRows.length; i++) {
                     DefaultMutableTreeNode node1 = (DefaultMutableTreeNode)propertyTree
                             .getPathForRow(selectedRows[i])
@@ -269,8 +287,8 @@ public class OntologyEditor extends AbstractVisualResource
                     selectedNodes.add(node1);
                   }
                   propertyDetailsTableModel
-                          .setItem(((DefaultMutableTreeNode)selectedNodes
-                                  .get(0)).getUserObject());
+                          .setItem(((OResourceNode)((DefaultMutableTreeNode)selectedNodes
+                                  .get(0)).getUserObject()).getResource());
                   enableDisableToolBarComponents();
                   fireTreeNodeSelectionChanged(selectedNodes);
                   tree.clearSelection();
@@ -313,8 +331,8 @@ public class OntologyEditor extends AbstractVisualResource
           if(selectedNodes.size() > 1) return;
           final JPopupMenu menu = new JPopupMenu();
           final JMenu addProperty = new JMenu("Properties");
-          final OResource candidate = (OResource)((DefaultMutableTreeNode)selectedNodes
-                  .get(0)).getUserObject();
+          final OResource candidate = (OResource)((OResourceNode)((DefaultMutableTreeNode)selectedNodes
+                  .get(0)).getUserObject()).getResource();
           menu.add(addProperty);
           final JMenuItem sameAs = new JMenuItem(candidate instanceof OClass
                   ? "Equivalent Class"
@@ -528,8 +546,8 @@ public class OntologyEditor extends AbstractVisualResource
         if(SwingUtilities.isRightMouseButton(me)) {
           if(selectedNodes.size() > 1) return;
           final JPopupMenu menu = new JPopupMenu();
-          final OResource candidate = (OResource)((DefaultMutableTreeNode)selectedNodes
-                  .get(0)).getUserObject();
+          final OResource candidate = ((OResourceNode)((DefaultMutableTreeNode)selectedNodes
+                  .get(0)).getUserObject()).getResource();
           final JMenuItem sameAs = new JMenuItem("Equivalent Property");
           final JMenuItem delete = new JMenuItem("Delete", MainFrame
                   .getIcon("delete"));
@@ -622,11 +640,12 @@ public class OntologyEditor extends AbstractVisualResource
     for(int i = 0; i < selectedNodes.size(); i++) {
       DefaultMutableTreeNode node = (DefaultMutableTreeNode)selectedNodes
               .get(i);
-      if(node.getUserObject() instanceof OClass) {
+      OResource res = ((OResourceNode)node.getUserObject()).getResource();
+      if(res instanceof OClass) {
         allProperties = false;
         allInstances = false;
       }
-      else if(node.getUserObject() instanceof OInstance) {
+      else if(res instanceof OInstance) {
         allClasses = false;
         allProperties = false;
       }
@@ -756,7 +775,8 @@ public class OntologyEditor extends AbstractVisualResource
   protected void addChidrenRec(DefaultMutableTreeNode parent,
           List<OResource> children, Comparator comparator) {
     for(OResource aChild : children) {
-      DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(aChild);
+      DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(
+              new OResourceNode(aChild));
       parent.add(childNode);
 
       // we maintain a map of ontology resources and their representing
@@ -802,7 +822,8 @@ public class OntologyEditor extends AbstractVisualResource
   protected void addPropertyChidrenRec(DefaultMutableTreeNode parent,
           List<RDFProperty> children, Comparator comparator) {
     for(RDFProperty aChild : children) {
-      DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(aChild);
+      DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(
+              new OResourceNode(aChild));
       parent.add(childNode);
       // we maintain a map of ontology resources and their representing
       // tree
@@ -1168,9 +1189,22 @@ public class OntologyEditor extends AbstractVisualResource
     String deletedResourceURI = resources[resources.length - 1];
     DefaultMutableTreeNode aNode = uri2TreeNodesListMap.get(deletedResourceURI)
             .get(0);
-    final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode)(aNode
-            .getParent() == null
-            ? aNode.getUserObject() instanceof RDFProperty ? propertyRootNode : rootNode : aNode.getParent());
+
+    DefaultMutableTreeNode probableParentNode = null;
+    if(aNode.getParent() == null) {
+      OResource res = ((OResourceNode)aNode.getUserObject()).getResource();
+      if(res instanceof RDFProperty) {
+        probableParentNode = propertyRootNode;
+      }
+      else {
+        probableParentNode = rootNode;
+      }
+    }
+    else {
+      probableParentNode = (DefaultMutableTreeNode)aNode.getParent();
+    }
+
+    final DefaultMutableTreeNode parentNode = probableParentNode;
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
@@ -1191,7 +1225,8 @@ public class OntologyEditor extends AbstractVisualResource
               if(nodeList != null) {
                 for(int j = 0; j < nodeList.size(); j++) {
                   DefaultMutableTreeNode node = nodeList.get(j);
-                  DefaultTreeModel modelToUse = node.getUserObject() instanceof RDFProperty
+                  DefaultTreeModel modelToUse = ((OResourceNode)node
+                          .getUserObject()).getResource() instanceof RDFProperty
                           ? propertyTreeModel
                           : treeModel;
                   removeFromMap(modelToUse, node);
@@ -1211,18 +1246,20 @@ public class OntologyEditor extends AbstractVisualResource
                 propertyTree.invalidate();
 
                 if(parentNode != rootNode && parentNode != propertyRootNode) {
-                  if(parentNode.getUserObject() instanceof RDFProperty) {
+                  if(((OResourceNode)parentNode.getUserObject()).getResource() instanceof RDFProperty) {
                     propertyTree.setSelectionPath(new TreePath(parentNode
-                          .getPath()));
+                            .getPath()));
                   }
                   else {
                     tree.setSelectionPath(new TreePath(parentNode.getPath()));
                   }
-                } else if(parentNode == rootNode){
+                }
+                else if(parentNode == rootNode) {
                   if(tree.getRowCount() > 0) {
                     tree.setSelectionRow(0);
                   }
-                } else {
+                }
+                else {
                   if(propertyTree.getRowCount() > 0) {
                     propertyTree.setSelectionRow(0);
                   }
@@ -1292,7 +1329,7 @@ public class OntologyEditor extends AbstractVisualResource
       isItTree = false;
       path = propertyTree.getSelectionPath();
     }
-    
+
     switch(eventType) {
       case OConstants.SUB_PROPERTY_ADDED_EVENT:
         subPropertyIsAdded((RDFProperty)resource);
@@ -1324,12 +1361,12 @@ public class OntologyEditor extends AbstractVisualResource
     transitivePropertyAction.setOntologyClassesURIs(ontologyClassesURIs);
     if(isItTree) {
       tree.setSelectionPath(path);
-        DefaultMutableTreeNode aNode = uri2TreeNodesListMap.get(
+      DefaultMutableTreeNode aNode = uri2TreeNodesListMap.get(
               resource.getURI().toString()).get(0);
       tree.setSelectionPath(new TreePath(aNode.getPath()));
     }
     else {
-        propertyTree.setSelectionPath(path);
+      propertyTree.setSelectionPath(path);
       DefaultMutableTreeNode aNode = uri2TreeNodesListMap.get(
               resource.getURI().toString()).get(0);
       propertyTree.setSelectionPath(new TreePath(aNode.getPath()));
@@ -1365,6 +1402,208 @@ public class OntologyEditor extends AbstractVisualResource
     }
   }
 
+  class DnDJTree extends JTree implements DragGestureListener,
+                              DropTargetListener, DragSourceListener {
+
+    /** Variables needed for DnD */
+    private DragSource dragSource = null;
+
+    private DragSourceContext dragSourceContext = null;
+
+    private DefaultMutableTreeNode selectedNode = null;
+
+    private TreePath selectedTreePath = null;
+
+    /**
+     * Constructor
+     * 
+     * @param root The root node of the tree
+     * @param parent Parent JFrame of the JTree
+     */
+    public DnDJTree(TreeModel model) {
+      super(model);
+      dragSource = DragSource.getDefaultDragSource();
+      DragGestureRecognizer dgr = dragSource
+              .createDefaultDragGestureRecognizer(this,
+                      DnDConstants.ACTION_MOVE, this);
+      DropTarget dropTarget = new DropTarget(this, this);
+    }
+
+    /** DragGestureListener interface method */
+    public void dragGestureRecognized(DragGestureEvent e) {
+      // Get the selected node
+      if(selectedNodes.isEmpty()) {
+        selectedNode = null;
+        selectedTreePath = null;
+        return;
+      }
+
+      selectedNode = selectedNodes.get(0);
+      selectedTreePath = new TreePath(selectedNode.getPath());
+      DefaultMutableTreeNode dragNode = selectedNode;
+
+      if(dragNode != null) {
+
+        // Get the Transferable Object
+        Transferable transferable = (Transferable)dragNode.getUserObject();
+
+        // Select the appropriate cursor;
+        Cursor cursor = DragSource.DefaultCopyNoDrop;
+        int action = e.getDragAction();
+        if(action == DnDConstants.ACTION_MOVE)
+          cursor = DragSource.DefaultMoveNoDrop;
+
+        // begin the drag
+        dragSource.startDrag(e, cursor, transferable, this);
+      }
+    }
+
+    /** DragSourceListener interface method */
+    public void dragDropEnd(DragSourceDropEvent dsde) {
+    }
+
+    /** DragSourceListener interface method */
+    public void dragEnter(DragSourceDragEvent dsde) {
+    }
+
+    /** DragSourceListener interface method */
+    public void dragOver(DragSourceDragEvent dsde) {
+    }
+
+    /** DragSourceListener interface method */
+    public void dropActionChanged(DragSourceDragEvent dsde) {
+    }
+
+    /** DragSourceListener interface method */
+    public void dragExit(DragSourceEvent dsde) {
+    }
+
+    /**
+     * DropTargetListener interface method - What we do when drag is
+     * released
+     */
+    public void drop(DropTargetDropEvent e) {
+      /*
+       * Transferable tr = e.getTransferable();
+       * 
+       * DefaultMutableTreeNode node =
+       * (DefaultMutableTreeNode)selectedTreePath
+       * .getLastPathComponent(); OResource source =
+       * ((OResourceNode)node.getUserObject()).getResource();
+       * 
+       * if(source instanceof OInstance) { e.rejectDrop();
+       * SwingUtilities.invokeLater(new Runnable() { public void run() {
+       * JOptionPane.showMessageDialog(MainFrame.getInstance(),
+       * "Instances are not allowed to be moved!", "Error Dialog",
+       * JOptionPane.ERROR_MESSAGE); } }); return; }
+       *  // now check if the class to be moved under the class is not a //
+       * super class of the later. // get new parent node Point loc =
+       * e.getLocation(); TreePath destinationPath =
+       * getPathForLocation(loc.x, loc.y); if(destinationPath == null) {
+       * e.rejectDrop(); return; }
+       * 
+       * OResource target =
+       * ((OResourceNode)((DefaultMutableTreeNode)destinationPath
+       * .getLastPathComponent()).getUserObject()).getResource();
+       * 
+       * if(target instanceof OInstance) { e.rejectDrop();
+       * SwingUtilities.invokeLater(new Runnable() { public void run() {
+       * JOptionPane.showMessageDialog(MainFrame.getInstance(), "Invalid
+       * Operation!", "Error Dialog", JOptionPane.ERROR_MESSAGE); } });
+       * return; }
+       * 
+       * if(source instanceof OClass && target instanceof OClass) {
+       * if(((OClass)target).isSubClassOf((OClass)source,
+       * OConstants.TRANSITIVE_CLOSURE)) { e.rejectDrop();
+       * SwingUtilities.invokeLater(new Runnable() { public void run() {
+       * JOptionPane.showMessageDialog(MainFrame.getInstance(), "A super
+       * class can not be set as a sub class!", "Error Dialog",
+       * JOptionPane.ERROR_MESSAGE); } }); return; } }
+       * 
+       * if(source instanceof RDFProperty && target instanceof
+       * RDFProperty) {
+       * if(((RDFProperty)target).isSubPropertyOf((RDFProperty)source,
+       * OConstants.TRANSITIVE_CLOSURE)) { e.rejectDrop();
+       * SwingUtilities.invokeLater(new Runnable() { public void run() {
+       * JOptionPane.showMessageDialog(MainFrame.getInstance(), "A super
+       * property can not be set as a sub property!", "Error Dialog",
+       * JOptionPane.ERROR_MESSAGE); } });
+       * 
+       * return; }
+       * 
+       * if(source instanceof AnnotationProperty || target instanceof
+       * AnnotationProperty) { e.rejectDrop();
+       * SwingUtilities.invokeLater(new Runnable() { public void run() {
+       * JOptionPane .showMessageDialog( MainFrame.getInstance(),
+       * "Annotation Properties cannot be set as sub or super
+       * properties!", "Error Dialog", JOptionPane.ERROR_MESSAGE); } });
+       * return;
+       *  } }
+       * 
+       * if(!source.getClass().getName().equals(target.getClass().getName())) {
+       * e.rejectDrop(); SwingUtilities.invokeLater(new Runnable() {
+       * public void run() {
+       * JOptionPane.showMessageDialog(MainFrame.getInstance(), "Invalid
+       * Operation!", "Error Dialog", JOptionPane.ERROR_MESSAGE); } });
+       * return; }
+       * 
+       * if(source instanceof OClass && target instanceof OClass) { //
+       * first find out the source's super classes OClass sc =
+       * (OClass)source; Set<OClass> superClasses = sc
+       * .getSuperClasses(OConstants.DIRECT_CLOSURE);
+       *  // lets check if the
+       * 
+       * for(OClass sClass : superClasses) { sClass.removeSubClass(sc); }
+       * 
+       * ((OClass)target).addSubClass(sc);
+       * 
+       * return; }
+       * 
+       * if(source instanceof RDFProperty && target instanceof
+       * RDFProperty) { // first find out the source's super classes
+       * RDFProperty sp = (RDFProperty)source; Set<RDFProperty>
+       * superProps = sp .getSuperProperties(OConstants.DIRECT_CLOSURE);
+       * 
+       * for(RDFProperty sProp : superProps) {
+       * sProp.removeSubProperty(sp); }
+       * 
+       * ((RDFProperty)target).addSubProperty(sp);
+       * 
+       * return; }
+       * 
+       */
+      int action = e.getDropAction();
+      e.rejectDrop();
+      e.getDropTargetContext().dropComplete(false);
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          JOptionPane
+                  .showMessageDialog(
+                          MainFrame.getInstance(),
+                          "This feature is being implemented and will be provided soon",
+                          "Coming Soon!", JOptionPane.INFORMATION_MESSAGE);
+        }
+      });
+    } // end of method
+
+    /** DropTaregetListener interface method */
+    public void dragEnter(DropTargetDragEvent e) {
+    }
+
+    /** DropTaregetListener interface method */
+    public void dragExit(DropTargetEvent e) {
+    }
+
+    /** DropTaregetListener interface method */
+    public void dragOver(DropTargetDragEvent e) {
+    }
+
+    /** DropTaregetListener interface method */
+    public void dropActionChanged(DropTargetDragEvent e) {
+    }
+
+  } // end of DnDJTree
+
   /**
    * the ontology instance
    */
@@ -1378,12 +1617,12 @@ public class OntologyEditor extends AbstractVisualResource
   /**
    * The tree view.
    */
-  protected JTree tree;
+  protected DnDJTree tree;
 
   /**
    * The property treeView
    */
-  protected JTree propertyTree;
+  protected DnDJTree propertyTree;
 
   /**
    * The mode, for the tree.
@@ -1402,9 +1641,9 @@ public class OntologyEditor extends AbstractVisualResource
 
   protected JTable propertyDetailsTable;
 
-  DetailsTableModel detailsTableModel;
+  protected DetailsTableModel detailsTableModel;
 
-  PropertyDetailsTableModel propertyDetailsTableModel;
+  protected PropertyDetailsTableModel propertyDetailsTableModel;
 
   /**
    * The main split
@@ -1483,5 +1722,5 @@ public class OntologyEditor extends AbstractVisualResource
 
   protected HashMap<DefaultMutableTreeNode, URI> reverseMap;
 
-  JScrollPane propertyScroller, scroller;
+  protected JScrollPane propertyScroller, scroller;
 }

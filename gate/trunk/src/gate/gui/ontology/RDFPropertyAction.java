@@ -18,6 +18,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  * Action to create an RDF Property
+ * 
  * @author niraj
  */
 public class RDFPropertyAction extends AbstractAction implements
@@ -40,9 +41,10 @@ public class RDFPropertyAction extends AbstractAction implements
         ArrayList<String> arraylist = new ArrayList<String>();
         for(int j = 0; j < selectedNodes.size(); j++) {
           DefaultMutableTreeNode defaultmutabletreenode = selectedNodes.get(j);
-          if(defaultmutabletreenode.getUserObject() instanceof OClass)
-            arraylist.add(((OClass)defaultmutabletreenode.getUserObject())
-                    .getURI().toString());
+          if(((OResourceNode)defaultmutabletreenode.getUserObject())
+                  .getResource() instanceof OClass)
+            arraylist.add(((OClass)((OResourceNode)defaultmutabletreenode
+                    .getUserObject()).getResource()).getURI().toString());
         }
         String as[] = new String[resoucesList.size()];
         for(int i = 0; i < as.length; i++)
@@ -80,14 +82,15 @@ public class RDFPropertyAction extends AbstractAction implements
     subPropPanel = new JPanel(new FlowLayout(0));
     subPropertyCB = new JCheckBox("sub property of the selected nodes?");
     subPropPanel.add(subPropertyCB);
-    //panel.add(subPropPanel);
+    // panel.add(subPropPanel);
   }
 
   public void actionPerformed(ActionEvent actionevent) {
-    ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(this.selectedNodes);
+    ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(
+            this.selectedNodes);
     nameSpace.setText(ontology.getDefaultNameSpace());
     int i = JOptionPane.showOptionDialog(null, panel, "New Property", 2, 3,
-            null, new String[]{"OK", "Cancel"}, "OK");
+            null, new String[] {"OK", "Cancel"}, "OK");
     if(i == 0) {
       String s = nameSpace.getText();
       if(!Utils.isValidNameSpace(s)) {
@@ -127,12 +130,12 @@ public class RDFPropertyAction extends AbstractAction implements
         for(i = 0; i < selectedNodes.size(); i++) {
           DefaultMutableTreeNode node = (DefaultMutableTreeNode)selectedNodes
                   .get(i);
-          if(node.getUserObject() instanceof RDFProperty
-                  && !(node.getUserObject() instanceof ObjectProperty)
-                  && !(node.getUserObject() instanceof AnnotationProperty)
-                  && !(node.getUserObject() instanceof DatatypeProperty)) {
-            ((ObjectProperty)node.getUserObject()).addSubProperty(dp);
-            dp.addSubProperty((ObjectProperty)node.getUserObject());
+          Object obj = ((OResourceNode)node.getUserObject()).getResource();
+          if(obj instanceof RDFProperty && !(obj instanceof ObjectProperty)
+                  && !(obj instanceof AnnotationProperty)
+                  && !(obj instanceof DatatypeProperty)) {
+            ((ObjectProperty)obj).addSubProperty(dp);
+            dp.addSubProperty((ObjectProperty)obj);
           }
         }
       }

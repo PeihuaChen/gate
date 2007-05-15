@@ -19,8 +19,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  * Action to create a new Instance in the ontology
+ * 
  * @author niraj
- *
+ * 
  */
 public class InstanceAction extends AbstractAction implements
                                                   TreeNodeSelectionListener {
@@ -42,40 +43,49 @@ public class InstanceAction extends AbstractAction implements
   }
 
   public void actionPerformed(ActionEvent actionevent) {
-    ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(this.selectedNodes);
+    ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(
+            this.selectedNodes);
     if(selectedNodes.size() == 0) {
-        JOptionPane.showMessageDialog(MainFrame.getInstance(), "Please select a class for which you want to create a new instance");
-        return;
+      JOptionPane
+              .showMessageDialog(MainFrame.getInstance(),
+                      "Please select a class for which you want to create a new instance");
+      return;
     }
-    nameSpace.setText(((OClass) selectedNodes.get(0).getUserObject()).getURI().getNameSpace());
-    
-    int j = JOptionPane.showOptionDialog(MainFrame.getInstance(), panel, "New Instance: ", 2, 3,
-            null, new String[]{"OK", "Cancel"}, "OK");
+    OResource selectedNode = ((OResourceNode)selectedNodes.get(0).getUserObject()).getResource();
+    nameSpace.setText(selectedNode.getURI().getNameSpace());
+
+    int j = JOptionPane.showOptionDialog(MainFrame.getInstance(), panel,
+            "New Instance: ", 2, 3, null, new String[] {"OK", "Cancel"}, "OK");
     if(j == 0) {
       String s = nameSpace.getText();
       if(!Utils.isValidNameSpace(s)) {
-        JOptionPane.showMessageDialog(MainFrame.getInstance(), (new StringBuilder()).append(
-                "Invalid NameSpace:").append(s).append(
-                "\n example: http://gate.ac.uk/example#").toString());
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),
+                (new StringBuilder()).append("Invalid NameSpace:").append(s)
+                        .append("\n example: http://gate.ac.uk/example#")
+                        .toString());
         return;
       }
       if(!Utils.isValidOntologyResourceName(instanceName.getText())) {
-        JOptionPane.showMessageDialog(MainFrame.getInstance(), "Invalid Instance Name");
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),
+                "Invalid Instance Name");
         return;
       }
-      
-      if(ontology.getOResourceFromMap(nameSpace.getText()+instanceName.getText()) != null) {
-        JOptionPane.showMessageDialog(MainFrame.getInstance(), (new StringBuilder()).append(
-                "An instance with name \"").append(nameSpace.getText()+instanceName.getText()).append(
-                "\" already exists").toString());
+
+      if(ontology.getOResourceFromMap(nameSpace.getText()
+              + instanceName.getText()) != null) {
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),
+                (new StringBuilder()).append("An instance with name \"")
+                        .append(nameSpace.getText() + instanceName.getText())
+                        .append("\" already exists").toString());
         return;
       }
 
       for(int i = 0; i < selectedNodes.size(); i++) {
-        Object obj = selectedNodes.get(i).getUserObject();
+        Object obj = ((OResourceNode)selectedNodes.get(i).getUserObject()).getResource();
         if(obj instanceof OClass) {
-          OInstance instance = ontology.addOInstance(new URI(nameSpace.getText()+instanceName.getText(), false),
-                  (OClass)obj);
+          OInstance instance = ontology.addOInstance(new URI(nameSpace
+                  .getText()
+                  + instanceName.getText(), false), (OClass)obj);
         }
       }
     }

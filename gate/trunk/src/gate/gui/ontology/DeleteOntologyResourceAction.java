@@ -17,8 +17,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  * Action to delete a resource from ontology.
+ * 
  * @author niraj
- *
+ * 
  */
 public class DeleteOntologyResourceAction extends AbstractAction implements
                                                                 TreeNodeSelectionListener {
@@ -33,13 +34,15 @@ public class DeleteOntologyResourceAction extends AbstractAction implements
     ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(
             this.selectedNodes);
 
-    int i = JOptionPane.showConfirmDialog(MainFrame.getInstance(), "Are you sure?",
-            "Resource deleting action", JOptionPane.YES_NO_OPTION);
+    int i = JOptionPane.showConfirmDialog(MainFrame.getInstance(),
+            "Are you sure?", "Resource deleting action",
+            JOptionPane.YES_NO_OPTION);
     if(i != 0) return;
     for(int j = 0; j < selectedNodes.size(); j++) {
       DefaultMutableTreeNode defaultmutabletreenode = (DefaultMutableTreeNode)selectedNodes
               .get(j);
-      Object obj = defaultmutabletreenode.getUserObject();
+      Object obj = ((OResourceNode)defaultmutabletreenode.getUserObject())
+              .getResource();
       try {
         if(obj instanceof OClass) {
           if(ontology.containsOClass(((OClass)obj).getURI()))
@@ -52,7 +55,7 @@ public class DeleteOntologyResourceAction extends AbstractAction implements
           continue;
         }
         if((obj instanceof RDFProperty)
-                && ontology.getProperty(((RDFProperty)obj).getURI()) != null)
+                && ontology.getOResourceFromMap(((RDFProperty)obj).getURI().toString()) != null)
           ontology.removeProperty((RDFProperty)obj);
       }
       catch(Exception re) {
