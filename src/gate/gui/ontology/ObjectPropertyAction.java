@@ -18,8 +18,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  * Action to create a new ObjectProperty in the ontology
+ * 
  * @author niraj
- *
+ * 
  */
 public class ObjectPropertyAction extends AbstractAction implements
                                                         TreeNodeSelectionListener {
@@ -44,9 +45,10 @@ public class ObjectPropertyAction extends AbstractAction implements
         ArrayList<String> arraylist = new ArrayList<String>();
         for(int j = 0; j < selectedNodes.size(); j++) {
           DefaultMutableTreeNode defaultmutabletreenode = selectedNodes.get(j);
-          if(defaultmutabletreenode.getUserObject() instanceof OClass)
-            arraylist.add(((OClass)defaultmutabletreenode.getUserObject())
-                    .getURI().toString());
+          if(((OResourceNode)defaultmutabletreenode.getUserObject())
+                  .getResource() instanceof OClass)
+            arraylist.add(((OClass)((OResourceNode)defaultmutabletreenode
+                    .getUserObject()).getResource()).getURI().toString());
         }
         String as1[] = new String[arraylist.size()];
         for(int k = 0; k < as1.length; k++)
@@ -84,14 +86,15 @@ public class ObjectPropertyAction extends AbstractAction implements
     subPropPanel = new JPanel(new FlowLayout(0));
     subPropertyCB = new JCheckBox("sub property of the selected nodes?");
     subPropPanel.add(subPropertyCB);
-    //panel.add(subPropPanel);
+    // panel.add(subPropPanel);
   }
 
   public void actionPerformed(ActionEvent actionevent) {
-    ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(this.selectedNodes);
+    ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(
+            this.selectedNodes);
     nameSpace.setText(ontology.getDefaultNameSpace());
     int i = JOptionPane.showOptionDialog(null, panel, "New Property", 2, 3,
-            null, new String[]{"OK", "Cancel"}, "OK");
+            null, new String[] {"OK", "Cancel"}, "OK");
     if(i == 0) {
       String s = nameSpace.getText();
       if(!Utils.isValidNameSpace(s)) {
@@ -129,16 +132,6 @@ public class ObjectPropertyAction extends AbstractAction implements
       ObjectProperty dp = ontology.addObjectProperty(new URI(nameSpace
               .getText()
               + propertyName.getText(), false), domainSet, rangeSet);
-      if(subPropertyCB.isSelected()) {
-        for(i = 0; i < selectedNodes.size(); i++) {
-          DefaultMutableTreeNode node = (DefaultMutableTreeNode)selectedNodes
-                  .get(i);
-          if(node.getUserObject() instanceof ObjectProperty) {
-            ((ObjectProperty)node.getUserObject()).addSubProperty(dp);
-            dp.addSubProperty((ObjectProperty)node.getUserObject());
-          }
-        }
-      }
     }
   }
 

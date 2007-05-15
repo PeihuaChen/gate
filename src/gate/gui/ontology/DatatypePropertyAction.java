@@ -35,7 +35,7 @@ public class DatatypePropertyAction extends AbstractAction implements
     propertyName = new JTextField(20);
     domainB = new JButton("Domain");
     domainAction = new ValuesSelectionAction();
-    datatypes = new JComboBox(new DefaultComboBoxModel(new String[]{
+    datatypes = new JComboBox(new DefaultComboBoxModel(new String[] {
         "http://www.w3.org/2001/XMLSchema#boolean",
         "http://www.w3.org/2001/XMLSchema#byte",
         "http://www.w3.org/2001/XMLSchema#date",
@@ -62,17 +62,17 @@ public class DatatypePropertyAction extends AbstractAction implements
         String as[] = new String[ontologyClassesURIs.size()];
         for(int i = 0; i < as.length; i++)
           as[i] = ((String)ontologyClassesURIs.get(i));
-        ArrayList arraylist = new ArrayList();
+        ArrayList<String> arraylist = new ArrayList<String>();
         for(int j = 0; j < selectedNodes.size(); j++) {
-          DefaultMutableTreeNode defaultmutabletreenode = (DefaultMutableTreeNode)selectedNodes
+          DefaultMutableTreeNode node = (DefaultMutableTreeNode)selectedNodes
                   .get(j);
-          if(defaultmutabletreenode.getUserObject() instanceof OClass)
-            arraylist.add(((OClass)defaultmutabletreenode.getUserObject())
-                    .getURI().toString());
+          OResource res = ((OResourceNode)node.getUserObject()).getResource();
+          if(res instanceof OClass)
+            arraylist.add(((OClass)res).getURI().toString());
         }
         String as1[] = new String[arraylist.size()];
         for(int k = 0; k < as1.length; k++)
-          as1[k] = (String)arraylist.get(k);
+          as1[k] = arraylist.get(k);
         domainAction.showGUI("Domain", as, as1, false);
       }
 
@@ -96,14 +96,15 @@ public class DatatypePropertyAction extends AbstractAction implements
     subPropPanel = new JPanel(new FlowLayout(0));
     subPropertyCB = new JCheckBox("sub property of the selected nodes?");
     subPropPanel.add(subPropertyCB);
-    //panel.add(subPropPanel);
+    // panel.add(subPropPanel);
   }
 
   public void actionPerformed(ActionEvent actionevent) {
-    ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(this.selectedNodes);
+    ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(
+            this.selectedNodes);
     nameSpace.setText(ontology.getDefaultNameSpace());
     int i = JOptionPane.showOptionDialog(null, panel, "New Datatype Property",
-            2, 3, null, new String[]{"OK", "Cancel"}, "OK");
+            2, 3, null, new String[] {"OK", "Cancel"}, "OK");
     if(i == 0) {
       String s = nameSpace.getText();
       if(!gate.gui.ontology.Utils.isValidNameSpace(s)) {
@@ -131,20 +132,11 @@ public class DatatypePropertyAction extends AbstractAction implements
         OClass oclass = (OClass)ontology.getOResourceFromMap(as[j]);
         hashset.add(oclass);
       }
-      DataType dt = OntologyUtilities.getDataType((String)datatypes.getSelectedItem());
+      DataType dt = OntologyUtilities.getDataType((String)datatypes
+              .getSelectedItem());
       DatatypeProperty dp = ontology.addDatatypeProperty(new URI(nameSpace
               .getText()
               + propertyName.getText(), false), hashset, dt);
-      if(subPropertyCB.isSelected()) {
-        for(i = 0; i < selectedNodes.size(); i++) {
-          DefaultMutableTreeNode node = (DefaultMutableTreeNode)selectedNodes
-                  .get(i);
-          if(node.getUserObject() instanceof DatatypeProperty) {
-            ((DatatypeProperty)node.getUserObject()).addSubProperty(dp);
-            dp.addSubProperty((DatatypeProperty)node.getUserObject());
-          }
-        }
-      }
     }
   }
 

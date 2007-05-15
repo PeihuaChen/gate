@@ -17,8 +17,9 @@ import javax.swing.*;
 
 /**
  * Action to create a new Top Class
+ * 
  * @author niraj
- *
+ * 
  */
 public class TopClassAction extends AbstractAction {
   private static final long serialVersionUID = 3258409543049359926L;
@@ -39,22 +40,25 @@ public class TopClassAction extends AbstractAction {
   }
 
   public void actionPerformed(ActionEvent actionevent) {
-      nameSpace.setText(ontology.getDefaultNameSpace());
-    int i = JOptionPane.showOptionDialog(MainFrame.getInstance(), panel, "New Top Class", 2, 3,
-            null, new String[]{"OK", "Cancel"}, "OK");
+    nameSpace.setText(ontology.getDefaultNameSpace());
+    int i = JOptionPane.showOptionDialog(MainFrame.getInstance(), panel,
+            "New Top Class", 2, 3, null, new String[] {"OK", "Cancel"}, "OK");
     if(i == 0) {
       String s = nameSpace.getText();
       if(!Utils.isValidNameSpace(s)) {
-        JOptionPane.showMessageDialog(MainFrame.getInstance(), (new StringBuilder()).append(
-                "Invalid NameSpace:").append(s).append(
-                "\n example: http://gate.ac.uk/example#").toString());
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),
+                (new StringBuilder()).append("Invalid NameSpace:").append(s)
+                        .append("\n example: http://gate.ac.uk/example#")
+                        .toString());
         return;
       }
       if(!Utils.isValidOntologyResourceName(className.getText())) {
-        JOptionPane.showMessageDialog(MainFrame.getInstance(), "Invalid Classname");
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),
+                "Invalid Classname");
         return;
       }
-      OClass oclassimpl = ontology.addOClass(new URI(nameSpace.getText()+className.getText(), false));
+      OClass oclassimpl = ontology.addOClass(new URI(nameSpace.getText()
+              + className.getText(), false));
     }
   }
 

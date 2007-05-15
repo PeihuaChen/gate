@@ -33,6 +33,9 @@ public class OntoTreeCellRenderer extends DefaultTreeCellRenderer {
       javax.swing.Icon icon = null;
       String s = null;
       Object obj1 = ((DefaultMutableTreeNode)obj).getUserObject();
+      if(obj1 != null && obj1 instanceof OResourceNode) {
+        obj1 = ((OResourceNode) obj1).getResource();
+      }
       if(obj1 instanceof OClass) {
         icon = MainFrame.getIcon("ontology-class");
         s = ((OClass)obj1).getName();

@@ -19,8 +19,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  * Action to create a new subclass.
+ * 
  * @author niraj
- *
+ * 
  */
 public class SubClassAction extends AbstractAction implements
                                                   TreeNodeSelectionListener {
@@ -42,42 +43,49 @@ public class SubClassAction extends AbstractAction implements
   }
 
   public void actionPerformed(ActionEvent actionevent) {
-    ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(this.selectedNodes);
+    ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(
+            this.selectedNodes);
     if(selectedNodes.size() == 0) {
-      JOptionPane.showMessageDialog(MainFrame.getInstance(), "Please select a class for which you want to create a new subclass");
+      JOptionPane
+              .showMessageDialog(MainFrame.getInstance(),
+                      "Please select a class for which you want to create a new subclass");
       return;
     }
-    nameSpace.setText(((OClass) selectedNodes.get(0).getUserObject()).getURI().getNameSpace());
+    OResource selectedNode = ((OResourceNode)selectedNodes.get(0).getUserObject()).getResource();
+    nameSpace.setText(selectedNode.getURI().getNameSpace());
     ArrayList<OClass> arraylist = new ArrayList<OClass>();
     for(int i = 0; i < selectedNodes.size(); i++) {
-      Object obj = ((DefaultMutableTreeNode)selectedNodes.get(i))
-              .getUserObject();
-      if(obj instanceof OClass) arraylist.add((OClass) obj);
+      Object obj = ((OResourceNode)((DefaultMutableTreeNode)selectedNodes.get(i)).getUserObject()).getResource();
+      if(obj instanceof OClass) arraylist.add((OClass)obj);
     }
-    
-    int j = JOptionPane.showOptionDialog(MainFrame.getInstance(), panel, "New Sub Class: ", 2,
-            3, null, new String[]{"OK", "Cancel"}, "OK");
+
+    int j = JOptionPane.showOptionDialog(MainFrame.getInstance(), panel,
+            "New Sub Class: ", 2, 3, null, new String[] {"OK", "Cancel"}, "OK");
     if(j == 0) {
       String s = nameSpace.getText();
       if(!Utils.isValidNameSpace(s)) {
-        JOptionPane.showMessageDialog(MainFrame.getInstance(), (new StringBuilder()).append(
-                "Invalid NameSpace:").append(s).append(
-                "\n example: http://gate.ac.uk/example#").toString());
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),
+                (new StringBuilder()).append("Invalid NameSpace:").append(s)
+                        .append("\n example: http://gate.ac.uk/example#")
+                        .toString());
         return;
       }
       if(!Utils.isValidOntologyResourceName(className.getText())) {
-        JOptionPane.showMessageDialog(MainFrame.getInstance(), "Invalid Classname");
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),
+                "Invalid Classname");
         return;
       }
-      
+
       if(ontology.getOResourceFromMap(s + className.getText()) != null) {
-        JOptionPane.showMessageDialog(MainFrame.getInstance(), (new StringBuilder()).append(
-                "Class :").append(className.getText())
-                .append(" already exists").toString());
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),
+                (new StringBuilder()).append("Class :").append(
+                        className.getText()).append(" already exists")
+                        .toString());
         return;
       }
-      
-      OClass oclassimpl = ontology.addOClass(new URI(s+ className.getText(), false));
+
+      OClass oclassimpl = ontology.addOClass(new URI(s + className.getText(),
+              false));
       for(int k = 0; k < arraylist.size(); k++) {
         ((OClass)arraylist.get(k)).addSubClass(oclassimpl);
       }

@@ -147,7 +147,8 @@ public class DetailsTableModel extends AbstractTableModel {
       }
 
       propertyTypes.getValues().clear();
-      propertyTypes.getValues().addAll(tclass.getPropertiesWithResourceAsDomain());
+      propertyTypes.getValues().addAll(
+              tclass.getPropertiesWithResourceAsDomain());
 
       propertyValues.getValues().clear();
       Set<AnnotationProperty> props = tclass.getSetAnnotationProperties();
@@ -162,7 +163,7 @@ public class DetailsTableModel extends AbstractTableModel {
           }
         }
       }
-      
+
       Collections.sort(propertyTypes.getValues(), itemComparator);
       Set<OInstance> set5 = ontology.getOInstances(tclass,
               OConstants.DIRECT_CLOSURE);
@@ -197,14 +198,15 @@ public class DetailsTableModel extends AbstractTableModel {
       }
 
       propertyTypes.getValues().clear();
-      propertyTypes.getValues().addAll(oinstance.getPropertiesWithResourceAsDomain());
-      
+      propertyTypes.getValues().addAll(
+              oinstance.getPropertiesWithResourceAsDomain());
+
       propertyValues.getValues().clear();
       Set<AnnotationProperty> apProps = oinstance.getSetAnnotationProperties();
       Set<DatatypeProperty> dtProps = oinstance.getSetDatatypeProperties();
       Set<ObjectProperty> obProps = oinstance.getSetObjectProperties();
       Set<RDFProperty> rdfProp = oinstance.getSetRDFProperties();
-      
+
       for(AnnotationProperty ap : apProps) {
         List<Literal> literals = oinstance.getAnnotationPropertyValues(ap);
         for(int i = 0; i < literals.size(); i++) {
@@ -212,7 +214,7 @@ public class DetailsTableModel extends AbstractTableModel {
           propertyValues.getValues().add(pv);
         }
       }
-      
+
       for(DatatypeProperty dt : dtProps) {
         List<Literal> literals = oinstance.getDatatypePropertyValues(dt);
         for(int i = 0; i < literals.size(); i++) {
@@ -220,7 +222,7 @@ public class DetailsTableModel extends AbstractTableModel {
           propertyValues.getValues().add(pv);
         }
       }
-      
+
       for(ObjectProperty ob : obProps) {
         List<OInstance> oinstances = oinstance.getObjectPropertyValues(ob);
         for(int i = 0; i < oinstances.size(); i++) {
