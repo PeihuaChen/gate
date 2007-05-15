@@ -16,6 +16,7 @@
 package gate.swing;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.*;
 import java.util.*;
@@ -124,6 +125,31 @@ public class XJTable extends JTable{
       calculatePreferredSize();
     }
     return super.getPreferredSize();
+  }
+
+  /**
+   * Overridden to ignore requests for this table to track the width of its
+   * containing viewport in cases where the viewport is narrower than the
+   * minimum size of the table.  Where the viewport is at least as wide as
+   * the minimum size of the table, we will allow the table to resize with
+   * the viewport, but when it gets too small we stop tracking, which allows
+   * the horizontal scrollbar to appear.
+   */
+  @Override
+  public boolean getScrollableTracksViewportWidth() {
+    if(super.getScrollableTracksViewportWidth()) {
+      Container parent = this.getParent();
+      if(parent instanceof JViewport) {
+        // only track the viewport width if it is big enough.
+        return parent.getWidth() > this.getMinimumSize().width;
+      }
+      else {
+        return true;
+      }
+    }
+    else { // super.getScrollableTracksViewportWidth() == false
+      return false;
+    }
   }
 
   private boolean componentSizedProperly = false;
