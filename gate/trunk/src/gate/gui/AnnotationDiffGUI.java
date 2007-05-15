@@ -694,6 +694,10 @@ public class AnnotationDiffGUI extends JFrame{
       switch(pairing.getType()){
         case(AnnotationDiffer.CORRECT_TYPE): return diffTable.getBackground();
         case(AnnotationDiffer.PARTIALLY_CORRECT_TYPE): return PARTIALLY_CORRECT_BG;
+        case(AnnotationDiffer.MISMATCH_TYPE):
+          if(column < COL_MATCH) return MISSING_BG;
+          else if(column > COL_MATCH) return FALSE_POZITIVE_BG;
+          else return diffTable.getBackground();
         case(AnnotationDiffer.MISSING_TYPE): return MISSING_BG;
         case(AnnotationDiffer.SPURIOUS_TYPE): return FALSE_POZITIVE_BG;
         default: return diffTable.getBackground();
@@ -833,9 +837,10 @@ public class AnnotationDiffGUI extends JFrame{
   protected static final Color FALSE_POZITIVE_BG = new Color(255,231,173);
   protected static final String[] matchLabel;
   static{
-    matchLabel = new String[4];
+    matchLabel = new String[5];
     matchLabel[AnnotationDiffer.CORRECT_TYPE] = "=";
     matchLabel[AnnotationDiffer.PARTIALLY_CORRECT_TYPE] = "~";
+    matchLabel[AnnotationDiffer.MISMATCH_TYPE] = "<>";
     matchLabel[AnnotationDiffer.SPURIOUS_TYPE] = "?-";
     matchLabel[AnnotationDiffer.MISSING_TYPE] = "-?";
   }

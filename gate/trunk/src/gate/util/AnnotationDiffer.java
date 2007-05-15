@@ -73,6 +73,7 @@ public class AnnotationDiffer {
    * that results in the best score.
    */
   public List calculateDiff(Collection key, Collection response){
+    
     //initialise data structures
     if(key == null || key.size() == 0)
       keyList = new ArrayList();
@@ -84,6 +85,11 @@ public class AnnotationDiffer {
     else
       responseList = new ArrayList(response);
 
+    if(correctAnnotations != null) correctAnnotations.clear();
+    if(partiallyCorrectAnnotations != null) partiallyCorrectAnnotations.clear();
+    if(missingAnnotations != null) missingAnnotations.clear();
+    if(spuriousAnnotations != null) spuriousAnnotations.clear();
+    
     keyChoices = new ArrayList(keyList.size());
     keyChoices.addAll(Collections.nCopies(keyList.size(), null));
     responseChoices = new ArrayList(responseList.size());
@@ -105,7 +111,7 @@ public class AnnotationDiffer {
           }else{
             //the two annotations are coextensive but don't match
             //we have a missmatch
-            choice = new PairingImpl(i, j, WRONG_VALUE);
+            choice = new PairingImpl(i, j, MISMATCH_VALUE);
           }
         }else if(keyAnn.overlaps(resAnn)){
           //we have partial overlap -> PARTIALLY_CORRECT or WRONG
@@ -152,6 +158,17 @@ public class AnnotationDiffer {
           partiallyCorrectAnnotations.add(bestChoice.getResponse());
           partiallyCorrectMatches++;
           bestChoice.setType(PARTIALLY_CORRECT_TYPE);
+          break;
+        }
+        case MISMATCH_VALUE:{
+          //this is a mising and a spurious annotations together
+          if(missingAnnotations == null) missingAnnotations = new HashSet();
+          missingAnnotations.add(bestChoice.getKey());
+          missing ++;
+          if(spuriousAnnotations == null) spuriousAnnotations = new HashSet();
+          spuriousAnnotations.add(bestChoice.getResponse());
+          spurious ++;
+          bestChoice.setType(MISMATCH_TYPE);
           break;
         }
         case WRONG_VALUE:{
@@ -773,16 +790,29 @@ public class AnnotationDiffer {
    * Type for missing pairings (where the key was not matched to a response).
    */
   public static final int MISSING_TYPE = 3;
+  
+  /** 
+   * Type for mismatched pairings (where the key and response are co-extensive
+   * but they don't match).
+   */
+  public static final int MISMATCH_TYPE = 4;
 
   /**
    * Score for a correct pairing.
    */
-  private static final int CORRECT_VALUE = 2;
+  private static final int CORRECT_VALUE = 3;
 
   /**
    * Score for a partially correct pairing.
    */
-  private static final int PARTIALLY_CORRECT_VALUE = 1;
+  private static final int PARTIALLY_CORRECT_VALUE = 2;
+  
+  
+  /**
+   * Score for a mismatched pairing (higher then for WRONG as at least the 
+   * offsets were right).
+   */
+  private static final int MISMATCH_VALUE = 1;
   
   /**
    * Score for a wrong (missing or spurious) pairing.
