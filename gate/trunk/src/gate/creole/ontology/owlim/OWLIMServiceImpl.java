@@ -63,7 +63,8 @@ import org.openrdf.vocabulary.XmlSchema;
  * 
  * @author niraj
  */
-public class OWLIMServiceImpl implements OWLIM, javax.xml.rpc.server.ServiceLifecycle,
+public class OWLIMServiceImpl implements OWLIM,
+                             javax.xml.rpc.server.ServiceLifecycle,
                              AdminListener {
   private HashMap<String, RepositoryDetails> mapToRepositoryDetails = new HashMap<String, RepositoryDetails>();
 
@@ -109,6 +110,8 @@ public class OWLIMServiceImpl implements OWLIM, javax.xml.rpc.server.ServiceLife
   private static URL systemConf = null;
 
   private static URL owlRDFS = null;
+
+  private static URL rdfSchema = null;
 
   /**
    * Ontology URL
@@ -264,6 +267,8 @@ public class OWLIMServiceImpl implements OWLIM, javax.xml.rpc.server.ServiceLife
 
         systemConf = new URL(gosHome, "system.conf");
         owlRDFS = new URL(gosHome, "owl.rdfs");
+        rdfSchema = new URL(gosHome, "rdf-schema.xml");
+
         SesameServer.setSystemConfig(readConfiguration());
         initiated = true;
       }
@@ -293,6 +298,7 @@ public class OWLIMServiceImpl implements OWLIM, javax.xml.rpc.server.ServiceLife
 
         systemConf = new URL(gosHome, "system.conf");
         owlRDFS = new URL(gosHome, "owl.rdfs");
+        rdfSchema = new URL(gosHome, "rdf-schema.xml");
         SesameServer.setSystemConfig(readConfiguration());
         initiated = true;
       }
@@ -947,8 +953,10 @@ public class OWLIMServiceImpl implements OWLIM, javax.xml.rpc.server.ServiceLife
       throw new RemoteException("No annotation property found with the URI :"
               + theAnnotationPropertyURI);
     }
+    startTransaction(repositoryID);
     removeUULStatement(theResourceURI, theAnnotationPropertyURI, value,
             language);
+    endTransaction(repositoryID);
   }
 
   /**
@@ -967,8 +975,10 @@ public class OWLIMServiceImpl implements OWLIM, javax.xml.rpc.server.ServiceLife
         throw new RemoteException("No annotation property found with the URI :"
                 + theAnnotationPropertyURI);
       }
+      startTransaction(repositoryID);
       sail.removeStatements(getResource(theResourceURI),
               getURI(theAnnotationPropertyURI), null);
+      endTransaction(repositoryID);
     }
     catch(Exception e) {
       throw new RemoteException(e.getMessage(), e);
@@ -1331,7 +1341,9 @@ public class OWLIMServiceImpl implements OWLIM, javax.xml.rpc.server.ServiceLife
       throw new RemoteException("Repository :" + repositoryID
               + " does not exist");
     }
+    startTransaction(repositoryID);
     removeUUUStatement(anInstanceURI, anRDFPropertyURI, aResourceURI);
+    endTransaction(repositoryID);
   }
 
   /**
@@ -1373,8 +1385,10 @@ public class OWLIMServiceImpl implements OWLIM, javax.xml.rpc.server.ServiceLife
         throw new RemoteException("Repository :" + repositoryID
                 + " does not exist");
       }
+      startTransaction(repositoryID);
       sail.removeStatements(getResource(anInstanceURI),
               getURI(anRDFPropertyURI), null);
+      endTransaction(repositoryID);
     }
     catch(Exception e) {
       throw new RemoteException(e.getMessage(), e);
@@ -1420,7 +1434,9 @@ public class OWLIMServiceImpl implements OWLIM, javax.xml.rpc.server.ServiceLife
       throw new RemoteException("No datatype property exists with URI :"
               + aDatatypePropertyURI);
     }
+    startTransaction(repositoryID);
     removeUUDStatement(anInstanceURI, aDatatypePropertyURI, value, datatypeURI);
+    endTransaction(repositoryID);
   }
 
   /**
@@ -1468,7 +1484,9 @@ public class OWLIMServiceImpl implements OWLIM, javax.xml.rpc.server.ServiceLife
       throw new RemoteException("No datatype property exists with URI :"
               + aDatatypePropertyURI);
     }
+    startTransaction(repositoryID);
     removeUUUStatement(anInstanceURI, aDatatypePropertyURI, null);
+    endTransaction(repositoryID);
   }
 
   // ******************
@@ -1516,8 +1534,11 @@ public class OWLIMServiceImpl implements OWLIM, javax.xml.rpc.server.ServiceLife
       throw new RemoteException("No object property exists with URI :"
               + anObjectPropertyURI);
     }
+
+    startTransaction(repositoryID);
     removeUUUStatement(sourceInstanceURI, anObjectPropertyURI,
             theValueInstanceURI);
+    endTransaction(repositoryID);
   }
 
   /**
@@ -1565,7 +1586,9 @@ public class OWLIMServiceImpl implements OWLIM, javax.xml.rpc.server.ServiceLife
       throw new RemoteException("No object property exists with URI :"
               + anObjectPropertyURI);
     }
+    startTransaction(repositoryID);
     removeUUUStatement(sourceInstanceURI, anObjectPropertyURI, null);
+    endTransaction(repositoryID);
   }
 
   /** This should be called by axis after each call to the operator?* */
@@ -1846,7 +1869,7 @@ public class OWLIMServiceImpl implements OWLIM, javax.xml.rpc.server.ServiceLife
       startTransaction(repositoryID);
       sail.clearRepository();
       endTransaction(repositoryID);
-      
+
     }
     catch(Exception e) {
       throw new RemoteException("" + e.getMessage());
@@ -2160,9 +2183,17 @@ public class OWLIMServiceImpl implements OWLIM, javax.xml.rpc.server.ServiceLife
       throw new RemoteException("Repository :" + repositoryID
               + " does not exist");
     }
-    
+
+    StatementIterator iter = sail.getDirectType(null, getResource(subClassURI));
     removeUUUStatement(subClassURI, RDFS.SUBCLASSOF, superClassURI);
-  }    
+    // while(iter.hasNext()) {
+    // Statement stmt = iter.next();
+    // Resource instance = stmt.getSubject();
+    // System.out.println("Removing : " + instance.toString() + "=>"
+    // + superClassURI);
+    // removeUUUStatement(instance.toString(), RDF.TYPE, superClassURI);
+    // }
+  }
 
   /**
    * Removes the superclass relationship
@@ -2373,8 +2404,8 @@ public class OWLIMServiceImpl implements OWLIM, javax.xml.rpc.server.ServiceLife
     // todo convert name into full uri
     // removeUUUStatement(aPropertyURI, RDF.TYPE, null);
     removeUUUStatement(aPropertyURI, null, null);
-    removeUUUStatement(null,aPropertyURI, null);
-    removeUUUStatement(null,null,aPropertyURI);
+    removeUUUStatement(null, aPropertyURI, null);
+    removeUUUStatement(null, null, aPropertyURI);
     return listToArray(deletedResources);
   }
 
@@ -3607,7 +3638,8 @@ public class OWLIMServiceImpl implements OWLIM, javax.xml.rpc.server.ServiceLife
     }
     else if(sail.isProperty(getResource(uri))) {
       type = Constants.RDF_PROPERTY;
-    } else {
+    }
+    else {
       return null;
     }
     return new Property(type, uri);
@@ -3752,7 +3784,12 @@ public class OWLIMServiceImpl implements OWLIM, javax.xml.rpc.server.ServiceLife
 
           for(int i = 0; i < values.length; i++) {
             String fileName = values[i].getValue();
-
+            if(fileName
+                    .equalsIgnoreCase("http://www.w3.org/2000/01/rdf-schema")
+                    || fileName
+                            .equalsIgnoreCase("www.w3.org/2000/01/rdf-schema")) {
+              fileName = rdfSchema.toExternalForm();
+            }
             // here we check what user has provided is a valid URL or
             // a relative path
             try {
