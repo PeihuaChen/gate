@@ -26,37 +26,55 @@ import gate.creole.ResourceData;
 import gate.util.*;
 
 /**
- * A simple editor for List values.
+ * A simple editor for Collection values.
  */
 public class ListEditorDialog extends JDialog {
 
   /**
    * Contructs a new ListEditorDialog.
    * @param owner the component this dialog will be centred on.
-   * @param data a list with the initial values. This list will not be changed,
+   * @param data a Collection with the initial values. This will not be changed,
    * its values will be cached and if the user selects the OK option a new list
    * with the updated contents will be returned.
-   * @param itemType the type of the elements in the list in the form of a
+   * @param itemType the type of the elements in the collection in the form of a
    * fully qualified class name
    */
-  public ListEditorDialog(Component owner, List data, String itemType) {
+  public ListEditorDialog(Component owner, Collection data, String itemType) {
+    this(owner, data, null, itemType);
+  }
+  
+  /**
+   * Contructs a new ListEditorDialog.
+   * @param owner the component this dialog will be centred on.
+   * @param data a Collection with the initial values. This will not be changed,
+   * its values will be cached and if the user selects the OK option a new list
+   * with the updated contents will be returned.
+   * @param collectionType the class of the <code>data</code> collection.
+   * If null the class will be inferred from <code>data</code>.  If
+   * <code>data</code> is also null, {@link List} will be assumed.
+   * @param itemType the type of the elements in the collection in the form of a
+   * fully qualified class name
+   */
+  public ListEditorDialog(Component owner, Collection data,
+          Class<? extends Collection> collectionType, String itemType) {
     super(MainFrame.getInstance());
+    if(collectionType == null) {
+      if(data != null) {
+        collectionType = data.getClass();
+      }
+      else {
+        collectionType = List.class;
+      }
+    }
     this.itemType = itemType == null ? "java.lang.String" : itemType;
     setLocationRelativeTo(owner);
-    initLocalData(data);
+    initLocalData(data, collectionType);
     initGuiComponents();
     initListeners();
   }
 
-  protected void initLocalData(List data){
-    listModel = new DefaultListModel();
-    if(data != null){
-      Iterator elemIter = data.iterator();
-      while(elemIter.hasNext()){
-        listModel.addElement(elemIter.next());
-      }
-    }
-
+  protected void initLocalData(Collection data,
+          Class<? extends Collection> collectionType){
     try{
       ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(itemType);
       itemTypeClass = rData == null ?
@@ -69,8 +87,49 @@ public class ListEditorDialog extends JDialog {
     finiteType = Gate.isGateType(itemType);
 
     ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(itemType);
-    setTitle("List of " + ((rData== null) ? itemType :rData.getName()));
 
+    String typeDescription = null;
+    if(List.class.isAssignableFrom(collectionType)) {
+      typeDescription = "List";
+      allowDuplicates = true;
+    }
+    else {
+      if(Set.class.isAssignableFrom(collectionType)) {
+        typeDescription = "Set";
+        allowDuplicates = false;
+      }
+      else {
+        typeDescription = "Collection";
+        allowDuplicates = true;
+      }
+      
+      if(SortedSet.class.isAssignableFrom(collectionType)
+              && data != null) {
+        comparator = ((SortedSet)data).comparator();
+      }
+      if(comparator == null) {
+        comparator = new NaturalComparator();
+      }
+    }
+    
+    listModel = new DefaultListModel();
+    if(data != null){
+      if(comparator == null) {
+        for(Object elt : data) {
+          listModel.addElement(elt);
+        }
+      }
+      else {
+        Object[] dataArray = data.toArray();
+        Arrays.sort(dataArray, comparator);
+        for(Object elt : dataArray) {
+          listModel.addElement(elt);
+        }
+      }
+    }
+
+    setTitle(typeDescription + " of "
+            + ((rData== null) ? itemType :rData.getName()));
     addAction = new AddAction();
     removeAction = new RemoveAction();
   }
@@ -113,17 +172,19 @@ public class ListEditorDialog extends JDialog {
                                    MULTIPLE_INTERVAL_SELECTION);
     listComponent.setCellRenderer(new ResourceRenderer());
     horBox.add(new JScrollPane(listComponent));
-    //up down buttons
-    Box verBox = Box.createVerticalBox();
-    verBox.add(Box.createVerticalGlue());
-    moveUpBtn = new JButton(MainFrame.getIcon("up"));
-    verBox.add(moveUpBtn);
-    verBox.add(Box.createVerticalStrut(5));
-    moveDownBtn = new JButton(MainFrame.getIcon("down"));
-    verBox.add(moveDownBtn);
-    verBox.add(Box.createVerticalGlue());
-    horBox.add(Box.createHorizontalStrut(3));
-    horBox.add(verBox);
+    //up down buttons if the user should control the ordering
+    if(comparator == null) {
+      Box verBox = Box.createVerticalBox();
+      verBox.add(Box.createVerticalGlue());
+      moveUpBtn = new JButton(MainFrame.getIcon("up"));
+      verBox.add(moveUpBtn);
+      verBox.add(Box.createVerticalStrut(5));
+      moveDownBtn = new JButton(MainFrame.getIcon("down"));
+      verBox.add(moveDownBtn);
+      verBox.add(Box.createVerticalGlue());
+      horBox.add(Box.createHorizontalStrut(3));
+      horBox.add(verBox);
+    }
     horBox.add(Box.createHorizontalStrut(3));
     getContentPane().add(horBox);
     getContentPane().add(Box.createVerticalStrut(5));
@@ -156,78 +217,87 @@ public class ListEditorDialog extends JDialog {
     });
 
 
-    moveUpBtn.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        int rows[] = listComponent.getSelectedIndices();
-        if(rows == null || rows.length == 0){
-          JOptionPane.showMessageDialog(
-              ListEditorDialog.this,
-              "Please select some items to be moved ",
-              "GATE", JOptionPane.ERROR_MESSAGE);
-        }else{
-          //we need to make sure the rows are sorted
-          Arrays.sort(rows);
-          //get the list of items
-          for(int i = 0; i < rows.length; i++){
-            int row = rows[i];
-            if(row > 0){
-              //move it up
-              Object value = listModel.remove(row);
-              listModel.add(row - 1, value);
+    if(moveUpBtn != null) {
+      moveUpBtn.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          int rows[] = listComponent.getSelectedIndices();
+          if(rows == null || rows.length == 0){
+            JOptionPane.showMessageDialog(
+                ListEditorDialog.this,
+                "Please select some items to be moved ",
+                "GATE", JOptionPane.ERROR_MESSAGE);
+          }else{
+            //we need to make sure the rows are sorted
+            Arrays.sort(rows);
+            //get the list of items
+            for(int i = 0; i < rows.length; i++){
+              int row = rows[i];
+              if(row > 0){
+                //move it up
+                Object value = listModel.remove(row);
+                listModel.add(row - 1, value);
+              }
+            }
+            //restore selection
+            for(int i = 0; i < rows.length; i++){
+              int newRow = -1;
+              if(rows[i] > 0) newRow = rows[i] - 1;
+              else newRow = rows[i];
+              listComponent.addSelectionInterval(newRow, newRow);
             }
           }
-          //restore selection
-          for(int i = 0; i < rows.length; i++){
-            int newRow = -1;
-            if(rows[i] > 0) newRow = rows[i] - 1;
-            else newRow = rows[i];
-            listComponent.addSelectionInterval(newRow, newRow);
-          }
-        }
-
-      }//public void actionPerformed(ActionEvent e)
-    });
+  
+        }//public void actionPerformed(ActionEvent e)
+      });
+    }
 
 
-    moveDownBtn.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        int rows[] = listComponent.getSelectedIndices();
-        if(rows == null || rows.length == 0){
-          JOptionPane.showMessageDialog(
-              ListEditorDialog.this,
-              "Please select some items to be moved ",
-              "GATE", JOptionPane.ERROR_MESSAGE);
-        } else {
-          //we need to make sure the rows are sorted
-          Arrays.sort(rows);
-          //get the list of items
-          for(int i = rows.length - 1; i >= 0; i--){
-            int row = rows[i];
-            if(row < listModel.size() -1){
-              //move it down
-              Object value = listModel.remove(row);
-              listModel.add(row + 1, value);
+    if(moveDownBtn != null) {
+      moveDownBtn.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          int rows[] = listComponent.getSelectedIndices();
+          if(rows == null || rows.length == 0){
+            JOptionPane.showMessageDialog(
+                ListEditorDialog.this,
+                "Please select some items to be moved ",
+                "GATE", JOptionPane.ERROR_MESSAGE);
+          } else {
+            //we need to make sure the rows are sorted
+            Arrays.sort(rows);
+            //get the list of items
+            for(int i = rows.length - 1; i >= 0; i--){
+              int row = rows[i];
+              if(row < listModel.size() -1){
+                //move it down
+                Object value = listModel.remove(row);
+                listModel.add(row + 1, value);
+              }
+            }
+            //restore selection
+            for(int i = 0; i < rows.length; i++){
+              int newRow = -1;
+              if(rows[i] < listModel.size() - 1) newRow = rows[i] + 1;
+              else newRow = rows[i];
+              listComponent.addSelectionInterval(newRow, newRow);
             }
           }
-          //restore selection
-          for(int i = 0; i < rows.length; i++){
-            int newRow = -1;
-            if(rows[i] < listModel.size() - 1) newRow = rows[i] + 1;
-            else newRow = rows[i];
-            listComponent.addSelectionInterval(newRow, newRow);
-          }
-        }
-
-      }//public void actionPerformed(ActionEvent e)
-    });
-
+  
+        }//public void actionPerformed(ActionEvent e)
+      });
+    }
   }
 
   /**
-   * Make this dialog visible allowing the editing of the list.
+   * Make this dialog visible allowing the editing of the collection.
    * If the user selects the <b>OK</b> option a new list with the updated
    * contents will be returned; it the <b>Cancel</b> option is selected this
-   * method return <tt>null</tt>.
+   * method return <tt>null</tt>.  Note that this method always returns
+   * a <code>List</code>.  When used for a resource parameter this is
+   * OK, as GATE automatically converts this to the right collection
+   * type when the resource is created, but if you use this class
+   * anywhere else to edit a non-<code>List</code> collection you will
+   * have to copy the result back into a collection of the appropriate
+   * type yourself.
    */
   public List showDialog(){
     pack();
@@ -291,7 +361,32 @@ public class ListEditorDialog extends JDialog {
             return;
           }
         }
-        listModel.addElement(value);
+        
+        if(comparator == null) {
+          // for a straight list, add at the end always
+          listModel.addElement(value);
+        }
+        else {
+          // otherwise, find where to insert
+          int index = 0;
+          while(index < listModel.size()
+                  && comparator.compare(value, listModel.get(index)) > 0) {
+            index++;
+          }
+          if(index == listModel.size()) {
+            // moved past the end of the list, and the new value is
+            // not contained in the list, so add at the end
+            listModel.addElement(value);
+          }
+          else {
+            if(allowDuplicates
+                    || comparator.compare(value, listModel.get(index)) < 0) {
+              // insert at the found index if either duplicates are allowed
+              // or it's not a duplicate
+              listModel.add(index, value);
+            }
+          }
+        }
         textField.setText("");
       }
     }
@@ -442,4 +537,48 @@ public class ListEditorDialog extends JDialog {
    * Did the user press the cancel button?
    */
   boolean userCancelled;
+  
+  /**
+   * Does this collection permit duplicate entries?
+   */
+  boolean allowDuplicates;
+  
+  /**
+   * Comparator to use to sort the entries displayed in the list.
+   * If this dialog was created to edit a List, this will be null
+   * and the ordering provided by the user will be preserved.  If
+   * the dialog was created from a Set or plain Collection this
+   * will be either the set's own comparator (if a SortedSet) or a
+   * {@link NaturalComparator}.
+   */
+  Comparator comparator;
+  
+  /**
+   * A comparator that uses the objects' natural order if the item
+   * class of the collection implements Comparable, and compares
+   * their <code>toString</code> representations if not.
+   * <code>null</code> is always treated as less than anything
+   * non-<code>null</code>.
+   */
+  protected class NaturalComparator implements Comparator {
+    public int compare(Object a, Object b) {
+      if(a == null) {
+        if(b == null) {
+          return 0;
+        }
+        else {
+          return -1;
+        }
+      }
+      else if(b == null) {
+        return 1;
+      }
+      else if(Comparable.class.isAssignableFrom(itemTypeClass)) {
+        return ((Comparable)a).compareTo(b);
+      }
+      else {
+        return a.toString().compareTo(b.toString());
+      }
+    }
+  }
 }

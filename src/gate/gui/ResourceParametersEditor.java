@@ -463,10 +463,10 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
             return textField;
           }
         }else if(typeClass != null &&
-                 List.class.isAssignableFrom(typeClass)){
+                 Collection.class.isAssignableFrom(typeClass)){
           //List value
 //          setText(textForList((List)value));
-          textField.setText(textForList((List)value));
+          textField.setText(textForList((Collection)value));
           if(ResourceParametersEditor.this.isEditable()){
           textButtonBox.removeAll();
 //          textButtonBox.add(this);
@@ -509,7 +509,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
     /**
      * Gets a string representation for a list value
      */
-    protected String textForList(List list){
+    protected String textForList(Collection list){
       if(list == null || list.isEmpty()) return "[]";
       StringBuffer res = new StringBuffer("[");
       Iterator elemIter = list.iterator();
@@ -653,7 +653,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       });
 
       listButton = new JButton(MainFrame.getIcon("edit-list"));
-      listButton.setToolTipText("Edit the list");
+      listButton.setToolTipText("Edit the collection");
       listButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           List returnedList = listEditor.showDialog();
@@ -786,19 +786,19 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
           textFieldBoolean.setText(value == null ? "false" : value.toString());
           return textFieldBoolean;
         }else if(typeClass != null &&
-                      List.class.isAssignableFrom(typeClass)){
+                      Collection.class.isAssignableFrom(typeClass)){
           //List value
           listUsed = true;
           Parameter param = pDisj.getParameter();
 
-          listValue = (List)value;
+          listValue = (Collection)value;
           listEditor = new ListEditorDialog(
                 SwingUtilities.getAncestorOfClass(
                 Window.class, ResourceParametersEditor.this),
-                (List)value, param.getItemClassName());
+                (Collection)value, typeClass, param.getItemClassName());
 
           textField.setEditable(false);
-          textField.setText(textForList((List)value));
+          textField.setText(textForList((Collection)value));
           textButtonBox.removeAll();
           textButtonBox.add(textField);
           textButtonBox.add(Box.createHorizontalStrut(5));
@@ -858,7 +858,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
     /**
      * Gets a string representation for a list value
      */
-    protected String textForList(List list){
+    protected String textForList(Collection list){
       if(list == null || list.isEmpty()) return "[]";
       StringBuffer res = new StringBuffer("[");
       Iterator elemIter = list.iterator();
@@ -933,7 +933,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
     JFileChooser fileChooser;
 
     ListEditorDialog listEditor = null;
-    List listValue;
+    Collection listValue;
     
     FeatureMapEditorDialog fmEditor = null;
     FeatureMap fmValue;
