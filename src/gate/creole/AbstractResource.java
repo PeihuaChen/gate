@@ -148,11 +148,15 @@ extends AbstractFeatureBearer implements Resource, Serializable
         // convert the parameter to the right type eg String -> URL
         if(parameterValue != null){
           Class propertyType = prop.getPropertyType();
+          Class typeToCreate = propertyType;
+          if(Parameter.substituteClasses.containsKey(propertyType)) {
+            typeToCreate = Parameter.substituteClasses.get(propertyType);
+          }
           Class paramType = parameterValue.getClass();
           if(!propertyType.isAssignableFrom(paramType)) {
             try {
               Constructor mostSpecificConstructor =
-                Tools.getMostSpecificConstructor(propertyType, paramType);
+                Tools.getMostSpecificConstructor(typeToCreate, paramType);
               parameterValue = mostSpecificConstructor
                  .newInstance( new Object[]{parameterValue} );
             } catch(Exception e) {
