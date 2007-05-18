@@ -69,26 +69,25 @@ public class Parameter implements Serializable
   
   /**
    * Map giving concrete classes that should be used for a parameter
-   * whose declared type is a collection interface when creating a
-   * value from a string.  This substitution allows a resource to
-   * specify a parameter of type, e.g. java.util.List, and give it
-   * a default value in creole.xml.  The runtime class of the default
-   * value will be taken from this map.
+   * whose declared type is an interface.  This substitution allows a
+   * resource to specify a parameter of type, e.g. java.util.List,
+   * and give it a default value in creole.xml.  The runtime class of
+   * the default value will be taken from this map.
    * 
    * Note that for this to work, it must be the case that for every
    * key <i>k</i> in this map,
    * 
-   * <code>k.isAssignableFrom(collectionSubstituteClasses.get(k))</code>
+   * <code>k.isAssignableFrom(substituteClasses.get(k))</code>
    */
-  private static Map<Class, Class> collectionSubstituteClasses = 
+   static Map<Class, Class> substituteClasses = 
     new HashMap<Class, Class>();
   
   static {
-    collectionSubstituteClasses.put(Collection.class, ArrayList.class);
-    collectionSubstituteClasses.put(List.class, ArrayList.class);
-    collectionSubstituteClasses.put(Set.class, HashSet.class);
-    collectionSubstituteClasses.put(SortedSet.class, TreeSet.class);
-    collectionSubstituteClasses.put(Queue.class, LinkedList.class);
+    substituteClasses.put(Collection.class, ArrayList.class);
+    substituteClasses.put(List.class, ArrayList.class);
+    substituteClasses.put(Set.class, HashSet.class);
+    substituteClasses.put(SortedSet.class, TreeSet.class);
+    substituteClasses.put(Queue.class, LinkedList.class);
   }
 
   /** Calculate and return the default value for this parameter */
@@ -112,6 +111,9 @@ public class Parameter implements Serializable
 
     // get the Class for the parameter via Class.forName or CREOLE register
     Class paramClass = getParameterClass();
+    if(substituteClasses.containsKey(paramClass)) {
+      paramClass = substituteClasses.get(paramClass);
+    }
 
 
     // Test if the paramClass is a collection and if it is, try to
@@ -120,13 +122,9 @@ public class Parameter implements Serializable
     // look up its substitute concrete type in the map
     // collectionSubstituteClasses and create a value of that type.
     if (Collection.class.isAssignableFrom(paramClass) &&
-            (!paramClass.isInterface()
-                    || collectionSubstituteClasses.containsKey(paramClass))){
+            !paramClass.isInterface()){
       // Create an collection object belonging to paramClass
       Collection colection = null;
-      if(collectionSubstituteClasses.containsKey(paramClass)) {
-        paramClass = collectionSubstituteClasses.get(paramClass);
-      }
       try{
         colection = (Collection)paramClass.getConstructor(new Class[]{}).
                                   newInstance(new Object[]{});
