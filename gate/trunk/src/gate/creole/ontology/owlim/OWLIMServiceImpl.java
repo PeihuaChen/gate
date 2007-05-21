@@ -1,5 +1,7 @@
 package gate.creole.ontology.owlim;
 
+import gate.creole.ontology.OntologyUtilities;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -1079,8 +1081,13 @@ public class OWLIMServiceImpl implements OWLIM,
     }
     StatementIterator iter = sail.getStatements(
             getResource(theDatatypePropertyURI), getURI(RDFS.RANGE), null);
-    if(iter.hasNext()) {
-      return iter.next().getObject().toString();
+    
+    String toReturn = null;
+    while(iter.hasNext()) {
+        toReturn = iter.next().getObject().toString();
+        if(OntologyUtilities.getDataType(toReturn) != null) {
+          return toReturn;
+        }
     }
     return null;
   }
@@ -1765,6 +1772,16 @@ public class OWLIMServiceImpl implements OWLIM,
     SesameServer.getSystemConfig().addRepositoryConfig(repConfig);
     if(persist) saveConfiguration();
     if(DEBUG) System.out.println("Repository created!");
+
+    // and here we check if there's any statement referring to owl:Thing
+    loadRepositoryDetails(repositoryID);
+    if(!sail.getStatements(getResource("http://www.w3.org/2002/07/owl#Thing"),
+            getURI(RDF.TYPE), null).hasNext()) {
+      if(sail.getStatements(null, getURI(RDFS.SUBCLASSOF),
+              getResource("http://www.w3.org/2002/07/owl#Thing")).hasNext()) {
+        addClass(repositoryID, "http://www.w3.org/2002/07/owl#Thing");
+      }
+    }
     return repositoryID;
   }
 
@@ -1821,6 +1838,17 @@ public class OWLIMServiceImpl implements OWLIM,
     if(persist) saveConfiguration();
     if(DEBUG) System.out.println("Repository created!");
     this.ontologyUrl = ontoFileUrl;
+
+    // and here we check if there's any statement referring to owl:Thing
+    loadRepositoryDetails(repositoryID);
+    if(!sail.getStatements(getResource("http://www.w3.org/2002/07/owl#Thing"),
+            getURI(RDF.TYPE), null).hasNext()) {
+      if(sail.getStatements(null, getURI(RDFS.SUBCLASSOF),
+              getResource("http://www.w3.org/2002/07/owl#Thing")).hasNext()) {
+        addClass(repositoryID, "http://www.w3.org/2002/07/owl#Thing");
+      }
+    }
+
     return repositoryID;
   }
 
@@ -4134,6 +4162,8 @@ public class OWLIMServiceImpl implements OWLIM,
 
   private boolean hasSystemNameSpace(String uri) {
     if(returnSystemStatements) return false;
+    if(uri.equalsIgnoreCase("http://www.w3.org/2002/07/owl#Thing")) return false;
+
     if(Constants.OWL_PATTERN.reset(uri).find()) {
       if(Constants.OWL_PATTERN.start() == 0) return true;
     }
