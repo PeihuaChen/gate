@@ -101,5 +101,9 @@ public class Literal {
   public Locale getLanguage() {
     return language;
   }
-  
+
+  public String toString() {
+    return "value : " + value + "\nlanguage :" + language + "\ndatatype :"
+            + dataType.xmlSchemaURI;
+  }
 }

@@ -37,6 +37,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
@@ -325,6 +326,7 @@ public class OntologyEditor extends AbstractVisualResource
       public void componentShown(ComponentEvent e) {
       }
     });
+
     tree.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent me) {
         if(SwingUtilities.isRightMouseButton(me)) {
@@ -347,18 +349,22 @@ public class OntologyEditor extends AbstractVisualResource
           if(candidate instanceof OClass) {
             menu.add(subClass);
             menu.add(instance);
+
+            // invoke new sub class action
             subClass.addActionListener(new ActionListener() {
               public void actionPerformed(ActionEvent ae) {
                 subClassAction.actionPerformed(ae);
               }
             });
 
+            // invoke new instance action
             instance.addActionListener(new ActionListener() {
               public void actionPerformed(ActionEvent ae) {
                 instanceAction.actionPerformed(ae);
               }
             });
 
+            // invoke same as action
             sameAs.addActionListener(new ActionListener() {
               public void actionPerformed(ActionEvent ae) {
                 Set<OClass> oclasses = ontology.getOClasses(false);
@@ -368,6 +374,8 @@ public class OntologyEditor extends AbstractVisualResource
                   OClass aClass = classIter.next();
                   classList.add(aClass);
                 }
+
+                // the selected class shouldn't appear in the list
                 classList.remove(candidate);
                 ValuesSelectionAction vsa = new ValuesSelectionAction();
                 String[] classArray = new String[classList.size()];
@@ -391,6 +399,7 @@ public class OntologyEditor extends AbstractVisualResource
             });
           }
 
+          // same as action for OInstance
           if(candidate instanceof OInstance) {
             sameAs.addActionListener(new ActionListener() {
               public void actionPerformed(ActionEvent ae) {
@@ -424,6 +433,7 @@ public class OntologyEditor extends AbstractVisualResource
             });
           }
 
+          // add the delete button here
           menu.add(delete);
           delete.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
@@ -431,12 +441,16 @@ public class OntologyEditor extends AbstractVisualResource
             }
           });
 
+          // finally add properties
           Set<RDFProperty> props = ontology.getPropertyDefinitions();
           Iterator<RDFProperty> iter = props.iterator();
           while(iter.hasNext()) {
             final RDFProperty p = iter.next();
+
+            // if property is an annotation property
             if(p instanceof AnnotationProperty) {
-              JMenuItem item = new JMenuItem(p.getName());
+              JMenuItem item = new JMenuItem(p.getName(), MainFrame
+                      .getIcon("ontology-annotation-property"));
               addProperty.add(item);
               item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ae) {
@@ -454,9 +468,12 @@ public class OntologyEditor extends AbstractVisualResource
               });
               continue;
             }
+
+            // if it is a datatype property
             if(candidate instanceof OInstance && p instanceof DatatypeProperty
                     && p.isValidDomain(candidate)) {
-              JMenuItem item = new JMenuItem(p.getName());
+              JMenuItem item = new JMenuItem(p.getName(), MainFrame
+                      .getIcon("ontology-datatype-property"));
               addProperty.add(item);
               item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ae) {
@@ -491,9 +508,12 @@ public class OntologyEditor extends AbstractVisualResource
               });
               continue;
             }
+
+            // if it is an object property
             if(candidate instanceof OInstance && p instanceof ObjectProperty
                     && p.isValidDomain(candidate)) {
-              JMenuItem item = new JMenuItem(p.getName());
+              JMenuItem item = new JMenuItem(p.getName(), MainFrame
+                      .getIcon("ontology-object-property"));
               addProperty.add(item);
               item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ae) {
@@ -535,12 +555,14 @@ public class OntologyEditor extends AbstractVisualResource
               });
               continue;
             }
+
           }
           menu.show(tree, me.getX(), me.getY());
           menu.setVisible(true);
         }
       }
     });
+
     propertyTree.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent me) {
         if(SwingUtilities.isRightMouseButton(me)) {
@@ -617,8 +639,221 @@ public class OntologyEditor extends AbstractVisualResource
               deleteOntoResourceAction.actionPerformed(ae);
             }
           });
+
+          JMenu addProperty = new JMenu("Properties");
+          Set<RDFProperty> rdfprops = ontology.getPropertyDefinitions();
+          Iterator<RDFProperty> iter = props.iterator();
+          while(iter.hasNext()) {
+            final RDFProperty p = iter.next();
+            if(p instanceof AnnotationProperty) {
+              JMenuItem item = new JMenuItem(p.getName(), MainFrame
+                      .getIcon("ontology-annotation-property"));
+              addProperty.add(item);
+              item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent ae) {
+                  String value = JOptionPane.showInputDialog(null,
+                          "Enter Value for property :" + p.getName());
+                  if(value != null) {
+                    candidate.addAnnotationPropertyValue((AnnotationProperty)p,
+                            new Literal(value));
+                  }
+                  TreePath path = tree.getSelectionPath();
+                  tree.setSelectionRow(0);
+                  tree.setSelectionPath(path);
+                  return;
+                }
+              });
+            }
+          }
           menu.show(propertyTree, me.getX(), me.getY());
           menu.setVisible(true);
+        }
+      }
+    });
+
+    detailsTable.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent me) {
+        if(SwingUtilities.isRightMouseButton(me)) {
+
+          int[] rows = detailsTable.getSelectedRows();
+          if(rows == null || rows.length == 0) return;
+
+          Object value = detailsTable.getModel().getValueAt(rows[0], 1);
+          if(!(value instanceof PropertyValue)) return;
+
+          final PropertyValue pv = (PropertyValue)value;
+
+          // find out the selected component in the tree
+          Object sc = tree.getSelectionPath().getLastPathComponent();
+          if(sc == null) {
+            JOptionPane.showMessageDialog(MainFrame.getInstance(),
+                    "No resource selected in the main ontology tree");
+            return;
+          }
+          else {
+            System.out.println("Selected Component : " + sc.toString());
+          }
+
+          // find out the treenode for the current selectio
+          final DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode)sc;
+          final OResource resource = ((OResourceNode)dmtn.getUserObject())
+                  .getResource();
+
+          JPopupMenu menu = new JPopupMenu();
+          JMenuItem delete = new JMenuItem("Delete");
+          JMenuItem edit = new JMenuItem("Edit Property Value");
+
+          delete.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+              try {
+                if(resource instanceof OClass) {
+                  if(pv.getProperty() instanceof AnnotationProperty) {
+                    ((OClass)resource).removeAnnotationPropertyValue(
+                            (AnnotationProperty)pv.getProperty(), (Literal)pv
+                                    .getValue());
+                  }
+                }
+                else {
+                  OInstance instance = (OInstance)resource;
+                  if(pv.getProperty() instanceof AnnotationProperty) {
+                    instance.removeAnnotationPropertyValue(
+                            (AnnotationProperty)pv.getProperty(), (Literal)pv
+                                    .getValue());
+                  }
+                  else if(pv.getProperty() instanceof DatatypeProperty) {
+                    instance.removeDatatypePropertyValue((DatatypeProperty)pv
+                            .getProperty(), (Literal)pv.getValue());
+                  }
+                  else if(pv.getProperty() instanceof ObjectProperty) {
+                    instance.removeObjectPropertyValue((ObjectProperty)pv
+                            .getProperty(), (OInstance)pv.getValue());
+                  }
+                }
+
+                SwingUtilities.invokeLater(new Runnable() {
+                  public void run() {
+                    TreePath path = tree.getSelectionPath();
+                    tree.setSelectionRow(0);
+                    tree.setSelectionPath(path);
+                  }
+                });
+
+              }
+              catch(Exception e) {
+                JOptionPane.showMessageDialog(MainFrame.getInstance(),
+                        "Cannot delete the property value because \n"
+                                + e.getMessage());
+                e.printStackTrace();
+              }
+            }
+          });
+
+          edit.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+              RDFProperty p = pv.getProperty();
+
+              // if property is an annotation property
+              if(p instanceof AnnotationProperty) {
+                String value = JOptionPane.showInputDialog(MainFrame
+                        .getInstance(), ((Literal)pv.getValue()).getValue());
+                if(value != null) {
+                  resource.removeAnnotationPropertyValue((AnnotationProperty)p,
+                          (Literal)pv.getValue());
+                  resource.addAnnotationPropertyValue((AnnotationProperty)p,
+                          new Literal(value));
+                }
+                TreePath path = tree.getSelectionPath();
+                tree.setSelectionRow(0);
+                tree.setSelectionPath(path);
+                return;
+              }
+
+              // if it is a datatype property
+              if(p instanceof DatatypeProperty) {
+                String value = JOptionPane.showInputDialog(MainFrame
+                        .getInstance(), "Datatype : "
+                        + ((DatatypeProperty)p).getDataType().getXmlSchemaURI()
+                                .toString(), ((Literal)pv.getValue())
+                        .getValue());
+                if(value != null) {
+                  boolean validValue = ((DatatypeProperty)p).getDataType()
+                          .isValidValue(value);
+                  if(!validValue) {
+                    JOptionPane.showMessageDialog(null, "Incompatible value : "
+                            + value);
+                    return;
+                  }
+                  try {
+                    ((OInstance)resource).removeDatatypePropertyValue(
+                            (DatatypeProperty)p, (Literal)pv.getValue());
+
+                    ((OInstance)resource).addDatatypePropertyValue(
+                            (DatatypeProperty)p, new Literal(value,
+                                    ((DatatypeProperty)p).getDataType()));
+                  }
+                  catch(InvalidValueException ive) {
+                    JOptionPane.showMessageDialog(null, "Incompatible value");
+                    return;
+                  }
+                }
+                TreePath path = tree.getSelectionPath();
+                tree.setSelectionRow(0);
+                tree.setSelectionPath(path);
+                return;
+              }
+
+              // if it is an object property
+              if(p instanceof ObjectProperty) {
+                Set<OInstance> instances = ontology.getOInstances();
+                ArrayList<OInstance> instList = new ArrayList<OInstance>();
+                Iterator<OInstance> instIter = instances.iterator();
+                while(instIter.hasNext()) {
+                  OInstance inst = instIter.next();
+                  if(p.isValidRange(inst)) {
+                    instList.add(inst);
+                  }
+                }
+                ValuesSelectionAction vsa = new ValuesSelectionAction();
+                String[] instArray = new String[instList.size()];
+                for(int i = 0; i < instArray.length; i++) {
+                  instArray[i] = instList.get(i).getURI().toString();
+                }
+
+                vsa.showGUI("Select Values for the " + p.getName(), instArray,
+                        new String[0], false);
+                String[] selectedValues = vsa.getSelectedValues();
+                ((OInstance)resource).removeObjectPropertyValue(
+                        (ObjectProperty)p, (OInstance)pv.getValue());
+
+                for(int i = 0; i < selectedValues.length; i++) {
+                  OInstance byName = (OInstance)ontology
+                          .getOResourceFromMap(selectedValues[i]);
+                  if(byName == null) continue;
+                  try {
+                    ((OInstance)resource).addObjectPropertyValue(
+                            (ObjectProperty)p, byName);
+                  }
+                  catch(InvalidValueException ive) {
+                    JOptionPane.showMessageDialog(null, "Incompatible value");
+                    return;
+                  }
+                }
+                TreePath path = tree.getSelectionPath();
+                tree.setSelectionRow(0);
+                tree.setSelectionPath(path);
+                return;
+              }
+            }
+          });
+
+          menu.add(new JLabel("Options"));
+          menu.setOpaque(true);
+          menu.setBackground(UIManager.getLookAndFeelDefaults().getColor(
+                  "ToolTip.background"));
+          menu.addSeparator();
+          menu.add(delete);
+          menu.add(edit);
+          menu.show(detailsTable, me.getX(), me.getY());
         }
       }
     });
@@ -1495,12 +1730,11 @@ public class OntologyEditor extends AbstractVisualResource
        * SwingUtilities.invokeLater(new Runnable() { public void run() {
        * JOptionPane.showMessageDialog(MainFrame.getInstance(),
        * "Instances are not allowed to be moved!", "Error Dialog",
-       * JOptionPane.ERROR_MESSAGE); } }); return; }
-       *  // now check if the class to be moved under the class is not a //
-       * super class of the later. // get new parent node Point loc =
-       * e.getLocation(); TreePath destinationPath =
-       * getPathForLocation(loc.x, loc.y); if(destinationPath == null) {
-       * e.rejectDrop(); return; }
+       * JOptionPane.ERROR_MESSAGE); } }); return; } // now check if the
+       * class to be moved under the class is not a // super class of
+       * the later. // get new parent node Point loc = e.getLocation();
+       * TreePath destinationPath = getPathForLocation(loc.x, loc.y);
+       * if(destinationPath == null) { e.rejectDrop(); return; }
        * 
        * OResource target =
        * ((OResourceNode)((DefaultMutableTreeNode)destinationPath
@@ -1537,8 +1771,7 @@ public class OntologyEditor extends AbstractVisualResource
        * JOptionPane .showMessageDialog( MainFrame.getInstance(),
        * "Annotation Properties cannot be set as sub or super
        * properties!", "Error Dialog", JOptionPane.ERROR_MESSAGE); } });
-       * return;
-       *  } }
+       * return; } }
        * 
        * if(!source.getClass().getName().equals(target.getClass().getName())) {
        * e.rejectDrop(); SwingUtilities.invokeLater(new Runnable() {
@@ -1550,8 +1783,8 @@ public class OntologyEditor extends AbstractVisualResource
        * if(source instanceof OClass && target instanceof OClass) { //
        * first find out the source's super classes OClass sc =
        * (OClass)source; Set<OClass> superClasses = sc
-       * .getSuperClasses(OConstants.DIRECT_CLOSURE);
-       *  // lets check if the
+       * .getSuperClasses(OConstants.DIRECT_CLOSURE); // lets check if
+       * the
        * 
        * for(OClass sClass : superClasses) { sClass.removeSubClass(sc); }
        * 

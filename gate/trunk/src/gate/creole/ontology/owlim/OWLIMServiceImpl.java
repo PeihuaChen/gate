@@ -175,7 +175,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void notification(String msg, int lineNo, int columnNo,
           Statement statement) {
-    // don't do anything
+
   }
 
   /**
@@ -183,7 +183,7 @@ public class OWLIMServiceImpl implements OWLIM,
    * progress.
    */
   public void status(String msg, int lineNo, int columnNo) {
-    // dont' do anything
+
   }
 
   /**
@@ -1081,13 +1081,13 @@ public class OWLIMServiceImpl implements OWLIM,
     }
     StatementIterator iter = sail.getStatements(
             getResource(theDatatypePropertyURI), getURI(RDFS.RANGE), null);
-    
+
     String toReturn = null;
     while(iter.hasNext()) {
-        toReturn = iter.next().getObject().toString();
-        if(OntologyUtilities.getDataType(toReturn) != null) {
-          return toReturn;
-        }
+      toReturn = iter.next().getObject().toString();
+      if(OntologyUtilities.getDataType(toReturn) != null) {
+        return toReturn;
+      }
     }
     return null;
   }
@@ -3458,7 +3458,7 @@ public class OWLIMServiceImpl implements OWLIM,
     }
   }
 
-  private void removeUUDStatement(String subject, String predicate,
+private void removeUUDStatement(String subject, String predicate,
           String object, String datatype) throws RemoteException {
     try {
       startTransaction(null);
@@ -3467,17 +3467,19 @@ public class OWLIMServiceImpl implements OWLIM,
               ? sail.getValueFactory().createURI(predicate)
               : null;
       URI d = sail.getValueFactory().createURI(datatype);
-      Literal l = object != null ? sail.getValueFactory().createLiteral(object,
-              d) : null;
+      Literal l = object != null ? sail.getValueFactory().createLiteral(object): null;
+      
       sail.removeStatements(s, p, l);
+      
+    l = object != null ? sail.getValueFactory().createLiteral(object,
+      d) : null;
+    sail.removeStatements(s, p, l);
       endTransaction(null);
     }
     catch(Exception e) {
       throw new RemoteException(e.getMessage(), e);
     }
-  }
-
-  public void startTransaction(String repositoryID) throws RemoteException {
+  }  public void startTransaction(String repositoryID) throws RemoteException {
     if(repositoryID != null && !loadRepositoryDetails(repositoryID)) {
       throw new RemoteException("Repository :" + repositoryID
               + " does not exist");
@@ -4162,7 +4164,8 @@ public class OWLIMServiceImpl implements OWLIM,
 
   private boolean hasSystemNameSpace(String uri) {
     if(returnSystemStatements) return false;
-    if(uri.equalsIgnoreCase("http://www.w3.org/2002/07/owl#Thing")) return false;
+    if(uri.equalsIgnoreCase("http://www.w3.org/2002/07/owl#Thing"))
+      return false;
 
     if(Constants.OWL_PATTERN.reset(uri).find()) {
       if(Constants.OWL_PATTERN.start() == 0) return true;
