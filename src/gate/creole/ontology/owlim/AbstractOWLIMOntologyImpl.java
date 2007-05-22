@@ -89,7 +89,7 @@ public abstract class AbstractOWLIMOntologyImpl
   /**
    * A List of ontology modification listeners
    */
-  protected List<OntologyModificationListener> modificationListeners;
+  protected transient List<OntologyModificationListener> modificationListeners;
 
   /**
    * Indicates whether the data in repository should be persisted
@@ -111,7 +111,6 @@ public abstract class AbstractOWLIMOntologyImpl
    * Constructor
    */
   public AbstractOWLIMOntologyImpl() {
-    modificationListeners = new ArrayList<OntologyModificationListener>();
     urisToOResouceMap = new HashMap<String, OResource>();
     resourceNamesToOResourcesMap = new HashMap<String, List<OResource>>();
     persistRepository = new Boolean(false);
@@ -1165,8 +1164,15 @@ public abstract class AbstractOWLIMOntologyImpl
    * 
    * @see gate.creole.ontology.Ontology#addOntologyModificationListener(gate.creole.ontology.OntologyModificationListener)
    */
-  public void addOntologyModificationListener(OntologyModificationListener oml) {
-    this.modificationListeners.add(oml);
+  public synchronized void addOntologyModificationListener(
+          OntologyModificationListener oml) {
+    List<OntologyModificationListener> newListeners =
+            new ArrayList<OntologyModificationListener>();
+    if(this.modificationListeners != null) {
+      newListeners.addAll(this.modificationListeners);
+    }
+    newListeners.add(oml);
+    this.modificationListeners = newListeners;
   }
 
   /*
@@ -1174,9 +1180,22 @@ public abstract class AbstractOWLIMOntologyImpl
    * 
    * @see gate.creole.ontology.Ontology#removeOntologyModificationListener(gate.creole.ontology.OntologyModificationListener)
    */
-  public void removeOntologyModificationListener(
+  public synchronized void removeOntologyModificationListener(
           OntologyModificationListener oml) {
-    this.modificationListeners.remove(oml);
+    if(this.modificationListeners == null
+            || !this.modificationListeners.contains(oml)) {
+      return;
+    }
+    else {
+      List<OntologyModificationListener> newListeners =
+              new ArrayList<OntologyModificationListener>();
+      for(OntologyModificationListener l : this.modificationListeners) {
+        if(l != oml) {
+          newListeners.add(l);
+        }
+      }
+      this.modificationListeners = newListeners;
+    }
   }
 
   /**
@@ -1186,15 +1205,20 @@ public abstract class AbstractOWLIMOntologyImpl
    * @param eventType
    */
   public void fireOntologyModificationEvent(OResource resource, int eventType) {
-    for(int i = 0; i < this.modificationListeners.size(); i++) {
-      this.modificationListeners.get(i).ontologyModified(this, resource,
-              eventType);
+    List<OntologyModificationListener> listeners = this.modificationListeners;
+    if(listeners != null) {
+      for(OntologyModificationListener l : listeners) {
+        l.ontologyModified(this, resource, eventType);
+      }
     }
   }
 
   public void fireOntologyReset() {
-    for(int i = 0; i < this.modificationListeners.size(); i++) {
-      this.modificationListeners.get(i).ontologyReset(this);
+    List<OntologyModificationListener> listeners = this.modificationListeners;
+    if(listeners != null) {
+      for(OntologyModificationListener l : listeners) {
+        l.ontologyReset(this);
+      }
     }
   }
 
@@ -1204,8 +1228,11 @@ public abstract class AbstractOWLIMOntologyImpl
    * @param resource
    */
   public void fireOntologyResourceAdded(OResource resource) {
-    for(int i = 0; i < this.modificationListeners.size(); i++) {
-      this.modificationListeners.get(i).resourceAdded(this, resource);
+    List<OntologyModificationListener> listeners = this.modificationListeners;
+    if(listeners != null) {
+      for(OntologyModificationListener l : listeners) {
+        l.resourceAdded(this, resource);
+      }
     }
   }
 
@@ -1220,8 +1247,11 @@ public abstract class AbstractOWLIMOntologyImpl
       removeOResourceFromMap(resources[i]);
     }
 
-    for(int i = 0; i < this.modificationListeners.size(); i++) {
-      this.modificationListeners.get(i).resourcesRemoved(this, resources);
+    List<OntologyModificationListener> listeners = this.modificationListeners;
+    if(listeners != null) {
+      for(OntologyModificationListener l : listeners) {
+        l.resourcesRemoved(this, resources);
+      }
     }
   }
 
