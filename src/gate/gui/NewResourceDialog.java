@@ -55,6 +55,8 @@ public class NewResourceDialog extends JDialog {
     nameField.setRequestFocusEnabled(true);
     nameField.setVerifyInputWhenFocusTarget(false);
     nameBox.add(nameField);
+    nameField.setToolTipText("Enter a name for the resource");
+    
     nameBox.add(Box.createHorizontalStrut(5));
     nameBox.add(Box.createHorizontalGlue());
     this.getContentPane().add(nameBox);
@@ -66,7 +68,7 @@ public class NewResourceDialog extends JDialog {
     this.getContentPane().add(tableScroll);
     this.getContentPane().add(Box.createVerticalStrut(5));
     this.getContentPane().add(Box.createVerticalGlue());
-
+//    ToolTipManager.sharedInstance().registerComponent(parametersEditor);
     //buttons box
     JPanel buttonsBox = new JPanel();
     buttonsBox.setLayout(new BoxLayout(buttonsBox, BoxLayout.X_AXIS));

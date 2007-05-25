@@ -412,7 +412,12 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
                                                    int row,
                                                    int column) {
 
-      String type = ((ParameterDisjunction)table.getValueAt(row, 0)).getType();
+      ParameterDisjunction pDisj = (ParameterDisjunction)
+          table.getValueAt(row, 0);
+      String type = pDisj.getType();
+      //set the tooltip
+      combo.setToolTipText(pDisj.getComment());
+      textField.setToolTipText(pDisj.getComment());
 
       if(Gate.isGateType(type)){
         //Gate type
@@ -732,6 +737,9 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       ParameterDisjunction pDisj = (ParameterDisjunction)
                                    table.getValueAt(row, 0);
       type = pDisj.getType();
+      //set the tooltip
+      combo.setToolTipText(pDisj.getComment());
+      textField.setToolTipText(pDisj.getComment());
 //      ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(type);
 
       if(Gate.isGateType(type)){
@@ -747,6 +755,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
         values.add(0, "<none>");
         combo.setModel(new DefaultComboBoxModel(values.toArray()));
         combo.setSelectedItem(value == null ? "<none>" : value);
+        combo.setToolTipText(pDisj.getComment());
         return combo;
       }else{
         //non Gate type
