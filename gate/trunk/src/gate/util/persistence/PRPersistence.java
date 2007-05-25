@@ -83,6 +83,6 @@ public class PRPersistence extends ResourcePersistence {
     return res;
   }
 
-  private Object runtimeParams;
+  protected Object runtimeParams;
   static final long serialVersionUID = 2031381604712340552L;
 }
