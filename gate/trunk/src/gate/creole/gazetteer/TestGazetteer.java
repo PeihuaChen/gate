@@ -49,8 +49,44 @@ public class TestGazetteer extends TestCase {
     //runtime stuff
     gaz.setDocument(doc);
     gaz.setAnnotationSetName("GazetteerAS");
+    //test with default parameters
     gaz.execute();
-    assertTrue(!doc.getAnnotations("GazetteerAS").isEmpty());
+    AnnotationSet resultAS = doc.getAnnotations("GazetteerAS");
+    assertTrue("Found " + resultAS.size() + 
+            " annotations instead of the expected 53!", resultAS.size() == 53);
+    resultAS.clear();
+    
+    //test with partial words
+    gaz.setWholeWordsOnly(false);
+    gaz.execute();
+    assertTrue("Found " + resultAS.size() + 
+            " annotations instead of the expected 135!", resultAS.size() == 135);
+    gaz.setWholeWordsOnly(true);
+    resultAS.clear();
+
+    //test with prefix matching
+    gaz.setLongestMatchOnly(false);
+    gaz.execute();
+    assertTrue("Found " + resultAS.size() + 
+            " annotations instead of the expected 68!", resultAS.size() == 68);
+    gaz.setLongestMatchOnly(true);
+    resultAS.clear();
+    Factory.deleteResource(gaz);
+    
+    //test with case insensitive
+    FeatureMap fm = Factory.newFeatureMap();
+    fm.put(DefaultGazetteer.DEF_GAZ_CASE_SENSITIVE_PARAMETER_NAME, false);
+    gaz = (DefaultGazetteer) Factory.createResource(
+    "gate.creole.gazetteer.DefaultGazetteer", fm);
+    gaz.setDocument(doc);
+    gaz.setAnnotationSetName("GazetteerAS");
+    gaz.execute();
+    assertTrue("Found " + resultAS.size() + 
+            " annotations instead of the expected 99!", resultAS.size() == 99);
+    gaz.setCaseSensitive(true);
+    resultAS.clear();
+    Factory.deleteResource(gaz);
+    Factory.deleteResource(doc);
   }
 
   /** Test suite routine for the test runner */
