@@ -66,7 +66,10 @@ public class DefaultGazetteer extends AbstractGazetteer {
 
   public static final String
     DEF_GAZ_CASE_SENSITIVE_PARAMETER_NAME = "caseSensitive";
-
+  
+  public static final String
+    DEF_GAZ_LONGEST_MATCH_ONLY_PARAMETER_NAME = "longestMatchOnly";
+  
   public static final String
     DEF_GAZ_FEATURE_SEPARATOR_PARAMETER_NAME = "gazetteerFeatureSeparator";
 
@@ -351,8 +354,7 @@ public class DefaultGazetteer extends AbstractGazetteer {
        annotationSetName.equals("")) annotationSet = document.getAnnotations();
     else annotationSet = document.getAnnotations(annotationSetName);
 
-    fireStatusChanged("Doing lookup in " +
-                           document.getName() + "...");
+    fireStatusChanged("Performing look-up in " + document.getName() + "...");
     String content = document.getContent().toString();
     int length = content.length();
 // >>> DAM, was
@@ -393,45 +395,16 @@ public class DefaultGazetteer extends AbstractGazetteer {
       nextState = currentState.next(currentChar);
       if(nextState == null) {
         //the matching stopped
-
         //if we had a successful match then act on it;
         if(lastMatchingState != null){
-          //let's add the new annotation(s)
-          Iterator lookupIter = lastMatchingState.getLookupSet().iterator();
-
-          while(lookupIter.hasNext()) {
-            currentLookup = (Lookup)lookupIter.next();
-            fm = Factory.newFeatureMap();
-            fm.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME, currentLookup.majorType);
-            if (null!= currentLookup.oClass && null!=currentLookup.ontology){
-              fm.put(LOOKUP_CLASS_FEATURE_NAME,currentLookup.oClass);
-              fm.put(LOOKUP_ONTOLOGY_FEATURE_NAME,currentLookup.ontology);
-            }
-            if(null != currentLookup.minorType) {
-              fm.put(LOOKUP_MINOR_TYPE_FEATURE_NAME, currentLookup.minorType);
-              if(null != currentLookup.languages)
-                fm.put("language", currentLookup.languages);
-            }
-            if(null != currentLookup.features) {
-              fm.putAll(currentLookup.features);
-            }
-            try {
-              annotationSet.add(new Long(matchedRegionStart),
-                              new Long(matchedRegionEnd + 1),
-                              LOOKUP_ANNOTATION_TYPE,
-                              fm);
-            } catch(InvalidOffsetException ioe) {
-              throw new LuckyException(ioe.toString());
-            }
-          }//while(lookupIter.hasNext())
+          createLookups(lastMatchingState, matchedRegionStart, matchedRegionEnd, 
+                  annotationSet);
           lastMatchingState = null;
         }
-
         //reset the FSM
         charIdx = matchedRegionStart + 1;
         matchedRegionStart = charIdx;
         currentState = initialState;
-
       } else{//go on with the matching
         currentState = nextState;
         //if we have a successful state then store it
@@ -447,6 +420,13 @@ public class DefaultGazetteer extends AbstractGazetteer {
             )
            )
           ){
+          //we have a new match
+          //if we had an existing match and we need to annotate prefixes, then 
+          //apply it
+          if(!longestMatchOnly && lastMatchingState != null){
+            createLookups(lastMatchingState, matchedRegionStart, 
+                    matchedRegionEnd, annotationSet);
+          }
           matchedRegionEnd = charIdx;
           lastMatchingState = currentState;
         }
@@ -456,42 +436,17 @@ public class DefaultGazetteer extends AbstractGazetteer {
           //from the next char
           if(lastMatchingState != null){
             //let's add the new annotation(s)
-            Iterator lookupIter = lastMatchingState.getLookupSet().iterator();
-
-            while(lookupIter.hasNext()) {
-              currentLookup = (Lookup)lookupIter.next();
-              fm = Factory.newFeatureMap();
-              fm.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME, currentLookup.majorType);
-              if (null!= currentLookup.oClass && null!=currentLookup.ontology){
-                fm.put(LOOKUP_CLASS_FEATURE_NAME,currentLookup.oClass);
-                fm.put(LOOKUP_ONTOLOGY_FEATURE_NAME,currentLookup.ontology);
-              }
-              if(null != currentLookup.minorType) {
-                fm.put(LOOKUP_MINOR_TYPE_FEATURE_NAME, currentLookup.minorType);
-                if(null != currentLookup.languages)
-                  fm.put("language", currentLookup.languages);
-              }
-              if(null != currentLookup.features) {
-                fm.putAll(currentLookup.features);
-              }
-              try {
-                annotationSet.add(new Long(matchedRegionStart),
-                                new Long(matchedRegionEnd + 1),
-                                LOOKUP_ANNOTATION_TYPE,
-                                fm);
-              } catch(InvalidOffsetException ioe) {
-                throw new LuckyException(ioe.toString());
-              }
-            }//while(lookupIter.hasNext())
+            createLookups(lastMatchingState, matchedRegionStart, 
+                    matchedRegionEnd, annotationSet);
             lastMatchingState = null;
           }
-
           //reset the FSM
           charIdx = matchedRegionStart + 1;
           matchedRegionStart = charIdx;
           currentState = initialState;
         }
       }
+      //fire the progress event
       if(charIdx - oldCharIdx > 256) {
         fireProgressChanged((100 * charIdx )/ length );
         oldCharIdx = charIdx;
@@ -500,38 +455,52 @@ public class DefaultGazetteer extends AbstractGazetteer {
             " gazetteer has been abruptly interrupted!");
       }
     } // while(charIdx < length)
-
+    //we've finished. If we had a stored match, then apply it.
     if(lastMatchingState != null) {
-      Iterator lookupIter = lastMatchingState.getLookupSet().iterator();
-      while(lookupIter.hasNext()) {
-        currentLookup = (Lookup)lookupIter.next();
-        fm = Factory.newFeatureMap();
-        fm.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME, currentLookup.majorType);
-        if (null!= currentLookup.oClass && null!=currentLookup.ontology){
-          fm.put(LOOKUP_CLASS_FEATURE_NAME,currentLookup.oClass);
-          fm.put(LOOKUP_ONTOLOGY_FEATURE_NAME,currentLookup.ontology);
-        }
-
-        if(null != currentLookup.minorType)
-          fm.put(LOOKUP_MINOR_TYPE_FEATURE_NAME, currentLookup.minorType);
-        if(null != currentLookup.features) {
-          fm.putAll(currentLookup.features);
-        }
-        try{
-          annotationSet.add(new Long(matchedRegionStart),
-                          new Long(matchedRegionEnd + 1),
-                          LOOKUP_ANNOTATION_TYPE,
-                          fm);
-        } catch(InvalidOffsetException ioe) {
-          throw new GateRuntimeException(ioe.toString());
-        }
-      }//while(lookupIter.hasNext())
+      createLookups(lastMatchingState, matchedRegionStart, 
+              matchedRegionEnd, annotationSet);
     }
     fireProcessFinished();
-    fireStatusChanged("Lookup complete!");
+    fireStatusChanged("Look-up complete!");
   } // execute
 
 
+  /**
+   * Creates the Lookup annotations according to a gazetteer match.
+   * @param matchingState the final FSMState that was reached while matching. 
+   * @param matchedRegionStart the start of the matched text region.
+   * @param matchedRegionEnd the end of the matched text region.
+   * @param annotationSet the annotation set where the new annotations should 
+   * be added.
+   */
+  protected void createLookups(FSMState matchingState, long matchedRegionStart, 
+          long matchedRegionEnd, AnnotationSet annotationSet){
+    Iterator lookupIter = matchingState.getLookupSet().iterator();
+    while(lookupIter.hasNext()) {
+      Lookup currentLookup = (Lookup)lookupIter.next();
+      FeatureMap fm = Factory.newFeatureMap();
+      fm.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME, currentLookup.majorType);
+      if (null!= currentLookup.oClass && null!=currentLookup.ontology){
+        fm.put(LOOKUP_CLASS_FEATURE_NAME,currentLookup.oClass);
+        fm.put(LOOKUP_ONTOLOGY_FEATURE_NAME,currentLookup.ontology);
+      }
+
+      if(null != currentLookup.minorType)
+        fm.put(LOOKUP_MINOR_TYPE_FEATURE_NAME, currentLookup.minorType);
+      if(null != currentLookup.features) {
+        fm.putAll(currentLookup.features);
+      }
+      try{
+        annotationSet.add(new Long(matchedRegionStart),
+                        new Long(matchedRegionEnd + 1),
+                        LOOKUP_ANNOTATION_TYPE,
+                        fm);
+      } catch(InvalidOffsetException ioe) {
+        throw new GateRuntimeException(ioe.toString());
+      }
+    }//while(lookupIter.hasNext())
+  }
+  
   /** The initial state of the FSM that backs this gazetteer
    */
   protected FSMState initialState;
@@ -594,7 +563,7 @@ public class DefaultGazetteer extends AbstractGazetteer {
   } // iter class
 
   /**
-   * class implementing the map using binary serach by char as key
+   * class implementing the map using binary search by char as key
    * to retrive the coresponding object.
    */
   public static class CharMap
