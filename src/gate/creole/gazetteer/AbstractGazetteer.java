@@ -53,8 +53,20 @@ public abstract class AbstractGazetteer
    * Should this gazetteer only match whole words. The default value is
    * <tt>true</tt>.
    */
-  protected Boolean wholeWordsOnly;
+  protected Boolean wholeWordsOnly = new Boolean(true);
 
+  /**
+   * Should this gazetteer only match the longest string starting from any 
+   * offset? This parameter is only relevant when the list of lookups contains
+   * proper prefixes of other entries (e.g when both &quot;Dell&quot; and 
+   * &quot;Dell Europe&quot; are in the lists). The default behaviour (when this
+   * parameter is set to <tt>true</tt>) is to only match the longest entry, 
+   * &quot;Dell Europe&quot; in this example. This is the default GATE gazetteer
+   * behaviour since version 2.0. Setting this parameter to <tt>false</tt> will 
+   * cause the gazetteer to match all possible prefixes.
+   */
+  protected Boolean longestMatchOnly = new Boolean(true);
+  
   /** the linear definition of the gazetteer */
   protected LinearDefinition definition;
 
@@ -109,6 +121,20 @@ public abstract class AbstractGazetteer
 
   public MappingDefinition getMappingDefinition(){
     return mappingDefinition;
+  }
+  
+  /**
+   * @return the longestMatchOnly
+   */
+  public Boolean getLongestMatchOnly() {
+    return longestMatchOnly;
+  }
+
+  /**
+   * @param longestMatchOnly the longestMatchOnly to set
+   */
+  public void setLongestMatchOnly(Boolean longestMatchOnly) {
+    this.longestMatchOnly = longestMatchOnly;
   }
 
   /**Gets the linear definition of this gazetteer. there is no parallel
