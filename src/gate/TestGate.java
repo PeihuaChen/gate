@@ -32,6 +32,7 @@ import gate.creole.*;
 import gate.creole.ir.TestIndex;
 import gate.creole.morph.TestMorph;
 import gate.creole.gazetteer.TestFlexibleGazetteer;
+import gate.creole.gazetteer.TestGazetteer;
 import gate.email.TestEmail;
 import gate.html.TestHtml;
 import gate.jape.TestJape;
@@ -229,7 +230,7 @@ public class TestGate {
       // set this true to run all tests; false to run the just one below
       boolean allTests = true;
       if(! allTests){
-        suite.addTest(TestPR.suite());
+        suite.addTest(TestGazetteer.suite());
       } else {
         
         suite.addTest(TestWordNet.suite());
@@ -265,7 +266,7 @@ public class TestGate {
         suite.addTest(TestDiffer.suite());
 //no longer needed as replaced by testPR
 //        suite.addTest(TestTokeniser.suite());
-//        suite.addTest(TestGazetteer.suite());
+        suite.addTest(TestGazetteer.suite());
 //        suite.addTest(TestSplitterTagger.suite());
         suite.addTest(TestFeatureMap.suite());
         suite.addTest(TestTools.suite());
