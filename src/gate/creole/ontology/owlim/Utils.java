@@ -122,7 +122,13 @@ public class Utils {
       throw new GateRuntimeException("ERROR :"+errorMsg);
   } 
   
-  
+  public static boolean hasSystemNameSpace(String uri) {
+    if(uri.startsWith("http://www.w3.org/2002/07/owl#")) return true;
+    else if(uri.startsWith("http://www.w3.org/2001/XMLSchema#")) return true;
+    else if(uri.startsWith("http://www.w3.org/2000/01/rdf-schema#")) return true;
+    else if(uri.startsWith("http://www.w3.org/1999/02/22-rdf-syntax-ns#")) return true;
+    else return false;
+  }
   
   
 }

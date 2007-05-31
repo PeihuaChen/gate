@@ -3458,7 +3458,7 @@ public class OWLIMServiceImpl implements OWLIM,
     }
   }
 
-private void removeUUDStatement(String subject, String predicate,
+  private void removeUUDStatement(String subject, String predicate,
           String object, String datatype) throws RemoteException {
     try {
       startTransaction(null);
@@ -3467,19 +3467,24 @@ private void removeUUDStatement(String subject, String predicate,
               ? sail.getValueFactory().createURI(predicate)
               : null;
       URI d = sail.getValueFactory().createURI(datatype);
-      Literal l = object != null ? sail.getValueFactory().createLiteral(object): null;
-      
+      Literal l = object != null
+              ? sail.getValueFactory().createLiteral(object)
+              : null;
+
       sail.removeStatements(s, p, l);
-      
-    l = object != null ? sail.getValueFactory().createLiteral(object,
-      d) : null;
-    sail.removeStatements(s, p, l);
+
+      l = object != null
+              ? sail.getValueFactory().createLiteral(object, d)
+              : null;
+      sail.removeStatements(s, p, l);
       endTransaction(null);
     }
     catch(Exception e) {
       throw new RemoteException(e.getMessage(), e);
     }
-  }  public void startTransaction(String repositoryID) throws RemoteException {
+  }
+
+  public void startTransaction(String repositoryID) throws RemoteException {
     if(repositoryID != null && !loadRepositoryDetails(repositoryID)) {
       throw new RemoteException("Repository :" + repositoryID
               + " does not exist");
@@ -4162,24 +4167,11 @@ private void removeUUDStatement(String subject, String predicate,
     return listToPropertyValueArray(list);
   }
 
-  private boolean hasSystemNameSpace(String uri) {
+  public boolean hasSystemNameSpace(String uri) {
     if(returnSystemStatements) return false;
     if(uri.equalsIgnoreCase("http://www.w3.org/2002/07/owl#Thing"))
       return false;
-
-    if(Constants.OWL_PATTERN.reset(uri).find()) {
-      if(Constants.OWL_PATTERN.start() == 0) return true;
-    }
-    if(Constants.XML_SCHEMA_PATTERN.reset(uri).find()) {
-      if(Constants.XML_SCHEMA_PATTERN.start() == 0) return true;
-    }
-    if(Constants.RDF_SCHEMA_PATTERN.reset(uri).find()) {
-      if(Constants.RDF_SCHEMA_PATTERN.start() == 0) return true;
-    }
-    if(Constants.RDF_SYNTAX_PATTERN.reset(uri).find()) {
-      if(Constants.RDF_SYNTAX_PATTERN.start() == 0) return true;
-    }
-    return false;
+    return Utils.hasSystemNameSpace(uri);
   }
 
   class RepositoryDetails {

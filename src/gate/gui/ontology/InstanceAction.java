@@ -8,6 +8,7 @@
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
+import gate.creole.ontology.owlim.Utils;
 import gate.gui.MainFrame;
 
 import java.awt.FlowLayout;
@@ -52,20 +53,24 @@ public class InstanceAction extends AbstractAction implements
       return;
     }
     OResource selectedNode = ((OResourceNode)selectedNodes.get(0).getUserObject()).getResource();
-    nameSpace.setText(selectedNode.getURI().getNameSpace());
+    String ns = selectedNode.getURI().getNameSpace();
+    if(Utils.hasSystemNameSpace(selectedNode.getURI().toString())) {
+      ns = ontology.getDefaultNameSpace();
+    }
+    nameSpace.setText(ns);
 
     int j = JOptionPane.showOptionDialog(MainFrame.getInstance(), panel,
             "New Instance: ", 2, 3, null, new String[] {"OK", "Cancel"}, "OK");
     if(j == 0) {
       String s = nameSpace.getText();
-      if(!Utils.isValidNameSpace(s)) {
+      if(!gate.gui.ontology.Utils.isValidNameSpace(s)) {
         JOptionPane.showMessageDialog(MainFrame.getInstance(),
                 (new StringBuilder()).append("Invalid NameSpace:").append(s)
                         .append("\n example: http://gate.ac.uk/example#")
                         .toString());
         return;
       }
-      if(!Utils.isValidOntologyResourceName(instanceName.getText())) {
+      if(!gate.gui.ontology.Utils.isValidOntologyResourceName(instanceName.getText())) {
         JOptionPane.showMessageDialog(MainFrame.getInstance(),
                 "Invalid Instance Name");
         return;
