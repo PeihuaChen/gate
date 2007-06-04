@@ -5,7 +5,7 @@
   <CREOLE>    
     <!-- creole.xml for the Learning PR -->
     <RESOURCE>
-      <NAME>Batch Learning ALL PR</NAME>
+      <NAME>Batch Learning PR</NAME>
       <COMMENT>Supports training, application and evaluation of machine
       learning models for NLP tasks
       (http://gate.ac.uk/sale/tao/#chapt:mlapi)</COMMENT>
