@@ -87,7 +87,10 @@
     </RESOURCE>
     <RESOURCE>
       <NAME>GATE HTML Document Format</NAME>
-      <CLASS>gate.corpora.HtmlDocumentFormat</CLASS>
+      <CLASS>gate.corpora.NekoHtmlDocumentFormat</CLASS>
+      <PARAMETER NAME="ignorableTags" DEFAULT="script;style"
+        COMMENT="HTML tags whose text content should be ignored"
+        ITEM_CLASS_NAME="java.lang.String">java.util.Set</PARAMETER>
       <AUTOINSTANCE/>
       <PRIVATE/>
     </RESOURCE>
