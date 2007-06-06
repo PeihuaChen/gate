@@ -42,6 +42,7 @@
 	<classpathentry kind="lib" path="lib/ant-junit.jar"/>
 	<classpathentry kind="lib" path="lib/ant-contrib-1.0b2.jar"/>
 	<classpathentry kind="lib" path="lib/activation.jar"/>
+	<classpathentry kind="lib" path="lib/nekohtml-0.9.5.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/javacc.jar"/>
 	<classpathentry kind="lib" path="lib/servlet-2_3.zip"/>
