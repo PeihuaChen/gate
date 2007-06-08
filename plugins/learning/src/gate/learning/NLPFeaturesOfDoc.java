@@ -19,9 +19,10 @@ import gate.AnnotationSet;
 import gate.FeatureMap;
 import gate.util.OffsetComparator;
 import gate.learning.Ngram;
+
 /*
- * Obtain the NLP (linguistic) features from the
- * GATE annotations of one document.
+ * Obtain the NLP (linguistic) features from the GATE annotations of one
+ * document.
  */
 public class NLPFeaturesOfDoc {
   /** One component stores all the features for one instance. */
@@ -37,9 +38,12 @@ public class NLPFeaturesOfDoc {
   /** Number of features counted for each instance */
   int[] featuresCounted;
   /** store the class name for each instances in. */
-  String[] classNames; 
-  /** Constructor, obtain NLP features from GATE annotations fro each
-   * instance in the document. */
+  String[] classNames;
+
+  /**
+   * Constructor, obtain NLP features from GATE annotations for each instance in
+   * the document.
+   */
   public NLPFeaturesOfDoc(AnnotationSet annotations, String instanceType,
     String docName) {
     // Number of instances (tokens) in the document
@@ -53,28 +57,36 @@ public class NLPFeaturesOfDoc {
   }
 
   /**
-   * Entry method for getting the NLP features according to the
-   * specifications in the dataset defintion files.
+   * Entry method for getting the NLP features according to the specifications
+   * in the dataset defintion files.
    */
   public void obtainDocNLPFeatures(AnnotationSet annotations,
     DataSetDefinition dsd) {
     if(dsd.dataType == DataSetDefinition.RelationData) {
       // get the features for the relation data
+      int initialPosition = 0;
       if(dsd.arg1 != null) {
         ArgOfRelation arg = dsd.arg1;
         boolean[][] isArgInRel = matchArgInstanceWithInst(annotations, dsd
           .getInstanceType(), arg.type, dsd.arg1Feat, arg.feat);
-        gatedoc2NLPFeaturesArg(annotations, arg.type,
-          arg.arrs.typesInDataSetDef, arg.arrs.featuresInDataSetDef,
-          arg.arrs.namesInDataSetDef, arg.arrs.featurePosition, isArgInRel);
+        if(arg.arrs.numTypes>0)
+          gatedoc2NLPFeaturesArg(annotations, arg.type,
+            arg.arrs.typesInDataSetDef, arg.arrs.featuresInDataSetDef,
+            arg.arrs.namesInDataSetDef, arg.arrs.featurePosition, isArgInRel, initialPosition);
+        if(arg.arrs.numNgrams>0)
+          gatedoc2NgramFeaturesArg(annotations, arg.type, arg.ngrams, isArgInRel, initialPosition);
+        initialPosition += arg.maxTotalPosition+1;
       }
       if(dsd.arg2 != null) {
         ArgOfRelation arg = dsd.arg2;
         boolean[][] isArgInRel = matchArgInstanceWithInst(annotations, dsd
           .getInstanceType(), arg.type, dsd.arg1Feat, arg.feat);
-        gatedoc2NLPFeaturesArg(annotations, arg.type,
-          arg.arrs.typesInDataSetDef, arg.arrs.featuresInDataSetDef,
-          arg.arrs.namesInDataSetDef, arg.arrs.featurePosition, isArgInRel);
+        if(arg.arrs.numTypes>0)
+          gatedoc2NLPFeaturesArg(annotations, arg.type,
+            arg.arrs.typesInDataSetDef, arg.arrs.featuresInDataSetDef,
+            arg.arrs.namesInDataSetDef, arg.arrs.featurePosition, isArgInRel, initialPosition);
+        if(arg.arrs.numNgrams>0)
+          gatedoc2NgramFeaturesArg(annotations, arg.type, arg.ngrams, isArgInRel, initialPosition);
       }
       if(dsd.relAttributes != null)
         gatedoc2NLPFeaturesRel(annotations, dsd.getInstanceType(),
@@ -99,7 +111,8 @@ public class NLPFeaturesOfDoc {
         dsd.arrs.classType, dsd.arrs.classFeature);
     }
   }
-  /** Get the N-gram features from the GATE document.*/
+
+  /** Get the N-gram features from the GATE document. */
   public void gatedoc2NgramFeatures(AnnotationSet annotations,
     String instanceType, java.util.List ngrams) {
     AnnotationSet anns = annotations.get(instanceType);
@@ -118,6 +131,8 @@ public class NLPFeaturesOfDoc {
     for(int i1 = 0; i1 < numNgrams; ++i1) {
       Ngram ngram = (Ngram)ngrams.get(i1);
       String nameOfNgram = ngram.getName();
+      int ngramPosition = ngram.position;
+      String positionStr = obtainPositionStr(ngramPosition);
       featuresName.append(nameOfNgram + ConstantParameters.ITEMSEPARATOR);
       String typeGateNgram = (ngram.getTypessGate())[0];
       for(int i = 0; i < numInstances; ++i) {
@@ -128,7 +143,7 @@ public class NLPFeaturesOfDoc {
           tokenStartOffset, tokenEndOffset);
         String[] features;
         features = obtainNgramFeatures(annsNgramType,
-          (ngram.getFeaturesGate())[0]); 
+          (ngram.getFeaturesGate())[0]);
         for(int j = 1; j < ngram.getConsnum(); j++) {
           String[] features1;
           if((ngram.getTypessGate())[j].equals(typeGateNgram))
@@ -165,15 +180,29 @@ public class NLPFeaturesOfDoc {
         if(featuresInLine[i] == null) featuresInLine[i] = new StringBuffer();
         while(iterator.hasNext()) {
           Object key = iterator.next();
-          this.featuresInLine[i].append(obtainFeatureName(nameOfNgram, key
+          if(ngramPosition != 0)
+            this.featuresInLine[i].append(obtainFeatureName(nameOfNgram, key
+              .toString()
+              + NLPFeaturesList.SYMBOLNGARM + ngramTerms.get(key).toString())
+              + positionStr + ConstantParameters.ITEMSEPARATOR);
+          else this.featuresInLine[i].append(obtainFeatureName(nameOfNgram, key
             .toString()
             + NLPFeaturesList.SYMBOLNGARM + ngramTerms.get(key).toString())
             + ConstantParameters.ITEMSEPARATOR);
           ++featuresCounted[i];
         }
       }// end of the loop on instances
-    }
+    } // end of the loop on number of ngrams
   }
+
+  /**
+   * Obtain the string for the position, which is attached at the end of the nlp
+   * feature.
+   */
+  String obtainPositionStr(int ngramPosition) {
+    return "[" + (new Integer(ngramPosition)).toString() + "]";
+  }
+
   /** Obtain the N-gram features from an annotation set. */
   private String[] obtainNgramFeatures(AnnotationSet annsNgramType,
     String gateFeature) {
@@ -185,13 +214,17 @@ public class NLPFeaturesOfDoc {
     for(int i = 0; i < num; ++i) {
       feats[i] = (String)((Annotation)annotationArray.get(i)).getFeatures()
         .get(gateFeature);
+      if(feats[i]==null)
+        feats[i] = ConstantParameters.NAMENONFEATURE;
       feats[i] = feats[i].trim().replaceAll(ConstantParameters.ITEMSEPARATOR,
         ConstantParameters.ITEMSEPREPLACEMENT);
     }
     return feats;
   }
-  /** Obtain the N-gram features from an annotation set for the Annotation
-   * type which is different from the instance's type. 
+
+  /**
+   * Obtain the N-gram features from an annotation set for the Annotation type
+   * which is different from the instance's type.
    */
   private String[] obtainNgramFeaturesFromDifferentType(
     AnnotationSet annsNgramType, AnnotationSet annsCurrent, String gateFeature) {
@@ -209,6 +242,7 @@ public class NLPFeaturesOfDoc {
     }
     return feats;
   }
+
   /** Get the labels of each instance in the document. */
   public void gatedoc2LabelsComplete(AnnotationSet annotations,
     String instanceType, String classType, String classFeature) {
@@ -251,6 +285,7 @@ public class NLPFeaturesOfDoc {
       }
     }
   }
+
   /** Get the Attribute feature for each instance of the document. */
   public void gatedoc2NLPFeatures(AnnotationSet annotations,
     String instanceType, String[] typesGate, String[] featuresGate,
@@ -259,6 +294,11 @@ public class NLPFeaturesOfDoc {
     this.totalnumTypes += numTypes;
     for(int i = 0; i < numTypes; ++i) {
       this.featuresName.append(namesGate[i] + ConstantParameters.ITEMSEPARATOR);
+    }
+    String[] positionArrStr = new String[numTypes];
+    for(int i = 0; i < numTypes; ++i) {
+      if(featurePosition[i] != 0)
+        positionArrStr[i] = obtainPositionStr(featurePosition[i]);
     }
     AnnotationSet anns = annotations.get(instanceType);
     ArrayList annotationArray = (anns == null || anns.isEmpty())
@@ -290,32 +330,136 @@ public class NLPFeaturesOfDoc {
         }
         // put the name into the feature name
         if(features[j] != null) {
-          features[j] = features[j].trim().replaceAll(ConstantParameters.ITEMSEPARATOR,
+          features[j] = features[j].trim().replaceAll(
+            ConstantParameters.ITEMSEPARATOR,
             ConstantParameters.ITEMSEPREPLACEMENT);
           features[j] = obtainFeatureName(namesGate[j], features[j]);
         }
       }// end of the loop on the types
       int numCounted = 0;
       if(featuresInLine[i] == null) featuresInLine[i] = new StringBuffer();
-      for(int j = 0; j < numTypes; ++j)
+      for(int j = 0; j < numTypes; ++j) {
         if(features[j] != null) {
           ++numCounted;
-          this.featuresInLine[i].append(features[j]
+          if(featurePosition[j]!=0)
+            this.featuresInLine[i].append(features[j]
+                 + positionArrStr[j]+ConstantParameters.ITEMSEPARATOR);
+          else           
+            this.featuresInLine[i].append(features[j]
             + ConstantParameters.ITEMSEPARATOR);
-        } else this.featuresInLine[i].append(ConstantParameters.NAMENONFEATURE
-          + ConstantParameters.ITEMSEPARATOR);
-      featuresCounted[i] += numCounted;
+        } else {
+          if(featurePosition[j]!=0)
+            this.featuresInLine[i].append(ConstantParameters.NAMENONFEATURE
+              + positionArrStr[j]+ConstantParameters.ITEMSEPARATOR);
+          else 
+            this.featuresInLine[i].append(ConstantParameters.NAMENONFEATURE
+              +ConstantParameters.ITEMSEPARATOR);
+        }
+        featuresCounted[i] += numCounted;
+      }
     }// end of the loop on instances
+  }
+  /** Get the N-gram features from the GATE document. */
+  public void gatedoc2NgramFeaturesArg(AnnotationSet annotations,
+    String instanceType, java.util.List ngrams, boolean[][] isArgInRel, int initialPosition) {
+    AnnotationSet anns = annotations.get(instanceType);
+    ArrayList annotationArray = (anns == null || anns.isEmpty())
+      ? new ArrayList()
+      : new ArrayList(anns);
+    Collections.sort(annotationArray, new OffsetComparator());
+    int numInstances0 = annotationArray.size();
+    int numNgrams = ngrams.size();
+    // For each ngram
+    for(int i1 = 0; i1 < numNgrams; ++i1) {
+      Ngram ngram = (Ngram)ngrams.get(i1);
+      String nameOfNgram = ngram.getName();
+      int ngramPosition = ngram.position;
+      if(ngramPosition>=0) ngramPosition += initialPosition;
+      else ngramPosition -= initialPosition;
+      String positionStr = obtainPositionStr(ngramPosition);
+      featuresName.append(nameOfNgram + ConstantParameters.ITEMSEPARATOR);
+      String typeGateNgram = (ngram.getTypessGate())[0];
+      for(int i = 0; i < numInstances0; ++i) {
+        Annotation annToken = (Annotation)annotationArray.get(i);
+        Long tokenStartOffset = annToken.getStartNode().getOffset();
+        Long tokenEndOffset = annToken.getEndNode().getOffset();
+        AnnotationSet annsNgramType = annotations.get(typeGateNgram,
+          tokenStartOffset, tokenEndOffset);
+        String[] features = obtainNgramFeatures(annsNgramType,
+          (ngram.getFeaturesGate())[0]);
+        for(int j = 1; j < ngram.getConsnum(); j++) {
+          String[] features1;
+          if((ngram.getTypessGate())[j].equals(typeGateNgram))
+            features1 = obtainNgramFeatures(annsNgramType, (ngram
+              .getFeaturesGate())[j]);
+          else features1 = obtainNgramFeaturesFromDifferentType(annsNgramType,
+            annotations.get((ngram.getTypessGate())[j], tokenStartOffset,
+              tokenEndOffset), (ngram.getFeaturesGate())[j]);
+          for(int j1 = 0; j1 < features.length; ++j1)
+            features[j1] = features[j1] + "_" + features1[j1];
+        }
+        // get the ngram features
+        int numFeats = features.length;
+        int number = ngram.getNumber();
+        StringBuffer[] featuresNgram = new StringBuffer[numFeats - number + 1];
+        for(int j = 0; j < featuresNgram.length; ++j)
+          featuresNgram[j] = new StringBuffer();
+        for(int j = 0; j < number; ++j) {
+          for(int j1 = j; j1 < numFeats - number + 1 + j; ++j1) {
+            featuresNgram[j1 - j].append(features[j1]
+              + NLPFeaturesList.SYMBOLNGARM);
+          }
+        }
+        Hashtable ngramTerms = new Hashtable();
+        for(int j = 0; j < featuresNgram.length; ++j)
+          if(!ngramTerms.containsKey(featuresNgram[j].toString()))
+            ngramTerms.put(featuresNgram[j].toString(), "1");
+          else ngramTerms.put(featuresNgram[j].toString(),
+            new Integer((new Integer(ngramTerms
+              .get(featuresNgram[j].toString()).toString())).intValue() + 1));
+        List keys = new ArrayList(ngramTerms.keySet());
+        Collections.sort(keys);
+        Iterator iterator = keys.iterator();
+        while(iterator.hasNext()) {
+          Object key = iterator.next();
+          //For each relation data with the current one as its argument
+          for(int ii = 0; ii < numInstances; ++ii) {
+            if(isArgInRel[i][ii]) {
+              if(featuresInLine[ii] == null) 
+                featuresInLine[ii] = new StringBuffer();
+              if(ngramPosition != 0)
+                this.featuresInLine[ii].append(obtainFeatureName(nameOfNgram, key.toString()
+                  + NLPFeaturesList.SYMBOLNGARM + ngramTerms.get(key).toString())
+                  + positionStr + ConstantParameters.ITEMSEPARATOR);
+              else 
+                this.featuresInLine[ii].append(obtainFeatureName(nameOfNgram, key.toString()
+                  + NLPFeaturesList.SYMBOLNGARM + ngramTerms.get(key).toString())
+                  + ConstantParameters.ITEMSEPARATOR);
+              ++featuresCounted[ii];
+            }
+          }//for each instance
+        }
+      }// end of the loop on instances
+    } // end of the loop on number of ngrams
   }
 
   /** Get the NLP feature for the argument feature of relation data. */
   public void gatedoc2NLPFeaturesArg(AnnotationSet annotations,
     String instanceType, String[] typesGate, String[] featuresGate,
-    String[] namesGate, int[] featurePosition, boolean[][] isArgInRel) {
+    String[] namesGate, int[] featurePosition, boolean[][] isArgInRel, int initialPosition) {
     int numTypes = typesGate.length;
     this.totalnumTypes += numTypes;
     for(int i = 0; i < numTypes; ++i) {
       this.featuresName.append(namesGate[i] + ConstantParameters.ITEMSEPARATOR);
+    }
+    int [] positionNum = new int[numTypes];
+    String[] positionArrStr = new String[numTypes];
+    for(int i = 0; i < numTypes; ++i) {
+      if(featurePosition[i]>=0)
+        positionNum[i] = featurePosition[i] + initialPosition;
+      else positionNum[i] = featurePosition[i] - initialPosition;
+      if(positionNum[i] != 0)
+        positionArrStr[i] = obtainPositionStr(featurePosition[i]);
     }
     AnnotationSet anns = annotations.get(instanceType);
     ArrayList annotationArray = (anns == null || anns.isEmpty())
@@ -348,7 +492,8 @@ public class NLPFeaturesOfDoc {
         }
         // put the name into the feature name
         if(features[j] != null) {
-          features[j] = features[j].trim().replaceAll(ConstantParameters.ITEMSEPARATOR,
+          features[j] = features[j].trim().replaceAll(
+            ConstantParameters.ITEMSEPARATOR,
             ConstantParameters.ITEMSEPREPLACEMENT);
           features[j] = obtainFeatureName(namesGate[j], features[j]);
         }
@@ -362,10 +507,18 @@ public class NLPFeaturesOfDoc {
           for(int j = 0; j < numTypes; ++j) {
             if(features[j] instanceof String) {
               ++numCounted;
-              this.featuresInLine[ii].append(features[j]
-                + ConstantParameters.ITEMSEPARATOR);
-            } else this.featuresInLine[ii]
-              .append(ConstantParameters.NAMENONFEATURE
+              if(positionNum[j]!=0)
+                this.featuresInLine[ii].append(features[j]
+                     + positionArrStr[j]+ ConstantParameters.ITEMSEPARATOR);
+              else 
+                this.featuresInLine[ii].append(features[j]
+                     + ConstantParameters.ITEMSEPARATOR);
+            } else 
+              if(positionNum[j]!=0)
+                this.featuresInLine[ii].append(ConstantParameters.NAMENONFEATURE
+                   + positionArrStr[j]+ConstantParameters.ITEMSEPARATOR);
+              else
+                this.featuresInLine[ii].append(ConstantParameters.NAMENONFEATURE
                 + ConstantParameters.ITEMSEPARATOR);
           }
           featuresCounted[ii] += numCounted;
@@ -373,6 +526,7 @@ public class NLPFeaturesOfDoc {
       }
     }// end of the loop on instances
   }
+
   /** Match the argument instance with the relation instance. */
   boolean[][] matchArgInstanceWithInst(AnnotationSet annotations,
     String relInstanceType, String instanceType, String relArgF, String argF) {
@@ -404,6 +558,7 @@ public class NLPFeaturesOfDoc {
     }
     return isArgInRel;
   }
+
   /** Get the annotation with different type from the instance. */
   String obtainAnnotationForTypeAndFeature(AnnotationSet singleAnnSet,
     String gateFeature, Long tokenStartOffset, Long tokenEndOffset) {
@@ -419,8 +574,10 @@ public class NLPFeaturesOfDoc {
     }
     return null;
   }
-  /** Get the annotation with different type from the instance for 
-   * relation learning. 
+
+  /**
+   * Get the annotation with different type from the instance for relation
+   * learning.
    */
   String obtainAnnotationForTypeAndFeatureRel(String arg1V, String arg2V,
     AnnotationSet singleAnnSet, String gateFeature, String arg1F, String arg2F) {
@@ -437,8 +594,9 @@ public class NLPFeaturesOfDoc {
     }
     return null;
   }
-  /** Get the Attribute-Rel features from annotations for relation
-   * learning. 
+
+  /**
+   * Get the Attribute-Rel features from annotations for relation learning.
    */
   public void gatedoc2NLPFeaturesRel(AnnotationSet annotations,
     String instanceType, String arg1Inst, String arg2Inst, String[] typesGate,
@@ -448,6 +606,11 @@ public class NLPFeaturesOfDoc {
     this.totalnumTypes += numTypes;
     for(int i = 0; i < numTypes; ++i) {
       this.featuresName.append(namesGate[i] + ConstantParameters.ITEMSEPARATOR);
+    }
+    String [] strPosition = new String[numTypes];
+    for(int i=0; i<numTypes; ++i) {
+      if(featurePosition[i]!=0)
+        strPosition[i] = obtainPositionStr(featurePosition[i]);
     }
     AnnotationSet anns = annotations.get(instanceType);
     ArrayList annotationArray = (anns == null || anns.isEmpty())
@@ -488,7 +651,8 @@ public class NLPFeaturesOfDoc {
         }
         // put the name into the feature name
         if(features[j] != null) {
-          features[j] = features[j].trim().replaceAll(ConstantParameters.ITEMSEPARATOR,
+          features[j] = features[j].trim().replaceAll(
+            ConstantParameters.ITEMSEPARATOR,
             ConstantParameters.ITEMSEPREPLACEMENT);
           features[j] = obtainFeatureName(namesGate[j], features[j]);
         }
@@ -498,13 +662,23 @@ public class NLPFeaturesOfDoc {
       for(int j = 0; j < numTypes; ++j)
         if(features[j] instanceof String) {
           ++numCounted;
-          this.featuresInLine[i].append(features[j]
-            + ConstantParameters.ITEMSEPARATOR);
-        } else this.featuresInLine[i].append(ConstantParameters.NAMENONFEATURE
-          + ConstantParameters.ITEMSEPARATOR);
+          if(featurePosition[j]!=0)
+            this.featuresInLine[i].append(features[j]
+                +strPosition[j]+ConstantParameters.ITEMSEPARATOR);
+          else
+            this.featuresInLine[i].append(features[j]
+               + ConstantParameters.ITEMSEPARATOR);
+        } else 
+          if(featurePosition[j]!=0)
+            this.featuresInLine[i].append(ConstantParameters.NAMENONFEATURE
+              +strPosition[j] + ConstantParameters.ITEMSEPARATOR);
+          else
+            this.featuresInLine[i].append(ConstantParameters.NAMENONFEATURE
+              + ConstantParameters.ITEMSEPARATOR);
       featuresCounted[i] = numCounted;
     }// end of the loop on instances
   }
+
   /** Get the label for the relation learning. */
   public void gatedoc2LabelsCompleteRel(AnnotationSet annotations,
     String instanceType, String arg1Inst, String arg2Inst, String classType,
@@ -553,10 +727,11 @@ public class NLPFeaturesOfDoc {
       }
     }
   }
+
   /** Write the NLP data into a file. */
   public void writeNLPFeaturesToFile(BufferedWriter out, String docId,
     int docIndex, int[] featurePosition) {
-    if(LogService.debug>0)
+    if(LogService.debug > 0)
       System.out.println("number=" + new Integer(numInstances));
     try {
       if(docIndex == 0) {
@@ -596,10 +771,10 @@ public class NLPFeaturesOfDoc {
   public String getDocId() {
     return this.docId;
   }
- 
+
   /** Put the type and feature together. */
   static String obtainFeatureName(String type, String feat) {
-    return ConstantParameters.ITEMSEPREPLACEMENT + type + 
-    ConstantParameters.ITEMSEPREPLACEMENT  + feat;
+    return ConstantParameters.ITEMSEPREPLACEMENT + type
+      + ConstantParameters.ITEMSEPREPLACEMENT + feat;
   }
 }

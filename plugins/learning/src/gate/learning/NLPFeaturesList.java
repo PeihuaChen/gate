@@ -18,27 +18,32 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
+
 /**
- *  NLP feature list. Read it from a file, update it
- *  using the new documents, and write back into the file.
+ * NLP feature list. Read it from a file, update it using the new documents, and
+ * write back into the file.
  */
 public class NLPFeaturesList {
   /** the features with ids, can be accessed by multiple threads. */
   public Hashtable featuresList = null;
-  /** Document frequence of each term, 
-   * useful for document or passage classification
+  /**
+   * Document frequence of each term, useful for document or passage
+   * classification
    */
   public Hashtable idfFeatures = null;
   /** Total number of documents used for forming the list. */
   int totalNumDocs;
   /** The unique sysmbol used for the N-gram feature. */
   public final static String SYMBOLNGARM = "<>";
+
   /** Constructor, get the two hashtables. */
   public NLPFeaturesList() {
     featuresList = new Hashtable();
     idfFeatures = new Hashtable();
     totalNumDocs = 1;
   }
+
   /** Loading the list from a file. */
   public void loadFromFile(File parentDir, String filename) {
     File fileFeaturesList = new File(parentDir, filename);
@@ -59,14 +64,15 @@ public class NLPFeaturesList {
       } catch(IOException e) {
       }
     } else {
-      if(LogService.debug>0)
+      if(LogService.debug > 0)
         System.out.println("No feature list file in initialisation phrase.");
     }
   }
+
   /** Write back the list into the file, with updated information. */
   public void writeListIntoFile(File parentDir, String filename) {
     File fileFeaturesList = new File(parentDir, filename);
-    if(LogService.debug>0)
+    if(LogService.debug > 0)
       System.out.println("Lengh of List = " + featuresList.size());
     try {
       PrintWriter out = new PrintWriter(new FileWriter(fileFeaturesList));
@@ -86,6 +92,7 @@ public class NLPFeaturesList {
     } catch(IOException e) {
     }
   }
+
   /** Update the NLP features from new documents. */
   public void addFeaturesFromDoc(NLPFeaturesOfDoc fd) {
     long size = featuresList.size();
@@ -93,15 +100,20 @@ public class NLPFeaturesList {
       String[] features = fd.featuresInLine[i].toString().split(
         ConstantParameters.ITEMSEPARATOR);
       for(int j = 0; j < features.length; ++j) {
+        if(features[j] != null && Pattern.matches((".+\\[[-0-9]+\\]$"), features[j])) {
+          int ind = features[j].lastIndexOf('[');
+          features[j] = features[j].substring(0,ind);
+        }
         String feat = features[j];
         if(feat.contains(SYMBOLNGARM))
           feat = feat.substring(0, feat.lastIndexOf(SYMBOLNGARM));
         if(!feat.equals(ConstantParameters.NAMENONFEATURE)) {
-          //If the featureName is not in the feature list
-          if(size < ConstantParameters.MAXIMUMFEATURES) { 
+          // If the featureName is not in the feature list
+          if(size < ConstantParameters.MAXIMUMFEATURES) {
             if(!featuresList.containsKey(feat)) {
               ++size;
-              //features is from 1 (not zero), in the SVM-light format
+              // features is from 1 (not zero), in the SVM-light
+              // format
               featuresList.put(feat, new Long(size));
               idfFeatures.put(feat, new Long(1));
             } else {
@@ -109,7 +121,8 @@ public class NLPFeaturesList {
                 .toString())).longValue() + 1));
             }
           } else {
-            System.out.println("There are more NLP features from the training docuemnts");
+            System.out
+              .println("There are more NLP features from the training docuemnts");
             System.out.println(" than the pre-defined maximal number"
               + new Long(ConstantParameters.MAXIMUMFEATURES));
             return;

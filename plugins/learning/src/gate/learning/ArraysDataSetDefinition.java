@@ -10,8 +10,8 @@ package gate.learning;
 import java.util.List;
 
 /**
- * Arrays and variables representing the features from one unit of data 
- * set definition, for the purpose of fast computation.
+ * Arrays and variables representing the features from one unit of data set
+ * definition, for the purpose of fast computation.
  */
 public class ArraysDataSetDefinition {
   /** Array of annotation types for all ATTRIBUTEs. */
@@ -20,19 +20,19 @@ public class ArraysDataSetDefinition {
   String[] featuresInDataSetDef;
   /** Array of names of all ATTRIBUTEs. */
   String[] namesInDataSetDef;
-  /** Array of annotation types of all attributes 
-   * in Argument 1 of a relation. 
+  /**
+   * Array of annotation types of all attributes in Argument 1 of a relation.
    */
   String[] arg1s;
-  /** Array of annotation types of all attributes 
-   * in Argument 2 of a relation. 
+  /**
+   * Array of annotation types of all attributes in Argument 2 of a relation.
    */
   String[] arg2s;
-  /** Position of the feature's annotation to the instance annotation.*/
+  /** Position of the feature's annotation to the instance annotation. */
   int[] featurePosition;
-  /** Number of ATTRIBUTEs in the dataset definition unit.*/ 
+  /** Number of ATTRIBUTEs in the dataset definition unit. */
   int numTypes = 0;
-  /** Number of NGRAMs in the dataset definition unit.*/ 
+  /** Number of NGRAMs in the dataset definition unit. */
   int numNgrams = 0;
   /** Name of annotation type for class. */
   String classType;
@@ -42,12 +42,16 @@ public class ArraysDataSetDefinition {
   String classArg1;
   /** Name of feature in the instance annotation as argument 2 of the relation. */
   String classArg2;
-  /** The furthest left-hand position of the features, relative to the instance.*/
+  /**
+   * The furthest left-hand position of the features, relative to the instance.
+   */
   int maxNegPosition = 0;
-  /** The furthest right-hand position of the features, relative to the instance.*/
+  /**
+   * The furthest right-hand position of the features, relative to the instance.
+   */
   int maxPosPosition = 0;
 
-  /** Put the types and feautures and others into the arrays.*/
+  /** Put the types and feautures and others into the arrays. */
   void putTypeAndFeatIntoArray(List attrs) {
     numTypes = obtainNumberOfNLPTypes(attrs);
     typesInDataSetDef = new String[numTypes];
@@ -66,7 +70,7 @@ public class ArraysDataSetDefinition {
     maxNegPosition = -maxNegPosition;
   }
 
-  /** Get the number of features in the dataset definition unit.*/
+  /** Get the number of features in the dataset definition unit. */
   static int obtainNumberOfNLPTypes(List attrs) {
     int num = 0;
     if(attrs == null) {
@@ -78,7 +82,8 @@ public class ArraysDataSetDefinition {
       return num;
     }
   }
-  /** Get the type, feature, name and position of each of attribute features.*/
+
+  /** Get the type, feature, name and position of each of attribute features. */
   void obtainGATETypesAndFeatures(List attrs) {
     int num0 = 0;
     for(int i = 0; i < attrs.size(); i++) {
@@ -99,8 +104,10 @@ public class ArraysDataSetDefinition {
       }
     }
   }
-  /** Get the annotation features of the two arguments of relation for
-   * all the ATTRIBUTE_RELs. 
+
+  /**
+   * Get the annotation features of the two arguments of relation for all the
+   * ATTRIBUTE_RELs.
    */
   void obtainArgs(List relAttrs) {
     int num0 = 0;

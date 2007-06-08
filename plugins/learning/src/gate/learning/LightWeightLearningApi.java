@@ -38,18 +38,18 @@ import gate.learning.learners.weka.WekaLearner;
 import gate.learning.learners.weka.WekaLearning;
 import gate.util.GateException;
 import gate.util.OffsetComparator;
+
 /**
- *  Do all the main learning tasks, such as obtaining
- *  the feature vectors from GATE annotations,
- *  training and application. Also filtering out
- *  some negative examples if want.
+ * Do all the main learning tasks, such as obtaining the feature vectors from
+ * GATE annotations, training and application. Also filtering out some negative
+ * examples if want.
  */
 public class LightWeightLearningApi extends Object {
   /** This is where the model(s) should be saved */
   private File wd;
   /**
-   * The annotationSet containing annotations considered in 
-   * the DATASET element of configuration file.
+   * The annotationSet containing annotations considered in the DATASET element
+   * of configuration file.
    */
   public String inputASName;
   /** Object of the NLP feature list. */
@@ -63,22 +63,21 @@ public class LightWeightLearningApi extends Object {
   /** The right-most position among all features. */
   int maxPosPositionTotal = 0;
   /**
-   * HashMap for the chunkLenStats, 
-   * for post-processing of chunk learning. 
+   * HashMap for the chunkLenStats, for post-processing of chunk learning.
    */
   HashMap chunkLenHash;
   /** Refering to the feature vector file for writing. */
   public BufferedWriter outFeatureVectors = null;
   /** Refering to the NLP feature file for writing. */
   public BufferedWriter outNLPFeatures = null;
-  
+
   /** Constructor, with working directory setting. */
   public LightWeightLearningApi(File wd) {
     this.wd = wd;
   }
-  /** 
-   * Further initialisation for the main object 
-   * LearningAPIMain(). 
+
+  /**
+   * Further initialisation for the main object LearningAPIMain().
    */
   public void furtherInit(File wdResults, LearningEngineSettings engineSettings) {
     // read the NLP feature list
@@ -106,7 +105,8 @@ public class LightWeightLearningApi extends Object {
       for(int i = 0; i < engineSettings.datasetDefinition.arg1.arrs.featurePosition.length; ++i)
         this.featurePositionTotal[num++] = engineSettings.datasetDefinition.arg1.arrs.featurePosition[i];
       for(int i = 0; i < engineSettings.datasetDefinition.arg2.arrs.featurePosition.length; ++i)
-        this.featurePositionTotal[num++] = engineSettings.datasetDefinition.arg2.arrs.featurePosition[i];
+        this.featurePositionTotal[num++] = engineSettings.datasetDefinition.arg2.arrs.featurePosition[i]
+                                           +engineSettings.datasetDefinition.arg1.maxTotalPosition+1;
     }
     for(int i = 0; i < engineSettings.datasetDefinition.arrs.featurePosition.length; ++i)
       this.featurePositionTotal[num++] = engineSettings.datasetDefinition.arrs.featurePosition[i];
@@ -116,7 +116,8 @@ public class LightWeightLearningApi extends Object {
     if(engineSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
       if(maxNegPositionTotal < engineSettings.datasetDefinition.arg1.arrs.maxNegPosition)
         maxNegPositionTotal = engineSettings.datasetDefinition.arg1.arrs.maxNegPosition;
-      if(maxNegPositionTotal < engineSettings.datasetDefinition.arg2.arrs.maxNegPosition)
+      if(maxNegPositionTotal < engineSettings.datasetDefinition.arg2.arrs.maxNegPosition + 
+             engineSettings.datasetDefinition.arg1.maxTotalPosition+1)
         maxNegPositionTotal = engineSettings.datasetDefinition.arg2.arrs.maxNegPosition;
     }
     maxPosPositionTotal = 0;
@@ -125,7 +126,8 @@ public class LightWeightLearningApi extends Object {
     if(engineSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
       if(maxPosPositionTotal < engineSettings.datasetDefinition.arg1.arrs.maxPosPosition)
         maxPosPositionTotal = engineSettings.datasetDefinition.arg1.arrs.maxPosPosition;
-      if(maxPosPositionTotal < engineSettings.datasetDefinition.arg2.arrs.maxPosPosition)
+      if(maxPosPositionTotal < engineSettings.datasetDefinition.arg2.arrs.maxPosPosition +
+           engineSettings.datasetDefinition.arg1.maxTotalPosition+1)
         maxPosPositionTotal = engineSettings.datasetDefinition.arg2.arrs.maxPosPosition;
     }
   }
@@ -158,7 +160,7 @@ public class LightWeightLearningApi extends Object {
       "_");
     if(docName.contains("_"))
       docName = docName.substring(0, docName.lastIndexOf("_"));
-    if(LogService.debug>0) 
+    if(LogService.debug > 0)
       System.out.println(numDocs + " docname=" + docName + ".");
     NLPFeaturesOfDoc nlpFeaturesDoc = new NLPFeaturesOfDoc(annotations,
       engineSettings.datasetDefinition.getInstanceType(), docName);
@@ -201,6 +203,7 @@ public class LightWeightLearningApi extends Object {
     }
     return;
   }
+
   /** Normalising the feature vectors. */
   static void normaliseFVs(DocFeatureVectors docFV) {
     for(int i = 0; i < docFV.numInstances; ++i) {
@@ -214,9 +217,9 @@ public class LightWeightLearningApi extends Object {
   }
 
   /**
-   * Finishing the conversion from annotations to feature
-   * vectors by writing back the label and nlp feature list into
-   * files, and closing the java writers. 
+   * Finishing the conversion from annotations to feature vectors by writing
+   * back the label and nlp feature list into files, and closing the java
+   * writers.
    */
   public void finishFVs(File wdResults, int numDocs, boolean isTraining,
     LearningEngineSettings engineSettings) {
@@ -237,6 +240,7 @@ public class LightWeightLearningApi extends Object {
       ChunkLengthStats.writeChunkLensStatsIntoFile(wdResults,
         ConstantParameters.FILENAMEOFChunkLenStats, chunkLenHash);
   }
+
   /** Write the FVs of one document into file. */
   void addDocFVsToFile(int index, BufferedWriter out, int[] labels,
     DocFeatureVectors docFV) {
@@ -256,6 +260,7 @@ public class LightWeightLearningApi extends Object {
     } catch(IOException e) {
     }
   }
+
   /** Write the FVs with labels of one document into file. */
   void addDocFVsMultiLabelToFile(int index, BufferedWriter out,
     LabelsOfFV[] multiLabels, DocFeatureVectors docFV) {
@@ -310,11 +315,12 @@ public class LightWeightLearningApi extends Object {
       case 1: // for weka learner
         logFileIn.println("Use weka learner.");
         WekaLearning wekaL = new WekaLearning();
-        short featureType =  WekaLearning.obtainWekaLeanerDataType(engineSettings.learnerSettings.learnerName);
+        short featureType = WekaLearning
+          .obtainWekaLeanerDataType(engineSettings.learnerSettings.learnerName);
         // Convert and read training data
         switch(featureType){
           case WekaLearning.NLPFEATUREFVDATA:
-            // Transfer the labels in nlpDataFile into 
+            // Transfer the labels in nlpDataFile into
             // the label in the sparse data
             // and collect the labels and write them into a file
             convertNLPLabelsTDataLabel(nlpDataFile, dataFile, labelInData,
@@ -329,15 +335,15 @@ public class LightWeightLearningApi extends Object {
             break;
         }
         // Get the wekaLearner from the learnername
-        WekaLearner wekaLearner =  WekaLearning.obtainWekaLearner(
-          engineSettings.learnerSettings.learnerName, engineSettings.learnerSettings.paramsOfLearning);
+        WekaLearner wekaLearner = WekaLearning.obtainWekaLearner(
+          engineSettings.learnerSettings.learnerName,
+          engineSettings.learnerSettings.paramsOfLearning);
         logFileIn.println("Weka learner name: " + wekaLearner.getLearnerName());
         // Training.
         wekaL.train(wekaLearner, modelFile);
         break;
       case 2: // for learner of multi to binary conversion
-        if(LogService.debug>0)
-          System.out.println("Using the SVM");
+        if(LogService.debug > 0) System.out.println("Using the SVM");
         logFileIn.println("Multi to binary conversion.");
         MultiClassLearning chunkLearning = new MultiClassLearning(
           engineSettings.multi2BinaryMode);
@@ -353,8 +359,10 @@ public class LightWeightLearningApi extends Object {
         SupervisedLearner paumLearner = MultiClassLearning
           .obtainLearnerFromName(engineSettings.learnerSettings.learnerName,
             learningCommand, dataSetFile);
-        paumLearner.setLearnerExecutable(engineSettings.learnerSettings.executableTraining);
-        paumLearner.setLearnerParams(engineSettings.learnerSettings.paramsOfLearning);
+        paumLearner
+          .setLearnerExecutable(engineSettings.learnerSettings.executableTraining);
+        paumLearner
+          .setLearnerParams(engineSettings.learnerSettings.paramsOfLearning);
         logFileIn.println("The learners: " + paumLearner.getLearnerName());
         // training
         chunkLearning.training(paumLearner, modelFile, logFileIn);
@@ -366,8 +374,8 @@ public class LightWeightLearningApi extends Object {
   }
 
   /**
-   * Apply the model to data, also using the learning algorithm
-   * implemented in Java.
+   * Apply the model to data, also using the learning algorithm implemented in
+   * Java.
    */
   public void applyModelInJava(Corpus corpus, String labelName,
     PrintWriter logFileIn, LearningEngineSettings engineSettings)
@@ -381,8 +389,8 @@ public class LightWeightLearningApi extends Object {
       + ConstantParameters.FILENAMEOFNLPFeaturesData;
     String modelFileName = wdResults.toString() + File.separator
       + ConstantParameters.FILENAMEOFModels;
-    //String labelInDataFileName = wdResults.toString() + File.separator
-      //+ ConstantParameters.FILENAMEOFLabelsInData;
+    // String labelInDataFileName = wdResults.toString() + File.separator
+    // + ConstantParameters.FILENAMEOFLabelsInData;
     File dataFile = new File(fvFileName);
     File nlpDataFile = new File(nlpFileName);
     File modelFile = new File(modelFileName);
@@ -398,7 +406,8 @@ public class LightWeightLearningApi extends Object {
         WekaLearning wekaL = new WekaLearning();
         // Check if the learner uses the sparse feaature vectors or NLP
         // features
-        featureType =  WekaLearning.obtainWekaLeanerDataType(engineSettings.learnerSettings.learnerName);
+        featureType = WekaLearning
+          .obtainWekaLeanerDataType(engineSettings.learnerSettings.learnerName);
         int numDocs = corpus.size();
         switch(featureType){
           case WekaLearning.NLPFEATUREFVDATA:
@@ -412,10 +421,12 @@ public class LightWeightLearningApi extends Object {
             break;
         }
         // Check if the weka learner has distribute output of classify
-        boolean distributionOutput =  WekaLearning.obtainWekaLearnerOutputType(engineSettings.learnerSettings.learnerName);
+        boolean distributionOutput = WekaLearning
+          .obtainWekaLearnerOutputType(engineSettings.learnerSettings.learnerName);
         // Get the wekaLearner from the learnername
         WekaLearner wekaLearner = WekaLearning.obtainWekaLearner(
-          engineSettings.learnerSettings.learnerName, engineSettings.learnerSettings.paramsOfLearning);
+          engineSettings.learnerSettings.learnerName,
+          engineSettings.learnerSettings.paramsOfLearning);
         logFileIn.println("Weka learner name: " + wekaLearner.getLearnerName());
         // Training.
         wekaL.apply(wekaLearner, modelFile, distributionOutput);
@@ -437,8 +448,10 @@ public class LightWeightLearningApi extends Object {
         SupervisedLearner paumLearner = MultiClassLearning
           .obtainLearnerFromName(engineSettings.learnerSettings.learnerName,
             learningCommand, dataSetFile);
-        paumLearner.setLearnerExecutable(engineSettings.learnerSettings.executableTraining);
-        paumLearner.setLearnerParams(engineSettings.learnerSettings.paramsOfLearning);
+        paumLearner
+          .setLearnerExecutable(engineSettings.learnerSettings.executableTraining);
+        paumLearner
+          .setLearnerParams(engineSettings.learnerSettings.paramsOfLearning);
         logFileIn.println("The learners: " + paumLearner.getLearnerName());
         // apply
         chunkLearning.apply(paumLearner, modelFile, logFileIn);
@@ -488,6 +501,7 @@ public class LightWeightLearningApi extends Object {
       }
     }
   }
+
   /** Add the annotation into documents for chunk learning. */
   private void addAnnsInDoc(Document doc, HashSet chunks, String instanceType,
     String featName, String labelName, Label2Id labelsAndId) {
@@ -516,6 +530,7 @@ public class LightWeightLearningApi extends Object {
         annsDoc.add(entityS, entityE, labelName, features);
     }
   }
+
   /** Add the annotation into documents for classification. */
   private void addAnnsInDocClassification(Document doc, int[] selectedLabels,
     float[] valuesLabels, String instanceType, String featName,
@@ -559,7 +574,7 @@ public class LightWeightLearningApi extends Object {
       annsDoc.add(ann.getStartNode(), ann.getEndNode(), labelName, features);
     }
   }
- 
+
   /** Convert the string labels in the nlp data file into the index labels. */
   public void convertNLPLabelsTDataLabel(File nlpDataFile, File dataFile,
     File labelInDataFile, File nlpDataLabelFile, int numDocs,
@@ -634,9 +649,12 @@ public class LightWeightLearningApi extends Object {
       e.printStackTrace();
     }
   }
-  /** Flitering out the negative examples of the
-   *  training data using the SVM. 
-   * @throws GateException */
+
+  /**
+   * Flitering out the negative examples of the training data using the SVM.
+   * 
+   * @throws GateException
+   */
   public void FilteringNegativeInstsInJava(int numDocs, PrintWriter logFileIn,
     LearningEngineSettings engineSettings) throws GateException {
     logFileIn.println("\nFiltering starts.");
@@ -672,8 +690,10 @@ public class LightWeightLearningApi extends Object {
     String dataSetFile = null;
     SupervisedLearner paumLearner = MultiClassLearning.obtainLearnerFromName(
       "SVMLibSvmJava", "-c 1.0 -t 0 -m 100 -tau 1.0 ", dataSetFile);
-    paumLearner.setLearnerExecutable(engineSettings.learnerSettings.executableTraining);
-    paumLearner.setLearnerParams(engineSettings.learnerSettings.paramsOfLearning);
+    paumLearner
+      .setLearnerExecutable(engineSettings.learnerSettings.executableTraining);
+    paumLearner
+      .setLearnerParams(engineSettings.learnerSettings.paramsOfLearning);
     logFileIn.println("The learners: " + paumLearner.getLearnerName());
     // training
     chunkLearning.training(paumLearner, modelFile, logFileIn);
@@ -757,10 +777,9 @@ public class LightWeightLearningApi extends Object {
       e.printStackTrace();
     }
   }
-  
-  /** 
-   * Determining the type of the learner, it is from
-   * Weka or not. 
+
+  /**
+   * Determining the type of the learner, it is from Weka or not.
    */
   public static int obtainLearnerType(String learnerName) throws GateException {
     if(learnerName.equals("SVMLibSvmJava") || learnerName.equals("C4.5Weka")
@@ -775,5 +794,4 @@ public class LightWeightLearningApi extends Object {
         + "\" is not defined!");
     }
   }
-  
 }

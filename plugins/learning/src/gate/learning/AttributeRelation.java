@@ -10,17 +10,19 @@ package gate.learning;
 import gate.util.GateException;
 import java.util.ArrayList;
 import org.jdom.Element;
+
 /**
- * Extend the Attribute class a bit in order to accommodate the two
- * arguments of one relation.
+ * Extend the Attribute class a bit in order to accommodate the two arguments of
+ * one relation.
  */
 public class AttributeRelation extends Attribute {
-  /** Annotation feature for argument 1.*/
+  /** Annotation feature for argument 1. */
   private String arg1;
-  /** Annotation feature for argument 2.*/
+  /** Annotation feature for argument 2. */
   private String arg2;
-  /** Constuctor
-   *  Create an AttributeRelation object from an xml element.
+
+  /**
+   * Constuctor Create an AttributeRelation object from an xml element.
    */
   public AttributeRelation(Element jdomElement) throws GateException {
     // find the name
@@ -147,5 +149,4 @@ public class AttributeRelation extends Attribute {
     sb.append("     ").append("</ATTRIBUTE>\n");
     return sb.toString();
   }
-
 }

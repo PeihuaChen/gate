@@ -29,40 +29,39 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-/** 
- * Do evaluation by spliting the documents into training
- * and testing datasets. Two methods of spliting are implemented,
- * namely k-fold and hold-out test.
+
+/**
+ * Do evaluation by spliting the documents into training and testing datasets.
+ * Two methods of spliting are implemented, namely k-fold and hold-out test.
  */
 public class EvaluationBasedOnDocs {
   /** Corpus referring to the corpus used as data. */
   Corpus corpusOn;
   /** Number of documents in the corpus. */
   int numDoc;
-  /** 
-   * Showing if one document used for training or testing
-   * in one evaluation. 
+  /**
+   * Showing if one document used for training or testing in one evaluation.
    */
   boolean[] isUsedForTraining;
   /** The sub-directory for storing the data file produced by ML api. */
   File wdResults;
   /** Name of the annotation set as input. */
   String inputASName;
-  /** Storing the macro averaged overall F-meausre results of the evaluation.*/
-  public EvaluationMeasuresComputation 
-    macroMeasuresOfResults = new EvaluationMeasuresComputation();
+  /** Storing the macro averaged overall F-meausre results of the evaluation. */
+  public EvaluationMeasuresComputation macroMeasuresOfResults = new EvaluationMeasuresComputation();
   /** Storing the macro averaged results of every label. */
   HashMap labels2MMR = new HashMap();
-  /** 
-   * Label to number of the runs having that label, 
-   * used for macro-averaged for each label. 
+  /**
+   * Label to number of the runs having that label, used for macro-averaged for
+   * each label.
    */
   HashMap labels2RunsNum = new HashMap();
-  /** 
-   * Label to number of the instances with that label,
-   * averaged over the number of runs for that label. 
+  /**
+   * Label to number of the instances with that label, averaged over the number
+   * of runs for that label.
    */
   HashMap labels2InstNum = new HashMap();
+
   /** Constructor. */
   public EvaluationBasedOnDocs(Corpus corpus, File wdRes, String inputAsN) {
     corpusOn = corpus;
@@ -71,20 +70,20 @@ public class EvaluationBasedOnDocs {
     wdResults = wdRes;
     inputASName = inputAsN;
   }
-  /** Main method for evluation.  */
+
+  /** Main method for evluation. */
   public void evaluation(LearningEngineSettings learningSettings,
     LightWeightLearningApi lightWeightApi, PrintWriter logFileIn)
     throws GateException {
-    //k-fold
+    // k-fold
     if(learningSettings.evaluationconfig.mode == EvaluationConfiguration.kfold)
       kfoldEval(learningSettings, lightWeightApi, logFileIn);
-    //Hold-out testing
+    // Hold-out testing
     else if(learningSettings.evaluationconfig.mode == EvaluationConfiguration.split)
       holdoutEval(learningSettings, lightWeightApi, logFileIn);
-    else throw new GateException(
-    "The evaluation configuration mode as "+learningSettings.evaluationconfig.mode
-    + " is not implemented!");
-    if(LogService.debug>=0) {
+    else throw new GateException("The evaluation configuration mode as "
+      + learningSettings.evaluationconfig.mode + " is not implemented!");
+    if(LogService.debug >= 0) {
       logFileIn.println("\nAveraged results for each label as:");
       printFmeasureForEachLabel(labels2InstNum, labels2MMR, logFileIn);
       System.out.println("\nOverall results as:");
@@ -93,7 +92,8 @@ public class EvaluationBasedOnDocs {
       macroMeasuresOfResults.printResults(logFileIn);
     }
   }
-  /** K-fold evalution.*/
+
+  /** K-fold evalution. */
   public void kfoldEval(LearningEngineSettings learningSettings,
     LightWeightLearningApi lightWeightApi, PrintWriter logFileIn)
     throws GateException {
@@ -102,15 +102,14 @@ public class EvaluationBasedOnDocs {
     int lenPerFold = (new Double(Math.floor((double)numDoc / k))).intValue();
     if(lenPerFold < 1) lenPerFold = 1;
     int beginIndex, endIndex;
-    if(LogService.debug>0) {
+    if(LogService.debug > 0) {
       System.out.println("Kfold k=" + new Integer(k) + ", numDoc="
         + new Integer(numDoc) + ", len=" + new Integer(lenPerFold) + ".");
     }
     for(int nr = 0; nr < k; ++nr) {
-      EvaluationMeasuresComputation measuresOfResults = 
-        new EvaluationMeasuresComputation();
-      //Label to measure of result of the label
-      HashMap labels2MR = new HashMap(); 
+      EvaluationMeasuresComputation measuresOfResults = new EvaluationMeasuresComputation();
+      // Label to measure of result of the label
+      HashMap labels2MR = new HashMap();
       beginIndex = nr * lenPerFold;
       endIndex = (nr + 1) * lenPerFold;
       if(endIndex > numDoc) endIndex = numDoc;
@@ -152,17 +151,16 @@ public class EvaluationBasedOnDocs {
     int trainingNum = (new Double(Math
       .floor((numDoc * learningSettings.evaluationconfig.ratio))).intValue());
     if(trainingNum > numDoc) trainingNum = numDoc;
-    if(LogService.debug>0) {
+    if(LogService.debug > 0) {
       System.out.println("Split, k=" + new Integer(k) + ", trainingNum="
         + new Integer(trainingNum) + ".");
     }
     int testNum = numDoc - trainingNum;
     Random randGenerator = new Random(1000);
     for(int nr = 0; nr < k; ++nr) {
-      EvaluationMeasuresComputation measuresOfResults = 
-        new EvaluationMeasuresComputation();
-      //Label to measure of result of the label
-      HashMap labels2MR = new HashMap(); 
+      EvaluationMeasuresComputation measuresOfResults = new EvaluationMeasuresComputation();
+      // Label to measure of result of the label
+      HashMap labels2MR = new HashMap();
       // Select the training examples randomly from the data
       int[] indexRand = new int[testNum];
       for(int i = 0; i < testNum; ++i) {
@@ -192,7 +190,7 @@ public class EvaluationBasedOnDocs {
             if(isOk) break;
           }
         }
-        if(LogService.debug>0) {
+        if(LogService.debug > 0) {
           System.out.println("i=" + new Integer(i) + ", newNum="
             + new Integer(newNum));
         }
@@ -260,9 +258,9 @@ public class EvaluationBasedOnDocs {
       .getFeature();
     learningSettings.datasetDefinition.getClassAttribute().setType(
       classTypeTest);
-    if(LogService.debug>0)
+    if(LogService.debug > 0)
       System.out.println("classType=" + classTypeOriginal + ", testType="
-      + classTypeTest + ".");
+        + classTypeTest + ".");
     isTraining = false;
     numDoc = 0;
     for(int i = 0; i < corpusOn.size(); ++i)
@@ -297,8 +295,8 @@ public class EvaluationBasedOnDocs {
     HashMap uniqueLabels = new HashMap();
     for(int i = 0; i < corpusOn.size(); ++i)
       if(isUsedForTraining[i]) {
-        AnnotationSet keyAnns = getInputAS((Document)corpusOn.get(i))
-          .get(classTypeOriginal);
+        AnnotationSet keyAnns = getInputAS((Document)corpusOn.get(i)).get(
+          classTypeOriginal);
         for(Object obj : keyAnns) {
           if(((Annotation)obj).getFeatures().get(classFeature) != null) {
             String label = ((Annotation)obj).getFeatures().get(classFeature)
@@ -326,7 +324,8 @@ public class EvaluationBasedOnDocs {
     }
     // Do the evaluation on the test set
     if(learningSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
-      //For relation type, we cannot use the evalutation method AnnDiff of Gate
+      // For relation type, we cannot use the evalutation method AnnDiff
+      // of Gate
       AttributeRelation relAttr = (AttributeRelation)learningSettings.datasetDefinition
         .getClassAttribute();
       String arg1F = relAttr.getArg1();
@@ -362,7 +361,7 @@ public class EvaluationBasedOnDocs {
       emc.computeFmeasure();
       emc.computeFmeasureLenient();
     }
-    if(LogService.debug>0) {
+    if(LogService.debug > 0) {
       System.out.println("in one run:");
       // Print the results of each label
       printFmeasureForEachLabel(uniqueLabels, labels2MR, logFileIn);
@@ -371,7 +370,7 @@ public class EvaluationBasedOnDocs {
       logFileIn.println("\nResults of overall labels (micro-averaged)");
       measuresOfResults.printResults(logFileIn);
     }
-    // finally, change the class type back for training, 
+    // finally, change the class type back for training,
     // and remove the test annotations
     learningSettings.datasetDefinition.getClassAttribute().setType(
       classTypeOriginal);
@@ -401,7 +400,8 @@ public class EvaluationBasedOnDocs {
       e.printStackTrace();
     }
   }
-  /** Add the F-measure of each label to the overal F-measure*/
+
+  /** Add the F-measure of each label to the overal F-measure */
   public void add2MacroMeasure(EvaluationMeasuresComputation measuresOfResults,
     HashMap labels2MR, EvaluationMeasuresComputation macroMeasuresOfResults,
     HashMap labels2MMR, HashMap labels2RunsNum) {
@@ -424,6 +424,7 @@ public class EvaluationBasedOnDocs {
       }
     }
   }
+
   /** Print the F-measure results for each label. */
   public void printFmeasureForEachLabel(HashMap uniqueLabels,
     HashMap labels2MR, PrintWriter logFileIn) {
@@ -585,8 +586,7 @@ public class EvaluationBasedOnDocs {
   private AnnotationSet getInputAS(Document doc) {
     if(inputASName == null || inputASName.trim().length() == 0) {
       return doc.getAnnotations();
-    }
-    else {
+    } else {
       return doc.getAnnotations(inputASName);
     }
   }

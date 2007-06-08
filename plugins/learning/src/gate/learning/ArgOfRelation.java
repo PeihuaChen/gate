@@ -6,6 +6,7 @@
  *  $Id: ArgOfRelation.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
  */
 package gate.learning;
+
 /**
  * Store the identification information and the related features for the
  * annotation corresponding to one argument of a relation
@@ -21,4 +22,6 @@ public class ArgOfRelation {
   java.util.List ngrams;
   /** Object for arrays and variables for fast computation purpose. */
   ArraysDataSetDefinition arrs;
+  /** The maximal total position of the features in this argument. */
+  int maxTotalPosition;
 }

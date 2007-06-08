@@ -6,9 +6,9 @@
  *  $Id: ConstantParameter.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
  */
 package gate.learning;
+
 /**
- * Define the constant parameters used accross different classes
- * in the ML api.
+ * Define the constant parameters used accross different classes in the ML api.
  */
 public class ConstantParameters {
   /** Maximal number of the unique NLP features. */
@@ -17,10 +17,10 @@ public class ConstantParameters {
   public static final String NAMECONFIGURATIONFILE = "engines.xml";
   /** Name of file extension for all the files saved from the ML Api. */
   public static final String FILETYPEOFSAVEDFILE = ".save";
-  /** 
-   * Name of the sub-directory under the working directory, which is
-   * used for storing all files produced by the ML Api, such as
-   * those for NLP featuers, feature vectors and learned model.
+  /**
+   * Name of the sub-directory under the working directory, which is used for
+   * storing all files produced by the ML Api, such as those for NLP featuers,
+   * feature vectors and learned model.
    */
   public static final String SUBDIRFORRESULTS = "savedFiles";
   /** Name of log file of ML Api. */
@@ -38,12 +38,13 @@ public class ConstantParameters {
   /** Name of the file storing the feature vectors in sparse format. */
   public static final String FILENAMEOFFeatureVectorData = "featureVectorsData"
     + FILETYPEOFSAVEDFILE;
-  //public static final String PARTFILENAMEOFDocNLPFeaturess = "DOCNLPFeaetures";
-  /** Name of the file storing the learned models*/
+  // public static final String PARTFILENAMEOFDocNLPFeaturess =
+  // "DOCNLPFeaetures";
+  /** Name of the file storing the learned models */
   public static final String FILENAMEOFModels = "learnedModels"
     + FILETYPEOFSAVEDFILE;
-  /** 
-   * Name of the file storing NLP feature data with label indexes, instead 
+  /**
+   * Name of the file storing NLP feature data with label indexes, instead
    * labels itsesl.
    */
   public static final String FILENAMEOFNLPDataLabel = "NLPFeatureDataLabels"
@@ -68,9 +69,9 @@ public class ConstantParameters {
   public static final String NAMENONFEATURE = new String("_NA");
   /** The suffix of start token of an entity. */
   public static final String SUFFIXSTARTTOKEN = new String("_BB");
-  /** 
-   * Separator in a pair of index and value used feature vector
-   * in sparse format.
+  /**
+   * Separator in a pair of index and value used feature vector in sparse
+   * format.
    */
   public static final String INDEXVALUESEPARATOR = new String(":");
 }

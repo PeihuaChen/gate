@@ -6,9 +6,10 @@
  *  $Id: UsefulFunctions.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
  */
 package gate.learning;
+
 /**
  * Some useful functions.
- *
+ * 
  */
 public class UsefulFunctions {
   /** The sigmoid fucntion. */
