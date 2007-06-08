@@ -8,25 +8,27 @@
 package gate.learning;
 
 import gate.learning.DocFeatureVectors.LongCompactor;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+
 /**
- * Labels (indexes) of feature vectors in one document. 
- * It represents multi-label via the LabelsOfFV object.
+ * Labels (indexes) of feature vectors in one document. It represents
+ * multi-label via the LabelsOfFV object.
  */
 public class LabelsOfFeatureVectorDoc {
   /** Array of multi-labels for all instances in a document. */
   public LabelsOfFV[] multiLabels = null;
-  /** Constructor, trivial case.*/
+
+  /** Constructor, trivial case. */
   public LabelsOfFeatureVectorDoc() {
   }
-  /** 
-   * Get the labels from the NLP label feautues of the document.
-   * For surround mode, get the start and end token label as 1 and 2. 
-   * For entity with single token, the token has two labels, 1 and 2. 
+
+  /**
+   * Get the labels from the NLP label feautues of the document. For surround
+   * mode, get the start and end token label as 1 and 2. For entity with single
+   * token, the token has two labels, 1 and 2.
    */
   public void obtainMultiLabelsFromNLPDocSurround(NLPFeaturesOfDoc nlpDoc,
     Label2Id label2Id, boolean surroundMode) {
@@ -61,7 +63,8 @@ public class LabelsOfFeatureVectorDoc {
               .toString()); // Integer.valueOf(obj.toString());
         }
       }// end of the i loop
-    } else // for the surrond mode
+    } else
+    // for the surrond mode
     for(int i = 0; i < num; ++i) {
       HashSet setLabels = new HashSet();
       if(nlpDoc.classNames[i] != null) {
@@ -72,7 +75,7 @@ public class LabelsOfFeatureVectorDoc {
           if(currentN.endsWith(ConstantParameters.SUFFIXSTARTTOKEN)) {
             String label = currentN.substring(0, currentN
               .lastIndexOf(ConstantParameters.SUFFIXSTARTTOKEN));
-            if(label2Id.label2Id.containsKey(label)) { 
+            if(label2Id.label2Id.containsKey(label)) {
               setLabels.add(Integer.valueOf(label2Id.label2Id.get(label)
                 .toString()) * 2 - 1);
               if(i + 1 == num
@@ -82,8 +85,9 @@ public class LabelsOfFeatureVectorDoc {
                   .toString()) * 2);
             }
           } else { // no start token
-            if(label2Id.label2Id.containsKey(currentN)) { 
-              if(i + 1 == num) {// the last token, hence the end token
+            if(label2Id.label2Id.containsKey(currentN)) {
+              if(i + 1 == num) {// the last token, hence the
+                // end token
                 setLabels.add(Integer.valueOf(label2Id.label2Id.get(currentN)
                   .toString()) * 2);
               } else if(!hasTheSameLabel(currentN, nlpDoc.classNames[i + 1]))
@@ -105,6 +109,7 @@ public class LabelsOfFeatureVectorDoc {
       }
     }// end of the i loop
   }
+
   /** Is a squence of labels contains one particular label. */
   private boolean hasTheSameLabel(String label, String classNames) {
     if(classNames != null) {
@@ -119,5 +124,4 @@ public class LabelsOfFeatureVectorDoc {
     }
     return false;
   }
-
 }

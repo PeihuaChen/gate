@@ -21,7 +21,8 @@ import java.util.ArrayList;
 import org.jdom.Element;
 
 /**
- * Desribe and read the ATTRIBUTE, one type of features in the dataset definition.  
+ * Desribe and read the ATTRIBUTE, one type of features in the dataset
+ * definition.
  */
 public class Attribute {
   // These constants are used only for returning values from
@@ -46,8 +47,8 @@ public class Attribute {
   // wrappers.
   double weighting;
 
-  /** Constuctor
-   *  Create an Attribute object from an xml element.
+  /**
+   * Constuctor Create an Attribute object from an xml element.
    */
   public Attribute(Element jdomElement) throws GateException {
     // find the name
@@ -218,10 +219,11 @@ public class Attribute {
     return sb.toString();
   }
 
-  /**  
-   * This method is a clone of gate.creole.mi.Attribute.parseSerie method with minor 
-   * changes to make it compatible with ML API. It basically given an attribute element
-   * first locates all required variable and creates multiple attributes for the given RANGE.
+  /**
+   * This method is a clone of gate.creole.mi.Attribute.parseSerie method with
+   * minor changes to make it compatible with ML API. It basically given an
+   * attribute element first locates all required variable and creates multiple
+   * attributes for the given RANGE.
    */
   public static java.util.List parseSerie(Element jdomElement)
     throws GateException {

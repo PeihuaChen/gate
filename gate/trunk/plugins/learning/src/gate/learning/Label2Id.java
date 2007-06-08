@@ -18,9 +18,10 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+
 /**
- * The list of unique labels, containing string labels and
- * their numeric indexes. 
+ * The list of unique labels, containing string labels and their numeric
+ * indexes.
  */
 public class Label2Id {
   /** Label to index map, for training. */
@@ -33,6 +34,7 @@ public class Label2Id {
     label2Id = new Hashtable();
     id2Label = new Hashtable();
   }
+
   /** Load the label list and the indexes from a file. */
   public void loadLabelAndIdFromFile(File parentDir, String filename) {
     File file1 = new File(parentDir, filename);
@@ -53,10 +55,11 @@ public class Label2Id {
       } catch(IOException e) {
       }
     } else {
-      if(LogService.debug>0)
+      if(LogService.debug > 0)
         System.out.println("No label list file in initialisation phrase.");
     }
   }
+
   /** Write the label list and indexes into a file. */
   public void writeLabelAndIdToFile(File parentDir, String filename) {
     try {
@@ -73,6 +76,7 @@ public class Label2Id {
     } catch(IOException e) {
     }
   }
+
   /** Update the label list from the new document. */
   public void updateMultiLabelFromDoc(String[] className) {
     int baseId = label2Id.size();
@@ -92,6 +96,7 @@ public class Label2Id {
       }
     }
   }
+
   /** Clear the label list object for another run in evaluation. */
   public void clearAllData() {
     this.label2Id.clear();

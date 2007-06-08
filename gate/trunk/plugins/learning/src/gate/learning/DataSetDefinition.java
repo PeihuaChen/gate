@@ -54,10 +54,10 @@ public class DataSetDefinition {
   ArgOfRelation arg2 = null;
   /** List of ATTRIBUTE_REL type features. */
   protected java.util.List relAttributes;
-  
-  /** 
-   * Constructor
-   * A DataSetDefinition is built using an XML element in configuration file. 
+
+  /**
+   * Constructor A DataSetDefinition is built using an XML element in
+   * configuration file.
    */
   public DataSetDefinition(Element domElement) throws GateException {
     if(!domElement.getName().equals("DATASET"))
@@ -97,6 +97,8 @@ public class DataSetDefinition {
         arg1.arrs = new ArraysDataSetDefinition();
         arg1.arrs.putTypeAndFeatIntoArray(arg1.attributes);
         arg1.arrs.numNgrams = arg1.ngrams.size();
+        // Get the maximal posistion
+        arg1.maxTotalPosition = obtainMaxTotalPosisiont(arg1);
       }
       // Get the features associated with arg2
       anElement = domElement.getChild("FEATURES-ARG2");
@@ -115,6 +117,8 @@ public class DataSetDefinition {
         arg2.arrs = new ArraysDataSetDefinition();
         arg2.arrs.putTypeAndFeatIntoArray(arg2.attributes);
         arg2.arrs.numNgrams = arg2.ngrams.size();
+        // Get the maximal posistion
+        arg2.maxTotalPosition = obtainMaxTotalPosisiont(arg2);
       }
       // find the relation attributes
       int attrIndex = 0;
@@ -185,9 +189,28 @@ public class DataSetDefinition {
       arrs.putTypeAndFeatIntoArray(attributes);
       arrs.numNgrams = ngrams.size();
     }
-    if(LogService.debug>0)
+    if(LogService.debug > 0)
       System.out.println("*** dataType=" + dataType + " classType="
         + arrs.classType + " classFeat=" + arrs.classFeature);
+  }
+
+  int obtainMaxTotalPosisiont(ArgOfRelation arg1) {
+    int maxP = 0;
+    int maxN = 0;
+    for(int i = 0; i < arg1.attributes.size(); ++i) {
+      if(((Attribute)arg1.attributes.get(i)).position > maxP)
+        maxP = ((Attribute)arg1.attributes.get(i)).position;
+      else if(((Attribute)arg1.attributes.get(i)).position < maxN)
+        maxN = ((Attribute)arg1.attributes.get(i)).position;
+    }
+    for(int i = 0; i < arg1.ngrams.size(); ++i) {
+      if(((Ngram)arg1.ngrams.get(i)).position > maxP)
+        maxP = ((Ngram)arg1.ngrams.get(i)).position;
+      else if(((Ngram)arg1.ngrams.get(i)).position < maxN)
+        maxN = ((Ngram)arg1.ngrams.get(i)).position;
+    }
+    // Minus for maxN because it's a negative number.
+    return maxP - maxN;
   }
 
   /** Obtain the ATTRIBUTEs and other features of one argument. */
@@ -220,7 +243,6 @@ public class DataSetDefinition {
     }
     return attrIndex;
   }
-
 
   public String toString() {
     StringBuffer res = new StringBuffer();
@@ -268,5 +290,4 @@ public class DataSetDefinition {
   public void setInstanceType(String instanceType) {
     this.instanceType = instanceType;
   }
-
 }

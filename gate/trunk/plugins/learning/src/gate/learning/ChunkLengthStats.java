@@ -10,7 +10,6 @@ package gate.learning;
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.learning.DocFeatureVectors.LongCompactor;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -21,25 +20,26 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-/** 
- * Store the length statitics of chunks belonging to one type
- * which will be used by the post-processing procedure.
+/**
+ * Store the length statitics of chunks belonging to one type which will be used
+ * by the post-processing procedure.
  */
 public class ChunkLengthStats {
-  /** Index refer to the length of chunk, and value is the 
-   * number of chunks with the length in training data.
+  /**
+   * Index refer to the length of chunk, and value is the number of chunks with
+   * the length in training data.
    */
   public int[] lenStats;
   /** Maixmal length of a chunk considered. */
   public final static int maxLen = 200;
 
-  /** 
-   * Constructor
-   * Get an int array with the length pre-defined.
+  /**
+   * Constructor Get an int array with the length pre-defined.
    */
   public ChunkLengthStats() {
     lenStats = new int[maxLen];
   }
+
   /** Read the chunk length statistics from a file specified. */
   static public void loadChunkLenStats(File parentDir, String filename,
     HashMap chunkLenHash) {
@@ -68,10 +68,12 @@ public class ChunkLengthStats {
       } catch(IOException e) {
       }
     } else {
-      if(LogService.debug>0)
-      System.out.println("No chunk length statistics list file in initialisation phrase.");
+      if(LogService.debug > 0)
+        System.out
+          .println("No chunk length statistics list file in initialisation phrase.");
     }
   }
+
   /** Write the chunk length statistics into a file. */
   static public void writeChunkLensStatsIntoFile(File parentDir,
     String filename, HashMap chunkLenHash) {
@@ -109,9 +111,10 @@ public class ChunkLengthStats {
     } catch(IOException e) {
     }
   }
-  /** 
-   * Update the chunk length statistics from the annotations according to
-   * data set defintion. 
+
+  /**
+   * Update the chunk length statistics from the annotations according to data
+   * set defintion.
    */
   public static void updateChunkLensStats(AnnotationSet annotations,
     DataSetDefinition dsd, HashMap chunkLenHash, Label2Id label2Id) {
@@ -131,7 +134,7 @@ public class ChunkLengthStats {
           for(Object objI : annsI)
             if(annC.overlaps((Annotation)objI)) ++num;
           if(num < ChunkLengthStats.maxLen) {
-            //Update the chunk length statistics
+            // Update the chunk length statistics
             if(chunkLenHash.containsKey(label)) {
               ChunkLengthStats chunkLen = (ChunkLengthStats)chunkLenHash
                 .get(label);

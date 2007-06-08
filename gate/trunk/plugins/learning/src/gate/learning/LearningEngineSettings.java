@@ -13,9 +13,9 @@ import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import gate.creole.ResourceInstantiationException;
 import gate.util.GateException;
-/** 
- *  Reading and storing the learning settings 
- *  from the configuration file.
+
+/**
+ * Reading and storing the learning settings from the configuration file.
  */
 public class LearningEngineSettings {
   /** Storing date set definition. */
@@ -31,8 +31,7 @@ public class LearningEngineSettings {
   /** Name used in the configuration file for entity prob threshold. */
   final static String thrEntityProbStr = "thresholdProbabilityEntity";
   /** Name used in the configuration file for classification prob. threshold. */
-  final static String thrClassificationProbStr = 
-    "thresholdProbabilityClassification";
+  final static String thrClassificationProbStr = "thresholdProbabilityClassification";
   /**
    * Two difference methods of converting multi-class problem into binary class
    * problems.
@@ -42,8 +41,9 @@ public class LearningEngineSettings {
   public final static short OneVSOtherMode = 1;
   /** One against Another one. */
   public final static short OneVSAnotehrMode = 2;
-  /** Name used in the configuration file for the
-   * the method of multi to binary mode conversion. 
+  /**
+   * Name used in the configuration file for the the method of multi to binary
+   * mode conversion.
    */
   final static String multi2BinaryN = "multiClassification2BinaryMethod";
   /** The settings of learner specified. */
@@ -56,28 +56,30 @@ public class LearningEngineSettings {
   public boolean isNLPFeatListUpdatable = true;
   /** The option if doing filtering training data or not. */
   public boolean fiteringTrainingData = false;
-  /** 
-   * Ratio of negative examples filiterd out
-   * to the total number of negative exampels in training set.
+  /**
+   * Ratio of negative examples filiterd out to the total number of negative
+   * exampels in training set.
    */
   public float filteringRatio = 0.0f;
-  /** 
-   * Filtering the negative examples which are nearest to
-   * classification hyper-plane or furthest from.*/
+  /**
+   * Filtering the negative examples which are nearest to classification
+   * hyper-plane or furthest from.
+   */
   public boolean filteringNear = false;
   /**
    * If the user only want to feature data to be used in his learning
    * algorithms.
    */
   public boolean isOnlyFeatureData = false;
-  /** The setting for evaluation.*/
+  /** The setting for evaluation. */
   public EvaluationConfiguration evaluationconfig = null;
+
   /** Loading the learning settings from the configuration file. */
   public static LearningEngineSettings loadLearningSettingsFromFile(
     java.net.URL xmlengines) throws GateException {
     SAXBuilder saxBuilder = new SAXBuilder(false);
     org.jdom.Document jdomDoc = null;
-    if(LogService.debug>0)
+    if(LogService.debug > 0)
       System.out.println("xmlFile=" + xmlengines.toString());
     try {
       jdomDoc = saxBuilder.build(xmlengines);
@@ -168,23 +170,21 @@ public class LearningEngineSettings {
         "The Engine element in the configureation file is missing or invalid");
     else {
       if(UEelement.getAttribute("nickname") != null)
-        learningSettings.learnerSettings.learnerNickName = UEelement.getAttribute(
-          "nickname").getValue();
+        learningSettings.learnerSettings.learnerNickName = UEelement
+          .getAttribute("nickname").getValue();
       else learningSettings.learnerSettings.learnerNickName = "A_Learner";
-      if (UEelement.getAttribute("implementationName") != null)
+      if(UEelement.getAttribute("implementationName") != null)
         learningSettings.learnerSettings.learnerName = UEelement.getAttribute(
           "implementationName").getValue();
-      else throw new GateException(
-        "The ENGINE element in the configuration " +
-        "does not specify the leaner's name!");
+      else throw new GateException("The ENGINE element in the configuration "
+        + "does not specify the leaner's name!");
       if(UEelement.getAttribute("options") != null)
-        learningSettings.learnerSettings.paramsOfLearning = UEelement.getAttribute("options")
-          .getValue();
+        learningSettings.learnerSettings.paramsOfLearning = UEelement
+          .getAttribute("options").getValue();
       if(UEelement.getAttribute("executableTraining") != null)
-        learningSettings.learnerSettings.executableTraining = UEelement.getAttribute("executableTraining")
-          .getValue();
+        learningSettings.learnerSettings.executableTraining = UEelement
+          .getAttribute("executableTraining").getValue();
     }
     return learningSettings;
   }
-
 }

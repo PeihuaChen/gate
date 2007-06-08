@@ -13,30 +13,32 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.regex.Pattern;
+
 /**
- * Convert the NLP features into a sparse feature vector for each instance
- * of one document.
+ * Convert the NLP features into a sparse feature vector for each instance of
+ * one document.
  */
 public class DocFeatureVectors {
   /** Document ID. */
   String docId = null;
   /** Number of instance in the document. */
   int numInstances;
-  /** 
-   * Array containing all sparse feature vectors of instances
-   * in the documents. 
+  /**
+   * Array containing all sparse feature vectors of instances in the documents.
    */
   SparseFeatureVector[] fvs;
   /** Default value of one component of feature vector. */
   final static float DEFAULTVALUE = 1.0f;
+
   /** Constructor in trival case. */
   public DocFeatureVectors() {
     numInstances = 0;
   }
-  /** 
-   * The main method for obtaining the sparse feature vector
-   * and label(s) from the NLP features of each instance in 
-   * the documents.
+
+  /**
+   * The main method for obtaining the sparse feature vector and label(s) from
+   * the NLP features of each instance in the documents.
    */
   public void obtainFVsFromNLPFeatures(NLPFeaturesOfDoc nlpDoc,
     NLPFeaturesList featList, int[] featurePosition, int maxNegPosition,
@@ -44,13 +46,22 @@ public class DocFeatureVectors {
     numInstances = nlpDoc.numInstances;
     docId = new String(nlpDoc.getDocId());
     fvs = new SparseFeatureVector[numInstances];
-    //For each istance
+    // For each istance
     for(int i = 0; i < numInstances; ++i) {
       Hashtable indexValues = new Hashtable();
       int n = 0;
       String[] feat = nlpDoc.featuresInLine[i].toString().split(
         ConstantParameters.ITEMSEPARATOR);
       for(int j = 0; j < feat.length; ++j) {
+        //First get the position information for the current NLP feature
+        int positionCurr=0;
+        if(feat[j] != null && Pattern.matches((".+\\[[-0-9]+\\]$"),feat[j])) {
+          int ind = feat[j].lastIndexOf('[');
+          String positionStr = feat[j].substring(ind+1, feat[j].length()-1);
+          positionCurr = new Integer(positionStr).intValue();
+          feat[j] = feat[j].substring(0,ind);
+        }
+        
         String featCur = feat[j];
         String featVal = null;
         int kk = -3;
@@ -62,39 +73,45 @@ public class DocFeatureVectors {
         if(featCur.length() > 0) { // if there is any feature
           if(featList.featuresList.containsKey(featCur)) {
             if(featCur.contains(NLPFeaturesList.SYMBOLNGARM)) {
+              int shiftNum=0;
+              if(positionCurr >0)
+                shiftNum = maxNegPosition+ positionCurr;
+              else shiftNum = -positionCurr;
               // for only the presence of Ngram in the sentence
               // indexValues.put(featList.featuresList.get(featCur),"1");
               // for tf representation
-              //indexValues.put(featList.featuresList.get(featCur),
-               //featVal);
-              //for tf*idf representation
-              double val = (Long.parseLong(featVal)+ 1)*Math.log((double)numDocs/
-                  (Long.parseLong(featList.idfFeatures.get(featCur).toString())));
+              // indexValues.put(featList.featuresList.get(featCur),
+              // featVal);
+              // for tf*idf representation
+              double val = (Long.parseLong(featVal) + 1)
+                * Math.log((double)numDocs
+                  / (Long.parseLong(featList.idfFeatures.get(featCur)
+                    .toString())));
               indexValues.put(featList.featuresList.get(featCur),
                 new Float(val));
             } else {
-              if(featurePosition[j] == 0)
+              if(positionCurr == 0)
                 indexValues.put(featList.featuresList.get(feat[j]), "1");
-              else if(featurePosition[j] < 0)
+              else if(positionCurr < 0)
                 indexValues.put(new Long((Long.parseLong(featList.featuresList
-                  .get(feat[j]).toString()) - featurePosition[j]
+                  .get(feat[j]).toString()) - positionCurr
                   * ConstantParameters.MAXIMUMFEATURES)), new Float(-1.0
-                  / (double)featurePosition[j]));
+                  / (double)positionCurr));
               else indexValues.put(
                 new Long((Long.parseLong(featList.featuresList.get(feat[j])
-                  .toString()) + (featurePosition[j] + maxNegPosition)
+                  .toString()) + (positionCurr + maxNegPosition)
                   * ConstantParameters.MAXIMUMFEATURES)), new Float(
-                  1.0 / (double)featurePosition[j]));
+                  1.0 / (double)positionCurr));
             }
             ++n;
           }
         }
       } // end of the loop on the types
-      if(LogService.debug>1)
+      if(LogService.debug > 1)
         if(n != nlpDoc.featuresCounted[i]) {
-          System.out.println("Error: the number of features (" + n +
-            ") is not the same as the number recorded (" +
-            nlpDoc.featuresCounted[i] + ")in document "+ docId);
+          System.out.println("Error: the number of features (" + n
+            + ") is not the same as the number recorded ("
+            + nlpDoc.featuresCounted[i] + ")in document " + docId);
         }
       // sort the indexes in ascending order
       List indexes = new ArrayList(indexValues.keySet());
@@ -119,7 +136,7 @@ public class DocFeatureVectors {
     } // end of the loop on the instances
   }
 
-  /** A static class for comparing two long numbers.*/
+  /** A static class for comparing two long numbers. */
   public static class LongCompactor implements java.util.Comparator {
     public int compare(Object l1, Object l2) {
       // return (new Long((new Long(l1.toString()).longValue()- new
@@ -147,8 +164,16 @@ public class DocFeatureVectors {
         iEndLabel = obtainMultiLabels(items, labelsDoc.multiLabels, i);
         // get the feature vector
         int len = items.length - iEndLabel;
-        fvs[i] = new SparseFeatureVector(len);
-        obtainFVs(items, iEndLabel, len, fvs[i]);
+        if(len==0) {
+          //If there is no feature vector, creat one for it 
+          fvs[i] = new SparseFeatureVector(1);
+          fvs[i].indexes[0]=1;
+          fvs[i].values[0]=0;
+        } else {
+          fvs[i] = new SparseFeatureVector(len);
+          obtainFVs(items, iEndLabel, len, fvs[i]);
+        }
+        
       }
     } catch(IOException e) {
       // TODO Auto-generated catch block

@@ -8,12 +8,12 @@
 package gate.learning;
 
 import java.io.PrintWriter;
+
 /**
- * Store the results for computing the F-measures for
- * binary classification problem (or one label of multi-class
- * problems). The measures include precision, recall and F1. 
- * It has exact results as well as 
- * lenient results counting partial matches.
+ * Store the results for computing the F-measures for binary classification
+ * problem (or one label of multi-class problems). The measures include
+ * precision, recall and F1. It has exact results as well as lenient results
+ * counting partial matches.
  */
 public class EvaluationMeasuresComputation {
   /** Precision for exact matches. */
@@ -30,9 +30,9 @@ public class EvaluationMeasuresComputation {
   public float f1Lenient;
   /** Number of exact matches. */
   public int correct;
-  /** Number of instances incorretly with predicted label.*/
+  /** Number of instances incorretly with predicted label. */
   public int spurious;
-  /** Number of positive instances missed by the system.*/
+  /** Number of positive instances missed by the system. */
   public int missing;
   /** Number of only partial matches. */
   public int partialCor;
@@ -41,7 +41,7 @@ public class EvaluationMeasuresComputation {
   /** Number of positive examples in the results. */
   private int resSize;
 
-  /** Constructor. Set everything as zero.*/
+  /** Constructor. Set everything as zero. */
   public EvaluationMeasuresComputation() {
     precision = 0;
     recall = 0;
@@ -54,6 +54,7 @@ public class EvaluationMeasuresComputation {
     missing = 0;
     partialCor = 0;
   }
+
   /** Compute the F-measures from the numbers. */
   public void computeFmeasure() {
     keySize = correct + partialCor + spurious;
@@ -69,6 +70,7 @@ public class EvaluationMeasuresComputation {
     else f1 = 2 * precision * recall / (precision + recall);
     return;
   }
+
   /** Compute the lenient F-measures from the numbers. */
   public void computeFmeasureLenient() {
     keySize = correct + partialCor + spurious;
@@ -85,6 +87,7 @@ public class EvaluationMeasuresComputation {
       / (precisionLenient + recallLenient);
     return;
   }
+
   /** Accumulate the F-measure data for computing overall results. */
   public void add(EvaluationMeasuresComputation anotherMeasure) {
     this.correct += anotherMeasure.correct;
@@ -99,6 +102,7 @@ public class EvaluationMeasuresComputation {
     this.f1Lenient += anotherMeasure.f1Lenient;
     return;
   }
+
   /** Compute the macro averaged results. */
   public void macroAverage(int k) {
     if(k > 0) {
@@ -118,6 +122,7 @@ public class EvaluationMeasuresComputation {
     }
     return;
   }
+
   /** Print out the results. */
   public void printResults() {
     System.out.print("  (correct, paritalCorrect, spurious, missing)= ("
@@ -128,6 +133,7 @@ public class EvaluationMeasuresComputation {
     System.out.print("Lenient: (" + (new Float(precisionLenient)) + ", "
       + (new Float(recallLenient)) + ", " + new Float(f1Lenient) + ")\n");
   }
+
   /** Print the results into a file. */
   public void printResults(PrintWriter logFileIn) {
     logFileIn.print("  (correct, paritalCorrect, spurious, missing)= ("

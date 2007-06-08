@@ -9,9 +9,10 @@ package gate.learning;
 
 import gate.util.GateException;
 import org.jdom.Element;
-/** 
- *  Desribing the NGAM features defined in the DATASET
- *  element of the configuration file.
+
+/**
+ * Desribing the NGAM features defined in the DATASET element of the
+ * configuration file.
  */
 public class Ngram {
   /** Name of the Ngram feature. */
@@ -22,10 +23,17 @@ public class Ngram {
   private short consnum;
   /** The GATE types of the features used in the N-gram. */
   private String[] typesGate = null;
-  /** The GATE features used in the N-gram.  */
+  /** The GATE features used in the N-gram. */
   private String[] featuresGate = null;
-  /** Load the N-gram definition from an XML element of 
-   * configuration file. */
+  /**
+   * The posistion of the annotation considered relative to the current instance
+   * annotation. Normally it should be 0.
+   */
+  int position;
+
+  /**
+   * Load the N-gram definition from an XML element of configuration file.
+   */
   public Ngram(Element jdomElement) throws GateException {
     // find the name
     Element anElement = jdomElement.getChild("NAME");
@@ -34,7 +42,7 @@ public class Ngram {
         "Required element \"NAME\" not present in attribute:\n"
           + jdomElement.toString() + "!");
     else name = anElement.getTextTrim();
-    name = name.replaceAll(ConstantParameters.ITEMSEPARATOR, 
+    name = name.replaceAll(ConstantParameters.ITEMSEPARATOR,
       ConstantParameters.ITEMSEPREPLACEMENT);
     // find how many tokens (N) are used for the Ngram
     anElement = jdomElement.getChild("NUMBER");
@@ -50,6 +58,11 @@ public class Ngram {
         "Required element \"CONSNUM\" not present in attribute:\n"
           + jdomElement.toString() + "!");
     else consnum = (new Short(anElement.getTextTrim())).shortValue();
+    // find the position if present
+    anElement = jdomElement.getChild("POSITION");
+    if(anElement == null)
+      position = 0;
+    else position = Integer.parseInt(anElement.getTextTrim());
     // allocate memory for the types and features for all the
     // constituents
     typesGate = new String[consnum];
@@ -66,6 +79,7 @@ public class Ngram {
       }
     }
   }
+
   /** Obtain the types and features of one N-gram definition. */
   private void obtainTypeAndFeat(Element anElement, String[] typesGate,
     String[] featuresGate, int i) throws GateException {
@@ -74,17 +88,16 @@ public class Ngram {
       typesGate[i] = lowerElement.getTextTrim();
       typesGate[i] = typesGate[i].replaceAll(ConstantParameters.ITEMSEPARATOR,
         ConstantParameters.ITEMSEPREPLACEMENT);
-    }
-    else throw new GateException(
+    } else throw new GateException(
       "Required element \"TYPE\" not present in attribute:\n"
         + anElement.toString() + "!");
     lowerElement = anElement.getChild("FEATURE");
     if(anElement != null) {
       featuresGate[i] = lowerElement.getTextTrim();
-      featuresGate[i] = featuresGate[i].replaceAll(ConstantParameters.ITEMSEPARATOR,
-        ConstantParameters.ITEMSEPREPLACEMENT);
-    }
-    else throw new GateException(
+      featuresGate[i] = featuresGate[i]
+        .replaceAll(ConstantParameters.ITEMSEPARATOR,
+          ConstantParameters.ITEMSEPREPLACEMENT);
+    } else throw new GateException(
       "Required element \"FEATURE\" not present in attribute:\n"
         + anElement.toString() + "!");
   }

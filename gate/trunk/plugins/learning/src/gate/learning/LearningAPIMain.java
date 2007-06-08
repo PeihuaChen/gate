@@ -142,7 +142,8 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
     // docsName.add(positionDoc, document.getName());
     if(positionDoc == 0) {
       if(LogService.debug >= 0)
-        System.out.println("Pre-processing the "+corpus.size()+" documents...");
+        System.out.println("Pre-processing the " + corpus.size()
+          + " documents...");
       try {
         PrintWriter logFileIn = new PrintWriter(new FileWriter(logFile, true));
         logFileIn.println("\n*** A new run starts.");
@@ -164,9 +165,10 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
       // set the inputASName in here, because it is a runtime parameter
       if(LogService.debug >= 0) {
         System.out.println("Learning starts.");
-        System.out.println("For the information about this leanring see the log file "+
-        wdResults.getAbsolutePath()+File.separator+
-        ConstantParameters.FILENAMEOFLOGFILE);
+        System.out
+          .println("For the information about this leanring see the log file "
+            + wdResults.getAbsolutePath() + File.separator
+            + ConstantParameters.FILENAMEOFLOGFILE);
       }
       lightWeightApi.inputASName = inputASName;
       int numDoc = corpus.size();
@@ -175,7 +177,8 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
         logFileIn.println("The learning start at " + new Date().toString());
         logFileIn.println("The number of documents in dataset: " + numDoc);
         // if only need the feature data
-        if(learningSettings.isOnlyFeatureData) {// if only want feature
+        if(learningSettings.isOnlyFeatureData) {// if only want
+          // feature
           // data
           isTraining = true;
           for(int i = 0; i < numDoc; ++i)
@@ -192,9 +195,9 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               if(LogService.debug >= 0) System.out.println("Training mode");
               logFileIn.println("Training mode.");
               isTraining = true;
-              if(LogService.debug>0)
+              if(LogService.debug > 0)
                 System.out.println("Training lightweight, wdResults="
-                + wdResults.toString() + ".");
+                  + wdResults.toString() + ".");
               for(int i = 0; i < numDoc; ++i)
                 lightWeightApi.annotations2FVs((Document)corpus.get(i), i,
                   wdResults, isTraining, learningSettings);
@@ -226,7 +229,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
                 logFileIn, learningSettings);
               break;
             case EVALUATION:
-              if(LogService.debug>=0) System.out.println("Evaluation mode");
+              if(LogService.debug >= 0) System.out.println("Evaluation mode");
               logFileIn.println("Evaluation mode.");
               evaluation = new EvaluationBasedOnDocs(corpus, wdResults,
                 inputASName);
@@ -248,8 +251,6 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
       if(LogService.debug >= 0)
         System.out.println("This learning session finished!.");
     } // end of learning (position=corpus.size()-1)
-    
-    
   }
 
   /** Print out the information for featureData only option. */

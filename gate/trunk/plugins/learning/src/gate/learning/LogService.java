@@ -8,20 +8,19 @@
 package gate.learning;
 
 import java.io.PrintWriter;
+
 /**
- *  Write the learning information into a log file, 
- *  which name is specified in ConstantParameters.java.
- *  Also including a static variable debug determining the
- *  level of output of the ML Api.
+ * Write the learning information into a log file, which name is specified in
+ * ConstantParameters.java. Also including a static variable debug determining
+ * the level of output of the ML Api.
  */
 public class LogService {
-  /** Determine if or not printing the information. 
-   * 0 -- no debug information; 
-   * 1 -- usual information output;
-   * 2 -- all the information output, including some 
-   *     warning information.
+  /**
+   * Determine if or not printing the information. 0 -- no debug information; 1 --
+   * usual information output; 2 -- all the information output, including some
+   * warning information.
    */
-  public static short debug = 0; 
+  public static short debug = 0;
   /** The PrintStream to write the messages to. */
   private static PrintWriter logFileIn = new PrintWriter(System.err);;
   /** The minimal verbosity level. Message below this level are ignored. */
