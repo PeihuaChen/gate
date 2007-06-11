@@ -31,7 +31,8 @@
          <CONS-2>
             <TYPE>Token</TYPE>
 	    <FEATURE>category</FEATURE>
-         </CONS-2>                                    
+         </CONS-2>
+         <WEIGHT>10.0</WEIGHT>                                 
      </NGRAM>
 
      <ATTRIBUTE>

@@ -42,7 +42,7 @@ public class DocFeatureVectors {
    */
   public void obtainFVsFromNLPFeatures(NLPFeaturesOfDoc nlpDoc,
     NLPFeaturesList featList, int[] featurePosition, int maxNegPosition,
-    int numDocs) {
+    int numDocs, float ngramWeight) {
     numInstances = nlpDoc.numInstances;
     docId = new String(nlpDoc.getDocId());
     fvs = new SparseFeatureVector[numInstances];
@@ -52,16 +52,33 @@ public class DocFeatureVectors {
       int n = 0;
       String[] feat = nlpDoc.featuresInLine[i].toString().split(
         ConstantParameters.ITEMSEPARATOR);
+      //Some variables for normalising the feature values of the same ngram
+      boolean sameNgram=true;
+      int prevPosition = -99999;
+      float [] tempVals = new float[9999];
+      long [] tempInds = new long[9999];
+      int tempSize = 0;
+      int positionCurr=0;
       for(int j = 0; j < feat.length; ++j) {
         //First get the position information for the current NLP feature
-        int positionCurr=0;
+        positionCurr=0;
         if(feat[j] != null && Pattern.matches((".+\\[[-0-9]+\\]$"),feat[j])) {
           int ind = feat[j].lastIndexOf('[');
           String positionStr = feat[j].substring(ind+1, feat[j].length()-1);
-          positionCurr = new Integer(positionStr).intValue();
+          positionCurr = Integer.parseInt(positionStr);
           feat[j] = feat[j].substring(0,ind);
         }
-        
+        if(prevPosition != positionCurr && tempSize>0) {
+          double sum=0.0;
+          for(int ii=0; ii<tempSize; ++ii)
+            sum += tempVals[ii]*tempVals[ii];
+          sum = Math.sqrt(sum);
+          for(int ii=0; ii<tempSize; ++ii){
+            tempVals[ii] /= sum;
+            indexValues.put(new Long(tempInds[ii]), new Float(tempVals[ii]));
+          }
+          tempSize = 0;
+        }
         String featCur = feat[j];
         String featVal = null;
         int kk = -3;
@@ -77,18 +94,21 @@ public class DocFeatureVectors {
               if(positionCurr >0)
                 shiftNum = maxNegPosition+ positionCurr;
               else shiftNum = -positionCurr;
+              long featInd= Long.parseLong(featList.featuresList.get(featCur).toString()) 
+                + shiftNum*ConstantParameters.MAXIMUMFEATURES;
               // for only the presence of Ngram in the sentence
-              // indexValues.put(featList.featuresList.get(featCur),"1");
+              // indexValues.put(featInd,"1");
               // for tf representation
-              // indexValues.put(featList.featuresList.get(featCur),
-              // featVal);
+              // indexValues.put(featInd, featVal);
               // for tf*idf representation
               double val = (Long.parseLong(featVal) + 1)
                 * Math.log((double)numDocs
                   / (Long.parseLong(featList.idfFeatures.get(featCur)
                     .toString())));
-              indexValues.put(featList.featuresList.get(featCur),
-                new Float(val));
+             // indexValues.put(featInd, new Float(val));
+              tempInds[tempSize] = featInd;
+              tempVals[tempSize] = (float)val;
+              ++tempSize;
             } else {
               if(positionCurr == 0)
                 indexValues.put(featList.featuresList.get(feat[j]), "1");
@@ -106,7 +126,21 @@ public class DocFeatureVectors {
             ++n;
           }
         }
-      } // end of the loop on the types
+        prevPosition = positionCurr;
+      } // end of the loop on the features of one instances
+      //For the last ngram features
+      if(tempSize>0) {
+        double sum=0.0;
+        for(int ii=0; ii<tempSize; ++ii)
+          sum += tempVals[ii]*tempVals[ii];
+        sum = Math.sqrt(sum);
+        for(int ii=0; ii<tempSize; ++ii){
+          tempVals[ii] /= sum;
+          tempVals[ii] *= ngramWeight;
+          indexValues.put(new Long(tempInds[ii]), new Float(tempVals[ii]));
+        }
+        tempSize = 0;
+      }
       if(LogService.debug > 1)
         if(n != nlpDoc.featuresCounted[i]) {
           System.out.println("Error: the number of features (" + n
