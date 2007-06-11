@@ -191,10 +191,10 @@ public class TestLearningAPI extends TestCase {
     // Using the evaluation mode for testing
     EvaluationBasedOnDocs evaluation = learningApi.getEvaluation();
     // Compare the overall results with the correct numbers
-    assertEquals(evaluation.macroMeasuresOfResults.correct, 24);
+    assertEquals(evaluation.macroMeasuresOfResults.correct, 26);
     assertEquals(evaluation.macroMeasuresOfResults.partialCor, 0);
-    assertEquals(evaluation.macroMeasuresOfResults.spurious, 33);
-    assertEquals(evaluation.macroMeasuresOfResults.missing, 41);
+    assertEquals(evaluation.macroMeasuresOfResults.spurious, 44);
+    assertEquals(evaluation.macroMeasuresOfResults.missing, 39);
     // Remove the resources
     clearOneTest();
     System.out.println("completed");
@@ -223,9 +223,9 @@ public class TestLearningAPI extends TestCase {
     // Using the evaluation mode for testing
     EvaluationBasedOnDocs evaluation = learningApi.getEvaluation();
     // Compare the overall results with the correct numbers
-    assertEquals(evaluation.macroMeasuresOfResults.correct, 28);
+    assertEquals(evaluation.macroMeasuresOfResults.correct, 27);
     assertEquals(evaluation.macroMeasuresOfResults.partialCor, 0);
-    assertEquals(evaluation.macroMeasuresOfResults.spurious, 41);
+    assertEquals(evaluation.macroMeasuresOfResults.spurious, 46);
     assertEquals(evaluation.macroMeasuresOfResults.missing, 38);
     // Remove the resources
     clearOneTest();
@@ -327,6 +327,42 @@ public class TestLearningAPI extends TestCase {
     assertEquals(evaluation.macroMeasuresOfResults.partialCor, 0);
     assertEquals(evaluation.macroMeasuresOfResults.spurious, 31);
     assertEquals(evaluation.macroMeasuresOfResults.missing, 108);
+    // Remove the resources
+    clearOneTest();
+    System.out.println("completed");
+  }
+  /** Test the relation extraction by using the SVM with linear kernel
+   * and a small part of data from ACE-04 relation extraction. 
+   */
+  public void testSVMRelationLearningWithNgramFeatures() throws GateException, IOException {
+    System.out.print("Testing the SVM with Ngram features on relation extraction ...");
+    // Initialisation relation-learning
+    File scHome = new File(new File(learningHome, "test"), "relation-learning");
+    String configFileURL = new File(scHome, "engines-svm-ngram.xml")
+      .getAbsolutePath();
+    String corpusDirName = new File(scHome, "data-acerelation")
+      .getAbsolutePath();
+    //Remove the label list file, feature list file and chunk length files. 
+    String wdResults = new File(scHome, 
+      ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
+    emptySavedFiles(wdResults);
+    String inputASN = "Key";
+    loadSettings(configFileURL, corpusDirName, inputASN);
+    // Set the evaluation mode
+    RunMode runM=RunMode.EVALUATION;
+    learningApi.setLearningMode(runM);
+    controller.execute();
+    // Using the evaluation mode for testing
+    EvaluationBasedOnDocs evaluation = learningApi.getEvaluation();
+    // Compare the overall results with the correct numbers
+    /*assertEquals(evaluation.macroMeasuresOfResults.correct, 4);
+    assertEquals(evaluation.macroMeasuresOfResults.partialCor, 0);
+    assertEquals(evaluation.macroMeasuresOfResults.spurious, 27);
+    assertEquals(evaluation.macroMeasuresOfResults.missing, 110);*/
+    assertEquals(evaluation.macroMeasuresOfResults.correct, 7);
+    assertEquals(evaluation.macroMeasuresOfResults.partialCor, 0);
+    assertEquals(evaluation.macroMeasuresOfResults.spurious, 20);
+    assertEquals(evaluation.macroMeasuresOfResults.missing, 107);
     // Remove the resources
     clearOneTest();
     System.out.println("completed");

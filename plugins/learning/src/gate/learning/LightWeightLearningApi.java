@@ -62,6 +62,8 @@ public class LightWeightLearningApi extends Object {
   int maxNegPositionTotal = 0;
   /** The right-most position among all features. */
   int maxPosPositionTotal = 0;
+  /** The weight for the Ngram features*/
+  float ngramWeight=1.0f;
   /**
    * HashMap for the chunkLenStats, for post-processing of chunk learning.
    */
@@ -117,19 +119,27 @@ public class LightWeightLearningApi extends Object {
       if(maxNegPositionTotal < engineSettings.datasetDefinition.arg1.arrs.maxNegPosition)
         maxNegPositionTotal = engineSettings.datasetDefinition.arg1.arrs.maxNegPosition;
       if(maxNegPositionTotal < engineSettings.datasetDefinition.arg2.arrs.maxNegPosition + 
-             engineSettings.datasetDefinition.arg1.maxTotalPosition+1)
-        maxNegPositionTotal = engineSettings.datasetDefinition.arg2.arrs.maxNegPosition;
+             engineSettings.datasetDefinition.arg1.maxTotalPosition+2)
+        maxNegPositionTotal = engineSettings.datasetDefinition.arg2.arrs.maxNegPosition
+          + engineSettings.datasetDefinition.arg1.maxTotalPosition+2;
     }
-    maxPosPositionTotal = 0;
-    if(maxPosPositionTotal < engineSettings.datasetDefinition.arrs.maxPosPosition)
-      maxPosPositionTotal = engineSettings.datasetDefinition.arrs.maxPosPosition;
+    //Get the ngram weight from the datasetdefintion.
+    ngramWeight = 1.0f;
+    if(engineSettings.datasetDefinition.ngrams!= null && 
+      engineSettings.datasetDefinition.ngrams.size()>0 &&
+      ((Ngram)engineSettings.datasetDefinition.ngrams.get(0)).weight != 1.0)
+      ngramWeight = ((Ngram)engineSettings.datasetDefinition.ngrams.get(0)).weight;
     if(engineSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
-      if(maxPosPositionTotal < engineSettings.datasetDefinition.arg1.arrs.maxPosPosition)
-        maxPosPositionTotal = engineSettings.datasetDefinition.arg1.arrs.maxPosPosition;
-      if(maxPosPositionTotal < engineSettings.datasetDefinition.arg2.arrs.maxPosPosition +
-           engineSettings.datasetDefinition.arg1.maxTotalPosition+1)
-        maxPosPositionTotal = engineSettings.datasetDefinition.arg2.arrs.maxPosPosition;
+      if(engineSettings.datasetDefinition.arg1.ngrams != null &&
+        engineSettings.datasetDefinition.arg1.ngrams.size()>0 &&
+        ((Ngram)engineSettings.datasetDefinition.arg1.ngrams.get(0)).weight!= 1.0)
+        ngramWeight = ((Ngram)engineSettings.datasetDefinition.arg1.ngrams.get(0)).weight;
+      if(engineSettings.datasetDefinition.arg2.ngrams != null &&
+        engineSettings.datasetDefinition.arg2.ngrams.size()>0 &&
+        ((Ngram)engineSettings.datasetDefinition.arg2.ngrams.get(0)).weight!= 1.0)
+        ngramWeight = ((Ngram)engineSettings.datasetDefinition.arg2.ngrams.get(0)).weight;
     }
+    
   }
 
   /**
@@ -185,11 +195,15 @@ public class LightWeightLearningApi extends Object {
     // used in learning algorithms
     DocFeatureVectors docFV = new DocFeatureVectors();
     docFV.obtainFVsFromNLPFeatures(nlpFeaturesDoc, featuresList,
-      featurePositionTotal, maxNegPositionTotal, featuresList.totalNumDocs);
+      featurePositionTotal, maxNegPositionTotal, featuresList.totalNumDocs, ngramWeight);
     // normalising the feature vector, if they are ngrams
-    if(engineSettings.datasetDefinition.ngrams != null
-      && engineSettings.datasetDefinition.ngrams.size() > 0)
-      normaliseFVs(docFV);
+    /*if((engineSettings.datasetDefinition.ngrams != null
+      && engineSettings.datasetDefinition.ngrams.size() > 0) ||
+      (engineSettings.datasetDefinition.arg1.ngrams != null 
+        && engineSettings.datasetDefinition.arg1.ngrams.size()>0) ||
+      (engineSettings.datasetDefinition.arg2.ngrams != null 
+        && engineSettings.datasetDefinition.arg2.ngrams.size()>0))
+      normaliseFVs(docFV);*/
     // obtain the labels of the instances for training
     if(isTraining) {
       LabelsOfFeatureVectorDoc labelsDoc = new LabelsOfFeatureVectorDoc();

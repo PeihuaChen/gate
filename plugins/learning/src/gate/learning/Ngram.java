@@ -30,6 +30,8 @@ public class Ngram {
    * annotation. Normally it should be 0.
    */
   int position;
+  /** The weight of ngram. */
+  float weight=1.0f;
 
   /**
    * Load the N-gram definition from an XML element of configuration file.
@@ -63,6 +65,11 @@ public class Ngram {
     if(anElement == null)
       position = 0;
     else position = Integer.parseInt(anElement.getTextTrim());
+    //Find the weight if present
+    anElement = jdomElement.getChild("WEIGHT");
+    if(anElement == null)
+      weight = 1.0f;
+    else weight = Float.parseFloat(anElement.getTextTrim());
     // allocate memory for the types and features for all the
     // constituents
     typesGate = new String[consnum];
