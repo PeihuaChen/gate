@@ -13,7 +13,7 @@
    <EVALUATION method="split" runs="1" ratio="0.66"/>
 
    <ENGINE nickname="SVM" implementationName="SVMLibSvmJava" 
-         options=" -c 0.7 -t 0 -m 100 -tau 0.4"/>
+         options=" -c 0.7 -t 0 -m 100 -tau 0.2"/>
 
    <DATASET>
      <INSTANCE-TYPE>RE_INS</INSTANCE-TYPE>
@@ -27,21 +27,21 @@
 	<TYPE>ACEEntity</TYPE>
 	<FEATURE>MENTION_ID</FEATURE>
        </ARG>
-       <ATTRIBUTELIST>
+       <ATTRIBUTE>
          <NAME>Form</NAME>
          <SEMTYPE>SEMTYPE>NOMINAL</SEMTYPE>
          <TYPE>Token</TYPE>
          <FEATURE>string</FEATURE>
-         <RANGE from="-2" to="0"/>
-       </ATTRIBUTELIST>
+         <POSITION>0</POSITION>
+       </ATTRIBUTE>
 
-       <ATTRIBUTELIST>
+       <ATTRIBUTE>
          <NAME>POS</NAME>
          <SEMTYPE>SEMTYPE>NOMINAL</SEMTYPE>
 	 <TYPE>Token</TYPE>
 	 <FEATURE>category</FEATURE>
-	 <RANGE from="-2" to="0"/>
-       </ATTRIBUTELIST>
+         <POSITION>0</POSITION>
+       </ATTRIBUTE>
        </FEATURES-ARG1>
 
        <FEATURES-ARG2>
@@ -51,21 +51,21 @@
 	  <TYPE>ACEEntity</TYPE>
 	  <FEATURE>MENTION_ID</FEATURE>
         </ARG>
-        <ATTRIBUTELIST>
+        <ATTRIBUTE>
           <NAME>Form</NAME>
           <SEMTYPE>SEMTYPE>NOMINAL</SEMTYPE>
 	  <TYPE>Token</TYPE>
 	  <FEATURE>string</FEATURE>
-	  <RANGE from="0" to="2"/>
-        </ATTRIBUTELIST>
+          <POSITION>0</POSITION>
+        </ATTRIBUTE>
 
-        <ATTRIBUTELIST>
+        <ATTRIBUTE>
           <NAME>POS</NAME>
           <SEMTYPE>SEMTYPE>NOMINAL</SEMTYPE>
 	  <TYPE>Token</TYPE>
 	  <FEATURE>category</FEATURE>
-	  <RANGE from="0" to="2"/>
-        </ATTRIBUTELIST>
+          <POSITION>0</POSITION>
+        </ATTRIBUTE>
       </FEATURES-ARG2>
     
       <ATTRIBUTE_REL>
