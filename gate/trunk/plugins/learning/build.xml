@@ -117,7 +117,13 @@
 
 	<!-- Targets used by the main GATE build file -->
 	<target name="build" depends="jar" />
-	<target name="distro.prepare" depends="clean.classes" />
+
+	<!-- Remove JUnit test results -->
+	<target name="distro.prepare" depends="clean.classes">
+		<delete>
+			<fileset dir="." includes="TEST*.xml" />
+		</delete>
+	</target>
 	
     
 </project>
