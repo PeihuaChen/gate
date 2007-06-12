@@ -18,7 +18,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -89,33 +88,39 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
     try {
       // Creat the sub-directory of the workingdirectroy where the data
       // files will be stored in
+      if(LogService.minVerbosityLevel>0) {
+        System.out.println("\n\n*************************");
+        System.out.println("A new session for NLP learning is starting.\n");
+      }
       wdResults = new File(wd,
         gate.learning.ConstantParameters.SUBDIRFORRESULTS);
       wdResults.mkdir();
       logFile = new File(new File(wd, ConstantParameters.SUBDIRFORRESULTS),
         ConstantParameters.FILENAMEOFLOGFILE);
-      PrintWriter logFileIn = new PrintWriter(new FileWriter(logFile, true));
-      logFileIn.println("\n\n*************************\n");
-      logFileIn.println("A new session for NLP learning is starting.\n");
-      logFileIn.println("The initiliased time of NLP learning: "
-        + new Date().toString());
-      logFileIn.println("Working directory: " + wd.getAbsolutePath());
-      logFileIn.println("The feature files and models are saved at: "
-        + wdResults.getAbsolutePath());
+      //PrintWriter logFileIn = new PrintWriter(new FileWriter(logFile, true));
+      LogService.init(logFile, true, learningSettings.verbosityLogService);
+      StringBuffer logMessage = new StringBuffer();
+      logMessage.append("\n\n*************************\n");
+      logMessage.append("A new session for NLP learning is starting.\n");
+      logMessage.append("The initiliased time of NLP learning: "
+        + new Date().toString()+"\n");
+      logMessage.append("Working directory: " + wd.getAbsolutePath()+"\n");
+      logMessage.append("The feature files and models are saved at: "
+        + wdResults.getAbsolutePath()+"\n");
       // Call the lightWeightLearningApi
       lightWeightApi = new LightWeightLearningApi(wd);
       // more initialisation
       lightWeightApi.furtherInit(wdResults, learningSettings);
-      logFileIn.println("Learner name: "
-        + learningSettings.learnerSettings.getLearnerName());
-      logFileIn.println("Learner nick name: "
-        + learningSettings.learnerSettings.getLearnerNickName());
-      logFileIn.println("Learner parameter settings: "
-        + learningSettings.learnerSettings.learnerName);
-      logFileIn.println("Surroud mode (or chunk learning): "
+      logMessage.append("Learner name: "
+        + learningSettings.learnerSettings.getLearnerName()+"\n");
+      logMessage.append("Learner nick name: "
+        + learningSettings.learnerSettings.getLearnerNickName()+"\n");
+      logMessage.append("Learner parameter settings: "
+        + learningSettings.learnerSettings.learnerName+"\n");
+      logMessage.append("Surroud mode (or chunk learning): "
         + learningSettings.surround);
-      logFileIn.println();
-      logFileIn.close();
+      LogService.logMessage(logMessage.toString(), 1);
+      LogService.close();
     } catch(Exception e) {
       throw new ResourceInstantiationException(e);
     }
@@ -141,19 +146,19 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
     int positionDoc = corpus.indexOf(document);
     // docsName.add(positionDoc, document.getName());
     if(positionDoc == 0) {
-      if(LogService.debug >= 0)
+      if(LogService.minVerbosityLevel > 0)
         System.out.println("Pre-processing the " + corpus.size()
           + " documents...");
       try {
-        PrintWriter logFileIn = new PrintWriter(new FileWriter(logFile, true));
-        logFileIn.println("\n*** A new run starts.");
-        logFileIn
-          .println("\nThe execution time (pre-processing the first document): "
-            + new Date().toString());
+        //PrintWriter logFileIn = new PrintWriter(new FileWriter(logFile, true));
+        LogService.init(logFile, true, learningSettings.verbosityLogService);
+        LogService.logMessage("\n*** A new run starts.", 1);
+        LogService.logMessage("\nThe execution time (pre-processing the first document): "
+            + new Date().toString(), 1);
+        LogService.close();
         // logFileIn.println("EvaluationMode: " + evaluationMode);
         // logFileIn.println("TrainingMode: " + trainingMode);
         // logFileIn.println("InputAS: " + inputASName);
-        logFileIn.close();
       } catch(IOException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
@@ -163,7 +168,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
       // first select the training data and test data according to the
       // learning setting
       // set the inputASName in here, because it is a runtime parameter
-      if(LogService.debug >= 0) {
+      if(LogService.minVerbosityLevel > 0) {
         System.out.println("Learning starts.");
         System.out
           .println("For the information about this leanring see the log file "
@@ -173,9 +178,10 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
       lightWeightApi.inputASName = inputASName;
       int numDoc = corpus.size();
       try {
-        PrintWriter logFileIn = new PrintWriter(new FileWriter(logFile, true));
-        logFileIn.println("The learning start at " + new Date().toString());
-        logFileIn.println("The number of documents in dataset: " + numDoc);
+        //PrintWriter logFileIn = new PrintWriter(new FileWriter(logFile, true));
+        LogService.init(logFile, true, learningSettings.verbosityLogService);
+        LogService.logMessage("The learning start at " + new Date().toString(), 1);
+        LogService.logMessage("The number of documents in dataset: " + numDoc, 1);
         // if only need the feature data
         if(learningSettings.isOnlyFeatureData) {// if only want
           // feature
@@ -186,18 +192,15 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               wdResults, isTraining, learningSettings);
           lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
             learningSettings);
-          if(LogService.debug >= 0) displayDataFilesInformation();
+          if(LogService.minVerbosityLevel > 0) displayDataFilesInformation();
         } else { // run the whole procedure of learning
           switch(learningMode){
             case TRAINING:
               // empty the data file
               EvaluationBasedOnDocs.emptyDatafile(wdResults, lightWeightApi);
-              if(LogService.debug >= 0) System.out.println("Training mode");
-              logFileIn.println("Training mode.");
+              if(LogService.minVerbosityLevel > 0) System.out.println("Training mode");
+              LogService.logMessage("Training mode.", 1);
               isTraining = true;
-              if(LogService.debug > 0)
-                System.out.println("Training lightweight, wdResults="
-                  + wdResults.toString() + ".");
               for(int i = 0; i < numDoc; ++i)
                 lightWeightApi.annotations2FVs((Document)corpus.get(i), i,
                   wdResults, isTraining, learningSettings);
@@ -207,15 +210,14 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               if(learningSettings.fiteringTrainingData
                 && learningSettings.filteringRatio > 0.0)
                 lightWeightApi.FilteringNegativeInstsInJava(corpus.size(),
-                  logFileIn, learningSettings);
+                  learningSettings);
               // using the java code for training
-              lightWeightApi.trainingJava(corpus.size(), logFileIn,
-                learningSettings);
+              lightWeightApi.trainingJava(corpus.size(), learningSettings);
               break;
             case APPLICATION:
               // if application
-              if(LogService.debug >= 0) System.out.println("Application mode");
-              logFileIn.println("Application mode.");
+              if(LogService.minVerbosityLevel> 0) System.out.println("Application mode");
+              LogService.logMessage("Application mode.", 1);
               isTraining = false;
               String classTypeOriginal = learningSettings.datasetDefinition
                 .getClassAttribute().getType();
@@ -226,21 +228,22 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
                 learningSettings);
               // Applying th model
               lightWeightApi.applyModelInJava(corpus, classTypeOriginal,
-                logFileIn, learningSettings);
+                learningSettings);
               break;
             case EVALUATION:
-              if(LogService.debug >= 0) System.out.println("Evaluation mode");
-              logFileIn.println("Evaluation mode.");
+              if(LogService.minVerbosityLevel > 0) System.out.println("Evaluation mode");
+              LogService.logMessage("Evaluation mode.", 1);
               evaluation = new EvaluationBasedOnDocs(corpus, wdResults,
                 inputASName);
               evaluation
-                .evaluation(learningSettings, lightWeightApi, logFileIn);
+                .evaluation(learningSettings, lightWeightApi);
               break;
             default:
               throw new GateException("The learning mode is not defined!");
           }
         }
-        logFileIn.close();
+        LogService.logMessage("This learning session finished!.", 1);
+        LogService.close();
       } catch(IOException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
@@ -248,29 +251,35 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
-      if(LogService.debug >= 0)
+      if(LogService.minVerbosityLevel > 0)
         System.out.println("This learning session finished!.");
+      
     } // end of learning (position=corpus.size()-1)
   }
 
   /** Print out the information for featureData only option. */
   private void displayDataFilesInformation() {
-    System.out.println("The NLP features for all the documents are in the file"
+    StringBuffer logMessage = new StringBuffer();
+    logMessage.append("The NLP features for all the documents are in the file"
       + wdResults.getAbsolutePath() + File.pathSeparator
-      + ConstantParameters.FILENAMEOFNLPFeaturesData);
-    System.out.println("The feature vectors in sparse format are in the file"
+      + ConstantParameters.FILENAMEOFNLPFeaturesData+"\n");
+    logMessage.append("The NLP features for all the documents are in the file"
       + wdResults.getAbsolutePath() + File.pathSeparator
-      + ConstantParameters.FILENAMEOFFeatureVectorData);
-    System.out.println("The Label list is in the file"
+      + ConstantParameters.FILENAMEOFNLPFeaturesData+"\n");
+    logMessage.append("The feature vectors in sparse format are in the file"
       + wdResults.getAbsolutePath() + File.pathSeparator
-      + ConstantParameters.FILENAMEOFLabelList);
-    System.out.println("The NLP features list is in the file"
+      + ConstantParameters.FILENAMEOFFeatureVectorData+"\n");
+    logMessage.append("The Label list is in the file"
       + wdResults.getAbsolutePath() + File.pathSeparator
-      + ConstantParameters.FILENAMEOFNLPFeatureList);
-    System.out
-      .println("The statistics of entity length for each class is in the file"
+      + ConstantParameters.FILENAMEOFLabelList+"\n");
+    logMessage.append("The NLP features list is in the file"
+      + wdResults.getAbsolutePath() + File.pathSeparator
+      + ConstantParameters.FILENAMEOFNLPFeatureList+"\n");
+    logMessage.append("The statistics of entity length for each class is in the file"
         + wdResults.getAbsolutePath() + File.pathSeparator
-        + ConstantParameters.FILENAMEOFChunkLenStats);
+        + ConstantParameters.FILENAMEOFChunkLenStats+"\n");
+    System.out.println(logMessage);
+    LogService.logMessage(logMessage.toString(),1);
   }
 
   public void setConfigFileURL(URL workingDirectory) {

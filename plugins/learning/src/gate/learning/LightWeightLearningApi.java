@@ -20,7 +20,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,9 +30,6 @@ import gate.learning.learners.ChunkOrEntity;
 import gate.learning.learners.MultiClassLearning;
 import gate.learning.learners.PostProcessing;
 import gate.learning.learners.SupervisedLearner;
-import gate.learning.learners.weka.C45;
-import gate.learning.learners.weka.KNNIBK;
-import gate.learning.learners.weka.NaiveBayesC;
 import gate.learning.learners.weka.WekaLearner;
 import gate.learning.learners.weka.WekaLearning;
 import gate.util.GateException;
@@ -107,8 +103,7 @@ public class LightWeightLearningApi extends Object {
       for(int i = 0; i < engineSettings.datasetDefinition.arg1.arrs.featurePosition.length; ++i)
         this.featurePositionTotal[num++] = engineSettings.datasetDefinition.arg1.arrs.featurePosition[i];
       for(int i = 0; i < engineSettings.datasetDefinition.arg2.arrs.featurePosition.length; ++i)
-        this.featurePositionTotal[num++] = engineSettings.datasetDefinition.arg2.arrs.featurePosition[i]
-                                           +engineSettings.datasetDefinition.arg1.maxTotalPosition+1;
+        this.featurePositionTotal[num++] = engineSettings.datasetDefinition.arg2.arrs.featurePosition[i];
     }
     for(int i = 0; i < engineSettings.datasetDefinition.arrs.featurePosition.length; ++i)
       this.featurePositionTotal[num++] = engineSettings.datasetDefinition.arrs.featurePosition[i];
@@ -170,7 +165,7 @@ public class LightWeightLearningApi extends Object {
       "_");
     if(docName.contains("_"))
       docName = docName.substring(0, docName.lastIndexOf("_"));
-    if(LogService.debug > 0)
+    if(LogService.minVerbosityLevel > 1)
       System.out.println(numDocs + " docname=" + docName + ".");
     NLPFeaturesOfDoc nlpFeaturesDoc = new NLPFeaturesOfDoc(annotations,
       engineSettings.datasetDefinition.getInstanceType(), docName);
@@ -304,9 +299,9 @@ public class LightWeightLearningApi extends Object {
   /**
    * Training using the Java implementatoin of learning algorithms.
    */
-  public void trainingJava(int numDocs, PrintWriter logFileIn,
+  public void trainingJava(int numDocs,
     LearningEngineSettings engineSettings) throws GateException {
-    logFileIn.println("\nTraining starts.");
+    LogService.logMessage("\nTraining starts.\n", 1);
     // The files for training data and model
     File wdResults = new File(wd, ConstantParameters.SUBDIRFORRESULTS);
     String fvFileName = wdResults.toString() + File.separator
@@ -327,7 +322,7 @@ public class LightWeightLearningApi extends Object {
     int learnerType = obtainLearnerType(engineSettings.learnerSettings.learnerName);
     switch(learnerType){
       case 1: // for weka learner
-        logFileIn.println("Use weka learner.");
+        LogService.logMessage("Use weka learner.", 1);
         WekaLearning wekaL = new WekaLearning();
         short featureType = WekaLearning
           .obtainWekaLeanerDataType(engineSettings.learnerSettings.learnerName);
@@ -352,19 +347,20 @@ public class LightWeightLearningApi extends Object {
         WekaLearner wekaLearner = WekaLearning.obtainWekaLearner(
           engineSettings.learnerSettings.learnerName,
           engineSettings.learnerSettings.paramsOfLearning);
-        logFileIn.println("Weka learner name: " + wekaLearner.getLearnerName());
+        LogService.logMessage("Weka learner name: " + wekaLearner.getLearnerName(), 1);
         // Training.
         wekaL.train(wekaLearner, modelFile);
         break;
       case 2: // for learner of multi to binary conversion
-        if(LogService.debug > 0) System.out.println("Using the SVM");
-        logFileIn.println("Multi to binary conversion.");
+        if(LogService.minVerbosityLevel > 1) 
+          System.out.println("Using the SVM");
+        LogService.logMessage("Multi to binary conversion.", 1);
         MultiClassLearning chunkLearning = new MultiClassLearning(
           engineSettings.multi2BinaryMode);
         // read data
         chunkLearning.getDataFromFile(numDocs, dataFile);
-        logFileIn.println("The number of classes in dataset: "
-          + chunkLearning.numClasses);
+        LogService.logMessage("The number of classes in dataset: "
+          + chunkLearning.numClasses, 1);
         // get a learner
         String learningCommand = engineSettings.learnerSettings.paramsOfLearning;
         learningCommand = learningCommand.trim();
@@ -377,13 +373,13 @@ public class LightWeightLearningApi extends Object {
           .setLearnerExecutable(engineSettings.learnerSettings.executableTraining);
         paumLearner
           .setLearnerParams(engineSettings.learnerSettings.paramsOfLearning);
-        logFileIn.println("The learners: " + paumLearner.getLearnerName());
+        LogService.logMessage("The learners: " + paumLearner.getLearnerName(), 1);
         // training
-        chunkLearning.training(paumLearner, modelFile, logFileIn);
+        chunkLearning.training(paumLearner, modelFile);
         break;
       default:
         System.out.println("Error! Wrong learner type.");
-        logFileIn.println("Error! Wrong learner type.");
+      LogService.logMessage("Error! Wrong learner type.", 0);
     }
   }
 
@@ -392,9 +388,9 @@ public class LightWeightLearningApi extends Object {
    * Java.
    */
   public void applyModelInJava(Corpus corpus, String labelName,
-    PrintWriter logFileIn, LearningEngineSettings engineSettings)
+    LearningEngineSettings engineSettings)
     throws GateException {
-    logFileIn.println("\nApplication starts.");
+    LogService.logMessage("\nApplication starts.", 1);
     // The files for training data and model
     File wdResults = new File(wd, ConstantParameters.SUBDIRFORRESULTS);
     String fvFileName = wdResults.toString() + File.separator
@@ -416,7 +412,7 @@ public class LightWeightLearningApi extends Object {
     short featureType = WekaLearning.SPARSEFVDATA;
     switch(learnerType){
       case 1: // for weka learner
-        logFileIn.println("Use weka learner.");
+        LogService.logMessage("Use weka learner.", 1);
         WekaLearning wekaL = new WekaLearning();
         // Check if the learner uses the sparse feaature vectors or NLP
         // features
@@ -441,7 +437,7 @@ public class LightWeightLearningApi extends Object {
         WekaLearner wekaLearner = WekaLearning.obtainWekaLearner(
           engineSettings.learnerSettings.learnerName,
           engineSettings.learnerSettings.paramsOfLearning);
-        logFileIn.println("Weka learner name: " + wekaLearner.getLearnerName());
+        LogService.logMessage("Weka learner name: " + wekaLearner.getLearnerName(), 1);
         // Training.
         wekaL.apply(wekaLearner, modelFile, distributionOutput);
         labelsFVDoc = wekaL.labelsFVDoc;
@@ -449,7 +445,7 @@ public class LightWeightLearningApi extends Object {
         // null class
         break;
       case 2: // for learner of multi to binary conversion
-        logFileIn.println("Multi to binary conversion.");
+        LogService.logMessage("Multi to binary conversion.", 1);
         MultiClassLearning chunkLearning = new MultiClassLearning(
           engineSettings.multi2BinaryMode);
         // read data
@@ -466,15 +462,15 @@ public class LightWeightLearningApi extends Object {
           .setLearnerExecutable(engineSettings.learnerSettings.executableTraining);
         paumLearner
           .setLearnerParams(engineSettings.learnerSettings.paramsOfLearning);
-        logFileIn.println("The learners: " + paumLearner.getLearnerName());
+        LogService.logMessage("The learners: " + paumLearner.getLearnerName(), 1);
         // apply
-        chunkLearning.apply(paumLearner, modelFile, logFileIn);
+        chunkLearning.apply(paumLearner, modelFile);
         labelsFVDoc = chunkLearning.dataFVinDoc.labelsFVDoc;
         numClasses = chunkLearning.numClasses;
         break;
       default:
         System.out.println("Error! Wrong learner type.");
-        logFileIn.println("Error! Wrong learner type.");
+        LogService.logMessage("Error! Wrong learner type.", 0);
     }
     if(engineSettings.surround) {
       String featName = engineSettings.datasetDefinition.arrs.classFeature;
@@ -669,9 +665,9 @@ public class LightWeightLearningApi extends Object {
    * 
    * @throws GateException
    */
-  public void FilteringNegativeInstsInJava(int numDocs, PrintWriter logFileIn,
+  public void FilteringNegativeInstsInJava(int numDocs,
     LearningEngineSettings engineSettings) throws GateException {
-    logFileIn.println("\nFiltering starts.");
+    LogService.logMessage("\nFiltering starts.", 1);
     // The files for training data and model
     File wdResults = new File(wd, ConstantParameters.SUBDIRFORRESULTS);
     String fvFileName = wdResults.toString() + File.separator
@@ -681,7 +677,7 @@ public class LightWeightLearningApi extends Object {
     File dataFile = new File(fvFileName);
     File modelFile = new File(modelFileName);
     // for learner of multi to binary conversion
-    logFileIn.println("Multi to binary conversion.");
+    LogService.logMessage("Multi to binary conversion.", 1);
     MultiClassLearning chunkLearning = new MultiClassLearning(
       engineSettings.multi2BinaryMode);
     // read data
@@ -698,8 +694,8 @@ public class LightWeightLearningApi extends Object {
     // purpose
     int numNeg; // number of negative example in the training data
     numNeg = chunkLearning.resetClassInData();
-    logFileIn.println("The number of classes in dataset: "
-      + chunkLearning.numClasses);
+    LogService.logMessage("The number of classes in dataset: "
+      + chunkLearning.numClasses, 1);
     // Use the SVM only for filtering
     String dataSetFile = null;
     SupervisedLearner paumLearner = MultiClassLearning.obtainLearnerFromName(
@@ -708,12 +704,12 @@ public class LightWeightLearningApi extends Object {
       .setLearnerExecutable(engineSettings.learnerSettings.executableTraining);
     paumLearner
       .setLearnerParams(engineSettings.learnerSettings.paramsOfLearning);
-    logFileIn.println("The learners: " + paumLearner.getLearnerName());
+    LogService.logMessage("The learners: " + paumLearner.getLearnerName(), 1);
     // training
-    chunkLearning.training(paumLearner, modelFile, logFileIn);
+    chunkLearning.training(paumLearner, modelFile);
     // applying the learning model to training example and get the
     // confidence score for each example
-    chunkLearning.apply(paumLearner, modelFile, logFileIn);
+    chunkLearning.apply(paumLearner, modelFile);
     // Store the scores of negative examples.
     float[] scoresNegB = new float[numNeg];
     float[] scoresNeg = new float[numNeg];

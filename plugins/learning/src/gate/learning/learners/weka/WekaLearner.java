@@ -30,7 +30,7 @@ public abstract class WekaLearner implements Serializable {
   /** Training by calling th buildClassifier method of the learner. */
   public void training(Instances instancesData) {
     try {
-      if(LogService.debug>0)
+      if(LogService.minVerbosityLevel>0)
         System.out.println("Learning start:");
       wekaCl.buildClassifier(instancesData);
     } catch(Exception e) {
@@ -53,7 +53,7 @@ public abstract class WekaLearner implements Serializable {
     for(int i = 0; i <= numClasses; ++i) {
       trueLabels[i] = Integer.parseInt(instancesData.classAttribute().value(i));
     }
-    if(LogService.debug>0)
+    if(LogService.minVerbosityLevel>0)
       System.out.println("Application starts...");
     try {
       if(distributionOutput) {

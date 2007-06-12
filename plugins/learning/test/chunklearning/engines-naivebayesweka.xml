@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <ML-CONFIG>
+  <VERBOSITY level="0"/>
   <SURROUND value="true"/>
   <ONLY-FEATURE-DATA value="false"/>
 

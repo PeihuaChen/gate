@@ -141,7 +141,7 @@ public class DocFeatureVectors {
         }
         tempSize = 0;
       }
-      if(LogService.debug > 1)
+      if(LogService.minVerbosityLevel > 1)
         if(n != nlpDoc.featuresCounted[i]) {
           System.out.println("Error: the number of features (" + n
             + ") is not the same as the number recorded ("

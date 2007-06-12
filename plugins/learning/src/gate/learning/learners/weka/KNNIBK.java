@@ -19,7 +19,7 @@ public class KNNIBK extends WekaLearner {
   int kk = 1;
   /** Constructor for the KNN, with the default number of neighbours. */
   public KNNIBK() {
-    if(LogService.debug>0)
+    if(LogService.minVerbosityLevel>0)
       System.out.println("For KNN, kk="+kk);
     wekaCl = new IBk(kk);
     learnerName = "KNN";
@@ -27,7 +27,7 @@ public class KNNIBK extends WekaLearner {
   
   public KNNIBK(String options) {
     getParametersFromOptionsLine(options);
-    if(LogService.debug>0)
+    if(LogService.minVerbosityLevel>0)
       System.out.println("For KNN, kk="+kk);
     wekaCl = new IBk(kk);
     learnerName = "KNN";

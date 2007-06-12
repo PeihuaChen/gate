@@ -125,23 +125,16 @@ public class EvaluationMeasuresComputation {
 
   /** Print out the results. */
   public void printResults() {
-    System.out.print("  (correct, paritalCorrect, spurious, missing)= ("
+    StringBuffer logMessage= new StringBuffer();
+    logMessage.append("  (correct, paritalCorrect, spurious, missing)= ("
       + new Integer(correct) + ", " + new Integer(partialCor) + ", "
       + new Integer(spurious) + ", " + new Integer(missing) + ");  ");
-    System.out.print("(precision, recall, F1)= (" + (new Float(precision))
+    logMessage.append("(precision, recall, F1)= (" + (new Float(precision))
       + ", " + (new Float(recall)) + ", " + new Float(f1) + ");  ");
-    System.out.print("Lenient: (" + (new Float(precisionLenient)) + ", "
+    logMessage.append("Lenient: (" + (new Float(precisionLenient)) + ", "
       + (new Float(recallLenient)) + ", " + new Float(f1Lenient) + ")\n");
+    System.out.print(logMessage+"\n");
+    LogService.logMessage(logMessage.toString()+"\n", 1);
   }
 
-  /** Print the results into a file. */
-  public void printResults(PrintWriter logFileIn) {
-    logFileIn.print("  (correct, paritalCorrect, spurious, missing)= ("
-      + new Integer(correct) + ", " + new Integer(partialCor) + ", "
-      + new Integer(spurious) + ", " + new Integer(missing) + ");  ");
-    logFileIn.print("(precision, recall, F1)= (" + (new Float(precision))
-      + ", " + (new Float(recall)) + ", " + new Float(f1) + ");  ");
-    logFileIn.print("Lenient: (" + (new Float(precisionLenient)) + ", "
-      + (new Float(recallLenient)) + ", " + new Float(f1Lenient) + ")\n");
-  }
 }

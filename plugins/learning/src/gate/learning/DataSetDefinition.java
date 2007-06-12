@@ -189,7 +189,7 @@ public class DataSetDefinition {
       arrs.putTypeAndFeatIntoArray(attributes);
       arrs.numNgrams = ngrams.size();
     }
-    if(LogService.debug > 0)
+    if(LogService.minVerbosityLevel > 1)
       System.out.println("*** dataType=" + dataType + " classType="
         + arrs.classType + " classFeat=" + arrs.classFeature);
   }

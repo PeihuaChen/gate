@@ -43,7 +43,7 @@ public class SvmLibSVM extends SupervisedLearner {
   public void getParametersFromCommmand() {
     param = new svm_parameter();
     if(commandLine == null) {
-      if(LogService.debug>0)
+      if(LogService.minVerbosityLevel>1)
         System.out.println("no options specified, using the default ones!");
         parseCommandLine(" ");
     } else {
@@ -54,7 +54,7 @@ public class SvmLibSVM extends SupervisedLearner {
           this.tau = new Float(items[i + 1]).floatValue();
       commandLine.concat("  ");
       String commandLineSVM = obtainSVMCommandline(commandLine);
-      if(LogService.debug > 0)
+      if(LogService.minVerbosityLevel > 1)
         System.out.println("**commandLineSVM= " + commandLineSVM);
       parseCommandLine(commandLineSVM);
     }
@@ -143,11 +143,11 @@ public class SvmLibSVM extends SupervisedLearner {
     DataForLearning dataFVinDoc, int totalNumFeatures, int numClasses,
     float optB, svm_parameter svmParam, boolean isUseTauAll) {
     if(svmParam.kernel_type == svm_parameter.LINEAR) {
-      if(LogService.debug > 0) System.out.println("Linear kernel used.");
+      if(LogService.minVerbosityLevel > 1) System.out.println("Linear kernel used.");
       applyLinearModel(modelFile, dataFVinDoc, totalNumFeatures, numClasses,
         optB, isUseTauAll);
     } else {
-      if(LogService.debug > 0) System.out.println("Non-linear kernel used.");
+      if(LogService.minVerbosityLevel > 1) System.out.println("Non-linear kernel used.");
       applyingDualFormModel(modelFile, dataFVinDoc, numClasses, optB, svmParam,
         isUseTauAll);
     }
@@ -165,7 +165,7 @@ public class SvmLibSVM extends SupervisedLearner {
           dataFVinDoc.labelsFVDoc[i].multiLabels[j].probs = new float[numClasses];
         }
       // for each class
-      if(LogService.debug>0) {
+      if(LogService.minVerbosityLevel>1) {
         System.out.println("****  numClasses=" + numClasses);
         System.out.println("  d=" + svmParam.degree + ", g=" + svmParam.gamma
           + ", r=" + svmParam.coef0);
@@ -437,7 +437,7 @@ public class SvmLibSVM extends SupervisedLearner {
     int i = 0;
     while(i < argv.length) {
       if(argv[i].charAt(0) != '-') {
-        if(LogService.debug>0)
+        if(LogService.minVerbosityLevel>1)
           System.out.println("no other options specified for the SVM, using the default options.");
         break;
       }

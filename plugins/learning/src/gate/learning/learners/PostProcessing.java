@@ -76,7 +76,7 @@ public class PostProcessing {
       }// End of loop for each instance (i)
     }
     // Solve the overlap case so that every entity has just one label
-    if(LogService.debug>0)
+    if(LogService.minVerbosityLevel>1)
       System.out.println("*** numberinTempChunks=" + tempChunks.size());
     HashMap<String,ChunkOrEntity>mapChunks = new HashMap<String,ChunkOrEntity>();
     for(Object obj : tempChunks.keySet()) {

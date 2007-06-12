@@ -55,7 +55,7 @@ public class Label2Id {
       } catch(IOException e) {
       }
     } else {
-      if(LogService.debug > 0)
+      if(LogService.minVerbosityLevel > 0)
         System.out.println("No label list file in initialisation phrase.");
     }
   }
