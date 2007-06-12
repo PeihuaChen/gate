@@ -64,7 +64,7 @@ public class NLPFeaturesList {
       } catch(IOException e) {
       }
     } else {
-      if(LogService.debug > 0)
+      if(LogService.minVerbosityLevel > 0)
         System.out.println("No feature list file in initialisation phrase.");
     }
   }
@@ -72,7 +72,7 @@ public class NLPFeaturesList {
   /** Write back the list into the file, with updated information. */
   public void writeListIntoFile(File parentDir, String filename) {
     File fileFeaturesList = new File(parentDir, filename);
-    if(LogService.debug > 0)
+    if(LogService.minVerbosityLevel > 1)
       System.out.println("Lengh of List = " + featuresList.size());
     try {
       PrintWriter out = new PrintWriter(new FileWriter(fileFeaturesList));

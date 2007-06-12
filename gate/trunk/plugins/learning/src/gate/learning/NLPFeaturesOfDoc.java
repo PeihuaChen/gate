@@ -731,7 +731,7 @@ public class NLPFeaturesOfDoc {
   /** Write the NLP data into a file. */
   public void writeNLPFeaturesToFile(BufferedWriter out, String docId,
     int docIndex, int[] featurePosition) {
-    if(LogService.debug > 0)
+    if(LogService.minVerbosityLevel > 1)
       System.out.println("number=" + new Integer(numInstances));
     try {
       if(docIndex == 0) {
@@ -741,7 +741,7 @@ public class NLPFeaturesOfDoc {
         for(int i = 0; i < featNs.length; ++i)
           if(featurePosition.length > i)
             sline.append(ConstantParameters.ITEMSEPARATOR + featNs[i] + "("
-              + new Integer(featurePosition[i]) + ")");
+              + featurePosition[i] + ")");
           else sline.append(ConstantParameters.ITEMSEPARATOR + featNs[i]);
         out.write(sline.toString());
         out.newLine();

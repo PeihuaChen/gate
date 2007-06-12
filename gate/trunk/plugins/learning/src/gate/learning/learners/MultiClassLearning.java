@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -91,16 +90,17 @@ public class MultiClassLearning {
   }
 
   /** Learn the models and write them into a file */
-  public void training(SupervisedLearner learner, File modelFile,
-    PrintWriter logFileIn) {
+  public void training(SupervisedLearner learner, File modelFile) {
     int totalNumFeatures = dataFVinDoc.getTotalNumFeatures();
     Set classesName = class2NumberInstances.keySet();
     ArrayList array1 = new ArrayList(classesName);
     LongCompactor c = new LongCompactor();
     Collections.sort(array1, c);
-    if(LogService.debug>0)
+    if(LogService.minVerbosityLevel>1)
       System.out.println("total Number of classes for learning is "
         + array1.size());
+    LogService.logMessage("total Number of classes for learning is "
+      + array1.size(), 1);
     // Open the mode file for writing the model into it
     BufferedWriter modelsBuff;
     try {
@@ -111,8 +111,8 @@ public class MultiClassLearning {
       switch(multi2BinaryMode){
         case 1: // if using the one vs all others appoach
           // Write some meta information into the model as a header
-          logFileIn
-            .println("One against others for multi to binary class conversion.");
+          LogService.logMessage(
+            "One against others for multi to binary class conversion.", 1);
           writeTrainingMetaData(modelsBuff, numClasses, numNull, dataFVinDoc
             .getNumTrainingDocs(), dataFVinDoc.getTotalNumFeatures(), modelFile
             .getAbsolutePath(), learner);
@@ -130,8 +130,8 @@ public class MultiClassLearning {
               labelsTraining, numTraining);
             long time2 = new Date().getTime();
             time2 -= time1;
-            logFileIn.println("Training time for class "
-              + array1.get(i).toString() + ": " + time2 + "ms");
+            LogService.logMessage("Training time for class "
+              + array1.get(i).toString() + ": " + time2 + "ms", 1);
           }
           break;
         case 2: // if using the one vs another appoach
@@ -140,10 +140,9 @@ public class MultiClassLearning {
           if(numNull > 0)
             numClasses0 = (numClasses + 1) * numClasses / 2;
           else numClasses0 = (numClasses - 1) * numClasses / 2;
-          logFileIn
-            .println("One against another for multi to binary class conversion.");
-          logFileIn.println("So actually we have " + numClasses0
-            + " binary classes.");
+          LogService.logMessage("One against another for multi to binary class conversion.\n"+
+            "So actually we have " + numClasses0
+            + " binary classes.", 1);
           writeTrainingMetaData(modelsBuff, numClasses0, numNull, dataFVinDoc
             .getNumTrainingDocs(), dataFVinDoc.getTotalNumFeatures(), modelFile
             .getAbsolutePath(), learner);
@@ -165,8 +164,8 @@ public class MultiClassLearning {
                 labelsTraining, numTraining);
               long time2 = new Date().getTime();
               time2 -= time1;
-              logFileIn.println("Training time for class null against "
-                + array1.get(j).toString() + ": " + time2 + "ms");
+              LogService.logMessage("Training time for class null against "
+                + array1.get(j).toString() + ": " + time2 + "ms", 1);
             }
           }
           // then for one vs. another
@@ -188,17 +187,17 @@ public class MultiClassLearning {
                 labelsTraining, numTraining);
               long time2 = new Date().getTime();
               time2 -= time1;
-              logFileIn.println("Training time for class "
+              LogService.logMessage("Training time for class "
                 + array1.get(i).toString() + " against "
-                + array1.get(j).toString() + ": " + time2 + "ms");
+                + array1.get(j).toString() + ": " + time2 + "ms", 1);
               // }
             }
           break;
         default:
           System.out.println("Incorrect multi2BinaryMode value="
             + multi2BinaryMode);
-          logFileIn.println("Incorrect multi2BinaryMode value="
-            + multi2BinaryMode);
+        LogService.logMessage("Incorrect multi2BinaryMode value="
+            + multi2BinaryMode,0);
       }
       modelsBuff.close();
     } catch(IOException e) {
@@ -208,8 +207,7 @@ public class MultiClassLearning {
   }
 
   /** Apply the model to the data. */
-  public void apply(SupervisedLearner learner, File modelFile,
-    PrintWriter logFileIn) {
+  public void apply(SupervisedLearner learner, File modelFile) {
     // Open the mode file and read the model
     BufferedReader modelsBuff;
     try {
@@ -219,7 +217,7 @@ public class MultiClassLearning {
       int totalNumFeatures;
       String learnerNameFromModel = learner.getLearnerName();
       totalNumFeatures = ReadTrainingMetaData(modelsBuff, learnerNameFromModel);
-      if(LogService.debug>0)
+      if(LogService.minVerbosityLevel>1)
         System.out.println(" *** numClasses=" + numClasses + " totalfeatures="
         + totalNumFeatures);
       // compare with the meta data of test data
@@ -229,19 +227,17 @@ public class MultiClassLearning {
       long time1 = new Date().getTime();
       switch(multi2BinaryMode){
         case 1:
-          logFileIn
-            .println("One against others for multi to binary class conversion.");
-          logFileIn.println("Number of classes in model: " + numClasses);
+          LogService.logMessage("One against others for multi to binary class conversion.\n"
+            +"Number of classes in model: " + numClasses, 1);
           // Use the tau modification in all cases
           learner.isUseTauALLCases = true;
           learner.applying(modelsBuff, dataFVinDoc, totalNumFeatures,
             numClasses);
-          if(LogService.debug>0)
+          if(LogService.minVerbosityLevel>1)
             System.out.println("**** One against all others, numNull=" + numNull);
           break;
         case 2:
-          logFileIn
-            .println("One against another for multi to binary class conversion.");
+          LogService.logMessage("One against another for multi to binary class conversion.", 1);
           // not use the tau modification in all cases
           learner.isUseTauALLCases = false;
           learner.applying(modelsBuff, dataFVinDoc, totalNumFeatures,
@@ -253,11 +249,10 @@ public class MultiClassLearning {
           int numClassesL = numClasses * 2;
           numClassesL = rootQuaEqn(numClassesL);
           if(numNull == 0) numClassesL += 1;
-          logFileIn.println("Number of classes in training data: "
-            + numClassesL);
-          logFileIn.println("Actuall number of binary classes in model: "
-            + numClasses);
-          if(LogService.debug>0)
+          LogService.logMessage("Number of classes in training data: "
+            + numClassesL+"\nActuall number of binary classes in model: "
+            + numClasses, 1);
+          if(LogService.minVerbosityLevel>1)
             System.out.println("**** One against another, numNull=" + numNull);
           if(numNull > 0)
             postProc.voteForOneVSAnotherNull(dataFVinDoc, numClassesL);
@@ -268,12 +263,12 @@ public class MultiClassLearning {
         default:
           System.out.println("Incorrect multi2BinaryMode value="
             + multi2BinaryMode);
-          logFileIn.println("Incorrect multi2BinaryMode value="
-            + multi2BinaryMode);
+        LogService.logMessage("Incorrect multi2BinaryMode value="
+            + multi2BinaryMode, 1);
       }
       long time2 = new Date().getTime();
       time2 -= time1;
-      logFileIn.println("Application time for class: " + time2 + "ms");
+      LogService.logMessage("Application time for class: " + time2 + "ms", 1);
       modelsBuff.close();
     } catch(IOException e) {
       // TODO Auto-generated catch block

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <ML-CONFIG>
+  <VERBOSITY level="0"/>
   <SURROUND value="false"/>
-
   <IS-LABEL-UPDATABLE value="true"/>
   <IS-NLPFEATURELIST-UPDATABLE value="true"/>
 

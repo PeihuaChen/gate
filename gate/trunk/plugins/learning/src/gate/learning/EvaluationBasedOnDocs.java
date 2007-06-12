@@ -73,39 +73,43 @@ public class EvaluationBasedOnDocs {
 
   /** Main method for evluation. */
   public void evaluation(LearningEngineSettings learningSettings,
-    LightWeightLearningApi lightWeightApi, PrintWriter logFileIn)
+    LightWeightLearningApi lightWeightApi)
     throws GateException {
     // k-fold
     if(learningSettings.evaluationconfig.mode == EvaluationConfiguration.kfold)
-      kfoldEval(learningSettings, lightWeightApi, logFileIn);
+      kfoldEval(learningSettings, lightWeightApi);
     // Hold-out testing
     else if(learningSettings.evaluationconfig.mode == EvaluationConfiguration.split)
-      holdoutEval(learningSettings, lightWeightApi, logFileIn);
+      holdoutEval(learningSettings, lightWeightApi);
     else throw new GateException("The evaluation configuration mode as "
       + learningSettings.evaluationconfig.mode + " is not implemented!");
-    if(LogService.debug >= 0) {
-      logFileIn.println("\nAveraged results for each label as:");
-      printFmeasureForEachLabel(labels2InstNum, labels2MMR, logFileIn);
+    if(LogService.minVerbosityLevel > 0) {
+      LogService.logMessage("\n*** Averaged results for each label over "+
+        learningSettings.evaluationconfig.kk +" runs as:", 1);
+      System.out.println("\n*** Averaged results for each label over "+
+        learningSettings.evaluationconfig.kk +" runs as:");
+      printFmeasureForEachLabel(labels2InstNum, labels2MMR);
       System.out.println("\nOverall results as:");
+      LogService.logMessage("\nOverall results:", 1);
       macroMeasuresOfResults.printResults();
-      logFileIn.println("\nOverall results (micro-averaged):");
-      macroMeasuresOfResults.printResults(logFileIn);
     }
   }
 
   /** K-fold evalution. */
   public void kfoldEval(LearningEngineSettings learningSettings,
-    LightWeightLearningApi lightWeightApi, PrintWriter logFileIn)
+    LightWeightLearningApi lightWeightApi)
     throws GateException {
     int k = learningSettings.evaluationconfig.kk;
-    logFileIn.println("K-fold evaluation: k=" + k);
+    LogService.logMessage("K-fold evaluation: k=" + k, 1);
     int lenPerFold = (new Double(Math.floor((double)numDoc / k))).intValue();
     if(lenPerFold < 1) lenPerFold = 1;
     int beginIndex, endIndex;
-    if(LogService.debug > 0) {
+    if(LogService.minVerbosityLevel > 0) {
       System.out.println("Kfold k=" + new Integer(k) + ", numDoc="
         + new Integer(numDoc) + ", len=" + new Integer(lenPerFold) + ".");
     }
+    LogService.logMessage("Kfold k=" + new Integer(k) + ", numDoc="
+        + new Integer(numDoc) + ", len=" + new Integer(lenPerFold) + ".", 1);
     for(int nr = 0; nr < k; ++nr) {
       EvaluationMeasuresComputation measuresOfResults = new EvaluationMeasuresComputation();
       // Label to measure of result of the label
@@ -121,14 +125,34 @@ public class EvaluationBasedOnDocs {
         isUsedForTraining[i] = false;
       for(i = endIndex; i < numDoc; ++i)
         isUsedForTraining[i] = true;
-      logFileIn.println("Fold " + nr);
-      logFileIn.println("Number of docs for training: "
-        + (int)(numDoc - endIndex + beginIndex));
-      logFileIn.println("Number of docs for application: "
-        + (int)(endIndex - beginIndex));
+      StringBuffer logMes = new StringBuffer();
+      int nr0 = nr+1;
+      logMes.append("\n*** Fold " + nr0+"\n");
+      logMes.append("Number of docs for training: "
+        + (int)(numDoc - endIndex + beginIndex)+"\n");
+      int ik=0;
+      for(i=0; i<numDoc; ++i) {
+        if(isUsedForTraining[i]) {
+          ++ik;
+          logMes.append(ik+" "+((Document)corpusOn.get(i)).getName()+"\n");
+        }
+      }
+      logMes.append("Number of docs for application: "
+        + (int)(endIndex - beginIndex)+"\n");
+      ik=0;
+      for(i=0; i<numDoc; ++i) {
+        if(!isUsedForTraining[i]) {
+          ++ik;
+          logMes.append(ik +" "+((Document)corpusOn.get(i)).getName()+"\n");
+        }
+      }
+      LogService.logMessage(logMes.toString(),1);
+      if(LogService.minVerbosityLevel>0)
+        System.out.println(logMes);
+      
       // call the training or application
       oneRun(learningSettings, lightWeightApi, isUsedForTraining,
-        measuresOfResults, labels2MR, labels2InstNum, logFileIn);
+        measuresOfResults, labels2MR, labels2InstNum);
       // Add to the macro averaged figures
       add2MacroMeasure(measuresOfResults, labels2MR, macroMeasuresOfResults,
         labels2MMR, labels2RunsNum);
@@ -142,16 +166,21 @@ public class EvaluationBasedOnDocs {
 
   /** Hold-out testing. */
   public void holdoutEval(LearningEngineSettings learningSettings,
-    LightWeightLearningApi lightWeightApi, PrintWriter logFileIn)
+    LightWeightLearningApi lightWeightApi)
     throws GateException {
     int k = learningSettings.evaluationconfig.kk;
-    logFileIn.println("Hold-out test: runs=" + k
+    LogService.logMessage("Hold-out test: runs=" + k
       + ", ratio of training docs is "
-      + learningSettings.evaluationconfig.ratio);
+      + learningSettings.evaluationconfig.ratio, 1);
     int trainingNum = (new Double(Math
       .floor((numDoc * learningSettings.evaluationconfig.ratio))).intValue());
     if(trainingNum > numDoc) trainingNum = numDoc;
-    if(LogService.debug > 0) {
+    LogService.logMessage("Split, k=" + new Integer(k) + ", trainingNum="
+      + new Integer(trainingNum) + ".", 1);
+    if(LogService.minVerbosityLevel > 0) {
+      System.out.println("Hold-out test: runs=" + k
+        + ", ratio of training docs is "
+        + learningSettings.evaluationconfig.ratio);
       System.out.println("Split, k=" + new Integer(k) + ", trainingNum="
         + new Integer(trainingNum) + ".");
     }
@@ -190,7 +219,7 @@ public class EvaluationBasedOnDocs {
             if(isOk) break;
           }
         }
-        if(LogService.debug > 0) {
+        if(LogService.minVerbosityLevel > 1) {
           System.out.println("i=" + new Integer(i) + ", newNum="
             + new Integer(newNum));
         }
@@ -200,13 +229,34 @@ public class EvaluationBasedOnDocs {
         isUsedForTraining[i] = true;
       for(int i = 0; i < testNum; ++i)
         isUsedForTraining[indexRand[i]] = false;
-      logFileIn.println("Run " + nr);
-      logFileIn.println("Number of docs for training: "
-        + (int)(numDoc - testNum));
-      logFileIn.println("Number of docs for application: " + (int)testNum);
+      StringBuffer logMes = new StringBuffer();
+      int nr0 = nr+1;
+      logMes.append("\n*** Run " + nr0+"\n");
+      logMes.append("Number of docs for training: "
+        + (int)(numDoc - testNum)+"\n");
+      int ik=0;
+      for(int i=0; i<numDoc; ++i) {
+        if(isUsedForTraining[i]) {
+          ++ik;
+          logMes.append(ik+" "+((Document)corpusOn.get(i)).getName()+"\n");
+        }
+      }
+      logMes.append("Number of docs for application: " + testNum+"\n");
+      ik=0;
+      for(int i=0; i<numDoc; ++i) {
+        if(!isUsedForTraining[i]) {
+          ++ik;
+          logMes.append(ik +" "+((Document)corpusOn.get(i)).getName()+"\n");
+        }
+      }
+
+      LogService.logMessage(logMes.toString(),1);
+      if(LogService.minVerbosityLevel>0)
+        System.out.println(logMes);
+      
       // One run, call the training and application and do evaluation
       oneRun(learningSettings, lightWeightApi, isUsedForTraining,
-        measuresOfResults, labels2MR, labels2InstNum, logFileIn);
+        measuresOfResults, labels2MR, labels2InstNum);
       // Add to the macro averaged figures
       add2MacroMeasure(measuresOfResults, labels2MR, macroMeasuresOfResults,
         labels2MMR, labels2RunsNum);
@@ -225,7 +275,7 @@ public class EvaluationBasedOnDocs {
   private void oneRun(LearningEngineSettings learningSettings,
     LightWeightLearningApi lightWeightApi, boolean isUsedForTraining[],
     EvaluationMeasuresComputation measuresOfResults, HashMap labels2MR,
-    HashMap labels2InstNum, PrintWriter logFileIn) throws GateException {
+    HashMap labels2InstNum) throws GateException {
     // first learning using the document for training
     // empty the data file
     // emptyDatafile(wdResults, lightWeightApi);
@@ -242,10 +292,9 @@ public class EvaluationBasedOnDocs {
     // if fitering the training data
     if(learningSettings.fiteringTrainingData
       && learningSettings.filteringRatio > 0.0)
-      lightWeightApi.FilteringNegativeInstsInJava(numDoc, logFileIn,
-        learningSettings);
+      lightWeightApi.FilteringNegativeInstsInJava(numDoc, learningSettings);
     // lightWeightApi.trainDirect();
-    lightWeightApi.trainingJava(numDoc, logFileIn, learningSettings);
+    lightWeightApi.trainingJava(numDoc, learningSettings);
     // then application to the test set
     // We have to use two class types for the evaluation purpose
     String classTypeOriginal = null;
@@ -258,7 +307,7 @@ public class EvaluationBasedOnDocs {
       .getFeature();
     learningSettings.datasetDefinition.getClassAttribute().setType(
       classTypeTest);
-    if(LogService.debug > 0)
+    if(LogService.minVerbosityLevel > 1)
       System.out.println("classType=" + classTypeOriginal + ", testType="
         + classTypeTest + ".");
     isTraining = false;
@@ -280,7 +329,7 @@ public class EvaluationBasedOnDocs {
           corpusTest.add((Document)corpusOn.get(i));
           ++numDoc;
         }
-      lightWeightApi.applyModelInJava(corpusTest, classTypeTest, logFileIn,
+      lightWeightApi.applyModelInJava(corpusTest, classTypeTest,
         learningSettings);
       corpusTest.clear();
       Factory.deleteResource(corpusTest);
@@ -361,14 +410,13 @@ public class EvaluationBasedOnDocs {
       emc.computeFmeasure();
       emc.computeFmeasureLenient();
     }
-    if(LogService.debug > 0) {
-      System.out.println("in one run:");
+    if(LogService.minVerbosityLevel > 0) {
+      System.out.println("Results of this run:\n");
       // Print the results of each label
-      printFmeasureForEachLabel(uniqueLabels, labels2MR, logFileIn);
-      System.out.println("Results of All labels");
+      printFmeasureForEachLabel(uniqueLabels, labels2MR);
+      System.out.println("\nOverall results(micro-averaged over all labels):");
+      LogService.logMessage("\nOverall results(micro-averaged over all labels):", 1);
       measuresOfResults.printResults();
-      logFileIn.println("\nResults of overall labels (micro-averaged)");
-      measuresOfResults.printResults(logFileIn);
     }
     // finally, change the class type back for training,
     // and remove the test annotations
@@ -427,9 +475,9 @@ public class EvaluationBasedOnDocs {
 
   /** Print the F-measure results for each label. */
   public void printFmeasureForEachLabel(HashMap uniqueLabels,
-    HashMap labels2MR, PrintWriter logFileIn) {
+    HashMap labels2MR) {
     System.out.println("\nResults of single label");
-    logFileIn.println("\nResults of single label");
+    LogService.logMessage("\nResults of single label", 1);
     List labels = new ArrayList(uniqueLabels.keySet());
     Collections.sort(labels);
     for(int i = 0; i < labels.size(); ++i) {
@@ -437,12 +485,12 @@ public class EvaluationBasedOnDocs {
       System.out.println(i + " LabelName=" + labelName
         + ", number of instances="
         + new Integer(uniqueLabels.get(labelName).toString()));
-      ((EvaluationMeasuresComputation)labels2MR.get(labelName)).printResults();
-      logFileIn.println(i + " LabelName=" + labelName
+      LogService.logMessage(i + " LabelName=" + labelName
         + ", number of instances="
-        + new Integer(uniqueLabels.get(labelName).toString()));
-      ((EvaluationMeasuresComputation)labels2MR.get(labelName))
-        .printResults(logFileIn);
+        + new Integer(uniqueLabels.get(labelName).toString()), 1);
+      ((EvaluationMeasuresComputation)labels2MR.get(labelName)).printResults();
+      //((EvaluationMeasuresComputation)labels2MR.get(labelName))
+        //.printResults(logFileIn);
     }
   }
 

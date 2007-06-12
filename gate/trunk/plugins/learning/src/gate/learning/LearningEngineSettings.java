@@ -73,13 +73,20 @@ public class LearningEngineSettings {
   public boolean isOnlyFeatureData = false;
   /** The setting for evaluation. */
   public EvaluationConfiguration evaluationconfig = null;
+  
+  /** The verbosity level for writing information into log file. 
+   * 0: no real output.
+   * 1: normal output including results and setting information.
+   * 2: warning information.
+   * */
+  public int verbosityLogService = LogService.NORMAL;
 
   /** Loading the learning settings from the configuration file. */
   public static LearningEngineSettings loadLearningSettingsFromFile(
     java.net.URL xmlengines) throws GateException {
     SAXBuilder saxBuilder = new SAXBuilder(false);
     org.jdom.Document jdomDoc = null;
-    if(LogService.debug > 0)
+    if(LogService.minVerbosityLevel > 0)
       System.out.println("xmlFile=" + xmlengines.toString());
     try {
       jdomDoc = saxBuilder.build(xmlengines);
@@ -97,6 +104,13 @@ public class LearningEngineSettings {
       String value = rootElement.getChild("SURROUND").getAttribute("value")
         .getValue();
       learningSettings.surround = "true".equalsIgnoreCase(value);
+    }
+    /** Get the setting for verbosity. */
+    learningSettings.verbosityLogService = LogService.NORMAL;
+    if(rootElement.getChild("VERBOSITY") != null) {
+      String value = rootElement.getChild("VERBOSITY").getAttribute("level")
+        .getValue();
+      learningSettings.verbosityLogService = Integer.parseInt(value);
     }
     learningSettings.fiteringTrainingData = false;
     learningSettings.filteringRatio = 0.0f;

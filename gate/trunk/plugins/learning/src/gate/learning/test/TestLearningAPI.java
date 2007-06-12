@@ -67,8 +67,8 @@ public class TestLearningAPI extends TestCase {
    */
   void loadSettings(String configFileName, String corpusDirName, String inputasN)
     throws GateException, IOException {
-    LogService.debug = -1;
-    if(LogService.debug>0)
+    LogService.minVerbosityLevel = 0;
+    if(LogService.minVerbosityLevel>0)
       System.out.println("Learning Home : " + learningHome.getAbsolutePath());
     FeatureMap parameters = Factory.newFeatureMap();
     URL configFileURL = new File(configFileName).toURL();
