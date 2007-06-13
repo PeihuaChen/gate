@@ -171,7 +171,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
       if(LogService.minVerbosityLevel > 0) {
         System.out.println("Learning starts.");
         System.out
-          .println("For the information about this leanring see the log file "
+          .println("For the information about this learning see the log file "
             + wdResults.getAbsolutePath() + File.separator
             + ConstantParameters.FILENAMEOFLOGFILE);
       }
@@ -183,23 +183,24 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
         LogService.logMessage("The learning start at " + new Date().toString(), 1);
         LogService.logMessage("The number of documents in dataset: " + numDoc, 1);
         // if only need the feature data
-        if(learningSettings.isOnlyFeatureData) {// if only want
-          // feature
-          // data
-          isTraining = true;
-          for(int i = 0; i < numDoc; ++i)
-            lightWeightApi.annotations2FVs((Document)corpus.get(i), i,
-              wdResults, isTraining, learningSettings);
-          lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
-            learningSettings);
-          if(LogService.minVerbosityLevel > 0) displayDataFilesInformation();
-        } else { // run the whole procedure of learning
-          switch(learningMode){
-            case TRAINING:
+        switch(learningMode) {
+          case ProduceFeatureFilesOnly:
+            // if only want feature data
+            if(LogService.minVerbosityLevel > 0) System.out.println("** Producing the feature files only!");
+            LogService.logMessage("** Producing the feature files only!", 1);
+            isTraining = true;
+            for(int i = 0; i < numDoc; ++i)
+              lightWeightApi.annotations2FVs((Document)corpus.get(i), i,
+                wdResults, isTraining, learningSettings);
+            lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
+              learningSettings);
+            if(LogService.minVerbosityLevel > 0) displayDataFilesInformation();
+            break;
+          case TRAINING:
               // empty the data file
               EvaluationBasedOnDocs.emptyDatafile(wdResults, lightWeightApi);
-              if(LogService.minVerbosityLevel > 0) System.out.println("Training mode");
-              LogService.logMessage("Training mode.", 1);
+              if(LogService.minVerbosityLevel > 0) System.out.println("** Training mode:");
+              LogService.logMessage("** Training mode:", 1);
               isTraining = true;
               for(int i = 0; i < numDoc; ++i)
                 lightWeightApi.annotations2FVs((Document)corpus.get(i), i,
@@ -216,8 +217,8 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               break;
             case APPLICATION:
               // if application
-              if(LogService.minVerbosityLevel> 0) System.out.println("Application mode");
-              LogService.logMessage("Application mode.", 1);
+              if(LogService.minVerbosityLevel> 0) System.out.println("** Application mode:");
+              LogService.logMessage("** Application mode:", 1);
               isTraining = false;
               String classTypeOriginal = learningSettings.datasetDefinition
                 .getClassAttribute().getType();
@@ -231,8 +232,8 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
                 learningSettings);
               break;
             case EVALUATION:
-              if(LogService.minVerbosityLevel > 0) System.out.println("Evaluation mode");
-              LogService.logMessage("Evaluation mode.", 1);
+              if(LogService.minVerbosityLevel > 0) System.out.println("** Evaluation mode:");
+              LogService.logMessage("** Evaluation mode:", 1);
               evaluation = new EvaluationBasedOnDocs(corpus, wdResults,
                 inputASName);
               evaluation
@@ -240,7 +241,6 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               break;
             default:
               throw new GateException("The learning mode is not defined!");
-          }
         }
         LogService.logMessage("This learning session finished!.", 1);
         LogService.close();
@@ -260,25 +260,22 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
   /** Print out the information for featureData only option. */
   private void displayDataFilesInformation() {
     StringBuffer logMessage = new StringBuffer();
-    logMessage.append("The NLP features for all the documents are in the file"
-      + wdResults.getAbsolutePath() + File.pathSeparator
+    logMessage.append("NLP features for all the documents are in the file"
+      + wdResults.getAbsolutePath() + File.separator
       + ConstantParameters.FILENAMEOFNLPFeaturesData+"\n");
-    logMessage.append("The NLP features for all the documents are in the file"
-      + wdResults.getAbsolutePath() + File.pathSeparator
-      + ConstantParameters.FILENAMEOFNLPFeaturesData+"\n");
-    logMessage.append("The feature vectors in sparse format are in the file"
-      + wdResults.getAbsolutePath() + File.pathSeparator
+    logMessage.append("Feature vectors in sparse format are in the file"
+      + wdResults.getAbsolutePath() + File.separator
       + ConstantParameters.FILENAMEOFFeatureVectorData+"\n");
-    logMessage.append("The Label list is in the file"
-      + wdResults.getAbsolutePath() + File.pathSeparator
+    logMessage.append("Label list is in the file"
+      + wdResults.getAbsolutePath() + File.separator
       + ConstantParameters.FILENAMEOFLabelList+"\n");
-    logMessage.append("The NLP features list is in the file"
-      + wdResults.getAbsolutePath() + File.pathSeparator
+    logMessage.append("NLP features list is in the file"
+      + wdResults.getAbsolutePath() + File.separator
       + ConstantParameters.FILENAMEOFNLPFeatureList+"\n");
     logMessage.append("The statistics of entity length for each class is in the file"
-        + wdResults.getAbsolutePath() + File.pathSeparator
+        + wdResults.getAbsolutePath() + File.separator
         + ConstantParameters.FILENAMEOFChunkLenStats+"\n");
-    System.out.println(logMessage);
+    System.out.println(logMessage.toString());
     LogService.logMessage(logMessage.toString(),1);
   }
 
