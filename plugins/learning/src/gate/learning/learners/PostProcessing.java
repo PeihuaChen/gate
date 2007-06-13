@@ -65,12 +65,14 @@ public class PostProcessing {
               && i1 - i + 1 < ChunkLengthStats.maxLen
               && chunkLen.lenStats[i1 - i + 1] > 0) {
               // if(multiLabels[i1].probs[j+1]>boundaryProb) {
-              ChunkOrEntity chunk = new ChunkOrEntity(i, i1);
-              chunk.prob = multiLabels[i].probs[j]
-                * multiLabels[i1].probs[j + 1];
-              chunk.name = j / 2 + 1;
-              tempChunks.put(chunk, 1);
-              break;
+              float entityP = multiLabels[i].probs[j]*multiLabels[i1].probs[j + 1];
+              if(entityP>entityProb) {
+                ChunkOrEntity chunk = new ChunkOrEntity(i, i1);
+                chunk.prob = entityP;
+                chunk.name = j / 2 + 1;
+                tempChunks.put(chunk, 1);
+                //break;
+              }
             }
         }
       }// End of loop for each instance (i)
@@ -102,12 +104,19 @@ public class PostProcessing {
               // if the two entities overlap
               if((chunk1.start >= chunk2.start && chunk1.start <= chunk2.end)
                 || (chunk1.end <= chunk2.end && chunk1.end >= chunk2.start)) {
-                if(chunk1.prob > chunk2.prob)
+                if(chunk1.end - chunk1.start>chunk2.end - chunk2.start)
                   tempChunks.put(chunk2, 0);
-                else {
+                else if (chunk1.end - chunk1.start<chunk2.end - chunk2.start) {
                   tempChunks.put(chunk1, 0);
-                  break; // break the inner loop (ob2)
+                  break;
                 }
+                else 
+                  if(chunk1.prob > chunk2.prob)
+                    tempChunks.put(chunk2, 0);
+                  else {
+                    tempChunks.put(chunk1, 0);
+                     break; // break the inner loop (ob2)
+                  }
               }
             }
           }
