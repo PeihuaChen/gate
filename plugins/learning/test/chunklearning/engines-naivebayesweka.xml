@@ -2,7 +2,6 @@
 <ML-CONFIG>
   <VERBOSITY level="0"/>
   <SURROUND value="true"/>
-  <ONLY-FEATURE-DATA value="false"/>
 
   <PARAMETER name="thresholdProbabilityEntity" value="0.2"/>
   <PARAMETER name="thresholdProbabilityBoundary" value="0.40"/>
