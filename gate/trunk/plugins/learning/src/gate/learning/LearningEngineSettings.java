@@ -70,7 +70,7 @@ public class LearningEngineSettings {
    * If the user only want to feature data to be used in his learning
    * algorithms.
    */
-  public boolean isOnlyFeatureData = false;
+  //public boolean isOnlyFeatureData = false;
   /** The setting for evaluation. */
   public EvaluationConfiguration evaluationconfig = null;
   
@@ -122,12 +122,6 @@ public class LearningEngineSettings {
       value = rootElement.getChild("FILTERING").getAttribute("dis").getValue();
       learningSettings.filteringNear = "near".equalsIgnoreCase(value);
       learningSettings.fiteringTrainingData = true;
-    }
-    learningSettings.isOnlyFeatureData = false;
-    if(rootElement.getChild("ONLY-FEATURE-DATA") != null) {
-      String value = rootElement.getChild("ONLY-FEATURE-DATA").getAttribute(
-        "value").getValue();
-      learningSettings.isOnlyFeatureData = "true".equalsIgnoreCase(value);
     }
     learningSettings.isLabelListUpdatable = true;
     if(rootElement.getChild("IS-LABEL-UPDATABLE") != null) {
