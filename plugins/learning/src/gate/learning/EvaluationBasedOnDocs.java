@@ -284,11 +284,12 @@ public class EvaluationBasedOnDocs {
     int numDoc = 0;
     for(int i = 0; i < corpusOn.size(); ++i)
       if(isUsedForTraining[i]) {
-        lightWeightApi.annotations2FVs((Document)corpusOn.get(i), numDoc,
+        lightWeightApi.annotations2NLPFeatures((Document)corpusOn.get(i), numDoc,
           wdResults, isTraining, learningSettings);
         ++numDoc;
       }
     lightWeightApi.finishFVs(wdResults, numDoc, isTraining, learningSettings);
+    lightWeightApi.nlpfeatures2FVs(wdResults, numDoc, isTraining, learningSettings);
     // if fitering the training data
     if(learningSettings.fiteringTrainingData
       && learningSettings.filteringRatio > 0.0)
@@ -314,11 +315,12 @@ public class EvaluationBasedOnDocs {
     numDoc = 0;
     for(int i = 0; i < corpusOn.size(); ++i)
       if(!isUsedForTraining[i]) {
-        lightWeightApi.annotations2FVs((Document)corpusOn.get(i), numDoc,
+        lightWeightApi.annotations2NLPFeatures((Document)corpusOn.get(i), numDoc,
           wdResults, isTraining, learningSettings);
         ++numDoc;
       }
     lightWeightApi.finishFVs(wdResults, numDoc, isTraining, learningSettings);
+    lightWeightApi.nlpfeatures2FVs(wdResults, numDoc, isTraining, learningSettings);
     // lightWeightApi.finishDocAnnotation();
     Corpus corpusTest;
     try {
@@ -441,8 +443,6 @@ public class EvaluationBasedOnDocs {
     try {
       (new File(wdResults, ConstantParameters.FILENAMEOFNLPFeatureList))
         .createNewFile();
-      lightWeightApi.outFeatureVectors = new BufferedWriter(new FileWriter(
-        new File(wdResults, ConstantParameters.FILENAMEOFFeatureVectorData)));
     } catch(IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

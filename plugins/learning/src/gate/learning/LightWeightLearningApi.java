@@ -64,8 +64,6 @@ public class LightWeightLearningApi extends Object {
    * HashMap for the chunkLenStats, for post-processing of chunk learning.
    */
   HashMap chunkLenHash;
-  /** Refering to the feature vector file for writing. */
-  public BufferedWriter outFeatureVectors = null;
   /** Refering to the NLP feature file for writing. */
   public BufferedWriter outNLPFeatures = null;
 
@@ -141,7 +139,7 @@ public class LightWeightLearningApi extends Object {
    * Obtain the features and labels and form feature vectors from the GATE
    * annotation of each document.
    */
-  public void annotations2FVs(Document doc, int numDocs, File wdResults,
+  public void annotations2NLPFeatures(Document doc, int numDocs, File wdResults,
     boolean isTraining, LearningEngineSettings engineSettings) {
     AnnotationSet annotations = null;
     if(inputASName == null || inputASName.trim().length() == 0) {
@@ -151,8 +149,6 @@ public class LightWeightLearningApi extends Object {
     }
     if(numDocs == 0) {
       try {
-        outFeatureVectors = new BufferedWriter(new FileWriter(new File(
-          wdResults, ConstantParameters.FILENAMEOFFeatureVectorData)));
         outNLPFeatures = new BufferedWriter(new FileWriter(new File(wdResults,
           ConstantParameters.FILENAMEOFNLPFeaturesData)));
       } catch(IOException e) {
@@ -186,30 +182,7 @@ public class LightWeightLearningApi extends Object {
         engineSettings.datasetDefinition, chunkLenHash, labelsAndId);
     nlpFeaturesDoc.writeNLPFeaturesToFile(outNLPFeatures, docName, numDocs,
       featurePositionTotal);
-    // convert the NLP features in document into sparse feature vectors
-    // used in learning algorithms
-    DocFeatureVectors docFV = new DocFeatureVectors();
-    docFV.obtainFVsFromNLPFeatures(nlpFeaturesDoc, featuresList,
-      featurePositionTotal, maxNegPositionTotal, featuresList.totalNumDocs, ngramWeight);
-    // normalising the feature vector, if they are ngrams
-    /*if((engineSettings.datasetDefinition.ngrams != null
-      && engineSettings.datasetDefinition.ngrams.size() > 0) ||
-      (engineSettings.datasetDefinition.arg1.ngrams != null 
-        && engineSettings.datasetDefinition.arg1.ngrams.size()>0) ||
-      (engineSettings.datasetDefinition.arg2.ngrams != null 
-        && engineSettings.datasetDefinition.arg2.ngrams.size()>0))
-      normaliseFVs(docFV);*/
-    // obtain the labels of the instances for training
-    if(isTraining) {
-      LabelsOfFeatureVectorDoc labelsDoc = new LabelsOfFeatureVectorDoc();
-      labelsDoc.obtainMultiLabelsFromNLPDocSurround(nlpFeaturesDoc,
-        labelsAndId, engineSettings.surround);
-      addDocFVsMultiLabelToFile(numDocs, outFeatureVectors,
-        labelsDoc.multiLabels, docFV);
-    } else {
-      int[] labels = new int[nlpFeaturesDoc.numInstances];
-      addDocFVsToFile(numDocs, outFeatureVectors, labels, docFV);
-    }
+ 
     return;
   }
 
@@ -233,7 +206,6 @@ public class LightWeightLearningApi extends Object {
   public void finishFVs(File wdResults, int numDocs, boolean isTraining,
     LearningEngineSettings engineSettings) {
     try {
-      outFeatureVectors.close();
       outNLPFeatures.close();
     } catch(IOException e) {
       // TODO Auto-generated catch block
@@ -250,6 +222,45 @@ public class LightWeightLearningApi extends Object {
         ConstantParameters.FILENAMEOFChunkLenStats, chunkLenHash);
   }
 
+  /** Convert the NLP features into feature vectors and write them into file. */
+  public void nlpfeatures2FVs(File wdResults, int numDocs, boolean isTraining, 
+    LearningEngineSettings engineSettings) {
+    
+      try {
+        BufferedWriter outFeatureVectors = new BufferedWriter(new FileWriter(new File(wdResults,
+          ConstantParameters.FILENAMEOFFeatureVectorData)));
+        BufferedReader inNLPFeatures = new BufferedReader(new FileReader(new File(wdResults,
+          ConstantParameters.FILENAMEOFNLPFeaturesData)));
+        //Read the first line out which is about feature names
+        inNLPFeatures.readLine();
+        for(int i=0; i<numDocs; ++i) {
+          NLPFeaturesOfDoc nlpFeatDoc = new NLPFeaturesOfDoc();
+          nlpFeatDoc.readNLPFeaturesFromFile(inNLPFeatures);
+          
+          DocFeatureVectors docFV = new DocFeatureVectors();
+          docFV.obtainFVsFromNLPFeatures(nlpFeatDoc, featuresList,
+            featurePositionTotal, maxNegPositionTotal, featuresList.totalNumDocs, ngramWeight);
+          
+          if(isTraining) {
+            LabelsOfFeatureVectorDoc labelsDoc = new LabelsOfFeatureVectorDoc();
+            labelsDoc.obtainMultiLabelsFromNLPDocSurround(nlpFeatDoc,
+              labelsAndId, engineSettings.surround);
+            addDocFVsMultiLabelToFile(numDocs, outFeatureVectors,
+              labelsDoc.multiLabels, docFV);
+          } else {
+            int[] labels = new int[nlpFeatDoc.numInstances];
+            addDocFVsToFile(numDocs, outFeatureVectors, labels, docFV);
+          }
+        }
+        outFeatureVectors.flush();
+        outFeatureVectors.close();
+        inNLPFeatures.close();
+      } catch(IOException e) {
+        System.out.println("Error occured in reading the NLP data from file for converting to FVs" +
+            "or writing the FVs data into file!");
+      }
+  }
+  
   /** Write the FVs of one document into file. */
   void addDocFVsToFile(int index, BufferedWriter out, int[] labels,
     DocFeatureVectors docFV) {
