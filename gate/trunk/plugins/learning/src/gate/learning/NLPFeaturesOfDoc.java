@@ -7,6 +7,7 @@
  */
 package gate.learning;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,6 +41,10 @@ public class NLPFeaturesOfDoc {
   /** store the class name for each instances in. */
   String[] classNames;
 
+  /** Constructor with no parameters. */
+  public NLPFeaturesOfDoc() {
+    
+  }
   /**
    * Constructor, obtain NLP features from GATE annotations for each instance in
    * the document.
@@ -746,7 +751,8 @@ public class NLPFeaturesOfDoc {
         out.write(sline.toString());
         out.newLine();
       }
-      out.write(new Integer(docIndex) + " " + docId + " "
+      out.write(new Integer(docIndex) + ConstantParameters.ITEMSEPARATOR + 
+        docId + ConstantParameters.ITEMSEPARATOR
         + new Integer(numInstances));
       out.newLine();
       for(int i = 0; i < numInstances; ++i) {
@@ -762,6 +768,37 @@ public class NLPFeaturesOfDoc {
     } catch(IOException e) {
       System.out.println("Error occured in writing the NLP data to a file!");
     }
+  }
+  
+  /** Read the NLP data of one document from the NLP feature file. */
+  public void readNLPFeaturesFromFile(BufferedReader in) {
+    try {
+      String [] lineItems = in.readLine().split(ConstantParameters.ITEMSEPARATOR);
+      numInstances = Integer.parseInt(lineItems[2]);
+      docId = lineItems[1];
+      featuresInLine = new StringBuffer[numInstances];
+      classNames = new String[numInstances];
+      int num;
+      for(int i=0; i<numInstances; ++i) {
+        String [] lineItems1 = in.readLine().split(ConstantParameters.ITEMSEPARATOR);
+        num = Integer.parseInt(lineItems1[0]);
+        if(num>0) {
+          StringBuffer classNs = new StringBuffer();
+          for(int j=1; j<num; ++j)
+            classNs.append(lineItems1[j]+ConstantParameters.ITEMSEPARATOR);
+          classNs.append(lineItems1[num]);
+          classNames[i] = classNs.toString();
+        }
+        featuresInLine[i] = new StringBuffer();
+        if(num+1<lineItems1.length)
+          featuresInLine[i].append(lineItems1[num+1]);
+        for(int j=num+2; j<lineItems1.length; ++j)
+          featuresInLine[i].append(ConstantParameters.ITEMSEPARATOR+lineItems1[j]);
+      }
+    } catch(IOException e) {
+      System.out.println("**Error occured in reading the NLP data from file for converting to FVs!");
+    }
+    
   }
 
   public void setDocId(String docId) {

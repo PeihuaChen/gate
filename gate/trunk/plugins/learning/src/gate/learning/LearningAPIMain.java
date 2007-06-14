@@ -189,11 +189,13 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
             if(LogService.minVerbosityLevel > 0) System.out.println("** Producing the feature files only!");
             LogService.logMessage("** Producing the feature files only!", 1);
             isTraining = true;
-            for(int i = 0; i < numDoc; ++i)
-              lightWeightApi.annotations2FVs((Document)corpus.get(i), i,
+            for(int i = 0; i < numDoc; ++i) {
+              lightWeightApi.annotations2NLPFeatures((Document)corpus.get(i), i,
                 wdResults, isTraining, learningSettings);
+            }
             lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
               learningSettings);
+            lightWeightApi.nlpfeatures2FVs(wdResults, numDoc, isTraining, learningSettings);
             if(LogService.minVerbosityLevel > 0) displayDataFilesInformation();
             break;
           case TRAINING:
@@ -202,11 +204,13 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               if(LogService.minVerbosityLevel > 0) System.out.println("** Training mode:");
               LogService.logMessage("** Training mode:", 1);
               isTraining = true;
-              for(int i = 0; i < numDoc; ++i)
-                lightWeightApi.annotations2FVs((Document)corpus.get(i), i,
+              for(int i = 0; i < numDoc; ++i) {
+                lightWeightApi.annotations2NLPFeatures((Document)corpus.get(i), i,
                   wdResults, isTraining, learningSettings);
+              }
               lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
                 learningSettings);
+              lightWeightApi.nlpfeatures2FVs(wdResults, numDoc, isTraining, learningSettings);
               // if fitering the training data
               if(learningSettings.fiteringTrainingData
                 && learningSettings.filteringRatio > 0.0)
@@ -222,11 +226,13 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               isTraining = false;
               String classTypeOriginal = learningSettings.datasetDefinition
                 .getClassAttribute().getType();
-              for(int i = 0; i < numDoc; ++i)
-                lightWeightApi.annotations2FVs((Document)corpus.get(i), i,
+              for(int i = 0; i < numDoc; ++i) {
+                lightWeightApi.annotations2NLPFeatures((Document)corpus.get(i), i,
                   wdResults, isTraining, learningSettings);
+              }
               lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
                 learningSettings);
+              lightWeightApi.nlpfeatures2FVs(wdResults, numDoc, isTraining, learningSettings);
               // Applying th model
               lightWeightApi.applyModelInJava(corpus, classTypeOriginal,
                 learningSettings);
