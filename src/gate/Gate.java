@@ -1052,7 +1052,7 @@ jar/classpath so it's the same as registerBuiltins
    * have previously been loaded manually).
    * @return a {@link List} of {@link URL}s.
    */
-  public static List getKnownPlugins(){
+  public static List<URL> getKnownPlugins(){
     return knownPlugins;
   }
   
@@ -1093,7 +1093,7 @@ jar/classpath so it's the same as registerBuiltins
    * start-up.
    * @return a {@link List} of {@link URL}s.
    */
-  public static List getAutoloadPlugins(){
+  public static List<URL> getAutoloadPlugins(){
     return autoloadPlugins;
   }
   
@@ -1208,7 +1208,7 @@ jar/classpath so it's the same as registerBuiltins
     /**
      * @return Returns the resourceInfoList.
      */
-    public List getResourceInfoList(){
+    public List<ResourceInfo> getResourceInfoList(){
       return resourceInfoList;
     }
     /**
@@ -1237,7 +1237,7 @@ jar/classpath so it's the same as registerBuiltins
     /**
      * The list of {@link Gate.ResourceInfo} objects.
      */
-    protected List resourceInfoList;
+    protected List<ResourceInfo> resourceInfoList;
   }
   
   /**
@@ -1420,20 +1420,20 @@ jar/classpath so it's the same as registerBuiltins
    * The list of plugins (aka CREOLE directories) the system knows about.
    * This list contains URL objects.
    */
-  protected static List knownPlugins;
+  protected static List<URL> knownPlugins;
   
   /**
    * The list of plugins (aka CREOLE directories) the system loads automatically
    * at start-up.
    * This list contains URL objects.
    */
-  protected static List autoloadPlugins;
+  protected static List<URL> autoloadPlugins;
   
   
   /**
    * Map from URL of directory to {@link DirectoryInfo}.
    */
-  protected static Map pluginData;
+  protected static Map<URL, DirectoryInfo> pluginData;
   
   
   
