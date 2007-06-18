@@ -124,7 +124,7 @@ public class EvaluationMeasuresComputation {
   }
 
   /** Print out the results. */
-  public void printResults() {
+  public String printResults() {
     StringBuffer logMessage= new StringBuffer();
     logMessage.append("  (correct, paritalCorrect, spurious, missing)= ("
       + new Integer(correct) + ", " + new Integer(partialCor) + ", "
@@ -133,8 +133,7 @@ public class EvaluationMeasuresComputation {
       + ", " + (new Float(recall)) + ", " + new Float(f1) + ");  ");
     logMessage.append("Lenient: (" + (new Float(precisionLenient)) + ", "
       + (new Float(recallLenient)) + ", " + new Float(f1Lenient) + ")\n");
-    System.out.print(logMessage+"\n");
-    LogService.logMessage(logMessage.toString()+"\n", 1);
+    return logMessage.toString();
   }
 
 }

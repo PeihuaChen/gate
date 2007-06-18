@@ -141,12 +141,12 @@ public class DocFeatureVectors {
         }
         tempSize = 0;
       }
-      if(LogService.minVerbosityLevel > 1)
-        if(n != nlpDoc.featuresCounted[i]) {
-          System.out.println("Error: the number of features (" + n
-            + ") is not the same as the number recorded ("
-            + nlpDoc.featuresCounted[i] + ")in document " + docId);
-        }
+      //if(LogService.minVerbosityLevel > 1)
+        //if(n != nlpDoc.featuresCounted[i]) {
+          //System.out.println("Error: the number of features (" + n
+          //  + ") is not the same as the number recorded ("
+            //+ nlpDoc.featuresCounted[i] + ")in document " + docId);
+        //}
       // sort the indexes in ascending order
       List indexes = new ArrayList(indexValues.keySet());
       Collections.sort(indexes, new LongCompactor());

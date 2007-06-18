@@ -83,16 +83,15 @@ public class EvaluationBasedOnDocs {
       holdoutEval(learningSettings, lightWeightApi);
     else throw new GateException("The evaluation configuration mode as "
       + learningSettings.evaluationconfig.mode + " is not implemented!");
-    if(LogService.minVerbosityLevel > 0) {
-      LogService.logMessage("\n*** Averaged results for each label over "+
-        learningSettings.evaluationconfig.kk +" runs as:", 1);
-      System.out.println("\n*** Averaged results for each label over "+
-        learningSettings.evaluationconfig.kk +" runs as:");
-      printFmeasureForEachLabel(labels2InstNum, labels2MMR);
-      System.out.println("\nOverall results as:");
-      LogService.logMessage("\nOverall results:", 1);
-      macroMeasuresOfResults.printResults();
-    }
+    StringBuffer logMes =new StringBuffer();
+    logMes.append("\n*** Averaged results for each label over "+
+        learningSettings.evaluationconfig.kk +" runs as:\n");
+    logMes.append(printFmeasureForEachLabel(labels2InstNum, labels2MMR));
+    logMes.append("\nOverall results as:\n");
+    logMes.append(macroMeasuresOfResults.printResults());
+    LogService.logMessage(logMes.toString(),1);
+    if(LogService.minVerbosityLevel > 0)
+      System.out.println(logMes);
   }
 
   /** K-fold evalution. */
@@ -147,7 +146,7 @@ public class EvaluationBasedOnDocs {
         }
       }
       LogService.logMessage(logMes.toString(),1);
-      if(LogService.minVerbosityLevel>0)
+      if(LogService.minVerbosityLevel>1)
         System.out.println(logMes);
       
       // call the training or application
@@ -251,7 +250,7 @@ public class EvaluationBasedOnDocs {
       }
 
       LogService.logMessage(logMes.toString(),1);
-      if(LogService.minVerbosityLevel>0)
+      if(LogService.minVerbosityLevel>1)
         System.out.println(logMes);
       
       // One run, call the training and application and do evaluation
@@ -412,14 +411,15 @@ public class EvaluationBasedOnDocs {
       emc.computeFmeasure();
       emc.computeFmeasureLenient();
     }
-    if(LogService.minVerbosityLevel > 0) {
-      System.out.println("Results of this run:\n");
-      // Print the results of each label
-      printFmeasureForEachLabel(uniqueLabels, labels2MR);
-      System.out.println("\nOverall results(micro-averaged over all labels):");
-      LogService.logMessage("\nOverall results(micro-averaged over all labels):", 1);
-      measuresOfResults.printResults();
+    StringBuffer logMes = new StringBuffer();
+    logMes.append("Results of this run:\n\n"); 
+    logMes.append(printFmeasureForEachLabel(uniqueLabels, labels2MR));
+    logMes.append("\nOverall results(micro-averaged over all labels):\n");
+    logMes.append(measuresOfResults.printResults());
+    if(LogService.minVerbosityLevel > 1) {
+      System.out.println(logMes);
     }
+    LogService.logMessage(logMes.toString(), 1);
     // finally, change the class type back for training,
     // and remove the test annotations
     learningSettings.datasetDefinition.getClassAttribute().setType(
@@ -474,24 +474,23 @@ public class EvaluationBasedOnDocs {
   }
 
   /** Print the F-measure results for each label. */
-  public void printFmeasureForEachLabel(HashMap uniqueLabels,
+  public String printFmeasureForEachLabel(HashMap uniqueLabels,
     HashMap labels2MR) {
-    System.out.println("\nResults of single label");
-    LogService.logMessage("\nResults of single label", 1);
+    StringBuffer logMes= new StringBuffer();
+    logMes.append("\nResults of single label:\n");
+    //LogService.logMessage("\nResults of single label", 1);
     List labels = new ArrayList(uniqueLabels.keySet());
     Collections.sort(labels);
     for(int i = 0; i < labels.size(); ++i) {
       String labelName = labels.get(i).toString();
-      System.out.println(i + " LabelName=" + labelName
+      logMes.append(i + " LabelName=" + labelName
         + ", number of instances="
-        + new Integer(uniqueLabels.get(labelName).toString()));
-      LogService.logMessage(i + " LabelName=" + labelName
-        + ", number of instances="
-        + new Integer(uniqueLabels.get(labelName).toString()), 1);
-      ((EvaluationMeasuresComputation)labels2MR.get(labelName)).printResults();
+        + new Integer(uniqueLabels.get(labelName).toString())+"\n");
+      logMes.append(((EvaluationMeasuresComputation)labels2MR.get(labelName)).printResults());
       //((EvaluationMeasuresComputation)labels2MR.get(labelName))
         //.printResults(logFileIn);
     }
+    return logMes.toString();
   }
 
   /** Evaluate the test document by using the AnnotationDiff class. */

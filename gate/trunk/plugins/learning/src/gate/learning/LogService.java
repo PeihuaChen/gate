@@ -20,12 +20,12 @@ import java.util.Date;
  */
 public class LogService {
   //-------------------- Verbosity Level --------------------
-  /** The Minimum level. */
+  /** The Minimum level, only output the error and warning information. */
   public static final int MINIMUM     = 0;
   /** The normal level, outputing the setting information and results. */
   public static final int NORMAL          = 1;
-  /** Output the warning information. */
-  public static final int WARNING      = 2;
+  /** Output the debug information. */
+  public static final int DEBUG      = 2;
   /**
    * Determine if or not printing the information. 0 -- no debug information; 1 --
    * usual information output; 2 -- all the information output, including some
