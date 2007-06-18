@@ -498,7 +498,7 @@ public class Sgml2Xml{
     File file = Files.writeTempFile(m_modifier.toString(),"UTF-8");
 
     //return m_doc.getSourceURL().toString();
-    return file.toURL().toString();
+    return file.toURI().toURL().toString();
   }// convert()
 
   /**

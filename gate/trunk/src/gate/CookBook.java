@@ -345,7 +345,7 @@ public class CookBook extends TestCase
 
       // set the source URL parameter to a "file:..." URL string
       params.put(Document.DOCUMENT_URL_PARAMETER_NAME,
-        inFile.toURL().toExternalForm());
+        inFile.toURI().toURL().toExternalForm());
 
       // use the platform's default encoding rather than GATE's
       params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");

@@ -145,7 +145,7 @@ public class TestGate {
           URL u = null;
           File f = new File(optionString);
           try {
-            u = f.toURL();
+            u = f.toURI().toURL();
           } catch(MalformedURLException e) {
             Err.prln("Bad initialisation file: " + optionString);
             Err.prln(e);
@@ -207,7 +207,7 @@ public class TestGate {
       if(configFile != null && configFile.length() > 0){
         File f = new File(configFile);
         try {
-          URL u = f.toURL();
+          URL u = f.toURI().toURL();
         } catch(MalformedURLException e) {
           Err.prln("Bad initialisation file: " + configFile);
           Err.prln(e);

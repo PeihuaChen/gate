@@ -53,7 +53,7 @@ public class TestMorph extends TestCase {
 			File pluginsHome = new File(System
 					.getProperty(GateConstants.GATE_HOME_PROPERTY_NAME),
 					"plugins");
-			Gate.getCreoleRegister().registerDirectories(new File(pluginsHome, "Tools").toURL());
+			Gate.getCreoleRegister().registerDirectories(new File(pluginsHome, "Tools").toURI().toURL());
 			// creating documents
 			verbDocumentToTest = Factory.newDocument(Files
 					.getGateResource("/gate.ac.uk/tests/morph/verbTest.dat"));

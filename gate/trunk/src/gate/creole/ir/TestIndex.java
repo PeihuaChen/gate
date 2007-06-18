@@ -51,7 +51,7 @@ public class TestIndex extends TestCase{
       storageDir.delete();
       // create and open a serial data store
       sds = Factory.createDataStore(
-        "gate.persist.SerialDataStore", storageDir.toURL().toString()
+        "gate.persist.SerialDataStore", storageDir.toURI().toURL().toString()
       );
 
       sds.open();

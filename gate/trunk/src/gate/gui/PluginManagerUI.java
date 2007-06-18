@@ -491,7 +491,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
           if(result == JFileChooser.APPROVE_OPTION){
             try{
               textField.setText(fileChooser.getSelectedFile().
-                                            toURL().toExternalForm());
+                                            toURI().toURL().toExternalForm());
             }catch(MalformedURLException mue){
               throw new GateRuntimeException(mue.toString());
             }

@@ -95,7 +95,7 @@ public class Compiler {
     Transducer transducer = null;
 
     try {
-      ParseCpsl cpslParser = Factory.newJapeParser(new File(japeFileName).toURL(),
+      ParseCpsl cpslParser = Factory.newJapeParser(new File(japeFileName).toURI().toURL(),
                                            encoding);
       transducer = cpslParser.MultiPhaseTransducer();
     } catch(gate.jape.parser.ParseException e) {

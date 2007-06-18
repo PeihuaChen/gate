@@ -725,7 +725,7 @@ public class ShellSlacFrame extends MainFrame {
       if(file != null) {
         MainFrame.lockGUI("Import file...");
         try {
-          Factory.newDocument(file.toURL());
+          Factory.newDocument(file.toURI().toURL());
         } catch (MalformedURLException mex) {
           mex.printStackTrace();
         } catch (ResourceInstantiationException rex) {

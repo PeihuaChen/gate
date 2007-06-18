@@ -92,7 +92,7 @@ extends AbstractFeatureBearer implements DataStore {
     if(storageDir == null) return null;
 
     URL u = null;
-    try { u = storageDir.toURL(); } catch(MalformedURLException e) {
+    try { u = storageDir.toURI().toURL(); } catch(MalformedURLException e) {
       // we can assume that this never happens as storageUrl should always
       // be a valid file and therefore convertable to URL
     }

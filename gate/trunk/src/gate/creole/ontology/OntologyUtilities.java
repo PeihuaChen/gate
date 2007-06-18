@@ -70,7 +70,7 @@ public class OntologyUtilities {
         // hardcoded to use OWL as the ontology type
         FeatureMap params = Factory.newFeatureMap();
         params.put("persistLocation", File.createTempFile("abc", "abc")
-                .getParentFile().toURL());
+                .getParentFile().toURI().toURL());
         params.put("rdfXmlURL", url);
         ontology = (Ontology)Factory.createResource(
                 "gate.creole.ontology.owlim.OWLIMOntologyLR", params);

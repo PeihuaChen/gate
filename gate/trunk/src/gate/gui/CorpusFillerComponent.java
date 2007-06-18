@@ -152,7 +152,7 @@ public class CorpusFillerComponent extends JPanel {
         if(res == JFileChooser.APPROVE_OPTION){
           try {
             urlTextField.setText(filer.getSelectedFile().
-                                 toURL().toExternalForm());
+                                 toURI().toURL().toExternalForm());
           } catch(IOException ioe){}
         }
       }

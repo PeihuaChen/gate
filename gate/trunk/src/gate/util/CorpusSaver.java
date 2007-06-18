@@ -35,7 +35,7 @@ public class CorpusSaver {
       File path = new File(dsPath);
       try {
        ds = Factory.openDataStore("gate.persist.SerialDataStore",
-                                  path.toURL().toString());
+                                  path.toURI().toURL().toString());
       } catch (Exception ex) {
         throw new gate.util.GateRuntimeException(ex.getMessage());
       }
@@ -214,8 +214,8 @@ public class CorpusSaver {
 
     for(int i=0; i<files.size(); i++) {
       try {
-        Document doc = Factory.newDocument(((File)files.get(i)).toURL());
-        doc.setName(Files.getLastPathComponent(((File)files.get(i)).toURL().toString()));
+        Document doc = Factory.newDocument(((File)files.get(i)).toURI().toURL());
+        doc.setName(Files.getLastPathComponent(((File)files.get(i)).toURI().toURL().toString()));
         Out.prln("Storing document: " + doc.getName());
         //first process it with ANNIE if in process mode
         if (processMode)

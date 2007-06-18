@@ -378,12 +378,12 @@ public class POSTagger {
       URL lexiconURL = (lexiconUrlString == null) ?
                        POSTagger.class.
                        getResource("/hepple/resources/sample_lexicon") :
-                       new File(lexiconUrlString).toURL();
+                       new File(lexiconUrlString).toURI().toURL();
 
       URL rulesURL = (rulesUrlString == null) ?
                        POSTagger.class.
                        getResource("/hepple/resources/sample_ruleset.big") :
-                       new File(rulesUrlString).toURL();
+                       new File(rulesUrlString).toURI().toURL();
 
       POSTagger tagger = new POSTagger(lexiconURL, rulesURL);
 

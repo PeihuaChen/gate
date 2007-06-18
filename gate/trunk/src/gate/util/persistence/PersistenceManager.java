@@ -120,7 +120,7 @@ public class PersistenceManager {
         if(url.getProtocol().equals("file")) {
           try {
             urlString = relativePathMarker
-                    + getRelativePath(persistenceFile.toURL(), url);
+                    + getRelativePath(persistenceFile.toURI().toURL(), url);
           }
           catch(MalformedURLException mue) {
             urlString = ((URL)source).toExternalForm();
@@ -365,14 +365,14 @@ public class PersistenceManager {
 
       // normalise the two file URLS
       try {
-        context = new File(context.getPath()).toURL();
+        context = new File(context.getPath()).toURI().toURL();
       }
       catch(MalformedURLException mue) {
         throw new GateRuntimeException("Could not normalise the file URL:\n"
                 + context + "\nThe problem was:\n" + mue);
       }
       try {
-        target = new File(target.getPath()).toURL();
+        target = new File(target.getPath()).toURI().toURL();
       }
       catch(MalformedURLException mue) {
         throw new GateRuntimeException("Could not normalise the file URL:\n"
@@ -520,7 +520,7 @@ public class PersistenceManager {
   public static Object loadObjectFromFile(File file)
           throws PersistenceException, IOException,
           ResourceInstantiationException {
-    return loadObjectFromUrl(file.toURL());
+    return loadObjectFromUrl(file.toURI().toURL());
   }
 
   public static Object loadObjectFromUrl(URL url) throws PersistenceException,

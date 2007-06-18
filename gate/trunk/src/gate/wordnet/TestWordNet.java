@@ -371,7 +371,7 @@ System.out.println(iSet);
     if(wnConfigFile == null) return;
     if (null == wnMain) {
       wnMain = new IndexFileWordNetImpl();
-      wnMain.setPropertyUrl(new File(wnConfigFile).toURL());
+      wnMain.setPropertyUrl(new File(wnConfigFile).toURI().toURL());
       wnMain.init();
     }
   }

@@ -558,7 +558,7 @@ public class Main {
           URL u2 = null;
           File f = new File(optionString);
           try {
-            u2 = f.toURL();
+            u2 = f.toURI().toURL();
           } catch(MalformedURLException e) {
             Err.prln("Bad initialisation file: " + optionString);
             Err.prln(e);

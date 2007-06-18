@@ -337,7 +337,7 @@ public class CorpusImpl extends AbstractLanguageResource
         if(aFile.isDirectory()){
           //recurse dir if required
           if(recurseDirectories){
-            populate(corpus, aFile.toURL(), filter,
+            populate(corpus, aFile.toURI().toURL(), filter,
                      encoding, recurseDirectories);
           }
         }else{
@@ -349,7 +349,7 @@ public class CorpusImpl extends AbstractLanguageResource
             "Reading: " + aFile.getName());
           String docName = aFile.getName() + "_" + Gate.genSym();
           FeatureMap params = Factory.newFeatureMap();
-          params.put(Document.DOCUMENT_URL_PARAMETER_NAME, aFile.toURL());
+          params.put(Document.DOCUMENT_URL_PARAMETER_NAME, aFile.toURI().toURL());
           if(encoding != null)
             params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, encoding);
 
