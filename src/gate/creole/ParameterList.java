@@ -33,22 +33,24 @@ public class ParameterList implements Serializable
   private static final boolean DEBUG = false;
 
   /** The runtime parameters */
-  protected List runtimeParameters = new ArrayList();
+  protected List<List<Parameter>> runtimeParameters = 
+    new ArrayList<List<Parameter>>();
 
   /** Get the list of runtime parameters
     * (as a list of parameter disjunctions).
     */
-  public List getRuntimeParameters() {
+  public List<List<Parameter>> getRuntimeParameters() {
     return runtimeParameters;
   } // getRuntimeParameters()
 
   /** The initialisation time parameters */
-  protected List initimeParameters = new ArrayList();
+  protected List<List<Parameter>> initimeParameters = 
+      new ArrayList<List<Parameter>>();
 
   /** Get the list of initialisation-time parameters
     * (as a list of parameter disjunctions).
     */
-  public List getInitimeParameters() {
+  public List<List<Parameter>> getInitimeParameters() {
     return initimeParameters;
   } // getInitimeParameters()
 
@@ -57,7 +59,7 @@ public class ParameterList implements Serializable
     * or all init-time, never a mix of the two.
     * @exception NoSuchElementException disjunction has no more elements.
     */
-  public boolean add(List disjunction) {
+  public boolean add(List<Parameter> disjunction) {
     boolean status = false;
     Iterator iter = disjunction.iterator();
     Parameter param = (Parameter) iter.next();
@@ -72,12 +74,12 @@ public class ParameterList implements Serializable
   } // add(param)
 
   /** Add all the members of a parameter list (as individual disjunctions) */
-  public boolean addAll(List c) {
+  public boolean addAll(List<Parameter> c) {
     boolean status = false;
-    Iterator iter = c.iterator();
+    Iterator<Parameter> iter = c.iterator();
     while(iter.hasNext()) {
-      List disj = new ArrayList();
-      Parameter param = (Parameter) iter.next();
+      List<Parameter> disj = new ArrayList<Parameter>();
+      Parameter param = iter.next();
       disj.add(param);
       status = add(disj);
     }
@@ -107,11 +109,11 @@ public class ParameterList implements Serializable
     * use <TT>isFullyDefaulted()</TT>.
     * @see #isFullyDefaulted()
     */
-  public FeatureMap getDefaults(List parameters) throws ParameterException {
+  public FeatureMap getDefaults(List<List<Parameter>> parameters) throws ParameterException {
     FeatureMap defaults = Factory.newFeatureMap();
 
     // each element of the parameters list is a list of (disjunctive) params
-    Iterator disjIter = parameters.iterator();
+    Iterator<List<Parameter>> disjIter = parameters.iterator();
 
     // for each parameter disjunction in parameters
     disjIterLoop:
@@ -119,12 +121,12 @@ public class ParameterList implements Serializable
       boolean optional = false; // were any of this disj optional?
 
       // get an iterator for this disjunction of parameters
-      List paramDisj = (List) disjIter.next();
-      Iterator paramsIter = paramDisj.iterator();
+      List<Parameter> paramDisj = disjIter.next();
+      Iterator<Parameter> paramsIter = paramDisj.iterator();
 
       // for each parameter in the disjunction
       while(paramsIter.hasNext()) {
-        Parameter param = (Parameter) paramsIter.next();
+        Parameter param = paramsIter.next();
         if(DEBUG) Out.prln("Examining " + param);
         if(!optional)
           optional = param.isOptional();
