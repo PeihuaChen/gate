@@ -388,6 +388,7 @@ public class XJTable extends JTable{
           //rows were deleted -> we need to rebuild
           init(sourceModel);
           if(isSortable()) sort();
+          else fireTableDataChanged();
       }
     }
     
