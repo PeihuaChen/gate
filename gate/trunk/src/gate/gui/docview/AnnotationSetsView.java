@@ -919,7 +919,7 @@ public class AnnotationSetsView extends AbstractDocumentView
         if(expanded){
           tableRows.remove(setRow + pos + 1);
           tableModel.fireTableRowsDeleted(setRow + pos + 1, setRow + pos + 1);
-          if(row >= (setRow + pos + 1)) row--;
+//          if(row >= (setRow + pos + 1)) row--;
         }
         if(typeHandlers.isEmpty()){
           //the set has no more handlers
@@ -927,7 +927,11 @@ public class AnnotationSetsView extends AbstractDocumentView
           tableModel.fireTableRowsUpdated(setRow, setRow);
         }
         //restore selection if any
-        if(row != -1) mainTable.getSelectionModel().setSelectionInterval(row, row);
+        if(row != -1){
+          if(mainTable.getRowCount() <= row){
+            row = mainTable.getRowCount() -1;
+          }
+          mainTable.getSelectionModel().setSelectionInterval(row, row);        }
       }
     }
     
@@ -1707,6 +1711,11 @@ public class AnnotationSetsView extends AbstractDocumentView
             document.removeAnnotationSet(sHandler.set.getName());
           }
         }
+        //restore selection
+        if(mainTable.getRowCount() <= row){
+          row = mainTable.getRowCount() -1;
+        }
+        mainTable.getSelectionModel().setSelectionInterval(row, row);
       }
     }
   }  
