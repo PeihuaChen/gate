@@ -447,7 +447,7 @@ public class CorpusBenchmarkTool {
 
     //create the datastore and process each document
     try {
-      SerialDataStore sds = new SerialDataStore(outDir.toURL().toString());
+      SerialDataStore sds = new SerialDataStore(outDir.toURI().toURL().toString());
       sds.create();
       sds.open();
 
@@ -456,10 +456,10 @@ public class CorpusBenchmarkTool {
         if (!files[i].isFile())
           continue;
         // create a document
-        Out.prln("Processing and storing document: " + files[i].toURL() + "<P>");
+        Out.prln("Processing and storing document: " + files[i].toURI().toURL() + "<P>");
 
         FeatureMap params = Factory.newFeatureMap();
-        params.put(Document.DOCUMENT_URL_PARAMETER_NAME, files[i].toURL());
+        params.put(Document.DOCUMENT_URL_PARAMETER_NAME, files[i].toURI().toURL());
         params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, documentEncoding);
 
         FeatureMap features = Factory.newFeatureMap();
@@ -564,7 +564,7 @@ public class CorpusBenchmarkTool {
       //open the data store
       DataStore sds = Factory.openDataStore
                       ("gate.persist.SerialDataStore",
-                       processedDir.toURL().toExternalForm());
+                       processedDir.toURI().toURL().toExternalForm());
 
       List lrIDs = sds.getLrIds("gate.corpora.DocumentImpl");
       for (int i = 0; i < lrIDs.size(); i++) {
@@ -602,7 +602,7 @@ public class CorpusBenchmarkTool {
         }
         else {
           FeatureMap params = Factory.newFeatureMap();
-          params.put(Document.DOCUMENT_URL_PARAMETER_NAME, cleanDocFile.toURL());
+          params.put(Document.DOCUMENT_URL_PARAMETER_NAME, cleanDocFile.toURI().toURL());
           params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME,
                      documentEncoding);
 
@@ -627,7 +627,7 @@ public class CorpusBenchmarkTool {
           else {
             FeatureMap params = Factory.newFeatureMap();
             params.put(Document.DOCUMENT_URL_PARAMETER_NAME,
-                       markedDocFile.toURL());
+                       markedDocFile.toURI().toURL());
             params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME,
                        documentEncoding);
 
@@ -642,7 +642,7 @@ public class CorpusBenchmarkTool {
           //open the data store
           DataStore sds1 = Factory.openDataStore
                            ("gate.persist.SerialDataStore",
-                            markedDir.toURL().toExternalForm());
+                            markedDir.toURI().toURL().toExternalForm());
 
           List lrIDs1 = sds1.getLrIds("gate.corpora.DocumentImpl");
           boolean found = false;
@@ -727,7 +727,7 @@ public class CorpusBenchmarkTool {
       //open the data store
       DataStore sds = Factory.openDataStore
                       ("gate.persist.SerialDataStore",
-                       storedDir.toURL().toExternalForm());
+                       storedDir.toURI().toURL().toExternalForm());
 
       List lrIDs = sds.getLrIds("gate.corpora.DocumentImpl");
       for (int i = 0; i < lrIDs.size(); i++) {
@@ -772,7 +772,7 @@ public class CorpusBenchmarkTool {
           else {
             FeatureMap params = Factory.newFeatureMap();
             params.put(Document.DOCUMENT_URL_PARAMETER_NAME,
-                       markedDocFile.toURL());
+                       markedDocFile.toURI().toURL());
             params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME,
                        documentEncoding);
 
@@ -788,7 +788,7 @@ public class CorpusBenchmarkTool {
             //open the data store
             DataStore sds1 = Factory.openDataStore
                              ("gate.persist.SerialDataStore",
-                              markedDir.toURL().toExternalForm());
+                              markedDir.toURI().toURL().toExternalForm());
 
             List lrIDs1 = sds1.getLrIds("gate.corpora.DocumentImpl");
             boolean found = false;
@@ -880,7 +880,7 @@ public class CorpusBenchmarkTool {
       //try reading the original document from clean
       FeatureMap params = Factory.newFeatureMap();
       try {
-        params.put(Document.DOCUMENT_URL_PARAMETER_NAME, cleanDocs[i].toURL());
+        params.put(Document.DOCUMENT_URL_PARAMETER_NAME, cleanDocs[i].toURI().toURL());
       }
       catch (java.net.MalformedURLException ex) {
         Out.prln("Cannot create document from file: " +
@@ -934,7 +934,7 @@ public class CorpusBenchmarkTool {
           params = Factory.newFeatureMap();
           try {
             params.put(Document.DOCUMENT_URL_PARAMETER_NAME,
-                       markedDocFile.toURL());
+                       markedDocFile.toURI().toURL());
           }
           catch (java.net.MalformedURLException ex) {
             Out.prln("Cannot create document from file: " +
@@ -964,7 +964,7 @@ public class CorpusBenchmarkTool {
           //open the data store
           DataStore sds1 = Factory.openDataStore
                            ("gate.persist.SerialDataStore",
-                            markedDir.toURL().toExternalForm());
+                            markedDir.toURI().toURL().toExternalForm());
 
           List lrIDs1 = sds1.getLrIds("gate.corpora.DocumentImpl");
           boolean found = false;

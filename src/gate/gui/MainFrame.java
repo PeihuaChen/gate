@@ -1478,7 +1478,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
     if(fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
       try {
-        URL dsURL = fileChooser.getSelectedFile().toURL();
+        URL dsURL = fileChooser.getSelectedFile().toURI().toURL();
         ds = Factory.createDataStore("gate.persist.SerialDataStore", dsURL
                 .toExternalForm());
       }
@@ -1506,7 +1506,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
     if(fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
       try {
-        URL dsURL = fileChooser.getSelectedFile().toURL();
+        URL dsURL = fileChooser.getSelectedFile().toURI().toURL();
         ds = Factory.openDataStore("gate.persist.SerialDataStore", dsURL
                 .toExternalForm());
       }
@@ -2097,7 +2097,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           int result = fileChooser.showOpenDialog(MainFrame.this);
           if(result == JFileChooser.APPROVE_OPTION) {
             try {
-              textField.setText(fileChooser.getSelectedFile().toURL()
+              textField.setText(fileChooser.getSelectedFile().toURI().toURL()
                       .toExternalForm());
             }
             catch(MalformedURLException mue) {
@@ -2229,7 +2229,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           if(fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
             try {
-              dsLocation.setText(fileChooser.getSelectedFile().toURL()
+              dsLocation.setText(fileChooser.getSelectedFile().toURI().toURL()
                       .toExternalForm());
             }
             catch(Exception e) {
@@ -2247,7 +2247,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           if(fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
             try {
-              indexLocation.setText(fileChooser.getSelectedFile().toURL()
+              indexLocation.setText(fileChooser.getSelectedFile().toURI().toURL()
                       .toExternalForm());
             }
             catch(Exception e) {
@@ -2329,7 +2329,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
     if(fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
       try {
-        URL dsURL = fileChooser.getSelectedFile().toURL();
+        URL dsURL = fileChooser.getSelectedFile().toURI().toURL();
         ds = Factory.openDataStore("gate.persist.LuceneDataStoreImpl", dsURL
                 .toExternalForm());
       }

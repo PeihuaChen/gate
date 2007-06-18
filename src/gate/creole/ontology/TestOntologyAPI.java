@@ -47,7 +47,7 @@ public class TestOntologyAPI extends TestCase {
     URL url = new URL("http://gate.ac.uk/tests/demo.owl");
     onto.setPersistRepository(new Boolean(false));
     try {
-      onto.setPersistLocation(File.createTempFile("abc","abc").getParentFile().toURL());
+      onto.setPersistLocation(File.createTempFile("abc","abc").getParentFile().toURI().toURL());
     } catch(IOException ioe) {
       throw new ResourceInstantiationException(ioe);
     }

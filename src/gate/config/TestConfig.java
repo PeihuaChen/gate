@@ -166,7 +166,7 @@ public class TestConfig extends TestCase
     // read the config file and check that the new data is present
     Gate.writeUserConfig();
     configMap.clear();
-    readConfig(userConfigFile.toURL());
+    readConfig(userConfigFile.toURI().toURL());
 
     // reinstante saved user config file if not null
     userConfigFile.delete();

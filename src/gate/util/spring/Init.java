@@ -106,7 +106,7 @@ public class Init {
           pluginURL = new URL((String)plugin);
         }
         else if(plugin instanceof File) {
-          pluginURL = ((File)plugin).toURL();
+          pluginURL = ((File)plugin).toURI().toURL();
         }
         else {
           throw new IllegalArgumentException(

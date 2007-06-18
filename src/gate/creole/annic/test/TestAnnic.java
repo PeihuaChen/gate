@@ -87,7 +87,7 @@ public class TestAnnic extends TestCase {
     File[] files = directory.listFiles();
     for(int i = 0; i < files.length; i++) {
       if(files[i].isFile()) {
-        Document doc = Factory.newDocument(files[i].toURL());
+        Document doc = Factory.newDocument(files[i].toURI().toURL());
         testCorpus.add(doc);
       }
     }
@@ -107,7 +107,7 @@ public class TestAnnic extends TestCase {
     annicPR.setBaseTokenAnnotationType("Token");
     annicPR.setCorpus(testCorpus);
     annicPR.setIndexUnitAnnotationType("Sentence");
-    annicPR.setIndexOutputDirectoryLocation(indexURL.toURL());
+    annicPR.setIndexOutputDirectoryLocation(indexURL.toURI().toURL());
     annicPR.execute();
     Factory.deleteResource(testCorpus);
 

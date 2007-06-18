@@ -98,7 +98,7 @@ public class Scratch
     
     File file = new File("Z:/gate/bin");
     System.out.println("Canonical path: " + file.getCanonicalPath());
-    System.out.println("URL: " + file.toURL());
+    System.out.println("URL: " + file.toURI().toURL());
     
     URL url = new URL("jar:file:/Z:/gate/bin/gate.jar!/gate/Gate.class");
     System.out.println(url);
@@ -389,7 +389,7 @@ public class Scratch
     //create a default transducer
     params = Factory.newFeatureMap();
     params.put(Transducer.TRANSD_DOCUMENT_PARAMETER_NAME, doc);
-    //params.put("grammarURL", new File("z:\\tmp\\main.jape").toURL());
+    //params.put("grammarURL", new File("z:\\tmp\\main.jape").toURI().toURL());
     ProcessingResource trans = (ProcessingResource) Factory.createResource(
       "gate.creole.Transducer", params
     );
@@ -507,7 +507,7 @@ public class Scratch
     //initialise GATE (only call it once!!)
     Gate.init();
     //create the document
-    Document doc = Factory.newDocument(file.toURL());
+    Document doc = Factory.newDocument(file.toURI().toURL());
     //create the tokeniser
     DefaultTokeniser tokeniser = (DefaultTokeniser)Factory.createResource(
       "gate.creole.tokeniser.DefaultTokeniser");

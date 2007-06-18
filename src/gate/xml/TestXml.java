@@ -141,10 +141,10 @@ public class TestXml extends TestCase
 
     // Load the XML Gate document form the tmp file into memory
     gate.Document gateDoc = null;
-    gateDoc = gate.Factory.newDocument(xmlFile.toURL(), workingEncoding);
+    gateDoc = gate.Factory.newDocument(xmlFile.toURI().toURL(), workingEncoding);
 
     assertTrue("Coudn't create a GATE document instance for " +
-                xmlFile.toURL().toString() +
+                xmlFile.toURI().toURL().toString() +
                 " Can't continue." , gateDoc != null);
 
     gate.DocumentFormat gateDocFormat = null;
@@ -152,7 +152,7 @@ public class TestXml extends TestCase
             DocumentFormat.getDocumentFormat(gateDoc,gateDoc.getSourceUrl());
 
     assertTrue("Fail to recognize " +
-      xmlFile.toURL().toString() +
+      xmlFile.toURI().toURL().toString() +
       " as being a GATE XML document !", gateDocFormat != null);
 
     gateDocFormat.unpackMarkup(gateDoc);
@@ -241,9 +241,9 @@ public class TestXml extends TestCase
     // Export the Gate document called origDoc as XML, into a temp file,
     // using the working encoding
     File xmlFile = Files.writeTempFile(origDoc.toXml(),workingEncoding);
-    System.out.println("Saved to temp file :" + xmlFile.toURL());
+    System.out.println("Saved to temp file :" + xmlFile.toURI().toURL());
 
-    Document reloadedDoc = gate.Factory.newDocument(xmlFile.toURL(), workingEncoding);
+    Document reloadedDoc = gate.Factory.newDocument(xmlFile.toURI().toURL(), workingEncoding);
     // Verifies if the maximum annotation ID on the origDoc is less than the
     // Annotation ID generator of the document.
     verifyAnnotationIDGenerator(reloadedDoc);

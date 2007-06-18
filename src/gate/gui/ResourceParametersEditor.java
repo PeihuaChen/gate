@@ -648,7 +648,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
           if(res == JFileChooser.APPROVE_OPTION){
             try {
               textField.setText(fileChooser.getSelectedFile().
-                                toURL().toExternalForm());
+                                toURI().toURL().toExternalForm());
             } catch(IOException ioe){}
             fireEditingStopped();
           }else{

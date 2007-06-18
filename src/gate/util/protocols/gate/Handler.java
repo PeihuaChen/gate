@@ -42,7 +42,7 @@ public class Handler extends URLStreamHandler {
           String oldPath = u.getPath();
           String newPath = oldPath.replaceFirst(aPath, 
                   (String)conversionMap.get(aPath));
-          actualURL = new File(pluginHome, newPath).toURL();
+          actualURL = new File(pluginHome, newPath).toURI().toURL();
           System.out.println(u.toExternalForm() + " ---> " + 
                   actualURL.toExternalForm() + "\n");
           return actualURL.openConnection();

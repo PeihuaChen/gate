@@ -39,7 +39,7 @@ public class TestFlexibleGazetteer extends TestCase {
             "plugins");
     try{
       Gate.getCreoleRegister().registerDirectories(
-              new File(pluginsHome, "Tools").toURL());
+              new File(pluginsHome, "Tools").toURI().toURL());
     }catch(Exception e){
       throw new GateRuntimeException(e);
     }

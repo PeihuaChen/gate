@@ -99,7 +99,7 @@ public class TestPersist extends TestCase
     storageDir.delete(); // get rid of the temp file
     storageDir.mkdir(); // create an empty dir of same name
 
-    SerialDataStore sds = new SerialDataStore(storageDir.toURL().toString());
+    SerialDataStore sds = new SerialDataStore(storageDir.toURI().toURL().toString());
     sds.create();
     sds.open();
 
@@ -119,7 +119,7 @@ public class TestPersist extends TestCase
     if(! cannotSync) assertTrue("doc synced ok before adoption", false);
 
     // check that we can't adopt a resource that's stored somewhere else
-    doc.setDataStore(new SerialDataStore(new File("z:\\").toURL().toString()));
+    doc.setDataStore(new SerialDataStore(new File("z:\\").toURI().toURL().toString()));
     try { sds.adopt(doc,null); } catch(PersistenceException e) { cannotSync=true; }
     if(! cannotSync)
       assertTrue("doc adopted but in other datastore already", false);
@@ -174,7 +174,7 @@ public class TestPersist extends TestCase
 
     // create and open a serial data store
     DataStore sds = Factory.createDataStore(
-      "gate.persist.SerialDataStore", storageDir.toURL().toString()
+      "gate.persist.SerialDataStore", storageDir.toURI().toURL().toString()
     );
 
     // check we can get empty lists from empty data stores
@@ -220,7 +220,7 @@ public class TestPersist extends TestCase
     storageDir.delete();
 
     // create and open a serial data store
-    SerialDataStore sds = new SerialDataStore(storageDir.toURL().toString());
+    SerialDataStore sds = new SerialDataStore(storageDir.toURI().toURL().toString());
     sds.create();
     sds.open();
 
@@ -311,7 +311,7 @@ public class TestPersist extends TestCase
 
     // create and open a serial data store
     SerialDataStore sds = new SerialDataStore();
-    sds.setStorageUrl(storageDir.toURL().toString());
+    sds.setStorageUrl(storageDir.toURI().toURL().toString());
     sds.create();
     sds.open();
 
@@ -358,7 +358,7 @@ public class TestPersist extends TestCase
 
     // create and open a serial data store
     DataStore sds = Factory.createDataStore(
-      "gate.persist.SerialDataStore", storageDir.toURL().toString()
+      "gate.persist.SerialDataStore", storageDir.toURI().toURL().toString()
     );
 
     // create a document with some annotations / features on it
@@ -381,7 +381,7 @@ public class TestPersist extends TestCase
     storageDir = File.createTempFile("TestPersist__", "__StorageDir");
     storageDir.delete();
     DataStore sds2 = Factory.createDataStore(
-      "gate.persist.SerialDataStore", storageDir.toURL().toString()
+      "gate.persist.SerialDataStore", storageDir.toURI().toURL().toString()
     );
 
     // DSR should have two members
