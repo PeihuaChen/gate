@@ -514,6 +514,10 @@
 				ITEM_CLASS_NAME="java.lang.String">
 				java.util.ArrayList
 			</PARAMETER>
+			<PARAMETER NAME="keepOriginalMarkupsAS" RUNTIME="true"
+			OPTIONAL="true" DEFAULT="true">
+				java.lang.Boolean
+			</PARAMETER>
 			<ICON>document-reset</ICON>
 		</RESOURCE>
 	</CREOLE>
