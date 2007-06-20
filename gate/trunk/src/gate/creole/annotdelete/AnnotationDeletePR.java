@@ -39,9 +39,14 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
   public static final String
     TRANSD_SETS_KEEP_PARAMETER_NAME = "setsToKeep";
 
+  public static final String
+    TRANSD_SETS_KEEP_ORIGIANL_MARKUPS_ANNOT_SET = "keppOriginalMarkupsAS";
+  
   protected String markupSetName = GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME;
   protected List annotationTypes;
   protected List setsToKeep;
+  protected Boolean keepOriginalMarkupsAS;
+  
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException
@@ -68,24 +73,19 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
     if(document == null)
       throw new GateRuntimeException("No document to process!");
 
-    /* Niraj */
     Map matchesMap = null;
     Object matchesMapObject = document.getFeatures().get(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME);
     if(matchesMapObject instanceof Map) {
-      // no need to do anything
-      // and return
       matchesMap = (Map) matchesMapObject;
     }
-    /* End */
 
     //first clear the default set, which cannot be removed
     if (annotationTypes == null || annotationTypes.isEmpty()) {
-      document.getAnnotations().clear();
-      /* Niraj */
+      document.removeAnnotationSet(null);
+      document.getAnnotations();
       removeFromDocumentCorefData( (String)null, matchesMap);
-      /* End */
     } else {
-      removeSubSet(document.getAnnotations(), /* Niraj */ matchesMap /* End */);
+      removeSubSet(document.getAnnotations(), matchesMap);
     }
 
     //get the names of all sets
@@ -98,20 +98,25 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
     List setNames = new ArrayList(namedSets.keySet());
     Iterator iter = setNames.iterator();
     String setName;
-
+    
+    if(setsToKeep == null) setsToKeep = new ArrayList();
+    if(keepOriginalMarkupsAS.booleanValue()) {
+        setsToKeep.add(markupSetName);
+    } else {
+        setsToKeep.remove(markupSetName);
+    }
+    
     while (iter.hasNext()) {
       setName = (String) iter.next();
       //check first whether this is the original markups or one of the sets
       //that we want to keep
-      if (setName != null && !setName.equals(markupSetName) ) {
+      if (setName != null) {
         // skip named sets from setsToKeep
         if(setsToKeep != null && setsToKeep.contains(setName)) continue;
 
         if (annotationTypes == null || annotationTypes.isEmpty()) {
           document.removeAnnotationSet(setName);
-          /* Niraj */
           removeFromDocumentCorefData( (String) setName, matchesMap);
-          /* End */
         } else {
           removeSubSet(document.getAnnotations(setName), /* Niraj */ matchesMap /* End */);
         }
@@ -219,6 +224,14 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
 
   public void setSetsToKeep(List newSetNames) {
     setsToKeep = newSetNames;
+  }
+
+  public Boolean getKeepOriginalMarkupsAS() {
+    return keepOriginalMarkupsAS;
+  }
+
+  public void setKeepOriginalMarkupsAS(Boolean emptyDefaultAnnotationSet) {
+    this.keepOriginalMarkupsAS = emptyDefaultAnnotationSet;
   }
 
 
