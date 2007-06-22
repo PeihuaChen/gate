@@ -23,9 +23,6 @@ package gate.util;
   */
 public class GateException extends Exception {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   public GateException() {
     super();
   }
@@ -41,4 +38,38 @@ public class GateException extends Exception {
   public GateException(String message, Throwable e) {
     super(message, e);
   }
+  
+  /**
+   * Overridden so we can print the enclosed exception's stacktrace too.
+   */
+  public void printStackTrace(){
+    printStackTrace(System.err);
+  }
+
+  /**
+   * Overridden so we can print the enclosed exception's stacktrace too.
+   */
+  public void printStackTrace(java.io.PrintStream s) {
+    s.flush();
+    super.printStackTrace(s);
+    Throwable cause = getCause();
+    if(cause != null){
+      s.print("Caused by:\n");
+      cause.printStackTrace(s);
+    }
+  }
+
+  /**
+   * Overridden so we can print the enclosed exception's stacktrace too.
+   */
+  public void printStackTrace(java.io.PrintWriter s) {
+    s.flush();
+    super.printStackTrace(s);
+    Throwable cause = getCause();
+    if(cause != null){
+      s.print("Caused by:\n");
+      cause.printStackTrace(s);
+    }
+  }
+  
 } // GateException
