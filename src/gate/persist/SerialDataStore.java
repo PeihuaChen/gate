@@ -379,9 +379,16 @@ extends AbstractFeatureBearer implements DataStore {
             this.sync(doc);
             if (DEBUG) Out.prln("Document sync-ed");
             corpus.setDocumentPersistentID(i, doc.getLRPersistenceId());
-            if (DEBUG) Out.prln("new document ID " + doc.getLRPersistenceId());
-          } else //if it is adopted, just sync it
+          } else{
+            //if it is adopted, just sync it
             this.sync(doc);
+            if (DEBUG) Out.prln("Document sync-ed");
+          }
+          // store the persistent ID. Needs to be done even if the document was
+          //already adopted, in case the doc was already persistent 
+          //when added to the corpus
+          corpus.setDocumentPersistentID(i, doc.getLRPersistenceId());
+          if (DEBUG) Out.prln("new document ID " + doc.getLRPersistenceId());
         } catch (Exception ex) {
           throw new PersistenceException("Error while saving corpus: "
                                          + corpus
