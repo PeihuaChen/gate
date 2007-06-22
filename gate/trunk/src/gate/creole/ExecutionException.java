@@ -17,14 +17,10 @@ package gate.creole;
 
 import gate.util.GateException;
 
-/** This exception indicates failure during <CODE>run()</CODE>
-  * invocations on ProcessingResources.
-  * These cannot be thrown at run time because <CODE>run()</CODE>
-  * is inheritted from  <CODE>runnable</CODE> and doesn't throw anything.
+/** Exception used to signal problems during the execution of GATE controllers
+  * and Processing Resources.
   */
 public class ExecutionException extends GateException {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
 
   public ExecutionException() {
     super();
@@ -34,36 +30,11 @@ public class ExecutionException extends GateException {
     super(s);
   }
 
-  public ExecutionException(Exception e) {
-    this.exception = e;
+  public ExecutionException(Throwable t) {
+    super(t);
   }
 
-  /**
-   * Overriden so we can print the enclosed exception's stacktrace too.
-   */
-  public void printStackTrace(){
-    printStackTrace(System.err);
+  public ExecutionException(String s, Throwable t) {
+    super(s, t);
   }
-
-  /**
-   * Overriden so we can print the enclosed exception's stacktrace too.
-   */
-  public void printStackTrace(java.io.PrintStream s) {
-    s.flush();
-    super.printStackTrace(s);
-    s.print("  Caused by:\n");
-    if(exception != null) exception.printStackTrace(s);
-  }
-
-  /**
-   * Overriden so we can print the enclosed exception's stacktrace too.
-   */
-  public void printStackTrace(java.io.PrintWriter s) {
-    s.flush();
-    super.printStackTrace(s);
-    s.print("  Caused by:\n");
-    if(exception != null) exception.printStackTrace(s);
-  }
-
-  Exception exception;
 } // ExecutionException
