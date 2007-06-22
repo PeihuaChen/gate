@@ -329,9 +329,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     if(directories.remove(directory)){
       DirectoryInfo dInfo = (DirectoryInfo)Gate.getDirectoryInfo(directory);
       if(dInfo != null){
-        Iterator resIter = dInfo.getResourceInfoList().iterator();
-        while(resIter.hasNext()){
-          ResourceInfo rInfo = (ResourceInfo)resIter.next();
+        for(ResourceInfo rInfo : dInfo.getResourceInfoList()){
           remove(rInfo.getResourceClassName());
         }
       }
@@ -345,22 +343,28 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   public ResourceData remove(Object key) {
     ResourceData rd = get(key);
     if(rd == null) return null;
-
     if(DEBUG) {
       Out.prln(key);
       Out.prln(rd);
     }
-    if(LanguageResource.class.isAssignableFrom(rd.getClass()))
-      lrTypes.remove(rd.getClassName());
-    else if(ProcessingResource.class.isAssignableFrom(rd.getClass()))
-      prTypes.remove(rd.getClassName());
-    else if(VisualResource.class.isAssignableFrom(rd.getClass()))
-      vrTypes.remove(rd.getClassName());
-
+    try {
+      if(LanguageResource.class.isAssignableFrom(rd.getResourceClass())){
+        lrTypes.remove(rd.getClassName());
+      }else if(ProcessingResource.class.isAssignableFrom(rd.getResourceClass())){
+        prTypes.remove(rd.getClassName());
+      }else if(VisualResource.class.isAssignableFrom(rd.getResourceClass())){
+        vrTypes.remove(rd.getClassName());
+      }else if(Controller.class.isAssignableFrom(rd.getResourceClass())){
+        controllerTypes.remove(rd.getClassName());
+      }
+    }
+    catch(ClassNotFoundException cnfe) {
+      throw new GateRuntimeException(
+              "Could not load class specified in CREOLE data.", cnfe);
+    }
     // maintain tool types list
-    if(rd.isTool())
-      toolTypes.remove(rd.getClassName());
-
+    if(rd.isTool()) toolTypes.remove(rd.getClassName());
+    
     return super.remove(key);
   } // remove(Object)
 
