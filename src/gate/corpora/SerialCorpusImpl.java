@@ -662,13 +662,13 @@ public class SerialCorpusImpl extends
 
       //if the document is null, then I must get it from the DS
       if (res == null) {
-        FeatureMap features = Factory.newFeatureMap();
-        features.put(DataStore.DATASTORE_FEATURE_NAME, this.dataStore);
+        FeatureMap parameters = Factory.newFeatureMap();
+        parameters.put(DataStore.DATASTORE_FEATURE_NAME, this.dataStore);
         try {
-          features.put(DataStore.LR_ID_FEATURE_NAME,
+          parameters.put(DataStore.LR_ID_FEATURE_NAME,
                       ((DocumentData)docDataList.get(index)).getPersistentID());
-          Resource lr = Factory.createResource( "gate.corpora.DocumentImpl",
-                                                features);
+          Resource lr = Factory.createResource("gate.corpora.DocumentImpl",
+                                                parameters);
           if (DEBUG)
             Out.prln("Loaded document :" + lr.getName());
           //change the result to the newly loaded doc
@@ -678,7 +678,7 @@ public class SerialCorpusImpl extends
           documents.set(index, lr);
         } catch (ResourceInstantiationException ex) {
           Err.prln("Error reading document inside a serialised corpus.");
-          throw new GateRuntimeException(ex.getMessage());
+          throw new GateRuntimeException(ex);
         }
       }
 
