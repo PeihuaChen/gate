@@ -81,8 +81,7 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
 
     //first clear the default set, which cannot be removed
     if (annotationTypes == null || annotationTypes.isEmpty()) {
-      document.removeAnnotationSet(null);
-      document.getAnnotations();
+      document.getAnnotations().clear();
       removeFromDocumentCorefData( (String)null, matchesMap);
     } else {
       removeSubSet(document.getAnnotations(), matchesMap);
