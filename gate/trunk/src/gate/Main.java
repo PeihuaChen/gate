@@ -96,9 +96,9 @@ public class Main {
   /** Register any CREOLE URLs that we got on the command line */
   private static void registerCreoleUrls() {
     CreoleRegister reg = Gate.getCreoleRegister();
-    Iterator iter = pendingCreoleUrls.iterator();
+    Iterator<URL> iter = pendingCreoleUrls.iterator();
     while(iter.hasNext()) {
-      URL u = (URL) iter.next();
+      URL u = iter.next();
       try {
         reg.registerDirectories(u);
       } catch(GateException e) {
@@ -821,6 +821,6 @@ public class Main {
   } // help()
 
   /** The list of pending URLs to add to the CREOLE register */
-  private static List pendingCreoleUrls = new ArrayList();
+  private static List<URL> pendingCreoleUrls = new ArrayList<URL>();
 
 } // class Main

@@ -367,9 +367,9 @@ public class Gate implements GateConstants
         mue.printStackTrace();
       }
       try{
-        Iterator loadPluginsIter = getAutoloadPlugins().iterator();
+        Iterator<URL> loadPluginsIter = getAutoloadPlugins().iterator();
         while(loadPluginsIter.hasNext()){  
-          getCreoleRegister().registerDirectories((URL)loadPluginsIter.next());
+          getCreoleRegister().registerDirectories(loadPluginsIter.next());
         }
       }catch(GateException ge){
         Err.println("Cannot load " + aDir + " CREOLE repository.");
@@ -933,9 +933,9 @@ jar/classpath so it's the same as registerBuiltins
     }
     //update the values for knownPluginPath
     String knownPluginPath = "";
-    Iterator pluginIter = getKnownPlugins().iterator();
+    Iterator<URL> pluginIter = getKnownPlugins().iterator();
     while(pluginIter.hasNext()){
-      URL aPluginURL = (URL)pluginIter.next();
+      URL aPluginURL = pluginIter.next();
       //do not save installed plug-ins - they get loaded automatically
       if(aPluginURL.getProtocol().equals("file")){
         File pluginDirectory = new File(aPluginURL.getFile());
@@ -956,7 +956,7 @@ jar/classpath so it's the same as registerBuiltins
     String loadPluginPath = "";
     pluginIter = getAutoloadPlugins().iterator();
     while(pluginIter.hasNext()){
-      URL aPluginURL = (URL)pluginIter.next();
+      URL aPluginURL = pluginIter.next();
       if(loadPluginPath.length() > 0) loadPluginPath += ";";
       loadPluginPath += aPluginURL.toExternalForm();
     }
@@ -1118,7 +1118,7 @@ jar/classpath so it's the same as registerBuiltins
    */
   public static DirectoryInfo getDirectoryInfo(URL directory){
     if(!knownPlugins.contains(directory)) return null;
-    DirectoryInfo dInfo = (DirectoryInfo)pluginData.get(directory);
+    DirectoryInfo dInfo = pluginData.get(directory);
     if(dInfo == null){
       dInfo = new DirectoryInfo(directory);
       pluginData.put(directory, dInfo);

@@ -86,9 +86,9 @@ public class EmailDocumentFormat extends TextualDocumentFormat
       AnnotationSet bodyAnnotations = doc.getAnnotations(
                     GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME).get("body");
       if (bodyAnnotations != null && !bodyAnnotations.isEmpty()){
-        Iterator iter = bodyAnnotations.iterator();
+        Iterator<Annotation> iter = bodyAnnotations.iterator();
         while(iter.hasNext()){
-          Annotation a = (Annotation)iter.next();
+          Annotation a = iter.next();
           annotateParagraphs(doc,a.getStartNode().getOffset().intValue(),
                                  a.getEndNode().getOffset().intValue(),
                                  GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);

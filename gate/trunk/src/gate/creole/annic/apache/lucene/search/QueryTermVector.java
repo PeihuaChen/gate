@@ -67,21 +67,21 @@ public class QueryTermVector implements TermFreqVector {
   private void processTerms(String[] queryTerms) {
     if (queryTerms != null) {
       Arrays.sort(queryTerms);
-      Map tmpSet = new HashMap(queryTerms.length);
+      Map<String, Integer> tmpSet = new HashMap<String, Integer>(queryTerms.length);
       //filter out duplicates
-      List tmpList = new ArrayList(queryTerms.length);
-      List tmpFreqs = new ArrayList(queryTerms.length);
+      List<String> tmpList = new ArrayList<String>(queryTerms.length);
+      List<Integer> tmpFreqs = new ArrayList<Integer>(queryTerms.length);
       int j = 0;
       for (int i = 0; i < queryTerms.length; i++) {
         String term = queryTerms[i];
-        Integer position = (Integer)tmpSet.get(term);
+        Integer position = tmpSet.get(term);
         if (position == null) {
           tmpSet.put(term, new Integer(j++));
           tmpList.add(term);
           tmpFreqs.add(new Integer(1));
         }
         else {
-          Integer integer = (Integer)tmpFreqs.get(position.intValue());
+          Integer integer = tmpFreqs.get(position.intValue());
           tmpFreqs.set(position.intValue(), new Integer(integer.intValue() + 1));
         }
       }
@@ -89,8 +89,8 @@ public class QueryTermVector implements TermFreqVector {
       //termFreqs = (int[])tmpFreqs.toArray(termFreqs);
       termFreqs = new int[tmpFreqs.size()];
       int i = 0;
-      for (Iterator iter = tmpFreqs.iterator(); iter.hasNext();) {
-        Integer integer = (Integer) iter.next();
+      for (Iterator<Integer> iter = tmpFreqs.iterator(); iter.hasNext();) {
+        Integer integer = iter.next();
         termFreqs[i++] = integer.intValue();
       }
     }

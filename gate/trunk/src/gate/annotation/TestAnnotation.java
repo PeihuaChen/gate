@@ -521,7 +521,7 @@ public class TestAnnotation extends TestCase
 
   public void testRemoveInexistant() throws Exception{
     basicAS.add(new Long(0), new Long(10), "Foo", emptyFeatureMap);
-    Annotation ann = (Annotation)basicAS.get("Foo").iterator().next();
+    Annotation ann = basicAS.get("Foo").iterator().next();
     basicAS.remove(ann);
     //the second remove should do nothing...
     basicAS.remove(ann);
@@ -554,12 +554,12 @@ public class TestAnnotation extends TestCase
 
   /** Test iterator */
   public void testIterator() {
-    Iterator iter = basicAS.iterator();
+    Iterator<Annotation> iter = basicAS.iterator();
     Annotation[] annots = new Annotation[basicAS.size()];
     int i = 0;
 
     while(iter.hasNext()) {
-      Annotation a = (Annotation) iter.next();
+      Annotation a = iter.next();
       annots[i++] = a;
 
       assertTrue(basicAS.contains(a));
@@ -663,9 +663,9 @@ public class TestAnnotation extends TestCase
     assertEquals(as.size(), 3);
 
     // iterate over the annotations
-    Iterator iter = as.iterator();
+    Iterator<Annotation> iter = as.iterator();
     while(iter.hasNext()) {
-      a = (Annotation) iter.next();
+      a = iter.next();
       if(a.getId().intValue() != 2)
         assertEquals(a.getType(), "Token");
       assertEquals(a.getFeatures().size(), 1);

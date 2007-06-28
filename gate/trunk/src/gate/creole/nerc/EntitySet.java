@@ -31,10 +31,9 @@ public class EntitySet extends AbstractSet implements Set, Serializable {
     this.fileName = fileName;
     myEntities = new HashSet();
     if(annotationSet != null){
-      Iterator annIter = annotationSet.iterator();
+      Iterator<Annotation> annIter = annotationSet.iterator();
       while(annIter.hasNext()){
-        myEntities.add(new EntityDescriptor(document,
-                                                  (Annotation)annIter.next()));
+        myEntities.add(new EntityDescriptor(document, annIter.next()));
       }
     }
   }

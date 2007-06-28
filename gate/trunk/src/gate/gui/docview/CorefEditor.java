@@ -253,7 +253,7 @@ public class CorefEditor
     int length = 0;
     int index = 0;
     for (int i = 0; i < matches.size(); i++) {
-      Annotation currAnn = (Annotation) set.get( (Integer) matches.get(i));
+      Annotation currAnn = set.get( (Integer) matches.get(i));
       int start = currAnn.getStartNode().getOffset().intValue();
       int end = currAnn.getEndNode().getOffset().intValue();
       if ( (end - start) > length) {
@@ -262,7 +262,7 @@ public class CorefEditor
       }
     }
     // so now we now have the longest String annotations at index
-    return (Annotation) set.get( (Integer) matches.get(index));
+    return set.get( (Integer) matches.get(index));
   }
 
   /**
@@ -837,9 +837,9 @@ public class CorefEditor
       Color color = getColor(type);
       if (type != null) {
         AnnotationSet typeSet = set.get(type);
-        Iterator iter = typeSet.iterator();
+        Iterator<Annotation> iter = typeSet.iterator();
         while (iter.hasNext()) {
-          Annotation ann = (Annotation) iter.next();
+          Annotation ann = iter.next();
           highlightedTypeAnnots.add(ann);
           try {
             typeSpecificHighlightedTags.add(highlighter.addHighlight(ann.

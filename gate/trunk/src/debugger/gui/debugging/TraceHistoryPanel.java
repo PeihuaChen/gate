@@ -322,15 +322,15 @@ public class TraceHistoryPanel extends JPanel {
         }
 
         // Annotations to display
-        HashSet annotationsToShowSet = new HashSet();
+        HashSet<Annotation> annotationsToShowSet = new HashSet<Annotation>();
         if (annotations != null) {
             annotationsToShowSet.addAll(annotations);
         }
 
         // Add some Token annotations to displayed annotations
-        HashSet tokensNotToBeIncluded = new HashSet();
-        for (Iterator it = annotationsToShowSet.iterator(); it.hasNext();) {
-            Annotation currentAnnotation = (Annotation) it.next();
+        HashSet<Annotation> tokensNotToBeIncluded = new HashSet<Annotation>();
+        for (Iterator<Annotation> it = annotationsToShowSet.iterator(); it.hasNext();) {
+            Annotation currentAnnotation = it.next();
             AnnotationSet containedTokens = currentAnnotationCut.getContained(currentAnnotation.getStartNode().getOffset(), currentAnnotation.getEndNode().getOffset()).get("Token");
             if (containedTokens != null) {
                 tokensNotToBeIncluded.addAll(containedTokens);
@@ -338,8 +338,8 @@ public class TraceHistoryPanel extends JPanel {
         }
         AnnotationSet tokenAnnotationSet = currentAnnotationCut.get("Token", new Long(currentStartOffset), new Long(currentEndOffset));
         if (tokenAnnotationSet != null) {
-            for (Iterator it = tokenAnnotationSet.iterator(); it.hasNext();) {
-                Annotation currentAnnotation = (Annotation) it.next();
+            for (Iterator<Annotation> it = tokenAnnotationSet.iterator(); it.hasNext();) {
+                Annotation currentAnnotation = it.next();
                 if (!tokensNotToBeIncluded.contains(currentAnnotation)) {
                     annotationsToShowSet.add(currentAnnotation);
                 }
@@ -348,7 +348,7 @@ public class TraceHistoryPanel extends JPanel {
         // end of adding tokens
 
         // Now let's sort all the annotations we'd like to display
-        ArrayList list = new ArrayList(annotationsToShowSet);
+        ArrayList<Annotation> list = new ArrayList<Annotation>(annotationsToShowSet);
         Collections.sort(list, new OffsetComparator());
         /*
          * Offset comparator doesn't always work as
@@ -385,18 +385,18 @@ public class TraceHistoryPanel extends JPanel {
 
         // Annotations of the same type, which should not be displayed -
         // for example, if we have several lookups - only one lookup should be displayed
-        ArrayList annotationsToIgnore = new ArrayList();
+        ArrayList<Annotation> annotationsToIgnore = new ArrayList<Annotation>();
         boolean isRedSet = false;
 
         int x = 0;
-        for (Iterator it = list.iterator(); it.hasNext();) {
-            Annotation currentAnnotation = (Annotation) it.next();
+        for (Iterator<Annotation> it = list.iterator(); it.hasNext();) {
+            Annotation currentAnnotation = it.next();
 
             // Get annotations of the same type with the same offsets and leave only one to display
             AnnotationSet containedAnnotationsOfTheSameType = currentAnnotationCut.getContained(currentAnnotation.getStartNode().getOffset(), currentAnnotation.getEndNode().getOffset()).get(annotationsType);
             if (containedAnnotationsOfTheSameType != null) {
-                for (Iterator iter = containedAnnotationsOfTheSameType.iterator(); iter.hasNext();) {
-                    Annotation ann = (Annotation) iter.next();
+                for (Iterator<Annotation> iter = containedAnnotationsOfTheSameType.iterator(); iter.hasNext();) {
+                    Annotation ann = iter.next();
                     if (!ann.equals(currentAnnotation)) {
                         annotationsToIgnore.add(ann);
                     }
@@ -405,11 +405,11 @@ public class TraceHistoryPanel extends JPanel {
 
             // I get text to display from the Token annotations
             AnnotationSet containedTokens = currentAnnotationCut.getContained(currentAnnotation.getStartNode().getOffset(), currentAnnotation.getEndNode().getOffset()).get("Token");
-            ArrayList containedTokensList = null;
+            ArrayList<Annotation> containedTokensList = null;
             if (containedTokens != null) {
-                containedTokensList = new ArrayList(containedTokens);
+                containedTokensList = new ArrayList<Annotation>(containedTokens);
             } else {
-                containedTokensList = new ArrayList();
+                containedTokensList = new ArrayList<Annotation>();
             }
             Collections.sort(containedTokensList, new OffsetComparator());
 
@@ -417,8 +417,8 @@ public class TraceHistoryPanel extends JPanel {
             int order = 0;
             if (!annotationsToIgnore.contains(currentAnnotation)) {
                 // At last we create the panels with (or without) text on them
-                for (Iterator iter = containedTokensList.iterator(); iter.hasNext();) {
-                    Annotation currentTokenAnnotation = (Annotation) iter.next();
+                for (Iterator<Annotation> iter = containedTokensList.iterator(); iter.hasNext();) {
+                    Annotation currentTokenAnnotation = iter.next();
                     String text = (String) currentTokenAnnotation.getFeatures().get("string");
                     PrimaryTextPanel textPanel = new PrimaryTextPanel(text, false, PrimaryTextPanel.OPEN_NONE);
                     if (containedAnnotationsOfTheSameType != null) {
@@ -446,8 +446,8 @@ public class TraceHistoryPanel extends JPanel {
                         textPanel.setHighlighted(true);
                     }
                     if (containedAnnotationsOfTheSameType != null) {
-                        for (Iterator iterator = containedAnnotationsOfTheSameType.iterator(); iterator.hasNext();) {
-                            Annotation a = (Annotation) iterator.next();
+                        for (Iterator<Annotation> iterator = containedAnnotationsOfTheSameType.iterator(); iterator.hasNext();) {
+                            Annotation a = iterator.next();
                             if (annotationsToHighlight != null && annotationsToHighlight.contains(a) && textPanel.isTextVisible()) {
                                 int startOffset = a.getStartNode().getOffset().intValue();
                                 int endOffset = a.getEndNode().getOffset().intValue();

@@ -771,9 +771,9 @@ public class DocumentStaxUtils {
     }
     newLine(xsw);
 
-    Iterator iterator = annotations.iterator();
+    Iterator<Annotation> iterator = annotations.iterator();
     while(iterator.hasNext()) {
-      Annotation annot = (Annotation)iterator.next();
+      Annotation annot = iterator.next();
       xsw.writeStartElement(namespaceURI, "Annotation");
       xsw.writeAttribute("Id", String.valueOf(annot.getId()));
       xsw.writeAttribute("Type", annot.getType());
@@ -814,9 +814,9 @@ public class DocumentStaxUtils {
 
     // build a set of all the offsets where Nodes are required
     TreeSet offsetsSet = new TreeSet();
-    Iterator annotSetIter = doc.getAnnotations().iterator();
+    Iterator<Annotation> annotSetIter = doc.getAnnotations().iterator();
     while(annotSetIter.hasNext()) {
-      Annotation annot = (Annotation)annotSetIter.next();
+      Annotation annot = annotSetIter.next();
       offsetsSet.add(annot.getStartNode().getOffset());
       offsetsSet.add(annot.getEndNode().getOffset());
     }// end While

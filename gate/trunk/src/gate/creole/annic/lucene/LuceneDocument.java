@@ -245,8 +245,8 @@ public class LuceneDocument {
         // String, int, int, String
         // we add extra info of position
         if(i > 0) {
-          if(annot.getStartNode().getOffset().longValue() == ((Annotation)tokens
-                  .get(i - 1)).getStartNode().getOffset().longValue()) {
+          if(annot.getStartNode().getOffset().longValue() == tokens
+                  .get(i - 1).getStartNode().getOffset().longValue()) {
             token1.setPositionIncrement(0);
             inc = 0;
           }

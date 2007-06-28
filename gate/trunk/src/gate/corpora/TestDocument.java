@@ -206,9 +206,9 @@ public class TestDocument extends TestCase
 
       if (annotSet == null || offests2NodeId == null) return;
 
-      Iterator iter = annotSet.iterator();
+      Iterator<Annotation> iter = annotSet.iterator();
       while(iter.hasNext()){
-        Annotation annot = (Annotation) iter.next();
+        Annotation annot = iter.next();
         String annotSetName = (annotSet.getName() == null)? "Default":
                                                           annotSet.getName();
         // check the Start node

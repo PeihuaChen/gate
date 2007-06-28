@@ -131,9 +131,9 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
     }
 
     List annots2Move = new ArrayList();
-    Iterator bodyIter = bodyAnnotations.iterator();
+    Iterator<Annotation> bodyIter = bodyAnnotations.iterator();
     while (bodyIter.hasNext()) {
-      Annotation bodyAnn = (Annotation)bodyIter.next();
+      Annotation bodyAnn = bodyIter.next();
       Long start = bodyAnn.getStartNode().getOffset();
       Long end = bodyAnn.getEndNode().getOffset();
 

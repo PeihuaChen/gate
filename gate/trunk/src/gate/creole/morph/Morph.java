@@ -124,7 +124,7 @@ public class Morph
     }
 
     // create iterator to get access to each and every individual token
-    Iterator tokensIter = tokens.iterator();
+    Iterator<Annotation> tokensIter = tokens.iterator();
 
     // variables used to keep track on progress
     int tokenSize = tokens.size();
@@ -133,7 +133,7 @@ public class Morph
 
     //lets process each token one at a time
     while (tokensIter != null && tokensIter.hasNext()) {
-      Annotation currentToken = (Annotation) tokensIter.next();
+      Annotation currentToken = tokensIter.next();
       String tokenValue = (String) (currentToken.getFeatures().
                                     get(TOKEN_STRING_FEATURE_NAME));
       if(considerPOSTag != null && considerPOSTag.booleanValue() && !currentToken.getFeatures().containsKey(TOKEN_CATEGORY_FEATURE_NAME)) {

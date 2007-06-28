@@ -97,29 +97,28 @@ public class TestMorph extends TestCase {
 		}
 
 		// now check if the tokenizer was run properly on the document
-		List queryTokens = new ArrayList(verbDocumentToTest.getAnnotations(
+		List<Annotation> queryTokens = new ArrayList<Annotation>(verbDocumentToTest.getAnnotations(
 				"TokeniserAS").get("Token"));
 		Collections.sort(queryTokens, new OffsetComparator());
 
 		// same procedure with the answer document
-		List answerTokens = new ArrayList(verbDocumentWithAnswers
+		List<Annotation> answerTokens = new ArrayList<Annotation>(verbDocumentWithAnswers
 				.getAnnotations("TokeniserAS").get("Token"));
 		Collections.sort(answerTokens, new OffsetComparator());
 
 		// create iterator to get access to each and every individual token
-		Iterator queryTokensIter = queryTokens.iterator();
-		Iterator answerTokensIter = answerTokens.iterator();
+		Iterator<Annotation> queryTokensIter = queryTokens.iterator();
+		Iterator<Annotation> answerTokensIter = answerTokens.iterator();
 
 		while (queryTokensIter.hasNext() && answerTokensIter.hasNext()) {
 
 			// get the word to test
-			Annotation currentQueryToken = (Annotation) queryTokensIter.next();
+			Annotation currentQueryToken = queryTokensIter.next();
 			String queryTokenValue = (String) (currentQueryToken.getFeatures()
 					.get(ANNIEConstants.TOKEN_STRING_FEATURE_NAME));
 
 			// get the answer of this word
-			Annotation currentAnswerToken = (Annotation) answerTokensIter
-					.next();
+			Annotation currentAnswerToken = answerTokensIter.next();
 			String answerTokenValue = (String) (currentAnswerToken
 					.getFeatures()
 					.get(ANNIEConstants.TOKEN_STRING_FEATURE_NAME));
@@ -171,12 +170,12 @@ public class TestMorph extends TestCase {
 		while (queryTokensIter.hasNext() && answerTokensIter.hasNext()) {
 
 			// get the word to test
-			Annotation currentQueryToken = (Annotation) queryTokensIter.next();
+			Annotation currentQueryToken = queryTokensIter.next();
 			String queryTokenValue = (String) (currentQueryToken.getFeatures()
 					.get(ANNIEConstants.TOKEN_STRING_FEATURE_NAME));
 
 			// get the answer of this word
-			Annotation currentAnswerToken = (Annotation) answerTokensIter
+			Annotation currentAnswerToken = answerTokensIter
 					.next();
 			String answerTokenValue = (String) (currentAnswerToken
 					.getFeatures()
