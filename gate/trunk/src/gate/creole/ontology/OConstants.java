@@ -16,6 +16,7 @@ import java.util.Locale;
  * @author Niraj Aswani
  */
 public interface OConstants {
+
   /** denotes a direct closure(no transitivity) */
   public static final byte DIRECT_CLOSURE = 0;
 
@@ -178,6 +179,12 @@ public interface OConstants {
    */
   public static final int SUB_PROPERTY_REMOVED_EVENT = 20;
 
+  /**
+   * denotes the event when a restriction has changed
+   */
+  public static final int RESTRICTION_MODIFICATION_EVENT = 21;
+  
+  
   /** Language code used "aa" */
   public static final Locale AFAR = new Locale("aa");
 
@@ -595,4 +602,48 @@ public interface OConstants {
   /** Language code used "zu" */
   public static final Locale ZULU = new Locale("zu");
 
+  // ***************************************
+  //***************** Restrictions
+  // ****************************************
+  
+  /**
+   * specifies that the value of y in the x rdf:type y is owl:class
+   */
+  public static final byte OWL_CLASS = 0;
+  
+  /**
+   * specifies that the value of y in the x rdf:type is owl:restriction and that is ia cardinality restriction
+   */
+  public static final byte CARDINALITY_RESTRICTION = 1;
+  
+  /**
+   * specifies that the value of y in the x rdf:type is owl:restriction and that it is a min cardinality restriction
+   */
+  public static final byte MIN_CARDINALITY_RESTRICTION = 2;
+  
+  /**
+   * specifies that the value of y in the x rdf:type is owl:restriction and that it is a max cardinality restriction
+   */
+  public static final byte MAX_CARDINALITY_RESTRICTION = 3;
+  
+  /**
+   * specifies that the value of y in the x rdf:type is owl:restriction and that it is a hasValue restriction
+   */
+  public static final byte HAS_VALUE_RESTRICTION = 4;
+  
+  /**
+   * specifies that the value of y in the x rdf:type is owl:restriction and that it is a allValuesFrom restriction
+   */
+  public static final byte ALL_VALUES_FROM_RESTRICTION = 5;
+
+  /**
+   * specifies that the value of y in the x rdf:type is owl:restriction and that it is a someValuesFrom restriction
+   */
+  public static final byte SOME_VALUES_FROM_RESTRICTION = 6;
+
+  /**
+   * specifies that the value of y in the x rdf:type is owl:restriction and that it is a someValuesFrom restriction
+   */
+  public static final byte ANNONYMOUS_CLASS = 7;
+  
 }

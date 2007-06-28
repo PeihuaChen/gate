@@ -171,5 +171,5 @@ public interface OResource {
    * @param theProperty the property
    */
   public void removeAnnotationPropertyValues(AnnotationProperty theProperty);
-
+  
 }
