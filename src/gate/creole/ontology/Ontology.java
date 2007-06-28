@@ -117,10 +117,13 @@ public interface Ontology extends LanguageResource {
    * Creates a new OClass and adds it the ontology.
    * 
    * @param aURI URI of this class
+   * @param classType one of the values from
+   *          OConstants.OCLASS_TYPE_OWL_CLASS and
+   *          OConstants.OCLASS_TYPE_OWL_RESTRICTION;
    * @return the newly created class or an existing class if available
    *         with the same URI.
    */
-  public OClass addOClass(URI aURI);
+  public OClass addOClass(URI aURI, byte classType);
 
   /**
    * Retrieves a class by its URI.
@@ -466,6 +469,89 @@ public interface Ontology extends LanguageResource {
   public void removeProperty(RDFProperty theProperty);
 
   // *****************************
+  // Restrictions
+  // *****************************
+
+  /**
+   * Adds a new MinCardinality Restriction to the ontology. It
+   * automatically creates a randon anonymous class, which it uses to
+   * denote the restriction. The default datatype is set to NonNegativeIntegerNumber
+   * 
+   * @param onProperty - Specifies the property for which the restriction is being set.
+   * @param minCardinalityValue - generally a numeric number.
+   * @return
+   * @throws InvalidValueException - if a value is not compatible with the nonNegativeIntegerNumber datatype.
+   */
+  public MinCardinalityRestriction addMinCardinalityRestriction(
+          RDFProperty onProperty, String minCardinalityValue)
+          throws InvalidValueException;
+  
+  /**
+   * Adds a new MaxCardinality Restriction to the ontology. It
+   * automatically creates a randon anonymous class, which it uses to
+   * denote the restriction. The default datatype is set to NonNegativeIntegerNumber
+   * 
+   * @param onProperty - Specifies the property for which the restriction is being set.
+   * @param minCardinalityValue - generally a numeric number.
+   * @return
+   * @throws InvalidValueException - if a value is not compatible with the nonNegativeIntegerNumber datatype.
+   */
+  public MaxCardinalityRestriction addMaxCardinalityRestriction(
+          RDFProperty onProperty, String maxCardinalityValue)
+          throws InvalidValueException;
+
+  /**
+   * Adds a new Cardinality Restriction to the ontology. It
+   * automatically creates a randon anonymous class, which it uses to
+   * denote the restriction. The default datatype is set to NonNegativeIntegerNumber
+   * 
+   * @param onProperty - Specifies the property for which the restriction is being set.
+   * @param minCardinalityValue - generally a numeric number.
+   * @return
+   * @throws InvalidValueException - if a value is not compatible with the nonNegativeIntegerNumber datatype.
+   */
+  public CardinalityRestriction addCardinalityRestriction(
+          RDFProperty onProperty, String cardinalityValue)
+          throws InvalidValueException;
+
+  /**
+   * Adds a new HasValue Restriction to the ontology. It
+   * automatically creates a randon anonymous class, which it uses to
+   * denote the restriction.
+   * 
+   * @param onProperty - Specifies the property for which the restriction is being set.
+   * @param hasValue - a resource used as a value for hasValue element of the restriction.
+   * @return
+   */
+  public HasValueRestriction addHasValueRestriction(
+          RDFProperty onProperty, OResource hasValue);
+
+  /**
+   * Adds a new AllValuesFrom Restriction to the ontology. It
+   * automatically creates a randon anonymous class, which it uses to
+   * denote the restriction.
+   * 
+   * @param onProperty - Specifies the property for which the restriction is being set.
+   * @param hasValue - a resource used as a value for hasValue element of the restriction.
+   * @return
+   */
+  public AllValuesFromRestriction addAllValuesFromRestriction(
+          RDFProperty onProperty, OResource hasValue);
+
+  /**
+   * Adds a new AllValuesFrom Restriction to the ontology. It
+   * automatically creates a randon anonymous class, which it uses to
+   * denote the restriction.
+   * 
+   * @param onProperty - Specifies the property for which the restriction is being set.
+   * @param hasValue - a resource used as a value for hasValue element of the restriction.
+   * @return
+   */
+  public SomeValuesFromRestriction addSomeValuesFromRestriction(
+          RDFProperty onProperty, OResource hasValue);
+  
+  
+  // *****************************
   // Ontology Modification Events
   // *****************************
   /**
@@ -519,10 +605,10 @@ public interface Ontology extends LanguageResource {
    * @param resource
    */
   public void fireOntologyResourcesRemoved(String[] resources);
-  
+
   /**
-   * A method to invoke when the ontology is reset. 
-   *
+   * A method to invoke when the ontology is reset.
+   * 
    */
   public void fireOntologyReset();
 
