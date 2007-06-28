@@ -7,7 +7,7 @@
  */
 package gate.creole.ontology.owlim;
 
-import java.rmi.RemoteException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -16,6 +16,7 @@ import java.util.Set;
 
 import gate.creole.ontology.DataType;
 import gate.creole.ontology.DatatypeProperty;
+import gate.creole.ontology.GateOntologyException;
 import gate.creole.ontology.InvalidValueException;
 import gate.creole.ontology.Literal;
 import gate.creole.ontology.OClass;
@@ -27,7 +28,6 @@ import gate.creole.ontology.Ontology;
 import gate.creole.ontology.OntologyUtilities;
 import gate.creole.ontology.RDFProperty;
 import gate.creole.ontology.URI;
-import gate.util.GateRuntimeException;
 
 /**
  * Implementation of the OInstance
@@ -55,19 +55,14 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#getOClasses(byte)
    */
   public Set<OClass> getOClasses(byte closure) {
-    try {
       ResourceInfo[] oClasses = owlim.getClassesOfIndividual(this.repositoryID,
               this.uri.toString(), closure);
       Set<OClass> set = new HashSet<OClass>();
       for(int i = 0; i < oClasses.length; i++) {
         set.add(Utils.createOClass(this.repositoryID, this.ontology,
-                this.owlim, oClasses[i].getUri(), oClasses[i].isAnonymous()));
+                this.owlim, oClasses[i].getUri(), oClasses[i].getClassType()));
       }
       return set;
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -77,13 +72,8 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    *      byte)
    */
   public boolean isInstanceOf(OClass aClass, byte closure) {
-    try {
       return owlim.hasIndividual(this.repositoryID, aClass.getURI().toString(),
               this.uri.toString(), closure);
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -92,7 +82,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#setDifferentFrom(gate.creole.ontology.OInstance)
    */
   public void setDifferentFrom(OInstance theInstance) {
-    try {
       if(this == theInstance) {
         Utils
                 .warning("setDifferentFrom(theInstance) : the source and the argument instances refer to the same instance and therefore cannot be set as different from each other");
@@ -103,10 +92,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
               theInstance.getURI().toString());
       ontology.fireOntologyModificationEvent(this,
               OConstants.DIFFERENT_INSTANCE_EVENT);
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -115,7 +100,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#getDifferentInstances()
    */
   public Set<OInstance> getDifferentInstances() {
-    try {
       String[] oInsts = owlim.getDifferentIndividualFrom(this.repositoryID,
               this.uri.toString());
       Set<OInstance> set = new HashSet<OInstance>();
@@ -124,10 +108,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
                 this.owlim, oInsts[i]));
       }
       return set;
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -136,13 +116,8 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#isDifferentFrom(gate.creole.ontology.OInstance)
    */
   public boolean isDifferentFrom(OInstance theInstance) {
-    try {
       return owlim.isDifferentIndividualFrom(this.repositoryID, this.uri
               .toString(), theInstance.getURI().toString());
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -151,7 +126,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#setSameInstanceAs(gate.creole.ontology.OInstance)
    */
   public void setSameInstanceAs(OInstance theInstance) {
-    try {
       if(this == theInstance) {
         Utils
                 .warning("setDifferentFrom(theInstance) : the source and the argument instances refer to the same instance and therefore cannot be set as same");
@@ -162,10 +136,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
               theInstance.getURI().toString());
       ontology.fireOntologyModificationEvent(this,
               OConstants.SAME_INSTANCE_EVENT);
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -174,7 +144,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#getSameInstance()
    */
   public Set<OInstance> getSameInstance() {
-    try {
       String[] oInsts = owlim.getSameIndividualAs(this.repositoryID, this.uri
               .toString());
       Set<OInstance> set = new HashSet<OInstance>();
@@ -183,10 +152,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
                 this.owlim, oInsts[i]));
       }
       return set;
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -195,13 +160,8 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#isSameInstanceAs(gate.creole.ontology.OInstance)
    */
   public boolean isSameInstanceAs(OInstance theInstance) {
-    try {
       return owlim.isSameIndividualAs(this.repositoryID, this.uri.toString(),
               theInstance.getURI().toString());
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -212,8 +172,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    */
   public void addRDFPropertyValue(RDFProperty aProperty, OResource value)
           throws InvalidValueException {
-    try {
-
       // we need to check if the current instance is a valid domain for
       // the property
       if(!aProperty.isValidDomain(this)) {
@@ -236,10 +194,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
               aProperty.getURI().toString(), value.getURI().toString());
       ontology.fireOntologyModificationEvent(this,
               OConstants.RDF_PROPERTY_VALUE_ADDED_EVENT);
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -249,15 +203,10 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    *      gate.creole.ontology.OResource)
    */
   public void removeRDFPropertyValue(RDFProperty aProperty, OResource value) {
-    try {
       owlim.removeRDFPropertyValue(this.repositoryID, this.uri.toString(),
               aProperty.getURI().toString(), value.getURI().toString());
       ontology.fireOntologyModificationEvent(this,
               OConstants.RDF_PROPERTY_VALUE_REMOVED_EVENT);
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -266,7 +215,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#getRDFPropertyValues(gate.creole.ontology.RDFProperty)
    */
   public List<OResource> getRDFPropertyValues(RDFProperty aProperty) {
-    try {
       ResourceInfo[] list = owlim.getRDFPropertyValues(this.repositoryID, uri
               .toString(), aProperty.getURI().toString());
       List<OResource> values = new ArrayList<OResource>();
@@ -290,7 +238,7 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
         // is it a class
         if(owlim.hasClass(this.repositoryID, list[i].getUri())) {
           values.add(Utils.createOClass(this.repositoryID, this.ontology,
-                  this.owlim, list[i].getUri(), list[i].isAnonymous()));
+                  this.owlim, list[i].getUri(), list[i].getClassType()));
           continue;
         }
 
@@ -300,10 +248,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
                 this.owlim, prop.getUri(), prop.getType()));
       }
       return values;
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /**
@@ -312,13 +256,12 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @return
    */
   public Set<RDFProperty> getSetRDFProperties() {
-    try {
       Property[] properties = owlim.getRDFProperties(this.repositoryID,
               this.uri.toString());
       Set<RDFProperty> rdfProps = new HashSet<RDFProperty>();
       for(int i = 0; i < properties.length; i++) {
         if(properties[i].getType() != OConstants.RDF_PROPERTY) {
-          throw new GateRuntimeException("The property :"
+          throw new GateOntologyException("The property :"
                   + properties[i].getUri()
                   + " returned from the repository is not an RDFProperty");
         }
@@ -332,11 +275,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
         rdfProps.add((RDFProperty)resource);
       }
       return rdfProps;
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
-
   }
 
   /**
@@ -362,15 +300,10 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#removeRDFPropertyValues(gate.creole.ontology.RDFProperty)
    */
   public void removeRDFPropertyValues(RDFProperty aProperty) {
-    try {
       owlim.removeRDFPropertyValues(this.repositoryID, this.uri.toString(),
               aProperty.getURI().toString());
       ontology.fireOntologyModificationEvent(this,
               OConstants.RDF_PROPERTY_VALUE_REMOVED_EVENT);
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -381,7 +314,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    */
   public void addDatatypePropertyValue(DatatypeProperty aProperty, Literal value)
           throws InvalidValueException {
-    try {
       // we need to check if the current instance is a valid domain for
       // the property
       if(!aProperty.isValidDomain(this)) {
@@ -398,7 +330,7 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
       else {
         if(!type.getXmlSchemaURI().toString().equals(
                 value.getDataType().getXmlSchemaURI().toString()))
-          throw new GateRuntimeException("Datatype :"
+          throw new GateOntologyException("Datatype :"
                   + value.getDataType().getXmlSchemaURI().toString()
                   + " doesn't match with the property's datatype :"
                   + type.getXmlSchemaURI().toString());
@@ -409,10 +341,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
               value.getValue());
       ontology.fireOntologyModificationEvent(this,
               OConstants.DATATYPE_PROPERTY_VALUE_ADDED_EVENT);
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -423,16 +351,11 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    */
   public void removeDatatypePropertyValue(DatatypeProperty aProperty,
           Literal value) {
-    try {
       owlim.removeDatatypePropertyValue(this.repositoryID, this.uri.toString(),
               aProperty.getURI().toString(), value.getDataType()
                       .getXmlSchemaURI().toString(), value.getValue());
       ontology.fireOntologyModificationEvent(this,
               OConstants.DATATYPE_PROPERTY_VALUE_REMOVED_EVENT);
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -452,11 +375,8 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
       }
       return list;
     }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
     catch(InvalidValueException ive) {
-      throw new GateRuntimeException(ive);
+      throw new GateOntologyException(ive);
     }
   }
 
@@ -466,15 +386,11 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#removeDatatypePropertyValues(gate.creole.ontology.DatatypeProperty)
    */
   public void removeDatatypePropertyValues(DatatypeProperty aProperty) {
-    try {
+
       owlim.removeDatatypePropertyValues(this.repositoryID,
               this.uri.toString(), aProperty.getURI().toString());
       ontology.fireOntologyModificationEvent(this,
               OConstants.DATATYPE_PROPERTY_VALUE_REMOVED_EVENT);
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /**
@@ -483,13 +399,12 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @return
    */
   public Set<DatatypeProperty> getSetDatatypeProperties() {
-    try {
       Property[] properties = owlim.getDatatypeProperties(this.repositoryID,
               this.uri.toString());
       Set<DatatypeProperty> dataProps = new HashSet<DatatypeProperty>();
       for(int i = 0; i < properties.length; i++) {
         if(properties[i].getType() != OConstants.DATATYPE_PROPERTY) {
-          throw new GateRuntimeException("The property :"
+          throw new GateOntologyException("The property :"
                   + properties[i].getUri()
                   + " returned from the repository is not an DatatypeProperty");
         }
@@ -503,11 +418,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
         dataProps.add((DatatypeProperty)resource);
       }
       return dataProps;
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
-
   }
 
   /**
@@ -556,8 +466,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    */
   public void addObjectPropertyValue(ObjectProperty aProperty, OInstance value)
           throws InvalidValueException {
-    try {
-
       // we need to check if the current instance is a valid domain for
       // the property
       if(!aProperty.isValidDomain(this)) {
@@ -580,10 +488,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
               aProperty.getURI().toString(), value.getURI().toString());
       ontology.fireOntologyModificationEvent(this,
               OConstants.OBJECT_PROPERTY_VALUE_ADDED_EVENT);
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -594,15 +498,10 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    */
   public void removeObjectPropertyValue(ObjectProperty aProperty,
           OInstance value) {
-    try {
       owlim.removeObjectPropertyValue(this.repositoryID, this.uri.toString(),
               aProperty.getURI().toString(), value.getURI().toString());
       ontology.fireOntologyModificationEvent(this,
               OConstants.OBJECT_PROPERTY_VALUE_REMOVED_EVENT);
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -611,7 +510,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#getObjectPropertyValues(gate.creole.ontology.ObjectProperty)
    */
   public List<OInstance> getObjectPropertyValues(ObjectProperty aProperty) {
-    try {
       String[] list = owlim.getObjectPropertyValues(this.repositoryID, uri
               .toString(), aProperty.getURI().toString());
       List<OInstance> values = new ArrayList<OInstance>();
@@ -620,10 +518,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
                 this.owlim, list[i]));
       }
       return values;
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -632,15 +526,10 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#removeObjectPropertyValues(gate.creole.ontology.ObjectProperty)
    */
   public void removeObjectPropertyValues(ObjectProperty aProperty) {
-    try {
       owlim.removeObjectPropertyValues(this.repositoryID, this.uri.toString(),
               aProperty.getURI().toString());
       ontology.fireOntologyModificationEvent(this,
               OConstants.OBJECT_PROPERTY_VALUE_REMOVED_EVENT);
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /**
@@ -649,13 +538,12 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @return
    */
   public Set<ObjectProperty> getSetObjectProperties() {
-    try {
       Property[] properties = owlim.getObjectProperties(this.repositoryID,
               this.uri.toString());
       Set<ObjectProperty> objectProps = new HashSet<ObjectProperty>();
       for(int i = 0; i < properties.length; i++) {
         if(properties[i].getType() != OConstants.OBJECT_PROPERTY) {
-          throw new GateRuntimeException("The property :"
+          throw new GateOntologyException("The property :"
                   + properties[i].getUri()
                   + " returned from the repository is not an ObjectProperty");
         }
@@ -669,11 +557,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
         objectProps.add((ObjectProperty)resource);
       }
       return objectProps;
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
-
   }
 
   /**
