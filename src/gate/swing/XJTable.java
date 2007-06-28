@@ -91,19 +91,24 @@ public class XJTable extends JTable{
     int colCount = getColumnModel().getColumnCount();
     for(int col = 0; col < colCount; col++){
       TableColumn tCol = getColumnModel().getColumn(col);
-      if(tCol.getHeaderRenderer() == null){
-        TableCellRenderer defaultRenderer = getDefaultRenderer(Object.class);
-        if(defaultRenderer != null){
-          Component c = defaultRenderer.getTableCellRendererComponent(
-                  XJTable.this, tCol.getHeaderValue(), false, false, 0, 0);
-          tCol.setMinWidth(c.getMinimumSize().width);
-          tCol.setPreferredWidth(c.getPreferredSize().width);
-        }else{
-          tCol.setMinWidth(1);
-          tCol.setPreferredWidth(1);          
+      TableCellRenderer headerRenderer = tCol.getHeaderRenderer();
+      if(headerRenderer == null){
+        //no header renderer provided -> use default implementation
+        JTableHeader tHeader = getTableHeader();
+        if(tHeader == null){
+          tHeader = new JTableHeader();
         }
+        headerRenderer = tHeader.getDefaultRenderer();
+        tCol.setHeaderRenderer(headerRenderer);
+      }
+      if(headerRenderer != null){
+        Component c = headerRenderer.getTableCellRendererComponent(
+                XJTable.this, tCol.getHeaderValue(), false, false, 0, 0);
+        tCol.setMinWidth(c.getMinimumSize().width);
+        tCol.setPreferredWidth(c.getPreferredSize().width);
       }else{
-        tCol.sizeWidthToFit();
+        tCol.setMinWidth(1);
+        tCol.setPreferredWidth(1);          
       }
     }
     //start with all rows of size 1
