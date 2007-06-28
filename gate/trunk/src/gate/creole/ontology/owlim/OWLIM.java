@@ -1,6 +1,6 @@
 package gate.creole.ontology.owlim;
 
-import java.rmi.RemoteException;
+import gate.creole.ontology.GateOntologyException;
 
 public interface OWLIM extends java.rmi.Remote {
 
@@ -10,8 +10,8 @@ public interface OWLIM extends java.rmi.Remote {
    * 
    * @return a String value.
    */
-  public String getDefaultNameSpace(String repositoryID) throws RemoteException;
-  
+  public String getDefaultNameSpace(String repositoryID) throws GateOntologyException;
+
   /**
    * Adds the ontology data
    * 
@@ -19,12 +19,19 @@ public interface OWLIM extends java.rmi.Remote {
    * @param data
    * @param baseURI
    * @param format
-   * @throws RemoteException
+   * @throws GateOntologyException
    */
   public void addOntologyData(String repositoryID, String data, String baseURI,
-          byte format) throws RemoteException;
+          byte format) throws GateOntologyException;
 
-
+  /**
+   * This method tells whether the resource is imported or added as an explicit statement.
+   * @param repositoryID
+   * @param resourceID
+   * @return
+   */
+  public boolean isImplicitResource(String repositoryID, String resourceID) throws GateOntologyException ;
+  
   /**
    * Returns whether the theSuperClass is indeed a super class of the
    * theSubClassURI.
@@ -36,7 +43,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public boolean isSuperClassOf(String repositoryID, String theSuperClassURI,
-          String theSubClassURI, byte direct) throws RemoteException;
+          String theSubClassURI, byte direct) throws GateOntologyException;
+
   /**
    * Returns whether the theSubClass is indeed a sub class of the
    * theSuperClassURI.
@@ -48,17 +56,18 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public boolean isSubClassOf(String repositoryID, String theSuperClassURI,
-          String theSubClassURI, byte direct) throws RemoteException;
+          String theSubClassURI, byte direct) throws GateOntologyException;
+
   /**
    * Given a property URI, this method returns an object of Property
    * 
    * @param repositoryID
    * @param thePropertyURI
    * @return
-   * @throws RemoteException
+   * @throws GateOntologyException
    */
   public Property getPropertyFromOntology(String repositoryID,
-          String thePropertyURI) throws RemoteException;
+          String thePropertyURI) throws GateOntologyException;
 
   /**
    * Checks whether the two classes defined as same in the ontology.
@@ -69,8 +78,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @throws Exception
    */
   public boolean isEquivalentClassAs(String repositoryID, String theClassURI1,
-          String theClassURI2) throws RemoteException;
-  
+          String theClassURI2) throws GateOntologyException;
+
   // *******************************************************************
   // property methods
   // *******************************************************************
@@ -84,71 +93,74 @@ public interface OWLIM extends java.rmi.Remote {
    *          ontology. Done
    */
   public void addAnnotationProperty(String repositoryID, String aPropertyURI)
-          throws RemoteException;
-  
+          throws GateOntologyException;
+
   /**
    * Gets the annotation properties set on the specified resource
    * 
    * @param repositoryID
    * @param theResourceURI
    * @return
-   * @throws RemoteException
+   * @throws GateOntologyException
    */
   public Property[] getAnnotationProperties(String repositoryID,
-          String theResourceURI) throws RemoteException;
-  
+          String theResourceURI) throws GateOntologyException;
+
   /**
    * Gets the RDF properties set on the specified resource
    * 
    * @param repositoryID
    * @param theResourceURI
    * @return
-   * @throws RemoteException
+   * @throws GateOntologyException
    */
   public Property[] getRDFProperties(String repositoryID, String theResourceURI)
-          throws RemoteException;
-  
+          throws GateOntologyException;
+
   /**
    * Gets the datatype properties set on the specified resource
    * 
    * @param repositoryID
    * @param theResourceURI
    * @return
-   * @throws RemoteException
+   * @throws GateOntologyException
    */
   public Property[] getDatatypeProperties(String repositoryID,
-          String theResourceURI) throws RemoteException;
-  
+          String theResourceURI) throws GateOntologyException;
+
   /**
    * Gets the object properties set on the specified resource
    * 
    * @param repositoryID
    * @param theResourceURI
    * @return
-   * @throws RemoteException
+   * @throws GateOntologyException
    */
   public Property[] getObjectProperties(String repositoryID,
-          String theResourceURI) throws RemoteException;
+          String theResourceURI) throws GateOntologyException;
+
   /**
    * Gets the transitive properties set on the specified resource
    * 
    * @param repositoryID
    * @param theResourceURI
    * @return
-   * @throws RemoteException
+   * @throws GateOntologyException
    */
   public Property[] getTransitiveProperties(String repositoryID,
-          String theResourceURI) throws RemoteException;
+          String theResourceURI) throws GateOntologyException;
+
   /**
    * Gets the symmetric properties set on the specified resource
    * 
    * @param repositoryID
    * @param theResourceURI
    * @return
-   * @throws RemoteException
+   * @throws GateOntologyException
    */
   public Property[] getSymmetricProperties(String repositoryID,
-          String theResourceURI) throws RemoteException; 
+          String theResourceURI) throws GateOntologyException;
+
   /**
    * returns if the given property is an Annotation property
    * 
@@ -156,7 +168,7 @@ public interface OWLIM extends java.rmi.Remote {
    * @return Done
    */
   public boolean isAnnotationProperty(String repositoryID, String aPropertyURI)
-          throws RemoteException;
+          throws GateOntologyException;
 
   /**
    * Adds a new annotation property value and specifies the language.
@@ -167,7 +179,7 @@ public interface OWLIM extends java.rmi.Remote {
    */
   public void addAnnotationPropertyValue(String repositoryID,
           String theResourceURI, String theAnnotationPropertyURI, String value,
-          String language) throws RemoteException;
+          String language) throws GateOntologyException;
 
   /**
    * Gets the list of annotation property values
@@ -179,7 +191,7 @@ public interface OWLIM extends java.rmi.Remote {
    */
   public PropertyValue[] getAnnotationPropertyValues(String repositoryID,
           String theResourceURI, String theAnnotationPropertyURI)
-          throws RemoteException;
+          throws GateOntologyException;
 
   /**
    * Gets the annotation property for the given resource uri.
@@ -192,8 +204,8 @@ public interface OWLIM extends java.rmi.Remote {
    */
   public String getAnnotationPropertyValue(String repositoryID,
           String theResourceURI, String theAnnotationPropertyURI,
-          String language) throws RemoteException;
-  
+          String language) throws GateOntologyException;
+
   /**
    * For the current resource, the method removes the given literal for
    * the given property.
@@ -203,8 +215,8 @@ public interface OWLIM extends java.rmi.Remote {
    */
   public void removeAnnotationPropertyValue(String repositoryID,
           String theResourceURI, String theAnnotationPropertyURI, String value,
-          String language) throws RemoteException;
-  
+          String language) throws GateOntologyException;
+
   /**
    * Removes all values for a named property.
    * 
@@ -212,8 +224,7 @@ public interface OWLIM extends java.rmi.Remote {
    */
   public void removeAnnotationPropertyValues(String repositoryID,
           String theResourceURI, String theAnnotationPropertyURI)
-          throws RemoteException;
-  
+          throws GateOntologyException;
 
   // **************
   // RDFProperties
@@ -228,7 +239,8 @@ public interface OWLIM extends java.rmi.Remote {
    */
   public void addRDFProperty(String repositoryID, String aPropertyURI,
           String[] domainClassesURIs, String[] rangeClassesTypes)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * returns if the given property is an RDF property
    * 
@@ -236,7 +248,7 @@ public interface OWLIM extends java.rmi.Remote {
    * @return Done
    */
   public boolean isRDFProperty(String repositoryID, String aPropertyURI)
-          throws RemoteException;
+          throws GateOntologyException;
 
   // **************
   // Datatype Properties
@@ -251,17 +263,19 @@ public interface OWLIM extends java.rmi.Remote {
    */
   public void addDataTypeProperty(String repositoryID, String aPropertyURI,
           String[] domainClassesURIs, String dataTypeURI)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * Returns the datatype uri specified for the given datatype property.
    * 
    * @param repositoryID
    * @param theDatatypePropertyURI
    * @return
-   * @throws RemoteException
+   * @throws GateOntologyException
    */
   public String getDatatype(String repositoryID, String theDatatypePropertyURI)
-          throws RemoteException;
+          throws GateOntologyException;
+
   // **************
   // Symmetric Properties
   // *************
@@ -273,17 +287,18 @@ public interface OWLIM extends java.rmi.Remote {
    * @param domainAndRangeClassesURIs Done
    */
   public void addSymmetricProperty(String repositoryID, String aPropertyURI,
-          String[] domainAndRangeClassesURIs) throws RemoteException;
+          String[] domainAndRangeClassesURIs) throws GateOntologyException;
+
   /**
    * Checkes whether the two properties are Equivalent.
    * 
    * @param repositoryID
    * @param aPropertyURI
    * @return
-   * @throws RemoteException
+   * @throws GateOntologyException
    */
   public boolean isEquivalentPropertyAs(String repositoryID,
-          String aPropertyURI1, String aPropertyURI2) throws RemoteException;
+          String aPropertyURI1, String aPropertyURI2) throws GateOntologyException;
 
   /**
    * for the given property, the method returns all its super properties
@@ -293,7 +308,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public Property[] getSuperProperties(String repositoryID,
-          String aPropertyURI, byte direct) throws RemoteException;
+          String aPropertyURI, byte direct) throws GateOntologyException;
+
   /**
    * for the given property, the method returns all its sub properties
    * 
@@ -302,7 +318,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public Property[] getSubProperties(String repositoryID, String aPropertyURI,
-          byte direct) throws RemoteException;
+          byte direct) throws GateOntologyException;
+
   /**
    * Checkes whether the two properties have a super-sub relation.
    * 
@@ -311,12 +328,12 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aSubPropertyURI
    * @param direct
    * @return
-   * @throws RemoteException
+   * @throws GateOntologyException
    */
   public boolean isSuperPropertyOf(String repositoryID,
           String aSuperPropertyURI, String aSubPropertyURI, byte direct)
-          throws RemoteException;
-  
+          throws GateOntologyException;
+
   /**
    * Checkes whether the two properties have a super-sub relation.
    * 
@@ -325,10 +342,10 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aSubPropertyURI
    * @param direct
    * @return
-   * @throws RemoteException
+   * @throws GateOntologyException
    */
   public boolean isSubPropertyOf(String repositoryID, String aSuperPropertyURI,
-          String aSubPropertyURI, byte direct) throws RemoteException;
+          String aSubPropertyURI, byte direct) throws GateOntologyException;
 
   /**
    * Given a class and instance URIs, the method checks if the latter is
@@ -341,18 +358,20 @@ public interface OWLIM extends java.rmi.Remote {
    * @return Done
    */
   public boolean hasIndividual(String repositoryID, String aSuperClassURI,
-          String individualURI, byte direct) throws RemoteException;
+          String individualURI, byte direct) throws GateOntologyException;
+
   /**
    * Returns whether the individual1 is different from the individual2.
    * 
    * @param theInstanceURI1
    * @param theInstanceURI2
    * @return
-   * @throws RemoteException
+   * @throws GateOntologyException
    */
   public boolean isDifferentIndividualFrom(String repositoryID,
           String theInstanceURI1, String theInstanceURI2)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * Checkes whether the two individuals are same.
    * 
@@ -360,12 +379,12 @@ public interface OWLIM extends java.rmi.Remote {
    * @param individualURI1
    * @param invidualURI2
    * @return
-   * @throws RemoteException
+   * @throws GateOntologyException
    */
   public boolean isSameIndividualAs(String repositoryID,
           String theInstanceURI1, String theInstanceURI2)
-          throws RemoteException;
-  
+          throws GateOntologyException;
+
   // *************
   // Instances and properties
   // **************
@@ -379,7 +398,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @throws InvalidValueException
    */
   public void addRDFPropertyValue(String repositoryID, String anInstanceURI,
-          String anRDFPropertyURI, String aResourceURI) throws RemoteException;
+          String anRDFPropertyURI, String aResourceURI) throws GateOntologyException;
+
   /**
    * Removes the specified RDF Property Value
    * 
@@ -389,7 +409,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aResourceURI
    */
   public void removeRDFPropertyValue(String repositoryID, String anInstanceURI,
-          String anRDFPropertyURI, String aResourceURI) throws RemoteException;
+          String anRDFPropertyURI, String aResourceURI) throws GateOntologyException;
+
   /**
    * gets the rdf property values for the specified instance.
    * 
@@ -399,7 +420,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return resource URIs
    */
   public ResourceInfo[] getRDFPropertyValues(String repositoryID,
-          String anInstanceURI, String anRDFPropertyURI) throws RemoteException;
+          String anInstanceURI, String anRDFPropertyURI) throws GateOntologyException;
+
   /**
    * Removes all the RDF Property values from the given instance.
    * 
@@ -408,7 +430,7 @@ public interface OWLIM extends java.rmi.Remote {
    * @param anRDFPropertyURI
    */
   public void removeRDFPropertyValues(String repositoryID,
-          String anInstanceURI, String anRDFPropertyURI) throws RemoteException;
+          String anInstanceURI, String anRDFPropertyURI) throws GateOntologyException;
 
   // ******************
   // DataType Properties
@@ -425,7 +447,7 @@ public interface OWLIM extends java.rmi.Remote {
    */
   public void addDatatypePropertyValue(String repositoryID,
           String anInstanceURI, String aDatatypePropertyURI,
-          String datatypeURI, String value) throws RemoteException;
+          String datatypeURI, String value) throws GateOntologyException;
 
   /**
    * Removes the provided value for the given instance.
@@ -438,7 +460,8 @@ public interface OWLIM extends java.rmi.Remote {
    */
   public void removeDatatypePropertyValue(String repositoryID,
           String anInstanceURI, String aDatatypePropertyURI,
-          String datatypeURI, String value) throws RemoteException;
+          String datatypeURI, String value) throws GateOntologyException;
+
   /**
    * Gets a list of values for the given Property.
    * 
@@ -449,7 +472,8 @@ public interface OWLIM extends java.rmi.Remote {
    */
   public PropertyValue[] getDatatypePropertyValues(String repositoryID,
           String anInstanceURI, String aDatatypePropertyURI)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * Removes all property values set on the provided instance for the
    * current property.
@@ -460,7 +484,7 @@ public interface OWLIM extends java.rmi.Remote {
    */
   public void removeDatatypePropertyValues(String repositoryID,
           String anInstanceURI, String aDatatypePropertyURI)
-          throws RemoteException;
+          throws GateOntologyException;
 
   // ******************
   // Object, Symmetric and Transitive Properties
@@ -477,7 +501,8 @@ public interface OWLIM extends java.rmi.Remote {
    */
   public void addObjectPropertyValue(String repositoryID,
           String sourceInstanceURI, String anObjectPropertyURI,
-          String theValueInstanceURI) throws RemoteException;
+          String theValueInstanceURI) throws GateOntologyException;
+
   /**
    * Remove the provided value for the given property (Object, Symmetric
    * and Transitive).
@@ -490,7 +515,7 @@ public interface OWLIM extends java.rmi.Remote {
    */
   public void removeObjectPropertyValue(String repositoryID,
           String sourceInstanceURI, String anObjectPropertyURI,
-          String theValueInstanceURI) throws RemoteException;
+          String theValueInstanceURI) throws GateOntologyException;
 
   /**
    * Gets a list of values for the given Property (Object, Symmetric and
@@ -503,8 +528,8 @@ public interface OWLIM extends java.rmi.Remote {
    */
   public String[] getObjectPropertyValues(String repositoryID,
           String sourceInstanceURI, String anObjectPropertyURI)
-          throws RemoteException;
-  
+          throws GateOntologyException;
+
   /**
    * Removes all property values set for the current property (Object,
    * Symmetric and Transitive).
@@ -515,8 +540,7 @@ public interface OWLIM extends java.rmi.Remote {
    */
   public void removeObjectPropertyValues(String repositoryID,
           String sourceInstanceURI, String anObjectPropertyURI)
-          throws RemoteException;
-  
+          throws GateOntologyException;
 
   // ****************************************************************************
   // user management methods
@@ -533,12 +557,12 @@ public interface OWLIM extends java.rmi.Remote {
    * @param password
    * @return
    */
-  public boolean login(String username, String password) throws RemoteException;
+  public boolean login(String username, String password) throws GateOntologyException;
 
   /**
    * End the session by logging out
    */
-  public void logout(String repositoryID) throws RemoteException;
+  public void logout(String repositoryID) throws GateOntologyException;
 
   // ****************************************************************************
   // repository methods
@@ -546,17 +570,18 @@ public interface OWLIM extends java.rmi.Remote {
   /**
    * Find out the list of repository list
    */
-  public String[] getRepositoryList() throws RemoteException;
+  public String[] getRepositoryList() throws GateOntologyException;
 
   /**
    * sets the provided repository as a current repository
    */
   public void setCurrentRepositoryID(String repositoryID)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * This method returns the ID of current repository
    */
-  public String getCurrentRepositoryID() throws RemoteException;
+  public String getCurrentRepositoryID() throws GateOntologyException;
 
   /**
    * Users are allowed to create new repositories and add data into it.
@@ -584,8 +609,8 @@ public interface OWLIM extends java.rmi.Remote {
   public String createRepository(String repositoryID, String username,
           String password, String ontoData, String baseURI, byte format,
           String absolutePersistLocation, boolean persist,
-          boolean returnSystemStatements) throws RemoteException;
-  
+          boolean returnSystemStatements) throws GateOntologyException;
+
   /**
    * Users are allowed to create new repositories and add data into it.
    * In order to create new repository, they don’t necessarily need to
@@ -611,7 +636,8 @@ public interface OWLIM extends java.rmi.Remote {
   public String createRepositoryFromUrl(String repositoryID, String username,
           String password, String ontoFileUrl, String baseURI, byte format,
           String absolutePersistLocation, boolean persist,
-          boolean returnSystemStatements) throws RemoteException;
+          boolean returnSystemStatements) throws GateOntologyException;
+
   /**
    * Removes the repository with given ID
    * 
@@ -619,7 +645,7 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public void removeRepository(String repositoryID, boolean persist)
-          throws RemoteException;
+          throws GateOntologyException;
 
   // *******************************************************************
   // *************************** Ontology Methods **********************
@@ -627,7 +653,7 @@ public interface OWLIM extends java.rmi.Remote {
   /**
    * The method removes all data from the available graph.
    */
-  public void cleanOntology(String repositoryID) throws RemoteException;
+  public void cleanOntology(String repositoryID) throws GateOntologyException;
 
   /**
    * This method is useful to export results. Given one of the four
@@ -639,20 +665,22 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public String getOntologyData(String repositoryID, byte format)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * The method allows adding version information to the repository.
    * 
    * @param versionInfo
    */
   public void setVersion(String repositoryID, String versionInfo)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * The method returns the version information of the repository.
    * 
    * @return
    */
-  public String getVersion(String repositoryID) throws RemoteException;
+  public String getVersion(String repositoryID) throws GateOntologyException;
 
   // *******************************************************************
   // class methods
@@ -661,9 +689,13 @@ public interface OWLIM extends java.rmi.Remote {
    * The method allows adding a class to repository.
    * 
    * @param classURI
+   * @param classType - one of the following constant values from the
+   *          OConstants class. OWL_CLASS, CARDINALITY_RESTRICTION,
+   *          MIN_CARDINALITY_RESTRICTION, MAX_CARDINALITY_RESTRICTION,
+   *          HAS_VALUE_RESTRICTION, ALL_VALUES_FROM_RESTRICTION.
    */
-  public void addClass(String repositoryID, String classURI)
-          throws RemoteException;
+  public void addClass(String repositoryID, String classURI, byte classType)
+          throws GateOntologyException;
 
   /**
    * Given a class to delete, it removes it from the repository.
@@ -673,7 +705,8 @@ public interface OWLIM extends java.rmi.Remote {
    *         this deletion
    */
   public String[] removeClass(String repositoryID, String classURI)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * The method returns if the current repository has a class with URI
    * that matches with the class parameter.
@@ -681,7 +714,7 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public boolean hasClass(String repositoryID, String classURI)
-          throws RemoteException;
+          throws GateOntologyException;
 
   /**
    * if top set to true, the method returns only the top classes (i.e.
@@ -692,7 +725,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public ResourceInfo[] getClasses(String repositoryID, boolean top)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * Returns if the given class is a top class. It also returns false if
    * the class is an instance of BNode
@@ -701,8 +735,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public boolean isTopClass(String repositoryID, String classURI)
-          throws RemoteException;
-  
+          throws GateOntologyException;
+
   // ****************************************************************************
   // relations among classes
   // ****************************************************************************
@@ -715,8 +749,7 @@ public interface OWLIM extends java.rmi.Remote {
    * @param subClassURI
    */
   public void addSubClass(String repositoryID, String superClassURI,
-          String subClassURI) throws RemoteException;
-  
+          String subClassURI) throws GateOntologyException;
 
   /**
    * The method creates a new class with the URI as specified in
@@ -727,8 +760,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @param subClassURI
    */
   public void addSuperClass(String repositoryID, String superClassURI,
-          String subClassURI) throws RemoteException;
-  
+          String subClassURI) throws GateOntologyException;
+
   /**
    * Removes the subclass relationship
    * 
@@ -736,7 +769,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @param subClassURI
    */
   public void removeSubClass(String repositoryID, String superClassURI,
-          String subClassURI) throws RemoteException;
+          String subClassURI) throws GateOntologyException;
+
   /**
    * Removes the superclass relationship
    * 
@@ -744,7 +778,7 @@ public interface OWLIM extends java.rmi.Remote {
    * @param subClassURI
    */
   public void removeSuperClass(String repositoryID, String superClassURI,
-          String subClassURI) throws RemoteException;
+          String subClassURI) throws GateOntologyException;
 
   /**
    * This method returns all sub classes of the given class
@@ -754,7 +788,7 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public ResourceInfo[] getSubClasses(String repositoryID,
-          String superClassURI, byte direct) throws RemoteException;
+          String superClassURI, byte direct) throws GateOntologyException;
 
   /**
    * This method returns all super classes of the given class
@@ -764,7 +798,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public ResourceInfo[] getSuperClasses(String repositoryID,
-          String subClassURI, byte direct) throws RemoteException;
+          String subClassURI, byte direct) throws GateOntologyException;
+
   /**
    * Sets the classes as disjoint
    * 
@@ -772,7 +807,7 @@ public interface OWLIM extends java.rmi.Remote {
    * @param class2URI
    */
   public void setDisjointClassWith(String repositoryID, String class1URI,
-          String class2URI) throws RemoteException;
+          String class2URI) throws GateOntologyException;
 
   /**
    * Sets the classes as same classes
@@ -781,7 +816,7 @@ public interface OWLIM extends java.rmi.Remote {
    * @param class2URI
    */
   public void setEquivalentClassAs(String repositoryID, String class1URI,
-          String class2URI) throws RemoteException;
+          String class2URI) throws GateOntologyException;
 
   /**
    * returns an array of classes which are marked as disjoint for the
@@ -791,7 +826,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public String[] getDisjointClasses(String repositoryID, String classURI)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * returns an array of classes which are equivalent as the given class
    * 
@@ -799,15 +835,16 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public ResourceInfo[] getEquivalentClasses(String repositoryID,
-          String aClassURI) throws RemoteException;
+          String aClassURI) throws GateOntologyException;
+
   /**
    * Removes the given property
    * 
    * @param aPropertyURI
    */
   public String[] removePropertyFromOntology(String repositoryID,
-          String aPropertyURI) throws RemoteException;
-  
+          String aPropertyURI) throws GateOntologyException;
+
   /**
    * The method adds an object property specifiying domain and range for
    * the same. All classes specified in domain and range must exist.
@@ -818,7 +855,7 @@ public interface OWLIM extends java.rmi.Remote {
    */
   public void addObjectProperty(String repositoryID, String aPropertyURI,
           String[] domainClassesURIs, String[] rangeClassesTypes)
-          throws RemoteException;
+          throws GateOntologyException;
 
   /**
    * The method adds a transitive property specifiying domain and range
@@ -830,7 +867,8 @@ public interface OWLIM extends java.rmi.Remote {
    */
   public void addTransitiveProperty(String repositoryID, String aPropertyURI,
           String[] domainClassesURIs, String[] rangeClassesTypes)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * The method returns an array of properties. Property is a complex
    * structure, which contains name, comment, information about its
@@ -839,7 +877,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public Property[] getRDFProperties(String repositoryID)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * The method returns an array of properties. Property is a complex
    * structure, which contains name, comment, information about its
@@ -848,7 +887,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public Property[] getObjectProperties(String repositoryID)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * The method returns an array of properties. Property is a complex
    * structure, which contains name, comment, information about its
@@ -857,7 +897,7 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public Property[] getSymmetricProperties(String repositoryID)
-          throws RemoteException;
+          throws GateOntologyException;
 
   /**
    * The method returns an array of properties. Property is a complex
@@ -867,7 +907,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public Property[] getTransitiveProperties(String repositoryID)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * The method returns an array of properties. Property is a complex
    * structure, which contains name, comment, information about its
@@ -876,7 +917,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public Property[] getDatatypeProperties(String repositoryID)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * The method returns an array of properties. Property is a complex
    * structure, which contains name, comment, information about its
@@ -885,7 +927,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public Property[] getAnnotationProperties(String repositoryID)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * Given a property, this method returns its domain
    * 
@@ -893,7 +936,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public ResourceInfo[] getDomain(String repositoryID, String aPropertyURI)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * Given a property, this method returns its range
    * 
@@ -901,7 +945,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public ResourceInfo[] getRange(String repositoryID, String aPropertyURI)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * Returns if the provided property is functional
    * 
@@ -909,7 +954,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public boolean isFunctional(String repositoryID, String aPropertyURI)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * sets the current property as functional
    * 
@@ -917,7 +963,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @param isFunctional
    */
   public void setFunctional(String repositoryID, String aPropertyURI,
-          boolean isFunctional) throws RemoteException;
+          boolean isFunctional) throws GateOntologyException;
+
   /**
    * returns if the given property is inverse functional property
    * 
@@ -925,7 +972,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public boolean isInverseFunctional(String repositoryID, String aPropertyURI)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * Sets the current property as inverse functional property
    * 
@@ -933,7 +981,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @param isInverseFunctional
    */
   public void setInverseFunctional(String repositoryID, String aPropertyURI,
-          boolean isInverseFunctional) throws RemoteException;
+          boolean isInverseFunctional) throws GateOntologyException;
+
   /**
    * returns if the given property is a symmetric property
    * 
@@ -941,7 +990,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public boolean isSymmetricProperty(String repositoryID, String aPropertyURI)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * returns if the given property is a transitive property
    * 
@@ -949,7 +999,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public boolean isTransitiveProperty(String repositoryID, String aPropertyURI)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * returns if the given property is a datatype property
    * 
@@ -957,7 +1008,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public boolean isDatatypeProperty(String repositoryID, String aPropertyURI)
-          throws RemoteException;
+          throws GateOntologyException;
+
   /**
    * returns if the given property is an object property
    * 
@@ -965,8 +1017,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public boolean isObjectProperty(String repositoryID, String aPropertyURI)
-          throws RemoteException;
-  
+          throws GateOntologyException;
+
   // *************************************
   // Relations among properties
   // *************************************
@@ -977,7 +1029,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @param property2URI
    */
   public void setEquivalentPropertyAs(String repositoryID, String property1URI,
-          String property2URI) throws RemoteException;
+          String property2URI) throws GateOntologyException;
+
   /**
    * For the given property, this method returns all properties marked
    * as Equivalent as it
@@ -986,7 +1039,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public Property[] getEquivalentPropertyAs(String repositoryID,
-          String aPropertyURI) throws RemoteException;
+          String aPropertyURI) throws GateOntologyException;
+
   /**
    * For the given properties, this method registers the super, sub
    * relation
@@ -995,7 +1049,7 @@ public interface OWLIM extends java.rmi.Remote {
    * @param subPropertyURI
    */
   public void addSuperProperty(String repositoryID, String superPropertyURI,
-          String subPropertyURI) throws RemoteException;
+          String subPropertyURI) throws GateOntologyException;
 
   /**
    * For the given properties, this method removes the super, sub
@@ -1005,7 +1059,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @param subPropertyURI
    */
   public void removeSuperProperty(String repositoryID, String superPropertyURI,
-          String subPropertyURI) throws RemoteException;
+          String subPropertyURI) throws GateOntologyException;
+
   /**
    * For the given properties, this method registers the super, sub
    * relation
@@ -1014,7 +1069,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @param subPropertyURI
    */
   public void addSubProperty(String repositoryID, String superPropertyURI,
-          String subPropertyURI) throws RemoteException;
+          String subPropertyURI) throws GateOntologyException;
+
   /**
    * For the given properties, this method removes the super, sub
    * relation
@@ -1023,7 +1079,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @param subPropertyURI
    */
   public void removeSubProperty(String repositoryID, String superPropertyURI,
-          String subPropertyURI) throws RemoteException;
+          String subPropertyURI) throws GateOntologyException;
+
   /**
    * for the given property, the method returns all its super properties
    * 
@@ -1032,7 +1089,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public Property[] getSuperProperties(String repositoryID,
-          String aPropertyURI, boolean direct) throws RemoteException;
+          String aPropertyURI, boolean direct) throws GateOntologyException;
+
   /**
    * for the given property, the method returns all its sub properties
    * 
@@ -1041,7 +1099,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public Property[] getSubProperties(String repositoryID, String aPropertyURI,
-          boolean direct) throws RemoteException;
+          boolean direct) throws GateOntologyException;
+
   /**
    * for the given property, the method returns all its inverse
    * properties
@@ -1050,7 +1109,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public Property[] getInverseProperties(String repositoryID,
-          String aPropertyURI) throws RemoteException;
+          String aPropertyURI) throws GateOntologyException;
+
   /**
    * property1 is set as inverse of property 2
    * 
@@ -1058,8 +1118,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @param property2URI
    */
   public void setInverseOf(String repositoryID, String propertyURI1,
-          String propertyURI2) throws RemoteException;
-  
+          String propertyURI2) throws GateOntologyException;
+
   // *******************************************************************
   // *************************** Instance Methods **********************
   // *******************************************************************
@@ -1072,8 +1132,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @param individualURI
    */
   public void addIndividual(String repositoryID, String superClassURI,
-          String individualURI) throws RemoteException;
-  
+          String individualURI) throws GateOntologyException;
+
   /**
    * The method removes the provided instance from the repository.
    * 
@@ -1081,8 +1141,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public String[] removeIndividual(String repositoryID, String individualURI)
-          throws RemoteException;
-  
+          throws GateOntologyException;
+
   /**
    * The method returns all member instances of the provided class. It
    * returns only the direct instances if the boolean parameter direct
@@ -1092,15 +1152,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param direct
    */
   public String[] getIndividuals(String repositoryID, String superClassURI,
-          byte direct) throws RemoteException;
-  
+          byte direct) throws GateOntologyException;
 
   /**
    * returns all resources registered as individuals in the ontology
    * 
    * @return
    */
-  public String[] getIndividuals(String repositoryID) throws RemoteException;
+  public String[] getIndividuals(String repositoryID) throws GateOntologyException;
 
   /**
    * Given a class and instance URIs, the method checks if the latter is
@@ -1113,7 +1172,7 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public boolean hasIndividual(String repositoryID, String aSuperClassURI,
-          String individualURI, boolean direct) throws RemoteException;
+          String individualURI, boolean direct) throws GateOntologyException;
 
   /**
    * For the given individual, the method returns a set of classes for
@@ -1122,8 +1181,7 @@ public interface OWLIM extends java.rmi.Remote {
    * @param individualURI
    */
   public ResourceInfo[] getClassesOfIndividual(String repositoryID,
-          String individualURI, byte direct) throws RemoteException;
-  
+          String individualURI, byte direct) throws GateOntologyException;
 
   // *******************************************************************
   // relations among individuals
@@ -1135,7 +1193,7 @@ public interface OWLIM extends java.rmi.Remote {
    * @param individual2URI
    */
   public void setDifferentIndividualFrom(String repositoryID,
-          String individual1URI, String individual2URI) throws RemoteException;
+          String individual1URI, String individual2URI) throws GateOntologyException;
 
   /**
    * for the given individual, the method returns all individuals
@@ -1145,7 +1203,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public String[] getDifferentIndividualFrom(String repositoryID,
-          String individualURI) throws RemoteException;
+          String individualURI) throws GateOntologyException;
+
   /**
    * individual1 is set as same as the individual2
    * 
@@ -1153,7 +1212,8 @@ public interface OWLIM extends java.rmi.Remote {
    * @param individual2URI
    */
   public void setSameIndividualAs(String repositoryID, String individual1URI,
-          String individual2URI) throws RemoteException;
+          String individual2URI) throws GateOntologyException;
+
   /**
    * for the given individual, the method returns all individuals which
    * are registered as same as the provided individual
@@ -1162,7 +1222,110 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    */
   public String[] getSameIndividualAs(String repositoryID, String individualURI)
-          throws RemoteException;
+          throws GateOntologyException;
+
+  // ***********************************************
+  // ********* Restrictions ***********************
+  // ***********************************************
+
+  /**
+   * This method given a restriction uri returns the value for the
+   * onProperty element.
+   * 
+   * @param repositoryId
+   * @param restrictionURI
+   * @return
+   * @throws GateOntologyException
+   */
+  public Property getOnPropertyValue(String repositoryId, String restrictionURI)
+          throws GateOntologyException;
+
+  /**
+   * This method sets the value for onProperty element on the given
+   * restriction.
+   * 
+   * @param repositoryId
+   * @param restrictionURI
+   * @param propertyURI
+   * @throws GateOntologyException
+   */
+  public void setOnPropertyValue(String repositoryId, String restrictionURI,
+          String propertyURI) throws GateOntologyException;
+
+  /**
+   * Gets the property value specified on the given restriction uri.
+   * 
+   * @param repositoryID
+   * @param restrictionURI
+   * @param restrictionType
+   * @return
+   * @throws GateOntologyException
+   */
+  public PropertyValue getPropertyValue(String repositoryID,
+          String restrictionURI, byte restrictionType) throws GateOntologyException;
+
+  /**
+   * Sets the datatype uri for the given restriction uri.
+   * 
+   * @param repositoryID
+   * @param restrictionURI
+   * @param restrictionType
+   * @param value
+   * @param datatypeURI
+   * @throws GateOntologyException
+   */
+  public void setPropertyValue(String repositoryID, String restrictionURI,
+          byte restrictionType, String value, String datatypeURI)
+          throws GateOntologyException;
+
+  /**
+   * Gets the cardinality value specified on the given restriction uri.
+   * 
+   * @param repositoryID
+   * @param restrictionURI
+   * @param restrictionType - either of the following constants from the
+   *          OConstants - ALL_VALUES_FROM_RESTRICTION,
+   *          SOME_VALUES_FROM_RESTRICTION, and HAS_VALUE_RESTRICTION
+   * @return
+   * @throws GateOntologyException
+   */
+  public ResourceInfo getRestrictionValue(String repositoryID, String restrictionURI,
+          byte restrictionType) throws GateOntologyException;
+
+  /**
+   * Sets the cardinality value for the given restriction uri.
+   * 
+   * @param repositoryID
+   * @param restrictionURI
+   * @param restrictionType - either of the following constants from the
+   *          OConstants - ALL_VALUES_FROM_RESTRICTION,
+   *          SOME_VALUES_FROM_RESTRICTION, and HAS_VALUE_RESTRICTION
+   * @param value
+   * @return
+   * @throws GateOntologyException
+   */
+  public void setRestrictionValue(String repositoryID, String restrictionURI,
+          byte restrictionType, String value) throws GateOntologyException;
+
+  /**
+   * This method tells what type of restriction the given uri refers to.
+   * If the given URI is not a restriction, the method returns -1.
+   * Otherwise one of the following values from the OConstants class.
+   * OWL_CLASS, CARDINALITY_RESTRICTION, MIN_CARDINALITY_RESTRICTION,
+   * MAX_CARDINALITY_RESTRICTION, HAS_VALUE_RESTRICTION,
+   * ALL_VALUES_FROM_RESTRICTION.
+   * 
+   * @param repositoryID
+   * @param restrictionURI
+   * @return
+   * @throws GateOntologyException
+   */
+  public byte getClassType(String repositoryID, String restrictionURI)
+          throws GateOntologyException;
+
+  // ****************************************************
+  // ******************** Generic statements ************
+  // ****************************************************
   /**
    * The method is useful for adding statements into the graph. All
    * three values must exist in repository. These values are cast in
@@ -1173,7 +1336,7 @@ public interface OWLIM extends java.rmi.Remote {
    * @param objectURI
    */
   public void addStatement(String repositoryID, String subjectURI,
-          String predicateURI, String objectURI) throws RemoteException;
+          String predicateURI, String objectURI) throws GateOntologyException;
 
   /**
    * The method is useful for removing statements from the graph of
@@ -1186,6 +1349,6 @@ public interface OWLIM extends java.rmi.Remote {
    * @param objectURI
    */
   public void removeStatement(String repositoryID, String subjectURI,
-          String predicateURI, String objectURI) throws RemoteException;
-  
+          String predicateURI, String objectURI) throws GateOntologyException;
+
 }

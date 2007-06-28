@@ -7,10 +7,11 @@
  */
 package gate.creole.ontology.owlim;
 
-import java.rmi.RemoteException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+
+import gate.creole.ontology.GateOntologyException;
 import gate.creole.ontology.OClass;
 import gate.creole.ontology.OConstants;
 import gate.creole.ontology.OInstance;
@@ -18,7 +19,6 @@ import gate.creole.ontology.OResource;
 import gate.creole.ontology.ObjectProperty;
 import gate.creole.ontology.Ontology;
 import gate.creole.ontology.URI;
-import gate.util.GateRuntimeException;
 
 /**
  * Implementation of the ObjectProperty
@@ -47,26 +47,21 @@ public class ObjectPropertyImpl extends RDFPropertyImpl implements
    * @see gate.creole.ontology.ObjectProperty#getInverseProperties()
    */
   public Set<ObjectProperty> getInverseProperties() {
-    try {
-      Property[] properties = owlim.getInverseProperties(this.repositoryID,
-              this.uri.toString());
-      Set<ObjectProperty> set = new HashSet<ObjectProperty>();
-      for(int i = 0; i < properties.length; i++) {
-        byte type = properties[i].getType();
-        if(type != OConstants.OBJECT_PROPERTY
-                && type != OConstants.SYMMETRIC_PROPERTY
-                && type != OConstants.TRANSITIVE_PROPERTY)
-          throw new GateRuntimeException(
-                  "Invalid Property type returned as an inverse property");
-        set.add((ObjectProperty)Utils.createOProperty(this.repositoryID,
-                this.ontology, this.owlim, properties[i].getUri(),
-                properties[i].getType()));
-      }
-      return set;
+    Property[] properties = owlim.getInverseProperties(this.repositoryID,
+            this.uri.toString());
+    Set<ObjectProperty> set = new HashSet<ObjectProperty>();
+    for(int i = 0; i < properties.length; i++) {
+      byte type = properties[i].getType();
+      if(type != OConstants.OBJECT_PROPERTY
+              && type != OConstants.SYMMETRIC_PROPERTY
+              && type != OConstants.TRANSITIVE_PROPERTY)
+        throw new GateOntologyException(
+                "Invalid Property type returned as an inverse property");
+      set.add((ObjectProperty)Utils.createOProperty(this.repositoryID,
+              this.ontology, this.owlim, properties[i].getUri(), properties[i]
+                      .getType()));
     }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
+    return set;
   }
 
   /*
@@ -75,20 +70,14 @@ public class ObjectPropertyImpl extends RDFPropertyImpl implements
    * @see gate.creole.ontology.ObjectProperty#setInverseOf(gate.creole.ontology.ObjectProperty)
    */
   public void setInverseOf(ObjectProperty theInverse) {
-    try {
-
-      if(this == theInverse) {
-        Utils
-                .warning("setInverseOf(ObjectProperty) : The source and the argument properties are referring to the same property");
-        return;
-      }
-
-      owlim.setInverseOf(this.repositoryID, uri.toString(), theInverse.getURI()
-              .toString());
+    if(this == theInverse) {
+      Utils
+              .warning("setInverseOf(ObjectProperty) : The source and the argument properties are referring to the same property");
+      return;
     }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
+
+    owlim.setInverseOf(this.repositoryID, uri.toString(), theInverse.getURI()
+            .toString());
   }
 
   /*
@@ -97,37 +86,32 @@ public class ObjectPropertyImpl extends RDFPropertyImpl implements
    * @see gate.creole.ontology.ObjectProperty#isValidRange(gate.creole.ontology.OInstance)
    */
   public boolean isValidRange(OInstance anInstance) {
-    try {
-      ResourceInfo[] oClasses = owlim.getRange(this.repositoryID, this.uri
-              .toString());
-      if(oClasses.length == 0) return true;
-      // obtain sub classes of
-      Set<String> listOfOClasses = new HashSet<String>();
-      for(int i = 0; i < oClasses.length; i++) {
-        listOfOClasses.add(oClasses[i].getUri());
-        OResource resource = ontology.getOResourceFromMap(oClasses[i].getUri());
-        if(resource != null && resource instanceof OClass) {
-          Set<OClass> classes = ((OClass)resource)
-                  .getSubClasses(OConstants.TRANSITIVE_CLOSURE);
-          Iterator<OClass> iter = classes.iterator();
-          while(iter.hasNext()) {
-            listOfOClasses.add(iter.next().getURI().toString());
-          }
+    ResourceInfo[] oClasses = owlim.getRange(this.repositoryID, this.uri
+            .toString());
+    if(oClasses.length == 0) return true;
+    // obtain sub classes of
+    Set<String> listOfOClasses = new HashSet<String>();
+    for(int i = 0; i < oClasses.length; i++) {
+      listOfOClasses.add(oClasses[i].getUri());
+      OResource resource = ontology.getOResourceFromMap(oClasses[i].getUri());
+      if(resource != null && resource instanceof OClass) {
+        Set<OClass> classes = ((OClass)resource)
+                .getSubClasses(OConstants.TRANSITIVE_CLOSURE);
+        Iterator<OClass> iter = classes.iterator();
+        while(iter.hasNext()) {
+          listOfOClasses.add(iter.next().getURI().toString());
         }
       }
-      // we need to obtain all the classes of anInstance
-      ResourceInfo[] instanceOClasses = owlim.getClassesOfIndividual(
-              this.repositoryID, anInstance.getURI().toString(),
-              OConstants.DIRECT_CLOSURE);
-      Set<String> listOfICs = new HashSet<String>();
-      for(int i = 0; i < instanceOClasses.length; i++) {
-        listOfICs.add(instanceOClasses[i].getUri());
-      }
-      return listOfOClasses.containsAll(listOfICs);
     }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
+    // we need to obtain all the classes of anInstance
+    ResourceInfo[] instanceOClasses = owlim.getClassesOfIndividual(
+            this.repositoryID, anInstance.getURI().toString(),
+            OConstants.DIRECT_CLOSURE);
+    Set<String> listOfICs = new HashSet<String>();
+    for(int i = 0; i < instanceOClasses.length; i++) {
+      listOfICs.add(instanceOClasses[i].getUri());
     }
+    return listOfOClasses.containsAll(listOfICs);
   }
 
   /*
@@ -136,37 +120,32 @@ public class ObjectPropertyImpl extends RDFPropertyImpl implements
    * @see gate.creole.ontology.DatatypeProperty#isValidDomain(gate.creole.ontology.OInstance)
    */
   public boolean isValidDomain(OInstance anInstance) {
-    try {
-      ResourceInfo[] oClasses = owlim.getDomain(this.repositoryID, this.uri
-              .toString());
-      if(oClasses.length == 0) return true;
-      // obtain sub classes of
-      Set<String> listOfOClasses = new HashSet<String>();
-      for(int i = 0; i < oClasses.length; i++) {
-        listOfOClasses.add(oClasses[i].getUri());
-        OResource resource = ontology.getOResourceFromMap(oClasses[i].getUri());
-        if(resource != null && resource instanceof OClass) {
-          Set<OClass> classes = ((OClass)resource)
-                  .getSubClasses(OConstants.TRANSITIVE_CLOSURE);
-          Iterator<OClass> iter = classes.iterator();
-          while(iter.hasNext()) {
-            listOfOClasses.add(iter.next().getURI().toString());
-          }
+    ResourceInfo[] oClasses = owlim.getDomain(this.repositoryID, this.uri
+            .toString());
+    if(oClasses.length == 0) return true;
+    // obtain sub classes of
+    Set<String> listOfOClasses = new HashSet<String>();
+    for(int i = 0; i < oClasses.length; i++) {
+      listOfOClasses.add(oClasses[i].getUri());
+      OResource resource = ontology.getOResourceFromMap(oClasses[i].getUri());
+      if(resource != null && resource instanceof OClass) {
+        Set<OClass> classes = ((OClass)resource)
+                .getSubClasses(OConstants.TRANSITIVE_CLOSURE);
+        Iterator<OClass> iter = classes.iterator();
+        while(iter.hasNext()) {
+          listOfOClasses.add(iter.next().getURI().toString());
         }
       }
-      // we need to obtain all the classes of anInstance
-      ResourceInfo[] instanceOClasses = owlim.getClassesOfIndividual(
-              this.repositoryID, anInstance.getURI().toString(),
-              OConstants.DIRECT_CLOSURE);
-      Set<String> listOfICs = new HashSet<String>();
-      for(int i = 0; i < instanceOClasses.length; i++) {
-        listOfICs.add(instanceOClasses[i].getUri());
-      }
-      return listOfOClasses.containsAll(listOfICs);
     }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
+    // we need to obtain all the classes of anInstance
+    ResourceInfo[] instanceOClasses = owlim.getClassesOfIndividual(
+            this.repositoryID, anInstance.getURI().toString(),
+            OConstants.DIRECT_CLOSURE);
+    Set<String> listOfICs = new HashSet<String>();
+    for(int i = 0; i < instanceOClasses.length; i++) {
+      listOfICs.add(instanceOClasses[i].getUri());
     }
+    return listOfOClasses.containsAll(listOfICs);
   }
 
   /*
@@ -197,21 +176,16 @@ public class ObjectPropertyImpl extends RDFPropertyImpl implements
    * @see gate.creole.ontology.RDFProperty#getDomain()
    */
   public Set<OResource> getDomain() {
-    try {
-      ResourceInfo[] list = owlim.getDomain(this.repositoryID, uri.toString());
-      // this is a list of classes
-      Set<OResource> domain = new HashSet<OResource>();
-      // these resources can be anything - an instance, a property, or a
-      // class
-      for(int i = 0; i < list.length; i++) {
-        domain.add(Utils.createOClass(this.repositoryID, this.ontology,
-                this.owlim, list[i].getUri(), list[i].isAnonymous()));
-      }
-      return domain;
+    ResourceInfo[] list = owlim.getDomain(this.repositoryID, uri.toString());
+    // this is a list of classes
+    Set<OResource> domain = new HashSet<OResource>();
+    // these resources can be anything - an instance, a property, or a
+    // class
+    for(int i = 0; i < list.length; i++) {
+      domain.add(Utils.createOClass(this.repositoryID, this.ontology,
+              this.owlim, list[i].getUri(), list[i].getClassType()));
     }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
+    return domain;
   }
 
   /*
@@ -220,20 +194,15 @@ public class ObjectPropertyImpl extends RDFPropertyImpl implements
    * @see gate.creole.ontology.RDFProperty#getRange()
    */
   public Set<OResource> getRange() {
-    try {
-      ResourceInfo[] list = owlim.getRange(this.repositoryID, uri.toString());
-      // this is a list of classes
-      Set<OResource> domain = new HashSet<OResource>();
-      // these resources can be anything - an instance, a property, or a
-      // class
-      for(int i = 0; i < list.length; i++) {
-        domain.add(Utils.createOClass(this.repositoryID, this.ontology,
-                this.owlim, list[i].getUri(), list[i].isAnonymous()));
-      }
-      return domain;
+    ResourceInfo[] list = owlim.getRange(this.repositoryID, uri.toString());
+    // this is a list of classes
+    Set<OResource> domain = new HashSet<OResource>();
+    // these resources can be anything - an instance, a property, or a
+    // class
+    for(int i = 0; i < list.length; i++) {
+      domain.add(Utils.createOClass(this.repositoryID, this.ontology,
+              this.owlim, list[i].getUri(), list[i].getClassType()));
     }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
+    return domain;
   }
 }

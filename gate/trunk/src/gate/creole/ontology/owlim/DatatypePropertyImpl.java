@@ -7,12 +7,12 @@
  */
 package gate.creole.ontology.owlim;
 
-import java.rmi.RemoteException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import gate.creole.ontology.DataType;
 import gate.creole.ontology.DatatypeProperty;
+import gate.creole.ontology.GateOntologyException;
 import gate.creole.ontology.OClass;
 import gate.creole.ontology.OConstants;
 import gate.creole.ontology.OInstance;
@@ -20,7 +20,7 @@ import gate.creole.ontology.OResource;
 import gate.creole.ontology.Ontology;
 import gate.creole.ontology.OntologyUtilities;
 import gate.creole.ontology.URI;
-import gate.util.GateRuntimeException;
+
 
 /**
  * Implementation of the DatatypeProperty
@@ -47,14 +47,10 @@ public class DatatypePropertyImpl extends RDFPropertyImpl implements
    * @see gate.creole.ontology.DatatypeProperty#getDataType()
    */
   public DataType getDataType() {
-    try {
       String datatypeURI = owlim.getDatatype(this.repositoryID, this.uri
               .toString());
       if(datatypeURI == null) { return DataType.getStringDataType(); }
       return OntologyUtilities.getDataType(datatypeURI);
-    } catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -72,7 +68,6 @@ public class DatatypePropertyImpl extends RDFPropertyImpl implements
    * @see gate.creole.ontology.DatatypeProperty#isValidDomain(gate.creole.ontology.OInstance)
    */
 public boolean isValidDomain(OInstance anInstance) {
-    try {
       ResourceInfo[] oClasses = owlim.getDomain(this.repositoryID, this.uri
               .toString());
       if(oClasses.length == 0) return true;
@@ -100,9 +95,6 @@ public boolean isValidDomain(OInstance anInstance) {
       }
       
       return listOfOClasses.containsAll(listOfICs);
-    } catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
   /*
    * (non-Javadoc)
@@ -110,7 +102,7 @@ public boolean isValidDomain(OInstance anInstance) {
    * @see gate.creole.ontology.RDFProperty#isValidRange(gate.creole.ontology.OResource)
    */
   public boolean isValidRange(OResource aResource) {
-    throw new GateRuntimeException(
+    throw new GateOntologyException(
             "Datatype Properties do not have Range, but a Datatype. Please use the isValidDatatypeValue(String value) method.");
   }
 
@@ -131,19 +123,15 @@ public boolean isValidDomain(OInstance anInstance) {
    * @see gate.creole.ontology.RDFProperty#getDomain()
    */
   public Set<OResource> getDomain() {
-    try {
       ResourceInfo[] list = owlim.getDomain(this.repositoryID, uri.toString());
       // this is a list of classes
       Set<OResource> domain = new HashSet<OResource>();
       // these resources can be anything - an instance, a property, or a class
       for(int i = 0; i < list.length; i++) {
         domain.add(Utils.createOClass(this.repositoryID, this.ontology,
-                this.owlim, list[i].getUri(), list[i].isAnonymous()));
+                this.owlim, list[i].getUri(), list[i].getClassType()));
       }
       return domain;
-    } catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -152,7 +140,7 @@ public boolean isValidDomain(OInstance anInstance) {
    * @see gate.creole.ontology.RDFProperty#getRange()
    */
   public Set<OResource> getRange() {
-    throw new GateRuntimeException(
+    throw new GateOntologyException(
             "Datatype Properties do not have Range, but a Datatype specified. Please use the getDatatype() method.");
   }
 }

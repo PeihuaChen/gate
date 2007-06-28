@@ -22,18 +22,16 @@ import java.awt.event.ActionEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.net.URL;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import javax.servlet.ServletContext;
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
-import javax.xml.rpc.ServiceException;
 import org.openrdf.sesame.repository.SesameRepository;
 
 /**
@@ -184,17 +182,8 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
       getOClasses(false);
       getOInstances();
       getPropertyDefinitions();
-
-    }
-    catch(RemoteException re) {
-      re.printStackTrace();
-      throw new ResourceInstantiationException(re);
-    }
-    catch(ServiceException se) {
-      throw new ResourceInstantiationException(se);
-    }
-    catch(Exception e) {
-      throw new ResourceInstantiationException(e);
+    } catch(IOException ioe) {
+      throw new ResourceInstantiationException(ioe);
     }
   }
 
@@ -251,16 +240,12 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
    * this instance of ontology.
    */
   public void unload() {
-    try {
       if(!getPersistRepository().booleanValue()) {
         owlim.removeRepository(getSesameRepositoryID(), getPersistRepository()
                 .booleanValue());
         owlim.logout(sesameRepositoryID);
+        owlim = null;
       }
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /**
@@ -526,13 +511,8 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
    * @see gate.creole.ontology.Ontology#getSesameRepository()
    */
   public SesameRepository getSesameRepository() {
-    try {
       return ((OWLIMServiceImpl)owlim)
               .getSesameRepository(this.sesameRepositoryID);
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /**
@@ -632,7 +612,6 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
    * This method returns the ontology output in ntripples format.
    */
   public String toString() {
-    try {
       String output = owlim.getOntologyData(sesameRepositoryID,
               OConstants.ONTOLOGY_FORMAT_NTRIPLES);
       List<String> outputList = Arrays.asList(output.split(System
@@ -645,9 +624,5 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
                 System.getProperty("line.separator"));
       }
       return toReturn.toString();
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re.getMessage(), re);
-    }
   }
 }

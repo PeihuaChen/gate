@@ -7,7 +7,6 @@
  */
 package gate.creole.ontology.owlim;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -16,6 +15,7 @@ import java.util.Set;
 import org.openrdf.vocabulary.RDFS;
 import gate.creole.ontology.AnnotationProperty;
 import gate.creole.ontology.DatatypeProperty;
+import gate.creole.ontology.GateOntologyException;
 import gate.creole.ontology.Literal;
 import gate.creole.ontology.OClass;
 import gate.creole.ontology.OConstants;
@@ -27,7 +27,6 @@ import gate.creole.ontology.OntologyUtilities;
 import gate.creole.ontology.RDFProperty;
 import gate.creole.ontology.URI;
 import gate.creole.ontology.owlim.PropertyValue;
-import gate.util.GateRuntimeException;
 
 /**
  * Constructor
@@ -87,7 +86,7 @@ public class OResourceImpl implements OResource {
    * @see gate.creole.ontology.OResource#getURI()
    */
   public void setURI(URI uri) {
-    throw new GateRuntimeException(
+    throw new GateOntologyException(
             "This operation is not allowed in this version!");
   }
 
@@ -97,7 +96,7 @@ public class OResourceImpl implements OResource {
    * @return
    */
   public Set<Literal> getLabels() {
-    try {
+
       PropertyValue[] pvalues = owlim.getAnnotationPropertyValues(
               this.repositoryID, this.uri.toString(), RDFS.LABEL);
 
@@ -108,11 +107,6 @@ public class OResourceImpl implements OResource {
       }
 
       return toReturn;
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
-
   }
 
   /**
@@ -121,7 +115,6 @@ public class OResourceImpl implements OResource {
    * @return
    */
   public Set<Literal> getComments() {
-    try {
       PropertyValue[] pvalues = owlim.getAnnotationPropertyValues(
               this.repositoryID, this.uri.toString(), RDFS.COMMENT);
 
@@ -132,10 +125,6 @@ public class OResourceImpl implements OResource {
       }
 
       return toReturn;
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -144,14 +133,9 @@ public class OResourceImpl implements OResource {
    * @see gate.creole.ontology.OResource#getComment(java.lang.String)
    */
   public String getComment(Locale language) {
-    try {
       return owlim.getAnnotationPropertyValue(this.repositoryID, this.uri
               .toString(), RDFS.COMMENT, language != null ? language
               .getLanguage() : null);
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -161,17 +145,12 @@ public class OResourceImpl implements OResource {
    *      java.lang.String)
    */
   public void setComment(String aComment, Locale language) {
-    try {
       owlim.addAnnotationPropertyValue(this.repositoryID, this.uri.toString(),
               RDFS.COMMENT, aComment, language != null
                       ? language.getLanguage()
                       : null);
       ontology.fireOntologyModificationEvent(this,
               OConstants.COMMENT_CHANGED_EVENT);
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -180,14 +159,9 @@ public class OResourceImpl implements OResource {
    * @see gate.creole.ontology.OResource#getLabel(java.lang.String)
    */
   public String getLabel(Locale language) {
-    try {
       return owlim.getAnnotationPropertyValue(this.repositoryID, this.uri
               .toString(), RDFS.LABEL, language != null ? language
               .getLanguage() : null);
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -197,17 +171,12 @@ public class OResourceImpl implements OResource {
    *      java.lang.String)
    */
   public void setLabel(String aLabel, Locale language) {
-    try {
       owlim.addAnnotationPropertyValue(this.repositoryID, this.uri.toString(),
               RDFS.LABEL, aLabel, language != null
                       ? language.getLanguage()
                       : null);
       ontology.fireOntologyModificationEvent(this,
               OConstants.LABEL_CHANGED_EVENT);
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -236,8 +205,6 @@ public class OResourceImpl implements OResource {
    */
   public void addAnnotationPropertyValue(
           AnnotationProperty theAnnotationProperty, Literal literal) {
-    try {
-
       OResource res = ontology.getOResourceFromMap(theAnnotationProperty
               .getURI().toString());
       if(res == null) {
@@ -258,10 +225,6 @@ public class OResourceImpl implements OResource {
                       .getLanguage() : null);
       ontology.fireOntologyModificationEvent(this,
               OConstants.ANNOTATION_PROPERTY_VALUE_ADDED_EVENT);
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -271,7 +234,6 @@ public class OResourceImpl implements OResource {
    */
   public List<Literal> getAnnotationPropertyValues(
           AnnotationProperty theAnnotationProperty) {
-    try {
       PropertyValue[] propValues = owlim.getAnnotationPropertyValues(
               this.repositoryID, this.uri.toString(), theAnnotationProperty
                       .getURI().toString());
@@ -282,10 +244,6 @@ public class OResourceImpl implements OResource {
         list.add(l);
       }
       return list;
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -296,17 +254,12 @@ public class OResourceImpl implements OResource {
    */
   public void removeAnnotationPropertyValue(
           AnnotationProperty theAnnotationProperty, Literal literal) {
-    try {
       owlim.removeAnnotationPropertyValue(this.repositoryID, this.uri
               .toString(), theAnnotationProperty.getURI().toString(), literal
               .getValue(), literal.getLanguage() != null ? literal
               .getLanguage().getLanguage() : null);
       ontology.fireOntologyModificationEvent(this,
               OConstants.ANNOTATION_PROPERTY_VALUE_REMOVED_EVENT);
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /*
@@ -316,15 +269,10 @@ public class OResourceImpl implements OResource {
    */
   public void removeAnnotationPropertyValues(
           AnnotationProperty theAnnotationProperty) {
-    try {
       owlim.removeAnnotationPropertyValues(this.repositoryID, this.uri
               .toString(), theAnnotationProperty.getURI().toString());
       ontology.fireOntologyModificationEvent(this,
               OConstants.ANNOTATION_PROPERTY_VALUE_REMOVED_EVENT);
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /**
@@ -333,13 +281,12 @@ public class OResourceImpl implements OResource {
    * @return
    */
   public Set<AnnotationProperty> getSetAnnotationProperties() {
-    try {
       Property[] properties = owlim.getAnnotationProperties(this.repositoryID,
               this.uri.toString());
       Set<AnnotationProperty> annotProps = new HashSet<AnnotationProperty>();
       for(int i = 0; i < properties.length; i++) {
         if(properties[i].getType() != OConstants.ANNOTATION_PROPERTY) {
-          throw new GateRuntimeException(
+          throw new GateOntologyException(
                   "The property :"
                           + properties[i].getUri()
                           + " returned from the repository is not an AnnotationProperty");
@@ -354,10 +301,6 @@ public class OResourceImpl implements OResource {
         annotProps.add((AnnotationProperty)resource);
       }
       return annotProps;
-    }
-    catch(RemoteException re) {
-      throw new GateRuntimeException(re);
-    }
   }
 
   /**
