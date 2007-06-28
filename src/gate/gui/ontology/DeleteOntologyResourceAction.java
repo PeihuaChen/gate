@@ -59,9 +59,8 @@ public class DeleteOntologyResourceAction extends AbstractAction implements
           ontology.removeProperty((RDFProperty)obj);
       }
       catch(Exception re) {
-        JOptionPane.showMessageDialog(MainFrame.getInstance(), "The Resource "
-                + ((OResource)obj).getURI() + " could not be deleted \n"
-                + "because : \n" + "It is not an explicit resource!");
+        re.printStackTrace();
+        JOptionPane.showMessageDialog(MainFrame.getInstance(), re.getMessage() + "\nPlease see tab messages for more information!");
       }
     }
   }

@@ -7,6 +7,21 @@
  */
 package gate.gui.ontology;
 
+import gate.creole.ontology.AllValuesFromRestriction;
+import gate.creole.ontology.AnnotationProperty;
+import gate.creole.ontology.CardinalityRestriction;
+import gate.creole.ontology.DatatypeProperty;
+import gate.creole.ontology.HasValueRestriction;
+import gate.creole.ontology.MaxCardinalityRestriction;
+import gate.creole.ontology.MinCardinalityRestriction;
+import gate.creole.ontology.OResource;
+import gate.creole.ontology.RDFProperty;
+import gate.creole.ontology.Restriction;
+import gate.creole.ontology.SomeValuesFromRestriction;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -47,5 +62,86 @@ public class Utils {
     String s1 = new String("[a-zA-Z0-9_-]+");
     Pattern pattern = Pattern.compile(s1);
     return pattern.matcher(s).matches();
+  }
+
+  /**
+   * This method returns the details to be added.
+   * 
+   * @param object
+   * @return
+   */
+  public static List getDetailsToAdd(Object object) {
+    ArrayList<Object> toAdd = new ArrayList<Object>();
+    toAdd.add(object);
+    if(object instanceof Restriction) {
+      Restriction res = (Restriction)object;
+      toAdd.add(new KeyValuePair(res, "RESTRICTION TYPE",
+              gate.creole.ontology.owlim.Utils.getRestrictionName(res), false));
+      toAdd.add(new KeyValuePair(res.getOnPropertyValue(), "ON PROPERTY", res
+              .getOnPropertyValue().getName(), false));
+      String valueString = null;
+      String datatypeString = null;
+
+      if(res instanceof CardinalityRestriction) {
+        valueString = ((CardinalityRestriction)res).getValue();
+        datatypeString = ((CardinalityRestriction)res).getDataType()
+                .getXmlSchemaURI().toString();
+        toAdd.add(new KeyValuePair(res, "DATATYPE", datatypeString, false));
+        toAdd.add(new KeyValuePair(res, "VALUE", valueString, true));
+      }
+      else if(res instanceof MinCardinalityRestriction) {
+        valueString = ((MinCardinalityRestriction)res).getValue();
+        datatypeString = ((MinCardinalityRestriction)res).getDataType()
+                .getXmlSchemaURI().toString();
+        toAdd.add(new KeyValuePair(res, "DATATYPE", datatypeString, false));
+        toAdd.add(new KeyValuePair(res, "VALUE", valueString, true));
+      }
+      else if(res instanceof MaxCardinalityRestriction) {
+        valueString = ((MaxCardinalityRestriction)res).getValue();
+        datatypeString = ((MaxCardinalityRestriction)res).getDataType()
+                .getXmlSchemaURI().toString();
+        toAdd.add(new KeyValuePair(res, "DATATYPE", datatypeString, false));
+        toAdd.add(new KeyValuePair(res, "VALUE", valueString, true));
+      }
+      else if(res instanceof HasValueRestriction) {
+        valueString = ((HasValueRestriction)res).getHasValue().getURI()
+                .toString();
+        toAdd.add(new KeyValuePair(((HasValueRestriction)res).getHasValue(),
+                "VALUE", valueString, false));
+      }
+      else if(res instanceof AllValuesFromRestriction) {
+        valueString = ((AllValuesFromRestriction)res).getHasValue().getURI()
+                .toString();
+        toAdd.add(new KeyValuePair(((AllValuesFromRestriction)res)
+                .getHasValue(), "VALUE", valueString, false));
+      }
+      else if(res instanceof SomeValuesFromRestriction) {
+        valueString = ((SomeValuesFromRestriction)res).getHasValue().getURI()
+                .toString();
+        toAdd.add(new KeyValuePair(((SomeValuesFromRestriction)res)
+                .getHasValue(), "VALUE", valueString, false));
+      }
+    }
+    else if(object instanceof RDFProperty) {
+      RDFProperty prop = (RDFProperty)object;
+      if(prop instanceof DatatypeProperty) {
+        toAdd.add(new KeyValuePair(prop, "DATATYPE", ((DatatypeProperty)prop)
+                .getDataType().getXmlSchemaURI().toString(), false));
+      }
+      else if(!(prop instanceof AnnotationProperty)) {
+        Set<OResource> set = prop.getRange();
+        if(set == null || set.isEmpty()) {
+          toAdd.add(new KeyValuePair(prop, "RANGE", "[ALL CLASSES]", false));
+        }
+        else {
+          String key = "RANGE";
+          for(OResource res : set) {
+            toAdd.add(new KeyValuePair(res, key, res.getName(), false));
+            key = "";
+          }
+        }
+      }
+    }
+    return toAdd;
   }
 }

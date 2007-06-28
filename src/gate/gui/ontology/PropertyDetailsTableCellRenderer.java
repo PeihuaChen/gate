@@ -7,16 +7,11 @@
  */
 package gate.gui.ontology;
 
-import gate.creole.ontology.AnnotationProperty;
-import gate.creole.ontology.DatatypeProperty;
-import gate.creole.ontology.OResource;
-import gate.creole.ontology.ObjectProperty;
-import gate.creole.ontology.RDFProperty;
-import gate.creole.ontology.SymmetricProperty;
-import gate.creole.ontology.TransitiveProperty;
+import gate.creole.ontology.*;
 import gate.gui.MainFrame;
 import java.awt.Component;
 import java.util.Set;
+
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
@@ -28,16 +23,16 @@ import javax.swing.table.DefaultTableCellRenderer;
  * 
  */
 public class PropertyDetailsTableCellRenderer extends DefaultTableCellRenderer {
-  private static final long serialVersionUID = 3835153969470124336L;
+  private static final long serialVersionUID = 3257572784619337525L;
 
   public PropertyDetailsTableCellRenderer(
-          PropertyDetailsTableModel propertydetailstablemodel) {
-    propertyDetailsTableModel = propertydetailstablemodel;
+          PropertyDetailsTableModel detailstablemodel) {
+    propertyDetailsTableModel = detailstablemodel;
   }
 
-  public Component getTableCellRendererComponent(JTable jtable, Object obj,
+  public Component getTableCellRendererComponent(JTable table, Object obj,
           boolean flag, boolean flag1, int i, int j) {
-    Component component = super.getTableCellRendererComponent(jtable, "", flag,
+    Component component = super.getTableCellRendererComponent(table, "", flag,
             flag1, i, j);
     try {
       if(j == 0) {
@@ -53,13 +48,44 @@ public class PropertyDetailsTableCellRenderer extends DefaultTableCellRenderer {
           setEnabled(((DetailsGroup)obj1).getSize() > 0);
         }
       }
-      else if(j == 1)
+      else if(j == 1) {
         if(obj instanceof DetailsGroup) {
           DetailsGroup detailsgroup = (DetailsGroup)obj;
           setIcon(null);
           setFont(getFont().deriveFont(1));
           setText(detailsgroup.getName());
           setEnabled(detailsgroup.getSize() > 0);
+        }
+        else if(obj instanceof KeyValuePair) {
+          KeyValuePair kvp = (KeyValuePair)obj;
+          setIcon(MainFrame.getIcon("empty"));
+          setFont(getFont().deriveFont(0));
+          setText(kvp.getKey());
+          setEnabled(true);
+        }
+        else if(obj instanceof Restriction) {
+          OClass tclass = (OClass)obj;
+          setIcon(MainFrame.getIcon("ontology-restriction"));
+          setFont(getFont().deriveFont(0));
+          setText(tclass.getName());
+          setToolTipText(tclass.getURI().toString());
+          setEnabled(true);
+        }
+        else if(obj instanceof OClass) {
+          OClass tclass = (OClass)obj;
+          setIcon(MainFrame.getIcon("ontology-class"));
+          setFont(getFont().deriveFont(0));
+          setText(tclass.getName());
+          setToolTipText(tclass.getURI().toString());
+          setEnabled(true);
+        }
+        else if(obj instanceof OInstance) {
+          OInstance oinstance = (OInstance)obj;
+          setIcon(MainFrame.getIcon("ontology-instance"));
+          setFont(getFont().deriveFont(0));
+          setText(oinstance.getName());
+          setToolTipText(oinstance.getURI().toString());
+          setEnabled(true);
         }
         else if(obj instanceof RDFProperty) {
           RDFProperty property = (RDFProperty)obj;
@@ -84,23 +110,11 @@ public class PropertyDetailsTableCellRenderer extends DefaultTableCellRenderer {
             setIcon(MainFrame.getIcon("ontology-datatype-property"));
             propertyType = "Datatype";
           }
-          else setIcon(MainFrame.getIcon("ontology-rdf-property"));
-          setFont(getFont().deriveFont(0));
-          String s = (new StringBuilder()).append(property.getName()).append(
-                  " -> ").toString();
-          if(property instanceof DatatypeProperty) {
-            s = (new StringBuilder()).append(s).append(
-                    ((DatatypeProperty)property).getDataType()
-                            .getXmlSchemaURI()).toString();
-          }
-          else if(property instanceof AnnotationProperty) {
-            s = property.getName();
-          }
           else {
-            Set<OResource> set = property.getRange();
-            s = (new StringBuilder()).append(s).append(set.toString())
-                    .toString();
+            setIcon(MainFrame.getIcon("ontology-rdf-property"));
           }
+          setFont(getFont().deriveFont(0));
+          String s = property.getName();
           setText(s);
           setToolTipText((new StringBuilder()).append(
                   "<HTML><b>" + propertyType + " Property</b><br>").append(
@@ -108,15 +122,35 @@ public class PropertyDetailsTableCellRenderer extends DefaultTableCellRenderer {
           setEnabled(true);
         }
         else if(obj instanceof PropertyValue) {
+
           PropertyValue property = (PropertyValue)obj;
           String propertyType = "RDF";
-          if(property.getProperty() instanceof AnnotationProperty) {
+          if(property.getProperty() instanceof SymmetricProperty) {
+            setIcon(MainFrame.getIcon("ontology-symmetric-property"));
+            propertyType = "Symmetric";
+          }
+          else if(property.getProperty() instanceof AnnotationProperty) {
             setIcon(MainFrame.getIcon("ontology-annotation-property"));
             propertyType = "Annotation";
           }
-          else setIcon(MainFrame.getIcon("ontology-rdf-property"));
+          else if(property.getProperty() instanceof TransitiveProperty) {
+            setIcon(MainFrame.getIcon("ontology-transitive-property"));
+            propertyType = "Transitive";
+          }
+          else if(property.getProperty() instanceof ObjectProperty) {
+            setIcon(MainFrame.getIcon("ontology-object-property"));
+            propertyType = "Object";
+          }
+          else if(property.getProperty() instanceof DatatypeProperty) {
+            setIcon(MainFrame.getIcon("ontology-datatype-property"));
+            propertyType = "Datatype";
+          }
+          else {
+            setIcon(MainFrame.getIcon("ontology-rdf-property"));
+          }
+
           setFont(getFont().deriveFont(0));
-          String s = property.toString();
+          String s = property.getProperty().getName();
           setText(s);
           setToolTipText((new StringBuilder()).append(
                   "<HTML><b>" + propertyType + " Property Value</b><br>")
@@ -124,16 +158,92 @@ public class PropertyDetailsTableCellRenderer extends DefaultTableCellRenderer {
                   .toString());
           setEnabled(true);
         }
+      }
+      else if(j == 2) {
+        setIcon(null);
+        if(obj instanceof PropertyValue) {
+          PropertyValue property = (PropertyValue)obj;
+          setFont(getFont().deriveFont(0));
+          String s = "";
+          if(property.getValue() instanceof Literal) {
+            s = ((Literal)property.getValue()).getValue();
+          }
+          else {
+            s = property.getValue().toString();
+          }
+          setText(s);
+          setEnabled(true);
+        }
+        else if(obj instanceof KeyValuePair) {
+          KeyValuePair kvp = (KeyValuePair)obj;
+          setIcon(null);
+          setFont(getFont().deriveFont(0));
+          setText(kvp.getValue().toString());
+          setEnabled(true);
+        }
+        else if(obj instanceof RDFProperty) {
+          RDFProperty prop = (RDFProperty)obj;
+          String s = "";
+          if(prop instanceof DatatypeProperty) {
+            s = ((DatatypeProperty)prop).getDataType().getXmlSchemaURI()
+                    .toString();
+          }
+          else if(prop instanceof ObjectProperty) {
+            Set<OResource> set = prop.getRange();
+            if(set == null || set.isEmpty()) {
+              s = "[ALL CLASSES]";
+            }
+            else {
+              s = "[";
+              boolean firstTime = true;
+              for(OResource res : set) {
+                if(!firstTime) {
+                  s += ",";
+                }
+                else {
+                  firstTime = false;
+                }
+                s += res.getName();
+              }
+              s += "]";
+            }
+          }
+          else {
+            s = "[ALL RESOURCES]";
+          }
+          setIcon(null);
+          setFont(getFont().deriveFont(0));
+          setText(s);
+          setEnabled(true);
+        }
         else {
           setIcon(null);
           setFont(getFont().deriveFont(0));
-          setText(obj.toString());
-          setEnabled(true);
+          setText("");
+          setEnabled(false);
         }
+      } else if(j==3) {
+        if(obj instanceof PropertyValue) {
+          setIcon(MainFrame.getIcon("delete"));
+          setText("");
+          setEnabled(true);
+          setFont(getFont().deriveFont(0));
+        } else {
+          setIcon(null);
+          setText("");
+          setEnabled(false);
+          setFont(getFont().deriveFont(0));
+        }
+      }
+      else {
+        setIcon(null);
+        setFont(getFont().deriveFont(0));
+        setText("");
+        setEnabled(false);
+      }
     }
     catch(Exception e) {
-      // just ignore it
-      // we might be refreshing the tree
+      // refreshing errors hiding them
     }
     return component;
   }
