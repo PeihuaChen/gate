@@ -63,7 +63,16 @@ public class AnnotationListView extends AbstractDocumentView
     table.setSortable(true);
     table.setSortedColumn(START_COL);
     table.setIntercellSpacing(new Dimension(2, 0));
+    //the background colour seems to change somewhere when using the GTK+ 
+    //look and feel on Linux, so we copy the value now and set it 
+    Color tableBG = table.getBackground();
+    //make a copy of the value (as the reference gets changed somewhere)
+    tableBG = new Color(tableBG.getRGB());
+    table.setBackground(tableBG);
+    
     scroller = new JScrollPane(table);
+    scroller.getViewport().setOpaque(true);
+    scroller.getViewport().setBackground(tableBG);
 
     mainPanel = new JPanel();
     mainPanel.setLayout(new GridBagLayout());

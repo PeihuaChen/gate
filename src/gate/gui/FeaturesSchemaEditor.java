@@ -15,35 +15,25 @@
 package gate.gui;
 
 import java.awt.*;
-import java.awt.Component;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
-import javax.swing.JLabel;
-import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import gate.*;
-import gate.FeatureMap;
-import gate.Resource;
 import gate.creole.*;
-import gate.creole.AnnotationSchema;
-import gate.creole.FeatureSchema;
 import gate.event.FeatureMapListener;
 import gate.swing.XJTable;
 import gate.util.*;
-import gate.util.GateRuntimeException;
 
 /**
  */
 public class FeaturesSchemaEditor extends AbstractVisualResource
         implements ResizableVisualResource, FeatureMapListener{
   public FeaturesSchemaEditor(){
-    setBackground(UIManager.getDefaults().getColor("Table.background"));
+//    setBackground(UIManager.getDefaults().getColor("Table.background"));
   }
   
   public void setTargetFeatures(FeatureMap features){
@@ -109,8 +99,9 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
     mainTable.setModel(featuresModel);
     mainTable.setTableHeader(null);
     mainTable.setSortable(false);
-    mainTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-    mainTable.setShowVerticalLines(false);    
+    mainTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+//    mainTable.setShowVerticalLines(false);
+    mainTable.setShowGrid(false);
     mainTable.setBackground(getBackground());
     mainTable.setIntercellSpacing(new Dimension(2,2));
     featureEditorRenderer = new FeatureEditorRenderer();
@@ -128,9 +119,17 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
         setCellRenderer(featureEditorRenderer);
     mainTable.getColumnModel().getColumn(DELETE_COL).
       setCellEditor(featureEditorRenderer);
+    
+    //the background colour seems to change somewhere when using the GTK+ 
+    //look and feel on Linux, so we copy the value now and set it 
+    Color tableBG = mainTable.getBackground();
+    //make a copy of the value (as the reference gets changed somewhere)
+    tableBG = new Color(tableBG.getRGB());
+    mainTable.setBackground(tableBG);
+
     scroller = new JScrollPane(mainTable);
-    scroller.setBackground(getBackground());
-    scroller.getViewport().setBackground(getBackground());
+    scroller.getViewport().setOpaque(true);
+    scroller.getViewport().setBackground(tableBG);
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     add(scroller);
   }
@@ -356,9 +355,9 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
       
       deleteButton = new JButton(MainFrame.getIcon("delete"));
       deleteButton.setMargin(new Insets(0,0,0,0));
-      deleteButton.setBorderPainted(false);
-      deleteButton.setContentAreaFilled(false);
-      deleteButton.setOpaque(false);
+//      deleteButton.setBorderPainted(false);
+//      deleteButton.setContentAreaFilled(false);
+//      deleteButton.setOpaque(false);
       deleteButton.setToolTipText("Delete");
       deleteButton.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent evt){

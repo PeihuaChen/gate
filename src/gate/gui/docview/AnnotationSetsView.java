@@ -88,8 +88,8 @@ public class AnnotationSetsView extends AbstractDocumentView
     tableModel = new SetsTableModel();
     ((XJTable)mainTable).setSortable(false);
     mainTable.setModel(tableModel);
-//    mainTable.setRowMargin(0);
-//    mainTable.getColumnModel().setColumnMargin(0);
+    mainTable.setRowMargin(0);
+    mainTable.getColumnModel().setColumnMargin(0);
     SetsTableCellRenderer cellRenderer = new SetsTableCellRenderer();
     mainTable.getColumnModel().getColumn(NAME_COL).setCellRenderer(cellRenderer);
     mainTable.getColumnModel().getColumn(SELECTED_COL).setCellRenderer(cellRenderer);
@@ -103,9 +103,16 @@ public class AnnotationSetsView extends AbstractDocumentView
     mainTable.setShowGrid(false);
     mainTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
     
+    //the background colour seems to change somewhere when using the GTK+ 
+    //look and feel on Linux, so we copy the value now and set it 
+    Color tableBG = mainTable.getBackground();
+    //make a copy of the value (as the reference gets changed somewhere)
+    tableBG = new Color(tableBG.getRGB());
+    mainTable.setBackground(tableBG);
+    
     scroller = new JScrollPane(mainTable);
     scroller.getViewport().setOpaque(true);
-    scroller.getViewport().setBackground(mainTable.getBackground());
+    scroller.getViewport().setBackground(tableBG);    
     
     annotationEditor = createAnnotationEditor(textView, this);
     
@@ -731,10 +738,10 @@ public class AnnotationSetsView extends AbstractDocumentView
             return setLabel;
           case SELECTED_COL:
             setChk.setSelected(sHandler.isExpanded());
-            setChk.setEnabled(sHandler.typeHandlers.size() > 0);
             setChk.setBackground(isSelected ?
                     		         table.getSelectionBackground() :
                     		         table.getBackground());
+            setChk.setEnabled(sHandler.typeHandlers.size() > 0);            
             return setChk;
         }
       }else if(value instanceof TypeHandler){

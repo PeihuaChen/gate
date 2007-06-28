@@ -14,11 +14,11 @@
 
 package gate.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -48,13 +48,21 @@ public class FeaturesEditor extends AbstractVisualResource{
 //    table.setIntercellSpacing(new Dimension(5,5));
     table.setDefaultRenderer(String.class, new ObjectRenderer());
     table.setDefaultRenderer(Object.class, new ObjectRenderer());
-
+    table.setAutoResizeMode(XJTable.AUTO_RESIZE_OFF);
     DefaultCellEditor editor = new DefaultCellEditor(new JTextField());
     editor.setClickCountToStart(0);
     table.setDefaultEditor(String.class, editor);
     table.setDefaultEditor(Object.class, editor);
 
     JScrollPane scroll = new JScrollPane(table);
+    scroll.getViewport().setOpaque(true);
+    //the background colour seems to change somewhere when using the GTK+ 
+    //look and feel on Linux, so we copy the value now and set it 
+    Color tableBG = table.getBackground();
+    //make a copy of the value (as the reference gets changed somewhere)
+    tableBG = new Color(tableBG.getRGB());
+    table.setBackground(tableBG);
+    scroll.getViewport().setBackground(tableBG);
     this.add(scroll, BorderLayout.CENTER);
     this.add(Box.createVerticalStrut(5));
 
