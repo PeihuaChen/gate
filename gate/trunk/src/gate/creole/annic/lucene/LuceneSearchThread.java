@@ -218,7 +218,7 @@ public class LuceneSearchThread {
 
       // Saving was accomplished by using XML serialization of the map.
       HashMap indexInformation = (HashMap)xstream.fromXML(fileReader);
-
+      fileReader.close();
       // find out the baseTokenAnnotationType name
       baseTokenAnnotationType = (String)indexInformation
               .get(Constants.BASE_TOKEN_ANNOTATION_TYPE);
