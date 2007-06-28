@@ -84,6 +84,10 @@ public class OntologyTreeListener extends MouseAdapter {
     // let us expand it if the sibling feature is on
     if(path != null) {
       final ClassNode node = (ClassNode)path.getLastPathComponent();
+      if(ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut.contains(node.toString())) {
+        return;
+      }
+      
       
       // ok let us see if this was a right click
       if(SwingUtilities.isRightMouseButton(me)) {
@@ -105,7 +109,7 @@ public class OntologyTreeListener extends MouseAdapter {
         popup.setOpaque(true);
         popup.setBackground(UIManager.getLookAndFeelDefaults().getColor(
                 "ToolTip.background"));
-        popup.add(new JLabel("Chain \"" + node.toString() + "\""),
+        popup.add(new JLabel(node.toString()),
                 BorderLayout.NORTH);
         popup.add(panel, BorderLayout.SOUTH);
 
@@ -429,6 +433,10 @@ public class OntologyTreeListener extends MouseAdapter {
     Iterator<String> iter = currentClass2IsSelectedMap.keySet().iterator();
     while(iter.hasNext()) {
       String className = iter.next();
+      if(ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut.contains(className)) {
+        continue;
+      }
+      
       if(!currentClass2IsSelectedMap.get(className).booleanValue()) {
         continue;
       }
