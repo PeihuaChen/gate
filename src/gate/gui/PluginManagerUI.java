@@ -16,36 +16,25 @@
 package gate.gui;
 
 import java.awt.*;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.*;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellRenderer;
 import org.jdom.*;
-import org.jdom.Element;
-import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 import gate.Gate;
 import gate.GateConstants;
 import gate.event.CreoleListener;
 import gate.swing.XJTable;
 import gate.util.*;
-import gate.util.Err;
-import gate.util.GateRuntimeException;
 
 /**
  * This is the user interface used for plugin management 
@@ -78,6 +67,9 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       setCellEditor(rendererEditor);
     mainTable.getColumnModel().getColumn(DELETE_COLUMN).
       setCellRenderer(rendererEditor);
+    
+    mainTable.getColumnModel().getColumn(ICON_COLUMN).
+      setCellRenderer(new IconTableCellRenderer());    
     
     resourcesListModel = new ResourcesListModel();
     resourcesList = new JList(resourcesListModel);
@@ -368,6 +360,21 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     JPanel rendererBox;
     JPanel editorBox;
     JLabel label;
+  }
+  
+  protected class IconTableCellRenderer extends DefaultTableCellRenderer{
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+      if(value instanceof Icon){
+        super.getTableCellRendererComponent(table, "", 
+                isSelected, hasFocus, row, column);
+        setIcon((Icon)value);
+        return this;
+      }else{
+        return super.getTableCellRendererComponent(table, value, 
+                isSelected, hasFocus, row, column);
+      }
+    }
+    
   }
   
   protected class ResourcesListCellRenderer extends DefaultListCellRenderer{
