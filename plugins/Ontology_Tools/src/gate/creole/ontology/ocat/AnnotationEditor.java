@@ -32,8 +32,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -230,7 +228,7 @@ public class AnnotationEditor extends AbstractAction {
     typeCombo.setEditable(true);
     typeCombo.setBackground(UIManager.getLookAndFeelDefaults().getColor(
             "ToolTip.background"));
-    
+
     typeCombo.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
       public void keyReleased(KeyEvent keyevent) {
         String s = ((JTextComponent)typeCombo.getEditor().getEditorComponent())
@@ -246,10 +244,11 @@ public class AnnotationEditor extends AbstractAction {
             ArrayList<ClassNode> items = getClassesAndInstances(rootNode, s
                     .toLowerCase());
             ClassNode[] nodes = new ClassNode[items.size()];
-            for(int i=0;i<items.size();i++) {
+            for(int i = 0; i < items.size(); i++) {
               nodes[i] = items.get(i);
             }
-            DefaultComboBoxModel defaultcomboboxmodel = new DefaultComboBoxModel(nodes);
+            DefaultComboBoxModel defaultcomboboxmodel = new DefaultComboBoxModel(
+                    nodes);
             typeCombo.setModel(defaultcomboboxmodel);
 
             try {
@@ -447,7 +446,7 @@ public class AnnotationEditor extends AbstractAction {
 
     // lets populate the typeCombo
     ClassNode[] nodes = new ClassNode[items.size()];
-    for(int i=0;i<items.size();i++) {
+    for(int i = 0; i < items.size(); i++) {
       nodes[i] = items.get(i);
     }
     model = new DefaultComboBoxModel(nodes);
@@ -464,7 +463,7 @@ public class AnnotationEditor extends AbstractAction {
     if(!newAnnotationMode) {
       gate.Annotation tempAnnot = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
               .get(selectedAnnotationIndex);
-      if(tempAnnot != null) { 
+      if(tempAnnot != null) {
         x1 = tempAnnot.getStartNode().getOffset().intValue();
         y1 = tempAnnot.getEndNode().getOffset().intValue();
 
@@ -488,14 +487,14 @@ public class AnnotationEditor extends AbstractAction {
         for(RDFProperty aProp : ontologyTreePanel.currentProperties) {
           if(aProp instanceof AnnotationProperty) {
             FeatureSchema fs = new FeatureSchema(aProp.getName(), List.class
-                    .getName(), "", "required", null);
+                    .getName(), "", "custom", null);
             fsSet.add(fs);
           }
           else if(resource instanceof OInstance) {
             if(aProp instanceof DatatypeProperty
                     && aProp.isValidDomain((OInstance)resource)) {
               FeatureSchema fs = new FeatureSchema(aProp.getName(), List.class
-                      .getName(), "", "required", null);
+                      .getName(), "", "custom", null);
               fsSet.add(fs);
             }
             else if(aProp instanceof ObjectProperty
@@ -552,17 +551,24 @@ public class AnnotationEditor extends AbstractAction {
 
   private ArrayList<ClassNode> getClassesAndInstances(IFolder rootNode,
           String startWith) {
+
     ArrayList<ClassNode> toReturn = new ArrayList<ClassNode>();
+
     if(rootNode instanceof ClassNode
             && ((ClassNode)rootNode).getSource() instanceof OResource) {
-      if(startWith.length() > 0) {
-        if(((OResource)((ClassNode)rootNode).getSource()).getName()
-                .toLowerCase().startsWith(startWith)) {
+      if(!ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut
+              .contains(((OResource)((ClassNode)rootNode).getSource())
+                      .getName())) {
+
+        if(startWith.length() > 0) {
+          if(((OResource)((ClassNode)rootNode).getSource()).getName()
+                  .toLowerCase().startsWith(startWith)) {
+            toReturn.add((ClassNode)rootNode);
+          }
+        }
+        else {
           toReturn.add((ClassNode)rootNode);
         }
-      }
-      else {
-        toReturn.add((ClassNode)rootNode);
       }
     }
 
@@ -810,22 +816,35 @@ public class AnnotationEditor extends AbstractAction {
 
   protected class AddChangeAnnotationAction implements ActionListener {
     public void actionPerformed(ActionEvent ie) {
-      //if(ie.getStateChange() != 1) return;
+      // if(ie.getStateChange() != 1) return;
       if(explicitCall) return;
       if(newAnnotationMode) {
         Object selectedItem = typeCombo.getSelectedItem();
         ClassNode item = null;
         if(selectedItem instanceof String) {
           item = ontologyTreePanel.getNode((String)selectedItem);
-        } else {
-            item = (ClassNode) selectedItem;    
         }
-        
+        else {
+          item = (ClassNode)selectedItem;
+        }
+
         if(item == null) {
-          JOptionPane.showMessageDialog(MainFrame.getInstance(), "No resource found with value : "+selectedItem.toString());
+          JOptionPane.showMessageDialog(MainFrame.getInstance(),
+                  "No resource found with value : " + selectedItem.toString());
+          newAnnotationMode = false;
+          annotationWindow.setVisible(false);
           return;
         }
-        
+        else if(ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut
+                .contains(((OResource)item.getSource()).getName())) {
+          //JOptionPane.showMessageDialog(MainFrame.getInstance(),
+          //        "This resource has been filtered out : "
+          //                + selectedItem.toString());
+          newAnnotationMode = false;
+          annotationWindow.setVisible(false);
+          return;
+        }
+
         boolean isClassAnnotation = item.getSource() instanceof OClass;
         boolean shouldCreateInstance = isClassAnnotation ? (createInstance
                 .isSelected() ? true : false) : false;
@@ -846,15 +865,28 @@ public class AnnotationEditor extends AbstractAction {
         ClassNode item = null;
         if(selectedItem instanceof String) {
           item = ontologyTreePanel.getNode((String)selectedItem);
-        } else {
-          item = (ClassNode) selectedItem;    
         }
-    
+        else {
+          item = (ClassNode)selectedItem;
+        }
+
         if(item == null) {
-          JOptionPane.showMessageDialog(MainFrame.getInstance(), "No resource found with value : "+selectedItem.toString());
+          JOptionPane.showMessageDialog(MainFrame.getInstance(),
+                  "No resource found with value : " + selectedItem.toString());
+          newAnnotationMode = false;
+          annotationWindow.setVisible(false);
           return;
         }
-          
+        else if(ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut
+                .contains(((OResource)item.getSource()).getName())) {
+          //JOptionPane.showMessageDialog(MainFrame.getInstance(),
+          //        "This resource has been filtered out : "
+          //                + selectedItem.toString());
+          newAnnotationMode = false;
+          annotationWindow.setVisible(false);
+          return;
+        }
+
         gate.Annotation annot1 = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
                 .get(selectedAnnotationIndex);
         int cStartOffset = annot1.getStartNode().getOffset().intValue();
@@ -888,7 +920,7 @@ public class AnnotationEditor extends AbstractAction {
           boolean isClassFeature = true;
           if(value == null) {
             isClassFeature = false;
-          } 
+          }
 
           ontologyTreePanel.ontoViewer.documentTextArea
                   .setSelectionStart(startOffset);

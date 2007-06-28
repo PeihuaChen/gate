@@ -10,10 +10,19 @@ package gate.creole.ontology.ocat;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import gate.*;
 import java.util.*;
 import gate.event.DocumentEvent;
 import gate.event.DocumentListener;
+import gate.gui.MainFrame;
+import gate.util.GateRuntimeException;
 
 /**
  * Description: This class Provides options window to set the options
@@ -27,24 +36,49 @@ public class OntologyViewerOptions implements DocumentListener {
   private JPanel optionPanel;
 
   /**
-   * Indicates whether to select all subclasses when a super class is selected or not.
+   * Indicates whether to select all subclasses when a super class is
+   * selected or not.
    */
-  private JCheckBox cFChBox;
+  private JCheckBox childFeatureCB;
 
   /**
-   * Indicates whether to confirm the deletion of an annotation with user or not.
+   * Indicates whether to confirm the deletion of an annotation with
+   * user or not.
    */
-  private JCheckBox dCChBox;
+  private JCheckBox deleteConfirmationCB;
 
   /**
-   * Indicates whether to be case-sensitive or not when annotating text in the add All option
+   * Indicates whether to be case-sensitive or not when annotating text
+   * in the add All option
    */
-  private JCheckBox addAllFeatureCaseSensitiveChBox;
-  
+  private JCheckBox addAllFeatureCaseSensitiveCB;
+
   /**
-   * Default AnnotationSEt or otherAnnotationSets 
+   * Indicates whether to use the provided ontology class filter file or
+   * not. If yes, it disables all the classes mentioned in the filter
+   * file from the ocat tree.
    */
-  private JRadioButton exSet, defaultSet;
+  private JCheckBox useOClassFilterFileCB;
+
+  /**
+   * Filter File URL
+   */
+  private URL filterFileURL;
+
+  /**
+   * Text box to display the path of the selected filter file.
+   */
+  private JTextField oClassFilterFilePathTF;
+
+  /**
+   * Button that allows selecting the filter file.
+   */
+  private JButton browseFilterFileButton;
+
+  /**
+   * Default AnnotationSEt or otherAnnotationSets
+   */
+  private JRadioButton otherAS, defaultAS;
 
   /**
    * All annotations are listed under this annotationSet comboBox
@@ -52,12 +86,14 @@ public class OntologyViewerOptions implements DocumentListener {
   private JComboBox annotationSetsNamesCB;
 
   /**
-   * Default AnnotationType, which is Mention and other available annotationtypes
+   * Default AnnotationType, which is Mention and other available
+   * annotationtypes
    */
-  private JRadioButton exType, defaultType;
+  private JRadioButton otherAT, mentionAT;
 
   /**
-   * All available annotation types, with a capability of adding new, are listed under this annotationTypesComboBox
+   * All available annotation types, with a capability of adding new,
+   * are listed under this annotationTypesComboBox
    */
   private JComboBox annotationTypesCB;
 
@@ -67,7 +103,13 @@ public class OntologyViewerOptions implements DocumentListener {
   private OntologyTreePanel ontologyTreePanel;
 
   /**
-   * Instead of a null value, we specify the defaultAnnotationSetName with some strange string
+   * List of ontology classes to be filtered out.
+   */
+  protected HashSet<String> ontologyClassesToFilterOut;
+
+  /**
+   * Instead of a null value, we specify the defaultAnnotationSetName
+   * with some strange string
    */
   public static final String DEFAULT_ANNOTATION_SET = "00#Default#00",
           DEFAULT_ANNOTATION_TYPE = "Mention";
@@ -104,29 +146,33 @@ public class OntologyViewerOptions implements DocumentListener {
 
   /** Returns the currently selected Annotation Set */
   public String getSelectedAnnotationSetName() {
-    if(exSet.isEnabled() && exSet.isSelected()) {
-      selectedAnnotationSetName = (String)annotationSetsNamesCB.getSelectedItem();
+    if(otherAS.isEnabled() && otherAS.isSelected()) {
+      selectedAnnotationSetName = (String)annotationSetsNamesCB
+              .getSelectedItem();
     }
-    else if(defaultSet.isEnabled()) {
+    else if(defaultAS.isEnabled()) {
       selectedAnnotationSetName = DEFAULT_ANNOTATION_SET;
     }
     return selectedAnnotationSetName;
   }
 
   /**
-   * The method disables the graphical selection of selectedAnnotationSetName and
-   * will allow user to provide the annotationSetName explicitly
+   * The method disables the graphical selection of
+   * selectedAnnotationSetName and will allow user to provide the
+   * annotationSetName explicitly
    * 
    * @param annotationSetName
    */
   public void disableAnnotationSetSelection(String annotationSetName) {
     selectedAnnotationSetName = annotationSetName;
-    // making sure the selectedAnnotationSetName exists, if not, it will be created
-    ontologyTreePanel.ontoViewer.getDocument().getAnnotations(selectedAnnotationSetName);
+    // making sure the selectedAnnotationSetName exists, if not, it will
+    // be created
+    ontologyTreePanel.ontoViewer.getDocument().getAnnotations(
+            selectedAnnotationSetName);
 
-    exSet.setEnabled(false);
+    otherAS.setEnabled(false);
     annotationSetsNamesCB.setEnabled(false);
-    defaultSet.setEnabled(false);
+    defaultAS.setEnabled(false);
   }
 
   /**
@@ -136,14 +182,14 @@ public class OntologyViewerOptions implements DocumentListener {
    * @param annotationSetName
    */
   public void enabledAnnotationSetSelection() {
-    exSet.setEnabled(true);
+    otherAS.setEnabled(true);
     annotationSetsNamesCB.setEnabled(true);
-    defaultSet.setEnabled(true);
+    defaultAS.setEnabled(true);
   }
 
   /** Returns the currently selected Annotation Type */
   public String getSelectedAnnotationType() {
-    if(exType.isSelected()) {
+    if(otherAT.isSelected()) {
       selectedAnnotationType = (String)annotationTypesCB.getSelectedItem();
     }
     else {
@@ -155,11 +201,24 @@ public class OntologyViewerOptions implements DocumentListener {
 
   /** Initialize the GUI */
   private void initGUI() {
-    cFChBox = new JCheckBox("Disable Child Feature");
-    dCChBox = new JCheckBox("Enable confirm deletion");
-    addAllFeatureCaseSensitiveChBox = new JCheckBox("Case Sensitive \"Annotate All\" Feature");
-    addAllFeatureCaseSensitiveChBox.setSelected(true);
-    
+    ontologyClassesToFilterOut = new HashSet<String>();
+    childFeatureCB = new JCheckBox("Disable Child Feature");
+    deleteConfirmationCB = new JCheckBox("Enable confirm deletion");
+    addAllFeatureCaseSensitiveCB = new JCheckBox(
+            "Case Sensitive \"Annotate All\" Feature");
+    addAllFeatureCaseSensitiveCB.setSelected(true);
+
+    useOClassFilterFileCB = new JCheckBox("Filter");
+    useOClassFilterFileCB.addActionListener(new OntologyViewerOptionsActions());
+    oClassFilterFilePathTF = new JTextField(15);
+    browseFilterFileButton = new JButton("Browse");
+    browseFilterFileButton
+            .addActionListener(new OntologyViewerOptionsActions());
+    JPanel temp6 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    temp6.add(useOClassFilterFileCB);
+    temp6.add(oClassFilterFilePathTF);
+    temp6.add(browseFilterFileButton);
+
     annotationSetsNamesCB = new JComboBox();
     annotationTypesCB = new JComboBox();
 
@@ -197,54 +256,55 @@ public class OntologyViewerOptions implements DocumentListener {
     annotationTypesCB.addActionListener(new OntologyViewerOptionsActions());
 
     optionPanel = new JPanel();
-    optionPanel.setLayout(new GridLayout(9, 1));
-    optionPanel.add(cFChBox);
-    optionPanel.add(dCChBox);
-    optionPanel.add(addAllFeatureCaseSensitiveChBox);
+    optionPanel.setLayout(new GridLayout(10, 1));
+    optionPanel.add(childFeatureCB);
+    optionPanel.add(deleteConfirmationCB);
+    optionPanel.add(addAllFeatureCaseSensitiveCB);
+    optionPanel.add(temp6);
 
     optionPanel.add(new JLabel("Annotation Set : "));
-    defaultSet = new JRadioButton();
-    defaultSet.setSelected(true);
-    defaultSet.addActionListener(new OntologyViewerOptionsActions());
-    exSet = new JRadioButton();
-    exSet.addActionListener(new OntologyViewerOptionsActions());
+    defaultAS = new JRadioButton();
+    defaultAS.setSelected(true);
+    defaultAS.addActionListener(new OntologyViewerOptionsActions());
+    otherAS = new JRadioButton();
+    otherAS.addActionListener(new OntologyViewerOptionsActions());
 
     ButtonGroup group = new ButtonGroup();
-    group.add(defaultSet);
-    group.add(exSet);
+    group.add(defaultAS);
+    group.add(otherAS);
 
     JPanel temp3 = new JPanel();
     temp3.setLayout(new FlowLayout(FlowLayout.LEFT));
-    temp3.add(defaultSet);
+    temp3.add(defaultAS);
     temp3.add(new JLabel("Default Annotation Set"));
 
     JPanel temp1 = new JPanel();
     temp1.setLayout(new FlowLayout(FlowLayout.LEFT));
-    temp1.add(exSet);
+    temp1.add(otherAS);
     temp1.add(annotationSetsNamesCB);
 
     optionPanel.add(temp3);
     optionPanel.add(temp1);
 
     optionPanel.add(new JLabel("Annotation Type : "));
-    defaultType = new JRadioButton();
-    defaultType.setSelected(true);
-    defaultType.addActionListener(new OntologyViewerOptionsActions());
-    exType = new JRadioButton();
-    exType.addActionListener(new OntologyViewerOptionsActions());
+    mentionAT = new JRadioButton();
+    mentionAT.setSelected(true);
+    mentionAT.addActionListener(new OntologyViewerOptionsActions());
+    otherAT = new JRadioButton();
+    otherAT.addActionListener(new OntologyViewerOptionsActions());
 
     ButtonGroup group1 = new ButtonGroup();
-    group1.add(defaultType);
-    group1.add(exType);
+    group1.add(mentionAT);
+    group1.add(otherAT);
 
     JPanel temp4 = new JPanel();
     temp4.setLayout(new FlowLayout(FlowLayout.LEFT));
-    temp4.add(defaultType);
+    temp4.add(mentionAT);
     temp4.add(new JLabel("Mention"));
 
     JPanel temp5 = new JPanel();
     temp5.setLayout(new FlowLayout(FlowLayout.LEFT));
-    temp5.add(exType);
+    temp5.add(otherAT);
     temp5.add(annotationTypesCB);
 
     optionPanel.add(temp4);
@@ -268,19 +328,20 @@ public class OntologyViewerOptions implements DocumentListener {
 
   /**
    * Inner class that implements the actions for various options
+   * 
    * @author Niraj Aswani
    * @version 1.0
    */
   private class OntologyViewerOptionsActions extends AbstractAction {
 
     /**
-	 * Serial version ID
-	 */
-	private static final long serialVersionUID = 3906926759864643636L;
+     * Serial version ID
+     */
+    private static final long serialVersionUID = 3906926759864643636L;
 
-	public void actionPerformed(ActionEvent ae) {
+    public void actionPerformed(ActionEvent ae) {
 
-      if(ae.getSource() == exSet) {
+      if(ae.getSource() == otherAS) {
         annotationSetsNamesCB.setEnabled(true);
         if(annotationSetsNamesCB.getSelectedItem() == null
                 && annotationSetsNamesCB.getItemCount() > 0) {
@@ -292,7 +353,8 @@ public class OntologyViewerOptions implements DocumentListener {
           return;
         }
         else {
-          annotationSetsNamesCB.setSelectedIndex(annotationSetsNamesCB.getSelectedIndex());
+          annotationSetsNamesCB.setSelectedIndex(annotationSetsNamesCB
+                  .getSelectedIndex());
           return;
         }
       }
@@ -313,7 +375,7 @@ public class OntologyViewerOptions implements DocumentListener {
         }
 
         annotationTypesCB.updateUI();
-        if(defaultType.isSelected()) {
+        if(mentionAT.isSelected()) {
           ontologyTreePanel.ontoTreeListener.refreshHighlights();
         }
         else {
@@ -327,13 +389,13 @@ public class OntologyViewerOptions implements DocumentListener {
             return;
           }
           else {
-            annotationTypesCB
-                    .setSelectedIndex(annotationTypesCB.getSelectedIndex());
+            annotationTypesCB.setSelectedIndex(annotationTypesCB
+                    .getSelectedIndex());
             return;
           }
         }
       }
-      else if(ae.getSource() == defaultSet) {
+      else if(ae.getSource() == defaultAS) {
 
         annotationSetsNamesCB.setEnabled(false);
 
@@ -350,7 +412,7 @@ public class OntologyViewerOptions implements DocumentListener {
         }
         annotationTypesCB.updateUI();
 
-        if(defaultType.isSelected()) {
+        if(mentionAT.isSelected()) {
           ontologyTreePanel.ontoTreeListener.refreshHighlights();
         }
         else {
@@ -364,15 +426,15 @@ public class OntologyViewerOptions implements DocumentListener {
             return;
           }
           else {
-            annotationTypesCB
-                    .setSelectedIndex(annotationTypesCB.getSelectedIndex());
+            annotationTypesCB.setSelectedIndex(annotationTypesCB
+                    .getSelectedIndex());
             return;
           }
         }
       }
-      else if(ae.getSource() == exType) {
+      else if(ae.getSource() == otherAT) {
 
-        annotationTypesCB.setEnabled(exType.isSelected());
+        annotationTypesCB.setEnabled(otherAT.isSelected());
         if(annotationTypesCB.getSelectedItem() == null
                 && annotationTypesCB.getItemCount() > 0) {
           annotationTypesCB.setSelectedIndex(0);
@@ -383,12 +445,13 @@ public class OntologyViewerOptions implements DocumentListener {
           return;
         }
         else {
-          annotationTypesCB.setSelectedIndex(annotationTypesCB.getSelectedIndex());
+          annotationTypesCB.setSelectedIndex(annotationTypesCB
+                  .getSelectedIndex());
           return;
         }
 
       }
-      else if(ae.getSource() == defaultType) {
+      else if(ae.getSource() == mentionAT) {
 
         annotationTypesCB.setEnabled(false);
         ontologyTreePanel.ontoTreeListener.refreshHighlights();
@@ -421,27 +484,97 @@ public class OntologyViewerOptions implements DocumentListener {
         ontologyTreePanel.ontoTreeListener.refreshHighlights();
         return;
       }
+      else if(ae.getSource() == browseFilterFileButton) {
+        // open the file dialogue
+        JFileChooser fileChooser = MainFrame.getFileChooser();
+        int answer = fileChooser.showOpenDialog(MainFrame.getInstance());
+        if(answer == JFileChooser.APPROVE_OPTION) {
+          File selectedFile = fileChooser.getSelectedFile();
+          if(selectedFile == null) {
+            return;
+          }
+          else {
+            try {
+              String newURL = selectedFile.toURI().toURL().toString();
+              oClassFilterFilePathTF.setText(newURL);
+              filterFileURL = selectedFile.toURI().toURL();
+              if(isFilterOn()) {
+                updateOClassFilter();
+              }
+            }
+            catch(MalformedURLException me) {
+              JOptionPane.showMessageDialog(MainFrame.getInstance(),
+                      "Invalid URL");
+              return;
+            }
+          }
+        }
+      }
+      else if(ae.getSource() == useOClassFilterFileCB) {
+        updateOClassFilter();
+      }
     }
+  }
+
+  public boolean isFilterOn() {
+    return useOClassFilterFileCB.isSelected();
+  }
+
+  private void updateOClassFilter() {
+    if(!useOClassFilterFileCB.isSelected()) {
+      ontologyClassesToFilterOut.clear();
+      ontologyTreePanel.ontoTreeListener.refreshHighlights();
+    }
+    else {
+      try {
+        if(filterFileURL == null) return;
+        BufferedReader br = new BufferedReader(new InputStreamReader(filterFileURL.openStream()));
+        String line = br.readLine();
+        while(line != null) {
+          ontologyClassesToFilterOut.add(line.trim());
+          line = br.readLine();
+        }
+        br.close();
+        ontologyTreePanel.ontoTreeListener.refreshHighlights();
+        return;
+      }
+      catch(IOException ioe) {
+        throw new GateRuntimeException(ioe);
+      }
+      
+    }
+  }
+
+  /**
+   * Use this method to switch on and off the filter.
+   * @param onOff
+   */
+  public void setFilterOn(boolean onOff) {
+    if(useOClassFilterFileCB.isSelected() != onOff) {
+      useOClassFilterFileCB.setSelected(onOff);
+    }
+    updateOClassFilter();
   }
 
   /** Returns if Child Feature is set to ON/OFF */
   public boolean getChildFeature() {
-    return cFChBox.isSelected();
+    return childFeatureCB.isSelected();
   }
 
   /** Returns if Child Feature is set to ON/OFF */
   public boolean getDeleteConfirmation() {
-    return dCChBox.isSelected();
+    return deleteConfirmationCB.isSelected();
   }
 
   /**
    * Returns if case sensitive option is set to ON/OFF
+   * 
    * @return
    */
   public boolean isAddAllOptionCaseSensitive() {
-    return addAllFeatureCaseSensitiveChBox.isSelected();
+    return addAllFeatureCaseSensitiveCB.isSelected();
   }
-  
+
   // DocumentListener Methods
   public void annotationSetAdded(DocumentEvent de) {
     // we need to update our annotationSetsNamesCB List
@@ -459,8 +592,8 @@ public class OntologyViewerOptions implements DocumentListener {
   }
 
   /**
-   * This methods implements the actions when any selectedAnnotationSetName is
-   * removed from
+   * This methods implements the actions when any
+   * selectedAnnotationSetName is removed from
    * 
    * @param de
    */
@@ -470,5 +603,26 @@ public class OntologyViewerOptions implements DocumentListener {
     // Note: still removing the hook (listener) is remaining and we need
     // to
     // sort it out
+  }
+
+  /**
+   * Gets the URL of the filter file being used.
+   * 
+   * @return
+   */
+  public URL getFilterFileURL() {
+    return filterFileURL;
+  }
+
+  /**
+   * Sets the filter file to be used.
+   * 
+   * @param filterFileURL
+   */
+  public void setFilterFileURL(URL filterFileURL) {
+    this.filterFileURL = filterFileURL;
+    if(isFilterOn()) {
+      updateOClassFilter();
+    }
   }
 }

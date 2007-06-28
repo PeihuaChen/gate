@@ -116,7 +116,7 @@ public class CheckRenderer extends JPanel implements TreeCellRenderer {
 
 		// if node should be selected
 		boolean selected = ontologyTreePanel.currentOResource2IsSelectedMap.get(conceptName).booleanValue();
-		check.setSelected(selected);
+  	check.setSelected(selected);
     if(node.getSource() instanceof OClass) {
       iconLabel.setIcon(MainFrame.getIcon("ontology-class"));
     } else if(node.getSource() instanceof OInstance){
@@ -137,6 +137,13 @@ public class CheckRenderer extends JPanel implements TreeCellRenderer {
 			labelPanel.setBackground(color);
 			iconPanel.setBackground(Color.WHITE);
 		}
+    if(ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut.contains(conceptName)) {
+      check.setEnabled(false);
+      label.setEnabled(false);
+    } else {
+      check.setEnabled(true);
+      label.setEnabled(true);
+    }
 		return this;
 	}
 }
