@@ -27,6 +27,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import javax.swing.*;
+
 import org.pdfbox.pdmodel.PDDocument;
 import org.pdfbox.util.PDFTextStripper;
 
@@ -75,6 +76,18 @@ public class Scratch
     
   public static void main(String args[]) throws Exception {   
     
+    System.out.println("Text fg: " + UIManager.getColor("Tree.textForeground"));
+    System.out.println("Text bg: " + UIManager.getColor("Tree.textBackground"));
+    System.out.println("Tree fg: " + UIManager.getColor("Tree.foreground"));
+    System.out.println("Tree bg: " + UIManager.getColor("Tree.background"));
+    System.out.println("Tree DC fg: " + UIManager.getColor("Tree.dropCellForeground"));
+    System.out.println("Tree DC bg: " + UIManager.getColor("Tree.dropCellBackground"));
+    System.out.println("Tree Sel bg: " + UIManager.getColor("Tree.selectionBackground"));
+    
+    Map defaultsMap = UIManager.getLookAndFeelDefaults();
+    System.out.println(defaultsMap.keySet());
+    
+    if(true) return;
     boolean value = OkCancelDialog.showDialog(null, new JLabel("OK?"), "Answer please!");
     System.out.println(value ? "Yes!" : "No!");
     
@@ -115,8 +128,8 @@ public class Scratch
     System.out.println("Host: " + url.getHost());
     System.out.println("Proto: " + url.getProtocol());
     
-    Map defaultsMap = UIManager.getLookAndFeelDefaults();
-    System.out.println(defaultsMap.keySet());
+//    Map defaultsMap = UIManager.getLookAndFeelDefaults();
+//    System.out.println(defaultsMap.keySet());
 
     
     //test for a bug reported by Luc Plamondon
