@@ -446,7 +446,11 @@ public class LuceneIndexer implements Indexer {
 
     // Saving is accomplished just using XML serialization of
     // the map.
-    xstream.toXML(indexInformation, fileWriter);
+    try{
+      xstream.toXML(indexInformation, fileWriter);
+    }finally{
+      fileWriter.close();
+    }
   }
 
   /**
