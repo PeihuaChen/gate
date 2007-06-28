@@ -299,7 +299,7 @@ public class ClassNode
         if (sub.getSource() instanceof OClass) {
           OClass sc = (OClass) sub.getSource();
           c.addSubClass(sc);
-          c.getOntology().addOClass(sc.getURI());
+          c.getOntology().addOClass(sc.getURI(), OConstants.OWL_CLASS);
           children.add(sub);
         }
         if (sub.getSource() instanceof OInstance &&
@@ -318,7 +318,7 @@ public class ClassNode
           if (!(sub.getSource() instanceof OClass))
             throw new GateRuntimeException("The sub node's source is not an instance of TClass");
           OClass sc = (OClass)sub.getSource();
-          o.addOClass(sc.getURI());
+          o.addOClass(sc.getURI(), OConstants.OWL_CLASS);
           children.add(sub);
         } else  {
           throw new GateRuntimeException(
