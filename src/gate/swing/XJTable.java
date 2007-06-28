@@ -44,12 +44,12 @@ import gate.util.ObjectComparator;
 public class XJTable extends JTable{
   
   public XJTable(){
-    super();
+    this(null);
   }
   
   public XJTable(TableModel model){
     super();
-    setModel(model);
+    if(model != null) setModel(model);
   }
   
   public void setModel(TableModel dataModel) {
