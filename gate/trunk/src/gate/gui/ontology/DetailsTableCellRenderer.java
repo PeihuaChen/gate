@@ -46,13 +46,28 @@ public class DetailsTableCellRenderer extends DefaultTableCellRenderer {
           setEnabled(((DetailsGroup)obj1).getSize() > 0);
         }
       }
-      else if(j == 1)
+      else if(j == 1) {
         if(obj instanceof DetailsGroup) {
           DetailsGroup detailsgroup = (DetailsGroup)obj;
           setIcon(null);
           setFont(getFont().deriveFont(1));
           setText(detailsgroup.getName());
           setEnabled(detailsgroup.getSize() > 0);
+        }
+        else if(obj instanceof KeyValuePair) {
+          KeyValuePair kvp = (KeyValuePair)obj;
+          setIcon(MainFrame.getIcon("empty"));
+          setFont(getFont().deriveFont(0));
+          setText(kvp.getKey());
+          setEnabled(true);
+        }
+        else if(obj instanceof Restriction) {
+          OClass tclass = (OClass)obj;
+          setIcon(MainFrame.getIcon("ontology-restriction"));
+          setFont(getFont().deriveFont(0));
+          setText(tclass.getName());
+          setToolTipText(tclass.getURI().toString());
+          setEnabled(true);
         }
         else if(obj instanceof OClass) {
           OClass tclass = (OClass)obj;
@@ -95,21 +110,7 @@ public class DetailsTableCellRenderer extends DefaultTableCellRenderer {
           }
           else setIcon(MainFrame.getIcon("ontology-rdf-property"));
           setFont(getFont().deriveFont(0));
-          String s = (new StringBuilder()).append(property.getName()).append(
-                  " -> ").toString();
-          if(property instanceof DatatypeProperty) {
-            s = (new StringBuilder()).append(s).append(
-                    ((DatatypeProperty)property).getDataType()
-                            .getXmlSchemaURI()).toString();
-          }
-          else if(property instanceof AnnotationProperty) {
-            s = property.getName();
-          }
-          else {
-            Set<OResource> set = property.getRange();
-            s = (new StringBuilder()).append(s).append(set.toString())
-                    .toString();
-          }
+          String s = property.getName();
           setText(s);
           setToolTipText((new StringBuilder()).append(
                   "<HTML><b>" + propertyType + " Property</b><br>").append(
@@ -117,6 +118,7 @@ public class DetailsTableCellRenderer extends DefaultTableCellRenderer {
           setEnabled(true);
         }
         else if(obj instanceof PropertyValue) {
+
           PropertyValue property = (PropertyValue)obj;
           String propertyType = "RDF";
           if(property.getProperty() instanceof SymmetricProperty) {
@@ -139,9 +141,12 @@ public class DetailsTableCellRenderer extends DefaultTableCellRenderer {
             setIcon(MainFrame.getIcon("ontology-datatype-property"));
             propertyType = "Datatype";
           }
-          else setIcon(MainFrame.getIcon("ontology-rdf-property"));
+          else {
+            setIcon(MainFrame.getIcon("ontology-rdf-property"));
+          }
+
           setFont(getFont().deriveFont(0));
-          String s = property.toString();
+          String s = property.getProperty().getName();
           setText(s);
           setToolTipText((new StringBuilder()).append(
                   "<HTML><b>" + propertyType + " Property Value</b><br>")
@@ -149,12 +154,91 @@ public class DetailsTableCellRenderer extends DefaultTableCellRenderer {
                   .toString());
           setEnabled(true);
         }
+      }
+      else if(j == 2) {
+        setIcon(null);
+        if(obj instanceof PropertyValue) {
+          PropertyValue property = (PropertyValue)obj;
+          setFont(getFont().deriveFont(0));
+          String s = "";
+          if(property.getValue() instanceof Literal) {
+            s = ((Literal)property.getValue()).getValue();
+          }
+          else {
+            s = property.getValue().toString();
+          }
+          setText(s);
+          setEnabled(true);
+        }
+        else if(obj instanceof KeyValuePair) {
+          KeyValuePair kvp = (KeyValuePair)obj;
+          setIcon(null);
+          setFont(getFont().deriveFont(0));
+          setText(kvp.getValue().toString());
+          setEnabled(true);
+        }
+        else if(obj instanceof RDFProperty) {
+          RDFProperty prop = (RDFProperty)obj;
+          String s = "";
+          if(prop instanceof DatatypeProperty) {
+            s = ((DatatypeProperty)prop).getDataType().getXmlSchemaURI()
+                    .toString();
+          }
+          else if(!(prop instanceof AnnotationProperty)) {
+            Set<OResource> set = prop.getRange();
+            if(set == null || set.isEmpty()) {
+              s = "[ALL CLASSES]";
+            }
+            else {
+              s = "[";
+              boolean firstTime = true;
+              for(OResource res : set) {
+                if(!firstTime) {
+                  s += ",";
+                }
+                else {
+                  firstTime = false;
+                }
+                s += res.getName();
+              }
+              s += "]";
+            }
+          }
+          else {
+            s = "[ALL RESOURCES]";
+          }
+          setIcon(null);
+          setFont(getFont().deriveFont(0));
+          setText(s);
+          setEnabled(true);
+        }
         else {
           setIcon(null);
           setFont(getFont().deriveFont(0));
-          setText(obj.toString());
-          setEnabled(true);
+          setText("");
+          setEnabled(false);
         }
+      }
+      else if(j == 3) {
+        if(obj instanceof PropertyValue) {
+          setIcon(MainFrame.getIcon("delete"));
+          setText("");
+          setEnabled(true);
+          setFont(getFont().deriveFont(0));
+        }
+        else {
+          setIcon(null);
+          setText("");
+          setEnabled(false);
+          setFont(getFont().deriveFont(0));
+        }
+      }
+      else {
+        setIcon(null);
+        setFont(getFont().deriveFont(0));
+        setText("");
+        setEnabled(false);
+      }
     }
     catch(Exception e) {
       // just ignore this as we might be making some changes to the tree

@@ -8,6 +8,7 @@
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
+
 import java.util.*;
 import javax.swing.table.AbstractTableModel;
 
@@ -26,6 +27,7 @@ public class DetailsTableModel extends AbstractTableModel {
 
   public DetailsTableModel() {
     ontologyMode = false;
+    resourceInfo = new DetailsGroup("Resource Information",true,null);
     directSuperClasses = new DetailsGroup("Direct Super Classes", true, null);
     allSuperClasses = new DetailsGroup("All Super Classes", true, null);
     directSubClasses = new DetailsGroup("Direct Sub Classes", true, null);
@@ -42,39 +44,51 @@ public class DetailsTableModel extends AbstractTableModel {
   }
 
   public int getColumnCount() {
-    return 2;
+    return COLUMN_COUNT;
   }
 
   public int getRowCount() {
     int i = detailGroups.length;
     for(int j = 0; j < detailGroups.length; j++)
-      if(detailGroups[j].isExpanded()) i += detailGroups[j].getSize();
+      if(detailGroups[j].isExpanded()) {
+        i += detailGroups[j].getSize();
+      }
     return i;
   }
 
   public String getColumnName(int i) {
     switch(i) {
-      case 0:
+      case EXPANDED_COLUMN:
         return "";
-      case 1:
+      case LABEL_COLUMN:
         return "";
+      case VALUE_COLUMN:
+        return "Value";
+      case DELETE_COLUMN:
+        return "Delete";
     }
     return "";
   }
 
   public Class getColumnClass(int i) {
     switch(i) {
-      case 0:
+      case EXPANDED_COLUMN:
         return Boolean.class;
-      case 1:
+      case LABEL_COLUMN:
         return Object.class;
+      case VALUE_COLUMN:
+        return Object.class;
+      case DELETE_COLUMN:
+        return Object.class;
+      
     }
     return Object.class;
   }
 
   public boolean isCellEditable(int i, int j) {
     Object obj = getItemForRow(i);
-    return j == 0 && (obj instanceof DetailsGroup);
+    //if(obj instanceof PropertyValue && j==2) return true;
+    return false;
   }
 
   public void setValueAt(Object obj, int i, int j) {
@@ -100,10 +114,14 @@ public class DetailsTableModel extends AbstractTableModel {
   public Object getValueAt(int i, int j) {
     Object obj = getItemForRow(i);
     switch(j) {
-      case 0:
+      case EXPANDED_COLUMN:
         return (obj instanceof DetailsGroup) ? new Boolean(((DetailsGroup)obj)
                 .isExpanded()) : null;
-      case 1:
+      case LABEL_COLUMN:
+        return obj;
+      case VALUE_COLUMN:
+        return obj;
+      case DELETE_COLUMN:
         return obj;
     }
     return null;
@@ -111,44 +129,83 @@ public class DetailsTableModel extends AbstractTableModel {
 
   public void setItem(Object obj) {
     if(obj instanceof OClass) {
-      detailGroups = new DetailsGroup[] {directSuperClasses, allSuperClasses,
+      detailGroups = new DetailsGroup[] {resourceInfo, directSuperClasses, allSuperClasses,
           directSubClasses, allSubClasses, equivalentClasses, propertyTypes,
           propertyValues, instances};
       OClass tclass = (OClass)obj;
+      resourceInfo.getValues().clear();
+      if(tclass instanceof Restriction) {
+          resourceInfo.getValues().addAll(Utils.getDetailsToAdd(tclass));
+      } else {
+        resourceInfo.getValues().add(tclass);
+        resourceInfo.getValues().add(new KeyValuePair(tclass, "URI", tclass.getURI().toString(), false));
+        resourceInfo.getValues().add(new KeyValuePair(tclass, "TYPE", "Ontology Class", false));
+      }
+      
       Set<OClass> set = tclass.getSuperClasses(OConstants.DIRECT_CLOSURE);
       directSuperClasses.getValues().clear();
-      if(set != null) {
-        directSuperClasses.getValues().addAll(set);
-        Collections.sort(directSuperClasses.getValues(), itemComparator);
-      }
+      directSuperClasses.getValues().addAll(set);
+      Collections.sort(directSuperClasses.getValues(), itemComparator);
+      
+//      if(set != null) {
+//        for(OClass aClass : set) {
+//          directSuperClasses.getValues().addAll(Utils.getDetailsToAdd(aClass));
+//        }
+//      }
+
       Set<OClass> set1 = tclass.getSuperClasses(OConstants.TRANSITIVE_CLOSURE);
       allSuperClasses.getValues().clear();
-      if(set1 != null) {
-        allSuperClasses.getValues().addAll(set1);
-        Collections.sort(allSuperClasses.getValues(), itemComparator);
-      }
+      allSuperClasses.getValues().addAll(set1);
+      Collections.sort(allSuperClasses.getValues(), itemComparator);
+      
+//      if(set1 != null) {
+//        for(OClass aClass : set1) {
+//          allSuperClasses.getValues().addAll(Utils.getDetailsToAdd(aClass));
+//        }
+//      }
+
       Set<OClass> set2 = tclass.getSubClasses(OConstants.DIRECT_CLOSURE);
       directSubClasses.getValues().clear();
-      if(set2 != null) {
-        directSubClasses.getValues().addAll(set2);
-        Collections.sort(directSubClasses.getValues(), itemComparator);
-      }
+      directSubClasses.getValues().addAll(set2);
+      Collections.sort(directSubClasses.getValues(), itemComparator);
+      
+//      if(set2 != null) {
+//        for(OClass aClass : set2) {
+//          directSubClasses.getValues().addAll(Utils.getDetailsToAdd(aClass));
+//        }
+//      }
+      
+      
       Set<OClass> set3 = tclass.getSubClasses(OConstants.TRANSITIVE_CLOSURE);
       allSubClasses.getValues().clear();
-      if(set3 != null) {
-        allSubClasses.getValues().addAll(set3);
-        Collections.sort(allSubClasses.getValues(), itemComparator);
-      }
+      allSubClasses.getValues().addAll(set3);
+      Collections.sort(allSubClasses.getValues(), itemComparator);
+      
+//      if(set3 != null) {
+//        for(OClass aClass : set3) {
+//          allSubClasses.getValues().addAll(Utils.getDetailsToAdd(aClass));
+//        }
+//      }
+
       Set<OClass> set4 = tclass.getEquivalentClasses();
       equivalentClasses.getValues().clear();
-      if(set4 != null) {
-        equivalentClasses.getValues().addAll(set4);
-        Collections.sort(equivalentClasses.getValues(), itemComparator);
-      }
+      equivalentClasses.getValues().addAll(set4);
+      Collections.sort(equivalentClasses.getValues(), itemComparator);
+      
+//      if(set4 != null) {
+//        for(OClass aClass : set4) {
+//          equivalentClasses.getValues().addAll(Utils.getDetailsToAdd(aClass));
+//        }
+//      }
 
       propertyTypes.getValues().clear();
-      propertyTypes.getValues().addAll(
-              tclass.getPropertiesWithResourceAsDomain());
+      Set<RDFProperty> dprops = tclass.getPropertiesWithResourceAsDomain();
+      propertyTypes.getValues().addAll(dprops);
+      Collections.sort(propertyTypes.getValues(), itemComparator);
+      
+//      for(RDFProperty prop : dprops) {
+//        propertyTypes.getValues().addAll(Utils.getDetailsToAdd(prop));
+//      }
 
       propertyValues.getValues().clear();
       Set<AnnotationProperty> props = tclass.getSetAnnotationProperties();
@@ -164,7 +221,6 @@ public class DetailsTableModel extends AbstractTableModel {
         }
       }
 
-      Collections.sort(propertyTypes.getValues(), itemComparator);
       Set<OInstance> set5 = ontology.getOInstances(tclass,
               OConstants.DIRECT_CLOSURE);
       instances.getValues().clear();
@@ -175,19 +231,28 @@ public class DetailsTableModel extends AbstractTableModel {
     }
     else if(obj instanceof OInstance) {
       OInstance oinstance = (OInstance)obj;
-      detailGroups = (new DetailsGroup[] {directTypes, allTypes,
+      detailGroups = (new DetailsGroup[] {resourceInfo, directTypes, allTypes,
           sameAsInstances, propertyTypes, propertyValues});
+
+      resourceInfo.getValues().clear();
+      resourceInfo.getValues().add(oinstance);
+      resourceInfo.getValues().add(new KeyValuePair(oinstance, "URI", oinstance.getURI().toString(), false));
+      resourceInfo.getValues().add(new KeyValuePair(oinstance, "TYPE", "Ontology Instance", false));
+      
       Set<OClass> set1 = oinstance.getOClasses(OConstants.DIRECT_CLOSURE);
       directTypes.getValues().clear();
       if(set1 != null) {
-        directTypes.getValues().addAll(set1);
-        Collections.sort(directTypes.getValues(), itemComparator);
+        for(OClass aClass : set1) {
+          directTypes.getValues().addAll(Utils.getDetailsToAdd(aClass));
+        }
       }
+
       Set<OClass> set2 = oinstance.getOClasses(OConstants.TRANSITIVE_CLOSURE);
       allTypes.getValues().clear();
       if(set2 != null) {
-        allTypes.getValues().addAll(set2);
-        Collections.sort(allTypes.getValues(), itemComparator);
+        for(OClass aClass : set2) {
+          allTypes.getValues().addAll(Utils.getDetailsToAdd(aClass));
+        }
       }
 
       Set<OInstance> set3 = oinstance.getSameInstance();
@@ -198,9 +263,12 @@ public class DetailsTableModel extends AbstractTableModel {
       }
 
       propertyTypes.getValues().clear();
-      propertyTypes.getValues().addAll(
-              oinstance.getPropertiesWithResourceAsDomain());
-
+      Set<RDFProperty> dprops = oinstance.getPropertiesWithResourceAsDomain();
+      propertyTypes.getValues().addAll(dprops);
+//      for(RDFProperty prop : dprops) {
+//        propertyTypes.getValues().addAll(Utils.getDetailsToAdd(prop));
+//      }
+      
       propertyValues.getValues().clear();
       Set<AnnotationProperty> apProps = oinstance.getSetAnnotationProperties();
       Set<DatatypeProperty> dtProps = oinstance.getSetDatatypeProperties();
@@ -250,8 +318,11 @@ public class DetailsTableModel extends AbstractTableModel {
     ontology = ontology1;
   }
 
+  protected DetailsGroup resourceInfo;
+  
   protected DetailsGroup directSuperClasses;
-
+  
+  
   protected DetailsGroup allSuperClasses;
 
   protected DetailsGroup directSubClasses;
@@ -278,11 +349,15 @@ public class DetailsTableModel extends AbstractTableModel {
 
   protected boolean ontologyMode;
 
-  public static final int COLUMN_COUNT = 2;
+  public static final int COLUMN_COUNT = 4;
 
   public static final int EXPANDED_COLUMN = 0;
 
   public static final int LABEL_COLUMN = 1;
+
+  public static final int VALUE_COLUMN = 2;
+  
+  public static final int DELETE_COLUMN = 3;
 
   protected OntologyItemComparator itemComparator;
 }

@@ -9,6 +9,8 @@ package gate.gui.ontology;
 
 import gate.creole.ontology.*;
 import gate.gui.MainFrame;
+
+import java.awt.Color;
 import java.awt.Component;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -34,9 +36,23 @@ public class OntoTreeCellRenderer extends DefaultTreeCellRenderer {
       String s = null;
       Object obj1 = ((DefaultMutableTreeNode)obj).getUserObject();
       if(obj1 != null && obj1 instanceof OResourceNode) {
-        obj1 = ((OResourceNode) obj1).getResource();
+        obj1 = ((OResourceNode)obj1).getResource();
       }
-      if(obj1 instanceof OClass) {
+
+      if(obj1 instanceof OResource) {
+        Color color = Color.BLACK;
+        setForeground(color);
+      }
+      
+      if(obj1 instanceof Restriction) {
+        icon = MainFrame.getIcon("ontology-restriction");
+        s = ((OClass)obj1).getName();
+        if(((OClass)obj1).getURI().isAnonymousResource())
+          setToolTipText(((OClass)obj1).getURI().toString()
+                  + " is a restriction");
+        else setToolTipText(((OClass)obj1).getURI().toString());
+      }
+      else if(obj1 instanceof OClass) {
         icon = MainFrame.getIcon("ontology-class");
         s = ((OClass)obj1).getName();
         if(((OClass)obj1).getURI().isAnonymousResource())

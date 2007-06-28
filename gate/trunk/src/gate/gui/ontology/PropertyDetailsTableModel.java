@@ -25,6 +25,7 @@ import javax.swing.table.AbstractTableModel;
  */
 public class PropertyDetailsTableModel extends AbstractTableModel {
   public PropertyDetailsTableModel() {
+    resourceInfo = new DetailsGroup("Resource Information", true, null);
     directSuperProps = new DetailsGroup("Direct Super Properties", true, null);
     allSuperProps = new DetailsGroup("All Super Properties", true, null);
     directSubProps = new DetailsGroup("Direct Sub Properties", true, null);
@@ -39,7 +40,7 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
   }
 
   public int getColumnCount() {
-    return 2;
+    return COLUMN_COUNT;
   }
 
   public int getRowCount() {
@@ -55,6 +56,10 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
         return "";
       case 1: // '\001'
         return "";
+      case 2:
+        return "";
+      case 3:
+        return "";
     }
     return "";
   }
@@ -65,13 +70,18 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
         return Boolean.class;
       case 1:
         return Object.class;
+      case 2:
+        return Object.class;
+      case 3:
+        return Object.class;
     }
     return Object.class;
   }
 
   public boolean isCellEditable(int i, int j) {
     Object obj = getItemForRow(i);
-    return j == 0 && (obj instanceof DetailsGroup);
+    //if(obj instanceof PropertyValue && j == 2) return true;
+    return false;
   }
 
   public void setValueAt(Object obj, int i, int j) {
@@ -102,15 +112,21 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
                 .isExpanded()) : null;
       case 1:
         return obj;
+      case 2:
+        return obj;
+      case 3:
+        return obj;
     }
     return null;
   }
 
   public void setItem(Object obj) {
-    detailGroups = (new DetailsGroup[] {directSuperProps, allSuperProps,
+    detailGroups = (new DetailsGroup[] {resourceInfo, directSuperProps, allSuperProps,
         directSubProps, allSubProps, equivalentProps, domain, range,
         propertyTypes, propertyValues});
+    
     RDFProperty property = (RDFProperty)obj;
+    resourceInfo.getValues().clear();
     directSuperProps.getValues().clear();
     allSuperProps.getValues().clear();
     directSubProps.getValues().clear();
@@ -120,9 +136,19 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
     range.getValues().clear();
     propertyTypes.getValues().clear();
     propertyValues.getValues().clear();
-
-    propertyTypes.getValues().addAll(
-            property.getPropertiesWithResourceAsDomain());
+    
+    resourceInfo.getValues().clear();
+    resourceInfo.getValues().add(property);
+    resourceInfo.getValues().add(new KeyValuePair(property, "URI", property.getURI().toString(), false));
+    
+    Set<RDFProperty> dprops = property.getPropertiesWithResourceAsDomain();
+    propertyTypes.getValues().addAll(dprops);
+    Collections.sort(propertyTypes.getValues(), itemComparator);
+    
+//    for(RDFProperty prop : dprops) {
+//      propertyTypes.getValues().addAll(Utils.getDetailsToAdd(prop));
+//    }
+    
     Set<AnnotationProperty> props = property.getSetAnnotationProperties();
     if(props != null) {
       Iterator<AnnotationProperty> apIter = props.iterator();
@@ -137,6 +163,18 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
     }
 
     if(property instanceof AnnotationProperty) {
+      resourceInfo.getValues().add(new KeyValuePair(property, "TYPE", "Annotation Property", false));
+    } else if(property instanceof DatatypeProperty) {
+      resourceInfo.getValues().add(new KeyValuePair(property, "TYPE", "Datatype Property", false));
+    } else if(property instanceof SymmetricProperty) {
+      resourceInfo.getValues().add(new KeyValuePair(property, "TYPE", "Symmetric Property", false));
+    } else if(property instanceof TransitiveProperty) {
+      resourceInfo.getValues().add(new KeyValuePair(property, "TYPE", "Transitive Property", false));      
+    } else {
+      resourceInfo.getValues().add(new KeyValuePair(property, "TYPE", "Object Property", false));      
+    }
+    
+    if(property instanceof AnnotationProperty) {
       fireTableDataChanged();
       return;
     }
@@ -148,6 +186,7 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
       directSuperProps.getValues().addAll(set);
       Collections.sort(directSuperProps.getValues(), itemComparator);
     }
+    
     set = property.getSuperProperties(OConstants.TRANSITIVE_CLOSURE);
     if(set != null) {
       allSuperProps.getValues().addAll(set);
@@ -172,34 +211,39 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
 
     Set set1 = property.getDomain();
     if(set1 != null) {
-      Iterator iterator = set1.iterator();
-      while(iterator.hasNext()) {
-        OResource resource = (OResource)iterator.next();
-        domain.getValues().add(resource);
-      }
+      domain.getValues().addAll(set1);
       Collections.sort(domain.getValues(), itemComparator);
+      
+//      Iterator iterator = set1.iterator();
+//      while(iterator.hasNext()) {
+//        OResource resource = (OResource)iterator.next();
+//        domain.getValues().addAll(Utils.getDetailsToAdd(resource));
+//      }
     }
 
     if(property instanceof DatatypeProperty) {
-      range.getValues().add(
-              ((DatatypeProperty)property).getDataType().getXmlSchemaURI());
+      //range.getValues().add(new KeyValuePair(property, "DATATYPE", ((DatatypeProperty)property).getDataType().getXmlSchemaURI(), false));
       fireTableDataChanged();
       return;
     }
 
     Set set2 = property.getRange();
     if(set2 != null) {
-      Iterator iterator = set2.iterator();
-      while(iterator.hasNext()) {
-        OResource resource = (OResource)iterator.next();
-        range.getValues().add(resource.toString());
-      }
+      range.getValues().addAll(set2);
       Collections.sort(range.getValues(), itemComparator);
+      
+//      Iterator iterator = set2.iterator();
+//      while(iterator.hasNext()) {
+//        OResource resource = (OResource)iterator.next();
+//        range.getValues().addAll(Utils.getDetailsToAdd(resource));
+//      }
     }
 
     fireTableDataChanged();
   }
 
+  protected DetailsGroup resourceInfo;
+  
   protected DetailsGroup directSuperProps;
 
   protected DetailsGroup allSuperProps;
@@ -222,9 +266,13 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
 
   protected OntologyItemComparator itemComparator;
 
-  public static final int COLUMN_COUNT = 2;
+  public static final int COLUMN_COUNT = 4;
 
   public static final int EXPANDED_COLUMN = 0;
 
   public static final int LABEL_COLUMN = 1;
+  
+  public static final int VALUE_COLUMN = 2;
+  
+  public static final int DELETE_COLUMN = 3;
 }

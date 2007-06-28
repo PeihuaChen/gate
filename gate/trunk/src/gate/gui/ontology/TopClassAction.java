@@ -58,7 +58,7 @@ public class TopClassAction extends AbstractAction {
         return;
       }
       OClass oclassimpl = ontology.addOClass(new URI(nameSpace.getText()
-              + className.getText(), false));
+              + className.getText(), false), OConstants.OWL_CLASS);
     }
   }
 
