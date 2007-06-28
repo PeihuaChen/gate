@@ -126,6 +126,16 @@ public interface Ontology extends LanguageResource {
   public OClass addOClass(URI aURI, byte classType);
 
   /**
+   * Creates a new OWL_Class and adds it the ontology.
+   * 
+   * @param aURI URI of this class
+   * @return the newly created class or an existing class if available
+   *         with the same URI.
+   */
+  public OClass addOClass(URI aURI);
+  
+  
+  /**
    * Retrieves a class by its URI.
    * 
    * @param theClassURI the URI of the class

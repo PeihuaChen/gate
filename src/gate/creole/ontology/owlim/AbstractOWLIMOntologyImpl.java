@@ -261,6 +261,15 @@ public abstract class AbstractOWLIMOntologyImpl
   /*
    * (non-Javadoc)
    * 
+   * @see gate.creole.ontology.Ontology#addOClass(gate.creole.ontology.URI, byte)
+   */
+  public OClass addOClass(URI aURI) {
+    return addOClass(aURI, OConstants.OWL_CLASS);
+  }
+  
+  /*
+   * (non-Javadoc)
+   * 
    * @see gate.creole.ontology.Ontology#getOClass(gate.creole.ontology.URI)
    */
   public OClass getOClass(URI theClassURI) {
