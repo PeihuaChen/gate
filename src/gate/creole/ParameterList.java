@@ -61,8 +61,8 @@ public class ParameterList implements Serializable
     */
   public boolean add(List<Parameter> disjunction) {
     boolean status = false;
-    Iterator iter = disjunction.iterator();
-    Parameter param = (Parameter) iter.next();
+    Iterator<Parameter> iter = disjunction.iterator();
+    Parameter param = iter.next();
 
     if(param.isRuntime()) {
       status = runtimeParameters.add(disjunction);
@@ -205,26 +205,26 @@ public class ParameterList implements Serializable
   public String toString() {
     StringBuffer s = new StringBuffer(Strings.getNl() + "  ParameterList:");
 
-    Iterator iter = getRuntimeParameters().iterator();
+    Iterator<List<Parameter>> iter = getRuntimeParameters().iterator();
     if(iter.hasNext()) s.append(Strings.getNl() + "  runtime params=");
     while(iter.hasNext()) {
       s.append(Strings.getNl() + "    ");
-      List paramDisj = (List) iter.next();
-      Iterator iter2 = paramDisj.iterator();
+      List<Parameter> paramDisj = iter.next();
+      Iterator<Parameter> iter2 = paramDisj.iterator();
 
       while(iter2.hasNext())
-        s.append( (Parameter) iter2.next() + Strings.getNl() + "    " );
+        s.append( iter2.next() + Strings.getNl() + "    " );
     }
 
     iter = getInitimeParameters().iterator();
     if(iter.hasNext()) s.append(Strings.getNl() + "  initime params=");
     while(iter.hasNext()) {
       s.append(Strings.getNl() + "    ");
-      List paramDisj = (List) iter.next();
-      Iterator iter2 = paramDisj.iterator();
+      List<Parameter> paramDisj = iter.next();
+      Iterator<Parameter> iter2 = paramDisj.iterator();
 
       while(iter2.hasNext())
-        s.append( (Parameter) iter2.next() + Strings.getNl() + "    " );
+        s.append( iter2.next() + Strings.getNl() + "    " );
     }
 
     return s.toString();

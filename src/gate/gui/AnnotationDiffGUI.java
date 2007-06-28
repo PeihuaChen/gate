@@ -401,11 +401,11 @@ public class AnnotationDiffGUI extends JFrame{
         if(someFeaturesBtn.isSelected()){
           if(keySet == null || keySet.isEmpty() ||
                   annTypeCombo.getSelectedItem() == null) return;
-          Iterator annIter = keySet.
+          Iterator<Annotation> annIter = keySet.
               get((String)annTypeCombo.getSelectedItem()).iterator();
           Set featureSet = new HashSet();
           while(annIter.hasNext()){
-            Annotation ann = (Annotation)annIter.next();
+            Annotation ann = annIter.next();
             Map someFeatures = ann.getFeatures();
             if(someFeatures != null) featureSet.addAll(someFeatures.keySet());
           }

@@ -167,9 +167,9 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
     // each element in the matches is a group of annotation IDs
     // so for each annotation we will have to traverse through all the lists and
     // find out the annotation and remove it
-    ArrayList annots = new ArrayList(annotations);
-    for(int i=0;i<annots.size();i++) {
-      Annotation toRemove = (Annotation) annots.get(i);
+    ArrayList<Annotation> annots = new ArrayList<Annotation>(annotations);
+    for(int i=0; i<annots.size(); i++) {
+      Annotation toRemove = annots.get(i);
       Iterator idIters = matches.iterator();
       ArrayList ids = new ArrayList();
       while(idIters.hasNext()) {

@@ -307,9 +307,9 @@ public class DocumentXmlUtils {
     }// End if
     // Construct the offsetsSet for all nodes belonging to this document
     TreeSet offsetsSet = new TreeSet();
-    Iterator annotSetIter = doc.getAnnotations().iterator();
+    Iterator<Annotation> annotSetIter = doc.getAnnotations().iterator();
     while(annotSetIter.hasNext()) {
-      Annotation annot = (Annotation)annotSetIter.next();
+      Annotation annot = annotSetIter.next();
       offsetsSet.add(annot.getStartNode().getOffset());
       offsetsSet.add(annot.getEndNode().getOffset());
     }// end While
@@ -319,9 +319,9 @@ public class DocumentXmlUtils {
       Iterator iter = namedAnnotSets.values().iterator();
       while(iter.hasNext()) {
         AnnotationSet annotSet = (AnnotationSet)iter.next();
-        Iterator iter2 = annotSet.iterator();
+        Iterator<Annotation> iter2 = annotSet.iterator();
         while(iter2.hasNext()) {
-          Annotation annotTmp = (Annotation)iter2.next();
+          Annotation annotTmp = iter2.next();
           offsetsSet.add(annotTmp.getStartNode().getOffset());
           offsetsSet.add(annotTmp.getEndNode().getOffset());
         }// End while
@@ -425,9 +425,9 @@ public class DocumentXmlUtils {
     }
     HashMap convertedKeys = new HashMap();
     // Iterate through AnnotationSet and save each Annotation as XML
-    Iterator iterator = anAnnotationSet.iterator();
+    Iterator<Annotation> iterator = anAnnotationSet.iterator();
     while(iterator.hasNext()) {
-      Annotation annot = (Annotation)iterator.next();
+      Annotation annot = iterator.next();
       buffer.append("<Annotation Id=\"");
       buffer.append(annot.getId());
       buffer.append("\" Type=\"");

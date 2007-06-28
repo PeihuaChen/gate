@@ -522,13 +522,13 @@ public class Scratch
     annotationTypes.add(ANNIEConstants.TOKEN_ANNOTATION_TYPE);
     annotationTypes.add(ANNIEConstants.SPACE_TOKEN_ANNOTATION_TYPE);
 
-    List tokenList = new ArrayList(doc.getAnnotations().get(annotationTypes));
+    List<Annotation> tokenList = new ArrayList<Annotation>(doc.getAnnotations().get(annotationTypes));
     Collections.sort(tokenList, new OffsetComparator());
 
     //iterate through the tokens
-    Iterator tokIter = tokenList.iterator();
+    Iterator<Annotation> tokIter = tokenList.iterator();
     while(tokIter.hasNext()){
-      Annotation anAnnotation = (Annotation)tokIter.next();
+      Annotation anAnnotation = tokIter.next();
       System.out.println("Annotation: (" +
                         anAnnotation.getStartNode().getOffset().toString() +
                         ", " + anAnnotation.getEndNode().getOffset().toString() +

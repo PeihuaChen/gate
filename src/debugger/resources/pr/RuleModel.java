@@ -182,9 +182,9 @@ public class RuleModel //extends DefaultMutableTreeNode
             }
         }
         boolean isEqual = true;
-        Iterator iterSet = annSet.iterator();
+        Iterator<Annotation> iterSet = annSet.iterator();
         while (iterSet.hasNext()) {
-            Annotation ann = (Annotation) iterSet.next();
+            Annotation ann = iterSet.next();
             String annType = ann.getType();
             if (target.indexOf(annType) != -1) {
                 gate.FeatureMap fm = ann.getFeatures();

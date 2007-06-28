@@ -99,9 +99,9 @@ public class TestHashGazetteer extends TestCase {
    */
   private void dumpAnnotationSet(AnnotationSet marks) {
     if (marks != null) {
-        Iterator iter = marks.iterator();
+        Iterator<Annotation> iter = marks.iterator();
         while(iter.hasNext()) {
-          Annotation lookup = (Annotation) iter.next();
+          Annotation lookup = iter.next();
           FeatureMap lookFeats = lookup.getFeatures();
           String majorStr = (String) lookFeats.get("majorType");
           String minorStr = (String) lookFeats.get("minorType");
@@ -124,10 +124,10 @@ public class TestHashGazetteer extends TestCase {
     areEqual = areEqual && (marks.size() == DESIRED_ANNOTATIONS.length);
 
     if (marks != null) {
-      Iterator iter = marks.iterator();
+      Iterator<Annotation> iter = marks.iterator();
 
       while(iter.hasNext() & areEqual) {
-        Annotation lookup = (Annotation) iter.next();
+        Annotation lookup = iter.next();
         FeatureMap lookFeats = lookup.getFeatures();
         String majorStr = (String) lookFeats.get("majorType");
         String minorStr = (String) lookFeats.get("minorType");

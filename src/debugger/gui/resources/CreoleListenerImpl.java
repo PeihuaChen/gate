@@ -33,8 +33,8 @@ public class CreoleListenerImpl implements CreoleListener, CorpusListener {
 
     private CreoleListenerImpl() {
         // we should add corpus listener to all corpuses already loaded in GATE
-        for (Iterator it = Gate.getCreoleRegister().getLrInstances().iterator(); it.hasNext();) {
-            LanguageResource lr = (LanguageResource) it.next();
+        for (Iterator<LanguageResource> it = Gate.getCreoleRegister().getLrInstances().iterator(); it.hasNext();) {
+            LanguageResource lr = it.next();
             if (lr instanceof Corpus) {
                 ((Corpus) lr).addCorpusListener(this);
             }

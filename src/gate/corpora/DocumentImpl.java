@@ -793,9 +793,9 @@ public class DocumentImpl extends AbstractLanguageResource implements
     AnnotationSet as = aTargetAnnotSet.get(start, end);
     // Investigate all the annotations from as to see if there is one that
     // comes in conflict with aSourceAnnotation
-    Iterator it = as.iterator();
+    Iterator<Annotation> it = as.iterator();
     while(it.hasNext()) {
-      Annotation ann = (Annotation)it.next();
+      Annotation ann = it.next();
       // Read ann offsets
       long s1 = ann.getStartNode().getOffset().longValue();
       long e1 = ann.getEndNode().getOffset().longValue();
@@ -835,9 +835,9 @@ public class DocumentImpl extends AbstractLanguageResource implements
     long e2 = end.longValue();
     // Obtain a set with all annotations annotations that overlap
     // totaly or partially with the interval defined by the two provided offsets
-    List as = new ArrayList();
+    List<Annotation> as = new ArrayList<Annotation>();
     for(int i = 0; i < aTargetAnnotList.size(); i++) {
-      Annotation annot = (Annotation)aTargetAnnotList.get(i);
+      Annotation annot = (Annotation) aTargetAnnotList.get(i);
       if(annot.getStartNode().getOffset().longValue() >= s2
               && annot.getStartNode().getOffset().longValue() <= e2)
         as.add(annot);
@@ -847,9 +847,9 @@ public class DocumentImpl extends AbstractLanguageResource implements
     }
     // Investigate all the annotations from as to see if there is one that
     // comes in conflict with aSourceAnnotation
-    Iterator it = as.iterator();
+    Iterator<Annotation> it = as.iterator();
     while(it.hasNext()) {
-      Annotation ann = (Annotation)it.next();
+      Annotation ann = it.next();
       // Read ann offsets
       long s1 = ann.getStartNode().getOffset().longValue();
       long e1 = ann.getEndNode().getOffset().longValue();
@@ -901,9 +901,9 @@ public class DocumentImpl extends AbstractLanguageResource implements
     // order. For each node write all the tags from left to right.
     // Construct the node set
     TreeSet offsets = new TreeSet();
-    Iterator iter = aDumpAnnotSet.iterator();
+    Iterator<Annotation> iter = aDumpAnnotSet.iterator();
     while(iter.hasNext()) {
-      Annotation annot = (Annotation)iter.next();
+      Annotation annot = iter.next();
       offsets.add(annot.getStartNode().getOffset());
       offsets.add(annot.getEndNode().getOffset());
     }// End while
@@ -922,11 +922,11 @@ public class DocumentImpl extends AbstractLanguageResource implements
       // StringBuffer tmpBuff = new StringBuffer("");
       StringBuffer tmpBuff = new StringBuffer(DOC_SIZE_MULTIPLICATION_FACTOR_AS
               * (this.getContent().size().intValue()));
-      Stack stack = new Stack();
+      Stack<Annotation> stack = new Stack<Annotation>();
       // Iterate through all these annotations and serialize them
       Iterator it = annotations.iterator();
       while(it.hasNext()) {
-        Annotation a = (Annotation)it.next();
+        Annotation a = (Annotation) it.next();
         it.remove();
         // Test if a Ends at offset
         if(offset.equals(a.getEndNode().getOffset())) {
@@ -950,7 +950,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
             // In this case empty the stack and write the end tag
             if(!stack.isEmpty()) {
               while(!stack.isEmpty()) {
-                Annotation a1 = (Annotation)stack.pop();
+                Annotation a1 = stack.pop();
                 tmpBuff.append(writeEndTag(a1));
               }// End while
             }// End if
@@ -964,7 +964,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
             // In this case empty the stack and write the end tag
             if(!stack.isEmpty()) {
               while(!stack.isEmpty()) {
-                Annotation a1 = (Annotation)stack.pop();
+                Annotation a1 = stack.pop();
                 tmpBuff.append(writeEndTag(a1));
               }// End while
             }// End if
@@ -977,7 +977,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
       // In this case empty the stack and write the end tag
       if(!stack.isEmpty()) {
         while(!stack.isEmpty()) {
-          Annotation a1 = (Annotation)stack.pop();
+          Annotation a1 = stack.pop();
           tmpBuff.append(writeEndTag(a1));
         }// End while
       }// End if
@@ -1079,7 +1079,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
     List annotations;
     // This don't have to be a large buffer - just for tags
     StringBuffer tmpBuff = new StringBuffer(255);
-    Stack stack = new Stack();
+    Stack<Annotation> stack = new Stack<Annotation>();
     while(offsetIt.hasNext()) {
       offset = (Long)offsetIt.next();
       // Now, use it.
@@ -1119,7 +1119,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
             // In this case empty the stack and write the end tag
             if(!stack.isEmpty()) {
               while(!stack.isEmpty()) {
-                annStack = (Annotation)stack.pop();
+                annStack = stack.pop();
                 tmpBuff.append(writeEndTag(annStack));
               }// End while
             }// End if
@@ -1133,7 +1133,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
             // In this case empty the stack and write the end tag
             if(!stack.isEmpty()) {
               while(!stack.isEmpty()) {
-                annStack = (Annotation)stack.pop();
+                annStack = stack.pop();
                 tmpBuff.append(writeEndTag(annStack));
               }// End while
             }// End if
@@ -1145,7 +1145,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
       // In this case empty the stack and write the end tag
       if(!stack.isEmpty()) {
         while(!stack.isEmpty()) {
-          annStack = (Annotation)stack.pop();
+          annStack = stack.pop();
           tmpBuff.append(writeEndTag(annStack));
         }// End while
       }// End if
@@ -1685,8 +1685,8 @@ public class DocumentImpl extends AbstractLanguageResource implements
     // END offset should be the bigest offset from the input annotation set.
     long start = startNode.getOffset().longValue();
     long end = endNode.getOffset().longValue();
-    for(Iterator it = anAnnotationSet.iterator(); it.hasNext();) {
-      Annotation currentAnnot = (Annotation)it.next();
+    for(Iterator<Annotation> it = anAnnotationSet.iterator(); it.hasNext();) {
+      Annotation currentAnnot = it.next();
       // If the currentAnnot has both its Start and End equals to the Start and
       // end of the AnnotationSet then check to see if its ID is the smallest.
       if((start == currentAnnot.getStartNode().getOffset().longValue())

@@ -87,9 +87,9 @@ public class RuleTrace {
             ArrayList newWave = new ArrayList();
             for (int i = 0; i < wave.size(); i++) {
                 State oldState = (State) wave.get(i);
-                Iterator iter = oldState.getTransitions().iterator();
+                Iterator<Transition> iter = oldState.getTransitions().iterator();
                 while (iter.hasNext()) {
-                    Transition transition = (Transition) iter.next();
+                    Transition transition = iter.next();
                     State newState = transition.getTarget();
                     if (newState.isFinal()) {
                         rhs = newState.getAction();

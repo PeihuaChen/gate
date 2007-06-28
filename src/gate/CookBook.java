@@ -389,9 +389,9 @@ public class CookBook extends TestCase
       // NOTE: to dump all to XML: outFileWriter.write(doc.toXml(tokens));
       AnnotationSet tokens = doc.getAnnotations("nercAS").
         get(ANNIEConstants.TOKEN_ANNOTATION_TYPE);
-      Iterator iter = tokens.iterator();
+      Iterator<Annotation> iter = tokens.iterator();
       while(iter.hasNext()) {
-        Annotation token = (Annotation) iter.next();
+        Annotation token = iter.next();
         FeatureMap tokFeats = token.getFeatures();
         String tokStr = (String) tokFeats.
           get(ANNIEConstants.TOKEN_STRING_FEATURE_NAME);

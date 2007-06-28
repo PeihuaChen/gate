@@ -81,12 +81,16 @@ public class GazetteerListsCollector extends AbstractLanguageAnalyser {
     return markupSetName;
   }
 
-  /** get the types of the annotation*/
+  /** get the types of the annotation
+   * @return type of the annotation
+   */
   public List getAnnotationTypes() {
     return annotationTypes;
   }//getAnnotationTypes
 
-  /** set the types of the annotations*/
+  /** set the types of the annotations
+   * @param newType 
+   */
   public void setAnnotationTypes(List newType) {
     annotationTypes = newType;
   }//setAnnotationTypes
@@ -108,7 +112,7 @@ public class GazetteerListsCollector extends AbstractLanguageAnalyser {
   }
 
   protected void collectLists(AnnotationSet annots, String annotType) {
-    Iterator iter = annots.iterator();
+    Iterator<Annotation> iter = annots.iterator();
     String listName = "";
     GazetteerList theList = null;
     Iterator theListsIter =
@@ -119,7 +123,7 @@ public class GazetteerListsCollector extends AbstractLanguageAnalyser {
         listName = theList.getURL().toExternalForm();
     }
     while (iter.hasNext()) {
-      Annotation annot = (Annotation) iter.next();
+      Annotation annot = iter.next();
       String text = "";
       List strings = new ArrayList();
       try {

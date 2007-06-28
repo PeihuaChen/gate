@@ -302,12 +302,12 @@ public class DumpingPR extends AbstractLanguageAnalyser
 
   protected AnnotationSet renameAnnotations(AnnotationSet annots2Export,
                                    HashMap renameMap){
-    Iterator iter = annots2Export.iterator();
+    Iterator<Annotation> iter = annots2Export.iterator();
     AnnotationSet as = document.getAnnotations(DUMPING_PR_SET);
     if (!as.isEmpty())
       as.clear();
     while(iter.hasNext()) {
-      Annotation annot = (Annotation) iter.next();
+      Annotation annot = iter.next();
       //first check whether this type needs to be renamed
       //if not, continue
       if (!renameMap.containsKey(annot.getType()))

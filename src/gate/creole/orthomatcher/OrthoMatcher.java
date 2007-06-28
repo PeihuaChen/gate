@@ -261,9 +261,9 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
       if (tokensNameAS.isEmpty()) continue;
       
       
-      Iterator iterNames = nameAnnots.iterator();
+      Iterator<Annotation> iterNames = nameAnnots.iterator();
       while (iterNames.hasNext()) {
-        Annotation nameAnnot = (Annotation) iterNames.next();
+        Annotation nameAnnot = iterNames.next();
         Integer id = nameAnnot.getId();
 
         // get string and value
@@ -349,10 +349,10 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     AnnotationSet nameAllTokens = nameAllAnnots.get(TOKEN_ANNOTATION_TYPE); 
     if (nameAllTokens.isEmpty()) return;
 
-    Iterator iter = unknownAnnots.iterator();
+    Iterator<Annotation> iter = unknownAnnots.iterator();
     //loop through the unknown annots
     while (iter.hasNext()) {
-      Annotation unknown = (Annotation) iter.next();
+      Annotation unknown = iter.next();
 
       // get string and value
       String unknownString = null;
@@ -776,11 +776,10 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     if (annots == null || annots.isEmpty())
       return;
 
-    Iterator iter = annots.iterator();
+    Iterator<Annotation> iter = annots.iterator();
     while (iter.hasNext()) {
       while (iter.hasNext())
-        ((Annotation) iter.next()).getFeatures().
-                                   remove(ANNOTATION_COREF_FEATURE_NAME);
+        iter.next().getFeatures().remove(ANNOTATION_COREF_FEATURE_NAME);
     } //while
   }//cleanup
 
@@ -800,12 +799,12 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     AnnotationSet as =
       as1.get("Lookup", queryFM);
     if (as !=null && ! as.isEmpty()) {
-      List titles = new ArrayList((Set)as);
+      List<Annotation> titles = new ArrayList<Annotation>(as);
       Collections.sort(titles, new gate.util.OffsetComparator());
 
-      Iterator iter = titles.iterator();
+      Iterator<Annotation> iter = titles.iterator();
       while (iter.hasNext()) {
-        Annotation titleAnn = (Annotation)(iter.next());
+        Annotation titleAnn = iter.next();
 
         //we've not found a title at the start offset,
         //there's no point in looking further
@@ -1716,9 +1715,9 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
       if ((nameAnnots ==null) || nameAnnots.isEmpty())
         return;
 
-      Iterator iter = nameAnnots.iterator();
+      Iterator<Annotation> iter = nameAnnots.iterator();
       while (iter.hasNext()) {
-         Annotation annot = (Annotation)iter.next();
+         Annotation annot = iter.next();
          // get the actual string
          Long offsetStartAnnot = annot.getStartNode().getOffset();
          Long offsetEndAnnot = annot.getEndNode().getOffset();

@@ -995,11 +995,11 @@ public class AnnotationSetsView extends AbstractDocumentView
         textView.removeHighlights(hghltTagsForAnn.values());
         hghltTagsForAnn.clear();
         //show highlights
-        List annots = new ArrayList(setHandler.set.get(name));
+        List<Annotation> annots = new ArrayList<Annotation>(setHandler.set.get(name));
         List tags = textView.addHighlights(annots, setHandler.set, 
                 TypeHandler.this.colour);
         for(int i = 0; i < annots.size(); i++){
-          hghltTagsForAnn.put(((Annotation)annots.get(i)).getId(), tags.get(i));
+          hghltTagsForAnn.put(annots.get(i).getId(), tags.get(i));
         }
       }
       //update the table display
@@ -1010,7 +1010,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     public void setSelected(boolean selected){
       if(this.selected == selected) return;
       this.selected = selected;
-      final List<Annotation> annots = new ArrayList(setHandler.set.get(name));
+      final List<Annotation> annots = new ArrayList<Annotation>(setHandler.set.get(name));
       if(selected){
         //make sure set is expanded
         setHandler.setExpanded(true);
@@ -1018,7 +1018,7 @@ public class AnnotationSetsView extends AbstractDocumentView
         hghltTagsForAnn.clear();
         List tags = textView.addHighlights(annots, setHandler.set, colour);
         for(int i = 0; i < annots.size(); i++){
-          hghltTagsForAnn.put(((Annotation)annots.get(i)).getId(), tags.get(i));
+          hghltTagsForAnn.put(annots.get(i).getId(), tags.get(i));
         }
         //add to the list view
         annListTagsForAnn.clear();
@@ -1087,7 +1087,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     protected void repairHighlights(int start, int end){
       //map from tag to annotation
       List tags = new ArrayList(hghltTagsForAnn.size());
-      List annots = new ArrayList(hghltTagsForAnn.size());
+      List<Annotation> annots = new ArrayList<Annotation>(hghltTagsForAnn.size());
       Iterator annIter = hghltTagsForAnn.keySet().iterator();
       while(annIter.hasNext()){
         Annotation ann = setHandler.set.get((Integer)annIter.next());
@@ -1104,7 +1104,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       }
       for(int i = 0; i < tags.size(); i++){
         Object tag = tags.get(i);
-        Annotation ann = (Annotation)annots.get(i);
+        Annotation ann = annots.get(i);
         try{
           textView.moveHighlight(tag, 
                   ann.getStartNode().getOffset().intValue(), 

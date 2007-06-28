@@ -88,10 +88,10 @@ public class TestSplitterTagger extends TestCase{
     tagger.setDocument(doc);
     tagger.setInputASName("testAS");
     tagger.execute();
-    Iterator tokIter =doc.getAnnotations("testAS").
+    Iterator<Annotation> tokIter =doc.getAnnotations("testAS").
       get(ANNIEConstants.TOKEN_ANNOTATION_TYPE).iterator();
     while(tokIter.hasNext()){
-      Annotation token = (Annotation)tokIter.next();
+      Annotation token = tokIter.next();
       String kind = (String)token.getFeatures().
         get(ANNIEConstants.TOKEN_KIND_FEATURE_NAME);
       if(kind.equals(ANNIEConstants.TOKEN_KIND_FEATURE_NAME))

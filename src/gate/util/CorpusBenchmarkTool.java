@@ -1112,10 +1112,10 @@ public class CorpusBenchmarkTool {
     AnnotationSet tokens = annotDoc.getAnnotations(outputSetName).get("Token");
     if (tokens == null)return 0;
 
-    Iterator it = tokens.iterator();
+    Iterator<Annotation> it = tokens.iterator();
     Annotation currAnnotation;
     while (it.hasNext()) {
-      currAnnotation = (Annotation) it.next();
+      currAnnotation = it.next();
       Object feature = currAnnotation.getFeatures().get("kind");
       if (feature != null && "word".equalsIgnoreCase( (String) feature))++count;
     } // while

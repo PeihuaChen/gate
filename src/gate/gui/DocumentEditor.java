@@ -547,7 +547,7 @@ public class DocumentEditor extends AbstractVisualResource
             //no selection -> select an annotation
             JPopupMenu popup = new XJPopupMenu("Select:");
             //find annotations at this position
-            Iterator annIter = document.getAnnotations().
+            Iterator<Annotation> annIter = document.getAnnotations().
                                         get(new Long(position),
                                             new Long(position)
                                         ).iterator();
@@ -555,7 +555,7 @@ public class DocumentEditor extends AbstractVisualResource
               JMenu menu = new XJMenu("Default");
               popup.add(menu);
               while(annIter.hasNext()){
-                Annotation ann = (Annotation)annIter.next();
+                Annotation ann = annIter.next();
                 menu.add(new HighlightAnnotationMenu(ann,
                                                      document.getAnnotations()));
               }
@@ -572,7 +572,7 @@ public class DocumentEditor extends AbstractVisualResource
                   JMenu menu = new XJMenu(set.getName());
                   popup.add(menu);
                   while(annIter.hasNext()){
-                    Annotation ann = (Annotation)annIter.next();
+                    Annotation ann = annIter.next();
                     menu.add(new HighlightAnnotationMenu(ann,set));
                   }
                 }
