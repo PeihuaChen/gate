@@ -41,7 +41,7 @@ public class SerialAnalyserController extends SerialController
   }
 
   /** Run the Processing Resources in sequence. */
-  public void execute() throws ExecutionException{
+  protected void executeImpl() throws ExecutionException{
     interrupted = false;
     if(corpus == null) throw new ExecutionException(
       "(SerialAnalyserController) \"" + getName() + "\":\n" +
@@ -64,7 +64,7 @@ public class SerialAnalyserController extends SerialController
 //      try{
       if (DEBUG) 
         Out.pr("SerialAnalyserController processing doc=" + doc.getName()+ "...");      
-      super.execute();
+      super.executeImpl();
       if (DEBUG) 
         Out.prln("done.");      
 //      }catch(Exception e){

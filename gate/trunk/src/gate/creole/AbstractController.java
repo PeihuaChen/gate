@@ -12,6 +12,7 @@
  */
 package gate.creole;
 
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.*;
 
 import gate.*;
@@ -24,12 +25,97 @@ public abstract class AbstractController extends AbstractResource
 
   //executable code
   /**
-   * Starts the execution of this executable
+   * Execute this controller.  This implementation takes care of
+   * informing any {@link ControllerAwarePR}s of the start and end
+   * of execution, and delegates to the {@link #executeImpl()}
+   * method to do the real work.  Subclasses should override
+   * {@link #executeImpl()} rather than this method.
    */
   public void execute() throws ExecutionException {
-    throw new ExecutionException(
-      "Controller " + getClass() + " hasn't overriden the execute() method"
-    );  }
+    // inform ControllerAware PRs that execution has started
+    for(ControllerAwarePR pr : getControllerAwarePRs()) {
+      pr.controllerExecutionStarted(this);
+    }
+    Throwable thrown = null;
+    try {
+      // do the real work
+      this.executeImpl();
+    }
+    catch(Throwable t) {
+      thrown = t;
+    }
+    finally {
+      if(thrown == null) {
+        // successfully completed
+        for(ControllerAwarePR pr : getControllerAwarePRs()) {
+          pr.controllerExecutionFinished(this);
+        }
+      }
+      else {
+        // aborted
+        for(ControllerAwarePR pr : getControllerAwarePRs()) {
+          pr.controllerExecutionAborted(this, thrown);
+        }
+        
+        // rethrow the aborting exception or error
+        if(thrown instanceof Error) {
+          throw (Error)thrown;
+        }
+        else if(thrown instanceof RuntimeException) {
+          throw (RuntimeException)thrown;
+        }
+        else if(thrown instanceof ExecutionException) {
+          throw (ExecutionException)thrown;
+        }
+        else {
+          // we have a checked exception that isn't one executeImpl can
+          // throw. This shouldn't be possible, but just in case...
+          throw new UndeclaredThrowableException(thrown);
+        }
+      }
+    }
+  }
+
+  /**
+   * Get the set of PRs from this controller that implement
+   * {@link ControllerAwarePR}. If there are no such PRs in this
+   * controller, an empty set is returned. This implementation
+   * simply filters the collection returned by
+   * {@link Controller#getPRs()}, override this method if your subclass
+   * admits a more efficient implementation.
+   */
+  protected Set<ControllerAwarePR> getControllerAwarePRs() {
+    Set<ControllerAwarePR> returnSet = null;
+    for(Object pr : getPRs()) {
+      if(pr instanceof ControllerAwarePR) {
+        if(returnSet == null) {
+          returnSet = new HashSet<ControllerAwarePR>();
+        }
+        returnSet.add((ControllerAwarePR)pr);
+      }
+    }
+
+    if(returnSet == null) {
+      // optimization - don't waste time creating a new set in the most
+      // common case where there are no Controller aware PRs
+      return Collections.emptySet();
+    }
+    else {
+      return returnSet;
+    }
+  }
+
+  /**
+   * Executes the PRs in this controller, according to the execution
+   * strategy of the particular controller type (simple pipeline,
+   * parallel execution, once-per-document in a corpus, etc.). Subclasses
+   * should override this method, allowing the default {@link #execute()}
+   * method to handle sending notifications to controller aware PRs.
+   */
+  protected void executeImpl() throws ExecutionException {
+    throw new ExecutionException("Controller " + getClass()
+            + " hasn't overriden the executeImpl() method");
+  }
 
 
   /** Initialise this resource, and return it. */
