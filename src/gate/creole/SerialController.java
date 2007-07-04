@@ -118,7 +118,7 @@ public class SerialController extends AbstractController
   }
 
   /** Run the Processing Resources in sequence. */
-  public void execute() throws ExecutionException{
+  protected void executeImpl() throws ExecutionException{
     //check all the PRs have the right parameters
     checkParameters();
 
@@ -144,7 +144,7 @@ public class SerialController extends AbstractController
       prof.checkPoint("Execute controller [" + getName() + "] finished");
     }
 
-  } // execute()
+  } // executeImpl()
 
 
   /**

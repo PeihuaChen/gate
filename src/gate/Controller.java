@@ -17,32 +17,52 @@ package gate;
 
 import java.util.Collection;
 
+import gate.creole.ControllerAwarePR;
+import gate.creole.ExecutionException;
 import gate.util.FeatureBearer;
 import gate.util.NameBearer;
 
-/** Models the execution of groups of ProcessingResources.
-  */
-public interface Controller extends Resource, Executable,
-                                    NameBearer, FeatureBearer
-{
+/**
+ * Models the execution of groups of ProcessingResources.
+ */
+public interface Controller extends Resource, Executable, NameBearer,
+                           FeatureBearer {
   /**
    * Returns all the {@link gate.ProcessingResource}s contained by this
-   * controller.
-   * The actual type of collection returned depends on the controller type.
+   * controller. The actual type of collection returned depends on the
+   * controller type.
    */
   public Collection getPRs();
 
-
   /**
-   * Populates this controller from a collection of {@link ProcessingResource}s
-   * (optional operation).
-   *
-   * Controllers that are serializable must implement this method needed by GATE
-   * to restore their contents.
-   * @throws UnsupportedOperationException if the <tt>setPRs</tt> method
-   * 	       is not supported by this controller.
+   * Populates this controller from a collection of
+   * {@link ProcessingResource}s (optional operation).
+   * 
+   * Controllers that are serializable must implement this method needed
+   * by GATE to restore their contents.
+   * 
+   * @throws UnsupportedOperationException if the <tt>setPRs</tt>
+   *           method is not supported by this controller.
    */
   public void setPRs(Collection PRs);
 
+  /**
+   * <p>
+   * Executes this controller. Different controller implementations will
+   * provide different strategies for executing the PRs they contain,
+   * e.g. execute the PRs one after the other in sequence, execute them
+   * once for each document in a corpus, or in parallel, based on some
+   * condition, or in a branching workflow arrangement, etc.
+   * </p>
+   * 
+   * <p>
+   * If any of its child PRs implement the
+   * {@link gate.creole.ControllerAwarePR} interface, then the controller
+   * must ensure that all their relevant methods are called at the
+   * correct times. See the documentation for {@link ControllerAwarePR}
+   * for details.
+   * </p>
+   */
+  public void execute() throws ExecutionException;
 
 } // interface Controller

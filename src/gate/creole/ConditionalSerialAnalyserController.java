@@ -42,7 +42,7 @@ public class ConditionalSerialAnalyserController
   }
 
   /** Run the Processing Resources in sequence. */
-  public void execute() throws ExecutionException{
+  protected void executeImpl() throws ExecutionException{
     interrupted = false;
     if(corpus == null) throw new ExecutionException(
       "(SerialAnalyserController) \"" + getName() + "\":\n" +
@@ -63,7 +63,7 @@ public class ConditionalSerialAnalyserController
       }
 
       try{
-        super.execute();
+        super.executeImpl();
       }catch(Exception e){
         e.printStackTrace(Err.getPrintWriter());
       }
