@@ -92,6 +92,9 @@ public class Attribute {
     if(anElement == null)
       weighting = 1.0;
     else weighting = Double.parseDouble(anElement.getTextTrim());
+    //Replace the possible character "_" which was used as separator
+    name = name.replaceAll(ConstantParameters.SEPARAPERINFeaturesName, 
+      ConstantParameters.SEPFeatureNamesREPLACEMENT);
     // find the class if present
     // confidence_feature
     anElement = jdomElement.getChild("CLASS");
@@ -272,6 +275,10 @@ public class Attribute {
     anElement = jdomElement.getChild("WEIGHTING");
     if(anElement != null)
       weighting = Double.parseDouble(anElement.getTextTrim());
+    
+    //  Replace the possible character "_" which was used as separator
+    name = name.replaceAll(ConstantParameters.SEPARAPERINFeaturesName, 
+      ConstantParameters.SEPFeatureNamesREPLACEMENT);
     // find the class if present
     boolean isClass = jdomElement.getChild("CLASS") != null;
     if(isClass) { throw new GateException(

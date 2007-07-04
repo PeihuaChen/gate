@@ -69,6 +69,10 @@ public class ConstantParameters {
   public static final String NAMENONFEATURE = new String("_NA");
   /** The suffix of start token of an entity. */
   public static final String SUFFIXSTARTTOKEN = new String("_BB");
+  /** A String used to separate the features' names items in NLP features. */
+  public static final String SEPARAPERINFeaturesName = new String("_");
+  /** A String used to replace the separator of feature names in a String. */
+  public static final String SEPFeatureNamesREPLACEMENT = new String("8");
   /**
    * Separator in a pair of index and value used feature vector in sparse
    * format.

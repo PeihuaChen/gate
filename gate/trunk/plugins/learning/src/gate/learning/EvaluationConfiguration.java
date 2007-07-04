@@ -54,6 +54,8 @@ public class EvaluationConfiguration {
 
   /** Create an object from an XML element in configuration file. */
   public static EvaluationConfiguration fromXML(Element domElement) {
+    if(domElement == null)
+      return new EvaluationConfiguration();
     String method = domElement.getAttributeValue("method");
     String kk = domElement.getAttributeValue("runs");
     String value = domElement.getAttributeValue("ratio");
