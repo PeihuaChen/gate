@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" output="plugins/learning/build" path="plugins/learning/src"/>
-	<classpathentry kind="src" path="plugins/Ontology_Tools/src"/>
-	<classpathentry kind="src" output="plugins/Kea/build" path="plugins/Kea/src"/>
 	<classpathentry kind="lib" path="lib/Bib2HTML.jar"/>
 	<classpathentry kind="lib" path="lib/ext/nl.mpi.lookup.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-1.3-final.jar"/>
 	<classpathentry kind="lib" path="lib/plugins/rdf_backend.jar"/>
 	<classpathentry kind="lib" path="lib/plugins/query_tab.jar"/>
-	<classpathentry kind="lib" path="lib/plugins/standard_extensions.jar"/>
 	<classpathentry kind="lib" path="lib/pg73jdbc3.jar"/>
 	<classpathentry kind="lib" path="lib/plugins/rdf-api.jar"/>
 	<classpathentry kind="lib" path="lib/jdom.jar"/>
@@ -64,5 +60,6 @@
 	<classpathentry kind="lib" path="lib/openrdf-util.jar"/>
 	<classpathentry kind="lib" path="lib/openrdf-model.jar"/>
 	<classpathentry kind="lib" path="lib/jaxrpc.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/tools.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
