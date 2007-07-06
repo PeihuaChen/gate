@@ -60,6 +60,5 @@
 	<classpathentry kind="lib" path="lib/openrdf-util.jar"/>
 	<classpathentry kind="lib" path="lib/openrdf-model.jar"/>
 	<classpathentry kind="lib" path="lib/jaxrpc.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/tools.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
