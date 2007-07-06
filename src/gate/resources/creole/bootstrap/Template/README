@@ -24,9 +24,8 @@ To build your plugin you can use Ant:
 ant jar
 
 This will compile the Java code and package the classes into a JAR file.  The
-build file also has targets to create JavaDoc documentation and HTML of the
-source code - "ant javadoc" and "ant java2html" respectively.  If you run Ant
-without any arguments it will build everything in one pass.
+build file also has a target to create JavaDoc documentation - "ant javadoc".
+If you run Ant without any arguments it will build everything in one pass.
 
 The build process creates additional files and directories:
 
@@ -36,7 +35,6 @@ ___RESOURCE___/
   |     compiled classes are placed in here.
   +-- doc/
   |    +-- javadoc/
-  |    +-- java2html/
   +-- ___RESOURCE___.jar
 
 
