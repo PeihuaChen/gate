@@ -3,7 +3,7 @@
 <project basedir="." default="build" name="aligntools">
   <property name="jdk.home" value="${JAVA_HOME}"/>
   <property name="dest" value="classes"/>
-  <property name="gatehome" value="../../../gate"/>
+  <property name="gatehome" value="../.."/>
   <property name="src" value="src"/>
 
   <fileset id="gatelib.classpath" dir="${gatehome}/lib">
