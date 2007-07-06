@@ -49,9 +49,6 @@
   <!-- JavaDoc documentation directory -->
   <property name="javadoc.dir" location="${doc.dir}/javadoc" />
 
-  <!-- Java2HTML directory -->
-  <property name="java2html.dir" location="${doc.dir}/java2html" />
-
   <!-- lib directory - put any additional JAR files your plugin requires into
        this directory.  You will also need to add them as <JAR> entries in
        creole.xml -->
@@ -117,7 +114,6 @@
   <!-- Build JavaDoc documentation -->
   <target name="doc.prepare">
     <mkdir dir="${javadoc.dir}" />
-    <mkdir dir="${java2html.dir}" />
   </target>
 
   <target name="javadoc" depends="doc.prepare">
@@ -134,22 +130,7 @@
     </javadoc>
   </target>
 
-  <!-- Build Java2HTML of the source code -->
-  <property name="java2html.jar" location="${gate.home}/build/lib/j2h.jar" />
-
-  <target name="java2html" depends="doc.prepare">
-    <java jar="${java2html.jar}" fork="true">
-      <sysproperty key="file.encoding" value="UTF-8" />
-      <arg value="-d"/> <arg file="${java2html.dir}"/>
-      <arg value="-js"/> <arg file="${src.dir}"/>
-      <arg value="-jd"/> <arg file="${javadoc.dir}"/>
-      <arg value="-m"/> <arg value="4"/>
-      <arg value="-t"/> <arg value="2"/>
-      <arg value="-n"/> <arg value="&quot;${plugin.name} source&quot;"/>
-    </java>
-  </target>
-
-  <!-- Build everything - the code, JavaDoc and Java2HTML -->
-  <target name="all" depends="jar, javadoc, java2html" />
+  <!-- Build everything - the code and JavaDoc -->
+  <target name="all" depends="jar, javadoc" />
 
 </project>
