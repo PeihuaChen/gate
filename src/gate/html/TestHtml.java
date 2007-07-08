@@ -63,8 +63,10 @@ public class TestHtml extends TestCase
 
 
     // set's the map
-    docFormat.setMarkupElementsMap(markupElementsMap);
-    docFormat.unpackMarkup (doc,"DocumentContent");
+    // Don't need to unpack markup explicitly, as it is already unpacked by
+    // default by newDocument - unpacking it twice causes exceptions
+    //docFormat.setMarkupElementsMap(markupElementsMap);
+    //docFormat.unpackMarkup (doc,"DocumentContent");
 
     gate.corpora.TestDocument.verifyNodeIdConsistency(doc);
 /*
