@@ -99,8 +99,8 @@ public class TestPR extends TestCase
     tokeniser.execute();
     assertTrue("Found in "+doc1.getSourceUrl().getFile()+ " "+
       doc1.getAnnotations().size() +
-      " Token annotations, instead of the expected 1284.",
-      doc1.getAnnotations().size()== 1284);
+      " Token annotations, instead of the expected 1281.",
+      doc1.getAnnotations().size()== 1281);
 
 
     //run the tokeniser for doc2
@@ -108,8 +108,8 @@ public class TestPR extends TestCase
     tokeniser.execute();
     assertTrue("Found in "+ doc2.getSourceUrl().getFile()+ " "+
       doc2.getAnnotations().size() +
-      " Token annotations, instead of the expected 2138.",
-      doc2.getAnnotations().size()== 2138);
+      " Token annotations, instead of the expected 2135.",
+      doc2.getAnnotations().size()== 2135);
 
 
     //run the tokeniser for doc3
@@ -164,13 +164,13 @@ public class TestPR extends TestCase
     splitter.execute();
     assertTrue("Found in "+ doc1.getSourceUrl().getFile()+ " "+
       doc1.getAnnotations().get(ANNIEConstants.SENTENCE_ANNOTATION_TYPE).size() +
-      " Sentence annotations, instead of the expected 22.",
-      doc1.getAnnotations().get(ANNIEConstants.SENTENCE_ANNOTATION_TYPE).size()== 22);
+      " Sentence annotations, instead of the expected 21.",
+      doc1.getAnnotations().get(ANNIEConstants.SENTENCE_ANNOTATION_TYPE).size()== 21);
 
     assertTrue("Found in "+ doc1.getSourceUrl().getFile()+ " "+
       doc1.getAnnotations().get("Split").size() +
-      " Split annotations, instead of the expected 39.",
-      doc1.getAnnotations().get("Split").size()== 39);
+      " Split annotations, instead of the expected 38.",
+      doc1.getAnnotations().get("Split").size()== 38);
 
 
     //run splitter for doc2
@@ -218,16 +218,16 @@ public class TestPR extends TestCase
       doc1.getAnnotations().get(ANNIEConstants.TOKEN_ANNOTATION_TYPE, fType);
 
     assertTrue("Found in "+ doc1.getSourceUrl().getFile()+ " "+ annots.size() +
-      " Token annotations with category feature, instead of the expected 675.",
-      annots.size() == 675);
+      " Token annotations with category feature, instead of the expected 677.",
+      annots.size() == 677);
 
     //run the tagger for doc2
     tagger.setDocument(doc2);
     tagger.execute();
     annots = doc2.getAnnotations().get(ANNIEConstants.TOKEN_ANNOTATION_TYPE, fType);
     assertTrue("Found in "+  doc2.getSourceUrl().getFile()+ " "+annots.size() +
-      " Token annotations with category feature, instead of the expected 1131.",
-      annots.size() == 1131);
+      " Token annotations with category feature, instead of the expected 1133.",
+      annots.size() == 1133);
 
     //run the tagger for doc3
     tagger.setDocument(doc3);
