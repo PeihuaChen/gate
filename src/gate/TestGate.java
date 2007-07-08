@@ -16,6 +16,7 @@
 package gate;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.StringTokenizer;
@@ -228,11 +229,16 @@ public class TestGate {
       // Test bench
       ////////////////////////////////////////////////
       // set this true to run all tests; false to run the just one below
-      boolean allTests = true;
-      if(! allTests){
-        suite.addTest(TestGazetteer.suite());
+      String testName = System.getProperty("gate.testcase");
+      if(testName != null) {
+        // single test class specified in a system property, so run just
+        // that test
+        Class testClass = Class.forName(testName);
+        Method suiteMethod = testClass.getMethod("suite");
+        Test theSuite = (Test)suiteMethod.invoke(null);
+        suite.addTest(theSuite);
       } else {
-        
+        // no test name specified, so run them all
         suite.addTest(TestWordNet.suite());
         suite.addTest(TestIndex.suite());
         suite.addTest(TestPersist.suite());
