@@ -157,7 +157,7 @@ public class CookBook extends TestCase
       Out.prln("annotations on doc after unpack= " + numMarkupAnnotations);
     assertTrue(
       "wrong number annots on doc: " + doc + numMarkupAnnotations,
-      numMarkupAnnotations == 27
+      numMarkupAnnotations == 20
     );
 
   } // testResourceCreation
