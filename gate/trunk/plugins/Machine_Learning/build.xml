@@ -92,6 +92,8 @@
       <sysproperty key="annie.plugin" file="../ANNIE" />
       <!-- don't load any plugins automatically -->
       <sysproperty key="load.plugin.path" value=";" />
+      <!-- run headless -->
+      <sysproperty key="java.awt.headless" value="true" />
       <formatter type="xml" />
       <test name="gate.creole.ml.maxent.TestMaxentWrapper" />
     </junit>

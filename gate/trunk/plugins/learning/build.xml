@@ -109,6 +109,8 @@
 				<pathelement location="learningapi.jar" />
 				<path refid="build.class.path" />
 			</classpath>
+			<!-- run headless -->
+			<sysproperty key="java.awt.headless" value="true" />
 			<formatter type="xml" />
 
 			<test name="gate.learning.test.TestLearningAPI" />
