@@ -41,17 +41,16 @@
         description="generate the distribution" >
     <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
     <jar jarfile="${jar.location}" basedir="${build}"/>
-    <delete dir="${build}"/>
   </target>
 
   <target name="clean.classes"
         description="clean up" >
+    <delete dir="${build}"/>
   </target>
 
   <target name="clean" depends="clean.classes" >
     <!-- full clean also removes the generated JAR file -->
     <delete file="${jar.location}" />
-    
   </target>
   
   <!-- Targets used by the main GATE build file -->
