@@ -1585,7 +1585,12 @@ public class MainFrame extends JFrame implements ProgressListener,
       // annotDiffDialog.setVisible(true);
       AnnotationDiffGUI frame = new AnnotationDiffGUI("Annotation Diff Tool");
       frame.pack();
-      frame.setIconImage(((ImageIcon)getIcon("annotation-diff")).getImage());
+      try {
+        frame.setIconImage(((ImageIcon)getIcon("annotation-diff")).getImage());
+      }
+      catch(Exception ex) {
+        // ignore exceptions here - this is only for aesthetic reasons
+      }
       frame.setLocationRelativeTo(MainFrame.this);
       frame.setVisible(true);
     }// actionPerformed();
