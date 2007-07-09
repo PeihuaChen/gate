@@ -536,11 +536,15 @@ public class TestAnnotation extends TestCase
 
     // remove annotation with id 0; this is returned last by the
     // iterator
-    Iterator iter = basicAS.iterator();
-    while(iter.hasNext())
-      iter.next();
+    Iterator<Annotation> iter = basicAS.iterator();
+    Annotation ann = null;
+    while(iter.hasNext()){
+      ann = iter.next();
+    }
     iter.remove();
-
+    assertEquals("Last annotation from iterator not ID 0!", 0, 
+             ann.getId().intValue());
+    
     assertEquals(10, basicAS.size());
     assertEquals(10, ((AnnotationSetImpl) basicAS).annotsById.size());
     asBuf = basicAS.get("T1");
