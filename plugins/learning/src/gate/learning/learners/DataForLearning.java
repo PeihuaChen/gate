@@ -8,8 +8,10 @@
 package gate.learning.learners;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 import gate.learning.DocFeatureVectors;
 import gate.learning.LabelsOfFeatureVectorDoc;
@@ -49,7 +51,8 @@ public class DataForLearning {
     // read the training data from the file
     // first open the training data file
     try {
-      BufferedReader in = new BufferedReader(new FileReader(trainingData));
+      BufferedReader in = new BufferedReader(new InputStreamReader(
+        new FileInputStream(trainingData), "UTF-8"));
       String line;
       String[] items;
       for(int i = 0; i < numTrainingDocs; ++i) {
@@ -93,7 +96,8 @@ public class DataForLearning {
     // read the training data from the file
     // first open the training data file
     try {
-      BufferedReader in = new BufferedReader(new FileReader(trainingData));
+      BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(
+        trainingData), "UTF-8"));
       String line;
       String[] items;
       for(int i = 0; i < numTrainingDocs; ++i) {

@@ -12,8 +12,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -32,7 +32,6 @@ import gate.learning.LabelsOfFeatureVectorDoc;
 import gate.learning.NLPFeaturesList;
 import gate.learning.SparseFeatureVector;
 import gate.learning.learners.MultiClassLearning;
-import gate.util.GateException;
 /**
  * The interface between the Weka learner and the data defined
  * in the ML Api, which convert the data into the format a Weka
@@ -158,7 +157,8 @@ public class WekaLearning {
     labelsFVDoc = new LabelsOfFeatureVectorDoc[numDocs];
     try {
       BufferedReader inData;
-      inData = new BufferedReader(new FileReader(dataFile));
+      inData = new BufferedReader(new InputStreamReader(
+        new FileInputStream(dataFile), "UTF-8"));
       // Get the number of attributes in the data
       String[] items = inData.readLine()
         .split(ConstantParameters.ITEMSEPARATOR);

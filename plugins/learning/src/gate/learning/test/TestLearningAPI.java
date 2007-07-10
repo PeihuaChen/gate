@@ -11,7 +11,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Comparator;
 import gate.Corpus;
+import gate.Document;
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
@@ -79,8 +82,30 @@ public class TestLearningAPI extends TestCase {
     corpus = Factory.newCorpus("DataSet");
     ExtensionFileFilter fileFilter = new ExtensionFileFilter();
     fileFilter.addExtension("xml");
-    URL tempURL = new File(corpusDirName).toURL();
-    corpus.populate(tempURL, fileFilter, "UTF-8", false);
+    File[] allFiles = new File(corpusDirName).listFiles(fileFilter);
+    int numXML=0;
+    for(int i=0; i<allFiles.length; ++i)
+      if(allFiles[i].getAbsolutePath().endsWith(".xml"))
+        ++numXML;
+    File[] xmlFiles = new File[numXML]; //(corpusDirName).listFiles(fileFilter);
+    numXML=0;
+    for(int i=0; i<allFiles.length; ++i)
+      if(allFiles[i].getAbsolutePath().endsWith(".xml"))
+        xmlFiles[numXML++] = allFiles[i];
+    
+    Arrays.sort(xmlFiles, new Comparator<File>() {
+      public int compare(File a, File b) {
+        return a.getName().compareTo(b.getName());
+      }
+    });
+    
+    for(File f : xmlFiles) {
+      Document doc = Factory.newDocument(f.toURI().toURL(), "UTF-8");
+      doc.setName(f.getName());
+      corpus.add(doc);
+    }
+//    URL tempURL = new File(corpusDirName).toURL();
+//    corpus.populate(tempURL, fileFilter, "UTF-8", false);
     // Set the inputAS
     learningApi.setInputASName(inputasN);
     controller = (gate.creole.SerialAnalyserController)Factory
@@ -124,7 +149,7 @@ public class TestLearningAPI extends TestCase {
     // Compare the overall results with the correct numbers
     assertEquals(evaluation.macroMeasuresOfResults.correct, 47);
     assertEquals(evaluation.macroMeasuresOfResults.partialCor, 13);
-    assertEquals(evaluation.macroMeasuresOfResults.spurious, 29);
+    assertEquals(evaluation.macroMeasuresOfResults.spurious, 28);
     assertEquals(evaluation.macroMeasuresOfResults.missing, 33);
     
     System.out.println("completed");

@@ -15,9 +15,11 @@ import gate.util.GateException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -104,7 +106,7 @@ public class MultiClassLearning {
     // Open the mode file for writing the model into it
     BufferedWriter modelsBuff;
     try {
-      modelsBuff = new BufferedWriter(new FileWriter(modelFile));
+      modelsBuff = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(modelFile), "UTF-8"));
       // convert the multi-class to binary class -- labels conversion
       labelsTraining = new short[dataFVinDoc.numTraining];
       fvsTraining = new SparseFeatureVector[dataFVinDoc.numTraining];
@@ -211,7 +213,8 @@ public class MultiClassLearning {
     // Open the mode file and read the model
     BufferedReader modelsBuff;
     try {
-      modelsBuff = new BufferedReader(new FileReader(modelFile));
+      modelsBuff = new BufferedReader(new InputStreamReader(
+        new FileInputStream(modelFile), "UTF-8"));
       // Read the training meta information from the model file's header
       // include the total number of features and number of tags (numClasses)
       int totalNumFeatures;
