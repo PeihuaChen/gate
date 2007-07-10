@@ -16,10 +16,12 @@ import gate.Node;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -149,8 +151,8 @@ public class LightWeightLearningApi extends Object {
     }
     if(numDocs == 0) {
       try {
-        outNLPFeatures = new BufferedWriter(new FileWriter(new File(wdResults,
-          ConstantParameters.FILENAMEOFNLPFeaturesData)));
+        outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(wdResults,
+          ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
       } catch(IOException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
@@ -227,10 +229,11 @@ public class LightWeightLearningApi extends Object {
     LearningEngineSettings engineSettings) {
     
       try {
-        BufferedWriter outFeatureVectors = new BufferedWriter(new FileWriter(new File(wdResults,
-          ConstantParameters.FILENAMEOFFeatureVectorData)));
-        BufferedReader inNLPFeatures = new BufferedReader(new FileReader(new File(wdResults,
-          ConstantParameters.FILENAMEOFNLPFeaturesData)));
+        BufferedWriter outFeatureVectors = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+          new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorData)), "UTF-8"));
+        BufferedReader inNLPFeatures = new BufferedReader(new InputStreamReader(new 
+          FileInputStream(new File(wdResults,
+            ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
         //Read the first line out which is about feature names
         inNLPFeatures.readLine();
         for(int i=0; i<numDocs; ++i) {
@@ -457,6 +460,7 @@ public class LightWeightLearningApi extends Object {
         break;
       case 2: // for learner of multi to binary conversion
         LogService.logMessage("Multi to binary conversion.", 1);
+        //System.out.println("** multi to binary:");
         MultiClassLearning chunkLearning = new MultiClassLearning(
           engineSettings.multi2BinaryMode);
         // read data
@@ -493,10 +497,16 @@ public class LightWeightLearningApi extends Object {
       PostProcessing postPr = new PostProcessing(
         engineSettings.thrBoundaryProb, engineSettings.thrEntityProb,
         engineSettings.thrClassificationProb);
+      //System.out.println("** Application mode:");
       for(int i = 0; i < corpus.size(); ++i) {
         HashSet chunks = new HashSet();
+        
+        //for(int j=0; j<labelsFVDoc[i].multiLabels.length; ++j)
+          //System.out.println("labelSum="+labelsFVDoc[i].multiLabels[j].probs[0]);
+        
         postPr.postProcessingChunk((short)3, labelsFVDoc[i].multiLabels,
           numClasses, chunks, chunkLenHash);
+        //System.out.println("** documentName="+((Document)corpus.get(i)).getName());
         addAnnsInDoc((Document)corpus.get(i), chunks, instanceType, featName,
           labelName, labelsAndId);
       }
@@ -601,10 +611,12 @@ public class LightWeightLearningApi extends Object {
     File labelInDataFile, File nlpDataLabelFile, int numDocs,
     boolean surroundingMode) {
     try {
-      BufferedReader inData = new BufferedReader(new FileReader(dataFile));
-      BufferedReader inNlpData = new BufferedReader(new FileReader(nlpDataFile));
-      BufferedWriter outNlpDataLabel = new BufferedWriter(new FileWriter(
-        nlpDataLabelFile));
+      BufferedReader inData = new BufferedReader(new InputStreamReader(new FileInputStream
+        (dataFile), "UTF-8"));
+      BufferedReader inNlpData = new BufferedReader(new InputStreamReader(new FileInputStream
+        (nlpDataFile), "UTF-8"));
+      BufferedWriter outNlpDataLabel = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+        nlpDataLabelFile), "UTF-8"));
       HashSet uniqueLabels = new HashSet();
       // The head line of NLP feature file
       String line = inNlpData.readLine();
@@ -652,8 +664,8 @@ public class LightWeightLearningApi extends Object {
       outNlpDataLabel.close();
       inData.close();
       inNlpData.close();
-      BufferedWriter labelInData = new BufferedWriter(new FileWriter(
-        labelInDataFile));
+      BufferedWriter labelInData = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+        labelInDataFile), "UTF-8"));
       labelInData.append(uniqueLabels.size() + " #total_labels");
       labelInData.newLine();
       for(Object obj : uniqueLabels) {
@@ -753,7 +765,7 @@ public class LightWeightLearningApi extends Object {
     // Write the filtered data into the data file
     BufferedWriter out;
     try {
-      out = new BufferedWriter(new FileWriter(dataFile));
+      out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dataFile), "UTF-8"));
       numNeg = 0;
       for(int i = 0; i < labelsFVDocB.length; ++i) {
         int kk1 = 0;
