@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id: creole.xml 7451 2006-06-15 14:10:50Z ian_roberts $ -->
+<!-- $Id$ -->
 <!--
 This is the old HTML document format, which uses the Swing HTML parser.  It
 has been replaced by a new parser, based on NekoHTML, which is much better at
