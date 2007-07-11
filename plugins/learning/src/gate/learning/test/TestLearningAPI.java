@@ -82,27 +82,13 @@ public class TestLearningAPI extends TestCase {
     corpus = Factory.newCorpus("DataSet");
     ExtensionFileFilter fileFilter = new ExtensionFileFilter();
     fileFilter.addExtension("xml");
-    File[] allFiles = new File(corpusDirName).listFiles(fileFilter);
-    int numXML=0;
-    for(int i=0; i<allFiles.length; ++i)
-      if(allFiles[i].getAbsolutePath().endsWith(".xml"))
-        ++numXML;
-    File[] xmlFiles = new File[numXML]; //(corpusDirName).listFiles(fileFilter);
-    numXML=0;
-    for(int i=0; i<allFiles.length; ++i)
-      if(allFiles[i].getAbsolutePath().endsWith(".xml"))
-        xmlFiles[numXML++] = allFiles[i];
-    
-    Arrays.sort(xmlFiles, new Comparator<File>() {
-      public int compare(File a, File b) {
-        return a.getName().compareTo(b.getName());
-      }
-    });
-    
+    File[] xmlFiles = new File(corpusDirName).listFiles(fileFilter);    
     for(File f : xmlFiles) {
-      Document doc = Factory.newDocument(f.toURI().toURL(), "UTF-8");
-      doc.setName(f.getName());
-      corpus.add(doc);
+      if(!f.isDirectory()) {
+          Document doc = Factory.newDocument(f.toURI().toURL(), "UTF-8");
+          doc.setName(f.getName());
+          corpus.add(doc);
+      }
     }
 //    URL tempURL = new File(corpusDirName).toURL();
 //    corpus.populate(tempURL, fileFilter, "UTF-8", false);
@@ -399,6 +385,8 @@ public class TestLearningAPI extends TestCase {
     (new File(savedFilesDir, ConstantParameters.FILENAMEOFNLPFeatureList)).delete();
     (new File(savedFilesDir, ConstantParameters.FILENAMEOFLabelList)).delete();
     (new File(savedFilesDir, ConstantParameters.FILENAMEOFChunkLenStats)).delete();
+    (new File(savedFilesDir, ConstantParameters.FILENAMEOFFeatureVectorData)).delete();
+    (new File(savedFilesDir, ConstantParameters.FILENAMEOFNLPFeaturesData)).delete();
   }
 
   /** Test suite routine for the test runner */
