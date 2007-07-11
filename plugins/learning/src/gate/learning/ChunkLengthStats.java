@@ -43,8 +43,8 @@ public class ChunkLengthStats {
   }
 
   /** Read the chunk length statistics from a file specified. */
-  static public void loadChunkLenStats(File parentDir, String filename,
-    HashMap chunkLenHash) {
+  static public HashMap loadChunkLenStats(File parentDir, String filename) {
+    HashMap chunkLenHash = new HashMap();
     File file1 = new File(parentDir, filename);
     if(file1.exists()) {
       try {
@@ -58,7 +58,11 @@ public class ChunkLengthStats {
           String[] items = line.split(ConstantParameters.ITEMSEPARATOR);
           label = Integer.parseInt(items[0]);
           num = Integer.parseInt(items[1]);
-          ChunkLengthStats chunkLens = new ChunkLengthStats();
+          ChunkLengthStats chunkLens;
+          if(chunkLenHash.containsKey(label)) {
+            chunkLens = (ChunkLengthStats)chunkLenHash.get(label);
+          } else 
+            chunkLens = new ChunkLengthStats();
           for(int i = 0; i < num; ++i) {
             items = (in.readLine()).split(ConstantParameters.ITEMSEPARATOR);
             chunkLens.lenStats[Integer.parseInt(items[0])] = Integer
@@ -74,6 +78,8 @@ public class ChunkLengthStats {
         System.out
           .println("No chunk length statistics list file in initialisation phrase.");
     }
+    
+    return chunkLenHash;
   }
 
   /** Write the chunk length statistics into a file. */
@@ -130,7 +136,8 @@ public class ChunkLengthStats {
         // Get the label
         String feat = annC.getFeatures().get(classFeat).toString();
         if(label2Id.label2Id.containsKey(feat)) {
-          String label = label2Id.label2Id.get(feat).toString();
+          String labelS = label2Id.label2Id.get(feat).toString();
+          int label = Integer.parseInt(labelS);
           int num = 0;
           // For each annotation of instance type
           for(Object objI : annsI)
