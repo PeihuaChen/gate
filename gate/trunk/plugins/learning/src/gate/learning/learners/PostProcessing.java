@@ -53,7 +53,8 @@ public class PostProcessing {
     HashMap<ChunkOrEntity,Integer>tempChunks = new HashMap<ChunkOrEntity,Integer>();
     for(int j = 0; j < numClasses; j += 2) { // for start and end token
       ChunkLengthStats chunkLen;
-      String labelS = new Integer(j / 2 + 1).toString();
+      //String labelS = new Integer(j / 2 + 1).toString();
+      int labelS = j / 2 + 1;
       if(chunkLenHash.get(labelS) != null)
         chunkLen = (ChunkLengthStats)chunkLenHash.get(labelS);
       else chunkLen = new ChunkLengthStats();
@@ -64,7 +65,7 @@ public class PostProcessing {
             if(multiLabels[i1].probs[j + 1] > boundaryProb
               && i1 - i + 1 < ChunkLengthStats.maxLen
               && chunkLen.lenStats[i1 - i + 1] > 0) {
-              // if(multiLabels[i1].probs[j+1]>boundaryProb) {
+               //if(multiLabels[i1].probs[j+1]>boundaryProb) {
               float entityP = multiLabels[i].probs[j]*multiLabels[i1].probs[j + 1];
               if(entityP>entityProb) {
                 ChunkOrEntity chunk = new ChunkOrEntity(i, i1);

@@ -85,9 +85,9 @@ public class LightWeightLearningApi extends Object {
     labelsAndId = new Label2Id();
     labelsAndId.loadLabelAndIdFromFile(wdResults,
       ConstantParameters.FILENAMEOFLabelList);
-    chunkLenHash = new HashMap();
-    ChunkLengthStats.loadChunkLenStats(wdResults,
-      ConstantParameters.FILENAMEOFChunkLenStats, chunkLenHash);
+    chunkLenHash = ChunkLengthStats.loadChunkLenStats(wdResults,
+      ConstantParameters.FILENAMEOFChunkLenStats);
+    
     // Get the feature position of all features
     // Keep the order of the three types of features as that in
     // NLPFeaturesOfDoc.obtainDocNLPFeatures()
@@ -500,10 +500,6 @@ public class LightWeightLearningApi extends Object {
       //System.out.println("** Application mode:");
       for(int i = 0; i < corpus.size(); ++i) {
         HashSet chunks = new HashSet();
-        
-        //for(int j=0; j<labelsFVDoc[i].multiLabels.length; ++j)
-          //System.out.println("labelSum="+labelsFVDoc[i].multiLabels[j].probs[0]);
-        
         postPr.postProcessingChunk((short)3, labelsFVDoc[i].multiLabels,
           numClasses, chunks, chunkLenHash);
         //System.out.println("** documentName="+((Document)corpus.get(i)).getName());
