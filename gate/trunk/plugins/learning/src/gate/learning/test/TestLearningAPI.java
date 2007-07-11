@@ -82,7 +82,12 @@ public class TestLearningAPI extends TestCase {
     corpus = Factory.newCorpus("DataSet");
     ExtensionFileFilter fileFilter = new ExtensionFileFilter();
     fileFilter.addExtension("xml");
-    File[] xmlFiles = new File(corpusDirName).listFiles(fileFilter);    
+    File[] xmlFiles = new File(corpusDirName).listFiles(fileFilter);  
+    Arrays.sort(xmlFiles, new Comparator<File>() {
+      public int compare(File a, File b) {
+        return a.getName().compareTo(b.getName());
+      }
+    });
     for(File f : xmlFiles) {
       if(!f.isDirectory()) {
           Document doc = Factory.newDocument(f.toURI().toURL(), "UTF-8");
