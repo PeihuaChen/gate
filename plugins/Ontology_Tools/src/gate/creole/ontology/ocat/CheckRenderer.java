@@ -19,26 +19,28 @@ import com.ontotext.gate.vr.ClassNode;
 import com.ontotext.gate.vr.IFolder;
 
 /**
- * Description: This class provides the renderer for the Ontology Tree Nodes.
+ * Description: This class provides the renderer for the Ontology Tree
+ * Nodes.
+ * 
  * @author Niraj Aswani
  * @version 1.0
  */
 public class CheckRenderer extends JPanel implements TreeCellRenderer {
 
-	/**
-	 * Serial Version ID
-	 */
-	private static final long serialVersionUID = 3257004371551204912L;
+  /**
+   * Serial Version ID
+   */
+  private static final long serialVersionUID = 3257004371551204912L;
 
-	/**
-	 * Allows user to select/deselect class in the ontology Tree
-	 */
-	private JCheckBox check;
+  /**
+   * Allows user to select/deselect class in the ontology Tree
+   */
+  private JCheckBox check;
 
-	/**
-	 * Class label is shown using this label
-	 */
-	private JLabel label;
+  /**
+   * Class label is shown using this label
+   */
+  private JLabel label;
 
   /**
    * ICon label
@@ -49,101 +51,110 @@ public class CheckRenderer extends JPanel implements TreeCellRenderer {
    * Label Panel
    */
   private JPanel iconPanel, labelPanel;
-  
-	/**
-	 * The instance of ontologyTreePanel
-	 */
-	private OntologyTreePanel ontologyTreePanel;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param owner
-	 */
-	public CheckRenderer(OntologyTreePanel owner) {
-		this.ontologyTreePanel = owner;
-		check = new JCheckBox();
-		check.setBackground(Color.white);
-		label = new JLabel();
+  /**
+   * The instance of ontologyTreePanel
+   */
+  private OntologyTreePanel ontologyTreePanel;
+
+  /**
+   * Constructor
+   * 
+   * @param owner
+   */
+  public CheckRenderer(OntologyTreePanel owner) {
+    this.ontologyTreePanel = owner;
+    check = new JCheckBox();
+    check.setBackground(Color.white);
+    label = new JLabel();
     iconLabel = new JLabel();
-    
-    iconPanel = new JPanel(new BorderLayout(5,10));
-    ((BorderLayout) iconPanel.getLayout()).setHgap(0);
+
+    iconPanel = new JPanel(new BorderLayout(5, 10));
+    ((BorderLayout)iconPanel.getLayout()).setHgap(0);
     iconPanel.setOpaque(true);
     iconPanel.add(check, BorderLayout.WEST);
     iconPanel.add(iconLabel, BorderLayout.EAST);
 
-    labelPanel = new JPanel(new BorderLayout(5,10));
-    ((BorderLayout) labelPanel.getLayout()).setHgap(0);
-    //labelPanel.setOpaque(true);
+    labelPanel = new JPanel(new BorderLayout(5, 10));
+    ((BorderLayout)labelPanel.getLayout()).setHgap(0);
+    // labelPanel.setOpaque(true);
     labelPanel.add(label);
-    
-    setLayout(new BorderLayout(5,10));
+
+    setLayout(new BorderLayout(5, 10));
     ((BorderLayout)getLayout()).setHgap(1);
     add(iconPanel, BorderLayout.WEST);
     add(labelPanel, BorderLayout.EAST);
-	}
+  }
 
-	/**
-	 * Renderer method
-	 */
-	public Component getTreeCellRendererComponent(JTree tree, Object value,
-			boolean isSelected, boolean expanded, boolean leaf, int row,
-			boolean hasFocus) {
+  /**
+   * Renderer method
+   */
+  public Component getTreeCellRendererComponent(JTree tree, Object value,
+          boolean isSelected, boolean expanded, boolean leaf, int row,
+          boolean hasFocus) {
 
-		Object userObject = value;
-		if (!(userObject instanceof IFolder)) {
-			label.setBackground(Color.white);
-			return this;
-		}
-    
+    Object userObject = value;
+    if(!(userObject instanceof IFolder)) {
+      label.setBackground(Color.white);
+      return this;
+    }
+
     javax.swing.Icon icon = null;
-		ClassNode node = (ClassNode) userObject;
-		String conceptName = node.toString();
+    ClassNode node = (ClassNode)userObject;
+    String conceptName = node.toString();
 
-    if (row == 0) {
-			// this is the ontology name
-			check.setVisible(false);
+    if(row == 0) {
+      // this is the ontology name
+      check.setVisible(false);
       iconLabel.setVisible(false);
       label.setText(conceptName);
       labelPanel.setBackground(Color.white);
       iconPanel.setBackground(Color.WHITE);
       return this;
-		} else {
-			check.setVisible(true);
+    }
+    else {
+      check.setVisible(true);
       iconLabel.setVisible(true);
-		}
+    }
 
-		// if node should be selected
-		boolean selected = ontologyTreePanel.currentOResource2IsSelectedMap.get(conceptName).booleanValue();
-  	check.setSelected(selected);
+    // if node should be selected
+    boolean selected = ontologyTreePanel.currentOResource2IsSelectedMap.get(
+            conceptName).booleanValue();
+    check.setSelected(selected);
     if(node.getSource() instanceof OClass) {
       iconLabel.setIcon(MainFrame.getIcon("ontology-class"));
-    } else if(node.getSource() instanceof OInstance){
+    }
+    else if(node.getSource() instanceof OInstance) {
       iconLabel.setIcon(MainFrame.getIcon("ontology-instance"));
-    } else {
+    }
+    else {
       iconLabel.setIcon(null);
     }
-     
-		label.setText(conceptName);
-		label.setFont(tree.getFont());
 
-		// We assign the automatically generated random colors to the concept,
-		// but randomly generation of colors for different classes takes place
-		// only once when that ontology is loaded for the first time
-		if (ontologyTreePanel.currentOResource2ColorMap.containsKey(conceptName)) {
-			Color color = (Color) ontologyTreePanel.currentOResource2ColorMap.get(
-					conceptName);
-			labelPanel.setBackground(color);
-			iconPanel.setBackground(Color.WHITE);
-		}
-    if(ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut.contains(conceptName)) {
+    label.setText(conceptName);
+    label.setFont(tree.getFont());
+
+    // We assign the automatically generated random colors to the
+    // concept,
+    // but randomly generation of colors for different classes takes
+    // place
+    // only once when that ontology is loaded for the first time
+    if(ontologyTreePanel.currentOResource2ColorMap.containsKey(conceptName)) {
+      Color color = (Color)ontologyTreePanel.currentOResource2ColorMap
+              .get(conceptName);
+      labelPanel.setBackground(color);
+      iconPanel.setBackground(Color.WHITE);
+    }
+    if(ontologyTreePanel.ontologyViewerOptions.isFilterOn()
+            && ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut
+                    .contains(conceptName)) {
       check.setEnabled(false);
       label.setEnabled(false);
-    } else {
+    }
+    else {
       check.setEnabled(true);
       label.setEnabled(true);
     }
-		return this;
-	}
+    return this;
+  }
 }

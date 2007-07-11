@@ -11,7 +11,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -76,6 +78,12 @@ public class OntologyViewerOptions implements DocumentListener {
   private JButton browseFilterFileButton;
 
   /**
+   * Button that allows saving the filter file.
+   */
+   private JButton browseNewFilterFileButton;
+
+  
+  /**
    * Default AnnotationSEt or otherAnnotationSets
    */
   private JRadioButton otherAS, defaultAS;
@@ -124,7 +132,9 @@ public class OntologyViewerOptions implements DocumentListener {
    */
   protected String selectedAnnotationType = DEFAULT_ANNOTATION_TYPE;
 
-  private JOptionPane optionPane;
+  private JOptionPane optionPane = null;
+
+  private boolean readFilterFile = false;
 
   /**
    * Constructor
@@ -214,10 +224,14 @@ public class OntologyViewerOptions implements DocumentListener {
     browseFilterFileButton = new JButton("Browse");
     browseFilterFileButton
             .addActionListener(new OntologyViewerOptionsActions());
+    browseNewFilterFileButton = new JButton("Save");
+    browseNewFilterFileButton.addActionListener(new OntologyViewerOptionsActions());
+    
     JPanel temp6 = new JPanel(new FlowLayout(FlowLayout.LEFT));
     temp6.add(useOClassFilterFileCB);
     temp6.add(oClassFilterFilePathTF);
     temp6.add(browseFilterFileButton);
+    temp6.add(browseNewFilterFileButton);
 
     annotationSetsNamesCB = new JComboBox();
     annotationTypesCB = new JComboBox();
@@ -496,6 +510,14 @@ public class OntologyViewerOptions implements DocumentListener {
           else {
             try {
               String newURL = selectedFile.toURI().toURL().toString();
+              if(!newURL.equalsIgnoreCase(oClassFilterFilePathTF.getText()
+                      .trim())) {
+                readFilterFile = true;
+              }
+              else {
+                readFilterFile = false;
+              }
+
               oClassFilterFilePathTF.setText(newURL);
               filterFileURL = selectedFile.toURI().toURL();
               if(isFilterOn()) {
@@ -509,6 +531,34 @@ public class OntologyViewerOptions implements DocumentListener {
             }
           }
         }
+      } else if(ae.getSource() == browseNewFilterFileButton){
+        // open the file dialogue
+        JFileChooser fileChooser = MainFrame.getFileChooser();
+        int answer = fileChooser.showSaveDialog(MainFrame.getInstance());
+        if(answer == JFileChooser.APPROVE_OPTION) {
+          File selectedFile = fileChooser.getSelectedFile();
+          if(selectedFile == null) {
+            return;
+          }
+          else {
+            try {
+              
+              BufferedWriter bw = new BufferedWriter(new FileWriter(selectedFile));
+              for(String s : ontologyClassesToFilterOut) {
+                bw.write(s);
+                bw.newLine();
+              }
+              bw.flush();
+              bw.close();
+            }
+            catch(IOException ioe) {
+              JOptionPane.showMessageDialog(MainFrame.getInstance(),
+                      ioe.getMessage());
+              throw new GateRuntimeException(ioe);
+            }
+          }
+        }
+        
       }
       else if(ae.getSource() == useOClassFilterFileCB) {
         updateOClassFilter();
@@ -521,32 +571,28 @@ public class OntologyViewerOptions implements DocumentListener {
   }
 
   private void updateOClassFilter() {
-    if(!useOClassFilterFileCB.isSelected()) {
+    try {
+      if(filterFileURL == null || !readFilterFile) return;
       ontologyClassesToFilterOut.clear();
+      BufferedReader br = new BufferedReader(new InputStreamReader(
+              filterFileURL.openStream()));
+      String line = br.readLine();
+      while(line != null) {
+        ontologyClassesToFilterOut.add(line.trim());
+        line = br.readLine();
+      }
+      br.close();
       ontologyTreePanel.ontoTreeListener.refreshHighlights();
+      return;
     }
-    else {
-      try {
-        if(filterFileURL == null) return;
-        BufferedReader br = new BufferedReader(new InputStreamReader(filterFileURL.openStream()));
-        String line = br.readLine();
-        while(line != null) {
-          ontologyClassesToFilterOut.add(line.trim());
-          line = br.readLine();
-        }
-        br.close();
-        ontologyTreePanel.ontoTreeListener.refreshHighlights();
-        return;
-      }
-      catch(IOException ioe) {
-        throw new GateRuntimeException(ioe);
-      }
-      
+    catch(IOException ioe) {
+      throw new GateRuntimeException(ioe);
     }
   }
 
   /**
    * Use this method to switch on and off the filter.
+   * 
    * @param onOff
    */
   public void setFilterOn(boolean onOff) {
@@ -557,7 +603,7 @@ public class OntologyViewerOptions implements DocumentListener {
   }
 
   /** Returns if Child Feature is set to ON/OFF */
-  public boolean getChildFeature() {
+  public boolean isChildFeatureDisabled() {
     return childFeatureCB.isSelected();
   }
 
@@ -575,6 +621,21 @@ public class OntologyViewerOptions implements DocumentListener {
     return addAllFeatureCaseSensitiveCB.isSelected();
   }
 
+  public void addToFilter(HashSet<String> list) {
+    if(ontologyClassesToFilterOut == null)
+      ontologyClassesToFilterOut = new HashSet<String>();
+    ontologyClassesToFilterOut.addAll(list);
+    ontologyTreePanel.ontoTreeListener.refreshHighlights();
+  }
+
+  public void removeFromFilter(HashSet<String> list) {
+    if(ontologyClassesToFilterOut == null)
+      ontologyClassesToFilterOut = new HashSet<String>();
+    ontologyClassesToFilterOut.removeAll(list);
+    ontologyTreePanel.ontoTreeListener.refreshHighlights();
+  }
+  
+  
   // DocumentListener Methods
   public void annotationSetAdded(DocumentEvent de) {
     // we need to update our annotationSetsNamesCB List

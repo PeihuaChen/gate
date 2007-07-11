@@ -14,7 +14,10 @@ import java.awt.event.*;
 import java.util.*;
 import gate.*;
 import gate.creole.ontology.OClass;
+import gate.creole.ontology.OConstants;
+import gate.creole.ontology.OInstance;
 import gate.creole.ontology.OResource;
+import gate.creole.ontology.Ontology;
 import gate.creole.ontology.OntologyUtilities;
 import gate.creole.ontology.URI;
 import gate.util.GateRuntimeException;
@@ -84,34 +87,45 @@ public class OntologyTreeListener extends MouseAdapter {
     // let us expand it if the sibling feature is on
     if(path != null) {
       final ClassNode node = (ClassNode)path.getLastPathComponent();
-      if(ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut.contains(node.toString())) {
-        return;
-      }
-      
-      
+
       // ok let us see if this was a right click
       if(SwingUtilities.isRightMouseButton(me)) {
         // it is a right click
-        final Color color = ontologyTreePanel.currentOResource2ColorMap.get(node
-                .toString());
+        final Color color = ontologyTreePanel.currentOResource2ColorMap
+                .get(node.toString());
         final JPopupMenu popup = new JPopupMenu();
-        JButton cancel = new JButton("Close");
+        JMenuItem cancel = new JMenuItem("Close");
         cancel.setToolTipText("Closes this popup");
-        JButton changeColor = new JButton("Change Color");
+        JMenuItem changeColor = new JMenuItem("Change Color");
         changeColor.setToolTipText("Changes Color");
+        JMenuItem addToFilter = new JMenuItem("Disable (Children : "
+                + (!ontologyTreePanel.ontologyViewerOptions
+                        .isChildFeatureDisabled()) + ")");
+        JMenuItem removeFromFilter = new JMenuItem("Enable (Children : "
+                + (!ontologyTreePanel.ontologyViewerOptions
+                        .isChildFeatureDisabled()) + ")");
+
+        changeColor.setToolTipText("Adds to the Filter List");
+
         ToolTipManager.sharedInstance().registerComponent(cancel);
         ToolTipManager.sharedInstance().registerComponent(changeColor);
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panel.setOpaque(false);
-        panel.add(changeColor);
-        panel.add(cancel);
-        popup.setLayout(new BorderLayout());
+        ToolTipManager.sharedInstance().registerComponent(addToFilter);
+
+        popup.add(new JLabel(node.toString()));
+        popup.addSeparator();
+        popup.add(changeColor);
+        if(!ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut
+                .contains(node.toString())) {
+          popup.add(addToFilter);
+        }
+        else {
+          popup.add(removeFromFilter);
+        }
+
+        popup.add(cancel);
         popup.setOpaque(true);
         popup.setBackground(UIManager.getLookAndFeelDefaults().getColor(
                 "ToolTip.background"));
-        popup.add(new JLabel(node.toString()),
-                BorderLayout.NORTH);
-        popup.add(panel, BorderLayout.SOUTH);
 
         changeColor.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ae) {
@@ -128,7 +142,74 @@ public class OntologyTreeListener extends MouseAdapter {
               popup.setVisible(false);
             }
           }
+        });
 
+        addToFilter.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent ae) {
+            boolean disabled = ontologyTreePanel.ontologyViewerOptions
+                    .isChildFeatureDisabled();
+            HashSet<String> classNames = new HashSet<String>();
+            popup.setVisible(false);
+            if(!disabled) {
+              Ontology ontology = ontologyTreePanel.getCurrentOntology();
+              OResource aClass = (OClass)ontology.getOResourceByName(node
+                      .toString());
+              classNames.add(node.toString());
+              if(aClass instanceof OClass) {
+                Set<OClass> classes = ((OClass)aClass)
+                        .getSubClasses(OConstants.TRANSITIVE_CLOSURE);
+
+                for(OClass ac : classes) {
+                  classNames.add(ac.getName());
+                }
+
+                Set<OInstance> instances = ontology.getOInstances(
+                        (OClass)aClass, OConstants.TRANSITIVE_CLOSURE);
+                for(OInstance ai : instances) {
+                  classNames.add(ai.getName());
+                }
+              }
+            }
+            else {
+              classNames.add(node.toString());
+            }
+            ontologyTreePanel.ontologyViewerOptions.addToFilter(classNames);
+            return;
+          }
+        });
+
+        removeFromFilter.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent ae) {
+            boolean disabled = ontologyTreePanel.ontologyViewerOptions
+                    .isChildFeatureDisabled();
+            HashSet<String> classNames = new HashSet<String>();
+            popup.setVisible(false);
+            if(!disabled) {
+              Ontology ontology = ontologyTreePanel.getCurrentOntology();
+              OResource aClass = (OClass)ontology.getOResourceByName(node
+                      .toString());
+              classNames.add(node.toString());
+              if(aClass instanceof OClass) {
+                Set<OClass> classes = ((OClass)aClass)
+                        .getSubClasses(OConstants.TRANSITIVE_CLOSURE);
+
+                for(OClass ac : classes) {
+                  classNames.add(ac.getName());
+                }
+
+                Set<OInstance> instances = ontology.getOInstances(
+                        (OClass)aClass, OConstants.TRANSITIVE_CLOSURE);
+                for(OInstance ai : instances) {
+                  classNames.add(ai.getName());
+                }
+              }
+            }
+            else {
+              classNames.add(node.toString());
+            }
+            ontologyTreePanel.ontologyViewerOptions.removeFromFilter(classNames);
+            return;
+          }
         });
 
         cancel.addActionListener(new ActionListener() {
@@ -141,25 +222,34 @@ public class OntologyTreeListener extends MouseAdapter {
         ontologyTreePanel.ontoViewer.documentTextArea.requestFocus();
         return;
       }
+
+      if(ontologyTreePanel.ontologyViewerOptions.isFilterOn()
+              && ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut
+                      .contains(node.toString())) {
+        return;
+      }
       
-      String selectedText = ontologyTreePanel.ontoViewer.documentTextArea.getSelectedText();
+      
+      String selectedText = ontologyTreePanel.ontoViewer.documentTextArea
+              .getSelectedText();
       ontologyTreePanel.ontoViewer.annotationAction.hideAllWindows();
 
       if(selectedText != null && selectedText.length() > 0) {
         if(node.getSource() instanceof OClass) {
           addNewAnnotation(node, false, null, false, false);
-        } else {
+        }
+        else {
           addNewAnnotation(node, false, null, true, false);
         }
         ontologyTreePanel.ontoViewer.documentTextArea.requestFocus();
       }
 
-      boolean isSelected = !ontologyTreePanel.currentOResource2IsSelectedMap.get(
-              node.toString()).booleanValue();
+      boolean isSelected = !ontologyTreePanel.currentOResource2IsSelectedMap
+              .get(node.toString()).booleanValue();
 
       // now if the sibling feature is ON we need to reflect our changes
       // to its children as well
-      if(!ontologyTreePanel.ontologyViewerOptions.getChildFeature()) {
+      if(!ontologyTreePanel.ontologyViewerOptions.isChildFeatureDisabled()) {
         // yes it is ON
         setChildrenSelection(node, isSelected);
 
@@ -277,7 +367,7 @@ public class OntologyTreeListener extends MouseAdapter {
           FeatureMap map, boolean isClassFeature, boolean shouldCreateInstance) {
 
     ArrayList<Annotation> toReturn = new ArrayList<Annotation>();
-    
+
     // lets find out the text offsets
     int start = ontologyTreePanel.ontoViewer.documentTextArea
             .getSelectionStart();
@@ -294,9 +384,9 @@ public class OntologyTreeListener extends MouseAdapter {
       if(!ontologyTreePanel.ontologyViewerOptions.isAddAllOptionCaseSensitive()) {
         textToSearchIn = textToSearchIn.toLowerCase();
       }
-      
+
       String textToSearch = textToSearchIn.substring(start, end);
-      
+
       int index = 0;
       while(index >= 0) {
         index = textToSearchIn.indexOf(textToSearch, index);
@@ -310,12 +400,13 @@ public class OntologyTreeListener extends MouseAdapter {
     else {
       offsets.add(new Integer[] {new Integer(start), new Integer(end)});
     }
-    String selectedText = ontologyTreePanel.ontoViewer.documentTextArea.getSelectedText();
-    selectedText = selectedText.replaceAll(" ","_");
+    String selectedText = ontologyTreePanel.ontoViewer.documentTextArea
+            .getSelectedText();
+    selectedText = selectedText.replaceAll(" ", "_");
 
     ontologyTreePanel.ontoViewer.documentTextArea.setSelectionStart(start);
     ontologyTreePanel.ontoViewer.documentTextArea.setSelectionEnd(start);
-    
+
     // and so add it to the annotationSetName
     String annotationSet = ontologyTreePanel.ontologyViewerOptions
             .getSelectedAnnotationSetName();
@@ -327,27 +418,30 @@ public class OntologyTreeListener extends MouseAdapter {
       set = ontologyTreePanel.ontoViewer.getDocument().getAnnotations(
               annotationSet);
     }
-    
-    
+
     FeatureMap newMap = Factory.newFeatureMap();
-    if(map != null)
-      newMap.putAll(map);
-    
+    if(map != null) newMap.putAll(map);
+
     newMap.remove(gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME);
     newMap.remove(gate.creole.ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME);
-    
+
     if(isClassFeature) {
-      newMap.put(gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME, ((OResource) node.getSource()).getURI().toString());
+      newMap.put(gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME,
+              ((OResource)node.getSource()).getURI().toString());
       if(shouldCreateInstance) {
-        if(ontologyTreePanel.getCurrentOntology().getOResourceByName(selectedText) == null) {
-          URI uri = OntologyUtilities.createURI(ontologyTreePanel.getCurrentOntology(), selectedText, false);
-          ontologyTreePanel.getCurrentOntology().addOInstance(uri, (OClass) node.getSource());
+        if(ontologyTreePanel.getCurrentOntology().getOResourceByName(
+                selectedText) == null) {
+          URI uri = OntologyUtilities.createURI(ontologyTreePanel
+                  .getCurrentOntology(), selectedText, false);
+          ontologyTreePanel.getCurrentOntology().addOInstance(uri,
+                  (OClass)node.getSource());
         }
       }
-      
+
     }
     else {
-        newMap.put(gate.creole.ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME, ((OResource) node.getSource()).getURI().toString());
+      newMap.put(gate.creole.ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME,
+              ((OResource)node.getSource()).getURI().toString());
     }
 
     String dns = ontologyTreePanel.getCurrentOntology().getDefaultNameSpace();
@@ -362,9 +456,9 @@ public class OntologyTreeListener extends MouseAdapter {
       try {
 
         if(i == 0) {
-         // if(!ontologyTreePanel.showingNewInstanceAnnotationWindow) {
-            ontologyTreePanel.setSelected(node.toString(), true);
-          //}
+          // if(!ontologyTreePanel.showingNewInstanceAnnotationWindow) {
+          ontologyTreePanel.setSelected(node.toString(), true);
+          // }
           // and finally we need to expand the path
           if(node != null) {
             TreePath path = getTreePath(node);
@@ -433,14 +527,16 @@ public class OntologyTreeListener extends MouseAdapter {
     Iterator<String> iter = currentClass2IsSelectedMap.keySet().iterator();
     while(iter.hasNext()) {
       String className = iter.next();
-      if(ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut.contains(className)) {
+      if(ontologyTreePanel.ontologyViewerOptions.isFilterOn()
+              && ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut
+                      .contains(className)) {
         continue;
       }
-      
+
       if(!currentClass2IsSelectedMap.get(className).booleanValue()) {
         continue;
       }
-      
+
       ArrayList<Annotation> annotationsList = currentClassName2AnnotationsListMap
               .get(className);
 
