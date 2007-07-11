@@ -556,9 +556,10 @@ public class AnnotationEditor extends AbstractAction {
 
     if(rootNode instanceof ClassNode
             && ((ClassNode)rootNode).getSource() instanceof OResource) {
-      if(!ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut
-              .contains(((OResource)((ClassNode)rootNode).getSource())
-                      .getName())) {
+      if(!ontologyTreePanel.ontologyViewerOptions.isFilterOn()
+              || !ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut
+                      .contains(((OResource)((ClassNode)rootNode).getSource())
+                              .getName())) {
 
         if(startWith.length() > 0) {
           if(((OResource)((ClassNode)rootNode).getSource()).getName()
@@ -835,11 +836,12 @@ public class AnnotationEditor extends AbstractAction {
           annotationWindow.setVisible(false);
           return;
         }
-        else if(ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut
-                .contains(((OResource)item.getSource()).getName())) {
-          //JOptionPane.showMessageDialog(MainFrame.getInstance(),
-          //        "This resource has been filtered out : "
-          //                + selectedItem.toString());
+        else if(ontologyTreePanel.ontologyViewerOptions.isFilterOn()
+                && ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut
+                        .contains(((OResource)item.getSource()).getName())) {
+          // JOptionPane.showMessageDialog(MainFrame.getInstance(),
+          // "This resource has been filtered out : "
+          // + selectedItem.toString());
           newAnnotationMode = false;
           annotationWindow.setVisible(false);
           return;
@@ -877,11 +879,12 @@ public class AnnotationEditor extends AbstractAction {
           annotationWindow.setVisible(false);
           return;
         }
-        else if(ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut
-                .contains(((OResource)item.getSource()).getName())) {
-          //JOptionPane.showMessageDialog(MainFrame.getInstance(),
-          //        "This resource has been filtered out : "
-          //                + selectedItem.toString());
+        else if(ontologyTreePanel.ontologyViewerOptions.isFilterOn()
+                && ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut
+                        .contains(((OResource)item.getSource()).getName())) {
+          // JOptionPane.showMessageDialog(MainFrame.getInstance(),
+          // "This resource has been filtered out : "
+          // + selectedItem.toString());
           newAnnotationMode = false;
           annotationWindow.setVisible(false);
           return;
