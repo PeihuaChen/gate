@@ -259,17 +259,23 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
 							for (int i = 0; i < corpusPIDs.size(); i++) {
 								Object corpusID = corpusPIDs.get(i);
 								// we will have to load this corpus
-								SerialCorpusImpl corpusLR = (SerialCorpusImpl) this
-										.getLr(
-												SerialCorpusImpl.class
-														.getName(), corpusID);
+                FeatureMap params = Factory.newFeatureMap();
+                params.put(DataStore.DATASTORE_FEATURE_NAME, this);
+                params.put(DataStore.LR_ID_FEATURE_NAME, corpusID);
+                FeatureMap features = Factory.newFeatureMap();
+                Gate.setHiddenAttribute(features, true);
+                SerialCorpusImpl corpusLR = (SerialCorpusImpl)Factory.createResource(SerialCorpusImpl.class.getCanonicalName(),
+                        params, features);
+//								SerialCorpusImpl corpusLR = (SerialCorpusImpl) this
+//										.getLr(
+//												SerialCorpusImpl.class
+//														.getName(), corpusID);
 								if (corpusLR != null) {
 									if (corpusLR.contains(lr)) {
-										corpusPID = corpusLR
-												.getLRPersistenceId()
-												.toString();
-										break;
-									}
+										corpusPID = corpusLR.getLRPersistenceId().toString();
+                  }
+                  Factory.deleteResource(corpusLR);
+									if(corpusPID != null) break;
 								}
 							}
 						}
