@@ -102,6 +102,7 @@ foreach my $creoleFileName (@creoleFileList)
    	my $xp = XML::XPath->new(filename => $creoleFileName); # parse the XML file
     my $nodeset = $xp->find('//RESOURCE'); 	# find all resources in this creole.xml file..
         my @nodes = $nodeset->get_nodelist;
+        # Ignore plugins that do not define any RESOURCEs
         if(@nodes) {
                 print HTMLFILE "<li><a href='#$1'>$1</a></li>\n";
                 push @creoleFileData, { NAME => $1,
