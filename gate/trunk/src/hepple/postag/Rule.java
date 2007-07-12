@@ -1,7 +1,7 @@
 /*
  *  Rule.java
  *
- *  Copyright (c) 2001-2005, The University of Sheffield.
+ *  Copyright (c) 2001-2007, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
