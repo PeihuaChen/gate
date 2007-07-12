@@ -61,7 +61,7 @@
 	<RESOURCE>
       <NAME>Switch Member PR</NAME>
       <CLASS>gate.compound.impl.SwitchMemberPR</CLASS>
-      <COMMENT>Selects the focused document in a compound doc (http://gate.ac.uk/sale/tao/#sec:alignment:switchmembers)</COMMENT>
+      <COMMENT>Sets the focus of a compound document to a specified member document (http://gate.ac.uk/sale/tao/#sec:alignment:switchmembers)</COMMENT>
       <JAR>aligntools.jar</JAR>
      <PARAMETER NAME="document"  
          COMMENT="The document to be processed"  
