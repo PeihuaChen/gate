@@ -42,7 +42,8 @@ list</a>.</p>
 <hr/>
 <a name='internal-plugins'></a>
 <h2>Plugins included in the GATE distribution</h2>
-<ul type='circle'><li><a href='#ANNIE'>ANNIE</a></li>
+<ul type='circle'><li><a href='#alignment'>alignment</a></li>
+<li><a href='#ANNIE'>ANNIE</a></li>
 <li><a href='#arabic'>arabic</a></li>
 <li><a href='#cebuano'>cebuano</a></li>
 <li><a href='#Chemistry_Tagger'>Chemistry_Tagger</a></li>
@@ -59,11 +60,12 @@ list</a>.</p>
 <li><a href='#Montreal_Transducer'>Montreal_Transducer</a></li>
 <li><a href='#NLG_Tools'>NLG_Tools</a></li>
 <li><a href='#NP_Chunking'>NP_Chunking</a></li>
-<li><a href='#Obsolete'>Obsolete</a></li>
+<li><a href='#Obsolete/apf-exporter'>Obsolete/apf-exporter</a></li>
+<li><a href='#Obsolete/document-editor'>Obsolete/document-editor</a></li>
+<li><a href='#Obsolete/html-documentformat'>Obsolete/html-documentformat</a></li>
 <li><a href='#Ontology_Tools'>Ontology_Tools</a></li>
 <li><a href='#rasp'>rasp</a></li>
 <li><a href='#romanian'>romanian</a></li>
-<li><a href='#spanish'>spanish</a></li>
 <li><a href='#Stemmer'>Stemmer</a></li>
 <li><a href='#SUPPLE'>SUPPLE</a></li>
 <li><a href='#Tools'>Tools</a></li>
@@ -73,6 +75,44 @@ list</a>.</p>
 <li><a href='#yahoo'>yahoo</a></li>
 </ul>
 <table border='1'>
+	<tr>
+		<th colspan='3'><a name='alignment'>alignment</a></th>
+	</tr>
+	<tr>
+		<td>Compound Document</td>
+		<td>GATE Compound Document (<a href="http://gate.ac.uk/sale/tao/#sec:alignment:compounddocument">docs</a>)</td>
+		<td>gate.compound.impl.CompoundDocumentImpl</td>
+	</tr>
+	<tr>
+		<td>Compound Document Editor</td>
+		<td>Editor for compound documents (<a href="http://gate.ac.uk/sale/tao/#sec:alignment:compounddoceditor">docs</a>)</td>
+		<td>gate.compound.gui.CompoundDocumentEditor</td>
+	</tr>
+	<tr>
+		<td>GATE Composite document</td>
+		<td>GATE Composite document (<a href="http://gate.ac.uk/sale/tao/#sec:alignment:compositedoc">docs</a>)</td>
+		<td>gate.composite.impl.CompositeDocumentImpl</td>
+	</tr>
+	<tr>
+		<td>Alignment Editor</td>
+		<td>Alignment editor (<a href="http://gate.ac.uk/sale/tao/#sec:alignment:editor">docs</a>)</td>
+		<td>gate.alignment.gui.AlignmentEditor</td>
+	</tr>
+	<tr>
+		<td>Switch Member PR</td>
+		<td>Selects the focused document in a compound doc (<a href="http://gate.ac.uk/sale/tao/#sec:alignment:switchmembers">docs</a>)</td>
+		<td>gate.compound.impl.SwitchMemberPR</td>
+	</tr>
+	<tr>
+		<td>Delete Member PR</td>
+		<td>Deletes one member document from a compound doc (<a href="http://gate.ac.uk/sale/tao/#sec:alignment:deletemembers">docs</a>)</td>
+		<td>gate.compound.impl.DeleteMemberPR</td>
+	</tr>
+	<tr>
+		<td>Combine Members PR</td>
+		<td>Combines documents in a composite (<a href="http://gate.ac.uk/sale/tao/#sec:alignment:compositedoc">docs</a>)</td>
+		<td>gate.composite.impl.CombineMembersPR</td>
+	</tr>
 	<tr>
 		<th colspan='3'><a name='ANNIE'>ANNIE</a></th>
 	</tr>
@@ -358,7 +398,7 @@ list</a>.</p>
 		<th colspan='3'><a name='learning'>learning</a></th>
 	</tr>
 	<tr>
-		<td>Batch Learning ALL PR</td>
+		<td>Batch Learning PR</td>
 		<td>Supports training, application and evaluation of machine
       learning models for NLP tasks
       (<a href="http://gate.ac.uk/sale/tao/#chapt:mlapi">docs</a>)</td>
@@ -418,11 +458,19 @@ list</a>.</p>
 		<td>mark.chunking.GATEWrapper</td>
 	</tr>
 	<tr>
-		<th colspan='3'><a name='Obsolete'>Obsolete</a></th>
+		<th colspan='3'><a name='Obsolete/apf-exporter'>Obsolete/apf-exporter</a></th>
+	</tr>
+	<tr>
+		<td>GATE APF exporter</td>
+		<td>An APF exporter .</td>
+		<td>gate.creole.APFormatExporter</td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name='Obsolete/document-editor'>Obsolete/document-editor</a></th>
 	</tr>
 	<tr>
 		<td>OLD Document Editor</td>
-		<td>&nbsp;</td>
+		<td>Old editor for documents, superseded by gate.gui.docview.*</td>
 		<td>gate.gui.DocumentEditor</td>
 	</tr>
 	<tr>
@@ -437,18 +485,16 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>Features Editor</td>
-		<td>&nbsp;</td>
+		<td>Old editor for feature values of any resource.  Superseded by the small feature editor in the bottom-left corner of the GUI.</td>
 		<td>gate.gui.FeaturesEditor</td>
 	</tr>
 	<tr>
-		<td>GATE APF exporter</td>
-		<td>An APF exporter .</td>
-		<td>gate.creole.APFormatExporter</td>
+		<th colspan='3'><a name='Obsolete/html-documentformat'>Obsolete/html-documentformat</a></th>
 	</tr>
 	<tr>
-		<td>DAML+OIL exporter</td>
-		<td>A DAML+OIL exporter</td>
-		<td>gate.creole.RDFFormatExporter</td>
+		<td>Old GATE HTML Document Format</td>
+		<td>Old HTML document parser, based on the Swing parser that drives JEditorPane.</td>
+		<td>gate.corpora.HtmlDocumentFormat</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Ontology_Tools'>Ontology_Tools</a></th>
@@ -470,7 +516,7 @@ list</a>.</p>
 		<td>gate.gui.ontology.OntologyEditor</td>
 	</tr>
 	<tr>
-		<td>OCAT</td>
+		<td>Ontology</td>
 		<td>Ontology-based Corpus Annotation Tool (<a href="http://gate.ac.uk/sale/tao/#sec:ontologies:ocat">docs</a>)</td>
 		<td>gate.creole.ontology.ocat.OntologyViewer</td>
 	</tr>
@@ -499,14 +545,6 @@ list</a>.</p>
 		<td>Romanian Transducer</td>
 		<td>A module for executing Jape grammars</td>
 		<td>romanian.RomanianTransducer</td>
-	</tr>
-	<tr>
-		<th colspan='3'><a name='spanish'>spanish</a></th>
-	</tr>
-	<tr>
-		<td>Keywords</td>
-		<td>&nbsp;</td>
-		<td>com.isoco.gate.keywords.KeywordsDetector</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Stemmer'>Stemmer</a></th>
