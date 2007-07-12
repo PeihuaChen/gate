@@ -8,13 +8,19 @@ use strict;
 use XML::Simple;
 use XML::XPath;
 use XML::XPath::XMLParser;
+use File::Find;
 
 # ********** Some constants **********
 my $internalPluginsTitle = "Plugins included in the GATE distribution";
 my $externalPluginsTitle = "Other contributed plugins";
 
 # Grab all the creole filenames for all the plugins
-my @creoleFileList = glob("../plugins/*/creole.xml");
+my @creoleFileList = ();
+File::Find::find(
+    sub {
+      push (@creoleFileList, $File::Find::name) if $_ eq 'creole.xml';
+    },
+    qw(../plugins));
 
 my @elementsToGet = ("NAME", "COMMENT", "CLASS");
 # **************************************************
@@ -88,34 +94,41 @@ print HTMLFILE "<a name='internal-plugins'></a>\n",
 				"<h2>$internalPluginsTitle</h2>\n",
 				"<ul type='circle'>";
 
+my @creoleFileData = ();
+
 foreach my $creoleFileName (@creoleFileList)
 {
-	$creoleFileName =~ /plugins\/(\w+)\/creole.xml/;
-	print HTMLFILE "<li><a href='#$1'>$1</a></li>\n";
+	$creoleFileName =~ /plugins\/(.+)\/creole.xml/;
+   	my $xp = XML::XPath->new(filename => $creoleFileName); # parse the XML file
+    my $nodeset = $xp->find('//RESOURCE'); 	# find all resources in this creole.xml file..
+        my @nodes = $nodeset->get_nodelist;
+        if(@nodes) {
+                print HTMLFILE "<li><a href='#$1'>$1</a></li>\n";
+                push @creoleFileData, { NAME => $1,
+                                        DATA => $nodeset };
+        }
 }
 
 print HTMLFILE "</ul>\n",
 				"<table border='1'>\n";
 
 # foreach plugin creole.xml file...
-foreach my $creoleFileName (@creoleFileList)
+foreach my $creoleFile (@creoleFileData)
 {
-	$creoleFileName =~ /plugins\/(\w+)\/creole.xml/;
-	print "$1\n";
-	print HTMLFILE "\t<tr>\n\t\t<th colspan='3'><a name='$1'>$1</a></th>\n\t</tr>\n";
-   	my $xp = XML::XPath->new(filename => $creoleFileName); # parse the XML file
-    my $nodeset = $xp->find('//RESOURCE'); 	# find all resources in this creole.xml file..
-	foreach my $node ($nodeset->get_nodelist) 
-	{
-		my $creoleFragment = XML::XPath::XMLParser::as_string($node);
-		print HTMLFILE "\t<tr>\n";
-		
-		foreach my $elementToGet (@elementsToGet)
-		{
-			print HTMLFILE "\t\t<td>", getElement($creoleFragment, $elementToGet), "</td>\n";
-		}
-		print HTMLFILE "\t</tr>\n";
-	}
+	my $creoleFileName = $creoleFile->{NAME};
+        print "$creoleFileName\n";
+        print HTMLFILE "\t<tr>\n\t\t<th colspan='3'><a name='$creoleFileName'>$creoleFileName</a></th>\n\t</tr>\n";
+        foreach my $node ($creoleFile->{DATA}->get_nodelist) 
+        {
+                my $creoleFragment = XML::XPath::XMLParser::as_string($node);
+                print HTMLFILE "\t<tr>\n";
+                
+                foreach my $elementToGet (@elementsToGet)
+                {
+                        print HTMLFILE "\t\t<td>", getElement($creoleFragment, $elementToGet), "</td>\n";
+                }
+                print HTMLFILE "\t</tr>\n";
+        }
 }
 
 print HTMLFILE "</table>\n",
