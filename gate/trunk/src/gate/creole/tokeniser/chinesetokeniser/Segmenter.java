@@ -23,7 +23,6 @@ public class Segmenter {
   public final static int SIMP = 1;
   public final static int BOTH = 2;
 
-  // by niraj
   private ArrayList marks;
 
   // Charform is TRAD, SIMP or BOTH
@@ -246,7 +245,7 @@ public class Segmenter {
 
     clength = cline.length();
     int[][] offsets = new int[clength][2];
-    marks = new ArrayList(); // addition by Niraj
+    marks = new ArrayList(); 
 
     for (i = 0; i < clength; i++) {
       currentchar = cline.charAt(i);
@@ -258,7 +257,7 @@ public class Segmenter {
           //System.err.println("current word length 0");
           if (i > 0 && (Character.isWhitespace(cline.charAt(i - 1)) == false)) {
 
-            marks.add(new Long(i + marks.size())); //addition by Niraj
+            marks.add(new Long(i + marks.size())); 
             outline.append(separator);
           }
           currentword.append(currentchar);
@@ -309,9 +308,7 @@ public class Segmenter {
 
             outline.append(currentword.toString());
             if (Character.isWhitespace(currentchar) == false) {
-              // addition by Niraj
               marks.add(new Long(i + marks.size()));
-              // end of addition
               outline.append(separator);
             }
             currentword.setLength(0);
@@ -325,9 +322,7 @@ public class Segmenter {
         if (currentword.length() > 0) {
           outline.append(currentword.toString());
           if (Character.isWhitespace(currentchar) == false) {
-            // addition by Niraj
             marks.add(new Long(i + marks.size()));
-            // end of addition
             outline.append(separator);
           }
           currentword.setLength(0);
@@ -393,7 +388,7 @@ public class Segmenter {
   /**
    * This method returns the marks where the spaces were added by the segmenter
    */
-  // addition by Niraj
+
   public ArrayList getMarks() {
     return marks;
   }

@@ -117,22 +117,19 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
           document.removeAnnotationSet(setName);
           removeFromDocumentCorefData( (String) setName, matchesMap);
         } else {
-          removeSubSet(document.getAnnotations(setName), /* Niraj */ matchesMap /* End */);
+          removeSubSet(document.getAnnotations(setName), matchesMap);
         }
       }//if
     }
 
-    /* Niraj */
     // and finally we add it to the document
     if(matchesMap != null) {
       document.getFeatures().put(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME,
                                  matchesMap);
     }
-    /* End */
 
   } // execute()
 
-  /* Niraj */
   // method to undate the Document-Coref-data
   private void removeFromDocumentCorefData(String currentSet, Map matchesMap) {
     if(matchesMap == null)
@@ -196,9 +193,7 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
     if (toRemove == null || toRemove.isEmpty())
       return;
     theSet.removeAll(toRemove);
-    /* Niraj */
     removeAnnotationsFromCorefData(toRemove, theSet.getName(), matchMap);
-    /* End */
   }//removeSubSet
 
   public void setMarkupASName(String newMarkupASName) {
