@@ -139,7 +139,6 @@ public class AnnotationDiffGUI extends JFrame{
       }
     });
 
-    /* Niraj */
     Comparator startEndComparator = new Comparator() {
       public int compare(Object o1, Object o2) {
         String no1 = (String) o1;
@@ -168,7 +167,6 @@ public class AnnotationDiffGUI extends JFrame{
     diffTable.setComparator(DiffTableModel.COL_KEY_END, startEndComparator);
     diffTable.setComparator(DiffTableModel.COL_RES_START, startEndComparator);
     diffTable.setComparator(DiffTableModel.COL_RES_END, startEndComparator);
-    /* End */
 
     diffTable.setSortable(true);
     diffTable.setSortedColumn(DiffTableModel.COL_MATCH);
