@@ -12,6 +12,7 @@ that depend on its behaviour.
     <RESOURCE>
       <NAME>Old GATE HTML Document Format</NAME>
       <CLASS>gate.corpora.HtmlDocumentFormat</CLASS>
+      <COMMENT>Old HTML document parser, based on the Swing parser that drives JEditorPane.</COMMENT>
       <AUTOINSTANCE/>
       <PRIVATE/>
     </RESOURCE>

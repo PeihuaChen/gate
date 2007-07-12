@@ -9,6 +9,7 @@ by the classes in gate.gui.docview.
    <RESOURCE>
       <NAME>OLD Document Editor</NAME>
       <CLASS>gate.gui.DocumentEditor</CLASS>
+      <COMMENT>Old editor for documents, superseded by gate.gui.docview.*</COMMENT>
       <!-- type values can be "large" or "small"-->
       <GUI TYPE="large">
         <RESOURCE_DISPLAYED>gate.Document</RESOURCE_DISPLAYED>
@@ -36,6 +37,7 @@ by the classes in gate.gui.docview.
     <RESOURCE>
       <NAME>Features Editor</NAME>
       <CLASS>gate.gui.FeaturesEditor</CLASS>
+      <COMMENT>Old editor for feature values of any resource.  Superseded by the small feature editor in the bottom-left corner of the GUI.</COMMENT>
       <!-- type values can be "large" or "small"-->
       <GUI TYPE="large">
         <RESOURCE_DISPLAYED>gate.util.FeatureBearer</RESOURCE_DISPLAYED>
