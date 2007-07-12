@@ -82,8 +82,7 @@ public class POSTagger extends AbstractLanguageAnalyser {
                             document.getAnnotations() :
                             document.getAnnotations(inputASName);
 
-    /* Addition by Niraj */
-                            
+                           
     if(baseTokenAnnotationType == null || baseTokenAnnotationType.trim().length()==0) {
         throw new ExecutionException("No base Token Annotation Type provided!");
     }
@@ -100,8 +99,6 @@ public class POSTagger extends AbstractLanguageAnalyser {
     if(outputAnnotationType == null || outputAnnotationType.trim().length()==0) {
         throw new ExecutionException("No AnnotationType provided to store the new feature!");
     }
-    
-    /* End of addition */
     
     AnnotationSet sentencesAS = inputAS.get(baseSentenceAnnotationType);
     AnnotationSet tokensAS = inputAS.get(baseTokenAnnotationType);
@@ -160,10 +157,8 @@ public class POSTagger extends AbstractLanguageAnalyser {
           Iterator resIter = taggerResults.iterator();
           Iterator tokIter = tokensInCurrentSentence.iterator();
           while(resIter.hasNext()){
-              /* Addition by Niraj */
               Annotation annot = (Annotation) tokIter.next();
               addFeatures(annot, TOKEN_CATEGORY_FEATURE_NAME, ((String[])resIter.next())[1]);
-              /* End */
           }
         }
         fireProgressChanged(sentIndex++ * 100 / sentCnt);
@@ -193,10 +188,8 @@ public class POSTagger extends AbstractLanguageAnalyser {
         Iterator resIter = taggerResults.iterator();
         Iterator tokIter = tokensInCurrentSentence.iterator();
         while(resIter.hasNext()){
-            /* Addition by Niraj */
             Annotation annot = (Annotation) tokIter.next();
             addFeatures(annot, TOKEN_CATEGORY_FEATURE_NAME, ((String[])resIter.next())[1]);
-            /* End */
         }
       }//if(currentToken != null)
       fireProcessFinished();
@@ -405,10 +398,8 @@ Out.prln("POS after execution time:" + postTime);
   private java.net.URL rulesURL;
   private String inputASName;
   private String encoding;
-  /* Addition by Niraj */
   private String baseTokenAnnotationType;
   private String baseSentenceAnnotationType;
   private String outputAnnotationType;
   private String outputASName;
-  /* End of Addition */
 }

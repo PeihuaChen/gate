@@ -35,7 +35,6 @@ import java.net.URL;
  */
 class Lexicon extends HashMap {
 
-  /** Niraj */
   private String encoding;
 
 
@@ -50,7 +49,6 @@ class Lexicon extends HashMap {
                                   + "argument constructor to specify "
                                   + "encoding.");
   }
-  /* End */
 
   /**
    * Constructor.

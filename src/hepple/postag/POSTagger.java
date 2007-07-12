@@ -88,9 +88,7 @@ public class POSTagger {
 
     Lexicon lexicon;
 
-    /** Niraj */
     private String encoding;
-    /* End */
 
     static final String staart = "STAART";
 
