@@ -498,11 +498,14 @@
   <target name="clean" depends="clean.gate, plugins.clean" />
   
   <!-- Make documentation -->
-	<taskdef name="java2html"
-	    classname="de.java2html.anttasks.Java2HtmlTask"
-	    classpath="${buildDir}/lib/java2html.jar"
-	/>
-  <target name="javadoc">
+  <target name="java2html.taskdef">
+    <taskdef name="java2html"
+        classname="de.java2html.anttasks.Java2HtmlTask"
+        classpath="${buildDir}/lib/java2html.jar"
+    />
+  </target>
+
+  <target name="javadoc" depends="java2html.taskdef">
     <javadoc access="protected" 
               destdir="${docDir}/javadoc"
               classpathref="run.class.path"
@@ -520,12 +523,12 @@
               maxmemory="${runtime.max.memory}">
       <fileset dir="${srcDir}"/>        
     </javadoc>
-  	<!-- Now replace the ugly Java-html files with a better version -->
-  	<delete dir="${docDir}/javadoc/src-html"/>
-  	<java2html srcdir="${srcDir}"
-  	           destdir="${docDir}/javadoc/src-html"
-  		         includes="**/*.java"
-  	           style="eclipse"
+    <!-- Now replace the ugly Java-html files with a better version -->
+    <delete dir="${docDir}/javadoc/src-html"/>
+    <java2html srcdir="${srcDir}"
+               destdir="${docDir}/javadoc/src-html"
+               includes="**/*.java"
+               style="eclipse"
                showLineNumbers="true"
                showFileName="true"
                showTableBorder="false"
@@ -540,7 +543,7 @@
   </target>
   
   <!-- Make documentation - internal -->
-  <target name="internaljavadoc">
+  <target name="internaljavadoc" depends="java2html.taskdef">
    <javadoc access="private" 
               destdir="${docDir}/javadoc/internal"
               classpathref="run.class.path"
@@ -558,22 +561,22 @@
               maxmemory="${runtime.max.memory}">
       <fileset dir="${srcDir}"/>        
     </javadoc>
-  	<delete dir="${docDir}/javadoc/internal/src-html"/>
-  	<java2html srcdir="${srcDir}"
-  	           destdir="${docDir}/javadoc/internal/src-html"
-				      includes="**/*.java"
-				      style="eclipse"
-				      showLineNumbers="true"
-				      showFileName="true"
-				      showTableBorder="false"
-				      includeDocumentHeader="true"
-				      outputFormat="html"
-				      lineAnchorPrefix="line."
-				      tabs="2"
-				      addLineAnchors="true"
-				      showDefaultTitle="true"
-				      useShortFileName="true"
-				      overwrite="true"/> 	
+    <delete dir="${docDir}/javadoc/internal/src-html"/>
+    <java2html srcdir="${srcDir}"
+               destdir="${docDir}/javadoc/internal/src-html"
+               includes="**/*.java"
+               style="eclipse"
+               showLineNumbers="true"
+               showFileName="true"
+               showTableBorder="false"
+               includeDocumentHeader="true"
+               outputFormat="html"
+               lineAnchorPrefix="line."
+               tabs="2"
+               addLineAnchors="true"
+               showDefaultTitle="true"
+               useShortFileName="true"
+               overwrite="true"/>
   </target>
 	
   <target name="doc" depends="javadoc, internaljavadoc"/>
