@@ -19,8 +19,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.xml.*;
 
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.*;
 import java.text.NumberFormat;
 import java.util.*;
 
@@ -362,30 +361,18 @@ public class PersistenceManager {
   public static String getRelativePath(URL context, URL target) {
     if(context.getProtocol().equals("file")
             && target.getProtocol().equals("file")) {
+      File contextFile = Files.fileFromURL(context);
+      File targetFile = Files.fileFromURL(target);
 
-      // normalise the two file URLS
-      try {
-        context = new File(context.getPath()).toURI().toURL();
-      }
-      catch(MalformedURLException mue) {
-        throw new GateRuntimeException("Could not normalise the file URL:\n"
-                + context + "\nThe problem was:\n" + mue);
-      }
-      try {
-        target = new File(target.getPath()).toURI().toURL();
-      }
-      catch(MalformedURLException mue) {
-        throw new GateRuntimeException("Could not normalise the file URL:\n"
-                + target + "\nThe problem was:\n" + mue);
-      }
+
       List targetPathComponents = new ArrayList();
-      File aFile = new File(target.getPath()).getParentFile();
+      File aFile = targetFile.getParentFile();
       while(aFile != null) {
         targetPathComponents.add(0, aFile);
         aFile = aFile.getParentFile();
       }
       List contextPathComponents = new ArrayList();
-      aFile = new File(context.getPath()).getParentFile();
+      aFile = contextFile.getParentFile();
       while(aFile != null) {
         contextPathComponents.add(0, aFile);
         aFile = aFile.getParentFile();
@@ -426,13 +413,20 @@ public class PersistenceManager {
       }
       // we have the directory; add the file name
       if(relativePath.length() == 0) {
-        relativePath += new File(target.getPath()).getName();
+        relativePath += targetFile.getName();
       }
       else {
-        relativePath += "/" + new File(target.getPath()).getName();
+        relativePath += "/" + targetFile.getName();
       }
 
-      return relativePath;
+      try {
+        URI relativeURI = new URI(null, null, relativePath, null, null);
+        return relativeURI.getRawPath();
+      }
+      catch(URISyntaxException use) {
+        throw new GateRuntimeException("Failed to generate relative path " +
+            "between context: " + context + " and target: " + target, use);
+      }
     }
     else {
       throw new GateRuntimeException("Both the target and the context URLs "
