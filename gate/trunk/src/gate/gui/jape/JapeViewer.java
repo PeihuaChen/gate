@@ -73,6 +73,10 @@ public class JapeViewer extends AbstractVisualResource implements
 							+ target.getClass().toString()
 							+ " is not a GATE Jape Transducer!");
 		}
+    
+    if(transducer != null) {
+      transducer.removeProgressListener(this);
+    }
 
 		this.transducer = (Transducer) target;
 		// Transducer inst =
@@ -86,7 +90,15 @@ public class JapeViewer extends AbstractVisualResource implements
 	private void readJAPEFileContents() {
 		try {
 			if (japeFileURL != null) {
-				BufferedReader br = new BufferedReader(new FileReader(new File(japeFileURL.getFile())));
+        Reader japeReader = null;
+        if(transducer.getEncoding() == null) {
+          japeReader = new InputStreamReader(japeFileURL.openStream());
+        }
+        else {
+          japeReader = new InputStreamReader(japeFileURL.openStream(),
+                  transducer.getEncoding());
+        }
+				BufferedReader br = new BufferedReader(japeReader);
 				String content = br.readLine();
 				japeFileContents = "";
 				while (content != null) {
