@@ -122,11 +122,13 @@ public class OntologyEditor extends AbstractVisualResource
     tree.getSelectionModel().setSelectionMode(
             TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
     scroller = new JScrollPane(tree);
+
     // enable tooltips for the tree
     ToolTipManager.sharedInstance().registerComponent(tree);
     tabbedPane.addTab("Classes & Instances", scroller);
     scroller.setBorder(new TitledBorder("Classes and Instances"));
     // ----------------------------------------------
+    
     propertyRootNode = new DefaultMutableTreeNode(null, true);
     propertyTreeModel = new DefaultTreeModel(propertyRootNode);
     propertyTree = new DnDJTree(propertyTreeModel);
@@ -696,7 +698,16 @@ public class OntologyEditor extends AbstractVisualResource
           if(rows == null || rows.length == 0) return;
 
           Object value = detailsTable.getModel().getValueAt(rows[0], 1);
-          if(value instanceof DetailsGroup) return;
+          if(value instanceof DetailsGroup) {
+            if(column == 0) {
+              boolean expanded = ((DetailsGroup)value).isExpanded();
+              ((DetailsGroup)value).setExpanded(!expanded);
+              detailsTable.updateUI();
+            } else {
+              return;
+            }
+          }
+          
           final Object finalObj = value;
 
           // find out the selected component in the tree
@@ -903,6 +914,16 @@ public class OntologyEditor extends AbstractVisualResource
           if(rows == null || rows.length == 0) return;
 
           Object value = propertyDetailsTable.getModel().getValueAt(rows[0], 1);
+          if(value instanceof DetailsGroup) {
+            if(column == 0) {
+              boolean expanded = ((DetailsGroup)value).isExpanded();
+              ((DetailsGroup)value).setExpanded(!expanded);
+              propertyDetailsTable.updateUI();
+            } else {
+              return;
+            }
+          }
+          
           if(value instanceof DetailsGroup) return;
           final Object finalObj = value;
 
