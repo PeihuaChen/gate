@@ -508,10 +508,13 @@ public class XJTable extends JTable{
      * Converts an index from the source coordinates to the target ones.
      * Used to propagate events from the data source (table model) to the view. 
      * @param index the index in the source coordinates.
-     * @return the corresponding index in the target coordinates.
+     * @return the corresponding index in the target coordinates or -1 if the 
+     * provided row is outside the permitted values.
      */
     public int sourceToTarget(int index){
-      return sourceToTarget[index];
+      return (index >= 0 && index < sourceToTarget.length) ?
+              sourceToTarget[index] :
+              -1;
     }
 
     /**
@@ -519,10 +522,13 @@ public class XJTable extends JTable{
      * @param index the index in the target coordinates.
      * Used to propagate events from the view (e.g. editing) to the source
      * data source (table model).
-     * @return the corresponding index in the source coordinates.
+     * @return the corresponding index in the source coordinates or -1 if the 
+     * row provided is outside the allowed range.
      */
     public int targetToSource(int index){
-      return targetToSource[index];
+      return (index >= 0 && index < targetToSource.length) ?
+             targetToSource[index] :
+             -1;
     }
     
     /**
