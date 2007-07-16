@@ -1036,8 +1036,8 @@ public class AnnotationSetsView extends AbstractDocumentView
       }else{
         //hide highlights
         try{
-          textView.removeHighlights(hghltTagsForAnn.values());
           listView.removeAnnotations(annListTagsForAnn.values());
+          textView.removeHighlights(hghltTagsForAnn.values());
         }finally{
           hghltTagsForAnn.clear();
           annListTagsForAnn.clear();

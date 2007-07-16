@@ -240,11 +240,14 @@ public class AnnotationListView extends AbstractDocumentView
   }
 
   protected void showHighlights(){
-    int[] rows = table.getSelectedRows();
+    int[] viewRows = table.getSelectedRows();
     AnnotationData aHandler = null;
-    for(int i = 0; i < rows.length; i++){
-      aHandler = annDataList.get(table.rowViewToModel(rows[i]));
-      textView.addBlinkingHighlight(aHandler.ann);
+    for(int i = 0; i < viewRows.length; i++){
+      int modelRow = table.rowViewToModel(viewRows[i]);
+      if(modelRow >= 0){
+        aHandler = annDataList.get(modelRow);
+        textView.addBlinkingHighlight(aHandler.ann);
+      }
     }    
     //scroll to show the last highlight
     if(aHandler != null && aHandler.ann != null)
@@ -271,14 +274,16 @@ public class AnnotationListView extends AbstractDocumentView
   public void removeAnnotation(AnnotationData tag){
     int row = annDataList.indexOf(tag);
     if(row >= 0){
+      AnnotationData aHandler = annDataList.get(row);
       //remove from selection, if the table is built
       if(table != null){
         int viewRow = table.rowModelToView(row);
         if(table.isRowSelected(viewRow)){
           table.getSelectionModel().removeIndexInterval(viewRow, viewRow);
+          //remove the blinking highlight
+          textView.removeBlinkingHighlight(aHandler.ann);
         }
       }
-      AnnotationData aHandler = annDataList.get(row);
       aHandler.ann.removeAnnotationListener(AnnotationListView.this);
       annDataList.remove(row);
       if(tableModel != null) tableModel.fireTableRowsDeleted(row, row);
@@ -286,8 +291,37 @@ public class AnnotationListView extends AbstractDocumentView
   }
   
   public void removeAnnotations(Collection<AnnotationData> tags){
-    for(AnnotationData aData : (Collection<AnnotationData>)tags)
-      removeAnnotation(aData);
+    //cache the selected annotations
+    final List<AnnotationData> selectedAnns = new ArrayList<AnnotationData>();
+    if(table != null){
+      int[] selRows = table.getSelectedRows();
+      if(selRows != null && selRows.length > 0){
+        for(int viewRow : selRows){
+          int modelRow = table.rowViewToModel(viewRow);
+          AnnotationData aData = annDataList.get(modelRow);
+          //only save it if it's not to be removed
+          if(!tags.contains(aData)) selectedAnns.add(aData);
+        }
+      }
+    }
+    //to speed-up things, first remove all blinking highlights
+    table.getSelectionModel().clearSelection();
+    //now do the actual removal
+    for(AnnotationData aData : tags) removeAnnotation(aData);
+    //restore the selection
+    //this needs to happen after the table has caught up with all the changes
+    //hence we need to queue it to the GUI thread
+    SwingUtilities.invokeLater(new Runnable(){
+      public void run(){
+        for(AnnotationData aData : selectedAnns){
+          int modelRow = annDataList.indexOf(aData);
+          if(modelRow != -1){
+            int viewRow = table.rowModelToView(modelRow);
+            table.getSelectionModel().addSelectionInterval(viewRow, viewRow);
+          }
+        }        
+      }
+    });
   }
 
   /**

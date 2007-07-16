@@ -44,6 +44,8 @@ public class TextualDocumentView extends AbstractDocumentView {
     //is not required.
     highlightsToAdd = new LinkedList<HighlightData>();
     highlightsToRemove = new LinkedList<HighlightData>();
+    blinkingHighlightsToRemove = new LinkedList<Integer>();
+    blinkingHighlightsToAdd = new LinkedList<Annotation>();
     gateDocListener = new GateDocumentListener();
   }
   
@@ -92,6 +94,8 @@ public class TextualDocumentView extends AbstractDocumentView {
    * @param tags the tags for the highlights to be removed
    */  
   public void removeHighlights(Collection tags){
+    //this might get an optimised implementation at some point,
+    //for the time being this seems to work fine.
     for(Object tag : tags) removeHighlight(tag);
   }
   
@@ -135,33 +139,37 @@ public class TextualDocumentView extends AbstractDocumentView {
   }
 
   public void addBlinkingHighlight(Annotation ann){
-    synchronized(blinkingTagsForAnnotations){
-      blinkingTagsForAnnotations.put(ann.getId(), new HighlightData(ann, null, null));
+    synchronized(TextualDocumentView.this){
+      blinkingHighlightsToAdd.add(ann);
+      
+//      blinkingTagsForAnnotations.put(ann.getId(), 
+//              new HighlightData(ann, null, null));
+//      highlightsMinder.restart();
     }
   }
   
   public void removeBlinkingHighlight(Annotation ann){
-    synchronized(blinkingTagsForAnnotations){
-      HighlightData annTag = blinkingTagsForAnnotations.remove(ann.getId()); 
-      if(annTag != null && annTag.tag != null)
-          textView.getHighlighter().removeHighlight(annTag.tag);
+    synchronized(TextualDocumentView.this) {
+      blinkingHighlightsToRemove.add(ann.getId());
+      highlightsMinder.restart();
     }
   }
   
   
   public void removeAllBlinkingHighlights(){
-    synchronized(blinkingTagsForAnnotations){
-      Iterator annIdIter = new ArrayList(blinkingTagsForAnnotations.keySet()).
-        iterator();
-      while(annIdIter.hasNext()){
-        HighlightData annTag = blinkingTagsForAnnotations.remove(annIdIter.next());
-        Annotation ann = annTag.annotation;
-        Object tag = annTag.tag;
-        if(tag != null){
-          Highlighter highlighter = textView.getHighlighter();
-          highlighter.removeHighlight(tag);
-        }
-      }
+    synchronized(TextualDocumentView.this){
+      blinkingHighlightsToRemove.addAll(blinkingTagsForAnnotations.keySet());
+//      Iterator annIdIter = new ArrayList(blinkingTagsForAnnotations.keySet()).
+//        iterator();
+//      while(annIdIter.hasNext()){
+//        HighlightData annTag = blinkingTagsForAnnotations.remove(annIdIter.next());
+//        Object tag = annTag.tag;
+//        if(tag != null){
+//          Highlighter highlighter = textView.getHighlighter();
+//          highlighter.removeHighlight(tag);
+//        }
+//      }
+      highlightsMinder.restart();
     }
   }
   
@@ -260,51 +268,71 @@ public class TextualDocumentView extends AbstractDocumentView {
    */
   protected class UpdateHighlightsAction extends AbstractAction{
     public void actionPerformed(ActionEvent evt){
-      updateBlinkingHighlights();
-      updateNormalHighlights();
+      synchronized(blinkingTagsForAnnotations){
+        updateBlinkingHighlights();
+        updateNormalHighlights();
+      }
     }
     
     
     protected void updateBlinkingHighlights(){
       //this needs to either add or remove the highlights
-      synchronized(blinkingTagsForAnnotations){
-        //get out as quickly as possible if nothing to do
-        if(blinkingTagsForAnnotations.isEmpty()) return;
-        Iterator annIdIter = new ArrayList(blinkingTagsForAnnotations.keySet()).
-          iterator();
-        Highlighter highlighter = textView.getHighlighter();
-        if(highlightsShown){
-          //hide current highlights
-          while(annIdIter.hasNext()){
-            HighlightData annTag = 
-                blinkingTagsForAnnotations.get(annIdIter.next());
-            Annotation ann = annTag.annotation;
-            Object tag = annTag.tag;
-            if(tag != null) highlighter.removeHighlight(tag);
-            annTag.tag = null;
-          }
-          highlightsShown = false;
-        }else{
-          //show highlights
-          while(annIdIter.hasNext()){
-            HighlightData annTag = 
-                blinkingTagsForAnnotations.get(annIdIter.next());
-            Annotation ann = annTag.annotation;
-            try{
-              Object tag = highlighter.addHighlight(
-                      ann.getStartNode().getOffset().intValue(),
-                      ann.getEndNode().getOffset().intValue(),
-                      new DefaultHighlighter.DefaultHighlightPainter(
-                              textView.getSelectionColor()));
-              annTag.tag = tag;
-//              scrollAnnotationToVisible(ann);
-            }catch(BadLocationException ble){
-              //this should never happen
-              throw new GateRuntimeException(ble);
-            }
-          }
-          highlightsShown = true;
+      
+      //first remove the queued highlights
+      Highlighter highlighter = textView.getHighlighter();      
+      for(Integer annId : blinkingHighlightsToRemove){
+        HighlightData annTag = blinkingTagsForAnnotations.remove(annId);
+        if(annTag != null){
+          Object tag = annTag.tag;
+          if(tag != null) highlighter.removeHighlight(tag);
+          annTag.tag = null;
         }
+      }
+      blinkingHighlightsToRemove.clear();
+      //then add the queued highlights
+      for(Annotation ann : blinkingHighlightsToAdd){
+        blinkingTagsForAnnotations.put(ann.getId(), 
+                new HighlightData(ann, null, null));
+      }
+      blinkingHighlightsToAdd.clear();
+
+      //finally switch the state of the current blinking highlights
+      //get out as quickly as possible if nothing to do
+      if(blinkingTagsForAnnotations.isEmpty()) return;
+      Iterator annIdIter = new ArrayList(blinkingTagsForAnnotations.keySet()).
+        iterator();
+      
+      if(highlightsShown){
+        //hide current highlights
+        while(annIdIter.hasNext()){
+          HighlightData annTag = 
+              blinkingTagsForAnnotations.get(annIdIter.next());
+          Annotation ann = annTag.annotation;
+          Object tag = annTag.tag;
+          if(tag != null) highlighter.removeHighlight(tag);
+          annTag.tag = null;
+        }
+        highlightsShown = false;
+      }else{
+        //show highlights
+        while(annIdIter.hasNext()){
+          HighlightData annTag = 
+              blinkingTagsForAnnotations.get(annIdIter.next());
+          Annotation ann = annTag.annotation;
+          try{
+            Object tag = highlighter.addHighlight(
+                    ann.getStartNode().getOffset().intValue(),
+                    ann.getEndNode().getOffset().intValue(),
+                    new DefaultHighlighter.DefaultHighlightPainter(
+                            textView.getSelectionColor()));
+            annTag.tag = tag;
+//              scrollAnnotationToVisible(ann);
+          }catch(BadLocationException ble){
+            //this should never happen
+            throw new GateRuntimeException(ble);
+          }
+        }
+        highlightsShown = true;
       }
     }
     
@@ -461,6 +489,18 @@ public class TextualDocumentView extends AbstractDocumentView {
    * to be removed
    */
   protected List<HighlightData> highlightsToRemove;
+  
+  /**
+   * Used internally to store the annotations for which blinking highlights 
+   * need to be removed.
+   */
+  protected List<Integer> blinkingHighlightsToRemove;  
+  
+  /**
+   * Used internally to store the annotations for which blinking highlights 
+   * need to be added.
+   */
+  protected List<Annotation> blinkingHighlightsToAdd;  
   
   protected Timer highlightsMinder;
   
