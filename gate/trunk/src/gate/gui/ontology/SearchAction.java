@@ -1,11 +1,22 @@
 package gate.gui.ontology;
 
+import gate.creole.ontology.AnnotationProperty;
+import gate.creole.ontology.DatatypeProperty;
 import gate.creole.ontology.Literal;
+import gate.creole.ontology.OClass;
+import gate.creole.ontology.OInstance;
 import gate.creole.ontology.OResource;
 import gate.creole.ontology.ObjectProperty;
 import gate.creole.ontology.RDFProperty;
+import gate.creole.ontology.Restriction;
+import gate.creole.ontology.SymmetricProperty;
+import gate.creole.ontology.TransitiveProperty;
 import gate.gui.MainFrame;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 
 import java.awt.event.ActionEvent;
@@ -21,74 +32,98 @@ import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import javax.swing.tree.TreePath;
 
+/**
+ * A Class that provides a GUI to search for a resource in the ontology
+ * editor. It allows looking up for a resource with certain name or to
+ * locate a resource that has a certain value set on the specified
+ * property.
+ * 
+ * @author niraj
+ * 
+ */
 public class SearchAction extends AbstractAction {
 
+  /**
+   * Constructor
+   * 
+   * @param s - caption of the search button
+   * @param icon - icon to be used for the search button
+   * @param editor - instance of the ontology editor
+   */
   public SearchAction(String s, Icon icon, OntologyEditor editor) {
     super(s, icon);
     this.ontologyEditor = editor;
-    panel = new JPanel();
-    panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+    guiPanel = new JPanel();
+    guiPanel.setLayout(new BoxLayout(guiPanel, BoxLayout.Y_AXIS));
     JPanel panel1 = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     JPanel panel2 = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     panel1.add(new JLabel("Find what: "));
 
-    domainBox = new JComboBox();
-    domainBox.setPrototypeDisplayValue("this is just an example, not a value. OK?");
-    domainBox.setEditable(true);
-    domainBox.setEditable(true);
-    domainBox.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
-      public void keyReleased(KeyEvent keyevent) {
-        String s = ((JTextComponent)domainBox.getEditor().getEditorComponent())
-                .getText();
-        if(s != null) {
-          if(keyevent.getKeyCode() != KeyEvent.VK_ENTER) {
-            HashSet<OResource> set = new HashSet<OResource>();
-            for(int i = 0; i < resourcesArray.length; i++) {
-              String s1 = resourcesArray[i].getName();
-              if(s1.toLowerCase().startsWith(s.toLowerCase())) {
-                set.add(resourcesArray[i]);
-              }
-            }
+    resourcesBox = new JComboBox();
+    resourcesBox.setRenderer(new ComboRenderer());
+    resourcesBox
+            .setPrototypeDisplayValue("this is just an example, not a value. OK?");
+    
+    resourcesBox.setEditable(true);
+    resourcesBox.setEditable(true);
+    resourcesBox.getEditor().getEditorComponent().addKeyListener(
+            new KeyAdapter() {
+              public void keyReleased(KeyEvent keyevent) {
+                String s = ((JTextComponent)resourcesBox.getEditor()
+                        .getEditorComponent()).getText();
+                if(s != null) {
+                  if(keyevent.getKeyCode() != KeyEvent.VK_ENTER) {
+                    HashSet<OResource> set = new HashSet<OResource>();
+                    for(int i = 0; i < resourcesArray.length; i++) {
+                      String s1 = resourcesArray[i].getName();
+                      if(s1.toLowerCase().startsWith(s.toLowerCase())) {
+                        set.add(resourcesArray[i]);
+                      }
+                    }
 
-            if(searchInPropertyValues.isSelected()) {
-              RDFProperty aProp = (RDFProperty)properties.getSelectedItem();
-              List<OResource> toAdd = new ArrayList<OResource>();
-              if(aProp instanceof ObjectProperty) {
-                OResource res = ontologyEditor.ontology.getOResourceByName(s);
-                if(res != null) {
-                  toAdd = ontologyEditor.ontology.getOResourcesWith(aProp, res);
+                    if(searchInPropertyValues.isSelected()) {
+                      RDFProperty aProp = (RDFProperty)properties
+                              .getSelectedItem();
+                      List<OResource> toAdd = new ArrayList<OResource>();
+                      if(aProp instanceof ObjectProperty) {
+                        OResource res = ontologyEditor.ontology
+                                .getOResourceByName(s);
+                        if(res != null) {
+                          toAdd = ontologyEditor.ontology.getOResourcesWith(
+                                  aProp, res);
+                        }
+                      }
+                      else {
+                        toAdd = ontologyEditor.ontology.getOResourcesWith(
+                                aProp, new Literal(s));
+                      }
+                      set.addAll(toAdd);
+                    }
+                    List<OResource> setList = new ArrayList<OResource>(set);
+                    Collections.sort(setList, new OntologyItemComparator());
+
+                    DefaultComboBoxModel defaultcomboboxmodel = new DefaultComboBoxModel(
+                            setList.toArray());
+
+                    resourcesBox.setModel(defaultcomboboxmodel);
+
+                    try {
+                      if(!setList.isEmpty()) resourcesBox.showPopup();
+                    }
+                    catch(Exception exception) {
+                    }
+                  }
+                  ((JTextComponent)resourcesBox.getEditor()
+                          .getEditorComponent()).setText(s);
                 }
               }
-              else {
-                toAdd = ontologyEditor.ontology.getOResourcesWith(aProp,
-                        new Literal(s));
-              }
-              set.addAll(toAdd);
-            }
-            List<OResource> setList = new ArrayList<OResource>(set);
-            Collections.sort(setList, new OntologyItemComparator());
-
-            
-            DefaultComboBoxModel defaultcomboboxmodel = new DefaultComboBoxModel(
-                    setList.toArray());
-
-            domainBox.setModel(defaultcomboboxmodel);
-
-            try {
-              if(!setList.isEmpty()) domainBox.showPopup();
-            }
-            catch(Exception exception) {
-            }
-          }
-          ((JTextComponent)domainBox.getEditor().getEditorComponent())
-                  .setText(s);
-        }
-      }
-    });
-    panel1.add(domainBox);
+            });
+    panel1.add(resourcesBox);
     properties = new JComboBox();
+    properties.setRenderer(new ComboRenderer());
     properties.setEditable(true);
-    properties.setPrototypeDisplayValue("this is just an example, not a value. OK?");
+    properties
+            .setPrototypeDisplayValue("this is just an example, not a value. OK?");
     properties.getEditor().getEditorComponent().addKeyListener(
             new KeyAdapter() {
               public void keyReleased(KeyEvent keyevent) {
@@ -107,7 +142,7 @@ public class SearchAction extends AbstractAction {
                     DefaultComboBoxModel defaultcomboboxmodel = new DefaultComboBoxModel(
                             arraylist.toArray());
                     properties.setModel(defaultcomboboxmodel);
-                    
+
                     try {
                       if(!arraylist.isEmpty()) properties.showPopup();
                     }
@@ -119,48 +154,54 @@ public class SearchAction extends AbstractAction {
                 }
               }
             });
-    
+
     searchInPropertyValues = new JCheckBox("In the values of: ");
     searchInPropertyValues.setSelected(false);
     panel2.add(searchInPropertyValues);
     panel2.add(properties);
-    
-    panel.add(panel1);
-    panel.add(panel2);
+
+    guiPanel.add(panel1);
+    guiPanel.add(panel2);
+    resourcesBox.setPreferredSize(new Dimension(300, resourcesBox.getPreferredSize().height));
+    properties.setPreferredSize(new Dimension(300, resourcesBox.getPreferredSize().height));
   }
 
+  /**
+   * Obtains a list of resources from the ontology being displayed in
+   * the ontology editor and invokes the search dialog.
+   */
   public void actionPerformed(ActionEvent ae) {
     List<OResource> resources = ontologyEditor.ontology.getAllResources();
     Collections.sort(resources, new OntologyItemComparator());
-    
+
     resourcesArray = new OResource[resources.size()];
     resourcesArray = resources.toArray(resourcesArray);
     DefaultComboBoxModel defaultcomboboxmodel = new DefaultComboBoxModel(
             resources.toArray());
-    domainBox.setModel(defaultcomboboxmodel);
-    
+    resourcesBox.setModel(defaultcomboboxmodel);
+
     Set<RDFProperty> props = ontologyEditor.ontology.getRDFProperties();
     props.addAll(ontologyEditor.ontology.getAnnotationProperties());
     props.addAll(ontologyEditor.ontology.getObjectProperties());
     List<RDFProperty> propsList = new ArrayList<RDFProperty>(props);
     Collections.sort(propsList, new OntologyItemComparator());
-    
+
     propertiesArray = new RDFProperty[props.size()];
     propertiesArray = props.toArray(propertiesArray);
     DefaultComboBoxModel defaultcomboboxmodel1 = new DefaultComboBoxModel(
             propsList.toArray());
     properties.setModel(defaultcomboboxmodel1);
-    
-    
+
     resources = null;
     props = null;
     propsList = null;
-    
+
     int returnValue = JOptionPane.showOptionDialog(MainFrame.getInstance(),
-            panel, "Find Ontology Resource", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE,
-            MainFrame.getIcon("search"), new String[] {"Find", "Cancel"}, "Find");
+            guiPanel, "Find Ontology Resource", JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.QUESTION_MESSAGE, MainFrame.getIcon("search"),
+            new String[] {"Find", "Cancel"}, "Find");
     if(returnValue == JOptionPane.OK_OPTION) {
-      OResource selectedR = (OResource)domainBox.getSelectedItem();
+      OResource selectedR = (OResource)resourcesBox.getSelectedItem();
       if(selectedR instanceof RDFProperty) {
         ontologyEditor.propertyTree.setSelectionPath(new TreePath(
                 ontologyEditor.uri2TreeNodesListMap.get(
@@ -182,17 +223,138 @@ public class SearchAction extends AbstractAction {
     }
   }
 
-  protected JComboBox domainBox;
+  /**
+   * Box to show the filtered resources based on the user's input in the
+   * find what box.
+   */
+  protected JComboBox resourcesBox;
 
-  protected JPanel panel;
+  /**
+   * main guiPanel that holds the search gui components.
+   */
+  protected JPanel guiPanel;
 
+  /**
+   * The editor whose ontology is used for searching in.
+   */
   protected OntologyEditor ontologyEditor;
 
+  /**
+   * An array that contains a list of resources in which the search
+   * function searches in. This list is updated on each invocation of
+   * the search function.
+   */
   protected OResource[] resourcesArray = new OResource[0];
 
+  /**
+   * An array that contains a list of properties in which the search
+   * function searches in. This list is updated on each invocation of
+   * the search function.
+   */
   protected RDFProperty[] propertiesArray = new RDFProperty[0];
 
+  /**
+   * combobox that holds the filtered properties based on user's input.
+   */
   protected JComboBox properties;
 
+  /**
+   * Indicates if the search function should search for the find what
+   * string in the values of the specified property.
+   */
   protected JCheckBox searchInPropertyValues;
+
+
+  /**
+   * Description: This class provides the renderer for the Search comboBox Nodes.
+   * @author Niraj Aswani
+   * @version 1.0
+   */
+  public class ComboRenderer extends JPanel implements ListCellRenderer {
+
+    /**
+     * Class label is shown using this label
+     */
+    private JLabel label;
+
+    /**
+     * ICon label
+     */
+    private JLabel iconLabel;
+
+    /**
+     * Label Panel
+     */
+    private JPanel labelPanel;
+    
+    /**
+     * Constructor
+     * 
+     * @param owner
+     */
+    public ComboRenderer() {
+      label = new JLabel();
+      iconLabel = new JLabel();
+      labelPanel = new JPanel(new BorderLayout(5,10));
+      ((BorderLayout) labelPanel.getLayout()).setHgap(0);
+      labelPanel.add(label);
+      
+      setLayout(new BorderLayout(5,10));
+      ((BorderLayout)getLayout()).setHgap(1);
+      add(iconLabel, BorderLayout.WEST);
+      add(labelPanel, BorderLayout.CENTER);
+      this.setOpaque(true);
+    }
+
+    /**
+     * Renderer method
+     */
+    public Component getListCellRendererComponent(JList list, Object value,
+        int row, boolean isSelected, boolean hasFocus) {
+
+     
+      if (!(value instanceof OResource)) {
+        label.setBackground(Color.white);
+        return this;
+      }
+      
+      javax.swing.Icon icon = null;
+      String conceptName = ((OResource) value).getName();
+      iconLabel.setVisible(true);
+      if(value instanceof Restriction) {
+        icon = MainFrame.getIcon("ontology-restriction");
+      }
+      else if(value instanceof OClass) {
+        icon = MainFrame.getIcon("ontology-class");
+      }
+      else if(value instanceof OInstance) {
+        icon = MainFrame.getIcon("ontology-instance");
+      }
+      else if(value instanceof AnnotationProperty) {
+        icon = MainFrame.getIcon("ontology-annotation-property");
+      }
+      else if(value instanceof DatatypeProperty) {
+        icon = MainFrame.getIcon("ontology-datatype-property");
+      }
+      else if(value instanceof SymmetricProperty) {
+        icon = MainFrame.getIcon("ontology-symmetric-property");
+      }
+      else if(value instanceof TransitiveProperty) {
+        icon = MainFrame.getIcon("ontology-transitive-property");
+      }
+      else if(value instanceof ObjectProperty) {
+        icon = MainFrame.getIcon("ontology-object-property");
+      }
+      else if(value instanceof RDFProperty) {
+        icon = MainFrame.getIcon("ontology-rdf-property");
+      }      
+      
+      iconLabel.setIcon(icon);
+      label.setText(conceptName);
+      label.setFont(list.getFont());
+      return this;
+    }
+  }  
+  
+
 }
