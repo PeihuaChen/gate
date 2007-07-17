@@ -203,7 +203,13 @@ public class OntologyEditor extends AbstractVisualResource
             propertyDetailsTable.getBackground());
 
     // --------------------
+    
+    
     toolBar = new JToolBar(JToolBar.HORIZONTAL);
+    searchAction = new SearchAction("", MainFrame.getIcon("search"), this);
+    search = new JButton(searchAction);
+    search.setToolTipText("Advanced search in the ontology");
+    
     topClassAction = new TopClassAction("", MainFrame
             .getIcon("ontology-topclass"));
     topClass = new JButton(topClassAction);
@@ -281,6 +287,7 @@ public class OntologyEditor extends AbstractVisualResource
     toolBar.add(symmetricProperty);
     toolBar.add(transitiveProperty);
     toolBar.add(delete);
+    toolBar.add(search);
     this.add(toolBar, BorderLayout.NORTH);
   }
 
@@ -2108,10 +2115,14 @@ public class OntologyEditor extends AbstractVisualResource
 
   protected JButton delete;
 
+  protected JButton search;
+  
   protected ArrayList<DefaultMutableTreeNode> selectedNodes;
 
   protected ArrayList<String> ontologyClassesURIs;
 
+  protected SearchAction searchAction;
+  
   protected TopClassAction topClassAction;
 
   protected SubClassAction subClassAction;
