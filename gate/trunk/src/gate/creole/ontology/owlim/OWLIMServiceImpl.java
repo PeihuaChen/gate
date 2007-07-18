@@ -1605,7 +1605,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void setCurrentRepositoryID(String repositoryID)
           throws GateOntologyException {
-    if(DEBUG) print("setCurrentRepository");
+    if(DEBUG) print("setCurrentRepository with ID "+repositoryID);
     if(sail != null && sail.transactionStarted()) {
       // we need to commit all changes
       sail.commitTransaction();
@@ -4115,9 +4115,10 @@ public class OWLIMServiceImpl implements OWLIM,
     HashSet<String> finallyToReturn = new HashSet<String>();
     finallyToReturn.addAll(toReturn);
     parsedValues.addAll(toReturn);
+    isOntologyData = false;
     for(String value : toReturn) {
       finallyToReturn.addAll(getImportValues(currentRepository, value, baseURI,
-              format, absolutePersistLocation, isOntologyData, parsedValues));
+              OConstants.ONTOLOGY_FORMAT_RDFXML, absolutePersistLocation, isOntologyData, parsedValues));
     }
 
     return finallyToReturn;
