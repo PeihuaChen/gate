@@ -8,6 +8,7 @@
 package gate.learning;
 
 import java.io.File;
+import java.net.URISyntaxException;
 import java.util.Iterator;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
@@ -86,12 +87,11 @@ public class LearningEngineSettings {
     java.net.URL xmlengines) throws GateException {
     SAXBuilder saxBuilder = new SAXBuilder(false);
     org.jdom.Document jdomDoc = null;
-    if(LogService.minVerbosityLevel > 0)
-      System.out.println("xmlFile=" + xmlengines.toString());
     try {
       jdomDoc = saxBuilder.build(xmlengines);
     } catch(Exception e) {
     }
+ 
     Element rootElement = jdomDoc.getRootElement();
     if(!rootElement.getName().equals("ML-CONFIG"))
       throw new ResourceInstantiationException(

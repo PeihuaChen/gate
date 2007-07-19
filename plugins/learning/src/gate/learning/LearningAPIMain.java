@@ -14,9 +14,9 @@ import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.util.GateException;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
 
@@ -39,6 +39,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
    * and evaluation.
    */
   private RunMode learningMode;
+  private RunMode learningModeAppl;
   /** Learning settings specified in the configuration file. */
   private LearningEngineSettings learningSettings;
   /**
@@ -77,6 +78,19 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
     // it must be a directory
     if(!wd.isDirectory()) { throw new ResourceInstantiationException(wd
       + " must be a reference to directory"); }
+    if(LogService.minVerbosityLevel > 0)
+      System.out.println("Configuration File=" + configFileURL.toString());
+    try {
+      if(!new File(configFileURL.toURI()).exists()) {
+        //System.out.println("Error: the configuration file specified does not exist!!");
+        throw new ResourceInstantiationException(
+          "Error: the configuration file specified does not exist!!");
+      }
+    } catch(URISyntaxException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    }
+    
     try {
       // Load the learning setting file
       // by reading the configuration file
@@ -124,6 +138,8 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
     } catch(Exception e) {
       throw new ResourceInstantiationException(e);
     }
+    
+    learningModeAppl = RunMode.APPLICATION;
     fireProcessFinished();
     // System.out.println("initialisation finished.");
     return this;
@@ -146,6 +162,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
     int positionDoc = corpus.indexOf(document);
     // docsName.add(positionDoc, document.getName());
     if(positionDoc == 0) {
+      lightWeightApi.inputASName = inputASName;
       if(LogService.minVerbosityLevel > 0)
         System.out.println("Pre-processing the " + corpus.size()
           + " documents...");
@@ -164,6 +181,24 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
         e.printStackTrace();
       }
     }
+    /*if(learningMode.equals(learningModeAppl)) {
+      LogService.logMessage("** Application mode:", 1);
+      isTraining = false;
+      lightWeightApi.annotations2NLPFeatures(this.document, 0,
+          wdResults, isTraining, learningSettings);
+      lightWeightApi.finishFVs(wdResults, 1, isTraining,
+        learningSettings);
+      lightWeightApi.nlpfeatures2FVs(wdResults, 1, isTraining, learningSettings);
+      // Applying th model
+      String classTypeOriginal = learningSettings.datasetDefinition
+      .getClassAttribute().getType();
+      try {
+        lightWeightApi.applyModelInJavaPerDoc(this.document, classTypeOriginal, learningSettings);
+      } catch(GateException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }*/
     if(positionDoc == corpus.size() - 1) {
       // first select the training data and test data according to the
       // learning setting
@@ -175,7 +210,6 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
             + wdResults.getAbsolutePath() + File.separator
             + ConstantParameters.FILENAMEOFLOGFILE);
       }
-      lightWeightApi.inputASName = inputASName;
       int numDoc = corpus.size();
       try {
         //PrintWriter logFileIn = new PrintWriter(new FileWriter(logFile, true));
