@@ -9,7 +9,6 @@ package gate.learning.learners;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -67,6 +66,7 @@ public class DataForLearning {
         labelsFVDoc[i] = new LabelsOfFeatureVectorDoc();
         trainingFVinDoc[i].readDocFVFromFile(in, num, labelsFVDoc[i]);
       }
+      in.close();
       // compute the total number of training examples
       numTraining = 0;
       for(int i = 0; i < numTrainingDocs; ++i)

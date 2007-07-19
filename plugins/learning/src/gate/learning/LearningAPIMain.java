@@ -234,7 +234,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
             break;
           case TRAINING:
               // empty the data file
-              EvaluationBasedOnDocs.emptyDatafile(wdResults, lightWeightApi);
+              EvaluationBasedOnDocs.emptyDatafile(wdResults, true);
               if(LogService.minVerbosityLevel > 0) System.out.println("** Training mode:");
               LogService.logMessage("** Training mode:", 1);
               isTraining = true;

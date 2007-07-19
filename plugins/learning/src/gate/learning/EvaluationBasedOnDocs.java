@@ -18,9 +18,10 @@ import gate.util.AnnotationDiffer;
 import gate.util.GateException;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -277,8 +278,9 @@ public class EvaluationBasedOnDocs {
     HashMap labels2InstNum) throws GateException {
     // first learning using the document for training
     // empty the data file
-    // emptyDatafile(wdResults, lightWeightApi);
+    emptyDatafile(wdResults, true);
     lightWeightApi.labelsAndId.clearAllData();
+    lightWeightApi.featuresList.clearAllData();
     boolean isTraining = true;
     int numDoc = 0;
     for(int i = 0; i < corpusOn.size(); ++i)
@@ -296,7 +298,9 @@ public class EvaluationBasedOnDocs {
     // lightWeightApi.trainDirect();
     lightWeightApi.trainingJava(numDoc, learningSettings);
     // then application to the test set
-    // We have to use two class types for the evaluation purpose
+    //First we empty the NLP feature file and feature vector file; but not the list files.
+    emptyDatafile(wdResults, false);
+    //  We have to use two class types for the evaluation purpose
     String classTypeOriginal = null;
     String classTypeTest = null;
     String classFeature = null;
@@ -437,16 +441,23 @@ public class EvaluationBasedOnDocs {
 
   /** Empty the label list and feature list. */
   public static void emptyDatafile(File wdResults,
-    LightWeightLearningApi lightWeightApi) {
-    (new File(wdResults, ConstantParameters.FILENAMEOFNLPFeatureList)).delete();
-    (new File(wdResults, ConstantParameters.FILENAMEOFLabelList)).delete();
-    try {
-      (new File(wdResults, ConstantParameters.FILENAMEOFNLPFeatureList))
-        .createNewFile();
-    } catch(IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+    boolean isRemoveList) {
+    if(isRemoveList) {
+      (new File(wdResults, ConstantParameters.FILENAMEOFNLPFeatureList)).delete();
+      (new File(wdResults, ConstantParameters.FILENAMEOFLabelList)).delete();
+      (new File(wdResults, ConstantParameters.FILENAMEOFChunkLenStats)).delete();
+      (new File(wdResults, ConstantParameters.FILENAMEOFLabelsInData)).delete();
+      try {
+        (new File(wdResults, ConstantParameters.FILENAMEOFNLPFeatureList))
+          .createNewFile();
+      } catch(IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
     }
+    (new File(wdResults, ConstantParameters.FILENAMEOFNLPFeaturesData)).delete();
+    (new File(wdResults, ConstantParameters.FILENAMEOFFeatureVectorData)).delete();
+    (new File(wdResults, ConstantParameters.FILENAMEOFNLPDataLabel)).delete();
   }
 
   /** Add the F-measure of each label to the overal F-measure */

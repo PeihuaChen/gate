@@ -152,7 +152,7 @@ public class LightWeightLearningApi extends Object {
     if(numDocs == 0) {
       try {
         outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(wdResults,
-          ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
+          ConstantParameters.FILENAMEOFNLPFeaturesData), true), "UTF-8"));
       } catch(IOException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
@@ -229,8 +229,10 @@ public class LightWeightLearningApi extends Object {
     LearningEngineSettings engineSettings) {
     
       try {
+        
         BufferedWriter outFeatureVectors = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-          new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorData)), "UTF-8"));
+          new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorData), true), "UTF-8"));
+        
         BufferedReader inNLPFeatures = new BufferedReader(new InputStreamReader(new 
           FileInputStream(new File(wdResults,
             ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
@@ -248,11 +250,11 @@ public class LightWeightLearningApi extends Object {
             LabelsOfFeatureVectorDoc labelsDoc = new LabelsOfFeatureVectorDoc();
             labelsDoc.obtainMultiLabelsFromNLPDocSurround(nlpFeatDoc,
               labelsAndId, engineSettings.surround);
-            addDocFVsMultiLabelToFile(numDocs, outFeatureVectors,
+            addDocFVsMultiLabelToFile(i, outFeatureVectors,
               labelsDoc.multiLabels, docFV);
           } else {
             int[] labels = new int[nlpFeatDoc.numInstances];
-            addDocFVsToFile(numDocs, outFeatureVectors, labels, docFV);
+            addDocFVsToFile(i, outFeatureVectors, labels, docFV);
           }
         }
         outFeatureVectors.flush();
@@ -529,6 +531,139 @@ public class LightWeightLearningApi extends Object {
     }
   }
 
+  /**
+   * Apply the model to one document, also using the learning algorithm implemented in
+   * Java.
+   */
+  public void applyModelInJavaPerDoc(Document doc, String labelName,
+    LearningEngineSettings engineSettings)
+    throws GateException {
+    LogService.logMessage("\nApplication starts.", 1);
+    // The files for training data and model
+    File wdResults = new File(wd, ConstantParameters.SUBDIRFORRESULTS);
+    String fvFileName = wdResults.toString() + File.separator
+      + ConstantParameters.FILENAMEOFFeatureVectorData;
+    String nlpFileName = wdResults.toString() + File.separator
+      + ConstantParameters.FILENAMEOFNLPFeaturesData;
+    String modelFileName = wdResults.toString() + File.separator
+      + ConstantParameters.FILENAMEOFModels;
+    // String labelInDataFileName = wdResults.toString() + File.separator
+    // + ConstantParameters.FILENAMEOFLabelsInData;
+    File dataFile = new File(fvFileName);
+    File nlpDataFile = new File(nlpFileName);
+    File modelFile = new File(modelFileName);
+    int learnerType;
+    learnerType = obtainLearnerType(engineSettings.learnerSettings.learnerName);
+    int numClasses = 0;
+    int numDocs = 1; //corpus.size();
+    // Store the label information from the model application
+    LabelsOfFeatureVectorDoc[] labelsFVDoc = null;
+    short featureType = WekaLearning.SPARSEFVDATA;
+    switch(learnerType){
+      case 1: // for weka learner
+        LogService.logMessage("Use weka learner.", 1);
+        WekaLearning wekaL = new WekaLearning();
+        // Check if the learner uses the sparse feaature vectors or NLP
+        // features
+        featureType = WekaLearning
+          .obtainWekaLeanerDataType(engineSettings.learnerSettings.learnerName);
+        switch(featureType){
+          case WekaLearning.NLPFEATUREFVDATA:
+            wekaL.readNLPFeaturesFromFile(nlpDataFile, numDocs,
+              this.featuresList, false, labelsAndId.label2Id.size(),
+              engineSettings.surround);
+            break;
+          case WekaLearning.SPARSEFVDATA:
+            wekaL.readSparseFVsFromFile(dataFile, numDocs, false,
+              labelsAndId.label2Id.size(), engineSettings.surround);
+            break;
+        }
+        // Check if the weka learner has distribute output of classify
+        boolean distributionOutput = WekaLearning
+          .obtainWekaLearnerOutputType(engineSettings.learnerSettings.learnerName);
+        // Get the wekaLearner from the learnername
+        WekaLearner wekaLearner = WekaLearning.obtainWekaLearner(
+          engineSettings.learnerSettings.learnerName,
+          engineSettings.learnerSettings.paramsOfLearning);
+        LogService.logMessage("Weka learner name: " + wekaLearner.getLearnerName(), 1);
+        // Training.
+        wekaL.apply(wekaLearner, modelFile, distributionOutput);
+        labelsFVDoc = wekaL.labelsFVDoc;
+        numClasses = labelsAndId.label2Id.size() * 2; // subtract the
+        // null class
+        break;
+      case 2: // for learner of multi to binary conversion
+        LogService.logMessage("Multi to binary conversion.", 1);
+        //System.out.println("** multi to binary:");
+        MultiClassLearning chunkLearning = new MultiClassLearning(
+          engineSettings.multi2BinaryMode);
+        // read data
+        chunkLearning.getDataFromFile(numDocs, dataFile); //corpus.size(), dataFile);
+        // get a learner
+        String learningCommand = engineSettings.learnerSettings.paramsOfLearning;
+        learningCommand = learningCommand.trim();
+        learningCommand = learningCommand.replaceAll("[ \t]+", " ");
+        String dataSetFile = null;
+        SupervisedLearner paumLearner = MultiClassLearning
+          .obtainLearnerFromName(engineSettings.learnerSettings.learnerName,
+            learningCommand, dataSetFile);
+        paumLearner
+          .setLearnerExecutable(engineSettings.learnerSettings.executableTraining);
+        paumLearner
+          .setLearnerParams(engineSettings.learnerSettings.paramsOfLearning);
+        LogService.logMessage("The learners: " + paumLearner.getLearnerName(), 1);
+        // apply
+        chunkLearning.apply(paumLearner, modelFile);
+        labelsFVDoc = chunkLearning.dataFVinDoc.labelsFVDoc;
+        numClasses = chunkLearning.numClasses;
+        break;
+      default:
+        System.out.println("Error! Wrong learner type.");
+        LogService.logMessage("Error! Wrong learner type.", 0);
+    }
+    if(engineSettings.surround) {
+      String featName = engineSettings.datasetDefinition.arrs.classFeature;
+      String instanceType = engineSettings.datasetDefinition.getInstanceType();
+      labelsAndId = new Label2Id();
+      labelsAndId.loadLabelAndIdFromFile(wdResults,
+        ConstantParameters.FILENAMEOFLabelList);
+      // post-processing and add new annotation to the text
+      PostProcessing postPr = new PostProcessing(
+        engineSettings.thrBoundaryProb, engineSettings.thrEntityProb,
+        engineSettings.thrClassificationProb);
+      //System.out.println("** Application mode:");
+     for(int i = 0; i < numDocs; ++i) {
+        HashSet chunks = new HashSet();
+        postPr.postProcessingChunk((short)3, labelsFVDoc[i].multiLabels,
+          numClasses, chunks, chunkLenHash);
+        //System.out.println("** documentName="+((Document)corpus.get(i)).getName());
+        addAnnsInDoc(doc, chunks, instanceType, featName,
+          labelName, labelsAndId);
+      }
+    } else {
+      String featName = engineSettings.datasetDefinition.arrs.classFeature;
+      String instanceType = engineSettings.datasetDefinition.getInstanceType();
+      labelsAndId = new Label2Id();
+      labelsAndId.loadLabelAndIdFromFile(wdResults,
+        ConstantParameters.FILENAMEOFLabelList);
+      // post-processing and add new annotation to the text
+      // PostProcessing postPr = new PostProcessing(0.42, 0.2);
+      PostProcessing postPr = new PostProcessing(
+        engineSettings.thrBoundaryProb, engineSettings.thrEntityProb,
+        engineSettings.thrClassificationProb);
+      for(int i = 0; i < numDocs; ++i) { //numDocs is always 1
+        int[] selectedLabels = new int[labelsFVDoc[i].multiLabels.length];
+        float[] valuesLabels = new float[labelsFVDoc[i].multiLabels.length];
+        postPr.postProcessingClassification((short)3,
+          labelsFVDoc[i].multiLabels, selectedLabels, valuesLabels);
+        addAnnsInDocClassification(doc, selectedLabels,
+          valuesLabels, instanceType, featName, labelName, labelsAndId,
+          engineSettings);
+      }
+    }
+  }
+
+  
   /** Add the annotation into documents for chunk learning. */
   private void addAnnsInDoc(Document doc, HashSet chunks, String instanceType,
     String featName, String labelName, Label2Id labelsAndId) {

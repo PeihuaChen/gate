@@ -137,4 +137,10 @@ public class NLPFeaturesList {
     // update the total number of docs
     totalNumDocs += fd.numInstances;
   }
+  
+  /** Clear the label list object for another run in evaluation. */
+  public void clearAllData() {
+    featuresList.clear();
+    idfFeatures.clear();
+  }
 }
