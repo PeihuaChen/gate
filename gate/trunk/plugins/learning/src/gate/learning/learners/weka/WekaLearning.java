@@ -306,6 +306,7 @@ public class WekaLearning {
           }
         }// end of the loop i
       }
+      inData.close();
     } catch(FileNotFoundException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
