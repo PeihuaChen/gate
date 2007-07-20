@@ -63,6 +63,7 @@ public class DataForLearning {
         int num;
         num = (new Integer(items[1])).intValue();
         trainingFVinDoc[i] = new DocFeatureVectors();
+        trainingFVinDoc[i].setDocID(items[2]);
         labelsFVDoc[i] = new LabelsOfFeatureVectorDoc();
         trainingFVinDoc[i].readDocFVFromFile(in, num, labelsFVDoc[i]);
       }

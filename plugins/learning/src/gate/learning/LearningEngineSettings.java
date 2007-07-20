@@ -67,13 +67,10 @@ public class LearningEngineSettings {
    * hyper-plane or furthest from.
    */
   public boolean filteringNear = false;
-  /**
-   * If the user only want to feature data to be used in his learning
-   * algorithms.
-   */
-  //public boolean isOnlyFeatureData = false;
   /** The setting for evaluation. */
   public EvaluationConfiguration evaluationconfig = null;
+  /** Number of document as interval between trainings in MI-learning mode. */
+  public int miDocInterval=1;
   
   /** The verbosity level for writing information into log file. 
    * 0: no real output.
@@ -104,6 +101,13 @@ public class LearningEngineSettings {
       String value = rootElement.getChild("SURROUND").getAttribute("value")
         .getValue();
       learningSettings.surround = "true".equalsIgnoreCase(value);
+    }
+    /** Set the number of documents as training interval for mi-learning. */
+    learningSettings.miDocInterval = 1;
+    if(rootElement.getChild("MI-TRAINING-INTERVAL") != null) {
+      String value = rootElement.getChild("MI-TRAINING-INTERVAL").getAttribute("num")
+        .getValue();
+      learningSettings.miDocInterval = Integer.parseInt(value);
     }
     /** Get the setting for verbosity. */
     learningSettings.verbosityLogService = LogService.NORMAL;

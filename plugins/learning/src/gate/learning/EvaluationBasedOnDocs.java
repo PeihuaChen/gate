@@ -16,10 +16,17 @@ import gate.FeatureMap;
 import gate.creole.ResourceInstantiationException;
 import gate.util.AnnotationDiffer;
 import gate.util.GateException;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -271,7 +278,9 @@ public class EvaluationBasedOnDocs {
     }
   }
 
-  /** One run of the evaluation: training, testing and measuring results. */
+  /** One run of the evaluation: training, testing and measuring results. 
+   * @throws  
+   * @throws UnsupportedEncodingException */
   private void oneRun(LearningEngineSettings learningSettings,
     LightWeightLearningApi lightWeightApi, boolean isUsedForTraining[],
     EvaluationMeasuresComputation measuresOfResults, HashMap labels2MR,
@@ -283,50 +292,67 @@ public class EvaluationBasedOnDocs {
     lightWeightApi.featuresList.clearAllData();
     boolean isTraining = true;
     int numDoc = 0;
-    for(int i = 0; i < corpusOn.size(); ++i)
-      if(isUsedForTraining[i]) {
-        lightWeightApi.annotations2NLPFeatures((Document)corpusOn.get(i), numDoc,
-          wdResults, isTraining, learningSettings);
-        ++numDoc;
-      }
-    lightWeightApi.finishFVs(wdResults, numDoc, isTraining, learningSettings);
-    lightWeightApi.nlpfeatures2FVs(wdResults, numDoc, isTraining, learningSettings);
-    // if fitering the training data
-    if(learningSettings.fiteringTrainingData
-      && learningSettings.filteringRatio > 0.0)
-      lightWeightApi.FilteringNegativeInstsInJava(numDoc, learningSettings);
-    // lightWeightApi.trainDirect();
-    lightWeightApi.trainingJava(numDoc, learningSettings);
-    // then application to the test set
-    //First we empty the NLP feature file and feature vector file; but not the list files.
-    emptyDatafile(wdResults, false);
-    //  We have to use two class types for the evaluation purpose
-    String classTypeOriginal = null;
-    String classTypeTest = null;
-    String classFeature = null;
-    classTypeOriginal = learningSettings.datasetDefinition.getClassAttribute()
-      .getType();
-    classTypeTest = classTypeOriginal.concat("Test");
-    classFeature = learningSettings.datasetDefinition.getClassAttribute()
-      .getFeature();
-    learningSettings.datasetDefinition.getClassAttribute().setType(
-      classTypeTest);
-    if(LogService.minVerbosityLevel > 1)
-      System.out.println("classType=" + classTypeOriginal + ", testType="
-        + classTypeTest + ".");
-    isTraining = false;
-    numDoc = 0;
-    for(int i = 0; i < corpusOn.size(); ++i)
-      if(!isUsedForTraining[i]) {
-        lightWeightApi.annotations2NLPFeatures((Document)corpusOn.get(i), numDoc,
-          wdResults, isTraining, learningSettings);
-        ++numDoc;
-      }
-    lightWeightApi.finishFVs(wdResults, numDoc, isTraining, learningSettings);
-    lightWeightApi.nlpfeatures2FVs(wdResults, numDoc, isTraining, learningSettings);
-    // lightWeightApi.finishDocAnnotation();
-    Corpus corpusTest;
+    BufferedWriter outNLPFeatures=null;
+    BufferedReader inNLPFeatures = null;
     try {
+      outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(wdResults,
+        ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
+      for(int i = 0; i < corpusOn.size(); ++i)
+        if(isUsedForTraining[i]) {
+          lightWeightApi.annotations2NLPFeatures((Document)corpusOn.get(i), numDoc,
+            outNLPFeatures, isTraining, learningSettings);
+          ++numDoc;
+        }
+      outNLPFeatures.flush();
+      outNLPFeatures.close();
+      lightWeightApi.finishFVs(wdResults, numDoc, isTraining, learningSettings);
+      /** Open the normal NLP feature file. */
+      inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
+        ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
+      lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, numDoc, isTraining, learningSettings);
+      inNLPFeatures.close();
+      // if fitering the training data
+      if(learningSettings.fiteringTrainingData
+        && learningSettings.filteringRatio > 0.0)
+        lightWeightApi.FilteringNegativeInstsInJava(numDoc, learningSettings);
+      // lightWeightApi.trainDirect();
+      lightWeightApi.trainingJava(numDoc, learningSettings);
+      // then application to the test set
+      //First we empty the NLP feature file and feature vector file; but not the list files.
+      emptyDatafile(wdResults, false);
+      //  We have to use two class types for the evaluation purpose
+      String classTypeOriginal = null;
+      String classTypeTest = null;
+      String classFeature = null;
+      classTypeOriginal = learningSettings.datasetDefinition.getClassAttribute()
+        .getType();
+      classTypeTest = classTypeOriginal.concat("Test");
+      classFeature = learningSettings.datasetDefinition.getClassAttribute()
+        .getFeature();
+      learningSettings.datasetDefinition.getClassAttribute().setType(
+        classTypeTest);
+      if(LogService.minVerbosityLevel > 1)
+        System.out.println("classType=" + classTypeOriginal + ", testType="
+          + classTypeTest + ".");
+      isTraining = false;
+      numDoc = 0;
+      outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(wdResults,
+        ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
+      for(int i = 0; i < corpusOn.size(); ++i)
+        if(!isUsedForTraining[i]) {
+          lightWeightApi.annotations2NLPFeatures((Document)corpusOn.get(i), numDoc,
+            outNLPFeatures, isTraining, learningSettings);
+          ++numDoc;
+        }
+      outNLPFeatures.flush();
+      outNLPFeatures.close();
+      lightWeightApi.finishFVs(wdResults, numDoc, isTraining, learningSettings);
+      inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
+        ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
+      lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, numDoc, isTraining, learningSettings);
+      inNLPFeatures.close();
+      // lightWeightApi.finishDocAnnotation();
+      Corpus corpusTest;
       corpusTest = Factory.newCorpus("testCorpus");
       numDoc = 0;
       for(int i = 0; i < corpusOn.size(); ++i)
@@ -338,60 +364,56 @@ public class EvaluationBasedOnDocs {
         learningSettings);
       corpusTest.clear();
       Factory.deleteResource(corpusTest);
-    } catch(ResourceInstantiationException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    // Do the evaluation on test using the AnnotationDiff
-    // First get all the labels in the training data,
-    // so that we can do evaluation on each single label
-    // as well as on all labels
-    HashMap uniqueLabels = new HashMap();
-    for(int i = 0; i < corpusOn.size(); ++i)
-      if(isUsedForTraining[i]) {
-        AnnotationSet keyAnns = getInputAS((Document)corpusOn.get(i)).get(
-          classTypeOriginal);
-        for(Object obj : keyAnns) {
-          if(((Annotation)obj).getFeatures().get(classFeature) != null) {
-            String label = ((Annotation)obj).getFeatures().get(classFeature)
-              .toString();
-            if(uniqueLabels.containsKey(label))
-              uniqueLabels.put(label, new Integer(new Integer(uniqueLabels.get(
-                label).toString()).intValue() + 1));
-            else uniqueLabels.put(label, "1");
+    
+      // Do the evaluation on test using the AnnotationDiff
+      // First get all the labels in the training data,
+      // so that we can do evaluation on each single label
+      // as well as on all labels
+      HashMap uniqueLabels = new HashMap();
+      for(int i = 0; i < corpusOn.size(); ++i)
+        if(isUsedForTraining[i]) {
+          AnnotationSet keyAnns = getInputAS((Document)corpusOn.get(i)).get(
+            classTypeOriginal);
+          for(Object obj : keyAnns) {
+            if(((Annotation)obj).getFeatures().get(classFeature) != null) {
+              String label = ((Annotation)obj).getFeatures().get(classFeature)
+                .toString();
+              if(uniqueLabels.containsKey(label))
+                uniqueLabels.put(label, new Integer(new Integer(uniqueLabels.get(
+                  label).toString()).intValue() + 1));
+              else uniqueLabels.put(label, "1");
+            }
           }
         }
+      // Then create one evaluationMeasure object for each label
+      for(Object obj : uniqueLabels.keySet()) {
+        EvaluationMeasuresComputation emc = new EvaluationMeasuresComputation();
+        labels2MR.put(obj, emc);
       }
-    // Then create one evaluationMeasure object for each label
-    for(Object obj : uniqueLabels.keySet()) {
-      EvaluationMeasuresComputation emc = new EvaluationMeasuresComputation();
-      labels2MR.put(obj, emc);
-    }
-    // Copy the number of instances for each label into the macro one
-    for(Object obj : uniqueLabels.keySet()) {
-      if(labels2InstNum.containsKey(obj)) {
-        int num = new Integer(uniqueLabels.get(obj).toString()).intValue();
-        labels2InstNum.put(obj, new Integer(new Integer(labels2InstNum.get(obj)
-          .toString()).intValue()
-          + num));
-      } else labels2InstNum.put(obj, uniqueLabels.get(obj));
-    }
-    // Do the evaluation on the test set
-    if(learningSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
-      // For relation type, we cannot use the evalutation method AnnDiff
-      // of Gate
-      AttributeRelation relAttr = (AttributeRelation)learningSettings.datasetDefinition
-        .getClassAttribute();
-      String arg1F = relAttr.getArg1();
-      String arg2F = relAttr.getArg2();
-      for(int i = 0; i < corpusOn.size(); ++i) {
-        if(!isUsedForTraining[i]) {
-          evaluateAnnotationsRel((Document)corpusOn.get(i), classTypeOriginal,
-            classTypeTest, classFeature, arg1F, arg2F, uniqueLabels.keySet(),
-            labels2MR);
+      // Copy the number of instances for each label into the macro one
+      for(Object obj : uniqueLabels.keySet()) {
+        if(labels2InstNum.containsKey(obj)) {
+          int num = new Integer(uniqueLabels.get(obj).toString()).intValue();
+          labels2InstNum.put(obj, new Integer(new Integer(labels2InstNum.get(obj)
+            .toString()).intValue()+ num));
+        } else labels2InstNum.put(obj, uniqueLabels.get(obj));
+      }
+      // Do the evaluation on the test set
+      if(learningSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
+        // For relation type, we cannot use the evalutation method AnnDiff
+        // of Gate
+        AttributeRelation relAttr = (AttributeRelation)learningSettings.datasetDefinition
+          .getClassAttribute();
+        String arg1F = relAttr.getArg1();
+        String arg2F = relAttr.getArg2();
+        for(int i = 0; i < corpusOn.size(); ++i) {
+          if(!isUsedForTraining[i]) {
+            evaluateAnnotationsRel((Document)corpusOn.get(i), classTypeOriginal,
+              classTypeTest, classFeature, arg1F, arg2F, uniqueLabels.keySet(),
+              labels2MR);
+          }
         }
-      }
-    } else {
+      } else {
       /*
        * for(int i=0; i<corpusOn.size(); ++i) { if(! isUsedForTraining[i]) {
        * evaluateAnnotations((Document)corpusOn.get(i), classTypeOriginal,
@@ -436,6 +458,20 @@ public class EvaluationBasedOnDocs {
         while(iter.hasNext())
           annsInput.remove((Annotation)iter.next());
       }
+    }
+    } catch(ResourceInstantiationException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+     catch(UnsupportedEncodingException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    } catch(FileNotFoundException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    } catch(IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
   }
 

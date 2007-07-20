@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -66,9 +67,7 @@ public class LightWeightLearningApi extends Object {
    * HashMap for the chunkLenStats, for post-processing of chunk learning.
    */
   HashMap chunkLenHash;
-  /** Refering to the NLP feature file for writing. */
-  public BufferedWriter outNLPFeatures = null;
-
+ 
   /** Constructor, with working directory setting. */
   public LightWeightLearningApi(File wd) {
     this.wd = wd;
@@ -134,14 +133,13 @@ public class LightWeightLearningApi extends Object {
         ((Ngram)engineSettings.datasetDefinition.arg2.ngrams.get(0)).weight!= 1.0)
         ngramWeight = ((Ngram)engineSettings.datasetDefinition.arg2.ngrams.get(0)).weight;
     }
-    
   }
 
   /**
    * Obtain the features and labels and form feature vectors from the GATE
    * annotation of each document.
    */
-  public void annotations2NLPFeatures(Document doc, int numDocs, File wdResults,
+  public void annotations2NLPFeatures(Document doc, int numDocs, BufferedWriter outNLPFeatures,
     boolean isTraining, LearningEngineSettings engineSettings) {
     AnnotationSet annotations = null;
     if(inputASName == null || inputASName.trim().length() == 0) {
@@ -149,15 +147,15 @@ public class LightWeightLearningApi extends Object {
     } else {
       annotations = doc.getAnnotations(inputASName);
     }
-    if(numDocs == 0) {
+    /*if(numDocs == 0) {
       try {
         outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(wdResults,
-          ConstantParameters.FILENAMEOFNLPFeaturesData), true), "UTF-8"));
+          ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
       } catch(IOException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
-    }
+    }*/
     // obtain the NLP features for the document
     String docName = doc.getName().replaceAll(ConstantParameters.ITEMSEPARATOR,
       "_");
@@ -199,7 +197,6 @@ public class LightWeightLearningApi extends Object {
         docFV.fvs[i].values[j] /= sum;
     }
   }
-
   /**
    * Finishing the conversion from annotations to feature vectors by writing
    * back the label and nlp feature list into files, and closing the java
@@ -207,12 +204,6 @@ public class LightWeightLearningApi extends Object {
    */
   public void finishFVs(File wdResults, int numDocs, boolean isTraining,
     LearningEngineSettings engineSettings) {
-    try {
-      outNLPFeatures.close();
-    } catch(IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
     if(isTraining && engineSettings.isNLPFeatListUpdatable)
       featuresList.writeListIntoFile(wdResults,
         ConstantParameters.FILENAMEOFNLPFeatureList);
@@ -225,17 +216,13 @@ public class LightWeightLearningApi extends Object {
   }
 
   /** Convert the NLP features into feature vectors and write them into file. */
-  public void nlpfeatures2FVs(File wdResults, int numDocs, boolean isTraining, 
+  public void nlpfeatures2FVs(File wdResults, BufferedReader inNLPFeatures, int numDocs, boolean isTraining, 
     LearningEngineSettings engineSettings) {
     
       try {
         
         BufferedWriter outFeatureVectors = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
           new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorData), true), "UTF-8"));
-        
-        BufferedReader inNLPFeatures = new BufferedReader(new InputStreamReader(new 
-          FileInputStream(new File(wdResults,
-            ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
         //Read the first line out which is about feature names
         inNLPFeatures.readLine();
         for(int i=0; i<numDocs; ++i) {
@@ -259,7 +246,6 @@ public class LightWeightLearningApi extends Object {
         }
         outFeatureVectors.flush();
         outFeatureVectors.close();
-        inNLPFeatures.close();
       } catch(IOException e) {
         System.out.println("Error occured in reading the NLP data from file for converting to FVs" +
             "or writing the FVs data into file!");
@@ -310,6 +296,42 @@ public class LightWeightLearningApi extends Object {
       }
     } catch(IOException e) {
     }
+  }
+  
+  /** Copy the NLP features from tempory file to normal file. */
+  public void copyNLPFeat2NormalFile(File wdResults, int miNumDocsTraining) {
+    try {
+      BufferedWriter outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+        new File(wdResults,ConstantParameters.FILENAMEOFNLPFeaturesData), true), "UTF-8"));
+      BufferedReader inNLPFeaturesTemp = new BufferedReader(new InputStreamReader(new 
+        FileInputStream(new File(wdResults,
+          ConstantParameters.FILENAMEOFNLPFeaturesDataTemp)), "UTF-8"));
+      String line = inNLPFeaturesTemp.readLine();
+      if(miNumDocsTraining==0) {
+        outNLPFeatures.append(line);
+        outNLPFeatures.newLine();
+      }
+      line=inNLPFeaturesTemp.readLine();
+      while(line != null){
+        outNLPFeatures.append(line);
+        outNLPFeatures.newLine();
+        line=inNLPFeaturesTemp.readLine();
+      }
+      inNLPFeaturesTemp.close();
+      outNLPFeatures.flush();
+      outNLPFeatures.close();
+    } catch(UnsupportedEncodingException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch(FileNotFoundException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch(IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    
+   
   }
 
   /**

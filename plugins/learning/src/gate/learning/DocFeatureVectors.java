@@ -255,4 +255,8 @@ public class DocFeatureVectors {
   public SparseFeatureVector[] getFvs() {
     return fvs;
   }
+  /** Set the DocID. */
+  public void setDocID(String docI) {
+    this.docId = docI;
+  }
 }
