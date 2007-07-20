@@ -32,6 +32,9 @@ public class ConstantParameters {
   /** Name of the file storing the NLP data from all documents. */
   public static final String FILENAMEOFNLPFeaturesData = "NLPFeatureData"
     + FILETYPEOFSAVEDFILE;
+  /** Name of the temp file storing the NLP data temporaily for MI-training. */
+  public static final String FILENAMEOFNLPFeaturesDataTemp = "NLPFeatureDataTemp"
+    + FILETYPEOFSAVEDFILE;
   /** Name of the file for label list. */
   public static final String FILENAMEOFLabelList = "LabelsList"
     + FILETYPEOFSAVEDFILE;
@@ -54,6 +57,10 @@ public class ConstantParameters {
     + FILETYPEOFSAVEDFILE;
   /** Name of the file storing the unique label indexes from training data. */
   public static final String FILENAMEOFLabelsInData = "LabelListInData"
+    + FILETYPEOFSAVEDFILE;
+  /** Name fo the file storing the number of documents got so far and number
+   * of new documents got since last training. */
+  public static final String FILENAMEOFMILearningInfor = "MILearningInformation"
     + FILETYPEOFSAVEDFILE;
   /** Training mode. */
   public static final String LEARNINGMODE1 = "TRAINING";

@@ -11,5 +11,5 @@ package gate.learning;
  * Enum data type for learning mode in GUI.
  */
 public enum RunMode {
-  TRAINING, APPLICATION, EVALUATION, ProduceFeatureFilesOnly
+  TRAINING, APPLICATION, EVALUATION, ProduceFeatureFilesOnly, MITRAINING
 }

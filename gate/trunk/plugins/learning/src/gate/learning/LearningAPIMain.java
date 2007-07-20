@@ -13,8 +13,14 @@ import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.util.GateException;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -40,6 +46,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
    */
   private RunMode learningMode;
   private RunMode learningModeAppl;
+  private RunMode learningModeMiTraining;
   /** Learning settings specified in the configuration file. */
   private LearningEngineSettings learningSettings;
   /**
@@ -55,6 +62,8 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
   private File wdResults = null;
   /** Doing evaluation. */
   private EvaluationBasedOnDocs evaluation;
+  /** The MI learning information object.*/
+  MiLearningInformation miLearningInfor = null;
 
   /** Trivial constructor. */
   public LearningAPIMain() {
@@ -90,6 +99,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
       // TODO Auto-generated catch block
       e1.printStackTrace();
     }
+    miLearningInfor = new MiLearningInformation();
     
     try {
       // Load the learning setting file
@@ -140,6 +150,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
     }
     
     learningModeAppl = RunMode.APPLICATION;
+    learningModeMiTraining = RunMode.MITRAINING;
     fireProcessFinished();
     // System.out.println("initialisation finished.");
     return this;
@@ -163,6 +174,12 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
     // docsName.add(positionDoc, document.getName());
     if(positionDoc == 0) {
       lightWeightApi.inputASName = inputASName;
+      /** Obtain the MI learning information of the last time learning. */
+      if(learningMode.equals(this.learningModeMiTraining)) {
+        miLearningInfor = new MiLearningInformation();
+        File miLeFile = new File(wdResults, ConstantParameters.FILENAMEOFMILearningInfor);
+        miLearningInfor.readDataFromFile(miLeFile);
+      }
       if(LogService.minVerbosityLevel > 0)
         System.out.println("Pre-processing the " + corpus.size()
           + " documents...");
@@ -216,20 +233,32 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
         LogService.init(logFile, true, learningSettings.verbosityLogService);
         LogService.logMessage("The learning start at " + new Date().toString(), 1);
         LogService.logMessage("The number of documents in dataset: " + numDoc, 1);
+        //Open the NLP feature file for storing the NLP feature vectors
+        BufferedWriter outNLPFeatures = null;
+        BufferedReader inNLPFeatures = null;
         // if only need the feature data
         switch(learningMode) {
           case ProduceFeatureFilesOnly:
             // if only want feature data
+            EvaluationBasedOnDocs.emptyDatafile(wdResults, true);
             if(LogService.minVerbosityLevel > 0) System.out.println("** Producing the feature files only!");
             LogService.logMessage("** Producing the feature files only!", 1);
             isTraining = true;
+            outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(wdResults,
+              ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
             for(int i = 0; i < numDoc; ++i) {
               lightWeightApi.annotations2NLPFeatures((Document)corpus.get(i), i,
-                wdResults, isTraining, learningSettings);
+                outNLPFeatures, isTraining, learningSettings);
             }
+            outNLPFeatures.flush();
+            outNLPFeatures.close();
             lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
               learningSettings);
-            lightWeightApi.nlpfeatures2FVs(wdResults, numDoc, isTraining, learningSettings);
+            /** Open the normal NLP feature file. */
+            inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
+              ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
+            lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, numDoc, isTraining, learningSettings);
+            inNLPFeatures.close();
             if(LogService.minVerbosityLevel > 0) displayDataFilesInformation();
             break;
           case TRAINING:
@@ -238,13 +267,21 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               if(LogService.minVerbosityLevel > 0) System.out.println("** Training mode:");
               LogService.logMessage("** Training mode:", 1);
               isTraining = true;
+              outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(wdResults,
+                ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
               for(int i = 0; i < numDoc; ++i) {
                 lightWeightApi.annotations2NLPFeatures((Document)corpus.get(i), i,
-                  wdResults, isTraining, learningSettings);
+                  outNLPFeatures, isTraining, learningSettings);
               }
+              outNLPFeatures.flush();
+              outNLPFeatures.close();
               lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
                 learningSettings);
-              lightWeightApi.nlpfeatures2FVs(wdResults, numDoc, isTraining, learningSettings);
+              /** Open the normal NLP feature file. */
+              inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
+                ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
+              lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, numDoc, isTraining, learningSettings);
+              inNLPFeatures.close();
               // if fitering the training data
               if(learningSettings.fiteringTrainingData
                 && learningSettings.filteringRatio > 0.0)
@@ -255,18 +292,27 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               break;
             case APPLICATION:
               // if application
+              EvaluationBasedOnDocs.emptyDatafile(wdResults, false);
               if(LogService.minVerbosityLevel> 0) System.out.println("** Application mode:");
               LogService.logMessage("** Application mode:", 1);
               isTraining = false;
               String classTypeOriginal = learningSettings.datasetDefinition
                 .getClassAttribute().getType();
+              outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(wdResults,
+                ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
               for(int i = 0; i < numDoc; ++i) {
                 lightWeightApi.annotations2NLPFeatures((Document)corpus.get(i), i,
-                  wdResults, isTraining, learningSettings);
+                  outNLPFeatures, isTraining, learningSettings);
               }
+              outNLPFeatures.flush();
+              outNLPFeatures.close();
               lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
                 learningSettings);
-              lightWeightApi.nlpfeatures2FVs(wdResults, numDoc, isTraining, learningSettings);
+              /** Open the normal NLP feature file. */
+              inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
+                ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
+              lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, numDoc, isTraining, learningSettings);
+              inNLPFeatures.close();
               // Applying th model
               lightWeightApi.applyModelInJava(corpus, classTypeOriginal,
                 learningSettings);
@@ -278,6 +324,44 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
                 inputASName);
               evaluation
                 .evaluation(learningSettings, lightWeightApi);
+              break;
+            case MITRAINING:
+              if(LogService.minVerbosityLevel > 0) System.out.println("** MITRAINING mode:");
+              LogService.logMessage("** MITRAINING mode:", 1);
+              isTraining = true;
+              /**Need to write the NLP features into a temporary file, then copy it into the NLP file. */
+              BufferedWriter outNLPFeaturesTemp = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(wdResults,
+                ConstantParameters.FILENAMEOFNLPFeaturesDataTemp)), "UTF-8"));
+              for(int i = 0; i < numDoc; ++i) {
+                lightWeightApi.annotations2NLPFeatures((Document)corpus.get(i), i,
+                  outNLPFeaturesTemp, isTraining, learningSettings);
+              }
+              outNLPFeaturesTemp.flush();
+              outNLPFeaturesTemp.close();
+              lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
+                learningSettings);
+              lightWeightApi.copyNLPFeat2NormalFile(wdResults, miLearningInfor.miNumDocsTraining);
+              /** Use the temp NLP feature file instead of the normal one for MI-training. */
+              inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
+                ConstantParameters.FILENAMEOFNLPFeaturesDataTemp)), "UTF-8"));
+              lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, numDoc, isTraining, learningSettings);
+              inNLPFeatures.close();
+              miLearningInfor.miNumDocsTraining += numDoc;
+              miLearningInfor.miNumDocsFromLast += numDoc;
+              if(miLearningInfor.miNumDocsFromLast>=learningSettings.miDocInterval) {
+                //Start learning
+                //              if fitering the training data
+                if(learningSettings.fiteringTrainingData
+                  && learningSettings.filteringRatio > 0.0)
+                  lightWeightApi.FilteringNegativeInstsInJava(miLearningInfor.miNumDocsTraining,
+                    learningSettings);
+                // using the java code for training
+                lightWeightApi.trainingJava(miLearningInfor.miNumDocsTraining, learningSettings);
+                //Reset the num from last training as 0
+                miLearningInfor.miNumDocsFromLast = 0;
+              }
+              File miLeFile = new File(wdResults, ConstantParameters.FILENAMEOFMILearningInfor);
+              miLearningInfor.writeDataIntoFile(miLeFile);
               break;
             default:
               throw new GateException("The learning mode is not defined!");
