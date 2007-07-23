@@ -206,7 +206,7 @@ public class OntologyEditor extends AbstractVisualResource
     
     
     toolBar = new JToolBar(JToolBar.HORIZONTAL);
-    searchAction = new SearchAction("", MainFrame.getIcon("search"), this);
+    searchAction = new SearchAction("", MainFrame.getIcon("ontology-search"), this);
     search = new JButton(searchAction);
     search.setToolTipText("Advanced search in the ontology");
     
