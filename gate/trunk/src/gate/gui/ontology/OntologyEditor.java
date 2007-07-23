@@ -264,7 +264,7 @@ public class OntologyEditor extends AbstractVisualResource
     transitiveProperty.setToolTipText("Add New Transitive Property");
 
     deleteOntoResourceAction = new DeleteOntologyResourceAction("", MainFrame
-            .getIcon("delete"));
+            .getIcon("ontology-delete"));
     restrictionAction = new RestrictionAction("", MainFrame
             .getIcon("ontology-restriction"));
 
