@@ -360,7 +360,7 @@ public class EvaluationBasedOnDocs {
           corpusTest.add((Document)corpusOn.get(i));
           ++numDoc;
         }
-      lightWeightApi.applyModelInJava(corpusTest, classTypeTest,
+      lightWeightApi.applyModelInJava(corpusTest, 0, corpusTest.size(), classTypeTest,
         learningSettings);
       corpusTest.clear();
       Factory.deleteResource(corpusTest);
@@ -494,6 +494,7 @@ public class EvaluationBasedOnDocs {
     (new File(wdResults, ConstantParameters.FILENAMEOFNLPFeaturesData)).delete();
     (new File(wdResults, ConstantParameters.FILENAMEOFFeatureVectorData)).delete();
     (new File(wdResults, ConstantParameters.FILENAMEOFNLPDataLabel)).delete();
+    System.gc(); //to make effort to delete the files as want.
   }
 
   /** Add the F-measure of each label to the overal F-measure */

@@ -71,6 +71,8 @@ public class LearningEngineSettings {
   public EvaluationConfiguration evaluationconfig = null;
   /** Number of document as interval between trainings in MI-learning mode. */
   public int miDocInterval=1;
+  /** The document number interval for one applicataion in batch learning mode. */
+  public int docNumIntevalApp=100;
   
   /** The verbosity level for writing information into log file. 
    * 0: no real output.
@@ -106,6 +108,13 @@ public class LearningEngineSettings {
     learningSettings.miDocInterval = 1;
     if(rootElement.getChild("MI-TRAINING-INTERVAL") != null) {
       String value = rootElement.getChild("MI-TRAINING-INTERVAL").getAttribute("num")
+        .getValue();
+      learningSettings.miDocInterval = Integer.parseInt(value);
+    }
+    /** Set the number of documents as interval for batch application. */
+    learningSettings.docNumIntevalApp = 100;
+    if(rootElement.getChild("BATCH-APP-INTERVAL") != null) {
+      String value = rootElement.getChild("BATCH-APP-INTERVAL").getAttribute("num")
         .getValue();
       learningSettings.miDocInterval = Integer.parseInt(value);
     }
