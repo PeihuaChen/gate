@@ -7,7 +7,9 @@
  */
 package gate.learning;
 
+import gate.Corpus;
 import gate.Document;
+import gate.Factory;
 import gate.ProcessingResource;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
@@ -17,11 +19,13 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
@@ -64,6 +68,11 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
   private EvaluationBasedOnDocs evaluation;
   /** The MI learning information object.*/
   MiLearningInformation miLearningInfor = null;
+  
+  /** The three counters for batch application. */
+  int startDocIdApp;
+  int endDocIdApp;
+  int maxNumApp;
 
   /** Trivial constructor. */
   public LearningAPIMain() {
@@ -150,6 +159,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
     }
     
     learningModeAppl = RunMode.APPLICATION;
+    maxNumApp = learningSettings.docNumIntevalApp;
     learningModeMiTraining = RunMode.MITRAINING;
     fireProcessFinished();
     // System.out.println("initialisation finished.");
@@ -160,6 +170,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
    * Run the resource.
    * 
    * @throws ExecutionException
+   * @throws  
    * @throws
    */
   public void execute() throws ExecutionException {
@@ -180,6 +191,9 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
         File miLeFile = new File(wdResults, ConstantParameters.FILENAMEOFMILearningInfor);
         miLearningInfor.readDataFromFile(miLeFile);
       }
+      /** Set the information for batch application. */
+      startDocIdApp = 0;
+      endDocIdApp = 0;
       if(LogService.minVerbosityLevel > 0)
         System.out.println("Pre-processing the " + corpus.size()
           + " documents...");
@@ -189,6 +203,13 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
         LogService.logMessage("\n*** A new run starts.", 1);
         LogService.logMessage("\nThe execution time (pre-processing the first document): "
             + new Date().toString(), 1);
+        if(LogService.minVerbosityLevel > 0) {
+          System.out.println("Learning starts.");
+          System.out
+            .println("For the information about this learning see the log file "
+              + wdResults.getAbsolutePath() + File.separator
+              + ConstantParameters.FILENAMEOFLOGFILE);
+        }
         LogService.close();
         // logFileIn.println("EvaluationMode: " + evaluationMode);
         // logFileIn.println("TrainingMode: " + trainingMode);
@@ -198,7 +219,9 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
         e.printStackTrace();
       }
     }
-    /*if(learningMode.equals(learningModeAppl)) {
+    
+    /*  //for apply the model to each document
+     if(learningMode.equals(learningModeAppl)) {
       LogService.logMessage("** Application mode:", 1);
       isTraining = false;
       lightWeightApi.annotations2NLPFeatures(this.document, 0,
@@ -216,17 +239,56 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
         e.printStackTrace();
       }
     }*/
+    // Apply the model to a bunch of documents
+    if(learningMode.equals(learningModeAppl)) {
+      ++endDocIdApp;
+      if(endDocIdApp- startDocIdApp == maxNumApp) {
+        try {
+          BufferedWriter outNLPFeatures = null;
+          BufferedReader inNLPFeatures = null;
+          EvaluationBasedOnDocs.emptyDatafile(wdResults, false);
+          if(LogService.minVerbosityLevel> 0) System.out.println("** " +
+              "Application mode for document from "+ startDocIdApp + " to "+ endDocIdApp+"(not included):");
+          LogService.logMessage("** Application mode for document from "+ startDocIdApp + " to "+ endDocIdApp+"(not included):", 1);
+          isTraining = false;
+          String classTypeOriginal = learningSettings.datasetDefinition
+            .getClassAttribute().getType();
+          outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(wdResults,
+            ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
+          int numDoc;
+          numDoc = endDocIdApp - startDocIdApp;
+          for(int i = startDocIdApp; i < endDocIdApp; ++i) {
+            lightWeightApi.annotations2NLPFeatures((Document)corpus.get(i), i-startDocIdApp,
+              outNLPFeatures, isTraining, learningSettings);
+          }
+          outNLPFeatures.flush();
+          outNLPFeatures.close();
+          lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
+            learningSettings);
+          /** Open the normal NLP feature file. */
+          inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
+            ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
+          lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, numDoc, isTraining, learningSettings);
+          inNLPFeatures.close();
+          // Applying th model
+          lightWeightApi.applyModelInJava(corpus, startDocIdApp, endDocIdApp, classTypeOriginal,
+            learningSettings);
+          
+          startDocIdApp = endDocIdApp;
+          
+        } catch(IOException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        } catch(GateException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+      }
+    }
     if(positionDoc == corpus.size() - 1) {
       // first select the training data and test data according to the
       // learning setting
       // set the inputASName in here, because it is a runtime parameter
-      if(LogService.minVerbosityLevel > 0) {
-        System.out.println("Learning starts.");
-        System.out
-          .println("For the information about this learning see the log file "
-            + wdResults.getAbsolutePath() + File.separator
-            + ConstantParameters.FILENAMEOFLOGFILE);
-      }
       int numDoc = corpus.size();
       try {
         //PrintWriter logFileIn = new PrintWriter(new FileWriter(logFile, true));
@@ -292,7 +354,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               break;
             case APPLICATION:
               // if application
-              EvaluationBasedOnDocs.emptyDatafile(wdResults, false);
+              /*EvaluationBasedOnDocs.emptyDatafile(wdResults, false);
               if(LogService.minVerbosityLevel> 0) System.out.println("** Application mode:");
               LogService.logMessage("** Application mode:", 1);
               isTraining = false;
@@ -308,13 +370,39 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               outNLPFeatures.close();
               lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
                 learningSettings);
+              // Open the normal NLP feature file.
+              inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
+                ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
+              lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, numDoc, isTraining, learningSettings);
+              inNLPFeatures.close();
+              // Applying th model
+              lightWeightApi.applyModelInJava(corpus, 0, corpus.size(), classTypeOriginal,
+                learningSettings);*/
+              EvaluationBasedOnDocs.emptyDatafile(wdResults, false);
+              if(LogService.minVerbosityLevel> 0) System.out.println("** " +
+                  "Application mode for document from "+ startDocIdApp + " to "+ endDocIdApp+"(not included):");
+              LogService.logMessage("** Application mode for document from "+ startDocIdApp + " to "+ endDocIdApp+"(not included):", 1);
+              isTraining = false;
+              String classTypeOriginal = learningSettings.datasetDefinition
+                .getClassAttribute().getType();
+              outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(wdResults,
+                ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
+              numDoc = endDocIdApp - startDocIdApp;
+              for(int i = startDocIdApp; i < endDocIdApp; ++i) {
+                lightWeightApi.annotations2NLPFeatures((Document)corpus.get(i), i-startDocIdApp,
+                  outNLPFeatures, isTraining, learningSettings);
+              }
+              outNLPFeatures.flush();
+              outNLPFeatures.close();
+              lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
+                learningSettings);
               /** Open the normal NLP feature file. */
               inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
                 ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
               lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, numDoc, isTraining, learningSettings);
               inNLPFeatures.close();
               // Applying th model
-              lightWeightApi.applyModelInJava(corpus, classTypeOriginal,
+              lightWeightApi.applyModelInJava(corpus, startDocIdApp, endDocIdApp, classTypeOriginal,
                 learningSettings);
               break;
             case EVALUATION:

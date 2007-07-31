@@ -425,9 +425,10 @@ public class LightWeightLearningApi extends Object {
    * Apply the model to data, also using the learning algorithm implemented in
    * Java.
    */
-  public void applyModelInJava(Corpus corpus, String labelName,
+  public void applyModelInJava(Corpus corpus, int startDocId, int endDocId, String labelName,
     LearningEngineSettings engineSettings)
     throws GateException {
+    int numDocs = endDocId - startDocId;
     LogService.logMessage("\nApplication starts.", 1);
     // The files for training data and model
     File wdResults = new File(wd, ConstantParameters.SUBDIRFORRESULTS);
@@ -456,7 +457,6 @@ public class LightWeightLearningApi extends Object {
         // features
         featureType = WekaLearning
           .obtainWekaLeanerDataType(engineSettings.learnerSettings.learnerName);
-        int numDocs = corpus.size();
         switch(featureType){
           case WekaLearning.NLPFEATUREFVDATA:
             wekaL.readNLPFeaturesFromFile(nlpDataFile, numDocs,
@@ -488,7 +488,7 @@ public class LightWeightLearningApi extends Object {
         MultiClassLearning chunkLearning = new MultiClassLearning(
           engineSettings.multi2BinaryMode);
         // read data
-        chunkLearning.getDataFromFile(corpus.size(), dataFile);
+        chunkLearning.getDataFromFile(numDocs, dataFile);
         // get a learner
         String learningCommand = engineSettings.learnerSettings.paramsOfLearning;
         learningCommand = learningCommand.trim();
@@ -522,12 +522,12 @@ public class LightWeightLearningApi extends Object {
         engineSettings.thrBoundaryProb, engineSettings.thrEntityProb,
         engineSettings.thrClassificationProb);
       //System.out.println("** Application mode:");
-      for(int i = 0; i < corpus.size(); ++i) {
+      for(int i = 0; i < numDocs; ++i) {
         HashSet chunks = new HashSet();
         postPr.postProcessingChunk((short)3, labelsFVDoc[i].multiLabels,
           numClasses, chunks, chunkLenHash);
         //System.out.println("** documentName="+((Document)corpus.get(i)).getName());
-        addAnnsInDoc((Document)corpus.get(i), chunks, instanceType, featName,
+        addAnnsInDoc((Document)corpus.get(i+startDocId), chunks, instanceType, featName,
           labelName, labelsAndId);
       }
     } else {
@@ -541,12 +541,12 @@ public class LightWeightLearningApi extends Object {
       PostProcessing postPr = new PostProcessing(
         engineSettings.thrBoundaryProb, engineSettings.thrEntityProb,
         engineSettings.thrClassificationProb);
-      for(int i = 0; i < corpus.size(); ++i) {
+      for(int i = 0; i < numDocs; ++i) {
         int[] selectedLabels = new int[labelsFVDoc[i].multiLabels.length];
         float[] valuesLabels = new float[labelsFVDoc[i].multiLabels.length];
         postPr.postProcessingClassification((short)3,
           labelsFVDoc[i].multiLabels, selectedLabels, valuesLabels);
-        addAnnsInDocClassification((Document)corpus.get(i), selectedLabels,
+        addAnnsInDocClassification((Document)corpus.get(i+startDocId), selectedLabels,
           valuesLabels, instanceType, featName, labelName, labelsAndId,
           engineSettings);
       }
