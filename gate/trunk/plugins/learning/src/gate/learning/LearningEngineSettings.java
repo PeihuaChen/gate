@@ -116,7 +116,7 @@ public class LearningEngineSettings {
     if(rootElement.getChild("BATCH-APP-INTERVAL") != null) {
       String value = rootElement.getChild("BATCH-APP-INTERVAL").getAttribute("num")
         .getValue();
-      learningSettings.miDocInterval = Integer.parseInt(value);
+      learningSettings.docNumIntevalApp = Integer.parseInt(value);
     }
     /** Get the setting for verbosity. */
     learningSettings.verbosityLogService = LogService.NORMAL;
