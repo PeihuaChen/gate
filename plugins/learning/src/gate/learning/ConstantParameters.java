@@ -41,6 +41,9 @@ public class ConstantParameters {
   /** Name of the file storing the feature vectors in sparse format. */
   public static final String FILENAMEOFFeatureVectorData = "featureVectorsData"
     + FILETYPEOFSAVEDFILE;
+  /** Name of the file storing the feature vectors in sparse format for application. */
+  public static final String FILENAMEOFFeatureVectorDataApp = "featureVectorsDataApp"
+    + FILETYPEOFSAVEDFILE;
   // public static final String PARTFILENAMEOFDocNLPFeaturess =
   // "DOCNLPFeaetures";
   /** Name of the file storing the learned models */
