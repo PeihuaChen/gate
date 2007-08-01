@@ -245,7 +245,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
           BufferedWriter outNLPFeatures = null;
           BufferedReader inNLPFeatures = null;
           BufferedWriter outFeatureVectors = null;
-          EvaluationBasedOnDocs.emptyDatafile(wdResults, false);
+          //EvaluationBasedOnDocs.emptyDatafile(wdResults, false);
           if(LogService.minVerbosityLevel> 0) System.out.println("** " +
               "Application mode for document from "+ startDocIdApp + " to "+ endDocIdApp+"(not included):");
           LogService.logMessage("** Application mode for document from "+ startDocIdApp + " to "+ endDocIdApp+"(not included):", 1);
@@ -392,7 +392,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               // Applying th model
               lightWeightApi.applyModelInJava(corpus, 0, corpus.size(), classTypeOriginal,
                 learningSettings);*/
-              EvaluationBasedOnDocs.emptyDatafile(wdResults, false);
+              //EvaluationBasedOnDocs.emptyDatafile(wdResults, false);
               if(LogService.minVerbosityLevel> 0) System.out.println("** " +
                   "Application mode for document from "+ startDocIdApp + " to "+ endDocIdApp+"(not included):");
               LogService.logMessage("** Application mode for document from "+ startDocIdApp + " to "+ endDocIdApp+"(not included):", 1);
@@ -458,6 +458,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               inNLPFeatures.close();
               outFeatureVectors.flush();
               outFeatureVectors.close();
+              System.gc(); //to make effort to delete the files.
               miLearningInfor.miNumDocsTraining += numDoc;
               miLearningInfor.miNumDocsFromLast += numDoc;
               if(miLearningInfor.miNumDocsFromLast>=learningSettings.miDocInterval) {
