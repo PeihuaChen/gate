@@ -294,6 +294,7 @@ public class EvaluationBasedOnDocs {
     int numDoc = 0;
     BufferedWriter outNLPFeatures=null;
     BufferedReader inNLPFeatures = null;
+    BufferedWriter outFeatureVectors = null;
     try {
       outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(wdResults,
         ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
@@ -309,8 +310,13 @@ public class EvaluationBasedOnDocs {
       /** Open the normal NLP feature file. */
       inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
         ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
-      lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, numDoc, isTraining, learningSettings);
+      outFeatureVectors = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+        new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorData)), "UTF-8"));
+      lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, outFeatureVectors, numDoc, isTraining, learningSettings);
       inNLPFeatures.close();
+      outFeatureVectors.flush();
+      outFeatureVectors.close();
+      //outFeatureVectors.close();
       // if fitering the training data
       if(learningSettings.fiteringTrainingData
         && learningSettings.filteringRatio > 0.0)
@@ -349,8 +355,12 @@ public class EvaluationBasedOnDocs {
       lightWeightApi.finishFVs(wdResults, numDoc, isTraining, learningSettings);
       inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
         ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
-      lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, numDoc, isTraining, learningSettings);
+      outFeatureVectors = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+        new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorDataApp)), "UTF-8"));
+      lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, outFeatureVectors, numDoc, isTraining, learningSettings);
       inNLPFeatures.close();
+      outFeatureVectors.flush();
+      outFeatureVectors.close();
       // lightWeightApi.finishDocAnnotation();
       Corpus corpusTest;
       corpusTest = Factory.newCorpus("testCorpus");
@@ -360,8 +370,10 @@ public class EvaluationBasedOnDocs {
           corpusTest.add((Document)corpusOn.get(i));
           ++numDoc;
         }
+      String fvFileName = wdResults.toString() + File.separator
+      + ConstantParameters.FILENAMEOFFeatureVectorDataApp;
       lightWeightApi.applyModelInJava(corpusTest, 0, corpusTest.size(), classTypeTest,
-        learningSettings);
+        learningSettings, fvFileName);
       corpusTest.clear();
       Factory.deleteResource(corpusTest);
     
@@ -494,7 +506,7 @@ public class EvaluationBasedOnDocs {
     (new File(wdResults, ConstantParameters.FILENAMEOFNLPFeaturesData)).delete();
     (new File(wdResults, ConstantParameters.FILENAMEOFFeatureVectorData)).delete();
     (new File(wdResults, ConstantParameters.FILENAMEOFNLPDataLabel)).delete();
-    System.gc(); //to make effort to delete the files as want.
+    System.gc(); //to make effort to delete the files.
   }
 
   /** Add the F-measure of each label to the overal F-measure */

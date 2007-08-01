@@ -216,13 +216,13 @@ public class LightWeightLearningApi extends Object {
   }
 
   /** Convert the NLP features into feature vectors and write them into file. */
-  public void nlpfeatures2FVs(File wdResults, BufferedReader inNLPFeatures, int numDocs, boolean isTraining, 
+  public void nlpfeatures2FVs(File wdResults, BufferedReader inNLPFeatures, BufferedWriter outFeatureVectors, int numDocs, boolean isTraining, 
     LearningEngineSettings engineSettings) {
     
       try {
         
-        BufferedWriter outFeatureVectors = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-          new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorData), true), "UTF-8"));
+        //BufferedWriter outFeatureVectors = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+          //new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorData), true), "UTF-8"));
         //Read the first line out which is about feature names
         inNLPFeatures.readLine();
         for(int i=0; i<numDocs; ++i) {
@@ -244,12 +244,13 @@ public class LightWeightLearningApi extends Object {
             addDocFVsToFile(i, outFeatureVectors, labels, docFV);
           }
         }
-        outFeatureVectors.flush();
-        outFeatureVectors.close();
+        //outFeatureVectors.flush();
+        //outFeatureVectors.close();
       } catch(IOException e) {
         System.out.println("Error occured in reading the NLP data from file for converting to FVs" +
             "or writing the FVs data into file!");
       }
+     
   }
   
   /** Write the FVs of one document into file. */
@@ -426,14 +427,14 @@ public class LightWeightLearningApi extends Object {
    * Java.
    */
   public void applyModelInJava(Corpus corpus, int startDocId, int endDocId, String labelName,
-    LearningEngineSettings engineSettings)
+    LearningEngineSettings engineSettings, String fvFileName)
     throws GateException {
     int numDocs = endDocId - startDocId;
     LogService.logMessage("\nApplication starts.", 1);
     // The files for training data and model
     File wdResults = new File(wd, ConstantParameters.SUBDIRFORRESULTS);
-    String fvFileName = wdResults.toString() + File.separator
-      + ConstantParameters.FILENAMEOFFeatureVectorData;
+    //String fvFileName = wdResults.toString() + File.separator
+      //+ ConstantParameters.FILENAMEOFFeatureVectorData;
     String nlpFileName = wdResults.toString() + File.separator
       + ConstantParameters.FILENAMEOFNLPFeaturesData;
     String modelFileName = wdResults.toString() + File.separator

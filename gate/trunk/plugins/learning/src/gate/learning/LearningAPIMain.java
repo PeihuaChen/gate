@@ -170,8 +170,6 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
    * Run the resource.
    * 
    * @throws ExecutionException
-   * @throws  
-   * @throws
    */
   public void execute() throws ExecutionException {
     // now we need to see if the corpus is provided
@@ -246,6 +244,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
         try {
           BufferedWriter outNLPFeatures = null;
           BufferedReader inNLPFeatures = null;
+          BufferedWriter outFeatureVectors = null;
           EvaluationBasedOnDocs.emptyDatafile(wdResults, false);
           if(LogService.minVerbosityLevel> 0) System.out.println("** " +
               "Application mode for document from "+ startDocIdApp + " to "+ endDocIdApp+"(not included):");
@@ -268,11 +267,17 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
           /** Open the normal NLP feature file. */
           inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
             ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
-          lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, numDoc, isTraining, learningSettings);
+          outFeatureVectors = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+            new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorDataApp)), "UTF-8"));
+          lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, outFeatureVectors, numDoc, isTraining, learningSettings);
           inNLPFeatures.close();
+          outFeatureVectors.flush();
+          outFeatureVectors.close();
           // Applying th model
+          String fvFileName = wdResults.toString() + File.separator
+          + ConstantParameters.FILENAMEOFFeatureVectorDataApp;
           lightWeightApi.applyModelInJava(corpus, startDocIdApp, endDocIdApp, classTypeOriginal,
-            learningSettings);
+            learningSettings, fvFileName);
           
           startDocIdApp = endDocIdApp;
           
@@ -298,6 +303,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
         //Open the NLP feature file for storing the NLP feature vectors
         BufferedWriter outNLPFeatures = null;
         BufferedReader inNLPFeatures = null;
+        BufferedWriter outFeatureVectors = null;
         // if only need the feature data
         switch(learningMode) {
           case ProduceFeatureFilesOnly:
@@ -319,8 +325,12 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
             /** Open the normal NLP feature file. */
             inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
               ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
-            lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, numDoc, isTraining, learningSettings);
+            outFeatureVectors = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+              new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorData)), "UTF-8"));
+            lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, outFeatureVectors, numDoc, isTraining, learningSettings);
             inNLPFeatures.close();
+            outFeatureVectors.flush();
+            outFeatureVectors.close();
             if(LogService.minVerbosityLevel > 0) displayDataFilesInformation();
             break;
           case TRAINING:
@@ -342,8 +352,12 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               /** Open the normal NLP feature file. */
               inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
                 ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
-              lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, numDoc, isTraining, learningSettings);
+              outFeatureVectors = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+                new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorData)), "UTF-8"));
+              lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, outFeatureVectors, numDoc, isTraining, learningSettings);
               inNLPFeatures.close();
+              outFeatureVectors.flush();
+              outFeatureVectors.close();
               // if fitering the training data
               if(learningSettings.fiteringTrainingData
                 && learningSettings.filteringRatio > 0.0)
@@ -399,11 +413,17 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               /** Open the normal NLP feature file. */
               inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
                 ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
-              lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, numDoc, isTraining, learningSettings);
+              outFeatureVectors = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+                new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorDataApp)), "UTF-8"));
+              lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, outFeatureVectors, numDoc, isTraining, learningSettings);
               inNLPFeatures.close();
+              outFeatureVectors.flush();
+              outFeatureVectors.close();
               // Applying th model
+              String fvFileName = wdResults.toString() + File.separator
+              + ConstantParameters.FILENAMEOFFeatureVectorDataApp;
               lightWeightApi.applyModelInJava(corpus, startDocIdApp, endDocIdApp, classTypeOriginal,
-                learningSettings);
+                learningSettings, fvFileName);
               break;
             case EVALUATION:
               if(LogService.minVerbosityLevel > 0) System.out.println("** Evaluation mode:");
@@ -432,8 +452,12 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               /** Use the temp NLP feature file instead of the normal one for MI-training. */
               inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
                 ConstantParameters.FILENAMEOFNLPFeaturesDataTemp)), "UTF-8"));
-              lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, numDoc, isTraining, learningSettings);
+              outFeatureVectors = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+                new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorData), true), "UTF-8"));
+              lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, outFeatureVectors, numDoc, isTraining, learningSettings);
               inNLPFeatures.close();
+              outFeatureVectors.flush();
+              outFeatureVectors.close();
               miLearningInfor.miNumDocsTraining += numDoc;
               miLearningInfor.miNumDocsFromLast += numDoc;
               if(miLearningInfor.miNumDocsFromLast>=learningSettings.miDocInterval) {
