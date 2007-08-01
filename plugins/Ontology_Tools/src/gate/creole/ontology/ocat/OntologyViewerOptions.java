@@ -80,9 +80,8 @@ public class OntologyViewerOptions implements DocumentListener {
   /**
    * Button that allows saving the filter file.
    */
-   private JButton browseNewFilterFileButton;
+  private JButton browseNewFilterFileButton;
 
-  
   /**
    * Default AnnotationSEt or otherAnnotationSets
    */
@@ -225,8 +224,9 @@ public class OntologyViewerOptions implements DocumentListener {
     browseFilterFileButton
             .addActionListener(new OntologyViewerOptionsActions());
     browseNewFilterFileButton = new JButton("Save");
-    browseNewFilterFileButton.addActionListener(new OntologyViewerOptionsActions());
-    
+    browseNewFilterFileButton
+            .addActionListener(new OntologyViewerOptionsActions());
+
     JPanel temp6 = new JPanel(new FlowLayout(FlowLayout.LEFT));
     temp6.add(useOClassFilterFileCB);
     temp6.add(oClassFilterFilePathTF);
@@ -531,7 +531,8 @@ public class OntologyViewerOptions implements DocumentListener {
             }
           }
         }
-      } else if(ae.getSource() == browseNewFilterFileButton){
+      }
+      else if(ae.getSource() == browseNewFilterFileButton) {
         // open the file dialogue
         JFileChooser fileChooser = MainFrame.getFileChooser();
         int answer = fileChooser.showSaveDialog(MainFrame.getInstance());
@@ -542,8 +543,9 @@ public class OntologyViewerOptions implements DocumentListener {
           }
           else {
             try {
-              
-              BufferedWriter bw = new BufferedWriter(new FileWriter(selectedFile));
+
+              BufferedWriter bw = new BufferedWriter(new FileWriter(
+                      selectedFile));
               for(String s : ontologyClassesToFilterOut) {
                 bw.write(s);
                 bw.newLine();
@@ -552,13 +554,13 @@ public class OntologyViewerOptions implements DocumentListener {
               bw.close();
             }
             catch(IOException ioe) {
-              JOptionPane.showMessageDialog(MainFrame.getInstance(),
-                      ioe.getMessage());
+              JOptionPane.showMessageDialog(MainFrame.getInstance(), ioe
+                      .getMessage());
               throw new GateRuntimeException(ioe);
             }
           }
         }
-        
+
       }
       else if(ae.getSource() == useOClassFilterFileCB) {
         updateOClassFilter();
@@ -634,8 +636,7 @@ public class OntologyViewerOptions implements DocumentListener {
     ontologyClassesToFilterOut.removeAll(list);
     ontologyTreePanel.ontoTreeListener.refreshHighlights();
   }
-  
-  
+
   // DocumentListener Methods
   public void annotationSetAdded(DocumentEvent de) {
     // we need to update our annotationSetsNamesCB List
@@ -684,6 +685,48 @@ public class OntologyViewerOptions implements DocumentListener {
     this.filterFileURL = filterFileURL;
     if(isFilterOn()) {
       updateOClassFilter();
+    }
+  }
+
+  /**
+   * Gets a set of ontology classes disabled in the OCAT.
+   * @return
+   */
+  public HashSet<String> getOntologyClassesToFilterOut() {
+    return ontologyClassesToFilterOut;
+  }
+
+  /**
+   * This method should be called to specify the ontology classes that
+   * should be disabled from the ocat.
+   * 
+   * @param ontologyClassesToFilterOut
+   */
+  public void setOntologyClassesToFilterOut(
+          HashSet<String> ontologyClassesToFilterOut) {
+    // ok here we need to create a temporary file and add these classes
+    // in it
+    if(ontologyClassesToFilterOut == null) {
+      ontologyClassesToFilterOut = new HashSet<String>();
+    }
+
+    try {
+      File newFile = File.createTempFile("ontologyClassesToFilterOut", "tmp");
+      BufferedWriter bw = new BufferedWriter(new FileWriter(newFile));
+      for(String aClassName : ontologyClassesToFilterOut) {
+        bw.write(aClassName);
+        bw.newLine();
+      }
+      bw.flush();
+      bw.close();
+      readFilterFile = true;
+      oClassFilterFilePathTF.setText(newFile.toURI().toURL().toString());
+      filterFileURL = newFile.toURI().toURL();
+      setFilterOn(true);
+    }
+    catch(IOException ioe) {
+      throw new GateRuntimeException(
+              "Not able to save the classes in a temporary file", ioe);
     }
   }
 }
