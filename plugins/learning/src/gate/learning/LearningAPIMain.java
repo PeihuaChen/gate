@@ -180,6 +180,8 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
     // first, get the NLP features from the documents, according to the
     // feature types specified in DataSetDefinition file
     int positionDoc = corpus.indexOf(document);
+    //To see if the corpus is from a datastore or not
+    
     // docsName.add(positionDoc, document.getName());
     if(positionDoc == 0) {
       lightWeightApi.inputASName = inputASName;
@@ -257,8 +259,11 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
           int numDoc;
           numDoc = endDocIdApp - startDocIdApp;
           for(int i = startDocIdApp; i < endDocIdApp; ++i) {
-            lightWeightApi.annotations2NLPFeatures((Document)corpus.get(i), i-startDocIdApp,
+            Document toProcess = (Document)corpus.get(i);
+            lightWeightApi.annotations2NLPFeatures(toProcess, i-startDocIdApp,
               outNLPFeatures, isTraining, learningSettings);
+            if(toProcess.getDataStore()!= null) //(isDatastore)
+              Factory.deleteResource(toProcess);
           }
           outNLPFeatures.flush();
           outNLPFeatures.close();
@@ -315,8 +320,11 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
             outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(wdResults,
               ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
             for(int i = 0; i < numDoc; ++i) {
-              lightWeightApi.annotations2NLPFeatures((Document)corpus.get(i), i,
+              Document toProcess = (Document)corpus.get(i);
+              lightWeightApi.annotations2NLPFeatures(toProcess, i,
                 outNLPFeatures, isTraining, learningSettings);
+              if(toProcess.getDataStore() != null)
+                Factory.deleteResource(toProcess);
             }
             outNLPFeatures.flush();
             outNLPFeatures.close();
@@ -342,8 +350,11 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(wdResults,
                 ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
               for(int i = 0; i < numDoc; ++i) {
-                lightWeightApi.annotations2NLPFeatures((Document)corpus.get(i), i,
+                Document toProcess = (Document)corpus.get(i);
+                lightWeightApi.annotations2NLPFeatures(toProcess, i,
                   outNLPFeatures, isTraining, learningSettings);
+                if(toProcess.getDataStore() != null)
+                  Factory.deleteResource(toProcess);
               }
               outNLPFeatures.flush();
               outNLPFeatures.close();
@@ -403,8 +414,11 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
                 ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
               numDoc = endDocIdApp - startDocIdApp;
               for(int i = startDocIdApp; i < endDocIdApp; ++i) {
-                lightWeightApi.annotations2NLPFeatures((Document)corpus.get(i), i-startDocIdApp,
+                Document toProcess = (Document)corpus.get(i);
+                lightWeightApi.annotations2NLPFeatures(toProcess, i-startDocIdApp,
                   outNLPFeatures, isTraining, learningSettings);
+                if(toProcess.getDataStore()!= null) //(isDatastore)
+                  Factory.deleteResource(toProcess);
               }
               outNLPFeatures.flush();
               outNLPFeatures.close();
@@ -424,6 +438,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               + ConstantParameters.FILENAMEOFFeatureVectorDataApp;
               lightWeightApi.applyModelInJava(corpus, startDocIdApp, endDocIdApp, classTypeOriginal,
                 learningSettings, fvFileName);
+              //Update the datastore for the added annotations
               break;
             case EVALUATION:
               if(LogService.minVerbosityLevel > 0) System.out.println("** Evaluation mode:");

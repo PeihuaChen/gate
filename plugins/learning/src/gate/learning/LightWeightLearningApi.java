@@ -528,8 +528,13 @@ public class LightWeightLearningApi extends Object {
         postPr.postProcessingChunk((short)3, labelsFVDoc[i].multiLabels,
           numClasses, chunks, chunkLenHash);
         //System.out.println("** documentName="+((Document)corpus.get(i)).getName());
-        addAnnsInDoc((Document)corpus.get(i+startDocId), chunks, instanceType, featName,
+        Document toProcess = (Document)corpus.get(i+startDocId);
+        addAnnsInDoc(toProcess, chunks, instanceType, featName,
           labelName, labelsAndId);
+        if(toProcess.getDataStore()!= null) {
+          corpus.getDataStore().sync(corpus);
+          Factory.deleteResource(toProcess);
+        }
       }
     } else {
       String featName = engineSettings.datasetDefinition.arrs.classFeature;
@@ -547,9 +552,14 @@ public class LightWeightLearningApi extends Object {
         float[] valuesLabels = new float[labelsFVDoc[i].multiLabels.length];
         postPr.postProcessingClassification((short)3,
           labelsFVDoc[i].multiLabels, selectedLabels, valuesLabels);
-        addAnnsInDocClassification((Document)corpus.get(i+startDocId), selectedLabels,
+        Document toProcess = (Document)corpus.get(i+startDocId);
+        addAnnsInDocClassification(toProcess, selectedLabels,
           valuesLabels, instanceType, featName, labelName, labelsAndId,
           engineSettings);
+        if(toProcess.getDataStore()!= null) {
+          corpus.getDataStore().sync(corpus);
+          Factory.deleteResource(toProcess);
+        }
       }
     }
   }
