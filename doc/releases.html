@@ -1,78 +1,107 @@
 <!-- releases.html $Id$ -->
 
 <HTML>
-  <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
-  <META name="keywords"
-    content="GATE, General Architecture for Text Engineering"/>
-  <META name="description"
-    content="GATE Releases"/>
-  <TITLE>GATE Releases</TITLE>
-  <LINK rel="stylesheet" type="text/css" href="gate.css"></LINK>
+<META http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<META name="keywords"
+	content="GATE, General Architecture for Text Engineering" />
+<META name="description" content="GATE Releases" />
+<TITLE>GATE Releases</TITLE>
+<LINK rel="stylesheet" type="text/css" href="gate.css"></LINK>
 </HEAD>
 
 <!-- body ************************************************************ -->
 <BODY>
 
 <!-- header gif ****************************************************** -->
-<P ALIGN="center">
-<A HREF="http://gate.ac.uk/">
-<IMG SRC="gateHeader.gif" ALT="GATE" HEIGHT=76 WIDTH=356 BORDER=0></A>
-</P>
+<P ALIGN="center"><A HREF="http://gate.ac.uk/"> <IMG
+	SRC="gateHeader.gif" ALT="GATE" HEIGHT=76 WIDTH=356 BORDER=0></A></P>
 
 <!-- top banner ****************************************************** -->
 <DIV CLASS="banner">
-  <P>
-  GATE Releases
-  </P>
+<P>GATE Releases</P>
 </DIV>
 
+
+
 <!-- release notes *************************************************** -->
+<H2>GATE 4.0 (build 2752), July 12th 2007</H2>
+
+<P>GATE version 4 is now available for download from Sourceforge
+(follow the download link from <a href="http://gate.ac.uk/download">http://gate.ac.uk/download</a>).</P>
+
+<P>Version 4 includes major new facilities for annotation indexing
+and search, machine learning, scaleable ontology support from OWLIM (<a
+	hred="http://www.ontotext.com/owlim/">http://www.ontotext.com/owlim/</a>
+), ontology-based document annotation, and parallel corpus alignment.
+There is a raft of efficiency and infrastructure improvements including
+revamped HTML handling, Java 5 support and numerous optimisations and
+bug fixes. The set of plugins available has expanded to include around
+150 components, which integrate with many high-quality language
+processing tools from the wider research community (<a
+	href="http://gate.ac.uk/gate/doc/plugins.html">http://gate.ac.uk/gate/doc/plugins.html</a>).</P>
+
+<P>GATE is free and open (under the LGPL licence) and you are very
+welcome to use it for both commercial and research purposes. A number of
+businesses now use GATE in production applications, from large
+corporates like Thompson or AT&T to startups like Garlik or Innovantage.
+Research, teaching and student users represent a high proportion of labs
+working on language and knowledge worldwide. </P>
+
+
+<P>Plans for the future include:
+<ul>
+	<li>a new version of the JAPE finite state annotation processing
+language</li>
+	<li>more and better integration with related systems and tools</li>
+	<li>SAFE, the Semantic Annotation Factory Environment: <a href="http://gate.ac.uk/safe/">http://gate.ac.uk/safe/</a></li> 
+</ul>
+</P>
+
+<P>See <a href=http://gate.ac.uk/sale/tao/#chap:changes>the changelog</a> for 
+more details.</P>
+
+<P>GATE is developed on Ubuntu (and other less advanced operating systems).</P>
+
+<!-- release notes *************************************************** -->
+
 <H2>GATE 3.1 (build 2270), April 7th 2006</H2>
 
-<p>
-This is the final release of version 3.1. 
-
-<p>
-New features in 3.1 (see also next section) include:
+<p>This is the final release of version 3.1.
+<p>New features in 3.1 (see also next section) include:
 <ul>
-<li>
-UIMA interoperability layer, paid for by IBM's TJ Watson labs (thanks folks!)
-<li>
-a revised and reworked ontology abstraction API that generalises over
-Sesame, JENA and KAON for language technology purposes
-<li>
-<a href=http://www.ontotext.com/gate/japec.html>OntoText's new JAPE
-compiler</a>, which makes ANNIE run 200% as fast as previously and in general 
-achieves JAPE speed-ups of 2-5 times.
+	<li>UIMA interoperability layer, paid for by IBM's TJ Watson labs
+	(thanks folks!)
+	<li>a revised and reworked ontology abstraction API that
+	generalises over Sesame, JENA and KAON for language technology purposes
+	
+	<li><a href=http://www.ontotext.com/gate/japec.html>OntoText's
+	new JAPE compiler</a>, which makes ANNIE run 200% as fast as previously and
+	in general achieves JAPE speed-ups of 2-5 times.
 </ul>
 ...and a whole bunch of bug fixes!
 
-<p>
-There are a few backwards
-incompatibilities (see <a href=http://gate.ac.uk/sale/tao/#chap:changes>the
-changelog</a> for more details).
+<p>There are a few backwards incompatibilities (see <a
+	href=http://gate.ac.uk/sale/tao/#chap:changes>the changelog</a> for
+more details).
 
 
 <!-- release notes *************************************************** -->
 <H2>GATE 3.1 beta 1 (build 2168), December 16th 2005</H2>
 
-<p>
-This is the first release (beta 1) of version 3.1. This core of this release
-is stable, but some new features may have bugs, and there are some backwards
-incompatibilities (see <a href=http://gate.ac.uk/sale/tao/#chap:changes>the
-changelog</a> for more details).
-
-<p>
-New features in 3.1 include:
+<p>This is the first release (beta 1) of version 3.1. This core of
+this release is stable, but some new features may have bugs, and there
+are some backwards incompatibilities (see <a
+	href=http://gate.ac.uk/sale/tao/#chap:changes>the changelog</a> for
+more details).
+<p>New features in 3.1 include:
 <ul>
-<li>
-UIMA interoperability layer, paid for by IBM's TJ Watson labs (thanks folks!)
-<li>
-a revised and reworked ontology abstraction API that generalises over
-Sesame, JENA and KAON for language technology purposes
-<li>
-OntoText's new JAPE compiler, which makes ANNIE run 200% as fast as
-previously
+	<li>UIMA interoperability layer, paid for by IBM's TJ Watson labs
+	(thanks folks!)
+	<li>a revised and reworked ontology abstraction API that
+	generalises over Sesame, JENA and KAON for language technology purposes
+	
+	<li>OntoText's new JAPE compiler, which makes ANNIE run 200% as
+	fast as previously
 </ul>
 ...and a whole bunch of bug fixes!
 
@@ -80,232 +109,169 @@ previously
 <!-- release notes *************************************************** -->
 <H2>GATE 3.0 (build 1846), January 14th 2005</H2>
 
-<p>
-This is the final release of version 3.0. This is a stable release
-and supercedes all previous versions. 
-
-<P>
-New features include:
+<p>This is the final release of version 3.0. This is a stable
+release and supercedes all previous versions.
+<P>New features include:
 <ul>
-<li>completely rewritten document viewer/editor
-<li>extensive ontology support
-<li>a new plugin management system
-<li>lots more CREOLE plugins, including 
-Chemistry Tagger, Montreal Transducer, RASP Parser, MiniPar, Buchart Parser,
-MinorThird, NP Chunker, Stemmer, TreeTagger, Probability Finder, Crawler,
-Google PR, SVM Light, ...
-<li>faster JAPE compiles, and removal of dependency on Sun Java compiler
-<li>separate .jar files and Tomcat classloading fixes
-<li>transparent XML-based application serialisation
+	<li>completely rewritten document viewer/editor
+	<li>extensive ontology support
+	<li>a new plugin management system
+	<li>lots more CREOLE plugins, including Chemistry Tagger, Montreal
+	Transducer, RASP Parser, MiniPar, Buchart Parser, MinorThird, NP
+	Chunker, Stemmer, TreeTagger, Probability Finder, Crawler, Google PR,
+	SVM Light, ...
+	<li>faster JAPE compiles, and removal of dependency on Sun Java
+	compiler
+	<li>separate .jar files and Tomcat classloading fixes
+	<li>transparent XML-based application serialisation
 </ul>
-See <a href=http://gate.ac.uk/sale/tao>chapter 2 (Change Log)</a> of
-the User Guide for full details of what has changed.
+See
+<a href=http://gate.ac.uk/sale/tao>chapter 2 (Change Log)</a>
+of the User Guide for full details of what has changed.
 
-<p>
-<b>Compatibility:</b>
-for version 3 we decided that it was worthwhile making a few incompatible
-changes in order to clean up a couple of things that have caused trouble in
-previous versions. For example: some recent classes have been renamed
-(particularly the ontologies support classes); a few new events have been
-added; datastores created by version 3 will probably not read properly in 
+<p><b>Compatibility:</b> for version 3 we decided that it was
+worthwhile making a few incompatible changes in order to clean up a
+couple of things that have caused trouble in previous versions. For
+example: some recent classes have been renamed (particularly the
+ontologies support classes); a few new events have been added;
+datastores created by version 3 will probably not read properly in
 version 2. If you have problems use the <a
-href=http://gate.ac.uk/mail/index.html>mailing list</a> and we'll help you
-fix your code!
-
-<p>
-Version 3.1 will be a bug fix and minor adjustments to new features
-release; <a href=http://gate.ac.uk/mail/index.html>send us your comments</a>.
-
-<p>
-GATE is free software, developed using public research funds. If you find it
-useful, don't keep it a secret!
-
-<p>
-Thought for the day:
-did you know that if Walt Disney was working now, most of his films would be
-illegal? Check out <a href=http://www.eff.org/>the Electronic Frontier
-Foundation</a>, or take a look at Lessig's <b>Free Culture</b>.
-
-
-<!-- release notes *************************************************** -->
+	href=http://gate.ac.uk/mail/index.html>mailing list</a> and we'll help
+you fix your code!
+<p>Version 3.1 will be a bug fix and minor adjustments to new
+features release; <a href=http://gate.ac.uk/mail/index.html>send us
+your comments</a>.
+<p>GATE is free software, developed using public research funds. If
+you find it useful, don't keep it a secret!
+<p>Thought for the day: did you know that if Walt Disney was working
+now, most of his films would be illegal? Check out <a
+	href=http://www.eff.org />the Electronic Frontier Foundation</a>, or take a
+look at Lessig's <b>Free Culture</b>. <!-- release notes *************************************************** -->
 <H2>GATE 3.0 (build 1810, Release Candidate 1), December 7th 2004</H2>
 
-<p>
-Since beta 1 of version 3 we have stabilised the system, and made all
-pre-release final changes. This RC1 release is for testing of the
-installation routines and backwards compatibility analysis. Please report
-all bugs and errors. Version 3.0 FCS will be very early 2005.
-
-
-<!-- release notes *************************************************** -->
+<p>Since beta 1 of version 3 we have stabilised the system, and made
+all pre-release final changes. This RC1 release is for testing of the
+installation routines and backwards compatibility analysis. Please
+report all bugs and errors. Version 3.0 FCS will be very early 2005. <!-- release notes *************************************************** -->
 <H2>GATE 3.0 (build 1717, Beta 1), August 6th 2004</H2>
 
-<p>
-This release is dedicated to the memory of Jeremy Black (main instigator
-of the <a
-href=http://www.gate.ac.uk/projects/etcsl/>ETCSL projects</a>).
-
-<P>
-This is the latest release (is it <b>not</b> production quality).
-The <A HREF="http://www.gate.ac.uk/releases/gate-3.0-beta1-build1717--ALL/tao.pdf">
-user guide</A>.
-The <A HREF="http://www.gate.ac.uk/releases/gate-3.0-beta1-build1717--ALL/">
-developer documentation</A>.
-The <A HREF="http://gate.ac.uk/download">download page</A>.
-
-<P> See <a href=http://gate.ac.uk/sale/tao>chapter 2 (Change Log)</a> of
-the User Guide for full details of what has changed.
-
-<P>
-<b>Highlights</b>
-
-<P> New features include:
+<p>This release is dedicated to the memory of Jeremy Black (main
+instigator of the <a href=http://www.gate.ac.uk/projects/etcsl />ETCSL
+projects</a>).
+<P>This is the latest release (is it <b>not</b> production quality).
+The <A
+	HREF="http://www.gate.ac.uk/releases/gate-3.0-beta1-build1717--ALL/tao.pdf">
+user guide</A>. The <A
+	HREF="http://www.gate.ac.uk/releases/gate-3.0-beta1-build1717--ALL/">
+developer documentation</A>. The <A HREF="http://gate.ac.uk/download">download
+page</A>.
+<P>See <a href=http://gate.ac.uk/sale/tao>chapter 2 (Change Log)</a>
+of the User Guide for full details of what has changed.
+<P><b>Highlights</b>
+<P>New features include:
 <ul>
-<li>completely rewritten document viewer/editor
-<li>extensive ontology support
-<li>a new plugin management system
-<li>separate .jar
-files and a Tomcat classloading fix
-<li>lots more CREOLE components (and some more to come soon)
+	<li>completely rewritten document viewer/editor
+	<li>extensive ontology support
+	<li>a new plugin management system
+	<li>separate .jar files and a Tomcat classloading fix
+	<li>lots more CREOLE components (and some more to come soon)
 </ul>
 
-<P>
-<b>Compatibility</b>
-
-<p>
-For version 3 we decided that it was worthwhile making a few
+<P><b>Compatibility</b>
+<p>For version 3 we decided that it was worthwhile making a few
 incompatible changes in order to clean up a few things that have caused
 trouble in previous versions. For example: some recent classes have been
-renamed (particularly the ontologies support classes) and a few events added
-(see below); datastores created by version 3 will probably not read properly
-in version 2.  If you have problems use the mailing list and we'll help you
-fix your code!
-
-<P>
-<b>Contributions</b>
-
-<p>
-A big "thank you" to the following contributors of new code to this release
-(please let <a href=http://www.dcs.shef.ac.uk/~hamish>me</a>
+renamed (particularly the ontologies support classes) and a few events
+added (see below); datastores created by version 3 will probably not
+read properly in version 2. If you have problems use the mailing list
+and we'll help you fix your code!
+<P><b>Contributions</b>
+<p>A big "thank you" to the following contributors of new code to
+this release (please let <a href=http://www.dcs.shef.ac.uk/~hamish>me</a>
 know if I missed you out!):
 <ul>
-<li>
-OntoText for contributing the OntoGazetteer and various other components: <a
-href=http://www.ontotext.com/>http://www.ontotext.com/</a>
-<li>
-Ontos International AG for the new JAPE debugger:
-<a href=http://www.ontosearch.com/en/company/>http://www.ontosearch.com/en/company/</a>.
-<li>
-Mark Greenwood for several CREOLE components:
-<a href=http://www.dcs.shef.ac.uk/~mark>http://www.dcs.shef.ac.uk/~mark</a>
-<li>
-Angus Roberts for several CREOLE components:
-<a href=http://www.dcs.shef.ac.uk/~angus/software.html>http://www.dcs.shef.ac.uk/~angus/software.html</a>.
-<li>
-Luc Plamondon for the Montreal transducer [not bundled in beta 1]:
-<a href=http://www.iro.umontreal.ca/~plamondl/mtltransducer/>http://www.iro.umontreal.ca/~plamondl/mtltransducer/</a>.
-<li>
-<a href=http://www.media-style.com/index.jsp?folderPK=754>Media Style</a> for
-the CoNLL ANNIE wrapper.
-<li>
-Osamu Masutani of <a href=http://www.d-itlab.co.jp>Denso IT Laboratory,
-Inc.</a> for many useful suggestions.
+	<li>OntoText for contributing the OntoGazetteer and various other
+	components: <a href=http://www.ontotext.com />http://www.ontotext.com/</a>
+	<li>Ontos International AG for the new JAPE debugger: <a
+		href=http://www.ontosearch.com/en/company />http://www.ontosearch.com/en/company/</a>.
+	
+	<li>Mark Greenwood for several CREOLE components: <a
+		href=http://www.dcs.shef.ac.uk/~mark>http://www.dcs.shef.ac.uk/~mark</a>
+	<li>Angus Roberts for several CREOLE components: <a
+		href=http://www.dcs.shef.ac.uk/~angus/software.html>http://www.dcs.shef.ac.uk/~angus/software.html</a>.
+	
+	<li>Luc Plamondon for the Montreal transducer [not bundled in beta
+	1]: <a href=http://www.iro.umontreal.ca/~plamondl/mtltransducer />http://www.iro.umontreal.ca/~plamondl/mtltransducer/</a>.
+	
+	<li><a href=http://www.media-style.com/index.jsp?folderPK=754>Media
+	Style</a> for the CoNLL ANNIE wrapper.
+	<li>Osamu Masutani of <a href=http://www.d-itlab.co.jp>Denso
+	IT Laboratory, Inc.</a> for many useful suggestions.
 </ul>
 
-<P>
-<b>See also</b>
-
+<P><b>See also</b>
 <ul>
-<li>
-<a href=http://melandra.com/>Melandra</a>, whose Peter Crowther sometimes
-helps out on the mailing list
-<li>
-<a href=http://bioinf.cs.ucl.ac.uk/biorat>David Corney's BioRAT</a>
-GATE/ANNIE/JAPE-based bio-informatics extraction tool.
-<li>
-Thanks to Ian Roberts for lots of hard thinking about class loaders:
-<a href=http://www.dcs.shef.ac.uk/~ian>http://www.dcs.shef.ac.uk/~ian</a>
-<li>
-The Open University's
-<a href=http://kmi.open.ac.uk/projects/akt/aqualog/>AquaLog system</a>
-<li>
-<a href=http://medwrite.biz>Medwrite Inc.</a>'s medical informatics systems
+	<li><a href=http://melandra.com />Melandra</a>, whose Peter Crowther
+	sometimes helps out on the mailing list
+	<li><a href=http://bioinf.cs.ucl.ac.uk/biorat>David Corney's
+	BioRAT</a> GATE/ANNIE/JAPE-based bio-informatics extraction tool.
+	<li>Thanks to Ian Roberts for lots of hard thinking about class
+	loaders: <a href=http://www.dcs.shef.ac.uk/~ian>http://www.dcs.shef.ac.uk/~ian</a>
+	<li>The Open University's <a
+		href=http://kmi.open.ac.uk/projects/akt/aqualog />AquaLog system</a>
+	<li><a href=http://medwrite.biz>Medwrite Inc.</a>'s medical
+	informatics systems
 </ul>
 
 
 <!-- release notes *************************************************** -->
 <H2>GATE 2.2 (build 1350), July 29th 2003</H2>
 
-<P>
-The last production quality release.
-
-<P>
-<A HREF="http://www.gate.ac.uk/releases/gate-2.2-build1350--ALL/">
+<P>The last production quality release.
+<P><A HREF="http://www.gate.ac.uk/releases/gate-2.2-build1350--ALL/">
 Developer documentation for this release</A>.
-
-<P>
-<A HREF="http://gate.ac.uk/download">Download</A>.
-
-
-<!-- release notes *************************************************** -->
+<P><A HREF="http://gate.ac.uk/download">Download</A>. <!-- release notes *************************************************** -->
 <H2>GATE 2.1_01 (build 1170), February 14th 2003</H2>
 
-<P>
-The 2.1 release.
-
-<P>
-<A HREF="http://www.gate.ac.uk/releases/gate-2.1_01-build1170--ALL/">
+<P>The 2.1 release.
+<P><A
+	HREF="http://www.gate.ac.uk/releases/gate-2.1_01-build1170--ALL/">
 Developer documentation for this release</A>.
-
-<P>
-<A HREF="http://gate.ac.uk/download">Download</A>.
-
-<!-- release notes *************************************************** -->
+<P><A HREF="http://gate.ac.uk/download">Download</A>. <!-- release notes *************************************************** -->
 <H2>GATE 2.0 (build 835), March 14th 2002</H2>
 
-<P>
-The full-function version of 2.0.
-
-<P>
-<A HREF="http://gate.ac.uk/releases/gate-2.0-build835--ALL/doc">
-Developer documentation for this release</A>.
-
-
-<!-- release notes *************************************************** -->
+<P>The full-function version of 2.0.
+<P><A HREF="http://gate.ac.uk/releases/gate-2.0-build835--ALL/doc">
+Developer documentation for this release</A>. <!-- release notes *************************************************** -->
 <H2>GATE 2.0 Beta 1 (build 721), December 3rd 2001</H2>
 
-<P>
-The first (fairly) stable full-function version of 2.0.
-
-<P>
-<A HREF="http://gate.ac.uk/releases/gate-2.0beta1-build721--ALL/doc">
-Developer documentation for this release</A>.
-
-
-<!-- old releases *************************************************** -->
+<P>The first (fairly) stable full-function version of 2.0.
+<P><A
+	HREF="http://gate.ac.uk/releases/gate-2.0beta1-build721--ALL/doc">
+Developer documentation for this release</A>. <!-- old releases *************************************************** -->
 <H2>(Very) old releases</H2>
 
 <UL>
-<LI>
-<A HREF="http://gate.ac.uk/releases/gate-2.0alpha3-build516/doc">
-gate-2.0alpha3-build516</A>
-<LI>
-<A HREF="http://gate.ac.uk/releases/gate-2.0alpha2-build484/doc">
-gate-2.0alpha2-build484</A>
-<LI>
-<A HREF="http://gate.ac.uk/releases/gate-2.0alpha1-build427/doc">
-gate-2.0alpha1-build427</A>
+	<LI><A
+		HREF="http://gate.ac.uk/releases/gate-2.0alpha3-build516/doc">
+	gate-2.0alpha3-build516</A>
+	<LI><A
+		HREF="http://gate.ac.uk/releases/gate-2.0alpha2-build484/doc">
+	gate-2.0alpha2-build484</A>
+	<LI><A
+		HREF="http://gate.ac.uk/releases/gate-2.0alpha1-build427/doc">
+	gate-2.0alpha1-build427</A>
 </UL>
 
 <!-- footer ********************************************************** -->
-<P><DIV CLASS="banner">| <A HREF="http://gate.ac.uk/">gate home</A> |</DIV>
-<P ALIGN="center">
-<A HREF=http://nlp.shef.ac.uk/>
-<IMG WIDTH=164 HEIGHT=60 SRC="revNlpLogo.jpg" ALIGN="left" BORDER="0"
-  name="revNlpLogo" alt="NLP group">
-</A><BR>
+<P>
+<DIV CLASS="banner">| <A HREF="http://gate.ac.uk/">gate home</A> |</DIV>
+<P ALIGN="center"><A HREF=http://nlp.shef.ac.uk /> <IMG WIDTH=164
+	HEIGHT=60 SRC="revNlpLogo.jpg" ALIGN="left" BORDER="0"
+	name="revNlpLogo" alt="NLP group"> </A><BR>
 <IMG WIDTH=250 HEIGHT=18 SRC="nlpTitle.gif" BORDER="0" ALIGN="center">
-<BR><IMG WIDTH=500 HEIGHT=17 SRC="redline.jpg" BORDER="0" ALIGN="right">
+<BR>
+<IMG WIDTH=500 HEIGHT=17 SRC="redline.jpg" BORDER="0" ALIGN="right">
 <!-- ***************************************************************** -->
 
 <!-- the end ********************************************************* -->
