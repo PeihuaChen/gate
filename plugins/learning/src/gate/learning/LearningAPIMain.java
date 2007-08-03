@@ -262,8 +262,10 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
             Document toProcess = (Document)corpus.get(i);
             lightWeightApi.annotations2NLPFeatures(toProcess, i-startDocIdApp,
               outNLPFeatures, isTraining, learningSettings);
-            if(toProcess.getDataStore()!= null) //(isDatastore)
+            if(toProcess.getDataStore()!= null) {//(isDatastore)
+              corpus.getDataStore().sync(corpus);
               Factory.deleteResource(toProcess);
+            }
           }
           outNLPFeatures.flush();
           outNLPFeatures.close();
@@ -417,8 +419,10 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
                 Document toProcess = (Document)corpus.get(i);
                 lightWeightApi.annotations2NLPFeatures(toProcess, i-startDocIdApp,
                   outNLPFeatures, isTraining, learningSettings);
-                if(toProcess.getDataStore()!= null) //(isDatastore)
+                if(toProcess.getDataStore()!= null) {//(isDatastore)
                   Factory.deleteResource(toProcess);
+                  corpus.getDataStore().sync(corpus);
+                }
               }
               outNLPFeatures.flush();
               outNLPFeatures.close();
