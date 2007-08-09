@@ -347,7 +347,7 @@ public class OntologyTreeListener extends MouseAdapter {
   }
 
   /** Method to select the children node as well */
-  private void setChildrenSelection(IFolder node, boolean value) {
+  void setChildrenSelection(IFolder node, boolean value) {
     ontologyTreePanel.setSelected(node.toString(), value);
     if(node.getChildCount() > 0) {
       Iterator iter = node.getChildren();
@@ -462,10 +462,8 @@ public class OntologyTreeListener extends MouseAdapter {
           // and finally we need to expand the path
           if(node != null) {
             TreePath path = getTreePath(node);
-
-            if(!ontologyTreePanel.currentOntologyTree.isVisible(path)) {
-              ontologyTreePanel.currentOntologyTree.expandPath(path);
-            }
+            ontologyTreePanel.currentOntologyTree.expandPath(path);
+            ontologyTreePanel.currentOntologyTree.scrollPathToVisible(path);
           }
         }
 

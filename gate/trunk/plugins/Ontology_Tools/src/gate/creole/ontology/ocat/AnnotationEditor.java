@@ -59,6 +59,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
+import javax.swing.tree.TreePath;
 
 import com.ontotext.gate.vr.ClassNode;
 import com.ontotext.gate.vr.IFolder;
@@ -77,7 +78,9 @@ public class AnnotationEditor extends AbstractAction {
   protected JCheckBox applyToAll;
 
   protected JCheckBox createInstance;
-
+  
+  protected JCheckBox deHighlight;
+  
   protected JScrollPane scroller;
 
   protected FeaturesEditor featuresEditor;
@@ -208,6 +211,12 @@ public class AnnotationEditor extends AbstractAction {
     createInstance.setToolTipText("Create Instance");
     buttonPanel.add(createInstance);
 
+    deHighlight = new JCheckBox(new HideHighlightsAction("Dehighlight"));
+    deHighlight.setContentAreaFilled(false);
+    deHighlight.setMargin(new Insets(0, 0, 0, 0));
+    deHighlight.setToolTipText("Deselects the mention in ontology tree");
+    buttonPanel.add(deHighlight); 
+    
     Icon icon = UIManager.getIcon("InternalFrame.closeIcon");
     if(icon == null) icon = MainFrame.getIcon("exit");
     dissmissAction = new CancelAction(icon);
@@ -304,6 +313,7 @@ public class AnnotationEditor extends AbstractAction {
       eoelBtn.setEnabled(false);
       eoerBtn.setEnabled(false);
       scroller.setEnabled(false);
+      deHighlight.setEnabled(false);
     }
     else {
       deleteBtn.setEnabled(true);
@@ -312,6 +322,7 @@ public class AnnotationEditor extends AbstractAction {
       eoelBtn.setEnabled(true);
       eoerBtn.setEnabled(true);
       scroller.setEnabled(true);
+      deHighlight.setEnabled(true);
     }
   }
 
@@ -437,6 +448,7 @@ public class AnnotationEditor extends AbstractAction {
   boolean explicitCall = false;
 
   private void showWindow() {
+    deHighlight.setSelected(false);
     IFolder rootNode = (ClassNode)((OntoTreeModel)ontologyTreePanel.currentOntologyTree
             .getModel()).getRoot();
     // ok we first need to iterate through nodes and obtain all the
@@ -642,6 +654,52 @@ public class AnnotationEditor extends AbstractAction {
   }
 
   // extend the annotation by one character on left
+  protected class HideHighlightsAction extends AbstractAction {
+
+    public HideHighlightsAction(String caption) {
+      super(caption);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      try {
+
+        if(!deHighlight.isSelected()) {
+          return;
+        }
+        
+        gate.Annotation annot = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
+                .get(selectedAnnotationIndex);
+        FeatureMap features = annot.getFeatures();
+        String value = (String)features.get(ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME);
+        if(value == null) {
+          value = (String)features.get(ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME);
+        }
+        
+        ClassNode node = ontologyTreePanel.getNode(value);
+        // now if the sibling feature is ON we need to reflect our changes
+        // to its children as well
+        if(!ontologyTreePanel.ontologyViewerOptions.isChildFeatureDisabled()) {
+          // yes it is ON
+          ontologyTreePanel.ontoTreeListener.setChildrenSelection(node, false);
+        }
+        else {
+          ontologyTreePanel.setSelected(node.toString(), false);
+        }
+        
+        TreePath path = ontologyTreePanel.ontoTreeListener.getTreePath(node);
+        ontologyTreePanel.currentOntologyTree.scrollPathToVisible(path);
+        
+        ontologyTreePanel.currentOntologyTree.repaint();
+        ontologyTreePanel.ontoTreeListener.refreshHighlights();
+        hideWindow();
+      }
+      catch(Exception e1) {
+        throw new GateRuntimeException(e1);
+      }
+    }
+  }
+  
+  // extend the annotation by one character on left
   protected class StartOffsetExtendLeftAction extends AbstractAction {
 
     public StartOffsetExtendLeftAction(Icon icon) {
@@ -683,6 +741,8 @@ public class AnnotationEditor extends AbstractAction {
     }
   }
 
+  
+  
   // extend the annotation by one character on left
   protected class StartOffsetExtendRightAction extends AbstractAction {
     public StartOffsetExtendRightAction(Icon icon) {
