@@ -302,9 +302,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 				.setToolTipText("re-issues the previous query and export all patterns without any limit on number of documents");
 		selectedPatterns.setToolTipText("exports only the selected patterns");
 		allPatterns.setSelected(true);
-		allPatterns.setEnabled(false);
+		allPatterns.setEnabled(true);
 		selectedPatterns.setSelected(false);
-		selectedPatterns.setEnabled(false);
+		selectedPatterns.setEnabled(true);
 
 		annotTypesBox = new JComboBox();
 		annotTypesBox.addActionListener(this);
@@ -966,7 +966,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 				bw.write("<HTML><TITLE>ANNIC Output</TITLE><BODY>");
 				bw.write("<BR><B>Query Issued: " + searcher.getQuery()
 						+ "<BR>Context Window :"
-						+ ((String) parameters.get(Constants.CONTEXT_WINDOW))
+						+ ((Integer) parameters.get(Constants.CONTEXT_WINDOW)).intValue()
 						+ "</B><BR><BR>");
 				bw.write("<BR><B>Queries:</B>");
 				String queryString = "";
