@@ -364,6 +364,15 @@ public class PersistenceManager {
       File contextFile = Files.fileFromURL(context);
       File targetFile = Files.fileFromURL(target);
 
+      // if the original context URL ends with a slash (i.e. denotes
+      // a directory), then we pretend we're taking a path relative to
+      // some file in that directory.  This is because the relative
+      // path from context file:/home/foo/bar to file:/home/foo/bar/baz
+      // is bar/baz, whereas the path from file:/home/foo/bar/ - with
+      // the trailing slash - is just baz.
+      if(context.toExternalForm().endsWith("/")) {
+        contextFile = new File(contextFile, "__dummy__");
+      }
 
       List targetPathComponents = new ArrayList();
       File aFile = targetFile.getParentFile();
