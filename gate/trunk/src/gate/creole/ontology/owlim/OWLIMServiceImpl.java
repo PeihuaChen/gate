@@ -408,7 +408,6 @@ public class OWLIMServiceImpl implements OWLIM,
         writer = new RdfXmlWriter(out);
         break;
     }
-    writer.startDocument();
     writeData(writer);
     switch(format) {
       case OConstants.ONTOLOGY_FORMAT_N3:
@@ -453,7 +452,6 @@ public class OWLIMServiceImpl implements OWLIM,
         writer = new RdfXmlWriter(out);
         break;
     }
-    writer.startDocument();
     writeData(writer);
     switch(format) {
       case OConstants.ONTOLOGY_FORMAT_N3:
@@ -472,12 +470,13 @@ public class OWLIMServiceImpl implements OWLIM,
   }
 
   private void writeData(RdfDocumentWriter writer) throws IOException {
-    writer.writeComment("Ontology Generated from GATE");
     NamespaceIterator nIter = sail.getNamespaces();
     while(nIter.hasNext()) {
       nIter.next();
       writer.setNamespace(nIter.getPrefix(), nIter.getName());
     }
+    writer.startDocument();
+    writer.writeComment("Ontology Generated from GATE");
     StatementIterator iter = sail.getStatements(null, null, null);
     while(iter.hasNext()) {
       Statement stmt = iter.next();
