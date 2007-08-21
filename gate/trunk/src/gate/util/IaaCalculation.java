@@ -71,7 +71,7 @@ public class IaaCalculation {
     this.numDocs = annsA2.length; // the number of documents
     this.numAnnotators = annsA2[0].length; // the number of annotators
     if(this.numAnnotators < 2) {
-      System.out
+      if(verbosity>0) System.out
         .println("Warning: the IAA calculation needs at least two annotation sets. ");
     }
     checkIsAnnsMissing();
@@ -88,7 +88,7 @@ public class IaaCalculation {
     this.numDocs = annsA2.length; // the number of documents
     this.numAnnotators = annsA2[0].length; // the number of annotators
     if(this.numAnnotators < 2) {
-      System.out
+      if(verbosity>0) System.out
         .println("Warning: the IAA calculation needs at least two annotation sets. ");
     }
     checkIsAnnsMissing();
@@ -100,15 +100,18 @@ public class IaaCalculation {
     for(int i = 0; i < numDocs; ++i)
       for(int j = 0; j < numAnnotators; ++j)
         if(annsArrArr[i][j] == null) {
-          System.out.println("Warning: The AnnotationSet of the "
+          if(verbosity>0) System.out.println("Warning: The AnnotationSet of the "
             + "Annotator " + j + " on the document " + i + " is missed!");
           isMissing = true;
         }
-    if(isMissing)
-      System.out.println("There should be " + numAnnotators
+    if(isMissing){
+      if(verbosity>0) System.out.println("There should be " + numAnnotators
         + " Annotator(s) and " + numDocs + " document(s).");
-    else System.out.println("There are " + numAnnotators + " Annotator(s) and "
+    }
+    else {
+      if(verbosity>0) System.out.println("There are " + numAnnotators + " Annotator(s) and "
       + numDocs + " document(s).");
+    }
   }
 
   /** Compute the pairwise kappa for annotators. */
@@ -663,7 +666,7 @@ public class IaaCalculation {
    * Check if the annotation task is suitable for computing kappa by checking if
    * the annotation sets contain the same annotations.
    */
-  public static boolean isSameInstancesForAnnotators(AnnotationSet[] annsA) {
+  public static boolean isSameInstancesForAnnotators(AnnotationSet[] annsA, int vsy) {
     int numAnnotators = annsA.length;
     if(annsA[0] == null) return false;
     for(Annotation ann : annsA[0]) {
@@ -678,6 +681,7 @@ public class IaaCalculation {
           }
         }
         if(!isContained) {
+          if(vsy>0)
           System.out.println("The " + iJud + " annotator cause different");
           return false;
         }
