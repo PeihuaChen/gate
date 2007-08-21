@@ -26,6 +26,7 @@ import gate.FeatureMap;
 import gate.Gate;
 import gate.annotation.AnnotationSetImpl;
 import gate.gui.MainFrame;
+import gate.GateConstants;
 
 public class TestIaa extends TestCase {
   /** The id of test case. */
@@ -59,20 +60,28 @@ public class TestIaa extends TestCase {
 
   /** The test the IAA. */
   public void testIaa() throws Exception {
-    // Load the documents into a corpus
-    Corpus data = Factory.newCorpus("data");
-    data.add(loadDocument("tests/iaa/twodocs/doc1-ann1.xml",
-      "doc1-ann1.xml"));
-    data.add(loadDocument("tests/iaa/twodocs/doc1-ann3.xml",
-      "doc1-ann3.xml"));
-    data.add(loadDocument("tests/iaa/twodocs/doc2-ann1.xml",
-      "doc2-ann1.xml"));
-    data.add(loadDocument("tests/iaa/twodocs/doc2-ann2.xml",
-      "doc2-ann2.xml"));
-    data.add(loadDocument("tests/iaa/twodocs/doc2-ann3.xml",
-      "doc2-ann3.xml"));
 
-    boolean isUsingLabel = true;
+    Boolean savedSpaceSetting = Gate.getUserConfig().getBoolean(
+    GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME);
+    Gate.getUserConfig().put(
+      GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME,
+      Boolean.FALSE);
+    try {
+
+      // Load the documents into a corpus
+      Corpus data = Factory.newCorpus("data");
+      data.add(loadDocument("tests/iaa/twodocs/doc1-ann1.xml",
+        "doc1-ann1.xml"));
+      data.add(loadDocument("tests/iaa/twodocs/doc1-ann3.xml",
+        "doc1-ann3.xml"));
+      data.add(loadDocument("tests/iaa/twodocs/doc2-ann1.xml",
+        "doc2-ann1.xml"));
+      data.add(loadDocument("tests/iaa/twodocs/doc2-ann2.xml",
+        "doc2-ann2.xml"));
+      data.add(loadDocument("tests/iaa/twodocs/doc2-ann3.xml",
+        "doc2-ann3.xml"));
+
+      boolean isUsingLabel = true;
 
     int numDocs = 2; // Number of documents
     int numJudges = 3; // number of judges
@@ -119,12 +128,19 @@ public class TestIaa extends TestCase {
     testWithfeat(numDocs, numJudges, nameAnnSet, nameAnnType, nameAnnFeat,
       data, isUsingLabel);
 
-    caseN = 4;
-    nameAnnType = "OPINION_SRC";
-    nameAnnFeat = "type";
-    isUsingLabel = true;
-    testWithfeat(numDocs, numJudges, nameAnnSet, nameAnnType, nameAnnFeat,
-      data, isUsingLabel);
+      caseN = 4;
+      nameAnnType = "OPINION_SRC";
+      nameAnnFeat = "type";
+      isUsingLabel = true;
+      testWithfeat(numDocs, numJudges, nameAnnSet, nameAnnType, nameAnnFeat,
+        data, isUsingLabel);
+    }
+    finally {
+      Gate.getUserConfig().put(
+        GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME,
+        savedSpaceSetting);
+    }
+
   }
 
   private int obtainAnnotatorId(String docName) {
@@ -195,7 +211,7 @@ public class TestIaa extends TestCase {
 
     boolean isSuitable = true;
     for(int i = 0; i < annArr2.length; ++i)
-      if(!IaaCalculation.isSameInstancesForAnnotators(annArr2[i])) {
+	if(!IaaCalculation.isSameInstancesForAnnotators(annArr2[i], iaa.verbosity)) {
         isSuitable = false;
         break;
       }
