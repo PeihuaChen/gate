@@ -303,25 +303,27 @@ public class AnnotationListView extends AbstractDocumentView
           if(!tags.contains(aData)) selectedAnns.add(aData);
         }
       }
+      //to speed-up things, first remove all blinking highlights
+      table.getSelectionModel().clearSelection();      
     }
-    //to speed-up things, first remove all blinking highlights
-    table.getSelectionModel().clearSelection();
     //now do the actual removal
     for(AnnotationData aData : tags) removeAnnotation(aData);
-    //restore the selection
-    //this needs to happen after the table has caught up with all the changes
-    //hence we need to queue it to the GUI thread
-    SwingUtilities.invokeLater(new Runnable(){
-      public void run(){
-        for(AnnotationData aData : selectedAnns){
-          int modelRow = annDataList.indexOf(aData);
-          if(modelRow != -1){
-            int viewRow = table.rowModelToView(modelRow);
-            table.getSelectionModel().addSelectionInterval(viewRow, viewRow);
-          }
-        }        
-      }
-    });
+    //restore the selection, if necessary
+    if(selectedAnns.size() > 0){
+      //this needs to happen after the table has caught up with all the changes
+      //hence we need to queue it to the GUI thread
+      SwingUtilities.invokeLater(new Runnable(){
+        public void run(){
+          for(AnnotationData aData : selectedAnns){
+            int modelRow = annDataList.indexOf(aData);
+            if(modelRow != -1){
+              int viewRow = table.rowModelToView(modelRow);
+              table.getSelectionModel().addSelectionInterval(viewRow, viewRow);
+            }
+          }        
+        }
+      });
+    }
   }
 
   /**
