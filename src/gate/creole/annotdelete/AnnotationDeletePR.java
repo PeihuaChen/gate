@@ -99,10 +99,9 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
     String setName;
     
     if(setsToKeep == null) setsToKeep = new ArrayList();
-    if(keepOriginalMarkupsAS.booleanValue()) {
+    if(keepOriginalMarkupsAS.booleanValue() && 
+       !setsToKeep.contains(markupSetName)) {
         setsToKeep.add(markupSetName);
-    } else {
-        setsToKeep.remove(markupSetName);
     }
     
     while (iter.hasNext()) {
@@ -217,7 +216,9 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
   }
 
   public void setSetsToKeep(List newSetNames) {
-    setsToKeep = newSetNames;
+    //we need to modify this list sometimes, so to make sure it's not some
+    //unmodifiable version, we'll create our own 
+    setsToKeep = new ArrayList(newSetNames);
   }
 
   public Boolean getKeepOriginalMarkupsAS() {
