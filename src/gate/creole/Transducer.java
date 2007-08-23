@@ -95,7 +95,10 @@ public class Transducer extends AbstractLanguageAnalyser
                 "Neither grammarURL or binaryGrammarURL parameters are set!");
       }
     } catch(Exception e) {
-      throw new ResourceInstantiationException(e);
+      String message = "Error while parsing the grammar ";
+      if(grammarURL != null) message += "(" + grammarURL.toExternalForm() + ")";
+      message += ":";
+      throw new ResourceInstantiationException(message, e);
     } finally {
       fireProcessFinished();
     }
