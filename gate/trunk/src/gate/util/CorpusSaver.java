@@ -22,6 +22,7 @@ import java.util.*;
 import gate.*;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
+import gate.gui.MainFrame;
 
 public class CorpusSaver {
 
@@ -119,10 +120,14 @@ public class CorpusSaver {
   public static void main(String[] args) throws GateException {
     Gate.init();
 
+MainFrame mFramew = new MainFrame();
+mFramew.setSize(800, 600);
+mFramew.setVisible(true);
+    
     CorpusSaver corpusSaver1 = new CorpusSaver();
 
     if(args.length < 2)
-      throw new GateException("usage: [-process|-process-only] source_directory datastore_path application");
+      throw new GateException("usage: [-process|-process_only] source_directory datastore_path application");
     int i = 0;
     while (i < args.length && args[i].startsWith("-")) {
       if(args[i].equals("-process")) {
@@ -141,19 +146,21 @@ public class CorpusSaver {
     if (!dir.isDirectory())
       throw new GateRuntimeException("Corpus directory should be "
                                      + "provided as a parameter");
-
-    if(i+1 >= args.length)
-      throw new GateRuntimeException("Datastore path not provided");
-
-    if (corpusSaver1.getSaveMode()) {
-      String storagePath = args[i + 1];
-      File storage = new File(storagePath);
-      if (!storage.isDirectory())
-        throw new GateRuntimeException("Please provide path to an existing "
-                                       + "GATE serial datastore");
-      corpusSaver1.setDSPath(storagePath);
+    if(corpusSaver1.getSaveMode()){
+      i++;
+      if( i >= args.length)
+        throw new GateRuntimeException("Datastore path not provided");
+  
+      if (corpusSaver1.getSaveMode()) {
+        String storagePath = args[i];
+        File storage = new File(storagePath);
+        if (!storage.isDirectory())
+          throw new GateRuntimeException("Please provide path to an existing "
+                                         + "GATE serial datastore");
+        corpusSaver1.setDSPath(storagePath);
+      }
     }
-
+    
     //get the last argument which is the application
     if (corpusSaver1.getProcessMode()) {
       i++;
