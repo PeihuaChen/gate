@@ -22,6 +22,7 @@ import gate.event.*;
 import gate.util.Err;
 import gate.util.GateRuntimeException;
 import gate.util.profile.Profiler;
+import gate.util.Out;
 
 /** Execute a list of PRs serially.
  */
@@ -31,6 +32,7 @@ public class SerialController extends AbstractController
 
   /** Profiler to track PR execute time */
   protected Profiler prof;
+  protected HashMap timeMap;
 
   public SerialController(){
     prList = Collections.synchronizedList(new ArrayList());
@@ -40,6 +42,7 @@ public class SerialController extends AbstractController
       prof = new Profiler();
       prof.enableGCCalling(false);
       prof.printToSystemOut(true);
+      timeMap = new HashMap();
     }
     Gate.getCreoleRegister().addCreoleListener(this);
   }
@@ -137,6 +140,18 @@ public class SerialController extends AbstractController
       if (DEBUG) {
         prof.checkPoint("~Execute PR ["+((ProcessingResource)
                                    prList.get(i)).getName()+"]");
+        Long timeOfPR = (Long) timeMap.get(((ProcessingResource)
+                                   prList.get(i)).getName());
+        if (timeOfPR == null) 
+          timeMap.put(((ProcessingResource)
+                                   prList.get(i)).getName(), new Long(prof.getLastDuration()));
+        else 
+          timeMap.put(((ProcessingResource)
+                                   prList.get(i)).getName(), new Long(timeOfPR.longValue() + prof.getLastDuration())); 
+        Out.println("Time taken so far by " + ((ProcessingResource)
+                                   prList.get(i)).getName() + ": " 
+				   + timeMap.get(((ProcessingResource) prList.get(i)).getName()));
+
       }
     }
 
