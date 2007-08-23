@@ -144,6 +144,10 @@ public class Profiler {
 //        long auxTime1 = (System.currentTimeMillis() - m_startTime1000)/10;
 //        return ((double)auxTime1)/100;
   } ;
+ 
+  public long getLastDuration() {
+    return m_lastDuration;
+  }
 
 
   /**
@@ -257,8 +261,8 @@ public class Profiler {
       buff.append(m_maxMemory);
       buff.append("k; Net time:   ");
       buff.append(printTime(getNetRunTime()));
-      buff.append("; since prev.: ");
-      buff.append(printTime(m_lastDuration));
+      buff.append("; since prev. millisecs: ");
+      buff.append(m_lastDuration);
 //            buff.append("; profiler time: ");
 //            buff.append(printTime(m_profilerTime));
 //            buff.append("; duration: ");
