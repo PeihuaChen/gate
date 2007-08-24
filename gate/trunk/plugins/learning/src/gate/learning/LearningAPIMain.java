@@ -51,6 +51,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
   private RunMode learningMode;
   private RunMode learningModeAppl;
   private RunMode learningModeMiTraining;
+  private RunMode learningModeVIEWSVMMODEL;
   /** Learning settings specified in the configuration file. */
   private LearningEngineSettings learningSettings;
   /**
@@ -161,6 +162,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
     learningModeAppl = RunMode.APPLICATION;
     maxNumApp = learningSettings.docNumIntevalApp;
     learningModeMiTraining = RunMode.MITRAINING;
+    learningModeVIEWSVMMODEL = RunMode.VIEWLINEARSVMMODELS;
     fireProcessFinished();
     // System.out.println("initialisation finished.");
     return this;
@@ -181,6 +183,12 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
     // feature types specified in DataSetDefinition file
     int positionDoc = corpus.indexOf(document);
     //To see if the corpus is from a datastore or not
+    if(learningMode.equals(learningModeVIEWSVMMODEL)) {
+      if(positionDoc == 0)
+        lightWeightApi.viewSVMmodelsInNLPFeatures(new File(wdResults,
+          ConstantParameters.FILENAMEOFModels), 10);
+      return;
+    }
     
     // docsName.add(positionDoc, document.getName());
     if(positionDoc == 0) {
