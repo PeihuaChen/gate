@@ -26,13 +26,16 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import gate.Document;
+import gate.learning.DocFeatureVectors.LongCompactor;
 import gate.learning.learners.ChunkOrEntity;
 import gate.learning.learners.MultiClassLearning;
 import gate.learning.learners.PostProcessing;
 import gate.learning.learners.SupervisedLearner;
+import gate.learning.learners.SvmLibSVM;
 import gate.learning.learners.weka.WekaLearner;
 import gate.learning.learners.weka.WekaLearning;
 import gate.util.GateException;
@@ -989,6 +992,103 @@ public class LightWeightLearningApi extends Object {
     } else {
       throw new GateException("The learning engine named as \"" + learnerName
         + "\" is not defined!");
+    }
+  }
+  
+  /** Convert and view the SVM models in term of NLP features. */
+  public void viewSVMmodelsInNLPFeatures(File modelFile, int numP) {
+//  Open the mode file and read the model
+    BufferedReader modelsBuff;
+    try {
+      HashMap featId2Form = new HashMap();
+      for(Object obj:featuresList.featuresList.keySet()) {
+        int k = Integer.parseInt(featuresList.featuresList.get(obj).toString());
+        featId2Form.put(k, obj);
+      }
+      
+      modelsBuff = new BufferedReader(new InputStreamReader(
+        new FileInputStream(modelFile), "UTF-8"));
+      // Read the training meta information from the model file's header
+      // include the total number of features and number of tags (numClasses)
+      int totalNumFeatures;
+      MultiClassLearning mulL = new MultiClassLearning();
+      String learnerNameFromModel=null;
+      totalNumFeatures = mulL.ReadTrainingMetaData(modelsBuff, learnerNameFromModel);
+//    for each class
+      for(int iClass = 0; iClass < mulL.numClasses; ++iClass) {
+        float b;
+        float[] w = new float[totalNumFeatures];
+        String items[] = modelsBuff.readLine().split(" ");
+        // Get the weight vector
+        b = SvmLibSVM.readWeightVectorFromFile(modelsBuff, w);
+        int numT=0;
+        for(int i=0; i<totalNumFeatures; ++i)
+          if(w[i]>0) ++numT;
+        float [] wP = new float[numT];
+        int [] indexW = new int[numT];
+        numT = 0;
+        for(int i=0; i<totalNumFeatures; ++i)
+          if(w[i]>0) {
+            wP[numT] = w[i];
+            indexW[numT] = i;
+            ++numT;
+          }
+        if(numP>numT)
+          numP = numT;
+        int [] indexSort = new int[numT];
+        sortFloatAscIndex(wP, indexSort, numT);
+        
+        String st1=null;
+        st1 = labelsAndId.id2Label.get(new Integer(iClass/2+1).toString()).toString();
+        if(iClass/2==0)
+          st1 += "-StartToken";
+        else st1 += "-LastToken";
+        System.out.println("The " +numP+" most significiant positive NLP feature for class:   "+st1+":");
+        for(int i=0; i<numP; ++i) {
+          int k1 = indexW[indexSort[i]]/(int)ConstantParameters.MAXIMUMFEATURES;
+          int k2 = indexW[indexSort[i]]%(int)ConstantParameters.MAXIMUMFEATURES;
+          String st=null;
+          if(k1==0)
+            st = "0";
+          else if(k1<=maxNegPositionTotal)
+            st = "-"+k1;
+          else {
+            k1 -= maxNegPositionTotal+1;
+            st = "+"+k1;
+          }
+          st += " "+featId2Form.get(k2).toString();
+          System.out.println(i+": "+st + " -- "+wP[indexSort[i]]);
+        }
+        
+      }
+      
+      modelsBuff.close();
+    } catch(IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+  
+  public static void sortFloatAscIndex(float [] wP, int [] indexSort, int numT) {
+    int i, j, k;
+    float [] rp1 = new float[numT];
+    float one;
+
+    rp1[0] = wP[0];
+    indexSort[0] = 0;
+    for (i=1; i<numT; i++) {
+       one = wP[i];
+       k = i;
+       for(j=i-1; j>-1; --j) {
+          if(one>rp1[j]) --k;
+          else    break;
+       }
+       for(j=i-1; j>k-1; j--) {
+           rp1[j+1] = rp1[j];
+           indexSort[j+1] = indexSort[j];
+       }
+       rp1[k] = one;
+       indexSort[k] = i;
     }
   }
 }
