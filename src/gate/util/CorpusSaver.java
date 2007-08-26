@@ -120,6 +120,10 @@ public class CorpusSaver {
   public static void main(String[] args) throws GateException {
     Gate.init();
 
+//MainFrame mFramew = new MainFrame();
+//mFramew.setSize(800, 600);
+//mFramew.setVisible(true);
+    
     CorpusSaver corpusSaver1 = new CorpusSaver();
 
     if(args.length < 2)
