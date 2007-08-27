@@ -174,6 +174,12 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
    * @throws ExecutionException
    */
   public void execute() throws ExecutionException {
+    if( learningMode.equals(learningModeVIEWSVMMODEL)) {
+      if(corpus == null || corpus.size() == 0 || corpus.indexOf(document) == 0)
+        lightWeightApi.viewSVMmodelsInNLPFeatures(new File(wdResults,
+          ConstantParameters.FILENAMEOFModels), 10);
+      return;
+    }
     // now we need to see if the corpus is provided
     if(corpus == null)
       throw new ExecutionException("Provided corpus is null!");
@@ -183,12 +189,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
     // feature types specified in DataSetDefinition file
     int positionDoc = corpus.indexOf(document);
     //To see if the corpus is from a datastore or not
-    if(learningMode.equals(learningModeVIEWSVMMODEL)) {
-      if(positionDoc == 0)
-        lightWeightApi.viewSVMmodelsInNLPFeatures(new File(wdResults,
-          ConstantParameters.FILENAMEOFModels), 10);
-      return;
-    }
+    
     
     // docsName.add(positionDoc, document.getName());
     if(positionDoc == 0) {
@@ -414,6 +415,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               lightWeightApi.applyModelInJava(corpus, 0, corpus.size(), classTypeOriginal,
                 learningSettings);*/
               //EvaluationBasedOnDocs.emptyDatafile(wdResults, false);
+              if(endDocIdApp>startDocIdApp) {
               if(LogService.minVerbosityLevel> 0) System.out.println("** " +
                   "Application mode for document from "+ startDocIdApp + " to "+ endDocIdApp+"(not included):");
               LogService.logMessage("** Application mode for document from "+ startDocIdApp + " to "+ endDocIdApp+"(not included):", 1);
@@ -451,6 +453,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               lightWeightApi.applyModelInJava(corpus, startDocIdApp, endDocIdApp, classTypeOriginal,
                 learningSettings, fvFileName);
               //Update the datastore for the added annotations
+              }
               break;
             case EVALUATION:
               if(LogService.minVerbosityLevel > 0) System.out.println("** Evaluation mode:");
