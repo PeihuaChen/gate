@@ -217,8 +217,10 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
 
   public void setSetsToKeep(List newSetNames) {
     //we need to modify this list sometimes, so to make sure it's not some
-    //unmodifiable version, we'll create our own 
-    setsToKeep = new ArrayList(newSetNames);
+    //unmodifiable version, we'll create our own
+    setsToKeep = newSetNames != null ?
+            new ArrayList(newSetNames):
+            new ArrayList();
   }
 
   public Boolean getKeepOriginalMarkupsAS() {
