@@ -61,7 +61,7 @@ public class IaaCalculation {
 
   /** Constractor by giving the annotation sets and a list of labels. */
   public IaaCalculation(String nameAnnT, String nameF, String[] labels,
-    AnnotationSet[][] annsA2) {
+    AnnotationSet[][] annsA2, int verbsy) {
     this.nameAnnType = nameAnnT;
     this.nameClassFeat = nameF;
     this.labelsArr = labels;
@@ -70,15 +70,16 @@ public class IaaCalculation {
     this.numLabels = labels.length;
     this.numDocs = annsA2.length; // the number of documents
     this.numAnnotators = annsA2[0].length; // the number of annotators
+    this.verbosity = verbsy;
     if(this.numAnnotators < 2) {
-      if(verbosity>0) System.out
+      if(this.verbosity>0) System.out
         .println("Warning: the IAA calculation needs at least two annotation sets. ");
     }
     checkIsAnnsMissing();
   }
 
   /** Constractor by giving the annotation sets and the name of annotation type. */
-  public IaaCalculation(String nameAnnT, AnnotationSet[][] annsA2) {
+  public IaaCalculation(String nameAnnT, AnnotationSet[][] annsA2, int verbsy) {
     this.nameAnnType = nameAnnT;
     this.numLabels = 1;
     this.labelsArr = new String[this.numLabels];
@@ -87,6 +88,7 @@ public class IaaCalculation {
     this.annsArrArr = annsA2;
     this.numDocs = annsA2.length; // the number of documents
     this.numAnnotators = annsA2[0].length; // the number of annotators
+    this.verbosity = verbsy;
     if(this.numAnnotators < 2) {
       if(verbosity>0) System.out
         .println("Warning: the IAA calculation needs at least two annotation sets. ");
@@ -457,12 +459,14 @@ public class IaaCalculation {
         else if(annsOriginal == null && annsTest != null) {
           AnnotationSet responseAnns = annsTest.get(nameAnnType, featMap);
           // Add the number
-          fMeasures[num11][iLabel].spurious += responseAnns.size();
+          if(responseAnns != null)
+            fMeasures[num11][iLabel].spurious += responseAnns.size();
         }
         else if(annsOriginal != null && annsTest == null) {
           AnnotationSet keyAnns = annsOriginal.get(nameAnnType, featMap);
           // Add the number
-          fMeasures[num11][iLabel].missing += keyAnns.size();
+          if(keyAnns != null)
+            fMeasures[num11][iLabel].missing += keyAnns.size();
         }
       }
     }
@@ -487,12 +491,14 @@ public class IaaCalculation {
       else if(annsOriginal == null && annsTest != null) {
         AnnotationSet responseAnns = annsTest.get(nameAnnType);
         // Add the number
-        fMeasures[num11][iLabel].spurious += responseAnns.size();
+        if(responseAnns != null)
+          fMeasures[num11][iLabel].spurious += responseAnns.size();
       }
       else if(annsOriginal != null && annsTest == null) {
         AnnotationSet keyAnns = annsOriginal.get(nameAnnType);
         // Add the number
-        fMeasures[num11][iLabel].missing += keyAnns.size();
+        if(keyAnns != null)
+          fMeasures[num11][iLabel].missing += keyAnns.size();
       }
     }
     // }
@@ -597,12 +603,14 @@ public class IaaCalculation {
           featMap.put(nameClassFeat, labelsArr[iLabel]);
           // For the test set with label
           AnnotationSet testAnns = annsTest.get(nameAnnType, featMap);
-          contingencyTableNumbers[num11].confusionMatrix[numLabels][iLabel] += testAnns
-            .size();
+          if(testAnns != null)
+            contingencyTableNumbers[num11].confusionMatrix[numLabels][iLabel] += testAnns
+              .size();
         }
         // For two non-category
-        contingencyTableNumbers[num11].confusionMatrix[numLabels][numLabels] += testAnnsNonlabel
-          .size();
+        if(testAnnsNonlabel !=null)
+          contingencyTableNumbers[num11].confusionMatrix[numLabels][numLabels] += testAnnsNonlabel
+            .size();
       }
       else if(annsOriginal != null && annsTest == null) {
         for(Annotation ann : annsOriginal) {
@@ -615,10 +623,12 @@ public class IaaCalculation {
           featMap.put(nameClassFeat, labelsArr[iLabel]);
           // For the test set with label
           AnnotationSet keyAnns = annsOriginal.get(nameAnnType, featMap);
-          contingencyTableNumbers[num11].confusionMatrix[iLabel][numLabels] += keyAnns
-            .size();
+          if(keyAnns != null)
+            contingencyTableNumbers[num11].confusionMatrix[iLabel][numLabels] += keyAnns
+              .size();
         }
         // For two non-category
+        if(keyAnnsNonlabel != null)
         contingencyTableNumbers[num11].confusionMatrix[numLabels][numLabels] += keyAnnsNonlabel
           .size();
       }
@@ -649,15 +659,17 @@ public class IaaCalculation {
         // Get annotation set containing another label
         AnnotationSet responseAnns = annsTest.get(nameAnnType);
         // For the un-matched annotations
-        contingencyTableNumbers[num11].confusionMatrix[numLabels][numL] += responseAnns
-          .size();
+        if(responseAnns != null)
+          contingencyTableNumbers[num11].confusionMatrix[numLabels][numL] += responseAnns
+            .size();
       }
       else if(annsOriginal != null && annsTest == null) {
         // Get annotation set containing another label
         AnnotationSet keyAnns = annsOriginal.get(nameAnnType);
         // For the un-matched annotations
-        contingencyTableNumbers[num11].confusionMatrix[numL][numLabels] += keyAnns
-          .size();
+        if(keyAnns != null)
+          contingencyTableNumbers[num11].confusionMatrix[numL][numLabels] += keyAnns
+            .size();
       }
     }
   }
