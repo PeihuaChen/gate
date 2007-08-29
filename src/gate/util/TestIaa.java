@@ -26,7 +26,6 @@ import gate.FeatureMap;
 import gate.Gate;
 import gate.annotation.AnnotationSetImpl;
 import gate.gui.MainFrame;
-import gate.GateConstants;
 
 public class TestIaa extends TestCase {
   /** The id of test case. */
@@ -53,35 +52,29 @@ public class TestIaa extends TestCase {
   } // suite
 
   private Document loadDocument(String path, String name) throws Exception {
-    Document doc = Factory.newDocument(Gate.getUrl(path), "UTF-8");
+    //Document doc = Factory.newDocument(Gate.getUrl(path), "UTF-8");
+    Document doc = Factory.newDocument(new File(path).toURL(), "UTF-8");
     doc.setName(name);
     return doc;
   }
 
   /** The test the IAA. */
   public void testIaa() throws Exception {
+    // Load the documents into a corpus
+    Gate.init();
+    Corpus data = Factory.newCorpus("data");
+    data.add(loadDocument("c:/yaoyong_h/iaa/twodocs/doc1-ann1.xml",
+      "doc1-ann1.xml"));
+    data.add(loadDocument("c:/yaoyong_h/iaa/twodocs/doc1-ann3.xml",
+      "doc1-ann3.xml"));
+    data.add(loadDocument("c:/yaoyong_h/iaa/twodocs/doc2-ann1.xml",
+      "doc2-ann1.xml"));
+    data.add(loadDocument("c:/yaoyong_h/iaa/twodocs/doc2-ann2.xml",
+      "doc2-ann2.xml"));
+    data.add(loadDocument("c:/yaoyong_h/iaa/twodocs/doc2-ann3.xml",
+      "doc2-ann3.xml"));
 
-    Boolean savedSpaceSetting = Gate.getUserConfig().getBoolean(
-    GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME);
-    Gate.getUserConfig().put(
-      GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME,
-      Boolean.FALSE);
-    try {
-
-      // Load the documents into a corpus
-      Corpus data = Factory.newCorpus("data");
-      data.add(loadDocument("tests/iaa/twodocs/doc1-ann1.xml",
-        "doc1-ann1.xml"));
-      data.add(loadDocument("tests/iaa/twodocs/doc1-ann3.xml",
-        "doc1-ann3.xml"));
-      data.add(loadDocument("tests/iaa/twodocs/doc2-ann1.xml",
-        "doc2-ann1.xml"));
-      data.add(loadDocument("tests/iaa/twodocs/doc2-ann2.xml",
-        "doc2-ann2.xml"));
-      data.add(loadDocument("tests/iaa/twodocs/doc2-ann3.xml",
-        "doc2-ann3.xml"));
-
-      boolean isUsingLabel = true;
+    boolean isUsingLabel = true;
 
     int numDocs = 2; // Number of documents
     int numJudges = 3; // number of judges
@@ -110,11 +103,11 @@ public class TestIaa extends TestCase {
 
     // Use another dataset
     data.clear();
-    data.add(loadDocument("tests/iaa/small/ann1.xml",
+    data.add(loadDocument("c:/yaoyong_h/iaa/small/ann1.xml",
       "ann1.xml"));
-    data.add(loadDocument("tests/iaa/small/ann2.xml",
+    data.add(loadDocument("c:/yaoyong_h/iaa/small/ann2.xml",
       "ann2.xml"));
-    data.add(loadDocument("tests/iaa/small/ann3.xml",
+    data.add(loadDocument("c:/yaoyong_h/iaa/small/ann3.xml",
       "ann3.xml"));
 
     numDocs = 1; // Number of documents
@@ -128,19 +121,12 @@ public class TestIaa extends TestCase {
     testWithfeat(numDocs, numJudges, nameAnnSet, nameAnnType, nameAnnFeat,
       data, isUsingLabel);
 
-      caseN = 4;
-      nameAnnType = "OPINION_SRC";
-      nameAnnFeat = "type";
-      isUsingLabel = true;
-      testWithfeat(numDocs, numJudges, nameAnnSet, nameAnnType, nameAnnFeat,
-        data, isUsingLabel);
-    }
-    finally {
-      Gate.getUserConfig().put(
-        GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME,
-        savedSpaceSetting);
-    }
-
+    caseN = 4;
+    nameAnnType = "OPINION_SRC";
+    nameAnnFeat = "type";
+    isUsingLabel = true;
+    testWithfeat(numDocs, numJudges, nameAnnSet, nameAnnType, nameAnnFeat,
+      data, isUsingLabel);
   }
 
   private int obtainAnnotatorId(String docName) {
@@ -198,9 +184,8 @@ public class TestIaa extends TestCase {
     }
     IaaCalculation iaa = null;
     if(isUsingLabel)
-      iaa = new IaaCalculation(nameAnnType, nameAnnFeat, labelsArr, annArr2);
-    else iaa = new IaaCalculation(nameAnnType, annArr2);
-    iaa.verbosity = 0;
+      iaa = new IaaCalculation(nameAnnType, nameAnnFeat, labelsArr, annArr2, 0);
+    else iaa = new IaaCalculation(nameAnnType, annArr2,0);
 
     iaa.pairwiseIaaFmeasure();
     int[] nPwF = new int[4];
@@ -211,7 +196,7 @@ public class TestIaa extends TestCase {
 
     boolean isSuitable = true;
     for(int i = 0; i < annArr2.length; ++i)
-	if(!IaaCalculation.isSameInstancesForAnnotators(annArr2[i], iaa.verbosity)) {
+      if(!IaaCalculation.isSameInstancesForAnnotators(annArr2[i], 0)) {
         isSuitable = false;
         break;
       }
