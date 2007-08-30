@@ -289,8 +289,10 @@ public class Main {
 
   /**
    * Reads the user config data and applies the required settings.
+   * This must be called <b>after</b> {@link Gate#init()} but <b>before</b>
+   * any GUI components are created.
    */
-  protected static void applyUserPreferences(){
+  public static void applyUserPreferences(){
     //look and feel
     String lnfClassName = Gate.getUserConfig().
                           getString(GateConstants.LOOK_AND_FEEL);
