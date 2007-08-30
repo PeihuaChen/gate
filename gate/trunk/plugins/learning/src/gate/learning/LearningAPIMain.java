@@ -177,7 +177,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
     if( learningMode.equals(learningModeVIEWSVMMODEL)) {
       if(corpus == null || corpus.size() == 0 || corpus.indexOf(document) == 0)
         lightWeightApi.viewSVMmodelsInNLPFeatures(new File(wdResults,
-          ConstantParameters.FILENAMEOFModels), 10);
+          ConstantParameters.FILENAMEOFModels), learningSettings);
       return;
     }
     // now we need to see if the corpus is provided

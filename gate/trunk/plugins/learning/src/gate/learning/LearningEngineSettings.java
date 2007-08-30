@@ -73,6 +73,11 @@ public class LearningEngineSettings {
   public int miDocInterval=1;
   /** The document number interval for one applicataion in batch learning mode. */
   public int docNumIntevalApp=100;
+  /** Define the number of the NLP features with the biggest weights in linear SVM model. */
+  public int numPosSVMModel;
+  /** Define the number of the NLP features with the smallest weight in linear SVM model. */
+  public int numNegSVMModel;
+  
   
   /** The verbosity level for writing information into log file. 
    * 0: no real output.
@@ -155,7 +160,20 @@ public class LearningEngineSettings {
       if(value.equalsIgnoreCase("one-vs-another"))
         learningSettings.multi2BinaryMode = 2;
     }
-    /* Read the evaluation method: k-fold CV or k-run hold-out */
+    //Read the parameter for displaying the NLP features from linear SVM model
+    learningSettings.numPosSVMModel = 10;
+    learningSettings.numNegSVMModel = 0;
+    if(rootElement.getChild("DISPLAY-NLPFEATURES-LINEARSVM") != null) {
+      String value = rootElement.getChild("DISPLAY-NLPFEATURES-LINEARSVM")
+        .getAttribute("numP").getValue();
+      if(value != null)
+        learningSettings.numPosSVMModel = Integer.parseInt(value);
+      value = rootElement.getChild("DISPLAY-NLPFEATURES-LINEARSVM")
+        .getAttribute("numN").getValue();
+      if(value != null)
+        learningSettings.numNegSVMModel = Integer.parseInt(value);
+    }
+    //Read the evaluation method: k-fold CV or k-run hold-out
     try {
       Element evalelem = rootElement.getChild("EVALUATION");
       learningSettings.evaluationconfig = EvaluationConfiguration

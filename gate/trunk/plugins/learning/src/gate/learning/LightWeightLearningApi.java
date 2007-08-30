@@ -64,13 +64,13 @@ public class LightWeightLearningApi extends Object {
   int maxNegPositionTotal = 0;
   /** The right-most position among all features. */
   int maxPosPositionTotal = 0;
-  /** The weight for the Ngram features*/
-  float ngramWeight=1.0f;
+  /** The weight for the Ngram features */
+  float ngramWeight = 1.0f;
   /**
    * HashMap for the chunkLenStats, for post-processing of chunk learning.
    */
   HashMap chunkLenHash;
- 
+
   /** Constructor, with working directory setting. */
   public LightWeightLearningApi(File wd) {
     this.wd = wd;
@@ -89,7 +89,6 @@ public class LightWeightLearningApi extends Object {
       ConstantParameters.FILENAMEOFLabelList);
     chunkLenHash = ChunkLengthStats.loadChunkLenStats(wdResults,
       ConstantParameters.FILENAMEOFChunkLenStats);
-    
     // Get the feature position of all features
     // Keep the order of the three types of features as that in
     // NLPFeaturesOfDoc.obtainDocNLPFeatures()
@@ -115,26 +114,28 @@ public class LightWeightLearningApi extends Object {
     if(engineSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
       if(maxNegPositionTotal < engineSettings.datasetDefinition.arg1.arrs.maxNegPosition)
         maxNegPositionTotal = engineSettings.datasetDefinition.arg1.arrs.maxNegPosition;
-      if(maxNegPositionTotal < engineSettings.datasetDefinition.arg2.arrs.maxNegPosition + 
-             engineSettings.datasetDefinition.arg1.maxTotalPosition+2)
+      if(maxNegPositionTotal < engineSettings.datasetDefinition.arg2.arrs.maxNegPosition
+        + engineSettings.datasetDefinition.arg1.maxTotalPosition + 2)
         maxNegPositionTotal = engineSettings.datasetDefinition.arg2.arrs.maxNegPosition
-          + engineSettings.datasetDefinition.arg1.maxTotalPosition+2;
+          + engineSettings.datasetDefinition.arg1.maxTotalPosition + 2;
     }
-    //Get the ngram weight from the datasetdefintion.
+    // Get the ngram weight from the datasetdefintion.
     ngramWeight = 1.0f;
-    if(engineSettings.datasetDefinition.ngrams!= null && 
-      engineSettings.datasetDefinition.ngrams.size()>0 &&
-      ((Ngram)engineSettings.datasetDefinition.ngrams.get(0)).weight != 1.0)
+    if(engineSettings.datasetDefinition.ngrams != null
+      && engineSettings.datasetDefinition.ngrams.size() > 0
+      && ((Ngram)engineSettings.datasetDefinition.ngrams.get(0)).weight != 1.0)
       ngramWeight = ((Ngram)engineSettings.datasetDefinition.ngrams.get(0)).weight;
     if(engineSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
-      if(engineSettings.datasetDefinition.arg1.ngrams != null &&
-        engineSettings.datasetDefinition.arg1.ngrams.size()>0 &&
-        ((Ngram)engineSettings.datasetDefinition.arg1.ngrams.get(0)).weight!= 1.0)
-        ngramWeight = ((Ngram)engineSettings.datasetDefinition.arg1.ngrams.get(0)).weight;
-      if(engineSettings.datasetDefinition.arg2.ngrams != null &&
-        engineSettings.datasetDefinition.arg2.ngrams.size()>0 &&
-        ((Ngram)engineSettings.datasetDefinition.arg2.ngrams.get(0)).weight!= 1.0)
-        ngramWeight = ((Ngram)engineSettings.datasetDefinition.arg2.ngrams.get(0)).weight;
+      if(engineSettings.datasetDefinition.arg1.ngrams != null
+        && engineSettings.datasetDefinition.arg1.ngrams.size() > 0
+        && ((Ngram)engineSettings.datasetDefinition.arg1.ngrams.get(0)).weight != 1.0)
+        ngramWeight = ((Ngram)engineSettings.datasetDefinition.arg1.ngrams
+          .get(0)).weight;
+      if(engineSettings.datasetDefinition.arg2.ngrams != null
+        && engineSettings.datasetDefinition.arg2.ngrams.size() > 0
+        && ((Ngram)engineSettings.datasetDefinition.arg2.ngrams.get(0)).weight != 1.0)
+        ngramWeight = ((Ngram)engineSettings.datasetDefinition.arg2.ngrams
+          .get(0)).weight;
     }
   }
 
@@ -142,23 +143,22 @@ public class LightWeightLearningApi extends Object {
    * Obtain the features and labels and form feature vectors from the GATE
    * annotation of each document.
    */
-  public void annotations2NLPFeatures(Document doc, int numDocs, BufferedWriter outNLPFeatures,
-    boolean isTraining, LearningEngineSettings engineSettings) {
+  public void annotations2NLPFeatures(Document doc, int numDocs,
+    BufferedWriter outNLPFeatures, boolean isTraining,
+    LearningEngineSettings engineSettings) {
     AnnotationSet annotations = null;
     if(inputASName == null || inputASName.trim().length() == 0) {
       annotations = doc.getAnnotations();
     } else {
       annotations = doc.getAnnotations(inputASName);
     }
-    /*if(numDocs == 0) {
-      try {
-        outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(wdResults,
-          ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
-      } catch(IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-    }*/
+    /*
+     * if(numDocs == 0) { try { outNLPFeatures = new BufferedWriter(new
+     * OutputStreamWriter(new FileOutputStream(new File(wdResults,
+     * ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8")); }
+     * catch(IOException e) { // TODO Auto-generated catch block
+     * e.printStackTrace(); } }
+     */
     // obtain the NLP features for the document
     String docName = doc.getName().replaceAll(ConstantParameters.ITEMSEPARATOR,
       "_");
@@ -185,7 +185,6 @@ public class LightWeightLearningApi extends Object {
         engineSettings.datasetDefinition, chunkLenHash, labelsAndId);
     nlpFeaturesDoc.writeNLPFeaturesToFile(outNLPFeatures, docName, numDocs,
       featurePositionTotal);
- 
     return;
   }
 
@@ -200,6 +199,7 @@ public class LightWeightLearningApi extends Object {
         docFV.fvs[i].values[j] /= sum;
     }
   }
+
   /**
    * Finishing the conversion from annotations to feature vectors by writing
    * back the label and nlp feature list into files, and closing the java
@@ -219,43 +219,43 @@ public class LightWeightLearningApi extends Object {
   }
 
   /** Convert the NLP features into feature vectors and write them into file. */
-  public void nlpfeatures2FVs(File wdResults, BufferedReader inNLPFeatures, BufferedWriter outFeatureVectors, int numDocs, boolean isTraining, 
+  public void nlpfeatures2FVs(File wdResults, BufferedReader inNLPFeatures,
+    BufferedWriter outFeatureVectors, int numDocs, boolean isTraining,
     LearningEngineSettings engineSettings) {
-    
-      try {
-        
-        //BufferedWriter outFeatureVectors = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-          //new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorData), true), "UTF-8"));
-        //Read the first line out which is about feature names
-        inNLPFeatures.readLine();
-        for(int i=0; i<numDocs; ++i) {
-          NLPFeaturesOfDoc nlpFeatDoc = new NLPFeaturesOfDoc();
-          nlpFeatDoc.readNLPFeaturesFromFile(inNLPFeatures);
-          
-          DocFeatureVectors docFV = new DocFeatureVectors();
-          docFV.obtainFVsFromNLPFeatures(nlpFeatDoc, featuresList,
-            featurePositionTotal, maxNegPositionTotal, featuresList.totalNumDocs, ngramWeight);
-          
-          if(isTraining) {
-            LabelsOfFeatureVectorDoc labelsDoc = new LabelsOfFeatureVectorDoc();
-            labelsDoc.obtainMultiLabelsFromNLPDocSurround(nlpFeatDoc,
-              labelsAndId, engineSettings.surround);
-            addDocFVsMultiLabelToFile(i, outFeatureVectors,
-              labelsDoc.multiLabels, docFV);
-          } else {
-            int[] labels = new int[nlpFeatDoc.numInstances];
-            addDocFVsToFile(i, outFeatureVectors, labels, docFV);
-          }
+    try {
+      // BufferedWriter outFeatureVectors = new BufferedWriter(new
+      // OutputStreamWriter(new FileOutputStream(
+      // new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorData),
+      // true), "UTF-8"));
+      // Read the first line out which is about feature names
+      inNLPFeatures.readLine();
+      for(int i = 0; i < numDocs; ++i) {
+        NLPFeaturesOfDoc nlpFeatDoc = new NLPFeaturesOfDoc();
+        nlpFeatDoc.readNLPFeaturesFromFile(inNLPFeatures);
+        DocFeatureVectors docFV = new DocFeatureVectors();
+        docFV.obtainFVsFromNLPFeatures(nlpFeatDoc, featuresList,
+          featurePositionTotal, maxNegPositionTotal, featuresList.totalNumDocs,
+          ngramWeight);
+        if(isTraining) {
+          LabelsOfFeatureVectorDoc labelsDoc = new LabelsOfFeatureVectorDoc();
+          labelsDoc.obtainMultiLabelsFromNLPDocSurround(nlpFeatDoc,
+            labelsAndId, engineSettings.surround);
+          addDocFVsMultiLabelToFile(i, outFeatureVectors,
+            labelsDoc.multiLabels, docFV);
+        } else {
+          int[] labels = new int[nlpFeatDoc.numInstances];
+          addDocFVsToFile(i, outFeatureVectors, labels, docFV);
         }
-        //outFeatureVectors.flush();
-        //outFeatureVectors.close();
-      } catch(IOException e) {
-        System.out.println("Error occured in reading the NLP data from file for converting to FVs" +
-            "or writing the FVs data into file!");
       }
-     
+      // outFeatureVectors.flush();
+      // outFeatureVectors.close();
+    } catch(IOException e) {
+      System.out
+        .println("Error occured in reading the NLP data from file for converting to FVs"
+          + "or writing the FVs data into file!");
+    }
   }
-  
+
   /** Write the FVs of one document into file. */
   void addDocFVsToFile(int index, BufferedWriter out, int[] labels,
     DocFeatureVectors docFV) {
@@ -301,25 +301,26 @@ public class LightWeightLearningApi extends Object {
     } catch(IOException e) {
     }
   }
-  
+
   /** Copy the NLP features from tempory file to normal file. */
   public void copyNLPFeat2NormalFile(File wdResults, int miNumDocsTraining) {
     try {
-      BufferedWriter outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-        new File(wdResults,ConstantParameters.FILENAMEOFNLPFeaturesData), true), "UTF-8"));
-      BufferedReader inNLPFeaturesTemp = new BufferedReader(new InputStreamReader(new 
-        FileInputStream(new File(wdResults,
+      BufferedWriter outNLPFeatures = new BufferedWriter(
+        new OutputStreamWriter(new FileOutputStream(new File(wdResults,
+          ConstantParameters.FILENAMEOFNLPFeaturesData), true), "UTF-8"));
+      BufferedReader inNLPFeaturesTemp = new BufferedReader(
+        new InputStreamReader(new FileInputStream(new File(wdResults,
           ConstantParameters.FILENAMEOFNLPFeaturesDataTemp)), "UTF-8"));
       String line = inNLPFeaturesTemp.readLine();
-      if(miNumDocsTraining==0) {
+      if(miNumDocsTraining == 0) {
         outNLPFeatures.append(line);
         outNLPFeatures.newLine();
       }
-      line=inNLPFeaturesTemp.readLine();
-      while(line != null){
+      line = inNLPFeaturesTemp.readLine();
+      while(line != null) {
         outNLPFeatures.append(line);
         outNLPFeatures.newLine();
-        line=inNLPFeaturesTemp.readLine();
+        line = inNLPFeaturesTemp.readLine();
       }
       inNLPFeaturesTemp.close();
       outNLPFeatures.flush();
@@ -334,15 +335,13 @@ public class LightWeightLearningApi extends Object {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    
-   
   }
 
   /**
    * Training using the Java implementatoin of learning algorithms.
    */
-  public void trainingJava(int numDocs,
-    LearningEngineSettings engineSettings) throws GateException {
+  public void trainingJava(int numDocs, LearningEngineSettings engineSettings)
+    throws GateException {
     LogService.logMessage("\nTraining starts.\n", 1);
     // The files for training data and model
     File wdResults = new File(wd, ConstantParameters.SUBDIRFORRESULTS);
@@ -389,12 +388,13 @@ public class LightWeightLearningApi extends Object {
         WekaLearner wekaLearner = WekaLearning.obtainWekaLearner(
           engineSettings.learnerSettings.learnerName,
           engineSettings.learnerSettings.paramsOfLearning);
-        LogService.logMessage("Weka learner name: " + wekaLearner.getLearnerName(), 1);
+        LogService.logMessage("Weka learner name: "
+          + wekaLearner.getLearnerName(), 1);
         // Training.
         wekaL.train(wekaLearner, modelFile);
         break;
       case 2: // for learner of multi to binary conversion
-        if(LogService.minVerbosityLevel > 1) 
+        if(LogService.minVerbosityLevel > 1)
           System.out.println("Using the SVM");
         LogService.logMessage("Multi to binary conversion.", 1);
         MultiClassLearning chunkLearning = new MultiClassLearning(
@@ -415,13 +415,14 @@ public class LightWeightLearningApi extends Object {
           .setLearnerExecutable(engineSettings.learnerSettings.executableTraining);
         paumLearner
           .setLearnerParams(engineSettings.learnerSettings.paramsOfLearning);
-        LogService.logMessage("The learners: " + paumLearner.getLearnerName(), 1);
+        LogService.logMessage("The learners: " + paumLearner.getLearnerName(),
+          1);
         // training
         chunkLearning.training(paumLearner, modelFile);
         break;
       default:
         System.out.println("Error! Wrong learner type.");
-      LogService.logMessage("Error! Wrong learner type.", 0);
+        LogService.logMessage("Error! Wrong learner type.", 0);
     }
   }
 
@@ -429,15 +430,15 @@ public class LightWeightLearningApi extends Object {
    * Apply the model to data, also using the learning algorithm implemented in
    * Java.
    */
-  public void applyModelInJava(Corpus corpus, int startDocId, int endDocId, String labelName,
-    LearningEngineSettings engineSettings, String fvFileName)
+  public void applyModelInJava(Corpus corpus, int startDocId, int endDocId,
+    String labelName, LearningEngineSettings engineSettings, String fvFileName)
     throws GateException {
     int numDocs = endDocId - startDocId;
     LogService.logMessage("\nApplication starts.", 1);
     // The files for training data and model
     File wdResults = new File(wd, ConstantParameters.SUBDIRFORRESULTS);
-    //String fvFileName = wdResults.toString() + File.separator
-      //+ ConstantParameters.FILENAMEOFFeatureVectorData;
+    // String fvFileName = wdResults.toString() + File.separator
+    // + ConstantParameters.FILENAMEOFFeatureVectorData;
     String nlpFileName = wdResults.toString() + File.separator
       + ConstantParameters.FILENAMEOFNLPFeaturesData;
     String modelFileName = wdResults.toString() + File.separator
@@ -479,7 +480,8 @@ public class LightWeightLearningApi extends Object {
         WekaLearner wekaLearner = WekaLearning.obtainWekaLearner(
           engineSettings.learnerSettings.learnerName,
           engineSettings.learnerSettings.paramsOfLearning);
-        LogService.logMessage("Weka learner name: " + wekaLearner.getLearnerName(), 1);
+        LogService.logMessage("Weka learner name: "
+          + wekaLearner.getLearnerName(), 1);
         // Training.
         wekaL.apply(wekaLearner, modelFile, distributionOutput);
         labelsFVDoc = wekaL.labelsFVDoc;
@@ -488,7 +490,7 @@ public class LightWeightLearningApi extends Object {
         break;
       case 2: // for learner of multi to binary conversion
         LogService.logMessage("Multi to binary conversion.", 1);
-        //System.out.println("** multi to binary:");
+        // System.out.println("** multi to binary:");
         MultiClassLearning chunkLearning = new MultiClassLearning(
           engineSettings.multi2BinaryMode);
         // read data
@@ -505,7 +507,8 @@ public class LightWeightLearningApi extends Object {
           .setLearnerExecutable(engineSettings.learnerSettings.executableTraining);
         paumLearner
           .setLearnerParams(engineSettings.learnerSettings.paramsOfLearning);
-        LogService.logMessage("The learners: " + paumLearner.getLearnerName(), 1);
+        LogService.logMessage("The learners: " + paumLearner.getLearnerName(),
+          1);
         // apply
         chunkLearning.apply(paumLearner, modelFile);
         labelsFVDoc = chunkLearning.dataFVinDoc.labelsFVDoc;
@@ -525,16 +528,17 @@ public class LightWeightLearningApi extends Object {
       PostProcessing postPr = new PostProcessing(
         engineSettings.thrBoundaryProb, engineSettings.thrEntityProb,
         engineSettings.thrClassificationProb);
-      //System.out.println("** Application mode:");
+      // System.out.println("** Application mode:");
       for(int i = 0; i < numDocs; ++i) {
         HashSet chunks = new HashSet();
         postPr.postProcessingChunk((short)3, labelsFVDoc[i].multiLabels,
           numClasses, chunks, chunkLenHash);
-        //System.out.println("** documentName="+((Document)corpus.get(i)).getName());
-        Document toProcess = (Document)corpus.get(i+startDocId);
-        addAnnsInDoc(toProcess, chunks, instanceType, featName,
-          labelName, labelsAndId);
-        if(toProcess.getDataStore()!= null) {
+        // System.out.println("**
+        // documentName="+((Document)corpus.get(i)).getName());
+        Document toProcess = (Document)corpus.get(i + startDocId);
+        addAnnsInDoc(toProcess, chunks, instanceType, featName, labelName,
+          labelsAndId);
+        if(toProcess.getDataStore() != null) {
           corpus.getDataStore().sync(corpus);
           Factory.deleteResource(toProcess);
         }
@@ -555,11 +559,10 @@ public class LightWeightLearningApi extends Object {
         float[] valuesLabels = new float[labelsFVDoc[i].multiLabels.length];
         postPr.postProcessingClassification((short)3,
           labelsFVDoc[i].multiLabels, selectedLabels, valuesLabels);
-        Document toProcess = (Document)corpus.get(i+startDocId);
-        addAnnsInDocClassification(toProcess, selectedLabels,
-          valuesLabels, instanceType, featName, labelName, labelsAndId,
-          engineSettings);
-        if(toProcess.getDataStore()!= null) {
+        Document toProcess = (Document)corpus.get(i + startDocId);
+        addAnnsInDocClassification(toProcess, selectedLabels, valuesLabels,
+          instanceType, featName, labelName, labelsAndId, engineSettings);
+        if(toProcess.getDataStore() != null) {
           corpus.getDataStore().sync(corpus);
           Factory.deleteResource(toProcess);
         }
@@ -568,12 +571,11 @@ public class LightWeightLearningApi extends Object {
   }
 
   /**
-   * Apply the model to one document, also using the learning algorithm implemented in
-   * Java.
+   * Apply the model to one document, also using the learning algorithm
+   * implemented in Java.
    */
   public void applyModelInJavaPerDoc(Document doc, String labelName,
-    LearningEngineSettings engineSettings)
-    throws GateException {
+    LearningEngineSettings engineSettings) throws GateException {
     LogService.logMessage("\nApplication starts.", 1);
     // The files for training data and model
     File wdResults = new File(wd, ConstantParameters.SUBDIRFORRESULTS);
@@ -591,7 +593,7 @@ public class LightWeightLearningApi extends Object {
     int learnerType;
     learnerType = obtainLearnerType(engineSettings.learnerSettings.learnerName);
     int numClasses = 0;
-    int numDocs = 1; //corpus.size();
+    int numDocs = 1; // corpus.size();
     // Store the label information from the model application
     LabelsOfFeatureVectorDoc[] labelsFVDoc = null;
     short featureType = WekaLearning.SPARSEFVDATA;
@@ -621,7 +623,8 @@ public class LightWeightLearningApi extends Object {
         WekaLearner wekaLearner = WekaLearning.obtainWekaLearner(
           engineSettings.learnerSettings.learnerName,
           engineSettings.learnerSettings.paramsOfLearning);
-        LogService.logMessage("Weka learner name: " + wekaLearner.getLearnerName(), 1);
+        LogService.logMessage("Weka learner name: "
+          + wekaLearner.getLearnerName(), 1);
         // Training.
         wekaL.apply(wekaLearner, modelFile, distributionOutput);
         labelsFVDoc = wekaL.labelsFVDoc;
@@ -630,11 +633,12 @@ public class LightWeightLearningApi extends Object {
         break;
       case 2: // for learner of multi to binary conversion
         LogService.logMessage("Multi to binary conversion.", 1);
-        //System.out.println("** multi to binary:");
+        // System.out.println("** multi to binary:");
         MultiClassLearning chunkLearning = new MultiClassLearning(
           engineSettings.multi2BinaryMode);
         // read data
-        chunkLearning.getDataFromFile(numDocs, dataFile); //corpus.size(), dataFile);
+        chunkLearning.getDataFromFile(numDocs, dataFile); // corpus.size(),
+                                                          // dataFile);
         // get a learner
         String learningCommand = engineSettings.learnerSettings.paramsOfLearning;
         learningCommand = learningCommand.trim();
@@ -647,7 +651,8 @@ public class LightWeightLearningApi extends Object {
           .setLearnerExecutable(engineSettings.learnerSettings.executableTraining);
         paumLearner
           .setLearnerParams(engineSettings.learnerSettings.paramsOfLearning);
-        LogService.logMessage("The learners: " + paumLearner.getLearnerName(), 1);
+        LogService.logMessage("The learners: " + paumLearner.getLearnerName(),
+          1);
         // apply
         chunkLearning.apply(paumLearner, modelFile);
         labelsFVDoc = chunkLearning.dataFVinDoc.labelsFVDoc;
@@ -667,14 +672,15 @@ public class LightWeightLearningApi extends Object {
       PostProcessing postPr = new PostProcessing(
         engineSettings.thrBoundaryProb, engineSettings.thrEntityProb,
         engineSettings.thrClassificationProb);
-      //System.out.println("** Application mode:");
-     for(int i = 0; i < numDocs; ++i) {
+      // System.out.println("** Application mode:");
+      for(int i = 0; i < numDocs; ++i) {
         HashSet chunks = new HashSet();
         postPr.postProcessingChunk((short)3, labelsFVDoc[i].multiLabels,
           numClasses, chunks, chunkLenHash);
-        //System.out.println("** documentName="+((Document)corpus.get(i)).getName());
-        addAnnsInDoc(doc, chunks, instanceType, featName,
-          labelName, labelsAndId);
+        // System.out.println("**
+        // documentName="+((Document)corpus.get(i)).getName());
+        addAnnsInDoc(doc, chunks, instanceType, featName, labelName,
+          labelsAndId);
       }
     } else {
       String featName = engineSettings.datasetDefinition.arrs.classFeature;
@@ -687,19 +693,17 @@ public class LightWeightLearningApi extends Object {
       PostProcessing postPr = new PostProcessing(
         engineSettings.thrBoundaryProb, engineSettings.thrEntityProb,
         engineSettings.thrClassificationProb);
-      for(int i = 0; i < numDocs; ++i) { //numDocs is always 1
+      for(int i = 0; i < numDocs; ++i) { // numDocs is always 1
         int[] selectedLabels = new int[labelsFVDoc[i].multiLabels.length];
         float[] valuesLabels = new float[labelsFVDoc[i].multiLabels.length];
         postPr.postProcessingClassification((short)3,
           labelsFVDoc[i].multiLabels, selectedLabels, valuesLabels);
-        addAnnsInDocClassification(doc, selectedLabels,
-          valuesLabels, instanceType, featName, labelName, labelsAndId,
-          engineSettings);
+        addAnnsInDocClassification(doc, selectedLabels, valuesLabels,
+          instanceType, featName, labelName, labelsAndId, engineSettings);
       }
     }
   }
 
-  
   /** Add the annotation into documents for chunk learning. */
   private void addAnnsInDoc(Document doc, HashSet chunks, String instanceType,
     String featName, String labelName, Label2Id labelsAndId) {
@@ -778,12 +782,12 @@ public class LightWeightLearningApi extends Object {
     File labelInDataFile, File nlpDataLabelFile, int numDocs,
     boolean surroundingMode) {
     try {
-      BufferedReader inData = new BufferedReader(new InputStreamReader(new FileInputStream
-        (dataFile), "UTF-8"));
-      BufferedReader inNlpData = new BufferedReader(new InputStreamReader(new FileInputStream
-        (nlpDataFile), "UTF-8"));
-      BufferedWriter outNlpDataLabel = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-        nlpDataLabelFile), "UTF-8"));
+      BufferedReader inData = new BufferedReader(new InputStreamReader(
+        new FileInputStream(dataFile), "UTF-8"));
+      BufferedReader inNlpData = new BufferedReader(new InputStreamReader(
+        new FileInputStream(nlpDataFile), "UTF-8"));
+      BufferedWriter outNlpDataLabel = new BufferedWriter(
+        new OutputStreamWriter(new FileOutputStream(nlpDataLabelFile), "UTF-8"));
       HashSet uniqueLabels = new HashSet();
       // The head line of NLP feature file
       String line = inNlpData.readLine();
@@ -831,8 +835,8 @@ public class LightWeightLearningApi extends Object {
       outNlpDataLabel.close();
       inData.close();
       inNlpData.close();
-      BufferedWriter labelInData = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-        labelInDataFile), "UTF-8"));
+      BufferedWriter labelInData = new BufferedWriter(new OutputStreamWriter(
+        new FileOutputStream(labelInDataFile), "UTF-8"));
       labelInData.append(uniqueLabels.size() + " #total_labels");
       labelInData.newLine();
       for(Object obj : uniqueLabels) {
@@ -932,7 +936,8 @@ public class LightWeightLearningApi extends Object {
     // Write the filtered data into the data file
     BufferedWriter out;
     try {
-      out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dataFile), "UTF-8"));
+      out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+        dataFile), "UTF-8"));
       numNeg = 0;
       for(int i = 0; i < labelsFVDocB.length; ++i) {
         int kk1 = 0;
@@ -994,101 +999,197 @@ public class LightWeightLearningApi extends Object {
         + "\" is not defined!");
     }
   }
-  
+
   /** Convert and view the SVM models in term of NLP features. */
-  public void viewSVMmodelsInNLPFeatures(File modelFile, int numP) {
-//  Open the mode file and read the model
-    BufferedReader modelsBuff;
+  public void viewSVMmodelsInNLPFeatures(File modelFile, 
+    LearningEngineSettings engineSettings) {
     try {
+      //First decide if the learning model is linear one or not
+      if(!(engineSettings.learnerSettings.learnerName.equalsIgnoreCase("SVMLibSvmJava" )
+        && (!engineSettings.learnerSettings.paramsOfLearning.contains("-t ") ||
+          engineSettings.learnerSettings.paramsOfLearning.contains("-t 0")))) {
+        System.out.println("According to the configuration file, " +
+            "the model file is not linear svm model. Hence it cannot be displayed in the " +
+            "current implementation!");
+            return;
+      }
+      int numP0, numN0;
+      boolean surroundMode;
+      numP0 = engineSettings.numPosSVMModel;
+      numN0 = engineSettings.numNegSVMModel;
+      surroundMode = engineSettings.surround;
+      // Open the mode file and read the model
       HashMap featId2Form = new HashMap();
-      for(Object obj:featuresList.featuresList.keySet()) {
+      for(Object obj : featuresList.featuresList.keySet()) {
         int k = Integer.parseInt(featuresList.featuresList.get(obj).toString());
         featId2Form.put(k, obj);
       }
-      
+      BufferedReader modelsBuff;
       modelsBuff = new BufferedReader(new InputStreamReader(
         new FileInputStream(modelFile), "UTF-8"));
       // Read the training meta information from the model file's header
       // include the total number of features and number of tags (numClasses)
       int totalNumFeatures;
+      String learnerNameFromModel = null;
       MultiClassLearning mulL = new MultiClassLearning();
-      String learnerNameFromModel=null;
-      totalNumFeatures = mulL.ReadTrainingMetaData(modelsBuff, learnerNameFromModel);
-//    for each class
+      totalNumFeatures = mulL.ReadTrainingMetaData(modelsBuff,
+        learnerNameFromModel);
+      // for each class
       for(int iClass = 0; iClass < mulL.numClasses; ++iClass) {
         float b;
         float[] w = new float[totalNumFeatures];
         String items[] = modelsBuff.readLine().split(" ");
         // Get the weight vector
         b = SvmLibSVM.readWeightVectorFromFile(modelsBuff, w);
-        int numT=0;
-        for(int i=0; i<totalNumFeatures; ++i)
-          if(w[i]>0) ++numT;
-        float [] wP = new float[numT];
-        int [] indexW = new int[numT];
-        numT = 0;
-        for(int i=0; i<totalNumFeatures; ++i)
-          if(w[i]>0) {
-            wP[numT] = w[i];
-            indexW[numT] = i;
-            ++numT;
+        int numT;
+        int numP;
+        if(numP0 > 0) {
+          numT = 0;
+          for(int i = 1; i < totalNumFeatures; ++i)
+            if(w[i] >= 0) ++numT;
+          float[] wP = new float[numT];
+          int[] indexW = new int[numT];
+          numT = 0;
+          for(int i = 1; i < totalNumFeatures; ++i)
+            if(w[i] >= 0) {
+              wP[numT] = w[i];
+              indexW[numT] = i;
+              ++numT;
+            }
+          if(numP0 > numT)
+            numP = numT;
+          else numP = numP0;
+          int[] indexSort = new int[numP];
+          sortFloatAscIndex(wP, indexSort, numT, numP);
+          String st1 = null;
+          if(surroundMode) {
+            st1 = labelsAndId.id2Label.get(
+              new Integer(iClass / 2 + 1).toString()).toString();
+            if(iClass % 2 == 0)
+              st1 += "-StartToken";
+            else st1 += "-LastToken";
+          } else {
+            st1 = labelsAndId.id2Label.get(new Integer(iClass + 1).toString())
+              .toString();
           }
-        if(numP>numT)
-          numP = numT;
-        int [] indexSort = new int[numT];
-        sortFloatAscIndex(wP, indexSort, numT);
-        
-        String st1=null;
-        st1 = labelsAndId.id2Label.get(new Integer(iClass/2+1).toString()).toString();
-        if(iClass/2==0)
-          st1 += "-StartToken";
-        else st1 += "-LastToken";
-        System.out.println("The " +numP+" most significiant positive NLP feature for class:   "+st1+":");
-        for(int i=0; i<numP; ++i) {
-          int k1 = indexW[indexSort[i]]/(int)ConstantParameters.MAXIMUMFEATURES;
-          int k2 = indexW[indexSort[i]]%(int)ConstantParameters.MAXIMUMFEATURES;
-          String st=null;
-          if(k1==0)
-            st = "0";
-          else if(k1<=maxNegPositionTotal)
-            st = "-"+k1;
-          else {
-            k1 -= maxNegPositionTotal+1;
-            st = "+"+k1;
+          System.out.println("The " + numP
+            + " most significiant positive NLP feature for class:   " + st1
+            + ":");
+          for(int i = 0; i < numP; ++i) {
+            int k1 = indexW[indexSort[i]]
+              / (int)ConstantParameters.MAXIMUMFEATURES;
+            int k2 = indexW[indexSort[i]]
+              % (int)ConstantParameters.MAXIMUMFEATURES;
+            String st = null;
+            if(k1 == 0) {
+              st = "0";
+            } else {
+              if(k1 <= maxNegPositionTotal)
+                st = "-" + k1;
+              else {
+                k1 -= maxNegPositionTotal;
+                st = "+" + k1;
+              }
+            }
+            st += " " + featId2Form.get(k2).toString();
+            System.out.println(i + ": " + st + " -- " + wP[indexSort[i]]);
           }
-          st += " "+featId2Form.get(k2).toString();
-          System.out.println(i+": "+st + " -- "+wP[indexSort[i]]);
         }
-        
+        // For the negative weight
+        if(numN0 > 0) {
+          System.out.println("Negative weight:");
+          numT = 0;
+          for(int i = 0; i < totalNumFeatures; ++i)
+            if(w[i] < 0) ++numT;
+          float[] wN = new float[numT];
+          int[] indexWN = new int[numT];
+          numT = 0;
+          for(int i = 0; i < totalNumFeatures; ++i)
+            if(w[i] < 0) {
+              wN[numT] = -w[i];
+              indexWN[numT] = i;
+              ++numT;
+            }
+          if(numN0 > numT)
+            numP = numT;
+          else numP = numN0;
+          int[] indexSortN = new int[numP];
+          sortFloatAscIndex(wN, indexSortN, numT, numP);
+          String st1 = null;
+          if(surroundMode) {
+            st1 = labelsAndId.id2Label.get(
+              new Integer(iClass / 2 + 1).toString()).toString();
+            if(iClass % 2 == 0)
+              st1 += "-StartToken";
+            else st1 += "-LastToken";
+          } else {
+            st1 = labelsAndId.id2Label.get(new Integer(iClass + 1).toString())
+              .toString();
+          }
+          System.out.println("The " + numP
+            + " most significiant negative NLP feature for class:   " + st1
+            + ":");
+          for(int i = 0; i < numP; ++i) {
+            int k1 = indexWN[indexSortN[i]]
+              / (int)ConstantParameters.MAXIMUMFEATURES;
+            int k2 = indexWN[indexSortN[i]]
+              % (int)ConstantParameters.MAXIMUMFEATURES;
+            String st = null;
+            if(k1 == 0) {
+              st = "0";
+            } else {
+              if(k1 <= maxNegPositionTotal)
+                st = "-" + k1;
+              else {
+                k1 -= maxNegPositionTotal;
+                st = "+" + k1;
+              }
+            }
+            st += " " + featId2Form.get(k2).toString();
+            float wN0 = -wN[indexSortN[i]];
+            System.out.println(i + ": " + st + " -- " + wN0);
+          }
+        }
       }
-      
       modelsBuff.close();
     } catch(IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
-  
-  public static void sortFloatAscIndex(float [] wP, int [] indexSort, int numT) {
-    int i, j, k;
-    float [] rp1 = new float[numT];
-    float one;
 
+  /** Get the biggest numK components from an array. */
+  public static void sortFloatAscIndex(float[] wP, int[] indexSort, int numT,
+    int numK) {
+    int i, j, k, j1;
+    float[] rp1 = new float[numK];
+    float one;
     rp1[0] = wP[0];
     indexSort[0] = 0;
-    for (i=1; i<numT; i++) {
-       one = wP[i];
-       k = i;
-       for(j=i-1; j>-1; --j) {
-          if(one>rp1[j]) --k;
-          else    break;
-       }
-       for(j=i-1; j>k-1; j--) {
-           rp1[j+1] = rp1[j];
-           indexSort[j+1] = indexSort[j];
-       }
-       rp1[k] = one;
-       indexSort[k] = i;
+    for(i = 1; i < numT; ++i) {
+      one = wP[i];
+      if(i >= numK)
+        j1 = numK - 1;
+      else j1 = i - 1;
+      k = j1;
+      for(j = j1; j > -1; --j) {
+        if(one > rp1[j])
+          --k;
+        else break;
+      }
+      if(i < numK) {
+        rp1[i] = rp1[i - 1];
+        indexSort[i] = indexSort[i - 1];
+      }
+      ++k;
+      for(j = j1; j > k; --j) {
+        rp1[j] = rp1[j - 1];
+        indexSort[j] = indexSort[j - 1];
+      }
+      if(k < numK) {
+        rp1[k] = one;
+        indexSort[k] = i;
+      }
     }
   }
 }
