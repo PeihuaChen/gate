@@ -66,8 +66,7 @@ public class NekoHtmlDocumentHandler
 
   private static final boolean DEBUG_UNUSED = DEBUG;
 
-  public static final String AUGMENTATIONS =
-          "http://cyberneko.org/html/features/augmentations";
+  public static final String AUGMENTATIONS = "http://cyberneko.org/html/features/augmentations";
 
   /**
    * Constructor initialises all the private memeber data
@@ -172,8 +171,8 @@ public class NekoHtmlDocumentHandler
     Long startIndex = new Long(tmpDocContent.length());
 
     // initialy the start index is equal with the End index
-    CustomObject obj =
-            new CustomObject(element.localpart, fm, startIndex, startIndex);
+    CustomObject obj = new CustomObject(element.localpart, fm, startIndex,
+            startIndex);
 
     // put it into the stack
     stack.push(obj);
@@ -188,20 +187,30 @@ public class NekoHtmlDocumentHandler
   public void characters(XMLString text, Augmentations augs)
           throws XNIException {
     if(!readCharacterStatus) {
-      HTMLEventInfo evInfo = (HTMLEventInfo)augs.getItem(AUGMENTATIONS);
-      // NekoHTML numbers lines and columns from 1, not 0
-      int line = evInfo.getBeginLineNumber() - 1;
-      int col = evInfo.getBeginColumnNumber() - 1;
-      charactersStartOffset = lineOffsets[line] + col;
+      if(reposInfo != null) {
+        HTMLEventInfo evInfo = (augs == null) ? null : (HTMLEventInfo)augs
+                .getItem(AUGMENTATIONS);
+        if(evInfo == null) {
+          Err.println("Warning: could not determine proper repositioning "
+                  + "info for character chunk \""
+                  + new String(text.ch, text.offset, text.length)
+                  + "\" near offset " + charactersStartOffset
+                  + ".  Save preserving format may give incorret results.");
+        }
+        else {
+          // NekoHTML numbers lines and columns from 1, not 0
+          int line = evInfo.getBeginLineNumber() - 1;
+          int col = evInfo.getBeginColumnNumber() - 1;
+          charactersStartOffset = lineOffsets[line] + col;
+        }
+      }
 
       contentBuffer = new StringBuilder();
     }
     readCharacterStatus = true;
 
-    boolean canAppendWS =
-            (contentBuffer.length() == 0 || !Character
-                    .isWhitespace(contentBuffer
-                            .charAt(contentBuffer.length() - 1)));
+    boolean canAppendWS = (contentBuffer.length() == 0 || !Character
+            .isWhitespace(contentBuffer.charAt(contentBuffer.length() - 1)));
     // we must collapse
     // whitespace down to a single space, to mirror the normal
     // HtmlDocumentFormat.
@@ -403,8 +412,8 @@ public class NekoHtmlDocumentHandler
     // If basicAs is null then get the default annotation
     // set from this gate document
     if(basicAS == null)
-      basicAS =
-              doc.getAnnotations(GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
+      basicAS = doc
+              .getAnnotations(GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
 
     // sort colector ascending on its id
     Collections.sort(colector);
@@ -447,32 +456,27 @@ public class NekoHtmlDocumentHandler
    * directly. This allows you to binarySearch for an offset rather than
    * having to construct a PositionInfo record with the target value.
    */
-  private static final Comparator<Object> POSITION_INFO_COMPARATOR =
-          new Comparator<Object>() {
-            public int compare(Object a, Object b) {
-              Long offA = null;
-              if(a instanceof Long) {
-                offA = (Long)a;
-              }
-              else if(a instanceof RepositioningInfo.PositionInfo) {
-                offA =
-                        ((RepositioningInfo.PositionInfo)a)
-                                .getOriginalPosition();
-              }
+  private static final Comparator<Object> POSITION_INFO_COMPARATOR = new Comparator<Object>() {
+    public int compare(Object a, Object b) {
+      Long offA = null;
+      if(a instanceof Long) {
+        offA = (Long)a;
+      }
+      else if(a instanceof RepositioningInfo.PositionInfo) {
+        offA = ((RepositioningInfo.PositionInfo)a).getOriginalPosition();
+      }
 
-              Long offB = null;
-              if(b instanceof Long) {
-                offB = (Long)b;
-              }
-              else if(b instanceof RepositioningInfo.PositionInfo) {
-                offB =
-                        ((RepositioningInfo.PositionInfo)a)
-                                .getOriginalPosition();
-              }
+      Long offB = null;
+      if(b instanceof Long) {
+        offB = (Long)b;
+      }
+      else if(b instanceof RepositioningInfo.PositionInfo) {
+        offB = ((RepositioningInfo.PositionInfo)a).getOriginalPosition();
+      }
 
-              return offA.compareTo(offB);
-            }
-          };
+      return offA.compareTo(offB);
+    }
+  };
 
   /**
    * Correct for whitespace. Given the offset of the start of a block of
@@ -487,9 +491,8 @@ public class NekoHtmlDocumentHandler
   private long fixStartOffsetForWhitespace(long wsOffset) {
     // see whether we have a repositioning record in ampCodingInfo for
     // the whitespace starting at wsOffset
-    int wsPosInfoIndex =
-            Collections.binarySearch(ampCodingInfo, wsOffset,
-                    POSITION_INFO_COMPARATOR);
+    int wsPosInfoIndex = Collections.binarySearch(ampCodingInfo, wsOffset,
+            POSITION_INFO_COMPARATOR);
 
     // if we don't find a repos record it means that the whitespace
     // really is a single space in the original content
@@ -758,8 +761,7 @@ public class NekoHtmlDocumentHandler
   private gate.AnnotationSet basicAS;
 
   // listeners for status report
-  protected List<StatusListener> myStatusListeners =
-          new LinkedList<StatusListener>();
+  protected List<StatusListener> myStatusListeners = new LinkedList<StatusListener>();
 
   // this reports the the number of elements that have beed processed so
   // far
