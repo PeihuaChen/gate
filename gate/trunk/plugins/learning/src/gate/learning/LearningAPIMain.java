@@ -162,7 +162,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
     learningModeAppl = RunMode.APPLICATION;
     maxNumApp = learningSettings.docNumIntevalApp;
     learningModeMiTraining = RunMode.MITRAINING;
-    learningModeVIEWSVMMODEL = RunMode.VIEWLINEARSVMMODELS;
+    learningModeVIEWSVMMODEL = RunMode.VIEWPRIMALFORMMODELS;
     fireProcessFinished();
     // System.out.println("initialisation finished.");
     return this;
