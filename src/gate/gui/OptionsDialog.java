@@ -471,104 +471,104 @@ public class OptionsDialog extends JDialog {
   /**
    * The main tabbed pane
    */
-  JTabbedPane mainTabbedPane;
+  protected JTabbedPane mainTabbedPane;
 
   /**
    * The OK button. The action for this button is an {@link OKAction}
    */
-  JButton okButton;
+  protected JButton okButton;
 
   /**
    * The Cancel button: hides the dialog without doing anything
    */
-  JButton cancelButton;
+  protected JButton cancelButton;
 
   /**
    * Radio button used to set the font for text components
    */
-  JRadioButton textBtn;
+  protected JRadioButton textBtn;
 
   /**
    * which text is currently being edited; values are: "text", "menu", "other"
    */
-  String selectedFontBtn = null;
+  protected String selectedFontBtn = null;
 
   /**
    * Radio button used to set the font for menu components
    */
-  JRadioButton menuBtn;
+  protected JRadioButton menuBtn;
 
   /**
    * Radio button used to set the font for other components
    */
-  JRadioButton otherCompsBtn;
+  protected JRadioButton otherCompsBtn;
 
   /**
    * Button group for the font setting radio buttons
    */
-  ButtonGroup fontBG;
+  protected ButtonGroup fontBG;
 
   /**
    * The font chooser used for selecting fonts
    */
-  JFontChooser fontChooser;
+  protected JFontChooser fontChooser;
 
   /**
    * The "Save Options on close" checkbox
    */
-  JCheckBox saveOptionsChk;
+  protected JCheckBox saveOptionsChk;
 
   /**
    * The "Save Session on close" checkbox
    */
-  JCheckBox saveSessionChk;
+  protected JCheckBox saveSessionChk;
 
   /**
    * The "Include Annotation Features in Save Preserving Format" checkbox
    */
-  JCheckBox includeFeaturesOnPreserveFormatChk;
+  protected JCheckBox includeFeaturesOnPreserveFormatChk;
 
   /**
    * The "Add extra space markup unpack if needed" checkbox
    */
-  JCheckBox addSpaceOnMarkupUnpackChk;
+  protected JCheckBox addSpaceOnMarkupUnpackChk;
 
   /** The Docedit append checkbox */
-  JCheckBox doceditInsertAppendChk;
+  protected JCheckBox doceditInsertAppendChk;
 
   /** The Docedit prepend checkbox */
-  JCheckBox doceditInsertPrependChk;
+  protected JCheckBox doceditInsertPrependChk;
 
   /**
    * The name of the look and feel class
    */
-  String lookAndFeelClassName;
+  protected String lookAndFeelClassName;
 
   /**
    * The font to be used for the menus; cached value for the one in the user
    * config map.
    */
-  Font menusFont;
+  protected Font menusFont;
 
   /**
    * The font to be used for text components; cached value for the one in the
    * user config map.
    */
-  Font textComponentsFont;
+  protected Font textComponentsFont;
 
   /**
    * The font to be used for GUI components; cached value for the one in the
    * user config map.
    */
-  Font componentsFont;
+  protected Font componentsFont;
 
   /**
    * This flag becomes true when an GUI related option has been changed
    */
-  boolean dirtyGUI;
+  protected boolean dirtyGUI;
 
   /**
    * The combobox for the look and feel selection
    */
-  JComboBox lnfCombo;
+  protected JComboBox lnfCombo;
 }
