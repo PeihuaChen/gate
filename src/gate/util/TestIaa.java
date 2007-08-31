@@ -26,6 +26,7 @@ import gate.FeatureMap;
 import gate.Gate;
 import gate.annotation.AnnotationSetImpl;
 import gate.gui.MainFrame;
+import gate.GateConstants;
 
 public class TestIaa extends TestCase {
   /** The id of test case. */
@@ -52,81 +53,97 @@ public class TestIaa extends TestCase {
   } // suite
 
   private Document loadDocument(String path, String name) throws Exception {
-    //Document doc = Factory.newDocument(Gate.getUrl(path), "UTF-8");
-    Document doc = Factory.newDocument(new File(path).toURL(), "UTF-8");
+    Document doc = Factory.newDocument(Gate.getUrl(path), "UTF-8");
     doc.setName(name);
     return doc;
   }
 
   /** The test the IAA. */
   public void testIaa() throws Exception {
-    // Load the documents into a corpus
-    Gate.init();
-    Corpus data = Factory.newCorpus("data");
-    data.add(loadDocument("c:/yaoyong_h/iaa/twodocs/doc1-ann1.xml",
-      "doc1-ann1.xml"));
-    data.add(loadDocument("c:/yaoyong_h/iaa/twodocs/doc1-ann3.xml",
-      "doc1-ann3.xml"));
-    data.add(loadDocument("c:/yaoyong_h/iaa/twodocs/doc2-ann1.xml",
-      "doc2-ann1.xml"));
-    data.add(loadDocument("c:/yaoyong_h/iaa/twodocs/doc2-ann2.xml",
-      "doc2-ann2.xml"));
-    data.add(loadDocument("c:/yaoyong_h/iaa/twodocs/doc2-ann3.xml",
-      "doc2-ann3.xml"));
 
-    boolean isUsingLabel = true;
+    Boolean savedSpaceSetting = Gate.getUserConfig().getBoolean(
+            GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME);
+    Gate.getUserConfig().put(
+            GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME,
+            Boolean.FALSE);
+    try {
 
-    int numDocs = 2; // Number of documents
-    int numJudges = 3; // number of judges
-    // Put the annotated document into a matrix for IAA
-    String nameAnnSet = "Original markups";
-    String nameAnnType = "OPINION_SRC";
-    String nameAnnFeat = "";
-    // testNofeat(nameAnnSet, nameAnnType, nameAnnFeat, annArr2, data);
-    // Test with feature
-    nameAnnSet = "Original markups";
-    // nameAnnType = "OPINION_SRC";
-    // nameAnnFeat = "type";
-    caseN = 1;
-    nameAnnType = "SENT";
-    nameAnnFeat = "senOp";
-    isUsingLabel = true;
-    testWithfeat(numDocs, numJudges, nameAnnSet, nameAnnType, nameAnnFeat,
-      data, isUsingLabel);
+      // Load the documents into a corpus
+      Corpus data = Factory.newCorpus("data");
+      data
+              .add(loadDocument("tests/iaa/twodocs/doc1-ann1.xml",
+                      "doc1-ann1.xml"));
+      data
+              .add(loadDocument("tests/iaa/twodocs/doc1-ann3.xml",
+                      "doc1-ann3.xml"));
+      data
+              .add(loadDocument("tests/iaa/twodocs/doc2-ann1.xml",
+                      "doc2-ann1.xml"));
+      data
+              .add(loadDocument("tests/iaa/twodocs/doc2-ann2.xml",
+                      "doc2-ann2.xml"));
+      data
+              .add(loadDocument("tests/iaa/twodocs/doc2-ann3.xml",
+                      "doc2-ann3.xml"));
 
-    caseN = 2;
-    nameAnnType = "OPINION_SRC";
-    nameAnnFeat = "type";
-    isUsingLabel = false;
-    testWithfeat(numDocs, numJudges, nameAnnSet, nameAnnType, nameAnnFeat,
-      data, isUsingLabel);
+      boolean isUsingLabel = true;
 
-    // Use another dataset
-    data.clear();
-    data.add(loadDocument("c:/yaoyong_h/iaa/small/ann1.xml",
-      "ann1.xml"));
-    data.add(loadDocument("c:/yaoyong_h/iaa/small/ann2.xml",
-      "ann2.xml"));
-    data.add(loadDocument("c:/yaoyong_h/iaa/small/ann3.xml",
-      "ann3.xml"));
+      int numDocs = 2; // Number of documents
+      int numJudges = 3; // number of judges
+      // Put the annotated document into a matrix for IAA
+      String nameAnnSet = "Original markups";
+      String nameAnnType = "OPINION_SRC";
+      String nameAnnFeat = "";
+      // testNofeat(nameAnnSet, nameAnnType, nameAnnFeat, annArr2,
+      // data);
+      // Test with feature
+      nameAnnSet = "Original markups";
+      // nameAnnType = "OPINION_SRC";
+      // nameAnnFeat = "type";
+      caseN = 1;
+      nameAnnType = "SENT";
+      nameAnnFeat = "senOp";
+      isUsingLabel = true;
+      testWithfeat(numDocs, numJudges, nameAnnSet, nameAnnType, nameAnnFeat,
+              data, isUsingLabel);
 
-    numDocs = 1; // Number of documents
-    numJudges = 3; // number of judges
-    // Test with feature
-    nameAnnSet = "Original markups";
-    caseN = 3;
-    nameAnnType = "SENT";
-    nameAnnFeat = "senOp";
-    isUsingLabel = true;
-    testWithfeat(numDocs, numJudges, nameAnnSet, nameAnnType, nameAnnFeat,
-      data, isUsingLabel);
+      caseN = 2;
+      nameAnnType = "OPINION_SRC";
+      nameAnnFeat = "type";
+      isUsingLabel = false;
+      testWithfeat(numDocs, numJudges, nameAnnSet, nameAnnType, nameAnnFeat,
+              data, isUsingLabel);
 
-    caseN = 4;
-    nameAnnType = "OPINION_SRC";
-    nameAnnFeat = "type";
-    isUsingLabel = true;
-    testWithfeat(numDocs, numJudges, nameAnnSet, nameAnnType, nameAnnFeat,
-      data, isUsingLabel);
+      // Use another dataset
+      data.clear();
+      data.add(loadDocument("tests/iaa/small/ann1.xml", "ann1.xml"));
+      data.add(loadDocument("tests/iaa/small/ann2.xml", "ann2.xml"));
+      data.add(loadDocument("tests/iaa/small/ann3.xml", "ann3.xml"));
+
+      numDocs = 1; // Number of documents
+      numJudges = 3; // number of judges
+      // Test with feature
+      nameAnnSet = "Original markups";
+      caseN = 3;
+      nameAnnType = "SENT";
+      nameAnnFeat = "senOp";
+      isUsingLabel = true;
+      testWithfeat(numDocs, numJudges, nameAnnSet, nameAnnType, nameAnnFeat,
+              data, isUsingLabel);
+
+      caseN = 4;
+      nameAnnType = "OPINION_SRC";
+      nameAnnFeat = "type";
+      isUsingLabel = true;
+      testWithfeat(numDocs, numJudges, nameAnnSet, nameAnnType, nameAnnFeat,
+              data, isUsingLabel);
+    }
+    finally {
+      Gate.getUserConfig().put(
+              GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME,
+              savedSpaceSetting);
+    }
+
   }
 
   private int obtainAnnotatorId(String docName) {
@@ -144,10 +161,12 @@ public class TestIaa extends TestCase {
 
   /** The actual method for testing. */
   public void testWithfeat(int numDocs0, int numJudges, String nameAnnSet,
-    String nameAnnType, String nameAnnFeat, Corpus data, boolean isUsingLabel) {
+          String nameAnnType, String nameAnnFeat, Corpus data,
+          boolean isUsingLabel) {
     AnnotationSet[][] annArr2 = new AnnotationSet[numDocs0][numJudges];
     int numDocs = data.size();
-    // Get a document list as different annotation in different document copy
+    // Get a document list as different annotation in different document
+    // copy
     HashMap<String, Integer> docNameList = new HashMap<String, Integer>();
     int k = 0;
     for(int i = 0; i < data.size(); ++i) {
@@ -168,11 +187,12 @@ public class TestIaa extends TestCase {
       else {
         // Get the annotation
         annArr2[docNameList.get(docName).intValue()][annotatorId] = doc
-          .getAnnotations(nameAnnSet).get(nameAnnType);
+                .getAnnotations(nameAnnSet).get(nameAnnType);
       }
     }
     // Get the Iaa computation
-    // System.out.println("annSet="+nameAnnSet+", annType="+nameAnnType+",
+    // System.out.println("annSet="+nameAnnSet+",
+    // annType="+nameAnnType+",
     // annFeat="+nameAnnFeat+".");
     // First collect labels for the feature
     ArrayList<String> labelsSet;
@@ -185,7 +205,7 @@ public class TestIaa extends TestCase {
     IaaCalculation iaa = null;
     if(isUsingLabel)
       iaa = new IaaCalculation(nameAnnType, nameAnnFeat, labelsArr, annArr2, 0);
-    else iaa = new IaaCalculation(nameAnnType, annArr2,0);
+    else iaa = new IaaCalculation(nameAnnType, annArr2, 0);
 
     iaa.pairwiseIaaFmeasure();
     int[] nPwF = new int[4];
@@ -226,7 +246,7 @@ public class TestIaa extends TestCase {
           featM.put("annotators", mergeInfor.get(ann));
           try {
             annsDoc.add(ann.getStartNode().getOffset(), ann.getEndNode()
-              .getOffset(), nameAnnType, featM);
+                    .getOffset(), nameAnnType, featM);
           }
           catch(InvalidOffsetException e) {
             // TODO Auto-generated catch block
@@ -246,14 +266,14 @@ public class TestIaa extends TestCase {
     iaa.pairwiseIaaKappa();
     int[] nPwKa = new int[3];
     nPwKa[0] = (int)Math
-      .ceil((double)iaa.contingencyOverall.observedAgreement * 100);
+            .ceil((double)iaa.contingencyOverall.observedAgreement * 100);
     nPwKa[1] = (int)Math.ceil((double)iaa.contingencyOverall.kappaCohen * 100);
     nPwKa[2] = (int)Math.ceil((double)iaa.contingencyOverall.kappaPi * 100);
 
     iaa.allwayIaaKappa();
     int[] nAwKa = new int[3];
     nAwKa[0] = (int)Math
-      .ceil((double)iaa.contingencyOverall.observedAgreement * 100);
+            .ceil((double)iaa.contingencyOverall.observedAgreement * 100);
     nAwKa[1] = (int)Math.ceil((double)iaa.contingencyOverall.kappaDF * 100);
     nAwKa[2] = (int)Math.ceil((double)iaa.contingencyOverall.kappaSC * 100);
 
@@ -262,8 +282,8 @@ public class TestIaa extends TestCase {
 
   /** Check the numbers. */
   private void checkNumbers(int[] nPwF, int[] nAwF, int[] nPwKa, int[] nAwKa,
-    boolean isSuitable) {
-    switch(caseN){
+          boolean isSuitable) {
+    switch(caseN) {
       case 1:
         assertEquals(nPwF[0], 13);
         assertEquals(nPwF[1], 0);
