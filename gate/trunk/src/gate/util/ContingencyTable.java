@@ -20,29 +20,29 @@ package gate.util;
  */
 public class ContingencyTable {
   /** Number of category. */
-  int numCats;
+  public int numCats;
   /** Number of annotators. */
-  int numJudges;
+  public int numJudges;
   /** Number of annotators. */
   // int numAnnotators;
   /* Confusion matrix. */
-  float[][] confusionMatrix;
+  public float[][] confusionMatrix;
   /** The observed agreement. */
-  float observedAgreement = 0;
+  public float observedAgreement = 0;
   /** Indicate if the agreement is available or not. */
-  boolean isAgreementAvailable = false;
+  public boolean isAgreementAvailable = false;
   /** Cohen's kappa. */
-  float kappaCohen = 0;
+  public float kappaCohen = 0;
   /** Scott's pi or Siegel & Castellan's kappa */
-  float kappaPi = 0;
+  public float kappaPi = 0;
   /** Assignment matrix for computing the all way kappa. */
   float[][] assignmentMatrix;
   /** Davies and Fleiss's extension of Cohen's kappa. */
-  float kappaDF = 0;
+  public float kappaDF = 0;
   /** Extension of Scott's pi for more than two judges. */
-  float kappaSC = 0;
+  public float kappaSC = 0;
   /** Positive and negative specific agreement for each category. */
-  float[][] sAgreements;
+  public float[][] sAgreements;
 
   /** Constructor for pairise case. */
   public ContingencyTable(int numC) {

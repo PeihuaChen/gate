@@ -53,11 +53,11 @@ public class IaaCalculation {
    */
   AnnotationSet[][] annsArrArr;
   /** The overall contingency table. */
-  ContingencyTable contingencyOverall;
+  public ContingencyTable contingencyOverall;
   /** The overall F-measure. */
-  FMeasure fMeasureOverall;
+  public FMeasure fMeasureOverall;
   /** The verbosity level for print the measures. */
-  public int verbosity = 2;
+  int verbosity = 2;
 
   /** Constractor by giving the annotation sets and a list of labels. */
   public IaaCalculation(String nameAnnT, String nameF, String[] labels,
