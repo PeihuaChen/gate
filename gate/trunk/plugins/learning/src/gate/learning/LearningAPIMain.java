@@ -267,6 +267,9 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
             ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
           int numDoc;
           numDoc = endDocIdApp - startDocIdApp;
+          //time bug
+          //Date date1 = new Date();
+          //long time1 = date1.getTime();
           for(int i = startDocIdApp; i < endDocIdApp; ++i) {
             Document toProcess = (Document)corpus.get(i);
             lightWeightApi.annotations2NLPFeatures(toProcess, i-startDocIdApp,
@@ -280,6 +283,13 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
           outNLPFeatures.close();
           lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
             learningSettings);
+//        time bug
+          //Date date2 = new Date();
+          //long time2 = date2.getTime();
+          //time1 = time2 - time1;
+          //System.out.println("docName="+document.getName());
+          //System.out.println("time for getting NLP features is "+time1);
+          
           /** Open the normal NLP feature file. */
           inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
             ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
@@ -289,11 +299,24 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
           inNLPFeatures.close();
           outFeatureVectors.flush();
           outFeatureVectors.close();
+//        time bug
+          //Date date3 = new Date();
+          //long time3 = date3.getTime();
+          //time2 = time3 - time2;
+          //System.out.println("time for getting feature vector is "+time2);
+          
           // Applying th model
           String fvFileName = wdResults.toString() + File.separator
           + ConstantParameters.FILENAMEOFFeatureVectorDataApp;
           lightWeightApi.applyModelInJava(corpus, startDocIdApp, endDocIdApp, classTypeOriginal,
             learningSettings, fvFileName);
+          
+//        time bug
+          //Date date4 = new Date();
+          //long time4 = date4.getTime();
+          //time3 = time4 - time3;
+          //System.out.println("time for applying models is "+time3);
+          
           
           startDocIdApp = endDocIdApp;
           
