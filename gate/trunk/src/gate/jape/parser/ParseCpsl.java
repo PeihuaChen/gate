@@ -69,11 +69,26 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   protected void appendAnnotationAdd(StringBuffer blockBuffer, String newAnnotType, String annotSetName)
   {
       String nl = Strings.getNl();
-      blockBuffer.append("      annotations.add(" + nl);
-      blockBuffer.append("        " + annotSetName + ".firstNode(), ");
+      blockBuffer.append("      if(outputAS == inputAS) { // use nodes directly" + nl);
+      blockBuffer.append("        outputAS.add(" + nl);
+      blockBuffer.append("          " + annotSetName + ".firstNode(), ");
       blockBuffer.append(annotSetName + ".lastNode(), " + nl);
-      blockBuffer.append("        \"" + newAnnotType + "\", features" + nl);
-      blockBuffer.append("      );" + nl);
+      blockBuffer.append("          \"" + newAnnotType + "\", features" + nl);
+      blockBuffer.append("        );" + nl);
+      blockBuffer.append("      }" + nl);
+      blockBuffer.append("      else { // use offsets" + nl);
+      blockBuffer.append("        try {" + nl);
+      blockBuffer.append("          outputAS.add(" + nl);
+      blockBuffer.append("            " + annotSetName + ".firstNode().getOffset(), ");
+      blockBuffer.append(annotSetName + ".lastNode().getOffset(), " + nl);
+      blockBuffer.append("            \"" + newAnnotType + "\", features" + nl);
+      blockBuffer.append("          );" + nl);
+      blockBuffer.append("        }" + nl);
+      blockBuffer.append("        catch(InvalidOffsetException ioe) {" + nl);
+      blockBuffer.append("          throw new LuckyException(\"Invalid offset exception generated \" +" + nl);
+      blockBuffer.append("               \"from offsets taken from same document!\");" + nl);
+      blockBuffer.append("        }" + nl);
+      blockBuffer.append("      }" + nl);
       blockBuffer.append("      // end of RHS assignment block");
   }
 
@@ -1118,6 +1133,47 @@ existingAttrName + "\");" + nl +
     finally { jj_save(1, xla); }
   }
 
+  final private boolean jj_3R_20() {
+    if (jj_scan_token(string)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_18() {
+    if (jj_scan_token(leftBracket)) return true;
+    if (jj_3R_21()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_23() {
+    if (jj_3R_12()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_16() {
+    if (jj_3R_18()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_21() {
+    Token xsp;
+    if (jj_3R_23()) return true;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_23()) { jj_scanpos = xsp; break; }
+    }
+    return false;
+  }
+
+  final private boolean jj_3R_15() {
+    if (jj_3R_17()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_14() {
+    if (jj_scan_token(ident)) return true;
+    return false;
+  }
+
   final private boolean jj_3R_19() {
     if (jj_scan_token(leftBrace)) return true;
     if (jj_3R_22()) return true;
@@ -1174,47 +1230,6 @@ existingAttrName + "\");" + nl +
     if (jj_scan_token(colon)) return true;
     if (jj_scan_token(ident)) return true;
     if (jj_scan_token(leftBrace)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_20() {
-    if (jj_scan_token(string)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_18() {
-    if (jj_scan_token(leftBracket)) return true;
-    if (jj_3R_21()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_23() {
-    if (jj_3R_12()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_16() {
-    if (jj_3R_18()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_21() {
-    Token xsp;
-    if (jj_3R_23()) return true;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_23()) { jj_scanpos = xsp; break; }
-    }
-    return false;
-  }
-
-  final private boolean jj_3R_15() {
-    if (jj_3R_17()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_14() {
-    if (jj_scan_token(ident)) return true;
     return false;
   }
 
