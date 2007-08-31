@@ -96,11 +96,26 @@ public class ParseCpsl implements JapeConstants {
   protected void appendAnnotationAdd(StringBuffer blockBuffer, String newAnnotType, String annotSetName)
   {
       String nl = Strings.getNl();
-      blockBuffer.append("      annotations.add(" + nl);
-      blockBuffer.append("        " + annotSetName + ".firstNode(), ");
+      blockBuffer.append("      if(outputAS == inputAS) { // use nodes directly" + nl);
+      blockBuffer.append("        outputAS.add(" + nl);
+      blockBuffer.append("          " + annotSetName + ".firstNode(), ");
       blockBuffer.append(annotSetName + ".lastNode(), " + nl);
-      blockBuffer.append("        \"" + newAnnotType + "\", features" + nl);
-      blockBuffer.append("      );" + nl);
+      blockBuffer.append("          \"" + newAnnotType + "\", features" + nl);
+      blockBuffer.append("        );" + nl);
+      blockBuffer.append("      }" + nl);
+      blockBuffer.append("      else { // use offsets" + nl);
+      blockBuffer.append("        try {" + nl);
+      blockBuffer.append("          outputAS.add(" + nl);
+      blockBuffer.append("            " + annotSetName + ".firstNode().getOffset(), ");
+      blockBuffer.append(annotSetName + ".lastNode().getOffset(), " + nl);
+      blockBuffer.append("            \"" + newAnnotType + "\", features" + nl);
+      blockBuffer.append("          );" + nl);
+      blockBuffer.append("        }" + nl);
+      blockBuffer.append("        catch(InvalidOffsetException ioe) {" + nl);
+      blockBuffer.append("          throw new LuckyException(\"Invalid offset exception generated \" +" + nl);
+      blockBuffer.append("               \"from offsets taken from same document!\");" + nl);
+      blockBuffer.append("        }" + nl);
+      blockBuffer.append("      }" + nl);
       blockBuffer.append("      // end of RHS assignment block");
   }
 
