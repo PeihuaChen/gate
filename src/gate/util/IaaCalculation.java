@@ -54,8 +54,14 @@ public class IaaCalculation {
   AnnotationSet[][] annsArrArr;
   /** The overall contingency table. */
   public ContingencyTable contingencyOverall;
+  /** The contingency table for each pair of annotator. */
+  public ContingencyTable[] contingencyTables=null;
   /** The overall F-measure. */
   public FMeasure fMeasureOverall;
+  /** Fmeaures for each pair of annotator and each label. */
+  public FMeasure[][] fMeasuresPairwiseLabel=null;
+  /** Fmeaures for each pair of annotator and over all labels. */
+  public FMeasure[] fMeasuresPairwise=null;
   /** The verbosity level for print the measures. */
   int verbosity = 2;
 
@@ -121,7 +127,7 @@ public class IaaCalculation {
     // Create one contingency object for each pair of annotators and all labels
     int num1 = numAnnotators * (numAnnotators - 1) / 2; // Number of pairs of
     // annotators
-    ContingencyTable[] contingencyTables = new ContingencyTable[num1];
+    contingencyTables = new ContingencyTable[num1];
     for(int i = 0; i < num1; ++i) {
       contingencyTables[i] = new ContingencyTable(numLabels + 1); // Count the
       // non-label
@@ -144,11 +150,18 @@ public class IaaCalculation {
     for(int i = 0; i < num1; ++i)
       conOverall.add(contingencyTables[i]);
     conOverall.macroAveraged(num1);
+    
+    contingencyOverall = conOverall;
+  }
+  /** Print out the results for pairwise Kappas. */
+  public void printResultsPairwiseIaa() {
     // Print out the results
     if(verbosity >= 1) {
+      int num1 = numAnnotators * (numAnnotators - 1) / 2; // Number of pairs of
+      // annotators
       System.out.println("Overall resutls macro-averaged over " + num1
         + " pairs:");
-      System.out.println(conOverall.printResultsPairwise());
+      System.out.println(contingencyOverall.printResultsPairwise());
       System.out.println("Results for pairwise of annotator:");
       int num11 = 0;
       for(int i = 0; i < numAnnotators; ++i)
@@ -175,10 +188,7 @@ public class IaaCalculation {
           ++num11;
         }
     }
-
-    contingencyOverall = conOverall;
   }
-
   /**
    * Compute the allway kappa, i.e. for more than two annotator, with extended
    * formula.
@@ -273,15 +283,17 @@ public class IaaCalculation {
     // Compute the all way kappa
     contingencyT.computeAllwayKappa(ySum, numInstances, numAgreements,
       numJudgementsCat, isUsingNonlabel);
+    contingencyOverall = contingencyT;
+  }
+  /** Print out the results for allway Kappa. */
+  public void printAllwayIaa() {
     // Print out the results
     if(verbosity >= 1) {
       System.out.println("Overall resutls (allWay) over " + numAnnotators
         + " annotators:");
-      System.out.println(contingencyT.printResultsAllway());
+      System.out.println(contingencyOverall.printResultsAllway());
     }
-    contingencyOverall = contingencyT;
   }
-
   /** Compute the pairwise fmeasure for annotators. */
   public void pairwiseIaaFmeasure() {
     // Create one fmeasure object for each pair of annotators and each label
@@ -329,17 +341,24 @@ public class IaaCalculation {
       }
     }
     fMAve.macroAverage(num1);
-    // Print out the FMeasures for pairwise comparison
+    this.fMeasureOverall = fMAve;
+    this.fMeasuresPairwiseLabel = fMeasures;
+    this.fMeasuresPairwise = fMPair;
+  }
+  /** Print out the results for pairwise F-measures. */
+  public void printResultsPairwiseFmeasures() {
+    //  Print out the FMeasures for pairwise comparison
     if(verbosity >= 1) {
+      int num1 = numAnnotators * (numAnnotators - 1) / 2;
       System.out.println("Fmeasures averaged over " + num1
         + " pairs of annotators.");
-      System.out.println(fMAve.printResults());
+      System.out.println(this.fMeasureOverall.printResults());
       System.out.println("For each pair of annotators:");
       int num11 = 0;
       for(int i = 0; i < numAnnotators; ++i)
         for(int j = i + 1; j < numAnnotators; ++j) {
           System.out.println("(" + i + "," + j + "): "
-            + fMPair[num11].printResults());
+            + this.fMeasuresPairwise[num11].printResults());
           ++num11;
         }
       if(isUsingLabel) {
@@ -351,13 +370,12 @@ public class IaaCalculation {
             for(int j = i + 1; j < numAnnotators; ++j) {
               for(int iL = 0; iL < numLabels; ++iL)
                 System.out.println("(" + i + "," + j + "), label= "
-                  + labelsArr[iL] + ": " + fMeasures[num11][iL].printResults());
+                  + labelsArr[iL] + ": " + this.fMeasuresPairwiseLabel[num11][iL].printResults());
               ++num11;
             }
         }
       }
     }
-    this.fMeasureOverall = fMAve;
   }
 
   /** Compute the fmeasure for annotators against one reference annotations. */
@@ -406,15 +424,22 @@ public class IaaCalculation {
       }
     }
     fMAve.macroAverage(num1);
-    // Print out the FMeasures for pairwise comparison
+    this.fMeasureOverall = fMAve;
+    this.fMeasuresPairwise = fMPair;
+    this.fMeasuresPairwiseLabel = fMeasures;
+  }
+  /** Print out the results for allway F-measures. */
+  public void printResultsAllwayFmeasures() {
+    //  Print out the FMeasures for pairwise comparison
     if(verbosity >= 1) {
+      int num1 = numAnnotators;
       System.out
         .println("F-measures against the reference annotations provided:");
       System.out.println("Macro averaged over " + num1 + " pairs:");
-      System.out.println(fMAve.printResults());
+      System.out.println(this.fMeasureOverall.printResults());
       System.out.println("For each annotator:");
       for(int i = 0; i < numAnnotators; ++i)
-        System.out.println("Annotator " + i + ": " + fMPair[i].printResults());
+        System.out.println("Annotator " + i + ": " + this.fMeasuresPairwise[i].printResults());
       if(isUsingLabel) {
         if(verbosity >= 2) {
           System.out
@@ -422,12 +447,11 @@ public class IaaCalculation {
           for(int i = 0; i < numAnnotators; ++i) {
             for(int iL = 0; iL < numLabels; ++iL)
               System.out.println("Annotator " + i + ", label= " + labelsArr[iL]
-                + ": " + fMeasures[i][iL].printResults());
+                + ": " + this.fMeasuresPairwiseLabel[i][iL].printResults());
           }
         }
       }
     }
-    this.fMeasureOverall = fMAve;
   }
 
   /** Count the f-measure numbers given two annotation set. */
