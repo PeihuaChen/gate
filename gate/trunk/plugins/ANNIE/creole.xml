@@ -347,6 +347,53 @@
 			<ICON>sentence-splitter</ICON>
 		</RESOURCE>
 
+		<!-- creole.xml for RegEx Sentence splitter-->
+		<RESOURCE>
+			<NAME>RegEx Sentence Splitter</NAME>
+			<COMMENT>
+				A sentence splitter based on regular expressions
+			</COMMENT>
+			<CLASS>gate.creole.splitter.RegexSentenceSplitter</CLASS>
+			<PARAMETER COMMENT="The document to be processed"
+				NAME="document" RUNTIME="true">
+				gate.Document
+			</PARAMETER>
+			<PARAMETER NAME="inputASName"
+				COMMENT="The name used for the temporary annotation set"
+				RUNTIME="true" OPTIONAL="true">
+				java.lang.String
+			</PARAMETER>
+			<PARAMETER NAME="outputASName"
+				COMMENT="The name used for the temporary annotation set"
+				RUNTIME="true" OPTIONAL="true">
+				java.lang.String
+			</PARAMETER>
+			<PARAMETER NAME="encoding"
+				COMMENT="The encoding used for reading the definition files"
+				DEFAULT="UTF-8">
+				java.lang.String
+			</PARAMETER>
+			<PARAMETER NAME="internalSplitListURL"
+				DEFAULT="resources/regex-splitter/internal-split-patterns.txt"
+				COMMENT="The URL to the internal splits pattern list"
+				OPTIONAL="false" SUFFIXES="txt">
+				java.net.URL
+			</PARAMETER>
+			<PARAMETER NAME="externalSplitListURL"
+				DEFAULT="resources/regex-splitter/external-split-patterns.txt"
+				COMMENT="The URL to the external splits pattern list"
+				OPTIONAL="false" SUFFIXES="txt">
+				java.net.URL
+			</PARAMETER>
+			<PARAMETER NAME="nonSplitListURL"
+				DEFAULT="resources/regex-splitter/non-split-patterns.txt"
+				COMMENT="The URL to the non splits pattern list"
+				OPTIONAL="false" SUFFIXES="txt">
+				java.net.URL
+			</PARAMETER>			
+			<ICON>sentence-splitter</ICON>
+		</RESOURCE>
+
 		<!-- creole.xml for HepTag (Mark Hepple's POS tagger)-->
 		<RESOURCE>
 			<NAME>ANNIE POS Tagger</NAME>
