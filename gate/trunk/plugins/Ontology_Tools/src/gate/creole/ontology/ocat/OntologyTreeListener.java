@@ -428,20 +428,25 @@ public class OntologyTreeListener extends MouseAdapter {
     if(isClassFeature) {
       newMap.put(gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME,
               ((OResource)node.getSource()).getURI().toString());
+    }
+    else {
+      URI uri = null;
       if(shouldCreateInstance) {
-        if(ontologyTreePanel.getCurrentOntology().getOResourceByName(
-                selectedText) == null) {
-          URI uri = OntologyUtilities.createURI(ontologyTreePanel
+        OResource aResource = ontologyTreePanel.getCurrentOntology().getOResourceByName(selectedText); 
+        if(aResource == null) {
+          uri = OntologyUtilities.createURI(ontologyTreePanel
                   .getCurrentOntology(), selectedText, false);
           ontologyTreePanel.getCurrentOntology().addOInstance(uri,
                   (OClass)node.getSource());
+        } else {
+          uri = aResource.getURI();
         }
+      } else {
+        uri = ((OResource)node.getSource()).getURI();
       }
-
-    }
-    else {
+      
       newMap.put(gate.creole.ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME,
-              ((OResource)node.getSource()).getURI().toString());
+              uri.toString());
     }
 
     String dns = ontologyTreePanel.getCurrentOntology().getDefaultNameSpace();
