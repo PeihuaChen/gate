@@ -910,6 +910,10 @@ public class AnnotationEditor extends AbstractAction {
         boolean isClassAnnotation = item.getSource() instanceof OClass;
         boolean shouldCreateInstance = isClassAnnotation ? (createInstance
                 .isSelected() ? true : false) : false;
+
+        // if user wants to create an instance, it cannot be class annotation and it must be instanceAnnotation 
+        isClassAnnotation = shouldCreateInstance ? false : true;
+        
         Annotation addedAnnotation = ontologyTreePanel.ontoTreeListener
                 .addNewAnnotation(item, applyToAll.isSelected(), null,
                         isClassAnnotation, shouldCreateInstance).get(0);
@@ -992,6 +996,10 @@ public class AnnotationEditor extends AbstractAction {
           boolean isClassAnnotation = item.getSource() instanceof OClass;
           boolean shouldCreateInstance = isClassAnnotation ? (createInstance
                   .isSelected() ? true : false) : false;
+
+          // if user wants to create an instance, it cannot be class annotation and it must be instanceAnnotation 
+          isClassAnnotation = shouldCreateInstance ? false : true;
+          
           Annotation addedAnnotation = ontologyTreePanel.ontoTreeListener
                   .addNewAnnotation(item, false, features, isClassAnnotation,
                           shouldCreateInstance).get(0);
