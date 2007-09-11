@@ -377,8 +377,6 @@ public class OntologyViewer extends AbstractDocumentView implements
       aValue = aName;
     }
 
-    System.out.println(aValue);
-
     if(className2AnnotationList.containsKey(aValue)) {
       ArrayList<Annotation> annotList = className2AnnotationList.get(aValue);
       annotList.add(currentAnnot);
