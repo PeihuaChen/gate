@@ -84,12 +84,9 @@ public class ComboRenderer extends JPanel implements ListCellRenderer {
 			return this;
 		}
     
-    javax.swing.Icon icon = null;
 		String conceptName = item.getSource().toString();
     iconLabel.setVisible(true);
 
-		// if node should be selected
-		boolean selected = ontologyTreePanel.currentOResource2IsSelectedMap.get(conceptName).booleanValue();
     if(item.getSource() instanceof OClass) {
       iconLabel.setIcon(MainFrame.getIcon("ontology-class"));
     } else if(item.getSource() instanceof OInstance){

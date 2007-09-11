@@ -117,9 +117,15 @@ public class CheckRenderer extends JPanel implements TreeCellRenderer {
       iconLabel.setVisible(true);
     }
 
+    Boolean bValue = ontologyTreePanel.currentOResource2IsSelectedMap.get(conceptName);
+    if(bValue == null) {
+      bValue = new Boolean(false);
+      ontologyTreePanel.currentOResource2IsSelectedMap.put(conceptName, bValue);
+    }
+    
     // if node should be selected
-    boolean selected = ontologyTreePanel.currentOResource2IsSelectedMap.get(
-            conceptName).booleanValue();
+    boolean selected = bValue.booleanValue();
+    
     check.setSelected(selected);
     if(node.getSource() instanceof OClass) {
       iconLabel.setIcon(MainFrame.getIcon("ontology-class"));
