@@ -1,8 +1,14 @@
 /*
- * Created on Mar 23, 2004
+ *  Copyright (c) 1998-2007, The University of Sheffield.
  *
- * To change the template for this generated file go to
- * Window - Preferences - Java - Code Generation - Code and Comments
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Valentin Tablan, Mar 23, 2004
+ *
+ *  $Id$
  */
 package gate.gui.docview;
 
@@ -26,6 +32,7 @@ import gate.event.*;
 import gate.event.DocumentEvent;
 import gate.event.DocumentListener;
 import gate.gui.*;
+import gate.gui.annedit.SchemaAnnotationEditor;
 import gate.swing.ColorGenerator;
 import gate.swing.XJTable;
 import gate.util.*;
@@ -153,9 +160,10 @@ public class AnnotationSetsView extends AbstractDocumentView
    * @param asView
    * @return
    */
-  protected AnnotationEditor createAnnotationEditor(TextualDocumentView textView,
+  protected gate.gui.annedit.AnnotationEditor createAnnotationEditor(TextualDocumentView textView,
           AnnotationSetsView asView) {
     return new AnnotationEditor(textView, asView);
+//    return new SchemaAnnotationEditor(textView);
   }
   
   protected void populateUI(){
@@ -221,7 +229,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected void registerHooks(){
     textPane.addMouseListener(textMouseListener);
     textPane.addMouseMotionListener(textMouseListener);
-    textPane.addAncestorListener(textAncestorListener);
+//    textPane.addAncestorListener(textAncestorListener);
     restoreSelectedTypes();
   }
 
@@ -234,7 +242,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected void unregisterHooks(){
     textPane.removeMouseListener(textMouseListener);
     textPane.removeMouseMotionListener(textMouseListener);
-    textPane.removeAncestorListener(textAncestorListener);
+//    textPane.removeAncestorListener(textAncestorListener);
     storeSelectedTypes();
   }
   
@@ -331,24 +339,6 @@ public class AnnotationSetsView extends AbstractDocumentView
             mouseStoppedMovingAction);
     mouseMovementTimer.setRepeats(false);
     textMouseListener = new TextMouseListener();
-    textAncestorListener = new AncestorListener(){
-      public void ancestorAdded(AncestorEvent event){
-        if(wasShowing) annotationEditor.show(false);
-        wasShowing = false;
-      }
-      
-      public void ancestorRemoved(AncestorEvent event){
-        if(annotationEditor.isShowing()){
-          wasShowing = true;
-          annotationEditor.hide();
-        }
-      }
-      
-      public void ancestorMoved(AncestorEvent event){
-        
-      }
-      private boolean wasShowing = false; 
-    };
     
     mainTable.getInputMap().put(
             KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "deleteAll");
@@ -1303,8 +1293,8 @@ public class AnnotationSetsView extends AbstractDocumentView
 	        //make sure new annotation is visible
 	        setTypeSelected(set.getName(), ann.getType(), true);
 	        //show the editor
-	        annotationEditor.setAnnotation(ann, set);
-	        annotationEditor.show(true);
+	        annotationEditor.editAnnotation(ann, set);
+//	        annotationEditor.show(true);
         }catch(InvalidOffsetException ioe){
           //this should never happen
           throw new GateRuntimeException(ioe);
@@ -1676,8 +1666,6 @@ public class AnnotationSetsView extends AbstractDocumentView
     }
     
     public void actionPerformed(ActionEvent evt){
-      annotationEditor.setAnnotation(aHandler.ann, aHandler.set);
-      
       //select the annotation being edited in the tabular view
       if(listView != null && listView.isActive() &&
               listView.getGUI().isVisible()){
@@ -1688,7 +1676,8 @@ public class AnnotationSetsView extends AbstractDocumentView
           listView.selectAnnotationForTag(tag);
         }
       }
-      annotationEditor.show(true);
+      annotationEditor.editAnnotation(aHandler.ann, aHandler.set);
+//      annotationEditor.show(true);
     }
     
     AnnotationHandler aHandler;
@@ -1738,7 +1727,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   TextualDocumentView textView;
   AnnotationListView listView;
   JTextArea textPane;
-  AnnotationEditor annotationEditor;
+  gate.gui.annedit.AnnotationEditor annotationEditor;
   NewAnnotationSetAction newSetAction;
   
   /**
@@ -1762,7 +1751,6 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected Queue<GateEvent> pendingEvents;
   
   private static final int MOUSE_MOVEMENT_TIMER_DELAY = 500;
-  protected AncestorListener textAncestorListener; 
   protected MouseStoppedMovingAction mouseStoppedMovingAction;
   
   protected String lastAnnotationType = "_New_";

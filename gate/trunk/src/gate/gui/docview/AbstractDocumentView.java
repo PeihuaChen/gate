@@ -99,6 +99,20 @@ public abstract class AbstractDocumentView extends AbstractResource
   }
   
   /**
+   * @return the handle
+   */
+  public Handle getHandle() {
+    return handle;
+  }
+
+  /**
+   * @return the owner
+   */
+  public DocumentEditor getOwner() {
+    return owner;
+  }
+
+  /**
    * Implementers should override this method and use it for populating the GUI. 
    *
    */

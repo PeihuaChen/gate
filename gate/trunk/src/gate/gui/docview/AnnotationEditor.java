@@ -22,6 +22,8 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.border.LineBorder;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 import javax.swing.text.BadLocationException;
 
 import gate.*;
@@ -32,15 +34,13 @@ import gate.event.CreoleListener;
 import gate.gui.FeaturesSchemaEditor;
 import gate.gui.MainFrame;
 import gate.util.*;
-import gate.util.GateException;
-import gate.util.GateRuntimeException;
 
 
 /**
  * @author Valentin Tablan
  *
  */
-public class AnnotationEditor{
+public class AnnotationEditor implements gate.gui.annedit.AnnotationEditor{
   /**
    * 
    */
@@ -218,7 +218,7 @@ public class AnnotationEditor{
           set.add(oldId, oldAnn.getStartNode().getOffset(), 
                   oldAnn.getEndNode().getOffset(), 
                   newType, oldAnn.getFeatures());
-          setAnnotation(set.get(oldId), set);
+          editAnnotation(set.get(oldId), set);
           
           setsView.setTypeSelected(set.getName(), newType, true);
           setsView.setLastAnnotationType(newType);
@@ -246,10 +246,28 @@ public class AnnotationEditor{
       }
     });
     hideTimer.setRepeats(false);
-    
+   
+    AncestorListener textAncestorListener = new AncestorListener(){
+      public void ancestorAdded(AncestorEvent event){
+        if(wasShowing) show(false);
+        wasShowing = false;
+      }
+      
+      public void ancestorRemoved(AncestorEvent event){
+        if(isShowing()){
+          wasShowing = true;
+          hide();
+        }
+      }
+      
+      public void ancestorMoved(AncestorEvent event){
+      }
+      private boolean wasShowing = false; 
+    };
+    textPane.addAncestorListener(textAncestorListener);
   }
   
-  public void setAnnotation(Annotation ann, AnnotationSet set){
+  public void editAnnotation(Annotation ann, AnnotationSet set){
    this.ann = ann;
    this.set = set;
    //repopulate the types combo
@@ -265,6 +283,7 @@ public class AnnotationEditor{
    featuresEditor.setSchema((AnnotationSchema)schemasByType.get(annType));
    featuresEditor.setTargetFeatures(ann.getFeatures());
    bottomWindow.doLayout();
+   show(true);
   }
   
   public boolean isShowing(){
@@ -352,7 +371,7 @@ public class AnnotationEditor{
     set.remove(oldAnnotation);
     set.add(oldID, newStartOffset, newEndOffset,
             oldAnnotation.getType(), oldAnnotation.getFeatures());
-    setAnnotation(set.get(oldID), set);
+    editAnnotation(set.get(oldID), set);
     AnnotationSetsView.TypeHandler newHandler = setsView.getTypeHandler(
             set.getName(), oldAnnotation.getType());
     
