@@ -26,6 +26,8 @@ import java.util.*;
 import java.util.List;
 
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.JTextComponent;
 
 import gate.*;
 import gate.creole.*;
@@ -33,17 +35,133 @@ import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
 import gate.gui.docview.TextualDocumentView;
 import gate.util.GateException;
+import gate.util.GateRuntimeException;
 
 public class SchemaAnnotationEditor extends JPanel implements AnnotationEditor{
 
+  private class TypeButtonListener implements ActionListener{
+    public void actionPerformed(ActionEvent e) {
+      String annType = ((AbstractButton)e.getSource()).getText();
+      //find the right editor
+      SchemaFeaturesEditor aFeaturesEditor = featureEditorsByType.get(annType);
+      if(aFeaturesEditor != null){
+        featuresBox.removeAll();
+        featuresBox.add(aFeaturesEditor);
+        SchemaAnnotationEditor.this.revalidate();
+        if(dialog != null) dialog.pack();
+      }
+    }
+  }
+  
+  /**
+   * A panel with a flow layout used for flows of buttons.
+   */
+  private class FlowPanel extends JPanel{
+    public FlowPanel(){
+      setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+    }
+
+    /* (non-Javadoc)
+     * @see javax.swing.JComponent#getPreferredSize()
+     */
+    @Override
+    public Dimension getPreferredSize() {
+      Dimension size = super.getPreferredSize();
+      if(size.width > MAX_WIDTH){
+        setSize(MAX_WIDTH, Integer.MAX_VALUE);
+        doLayout();
+        int compCnt = getComponentCount();
+        if(compCnt > 0){
+          Component lastComp = getComponent(compCnt -1);
+          Point compLoc = lastComp.getLocation();
+          Dimension compSize = lastComp.getSize();
+          size.width = MAX_WIDTH;
+          size.height = compLoc.y + compSize.height;
+        }
+      }
+      return size;
+    }
+    
+    /**
+     * An arbitrary value for the maximum width.
+     */
+    private static final int MAX_WIDTH = 500;
+  }
+  
   /* (non-Javadoc)
    * @see gate.gui.annedit.AnnotationEditor#editAnnotation(gate.Annotation, gate.AnnotationSet)
    */
   public void editAnnotation(Annotation ann, AnnotationSet set) {
     this.annotation = ann;
     this.annSet = set;
+//System.out.println("Editing: " + ann.getType() + ", id: " + ann.getId());    
+    String annType = ann.getType();
+    Enumeration<AbstractButton> typBtnEnum = annTypesBtnGroup.getElements();
+    while(typBtnEnum.hasMoreElements()){
+      AbstractButton aBtn = typBtnEnum.nextElement();
+      if(aBtn.getText().equals(annType)){
+        aBtn.doClick();
+        break;
+      }
+    }
+    SchemaFeaturesEditor fEdit = featureEditorsByType.get(annType);
+    if(fEdit != null) fEdit.editFeatureMap(ann.getFeatures());
+    if(dialog != null){
+      placeDialog();
+    }
   }
 
+  /**
+   * Finds the best location for the editor dialog
+   */
+  protected void placeDialog(){
+    //calculate position
+    try{
+      Rectangle startRect = textPane.modelToView(annotation.getStartNode().
+        getOffset().intValue());
+      Rectangle endRect = textPane.modelToView(annotation.getEndNode().
+            getOffset().intValue());
+      Point topLeft = textPane.getLocationOnScreen();
+      int x = topLeft.x + startRect.x;
+      int y = topLeft.y + endRect.y + endRect.height;
+
+      //make sure the window doesn't start lower 
+      //than the end of the visible rectangle
+      Rectangle visRect = textPane.getVisibleRect();
+      int maxY = topLeft.y + visRect.y + visRect.height;      
+      
+      //make sure window doesn't get off-screen
+      dialog.pack();
+      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+      boolean revalidate = false;
+      if(dialog.getSize().width > screenSize.width){
+        dialog.setSize(screenSize.width, dialog.getSize().height);
+        revalidate = true;
+      }
+      if(dialog.getSize().height > screenSize.height){
+        dialog.setSize(dialog.getSize().width, screenSize.height);
+        revalidate = true;
+      }
+      
+      if(revalidate) dialog.validate();
+      //calculate max X
+      int maxX = screenSize.width - dialog.getSize().width;
+      //calculate max Y
+      if(maxY + dialog.getSize().height > screenSize.height){
+        maxY = screenSize.height - dialog.getSize().height;
+      }
+      
+      //correct position
+      if(y > maxY) y = maxY;
+      if(x > maxX) x = maxX;
+      dialog.setLocation(x, y);
+      if(!dialog.isVisible()) dialog.setVisible(true);
+    }catch(BadLocationException ble){
+      //this should never occur
+      throw new GateRuntimeException(ble);
+    }
+  }
+  
   /**
    * The annotation currently being edited.
    */
@@ -58,6 +176,18 @@ public class SchemaAnnotationEditor extends JPanel implements AnnotationEditor{
    * The textual view controlling this annotation editor.
    */
   protected TextualDocumentView textView;
+  
+  protected JTextComponent textPane;
+  
+  /**
+   * The dialog used to show this annotation editor.
+   */
+  protected JDialog dialog;
+  
+  /**
+   * The common listener for all type buttons.
+   */
+  protected TypeButtonListener typeButtonListener;
   
   protected CreoleListener creoleListener;
   /**
@@ -77,12 +207,20 @@ public class SchemaAnnotationEditor extends JPanel implements AnnotationEditor{
   protected ButtonGroup annTypesBtnGroup;
   
 
+  protected Box featuresBox;
   
   public SchemaAnnotationEditor(TextualDocumentView textView){
     super();
     this.textView = textView;
     initData();
     initGui();
+    
+//    JToolBar tBar = new JToolBar("Annotation Editor", JToolBar.HORIZONTAL);
+//    tBar.add(this);
+//    tBar.setFloatable(true);
+//    if(textView != null && textView.getOwner() != null){
+//      textView.getOwner().add(tBar, BorderLayout.SOUTH);
+//    }
   }
   
   protected void initData(){
@@ -135,35 +273,18 @@ public class SchemaAnnotationEditor extends JPanel implements AnnotationEditor{
   
   protected void initGui(){
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+//    setLayout(new FlowLayout());
+//    setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
     annTypesBtnGroup = new ButtonGroup();
     featureEditorsByType = new HashMap<String, SchemaFeaturesEditor>();
+    typeButtonListener = new TypeButtonListener();
     
-    ActionListener typeButtonsListener = new ActionListener(){
-
-      public void actionPerformed(ActionEvent e) {
-        String annType = ((AbstractButton)e.getSource()).getText();
-System.out.println(annType + " selected!");
-        //find the right editor
-        SchemaFeaturesEditor aFeaturesEditor = featureEditorsByType.get(annType);
-        if(aFeaturesEditor != null){
-          remove(1);
-          add(aFeaturesEditor);
-          SchemaAnnotationEditor.this.validate();
-          SchemaAnnotationEditor.this.setMinimumSize(getPreferredSize());
-
-          SchemaAnnotationEditor.this.invalidate();
-          SchemaAnnotationEditor.this.getParent().doLayout();
-//          invalidate();
-//          validate();
-        }
-      }
-    };
-    
-    JPanel buttonsPane = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+    JPanel buttonsPane = new FlowPanel();
+    buttonsPane.setAlignmentX(Component.LEFT_ALIGNMENT);
     //for each schema we need to create a type button and a features editor
     for(String annType : schemasByType.keySet()){
       JToggleButton aTypeBtn = new JToggleButton(annType);
-      aTypeBtn.addActionListener(typeButtonsListener);
+      aTypeBtn.addActionListener(typeButtonListener);
       annTypesBtnGroup.add(aTypeBtn);
       buttonsPane.add(aTypeBtn);
       
@@ -172,13 +293,30 @@ System.out.println(annType + " selected!");
       featureEditorsByType.put(annType, aFeaturesEditor);
     }
     add(buttonsPane);
-    if(annTypesBtnGroup.getButtonCount() > 0){
-      AbstractButton aTypeBtn = annTypesBtnGroup.getElements().nextElement();
-      SchemaFeaturesEditor aFeaturesEditor = 
-        featureEditorsByType.get(aTypeBtn.getText());
-      if(aFeaturesEditor != null){
-        add(aFeaturesEditor);
-        aTypeBtn.setSelected(true);
+    featuresBox = Box.createVerticalBox();
+    String boxTitle = "Features "; 
+    featuresBox.setBorder(BorderFactory.createTitledBorder(boxTitle));
+    featuresBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+    JLabel aLabel = new JLabel(boxTitle);
+    featuresBox.setMinimumSize(new Dimension(aLabel.getPreferredSize().width,
+            Integer.MAX_VALUE));
+    add(featuresBox);
+    
+    //make the dialog
+    if(textView != null){
+      textPane = textView.getTextView();
+      Window parentWindow = SwingUtilities.windowForComponent(textView.getGUI());
+      if(parentWindow != null){
+        dialog = parentWindow instanceof Frame ?
+                new JDialog((Frame)parentWindow, 
+                "Annotation Editor Dialog", false) :
+                  new JDialog((Dialog)parentWindow, 
+                          "Annotation Editor Dialog", false);
+        dialog.setFocusableWindowState(false);
+        dialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+        dialog.setResizable(false);
+        dialog.add(this);
+        dialog.pack();
       }
     }
   }
@@ -193,14 +331,22 @@ System.out.println(annType + " selected!");
       
       JFrame aFrame = new JFrame("New Annotation Editor");
       aFrame.setSize( 800, 600);
+      aFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+      
+      JDialog annDialog = new JDialog(aFrame, "Annotation Editor Dialog", false);
+      annDialog.setFocusableWindowState(false);
+//      annDialog.setResizable(false);
+//      annDialog.setUndecorated(true);
       
       SchemaAnnotationEditor pane = new SchemaAnnotationEditor(null);
+      annDialog.add(pane);
+      annDialog.pack();
       
-      JToolBar tBar = new JToolBar("Annotation Editor", JToolBar.HORIZONTAL);
-      tBar.setLayout(new BorderLayout());
-      tBar.setMinimumSize(tBar.getPreferredSize());
-      tBar.add(pane);
-      aFrame.getContentPane().add(tBar, BorderLayout.NORTH);
+//      JToolBar tBar = new JToolBar("Annotation Editor", JToolBar.HORIZONTAL);
+//      tBar.setLayout(new BorderLayout());
+//      tBar.setMinimumSize(tBar.getPreferredSize());
+//      tBar.add(pane);
+//      aFrame.getContentPane().add(tBar, BorderLayout.NORTH);
       
       StringBuffer strBuf = new StringBuffer();
       for(int i = 0; i < 100; i++){
@@ -233,6 +379,9 @@ System.out.println(annType + " selected!");
 //    aBox.add(aFeatEditor.getGui());
       
       aFrame.setVisible(true);
+System.out.println("Window up");
+      annDialog.setVisible(true);
+      System.out.println("Dialog up");      
       
     }catch(HeadlessException e) {
       // TODO Auto-generated catch block
@@ -242,5 +391,12 @@ System.out.println(annType + " selected!");
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
+  }
+
+  /**
+   * @return the dialog
+   */
+  public JDialog getDialog() {
+    return dialog;
   }
 }

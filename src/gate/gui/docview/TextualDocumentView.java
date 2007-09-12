@@ -213,6 +213,9 @@ public class TextualDocumentView extends AbstractDocumentView {
     textView.getDocument().addDocumentListener(new SwingDocumentListener());
     scroller.getViewport().setViewPosition(new Point(0, 0));
     
+//    contentPane = new JPanel(new BorderLayout());
+//    contentPane.add(scroller, BorderLayout.CENTER);
+    
 //    //get a pointer to the annotation list view used to display
 //    //the highlighted annotations 
 //    Iterator horizViewsIter = owner.getHorizontalViews().iterator();
@@ -240,6 +243,7 @@ public class TextualDocumentView extends AbstractDocumentView {
   }
   
   public Component getGUI(){
+//    return contentPane;
     return scroller;
   }
   
@@ -460,9 +464,16 @@ public class TextualDocumentView extends AbstractDocumentView {
   }//class SwingDocumentListener implements javax.swing.event.DocumentListener
 
 
-  
+  /**
+   * The scroll pane holding the text
+   */
   protected JScrollPane scroller;
 //  protected AnnotationListView annotationListView;
+  
+//  /**
+//   * The main panel containing the text scroll in the central location.
+//   */
+//  protected JPanel contentPane;
   
   protected GateDocumentListener gateDocListener;
 
@@ -515,4 +526,11 @@ public class TextualDocumentView extends AbstractDocumentView {
    * The delay used by the highlights minder.
    */
   protected final static int HIGHLIGHT_DELAY = 100;
+
+  /**
+   * @return the textView
+   */
+  public JTextArea getTextView() {
+    return textView;
+  }
 }
