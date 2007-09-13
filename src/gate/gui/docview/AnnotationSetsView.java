@@ -163,7 +163,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected gate.gui.annedit.AnnotationEditor createAnnotationEditor(TextualDocumentView textView,
           AnnotationSetsView asView) {
     return new AnnotationEditor(textView, asView);
-//    return new SchemaAnnotationEditor(textView);
+//    return new SchemaAnnotationEditor(textView, asView);
   }
   
   protected void populateUI(){
@@ -518,7 +518,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     return null;
   }
   
-  protected TypeHandler getTypeHandler(String set, String type){
+  public TypeHandler getTypeHandler(String set, String type){
     SetHandler sHandler = getSetHandler(set);
     TypeHandler tHandler = null;
     Iterator typeIter = sHandler.typeHandlers.iterator();
@@ -555,7 +555,7 @@ public class AnnotationSetsView extends AbstractDocumentView
    * for creating new annotations).
    * @param annType the type of annotation.
    */
-  void setLastAnnotationType(String annType){
+  public void setLastAnnotationType(String annType){
     this.lastAnnotationType = annType;
   }
   
@@ -844,7 +844,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   /**
    * Stores the data related to an annotation set
    */
-  protected class SetHandler{
+  public class SetHandler{
     SetHandler(AnnotationSet set){
       this.set = set;
       typeHandlers = new ArrayList<TypeHandler>();
@@ -971,7 +971,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     private boolean expanded = false;
   }
   
-  protected class TypeHandler{
+  public class TypeHandler{
     TypeHandler (SetHandler setHandler, String name){
       this.setHandler = setHandler;
       this.name = name;
@@ -982,6 +982,13 @@ public class AnnotationSetsView extends AbstractDocumentView
       annotationCount = 0;
     }
     
+    /**
+     * @return the colour
+     */
+    public Color getColour() {
+      return colour;
+    }
+
     public void setColour(Color colour){
       if(this.colour.equals(colour)) return;
       this.colour = colour;

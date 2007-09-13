@@ -16,6 +16,7 @@ package gate.gui.annedit;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.util.*;
@@ -26,6 +27,7 @@ import gate.Factory;
 import gate.FeatureMap;
 import gate.creole.*;
 import gate.event.FeatureMapListener;
+import gate.swing.JChoice;
 
 /**
  * A GUI component for editing a feature map based on a feature schema object.
@@ -39,12 +41,6 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
     nominal, 
     
     /**
-     * Type for features that have a large range of possible values.
-     * This means it's not practical to show the values as a flow of buttons.
-     */
-    nominal_large, 
-    
-    /**
      * Type for boolean features.
      */
     bool, 
@@ -54,7 +50,7 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
      */
     text};
 
-  protected static class FeatureEditor{
+  protected class FeatureEditor{
     
     /**
      * Constructor for nominal features
@@ -65,8 +61,7 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
     public FeatureEditor(String featureName, String[] values, 
             String defaultValue){
       this.featureName = featureName;
-      this.type = values.length <= MAX_BUTTONS_FLOW ? FeatureType.nominal :
-        FeatureType.nominal_large;
+      this.type = FeatureType.nominal;
       this.values = values;
       this.defaultValue = defaultValue;
       buildGui();
@@ -102,41 +97,40 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
      * Builds the GUI according to the internally stored values.
      */
     protected void buildGui(){
+      //prepare the action listener
+      sharedActionListener = new ActionListener(){
+        public void actionPerformed(ActionEvent e) {
+          Object newValue = null;
+          if(e.getSource() == checkbox){
+            newValue = new Boolean(checkbox.isSelected());
+          }else if(e.getSource() == textField){
+            newValue = textField.getText();
+          }else if(e.getSource() == jchoice){
+            newValue = jchoice.getSelectedItem();
+          }
+          featureMap.put(featureName, newValue);
+        }
+      };
       //build the empty shell
       gui = new JPanel();
       gui.setAlignmentX(Component.LEFT_ALIGNMENT);
+      gui.setLayout(new BoxLayout(gui, BoxLayout.LINE_AXIS));
       switch(type) {
         case nominal:
-          gui.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-          //use buttons flow
-          buttonGroup = new ButtonGroup();
-          for(String aValue : values){
-            JToggleButton aButton = new JToggleButton(aValue);
-            buttonGroup.add(aButton);
-            aButton.setSelected(aValue.equals(value) || 
-                    (value == null && aValue.equals(defaultValue)));
-            gui.add(aButton);
-          }
-          break;
-        case nominal_large:
-          gui.setLayout(new BoxLayout(gui, BoxLayout.LINE_AXIS));
-          //use combo-box
-          combobox = new JComboBox(values);
-          if(value != null) combobox.setSelectedItem(value);
-          else if(defaultValue != null) combobox.setSelectedItem(defaultValue);
-          //restrict the height: comboboxes look horible when extended
-          //verticaly
-          combobox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 
-                  combobox.getPreferredSize().height));
-          gui.add(combobox);
+          //use JChoice
+          jchoice = new JChoice(values);
+          jchoice.setSelectedItem(value);
+          jchoice.addActionListener(sharedActionListener);
+          gui.add(jchoice);
           break;
         case bool:
           gui.setLayout(new BoxLayout(gui, BoxLayout.LINE_AXIS));
-          checkBox = new JCheckBox();
+          checkbox = new JCheckBox();
+          checkbox.addActionListener(sharedActionListener);
           if(defaultValue != null){ 
-            checkBox.setSelected(Boolean.parseBoolean(defaultValue));
+            checkbox.setSelected(Boolean.parseBoolean(defaultValue));
           }
-          gui.add(checkBox);
+          gui.add(checkbox);
           break;
         case text:
           gui.setLayout(new BoxLayout(gui, BoxLayout.LINE_AXIS));
@@ -146,16 +140,15 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
           }else if(defaultValue != null){
             textField.setText(defaultValue);
           }
+          textField.addActionListener(sharedActionListener);
           gui.add(textField);          
           break;
       }
     }
     
     protected JTextField textField;
-    protected ButtonGroup buttonGroup;
-    protected JCheckBox checkBox;
-    protected JComboBox combobox;
-    
+    protected JCheckBox checkbox;
+    protected JChoice jchoice;
     
     /**
      * The type of the feature.
@@ -177,6 +170,16 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
      * Permitted values for nominal features. 
      */
     protected String[] values;
+    
+    /**
+     * Is this feature required
+     */
+    protected boolean required;
+    
+    /**
+     * The action listener that acts upon UI actions on nay of the widgets.
+     */
+    protected ActionListener sharedActionListener;
     
     /**
      * Default value as string.
@@ -234,26 +237,18 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
      * @param value
      */
     public void setValue(Object value) {
-      switch(type){
-        case nominal:
-          Enumeration<AbstractButton> btnEnum = buttonGroup.getElements();
-          while(btnEnum.hasMoreElements()){
-            AbstractButton aBtn = btnEnum.nextElement();
-            if(aBtn.getText().equals(value.toString())){
-              aBtn.setSelected(true);
-              break;
-            }
-          }
-          break;
-        case nominal_large:
-          combobox.setSelectedItem(value.toString());
-          break;
-        case bool:
-          checkBox.setSelected(Boolean.parseBoolean(value.toString()));
-          break;
-        case text:
-          textField.setText(value.toString());
-          break;
+      if(value != null){
+        switch(type){
+          case nominal:
+            jchoice.setSelectedItem(value.toString());
+            break;
+          case bool:
+            checkbox.setSelected(Boolean.parseBoolean(value.toString()));
+            break;
+          case text:
+            textField.setText(value.toString());
+            break;
+        }
       }
     }
 
@@ -283,6 +278,20 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
      * opposed to a combo-box). 
      */
     private static final int MAX_BUTTONS_FLOW = 10;
+
+    /**
+     * @return the required
+     */
+    public boolean isRequired() {
+      return required;
+    }
+
+    /**
+     * @param required the required to set
+     */
+    public void setRequired(boolean required) {
+      this.required = required;
+    }
 
   }
   
@@ -399,6 +408,7 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
                     aFeatureSchema.getFeatureValue());
           }
         }
+        anEditor.setRequired(aFeatureSchema.isRequired());
         featureEditors.put(aFeatureName, anEditor);
       }
     }
@@ -406,7 +416,9 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
     for(String featureName : featureEditors.keySet()){
       FeatureEditor featureEditor = featureEditors.get(featureName);
       constraints.gridy = gridy++;
-      JLabel nameLabel = new JLabel(featureName);
+      
+      JLabel nameLabel = new JLabel(featureName + 
+              (featureEditor.isRequired() ? "*: " : ": "));
       add(nameLabel, constraints);
       add(featureEditor.getGui(), constraints);
       //add a horizontal spacer
