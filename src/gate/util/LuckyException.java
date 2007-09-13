@@ -45,6 +45,16 @@ public class LuckyException extends RuntimeException {
     super(message + "\n" + defaultMessage);
   }
 
+  public LuckyException(String message, Throwable cause) {
+    super(message + "\n" + defaultMessage, cause);
+    // TODO Auto-generated constructor stub
+  }
+
+  public LuckyException(Throwable cause) {
+    super(defaultMessage, cause);
+    // TODO Auto-generated constructor stub
+  }
+
   /**The default message carried by this type of exceptions*/
   static String defaultMessage =
     "Congratulations, you found the ONLY bug in GATE!";
