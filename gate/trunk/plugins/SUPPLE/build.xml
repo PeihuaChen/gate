@@ -160,6 +160,7 @@ Ian Roberts (i.roberts@dcs.shef.ac.uk), March 2006
        but not the translated PrologCafe predicates) -->
   <target name="supple.compile" depends="supple.prepare">
     <javac destdir="${classes.dir}" classpathref="compile.classpath"
+           debug="true" debuglevel="lines,source"
            srcdir="${src.dir}" source="1.4"/>
   </target>
 
@@ -220,6 +221,8 @@ Ian Roberts (i.roberts@dcs.shef.ac.uk), March 2006
           depends="supple.jar, plcafe.prepare, plcafe.checkdepends, plcafe.translate">
     <javac destdir="${plcafe.classes.dir}"
            source="1.4"
+           debug="true"
+           debuglevel="lines,source"
            classpathref="prologimpl.compile.classpath">
       <src>
         <pathelement location="${plcafe.src.dir}" />
@@ -278,6 +281,8 @@ Ian Roberts (i.roberts@dcs.shef.ac.uk), March 2006
     <javac destdir="${sicstus.classes.dir}"
            srcdir="${sicstus.src.dir}"
            source="1.4"
+           debug="true"
+           debuglevel="lines,source"
            classpathref="prologimpl.compile.classpath"/>
   </target>
 
@@ -326,6 +331,8 @@ Ian Roberts (i.roberts@dcs.shef.ac.uk), March 2006
     <javac destdir="${swi.classes.dir}"
            srcdir="${swi.src.dir}"
            source="1.4"
+           debug="true"
+           debuglevel="lines,source"
            classpathref="prologimpl.compile.classpath"/>
   </target>
 
