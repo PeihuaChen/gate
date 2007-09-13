@@ -29,64 +29,19 @@ import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 
+import sun.rmi.runtime.NewThreadAction;
+
 import gate.*;
 import gate.creole.*;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
+import gate.gui.MainFrame;
+import gate.gui.docview.AnnotationSetsView;
 import gate.gui.docview.TextualDocumentView;
-import gate.util.GateException;
-import gate.util.GateRuntimeException;
+import gate.swing.JChoice;
+import gate.util.*;
 
 public class SchemaAnnotationEditor extends JPanel implements AnnotationEditor{
-
-  private class TypeButtonListener implements ActionListener{
-    public void actionPerformed(ActionEvent e) {
-      String annType = ((AbstractButton)e.getSource()).getText();
-      //find the right editor
-      SchemaFeaturesEditor aFeaturesEditor = featureEditorsByType.get(annType);
-      if(aFeaturesEditor != null){
-        featuresBox.removeAll();
-        featuresBox.add(aFeaturesEditor);
-        SchemaAnnotationEditor.this.revalidate();
-        if(dialog != null) dialog.pack();
-      }
-    }
-  }
-  
-  /**
-   * A panel with a flow layout used for flows of buttons.
-   */
-  private class FlowPanel extends JPanel{
-    public FlowPanel(){
-      setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-    }
-
-    /* (non-Javadoc)
-     * @see javax.swing.JComponent#getPreferredSize()
-     */
-    @Override
-    public Dimension getPreferredSize() {
-      Dimension size = super.getPreferredSize();
-      if(size.width > MAX_WIDTH){
-        setSize(MAX_WIDTH, Integer.MAX_VALUE);
-        doLayout();
-        int compCnt = getComponentCount();
-        if(compCnt > 0){
-          Component lastComp = getComponent(compCnt -1);
-          Point compLoc = lastComp.getLocation();
-          Dimension compSize = lastComp.getSize();
-          size.width = MAX_WIDTH;
-          size.height = compLoc.y + compSize.height;
-        }
-      }
-      return size;
-    }
-    
-    /**
-     * An arbitrary value for the maximum width.
-     */
-    private static final int MAX_WIDTH = 500;
-  }
   
   /* (non-Javadoc)
    * @see gate.gui.annedit.AnnotationEditor#editAnnotation(gate.Annotation, gate.AnnotationSet)
@@ -96,16 +51,19 @@ public class SchemaAnnotationEditor extends JPanel implements AnnotationEditor{
     this.annSet = set;
 //System.out.println("Editing: " + ann.getType() + ", id: " + ann.getId());    
     String annType = ann.getType();
-    Enumeration<AbstractButton> typBtnEnum = annTypesBtnGroup.getElements();
-    while(typBtnEnum.hasMoreElements()){
-      AbstractButton aBtn = typBtnEnum.nextElement();
-      if(aBtn.getText().equals(annType)){
-        aBtn.doClick();
-        break;
+    SchemaFeaturesEditor newFeaturesEditor = featureEditorsByType.get(annType);
+    //if new type, we need to change the features editor and selected type 
+    //button
+    if(!featuresBox.isAncestorOf(newFeaturesEditor)){
+      typesChoice.setSelectedItem(ann.getType());
+      if(featuresBox.getComponentCount() > 1)  featuresBox.remove(1);
+      if(newFeaturesEditor != null){
+        featuresBox.add(newFeaturesEditor, 1);
       }
     }
-    SchemaFeaturesEditor fEdit = featureEditorsByType.get(annType);
-    if(fEdit != null) fEdit.editFeatureMap(ann.getFeatures());
+    if(newFeaturesEditor != null){
+      newFeaturesEditor.editFeatureMap(ann.getFeatures());
+    }
     if(dialog != null){
       placeDialog();
     }
@@ -162,6 +120,11 @@ public class SchemaAnnotationEditor extends JPanel implements AnnotationEditor{
     }
   }
   
+  protected static final int HIDE_DELAY = 1500;
+  protected static final int SHIFT_INCREMENT = 5;
+  protected static final int CTRL_SHIFT_INCREMENT = 10;
+
+  
   /**
    * The annotation currently being edited.
    */
@@ -177,17 +140,27 @@ public class SchemaAnnotationEditor extends JPanel implements AnnotationEditor{
    */
   protected TextualDocumentView textView;
   
+  
+  /**
+   * Pointer to the AnnotationSetsView that controls this e3itor.
+   */
+  protected AnnotationSetsView setsView;
+  
+  /**
+   * A pointer to the actual text component in the document editor. This is
+   * ised for finding the location of the annotations on screen.
+   */
   protected JTextComponent textPane;
+  
+  /**
+   * JChoice used for selecting the annotation type.
+   */
+  protected JChoice typesChoice;
   
   /**
    * The dialog used to show this annotation editor.
    */
   protected JDialog dialog;
-  
-  /**
-   * The common listener for all type buttons.
-   */
-  protected TypeButtonListener typeButtonListener;
   
   protected CreoleListener creoleListener;
   /**
@@ -202,16 +175,16 @@ public class SchemaAnnotationEditor extends JPanel implements AnnotationEditor{
   protected Map<String, SchemaFeaturesEditor> featureEditorsByType;
   
   /**
-   * Button group for selecting the annotation type.
+   * The box used to host the features editor pane.
    */
-  protected ButtonGroup annTypesBtnGroup;
-  
-
   protected Box featuresBox;
   
-  public SchemaAnnotationEditor(TextualDocumentView textView){
+  
+  public SchemaAnnotationEditor(TextualDocumentView textView, 
+          AnnotationSetsView asView){
     super();
     this.textView = textView;
+    this.setsView = asView; 
     initData();
     initGui();
     
@@ -272,35 +245,91 @@ public class SchemaAnnotationEditor extends JPanel implements AnnotationEditor{
   }
   
   protected void initGui(){
-    setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-//    setLayout(new FlowLayout());
-//    setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-    annTypesBtnGroup = new ButtonGroup();
-    featureEditorsByType = new HashMap<String, SchemaFeaturesEditor>();
-    typeButtonListener = new TypeButtonListener();
+    setLayout(new BorderLayout());
+    //build the toolbar
+    JPanel tBar = new JPanel();
+    tBar.setLayout(new GridBagLayout());
+//    tBar.setMargin(new Insets(0, 0, 0, 0));
+//    tBar.setFloatable(false);
+//    tBar.setBorderPainted(false);
+//    tBar.setBorder(null);
+    GridBagConstraints constraints = new GridBagConstraints();
+    constraints.gridx = GridBagConstraints.RELATIVE;
+    constraints.gridy = 0;
+    constraints.weightx = 0;
+    tBar.add(new SmallButton(new StartOffsetLeftAction()), constraints);
+    tBar.add(Box.createHorizontalStrut(5), constraints);
+    tBar.add(new SmallButton(new StartOffsetRightAction()), constraints);
+    constraints.weightx = 1;
+    tBar.add(Box.createHorizontalGlue(), constraints);
+    constraints.weightx = 0;
+    tBar.add(new SmallButton(new DeleteAnnotationAction()), constraints);
+    constraints.weightx = 1;
+    tBar.add(Box.createHorizontalGlue(), constraints);
+    constraints.weightx = 0;
+    tBar.add(new SmallButton(new EndOffsetLeftAction()), constraints);
+    tBar.add(Box.createHorizontalStrut(5), constraints);
+    tBar.add(new SmallButton(new EndOffsetRightAction()), constraints);
+    add(tBar, BorderLayout.NORTH);
     
-    JPanel buttonsPane = new FlowPanel();
-    buttonsPane.setAlignmentX(Component.LEFT_ALIGNMENT);
+    //build the main pane
+    JPanel mainPane = new JPanel();
+    mainPane.setLayout(new BoxLayout(mainPane, BoxLayout.Y_AXIS));
+    add(mainPane, BorderLayout.CENTER);
+    
+    featureEditorsByType = new HashMap<String, SchemaFeaturesEditor>();
     //for each schema we need to create a type button and a features editor
     for(String annType : schemasByType.keySet()){
-      JToggleButton aTypeBtn = new JToggleButton(annType);
-      aTypeBtn.addActionListener(typeButtonListener);
-      annTypesBtnGroup.add(aTypeBtn);
-      buttonsPane.add(aTypeBtn);
-      
       AnnotationSchema annSchema = schemasByType.get(annType);
       SchemaFeaturesEditor aFeaturesEditor = new SchemaFeaturesEditor(annSchema);
       featureEditorsByType.put(annType, aFeaturesEditor);
     }
-    add(buttonsPane);
-    featuresBox = Box.createVerticalBox();
-    String boxTitle = "Features "; 
-    featuresBox.setBorder(BorderFactory.createTitledBorder(boxTitle));
-    featuresBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-    JLabel aLabel = new JLabel(boxTitle);
-    featuresBox.setMinimumSize(new Dimension(aLabel.getPreferredSize().width,
+    List<String> typeList = new ArrayList<String>(schemasByType.keySet());
+    Collections.sort(typeList);
+    String[] typesArray = new String[typeList.size()];
+    typeList.toArray(typesArray);
+    typesChoice = new JChoice(typesArray);
+    typesChoice.setMaximumFastChoices(20);
+    typesChoice.setMaximumWidth(500);
+    typesChoice.setAlignmentX(Component.LEFT_ALIGNMENT);
+    String aTitle = "Type ";
+    typesChoice.setBorder(BorderFactory.createTitledBorder(aTitle));
+    JLabel aLabel = new JLabel(aTitle);
+    typesChoice.setMinimumSize(new Dimension(aLabel.getPreferredSize().width,
             Integer.MAX_VALUE));
-    add(featuresBox);
+    typesChoice.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e) {
+        String newType = typesChoice.getSelectedItem().toString();
+        if(annotation != null && annSet != null && 
+                !annotation.getType().equals(newType)){
+          //annotation type change
+          Integer oldId = annotation.getId();
+          Annotation oldAnn = annotation;
+          annSet.remove(oldAnn);
+          try{
+            annSet.add(oldId, oldAnn.getStartNode().getOffset(), 
+                    oldAnn.getEndNode().getOffset(), 
+                    newType, oldAnn.getFeatures());
+            editAnnotation(annSet.get(oldId), annSet);
+            
+            setsView.setTypeSelected(annSet.getName(), newType, true);
+            setsView.setLastAnnotationType(newType);
+          }catch(InvalidOffsetException ioe){
+            //this should never hapen 
+            throw new LuckyException(ioe);
+          }
+        }
+      }
+    });
+    mainPane.add(typesChoice);
+    featuresBox = Box.createVerticalBox();
+    aTitle = "Features "; 
+    featuresBox.setBorder(BorderFactory.createTitledBorder(aTitle));
+    featuresBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+    aLabel = new JLabel(aTitle);
+    featuresBox.add(Box.createRigidArea(
+            new Dimension(aLabel.getPreferredSize().width, 0)));
+    mainPane.add(featuresBox);
     
     //make the dialog
     if(textView != null){
@@ -338,7 +367,7 @@ public class SchemaAnnotationEditor extends JPanel implements AnnotationEditor{
 //      annDialog.setResizable(false);
 //      annDialog.setUndecorated(true);
       
-      SchemaAnnotationEditor pane = new SchemaAnnotationEditor(null);
+      SchemaAnnotationEditor pane = new SchemaAnnotationEditor(null, null);
       annDialog.add(pane);
       annDialog.pack();
       
@@ -398,5 +427,189 @@ System.out.println("Window up");
    */
   public JDialog getDialog() {
     return dialog;
+  }
+  
+  /**
+   * Base class for actions on annotations.
+   */
+  protected abstract class AnnotationAction extends AbstractAction{
+    public AnnotationAction(String name, Icon icon){
+      super("", icon);
+      putValue(SHORT_DESCRIPTION, name);
+      
+    }
+  }
+
+  protected class StartOffsetLeftAction extends AnnotationAction{
+    public StartOffsetLeftAction(){
+      super("<html><b>Extend</b><br><small>SHIFT = 5 characters, CTRL-SHIFT = 10 characters</small></html>", 
+              MainFrame.getIcon("extend-left"));
+    }
+    
+    public void actionPerformed(ActionEvent evt){
+      Annotation oldAnn = annotation;
+      int increment = 1;
+      if((evt.getModifiers() & ActionEvent.SHIFT_MASK) > 0){
+        //CTRL pressed -> use tokens for advancing
+        increment = SHIFT_INCREMENT;
+        if((evt.getModifiers() & ActionEvent.CTRL_MASK) > 0){
+          increment = CTRL_SHIFT_INCREMENT;
+        }
+      }
+      long newValue = annotation.getStartNode().getOffset().longValue() - increment;
+      if(newValue < 0) newValue = 0;
+      try{
+        moveAnnotation(annSet, annotation, new Long(newValue), 
+                annotation.getEndNode().getOffset());
+      }catch(InvalidOffsetException ioe){
+        throw new GateRuntimeException(ioe);
+      }
+    }
+  }
+  
+  protected class StartOffsetRightAction extends AnnotationAction{
+    public StartOffsetRightAction(){
+      super("<html><b>Shrink</b><br><small>SHIFT = 5 characters, " +
+            "CTRL-SHIFT = 10 characters</small></html>", 
+            MainFrame.getIcon("extend-right"));
+    }
+    
+    public void actionPerformed(ActionEvent evt){
+      long endOffset = annotation.getEndNode().getOffset().longValue(); 
+      int increment = 1;
+      if((evt.getModifiers() & ActionEvent.SHIFT_MASK) > 0){
+        //CTRL pressed -> use tokens for advancing
+        increment = SHIFT_INCREMENT;
+        if((evt.getModifiers() & ActionEvent.CTRL_MASK) > 0){
+          increment = CTRL_SHIFT_INCREMENT;
+        }
+      }
+      
+      long newValue = annotation.getStartNode().getOffset().longValue()  + increment;
+      if(newValue > endOffset) newValue = endOffset;
+      try{
+        moveAnnotation(annSet, annotation, new Long(newValue), 
+                annotation.getEndNode().getOffset());
+      }catch(InvalidOffsetException ioe){
+        throw new GateRuntimeException(ioe);
+      }
+    }
+  }
+
+  protected class EndOffsetLeftAction extends AnnotationAction{
+    public EndOffsetLeftAction(){
+      super("<html><b>Shrink</b><br><small>SHIFT = 5 characters, " +
+            "CTRL-SHIFT = 10 characters</small></html>",
+            MainFrame.getIcon("extend-left"));
+    }
+    
+    public void actionPerformed(ActionEvent evt){
+      long startOffset = annotation.getStartNode().getOffset().longValue(); 
+      int increment = 1;
+      if((evt.getModifiers() & ActionEvent.SHIFT_MASK) > 0){
+        //CTRL pressed -> use tokens for advancing
+        increment = SHIFT_INCREMENT;
+        if((evt.getModifiers() & ActionEvent.CTRL_MASK) > 0){
+          increment =CTRL_SHIFT_INCREMENT;
+        }
+      }
+      
+      long newValue = annotation.getEndNode().getOffset().longValue()  - increment;
+      if(newValue < startOffset) newValue = startOffset;
+      try{
+        moveAnnotation(annSet, annotation, annotation.getStartNode().getOffset(), 
+                new Long(newValue));
+      }catch(InvalidOffsetException ioe){
+        throw new GateRuntimeException(ioe);
+      }
+    }
+  }
+  
+  protected class EndOffsetRightAction extends AnnotationAction{
+    public EndOffsetRightAction(){
+      super("<html><b>Extend</b><br><small>SHIFT = 5 characters, " +
+            "CTRL-SHIFT = 10 characters</small></html>", 
+            MainFrame.getIcon("extend-right"));
+    }
+    
+    public void actionPerformed(ActionEvent evt){
+      long maxOffset = textView.getDocument().
+          getContent().size().longValue() -1; 
+//      Long newEndOffset = ann.getEndNode().getOffset();
+      int increment = 1;
+      if((evt.getModifiers() & ActionEvent.SHIFT_MASK) > 0){
+        //CTRL pressed -> use tokens for advancing
+        increment = SHIFT_INCREMENT;
+        if((evt.getModifiers() & ActionEvent.CTRL_MASK) > 0){
+          increment = CTRL_SHIFT_INCREMENT;
+        }
+      }
+      long newValue = annotation.getEndNode().getOffset().longValue() + increment;
+      if(newValue > maxOffset) newValue = maxOffset;
+      try{
+        moveAnnotation(annSet, annotation, annotation.getStartNode().getOffset(),
+                new Long(newValue));
+      }catch(InvalidOffsetException ioe){
+        throw new GateRuntimeException(ioe);
+      }
+    }
+  }
+  
+  
+  protected class DeleteAnnotationAction extends AnnotationAction{
+    public DeleteAnnotationAction(){
+      super("Delete annotation", MainFrame.getIcon("remove-annotation"));
+    }
+    
+    public void actionPerformed(ActionEvent evt){
+      annSet.remove(annotation);
+    }
+  }
+  /**
+   * Changes the span of an existing annotation by creating a new annotation 
+   * with the same ID, type and features but with the new start and end offsets.
+   * @param set the annotation set 
+   * @param oldAnnotation the annotation to be moved
+   * @param newStartOffset the new start offset
+   * @param newEndOffset the new end offset
+   */
+  protected void moveAnnotation(AnnotationSet set, Annotation oldAnnotation, 
+          Long newStartOffset, Long newEndOffset) throws InvalidOffsetException{
+    //Moving is done by deleting the old annotation and creating a new one.
+    //If this was the last one of one type it would mess up the gui which 
+    //"forgets" about this type and then it recreates it (with a different 
+    //colour and not visible
+    //We need to store the metadata about this type so we can recreate it if 
+    //needed
+    AnnotationSetsView.TypeHandler oldHandler = setsView.getTypeHandler(
+            set.getName(), oldAnnotation.getType());
+    
+    Integer oldID = oldAnnotation.getId();
+    set.remove(oldAnnotation);
+    set.add(oldID, newStartOffset, newEndOffset,
+            oldAnnotation.getType(), oldAnnotation.getFeatures());
+    editAnnotation(set.get(oldID), set);
+    AnnotationSetsView.TypeHandler newHandler = setsView.getTypeHandler(
+            set.getName(), oldAnnotation.getType());
+    
+    if(newHandler != oldHandler){
+      //hide all highlights (if any) so we can show them in the right colour
+      newHandler.setColour(oldHandler.getColour());
+      newHandler.setSelected(oldHandler.isSelected());
+    }
+  }  
+
+  /**
+   * A JButton with content are not filled and border not painted (in order to
+   * save screen real estate)
+   */  
+  protected class SmallButton extends JButton{
+    public SmallButton(Action a) {
+      super(a);
+//      setBorder(null);
+      setMargin(new Insets(0, 2, 0, 2));
+//      setBorderPainted(false);
+//      setContentAreaFilled(false);
+    }
   }
 }
