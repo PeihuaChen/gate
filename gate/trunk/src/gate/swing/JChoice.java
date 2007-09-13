@@ -48,6 +48,11 @@ public class JChoice extends JPanel {
 
 
   /**
+   * Margin used for choice buttons. 
+   */
+  private Insets defaultButtonMargin;
+  
+  /**
    * The maximum width allowed for this component. This value is only
    * used when the component appears as a flow of buttons. By default
    * this value is {@link #DEFAULT_MAX_WIDTH}. This is used to force the flow 
@@ -257,6 +262,7 @@ public class JChoice extends JPanel {
         for(int i = 0; i < model.getSize(); i++){
           Object aValue = model.getElementAt(i);
           JToggleButton aButton = new JToggleButton(aValue.toString());
+          if(defaultButtonMargin != null) aButton.setMargin(defaultButtonMargin);
           aButton.addItemListener(sharedItemListener);
           buttonGroup.add(aButton);
           buttonToValueMap.put(aButton, aValue);
@@ -406,5 +412,20 @@ public class JChoice extends JPanel {
       ((ActionListener)originalListener).actionPerformed(e);
     }
     private EventListener originalListener;
+  }
+
+  /**
+   * @return the defaultButtonMargin
+   */
+  public Insets getDefaultButtonMargin() {
+    return defaultButtonMargin;
+  }
+
+  /**
+   * @param defaultButtonMargin the defaultButtonMargin to set
+   */
+  public void setDefaultButtonMargin(Insets defaultButtonMargin) {
+    this.defaultButtonMargin = defaultButtonMargin;
+    buildGui();
   }
 }
