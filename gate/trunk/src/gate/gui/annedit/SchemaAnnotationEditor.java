@@ -289,8 +289,9 @@ public class SchemaAnnotationEditor extends JPanel implements AnnotationEditor{
     String[] typesArray = new String[typeList.size()];
     typeList.toArray(typesArray);
     typesChoice = new JChoice(typesArray);
+    typesChoice.setDefaultButtonMargin(new Insets(0, 2, 0, 2));
     typesChoice.setMaximumFastChoices(20);
-    typesChoice.setMaximumWidth(500);
+    typesChoice.setMaximumWidth(300);
     typesChoice.setAlignmentX(Component.LEFT_ALIGNMENT);
     String aTitle = "Type ";
     typesChoice.setBorder(BorderFactory.createTitledBorder(aTitle));
