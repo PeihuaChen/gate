@@ -71,7 +71,10 @@ public class JChoice extends JPanel {
    */
   private ButtonGroup buttonGroup;
   
-  
+  /**
+   * Internal item listener for both the combo and the buttons, used to keep
+   * the two in sync. 
+   */
   private ItemListener sharedItemListener; 
   
   /**
@@ -91,6 +94,11 @@ public class JChoice extends JPanel {
   public JChoice() {
     this(new DefaultComboBoxModel());
   }
+  
+  /**
+   * A map from wrapped action listeners to listener
+   */
+  private Map<EventListener, ListenerWrapper> listenersMap;
   
   /**
    * Creates a FastChoice with the given data model.
@@ -122,19 +130,33 @@ public class JChoice extends JPanel {
   private void initLocalData(){
     maximumFastChoices = DEFAULT_MAX_FAST_CHOICES;
     maximumWidth = DEFAULT_MAX_WIDTH;
-    
+    listenersMap = new HashMap<EventListener, ListenerWrapper>();
     buttonGroup = new ButtonGroup();
     combo = new JComboBox(model);
     buttonToValueMap = new HashMap<AbstractButton, Object>();
     sharedItemListener = new ItemListener(){
       public void itemStateChanged(ItemEvent e) {
-        if(e.getSource() != combo && 
-           e.getStateChange() == ItemEvent.SELECTED){
-          Object value = buttonToValueMap.get(e.getSource());
-          combo.setSelectedItem(value);
+        //we only care about SELECTED events
+        if(e.getStateChange() == ItemEvent.SELECTED){
+          if(e.getSource() == combo){
+            //combo selection changed -> propagate to buttons
+            for(AbstractButton aBtn : buttonToValueMap.keySet()){
+              Object aValue = buttonToValueMap.get(aBtn);
+              if(e.getItem().equals(aValue)){
+                //we found the right button
+                aBtn.setSelected(true);
+                break;
+              }
+            }
+          }else{
+            //button selection changed -> propagate to combo
+            Object value = buttonToValueMap.get(e.getSource());
+            combo.setSelectedItem(value);
+          }
         }
       }      
     };
+    combo.addItemListener(sharedItemListener);
   }
   
   public static void main(String[] args){
@@ -179,7 +201,8 @@ public class JChoice extends JPanel {
    * @see javax.swing.JComboBox#removeActionListener(java.awt.event.ActionListener)
    */
   public void removeActionListener(ActionListener l) {
-    combo.removeActionListener(l);
+    ListenerWrapper wrapper = listenersMap.remove(l);
+    combo.removeActionListener(wrapper);
   }
 
   /**
@@ -187,7 +210,8 @@ public class JChoice extends JPanel {
    * @see javax.swing.JComboBox#removeItemListener(java.awt.event.ItemListener)
    */
   public void removeItemListener(ItemListener listener) {
-    combo.removeItemListener(listener);
+    ListenerWrapper wrapper = listenersMap.remove(listener);
+    combo.removeActionListener(wrapper);
   }
 
   /**
@@ -195,7 +219,7 @@ public class JChoice extends JPanel {
    * @see javax.swing.JComboBox#addActionListener(java.awt.event.ActionListener)
    */
   public void addActionListener(ActionListener l) {
-    combo.addActionListener(l);
+    combo.addActionListener(new ListenerWrapper(l));
   }
 
   /**
@@ -203,7 +227,7 @@ public class JChoice extends JPanel {
    * @see javax.swing.JComboBox#addItemListener(java.awt.event.ItemListener)
    */
   public void addItemListener(ItemListener listener) {
-    combo.addItemListener(listener);
+    combo.addItemListener(new ListenerWrapper(listener));
   }
 
   /**
@@ -216,7 +240,6 @@ public class JChoice extends JPanel {
     if(model != null && model.getSize() > 0){
       if(model.getSize() > maximumFastChoices){
         //use combobox
-        combo.setModel(model);
         add(combo);
       }else{
         //use buttons
@@ -311,7 +334,7 @@ public class JChoice extends JPanel {
         Point compLoc = lastComp.getLocation();
         Dimension compSize = lastComp.getSize();
         size.width = maximumWidth;
-        size.height = compLoc.y + compSize.height;
+        size.height = compLoc.y + compSize.height + getInsets().bottom;
       }
     }
     return size;
@@ -362,5 +385,26 @@ public class JChoice extends JPanel {
    */
   public void setMaximumWidth(int maximumWidth) {
     this.maximumWidth = maximumWidth;
+  }
+  
+  /**
+   * An action listener that changes the source of events to be this object.
+   */
+  private class ListenerWrapper implements ActionListener, ItemListener{
+    public ListenerWrapper(EventListener originalListener) {
+      this.originalListener = originalListener;
+      listenersMap.put(originalListener, this);
+    }
+
+    public void itemStateChanged(ItemEvent e) {
+      e.setSource(JChoice.this);
+      ((ItemListener)originalListener).itemStateChanged(e);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      e.setSource(JChoice.this);
+      ((ActionListener)originalListener).actionPerformed(e);
+    }
+    private EventListener originalListener;
   }
 }
