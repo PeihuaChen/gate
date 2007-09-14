@@ -165,10 +165,13 @@ public class EvaluationBasedOnDocs {
         labels2MMR, labels2RunsNum);
     }
     macroMeasuresOfResults.macroAverage(k);
-    for(Object obj : labels2MMR.keySet())
+    for(Object obj : labels2MMR.keySet()) {
+      int num = new Integer(labels2RunsNum.get(obj).toString()).intValue();
       ((EvaluationMeasuresComputation)labels2MMR.get(obj))
-        .macroAverage(new Integer(labels2RunsNum.get(obj).toString())
-          .intValue());
+        .macroAverage(num);
+      num = (int)(new Float(labels2InstNum.get(obj).toString()).floatValue() / num);
+      labels2InstNum.put(obj, new Integer(num));
+    }
   }
 
   /** Hold-out testing. */
