@@ -498,6 +498,11 @@ public class OWLIMServiceImpl implements OWLIM,
   public boolean isSuperClassOf(String repositoryID, String theSuperClassURI,
           String theSubClassURI, byte direct) throws GateOntologyException {
     loadRepositoryDetails(repositoryID);
+    // check if the classes are equivalent of each
+    if(sail.hasStatement(getResource(theSuperClassURI),
+            getURI(OWL.EQUIVALENTCLASS), getResource(theSubClassURI)))
+      return false;
+
     if(direct == OConstants.DIRECT_CLOSURE)
       return sail.getDirectSubClassOf(getResource(theSubClassURI),
               getResource(theSuperClassURI)).hasNext();
@@ -1124,6 +1129,9 @@ public class OWLIMServiceImpl implements OWLIM,
         continue;
       }
 
+      if(sail.hasStatement(stmt.getSubject(), getURI(OWL.EQUIVALENTPROPERTY),
+              stmt.getObject())) continue;
+
       byte type = getPropertyType(repositoryID, aSuperProperty);
       properties.add(new Property(type, aSuperProperty));
     }
@@ -1155,6 +1163,9 @@ public class OWLIMServiceImpl implements OWLIM,
         continue;
       }
 
+      if(sail.hasStatement(stmt.getSubject(), getURI(OWL.EQUIVALENTPROPERTY),
+              stmt.getObject())) continue;
+
       byte type = getPropertyType(repositoryID, aSubProperty);
       properties.add(new Property(type, aSubProperty));
     }
@@ -1175,6 +1186,10 @@ public class OWLIMServiceImpl implements OWLIM,
           String aSuperPropertyURI, String aSubPropertyURI, byte direct)
           throws GateOntologyException {
     loadRepositoryDetails(repositoryID);
+    if(sail.hasStatement(getResource(aSuperPropertyURI),
+            getURI(OWL.EQUIVALENTPROPERTY), getResource(aSubPropertyURI)))
+      return false;
+
     StatementIterator iter = null;
     if(direct == OConstants.DIRECT_CLOSURE) {
       iter = sail.getDirectSubPropertyOf(getResource(aSubPropertyURI),
@@ -1604,7 +1619,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void setCurrentRepositoryID(String repositoryID)
           throws GateOntologyException {
-    if(DEBUG) print("setCurrentRepository with ID "+repositoryID);
+    if(DEBUG) print("setCurrentRepository with ID " + repositoryID);
     if(sail != null && sail.transactionStarted()) {
       // we need to commit all changes
       sail.commitTransaction();
@@ -2046,11 +2061,19 @@ public class OWLIMServiceImpl implements OWLIM,
     boolean result = true;
     while(iter.hasNext()) {
       Statement stmt = iter.next();
-      if(stmt.getObject().toString().equalsIgnoreCase(classURI)) continue;
+      if(stmt.getObject().toString().equals(classURI)) continue;
+      if(sail.getStatements(stmt.getSubject(), getURI(OWL.EQUIVALENTCLASS),
+              stmt.getObject()).hasNext()) continue;
 
       // if the parent class is an instance of BNode we still consider
       // the object to be a top class
-
+      if(stmt.getObject() instanceof BNode) {
+        if(stmt.getSubject() instanceof BNode) {
+          result = false;
+          break;
+        }
+        continue;
+      }
       result = false;
       break;
     }
@@ -2151,6 +2174,10 @@ public class OWLIMServiceImpl implements OWLIM,
       if(stmt.getSubject().toString().equals(superClassURI)) {
         continue;
       }
+
+      if(sail.getStatements(stmt.getSubject(), getURI(OWL.EQUIVALENTCLASS),
+              stmt.getObject()).hasNext()) continue;
+
       list.add(stmt.getSubject());
     }
     return listToResourceInfoArray(list);
@@ -2181,6 +2208,10 @@ public class OWLIMServiceImpl implements OWLIM,
       if(stmt.getObject().toString().equals(subClassURI)) {
         continue;
       }
+
+      if(sail.getStatements(stmt.getSubject(), getURI(OWL.EQUIVALENTCLASS),
+              stmt.getObject()).hasNext()) continue;
+
       list.add(stmt.getObject());
     }
     return listToResourceInfoArray(list);
@@ -2272,7 +2303,7 @@ public class OWLIMServiceImpl implements OWLIM,
     else {
       deletedResources.add(aPropertyURI);
     }
-    
+
     try {
       startTransaction(repositoryID);
       // removing all values set for the current property
@@ -3982,8 +4013,8 @@ public class OWLIMServiceImpl implements OWLIM,
           String ontoFileUrl, String baseURI, byte format,
           String absolutePersistLocation, boolean isOntologyData,
           Set<String> parsedValues) {
-    String baseURL = ontoFileUrl;
-    System.out.println(baseURL);
+    System.out.println("Importing : " + ontoFileUrl);
+    String baseUrl = ontoFileUrl;
     ArrayList<String> toReturn = new ArrayList<String>();
     try {
       String dummyRepository = "dummy" + Math.random();
@@ -4006,6 +4037,7 @@ public class OWLIMServiceImpl implements OWLIM,
         }
         StatementIterator si = sail.getStatements(null, getURI(OWL.IMPORTS),
                 null);
+        si = sail.getStatements(null, getURI(OWL.IMPORTS), null);
         if(si.hasNext()) {
           ontoFileUrl = si.next().getSubject().toString();
           this.ontologyUrl = ontoFileUrl;
@@ -4030,7 +4062,7 @@ public class OWLIMServiceImpl implements OWLIM,
             try {
               new URL(fileName).openStream();
               if(parsedValues.contains(fileName)) continue;
-
+              if(DEBUG) System.out.println("\t To Be Imported : " + fileName);
               toReturn.add(fileName);
               continue;
             }
@@ -4039,64 +4071,76 @@ public class OWLIMServiceImpl implements OWLIM,
             catch(IOException ioe) {
             }
 
+            // url is not valid, lets try to find out the file on local
+            // system
             int m = 0;
             boolean allFound = true;
-            for(m = 0; m < fileName.length() && m < baseURI.length(); m++) {
-              if(fileName.charAt(m) != baseURI.charAt(m)) {
+            int lastIndexOfSlash = -1;
+            for(; m < fileName.length() && m < ontoFileUrl.length(); m++) {
+              if(fileName.charAt(m) != ontoFileUrl.charAt(m)) {
                 allFound = false;
                 break;
               }
             }
 
             if(!allFound) {
-
-              String newBaseURL = baseURL;
-              int lastIndex = newBaseURL.lastIndexOf("/");
-              if(lastIndex > 0)
-                newBaseURL = newBaseURL.substring(0, lastIndex);
-              else newBaseURL = newBaseURL;
-
-              fileName = fileName.substring(m, fileName.length());
-              String newBaseURI = baseURI.substring(m, baseURI.length());
-
-              int atLeast = 0;
-              int index = 0;
-
-              while(true) {
-                index = newBaseURI.indexOf('/', index);
-                if(index == -1) break;
-                index++;
-                atLeast++;
+              if(m < 1) {
+                throw new GateOntologyException("Invalid Import URL" + fileName);
               }
+              
+              // character at m-- must be '/' or, we're going to throw
+              // exception
+              // lets find out the index of the last /
+              String tempFileName = fileName.substring(0, m);
+              m = tempFileName.lastIndexOf('/') + 1;
+              if(fileName.charAt(m - 1) == '/') {
+                int counter = 1;
+                for(int k = m; k < ontoFileUrl.length(); k++) {
+                  if(ontoFileUrl.charAt(k) == '/') {
+                    counter++;
+                  }
+                }
 
-              for(m = 0; m < atLeast; m++) {
-                int newIndex = newBaseURL.lastIndexOf("/");
-                if(newIndex > 0) {
-                  newBaseURL = newBaseURL.substring(0, newIndex);
+                String tempString = baseUrl;
+                for(int k = 0; k < counter; k++) {
+                  int tempIndex = tempString.lastIndexOf('/');
+                  if(tempIndex != -1) {
+                    tempString = tempString.substring(0, tempIndex);
+                  }
+                  else {
+                    throw new GateOntologyException("Invalid Import URL"
+                            + ontoFileUrl);
+                  }
                 }
-                else {
-                  throw new GateOntologyException("Invalid Import :" + fileName);
+
+                fileName = tempString
+                        + fileName.substring(m - 1, fileName.length());
+                
+                fileName = new File(new URL(fileName).getFile()).getAbsolutePath();
+                // lets normalize the name by replacing .. in the path
+                //file://abc/xyz/../../pqr
+                //13 16
+                while(true) {
+                  int index = fileName.indexOf("/../");
+                  if(index == -1) break;
+                  tempString = fileName.substring(0, index);
+                  int index1 = tempString.lastIndexOf("/");
+                  if(index1 == -1) {
+                    throw new GateOntologyException("Invalid Import URL"
+                            + ontoFileUrl);
+                  }
+                  tempString = tempString.substring(0, index1);
+                  fileName = tempString + fileName.substring(index + 3, fileName.length());
                 }
+                
+                if(parsedValues.contains(fileName)) continue;
+                
+                toReturn.add(fileName);
+                if(DEBUG) System.out.println("\t To Be Imported : " + fileName);
               }
-
-              while(true) {
-                int newIndex = fileName.indexOf("..");
-                if(newIndex == 0) {
-                  fileName = fileName
-                          .substring(newIndex + 3, fileName.length());
-                  newIndex = newBaseURL.lastIndexOf("/");
-                  newBaseURL = newBaseURL.substring(0, newIndex + 1);
-                }
-                else {
-                  break;
-                }
+              else {
+                throw new GateOntologyException("Invalid Import URL" + fileName);
               }
-
-              fileName = newBaseURL + (newBaseURL.endsWith("/") ? "" : "/")
-                      + fileName;
-              if(parsedValues.contains(fileName)) continue;
-
-              toReturn.add(fileName);
             }
           }
         }
@@ -4117,7 +4161,8 @@ public class OWLIMServiceImpl implements OWLIM,
     isOntologyData = false;
     for(String value : toReturn) {
       finallyToReturn.addAll(getImportValues(currentRepository, value, baseURI,
-              OConstants.ONTOLOGY_FORMAT_RDFXML, absolutePersistLocation, isOntologyData, parsedValues));
+              OConstants.ONTOLOGY_FORMAT_RDFXML, absolutePersistLocation,
+              isOntologyData, parsedValues));
     }
 
     return finallyToReturn;
@@ -4193,7 +4238,10 @@ public class OWLIMServiceImpl implements OWLIM,
                 new HashSet<String>());
         for(String imValue : importValues) {
           imports += ";" + imValue;
-          defaultNS += ";" + imValue + "#";
+          defaultNS += ";"
+                  + (imValue.startsWith("http:")
+                          ? imValue
+                          : "http://www.gate.ac.uk/owlim") + "#";
         }
       }
       map.put("imports", imports);
