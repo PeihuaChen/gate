@@ -465,7 +465,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       if (fs.isDefault() || fs.isFixed())
         value = fs.getFeatureValue();
       if (value == null && fs.isEnumeration()){
-        Iterator iter = fs.getPermissibleValues().iterator();
+        Iterator iter = fs.getPermittedValues().iterator();
         if (iter.hasNext()) value = iter.next();
       }
       tableModel.data.add(new RowData(value,fs));
@@ -536,14 +536,11 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
         case 2: {
                   // Show only the last substring. For example, for
                   // java.lang.Integer -> Integer
-                  String type = rd.getFeatureSchema().getValueClassName();
+                  Class<?> type = rd.getFeatureSchema().getFeatureValueClass();
                   if(type == null)
                       return new String("");
                   else{
-                    int start = type.lastIndexOf(".");
-                    if ((start > -1) && (start < type.length()))
-                      return type.substring(start+1,type.length());
-                    else return type;
+                    return type.getName();
                   }// End if
                 }
 
@@ -571,7 +568,8 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
             return;
           }// End if
           // Get the class name the final object must belong
-          className = rd.getFeatureSchema().getValueClassName();
+          className = rd.getFeatureSchema().getFeatureValueClass().
+              getCanonicalName();
           // Get the class name that aValue object belongs to.
           aValueClassName = aValue.getClass().toString();
           // If there is no class to convert to, let the aValue object as it is
@@ -709,7 +707,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
        RowData rd = (RowData) tableModel.data.get(row);
        if (rd.getFeatureSchema().isEnumeration()){
           cb = new JComboBox(rd.getFeatureSchema().
-                                            getPermissibleValues().toArray());
+                                            getPermittedValues().toArray());
           cb.setSelectedItem(value);
           cb.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){

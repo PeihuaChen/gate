@@ -1139,7 +1139,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
         FeatureSchema categories = annotSchema.getFeatureSchema(NODE_CAT_FEATURE_NAME);
         //iterate through all categories
         for (Iterator i =
-                categories.getPermissibleValues().iterator(); i.hasNext(); ) {
+                categories.getPermittedValues().iterator(); i.hasNext(); ) {
 
           JMenuItem menuItem = new JMenuItem( (String) i.next() );
           menuItem.addActionListener(this);

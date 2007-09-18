@@ -14,8 +14,7 @@ package gate.gui.annedit;
 
 import javax.swing.text.JTextComponent;
 
-import gate.Annotation;
-import gate.Document;
+import gate.*;
 
 /**
  * Objects of this type control the interaction with an 
@@ -43,7 +42,8 @@ public interface AnnotationEditorOwner {
    * @param oldType the old type of the annotation. 
    * @param newType the new type of the annotation.
    */
-  public void annotationTypeChanged(Annotation ann, String oldType, 
+  public void annotationTypeChanged(Annotation ann, AnnotationSet set, 
+          String oldType, 
           String newType);
   
   /**
