@@ -17,6 +17,8 @@ import gate.*;
 /**
  * Interface for all annotation editor components
  */
-public interface AnnotationEditor {
+public interface AnnotationEditor extends Resource{
   public void editAnnotation(Annotation ann, AnnotationSet set);
+  
+  public void setOwner(AnnotationEditorOwner owner);
 }

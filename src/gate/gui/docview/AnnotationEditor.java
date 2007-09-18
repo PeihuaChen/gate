@@ -27,12 +27,12 @@ import javax.swing.event.AncestorListener;
 import javax.swing.text.BadLocationException;
 
 import gate.*;
-import gate.creole.AnnotationSchema;
-import gate.creole.ResourceInstantiationException;
+import gate.creole.*;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
 import gate.gui.FeaturesSchemaEditor;
 import gate.gui.MainFrame;
+import gate.gui.annedit.AnnotationEditorOwner;
 import gate.util.*;
 
 
@@ -40,19 +40,36 @@ import gate.util.*;
  * @author Valentin Tablan
  *
  */
-public class AnnotationEditor implements gate.gui.annedit.AnnotationEditor{
-  /**
-   * 
-   */
-  public AnnotationEditor(TextualDocumentView textView,
-                          AnnotationSetsView setsView){
-    this.textView = textView;
-    textPane = (JTextArea)((JScrollPane)textView.getGUI())
-    			.getViewport().getView();
-    this.setsView = setsView;
-    initGUI();
+public class AnnotationEditor extends AbstractVisualResource 
+    implements gate.gui.annedit.AnnotationEditor{
+  
+  public AnnotationEditor(){
+    
   }
   
+//  /**
+//   * 
+//   */
+//  public AnnotationEditor(TextualDocumentView textView,
+//                          AnnotationSetsView setsView){
+//    this.textView = textView;
+//    textPane = (JTextArea)((JScrollPane)textView.getGUI())
+//    			.getViewport().getView();
+//    this.setsView = setsView;
+//    initGUI();
+//  }
+  
+  
+  /* (non-Javadoc)
+   * @see gate.creole.AbstractVisualResource#init()
+   */
+  @Override
+  public Resource init() throws ResourceInstantiationException {
+    super.init();
+    initGUI();
+    return this;
+  }
+
   protected void initData(){
     schemasByType = new HashMap();
     java.util.List schemas = Gate.getCreoleRegister().
@@ -218,10 +235,11 @@ public class AnnotationEditor implements gate.gui.annedit.AnnotationEditor{
           set.add(oldId, oldAnn.getStartNode().getOffset(), 
                   oldAnn.getEndNode().getOffset(), 
                   newType, oldAnn.getFeatures());
-          editAnnotation(set.get(oldId), set);
-          
-          setsView.setTypeSelected(set.getName(), newType, true);
-          setsView.setLastAnnotationType(newType);
+          Annotation newAnn = set.get(oldId); 
+          editAnnotation(newAnn, set);
+          owner.annotationTypeChanged(newAnn, oldAnn.getType(), newType);
+//          setsView.setTypeSelected(set.getName(), newType, true);
+//          setsView.setLastAnnotationType(newType);
         }catch(InvalidOffsetException ioe){
           throw new GateRuntimeException(ioe);
         }
@@ -237,7 +255,7 @@ public class AnnotationEditor implements gate.gui.annedit.AnnotationEditor{
     delAction = new DeleteAnnotationAction();
     
     initData();
-    initBottomWindow(SwingUtilities.getWindowAncestor(textView.getGUI()));
+    initBottomWindow(SwingUtilities.getWindowAncestor(owner.getTextComponent()));
     initListeners();
     
     hideTimer = new Timer(HIDE_DELAY, new ActionListener(){
@@ -264,7 +282,7 @@ public class AnnotationEditor implements gate.gui.annedit.AnnotationEditor{
       }
       private boolean wasShowing = false; 
     };
-    textPane.addAncestorListener(textAncestorListener);
+    owner.getTextComponent().addAncestorListener(textAncestorListener);
   }
   
   public void editAnnotation(Annotation ann, AnnotationSet set){
@@ -303,17 +321,17 @@ public class AnnotationEditor implements gate.gui.annedit.AnnotationEditor{
   protected void placeWindows(){
     //calculate position
     try{
-		  Rectangle startRect = textPane.modelToView(ann.getStartNode().
+		  Rectangle startRect = owner.getTextComponent().modelToView(ann.getStartNode().
 		    getOffset().intValue());
-		  Rectangle endRect = textPane.modelToView(ann.getEndNode().
+		  Rectangle endRect = owner.getTextComponent().modelToView(ann.getEndNode().
 				    getOffset().intValue());
-      Point topLeft = textPane.getLocationOnScreen();
+      Point topLeft = owner.getTextComponent().getLocationOnScreen();
       int x = topLeft.x + startRect.x;
       int y = topLeft.y + endRect.y + endRect.height;
 
       //make sure the window doesn't start lower 
       //than the end of the visible rectangle
-      Rectangle visRect = textPane.getVisibleRect();
+      Rectangle visRect = owner.getTextComponent().getVisibleRect();
       int maxY = topLeft.y + visRect.y + visRect.height;      
       
       //make sure window doesn't get off-screen
@@ -361,27 +379,61 @@ public class AnnotationEditor implements gate.gui.annedit.AnnotationEditor{
     //Moving is done by deleting the old annotation and creating a new one.
     //If this was the last one of one type it would mess up the gui which 
     //"forgets" about this type and then it recreates it (with a different 
-    //colour and not visible
-    //We need to store the metadata about this type so we can recreate it if 
-    //needed
-    AnnotationSetsView.TypeHandler oldHandler = setsView.getTypeHandler(
-            set.getName(), oldAnnotation.getType());
-    
+    //colour and not visible.
+    //In order to avoid this problem, we'll create a new temporary annotation.
+    Annotation tempAnn = null;
+    if(set.get(oldAnnotation.getType()).size() == 1){
+      //create a clone of the annotation that will be deleted, to act as a 
+      //placeholder 
+      Integer tempAnnId = set.add(oldAnnotation.getStartNode(), 
+              oldAnnotation.getStartNode(), oldAnnotation.getType(), 
+              oldAnnotation.getFeatures());
+      tempAnn = set.get(tempAnnId);
+    }
+
     Integer oldID = oldAnnotation.getId();
     set.remove(oldAnnotation);
     set.add(oldID, newStartOffset, newEndOffset,
             oldAnnotation.getType(), oldAnnotation.getFeatures());
     editAnnotation(set.get(oldID), set);
-    AnnotationSetsView.TypeHandler newHandler = setsView.getTypeHandler(
-            set.getName(), oldAnnotation.getType());
-    
-    if(newHandler != oldHandler){
-      //hide all highlights (if any) so we can show them in the right colour
-      newHandler.setSelected(false);
-      newHandler.colour = oldHandler.colour;
-      newHandler.setSelected(oldHandler.isSelected());
-    }
-  }
+    //remove the temporary annotation
+    if(tempAnn != null) set.remove(tempAnn);
+  }   
+  
+//  /**
+//   * Changes the span of an existing annotation by creating a new annotation 
+//   * with the same ID, type and features but with the new start and end offsets.
+//   * @param set the annotation set 
+//   * @param oldAnnotation the annotation to be moved
+//   * @param newStartOffset the new start offset
+//   * @param newEndOffset the new end offset
+//   */
+//  protected void moveAnnotation1(AnnotationSet set, Annotation oldAnnotation, 
+//          Long newStartOffset, Long newEndOffset) throws InvalidOffsetException{
+//    //Moving is done by deleting the old annotation and creating a new one.
+//    //If this was the last one of one type it would mess up the gui which 
+//    //"forgets" about this type and then it recreates it (with a different 
+//    //colour and not visible
+//    //We need to store the metadata about this type so we can recreate it if 
+//    //needed
+//    AnnotationSetsView.TypeHandler oldHandler = setsView.getTypeHandler(
+//            set.getName(), oldAnnotation.getType());
+//    
+//    Integer oldID = oldAnnotation.getId();
+//    set.remove(oldAnnotation);
+//    set.add(oldID, newStartOffset, newEndOffset,
+//            oldAnnotation.getType(), oldAnnotation.getFeatures());
+//    editAnnotation(set.get(oldID), set);
+//    AnnotationSetsView.TypeHandler newHandler = setsView.getTypeHandler(
+//            set.getName(), oldAnnotation.getType());
+//    
+//    if(newHandler != oldHandler){
+//      //hide all highlights (if any) so we can show them in the right colour
+//      newHandler.setSelected(false);
+//      newHandler.colour = oldHandler.colour;
+//      newHandler.setSelected(oldHandler.isSelected());
+//    }
+//  }
   
   public void hide(){
 //    topWindow.setVisible(false);
@@ -492,7 +544,7 @@ public class AnnotationEditor implements gate.gui.annedit.AnnotationEditor{
     }
     
     public void actionPerformed(ActionEvent evt){
-      long maxOffset = textView.getDocument().
+      long maxOffset = owner.getDocument().
       		getContent().size().longValue() -1; 
 //      Long newEndOffset = ann.getEndNode().getOffset();
       int increment = 1;
@@ -578,9 +630,29 @@ public class AnnotationEditor implements gate.gui.annedit.AnnotationEditor{
   protected Map schemasByType;
   
   
-  protected TextualDocumentView textView;
-  protected AnnotationSetsView setsView;
-  protected JTextArea textPane;
+  /**
+   * The controlling object for this editor.
+   */
+  private AnnotationEditorOwner owner;
+  
+  
+  
+//  protected TextualDocumentView textView;
+//  protected AnnotationSetsView setsView;
+//  protected JTextArea textPane;
   protected Annotation ann;
   protected AnnotationSet set;
+  /**
+   * @return the owner
+   */
+  public AnnotationEditorOwner getOwner() {
+    return owner;
+  }
+
+  /**
+   * @param owner the owner to set
+   */
+  public void setOwner(AnnotationEditorOwner owner) {
+    this.owner = owner;
+  }
 }
