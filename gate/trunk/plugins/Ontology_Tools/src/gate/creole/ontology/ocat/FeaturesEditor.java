@@ -183,8 +183,8 @@ public class FeaturesEditor extends JPanel {
     boolean isCorrect() {
       if(schema == null) return true;
       FeatureSchema fSchema = schema.getFeatureSchema(name);
-      return fSchema == null || fSchema.getPermissibleValues() == null
-              || fSchema.getPermissibleValues().contains(value);
+      return fSchema == null || fSchema.getPermittedValues() == null
+              || fSchema.getPermittedValues().contains(value);
     }
 
     boolean isRequired() {
@@ -303,7 +303,7 @@ public class FeaturesEditor extends JPanel {
 
             String[] availableValues = new String[0];
             if(feature.isSchemaFeature()) {
-              Set pValues = schema.getFeatureSchema(feature.name).getPermissibleValues();
+              Set pValues = schema.getFeatureSchema(feature.name).getPermittedValues();
               if(pValues == null) pValues = new HashSet();
               List permValues = new ArrayList(pValues);
               if(permValues != null) {
@@ -528,7 +528,7 @@ public class FeaturesEditor extends JPanel {
           List fValues = new ArrayList();
           if(feature.isSchemaFeature()) {
             Set permValues = schema.getFeatureSchema(feature.name)
-                    .getPermissibleValues();
+                    .getPermittedValues();
             if(permValues != null) fValues.addAll(permValues);
           }
           if(!fValues.contains(feature.value)) fValues.add(feature.value);
