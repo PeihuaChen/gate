@@ -302,7 +302,8 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
                     newType, oldAnn.getFeatures());
             Annotation newAnn = annSet.get(oldId); 
             editAnnotation(newAnn, annSet);
-            owner.annotationTypeChanged(newAnn, oldAnn.getType(), newType);
+            owner.annotationTypeChanged(newAnn, annSet, oldAnn.getType(), 
+                    newType);
           }catch(InvalidOffsetException ioe){
             //this should never hapen 
             throw new LuckyException(ioe);
