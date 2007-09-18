@@ -144,7 +144,7 @@ public class TextualDocumentView extends AbstractDocumentView {
       
 //      blinkingTagsForAnnotations.put(ann.getId(), 
 //              new HighlightData(ann, null, null));
-//      highlightsMinder.restart();
+      highlightsMinder.restart();
     }
   }
   
@@ -158,6 +158,9 @@ public class TextualDocumentView extends AbstractDocumentView {
   
   public void removeAllBlinkingHighlights(){
     synchronized(TextualDocumentView.this){
+      //clear the pending queue, if any
+      blinkingHighlightsToAdd.clear();
+      //request the removal of existing highlights 
       blinkingHighlightsToRemove.addAll(blinkingTagsForAnnotations.keySet());
 //      Iterator annIdIter = new ArrayList(blinkingTagsForAnnotations.keySet()).
 //        iterator();
