@@ -56,19 +56,13 @@ public class AnnotationSetsView extends AbstractDocumentView
   /* (non-Javadoc)
    * @see gate.gui.annedit.AnnotationEditorOwner#annotationTypeChanged(gate.Annotation, java.lang.String, java.lang.String)
    */
-  public void annotationTypeChanged(Annotation ann, AnnotationSet set, 
-          String oldType,
-          String newType) {
-    lastAnnotationType = newType;
+  public void annotationChanged(Annotation ann, AnnotationSet set, 
+          String oldType) {
+    lastAnnotationType = ann.getType();
     //show new annotation type
     setTypeSelected(set.getName(), ann.getType(), true);
-//    TypeSpec typeSpec = new TypeSpec(set.getName(), ann.getType());
-//    visibleAnnotationTypes.add(typeSpec);
-//    
-//    TypeHandler tHandler = getTypeHandler(set.getName(), ann.getType());
-//    //wait a maximum of 1 second and show the new annotation type
-//    int waitTime = 1000;
-//    if(!tHandler.isSelected()) tHandler.setSelected(true);
+    //select new annotation
+    selectAnnotation(ann, set);
   }
 
   /* (non-Javadoc)
@@ -550,21 +544,6 @@ public class AnnotationSetsView extends AbstractDocumentView
       pendingEvents.offer(e);
       eventMinder.restart();
     }
-//    
-//    Runnable runner = new Runnable(){
-//      public void run(){
-//        AnnotationSet set = (AnnotationSet)e.getSource();
-//        Annotation ann = e.getAnnotation();
-//        TypeHandler tHandler = getTypeHandler(set.getName(), ann.getType());
-//        if(tHandler == null){
-//          //new type for this set
-//          SetHandler sHandler = getSetHandler(set.getName());
-//          tHandler = sHandler.newType(ann.getType());
-//        }
-//        tHandler.annotationAdded(ann);        
-//      }
-//    };
-//    SwingUtilities.invokeLater(runner);
   }
   
   public void annotationRemoved(final AnnotationSetEvent e) {
@@ -572,21 +551,6 @@ public class AnnotationSetsView extends AbstractDocumentView
       pendingEvents.offer(e);
       eventMinder.restart();
     }
-    
-//    //we need to find out if this was the last annotation of its kind
-//    //this needs to be done from this thread to avoid concurrent modifications
-//    String annType = e.getAnnotation().getType();
-//    Set<String> remainingTypes = ((AnnotationSet)e.getSource()).getAllTypes();
-//    final boolean lastOfItsType = !remainingTypes.contains(annType);
-//    Runnable runner = new Runnable(){
-//      public void run(){
-//        AnnotationSet set = (AnnotationSet)e.getSource();
-//        Annotation ann = e.getAnnotation();
-//        TypeHandler tHandler = getTypeHandler(set.getName(), ann.getType());
-//        tHandler.annotationRemoved(ann, lastOfItsType);
-//      }
-//    };
-//    SwingUtilities.invokeLater(runner);
   }
   
   protected SetHandler getSetHandler(String name){
@@ -634,13 +598,37 @@ public class AnnotationSetsView extends AbstractDocumentView
     });
   }
   
+ 
   /**
-   * Sets the last annotation type created (which will be used as a default
-   * for creating new annotations).
-   * @param annType the type of annotation.
+   * Make sure the given annotation is selected in the annotation list view, if
+   * appropriate. 
+   * @param ann the annotation
+   * @param annSet the parent set
    */
-  public void setLastAnnotationType(String annType){
-    this.lastAnnotationType = annType;
+  protected void selectAnnotation(final Annotation ann, 
+          final AnnotationSet annSet){
+    //queue the select action to the events minder
+    PerformActionEvent actionEvent = new PerformActionEvent(new Runnable(){
+      public void run(){
+        if(listView != null && listView.isActive() &&
+                listView.getGUI().isVisible()){
+          TypeHandler tHandler = getTypeHandler(annSet.getName(), ann.getType());
+          if(tHandler != null){
+            Object tag = tHandler.annListTagsForAnn.get(ann.getId());
+if(tag == null){
+  Out.prln("No tag yet");
+}
+            listView.selectAnnotationForTag(tag);
+          }else{
+Out.prln("no handler yet");        
+          }
+        }
+      }
+    });
+    synchronized(AnnotationSetsView.this) {
+      pendingEvents.offer(actionEvent);
+      eventMinder.restart();
+    }
   }
   
   protected class SetsTableModel extends AbstractTableModel{
@@ -1384,6 +1372,8 @@ public class AnnotationSetsView extends AbstractDocumentView
 	        Annotation ann = set.get(annId);
 	        //make sure new annotation is visible
 	        setTypeSelected(set.getName(), ann.getType(), true);
+	        //select the newly created annotation
+	        selectAnnotation(ann, set);
 	        //show the editor
 	        annotationEditor.editAnnotation(ann, set);
 //	        annotationEditor.show(true);
@@ -1469,6 +1459,26 @@ public class AnnotationSetsView extends AbstractDocumentView
       Thread thread = new Thread(runableAction, "");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
+    }
+  }
+  
+  /**
+   * A fake GATE Event used to wrap a {@link Runnable} value. This is used for
+   * queueing actions to the document UI update timer.  
+   */
+  private class PerformActionEvent extends GateEvent{
+    public PerformActionEvent(Runnable runnable){
+      super(AnnotationSetsView.this, 0);
+      this.runnable = runnable;
+    }
+    
+    private Runnable runnable;
+
+    /**
+     * @return the runnable
+     */
+    public Runnable getRunnable() {
+      return runnable;
     }
   }
   
@@ -1568,6 +1578,8 @@ public class AnnotationSetsView extends AbstractDocumentView
             }else{
               //some other kind of event we don't care about
             }
+          }else if(event instanceof PerformActionEvent){
+            ((PerformActionEvent)event).getRunnable().run();
           }else{
             //unknown type of event -> ignore
           }
@@ -1761,20 +1773,11 @@ public class AnnotationSetsView extends AbstractDocumentView
     public void actionPerformed(ActionEvent evt){
       if(annotationEditor == null) return;
       //select the annotation being edited in the tabular view
-      if(listView != null && listView.isActive() &&
-              listView.getGUI().isVisible()){
-        TypeHandler tHandler = getTypeHandler(aHandler.set.getName(), 
-                aHandler.ann.getType());
-        if(tHandler != null){
-          Object tag = tHandler.annListTagsForAnn.get(aHandler.ann.getId());
-          listView.selectAnnotationForTag(tag);
-        }
-      }
+      selectAnnotation(aHandler.ann, aHandler.set);
       annotationEditor.editAnnotation(aHandler.ann, aHandler.set);
-//      annotationEditor.show(true);
     }
     
-    AnnotationHandler aHandler;
+    private AnnotationHandler aHandler;
   }
   
   protected class DeleteSelectedAnnotationGroupAction extends AbstractAction{

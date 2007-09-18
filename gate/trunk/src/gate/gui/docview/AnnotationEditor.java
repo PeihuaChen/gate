@@ -225,7 +225,7 @@ public class AnnotationEditor extends AbstractVisualResource
                   newType, oldAnn.getFeatures());
           Annotation newAnn = set.get(oldId); 
           editAnnotation(newAnn, set);
-          owner.annotationTypeChanged(newAnn, set, oldAnn.getType(), newType);
+          owner.annotationChanged(newAnn, set, oldAnn.getType());
         }catch(InvalidOffsetException ioe){
           throw new GateRuntimeException(ioe);
         }
@@ -381,9 +381,11 @@ public class AnnotationEditor extends AbstractVisualResource
     set.remove(oldAnnotation);
     set.add(oldID, newStartOffset, newEndOffset,
             oldAnnotation.getType(), oldAnnotation.getFeatures());
-    editAnnotation(set.get(oldID), set);
+    Annotation newAnn = set.get(oldID); 
+    editAnnotation(newAnn, set);
     //remove the temporary annotation
     if(tempAnn != null) set.remove(tempAnn);
+    owner.annotationChanged(newAnn, set, null);
   }   
   
   public void hide(){
