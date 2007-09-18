@@ -996,7 +996,6 @@ public class MainFrame extends JFrame implements ProgressListener,
               }
 
               public void changedUpdate(javax.swing.event.DocumentEvent e) {
-                changeOccured();
               }
 
               protected void changeOccured() {
