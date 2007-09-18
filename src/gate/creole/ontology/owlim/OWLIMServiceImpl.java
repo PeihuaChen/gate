@@ -309,7 +309,6 @@ public class OWLIMServiceImpl implements OWLIM,
       gosHome = gosHomeURL;
 
       systemConf = null;
-      // new URL(gosHome, "system.conf");
       owlRDFS = new URL(gosHome, "owl.rdfs");
       rdfSchema = new URL(gosHome, "rdf-schema.xml");
 
@@ -348,7 +347,6 @@ public class OWLIMServiceImpl implements OWLIM,
     NamespaceIterator iter = sail.getNamespaces();
     while(iter.hasNext()) {
       iter.next();
-      // System.out.println(iter.getPrefix() + "==>" + iter.getName());
       if(iter.getPrefix() == null || iter.getPrefix().trim().length() == 0)
         return iter.getName();
     }
@@ -499,15 +497,39 @@ public class OWLIMServiceImpl implements OWLIM,
           String theSubClassURI, byte direct) throws GateOntologyException {
     loadRepositoryDetails(repositoryID);
     // check if the classes are equivalent of each
+    if(theSuperClassURI.equals(theSubClassURI)) return false;
     if(sail.hasStatement(getResource(theSuperClassURI),
             getURI(OWL.EQUIVALENTCLASS), getResource(theSubClassURI)))
       return false;
+    
+    if(direct != OConstants.DIRECT_CLOSURE) {
+      return sail.getSubClassOf(getResource(theSubClassURI),
+              getResource(theSuperClassURI)).hasNext();      
+    }
+    
+    // first lets find out the subClasses of the super class
+    StatementIterator iter = sail.getSubClassOf(null, getResource(theSuperClassURI));
+    // we just need to check if any of these subclasses is a super class of the sub class
+    // if so, return false, otherwise true.
+    boolean atleastOne = false;
+    while(iter.hasNext()) {
 
-    if(direct == OConstants.DIRECT_CLOSURE)
-      return sail.getDirectSubClassOf(getResource(theSubClassURI),
-              getResource(theSuperClassURI)).hasNext();
-    else return sail.getSubClassOf(getResource(theSubClassURI),
-            getResource(theSuperClassURI)).hasNext();
+      // here subject is a subclass
+      Statement stmt = iter.next();
+      if(stmt.getSubject().toString().equals(theSuperClassURI)) continue;
+      if(sail.hasStatement(getResource(theSuperClassURI),
+              getURI(OWL.EQUIVALENTCLASS), getResource(stmt.getSubject().toString()))) continue;
+
+      atleastOne = true;
+      
+      if(isSuperClassOf(repositoryID, stmt.getSubject().toString(), theSubClassURI, OConstants.TRANSITIVE_CLOSURE)) {
+        return false;
+      }
+    }
+    if(atleastOne)
+      return true;
+    else
+      return false;
   }
 
   /**
@@ -1200,6 +1222,7 @@ public class OWLIMServiceImpl implements OWLIM,
               getResource(aSuperPropertyURI));
     }
     return iter.hasNext();
+    
   }
 
   /**
@@ -1809,7 +1832,6 @@ public class OWLIMServiceImpl implements OWLIM,
             currentRepository.getRepositoryId());
     if(persist) saveConfiguration();
     endTransaction(null);
-    // System.out.println("Removing Info :"+repositoryID);
     mapToRepositoryDetails.remove(repositoryID);
   }
 
@@ -2064,7 +2086,7 @@ public class OWLIMServiceImpl implements OWLIM,
       if(stmt.getObject().toString().equals(classURI)) continue;
       if(sail.getStatements(stmt.getSubject(), getURI(OWL.EQUIVALENTCLASS),
               stmt.getObject()).hasNext()) continue;
-
+      
       // if the parent class is an instance of BNode we still consider
       // the object to be a top class
       if(stmt.getObject() instanceof BNode) {
@@ -2077,6 +2099,8 @@ public class OWLIMServiceImpl implements OWLIM,
       result = false;
       break;
     }
+
+    
     // if there is any element, the class is not a super class
     return result;
   }
@@ -2127,13 +2151,6 @@ public class OWLIMServiceImpl implements OWLIM,
 
     StatementIterator iter = sail.getDirectType(null, getResource(subClassURI));
     removeUUUStatement(subClassURI, RDFS.SUBCLASSOF, superClassURI);
-    // while(iter.hasNext()) {
-    // Statement stmt = iter.next();
-    // Resource instance = stmt.getSubject();
-    // System.out.println("Removing : " + instance.toString() + "=>"
-    // + superClassURI);
-    // removeUUUStatement(instance.toString(), RDF.TYPE, superClassURI);
-    // }
   }
 
   /**
@@ -2161,28 +2178,19 @@ public class OWLIMServiceImpl implements OWLIM,
     if(DEBUG) print("getSubClasses");
     loadRepositoryDetails(repositoryID);
     StatementIterator iter = null;
-    if(direct == OConstants.DIRECT_CLOSURE) {
-      iter = sail.getDirectSubClassOf(null, getResource(superClassURI));
-    }
-    else {
-      iter = sail.getSubClassOf(null, getResource(superClassURI));
-    }
+    iter = sail.getSubClassOf(null, getResource(superClassURI));
     List<Value> list = new ArrayList<Value>();
     while(iter.hasNext()) {
       Statement stmt = (Statement)iter.next();
-
-      if(stmt.getSubject().toString().equals(superClassURI)) {
-        continue;
+      if(isSubClassOf(repositoryID, superClassURI, stmt.getSubject().toString(), direct)) {
+        list.add(stmt.getSubject());
       }
-
-      if(sail.getStatements(stmt.getSubject(), getURI(OWL.EQUIVALENTCLASS),
-              stmt.getObject()).hasNext()) continue;
-
-      list.add(stmt.getSubject());
     }
     return listToResourceInfoArray(list);
   }
 
+  
+  
   /**
    * This method returns all super classes of the given class
    * 
@@ -2192,27 +2200,16 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public ResourceInfo[] getSuperClasses(String repositoryID,
           String subClassURI, byte direct) throws GateOntologyException {
-    loadRepositoryDetails(repositoryID);
     if(DEBUG) print("getSuperClasses");
+    loadRepositoryDetails(repositoryID);
     StatementIterator iter = null;
-    if(direct == OConstants.DIRECT_CLOSURE) {
-      iter = sail.getDirectSubClassOf(getResource(subClassURI), null);
-    }
-    else {
-      iter = sail.getSubClassOf(getResource(subClassURI), null);
-    }
+    iter = sail.getSubClassOf(getResource(subClassURI), null);
     List<Value> list = new ArrayList<Value>();
     while(iter.hasNext()) {
       Statement stmt = (Statement)iter.next();
-
-      if(stmt.getObject().toString().equals(subClassURI)) {
-        continue;
+      if(isSubClassOf(repositoryID, stmt.getObject().toString(), subClassURI, direct)) {
+        list.add(stmt.getObject());
       }
-
-      if(sail.getStatements(stmt.getSubject(), getURI(OWL.EQUIVALENTCLASS),
-              stmt.getObject()).hasNext()) continue;
-
-      list.add(stmt.getObject());
     }
     return listToResourceInfoArray(list);
   }
@@ -4062,7 +4059,7 @@ public class OWLIMServiceImpl implements OWLIM,
             try {
               new URL(fileName).openStream();
               if(parsedValues.contains(fileName)) continue;
-              if(DEBUG) System.out.println("\t To Be Imported : " + fileName);
+              if(DEBUG) System.out.println("\t URL To Be Imported : " + fileName);
               toReturn.add(fileName);
               continue;
             }
@@ -4088,7 +4085,6 @@ public class OWLIMServiceImpl implements OWLIM,
                 throw new GateOntologyException("Invalid Import URL" + fileName);
               }
               
-              // character at m-- must be '/' or, we're going to throw
               // exception
               // lets find out the index of the last /
               String tempFileName = fileName.substring(0, m);
@@ -4113,6 +4109,7 @@ public class OWLIMServiceImpl implements OWLIM,
                   }
                 }
 
+                
                 fileName = tempString
                         + fileName.substring(m - 1, fileName.length());
                 
@@ -4132,11 +4129,11 @@ public class OWLIMServiceImpl implements OWLIM,
                   tempString = tempString.substring(0, index1);
                   fileName = tempString + fileName.substring(index + 3, fileName.length());
                 }
-                
+                fileName = new File(fileName).toURI().toURL().toExternalForm();
                 if(parsedValues.contains(fileName)) continue;
                 
                 toReturn.add(fileName);
-                if(DEBUG) System.out.println("\t To Be Imported : " + fileName);
+                if(DEBUG) System.out.println("\t File To Be Imported : " + fileName);
               }
               else {
                 throw new GateOntologyException("Invalid Import URL" + fileName);
@@ -4238,10 +4235,10 @@ public class OWLIMServiceImpl implements OWLIM,
                 new HashSet<String>());
         for(String imValue : importValues) {
           imports += ";" + imValue;
-          defaultNS += ";"
-                  + (imValue.startsWith("http:")
-                          ? imValue
-                          : "http://www.gate.ac.uk/owlim") + "#";
+          defaultNS += ";" + imValue + "#";
+//                  + (imValue.startsWith("http:")
+//                          ? imValue
+//                          : "http://www.gate.ac.uk/owlim") + "#";
         }
       }
       map.put("imports", imports);
