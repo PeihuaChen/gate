@@ -196,7 +196,7 @@
       <CLASS>gate.gui.docview.AnnotationSetsView</CLASS>
     </RESOURCE>
     <RESOURCE>
-      <NAME>Annotations</NAME>
+      <NAME>Annotations List</NAME>
       <CLASS>gate.gui.docview.AnnotationListView</CLASS>
     </RESOURCE>
 
@@ -204,7 +204,13 @@
       <NAME>Co-reference Editor</NAME>
       <CLASS>gate.gui.docview.CorefEditor</CLASS>
     </RESOURCE>
-
+		
+		<!-- The default annotation editor -->
+    <RESOURCE>
+      <NAME>Annotations Editor</NAME>
+      <CLASS>gate.gui.docview.AnnotationEditor</CLASS>
+    </RESOURCE>
+    
     <RESOURCE>
       <NAME>Corpus Editor</NAME>
       <CLASS>gate.gui.CorpusEditor</CLASS>
