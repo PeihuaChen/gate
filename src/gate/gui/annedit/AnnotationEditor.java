@@ -17,7 +17,7 @@ import gate.*;
 /**
  * Interface for all annotation editor components
  */
-public interface AnnotationEditor extends Resource{
+public interface AnnotationEditor extends VisualResource{
   public void editAnnotation(Annotation ann, AnnotationSet set);
   
   public void setOwner(AnnotationEditorOwner owner);
