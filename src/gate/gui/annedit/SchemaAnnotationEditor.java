@@ -41,7 +41,8 @@ import gate.gui.docview.TextualDocumentView;
 import gate.swing.JChoice;
 import gate.util.*;
 
-public class SchemaAnnotationEditor extends JPanel implements AnnotationEditor{
+public class SchemaAnnotationEditor extends AbstractVisualResource 
+    implements AnnotationEditor{
   
   /* (non-Javadoc)
    * @see gate.gui.annedit.AnnotationEditor#editAnnotation(gate.Annotation, gate.AnnotationSet)
@@ -75,17 +76,17 @@ public class SchemaAnnotationEditor extends JPanel implements AnnotationEditor{
   protected void placeDialog(){
     //calculate position
     try{
-      Rectangle startRect = textPane.modelToView(annotation.getStartNode().
+      Rectangle startRect = owner.getTextComponent().modelToView(annotation.getStartNode().
         getOffset().intValue());
-      Rectangle endRect = textPane.modelToView(annotation.getEndNode().
+      Rectangle endRect = owner.getTextComponent().modelToView(annotation.getEndNode().
             getOffset().intValue());
-      Point topLeft = textPane.getLocationOnScreen();
+      Point topLeft = owner.getTextComponent().getLocationOnScreen();
       int x = topLeft.x + startRect.x;
       int y = topLeft.y + endRect.y + endRect.height;
 
       //make sure the window doesn't start lower 
       //than the end of the visible rectangle
-      Rectangle visRect = textPane.getVisibleRect();
+      Rectangle visRect = owner.getTextComponent().getVisibleRect();
       int maxY = topLeft.y + visRect.y + visRect.height;      
       
       //make sure window doesn't get off-screen
@@ -136,21 +137,11 @@ public class SchemaAnnotationEditor extends JPanel implements AnnotationEditor{
   protected AnnotationSet annSet;
   
   /**
-   * The textual view controlling this annotation editor.
+   * The controlling object for this editor.
    */
-  protected TextualDocumentView textView;
+  private AnnotationEditorOwner owner;
   
   
-  /**
-   * Pointer to the AnnotationSetsView that controls this e3itor.
-   */
-  protected AnnotationSetsView setsView;
-  
-  /**
-   * A pointer to the actual text component in the document editor. This is
-   * ised for finding the location of the annotations on screen.
-   */
-  protected JTextComponent textPane;
   
   /**
    * JChoice used for selecting the annotation type.
@@ -180,22 +171,22 @@ public class SchemaAnnotationEditor extends JPanel implements AnnotationEditor{
   protected Box featuresBox;
   
   
-  public SchemaAnnotationEditor(TextualDocumentView textView, 
-          AnnotationSetsView asView){
-    super();
-    this.textView = textView;
-    this.setsView = asView; 
-    initData();
-    initGui();
-    
-//    JToolBar tBar = new JToolBar("Annotation Editor", JToolBar.HORIZONTAL);
-//    tBar.add(this);
-//    tBar.setFloatable(true);
-//    if(textView != null && textView.getOwner() != null){
-//      textView.getOwner().add(tBar, BorderLayout.SOUTH);
-//    }
+  public SchemaAnnotationEditor(){
   }
   
+  
+  /* (non-Javadoc)
+   * @see gate.creole.AbstractVisualResource#init()
+   */
+  @Override
+  public Resource init() throws ResourceInstantiationException {
+    super.init();
+    
+    initData();
+    initGui();
+    return this;
+  }
+
   protected void initData(){
     schemasByType = new TreeMap<String, AnnotationSchema>();
     for(LanguageResource aSchema : Gate.getCreoleRegister().
@@ -311,10 +302,9 @@ public class SchemaAnnotationEditor extends JPanel implements AnnotationEditor{
             annSet.add(oldId, oldAnn.getStartNode().getOffset(), 
                     oldAnn.getEndNode().getOffset(), 
                     newType, oldAnn.getFeatures());
-            editAnnotation(annSet.get(oldId), annSet);
-            
-            setsView.setTypeSelected(annSet.getName(), newType, true);
-            setsView.setLastAnnotationType(newType);
+            Annotation newAnn = annSet.get(oldId); 
+            editAnnotation(newAnn, annSet);
+            owner.annotationTypeChanged(newAnn, oldAnn.getType(), newType);
           }catch(InvalidOffsetException ioe){
             //this should never hapen 
             throw new LuckyException(ioe);
@@ -333,21 +323,18 @@ public class SchemaAnnotationEditor extends JPanel implements AnnotationEditor{
     mainPane.add(featuresBox);
     
     //make the dialog
-    if(textView != null){
-      textPane = textView.getTextView();
-      Window parentWindow = SwingUtilities.windowForComponent(textView.getGUI());
-      if(parentWindow != null){
-        dialog = parentWindow instanceof Frame ?
-                new JDialog((Frame)parentWindow, 
-                "Annotation Editor Dialog", false) :
-                  new JDialog((Dialog)parentWindow, 
-                          "Annotation Editor Dialog", false);
-        dialog.setFocusableWindowState(false);
-        dialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-        dialog.setResizable(false);
-        dialog.add(this);
-        dialog.pack();
-      }
+    Window parentWindow = SwingUtilities.windowForComponent(owner.getTextComponent());
+    if(parentWindow != null){
+      dialog = parentWindow instanceof Frame ?
+              new JDialog((Frame)parentWindow, 
+              "Annotation Editor Dialog", false) :
+                new JDialog((Dialog)parentWindow, 
+                        "Annotation Editor Dialog", false);
+      dialog.setFocusableWindowState(false);
+      dialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+      dialog.setResizable(false);
+      dialog.add(this);
+      dialog.pack();
     }
   }
 
@@ -368,7 +355,7 @@ public class SchemaAnnotationEditor extends JPanel implements AnnotationEditor{
 //      annDialog.setResizable(false);
 //      annDialog.setUndecorated(true);
       
-      SchemaAnnotationEditor pane = new SchemaAnnotationEditor(null, null);
+      SchemaAnnotationEditor pane = new SchemaAnnotationEditor();
       annDialog.add(pane);
       annDialog.pack();
       
@@ -534,7 +521,7 @@ System.out.println("Window up");
     }
     
     public void actionPerformed(ActionEvent evt){
-      long maxOffset = textView.getDocument().
+      long maxOffset = owner.getDocument().
           getContent().size().longValue() -1; 
 //      Long newEndOffset = ann.getEndNode().getOffset();
       int increment = 1;
@@ -579,25 +566,25 @@ System.out.println("Window up");
     //Moving is done by deleting the old annotation and creating a new one.
     //If this was the last one of one type it would mess up the gui which 
     //"forgets" about this type and then it recreates it (with a different 
-    //colour and not visible
-    //We need to store the metadata about this type so we can recreate it if 
-    //needed
-    AnnotationSetsView.TypeHandler oldHandler = setsView.getTypeHandler(
-            set.getName(), oldAnnotation.getType());
-    
+    //colour and not visible.
+    //In order to avoid this problem, we'll create a new temporary annotation.
+    Annotation tempAnn = null;
+    if(set.get(oldAnnotation.getType()).size() == 1){
+      //create a clone of the annoation that will be deleted, to act as a 
+      //placeholder 
+      Integer tempAnnId = set.add(oldAnnotation.getStartNode(), 
+              oldAnnotation.getStartNode(), oldAnnotation.getType(), 
+              oldAnnotation.getFeatures());
+      tempAnn = set.get(tempAnnId);
+    }
+
     Integer oldID = oldAnnotation.getId();
     set.remove(oldAnnotation);
     set.add(oldID, newStartOffset, newEndOffset,
             oldAnnotation.getType(), oldAnnotation.getFeatures());
     editAnnotation(set.get(oldID), set);
-    AnnotationSetsView.TypeHandler newHandler = setsView.getTypeHandler(
-            set.getName(), oldAnnotation.getType());
-    
-    if(newHandler != oldHandler){
-      //hide all highlights (if any) so we can show them in the right colour
-      newHandler.setColour(oldHandler.getColour());
-      newHandler.setSelected(oldHandler.isSelected());
-    }
+    //remove the temporary annotation
+    if(tempAnn != null) set.remove(tempAnn);
   }  
 
   /**
@@ -612,5 +599,18 @@ System.out.println("Window up");
 //      setBorderPainted(false);
 //      setContentAreaFilled(false);
     }
+  }
+  /**
+   * @return the owner
+   */
+  public AnnotationEditorOwner getOwner() {
+    return owner;
+  }
+
+  /**
+   * @param owner the owner to set
+   */
+  public void setOwner(AnnotationEditorOwner owner) {
+    this.owner = owner;
   }
 }
