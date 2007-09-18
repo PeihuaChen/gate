@@ -29,8 +29,6 @@ import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 
-import sun.rmi.runtime.NewThreadAction;
-
 import gate.*;
 import gate.creole.*;
 import gate.event.CreoleEvent;
