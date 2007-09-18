@@ -47,18 +47,6 @@ public class AnnotationEditor extends AbstractVisualResource
     
   }
   
-//  /**
-//   * 
-//   */
-//  public AnnotationEditor(TextualDocumentView textView,
-//                          AnnotationSetsView setsView){
-//    this.textView = textView;
-//    textPane = (JTextArea)((JScrollPane)textView.getGUI())
-//    			.getViewport().getView();
-//    this.setsView = setsView;
-//    initGUI();
-//  }
-  
   
   /* (non-Javadoc)
    * @see gate.creole.AbstractVisualResource#init()
@@ -117,13 +105,13 @@ public class AnnotationEditor extends AbstractVisualResource
   }
   
   protected void initBottomWindow(Window parent){
-    bottomWindow = new JWindow(parent);
+    popupWindow = new JWindow(parent);
     JPanel pane = new JPanel();
     pane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
     pane.setLayout(new GridBagLayout());
     pane.setBackground(UIManager.getLookAndFeelDefaults().
             getColor("ToolTip.background"));
-    bottomWindow.setContentPane(pane);
+    popupWindow.setContentPane(pane);
 
     Insets insets0 = new Insets(0, 0, 0, 0);
     GridBagConstraints constraints = new GridBagConstraints();
@@ -198,7 +186,7 @@ public class AnnotationEditor extends AbstractVisualResource
     }catch(ResourceInstantiationException rie){
       throw new GateRuntimeException(rie);
     }
-    scroller = new JScrollPane(featuresEditor.getTable());
+    JScrollPane scroller = new JScrollPane(featuresEditor.getTable());
     
     constraints.gridy = 2;
     constraints.weighty = 1;
@@ -214,13 +202,13 @@ public class AnnotationEditor extends AbstractVisualResource
       }
     };
 
-    bottomWindow.getRootPane().addMouseListener(windowMouseListener);
+    popupWindow.getRootPane().addMouseListener(windowMouseListener);
 //    featuresEditor.addMouseListener(windowMouseListener);
     
-    ((JComponent)bottomWindow.getContentPane()).
+    ((JComponent)popupWindow.getContentPane()).
     		getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).
     		put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "dismiss");
-    ((JComponent)bottomWindow.getContentPane()).
+    ((JComponent)popupWindow.getContentPane()).
     		getActionMap().put("dismiss", dismissAction);
     
     typeCombo.addActionListener(new ActionListener(){
@@ -238,8 +226,6 @@ public class AnnotationEditor extends AbstractVisualResource
           Annotation newAnn = set.get(oldId); 
           editAnnotation(newAnn, set);
           owner.annotationTypeChanged(newAnn, oldAnn.getType(), newType);
-//          setsView.setTypeSelected(set.getName(), newType, true);
-//          setsView.setLastAnnotationType(newType);
         }catch(InvalidOffsetException ioe){
           throw new GateRuntimeException(ioe);
         }
@@ -300,12 +286,12 @@ public class AnnotationEditor extends AbstractVisualResource
    
    featuresEditor.setSchema((AnnotationSchema)schemasByType.get(annType));
    featuresEditor.setTargetFeatures(ann.getFeatures());
-   bottomWindow.doLayout();
+   popupWindow.doLayout();
    show(true);
   }
   
   public boolean isShowing(){
-    return bottomWindow.isShowing();
+    return popupWindow.isShowing();
   }
   
   /**
@@ -314,7 +300,7 @@ public class AnnotationEditor extends AbstractVisualResource
    */
   public void show(boolean autohide){
     placeWindows();
-    bottomWindow.setVisible(true);
+    popupWindow.setVisible(true);
     if(autohide) hideTimer.restart();
   }
   
@@ -335,30 +321,30 @@ public class AnnotationEditor extends AbstractVisualResource
       int maxY = topLeft.y + visRect.y + visRect.height;      
       
       //make sure window doesn't get off-screen
-      bottomWindow.pack();
+      popupWindow.pack();
       Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
       boolean revalidate = false;
-      if(bottomWindow.getSize().width > screenSize.width){
-        bottomWindow.setSize(screenSize.width, bottomWindow.getSize().height);
+      if(popupWindow.getSize().width > screenSize.width){
+        popupWindow.setSize(screenSize.width, popupWindow.getSize().height);
         revalidate = true;
       }
-      if(bottomWindow.getSize().height > screenSize.height){
-        bottomWindow.setSize(bottomWindow.getSize().width, screenSize.height);
+      if(popupWindow.getSize().height > screenSize.height){
+        popupWindow.setSize(popupWindow.getSize().width, screenSize.height);
         revalidate = true;
       }
       
-      if(revalidate) bottomWindow.validate();
+      if(revalidate) popupWindow.validate();
       //calculate max X
-      int maxX = screenSize.width - bottomWindow.getSize().width;
+      int maxX = screenSize.width - popupWindow.getSize().width;
       //calculate max Y
-      if(maxY + bottomWindow.getSize().height > screenSize.height){
-        maxY = screenSize.height - bottomWindow.getSize().height;
+      if(maxY + popupWindow.getSize().height > screenSize.height){
+        maxY = screenSize.height - popupWindow.getSize().height;
       }
       
       //correct position
       if(y > maxY) y = maxY;
       if(x > maxX) x = maxX;
-      bottomWindow.setLocation(x, y);
+      popupWindow.setLocation(x, y);
       
     }catch(BadLocationException ble){
       //this should never occur
@@ -400,44 +386,9 @@ public class AnnotationEditor extends AbstractVisualResource
     if(tempAnn != null) set.remove(tempAnn);
   }   
   
-//  /**
-//   * Changes the span of an existing annotation by creating a new annotation 
-//   * with the same ID, type and features but with the new start and end offsets.
-//   * @param set the annotation set 
-//   * @param oldAnnotation the annotation to be moved
-//   * @param newStartOffset the new start offset
-//   * @param newEndOffset the new end offset
-//   */
-//  protected void moveAnnotation1(AnnotationSet set, Annotation oldAnnotation, 
-//          Long newStartOffset, Long newEndOffset) throws InvalidOffsetException{
-//    //Moving is done by deleting the old annotation and creating a new one.
-//    //If this was the last one of one type it would mess up the gui which 
-//    //"forgets" about this type and then it recreates it (with a different 
-//    //colour and not visible
-//    //We need to store the metadata about this type so we can recreate it if 
-//    //needed
-//    AnnotationSetsView.TypeHandler oldHandler = setsView.getTypeHandler(
-//            set.getName(), oldAnnotation.getType());
-//    
-//    Integer oldID = oldAnnotation.getId();
-//    set.remove(oldAnnotation);
-//    set.add(oldID, newStartOffset, newEndOffset,
-//            oldAnnotation.getType(), oldAnnotation.getFeatures());
-//    editAnnotation(set.get(oldID), set);
-//    AnnotationSetsView.TypeHandler newHandler = setsView.getTypeHandler(
-//            set.getName(), oldAnnotation.getType());
-//    
-//    if(newHandler != oldHandler){
-//      //hide all highlights (if any) so we can show them in the right colour
-//      newHandler.setSelected(false);
-//      newHandler.colour = oldHandler.colour;
-//      newHandler.setSelected(oldHandler.isSelected());
-//    }
-//  }
-  
   public void hide(){
 //    topWindow.setVisible(false);
-    bottomWindow.setVisible(false);
+    popupWindow.setVisible(false);
   }
   
   /**
@@ -603,11 +554,20 @@ public class AnnotationEditor extends AbstractVisualResource
     }
   }
   
-  protected JWindow bottomWindow;
+  /**
+   * The popup window used by the editor.
+   */
+  protected JWindow popupWindow;
 
+  /**
+   * Combobox for annotation type.
+   */
   protected JComboBox typeCombo;
+  
+  /**
+   * Component for features editing.
+   */
   protected FeaturesSchemaEditor featuresEditor;
-  protected JScrollPane scroller;
   
   protected StartOffsetLeftAction solAction;
   protected StartOffsetRightAction sorAction;
@@ -617,11 +577,23 @@ public class AnnotationEditor extends AbstractVisualResource
   
   protected DeleteAnnotationAction delAction;
   protected Timer hideTimer;
+  
+  /**
+   * Constant for delay before hiding the popup window (in milliseconds).
+   */
   protected static final int HIDE_DELAY = 1500;
+  
+  /**
+   * Constant for the number of characters when changing annotation boundary 
+   * with Shift key pressed.
+   */
   protected static final int SHIFT_INCREMENT = 5;
+
+  /**
+   * Constant for the number of characters when changing annotation boundary 
+   * with Ctrl+Shift keys pressed.
+   */
   protected static final int CTRL_SHIFT_INCREMENT = 10;
-    
-  protected Object highlight;
   
   /**
    * Stores the Annotation schema objects available in the system.
@@ -634,14 +606,17 @@ public class AnnotationEditor extends AbstractVisualResource
    * The controlling object for this editor.
    */
   private AnnotationEditorOwner owner;
-  
-  
-  
-//  protected TextualDocumentView textView;
-//  protected AnnotationSetsView setsView;
-//  protected JTextArea textPane;
+
+  /**
+   * The annotation being edited.
+   */
   protected Annotation ann;
+  
+  /**
+   * The parent set of the current annotation.
+   */
   protected AnnotationSet set;
+  
   /**
    * @return the owner
    */
