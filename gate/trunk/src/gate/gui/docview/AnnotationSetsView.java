@@ -214,8 +214,8 @@ public class AnnotationSetsView extends AbstractDocumentView
     for(String aVrType : vrTypes){
       ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(aVrType);
       try{
-        if(AnnotationEditor.class.isAssignableFrom(rData.getResourceClass())){
-          Class resClass = rData.getResourceClass();
+        Class resClass = rData.getResourceClass();
+        if(AnnotationEditor.class.isAssignableFrom(resClass)){
           AnnotationEditor newEditor = (AnnotationEditor) resClass.newInstance();
           newEditor.setOwner(this);
           newEditor.init();
