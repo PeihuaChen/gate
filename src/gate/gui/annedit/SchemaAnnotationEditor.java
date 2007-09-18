@@ -53,15 +53,19 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     SchemaFeaturesEditor newFeaturesEditor = featureEditorsByType.get(annType);
     //if new type, we need to change the features editor and selected type 
     //button
-    if(!featuresBox.isAncestorOf(newFeaturesEditor)){
+    if(newFeaturesEditor != featuresEditor){
       typesChoice.setSelectedItem(ann.getType());
-      if(featuresBox.getComponentCount() > 1)  featuresBox.remove(1);
+      if(featuresEditor != null){
+        featuresBox.remove(featuresEditor);
+        featuresEditor.editFeatureMap(null);
+      }
+      featuresEditor = newFeaturesEditor;
       if(newFeaturesEditor != null){
-        featuresBox.add(newFeaturesEditor, 1);
+        featuresBox.add(newFeaturesEditor);
       }
     }
-    if(newFeaturesEditor != null){
-      newFeaturesEditor.editFeatureMap(ann.getFeatures());
+    if(featuresEditor != null){
+      featuresEditor.editFeatureMap(ann.getFeatures());
     }
     if(dialog != null){
       placeDialog();
@@ -168,7 +172,12 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
    */
   protected Box featuresBox;
   
-  
+  /**
+   * The current features editor, one of the ones stored in 
+   * {@link #featureEditorsByType}.
+   */
+  protected SchemaFeaturesEditor featuresEditor = null;
+
   public SchemaAnnotationEditor(){
   }
   

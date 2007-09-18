@@ -462,37 +462,38 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
   public void featureMapUpdated() {
     //the underlying F-map was changed
     // 1) first make the new FeatureMap compliant with the schema
-    for(Object aFeatureName : new HashSet<Object>(featureMap.keySet())){
-      //first check if the feature is allowed
-      if(featureSchemas.keySet().contains(aFeatureName)){
-        FeatureSchema fSchema = featureSchemas.get(aFeatureName);
-        Object aFeatureValue = featureMap.get(aFeatureName);
-        //check if the value is permitted
-        if(fSchema.getFeatureValueClass().equals(Boolean.class) ||
-           fSchema.getFeatureValueClass().equals(Integer.class) ||
-           fSchema.getFeatureValueClass().equals(Short.class) ||
-           fSchema.getFeatureValueClass().equals(Byte.class) ||
-           fSchema.getFeatureValueClass().equals(Float.class) ||
-           fSchema.getFeatureValueClass().equals(Double.class)){
-          //just check the right type
-          if(!fSchema.getFeatureValueClass().isAssignableFrom(
-                  aFeatureValue.getClass())){
-            //invalid value type
-            featureMap.remove(aFeatureName);
+    if(featureMap != null){
+      for(Object aFeatureName : new HashSet<Object>(featureMap.keySet())){
+        //first check if the feature is allowed
+        if(featureSchemas.keySet().contains(aFeatureName)){
+          FeatureSchema fSchema = featureSchemas.get(aFeatureName);
+          Object aFeatureValue = featureMap.get(aFeatureName);
+          //check if the value is permitted
+          if(fSchema.getFeatureValueClass().equals(Boolean.class) ||
+             fSchema.getFeatureValueClass().equals(Integer.class) ||
+             fSchema.getFeatureValueClass().equals(Short.class) ||
+             fSchema.getFeatureValueClass().equals(Byte.class) ||
+             fSchema.getFeatureValueClass().equals(Float.class) ||
+             fSchema.getFeatureValueClass().equals(Double.class)){
+            //just check the right type
+            if(!fSchema.getFeatureValueClass().isAssignableFrom(
+                    aFeatureValue.getClass())){
+              //invalid value type
+              featureMap.remove(aFeatureName);
+            }
+          }else if(fSchema.getFeatureValueClass().equals(String.class)){
+            if(fSchema.getPermittedValues() != null &&
+                    !fSchema.getPermittedValues().contains(aFeatureValue)){
+                   //invalid value
+                   featureMap.remove(aFeatureName);
+                 }
           }
-        }else if(fSchema.getFeatureValueClass().equals(String.class)){
-          if(fSchema.getPermittedValues() != null &&
-                  !fSchema.getPermittedValues().contains(aFeatureValue)){
-                 //invalid value
-                 featureMap.remove(aFeatureName);
-               }
+        }else{
+          //feature not permitted
+          featureMap.remove(aFeatureName);
         }
-      }else{
-        //feature not permitted
-        featureMap.remove(aFeatureName);
       }
-    }
-    
+    }    
     // 2) then update all the displays
     for(String featureName : featureEditors.keySet()){
       FeatureEditor aFeatureEditor = featureEditors.get(featureName);
