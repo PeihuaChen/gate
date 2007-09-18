@@ -495,7 +495,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
 
   /** Get a list of all non-private types of VR in the register. */
   public List<String> getPublicVrTypes() {
-    return Collections.unmodifiableList(getPublicTypes(getVrTypes()));
+    return Collections.unmodifiableList(getPublicTypes(vrTypes));
   }//getPublicVrTypes()
 
   /** Get a list of all non-private types of controller in the register. */
