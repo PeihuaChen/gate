@@ -135,7 +135,7 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
           break;
         case text:
           gui.setLayout(new BoxLayout(gui, BoxLayout.LINE_AXIS));
-          textField = new JTextField();
+          textField = new JTextField(20);
           if(value != null){
             textField.setText(value);
           }else if(defaultValue != null){
@@ -468,14 +468,30 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
         FeatureSchema fSchema = featureSchemas.get(aFeatureName);
         Object aFeatureValue = featureMap.get(aFeatureName);
         //check if the value is permitted
-//        fSchema.getValueClassName()
+        if(fSchema.getFeatureValueClass().equals(Boolean.class) ||
+           fSchema.getFeatureValueClass().equals(Integer.class) ||
+           fSchema.getFeatureValueClass().equals(Short.class) ||
+           fSchema.getFeatureValueClass().equals(Byte.class) ||
+           fSchema.getFeatureValueClass().equals(Float.class) ||
+           fSchema.getFeatureValueClass().equals(Double.class)){
+          //just check the right type
+          if(!fSchema.getFeatureValueClass().isAssignableFrom(
+                  aFeatureValue.getClass())){
+            //invalid value type
+            featureMap.remove(aFeatureName);
+          }
+        }else if(fSchema.getFeatureValueClass().equals(String.class)){
+          if(fSchema.getPermittedValues() != null &&
+                  !fSchema.getPermittedValues().contains(aFeatureValue)){
+                 //invalid value
+                 featureMap.remove(aFeatureName);
+               }
+        }
       }else{
         //feature not permitted
         featureMap.remove(aFeatureName);
       }
-      
     }
-    
     
     // 2) then update all the displays
     for(String featureName : featureEditors.keySet()){
