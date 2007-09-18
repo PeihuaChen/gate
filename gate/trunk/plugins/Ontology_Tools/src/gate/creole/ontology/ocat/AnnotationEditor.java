@@ -498,15 +498,15 @@ public class AnnotationEditor extends AbstractAction {
         Set<FeatureSchema> fsSet = new HashSet<FeatureSchema>();
         for(RDFProperty aProp : ontologyTreePanel.currentProperties) {
           if(aProp instanceof AnnotationProperty) {
-            FeatureSchema fs = new FeatureSchema(aProp.getName(), List.class
-                    .getName(), "", "custom", null);
+            FeatureSchema fs = new FeatureSchema(aProp.getName(), List.class,
+                    "", "custom", null);
             fsSet.add(fs);
           }
           else if(resource instanceof OInstance) {
             if(aProp instanceof DatatypeProperty
                     && aProp.isValidDomain((OInstance)resource)) {
               FeatureSchema fs = new FeatureSchema(aProp.getName(), List.class
-                      .getName(), "", "custom", null);
+                      , "", "custom", null);
               fsSet.add(fs);
             }
             else if(aProp instanceof ObjectProperty
@@ -524,7 +524,7 @@ public class AnnotationEditor extends AbstractAction {
                 }
               }
               FeatureSchema fs = new FeatureSchema(aProp.getName(), List.class
-                      .getName(), "", "fixed", instSet);
+                      , "", "fixed", instSet);
               fsSet.add(fs);
             }
           }
