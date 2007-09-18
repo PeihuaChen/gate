@@ -65,7 +65,11 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       }
     }
     if(featuresEditor != null){
-      featuresEditor.editFeatureMap(ann.getFeatures());
+      FeatureMap features = ann.getFeatures();
+      if(features == null){
+        ann.setFeatures(Factory.newFeatureMap());
+      }
+      featuresEditor.editFeatureMap(features);
     }
     if(dialog != null){
       placeDialog();
@@ -311,8 +315,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
                     newType, oldAnn.getFeatures());
             Annotation newAnn = annSet.get(oldId); 
             editAnnotation(newAnn, annSet);
-            owner.annotationTypeChanged(newAnn, annSet, oldAnn.getType(), 
-                    newType);
+            owner.annotationChanged(newAnn, annSet, oldAnn.getType());
           }catch(InvalidOffsetException ioe){
             //this should never hapen 
             throw new LuckyException(ioe);
@@ -559,6 +562,7 @@ System.out.println("Window up");
     
     public void actionPerformed(ActionEvent evt){
       annSet.remove(annotation);
+      dialog.setVisible(false);
     }
   }
   /**
@@ -590,9 +594,11 @@ System.out.println("Window up");
     set.remove(oldAnnotation);
     set.add(oldID, newStartOffset, newEndOffset,
             oldAnnotation.getType(), oldAnnotation.getFeatures());
-    editAnnotation(set.get(oldID), set);
+    Annotation newAnn = set.get(oldID); 
+    editAnnotation(newAnn, set);
     //remove the temporary annotation
     if(tempAnn != null) set.remove(tempAnn);
+    owner.annotationChanged(newAnn, set, null);
   }  
 
   /**

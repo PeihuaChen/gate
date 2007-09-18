@@ -386,7 +386,7 @@ public class AnnotationListView extends AbstractDocumentView
    */
   public void selectAnnotationForTag(Object tag){
     int modelPosition = annDataList.indexOf(tag);
-    
+    table.getSelectionModel().clearSelection();
     if(modelPosition != -1){
       int tablePosition = table.rowModelToView(modelPosition);
       table.getSelectionModel().setSelectionInterval(tablePosition, 

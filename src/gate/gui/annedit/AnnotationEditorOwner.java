@@ -36,15 +36,15 @@ public interface AnnotationEditorOwner {
   public JTextComponent getTextComponent();
   
   /**
-   * Called by the annotation editor when the type of an annotation has been 
+   * Called by the annotation editor when an annotation has been 
    * changed.
    * @param ann the annotation modified (after the modification occurred).
-   * @param oldType the old type of the annotation. 
-   * @param newType the new type of the annotation.
+   * @param set the parent annotation set for the annotation
+   * @param oldType the old type of the annotation. This value is only set if 
+   * the annotation modification included a change of type.  
    */
-  public void annotationTypeChanged(Annotation ann, AnnotationSet set, 
-          String oldType, 
-          String newType);
+  public void annotationChanged(Annotation ann, AnnotationSet set, 
+          String oldType);
   
   /**
    * Called by the editor for obtaining the next annotation to be edited.
