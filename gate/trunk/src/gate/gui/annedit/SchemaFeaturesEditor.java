@@ -298,6 +298,12 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
   
   public SchemaFeaturesEditor(AnnotationSchema schema){
     this.schema = schema;
+    featureSchemas = new HashMap<String, FeatureSchema>();
+    if(schema != null && schema.getFeatureSchemaSet() != null){
+      for(FeatureSchema aFSchema : schema.getFeatureSchemaSet()){
+        featureSchemas.put(aFSchema.getFeatureName(), aFSchema);
+      }
+    }
     initGui();
   }
   
@@ -382,7 +388,7 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
         String aFeatureName = aFeatureSchema.getFeatureName();
         String defaultValue = aFeatureSchema.getFeatureValue();
         String[] valuesArray = null;
-        Set values = aFeatureSchema.getPermissibleValues();
+        Set values = aFeatureSchema.getPermittedValues();
         if(values != null && values.size() > 0){
           valuesArray = new String[values.size()];
           int i = 0;
@@ -399,7 +405,7 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
                   aFeatureSchema.getFeatureValue());
         }else{
           //we don't have any permitted set of values specified
-          if(aFeatureSchema.getValueClassName().equals(Boolean.class.getCanonicalName())){
+          if(aFeatureSchema.getFeatureValueClass().equals(Boolean.class)){
             //boolean value
             anEditor = new FeatureEditor(aFeatureName, 
                     Boolean.parseBoolean(aFeatureSchema.getFeatureValue()));
@@ -455,7 +461,23 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
    */
   public void featureMapUpdated() {
     //the underlying F-map was changed
-    //update all the displays
+    // 1) first make the new FeatureMap compliant with the schema
+    for(Object aFeatureName : new HashSet<Object>(featureMap.keySet())){
+      //first check if the feature is allowed
+      if(featureSchemas.keySet().contains(aFeatureName)){
+        FeatureSchema fSchema = featureSchemas.get(aFeatureName);
+        Object aFeatureValue = featureMap.get(aFeatureName);
+        //check if the value is permitted
+//        fSchema.getValueClassName()
+      }else{
+        //feature not permitted
+        featureMap.remove(aFeatureName);
+      }
+      
+    }
+    
+    
+    // 2) then update all the displays
     for(String featureName : featureEditors.keySet()){
       FeatureEditor aFeatureEditor = featureEditors.get(featureName);
       if(featureMap == null){
@@ -472,6 +494,11 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
    * The feature schema for this editor
    */
   protected AnnotationSchema schema;
+  
+  /**
+   * Stored the individual feature schemas, indexed by name. 
+   */
+  protected Map<String, FeatureSchema> featureSchemas;
   
   /**
    * The feature map currently being edited.

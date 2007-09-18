@@ -202,8 +202,8 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
     boolean isCorrect(){
       if(schema == null) return true;
       FeatureSchema fSchema = schema.getFeatureSchema(name);
-      return fSchema == null || fSchema.getPermissibleValues() == null||
-             fSchema.getPermissibleValues().contains(value);
+      return fSchema == null || fSchema.getPermittedValues() == null||
+             fSchema.getPermittedValues().contains(value);
     }
     boolean isRequired(){
       if(schema == null) return false;
@@ -439,7 +439,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
           List fValues = new ArrayList();
           if(feature.isSchemaFeature()){
             Set permValues = schema.getFeatureSchema(feature.name).
-              getPermissibleValues();
+              getPermittedValues();
             if(permValues != null) fValues.addAll(permValues);
           }
           if(!fValues.contains(feature.value)) fValues.add(feature.value);

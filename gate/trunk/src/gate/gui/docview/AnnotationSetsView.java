@@ -56,9 +56,19 @@ public class AnnotationSetsView extends AbstractDocumentView
   /* (non-Javadoc)
    * @see gate.gui.annedit.AnnotationEditorOwner#annotationTypeChanged(gate.Annotation, java.lang.String, java.lang.String)
    */
-  public void annotationTypeChanged(Annotation ann, String oldType,
+  public void annotationTypeChanged(Annotation ann, AnnotationSet set, 
+          String oldType,
           String newType) {
     lastAnnotationType = newType;
+    //show new annotation type
+    setTypeSelected(set.getName(), ann.getType(), true);
+//    TypeSpec typeSpec = new TypeSpec(set.getName(), ann.getType());
+//    visibleAnnotationTypes.add(typeSpec);
+//    
+//    TypeHandler tHandler = getTypeHandler(set.getName(), ann.getType());
+//    //wait a maximum of 1 second and show the new annotation type
+//    int waitTime = 1000;
+//    if(!tHandler.isSelected()) tHandler.setSelected(true);
   }
 
   /* (non-Javadoc)

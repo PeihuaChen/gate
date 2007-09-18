@@ -35,10 +35,10 @@ public class AnnotationSchema extends AbstractLanguageResource{
   private static final boolean DEBUG = false;
 
   /** A map between XSchema types and Java Types */
-  private static Map<String, String> xSchema2JavaMap;
+  private static Map<String, Class<?>> xSchema2JavaMap;
 
-  /** A map between JAva types and XSchema */
-  private static Map<String, String> java2xSchemaMap;
+  /** A map between Java types and XSchema */
+  private static Map<Class<?>, String> java2xSchemaMap;
 
   /** This sets up two Maps between XSchema types and their coresponding
     * Java types + a DOM xml parser
@@ -46,25 +46,25 @@ public class AnnotationSchema extends AbstractLanguageResource{
   private static void setUpStaticData()
   throws ResourceInstantiationException
   {
-    xSchema2JavaMap = new HashMap<String, String>();
-    java2xSchemaMap = new HashMap<String, String>();
+    xSchema2JavaMap = new HashMap<String, Class<?>>();
+    java2xSchemaMap = new HashMap<Class<?>, String>();
 
-    xSchema2JavaMap.put("string",   String.class.getName());
-    xSchema2JavaMap.put("integer",  Integer.class.getName());
-    xSchema2JavaMap.put("int",      Integer.class.getName() );
-    xSchema2JavaMap.put("boolean",  Boolean.class.getName());
-    xSchema2JavaMap.put("float",    Float.class.getName());
-    xSchema2JavaMap.put("double",   Double.class.getName());
-    xSchema2JavaMap.put("short",    Short.class.getName());
-    xSchema2JavaMap.put("byte",     Byte.class.getName());
+    xSchema2JavaMap.put("string",   String.class);
+    xSchema2JavaMap.put("integer",  Integer.class);
+    xSchema2JavaMap.put("int",      Integer.class);
+    xSchema2JavaMap.put("boolean",  Boolean.class);
+    xSchema2JavaMap.put("float",    Float.class);
+    xSchema2JavaMap.put("double",   Double.class);
+    xSchema2JavaMap.put("short",    Short.class);
+    xSchema2JavaMap.put("byte",     Byte.class);
 
-    java2xSchemaMap.put(String.class.getName(),   "string");
-    java2xSchemaMap.put(Integer.class.getName(),  "integer");
-    java2xSchemaMap.put(Boolean.class.getName(),  "boolean");
-    java2xSchemaMap.put(Float.class.getName(),    "float");
-    java2xSchemaMap.put(Double.class.getName(),   "double");
-    java2xSchemaMap.put(Short.class.getName(),    "short");
-    java2xSchemaMap.put(Byte.class.getName(),     "byte");
+    java2xSchemaMap.put(String.class,   "string");
+    java2xSchemaMap.put(Integer.class,  "integer");
+    java2xSchemaMap.put(Boolean.class,  "boolean");
+    java2xSchemaMap.put(Float.class,    "float");
+    java2xSchemaMap.put(Double.class,   "double");
+    java2xSchemaMap.put(Short.class,    "short");
+    java2xSchemaMap.put(Byte.class,     "byte");
   } //setUpStaticData
 
   /** The name of the annotation */
@@ -228,10 +228,10 @@ public class AnnotationSchema extends AbstractLanguageResource{
   public void createAndAddFeatureSchemaObject(org.jdom.Element
                                                           anAttributeElement) {
     String featureName = null;
-    String featureType = null;
+    Class<?> featureType = null;
     String featureUse  = null;
     String featureValue = null;
-    Set    featurePermissibleValuesSet = null;
+    Set    featurePermittedValuesSet = null;
 
     // Get the value of the name attribute. If this attribute doesn't exists
     // then it will receive a default one.
@@ -240,10 +240,10 @@ public class AnnotationSchema extends AbstractLanguageResource{
       featureName = "UnknownFeature";
 
     // See if it has a type attribute associated
-    featureType = anAttributeElement.getAttributeValue("type");
+    String featureTypeName = anAttributeElement.getAttributeValue("type");
     if (featureType != null)
       // Set it to the corresponding Java type
-      featureType = (String) xSchema2JavaMap.get(featureType);
+      featureType = xSchema2JavaMap.get(featureTypeName);
 
     // Get the value of use attribute
     featureUse = anAttributeElement.getAttributeValue("use");
@@ -268,16 +268,10 @@ public class AnnotationSchema extends AbstractLanguageResource{
                                                          namespace);
       if (restrictionElement != null) {
         // Get the type attribute for restriction element
-        featureType = restrictionElement.getAttributeValue("base");
-
-        // Check to see if that attribute was present. getAttributeValue will
-        // return null if it wasn't present
-        if (featureType == null)
-          // If it wasn't present then set it to default type (string)
-          featureType =  (String) xSchema2JavaMap.get("string");
-        else
-          // Set it to the corresponding Java type
-          featureType = (String) xSchema2JavaMap.get(featureType);
+        featureTypeName = restrictionElement.getAttributeValue("base");
+        if (featureTypeName == null) featureTypeName = "string";
+        // Set it to the corresponding Java type
+        featureType =  xSchema2JavaMap.get(featureTypeName);
 
         // Check to see if there are any enumeration elements inside
         List enumerationElementChildrenList =
@@ -288,14 +282,14 @@ public class AnnotationSchema extends AbstractLanguageResource{
 
         // Check if there is any enumeration element in the list
         if (enumerationChildrenIterator.hasNext())
-            featurePermissibleValuesSet = new HashSet();
+            featurePermittedValuesSet = new HashSet();
         while (enumerationChildrenIterator.hasNext()) {
           org.jdom.Element enumerationElement =
                         (org.jdom.Element) enumerationChildrenIterator.next();
           String permissibleValue =
                             enumerationElement.getAttributeValue("value");
           // Add that value to the featureSchema possible values set.
-          featurePermissibleValuesSet.add(permissibleValue);
+          featurePermittedValuesSet.add(permissibleValue);
         }// end while
       }// end if( restrictionElement != null)
     }// end if (simpleTypeElement != null)
@@ -303,7 +297,7 @@ public class AnnotationSchema extends AbstractLanguageResource{
     // If it doesn't have a simpleTypeElement inside and featureType is null or
     // it wasn't recognised, then we set the default type to string.
     if (simpleTypeElement == null && featureType == null )
-      featureType =  (String) xSchema2JavaMap.get("string");
+      featureType = xSchema2JavaMap.get("string");
 
     // Create an add a featureSchema object
     FeatureSchema featureSchema = new FeatureSchema(
@@ -311,7 +305,7 @@ public class AnnotationSchema extends AbstractLanguageResource{
                                                    featureType,
                                                    featureValue,
                                                    featureUse,
-                                                   featurePermissibleValuesSet);
+                                                   featurePermittedValuesSet);
     featureSchemaSet.add(featureSchema);
   } // createAndAddFeatureSchemaObject
 

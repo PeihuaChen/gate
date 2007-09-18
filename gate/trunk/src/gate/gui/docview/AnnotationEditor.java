@@ -225,7 +225,7 @@ public class AnnotationEditor extends AbstractVisualResource
                   newType, oldAnn.getFeatures());
           Annotation newAnn = set.get(oldId); 
           editAnnotation(newAnn, set);
-          owner.annotationTypeChanged(newAnn, oldAnn.getType(), newType);
+          owner.annotationTypeChanged(newAnn, set, oldAnn.getType(), newType);
         }catch(InvalidOffsetException ioe){
           throw new GateRuntimeException(ioe);
         }
