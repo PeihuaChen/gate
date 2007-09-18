@@ -35,10 +35,10 @@ public class AnnotationSchema extends AbstractLanguageResource{
   private static final boolean DEBUG = false;
 
   /** A map between XSchema types and Java Types */
-  private static Map xSchema2JavaMap;
+  private static Map<String, String> xSchema2JavaMap;
 
   /** A map between JAva types and XSchema */
-  private static Map java2xSchemaMap;
+  private static Map<String, String> java2xSchemaMap;
 
   /** This sets up two Maps between XSchema types and their coresponding
     * Java types + a DOM xml parser
@@ -46,8 +46,8 @@ public class AnnotationSchema extends AbstractLanguageResource{
   private static void setUpStaticData()
   throws ResourceInstantiationException
   {
-    xSchema2JavaMap = new HashMap();
-    java2xSchemaMap = new HashMap();
+    xSchema2JavaMap = new HashMap<String, String>();
+    java2xSchemaMap = new HashMap<String, String>();
 
     xSchema2JavaMap.put("string",   String.class.getName());
     xSchema2JavaMap.put("integer",  Integer.class.getName());
@@ -81,19 +81,19 @@ public class AnnotationSchema extends AbstractLanguageResource{
   } // setAnnotationName
 
   /** Schemas for the attributes */
-  protected Set featureSchemaSet = null;
+  protected Set<FeatureSchema> featureSchemaSet = null;
 
   /** Constructs an annotation schema. */
   public AnnotationSchema(){
   } // AnnotationSchema
 
   /** Returns the feature schema set */
-  public Set getFeatureSchemaSet(){
+  public Set<FeatureSchema> getFeatureSchemaSet(){
     return featureSchemaSet;
   } // getAttributeSchemas
 
   /** Sets the feature schema set */
-  public void setFeatureSchemaSet(Set featureSchemaSet) {
+  public void setFeatureSchemaSet(Set<FeatureSchema> featureSchemaSet) {
     this.featureSchemaSet = featureSchemaSet;
   } // setFeatureSchemaSet
 
@@ -102,11 +102,8 @@ public class AnnotationSchema extends AbstractLanguageResource{
     */
   public FeatureSchema getFeatureSchema(String featureName) {
     if(featureSchemaSet == null) return null;
-    Iterator fsIterator = featureSchemaSet.iterator();
-    while (fsIterator.hasNext()) {
-      FeatureSchema fs = (FeatureSchema) fsIterator.next();
-      if (fs.getFeatureName().equals(featureName) )
-        return fs;
+    for(FeatureSchema fs : featureSchemaSet){
+      if (fs.getFeatureName().equals(featureName)) return fs;      
     }
     return null;
   } // getFeatureSchema
@@ -331,11 +328,9 @@ public class AnnotationSchema extends AbstractLanguageResource{
       schemaString.append("/>\n");
     else {
       schemaString.append(">\n  <complexType>\n");
-      Iterator featureSchemaSetIterator = featureSchemaSet.iterator();
-      while (featureSchemaSetIterator.hasNext()){
-        FeatureSchema fs = (FeatureSchema) featureSchemaSetIterator.next();
+      for(FeatureSchema fs : featureSchemaSet){
         schemaString.append("   " + fs.toXSchema(java2xSchemaMap));
-      }// end while
+      }
       schemaString.append("  </complexType>\n");
       schemaString.append(" </element>\n");
     }// end if else
