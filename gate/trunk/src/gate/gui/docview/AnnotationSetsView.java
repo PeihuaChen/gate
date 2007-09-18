@@ -28,10 +28,14 @@ import javax.swing.table.*;
 import javax.swing.text.*;
 
 import gate.*;
+import gate.creole.ResourceData;
+import gate.creole.ResourceInstantiationException;
 import gate.event.*;
 import gate.event.DocumentEvent;
 import gate.event.DocumentListener;
 import gate.gui.*;
+import gate.gui.annedit.AnnotationEditor;
+import gate.gui.annedit.AnnotationEditorOwner;
 import gate.gui.annedit.SchemaAnnotationEditor;
 import gate.swing.ColorGenerator;
 import gate.swing.XJTable;
@@ -45,9 +49,42 @@ import gate.util.*;
  */
 public class AnnotationSetsView extends AbstractDocumentView 
 		                        implements DocumentListener,
-		                                   AnnotationSetListener{
+		                                   AnnotationSetListener, 
+		                                   AnnotationEditorOwner{
 
   
+  /* (non-Javadoc)
+   * @see gate.gui.annedit.AnnotationEditorOwner#annotationTypeChanged(gate.Annotation, java.lang.String, java.lang.String)
+   */
+  public void annotationTypeChanged(Annotation ann, String oldType,
+          String newType) {
+    lastAnnotationType = newType;
+  }
+
+  /* (non-Javadoc)
+   * @see gate.gui.annedit.AnnotationEditorOwner#getNextAnnotation()
+   */
+  public Annotation getNextAnnotation() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see gate.gui.annedit.AnnotationEditorOwner#getPreviousAnnotation()
+   */
+  public Annotation getPreviousAnnotation() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see gate.gui.annedit.AnnotationEditorOwner#getTextComponent()
+   */
+  public JTextComponent getTextComponent() {
+    // TODO Auto-generated method stub
+    return textPane;
+  }
+
   public AnnotationSetsView(){
     setHandlers = new ArrayList<SetHandler>();
     tableRows = new ArrayList();
@@ -73,7 +110,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     return VERTICAL;
   }
   
-  protected void initGUI() {
+  protected void initGUI(){
     //get a pointer to the textual view used for highlights
     Iterator centralViewsIter = owner.getCentralViews().iterator();
     while(textView == null && centralViewsIter.hasNext()){
@@ -121,7 +158,14 @@ public class AnnotationSetsView extends AbstractDocumentView
     scroller.getViewport().setOpaque(true);
     scroller.getViewport().setBackground(tableBG);    
     
-    annotationEditor = createAnnotationEditor(textView, this);
+    try {
+      annotationEditor = createAnnotationEditor(textView, this);
+    }
+    catch(ResourceInstantiationException e) {
+     //this should not really happen
+      throw new GateRuntimeException(
+              "Could not initialise the annotation editor!", e);
+    }
     
     mainPanel = new JPanel();
     mainPanel.setLayout(new GridBagLayout());
@@ -159,11 +203,41 @@ public class AnnotationSetsView extends AbstractDocumentView
    * @param textView
    * @param asView
    * @return
+   * @throws ResourceInstantiationException 
    */
   protected gate.gui.annedit.AnnotationEditor createAnnotationEditor(TextualDocumentView textView,
-          AnnotationSetsView asView) {
-    return new AnnotationEditor(textView, asView);
-//    return new SchemaAnnotationEditor(textView, asView);
+          AnnotationSetsView asView) throws ResourceInstantiationException {
+    //find the last VR that implements the AnnotationEditor interface
+    List<String> vrTypes = new ArrayList<String>(
+            Gate.getCreoleRegister().getPublicVrTypes());
+    Collections.reverse(vrTypes);
+    for(String aVrType : vrTypes){
+      ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(aVrType);
+      try{
+        if(AnnotationEditor.class.isAssignableFrom(rData.getResourceClass())){
+          Class resClass = rData.getResourceClass();
+          AnnotationEditor newEditor = (AnnotationEditor) resClass.newInstance();
+          newEditor.setOwner(this);
+          newEditor.init();
+          return newEditor;
+        }
+      }catch(ClassNotFoundException cnfe){
+        //ignore
+        Err.prln("Invalid CREOLE data:");
+        cnfe.printStackTrace(Err.getPrintWriter());
+      }
+      catch(InstantiationException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      catch(IllegalAccessException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
+    //if we got this far, we couldn't find an editor
+    Err.prln("Could not find any annotation editors. Editing annotations disabled.");
+    return null;
   }
   
   protected void populateUI(){
@@ -1280,6 +1354,7 @@ public class AnnotationSetsView extends AbstractDocumentView
 
   protected class NewAnnotationAction extends AbstractAction{
     public void actionPerformed(ActionEvent evt){
+      if(annotationEditor == null) return;
       int start = textPane.getSelectionStart();
       int end = textPane.getSelectionEnd();
       if(start != end){
@@ -1546,6 +1621,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected class MouseStoppedMovingAction extends AbstractAction{
     
     public void actionPerformed(ActionEvent evt){
+      if(annotationEditor == null) return;
       //first check for selection hovering
       //if inside selection, add new annotation.
       if(textPane.getSelectionStart() <= textLocation &&
@@ -1673,6 +1749,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     }
     
     public void actionPerformed(ActionEvent evt){
+      if(annotationEditor == null) return;
       //select the annotation being edited in the tabular view
       if(listView != null && listView.isActive() &&
               listView.getGUI().isVisible()){
