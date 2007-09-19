@@ -467,17 +467,32 @@ public class OntologyEditor extends AbstractVisualResource
             }
           });
 
+          int propertyCounter = 0;
+          JMenu whereToAdd = addProperty;
+          
           // finally add properties
           Set<RDFProperty> props = ontology.getPropertyDefinitions();
           Iterator<RDFProperty> iter = props.iterator();
           while(iter.hasNext()) {
             final RDFProperty p = iter.next();
 
+            if(propertyCounter > 10) {
+              JMenu newMenu = new JMenu("More >");
+              whereToAdd.add(newMenu);
+              whereToAdd = newMenu;
+              propertyCounter = 0;
+              whereToAdd.setEnabled(false);
+
+            }
+            
             // if property is an annotation property
             if(p instanceof AnnotationProperty) {
               JMenuItem item = new JMenuItem(p.getName(), MainFrame
                       .getIcon("ontology-annotation-property"));
-              addProperty.add(item);
+              whereToAdd.setEnabled(true);
+              whereToAdd.add(item);
+              propertyCounter++;
+              
               item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ae) {
                   String value = JOptionPane.showInputDialog(null,
@@ -500,7 +515,10 @@ public class OntologyEditor extends AbstractVisualResource
                     && p.isValidDomain(candidate)) {
               JMenuItem item = new JMenuItem(p.getName(), MainFrame
                       .getIcon("ontology-datatype-property"));
-              addProperty.add(item);
+              whereToAdd.add(item);
+              whereToAdd.setEnabled(true);
+              propertyCounter++;
+
               item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ae) {
                   String value = JOptionPane.showInputDialog(null,
@@ -540,7 +558,9 @@ public class OntologyEditor extends AbstractVisualResource
                     && p.isValidDomain(candidate)) {
               JMenuItem item = new JMenuItem(p.getName(), MainFrame
                       .getIcon("ontology-object-property"));
-              addProperty.add(item);
+              whereToAdd.add(item);
+              whereToAdd.setEnabled(true);
+              propertyCounter++;
               item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ae) {
                   Set<OInstance> instances = ontology.getOInstances();
@@ -669,12 +689,29 @@ public class OntologyEditor extends AbstractVisualResource
           JMenu addProperty = new JMenu("Properties");
           Set<RDFProperty> rdfprops = ontology.getPropertyDefinitions();
           Iterator<RDFProperty> iter = props.iterator();
+          
+          JMenu whereToAdd = addProperty;
+          int propertyCounter = 0;
+          
           while(iter.hasNext()) {
             final RDFProperty p = iter.next();
+            
+            if(propertyCounter > 10) {
+              JMenu newMenu = new JMenu("More >");
+              whereToAdd.add(newMenu);
+              whereToAdd = newMenu;
+              propertyCounter = 0;
+              whereToAdd.setEnabled(false);
+            }
+            
+            
             if(p instanceof AnnotationProperty) {
               JMenuItem item = new JMenuItem(p.getName(), MainFrame
                       .getIcon("ontology-annotation-property"));
-              addProperty.add(item);
+              whereToAdd.add(item);
+              whereToAdd.setEnabled(true);
+              propertyCounter++;
+              
               item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ae) {
                   String value = JOptionPane.showInputDialog(null,

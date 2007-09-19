@@ -512,17 +512,26 @@ public class OWLIMServiceImpl implements OWLIM,
     // we just need to check if any of these subclasses is a super class of the sub class
     // if so, return false, otherwise true.
     boolean atleastOne = false;
+    boolean foundSameObject = false;
+    boolean foundEquivalentObject = false;
     while(iter.hasNext()) {
 
       // here subject is a subclass
       Statement stmt = iter.next();
-      if(stmt.getSubject().toString().equals(theSuperClassURI)) continue;
-      if(sail.hasStatement(getResource(theSuperClassURI),
-              getURI(OWL.EQUIVALENTCLASS), getResource(stmt.getSubject().toString()))) continue;
+      if(!foundSameObject && stmt.getSubject().toString().equals(theSuperClassURI)) {
+        foundSameObject = true;
+        continue;
+      }
+      
+      if(!foundEquivalentObject && sail.hasStatement(getResource(theSuperClassURI),
+              getURI(OWL.EQUIVALENTCLASS), getResource(stmt.getSubject().toString()))) {
+        foundEquivalentObject = true;
+        continue;
+      }
 
       atleastOne = true;
       
-      if(isSuperClassOf(repositoryID, stmt.getSubject().toString(), theSubClassURI, OConstants.TRANSITIVE_CLOSURE)) {
+      if(isSuperClassOf(null, stmt.getSubject().toString(), theSubClassURI, OConstants.TRANSITIVE_CLOSURE)) {
         return false;
       }
     }
@@ -560,7 +569,7 @@ public class OWLIMServiceImpl implements OWLIM,
           String thePropertyURI) throws GateOntologyException {
     loadRepositoryDetails(repositoryID);
     // here we need to check which type of property it is
-    return createPropertyObject(repositoryID, thePropertyURI);
+    return createPropertyObject(null, thePropertyURI);
   }
 
   /**
@@ -645,8 +654,8 @@ public class OWLIMServiceImpl implements OWLIM,
             getResource(RDF.PROPERTY));
 
     ResourceInfo[] superClasses = new ResourceInfo[0];
-    if(hasClass(repositoryID, theResourceURI)) {
-      superClasses = getSuperClasses(repositoryID, theResourceURI,
+    if(hasClass(null, theResourceURI)) {
+      superClasses = getSuperClasses(null, theResourceURI,
               OConstants.TRANSITIVE_CLOSURE);
     }
     while(iter.hasNext()) {
@@ -654,11 +663,11 @@ public class OWLIMServiceImpl implements OWLIM,
       Resource anAnnProp = stmt.getSubject();
       // lets check if the property is indeed an rdf property and not
       // any other
-      if(isAnnotationProperty(repositoryID, anAnnProp.toString()))
+      if(isAnnotationProperty(null, anAnnProp.toString()))
         continue;
-      else if(isDatatypeProperty(repositoryID, anAnnProp.toString()))
+      else if(isDatatypeProperty(null, anAnnProp.toString()))
         continue;
-      else if(isObjectProperty(repositoryID, anAnnProp.toString())) continue;
+      else if(isObjectProperty(null, anAnnProp.toString())) continue;
 
       // for this property, check if there is any value available for
       // the
@@ -692,8 +701,8 @@ public class OWLIMServiceImpl implements OWLIM,
     StatementIterator iter = sail.getStatements(null, getURI(RDF.TYPE),
             getResource(OWL.DATATYPEPROPERTY));
     ResourceInfo[] superClasses = new ResourceInfo[0];
-    if(hasClass(repositoryID, theResourceURI)) {
-      superClasses = getSuperClasses(repositoryID, theResourceURI,
+    if(hasClass(null, theResourceURI)) {
+      superClasses = getSuperClasses(null, theResourceURI,
               OConstants.TRANSITIVE_CLOSURE);
     }
     while(iter.hasNext()) {
@@ -733,8 +742,8 @@ public class OWLIMServiceImpl implements OWLIM,
     StatementIterator iter = sail.getStatements(null, getURI(RDF.TYPE),
             getResource(OWL.OBJECTPROPERTY));
     ResourceInfo[] superClasses = new ResourceInfo[0];
-    if(hasClass(repositoryID, theResourceURI)) {
-      superClasses = getSuperClasses(repositoryID, theResourceURI,
+    if(hasClass(null, theResourceURI)) {
+      superClasses = getSuperClasses(null, theResourceURI,
               OConstants.TRANSITIVE_CLOSURE);
     }
     while(iter.hasNext()) {
@@ -775,8 +784,8 @@ public class OWLIMServiceImpl implements OWLIM,
     StatementIterator iter = sail.getStatements(null, getURI(RDF.TYPE),
             getResource(OWL.TRANSITIVEPROPERTY));
     ResourceInfo[] superClasses = new ResourceInfo[0];
-    if(hasClass(repositoryID, theResourceURI)) {
-      superClasses = getSuperClasses(repositoryID, theResourceURI,
+    if(hasClass(null, theResourceURI)) {
+      superClasses = getSuperClasses(null, theResourceURI,
               OConstants.TRANSITIVE_CLOSURE);
     }
     while(iter.hasNext()) {
@@ -816,8 +825,8 @@ public class OWLIMServiceImpl implements OWLIM,
     StatementIterator iter = sail.getStatements(null, getURI(RDF.TYPE),
             getResource(OWL.SYMMETRICPROPERTY));
     ResourceInfo[] superClasses = new ResourceInfo[0];
-    if(hasClass(repositoryID, theResourceURI)) {
-      superClasses = getSuperClasses(repositoryID, theResourceURI,
+    if(hasClass(null, theResourceURI)) {
+      superClasses = getSuperClasses(null, theResourceURI,
               OConstants.TRANSITIVE_CLOSURE);
     }
     while(iter.hasNext()) {
@@ -958,10 +967,10 @@ public class OWLIMServiceImpl implements OWLIM,
               "No annotation property found with the URI :"
                       + theAnnotationPropertyURI);
     }
-    startTransaction(repositoryID);
+    startTransaction(null);
     removeUULStatement(theResourceURI, theAnnotationPropertyURI, value,
             language);
-    endTransaction(repositoryID);
+    endTransaction(null);
   }
 
   /**
@@ -981,10 +990,10 @@ public class OWLIMServiceImpl implements OWLIM,
                 "No annotation property found with the URI :"
                         + theAnnotationPropertyURI);
       }
-      startTransaction(repositoryID);
+      startTransaction(null);
       sail.removeStatements(getResource(theResourceURI),
               getURI(theAnnotationPropertyURI), null);
-      endTransaction(repositoryID);
+      endTransaction(null);
     }
     catch(SailUpdateException e) {
       throw new GateOntologyException(e);
@@ -1144,17 +1153,24 @@ public class OWLIMServiceImpl implements OWLIM,
       iter = sail.getSubPropertyOf(getResource(aPropertyURI), null);
     }
     ArrayList<Property> properties = new ArrayList<Property>();
+    boolean foundSameObject = false;
+    boolean foundEquivalentObject = false;
+
     while(iter.hasNext()) {
       Statement stmt = iter.next();
       String aSuperProperty = stmt.getObject().toString();
-      if(aSuperProperty.equals(aPropertyURI)) {
+      if(!foundSameObject && aSuperProperty.equals(aPropertyURI)) {
+        foundSameObject = true;
         continue;
       }
 
-      if(sail.hasStatement(stmt.getSubject(), getURI(OWL.EQUIVALENTPROPERTY),
-              stmt.getObject())) continue;
+      if(!foundEquivalentObject && sail.hasStatement(stmt.getSubject(), getURI(OWL.EQUIVALENTPROPERTY),
+              stmt.getObject())) {
+        foundEquivalentObject = true;
+        continue;
+      }
 
-      byte type = getPropertyType(repositoryID, aSuperProperty);
+      byte type = getPropertyType(null, aSuperProperty);
       properties.add(new Property(type, aSuperProperty));
     }
     return listToPropertyArray(properties);
@@ -1178,17 +1194,24 @@ public class OWLIMServiceImpl implements OWLIM,
       iter = sail.getSubPropertyOf(null, getResource(aPropertyURI));
     }
     ArrayList<Property> properties = new ArrayList<Property>();
+    boolean foundSameObject = false;
+    boolean foundEquivalentObject = false;
+
     while(iter.hasNext()) {
       Statement stmt = iter.next();
       String aSubProperty = stmt.getSubject().toString();
-      if(aSubProperty.equals(aPropertyURI)) {
+      if(!foundSameObject && aSubProperty.equals(aPropertyURI)) {
+        foundSameObject = true;
         continue;
       }
 
-      if(sail.hasStatement(stmt.getSubject(), getURI(OWL.EQUIVALENTPROPERTY),
-              stmt.getObject())) continue;
+      if(!foundEquivalentObject && sail.hasStatement(stmt.getSubject(), getURI(OWL.EQUIVALENTPROPERTY),
+              stmt.getObject())) {
+        foundEquivalentObject = true;
+        continue;
+      }
 
-      byte type = getPropertyType(repositoryID, aSubProperty);
+      byte type = getPropertyType(null, aSubProperty);
       properties.add(new Property(type, aSubProperty));
     }
     return listToPropertyArray(properties);
@@ -1253,14 +1276,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public boolean hasIndividual(String repositoryID, String aSuperClassURI,
           String individualURI, byte direct) throws GateOntologyException {
-    loadRepositoryDetails(repositoryID);
-    StatementIterator iter = null;
-    if(direct == OConstants.DIRECT_CLOSURE)
-      iter = sail.getDirectType(getResource(individualURI),
-              getResource(aSuperClassURI));
-    else iter = sail.getType(getResource(individualURI),
-            getResource(aSuperClassURI));
-    return iter.hasNext();
+    return this.hasIndividual(repositoryID, aSuperClassURI, individualURI,direct == OConstants.DIRECT_CLOSURE);
   }
 
   /**
@@ -1327,9 +1343,9 @@ public class OWLIMServiceImpl implements OWLIM,
           String anRDFPropertyURI, String aResourceURI)
           throws GateOntologyException {
     loadRepositoryDetails(repositoryID);
-    startTransaction(repositoryID);
+    startTransaction(null);
     removeUUUStatement(anInstanceURI, anRDFPropertyURI, aResourceURI);
-    endTransaction(repositoryID);
+    endTransaction(null);
   }
 
   /**
@@ -1415,9 +1431,9 @@ public class OWLIMServiceImpl implements OWLIM,
       throw new GateOntologyException("No datatype property exists with URI :"
               + aDatatypePropertyURI);
     }
-    startTransaction(repositoryID);
+    startTransaction(null);
     removeUUDStatement(anInstanceURI, aDatatypePropertyURI, value, datatypeURI);
-    endTransaction(repositoryID);
+    endTransaction(null);
   }
 
   /**
@@ -1465,9 +1481,9 @@ public class OWLIMServiceImpl implements OWLIM,
       throw new GateOntologyException("No datatype property exists with URI :"
               + aDatatypePropertyURI);
     }
-    startTransaction(repositoryID);
+    startTransaction(null);
     removeUUUStatement(anInstanceURI, aDatatypePropertyURI, null);
-    endTransaction(repositoryID);
+    endTransaction(null);
   }
 
   // ******************
@@ -1513,10 +1529,10 @@ public class OWLIMServiceImpl implements OWLIM,
               + anObjectPropertyURI);
     }
 
-    startTransaction(repositoryID);
+    startTransaction(null);
     removeUUUStatement(sourceInstanceURI, anObjectPropertyURI,
             theValueInstanceURI);
-    endTransaction(repositoryID);
+    endTransaction(null);
   }
 
   /**
@@ -1532,8 +1548,8 @@ public class OWLIMServiceImpl implements OWLIM,
           String sourceInstanceURI, String anObjectPropertyURI)
           throws GateOntologyException {
     if(!isObjectProperty(repositoryID, anObjectPropertyURI)
-            && !isTransitiveProperty(repositoryID, anObjectPropertyURI)
-            && !isSymmetricProperty(repositoryID, anObjectPropertyURI)) {
+            && !isTransitiveProperty(null, anObjectPropertyURI)
+            && !isSymmetricProperty(null, anObjectPropertyURI)) {
       throw new GateOntologyException(
               "No object/transitive/symmetric property exists with URI :"
                       + anObjectPropertyURI);
@@ -1563,9 +1579,9 @@ public class OWLIMServiceImpl implements OWLIM,
       throw new GateOntologyException("No object property exists with URI :"
               + anObjectPropertyURI);
     }
-    startTransaction(repositoryID);
+    startTransaction(null);
     removeUUUStatement(sourceInstanceURI, anObjectPropertyURI, null);
-    endTransaction(repositoryID);
+    endTransaction(null);
   }
 
   /** This should be called by axis after each call to the operator?* */
@@ -1848,7 +1864,7 @@ public class OWLIMServiceImpl implements OWLIM,
     RepositoryConfig rc = service.getSystemConfig().getRepositoryConfig(
             currentRepository.getRepositoryId());
     if(rc == null) return;
-    startTransaction(repositoryID);
+    startTransaction(null);
     try {
       sail.clearRepository();
     }
@@ -1856,7 +1872,7 @@ public class OWLIMServiceImpl implements OWLIM,
       throw new GateOntologyException(sue);
     }
 
-    endTransaction(repositoryID);
+    endTransaction(null);
   }
 
   /**
@@ -1966,57 +1982,57 @@ public class OWLIMServiceImpl implements OWLIM,
     }
 
     try {
-      startTransaction(repositoryID);
+      startTransaction(null);
       sail.removeStatements(getResource(classURI), getURI(RDFS.SUBCLASSOF),
               null);
-      endTransaction(repositoryID);
+      endTransaction(null);
     }
     catch(SailUpdateException sue) {
       throw new GateOntologyException(sue.getMessage());
     }
-    ResourceInfo[] subClasses = getSubClasses(repositoryID, classURI,
+    ResourceInfo[] subClasses = getSubClasses(null, classURI,
             OConstants.DIRECT_CLOSURE);
     for(int i = 0; i < subClasses.length; i++) {
-      String[] removedResources = removeClass(repositoryID, subClasses[i]
+      String[] removedResources = removeClass(null, subClasses[i]
               .getUri());
       deletedResources.addAll(Arrays.asList(removedResources));
     }
-    String[] individuals = getIndividuals(repositoryID, classURI,
+    String[] individuals = getIndividuals(null, classURI,
             OConstants.DIRECT_CLOSURE);
     for(int i = 0; i < individuals.length; i++) {
-      String[] removedResources = removeIndividual(repositoryID, individuals[i]);
+      String[] removedResources = removeIndividual(null, individuals[i]);
       deletedResources.addAll(Arrays.asList(removedResources));
     }
-    startTransaction(repositoryID);
+    startTransaction(null);
     StatementIterator iter = sail.getStatements(null, getURI(RDFS.DOMAIN),
             getResource(classURI));
-    endTransaction(repositoryID);
+    endTransaction(null);
     while(iter.hasNext()) {
       Statement stmt = iter.next();
       Resource resource = stmt.getSubject();
-      String[] removedResources = removePropertyFromOntology(repositoryID,
+      String[] removedResources = removePropertyFromOntology(null,
               resource.toString());
       deletedResources.addAll(Arrays.asList(removedResources));
     }
-    startTransaction(repositoryID);
+    startTransaction(null);
     iter = sail.getStatements(null, getURI(RDFS.RANGE), getResource(classURI));
-    endTransaction(repositoryID);
+    endTransaction(null);
     while(iter.hasNext()) {
       Statement stmt = iter.next();
       Resource resource = stmt.getSubject();
-      String[] removedResources = removePropertyFromOntology(repositoryID,
+      String[] removedResources = removePropertyFromOntology(null,
               resource.toString());
       deletedResources.addAll(Arrays.asList(removedResources));
     }
     // finaly remove all statements concerning this resource
     try {
-      startTransaction(repositoryID);
+      startTransaction(null);
       sail.removeStatements(getResource(classURI), null, null);
       if(!(getResource(classURI) instanceof BNode))
         sail.removeStatements(null, getURI(classURI), null);
       sail.removeStatements(null, null, getResource(classURI));
 
-      endTransaction(repositoryID);
+      endTransaction(null);
     }
     catch(SailUpdateException sue) {
       throw new GateOntologyException(sue);
@@ -2057,7 +2073,7 @@ public class OWLIMServiceImpl implements OWLIM,
       Resource uri = null;
       uri = getResource(statement.getSubject().toString());
       if(top) {
-        if(!isTopClass(repositoryID, uri.toString())) {
+        if(!isTopClass(null, uri.toString())) {
           continue;
         }
       }
@@ -2081,11 +2097,20 @@ public class OWLIMServiceImpl implements OWLIM,
     Resource resource = getResource(classURI);
     StatementIterator iter = sail.getSubClassOf(resource, null);
     boolean result = true;
+    boolean foundSameObject = false;
+    boolean foundEquivalentObject = false;
+
     while(iter.hasNext()) {
       Statement stmt = iter.next();
-      if(stmt.getObject().toString().equals(classURI)) continue;
-      if(sail.getStatements(stmt.getSubject(), getURI(OWL.EQUIVALENTCLASS),
-              stmt.getObject()).hasNext()) continue;
+      if(!foundSameObject && stmt.getObject().toString().equals(classURI)) {
+        foundSameObject = true;
+        continue;
+      }
+      if(!foundEquivalentObject && sail.getStatements(stmt.getSubject(), getURI(OWL.EQUIVALENTCLASS),
+              stmt.getObject()).hasNext()) {
+        foundEquivalentObject = true;
+        continue;
+      }
       
       // if the parent class is an instance of BNode we still consider
       // the object to be a top class
@@ -2182,7 +2207,7 @@ public class OWLIMServiceImpl implements OWLIM,
     List<Value> list = new ArrayList<Value>();
     while(iter.hasNext()) {
       Statement stmt = (Statement)iter.next();
-      if(isSubClassOf(repositoryID, superClassURI, stmt.getSubject().toString(), direct)) {
+      if(isSubClassOf(null, superClassURI, stmt.getSubject().toString(), direct)) {
         list.add(stmt.getSubject());
       }
     }
@@ -2207,7 +2232,7 @@ public class OWLIMServiceImpl implements OWLIM,
     List<Value> list = new ArrayList<Value>();
     while(iter.hasNext()) {
       Statement stmt = (Statement)iter.next();
-      if(isSubClassOf(repositoryID, stmt.getObject().toString(), subClassURI, direct)) {
+      if(isSubClassOf(null, stmt.getObject().toString(), subClassURI, direct)) {
         list.add(stmt.getObject());
       }
     }
@@ -2302,22 +2327,22 @@ public class OWLIMServiceImpl implements OWLIM,
     }
 
     try {
-      startTransaction(repositoryID);
+      startTransaction(null);
       // removing all values set for the current property
       sail.removeStatements(null, getURI(aPropertyURI), null);
       sail.removeStatements(getResource(aPropertyURI),
               getURI(RDFS.SUBPROPERTYOF), null);
-      endTransaction(repositoryID);
+      endTransaction(null);
     }
     catch(SailUpdateException sue) {
       throw new GateOntologyException(sue);
     }
-    Property[] subProps = getSubProperties(repositoryID, aPropertyURI,
+    Property[] subProps = getSubProperties(null, aPropertyURI,
             OConstants.DIRECT_CLOSURE);
     for(int i = 0; i < subProps.length; i++) {
       if(sail.hasExplicitStatement(getResource(subProps[i].getUri()),
               getURI(RDF.TYPE), null)) continue;
-      String[] removedResources = removePropertyFromOntology(repositoryID,
+      String[] removedResources = removePropertyFromOntology(null,
               subProps[i].getUri());
       deletedResources.addAll(Arrays.asList(removedResources));
     }
@@ -2399,10 +2424,10 @@ public class OWLIMServiceImpl implements OWLIM,
       Statement stmt = (Statement)iter.next();
       // we also need to check that the property is neither of the
       // annotation, datatype or object property
-      if(isObjectProperty(repositoryID, stmt.getSubject().toString())
-              || isAnnotationProperty(repositoryID, stmt.getSubject()
+      if(isObjectProperty(null, stmt.getSubject().toString())
+              || isAnnotationProperty(null, stmt.getSubject()
                       .toString())
-              || isDatatypeProperty(repositoryID, stmt.getSubject().toString()))
+              || isDatatypeProperty(null, stmt.getSubject().toString()))
         continue;
 
       Property prop = new Property(OConstants.RDF_PROPERTY, stmt.getSubject()
@@ -2592,7 +2617,7 @@ public class OWLIMServiceImpl implements OWLIM,
       }
       list.add(new ResourceInfo(stmt.getObject().toString(), classType));
     }
-    return reduceToMostSpecificClasses(repositoryID, list);
+    return reduceToMostSpecificClasses(null, list);
   }
 
   /**
@@ -2608,7 +2633,7 @@ public class OWLIMServiceImpl implements OWLIM,
       throw new GateOntologyException(
               "AnnotationProperties do no specify any domain or range");
     }
-    if(isDatatypeProperty(repositoryID, aPropertyURI)) {
+    if(isDatatypeProperty(null, aPropertyURI)) {
       throw new GateOntologyException(
               "Please use getDatatype(String repositoryID, String theDatatypeProerptyURI) method instead");
     }
@@ -2647,7 +2672,7 @@ public class OWLIMServiceImpl implements OWLIM,
       }
       list.add(new ResourceInfo(stmt.getObject().toString(), classType));
     }
-    return reduceToMostSpecificClasses(repositoryID, list);
+    return reduceToMostSpecificClasses(null, list);
   }
 
   /**
@@ -2809,7 +2834,7 @@ public class OWLIMServiceImpl implements OWLIM,
     List<Property> list = new ArrayList<Property>();
     while(iter.hasNext()) {
       Statement stmt = (Statement)iter.next();
-      list.add(createPropertyObject(repositoryID, stmt.getObject().toString()));
+      list.add(createPropertyObject(null, stmt.getObject().toString()));
     }
     return listToPropertyArray(list);
   }
@@ -2879,19 +2904,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public Property[] getSuperProperties(String repositoryID,
           String aPropertyURI, boolean direct) throws GateOntologyException {
-    if(DEBUG) print("getSuperProperties");
-    loadRepositoryDetails(repositoryID);
-    StatementIterator iter = null;
-    if(direct)
-      iter = sail.getDirectSubPropertyOf(getResource(aPropertyURI), null);
-    else iter = sail.getSubPropertyOf(getResource(aPropertyURI), null);
-    List<Property> list = new ArrayList<Property>();
-    while(iter.hasNext()) {
-      Statement stmt = iter.next();
-      if(stmt.getObject().toString().equalsIgnoreCase(aPropertyURI)) continue;
-      list.add(createPropertyObject(repositoryID, stmt.getObject().toString()));
-    }
-    return listToPropertyArray(list);
+    return this.getSuperProperties(repositoryID, aPropertyURI, direct ? OConstants.DIRECT_CLOSURE : OConstants.TRANSITIVE_CLOSURE);
   }
 
   /**
@@ -2903,21 +2916,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public Property[] getSubProperties(String repositoryID, String aPropertyURI,
           boolean direct) throws GateOntologyException {
-    if(DEBUG) print("getSubProperties");
-    loadRepositoryDetails(repositoryID);
-    StatementIterator iter = null;
-    if(direct)
-      iter = sail.getDirectSubPropertyOf(null, getResource(aPropertyURI));
-    else iter = sail.getSubPropertyOf(null, getResource(aPropertyURI));
-    List<Property> list = new ArrayList<Property>();
-    while(iter.hasNext()) {
-      Statement stmt = iter.next();
-      if(stmt.getSubject().toString().equals(aPropertyURI)) continue;
-      list
-              .add(createPropertyObject(repositoryID, stmt.getSubject()
-                      .toString()));
-    }
-    return listToPropertyArray(list);
+    return this.getSubProperties(repositoryID, aPropertyURI, direct ? OConstants.DIRECT_CLOSURE : OConstants.TRANSITIVE_CLOSURE);
   }
 
   /**
@@ -2935,7 +2934,7 @@ public class OWLIMServiceImpl implements OWLIM,
             getURI(OWL.INVERSEOF), null);
     List<Property> list = new ArrayList<Property>();
     while(iter.hasNext()) {
-      list.add(createPropertyObject(repositoryID, ((Statement)iter.next())
+      list.add(createPropertyObject(null, ((Statement)iter.next())
               .getObject().toString()));
     }
     return listToPropertyArray(list);
@@ -2990,14 +2989,14 @@ public class OWLIMServiceImpl implements OWLIM,
     // check if they have property with value the current resource
     // we need to delete it
     List<Property> properties = new ArrayList<Property>();
-    properties.addAll(Arrays.asList(getObjectProperties(repositoryID)));
+    properties.addAll(Arrays.asList(getObjectProperties(null)));
     try {
-      startTransaction(repositoryID);
+      startTransaction(null);
       for(int i = 0; i < properties.size(); i++) {
         sail.removeStatements(null, getURI(properties.get(i).getUri()),
                 getResource(individualURI));
       }
-      endTransaction(repositoryID);
+      endTransaction(null);
     }
     catch(SailUpdateException sue) {
       throw new GateOntologyException(sue);
@@ -3021,16 +3020,17 @@ public class OWLIMServiceImpl implements OWLIM,
     if(DEBUG) print("getIndividulas");
     loadRepositoryDetails(repositoryID);
     StatementIterator iter = null;
-    if(direct == OConstants.DIRECT_CLOSURE)
-      iter = sail.getDirectType(null, getResource(superClassURI));
-    else iter = sail.getType(null, getResource(superClassURI));
+    iter = sail.getType(null, getResource(superClassURI));
     List<String> list = new ArrayList<String>();
     while(iter.hasNext()) {
       Resource res = iter.next().getSubject();
-
       String subjectString = res.toString();
-      if(hasClass(repositoryID, subjectString)) continue;
-      list.add(subjectString);
+      if(hasClass(null, subjectString)) continue;
+      if(direct != OConstants.DIRECT_CLOSURE)
+        list.add(subjectString);
+      else if(hasIndividual(null, superClassURI, subjectString, direct)) {
+        list.add(subjectString);
+      }
     }
     return listToArray(list);
   }
@@ -3044,11 +3044,11 @@ public class OWLIMServiceImpl implements OWLIM,
           throws GateOntologyException {
     if(DEBUG) print("getIndividuals");
     loadRepositoryDetails(repositoryID);
-    ResourceInfo[] classes = getClasses(repositoryID, false);
+    ResourceInfo[] classes = getClasses(null, false);
     List<String> list = new ArrayList<String>();
     for(int i = 0; i < classes.length; i++) {
       if(hasSystemNameSpace(classes[i].getUri())) continue;
-      String[] individuals = getIndividuals(repositoryID, classes[i].getUri(),
+      String[] individuals = getIndividuals(null, classes[i].getUri(),
               OConstants.DIRECT_CLOSURE);
       for(int m = 0; m < individuals.length; m++) {
         list.add(individuals[m]);
@@ -3070,10 +3070,29 @@ public class OWLIMServiceImpl implements OWLIM,
   public boolean hasIndividual(String repositoryID, String aSuperClassURI,
           String individualURI, boolean direct) throws GateOntologyException {
     if(DEBUG) print("hasIndividual");
+    
     loadRepositoryDetails(repositoryID);
     if(direct) {
-      return sail.isDirectType(getResource(individualURI),
-              getResource(aSuperClassURI));
+      StatementIterator subClassIter = sail.getSubClassOf(null, getResource(aSuperClassURI));
+      boolean foundSameObject = false;
+      boolean foundEquivalentObject = false;
+      
+      while(subClassIter.hasNext()) {
+        Statement stmt1 = subClassIter.next();
+        if(!foundSameObject && stmt1.getSubject().toString().equals(aSuperClassURI)) {
+          foundSameObject = true;
+          continue;
+        }
+        if(!foundEquivalentObject && sail.hasStatement(stmt1.getSubject(), getURI(OWL.EQUIVALENTCLASS), getResource(aSuperClassURI))) {
+          foundEquivalentObject = true;
+          continue;
+        }
+        
+        if(sail.hasStatement(getResource(individualURI), getURI(RDF.TYPE), stmt1.getSubject())) {
+          return false;
+        }
+      }
+      return true;
     }
     else {
       return sail.isType(getResource(individualURI),
@@ -3092,17 +3111,17 @@ public class OWLIMServiceImpl implements OWLIM,
     if(DEBUG) print("getClassesOfIndividual");
     loadRepositoryDetails(repositoryID);
     StatementIterator iter = null;
-    if(direct == OConstants.DIRECT_CLOSURE) {
-      iter = sail.getDirectType(getResource(individualURI), null);
-    }
-    else {
-      iter = sail.getType(getResource(individualURI), null);
-    }
+    iter = sail.getType(getResource(individualURI), null);
     List<Value> list = new ArrayList<Value>();
     while(iter.hasNext()) {
       Statement stmt = iter.next();
-
-      list.add(stmt.getObject());
+      if(direct != OConstants.DIRECT_CLOSURE) {
+        list.add(stmt.getObject());
+      } else {
+        if(hasIndividual(null, stmt.getObject().toString(), individualURI, direct)) {
+          list.add(stmt.getObject());  
+        }
+      }
     }
     return listToResourceInfoArray(list);
   }
@@ -3200,7 +3219,7 @@ public class OWLIMServiceImpl implements OWLIM,
             getURI(OWL.ONPROPERTY), null);
     if(iter.hasNext()) {
       // here we need to check which type of property it is
-      return createPropertyObject(repositoryId, iter.next().getObject()
+      return createPropertyObject(null, iter.next().getObject()
               .toString());
     }
     return null;
@@ -3467,7 +3486,7 @@ public class OWLIMServiceImpl implements OWLIM,
       classType = OConstants.MAX_CARDINALITY_RESTRICTION;
     }
     else {
-      if(hasClass(repositoryID, restrictionURI)) {
+      if(hasClass(null, restrictionURI)) {
         if(res instanceof BNode) {
           classType = OConstants.ANNONYMOUS_CLASS;
         }
@@ -3644,33 +3663,24 @@ public class OWLIMServiceImpl implements OWLIM,
 
   public void startTransaction(String repositoryID)
           throws GateOntologyException {
-    if(repositoryID != null) {
-      loadRepositoryDetails(repositoryID);
-    }
-
+    loadRepositoryDetails(repositoryID);
     if(!sail.transactionStarted()) sail.startTransaction();
   }
 
   public void endTransaction(String repositoryID) throws GateOntologyException {
-    if(repositoryID != null) {
-      loadRepositoryDetails(repositoryID);
-    }
+    loadRepositoryDetails(repositoryID);
     if(sail.transactionStarted()) sail.commitTransaction();
   }
 
   public boolean transactionStarted(String repositoryID)
           throws GateOntologyException {
-    if(repositoryID != null) {
-      loadRepositoryDetails(repositoryID);
-    }
+    loadRepositoryDetails(repositoryID);
     return sail.transactionStarted();
   }
 
   public void commitTransaction(String repositoryID)
           throws GateOntologyException {
-    if(repositoryID != null) {
-      loadRepositoryDetails(repositoryID);
-    }
+    loadRepositoryDetails(repositoryID);
 
     if(sail != null && sail.transactionStarted()) {
       // we need to commit all changes
@@ -3757,9 +3767,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public boolean isImplicitResource(String repositoryID, String resourceURI)
           throws GateOntologyException {
-    if(repositoryID != null) {
-      loadRepositoryDetails(repositoryID);
-    }
+    loadRepositoryDetails(repositoryID);
     return !sail.hasExplicitStatement(getResource(resourceURI),
             getURI(RDF.TYPE), null);
   }
@@ -3881,13 +3889,13 @@ public class OWLIMServiceImpl implements OWLIM,
     if(isObjectProperty(repositoryID, uri)) {
       type = OConstants.OBJECT_PROPERTY;
     }
-    else if(isDatatypeProperty(repositoryID, uri)) {
+    else if(isDatatypeProperty(null, uri)) {
       type = OConstants.DATATYPE_PROPERTY;
     }
-    else if(isTransitiveProperty(repositoryID, uri)) {
+    else if(isTransitiveProperty(null, uri)) {
       type = OConstants.TRANSITIVE_PROPERTY;
     }
-    else if(isSymmetricProperty(repositoryID, uri)) {
+    else if(isSymmetricProperty(null, uri)) {
       type = OConstants.SYMMETRIC_PROPERTY;
     }
     else if(sail.isProperty(getResource(uri))) {
@@ -4010,7 +4018,7 @@ public class OWLIMServiceImpl implements OWLIM,
           String ontoFileUrl, String baseURI, byte format,
           String absolutePersistLocation, boolean isOntologyData,
           Set<String> parsedValues) {
-    System.out.println("Importing : " + ontoFileUrl);
+    if(!isOntologyData) System.out.println("Importing : " + ontoFileUrl);
     String baseUrl = ontoFileUrl;
     ArrayList<String> toReturn = new ArrayList<String>();
     try {
@@ -4236,9 +4244,6 @@ public class OWLIMServiceImpl implements OWLIM,
         for(String imValue : importValues) {
           imports += ";" + imValue;
           defaultNS += ";" + imValue + "#";
-//                  + (imValue.startsWith("http:")
-//                          ? imValue
-//                          : "http://www.gate.ac.uk/owlim") + "#";
         }
       }
       map.put("imports", imports);
@@ -4366,11 +4371,14 @@ public class OWLIMServiceImpl implements OWLIM,
 
   private void loadRepositoryDetails(String repositoryID)
           throws GateOntologyException {
+    if(sail != null && repositoryID == null) return;
     RepositoryDetails rd = mapToRepositoryDetails.get(repositoryID);
     if(rd == null) {
       throw new GateOntologyException("Repository :" + repositoryID
               + " does not exist");
     }
+    if(currentRepository == rd.repository) return;
+    
     currentRepository = rd.repository;
     sail = rd.sail;
     ontologyUrl = rd.ontologyUrl;
@@ -4381,13 +4389,13 @@ public class OWLIMServiceImpl implements OWLIM,
           throws GateOntologyException {
     if(isDatatypeProperty(repositoryID, aPropertyURI))
       return OConstants.DATATYPE_PROPERTY;
-    else if(isTransitiveProperty(repositoryID, aPropertyURI))
+    else if(isTransitiveProperty(null, aPropertyURI))
       return OConstants.TRANSITIVE_PROPERTY;
-    else if(isSymmetricProperty(repositoryID, aPropertyURI))
+    else if(isSymmetricProperty(null, aPropertyURI))
       return OConstants.SYMMETRIC_PROPERTY;
-    else if(isObjectProperty(repositoryID, aPropertyURI))
+    else if(isObjectProperty(null, aPropertyURI))
       return OConstants.OBJECT_PROPERTY;
-    else if(isAnnotationProperty(repositoryID, aPropertyURI))
+    else if(isAnnotationProperty(null, aPropertyURI))
       return OConstants.ANNOTATION_PROPERTY;
     else return OConstants.RDF_PROPERTY;
   }
