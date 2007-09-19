@@ -538,7 +538,7 @@ public class LightWeightLearningApi extends Object {
         Document toProcess = (Document)corpus.get(i + startDocId);
         addAnnsInDoc(toProcess, chunks, instanceType, featName, labelName,
           labelsAndId);
-        if(toProcess.getDataStore() != null) {
+        if(toProcess.getDataStore() != null && corpus.getDataStore() != null) {
           corpus.getDataStore().sync(corpus);
           Factory.deleteResource(toProcess);
         }
@@ -562,7 +562,7 @@ public class LightWeightLearningApi extends Object {
         Document toProcess = (Document)corpus.get(i + startDocId);
         addAnnsInDocClassification(toProcess, selectedLabels, valuesLabels,
           instanceType, featName, labelName, labelsAndId, engineSettings);
-        if(toProcess.getDataStore() != null) {
+        if(toProcess.getDataStore() != null && corpus.getDataStore() != null) {
           corpus.getDataStore().sync(corpus);
           Factory.deleteResource(toProcess);
         }
