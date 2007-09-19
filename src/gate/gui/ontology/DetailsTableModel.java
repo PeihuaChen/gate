@@ -142,71 +142,45 @@ public class DetailsTableModel extends AbstractTableModel {
         resourceInfo.getValues().add(new KeyValuePair(tclass, "TYPE", "Ontology Class", false));
       }
       
+      // direct super classes
       Set<OClass> set = tclass.getSuperClasses(OConstants.DIRECT_CLOSURE);
       directSuperClasses.getValues().clear();
       directSuperClasses.getValues().addAll(set);
       Collections.sort(directSuperClasses.getValues(), itemComparator);
-      
-//      if(set != null) {
-//        for(OClass aClass : set) {
-//          directSuperClasses.getValues().addAll(Utils.getDetailsToAdd(aClass));
-//        }
-//      }
 
+      // all super classes
       Set<OClass> set1 = tclass.getSuperClasses(OConstants.TRANSITIVE_CLOSURE);
       allSuperClasses.getValues().clear();
       allSuperClasses.getValues().addAll(set1);
       Collections.sort(allSuperClasses.getValues(), itemComparator);
       
-//      if(set1 != null) {
-//        for(OClass aClass : set1) {
-//          allSuperClasses.getValues().addAll(Utils.getDetailsToAdd(aClass));
-//        }
-//      }
 
+      // direct subclasses
       Set<OClass> set2 = tclass.getSubClasses(OConstants.DIRECT_CLOSURE);
       directSubClasses.getValues().clear();
       directSubClasses.getValues().addAll(set2);
       Collections.sort(directSubClasses.getValues(), itemComparator);
       
-//      if(set2 != null) {
-//        for(OClass aClass : set2) {
-//          directSubClasses.getValues().addAll(Utils.getDetailsToAdd(aClass));
-//        }
-//      }
-      
-      
+      // all sub classes
       Set<OClass> set3 = tclass.getSubClasses(OConstants.TRANSITIVE_CLOSURE);
       allSubClasses.getValues().clear();
       allSubClasses.getValues().addAll(set3);
       Collections.sort(allSubClasses.getValues(), itemComparator);
-      
-//      if(set3 != null) {
-//        for(OClass aClass : set3) {
-//          allSubClasses.getValues().addAll(Utils.getDetailsToAdd(aClass));
-//        }
-//      }
 
+      // equivalent classes
       Set<OClass> set4 = tclass.getEquivalentClasses();
       equivalentClasses.getValues().clear();
       equivalentClasses.getValues().addAll(set4);
       Collections.sort(equivalentClasses.getValues(), itemComparator);
       
-//      if(set4 != null) {
-//        for(OClass aClass : set4) {
-//          equivalentClasses.getValues().addAll(Utils.getDetailsToAdd(aClass));
-//        }
-//      }
-
+      // properties with resource as domain
       propertyTypes.getValues().clear();
       Set<RDFProperty> dprops = tclass.getPropertiesWithResourceAsDomain();
       propertyTypes.getValues().addAll(dprops);
       Collections.sort(propertyTypes.getValues(), itemComparator);
       
-//      for(RDFProperty prop : dprops) {
-//        propertyTypes.getValues().addAll(Utils.getDetailsToAdd(prop));
-//      }
 
+      // annotation property values
       propertyValues.getValues().clear();
       Set<AnnotationProperty> props = tclass.getSetAnnotationProperties();
       if(props != null) {
@@ -221,6 +195,7 @@ public class DetailsTableModel extends AbstractTableModel {
         }
       }
 
+      // instances
       Set<OInstance> set5 = ontology.getOInstances(tclass,
               OConstants.DIRECT_CLOSURE);
       instances.getValues().clear();
@@ -239,6 +214,7 @@ public class DetailsTableModel extends AbstractTableModel {
       resourceInfo.getValues().add(new KeyValuePair(oinstance, "URI", oinstance.getURI().toString(), false));
       resourceInfo.getValues().add(new KeyValuePair(oinstance, "TYPE", "Ontology Instance", false));
       
+      // direct classes
       Set<OClass> set1 = oinstance.getOClasses(OConstants.DIRECT_CLOSURE);
       directTypes.getValues().clear();
       if(set1 != null) {
@@ -247,6 +223,7 @@ public class DetailsTableModel extends AbstractTableModel {
         }
       }
 
+      // all classes
       Set<OClass> set2 = oinstance.getOClasses(OConstants.TRANSITIVE_CLOSURE);
       allTypes.getValues().clear();
       if(set2 != null) {
@@ -265,9 +242,6 @@ public class DetailsTableModel extends AbstractTableModel {
       propertyTypes.getValues().clear();
       Set<RDFProperty> dprops = oinstance.getPropertiesWithResourceAsDomain();
       propertyTypes.getValues().addAll(dprops);
-//      for(RDFProperty prop : dprops) {
-//        propertyTypes.getValues().addAll(Utils.getDetailsToAdd(prop));
-//      }
       
       propertyValues.getValues().clear();
       Set<AnnotationProperty> apProps = oinstance.getSetAnnotationProperties();
