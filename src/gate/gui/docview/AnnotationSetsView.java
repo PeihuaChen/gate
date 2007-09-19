@@ -14,6 +14,8 @@ package gate.gui.docview;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -26,6 +28,7 @@ import javax.swing.border.Border;
 import javax.swing.event.*;
 import javax.swing.table.*;
 import javax.swing.text.*;
+import javax.swing.text.Highlighter.Highlight;
 
 import gate.*;
 import gate.creole.ResourceData;
@@ -307,6 +310,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected void registerHooks(){
     textPane.addMouseListener(textMouseListener);
     textPane.addMouseMotionListener(textMouseListener);
+    textPane.addPropertyChangeListener("highlighter", textChangeListener);
 //    textPane.addAncestorListener(textAncestorListener);
     restoreSelectedTypes();
   }
@@ -320,6 +324,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected void unregisterHooks(){
     textPane.removeMouseListener(textMouseListener);
     textPane.removeMouseMotionListener(textMouseListener);
+    textPane.removePropertyChangeListener("highlighter", textChangeListener);
 //    textPane.removeAncestorListener(textAncestorListener);
     storeSelectedTypes();
   }
@@ -417,6 +422,22 @@ public class AnnotationSetsView extends AbstractDocumentView
             mouseStoppedMovingAction);
     mouseMovementTimer.setRepeats(false);
     textMouseListener = new TextMouseListener();
+    textChangeListener = new PropertyChangeListener(){
+      public void propertyChange(PropertyChangeEvent evt) {
+        if(evt.getNewValue() != null){
+          //we have a new highlighter
+          //we need to re-highlight all selected annotations
+          for(SetHandler sHandler : setHandlers){
+            for(TypeHandler tHandler : sHandler.typeHandlers){
+              if(tHandler.isSelected()){
+                setTypeSelected(sHandler.set.getName(), tHandler.name, false);
+                setTypeSelected(sHandler.set.getName(), tHandler.name, true);
+              }
+            }
+          }
+        }
+      }
+    };
     
     mainTable.getInputMap().put(
             KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "deleteAll");
@@ -1831,6 +1852,11 @@ Out.prln("no handler yet");
    * The listener for mouse and mouse motion events in the text view.
    */
   protected TextMouseListener textMouseListener;
+  
+  /**
+   * Listener for property changes on the text pane.
+   */
+  protected PropertyChangeListener textChangeListener;
   
   /**
    * Stores the list of visible annotation types when the view is inactivated 
