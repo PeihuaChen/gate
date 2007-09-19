@@ -17,8 +17,7 @@
 package gate.gui.annedit;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -80,50 +79,57 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
    * Finds the best location for the editor dialog
    */
   protected void placeDialog(){
-    //calculate position
-    try{
-      Rectangle startRect = owner.getTextComponent().modelToView(annotation.getStartNode().
-        getOffset().intValue());
-      Rectangle endRect = owner.getTextComponent().modelToView(annotation.getEndNode().
-            getOffset().intValue());
-      Point topLeft = owner.getTextComponent().getLocationOnScreen();
-      int x = topLeft.x + startRect.x;
-      int y = topLeft.y + endRect.y + endRect.height;
-
-      //make sure the window doesn't start lower 
-      //than the end of the visible rectangle
-      Rectangle visRect = owner.getTextComponent().getVisibleRect();
-      int maxY = topLeft.y + visRect.y + visRect.height;      
-      
-      //make sure window doesn't get off-screen
+    dialogIsMoving = true;
+    
+    if(dialogPinned){
+      //just resize
       dialog.pack();
-      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-      boolean revalidate = false;
-      if(dialog.getSize().width > screenSize.width){
-        dialog.setSize(screenSize.width, dialog.getSize().height);
-        revalidate = true;
+    }else{
+      //calculate position
+      try{
+        Rectangle startRect = owner.getTextComponent().modelToView(annotation.getStartNode().
+          getOffset().intValue());
+        Rectangle endRect = owner.getTextComponent().modelToView(annotation.getEndNode().
+              getOffset().intValue());
+        Point topLeft = owner.getTextComponent().getLocationOnScreen();
+        int x = topLeft.x + startRect.x;
+        int y = topLeft.y + endRect.y + endRect.height;
+
+        //make sure the window doesn't start lower 
+        //than the end of the visible rectangle
+        Rectangle visRect = owner.getTextComponent().getVisibleRect();
+        int maxY = topLeft.y + visRect.y + visRect.height;      
+        
+        //make sure window doesn't get off-screen
+        dialog.pack();
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        boolean revalidate = false;
+        if(dialog.getSize().width > screenSize.width){
+          dialog.setSize(screenSize.width, dialog.getSize().height);
+          revalidate = true;
+        }
+        if(dialog.getSize().height > screenSize.height){
+          dialog.setSize(dialog.getSize().width, screenSize.height);
+          revalidate = true;
+        }
+        
+        if(revalidate) dialog.validate();
+        //calculate max X
+        int maxX = screenSize.width - dialog.getSize().width;
+        //calculate max Y
+        if(maxY + dialog.getSize().height > screenSize.height){
+          maxY = screenSize.height - dialog.getSize().height;
+        }
+        
+        //correct position
+        if(y > maxY) y = maxY;
+        if(x > maxX) x = maxX;
+        dialog.setLocation(x, y);
+        if(!dialog.isVisible()) dialog.setVisible(true);
+      }catch(BadLocationException ble){
+        //this should never occur
+        throw new GateRuntimeException(ble);
       }
-      if(dialog.getSize().height > screenSize.height){
-        dialog.setSize(dialog.getSize().width, screenSize.height);
-        revalidate = true;
-      }
-      
-      if(revalidate) dialog.validate();
-      //calculate max X
-      int maxX = screenSize.width - dialog.getSize().width;
-      //calculate max Y
-      if(maxY + dialog.getSize().height > screenSize.height){
-        maxY = screenSize.height - dialog.getSize().height;
-      }
-      
-      //correct position
-      if(y > maxY) y = maxY;
-      if(x > maxX) x = maxX;
-      dialog.setLocation(x, y);
-      if(!dialog.isVisible()) dialog.setVisible(true);
-    }catch(BadLocationException ble){
-      //this should never occur
-      throw new GateRuntimeException(ble);
     }
   }
   
@@ -147,7 +153,17 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
    */
   private AnnotationEditorOwner owner;
   
+  /**
+   * Internal flag used to mark the dialog movements that were started by this
+   * class (as opposed to the ones effected by the user).
+   */
+  private boolean dialogIsMoving = true;
   
+  /**
+   * Flag to show the annotation dialog has been moved by the user and should not
+   * automatically reposition itself.
+   */
+  private boolean dialogPinned = false;
   
   /**
    * JChoice used for selecting the annotation type.
@@ -346,6 +362,49 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       dialog.setResizable(false);
       dialog.add(this);
       dialog.pack();
+      
+      dialog.addComponentListener(new ComponentAdapter(){
+
+        /* (non-Javadoc)
+         * @see java.awt.event.ComponentAdapter#componentMoved(java.awt.event.ComponentEvent)
+         */
+        @Override
+        public void componentMoved(ComponentEvent e) {
+          if(dialogIsMoving){
+            //system move, do nothing
+            dialogIsMoving = false;
+            fixDialogTitle();
+          }else{
+            //user move -> pin the dialog
+            dialogPinned = true;
+            fixDialogTitle();
+          }
+        }
+        
+        public void componentHidden(ComponentEvent e) {
+          dialogPinned = false;
+        }
+
+        private void fixDialogTitle(){
+          if(dialog.getTitle().endsWith(pinSuffix)){
+            if(dialogPinned){
+              //do nothing
+            }else{
+              //remove the suffix
+              String title = dialog.getTitle();
+              title = title.substring(0, title.length() - pinSuffix.length());
+              dialog.setTitle(title);
+            }
+          }else{
+            if(dialogPinned){
+              dialog.setTitle(dialog.getTitle() + pinSuffix);
+            }else{
+              //do nothing
+            }
+          }
+        }
+        private String pinSuffix = " (pinned)";
+      });
     }
   }
 
