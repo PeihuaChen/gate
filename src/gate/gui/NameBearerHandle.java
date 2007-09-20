@@ -32,6 +32,7 @@ import gate.corpora.DocumentStaxUtils;
 import gate.creole.*;
 import gate.creole.ir.*;
 import gate.event.*;
+import gate.persist.LuceneDataStoreImpl;
 import gate.persist.PersistenceException;
 import gate.security.*;
 import gate.security.SecurityException;
@@ -323,22 +324,29 @@ public class NameBearerHandle implements Handle, StatusListener,
         // staticPopupItems.add(new XJMenuItem(new
         // SaveCorpusAsXmlAction(true), sListenerProxy));
         if(target instanceof IndexedCorpus) {
-          staticPopupItems.add(null);
-          staticPopupItems.add(new XJMenuItem(new CreateIndexAction(),
-                  sListenerProxy));
-          staticPopupItems.add(new XJMenuItem(new OptimizeIndexAction(),
-                  sListenerProxy));
-          staticPopupItems.add(new XJMenuItem(new DeleteIndexAction(),
-                  sListenerProxy));
+          IndexedCorpus ic = (IndexedCorpus)target;
+          if(ic.getDataStore() != null
+                  && ic.getDataStore() instanceof LuceneDataStoreImpl) {
+            // do nothing
+          }
+          else {
+            staticPopupItems.add(null);
+            staticPopupItems.add(new XJMenuItem(new CreateIndexAction(),
+                    sListenerProxy));
+            staticPopupItems.add(new XJMenuItem(new OptimizeIndexAction(),
+                    sListenerProxy));
+            staticPopupItems.add(new XJMenuItem(new DeleteIndexAction(),
+                    sListenerProxy));
+          }
         }
       }
-      
+
       if(target instanceof Document) {
         staticPopupItems.add(null);
         staticPopupItems.add(new XJMenuItem(new CreateCorpusForDocAction(),
                 sListenerProxy));
       }
-      
+
     }
     else if(target instanceof Controller) {
       // Applications
@@ -442,7 +450,8 @@ public class NameBearerHandle implements Handle, StatusListener,
       progressListeners = v;
     }
   }// public synchronized void removeProgressListener(ProgressListener
-    // l)
+
+  // l)
 
   public synchronized void addProgressListener(ProgressListener l) {
     Vector v = progressListeners == null
@@ -617,7 +626,7 @@ public class NameBearerHandle implements Handle, StatusListener,
               // writer.write(((gate.Document)target).toXml());
               // writer.flush();
               // writer.close();
-              
+
               // write directly to the file using StAX
               DocumentStaxUtils.writeDocument((gate.Document)target,
                       selectedFile);
@@ -1076,6 +1085,26 @@ public class NameBearerHandle implements Handle, StatusListener,
                 double timeBefore = System.currentTimeMillis();
                 LanguageResource lr = ds.adopt((LanguageResource)target, si);
                 ds.sync(lr);
+                if(ds instanceof LuceneDataStoreImpl
+                        && lr instanceof IndexedCorpus) {
+                  Object persistanceID = lr.getLRPersistenceId();
+                  String lrType = lr.getClass().getName();
+                  String lrName = lr.getName();
+                  Factory.deleteResource(lr);
+                  FeatureMap params = Factory.newFeatureMap();
+                  params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
+                  params.put(DataStore.LR_ID_FEATURE_NAME, persistanceID);
+                  FeatureMap features = Factory.newFeatureMap();
+                  try {
+                    lr = (LanguageResource)Factory.createResource(lrType,
+                            params, features, lrName);
+                  }
+                  catch(ResourceInstantiationException rie) {
+                    throw new GateRuntimeException("Could not load the corpus",
+                            rie);
+                  }
+                }
+
                 double timeAfter = System.currentTimeMillis();
                 if(sListener != null)
                   sListener
@@ -1432,12 +1461,12 @@ public class NameBearerHandle implements Handle, StatusListener,
       }
     }
   }
-  
+
   class CreateCorpusForDocAction extends AbstractAction {
     public CreateCorpusForDocAction() {
       super("New corpus with this document");
     }
-    
+
     public void actionPerformed(ActionEvent e) {
       try {
         Corpus corpus = Factory.newCorpus("Corpus for " + target.getName());
@@ -1450,21 +1479,20 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
   }
 
-  
   public void removeViews() {
     // delete all the VRs that were created
     if(largeView != null) {
       if(largeView instanceof VisualResource) {
         // we only had a view so no tabbed pane was used
-        if(largeView instanceof ActionsPublisher) 
-            actionPublishers.remove(largeView);
+        if(largeView instanceof ActionsPublisher)
+          actionPublishers.remove(largeView);
         Factory.deleteResource((VisualResource)largeView);
       }
       else {
         Component vrs[] = ((JTabbedPane)largeView).getComponents();
         for(int i = 0; i < vrs.length; i++) {
           if(vrs[i] instanceof VisualResource) {
-            if(vrs[i] instanceof ActionsPublisher) 
+            if(vrs[i] instanceof ActionsPublisher)
               actionPublishers.remove(vrs[i]);
             Factory.deleteResource((VisualResource)vrs[i]);
           }
@@ -1476,7 +1504,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     if(smallView != null) {
       if(smallView instanceof VisualResource) {
         // we only had a view so no tabbed pane was used
-        if(smallView instanceof ActionsPublisher) 
+        if(smallView instanceof ActionsPublisher)
           actionPublishers.remove(smallView);
         Factory.deleteResource((VisualResource)smallView);
       }
@@ -1484,8 +1512,8 @@ public class NameBearerHandle implements Handle, StatusListener,
         Component vrs[] = ((JTabbedPane)smallView).getComponents();
         for(int i = 0; i < vrs.length; i++) {
           if(vrs[i] instanceof VisualResource) {
-            if(vrs[i] instanceof ActionsPublisher) 
-                actionPublishers.remove(vrs[i]);
+            if(vrs[i] instanceof ActionsPublisher)
+              actionPublishers.remove(vrs[i]);
             Factory.deleteResource((VisualResource)vrs[i]);
           }
         }
