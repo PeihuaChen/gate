@@ -31,20 +31,31 @@ public class ClassNode
    *  @return the root node of the structure
    */
   public static ClassNode createRootNode(Ontology o) {
-    return createRootNode(o, false);
+    return createRootNode(o, false, false);
   }
 
-  public static ClassNode createRootNode(Ontology o, boolean includeInstances) {
+  public static ClassNode createRootNode(Ontology o, boolean includeInstances, boolean includeAnonymousClasses) {
     if (null == o)
       throw new gate.util.LazyProgrammerException("ontology is null.");
 
     ClassNode root = new ClassNode(o);
     Iterator<OClass> itops = o.getOClasses(true).iterator();
     Vector<ClassNode> kids = new Vector<ClassNode>();
-    while (itops.hasNext()) {
-      ClassNode node = new ClassNode(itops.next());
-      kids.add(node);
-    } // while
+    if(includeAnonymousClasses) {
+      while (itops.hasNext()) {
+        ClassNode node = new ClassNode(itops.next());
+        kids.add(node);
+      } // while
+    } else {
+      while (itops.hasNext()) {
+        OClass aClass = itops.next();
+        if(aClass instanceof AnonymousClass) {
+          continue;
+        }
+        ClassNode node = new ClassNode(aClass);
+        kids.add(node);
+      } // while
+    }
 
     root.source = o;
     root.setChildren(kids);
@@ -84,7 +95,9 @@ public class ClassNode
         Iterator<OClass> kidsi = ocl.getSubClasses(OConstants.DIRECT_CLOSURE).iterator();
 
         while ( kidsi.hasNext()) {
-          kids.add(new ClassNode(kidsi.next()));
+          OClass aClass = kidsi.next();
+          if(!includeAnonymousClasses && aClass instanceof AnonymousClass) continue;
+          kids.add(new ClassNode(aClass));
         } // while kidsi
         parent.setChildren(kids);
         allKids.addAll(kids);
