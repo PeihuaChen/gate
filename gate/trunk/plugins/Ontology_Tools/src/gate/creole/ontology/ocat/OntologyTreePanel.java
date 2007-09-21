@@ -313,7 +313,7 @@ public class OntologyTreePanel extends JPanel {
       currentProperties = ontology2PropertiesMap.get(ontology);
     }
     else {
-      root = ClassNode.createRootNode(ontology, true);
+      root = ClassNode.createRootNode(ontology, true, false);
       HashMap<String, Color> newColorScheme = new HashMap<String, Color>();
       setColorScheme(root, newColorScheme);
       currentOResource2ColorMap = newColorScheme;
