@@ -203,7 +203,7 @@ public class OntoLexEditorVR extends AbstractVisualResource
 
   protected void updateGUI() {
     Ontology ontology = loadOntology(ontoLex.getOntologyIdentifier());
-    ClassNode root = ClassNode.createRootNode(ontology, true);
+    ClassNode root = ClassNode.createRootNode(ontology, true, false);
     this.ontoModel = new OntoTreeModel(root);
     this.ontoEditor.setModel(ontoModel);
     ontoEditor.setVisible(true);
