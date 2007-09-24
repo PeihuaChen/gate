@@ -488,7 +488,8 @@ public class AnnotationEditor extends AbstractAction {
           isClassAnnotation = false;
         }
         aValue = OntologyUtilities.getResourceName(aValue);
-        ClassNode aNode = ontologyTreePanel.getNode(aValue);
+        List<ClassNode> cnodes = ontologyTreePanel.getNode(aValue); 
+        ClassNode aNode = cnodes.isEmpty() ? null : cnodes.get(0);
         OResource resource = (OResource)aNode.getSource();
         explicitCall = true;
         typeCombo.setSelectedItem(aNode);
@@ -674,8 +675,8 @@ public class AnnotationEditor extends AbstractAction {
         if(value == null) {
           value = (String)features.get(ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME);
         }
-        
-        ClassNode node = ontologyTreePanel.getNode(value);
+        List<ClassNode> cnodes = ontologyTreePanel.getNode(value); 
+        ClassNode node = cnodes.isEmpty() ? null : cnodes.get(0);
         // now if the sibling feature is ON we need to reflect our changes
         // to its children as well
         if(!ontologyTreePanel.ontologyViewerOptions.isChildFeatureDisabled()) {
@@ -729,8 +730,11 @@ public class AnnotationEditor extends AbstractAction {
                 .setSelectionStart(startOffset);
         ontologyTreePanel.ontoViewer.documentTextArea
                 .setSelectionEnd(endOffset);
+        List<ClassNode> cnodes = ontologyTreePanel.getNode(value); 
+        ClassNode aNode = cnodes.isEmpty() ? null : cnodes.get(0);
+        
         Annotation addedAnnotation = ontologyTreePanel.ontoTreeListener
-                .addNewAnnotation(ontologyTreePanel.getNode(value), false,
+                .addNewAnnotation(aNode, false,
                         features, isClassFeature, false).get(0);
         selectedAnnotationIndex = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
                 .indexOf(addedAnnotation);
@@ -771,8 +775,11 @@ public class AnnotationEditor extends AbstractAction {
       ontologyTreePanel.ontoViewer.documentTextArea
               .setSelectionStart(startOffset);
       ontologyTreePanel.ontoViewer.documentTextArea.setSelectionEnd(endOffset);
+      List<ClassNode> cnodes = ontologyTreePanel.getNode(value); 
+      ClassNode aNode = cnodes.isEmpty() ? null : cnodes.get(0);
+      
       Annotation addedAnnotation = ontologyTreePanel.ontoTreeListener
-              .addNewAnnotation(ontologyTreePanel.getNode(value), false,
+              .addNewAnnotation(aNode, false,
                       features, isClassFeature, false).get(0);
       selectedAnnotationIndex = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
               .indexOf(addedAnnotation);
@@ -809,8 +816,11 @@ public class AnnotationEditor extends AbstractAction {
                 .setSelectionStart(startOffset);
         ontologyTreePanel.ontoViewer.documentTextArea
                 .setSelectionEnd(endOffset);
+        List<ClassNode> cnodes = ontologyTreePanel.getNode(value); 
+        ClassNode aNode = cnodes.isEmpty() ? null : cnodes.get(0);
+        
         Annotation addedAnnotation = ontologyTreePanel.ontoTreeListener
-                .addNewAnnotation(ontologyTreePanel.getNode(value), false,
+                .addNewAnnotation(aNode, false,
                         features, isClassFeature, false).get(0);
         selectedAnnotationIndex = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
                 .indexOf(addedAnnotation);
@@ -849,8 +859,11 @@ public class AnnotationEditor extends AbstractAction {
       ontologyTreePanel.ontoViewer.documentTextArea
               .setSelectionStart(startOffset);
       ontologyTreePanel.ontoViewer.documentTextArea.setSelectionEnd(endOffset);
+      List<ClassNode> cnodes = ontologyTreePanel.getNode(value); 
+      ClassNode aNode = cnodes.isEmpty() ? null : cnodes.get(0);
+      
       Annotation addedAnnotation = ontologyTreePanel.ontoTreeListener
-              .addNewAnnotation(ontologyTreePanel.getNode(value), false,
+              .addNewAnnotation(aNode, false,
                       features, isClassFeature, false).get(0);
       selectedAnnotationIndex = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
               .indexOf(addedAnnotation);
@@ -883,13 +896,14 @@ public class AnnotationEditor extends AbstractAction {
         Object selectedItem = typeCombo.getSelectedItem();
         ClassNode item = null;
         if(selectedItem instanceof String) {
-          item = ontologyTreePanel.getNode((String)selectedItem);
+          List<ClassNode> nodes = ontologyTreePanel.getNode((String)selectedItem); 
+          item = nodes.isEmpty() ? null : nodes.get(0);
         }
         else {
           item = (ClassNode)selectedItem;
         }
 
-        if(item == null) {
+        if(item == null ) {
           JOptionPane.showMessageDialog(MainFrame.getInstance(),
                   "No resource found with value : " + selectedItem.toString());
           newAnnotationMode = false;
@@ -930,7 +944,8 @@ public class AnnotationEditor extends AbstractAction {
         Object selectedItem = typeCombo.getSelectedItem();
         ClassNode item = null;
         if(selectedItem instanceof String) {
-          item = ontologyTreePanel.getNode((String)selectedItem);
+          List<ClassNode> cnodes = ontologyTreePanel.getNode((String) selectedItem); 
+          item = cnodes.isEmpty() ? null : cnodes.get(0);
         }
         else {
           item = (ClassNode)selectedItem;
