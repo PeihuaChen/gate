@@ -9,14 +9,25 @@ package gate.creole.ontology.ocat;
 
 import gate.gui.docview.AbstractDocumentView;
 import javax.swing.*;
+
+import com.ontotext.gate.vr.ClassNode;
+import com.ontotext.gate.vr.IFolder;
+import com.ontotext.gate.vr.OntoTreeModel;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.util.List;
+
 import gate.*;
 import gate.creole.ANNIEConstants;
+import gate.creole.ontology.OClass;
+import gate.creole.ontology.OConstants;
+import gate.creole.ontology.OInstance;
 import gate.creole.ontology.OResource;
 import gate.creole.ontology.Ontology;
 import gate.creole.ontology.OntologyModificationListener;
+import gate.creole.ontology.RDFProperty;
 import gate.event.*;
 import gate.gui.docview.*;
 
@@ -783,22 +794,31 @@ public class OntologyViewer extends AbstractDocumentView implements
       shouldSelectAgain = true;
     }
 
-    // lets traverse through the ontology and find out the classes which
-    // are selected
-    HashMap<String, Boolean> selectionMap = ontologyTreePanel.ontology2OResourceSelectionMap
-            .get(ontology);
-    refreshOntologyCB(ontology, true);
-    refreshOntologyCB(ontology, false);
-    if(shouldSelectAgain) ontologyCB.setSelectedIndex(index);
-    HashMap<String, Boolean> newMap = ontologyTreePanel.ontology2OResourceSelectionMap
-            .get(ontology);
-    for(String key : selectionMap.keySet()) {
-      Boolean val = selectionMap.get(key);
-      if(newMap.containsKey(key)) {
-        newMap.put(key, val);
+    if(resource instanceof OInstance) {
+      OInstance inst1 = (OInstance) resource;
+      Set<OClass> oClasses = inst1.getOClasses(OConstants.DIRECT_CLOSURE);
+      // for each class find out its class nodes
+      for(OClass aClass : oClasses) {
+        List<ClassNode> cnodes = ontologyTreePanel.getNode(aClass.getName());
+        if(cnodes.isEmpty()) {
+          continue;
+        }
+        
+        for(ClassNode anode : cnodes) {
+          ClassNode instNode = new ClassNode(inst1);
+          anode.addSubNode(instNode);
+          // here we need to set a color for this new instance
+          ontologyTreePanel.setColorScheme(instNode, (HashMap<String, Color>) ontologyTreePanel.ontology2ColorSchemesMap.get(ontology));      
+          ontologyTreePanel.setOntoTreeClassSelection(instNode, (HashMap<String, Boolean>) ontologyTreePanel.ontology2OResourceSelectionMap.get(ontology));
+        }
       }
+      
+      HashMap<String, Set<OClass>> map = ontologyTreePanel.ontology2PropValuesAndInstances2ClassesMap.get(ontology);
+      Set<RDFProperty> rdfProps = ontologyTreePanel.ontology2PropertiesMap.get(ontology);
+      ontologyTreePanel.updatePVnInst2ClassesMap(inst1, rdfProps, oClasses, map);
     }
-
+    
+    if(shouldSelectAgain) ontologyCB.setSelectedIndex(index);
     documentTextArea.requestFocus();
   }
   
