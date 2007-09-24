@@ -100,7 +100,7 @@ public class OntologyTreePanel extends JPanel {
    * each concept
    */
   protected HashMap<String, ArrayList<Annotation>> currentOResourceName2AnnotationsListMap;
-
+  
   /** Instance of colorGenerator */
   private ColorGenerator colorGenerator;
 

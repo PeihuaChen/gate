@@ -72,7 +72,7 @@ public class AnnotationAction extends MouseInputAdapter {
     if(ontologyTreePanel.showingAnnotationWindow) {
       ontologyTreePanel.showingAnnotationWindow = false;
       annotationEditor.hideWindow();
-      ontologyTreePanel.ontoViewer.documentTextArea.requestFocus();
+      //ontologyTreePanel.ontoViewer.documentTextArea.requestFocus();
     }
   }
 
