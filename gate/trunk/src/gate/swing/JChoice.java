@@ -26,7 +26,11 @@ import javax.swing.event.ListDataListener;
  * set of buttons in a flow layout. If more options are available, a
  * simple {@link JComboBox} is used instead.
  */
-public class JChoice extends JPanel {
+public class JChoice extends JPanel implements ItemSelectable{
+
+  public Object[] getSelectedObjects() {
+    return new Object[]{getSelectedItem()};
+  }
 
   /**
    * The default value for the {@link #maximumWidth} parameter.
@@ -75,6 +79,11 @@ public class JChoice extends JPanel {
    * The button group used for a small number of choices.
    */
   private ButtonGroup buttonGroup;
+  
+  /**
+   * A hidden button used to simulate no selection state.
+   */
+  private JToggleButton noSelection;
   
   /**
    * Internal item listener for both the combo and the buttons, used to keep
@@ -137,11 +146,12 @@ public class JChoice extends JPanel {
     maximumWidth = DEFAULT_MAX_WIDTH;
     listenersMap = new HashMap<EventListener, ListenerWrapper>();
     buttonGroup = new ButtonGroup();
+    noSelection = new JToggleButton("NONE");
+    buttonGroup.add(noSelection);
     combo = new JComboBox(model);
     buttonToValueMap = new HashMap<AbstractButton, Object>();
     sharedItemListener = new ItemListener(){
       public void itemStateChanged(ItemEvent e) {
-        //we only care about SELECTED events
         if(e.getStateChange() == ItemEvent.SELECTED){
           if(e.getSource() == combo){
             //combo selection changed -> propagate to buttons
@@ -158,6 +168,13 @@ public class JChoice extends JPanel {
             Object value = buttonToValueMap.get(e.getSource());
             combo.setSelectedItem(value);
           }
+        }else if(e.getStateChange() == ItemEvent.DESELECTED){
+          //de-selection
+          if(e.getSource() == combo){
+            //de selection event from combo -> unselect everything in the 
+            //button group
+            noSelection.setSelected(true);
+          }
         }
       }      
     };
@@ -165,7 +182,7 @@ public class JChoice extends JPanel {
   }
   
   public static void main(String[] args){
-    final JChoice fChioce = new JChoice(new String[]{
+    final JChoice fChoice = new JChoice(new String[]{
             "Jan",
             "Feb",
             "Mar",
@@ -178,14 +195,14 @@ public class JChoice extends JPanel {
             "Oct",
             "Nov",
             "Dec"});
-    fChioce.setMaximumFastChoices(20);
-    fChioce.addActionListener(new ActionListener(){
+    fChoice.setMaximumFastChoices(20);
+    fChoice.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e) {
         // TODO Auto-generated method stub
-        System.out.println("Action (" + e.getActionCommand() + ") :" + fChioce.getSelectedItem().toString() + " selected!");
+        System.out.println("Action (" + e.getActionCommand() + ") :" + fChoice.getSelectedItem() + " selected!");
       }
     });
-    fChioce.addItemListener(new ItemListener(){
+    fChoice.addItemListener(new ItemListener(){
       public void itemStateChanged(ItemEvent e) {
         System.out.println("Item " + e.getItem().toString() +
                (e.getStateChange() == ItemEvent.SELECTED ? " selected!" :
@@ -194,8 +211,19 @@ public class JChoice extends JPanel {
       
     });
     JFrame aFrame = new JFrame("Fast Chioce Test Frame");
-    aFrame.getContentPane().add(fChioce);
+    aFrame.getContentPane().add(fChoice);
     
+    Box topBox = Box.createHorizontalBox();
+    JButton aButn = new JButton("Clear");
+    aButn.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e) {
+        System.out.println("Clearing");
+        fChoice.setSelectedItem(null);
+      }
+    });
+    topBox.add(Box.createHorizontalStrut(10));
+    topBox.add(aButn);
+    aFrame.add(topBox, BorderLayout.NORTH);
     aFrame.pack();
     aFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     aFrame.setVisible(true);
@@ -257,6 +285,8 @@ public class JChoice extends JPanel {
             buttonGroup.remove(aButton);
           }
         }
+        //always add the hidden button used for no selection
+        buttonGroup.add(noSelection);
         //now create the new buttons
         buttonToValueMap.clear();
         for(int i = 0; i < model.getSize(); i++){
@@ -320,7 +350,7 @@ public class JChoice extends JPanel {
    * @see javax.swing.ComboBoxModel#setSelectedItem(java.lang.Object)
    */
   public void setSelectedItem(Object anItem) {
-    combo.setSelectedItem(anItem);
+    model.setSelectedItem(anItem);
   }
 
   /*
@@ -403,13 +433,17 @@ public class JChoice extends JPanel {
     }
 
     public void itemStateChanged(ItemEvent e) {
-      e.setSource(JChoice.this);
-      ((ItemListener)originalListener).itemStateChanged(e);
+      //generate a new event with this as source
+      ((ItemListener)originalListener).itemStateChanged(
+              new ItemEvent(JChoice.this, e.getID(), e.getItem(), 
+                      e.getStateChange()));
     }
 
     public void actionPerformed(ActionEvent e) {
-      e.setSource(JChoice.this);
-      ((ActionListener)originalListener).actionPerformed(e);
+      //generate a new event
+      ((ActionListener)originalListener).actionPerformed(new ActionEvent(
+              JChoice.this, e.getID(), e.getActionCommand(), e.getWhen(), 
+              e.getModifiers()));
     }
     private EventListener originalListener;
   }
