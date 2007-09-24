@@ -75,7 +75,8 @@ public class OWLIMServiceImpl implements OWLIM,
                              javax.xml.rpc.server.ServiceLifecycle,
                              AdminListener {
   private HashMap<String, RepositoryDetails> mapToRepositoryDetails = new HashMap<String, RepositoryDetails>();
-
+  private HashMap<String, Resource> resourcesMap = new HashMap<String, Resource>();
+   
   /**
    * Debug parameter, if set to true, shows various messages when
    * different methods are invoked
@@ -497,7 +498,8 @@ public class OWLIMServiceImpl implements OWLIM,
           String theSubClassURI, byte direct) throws GateOntologyException {
     loadRepositoryDetails(repositoryID);
     // check if the classes are equivalent of each
-    if(theSuperClassURI.equals(theSubClassURI)) return false;
+    
+    if(theSuperClassURI.intern() == theSubClassURI.intern()) return false;
     if(sail.hasStatement(getResource(theSuperClassURI),
             getURI(OWL.EQUIVALENTCLASS), getResource(theSubClassURI)))
       return false;
@@ -518,7 +520,7 @@ public class OWLIMServiceImpl implements OWLIM,
 
       // here subject is a subclass
       Statement stmt = iter.next();
-      if(!foundSameObject && stmt.getSubject().toString().equals(theSuperClassURI)) {
+      if(!foundSameObject && stmt.getSubject().toString().intern() == theSuperClassURI.intern()) {
         foundSameObject = true;
         continue;
       }
@@ -1159,7 +1161,7 @@ public class OWLIMServiceImpl implements OWLIM,
     while(iter.hasNext()) {
       Statement stmt = iter.next();
       String aSuperProperty = stmt.getObject().toString();
-      if(!foundSameObject && aSuperProperty.equals(aPropertyURI)) {
+      if(!foundSameObject && aSuperProperty.intern() == aPropertyURI.intern()) {
         foundSameObject = true;
         continue;
       }
@@ -1200,7 +1202,7 @@ public class OWLIMServiceImpl implements OWLIM,
     while(iter.hasNext()) {
       Statement stmt = iter.next();
       String aSubProperty = stmt.getSubject().toString();
-      if(!foundSameObject && aSubProperty.equals(aPropertyURI)) {
+      if(!foundSameObject && aSubProperty.intern() == aPropertyURI.intern()) {
         foundSameObject = true;
         continue;
       }
@@ -2102,7 +2104,7 @@ public class OWLIMServiceImpl implements OWLIM,
 
     while(iter.hasNext()) {
       Statement stmt = iter.next();
-      if(!foundSameObject && stmt.getObject().toString().equals(classURI)) {
+      if(!foundSameObject && stmt.getObject().toString().intern() == classURI.intern()) {
         foundSameObject = true;
         continue;
       }
@@ -3079,7 +3081,7 @@ public class OWLIMServiceImpl implements OWLIM,
       
       while(subClassIter.hasNext()) {
         Statement stmt1 = subClassIter.next();
-        if(!foundSameObject && stmt1.getSubject().toString().equals(aSuperClassURI)) {
+        if(!foundSameObject && stmt1.getSubject().toString().intern() == aSuperClassURI.intern()) {
           foundSameObject = true;
           continue;
         }
@@ -3319,7 +3321,7 @@ public class OWLIMServiceImpl implements OWLIM,
       Statement stmt = iter.next();
       Value v = stmt.getObject();
       if(v instanceof Literal) {
-        if(((Literal)v).getDatatype().toString().equals(datatypeURI)) {
+        if(((Literal)v).getDatatype().toString().intern() == datatypeURI.intern()) {
           toDelete = stmt;
         }
       }
@@ -3788,16 +3790,26 @@ public class OWLIMServiceImpl implements OWLIM,
   }
 
   private URI getURI(String string) {
-    return sail.getValueFactory().createURI(string);
+    Resource rs = resourcesMap.get(string);
+    if(rs != null) return (URI) rs;
+    rs = sail.getValueFactory().createURI(string);
+    resourcesMap.put(string, rs);
+    return (URI) rs;
   }
 
   private Resource getResource(String string) {
+    Resource rs = resourcesMap.get(string);
+    if(rs != null) return rs;
+    
     try {
-      return sail.getValueFactory().createURI(string);
+      rs = sail.getValueFactory().createURI(string);
+      resourcesMap.put(string, rs);
     }
     catch(Exception e) {
-      return sail.getValueFactory().createBNode(string);
+      rs = sail.getValueFactory().createBNode(string);
+      resourcesMap.put(string, rs);
     }
+    return rs;
   }
 
   private int getUserID(String username, String password) {
