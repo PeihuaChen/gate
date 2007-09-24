@@ -730,6 +730,11 @@ public class OntologyViewer extends AbstractDocumentView implements
 
   public void ontologyModified(Ontology ontology, OResource resource,
           int eventType) {
+    if(eventType == OConstants.SUB_CLASS_ADDED_EVENT
+            || eventType == OConstants.SUB_CLASS_REMOVED_EVENT) {
+      ontologyReset(ontology);
+    }
+
     // boolean shouldSelectAgain = false;
     // int index = ontologies.indexOf(ontology);
     // if(index < 0) return;
@@ -795,7 +800,7 @@ public class OntologyViewer extends AbstractDocumentView implements
     }
 
     if(resource instanceof OInstance) {
-      OInstance inst1 = (OInstance) resource;
+      OInstance inst1 = (OInstance)resource;
       Set<OClass> oClasses = inst1.getOClasses(OConstants.DIRECT_CLOSURE);
       // for each class find out its class nodes
       for(OClass aClass : oClasses) {
@@ -803,34 +808,70 @@ public class OntologyViewer extends AbstractDocumentView implements
         if(cnodes.isEmpty()) {
           continue;
         }
-        
+
         for(ClassNode anode : cnodes) {
           ClassNode instNode = new ClassNode(inst1);
           anode.addSubNode(instNode);
           // here we need to set a color for this new instance
-          ontologyTreePanel.setColorScheme(instNode, (HashMap<String, Color>) ontologyTreePanel.ontology2ColorSchemesMap.get(ontology));      
-          ontologyTreePanel.setOntoTreeClassSelection(instNode, (HashMap<String, Boolean>) ontologyTreePanel.ontology2OResourceSelectionMap.get(ontology));
+          ontologyTreePanel
+                  .setColorScheme(
+                          instNode,
+                          (HashMap<String, Color>)ontologyTreePanel.ontology2ColorSchemesMap
+                                  .get(ontology));
+          ontologyTreePanel
+                  .setOntoTreeClassSelection(
+                          instNode,
+                          (HashMap<String, Boolean>)ontologyTreePanel.ontology2OResourceSelectionMap
+                                  .get(ontology));
         }
       }
-      
-      HashMap<String, Set<OClass>> map = ontologyTreePanel.ontology2PropValuesAndInstances2ClassesMap.get(ontology);
-      Set<RDFProperty> rdfProps = ontologyTreePanel.ontology2PropertiesMap.get(ontology);
-      ontologyTreePanel.updatePVnInst2ClassesMap(inst1, rdfProps, oClasses, map);
+
+      HashMap<String, Set<OClass>> map = ontologyTreePanel.ontology2PropValuesAndInstances2ClassesMap
+              .get(ontology);
+      Set<RDFProperty> rdfProps = ontologyTreePanel.ontology2PropertiesMap
+              .get(ontology);
+      ontologyTreePanel
+              .updatePVnInst2ClassesMap(inst1, rdfProps, oClasses, map);
     }
-    
+    else {
+
+      // lets traverse through the ontology and find out the classes
+      // which
+      // are selected
+      HashMap<String, Boolean> selectionMap = ontologyTreePanel.ontology2OResourceSelectionMap
+              .get(ontology);
+      refreshOntologyCB(ontology, true);
+      refreshOntologyCB(ontology, false);
+      if(shouldSelectAgain) ontologyCB.setSelectedIndex(index);
+      HashMap<String, Boolean> newMap = ontologyTreePanel.ontology2OResourceSelectionMap
+              .get(ontology);
+      for(String key : selectionMap.keySet()) {
+        Boolean val = selectionMap.get(key);
+        if(newMap.containsKey(key)) {
+          newMap.put(key, val);
+        }
+      }
+    }
+
     if(shouldSelectAgain) ontologyCB.setSelectedIndex(index);
-    documentTextArea.requestFocus();
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        ontologyTreePanel.currentOntologyTree.updateUI();
+        documentTextArea.requestFocus();
+      }
+    });
   }
-  
+
   /**
    * A method that returns the instance of ontology viewer options.
+   * 
    * @return
    */
   public OntologyViewerOptions getOntologyViewerOptions() {
     /*
      * Do not delete this method, as it is used by Annotator GUI
      */
-    
+
     return ontologyTreePanel.ontologyViewerOptions;
   }
 
