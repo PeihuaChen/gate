@@ -304,8 +304,8 @@ public class ClassNode
     if ( ! children.contains(sub) )  {
       Object source = this.getSource();
       if ( source instanceof OClass) {
-        OClass c = (OClass)source;
-        if (!(sub.getSource() instanceof OClass) ||
+        OClass c = (OClass)source; 
+        if (!(sub.getSource() instanceof OClass) &&
             !(sub.getSource() instanceof OInstance))
           throw new GateRuntimeException(
           "The sub node's source is not an instance of TClass or OInstance");
