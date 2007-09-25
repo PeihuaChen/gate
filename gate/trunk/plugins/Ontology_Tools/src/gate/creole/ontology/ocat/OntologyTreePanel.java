@@ -137,6 +137,52 @@ public class OntologyTreePanel extends JPanel {
     initGUI();
   }
 
+  
+  /**
+   * This method finds out the ClassNode node in the ontology Tree for
+   * given class
+   * 
+   * @param classValue
+   * @return
+   */
+  public ClassNode getFirstNode(String classValue) {
+    // lets first convert this classValue into the className
+    int index = classValue.lastIndexOf("#");
+    if(index < 0) index = classValue.lastIndexOf("/");
+    if(index < 0) index = classValue.lastIndexOf(":");
+    if(index >= 0) {
+      classValue = classValue.substring(index + 1, classValue.length());
+    }
+    
+    ClassNode currentNode = (ClassNode)currentOntologyTree.getModel().getRoot();
+    return getFirstClassNode(currentNode, classValue);
+  }
+  
+  /**
+   * Internal recursive method to find out the Node for given class
+   * Value under the heirarchy of given node
+   * 
+   * @param node
+   * @param classValue
+   * @return
+   */
+  private ClassNode getFirstClassNode(ClassNode node, String classValue) {
+    if(node.toString().intern() == classValue.intern()) {
+      return node;
+    }
+
+    Iterator children = node.getChildren();
+    while(children.hasNext()) {
+      ClassNode tempNode = (ClassNode)children.next();
+      ClassNode returnedNode = getFirstClassNode(tempNode, classValue);
+      if(returnedNode != null) {
+        return returnedNode;
+      }
+    }
+    return null;
+  }
+
+  
   /**
    * This method finds out the ClassNode node in the ontology Tree for
    * given class
@@ -157,6 +203,8 @@ public class OntologyTreePanel extends JPanel {
     return getClassNode(currentNode, classValue);
   }
 
+  
+  
   /**
    * Internal recursive method to find out the Node for given class
    * Value under the heirarchy of given node

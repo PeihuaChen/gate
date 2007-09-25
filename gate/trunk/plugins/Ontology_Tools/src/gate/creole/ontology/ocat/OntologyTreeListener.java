@@ -436,10 +436,23 @@ public class OntologyTreeListener extends MouseAdapter {
         if(aResource == null) {
           uri = OntologyUtilities.createURI(ontologyTreePanel
                   .getCurrentOntology(), selectedText, false);
+          
           ontologyTreePanel.getCurrentOntology().addOInstance(uri,
                   (OClass)node.getSource());
         } else {
-          uri = aResource.getURI();
+          int index = 1;
+          while(true) {
+            OResource tempResource = ontologyTreePanel.getCurrentOntology().getOResourceByName(selectedText+index);
+            if(tempResource == null) {
+              uri = OntologyUtilities.createURI(ontologyTreePanel
+                      .getCurrentOntology(), selectedText+index, false);
+              
+              ontologyTreePanel.getCurrentOntology().addOInstance(uri,
+                      (OClass)node.getSource());
+              break;
+            }
+            index++;
+          }
         }
       } else {
         uri = ((OResource)node.getSource()).getURI();

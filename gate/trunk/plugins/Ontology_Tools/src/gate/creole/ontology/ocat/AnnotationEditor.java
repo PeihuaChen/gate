@@ -48,7 +48,6 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -342,7 +341,6 @@ public class AnnotationEditor extends AbstractAction {
     }
 
     final ArrayList<Integer> indexes1 = indexes;
-
     // yes it is put on the highlighted annotation so show the
     // annotation window
     if(range != null && indexes.size() > 0) {
@@ -490,9 +488,11 @@ public class AnnotationEditor extends AbstractAction {
                   ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME);
           isClassAnnotation = false;
         }
+        
+        
+        
         aValue = OntologyUtilities.getResourceName(aValue);
-        List<ClassNode> cnodes = ontologyTreePanel.getNode(aValue);
-        ClassNode aNode = cnodes.isEmpty() ? null : cnodes.get(0);
+        ClassNode aNode = ontologyTreePanel.getFirstNode(aValue);
         OResource resource = (OResource)aNode.getSource();
         explicitCall = true;
         typeCombo.setSelectedItem(aNode);
@@ -544,26 +544,27 @@ public class AnnotationEditor extends AbstractAction {
       featuresEditor.setTargetFeatures(Factory.newFeatureMap());
     }
 
-    Rectangle startRect = null;
-    Point topLeft = null;
-    int charHeight = 0;
-
-    try {
-      startRect = textComp.modelToView(x1);
-      topLeft = textComp.getLocationOnScreen();
-
-      FontMetrics fm = textComp.getFontMetrics(textComp.getFont());
-      charHeight = fm.getAscent() + fm.getDescent();
-    }
-    catch(BadLocationException ble) {
-      throw new GateRuntimeException("Can't show the window ", ble);
-    }
-
-    final int x = topLeft.x + startRect.x;
-    final int y = topLeft.y + startRect.y + charHeight;
-    
+    final int xx = x1;
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
+        Rectangle startRect = null;
+        Point topLeft = null;
+        int charHeight = 0;
+        
+        try {
+          startRect = textComp.modelToView(xx);
+          topLeft = textComp.getLocationOnScreen();
+
+          FontMetrics fm = textComp.getFontMetrics(textComp.getFont());
+          charHeight = fm.getAscent() + fm.getDescent();
+        }
+        catch(BadLocationException ble) {
+          throw new GateRuntimeException("Can't show the window ", ble);
+        }
+
+        final int x = topLeft.x + startRect.x;
+        final int y = topLeft.y + startRect.y + charHeight;
+
         ontologyTreePanel.showingAnnotationWindow = true;
         annotationWindow.setLocation(x, y);
         annotationWindow.pack();
@@ -575,13 +576,11 @@ public class AnnotationEditor extends AbstractAction {
   private boolean isValidDomain(RDFProperty aProp, OInstance inst) {
     Set<OResource> domain = aProp.getDomain();
     if(domain == null || domain.isEmpty()) return true;
-    ClassNode inode = ontologyTreePanel.getNode(inst.getName()).get(0);
+    ClassNode inode = ontologyTreePanel.getFirstNode(inst.getName());
     for(OResource res : domain) {
       if(!(res instanceof OClass)) continue;
-
-      List<ClassNode> cnodes = ontologyTreePanel.getNode(res.getName());
-      if(cnodes == null || cnodes.isEmpty()) continue;
-      ClassNode cnode = cnodes.get(0);
+      ClassNode cnode = ontologyTreePanel.getFirstNode(res.getName());
+      if(cnode == null) continue;
       if(!hasChild(cnode, inode)) return false;
     }
     return true;
@@ -601,13 +600,12 @@ public class AnnotationEditor extends AbstractAction {
   private boolean isValidRange(RDFProperty aProp, OInstance inst) {
     Set<OResource> range = aProp.getRange();
     if(range == null || range.isEmpty()) return true;
-    ClassNode inode = ontologyTreePanel.getNode(inst.getName()).get(0);
+    ClassNode inode = ontologyTreePanel.getFirstNode(inst.getName());
     for(OResource res : range) {
       if(!(res instanceof OClass)) continue;
 
-      List<ClassNode> cnodes = ontologyTreePanel.getNode(res.getName());
-      if(cnodes == null || cnodes.isEmpty()) continue;
-      ClassNode cnode = cnodes.get(0);
+      ClassNode cnode = ontologyTreePanel.getFirstNode(res.getName());
+      if(cnode == null) continue;
       if(!hasChild(cnode, inode)) return false;
     }
     return true;
@@ -810,8 +808,8 @@ public class AnnotationEditor extends AbstractAction {
                 .setSelectionStart(startOffset);
         ontologyTreePanel.ontoViewer.documentTextArea
                 .setSelectionEnd(endOffset);
-        List<ClassNode> cnodes = ontologyTreePanel.getNode(value);
-        ClassNode aNode = cnodes.isEmpty() ? null : cnodes.get(0);
+ 
+        ClassNode aNode = ontologyTreePanel.getFirstNode(value);
 
         Annotation addedAnnotation = ontologyTreePanel.ontoTreeListener
                 .addNewAnnotation(aNode, false, features, isClassFeature, false)
@@ -853,9 +851,7 @@ public class AnnotationEditor extends AbstractAction {
       ontologyTreePanel.ontoViewer.documentTextArea
               .setSelectionStart(startOffset);
       ontologyTreePanel.ontoViewer.documentTextArea.setSelectionEnd(endOffset);
-      List<ClassNode> cnodes = ontologyTreePanel.getNode(value);
-      ClassNode aNode = cnodes.isEmpty() ? null : cnodes.get(0);
-
+      ClassNode aNode = ontologyTreePanel.getFirstNode(value);
       Annotation addedAnnotation = ontologyTreePanel.ontoTreeListener
               .addNewAnnotation(aNode, false, features, isClassFeature, false)
               .get(0);
@@ -894,9 +890,7 @@ public class AnnotationEditor extends AbstractAction {
                 .setSelectionStart(startOffset);
         ontologyTreePanel.ontoViewer.documentTextArea
                 .setSelectionEnd(endOffset);
-        List<ClassNode> cnodes = ontologyTreePanel.getNode(value);
-        ClassNode aNode = cnodes.isEmpty() ? null : cnodes.get(0);
-
+        ClassNode aNode = ontologyTreePanel.getFirstNode(value);
         Annotation addedAnnotation = ontologyTreePanel.ontoTreeListener
                 .addNewAnnotation(aNode, false, features, isClassFeature, false)
                 .get(0);
@@ -937,8 +931,8 @@ public class AnnotationEditor extends AbstractAction {
       ontologyTreePanel.ontoViewer.documentTextArea
               .setSelectionStart(startOffset);
       ontologyTreePanel.ontoViewer.documentTextArea.setSelectionEnd(endOffset);
-      List<ClassNode> cnodes = ontologyTreePanel.getNode(value);
-      ClassNode aNode = cnodes.isEmpty() ? null : cnodes.get(0);
+
+      ClassNode aNode = ontologyTreePanel.getFirstNode(value);
 
       Annotation addedAnnotation = ontologyTreePanel.ontoTreeListener
               .addNewAnnotation(aNode, false, features, isClassFeature, false)
@@ -963,6 +957,7 @@ public class AnnotationEditor extends AbstractAction {
               .setSelectionEnd(ontologyTreePanel.ontoViewer.documentTextArea
                       .getSelectionStart());
       ontologyTreePanel.ontoViewer.documentTextArea.requestFocus();
+      ontologyTreePanel.showingAnnotationWindow = false;
     }
   }
 
@@ -974,9 +969,8 @@ public class AnnotationEditor extends AbstractAction {
         Object selectedItem = typeCombo.getSelectedItem();
         ClassNode item = null;
         if(selectedItem instanceof String) {
-          List<ClassNode> nodes = ontologyTreePanel
-                  .getNode((String)selectedItem);
-          item = nodes.isEmpty() ? null : nodes.get(0);
+          item = ontologyTreePanel
+                  .getFirstNode((String)selectedItem);
         }
         else {
           item = (ClassNode)selectedItem;
@@ -986,7 +980,7 @@ public class AnnotationEditor extends AbstractAction {
           JOptionPane.showMessageDialog(MainFrame.getInstance(),
                   "No resource found with value : " + selectedItem.toString());
           newAnnotationMode = false;
-          annotationWindow.setVisible(false);
+          hideWindow();
           return;
         }
         else if(ontologyTreePanel.ontologyViewerOptions.isFilterOn()
@@ -996,7 +990,7 @@ public class AnnotationEditor extends AbstractAction {
           // "This resource has been filtered out : "
           // + selectedItem.toString());
           newAnnotationMode = false;
-          annotationWindow.setVisible(false);
+          hideWindow();
           return;
         }
 
@@ -1007,16 +1001,14 @@ public class AnnotationEditor extends AbstractAction {
         // if user wants to create an instance, it cannot be class
         // annotation and it must be instanceAnnotation
         isClassAnnotation = shouldCreateInstance ? false : true;
-
         Annotation addedAnnotation = ontologyTreePanel.ontoTreeListener
                 .addNewAnnotation(item, applyToAll.isSelected(), null,
                         isClassAnnotation, shouldCreateInstance).get(0);
 
         selectedAnnotationIndex = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
                 .indexOf(addedAnnotation);
-
         newAnnotationMode = false;
-        annotationWindow.setVisible(false);
+        hideWindow();
         return;
       }
       else {
@@ -1024,9 +1016,7 @@ public class AnnotationEditor extends AbstractAction {
         Object selectedItem = typeCombo.getSelectedItem();
         ClassNode item = null;
         if(selectedItem instanceof String) {
-          List<ClassNode> cnodes = ontologyTreePanel
-                  .getNode((String)selectedItem);
-          item = cnodes.isEmpty() ? null : cnodes.get(0);
+          item = ontologyTreePanel.getFirstNode((String)selectedItem);
         }
         else {
           item = (ClassNode)selectedItem;
@@ -1036,7 +1026,7 @@ public class AnnotationEditor extends AbstractAction {
           JOptionPane.showMessageDialog(MainFrame.getInstance(),
                   "No resource found with value : " + selectedItem.toString());
           newAnnotationMode = false;
-          annotationWindow.setVisible(false);
+          hideWindow();
           return;
         }
         else if(ontologyTreePanel.ontologyViewerOptions.isFilterOn()
@@ -1046,15 +1036,17 @@ public class AnnotationEditor extends AbstractAction {
           // "This resource has been filtered out : "
           // + selectedItem.toString());
           newAnnotationMode = false;
-          annotationWindow.setVisible(false);
+          hideWindow();
           return;
         }
 
         gate.Annotation annot1 = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
-                .get(selectedAnnotationIndex);
+          .get(selectedAnnotationIndex);
         int cStartOffset = annot1.getStartNode().getOffset().intValue();
         int cEndOffset = annot1.getEndNode().getOffset().intValue();
-
+        ontologyTreePanel.ontoViewer.documentTextArea.setSelectionStart(cStartOffset);
+        ontologyTreePanel.ontoViewer.documentTextArea.setSelectionEnd(cEndOffset);
+        
         ArrayList<Annotation> annotations = new ArrayList<Annotation>();
         if(applyToAll.isSelected()) {
           annotations = getSimilarAnnotations(annot1);
@@ -1111,6 +1103,8 @@ public class AnnotationEditor extends AbstractAction {
                 .setSelectionStart(cStartOffset);
         ontologyTreePanel.ontoViewer.documentTextArea
                 .setSelectionEnd(cEndOffset);
+        hideWindow();
+        return;
       }
     }
   }
