@@ -76,7 +76,8 @@ public class OWLIMServiceImpl implements OWLIM,
                              AdminListener {
   private HashMap<String, RepositoryDetails> mapToRepositoryDetails = new HashMap<String, RepositoryDetails>();
   private HashMap<String, Resource> resourcesMap = new HashMap<String, Resource>();
-   
+  private HashMap<String, Boolean> hasSystemNameSpace = new HashMap<String, Boolean>(); 
+  
   /**
    * Debug parameter, if set to true, shows various messages when
    * different methods are invoked
@@ -285,6 +286,7 @@ public class OWLIMServiceImpl implements OWLIM,
 
         SesameServer.setSystemConfig(readConfiguration());
         service = SesameServer.getLocalService();
+        hasSystemNameSpace.put("http://www.w3.org/2002/07/owl#Thing", new Boolean(true));
         initiated = true;
       }
       catch(IOException ioe) {
@@ -308,6 +310,7 @@ public class OWLIMServiceImpl implements OWLIM,
     try {
       if(DEBUG) System.out.println("Initiating OWLIMService...");
       gosHome = gosHomeURL;
+      hasSystemNameSpace.put("http://www.w3.org/2002/07/owl#Thing", new Boolean(true));
 
       systemConf = null;
       owlRDFS = new URL(gosHome, "owl.rdfs");
@@ -4431,11 +4434,13 @@ public class OWLIMServiceImpl implements OWLIM,
   }
 
   public boolean hasSystemNameSpace(String uri) {
-
     if(returnSystemStatements) return false;
-    if(uri.equalsIgnoreCase("http://www.w3.org/2002/07/owl#Thing"))
-      return false;
-    return Utils.hasSystemNameSpace(uri);
+    Boolean val = hasSystemNameSpace.get(uri);
+    if(val == null) {
+      val = new Boolean(Utils.hasSystemNameSpace(uri));
+      hasSystemNameSpace.put(uri, val);
+    }
+    return val.booleanValue(); 
   }
 
   class RepositoryDetails {
