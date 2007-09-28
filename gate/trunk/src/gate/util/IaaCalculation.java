@@ -727,53 +727,6 @@ public class IaaCalculation {
     return true;
   }
 
-  /**
-   * Merge all annotationset from an array. If one annotation is in at least
-   * numK annotation sets, then put it into the merging annotation set.
-   */
-  public static void mergeAnnogation(AnnotationSet[] annsArr, String nameFeat,
-    HashMap<Annotation, String> mergeAnns, int numMaxK) {
-    int numA = annsArr.length;
-    // First copy the annotatioin sets into a temp array
-    HashSet<Annotation>[] annsArrTemp = new HashSet[numA];
-    for(int i = 0; i < numA; ++i) {
-      if(annsArr[i] != null) {
-        annsArrTemp[i] = new HashSet<Annotation>();
-        for(Annotation ann : annsArr[i])
-          annsArrTemp[i].add(ann);
-      }
-    }
-    HashSet<String> featSet = new HashSet<String>();
-    if(nameFeat != null) featSet.add(nameFeat);
-    for(int iA = 0; iA < numA - numMaxK + 1; ++iA) {
-      if(annsArrTemp[iA] != null) {
-        for(Annotation ann : annsArrTemp[iA]) {
-          int numContained = 1;
-          StringBuffer featAdd = new StringBuffer();
-          featAdd.append(iA);
-          for(int i = iA + 1; i < numA; ++i) {
-            if(annsArrTemp[i] != null) {
-              Annotation annT = null;
-              for(Annotation ann0 : annsArrTemp[i]) {
-                if(ann0.isCompatible(ann, featSet)) {
-                  ++numContained;
-                  featAdd.append("-" + i);
-                  annT = ann0;
-                  break;
-                }
-              }
-              annsArrTemp[i].remove(annT);
-            }
-          }
-          if(numContained >= numMaxK) {
-            mergeAnns.put(ann, featAdd.toString());
-          }
-        }
-      }
-    }
-    return;
-  }
-
   /** Collect the labels into a list and sort it alphabetically. */
   public static ArrayList<String> collectLabels(AnnotationSet[][] annsA2,
     String nameF) {
