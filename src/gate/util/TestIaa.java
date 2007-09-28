@@ -67,6 +67,12 @@ public class TestIaa extends TestCase {
             GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME,
             Boolean.FALSE);
     try {
+      
+      //Gate.setGateHome(new File("C:\\svn\\gate"));
+      //Gate.setUserConfigFile(new File("C:\\svn\\gate.xml"));
+      //Gate.init();
+      //ExtensionFileFilter fileFilter = new ExtensionFileFilter();
+      //fileFilter.addExtension("xml");
 
       // Load the documents into a corpus
       Corpus data = Factory.newCorpus("data");
@@ -85,6 +91,8 @@ public class TestIaa extends TestCase {
       data
               .add(loadDocument("tests/iaa/twodocs/doc2-ann3.xml",
                       "doc2-ann3.xml"));
+      
+      //data.populate(new File("C:\\yaoyong_h\\work\\iaa\\data\\twoDocs").toURL(), fileFilter, "UTF-8", false);
 
       boolean isUsingLabel = true;
 
@@ -119,6 +127,7 @@ public class TestIaa extends TestCase {
       data.add(loadDocument("tests/iaa/small/ann1.xml", "ann1.xml"));
       data.add(loadDocument("tests/iaa/small/ann2.xml", "ann2.xml"));
       data.add(loadDocument("tests/iaa/small/ann3.xml", "ann3.xml"));
+      //data.populate(new File("C:\\yaoyong_h\\work\\iaa\\data\\smallData").toURL(), fileFilter, "UTF-8", false);
 
       numDocs = 1; // Number of documents
       numJudges = 3; // number of judges
@@ -191,9 +200,6 @@ public class TestIaa extends TestCase {
       }
     }
     // Get the Iaa computation
-    // System.out.println("annSet="+nameAnnSet+",
-    // annType="+nameAnnType+",
-    // annFeat="+nameAnnFeat+".");
     // First collect labels for the feature
     ArrayList<String> labelsSet;
     labelsSet = IaaCalculation.collectLabels(annArr2, nameAnnFeat);
@@ -234,7 +240,7 @@ public class TestIaa extends TestCase {
       if(!isMerged[kk]) {
         refAnnsArr[kk] = new AnnotationSetImpl(docC);
         HashMap<Annotation, String> mergeInfor = new HashMap<Annotation, String>();
-        IaaCalculation.mergeAnnogation(annArr2[kk], nameAnnFeat, mergeInfor, 2);
+        AnnotationMerging.mergeAnnogation(annArr2[kk], nameAnnFeat, mergeInfor, 2, isSuitable);
         isMerged[kk] = true;
         // FeatureMap featM = Factory.newFeatureMap();
         AnnotationSet annsDoc = docC.getAnnotations("mergedAnns");
@@ -325,14 +331,14 @@ public class TestIaa extends TestCase {
         assertEquals(nPwF[3], 6);
         assertEquals(nAwF[0], 11);
         assertEquals(nAwF[1], 0);
-        assertEquals(nAwF[2], 3);
+        assertEquals(nAwF[2], 2);
         assertEquals(nAwF[3], 3);
         assertEquals(nPwKa[0], 58);
-        assertEquals(nPwKa[1], 15);
-        assertEquals(nPwKa[2], -7);
+        assertEquals(nPwKa[1], 18);
+        assertEquals(nPwKa[2], 1);
         assertEquals(nAwKa[0], 36);
-        assertEquals(nAwKa[1], 15);
-        assertEquals(nAwKa[2], 4);
+        assertEquals(nAwKa[1], 20);
+        assertEquals(nAwKa[2], 7);
         assertEquals(isSuitable, true);
         break;
       case 4:
