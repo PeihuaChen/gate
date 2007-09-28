@@ -48,13 +48,22 @@ public class AnnotationMerging {
     }
     HashSet<String> featSet = new HashSet<String>();
     if(nameFeat != null) featSet.add(nameFeat);
+    if(numMaxK<1) numMaxK=1;
     for(int iA = 0; iA < numA - numMaxK + 1; ++iA) {
       if(annsArrTemp[iA] != null) {
         for(Annotation ann : annsArrTemp[iA]) {
           int numContained = 1;
           StringBuffer featAdd = new StringBuffer();
           featAdd.append(iA);
+          StringBuffer featDisa = new StringBuffer();
+          if(iA>0) {
+            featDisa.append("0");
+            for(int i=1; i<iA; ++i)
+              featDisa.append("-"+i);
+          }
+          int numDisagreed = iA;
           for(int i = iA + 1; i < numA; ++i) {
+            boolean isContained = false;
             if(annsArrTemp[i] != null) {
               Annotation annT = null;
               for(Annotation ann0 : annsArrTemp[i]) {
@@ -62,10 +71,18 @@ public class AnnotationMerging {
                   ++numContained;
                   featAdd.append("-" + i);
                   annT = ann0;
+                  isContained = true;
                   break;
                 }
               }
-              annsArrTemp[i].remove(annT);
+              if(isContained)
+                annsArrTemp[i].remove(annT);
+            }
+            if(!isContained){
+              if(numDisagreed==0)
+                featDisa.append(i);
+              else featDisa.append("-"+i);
+              ++numDisagreed;
             }
           }
           if(numContained >= numMaxK) {
@@ -81,13 +98,109 @@ public class AnnotationMerging {
     removeDuplicate(mergeAnns);
     return;
   }
-
   /**
    * Merge all annotationset from an array. If one annotation is agreed by
    * the majority of the annotators, then put it into the merging annotation set.
    */
   public static void mergeAnnogationMajority(AnnotationSet[] annsArr, String nameFeat,
-    HashMap<Annotation, String> mergeAnns) {
+    HashMap<Annotation, String> mergeAnns, boolean isTheSameInstances) {
+    int numA = annsArr.length;
+    if(nameFeat == null) {
+      mergeAnnogationMajorityNoFeat(annsArr, mergeAnns, isTheSameInstances);
+      return;
+    }
+      
+    // First copy the annotatioin sets into a temp array
+    HashSet<Annotation>[] annsArrTemp = new HashSet[numA];
+    for(int i = 0; i < numA; ++i) {
+      if(annsArr[i] != null) {
+        annsArrTemp[i] = new HashSet<Annotation>();
+        for(Annotation ann : annsArr[i])
+          annsArrTemp[i].add(ann);
+      }
+    }
+    for(int iA = 0; iA < numA; ++iA) {
+      if(annsArrTemp[iA] != null) {
+        for(Annotation ann : annsArrTemp[iA]) {
+          int numDisagreed=0;
+          //Already the iA annotators don't agree the annotation
+          numDisagreed = iA;
+          StringBuffer featDisa = new StringBuffer();
+          if(iA>0) {
+            featDisa.append("0");
+            for(int i=1; i<iA; ++i)
+              featDisa.append("-"+i);
+          }
+          HashMap<String,String>featOthers = new HashMap<String,String>();
+          String featTh = null;
+          if(nameFeat != null && ann.getFeatures().get(nameFeat)!= null)
+              featTh =  ann.getFeatures().get(nameFeat).toString();
+          
+          featOthers.put(featTh, new Integer(iA).toString());
+          HashMap<String,Annotation>annAll = new HashMap<String,Annotation>();
+          annAll.put(featTh, ann);
+          for(int i = iA + 1; i < numA; ++i) {
+            boolean isContained = false;
+            if(annsArrTemp[i] != null) {
+              Annotation annT = null;
+              for(Annotation ann0 : annsArrTemp[i]) {
+                if(ann0.coextensive(ann)) {
+                  String featValue = null;
+                  if(nameFeat != null && ann0.getFeatures().get(nameFeat)!=null)
+                    featValue = ann0.getFeatures().get(nameFeat).toString();
+                  if(!featOthers.containsKey(featValue)) {
+                    featOthers.put(featValue, new Integer(i).toString());
+                    annAll.put(featValue, ann0);
+                  }
+                  else {
+                    String str = featOthers.get(featValue);
+                    featOthers.put(featValue, str+"-"+i);
+                  }
+                  annT = ann0;
+                  isContained = true;
+                  break;
+                }
+              }
+              if(isContained) 
+                annsArrTemp[i].remove(annT);
+            }
+            if(!isContained)  {
+              if(numDisagreed==0)
+                featDisa.append(i);
+              else featDisa.append("-"+i);
+              ++numDisagreed;
+            }
+          }//end of the loop for the following annotation set
+          int numAgreed = -1;
+          String agreeFeat = null;
+          for(String str:featOthers.keySet()) {
+            String str0 = featOthers.get(str);
+            int num=1;
+            while(str0.contains("-")) {
+              ++num;
+              str0 = str0.substring(str0.indexOf('-')+1);
+            }
+            if(numAgreed<num) {
+              numAgreed = num;
+              agreeFeat = str;
+            }
+          }
+          if(numAgreed >= numDisagreed) {
+            mergeAnns.put(annAll.get(agreeFeat), featOthers.get(agreeFeat));
+          } else if(isTheSameInstances) {
+            if(nameFeat!=null && ann.getFeatures().get(nameFeat)!= null)
+              ann.getFeatures().remove(nameFeat);
+            mergeAnns.put(ann, featDisa.toString());
+         }
+        } //for each ann in the current annotation set
+      }
+    }
+    //remove the annotation in the same place
+    //removeDuplicate(mergeAnns);
+    return;
+  }
+  public static void mergeAnnogationMajorityNoFeat(AnnotationSet[] annsArr,
+    HashMap<Annotation, String> mergeAnns, boolean isTheSameInstances) {
     int numA = annsArr.length;
     // First copy the annotatioin sets into a temp array
     HashSet<Annotation>[] annsArrTemp = new HashSet[numA];
@@ -98,17 +211,19 @@ public class AnnotationMerging {
           annsArrTemp[i].add(ann);
       }
     }
-    HashSet<String> featSet = new HashSet<String>();
-    if(nameFeat != null) featSet.add(nameFeat);
     for(int iA = 0; iA < numA; ++iA) {
       if(annsArrTemp[iA] != null) {
         for(Annotation ann : annsArrTemp[iA]) {
-          int numAgreed=0;
           int numDisagreed=0;
           //Already the iA annotators don't agree the annotation
-          if(iA>0) numDisagreed = iA;
-          //The current annotator agree the annotation of course.
-          ++numAgreed;
+          numDisagreed = iA;
+          StringBuffer featDisa = new StringBuffer();
+          if(iA>0) {
+            featDisa.append("0");
+            for(int i=1; i<iA; ++i)
+              featDisa.append("-"+i);
+          }
+          int numAgreed=1;
           StringBuffer featAdd = new StringBuffer();
           featAdd.append(iA);
           for(int i = iA + 1; i < numA; ++i) {
@@ -116,28 +231,34 @@ public class AnnotationMerging {
             if(annsArrTemp[i] != null) {
               Annotation annT = null;
               for(Annotation ann0 : annsArrTemp[i]) {
-                  if(ann0.isCompatible(ann, featSet)) {
-                    ++numAgreed;
-                    featAdd.append("-" + i);
-                    annT = ann0;
-                    isContained = true;
-                    break;
-                  }
+                if(ann0.coextensive(ann)) {
+                  ++numAgreed;
+                  annT = ann0;
+                  isContained = true;
+                  featAdd.append("-"+i);
+                  break;
+                }
               }
               if(isContained) 
                 annsArrTemp[i].remove(annT);
             }
-            if(!isContained) 
-              ++numDisagreed; 
-          }
+            if(!isContained)  {
+              if(numDisagreed==0)
+                featDisa.append(i);
+              else featDisa.append("-"+i);
+              ++numDisagreed;
+            }
+          }//end of the loop for the following annotation set
           if(numAgreed >= numDisagreed) {
             mergeAnns.put(ann, featAdd.toString());
-          }
-        }
+          } else if(isTheSameInstances) {
+              mergeAnns.put(ann, featAdd.toString());
+         }
+        } //for each ann in the current annotation set
       }
     }
     //remove the annotation in the same place
-    removeDuplicate(mergeAnns);
+    //removeDuplicate(mergeAnns);
     return;
   }
   /** Remove the duplicate annotations from the merged annotations. */

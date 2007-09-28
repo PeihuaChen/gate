@@ -42,7 +42,7 @@ public class TestAnnotationMerging extends TestCase {
     return doc;
   }
 
-  /** The test the AnnotationMerging. */
+  /** The test for AnnotationMerging. */
   public void testAnnotationMerging() throws Exception {
 
     Boolean savedSpaceSetting = Gate.getUserConfig().getBoolean(
@@ -161,8 +161,8 @@ public class TestAnnotationMerging extends TestCase {
       }
     HashMap<Annotation,String>mergeInfor = new HashMap<Annotation,String>();
     if(isUsingMajority)
-      AnnotationMerging.mergeAnnogationMajority(annArr2[0], nameAnnFeat, mergeInfor);
-    else AnnotationMerging.mergeAnnogation(annArr2[0], nameAnnFeat, mergeInfor, 3, isTheSameInstances);
+      AnnotationMerging.mergeAnnogationMajority(annArr2[0], nameAnnFeat, mergeInfor, isTheSameInstances);
+    else AnnotationMerging.mergeAnnogation(annArr2[0], nameAnnFeat, mergeInfor, 2, isTheSameInstances);
     int numAnns=0;
     if(isTheSameInstances) {
       for(Annotation ann:mergeInfor.keySet()) {
@@ -183,7 +183,7 @@ public class TestAnnotationMerging extends TestCase {
         assertEquals(numAnns, 14);
         break;
       case 2:
-        assertEquals(numAnns, 5);
+        assertEquals(numAnns, 14);
         break;
       case 3:
         assertEquals(numAnns, 6);
