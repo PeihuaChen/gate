@@ -22,11 +22,15 @@ import java.util.Vector;
  * is the array containing the annotation set for merging. The
  * output is a map, the key of which is the merged annotations
  * and the values of which represent those annotators who agree
- * on the merged annotation. The program also selects only one 
- * annotation for one example (namely if there are more than one
- * merged annotations with the same span, the program selects only
+ * on the merged annotation. Two merging methods are implemented.
+ * One method selects one annotation if at least a pre-defined
+ * number of annotators agree on it. If there are more than 
+ * one merged annotations with the same span, the program selects only
  * one annotation from them with the maximal number of annotators 
- * on it.
+ * on it. Another method selects only one 
+ * annotation from those annotations with the same span, 
+ * which majority of the annotators support. 
+ * 
  */
 public class AnnotationMerging {
 
@@ -35,7 +39,7 @@ public class AnnotationMerging {
    * numK annotation sets, then put it into the merging annotation set.
    */
   public static void mergeAnnogation(AnnotationSet[] annsArr, String nameFeat,
-    HashMap<Annotation, String> mergeAnns, int numMaxK, boolean isTheSameInstances) {
+    HashMap<Annotation, String> mergeAnns, int numMinK, boolean isTheSameInstances) {
     int numA = annsArr.length;
     // First copy the annotatioin sets into a temp array
     HashSet<Annotation>[] annsArrTemp = new HashSet[numA];
@@ -48,8 +52,8 @@ public class AnnotationMerging {
     }
     HashSet<String> featSet = new HashSet<String>();
     if(nameFeat != null) featSet.add(nameFeat);
-    if(numMaxK<1) numMaxK=1;
-    for(int iA = 0; iA < numA - numMaxK + 1; ++iA) {
+    if(numMinK<1) numMinK=1;
+    for(int iA = 0; iA < numA - numMinK + 1; ++iA) {
       if(annsArrTemp[iA] != null) {
         for(Annotation ann : annsArrTemp[iA]) {
           int numContained = 1;
@@ -85,7 +89,7 @@ public class AnnotationMerging {
               ++numDisagreed;
             }
           }
-          if(numContained >= numMaxK) {
+          if(numContained >= numMinK) {
             mergeAnns.put(ann, featAdd.toString());
           } else if(isTheSameInstances && nameFeat != null) {
            ann.getFeatures().remove(nameFeat);
@@ -133,7 +137,7 @@ public class AnnotationMerging {
           }
           HashMap<String,String>featOthers = new HashMap<String,String>();
           String featTh = null;
-          if(nameFeat != null && ann.getFeatures().get(nameFeat)!= null)
+          if(ann.getFeatures().get(nameFeat)!= null)
               featTh =  ann.getFeatures().get(nameFeat).toString();
           
           featOthers.put(featTh, new Integer(iA).toString());
@@ -146,7 +150,7 @@ public class AnnotationMerging {
               for(Annotation ann0 : annsArrTemp[i]) {
                 if(ann0.coextensive(ann)) {
                   String featValue = null;
-                  if(nameFeat != null && ann0.getFeatures().get(nameFeat)!=null)
+                  if(ann0.getFeatures().get(nameFeat)!=null)
                     featValue = ann0.getFeatures().get(nameFeat).toString();
                   if(!featOthers.containsKey(featValue)) {
                     featOthers.put(featValue, new Integer(i).toString());
@@ -188,18 +192,19 @@ public class AnnotationMerging {
           if(numAgreed >= numDisagreed) {
             mergeAnns.put(annAll.get(agreeFeat), featOthers.get(agreeFeat));
           } else if(isTheSameInstances) {
-            if(nameFeat!=null && ann.getFeatures().get(nameFeat)!= null)
+            if(ann.getFeatures().get(nameFeat)!= null)
               ann.getFeatures().remove(nameFeat);
             mergeAnns.put(ann, featDisa.toString());
          }
         } //for each ann in the current annotation set
       }
     }
-    //remove the annotation in the same place
-    //removeDuplicate(mergeAnns);
     return;
   }
-  public static void mergeAnnogationMajorityNoFeat(AnnotationSet[] annsArr,
+  /** The majority merging method for the annotaiton not specifying any annotation
+   * feature for label. 
+   * */
+  private static void mergeAnnogationMajorityNoFeat(AnnotationSet[] annsArr,
     HashMap<Annotation, String> mergeAnns, boolean isTheSameInstances) {
     int numA = annsArr.length;
     // First copy the annotatioin sets into a temp array
@@ -257,8 +262,6 @@ public class AnnotationMerging {
         } //for each ann in the current annotation set
       }
     }
-    //remove the annotation in the same place
-    //removeDuplicate(mergeAnns);
     return;
   }
   /** Remove the duplicate annotations from the merged annotations. */
