@@ -15,6 +15,7 @@ package gate.swing;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.event.ListDataListener;
@@ -76,16 +77,6 @@ public class JChoice extends JPanel implements ItemSelectable{
   private JComboBox combo;
   
   /**
-   * The button group used for a small number of choices.
-   */
-  private ButtonGroup buttonGroup;
-  
-  /**
-   * A hidden button used to simulate no selection state.
-   */
-  private JToggleButton noSelection;
-  
-  /**
    * Internal item listener for both the combo and the buttons, used to keep
    * the two in sync. 
    */
@@ -101,6 +92,7 @@ public class JChoice extends JPanel implements ItemSelectable{
    * model.
    */
   private Map<AbstractButton, Object> buttonToValueMap;
+  
   
   /**
    * Creates a FastChoice with a default empty data model.
@@ -145,9 +137,6 @@ public class JChoice extends JPanel implements ItemSelectable{
     maximumFastChoices = DEFAULT_MAX_FAST_CHOICES;
     maximumWidth = DEFAULT_MAX_WIDTH;
     listenersMap = new HashMap<EventListener, ListenerWrapper>();
-    buttonGroup = new ButtonGroup();
-    noSelection = new JToggleButton("NONE");
-    buttonGroup.add(noSelection);
     combo = new JComboBox(model);
     buttonToValueMap = new HashMap<AbstractButton, Object>();
     sharedItemListener = new ItemListener(){
@@ -158,9 +147,11 @@ public class JChoice extends JPanel implements ItemSelectable{
             for(AbstractButton aBtn : buttonToValueMap.keySet()){
               Object aValue = buttonToValueMap.get(aBtn);
               if(e.getItem().equals(aValue)){
-                //we found the right button
-                aBtn.setSelected(true);
-                break;
+                //we found the selected button
+                if(!aBtn.isSelected()) aBtn.setSelected(true);
+              }else{
+                //we found a button which should not be selected
+                if(aBtn.isSelected()) aBtn.setSelected(false);
               }
             }
           }else{
@@ -169,11 +160,11 @@ public class JChoice extends JPanel implements ItemSelectable{
             combo.setSelectedItem(value);
           }
         }else if(e.getStateChange() == ItemEvent.DESELECTED){
-          //de-selection
-          if(e.getSource() == combo){
-            //de selection event from combo -> unselect everything in the 
-            //button group
-            noSelection.setSelected(true);
+          if(e.getSource() instanceof AbstractButton){
+            Object wrongValue = buttonToValueMap.get(e.getSource());
+            if(combo.getSelectedItem().equals(wrongValue)){
+              combo.setSelectedItem(null);
+            }
           }
         }
       }      
@@ -223,6 +214,9 @@ public class JChoice extends JPanel implements ItemSelectable{
     });
     topBox.add(Box.createHorizontalStrut(10));
     topBox.add(aButn);
+    topBox.add(Box.createHorizontalStrut(10));
+    topBox.add(new JToggleButton("GAGA"));
+    
     aFrame.add(topBox, BorderLayout.NORTH);
     aFrame.pack();
     aFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -277,16 +271,11 @@ public class JChoice extends JPanel implements ItemSelectable{
       }else{
         //use buttons
         //first clear the old buttons, if any exist
-        if(buttonGroup != null && buttonGroup.getButtonCount() > 0){
-          Enumeration<AbstractButton> btnEnum = buttonGroup.getElements();
-          while(btnEnum.hasMoreElements()){
-            AbstractButton aButton = btnEnum.nextElement();
-            aButton.removeItemListener(sharedItemListener);
-            buttonGroup.remove(aButton);
+        if(buttonToValueMap.size() > 0){
+          for(AbstractButton aBtn : buttonToValueMap.keySet()){
+            aBtn.removeItemListener(sharedItemListener);
           }
         }
-        //always add the hidden button used for no selection
-        buttonGroup.add(noSelection);
         //now create the new buttons
         buttonToValueMap.clear();
         for(int i = 0; i < model.getSize(); i++){
@@ -294,7 +283,6 @@ public class JChoice extends JPanel implements ItemSelectable{
           JToggleButton aButton = new JToggleButton(aValue.toString());
           if(defaultButtonMargin != null) aButton.setMargin(defaultButtonMargin);
           aButton.addItemListener(sharedItemListener);
-          buttonGroup.add(aButton);
           buttonToValueMap.put(aButton, aValue);
           add(aButton);
         }
