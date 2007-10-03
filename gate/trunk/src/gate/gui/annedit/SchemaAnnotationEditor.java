@@ -25,6 +25,8 @@ import java.util.*;
 import java.util.List;
 
 import javax.swing.*;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 
@@ -66,7 +68,8 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     if(featuresEditor != null){
       FeatureMap features = ann.getFeatures();
       if(features == null){
-        ann.setFeatures(Factory.newFeatureMap());
+        features = Factory.newFeatureMap();
+        ann.setFeatures(features);
       }
       featuresEditor.editFeatureMap(features);
     }
@@ -176,6 +179,12 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
   protected JDialog dialog;
   
   protected CreoleListener creoleListener;
+  
+  /**
+   * Listener used to hide the editing window when the text is hidden.
+   */
+  protected AncestorListener textAncestorListener;
+  
   /**
    * Stores the Annotation schema objects available in the system.
    * The annotation types are used as keys for the map.
@@ -208,9 +217,9 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
   @Override
   public Resource init() throws ResourceInstantiationException {
     super.init();
-    
     initData();
     initGui();
+    getOwner().getTextComponent().addAncestorListener(textAncestorListener);
     return this;
   }
 
@@ -256,6 +265,33 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       }  
     };
     Gate.getCreoleRegister().addCreoleListener(creoleListener); 
+    
+    textAncestorListener = new AncestorListener(){
+      /**
+       * A flag used to mark the fact that the dialog is active and was hidden 
+       * by this listener.
+       */
+      private boolean dialogActive = false;
+      
+      public void ancestorAdded(AncestorEvent event) {
+        if(dialogActive){
+          placeDialog();
+          dialogActive = false;
+        }
+      }
+      public void ancestorMoved(AncestorEvent event) {
+        if(dialog.isVisible()){
+          placeDialog();
+        }
+      }
+      
+      public void ancestorRemoved(AncestorEvent event) {
+        if(dialog.isVisible()){
+          dialogActive = true;
+          dialog.setVisible(false);
+        }
+      }
+    };
   }  
   
   public void cleanup(){
@@ -684,6 +720,12 @@ System.out.println("Window up");
    * @param owner the owner to set
    */
   public void setOwner(AnnotationEditorOwner owner) {
+    if(this.owner != null && this.owner != owner){
+      this.owner.getTextComponent().removeAncestorListener(textAncestorListener);
+    }
     this.owner = owner;
+    if(this.owner != null){
+      this.owner.getTextComponent().addAncestorListener(textAncestorListener);
+    }
   }
 }

@@ -22,6 +22,8 @@ import java.net.MalformedURLException;
 import java.util.*;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import gate.Factory;
 import gate.FeatureMap;
@@ -108,7 +110,13 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
           }else if(e.getSource() == jchoice){
             newValue = jchoice.getSelectedItem();
           }
-          featureMap.put(featureName, newValue);
+          if(featureMap != null){
+            if(newValue != null){
+              featureMap.put(featureName, newValue);
+            }else{
+              featureMap.remove(featureName);
+            }
+          }
         }
       };
       //build the empty shell
@@ -142,6 +150,20 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
             textField.setText(defaultValue);
           }
           textField.addActionListener(sharedActionListener);
+          textField.getDocument().addDocumentListener(new DocumentListener(){
+            public void changedUpdate(DocumentEvent e) {
+            }
+            public void insertUpdate(DocumentEvent e) {
+              sharedActionListener.actionPerformed(
+                      new ActionEvent(textField, ActionEvent.ACTION_PERFORMED, 
+                              null));
+            }
+            public void removeUpdate(DocumentEvent e) {
+              sharedActionListener.actionPerformed(
+                      new ActionEvent(textField, ActionEvent.ACTION_PERFORMED, 
+                              null));
+            }
+          });
           gui.add(textField);          
           break;
       }
@@ -445,16 +467,25 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
    * @param featureMap
    */
   public void editFeatureMap(FeatureMap featureMap){
-    if(this.featureMap != null && this.featureMap != featureMap){
-      this.featureMap.removeFeatureMapListener(this);
-    }
+//    if(this.featureMap != null && this.featureMap != featureMap){
+//      this.featureMap.removeFeatureMapListener(this);
+//    }
     this.featureMap = featureMap;
-    if(this.featureMap != null){
-      this.featureMap.addFeatureMapListener(this);
-    }
+//    if(this.featureMap != null){
+//      this.featureMap.addFeatureMapListener(this);
+//    }
     featureMapUpdated();
   }
   
+  /**
+   * Brings a feature map in line with an annotation schema by removing all 
+   * spurious values and giving default values for the required features that 
+   * don't have a value or have the wrong one.   
+   * @param fMap
+   */
+  private void tidyFeatureMap(FeatureMap fMap){
+    
+  }
   
   /* (non-Javadoc)
    * @see gate.event.FeatureMapListener#featureMapUpdated()
