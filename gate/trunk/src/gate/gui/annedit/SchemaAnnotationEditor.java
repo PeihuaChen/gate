@@ -400,16 +400,11 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       dialog.pack();
       
       dialog.addComponentListener(new ComponentAdapter(){
-
-        /* (non-Javadoc)
-         * @see java.awt.event.ComponentAdapter#componentMoved(java.awt.event.ComponentEvent)
-         */
-        @Override
         public void componentMoved(ComponentEvent e) {
           if(dialogIsMoving){
             //system move, do nothing
-            dialogIsMoving = false;
             fixDialogTitle();
+            dialogIsMoving = false;
           }else{
             //user move -> pin the dialog
             dialogPinned = true;
