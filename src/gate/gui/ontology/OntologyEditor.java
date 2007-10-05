@@ -37,6 +37,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
@@ -44,6 +45,15 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.*;
+
+import org.openrdf.model.Graph;
+import org.openrdf.model.Statement;
+import org.openrdf.sesame.config.AccessDeniedException;
+import org.openrdf.sesame.constants.QueryLanguage;
+import org.openrdf.sesame.query.MalformedQueryException;
+import org.openrdf.sesame.query.QueryEvaluationException;
+import org.openrdf.sesame.query.QueryResultsTable;
+import org.openrdf.sesame.sail.StatementIterator;
 
 /**
  * The GUI for the Ontology Editor
@@ -209,6 +219,47 @@ public class OntologyEditor extends AbstractVisualResource
     searchAction = new SearchAction("", MainFrame.getIcon("ontology-search"), this);
     search = new JButton(searchAction);
     search.setToolTipText("Advanced search in the ontology");
+    
+    
+    queryBtn = new JButton("Q");
+    queryBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) {
+        
+        String serqlQuery = JOptionPane.showInputDialog("SeRQL Query :");
+        
+        if(serqlQuery == null || serqlQuery.trim().length() == 0) {
+          return;
+        }
+        try {
+          long time = System.currentTimeMillis();
+          Graph result = ontology.getSesameRepository().performGraphQuery(QueryLanguage.SERQL, "construct "+serqlQuery);
+          StatementIterator iter = result.getStatements();
+          while(iter.hasNext()) {
+            Statement stmt = iter.next();
+            System.out.println(stmt.getSubject().toString()+"=>"+stmt.getPredicate().toString()+"=>"+stmt.getObject().toString());
+          }
+          System.out.println(System.currentTimeMillis() - time);
+          time = System.currentTimeMillis();
+          QueryResultsTable result1 = ontology.getSesameRepository().performTableQuery(QueryLanguage.SERQL, "select "+serqlQuery);
+          for(int i=0;i<result1.getRowCount();i++) {
+            for(int j=0;j<result1.getColumnCount();j++) {
+              System.out.print(result1.getValue(i,j)+"=>");
+            }
+            System.out.println();
+          }
+          System.out.println(System.currentTimeMillis() - time);
+        } catch(AccessDeniedException ade) {
+          throw new GateOntologyException(ade);
+        } catch(IOException ioe) {
+          throw new GateOntologyException(ioe);
+        } catch(MalformedQueryException mqe) {
+          throw new GateOntologyException(mqe);
+        } catch(QueryEvaluationException qee) {
+          throw new GateOntologyException(qee);
+        }
+      }
+    });
+    //toolBar.add(queryBtn);
     
     topClassAction = new TopClassAction("", MainFrame
             .getIcon("ontology-topclass"));
@@ -2130,6 +2181,8 @@ public class OntologyEditor extends AbstractVisualResource
    */
   protected JToolBar toolBar;
 
+  protected JButton queryBtn;
+  
   protected JButton topClass;
 
   protected JButton subClass;
