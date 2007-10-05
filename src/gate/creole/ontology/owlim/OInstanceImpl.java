@@ -215,7 +215,8 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#getRDFPropertyValues(gate.creole.ontology.RDFProperty)
    */
   public List<OResource> getRDFPropertyValues(RDFProperty aProperty) {
-      ResourceInfo[] list = owlim.getRDFPropertyValues(this.repositoryID, uri
+    System.out.println(aProperty.getURI().toString());  
+    ResourceInfo[] list = owlim.getRDFPropertyValues(this.repositoryID, uri
               .toString(), aProperty.getURI().toString());
       List<OResource> values = new ArrayList<OResource>();
       List<String> individuals = Arrays.asList(owlim
