@@ -23,16 +23,16 @@
         COMMENT="The name of the annotation set used for storing the merged annotations" 
          RUNTIME="true" OPTIONAL="false">java.lang.String</PARAMETER>
 
-      <PARAMETER NAME="corpus" COMMENT="Corpus to be processed"
-        RUNTIME="true" OPTIONAL="false">gate.Corpus</PARAMETER>
+      <PARAMETER NAME="document" COMMENT="Document to be processed"
+        RUNTIME="true" OPTIONAL="false">gate.Document</PARAMETER>
 
       <PARAMETER NAME="mergingMethod"
         COMMENT="merging method" RUNTIME="true" DEFAULT="MajorityVoting"
         OPTIONAL="false">gate.merger.MergingMethodsEnum</PARAMETER>
 
       <PARAMETER NAME="minimalAnnNum"
-        COMMENT="The name of the annotation set used for storing the merged annotations" 
-         RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
+        COMMENT="The minimal number of the annotation sets used for merged annotations" 
+         RUNTIME="true" DEFAULT="1" OPTIONAL="true">java.lang.String</PARAMETER>
 
      </RESOURCE>
      
