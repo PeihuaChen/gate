@@ -1,0 +1,923 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<GateDocument>
+<!-- The document's features-->
+
+<GateDocumentFeatures>
+<Feature>
+  <Name className="java.lang.String">gate.SourceURL</Name>
+  <Value className="java.lang.String">file:/C:/yaoyong_h/work/iaa/data/smallData-test/CH-01-a-udn_xxx_20000111_0252292-1.xml</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">MimeType</Name>
+  <Value className="java.lang.String">text/xml</Value>
+</Feature>
+</GateDocumentFeatures>
+<!-- The document content area with serialized nodes -->
+
+<TextWithNodes><Node id="0" />美國線上、時代華納換股合併-總值三千五百億美元歷來最大合併案將成首家全球性媒體與通信公司美股市開盤上揚
+<Node id="52" />【本報綜合十日外電報導】媒體、<Node id="67" />娛樂巨擘<Node id="71" />時代華納公司<Node id="77" />與全球最大網際網路服務公司<Node id="90" />美國線上（AOL）公司<Node id="101" />今天在聯合記者會中宣布，兩公司將以換股的方式合併。<Node id="126" />這項總值三千五百億美元的合併是歷來最大的公司合併案。<Node id="152" />時代華納<Node id="156" />表示，合併後的新集團將稱為美國線上時代華納公司，其目的在大事革新人們取得資訊與彼此溝通的方式。<Node id="203" />分析師<Node id="206" />表示，媒體界對此一結合內容服務與網路通路服務的購併案，勢必令媒體界感到興奮莫名，因為這是新科技領域內合乎邏輯的進展。<Node id="264" />投資人對媒體與網路的合作當然也樂觀其成。<Node id="284" />合併後，美國線上的股東將持有新集團百分之五十五的大多數股份，時代華納持有百分之四十五。<Node id="327" />根據合併協定，時代華納股東每一股可換取美國線上的一點五股，而後者的股東每一股可換取時代華納的一股。<Node id="376" />雙方<Node id="378" />在合併聲明中指出，美國線上創辦人、現任董事長兼執行長凱斯將出任新集團董事長；時代華納董事長兼執行長李文將任執行長；而時代華納副董事長、美國有線電視新聞網（CNN）創辦人特納將任副董事長。<Node id="471" />凱斯<Node id="473" />說，合併後將產生「國際網際網路世紀首家全球性媒體與通信公司，這是歷史性的一刻，將改變國際網際網路與通訊的風貌」，帶動下一次國際網際網路革命。<Node id="543" />華爾街日報<Node id="548" />今天指出，設在維吉尼亞州杜勒斯的美國線上有一千九百萬名用戶，現有資本總市值為一千六百四十億美元，約為設在紐約的時代華納公司（八百卅億美元）的兩倍。<Node id="621" />時代華納公司旗下的公司行號包括時代雜誌、華納兄弟電影公司、華納音樂集團、HBO（家庭票房）有線電視電影頻道、時代華納有線電視、時代華納電信公司、華納圖書公司及華納兄弟電視網。<Node id="708" />該報<Node id="710" />表示，這項合併案對交易雙方所屬的產業可能都會造成重大影響；兩家公司合併，適逢許多大媒體公司正奮力設法約束國際網際網路的勢力，同時國際網際網路公司似有日益要把娛樂等內容擺到他們的網站以吸引更多顧客之勢。<Node id="810" />【本報綜合十日外電報導】在<Node id="823" />美國線上與時代華納公司<Node id="834" />宣布合併後，以科技股為主的那斯達克股市開盤即衝破四千點，道瓊指數也大幅上揚，在開盤二十分鐘後，那斯達克大漲一二九點瓞一，漲至四瓞一一點六三，漲幅百分之三點三二，道瓊指數上漲七九點七三，達到一一六瓞二點二九，漲幅百分之瓞點六九。<Node id="947" /></TextWithNodes>
+<!-- The default annotation set -->
+
+<AnnotationSet>
+</AnnotationSet>
+<!-- Named annotation set -->
+
+<AnnotationSet Name="a-0">
+<Annotation Id="68" Type="OPINION_SRC" StartNode="708" EndNode="710">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">IMP</Value>
+</Feature>
+</Annotation>
+<Annotation Id="62" Type="SENT" StartNode="621" EndNode="708">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String"></Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0011</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+</Annotation>
+<Annotation Id="51" Type="SENT" StartNode="0" EndNode="52">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String"></Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0000</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+</Annotation>
+<Annotation Id="58" Type="SENT" StartNode="327" EndNode="376">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">POS</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0007</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="55" Type="SENT" StartNode="203" EndNode="264">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">POS</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0004</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="67" Type="OPINION_SRC" StartNode="376" EndNode="378">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">IMP</Value>
+</Feature>
+</Annotation>
+<Annotation Id="50" Type="SENT" StartNode="264" EndNode="284">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">POS</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0005</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="63" Type="OPINION_SRC" StartNode="823" EndNode="834">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">EXP</Value>
+</Feature>
+</Annotation>
+<Annotation Id="66" Type="OPINION_SRC" StartNode="543" EndNode="548">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">EXP</Value>
+</Feature>
+</Annotation>
+<Annotation Id="49" Type="SENT" StartNode="52" EndNode="126">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String"></Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0001</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+</Annotation>
+<Annotation Id="54" Type="SENT" StartNode="543" EndNode="621">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String"></Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0010</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+</Annotation>
+<Annotation Id="59" Type="SENT" StartNode="810" EndNode="947">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String"></Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0013</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+</Annotation>
+<Annotation Id="64" Type="OPINION_SRC" StartNode="471" EndNode="473">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">EXP</Value>
+</Feature>
+</Annotation>
+<Annotation Id="53" Type="SENT" StartNode="471" EndNode="543">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">POS</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0009</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="65" Type="OPINION_SRC" StartNode="203" EndNode="206">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">IMP</Value>
+</Feature>
+</Annotation>
+<Annotation Id="70" Type="OPINION_SRC" StartNode="67" EndNode="101">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">EXP</Value>
+</Feature>
+</Annotation>
+<Annotation Id="60" Type="SENT" StartNode="284" EndNode="327">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String"></Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0006</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+</Annotation>
+<Annotation Id="61" Type="SENT" StartNode="376" EndNode="471">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String"></Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0008</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+</Annotation>
+<Annotation Id="57" Type="SENT" StartNode="708" EndNode="810">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">NEU</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0012</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="52" Type="SENT" StartNode="126" EndNode="152">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">POS</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0002</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="56" Type="SENT" StartNode="152" EndNode="203">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">POS</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0003</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="69" Type="OPINION_SRC" StartNode="152" EndNode="156">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">EXP</Value>
+</Feature>
+</Annotation>
+</AnnotationSet>
+<!-- Named annotation set -->
+
+<AnnotationSet Name="a-2">
+<Annotation Id="111" Type="OPINION_SRC" StartNode="71" EndNode="77">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">EXP</Value>
+</Feature>
+</Annotation>
+<Annotation Id="100" Type="SENT" StartNode="284" EndNode="327">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">NEU</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0006</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="107" Type="OPINION_SRC" StartNode="543" EndNode="548">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">EXP</Value>
+</Feature>
+</Annotation>
+<Annotation Id="94" Type="SENT" StartNode="376" EndNode="471">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">NEU</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0008</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="104" Type="SENT" StartNode="152" EndNode="203">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">POS</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0003</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="99" Type="SENT" StartNode="621" EndNode="708">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">NEU</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0011</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="95" Type="SENT" StartNode="0" EndNode="52">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">NEU</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0000</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="112" Type="OPINION_SRC" StartNode="376" EndNode="378">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">IMP</Value>
+</Feature>
+</Annotation>
+<Annotation Id="108" Type="OPINION_SRC" StartNode="708" EndNode="710">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">IMP</Value>
+</Feature>
+</Annotation>
+<Annotation Id="91" Type="SENT" StartNode="810" EndNode="947">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">NEU</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0013</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="103" Type="SENT" StartNode="327" EndNode="376">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">NEU</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0007</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="98" Type="SENT" StartNode="126" EndNode="152">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">NEU</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0002</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="105" Type="OPINION_SRC" StartNode="203" EndNode="206">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">IMP</Value>
+</Feature>
+</Annotation>
+<Annotation Id="109" Type="OPINION_SRC" StartNode="90" EndNode="101">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">EXP</Value>
+</Feature>
+</Annotation>
+<Annotation Id="96" Type="SENT" StartNode="543" EndNode="621">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">NEU</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0010</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="92" Type="SENT" StartNode="52" EndNode="126">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">NEU</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0001</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="97" Type="SENT" StartNode="708" EndNode="810">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">NEU</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0012</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="102" Type="SENT" StartNode="203" EndNode="264">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">POS</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0004</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="106" Type="OPINION_SRC" StartNode="471" EndNode="473">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">EXP</Value>
+</Feature>
+</Annotation>
+<Annotation Id="93" Type="SENT" StartNode="264" EndNode="284">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">POS</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0005</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="110" Type="OPINION_SRC" StartNode="152" EndNode="156">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">EXP</Value>
+</Feature>
+</Annotation>
+<Annotation Id="101" Type="SENT" StartNode="471" EndNode="543">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">POS</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0009</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+</AnnotationSet>
+<!-- Named annotation set -->
+
+<AnnotationSet Name="a-1">
+<Annotation Id="90" Type="OPINION_SRC" StartNode="376" EndNode="378">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">IMP</Value>
+</Feature>
+</Annotation>
+<Annotation Id="83" Type="SENT" StartNode="327" EndNode="376">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String"></Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0007</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+</Annotation>
+<Annotation Id="79" Type="SENT" StartNode="152" EndNode="203">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">NEU</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0003</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="75" Type="SENT" StartNode="810" EndNode="947">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String"></Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0013</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+</Annotation>
+<Annotation Id="82" Type="SENT" StartNode="52" EndNode="126">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String"></Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0001</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+</Annotation>
+<Annotation Id="87" Type="OPINION_SRC" StartNode="708" EndNode="710">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">IMP</Value>
+</Feature>
+</Annotation>
+<Annotation Id="72" Type="SENT" StartNode="284" EndNode="327">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String"></Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0006</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+</Annotation>
+<Annotation Id="80" Type="SENT" StartNode="621" EndNode="708">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String"></Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0011</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+</Annotation>
+<Annotation Id="76" Type="SENT" StartNode="203" EndNode="264">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">POS</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0004</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="81" Type="SENT" StartNode="376" EndNode="471">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String"></Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0008</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+</Annotation>
+<Annotation Id="86" Type="OPINION_SRC" StartNode="543" EndNode="548">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">EXP</Value>
+</Feature>
+</Annotation>
+<Annotation Id="71" Type="SENT" StartNode="543" EndNode="621">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">NEU</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0010</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="73" Type="SENT" StartNode="0" EndNode="52">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">POS</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0000</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="77" Type="SENT" StartNode="708" EndNode="810">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">NEU</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0012</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="85" Type="OPINION_SRC" StartNode="203" EndNode="206">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">IMP</Value>
+</Feature>
+</Annotation>
+<Annotation Id="89" Type="OPINION_SRC" StartNode="152" EndNode="156">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">EXP</Value>
+</Feature>
+</Annotation>
+<Annotation Id="74" Type="SENT" StartNode="126" EndNode="152">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String"></Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0002</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">NO</Value>
+</Feature>
+</Annotation>
+<Annotation Id="84" Type="SENT" StartNode="471" EndNode="543">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">POS</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0009</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="78" Type="SENT" StartNode="264" EndNode="284">
+<Feature>
+  <Name className="java.lang.String">senAtti</Name>
+  <Value className="java.lang.String">POS</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senRel</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">id</Name>
+  <Value className="java.lang.String">0005</Value>
+</Feature>
+<Feature>
+  <Name className="java.lang.String">senOp</Name>
+  <Value className="java.lang.String">YES</Value>
+</Feature>
+</Annotation>
+<Annotation Id="88" Type="OPINION_SRC" StartNode="471" EndNode="473">
+<Feature>
+  <Name className="java.lang.String">type</Name>
+  <Value className="java.lang.String">EXP</Value>
+</Feature>
+</Annotation>
+</AnnotationSet>
+</GateDocument>
