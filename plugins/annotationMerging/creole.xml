@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!-- $Id$ -->
+<CREOLE-DIRECTORY>
+  <!-- Processing Resources -->
+  <CREOLE>    
+    <!-- creole.xml for the Learning PR -->
+    <RESOURCE>
+      <NAME>Annotation Merging PR</NAME>
+      <COMMENT>Merge Annotations from different annotators
+      (http://gate.ac.uk/sale/tao/#chapt:mlapi)</COMMENT>
+      <CLASS>gate.merger.AnnotationMergingMain</CLASS>
+      <JAR>annotationMerging.jar</JAR>
+
+      <PARAMETER NAME="annSetsForMerging"
+        COMMENT="The name of the annotation sets used for merging" RUNTIME="true"
+        OPTIONAL="true">java.lang.String</PARAMETER>
+
+       <PARAMETER NAME="annTypesAndFeats"
+        COMMENT="The name of the annotation types and probably features used for merging" 
+        RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
+
+      <PARAMETER NAME="annSetOutput"
+        COMMENT="The name of the annotation set used for storing the merged annotations" 
+         RUNTIME="true" OPTIONAL="false">java.lang.String</PARAMETER>
+
+      <PARAMETER NAME="corpus" COMMENT="Corpus to be processed"
+        RUNTIME="true" OPTIONAL="false">gate.Corpus</PARAMETER>
+
+      <PARAMETER NAME="mergingMethod"
+        COMMENT="merging method" RUNTIME="true" DEFAULT="MajorityVoting"
+        OPTIONAL="false">gate.merger.MergingMethodsEnum</PARAMETER>
+
+      <PARAMETER NAME="minimalAnnNum"
+        COMMENT="The name of the annotation set used for storing the merged annotations" 
+         RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
+
+     </RESOURCE>
+     
+  </CREOLE>
+  
+  
+</CREOLE-DIRECTORY>
+

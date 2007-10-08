@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuite errors="1" failures="0" name="gate.merger.test.TestAnnotationMerging" tests="1" time="0.0">
+  <properties>
+    <property name="gate.lib.dir" value="C:\svn\gate\lib"></property>
+    <property name="java.runtime.name" value="Java(TM) 2 Runtime Environment, Standard Edition"></property>
+    <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk1.5.0_06\jre\bin"></property>
+    <property name="java.vm.version" value="1.5.0_06-b05"></property>
+    <property name="ant.library.dir" value="c:/svn/gate/lib"></property>
+    <property name="ant.version" value="Apache Ant version 1.6.5 compiled on June 2 2005"></property>
+    <property name="ant.java.version" value="1.5"></property>
+    <property name="java.vm.vendor" value="Sun Microsystems Inc."></property>
+    <property name="java.vendor.url" value="http://java.sun.com/"></property>
+    <property name="path.separator" value=";"></property>
+    <property name="java.vm.name" value="Java HotSpot(TM) Client VM"></property>
+    <property name="file.encoding.pkg" value="sun.io"></property>
+    <property name="user.country" value="GB"></property>
+    <property name="sun.os.patch.level" value="Service Pack 2"></property>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"></property>
+    <property name="user.dir" value="c:\svn\gate\plugins\annotationMerging"></property>
+    <property name="java.runtime.version" value="1.5.0_06-b05"></property>
+    <property name="java.awt.graphicsenv" value="sun.awt.Win32GraphicsEnvironment"></property>
+    <property name="basedir" value="C:\svn\gate\plugins\annotationMerging"></property>
+    <property name="java.endorsed.dirs" value="C:\Program Files\Java\jdk1.5.0_06\jre\lib\endorsed"></property>
+    <property name="run.memory" value="700M"></property>
+    <property name="os.arch" value="x86"></property>
+    <property name="java.io.tmpdir" value="c:\DOCUME~1\yaolocal\LOCALS~1\Temp\"></property>
+    <property name="gate.jar" value="C:\svn\gate\bin\gate.jar"></property>
+    <property name="line.separator" value="
+"></property>
+    <property name="java.vm.specification.vendor" value="Sun Microsystems Inc."></property>
+    <property name="buildDir" value="C:\svn\gate\plugins\annotationMerging\build"></property>
+    <property name="user.variant" value=""></property>
+    <property name="os.name" value="Windows XP"></property>
+    <property name="ant.home" value="c:/svn/gate"></property>
+    <property name="ant.project.name" value="annotationMerging"></property>
+    <property name="sun.jnu.encoding" value="GBK"></property>
+    <property name="cygwin.user.home" value="c:/yaoyong_h"></property>
+    <property name="java.library.path" value="C:\Program Files\Java\jdk1.5.0_06\jre\bin;.;C:\WINDOWS\system32;C:\WINDOWS;C:\cygwin\usr\local\bin;C:\cygwin\bin;C:\cygwin\bin;C:\cygwin\usr\X11R6\bin;C:\cygwin\bin;c:\Program Files\Java\jdk1.5.0_06\bin;c:\WINDOWS\system32;c:\WINDOWS;c:\WINDOWS\System32\Wbem;c:\Program Files\Common Files\Adaptec Shared\System;c:\Program Files\Hummingbird\Connectivity\8.00\Accessories\;c:\PROGRA~1\ATT\Graphviz\bin;.\;C:\cygwin\lib\lapack"></property>
+    <property name="srcDir" value="C:\svn\gate\plugins\annotationMerging\src"></property>
+    <property name="ant.file.annotationMerging" value="C:\svn\gate\plugins\annotationMerging\build.xml"></property>
+    <property name="java.class.version" value="49.0"></property>
+    <property name="java.specification.name" value="Java Platform API Specification"></property>
+    <property name="sun.management.compiler" value="HotSpot Client Compiler"></property>
+    <property name="gate.home" value="C:\svn\gate"></property>
+    <property name="docDir" value="C:\svn\gate\plugins\annotationMerging\docs"></property>
+    <property name="os.version" value="5.1"></property>
+    <property name="ant.file" value="c:\svn\gate\plugins\annotationMerging\build.xml"></property>
+    <property name="user.home" value="C:\Documents and Settings\yaolocal"></property>
+    <property name="user.timezone" value=""></property>
+    <property name="java.awt.printerjob" value="sun.awt.windows.WPrinterJob"></property>
+    <property name="java.specification.version" value="1.5"></property>
+    <property name="file.encoding" value="Cp1252"></property>
+    <property name="user.name" value="yaolocal"></property>
+    <property name="build.compiler" value="modern"></property>
+    <property name="java.class.path" value="C:\svn\gate\plugins\annotationMerging\annotationMerging.jar;C:\svn\gate\bin\gate.jar;C:\svn\gate\lib\Bib2HTML.jar;C:\svn\gate\lib\GnuGetOpt.jar;C:\svn\gate\lib\PDFBox-0.7.2.jar;C:\svn\gate\lib\activation.jar;C:\svn\gate\lib\ant-contrib-1.0b2.jar;C:\svn\gate\lib\ant-junit.jar;C:\svn\gate\lib\ant-launcher.jar;C:\svn\gate\lib\ant-nodeps.jar;C:\svn\gate\lib\ant.jar;C:\svn\gate\lib\antlr.jar;C:\svn\gate\lib\axis-ant.jar;C:\svn\gate\lib\axis-schema.jar;C:\svn\gate\lib\axis.jar;C:\svn\gate\lib\commons-discovery-0.2.jar;C:\svn\gate\lib\commons-fileupload-1.0.jar;C:\svn\gate\lib\commons-logging.jar;C:\svn\gate\lib\concurrent.jar;C:\svn\gate\lib\gateHmm.jar;C:\svn\gate\lib\icu4j.jar;C:\svn\gate\lib\jakarta-oro-2.0.5.jar;C:\svn\gate\lib\jasper-compiler-jdt.jar;C:\svn\gate\lib\javacc.jar;C:\svn\gate\lib\jaxrpc.jar;C:\svn\gate\lib\jdom.jar;C:\svn\gate\lib\junit.jar;C:\svn\gate\lib\jwnl.jar;C:\svn\gate\lib\log4j-1.2.14.jar;C:\svn\gate\lib\lubm.jar;C:\svn\gate\lib\lucene-1.3-final.jar;C:\svn\gate\lib\mail.jar;C:\svn\gate\lib\nekohtml-0.9.5.jar;C:\svn\gate\lib\ontotext.jar;C:\svn\gate\lib\openrdf-model.jar;C:\svn\gate\lib\openrdf-util.jar;C:\svn\gate\lib\orajdbc9i.zip;C:\svn\gate\lib\owlim-2.8.4.jar;C:\svn\gate\lib\pg73jdbc3.jar;C:\svn\gate\lib\poi-2.5.1-final-20040804.jar;C:\svn\gate\lib\rio.jar;C:\svn\gate\lib\saaj.jar;C:\svn\gate\lib\servlet-2_3.zip;C:\svn\gate\lib\sesame.jar;C:\svn\gate\lib\soap.jar;C:\svn\gate\lib\spring-core-1.2.8.jar;C:\svn\gate\lib\stax-api-1.0.1.jar;C:\svn\gate\lib\tm-extractors-0.4.jar;C:\svn\gate\lib\trree-2.8.4.jar;C:\svn\gate\lib\wsdl4j-1.5.1.jar;C:\svn\gate\lib\wstx-lgpl-2.0.6.jar;C:\svn\gate\lib\xercesImpl.jar;C:\svn\gate\lib\xml-apis.jar;C:\svn\gate\lib\xpp3-1.1.3.3_min.jar;C:\svn\gate\lib\xstream-1.2.jar"></property>
+    <property name="java.vm.specification.version" value="1.0"></property>
+    <property name="sun.arch.data.model" value="32"></property>
+    <property name="java.home" value="C:\Program Files\Java\jdk1.5.0_06\jre"></property>
+    <property name="java.specification.vendor" value="Sun Microsystems Inc."></property>
+    <property name="user.language" value="en"></property>
+    <property name="awt.toolkit" value="sun.awt.windows.WToolkit"></property>
+    <property name="java.vm.info" value="mixed mode"></property>
+    <property name="java.version" value="1.5.0_06"></property>
+    <property name="java.ext.dirs" value="C:\Program Files\Java\jdk1.5.0_06\jre\lib\ext"></property>
+    <property name="sun.boot.class.path" value="C:\Program Files\Java\jdk1.5.0_06\jre\lib\rt.jar;C:\Program Files\Java\jdk1.5.0_06\jre\lib\i18n.jar;C:\Program Files\Java\jdk1.5.0_06\jre\lib\sunrsasign.jar;C:\Program Files\Java\jdk1.5.0_06\jre\lib\jsse.jar;C:\Program Files\Java\jdk1.5.0_06\jre\lib\jce.jar;C:\Program Files\Java\jdk1.5.0_06\jre\lib\charsets.jar;C:\Program Files\Java\jdk1.5.0_06\jre\classes"></property>
+    <property name="java.vendor" value="Sun Microsystems Inc."></property>
+    <property name="file.separator" value="\"></property>
+    <property name="java.vendor.url.bug" value="http://java.sun.com/cgi-bin/bugreport.cgi"></property>
+    <property name="libDir" value="C:\svn\gate\plugins\annotationMerging\lib"></property>
+    <property name="sun.cpu.endian" value="little"></property>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"></property>
+    <property name="sun.desktop" value="windows"></property>
+    <property name="sun.cpu.isalist" value="pentium_pro+mmx pentium_pro pentium+mmx pentium i486 i386 i86"></property>
+  </properties>
+  <error message="gate.merger.test.TestAnnotationMerging" type="java.lang.ClassNotFoundException">java.lang.ClassNotFoundException: gate.merger.test.TestAnnotationMerging
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:200)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:188)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:306)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:268)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:251)
+	at java.lang.ClassLoader.loadClassInternal(ClassLoader.java:319)
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:164)
+</error>
+</testsuite>
