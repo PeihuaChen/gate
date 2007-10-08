@@ -1,7 +1,10 @@
 package gate.merger;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
+import java.util.Vector;
 
 import gate.Annotation;
 import gate.AnnotationSet;
@@ -50,13 +53,22 @@ public class AnnotationMergingMain extends AbstractLanguageAnalyser implements
     // Get all the existing annotation sets from the current document
     Set annsExisting = document.getAnnotationSetNames();
     String[] annsArray = null;
-    if(annSetsForMerging == null || annSetsForMerging.length() == 0) {
+    if(annSetsForMerging == null || annSetsForMerging.trim().length() == 0) {
       // throw new ExecutionException("No annotation set was specified for
       // merging!");
       int num = 0;
-      for(Object obj : annsExisting)
-        annsArray[num++] = obj.toString();
-
+      for(Object obj : annsExisting) {
+        if(obj!= null && obj.toString().trim().length()>0)
+          ++num;
+      }
+      annsArray = new String[num];
+      num=0;
+      List<String>annsE = new Vector<String>(annsExisting);
+      Collections.sort(annsE);
+      for(Object obj : annsE) {
+        if(obj!= null && obj.toString().trim().length()>0)
+          annsArray[num++] = obj.toString();
+      }
     }
     else {
       annSetsForMerging = annSetsForMerging.trim();
