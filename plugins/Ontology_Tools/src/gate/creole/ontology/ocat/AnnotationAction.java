@@ -41,7 +41,7 @@ public class AnnotationAction extends MouseInputAdapter {
    * annotation.
    */
   private AnnotationEditor annotationEditor;
-
+  
   /**
    * Constructor
    * 

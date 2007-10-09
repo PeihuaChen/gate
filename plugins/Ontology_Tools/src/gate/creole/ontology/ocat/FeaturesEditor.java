@@ -29,13 +29,9 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import gate.*;
 import gate.FeatureMap;
-import gate.Resource;
-import gate.creole.*;
 import gate.creole.AnnotationSchema;
 import gate.creole.FeatureSchema;
-import gate.event.FeatureMapListener;
 import gate.gui.MainFrame;
-import gate.gui.ResizableVisualResource;
 import gate.gui.ontology.ValuesSelectionAction;
 import gate.swing.XJTable;
 import gate.util.*;
@@ -327,7 +323,6 @@ public class FeaturesEditor extends JPanel {
 
             feature.value = list;
             targetFeatures.put(feature.name, feature.value);
-            System.out.println(targetFeatures);
             populate();
           }
         }
@@ -441,7 +436,6 @@ public class FeaturesEditor extends JPanel {
           else {
             featureList.remove(row);
             targetFeatures.remove(feature.name);
-            System.out.println(targetFeatures);
             populate();
           }
         }

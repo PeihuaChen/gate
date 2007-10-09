@@ -58,10 +58,10 @@
       </GUI>
     </RESOURCE>
 
-    <!-- Ontology Corpus Annotation Tool -->    
+    <!-- Ontology Annotation Tool -->    
     <RESOURCE>
-      <NAME>Ontology</NAME>
-      <COMMENT>Ontology-based Corpus Annotation Tool (http://gate.ac.uk/sale/tao/#sec:ontologies:ocat)</COMMENT>
+      <NAME>OAT</NAME>
+      <COMMENT>Ontology Annotation Tool (http://gate.ac.uk/sale/tao/#sec:ontologies:ocat)</COMMENT>
       <JAR>ontology_tools.jar</JAR>
       <CLASS>gate.creole.ontology.ocat.OntologyViewer</CLASS>
     </RESOURCE>
