@@ -7,6 +7,8 @@ import gate.creole.ontology.OntologyUtilities;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -96,6 +98,8 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   private static boolean initiated = false;
 
+  private static boolean serviceCall = false;
+  
   /**
    * OWLIMSchemaRepository is used as an interaction layer on top of
    * Sesame server. The class provides various methods of manipulating
@@ -253,9 +257,9 @@ public class OWLIMServiceImpl implements OWLIM,
    * @throws GateOntologyException
    */
   public void init(ServletContext context) throws GateOntologyException {
-    if(!initiated) {
+    if(!initiated || service == null) {
       try {
-        if(DEBUG) System.out.println("Initiating OWLIMService...");
+        if(DEBUG) System.out.println("Initiating OWLIMService... with servlet context");
         // create an instance of service
         URL classURL = this.getClass().getResource(
                 "/" + this.getClass().getName().replace('.', '/') + ".class");
@@ -282,14 +286,42 @@ public class OWLIMServiceImpl implements OWLIM,
         }
 
         systemConf = new URL(gosHome, "system.conf");
+
+
+        String userHome = System.getProperty("user.home");
+        System.out.println("USERHOME : " + userHome);
+        File sysConfFile = new File(new File(new File(new File(
+            userHome, "safe"), getInstanceName()), "owlim"),
+            "system.conf");
+        // lets check if it exists
+        if (sysConfFile.exists()) {
+          systemConf = sysConfFile.toURI().toURL();
+        } else {
+          systemConf = new URL(gosHome, "system.conf");
+          if (sysConfFile.getParentFile().mkdirs()) {
+            copyFile(new File(systemConf.getFile()), sysConfFile);
+            systemConf = sysConfFile.toURI().toURL();
+            System.out.println("SystemConf :"
+                + systemConf.toExternalForm());
+          }
+        }        
+        
         owlRDFS = new URL(gosHome, "owl.rdfs");
         rdfSchema = new URL(gosHome, "rdf-schema.xml");
 
         SesameServer.setSystemConfig(readConfiguration());
         service = SesameServer.getLocalService();
+        login("admin", "admin");
+        String[] repositories = getRepositoryList();
+        if (repositories != null) {
+          for (String rep : repositories) {
+            setCurrentRepositoryID(rep);
+          }
+        }        
         hasSystemNameSpace.put("http://www.w3.org/2002/07/owl#Thing",
                 new Boolean(false));
         initiated = true;
+        serviceCall = true;
       }
       catch(IOException ioe) {
         throw new GateOntologyException(ioe);
@@ -297,6 +329,75 @@ public class OWLIMServiceImpl implements OWLIM,
     }
   }
 
+  /**
+   * Gets the instance name
+   * 
+   * @return
+   */
+  private String getInstanceName() {
+    // lets first try to find out the repository localtion from system
+    // properties
+    String instanceName = System.getProperty("instance.name");
+    if (instanceName == null) {
+      try {
+        InputStream stream = this.getClass().getResourceAsStream(
+            "/gos.properties");
+        BufferedReader reader = new BufferedReader(
+            new InputStreamReader(stream));
+        String line = reader.readLine();
+        while (line != null) {
+          String pdata[] = line.split("=");
+          if (pdata.length > 1) {
+            if (pdata[0].trim().equals("instance.name")) {
+              instanceName = pdata[1].trim();
+              break;
+            }
+          }
+          line = reader.readLine();
+        }
+        reader.close();
+      } catch (IOException ioe) {
+        throw new GateOntologyException(
+            "Exception occurred while reading the gos.property file",
+            ioe);
+      }
+      if (instanceName == null) {
+        instanceName = "dev";
+      }
+      System.setProperty("instance.name", instanceName);
+    }
+    return instanceName;
+  }
+
+  
+  
+  private void copyFile(File fromFile, File toFile) throws IOException {
+    FileInputStream from = null;
+    FileOutputStream to = null;
+    try {
+      from = new FileInputStream(fromFile);
+      to = new FileOutputStream(toFile);
+      byte[] buffer = new byte[4096];
+      int bytesRead;
+      while ((bytesRead = from.read(buffer)) != -1)
+        to.write(buffer, 0, bytesRead); // write
+    } finally {
+      if (from != null) {
+        try {
+          from.close();
+        } catch (IOException e) {
+        }
+      }
+      if (to != null) {
+        try {
+          to.close();
+        } catch (IOException e) {
+        }
+      }
+    }
+  }
+  
+  
   /**
    * This method intializes the OWLIMService. It locates the system
    * configuration file in the directory whose URL is passed in. The
@@ -310,7 +411,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void init(URL gosHomeURL) throws GateOntologyException {
     try {
-      if(DEBUG) System.out.println("Initiating OWLIMService...");
+      if(DEBUG) System.out.println("Initiating OWLIMService... with URL");
       gosHome = gosHomeURL;
       hasSystemNameSpace.put("http://www.w3.org/2002/07/owl#Thing",
               new Boolean(false));
@@ -321,6 +422,13 @@ public class OWLIMServiceImpl implements OWLIM,
 
       SystemConfig conf = readConfiguration();
       service = new LocalService(conf);
+      login("admin", "admin");
+      String[] repositories = getRepositoryList();
+      if (repositories != null) {
+        for (String rep : repositories) {
+          setCurrentRepositoryID(rep);
+        }
+      }      
     }
     catch(IOException ioe) {
       throw new GateOntologyException(ioe);
@@ -1730,12 +1838,14 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void logout(String repositoryID) throws GateOntologyException {
     if(DEBUG) print("logout");
-    mapToRepositoryDetails.remove(repositoryID);
+    //mapToRepositoryDetails.remove(repositoryID);
     service.logout();
-    service.shutDown();
+    if(!serviceCall) {
+      service.shutDown();
+    }
     currentRepository = null;
     sail = null;
-    System.gc();
+    //System.gc();
   }
 
   // ****************************************************************************
@@ -4108,13 +4218,17 @@ public class OWLIMServiceImpl implements OWLIM,
           }
           map.put("imports", imports);
           map.put("defaultNS", defaultNS);
+          File systemConfFile = new File(systemConf == null ? "temp" : systemConf.getFile());
           String persistFile = absolutePersistLocation == null
-                  || absolutePersistLocation.trim().length() == 0 ? new File(
+                  || absolutePersistLocation.trim().length() == 0 ? new File(systemConfFile.getParentFile(),
                   repositoryID + ".nt").getAbsolutePath() : new File(new File(
                   absolutePersistLocation), repositoryID + ".nt")
                   .getAbsolutePath();
-          String tempTripplesFile = new File(new File(absolutePersistLocation),
-                  repositoryID + "-tripples.nt").getAbsolutePath();
+          String tempTripplesFile = absolutePersistLocation == null
+                  || absolutePersistLocation.trim().length() == 0 ? new File(systemConfFile.getParentFile(),
+                  repositoryID + "-tripples.nt").getAbsolutePath() : new File(new File(
+                  absolutePersistLocation), repositoryID + "-tripples.nt")
+                  .getAbsolutePath();
           map.put("file", persistFile);
           map.put("new-triples-file", tempTripplesFile);
           map.put("auto-write-time-minutes", "0");
@@ -4392,12 +4506,18 @@ public class OWLIMServiceImpl implements OWLIM,
       map.put("noPersist", Boolean.toString(!persist));
       map.put("compressFile", "no");
       map.put("dataFormat", formatToUse);
+      
+      File systemConfFile = new File(systemConf == null ? "temp" : systemConf.getFile());
       String persistFile = absolutePersistLocation == null
-              || absolutePersistLocation.trim().length() == 0 ? new File(
+              || absolutePersistLocation.trim().length() == 0 ? new File(systemConfFile.getParentFile(),
               repositoryID + ".nt").getAbsolutePath() : new File(new File(
-              absolutePersistLocation), repositoryID + ".nt").getAbsolutePath();
-      String tempTripplesFile = new File(new File(absolutePersistLocation),
-              repositoryID + "tripples.nt").getAbsolutePath();
+              absolutePersistLocation), repositoryID + ".nt")
+              .getAbsolutePath();
+      String tempTripplesFile = absolutePersistLocation == null
+              || absolutePersistLocation.trim().length() == 0 ? new File(systemConfFile.getParentFile(),
+              repositoryID + "-tripples.nt").getAbsolutePath() : new File(new File(
+              absolutePersistLocation), repositoryID + "-tripples.nt")
+              .getAbsolutePath();
       map.put("file", persistFile);
       map.put("new-triples-file", tempTripplesFile);
       map.put("auto-write-time-minutes", "0");
