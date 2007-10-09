@@ -253,6 +253,14 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
       ++endDocIdApp;
       if(endDocIdApp- startDocIdApp == maxNumApp) {
         try {
+          //first checking if the model file is available or not
+          String modelFileName = wdResults.toString() + File.separator
+          + ConstantParameters.FILENAMEOFModels;
+          if(!new File(modelFileName).exists()) {
+            System.out.println("The model is not available at the moment!!");
+            return;
+          }
+          
           BufferedWriter outNLPFeatures = null;
           BufferedReader inNLPFeatures = null;
           BufferedWriter outFeatureVectors = null;
@@ -438,6 +446,14 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               lightWeightApi.applyModelInJava(corpus, 0, corpus.size(), classTypeOriginal,
                 learningSettings);*/
               //EvaluationBasedOnDocs.emptyDatafile(wdResults, false);
+              //first checking if the model file is available or not
+              String modelFileName = wdResults.toString() + File.separator
+              + ConstantParameters.FILENAMEOFModels;
+              if(!new File(modelFileName).exists()) {
+                System.out.println("The model is not available at the moment!!");
+                return;
+              }
+              
               if(endDocIdApp>startDocIdApp) {
               if(LogService.minVerbosityLevel> 0) System.out.println("** " +
                   "Application mode for document from "+ startDocIdApp + " to "+ endDocIdApp+"(not included):");
