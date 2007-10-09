@@ -11,8 +11,6 @@ import gate.gui.docview.AbstractDocumentView;
 import javax.swing.*;
 
 import com.ontotext.gate.vr.ClassNode;
-import com.ontotext.gate.vr.IFolder;
-import com.ontotext.gate.vr.OntoTreeModel;
 
 import java.awt.*;
 import java.awt.event.*;

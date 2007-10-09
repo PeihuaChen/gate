@@ -115,6 +115,10 @@ public class AnnotationEditor extends AbstractAction {
 
   private int iconWidth = 0;
 
+  private String latestAnnotationType = null;
+
+  private boolean automaticLastAnnotation = false;
+  
   /**
    * Constructor
    * 
@@ -383,13 +387,13 @@ public class AnnotationEditor extends AbstractAction {
         gate.Annotation tempAnnot = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
                 .get(indexes.get(i).intValue());
         if(tempAnnot.getFeatures().containsKey(
-                ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME)) {
-          classValues.add(Utils.getClassFeatureValue(tempAnnot));
-          isClass.add(new Boolean(true));
-        }
-        else {
+                ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME)) {
           classValues.add(Utils.getInstanceFeatureValue(tempAnnot));
           isClass.add(new Boolean(false));
+        }
+        else {
+          classValues.add(Utils.getClassFeatureValue(tempAnnot));
+          isClass.add(new Boolean(true));
         }
       }
 
@@ -436,8 +440,8 @@ public class AnnotationEditor extends AbstractAction {
       JTextArea textPane = ontologyTreePanel.ontoViewer.documentTextArea;
       String selectedText = textPane.getSelectedText();
       if(selectedText != null && selectedText.length() > 0) {
-        newAnnotationMode = true;
-        showWindow();
+          newAnnotationMode = true;
+          showWindow();
       }
     }
   }
@@ -469,10 +473,17 @@ public class AnnotationEditor extends AbstractAction {
     model = new DefaultComboBoxModel(nodes);
     typeCombo.setModel(model);
 
-
-
     enableDisableComponents(newAnnotationMode);
 
+    if(latestAnnotationType != null && newAnnotationMode) {
+      ClassNode aNode = ontologyTreePanel.getFirstNode(latestAnnotationType);
+      if(aNode != null) {
+        explicitCall = true;
+        typeCombo.setSelectedItem(aNode);
+        explicitCall = false;
+      }
+    }
+    
     if(!newAnnotationMode) {
       gate.Annotation tempAnnot = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
               .get(selectedAnnotationIndex);
@@ -481,12 +492,12 @@ public class AnnotationEditor extends AbstractAction {
         y1 = tempAnnot.getEndNode().getOffset().intValue();
 
         String aValue = (String)tempAnnot.getFeatures().get(
-                ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME);
-        boolean isClassAnnotation = true;
+                ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME);
+        boolean isClassAnnotation = false;
         if(aValue == null) {
           aValue = (String)tempAnnot.getFeatures().get(
-                  ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME);
-          isClassAnnotation = false;
+                  ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME);
+          isClassAnnotation = true;
         }
         
         
@@ -1004,7 +1015,7 @@ public class AnnotationEditor extends AbstractAction {
         Annotation addedAnnotation = ontologyTreePanel.ontoTreeListener
                 .addNewAnnotation(item, applyToAll.isSelected(), null,
                         isClassAnnotation, shouldCreateInstance).get(0);
-
+        latestAnnotationType = ((OResource)item.getSource()).getName();
         selectedAnnotationIndex = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
                 .indexOf(addedAnnotation);
         newAnnotationMode = false;
@@ -1092,7 +1103,7 @@ public class AnnotationEditor extends AbstractAction {
           Annotation addedAnnotation = ontologyTreePanel.ontoTreeListener
                   .addNewAnnotation(item, false, features, isClassAnnotation,
                           shouldCreateInstance).get(0);
-
+          latestAnnotationType = ((OResource)item.getSource()).getName();
           if(updateIndex) {
             selectedAnnotationIndex = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
                     .indexOf(addedAnnotation);
