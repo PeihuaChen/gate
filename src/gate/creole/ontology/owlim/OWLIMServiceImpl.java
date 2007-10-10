@@ -4218,7 +4218,18 @@ public class OWLIMServiceImpl implements OWLIM,
           }
           map.put("imports", imports);
           map.put("defaultNS", defaultNS);
-          File systemConfFile = new File(systemConf == null ? "temp" : systemConf.getFile());
+          File systemConfFile = null;
+          
+          if(systemConf == null) {
+            systemConfFile = new File("temp");
+          } else {
+            try {
+              systemConfFile = new File(systemConf.toURI());
+            } catch(Exception e) {
+              systemConfFile = new File("temp");
+            }
+          }
+          
           String persistFile = absolutePersistLocation == null
                   || absolutePersistLocation.trim().length() == 0 ? new File(systemConfFile.getParentFile(),
                   repositoryID + ".nt").getAbsolutePath() : new File(new File(
@@ -4507,7 +4518,18 @@ public class OWLIMServiceImpl implements OWLIM,
       map.put("compressFile", "no");
       map.put("dataFormat", formatToUse);
       
-      File systemConfFile = new File(systemConf == null ? "temp" : systemConf.getFile());
+      File systemConfFile = null;
+      
+      if(systemConf == null) {
+        systemConfFile = new File("temp");
+      } else {
+        try {
+          systemConfFile = new File(systemConf.toURI());
+        } catch(Exception e) {
+          systemConfFile = new File("temp");
+        }
+      }
+
       String persistFile = absolutePersistLocation == null
               || absolutePersistLocation.trim().length() == 0 ? new File(systemConfFile.getParentFile(),
               repositoryID + ".nt").getAbsolutePath() : new File(new File(
