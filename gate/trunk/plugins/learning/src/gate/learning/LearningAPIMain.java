@@ -257,7 +257,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
           String modelFileName = wdResults.toString() + File.separator
           + ConstantParameters.FILENAMEOFModels;
           if(!new File(modelFileName).exists()) {
-            System.out.println("The model is not available at the moment!!");
+            System.out.println("Warning: the model is not available at the moment!!");
             return;
           }
           
@@ -450,7 +450,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               String modelFileName = wdResults.toString() + File.separator
               + ConstantParameters.FILENAMEOFModels;
               if(!new File(modelFileName).exists()) {
-                System.out.println("The model is not available at the moment!!");
+                System.out.println("Warning: the model is not available at the moment!!");
                 return;
               }
               
