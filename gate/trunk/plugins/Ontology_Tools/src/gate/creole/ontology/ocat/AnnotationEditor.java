@@ -117,8 +117,6 @@ public class AnnotationEditor extends AbstractAction {
 
   private String latestAnnotationType = null;
 
-  private boolean automaticLastAnnotation = false;
-  
   /**
    * Constructor
    * 

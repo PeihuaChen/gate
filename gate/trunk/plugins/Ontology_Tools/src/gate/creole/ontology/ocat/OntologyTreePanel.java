@@ -157,6 +157,7 @@ public class OntologyTreePanel extends JPanel {
     ClassNode currentNode = (ClassNode)currentOntologyTree.getModel().getRoot();
     return getFirstClassNode(currentNode, classValue);
   }
+
   
   /**
    * Internal recursive method to find out the Node for given class
