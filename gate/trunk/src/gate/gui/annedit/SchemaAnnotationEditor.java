@@ -61,8 +61,8 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
         featuresEditor.editFeatureMap(null);
       }
       featuresEditor = newFeaturesEditor;
-      if(newFeaturesEditor != null){
-        featuresBox.add(newFeaturesEditor);
+      if(featuresEditor != null){
+        featuresBox.add(featuresEditor);
       }
     }
     if(featuresEditor != null){
@@ -354,7 +354,13 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
             Integer.MAX_VALUE));
     typesChoice.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e) {
-        String newType = typesChoice.getSelectedItem().toString();
+        
+        String newType;
+        if(typesChoice.getSelectedItem() == null){
+          newType = "";
+        }else{
+          newType = typesChoice.getSelectedItem().toString();
+        }
         if(annotation != null && annSet != null && 
                 !annotation.getType().equals(newType)){
           //annotation type change
