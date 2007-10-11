@@ -122,7 +122,7 @@ public class OWLIMServiceImpl implements OWLIM,
   /**
    * The file that stores the various configuration parameters
    */
-  private static URL systemConf = null;
+  private URL systemConf = null;
 
   private static URL owlRDFS = null;
 
@@ -257,7 +257,7 @@ public class OWLIMServiceImpl implements OWLIM,
    * @throws GateOntologyException
    */
   public void init(ServletContext context) throws GateOntologyException {
-    if(!initiated || service == null) {
+    if(!initiated || service == null || systemConf == null) {
       try {
         if(DEBUG) System.out.println("Initiating OWLIMService... with servlet context");
         // create an instance of service
@@ -1949,15 +1949,15 @@ public class OWLIMServiceImpl implements OWLIM,
           String absolutePersistLocation, boolean persist,
           boolean returnSystemStatements) throws GateOntologyException {
     if(DEBUG) print("createRepository");
-    if(absolutePersistLocation == null) {
-      try {
-        absolutePersistLocation = new File(gosHome.toURI()).getAbsolutePath();
-      }
-      catch(URISyntaxException e) {
-        throw new GateOntologyException(
-                "Cannot construct persistence location " + "from gosHome", e);
-      }
-    }
+//    if(absolutePersistLocation == null) {
+//      try {
+//        absolutePersistLocation = new File(gosHome.toURI()).getAbsolutePath();
+//      }
+//      catch(URISyntaxException e) {
+//        throw new GateOntologyException(
+//                "Cannot construct persistence location " + "from gosHome", e);
+//      }
+//    }
     // check if user exists
     if(password == null) password = "";
     createNewUser(username, password);
@@ -2009,15 +2009,15 @@ public class OWLIMServiceImpl implements OWLIM,
           String absolutePersistLocation, boolean persist,
           boolean returnSystemStatements) throws GateOntologyException {
     if(DEBUG) print("createRepository");
-    if(absolutePersistLocation == null) {
-      try {
-        absolutePersistLocation = new File(gosHome.toURI()).getAbsolutePath();
-      }
-      catch(URISyntaxException e) {
-        throw new GateOntologyException(
-                "Cannot construct persistence location " + "from gosHome", e);
-      }
-    }
+//    if(absolutePersistLocation == null) {
+//      try {
+//        absolutePersistLocation = new File(gosHome.toURI()).getAbsolutePath();
+//      }
+//      catch(URISyntaxException e) {
+//        throw new GateOntologyException(
+//                "Cannot construct persistence location " + "from gosHome", e);
+//      }
+//    }
     // check if user exists
     if(password == null) password = "";
     createNewUser(username, password);
