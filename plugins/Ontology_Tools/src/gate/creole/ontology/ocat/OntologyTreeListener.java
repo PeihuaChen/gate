@@ -431,21 +431,26 @@ public class OntologyTreeListener extends MouseAdapter {
     }
     else {
       URI uri = null;
+      //String classFeature = null;
+      
       if(shouldCreateInstance) {
-        OResource aResource = ontologyTreePanel.getCurrentOntology().getOResourceByName(selectedText); 
+        // generate instance URI
+        String instanceName = ((OClass)node.getSource()).getName() + "_" + Gate.genSym();
+        OResource aResource = ontologyTreePanel.getCurrentOntology().getOResourceByName(instanceName);
+        //classFeature = ((OClass)node.getSource()).getURI().toString();
         if(aResource == null) {
           uri = OntologyUtilities.createURI(ontologyTreePanel
-                  .getCurrentOntology(), selectedText, false);
+                  .getCurrentOntology(), instanceName, false);
           
           ontologyTreePanel.getCurrentOntology().addOInstance(uri,
                   (OClass)node.getSource());
         } else {
           int index = 1;
           while(true) {
-            OResource tempResource = ontologyTreePanel.getCurrentOntology().getOResourceByName(selectedText+index);
+            OResource tempResource = ontologyTreePanel.getCurrentOntology().getOResourceByName(instanceName+index);
             if(tempResource == null) {
               uri = OntologyUtilities.createURI(ontologyTreePanel
-                      .getCurrentOntology(), selectedText+index, false);
+                      .getCurrentOntology(), instanceName+index, false);
               
               ontologyTreePanel.getCurrentOntology().addOInstance(uri,
                       (OClass)node.getSource());
@@ -455,11 +460,22 @@ public class OntologyTreeListener extends MouseAdapter {
           }
         }
       } else {
+//        OResource res = (OResource)node.getSource();
+//        if(res instanceof OInstance) {
+//          Set<OClass> classes = ((OInstance) res).getOClasses(OConstants.DIRECT_CLOSURE);
+//          if(classes.size() > 0) {
+//            classFeature = classes.iterator().next().getURI().toString();
+//          } 
+//        }
         uri = ((OResource)node.getSource()).getURI();
+        
       }
       
       newMap.put(gate.creole.ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME,
               uri.toString());
+//      if(classFeature != null) {
+//        
+//      }
     }
 
     String dns = ontologyTreePanel.getCurrentOntology().getDefaultNameSpace();
