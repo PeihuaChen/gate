@@ -490,7 +490,7 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
    */
   public void featureMapUpdated() {
     //the underlying F-map was changed
-    // 1) first make the new FeatureMap compliant with the schema
+    // 1) remove all non schema compliant values
     if(featureMap != null){
       for(Object aFeatureName : new HashSet<Object>(featureMap.keySet())){
         //first check if the feature is allowed
@@ -526,13 +526,9 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
     // 2) then update all the displays
     for(String featureName : featureEditors.keySet()){
       FeatureEditor aFeatureEditor = featureEditors.get(featureName);
-      if(featureMap == null){
-        //use default value
-        aFeatureEditor.setValue(null);
-      }else{
-        //use actual value
-        aFeatureEditor.setValue((String)featureMap.get(featureName));
-      }
+      Object featureValue = featureMap == null ? 
+              null : featureMap.get(featureName);
+      aFeatureEditor.setValue((String)featureValue);
     }
   }
   
