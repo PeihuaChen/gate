@@ -162,7 +162,8 @@ public class JChoice extends JPanel implements ItemSelectable{
         }else if(e.getStateChange() == ItemEvent.DESELECTED){
           if(e.getSource() instanceof AbstractButton){
             Object wrongValue = buttonToValueMap.get(e.getSource());
-            if(combo.getSelectedItem().equals(wrongValue)){
+            if(combo.getSelectedItem() != null &&
+               combo.getSelectedItem().equals(wrongValue)){
               combo.setSelectedItem(null);
             }
           }
