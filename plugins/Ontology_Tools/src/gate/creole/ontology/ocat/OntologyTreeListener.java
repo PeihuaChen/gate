@@ -13,6 +13,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import gate.*;
+import gate.creole.ontology.AnnotationProperty;
+import gate.creole.ontology.Literal;
 import gate.creole.ontology.OClass;
 import gate.creole.ontology.OConstants;
 import gate.creole.ontology.OInstance;
@@ -20,6 +22,7 @@ import gate.creole.ontology.OResource;
 import gate.creole.ontology.Ontology;
 import gate.creole.ontology.OntologyUtilities;
 import gate.creole.ontology.URI;
+import gate.gui.MainFrame;
 import gate.util.GateRuntimeException;
 
 import com.ontotext.gate.vr.ClassNode;
@@ -428,21 +431,45 @@ public class OntologyTreeListener extends MouseAdapter {
     if(isClassFeature) {
       newMap.put(gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME,
               ((OResource)node.getSource()).getURI().toString());
+      
+      // we need to check here if we need to add the selected value as a property value
+      String propName = ontologyTreePanel.ontologyViewerOptions.getPropertyName();
+      if(propName != null) {
+        OResource prop = ontologyTreePanel.getCurrentOntology().getOResourceByName(propName);
+        if(prop == null) {
+          prop = ontologyTreePanel.getCurrentOntology().getOResourceFromMap(propName);
+        }
+        
+        if(prop != null) {
+          if(!(prop instanceof AnnotationProperty)) {
+            JOptionPane.showMessageDialog(MainFrame.getInstance(), propName+" is not a valid annotation property");
+          } else {
+            ((OClass)node.getSource()).addAnnotationPropertyValue((AnnotationProperty) prop, new Literal(selectedText));
+          }
+        } else {
+          // lets add this property in ontology
+          URI annPropURI = OntologyUtilities.createURI(ontologyTreePanel.getCurrentOntology(), propName, false);
+          AnnotationProperty aProp = ontologyTreePanel.getCurrentOntology().addAnnotationProperty(annPropURI);
+          ((OClass)node.getSource()).addAnnotationPropertyValue(aProp, new Literal(selectedText));
+        }
+      }
+      
     }
     else {
       URI uri = null;
-      //String classFeature = null;
+      String classFeature = null;
+      OInstance instance = null;
       
       if(shouldCreateInstance) {
         // generate instance URI
         String instanceName = ((OClass)node.getSource()).getName() + "_" + Gate.genSym();
         OResource aResource = ontologyTreePanel.getCurrentOntology().getOResourceByName(instanceName);
-        //classFeature = ((OClass)node.getSource()).getURI().toString();
+        classFeature = ((OClass)node.getSource()).getURI().toString();
         if(aResource == null) {
           uri = OntologyUtilities.createURI(ontologyTreePanel
                   .getCurrentOntology(), instanceName, false);
           
-          ontologyTreePanel.getCurrentOntology().addOInstance(uri,
+          instance = ontologyTreePanel.getCurrentOntology().addOInstance(uri,
                   (OClass)node.getSource());
         } else {
           int index = 1;
@@ -452,30 +479,56 @@ public class OntologyTreeListener extends MouseAdapter {
               uri = OntologyUtilities.createURI(ontologyTreePanel
                       .getCurrentOntology(), instanceName+index, false);
               
-              ontologyTreePanel.getCurrentOntology().addOInstance(uri,
+              instance = ontologyTreePanel.getCurrentOntology().addOInstance(uri,
                       (OClass)node.getSource());
               break;
             }
             index++;
           }
         }
+        
       } else {
-//        OResource res = (OResource)node.getSource();
-//        if(res instanceof OInstance) {
-//          Set<OClass> classes = ((OInstance) res).getOClasses(OConstants.DIRECT_CLOSURE);
-//          if(classes.size() > 0) {
-//            classFeature = classes.iterator().next().getURI().toString();
-//          } 
-//        }
+        OResource res = (OResource)node.getSource();
+        if(res instanceof OInstance) {
+          Set<OClass> classes = ((OInstance) res).getOClasses(OConstants.DIRECT_CLOSURE);
+          if(classes.size() > 0) {
+            classFeature = classes.iterator().next().getURI().toString();
+          }
+          instance = (OInstance) res;
+        }
         uri = ((OResource)node.getSource()).getURI();
         
       }
       
       newMap.put(gate.creole.ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME,
               uri.toString());
-//      if(classFeature != null) {
-//        
-//      }
+      if(classFeature != null) {
+        newMap.put(gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME,
+                classFeature);
+        
+      }
+      
+      // we need to check here if we need to add the selected value as a property value
+      String propName = ontologyTreePanel.ontologyViewerOptions.getPropertyName();
+      if(propName != null && instance!=null) {
+        OResource prop = ontologyTreePanel.getCurrentOntology().getOResourceByName(propName);
+        if(prop == null) {
+          prop = ontologyTreePanel.getCurrentOntology().getOResourceFromMap(propName);
+        }
+        
+        if(prop != null) {
+          if(!(prop instanceof AnnotationProperty)) {
+            JOptionPane.showMessageDialog(MainFrame.getInstance(), propName+" is not a valid annotation property");
+          } else {
+            instance.addAnnotationPropertyValue((AnnotationProperty) prop, new Literal(selectedText));
+          }
+        } else {
+          // lets add this property in ontology
+          URI annPropURI = OntologyUtilities.createURI(ontologyTreePanel.getCurrentOntology(), propName, false);
+          AnnotationProperty aProp = ontologyTreePanel.getCurrentOntology().addAnnotationProperty(annPropURI);
+          instance.addAnnotationPropertyValue(aProp, new Literal(selectedText));
+        }
+      }
     }
 
     String dns = ontologyTreePanel.getCurrentOntology().getDefaultNameSpace();

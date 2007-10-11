@@ -124,7 +124,6 @@ public class AnnotationEditor extends AbstractAction {
    */
   public AnnotationEditor(OntologyTreePanel ontoTreePanel) {
     this.ontologyTreePanel = ontoTreePanel;
-
     initGUI();
   }
 
@@ -438,8 +437,8 @@ public class AnnotationEditor extends AbstractAction {
       JTextArea textPane = ontologyTreePanel.ontoViewer.documentTextArea;
       String selectedText = textPane.getSelectedText();
       if(selectedText != null && selectedText.length() > 0) {
-          newAnnotationMode = true;
-          showWindow();
+        newAnnotationMode = true;
+        showWindow();
       }
     }
   }
@@ -481,7 +480,7 @@ public class AnnotationEditor extends AbstractAction {
         explicitCall = false;
       }
     }
-    
+
     if(!newAnnotationMode) {
       gate.Annotation tempAnnot = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
               .get(selectedAnnotationIndex);
@@ -491,15 +490,11 @@ public class AnnotationEditor extends AbstractAction {
 
         String aValue = (String)tempAnnot.getFeatures().get(
                 ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME);
-        boolean isClassAnnotation = false;
         if(aValue == null) {
           aValue = (String)tempAnnot.getFeatures().get(
                   ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME);
-          isClassAnnotation = true;
         }
-        
-        
-        
+
         aValue = OntologyUtilities.getResourceName(aValue);
         ClassNode aNode = ontologyTreePanel.getFirstNode(aValue);
         OResource resource = (OResource)aNode.getSource();
@@ -559,7 +554,7 @@ public class AnnotationEditor extends AbstractAction {
         Rectangle startRect = null;
         Point topLeft = null;
         int charHeight = 0;
-        
+
         try {
           startRect = textComp.modelToView(xx);
           topLeft = textComp.getLocationOnScreen();
@@ -804,12 +799,12 @@ public class AnnotationEditor extends AbstractAction {
         if(startOffset == 0) return;
         startOffset--;
         String value = (String)features
-                .get(ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME);
-        boolean isClassFeature = true;
+                .get(ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME);
+        boolean isClassFeature = false;
         if(value == null) {
-          isClassFeature = false;
+          isClassFeature = true;
           value = (String)features
-                  .get(ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME);
+                  .get(ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME);
         }
 
         ontologyTreePanel.deleteAnnotation(annot);
@@ -817,7 +812,7 @@ public class AnnotationEditor extends AbstractAction {
                 .setSelectionStart(startOffset);
         ontologyTreePanel.ontoViewer.documentTextArea
                 .setSelectionEnd(endOffset);
- 
+
         ClassNode aNode = ontologyTreePanel.getFirstNode(value);
 
         Annotation addedAnnotation = ontologyTreePanel.ontoTreeListener
@@ -848,12 +843,11 @@ public class AnnotationEditor extends AbstractAction {
       startOffset++;
       if(startOffset == endOffset) return;
       String value = (String)features
-              .get(ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME);
-      boolean isClassFeature = true;
+              .get(ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME);
+      boolean isClassFeature = false;
       if(value == null) {
-        isClassFeature = false;
-        value = (String)features
-                .get(ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME);
+        isClassFeature = true;
+        value = (String)features.get(ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME);
       }
 
       ontologyTreePanel.deleteAnnotation(annot);
@@ -886,12 +880,12 @@ public class AnnotationEditor extends AbstractAction {
         endOffset--;
         if(endOffset == startOffset) return;
         String value = (String)features
-                .get(ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME);
-        boolean isClassFeature = true;
+                .get(ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME);
+        boolean isClassFeature = false;
         if(value == null) {
-          isClassFeature = false;
+          isClassFeature = true;
           value = (String)features
-                  .get(ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME);
+                  .get(ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME);
         }
 
         ontologyTreePanel.deleteAnnotation(annot);
@@ -928,12 +922,11 @@ public class AnnotationEditor extends AbstractAction {
               .longValue() == endOffset) return;
       endOffset++;
       String value = (String)features
-              .get(ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME);
-      boolean isClassFeature = true;
+              .get(ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME);
+      boolean isClassFeature = false;
       if(value == null) {
-        isClassFeature = false;
-        value = (String)features
-                .get(ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME);
+        isClassFeature = true;
+        value = (String)features.get(ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME);
       }
 
       ontologyTreePanel.deleteAnnotation(annot);
@@ -978,8 +971,7 @@ public class AnnotationEditor extends AbstractAction {
         Object selectedItem = typeCombo.getSelectedItem();
         ClassNode item = null;
         if(selectedItem instanceof String) {
-          item = ontologyTreePanel
-                  .getFirstNode((String)selectedItem);
+          item = ontologyTreePanel.getFirstNode((String)selectedItem);
         }
         else {
           item = (ClassNode)selectedItem;
@@ -1009,7 +1001,7 @@ public class AnnotationEditor extends AbstractAction {
 
         // if user wants to create an instance, it cannot be class
         // annotation and it must be instanceAnnotation
-        isClassAnnotation = shouldCreateInstance ? false : true;
+        isClassAnnotation = shouldCreateInstance ? false : isClassAnnotation;
         Annotation addedAnnotation = ontologyTreePanel.ontoTreeListener
                 .addNewAnnotation(item, applyToAll.isSelected(), null,
                         isClassAnnotation, shouldCreateInstance).get(0);
@@ -1050,12 +1042,14 @@ public class AnnotationEditor extends AbstractAction {
         }
 
         gate.Annotation annot1 = ontologyTreePanel.ontoTreeListener.highlightedAnnotations
-          .get(selectedAnnotationIndex);
+                .get(selectedAnnotationIndex);
         int cStartOffset = annot1.getStartNode().getOffset().intValue();
         int cEndOffset = annot1.getEndNode().getOffset().intValue();
-        ontologyTreePanel.ontoViewer.documentTextArea.setSelectionStart(cStartOffset);
-        ontologyTreePanel.ontoViewer.documentTextArea.setSelectionEnd(cEndOffset);
-        
+        ontologyTreePanel.ontoViewer.documentTextArea
+                .setSelectionStart(cStartOffset);
+        ontologyTreePanel.ontoViewer.documentTextArea
+                .setSelectionEnd(cEndOffset);
+
         ArrayList<Annotation> annotations = new ArrayList<Annotation>();
         if(applyToAll.isSelected()) {
           annotations = getSimilarAnnotations(annot1);
@@ -1079,13 +1073,6 @@ public class AnnotationEditor extends AbstractAction {
           ontologyTreePanel.deleteAnnotation(annot);
 
           FeatureMap features = annot.getFeatures();
-          String value = (String)features
-                  .get(ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME);
-          boolean isClassFeature = true;
-          if(value == null) {
-            isClassFeature = false;
-          }
-
           ontologyTreePanel.ontoViewer.documentTextArea
                   .setSelectionStart(startOffset);
           ontologyTreePanel.ontoViewer.documentTextArea
@@ -1096,7 +1083,7 @@ public class AnnotationEditor extends AbstractAction {
 
           // if user wants to create an instance, it cannot be class
           // annotation and it must be instanceAnnotation
-          isClassAnnotation = shouldCreateInstance ? false : true;
+          isClassAnnotation = shouldCreateInstance ? false : isClassAnnotation;
 
           Annotation addedAnnotation = ontologyTreePanel.ontoTreeListener
                   .addNewAnnotation(item, false, features, isClassAnnotation,

@@ -50,6 +50,14 @@ public class OntologyViewerOptions implements DocumentListener {
   private JCheckBox deleteConfirmationCB;
 
   /**
+   * selected text as annotation property?
+   * user or not.
+   */
+  private JCheckBox selectedTextAsPropertyValue;
+  
+  private JTextField propertyName;
+  
+  /**
    * Indicates whether to be case-sensitive or not when annotating text
    * in the add All option
    */
@@ -212,6 +220,9 @@ public class OntologyViewerOptions implements DocumentListener {
   private void initGUI() {
     ontologyClassesToFilterOut = new HashSet<String>();
     childFeatureCB = new JCheckBox("Disable Child Feature");
+    selectedTextAsPropertyValue = new JCheckBox("Selected Text As Property Value?");
+    propertyName = new JTextField("alias",15);
+    
     deleteConfirmationCB = new JCheckBox("Enable confirm deletion");
     addAllFeatureCaseSensitiveCB = new JCheckBox(
             "Case Sensitive \"Annotate All\" Feature");
@@ -228,11 +239,15 @@ public class OntologyViewerOptions implements DocumentListener {
             .addActionListener(new OntologyViewerOptionsActions());
 
     JPanel temp6 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    temp6.add(useOClassFilterFileCB);
+    temp6.add(new JLabel("    File:"));
     temp6.add(oClassFilterFilePathTF);
     temp6.add(browseFilterFileButton);
     temp6.add(browseNewFilterFileButton);
 
+    JPanel temp7 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    temp7.add(new JLabel("    Annotation Property : "));
+    temp7.add(propertyName);
+    
     annotationSetsNamesCB = new JComboBox();
     annotationTypesCB = new JComboBox();
 
@@ -270,12 +285,15 @@ public class OntologyViewerOptions implements DocumentListener {
     annotationTypesCB.addActionListener(new OntologyViewerOptionsActions());
 
     optionPanel = new JPanel();
-    optionPanel.setLayout(new GridLayout(10, 1));
+    optionPanel.setLayout(new GridLayout(13, 1));
     optionPanel.add(childFeatureCB);
     optionPanel.add(deleteConfirmationCB);
     optionPanel.add(addAllFeatureCaseSensitiveCB);
+    optionPanel.add(useOClassFilterFileCB);
     optionPanel.add(temp6);
-
+    optionPanel.add(selectedTextAsPropertyValue);
+    optionPanel.add(temp7);
+    
     optionPanel.add(new JLabel("Annotation Set : "));
     defaultAS = new JRadioButton();
     defaultAS.setSelected(true);
@@ -696,6 +714,11 @@ public class OntologyViewerOptions implements DocumentListener {
     return ontologyClassesToFilterOut;
   }
 
+  public String getPropertyName() {
+    return selectedTextAsPropertyValue.isSelected() ? propertyName.getText().trim() : null; 
+  }
+  
+  
   /**
    * This method should be called to specify the ontology classes that
    * should be disabled from the ocat.
