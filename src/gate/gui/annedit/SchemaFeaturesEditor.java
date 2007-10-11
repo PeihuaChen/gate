@@ -259,19 +259,17 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
     /**
      * @param value
      */
-    public void setValue(Object value) {
-      if(value != null){
-        switch(type){
-          case nominal:
-            jchoice.setSelectedItem(value.toString());
-            break;
-          case bool:
-            checkbox.setSelected(Boolean.parseBoolean(value.toString()));
-            break;
-          case text:
-            textField.setText(value.toString());
-            break;
-        }
+    public void setValue(String value) {
+      switch(type){
+        case nominal:
+          jchoice.setSelectedItem(value);
+          break;
+        case bool:
+          checkbox.setSelected(value != null && Boolean.parseBoolean(value));
+          break;
+        case text:
+          textField.setText(value);
+          break;
       }
     }
 
@@ -524,16 +522,16 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
           featureMap.remove(aFeatureName);
         }
       }
-    }    
+    }
     // 2) then update all the displays
     for(String featureName : featureEditors.keySet()){
       FeatureEditor aFeatureEditor = featureEditors.get(featureName);
       if(featureMap == null){
         //use default value
-        aFeatureEditor.setValue(aFeatureEditor.getDefaultValue());
+        aFeatureEditor.setValue(null);
       }else{
         //use actual value
-        aFeatureEditor.setValue(featureMap.get(featureName));
+        aFeatureEditor.setValue((String)featureMap.get(featureName));
       }
     }
   }

@@ -395,7 +395,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
                         "Annotation Editor Dialog", false);
 //      dialog.setFocusableWindowState(false);
       dialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-      dialog.setResizable(false);
+//      dialog.setResizable(false);
       dialog.add(this);
       dialog.pack();
       
