@@ -900,6 +900,8 @@ public class LightWeightLearningApi extends Object {
       .setLearnerParams(engineSettings.learnerSettings.paramsOfLearning);
     LogService.logMessage("The learners: " + paumLearner.getLearnerName(), 1);
     // training
+    if(chunkLearning.numClasses==0)
+      return;
     chunkLearning.training(paumLearner, modelFile);
     // applying the learning model to training example and get the
     // confidence score for each example
@@ -910,13 +912,16 @@ public class LightWeightLearningApi extends Object {
     int kk = 0;
     for(int i = 0; i < labelsFVDocB.length; ++i) {
       for(int j = 0; j < labelsFVDocB[i].multiLabels.length; ++j)
-        if(labelsFVDocB[i].multiLabels[j].num == 0)
+        if(labelsFVDocB[i].multiLabels[j].num == 0) {
+          //System.out.println("(i, j, kk)="+i+","+j+","+kk+"*");
           scoresNeg[kk++] = chunkLearning.dataFVinDoc.labelsFVDoc[i].multiLabels[j].probs[0];
+        }
     }
     // If want to remove the negative that are close to positive one,
     // reverse the scores.
-    if(engineSettings.filteringNear) for(int i = 0; i < numNeg; ++i)
-      scoresNeg[i] = -scoresNeg[i];
+    if(engineSettings.filteringNear) 
+      for(int i = 0; i < numNeg; ++i)
+        scoresNeg[i] = -scoresNeg[i];
     // Back up the score before sorting
     for(int i = 0; i < numNeg; ++i)
       scoresNegB[i] = scoresNeg[i];
