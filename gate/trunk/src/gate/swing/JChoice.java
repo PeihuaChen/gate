@@ -140,25 +140,47 @@ public class JChoice extends JPanel implements ItemSelectable{
     combo = new JComboBox(model);
     buttonToValueMap = new HashMap<AbstractButton, Object>();
     sharedItemListener = new ItemListener(){
+      /**
+       * Flag used to disable event handling while generating events. Used as an
+       * exit mechanism from event handling loops. 
+       */
+      private boolean disabled = false;
+      
       public void itemStateChanged(ItemEvent e) {
+        if(disabled) return;
         if(e.getSource() == combo){
-          //combo selection changed --> propagate to buttons
-          for(AbstractButton aBtn : buttonToValueMap.keySet()){
-            Object aValue = buttonToValueMap.get(aBtn);
-            if(e.getItem().equals(aValue)){
-              //we found the right button
-              if(e.getStateChange() == ItemEvent.SELECTED){
+          //event from the combo
+          //disable event handling, to avoid unwanted cycles
+          disabled = true;
+          if(e.getStateChange() == ItemEvent.SELECTED){
+            //update the state of all buttons
+            for(AbstractButton aBtn : buttonToValueMap.keySet()){
+              Object aValue = buttonToValueMap.get(aBtn);
+              if(aValue.equals(e.getItem())){
+                //this is the selected button
                 if(!aBtn.isSelected()) aBtn.setSelected(true);
-              }else if (e.getStateChange() == ItemEvent.DESELECTED){
+              }else{
+                //this is a button that should not be selected
+                if(aBtn.isSelected()) aBtn.setSelected(false);
+              }
+            }
+          }else if(e.getStateChange() == ItemEvent.DESELECTED){
+            //deselections due to other value being selected are handled
+            //above.
+            //here we only need to handle the case when the selection was
+            //removed, but not replaced (i.e. setSelectedItem(null)
+            for(AbstractButton aBtn : buttonToValueMap.keySet()){
+              Object aValue = buttonToValueMap.get(aBtn);
+              if(aValue.equals(e.getItem())){
+                //this is the de-selected button
                 if(aBtn.isSelected()) aBtn.setSelected(false);
               }
             }
           }
+          //re-enable event handling
+          disabled = false;
         }else if(e.getSource() instanceof AbstractButton){
-          //one of the buttons was changed -> update the model
-          //this will cause the combo to fire an event as well,
-          //but the button will already be in the right state, so the cycle
-          //will break there.
+          //event from the buttons
           if(buttonToValueMap.containsKey(e.getSource())){
             Object value = buttonToValueMap.get(e.getSource());
             if(e.getStateChange() == ItemEvent.SELECTED){
@@ -166,43 +188,8 @@ public class JChoice extends JPanel implements ItemSelectable{
             }else if(e.getStateChange() == ItemEvent.DESELECTED){
               model.setSelectedItem(null);
             }
-          }
+          }          
         }
-        
-        
-        
-        //////////////////////////////////////////////
-//        if(e.getStateChange() == ItemEvent.SELECTED){
-//          if(e.getSource() == combo){
-//            //combo selection changed -> propagate to buttons
-//            for(AbstractButton aBtn : buttonToValueMap.keySet()){
-//              Object aValue = buttonToValueMap.get(aBtn);
-//              if(e.getItem().equals(aValue)){
-//                //we found the selected button
-//                if(!aBtn.isSelected()) aBtn.setSelected(true);
-//              }else{
-//                //we found a button which should not be selected
-//                if(aBtn.isSelected()) aBtn.setSelected(false);
-//              }
-//            }
-//          }else{
-//            //button selection changed -> propagate to combo
-//            Object value = buttonToValueMap.get(e.getSource());
-//            combo.setSelectedItem(value);
-//          }
-//        }else if(e.getStateChange() == ItemEvent.DESELECTED){
-//          if(e.getSource() instanceof AbstractButton){
-//            Object wrongValue = buttonToValueMap.get(e.getSource());
-//            if(combo.getSelectedItem() != null &&
-//               combo.getSelectedItem().equals(wrongValue)){
-//              combo.setSelectedItem(null);
-//            }
-//          }else{
-//            //someone set null as a value programmatically
-//            
-//            
-//          }
-//        }
       }      
     };
     combo.addItemListener(sharedItemListener);
