@@ -232,14 +232,6 @@ public class OntologyEditor extends AbstractVisualResource
         }
         try {
           long time = System.currentTimeMillis();
-          Graph result = ontology.getSesameRepository().performGraphQuery(QueryLanguage.SERQL, "construct "+serqlQuery);
-          StatementIterator iter = result.getStatements();
-          while(iter.hasNext()) {
-            Statement stmt = iter.next();
-            System.out.println(stmt.getSubject().toString()+"=>"+stmt.getPredicate().toString()+"=>"+stmt.getObject().toString());
-          }
-          System.out.println(System.currentTimeMillis() - time);
-          time = System.currentTimeMillis();
           QueryResultsTable result1 = ontology.getSesameRepository().performTableQuery(QueryLanguage.SERQL, "select "+serqlQuery);
           for(int i=0;i<result1.getRowCount();i++) {
             for(int j=0;j<result1.getColumnCount();j++) {
@@ -259,7 +251,7 @@ public class OntologyEditor extends AbstractVisualResource
         }
       }
     });
-    //toolBar.add(queryBtn);
+    toolBar.add(queryBtn);
     
     topClassAction = new TopClassAction("", MainFrame
             .getIcon("ontology-topclass"));

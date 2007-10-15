@@ -230,6 +230,17 @@ public class DataType {
   }
 
   /**
+   * denotes the "http://www.w3.org/2001/XMLSchema#dateTime" datatype.
+   */
+  public static DataType getDateTimeDataType() {
+    try {
+      return new DataType(new URI("http://www.w3.org/2001/XMLSchema#dateTime", false));
+    } catch(InvalidURIException iue) {
+      return null;
+    }
+  }
+  
+  /**
    * denotes the "http://www.w3.org/2001/XMLSchema#unsignedByte" datatype.
    */
   public static DataType getUnsignedByteDataType() {
@@ -563,6 +574,7 @@ class UnsignedLongDT extends DataType {
     }
   }
 }
+
 
 /**
  * UnsignedShort Datatype

@@ -146,6 +146,9 @@ public class OntologyUtilities {
             .getUnsignedLongDataType());
     datatypeMap.put("http://www.w3.org/2001/XMLSchema#unsignedShort", DataType
             .getUnsignedShortDataType());
+    datatypeMap.put("http://www.w3.org/2001/XMLSchema#dateTime", DataType
+            .getDateTimeDataType());
+    
   }
 
   /**

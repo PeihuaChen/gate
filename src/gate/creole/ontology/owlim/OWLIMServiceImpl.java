@@ -99,7 +99,7 @@ public class OWLIMServiceImpl implements OWLIM,
   private static boolean initiated = false;
 
   private static boolean serviceCall = false;
-  
+
   /**
    * OWLIMSchemaRepository is used as an interaction layer on top of
    * Sesame server. The class provides various methods of manipulating
@@ -117,7 +117,7 @@ public class OWLIMServiceImpl implements OWLIM,
    * The class that provides an implementation of the
    * OWLIM_SCHEMA_REPOSITORY
    */
-  private final String OWLIM_SCHEMA_REPOSITORY_CLASS = "org.openrdf.sesame.sailimpl.OWLIMSchemaRepository";
+  public static final String OWLIM_SCHEMA_REPOSITORY_CLASS = "org.openrdf.sesame.sailimpl.OWLIMSchemaRepository";
 
   /**
    * The file that stores the various configuration parameters
@@ -259,7 +259,8 @@ public class OWLIMServiceImpl implements OWLIM,
   public void init(ServletContext context) throws GateOntologyException {
     if(!initiated || service == null || systemConf == null) {
       try {
-        if(DEBUG) System.out.println("Initiating OWLIMService... with servlet context");
+        if(DEBUG)
+          System.out.println("Initiating OWLIMService... with servlet context");
         // create an instance of service
         URL classURL = this.getClass().getResource(
                 "/" + this.getClass().getName().replace('.', '/') + ".class");
@@ -287,25 +288,24 @@ public class OWLIMServiceImpl implements OWLIM,
 
         systemConf = new URL(gosHome, "system.conf");
 
-
         String userHome = System.getProperty("user.home");
         System.out.println("USERHOME : " + userHome);
-        File sysConfFile = new File(new File(new File(new File(
-            userHome, "safe"), getInstanceName()), "owlim"),
-            "system.conf");
+        File sysConfFile = new File(new File(new File(
+                new File(userHome, "safe"), getInstanceName()), "owlim"),
+                "system.conf");
         // lets check if it exists
-        if (sysConfFile.exists()) {
+        if(sysConfFile.exists()) {
           systemConf = sysConfFile.toURI().toURL();
-        } else {
+        }
+        else {
           systemConf = new URL(gosHome, "system.conf");
-          if (sysConfFile.getParentFile().mkdirs()) {
+          if(sysConfFile.getParentFile().mkdirs()) {
             copyFile(new File(systemConf.getFile()), sysConfFile);
             systemConf = sysConfFile.toURI().toURL();
-            System.out.println("SystemConf :"
-                + systemConf.toExternalForm());
+            System.out.println("SystemConf :" + systemConf.toExternalForm());
           }
-        }        
-        
+        }
+
         owlRDFS = new URL(gosHome, "owl.rdfs");
         rdfSchema = new URL(gosHome, "rdf-schema.xml");
 
@@ -313,11 +313,11 @@ public class OWLIMServiceImpl implements OWLIM,
         service = SesameServer.getLocalService();
         login("admin", "admin");
         String[] repositories = getRepositoryList();
-        if (repositories != null) {
-          for (String rep : repositories) {
+        if(repositories != null) {
+          for(String rep : repositories) {
             setCurrentRepositoryID(rep);
           }
-        }        
+        }
         hasSystemNameSpace.put("http://www.w3.org/2002/07/owl#Thing",
                 new Boolean(false));
         initiated = true;
@@ -338,17 +338,17 @@ public class OWLIMServiceImpl implements OWLIM,
     // lets first try to find out the repository localtion from system
     // properties
     String instanceName = System.getProperty("instance.name");
-    if (instanceName == null) {
+    if(instanceName == null) {
       try {
         InputStream stream = this.getClass().getResourceAsStream(
-            "/gos.properties");
+                "/gos.properties");
         BufferedReader reader = new BufferedReader(
-            new InputStreamReader(stream));
+                new InputStreamReader(stream));
         String line = reader.readLine();
-        while (line != null) {
+        while(line != null) {
           String pdata[] = line.split("=");
-          if (pdata.length > 1) {
-            if (pdata[0].trim().equals("instance.name")) {
+          if(pdata.length > 1) {
+            if(pdata[0].trim().equals("instance.name")) {
               instanceName = pdata[1].trim();
               break;
             }
@@ -356,12 +356,12 @@ public class OWLIMServiceImpl implements OWLIM,
           line = reader.readLine();
         }
         reader.close();
-      } catch (IOException ioe) {
-        throw new GateOntologyException(
-            "Exception occurred while reading the gos.property file",
-            ioe);
       }
-      if (instanceName == null) {
+      catch(IOException ioe) {
+        throw new GateOntologyException(
+                "Exception occurred while reading the gos.property file", ioe);
+      }
+      if(instanceName == null) {
         instanceName = "dev";
       }
       System.setProperty("instance.name", instanceName);
@@ -369,8 +369,6 @@ public class OWLIMServiceImpl implements OWLIM,
     return instanceName;
   }
 
-  
-  
   private void copyFile(File fromFile, File toFile) throws IOException {
     FileInputStream from = null;
     FileOutputStream to = null;
@@ -379,25 +377,27 @@ public class OWLIMServiceImpl implements OWLIM,
       to = new FileOutputStream(toFile);
       byte[] buffer = new byte[4096];
       int bytesRead;
-      while ((bytesRead = from.read(buffer)) != -1)
+      while((bytesRead = from.read(buffer)) != -1)
         to.write(buffer, 0, bytesRead); // write
-    } finally {
-      if (from != null) {
+    }
+    finally {
+      if(from != null) {
         try {
           from.close();
-        } catch (IOException e) {
+        }
+        catch(IOException e) {
         }
       }
-      if (to != null) {
+      if(to != null) {
         try {
           to.close();
-        } catch (IOException e) {
+        }
+        catch(IOException e) {
         }
       }
     }
   }
-  
-  
+
   /**
    * This method intializes the OWLIMService. It locates the system
    * configuration file in the directory whose URL is passed in. The
@@ -424,11 +424,11 @@ public class OWLIMServiceImpl implements OWLIM,
       service = new LocalService(conf);
       login("admin", "admin");
       String[] repositories = getRepositoryList();
-      if (repositories != null) {
-        for (String rep : repositories) {
+      if(repositories != null) {
+        for(String rep : repositories) {
           setCurrentRepositoryID(rep);
         }
-      }      
+      }
     }
     catch(IOException ioe) {
       throw new GateOntologyException(ioe);
@@ -760,6 +760,332 @@ public class OWLIMServiceImpl implements OWLIM,
   }
 
   /**
+   * This method returns a set of all properties where the current
+   * resource has been specified as one of the domain resources. Please
+   * note that this method is different from the getAllSetProperties()
+   * method which returns a set of properties set on the resource. For
+   * each property in the ontology, this method checks if the current
+   * resource is valid domain. If so, the property is said to be
+   * applicable, and otherwise not..
+   * 
+   * @return
+   */
+  public Property[] getPropertiesWithResourceAsDomain(String repositoryID,
+          String theResourceURI) throws GateOntologyException {
+
+    loadRepositoryDetails(repositoryID);
+    List<Property> list = new ArrayList<Property>();
+
+    HashSet<String> toCheck = new HashSet<String>();
+    if(sail.hasStatement(getResource(theResourceURI), getURI(RDF.TYPE),
+            getResource(OWL.CLASS))) {
+      
+      Resource r = getResource(theResourceURI);
+      String queryRep = "{<" + theResourceURI + ">}";
+      String queryRep1 = "<" + theResourceURI + ">";
+      if(r instanceof BNode) {
+        queryRep = "{_:" + theResourceURI + "}";
+        queryRep1 = "_:" + theResourceURI;
+      }
+      
+      String query = "Select distinct SUPER FROM " + queryRep
+      + " rdfs:subClassOf {SUPER}" + " WHERE SUPER!=" + queryRep1
+      + " MINUS " + " select distinct B FROM {B} owl:equivalentClass "
+      + queryRep;
+
+      QueryResultsTable iter = performQuery(query);
+      for(int i = 0; i < iter.getRowCount(); i++) {
+        toCheck.add(iter.getValue(i, 0).toString());
+      }
+      
+      toCheck.add(theResourceURI);
+    }
+    else if(sail.hasStatement(getResource(theResourceURI), getURI(RDF.TYPE),
+            getResource(RDF.PROPERTY))) {
+
+      Resource r = getResource(theResourceURI);
+      String queryRep = "{<" + theResourceURI + ">}";
+      String queryRep1 = "<" + theResourceURI + ">";
+      if(r instanceof BNode) {
+        queryRep = "{_:" + theResourceURI + "}";
+        queryRep1 = "_:" + theResourceURI;
+      }
+      
+      String query = "Select distinct SUPER FROM " + queryRep
+      + " rdfs:subPropertyOf {SUPER}" + " WHERE SUPER!=" + queryRep1
+      + " MINUS " + " select distinct B FROM {B} owl:equivalentProperty "
+      + queryRep;
+
+      QueryResultsTable iter = performQuery(query);
+      for(int i = 0; i < iter.getRowCount(); i++) {
+        toCheck.add(iter.getValue(i, 0).toString());
+      }
+      
+      toCheck.add(theResourceURI);
+    }
+    else {
+      // it is an instance
+      String query = "Select DISTINCT B from {X} rdf:type {B} WHERE X=<"
+              + theResourceURI + ">";
+
+      QueryResultsTable iter2 = performQuery(query);
+      for(int i = 0; i < iter2.getRowCount(); i++) {
+        toCheck.add(iter2.getValue(i, 0).toString().intern());
+      }
+    }
+
+    String query = "Select distinct X FROM {X} rdf:type {<"
+      + OWL.ANNOTATIONPROPERTY + ">}";
+    
+    QueryResultsTable iter = performQuery(query);
+    for(int i = 0; i < iter.getRowCount(); i++) {
+      Value anAnnProp = iter.getValue(i, 0);
+      list.add(new Property(OConstants.ANNOTATION_PROPERTY, anAnnProp
+              .toString()));
+    }
+
+    boolean allowSystemStatements = this.returnSystemStatements;
+    this.returnSystemStatements = true;
+    Property[] props = listToPropertyArray(list);
+    this.returnSystemStatements = allowSystemStatements;
+
+    // now we obtain all datatype properties
+    list = new ArrayList<Property>();
+    query = "Select X FROM {X} rdf:type {<" + OWL.DATATYPEPROPERTY
+            + ">}";
+
+    iter = performQuery(query);
+    for(int i = 0; i < iter.getRowCount(); i++) {
+      Value anAnnProp = iter.getValue(i, 0);
+      // for each property we obtain its domain and search for the
+      // resourceURI in it
+      query = "select distinct Y from {<" + anAnnProp.toString()
+              + ">} rdfs:domain {Y}";
+      QueryResultsTable iter1 = performQuery(query);
+      Set<String> set = new HashSet<String>();
+      for(int j = 0; j < iter1.getRowCount(); j++) {
+        set.add(iter1.getValue(j, 0).toString().intern());
+      }
+
+      if(set.isEmpty()) {
+        list.add(new Property(OConstants.DATATYPE_PROPERTY, anAnnProp
+                .toString()));
+      }
+
+      set = new HashSet<String>(reduceToMostSpecificClasses(repositoryID, set));
+      
+      set.retainAll(toCheck);
+      if(!set.isEmpty()) {
+        list.add(new Property(OConstants.DATATYPE_PROPERTY, anAnnProp
+                .toString()));
+      }
+    }
+
+    query = "Select X FROM {X} rdf:type {<" + OWL.OBJECTPROPERTY
+            + ">}";
+
+    iter = performQuery(query);
+    for(int i = 0; i < iter.getRowCount(); i++) {
+      Value anAnnProp = iter.getValue(i, 0);
+      // for each property we obtain its domain and search for the
+      // resourceURI in it
+      query = "select distinct Y from {<" + anAnnProp.toString()
+              + ">} rdfs:domain {Y}";
+      QueryResultsTable iter1 = performQuery(query);
+      Set<String> set = new HashSet<String>();
+      for(int j = 0; j < iter1.getRowCount(); j++) {
+        set.add(iter1.getValue(j, 0).toString().intern());
+      }
+      
+      set = new HashSet<String>(reduceToMostSpecificClasses(repositoryID, set));
+      
+      byte type = OConstants.OBJECT_PROPERTY;
+      
+      if(set.isEmpty()) {
+        if(isSymmetricProperty(repositoryID,anAnnProp.toString().intern())) {
+          type = OConstants.SYMMETRIC_PROPERTY;
+        } else if(isTransitiveProperty(repositoryID,anAnnProp.toString().intern())) {
+          type = OConstants.TRANSITIVE_PROPERTY;
+        }
+
+        list.add(new Property(type, anAnnProp
+                .toString()));
+        continue;
+      }
+      set.retainAll(toCheck);
+      if(!set.isEmpty()) {
+        if(isSymmetricProperty(repositoryID,anAnnProp.toString().intern())) {
+          type = OConstants.SYMMETRIC_PROPERTY;
+        } else if(isTransitiveProperty(repositoryID,anAnnProp.toString().intern())) {
+          type = OConstants.TRANSITIVE_PROPERTY;
+        }
+
+        list.add(new Property(type, anAnnProp
+                .toString()));
+      }
+    }
+    Property[] props1 = listToPropertyArray(list);
+    Property[] toProps = new Property[props.length + props1.length];
+    for(int i=0;i<props.length;i++) {
+     toProps[i] = props[i]; 
+    }
+    
+    for(int i=0;i<props1.length;i++) {
+      toProps[props.length + i] = props1[i];
+    }
+    
+    return toProps;
+
+  }
+
+  /**
+   * This method returns a set of all properties where the current
+   * resource has been specified as one of the range resources. Please
+   * note that this method is different from the getAllSetProperties()
+   * method which returns a set of properties set on the resource. For
+   * each property in the ontology, this method checks if the current
+   * resource is valid range. If so, the property is said to be
+   * applicable, and otherwise not.
+   * 
+   * @return
+   */
+  public Property[] getPropertiesWithResourceAsRange(String repositoryID,
+          String theResourceURI) throws GateOntologyException {
+    loadRepositoryDetails(repositoryID);
+    List<Property> list = new ArrayList<Property>();
+
+    HashSet<String> toCheck = new HashSet<String>();
+    if(sail.hasStatement(getResource(theResourceURI), getURI(RDF.TYPE),
+            getResource(OWL.CLASS))) {
+
+      Resource r = getResource(theResourceURI);
+      String queryRep = "{<" + theResourceURI + ">}";
+      String queryRep1 = "<" + theResourceURI + ">";
+      if(r instanceof BNode) {
+        queryRep = "{_:" + theResourceURI + "}";
+        queryRep1 = "_:" + theResourceURI;
+      }
+      
+      String query = "Select distinct SUPER FROM " + queryRep
+      + " rdfs:subClassOf {SUPER}" + " WHERE SUPER!=" + queryRep1
+      + " MINUS " + " select distinct B FROM {B} owl:equivalentClass "
+      + queryRep;
+
+      QueryResultsTable iter = performQuery(query);
+      for(int i = 0; i < iter.getRowCount(); i++) {
+        toCheck.add(iter.getValue(i, 0).toString());
+      }
+      
+      toCheck.add(theResourceURI);
+    }
+    else if(sail.hasStatement(getResource(theResourceURI), getURI(RDF.TYPE),
+            getResource(RDF.PROPERTY))) {
+
+      Resource r = getResource(theResourceURI);
+      String queryRep = "{<" + theResourceURI + ">}";
+      String queryRep1 = "<" + theResourceURI + ">";
+      if(r instanceof BNode) {
+        queryRep = "{_:" + theResourceURI + "}";
+        queryRep1 = "_:" + theResourceURI;
+      }
+      
+      String query = "Select distinct SUPER FROM " + queryRep
+      + " rdfs:subPropertyOf {SUPER}" + " WHERE SUPER!=" + queryRep1
+      + " MINUS " + " select distinct B FROM {B} owl:equivalentProperty "
+      + queryRep;
+
+      QueryResultsTable iter = performQuery(query);
+      for(int i = 0; i < iter.getRowCount(); i++) {
+        toCheck.add(iter.getValue(i, 0).toString());
+      }
+      
+      toCheck.add(theResourceURI);
+    }
+    else {
+      // it is an instance
+      String query = "Select DISTINCT B from {X} rdf:type {B} WHERE X=<"
+              + theResourceURI + ">";
+
+      QueryResultsTable iter2 = performQuery(query);
+      for(int i = 0; i < iter2.getRowCount(); i++) {
+        toCheck.add(iter2.getValue(i, 0).toString().intern());
+      }
+    }
+
+    String query = "Select distinct X FROM {X} rdf:type {<"
+      + OWL.ANNOTATIONPROPERTY + ">}";
+
+    QueryResultsTable iter = performQuery(query);
+    for(int i = 0; i < iter.getRowCount(); i++) {
+      Value anAnnProp = iter.getValue(i, 0);
+      list.add(new Property(OConstants.ANNOTATION_PROPERTY, anAnnProp
+              .toString()));
+    }
+
+    boolean allowSystemStatements = this.returnSystemStatements;
+    this.returnSystemStatements = true;
+    Property[] props = listToPropertyArray(list);
+    this.returnSystemStatements = allowSystemStatements;
+
+    // now we obtain all datatype properties
+    list = new ArrayList<Property>();
+    query = "Select X FROM {X} rdf:type {<" + OWL.OBJECTPROPERTY
+            + ">}";
+
+    iter = performQuery(query);
+    for(int i = 0; i < iter.getRowCount(); i++) {
+      Value anAnnProp = iter.getValue(i, 0);
+      // for each property we obtain its domain and search for the
+      // resourceURI in it
+      query = "select distinct Y from {<" + anAnnProp.toString()
+              + ">} rdfs:range {Y}";
+      QueryResultsTable iter1 = performQuery(query);
+      Set<String> set = new HashSet<String>();
+      for(int j = 0; j < iter1.getRowCount(); j++) {
+        set.add(iter1.getValue(j, 0).toString().intern());
+      }
+      
+      set = new HashSet<String>(reduceToMostSpecificClasses(repositoryID, set));
+      
+      byte type = OConstants.OBJECT_PROPERTY;
+      
+      if(set.isEmpty()) {
+        if(isSymmetricProperty(repositoryID,anAnnProp.toString().intern())) {
+          type = OConstants.SYMMETRIC_PROPERTY;
+        } else if(isTransitiveProperty(repositoryID,anAnnProp.toString().intern())) {
+          type = OConstants.TRANSITIVE_PROPERTY;
+        }
+
+        list.add(new Property(type, anAnnProp
+                .toString()));
+      }
+      
+      set.retainAll(toCheck);
+      if(!set.isEmpty()) {
+        if(isSymmetricProperty(repositoryID,anAnnProp.toString().intern())) {
+          type = OConstants.SYMMETRIC_PROPERTY;
+        } else if(isTransitiveProperty(repositoryID,anAnnProp.toString().intern())) {
+          type = OConstants.TRANSITIVE_PROPERTY;
+        }
+
+        list.add(new Property(type, anAnnProp
+                .toString()));
+      }
+    }
+    Property[] props1 = listToPropertyArray(list);
+    Property[] toProps = new Property[props.length + props1.length];
+    for(int i=0;i<props.length;i++) {
+     toProps[i] = props[i]; 
+    }
+    
+    for(int i=0;i<props1.length;i++) {
+      toProps[props.length + i] = props1[i];
+    }
+    
+    return toProps;
+  }
+
+  /**
    * Gets the annotation properties set on the specified resource
    * 
    * @param repositoryID
@@ -774,6 +1100,7 @@ public class OWLIMServiceImpl implements OWLIM,
 
     String queryRep = getResource(theResourceURI) instanceof BNode ? "{_:"
             + theResourceURI + "}" : "{<" + theResourceURI + ">}";
+
     String query = "Select DISTINCT X FROM {X} rdf:type {<"
             + OWL.ANNOTATIONPROPERTY + ">} WHERE EXISTS (SELECT * FROM "
             + queryRep + " X {Z})";
@@ -1185,8 +1512,8 @@ public class OWLIMServiceImpl implements OWLIM,
               + theDatatypePropertyURI);
     }
 
-    String query = "Select Z from {<" + theDatatypePropertyURI + ">} rdfs:range"
-             + " {Z}";
+    String query = "Select Z from {<" + theDatatypePropertyURI
+            + ">} rdfs:range" + " {Z}";
     QueryResultsTable iter = performQuery(query);
 
     String toReturn = null;
@@ -1196,7 +1523,7 @@ public class OWLIMServiceImpl implements OWLIM,
         return toReturn;
       }
     }
-    return null;
+    return "http://www.w3.org/2001/XMLSchema#string";
   }
 
   // **************
@@ -1838,14 +2165,14 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void logout(String repositoryID) throws GateOntologyException {
     if(DEBUG) print("logout");
-    //mapToRepositoryDetails.remove(repositoryID);
+    // mapToRepositoryDetails.remove(repositoryID);
     service.logout();
     if(!serviceCall) {
       service.shutDown();
     }
     currentRepository = null;
     sail = null;
-    //System.gc();
+    // System.gc();
   }
 
   // ****************************************************************************
@@ -1949,15 +2276,16 @@ public class OWLIMServiceImpl implements OWLIM,
           String absolutePersistLocation, boolean persist,
           boolean returnSystemStatements) throws GateOntologyException {
     if(DEBUG) print("createRepository");
-//    if(absolutePersistLocation == null) {
-//      try {
-//        absolutePersistLocation = new File(gosHome.toURI()).getAbsolutePath();
-//      }
-//      catch(URISyntaxException e) {
-//        throw new GateOntologyException(
-//                "Cannot construct persistence location " + "from gosHome", e);
-//      }
-//    }
+    // if(absolutePersistLocation == null) {
+    // try {
+    // absolutePersistLocation = new
+    // File(gosHome.toURI()).getAbsolutePath();
+    // }
+    // catch(URISyntaxException e) {
+    // throw new GateOntologyException(
+    // "Cannot construct persistence location " + "from gosHome", e);
+    // }
+    // }
     // check if user exists
     if(password == null) password = "";
     createNewUser(username, password);
@@ -2009,15 +2337,16 @@ public class OWLIMServiceImpl implements OWLIM,
           String absolutePersistLocation, boolean persist,
           boolean returnSystemStatements) throws GateOntologyException {
     if(DEBUG) print("createRepository");
-//    if(absolutePersistLocation == null) {
-//      try {
-//        absolutePersistLocation = new File(gosHome.toURI()).getAbsolutePath();
-//      }
-//      catch(URISyntaxException e) {
-//        throw new GateOntologyException(
-//                "Cannot construct persistence location " + "from gosHome", e);
-//      }
-//    }
+    // if(absolutePersistLocation == null) {
+    // try {
+    // absolutePersistLocation = new
+    // File(gosHome.toURI()).getAbsolutePath();
+    // }
+    // catch(URISyntaxException e) {
+    // throw new GateOntologyException(
+    // "Cannot construct persistence location " + "from gosHome", e);
+    // }
+    // }
     // check if user exists
     if(password == null) password = "";
     createNewUser(username, password);
@@ -2877,6 +3206,7 @@ public class OWLIMServiceImpl implements OWLIM,
     for(int i = 0; i < iter.getRowCount(); i++) {
       String classString = iter.getValue(i, 0).toString();
       byte classType = getClassType(repositoryID, classString);
+      if(classType == OConstants.ANNONYMOUS_CLASS) continue;
       list.add(new ResourceInfo(classString, classType));
     }
     return reduceToMostSpecificClasses(null, list);
@@ -2907,6 +3237,7 @@ public class OWLIMServiceImpl implements OWLIM,
     for(int i = 0; i < iter.getRowCount(); i++) {
       String classString = iter.getValue(i, 0).toString();
       byte classType = getClassType(repositoryID, classString);
+      if(classType == OConstants.ANNONYMOUS_CLASS) continue;
       list.add(new ResourceInfo(classString, classType));
     }
     return reduceToMostSpecificClasses(null, list);
@@ -3753,11 +4084,11 @@ public class OWLIMServiceImpl implements OWLIM,
     }
 
     if(res instanceof BNode) {
-        return OConstants.ANNONYMOUS_CLASS;
-      }
-      else {
-        return OConstants.OWL_CLASS;
-      }
+      return OConstants.ANNONYMOUS_CLASS;
+    }
+    else {
+      return OConstants.OWL_CLASS;
+    }
   }
 
   /**
@@ -3980,6 +4311,7 @@ public class OWLIMServiceImpl implements OWLIM,
       String resourceURI = list.get(i);
       if(hasSystemNameSpace(resourceURI)) continue;
       byte classType = getClassType(null, resourceURI);
+      if(classType == OConstants.ANNONYMOUS_CLASS) continue;
       subList.add(new ResourceInfo(list.get(i).toString(), classType));
     }
 
@@ -4219,27 +4551,31 @@ public class OWLIMServiceImpl implements OWLIM,
           map.put("imports", imports);
           map.put("defaultNS", defaultNS);
           File systemConfFile = null;
-          
+
           if(systemConf == null) {
             systemConfFile = new File("temp");
-          } else {
+          }
+          else {
             try {
               systemConfFile = new File(systemConf.toURI());
-            } catch(Exception e) {
+            }
+            catch(Exception e) {
               systemConfFile = new File("temp");
             }
           }
-          
+
           String persistFile = absolutePersistLocation == null
-                  || absolutePersistLocation.trim().length() == 0 ? new File(systemConfFile.getParentFile(),
-                  repositoryID + ".nt").getAbsolutePath() : new File(new File(
+                  || absolutePersistLocation.trim().length() == 0 ? new File(
+                  systemConfFile.getParentFile(), repositoryID + ".nt")
+                  .getAbsolutePath() : new File(new File(
                   absolutePersistLocation), repositoryID + ".nt")
                   .getAbsolutePath();
           String tempTripplesFile = absolutePersistLocation == null
-                  || absolutePersistLocation.trim().length() == 0 ? new File(systemConfFile.getParentFile(),
-                  repositoryID + "-tripples.nt").getAbsolutePath() : new File(new File(
-                  absolutePersistLocation), repositoryID + "-tripples.nt")
-                  .getAbsolutePath();
+                  || absolutePersistLocation.trim().length() == 0
+                  ? new File(systemConfFile.getParentFile(), repositoryID
+                          + "-tripples.nt").getAbsolutePath()
+                  : new File(new File(absolutePersistLocation), repositoryID
+                          + "-tripples.nt").getAbsolutePath();
           map.put("file", persistFile);
           map.put("new-triples-file", tempTripplesFile);
           map.put("auto-write-time-minutes", "0");
@@ -4517,29 +4853,31 @@ public class OWLIMServiceImpl implements OWLIM,
       map.put("noPersist", Boolean.toString(!persist));
       map.put("compressFile", "no");
       map.put("dataFormat", formatToUse);
-      
+
       File systemConfFile = null;
-      
+
       if(systemConf == null) {
         systemConfFile = new File("temp");
-      } else {
+      }
+      else {
         try {
           systemConfFile = new File(systemConf.toURI());
-        } catch(Exception e) {
+        }
+        catch(Exception e) {
           systemConfFile = new File("temp");
         }
       }
 
       String persistFile = absolutePersistLocation == null
-              || absolutePersistLocation.trim().length() == 0 ? new File(systemConfFile.getParentFile(),
-              repositoryID + ".nt").getAbsolutePath() : new File(new File(
-              absolutePersistLocation), repositoryID + ".nt")
-              .getAbsolutePath();
+              || absolutePersistLocation.trim().length() == 0 ? new File(
+              systemConfFile.getParentFile(), repositoryID + ".nt")
+              .getAbsolutePath() : new File(new File(absolutePersistLocation),
+              repositoryID + ".nt").getAbsolutePath();
       String tempTripplesFile = absolutePersistLocation == null
-              || absolutePersistLocation.trim().length() == 0 ? new File(systemConfFile.getParentFile(),
-              repositoryID + "-tripples.nt").getAbsolutePath() : new File(new File(
-              absolutePersistLocation), repositoryID + "-tripples.nt")
-              .getAbsolutePath();
+              || absolutePersistLocation.trim().length() == 0 ? new File(
+              systemConfFile.getParentFile(), repositoryID + "-tripples.nt")
+              .getAbsolutePath() : new File(new File(absolutePersistLocation),
+              repositoryID + "-tripples.nt").getAbsolutePath();
       map.put("file", persistFile);
       map.put("new-triples-file", tempTripplesFile);
       map.put("auto-write-time-minutes", "0");
@@ -4659,6 +4997,53 @@ public class OWLIMServiceImpl implements OWLIM,
     return values.toArray(new ResourceInfo[0]);
   }
 
+  /**
+   * This method is used to obtain the most specific classes
+   * 
+   * @param repositoryID
+   * @param values
+   * @return
+   * @throws GateOntologyException
+   */
+  private List<String> reduceToMostSpecificClasses(String repositoryID,
+          Set<String> values) throws GateOntologyException {
+    if(values == null || values.isEmpty()) return new ArrayList<String>();
+    List<String> classes = new ArrayList<String>(values);
+    outer: for(int i = 0; i < classes.size(); i++) {
+      String c = classes.get(i);
+      // if the class's children appear in list, it is not the most
+      // specific class
+
+      Resource r = getResource(c);
+      String queryRep = "{<" + c + ">}";
+      String queryRep1 = "<" + c + ">";
+      if(r instanceof BNode) {
+        queryRep = "{_:" + c + "}";
+        queryRep1 = "_:" + c;
+      }
+
+      String query = "select distinct A FROM {A} rdfs:subClassOf " + queryRep
+              + " WHERE A!=" + queryRep1 + " MINUS "
+              + " select distinct B FROM {B} owl:equivalentClass " + queryRep;
+
+      QueryResultsTable iter = performQuery(query);
+      List<String> list = new ArrayList<String>();
+      for(int j = 0; j < iter.getRowCount(); j++) {
+        list.add(iter.getValue(j, 0).toString());
+      }
+
+      for(int j = 0; j < list.size(); j++) {
+        if(classes.contains(list.get(j))) {
+          classes.remove(i);
+          i--;
+          continue outer;
+        }
+      }
+    }
+    return classes;
+  }
+  
+  
   private void loadRepositoryDetails(String repositoryID)
           throws GateOntologyException {
     if(sail != null && repositoryID == null) return;
@@ -4695,19 +5080,21 @@ public class OWLIMServiceImpl implements OWLIM,
           throws GateOntologyException {
     if(DEBUG) print("getPropertyValues");
     loadRepositoryDetails(repositoryID);
-    
+
     Resource r = getResource(aResourceURI);
-    String rep1 = "<"+aResourceURI+">";
-    String rep2 = "{"+rep1+"}";
+    String rep1 = "<" + aResourceURI + ">";
+    String rep2 = "{" + rep1 + "}";
     if(r instanceof BNode) {
-      rep1 = "_:"+aResourceURI;
-      rep2 = "{"+rep1+"}";
+      rep1 = "_:" + aResourceURI;
+      rep2 = "{" + rep1 + "}";
     }
-    String query = "Select DISTINCT Y from "+rep2+" <"+aPropertyURI+"> {Y}";
+    String query = "Select DISTINCT Y from " + rep2 + " <" + aPropertyURI
+            + "> {Y}";
     QueryResultsTable qrt = performQuery(query);
     List<PropertyValue> list = new ArrayList<PropertyValue>();
-    for(int i=0;i<qrt.getRowCount();i++) {
-      list.add(new PropertyValue(String.class.getName(), qrt.getValue(i,0).toString()));
+    for(int i = 0; i < qrt.getRowCount(); i++) {
+      list.add(new PropertyValue(String.class.getName(), qrt.getValue(i, 0)
+              .toString()));
     }
     return listToPropertyValueArray(list);
   }
