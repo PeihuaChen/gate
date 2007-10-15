@@ -222,7 +222,7 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
     }
 
     if(property instanceof DatatypeProperty) {
-      //range.getValues().add(new KeyValuePair(property, "DATATYPE", ((DatatypeProperty)property).getDataType().getXmlSchemaURI(), false));
+      range.getValues().add(new KeyValuePair(property, "DATATYPE", ((DatatypeProperty)property).getDataType().getXmlSchemaURI(), false));
       fireTableDataChanged();
       return;
     }

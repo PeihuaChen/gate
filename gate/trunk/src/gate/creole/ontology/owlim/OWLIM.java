@@ -1323,6 +1323,14 @@ public interface OWLIM extends java.rmi.Remote {
   public byte getClassType(String repositoryID, String restrictionURI)
           throws GateOntologyException;
 
+  
+  public Property[] getPropertiesWithResourceAsDomain(String repositoryID,
+          String theResourceURI) throws GateOntologyException;
+  
+  
+  public Property[] getPropertiesWithResourceAsRange(String repositoryID,
+          String theResourceURI) throws GateOntologyException;
+  
   // ****************************************************
   // ******************** Generic statements ************
   // ****************************************************

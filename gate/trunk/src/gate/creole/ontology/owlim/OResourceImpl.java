@@ -97,16 +97,16 @@ public class OResourceImpl implements OResource {
    */
   public Set<Literal> getLabels() {
 
-      PropertyValue[] pvalues = owlim.getAnnotationPropertyValues(
-              this.repositoryID, this.uri.toString(), RDFS.LABEL);
+    PropertyValue[] pvalues = owlim.getAnnotationPropertyValues(
+            this.repositoryID, this.uri.toString(), RDFS.LABEL);
 
-      Set<Literal> toReturn = new HashSet<Literal>();
-      for(PropertyValue pv : pvalues) {
-        toReturn.add(new Literal(pv.getValue(), OntologyUtilities.getLocale(pv
-                .getDatatype())));
-      }
+    Set<Literal> toReturn = new HashSet<Literal>();
+    for(PropertyValue pv : pvalues) {
+      toReturn.add(new Literal(pv.getValue(), OntologyUtilities.getLocale(pv
+              .getDatatype())));
+    }
 
-      return toReturn;
+    return toReturn;
   }
 
   /**
@@ -115,16 +115,16 @@ public class OResourceImpl implements OResource {
    * @return
    */
   public Set<Literal> getComments() {
-      PropertyValue[] pvalues = owlim.getAnnotationPropertyValues(
-              this.repositoryID, this.uri.toString(), RDFS.COMMENT);
+    PropertyValue[] pvalues = owlim.getAnnotationPropertyValues(
+            this.repositoryID, this.uri.toString(), RDFS.COMMENT);
 
-      Set<Literal> toReturn = new HashSet<Literal>();
-      for(PropertyValue pv : pvalues) {
-        toReturn.add(new Literal(pv.getValue(), OntologyUtilities.getLocale(pv
-                .getDatatype())));
-      }
+    Set<Literal> toReturn = new HashSet<Literal>();
+    for(PropertyValue pv : pvalues) {
+      toReturn.add(new Literal(pv.getValue(), OntologyUtilities.getLocale(pv
+              .getDatatype())));
+    }
 
-      return toReturn;
+    return toReturn;
   }
 
   /*
@@ -133,9 +133,9 @@ public class OResourceImpl implements OResource {
    * @see gate.creole.ontology.OResource#getComment(java.lang.String)
    */
   public String getComment(Locale language) {
-      return owlim.getAnnotationPropertyValue(this.repositoryID, this.uri
-              .toString(), RDFS.COMMENT, language != null ? language
-              .getLanguage() : null);
+    return owlim.getAnnotationPropertyValue(this.repositoryID, this.uri
+            .toString(), RDFS.COMMENT, language != null ? language
+            .getLanguage() : null);
   }
 
   /*
@@ -145,12 +145,12 @@ public class OResourceImpl implements OResource {
    *      java.lang.String)
    */
   public void setComment(String aComment, Locale language) {
-      owlim.addAnnotationPropertyValue(this.repositoryID, this.uri.toString(),
-              RDFS.COMMENT, aComment, language != null
-                      ? language.getLanguage()
-                      : null);
-      ontology.fireOntologyModificationEvent(this,
-              OConstants.COMMENT_CHANGED_EVENT);
+    owlim.addAnnotationPropertyValue(this.repositoryID, this.uri.toString(),
+            RDFS.COMMENT, aComment, language != null
+                    ? language.getLanguage()
+                    : null);
+    ontology.fireOntologyModificationEvent(this,
+            OConstants.COMMENT_CHANGED_EVENT);
   }
 
   /*
@@ -159,9 +159,10 @@ public class OResourceImpl implements OResource {
    * @see gate.creole.ontology.OResource#getLabel(java.lang.String)
    */
   public String getLabel(Locale language) {
-      return owlim.getAnnotationPropertyValue(this.repositoryID, this.uri
-              .toString(), RDFS.LABEL, language != null ? language
-              .getLanguage() : null);
+    return owlim.getAnnotationPropertyValue(this.repositoryID, this.uri
+            .toString(), RDFS.LABEL, language != null
+            ? language.getLanguage()
+            : null);
   }
 
   /*
@@ -171,12 +172,12 @@ public class OResourceImpl implements OResource {
    *      java.lang.String)
    */
   public void setLabel(String aLabel, Locale language) {
-      owlim.addAnnotationPropertyValue(this.repositoryID, this.uri.toString(),
-              RDFS.LABEL, aLabel, language != null
-                      ? language.getLanguage()
-                      : null);
-      ontology.fireOntologyModificationEvent(this,
-              OConstants.LABEL_CHANGED_EVENT);
+    owlim.addAnnotationPropertyValue(this.repositoryID, this.uri.toString(),
+            RDFS.LABEL, aLabel, language != null
+                    ? language.getLanguage()
+                    : null);
+    ontology
+            .fireOntologyModificationEvent(this, OConstants.LABEL_CHANGED_EVENT);
   }
 
   /*
@@ -205,26 +206,28 @@ public class OResourceImpl implements OResource {
    */
   public void addAnnotationPropertyValue(
           AnnotationProperty theAnnotationProperty, Literal literal) {
-      OResource res = ontology.getOResourceFromMap(theAnnotationProperty
-              .getURI().toString());
-      if(res == null) {
-        Utils.error(theAnnotationProperty.getURI().toString()
-                + " does not exist");
-        return;
-      }
+    OResource res = ontology.getOResourceFromMap(theAnnotationProperty.getURI()
+            .toString());
+    if(res == null) {
+      Utils
+              .error(theAnnotationProperty.getURI().toString()
+                      + " does not exist");
+      return;
+    }
 
-      if(!(res instanceof AnnotationProperty)) {
-        Utils.error(theAnnotationProperty.getURI().toString()
-                + " is not a registered annotation property");
-        return;
-      }
+    if(!(res instanceof AnnotationProperty)) {
+      Utils.error(theAnnotationProperty.getURI().toString()
+              + " is not a registered annotation property");
+      return;
+    }
 
-      owlim.addAnnotationPropertyValue(this.repositoryID, this.uri.toString(),
-              theAnnotationProperty.getURI().toString(), literal.getValue(),
-              literal.getLanguage() != null ? literal.getLanguage()
-                      .getLanguage() : null);
-      ontology.fireOntologyModificationEvent(this,
-              OConstants.ANNOTATION_PROPERTY_VALUE_ADDED_EVENT);
+    owlim.addAnnotationPropertyValue(this.repositoryID, this.uri.toString(),
+            theAnnotationProperty.getURI().toString(), literal.getValue(),
+            literal.getLanguage() != null
+                    ? literal.getLanguage().getLanguage()
+                    : null);
+    ontology.fireOntologyModificationEvent(this,
+            OConstants.ANNOTATION_PROPERTY_VALUE_ADDED_EVENT);
   }
 
   /*
@@ -234,16 +237,16 @@ public class OResourceImpl implements OResource {
    */
   public List<Literal> getAnnotationPropertyValues(
           AnnotationProperty theAnnotationProperty) {
-      PropertyValue[] propValues = owlim.getAnnotationPropertyValues(
-              this.repositoryID, this.uri.toString(), theAnnotationProperty
-                      .getURI().toString());
-      List<Literal> list = new ArrayList<Literal>();
-      for(int i = 0; i < propValues.length; i++) {
-        Literal l = new Literal(propValues[i].getValue(), OntologyUtilities
-                .getLocale(propValues[i].getDatatype()));
-        list.add(l);
-      }
-      return list;
+    PropertyValue[] propValues = owlim.getAnnotationPropertyValues(
+            this.repositoryID, this.uri.toString(), theAnnotationProperty
+                    .getURI().toString());
+    List<Literal> list = new ArrayList<Literal>();
+    for(int i = 0; i < propValues.length; i++) {
+      Literal l = new Literal(propValues[i].getValue(), OntologyUtilities
+              .getLocale(propValues[i].getDatatype()));
+      list.add(l);
+    }
+    return list;
   }
 
   /*
@@ -254,12 +257,13 @@ public class OResourceImpl implements OResource {
    */
   public void removeAnnotationPropertyValue(
           AnnotationProperty theAnnotationProperty, Literal literal) {
-      owlim.removeAnnotationPropertyValue(this.repositoryID, this.uri
-              .toString(), theAnnotationProperty.getURI().toString(), literal
-              .getValue(), literal.getLanguage() != null ? literal
-              .getLanguage().getLanguage() : null);
-      ontology.fireOntologyModificationEvent(this,
-              OConstants.ANNOTATION_PROPERTY_VALUE_REMOVED_EVENT);
+    owlim.removeAnnotationPropertyValue(this.repositoryID, this.uri.toString(),
+            theAnnotationProperty.getURI().toString(), literal.getValue(),
+            literal.getLanguage() != null
+                    ? literal.getLanguage().getLanguage()
+                    : null);
+    ontology.fireOntologyModificationEvent(this,
+            OConstants.ANNOTATION_PROPERTY_VALUE_REMOVED_EVENT);
   }
 
   /*
@@ -269,10 +273,10 @@ public class OResourceImpl implements OResource {
    */
   public void removeAnnotationPropertyValues(
           AnnotationProperty theAnnotationProperty) {
-      owlim.removeAnnotationPropertyValues(this.repositoryID, this.uri
-              .toString(), theAnnotationProperty.getURI().toString());
-      ontology.fireOntologyModificationEvent(this,
-              OConstants.ANNOTATION_PROPERTY_VALUE_REMOVED_EVENT);
+    owlim.removeAnnotationPropertyValues(this.repositoryID,
+            this.uri.toString(), theAnnotationProperty.getURI().toString());
+    ontology.fireOntologyModificationEvent(this,
+            OConstants.ANNOTATION_PROPERTY_VALUE_REMOVED_EVENT);
   }
 
   /**
@@ -281,26 +285,25 @@ public class OResourceImpl implements OResource {
    * @return
    */
   public Set<AnnotationProperty> getSetAnnotationProperties() {
-      Property[] properties = owlim.getAnnotationProperties(this.repositoryID,
-              this.uri.toString());
-      Set<AnnotationProperty> annotProps = new HashSet<AnnotationProperty>();
-      for(int i = 0; i < properties.length; i++) {
-        if(properties[i].getType() != OConstants.ANNOTATION_PROPERTY) {
-          throw new GateOntologyException(
-                  "The property :"
-                          + properties[i].getUri()
-                          + " returned from the repository is not an AnnotationProperty");
-        }
-        String propUri = properties[i].getUri();
-        OResource resource = ontology.getOResourceFromMap(propUri);
-        if(resource == null) {
-          resource = new AnnotationPropertyImpl(new URI(propUri, false),
-                  this.ontology, this.repositoryID, owlim);
-          ontology.addOResourceToMap(propUri, resource);
-        }
-        annotProps.add((AnnotationProperty)resource);
+    Property[] properties = owlim.getAnnotationProperties(this.repositoryID,
+            this.uri.toString());
+    Set<AnnotationProperty> annotProps = new HashSet<AnnotationProperty>();
+    for(int i = 0; i < properties.length; i++) {
+      if(properties[i].getType() != OConstants.ANNOTATION_PROPERTY) {
+        throw new GateOntologyException("The property :"
+                + properties[i].getUri()
+                + " returned from the repository is not an AnnotationProperty");
       }
-      return annotProps;
+      String propUri = properties[i].getUri();
+      OResource resource = ontology.getOResourceFromMap(propUri);
+      if(resource == null) {
+        resource = new AnnotationPropertyImpl(new URI(propUri, false),
+                this.ontology, this.repositoryID, owlim);
+        ontology.addOResourceToMap(propUri, resource);
+      }
+      annotProps.add((AnnotationProperty)resource);
+    }
+    return annotProps;
   }
 
   /**
@@ -364,52 +367,14 @@ public class OResourceImpl implements OResource {
    */
   public Set<RDFProperty> getPropertiesWithResourceAsDomain() {
     Set<RDFProperty> toReturn = new HashSet<RDFProperty>();
-
-    // obtain all property definitions
-    Set<RDFProperty> rdfProps = ontology.getPropertyDefinitions();
-    if(rdfProps != null) {
-      outer: for(RDFProperty property : rdfProps) {
-        if(property instanceof AnnotationProperty) {
-          toReturn.add(property);
-          continue;
-        }
-
-        if(property instanceof ObjectProperty
-                || property instanceof DatatypeProperty) {
-          if(this instanceof OClass) {
-            Set<OResource> domain = property.getDomain();
-            if(domain.size() == 0) {
-              toReturn.add(property);
-              continue;
-            }
-
-            for(OResource r : domain) {
-              OClass c = (OClass)r;
-              if(c.equals(this)
-                      || ((OClass)this).isSubClassOf(c,
-                              OConstants.TRANSITIVE_CLOSURE)) {
-                toReturn.add(property);
-                continue outer;
-              }
-            }
-          }
-          else if(this instanceof OInstance) {
-            if(property.isValidDomain((OInstance)this)) {
-              toReturn.add(property);
-              continue;
-            }
-          }
-        }
-        else {
-          if(property.isValidDomain(this)) {
-            toReturn.add(property);
-            continue;
-          }
-        }
-      }
+    Property[] properties = this.owlim.getPropertiesWithResourceAsDomain(
+            this.repositoryID, this.getURI().toString());
+    for(int i = 0; i < properties.length; i++) {
+      toReturn.add((RDFProperty)Utils.createOProperty(this.repositoryID,
+              this.ontology, owlim, properties[i].getUri(), properties[i]
+                      .getType()));
     }
     return toReturn;
-
   }
 
   /**
@@ -425,46 +390,12 @@ public class OResourceImpl implements OResource {
    */
   public Set<RDFProperty> getPropertiesWithResourceAsRange() {
     Set<RDFProperty> toReturn = new HashSet<RDFProperty>();
-    // obtain all property definitions
-    Set<RDFProperty> rdfProps = ontology.getPropertyDefinitions();
-    if(rdfProps != null) {
-      outer: for(RDFProperty property : rdfProps) {
-        if(property instanceof AnnotationProperty) {
-          toReturn.add(property);
-          continue;
-        }
-        if(property instanceof ObjectProperty) {
-          if(this instanceof OClass) {
-            Set<OResource> range = property.getRange();
-            if(range.size() == 0) {
-              toReturn.add(property);
-              continue;
-            }
-            for(OResource r : range) {
-              OClass c = (OClass)r;
-              if(c.equals(this)
-                      || ((OClass)this).isSubClassOf(c,
-                              OConstants.TRANSITIVE_CLOSURE)) {
-                toReturn.add(property);
-                continue outer;
-              }
-            }
-          }
-          else if(this instanceof OInstance) {
-            if(property.isValidRange((OInstance)this)) {
-              toReturn.add(property);
-              continue;
-            }
-          }
-        }
-        else {
-          if(!(property instanceof DatatypeProperty)
-                  && property.isValidRange(this)) {
-            toReturn.add(property);
-            continue;
-          }
-        }
-      }
+    Property[] properties = this.owlim.getPropertiesWithResourceAsRange(
+            this.repositoryID, this.getURI().toString());
+    for(int i = 0; i < properties.length; i++) {
+      toReturn.add((RDFProperty)Utils.createOProperty(this.repositoryID,
+              this.ontology, owlim, properties[i].getUri(), properties[i]
+                      .getType()));
     }
     return toReturn;
   }
