@@ -619,12 +619,9 @@ public class AnnotationEditor extends AbstractAction {
     Set<OInstance> toReturn = new HashSet<OInstance>();
     if(rootNode instanceof ClassNode
             && ((ClassNode)rootNode).getSource() instanceof OInstance) {
-      if(ontologyTreePanel.ontologyViewerOptions.isFilterOn()
-              && ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut
-                      .contains(((OResource)((ClassNode)rootNode).getSource())
-                              .getName())) {
-      }
-      else {
+      if(ontologyTreePanel.ontologyViewerOptions
+              .shouldShow(((OResource)((ClassNode)rootNode).getSource())
+                      .getName())) {
         toReturn.add((OInstance)((ClassNode)rootNode).getSource());
       }
     }
@@ -648,10 +645,9 @@ public class AnnotationEditor extends AbstractAction {
 
     if(rootNode instanceof ClassNode
             && ((ClassNode)rootNode).getSource() instanceof OResource) {
-      if(!ontologyTreePanel.ontologyViewerOptions.isFilterOn()
-              || !ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut
-                      .contains(((OResource)((ClassNode)rootNode).getSource())
-                              .getName())) {
+      if(ontologyTreePanel.ontologyViewerOptions
+              .shouldShow(((OResource)((ClassNode)rootNode).getSource())
+                      .getName())) {
 
         if(startWith.length() > 0) {
           if(((OResource)((ClassNode)rootNode).getSource()).getName()
@@ -984,9 +980,8 @@ public class AnnotationEditor extends AbstractAction {
           hideWindow();
           return;
         }
-        else if(ontologyTreePanel.ontologyViewerOptions.isFilterOn()
-                && ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut
-                        .contains(((OResource)item.getSource()).getName())) {
+        else if(!ontologyTreePanel.ontologyViewerOptions
+                .shouldShow(((OResource)item.getSource()).getName())) {
           // JOptionPane.showMessageDialog(MainFrame.getInstance(),
           // "This resource has been filtered out : "
           // + selectedItem.toString());
@@ -1030,8 +1025,9 @@ public class AnnotationEditor extends AbstractAction {
           hideWindow();
           return;
         }
-        else if(ontologyTreePanel.ontologyViewerOptions.isFilterOn()
-                && ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut
+        else if(ontologyTreePanel.ontologyViewerOptions
+                .isClassesToHideFilterOn()
+                && ontologyTreePanel.ontologyViewerOptions.classesToHide
                         .contains(((OResource)item.getSource()).getName())) {
           // JOptionPane.showMessageDialog(MainFrame.getInstance(),
           // "This resource has been filtered out : "
