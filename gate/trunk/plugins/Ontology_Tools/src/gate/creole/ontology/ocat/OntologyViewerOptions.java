@@ -35,6 +35,8 @@ import gate.util.GateRuntimeException;
  */
 public class OntologyViewerOptions implements DocumentListener {
 
+  private JScrollPane scroller;
+  
   private JPanel optionPanel;
 
   /**
@@ -68,28 +70,59 @@ public class OntologyViewerOptions implements DocumentListener {
    * not. If yes, it disables all the classes mentioned in the filter
    * file from the ocat tree.
    */
-  private JCheckBox useOClassFilterFileCB;
+  private JRadioButton classesToHideRB;
 
   /**
    * Filter File URL
    */
-  private URL filterFileURL;
+  private URL classesToHideFileURL;
 
   /**
    * Text box to display the path of the selected filter file.
    */
-  private JTextField oClassFilterFilePathTF;
+  private JTextField classesToHideFilePathTF;
 
   /**
    * Button that allows selecting the filter file.
    */
-  private JButton browseFilterFileButton;
+  private JButton browseClassesToHideFileButton;
 
   /**
    * Button that allows saving the filter file.
    */
-  private JButton browseNewFilterFileButton;
+  private JButton saveClassesToHideFileButton;
 
+  
+  /**
+   * Indicates whether to use the provided ontology class filter file or
+   * not. If yes, it disables all the classes mentioned in the filter
+   * file from the ocat tree.
+   */
+  private JRadioButton classesToShowRB;
+
+  private JRadioButton disableFilteringRB;
+  
+  /**
+   * Filter File URL
+   */
+  private URL classesToShowFileURL;
+
+  /**
+   * Text box to display the path of the selected filter file.
+   */
+  private JTextField classesToShowFilePathTF;
+
+  /**
+   * Button that allows selecting the filter file.
+   */
+  private JButton browseClassesToShowFileButton;
+
+  /**
+   * Button that allows saving the filter file.
+   */
+  private JButton saveClassesToShowFileButton;
+  
+  
   /**
    * Default AnnotationSEt or otherAnnotationSets
    */
@@ -120,8 +153,13 @@ public class OntologyViewerOptions implements DocumentListener {
   /**
    * List of ontology classes to be filtered out.
    */
-  protected HashSet<String> ontologyClassesToFilterOut;
+  protected HashSet<String> classesToHide;
 
+  /**
+   * List of ontology classes to be filtered out.
+   */
+  protected HashSet<String> classesToShow;
+  
   /**
    * Instead of a null value, we specify the defaultAnnotationSetName
    * with some strange string
@@ -139,10 +177,10 @@ public class OntologyViewerOptions implements DocumentListener {
    */
   protected String selectedAnnotationType = DEFAULT_ANNOTATION_TYPE;
 
-  private JOptionPane optionPane = null;
-
-  private boolean readFilterFile = false;
-
+  
+  private boolean readClassesToHideFile = false;
+  private boolean readClassesToShowFile = false;
+  
   /**
    * Constructor
    * 
@@ -218,7 +256,8 @@ public class OntologyViewerOptions implements DocumentListener {
 
   /** Initialize the GUI */
   private void initGUI() {
-    ontologyClassesToFilterOut = new HashSet<String>();
+    classesToHide = new HashSet<String>();
+    classesToShow = new HashSet<String>();
     childFeatureCB = new JCheckBox("Disable Child Feature");
     selectedTextAsPropertyValue = new JCheckBox("Selected Text As Property Value?");
     propertyName = new JTextField("alias",15);
@@ -228,22 +267,46 @@ public class OntologyViewerOptions implements DocumentListener {
             "Case Sensitive \"Annotate All\" Feature");
     addAllFeatureCaseSensitiveCB.setSelected(true);
 
-    useOClassFilterFileCB = new JCheckBox("Filter");
-    useOClassFilterFileCB.addActionListener(new OntologyViewerOptionsActions());
-    oClassFilterFilePathTF = new JTextField(15);
-    browseFilterFileButton = new JButton("Browse");
-    browseFilterFileButton
+    classesToHideRB = new JRadioButton("Classes to ommit");
+    classesToHideRB.addActionListener(new OntologyViewerOptionsActions());
+    classesToHideFilePathTF = new JTextField(15);
+    browseClassesToHideFileButton = new JButton("Browse");
+    browseClassesToHideFileButton
             .addActionListener(new OntologyViewerOptionsActions());
-    browseNewFilterFileButton = new JButton("Save");
-    browseNewFilterFileButton
+    saveClassesToHideFileButton = new JButton("Save");
+    saveClassesToHideFileButton
             .addActionListener(new OntologyViewerOptionsActions());
 
     JPanel temp6 = new JPanel(new FlowLayout(FlowLayout.LEFT));
     temp6.add(new JLabel("    File:"));
-    temp6.add(oClassFilterFilePathTF);
-    temp6.add(browseFilterFileButton);
-    temp6.add(browseNewFilterFileButton);
+    temp6.add(classesToHideFilePathTF);
+    temp6.add(browseClassesToHideFileButton);
+    temp6.add(saveClassesToHideFileButton);
 
+    classesToShowRB = new JRadioButton("Classes to show");
+    classesToShowRB.addActionListener(new OntologyViewerOptionsActions());
+    classesToShowFilePathTF = new JTextField(15);
+    browseClassesToShowFileButton = new JButton("Browse");
+    browseClassesToShowFileButton
+            .addActionListener(new OntologyViewerOptionsActions());
+    saveClassesToShowFileButton = new JButton("Save");
+    saveClassesToShowFileButton
+            .addActionListener(new OntologyViewerOptionsActions());
+
+    JPanel temp8 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    temp8.add(new JLabel("    File:"));
+    temp8.add(classesToShowFilePathTF);
+    temp8.add(browseClassesToShowFileButton);
+    temp8.add(saveClassesToShowFileButton);
+
+    disableFilteringRB = new JRadioButton("Disable Filtering");
+    
+    ButtonGroup bg8 = new ButtonGroup();
+    bg8.add(classesToShowRB);
+    bg8.add(classesToHideRB);
+    bg8.add(disableFilteringRB);
+    disableFilteringRB.setSelected(true);
+    
     JPanel temp7 = new JPanel(new FlowLayout(FlowLayout.LEFT));
     temp7.add(new JLabel("    Annotation Property : "));
     temp7.add(propertyName);
@@ -285,12 +348,15 @@ public class OntologyViewerOptions implements DocumentListener {
     annotationTypesCB.addActionListener(new OntologyViewerOptionsActions());
 
     optionPanel = new JPanel();
-    optionPanel.setLayout(new GridLayout(13, 1));
+    optionPanel.setLayout(new GridLayout(16, 1));
     optionPanel.add(childFeatureCB);
     optionPanel.add(deleteConfirmationCB);
     optionPanel.add(addAllFeatureCaseSensitiveCB);
-    optionPanel.add(useOClassFilterFileCB);
+    optionPanel.add(disableFilteringRB);
+    optionPanel.add(classesToHideRB);
     optionPanel.add(temp6);
+    optionPanel.add(classesToShowRB);
+    optionPanel.add(temp8);
     optionPanel.add(selectedTextAsPropertyValue);
     optionPanel.add(temp7);
     
@@ -341,9 +407,7 @@ public class OntologyViewerOptions implements DocumentListener {
 
     optionPanel.add(temp4);
     optionPanel.add(temp5);
-
-    optionPane = new JOptionPane();
-
+    scroller = new JScrollPane(optionPanel);
   }
 
   /**
@@ -352,10 +416,11 @@ public class OntologyViewerOptions implements DocumentListener {
    * @return
    */
   public Component getGUI() {
-    JPanel myPanel = new JPanel();
-    myPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-    myPanel.add(optionPanel);
-    return myPanel;
+    return scroller;
+//    JPanel myPanel = new JPanel();
+//    myPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+//    myPanel.add(scroller);
+//    return myPanel;
   }
 
   /**
@@ -516,7 +581,7 @@ public class OntologyViewerOptions implements DocumentListener {
         ontologyTreePanel.ontoTreeListener.refreshHighlights();
         return;
       }
-      else if(ae.getSource() == browseFilterFileButton) {
+      else if(ae.getSource() == browseClassesToHideFileButton) {
         // open the file dialogue
         JFileChooser fileChooser = MainFrame.getFileChooser();
         int answer = fileChooser.showOpenDialog(MainFrame.getInstance());
@@ -528,18 +593,18 @@ public class OntologyViewerOptions implements DocumentListener {
           else {
             try {
               String newURL = selectedFile.toURI().toURL().toString();
-              if(!newURL.equalsIgnoreCase(oClassFilterFilePathTF.getText()
+              if(!newURL.equalsIgnoreCase(classesToHideFilePathTF.getText()
                       .trim())) {
-                readFilterFile = true;
+                readClassesToHideFile = true;
               }
               else {
-                readFilterFile = false;
+                readClassesToHideFile = false;
               }
 
-              oClassFilterFilePathTF.setText(newURL);
-              filterFileURL = selectedFile.toURI().toURL();
-              if(isFilterOn()) {
-                updateOClassFilter();
+              classesToHideFilePathTF.setText(newURL);
+              classesToHideFileURL = selectedFile.toURI().toURL();
+              if(isClassesToHideFilterOn()) {
+                updateClassesToHide();
               }
             }
             catch(MalformedURLException me) {
@@ -550,7 +615,7 @@ public class OntologyViewerOptions implements DocumentListener {
           }
         }
       }
-      else if(ae.getSource() == browseNewFilterFileButton) {
+      else if(ae.getSource() == saveClassesToHideFileButton) {
         // open the file dialogue
         JFileChooser fileChooser = MainFrame.getFileChooser();
         int answer = fileChooser.showSaveDialog(MainFrame.getInstance());
@@ -564,7 +629,7 @@ public class OntologyViewerOptions implements DocumentListener {
 
               BufferedWriter bw = new BufferedWriter(new FileWriter(
                       selectedFile));
-              for(String s : ontologyClassesToFilterOut) {
+              for(String s : classesToHide) {
                 bw.write(s);
                 bw.newLine();
               }
@@ -580,25 +645,97 @@ public class OntologyViewerOptions implements DocumentListener {
         }
 
       }
-      else if(ae.getSource() == useOClassFilterFileCB) {
-        updateOClassFilter();
+      else if(ae.getSource() == classesToHideRB) {
+        updateClassesToHide();
+      }
+      else if(ae.getSource() == browseClassesToShowFileButton) {
+        // open the file dialogue
+        JFileChooser fileChooser = MainFrame.getFileChooser();
+        int answer = fileChooser.showOpenDialog(MainFrame.getInstance());
+        if(answer == JFileChooser.APPROVE_OPTION) {
+          File selectedFile = fileChooser.getSelectedFile();
+          if(selectedFile == null) {
+            return;
+          }
+          else {
+            try {
+              String newURL = selectedFile.toURI().toURL().toString();
+              if(!newURL.equalsIgnoreCase(classesToShowFilePathTF.getText()
+                      .trim())) {
+                readClassesToShowFile = true;
+              }
+              else {
+                readClassesToShowFile = false;
+              }
+
+              classesToShowFilePathTF.setText(newURL);
+              classesToShowFileURL = selectedFile.toURI().toURL();
+              if(isClassesToShowFilterOn()) {
+                updateClassesToShow();
+              }
+            }
+            catch(MalformedURLException me) {
+              JOptionPane.showMessageDialog(MainFrame.getInstance(),
+                      "Invalid URL");
+              return;
+            }
+          }
+        }
+      }
+      else if(ae.getSource() == saveClassesToShowFileButton) {
+        // open the file dialogue
+        JFileChooser fileChooser = MainFrame.getFileChooser();
+        int answer = fileChooser.showSaveDialog(MainFrame.getInstance());
+        if(answer == JFileChooser.APPROVE_OPTION) {
+          File selectedFile = fileChooser.getSelectedFile();
+          if(selectedFile == null) {
+            return;
+          }
+          else {
+            try {
+
+              BufferedWriter bw = new BufferedWriter(new FileWriter(
+                      selectedFile));
+              for(String s : classesToShow) {
+                bw.write(s);
+                bw.newLine();
+              }
+              bw.flush();
+              bw.close();
+            }
+            catch(IOException ioe) {
+              JOptionPane.showMessageDialog(MainFrame.getInstance(), ioe
+                      .getMessage());
+              throw new GateRuntimeException(ioe);
+            }
+          }
+        }
+
+      }
+      else if(ae.getSource() == classesToShowRB) {
+        updateClassesToShow();
       }
     }
   }
 
-  public boolean isFilterOn() {
-    return useOClassFilterFileCB.isSelected();
+  public boolean isClassesToHideFilterOn() {
+    return classesToHideRB.isSelected();
+  }
+  
+  public boolean isClassesToShowFilterOn() {
+    return classesToShowRB.isSelected();
   }
 
-  private void updateOClassFilter() {
+  
+  private void updateClassesToHide() {
     try {
-      if(filterFileURL == null || !readFilterFile) return;
-      ontologyClassesToFilterOut.clear();
+      if(classesToHideFileURL == null || !readClassesToHideFile) return;
+      classesToHide.clear();
       BufferedReader br = new BufferedReader(new InputStreamReader(
-              filterFileURL.openStream()));
+              classesToHideFileURL.openStream()));
       String line = br.readLine();
       while(line != null) {
-        ontologyClassesToFilterOut.add(line.trim());
+        classesToHide.add(line.trim());
         line = br.readLine();
       }
       br.close();
@@ -610,18 +747,52 @@ public class OntologyViewerOptions implements DocumentListener {
     }
   }
 
+  private void updateClassesToShow() {
+    try {
+      if(classesToShowFileURL == null || !readClassesToShowFile) return;
+      classesToShow.clear();
+      BufferedReader br = new BufferedReader(new InputStreamReader(
+              classesToShowFileURL.openStream()));
+      String line = br.readLine();
+      while(line != null) {
+        classesToShow.add(line.trim());
+        line = br.readLine();
+      }
+      br.close();
+      ontologyTreePanel.ontoTreeListener.refreshHighlights();
+      return;
+    }
+    catch(IOException ioe) {
+      throw new GateRuntimeException(ioe);
+    }
+  }
+  
+  
   /**
    * Use this method to switch on and off the filter.
    * 
    * @param onOff
    */
-  public void setFilterOn(boolean onOff) {
-    if(useOClassFilterFileCB.isSelected() != onOff) {
-      useOClassFilterFileCB.setSelected(onOff);
+  public void setClassesToHideOn(boolean onOff) {
+    if(classesToHideRB.isSelected() != onOff) {
+      classesToHideRB.setSelected(onOff);
     }
-    updateOClassFilter();
+    updateClassesToHide();
   }
 
+  /**
+   * Use this method to switch on and off the filter.
+   * 
+   * @param onOff
+   */
+  public void setClassesToShowOn(boolean onOff) {
+    if(classesToShowRB.isSelected() != onOff) {
+      classesToShowRB.setSelected(onOff);
+    }
+    updateClassesToShow();
+  }
+  
+  
   /** Returns if Child Feature is set to ON/OFF */
   public boolean isChildFeatureDisabled() {
     return childFeatureCB.isSelected();
@@ -641,20 +812,35 @@ public class OntologyViewerOptions implements DocumentListener {
     return addAllFeatureCaseSensitiveCB.isSelected();
   }
 
-  public void addToFilter(HashSet<String> list) {
-    if(ontologyClassesToFilterOut == null)
-      ontologyClassesToFilterOut = new HashSet<String>();
-    ontologyClassesToFilterOut.addAll(list);
+  public void addToClassesToHide(HashSet<String> list) {
+    if(classesToHide == null)
+      classesToHide = new HashSet<String>();
+    classesToHide.addAll(list);
     ontologyTreePanel.ontoTreeListener.refreshHighlights();
   }
 
-  public void removeFromFilter(HashSet<String> list) {
-    if(ontologyClassesToFilterOut == null)
-      ontologyClassesToFilterOut = new HashSet<String>();
-    ontologyClassesToFilterOut.removeAll(list);
+  public void removeFromClassesToHide(HashSet<String> list) {
+    if(classesToHide == null)
+      classesToHide = new HashSet<String>();
+    classesToHide.removeAll(list);
     ontologyTreePanel.ontoTreeListener.refreshHighlights();
   }
 
+  public void addToClassesToShow(HashSet<String> list) {
+    if(classesToShow == null)
+      classesToShow = new HashSet<String>();
+    classesToShow.addAll(list);
+    ontologyTreePanel.ontoTreeListener.refreshHighlights();
+  }
+
+  public void removeFromClassesToShow(HashSet<String> list) {
+    if(classesToShow == null)
+      classesToShow = new HashSet<String>();
+    classesToShow.removeAll(list);
+    ontologyTreePanel.ontoTreeListener.refreshHighlights();
+  }
+  
+  
   // DocumentListener Methods
   public void annotationSetAdded(DocumentEvent de) {
     // we need to update our annotationSetsNamesCB List
@@ -678,7 +864,7 @@ public class OntologyViewerOptions implements DocumentListener {
    * @param de
    */
   public void annotationSetRemoved(DocumentEvent de) {
-    String getSelected = (String)annotationSetsNamesCB.getSelectedItem();
+    //String getSelected = (String)annotationSetsNamesCB.getSelectedItem();
     annotationSetsNamesCB.removeItem(de.getAnnotationSetName());
     // Note: still removing the hook (listener) is remaining and we need
     // to
@@ -690,30 +876,60 @@ public class OntologyViewerOptions implements DocumentListener {
    * 
    * @return
    */
-  public URL getFilterFileURL() {
-    return filterFileURL;
+  public URL getClassesToHideFileURL() {
+    return classesToHideFileURL;
   }
 
   /**
    * Sets the filter file to be used.
    * 
-   * @param filterFileURL
+   * @param classesToHideFileURL
    */
-  public void setFilterFileURL(URL filterFileURL) {
-    this.filterFileURL = filterFileURL;
-    if(isFilterOn()) {
-      updateOClassFilter();
+  public void setClassesToHideFileURL(URL filterFileURL) {
+    this.classesToHideFileURL = filterFileURL;
+    if(isClassesToHideFilterOn()) {
+      updateClassesToHide();
     }
+  }
+
+  /**
+   * Gets the URL of the filter file being used.
+   * 
+   * @return
+   */
+  public URL getClassesToShowFileURL() {
+    return classesToShowFileURL;
+  }
+
+  /**
+   * Sets the filter file to be used.
+   * 
+   * @param classesToHideFileURL
+   */
+  public void setClassesToShowFileURL(URL filterFileURL) {
+    this.classesToShowFileURL = filterFileURL;
+    if(isClassesToShowFilterOn()) {
+      updateClassesToShow();
+    }
+  }
+  
+  
+  /**
+   * Gets a set of ontology classes disabled in the OCAT.
+   * @return
+   */
+  public HashSet<String> getClassesToHide() {
+    return classesToHide;
   }
 
   /**
    * Gets a set of ontology classes disabled in the OCAT.
    * @return
    */
-  public HashSet<String> getOntologyClassesToFilterOut() {
-    return ontologyClassesToFilterOut;
-  }
-
+  public HashSet<String> getClassesToShow() {
+    return classesToShow;
+  }  
+  
   public String getPropertyName() {
     return selectedTextAsPropertyValue.isSelected() ? propertyName.getText().trim() : null; 
   }
@@ -723,9 +939,9 @@ public class OntologyViewerOptions implements DocumentListener {
    * This method should be called to specify the ontology classes that
    * should be disabled from the ocat.
    * 
-   * @param ontologyClassesToFilterOut
+   * @param classesToHide
    */
-  public void setOntologyClassesToFilterOut(
+  public void setClassesToHide(
           HashSet<String> ontologyClassesToFilterOut) {
     // ok here we need to create a temporary file and add these classes
     // in it
@@ -734,7 +950,7 @@ public class OntologyViewerOptions implements DocumentListener {
     }
 
     try {
-      File newFile = File.createTempFile("ontologyClassesToFilterOut", "tmp");
+      File newFile = File.createTempFile("classesToHide", "tmp");
       BufferedWriter bw = new BufferedWriter(new FileWriter(newFile));
       for(String aClassName : ontologyClassesToFilterOut) {
         bw.write(aClassName);
@@ -742,14 +958,63 @@ public class OntologyViewerOptions implements DocumentListener {
       }
       bw.flush();
       bw.close();
-      readFilterFile = true;
-      oClassFilterFilePathTF.setText(newFile.toURI().toURL().toString());
-      filterFileURL = newFile.toURI().toURL();
-      setFilterOn(true);
+      readClassesToHideFile = true;
+      classesToHideFilePathTF.setText(newFile.toURI().toURL().toString());
+      classesToHideFileURL = newFile.toURI().toURL();
+      setClassesToHideOn(true);
     }
     catch(IOException ioe) {
       throw new GateRuntimeException(
               "Not able to save the classes in a temporary file", ioe);
     }
   }
+
+  /**
+   * This method should be called to specify the ontology classes that
+   * should be disabled from the ocat.
+   * 
+   * @param classesToHide
+   */
+  public void setClassesToShow(
+          HashSet<String> ontologyClassesToShow) {
+    // ok here we need to create a temporary file and add these classes
+    // in it
+    if(ontologyClassesToShow == null) {
+      ontologyClassesToShow = new HashSet<String>();
+    }
+
+    try {
+      File newFile = File.createTempFile("classesToShow", "tmp");
+      BufferedWriter bw = new BufferedWriter(new FileWriter(newFile));
+      for(String aClassName : ontologyClassesToShow) {
+        bw.write(aClassName);
+        bw.newLine();
+      }
+      bw.flush();
+      bw.close();
+      readClassesToShowFile = true;
+      classesToShowFilePathTF.setText(newFile.toURI().toURL().toString());
+      classesToShowFileURL = newFile.toURI().toURL();
+      setClassesToShowOn(true);
+    }
+    catch(IOException ioe) {
+      throw new GateRuntimeException(
+              "Not able to save the classes in a temporary file", ioe);
+    }
+  }
+  
+  
+  public boolean shouldShow(String aResourceName) {
+    if(disableFilteringRB.isSelected())
+      return true;
+    
+    if(classesToHideRB.isSelected() && classesToHide != null)
+      return !classesToHide.contains(aResourceName);
+    
+    else if(classesToShow != null)
+      return classesToShow.contains(aResourceName);
+    
+    return true;
+  }
+
 }

@@ -101,10 +101,16 @@ public class OntologyTreeListener extends MouseAdapter {
         cancel.setToolTipText("Closes this popup");
         JMenuItem changeColor = new JMenuItem("Change Color");
         changeColor.setToolTipText("Changes Color");
-        JMenuItem addToFilter = new JMenuItem("Disable (Children : "
+        JMenuItem addToClassesToHide = new JMenuItem("Hide (Children : "
                 + (!ontologyTreePanel.ontologyViewerOptions
                         .isChildFeatureDisabled()) + ")");
-        JMenuItem removeFromFilter = new JMenuItem("Enable (Children : "
+        JMenuItem removeFromClassesToHide = new JMenuItem("Show (Children : "
+                + (!ontologyTreePanel.ontologyViewerOptions
+                        .isChildFeatureDisabled()) + ")");
+        JMenuItem addToClassesToShow = new JMenuItem("Show (Children : "
+                + (!ontologyTreePanel.ontologyViewerOptions
+                        .isChildFeatureDisabled()) + ")");
+        JMenuItem removeFromClassesToShow = new JMenuItem("Hide (Children : "
                 + (!ontologyTreePanel.ontologyViewerOptions
                         .isChildFeatureDisabled()) + ")");
 
@@ -112,17 +118,27 @@ public class OntologyTreeListener extends MouseAdapter {
 
         ToolTipManager.sharedInstance().registerComponent(cancel);
         ToolTipManager.sharedInstance().registerComponent(changeColor);
-        ToolTipManager.sharedInstance().registerComponent(addToFilter);
+        ToolTipManager.sharedInstance().registerComponent(addToClassesToHide);
 
         popup.add(new JLabel(node.toString()));
         popup.addSeparator();
         popup.add(changeColor);
-        if(!ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut
-                .contains(node.toString())) {
-          popup.add(addToFilter);
-        }
-        else {
-          popup.add(removeFromFilter);
+        if(ontologyTreePanel.ontologyViewerOptions.isClassesToHideFilterOn()) {
+          if(!ontologyTreePanel.ontologyViewerOptions.classesToHide
+                  .contains(node.toString())) {
+            popup.add(addToClassesToHide);
+          }
+          else {
+            popup.add(removeFromClassesToHide);
+          }
+        } else if(ontologyTreePanel.ontologyViewerOptions.isClassesToShowFilterOn()) {
+          if(!ontologyTreePanel.ontologyViewerOptions.classesToShow
+                  .contains(node.toString())) {
+            popup.add(addToClassesToShow);
+          }
+          else {
+            popup.add(removeFromClassesToShow);
+          }
         }
 
         popup.add(cancel);
@@ -147,7 +163,7 @@ public class OntologyTreeListener extends MouseAdapter {
           }
         });
 
-        addToFilter.addActionListener(new ActionListener() {
+        addToClassesToHide.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ae) {
             boolean disabled = ontologyTreePanel.ontologyViewerOptions
                     .isChildFeatureDisabled();
@@ -176,12 +192,12 @@ public class OntologyTreeListener extends MouseAdapter {
             else {
               classNames.add(node.toString());
             }
-            ontologyTreePanel.ontologyViewerOptions.addToFilter(classNames);
+            ontologyTreePanel.ontologyViewerOptions.addToClassesToHide(classNames);
             return;
           }
         });
 
-        removeFromFilter.addActionListener(new ActionListener() {
+        removeFromClassesToHide.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ae) {
             boolean disabled = ontologyTreePanel.ontologyViewerOptions
                     .isChildFeatureDisabled();
@@ -210,11 +226,79 @@ public class OntologyTreeListener extends MouseAdapter {
             else {
               classNames.add(node.toString());
             }
-            ontologyTreePanel.ontologyViewerOptions.removeFromFilter(classNames);
+            ontologyTreePanel.ontologyViewerOptions.removeFromClassesToHide(classNames);
             return;
           }
         });
 
+        addToClassesToShow.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent ae) {
+            boolean disabled = ontologyTreePanel.ontologyViewerOptions
+                    .isChildFeatureDisabled();
+            HashSet<String> classNames = new HashSet<String>();
+            popup.setVisible(false);
+            if(!disabled) {
+              Ontology ontology = ontologyTreePanel.getCurrentOntology();
+              OResource aClass = (OClass)ontology.getOResourceByName(node
+                      .toString());
+              classNames.add(node.toString());
+              if(aClass instanceof OClass) {
+                Set<OClass> classes = ((OClass)aClass)
+                        .getSubClasses(OConstants.TRANSITIVE_CLOSURE);
+
+                for(OClass ac : classes) {
+                  classNames.add(ac.getName());
+                }
+
+                Set<OInstance> instances = ontology.getOInstances(
+                        (OClass)aClass, OConstants.TRANSITIVE_CLOSURE);
+                for(OInstance ai : instances) {
+                  classNames.add(ai.getName());
+                }
+              }
+            }
+            else {
+              classNames.add(node.toString());
+            }
+            ontologyTreePanel.ontologyViewerOptions.addToClassesToShow(classNames);
+            return;
+          }
+        });
+
+        removeFromClassesToShow.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent ae) {
+            boolean disabled = ontologyTreePanel.ontologyViewerOptions
+                    .isChildFeatureDisabled();
+            HashSet<String> classNames = new HashSet<String>();
+            popup.setVisible(false);
+            if(!disabled) {
+              Ontology ontology = ontologyTreePanel.getCurrentOntology();
+              OResource aClass = (OClass)ontology.getOResourceByName(node
+                      .toString());
+              classNames.add(node.toString());
+              if(aClass instanceof OClass) {
+                Set<OClass> classes = ((OClass)aClass)
+                        .getSubClasses(OConstants.TRANSITIVE_CLOSURE);
+
+                for(OClass ac : classes) {
+                  classNames.add(ac.getName());
+                }
+
+                Set<OInstance> instances = ontology.getOInstances(
+                        (OClass)aClass, OConstants.TRANSITIVE_CLOSURE);
+                for(OInstance ai : instances) {
+                  classNames.add(ai.getName());
+                }
+              }
+            }
+            else {
+              classNames.add(node.toString());
+            }
+            ontologyTreePanel.ontologyViewerOptions.removeFromClassesToShow(classNames);
+            return;
+          }
+        });
+        
         cancel.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ae) {
             popup.setVisible(false);
@@ -226,9 +310,7 @@ public class OntologyTreeListener extends MouseAdapter {
         return;
       }
 
-      if(ontologyTreePanel.ontologyViewerOptions.isFilterOn()
-              && ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut
-                      .contains(node.toString())) {
+      if(!ontologyTreePanel.ontologyViewerOptions.shouldShow(node.toString())) {
         return;
       }
       
@@ -612,9 +694,7 @@ public class OntologyTreeListener extends MouseAdapter {
     Iterator<String> iter = currentClass2IsSelectedMap.keySet().iterator();
     while(iter.hasNext()) {
       String className = iter.next();
-      if(ontologyTreePanel.ontologyViewerOptions.isFilterOn()
-              && ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut
-                      .contains(className)) {
+      if(!ontologyTreePanel.ontologyViewerOptions.shouldShow(className)) {
         continue;
       }
 

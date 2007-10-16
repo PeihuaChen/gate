@@ -151,9 +151,7 @@ public class CheckRenderer extends JPanel implements TreeCellRenderer {
       labelPanel.setBackground(color);
       iconPanel.setBackground(Color.WHITE);
     }
-    if(ontologyTreePanel.ontologyViewerOptions.isFilterOn()
-            && ontologyTreePanel.ontologyViewerOptions.ontologyClassesToFilterOut
-                    .contains(conceptName)) {
+    if(!ontologyTreePanel.ontologyViewerOptions.shouldShow(conceptName)) {
       check.setEnabled(false);
       label.setEnabled(false);
     }
