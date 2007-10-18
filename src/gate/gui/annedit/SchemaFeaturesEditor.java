@@ -122,12 +122,14 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
       //build the empty shell
       gui = new JPanel();
       gui.setAlignmentX(Component.LEFT_ALIGNMENT);
-      gui.setLayout(new BoxLayout(gui, BoxLayout.LINE_AXIS));
+      gui.setLayout(new BoxLayout(gui, BoxLayout.Y_AXIS));
       switch(type) {
         case nominal:
           //use JChoice
           jchoice = new JChoice(values);
           jchoice.setDefaultButtonMargin(new Insets(0, 2, 0, 2));
+          jchoice.setMaximumFastChoices(20);
+          jchoice.setMaximumWidth(300);
           jchoice.setSelectedItem(value);
           jchoice.addActionListener(sharedActionListener);
           gui.add(jchoice);
