@@ -116,7 +116,8 @@ public class JChoice extends JPanel implements ItemSelectable{
     layout.setAlignment(FlowLayout.LEFT);
     setLayout(layout);
     this.model = model;
-    
+    //by default nothing is selected
+    setSelectedItem(null);
     initLocalData();
     buildGui();
   }
