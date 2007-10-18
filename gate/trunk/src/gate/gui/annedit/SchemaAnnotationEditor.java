@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.*;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.*;
 import javax.swing.event.AncestorEvent;
@@ -32,8 +34,7 @@ import javax.swing.text.JTextComponent;
 
 import gate.*;
 import gate.creole.*;
-import gate.event.CreoleEvent;
-import gate.event.CreoleListener;
+import gate.event.*;
 import gate.gui.MainFrame;
 import gate.gui.docview.AnnotationSetsView;
 import gate.gui.docview.TextualDocumentView;
@@ -322,6 +323,8 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     tBar.add(new SmallButton(new EndOffsetLeftAction()), constraints);
     tBar.add(Box.createHorizontalStrut(5), constraints);
     tBar.add(new SmallButton(new EndOffsetRightAction()), constraints);
+    tBar.add(Box.createHorizontalStrut(15), constraints);
+    tBar.add(new SmallButton(new AnnotateAllAction()), constraints);
     constraints.weightx = 1;
     tBar.add(Box.createHorizontalGlue(), constraints);
     constraints.weightx = 0;
@@ -620,6 +623,57 @@ System.out.println("Window up");
     }
   }
   
+  
+  protected class AnnotateAllAction extends AbstractAction{
+    public AnnotateAllAction(){
+      super("Annotate all");
+      super.putValue(SHORT_DESCRIPTION, 
+              "Annotate all occurrences of this text");
+    }
+    
+    public void actionPerformed(ActionEvent evt){
+      if(annotation != null){
+        String docText = getOwner().getDocument().getContent().toString();
+        String annText = docText.substring(
+                annotation.getStartNode().getOffset().intValue(),
+                annotation.getEndNode().getOffset().intValue());
+        Pattern annPattern = Pattern.compile(annText, Pattern.LITERAL);
+        Matcher matcher = annPattern.matcher(docText);
+        while(matcher.find()){
+          int start = matcher.start();
+          int end = matcher.end();
+          //if there isn't already an annotation of the right type at these
+          //offsets, then create one.
+          boolean alreadyThere = false;
+          AnnotationSet oldAnnots = annSet.get(new Long(start)).
+              get(annotation.getType());
+          if(oldAnnots != null && oldAnnots.size() > 0){
+            for(Annotation anOldAnn : oldAnnots){
+              if(anOldAnn.getStartNode().getOffset().intValue() == start &&
+                 anOldAnn.getEndNode().getOffset().intValue() == end &&
+                 anOldAnn.getFeatures().subsumes(annotation.getFeatures())){
+                alreadyThere = true;
+                break;
+              }
+            }
+          }
+          if(!alreadyThere){
+            //create the new annotation
+            FeatureMap features = Factory.newFeatureMap();
+            features.putAll(annotation.getFeatures());
+            try {
+              annSet.add(new Long(start), new Long(end), annotation.getType(), 
+                      features);
+            }catch(InvalidOffsetException e) {
+              //this should not happen as the offsets are obtained from the 
+              //text
+              throw new LuckyException(e);
+            }              
+          }
+        }
+      }
+    }
+  }
   
   protected class DeleteAnnotationAction extends AnnotationAction{
     public DeleteAnnotationAction(){
