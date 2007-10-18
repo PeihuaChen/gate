@@ -103,7 +103,7 @@ public class PostProcessing {
             if(chunk2.start != chunk1.start || chunk2.end != chunk1.end
               || chunk2.name != chunk1.name) {
               // if the two entities overlap
-              if((chunk1.start >= chunk2.start && chunk1.start <= chunk2.end)
+              /*if((chunk1.start >= chunk2.start && chunk1.start <= chunk2.end)
                 || (chunk1.end <= chunk2.end && chunk1.end >= chunk2.start)) {
                 if(chunk1.end - chunk1.start>chunk2.end - chunk2.start)
                   tempChunks.put(chunk2, 0);
@@ -118,7 +118,7 @@ public class PostProcessing {
                     tempChunks.put(chunk1, 0);
                      break; // break the inner loop (ob2)
                   }
-              }
+              }*/
             }
           }
         }// end of the inner loop
