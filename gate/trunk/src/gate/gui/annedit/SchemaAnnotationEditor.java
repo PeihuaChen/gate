@@ -82,11 +82,16 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
    * Finds the best location for the editor dialog
    */
   protected void placeDialog(){
-    dialogIsMoving = true;
-    
-    if(dialogPinned){
+    if(pinnedButton.isSelected()){
       //just resize
+      Point where = null;
+      if(dialog.isVisible()){
+        where = dialog.getLocationOnScreen();
+      }
       dialog.pack();
+      if(where != null){
+        dialog.setLocation(where);
+      }
     }else{
       //calculate position
       try{
@@ -103,8 +108,9 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
         Rectangle visRect = owner.getTextComponent().getVisibleRect();
         int maxY = topLeft.y + visRect.y + visRect.height;      
         
-        //make sure window doesn't get off-screen
+        //make sure window doesn't get off-screen       
         dialog.pack();
+//        dialog.validate();
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         boolean revalidate = false;
         if(dialog.getSize().width > screenSize.width){
@@ -128,12 +134,12 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
         if(y > maxY) y = maxY;
         if(x > maxX) x = maxX;
         dialog.setLocation(x, y);
-        if(!dialog.isVisible()) dialog.setVisible(true);
       }catch(BadLocationException ble){
         //this should never occur
         throw new GateRuntimeException(ble);
       }
     }
+    if(!dialog.isVisible()) dialog.setVisible(true);
   }
   
   protected static final int HIDE_DELAY = 1500;
@@ -156,17 +162,6 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
    */
   private AnnotationEditorOwner owner;
   
-  /**
-   * Internal flag used to mark the dialog movements that were started by this
-   * class (as opposed to the ones effected by the user).
-   */
-  private boolean dialogIsMoving = true;
-  
-  /**
-   * Flag to show the annotation dialog has been moved by the user and should not
-   * automatically reposition itself.
-   */
-  private boolean dialogPinned = false;
   
   /**
    * JChoice used for selecting the annotation type.
@@ -200,6 +195,13 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
    * The box used to host the features editor pane.
    */
   protected Box featuresBox;
+  
+  
+  /**
+   * Toggle button used to pin down the dialog. 
+   */
+  protected JToggleButton pinnedButton;
+  
   
   /**
    * The current features editor, one of the ones stored in 
@@ -314,16 +316,23 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     tBar.add(new SmallButton(new StartOffsetLeftAction()), constraints);
     tBar.add(Box.createHorizontalStrut(5), constraints);
     tBar.add(new SmallButton(new StartOffsetRightAction()), constraints);
-    constraints.weightx = 1;
-    tBar.add(Box.createHorizontalGlue(), constraints);
-    constraints.weightx = 0;
+    tBar.add(Box.createHorizontalStrut(15), constraints);
     tBar.add(new SmallButton(new DeleteAnnotationAction()), constraints);
-    constraints.weightx = 1;
-    tBar.add(Box.createHorizontalGlue(), constraints);
-    constraints.weightx = 0;
+    tBar.add(Box.createHorizontalStrut(15), constraints);
     tBar.add(new SmallButton(new EndOffsetLeftAction()), constraints);
     tBar.add(Box.createHorizontalStrut(5), constraints);
     tBar.add(new SmallButton(new EndOffsetRightAction()), constraints);
+    constraints.weightx = 1;
+    tBar.add(Box.createHorizontalGlue(), constraints);
+    constraints.weightx = 0;
+    pinnedButton = new JToggleButton(MainFrame.getIcon("pin"));
+    pinnedButton.setSelectedIcon(MainFrame.getIcon("pin-in"));
+    pinnedButton.setSelected(false);
+    pinnedButton.setToolTipText("Press to pin window in place.");
+    pinnedButton.setMargin(new Insets(0, 2, 0, 2));
+    pinnedButton.setBorderPainted(false);
+    pinnedButton.setContentAreaFilled(false);
+    tBar.add(pinnedButton);
     add(tBar, BorderLayout.NORTH);
     
     //build the main pane
@@ -354,7 +363,6 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
             Integer.MAX_VALUE));
     typesChoice.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e) {
-        
         String newType;
         if(typesChoice.getSelectedItem() == null){
           newType = "";
@@ -404,44 +412,6 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
 //      dialog.setResizable(false);
       dialog.add(this);
       dialog.pack();
-      
-      dialog.addComponentListener(new ComponentAdapter(){
-        public void componentMoved(ComponentEvent e) {
-          if(dialogIsMoving){
-            //system move, do nothing
-            fixDialogTitle();
-            dialogIsMoving = false;
-          }else{
-            //user move -> pin the dialog
-            dialogPinned = true;
-            fixDialogTitle();
-          }
-        }
-        
-        public void componentHidden(ComponentEvent e) {
-          dialogPinned = false;
-        }
-
-        private void fixDialogTitle(){
-          if(dialog.getTitle().endsWith(pinSuffix)){
-            if(dialogPinned){
-              //do nothing
-            }else{
-              //remove the suffix
-              String title = dialog.getTitle();
-              title = title.substring(0, title.length() - pinSuffix.length());
-              dialog.setTitle(title);
-            }
-          }else{
-            if(dialogPinned){
-              dialog.setTitle(dialog.getTitle() + pinSuffix);
-            }else{
-              //do nothing
-            }
-          }
-        }
-        private String pinSuffix = " (pinned)";
-      });
     }
   }
 
