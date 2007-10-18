@@ -197,7 +197,35 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
    */
   protected Box featuresBox;
   
+  /**
+   * The box used to host the search pane.
+   */
+  protected Box searchBox;
   
+  /**
+   * The pane containing the UI for search and anootate functionality.
+   */
+  protected JPanel searchPane;
+  
+  /**
+   * Text field for searching
+   */
+  protected JTextField searchTextField;
+  
+  /**
+   * Checkbox for enabling RegEx searching 
+   */
+  protected JCheckBox searchRegExpChk;
+  
+  /**
+   * Checkbox for enabling case sensitive searching 
+   */
+  protected JCheckBox searchCaseSensChk;
+  
+  /**
+   * Checkbox for showing the search UI.
+   */
+  protected JCheckBox searchEnabledCheck;
   /**
    * Toggle button used to pin down the dialog. 
    */
@@ -393,6 +421,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       }
     });
     mainPane.add(typesChoice);
+    //add the features box
     featuresBox = Box.createVerticalBox();
     aTitle = "Features "; 
     featuresBox.setBorder(BorderFactory.createTitledBorder(aTitle));
@@ -402,6 +431,62 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
             new Dimension(aLabel.getPreferredSize().width, 0)));
     mainPane.add(featuresBox);
     
+    //add the search box
+    searchEnabledCheck = new JCheckBox("Search & Annotate", 
+            MainFrame.getIcon("closed"), false);
+    searchEnabledCheck.setSelectedIcon(MainFrame.getIcon("expanded"));
+    mainPane.add(searchEnabledCheck);
+    
+    searchBox = Box.createVerticalBox();
+    searchBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+    mainPane.add(searchBox);
+    
+    searchPane = new JPanel();
+    searchPane.setLayout(new BoxLayout(searchPane, BoxLayout.Y_AXIS));
+    
+//    searchPane.setBorder(BorderFactory.createEtchedBorder());
+
+    searchTextField = new JTextField(20);
+    //disallow vertical expansion
+    searchTextField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 
+            searchTextField.getPreferredSize().height));
+    
+    searchPane.add(searchTextField);
+    Box hBox = Box.createHorizontalBox();
+    searchCaseSensChk = new JCheckBox("Case sensitive", true);
+    hBox.add(searchCaseSensChk);
+    hBox.add(Box.createHorizontalStrut(15));
+    searchRegExpChk = new JCheckBox("Regular Expression", false);
+    hBox.add(searchRegExpChk);
+    hBox.add(Box.createHorizontalGlue());
+    searchPane.add(hBox);
+
+    hBox = Box.createHorizontalBox();
+    hBox.add(new SmallButton(new FindFirstAction()));
+    hBox.add(Box.createHorizontalStrut(5));
+    hBox.add(new SmallButton(new FindNextAction()));
+    hBox.add(Box.createHorizontalStrut(15));
+    hBox.add(new SmallButton(new AnnotateOccurrenceAction()));
+    hBox.add(Box.createHorizontalGlue());
+    searchPane.add(hBox);
+    searchPane.add(Box.createVerticalGlue());
+    
+    searchEnabledCheck.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e) {
+        if(searchEnabledCheck.isSelected()){
+          if(!searchBox.isAncestorOf(searchPane)){
+            searchBox.add(searchPane);
+            dialog.pack();
+          }
+        }else{
+          if(searchBox.isAncestorOf(searchPane)){
+            searchBox.remove(searchPane);
+            dialog.pack();
+          }
+        }
+      }
+    });
+
     //make the dialog
     Window parentWindow = SwingUtilities.windowForComponent(owner.getTextComponent());
     if(parentWindow != null){
@@ -481,11 +566,9 @@ System.out.println("Window up");
       System.out.println("Dialog up");      
       
     }catch(HeadlessException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     catch(GateException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
@@ -623,12 +706,51 @@ System.out.println("Window up");
     }
   }
   
+  protected class FindFirstAction extends AbstractAction{
+    public FindFirstAction(){
+      super("Find first");
+      super.putValue(SHORT_DESCRIPTION, 
+              "Finds the first occurrence.");
+    }
+    
+    public void actionPerformed(ActionEvent evt){
+      JOptionPane.showMessageDialog(searchPane, 
+              "You wish!", "Yeah right!", JOptionPane.WARNING_MESSAGE);
+
+    }
+  }
   
+  protected class FindNextAction extends AbstractAction{
+    public FindNextAction(){
+      super("Find next");
+      super.putValue(SHORT_DESCRIPTION, 
+              "Finds the next occurrence.");
+    }
+    
+    public void actionPerformed(ActionEvent evt){
+      JOptionPane.showMessageDialog(searchPane, 
+              "You wish!", "Yeah right!", JOptionPane.WARNING_MESSAGE);
+
+    }
+  }
+  
+  protected class AnnotateOccurrenceAction extends AbstractAction{
+    public AnnotateOccurrenceAction(){
+      super("Annotate");
+      super.putValue(SHORT_DESCRIPTION, 
+              "Annotates the current occurrence.");
+    }
+    
+    public void actionPerformed(ActionEvent evt){
+      JOptionPane.showMessageDialog(searchPane, 
+              "You wish!", "Yeah right!", JOptionPane.WARNING_MESSAGE);
+    }
+  }
   protected class AnnotateAllAction extends AbstractAction{
     public AnnotateAllAction(){
       super("Annotate all");
       super.putValue(SHORT_DESCRIPTION, 
-              "Annotate all occurrences of this text");
+              "Annotate all occurrences of this text.");
     }
     
     public void actionPerformed(ActionEvent evt){
