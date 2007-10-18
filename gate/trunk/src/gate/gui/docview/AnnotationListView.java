@@ -206,7 +206,18 @@ public class AnnotationListView extends AbstractDocumentView
             }
           }
           popup.show(table, me.getX(), me.getY());
-        } 
+        }else{
+          //not popup trigger (most likely normal click)
+        //if the clicked row is now selected, scroll the text view
+          if(me.getID() == MouseEvent.MOUSE_CLICKED &&
+             table.getSelectionModel().isSelectedIndex(viewRow) &&
+             modelRow >= 0){
+            AnnotationData aHandler = annDataList.get(modelRow);
+            //scroll to show the last highlight
+            if(aHandler != null && aHandler.ann != null)
+                textView.scrollAnnotationToVisible(aHandler.ann);
+          }
+        }
       }
     });
     /* End */
@@ -249,9 +260,6 @@ public class AnnotationListView extends AbstractDocumentView
         textView.addBlinkingHighlight(aHandler.ann);
       }
     }    
-    //scroll to show the last highlight
-    if(aHandler != null && aHandler.ann != null)
-        textView.scrollAnnotationToVisible(aHandler.ann);
   }
 
   /**
