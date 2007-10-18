@@ -636,12 +636,8 @@ public class AnnotationSetsView extends AbstractDocumentView
           TypeHandler tHandler = getTypeHandler(annSet.getName(), ann.getType());
           if(tHandler != null){
             Object tag = tHandler.annListTagsForAnn.get(ann.getId());
-if(tag == null){
-  Out.prln("No tag yet");
-}
             listView.selectAnnotationForTag(tag);
           }else{
-Out.prln("no handler yet");        
           }
         }
       }
