@@ -192,6 +192,24 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   /**
+   * Gets the original system output stream, which was later redirected to the
+   * messages pane.  
+   * @return a {@link PrintStream} value.
+   */
+  public PrintStream getOriginalOut(){
+    return logArea.getOriginalOut();
+  }
+  
+  /**
+   * Gets the original system error output stream, which was later redirected 
+   * to the messages pane.  
+   * @return a {@link PrintStream} value.
+   */
+  public PrintStream getOriginalErr(){
+    return logArea.getOriginalErr();
+  }
+
+  /**
    * Selects a resource if loaded in the system and not invisible.
    * 
    * @param res the resource to be selected.
