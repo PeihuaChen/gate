@@ -250,10 +250,29 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     super.init();
     initData();
     initGui();
-    getOwner().getTextComponent().addAncestorListener(textAncestorListener);
+    initListeners();
+    registerAncestorListener();
     return this;
   }
 
+  protected void registerAncestorListener(){
+    //the text itself may be hidden for efficiency reasons (e.g. when hiding a 
+    //large number of highlights. We need to hook to the text's parent
+//    Container textparent = getOwner().getTextComponent().getParent();
+//    if(textparent instanceof JComponent){
+//      ((JComponent)textparent).addAncestorListener(textAncestorListener);
+//    }
+    getOwner().getTextComponent().addAncestorListener(textAncestorListener);
+  }
+  
+  protected void unregisterAncestorListener(){
+//    Container textparent = getOwner().getTextComponent().getParent();
+//    if(textparent instanceof JComponent){
+//      ((JComponent)textparent).removeAncestorListener(textAncestorListener);
+//    }
+    getOwner().getTextComponent().removeAncestorListener(textAncestorListener);
+  }
+  
   protected void initData(){
     schemasByType = new TreeMap<String, AnnotationSchema>();
     for(LanguageResource aSchema : Gate.getCreoleRegister().
@@ -261,68 +280,6 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       schemasByType.put(((AnnotationSchema)aSchema).getAnnotationName(), 
               (AnnotationSchema)aSchema);
     }
-
-    creoleListener = new CreoleListener(){
-      public void resourceLoaded(CreoleEvent e){
-        Resource newResource =  e.getResource();
-        if(newResource instanceof AnnotationSchema){
-          AnnotationSchema aSchema = (AnnotationSchema)newResource;
-          schemasByType.put(aSchema.getAnnotationName(), aSchema);
-        }
-      }
-      
-      public void resourceUnloaded(CreoleEvent e){
-        Resource newResource =  e.getResource();
-        if(newResource instanceof AnnotationSchema){
-          AnnotationSchema aSchema = (AnnotationSchema)newResource;
-          if(schemasByType.containsValue(aSchema)){
-            schemasByType.remove(aSchema.getAnnotationName());
-          }
-        }
-      }
-      
-      public void datastoreOpened(CreoleEvent e){
-        
-      }
-      public void datastoreCreated(CreoleEvent e){
-        
-      }
-      public void datastoreClosed(CreoleEvent e){
-        
-      }
-      public void resourceRenamed(Resource resource,
-                              String oldName,
-                              String newName){
-      }  
-    };
-    Gate.getCreoleRegister().addCreoleListener(creoleListener); 
-    
-    textAncestorListener = new AncestorListener(){
-      /**
-       * A flag used to mark the fact that the dialog is active and was hidden 
-       * by this listener.
-       */
-      private boolean dialogActive = false;
-      
-      public void ancestorAdded(AncestorEvent event) {
-        if(dialogActive){
-          placeDialog();
-          dialogActive = false;
-        }
-      }
-      public void ancestorMoved(AncestorEvent event) {
-        if(dialog.isVisible()){
-          placeDialog();
-        }
-      }
-      
-      public void ancestorRemoved(AncestorEvent event) {
-        if(dialog.isVisible()){
-          dialogActive = true;
-          dialog.setVisible(false);
-        }
-      }
-    };
   }  
   
   public void cleanup(){
@@ -392,34 +349,6 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     JLabel aLabel = new JLabel(aTitle);
     typesChoice.setMinimumSize(new Dimension(aLabel.getPreferredSize().width,
             Integer.MAX_VALUE));
-    typesChoice.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e) {
-        String newType;
-        if(typesChoice.getSelectedItem() == null){
-          newType = "";
-        }else{
-          newType = typesChoice.getSelectedItem().toString();
-        }
-        if(annotation != null && annSet != null && 
-                !annotation.getType().equals(newType)){
-          //annotation type change
-          Integer oldId = annotation.getId();
-          Annotation oldAnn = annotation;
-          annSet.remove(oldAnn);
-          try{
-            annSet.add(oldId, oldAnn.getStartNode().getOffset(), 
-                    oldAnn.getEndNode().getOffset(), 
-                    newType, oldAnn.getFeatures());
-            Annotation newAnn = annSet.get(oldId); 
-            editAnnotation(newAnn, annSet);
-            owner.annotationChanged(newAnn, annSet, oldAnn.getType());
-          }catch(InvalidOffsetException ioe){
-            //this should never hapen 
-            throw new LuckyException(ioe);
-          }
-        }
-      }
-    });
     mainPane.add(typesChoice);
     //add the features box
     featuresBox = Box.createVerticalBox();
@@ -467,25 +396,11 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     hBox.add(new SmallButton(new FindNextAction()));
     hBox.add(Box.createHorizontalStrut(15));
     hBox.add(new SmallButton(new AnnotateOccurrenceAction()));
+    hBox.add(Box.createHorizontalStrut(5));
+    hBox.add(new SmallButton(new AnnotateAllAction()));
     hBox.add(Box.createHorizontalGlue());
     searchPane.add(hBox);
     searchPane.add(Box.createVerticalGlue());
-    
-    searchEnabledCheck.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e) {
-        if(searchEnabledCheck.isSelected()){
-          if(!searchBox.isAncestorOf(searchPane)){
-            searchBox.add(searchPane);
-            dialog.pack();
-          }
-        }else{
-          if(searchBox.isAncestorOf(searchPane)){
-            searchBox.remove(searchPane);
-            dialog.pack();
-          }
-        }
-      }
-    });
 
     //make the dialog
     Window parentWindow = SwingUtilities.windowForComponent(owner.getTextComponent());
@@ -503,6 +418,115 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     }
   }
 
+  protected void initListeners(){
+    creoleListener = new CreoleListener(){
+      public void resourceLoaded(CreoleEvent e){
+        Resource newResource =  e.getResource();
+        if(newResource instanceof AnnotationSchema){
+          AnnotationSchema aSchema = (AnnotationSchema)newResource;
+          schemasByType.put(aSchema.getAnnotationName(), aSchema);
+        }
+      }
+      
+      public void resourceUnloaded(CreoleEvent e){
+        Resource newResource =  e.getResource();
+        if(newResource instanceof AnnotationSchema){
+          AnnotationSchema aSchema = (AnnotationSchema)newResource;
+          if(schemasByType.containsValue(aSchema)){
+            schemasByType.remove(aSchema.getAnnotationName());
+          }
+        }
+      }
+      
+      public void datastoreOpened(CreoleEvent e){
+        
+      }
+      public void datastoreCreated(CreoleEvent e){
+        
+      }
+      public void datastoreClosed(CreoleEvent e){
+        
+      }
+      public void resourceRenamed(Resource resource,
+                              String oldName,
+                              String newName){
+      }  
+    };
+    Gate.getCreoleRegister().addCreoleListener(creoleListener); 
+    
+    textAncestorListener = new AncestorListener(){
+      /**
+       * A flag used to mark the fact that the dialog is active and was hidden 
+       * by this listener.
+       */
+      private boolean dialogActive = false;
+      
+      public void ancestorAdded(AncestorEvent event) {
+        if(dialogActive){
+          placeDialog();
+          dialogActive = false;
+        }
+      }
+      public void ancestorMoved(AncestorEvent event) {
+        if(dialog.isVisible()){
+          placeDialog();
+        }
+      }
+      
+      public void ancestorRemoved(AncestorEvent event) {
+        if(dialog.isVisible()){
+          dialogActive = true;
+          dialog.setVisible(false);
+        }
+      }
+    };
+    
+    typesChoice.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e) {
+        String newType;
+        if(typesChoice.getSelectedItem() == null){
+          newType = "";
+        }else{
+          newType = typesChoice.getSelectedItem().toString();
+        }
+        if(annotation != null && annSet != null && 
+                !annotation.getType().equals(newType)){
+          //annotation type change
+          Integer oldId = annotation.getId();
+          Annotation oldAnn = annotation;
+          annSet.remove(oldAnn);
+          try{
+            annSet.add(oldId, oldAnn.getStartNode().getOffset(), 
+                    oldAnn.getEndNode().getOffset(), 
+                    newType, oldAnn.getFeatures());
+            Annotation newAnn = annSet.get(oldId); 
+            editAnnotation(newAnn, annSet);
+            owner.annotationChanged(newAnn, annSet, oldAnn.getType());
+          }catch(InvalidOffsetException ioe){
+            //this should never hapen 
+            throw new LuckyException(ioe);
+          }
+        }
+      }
+    });
+
+    searchEnabledCheck.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e) {
+        if(searchEnabledCheck.isSelected()){
+          if(!searchBox.isAncestorOf(searchPane)){
+            searchBox.add(searchPane);
+            dialog.pack();
+          }
+        }else{
+          if(searchBox.isAncestorOf(searchPane)){
+            searchBox.remove(searchPane);
+            dialog.pack();
+          }
+        }
+      }
+    });
+  }
+  
   /**
    * @param args
    */
@@ -573,13 +597,6 @@ System.out.println("Window up");
     }
   }
 
-  /**
-   * @return the dialog
-   */
-  public JDialog getDialog() {
-    return dialog;
-  }
-  
   /**
    * Base class for actions on annotations.
    */
@@ -824,7 +841,7 @@ System.out.println("Window up");
     //In order to avoid this problem, we'll create a new temporary annotation.
     Annotation tempAnn = null;
     if(set.get(oldAnnotation.getType()).size() == 1){
-      //create a clone of the annoation that will be deleted, to act as a 
+      //create a clone of the annotation that will be deleted, to act as a 
       //placeholder 
       Integer tempAnnId = set.add(oldAnnotation.getStartNode(), 
               oldAnnotation.getStartNode(), oldAnnotation.getType(), 
@@ -867,12 +884,13 @@ System.out.println("Window up");
    * @param owner the owner to set
    */
   public void setOwner(AnnotationEditorOwner owner) {
-    if(this.owner != null && this.owner != owner){
-      this.owner.getTextComponent().removeAncestorListener(textAncestorListener);
+    if(this.owner != null && this.owner != owner && 
+       textAncestorListener != null){
+      unregisterAncestorListener();
     }
     this.owner = owner;
-    if(this.owner != null){
-      this.owner.getTextComponent().addAncestorListener(textAncestorListener);
+    if(this.owner != null && textAncestorListener != null){
+      registerAncestorListener();
     }
   }
 }
