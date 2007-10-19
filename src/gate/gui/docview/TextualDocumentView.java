@@ -346,10 +346,10 @@ public class TextualDocumentView extends AbstractDocumentView {
     protected void updateNormalHighlights(){
       synchronized(TextualDocumentView.this) {
         if((highlightsToRemove.size() + highlightsToAdd.size()) > 0){
-          Point viewPosition = scroller.getViewport().getViewPosition();
+//          Point viewPosition = scroller.getViewport().getViewPosition();
           Highlighter highlighter = textView.getHighlighter();
-          textView.setVisible(false);
-          scroller.getViewport().setView(new JLabel("Updating"));
+//          textView.setVisible(false);
+//          scroller.getViewport().setView(new JLabel("Updating"));
           //add all new highlights
           while(highlightsToAdd.size() > 0){
             HighlightData hData = highlightsToAdd.remove(0);
@@ -377,9 +377,9 @@ public class TextualDocumentView extends AbstractDocumentView {
           
           
           //restore the updated view
-          scroller.getViewport().setView(textView);
-          textView.setVisible(true);
-          scroller.getViewport().setViewPosition(viewPosition);
+//          scroller.getViewport().setView(textView);
+//          textView.setVisible(true);
+//          scroller.getViewport().setViewPosition(viewPosition);
         }
       }
     }
