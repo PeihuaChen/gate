@@ -445,9 +445,13 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
     for(String featureName : featureEditors.keySet()){
       FeatureEditor featureEditor = featureEditors.get(featureName);
       constraints.gridy = gridy++;
-      
-      JLabel nameLabel = new JLabel(featureName + 
-              (featureEditor.isRequired() ? "*: " : ": "));
+      JLabel nameLabel = new JLabel(
+              "<html>" + featureName + 
+              (featureEditor.isRequired() ? "<font color='red'>*</font>: " : ": ") +
+              "</html>");
+      if(featureEditor.isRequired()){
+        
+      }
       add(nameLabel, constraints);
       add(featureEditor.getGui(), constraints);
       //add a horizontal spacer

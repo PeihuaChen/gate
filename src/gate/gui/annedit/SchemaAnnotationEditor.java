@@ -299,19 +299,41 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     constraints.gridx = GridBagConstraints.RELATIVE;
     constraints.gridy = 0;
     constraints.weightx = 0;
-    tBar.add(new SmallButton(new StartOffsetLeftAction()), constraints);
-    tBar.add(Box.createHorizontalStrut(5), constraints);
-    tBar.add(new SmallButton(new StartOffsetRightAction()), constraints);
+    
+    IconOnlyButton iob = new IconOnlyButton(new StartOffsetLeftAction());
+    iob.setIcon(MainFrame.getIcon("bounds-sol"));
+    iob.setPressedIcon(MainFrame.getIcon("bounds-sol-pressed"));
+    tBar.add(iob, constraints);
+    JLabel aLabel = new JLabel(MainFrame.getIcon("bounds-left"));
+    aLabel.setBorder(null);
+    tBar.add(aLabel, constraints);
+    iob = new IconOnlyButton(new StartOffsetRightAction());
+    iob.setIcon(MainFrame.getIcon("bounds-sor"));
+    iob.setPressedIcon(MainFrame.getIcon("bounds-sor-pressed"));
+    tBar.add(iob, constraints);
+    aLabel = new JLabel(MainFrame.getIcon("bounds-span"));
+    aLabel.setBorder(null);
+    tBar.add(aLabel, constraints);
+    iob = new IconOnlyButton(new EndOffsetLeftAction());
+    iob.setIcon(MainFrame.getIcon("bounds-eol"));
+    iob.setPressedIcon(MainFrame.getIcon("bounds-eol-pressed"));
+    tBar.add(iob, constraints);
+    aLabel = new JLabel(MainFrame.getIcon("bounds-right"));
+    aLabel.setBorder(null);
+    tBar.add(aLabel, constraints);
+    iob = new IconOnlyButton(new EndOffsetRightAction());
+    iob.setIcon(MainFrame.getIcon("bounds-eor"));
+    iob.setPressedIcon(MainFrame.getIcon("bounds-eor-pressed"));
+    tBar.add(iob, constraints);
+    
     tBar.add(Box.createHorizontalStrut(15), constraints);
     tBar.add(new SmallButton(new DeleteAnnotationAction()), constraints);
     tBar.add(Box.createHorizontalStrut(15), constraints);
-    tBar.add(new SmallButton(new EndOffsetLeftAction()), constraints);
-    tBar.add(Box.createHorizontalStrut(5), constraints);
-    tBar.add(new SmallButton(new EndOffsetRightAction()), constraints);
-    tBar.add(Box.createHorizontalStrut(15), constraints);
     tBar.add(new SmallButton(new AnnotateAllAction()), constraints);
+
     constraints.weightx = 1;
     tBar.add(Box.createHorizontalGlue(), constraints);
+    
     constraints.weightx = 0;
     pinnedButton = new JToggleButton(MainFrame.getIcon("pin"));
     pinnedButton.setSelectedIcon(MainFrame.getIcon("pin-in"));
@@ -346,7 +368,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     typesChoice.setAlignmentX(Component.LEFT_ALIGNMENT);
     String aTitle = "Type ";
     typesChoice.setBorder(BorderFactory.createTitledBorder(aTitle));
-    JLabel aLabel = new JLabel(aTitle);
+    aLabel = new JLabel(aTitle);
     typesChoice.setMinimumSize(new Dimension(aLabel.getPreferredSize().width,
             Integer.MAX_VALUE));
     mainPane.add(typesChoice);
@@ -731,9 +753,6 @@ System.out.println("Window up");
     }
     
     public void actionPerformed(ActionEvent evt){
-      JOptionPane.showMessageDialog(searchPane, 
-              "You wish!", "Yeah right!", JOptionPane.WARNING_MESSAGE);
-
     }
   }
   
@@ -745,9 +764,6 @@ System.out.println("Window up");
     }
     
     public void actionPerformed(ActionEvent evt){
-      JOptionPane.showMessageDialog(searchPane, 
-              "You wish!", "Yeah right!", JOptionPane.WARNING_MESSAGE);
-
     }
   }
   
@@ -759,8 +775,6 @@ System.out.println("Window up");
     }
     
     public void actionPerformed(ActionEvent evt){
-      JOptionPane.showMessageDialog(searchPane, 
-              "You wish!", "Yeah right!", JOptionPane.WARNING_MESSAGE);
     }
   }
   protected class AnnotateAllAction extends AbstractAction{
@@ -873,6 +887,17 @@ System.out.println("Window up");
 //      setContentAreaFilled(false);
     }
   }
+  
+  protected class IconOnlyButton extends JButton{
+    public IconOnlyButton(Action a) {
+      super(a);
+      setMargin(new Insets(0, 0, 0, 0));
+      setBorder(null);
+      setBorderPainted(false);
+      setContentAreaFilled(false);
+    }
+  }
+  
   /**
    * @return the owner
    */
