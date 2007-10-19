@@ -1345,40 +1345,6 @@ public class AnnotationSetsView extends AbstractDocumentView
     }
     
     public void mouseClicked(MouseEvent e){
-MainFrame.getInstance().getOriginalOut().print("Click ");      
-      //this triggers select annotation leading to edit annotation or new 
-      //annotation actions
-      //ignore movement if CTRL pressed or dragging
-      int modEx = e.getModifiersEx();
-      if((modEx & MouseEvent.CTRL_DOWN_MASK) != 0){
-        mouseMovementTimer.stop();
-        return;
-      }
-      
-      //check the text location is real
-      int textLocation = textPane.viewToModel(e.getPoint());
-      try {
-        Rectangle viewLocation = textPane.modelToView(textLocation);
-        //expand the rectangle a bit
-        int error = 10;
-        viewLocation = new Rectangle(viewLocation.x - error, 
-                                     viewLocation.y - error,
-                                     viewLocation.width + 2*error, 
-                                     viewLocation.height + 2*error);
-        if(viewLocation.contains(e.getPoint())){
-          mouseStoppedMovingAction.setTextLocation(textLocation);
-MainFrame.getInstance().getOriginalOut().println("Click accepted");          
-          mouseStoppedMovingAction.actionPerformed(null);
-        }else{
-          mouseStoppedMovingAction.setTextLocation(-1);
-        }
-      }
-      catch(BadLocationException e1) {
-        //this should not happen, as the text location comes from the text view 
-        throw new LuckyException(e1);
-      }finally{
-        mouseMovementTimer.restart();
-      }
     }
     
     public void mousePressed(MouseEvent e){

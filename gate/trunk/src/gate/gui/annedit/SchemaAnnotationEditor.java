@@ -23,12 +23,13 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.*;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.regex.*;
 
 import javax.swing.*;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 
@@ -75,14 +76,15 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       featuresEditor.editFeatureMap(features);
     }
     if(dialog != null){
-      placeDialog();
+      placeDialog(annotation.getStartNode().getOffset().intValue(),
+                  annotation.getEndNode().getOffset().intValue());
     }
   }
 
   /**
-   * Finds the best location for the editor dialog
+   * Finds the best location for the editor dialog for a given span of text
    */
-  protected void placeDialog(){
+  protected void placeDialog(int start, int end){
     if(pinnedButton.isSelected()){
       //just resize
       Point where = null;
@@ -96,10 +98,8 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     }else{
       //calculate position
       try{
-        Rectangle startRect = owner.getTextComponent().modelToView(annotation.getStartNode().
-          getOffset().intValue());
-        Rectangle endRect = owner.getTextComponent().modelToView(annotation.getEndNode().
-              getOffset().intValue());
+        Rectangle startRect = owner.getTextComponent().modelToView(start);
+        Rectangle endRect = owner.getTextComponent().modelToView(end);
         Point topLeft = owner.getTextComponent().getLocationOnScreen();
         int x = topLeft.x + startRect.x;
         int y = topLeft.y + endRect.y + endRect.height;
@@ -231,6 +231,14 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
    */
   protected JToggleButton pinnedButton;
   
+  /**
+   * Shared regex matcher used for search functionality. 
+   */
+  protected Matcher matcher;
+  
+  protected FindFirstAction findFirstAction;
+  
+  protected FindNextAction findNextAction;
   
   /**
    * The current features editor, one of the ones stored in 
@@ -413,9 +421,12 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     searchPane.add(hBox);
 
     hBox = Box.createHorizontalBox();
-    hBox.add(new SmallButton(new FindFirstAction()));
+    findFirstAction = new FindFirstAction();
+    hBox.add(new SmallButton(findFirstAction));
     hBox.add(Box.createHorizontalStrut(5));
-    hBox.add(new SmallButton(new FindNextAction()));
+    findNextAction = new FindNextAction();
+    findNextAction.setEnabled(false);
+    hBox.add(new SmallButton(findNextAction));
     hBox.add(Box.createHorizontalStrut(15));
     hBox.add(new SmallButton(new AnnotateOccurrenceAction()));
     hBox.add(Box.createHorizontalStrut(5));
@@ -485,13 +496,15 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       
       public void ancestorAdded(AncestorEvent event) {
         if(dialogActive){
-          placeDialog();
+          placeDialog(annotation.getStartNode().getOffset().intValue(),
+                  annotation.getEndNode().getOffset().intValue());
           dialogActive = false;
         }
       }
       public void ancestorMoved(AncestorEvent event) {
         if(dialog.isVisible()){
-          placeDialog();
+          placeDialog(annotation.getStartNode().getOffset().intValue(),
+                  annotation.getEndNode().getOffset().intValue());
         }
       }
       
@@ -535,7 +548,20 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     searchEnabledCheck.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e) {
         if(searchEnabledCheck.isSelected()){
+          //add the search box if not already there
           if(!searchBox.isAncestorOf(searchPane)){
+            //if empty, initialise the search field to the text of teh current
+            //annotation.
+            String searchText = searchTextField.getText(); 
+            if(searchText == null || searchText.trim().length() == 0){
+              if(annotation != null && getOwner() != null){
+                String annText = getOwner().getDocument().getContent().
+                    toString().substring(
+                            annotation.getStartNode().getOffset().intValue(),
+                            annotation.getEndNode().getOffset().intValue());
+                searchTextField.setText(annText);
+              }
+            }
             searchBox.add(searchPane);
             dialog.pack();
           }
@@ -547,6 +573,25 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
         }
       }
     });
+
+    searchTextField.getDocument().addDocumentListener(new DocumentListener(){
+      public void changedUpdate(DocumentEvent e) {
+        findNextAction.setEnabled(false);
+      }
+      public void insertUpdate(DocumentEvent e) {
+        findNextAction.setEnabled(false);
+      }
+      public void removeUpdate(DocumentEvent e) {
+        findNextAction.setEnabled(false);
+      }
+    });
+    
+    dialog.addComponentListener(new ComponentAdapter(){
+      public void componentHidden(ComponentEvent e) {
+        //automatically unpin the dialog on closing
+        if(pinnedButton.isSelected())pinnedButton.setSelected(false);
+      }
+    });    
   }
   
   /**
@@ -753,6 +798,30 @@ System.out.println("Window up");
     }
     
     public void actionPerformed(ActionEvent evt){
+      if(getOwner() == null) return;
+      String patternText = searchTextField.getText();
+      if(patternText == null) return;
+        int flags = Pattern.UNICODE_CASE;
+        if(!searchCaseSensChk.isSelected()) flags |= Pattern.CASE_INSENSITIVE;
+        if(!searchRegExpChk.isSelected()) flags |= Pattern.LITERAL;
+        Pattern pattern = null;
+        try {
+          pattern = Pattern.compile(patternText, flags);
+          String text = getOwner().getDocument().getContent().toString();
+          matcher = pattern.matcher(text);
+          if(matcher.find()){
+            findNextAction.setEnabled(true);
+            int start = matcher.start();
+            int end = matcher.end();
+            //automatically pin the dialog
+            pinnedButton.setSelected(true);
+            getOwner().getTextComponent().requestFocus();
+            getOwner().getTextComponent().select(start, end);
+          }
+        }
+        catch(PatternSyntaxException e) {
+          e.printStackTrace();
+        }
     }
   }
   
@@ -764,6 +833,18 @@ System.out.println("Window up");
     }
     
     public void actionPerformed(ActionEvent evt){
+      if(matcher != null){
+        if(matcher.find()){
+          int start = matcher.start();
+          int end = matcher.end();
+          getOwner().getTextComponent().requestFocus();
+          getOwner().getTextComponent().select(start, end);
+          placeDialog(start, end);
+        }
+      }else{
+        //matcher is not prepared
+        new FindFirstAction().actionPerformed(evt);
+      }
     }
   }
   
@@ -775,6 +856,23 @@ System.out.println("Window up");
     }
     
     public void actionPerformed(ActionEvent evt){
+      if(matcher != null){
+        int start = matcher.start();
+        int end = matcher.end();
+        FeatureMap features = Factory.newFeatureMap();
+        if(annotation.getFeatures() != null) 
+          features.putAll(annotation.getFeatures());
+        try {
+          Integer id = annSet.add(new Long(start), new Long(end), 
+                  annotation.getType(), features);
+          Annotation newAnn = annSet.get(id);
+          editAnnotation(newAnn, annSet);
+        }
+        catch(InvalidOffsetException e) {
+          //the offsets here should always be valid.
+          throw new LuckyException(e);
+        }
+      }
     }
   }
   protected class AnnotateAllAction extends AbstractAction{
