@@ -240,6 +240,10 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
   
   protected FindNextAction findNextAction;
   
+  protected AnnotateMatchAction annotateMatchAction;
+  
+  protected AnnotateAllMatchesAction annotateAllMatchesAction;
+  
   /**
    * The current features editor, one of the ones stored in 
    * {@link #featureEditorsByType}.
@@ -428,9 +432,13 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     findNextAction.setEnabled(false);
     hBox.add(new SmallButton(findNextAction));
     hBox.add(Box.createHorizontalStrut(15));
-    hBox.add(new SmallButton(new AnnotateOccurrenceAction()));
+    annotateMatchAction = new AnnotateMatchAction();
+    annotateMatchAction.setEnabled(false);
+    hBox.add(new SmallButton(annotateMatchAction));
     hBox.add(Box.createHorizontalStrut(5));
-    hBox.add(new SmallButton(new AnnotateAllAction()));
+    annotateAllMatchesAction = new AnnotateAllMatchesAction();
+    annotateAllMatchesAction.setEnabled(false);
+    hBox.add(new SmallButton(annotateAllMatchesAction));
     hBox.add(Box.createHorizontalGlue());
     searchPane.add(hBox);
     searchPane.add(Box.createVerticalGlue());
@@ -576,13 +584,19 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
 
     searchTextField.getDocument().addDocumentListener(new DocumentListener(){
       public void changedUpdate(DocumentEvent e) {
-        findNextAction.setEnabled(false);
+        enableActions(false);
       }
       public void insertUpdate(DocumentEvent e) {
-        findNextAction.setEnabled(false);
+        enableActions(false);
       }
       public void removeUpdate(DocumentEvent e) {
-        findNextAction.setEnabled(false);
+        enableActions(false);
+      }
+      
+      private void enableActions(boolean state){
+        findNextAction.setEnabled(state);
+        annotateMatchAction.setEnabled(state);
+        annotateAllMatchesAction.setEnabled(state);
       }
     });
     
@@ -811,12 +825,18 @@ System.out.println("Window up");
           matcher = pattern.matcher(text);
           if(matcher.find()){
             findNextAction.setEnabled(true);
+            annotateMatchAction.setEnabled(true);
+            annotateAllMatchesAction.setEnabled(true);
             int start = matcher.start();
             int end = matcher.end();
             //automatically pin the dialog
             pinnedButton.setSelected(true);
             getOwner().getTextComponent().requestFocus();
             getOwner().getTextComponent().select(start, end);
+          }else{
+            findNextAction.setEnabled(false);
+            annotateMatchAction.setEnabled(false);
+            annotateAllMatchesAction.setEnabled(false);            
           }
         }
         catch(PatternSyntaxException e) {
@@ -848,11 +868,11 @@ System.out.println("Window up");
     }
   }
   
-  protected class AnnotateOccurrenceAction extends AbstractAction{
-    public AnnotateOccurrenceAction(){
-      super("Annotate");
+  protected class AnnotateMatchAction extends AbstractAction{
+    public AnnotateMatchAction(){
+      super("Annotate Match");
       super.putValue(SHORT_DESCRIPTION, 
-              "Annotates the current occurrence.");
+              "Annotates the current match.");
     }
     
     public void actionPerformed(ActionEvent evt){
@@ -866,6 +886,7 @@ System.out.println("Window up");
           Integer id = annSet.add(new Long(start), new Long(end), 
                   annotation.getType(), features);
           Annotation newAnn = annSet.get(id);
+          getOwner().getTextComponent().select(start, start);
           editAnnotation(newAnn, annSet);
         }
         catch(InvalidOffsetException e) {
@@ -875,6 +896,45 @@ System.out.println("Window up");
       }
     }
   }
+  
+  protected class AnnotateAllMatchesAction extends AbstractAction{
+    public AnnotateAllMatchesAction(){
+      super("Annotate all");
+      super.putValue(SHORT_DESCRIPTION, 
+              "Annotates all the following matches.");
+    }
+    
+    public void actionPerformed(ActionEvent evt){
+      //first annotate the current match
+      annotateCurrentMatch();
+      //next annotate all other matches
+      while(matcher.find()){
+        annotateCurrentMatch();
+      }
+    }
+    
+    private void annotateCurrentMatch(){
+      if(matcher != null){
+        int start = matcher.start();
+        int end = matcher.end();
+        FeatureMap features = Factory.newFeatureMap();
+        if(annotation.getFeatures() != null) 
+          features.putAll(annotation.getFeatures());
+        try {
+          Integer id = annSet.add(new Long(start), new Long(end), 
+                  annotation.getType(), features);
+          Annotation newAnn = annSet.get(id);
+          getOwner().getTextComponent().select(start, start);
+          editAnnotation(newAnn, annSet);
+        }
+        catch(InvalidOffsetException e) {
+          //the offsets here should always be valid.
+          throw new LuckyException(e);
+        }
+      }
+    }
+  }
+  
   protected class AnnotateAllAction extends AbstractAction{
     public AnnotateAllAction(){
       super("Annotate all");
