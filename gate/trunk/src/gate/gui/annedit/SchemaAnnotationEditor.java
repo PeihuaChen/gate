@@ -953,7 +953,6 @@ System.out.println("Window up");
         while(matcher.find()){
           int start = matcher.start();
           int end = matcher.end();
-          
           //if there isn't already an annotation of the right type at these
           //offsets, then create one.
           boolean alreadyThere = false;
