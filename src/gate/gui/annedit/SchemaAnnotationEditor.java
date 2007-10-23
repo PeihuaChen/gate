@@ -52,12 +52,12 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     this.annotation = ann;
     this.annSet = set;
 //System.out.println("Editing: " + ann.getType() + ", id: " + ann.getId());    
-    String annType = ann.getType();
+    String annType = annotation == null ? null : annotation.getType();
     SchemaFeaturesEditor newFeaturesEditor = featureEditorsByType.get(annType);
     //if new type, we need to change the features editor and selected type 
     //button
     if(newFeaturesEditor != featuresEditor){
-      typesChoice.setSelectedItem(ann.getType());
+      typesChoice.setSelectedItem(annType);
       if(featuresEditor != null){
         featuresBox.remove(featuresEditor);
         featuresEditor.editFeatureMap(null);
@@ -76,8 +76,14 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       featuresEditor.editFeatureMap(features);
     }
     if(dialog != null){
-      placeDialog(annotation.getStartNode().getOffset().intValue(),
-                  annotation.getEndNode().getOffset().intValue());
+      if(annotation != null){
+        placeDialog(annotation.getStartNode().getOffset().intValue(),
+                    annotation.getEndNode().getOffset().intValue());
+      }else{
+        //this should only occur when the dialog is pinned, so offsets are 
+        //irrelevant
+        placeDialog(0,0);        
+      }
     }
   }
 
@@ -993,7 +999,14 @@ System.out.println("Window up");
     
     public void actionPerformed(ActionEvent evt){
       annSet.remove(annotation);
-      dialog.setVisible(false);
+      
+      if(pinnedButton.isSelected()){
+        //if pinned, clear the dialog
+        editAnnotation(null, annSet);
+      }else{
+        //if not pinned, hide the dialog.
+        dialog.setVisible(false);
+      }
     }
   }
   /**
