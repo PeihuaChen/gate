@@ -18,7 +18,26 @@ import gate.*;
  * Interface for all annotation editor components
  */
 public interface AnnotationEditor extends VisualResource{
+  /**
+   * Changes the annotation currently being edited.
+   * @param ann the new annotation.
+   * @param set the set to which the new annotation belongs. 
+   */
   public void editAnnotation(Annotation ann, AnnotationSet set);
   
+  /**
+   * Checks whether the annotation currently being edited can be considered
+   * complete.
+   * @return <tt>true</tt> iff the editor has finished editing the current 
+   * annotation. This might return <tt>false</tt> for instance when the current 
+   * annotation does not yet comply with the schema and the editor 
+   * implementation is designed to enforce schemas. 
+   */
+  public boolean editingFinished();
+  
+  /**
+   * Sets the owner (i.e. controller) for this editor.
+   * @param owner
+   */
   public void setOwner(AnnotationEditorOwner owner);
 }
