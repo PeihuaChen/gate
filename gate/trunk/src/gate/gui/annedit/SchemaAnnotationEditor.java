@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.regex.*;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.event.DocumentEvent;
@@ -44,15 +45,29 @@ import gate.util.*;
 
 public class SchemaAnnotationEditor extends AbstractVisualResource 
     implements AnnotationEditor{
-  
-  /* (non-Javadoc)
-   * @see gate.gui.annedit.AnnotationEditor#editAnnotation(gate.Annotation, gate.AnnotationSet)
-   */
+
   public void editAnnotation(Annotation ann, AnnotationSet set) {
     this.annotation = ann;
     this.annSet = set;
-//System.out.println("Editing: " + ann.getType() + ", id: " + ann.getId());    
     String annType = annotation == null ? null : annotation.getType();
+    //update the border for the types choice
+    if(annType == null){
+      //no annotation -> ok
+      if(typesChoice.getBorder() != typeDefaultBorder)
+        typesChoice.setBorder(typeDefaultBorder);
+    }else{
+      if(schemasByType.containsKey(annType)){
+        //accepted type
+        if(typesChoice.getBorder() != typeDefaultBorder)
+          typesChoice.setBorder(typeDefaultBorder);
+      }else{
+        //wrong type
+        if(typesChoice.getBorder() != typeHighlightBorder)
+          typesChoice.setBorder(typeHighlightBorder);
+        
+      }
+    }
+    //update the features editor
     SchemaFeaturesEditor newFeaturesEditor = featureEditorsByType.get(annType);
     //if new type, we need to change the features editor and selected type 
     //button
@@ -85,6 +100,63 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
         placeDialog(0,0);        
       }
     }
+  }
+
+  
+  /**
+   * This editor implementation is designed to enforce schema compliance. This
+   * method will return <tt>false</tt> if the current annotation type does not
+   * have a schema or if the features of the current annotation do not comply
+   * with the schema. 
+   * @see gate.gui.annedit.AnnotationEditor#editingFinished()
+   */
+  public boolean editingFinished() {
+    if(annotation == null) return true;
+    if(!schemasByType.containsKey(annotation.getType())) return false;
+    
+    //we need to check that:
+    //1) all required features have values
+    //2) all features known by schema that have values, comply with the schema
+    if(annotation == null) return true;
+    AnnotationSchema aSchema = schemasByType.get(annotation.getType());
+    FeatureMap annotationFeatures = annotation.getFeatures();
+    Map<String, FeatureSchema> featureSchemaByName = 
+      new HashMap<String, FeatureSchema>(); 
+    //store all the feature schemas, and check the required ones
+    for(FeatureSchema aFeatureSchema : aSchema.getFeatureSchemaSet()){
+      featureSchemaByName.put(aFeatureSchema.getFeatureName(), aFeatureSchema);
+      Object featureValue = annotationFeatures == null ? null :
+        annotationFeatures.get(aFeatureSchema.getFeatureName());
+      if(aFeatureSchema.isRequired() && featureValue == null) return false;
+    }
+    //check all the actual values for compliance
+    for(Object featureName : annotationFeatures.keySet()){
+      Object featureValue = annotationFeatures.get(featureName);
+      FeatureSchema fSchema = featureSchemaByName.get(featureName);
+      if(fSchema != null){
+        //this is a schema feature
+        if(fSchema.getFeatureValueClass().equals(Boolean.class) ||
+           fSchema.getFeatureValueClass().equals(Integer.class) ||
+           fSchema.getFeatureValueClass().equals(Short.class) ||
+           fSchema.getFeatureValueClass().equals(Byte.class) ||
+           fSchema.getFeatureValueClass().equals(Float.class) ||
+           fSchema.getFeatureValueClass().equals(Double.class)){
+          //just check the right type
+          if(!fSchema.getFeatureValueClass().isAssignableFrom(
+                 featureValue.getClass())){
+           //invalid value type
+           return false;
+          }
+        }else if(fSchema.getFeatureValueClass().equals(String.class)){
+          if(fSchema.getPermittedValues() != null &&
+            !fSchema.getPermittedValues().contains(featureValue)){
+            //invalid value
+            return false;
+          }
+        }
+      }
+    }
+    return true;
   }
 
   /**
@@ -174,6 +246,16 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
    * JChoice used for selecting the annotation type.
    */
   protected JChoice typesChoice;
+  
+  /**
+   * The default border for the types choice
+   */
+  protected Border typeDefaultBorder;
+  
+  /**
+   * The highlight border for the types choice
+   */
+  protected Border typeHighlightBorder;
   
   /**
    * The dialog used to show this annotation editor.
@@ -385,7 +467,14 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     typesChoice.setMaximumWidth(300);
     typesChoice.setAlignmentX(Component.LEFT_ALIGNMENT);
     String aTitle = "Type ";
-    typesChoice.setBorder(BorderFactory.createTitledBorder(aTitle));
+    
+    Border titleBorder = BorderFactory.createTitledBorder(aTitle);
+    typeDefaultBorder = BorderFactory.createCompoundBorder(titleBorder, 
+            BorderFactory.createEmptyBorder(2, 2, 2, 2));
+    typeHighlightBorder = BorderFactory.createCompoundBorder(titleBorder, 
+            BorderFactory.createLineBorder(Color.RED, 2));
+    
+    typesChoice.setBorder(typeDefaultBorder);
     aLabel = new JLabel(aTitle);
     typesChoice.setMinimumSize(new Dimension(aLabel.getPreferredSize().width,
             Integer.MAX_VALUE));
@@ -458,7 +547,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
                 new JDialog((Dialog)parentWindow, 
                         "Annotation Editor Dialog", false);
 //      dialog.setFocusableWindowState(false);
-      dialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+      dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 //      dialog.setResizable(false);
       dialog.add(this);
       dialog.pack();
@@ -606,12 +695,25 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       }
     });
     
-    dialog.addComponentListener(new ComponentAdapter(){
-      public void componentHidden(ComponentEvent e) {
-        //automatically unpin the dialog on closing
-        if(pinnedButton.isSelected())pinnedButton.setSelected(false);
+    dialog.addWindowListener(new WindowAdapter(){
+      public void windowClosing(WindowEvent e) {
+        if(editingFinished()){
+          //we can close
+          dialog.setVisible(false);
+          if(pinnedButton.isSelected())pinnedButton.setSelected(false);
+        }else{
+          //let's be really snotty
+          getToolkit().beep();
+        }
       }
-    });    
+    });
+    
+//    dialog.addComponentListener(new ComponentAdapter(){
+//      public void componentHidden(ComponentEvent e) {
+//        //automatically unpin the dialog on closing
+//        if(pinnedButton.isSelected())pinnedButton.setSelected(false);
+//      }
+//    });  
   }
   
   /**
