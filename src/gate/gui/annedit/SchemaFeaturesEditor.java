@@ -22,6 +22,7 @@ import java.net.MalformedURLException;
 import java.util.*;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -116,6 +117,17 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
             }else{
               featureMap.remove(featureName);
             }
+            //if the change makes this feature map non schema-compliant,
+            //highlight this feature editor
+            if(required && newValue == null){
+              if(getGui().getBorder() != highlightBorder){ 
+                getGui().setBorder(highlightBorder);
+              }
+            }else{
+              if(getGui().getBorder() != defaultBorder){
+                getGui().setBorder(defaultBorder);
+              }
+            }
           }
         }
       };
@@ -169,11 +181,20 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
           gui.add(textField);          
           break;
       }
+      
+      defaultBorder = BorderFactory.createEmptyBorder(2, 2, 2, 2);
+      highlightBorder = BorderFactory.createLineBorder(Color.RED, 2);
+      gui.setBorder(defaultBorder);
     }
     
     protected JTextField textField;
     protected JCheckBox checkbox;
     protected JChoice jchoice;
+    
+    protected Border defaultBorder;
+    
+    protected Border highlightBorder;
+    
     
     /**
      * The type of the feature.
@@ -273,9 +294,23 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
           textField.setText(value);
           break;
       }
+      //call the action listener to update the border
+      sharedActionListener.actionPerformed(new ActionEvent(this, 
+              ActionEvent.ACTION_PERFORMED, ""));
     }
 
-    
+    public Object getValue(){
+      switch(type){
+        case nominal:
+          return jchoice.getSelectedItem();
+        case bool:
+          return new Boolean(checkbox.isSelected());
+        case text:
+          return textField.getText();
+        default:
+          return null;
+      }
+    }
     /**
      * @return the featureName
      */
@@ -409,6 +444,8 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
       for(FeatureSchema aFeatureSchema : fsSet){
         String aFeatureName = aFeatureSchema.getFeatureName();
         String defaultValue = aFeatureSchema.getFeatureValue();
+        if(defaultValue != null && defaultValue.length() == 0) 
+          defaultValue = null;
         String[] valuesArray = null;
         Set values = aFeatureSchema.getPermittedValues();
         if(values != null && values.size() > 0){
@@ -424,17 +461,16 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
         if(valuesArray != null && valuesArray.length > 0){
           //we have a set of allowed values -> nominal feature
           anEditor = new FeatureEditor(aFeatureName, valuesArray, 
-                  aFeatureSchema.getFeatureValue());
+                  defaultValue);
         }else{
           //we don't have any permitted set of values specified
           if(aFeatureSchema.getFeatureValueClass().equals(Boolean.class)){
             //boolean value
             anEditor = new FeatureEditor(aFeatureName, 
-                    Boolean.parseBoolean(aFeatureSchema.getFeatureValue()));
+                    Boolean.parseBoolean(defaultValue));
           }else{
             //plain text value
-            anEditor = new FeatureEditor(aFeatureName, 
-                    aFeatureSchema.getFeatureValue());
+            anEditor = new FeatureEditor(aFeatureName, defaultValue);
           }
         }
         anEditor.setRequired(aFeatureSchema.isRequired());
@@ -447,11 +483,8 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
       constraints.gridy = gridy++;
       JLabel nameLabel = new JLabel(
               "<html>" + featureName + 
-              (featureEditor.isRequired() ? "<font color='red'>*</font>: " : ": ") +
+              (featureEditor.isRequired() ? "<b><font color='red'>*</font></b>: " : ": ") +
               "</html>");
-      if(featureEditor.isRequired()){
-        
-      }
       add(nameLabel, constraints);
       add(featureEditor.getGui(), constraints);
       //add a horizontal spacer
@@ -531,9 +564,26 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
     }
     // 2) then update all the displays
     for(String featureName : featureEditors.keySet()){
+//      FeatureSchema fSchema = featureSchemas.get(featureName);
       FeatureEditor aFeatureEditor = featureEditors.get(featureName);
       Object featureValue = featureMap == null ? 
               null : featureMap.get(featureName);
+      if(featureValue == null){
+        //we don't have a value from the featureMap
+        //use the default
+        featureValue = aFeatureEditor.getDefaultValue();
+        //if we still don't have a value, use the last used value
+        if(featureValue == null ||
+           ( featureValue instanceof String && 
+             ((String)featureValue).length() == 0 
+           ) ){
+          featureValue = aFeatureEditor.getValue();
+        }
+        if(featureValue != null && featureMap != null){
+          //we managed to find a relevant value -> save it in the feature map
+          featureMap.put(featureName, featureValue);
+        }
+      }
       aFeatureEditor.setValue((String)featureValue);
     }
   }
