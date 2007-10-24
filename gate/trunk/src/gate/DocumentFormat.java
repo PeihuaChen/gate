@@ -45,21 +45,25 @@ extends AbstractLanguageResource implements LanguageResource{
   /** Map of MimeTypeString to ClassHandler class. This is used to find the
     * language resource that deals with the specific Document format
     */
-  protected static Map mimeString2ClassHandlerMap = new HashMap();
+  protected static Map<String, DocumentFormat>
+          mimeString2ClassHandlerMap = new HashMap();
   /** Map of MimeType to DocumentFormat Class. This is used to find the
     * DocumentFormat subclass that deals with a particular MIME type.
     */
-  protected static Map mimeString2mimeTypeMap = new HashMap();
+  protected static Map<String, MimeType>
+          mimeString2mimeTypeMap = new HashMap();
 
   /** Map of Set of file suffixes to MimeType. This is used to figure
     * out what MIME type a document is from its file name.
     */
-  protected static Map suffixes2mimeTypeMap = new HashMap();
+  protected static Map<String, MimeType>
+          suffixes2mimeTypeMap = new HashMap();
 
   /** Map of Set of magic numbers to MimeType. This is used to guess the
     * MIME type of a document, when we don't have any other clues.
     */
-  protected static Map magic2mimeTypeMap = new HashMap();
+  protected static Map<String, MimeType>
+          magic2mimeTypeMap = new HashMap();
 
   /** Map of markup elements to annotation types. If it is null, the
     * unpackMarkup() method will convert all markup, using the element names
@@ -153,7 +157,7 @@ extends AbstractLanguageResource implements LanguageResource{
     // Eg: for html returns  MimeType("text/html"), for xml returns
     // MimeType("text/xml")
     if(fileSufix == null) return null;
-    return  (MimeType) suffixes2mimeTypeMap.get(fileSufix.toLowerCase());
+    return  suffixes2mimeTypeMap.get(fileSufix.toLowerCase());
   }//getMimeType
 
   /**
@@ -214,8 +218,7 @@ extends AbstractLanguageResource implements LanguageResource{
       } // End if
     }// end if
     // Return the corresponding MimeType with WebServer from the associated MAP
-    mimeTypeFromWebServer = (MimeType)
-                                mimeString2mimeTypeMap.get(mimeTypeString);
+    mimeTypeFromWebServer = mimeString2mimeTypeMap.get(mimeTypeString);
     // Let's try a file suffix detection
     // Get the file sufix from the URL.See method definition for more details
     fileSufix = getFileSufix(url);
@@ -389,15 +392,15 @@ extends AbstractLanguageResource implements LanguageResource{
     //  isGateXmlDocument = false;
 
     // Run the magic numbers test
-    Set magicSet = magic2mimeTypeMap.keySet();
-    Iterator iterator=magicSet.iterator();
+    Set<String> magicSet = magic2mimeTypeMap.keySet();
+    Iterator<String> iterator=magicSet.iterator();
     String magic;
     // change case to cover more variants
     aContent = aContent.toLowerCase();
     while (iterator.hasNext()){
-      magic = ((String) iterator.next()).toLowerCase();
+      magic = iterator.next().toLowerCase();
       if (aContent.indexOf(magic) != -1)
-        detectedMimeType = (MimeType) magic2mimeTypeMap.get(magic);
+        detectedMimeType = magic2mimeTypeMap.get(magic);
     }// End while
 
     // If this fails then surrender
@@ -457,7 +460,7 @@ extends AbstractLanguageResource implements LanguageResource{
       aGateDocument.getFeatures().put("MimeType",mimeType.getType() + "/" +
                                           mimeType.getSubtype());
 
-      return (DocumentFormat) mimeString2ClassHandlerMap.get(mimeType.getType()
+      return mimeString2ClassHandlerMap.get(mimeType.getType()
                                                + "/" + mimeType.getSubtype());
     }// end If
     return null;
@@ -527,7 +530,15 @@ extends AbstractLanguageResource implements LanguageResource{
    * Utility method to get a {@link MimeType} given the type string.
    */
   public static MimeType getMimeTypeForString(String typeString) {
-    return (MimeType)mimeString2mimeTypeMap.get(typeString);
+    return mimeString2mimeTypeMap.get(typeString);
+  }
+
+  /**
+   * Utility method to get the set of all file suffixes that are registered
+   * with this class.
+   */
+  public static Set<String> getSupportedFileSuffixes() {
+    return Collections.unmodifiableSet(suffixes2mimeTypeMap.keySet());
   }
 
   //StatusReporter Implementation
