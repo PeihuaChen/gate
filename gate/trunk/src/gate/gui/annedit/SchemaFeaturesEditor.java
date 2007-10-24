@@ -504,24 +504,8 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
    * @param featureMap
    */
   public void editFeatureMap(FeatureMap featureMap){
-//    if(this.featureMap != null && this.featureMap != featureMap){
-//      this.featureMap.removeFeatureMapListener(this);
-//    }
     this.featureMap = featureMap;
-//    if(this.featureMap != null){
-//      this.featureMap.addFeatureMapListener(this);
-//    }
     featureMapUpdated();
-  }
-  
-  /**
-   * Brings a feature map in line with an annotation schema by removing all 
-   * spurious values and giving default values for the required features that 
-   * don't have a value or have the wrong one.   
-   * @param fMap
-   */
-  private void tidyFeatureMap(FeatureMap fMap){
-    
   }
   
   /* (non-Javadoc)
@@ -577,16 +561,17 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
            ( featureValue instanceof String && 
              ((String)featureValue).length() == 0 
            ) ){
-          featureValue = aFeatureEditor.getValue();
+//          featureValue = aFeatureEditor.getValue();
         }
         if(featureValue != null && featureMap != null){
           //we managed to find a relevant value -> save it in the feature map
           featureMap.put(featureName, featureValue);
         }
       }
-//      aFeatureEditor.setValue((String)featureValue);
+      aFeatureEditor.setValue((String)featureValue);
     }
   }
+  
   
   /**
    * The feature schema for this editor
