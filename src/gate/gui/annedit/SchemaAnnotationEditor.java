@@ -124,6 +124,11 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     //2) all features known by schema that have values, comply with the schema
     if(annotation == null) return true;
     AnnotationSchema aSchema = schemasByType.get(annotation.getType());
+    if(aSchema.getFeatureSchemaSet() == null ||
+       aSchema.getFeatureSchemaSet().isEmpty()){
+      //known type but no schema restrictions -> OK
+      return true;
+    }
     FeatureMap annotationFeatures = annotation.getFeatures();
     Map<String, FeatureSchema> featureSchemaByName = 
       new HashMap<String, FeatureSchema>(); 
@@ -973,6 +978,11 @@ System.out.println("Window up");
           getOwner().getTextComponent().requestFocus();
           getOwner().getTextComponent().select(start, end);
           placeDialog(start, end);
+        }else{
+          //no more matches possible
+          findNextAction.setEnabled(false);
+          annotateMatchAction.setEnabled(false);
+          annotateAllMatchesAction.setEnabled(false);            
         }
       }else{
         //matcher is not prepared
