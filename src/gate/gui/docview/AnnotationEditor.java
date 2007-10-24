@@ -289,7 +289,18 @@ public class AnnotationEditor extends AbstractVisualResource
    popupWindow.doLayout();
    show(true);
   }
+
   
+  /* (non-Javadoc)
+   * @see gate.gui.annedit.AnnotationEditor#editingFinished()
+   */
+  public boolean editingFinished() {
+    //this editor implementation has no special requirements (such as schema 
+    //compliance), so it always returns true.
+    return true;
+  }
+
+
   public boolean isShowing(){
     return popupWindow.isShowing();
   }

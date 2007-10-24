@@ -1682,6 +1682,10 @@ public class AnnotationSetsView extends AbstractDocumentView
     
     public void actionPerformed(ActionEvent evt){
       if(annotationEditor == null) return;
+      //this action either creates a new annotation or starts editing an 
+      //existing one. In either case we need first to make sure that the current
+      //annotation is finished editing.
+      if(!annotationEditor.editingFinished()) return;
       if(textLocation == -1) return;
       //first check for selection hovering
       //if inside selection, add new annotation.
@@ -1811,9 +1815,12 @@ public class AnnotationSetsView extends AbstractDocumentView
     
     public void actionPerformed(ActionEvent evt){
       if(annotationEditor == null) return;
-      //select the annotation being edited in the tabular view
-      selectAnnotation(aHandler.ann, aHandler.set);
-      annotationEditor.editAnnotation(aHandler.ann, aHandler.set);
+      //if the editor is done with the current annotation, we can move to the 
+      //next one
+      if(annotationEditor.editingFinished()){
+        selectAnnotation(aHandler.ann, aHandler.set);
+        annotationEditor.editAnnotation(aHandler.ann, aHandler.set);
+      }
     }
     
     private AnnotationHandler aHandler;
