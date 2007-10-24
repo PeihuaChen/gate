@@ -1101,11 +1101,11 @@ System.out.println("Window up");
     
     public void actionPerformed(ActionEvent evt){
       annSet.remove(annotation);
-      
-      if(pinnedButton.isSelected()){
-        //if pinned, clear the dialog
-        editAnnotation(null, annSet);
-      }else{
+
+      //clear the dialog
+      editAnnotation(null, annSet);
+
+      if(!pinnedButton.isSelected()){
         //if not pinned, hide the dialog.
         dialog.setVisible(false);
       }
