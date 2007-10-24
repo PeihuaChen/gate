@@ -1034,6 +1034,7 @@ System.out.println("Window up");
         if(annotation.getFeatures() != null) 
           features.putAll(annotation.getFeatures());
         try {
+MainFrame.getInstance().getOriginalOut().println("FM size " + features.size());          
           Integer id = annSet.add(new Long(start), new Long(end), 
                   annotation.getType(), features);
           Annotation newAnn = annSet.get(id);

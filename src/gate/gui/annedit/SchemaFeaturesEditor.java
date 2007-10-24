@@ -584,7 +584,7 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
           featureMap.put(featureName, featureValue);
         }
       }
-      aFeatureEditor.setValue((String)featureValue);
+//      aFeatureEditor.setValue((String)featureValue);
     }
   }
   
