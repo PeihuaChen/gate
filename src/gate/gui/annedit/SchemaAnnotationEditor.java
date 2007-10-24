@@ -1041,6 +1041,7 @@ System.out.println("Window up");
         int start = matcher.start();
         int end = matcher.end();
         FeatureMap features = Factory.newFeatureMap();
+        features.put("safe.regex", "true");
         if(annotation.getFeatures() != null) 
           features.putAll(annotation.getFeatures());
         try {
