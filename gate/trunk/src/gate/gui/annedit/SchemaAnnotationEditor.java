@@ -112,6 +112,11 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
    */
   public boolean editingFinished() {
     if(annotation == null) return true;
+    //if the dialog is hidden, we've missed the train and we can't force 
+    //compliance for the old annotation any more. Just give up and
+    //allow furhter editing
+    if(!dialog.isVisible()) return true;
+    
     if(!schemasByType.containsKey(annotation.getType())) return false;
     
     //we need to check that:
