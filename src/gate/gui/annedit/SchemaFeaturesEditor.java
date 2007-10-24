@@ -30,6 +30,7 @@ import gate.Factory;
 import gate.FeatureMap;
 import gate.creole.*;
 import gate.event.FeatureMapListener;
+import gate.gui.MainFrame;
 import gate.swing.JChoice;
 
 /**
@@ -111,22 +112,25 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
           }else if(e.getSource() == jchoice){
             newValue = jchoice.getSelectedItem();
           }
-          if(featureMap != null){
+          
+          if(featureMap != null && e.getSource() != SchemaFeaturesEditor.this){
             if(newValue != null){
               featureMap.put(featureName, newValue);
             }else{
               featureMap.remove(featureName);
             }
-            //if the change makes this feature map non schema-compliant,
-            //highlight this feature editor
-            if(required && newValue == null){
-              if(getGui().getBorder() != highlightBorder){ 
-                getGui().setBorder(highlightBorder);
-              }
-            }else{
-              if(getGui().getBorder() != defaultBorder){
-                getGui().setBorder(defaultBorder);
-              }
+          }
+          
+          
+          //if the change makes this feature map non schema-compliant,
+          //highlight this feature editor
+          if(required && newValue == null){
+            if(getGui().getBorder() != highlightBorder){ 
+              getGui().setBorder(highlightBorder);
+            }
+          }else{
+            if(getGui().getBorder() != defaultBorder){
+              getGui().setBorder(defaultBorder);
             }
           }
         }
@@ -295,7 +299,8 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
           break;
       }
       //call the action listener to update the border
-      sharedActionListener.actionPerformed(new ActionEvent(this, 
+      sharedActionListener.actionPerformed(
+              new ActionEvent(SchemaFeaturesEditor.this, 
               ActionEvent.ACTION_PERFORMED, ""));
     }
 
