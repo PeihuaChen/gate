@@ -110,7 +110,7 @@ public class DocumentStaxUtils {
     xsr.nextTag();
     xsr.require(XMLStreamConstants.START_ELEMENT, null, "TextWithNodes");
 
-    Map nodeIdToOffsetMap = new HashMap();
+    Map<Integer, Long> nodeIdToOffsetMap = new HashMap<Integer, Long>();
     if(statusListener != null) {
       statusListener.statusChanged("Reading document content");
     }
@@ -122,8 +122,9 @@ public class DocumentStaxUtils {
     doc.setContent(new DocumentContentImpl(documentText));
 
     try {
+      int numAnnots = 0;
       // process annotation sets, using the node map built above
-      SortedSet allAnnotIds = new TreeSet();
+      Integer maxAnnotId = null;
       // initially, we don't know whether annotation IDs are required or
       // not
       Boolean requireAnnotationIds = null;
@@ -146,8 +147,14 @@ public class DocumentStaxUtils {
           annotationSet = doc.getAnnotations(annotationSetName);
         }
         annotationSet.clear();
+        SortedSet<Integer> annotIdsInSet = new TreeSet<Integer>();
         requireAnnotationIds = readAnnotationSet(xsr, annotationSet,
-                nodeIdToOffsetMap, allAnnotIds, requireAnnotationIds);
+                nodeIdToOffsetMap, annotIdsInSet, requireAnnotationIds);
+        if(annotIdsInSet.size() > 0 && (maxAnnotId == null
+                || annotIdsInSet.last().intValue() > maxAnnotId.intValue())) {
+          maxAnnotId = annotIdsInSet.last();
+        }
+        numAnnots += annotIdsInSet.size();
         // readAnnotationSet leaves reader positioned on the
         // </AnnotationSet> tag, so nextTag takes us to either the next
         // <AnnotationSet> or to the </GateDocument>
@@ -160,12 +167,11 @@ public class DocumentStaxUtils {
       doc.setFeatures(documentFeatures);
 
       // set the ID generator, if doc is a DocumentImpl
-      if(doc instanceof DocumentImpl && allAnnotIds.size() > 0) {
-        ((DocumentImpl)doc).setNextAnnotationId(((Integer)allAnnotIds.last())
-                .intValue() + 1);
+      if(doc instanceof DocumentImpl && maxAnnotId != null) {
+        ((DocumentImpl)doc).setNextAnnotationId(maxAnnotId.intValue() + 1);
       }
       if(statusListener != null) {
-        statusListener.statusChanged("Finished.  " + allAnnotIds.size()
+        statusListener.statusChanged("Finished.  " + numAnnots
                 + " annotation(s) processed");
       }
     }
@@ -193,8 +199,8 @@ public class DocumentStaxUtils {
    *          node ids and offsets are the same (useful if parsing an
    *          annotation set in isolation).
    * @param allAnnotIds a set to contain all annotation IDs specified in
-   *          the document. It will be updated if any of the annotations
-   *          in this set specify an ID.
+   *          the annotation set. It should initially be empty and will be
+   *          updated if any of the annotations in this set specify an ID.
    * @param requireAnnotationIds whether annotations are required to
    *          specify their IDs. If true, it is an error for an
    *          annotation to omit the Id attribute. If false, it is an
@@ -206,9 +212,10 @@ public class DocumentStaxUtils {
    * @throws XMLStreamException
    */
   public static Boolean readAnnotationSet(XMLStreamReader xsr,
-          AnnotationSet annotationSet, Map nodeIdToOffsetMap, Set allAnnotIds,
-          Boolean requireAnnotationIds) throws XMLStreamException {
-    List collectedAnnots = new ArrayList();
+          AnnotationSet annotationSet, Map<Integer, Long> nodeIdToOffsetMap,
+          Set<Integer> allAnnotIds, Boolean requireAnnotationIds)
+          throws XMLStreamException {
+    List<AnnotationObject> collectedAnnots = new ArrayList<AnnotationObject>();
     while(xsr.nextTag() == XMLStreamConstants.START_ELEMENT) {
       xsr.require(XMLStreamConstants.START_ELEMENT, null, "Annotation");
       AnnotationObject annObj = new AnnotationObject();
@@ -217,8 +224,7 @@ public class DocumentStaxUtils {
         int startNodeId = Integer.parseInt(xsr.getAttributeValue(null,
                 "StartNode"));
         if(nodeIdToOffsetMap != null) {
-          Long startOffset = (Long)nodeIdToOffsetMap.get(new Integer(
-                  startNodeId));
+          Long startOffset = nodeIdToOffsetMap.get(new Integer(startNodeId));
           if(startOffset != null) {
             annObj.setStart(startOffset);
           }
@@ -241,7 +247,7 @@ public class DocumentStaxUtils {
         int endNodeId = Integer
                 .parseInt(xsr.getAttributeValue(null, "EndNode"));
         if(nodeIdToOffsetMap != null) {
-          Long endOffset = (Long)nodeIdToOffsetMap.get(new Integer(endNodeId));
+          Long endOffset = nodeIdToOffsetMap.get(new Integer(endNodeId));
           if(endOffset != null) {
             annObj.setEnd(endOffset);
           }
@@ -294,8 +300,9 @@ public class DocumentStaxUtils {
         try {
           Integer annotationId = Integer.valueOf(annotIdString);
           if(allAnnotIds.contains(annotationId)) {
-            throw new XMLStreamException("Annotation IDs must be unique. "
-                    + "Found duplicate ID", xsr.getLocation());
+            throw new XMLStreamException("Annotation IDs must be unique "
+                    + "within an annotation set. Found duplicate ID",
+                    xsr.getLocation());
           }
           allAnnotIds.add(annotationId);
           annObj.setId(annotationId);
@@ -313,9 +320,9 @@ public class DocumentStaxUtils {
     }
 
     // now process all found annotations.to add to the set
-    Iterator collectedAnnotsIt = collectedAnnots.iterator();
+    Iterator<AnnotationObject> collectedAnnotsIt = collectedAnnots.iterator();
     while(collectedAnnotsIt.hasNext()) {
-      AnnotationObject annObj = (AnnotationObject)collectedAnnotsIt.next();
+      AnnotationObject annObj = collectedAnnotsIt.next();
       try {
         if(annObj.getId() != null) {
           annotationSet.add(annObj.getId(), annObj.getStart(), annObj.getEnd(),
@@ -348,7 +355,7 @@ public class DocumentStaxUtils {
    * @return
    */
   public static String readTextWithNodes(XMLStreamReader xsr,
-          Map nodeIdToOffsetMap) throws XMLStreamException {
+          Map<Integer, Long> nodeIdToOffsetMap) throws XMLStreamException {
     StringBuffer textBuf = new StringBuffer(20480);
     int eventType;
     while((eventType = xsr.next()) != XMLStreamConstants.END_ELEMENT) {
@@ -813,7 +820,7 @@ public class DocumentStaxUtils {
     }
 
     // build a set of all the offsets where Nodes are required
-    TreeSet offsetsSet = new TreeSet();
+    TreeSet<Long> offsetsSet = new TreeSet<Long>();
     Iterator<Annotation> annotSetIter = doc.getAnnotations().iterator();
     while(annotSetIter.hasNext()) {
       Annotation annot = annotSetIter.next();
@@ -841,9 +848,9 @@ public class DocumentStaxUtils {
     int lastNodeOffset = 0;
     // offsetsSet iterator is in ascending order of offset, as it is a
     // SortedSet
-    Iterator offsetsIterator = offsetsSet.iterator();
+    Iterator<Long> offsetsIterator = offsetsSet.iterator();
     while(offsetsIterator.hasNext()) {
-      int offset = ((Long)offsetsIterator.next()).intValue();
+      int offset = offsetsIterator.next().intValue();
       // write characters since the last node output
       xsw.writeCharacters(textArray, lastNodeOffset, offset - lastNodeOffset);
       xsw.writeEmptyElement(namespaceURI, "Node");
