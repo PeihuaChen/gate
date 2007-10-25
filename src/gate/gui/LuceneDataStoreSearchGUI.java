@@ -23,6 +23,7 @@ import gate.gui.MainFrame;
 import gate.persist.LuceneDataStoreImpl;
 import gate.persist.PersistenceException;
 import gate.swing.XJTable;
+import gate.util.GateRuntimeException;
 
 /**
  * Shows the results of a IR query. This VR is associated to
@@ -39,7 +40,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 	private int firstColumnWidth = 0;
 
 	/** The GUI is associated with the AnnicSearchPR */
-	private LuceneDataStoreImpl target;
+	private Object target;
 
 	/**
 	 * arraylist consist of instances of patterns associated found in the
@@ -186,6 +187,11 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
 	LuceneDataStoreSearchGUI thisInstance;
 
+	/**
+	 * Searcher object obtained from the datastore
+	 */
+	private Searcher searcher;
+	
 	/** A method gets called when a View in GATE is loaded */
 	public Resource init() {
 		// initialize maps
@@ -203,7 +209,15 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 		// unless the AnnicSerachPR is initialized, we don't have any data to
 		// show
 		if (target != null) {
-			initLocalData();
+			if(target instanceof Searcher) {
+			  searcher = (Searcher) target;
+			} else if(target instanceof LuceneDataStoreImpl) {
+			  searcher = ((LuceneDataStoreImpl) target).getSearcher();
+			} else {
+			  throw new GateRuntimeException("Invalid target specified for the GUI");
+			}
+
+      initLocalData();
 			updateGui();
 			patternsTableModel.fireTableDataChanged();
 			if (patternTable.getRowCount() > 0) {
@@ -270,8 +284,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 		corpusToSearchInModel.addElement("Entire DataStore");
 		corpusToSearchIn = new JComboBox(corpusToSearchInModel);
 		corpusToSearchIn.setPrototypeDisplayValue("Entire DataStore   ");
-
 		corpusToSearchIn.setToolTipText("Corpus Name");
+		
 		executeQuery.setEnabled(true);
 		nextResults.setEnabled(true);
 		clearQueryTF.setEnabled(true);
@@ -289,7 +303,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 		totalFoundPatterns = new JLabel("Total Found Patterns : 0        ");
 		exportResultsAction = new ExportResultsAction();
 		exportToHTML = new JButton(exportResultsAction);
-
 		exportButtonsGroup = new ButtonGroup();
 		patternExportButtonsGroup = new ButtonGroup();
 		exportButtonsGroup.add(exportToHTML);
@@ -306,6 +319,13 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 		selectedPatterns.setSelected(false);
 		selectedPatterns.setEnabled(true);
 
+    if(target == null || target instanceof Searcher) {
+      corpusToSearchIn.setEnabled(false);
+      exportToHTML.setEnabled(false);
+      allPatterns.setEnabled(false);
+      selectedPatterns.setEnabled(false);
+    }
+		
 		annotTypesBox = new JComboBox();
 		annotTypesBox.addActionListener(this);
 
@@ -772,7 +792,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 			}
 		}
 		featuresBox.updateUI();
-		newQuery.setText(target.getSearcher().getQuery());
+		newQuery.setText(searcher.getQuery());
 	}
 
 	/** Updates the features box according to the selected annotation type */
@@ -871,8 +891,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
 		public void actionPerformed(ActionEvent ae) {
 
-			Searcher searcher = target.getSearcher();
-			Map parameters = target.getSearcher().getParameters();
+			Map parameters = searcher.getParameters();
 
 			// if there are no pattern say so
 			if (patterns == null || patterns.isEmpty()) {
@@ -923,9 +942,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 					explicitCall = true;
 
 					// and finally issue the query to get all patterns
-					boolean success = target.search(target.getSearcher()
-							.getQuery(), parameters);
-					Hit[] pats = target.getSearcher().next(-1);
+					boolean success = ((LuceneDataStoreImpl)target).search(searcher.getQuery(), parameters);
+					Hit[] pats = searcher.next(-1);
 					if (patterns == null)
 						patterns = new ArrayList<Hit>();
 					patterns.clear();
@@ -1058,27 +1076,31 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 				public void run() {
 
 					thisInstance.setEnabled(false);
-					Searcher searcher = target.getSearcher();
-					Map parameters = target.getSearcher().getParameters();
+					Map parameters = searcher.getParameters();
 					if (parameters == null)
 						parameters = new HashMap();
-					String indexLocation = new File(((URL) target.getIndexer()
+					
+					if(target instanceof LuceneDataStoreImpl) {
+					  String indexLocation = new File(((URL) ((LuceneDataStoreImpl)target).getIndexer()
 							.getParameters().get(Constants.INDEX_LOCATION_URL))
 							.getFile()).getAbsolutePath();
-					ArrayList<String> indexLocations = new ArrayList<String>();
-					indexLocations.add(indexLocation);
+					  ArrayList<String> indexLocations = new ArrayList<String>();
+					  indexLocations.add(indexLocation);
+					  parameters.put(Constants.INDEX_LOCATIONS, indexLocations);
+
+					  int index = corpusToSearchIn.getSelectedIndex();
+	          String corpus2SearchIn = index == 0 ? null
+	              : (String) corpusIds.get(index - 1);
+	          parameters.put(Constants.CORPUS_ID, corpus2SearchIn);
+					}
 
 					Integer noOfPatterns = new Integer(noOfPatternsField
 							.getText().trim());
 					Integer contextWindow = new Integer(contextWindowField
 							.getText().trim());
 					String query = newQuery.getText().trim();
-					int index = corpusToSearchIn.getSelectedIndex();
-					String corpus2SearchIn = index == 0 ? null
-							: (String) corpusIds.get(index - 1);
-					parameters.put(Constants.INDEX_LOCATIONS, indexLocations);
 					parameters.put(Constants.CONTEXT_WINDOW, contextWindow);
-					parameters.put(Constants.CORPUS_ID, corpus2SearchIn);
+					
 					try {
 						if (searcher.search(query, parameters)) {
 							searcher.next(noOfPatterns.intValue());
@@ -1111,7 +1133,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 				public void run() {
 
 					thisInstance.setEnabled(false);
-					Searcher searcher = target.getSearcher();
 					try {
 						searcher.next(Integer.parseInt(noOfPatternsField
 								.getText()));
@@ -1599,7 +1620,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
 	// initialize the local data
 	protected void initLocalData() {
-		Hit[] pats = target.getSearcher().getHits();
+		Hit[] pats = searcher.getHits();
 		if (patterns == null)
 			patterns = new ArrayList<Hit>();
 		patterns.clear();
@@ -1607,7 +1628,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 			patterns.add(pats[m]);
 		}
 		pats = null;
-		annotTypes = target.getSearcher().getAnnotationTypesMap();
+		annotTypes = searcher.getAnnotationTypesMap();
 	}
 
 	/**
@@ -1619,50 +1640,61 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 	 *            {@link gate.DataStore}or whatever) this viewer has to display
 	 */
 	public void setTarget(Object target) {
-		if (!(target instanceof LuceneDataStoreImpl)) {
+		if (!(target instanceof LuceneDataStoreImpl) && !(target instanceof Searcher)) {
 			throw new IllegalArgumentException(
 					"The GATE LuceneDataStoreSearchGUI can only be used with a GATE LuceneDataStores!\n"
 							+ target.getClass().toString()
-							+ " is not a GATE LuceneDataStore!");
+							+ " is not a GATE LuceneDataStore or an object of Searcher!");
 		}
-		this.target = (LuceneDataStoreImpl) target;
-		this.target.addDatastoreListener(this);
+
+		this.target = target;
+		if(this.target instanceof LuceneDataStoreImpl) {
+		  ((LuceneDataStoreImpl) this.target).addDatastoreListener(this);
+		  corpusToSearchIn.setEnabled(true);
+		  this.searcher = ((LuceneDataStoreImpl) this.target).getSearcher();
+	    exportToHTML.setEnabled(true);
+	    allPatterns.setEnabled(true);
+	    selectedPatterns.setEnabled(true);
+		  
+	    // here we need to find out all corpus resources from the datastore
+	    try {
+	      java.util.List corpusPIds = ((LuceneDataStoreImpl) this.target)
+	          .getLrIds(SerialCorpusImpl.class.getName());
+	      if (corpusIds != null) {
+	        for (int i = 0; i < corpusPIds.size(); i++) {
+	          // in order to obtain their names, we'll have to get them
+	          String name = ((LuceneDataStoreImpl) this.target).getLrName(corpusPIds.get(i));
+	          // so first lets add this ID to corpusIds
+	          this.corpusIds.add(corpusPIds.get(i));
+	          // and we need to add the name to the combobox
+	          ((DefaultComboBoxModel) corpusToSearchIn.getModel())
+	              .addElement(name);
+	        }
+	      }
+	      // lets fire the update event on combobox
+	      SwingUtilities.invokeLater(new Runnable() {
+	        public void run() {
+	          corpusToSearchIn.updateUI();
+	        }
+	      });
+	    } catch (PersistenceException pe) {
+	      // couldn't find any available corpusIds
+	    }
+		} else {
+		  this.searcher = (Searcher) this.target;
+		  corpusToSearchIn.setEnabled(false);
+	    exportToHTML.setEnabled(false);
+	    allPatterns.setEnabled(false);
+	    selectedPatterns.setEnabled(false);
+		}
+		
 		executeQuery.setEnabled(true);
 		nextResults.setEnabled(true);
 		newQuery.setToolTipText("Enter your new query here...");
 		newQuery.setEnabled(true);
-		corpusToSearchIn.setEnabled(true);
-		// here we need to find out all corpus resources from the datastore
-		try {
-			java.util.List corpusPIds = this.target
-					.getLrIds(SerialCorpusImpl.class.getName());
-			if (corpusIds != null) {
-				for (int i = 0; i < corpusPIds.size(); i++) {
-					// in order to obtain their names, we'll have to get them
-					String name = this.target.getLrName(corpusPIds.get(i));
-					// so first lets add this ID to corpusIds
-					this.corpusIds.add(corpusPIds.get(i));
-					// and we need to add the name to the combobox
-					((DefaultComboBoxModel) corpusToSearchIn.getModel())
-							.addElement(name);
-				}
-			}
-			// lets fire the update event on combobox
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					corpusToSearchIn.updateUI();
-				}
-			});
-		} catch (PersistenceException pe) {
-			// couldn't find any available corpusIds
-		}
-
 		noOfPatternsField.setEnabled(true);
 		contextWindowField.setEnabled(true);
 		clearQueryTF.setEnabled(true);
-		exportToHTML.setEnabled(true);
-		allPatterns.setSelected(true);
-		selectedPatterns.setSelected(true);
 		updateDisplay();
 	}
 
@@ -1685,14 +1717,20 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 					nextResults.setEnabled(true);
 					newQuery.setToolTipText("Enter your new query here...");
 					newQuery.setEnabled(true);
-					corpusToSearchIn.setEnabled(true);
+					if(target instanceof LuceneDataStoreImpl) {
+					  corpusToSearchIn.setEnabled(true);
+	          exportToHTML.setEnabled(true);
+	          allPatterns.setEnabled(true);
+	          selectedPatterns.setEnabled(true);
+					} else {
+            corpusToSearchIn.setEnabled(false);
+            exportToHTML.setEnabled(false);
+            allPatterns.setEnabled(false);
+            selectedPatterns.setEnabled(false);
+					}
 					noOfPatternsField.setEnabled(true);
 					contextWindowField.setEnabled(true);
 					clearQueryTF.setEnabled(true);
-					exportToHTML.setEnabled(true);
-					allPatterns.setSelected(true);
-					selectedPatterns.setSelected(true);
-
 					updateDisplay();
 				}
 			});
