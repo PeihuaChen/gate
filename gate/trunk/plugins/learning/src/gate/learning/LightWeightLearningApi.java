@@ -560,8 +560,13 @@ public class LightWeightLearningApi extends Object {
         postPr.postProcessingClassification((short)3,
           labelsFVDoc[i].multiLabels, selectedLabels, valuesLabels);
         Document toProcess = (Document)corpus.get(i + startDocId);
+        //Add the label list and their scores
+        addLabelListInDocClassification(toProcess, labelsFVDoc[i].multiLabels,
+          instanceType, featName, labelName, labelsAndId, engineSettings);
+        
         addAnnsInDocClassification(toProcess, selectedLabels, valuesLabels,
           instanceType, featName, labelName, labelsAndId, engineSettings);
+    
         if(toProcess.getDataStore() != null && corpus.getDataStore() != null) {
           corpus.getDataStore().sync(corpus);
           Factory.deleteResource(toProcess);
@@ -744,6 +749,7 @@ public class LightWeightLearningApi extends Object {
     } else {
       annsDoc = doc.getAnnotations(inputASName);
     }
+    AnnotationSet annsLabel = annsDoc.get(labelName);
     AnnotationSet anns = annsDoc.get(instanceType);
     ArrayList annotationArray = (anns == null || anns.isEmpty())
       ? new ArrayList()
@@ -773,9 +779,79 @@ public class LightWeightLearningApi extends Object {
         features.put(arg1F, arg1V);
         features.put(arg2F, arg2V);
       }
+      //FeatureMap featO = ann.getFeatures();
+      //for(Object obj:features.keySet()) {
+        //if(featO.containsKey(obj))
+         // featO.put(obj.toString()+"_results", features.get(obj));
+        //else featO.put(obj, features.get(obj));
+      //}
       annsDoc.add(ann.getStartNode(), ann.getEndNode(), labelName, features);
     }
   }
+  
+  /** Add the annotation into documents for classification. */
+  private void addLabelListInDocClassification(Document doc, LabelsOfFV[] multiLabels, 
+    String instanceType, String featName,
+    String labelName, Label2Id labelsAndId,
+    LearningEngineSettings engineSettings) {
+    AnnotationSet annsDoc = null;
+    if(inputASName == null || inputASName.trim().length() == 0) {
+      annsDoc = doc.getAnnotations();
+    } else {
+      annsDoc = doc.getAnnotations(inputASName);
+    }
+    AnnotationSet anns = annsDoc.get(instanceType);
+    ArrayList annotationArray = (anns == null || anns.isEmpty())
+      ? new ArrayList()
+      : new ArrayList(anns);
+    Collections.sort(annotationArray, new OffsetComparator());
+    // For the relation extraction
+    String arg1F = null;
+    String arg2F = null;
+    if(engineSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
+      AttributeRelation relAtt = (AttributeRelation)engineSettings.datasetDefinition.classAttribute;
+      arg1F = relAtt.getArg1();
+      arg2F = relAtt.getArg2();
+    }
+    for(int i = 0; i < annotationArray.size(); ++i) {
+      int len = multiLabels[i].num;
+      int [] indexSort = new int[len];
+      sortFloatAscIndex(multiLabels[i].probs, indexSort, len, len);
+      //get the labels and their scores
+      StringBuffer strB = new StringBuffer();
+      for(int j=0; j<len; ++j) {
+        String label = labelsAndId.id2Label.get(
+          new Integer(indexSort[j] + 1).toString()).toString();
+        strB.append(label+":"+multiLabels[i].probs[indexSort[j]]+" ");
+      }
+      
+      FeatureMap features = Factory.newFeatureMap();
+      features.put(featName, strB.toString().trim());
+      //features.put("prob", valuesLabels[i]);
+      Annotation ann = (Annotation)annotationArray.get(i);
+      // For relation data, need the argument features
+      if(engineSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
+        String arg1V = ann.getFeatures().get(
+          engineSettings.datasetDefinition.arg1Feat).toString();
+        String arg2V = ann.getFeatures().get(
+          engineSettings.datasetDefinition.arg2Feat).toString();
+        features.put(arg1F, arg1V);
+        features.put(arg2F, arg2V);
+      }
+      FeatureMap featO = ann.getFeatures();
+      for(Object obj:features.keySet()) {
+        //if(featO.containsKey(obj))
+          featO.put(obj.toString()+"_resultsList", features.get(obj));
+        //else featO.put(obj, features.get(obj));
+      }
+      //for(Object obj:featO.keySet()) {
+        //ann.getFeatures().put(obj, featO.get(obj));
+      //}
+      
+      //annsDoc.add(ann.getStartNode(), ann.getEndNode(), labelName, features);
+    }
+  }
+
 
   /** Convert the string labels in the nlp data file into the index labels. */
   public void convertNLPLabelsTDataLabel(File nlpDataFile, File dataFile,
@@ -900,6 +976,7 @@ public class LightWeightLearningApi extends Object {
       .setLearnerParams(engineSettings.learnerSettings.paramsOfLearning);
     LogService.logMessage("The learners: " + paumLearner.getLearnerName(), 1);
     // training
+    //if number of classes is zero, not filtering at all
     if(chunkLearning.numClasses==0)
       return;
     chunkLearning.training(paumLearner, modelFile);
@@ -1163,7 +1240,11 @@ public class LightWeightLearningApi extends Object {
     }
   }
 
-  /** Get the biggest numK components from an array. */
+  /** Get the biggest numK components from an array. 
+   * wP: the array storing the numbers for sorting,
+   * indexSort stores the indices of the numK biggest numbers
+   * numT, the number of those numbers.
+   * */
   public static void sortFloatAscIndex(float[] wP, int[] indexSort, int numT,
     int numK) {
     int i, j, k, j1;

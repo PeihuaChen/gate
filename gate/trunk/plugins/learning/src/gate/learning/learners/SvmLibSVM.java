@@ -343,6 +343,23 @@ public class SvmLibSVM extends SupervisedLearner {
     }
     return b;
   }
+  
+  /** Normalisation of weight vector */
+  public static float normalisation(float [] w, float b) {
+    double sum=0;
+    for(int i=0; i<w.length; ++i)
+      if(Math.abs(w[i])>0.0000000001)
+        sum += w[i]*w[i];
+    sum += b*b;
+    sum = Math.sqrt(sum);
+    if(sum>0.000000000001) {
+      for(int i=0; i<w.length; ++i)
+        if(Math.abs(w[i])>0.0000000001)
+          w[i] /= sum;
+      b /= sum;
+    }
+    return b;
+  }
 
   /** Apply the linear SVM model to the data. */
   public static void applyLinearModel(BufferedReader modelFile,
@@ -364,6 +381,8 @@ public class SvmLibSVM extends SupervisedLearner {
         int[] instDist = new int[2];
         obtainInstDist(items, instDist);
         b = readWeightVectorFromFile(modelFile, w);
+        //normalise the weight vector
+        b = normalisation(w, b);
         // modify the b by using the uneven margins parameter tau
         if(isUseTauAll)
           b += optB;

@@ -138,10 +138,10 @@ public class TestLearningAPI extends TestCase {
     // Using the evaluation mode for testing
     EvaluationBasedOnDocs evaluation = learningApi.getEvaluation();
     // Compare the overall results with the correct numbers
-    assertEquals(evaluation.macroMeasuresOfResults.correct, 52);
+    assertEquals(evaluation.macroMeasuresOfResults.correct, 48);
     assertEquals(evaluation.macroMeasuresOfResults.partialCor, 11);
-    assertEquals(evaluation.macroMeasuresOfResults.spurious, 68);
-    assertEquals(evaluation.macroMeasuresOfResults.missing, 31);
+    assertEquals(evaluation.macroMeasuresOfResults.spurious, 39);
+    assertEquals(evaluation.macroMeasuresOfResults.missing, 34);
     
     System.out.println("completed");
     // Remove the resources
@@ -207,10 +207,10 @@ public class TestLearningAPI extends TestCase {
     // Using the evaluation mode for testing
     EvaluationBasedOnDocs evaluation = learningApi.getEvaluation();
     // Compare the overall results with the correct numbers
-    assertEquals(evaluation.macroMeasuresOfResults.correct, 27);
+    assertEquals(evaluation.macroMeasuresOfResults.correct, 28);
     assertEquals(evaluation.macroMeasuresOfResults.partialCor, 0);
     assertEquals(evaluation.macroMeasuresOfResults.spurious, 45);
-    assertEquals(evaluation.macroMeasuresOfResults.missing, 39);
+    assertEquals(evaluation.macroMeasuresOfResults.missing, 37);
     // Remove the resources
     clearOneTest();
     System.out.println("completed");
@@ -339,10 +339,10 @@ public class TestLearningAPI extends TestCase {
     assertEquals(evaluation.macroMeasuresOfResults.partialCor, 0);
     assertEquals(evaluation.macroMeasuresOfResults.spurious, 27);
     assertEquals(evaluation.macroMeasuresOfResults.missing, 110);*/
-    assertEquals(evaluation.macroMeasuresOfResults.correct, 6);
+    assertEquals(evaluation.macroMeasuresOfResults.correct, 8);
     assertEquals(evaluation.macroMeasuresOfResults.partialCor, 0);
-    assertEquals(evaluation.macroMeasuresOfResults.spurious, 31);
-    assertEquals(evaluation.macroMeasuresOfResults.missing, 108);
+    assertEquals(evaluation.macroMeasuresOfResults.spurious, 63);
+    assertEquals(evaluation.macroMeasuresOfResults.missing, 106);
     // Remove the resources
     clearOneTest();
     System.out.println("completed");
@@ -375,10 +375,10 @@ public class TestLearningAPI extends TestCase {
     assertEquals(evaluation.macroMeasuresOfResults.partialCor, 0);
     assertEquals(evaluation.macroMeasuresOfResults.spurious, 27);
     assertEquals(evaluation.macroMeasuresOfResults.missing, 110);*/
-    assertEquals(evaluation.macroMeasuresOfResults.correct, 7);
+    assertEquals(evaluation.macroMeasuresOfResults.correct, 4);
     assertEquals(evaluation.macroMeasuresOfResults.partialCor, 0);
-    assertEquals(evaluation.macroMeasuresOfResults.spurious, 18);
-    assertEquals(evaluation.macroMeasuresOfResults.missing, 107);
+    assertEquals(evaluation.macroMeasuresOfResults.spurious, 11);
+    assertEquals(evaluation.macroMeasuresOfResults.missing, 110);
     // Remove the resources
     clearOneTest();
     System.out.println("completed");

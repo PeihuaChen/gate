@@ -88,4 +88,6 @@ public class ConstantParameters {
    * format.
    */
   public static final String INDEXVALUESEPARATOR = new String(":");
+  /** Separator for the labels in multilabel instances. */
+  public static final String MULTILABELSEPARATOR = new String(";1;");
 }

@@ -14,7 +14,7 @@
    <EVALUATION method="split" runs="1" ratio="0.66"/>
 
    <ENGINE nickname="SVM" implementationName="SVMLibSvmJava" 
-         options=" -c 0.7 -t 0 -m 100 -tau 0.2"/>
+         options=" -c 0.7 -t 0 -m 100 -tau 0.6"/>
 
    <DATASET>
      <INSTANCE-TYPE>RE_INS</INSTANCE-TYPE>
