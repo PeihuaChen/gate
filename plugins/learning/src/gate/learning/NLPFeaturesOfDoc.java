@@ -282,15 +282,25 @@ public class NLPFeaturesOfDoc {
       featName = featName.trim();
       featName = featName.replaceAll(ConstantParameters.SUFFIXSTARTTOKEN,
         ConstantParameters.SUFFIXSTARTTOKEN + "_");
+      featName = featName.replaceAll(ConstantParameters.ITEMSEPARATOR, "_");
+      //Get the multilabel from one instance
+      String [] featNameArray = featName.split(ConstantParameters.MULTILABELSEPARATOR); 
       boolean isStart = true;
       for(int i = 0; i < numInstances; ++i) {
         Annotation annToken = (Annotation)annotationArray.get(i);
         if(annToken.overlaps(annEntity)) {
-          String featName0 = featName;
+          String featName0 = "";
           if(isStart) {
-            featName0 += ConstantParameters.SUFFIXSTARTTOKEN;
+            for(int j=0; j<featNameArray.length; ++j) {
+              if(j>0) featName0 += ConstantParameters.ITEMSEPARATOR;
+              featName0 += featNameArray[j]+ConstantParameters.SUFFIXSTARTTOKEN;
+            } 
             isStart = false;
-          }
+          } else 
+            for(int j=0; j<featNameArray.length; ++j) {
+              if(j>0) featName0 += ConstantParameters.ITEMSEPARATOR;
+              featName0 += featNameArray[j];
+            }
           if(featName0.length() > 0) {
             if(this.classNames[i] != null)
               this.classNames[i] += ConstantParameters.ITEMSEPARATOR
