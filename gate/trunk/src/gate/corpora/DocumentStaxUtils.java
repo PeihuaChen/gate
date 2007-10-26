@@ -30,6 +30,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -56,6 +58,18 @@ import gate.util.Out;
  * using StAX (the Streaming API for XML).
  */
 public class DocumentStaxUtils {
+
+  /**
+   * The char used to replace characters in text content that are
+   * illegal in XML.
+   */
+  public static final char INVALID_CHARACTER_REPLACEMENT = ' ';
+
+  /**
+   * The number of &lt; signs after which we encode a string using CDATA
+   * rather than writeCharacters.
+   */
+  public static final int LT_THRESHOLD = 5;
 
   /**
    * Reads GATE XML format data from the given XMLStreamReader and puts
@@ -150,8 +164,9 @@ public class DocumentStaxUtils {
         SortedSet<Integer> annotIdsInSet = new TreeSet<Integer>();
         requireAnnotationIds = readAnnotationSet(xsr, annotationSet,
                 nodeIdToOffsetMap, annotIdsInSet, requireAnnotationIds);
-        if(annotIdsInSet.size() > 0 && (maxAnnotId == null
-                || annotIdsInSet.last().intValue() > maxAnnotId.intValue())) {
+        if(annotIdsInSet.size() > 0
+                && (maxAnnotId == null || annotIdsInSet.last().intValue() > maxAnnotId
+                        .intValue())) {
           maxAnnotId = annotIdsInSet.last();
         }
         numAnnots += annotIdsInSet.size();
@@ -199,8 +214,9 @@ public class DocumentStaxUtils {
    *          node ids and offsets are the same (useful if parsing an
    *          annotation set in isolation).
    * @param allAnnotIds a set to contain all annotation IDs specified in
-   *          the annotation set. It should initially be empty and will be
-   *          updated if any of the annotations in this set specify an ID.
+   *          the annotation set. It should initially be empty and will
+   *          be updated if any of the annotations in this set specify
+   *          an ID.
    * @param requireAnnotationIds whether annotations are required to
    *          specify their IDs. If true, it is an error for an
    *          annotation to omit the Id attribute. If false, it is an
@@ -301,8 +317,8 @@ public class DocumentStaxUtils {
           Integer annotationId = Integer.valueOf(annotIdString);
           if(allAnnotIds.contains(annotationId)) {
             throw new XMLStreamException("Annotation IDs must be unique "
-                    + "within an annotation set. Found duplicate ID",
-                    xsr.getLocation());
+                    + "within an annotation set. Found duplicate ID", xsr
+                    .getLocation());
           }
           allAnnotIds.add(annotationId);
           annObj.setId(annotationId);
@@ -618,14 +634,14 @@ public class DocumentStaxUtils {
    * @throws XMLStreamException
    * @throws IOException
    */
-  public static void writeDocument(Document doc, File file) throws
-          XMLStreamException, IOException {
+  public static void writeDocument(Document doc, File file)
+          throws XMLStreamException, IOException {
     writeDocument(doc, file, "");
   }
-  
+
   /**
-   * Write the specified GATE document to a File, optionally putting the XML in
-   * a namespace.
+   * Write the specified GATE document to a File, optionally putting the
+   * XML in a namespace.
    * 
    * @param doc the document to write
    * @param file the file to write it to
@@ -844,6 +860,7 @@ public class DocumentStaxUtils {
 
     // write the TextWithNodes element
     char[] textArray = aText.toCharArray();
+    replaceXMLIllegalCharacters(textArray);
     xsw.writeStartElement(namespaceURI, "TextWithNodes");
     int lastNodeOffset = 0;
     // offsetsSet iterator is in ascending order of offset, as it is a
@@ -852,16 +869,91 @@ public class DocumentStaxUtils {
     while(offsetsIterator.hasNext()) {
       int offset = offsetsIterator.next().intValue();
       // write characters since the last node output
-      xsw.writeCharacters(textArray, lastNodeOffset, offset - lastNodeOffset);
+      writeCharactersOrCDATA(xsw, new String(textArray, lastNodeOffset, offset
+              - lastNodeOffset));
       xsw.writeEmptyElement(namespaceURI, "Node");
       xsw.writeAttribute("id", String.valueOf(offset));
       lastNodeOffset = offset;
     }
     // write any remaining text after the last node
-    xsw.writeCharacters(textArray, lastNodeOffset, textArray.length
-            - lastNodeOffset);
+    writeCharactersOrCDATA(xsw, new String(textArray, lastNodeOffset,
+            textArray.length - lastNodeOffset));
     // and the closing TextWithNodes
     xsw.writeEndElement();
+  }
+
+  /**
+   * Replace any characters in the given buffer that are illegal in XML
+   * with spaces. Characters that are illegal in XML are:
+   * <ul>
+   * <li>Control characters U+0000 to U+001F, <i>except</i> U+0009,
+   * U+000A and U+000D, which are permitted.</li>
+   * <li><i>Unpaired</i> surrogates U+D800 to U+D8FF (valid surrogate
+   * pairs are OK).</li>
+   * <li>U+FFFE and U+FFFF (only allowed as part of the Unicode byte
+   * order mark).</li>
+   * </ul>
+   * 
+   * @param buf the buffer to process
+   */
+  private static void replaceXMLIllegalCharacters(char[] buf) {
+    for(int i = 0; i < buf.length; i++) {
+      if(isInvalidXmlChar(buf, i)) {
+        buf[i] = INVALID_CHARACTER_REPLACEMENT;
+      }
+    }
+  }
+
+  /**
+   * Check whether a character is illegal in XML.
+   * 
+   * @param buf the character buffer in which to look
+   * @param i the index of the character to check
+   */
+  private static final boolean isInvalidXmlChar(char[] buf, int i) {
+    // illegal control character
+    if(buf[i] <= 0x0008 || buf[i] == 0x000B || buf[i] == 0x000C
+            || (buf[i] >= 0x000E && buf[i] <= 0x001F)) {
+      return false;
+    }
+
+    // buf[i] is a high surrogate...
+    if(buf[i] >= 0xD800 && buf[i] <= 0xDBFF) {
+      // if we're not at the end of the buffer we can look ahead
+      if(i < buf.length - 1) {
+        // followed by a low surrogate is OK
+        if(buf[i + 1] >= 0xDC00 && buf[i + 1] <= 0xDFFF) {
+          return false;
+        }
+      }
+
+      // at the end of the buffer, or not followed by a low surrogate is
+      // not OK.
+      return true;
+    }
+
+    // buf[i] is a low surrogate...
+    if(buf[i] >= 0xDC00 && buf[i] <= 0xDFFF) {
+      // if we're not at the start of the buffer we can look behind
+      if(i > 0) {
+        // preceded by a high surrogate is OK
+        if(buf[i - 1] >= 0xD800 && buf[i - 1] <= 0xDBFF) {
+          return false;
+        }
+      }
+
+      // at the start of the buffer, or not preceded by a high surrogate
+      // is not OK
+      return true;
+    }
+
+    // buf[i] is a BOM character
+    if(buf[i] == 0xFFFE || buf[i] == 0xFFFF) {
+      return true;
+    }
+
+    // anything else is OK
+    return false;
   }
 
   /**
@@ -969,7 +1061,7 @@ public class DocumentStaxUtils {
         if(valueItemClassName != null) {
           xsw.writeAttribute("itemClassName", valueItemClassName);
         }
-        xsw.writeCharacters(value2String);
+        writeCharactersOrCDATA(xsw, value2String);
         xsw.writeEndElement();
         newLine(xsw);
 
@@ -988,6 +1080,74 @@ public class DocumentStaxUtils {
    */
   private static void newLine(XMLStreamWriter xsw) throws XMLStreamException {
     xsw.writeCharacters("\n");
+  }
+
+  /**
+   * The regular expression pattern that will match the end of a CDATA
+   * section.
+   */
+  private static Pattern CDATA_END_PATTERN = Pattern.compile("\\]\\]>");
+
+  /**
+   * Write the given string to the given writer, using either
+   * writeCharacters or, if there are more than a few less than signs in
+   * the string (e.g. if it is an XML fragment itself), write it with
+   * writeCData. This method properly handles the case where the string
+   * contains other CDATA sections - as a CDATA section cannot contain
+   * the CDATA end marker <code>]]></code>, we split the output CDATA
+   * at any occurrences of this marker and write the marker using a
+   * normal writeCharacters call in between.
+   * 
+   * @param xsw the writer to write to
+   * @param string the string to write
+   * @throws XMLStreamException
+   */
+  private static void writeCharactersOrCDATA(XMLStreamWriter xsw, String string)
+          throws XMLStreamException {
+    if(containsEnoughLTs(string)) {
+      Matcher m = CDATA_END_PATTERN.matcher(string);
+      int startFrom = 0;
+      while(m.find()) {
+        // we found a CDATA end marker, so write everything up to the
+        // marker as CDATA...
+        xsw.writeCData(string.substring(startFrom, m.start()));
+        // then write the marker as characters
+        xsw.writeCharacters("]]>");
+        startFrom = m.end();
+      }
+
+      if(startFrom == 0) {
+        // no "]]>" in the string, the normal case
+        xsw.writeCData(string);
+      }
+      else if(startFrom < string.length()) {
+        // there is some trailing text after the last ]]>
+        xsw.writeCData(string.substring(startFrom));
+      }
+      // else the last ]]> was the end of the string, so nothing more to
+      // do.
+    }
+    else {
+      // if fewer '<' characters, just writeCharacters as normal
+      xsw.writeCharacters(string);
+    }
+  }
+
+  /**
+   * Checks whether the given string contains at least
+   * <code>LT_THRESHOLD</code> &lt; characters.
+   */
+  private static boolean containsEnoughLTs(String string) {
+    int numLTs = 0;
+    int index = -1;
+    while((index = string.indexOf('<', index + 1)) >= 0) {
+      numLTs++;
+      if(numLTs >= LT_THRESHOLD) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /** An inner class modeling the information contained by an annotation. */
