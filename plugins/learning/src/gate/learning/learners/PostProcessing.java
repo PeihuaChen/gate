@@ -103,29 +103,28 @@ public class PostProcessing {
             if(chunk2.start != chunk1.start || chunk2.end != chunk1.end
               || chunk2.name != chunk1.name) {
               // if the two entities overlap
-              /*if((chunk1.start >= chunk2.start && chunk1.start <= chunk2.end)
+              if((chunk1.start >= chunk2.start && chunk1.start <= chunk2.end)
                 || (chunk1.end <= chunk2.end && chunk1.end >= chunk2.start)) {
-                if(chunk1.end - chunk1.start>chunk2.end - chunk2.start)
+                if(chunk1.prob > chunk2.prob) {
                   tempChunks.put(chunk2, 0);
-                else if (chunk1.end - chunk1.start<chunk2.end - chunk2.start) {
+                } else if(chunk1.prob < chunk2.prob) {
+                  tempChunks.put(chunk1, 0);
+                  break; // break the inner loop (ob2)
+               } else if(chunk1.end - chunk1.start>chunk2.end - chunk2.start) {
                   tempChunks.put(chunk1, 0);
                   break;
                 }
-                else 
-                  if(chunk1.prob > chunk2.prob)
-                    tempChunks.put(chunk2, 0);
-                  else {
-                    tempChunks.put(chunk1, 0);
-                     break; // break the inner loop (ob2)
-                  }
-              }*/
+                else {
+                  tempChunks.put(chunk2, 0);
+                }
+              }
             }
           }
         }// end of the inner loop
       }
     }// end of the outer loop
     for(Object ob1 : tempChunks.keySet()) {
-      if(tempChunks.get((ChunkOrEntity)ob1) == 1) chunks.add(ob1);
+      if(tempChunks.get((ChunkOrEntity)ob1).intValue() == 1) chunks.add(ob1);
     }
   }
   /** Post-processing the results for the classification problem

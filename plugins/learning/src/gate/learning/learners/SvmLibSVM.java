@@ -382,7 +382,7 @@ public class SvmLibSVM extends SupervisedLearner {
         obtainInstDist(items, instDist);
         b = readWeightVectorFromFile(modelFile, w);
         //normalise the weight vector
-        b = normalisation(w, b);
+        //b = normalisation(w, b);
         // modify the b by using the uneven margins parameter tau
         if(isUseTauAll)
           b += optB;
