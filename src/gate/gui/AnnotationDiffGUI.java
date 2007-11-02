@@ -524,12 +524,20 @@ public class AnnotationDiffGUI extends JFrame{
     }
   }
 
+  protected JFileChooser getFileChooser() {
+    if(MainFrame.getFileChooser() != null) {
+      return MainFrame.getFileChooser();
+    } else {
+      return new JFileChooser();
+    }
+  }
+
   protected class HTMLExportAction extends AbstractAction{
     public HTMLExportAction(){
       super("Export to HTML");
     }
     public void actionPerformed(ActionEvent evt){
-      JFileChooser fileChooser = MainFrame.getFileChooser();
+      JFileChooser fileChooser = getFileChooser();
       File currentFile = fileChooser.getSelectedFile();
       String nl = Strings.getNl();
       String parent = (currentFile != null) ? currentFile.getParent() :
