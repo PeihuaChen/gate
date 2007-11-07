@@ -12,7 +12,6 @@ import gate.AnnotationSet;
 import gate.Corpus;
 import gate.Document;
 import gate.Factory;
-import gate.FeatureMap;
 import gate.Gate;
 import gate.GateConstants;
 import gate.merger.AnnotationMergingMain;
@@ -25,9 +24,7 @@ import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import junit.framework.Test;
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 public class TestAnnotationMergingPlugin extends TestCase {
   private static File learningHome;
@@ -60,12 +57,8 @@ public class TestAnnotationMergingPlugin extends TestCase {
    * Put things back as they should be after running tests.
    */
   public void tearDown() throws Exception {
+    super.tearDown();
   } // tearDown
-
-  /** Test suite routine for the test runner */
-  public static Test suite() {
-    return new TestSuite(TestAnnotationMergingPlugin.class);
-  } // suite
 
   /** The test for AnnotationMerging. */
   public void testAnnotationMergingPlugin() throws Exception {

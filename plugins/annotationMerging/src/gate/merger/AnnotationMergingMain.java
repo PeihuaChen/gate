@@ -110,9 +110,10 @@ public class AnnotationMergingMain extends AbstractLanguageAnalyser implements
     // merged annotation set.
     int minimalAnnNumInt = 1;
     if(minimalAnnNum != null && minimalAnnNum.trim().length() > 0) {
-      if(Integer.parseInt(minimalAnnNum) < 1
-        || Integer.parseInt(minimalAnnNum) > numAnns)
+      if(Integer.parseInt(minimalAnnNum) < 1) 
         minimalAnnNumInt = 1;
+      else if (Integer.parseInt(minimalAnnNum) > numAnns)
+        minimalAnnNumInt = numAnns;
       else minimalAnnNumInt = Integer.parseInt(minimalAnnNum);
     }
     else minimalAnnNumInt = 1;
@@ -130,11 +131,11 @@ public class AnnotationMergingMain extends AbstractLanguageAnalyser implements
       //Call different merging methods
       switch(mergingMethod){
         case MajorityVoting:
-          AnnotationMerging.mergeAnnogationMajority(annsA, annsTypes.get(annT),
+          AnnotationMerging.mergeAnnotationMajority(annsA, annsTypes.get(annT),
             mergeInfor, isTheSameInstances);
           break;
         case MergingByAnnotatorNum:
-          AnnotationMerging.mergeAnnogation(annsA, annsTypes.get(annT),
+          AnnotationMerging.mergeAnnotation(annsA, annsTypes.get(annT),
             mergeInfor, minimalAnnNumInt, isTheSameInstances);
           break;
         default:
