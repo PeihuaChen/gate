@@ -306,13 +306,13 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 		exportButtonsGroup = new ButtonGroup();
 		patternExportButtonsGroup = new ButtonGroup();
 		exportButtonsGroup.add(exportToHTML);
-		exportToHTML.setEnabled(false);
+		exportToHTML.setEnabled(true);
 		allPatterns = new JRadioButton("All Patterns");
 		selectedPatterns = new JRadioButton("Selected Patterns");
 		patternExportButtonsGroup.add(allPatterns);
 		patternExportButtonsGroup.add(selectedPatterns);
 		allPatterns
-				.setToolTipText("re-issues the previous query and export all patterns without any limit on number of documents");
+				.setToolTipText("exports all the patterns on this screen");
 		selectedPatterns.setToolTipText("exports only the selected patterns");
 		allPatterns.setSelected(true);
 		allPatterns.setEnabled(true);
@@ -321,9 +321,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
     if(target == null || target instanceof Searcher) {
       corpusToSearchIn.setEnabled(false);
-      exportToHTML.setEnabled(false);
-      allPatterns.setEnabled(false);
-      selectedPatterns.setEnabled(false);
     }
 		
 		annotTypesBox = new JComboBox();
@@ -876,6 +873,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 		}
 	}
 
+	
+	
 	/**
 	 * Exports all patterns to the XML File
 	 */
@@ -909,10 +908,13 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 				// otherwise we need to ask user a location for the file where
 				// he wants to store results
 				JFileChooser fileDialog = new JFileChooser();
+				
 				String fileDialogTitle = "HTML";
 				fileDialog.setDialogTitle(fileDialogTitle
 						+ " File to export pattern results to...");
-				fileDialog.showSaveDialog(gate.Main.getMainFrame());
+				
+				JFrame frame = target instanceof Searcher ? null : gate.Main.getMainFrame(); 
+				fileDialog.showSaveDialog(frame);
 				java.io.File file = fileDialog.getSelectedFile();
 
 				// if user pressed the cancel button
@@ -923,36 +925,11 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
 				// we need to output patterns to the HTML File
 				// check if allPatterns is selected we need to reissue the
-				// query
-				// when we re-issue our query, we donot update GUI
+				// query when we re-issue our query, we do not update GUI
 				// but use the same PR and everything to get results from
-				// Annic Search
-				// hence, all the variables are modified
+				// Annic Search hence, all the variables are modified
 				// so take backup for the current patterns
 
-				// backup current pattern
-				ArrayList<Hit> patternsBackup = patterns;
-
-				// if all patterns option is selected
-				if (allPatterns.isSelected()) {
-
-					// as we donot want to update gui, make explicitCall to
-					// true this variable is checked while update gui
-					// if this is true, no change is made in the gui
-					explicitCall = true;
-
-					// and finally issue the query to get all patterns
-					boolean success = ((LuceneDataStoreImpl)target).search(searcher.getQuery(), parameters);
-					Hit[] pats = searcher.next(-1);
-					if (patterns == null)
-						patterns = new ArrayList<Hit>();
-					patterns.clear();
-					for (int m = 0; m < pats.length; m++) {
-						patterns.add(pats[m]);
-					}
-					pats = null;
-					explicitCall = false;
-				}
 
 				// here we have all patterns that we need to export
 				// we store them in a temporary storage
@@ -969,7 +946,12 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 					}
 
 				} else {
-					patternsToExport = patterns;
+          // in this case we only export those patterns which are
+          // selected by the user
+          for (int i = 0; i < patternTable.getRowCount(); i++) {
+            int num = patternTable.rowViewToModel(i);
+            patternsToExport.add(patterns.get(num));
+          }
 				}
 
 				// what we need to output is the
@@ -1035,8 +1017,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 				bw.write("</TABLE></BODY></HTML>");
 				bw.flush();
 				bw.close();
-				patterns = patternsBackup;
-
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -1683,9 +1663,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 		} else {
 		  this.searcher = (Searcher) this.target;
 		  corpusToSearchIn.setEnabled(false);
-	    exportToHTML.setEnabled(false);
-	    allPatterns.setEnabled(false);
-	    selectedPatterns.setEnabled(false);
 		}
 		
 		executeQuery.setEnabled(true);
@@ -1724,9 +1701,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 	          selectedPatterns.setEnabled(true);
 					} else {
             corpusToSearchIn.setEnabled(false);
-            exportToHTML.setEnabled(false);
-            allPatterns.setEnabled(false);
-            selectedPatterns.setEnabled(false);
 					}
 					noOfPatternsField.setEnabled(true);
 					contextWindowField.setEnabled(true);
