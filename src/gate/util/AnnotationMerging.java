@@ -30,7 +30,6 @@ import java.util.Vector;
  * on it. Another method selects only one 
  * annotation from those annotations with the same span, 
  * which majority of the annotators support. 
- * 
  */
 public class AnnotationMerging {
 
@@ -38,7 +37,7 @@ public class AnnotationMerging {
    * Merge all annotationset from an array. If one annotation is in at least
    * numK annotation sets, then put it into the merging annotation set.
    */
-  public static void mergeAnnogation(AnnotationSet[] annsArr, String nameFeat,
+  public static void mergeAnnotation(AnnotationSet[] annsArr, String nameFeat,
     HashMap<Annotation, String> mergeAnns, int numMinK, boolean isTheSameInstances) {
     int numA = annsArr.length;
     // First copy the annotatioin sets into a temp array
@@ -106,7 +105,7 @@ public class AnnotationMerging {
    * Merge all annotationset from an array. If one annotation is agreed by
    * the majority of the annotators, then put it into the merging annotation set.
    */
-  public static void mergeAnnogationMajority(AnnotationSet[] annsArr, String nameFeat,
+  public static void mergeAnnotationMajority(AnnotationSet[] annsArr, String nameFeat,
     HashMap<Annotation, String> mergeAnns, boolean isTheSameInstances) {
     int numA = annsArr.length;
     if(nameFeat == null) {

@@ -7,6 +7,7 @@ import gate.Document;
 import gate.Factory;
 import gate.Gate;
 import gate.GateConstants;
+import java.io.File;
 import java.util.HashMap;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -57,49 +58,40 @@ public class TestAnnotationMerging extends TestCase {
       //Gate.init();
       // Load the documents into a corpus
       Corpus data = Factory.newCorpus("data");
-  
-      int numDocs = 1; // Number of documents
-      int numJudges = 3; // number of judges
       // Put the annotated document into a matrix for IAA
-      String nameAnnSet = "Original markups";
+      String nameAnnSet;
       String nameAnnType = "";
       String nameAnnFeat = "";
-
       // Use the dataset of one document and three annotators
-      data.add(loadDocument("tests/iaa/small/ann1.xml", "ann1.xml"));
-      data.add(loadDocument("tests/iaa/small/ann2.xml", "ann2.xml"));
-      data.add(loadDocument("tests/iaa/small/ann3.xml", "ann3.xml"));
+      data.add(loadDocument("tests/iaa/beijing-opera.xml", "beijing-opera.xml"));
       //ExtensionFileFilter fileFilter = new ExtensionFileFilter();
       //fileFilter.addExtension("xml");
       //data.populate(new File("C:\\yaoyong_h\\work\\iaa\\data\\smallData").toURL(), fileFilter, "UTF-8", false);
       
-      numDocs = 1; // Number of documents
-      numJudges = 3; // number of judges
+      nameAnnSet = "ann1;ann2;ann3";
       boolean isUsingMajority=false;
-      nameAnnType = "SENT";
-      nameAnnFeat = "senOp";
+      nameAnnType = "sent";
+      nameAnnFeat = "Op";
       caseN = 1;
       isUsingMajority=true;
-      testWithfeat(numDocs, numJudges, nameAnnSet, nameAnnType, nameAnnFeat,
+      testWithfeat(nameAnnSet, nameAnnType, nameAnnFeat,
               data, isUsingMajority);
       
       caseN = 2;
       isUsingMajority=false;
-      testWithfeat(numDocs, numJudges, nameAnnSet, nameAnnType, nameAnnFeat,
+      testWithfeat(nameAnnSet, nameAnnType, nameAnnFeat,
               data, isUsingMajority);
 
       
-      nameAnnType = "OPINION_SRC";
-      nameAnnFeat = "type";
+      nameAnnType = "Os";
+      nameAnnFeat = null;
       caseN = 3;
       isUsingMajority=true;
-      testWithfeat(numDocs, numJudges, nameAnnSet, nameAnnType, nameAnnFeat,
-              data, isUsingMajority);
+      testWithfeat(nameAnnSet, nameAnnType, nameAnnFeat, data, isUsingMajority);
       
       caseN = 4;
       isUsingMajority=false;
-      testWithfeat(numDocs, numJudges, nameAnnSet, nameAnnType, nameAnnFeat,
-              data, isUsingMajority);
+      testWithfeat(nameAnnSet, nameAnnType, nameAnnFeat, data, isUsingMajority);
     }
     finally {
       Gate.getUserConfig().put(
@@ -109,47 +101,19 @@ public class TestAnnotationMerging extends TestCase {
 
   }
 
-  private int obtainAnnotatorId(String docName) {
-    if(docName.contains("1.xml"))
-      return 0;
-    else if(docName.contains("2.xml"))
-      return 1;
-    else if(docName.contains("3.xml")) return 2;
-    return -1;
-  }
-
-  private String obtainDocName(String docName) {
-    return docName.substring(0, docName.indexOf(".xml") - 1);
-  }
-
+ 
   /** The actual method for testing. */
-  public void testWithfeat(int numDocs0, int numJudges, String nameAnnSet,
-          String nameAnnType, String nameAnnFeat, Corpus data, boolean isUsingMajority) {
-    
-    AnnotationSet[][] annArr2 = new AnnotationSet[numDocs0][numJudges];
+  public void testWithfeat(String nameAnnSets, String nameAnnType, String nameAnnFeat, Corpus data, boolean isUsingMajority) {
+    //  get the annotation sets
+    String [] annSetsN = nameAnnSets.split(";");
+    int numJudges = annSetsN.length;
     int numDocs = data.size();
-    // Get a document list as different annotation in different document
-    // copy
-    HashMap<String, Integer> docNameList = new HashMap<String, Integer>();
-    int k = 0;
-    for(int i = 0; i < data.size(); ++i) {
-      String docName = obtainDocName(((Document)data.get(i)).getName());
-      if(!docNameList.containsKey(docName)) {
-        docNameList.put(docName, new Integer(k));
-        ++k;
-      }
-    }
+    AnnotationSet[][] annArr2 = new AnnotationSet[numDocs][numJudges];
     for(int i = 0; i < numDocs; ++i) {
       Document doc = (Document)data.get(i);
-      String docName = obtainDocName(doc.getName());
-      int annotatorId = obtainAnnotatorId(doc.getName());
-      if(annotatorId < 0 || !docNameList.containsKey(docName)) {
-        System.out.println("Warning: annotator id must be bigger than 0!");
-      }
-      else {
+      for(int j=0; j<numJudges; ++j) {
         // Get the annotation
-        annArr2[docNameList.get(docName).intValue()][annotatorId] = doc
-                .getAnnotations(nameAnnSet).get(nameAnnType);
+        annArr2[i][j] = doc.getAnnotations(annSetsN[j]).get(nameAnnType);
       }
     }
     //Annotation merging
@@ -161,8 +125,8 @@ public class TestAnnotationMerging extends TestCase {
       }
     HashMap<Annotation,String>mergeInfor = new HashMap<Annotation,String>();
     if(isUsingMajority)
-      AnnotationMerging.mergeAnnogationMajority(annArr2[0], nameAnnFeat, mergeInfor, isTheSameInstances);
-    else AnnotationMerging.mergeAnnogation(annArr2[0], nameAnnFeat, mergeInfor, 2, isTheSameInstances);
+      AnnotationMerging.mergeAnnotationMajority(annArr2[0], nameAnnFeat, mergeInfor, isTheSameInstances);
+    else AnnotationMerging.mergeAnnotation(annArr2[0], nameAnnFeat, mergeInfor, 2, isTheSameInstances);
     int numAnns=0;
     if(isTheSameInstances) {
       for(Annotation ann:mergeInfor.keySet()) {
@@ -180,16 +144,16 @@ public class TestAnnotationMerging extends TestCase {
   private void checkNumbers(int numAnns) {
     switch(caseN) {
       case 1:
-        assertEquals(numAnns, 14);
+        assertEquals(numAnns, 9);
         break;
       case 2:
-        assertEquals(numAnns, 14);
+        assertEquals(numAnns, 9);
         break;
       case 3:
-        assertEquals(numAnns, 6);
+        assertEquals(numAnns, 2);
         break;
       case 4:
-        assertEquals(numAnns, 6);
+        assertEquals(numAnns, 2);
         break;
       default:
         System.out.println("The test case " + caseN + " is not defined yet.");
