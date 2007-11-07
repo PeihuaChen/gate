@@ -34,9 +34,9 @@ public class IaaCalculation {
   /** Non-category string. */
   static String NONCAT = "Non-cat";
   /** Number of annotators. */
-  int numAnnotators;
+  public int numAnnotators;
   /** Number of documents. */
-  int numDocs;
+  public int numDocs;
   /** Number of labels. */
   int numLabels;
   /** Name of label feature. */
@@ -117,7 +117,7 @@ public class IaaCalculation {
         + " Annotator(s) and " + numDocs + " document(s).");
     }
     else {
-      if(verbosity>0) System.out.println("There are " + numAnnotators + " Annotator(s) and "
+      if(verbosity>0) System.out.println("Compute the IAA for" + numAnnotators + " Annotator(s) and on "
       + numDocs + " document(s).");
     }
   }
