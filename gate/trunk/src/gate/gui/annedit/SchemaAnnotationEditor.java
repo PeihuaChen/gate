@@ -177,8 +177,10 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       //just resize
       Point where = null;
       if(dialog.isVisible()){
-        where = dialog.getLocationOnScreen();
+//        where = dialog.getLocationOnScreen();
+        where = dialog.getLocation();
       }
+      
       dialog.pack();
       if(where != null){
         dialog.setLocation(where);

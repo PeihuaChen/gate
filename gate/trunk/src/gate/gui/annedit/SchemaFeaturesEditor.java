@@ -111,6 +111,9 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
             newValue = textField.getText();
           }else if(e.getSource() == jchoice){
             newValue = jchoice.getSelectedItem();
+          }else if(e.getSource() == SchemaFeaturesEditor.this){
+            //synthetic event
+            newValue = getValue();
           }
           
           if(featureMap != null && e.getSource() != SchemaFeaturesEditor.this){
@@ -562,12 +565,12 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
         //use the default
         featureValue = aFeatureEditor.getDefaultValue();
         //if we still don't have a value, use the last used value
-        if(featureValue == null ||
-           ( featureValue instanceof String && 
-             ((String)featureValue).length() == 0 
-           ) ){
+//        if(featureValue == null ||
+//           ( featureValue instanceof String && 
+//             ((String)featureValue).length() == 0 
+//           ) ){
 //          featureValue = aFeatureEditor.getValue();
-        }
+//        }
         if(featureValue != null && featureMap != null){
           //we managed to find a relevant value -> save it in the feature map
           featureMap.put(featureName, featureValue);
