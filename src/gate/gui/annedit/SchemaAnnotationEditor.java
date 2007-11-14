@@ -488,8 +488,8 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     
     typesChoice.setBorder(typeDefaultBorder);
     aLabel = new JLabel(aTitle);
-    typesChoice.setMinimumSize(new Dimension(aLabel.getPreferredSize().width,
-            Integer.MAX_VALUE));
+    typesChoice.setMinimumSize(
+            new Dimension(aLabel.getPreferredSize().width, 0));
     mainPane.add(typesChoice);
     //add the features box
     featuresBox = Box.createVerticalBox();
@@ -502,19 +502,27 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     mainPane.add(featuresBox);
     
     //add the search box
-    searchEnabledCheck = new JCheckBox("Search & Annotate", 
-            MainFrame.getIcon("closed"), false);
-    searchEnabledCheck.setSelectedIcon(MainFrame.getIcon("expanded"));
-    mainPane.add(searchEnabledCheck);
+    aTitle = "Search & Annotate";
+    searchBox = Box.createHorizontalBox();
+    aLabel = new JLabel(aTitle);
+    searchBox.setMinimumSize(new Dimension(aLabel.getPreferredSize().width, 0));    
     
-    searchBox = Box.createVerticalBox();
     searchBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+    searchBox.setBorder(BorderFactory.createTitledBorder(aTitle));
+    
+    searchEnabledCheck = new JCheckBox("", MainFrame.getIcon("closed"), false);
+    searchEnabledCheck.setSelectedIcon(MainFrame.getIcon("expanded"));
+    searchEnabledCheck.setAlignmentX(JComponent.LEFT_ALIGNMENT);
+    searchEnabledCheck.setAlignmentY(JComponent.TOP_ALIGNMENT);
+    searchBox.add(searchEnabledCheck);
+    searchBox.add(Box.createHorizontalGlue());
     mainPane.add(searchBox);
     
     searchPane = new JPanel();
+    searchPane.setAlignmentX(Component.LEFT_ALIGNMENT);
+    searchPane.setAlignmentY(Component.TOP_ALIGNMENT);
     searchPane.setLayout(new BoxLayout(searchPane, BoxLayout.Y_AXIS));
     
-//    searchPane.setBorder(BorderFactory.createEtchedBorder());
 
     searchTextField = new JTextField(20);
     //disallow vertical expansion
