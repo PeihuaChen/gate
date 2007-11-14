@@ -494,11 +494,13 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
               (featureEditor.isRequired() ? "<b><font color='red'>*</font></b>: " : ": ") +
               "</html>");
       add(nameLabel, constraints);
-      add(featureEditor.getGui(), constraints);
-      //add a horizontal spacer
       constraints.weightx = 1;
-      add(Box.createHorizontalGlue(), constraints);
+      add(featureEditor.getGui(), constraints);
       constraints.weightx = 0;
+//      //add a horizontal spacer
+//      constraints.weightx = 1;
+//      add(Box.createHorizontalGlue(), constraints);
+//      constraints.weightx = 0;
     }
     //add a vertical spacer
     constraints.weighty = 1;
