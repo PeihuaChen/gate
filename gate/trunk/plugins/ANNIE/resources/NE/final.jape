@@ -16,7 +16,7 @@
 //note: organization should be included as part of the address ??
 
 Phase:	Final
-Input: Token Lookup Jobtitle TempPerson TempLocation TempOrganization TempDate TempTime TempYear TempZone Street Postcode Email Url Phone Ip TempIdentifier TempSpecs
+Input: Token Lookup Jobtitle TempPerson TempLocation TempOrganization TempDate TempTime TempYear TempZone Street Postcode Email Url Phone Ip TempIdentifier TempSpecs Title
 Options: control = appelt
 
 
@@ -298,7 +298,10 @@ annotations.removeAll(date);
 
 
 Rule: DateOnlyFinal
-Priority: 10
+Priority: 50
+( 
+ {Title}
+)?
 (
  {TempDate}
 )

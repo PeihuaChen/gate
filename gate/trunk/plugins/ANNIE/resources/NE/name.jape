@@ -15,7 +15,7 @@
 
 
 Phase:	Name
-Input: Token Lookup Title FirstPerson
+Input: Token Lookup Title FirstPerson TempDate
 Options: control = appelt debug = false
 
 ///////////////////////////////////////////////////////////////
@@ -237,7 +237,6 @@ if (firstPerson != null && firstPerson.size()>0)
 annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
-
 
 Rule:	PersonTitle
 Priority: 35
