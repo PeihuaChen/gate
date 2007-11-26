@@ -1217,4 +1217,13 @@ System.out.println("Window up");
       registerAncestorListener();
     }
   }
+
+  public AnnotationSet getAnnotationSetCurrentlyEdited() {
+    return annSet;
+  }
+
+  public Annotation getAnnotationCurrentlyEdited() {
+    return annotation;
+  }
+
 }
