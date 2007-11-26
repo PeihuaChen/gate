@@ -60,7 +60,7 @@ public class PatternValidator {
    * @return int positive number indicates the offset of the last
    *         annotation of the pattern. -1 indicates invalid pattern.
    */
-  public int validate(ArrayList queryTokens, ArrayList annotations, int from,
+  public int validate(List<String> queryTokens, List<Token> annotations, int from,
           QueryParser queryParser) throws gate.creole.ir.SearchException {
     patLen = 0;
 
@@ -71,8 +71,7 @@ public class PatternValidator {
 
     for(int i = 0; i < queryTokens.size(); i++) {
       queryParser.position = 0;
-      ArrayList[] termpositions = queryParser.createTerms((String)queryTokens
-              .get(i));
+      ArrayList[] termpositions = queryParser.createTerms(queryTokens.get(i));
       ArrayList terms = termpositions[0];
       ArrayList consider = termpositions[2];
       // process each term individually
@@ -88,7 +87,7 @@ public class PatternValidator {
           // among this if we are able to find the token that has
           // start offset > previous enOffset
           innerLoop: for(int j = from; j < annotations.size(); j++) {
-            Token tk = (Token)annotations.get(j);
+            Token tk = annotations.get(j);
             // if the term is equal to one of the tokens
             if(!isEqual(tk, term)) continue;
             // the next token with consider must be starting with
@@ -123,7 +122,7 @@ public class PatternValidator {
           // if consider is false
           boolean found = false;
           for(int j = 0; j < annotations.size(); j++) {
-            Token tk = (Token)annotations.get(j);
+            Token tk = annotations.get(j);
             if(tk.getPosition() != position) continue;
             if(tk.endOffset() != enOffset || tk.startOffset() != stOffset)
               continue;

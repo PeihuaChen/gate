@@ -87,7 +87,11 @@ final class BooleanScorer extends Scorer {
   private Bucket current;
 
   public int doc() { return current.doc; }
-
+  public boolean next(IndexSearcher searcher) throws IOException {
+    this.searcher = searcher;
+    return next();
+  }
+  
   public boolean next() throws IOException {
     boolean more;
     do {
@@ -108,7 +112,7 @@ final class BooleanScorer extends Scorer {
       for (SubScorer sub = scorers; sub != null; sub = sub.next) {
         Scorer scorer = sub.scorer;
         while (!sub.done && scorer.doc() < end) {
-          sub.collector.collect(scorer.doc(), scorer.score());
+          sub.collector.collect(scorer.doc(), scorer.score(this.searcher));
           sub.done = !scorer.next();
         }
         if (!sub.done) {
@@ -122,7 +126,8 @@ final class BooleanScorer extends Scorer {
 
   /* Niraj */
   public float score(IndexSearcher searcher) throws IOException {
-      return score();
+    this.searcher = searcher;
+    return score();
   }
   /* End */
 

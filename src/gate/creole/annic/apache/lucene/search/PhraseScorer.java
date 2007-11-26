@@ -31,9 +31,6 @@ abstract class PhraseScorer extends Scorer {
   protected PhrasePositions first, last;
 
   private float freq;
-  /* Niraj */
-  protected IndexSearcher searcher;
-  /* End */
   
   /* Niraj */
   PhraseScorer(Weight weight, TermPositions[] tps, java.util.Vector positions, Similarity similarity,
@@ -109,6 +106,11 @@ abstract class PhraseScorer extends Scorer {
 
   public int doc() { return first.doc; }
 
+  public boolean next(IndexSearcher searcher) throws IOException {
+    this.searcher = searcher;
+    return next();
+  }
+  
   public boolean next() throws IOException {
     if (firstTime) {
       init();
@@ -140,7 +142,8 @@ abstract class PhraseScorer extends Scorer {
   }
   /* Niraj */
   public float score(IndexSearcher searcher) throws IOException {
-      return score();
+    this.searcher = searcher;  
+    return score();
   }
   /* End */
 

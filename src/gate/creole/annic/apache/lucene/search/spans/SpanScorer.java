@@ -45,6 +45,11 @@ public class SpanScorer extends Scorer {
     this.value = weight.getValue();
   }
 
+  public boolean next(IndexSearcher searcher) throws IOException {
+    this.searcher = searcher;
+    return next();
+  }
+  
   public boolean next() throws IOException {
     if (firstTime) {
       more = spans.next();

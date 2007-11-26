@@ -8,6 +8,8 @@
 package gate.creole.annic;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Pattern is an extension of the HIT class. This provides information
@@ -42,7 +44,7 @@ public class Pattern extends Hit {
   /**
    * annotations
    */
-  protected ArrayList<PatternAnnotation> annotations;
+  protected List<PatternAnnotation> annotations;
 
   /**
    * Constructor
@@ -55,10 +57,10 @@ public class Pattern extends Hit {
    * @param annotations
    * @param queryString
    */
-  public Pattern(String docID, String patternText, int startOffset,
+  public Pattern(String docID, String annotationSetName, String patternText, int startOffset,
           int endOffset, int leftContextStartOffset, int rightContextEndOffset,
-          ArrayList<PatternAnnotation> annotations, String queryString) {
-    super(docID, startOffset, endOffset, queryString);
+          List<PatternAnnotation> annotations, String queryString) {
+    super(docID, annotationSetName, startOffset, endOffset, queryString);
     this.patternText = patternText;
     this.leftContextStartOffset = leftContextStartOffset;
     this.rightContextEndOffset = rightContextEndOffset;
@@ -72,7 +74,7 @@ public class Pattern extends Hit {
    * @param end
    * @return
    */
-  public ArrayList getPatternAnnotations(int startOffset, int endOffset) {
+  public List<PatternAnnotation> getPatternAnnotations(int startOffset, int endOffset) {
     ArrayList<PatternAnnotation> annots = new ArrayList<PatternAnnotation>();
     for(int i = 0; i < annotations.size(); i++) {
       PatternAnnotation ga1 = (PatternAnnotation)annotations.get(i);
@@ -83,18 +85,6 @@ public class Pattern extends Hit {
     return annots;
   }
 
-  /**
-   * Converts the list of annotations to an array
-   * @param annotations
-   * @return
-   */
-  private PatternAnnotation[] toArray(ArrayList<PatternAnnotation> annotations) {
-    PatternAnnotation anns[] = new PatternAnnotation[annotations.size()];
-    for(int i = 0; i < annotations.size(); i++) {
-      anns[i] = (PatternAnnotation)annotations.get(i);
-    }
-    return anns;
-  }
 
   /**
    * Returns all annotations underlying the pattern
@@ -102,7 +92,7 @@ public class Pattern extends Hit {
    * @return
    */
   public PatternAnnotation[] getPatternAnnotations() {
-    return toArray(annotations);
+    return annotations.toArray(new PatternAnnotation[0]);
   }
 
   /**
@@ -112,14 +102,14 @@ public class Pattern extends Hit {
    * @return
    */
   public PatternAnnotation[] getPatternAnnotations(String type) {
-    ArrayList<PatternAnnotation> annots = new ArrayList<PatternAnnotation>();
+    List<PatternAnnotation> annots = new ArrayList<PatternAnnotation>();
     for(int i = 0; i < annotations.size(); i++) {
-      PatternAnnotation ga1 = (PatternAnnotation)annotations.get(i);
+      PatternAnnotation ga1 = annotations.get(i);
       if(ga1.getType().equals(type)) {
         annots.add(ga1);
       }
     }
-    return toArray(annots);
+    return annots.toArray(new PatternAnnotation[0]);
   }
 
   /**
@@ -130,18 +120,18 @@ public class Pattern extends Hit {
    * @return
    */
   public PatternAnnotation[] getPatternAnnotations(String type, String feature) {
-    ArrayList<PatternAnnotation> annots = new ArrayList<PatternAnnotation>();
+    List<PatternAnnotation> annots = new ArrayList<PatternAnnotation>();
     for(int i = 0; i < annotations.size(); i++) {
-      PatternAnnotation ga1 = (PatternAnnotation)annotations.get(i);
+      PatternAnnotation ga1 = annotations.get(i);
       if(ga1.getType().equals(type)) {
         // check if this has the following feature
-        java.util.HashMap<String, String> features = ga1.getFeatures();
+        Map<String, String> features = ga1.getFeatures();
         if(features != null && features.keySet().contains(feature)) {
           annots.add(ga1);
         }
       }
     }
-    return toArray(annots);
+    return annots.toArray(new PatternAnnotation[0]);
   }
 
   /**

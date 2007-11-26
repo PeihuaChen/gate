@@ -63,7 +63,7 @@ public class QueryParser {
   public static boolean isValidQuery(String query) {
     QueryParser qp = new QueryParser();
     try {
-      qp.parse("contents", query, "Token", null);
+      qp.parse("contents", query, "Token", null, null);
     }
     catch(SearchException se) {
       return false;
@@ -83,7 +83,7 @@ public class QueryParser {
    * @throws gate.creole.ir.SearchException
    */
   public Query[] parse(String field, String query,
-          String baseTokenAnnotationType, String corpusID)
+          String baseTokenAnnotationType, String corpusID, String annotationSetToSearchIn)
           throws gate.creole.ir.SearchException {
     this.field = field;
     this.baseTokenAnnotationType = baseTokenAnnotationType;
@@ -113,14 +113,34 @@ public class QueryParser {
       Query phraseQuery = createPhraseQuery((String)queries.get(i));
       // if the corpusID is not provided we donot want to create a
       // boolean query
-      if(corpusID == null)
-        q[i] = phraseQuery;
+      if(corpusID == null && annotationSetToSearchIn == null) {
+        BooleanQuery booleanQuery = new BooleanQuery();
+        Term t = new Term(Constants.ANNOTATION_SET_ID, Constants.COMBINED_SET);
+        TermQuery tQuery = new TermQuery(t);
+        booleanQuery.add(tQuery, false, true);
+        booleanQuery.add(phraseQuery, true, false);
+        q[i] = booleanQuery;
+      }
       else {
         BooleanQuery booleanQuery = new BooleanQuery();
-        Term t = new Term(Constants.CORPUS_ID, corpusID);
-        TermQuery tQuery = new TermQuery(t);
-        booleanQuery.add(tQuery, true, false);
         booleanQuery.add(phraseQuery, true, false);
+        if(corpusID != null) {
+          Term t = new Term(Constants.CORPUS_ID, corpusID);
+          TermQuery tQuery = new TermQuery(t);
+          booleanQuery.add(tQuery, true, false);
+        }
+        
+        if(annotationSetToSearchIn != null) {
+          Term t = new Term(Constants.ANNOTATION_SET_ID, annotationSetToSearchIn);
+          TermQuery tQuery = new TermQuery(t);
+          booleanQuery.add(tQuery, true, false);
+        } else {
+          Term t = new Term(Constants.ANNOTATION_SET_ID, Constants.COMBINED_SET);
+          TermQuery tQuery = new TermQuery(t);
+          booleanQuery.add(tQuery, false, true);
+        }
+        
+
         q[i] = booleanQuery;
       }
     }
@@ -186,11 +206,11 @@ public class QueryParser {
     // "said"
     // "Hello"
     // {Person.gender=="male"}
-    ArrayList tokens = findTokens(query);
+    List<String> tokens = findTokens(query);
 
     // and then convert each token into separate terms
     if(tokens.size() == 1) {
-      ArrayList[] termsPos = (createTerms((String)tokens.get(0)));
+      ArrayList[] termsPos = (createTerms(tokens.get(0)));
       ArrayList terms = termsPos[0];
       if(terms.size() == 1) {
         if(areAllTermsTokens)
@@ -201,7 +221,6 @@ public class QueryParser {
       else {
         position = 0;
       }
-
     }
 
     int totalTerms = 0;
@@ -217,16 +236,12 @@ public class QueryParser {
       ArrayList pos = termpositions[1];
       ArrayList consider = termpositions[2];
 
-      boolean atLeastOneToken = false;
+      boolean allTermsTokens = true;
       // lets first find out if there's any token in this terms
       for(int k = 0; k < terms.size(); k++) {
         Term t = (Term)terms.get(k);
 
-        if(isTermBaseToken) isTermBaseToken = isBaseTokenTerm(t);
-
-        if(isTermBaseToken) {
-          atLeastOneToken = true;
-        }
+        if(allTermsTokens) allTermsTokens = isBaseTokenTerm(t);
       }
 
       if(!hadPreviousTermsAToken) {
@@ -234,10 +249,11 @@ public class QueryParser {
         break;
       }
 
-      if(i > 0 && !atLeastOneToken) {
+      if(!allTermsTokens) {
         // we want to break here
         needValidation = true;
-        break outer;
+        if(i > 0)
+          break outer;
       }
 
       for(int k = 0; k < terms.size(); k++) {
@@ -247,7 +263,7 @@ public class QueryParser {
         if(considerValue) totalTerms++;
       }
 
-      hadPreviousTermsAToken = atLeastOneToken;
+      hadPreviousTermsAToken = allTermsTokens;
     }
     phQuery.setTotalTerms(totalTerms);
     return phQuery;
@@ -288,9 +304,9 @@ public class QueryParser {
    * @return
    * @throws gate.creole.ir.SearchException
    */
-  public ArrayList findTokens(String query)
+  public List<String> findTokens(String query)
           throws gate.creole.ir.SearchException {
-    ArrayList tokens = new ArrayList();
+    List<String> tokens = new ArrayList<String>();
     String token = "";
     char ch = ' ';
     char prev = ' ';
@@ -391,8 +407,8 @@ public class QueryParser {
     }
     if(newString.length() > 0) {
       if(normalize)
-        strings.add(norm(newString.toString()));
-      else strings.add(newString.toString());
+        strings.add(norm(newString.toString()).trim());
+      else strings.add(newString.toString().trim());
     }
     return strings;
   }
@@ -445,16 +461,15 @@ public class QueryParser {
 
       if(index == -1 && index1 == -1) {
         // 3. {AnnotationType}
-        // this can be either {AnnotationType, AnnotationType...}
+        // this can be {AnnotationType, AnnotationType...}
         ArrayList fields = splitString(elem, ',', true);
 
         for(int p = 0; p < fields.size(); p++) {
-
           if(areAllTermsTokens
                   && !((String)fields.get(p)).equals(baseTokenAnnotationType))
             areAllTermsTokens = false;
 
-          terms.add(new Term(field, ((String)fields.get(p)), "*"));
+          terms.add(new Term(field, norm(((String)fields.get(p))), "*"));
           pos.add(new Integer(position));
           if(p == 0)
             consider.add(new Boolean(true));
@@ -469,9 +484,7 @@ public class QueryParser {
 
         ArrayList fields = splitString(elem, ',', false);
         for(int p = 0; p < fields.size(); p++) {
-
           index = ((String)fields.get(p)).indexOf("==");
-          index1 = findIndexOf((String)fields.get(p), '.');
           // here this is also posible
           // {AnnotationType, AnnotationType=="String"}
           if(index != -1) {
@@ -485,6 +498,7 @@ public class QueryParser {
             }
             if(!annotType.trim().equals(baseTokenAnnotationType))
               areAllTermsTokens = false;
+            
             terms.add(new Term(field, annotText, annotType + ".string"));
             pos.add(new Integer(position));
             if(p == 0)
@@ -495,6 +509,7 @@ public class QueryParser {
           else {
             if(!(norm((String)fields.get(p))).equals(baseTokenAnnotationType))
               areAllTermsTokens = false;
+            
             terms.add(new Term(field, norm(((String)fields.get(p))), "*"));
             pos.add(new Integer(position));
             if(p == 0)
@@ -600,7 +615,7 @@ public class QueryParser {
         }
       }
       // there can be many tokens
-      String[] subTokens = norm(newString).split("( )");
+      String[] subTokens = norm(newString).split("( )+");
       for(int k = 0; k < subTokens.length; k++) {
         if(subTokens[k].trim().length() > 0) {
           terms.add(new Term(field, norm(subTokens[k]), baseTokenAnnotationType

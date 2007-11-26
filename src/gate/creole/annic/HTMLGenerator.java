@@ -34,13 +34,13 @@ public class HTMLGenerator {
 
     // at the begining we find out number of rows we need to create for
     // this
-    ArrayList rows = getRowData(patternAnnotations);
+    List<String> rows = getRowData(patternAnnotations);
     Collections.sort(rows);
 
     // find out the number of columns
-    ArrayList colPositions = getColsPositions(patternAnnotations);
-    Collections.sort(colPositions, new Comparator() {
-      public int compare(Object a, Object b) {
+    List<String> colPositions = getColsPositions(patternAnnotations);
+    Collections.sort(colPositions, new Comparator<String>() {
+      public int compare(String a, String b) {
         int aVal = Integer.parseInt((String)a);
         int bVal = Integer.parseInt((String)b);
         return aVal - bVal;
@@ -50,12 +50,16 @@ public class HTMLGenerator {
     patternAnnotations = sort(patternAnnotations);
 
     html += "\n"
-            + "<tr> <td style=\"width: 85.25pt; border-left: medium none; border-right: 1.0pt dashed blue; border-top: 1.0pt dashed blue; border-bottom: 1.0pt dashed blue; padding-left: 5.4pt; padding-right: 5.4pt; padding-top: 0cm; padding-bottom: 0cm\"><p class=\"MsoNormal\" align=\"center\">Pattern Text : </td>";
+            + "<tr> " +
+            "<td style=\"width: 85.25pt; border-left: medium none; border-right: 1.0pt dashed blue; " +
+            "border-top: 1.0pt dashed blue; border-bottom: 1.0pt dashed blue; padding-left: 5.4pt; " +
+            "padding-right: 5.4pt; padding-top: 0cm; padding-bottom: 0cm\">" +
+            "<p class=\"MsoNormal\" align=\"center\">Pattern Text : </td>";
     int endPos = patternAnnotations[0].getStartOffset();
     int startPos = 0;
     for(int j = 1; j < colPositions.size(); j++) {
       startPos = endPos;
-      endPos = Integer.parseInt((String)colPositions.get(j));
+      endPos = Integer.parseInt(colPositions.get(j));
       String text = pattern.getPatternText(startPos, endPos);
       html += "\n"
               + "<td style=\"border: 1.0pt dashed blue;\" align=\"center\">"
@@ -67,9 +71,9 @@ public class HTMLGenerator {
 
       // first column is the annotation Type
       html += "\n" + "<tr width=\"100%\" height=\"19\"> <td>"
-              + (String)rows.get(j) + "</td>";
-      ArrayList rowAnnotations = findOutAnnotationsOfType(patternAnnotations,
-              (String)rows.get(j));
+              + rows.get(j) + "</td>";
+      List<PatternAnnotation> rowAnnotations = findOutAnnotationsOfType(patternAnnotations,
+              rows.get(j));
 
       int columnsDrawn = 0;
       for(int k = 0; k < rowAnnotations.size(); k++) {
@@ -84,13 +88,13 @@ public class HTMLGenerator {
 
         // now lets find out the annotations at the same starting
         // positions
-        ArrayList tempList = new ArrayList();
+        List<PatternAnnotation> tempList = new ArrayList<PatternAnnotation>();
         tempList.add(annot);
 
         int maxEndOffset = annot.getEndOffset();
         int m = k + 1;
         for(; m < rowAnnotations.size(); m++) {
-          PatternAnnotation annot1 = (PatternAnnotation)rowAnnotations.get(m);
+          PatternAnnotation annot1 = rowAnnotations.get(m);
           if(annot.getStartOffset() == annot1.getStartOffset()) {
             tempList.add(annot1);
             if(annot1.getEndOffset() > maxEndOffset) {
@@ -123,8 +127,7 @@ public class HTMLGenerator {
         }
 
         for(m = 0; m < tempList.size(); m++) {
-          html += addFeatures(((PatternAnnotation)tempList.get(m))
-                  .getFeatures())
+          html += addFeatures(tempList.get(m).getFeatures())
                   + "<br>";
         }
 
@@ -178,7 +181,7 @@ public class HTMLGenerator {
 
   private static String columnsToDraw(
           PatternAnnotation[] currentTableAnnotations,
-          ArrayList rowAnnotations, int currentPos, ArrayList colPositions) {
+          List<PatternAnnotation> rowAnnotations, int currentPos, List<String> colPositions) {
 
     // if currentPos == 0
     // this is the first annotation in this row
@@ -193,7 +196,7 @@ public class HTMLGenerator {
     }
 
     noOfColumnsToDraw = noOfColumnsToDraw(startPoint,
-            ((PatternAnnotation)rowAnnotations.get(currentPos))
+            rowAnnotations.get(currentPos)
                     .getStartOffset(), colPositions);
     String html = "";
     for(int i = 0; i < noOfColumnsToDraw; i++) {
@@ -203,13 +206,13 @@ public class HTMLGenerator {
   }
 
   private static int noOfColumnsToDraw(int start, int end,
-          ArrayList colPositions) {
+          List<String> colPositions) {
     if(start == end) return 0;
 
     int counter = 0;
     int i = 0;
     for(; i < colPositions.size(); i++) {
-      if(Integer.parseInt((String)colPositions.get(i)) == start) {
+      if(Integer.parseInt(colPositions.get(i)) == start) {
         i++;
         break;
       }
@@ -218,7 +221,7 @@ public class HTMLGenerator {
     if(i == colPositions.size() || i < 0) i = 0;
 
     for(; i < colPositions.size(); i++) {
-      if(end == Integer.parseInt((String)colPositions.get(i))) {
+      if(end == Integer.parseInt(colPositions.get(i))) {
         counter++;
         break;
       }
@@ -236,9 +239,9 @@ public class HTMLGenerator {
    * @param type
    * @return
    */
-  private static ArrayList findOutAnnotationsOfType(
+  private static List<PatternAnnotation> findOutAnnotationsOfType(
           PatternAnnotation[] annotations, String type) {
-    ArrayList annots = new ArrayList();
+    List<PatternAnnotation> annots = new ArrayList<PatternAnnotation>();
     for(int i = 0; i < annotations.length; i++) {
       if(annotations[i].getType().equals(type)) {
         annots.add(annotations[i]);
@@ -248,7 +251,7 @@ public class HTMLGenerator {
   }
 
   private static int getColSpan(int startOffset, int endOffset,
-          ArrayList colPositions) {
+          List<String> colPositions) {
     // given startOffset and endOffset
     // we need to find out how many columns this particular annotations
     // needs to span
@@ -257,7 +260,7 @@ public class HTMLGenerator {
     // lets find out the starting position
     int i = 0;
     for(; i < colPositions.size(); i++) {
-      if(Integer.parseInt((String)colPositions.get(i)) == startOffset) {
+      if(Integer.parseInt(colPositions.get(i)) == startOffset) {
         i++;
         break;
       }
@@ -275,7 +278,7 @@ public class HTMLGenerator {
     // position
     // in the col Positions
     for(; i < colPositions.size(); i++) {
-      if(endOffset == Integer.parseInt((String)colPositions.get(i))) {
+      if(endOffset == Integer.parseInt(colPositions.get(i))) {
         counter++;
         break;
       }
@@ -284,10 +287,10 @@ public class HTMLGenerator {
     return counter;
   }
 
-  private static ArrayList getColsPositions(PatternAnnotation[] annotations) {
+  private static List<String> getColsPositions(PatternAnnotation[] annotations) {
     // the logic is:
     // find out the unique number of endOffsets
-    ArrayList offsets = new ArrayList();
+    List<String> offsets = new ArrayList<String>();
     for(int i = 0; i < annotations.length; i++) {
       int endOffset = annotations[i].getEndOffset();
       int startOffset = annotations[i].getStartOffset();
@@ -317,8 +320,8 @@ public class HTMLGenerator {
    * @param annotations
    * @return a list of string objects referring to the annotation types
    */
-  private static ArrayList getRowData(PatternAnnotation[] annotations) {
-    ArrayList types = new ArrayList();
+  private static List<String> getRowData(PatternAnnotation[] annotations) {
+    List<String> types = new ArrayList<String>();
     for(int i = 0; i < annotations.length; i++) {
       String type = annotations[i].getType();
       if(types.contains(type))
@@ -330,11 +333,11 @@ public class HTMLGenerator {
 
   // this method takes the features of a particular annotations
   // and returns the equivalent html code
-  private static String addFeatures(HashMap features) {
+  private static String addFeatures(Map<String, String> features) {
     String html = "<select size=\"1\" >";
-    Iterator fIter = features.keySet().iterator();
+    Iterator<String> fIter = features.keySet().iterator();
     while(fIter.hasNext()) {
-      String key = (String)fIter.next();
+      String key = fIter.next();
       String value = features.get(key).toString();
       html += "\n" + "<option>" + key + " = \"" + value + "\"</option>";
     }

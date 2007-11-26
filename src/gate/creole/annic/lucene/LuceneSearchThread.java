@@ -16,6 +16,8 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import gate.creole.annic.Pattern;
 import gate.creole.annic.PatternAnnotation;
@@ -71,9 +73,9 @@ public class LuceneSearchThread {
   public boolean finished = false;
 
   /**
-   * Index of the documentID we are currently searching for.
+   * Index of the serializedFileID we are currently searching for.
    */
-  private int documentIDIndex = 0;
+  private int serializedFileIDIndex = 0;
 
   /**
    * QueryItemIndex
@@ -81,14 +83,14 @@ public class LuceneSearchThread {
   private int queryItemIndex = 0;
 
   /**
-   * List of document IDs retrieved from lucene index.
+   * List of serialized Files IDs retrieved from the lucene index
    */
-  private ArrayList documentIDsList = new ArrayList();
+  private List<String> serializedFilesIDsList = new ArrayList<String>();
 
   /**
    * A Map that holds information about search results.
    */
-  private HashMap searchResultInfoMap = new HashMap();
+  private Map<String, List<QueryItem>> searchResultInfoMap = new HashMap<String, List<QueryItem>>();
 
   /**
    * First term position index.
@@ -106,15 +108,15 @@ public class LuceneSearchThread {
   private boolean fwdIterationEnded = false;
 
   /**
-   * We keep track of what was the last document ID visited. This is
+   * We keep track of what was the last ID of the serialized File that we visited. This is
    * used for optimization reasons
    */
-  private String documentIDInUse = null;
+  private String serializedFileIDInUse = null;
 
   /**
    * This is where we store the tokenStreamInUse
    */
-  private ArrayList tokenStreamInUse = null;
+  private List<gate.creole.annic.apache.lucene.analysis.Token> tokenStreamInUse = null;
 
   /**
    * Query
@@ -146,8 +148,8 @@ public class LuceneSearchThread {
    * @return true iff search was successful false otherwise
    */
   public boolean search(String query, int patternWindow, String indexLocation,
-          String corpusToSearchIn, LuceneSearcher luceneSearcher)
-          throws SearchException {
+          String corpusToSearchIn, String annotationSetToSearchIn,
+          LuceneSearcher luceneSearcher) throws SearchException {
 
     this.query = query;
     this.contextWindow = patternWindow;
@@ -160,10 +162,10 @@ public class LuceneSearchThread {
      * searching. These parameters are used mostly to keep track of
      * where to start fetching the next results from
      */
-    searchResultInfoMap = new HashMap();
-    documentIDIndex = 0;
+    searchResultInfoMap = new HashMap<String, List<QueryItem>>();
+    serializedFileIDIndex = 0;
     queryItemIndex = 0;
-    documentIDsList = new ArrayList();
+    serializedFilesIDsList = new ArrayList<String>();
     ftpIndex = -1;
     success = false;
     fwdIterationEnded = false;
@@ -219,9 +221,6 @@ public class LuceneSearchThread {
       // Saving was accomplished by using XML serialization of the map.
       HashMap indexInformation = (HashMap)xstream.fromXML(fileReader);
       fileReader.close();
-      // find out the baseTokenAnnotationType name
-      baseTokenAnnotationType = (String)indexInformation
-              .get(Constants.BASE_TOKEN_ANNOTATION_TYPE);
 
       // find out if the current index was indexed by annicIndexPR
       String indexedWithANNICIndexPR = (String)indexInformation
@@ -235,9 +234,20 @@ public class LuceneSearchThread {
         return false;
       }
 
+      // find out the baseTokenAnnotationType name
+      baseTokenAnnotationType = ((String)indexInformation
+              .get(Constants.BASE_TOKEN_ANNOTATION_TYPE)).trim();
+
+      int separatorIndex = baseTokenAnnotationType.lastIndexOf('.');
+      if(separatorIndex >= 0) {
+        baseTokenAnnotationType = baseTokenAnnotationType
+                .substring(separatorIndex + 1);
+      }
+
       // create various Queries from the user's query
       Query[] luceneQueries = queryParser.parse("contents", query,
-              baseTokenAnnotationType, corpusToSearchIn);
+              baseTokenAnnotationType, corpusToSearchIn,
+              annotationSetToSearchIn);
       if(queryParser.needValidation()) {
         if(DEBUG) System.out.println("Validation enabled!");
       }
@@ -247,10 +257,10 @@ public class LuceneSearchThread {
 
       // create an instance of Index Searcher
       LuceneIndexSearcher searcher = new LuceneIndexSearcher(indexLocation);
-
+      
       // we need to iterate through one query at a time
       for(int luceneQueryIndex = 0; luceneQueryIndex < luceneQueries.length; luceneQueryIndex++) {
-
+          
         /*
          * this call reinitializes the first Term positions arraylists
          * which are being used to store the results
@@ -276,7 +286,10 @@ public class LuceneSearchThread {
           continue;
         }
 
-        // iterate through each result and collect necessary information
+
+        
+        // iterate through each result and collect necessary
+        // information
         for(int hitIndex = 0; hitIndex < hits.length(); hitIndex++) {
           int index = firstTermPositions[0].indexOf(new Integer(hits
                   .id(hitIndex)));
@@ -298,15 +311,16 @@ public class LuceneSearchThread {
           int qType = ((Integer)firstTermPositions[3].get(index)).intValue();
 
           // find out the documentID
-          String documentID = hits.doc(hitIndex).get(Constants.DOCUMENT_ID);
-
+          String serializedFileID = hits.doc(hitIndex).get(Constants.DOCUMENT_ID_FOR_SERIALIZED_FILE);
           QueryItem queryItem = new QueryItem();
+          queryItem.annotationSetName = hits.doc(hitIndex).get(
+                  Constants.ANNOTATION_SET_ID).intern();
           queryItem.id = hits.id(hitIndex);
           queryItem.ftp = ftp;
           queryItem.patLen = patLen;
           queryItem.qType = qType;
           queryItem.query = luceneQueries[luceneQueryIndex];
-          queryItem.queryString = queryParser.getQueryString(luceneQueryIndex);
+          queryItem.queryString = queryParser.getQueryString(luceneQueryIndex).intern();
 
           /*
            * all these information go in the top level arrayList. we
@@ -314,25 +328,22 @@ public class LuceneSearchThread {
            * where each element in the arrayList provides information
            * about different query issued over it
            */
-          ArrayList queryItemsList = (ArrayList)searchResultInfoMap
-                  .get(documentID);
+          List<QueryItem> queryItemsList = searchResultInfoMap.get(serializedFileID);
           if(queryItemsList == null) {
-            queryItemsList = new ArrayList();
+            queryItemsList = new ArrayList<QueryItem>();
             queryItemsList.add(queryItem);
-            searchResultInfoMap.put(documentID, queryItemsList);
-            documentIDsList.add(documentID);
+            searchResultInfoMap.put(serializedFileID, queryItemsList);
+            serializedFilesIDsList.add(serializedFileID);
           }
           else {
             // before inserting we check if it is already added
             if(!doesAlreadyExist(queryItem, queryItemsList)) {
               queryItemsList.add(queryItem);
-              searchResultInfoMap.put(documentID, queryItemsList);
             }
           }
         }
       }
       searcher.close();
-
       // if any result possible, return true
       if(searchResultInfoMap.size() > 0)
         success = true;
@@ -348,16 +359,16 @@ public class LuceneSearchThread {
   /**
    * First term positions.
    */
-  private ArrayList ftp;
+  private List ftp;
 
   /**
-   * This method returns an array containing instances of QueryResult
+   * This method returns a list containing instances of Pattern
    * 
    * @param numberOfResults the number of results to fetch
    * @return a list of QueryResult
    * @throws Exception
    */
-  public ArrayList next(int numberOfResults) throws Exception {
+  public List<Pattern> next(int numberOfResults) throws Exception {
 
     /*
      * We check here, if there were no results found, we return null
@@ -371,25 +382,25 @@ public class LuceneSearchThread {
     }
 
     int noOfResultsToFetch = numberOfResults;
-    ArrayList toReturn = new ArrayList();
+    List<Pattern> toReturn = new ArrayList<Pattern>();
 
     // iterator over one document ID
-    for(; documentIDIndex < documentIDsList.size(); documentIDIndex++, queryItemIndex = 0, this.ftp = null) {
+    for(; serializedFileIDIndex < serializedFilesIDsList.size(); serializedFileIDIndex++, queryItemIndex = 0, this.ftp = null) {
 
       // deal with one document at a time
-      String documentID = (String)documentIDsList.get(documentIDIndex);
+      String serializedFileID = serializedFilesIDsList.get(serializedFileIDIndex);
 
       // obtain the information about all queries
-      ArrayList queryItemsList = (ArrayList)searchResultInfoMap.get(documentID);
+      List<QueryItem> queryItemsList = searchResultInfoMap.get(serializedFileID);
 
-      if(documentIDInUse == null || !documentIDInUse.equals(documentID)
+      if(serializedFileIDInUse == null || !serializedFileIDInUse.equals(serializedFileID)
               || tokenStreamInUse == null) {
-        documentIDInUse = documentID;
+        serializedFileIDInUse = serializedFileID;
         try {
           // this is the first and last time we want this tokenStream
           // to hold information about the current document
           tokenStreamInUse = getTokenStreamFromDisk(indexLocation,
-                  getCompatibleName(documentID));
+                  getCompatibleName(serializedFileID));
         }
         catch(Exception e) {
           continue;
@@ -418,9 +429,10 @@ public class LuceneSearchThread {
           qType = 1;
           patLen = 1;
         }
-        PatternResult patternResult = getTokenStream(tokenStreamInUse, patLen,
-                qType, contextWindow, queryItem.queryString,
-                baseTokenAnnotationType, noOfResultsToFetch);
+        PatternResult patternResult = getPatternResult(tokenStreamInUse,
+                queryItem.annotationSetName, patLen, qType, contextWindow,
+                queryItem.queryString, baseTokenAnnotationType,
+                noOfResultsToFetch);
 
         /*
          * if none of the found patterns is valid continue with the next
@@ -436,10 +448,11 @@ public class LuceneSearchThread {
         if(noOfResultsToFetch != -1)
           noOfResultsToFetch -= patternResult.numberOfPatterns;
 
-        ArrayList annicPatterns = createAnnicPatterns(new LuceneQueryResult(
-                removeUnitNumber(documentID), patternResult.firstTermPositions,
-                patternResult.patternLegths, queryItem.qType,
-                patternResult.gateAnnotations, queryItem.queryString));
+        List<Pattern> annicPatterns = createAnnicPatterns(new LuceneQueryResult(
+                removeUnitNumber(serializedFileID), patternResult.annotationSetName,
+                patternResult.firstTermPositions, patternResult.patternLegths,
+                queryItem.qType, patternResult.gateAnnotations,
+                queryItem.queryString));
         toReturn.addAll(annicPatterns);
 
         /*
@@ -470,16 +483,16 @@ public class LuceneSearchThread {
    * @param aResult
    * @return
    */
-  private ArrayList createAnnicPatterns(LuceneQueryResult aResult) {
+  private List<Pattern> createAnnicPatterns(LuceneQueryResult aResult) {
     // get the result from search engine
-    ArrayList annicPatterns = new ArrayList();
-    ArrayList firstTermPositions = aResult.getFirstTermPositions();
+    List<Pattern> annicPatterns = new ArrayList<Pattern>();
+    List firstTermPositions = aResult.getFirstTermPositions();
     if(firstTermPositions != null && firstTermPositions.size() > 0) {
-      ArrayList patternLength = aResult.patternLength();
+      List<Integer> patternLength = aResult.patternLength();
       // locate Pattern
-      ArrayList pats = locatePatterns((String)aResult.getDocumentID(), aResult
-              .getGateAnnotations(), firstTermPositions, patternLength, aResult
-              .getQuery());
+      List<Pattern> pats = locatePatterns((String)aResult.getDocumentID(),
+              aResult.getAnnotationSetName(), aResult.getGateAnnotations(),
+              firstTermPositions, patternLength, aResult.getQuery());
       if(pats != null) {
         annicPatterns.addAll(pats);
       }
@@ -498,16 +511,17 @@ public class LuceneSearchThread {
    * @param queryString
    * @return
    */
-  private ArrayList locatePatterns(String docID, ArrayList gateAnnotations,
-          ArrayList firstTermPositions, ArrayList patternLength,
+  private List<Pattern> locatePatterns(String docID, String annotationSetName,
+          List<List<PatternAnnotation>> gateAnnotations,
+          List firstTermPositions, List<Integer> patternLength,
           String queryString) {
 
     // patterns
-    ArrayList pat = new ArrayList();
+    List<Pattern> pats = new ArrayList<Pattern>();
     outer: for(int i = 0; i < gateAnnotations.size(); i++) {
 
       // each element in the tokens stream is a pattern
-      ArrayList annotations = (ArrayList)gateAnnotations.get(i);
+      List<PatternAnnotation> annotations = gateAnnotations.get(i);
       if(annotations.size() == 0) {
         continue;
       }
@@ -517,8 +531,7 @@ public class LuceneSearchThread {
       int highest = -1;
       for(int j = 0; j < annotations.size(); j++) {
         // each annotation is an instance of GateAnnotation
-        gate.creole.annic.PatternAnnotation ga = (gate.creole.annic.PatternAnnotation)annotations
-                .get(j);
+        PatternAnnotation ga = annotations.get(j);
         if(ga.getStartOffset() < smallest) {
           smallest = ga.getStartOffset();
         }
@@ -538,8 +551,7 @@ public class LuceneSearchThread {
       // and now place the text
       for(int j = 0; j < annotations.size(); j++) {
         // each annotation is an instance of GateAnnotation
-        gate.creole.annic.PatternAnnotation ga = (gate.creole.annic.PatternAnnotation)annotations
-                .get(j);
+        PatternAnnotation ga = annotations.get(j);
         if(ga.getText() == null) {
           // this is to avoid annotations such as split
           continue;
@@ -553,13 +565,13 @@ public class LuceneSearchThread {
 
         // we will initiate the annotTypes as well
         if(luceneSearcher.annotationTypesMap.keySet().contains(ga.getType())) {
-          ArrayList aFeatures = (ArrayList)luceneSearcher.annotationTypesMap
-                  .get(ga.getType());
-          HashMap features = ga.getFeatures();
+          List<String> aFeatures = luceneSearcher.annotationTypesMap.get(ga
+                  .getType());
+          Map<String, String> features = ga.getFeatures();
           if(features != null) {
-            Iterator fSet = features.keySet().iterator();
+            Iterator<String> fSet = features.keySet().iterator();
             while(fSet.hasNext()) {
-              String feature = (String)fSet.next();
+              String feature = fSet.next();
               if(!aFeatures.contains(feature)) {
                 aFeatures.add(feature);
               }
@@ -568,8 +580,8 @@ public class LuceneSearchThread {
           luceneSearcher.annotationTypesMap.put(ga.getType(), aFeatures);
         }
         else {
-          HashMap features = ga.getFeatures();
-          ArrayList aFeatures = new ArrayList();
+          Map<String, String> features = ga.getFeatures();
+          List<String> aFeatures = new ArrayList<String>();
           aFeatures.add("All");
           if(features != null) {
             aFeatures.addAll(features.keySet());
@@ -589,8 +601,7 @@ public class LuceneSearchThread {
 
       for(int j = 0; j < annotations.size(); j++) {
         // each annotation is an instance of GateAnnotation
-        gate.creole.annic.PatternAnnotation ga = (gate.creole.annic.PatternAnnotation)annotations
-                .get(j);
+        PatternAnnotation ga = annotations.get(j);
         if(ga.getPosition() == stPos) {
           if(ga.getStartOffset() < patStart) {
             patStart = ga.getStartOffset();
@@ -607,11 +618,12 @@ public class LuceneSearchThread {
       }
 
       // now create the pattern for this
-      Pattern ap = new Pattern(docID, new String(patternText), patStart,
-              endOffset, smallest, highest, annotations, queryString);
-      pat.add(ap);
+      Pattern ap = new Pattern(docID, annotationSetName,
+              new String(patternText), patStart, endOffset, smallest, highest,
+              annotations, queryString);
+      pats.add(ap);
     }
-    return pat;
+    return pats;
   }
 
   /**
@@ -635,8 +647,8 @@ public class LuceneSearchThread {
    * @throws Exception
    * @return ArrayList
    */
-  private ArrayList getTokenStreamFromDisk(String indexDirectory,
-          String documentID) throws Exception {
+  private List<gate.creole.annic.apache.lucene.analysis.Token> getTokenStreamFromDisk(
+          String indexDirectory, String documentID) throws Exception {
     if(indexDirectory.startsWith("file:/"))
       indexDirectory = indexDirectory.substring(6, indexDirectory.length());
 
@@ -648,7 +660,8 @@ public class LuceneSearchThread {
     ObjectInput input = new ObjectInputStream(buffer);
 
     // deserialize the List
-    ArrayList recoveredTokenStream = (ArrayList)input.readObject();
+    List<gate.creole.annic.apache.lucene.analysis.Token> recoveredTokenStream = 
+      (List<gate.creole.annic.apache.lucene.analysis.Token>)input.readObject();
     if(input != null) {
       // close "input" and its underlying streams
       input.close();
@@ -671,9 +684,11 @@ public class LuceneSearchThread {
    * @param baseTokenAnnotationType
    * @return
    */
-  private PatternResult getTokenStream(ArrayList subTokens, int patLen,
-          int qType, int patWindow, String query,
-          String baseTokenAnnotationType, int numberOfResultsToFetch) {
+  private PatternResult getPatternResult(
+          List<gate.creole.annic.apache.lucene.analysis.Token> subTokens,
+          String annotationSetName, int patLen, int qType, int patWindow,
+          String query, String baseTokenAnnotationType,
+          int numberOfResultsToFetch) {
 
     /*
      * ok so we first see what kind of query is that two possibilities
@@ -682,12 +697,12 @@ public class LuceneSearchThread {
      * indicates the PhraseQuery
      */
     if(qType == 1) {
-      return getTokenStream(subTokens, patLen, patWindow, query,
-              baseTokenAnnotationType, numberOfResultsToFetch);
+      return getPatternResult(subTokens, annotationSetName, patLen, patWindow,
+              query, baseTokenAnnotationType, numberOfResultsToFetch);
     }
     else {
       /*
-       * where the query is Term In term query it is possible that user
+       * where the query is Term. In term query it is possible that user
        * is searching for the particular annotation type (say: "Token"
        * or may be for text (say: "Hello") query parser converts the
        * annotation type query into Token == "*" and the latter to
@@ -701,10 +716,9 @@ public class LuceneSearchThread {
       String annotType = (String)ftp.get(1);
 
       // so here we search through subTokens and find out the positions
-      ArrayList positions = new ArrayList();
+      List<Integer> positions = new ArrayList<Integer>();
       for(int j = 0; j < subTokens.size(); j++) {
-        gate.creole.annic.apache.lucene.analysis.Token token = (gate.creole.annic.apache.lucene.analysis.Token)subTokens
-                .get(j);
+        gate.creole.annic.apache.lucene.analysis.Token token = subTokens.get(j);
         String type = token.termText();
         String text = token.type();
 
@@ -724,8 +738,8 @@ public class LuceneSearchThread {
 
       this.ftp = positions;
       // we have positions here
-      return getTokenStream(subTokens, 1, patWindow, query,
-              baseTokenAnnotationType, numberOfResultsToFetch);
+      return getPatternResult(subTokens, annotationSetName, 1, patWindow,
+              query, baseTokenAnnotationType, numberOfResultsToFetch);
     }
   }
 
@@ -740,16 +754,19 @@ public class LuceneSearchThread {
    * @param query String
    * @return PatternResult
    */
-  private PatternResult getTokenStream(ArrayList subTokens, int patLen,
-          int patWindow, String query, String baseTokenAnnotationType,
-          int noOfResultsToFetch) {
+  private PatternResult getPatternResult(
+          List<gate.creole.annic.apache.lucene.analysis.Token> subTokens,
+          String annotationSetName, int patLen, int patWindow, String query,
+          String baseTokenAnnotationType, int noOfResultsToFetch) {
 
-    ArrayList tokens = new ArrayList();
-    ArrayList patLens = new ArrayList();
+    List<List<PatternAnnotation>> tokens = new ArrayList<List<PatternAnnotation>>();
+    List<Integer> patLens = new ArrayList<Integer>();
     ftpIndex++;
 
     // Phrase Query
     // consider only one pattern at a time
+
+    // first term position index at the begining
     int ftpIndexATB = ftpIndex;
     mainForLoop: for(; ftpIndex < ftp.size()
             && (noOfResultsToFetch == -1 || noOfResultsToFetch > 0); ftpIndex++) {
@@ -760,8 +777,7 @@ public class LuceneSearchThread {
       // find out the token with pos
       int j = 0;
       for(; j < subTokens.size(); j++) {
-        gate.creole.annic.apache.lucene.analysis.Token token = (gate.creole.annic.apache.lucene.analysis.Token)subTokens
-                .get(j);
+        gate.creole.annic.apache.lucene.analysis.Token token = subTokens.get(j);
         if(token.getPosition() == pos) {
           break;
         }
@@ -775,8 +791,7 @@ public class LuceneSearchThread {
        */
       int k = j - 1;
       for(; k >= 0; k--) {
-        gate.creole.annic.apache.lucene.analysis.Token token = (gate.creole.annic.apache.lucene.analysis.Token)subTokens
-                .get(k);
+        gate.creole.annic.apache.lucene.analysis.Token token = subTokens.get(k);
         if(token.getPosition() < pos
                 && token.termText().equals(baseTokenAnnotationType)
                 && token.type().equals("*")) {
@@ -799,7 +814,7 @@ public class LuceneSearchThread {
 
         boolean breakNow = false;
         for(; k < subTokens.size(); k++) {
-          gate.creole.annic.apache.lucene.analysis.Token token = (gate.creole.annic.apache.lucene.analysis.Token)subTokens
+          gate.creole.annic.apache.lucene.analysis.Token token = subTokens
                   .get(k);
           if(token.getPosition() == pos) {
             breakNow = true;
@@ -817,15 +832,15 @@ public class LuceneSearchThread {
       int leftEnd = leftstart == -1 ? -1 : k - 1;
 
       /*
-       * we need to validate this pattern as a result of query, we get
-       * the positions of the first term we need to locate the full
-       * pattern along with all its other annotations this is done by
-       * using the ValidatePattern class this class provides a method,
-       * which takes as arguments the query Tokens the position in the
+       * we need to validate this pattern. As a result of query, we get
+       * the positions of the first term. We need to locate the full
+       * pattern along with all its other annotations. This is done by
+       * using the ValidatePattern class. This class provides a method,
+       * which takes as arguments the query Tokens, the position in the
        * tokenStream from where to start searching and returns the end
-       * offset of the last annotation in the found pattern we then
+       * offset of the last annotation in the found pattern. We then
        * search for this endoffset in our current tokenStream to
-       * retrieve the wanted annotations
+       * retrieve the wanted annotations.
        */
       int upto = -1;
       int tempPos = 0;
@@ -833,7 +848,7 @@ public class LuceneSearchThread {
 
         try {
 
-          ArrayList queryTokens = luceneSearcher.getQueryTokens(query);
+          List<String> queryTokens = luceneSearcher.getQueryTokens(query);
           if(queryTokens == null) {
             queryTokens = new QueryParser().findTokens(query);
             luceneSearcher.addQueryTokens(query, queryTokens);
@@ -865,10 +880,9 @@ public class LuceneSearchThread {
              */
             int jj = leftEnd + 1;
             boolean breaknow = false;
-            tempPos = ((gate.creole.annic.apache.lucene.analysis.Token)subTokens
-                    .get(jj)).getPosition();
+            tempPos = subTokens.get(jj).getPosition();
             for(; jj < subTokens.size(); jj++) {
-              gate.creole.annic.apache.lucene.analysis.Token token = (gate.creole.annic.apache.lucene.analysis.Token)subTokens
+              gate.creole.annic.apache.lucene.analysis.Token token = subTokens
                       .get(jj);
               if(token.endOffset() == upto) {
                 tempPos = token.getPosition();
@@ -899,7 +913,7 @@ public class LuceneSearchThread {
          * right direction to obtain the pattern
          */
         for(counter = 0; counter < patLen && k < subTokens.size(); k++) {
-          gate.creole.annic.apache.lucene.analysis.Token token = (gate.creole.annic.apache.lucene.analysis.Token)subTokens
+          gate.creole.annic.apache.lucene.analysis.Token token = subTokens
                   .get(k);
           if(token.termText().equals(baseTokenAnnotationType)
                   && token.type().equals("*")) {
@@ -918,8 +932,7 @@ public class LuceneSearchThread {
        * other words search for the first term of the right context
        */
       for(; k < subTokens.size(); k++) {
-        gate.creole.annic.apache.lucene.analysis.Token token = (gate.creole.annic.apache.lucene.analysis.Token)subTokens
-                .get(k);
+        gate.creole.annic.apache.lucene.analysis.Token token = subTokens.get(k);
         if(token.getPosition() == tempPos + 1) {
           break;
         }
@@ -928,8 +941,7 @@ public class LuceneSearchThread {
       // and now we need to locate the right context pattern
       counter = 0;
       for(; k < subTokens.size(); k++) {
-        gate.creole.annic.apache.lucene.analysis.Token token = (gate.creole.annic.apache.lucene.analysis.Token)subTokens
-                .get(k);
+        gate.creole.annic.apache.lucene.analysis.Token token = subTokens.get(k);
         if(token.startOffset() >= upto
                 && token.termText().equals(baseTokenAnnotationType)
                 && token.type().equals("*")) {
@@ -947,11 +959,10 @@ public class LuceneSearchThread {
          * now we would search for the position untill we see it having
          * the same position
          */
-        tempPos = ((gate.creole.annic.apache.lucene.analysis.Token)subTokens
-                .get(k)).getPosition();
+        tempPos = subTokens.get(k).getPosition();
 
         for(; k < subTokens.size(); k++) {
-          gate.creole.annic.apache.lucene.analysis.Token token = (gate.creole.annic.apache.lucene.analysis.Token)subTokens
+          gate.creole.annic.apache.lucene.analysis.Token token = subTokens
                   .get(k);
           if(token.getPosition() != tempPos) {
             break;
@@ -970,11 +981,10 @@ public class LuceneSearchThread {
        * index were converted into separate tokens we need to convert
        * them back into annotations
        */
-      ArrayList patternGateAnnotations = new ArrayList();
+      List<PatternAnnotation> patternGateAnnotations = new ArrayList<PatternAnnotation>();
       PatternAnnotation ga = null;
       for(int m = j; m <= k; m++) {
-        gate.creole.annic.apache.lucene.analysis.Token token = (gate.creole.annic.apache.lucene.analysis.Token)subTokens
-                .get(m);
+        gate.creole.annic.apache.lucene.analysis.Token token = subTokens.get(m);
         String text = token.termText();
         int st = token.startOffset();
         int end = token.endOffset();
@@ -1015,6 +1025,7 @@ public class LuceneSearchThread {
 
     // finally create an instance of PatternResult
     PatternResult pr = new PatternResult();
+    pr.annotationSetName = annotationSetName;
     pr.gateAnnotations = tokens;
     pr.firstTermPositions = new ArrayList();
     for(int i = 0; i < pr.gateAnnotations.size(); i++) {
@@ -1033,11 +1044,13 @@ public class LuceneSearchThread {
   private class PatternResult {
     int numberOfPatterns;
 
-    ArrayList gateAnnotations;
+    List<List<PatternAnnotation>> gateAnnotations;
+    
+    String annotationSetName;
 
-    ArrayList firstTermPositions;
+    List firstTermPositions;
 
-    ArrayList patternLegths;
+    List<Integer> patternLegths;
   }
 
   /**
@@ -1051,7 +1064,7 @@ public class LuceneSearchThread {
 
     int id;
 
-    ArrayList ftp;
+    List ftp;
 
     int patLen;
 
@@ -1061,11 +1074,15 @@ public class LuceneSearchThread {
 
     String queryString;
 
+    String annotationSetName;
+
     public boolean equals(Object m) {
       if(m instanceof QueryItem) {
         QueryItem n = (QueryItem)m;
         return n.score == score && n.id == id && n.patLen == patLen
-                && n.qType == qType && n.queryString.equals(queryString)
+                && n.qType == qType && n.ftp.size() == ftp.size()
+                && n.queryString.equals(queryString)
+                && n.annotationSetName.equals(annotationSetName)
                 && areTheyEqual(n.ftp, ftp, qType);
       }
       return false;
@@ -1079,10 +1096,10 @@ public class LuceneSearchThread {
    * @param top
    * @return
    */
-  private boolean doesAlreadyExist(QueryItem n, ArrayList top) {
+  private boolean doesAlreadyExist(QueryItem n, List<QueryItem> top) {
 
     for(int i = 0; i < top.size(); i++) {
-      QueryItem m = (QueryItem)top.get(i);
+      QueryItem m = top.get(i);
       if(m.equals(n)) return true;
     }
     return false;
@@ -1095,7 +1112,7 @@ public class LuceneSearchThread {
    * @param qType
    * @return
    */
-  private boolean areTheyEqual(ArrayList ftp, ArrayList ftp1, int qType) {
+  private boolean areTheyEqual(List ftp, List ftp1, int qType) {
     if(qType == 1) {
       if(ftp.size() == ftp1.size()) {
         for(int i = 0; i < ftp.size(); i++) {
@@ -1120,6 +1137,7 @@ public class LuceneSearchThread {
 
   /**
    * Gets the query.
+   * 
    * @return
    */
   public String getQuery() {

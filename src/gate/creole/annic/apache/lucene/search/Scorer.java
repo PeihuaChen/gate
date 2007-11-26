@@ -21,7 +21,12 @@ import java.io.IOException;
 /** Expert: Implements scoring for a class of queries. */
 public abstract class Scorer {
   private Similarity similarity;
-
+  /*
+   * Niraj
+   */
+  protected IndexSearcher searcher;
+  /* End */
+  
   /** Constructs a Scorer. */
   protected Scorer(Similarity similarity) {
     this.similarity = similarity;
@@ -35,7 +40,9 @@ public abstract class Scorer {
   /* Niraj */
   /** Scores all documents and passes them to a collector. */
   public void score(HitCollector hc, IndexSearcher searcher) throws IOException {
-    while (next()) {
+    this.searcher = searcher;
+    
+    while (next(this.searcher)) {
       hc.collect(doc(), score(searcher));
     }
   }
@@ -52,6 +59,12 @@ public abstract class Scorer {
    * is another match. */
   public abstract boolean next() throws IOException;
 
+  /* Niraj */
+  /** Advance to the next document matching the query.  Returns true iff there
+   * is another match. */
+  public abstract boolean next(IndexSearcher searcher) throws IOException;
+  /* End */
+  
   /** Returns the current document number.  Initially invalid, until {@link
    * #next()} is called the first time. */
   public abstract int doc();
