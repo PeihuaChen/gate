@@ -1255,6 +1255,11 @@ public class NameBearerHandle implements Handle, StatusListener,
               ((Corpus)target).populate(url, filter,
                       corpusFiller.getEncoding(), corpusFiller
                               .isRecurseDirectories());
+              if(((Corpus)target).getDataStore() != null) {
+                ((LanguageResource)target).getDataStore().sync(
+                      (LanguageResource)target);
+              }
+              
               long endTime = System.currentTimeMillis();
               fireStatusChanged("Corpus populated in "
                       + NumberFormat.getInstance().format(
@@ -1280,6 +1285,20 @@ public class NameBearerHandle implements Handle, StatusListener,
                               + "See \"Messages\" tab for details!", "GATE",
                       JOptionPane.ERROR_MESSAGE);
               rie.printStackTrace(Err.getPrintWriter());
+            }
+            catch(PersistenceException pe) {
+              JOptionPane.showMessageDialog(getLargeView(),
+                      "Corpus couldn't be synchronized!\n "
+                              + "See \"Messages\" tab for details!", "GATE",
+                      JOptionPane.ERROR_MESSAGE);
+              pe.printStackTrace(Err.getPrintWriter());
+            }
+            catch(SecurityException pe) {
+              JOptionPane.showMessageDialog(getLargeView(),
+                      "Corpus couldn't be synchronized!\n "
+                              + "See \"Messages\" tab for details!", "GATE",
+                      JOptionPane.ERROR_MESSAGE);
+              pe.printStackTrace(Err.getPrintWriter());
             }
           }
         }

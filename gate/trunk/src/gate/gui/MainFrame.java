@@ -39,6 +39,7 @@ import com.ontotext.gate.vr.Gaze;
 
 import gate.*;
 import gate.creole.*;
+import gate.creole.annic.Constants;
 import gate.event.*;
 import gate.persist.PersistenceException;
 import gate.security.*;
@@ -2206,43 +2207,82 @@ public class MainFrame extends JFrame implements ProgressListener,
   /** Method is used in NewDSAction */
   protected DataStore createSearchableDataStore() {
     try {
-      JPanel mainPanel = new JPanel(new GridLayout(6, 1));
-      JPanel panel1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-      JPanel panel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-      JPanel panel3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-      JPanel panel4 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-      JPanel panel5 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-      JPanel panel6 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-
-      mainPanel.add(panel1);
-      mainPanel.add(panel2);
-      mainPanel.add(panel3);
-      mainPanel.add(panel4);
-      mainPanel.add(panel5);
-      mainPanel.add(panel6);
-
-      panel1.add(new JLabel("DataStore Location:"));
-      panel2.add(new JLabel("Index Location:"));
-      panel3.add(new JLabel("Input Annotation Set Name:"));
-      panel4.add(new JLabel("Base Token Annotation Type:"));
-      panel5.add(new JLabel("Index Unit Annotation Type:"));
-      panel6.add(new JLabel("Features To Exclude:"));
-
-      final JTextField dsLocation = new JTextField("", 25);
-      final JTextField indexLocation = new JTextField("", 25);
-      JTextField btat = new JTextField("Token", 25);
-      JTextField iuat = new JTextField("Sentence", 25);
-      JTextField inputAS = new JTextField("Key", 25);
-      JTextField fte = new JTextField("SpaceToken;Split;Person.matches", 25);
-      panel1.add(dsLocation);
-      panel2.add(indexLocation);
-      panel3.add(inputAS);
-      panel4.add(btat);
-      panel5.add(iuat);
-      panel6.add(fte);
-
-      JButton dsBrowse = new JButton("Browse");
-      JButton indexBrowse = new JButton("Browse");
+      JPanel mainPanel = new JPanel(new GridBagLayout());
+      
+      final JTextField dsLocation = new JTextField("", 20);
+      final JTextField indexLocation = new JTextField("", 20);
+      
+      JTextField btat = new JTextField(Constants.DEFAULT_ANNOTATION_SET_NAME+".Token", 20);
+      btat.setToolTipText("Examples: Token, AnnotationSetName.Token, "+Constants.DEFAULT_ANNOTATION_SET_NAME+".Token");
+      JTextField iuat = new JTextField("", 20);
+      iuat.setToolTipText("Examples: Sentence, AnnotationSetName.Sentence, "+Constants.DEFAULT_ANNOTATION_SET_NAME+".Sentence");
+      
+      final List<String> inputASList = new ArrayList<String>();
+      inputASList.add("Key");
+      final JTextField inputAS = new JTextField("", 20);
+      inputAS.setText("Key");
+      inputAS.setEditable(false);
+      JButton editInputAS = new JButton(MainFrame.getIcon("edit-list"));
+      editInputAS.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent ae) {
+          ListEditorDialog listEditor = new ListEditorDialog(getInstance(), 
+                  inputASList,
+                  "java.lang.String");
+          List result = listEditor.showDialog();
+          if(result != null){
+            inputASList.clear();
+            inputASList.addAll(result);
+            if(inputASList.size() > 0){
+              String text = inputASList.get(0) == null ? "<null>" : inputASList.get(0).toString();
+              for(int j = 1; j < inputASList.size(); j++){
+                text += ";" + (inputASList.get(j) == null ? "<null>" : inputASList.get(j).toString());
+              }
+              inputAS.setText(text);
+            }else{
+              inputAS.setText("");
+            }
+          }
+        }
+      });
+      
+      JComboBox asie = new JComboBox(new String[]{"include", "exclude"});
+      inputAS.setToolTipText("Leave blank for indexing all annotation sets");
+      
+      final List<String> fteList = new ArrayList<String>();
+      fteList.add("SpaceToken");
+      fteList.add("Split");
+      final JTextField fte = new JTextField("", 20);
+      fte.setText("SpaceToken;Split");
+      fte.setEditable(false);
+      JButton editFTE = new JButton(MainFrame.getIcon("edit-list"));
+      editFTE.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent ae) {
+          ListEditorDialog listEditor = new ListEditorDialog(getInstance(), 
+                  fteList,
+                  "java.lang.String");
+          List result = listEditor.showDialog();
+          if(result != null){
+            fteList.clear();
+            fteList.addAll(result);
+            if(fteList.size() > 0){
+              String text = fteList.get(0) == null ? "<null>" : fteList.get(0).toString();
+              for(int j = 1; j < fteList.size(); j++){
+                text += ";" + (fteList.get(j) == null ? "<null>" : fteList.get(j).toString());
+              }
+              fte.setText(text);
+            }else{
+              fte.setText("");
+            }
+          }
+        }
+      });
+            
+      JComboBox ftie = new JComboBox(new String[]{"include", "exclude"});
+      ftie.setSelectedIndex(1);
+      fte.setToolTipText("Leave blank for inclusion of all features");
+      
+      JButton dsBrowse = new JButton(MainFrame.getIcon("open-file"));
+      JButton indexBrowse = new JButton(MainFrame.getIcon("open-file"));
       dsBrowse.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ae) {
           // first we need to ask for a new empty directory
@@ -2279,12 +2319,167 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
       });
 
-      panel1.add(dsBrowse);
-      panel2.add(indexBrowse);
+      
+      GridBagConstraints constraints = new GridBagConstraints();
+      constraints.gridx = GridBagConstraints.RELATIVE;
+      constraints.gridy = 0;
+      constraints.gridwidth = 3;
+      constraints.anchor = GridBagConstraints.WEST;
+      constraints.fill = GridBagConstraints.NONE;
+      constraints.insets = new Insets(0, 0, 0, 5);
+      mainPanel.add(new JLabel("Datastore URL:"), constraints);
 
+      constraints = new GridBagConstraints();
+      constraints.gridx = GridBagConstraints.RELATIVE;
+      constraints.gridy = 0;
+      constraints.gridwidth = 5;
+      constraints.fill = GridBagConstraints.HORIZONTAL;
+      constraints.insets = new Insets(0, 0, 0, 10);
+      mainPanel.add(dsLocation, constraints);
+
+      constraints = new GridBagConstraints();
+      constraints.gridx = GridBagConstraints.RELATIVE;
+      constraints.gridy = 0;
+      constraints.gridwidth = 1;
+      constraints.anchor = GridBagConstraints.NORTHWEST;
+      mainPanel.add(dsBrowse, constraints);
+      dsBrowse.setBorderPainted(false);
+      dsBrowse.setContentAreaFilled(false);
+
+      //second row
+      constraints = new GridBagConstraints();
+      constraints.gridx = GridBagConstraints.RELATIVE;
+      constraints.gridy = 1;
+      constraints.gridwidth = 3;
+      constraints.anchor = GridBagConstraints.WEST;
+      constraints.fill = GridBagConstraints.NONE;
+      constraints.insets = new Insets(0, 0, 0, 5);
+      mainPanel.add(new JLabel("Index Location:"), constraints);
+
+      constraints = new GridBagConstraints();
+      constraints.gridx = GridBagConstraints.RELATIVE;
+      constraints.gridy = 1;
+      constraints.gridwidth = 5;
+      constraints.fill = GridBagConstraints.HORIZONTAL;
+      constraints.insets = new Insets(0, 0, 0, 10);
+      mainPanel.add(indexLocation, constraints);
+
+      constraints = new GridBagConstraints();
+      constraints.gridx = GridBagConstraints.RELATIVE;
+      constraints.gridy = 1;
+      constraints.gridwidth = 1;
+      constraints.anchor = GridBagConstraints.NORTHWEST;
+      mainPanel.add(indexBrowse, constraints);
+      indexBrowse.setBorderPainted(false);
+      indexBrowse.setContentAreaFilled(false);
+      
+      //third row row
+      constraints = new GridBagConstraints();
+      constraints.gridx = GridBagConstraints.RELATIVE;
+      constraints.gridy = 2;
+      constraints.gridwidth = 2;
+      constraints.anchor = GridBagConstraints.WEST;
+      constraints.fill = GridBagConstraints.NONE;
+      constraints.insets = new Insets(0, 0, 0, 5);
+      mainPanel.add(new JLabel("Annotation Sets:"), constraints);
+
+      constraints = new GridBagConstraints();
+      constraints.gridx = GridBagConstraints.RELATIVE;
+      constraints.gridy = 2;
+      constraints.gridwidth = 1;
+      constraints.fill = GridBagConstraints.HORIZONTAL;
+      constraints.insets = new Insets(0, 0, 0, 10);
+      mainPanel.add(asie, constraints);
+
+      constraints = new GridBagConstraints();
+      constraints.gridx = GridBagConstraints.RELATIVE;
+      constraints.gridy = 2;
+      constraints.gridwidth = 5;
+      constraints.fill = GridBagConstraints.HORIZONTAL;
+      constraints.insets = new Insets(0, 0, 0, 10);
+      mainPanel.add(inputAS, constraints);
+      
+      constraints = new GridBagConstraints();
+      constraints.gridx = GridBagConstraints.RELATIVE;
+      constraints.gridy = 2;
+      constraints.gridwidth = 1;
+      constraints.anchor = GridBagConstraints.NORTHWEST;
+      mainPanel.add(editInputAS, constraints);
+      editInputAS.setBorderPainted(false);
+      editInputAS.setContentAreaFilled(false);
+      
+      //fourth row row
+      constraints = new GridBagConstraints();
+      constraints.gridx = GridBagConstraints.RELATIVE;
+      constraints.gridy = 3;
+      constraints.gridwidth = 3;
+      constraints.anchor = GridBagConstraints.WEST;
+      constraints.fill = GridBagConstraints.NONE;
+      constraints.insets = new Insets(0, 0, 0, 5);
+      mainPanel.add(new JLabel("Base Token Type:"), constraints);
+
+      constraints = new GridBagConstraints();
+      constraints.gridx = GridBagConstraints.RELATIVE;
+      constraints.gridy = 3;
+      constraints.gridwidth = 5;
+      constraints.anchor = GridBagConstraints.NORTHWEST;
+      mainPanel.add(btat, constraints);
+      
+      //fifth row
+      constraints = new GridBagConstraints();
+      constraints.gridx = GridBagConstraints.RELATIVE;
+      constraints.gridy = 4;
+      constraints.gridwidth = 3;
+      constraints.anchor = GridBagConstraints.WEST;
+      constraints.fill = GridBagConstraints.NONE;
+      constraints.insets = new Insets(0, 0, 0, 5);
+      mainPanel.add(new JLabel("Index Unit Type:"), constraints);
+
+      constraints = new GridBagConstraints();
+      constraints.gridx = GridBagConstraints.RELATIVE;
+      constraints.gridy = 4;
+      constraints.gridwidth = 5;
+      constraints.anchor = GridBagConstraints.NORTHWEST;
+      mainPanel.add(iuat, constraints);
+
+      //sixth row
+      constraints = new GridBagConstraints();
+      constraints.gridx = GridBagConstraints.RELATIVE;
+      constraints.gridy = 5;
+      constraints.gridwidth = 2;
+      constraints.anchor = GridBagConstraints.WEST;
+      constraints.fill = GridBagConstraints.NONE;
+      constraints.insets = new Insets(0, 0, 0, 5);
+      mainPanel.add(new JLabel("Features:"), constraints);
+
+      constraints = new GridBagConstraints();
+      constraints.gridx = GridBagConstraints.RELATIVE;
+      constraints.gridy = 5;
+      constraints.gridwidth = 1;
+      constraints.fill = GridBagConstraints.HORIZONTAL;
+      constraints.insets = new Insets(0, 0, 0, 10);
+      mainPanel.add(ftie, constraints);
+
+      constraints = new GridBagConstraints();
+      constraints.gridx = GridBagConstraints.RELATIVE;
+      constraints.gridy = 5;
+      constraints.gridwidth = 5;
+      constraints.fill = GridBagConstraints.HORIZONTAL;
+      constraints.insets = new Insets(0, 0, 0, 10);
+      mainPanel.add(fte, constraints);
+      
+      constraints = new GridBagConstraints();
+      constraints.gridx = GridBagConstraints.RELATIVE;
+      constraints.gridy = 5;
+      constraints.gridwidth = 1;
+      constraints.anchor = GridBagConstraints.NORTHWEST;
+      mainPanel.add(editFTE, constraints);
+      editFTE.setBorderPainted(false);
+      editFTE.setContentAreaFilled(false);
+      
       int returnValue = JOptionPane.showOptionDialog(MainFrame.getInstance(),
               mainPanel, "SearchableDataStore", JOptionPane.PLAIN_MESSAGE,
-              JOptionPane.OK_CANCEL_OPTION, null,
+              JOptionPane.OK_CANCEL_OPTION, MainFrame.getIcon("empty"),
               new String[] {"OK", "Cancel"}, "OK");
       if(returnValue == JOptionPane.OK_OPTION) {
 
@@ -2304,17 +2499,52 @@ public class MainFrame extends JFrame implements ProgressListener,
         parameters.put("INDEX_LOCATION_URL", new URL(indexLocation.getText()));
         parameters.put("BASE_TOKEN_ANNOTATION_TYPE", btat.getText());
         parameters.put("INDEX_UNIT_ANNOTATION_TYPE", iuat.getText());
-        parameters.put("FEATURES_TO_EXCLUDE", new ArrayList());
-        parameters.put("ANNOTATION_SET_NAME", inputAS.getText());
-        String[] fteArray = fte.getText().split(";");
-        if(fteArray != null && fteArray.length > 0) {
-          ArrayList fteList = new ArrayList();
-          for(int k = 0; k < fteArray.length; k++) {
-            fteList.add(fteArray[k]);
+        
+        if(inputAS.getText().trim().length() > 0) {
+          ArrayList<String> inputASList1 = new ArrayList<String>();
+          String[] inputASArray = inputAS.getText().trim().split(";");
+          if(inputASArray != null && inputASArray.length > 0) {
+            for(int k = 0; k < inputASArray.length; k++) {
+              inputASList1.add(inputASArray[k]);
+            }
           }
-          parameters.put("FEATURES_TO_EXCLUDE", fteList);
+          if(asie.getSelectedIndex() == 0) {
+            // user has provided values for inclusion
+            parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE, inputASList1);
+            parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_EXCLUDE, new ArrayList<String>());
+          } else {
+            // user has provided values for exclusion
+            parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_EXCLUDE, inputASList1); 
+            parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE, new ArrayList<String>());
+          }
+        } else {
+          parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_EXCLUDE, new ArrayList<String>());
+          parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE, new ArrayList<String>());
+        }
+        
+        if(fte.getText().trim().length() > 0) {
+          ArrayList<String> fteList1 = new ArrayList<String>();
+          String[] inputASArray = fte.getText().trim().split(";");
+          if(inputASArray != null && inputASArray.length > 0) {
+            for(int k = 0; k < inputASArray.length; k++) {
+              fteList1.add(inputASArray[k]);
+            }
+          }
+          if(ftie.getSelectedIndex() == 0) {
+            // user has provided values for inclusion
+            parameters.put(Constants.FEATURES_TO_INCLUDE, fteList1);
+            parameters.put(Constants.FEATURES_TO_EXCLUDE, new ArrayList<String>());
+          } else {
+            // user has provided values for exclusion
+            parameters.put(Constants.FEATURES_TO_EXCLUDE, fteList1);
+            parameters.put(Constants.FEATURES_TO_INCLUDE, new ArrayList<String>());
+          }
+        } else {
+          parameters.put(Constants.FEATURES_TO_EXCLUDE, new ArrayList<String>());
+          parameters.put(Constants.FEATURES_TO_INCLUDE, new ArrayList<String>());
         }
 
+        
         Class[] params = new Class[2];
         params[0] = Class.forName("gate.creole.annic.Indexer", true, Gate
                 .getClassLoader());

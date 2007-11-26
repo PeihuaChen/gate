@@ -32,6 +32,7 @@ import gate.corpora.*;
 import gate.creole.*;
 import gate.creole.ir.TestIndex;
 import gate.creole.morph.TestMorph;
+import gate.creole.annic.test.TestAnnic;
 import gate.creole.gazetteer.TestFlexibleGazetteer;
 import gate.creole.gazetteer.TestGazetteer;
 import gate.email.TestEmail;
@@ -238,6 +239,7 @@ public class TestGate {
         Test theSuite = (Test)suiteMethod.invoke(null);
         suite.addTest(theSuite);
       } else {
+        suite.addTest(TestAnnic.suite());
         // no test name specified, so run them all
         suite.addTest(TestWordNet.suite());
         suite.addTest(TestIndex.suite());
