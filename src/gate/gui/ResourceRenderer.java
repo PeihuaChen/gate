@@ -13,6 +13,7 @@
  */
 package gate.gui;
 
+import java.awt.Color;
 import java.awt.Component;
 
 import javax.swing.*;
@@ -111,7 +112,9 @@ public class ResourceRenderer extends JLabel
       rData = (ResourceData)Gate.getCreoleRegister().
                                  get(value.getClass().getName());
     }else{
-      text = (value == null) ? "<none>" : value.toString();
+      text = (value == null) ? "<null>" : value.toString();
+      if(value == null)
+        setForeground(Color.red);
     }
     if(rData != null){
       toolTipText = "<HTML>Type: <b>" + rData.getName() + "</b></HTML>";
