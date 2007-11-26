@@ -90,7 +90,7 @@ public class NLPFeaturesList {
         Object key = iterator.next();
         out.println(key + " " + featuresList.get(key) + " "
           + idfFeatures.get(key));
-        // System.out.println(key+ " " + featuresList.get(key));
+         //System.out.println("*"+key+ "* " + featuresList.get(key));
       }
       out.close();
     } catch(IOException e) {
@@ -101,13 +101,16 @@ public class NLPFeaturesList {
   public void addFeaturesFromDoc(NLPFeaturesOfDoc fd) {
     long size = featuresList.size();
     for(int i = 0; i < fd.numInstances; ++i) {
-      String[] features = fd.featuresInLine[i].toString().split(
+      String[] features = fd.featuresInLine[i].toString().trim().split(
         ConstantParameters.ITEMSEPARATOR);
       for(int j = 0; j < features.length; ++j) {
         if(features[j] != null && Pattern.matches((".+\\[[-0-9]+\\]$"), features[j])) {
           int ind = features[j].lastIndexOf('[');
           features[j] = features[j].substring(0,ind);
         }
+        //if the feature is an empty, don't count it as a feature at all. 
+        if(features[j].equals(""))
+          continue;
         String feat = features[j];
         if(feat.contains(SYMBOLNGARM))
           feat = feat.substring(0, feat.lastIndexOf(SYMBOLNGARM));
