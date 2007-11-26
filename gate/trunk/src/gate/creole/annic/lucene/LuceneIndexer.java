@@ -12,15 +12,23 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import gate.creole.annic.Constants;
 import gate.creole.annic.IndexException;
 import gate.creole.annic.Indexer;
+import gate.creole.annic.apache.lucene.document.Document;
 import gate.creole.annic.apache.lucene.index.IndexReader;
 import gate.creole.annic.apache.lucene.index.IndexWriter;
+import gate.creole.annic.apache.lucene.index.Term;
+import gate.creole.annic.apache.lucene.index.TermEnum;
+import gate.creole.annic.apache.lucene.search.Hits;
+import gate.creole.annic.apache.lucene.search.IndexSearcher;
+import gate.creole.annic.apache.lucene.search.TermQuery;
 import gate.Corpus;
 
 /**
@@ -34,7 +42,7 @@ import gate.Corpus;
 public class LuceneIndexer implements Indexer {
 
   protected boolean DEBUG = false;
-  
+
   /** An corpus for indexing */
   protected Corpus corpus;
 
@@ -42,11 +50,6 @@ public class LuceneIndexer implements Indexer {
    * Various parameters such as location of the Index etc.
    */
   protected Map parameters;
-
-  /**
-   * For each document, we obtain the indexing units.
-   */
-  protected Map noOfIndexUnitsPerDocument;
 
   /**
    * Constructor
@@ -63,7 +66,6 @@ public class LuceneIndexer implements Indexer {
    */
   protected void checkIndexParameters(Map parameters) throws IndexException {
     this.parameters = parameters;
-    noOfIndexUnitsPerDocument = new HashMap();
 
     if(parameters == null) {
       throw new IndexException("No parameters provided!");
@@ -89,14 +91,17 @@ public class LuceneIndexer implements Indexer {
             .get(Constants.BASE_TOKEN_ANNOTATION_TYPE);
     String indexUnitAnnotationType = (String)parameters
             .get(Constants.INDEX_UNIT_ANNOTATION_TYPE);
+
     if(DEBUG) {
-      System.out.println("BTAT : "+baseTokenAnnotationType);
-      System.out.println("IUAT : "+indexUnitAnnotationType);
+      System.out.println("BTAT : " + baseTokenAnnotationType);
+      System.out.println("IUAT : " + indexUnitAnnotationType);
     }
-    
+
     if(baseTokenAnnotationType == null
             || baseTokenAnnotationType.trim().length() == 0) {
-      throw new IndexException("Base Token Annotation Type not set properly");
+      baseTokenAnnotationType = Constants.ANNIC_TOKEN;
+      parameters.put(Constants.BASE_TOKEN_ANNOTATION_TYPE,
+              Constants.ANNIC_TOKEN);
     }
   }
 
@@ -124,6 +129,10 @@ public class LuceneIndexer implements Indexer {
    *          INDEX_UNIT_ANNOTATION_TYPE
    *          <P>
    *          FEATURES_TO_EXCLUDE
+   *          <P>
+   *          FEATURES_TO_INCLUDE
+   *          <P>
+   * 
    */
   public void createIndex(Map indexParameters) throws IndexException {
     checkIndexParameters(indexParameters);
@@ -142,27 +151,20 @@ public class LuceneIndexer implements Indexer {
           gate.Document gateDoc = (gate.Document)corpus.get(i);
           String idToUse = gateDoc.getLRPersistenceId() == null ? gateDoc
                   .getName() : gateDoc.getLRPersistenceId().toString();
-          System.out.print("Indexing : "+idToUse+" ...");
+
+          System.out.print("Indexing : " + idToUse + " ...");
           String corpusName = corpus.getLRPersistenceId() == null ? corpus
                   .getName() : corpus.getLRPersistenceId().toString();
-          gate.creole.annic.apache.lucene.document.Document[] luceneDocs = getLuceneDoc(
+
+          List<gate.creole.annic.apache.lucene.document.Document> luceneDocs = getLuceneDocuments(
                   corpusName, gateDoc, indexLocation.toString());
 
-          if(luceneDocs == null) {
-            String indexUnitAnnotationType = (String)parameters
-                    .get(Constants.INDEX_UNIT_ANNOTATION_TYPE);
-            System.err
-                    .println("Ignoring Document : There are no annotations of type :"
-                            + indexUnitAnnotationType);
-          }
-          else {
-            for(int j = 0; j < luceneDocs.length; j++) {
-              if(luceneDocs[j] != null) {
-                writer.addDocument(luceneDocs[j]);
+          if(luceneDocs != null) {
+            for(int j = 0; j < luceneDocs.size(); j++) {
+              if(luceneDocs.get(j) != null) {
+                writer.addDocument(luceneDocs.get(j));
               }
             }
-            noOfIndexUnitsPerDocument.put(idToUse, new Integer(
-                    luceneDocs.length));
           }
           if(gateDoc.getLRPersistenceId() != null) {
             gate.Factory.deleteResource(gateDoc);
@@ -213,7 +215,6 @@ public class LuceneIndexer implements Indexer {
         f.delete();
       }
     }
-    noOfIndexUnitsPerDocument = new HashMap();
     isDeleted = dir.delete();
     if(!isDeleted) {
       throw new IndexException("Can't delete directory" + dir.getAbsolutePath());
@@ -237,19 +238,21 @@ public class LuceneIndexer implements Indexer {
 
       if(added != null) {
         for(int i = 0; i < added.size(); i++) {
-          
+
           gate.Document gateDoc = added.get(i);
-          
+
           String idToUse = gateDoc.getLRPersistenceId() == null ? gateDoc
                   .getName() : gateDoc.getLRPersistenceId().toString();
-          System.out.print("Indexing : "+idToUse+ " ...");
-          gate.creole.annic.apache.lucene.document.Document[] docs = getLuceneDoc(
+          System.out.print("Indexing : " + idToUse + " ...");
+          List<gate.creole.annic.apache.lucene.document.Document> docs = getLuceneDocuments(
                   corpusPersistenceID, gateDoc, location);
-          if(docs == null) continue;
-          for(int j = 0; j < docs.length; j++) {
-            writer.addDocument(docs[j]);
+          if(docs == null) {
+            System.out.println("Done");
+            continue;
           }
-          noOfIndexUnitsPerDocument.put(idToUse, new Integer(docs.length));
+          for(int j = 0; j < docs.size(); j++) {
+            writer.addDocument(docs.get(j));
+          }
           System.out.println("Done");
         }// for (add all added documents)
       }
@@ -261,7 +264,6 @@ public class LuceneIndexer implements Indexer {
       // whatever happens we need to try to close the writer
       try {
         writer.close();
-        writeParametersToDisk();
       }
       catch(java.io.IOException ioe) {
         throw new IndexException(ioe);
@@ -280,7 +282,6 @@ public class LuceneIndexer implements Indexer {
   public void remove(List removedIDs) throws IndexException {
     String location = new File(((URL)parameters
             .get(Constants.INDEX_LOCATION_URL)).getFile()).getAbsolutePath();
-
     try {
 
       IndexReader reader = IndexReader.open(location);
@@ -289,31 +290,27 @@ public class LuceneIndexer implements Indexer {
       if(removedIDs != null) {
         for(int i = 0; i < removedIDs.size(); i++) {
           String id = removedIDs.get(i).toString();
-
-          // for this ID we need to find out noOfUnits
-          Integer size = (Integer)noOfIndexUnitsPerDocument.get(id);
-          if(size == null) {
-            continue;
-          }
-          System.out.print("Removing => " + id + "...");
-
-          for(int j = 0; j < size.intValue(); j++) {
-            String tempID = id + "-" + j;
+          
+          Set<String> serializedFilesIDs = getNamesOfSerializedFiles(id);
+          if(serializedFilesIDs.size() > 0) {
+            System.out.print("Removing => " + id + "...");
+          
+          for(String serializedFileID : serializedFilesIDs) {
             gate.creole.annic.apache.lucene.index.Term term = new gate.creole.annic.apache.lucene.index.Term(
-                    Constants.DOCUMENT_ID, tempID);
+                    Constants.DOCUMENT_ID_FOR_SERIALIZED_FILE, serializedFileID);
             reader.delete(term);
             // deleting them from the disk as well
             File file = new File(new File(location,
-                    Constants.SERIALIZED_FOLDER_NAME), tempID + ".annic");
+                    Constants.SERIALIZED_FOLDER_NAME), serializedFileID
+                    + ".annic");
             if(file.exists()) file.delete();
           }
-          noOfIndexUnitsPerDocument.remove(id);
           System.out.println("Done ");
+          }
         }// for (remove all removed documents)
       }
 
       reader.close();
-      writeParametersToDisk();
     }
     catch(java.io.IOException ioe) {
       throw new IndexException(ioe);
@@ -333,23 +330,39 @@ public class LuceneIndexer implements Indexer {
    * @return
    * @throws IndexException
    */
-  private gate.creole.annic.apache.lucene.document.Document[] getLuceneDoc(
+  private List<gate.creole.annic.apache.lucene.document.Document> getLuceneDocuments(
           String corpusPersistenceID, gate.Document gateDoc, String location)
           throws IndexException {
-    String set = (String)parameters.get(Constants.ANNOTATION_SET_NAME);
+    ArrayList sets_to_include = new ArrayList((List)parameters
+            .get(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE));
+    ArrayList sets_to_exclude = new ArrayList((List)parameters
+            .get(Constants.ANNOTATION_SETS_NAMES_TO_EXCLUDE));
+
     String baseTokenAnnotationType = (String)parameters
             .get(Constants.BASE_TOKEN_ANNOTATION_TYPE);
-    ArrayList featuresToExclude = new ArrayList((List)parameters
-            .get(Constants.FEATURES_TO_EXCLUDE));
+
     String indexUnitAnnotationType = (String)parameters
             .get(Constants.INDEX_UNIT_ANNOTATION_TYPE);
+
+    ArrayList featuresToExclude = new ArrayList((List)parameters
+            .get(Constants.FEATURES_TO_EXCLUDE));
+
+    ArrayList featuresToInclude = new ArrayList((List)parameters
+            .get(Constants.FEATURES_TO_INCLUDE));
+
+    ArrayList annotationSetsToExclude = new ArrayList((List)parameters
+            .get(Constants.ANNOTATION_SETS_NAMES_TO_EXCLUDE));
+
+    ArrayList annotationSetsToInclude = new ArrayList((List)parameters
+            .get(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE));
 
     String idToUse = gateDoc.getLRPersistenceId() == null
             ? gateDoc.getName()
             : gateDoc.getLRPersistenceId().toString();
-    
-    return new gate.creole.annic.lucene.LuceneDocument().createDocument(
-            corpusPersistenceID, gateDoc, idToUse, set, featuresToExclude,
+
+    return new gate.creole.annic.lucene.LuceneDocument().createDocuments(
+            corpusPersistenceID, gateDoc, idToUse, annotationSetsToInclude,
+            annotationSetsToExclude, featuresToInclude, featuresToExclude,
             location, baseTokenAnnotationType, indexUnitAnnotationType);
   }
 
@@ -401,8 +414,6 @@ public class LuceneIndexer implements Indexer {
 
     // Saving is accomplished just using XML serialization of the map.
     this.parameters = (HashMap)xstream.fromXML(fileReader);
-    this.noOfIndexUnitsPerDocument = (HashMap)this.parameters
-            .get(Constants.NO_OF_INDEX_UNITS_PER_DOCUMENT);
     fileReader.close();
   }
 
@@ -438,17 +449,16 @@ public class LuceneIndexer implements Indexer {
     if(corpus != null)
       indexInformation.put(Constants.CORPUS_SIZE, new Integer(corpus
               .getDocumentNames().size()));
-    indexInformation.put(Constants.NO_OF_INDEX_UNITS_PER_DOCUMENT,
-            noOfIndexUnitsPerDocument);
 
     // we would use XStream library to store annic patterns
     com.thoughtworks.xstream.XStream xstream = new com.thoughtworks.xstream.XStream();
 
     // Saving is accomplished just using XML serialization of
     // the map.
-    try{
+    try {
       xstream.toXML(indexInformation, fileWriter);
-    }finally{
+    }
+    finally {
       fileWriter.close();
     }
   }
@@ -458,5 +468,77 @@ public class LuceneIndexer implements Indexer {
    */
   public Map getParameters() {
     return this.parameters;
+  }
+
+  /**
+   * This method returns a set of annotation set names that are indexed.
+   * 
+   * @return
+   */
+  public Set<String> getIndexedAnnotationSetNames() throws IndexException {
+    String location = new File(((URL)parameters
+            .get(Constants.INDEX_LOCATION_URL)).getFile()).getAbsolutePath();
+    Set<String> toReturn = new HashSet<String>();
+
+    IndexReader reader = null;
+    try {
+      reader = IndexReader.open(location);
+      TermEnum terms = reader.terms(new Term(Constants.ANNOTATION_SET_ID, ""));
+      while(Constants.ANNOTATION_SET_ID.equals(terms.term().field())) {
+        toReturn.add(terms.term().text());
+        if(!terms.next()) break;
+      }
+    }
+    catch(IOException ioe) {
+      throw new IndexException(ioe);
+    }
+    finally {
+      try {
+        if(reader != null) reader.close();
+      }
+      catch(IOException ioe) {
+        throw new IndexException(ioe);
+      }
+    }
+    return toReturn;
+  }
+
+  /**
+   * This method returns a set of annotation set names that are indexed.
+   * 
+   * @return
+   */
+  public Set<String> getNamesOfSerializedFiles(String documentID)
+          throws IndexException {
+    String location = new File(((URL)parameters
+            .get(Constants.INDEX_LOCATION_URL)).getFile()).getAbsolutePath();
+    Set<String> toReturn = new HashSet<String>();
+    gate.creole.annic.apache.lucene.search.Searcher searcher = null;
+    try {
+      Term term = new Term(Constants.DOCUMENT_ID, documentID);
+      TermQuery tq = new TermQuery(term);
+      searcher = new IndexSearcher(location);
+      // and now execute the query
+      // result of which will be stored in hits
+      Hits luceneHits = searcher.search(tq);
+      for(int i = 0; i < luceneHits.length(); i++) {
+        Document luceneDoc = luceneHits.doc(i);
+        String documentIdOfSerializedFile = luceneDoc
+                .get(Constants.DOCUMENT_ID_FOR_SERIALIZED_FILE);
+        toReturn.add(documentIdOfSerializedFile);
+      }
+      return toReturn;
+    }
+    catch(IOException ioe) {
+      throw new IndexException(ioe);
+    }
+    finally {
+      try {
+        if(searcher != null) searcher.close();
+      }
+      catch(IOException ioe) {
+        throw new IndexException(ioe);
+      }
+    }
   }
 }

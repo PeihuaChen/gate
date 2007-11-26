@@ -7,7 +7,10 @@
  */
 package gate.creole.annic.lucene;
 
+import gate.creole.annic.PatternAnnotation;
+
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class
@@ -18,14 +21,16 @@ public class LuceneQueryResult {
 
   /** Persistance document ID. */
   private Object docID;
+  
+  private String annotationSetName;
 
-  private ArrayList firstTermPositions;
+  private List firstTermPositions;
 
-  private ArrayList patternLength;
+  private List<Integer> patternLength;
 
   private int queryType;
 
-  private ArrayList gateAnnotations;
+  private List<List<PatternAnnotation>> gateAnnotations;
 
   private String query;
 
@@ -39,10 +44,11 @@ public class LuceneQueryResult {
    * @param gateAnnotations
    * @param query
    */
-  public LuceneQueryResult(Object docID, ArrayList firstTermPositions,
-          ArrayList patternLength, int queryType, ArrayList gateAnnotations,
+  public LuceneQueryResult(Object docID, String annotationSetName, List firstTermPositions,
+          List<Integer> patternLength, int queryType, List<List<PatternAnnotation>> gateAnnotations,
           String query) {
     this.docID = docID;
+    this.annotationSetName = annotationSetName;
     this.firstTermPositions = firstTermPositions;
     this.patternLength = patternLength;
     this.queryType = queryType;
@@ -76,7 +82,7 @@ public class LuceneQueryResult {
    *         Integer values indicating positions of first annotations of
    *         found patterns in the token stream.
    */
-  public ArrayList getFirstTermPositions() {
+  public List getFirstTermPositions() {
     return firstTermPositions;
   }
 
@@ -86,7 +92,7 @@ public class LuceneQueryResult {
    * 
    * @return
    */
-  public ArrayList patternLength() {
+  public List<Integer> patternLength() {
     return patternLength;
   }
 
@@ -94,7 +100,7 @@ public class LuceneQueryResult {
    * Gets the GateAnnotations for each pattern.
    * @return
    */
-  public ArrayList getGateAnnotations() {
+  public List<List<PatternAnnotation>> getGateAnnotations() {
     return this.gateAnnotations;
   }
 
@@ -104,5 +110,13 @@ public class LuceneQueryResult {
    */
   public String getQuery() {
     return this.query;
+  }
+
+  /**
+   * Gets the annotation set Name for this result
+   * @return
+   */
+  public String getAnnotationSetName() {
+    return annotationSetName;
   }
 }

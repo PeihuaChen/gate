@@ -10,9 +10,9 @@ package gate.creole.annic;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jdom.Element;
@@ -42,6 +42,11 @@ public class Parser {
    *  DOC_ID XML Element
    */
   public static final String DOC_ID = "DOC_ID";
+
+  /**
+   *  ANNOTATION_SET_NAME XML Element
+   */
+  public static final String ANNOTATION_SET_NAME = "ANNOTATION_SET_NAME";
 
   /**
    * START_OFFSET  XML Element
@@ -179,18 +184,18 @@ public class Parser {
           sb.append(wrap(TYPE, annots[j].getType()));
           sb.append(wrap(POSITION, annots[j].getPosition()));
           // exporting features as well
-          HashMap features = annots[j].getFeatures();
+          Map<String, String> features = annots[j].getFeatures();
           sb.append(wrap(FEATURES, true));
           // one feature at a time
           if(features != null) {
-            Set keySet = features.keySet();
+            Set<String> keySet = features.keySet();
             if(keySet != null) {
-              Iterator iter = keySet.iterator();
+              Iterator<String> iter = keySet.iterator();
               while(iter.hasNext()) {
                 sb.append(wrap(FEATURE, true));
-                String key = (String)iter.next();
+                String key = iter.next();
                 sb.append(wrap(KEY, key));
-                String value = (String)features.get(key);
+                String value = features.get(key);
                 sb.append(wrap(VALUE, value));
                 sb.append(wrap(FEATURE, false));
               }
@@ -247,16 +252,17 @@ public class Parser {
       int startOffset = Integer.parseInt(hitElem.getChildText(START_OFFSET));
       int endOffset = Integer.parseInt(hitElem.getChildText(END_OFFSET));
       String docID = hitElem.getChildText(DOC_ID);
+      String setID = hitElem.getChildText(ANNOTATION_SET_NAME);
       String queryString = hitElem.getChildText(QUERY);
 
       Element patternAnnotations = hitElem.getChild(PATTERN_ANNOTATIONS);
       if(patternAnnotations == null) {
-        hits[i] = new Hit(docID, startOffset, endOffset, queryString);
+        hits[i] = new Hit(docID, setID, startOffset, endOffset, queryString);
         continue;
       }
 
       List patAnnots = patternAnnotations.getChildren(PATTERN_ANNOTATION);
-      ArrayList patAnnotsList = new ArrayList();
+      List<PatternAnnotation> patAnnotsList = new ArrayList<PatternAnnotation>();
       for(int j = 0; j < patAnnots.size(); j++) {
         Element patAnnot = (Element)patAnnots.get(j);
         PatternAnnotation pa = new PatternAnnotation();
@@ -285,7 +291,7 @@ public class Parser {
       int rightCEO = Integer.parseInt(hitElem
               .getChildText(RIGHT_CONTEXT_END_OFFSET));
 
-      hits[i] = new Pattern(docID, patternText, startOffset, endOffset,
+      hits[i] = new Pattern(docID, setID, patternText, startOffset, endOffset,
               leftCSO, rightCEO, patAnnotsList, queryString);
     }
     return hits;

@@ -85,6 +85,7 @@ extends Query {
 
           // pass these methods through to the enclosed scorer
           public boolean next() throws IOException { return scorer.next(); }
+          public boolean next(IndexSearcher searcher) throws IOException { return scorer.next(searcher); }
           public int doc() { return scorer.doc(); }
           public boolean skipTo (int i) throws IOException { return scorer.skipTo(i); }
 

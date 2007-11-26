@@ -9,6 +9,7 @@ package gate.creole.annic;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Pattern Annotation is similar to a GATE Annotation except that it
@@ -48,7 +49,7 @@ public class PatternAnnotation implements Serializable {
   /**
    * FeatureMap
    */
-  private HashMap<String, String> features;
+  private Map<String, String> features;
 
   /**
    * Position in the token stream
@@ -115,7 +116,7 @@ public class PatternAnnotation implements Serializable {
    * Gets the Features
    * @return
    */
-  public HashMap<String, String> getFeatures() {
+  public Map<String, String> getFeatures() {
     return features;
   }
 

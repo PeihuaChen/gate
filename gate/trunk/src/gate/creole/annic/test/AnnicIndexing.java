@@ -42,7 +42,7 @@ public class AnnicIndexing {
   /**
    * Features to exclude from index.
    */
-  private ArrayList<String> featuresToExclude = new ArrayList<String>(10);
+  private ArrayList<String> featuresToExclude = new ArrayList<String>();
 
   /**
    * Where to store the index.
@@ -88,14 +88,15 @@ public class AnnicIndexing {
     long start = System.currentTimeMillis();
     try {
       Map parameters = new HashMap();
-      parameters.put(Constants.ANNOTATION_SET_NAME, getAnnotationSetName());
-      parameters.put(Constants.BASE_TOKEN_ANNOTATION_TYPE,
-              getBaseTokenAnnotationType());
+      ArrayList<String> toinclude = new ArrayList<String>();
+      toinclude.add(getAnnotationSetName());
+      parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE, toinclude);
+      parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_EXCLUDE, new ArrayList<String>());
+      parameters.put(Constants.BASE_TOKEN_ANNOTATION_TYPE, getBaseTokenAnnotationType());
       parameters.put(Constants.FEATURES_TO_EXCLUDE, getFeaturesToExclude());
-      parameters.put(Constants.INDEX_UNIT_ANNOTATION_TYPE,
-              getIndexUnitAnnotationType());
-      parameters.put(Constants.INDEX_LOCATION_URL,
-              getIndexOutputDirectoryLocation());
+      parameters.put(Constants.FEATURES_TO_INCLUDE, new ArrayList<String>());
+      parameters.put(Constants.INDEX_UNIT_ANNOTATION_TYPE, getIndexUnitAnnotationType());
+      parameters.put(Constants.INDEX_LOCATION_URL, getIndexOutputDirectoryLocation());
       indexer.setCorpus(getCorpus());
       indexer.createIndex(parameters);
     }

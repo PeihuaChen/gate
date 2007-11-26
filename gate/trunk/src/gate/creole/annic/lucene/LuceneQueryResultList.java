@@ -37,7 +37,7 @@ public class LuceneQueryResultList {
 	 * @return List of QueryResult objects.
 	 * @see gate.creole.ir.QueryResult
 	 */
-	public List getQueryResultsList() {
+	public List<LuceneQueryResult> getQueryResultsList() {
 		return queryResults;
 	}
 

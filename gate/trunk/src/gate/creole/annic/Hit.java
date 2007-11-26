@@ -38,6 +38,11 @@ public class Hit implements java.io.Serializable {
   protected String documentID;
 
   /**
+   * Annotation Set Name - the annotation set this Hit belongs to
+   */
+  protected String annotationSetName;
+  
+  /**
    * Query that matches with this instance of Hit.
    */
   protected String queryString;
@@ -45,12 +50,14 @@ public class Hit implements java.io.Serializable {
   /**
    * Constructor
    * @param docID
+   * @param annotationSetName
    * @param startOffset
    * @param endOffset
    * @param queryString
    */
-  public Hit(String docID, int startOffset, int endOffset, String queryString) {
+  public Hit(String docID, String annotationSetName, int startOffset, int endOffset, String queryString) {
     this.documentID = docID;
+    this.annotationSetName = annotationSetName;
     this.startOffset = startOffset;
     this.endOffset = endOffset;
     this.queryString = queryString;
@@ -90,6 +97,14 @@ public class Hit implements java.io.Serializable {
    */
   public String getQueryString() {
     return this.queryString;
+  }
+
+  /**
+   * Returns the annotation set this pattern belongs to.
+   * @return
+   */
+  public String getAnnotationSetName() {
+    return annotationSetName;
   }
 
 }

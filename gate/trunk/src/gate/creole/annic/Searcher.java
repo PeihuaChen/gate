@@ -8,7 +8,9 @@
 package gate.creole.annic;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Searcher interface.
@@ -42,20 +44,21 @@ public interface Searcher {
    */
   public Hit[] next(int numberOfHits) throws SearchException;
 
+  
   /**
    * Returns the Map containing all possible values of AnnotationTypes
    * and Feature Values for each of this annotationType
    * 
    * @return
    */
-  public Map getAnnotationTypesMap();
+  public Map<String, List<String>> getAnnotationTypesMap();
 
   /**
    * Returns the recently set parameters
    * 
    * @return
    */
-  public Map getParameters();
+  public Map<Object, Object> getParameters();
 
   /**
    * This method can be used for exporting results

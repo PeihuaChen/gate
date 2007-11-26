@@ -127,7 +127,8 @@ public class BooleanQuery extends Query {
     }
     /* Niraj */
     public Scorer scorer(IndexReader reader, IndexSearcher searcher) throws IOException {
-        return scorer(reader);
+      this.searcher = searcher;  
+      return scorer(reader);
     }
     /* End */
 
@@ -168,7 +169,7 @@ public class BooleanQuery extends Query {
       for (int i = 0 ; i < weights.size(); i++) {
         BooleanClause c = (BooleanClause)clauses.elementAt(i);
         Weight w = (Weight)weights.elementAt(i);
-        Scorer subScorer = w.scorer(reader);
+        Scorer subScorer = w.scorer(reader, (IndexSearcher) searcher);
         if (subScorer != null)
           result.add(subScorer, c.required, c.prohibited);
         else if (c.required)

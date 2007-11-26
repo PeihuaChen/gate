@@ -39,6 +39,11 @@ final class ConjunctionScorer extends Scorer {
 
   public int doc() { return first().doc(); }
 
+  public boolean next(IndexSearcher searcher) throws IOException {
+    this.searcher = searcher;
+    return next();
+  }
+  
   public boolean next() throws IOException {
     if (firstTime) {
       init();
@@ -67,10 +72,9 @@ final class ConjunctionScorer extends Scorer {
   }
   
   /* Niraj */
-  IndexSearcher searcher = null;
   public float score(IndexSearcher searcher) throws IOException {
-      this.searcher = searcher;
-	  return score();
+	  this.searcher = searcher;
+    return score();
   }
   /* End */
 
