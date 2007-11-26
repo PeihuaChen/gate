@@ -40,4 +40,20 @@ public interface AnnotationEditor extends VisualResource{
    * @param owner
    */
   public void setOwner(AnnotationEditorOwner owner);
+
+  /**
+   * @return owner The owner (i.e. controller) for this editor.
+   */
+  public AnnotationEditorOwner getOwner();
+
+  /**
+   * @return the annotation currently edited
+   */
+  public Annotation getAnnotationCurrentlyEdited();
+
+  /**
+   * @return the annotation set currently edited
+   */
+  public AnnotationSet getAnnotationSetCurrentlyEdited();
+
 }

@@ -33,6 +33,7 @@ import gate.event.CreoleListener;
 import gate.gui.FeaturesSchemaEditor;
 import gate.gui.MainFrame;
 import gate.gui.annedit.AnnotationEditorOwner;
+import gate.gui.annedit.SearchAndAnnotatePanel;
 import gate.util.*;
 
 
@@ -105,7 +106,8 @@ public class AnnotationEditor extends AbstractVisualResource
   }
   
   protected void initBottomWindow(Window parent){
-    popupWindow = new JWindow(parent);
+    // draggable popup window
+    popupWindow = new MoveWindow(parent);
     JPanel pane = new JPanel();
     pane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
     pane.setLayout(new GridBagLayout());
@@ -156,6 +158,16 @@ public class AnnotationEditor extends AbstractVisualResource
     btn.setMargin(insets0);
     pane.add(btn, constraints);
     
+    constraints.weightx = 0;
+    pinnedButton = new JToggleButton(MainFrame.getIcon("pin"));
+    pinnedButton.setSelectedIcon(MainFrame.getIcon("pin-in"));
+    pinnedButton.setSelected(false);
+    pinnedButton.setToolTipText("Press to pin window in place.");
+    pinnedButton.setMargin(new Insets(0, 2, 0, 2));
+    pinnedButton.setBorderPainted(false);
+    pinnedButton.setContentAreaFilled(false);
+    pane.add(pinnedButton);
+
     dismissAction = new DismissAction(); 
     btn = new JButton(dismissAction);
     constraints.insets = new Insets(0, 10, 0, 0);
@@ -192,6 +204,22 @@ public class AnnotationEditor extends AbstractVisualResource
     constraints.weighty = 1;
     constraints.fill = GridBagConstraints.BOTH;
     pane.add(scroller, constraints);
+    
+    // add the search and annotate GUI at the bottom of the annotator editor
+    SearchAndAnnotatePanel searchPanel = new SearchAndAnnotatePanel();
+    searchPanel.setAnnotationEditor(this);
+    searchPanel.setAnnotationEditorWindow(popupWindow);
+    searchPanel.setBackground(pane.getBackground());
+    constraints.insets = new Insets(0, 0, 0, 0);
+    constraints.fill = GridBagConstraints.BOTH;
+    constraints.anchor = GridBagConstraints.WEST;
+    constraints.gridx = 0;
+    constraints.gridy = GridBagConstraints.RELATIVE;
+    constraints.gridwidth = GridBagConstraints.REMAINDER;
+    constraints.gridheight = GridBagConstraints.REMAINDER;
+    constraints.weightx = 0.0;
+    constraints.weighty = 0.0;
+    pane.add(searchPanel, constraints);
   }
   
 
@@ -290,6 +318,9 @@ public class AnnotationEditor extends AbstractVisualResource
    show(true);
   }
 
+  public Annotation getAnnotationCurrentlyEdited() {
+    return ann;
+  }
   
   /* (non-Javadoc)
    * @see gate.gui.annedit.AnnotationEditor#editingFinished()
@@ -310,57 +341,117 @@ public class AnnotationEditor extends AbstractVisualResource
    *
    */
   public void show(boolean autohide){
-    placeWindows();
+    placeWindows(ann.getStartNode().getOffset().intValue(),
+      ann.getEndNode().getOffset().intValue());
     popupWindow.setVisible(true);
     if(autohide) hideTimer.restart();
   }
   
-  protected void placeWindows(){
-    //calculate position
-    try{
-		  Rectangle startRect = owner.getTextComponent().modelToView(ann.getStartNode().
-		    getOffset().intValue());
-		  Rectangle endRect = owner.getTextComponent().modelToView(ann.getEndNode().
-				    getOffset().intValue());
-      Point topLeft = owner.getTextComponent().getLocationOnScreen();
-      int x = topLeft.x + startRect.x;
-      int y = topLeft.y + endRect.y + endRect.height;
-
-      //make sure the window doesn't start lower 
-      //than the end of the visible rectangle
-      Rectangle visRect = owner.getTextComponent().getVisibleRect();
-      int maxY = topLeft.y + visRect.y + visRect.height;      
-      
-      //make sure window doesn't get off-screen
+  /**
+   * Finds the best location for the editor dialog for a given span of text.
+   */
+  protected void placeWindows(int start, int end){
+    if(pinnedButton.isSelected()){
+      //just resize
+      Point where = null;
+      if(popupWindow.isVisible()){
+        where = popupWindow.getLocation();
+      }
       popupWindow.pack();
-      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-      boolean revalidate = false;
-      if(popupWindow.getSize().width > screenSize.width){
-        popupWindow.setSize(screenSize.width, popupWindow.getSize().height);
-        revalidate = true;
+      if(where != null){
+        popupWindow.setLocation(where);
       }
-      if(popupWindow.getSize().height > screenSize.height){
-        popupWindow.setSize(popupWindow.getSize().width, screenSize.height);
-        revalidate = true;
+    }else{
+      //calculate position
+      try{
+        Rectangle startRect = owner.getTextComponent().modelToView(start);
+        Rectangle endRect = owner.getTextComponent().modelToView(end);
+        Point topLeft = owner.getTextComponent().getLocationOnScreen();
+        int x = topLeft.x + startRect.x;
+        int y = topLeft.y + endRect.y + endRect.height;
+
+        //make sure the window doesn't start lower 
+        //than the end of the visible rectangle
+        Rectangle visRect = owner.getTextComponent().getVisibleRect();
+        int maxY = topLeft.y + visRect.y + visRect.height;      
+        
+        //make sure window doesn't get off-screen       
+        popupWindow.pack();
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        boolean revalidate = false;
+        if(popupWindow.getSize().width > screenSize.width){
+          popupWindow.setSize(screenSize.width, popupWindow.getSize().height);
+          revalidate = true;
+        }
+        if(popupWindow.getSize().height > screenSize.height){
+          popupWindow.setSize(popupWindow.getSize().width, screenSize.height);
+          revalidate = true;
+        }
+        
+        if(revalidate) popupWindow.validate();
+        //calculate max X
+        int maxX = screenSize.width - popupWindow.getSize().width;
+        //calculate max Y
+        if(maxY + popupWindow.getSize().height > screenSize.height){
+          maxY = screenSize.height - popupWindow.getSize().height;
+        }
+        
+        //correct position
+        if(y > maxY) y = maxY;
+        if(x > maxX) x = maxX;
+        popupWindow.setLocation(x, y);
+      }catch(BadLocationException ble){
+        //this should never occur
+        throw new GateRuntimeException(ble);
       }
-      
-      if(revalidate) popupWindow.validate();
-      //calculate max X
-      int maxX = screenSize.width - popupWindow.getSize().width;
-      //calculate max Y
-      if(maxY + popupWindow.getSize().height > screenSize.height){
-        maxY = screenSize.height - popupWindow.getSize().height;
-      }
-      
-      //correct position
-      if(y > maxY) y = maxY;
-      if(x > maxX) x = maxX;
-      popupWindow.setLocation(x, y);
-      
-    }catch(BadLocationException ble){
-      //this should never occur
-      throw new GateRuntimeException(ble);
     }
+    if(!popupWindow.isVisible()) popupWindow.setVisible(true);
+
+//    //calculate position
+//    try{
+//		  Rectangle startRect = owner.getTextComponent().modelToView(ann.getStartNode().
+//		    getOffset().intValue());
+//		  Rectangle endRect = owner.getTextComponent().modelToView(ann.getEndNode().
+//				    getOffset().intValue());
+//      Point topLeft = owner.getTextComponent().getLocationOnScreen();
+//      int x = topLeft.x + startRect.x;
+//      int y = topLeft.y + endRect.y + endRect.height;
+//
+//      //make sure the window doesn't start lower 
+//      //than the end of the visible rectangle
+//      Rectangle visRect = owner.getTextComponent().getVisibleRect();
+//      int maxY = topLeft.y + visRect.y + visRect.height;      
+//      
+//      //make sure window doesn't get off-screen
+//      popupWindow.pack();
+//      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+//      boolean revalidate = false;
+//      if(popupWindow.getSize().width > screenSize.width){
+//        popupWindow.setSize(screenSize.width, popupWindow.getSize().height);
+//        revalidate = true;
+//      }
+//      if(popupWindow.getSize().height > screenSize.height){
+//        popupWindow.setSize(popupWindow.getSize().width, screenSize.height);
+//        revalidate = true;
+//      }
+//      
+//      if(revalidate) popupWindow.validate();
+//      //calculate max X
+//      int maxX = screenSize.width - popupWindow.getSize().width;
+//      //calculate max Y
+//      if(maxY + popupWindow.getSize().height > screenSize.height){
+//        maxY = screenSize.height - popupWindow.getSize().height;
+//      }
+//      
+//      //correct position
+//      if(y > maxY) y = maxY;
+//      if(x > maxX) x = maxX;
+//      popupWindow.setLocation(x, y);
+//      
+//    }catch(BadLocationException ble){
+//      //this should never occur
+//      throw new GateRuntimeException(ble);
+//    }
   }
   
   /**
@@ -568,10 +659,54 @@ public class AnnotationEditor extends AbstractVisualResource
   }
   
   /**
+   * JWindow that can be dragged with a mouse.
+   */
+  private class MoveWindow extends JWindow
+    implements MouseListener, MouseMotionListener
+  {
+    Point location;
+    MouseEvent pressed;
+   
+    public MoveWindow(Window window)
+    {
+      super(window);
+      addMouseListener(this);
+      addMouseMotionListener(this);
+    }
+   
+    public void mousePressed(MouseEvent me)
+    {
+      System.out.println("mousePressed");
+      pressed = me;
+    }
+   
+    public void mouseClicked(MouseEvent e) {}
+    public void mouseReleased(MouseEvent e) {}
+   
+    public void mouseDragged(MouseEvent me)
+    {
+      System.out.println("mouseDragged");
+      location = getLocation(location);
+      int x = location.x - pressed.getX() + me.getX();
+      int y = location.y - pressed.getY() + me.getY();
+      setLocation(x, y);
+     }
+   
+    public void mouseMoved(MouseEvent e) {}
+    public void mouseEntered(MouseEvent e) {}
+    public void mouseExited(MouseEvent e) {}
+  }
+  
+  /**
    * The popup window used by the editor.
    */
   protected JWindow popupWindow;
 
+  /**
+   * Toggle button used to pin down the dialog. 
+   */
+  protected JToggleButton pinnedButton;
+  
   /**
    * Combobox for annotation type.
    */
@@ -629,6 +764,10 @@ public class AnnotationEditor extends AbstractVisualResource
    * The parent set of the current annotation.
    */
   protected AnnotationSet set;
+
+  public AnnotationSet getAnnotationSetCurrentlyEdited() {
+    return set;
+  }
   
   /**
    * @return the owner
