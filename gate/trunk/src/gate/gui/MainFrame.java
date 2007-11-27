@@ -2212,8 +2212,10 @@ public class MainFrame extends JFrame implements ProgressListener,
       final JTextField dsLocation = new JTextField("", 20);
       final JTextField indexLocation = new JTextField("", 20);
       
-      JTextField btat = new JTextField(Constants.DEFAULT_ANNOTATION_SET_NAME+".Token", 20);
+      JTextField btat = new JTextField("Token", 20);
       btat.setToolTipText("Examples: Token, AnnotationSetName.Token, "+Constants.DEFAULT_ANNOTATION_SET_NAME+".Token");
+      JCheckBox createTokensAutomatically = new JCheckBox("Create Tokens Automatically");
+      createTokensAutomatically.setSelected(true);
       JTextField iuat = new JTextField("", 20);
       iuat.setToolTipText("Examples: Sentence, AnnotationSetName.Sentence, "+Constants.DEFAULT_ANNOTATION_SET_NAME+".Sentence");
       
@@ -2233,9 +2235,9 @@ public class MainFrame extends JFrame implements ProgressListener,
             inputASList.clear();
             inputASList.addAll(result);
             if(inputASList.size() > 0){
-              String text = inputASList.get(0) == null ? "<null>" : inputASList.get(0).toString();
+              String text = inputASList.get(0) == null ? Constants.DEFAULT_ANNOTATION_SET_NAME : inputASList.get(0).toString();
               for(int j = 1; j < inputASList.size(); j++){
-                text += ";" + (inputASList.get(j) == null ? "<null>" : inputASList.get(j).toString());
+                text += ";" + (inputASList.get(j) == null ? Constants.DEFAULT_ANNOTATION_SET_NAME : inputASList.get(j).toString());
               }
               inputAS.setText(text);
             }else{
@@ -2265,9 +2267,9 @@ public class MainFrame extends JFrame implements ProgressListener,
             fteList.clear();
             fteList.addAll(result);
             if(fteList.size() > 0){
-              String text = fteList.get(0) == null ? "<null>" : fteList.get(0).toString();
+              String text = fteList.get(0) == null ? Constants.DEFAULT_ANNOTATION_SET_NAME : fteList.get(0).toString();
               for(int j = 1; j < fteList.size(); j++){
-                text += ";" + (fteList.get(j) == null ? "<null>" : fteList.get(j).toString());
+                text += ";" + (fteList.get(j) == null ? Constants.DEFAULT_ANNOTATION_SET_NAME : fteList.get(j).toString());
               }
               fte.setText(text);
             }else{
@@ -2427,8 +2429,19 @@ public class MainFrame extends JFrame implements ProgressListener,
       
       //fifth row
       constraints = new GridBagConstraints();
-      constraints.gridx = GridBagConstraints.RELATIVE;
+      constraints.gridx = 4;
       constraints.gridy = 4;
+      constraints.gridwidth = 5;
+      constraints.anchor = GridBagConstraints.WEST;
+      constraints.fill = GridBagConstraints.NONE;
+      constraints.insets = new Insets(0, 0, 0, 5);
+      mainPanel.add(createTokensAutomatically, constraints);
+
+      
+      //sixth row
+      constraints = new GridBagConstraints();
+      constraints.gridx = GridBagConstraints.RELATIVE;
+      constraints.gridy = 5;
       constraints.gridwidth = 3;
       constraints.anchor = GridBagConstraints.WEST;
       constraints.fill = GridBagConstraints.NONE;
@@ -2437,15 +2450,15 @@ public class MainFrame extends JFrame implements ProgressListener,
 
       constraints = new GridBagConstraints();
       constraints.gridx = GridBagConstraints.RELATIVE;
-      constraints.gridy = 4;
+      constraints.gridy = 5;
       constraints.gridwidth = 5;
       constraints.anchor = GridBagConstraints.NORTHWEST;
       mainPanel.add(iuat, constraints);
 
-      //sixth row
+      //seventh row
       constraints = new GridBagConstraints();
       constraints.gridx = GridBagConstraints.RELATIVE;
-      constraints.gridy = 5;
+      constraints.gridy = 6;
       constraints.gridwidth = 2;
       constraints.anchor = GridBagConstraints.WEST;
       constraints.fill = GridBagConstraints.NONE;
@@ -2454,7 +2467,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
       constraints = new GridBagConstraints();
       constraints.gridx = GridBagConstraints.RELATIVE;
-      constraints.gridy = 5;
+      constraints.gridy = 6;
       constraints.gridwidth = 1;
       constraints.fill = GridBagConstraints.HORIZONTAL;
       constraints.insets = new Insets(0, 0, 0, 10);
@@ -2462,7 +2475,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
       constraints = new GridBagConstraints();
       constraints.gridx = GridBagConstraints.RELATIVE;
-      constraints.gridy = 5;
+      constraints.gridy = 6;
       constraints.gridwidth = 5;
       constraints.fill = GridBagConstraints.HORIZONTAL;
       constraints.insets = new Insets(0, 0, 0, 10);
@@ -2470,7 +2483,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       
       constraints = new GridBagConstraints();
       constraints.gridx = GridBagConstraints.RELATIVE;
-      constraints.gridy = 5;
+      constraints.gridy = 6;
       constraints.gridwidth = 1;
       constraints.anchor = GridBagConstraints.NORTHWEST;
       mainPanel.add(editFTE, constraints);
@@ -2496,9 +2509,10 @@ public class MainFrame extends JFrame implements ProgressListener,
                 .getText()));
 
         Map parameters = new HashMap();
-        parameters.put("INDEX_LOCATION_URL", new URL(indexLocation.getText()));
-        parameters.put("BASE_TOKEN_ANNOTATION_TYPE", btat.getText());
-        parameters.put("INDEX_UNIT_ANNOTATION_TYPE", iuat.getText());
+        parameters.put(Constants.INDEX_LOCATION_URL, new URL(indexLocation.getText()));
+        parameters.put(Constants.BASE_TOKEN_ANNOTATION_TYPE, btat.getText());
+        parameters.put(Constants.INDEX_UNIT_ANNOTATION_TYPE, iuat.getText());
+        parameters.put(Constants.CREATE_TOKENS_AUTOMATICALLY, new Boolean(createTokensAutomatically.isSelected()));
         
         if(inputAS.getText().trim().length() > 0) {
           ArrayList<String> inputASList1 = new ArrayList<String>();

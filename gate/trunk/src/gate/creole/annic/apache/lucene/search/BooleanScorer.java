@@ -20,13 +20,17 @@ import java.io.IOException;
 
 final class BooleanScorer extends Scorer {
   private SubScorer scorers = null;
+
   private BucketTable bucketTable = new BucketTable(this);
 
   private int maxCoord = 1;
+
   private float[] coordFactors = null;
 
   private int requiredMask = 0;
+
   private int prohibitedMask = 0;
+
   private int nextMask = 1;
 
   BooleanScorer(Similarity similarity) {
@@ -35,17 +39,24 @@ final class BooleanScorer extends Scorer {
 
   static final class SubScorer {
     public Scorer scorer;
+
     public boolean done;
+
     public boolean required = false;
+
     public boolean prohibited = false;
+
     public HitCollector collector;
+
     public SubScorer next;
 
+    protected Searcher searcher;
+
     public SubScorer(Scorer scorer, boolean required, boolean prohibited,
-		     HitCollector collector, SubScorer next)
-      throws IOException {
+            HitCollector collector, SubScorer next) throws IOException {
+      this.searcher = scorer.searcher;
       this.scorer = scorer;
-      this.done = !scorer.next();
+      this.done = !scorer.next(this.searcher);
       this.required = required;
       this.prohibited = prohibited;
       this.collector = collector;
@@ -54,54 +65,52 @@ final class BooleanScorer extends Scorer {
   }
 
   final void add(Scorer scorer, boolean required, boolean prohibited)
-    throws IOException {
+          throws IOException {
     int mask = 0;
-    if (required || prohibited) {
-      if (nextMask == 0)
-	throw new IndexOutOfBoundsException
-	  ("More than 32 required/prohibited clauses in query.");
+    if(required || prohibited) {
+      if(nextMask == 0)
+        throw new IndexOutOfBoundsException(
+                "More than 32 required/prohibited clauses in query.");
       mask = nextMask;
       nextMask = nextMask << 1;
-    } else
-      mask = 0;
+    }
+    else mask = 0;
 
-    if (!prohibited)
-      maxCoord++;
+    if(!prohibited) maxCoord++;
 
-    if (prohibited)
-      prohibitedMask |= mask;			  // update prohibited mask
-    else if (required)
-      requiredMask |= mask;			  // update required mask
+    if(prohibited)
+      prohibitedMask |= mask; // update prohibited mask
+    else if(required) requiredMask |= mask; // update required mask
 
-    scorers = new SubScorer(scorer, required, prohibited,
-			    bucketTable.newCollector(mask), scorers);
+    scorers = new SubScorer(scorer, required, prohibited, bucketTable
+            .newCollector(mask), scorers);
   }
 
   private final void computeCoordFactors() throws IOException {
     coordFactors = new float[maxCoord];
-    for (int i = 0; i < maxCoord; i++)
-      coordFactors[i] = getSimilarity().coord(i, maxCoord-1);
+    for(int i = 0; i < maxCoord; i++)
+      coordFactors[i] = getSimilarity().coord(i, maxCoord - 1);
   }
 
   private int end;
+
   private Bucket current;
 
-  public int doc() { return current.doc; }
-  public boolean next(IndexSearcher searcher) throws IOException {
-    this.searcher = searcher;
-    return next();
+  public int doc() {
+    return current.doc;
   }
-  
-  public boolean next() throws IOException {
+
+  public boolean next(Searcher searcher) throws IOException {
+    this.searcher = searcher;
     boolean more;
     do {
-      while (bucketTable.first != null) {         // more queued
+      while(bucketTable.first != null) { // more queued
         current = bucketTable.first;
-        bucketTable.first = current.next;         // pop the queue
+        bucketTable.first = current.next; // pop the queue
 
         // check prohibited & required
-        if ((current.bits & prohibitedMask) == 0 &&
-            (current.bits & requiredMask) == requiredMask) {
+        if((current.bits & prohibitedMask) == 0
+                && (current.bits & requiredMask) == requiredMask) {
           return true;
         }
       }
@@ -109,49 +118,48 @@ final class BooleanScorer extends Scorer {
       // refill the queue
       more = false;
       end += BucketTable.SIZE;
-      for (SubScorer sub = scorers; sub != null; sub = sub.next) {
+      for(SubScorer sub = scorers; sub != null; sub = sub.next) {
         Scorer scorer = sub.scorer;
-        while (!sub.done && scorer.doc() < end) {
+        while(!sub.done && scorer.doc() < end) {
           sub.collector.collect(scorer.doc(), scorer.score(this.searcher));
-          sub.done = !scorer.next();
+          sub.done = !scorer.next(this.searcher);
         }
-        if (!sub.done) {
+        if(!sub.done) {
           more = true;
         }
       }
-    } while (bucketTable.first != null | more);
+    } while(bucketTable.first != null | more);
 
     return false;
   }
 
-  /* Niraj */
-  public float score(IndexSearcher searcher) throws IOException {
+  public float score(Searcher searcher) throws IOException {
     this.searcher = searcher;
-    return score();
-  }
-  /* End */
-
-  public float score() throws IOException {
-    if (coordFactors == null)
-      computeCoordFactors();
+    if(coordFactors == null) computeCoordFactors();
     return current.score * coordFactors[current.coord];
   }
 
   static final class Bucket {
-    int	doc = -1;				  // tells if bucket is valid
-    float	score;				  // incremental score
-    int	bits;					  // used for bool constraints
-    int	coord;					  // count of terms in score
-    Bucket 	next;				  // next valid bucket
+    int doc = -1; // tells if bucket is valid
+
+    float score; // incremental score
+
+    int bits; // used for bool constraints
+
+    int coord; // count of terms in score
+
+    Bucket next; // next valid bucket
   }
 
   /** A simple hash table of document scores within a range. */
   static final class BucketTable {
     public static final int SIZE = 1 << 10;
+
     public static final int MASK = SIZE - 1;
 
     final Bucket[] buckets = new Bucket[SIZE];
-    Bucket first = null;			  // head of valid list
+
+    Bucket first = null; // head of valid list
 
     private BooleanScorer scorer;
 
@@ -159,7 +167,9 @@ final class BooleanScorer extends Scorer {
       this.scorer = scorer;
     }
 
-    public final int size() { return SIZE; }
+    public final int size() {
+      return SIZE;
+    }
 
     public HitCollector newCollector(int mask) {
       return new Collector(mask, this);
@@ -168,30 +178,33 @@ final class BooleanScorer extends Scorer {
 
   static final class Collector extends HitCollector {
     private BucketTable bucketTable;
+
     private int mask;
+
     public Collector(int mask, BucketTable bucketTable) {
       this.mask = mask;
       this.bucketTable = bucketTable;
     }
+
     public final void collect(final int doc, final float score) {
       final BucketTable table = bucketTable;
       final int i = doc & BucketTable.MASK;
       Bucket bucket = table.buckets[i];
-      if (bucket == null)
-	table.buckets[i] = bucket = new Bucket();
+      if(bucket == null) table.buckets[i] = bucket = new Bucket();
 
-      if (bucket.doc != doc) {			  // invalid bucket
-	bucket.doc = doc;			  // set doc
-	bucket.score = score;			  // initialize score
-	bucket.bits = mask;			  // initialize mask
-	bucket.coord = 1;			  // initialize coord
+      if(bucket.doc != doc) { // invalid bucket
+        bucket.doc = doc; // set doc
+        bucket.score = score; // initialize score
+        bucket.bits = mask; // initialize mask
+        bucket.coord = 1; // initialize coord
 
-	bucket.next = table.first;		  // push onto valid list
-	table.first = bucket;
-      } else {					  // valid bucket
-	bucket.score += score;			  // increment score
-	bucket.bits |= mask;			  // add bits in mask
-	bucket.coord++;				  // increment coord
+        bucket.next = table.first; // push onto valid list
+        table.first = bucket;
+      }
+      else { // valid bucket
+        bucket.score += score; // increment score
+        bucket.bits |= mask; // add bits in mask
+        bucket.coord++; // increment coord
       }
     }
   }
@@ -207,13 +220,12 @@ final class BooleanScorer extends Scorer {
   public String toString() {
     StringBuffer buffer = new StringBuffer();
     buffer.append("boolean(");
-    for (SubScorer sub = scorers; sub != null; sub = sub.next) {
+    for(SubScorer sub = scorers; sub != null; sub = sub.next) {
       buffer.append(sub.scorer.toString());
       buffer.append(" ");
     }
     buffer.append(")");
     return buffer.toString();
   }
-
 
 }

@@ -111,13 +111,8 @@ public class PhrasePrefixQuery extends Query {
     }
 
 
-    /* Niraj */
-    public Scorer scorer(IndexReader reader, IndexSearcher searcher) throws IOException {
-        return scorer(reader);
-    }
-    /* End */
-    
-    public Scorer scorer(IndexReader reader) throws IOException {
+    public Scorer scorer(IndexReader reader, Searcher searcher) throws IOException {
+      this.searcher = searcher;
       if (termArrays.size() == 0)                  // optimize zero-term case
         return null;
 
@@ -176,7 +171,7 @@ public class PhrasePrefixQuery extends Query {
       fieldExpl.setDescription("fieldWeight("+getQuery()+" in "+doc+
                                "), product of:");
 
-      Explanation tfExpl = scorer(reader).explain(doc);
+      Explanation tfExpl = scorer(reader, this.searcher).explain(doc);
       fieldExpl.addDetail(tfExpl);
       fieldExpl.addDetail(idfExpl);
 

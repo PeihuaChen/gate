@@ -18,6 +18,7 @@ package gate.creole.annic.apache.lucene.search.spans;
 
 import java.io.IOException;
 
+import gate.creole.annic.apache.lucene.search.Searcher;
 import gate.creole.annic.apache.lucene.search.Weight;
 import gate.creole.annic.apache.lucene.search.Scorer;
 import gate.creole.annic.apache.lucene.search.Explanation;
@@ -44,13 +45,9 @@ public class SpanScorer extends Scorer {
     this.weight = weight;
     this.value = weight.getValue();
   }
-
-  public boolean next(IndexSearcher searcher) throws IOException {
-    this.searcher = searcher;
-    return next();
-  }
   
-  public boolean next() throws IOException {
+  public boolean next(Searcher searcher) throws IOException {
+    this.searcher = searcher;
     if (firstTime) {
       more = spans.next();
       firstTime = false;
@@ -72,13 +69,8 @@ public class SpanScorer extends Scorer {
 
   public int doc() { return doc; }
 
-  /* Niraj */
-  public float score(IndexSearcher searcher) throws IOException {
-      return score();
-  }
-  /* End */
-  
-  public float score() throws IOException {
+  public float score(Searcher searcher) throws IOException {
+    this.searcher = searcher;
     float raw = getSimilarity().tf(freq) * value; // raw score
     return raw * Similarity.decodeNorm(norms[doc]); // normalize
   }

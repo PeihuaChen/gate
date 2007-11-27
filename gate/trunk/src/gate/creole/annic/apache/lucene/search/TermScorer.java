@@ -64,12 +64,8 @@ final class TermScorer extends Scorer {
     return doc;
   }
 
-  public boolean next(IndexSearcher searcher) throws IOException {
+  public boolean next(Searcher searcher) throws IOException {
     this.searcher = searcher;
-    return next();
-  }
-  
-  public boolean next() throws IOException {
     pointer++;
     if(pointer >= pointerMax) {
       pointerMax = termDocs.read(docs, freqs); // refill buffer
@@ -86,15 +82,8 @@ final class TermScorer extends Scorer {
     return true;
   }
 
-  /* Niraj */
-  public float score(IndexSearcher searcher) throws IOException {
+  public float score(Searcher searcher) throws IOException {
     this.searcher = searcher;
-    return score();
-  }
-
-  /* End */
-
-  public float score() throws IOException {
     int f = freqs[pointer];
     float raw = // compute tf(f)*weight
     f < SCORE_CACHE_SIZE // check cache

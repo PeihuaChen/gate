@@ -32,9 +32,8 @@ abstract class PhraseScorer extends Scorer {
 
   private float freq;
   
-  /* Niraj */
   PhraseScorer(Weight weight, TermPositions[] tps, java.util.Vector positions, Similarity similarity,
-               byte[] norms, IndexSearcher searcher) throws IOException {
+               byte[] norms, Searcher searcher) throws IOException {
     super(similarity);
     this.norms = norms;
     this.weight = weight;
@@ -55,33 +54,7 @@ abstract class PhraseScorer extends Scorer {
     pq = new PhraseQueue(tps.length);             // construct empty pq
 
   }
-  /* End */
 
-  /* Niraj */
-  PhraseScorer(Weight weight, TermPositions[] tps, java.util.Vector positions, Similarity similarity,
-               byte[] norms) throws IOException {
-    super(similarity);
-    this.norms = norms;
-    this.weight = weight;
-    this.value = weight.getValue();
-
-    // convert tps to a list
-    for (int i = 0; i < tps.length; i++) {
-      PhrasePositions pp = new PhrasePositions(tps[i], ((Integer)positions.get(i)).intValue());
-      if (last != null) {			  // add next to end of list
-        last.next = pp;
-      } else
-        first = pp;
-
-      last = pp;
-    }
-
-    pq = new PhraseQueue(tps.length);             // construct empty pq
-
-  }
-  /* End */
-
-  
   PhraseScorer(Weight weight, TermPositions[] tps, Similarity similarity,
                byte[] norms) throws IOException {
     super(similarity);
@@ -106,12 +79,8 @@ abstract class PhraseScorer extends Scorer {
 
   public int doc() { return first.doc; }
 
-  public boolean next(IndexSearcher searcher) throws IOException {
+  public boolean next(Searcher searcher) throws IOException {
     this.searcher = searcher;
-    return next();
-  }
-  
-  public boolean next() throws IOException {
     if (firstTime) {
       init();
       firstTime = false;
@@ -140,14 +109,9 @@ abstract class PhraseScorer extends Scorer {
     }
     return false;                                 // no more matches
   }
-  /* Niraj */
-  public float score(IndexSearcher searcher) throws IOException {
-    this.searcher = searcher;  
-    return score();
-  }
-  /* End */
 
-  public float score() throws IOException {
+  public float score(Searcher searcher) throws IOException {
+    this.searcher = searcher;
     float raw = getSimilarity().tf(freq) * value; // raw score
     return raw * Similarity.decodeNorm(norms[first.doc]); // normalize
   }
@@ -200,7 +164,7 @@ abstract class PhraseScorer extends Scorer {
   public Explanation explain(final int doc) throws IOException {
     Explanation tfExplanation = new Explanation();
 
-    while (next() && doc() < doc) {}
+    while (next(this.searcher) && doc() < doc) {}
 
     float phraseFreq = (doc() == doc) ? freq : 0.0f;
     tfExplanation.setValue(getSimilarity().tf(phraseFreq));
