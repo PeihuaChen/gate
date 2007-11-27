@@ -106,8 +106,7 @@ public class AnnotationEditor extends AbstractVisualResource
   }
   
   protected void initBottomWindow(Window parent){
-    // draggable popup window
-    popupWindow = new MoveWindow(parent);
+    popupWindow = new JWindow(parent);
     JPanel pane = new JPanel();
     pane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
     pane.setLayout(new GridBagLayout());
@@ -206,10 +205,10 @@ public class AnnotationEditor extends AbstractVisualResource
     pane.add(scroller, constraints);
     
     // add the search and annotate GUI at the bottom of the annotator editor
-    SearchAndAnnotatePanel searchPanel = new SearchAndAnnotatePanel();
+    SearchAndAnnotatePanel searchPanel =
+      new SearchAndAnnotatePanel(pane.getBackground());
     searchPanel.setAnnotationEditor(this);
     searchPanel.setAnnotationEditorWindow(popupWindow);
-    searchPanel.setBackground(pane.getBackground());
     constraints.insets = new Insets(0, 0, 0, 0);
     constraints.fill = GridBagConstraints.BOTH;
     constraints.anchor = GridBagConstraints.WEST;
@@ -221,16 +220,33 @@ public class AnnotationEditor extends AbstractVisualResource
     constraints.weighty = 0.0;
     pane.add(searchPanel, constraints);
   }
-  
+
 
   protected void initListeners(){
-    MouseListener windowMouseListener = new MouseAdapter(){
-      public void mouseEntered(MouseEvent evt){
+
+    MouseListener windowMouseListener = new MouseAdapter() {
+      public void mouseEntered(MouseEvent evt) {
         hideTimer.stop();
+      }
+      // allow a JWindow to be dragged with a mouse
+      public void mousePressed(MouseEvent me) {
+        pressed = me;
       }
     };
 
+    MouseMotionListener windowMouseMotionListener = new MouseMotionAdapter() {
+      Point location;
+      // allow a JWindow to be dragged with a mouse
+      public void mouseDragged(MouseEvent me) {
+        location = popupWindow.getLocation(location);
+        int x = location.x - pressed.getX() + me.getX();
+        int y = location.y - pressed.getY() + me.getY();
+        popupWindow.setLocation(x, y);
+       }
+    };
+
     popupWindow.getRootPane().addMouseListener(windowMouseListener);
+    popupWindow.getRootPane().addMouseMotionListener(windowMouseMotionListener);
 //    featuresEditor.addMouseListener(windowMouseListener);
     
     ((JComponent)popupWindow.getContentPane()).
@@ -406,52 +422,6 @@ public class AnnotationEditor extends AbstractVisualResource
       }
     }
     if(!popupWindow.isVisible()) popupWindow.setVisible(true);
-
-//    //calculate position
-//    try{
-//		  Rectangle startRect = owner.getTextComponent().modelToView(ann.getStartNode().
-//		    getOffset().intValue());
-//		  Rectangle endRect = owner.getTextComponent().modelToView(ann.getEndNode().
-//				    getOffset().intValue());
-//      Point topLeft = owner.getTextComponent().getLocationOnScreen();
-//      int x = topLeft.x + startRect.x;
-//      int y = topLeft.y + endRect.y + endRect.height;
-//
-//      //make sure the window doesn't start lower 
-//      //than the end of the visible rectangle
-//      Rectangle visRect = owner.getTextComponent().getVisibleRect();
-//      int maxY = topLeft.y + visRect.y + visRect.height;      
-//      
-//      //make sure window doesn't get off-screen
-//      popupWindow.pack();
-//      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-//      boolean revalidate = false;
-//      if(popupWindow.getSize().width > screenSize.width){
-//        popupWindow.setSize(screenSize.width, popupWindow.getSize().height);
-//        revalidate = true;
-//      }
-//      if(popupWindow.getSize().height > screenSize.height){
-//        popupWindow.setSize(popupWindow.getSize().width, screenSize.height);
-//        revalidate = true;
-//      }
-//      
-//      if(revalidate) popupWindow.validate();
-//      //calculate max X
-//      int maxX = screenSize.width - popupWindow.getSize().width;
-//      //calculate max Y
-//      if(maxY + popupWindow.getSize().height > screenSize.height){
-//        maxY = screenSize.height - popupWindow.getSize().height;
-//      }
-//      
-//      //correct position
-//      if(y > maxY) y = maxY;
-//      if(x > maxX) x = maxX;
-//      popupWindow.setLocation(x, y);
-//      
-//    }catch(BadLocationException ble){
-//      //this should never occur
-//      throw new GateRuntimeException(ble);
-//    }
   }
   
   /**
@@ -659,45 +629,6 @@ public class AnnotationEditor extends AbstractVisualResource
   }
   
   /**
-   * JWindow that can be dragged with a mouse.
-   */
-  private class MoveWindow extends JWindow
-    implements MouseListener, MouseMotionListener
-  {
-    Point location;
-    MouseEvent pressed;
-   
-    public MoveWindow(Window window)
-    {
-      super(window);
-      addMouseListener(this);
-      addMouseMotionListener(this);
-    }
-   
-    public void mousePressed(MouseEvent me)
-    {
-      System.out.println("mousePressed");
-      pressed = me;
-    }
-   
-    public void mouseClicked(MouseEvent e) {}
-    public void mouseReleased(MouseEvent e) {}
-   
-    public void mouseDragged(MouseEvent me)
-    {
-      System.out.println("mouseDragged");
-      location = getLocation(location);
-      int x = location.x - pressed.getX() + me.getX();
-      int y = location.y - pressed.getY() + me.getY();
-      setLocation(x, y);
-     }
-   
-    public void mouseMoved(MouseEvent e) {}
-    public void mouseEntered(MouseEvent e) {}
-    public void mouseExited(MouseEvent e) {}
-  }
-  
-  /**
    * The popup window used by the editor.
    */
   protected JWindow popupWindow;
@@ -725,7 +656,8 @@ public class AnnotationEditor extends AbstractVisualResource
   
   protected DeleteAnnotationAction delAction;
   protected Timer hideTimer;
-  
+  protected MouseEvent pressed;
+
   /**
    * Constant for delay before hiding the popup window (in milliseconds).
    */
@@ -765,6 +697,9 @@ public class AnnotationEditor extends AbstractVisualResource
    */
   protected AnnotationSet set;
 
+  /* (non-Javadoc)
+   * @see gate.gui.annedit.AnnotationEditor#getAnnotationSetCurrentlyEdited()
+   */
   public AnnotationSet getAnnotationSetCurrentlyEdited() {
     return set;
   }
