@@ -68,18 +68,27 @@ public class LuceneDocument {
           ArrayList<String> annotSetsToExclude,
           ArrayList<String> featuresToInclude,
           ArrayList<String> featuresToExclude, String indexLocation,
-          String baseTokenAnnotationType, String indexUnitAnnotationType) {
+          String baseTokenAnnotationType, Boolean createTokensAutomatically, String indexUnitAnnotationType) {
+
+    baseTokenAnnotationType = baseTokenAnnotationType.trim();
 
     ArrayList<Document> toReturnBack = new ArrayList<Document>();
     ArrayList<String> annotSetsToIndex = new ArrayList<String>();
 
-    // if user has provided annotation sets to include, we don't bother about annotation sets to exclude
+    // by default merge set must be created
+    boolean createMergeSet = true;
+
+    // if user has provided annotation sets to include, we don't bother
+    // about annotation sets to exclude
     if(annotSetsToInclude.size() > 0) {
       annotSetsToIndex = annotSetsToInclude;
+      if(annotSetsToIndex.size() == 1) createMergeSet = false;
     }
     else if(annotSetsToExclude.size() > 0) {
-      // if there were no annotation sets to include, check if user has provided any annotation sets to exclude
-      // if so, we need to index all annotation sets but provided in the annotationsetstoexclude list
+      // if there were no annotation sets to include, check if user has
+      // provided any annotation sets to exclude
+      // if so, we need to index all annotation sets but provided in the
+      // annotationsetstoexclude list
       for(String setName : (Set<String>)gateDoc.getNamedAnnotationSets()
               .keySet()) {
         if(annotSetsToExclude.contains(setName)) continue;
@@ -88,8 +97,10 @@ public class LuceneDocument {
       if(!annotSetsToExclude.contains(Constants.DEFAULT_ANNOTATION_SET_NAME)) {
         annotSetsToIndex.add(Constants.DEFAULT_ANNOTATION_SET_NAME);
       }
-    } else {
-      // if both annotation sets to include and annotation sets to exclude are empty
+    }
+    else {
+      // if both annotation sets to include and annotation sets to
+      // exclude are empty
       // we need to index all annotation sets
       for(String setName : (Set<String>)gateDoc.getNamedAnnotationSets()
               .keySet()) {
@@ -97,219 +108,251 @@ public class LuceneDocument {
       }
       annotSetsToIndex.add(Constants.DEFAULT_ANNOTATION_SET_NAME);
     }
-    
-    
+
     // lets find out the annotation set that contains tokens in it
     AnnotationSet baseTokenAnnotationSet = null;
-    
+
+    // search in annotation sets to find out which of them has the
+    // baseTokenAnnotationType annotations
+    // initially this is set to false
+    boolean searchBaseTokensInAllAnnotationSets = false;
+    boolean searchIndexUnitInAllAnnotationSets = false;
+    // this variable tells whether we want to create manual tokens or
+    // not
+    boolean createManualTokens = false;
+
+    // lets check if user's input is setName.basetokenAnnotationType
     int index = -1;
-    if(baseTokenAnnotationType != null && baseTokenAnnotationType.trim().length() > 0)
+    if(baseTokenAnnotationType != null && baseTokenAnnotationType.length() > 0)
       index = baseTokenAnnotationType.lastIndexOf('.');
 
+    // yes it is, find out the annotationset name and the
+    // basetokenAnnotationType
     if(index >= 0) {
-      
+
+      // set name
       String setName = baseTokenAnnotationType.substring(0, index);
-      //System.out.println("BaseToken Annotation Type Set Name: "+setName);
-      
+
+      // token type
       baseTokenAnnotationType = baseTokenAnnotationType.substring(index + 1,
               baseTokenAnnotationType.length());
-      
-      //System.out.println("BaseToken Annotation Type : "+baseTokenAnnotationType);
-    
-      // check if user has asked to take tokens from the default annotation set
+
+      // check if user has asked to take tokens from the default
+      // annotation set
       if(setName.equals(Constants.DEFAULT_ANNOTATION_SET_NAME))
         baseTokenAnnotationSet = gateDoc.getAnnotations().get(
                 baseTokenAnnotationType);
       else baseTokenAnnotationSet = gateDoc.getAnnotations(setName).get(
               baseTokenAnnotationType);
-      
-      // here we check if the baseTokenAnnotationSet is null or its size is 0
-      // if so, we ignore the document
+
+      // here we check if the baseTokenAnnotationSet is null or its size
+      // is 0
+      // if so, we'll have to find out in all annotation sets for the
+      // base token annotation type
       if(baseTokenAnnotationSet == null || baseTokenAnnotationSet.size() == 0) {
-        System.err.println("\nIgnoring the document : " + gateDoc.getName()
-                + " since the document does not have annotations of type "
-                + baseTokenAnnotationType + " in "+ baseTokenAnnotationSet.getName());
-        return null;
+        System.err.println("Base Tokens " + baseTokenAnnotationType
+                + " counldn't be found under the specified annotation set "
+                + setName + "\n searching them in other annotation sets");
+        searchBaseTokensInAllAnnotationSets = true;
       }
-    } else {
-      // there is no annotation set name provided
-      // we assume that we need to index all annotation sets except those which doesn't have token annotations in it
-      // we don't need to do anything here but we know that the value of the
-      // baseTokenAnnotationSet will be null
+    }
+    else {
+
+      // either baseTokenAnnotation type is null or user hasn't provided
+      // any annotaiton set name
+      // so we search in all annotation sets
+      searchBaseTokensInAllAnnotationSets = true;
     }
 
+    if(baseTokenAnnotationType != null && baseTokenAnnotationType.length() > 0
+            && searchBaseTokensInAllAnnotationSets) {
+      // we set this to true and if we find basetokens in any of the
+      // annotationsets to index
+      // we will set this to false
+      createManualTokens = true;
 
-    // lets find out the annotation set that contains indexUnitAnnotationType in it
-    AnnotationSet indexUnitAnnotationSet = null;
-    index = -1;
-    if(indexUnitAnnotationType != null && indexUnitAnnotationType.trim().length() > 0)
-      index = indexUnitAnnotationType.lastIndexOf('.');
-    
-    if(index >= 0) {
-      String setName = indexUnitAnnotationType.substring(0, index);
-      //System.out.println("Index Unit Type Set Name: "+setName);
+      for(String aSet : annotSetsToIndex) {
+        if(aSet.equals(Constants.DEFAULT_ANNOTATION_SET_NAME)) {
+          AnnotationSet tempSet = gateDoc.getAnnotations().get(
+                  baseTokenAnnotationType);
+          if(tempSet.size() > 0) {
+            baseTokenAnnotationSet = tempSet;
+            createManualTokens = false;
+            break;
+          }
+        }
+        else {
+          AnnotationSet tempSet = gateDoc.getAnnotations(aSet).get(
+                  baseTokenAnnotationType);
+          if(tempSet.size() > 0) {
+            baseTokenAnnotationSet = tempSet;
+            createManualTokens = false;
+            break;
+          }
+        }
+      }
+    }
+
+    // if baseTokenAnnotaitonType is null or an empty string
+    // we'll have to create tokens ourselves
+    if(baseTokenAnnotationType == null || baseTokenAnnotationType.length() == 0)
+      createManualTokens = true;
+
+    // lets check if we have to create ManualTokens
+    if(createManualTokens) {
+      if(!createTokensAutomatically.booleanValue()) {
+        System.out
+        .println("Tokens couldn't be found in the document - Ignoring the document "
+                + gateDoc.getName());
+        return null;
+      }
       
+      baseTokenAnnotationType = Constants.ANNIC_TOKEN;
+
+      if(baseTokenAnnotationSet == null) {
+        baseTokenAnnotationSet = new AnnotationSetImpl(gateDoc);
+      }
+
+      if(!createTokens(gateDoc, baseTokenAnnotationSet)) {
+        System.out
+                .println("Tokens couldn't be created manually - Ignoring the document "
+                        + gateDoc.getName());
+        return null;
+      }
+    }
+    // by now, baseTokenAnnotationSet will not be null for sure and we
+    // know what's the baseTokenAnnotationType
+
+    // lets find out the annotation set that contains
+    // indexUnitAnnotationType in it
+    AnnotationSet indexUnitAnnotationSet = null;
+
+    // lets check if user has provided setName.indexUnitAnnotationType
+    index = -1;
+    if(indexUnitAnnotationType != null
+            && indexUnitAnnotationType.trim().length() > 0)
+      index = indexUnitAnnotationType.lastIndexOf('.');
+
+    // yes he has, so lets go and fethc setName and
+    // indexUnitAnnotationType
+    if(index >= 0) {
+      // setName
+      String setName = indexUnitAnnotationType.substring(0, index);
+
+      // indexUnitAnnotationType
       indexUnitAnnotationType = indexUnitAnnotationType.substring(index + 1,
               indexUnitAnnotationType.length());
-      
-      //System.out.println("Index Unit Type : "+indexUnitAnnotationType);
-      
+
       if(setName.equals(Constants.DEFAULT_ANNOTATION_SET_NAME))
         indexUnitAnnotationSet = gateDoc.getAnnotations().get(
                 indexUnitAnnotationType);
       else indexUnitAnnotationSet = gateDoc.getAnnotations(setName).get(
               indexUnitAnnotationType);
-      
-      // here we check if the indexUnitAnnotationSet is null or its size is 0
-      // if so, we ignore the document
+
+      // here we check if the indexUnitAnnotationSet is null or its size
+      // is 0
+      // if so, we'll have to search other annotation sets
       if(indexUnitAnnotationSet == null || indexUnitAnnotationSet.size() == 0) {
-        System.err.println("\nIgnoring the document : " + gateDoc.getName()
-                + " since the document does not have annotations of type "
-                + indexUnitAnnotationType + " in "+ indexUnitAnnotationSet.getName());
-        return null;
+        System.err.println("Index Unit " + indexUnitAnnotationType
+                + " counldn't be found under the specified annotation set "
+                + setName + "\n searching them in other annotation sets");
+        searchIndexUnitInAllAnnotationSets = true;
       }
-      
-    } else {
-      // there is no annotation set name provided
-      // we assume that we need to index all annotation sets except those which doesn't have indexUnitAnnotationType annotions in it
-      // we don't need to do anything here but we know that the value of the
-      // indexUnitAnnotationSet will be null
+    }
+    else {
+
+      // either indexUnitAnnotationType is null or user hasn't provided
+      // the setname
+      searchIndexUnitInAllAnnotationSets = true;
     }
 
-    
-    int j=0;
-    
-    // we maintain an annotation set that contains all annotations from all the annotation sets to be indexed 
-    // however it must not contain the baseTokens or indexUnitAnnotationType annotations
-    AnnotationSet mergedSet = null;
-    boolean mergedBaseTokenAnnotations = false;
-    boolean mergedIndexUnitAnnotations = false;
-    boolean useTempBaseTokenAnnotationSet = false;
-    
-    AnnotationSet tempBaseTokenAnnotationSet = baseTokenAnnotationSet;
-    String tempBaseTokenAnnotationType = baseTokenAnnotationType;
-
-    
-    for(String annotSet : annotSetsToIndex) {
-      
-      // lets print the name of annotation set that we are indexing
-      //System.out.println("\tIndexing :"+annotSet);
-      
-      AnnotationSet tempIndexUnitAnnotationSet = indexUnitAnnotationSet;
-
-      // this is to avoid recreating tokens for the document
-      // where user has asked to create tokens from the document
-      if(!useTempBaseTokenAnnotationSet) {
-        tempBaseTokenAnnotationSet = baseTokenAnnotationSet;
-        tempBaseTokenAnnotationType = baseTokenAnnotationType;
+    // searching in all annotation set names
+    if(indexUnitAnnotationType != null && indexUnitAnnotationType.length() > 0
+            && searchIndexUnitInAllAnnotationSets) {
+      for(String aSet : annotSetsToIndex) {
+        if(aSet.equals(Constants.DEFAULT_ANNOTATION_SET_NAME)) {
+          AnnotationSet tempSet = gateDoc.getAnnotations().get(
+                  indexUnitAnnotationType);
+          if(tempSet.size() > 0) {
+            indexUnitAnnotationSet = tempSet;
+            break;
+          }
+        }
+        else {
+          AnnotationSet tempSet = gateDoc.getAnnotations(aSet).get(
+                  indexUnitAnnotationType);
+          if(tempSet.size() > 0) {
+            indexUnitAnnotationSet = tempSet;
+            break;
+          }
+        }
       }
-      
+    }
+
+    // if indexUnitAnnotationSet is null, we set indexUnitAnnotationType
+    // to null as well
+    if(indexUnitAnnotationSet == null) {
+      indexUnitAnnotationType = null;
+    }
+
+    int j = 0;
+
+    // we maintain an annotation set that contains all annotations from
+    // all the annotation sets to be indexed
+    // however it must not contain the baseTokens or
+    // indexUnitAnnotationType annotations
+    AnnotationSet mergedSet = null;
+
+    for(String annotSet : annotSetsToIndex) {
+
       // we need to generate the Token Stream here, and send it to the
       // GateLuceneReader
       AnnotationSet aSetToIndex = annotSet
               .equals(Constants.DEFAULT_ANNOTATION_SET_NAME) ? gateDoc
               .getAnnotations() : gateDoc.getAnnotations(annotSet);
 
-      // if baseTokenAnnotationSet is null - it means that the user has asked us to
-      // obtain tokens from each annotation set. so if the setToIndex doesn't have annotations of type baseTokenAnnotationType
-      // we must throw an exception
-      if(tempBaseTokenAnnotationSet == null) {
-        // here we check if the baseTokenAnnotationType is null
-        if(tempBaseTokenAnnotationType != null && !tempBaseTokenAnnotationType.equals(Constants.ANNIC_TOKEN)) {
-          tempBaseTokenAnnotationSet = aSetToIndex.get(tempBaseTokenAnnotationType); 
-          if(tempBaseTokenAnnotationSet == null || tempBaseTokenAnnotationSet.size() == 0) {
-//            System.err.println("\nIgnoring the annotation set : " + aSetToIndex.getName()
-//                  + " since it does not have annotations of type "
-//                  + baseTokenAnnotationType);
-            continue;
-          } 
-        } else {
-          // we are asked to create tokens ourselves
-          tempBaseTokenAnnotationSet = new AnnotationSetImpl(gateDoc);
-          if(createTokens(gateDoc, tempBaseTokenAnnotationSet)) {
-            tempBaseTokenAnnotationType = Constants.ANNIC_TOKEN;
-            useTempBaseTokenAnnotationSet = true;
-          } else {
-            System.err.println("\nIgnoring the document as tokens could not be created for the document : " + gateDoc.getName());
-              return null;
-          }
-        }
-      } 
-      
-      // if indexUnitAnnotationSet is null - it means that the user has asked us to
-      // obtain indexUnitAnnotations from each annotation set. so if the setToIndex doesn't have annotations of type indexUnitAnnotationType
-      // we must throw an exception
-      if(tempIndexUnitAnnotationSet == null) {
-        if(indexUnitAnnotationType != null && indexUnitAnnotationType.trim().length() > 0) {
-          tempIndexUnitAnnotationSet = aSetToIndex.get(indexUnitAnnotationType); 
-          if(tempIndexUnitAnnotationSet == null || tempIndexUnitAnnotationSet.size() == 0) {
-//            System.err.println("\nIgnoring the annotation set : " + aSetToIndex.getName()
-//                  + " since it does not have annotations of type "
-//                  + indexUnitAnnotationType);
-            continue;
-          } 
-        }
-      } 
-      
       // tempBaseTokenAnnotationSet is not null
       ArrayList<Token>[] tokenStreams = getTokens(gateDoc, aSetToIndex,
-              featuresToInclude, featuresToExclude, tempBaseTokenAnnotationType,
-              tempBaseTokenAnnotationSet, indexUnitAnnotationType,
-              tempIndexUnitAnnotationSet);
+              featuresToInclude, featuresToExclude, baseTokenAnnotationType,
+              baseTokenAnnotationSet, indexUnitAnnotationType,
+              indexUnitAnnotationSet);
 
       // if there was some problem inside obtaining tokens
       // tokenStream is set to null
       if(tokenStreams == null) return null;
-      
-      if(mergedSet == null)
-        mergedSet = new AnnotationSetImpl(gateDoc);
-      
-      // we need to merge all annotations but the baseTokenAnnotationType
-      for(String aType : aSetToIndex.getAllTypes()) {
 
-        if(aType.equals(tempBaseTokenAnnotationType)) {
-          // first thing we need to check is if baseTokenAnnotationSet is not null
-          if(tempBaseTokenAnnotationSet != null) {
-            continue;
-          }
-          
-          // baseTokenAnnotationSet is null
-          // lets see if we've already added token annotations
-          if(mergedBaseTokenAnnotations) {
-            continue;
-          } else {
-            mergedBaseTokenAnnotations = true;
-          }
-        }
+      // this is enabled only if there are  more than one annotation sets available to search in
+      if(createMergeSet) {
+        if(mergedSet == null) mergedSet = new AnnotationSetImpl(gateDoc);
 
-        if(aType.equals(indexUnitAnnotationType)) {
-          // first thing we need to check is if indexUnitAnnotationSet is not null
-          if(indexUnitAnnotationSet != null) {
+        // we need to merge all annotations but the
+        // baseTokenAnnotationType
+        for(String aType : aSetToIndex.getAllTypes()) {
+
+          if(aType.equals(baseTokenAnnotationType)) {
             continue;
           }
-          
-          // indexUnitAnnotationSet is null
-          // lets see if we've already added setnence annotations
-          if(mergedIndexUnitAnnotations) {
+
+          if(indexUnitAnnotationType != null
+                  && aType.equals(indexUnitAnnotationType)) {
             continue;
-          } else {
-            mergedIndexUnitAnnotations = true;
           }
+
+          mergedSet.addAll(aSetToIndex.get(aType));
         }
-        
-        mergedSet.addAll(aSetToIndex.get(aType));
       }
-      
+
       Document[] toReturn = new Document[tokenStreams.length];
 
-      for(int i = 0; i < tokenStreams.length; i++,j++) {
+      for(int i = 0; i < tokenStreams.length; i++, j++) {
         // make a new, empty document
         Document doc = new Document();
 
         // and then create the document
         LuceneReader reader = new LuceneReader(gateDoc, tokenStreams[i]);
         doc.add(Field.Keyword(Constants.DOCUMENT_ID, documentID));
-        doc.add(Field.Keyword(Constants.DOCUMENT_ID_FOR_SERIALIZED_FILE, documentID + "-" + j));
+        doc.add(Field.Keyword(Constants.DOCUMENT_ID_FOR_SERIALIZED_FILE,
+                documentID + "-" + j));
         if(corpusPersistenceID != null)
           doc.add(Field.Keyword(Constants.CORPUS_ID, corpusPersistenceID));
         doc.add(Field.Keyword(Constants.ANNOTATION_SET_ID, annotSet));
@@ -333,34 +376,32 @@ public class LuceneDocument {
       toReturnBack.addAll(Arrays.asList(toReturn));
     }
 
-    
     // one again do an index with everything merged all together
-    if(mergedSet != null) {
+    if(createMergeSet && mergedSet != null) {
 
-      // lets print the name of annotation set that we are indexing
-//      System.out.println("\tIndexing :"+Constants.COMBINED_SET);
-      
       ArrayList<Token>[] tokenStreams = getTokens(gateDoc, mergedSet,
-              featuresToInclude, featuresToExclude, tempBaseTokenAnnotationType,
-              tempBaseTokenAnnotationSet, indexUnitAnnotationType,
+              featuresToInclude, featuresToExclude, baseTokenAnnotationType,
+              baseTokenAnnotationSet, indexUnitAnnotationType,
               indexUnitAnnotationSet);
-      
+
       if(tokenStreams == null) return null;
 
       Document[] toReturn = new Document[tokenStreams.length];
-      
-      for(int i = 0; i < tokenStreams.length; i++,j++) {
+
+      for(int i = 0; i < tokenStreams.length; i++, j++) {
         // make a new, empty document
         Document doc = new Document();
 
         // and then create the document
         LuceneReader reader = new LuceneReader(gateDoc, tokenStreams[i]);
         doc.add(Field.Keyword(Constants.DOCUMENT_ID, documentID));
-        doc.add(Field.Keyword(Constants.DOCUMENT_ID_FOR_SERIALIZED_FILE, documentID + "-" + j));
+        doc.add(Field.Keyword(Constants.DOCUMENT_ID_FOR_SERIALIZED_FILE,
+                documentID + "-" + j));
         if(corpusPersistenceID != null)
           doc.add(Field.Keyword(Constants.CORPUS_ID, corpusPersistenceID));
-        doc.add(Field.Keyword(Constants.ANNOTATION_SET_ID, Constants.COMBINED_SET));
-        
+        doc.add(Field.Keyword(Constants.ANNOTATION_SET_ID,
+                Constants.COMBINED_SET));
+
         doc.add(Field.Text("contents", reader));
         // here we store token stream on the file system
         try {
@@ -379,46 +420,50 @@ public class LuceneDocument {
 
       toReturnBack.addAll(Arrays.asList(toReturn));
     }
-    
+
     return toReturnBack;
   }
 
-  
   private boolean createTokens(gate.Document gateDocument, AnnotationSet set) {
     String gateContent = gateDocument.getContent().toString();
     int start = -1;
-    for(int i=0;i<gateContent.length();i++) {
+    for(int i = 0; i < gateContent.length(); i++) {
       char c = gateContent.charAt(i);
       if(Character.isWhitespace(c)) {
         if(start != -1) {
           FeatureMap features = gate.Factory.newFeatureMap();
           features.put("string", gateContent.substring(start, i));
           try {
-            set.add(new Long(start), new Long(i), Constants.ANNIC_TOKEN, features);
-          } catch(InvalidOffsetException ioe) {
+            set.add(new Long(start), new Long(i), Constants.ANNIC_TOKEN,
+                    features);
+          }
+          catch(InvalidOffsetException ioe) {
             ioe.printStackTrace();
             return false;
           }
-          start = i+1;
-        } 
-      } else {
-        if(start == -1)
-          start = i;
+          start = i + 1;
+        }
+      }
+      else {
+        if(start == -1) start = i;
       }
     }
     if(start < gateContent.length()) {
       FeatureMap features = gate.Factory.newFeatureMap();
-      features.put("string", gateContent.substring(start, gateContent.length()));
+      features
+              .put("string", gateContent.substring(start, gateContent.length()));
       try {
-        set.add(new Long(start), new Long(gateContent.length()), Constants.ANNIC_TOKEN, features);
-      } catch(InvalidOffsetException ioe) {
+        set.add(new Long(start), new Long(gateContent.length()),
+                Constants.ANNIC_TOKEN, features);
+      }
+      catch(InvalidOffsetException ioe) {
         ioe.printStackTrace();
         return false;
       }
     }
     return true;
   }
-  
+
   /**
    * Some file names are not compatible to the underlying file system.
    * This method replaces all those incompatible characters with '_'.
@@ -442,7 +487,8 @@ public class LuceneDocument {
   private void writeOnDisk(ArrayList tokenStream, String fileName,
           String location) throws Exception {
 
-    // before we write it on a disk, we need to change its name to underlying file system name
+    // before we write it on a disk, we need to change its name to
+    // underlying file system name
     fileName = getCompatibleName(fileName);
 
     if(location.startsWith("file:/"))
@@ -502,11 +548,13 @@ public class LuceneDocument {
 
     boolean excludeFeatures = false;
     boolean includeFeatures = false;
-    
-    // if include features are provided, we donot look at the exclude features
+
+    // if include features are provided, we donot look at the exclude
+    // features
     if(!featuresToInclude.isEmpty()) {
       includeFeatures = true;
-    } else if(!featuresToExclude.isEmpty()) {
+    }
+    else if(!featuresToExclude.isEmpty()) {
       excludeFeatures = true;
     }
 
@@ -536,21 +584,17 @@ public class LuceneDocument {
 
     if(baseTokenSet != null && baseTokenSet.size() > 0) {
       allTypes.remove(baseTokenAnnotationType);
-      //System.out.println("\t\tIndexing Type : Token = "+baseTokenSet.size());
     }
-    
+
     if(indexUnitSet != null && indexUnitSet.size() > 0)
       allTypes.remove(indexUnitAnnotationType);
-    
+
     AnnotationSet toUseSet = new AnnotationSetImpl(document);
     for(String type : allTypes) {
-      //System.out.println("\t\tIndexing type :"+type+" size :"+inputAs.get(type).size());
       toUseSet.addAll(inputAs.get(type));
-      
+
     }
-    
-    //System.out.println("\t\tSize:"+toUseSet.size());
-    
+
     ArrayList<Token> toReturn[] = new ArrayList[unitOffsetsSet.size()];
     Iterator<OffsetGroup> iter = unitOffsetsSet.iterator();
     int counter = 0;
@@ -560,13 +604,12 @@ public class LuceneDocument {
       ArrayList<Annotation> tokens = new ArrayList<Annotation>(toUseSet
               .getContained(group.startOffset, group.endOffset));
 
-      
       // add tokens from the baseTokenSet
       if(baseTokenSet != null && baseTokenSet.size() != 0) {
         tokens.addAll(baseTokenSet.getContained(group.startOffset,
                 group.endOffset));
       }
-      
+
       if(tokens == null || tokens.size() == 0) return null;
 
       Collections.sort(tokens, new OffsetComparator());

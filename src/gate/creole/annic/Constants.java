@@ -30,9 +30,15 @@ public class Constants {
   public final static String DEFAULT_ANNOTATION_SET_NAME = "<null>";
   
   /**
+   * create tokens automatically parameter name
+   */
+  public final static String CREATE_TOKENS_AUTOMATICALLY = "CREATE_TOKENS_AUTOMATICALLY";
+
+  /**
+   * 
    * Annic token which is created when no tokens are provided
    */
-  public final static String ANNIC_TOKEN = "_ANNIC_TOKEN";
+  public final static String ANNIC_TOKEN = "Token";
   
   /**
    * name of the index_location_url parameter.

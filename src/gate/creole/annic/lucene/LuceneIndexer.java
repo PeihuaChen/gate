@@ -356,6 +356,9 @@ public class LuceneIndexer implements Indexer {
     ArrayList annotationSetsToInclude = new ArrayList((List)parameters
             .get(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE));
 
+    Boolean createTokensAutomatically = (Boolean) parameters.get(Constants.CREATE_TOKENS_AUTOMATICALLY);
+    if(createTokensAutomatically == null) createTokensAutomatically = new Boolean(true);
+    
     String idToUse = gateDoc.getLRPersistenceId() == null
             ? gateDoc.getName()
             : gateDoc.getLRPersistenceId().toString();
@@ -363,7 +366,7 @@ public class LuceneIndexer implements Indexer {
     return new gate.creole.annic.lucene.LuceneDocument().createDocuments(
             corpusPersistenceID, gateDoc, idToUse, annotationSetsToInclude,
             annotationSetsToExclude, featuresToInclude, featuresToExclude,
-            location, baseTokenAnnotationType, indexUnitAnnotationType);
+            location, baseTokenAnnotationType, createTokensAutomatically, indexUnitAnnotationType);
   }
 
   /**
@@ -484,6 +487,8 @@ public class LuceneIndexer implements Indexer {
     try {
       reader = IndexReader.open(location);
       TermEnum terms = reader.terms(new Term(Constants.ANNOTATION_SET_ID, ""));
+      if(terms == null || terms.term() == null) return toReturn;
+      
       while(Constants.ANNOTATION_SET_ID.equals(terms.term().field())) {
         toReturn.add(terms.term().text());
         if(!terms.next()) break;

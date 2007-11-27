@@ -122,8 +122,7 @@ public class PhraseQuery extends Query {
       value = queryWeight * idf;                  // idf for document
     }
 
-    /* Niraj */
-    public Scorer scorer(IndexReader reader, IndexSearcher searcher) throws IOException {
+    public Scorer scorer(IndexReader reader, Searcher searcher) throws IOException {
         if (terms.size() == 0)			  // optimize zero-term case
             return null;
 
@@ -146,31 +145,7 @@ public class PhraseQuery extends Query {
                                      reader.norms(field));
 
     }
-    /* End */
     
-    public Scorer scorer(IndexReader reader) throws IOException {
-      if (terms.size() == 0)			  // optimize zero-term case
-        return null;
-
-      TermPositions[] tps = new TermPositions[terms.size()];
-      for (int i = 0; i < terms.size(); i++) {
-        TermPositions p = reader.termPositions((Term)terms.elementAt(i));
-        if (p == null)
-          return null;
-        tps[i] = p;
-      }
-
-      if (slop == 0)	{			  // optimize exact case
-        return new ExactPhraseScorer(this, tps, /*Niraj*/positions, totalTerms, getSimilarity(searcher),
-                                     reader.norms(field));
-
-      }
-      else
-        return
-          new SloppyPhraseScorer(this, tps, getSimilarity(searcher), slop,
-                                 reader.norms(field));
-
-    }
 
     public Explanation explain(IndexReader reader, int doc)
       throws IOException {
@@ -223,7 +198,7 @@ public class PhraseQuery extends Query {
       fieldExpl.setDescription("fieldWeight("+field+":"+query+" in "+doc+
                                "), product of:");
 
-      Explanation tfExpl = scorer(reader).explain(doc);
+      Explanation tfExpl = scorer(reader, this.searcher).explain(doc);
       fieldExpl.addDetail(tfExpl);
       fieldExpl.addDetail(idfExpl);
 

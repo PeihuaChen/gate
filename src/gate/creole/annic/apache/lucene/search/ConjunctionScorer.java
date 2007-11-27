@@ -39,16 +39,12 @@ final class ConjunctionScorer extends Scorer {
 
   public int doc() { return first().doc(); }
 
-  public boolean next(IndexSearcher searcher) throws IOException {
+  public boolean next(Searcher searcher) throws IOException {
     this.searcher = searcher;
-    return next();
-  }
-  
-  public boolean next() throws IOException {
     if (firstTime) {
       init();
     } else if (more) {
-      more = last().next();                       // trigger further scanning
+      more = last().next(this.searcher);                       // trigger further scanning
     }
     return doNext();
   }
@@ -71,14 +67,8 @@ final class ConjunctionScorer extends Scorer {
     return doNext();
   }
   
-  /* Niraj */
-  public float score(IndexSearcher searcher) throws IOException {
-	  this.searcher = searcher;
-    return score();
-  }
-  /* End */
-
-  public float score() throws IOException {
+  public float score(Searcher searcher) throws IOException {
+    this.searcher = searcher;
     float score = 0.0f;                           // sum scores
     Iterator i = scorers.iterator();
     while (i.hasNext())
@@ -96,7 +86,7 @@ final class ConjunctionScorer extends Scorer {
     // move each scorer to its first entry
     Iterator i = scorers.iterator();
     while (more && i.hasNext()) {
-      more = ((Scorer)i.next()).next();
+      more = ((Scorer)i.next()).next(this.searcher);
     }
     if (more)
       sortScorers();                              // initial sort of list

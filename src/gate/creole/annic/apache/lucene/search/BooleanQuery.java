@@ -125,15 +125,9 @@ public class BooleanQuery extends Query {
           w.normalize(norm);
       }
     }
-    /* Niraj */
-    public Scorer scorer(IndexReader reader, IndexSearcher searcher) throws IOException {
-      this.searcher = searcher;  
-      return scorer(reader);
-    }
-    /* End */
 
-    public Scorer scorer(IndexReader reader) throws IOException {
-
+    public Scorer scorer(IndexReader reader, Searcher searcher) throws IOException {
+      this.searcher = searcher;
       // First see if the (faster) ConjunctionScorer will work.  This can be
       // used when all clauses are required.  Also, at this point a
       // BooleanScorer cannot be embedded in a ConjunctionScorer, as the hits
@@ -155,7 +149,7 @@ public class BooleanQuery extends Query {
           new ConjunctionScorer(getSimilarity(searcher));
         for (int i = 0 ; i < weights.size(); i++) {
           Weight w = (Weight)weights.elementAt(i);
-          Scorer subScorer = w.scorer(reader);
+          Scorer subScorer = w.scorer(reader, searcher);
           if (subScorer == null)
             return null;
           result.add(subScorer);
@@ -169,7 +163,7 @@ public class BooleanQuery extends Query {
       for (int i = 0 ; i < weights.size(); i++) {
         BooleanClause c = (BooleanClause)clauses.elementAt(i);
         Weight w = (Weight)weights.elementAt(i);
-        Scorer subScorer = w.scorer(reader, (IndexSearcher) searcher);
+        Scorer subScorer = w.scorer(reader, searcher);
         if (subScorer != null)
           result.add(subScorer, c.required, c.prohibited);
         else if (c.required)

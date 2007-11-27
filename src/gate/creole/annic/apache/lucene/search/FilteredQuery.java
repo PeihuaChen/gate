@@ -1,4 +1,4 @@
-package gate.creole.annic.apache.lucene.search; 
+package gate.creole.annic.apache.lucene.search;
 
 /**
  * Copyright 2004 The Apache Software Foundation
@@ -20,93 +20,110 @@ import gate.creole.annic.apache.lucene.index.IndexReader;
 import java.io.IOException;
 import java.util.BitSet;
 
-
 /**
  * A query that applies a filter to the results of another query.
- *
- * <p>Note: the bits are retrieved from the filter each time this
- * query is used in a search - use a CachingWrapperFilter to avoid
- * regenerating the bits every time.
- *
- * <p>Created: Apr 20, 2004 8:58:29 AM
- *
- * @author  Tim Jones
- * @since   1.4
+ * 
+ * <p>
+ * Note: the bits are retrieved from the filter each time this query is
+ * used in a search - use a CachingWrapperFilter to avoid regenerating
+ * the bits every time.
+ * 
+ * <p>
+ * Created: Apr 20, 2004 8:58:29 AM
+ * 
+ * @author Tim Jones
+ * @since 1.4
  * @version $Id: FilteredQuery.java 3362 2006-10-27 15:37:08Z niraj $
- * @see     CachingWrapperFilter
+ * @see CachingWrapperFilter
  */
-public class FilteredQuery
-extends Query {
+public class FilteredQuery extends Query {
 
   Query query;
+
   Filter filter;
 
   /**
-   * Constructs a new query which applies a filter to the results of the original query.
-   * Filter.bits() will be called every time this query is used in a search.
-   * @param query  Query to be filtered, cannot be <code>null</code>.
-   * @param filter Filter to apply to query results, cannot be <code>null</code>.
+   * Constructs a new query which applies a filter to the results of the
+   * original query. Filter.bits() will be called every time this query
+   * is used in a search.
+   * 
+   * @param query Query to be filtered, cannot be <code>null</code>.
+   * @param filter Filter to apply to query results, cannot be
+   *          <code>null</code>.
    */
-  public FilteredQuery (Query query, Filter filter) {
+  public FilteredQuery(Query query, Filter filter) {
     this.query = query;
     this.filter = filter;
   }
 
   /**
-   * Returns a Weight that applies the filter to the enclosed query's Weight.
-   * This is accomplished by overriding the Scorer returned by the Weight.
+   * Returns a Weight that applies the filter to the enclosed query's
+   * Weight. This is accomplished by overriding the Scorer returned by
+   * the Weight.
    */
-  protected Weight createWeight (final Searcher searcher) {
-    final Weight weight = query.createWeight (searcher);
+  protected Weight createWeight(final Searcher searcher) {
+    final Weight weight = query.createWeight(searcher);
     return new Weight() {
 
       // pass these methods through to enclosed query's weight
-      public float getValue() { return weight.getValue(); }
-      public float sumOfSquaredWeights() throws IOException { return weight.sumOfSquaredWeights(); }
-      public void normalize (float v) { weight.normalize(v); }
-      public Explanation explain (IndexReader ir, int i) throws IOException { return weight.explain (ir, i); }
+      public float getValue() {
+        return weight.getValue();
+      }
+
+      public float sumOfSquaredWeights() throws IOException {
+        return weight.sumOfSquaredWeights();
+      }
+
+      public void normalize(float v) {
+        weight.normalize(v);
+      }
+
+      public Explanation explain(IndexReader ir, int i) throws IOException {
+        return weight.explain(ir, i);
+      }
 
       // return this query
-      public Query getQuery() { return FilteredQuery.this; }
-
-      /* Niraj */
-      public Scorer scorer(IndexReader reader, IndexSearcher searcher) throws IOException {
-          return scorer(reader);
+      public Query getQuery() {
+        return FilteredQuery.this;
       }
-      /* End */
 
-      
+      protected Searcher searcher = null;
+
+
       // return a scorer that overrides the enclosed query's score if
       // the given hit has been filtered out.
-      public Scorer scorer (IndexReader indexReader) throws IOException {
-        final Scorer scorer = weight.scorer (indexReader);
-        final BitSet bitset = filter.bits (indexReader);
-        return new Scorer (query.getSimilarity (searcher)) {
+      public Scorer scorer(IndexReader indexReader, Searcher searcher) throws IOException {
+        this.searcher = searcher;
+        final Scorer scorer = weight.scorer(indexReader, this.searcher); 
+        final BitSet bitset = filter.bits(indexReader);
+        return new Scorer(query.getSimilarity(searcher)) {
 
-          // pass these methods through to the enclosed scorer
-          public boolean next() throws IOException { return scorer.next(); }
-          public boolean next(IndexSearcher searcher) throws IOException { return scorer.next(searcher); }
-          public int doc() { return scorer.doc(); }
-          public boolean skipTo (int i) throws IOException { return scorer.skipTo(i); }
-
-          /* Niraj */
-          public float score(IndexSearcher searcher) throws IOException {
-              return score();
+          public boolean next(Searcher searcher) throws IOException {
+            this.searcher = searcher;
+            return scorer.next(searcher);
           }
-          /* End */
+
+          public int doc() {
+            return scorer.doc();
+          }
+
+          public boolean skipTo(int i) throws IOException {
+            return scorer.skipTo(i);
+          }
 
           // if the document has been filtered out, set score to 0.0
-          public float score() throws IOException {
-            return (bitset.get(scorer.doc())) ? scorer.score() : 0.0f;
+          public float score(Searcher searcher) throws IOException {
+            this.searcher = searcher;
+            return (bitset.get(scorer.doc())) ? scorer.score(this.searcher) : 0.0f;
           }
 
           // add an explanation about whether the document was filtered
-          public Explanation explain (int i) throws IOException {
-            Explanation exp = scorer.explain (i);
-            if (bitset.get(i))
-              exp.setDescription ("allowed by filter: "+exp.getDescription());
-            else
-              exp.setDescription ("removed by filter: "+exp.getDescription());
+          public Explanation explain(int i) throws IOException {
+            Explanation exp = scorer.explain(i);
+            if(bitset.get(i))
+              exp.setDescription("allowed by filter: " + exp.getDescription());
+            else exp.setDescription("removed by filter: "
+                    + exp.getDescription());
             return exp;
           }
         };
@@ -117,11 +134,12 @@ extends Query {
   /** Rewrites the wrapped query. */
   public Query rewrite(IndexReader reader) throws IOException {
     Query rewritten = query.rewrite(reader);
-    if (rewritten != query) {
+    if(rewritten != query) {
       FilteredQuery clone = (FilteredQuery)this.clone();
       clone.query = rewritten;
       return clone;
-    } else {
+    }
+    else {
       return this;
     }
   }
@@ -131,14 +149,14 @@ extends Query {
   }
 
   /** Prints a user-readable version of this query. */
-  public String toString (String s) {
-    return "filtered("+query.toString(s)+")->"+filter;
+  public String toString(String s) {
+    return "filtered(" + query.toString(s) + ")->" + filter;
   }
 
   /** Returns true iff <code>o</code> is equal to this. */
   public boolean equals(Object o) {
-    if (o instanceof FilteredQuery) {
-      FilteredQuery fq = (FilteredQuery) o;
+    if(o instanceof FilteredQuery) {
+      FilteredQuery fq = (FilteredQuery)o;
       return (query.equals(fq.query) && filter.equals(fq.filter));
     }
     return false;

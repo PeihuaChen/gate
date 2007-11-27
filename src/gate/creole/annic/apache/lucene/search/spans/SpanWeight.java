@@ -30,10 +30,10 @@ import gate.creole.annic.apache.lucene.search.Searcher;
 import gate.creole.annic.apache.lucene.search.Scorer;
 import gate.creole.annic.apache.lucene.search.Explanation;
 import gate.creole.annic.apache.lucene.search.Similarity;
-import gate.creole.annic.apache.lucene.search.IndexSearcher;
+
 
 class SpanWeight implements Weight {
-  private Searcher searcher;
+  protected Searcher searcher;
   private float value;
   private float idf;
   private float queryNorm;
@@ -63,20 +63,13 @@ class SpanWeight implements Weight {
     value = queryWeight * idf;                    // idf for document
   }
 
-  /* Niraj */
-  public Scorer scorer(IndexReader reader, IndexSearcher searcher) throws IOException {
-      return new SpanScorer(query.getSpans(reader), this,
+  public Scorer scorer(IndexReader reader, Searcher searcher) throws IOException {
+    this.searcher = searcher;  
+    return new SpanScorer(query.getSpans(reader), this,
               query.getSimilarity(searcher),
               reader.norms(query.getField()));
   }
-  /* End */
   
-  public Scorer scorer(IndexReader reader) throws IOException {
-    return new SpanScorer(query.getSpans(reader), this,
-                          query.getSimilarity(searcher),
-                          reader.norms(query.getField()));
-  }
-
   public Explanation explain(IndexReader reader, int doc)
     throws IOException {
 
@@ -123,7 +116,7 @@ class SpanWeight implements Weight {
     fieldExpl.setDescription("fieldWeight("+field+":"+query.toString(field)+
                              " in "+doc+"), product of:");
 
-    Explanation tfExpl = scorer(reader).explain(doc);
+    Explanation tfExpl = scorer(reader, searcher).explain(doc);
     fieldExpl.addDetail(tfExpl);
     fieldExpl.addDetail(idfExpl);
 

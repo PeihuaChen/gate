@@ -30,6 +30,7 @@ import gate.creole.annic.apache.lucene.index.IndexReader;
  * scorer may be constructed by calling {@link #scorer(IndexReader)}.
  */
 public interface Weight extends java.io.Serializable {
+
   /** The query that this concerns. */
   Query getQuery();
 
@@ -42,13 +43,8 @@ public interface Weight extends java.io.Serializable {
   /** Assigns the query normalization factor to this. */
   void normalize(float norm);
 
-  /* Niraj */
   /** Constructs a scorer for this. */
-  Scorer scorer(IndexReader reader, IndexSearcher searcher) throws IOException;
-  /* End */
-
-  /** Constructs a scorer for this. */
-  Scorer scorer(IndexReader reader) throws IOException;
+  Scorer scorer(IndexReader reader, Searcher searcher) throws IOException;
 
   /** An explanation of the score computation for the named document. */
   Explanation explain(IndexReader reader, int doc) throws IOException;

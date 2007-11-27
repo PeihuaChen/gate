@@ -20,7 +20,6 @@ import java.io.IOException;
 import gate.creole.annic.apache.lucene.index.Term;
 import gate.creole.annic.apache.lucene.index.TermDocs;
 import gate.creole.annic.apache.lucene.index.IndexReader;
-import gate.creole.annic.apache.lucene.search.spans.SpanScorer;
 
 /** A Query that matches documents containing a term.
   This may be combined with other terms with a {@link BooleanQuery}.
@@ -56,19 +55,8 @@ public class TermQuery extends Query {
       value = queryWeight * idf;                  // idf for document
     }
 
-    /* Niraj */
-    public Scorer scorer(IndexReader reader, IndexSearcher searcher) throws IOException {
-        TermDocs termDocs = reader.termDocs(term);
-
-        if (termDocs == null)
-          return null;
-
-        return new TermScorer(this, termDocs, getSimilarity(searcher),
-                              reader.norms(term.field()), term);
-    }
-    /* End */
-    
-    public Scorer scorer(IndexReader reader) throws IOException {
+    public Scorer scorer(IndexReader reader, Searcher searcher) throws IOException {
+      this.searcher = searcher;
       TermDocs termDocs = reader.termDocs(term);
 
       if (termDocs == null)
@@ -111,7 +99,7 @@ public class TermQuery extends Query {
       fieldExpl.setDescription("fieldWeight("+term+" in "+doc+
                                "), product of:");
 
-      Explanation tfExpl = scorer(reader).explain(doc);
+      Explanation tfExpl = scorer(reader, this.searcher).explain(doc);
       fieldExpl.addDetail(tfExpl);
       fieldExpl.addDetail(idfExpl);
 

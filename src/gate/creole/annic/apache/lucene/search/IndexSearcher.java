@@ -116,7 +116,7 @@ public class IndexSearcher extends Searcher {
 	public TopFieldDocs search(Query query, Filter filter, final int nDocs,
 			Sort sort) throws IOException {
 
-		Scorer scorer = query.weight(this).scorer(reader);
+		Scorer scorer = query.weight(this).scorer(reader, this);
 		if (scorer == null)
 			return new TopFieldDocs(0, new ScoreDoc[0], sort.fields);
 
@@ -133,7 +133,7 @@ public class IndexSearcher extends Searcher {
 					hq.insert(new FieldDoc(doc, score));
 				}
 			}
-		});
+		}, this);
 
 		ScoreDoc[] scoreDocs = new ScoreDoc[hq.size()];
 		for (int i = hq.size() - 1; i >= 0; i--)
@@ -158,10 +158,10 @@ public class IndexSearcher extends Searcher {
 			};
 		}
 
-		Scorer scorer = query.weight(this).scorer(reader);
+		Scorer scorer = query.weight(this).scorer(reader, this);
 		if (scorer == null)
 			return;
-		scorer.score(collector);
+		scorer.score(collector, this);
 	}
 
 	public Query rewrite(Query original) throws IOException {
