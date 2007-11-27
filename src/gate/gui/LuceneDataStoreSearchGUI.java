@@ -15,6 +15,7 @@ import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 import javax.swing.*;
+
 import gate.*;
 import gate.corpora.SerialCorpusImpl;
 import gate.creole.AbstractVisualResource;
@@ -90,12 +91,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
   /** Button to export results into an HTML file */
   private JButton exportToHTML;
-
-  /**
-   * group for exportToXML and exportToHTML, only one of them should be
-   * selected at a time
-   */
-  private ButtonGroup exportButtonsGroup;
 
   /**
    * group for allPatterns and selectedPatterns, only one of them should
@@ -202,6 +197,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
   /** Pattern Text displayed in guiPanel */
   JTextField patText;
 
+  JLabel progressLabel;
+
   LuceneDataStoreSearchGUI thisInstance;
 
   /**
@@ -273,10 +270,57 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         patternTable.setRowSelectionInterval(0, 0);
         tableValueChanged();
       }
-      totalFoundPatterns.setText("Listed Patterns : "
+      totalFoundPatterns.setText("Patterns: listed "
               + patternTable.getRowCount());
       totalFoundPatterns.updateUI();
+      
+      String query = newQuery.getText();
+      ArrayList<String> toAdd = new ArrayList<String>();
 
+      if(query.length() > 0 && !patterns.isEmpty()) {
+        String[] posStart = new String[]{"{",","," "};
+        String[] posEnd = new String[]{"}",".",","," ","="};
+
+        // lets go through annotations in the addedAnnotTypes
+        outer:for(String annotType : annotTypes.keySet()) {
+          for(String start : posStart) {
+            for(String end : posEnd) {
+              String toSearch = start + annotType + end;
+                if(query.indexOf(toSearch) > -1) {
+                toAdd.add(annotType);
+                continue outer;
+              }
+            }
+          }
+        }
+        
+        if(!toAdd.isEmpty()) {
+          String featureType = "nothing";
+          for(String at : toAdd) {
+
+            boolean add = true;
+            int index = addedAnnotTypesInGUI.indexOf(at);
+            if(index > -1) {
+              if(addedAnnotFeatureInGUI.get(index).equals(featureType)) {
+                add = false;
+              }
+            }
+
+            if(add) {
+              addedAnnotTypesInGUI.add(at);
+              addedAnnotFeatureInGUI.add(featureType);
+            }
+            else {
+              continue;
+            }
+          }
+
+          // update the gui
+          patternTable.setRowSelectionInterval(patternTable.getSelectedRow(),
+                  patternTable.getSelectedRow());
+          tableValueChanged();
+        }
+      }
     }
   }
 
@@ -294,17 +338,30 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     guiPanel.setBackground(Color.WHITE);
 
     execQueryAction = new ExecuteQueryAction();
-    executeQuery = new JButton(execQueryAction);
+    Icon annicSearchIcon = MainFrame.getIcon("annic-search");
+    executeQuery = new JButton(annicSearchIcon);
+    executeQuery.setPreferredSize(new Dimension(annicSearchIcon.getIconWidth()+8, annicSearchIcon.getIconHeight()+4));
+    executeQuery.setBorderPainted(false);
+    executeQuery.setContentAreaFilled(false);
+    executeQuery.addActionListener(execQueryAction);
     executeQuery.setToolTipText("Execute Query");
-    
+
     nextResultAction = new NextResultAction();
-    nextResults = new JButton(nextResultAction);
+    nextResults = new JButton(MainFrame.getIcon("annic-forward"));
+    nextResults.setPreferredSize(new Dimension(annicSearchIcon.getIconWidth()+8, annicSearchIcon.getIconHeight()+4));
+    nextResults.setBorderPainted(false);
+    nextResults.setContentAreaFilled(false);
+    nextResults.addActionListener(nextResultAction);
     nextResults.setToolTipText("Show Next Patterns");
-    
+
     clearQueryAction = new ClearQueryAction();
-    clearQueryTF = new JButton(clearQueryAction);
+    clearQueryTF = new JButton(MainFrame.getIcon("annic-clean"));
+    clearQueryTF.setPreferredSize(new Dimension(annicSearchIcon.getIconWidth()+8, annicSearchIcon.getIconHeight()+4));
+    clearQueryTF.setBorderPainted(false);
+    clearQueryTF.setContentAreaFilled(false);
+    clearQueryTF.addActionListener(clearQueryAction);
     clearQueryTF.setToolTipText("Clear Query Text Box");
-    
+
     newQuery = new JTextField(20);
 
     DefaultComboBoxModel corpusToSearchInModel = new DefaultComboBoxModel();
@@ -336,15 +393,17 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
     totalFoundPatterns = new JLabel("Total Found Patterns : 0        ");
     exportResultsAction = new ExportResultsAction();
-    exportToHTML = new JButton(exportResultsAction);
+    exportToHTML = new JButton(MainFrame.getIcon("annic-export"));
+    exportToHTML.setPreferredSize(new Dimension(annicSearchIcon.getIconWidth()+8, annicSearchIcon.getIconHeight()+4));
+    exportToHTML.setBorderPainted(false);
+    exportToHTML.setContentAreaFilled(false);
+    exportToHTML.addActionListener(exportResultsAction);
     exportToHTML.setToolTipText("Export Results to HTML");
-    
-    exportButtonsGroup = new ButtonGroup();
+
     patternExportButtonsGroup = new ButtonGroup();
-    exportButtonsGroup.add(exportToHTML);
     exportToHTML.setEnabled(true);
-    allPatterns = new JRadioButton("All Patterns");
-    selectedPatterns = new JRadioButton("Selected Patterns");
+    allPatterns = new JRadioButton("All");
+    selectedPatterns = new JRadioButton("Selected");
     patternExportButtonsGroup.add(allPatterns);
     patternExportButtonsGroup.add(selectedPatterns);
     allPatterns.setToolTipText("exports all the patterns on this screen");
@@ -363,8 +422,13 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     annotTypesBox.addActionListener(this);
 
     featuresBox = new JComboBox();
-    addAnnotTypeButton = new JButton(new AddAnnotTypeAction());
-    addAnnotTypeButton.setToolTipText("Add selected annotation type and feature to the visualization below");
+    addAnnotTypeButton = new JButton(MainFrame.getIcon("annic-down"));
+    addAnnotTypeButton.setPreferredSize(new Dimension(annicSearchIcon.getIconWidth()+8, annicSearchIcon.getIconHeight()+4));
+    addAnnotTypeButton.setBorderPainted(false);
+    addAnnotTypeButton.setContentAreaFilled(false);
+    addAnnotTypeButton.addActionListener(new AddAnnotTypeAction());
+    addAnnotTypeButton
+            .setToolTipText("Add selected annotation type and feature to the visualization below");
 
     comboPanel.add(new JLabel("Annotation Types : "));
     comboPanel.add(annotTypesBox);
@@ -456,16 +520,16 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     // and now add these stuffs into the main Panel
     setLayout(new BorderLayout());
     JPanel topPanel = new JPanel();
-    topPanel.setLayout(new GridLayout(4, 1));
+    topPanel.setLayout(new GridLayout(3, 1));
 
     JPanel newQueryPanel = new JPanel();
     newQueryPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
     newQueryPanel.add(queryToExecute);
     newQueryPanel.add(newQuery);
+    newQueryPanel.add(executeQuery);
+    newQueryPanel.add(clearQueryTF);
     newQueryPanel.add(noOfPatternsField);
     newQueryPanel.add(contextWindowField);
-    newQueryPanel.add(clearQueryTF);
-    newQueryPanel.add(executeQuery);
 
     JPanel toSearchInPanel = new JPanel();
     toSearchInPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -473,22 +537,31 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     toSearchInPanel.add(corpusToSearchIn);
     toSearchInPanel.add(new JLabel("AnnotationSet :"));
     toSearchInPanel.add(annotationSetToSearchIn);
+    toSearchInPanel.add(totalFoundPatterns);
+    toSearchInPanel.add(nextResults);
 
-    JPanel exportResultPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    exportResultPanel.add(totalFoundPatterns);
-    exportResultPanel.add(nextResults);
-    
-    exportResultPanel.add(new JLabel("Export:"));
-    exportResultPanel.add(allPatterns);
-    exportResultPanel.add(selectedPatterns);
-    exportResultPanel.add(exportToHTML);
-    
+    // JPanel exportResultPanel = new JPanel(new
+    // FlowLayout(FlowLayout.LEFT));
+    comboPanel.add(new JLabel("Export patterns:"));
+    comboPanel.add(allPatterns);
+    comboPanel.add(selectedPatterns);
+    comboPanel.add(exportToHTML);
+
+    progressLabel = new JLabel(MainFrame.getIcon("working"));
+
     topPanel.add(newQueryPanel);
     topPanel.add(toSearchInPanel);
-    topPanel.add(exportResultPanel);
     topPanel.add(comboPanel);
 
-    add(topPanel, BorderLayout.NORTH);
+    JPanel topTopPanel = new JPanel(new BorderLayout());
+    JScrollPane scrollPane = new JScrollPane(topPanel);
+    scrollPane.setOpaque(false);
+    topPanel.setOpaque(false);
+    topTopPanel.add(scrollPane, BorderLayout.CENTER);
+    topTopPanel.add(progressLabel, BorderLayout.EAST);
+    progressLabel.setEnabled(false);
+
+    add(topTopPanel, BorderLayout.NORTH);
     titleTextPanel = new JPanel(new BorderLayout());
     titleTextPanel.setOpaque(true);
     titleTextPanel.setBackground(Color.WHITE);
@@ -855,16 +928,12 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
    * Adds the pattern Row gui for newly selected annotation type and
    * feature
    */
-  protected class AddAnnotTypeAction extends AbstractAction {
+  protected class AddAnnotTypeAction implements ActionListener {
 
     /**
      * serial version id
      */
     private static final long serialVersionUID = 3256438118801225013L;
-
-    AddAnnotTypeAction() {
-      super("", MainFrame.getIcon("annic-down"));
-    }
 
     public void actionPerformed(ActionEvent ae) {
       // we would first find out the type of annotation selected and the
@@ -917,15 +986,11 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
   /**
    * Exports all patterns to the XML File
    */
-  private class ExportResultsAction extends AbstractAction {
+  private class ExportResultsAction implements ActionListener {
     /**
      * serial version id
      */
     private static final long serialVersionUID = 3257286928859412277L;
-
-    ExportResultsAction() {
-      super("", MainFrame.getIcon("annic-export"));
-    }
 
     public void actionPerformed(ActionEvent ae) {
 
@@ -1065,15 +1130,11 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
   }
 
   /** Action to clear the newQuery text box */
-  protected class ClearQueryAction extends AbstractAction {
+  protected class ClearQueryAction implements ActionListener {
     /**
      * serial version id
      */
     private static final long serialVersionUID = 3257569516199228209L;
-
-    ClearQueryAction() {
-      super("", MainFrame.getIcon("annic-clean"));
-    }
 
     public void actionPerformed(ActionEvent ae) {
       newQuery.setText("");
@@ -1081,83 +1142,87 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
   }
 
   /** finds out the newly created query and execute it */
-  protected class ExecuteQueryAction extends AbstractAction {
+  protected class ExecuteQueryAction implements ActionListener {
 
     /**
      * serial version id
      */
     private static final long serialVersionUID = 3258128055204917812L;
 
-    ExecuteQueryAction() {
-      super("",MainFrame.getIcon("annic-search"));
-    }
-
     public void actionPerformed(ActionEvent ae) {
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
+          progressLabel.setEnabled(true);
+          SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+              progressLabel.updateUI();
 
-          thisInstance.setEnabled(false);
-          Map<Object, Object> parameters = searcher.getParameters();
-          if(parameters == null) parameters = new HashMap<Object, Object>();
+              thisInstance.setEnabled(false);
+              Map<Object, Object> parameters = searcher.getParameters();
+              if(parameters == null)
+                parameters = new HashMap<Object, Object>();
 
-          if(target instanceof LuceneDataStoreImpl) {
-            URL indexLocationURL = (URL)((LuceneDataStoreImpl)target)
-                    .getIndexer().getParameters().get(
-                            Constants.INDEX_LOCATION_URL);
-            String indexLocation = new File(indexLocationURL.getFile())
-                    .getAbsolutePath();
-            ArrayList<String> indexLocations = new ArrayList<String>();
-            indexLocations.add(indexLocation);
-            parameters.put(Constants.INDEX_LOCATIONS, indexLocations);
+              if(target instanceof LuceneDataStoreImpl) {
+                URL indexLocationURL = (URL)((LuceneDataStoreImpl)target)
+                        .getIndexer().getParameters().get(
+                                Constants.INDEX_LOCATION_URL);
+                String indexLocation = new File(indexLocationURL.getFile())
+                        .getAbsolutePath();
+                ArrayList<String> indexLocations = new ArrayList<String>();
+                indexLocations.add(indexLocation);
+                parameters.put(Constants.INDEX_LOCATIONS, indexLocations);
 
-            int index = corpusToSearchIn.getSelectedIndex();
-            String corpus2SearchIn = index == 0 ? null : (String)corpusIds
-                    .get(index - 1);
-            parameters.put(Constants.CORPUS_ID, corpus2SearchIn);
+                int index = corpusToSearchIn.getSelectedIndex();
+                String corpus2SearchIn = index == 0 ? null : (String)corpusIds
+                        .get(index - 1);
+                parameters.put(Constants.CORPUS_ID, corpus2SearchIn);
 
-            index = annotationSetToSearchIn.getSelectedIndex();
-            if(index > 0) {
-              String annotationSet = (String)annotationSetToSearchIn
-                      .getSelectedItem();
-              parameters.put(Constants.ANNOTATION_SET_ID, annotationSet);
-            } else {
-              parameters.remove(Constants.ANNOTATION_SET_ID);
+                index = annotationSetToSearchIn.getSelectedIndex();
+                if(index > 0) {
+                  String annotationSet = (String)annotationSetToSearchIn
+                          .getSelectedItem();
+                  parameters.put(Constants.ANNOTATION_SET_ID, annotationSet);
+                }
+                else {
+                  parameters.remove(Constants.ANNOTATION_SET_ID);
+                }
+              }
+
+              Integer noOfPatterns = new Integer(noOfPatternsField.getText()
+                      .trim());
+              Integer contextWindow = new Integer(contextWindowField.getText()
+                      .trim());
+              String query = newQuery.getText().trim();
+              parameters.put(Constants.CONTEXT_WINDOW, contextWindow);
+
+              try {
+                if(searcher.search(query, parameters)) {
+                  searcher.next(noOfPatterns.intValue());
+                }
+              }
+              catch(Exception e) {
+                e.printStackTrace();
+                thisInstance.setEnabled(true);
+                progressLabel.setEnabled(false);
+              }
+              processFinished();
+              thisInstance.setEnabled(true);
+              progressLabel.setEnabled(false);
             }
-          }
+          });
 
-          Integer noOfPatterns = new Integer(noOfPatternsField.getText().trim());
-          Integer contextWindow = new Integer(contextWindowField.getText()
-                  .trim());
-          String query = newQuery.getText().trim();
-          parameters.put(Constants.CONTEXT_WINDOW, contextWindow);
-
-          try {
-            if(searcher.search(query, parameters)) {
-              searcher.next(noOfPatterns.intValue());
-            }
-          }
-          catch(Exception e) {
-            e.printStackTrace();
-            thisInstance.setEnabled(true);
-          }
-          processFinished();
-          thisInstance.setEnabled(true);
         }
       });
     }
   }
 
   /** finds out the next few results */
-  protected class NextResultAction extends AbstractAction {
+  protected class NextResultAction implements ActionListener {
 
     /**
      * Serial version ID
      */
     private static final long serialVersionUID = 3257005436719871288L;
-
-    NextResultAction() {
-      super("", MainFrame.getIcon("annic-forward"));
-    }
 
     public void actionPerformed(ActionEvent ae) {
       SwingUtilities.invokeLater(new Runnable() {
@@ -1259,15 +1324,15 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       }
     }
 
-    static private final int DOC_NAME_COLUMN = 0;
+    static private final int DOC_NAME_COLUMN = 3;
 
-    static private final int ANNOTATION_SET_NAME_COLUMN = 1;
+    static private final int ANNOTATION_SET_NAME_COLUMN = 4;
 
-    static private final int LEFT_CONTEXT_COLUMN = 2;
+    static private final int LEFT_CONTEXT_COLUMN = 0;
 
-    static private final int PATTERN_COLUMN = 3;
+    static private final int PATTERN_COLUMN = 1;
 
-    static private final int RIGHT_CONTEXT_COLUMN = 4;
+    static private final int RIGHT_CONTEXT_COLUMN = 2;
 
   }
 
@@ -1712,15 +1777,15 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       try {
         DefaultComboBoxModel annotationSetToSearchInModel = new DefaultComboBoxModel();
         annotationSetToSearchInModel.addElement(Constants.ALL_SETS);
-        
+
         Set<String> annotSets = ((LuceneDataStoreImpl)this.target).getIndexer()
                 .getIndexedAnnotationSetNames();
-        
+
         for(String aSetName : annotSets) {
           // and we need to add the name to the combobox
           annotationSetToSearchInModel.addElement(aSetName);
         }
-        
+
         annotationSetToSearchIn.setModel(annotationSetToSearchInModel);
 
         // lets fire the update event on combobox
