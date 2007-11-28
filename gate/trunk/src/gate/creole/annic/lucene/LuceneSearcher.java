@@ -12,9 +12,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import gate.creole.annic.Hit;
 import gate.creole.annic.Pattern;
@@ -23,7 +25,9 @@ import gate.creole.annic.PatternAnnotation;
 import gate.creole.annic.SearchException;
 import gate.creole.annic.Searcher;
 import gate.creole.annic.apache.lucene.document.Document;
+import gate.creole.annic.apache.lucene.index.IndexReader;
 import gate.creole.annic.apache.lucene.index.Term;
+import gate.creole.annic.apache.lucene.index.TermEnum;
 import gate.creole.annic.apache.lucene.search.Hits;
 import gate.creole.annic.apache.lucene.search.IndexSearcher;
 import gate.creole.annic.apache.lucene.search.TermQuery;
@@ -455,6 +459,40 @@ public class LuceneSearcher implements Searcher {
     return annotationTypesMap;
   }
 
+  /**
+   * This method returns a set of annotation set names that are indexed.
+   * 
+   * @return
+   */
+  public String[] getIndexedAnnotationSetNames(String indexLocation) throws SearchException {
+    Set<String> toReturn = new HashSet<String>();
+
+    IndexReader reader = null;
+    try {
+      reader = IndexReader.open(indexLocation);
+      TermEnum terms = reader.terms(new Term(Constants.ANNOTATION_SET_ID, ""));
+      if(terms == null || terms.term() == null) return new String[0];
+      
+      while(Constants.ANNOTATION_SET_ID.equals(terms.term().field())) {
+        toReturn.add(terms.term().text());
+        if(!terms.next()) break;
+      }
+    }
+    catch(IOException ioe) {
+      throw new SearchException(ioe);
+    }
+    finally {
+      try {
+        if(reader != null) reader.close();
+      }
+      catch(IOException ioe) {
+        throw new SearchException(ioe);
+      }
+    }
+    return toReturn.toArray(new String[0]);
+  }
+  
+  
   /**
    * Gets the search parameters set by user.
    */

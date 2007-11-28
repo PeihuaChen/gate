@@ -5,6 +5,7 @@ import gate.creole.annic.Hit;
 import gate.creole.annic.IndexException;
 import gate.creole.annic.PatternAnnotation;
 import gate.creole.annic.Pattern;
+import gate.creole.annic.SearchException;
 import gate.creole.annic.Searcher;
 import java.awt.*;
 import java.awt.event.*;
@@ -415,7 +416,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
     if(target == null || target instanceof Searcher) {
       corpusToSearchIn.setEnabled(false);
-      annotationSetToSearchIn.setEnabled(false);
     }
 
     annotTypesBox = new JComboBox();
@@ -924,6 +924,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     }
   }
 
+  
   /**
    * Adds the pattern Row gui for newly selected annotation type and
    * feature
@@ -1777,9 +1778,10 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       try {
         DefaultComboBoxModel annotationSetToSearchInModel = new DefaultComboBoxModel();
         annotationSetToSearchInModel.addElement(Constants.ALL_SETS);
-
-        Set<String> annotSets = ((LuceneDataStoreImpl)this.target).getIndexer()
-                .getIndexedAnnotationSetNames();
+        URL indexLocationURL = (URL)((LuceneDataStoreImpl)target).getIndexer().getParameters().get(Constants.INDEX_LOCATION_URL);
+        String location = new File(indexLocationURL.getFile()).getAbsolutePath();
+        String[] annotSets = ((LuceneDataStoreImpl)this.target).getSearcher()
+                .getIndexedAnnotationSetNames(location);
 
         for(String aSetName : annotSets) {
           // and we need to add the name to the combobox
@@ -1795,7 +1797,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           }
         });
       }
-      catch(IndexException pe) {
+      catch(SearchException pe) {
         throw new GateRuntimeException(pe);
       }
 
@@ -1803,9 +1805,34 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     else {
       this.searcher = (Searcher)this.target;
       corpusToSearchIn.setEnabled(false);
-      annotationSetToSearchIn.setEnabled(false);
+
+      // here we need to find out all annotation sets that are indexed
+      try {
+        DefaultComboBoxModel annotationSetToSearchInModel = new DefaultComboBoxModel();
+        annotationSetToSearchInModel.addElement(Constants.ALL_SETS);
+        String[] annotSets = this.searcher.getIndexedAnnotationSetNames(null);
+
+        for(String aSetName : annotSets) {
+          // and we need to add the name to the combobox
+          annotationSetToSearchInModel.addElement(aSetName);
+        }
+
+        annotationSetToSearchIn.setModel(annotationSetToSearchInModel);
+
+        // lets fire the update event on combobox
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            annotationSetToSearchIn.updateUI();
+          }
+        });
+      }
+      catch(SearchException pe) {
+        throw new GateRuntimeException(pe);
+      }
+    
     }
 
+    annotationSetToSearchIn.setEnabled(true);
     executeQuery.setEnabled(true);
     nextResults.setEnabled(true);
     newQuery.setToolTipText("Enter your new query here...");
@@ -1844,7 +1871,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           }
           else {
             corpusToSearchIn.setEnabled(false);
-            annotationSetToSearchIn.setEnabled(false);
           }
           noOfPatternsField.setEnabled(true);
           contextWindowField.setEnabled(true);

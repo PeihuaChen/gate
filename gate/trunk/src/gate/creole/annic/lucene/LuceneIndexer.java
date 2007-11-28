@@ -25,7 +25,6 @@ import gate.creole.annic.apache.lucene.document.Document;
 import gate.creole.annic.apache.lucene.index.IndexReader;
 import gate.creole.annic.apache.lucene.index.IndexWriter;
 import gate.creole.annic.apache.lucene.index.Term;
-import gate.creole.annic.apache.lucene.index.TermEnum;
 import gate.creole.annic.apache.lucene.search.Hits;
 import gate.creole.annic.apache.lucene.search.IndexSearcher;
 import gate.creole.annic.apache.lucene.search.TermQuery;
@@ -471,41 +470,6 @@ public class LuceneIndexer implements Indexer {
    */
   public Map getParameters() {
     return this.parameters;
-  }
-
-  /**
-   * This method returns a set of annotation set names that are indexed.
-   * 
-   * @return
-   */
-  public Set<String> getIndexedAnnotationSetNames() throws IndexException {
-    String location = new File(((URL)parameters
-            .get(Constants.INDEX_LOCATION_URL)).getFile()).getAbsolutePath();
-    Set<String> toReturn = new HashSet<String>();
-
-    IndexReader reader = null;
-    try {
-      reader = IndexReader.open(location);
-      TermEnum terms = reader.terms(new Term(Constants.ANNOTATION_SET_ID, ""));
-      if(terms == null || terms.term() == null) return toReturn;
-      
-      while(Constants.ANNOTATION_SET_ID.equals(terms.term().field())) {
-        toReturn.add(terms.term().text());
-        if(!terms.next()) break;
-      }
-    }
-    catch(IOException ioe) {
-      throw new IndexException(ioe);
-    }
-    finally {
-      try {
-        if(reader != null) reader.close();
-      }
-      catch(IOException ioe) {
-        throw new IndexException(ioe);
-      }
-    }
-    return toReturn;
   }
 
   /**

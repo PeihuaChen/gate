@@ -10,7 +10,6 @@ package gate.creole.annic;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Searcher interface.
@@ -53,6 +52,15 @@ public interface Searcher {
    */
   public Map<String, List<String>> getAnnotationTypesMap();
 
+  
+  /**
+   * Returns an containing names of the indexed annotation sets
+   * @param indexLocation
+   * @return
+   * @throws SearchException
+   */
+  public String[] getIndexedAnnotationSetNames(String indexLocation) throws SearchException;
+  
   /**
    * Returns the recently set parameters
    * 
