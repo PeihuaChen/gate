@@ -2,7 +2,6 @@ package gate.gui;
 
 import gate.creole.annic.Constants;
 import gate.creole.annic.Hit;
-import gate.creole.annic.IndexException;
 import gate.creole.annic.PatternAnnotation;
 import gate.creole.annic.Pattern;
 import gate.creole.annic.SearchException;
@@ -128,12 +127,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
    * We maintain a list of IDs available in datastore
    */
   private List<Object> corpusIds;
-
-  /**
-   * To Allow users to select the annotation set which he/she would like
-   * to search in.
-   */
-  private List<String> annotationSetNames;
 
   /**
    * User will specify the noOfPatternsToSearch here
@@ -1679,7 +1672,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     Color color;
 
     public List<String> getFeatures() {
-      List<String> feat = new ArrayList();
+      List<String> feat = new ArrayList<String>();
       if(features == null) {
         feat.add("No Feature Available");
         return feat;
@@ -1943,6 +1936,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
   }
 
   protected class VariableWidthJLabel extends JLabel {
+
+    private static final long serialVersionUID = -9214011164672538963L;
 
     public VariableWidthJLabel() {
       super();
