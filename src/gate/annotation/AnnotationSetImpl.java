@@ -153,6 +153,10 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     public void remove() {
       // this takes care of the ID index
       iter.remove();
+      
+      // what if lastNext is null
+      if(lastNext == null) return;
+      
       // remove from type index
       removeFromTypeIndex(lastNext);
       // remove from offset indices
@@ -195,7 +199,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     if(annotsByType != null) {
       AnnotationSet sameType = annotsByType.get(a.getType());
       if(sameType != null) sameType.remove(a);
-      if(sameType.isEmpty()) // none left of this type
+      if(sameType != null && sameType.isEmpty()) // none left of this type
         annotsByType.remove(a.getType());
     }
   } // removeFromTypeIndex(a)
