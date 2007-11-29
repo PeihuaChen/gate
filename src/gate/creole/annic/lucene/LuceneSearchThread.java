@@ -316,6 +316,7 @@ public class LuceneSearchThread {
           queryItem.annotationSetName = hits.doc(hitIndex).get(
                   Constants.ANNOTATION_SET_ID).intern();
           queryItem.id = hits.id(hitIndex);
+          queryItem.documentID = hits.doc(hitIndex).get(Constants.DOCUMENT_ID).intern();
           queryItem.ftp = ftp;
           queryItem.patLen = patLen;
           queryItem.qType = qType;
@@ -392,14 +393,16 @@ public class LuceneSearchThread {
 
       // obtain the information about all queries
       List<QueryItem> queryItemsList = searchResultInfoMap.get(serializedFileID);
-
+      if(queryItemsList.isEmpty()) continue;
+      String folder = queryItemsList.get(0).documentID.intern();
+      
       if(serializedFileIDInUse == null || !serializedFileIDInUse.equals(serializedFileID)
               || tokenStreamInUse == null) {
         serializedFileIDInUse = serializedFileID;
         try {
           // this is the first and last time we want this tokenStream
           // to hold information about the current document
-          tokenStreamInUse = getTokenStreamFromDisk(indexLocation,
+          tokenStreamInUse = getTokenStreamFromDisk(indexLocation,getCompatibleName(folder),
                   getCompatibleName(serializedFileID));
         }
         catch(Exception e) {
@@ -648,13 +651,14 @@ public class LuceneSearchThread {
    * @return ArrayList
    */
   private List<gate.creole.annic.apache.lucene.analysis.Token> getTokenStreamFromDisk(
-          String indexDirectory, String documentID) throws Exception {
+          String indexDirectory, String documentFolder, String documentID) throws Exception {
     if(indexDirectory.startsWith("file:/"))
       indexDirectory = indexDirectory.substring(6, indexDirectory.length());
 
     // use buffering
-    File fileToLoad = new File(new File(indexDirectory,
-            Constants.SERIALIZED_FOLDER_NAME), documentID + ".annic");
+    File folder = new File(indexDirectory, Constants.SERIALIZED_FOLDER_NAME);
+    folder = new File(folder, documentFolder);
+    File fileToLoad = new File(folder, documentID + ".annic");
     InputStream file = new FileInputStream(fileToLoad);
     InputStream buffer = new BufferedInputStream(file);
     ObjectInput input = new ObjectInputStream(buffer);
@@ -1064,6 +1068,8 @@ public class LuceneSearchThread {
 
     int id;
 
+    String documentID;
+    
     List ftp;
 
     int patLen;
@@ -1079,6 +1085,7 @@ public class LuceneSearchThread {
     public boolean equals(Object m) {
       if(m instanceof QueryItem) {
         QueryItem n = (QueryItem)m;
+        // no need to compare documentID as we don't compare documents with different docIDs anyway
         return n.score == score && n.id == id && n.patLen == patLen
                 && n.qType == qType && n.ftp.size() == ftp.size()
                 && n.queryString.equals(queryString)
