@@ -25,15 +25,17 @@ Priority: 50
 (
  (
   {Token.kind == word}|
-  {Token.kind == number}|
+  {Token.kind == number}
+ )+
+ (
   {Token.string == "_"}
- )
- ({Token.string == "."}
+ )?
+ ({Token.string == "."})?
   ({Token.kind == word}|
    {Token.kind == number}|
    {Token.string == "_"}
-  )
- )?
+  )*
+ 
  {Token.string == "@"}		
  (
   {Token.kind == word}|
@@ -47,7 +49,7 @@ Priority: 50
   {Token.kind == symbol}|
   {Token.kind == punctuation}|
   {Token.kind == number}
- )?
+ )*
  ({Token.string == "."})?
 (
   {Token.kind == word}|
