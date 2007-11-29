@@ -270,6 +270,11 @@ public class LuceneIndexer implements Indexer {
     }
   }
 
+  private String getCompatibleName(String name) {
+    return name.replaceAll("[\\/:\\*\\?\"<>|]", "_");
+  }
+  
+
   /**
    * remove documents from the Index
    * 
@@ -291,19 +296,31 @@ public class LuceneIndexer implements Indexer {
           String id = removedIDs.get(i).toString();
           
           Set<String> serializedFilesIDs = getNamesOfSerializedFiles(id);
+          
           if(serializedFilesIDs.size() > 0) {
             System.out.print("Removing => " + id + "...");
+          
+          id = getCompatibleName(id);
+          File file = new File(location, Constants.SERIALIZED_FOLDER_NAME);
+          file = new File(file, id);
           
           for(String serializedFileID : serializedFilesIDs) {
             gate.creole.annic.apache.lucene.index.Term term = new gate.creole.annic.apache.lucene.index.Term(
                     Constants.DOCUMENT_ID_FOR_SERIALIZED_FILE, serializedFileID);
             reader.delete(term);
+            serializedFileID = getCompatibleName(serializedFileID);
             // deleting them from the disk as well
-            File file = new File(new File(location,
-                    Constants.SERIALIZED_FOLDER_NAME), serializedFileID
+            // we have a subfolder for each document
+            
+            File toDelete = new File(file, serializedFileID
                     + ".annic");
-            if(file.exists()) file.delete();
+            if(toDelete.exists()) toDelete.delete();
           }
+          
+          if(file.exists() && file.isDirectory()) {
+            file.delete();
+          }
+          
           System.out.println("Done ");
           }
         }// for (remove all removed documents)

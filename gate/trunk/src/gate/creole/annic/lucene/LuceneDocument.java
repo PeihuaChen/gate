@@ -360,7 +360,7 @@ public class LuceneDocument {
         doc.add(Field.Text("contents", reader));
         // here we store token stream on the file system
         try {
-          writeOnDisk(tokenStreams[i], documentID + "-" + j, indexLocation);
+          writeOnDisk(tokenStreams[i], documentID, documentID + "-" + j, indexLocation);
         }
         catch(Exception e) {
           Err.println("\nIgnoring the document : " + gateDoc.getName()
@@ -405,7 +405,7 @@ public class LuceneDocument {
         doc.add(Field.Text("contents", reader));
         // here we store token stream on the file system
         try {
-          writeOnDisk(tokenStreams[i], documentID + "-" + j, indexLocation);
+          writeOnDisk(tokenStreams[i], documentID, documentID + "-" + j, indexLocation);
         }
         catch(Exception e) {
           Err.println("\nIgnoring the document : " + gateDoc.getName()
@@ -484,27 +484,39 @@ public class LuceneDocument {
    * @param location
    * @throws Exception
    */
-  private void writeOnDisk(ArrayList tokenStream, String fileName,
+  private void writeOnDisk(ArrayList tokenStream, String folderName, String fileName,
           String location) throws Exception {
 
     // before we write it on a disk, we need to change its name to
     // underlying file system name
     fileName = getCompatibleName(fileName);
-
+    folderName = getCompatibleName(folderName);
+    
     if(location.startsWith("file:/"))
       location = location.substring(6, location.length());
 
     if(location.charAt(1) != ':') location = "/" + location;
+    
     File locationFile = new File(location);
     File folder = new File(locationFile, Constants.SERIALIZED_FOLDER_NAME);
     if(!folder.exists()) {
-      boolean created = folder.mkdir();
+      folder.mkdirs();
     }
-
     if(!folder.exists()) {
       throw new IOException("Directory could not be created :"
               + folder.getAbsolutePath());
     }
+
+    folder = new File(folder, folderName);
+    if(!folder.exists()) {
+      folder.mkdirs();
+    }
+    
+    if(!folder.exists()) {
+      throw new IOException("Directory could not be created :"
+              + folder.getAbsolutePath());
+    }
+
     File outputFile = new File(folder, fileName + ".annic");
     ObjectOutput output = null;
     OutputStream file = new FileOutputStream(outputFile);
