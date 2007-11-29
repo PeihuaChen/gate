@@ -42,7 +42,7 @@ public class Parser {
    *  DOC_ID XML Element
    */
   public static final String DOC_ID = "DOC_ID";
-
+  
   /**
    *  ANNOTATION_SET_NAME XML Element
    */
@@ -155,9 +155,11 @@ public class Parser {
       // adding a hit element
       sb.append(wrap(HIT, true));
       sb.append(wrap(DOC_ID, hits[i].documentID));
+      sb.append(wrap(ANNOTATION_SET_NAME, hits[i].annotationSetName));
       sb.append(wrap(START_OFFSET, hits[i].startOffset));
       sb.append(wrap(END_OFFSET, hits[i].endOffset));
       sb.append(wrap(QUERY, hits[i].queryString));
+      
 
       // it hit is an instance of Pattern, we need to add further
       // information as well
@@ -252,12 +254,12 @@ public class Parser {
       int startOffset = Integer.parseInt(hitElem.getChildText(START_OFFSET));
       int endOffset = Integer.parseInt(hitElem.getChildText(END_OFFSET));
       String docID = hitElem.getChildText(DOC_ID);
-      String setID = hitElem.getChildText(ANNOTATION_SET_NAME);
+      String annotationSetName = hitElem.getChildText(ANNOTATION_SET_NAME);
       String queryString = hitElem.getChildText(QUERY);
 
       Element patternAnnotations = hitElem.getChild(PATTERN_ANNOTATIONS);
       if(patternAnnotations == null) {
-        hits[i] = new Hit(docID, setID, startOffset, endOffset, queryString);
+        hits[i] = new Hit(docID, annotationSetName, startOffset, endOffset, queryString);
         continue;
       }
 
@@ -291,7 +293,7 @@ public class Parser {
       int rightCEO = Integer.parseInt(hitElem
               .getChildText(RIGHT_CONTEXT_END_OFFSET));
 
-      hits[i] = new Pattern(docID, setID, patternText, startOffset, endOffset,
+      hits[i] = new Pattern(docID, annotationSetName, patternText, startOffset, endOffset,
               leftCSO, rightCEO, patAnnotsList, queryString);
     }
     return hits;
