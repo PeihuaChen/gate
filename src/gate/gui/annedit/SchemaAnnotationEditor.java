@@ -18,33 +18,26 @@ package gate.gui.annedit;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.*;
 import java.util.List;
-import java.util.regex.*;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.JTextComponent;
 
 import gate.*;
 import gate.creole.*;
 import gate.event.*;
 import gate.gui.MainFrame;
-import gate.gui.docview.AnnotationSetsView;
-import gate.gui.docview.TextualDocumentView;
 import gate.swing.JChoice;
 import gate.util.*;
 
 public class SchemaAnnotationEditor extends AbstractVisualResource 
     implements AnnotationEditor{
+
+  private static final long serialVersionUID = 1L;
 
   public void editAnnotation(Annotation ann, AnnotationSet set) {
     this.annotation = ann;
@@ -298,51 +291,9 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
   protected Box featuresBox;
   
   /**
-   * The box used to host the search pane.
-   */
-  protected Box searchBox;
-  
-  /**
-   * The pane containing the UI for search and anootate functionality.
-   */
-  protected JPanel searchPane;
-  
-  /**
-   * Text field for searching
-   */
-  protected JTextField searchTextField;
-  
-  /**
-   * Checkbox for enabling RegEx searching 
-   */
-  protected JCheckBox searchRegExpChk;
-  
-  /**
-   * Checkbox for enabling case sensitive searching 
-   */
-  protected JCheckBox searchCaseSensChk;
-  
-  /**
-   * Checkbox for showing the search UI.
-   */
-  protected JCheckBox searchEnabledCheck;
-  /**
    * Toggle button used to pin down the dialog. 
    */
   protected JToggleButton pinnedButton;
-  
-  /**
-   * Shared regex matcher used for search functionality. 
-   */
-  protected Matcher matcher;
-  
-  protected FindFirstAction findFirstAction;
-  
-  protected FindNextAction findNextAction;
-  
-  protected AnnotateMatchAction annotateMatchAction;
-  
-  protected AnnotateAllMatchesAction annotateAllMatchesAction;
   
   /**
    * The current features editor, one of the ones stored in 
@@ -399,14 +350,12 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
   }
   
   protected void initGui(){
+
     setLayout(new BorderLayout());
+
     //build the toolbar
     JPanel tBar = new JPanel();
     tBar.setLayout(new GridBagLayout());
-//    tBar.setMargin(new Insets(0, 0, 0, 0));
-//    tBar.setFloatable(false);
-//    tBar.setBorderPainted(false);
-//    tBar.setBorder(null);
     GridBagConstraints constraints = new GridBagConstraints();
     constraints.gridx = GridBagConstraints.RELATIVE;
     constraints.gridy = 0;
@@ -440,9 +389,6 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     
     tBar.add(Box.createHorizontalStrut(15), constraints);
     tBar.add(new SmallButton(new DeleteAnnotationAction()), constraints);
-    tBar.add(Box.createHorizontalStrut(15), constraints);
-    tBar.add(new SmallButton(new AnnotateAllAction()), constraints);
-
     constraints.weightx = 1;
     tBar.add(Box.createHorizontalGlue(), constraints);
     
@@ -455,12 +401,12 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     pinnedButton.setBorderPainted(false);
     pinnedButton.setContentAreaFilled(false);
     tBar.add(pinnedButton);
+
     add(tBar, BorderLayout.NORTH);
     
     //build the main pane
     JPanel mainPane = new JPanel();
-    mainPane.setLayout(new BoxLayout(mainPane, BoxLayout.Y_AXIS));
-    add(mainPane, BorderLayout.CENTER);
+    mainPane.setLayout(new BorderLayout());
     
     featureEditorsByType = new HashMap<String, SchemaFeaturesEditor>();
     //for each schema we need to create a type button and a features editor
@@ -477,7 +423,6 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     typesChoice.setDefaultButtonMargin(new Insets(0, 2, 0, 2));
     typesChoice.setMaximumFastChoices(20);
     typesChoice.setMaximumWidth(300);
-    typesChoice.setAlignmentX(Component.LEFT_ALIGNMENT);
     String aTitle = "Type ";
     
     Border titleBorder = BorderFactory.createTitledBorder(aTitle);
@@ -490,86 +435,38 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     aLabel = new JLabel(aTitle);
     typesChoice.setMinimumSize(
             new Dimension(aLabel.getPreferredSize().width, 0));
-    mainPane.add(typesChoice);
+    mainPane.add(typesChoice, BorderLayout.NORTH);
+
     //add the features box
     featuresBox = Box.createVerticalBox();
     aTitle = "Features "; 
     featuresBox.setBorder(BorderFactory.createTitledBorder(aTitle));
-    featuresBox.setAlignmentX(Component.LEFT_ALIGNMENT);
     aLabel = new JLabel(aTitle);
-    featuresBox.add(Box.createRigidArea(
-            new Dimension(aLabel.getPreferredSize().width, 0)));
-    mainPane.add(featuresBox);
-    
-    //add the search box
-    aTitle = "Search & Annotate";
-    searchBox = Box.createHorizontalBox();
-    aLabel = new JLabel(aTitle);
-    searchBox.setMinimumSize(new Dimension(aLabel.getPreferredSize().width, 0));    
-    
-    searchBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-    searchBox.setBorder(BorderFactory.createTitledBorder(aTitle));
-    
-    searchEnabledCheck = new JCheckBox("", MainFrame.getIcon("closed"), false);
-    searchEnabledCheck.setSelectedIcon(MainFrame.getIcon("expanded"));
-    searchEnabledCheck.setAlignmentX(JComponent.LEFT_ALIGNMENT);
-    searchEnabledCheck.setAlignmentY(JComponent.TOP_ALIGNMENT);
-    searchBox.add(searchEnabledCheck);
-    searchBox.add(Box.createHorizontalGlue());
-    mainPane.add(searchBox);
-    
-    searchPane = new JPanel();
-    searchPane.setAlignmentX(Component.LEFT_ALIGNMENT);
-    searchPane.setAlignmentY(Component.TOP_ALIGNMENT);
-    searchPane.setLayout(new BoxLayout(searchPane, BoxLayout.Y_AXIS));
-    
+    mainPane.add(featuresBox, BorderLayout.SOUTH);
 
-    searchTextField = new JTextField(20);
-    //disallow vertical expansion
-    searchTextField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 
-            searchTextField.getPreferredSize().height));
-    
-    searchPane.add(searchTextField);
-    Box hBox = Box.createHorizontalBox();
-    searchCaseSensChk = new JCheckBox("Case sensitive", true);
-    hBox.add(searchCaseSensChk);
-    hBox.add(Box.createHorizontalStrut(15));
-    searchRegExpChk = new JCheckBox("Regular Expression", false);
-    hBox.add(searchRegExpChk);
-    hBox.add(Box.createHorizontalGlue());
-    searchPane.add(hBox);
+    add(mainPane, BorderLayout.CENTER);
 
-    hBox = Box.createHorizontalBox();
-    findFirstAction = new FindFirstAction();
-    hBox.add(new SmallButton(findFirstAction));
-    hBox.add(Box.createHorizontalStrut(5));
-    findNextAction = new FindNextAction();
-    findNextAction.setEnabled(false);
-    hBox.add(new SmallButton(findNextAction));
-    hBox.add(Box.createHorizontalStrut(15));
-    annotateMatchAction = new AnnotateMatchAction();
-    annotateMatchAction.setEnabled(false);
-    hBox.add(new SmallButton(annotateMatchAction));
-    hBox.add(Box.createHorizontalStrut(5));
-    annotateAllMatchesAction = new AnnotateAllMatchesAction();
-    annotateAllMatchesAction.setEnabled(false);
-    hBox.add(new SmallButton(annotateAllMatchesAction));
-    hBox.add(Box.createHorizontalGlue());
-    searchPane.add(hBox);
-    searchPane.add(Box.createVerticalGlue());
+    // add the search and annotate GUI at the bottom of the annotator editor
+    dialog = new JDialog(); // stub for being able to create the searchPanel
+    SearchAndAnnotatePanel searchPanel =
+      new SearchAndAnnotatePanel(mainPane.getBackground(), this, dialog);
 
+    add(searchPanel, BorderLayout.SOUTH);
+            
     //make the dialog
-    Window parentWindow = SwingUtilities.windowForComponent(owner.getTextComponent());
+    Window parentWindow =
+      SwingUtilities.windowForComponent(owner.getTextComponent());
     if(parentWindow != null){
       dialog = parentWindow instanceof Frame ?
-              new JDialog((Frame)parentWindow, 
-              "Annotation Editor Dialog", false) :
+                new JDialog((Frame)parentWindow, 
+                        "Annotation Editor Dialog", false) :
                 new JDialog((Dialog)parentWindow, 
                         "Annotation Editor Dialog", false);
-//      dialog.setFocusableWindowState(false);
       dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-//      dialog.setResizable(false);
       dialog.add(this);
+      // we need to add the final annotator editor window,
+      // before it was a stub
+      searchPanel.setAnnotationEditorWindow(dialog);
       dialog.pack();
     }
   }
@@ -668,53 +565,6 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       }
     });
 
-    searchEnabledCheck.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e) {
-        if(searchEnabledCheck.isSelected()){
-          //add the search box if not already there
-          if(!searchBox.isAncestorOf(searchPane)){
-            //if empty, initialise the search field to the text of teh current
-            //annotation.
-            String searchText = searchTextField.getText(); 
-            if(searchText == null || searchText.trim().length() == 0){
-              if(annotation != null && getOwner() != null){
-                String annText = getOwner().getDocument().getContent().
-                    toString().substring(
-                            annotation.getStartNode().getOffset().intValue(),
-                            annotation.getEndNode().getOffset().intValue());
-                searchTextField.setText(annText);
-              }
-            }
-            searchBox.add(searchPane);
-            dialog.pack();
-          }
-        }else{
-          if(searchBox.isAncestorOf(searchPane)){
-            searchBox.remove(searchPane);
-            dialog.pack();
-          }
-        }
-      }
-    });
-
-    searchTextField.getDocument().addDocumentListener(new DocumentListener(){
-      public void changedUpdate(DocumentEvent e) {
-        enableActions(false);
-      }
-      public void insertUpdate(DocumentEvent e) {
-        enableActions(false);
-      }
-      public void removeUpdate(DocumentEvent e) {
-        enableActions(false);
-      }
-      
-      private void enableActions(boolean state){
-        findNextAction.setEnabled(state);
-        annotateMatchAction.setEnabled(state);
-        annotateAllMatchesAction.setEnabled(state);
-      }
-    });
-    
     dialog.addWindowListener(new WindowAdapter(){
       public void windowClosing(WindowEvent e) {
         if(editingFinished()){
@@ -727,13 +577,6 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
         }
       }
     });
-    
-//    dialog.addComponentListener(new ComponentAdapter(){
-//      public void componentHidden(ComponentEvent e) {
-//        //automatically unpin the dialog on closing
-//        if(pinnedButton.isSelected())pinnedButton.setSelected(false);
-//      }
-//    });  
   }
   
   /**
@@ -818,13 +661,15 @@ System.out.println("Window up");
   }
 
   protected class StartOffsetLeftAction extends AnnotationAction{
+
+    private static final long serialVersionUID = 1L;
+
     public StartOffsetLeftAction(){
       super("<html><b>Extend</b><br><small>SHIFT = 5 characters, CTRL-SHIFT = 10 characters</small></html>", 
               MainFrame.getIcon("extend-left"));
     }
     
     public void actionPerformed(ActionEvent evt){
-      Annotation oldAnn = annotation;
       int increment = 1;
       if((evt.getModifiers() & ActionEvent.SHIFT_MASK) > 0){
         //CTRL pressed -> use tokens for advancing
@@ -845,6 +690,9 @@ System.out.println("Window up");
   }
   
   protected class StartOffsetRightAction extends AnnotationAction{
+
+    private static final long serialVersionUID = 1L;
+
     public StartOffsetRightAction(){
       super("<html><b>Shrink</b><br><small>SHIFT = 5 characters, " +
             "CTRL-SHIFT = 10 characters</small></html>", 
@@ -874,6 +722,9 @@ System.out.println("Window up");
   }
 
   protected class EndOffsetLeftAction extends AnnotationAction{
+
+    private static final long serialVersionUID = 1L;
+
     public EndOffsetLeftAction(){
       super("<html><b>Shrink</b><br><small>SHIFT = 5 characters, " +
             "CTRL-SHIFT = 10 characters</small></html>",
@@ -903,6 +754,9 @@ System.out.println("Window up");
   }
   
   protected class EndOffsetRightAction extends AnnotationAction{
+
+    private static final long serialVersionUID = 1L;
+
     public EndOffsetRightAction(){
       super("<html><b>Extend</b><br><small>SHIFT = 5 characters, " +
             "CTRL-SHIFT = 10 characters</small></html>", 
@@ -931,196 +785,11 @@ System.out.println("Window up");
       }
     }
   }
-  
-  protected class FindFirstAction extends AbstractAction{
-    public FindFirstAction(){
-      super("Find first");
-      super.putValue(SHORT_DESCRIPTION, 
-              "Finds the first occurrence.");
-    }
-    
-    public void actionPerformed(ActionEvent evt){
-      if(getOwner() == null) return;
-      String patternText = searchTextField.getText();
-      if(patternText == null) return;
-        int flags = Pattern.UNICODE_CASE;
-        if(!searchCaseSensChk.isSelected()) flags |= Pattern.CASE_INSENSITIVE;
-        if(!searchRegExpChk.isSelected()) flags |= Pattern.LITERAL;
-        Pattern pattern = null;
-        try {
-          pattern = Pattern.compile(patternText, flags);
-          String text = getOwner().getDocument().getContent().toString();
-          matcher = pattern.matcher(text);
-          if(matcher.find()){
-            findNextAction.setEnabled(true);
-            annotateMatchAction.setEnabled(true);
-            annotateAllMatchesAction.setEnabled(true);
-            int start = matcher.start();
-            int end = matcher.end();
-            //automatically pin the dialog
-            pinnedButton.setSelected(true);
-            getOwner().getTextComponent().requestFocus();
-            getOwner().getTextComponent().select(start, end);
-          }else{
-            findNextAction.setEnabled(false);
-            annotateMatchAction.setEnabled(false);
-            annotateAllMatchesAction.setEnabled(false);            
-          }
-        }
-        catch(PatternSyntaxException e) {
-          e.printStackTrace();
-        }
-    }
-  }
-  
-  protected class FindNextAction extends AbstractAction{
-    public FindNextAction(){
-      super("Find next");
-      super.putValue(SHORT_DESCRIPTION, 
-              "Finds the next occurrence.");
-    }
-    
-    public void actionPerformed(ActionEvent evt){
-      if(matcher != null){
-        if(matcher.find()){
-          int start = matcher.start();
-          int end = matcher.end();
-          getOwner().getTextComponent().requestFocus();
-          getOwner().getTextComponent().select(start, end);
-          placeDialog(start, end);
-        }else{
-          //no more matches possible
-          findNextAction.setEnabled(false);
-          annotateMatchAction.setEnabled(false);
-          annotateAllMatchesAction.setEnabled(false);            
-        }
-      }else{
-        //matcher is not prepared
-        new FindFirstAction().actionPerformed(evt);
-      }
-    }
-  }
-  
-  protected class AnnotateMatchAction extends AbstractAction{
-    public AnnotateMatchAction(){
-      super("Annotate Match");
-      super.putValue(SHORT_DESCRIPTION, 
-              "Annotates the current match.");
-    }
-    
-    public void actionPerformed(ActionEvent evt){
-      if(matcher != null){
-        int start = matcher.start();
-        int end = matcher.end();
-        FeatureMap features = Factory.newFeatureMap();
-        if(annotation.getFeatures() != null) 
-          features.putAll(annotation.getFeatures());
-        try {
-          Integer id = annSet.add(new Long(start), new Long(end), 
-                  annotation.getType(), features);
-          Annotation newAnn = annSet.get(id);
-          getOwner().getTextComponent().select(start, start);
-          editAnnotation(newAnn, annSet);
-        }
-        catch(InvalidOffsetException e) {
-          //the offsets here should always be valid.
-          throw new LuckyException(e);
-        }
-      }
-    }
-  }
-  
-  protected class AnnotateAllMatchesAction extends AbstractAction{
-    public AnnotateAllMatchesAction(){
-      super("Annotate all");
-      super.putValue(SHORT_DESCRIPTION, 
-              "Annotates all the following matches.");
-    }
-    
-    public void actionPerformed(ActionEvent evt){
-      //first annotate the current match
-      annotateCurrentMatch();
-      //next annotate all other matches
-      while(matcher.find()){
-        annotateCurrentMatch();
-      }
-    }
-    
-    private void annotateCurrentMatch(){
-      if(matcher != null){
-        int start = matcher.start();
-        int end = matcher.end();
-        FeatureMap features = Factory.newFeatureMap();
-        features.put("safe.regex", "true");
-        if(annotation.getFeatures() != null) 
-          features.putAll(annotation.getFeatures());
-        try {
-          Integer id = annSet.add(new Long(start), new Long(end), 
-                  annotation.getType(), features);
-          Annotation newAnn = annSet.get(id);
-          getOwner().getTextComponent().select(start, start);
-          editAnnotation(newAnn, annSet);
-        }
-        catch(InvalidOffsetException e) {
-          //the offsets here should always be valid.
-          throw new LuckyException(e);
-        }
-      }
-    }
-  }
-  
-  protected class AnnotateAllAction extends AbstractAction{
-    public AnnotateAllAction(){
-      super("Annotate all");
-      super.putValue(SHORT_DESCRIPTION, 
-              "Annotate all occurrences of this text.");
-    }
-    
-    public void actionPerformed(ActionEvent evt){
-      if(annotation != null){
-        String docText = getOwner().getDocument().getContent().toString();
-        String annText = docText.substring(
-                annotation.getStartNode().getOffset().intValue(),
-                annotation.getEndNode().getOffset().intValue());
-        Pattern annPattern = Pattern.compile(annText, Pattern.LITERAL);
-        Matcher matcher = annPattern.matcher(docText);
-        while(matcher.find()){
-          int start = matcher.start();
-          int end = matcher.end();
-          //if there isn't already an annotation of the right type at these
-          //offsets, then create one.
-          boolean alreadyThere = false;
-          AnnotationSet oldAnnots = annSet.get(new Long(start)).
-              get(annotation.getType());
-          if(oldAnnots != null && oldAnnots.size() > 0){
-            for(Annotation anOldAnn : oldAnnots){
-              if(anOldAnn.getStartNode().getOffset().intValue() == start &&
-                 anOldAnn.getEndNode().getOffset().intValue() == end &&
-                 anOldAnn.getFeatures().subsumes(annotation.getFeatures())){
-                alreadyThere = true;
-                break;
-              }
-            }
-          }
-          if(!alreadyThere){
-            //create the new annotation
-            FeatureMap features = Factory.newFeatureMap();
-            features.putAll(annotation.getFeatures());
-            try {
-              annSet.add(new Long(start), new Long(end), annotation.getType(), 
-                      features);
-            }catch(InvalidOffsetException e) {
-              //this should not happen as the offsets are obtained from the 
-              //text
-              throw new LuckyException(e);
-            }              
-          }
-        }
-      }
-    }
-  }
-  
+
   protected class DeleteAnnotationAction extends AnnotationAction{
+
+    private static final long serialVersionUID = 1L;
+
     public DeleteAnnotationAction(){
       super("Delete annotation", MainFrame.getIcon("remove-annotation"));
     }
@@ -1137,6 +806,7 @@ System.out.println("Window up");
       }
     }
   }
+
   /**
    * Changes the span of an existing annotation by creating a new annotation 
    * with the same ID, type and features but with the new start and end offsets.
@@ -1178,6 +848,9 @@ System.out.println("Window up");
    * save screen real estate)
    */  
   protected class SmallButton extends JButton{
+
+   private static final long serialVersionUID = 1L;
+
     public SmallButton(Action a) {
       super(a);
 //      setBorder(null);
@@ -1188,6 +861,9 @@ System.out.println("Window up");
   }
   
   protected class IconOnlyButton extends JButton{
+
+    private static final long serialVersionUID = 1L;
+
     public IconOnlyButton(Action a) {
       super(a);
       setMargin(new Insets(0, 0, 0, 0));

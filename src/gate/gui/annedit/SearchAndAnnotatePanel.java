@@ -8,7 +8,6 @@
  *
  *  SearchAndAnnotatePanel.java
  *
- *  Valentin Tablan, Sep 10, 2007
  *  Thomas Heitz, Nov 21, 2007
  *
  *  $Id: SchemaAnnotationEditor.java 9221 2007-11-14 17:46:37Z valyt $
@@ -25,6 +24,7 @@ import java.util.regex.*;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.PopupMenuListener;
 
 import gate.*;
 import gate.event.*;
@@ -36,16 +36,22 @@ import gate.util.*;
  * It needs to be called from a gate.gui.docview.AnnotationEditor.
  * 
  * <p>Here is an example how to add it to a JPanel panel.
+ *  The code between brackets is only in case you instantiate
+ *  the annotation editor window after the search panel.
  *
  * <pre>
+ * [window = new JWindow(); // stub for being able to create the searchPanel]
  * SearchAndAnnotatePanel searchPanel =
- *   new SearchAndAnnotatePanel(panel.getBackground());
- * searchPanel.setAnnotationEditor(this);
- * searchPanel.setAnnotationEditorWindow(window);
+ *           new SearchAndAnnotatePanel(panel.getBackground(), this, window);
  * panel.add(searchPanel);
+ * [... creation of the annotation editor window ...]
+ * [// we need to add the final annotator editor window, before it was a stub]
+ * [searchPanel.setAnnotationEditorWindow(window);]
  * </pre>
  */
 public class SearchAndAnnotatePanel extends JPanel {
+
+  private static final long serialVersionUID = 1L;
 
   /**
    * The annotation editor that use this search and annotate panel.
@@ -143,8 +149,12 @@ public class SearchAndAnnotatePanel extends JPanel {
   protected SmallButton annotateAllMatchesSmallButton;
   
 
-  
-  public SearchAndAnnotatePanel(Color color) {
+
+  public SearchAndAnnotatePanel(Color color,
+          AnnotationEditor annotationEditor, Window window) {
+
+    this.annotationEditor = annotationEditor;
+    annotationEditorWindow = window;
 
     initGui(color);
 
@@ -271,6 +281,7 @@ public class SearchAndAnnotatePanel extends JPanel {
         searchedAnnotationComboBox = new JComboBox();
         searchedAnnotationComboBox.setToolTipText(
           "Type of annotation to search for.");
+        searchedAnnotationComboBox.setMaximumRowCount(12);
       hBox.add(searchedAnnotationComboBox);
       hBox.add(Box.createHorizontalGlue());
     optionsPane.add(hBox);
@@ -357,50 +368,10 @@ public class SearchAndAnnotatePanel extends JPanel {
     optionsEnabledCheck.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         if (optionsEnabledCheck.isSelected()) {
-          //add the options box if not already there
           if (!optionsBox.isAncestorOf(optionsPane)) {
-
-            // FIXME: make the searchedAnnotationComboBox working
-            if (getOwner() != null && annotationSetListener == null) {
-              // add a annotation listener only here because the owner is
-              // null when initListeners() is executed
-              annotationSetListener = new gate.event.AnnotationSetListener() {
-                public void annotationAdded(gate.event.AnnotationSetEvent e) {
-                  if (getAnnotationEditor().getAnnotationSetCurrentlyEdited() != null) {
-                  for(Annotation ann :
-                    getAnnotationEditor().getAnnotationSetCurrentlyEdited()) {
-                    searchedAnnotationComboBox.addItem(ann);
-                  }
-                  }
-                  if (getOwner().getDocument().getAnnotations() != null) {
-                    searchedAnnotationComboBox.addItem("------------");
-                  for (String ann :
-                        getOwner().getDocument().getAnnotations().getAllTypes()) {
-                    searchedAnnotationComboBox.addItem(ann);
-                  }
-                  }
-                }
-                public void annotationRemoved(gate.event.AnnotationSetEvent e) {
-                  if (getAnnotationEditor().getAnnotationSetCurrentlyEdited() != null) {
-                  for(Annotation ann :
-                    getAnnotationEditor().getAnnotationSetCurrentlyEdited()) {
-                    searchedAnnotationComboBox.addItem(ann);
-                  }
-                  }
-                  if (getOwner().getDocument().getAnnotations() != null) {
-                    searchedAnnotationComboBox.addItem("------------");
-                  for (String ann :
-                        getOwner().getDocument().getAnnotations().getAllTypes()) {
-                    searchedAnnotationComboBox.addItem(ann);
-                  }
-                  }
-                }
-            };
-            getOwner().getDocument().getAnnotations()
-              .addAnnotationSetListener(annotationSetListener);
-            }
-
+            // add the options box if not already there
             optionsBox.add(optionsPane);
+            updateSearchedAnnotationComboBox();
             getAnnotationEditorWindow().pack();
           }
         } else {
@@ -448,9 +419,65 @@ public class SearchAndAnnotatePanel extends JPanel {
         annotateAllMatchesAction.setEnabled(false);
       }
     });
+
+    searchedAnnotationComboBox.addPopupMenuListener(new PopupMenuListener() {
+
+      public void popupMenuCanceled(javax.swing.event.PopupMenuEvent e) {
+        // do nothing
+      }
+      public void popupMenuWillBecomeInvisible(
+              javax.swing.event.PopupMenuEvent e) {
+        // do nothing
+      }
+      public void popupMenuWillBecomeVisible(
+              javax.swing.event.PopupMenuEvent e) {
+        updateSearchedAnnotationComboBox();
+        searchedAnnotationComboBox.validate();
+      }
+    });
+  }
+
+  private void updateSearchedAnnotationComboBox() {
+
+    Object lastSelectedAnnotationName =
+      searchedAnnotationComboBox.getSelectedItem();
+
+    searchedAnnotationComboBox.removeAllItems();
+    searchedAnnotationComboBox.addItem("Any type");
+    searchedAnnotationComboBox.addItem("------------");
+
+    TreeSet<String> treeSet;
+    if (getAnnotationEditor().getAnnotationSetCurrentlyEdited() != null) {
+      treeSet = new TreeSet<String>(getAnnotationEditor()
+              .getAnnotationSetCurrentlyEdited().getAllTypes());
+      // add all annotation names from the currently edited annotation set
+      for(String annotationType : treeSet) {
+        searchedAnnotationComboBox.addItem(annotationType);
+      }
+    }
+    if (getOwner().getDocument().getAnnotationSetNames().size() > 0) {
+      // add all annotation names from all annotations set
+      for (Object setname :
+              getOwner().getDocument().getAnnotationSetNames()) {
+        if (getAnnotationEditor().getAnnotationSetCurrentlyEdited() != null
+               && ((String)setname).equals(getAnnotationEditor()
+                .getAnnotationSetCurrentlyEdited().getName())) { continue; }
+        treeSet = new TreeSet<String>(getOwner().getDocument()
+                .getAnnotations((String)setname).getAllTypes());
+        searchedAnnotationComboBox.addItem("------------");
+        for (String annotationType : treeSet) {
+          searchedAnnotationComboBox.addItem(annotationType);
+        }
+      }
+    }
+
+    searchedAnnotationComboBox.setSelectedItem(lastSelectedAnnotationName);
   }
 
   protected class FindFirstAction extends AbstractAction{
+
+    private static final long serialVersionUID = 1L;
+
     public FindFirstAction(){
       super("First");
       super.putValue(SHORT_DESCRIPTION, "Finds the first occurrence.");
@@ -469,7 +496,15 @@ public class SearchAndAnnotatePanel extends JPanel {
           pattern = Pattern.compile(patternText, flags);
           String text = getOwner().getDocument().getContent().toString();
           matcher = pattern.matcher(text);
-          if(matcher.find()){
+          if(matcher.find()
+            // FIXME: use the searchedAnnotationComboBox
+//            && (searchedAnnotationComboBox.getSelectedIndex() < 1
+//              || getAnnotationEditor()
+//                .getAnnotationSetCurrentlyEdited()
+//                .get(new Long(matcher.start()), new Long(matcher.end()))
+//                .getAllTypes().contains(
+//                        searchedAnnotationComboBox.getSelectedItem()))
+                        ) {
             findNextAction.setEnabled(true);
             annotateMatchAction.setEnabled(true);
             annotateAllMatchesAction.setEnabled(true);
@@ -516,6 +551,9 @@ public class SearchAndAnnotatePanel extends JPanel {
   }
   
   protected class FindPreviousAction extends AbstractAction {
+
+    private static final long serialVersionUID = 1L;
+
     public FindPreviousAction() {
       super("Previous");
       super.putValue(SHORT_DESCRIPTION, "Finds the previous occurrence.");
@@ -546,6 +584,9 @@ public class SearchAndAnnotatePanel extends JPanel {
   }
 
   protected class FindNextAction extends AbstractAction{
+
+    private static final long serialVersionUID = 1L;
+
     public FindNextAction(){
       super("Next");
       super.putValue(SHORT_DESCRIPTION, "Finds the next occurrence.");
@@ -579,6 +620,9 @@ public class SearchAndAnnotatePanel extends JPanel {
   }
   
   protected class AnnotateMatchAction extends AbstractAction{
+
+    private static final long serialVersionUID = 1L;
+
     public AnnotateMatchAction(){
       super("Annotate");
       super.putValue(SHORT_DESCRIPTION, "Annotates the current match.");
@@ -615,6 +659,9 @@ public class SearchAndAnnotatePanel extends JPanel {
   }
   
   protected class AnnotateAllMatchesAction extends AbstractAction{
+
+    private static final long serialVersionUID = 1L;
+
     public AnnotateAllMatchesAction(){
       super("Ann. all");
       super.putValue(SHORT_DESCRIPTION, "Annotates all the following matches.");
@@ -624,7 +671,8 @@ public class SearchAndAnnotatePanel extends JPanel {
     public void actionPerformed(ActionEvent evt){
       annotateAllAnnotationsID = new LinkedList<Annotation>();
       //first annotate the current match
-      annotateCurrentMatch();
+      //FIXME: why ? what the purpose ?
+//      annotateCurrentMatch();
       //next annotate all other matches
       while(matcher.find()){
         annotateCurrentMatch();
@@ -666,6 +714,9 @@ public class SearchAndAnnotatePanel extends JPanel {
    * Remove the annotations added by the last action that annotate all matches.
    */
   protected class UndoAnnotateAllMatchesAction extends AbstractAction{
+
+    private static final long serialVersionUID = 1L;
+
     public UndoAnnotateAllMatchesAction(){
       super("Undo");
       super.putValue(SHORT_DESCRIPTION, "Undo annotate all matches.");
@@ -700,6 +751,9 @@ public class SearchAndAnnotatePanel extends JPanel {
    * A smaller JButton with less margins.
    */
   protected class SmallButton extends JButton{
+
+    private static final long serialVersionUID = 1L;
+
     public SmallButton(Action a) {
       super(a);
       setMargin(new Insets(0, 2, 0, 2));
@@ -721,25 +775,17 @@ public class SearchAndAnnotatePanel extends JPanel {
   }
 
   /**
-   * @param annotationEditor annotation editor that use this search
-   *  and annotate panel
+   * @return The annotation editor window.
    */
-  public void setAnnotationEditor(AnnotationEditor annotationEditor) {
-    this.annotationEditor = annotationEditor;
+  public Window getAnnotationEditorWindow() {
+    return annotationEditorWindow;
   }
-  
+
   /**
    * @param window The annotation editor window.
    */
   public void setAnnotationEditorWindow(Window window) {
     annotationEditorWindow = window;
-  }
-
-  /**
-   * @return The annotation editor window.
-   */
-  public Window getAnnotationEditorWindow() {
-    return annotationEditorWindow;
   }
 
 }
