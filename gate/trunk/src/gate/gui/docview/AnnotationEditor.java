@@ -21,9 +21,9 @@ import java.util.*;
 
 import javax.swing.*;
 import javax.swing.Timer;
-import javax.swing.border.LineBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
+import javax.swing.event.TableModelListener;
 import javax.swing.text.BadLocationException;
 
 import gate.*;
@@ -44,10 +44,11 @@ import gate.util.*;
 public class AnnotationEditor extends AbstractVisualResource 
     implements gate.gui.annedit.AnnotationEditor{
   
+  private static final long serialVersionUID = 1L;
+
   public AnnotationEditor(){
     
   }
-  
   
   /* (non-Javadoc)
    * @see gate.creole.AbstractVisualResource#init()
@@ -198,17 +199,23 @@ public class AnnotationEditor extends AbstractVisualResource
       throw new GateRuntimeException(rie);
     }
     JScrollPane scroller = new JScrollPane(featuresEditor.getTable());
-    
+    // resize the annotation editor window when some data
+    // are modified in the features table
+    featuresEditor.getTable().getModel().addTableModelListener(
+            new TableModelListener() {
+              public void tableChanged(javax.swing.event.TableModelEvent e) {
+                popupWindow.pack();
+              }
+            });
+
     constraints.gridy = 2;
     constraints.weighty = 1;
     constraints.fill = GridBagConstraints.BOTH;
     pane.add(scroller, constraints);
-    
+
     // add the search and annotate GUI at the bottom of the annotator editor
     SearchAndAnnotatePanel searchPanel =
-      new SearchAndAnnotatePanel(pane.getBackground());
-    searchPanel.setAnnotationEditor(this);
-    searchPanel.setAnnotationEditorWindow(popupWindow);
+      new SearchAndAnnotatePanel(pane.getBackground(), this, popupWindow);
     constraints.insets = new Insets(0, 0, 0, 0);
     constraints.fill = GridBagConstraints.BOTH;
     constraints.anchor = GridBagConstraints.WEST;
@@ -275,63 +282,69 @@ public class AnnotationEditor extends AbstractVisualResource
         }
       }
     });
+
   }
   
-  protected void initGUI(){
+  protected void initGUI() {
     solAction = new StartOffsetLeftAction();
     sorAction = new StartOffsetRightAction();
     eolAction = new EndOffsetLeftAction();
     eorAction = new EndOffsetRightAction();
     delAction = new DeleteAnnotationAction();
-    
+
     initData();
     initBottomWindow(SwingUtilities.getWindowAncestor(owner.getTextComponent()));
     initListeners();
-    
-    hideTimer = new Timer(HIDE_DELAY, new ActionListener(){
-      public void actionPerformed(ActionEvent evt){
+
+    hideTimer = new Timer(HIDE_DELAY, new ActionListener() {
+      public void actionPerformed(ActionEvent evt) {
         hide();
       }
     });
     hideTimer.setRepeats(false);
-   
-    AncestorListener textAncestorListener = new AncestorListener(){
-      public void ancestorAdded(AncestorEvent event){
+
+    AncestorListener textAncestorListener = new AncestorListener() {
+      public void ancestorAdded(AncestorEvent event) {
         if(wasShowing) show(false);
         wasShowing = false;
       }
-      
-      public void ancestorRemoved(AncestorEvent event){
-        if(isShowing()){
+
+      public void ancestorRemoved(AncestorEvent event) {
+        if(isShowing()) {
           wasShowing = true;
           hide();
         }
       }
-      
-      public void ancestorMoved(AncestorEvent event){
+
+      public void ancestorMoved(AncestorEvent event) {
       }
-      private boolean wasShowing = false; 
+
+      private boolean wasShowing = false;
     };
     owner.getTextComponent().addAncestorListener(textAncestorListener);
   }
   
   public void editAnnotation(Annotation ann, AnnotationSet set){
-   this.ann = ann;
-   this.set = set;
-   //repopulate the types combo
-   String annType = ann.getType();
-   Set types = new HashSet(schemasByType.keySet());
-   types.add(annType);
-   types.addAll(set.getAllTypes());
-   java.util.List typeList = new ArrayList(types);
-   Collections.sort(typeList);
-   typeCombo.setModel(new DefaultComboBoxModel(typeList.toArray()));
-   typeCombo.setSelectedItem(annType);
+    this.ann = ann;
+    this.set = set;
+    //repopulate the types combo
+    String annType = ann.getType();
+    Set types = new HashSet(schemasByType.keySet());
+    types.add(annType);
+    types.addAll(set.getAllTypes());
+    java.util.List typeList = new ArrayList(types);
+    Collections.sort(typeList);
+    typeCombo.setModel(new DefaultComboBoxModel(typeList.toArray()));
+    typeCombo.setSelectedItem(annType);
    
-   featuresEditor.setSchema((AnnotationSchema)schemasByType.get(annType));
-   featuresEditor.setTargetFeatures(ann.getFeatures());
-   popupWindow.doLayout();
-   show(true);
+    featuresEditor.setSchema((AnnotationSchema)schemasByType.get(annType));
+    featuresEditor.setTargetFeatures(ann.getFeatures());
+    popupWindow.doLayout();
+    if (pinnedButton.isSelected()) {
+      show(false);
+    } else {
+      show(true);
+    }
   }
 
   public Annotation getAnnotationCurrentlyEdited() {
@@ -477,6 +490,9 @@ public class AnnotationEditor extends AbstractVisualResource
   }
 
   protected class StartOffsetLeftAction extends AnnotationAction{
+
+    private static final long serialVersionUID = 1L;
+
     public StartOffsetLeftAction(){
       super("<html><b>Extend</b><br><small>SHIFT = 5 characters, CTRL-SHIFT = 10 characters</small></html>", 
               MainFrame.getIcon("extend-left"));
@@ -504,6 +520,9 @@ public class AnnotationEditor extends AbstractVisualResource
   }
   
   protected class StartOffsetRightAction extends AnnotationAction{
+
+    private static final long serialVersionUID = 1L;
+
     public StartOffsetRightAction(){
       super("<html><b>Shrink</b><br><small>SHIFT = 5 characters, " +
             "CTRL-SHIFT = 10 characters</small></html>", 
@@ -533,6 +552,9 @@ public class AnnotationEditor extends AbstractVisualResource
   }
 
   protected class EndOffsetLeftAction extends AnnotationAction{
+
+    private static final long serialVersionUID = 1L;
+
     public EndOffsetLeftAction(){
       super("<html><b>Shrink</b><br><small>SHIFT = 5 characters, " +
             "CTRL-SHIFT = 10 characters</small></html>",
@@ -562,6 +584,9 @@ public class AnnotationEditor extends AbstractVisualResource
   }
   
   protected class EndOffsetRightAction extends AnnotationAction{
+
+    private static final long serialVersionUID = 1L;
+
     public EndOffsetRightAction(){
       super("<html><b>Extend</b><br><small>SHIFT = 5 characters, " +
             "CTRL-SHIFT = 10 characters</small></html>", 
@@ -593,6 +618,9 @@ public class AnnotationEditor extends AbstractVisualResource
   
   
   protected class DeleteAnnotationAction extends AnnotationAction{
+
+   private static final long serialVersionUID = 1L;
+
     public DeleteAnnotationAction(){
       super("Delete", MainFrame.getIcon("remove-annotation"));
     }
@@ -604,6 +632,9 @@ public class AnnotationEditor extends AbstractVisualResource
   }
   
   protected class DismissAction extends AbstractAction{
+
+    private static final long serialVersionUID = 1L;
+
     public DismissAction(){
       super("");
       Icon icon = UIManager.getIcon("InternalFrame.closeIcon");
@@ -618,6 +649,9 @@ public class AnnotationEditor extends AbstractVisualResource
   }
   
   protected class ApplyAction extends AbstractAction{
+
+    private static final long serialVersionUID = 1L;
+
     public ApplyAction(){
       super("Apply");
 //      putValue(SHORT_DESCRIPTION, "Apply");
@@ -680,7 +714,6 @@ public class AnnotationEditor extends AbstractVisualResource
    * The annotation types are used as keys for the map.
    */
   protected Map schemasByType;
-  
   
   /**
    * The controlling object for this editor.
