@@ -226,6 +226,8 @@ public class AnnotationEditor extends AbstractVisualResource
     constraints.weightx = 0.0;
     constraints.weighty = 0.0;
     pane.add(searchPanel, constraints);
+
+    popupWindow.pack();
   }
 
 
