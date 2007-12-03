@@ -351,6 +351,18 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
   
   protected void initGui(){
 
+    //make the dialog
+    Window parentWindow =
+      SwingUtilities.windowForComponent(owner.getTextComponent());
+    if(parentWindow != null){
+      dialog = parentWindow instanceof Frame ?
+                new JDialog((Frame)parentWindow, 
+                        "Annotation Editor Dialog", false) :
+                new JDialog((Dialog)parentWindow, 
+                        "Annotation Editor Dialog", false);
+      dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+    }
+
     setLayout(new BorderLayout());
 
     //build the toolbar
@@ -447,28 +459,13 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     add(mainPane, BorderLayout.CENTER);
 
     // add the search and annotate GUI at the bottom of the annotator editor
-    dialog = new JDialog(); // stub for being able to create the searchPanel
     SearchAndAnnotatePanel searchPanel =
       new SearchAndAnnotatePanel(mainPane.getBackground(), this, dialog);
 
     add(searchPanel, BorderLayout.SOUTH);
             
-    //make the dialog
-    Window parentWindow =
-      SwingUtilities.windowForComponent(owner.getTextComponent());
-    if(parentWindow != null){
-      dialog = parentWindow instanceof Frame ?
-                new JDialog((Frame)parentWindow, 
-                        "Annotation Editor Dialog", false) :
-                new JDialog((Dialog)parentWindow, 
-                        "Annotation Editor Dialog", false);
-      dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-      dialog.add(this);
-      // we need to add the final annotator editor window,
-      // before it was a stub
-      searchPanel.setAnnotationEditorWindow(dialog);
-      dialog.pack();
-    }
+    dialog.add(this);
+    dialog.pack();
   }
 
   protected void initListeners(){

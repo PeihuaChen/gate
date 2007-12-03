@@ -36,17 +36,11 @@ import gate.util.*;
  * It needs to be called from a gate.gui.docview.AnnotationEditor.
  * 
  * <p>Here is an example how to add it to a JPanel panel.
- *  The code between brackets is only in case you instantiate
- *  the annotation editor window after the search panel.
  *
  * <pre>
- * [window = new JWindow(); // stub for being able to create the searchPanel]
  * SearchAndAnnotatePanel searchPanel =
  *           new SearchAndAnnotatePanel(panel.getBackground(), this, window);
  * panel.add(searchPanel);
- * [... creation of the annotation editor window ...]
- * [// we need to add the final annotator editor window, before it was a stub]
- * [searchPanel.setAnnotationEditorWindow(window);]
  * </pre>
  */
 public class SearchAndAnnotatePanel extends JPanel {
@@ -280,7 +274,7 @@ public class SearchAndAnnotatePanel extends JPanel {
       hBox = Box.createHorizontalBox();
         searchedAnnotationComboBox = new JComboBox();
         searchedAnnotationComboBox.setToolTipText(
-          "Type of annotation to search for.");
+          "Type of annotation that should contains the searched text.");
         searchedAnnotationComboBox.setMaximumRowCount(12);
       hBox.add(searchedAnnotationComboBox);
       hBox.add(Box.createHorizontalGlue());
@@ -310,6 +304,20 @@ public class SearchAndAnnotatePanel extends JPanel {
   }
 
   protected void initListeners() {
+
+    // FIXME: doesn't work, why ?????????????????????
+    getAnnotationEditorWindow().addWindowStateListener(
+            new WindowStateListener() {
+      public void windowStateChanged(WindowEvent e) {
+        System.out.println("WindowEvent: "+e.toString());
+        if (e.equals(WindowEvent.COMPONENT_HIDDEN)){
+          findPreviousAction.setEnabled(false);
+          findNextAction.setEnabled(false);
+          annotateMatchAction.setEnabled(false);
+          annotateAllMatchesAction.setEnabled(false);
+        }
+      }
+    });
 
     searchEnabledCheck.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -421,7 +429,6 @@ public class SearchAndAnnotatePanel extends JPanel {
     });
 
     searchedAnnotationComboBox.addPopupMenuListener(new PopupMenuListener() {
-
       public void popupMenuCanceled(javax.swing.event.PopupMenuEvent e) {
         // do nothing
       }
@@ -485,68 +492,78 @@ public class SearchAndAnnotatePanel extends JPanel {
     }
 
     public void actionPerformed(ActionEvent evt){
-      if(getOwner() == null) return;
+      if(getOwner() == null) { return; }
       String patternText = searchTextField.getText();
-      if(patternText == null) return;
-        int flags = 0;
-        if(!searchCaseSensChk.isSelected()) flags |= Pattern.CASE_INSENSITIVE;
-        if(!searchRegExpChk.isSelected()) flags |= Pattern.LITERAL;
-        Pattern pattern = null;
-        try {
-          pattern = Pattern.compile(patternText, flags);
-          String text = getOwner().getDocument().getContent().toString();
-          matcher = pattern.matcher(text);
-          if(matcher.find()
-            // FIXME: use the searchedAnnotationComboBox
-//            && (searchedAnnotationComboBox.getSelectedIndex() < 1
-//              || getAnnotationEditor()
-//                .getAnnotationSetCurrentlyEdited()
-//                .get(new Long(matcher.start()), new Long(matcher.end()))
-//                .getAllTypes().contains(
-//                        searchedAnnotationComboBox.getSelectedItem()))
-                        ) {
-            findNextAction.setEnabled(true);
-            annotateMatchAction.setEnabled(true);
-            annotateAllMatchesAction.setEnabled(true);
-            int start = matcher.start();
-            int end = matcher.end();
-            matchedIndexes = new LinkedList<Vector<Integer>>();
-            Vector<Integer> v = new Vector<Integer>(2);
-            v.add(new Integer(start));
-            v.add(new Integer(end));
-            matchedIndexes.add(v);
-            //automatically pin the dialog
-//            pinnedButton.setSelected(true);
-            // FIXME: make the highlighting appear in text
-            // and put the focus back to the annotation editor window
-//            getAnnotationEditorWindow().setVisible(false);
-            getOwner().getTextComponent().requestFocus();
-            getOwner().getTextComponent().select(start, end);
-            SwingUtilities.getWindowAncestor(
-              getOwner().getTextComponent()).toFront();
-//            getAnnotationEditorWindow().setVisible(true);
-//            getAnnotationEditorWindow().requestFocus();
-            SwingUtilities.getWindowAncestor(
-              getAnnotationEditorWindow()).toFront();
-          }else{
-            findNextAction.setEnabled(false);
-            annotateMatchAction.setEnabled(false);
+      if(patternText == null) { return; }
+      int flags = 0;
+      if(!searchCaseSensChk.isSelected()) {
+        flags |= Pattern.CASE_INSENSITIVE; }
+      if(!searchRegExpChk.isSelected()) {
+        flags |= Pattern.LITERAL; }
+      Pattern pattern = null;
+
+      try {
+        pattern = Pattern.compile(patternText, flags);
+        String text = getOwner().getDocument().getContent().toString();
+        matcher = pattern.matcher(text);
+
+        boolean found = matcher.find();
+        if (searchedAnnotationComboBox.getSelectedIndex() > 0) {
+          // while there is no annotation of the selected type
+          // that contains the searched text 
+          while (found
+                 && !getAnnotationEditor().getAnnotationSetCurrentlyEdited()
+                .get(new Long(matcher.start()), new Long(matcher.end()))
+                .getAllTypes().contains(
+                        searchedAnnotationComboBox.getSelectedItem())) {
+            found = matcher.find();
           }
-          findPreviousAction.setEnabled(false);
         }
-        catch(PatternSyntaxException e) {
-            //FIXME: put this $#! error dialog in front of the editor dialog
-//          getAnnotationEditorWindow().setAlwaysOnTop(false);
-//            getAnnotationEditorWindow().toBack();
-            JOptionPane errorOptionsPane = new JOptionPane(
-              "Invalid pattern!\n" + e.toString(),
-              JOptionPane.ERROR_MESSAGE);
-            JDialog errorDialog = errorOptionsPane
+        if (found) {
+          findNextAction.setEnabled(true);
+          annotateMatchAction.setEnabled(true);
+          annotateAllMatchesAction.setEnabled(false);
+          int start = matcher.start();
+          int end = matcher.end();
+          matchedIndexes = new LinkedList<Vector<Integer>>();
+          Vector<Integer> v = new Vector<Integer>(2);
+          v.add(new Integer(start));
+          v.add(new Integer(end));
+          matchedIndexes.add(v);
+          //automatically pin the dialog
+//          pinnedButton.setSelected(true);
+          // FIXME: make the highlighting appear in text
+          // and put the focus back to the annotation editor window
+//          getAnnotationEditorWindow().setVisible(false);
+          getOwner().getTextComponent().requestFocus();
+          getOwner().getTextComponent().select(start, end);
+          SwingUtilities.getWindowAncestor(
+                  getOwner().getTextComponent()).toFront();
+//          getAnnotationEditorWindow().setVisible(true);
+//          getAnnotationEditorWindow().requestFocus();
+          SwingUtilities.getWindowAncestor(
+                  getAnnotationEditorWindow()).toFront();
+
+        } else {
+          // no match found
+          findNextAction.setEnabled(false);
+          annotateMatchAction.setEnabled(false);
+        }
+        findPreviousAction.setEnabled(false);
+
+      } catch(PatternSyntaxException e) {
+        //FIXME: put this $#! error dialog in front of the editor dialog
+//        getAnnotationEditorWindow().setAlwaysOnTop(false);
+//          getAnnotationEditorWindow().toBack();
+        JOptionPane errorOptionsPane = new JOptionPane(
+                "Invalid pattern!\n" + e.toString(),
+                JOptionPane.ERROR_MESSAGE);
+        JDialog errorDialog = errorOptionsPane
                 .createDialog(getAnnotationEditorWindow(), "GATE");
-//            errorDialog.setAlwaysOnTop(true);
-            errorDialog.setVisible(true);
-//            errorDialog.toFront();
-        }
+//          errorDialog.setAlwaysOnTop(true);
+        errorDialog.setVisible(true);
+//          errorDialog.toFront();
+      }
     }
   }
   
@@ -568,7 +585,7 @@ public class SearchAndAnnotatePanel extends JPanel {
 
       Vector<Integer> v;
       if (matchedIndexes.size() == 1) {
-        // no more previous annotation
+        // no more previous annotation, disable the action
         findPreviousAction.setEnabled(false);
       }
       v = matchedIndexes.getLast();
@@ -580,6 +597,8 @@ public class SearchAndAnnotatePanel extends JPanel {
 //      placeDialog(start, end);
       // reset the matcher for the next FindNextAction
       matcher.find(start);
+      findNextAction.setEnabled(true);
+      annotateMatchAction.setEnabled(true);
     }
   }
 
@@ -595,7 +614,19 @@ public class SearchAndAnnotatePanel extends JPanel {
 
     public void actionPerformed(ActionEvent evt){
       if(matcher != null){
-        if(matcher.find()){
+        boolean found = matcher.find();
+        if (searchedAnnotationComboBox.getSelectedIndex() > 0) {
+          // while there is no annotation of the selected type
+          // that contains the searched text 
+          while (found
+                 && !getAnnotationEditor().getAnnotationSetCurrentlyEdited()
+                .get(new Long(matcher.start()), new Long(matcher.end()))
+                .getAllTypes().contains(
+                        searchedAnnotationComboBox.getSelectedItem())) {
+            found = matcher.find();
+          }
+        }
+        if (found) {
           int start = matcher.start();
           int end = matcher.end();
           Vector<Integer> v = new Vector<Integer>(2);
@@ -607,12 +638,13 @@ public class SearchAndAnnotatePanel extends JPanel {
           searchTextField.requestFocus();
 //          getAnnotationEditor().placeDialog(start, end);
           findPreviousAction.setEnabled(true);
-        }else{
+        } else {
           //no more matches possible
           findNextAction.setEnabled(false);
           annotateMatchAction.setEnabled(false);
         }
-      }else{
+
+      } else {
         //matcher is not prepared
         new FindFirstAction().actionPerformed(evt);
       }
@@ -670,12 +702,22 @@ public class SearchAndAnnotatePanel extends JPanel {
 
     public void actionPerformed(ActionEvent evt){
       annotateAllAnnotationsID = new LinkedList<Annotation>();
-      //first annotate the current match
-      //FIXME: why ? what the purpose ?
-//      annotateCurrentMatch();
-      //next annotate all other matches
-      while(matcher.find()){
+      boolean found = matcher.find();
+      while(found) {
+        if (searchedAnnotationComboBox.getSelectedIndex() > 0) {
+          // while there is no annotation of the selected type
+          // that contains the searched text 
+          while (found
+               && !getAnnotationEditor().getAnnotationSetCurrentlyEdited()
+              .get(new Long(matcher.start()), new Long(matcher.end()))
+              .getAllTypes().contains(
+                      searchedAnnotationComboBox.getSelectedItem())) {
+            found = matcher.find();
+          }
+          if (!found) { break; }
+        }
         annotateCurrentMatch();
+        found = matcher.find();
       }
       searchTextField.requestFocus();
       annotateAllMatchesSmallButton
@@ -779,13 +821,6 @@ public class SearchAndAnnotatePanel extends JPanel {
    */
   public Window getAnnotationEditorWindow() {
     return annotationEditorWindow;
-  }
-
-  /**
-   * @param window The annotation editor window.
-   */
-  public void setAnnotationEditorWindow(Window window) {
-    annotationEditorWindow = window;
   }
 
 }
