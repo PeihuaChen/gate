@@ -9,6 +9,7 @@ package gate.creole.annic.lucene;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -79,12 +80,18 @@ public class LuceneIndexer implements Indexer {
               "Index Output Directory must be set to the empty directory on the file system");
     }
 
-    File file = new File(indexLocation.getFile());
-    if(file.exists()) {
-      if(!file.isDirectory()) {
-        throw new IndexException("Path doesn't exist");
-      }
+    File file = null;
+    try {
+      file = new File(indexLocation.toURI());
+    } catch(URISyntaxException use) {
+      file = new File(indexLocation.getFile());
     }
+      
+      if(file.exists()) {
+        if(!file.isDirectory()) {
+          throw new IndexException("Path doesn't exist");
+        }
+      }
 
     String baseTokenAnnotationType = (String)parameters
             .get(Constants.BASE_TOKEN_ANNOTATION_TYPE);
@@ -138,7 +145,13 @@ public class LuceneIndexer implements Indexer {
     URL indexLocation = (URL)parameters.get(Constants.INDEX_LOCATION_URL);
 
     try {
-      File file = new File(indexLocation.getFile());
+      File file = null;
+      try {
+        file = new File(indexLocation.toURI());
+      } catch(URISyntaxException use) {
+        file = new File(indexLocation.getFile());
+      }
+
 
       // create an instance of Index Writer
       IndexWriter writer = new IndexWriter(file.getAbsolutePath(),
@@ -198,8 +211,15 @@ public class LuceneIndexer implements Indexer {
   public void deleteIndex() throws IndexException {
     boolean isDeleted = true;
     if(parameters == null) return;
-    File dir = new File(((URL)parameters.get(Constants.INDEX_LOCATION_URL))
-            .getFile());
+    File dir = null;
+    try {
+      dir = new File(((URL)parameters.get(Constants.INDEX_LOCATION_URL))
+              .toURI());
+    } catch(URISyntaxException use) {
+      dir = new File(((URL)parameters.get(Constants.INDEX_LOCATION_URL))
+              .getFile());
+    }
+
     if(dir.exists() && dir.isDirectory()) {
       File[] files = dir.listFiles();
       for(int i = 0; i < files.length; i++) {
@@ -229,8 +249,16 @@ public class LuceneIndexer implements Indexer {
    */
   public void add(String corpusPersistenceID, List<gate.Document> added)
           throws IndexException {
-    String location = new File(((URL)parameters
-            .get(Constants.INDEX_LOCATION_URL)).getFile()).getAbsolutePath();
+
+    String location = null;
+    try {
+      location = new File(((URL)parameters.get(Constants.INDEX_LOCATION_URL))
+              .toURI()).getAbsolutePath();
+    } catch(URISyntaxException use) {
+      location = new File(((URL)parameters.get(Constants.INDEX_LOCATION_URL))
+              .getFile()).getAbsolutePath();
+    }
+
     IndexWriter writer = null;
     try {
       writer = new IndexWriter(location, new LuceneAnalyzer(), false);
@@ -284,8 +312,17 @@ public class LuceneIndexer implements Indexer {
    * @throws Exception
    */
   public void remove(List removedIDs) throws IndexException {
-    String location = new File(((URL)parameters
-            .get(Constants.INDEX_LOCATION_URL)).getFile()).getAbsolutePath();
+
+    String location = null;
+    try {
+      location = new File(((URL)parameters.get(Constants.INDEX_LOCATION_URL))
+              .toURI()).getAbsolutePath();
+    } catch(URISyntaxException use) {
+      location = new File(((URL)parameters.get(Constants.INDEX_LOCATION_URL))
+              .getFile()).getAbsolutePath();
+    
+    }
+    
     try {
 
       IndexReader reader = IndexReader.open(location);
@@ -418,11 +455,14 @@ public class LuceneIndexer implements Indexer {
   private void readParametersFromDisk(URL indexLocationUrl) throws IOException {
     // we create a hashmap to store index definition in the index
     // directory
-    String location = indexLocationUrl.toString();
-    String newIndexLocation = new URL(location).getFile();
 
-    java.io.File file = new java.io.File(newIndexLocation,
-            "LuceneIndexDefinition.xml");
+    File file = null;
+    try {
+      file = new File(new File(indexLocationUrl.toURI()), "LuceneIndexDefinition.xml");
+    } catch(URISyntaxException use) {
+      file = new File(indexLocationUrl.getFile(), "LuceneIndexDefinition.xml");
+    }
+
     if(!file.exists()) return;
 
     java.io.FileReader fileReader = new java.io.FileReader(file);
@@ -445,16 +485,14 @@ public class LuceneIndexer implements Indexer {
   private void writeParametersToDisk() throws IOException {
     // we create a hashmap to store index definition in the index
     // directory
-    String location = ((URL)parameters.get(Constants.INDEX_LOCATION_URL))
-            .toString();
-    String newIndexLocation = new URL(location).getFile();
-
-    if(!newIndexLocation.endsWith("/") && !newIndexLocation.endsWith("\\")) {
-      newIndexLocation += "/";
+    URL location = (URL)parameters.get(Constants.INDEX_LOCATION_URL);
+    File file = null;
+    try {
+      file = new File(new File(location.toURI()), "LuceneIndexDefinition.xml");
+    } catch(URISyntaxException use) {
+      file = new File(location.getFile(), "LuceneIndexDefinition.xml");
     }
 
-    java.io.File file = new java.io.File(newIndexLocation
-            + "LuceneIndexDefinition.xml");
     java.io.FileWriter fileWriter = new java.io.FileWriter(file);
     HashMap indexInformation = new HashMap();
     Iterator iter = parameters.keySet().iterator();
@@ -496,8 +534,15 @@ public class LuceneIndexer implements Indexer {
    */
   public Set<String> getNamesOfSerializedFiles(String documentID)
           throws IndexException {
-    String location = new File(((URL)parameters
-            .get(Constants.INDEX_LOCATION_URL)).getFile()).getAbsolutePath();
+    String location = null;
+    try {
+      location = new File(((URL)parameters
+            .get(Constants.INDEX_LOCATION_URL)).toURI()).getAbsolutePath();
+    } catch(URISyntaxException use) {
+      location = new File(((URL)parameters
+              .get(Constants.INDEX_LOCATION_URL)).getFile()).getAbsolutePath();
+    }
+    
     Set<String> toReturn = new HashSet<String>();
     gate.creole.annic.apache.lucene.search.Searcher searcher = null;
     try {

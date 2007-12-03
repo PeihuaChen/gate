@@ -9,6 +9,7 @@ import gate.creole.annic.Searcher;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
@@ -1160,11 +1161,17 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
                 URL indexLocationURL = (URL)((LuceneDataStoreImpl)target)
                         .getIndexer().getParameters().get(
                                 Constants.INDEX_LOCATION_URL);
-                String indexLocation = new File(indexLocationURL.getFile())
-                        .getAbsolutePath();
-                ArrayList<String> indexLocations = new ArrayList<String>();
-                indexLocations.add(indexLocation);
-                parameters.put(Constants.INDEX_LOCATIONS, indexLocations);
+                  String indexLocation = null;
+                  try {
+                    indexLocation = new File(indexLocationURL.toURI())
+                          .getAbsolutePath();
+                  } catch(URISyntaxException use) {
+                    indexLocation = new File(indexLocationURL.getFile()).getAbsolutePath();
+                  }
+                  ArrayList<String> indexLocations = new ArrayList<String>();
+                  indexLocations.add(indexLocation);
+                  parameters.put(Constants.INDEX_LOCATIONS, indexLocations);
+
 
                 int index = corpusToSearchIn.getSelectedIndex();
                 String corpus2SearchIn = index == 0 ? null : (String)corpusIds
@@ -1772,7 +1779,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         DefaultComboBoxModel annotationSetToSearchInModel = new DefaultComboBoxModel();
         annotationSetToSearchInModel.addElement(Constants.ALL_SETS);
         URL indexLocationURL = (URL)((LuceneDataStoreImpl)target).getIndexer().getParameters().get(Constants.INDEX_LOCATION_URL);
-        String location = new File(indexLocationURL.getFile()).getAbsolutePath();
+        String location = new File(indexLocationURL.toURI()).getAbsolutePath();
         String[] annotSets = ((LuceneDataStoreImpl)this.target).getSearcher()
                 .getIndexedAnnotationSetNames(location);
 
@@ -1792,8 +1799,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       }
       catch(SearchException pe) {
         throw new GateRuntimeException(pe);
+      } catch(URISyntaxException use) {
+        throw new GateRuntimeException(use);
       }
-
     }
     else {
       this.searcher = (Searcher)this.target;

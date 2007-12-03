@@ -17,6 +17,7 @@ package gate.persist;
 
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
@@ -84,7 +85,11 @@ extends AbstractFeatureBearer implements DataStore {
       throw new PersistenceException(
         "A serial data store needs a file URL, not " + storageUrl
       );
-    this.storageDir = new File(storageUrl.getFile());
+    try {
+      this.storageDir = new File(storageUrl.toURI());
+    } catch(URISyntaxException use){
+      this.storageDir = new File(storageUrl.getFile());
+    }
   } // setStorageUrl
 
   /** Get the URL for the underlying storage mechanism. */
@@ -111,6 +116,7 @@ extends AbstractFeatureBearer implements DataStore {
       throw new PersistenceException("null storage directory: cannot create");
 
     if(! storageDir.exists()) { // if doesn't exist create it
+      
       if(! storageDir.mkdir())
         throw new
           PersistenceException("cannot create directory " + storageDir);
