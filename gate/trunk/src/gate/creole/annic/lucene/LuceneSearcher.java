@@ -9,6 +9,7 @@ package gate.creole.annic.lucene;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -222,8 +223,13 @@ public class LuceneSearcher implements Searcher {
     if(parameters.size() == 2
             && parameters.get(Constants.INDEX_LOCATION_URL) != null) {
       String corpusID = (String)parameters.get(Constants.CORPUS_ID);
-      String indexLocation = new File(((URL)parameters
-              .get(Constants.INDEX_LOCATION_URL)).getFile()).getAbsolutePath();
+      String indexLocation = null;
+      try {
+        indexLocation = new File(((URL)parameters.get(Constants.INDEX_LOCATION_URL)).toURI()).getAbsolutePath();
+      } catch(URISyntaxException use) {
+        indexLocation = new File(((URL)parameters.get(Constants.INDEX_LOCATION_URL)).getFile()).getAbsolutePath();
+      }
+      
       if(corpusID != null && indexLocation != null) {
         wasDeleteQuery = true;
         Term term = new Term(Constants.CORPUS_ID, corpusID);

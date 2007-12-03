@@ -11,6 +11,7 @@ import gate.Gate;
 import gate.Resource;
 import gate.creole.ResourceData;
 import gate.creole.ResourceInstantiationException;
+import gate.creole.annic.SearchException;
 import gate.creole.ontology.OConstants;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
@@ -25,6 +26,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -147,8 +149,13 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
       String persistLocationPath = null;
       if(persistLocation != null
               && persistLocation.toString().trim().length() != 0) {
-        persistLocationPath = new File(persistLocation.getFile())
+        try {
+          persistLocationPath = new File(persistLocation.toURI())
                 .getAbsolutePath();
+        } catch(URISyntaxException use) {
+          persistLocationPath = new File(persistLocation.getFile())
+          .getAbsolutePath();
+        }
       }
       else if(persistRepository.booleanValue()) {
         throw new ResourceInstantiationException(
