@@ -22,6 +22,8 @@ import java.util.*;
 import java.util.regex.*;
 
 import javax.swing.*;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuListener;
@@ -170,17 +172,17 @@ public class SearchAndAnnotatePanel extends JPanel {
    * @param color Color of the background.
    * _
    * V Search & Annotate (searchBox)
-   *  _______________________   _              _
-   * |V_Searched_Text________| |_| Case sens. |_| Regular exp.
+   *  _______________________   _        _
+   * |V_Searched_Expression__| |_| Case |_| Regexp
    * 
-   * |Previous| |First| |Next| |Annotate|
+   *         |Previous| |First| |Next| |Annotate|
    * _
    * V Annotate options (optionsBox)
    *  ______________________
-   * | Whole text          V| |Annotate & next|
-   * | Any annotation       | |Annotate all|
+   * | Any annotation      V| |Ann. & next| |Ann. all|
    * | Annotation1          |
-   * |_Annotation2__________|
+   * | Annotation2          |
+   * |_Annotation3__________|
    *
    */
   protected void initGui(Color color) {
@@ -188,18 +190,18 @@ public class SearchAndAnnotatePanel extends JPanel {
     JPanel mainPane = new JPanel();
     mainPane.setLayout(new BoxLayout(mainPane, BoxLayout.Y_AXIS));
     mainPane.setBackground(color);
+    mainPane.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
 
     setLayout(new BorderLayout());
     add(mainPane, BorderLayout.CENTER);
 
-    searchBox = Box.createHorizontalBox();
+    searchBox = Box.createVerticalBox();
     String aTitle = "Search & Annotate";
     JLabel aLabel = new JLabel(aTitle);
     searchBox.setMinimumSize(
       new Dimension(aLabel.getPreferredSize().width, 0));    
     searchBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-    searchBox.setBorder(BorderFactory.createTitledBorder(aTitle));
-      searchEnabledCheck = new JCheckBox("", MainFrame.getIcon("closed"), false);
+      searchEnabledCheck = new JCheckBox(aTitle, MainFrame.getIcon("closed"), false);
       searchEnabledCheck.setSelectedIcon(MainFrame.getIcon("expanded"));
       searchEnabledCheck.setAlignmentX(JComponent.LEFT_ALIGNMENT);
       searchEnabledCheck.setAlignmentY(JComponent.TOP_ALIGNMENT);
@@ -213,24 +215,25 @@ public class SearchAndAnnotatePanel extends JPanel {
     searchPane.setLayout(new BoxLayout(searchPane, BoxLayout.Y_AXIS));
     searchPane.setBackground(color);
       Box hBox = Box.createHorizontalBox();
-        searchTextField = new JTextField(6);
-        searchTextField.setToolTipText("Searched text.");
+      hBox.add(Box.createHorizontalStrut(5));
+        searchTextField = new JTextField(10);
+        searchTextField.setToolTipText("Searched expression.");
         //disallow vertical expansion
         searchTextField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 
             searchTextField.getPreferredSize().height));
       hBox.add(searchTextField);
         searchCaseSensChk = new JCheckBox("Case", true);
-        searchCaseSensChk.setToolTipText("Case sensitive.");
+        searchCaseSensChk.setToolTipText("Case sensitive search.");
         searchCaseSensChk.setBackground(color);
       hBox.add(searchCaseSensChk);
-      hBox.add(Box.createHorizontalStrut(5));
         searchRegExpChk = new JCheckBox("Regexp", false);
-        searchRegExpChk.setToolTipText("Regular expression.");
+        searchRegExpChk.setToolTipText("Regular expression search.");
         searchRegExpChk.setBackground(color);
       hBox.add(searchRegExpChk);
       hBox.add(Box.createHorizontalGlue());
     searchPane.add(hBox);
       hBox = Box.createHorizontalBox();
+      hBox.add(Box.createHorizontalStrut(5));
         findFirstAction = new FindFirstAction();
       hBox.add(new SmallButton(findFirstAction));
       hBox.add(Box.createHorizontalStrut(5));
@@ -251,14 +254,13 @@ public class SearchAndAnnotatePanel extends JPanel {
     searchBox.add(searchPane);
     mainPane.add(searchBox);
 
-    optionsBox = Box.createHorizontalBox();
+    optionsBox = Box.createVerticalBox();
     aTitle = "Annotate options";
     aLabel = new JLabel(aTitle);
     optionsBox.setMinimumSize(
       new Dimension(aLabel.getPreferredSize().width, 0));    
     optionsBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-    optionsBox.setBorder(BorderFactory.createTitledBorder(aTitle));
-      optionsEnabledCheck = new JCheckBox("", MainFrame.getIcon("closed"), false);
+      optionsEnabledCheck = new JCheckBox(aTitle, MainFrame.getIcon("closed"), false);
       optionsEnabledCheck.setSelectedIcon(MainFrame.getIcon("expanded"));
       optionsEnabledCheck.setAlignmentX(JComponent.LEFT_ALIGNMENT);
       optionsEnabledCheck.setAlignmentY(JComponent.TOP_ALIGNMENT);
@@ -272,21 +274,20 @@ public class SearchAndAnnotatePanel extends JPanel {
     optionsPane.setLayout(new BoxLayout(optionsPane, BoxLayout.Y_AXIS));
     optionsPane.setBackground(color);
       hBox = Box.createHorizontalBox();
+      hBox.add(Box.createHorizontalStrut(5));
         searchedAnnotationComboBox = new JComboBox();
         searchedAnnotationComboBox.setToolTipText(
-          "Type of annotation that should contains the searched text.");
+          "Restrict search on this annotation type.");
         searchedAnnotationComboBox.setMaximumRowCount(12);
       hBox.add(searchedAnnotationComboBox);
-      hBox.add(Box.createHorizontalGlue());
-    optionsPane.add(hBox);
-      hBox = Box.createHorizontalBox();
+      hBox.add(Box.createHorizontalStrut(5));
         SmallButton annotateMatchSmallButton = new SmallButton(findNextAction);
         // second Action for the same button
         // and we pray for this one is executed first = ) 
         annotateMatchSmallButton.addActionListener(annotateMatchAction);
-        annotateMatchSmallButton.setText("Annotate & next");
+        annotateMatchSmallButton.setText("Ann. & next");
         annotateMatchSmallButton.setToolTipText(
-          "Annotate the selected annotation and go the next matched annotation.");
+          "Annotates the current match and finds the next occurrence.");
         annotateMatchSmallButton.setMnemonic(KeyEvent.VK_X);
       hBox.add(annotateMatchSmallButton);
       hBox.add(Box.createHorizontalStrut(5));
@@ -296,7 +297,7 @@ public class SearchAndAnnotatePanel extends JPanel {
         annotateAllMatchesSmallButton =
           new SmallButton(annotateAllMatchesAction);
       hBox.add(annotateAllMatchesSmallButton);
-      hBox.add(Box.createHorizontalGlue());
+      hBox.add(Box.createHorizontalStrut(5));
     optionsPane.add(hBox);
 
     optionsBox.add(optionsPane);
@@ -304,20 +305,6 @@ public class SearchAndAnnotatePanel extends JPanel {
   }
 
   protected void initListeners() {
-
-    // FIXME: doesn't work, why ?????????????????????
-    getAnnotationEditorWindow().addWindowStateListener(
-            new WindowStateListener() {
-      public void windowStateChanged(WindowEvent e) {
-        System.out.println("WindowEvent: "+e.toString());
-        if (e.equals(WindowEvent.COMPONENT_HIDDEN)){
-          findPreviousAction.setEnabled(false);
-          findNextAction.setEnabled(false);
-          annotateMatchAction.setEnabled(false);
-          annotateAllMatchesAction.setEnabled(false);
-        }
-      }
-    });
 
     searchEnabledCheck.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -353,26 +340,6 @@ public class SearchAndAnnotatePanel extends JPanel {
       }
     });
 
-    // FIXME: make this listener working for the the titled border
-    // of the searchBox
-    searchBox.addMouseListener(new MouseAdapter() {
-      public void mouseClicked(MouseEvent e) {
-//        if (!searchBox.isAncestorOf(searchPane)) {
-          if (searchEnabledCheck.isSelected()) {
-            searchBox.add(searchPane);
-            optionsBox.setVisible(true);
-            getAnnotationEditorWindow().pack();
-//          }
-        } else {
-//          if(searchBox.isAncestorOf(searchPane)){
-            searchBox.remove(searchPane);
-            optionsBox.setVisible(false);
-            getAnnotationEditorWindow().pack();
-//          }
-        }
-      }
-    });
-
     optionsEnabledCheck.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         if (optionsEnabledCheck.isSelected()) {
@@ -388,6 +355,22 @@ public class SearchAndAnnotatePanel extends JPanel {
             getAnnotationEditorWindow().pack();
           }
         }
+      }
+    });
+
+    this.addAncestorListener(new AncestorListener() {
+      public void ancestorAdded(AncestorEvent event) {
+        // do nothing
+      }
+      public void ancestorRemoved(AncestorEvent event) {
+        // if the editor window is closed
+        findPreviousAction.setEnabled(false);
+        findNextAction.setEnabled(false);
+        annotateMatchAction.setEnabled(false);
+        annotateAllMatchesAction.setEnabled(false);
+      }
+      public void ancestorMoved(AncestorEvent event) {
+        // do nothing
       }
     });
 
