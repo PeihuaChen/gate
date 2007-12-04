@@ -1408,6 +1408,12 @@ public class AnnotationSetsView extends AbstractDocumentView
 	        Integer annId =  set.add(new Long(start), new Long(end), 
 	                lastAnnotationType, Factory.newFeatureMap());
 	        Annotation ann = set.get(annId);
+          //select the annotation set in the tree view and expand it
+          //to avoid the next annotation to be always in the default set
+          if (tableRows.get(row) instanceof SetHandler) {
+            ((SetHandler)tableRows.get(row)).setExpanded(true);
+            mainTable.getSelectionModel().setSelectionInterval(row, row);
+          }
 	        //make sure new annotation is visible
 	        setTypeSelected(set.getName(), ann.getType(), true);
 	        //select the newly created annotation
