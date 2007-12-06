@@ -165,7 +165,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
   /**
    * Finds the best location for the editor dialog for a given span of text
    */
-  protected void placeDialog(int start, int end){
+  public void placeDialog(int start, int end){
     if(pinnedButton.isSelected()){
       //just resize
       Point where = null;

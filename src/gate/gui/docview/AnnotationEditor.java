@@ -372,7 +372,7 @@ public class AnnotationEditor extends AbstractVisualResource
    *
    */
   public void show(boolean autohide){
-    placeWindows(ann.getStartNode().getOffset().intValue(),
+    placeDialog(ann.getStartNode().getOffset().intValue(),
       ann.getEndNode().getOffset().intValue());
     popupWindow.setVisible(true);
     if(autohide) hideTimer.restart();
@@ -381,7 +381,7 @@ public class AnnotationEditor extends AbstractVisualResource
   /**
    * Finds the best location for the editor dialog for a given span of text.
    */
-  protected void placeWindows(int start, int end){
+  public void placeDialog(int start, int end){
     if(pinnedButton.isSelected()){
       //just resize
       Point where = null;

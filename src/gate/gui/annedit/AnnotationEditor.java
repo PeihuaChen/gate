@@ -36,6 +36,11 @@ public interface AnnotationEditor extends VisualResource{
   public boolean editingFinished();
   
   /**
+   * Finds the best location for the editor dialog for a given span of text
+   */
+  public void placeDialog(int start, int end);
+
+  /**
    * Sets the owner (i.e. controller) for this editor.
    * @param owner
    */
