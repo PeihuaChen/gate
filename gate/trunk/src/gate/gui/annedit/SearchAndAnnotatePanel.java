@@ -142,6 +142,8 @@ public class SearchAndAnnotatePanel extends JPanel {
    */
   protected LinkedList<Annotation> annotateAllAnnotationsID;
   
+  protected SmallButton firstSmallButton;
+
   protected SmallButton annotateAllMatchesSmallButton;
   
 
@@ -235,7 +237,8 @@ public class SearchAndAnnotatePanel extends JPanel {
       hBox = Box.createHorizontalBox();
       hBox.add(Box.createHorizontalStrut(5));
         findFirstAction = new FindFirstAction();
-      hBox.add(new SmallButton(findFirstAction));
+        firstSmallButton = new SmallButton(findFirstAction);
+      hBox.add(firstSmallButton);
       hBox.add(Box.createHorizontalStrut(5));
         findPreviousAction = new FindPreviousAction();
         findPreviousAction.setEnabled(false);
@@ -293,9 +296,10 @@ public class SearchAndAnnotatePanel extends JPanel {
       hBox.add(Box.createHorizontalStrut(5));
         annotateAllMatchesAction = new AnnotateAllMatchesAction();
         undoAnnotateAllMatchesAction = new UndoAnnotateAllMatchesAction();
-        annotateAllMatchesAction.setEnabled(false);
         annotateAllMatchesSmallButton =
           new SmallButton(annotateAllMatchesAction);
+        annotateAllMatchesAction.setEnabled(false);
+        undoAnnotateAllMatchesAction.setEnabled(false);
       hBox.add(annotateAllMatchesSmallButton);
       hBox.add(Box.createHorizontalStrut(5));
     optionsPane.add(hBox);
@@ -364,10 +368,7 @@ public class SearchAndAnnotatePanel extends JPanel {
       }
       public void ancestorRemoved(AncestorEvent event) {
         // if the editor window is closed
-        findPreviousAction.setEnabled(false);
-        findNextAction.setEnabled(false);
-        annotateMatchAction.setEnabled(false);
-        annotateAllMatchesAction.setEnabled(false);
+        enableActions(false);
       }
       public void ancestorMoved(AncestorEvent event) {
         // do nothing
@@ -384,30 +385,17 @@ public class SearchAndAnnotatePanel extends JPanel {
       public void removeUpdate(DocumentEvent e) {
         enableActions(false);
       }
-      
-      private void enableActions(boolean state){
-        findPreviousAction.setEnabled(state);
-        findNextAction.setEnabled(state);
-        annotateMatchAction.setEnabled(state);
-        annotateAllMatchesAction.setEnabled(state);
-      }
     });
 
     searchCaseSensChk.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        findPreviousAction.setEnabled(false);
-        findNextAction.setEnabled(false);
-        annotateMatchAction.setEnabled(false);
-        annotateAllMatchesAction.setEnabled(false);
+        enableActions(false);
       }
     });
 
     searchRegExpChk.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        findPreviousAction.setEnabled(false);
-        findNextAction.setEnabled(false);
-        annotateMatchAction.setEnabled(false);
-        annotateAllMatchesAction.setEnabled(false);
+        enableActions(false);
       }
     });
 
@@ -425,6 +413,17 @@ public class SearchAndAnnotatePanel extends JPanel {
         searchedAnnotationComboBox.validate();
       }
     });
+  }
+
+  private void enableActions(boolean state){
+    findPreviousAction.setEnabled(state);
+    findNextAction.setEnabled(state);
+    annotateMatchAction.setEnabled(state);
+    annotateAllMatchesAction.setEnabled(state);
+    if (annotateAllMatchesSmallButton.getAction()
+            .equals(undoAnnotateAllMatchesAction)) {
+      annotateAllMatchesSmallButton.setAction(annotateAllMatchesAction);
+    }
   }
 
   private void updateSearchedAnnotationComboBox() {
@@ -513,19 +512,11 @@ public class SearchAndAnnotatePanel extends JPanel {
           v.add(new Integer(start));
           v.add(new Integer(end));
           matchedIndexes.add(v);
-          //automatically pin the dialog
-//          pinnedButton.setSelected(true);
-          // FIXME: make the highlighting appear in text
-          // and put the focus back to the annotation editor window
-//          getAnnotationEditorWindow().setVisible(false);
           getOwner().getTextComponent().requestFocus();
           getOwner().getTextComponent().select(start, end);
-          SwingUtilities.getWindowAncestor(
-                  getOwner().getTextComponent()).toFront();
-//          getAnnotationEditorWindow().setVisible(true);
-//          getAnnotationEditorWindow().requestFocus();
-          SwingUtilities.getWindowAncestor(
-                  getAnnotationEditorWindow()).toFront();
+          // FIXME: put the focus back on the "First" button
+//          firstSmallButton.requestFocusInWindow();
+          searchPane.requestFocus();
 
         } else {
           // no match found
@@ -535,7 +526,8 @@ public class SearchAndAnnotatePanel extends JPanel {
         findPreviousAction.setEnabled(false);
 
       } catch(PatternSyntaxException e) {
-        //FIXME: put this $#! error dialog in front of the editor dialog
+        // FIXME: put this error dialog in front of the editor dialog
+        // when the dialog is a JWindow
 //        getAnnotationEditorWindow().setAlwaysOnTop(false);
 //          getAnnotationEditorWindow().toBack();
         JOptionPane errorOptionsPane = new JOptionPane(
@@ -574,10 +566,8 @@ public class SearchAndAnnotatePanel extends JPanel {
       v = matchedIndexes.getLast();
       int start = (v.firstElement()).intValue();
       int end = (v.lastElement()).intValue();
-      getOwner().getTextComponent().requestFocus();
       getOwner().getTextComponent().select(start, end);
-      searchTextField.requestFocus();
-//      placeDialog(start, end);
+      getAnnotationEditor().placeDialog(start, end);
       // reset the matcher for the next FindNextAction
       matcher.find(start);
       findNextAction.setEnabled(true);
@@ -616,10 +606,8 @@ public class SearchAndAnnotatePanel extends JPanel {
           v.add(new Integer(start));
           v.add(new Integer(end));
           matchedIndexes.add(v);
-          getOwner().getTextComponent().requestFocus();
           getOwner().getTextComponent().select(start, end);
-          searchTextField.requestFocus();
-//          getAnnotationEditor().placeDialog(start, end);
+          getAnnotationEditor().placeDialog(start, end);
           findPreviousAction.setEnabled(true);
         } else {
           //no more matches possible
@@ -662,8 +650,11 @@ public class SearchAndAnnotatePanel extends JPanel {
           getOwner().getTextComponent().select(start, start);
           getAnnotationEditor().editAnnotation(newAnn,
             getAnnotationEditor().getAnnotationSetCurrentlyEdited());
-          searchTextField.requestFocus();
           annotateAllMatchesAction.setEnabled(true);
+          if (annotateAllMatchesSmallButton.getAction()
+                  .equals(undoAnnotateAllMatchesAction)) {
+            annotateAllMatchesSmallButton.setAction(annotateAllMatchesAction);
+          }
         }
         catch(InvalidOffsetException e) {
           //the offsets here should always be valid.
@@ -702,12 +693,9 @@ public class SearchAndAnnotatePanel extends JPanel {
         annotateCurrentMatch();
         found = matcher.find();
       }
-      searchTextField.requestFocus();
-      annotateAllMatchesSmallButton
-        .removeActionListener(annotateAllMatchesAction);
-      annotateAllMatchesSmallButton
-        .addActionListener(undoAnnotateAllMatchesAction);
-      annotateAllMatchesSmallButton.setText("Undo");
+
+      annotateAllMatchesSmallButton.setAction(undoAnnotateAllMatchesAction);
+      undoAnnotateAllMatchesAction.setEnabled(true);
     }
 
     private void annotateCurrentMatch(){
@@ -745,7 +733,7 @@ public class SearchAndAnnotatePanel extends JPanel {
     public UndoAnnotateAllMatchesAction(){
       super("Undo");
       super.putValue(SHORT_DESCRIPTION, "Undo annotate all matches.");
-      super.putValue(ACCELERATOR_KEY, KeyEvent.VK_U);
+      super.putValue(MNEMONIC_KEY, KeyEvent.VK_U);
     }
     
     public void actionPerformed(ActionEvent evt){
@@ -755,20 +743,11 @@ public class SearchAndAnnotatePanel extends JPanel {
         getAnnotationEditor().getAnnotationSetCurrentlyEdited().remove(it.next());
       }
 
-      // FIXME: should we get here the pinned state of the annotation editor ?
-//      if(!pinnedButton.isSelected()){
-//        //if not pinned, hide the dialog.
-//        dialog.setVisible(false);
-//      }
-
       // just hide the editor to avoid editing null annotation
       getAnnotationEditorWindow().setVisible(false);
 
-      annotateAllMatchesSmallButton
-        .removeActionListener(undoAnnotateAllMatchesAction);
-      annotateAllMatchesSmallButton
-        .addActionListener(annotateAllMatchesAction);
-      annotateAllMatchesSmallButton.setText("Ann. all");
+      annotateAllMatchesSmallButton.setAction(annotateAllMatchesAction);
+      annotateAllMatchesAction.setEnabled(false);
     }
   }
 
