@@ -93,7 +93,13 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
       "WorkingDirectory must be a file: URL"); }
     // Get the working directory which the configuration
     // file reside in.
-    File wd = new File(configFileURL.getFile()).getParentFile();
+    File wd = null;
+    try {
+      wd = new File(configFileURL.toURI()).getParentFile();
+    } catch(URISyntaxException use) {
+      wd = new File(configFileURL.getFile()).getParentFile();
+    }
+    
     // it must be a directory
     if(!wd.isDirectory()) { throw new ResourceInstantiationException(wd
       + " must be a reference to directory"); }
