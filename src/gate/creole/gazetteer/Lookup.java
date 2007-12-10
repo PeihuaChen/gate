@@ -124,7 +124,7 @@ public class Lookup implements java.io.Serializable {
         b.append("|");
         b.append(key);
         b.append(":");
-        b.append((String)features.get(key));
+        b.append(features.get(key).toString());
         
       }
     }
