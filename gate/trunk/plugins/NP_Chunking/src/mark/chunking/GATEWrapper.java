@@ -132,6 +132,9 @@ public class GATEWrapper extends AbstractLanguageAnalyser implements ProcessingR
 
 		//Get the set of sentences contained within the current document
 		AnnotationSet sentences = inputAS.get(SENTENCE_ANNOTATION_TYPE);
+		
+		// All annotations of type tokens
+		AnnotationSet tokenas = inputAS.get(TOKEN_ANNOTATION_TYPE);
 
 		if (sentences != null && sentences.size() > 0)
 		{
@@ -157,7 +160,7 @@ public class GATEWrapper extends AbstractLanguageAnalyser implements ProcessingR
 
 				//Get a sorted list of the tokens within the current sentence
 				List tokens = new ArrayList();
-				tokens.addAll(inputAS.get(TOKEN_ANNOTATION_TYPE,sentence.getStartNode().getOffset(), sentence.getEndNode().getOffset()));
+				tokens.addAll(tokenas.getContained(sentence.getStartNode().getOffset(), sentence.getEndNode().getOffset()));
 				Collections.sort(tokens);
 
 				//Create three empty lists to hold the words, pos and chunk
