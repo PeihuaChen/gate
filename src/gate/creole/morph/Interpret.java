@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import gate.creole.ResourceInstantiationException;
@@ -181,7 +182,14 @@ public class Interpret {
 
 		// we have all states here
 		// we obtain all RHSes
-		HashSet rhses = new HashSet();
+		TreeSet rhses = new TreeSet(new Comparator() {
+      public int compare(Object o1, Object o2) {
+        RHS r1 = (RHS) o1;
+        RHS r2 = (RHS) o2;
+        return r1.getPatternIndex() - r2.getPatternIndex();
+      }
+    });
+    
 		Iterator iter = states.iterator();
 		while (iter.hasNext()) {
 			FSMState st = (FSMState) iter.next();
@@ -193,30 +201,16 @@ public class Interpret {
 			return word;
 		}
 
-		// we have all rhses
-		// we need to sort them
-		ArrayList rl = new ArrayList();
-		rl.addAll(rhses);
-		Collections.sort(rl, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				RHS r1 = (RHS) o1;
-				RHS r2 = (RHS) o2;
-				return r1.getPatternIndex() - r2.getPatternIndex();
-			}
-		});
-
-		foundRule = false;
-		// rhses are in sorted order
-		// we need to check if the word is compatible with pattern
-		for (int i = 0; i < rl.size(); i++) {
-			RHS r1 = (RHS) rl.get(i);
-			//System.out.println(r1.getPatternIndex());
-			String answer = executeRHS(word, category, r1);
-			if (foundRule) {
-				//System.out.println("Found!");
-				return answer;
-			}
-		}
+    foundRule = false;
+    
+    // rhses are in sorted order
+    // we need to check if the word is compatible with pattern
+		Iterator rhsiter = rhses.iterator();
+    while (rhsiter.hasNext()){
+      RHS r1 = (RHS) rhsiter.next();
+      String answer = executeRHS(word, category, r1);
+      if (foundRule) return answer;
+    }
 		return word;
 	}
 
