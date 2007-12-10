@@ -64,7 +64,8 @@ public class LuceneSearch implements Search {
 
     try {
       IndexSearcher searcher = new IndexSearcher(indexedCorpus.getIndexDefinition().getIndexLocation());
-      Query luceneQuery = QueryParser.parse(query, "body", new SimpleAnalyzer());
+      QueryParser parser = new QueryParser("body", new SimpleAnalyzer());
+      Query luceneQuery = parser.parse(query);
 
       Hits hits = searcher.search(luceneQuery);
       int resultlength = hits.length();

@@ -14,6 +14,13 @@
 
 package gate.creole.ir.lucene;
 
+import gate.Corpus;
+import gate.creole.ir.IndexDefinition;
+import gate.creole.ir.IndexException;
+import gate.creole.ir.IndexField;
+import gate.creole.ir.IndexManager;
+import gate.util.GateRuntimeException;
+
 import java.io.File;
 import java.util.Iterator;
 import java.util.List;
@@ -22,10 +29,6 @@ import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
-
-import gate.Corpus;
-import gate.creole.ir.*;
-import gate.util.GateRuntimeException;
 
 /** This class represents Lucene implementation of IndexManeager interface.*/
 public class LuceneIndexManager implements IndexManager{
@@ -139,12 +142,12 @@ public class LuceneIndexManager implements IndexManager{
     try {
 
       IndexReader reader = IndexReader.open(location);
-
+      
       for (int i = 0; i<removedIDs.size(); i++) {
         String id = removedIDs.get(i).toString();
         org.apache.lucene.index.Term term =
                                new org.apache.lucene.index.Term(DOCUMENT_ID,id);
-        reader.delete(term);
+        reader.deleteDocuments(term);
       }//for (remove all removed documents)
 
       for (int i = 0; i<changed.size(); i++) {
@@ -152,7 +155,7 @@ public class LuceneIndexManager implements IndexManager{
         String id = gateDoc.getLRPersistenceId().toString();
         org.apache.lucene.index.Term term =
                                new org.apache.lucene.index.Term(DOCUMENT_ID,id);
-        reader.delete(term);
+        reader.deleteDocuments(term);
       }//for (remove all changed documents)
 
       reader.close();
@@ -181,9 +184,12 @@ public class LuceneIndexManager implements IndexManager{
                                      new org.apache.lucene.document.Document();
     Iterator fields = indexDefinition.getIndexFields();
 
-    luceneDoc.add(Field.Keyword(DOCUMENT_ID,
-                                gateDoc.getLRPersistenceId().toString()));
+//    luceneDoc.add(Field.Keyword(DOCUMENT_ID,
+//                                gateDoc.getLRPersistenceId().toString()));
 
+    // update version of Lucene
+    luceneDoc.add(new Field(DOCUMENT_ID,gateDoc.getLRPersistenceId().toString(),Field.Store.YES,Field.Index.UN_TOKENIZED));
+    
     while (fields.hasNext()) {
       IndexField field = (IndexField) fields.next();
       String valueForIndexing;
@@ -195,9 +201,11 @@ public class LuceneIndexManager implements IndexManager{
       } //if-else reader or feature
 
       if (field.isPreseved()) {
-        luceneDoc.add(Field.Keyword(field.getName(),valueForIndexing));
+        luceneDoc.add(new Field(field.getName(),valueForIndexing,Field.Store.YES,Field.Index.UN_TOKENIZED));
+        // luceneDoc.add(Field.Keyword(field.getName(),valueForIndexing));
       } else {
-        luceneDoc.add(Field.UnStored(field.getName(),valueForIndexing));
+        luceneDoc.add(new Field(field.getName(),valueForIndexing,Field.Store.NO,Field.Index.TOKENIZED));
+        // luceneDoc.add(Field.UnStored(field.getName(),valueForIndexing));
       } // if-else keyword or text
 
     }// while (add all fields)
