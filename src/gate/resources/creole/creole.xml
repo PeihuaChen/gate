@@ -259,5 +259,14 @@
         <RESOURCE_DISPLAYED>gate.creole.annic.SearchableDataStore</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
+
+    <RESOURCE>
+      <NAME>Lucene Datastore Alternative Searcher</NAME>
+      <CLASS>gate.gui.LuceneDataStoreSearchAlternativeGUI</CLASS>
+      <!-- type values can be "large" or "small"-->
+      <GUI TYPE="large">
+        <RESOURCE_DISPLAYED>gate.creole.annic.SearchableDataStore</RESOURCE_DISPLAYED>
+      </GUI>
+    </RESOURCE>
   </CREOLE>
 </CREOLE-DIRECTORY>
