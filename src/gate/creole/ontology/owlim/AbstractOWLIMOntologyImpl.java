@@ -45,7 +45,6 @@ import gate.creole.ontology.Ontology;
 import gate.creole.ontology.OntologyModificationListener;
 import gate.creole.ontology.OntologyUtilities;
 import gate.creole.ontology.RDFProperty;
-import gate.creole.ontology.Restriction;
 import gate.creole.ontology.SomeValuesFromRestriction;
 import gate.creole.ontology.SymmetricProperty;
 import gate.creole.ontology.TransitiveProperty;
@@ -254,7 +253,6 @@ public abstract class AbstractOWLIMOntologyImpl
     // we need to add a label on this but only after the new class
     // addition event has been fired
     oClass.setLabel(aURI.getResourceName(), null);
-
     return oClass;
   }
 
@@ -299,7 +297,7 @@ public abstract class AbstractOWLIMOntologyImpl
     }
 
     String[] deletedResources = owlim.removeClass(this.sesameRepositoryID,
-            theClass.getURI().toString());
+            theClass.getURI().toString(), true);
     fireOntologyResourcesRemoved(deletedResources);
   }
 
@@ -980,7 +978,7 @@ public abstract class AbstractOWLIMOntologyImpl
     }
 
     String[] deletedResources = owlim.removePropertyFromOntology(
-            this.sesameRepositoryID, theProperty.getURI().toString());
+            this.sesameRepositoryID, theProperty.getURI().toString(), true);
     fireOntologyResourcesRemoved(deletedResources);
   }
 
@@ -1264,20 +1262,35 @@ public abstract class AbstractOWLIMOntologyImpl
   }
 
   /**
-   * A method to invoke when the ontology is modified
+   * A method to invoke when a resource's property value is changed
    * 
    * @param resource
    * @param eventType
    */
-  public void fireOntologyModificationEvent(OResource resource, int eventType) {
+  public void fireResourcePropertyValueChanged(OResource resource, RDFProperty property, Object value, int eventType) {
     List<OntologyModificationListener> listeners = this.modificationListeners;
     if(listeners != null) {
       for(OntologyModificationListener l : listeners) {
-        l.ontologyModified(this, resource, eventType);
+        l.resourcePropertyValueChanged(this, resource, property, value, eventType);
       }
     }
   }
 
+  /**
+   * A method to invoke when a resource's property value is changed
+   * 
+   * @param resource
+   * @param eventType
+   */
+  public void fireResourceRelationChanged(OResource resource1, OResource resource2,int eventType) {
+    List<OntologyModificationListener> listeners = this.modificationListeners;
+    if(listeners != null) {
+      for(OntologyModificationListener l : listeners) {
+        l.resourceRelationChanged(this, resource1, resource2, eventType);
+      }
+    }
+  }
+  
   public void fireOntologyReset() {
     List<OntologyModificationListener> listeners = this.modificationListeners;
     if(listeners != null) {

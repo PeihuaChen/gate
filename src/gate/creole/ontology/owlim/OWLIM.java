@@ -700,13 +700,16 @@ public interface OWLIM extends java.rmi.Remote {
   /**
    * Given a class to delete, it removes it from the repository.
    * 
+   * @param repositoryID
    * @param classURI
+   * @param deleteSubTree
    * @return a list of other resources, which got removed as a result of
    *         this deletion
    */
-  public String[] removeClass(String repositoryID, String classURI)
+  public String[] removeClass(String repositoryID, String classURI, boolean deleteSubTree)
           throws GateOntologyException;
 
+  
   /**
    * The method returns if the current repository has a class with URI
    * that matches with the class parameter.
@@ -839,11 +842,13 @@ public interface OWLIM extends java.rmi.Remote {
 
   /**
    * Removes the given property
-   * 
+   * @param repositoryID 
    * @param aPropertyURI
+   * @param removeSubTree
+   * @return a list of names of resources deleted as a result of deleting this property from the ontology.
    */
   public String[] removePropertyFromOntology(String repositoryID,
-          String aPropertyURI) throws GateOntologyException;
+          String aPropertyURI, boolean removeSubTree) throws GateOntologyException;
 
   /**
    * The method adds an object property specifiying domain and range for
@@ -1358,5 +1363,32 @@ public interface OWLIM extends java.rmi.Remote {
    */
   public void removeStatement(String repositoryID, String subjectURI,
           String predicateURI, String objectURI) throws GateOntologyException;
+
+
+  /**
+   * The method is useful for adding statements into the graph. All
+   * three values must exist in repository. These values are cast in
+   * Resources and then added into the graph of repository.
+   * 
+   * @param subjectURI
+   * @param predicateURI
+   * @param objectURI
+   * @param datatype
+   */
+  public void addStatement(String repositoryID, String subject, String predicate,
+          String object, String datatype) throws GateOntologyException;
+
+  /**
+   * The method is useful for adding statements into the graph. All
+   * three values must exist in repository. These values are cast in
+   * Resources and then added into the graph of repository.
+   * 
+   * @param subjectURI
+   * @param predicateURI
+   * @param objectURI
+   * @param datatype
+   */
+  public void removeStatement(String repositoryID, String subject, String predicate,
+          String object, String datatype) throws GateOntologyException;
 
 }

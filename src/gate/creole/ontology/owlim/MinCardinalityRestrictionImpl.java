@@ -83,8 +83,7 @@ public class MinCardinalityRestrictionImpl extends OClassImpl implements
   public void setOnPropertyValue(RDFProperty property) {
     owlim.setOnPropertyValue(this.repositoryID, this.uri.toString(), property
             .getURI().toString());
-    ontology.fireOntologyModificationEvent(this,
-            OConstants.RESTRICTION_MODIFICATION_EVENT);
+    ontology.fireResourceRelationChanged(this, property,OConstants.RESTRICTION_ON_PROPERTY_VALUE_CHANGED);
   }
 
 }

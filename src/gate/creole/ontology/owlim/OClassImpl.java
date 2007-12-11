@@ -65,8 +65,7 @@ public class OClassImpl extends OResourceImpl implements OClass {
 
     owlim.addSubClass(this.repositoryID, this.uri.toString(), subClass.getURI()
             .toString());
-    ontology.fireOntologyModificationEvent(this,
-            OConstants.SUB_CLASS_ADDED_EVENT);
+    ontology.fireResourceRelationChanged(this, subClass, OConstants.SUB_CLASS_ADDED_EVENT);
   }
 
   /*
@@ -90,8 +89,7 @@ public class OClassImpl extends OResourceImpl implements OClass {
 
     owlim.removeSubClass(this.repositoryID, this.uri.toString(), subClass
             .getURI().toString());
-    ontology.fireOntologyModificationEvent(this,
-            OConstants.SUB_CLASS_REMOVED_EVENT);
+    ontology.fireResourceRelationChanged(this, subClass, OConstants.SUB_CLASS_REMOVED_EVENT);  
   }
 
   /*
@@ -177,8 +175,7 @@ public class OClassImpl extends OResourceImpl implements OClass {
 
     owlim.setEquivalentClassAs(this.repositoryID, this.uri.toString(), theClass
             .getURI().toString());
-    ontology.fireOntologyModificationEvent(this,
-            OConstants.EQUIVALENT_CLASS_EVENT);
+    ontology.fireResourceRelationChanged(this, theClass, OConstants.EQUIVALENT_CLASS_EVENT);
   }
 
   /*
