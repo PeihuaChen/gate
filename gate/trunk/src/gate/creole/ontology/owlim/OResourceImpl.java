@@ -13,15 +13,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import org.openrdf.vocabulary.RDFS;
+
+import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
 import gate.creole.ontology.AnnotationProperty;
-import gate.creole.ontology.DatatypeProperty;
 import gate.creole.ontology.GateOntologyException;
 import gate.creole.ontology.Literal;
-import gate.creole.ontology.OClass;
 import gate.creole.ontology.OConstants;
-import gate.creole.ontology.OInstance;
 import gate.creole.ontology.OResource;
-import gate.creole.ontology.ObjectProperty;
 import gate.creole.ontology.Ontology;
 import gate.creole.ontology.OntologyUtilities;
 import gate.creole.ontology.RDFProperty;
@@ -149,8 +147,8 @@ public class OResourceImpl implements OResource {
             RDFS.COMMENT, aComment, language != null
                     ? language.getLanguage()
                     : null);
-    ontology.fireOntologyModificationEvent(this,
-            OConstants.COMMENT_CHANGED_EVENT);
+    Literal l = new Literal(aComment, language);
+    ontology.fireResourcePropertyValueChanged(this, (RDFProperty) ontology.getOResourceFromMap(RDFS.COMMENT), (Object)l, OConstants.ANNOTATION_PROPERTY_VALUE_ADDED_EVENT);
   }
 
   /*
@@ -176,8 +174,8 @@ public class OResourceImpl implements OResource {
             RDFS.LABEL, aLabel, language != null
                     ? language.getLanguage()
                     : null);
-    ontology
-            .fireOntologyModificationEvent(this, OConstants.LABEL_CHANGED_EVENT);
+    Literal l = new Literal(aLabel, language);
+    ontology.fireResourcePropertyValueChanged(this, (RDFProperty) ontology.getOResourceFromMap(RDFS.LABEL), (Object)l, OConstants.ANNOTATION_PROPERTY_VALUE_ADDED_EVENT);
   }
 
   /*
@@ -226,8 +224,7 @@ public class OResourceImpl implements OResource {
             literal.getLanguage() != null
                     ? literal.getLanguage().getLanguage()
                     : null);
-    ontology.fireOntologyModificationEvent(this,
-            OConstants.ANNOTATION_PROPERTY_VALUE_ADDED_EVENT);
+    ontology.fireResourcePropertyValueChanged(this, theAnnotationProperty, literal, OConstants.ANNOTATION_PROPERTY_VALUE_ADDED_EVENT);
   }
 
   /*
@@ -262,8 +259,7 @@ public class OResourceImpl implements OResource {
             literal.getLanguage() != null
                     ? literal.getLanguage().getLanguage()
                     : null);
-    ontology.fireOntologyModificationEvent(this,
-            OConstants.ANNOTATION_PROPERTY_VALUE_REMOVED_EVENT);
+    ontology.fireResourcePropertyValueChanged(this, theAnnotationProperty, literal, OConstants.ANNOTATION_PROPERTY_VALUE_REMOVED_EVENT);
   }
 
   /*
@@ -275,8 +271,7 @@ public class OResourceImpl implements OResource {
           AnnotationProperty theAnnotationProperty) {
     owlim.removeAnnotationPropertyValues(this.repositoryID,
             this.uri.toString(), theAnnotationProperty.getURI().toString());
-    ontology.fireOntologyModificationEvent(this,
-            OConstants.ANNOTATION_PROPERTY_VALUE_REMOVED_EVENT);
+    ontology.fireResourcePropertyValueChanged(this, theAnnotationProperty, null, OConstants.ANNOTATION_PROPERTY_VALUE_REMOVED_EVENT);
   }
 
   /**

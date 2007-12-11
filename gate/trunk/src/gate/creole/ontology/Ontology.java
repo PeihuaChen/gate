@@ -595,12 +595,20 @@ public interface Ontology extends LanguageResource {
           OntologyModificationListener oml);
 
   /**
-   * A method to invoke when the ontology is modified
+   * A method to invoke when a resource's property value is changed
    * 
    * @param resource
    * @param eventType
    */
-  public void fireOntologyModificationEvent(OResource resource, int eventType);
+  public void fireResourcePropertyValueChanged(OResource resource, RDFProperty property, Object value, int eventType);
+
+  /**
+   * A method to invoke when a resource's property value is changed
+   * 
+   * @param resource
+   * @param eventType
+   */
+  public void fireResourceRelationChanged(OResource resource1, OResource resource2,int eventType);
 
   /**
    * A Method to invoke an event for newly added ontology resource

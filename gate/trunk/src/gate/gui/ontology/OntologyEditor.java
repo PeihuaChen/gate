@@ -46,14 +46,11 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.*;
 
-import org.openrdf.model.Graph;
-import org.openrdf.model.Statement;
 import org.openrdf.sesame.config.AccessDeniedException;
 import org.openrdf.sesame.constants.QueryLanguage;
 import org.openrdf.sesame.query.MalformedQueryException;
 import org.openrdf.sesame.query.QueryEvaluationException;
 import org.openrdf.sesame.query.QueryResultsTable;
-import org.openrdf.sesame.sail.StatementIterator;
 
 /**
  * The GUI for the Ontology Editor
@@ -138,7 +135,7 @@ public class OntologyEditor extends AbstractVisualResource
     tabbedPane.addTab("Classes & Instances", scroller);
     scroller.setBorder(new TitledBorder("Classes and Instances"));
     // ----------------------------------------------
-    
+
     propertyRootNode = new DefaultMutableTreeNode(null, true);
     propertyTreeModel = new DefaultTreeModel(propertyRootNode);
     propertyTree = new DnDJTree(propertyTreeModel);
@@ -213,46 +210,51 @@ public class OntologyEditor extends AbstractVisualResource
             propertyDetailsTable.getBackground());
 
     // --------------------
-    
-    
+
     toolBar = new JToolBar(JToolBar.HORIZONTAL);
-    searchAction = new SearchAction("", MainFrame.getIcon("ontology-search"), this);
+    searchAction = new SearchAction("", MainFrame.getIcon("ontology-search"),
+            this);
     search = new JButton(searchAction);
     search.setToolTipText("Advanced search in the ontology");
-    
-    
+
     queryBtn = new JButton("Q");
     queryBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
-        
+
         String serqlQuery = JOptionPane.showInputDialog("SeRQL Query :");
-        
+
         if(serqlQuery == null || serqlQuery.trim().length() == 0) {
           return;
         }
         try {
           long time = System.currentTimeMillis();
-          QueryResultsTable result1 = ontology.getSesameRepository().performTableQuery(QueryLanguage.SERQL, "select "+serqlQuery);
-          for(int i=0;i<result1.getRowCount();i++) {
-            for(int j=0;j<result1.getColumnCount();j++) {
-              System.out.print(result1.getValue(i,j)+"=>");
+          QueryResultsTable result1 = ontology.getSesameRepository()
+                  .performTableQuery(QueryLanguage.SERQL,
+                          "select " + serqlQuery);
+          for(int i = 0; i < result1.getRowCount(); i++) {
+            for(int j = 0; j < result1.getColumnCount(); j++) {
+              System.out.print(result1.getValue(i, j) + "=>");
             }
             System.out.println();
           }
           System.out.println(System.currentTimeMillis() - time);
-        } catch(AccessDeniedException ade) {
+        }
+        catch(AccessDeniedException ade) {
           throw new GateOntologyException(ade);
-        } catch(IOException ioe) {
+        }
+        catch(IOException ioe) {
           throw new GateOntologyException(ioe);
-        } catch(MalformedQueryException mqe) {
+        }
+        catch(MalformedQueryException mqe) {
           throw new GateOntologyException(mqe);
-        } catch(QueryEvaluationException qee) {
+        }
+        catch(QueryEvaluationException qee) {
           throw new GateOntologyException(qee);
         }
       }
     });
-    //toolBar.add(queryBtn);
-    
+    // toolBar.add(queryBtn);
+
     topClassAction = new TopClassAction("", MainFrame
             .getIcon("ontology-topclass"));
     topClass = new JButton(topClassAction);
@@ -512,7 +514,7 @@ public class OntologyEditor extends AbstractVisualResource
 
           int propertyCounter = 0;
           JMenu whereToAdd = addProperty;
-          
+
           // finally add properties
           Set<RDFProperty> props = ontology.getPropertyDefinitions();
           Iterator<RDFProperty> iter = props.iterator();
@@ -527,7 +529,7 @@ public class OntologyEditor extends AbstractVisualResource
               whereToAdd.setEnabled(false);
 
             }
-            
+
             // if property is an annotation property
             if(p instanceof AnnotationProperty) {
               JMenuItem item = new JMenuItem(p.getName(), MainFrame
@@ -535,7 +537,7 @@ public class OntologyEditor extends AbstractVisualResource
               whereToAdd.setEnabled(true);
               whereToAdd.add(item);
               propertyCounter++;
-              
+
               item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ae) {
                   String value = JOptionPane.showInputDialog(null,
@@ -732,13 +734,13 @@ public class OntologyEditor extends AbstractVisualResource
           JMenu addProperty = new JMenu("Properties");
           Set<RDFProperty> rdfprops = ontology.getPropertyDefinitions();
           Iterator<RDFProperty> iter = props.iterator();
-          
+
           JMenu whereToAdd = addProperty;
           int propertyCounter = 0;
-          
+
           while(iter.hasNext()) {
             final RDFProperty p = iter.next();
-            
+
             if(propertyCounter > 10) {
               JMenu newMenu = new JMenu("More >");
               whereToAdd.add(newMenu);
@@ -746,15 +748,14 @@ public class OntologyEditor extends AbstractVisualResource
               propertyCounter = 0;
               whereToAdd.setEnabled(false);
             }
-            
-            
+
             if(p instanceof AnnotationProperty) {
               JMenuItem item = new JMenuItem(p.getName(), MainFrame
                       .getIcon("ontology-annotation-property"));
               whereToAdd.add(item);
               whereToAdd.setEnabled(true);
               propertyCounter++;
-              
+
               item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ae) {
                   String value = JOptionPane.showInputDialog(null,
@@ -790,11 +791,12 @@ public class OntologyEditor extends AbstractVisualResource
               boolean expanded = ((DetailsGroup)value).isExpanded();
               ((DetailsGroup)value).setExpanded(!expanded);
               detailsTable.updateUI();
-            } else {
+            }
+            else {
               return;
             }
           }
-          
+
           final Object finalObj = value;
 
           // find out the selected component in the tree
@@ -1006,11 +1008,12 @@ public class OntologyEditor extends AbstractVisualResource
               boolean expanded = ((DetailsGroup)value).isExpanded();
               ((DetailsGroup)value).setExpanded(!expanded);
               propertyDetailsTable.updateUI();
-            } else {
+            }
+            else {
               return;
             }
           }
-          
+
           if(value instanceof DetailsGroup) return;
           final Object finalObj = value;
 
@@ -1274,7 +1277,7 @@ public class OntologyEditor extends AbstractVisualResource
       DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(
               new OResourceNode(aChild));
       parent.add(childNode);
-
+      
       // we maintain a map of ontology resources and their representing
       // tree
       // nodes
@@ -1304,7 +1307,9 @@ public class OntologyEditor extends AbstractVisualResource
       else if(aChild instanceof OInstance) {
         childNode.setAllowsChildren(false);
       }
+      tree.expandPath(new TreePath(childNode.getPath()));
     }
+    
   }
 
   /**
@@ -1343,6 +1348,7 @@ public class OntologyEditor extends AbstractVisualResource
         Collections.sort(childList, comparator);
         addPropertyChidrenRec(childNode, childList, comparator);
       }
+      propertyTree.expandPath(new TreePath(childNode.getPath()));
     }
   }
 
@@ -1684,7 +1690,7 @@ public class OntologyEditor extends AbstractVisualResource
     }
   }
 
-  public void resourcesRemoved(Ontology ontology, final String[] resources) {
+  public void resourcesRemoved(final Ontology ontology, final String[] resources) {
     if(this.ontology != ontology) {
       return;
     }
@@ -1713,6 +1719,7 @@ public class OntologyEditor extends AbstractVisualResource
     }
 
     final DefaultMutableTreeNode parentNode = probableParentNode;
+    final URI parentURI = reverseMap.get(parentNode);
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
@@ -1727,6 +1734,7 @@ public class OntologyEditor extends AbstractVisualResource
             // this is not in the swing thread
             // update the tree...
             ontologyClassesURIs.removeAll(Arrays.asList(resources));
+            final HashSet<DefaultMutableTreeNode> nodesToRefresh = new HashSet<DefaultMutableTreeNode>();
             for(int i = 0; i < resources.length; i++) {
               ArrayList<DefaultMutableTreeNode> nodeList = uri2TreeNodesListMap
                       .get(resources[i]);
@@ -1737,11 +1745,20 @@ public class OntologyEditor extends AbstractVisualResource
                           .getUserObject()).getResource() instanceof RDFProperty
                           ? propertyTreeModel
                           : treeModel;
+                  if(node.getParent() != null) {
+                    nodesToRefresh
+                            .add((DefaultMutableTreeNode)node.getParent());
+                  } else if(modelToUse == treeModel) {
+                    nodesToRefresh.add(rootNode);
+                  } else {
+                    nodesToRefresh.add(propertyRootNode);
+                  }
                   removeFromMap(modelToUse, node);
                   modelToUse.nodeStructureChanged(node.getParent());
                 }
               }
             }
+
             // now we need to show back the tree
             // go back to the swing thread
             SwingUtilities.invokeLater(new Runnable() {
@@ -1753,23 +1770,130 @@ public class OntologyEditor extends AbstractVisualResource
                 tree.invalidate();
                 propertyTree.invalidate();
 
-                if(parentNode != rootNode && parentNode != propertyRootNode) {
-                  if(((OResourceNode)parentNode.getUserObject()).getResource() instanceof RDFProperty) {
-                    propertyTree.setSelectionPath(new TreePath(parentNode
-                            .getPath()));
+                for(DefaultMutableTreeNode parentNode : nodesToRefresh) {
+                  if(!reverseMap.containsKey(parentNode) && parentNode != rootNode && parentNode != propertyRootNode) continue;
+                  
+                  if(parentNode != rootNode && parentNode != propertyRootNode) {
+                    OResource parentResource = ((OResourceNode)parentNode
+                            .getUserObject()).getResource();
+                    if(parentResource instanceof RDFProperty) {
+                      List<RDFProperty> children = new ArrayList<RDFProperty>(
+                              ((RDFProperty)parentResource)
+                                      .getSubProperties(OConstants.DIRECT_CLOSURE));
+                      Enumeration en = parentNode.children();
+                      while(en.hasMoreElements()) {
+                        DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode)en
+                                .nextElement();
+                        String toCompare = ((OResourceNode)dmtn.getUserObject())
+                                .getResource().getURI().toString();
+                        List<OResource> delete = new ArrayList<OResource>();
+                        for(OResource aRes : children) {
+                          if(toCompare.equals(aRes.getURI().toString())) {
+                            delete.add(aRes);
+                          }
+                        }
+                        children.removeAll(delete);
+                      }
+
+                      addPropertyChidrenRec(parentNode, children,
+                              itemComparator);
+                      propertyTreeModel.nodeStructureChanged(parentNode);
+                      propertyTree.setSelectionPath(new TreePath(parentNode
+                              .getPath()));
+                    }
+                    else {
+                      List<OResource> children = new ArrayList<OResource>(
+                              ((OClass)parentResource)
+                                      .getSubClasses(OConstants.DIRECT_CLOSURE));
+                      children.addAll(ontology
+                              .getOInstances((OClass)parentResource,
+                                      OConstants.DIRECT_CLOSURE));
+                      Enumeration en = parentNode.children();
+                      while(en.hasMoreElements()) {
+                        DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode)en
+                                .nextElement();
+                        String toCompare = ((OResourceNode)dmtn.getUserObject())
+                                .getResource().getURI().toString();
+                        List<OResource> delete = new ArrayList<OResource>();
+                        for(OResource aRes : children) {
+                          if(toCompare.equals(aRes.getURI().toString())) {
+                            delete.add(aRes);
+                          }
+                        }
+                        children.removeAll(delete);
+                      }
+                      addChidrenRec(parentNode, children, itemComparator);
+                      treeModel.nodeStructureChanged(parentNode);
+                      tree.setSelectionPath(new TreePath(parentNode.getPath()));
+                    }
+                  }
+                  else if(parentNode == rootNode) {
+                    if(tree.getRowCount() > 0) {
+                      List<OResource> children = new ArrayList<OResource>(
+                              ontology.getOClasses(true));
+
+                      Enumeration en = parentNode.children();
+                      while(en.hasMoreElements()) {
+                        DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode)en
+                                .nextElement();
+                        if(dmtn.getLevel() != 1) continue;
+                        String toCompare = ((OResourceNode)dmtn.getUserObject())
+                                .getResource().getURI().toString();
+                        List<OResource> delete = new ArrayList<OResource>();
+                        for(OResource aRes : children) {
+                          if(toCompare.equals(aRes.getURI().toString())) {
+                            delete.add(aRes);
+                          }
+                        }
+                        children.removeAll(delete);
+                      }
+                      addChidrenRec(rootNode, children, itemComparator);
+                      treeModel.nodeStructureChanged(rootNode);
+                      tree.setSelectionRow(0);
+                    }
                   }
                   else {
-                    tree.setSelectionPath(new TreePath(parentNode.getPath()));
-                  }
-                }
-                else if(parentNode == rootNode) {
-                  if(tree.getRowCount() > 0) {
-                    tree.setSelectionRow(0);
-                  }
-                }
-                else {
-                  if(propertyTree.getRowCount() > 0) {
-                    propertyTree.setSelectionRow(0);
+                    if(propertyTree.getRowCount() > 0) {
+                      List<RDFProperty> props = new ArrayList<RDFProperty>(
+                              ontology.getPropertyDefinitions());
+                      List<RDFProperty> subList = new ArrayList<RDFProperty>();
+                      for(int i = 0; i < props.size(); i++) {
+                        RDFProperty prop = props.get(i);
+                        if(prop instanceof AnnotationProperty) {
+                          subList.add(prop);
+                          continue;
+                        }
+                        Set<RDFProperty> set = prop
+                                .getSuperProperties(OConstants.DIRECT_CLOSURE);
+                        if(set != null && !set.isEmpty()) {
+                          continue;
+                        }
+                        else {
+                          subList.add(prop);
+                        }
+                      }
+                      Collections.sort(subList, itemComparator);
+                      Enumeration en = parentNode.children();
+                      while(en.hasMoreElements()) {
+                        DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode)en
+                                .nextElement();
+                        if(dmtn.getLevel() != 1) continue;
+                        String toCompare = ((OResourceNode)dmtn.getUserObject())
+                                .getResource().getURI().toString();
+                        List<OResource> delete = new ArrayList<OResource>();
+                        for(OResource aRes : subList) {
+                          if(toCompare.equals(aRes.getURI().toString())) {
+                            delete.add(aRes);
+                          }
+                        }
+                        subList.removeAll(delete);
+                      }
+
+                      addPropertyChidrenRec(propertyRootNode, subList,
+                              itemComparator);
+                      propertyTreeModel.nodeStructureChanged(propertyRootNode);
+                      propertyTree.setSelectionRow(0);
+                    }
                   }
                 }
               }
@@ -1821,6 +1945,16 @@ public class OntologyEditor extends AbstractVisualResource
       propertyTree.setSelectionPath(new TreePath(aNode.getPath()));
     }
     return;
+  }
+
+  public void resourceRelationChanged(Ontology ontology, OResource resource1,
+          OResource resouce2, int eventType) {
+    this.ontologyModified(ontology, resource1, eventType);
+  }
+
+  public void resourcePropertyValueChanged(Ontology ontology,
+          OResource resource, RDFProperty property, Object value, int eventType) {
+    this.ontologyModified(ontology, resource, eventType);
   }
 
   /**
@@ -1882,9 +2016,7 @@ public class OntologyEditor extends AbstractVisualResource
   }
 
   /**
-   * This method is called whenever ontology is reset. In other words
-   * when all resources of the ontology are deleted using the
-   * ontology.cleanup method.
+   * This method is called whenever ontology is reset. 
    * 
    * @param ontology
    */
@@ -2174,7 +2306,7 @@ public class OntologyEditor extends AbstractVisualResource
   protected JToolBar toolBar;
 
   protected JButton queryBtn;
-  
+
   protected JButton topClass;
 
   protected JButton subClass;
@@ -2198,13 +2330,13 @@ public class OntologyEditor extends AbstractVisualResource
   protected JButton delete;
 
   protected JButton search;
-  
+
   protected ArrayList<DefaultMutableTreeNode> selectedNodes;
 
   protected ArrayList<String> ontologyClassesURIs;
 
   protected SearchAction searchAction;
-  
+
   protected TopClassAction topClassAction;
 
   protected SubClassAction subClassAction;

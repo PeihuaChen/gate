@@ -17,12 +17,27 @@ import java.util.Locale;
  */
 public interface OConstants {
 
+  /// **********************************
+  /// Ontology Event Log feature name
+  /// **********************************
+  /** denotes the name of the features for ontology event log */ 
+  public static final String ONTOLOGY_EVENT_LOG_FEATURE_NAME = "eventLog";
+  
+  /// ***********************************
+  /// Closure types 
+  /// ***********************************
+  
   /** denotes a direct closure(no transitivity) */
   public static final byte DIRECT_CLOSURE = 0;
 
   /** denotes atransitive closure */
   public static final byte TRANSITIVE_CLOSURE = 1;
 
+  
+  /// ***********************************
+  /// Property types 
+  /// ***********************************
+  
   /**
    * denotes the rdf property
    */
@@ -53,6 +68,55 @@ public interface OConstants {
    */
   public static final byte ANNOTATION_PROPERTY = 5;
 
+  /// ***********************************
+  /// Class types 
+  /// ***********************************
+  
+  /**
+   * specifies that the value of y in the x rdf:type y is owl:class
+   */
+  public static final byte OWL_CLASS = 0;
+  
+  /**
+   * specifies that the value of y in the x rdf:type is owl:restriction and that is ia cardinality restriction
+   */
+  public static final byte CARDINALITY_RESTRICTION = 1;
+  
+  /**
+   * specifies that the value of y in the x rdf:type is owl:restriction and that it is a min cardinality restriction
+   */
+  public static final byte MIN_CARDINALITY_RESTRICTION = 2;
+  
+  /**
+   * specifies that the value of y in the x rdf:type is owl:restriction and that it is a max cardinality restriction
+   */
+  public static final byte MAX_CARDINALITY_RESTRICTION = 3;
+  
+  /**
+   * specifies that the value of y in the x rdf:type is owl:restriction and that it is a hasValue restriction
+   */
+  public static final byte HAS_VALUE_RESTRICTION = 4;
+  
+  /**
+   * specifies that the value of y in the x rdf:type is owl:restriction and that it is a allValuesFrom restriction
+   */
+  public static final byte ALL_VALUES_FROM_RESTRICTION = 5;
+
+  /**
+   * specifies that the value of y in the x rdf:type is owl:restriction and that it is a someValuesFrom restriction
+   */
+  public static final byte SOME_VALUES_FROM_RESTRICTION = 6;
+
+  /**
+   * specifies that the value of y in the x rdf:type is owl:restriction and that it is a someValuesFrom restriction
+   */
+  public static final byte ANNONYMOUS_CLASS = 7;
+  
+  
+  /// ***********************************
+  /// Ontology Types 
+  /// ***********************************
+  
   /**
    * denotes the N3 ontology format
    */
@@ -78,112 +142,190 @@ public interface OConstants {
    */
   public static final String ANONYMOUS_CLASS_NAME = "Anonymous";
 
+
+  
+  /// **********************************************
+  /// when resources are modified
+  /// **********************************************
+  
+  /**
+   * denotes the event when a new class is added
+   */
+  public static final int OCLASS_ADDED_EVENT = 0;
+  
+  /**
+   * denotes the event when a new anonymous class is added
+   */
+  public static final int ANONYMOUS_CLASS_ADDED_EVENT = 1;
+
+  /**
+   * denotes the event when a new cardinality_restriction is added
+   */
+  public static final int CARDINALITY_RESTRICTION_ADDED_EVENT = 2;
+
+  /**
+   * denotes the event when a new min_cardinality_restriction is added
+   */
+  public static final int MIN_CARDINALITY_RESTRICTION_ADDED_EVENT = 3;
+  
+  /**
+   * denotes the event when a new max_cardinality_restriction is added
+   */
+  public static final int MAX_CARDINALITY_RESTRICTION_ADDED_EVENT = 4;
+
+  /**
+   * denotes the event when a new has_value_restriction is added
+   */
+  public static final int HAS_VALUE_RESTRICTION_ADDED_EVENT = 5;
+
+  /**
+   * denotes the event when a new some_values_from_restriction is added
+   */
+  public static final int SOME_VALUES_FROM_RESTRICTION_ADDED_EVENT = 6;
+
+  /**
+   * denotes the event when a new all_values_from_restriction is added
+   */
+  public static final int ALL_VALUES_FROM_RESTRICTION_ADDED_EVENT = 7;
+
   /**
    * denotes the addition of sub class event
    */
-  public static final int SUB_CLASS_ADDED_EVENT = 0;
+  public static final int SUB_CLASS_ADDED_EVENT = 8;
 
   /**
    * denotes the removal of sub class event
    */
-  public static final int SUB_CLASS_REMOVED_EVENT = 2;
+  public static final int SUB_CLASS_REMOVED_EVENT = 9;
 
   /**
    * denotes the event of two classes set as equivalent
    */
-  public static final int EQUIVALENT_CLASS_EVENT = 4;
+  public static final int EQUIVALENT_CLASS_EVENT = 10;
+  
+  /**
+   * denotes the event when a new annotation property is added
+   */
+  public static final int ANNOTATION_PROPERTY_ADDED_EVENT = 11;
 
   /**
-   * denotes the event when a comment on a resource is changed
+   * denotes the event when a new datatype property is added
    */
-  public static final int COMMENT_CHANGED_EVENT = 5;
+  public static final int DATATYPE_PROPERTY_ADDED_EVENT = 12;
+  
+  /**
+   * denotes the event when a new object property is added
+   */
+  public static final int OBJECT_PROPERTY_ADDED_EVENT = 13;
+  
+  /**
+   * denotes the event when a new transitive
+   * property is added
+   */
+  public static final int TRANSTIVE_PROPERTY_ADDED_EVENT = 14;
 
   /**
-   * denotes the event when a label on a resource is changed
+   * denotes the event when a new symmetric property is added
    */
-  public static final int LABEL_CHANGED_EVENT = 6;
-
+  public static final int SYMMETRIC_PROPERTY_ADDED_EVENT = 15;
+  
+  
   /**
    * denotes the event when an annotation property is assigned to a
    * resource with some compatible value
    */
-  public static final int ANNOTATION_PROPERTY_VALUE_ADDED_EVENT = 7;
+  public static final int ANNOTATION_PROPERTY_VALUE_ADDED_EVENT = 16;
 
   /**
    * denotes the event when a datatype property is assigned to a
    * resource with some compatible value
    */
-  public static final int DATATYPE_PROPERTY_VALUE_ADDED_EVENT = 8;
+  public static final int DATATYPE_PROPERTY_VALUE_ADDED_EVENT = 17;
 
   /**
    * denotes the event when an object property is assigned to a resource
    * with some compatible value
    */
-  public static final int OBJECT_PROPERTY_VALUE_ADDED_EVENT = 9;
+  public static final int OBJECT_PROPERTY_VALUE_ADDED_EVENT = 18;
 
   /**
    * denotes the event when an rdf property is assigned to a resource
    * with some compatible value
    */
-  public static final int RDF_PROPERTY_VALUE_ADDED_EVENT = 10;
+  public static final int RDF_PROPERTY_VALUE_ADDED_EVENT = 19;
 
+  
+  
   /**
    * denotes the event when an annotation property value is removed from
    * the resource
    */
-  public static final int ANNOTATION_PROPERTY_VALUE_REMOVED_EVENT = 11;
+  public static final int ANNOTATION_PROPERTY_VALUE_REMOVED_EVENT = 20;
 
   /**
    * denotes the event when a datatype property value is removed from
    * the resource
    */
-  public static final int DATATYPE_PROPERTY_VALUE_REMOVED_EVENT = 12;
+  public static final int DATATYPE_PROPERTY_VALUE_REMOVED_EVENT = 21;
 
   /**
    * denotes the event when an object property value is removed from the
    * resource
    */
-  public static final int OBJECT_PROPERTY_VALUE_REMOVED_EVENT = 13;
+  public static final int OBJECT_PROPERTY_VALUE_REMOVED_EVENT = 22;
 
   /**
    * denotes the event when an rdf property value is removed from the
    * resource
    */
-  public static final int RDF_PROPERTY_VALUE_REMOVED_EVENT = 14;
+  public static final int RDF_PROPERTY_VALUE_REMOVED_EVENT = 23;
 
+  
+  /**
+   * denotes the event when two properties are set to be equivalent
+   */
+  public static final int EQUIVALENT_PROPERTY_EVENT = 24;
+  
+  /**
+   * denotes the event when a new instance is added
+   */
+  public static final int OINSTANCE_ADDED_EVENT = 25;  
+  
   /**
    * denotes the event when two instances are set to be different from
    * each other
    */
-  public static final int DIFFERENT_INSTANCE_EVENT = 15;
+  public static final int DIFFERENT_INSTANCE_EVENT = 26;
 
   /**
    * denotes the event when two instances are set to be same instances
    */
-  public static final int SAME_INSTANCE_EVENT = 16;
+  public static final int SAME_INSTANCE_EVENT = 27;
 
   /**
-   * denotes the event when two properties are set to be equivalent
+   * when a resource is removed
    */
-  public static final int EQUIVALENT_PROPERTY_EVENT = 17;
+  public static final int RESOURCE_REMOVED_EVENT = 28;
+ 
+  /**
+   * when restriction's on property value is changed
+   */
+  public static final int RESTRICTION_ON_PROPERTY_VALUE_CHANGED = 29;
 
   /**
-   * denotes the event when a sub property is added to an existing
-   * property
+   * denotes the addition of sub property event
    */
-  public static final int SUB_PROPERTY_ADDED_EVENT = 18;
+  public static final int SUB_PROPERTY_ADDED_EVENT = 30;
 
   /**
-   * denotes the event when a sub property is removed from an existing
-   * property
+   * denotes the removal of sub property event
    */
-  public static final int SUB_PROPERTY_REMOVED_EVENT = 20;
-
-  /**
-   * denotes the event when a restriction has changed
-   */
-  public static final int RESTRICTION_MODIFICATION_EVENT = 21;
+  public static final int SUB_PROPERTY_REMOVED_EVENT = 31;
   
+  
+  /// **********************************************
+  /// Locale constants
+  /// **********************************************
   
   /** Language code used "aa" */
   public static final Locale AFAR = new Locale("aa");
@@ -602,48 +744,5 @@ public interface OConstants {
   /** Language code used "zu" */
   public static final Locale ZULU = new Locale("zu");
 
-  // ***************************************
-  //***************** Restrictions
-  // ****************************************
-  
-  /**
-   * specifies that the value of y in the x rdf:type y is owl:class
-   */
-  public static final byte OWL_CLASS = 0;
-  
-  /**
-   * specifies that the value of y in the x rdf:type is owl:restriction and that is ia cardinality restriction
-   */
-  public static final byte CARDINALITY_RESTRICTION = 1;
-  
-  /**
-   * specifies that the value of y in the x rdf:type is owl:restriction and that it is a min cardinality restriction
-   */
-  public static final byte MIN_CARDINALITY_RESTRICTION = 2;
-  
-  /**
-   * specifies that the value of y in the x rdf:type is owl:restriction and that it is a max cardinality restriction
-   */
-  public static final byte MAX_CARDINALITY_RESTRICTION = 3;
-  
-  /**
-   * specifies that the value of y in the x rdf:type is owl:restriction and that it is a hasValue restriction
-   */
-  public static final byte HAS_VALUE_RESTRICTION = 4;
-  
-  /**
-   * specifies that the value of y in the x rdf:type is owl:restriction and that it is a allValuesFrom restriction
-   */
-  public static final byte ALL_VALUES_FROM_RESTRICTION = 5;
-
-  /**
-   * specifies that the value of y in the x rdf:type is owl:restriction and that it is a someValuesFrom restriction
-   */
-  public static final byte SOME_VALUES_FROM_RESTRICTION = 6;
-
-  /**
-   * specifies that the value of y in the x rdf:type is owl:restriction and that it is a someValuesFrom restriction
-   */
-  public static final byte ANNONYMOUS_CLASS = 7;
-  
+ 
 }

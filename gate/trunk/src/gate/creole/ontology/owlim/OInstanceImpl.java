@@ -90,8 +90,7 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
 
       owlim.setDifferentIndividualFrom(this.repositoryID, this.uri.toString(),
               theInstance.getURI().toString());
-      ontology.fireOntologyModificationEvent(this,
-              OConstants.DIFFERENT_INSTANCE_EVENT);
+      ontology.fireResourceRelationChanged(this, theInstance, OConstants.DIFFERENT_INSTANCE_EVENT);      
   }
 
   /*
@@ -134,8 +133,7 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
 
       owlim.setSameIndividualAs(this.repositoryID, this.uri.toString(),
               theInstance.getURI().toString());
-      ontology.fireOntologyModificationEvent(this,
-              OConstants.SAME_INSTANCE_EVENT);
+      ontology.fireResourceRelationChanged(this, theInstance, OConstants.SAME_INSTANCE_EVENT);
   }
 
   /*
@@ -192,8 +190,7 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
 
       owlim.addRDFPropertyValue(this.repositoryID, this.uri.toString(),
               aProperty.getURI().toString(), value.getURI().toString());
-      ontology.fireOntologyModificationEvent(this,
-              OConstants.RDF_PROPERTY_VALUE_ADDED_EVENT);
+      ontology.fireResourcePropertyValueChanged(this, aProperty, value, OConstants.RDF_PROPERTY_VALUE_ADDED_EVENT);
   }
 
   /*
@@ -205,8 +202,7 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
   public void removeRDFPropertyValue(RDFProperty aProperty, OResource value) {
       owlim.removeRDFPropertyValue(this.repositoryID, this.uri.toString(),
               aProperty.getURI().toString(), value.getURI().toString());
-      ontology.fireOntologyModificationEvent(this,
-              OConstants.RDF_PROPERTY_VALUE_REMOVED_EVENT);
+      ontology.fireResourcePropertyValueChanged(this, aProperty, value, OConstants.RDF_PROPERTY_VALUE_REMOVED_EVENT);
   }
 
   /*
@@ -303,8 +299,7 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
   public void removeRDFPropertyValues(RDFProperty aProperty) {
       owlim.removeRDFPropertyValues(this.repositoryID, this.uri.toString(),
               aProperty.getURI().toString());
-      ontology.fireOntologyModificationEvent(this,
-              OConstants.RDF_PROPERTY_VALUE_REMOVED_EVENT);
+      ontology.fireResourcePropertyValueChanged(this, aProperty, null, OConstants.RDF_PROPERTY_VALUE_REMOVED_EVENT);
   }
 
   /*
@@ -340,8 +335,7 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
       owlim.addDatatypePropertyValue(this.repositoryID, this.uri.toString(),
               aProperty.getURI().toString(), type.getXmlSchemaURI().toString(),
               value.getValue());
-      ontology.fireOntologyModificationEvent(this,
-              OConstants.DATATYPE_PROPERTY_VALUE_ADDED_EVENT);
+      ontology.fireResourcePropertyValueChanged(this, aProperty, value, OConstants.DATATYPE_PROPERTY_VALUE_ADDED_EVENT);  
   }
 
   /*
@@ -355,8 +349,7 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
       owlim.removeDatatypePropertyValue(this.repositoryID, this.uri.toString(),
               aProperty.getURI().toString(), value.getDataType()
                       .getXmlSchemaURI().toString(), value.getValue());
-      ontology.fireOntologyModificationEvent(this,
-              OConstants.DATATYPE_PROPERTY_VALUE_REMOVED_EVENT);
+      ontology.fireResourcePropertyValueChanged(this, aProperty, value, OConstants.DATATYPE_PROPERTY_VALUE_REMOVED_EVENT);
   }
 
   /*
@@ -390,8 +383,7 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
 
       owlim.removeDatatypePropertyValues(this.repositoryID,
               this.uri.toString(), aProperty.getURI().toString());
-      ontology.fireOntologyModificationEvent(this,
-              OConstants.DATATYPE_PROPERTY_VALUE_REMOVED_EVENT);
+      ontology.fireResourcePropertyValueChanged(this, aProperty, null, OConstants.DATATYPE_PROPERTY_VALUE_REMOVED_EVENT);
   }
 
   /**
@@ -487,8 +479,7 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
 
       owlim.addObjectPropertyValue(this.repositoryID, this.uri.toString(),
               aProperty.getURI().toString(), value.getURI().toString());
-      ontology.fireOntologyModificationEvent(this,
-              OConstants.OBJECT_PROPERTY_VALUE_ADDED_EVENT);
+      ontology.fireResourcePropertyValueChanged(this, aProperty, value, OConstants.OBJECT_PROPERTY_VALUE_ADDED_EVENT);
   }
 
   /*
@@ -501,8 +492,7 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
           OInstance value) {
       owlim.removeObjectPropertyValue(this.repositoryID, this.uri.toString(),
               aProperty.getURI().toString(), value.getURI().toString());
-      ontology.fireOntologyModificationEvent(this,
-              OConstants.OBJECT_PROPERTY_VALUE_REMOVED_EVENT);
+      ontology.fireResourcePropertyValueChanged(this, aProperty, value, OConstants.OBJECT_PROPERTY_VALUE_REMOVED_EVENT);  
   }
 
   /*
@@ -529,8 +519,7 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
   public void removeObjectPropertyValues(ObjectProperty aProperty) {
       owlim.removeObjectPropertyValues(this.repositoryID, this.uri.toString(),
               aProperty.getURI().toString());
-      ontology.fireOntologyModificationEvent(this,
-              OConstants.OBJECT_PROPERTY_VALUE_REMOVED_EVENT);
+      ontology.fireResourcePropertyValueChanged(this, aProperty, null, OConstants.OBJECT_PROPERTY_VALUE_REMOVED_EVENT);
   }
 
   /**

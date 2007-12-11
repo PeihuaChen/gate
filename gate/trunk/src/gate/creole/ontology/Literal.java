@@ -39,6 +39,8 @@ public class Literal {
    */
   public Literal(String value) {
     this.value = value;
+    this.language = OConstants.ENGLISH;
+    this.dataType = DataType.getStringDataType();
   }
 
   /**
@@ -50,6 +52,7 @@ public class Literal {
   public Literal(String value, Locale language) {
     this.value = value;
     this.language = language;
+    this.dataType = DataType.getStringDataType(); 
   }
 
   /**
@@ -61,6 +64,7 @@ public class Literal {
    */
   public Literal(String value, DataType dataType) throws InvalidValueException {
     this.value = value;
+    this.language = OConstants.ENGLISH;
     this.dataType = dataType;
     // lets check if the provided value is valid for the supplied
     // dataType

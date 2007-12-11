@@ -834,6 +834,14 @@ public class Gaze extends AbstractVisualResource
       ontologyModified(ontology, null, -1);
   }
   
+  public void resourceRelationChanged(Ontology ontology, OResource resource1, OResource resouce2, int eventType) {
+    this.ontologyModified(ontology, resource1, eventType);
+  }
+  
+  public void resourcePropertyValueChanged(Ontology ontology, OResource resource, RDFProperty property, Object value, int eventType) {
+    this.ontologyModified(ontology, resource, eventType);
+  }
+  
   public void ontologyModified(Ontology ontology, OResource resource, int eventType) {
       JTree tree = ontologyTrees.get(ontology);
       if (tree!=null) {

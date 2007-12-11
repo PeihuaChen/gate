@@ -56,8 +56,7 @@ public class RDFPropertyImpl extends OResourceImpl implements RDFProperty {
 
     owlim.setEquivalentPropertyAs(repositoryID, uri.toString(), theProperty
             .getURI().toString());
-    ontology.fireOntologyModificationEvent(this,
-            OConstants.EQUIVALENT_PROPERTY_EVENT);
+    ontology.fireResourceRelationChanged(this, theProperty, OConstants.EQUIVALENT_PROPERTY_EVENT);
   }
 
   /*
@@ -144,8 +143,7 @@ public class RDFPropertyImpl extends OResourceImpl implements RDFProperty {
 
     owlim.addSubProperty(this.repositoryID, uri.toString(), theProperty
             .getURI().toString());
-    ontology.fireOntologyModificationEvent(this,
-            OConstants.SUB_PROPERTY_ADDED_EVENT);
+    ontology.fireResourceRelationChanged(this, theProperty, OConstants.SUB_PROPERTY_ADDED_EVENT);    
   }
 
   /*
@@ -156,8 +154,7 @@ public class RDFPropertyImpl extends OResourceImpl implements RDFProperty {
   public void removeSubProperty(RDFProperty theProperty) {
     owlim.removeSubProperty(this.repositoryID, uri.toString(), theProperty
             .getURI().toString());
-    ontology.fireOntologyModificationEvent(this,
-            OConstants.SUB_PROPERTY_REMOVED_EVENT);
+    ontology.fireResourceRelationChanged(this, theProperty, OConstants.SUB_PROPERTY_REMOVED_EVENT);    
   }
 
   /*

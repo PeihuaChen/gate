@@ -22,21 +22,27 @@ import java.util.EventListener;
  */
 public interface OntologyModificationListener extends EventListener {
   /**
-   * This method is invoked whenever the respective ontology is
-   * modified. This doesnot involve addition and deletion of resources
-   * (e.g. classes/properties/instances) in the ontology but
-   * addition/removal/change in property values, relations (e.g.
-   * addition of sub/super class/property etc) among
-   * classes/properties/instances.
+   * This method is invoked whenever a relation between two objects of the same class (e.g. OClass and OClass, RDFPRoeprty and RDFProeprty etc) is changed.
    * 
    * @param ontology the source of the event
-   * @param resouce the affected OResource
+   * @param resource1 the affected OResource
+   * @param resource2 the affected OResource
    * @param eventType the type of an event (@see OConstants) for more
    *          details
    */
-  public void ontologyModified(Ontology ontology, OResource resource,
-          int eventType);
-
+  public void resourceRelationChanged(Ontology ontology, OResource resource1, OResource resource2,int eventType);
+  
+  
+  /**
+   * This method should be invoked when a property value is added or removed (specified by the event type). 
+   * @param ontology the source of the event
+   * @param resource the affected resource whose property value is added or removed
+   * @param property the property whose value has been added or removed
+   * @param value the actual value that is added or removed. If the value is null - it indicates all the values related to the property are deleted.
+   * @param eventType type of the event (@see OConstants) for more details
+   */
+  public void resourcePropertyValueChanged(Ontology ontology, OResource resource, RDFProperty property, Object value, int eventType);
+  
   /**
    * This method is invoked whenever a resource
    * (class/property/instance) is removed from the ontology.
