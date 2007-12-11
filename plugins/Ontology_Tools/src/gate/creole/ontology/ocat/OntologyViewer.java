@@ -725,6 +725,15 @@ public class OntologyViewer extends AbstractDocumentView implements
 
     documentTextArea.requestFocus();
   }
+  
+  public void resourceRelationChanged(Ontology ontology, OResource resource1, OResource resouce2, int eventType) {
+    this.ontologyModified(ontology, resource1, eventType);
+  }
+  
+  public void resourcePropertyValueChanged(Ontology ontology, OResource resource, RDFProperty property, Object value, int eventType) {
+    this.ontologyModified(ontology, resource, eventType);
+  }
+  
 
   public void ontologyModified(Ontology ontology, OResource resource,
           int eventType) {
