@@ -96,6 +96,9 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
     actionsList.add(new SaveAsRDFXMLAction("Save in RDFXML format"));
     //actionsList.add(new SaveAsN3Action("Save in N3 format"));
     actionsList.add(new SaveAsTURTLEAction("Save in TURTLE format"));
+    actionsList.add(new SaveOntologyEventLogAction("Save Ontology Event Log"));
+    actionsList.add(new LoadOntologyEventLogAction("Load Ontology Event Log"));
+    
   }
 
   /** Initialises this resource, and returns it. */
@@ -632,4 +635,118 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
       }
       return toReturn.toString();
   }
+  
+  /**
+   * Export Results in N3 Format
+   * 
+   * @author niraj
+   */
+  public class SaveOntologyEventLogAction extends AbstractAction {
+    private static final long serialVersionUID = 4051328924770382905L;
+
+    public SaveOntologyEventLogAction(String label) {
+      super(label);
+    }
+
+    public void actionPerformed(ActionEvent ae) {
+      Runnable runableAction = new Runnable() {
+        public void run() {
+          File selectedFile = askForFile();
+          if (selectedFile == null)
+            return;
+          try {
+            MainFrame.lockGUI("Saving...");
+            OntologyEventsLog.exportLog(owlim.getEventsLog(getSesameRepositoryID()),
+                selectedFile);
+          } catch (Exception ex) {
+            ex.printStackTrace(Out.getPrintWriter());
+          } finally {
+            MainFrame.unlockGUI();
+          }
+        }
+      };
+      Thread thread = new Thread(runableAction, "");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
+    }
+  }
+
+  /**
+   * Export Results in N3 Format
+   * 
+   * @author niraj
+   */
+  public class LoadOntologyEventLogAction extends AbstractAction {
+    private static final long serialVersionUID = 4051328924770382905L;
+
+    public LoadOntologyEventLogAction(String label) {
+      super(label);
+    }
+
+    public void actionPerformed(ActionEvent ae) {
+      Runnable runableAction = new Runnable() {
+        public void run() {
+          JFileChooser fileChooser = MainFrame.getFileChooser();
+          fileChooser.setMultiSelectionEnabled(false);
+          fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          fileChooser.setDialogTitle("Select event log to load...");
+          fileChooser.setSelectedFiles(null);
+          int res = fileChooser.showDialog(null, "Load");
+          File selectedFile = null;
+          if (res == JFileChooser.APPROVE_OPTION) {
+            selectedFile = fileChooser.getSelectedFile();
+          }
+          if (selectedFile == null)
+            return;
+          try {
+            MainFrame.lockGUI("Loading...");
+            List<OEvent> events = OntologyEventsLog
+                .importLog(selectedFile);
+            MainFrame.lockGUI("Applying changes...");
+            for (OEvent e : events) {
+              if (e.getToAdd()) {
+                if (e.getDatatype() == null) {
+                  // this is the UUU statement
+                  owlim.addStatement(getSesameRepositoryID(),
+                      e.getSubject(), e.getPredicate(), e
+                          .getObject());
+                } else {
+                  owlim.addStatement(getSesameRepositoryID(),
+                      e.getSubject(), e.getPredicate(), e
+                          .getObject(), e
+                          .getDatatype());
+                }
+              } else {
+                String subject = e.getSubject();
+                String predicate = e.getPredicate();
+                String object = e.getObject();
+                subject = subject.equals("*") ? null : subject;
+                object = object.equals("*") ? null : object;
+                predicate = predicate.equals("*") ? null
+                    : predicate;
+                if (e.getDatatype() == null) {
+                  owlim.removeStatement(
+                      getSesameRepositoryID(), subject,
+                      predicate, object);
+                } else {
+                  owlim.removeStatement(
+                      getSesameRepositoryID(), subject,
+                      predicate, object, e.getDatatype());
+                }
+              }
+            }
+          } catch (Exception ex) {
+            ex.printStackTrace();
+          } finally {
+            MainFrame.unlockGUI();
+            fireOntologyReset();
+          }
+        }
+      };
+      Thread thread = new Thread(runableAction, "");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
+    }
+  }
+  
 }

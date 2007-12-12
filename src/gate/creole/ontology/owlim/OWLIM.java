@@ -5,6 +5,19 @@ import gate.creole.ontology.GateOntologyException;
 public interface OWLIM extends java.rmi.Remote {
 
   /**
+   * This method reports the events observed. Each event is a tupple consists of the following:
+   * + or - that indicates addition or removal of the tripple.
+   * subject - URI or * if all 
+   * predicate - URI or * if all
+   * object - URI or * if all
+   * datatype -  URI or * if all
+   * @param repositoryID
+   * @return
+   * @throws GateOntologyException
+   */
+  public String[] getEventsLog(String repositoryID) throws GateOntologyException;
+  
+  /**
    * Gets the default name space for this ontology. The defaultNameSpace
    * is (by default) used for the newly created resources.
    * 

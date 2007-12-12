@@ -87,6 +87,8 @@ public class OWLIMServiceImpl implements OWLIM,
 
   private HashMap<String, Boolean> hasSystemNameSpace = new HashMap<String, Boolean>();
 
+  
+  
   /**
    * Debug parameter, if set to true, shows various messages when
    * different methods are invoked
@@ -114,6 +116,11 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   private SesameRepository currentRepository;
 
+  /**
+   * Current Events Log
+   */
+  private OntologyEventsLog currentEventsLog;
+  
   /**
    * The class that provides an implementation of the
    * OWLIM_SCHEMA_REPOSITORY
@@ -452,6 +459,27 @@ public class OWLIMServiceImpl implements OWLIM,
   }
 
   /**
+   * This method reports the events observed. Each event is a tupple consists of the following:
+   * + or - that indicates addition or removal of the tripple.
+   * subject - URI or * if all 
+   * predicate - URI or * if all
+   * object - URI or * if all
+   * datatype -  URI or * if all
+   * @param repositoryID
+   * @return
+   * @throws GateOntologyException
+   */
+  public String[] getEventsLog(String repositoryID) throws GateOntologyException {
+    loadRepositoryDetails(repositoryID);
+    String[] events = new String[currentEventsLog.getEvents().size()];
+    for(int i=0;i<currentEventsLog.getEvents().size();i++) {
+      events[i] = currentEventsLog.getEvents().get(i).toString();
+    }
+    return events;
+  }
+  
+  
+  /**
    * Gets the default name space for this ontology. The defaultNameSpace
    * is (by default) used for the newly created resources.
    * 
@@ -758,6 +786,7 @@ public class OWLIMServiceImpl implements OWLIM,
           throws GateOntologyException {
     loadRepositoryDetails(repositoryID);
     addUUUStatement(aPropertyURI, RDF.TYPE, OWL.ANNOTATIONPROPERTY);
+    currentEventsLog.addEvent(new OEvent(aPropertyURI, RDF.TYPE, OWL.ANNOTATIONPROPERTY, true));
   }
 
   /**
@@ -1293,6 +1322,7 @@ public class OWLIMServiceImpl implements OWLIM,
                       + theAnnotationPropertyURI);
     }
     addUULStatement(theResourceURI, theAnnotationPropertyURI, value, language);
+    currentEventsLog.addEvent(new OEvent(theResourceURI, theAnnotationPropertyURI, value, true));
   }
 
   /**
@@ -1393,6 +1423,7 @@ public class OWLIMServiceImpl implements OWLIM,
     removeUULStatement(theResourceURI, theAnnotationPropertyURI, value,
             language);
     endTransaction(null);
+    currentEventsLog.addEvent(new OEvent(theResourceURI, theAnnotationPropertyURI, value, false));
   }
 
   /**
@@ -1416,6 +1447,7 @@ public class OWLIMServiceImpl implements OWLIM,
       sail.removeStatements(getResource(theResourceURI),
               getURI(theAnnotationPropertyURI), null);
       endTransaction(null);
+      currentEventsLog.addEvent(new OEvent(theResourceURI, theAnnotationPropertyURI, null, false));
     }
     catch(SailUpdateException e) {
       throw new GateOntologyException(e);
@@ -1438,14 +1470,18 @@ public class OWLIMServiceImpl implements OWLIM,
           throws GateOntologyException {
     loadRepositoryDetails(repositoryID);
     addUUUStatement(aPropertyURI, RDF.TYPE, RDF.PROPERTY);
+    currentEventsLog.addEvent(new OEvent(aPropertyURI, RDF.TYPE, RDF.PROPERTY, true));
+    
     if(domainClassesURIs != null) {
       for(int i = 0; i < domainClassesURIs.length; i++) {
         addUUUStatement(aPropertyURI, RDFS.DOMAIN, domainClassesURIs[i]);
+        currentEventsLog.addEvent(new OEvent(aPropertyURI, RDFS.DOMAIN, domainClassesURIs[i], true));
       }
     }
     if(rangeClassesTypes != null) {
       for(int i = 0; i < rangeClassesTypes.length; i++) {
         addUUUStatement(aPropertyURI, RDFS.RANGE, rangeClassesTypes[i]);
+        currentEventsLog.addEvent(new OEvent(aPropertyURI, RDFS.RANGE, rangeClassesTypes[i], true));
       }
     }
   }
@@ -1490,11 +1526,14 @@ public class OWLIMServiceImpl implements OWLIM,
           throws GateOntologyException {
     loadRepositoryDetails(repositoryID);
     addUUUStatement(aPropertyURI, RDF.TYPE, OWL.DATATYPEPROPERTY);
+    currentEventsLog.addEvent(new OEvent(aPropertyURI, RDF.TYPE, OWL.DATATYPEPROPERTY, true));
     addUUUStatement(aPropertyURI, RDFS.RANGE, dataTypeURI);
+    currentEventsLog.addEvent(new OEvent(aPropertyURI, RDFS.RANGE, dataTypeURI, true));
 
     if(domainClassesURIs != null) {
       for(int i = 0; i < domainClassesURIs.length; i++) {
         addUUUStatement(aPropertyURI, RDFS.DOMAIN, domainClassesURIs[i]);
+        currentEventsLog.addEvent(new OEvent(aPropertyURI, RDFS.DOMAIN, domainClassesURIs[i], true));
       }
     }
   }
@@ -1545,10 +1584,13 @@ public class OWLIMServiceImpl implements OWLIM,
     if(DEBUG) print("addSymmetricProperty");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(aPropertyURI, RDF.TYPE, OWL.SYMMETRICPROPERTY);
+    currentEventsLog.addEvent(new OEvent(aPropertyURI, RDF.TYPE, OWL.SYMMETRICPROPERTY, true));
     if(domainAndRangeClassesURIs != null) {
       for(int i = 0; i < domainAndRangeClassesURIs.length; i++) {
         addUUUStatement(aPropertyURI, RDFS.DOMAIN, domainAndRangeClassesURIs[i]);
+        currentEventsLog.addEvent(new OEvent(aPropertyURI, RDFS.DOMAIN, domainAndRangeClassesURIs[i], true));
         addUUUStatement(aPropertyURI, RDFS.RANGE, domainAndRangeClassesURIs[i]);
+        currentEventsLog.addEvent(new OEvent(aPropertyURI, RDFS.RANGE, domainAndRangeClassesURIs[i], true));
       }
     }
   }
@@ -1847,6 +1889,7 @@ public class OWLIMServiceImpl implements OWLIM,
           throws GateOntologyException {
     loadRepositoryDetails(repositoryID);
     addUUUStatement(anInstanceURI, anRDFPropertyURI, aResourceURI);
+    currentEventsLog.addEvent(new OEvent(anInstanceURI, anRDFPropertyURI, aResourceURI, true));
   }
 
   /**
@@ -1864,6 +1907,7 @@ public class OWLIMServiceImpl implements OWLIM,
     startTransaction(null);
     removeUUUStatement(anInstanceURI, anRDFPropertyURI, aResourceURI);
     endTransaction(null);
+    currentEventsLog.addEvent(new OEvent(anInstanceURI, anRDFPropertyURI, aResourceURI, false));
   }
 
   /**
@@ -1911,6 +1955,7 @@ public class OWLIMServiceImpl implements OWLIM,
       sail.removeStatements(getResource(anInstanceURI),
               getURI(anRDFPropertyURI), null);
       endTransaction(repositoryID);
+      currentEventsLog.addEvent(new OEvent(anInstanceURI, anRDFPropertyURI, null, true));
     }
     catch(SailUpdateException sue) {
       throw new GateOntologyException(sue);
@@ -1939,6 +1984,7 @@ public class OWLIMServiceImpl implements OWLIM,
     }
     addUUDStatement(repositoryID, anInstanceURI, aDatatypePropertyURI, value,
             datatypeURI);
+    currentEventsLog.addEvent(new OEvent(anInstanceURI, aDatatypePropertyURI, value, datatypeURI, true));
   }
 
   /**
@@ -1961,6 +2007,7 @@ public class OWLIMServiceImpl implements OWLIM,
     removeUUDStatement(repositoryID, anInstanceURI, aDatatypePropertyURI,
             value, datatypeURI);
     endTransaction(null);
+    currentEventsLog.addEvent(new OEvent(anInstanceURI, aDatatypePropertyURI, value, datatypeURI, false));
   }
 
   /**
@@ -2021,6 +2068,7 @@ public class OWLIMServiceImpl implements OWLIM,
     startTransaction(null);
     removeUUUStatement(anInstanceURI, aDatatypePropertyURI, null);
     endTransaction(null);
+    currentEventsLog.addEvent(new OEvent(anInstanceURI, aDatatypePropertyURI, null, false));
   }
 
   // ******************
@@ -2046,6 +2094,7 @@ public class OWLIMServiceImpl implements OWLIM,
               + anObjectPropertyURI);
     }
     addUUUStatement(sourceInstanceURI, anObjectPropertyURI, theValueInstanceURI);
+    currentEventsLog.addEvent(new OEvent(sourceInstanceURI, anObjectPropertyURI, theValueInstanceURI,true));
   }
 
   /**
@@ -2070,6 +2119,7 @@ public class OWLIMServiceImpl implements OWLIM,
     removeUUUStatement(sourceInstanceURI, anObjectPropertyURI,
             theValueInstanceURI);
     endTransaction(null);
+    currentEventsLog.addEvent(new OEvent(sourceInstanceURI, anObjectPropertyURI, theValueInstanceURI,false));
   }
 
   /**
@@ -2127,6 +2177,7 @@ public class OWLIMServiceImpl implements OWLIM,
     startTransaction(null);
     removeUUUStatement(sourceInstanceURI, anObjectPropertyURI, null);
     endTransaction(null);
+    currentEventsLog.addEvent(new OEvent(sourceInstanceURI, anObjectPropertyURI, null,false));
   }
 
   /** This should be called by axis after each call to the operator?* */
@@ -2228,6 +2279,8 @@ public class OWLIMServiceImpl implements OWLIM,
       if(rd == null) {
         rd = new RepositoryDetails();
         rd.repository = currentRepository;
+        if(currentEventsLog == null) currentEventsLog = new OntologyEventsLog();
+        rd.eventsLog = currentEventsLog;
         rd.sail = sail;
         rd.ontologyUrl = ontologyUrl;
         rd.returnSystemStatements = returnSystemStatements;
@@ -2422,6 +2475,7 @@ public class OWLIMServiceImpl implements OWLIM,
     }
 
     endTransaction(null);
+    currentEventsLog.addEvent(new OEvent("*", "*", "*",false));
   }
 
   /**
@@ -2470,6 +2524,7 @@ public class OWLIMServiceImpl implements OWLIM,
     loadRepositoryDetails(repositoryID);
     if(DEBUG) print("setVersion");
     addUULStatement(this.ontologyUrl, OWL.VERSIONINFO, versionInfo, null);
+    currentEventsLog.addEvent(new OEvent(this.ontologyUrl.toString(), OWL.VERSIONINFO, versionInfo,true));
   }
 
   /**
@@ -2504,9 +2559,11 @@ public class OWLIMServiceImpl implements OWLIM,
     switch(classType) {
       case OConstants.OWL_CLASS:
         addUUUStatement(classURI, RDF.TYPE, OWL.CLASS);
+        currentEventsLog.addEvent(new OEvent(classURI, RDF.TYPE, OWL.CLASS,true));
         return;
       default:
         addUUUStatement(classURI, RDF.TYPE, OWL.RESTRICTION);
+        currentEventsLog.addEvent(new OEvent(classURI, RDF.TYPE, OWL.RESTRICTION,true));
         return;
     }
   }
@@ -2534,6 +2591,7 @@ public class OWLIMServiceImpl implements OWLIM,
       throw new GateOntologyException(classURI + " is not an explicit resource");
     }
     else {
+      currentEventsLog.addEvent(new OEvent(classURI, RDF.TYPE, null,false));
       deletedResources.add(classURI);
     }
 
@@ -2542,6 +2600,7 @@ public class OWLIMServiceImpl implements OWLIM,
       sail.removeStatements(getResource(classURI), getURI(RDFS.SUBCLASSOF),
               null);
       endTransaction(null);
+      currentEventsLog.addEvent(new OEvent(classURI, RDFS.SUBCLASSOF, null,false));
     }
     catch(SailUpdateException sue) {
       throw new GateOntologyException(sue.getMessage());
@@ -2577,8 +2636,10 @@ public class OWLIMServiceImpl implements OWLIM,
               OConstants.DIRECT_CLOSURE);
       for(int i = 0; i < individuals.length; i++) {
         removeUUUStatement(individuals[i], RDF.TYPE, classURI);
+        currentEventsLog.addEvent(new OEvent(individuals[i], RDF.TYPE, classURI,false));
         for(int j = 0; j < superClasses.length; j++) {
           addUUUStatement(individuals[i], RDF.TYPE, superClasses[j].getUri());
+          currentEventsLog.addEvent(new OEvent(individuals[i], RDF.TYPE, superClasses[j].getUri(),true));
         }
       }
     }
@@ -2609,9 +2670,13 @@ public class OWLIMServiceImpl implements OWLIM,
     try {
       startTransaction(null);
       sail.removeStatements(getResource(classURI), null, null);
-      if(!(getResource(classURI) instanceof BNode))
+      currentEventsLog.addEvent(new OEvent(classURI, null, null,false));
+      if(!(getResource(classURI) instanceof BNode)) {
         sail.removeStatements(null, getURI(classURI), null);
+        currentEventsLog.addEvent(new OEvent(null, classURI, null,false));
+      }
       sail.removeStatements(null, null, getResource(classURI));
+      currentEventsLog.addEvent(new OEvent(null, null, classURI,false));
 
       endTransaction(null);
     }
@@ -2711,6 +2776,7 @@ public class OWLIMServiceImpl implements OWLIM,
     if(DEBUG) print("addSubClass");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(subClassURI, RDFS.SUBCLASSOF, superClassURI);
+    currentEventsLog.addEvent(new OEvent(subClassURI, RDFS.SUBCLASSOF, superClassURI,true));
   }
 
   /**
@@ -2726,6 +2792,7 @@ public class OWLIMServiceImpl implements OWLIM,
     if(DEBUG) print("addSuperClass");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(subClassURI, RDFS.SUBCLASSOF, superClassURI);
+    currentEventsLog.addEvent(new OEvent(subClassURI, RDFS.SUBCLASSOF, superClassURI,true));
   }
 
   /**
@@ -2739,6 +2806,7 @@ public class OWLIMServiceImpl implements OWLIM,
     if(DEBUG) print("removeSubClass");
     loadRepositoryDetails(repositoryID);
     removeUUUStatement(subClassURI, RDFS.SUBCLASSOF, superClassURI);
+    currentEventsLog.addEvent(new OEvent(subClassURI, RDFS.SUBCLASSOF, superClassURI,false));
   }
 
   /**
@@ -2752,6 +2820,7 @@ public class OWLIMServiceImpl implements OWLIM,
     loadRepositoryDetails(repositoryID);
     if(DEBUG) print("removeSuperClass");
     removeUUUStatement(subClassURI, RDFS.SUBCLASSOF, superClassURI);
+    currentEventsLog.addEvent(new OEvent(subClassURI, RDFS.SUBCLASSOF, superClassURI,false));
   }
 
   /**
@@ -2883,6 +2952,7 @@ public class OWLIMServiceImpl implements OWLIM,
     if(DEBUG) print("setDisjointWith");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(class1URI, OWL.DISJOINTWITH, class2URI);
+    currentEventsLog.addEvent(new OEvent(class1URI, OWL.DISJOINTWITH, class2URI,true));
   }
 
   /**
@@ -2896,6 +2966,7 @@ public class OWLIMServiceImpl implements OWLIM,
     if(DEBUG) print("setEquivalentClassAs");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(class1URI, OWL.EQUIVALENTCLASS, class2URI);
+    currentEventsLog.addEvent(new OEvent(class1URI, OWL.EQUIVALENTCLASS, class2URI,true));
   }
 
   /**
@@ -2976,6 +3047,7 @@ public class OWLIMServiceImpl implements OWLIM,
               + " is not an explicit Property");
     }
     else {
+      currentEventsLog.addEvent(new OEvent(aPropertyURI, RDF.TYPE, null,false));
       deletedResources.add(aPropertyURI);
     }
 
@@ -2983,8 +3055,10 @@ public class OWLIMServiceImpl implements OWLIM,
       startTransaction(null);
       // removing all values set for the current property
       sail.removeStatements(null, getURI(aPropertyURI), null);
+      currentEventsLog.addEvent(new OEvent(null, aPropertyURI, null,false));
       sail.removeStatements(getResource(aPropertyURI),
               getURI(RDFS.SUBPROPERTYOF), null);
+      currentEventsLog.addEvent(new OEvent(aPropertyURI, RDFS.SUBPROPERTYOF,null,false));
       endTransaction(null);
     }
     catch(SailUpdateException sue) {
@@ -3004,8 +3078,11 @@ public class OWLIMServiceImpl implements OWLIM,
       }
     }
     removeUUUStatement(aPropertyURI, null, null);
+    currentEventsLog.addEvent(new OEvent(aPropertyURI, null, null,false));
     removeUUUStatement(null, aPropertyURI, null);
+    currentEventsLog.addEvent(new OEvent(null, aPropertyURI, null,false));
     removeUUUStatement(null, null, aPropertyURI);
+    currentEventsLog.addEvent(new OEvent(null, null, aPropertyURI,false));
     return listToArray(deletedResources);
   }
 
@@ -3023,14 +3100,17 @@ public class OWLIMServiceImpl implements OWLIM,
     if(DEBUG) print("addObjectProperty");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(aPropertyURI, RDF.TYPE, OWL.OBJECTPROPERTY);
+    currentEventsLog.addEvent(new OEvent(aPropertyURI, RDF.TYPE, OWL.OBJECTPROPERTY,true));
     if(domainClassesURIs != null) {
       for(int i = 0; i < domainClassesURIs.length; i++) {
         addUUUStatement(aPropertyURI, RDFS.DOMAIN, domainClassesURIs[i]);
+        currentEventsLog.addEvent(new OEvent(aPropertyURI, RDFS.DOMAIN, domainClassesURIs[i],true));
       }
     }
     if(rangeClassesTypes != null) {
       for(int i = 0; i < rangeClassesTypes.length; i++) {
         addUUUStatement(aPropertyURI, RDFS.RANGE, rangeClassesTypes[i]);
+        currentEventsLog.addEvent(new OEvent(aPropertyURI, RDFS.RANGE, rangeClassesTypes[i],true));
       }
     }
   }
@@ -3049,14 +3129,17 @@ public class OWLIMServiceImpl implements OWLIM,
     if(DEBUG) print("addTransitiveProperty");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(aPropertyURI, RDF.TYPE, OWL.TRANSITIVEPROPERTY);
+    currentEventsLog.addEvent(new OEvent(aPropertyURI, RDF.TYPE, OWL.TRANSITIVEPROPERTY,true));
     if(domainClassesURIs != null) {
       for(int i = 0; i < domainClassesURIs.length; i++) {
         addUUUStatement(aPropertyURI, RDFS.DOMAIN, domainClassesURIs[i]);
+        currentEventsLog.addEvent(new OEvent(aPropertyURI, RDFS.DOMAIN, domainClassesURIs[i],true));
       }
     }
     if(rangeClassesTypes != null) {
       for(int i = 0; i < rangeClassesTypes.length; i++) {
         addUUUStatement(aPropertyURI, RDFS.RANGE, rangeClassesTypes[i]);
+        currentEventsLog.addEvent(new OEvent(aPropertyURI, RDFS.RANGE, rangeClassesTypes[i],true));
       }
     }
   }
@@ -3318,9 +3401,11 @@ public class OWLIMServiceImpl implements OWLIM,
     loadRepositoryDetails(repositoryID);
     if(isFunctional) {
       addUUUStatement(aPropertyURI, RDF.TYPE, OWL.FUNCTIONALPROPERTY);
+      currentEventsLog.addEvent(new OEvent(aPropertyURI, RDF.TYPE, OWL.FUNCTIONALPROPERTY,true));
     }
     else {
       removeUUUStatement(aPropertyURI, RDF.TYPE, OWL.FUNCTIONALPROPERTY);
+      currentEventsLog.addEvent(new OEvent(aPropertyURI, RDF.TYPE, OWL.FUNCTIONALPROPERTY,false));
     }
   }
 
@@ -3352,9 +3437,11 @@ public class OWLIMServiceImpl implements OWLIM,
     loadRepositoryDetails(repositoryID);
     if(isInverseFunctional) {
       addUUUStatement(aPropertyURI, RDF.TYPE, OWL.INVERSEFUNCTIONALPROPERTY);
+      currentEventsLog.addEvent(new OEvent(aPropertyURI, RDF.TYPE, OWL.INVERSEFUNCTIONALPROPERTY,true));
     }
     else {
       removeUUUStatement(aPropertyURI, RDF.TYPE, OWL.INVERSEFUNCTIONALPROPERTY);
+      currentEventsLog.addEvent(new OEvent(aPropertyURI, RDF.TYPE, OWL.INVERSEFUNCTIONALPROPERTY,false));
     }
   }
 
@@ -3432,6 +3519,7 @@ public class OWLIMServiceImpl implements OWLIM,
     if(DEBUG) print("setEquivalentPropertyAs");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(property1URI, OWL.EQUIVALENTPROPERTY, property2URI);
+    currentEventsLog.addEvent(new OEvent(property1URI, OWL.EQUIVALENTPROPERTY, property2URI,true));
   }
 
   /**
@@ -3468,6 +3556,7 @@ public class OWLIMServiceImpl implements OWLIM,
     if(DEBUG) print("addSuperProperty");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(subPropertyURI, RDFS.SUBPROPERTYOF, superPropertyURI);
+    currentEventsLog.addEvent(new OEvent(subPropertyURI, RDFS.SUBPROPERTYOF, superPropertyURI,true));
   }
 
   /**
@@ -3482,6 +3571,7 @@ public class OWLIMServiceImpl implements OWLIM,
     if(DEBUG) print("removeSuperProperty");
     loadRepositoryDetails(repositoryID);
     removeUUUStatement(subPropertyURI, RDFS.SUBPROPERTYOF, superPropertyURI);
+    currentEventsLog.addEvent(new OEvent(subPropertyURI, RDFS.SUBPROPERTYOF, superPropertyURI,false));
   }
 
   /**
@@ -3496,6 +3586,7 @@ public class OWLIMServiceImpl implements OWLIM,
     if(DEBUG) print("addSubProperty");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(subPropertyURI, RDFS.SUBPROPERTYOF, superPropertyURI);
+    currentEventsLog.addEvent(new OEvent(subPropertyURI, RDFS.SUBPROPERTYOF, superPropertyURI,true));
   }
 
   /**
@@ -3510,6 +3601,7 @@ public class OWLIMServiceImpl implements OWLIM,
     if(DEBUG) print("removeSubProperty");
     loadRepositoryDetails(repositoryID);
     removeUUUStatement(subPropertyURI, RDFS.SUBPROPERTYOF, superPropertyURI);
+    currentEventsLog.addEvent(new OEvent(subPropertyURI, RDFS.SUBPROPERTYOF, superPropertyURI,false));
   }
 
   /**
@@ -3573,6 +3665,7 @@ public class OWLIMServiceImpl implements OWLIM,
     if(DEBUG) print("setInverseOf");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(propertyURI1, OWL.INVERSEOF, propertyURI2);
+    currentEventsLog.addEvent(new OEvent(propertyURI1, OWL.INVERSEOF, propertyURI2,true));
   }
 
   // *******************************************************************
@@ -3591,6 +3684,7 @@ public class OWLIMServiceImpl implements OWLIM,
     if(DEBUG) print("addIndividual");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(individualURI, RDF.TYPE, superClassURI);
+    currentEventsLog.addEvent(new OEvent(individualURI, RDF.TYPE, superClassURI,true));
   }
 
   /**
@@ -3607,6 +3701,8 @@ public class OWLIMServiceImpl implements OWLIM,
     if(no == 0)
       throw new GateOntologyException(individualURI
               + " is not an explicit Individual");
+    currentEventsLog.addEvent(new OEvent(individualURI, RDF.TYPE, null,false));
+    
     // we need to go though all ontology resources of the ontology
     // check if they have property with value the current resource
     // we need to delete it
@@ -3617,6 +3713,7 @@ public class OWLIMServiceImpl implements OWLIM,
       for(int i = 0; i < properties.size(); i++) {
         sail.removeStatements(null, getURI(properties.get(i).getUri()),
                 getResource(individualURI));
+        currentEventsLog.addEvent(new OEvent(null, properties.get(i).getUri(), individualURI,false));
       }
       endTransaction(null);
     }
@@ -3624,8 +3721,11 @@ public class OWLIMServiceImpl implements OWLIM,
       throw new GateOntologyException(sue);
     }
     removeUUUStatement(individualURI, null, null);
+    currentEventsLog.addEvent(new OEvent(individualURI,null, null, false));
     removeUUUStatement(null, null, individualURI);
+    currentEventsLog.addEvent(new OEvent(null, null, individualURI, false));
     removeUUUStatement(null, individualURI, null);
+    currentEventsLog.addEvent(new OEvent(null, individualURI, null, false));
     return new String[] {individualURI};
   }
 
@@ -3761,6 +3861,7 @@ public class OWLIMServiceImpl implements OWLIM,
     if(DEBUG) print("setDifferentIndividualFrom");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(individual1URI, OWL.DIFFERENTFROM, individual2URI);
+    currentEventsLog.addEvent(new OEvent(individual1URI,OWL.DIFFERENTFROM, individual1URI, true));
   }
 
   /**
@@ -3796,6 +3897,7 @@ public class OWLIMServiceImpl implements OWLIM,
     if(DEBUG) print("setSameIndividualAs");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(individual1URI, OWL.SAMEAS, individual2URI);
+    currentEventsLog.addEvent(new OEvent(individual1URI,OWL.SAMEAS, individual1URI, true));
   }
 
   /**
@@ -3867,6 +3969,7 @@ public class OWLIMServiceImpl implements OWLIM,
     if(DEBUG) print("setOnPropertyValue");
     loadRepositoryDetails(repositoryId);
     addUUUStatement(restrictionURI, OWL.ONPROPERTY, propertyURI);
+    currentEventsLog.addEvent(new OEvent(restrictionURI,OWL.ONPROPERTY, propertyURI, true));
   }
 
   /**
@@ -3956,9 +4059,11 @@ public class OWLIMServiceImpl implements OWLIM,
     if(toDelete != null) {
       Literal l = (Literal)toDelete.getObject();
       removeUUUStatement(whatValueURI, l.getLabel(), l.getDatatype().toString());
+      currentEventsLog.addEvent(new OEvent(whatValueURI, l.getLabel(), l.getDatatype().toString(), false));
     }
     addUUDStatement(repositoryId, restrictionURI, whatValueURI, value,
             datatypeURI);
+    currentEventsLog.addEvent(new OEvent(restrictionURI,whatValueURI, value, datatypeURI, true));
   }
 
   /**
@@ -4072,8 +4177,10 @@ public class OWLIMServiceImpl implements OWLIM,
     if(toDelete != null) {
       String objectString = toDelete.getObject().toString();
       removeUUUStatement(restrictionURI, whatValueURI, objectString);
+      currentEventsLog.addEvent(new OEvent(restrictionURI,whatValueURI, objectString,false));
     }
     addUUUStatement(restrictionURI, whatValueURI, value);
+    currentEventsLog.addEvent(new OEvent(restrictionURI,whatValueURI, value,true));
   }
 
   /**
@@ -4158,6 +4265,7 @@ public class OWLIMServiceImpl implements OWLIM,
               predicateURI) : null;
       Resource o = objectURI != null ? getResource(objectURI) : null;
       sail.addStatement(s, p, o);
+      currentEventsLog.addEvent(new OEvent(subjectURI, predicateURI, objectURI,true));
       endTransaction(null);
     }
     catch(SailUpdateException e) {
@@ -4185,6 +4293,7 @@ public class OWLIMServiceImpl implements OWLIM,
               predicateURI) : null;
       Resource o = objectURI != null ? getResource(objectURI) : null;
       sail.removeStatements(s, p, o);
+      currentEventsLog.addEvent(new OEvent(subjectURI, predicateURI, objectURI,false));
       endTransaction(null);
     }
     catch(SailUpdateException e) {
@@ -4250,6 +4359,7 @@ public class OWLIMServiceImpl implements OWLIM,
       Literal l = object != null ? sail.getValueFactory().createLiteral(object,
               d) : null;
       sail.addStatement(s, p, l);
+      currentEventsLog.addEvent(new OEvent(subject, predicate, object, datatype, true));
       endTransaction(null);
     }
     catch(SailUpdateException e) {
@@ -4371,6 +4481,7 @@ public class OWLIMServiceImpl implements OWLIM,
               ? sail.getValueFactory().createLiteral(object, d)
               : null;
       sail.removeStatements(s, p, l);
+      currentEventsLog.addEvent(new OEvent(subject, predicate, object, datatype, false));
       endTransaction(null);
     }
     catch(SailUpdateException e) {
@@ -5196,6 +5307,7 @@ public class OWLIMServiceImpl implements OWLIM,
     if(currentRepository == rd.repository) return;
 
     currentRepository = rd.repository;
+    currentEventsLog = rd.eventsLog;
     sail = rd.sail;
     ontologyUrl = rd.ontologyUrl;
     returnSystemStatements = rd.returnSystemStatements;
@@ -5251,6 +5363,11 @@ public class OWLIMServiceImpl implements OWLIM,
   }
 
   class RepositoryDetails {
+    
+    public RepositoryDetails() {
+      eventsLog = new OntologyEventsLog();
+    }
+    
     /**
      * OWLIMSchemaRepository is used as an interaction layer on top of
      * Sesame server. The class provides various methods of manipulating
@@ -5264,6 +5381,8 @@ public class OWLIMServiceImpl implements OWLIM,
      */
     SesameRepository repository;
 
+    OntologyEventsLog eventsLog;
+    
     /**
      * Ontology URL
      */
