@@ -34,17 +34,9 @@ import gate.util.GateRuntimeException;
  * {@link gate.creole.ir.SearchPR}.
  */
 public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
-                                                                    implements
-                                                                    ProgressListener,
-                                                                    ActionListener,
-                                                                    DatastoreListener {
+               implements ProgressListener, ActionListener, DatastoreListener {
 
-  /**
-   * serial version id
-   */
   private static final long serialVersionUID = 3256720688877285686L;
-
-  private int firstColumnWidth = 0;
 
   /** The GUI is associated with the AnnicSearchPR */
   private Object target;
@@ -118,6 +110,21 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
   private JTextField newQuery;
 
   /**
+   * Options box that can be shown for the advanced user.
+   */
+  private Box optionsBox;
+
+  /**
+   * Options pane that is contained in the option box.
+   */
+  private JPanel optionsPane;
+
+  /**
+   * Checkbox for showing the options UI.
+   */
+  private JCheckBox optionsEnabledCheck;
+
+  /**
    * Which corpus to use when searching in
    */
   private JComboBox corpusToSearchIn;
@@ -176,17 +183,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
   /** Gridbagconstraints for the guiPanel */
   private GridBagConstraints guiCons;
 
-  /**
-   * We need to store all the GraphicalPatternRows that shows the
-   * annotation labels somewhere in order to facitiliate direct removal
-   * something we can straight way remove that pattern from this and
-   * redraw
-   */
-  private ArrayList<PatternRow> currentPatternRows;
-
-  /** A panel for the Pattern Text */
-  private JPanel titleTextPanel;
-
   /** Color Generator */
   gate.swing.ColorGenerator colorGenerator = new gate.swing.ColorGenerator();
 
@@ -216,7 +212,33 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
    */
   private Searcher searcher;
 
-  /** A method gets called when a View in GATE is loaded */
+
+  /**
+   * Updates the features box according to the selected annotation type.
+   */
+  public void actionPerformed(ActionEvent ae) {
+
+    // action for annotTypesBox
+    if(ae.getSource() == annotTypesBox) {
+      String choice = (String)annotTypesBox.getSelectedItem();
+      if(choice != null && !choice.equals(previousChoice)) {
+        previousChoice = choice;
+        // yes we need to update the featuresBox
+        List<String> featuresToAdd = annotTypes.get(choice);
+
+        // and finally update the featuresBox
+        featuresBox.removeAllItems();
+        for(int i = 0; i < featuresToAdd.size(); i++) {
+          featuresBox.addItem(featuresToAdd.get(i));
+        }
+        featuresBox.updateUI();
+      }
+    }
+  }
+
+  /**
+   * Called when a View is loaded in GATE.
+   */
   public Resource init() {
     // initialize maps
     patterns = new ArrayList<Hit>();
@@ -229,6 +251,9 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 
     // initialize GUI
     initGui();
+
+    // initially optionsBox is collapsed
+    optionsBox.remove(optionsPane);
 
     // unless the AnnicSerachPR is initialized, we don't have any data
     // to
@@ -254,6 +279,489 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     }
     validate();
     return this;
+  }
+
+  /**
+   * Initialize the GUI.
+   */
+  protected void initGui() {
+
+    setLayout(new BorderLayout());
+
+    /*************
+     * Top panel *
+     *************/
+
+    topPanel = new JPanel(new BorderLayout());
+    topPanel.setOpaque(false);
+
+    // first line of top panel
+    JPanel queryPanel = new JPanel(new BorderLayout());
+
+    queryToExecute = new JLabel("Query: ");
+    queryPanel.add(queryToExecute, BorderLayout.WEST);
+    newQuery = new JTextField(30);
+    newQuery.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
+    newQuery.setEnabled(true);
+    newQuery.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        // pressing enter in the query text field execute the query
+        executeQuery.doClick();        
+      }
+    });
+    queryPanel.add(newQuery, BorderLayout.CENTER);
+    JPanel queryButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    execQueryAction = new ExecuteQueryAction();
+    Icon annicSearchIcon = MainFrame.getIcon("annic-search");
+    executeQuery = new JButton();
+    executeQuery.setPreferredSize(new Dimension(annicSearchIcon.getIconWidth()+8, annicSearchIcon.getIconHeight()+4));
+    executeQuery.setBorderPainted(false);
+    executeQuery.setContentAreaFilled(false);
+    executeQuery.setAction(execQueryAction);
+    executeQuery.setEnabled(true);
+    queryButtonsPanel.add(executeQuery);
+    clearQueryAction = new ClearQueryAction();
+    clearQueryTF = new JButton();
+    clearQueryTF.setPreferredSize(new Dimension(annicSearchIcon.getIconWidth()+8, annicSearchIcon.getIconHeight()+4));
+    clearQueryTF.setBorderPainted(false);
+    clearQueryTF.setContentAreaFilled(false);
+    clearQueryTF.setAction(clearQueryAction);
+    clearQueryTF.setEnabled(true);
+    queryButtonsPanel.add(clearQueryTF);
+    queryPanel.add(queryButtonsPanel, BorderLayout.EAST);
+
+    topPanel.add(queryPanel, BorderLayout.NORTH);
+
+    // options Box
+    optionsBox = Box.createVerticalBox();
+    String aTitle = "Options";
+    JLabel aLabel = new JLabel(aTitle);
+    optionsBox.setMinimumSize(
+      new Dimension(aLabel.getPreferredSize().width, 0));    
+    optionsBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+      optionsEnabledCheck = new JCheckBox(aTitle, MainFrame.getIcon("closed"), false);
+      optionsEnabledCheck.setSelectedIcon(MainFrame.getIcon("expanded"));
+      optionsEnabledCheck.setAlignmentX(JComponent.LEFT_ALIGNMENT);
+      optionsEnabledCheck.setAlignmentY(JComponent.TOP_ALIGNMENT);
+      optionsEnabledCheck.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          if (optionsEnabledCheck.isSelected()) {
+            if (!optionsBox.isAncestorOf(optionsPane)) {
+              // add the options box if not already there
+              optionsBox.add(optionsPane);
+              thisInstance.validate();
+//              topPanel.validate();
+            }
+          } else {
+            if(optionsBox.isAncestorOf(optionsPane)){
+              optionsBox.remove(optionsPane);
+              thisInstance.validate();
+//              topPanel.validate();
+            }
+          }
+        }
+      });
+
+    optionsBox.add(optionsEnabledCheck);
+    optionsBox.add(Box.createHorizontalGlue());
+
+    // Options pane
+    optionsPane = new JPanel();
+    optionsPane.setAlignmentX(Component.LEFT_ALIGNMENT);
+    optionsPane.setAlignmentY(Component.TOP_ALIGNMENT);
+    optionsPane.setLayout(new BoxLayout(optionsPane, BoxLayout.Y_AXIS));
+
+    // first options line of top panel
+    JPanel newQueryOptionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+    JLabel noOfPatternsLabel = new JLabel("Number of results: ");
+    newQueryOptionsPanel.add(noOfPatternsLabel);
+    noOfPatternsField = new JTextField("50", 3);
+    noOfPatternsField.setToolTipText("Number of Patterns to retrieve");
+    noOfPatternsField.setEnabled(true);
+    newQueryOptionsPanel.add(noOfPatternsField);
+    JLabel contextWindowLabel = new JLabel("Context size: ");
+    newQueryOptionsPanel.add(contextWindowLabel);
+    contextWindowField = new JTextField("5", 2);
+    contextWindowField
+            .setToolTipText("Number of Tokens to be displayed in context");
+    contextWindowField.setEnabled(true);
+    newQueryOptionsPanel.add(contextWindowField);
+
+    optionsPane.add(newQueryOptionsPanel);
+
+    // second options line of top panel
+    JPanel toSearchInPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+    toSearchInPanel.add(new JLabel("Corpus :"));
+    DefaultComboBoxModel corpusToSearchInModel = new DefaultComboBoxModel();
+    corpusToSearchInModel.addElement("Entire DataStore");
+    corpusToSearchIn = new JComboBox(corpusToSearchInModel);
+    corpusToSearchIn.setPrototypeDisplayValue("Entire DataStore   ");
+    corpusToSearchIn.setToolTipText("Corpus Name");
+    if(target == null || target instanceof Searcher) {
+      corpusToSearchIn.setEnabled(false);
+    }
+    toSearchInPanel.add(corpusToSearchIn);
+    toSearchInPanel.add(new JLabel("AnnotationSet :"));
+    DefaultComboBoxModel annotationSetToSearchInModel = new DefaultComboBoxModel();
+    annotationSetToSearchInModel.addElement(Constants.ALL_SETS);
+    annotationSetToSearchIn = new JComboBox(annotationSetToSearchInModel);
+    annotationSetToSearchIn
+            .setPrototypeDisplayValue("Results from combined Sets");
+    annotationSetToSearchIn.setToolTipText("AnnotationSet Name");
+    toSearchInPanel.add(annotationSetToSearchIn);
+    totalFoundPatterns = new JLabel("Total Found Patterns : 0        ");
+    toSearchInPanel.add(totalFoundPatterns);
+    nextResultAction = new NextResultAction();
+    nextResults = new JButton();
+    nextResults.setPreferredSize(new Dimension(annicSearchIcon.getIconWidth()+8, annicSearchIcon.getIconHeight()+4));
+    nextResults.setBorderPainted(false);
+    nextResults.setContentAreaFilled(false);
+    nextResults.setAction(nextResultAction);
+    nextResults.setEnabled(true);
+    toSearchInPanel.add(nextResults);
+
+    optionsPane.add(toSearchInPanel);
+
+    //third options line of top panel
+    comboPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+    comboPanel.add(new JLabel("Annotation Types : "));
+    annotTypesBox = new JComboBox();
+    annotTypesBox.addActionListener(this);
+    comboPanel.add(annotTypesBox);
+    comboPanel.add(new JLabel("Features : "));
+    featuresBox = new JComboBox();
+    comboPanel.add(featuresBox);
+    addAnnotTypeButton = new JButton();
+    addAnnotTypeButton.setPreferredSize(new Dimension(annicSearchIcon.getIconWidth()+8, annicSearchIcon.getIconHeight()+4));
+    addAnnotTypeButton.setBorderPainted(false);
+    addAnnotTypeButton.setContentAreaFilled(false);
+    addAnnotTypeButton.setAction(new AddAnnotTypeAction());
+    comboPanel.add(addAnnotTypeButton);
+    comboPanel.add(new JLabel("Export patterns:"));
+    allPatterns = new JRadioButton("All");
+    allPatterns.setToolTipText("exports all the patterns on this screen");
+    allPatterns.setSelected(true);
+    allPatterns.setEnabled(true);
+    comboPanel.add(allPatterns);
+    selectedPatterns = new JRadioButton("Selected");
+    selectedPatterns.setToolTipText("exports only the selected patterns");
+    selectedPatterns.setSelected(false);
+    selectedPatterns.setEnabled(true);
+    comboPanel.add(selectedPatterns);
+    patternExportButtonsGroup = new ButtonGroup();
+    patternExportButtonsGroup.add(allPatterns);
+    patternExportButtonsGroup.add(selectedPatterns);
+    exportResultsAction = new ExportResultsAction();
+    exportToHTML = new JButton();
+    exportToHTML.setPreferredSize(new Dimension(annicSearchIcon.getIconWidth()+8, annicSearchIcon.getIconHeight()+4));
+    exportToHTML.setBorderPainted(false);
+    exportToHTML.setContentAreaFilled(false);
+    exportToHTML.setAction(exportResultsAction);
+    exportToHTML.setEnabled(true);
+    comboPanel.add(exportToHTML);
+
+    optionsPane.add(comboPanel);
+
+    optionsBox.add(optionsPane);
+
+    topPanel.add(optionsBox, BorderLayout.CENTER);
+
+    // right side of the top panel
+    progressLabel = new JLabel(MainFrame.getIcon("working"));
+    progressLabel.setEnabled(false);
+
+    topPanel.add(progressLabel, BorderLayout.EAST);
+//    topTopPanel.add(progressLabel, BorderLayout.EAST);
+//    JPanel topTopPanel = new JPanel(new BorderLayout());
+
+    JScrollPane scrollPane = new JScrollPane(topPanel);
+    scrollPane.setOpaque(false);
+//    topTopPanel.add(scrollPane, BorderLayout.CENTER);
+//    topTopPanel.add(topPanel, BorderLayout.CENTER);
+
+//    topTopPanel.validate();
+//    topTopPanel.setMinimumSize(new Dimension(
+//            topPanel.getPreferredSize().width
+//           +progressLabel.getPreferredSize().width,
+//            (topPanel.getPreferredSize().height
+//           > progressLabel.getPreferredSize().height)?
+//               topPanel.getPreferredSize().height
+//              :progressLabel.getPreferredSize().height));
+
+//    add(topTopPanel, BorderLayout.NORTH);
+    add(scrollPane, BorderLayout.NORTH);
+
+    /****************
+     * Center panel *
+     ****************/
+
+    guiCons = new GridBagConstraints();
+//    guiCons.fill = GridBagConstraints.HORIZONTAL;
+//    guiCons.anchor = GridBagConstraints.FIRST_LINE_START;
+
+    guiPanel = new JPanel();
+    guiPanel.setLayout(new GridBagLayout());
+    guiPanel.setOpaque(true);
+    guiPanel.setBackground(Color.WHITE);
+
+    // will be added to the GUI via a split panel
+
+    /****************
+     * Bottom panel *
+     ****************/
+
+    patternsTableModel = new PatternsTableModel();
+
+    patternTable = new XJTable(patternsTableModel);
+    // user should see the respective pattern query for the underlying
+    // row
+    patternTable.addMouseMotionListener(new MouseMotionListener() {
+      public void mouseMoved(MouseEvent me) {
+        int row = patternTable.rowAtPoint(me.getPoint());
+        row = patternTable.rowViewToModel(row);
+        Pattern pattern = null;
+        if(row > -1) {
+          pattern = (Pattern)patterns.get(row);
+          patternTable.setToolTipText(pattern.getQueryString());
+        }
+      }
+
+      public void mouseDragged(MouseEvent me) {
+      }
+    });
+
+    patternTable.addMouseListener(new MouseListener() {
+      public void mouseClicked(MouseEvent me) {
+        if(SwingUtilities.isRightMouseButton(me)) {
+          // if yes show the option to delete
+          final JPopupMenu popup = new JPopupMenu();
+          JButton delete = new JButton("Delete");
+          popup.add(delete);
+          delete.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+              int[] rows = patternTable.getSelectedRows();
+              for(int i = 0; i < rows.length; i++) {
+                rows[i] = patternTable.rowViewToModel(rows[i]);
+              }
+
+              rows = sortRows(rows);
+              // here all rows are in ascending order
+              for(int i = rows.length - 1; i >= 0; i--) {
+                patterns.remove(rows[i]);
+              }
+              patternsTableModel.fireTableDataChanged();
+              totalFoundPatterns.setText("Total Found Patterns : "
+                      + patternTable.getRowCount());
+              // and finally update the table
+              tableValueChanged();
+              popup.setVisible(false);
+            }
+          });
+          popup.show(patternTable, me.getX(), me.getY() - 10);
+        }
+      }
+
+      public void mousePressed(MouseEvent me) {
+      }
+
+      public void mouseReleased(MouseEvent me) {
+      }
+
+      public void mouseEntered(MouseEvent me) {
+      }
+
+      public void mouseExited(MouseEvent me) {
+      }
+    });
+
+    // when user changes his/her selection in the rows
+    // the graphical panel should change its ouput to reflect the new
+    // selection incase where multiple rows are selected
+    // the annotations of the first row will be highlighted
+    patternTable.getSelectionModel().addListSelectionListener(
+            new javax.swing.event.ListSelectionListener() {
+              public void valueChanged(javax.swing.event.ListSelectionEvent e) {
+                tableValueChanged();
+              }
+            });
+
+    // user should be allowed to select multiple rows
+    patternTable
+            .setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+    patternTable.setSortable(true);
+
+    // will be added to the GUI via a split panel
+
+    /***********************************************
+     * Split between center panel and bottom panel *
+     ***********************************************/
+
+    JSplitPane sPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+    sPane.setDividerLocation(300);
+    sPane.add(new JScrollPane(guiPanel,
+            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
+    sPane.add(new JScrollPane(patternTable,
+            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
+
+//    JPanel tempPanel = new JPanel(new BorderLayout());
+//    tempPanel.add(sPane, BorderLayout.CENTER);
+
+//    add(tempPanel, BorderLayout.CENTER);
+    add(sPane, BorderLayout.CENTER);
+
+  }
+
+  // initialize the local data
+  protected void initLocalData() {
+    Hit[] pats = searcher.getHits();
+    if(patterns == null) patterns = new ArrayList<Hit>();
+    patterns.clear();
+    for(int m = 0; m < pats.length; m++) {
+      patterns.add(pats[m]);
+    }
+    pats = null;
+    annotTypes = searcher.getAnnotationTypesMap();
+  }
+
+  /**
+   * Initializes the comboboxes for annotation Types and their features.
+   */
+  public void updateGui() {
+    guiPanel.removeAll();
+    guiPanel.validate();
+    guiPanel.updateUI();
+    annotTypesBox.removeAllItems();
+    ArrayList<String> annotTypesKeyList = new ArrayList<String>(annotTypes
+            .keySet());
+    for(int i = 0; i < annotTypesKeyList.size(); i++) {
+      annotTypesBox.addItem(annotTypesKeyList.get(i));
+    }
+    annotTypesBox.updateUI();
+
+    featuresBox.removeAllItems();
+    if(annotTypesBox.getItemCount() > 0) {
+      List<String> featuresList = annotTypes.get(annotTypesBox.getItemAt(0));
+      for(int i = 0; i < featuresList.size(); i++) {
+        featuresBox.addItem(featuresList.get(i));
+      }
+    }
+    featuresBox.updateUI();
+    newQuery.setText(searcher.getQuery());
+  }
+
+  /**
+   * Updates the pattern row view when the user changes
+   * his/her selection of pattern in the patternTable.
+   */
+  public void tableValueChanged() {
+
+    guiCons.gridx = 0;
+    guiCons.gridy = 0;
+    guiCons.gridwidth = 1;
+    guiCons.gridheight = 1;
+    guiCons.fill = GridBagConstraints.BOTH;
+    guiCons.insets = new java.awt.Insets(0, 0, 0, 0);
+    guiCons.anchor = GridBagConstraints.CENTER;
+    guiCons.weighty = 0.0;
+    guiCons.weightx = 1.0;
+    guiPanel.removeAll();
+
+    // get the row selected in the pattern table
+    int row = patternTable.getSelectedRow();
+
+    if(row == -1) { // no pattern is selected in the pattern table
+      guiPanel.add(new JLabel(
+              "Please select a row in the pattern table."), guiCons);
+      guiPanel.validate();
+      return;
+    }
+
+    addAnnotTypeButton.setEnabled(true);
+    annotTypesBox.setEnabled(true);
+    featuresBox.setEnabled(true);
+
+    // in case the user has sorted a column in the pattern table
+    row = patternTable.rowViewToModel(row);
+
+    Pattern pattern = (Pattern)patterns.get(row);
+
+    // display on the first line the text matching the pattern and its context
+    guiCons.gridx = 0;
+    guiPanel.add(new JLabel("Text"), guiCons);
+    for (int charNum = 0;
+         charNum < pattern.getPatternText().length(); charNum++) {
+      guiCons.gridx = charNum + 1;
+      JLabel label = new JLabel(String.valueOf(
+                (pattern.getPatternText().charAt(charNum))));
+      if (charNum >= pattern.getStartOffset()
+                   - pattern.getLeftContextStartOffset()
+       && charNum < pattern.getEndOffset()
+                  - pattern.getLeftContextStartOffset()) {
+        label.setBackground(new Color(240, 201, 184));
+      } else {
+        label.setBackground(Color.WHITE);
+      }
+      label.setOpaque(true);
+      label.addMouseListener(
+              new AddPatternRowInQueryMouseInputListener(label.getText()));
+      guiPanel.add(label, guiCons);
+    }
+
+    // for each annotation type / feature to display
+    for(int i = 0; i < addedAnnotTypesInGUI.size(); i++) {
+      String type = (String)addedAnnotTypesInGUI.get(i);
+      String feature = (String)addedAnnotFeatureInGUI.get(i);
+
+      guiCons.gridy++;
+      guiCons.gridx = 0;
+      guiPanel.add(new JLabel(type+"."+feature), guiCons);
+
+        // get the annotations / features to display
+        PatternAnnotation[] annots =
+          pattern.getPatternAnnotations(type, feature);
+        if(annots == null || annots.length == 0) {
+          annots = new PatternAnnotation[0];
+        }
+
+        // add a JPanel in the gridbag layout for each feature
+        // of the current annotation type
+        for(int k = 0, j = 0; k < annots.length; k++, j += 2) {
+          gate.creole.annic.PatternAnnotation ann =
+            (gate.creole.annic.PatternAnnotation)annots[k];
+          guiCons.gridx =
+            ann.getStartOffset() - pattern.getLeftContextStartOffset() + 1;
+          guiCons.gridwidth =
+            ann.getEndOffset() - pattern.getLeftContextStartOffset()
+            - guiCons.gridx + 1;
+          JLabel label = new JLabel((String)ann.getFeatures().get(feature));
+          label.setBackground(getAnnotationTypeColor(ann.getType()));
+          label.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+          label.setOpaque(true);
+          label.addMouseListener(new AddPatternRowInQueryMouseInputListener(
+                  type, feature, (String)ann.getFeatures().get(feature)));
+          guiPanel.add(label, guiCons);
+        }
+
+        // add a delete button at the end of the row
+        JButton removePattern;
+        removePattern = new JButton();//MainFrame.getIcon("delete.gif"));
+        removePattern.setAction(new DeletePatternRowAction(type, feature));
+        removePattern.setBorderPainted(true);
+        removePattern.setMargin(new Insets(0, 0, 0, 0));
+        guiCons.anchor = GridBagConstraints.LINE_END;
+        guiCons.gridwidth = 1;
+        guiCons.gridx = GridBagConstraints.RELATIVE;
+        guiPanel.add(removePattern, guiCons);
+        guiCons.anchor = GridBagConstraints.CENTER;
+    }
+
+    validate();
+    updateUI();
   }
 
   /**
@@ -334,293 +842,13 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     }
   }
 
-  /** Initialize the GUI */
-  protected void initGui() {
-
-    setLayout(new BorderLayout());
-
-    /*************
-     * Top panel *
-     *************/
-
-    topPanel = new JPanel();
-    topPanel.setLayout(new GridLayout(3, 1));
-    topPanel.setOpaque(false);
-
-    // first line of top panel
-    JPanel newQueryPanel = new JPanel();
-    newQueryPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-
-    queryToExecute = new JLabel("New Query : ");
-    newQueryPanel.add(queryToExecute);
-    newQuery = new JTextField(20);
-    newQuery.setEnabled(true);
-    newQuery.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        // pressing enter in the query text field execute the query
-        executeQuery.doClick();        
-      }
-    });
-    newQueryPanel.add(newQuery);
-    execQueryAction = new ExecuteQueryAction();
-    Icon annicSearchIcon = MainFrame.getIcon("annic-search");
-    executeQuery = new JButton();
-    executeQuery.setPreferredSize(new Dimension(annicSearchIcon.getIconWidth()+8, annicSearchIcon.getIconHeight()+4));
-    executeQuery.setBorderPainted(false);
-    executeQuery.setContentAreaFilled(false);
-    executeQuery.setAction(execQueryAction);
-    executeQuery.setEnabled(true);
-    newQueryPanel.add(executeQuery);
-    clearQueryAction = new ClearQueryAction();
-    clearQueryTF = new JButton(MainFrame.getIcon("annic-clean"));
-    clearQueryTF.setPreferredSize(new Dimension(annicSearchIcon.getIconWidth()+8, annicSearchIcon.getIconHeight()+4));
-    clearQueryTF.setBorderPainted(false);
-    clearQueryTF.setContentAreaFilled(false);
-    clearQueryTF.addActionListener(clearQueryAction);
-    clearQueryTF.setToolTipText("Clear Query Text Box");
-    clearQueryTF.setEnabled(true);
-    newQueryPanel.add(clearQueryTF);
-    noOfPatternsField = new JTextField("50", 3);
-    noOfPatternsField.setToolTipText("Number of Patterns to retrieve");
-    noOfPatternsField.setEnabled(true);
-    newQueryPanel.add(noOfPatternsField);
-    contextWindowField = new JTextField("5", 2);
-    contextWindowField
-            .setToolTipText("Number of Tokens to be displayed in context");
-    contextWindowField.setEnabled(true);
-    newQueryPanel.add(contextWindowField);
-
-    topPanel.add(newQueryPanel);
-
-    // second line of top panel
-    JPanel toSearchInPanel = new JPanel();
-    toSearchInPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-
-    toSearchInPanel.add(new JLabel("Corpus :"));
-    DefaultComboBoxModel corpusToSearchInModel = new DefaultComboBoxModel();
-    corpusToSearchInModel.addElement("Entire DataStore");
-    corpusToSearchIn = new JComboBox(corpusToSearchInModel);
-    corpusToSearchIn.setPrototypeDisplayValue("Entire DataStore   ");
-    corpusToSearchIn.setToolTipText("Corpus Name");
-    if(target == null || target instanceof Searcher) {
-      corpusToSearchIn.setEnabled(false);
-    }
-    toSearchInPanel.add(corpusToSearchIn);
-    toSearchInPanel.add(new JLabel("AnnotationSet :"));
-    DefaultComboBoxModel annotationSetToSearchInModel = new DefaultComboBoxModel();
-    annotationSetToSearchInModel.addElement(Constants.ALL_SETS);
-    annotationSetToSearchIn = new JComboBox(annotationSetToSearchInModel);
-    annotationSetToSearchIn
-            .setPrototypeDisplayValue("Results from combined Sets");
-    annotationSetToSearchIn.setToolTipText("AnnotationSet Name");
-    toSearchInPanel.add(annotationSetToSearchIn);
-    totalFoundPatterns = new JLabel("Total Found Patterns : 0        ");
-    toSearchInPanel.add(totalFoundPatterns);
-    nextResultAction = new NextResultAction();
-    nextResults = new JButton(MainFrame.getIcon("annic-forward"));
-    nextResults.setPreferredSize(new Dimension(annicSearchIcon.getIconWidth()+8, annicSearchIcon.getIconHeight()+4));
-    nextResults.setBorderPainted(false);
-    nextResults.setContentAreaFilled(false);
-    nextResults.addActionListener(nextResultAction);
-    nextResults.setToolTipText("Show Next Patterns");
-    nextResults.setEnabled(true);
-    toSearchInPanel.add(nextResults);
-
-    topPanel.add(toSearchInPanel);
-
-    //third line of top panel
-    comboPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-
-    comboPanel.add(new JLabel("Annotation Types : "));
-    annotTypesBox = new JComboBox();
-    annotTypesBox.addActionListener(this);
-    comboPanel.add(annotTypesBox);
-    comboPanel.add(new JLabel("Features : "));
-    featuresBox = new JComboBox();
-    comboPanel.add(featuresBox);
-    addAnnotTypeButton = new JButton(MainFrame.getIcon("annic-down"));
-    addAnnotTypeButton.setPreferredSize(new Dimension(annicSearchIcon.getIconWidth()+8, annicSearchIcon.getIconHeight()+4));
-    addAnnotTypeButton.setBorderPainted(false);
-    addAnnotTypeButton.setContentAreaFilled(false);
-    addAnnotTypeButton.addActionListener(new AddAnnotTypeAction());
-    addAnnotTypeButton.setToolTipText(
-        "Add selected annotation type and feature to the visualization below");
-    comboPanel.add(addAnnotTypeButton);
-    comboPanel.add(new JLabel("Export patterns:"));
-    allPatterns = new JRadioButton("All");
-    allPatterns.setToolTipText("exports all the patterns on this screen");
-    allPatterns.setSelected(true);
-    allPatterns.setEnabled(true);
-    comboPanel.add(allPatterns);
-    selectedPatterns = new JRadioButton("Selected");
-    selectedPatterns.setToolTipText("exports only the selected patterns");
-    selectedPatterns.setSelected(false);
-    selectedPatterns.setEnabled(true);
-    comboPanel.add(selectedPatterns);
-    patternExportButtonsGroup = new ButtonGroup();
-    patternExportButtonsGroup.add(allPatterns);
-    patternExportButtonsGroup.add(selectedPatterns);
-    exportResultsAction = new ExportResultsAction();
-    exportToHTML = new JButton(MainFrame.getIcon("annic-export"));
-    exportToHTML.setPreferredSize(new Dimension(annicSearchIcon.getIconWidth()+8, annicSearchIcon.getIconHeight()+4));
-    exportToHTML.setBorderPainted(false);
-    exportToHTML.setContentAreaFilled(false);
-    exportToHTML.addActionListener(exportResultsAction);
-    exportToHTML.setToolTipText("Export Results to HTML");
-    exportToHTML.setEnabled(true);
-    comboPanel.add(exportToHTML);
-
-    topPanel.add(comboPanel);
-
-    // right side of the top panel
-    JPanel topTopPanel = new JPanel(new BorderLayout());
-    JScrollPane scrollPane = new JScrollPane(topPanel);
-    scrollPane.setOpaque(false);
-    topTopPanel.add(scrollPane, BorderLayout.CENTER);
-//    topTopPanel.add(topPanel, BorderLayout.CENTER);
-    progressLabel = new JLabel(MainFrame.getIcon("working"));
-    progressLabel.setEnabled(false);
-    topTopPanel.add(progressLabel, BorderLayout.EAST);
-
-//    topTopPanel.validate();
-//    topTopPanel.setMinimumSize(new Dimension(
-//            topPanel.getPreferredSize().width
-//           +progressLabel.getPreferredSize().width,
-//            (topPanel.getPreferredSize().height
-//           > progressLabel.getPreferredSize().height)?
-//               topPanel.getPreferredSize().height
-//              :progressLabel.getPreferredSize().height));
-
-    add(topTopPanel, BorderLayout.NORTH);
-
-    /****************
-     * Center panel *
-     ****************/
-
-    guiCons = new GridBagConstraints();
-    guiCons.fill = GridBagConstraints.HORIZONTAL;
-    guiCons.anchor = GridBagConstraints.FIRST_LINE_START;
-
-    guiPanel = new JPanel();
-    guiPanel.setLayout(new GridBagLayout());
-    guiPanel.setOpaque(true);
-    guiPanel.setBackground(Color.WHITE);
-
-    titleTextPanel = new JPanel(new BorderLayout());
-    titleTextPanel.setOpaque(true);
-    titleTextPanel.setBackground(Color.WHITE);
-    
-    // will be added to the GUI via a split panel
-
-    /****************
-     * Bottom panel *
-     ****************/
-
-    patternsTableModel = new PatternsTableModel();
-
-    patternTable = new XJTable(patternsTableModel);
-    // user should see the respective pattern query for the underlying
-    // row
-    patternTable.addMouseMotionListener(new MouseMotionListener() {
-      public void mouseMoved(MouseEvent me) {
-        int row = patternTable.rowAtPoint(me.getPoint());
-        row = patternTable.rowViewToModel(row);
-        Pattern pattern = null;
-        if(row > -1) {
-          pattern = (Pattern)patterns.get(row);
-          patternTable.setToolTipText(pattern.getQueryString());
-        }
-      }
-
-      public void mouseDragged(MouseEvent me) {
-      }
-    });
-
-    patternTable.addMouseListener(new MouseListener() {
-      public void mouseClicked(MouseEvent me) {
-        if(SwingUtilities.isRightMouseButton(me)) {
-          // if yes show the option to delete
-          final JPopupMenu popup = new JPopupMenu();
-          JButton delete = new JButton("Delete");
-          popup.add(delete);
-          delete.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-              int[] rows = patternTable.getSelectedRows();
-              for(int i = 0; i < rows.length; i++) {
-                rows[i] = patternTable.rowViewToModel(rows[i]);
-              }
-
-              rows = sort(rows);
-              // here all rows are in ascending order
-              for(int i = rows.length - 1; i >= 0; i--) {
-                patterns.remove(rows[i]);
-              }
-              patternsTableModel.fireTableDataChanged();
-              totalFoundPatterns.setText("Total Found Patterns : "
-                      + patternTable.getRowCount());
-              // and finally update the table
-              tableValueChanged();
-              popup.setVisible(false);
-            }
-          });
-          popup.show(patternTable, me.getX(), me.getY() - 10);
-        }
-      }
-
-      public void mousePressed(MouseEvent me) {
-      }
-
-      public void mouseReleased(MouseEvent me) {
-      }
-
-      public void mouseEntered(MouseEvent me) {
-      }
-
-      public void mouseExited(MouseEvent me) {
-      }
-    });
-
-    // when user changes his/her selection in the rows
-    // the graphical panel should change its ouput to reflect the new
-    // selection incase where multiple rows are selected
-    // the annotations of the first row will be highlighted
-    patternTable.getSelectionModel().addListSelectionListener(
-            new javax.swing.event.ListSelectionListener() {
-              public void valueChanged(javax.swing.event.ListSelectionEvent e) {
-                tableValueChanged();
-              }
-            });
-
-    // user should be allowed to select multiple rows
-    patternTable
-            .setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-    patternTable.setSortable(true);
-
-    // will be added to the GUI via a split panel
-
-    /***********************************************
-     * Split between center panel and bottom panel *
-     ***********************************************/
-
-    JSplitPane sPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-    sPane.setDividerLocation(300);
-    sPane.add(new JScrollPane(guiPanel,
-            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
-    sPane.add(new JScrollPane(patternTable,
-            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
-
-//    JPanel tempPanel = new JPanel(new BorderLayout());
-//    tempPanel.add(sPane, BorderLayout.CENTER);
-
-//    add(tempPanel, BorderLayout.CENTER);
-    add(sPane, BorderLayout.CENTER);
-
-  }
-
-  private int[] sort(int[] rows) {
-    // we need to sort rows
+  /**
+   * Sort use for the pattern table.
+   * 
+   * @param rows table of rows to sort
+   * @return rows sorted 
+   */
+  private int[] sortRows(int[] rows) {
     for(int i = 0; i < rows.length; i++) {
       for(int j = 0; j < rows.length - 1; j++) {
         if(rows[j] > rows[j + 1]) {
@@ -634,218 +862,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
   }
 
   /**
-   * Updates the pattern row view when the user changes
-   * his/her selection of pattern in the patternTable.
-   */
-  public void tableValueChanged() {
-
-//    firstColumnWidth = 0;
-
-    int row = patternTable.getSelectedRow();
-
-    if(row == -1) {
-      // no pattern is selected in the pattern table
-//      VariableWidthJLabel patternLabel = new VariableWidthJLabel(
-//              "Pattern Text : ");
-//      int preferredWidth = patternLabel.getOriginalPreferredSize().width;
-//      if(preferredWidth > firstColumnWidth) firstColumnWidth = preferredWidth;
-//      titleTextPanel.removeAll();
-//      titleTextPanel.add(patternLabel, BorderLayout.WEST);
-//
-//      patText = new JTextField("<No Pattern Found>", 15);
-//      patText.setEditable(false);
-//      patText.setOpaque(false);
-//      patText.setBorder(null);
-//      JPanel tempPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-//      tempPanel.setOpaque(false);
-//      tempPanel.add(patText);
-//      titleTextPanel.add(tempPanel, BorderLayout.CENTER);
-//      // clear the previous graphics available
-//      titleTextPanel.validate();
-//      addAnnotTypeButton.setEnabled(false);
-//      annotTypesBox.setEnabled(false);
-//      featuresBox.setEnabled(false);
-//      guiCons.gridheight = 1;
-//      guiCons.gridx = 0;
-//      guiCons.gridy = 0;
-//      guiCons.weighty = 0.0;
-//      guiCons.weightx = 1.0;
-//      guiCons.fill = GridBagConstraints.HORIZONTAL;
-//      guiCons.insets = new java.awt.Insets(0, 0, 0, 0);
-//
-//      if(guiPanel.getComponentCount() > 0) {
-//        guiPanel.removeAll();
-//        guiPanel.add(titleTextPanel, guiCons);
-//        guiCons.weighty = 1.0;
-//        guiCons.fill = GridBagConstraints.BOTH;
-//        guiPanel.add(Box.createVerticalGlue(), guiCons);
-//        guiPanel.validate();
-//      }
-      return;
-    }
-
-    addAnnotTypeButton.setEnabled(true);
-    annotTypesBox.setEnabled(true);
-    featuresBox.setEnabled(true);
-
-    // in case the user has sorted a column in the pattern table
-    row = patternTable.rowViewToModel(row);
-
-    Pattern pattern = null;
-    if(row > -1) pattern = (Pattern)patterns.get(row);
-
-    // display the first line of text
-    guiCons.gridheight = 1;
-    guiCons.gridx = 0;
-    guiCons.gridy = 0;
-    guiCons.weighty = 0.0;
-    guiCons.weightx = 1.0;
-    guiCons.fill = GridBagConstraints.HORIZONTAL;
-    guiCons.insets = new java.awt.Insets(0, 0, 0, 0);
-
-    if (pattern == null) {
-      guiPanel.add(new JLabel("<No Pattern Found>"), guiCons);
-    }
-
-    // display on the first line the text matching the pattern and the context
-    
-//    VariableWidthJLabel patternLabel = new VariableWidthJLabel(
-//            "Pattern Text : ");
-//    int preferredWidth = patternLabel.getOriginalPreferredSize().width;
-//    if(preferredWidth > firstColumnWidth) firstColumnWidth = preferredWidth;
-//    titleTextPanel.removeAll();
-//    titleTextPanel.add(patternLabel, BorderLayout.WEST);
-//
-//    patText = new JTextField(pattern == null ? "<No Pattern Found>" : pattern
-//            .getPatternText());
-//    patText.setBorder(null);
-//    patText.setEditable(false);
-//    patText.setOpaque(false);
-//    if(pattern != null) patText.setToolTipText(pattern.getQueryString());
-//
-//    JPanel tempPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-//    tempPanel.setOpaque(false);
-//    tempPanel.add(patText);
-//    titleTextPanel.add(tempPanel, BorderLayout.CENTER);
-//
-//    javax.swing.text.Highlighter hilite = patText.getHighlighter();
-//
-//    // clear the previous graphics available
-//    titleTextPanel.validate();
-//    if(pattern == null) {
-//      return;
-//    }
-//
-//    // highlight the pattern part in the pattern text
-//    try {
-//      hilite.addHighlight(pattern.getStartOffset()
-//              - pattern.getLeftContextStartOffset(), pattern.getEndOffset()
-//              - pattern.getLeftContextStartOffset(),
-//              new javax.swing.text.DefaultHighlighter.DefaultHighlightPainter(
-//                      new Color(240, 201, 184)));
-//    }
-//    catch(Exception e) {
-//      e.printStackTrace();
-//    }
-
-    currentPatternRows = new ArrayList<PatternRow>();
-
-    // for each annotation type / feature to display
-    for(int i = 0; i < addedAnnotTypesInGUI.size(); i++) {
-      String type = (String)addedAnnotTypesInGUI.get(i);
-      String feature = (String)addedAnnotFeatureInGUI.get(i);
-
-      PatternRow pRow = null;
-      if(!feature.equals("nothing")) { // display only one feature
-        if(pRow == null) {
-          pRow = new PatternRow(type, feature, patText.getWidth());
-        }
-
-        // get the annotations / features to display
-        PatternAnnotation[] annots = pattern.getPatternAnnotations(type,
-                feature);
-        if(annots == null || annots.length == 0) {
-          annots = new PatternAnnotation[0];
-        }
-
-        // find relative offsets
-        int[] offsets = new int[annots.length * 2];
-        for(int k = 0, j = 0; k < annots.length; k++, j += 2) {
-          gate.creole.annic.PatternAnnotation ann =
-            (gate.creole.annic.PatternAnnotation)annots[k];
-          offsets[j] = ann.getStartOffset()
-                  - pattern.getLeftContextStartOffset();
-          offsets[j + 1] = ann.getEndOffset()
-                  - pattern.getLeftContextStartOffset();
-        }
-
-//        // find relative rectangles
-//        for(int k = 0, j = 0; j < annots.length; k += 2, j++) {
-//          try {
-//            java.awt.Rectangle rect1 = patText.modelToView(offsets[k]);
-//            int x = (int)rect1.getX();
-//            rect1 = patText.modelToView(offsets[k + 1]);
-//            int x1 = (int)rect1.getX();
-//            PatternAnnotation ann = annots[j];
-//            String featureValue = (String)ann.getFeatures().get(feature);
-//            if(featureValue == null) {
-//              continue;
-//            }
-//            else {
-//              int heightOne = patternLabel.getPreferredSize().height;
-//              // locations
-//              pRow.addPattern(1, 1, featureValue, ann.getText(),
-//                      getColor(ann.getType()));
-//            }
-//          }
-//          catch(javax.swing.text.BadLocationException ble) {
-//            ble.printStackTrace();
-//          }
-//        }
-
-      }
-
-      // add this pattern Row in the currentPatternRows list
-      pRow.repaintComps();
-      currentPatternRows.add(pRow);
-    }
-
-
-    if(guiPanel.getComponentCount() > 0) {
-      guiPanel.removeAll();
-      guiPanel.add(titleTextPanel, guiCons);
-    }
-
-    // display the pattern rows
-    int rowToAdd = 0;
-    for(int i = 1; i <= currentPatternRows.size(); i++) {
-      PatternRow pr = ((PatternRow)currentPatternRows.get(i - 1));
-      if(pr.yGrids == 0) {
-        pr.yGrids = 1;
-      }
-
-      guiCons.gridy = i + rowToAdd;
-      guiCons.weighty = 0.0;
-      guiCons.gridheight = pr.yGrids;
-      guiPanel.add(pr, guiCons);
-      rowToAdd += pr.yGrids - 1;
-    }
-
-    guiCons.weighty = 1.0;
-    guiCons.fill = GridBagConstraints.BOTH;
-    guiPanel.add(Box.createVerticalGlue(), guiCons);
-    guiPanel.validate();
-
-    for(int i = 0; i < currentPatternRows.size(); i++) {
-      PatternRow pr = ((PatternRow)currentPatternRows.get(i));
-      pr.updateDisplay();
-    }
-
-    validate();
-    updateUI();
-  }
-
-  /**
    * This method uses the java.util.prefs.Preferences and get the color
    * for particular annotationType.. This color could have been saved by
    * the AnnotationSetsView
@@ -853,7 +869,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
    * @param annotationType
    * @return
    */
-  private Color getColor(String annotationType) {
+  private Color getAnnotationTypeColor(String annotationType) {
     java.util.prefs.Preferences prefRoot = null;
     try {
       prefRoot = java.util.prefs.Preferences.userNodeForPackage(Class
@@ -880,62 +896,20 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     return colour;
   }
 
-  /** Initializes the comboboxes for annotation Types and their features */
-  public void updateGui() {
-    guiPanel.removeAll();
-    guiPanel.validate();
-    guiPanel.updateUI();
-    annotTypesBox.removeAllItems();
-    ArrayList<String> annotTypesKeyList = new ArrayList<String>(annotTypes
-            .keySet());
-    for(int i = 0; i < annotTypesKeyList.size(); i++) {
-      annotTypesBox.addItem(annotTypesKeyList.get(i));
-    }
-    annotTypesBox.updateUI();
-
-    featuresBox.removeAllItems();
-    if(annotTypesBox.getItemCount() > 0) {
-      List<String> featuresList = annotTypes.get(annotTypesBox.getItemAt(0));
-      for(int i = 0; i < featuresList.size(); i++) {
-        featuresBox.addItem(featuresList.get(i));
-      }
-    }
-    featuresBox.updateUI();
-    newQuery.setText(searcher.getQuery());
-  }
-
-  /** Updates the features box according to the selected annotation type */
-  public void actionPerformed(ActionEvent ae) {
-
-    // action for annotTypesBox
-    if(ae.getSource() == annotTypesBox) {
-      String choice = (String)annotTypesBox.getSelectedItem();
-      if(choice != null && !choice.equals(previousChoice)) {
-        previousChoice = choice;
-        // yes we need to update the featuresBox
-        List<String> featuresToAdd = annotTypes.get(choice);
-
-        // and finally update the featuresBox
-        featuresBox.removeAllItems();
-        for(int i = 0; i < featuresToAdd.size(); i++) {
-          featuresBox.addItem(featuresToAdd.get(i));
-        }
-        featuresBox.updateUI();
-      }
-    }
-  }
-
-  
   /**
    * Adds the pattern Row gui for newly selected annotation type and
-   * feature
+   * feature.
    */
-  protected class AddAnnotTypeAction implements ActionListener {
+  protected class AddAnnotTypeAction extends AbstractAction {
 
-    /**
-     * serial version id
-     */
     private static final long serialVersionUID = 3256438118801225013L;
+
+    public AddAnnotTypeAction() {
+      super("", MainFrame.getIcon("annic-down"));
+      super.putValue(SHORT_DESCRIPTION,
+        "Add selected annotation type and feature to the visualization below.");
+      super.putValue(MNEMONIC_KEY, KeyEvent.VK_DOWN);
+    }
 
     public void actionPerformed(ActionEvent ae) {
       // find out the selected annotation type and feature
@@ -986,13 +960,17 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
   }
 
   /**
-   * Exports all patterns to the XML File
+   * Exports all patterns to the XML File.
    */
-  private class ExportResultsAction implements ActionListener {
-    /**
-     * serial version id
-     */
+  private class ExportResultsAction extends AbstractAction {
+
     private static final long serialVersionUID = 3257286928859412277L;
+
+    public ExportResultsAction() {
+      super("", MainFrame.getIcon("annic-export"));
+      super.putValue(SHORT_DESCRIPTION, "Export Results to HTML.");
+      super.putValue(MNEMONIC_KEY, KeyEvent.VK_E);
+    }
 
     public void actionPerformed(ActionEvent ae) {
 
@@ -1131,26 +1109,34 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     }
   }
 
-  /** Action to clear the newQuery text box */
-  protected class ClearQueryAction implements ActionListener {
-    /**
-     * serial version id
-     */
+  /**
+   * Clear the newQuery text box.
+   */
+  protected class ClearQueryAction extends AbstractAction {
+
     private static final long serialVersionUID = 3257569516199228209L;
+
+    public ClearQueryAction() {
+      super("", MainFrame.getIcon("annic-clean"));
+      super.putValue(SHORT_DESCRIPTION, "Clear Query Text Box.");
+      super.putValue(MNEMONIC_KEY, KeyEvent.VK_BACK_SPACE);
+    }
 
     public void actionPerformed(ActionEvent ae) {
       newQuery.setText("");
     }
   }
 
-  /** finds out the newly created query and execute it */
+  /** 
+   * Finds out the newly created query and execute it.
+   */
   protected class ExecuteQueryAction extends AbstractAction {
 
     private static final long serialVersionUID = 3258128055204917812L;
 
     public ExecuteQueryAction() {
       super("", MainFrame.getIcon("annic-search"));
-      super.putValue(SHORT_DESCRIPTION, "Execute Query");
+      super.putValue(SHORT_DESCRIPTION, "Execute Query.");
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_ENTER);
     }
 
@@ -1227,13 +1213,18 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     }
   }
 
-  /** finds out the next few results */
-  protected class NextResultAction implements ActionListener {
+  /**
+   * Finds out the next few results.
+   */
+  protected class NextResultAction extends AbstractAction {
 
-    /**
-     * Serial version ID
-     */
     private static final long serialVersionUID = 3257005436719871288L;
+
+    public NextResultAction() {
+      super("", MainFrame.getIcon("annic-forward"));
+      super.putValue(SHORT_DESCRIPTION, "Show Next Patterns.");
+      super.putValue(MNEMONIC_KEY, KeyEvent.VK_RIGHT);
+    }
 
     public void actionPerformed(ActionEvent ae) {
       SwingUtilities.invokeLater(new Runnable() {
@@ -1254,7 +1245,86 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     }
   }
 
-  /** Table model for the Pattern Tables */
+  /**
+   * Delete the current pattern row.
+   */
+  protected class DeletePatternRowAction extends AbstractAction {
+
+    private static final long serialVersionUID = 1L;
+    private String type;
+    private String feature;
+
+    public DeletePatternRowAction(String type, String feature) {
+      super("", MainFrame.getIcon("delete.gif"));
+      super.putValue(SHORT_DESCRIPTION, "Delete this pattern row.");
+      this.type = type;
+      this.feature= feature;
+    }
+
+    public void actionPerformed(ActionEvent ae) {
+    // we need to remove these things from the added stuff
+    forLoop: for(int i = 0; i < addedAnnotTypesInGUI.size(); i++) {
+      String type1 = (String)addedAnnotTypesInGUI.get(i);
+      if(type1.equals(type)) {
+        String f1 = (String)addedAnnotFeatureInGUI.get(i);
+        if(feature.equals(f1)) {
+          addedAnnotTypesInGUI.remove(i);
+          addedAnnotFeatureInGUI.remove(i);
+          break forLoop;
+        }
+      }
+    }
+//    currentPatternRows.remove(this);
+    tableValueChanged();
+  }
+  }
+
+  /**
+   * Modify the query with the current clicked pattern row.
+   */
+  protected class AddPatternRowInQueryMouseInputListener
+    extends javax.swing.event.MouseInputAdapter {
+
+    private String type;
+    private String feature;
+    private String text;
+
+    public AddPatternRowInQueryMouseInputListener(
+            String type, String feature, String text) {
+      this.type = type;
+      this.feature= feature;
+      this.text = text;
+    }
+
+    public AddPatternRowInQueryMouseInputListener(String text) {
+      this.type = null;
+      this.feature= null;
+      this.text = text;
+    }
+
+    public void mouseClicked(MouseEvent me) {
+      int caretPosition = newQuery.getCaretPosition();
+      if(caretPosition < 0) {
+        caretPosition = newQuery.getText().length();
+      }
+      String query = newQuery.getText();
+      if (type != null && feature != null) {
+        // add {feature.type == value} in the query
+        query = query.substring(0, caretPosition) + "{" + type
+              + (feature.equals("nothing") ? "" : "." + feature) + "==\""
+              + text + "\"}" + query.substring(caretPosition, query.length());
+      } else {
+        query = query.substring(0, caretPosition)
+        + text
+        + query.substring(caretPosition, query.length());
+      }
+      newQuery.setText(query);
+    }
+  }
+
+  /**
+   * Table model for the Pattern Tables.
+   */
   protected class PatternsTableModel extends AbstractTableModel {
 
     /**
@@ -1345,284 +1415,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 
     static private final int RIGHT_CONTEXT_COLUMN = 2;
 
-  }
-
-  /** the row in the ANNIC Pattern GUI */
-  protected class PatternRow extends JPanel implements ActionListener {
-
-    private static final long serialVersionUID = 3616730456989380917L;
-
-    /**
-     * JLabel that contains the name of the annotation type and/or feature
-     * that is placed in front of the rectangles.
-     */
-    VariableWidthJLabel patternLabel;
-
-    /**
-     * JButton at the end of the pattern row for deleting it.
-     */
-    JButton removePattern;
-
-    /**
-     * List of annotation types and/or features that are displayed
-     * in the pattern row as rectangles.
-     **/
-    List<Object> subComponents;
-
-    /**
-     * Part of the pattern row that contains the annotation
-     * type and features boxes as JLabel objects.
-     */
-    JPanel subGuiPanel;
-    
-    /**
-     * Contraints for the layout of the subGuiPanel.
-     */
-    GridBagConstraints subGuiPanelConstraints;
-
-    int maxY = 0;
-
-    int width = 0;
-
-    int yGrids = 0;
-
-    String type, feature;
-
-    // updates all GUI
-    public void updateDisplay() {
-      patternLabel.updateUI();
-      removePattern.updateUI();
-      // we need to calculate the height
-      // if it is only 1
-      // it will be 20
-      // otherwise
-      int heightOne = patternLabel.getPreferredSize().height;
-      subGuiPanel.setPreferredSize(new Dimension(
-              subGuiPanel.getPreferredSize().width,
-              (heightOne * yGrids + yGrids)));
-      subGuiPanel.updateUI();
-    }
-
-    /**
-     * A pattern row is a JPanel that contains Rectangles displaying
-     * the features of one annotation type for the selected pattern with
-     * its context in the pattern table.
-     * 
-     * @param type annotation type
-     * @param feature one feature of the annotation type
-     * @param width width of the label that display the value of the feature
-     */
-    public PatternRow(String type, String feature, int width) {
-      this.type = type;
-      this.feature = feature;
-      String patL = type;
-      if(!feature.equals("nothing")) {
-        patL += "." + feature;
-      }
-      this.width = width;
-      setLayout(new BorderLayout());
-      setOpaque(false);
-      // setBorder(LineBorder.createGrayLineBorder());
-
-      patternLabel = new VariableWidthJLabel(patL + ": ");
-      patternLabel.setAlignmentY(Component.TOP_ALIGNMENT);
-      int preferredWidth = patternLabel.getOriginalPreferredSize().width;
-      if(preferredWidth > firstColumnWidth) firstColumnWidth = preferredWidth;
-      Box labelBox = Box.createVerticalBox();
-      labelBox.add(patternLabel);
-      labelBox.add(Box.createVerticalGlue());
-      add(labelBox, BorderLayout.WEST);
-
-      removePattern = new JButton(MainFrame.getIcon("delete.gif"));
-      removePattern.addActionListener(this);
-      removePattern.setBorderPainted(true);
-      removePattern.setMargin(new Insets(0, 0, 0, 0));
-      removePattern.setAlignmentY(Component.TOP_ALIGNMENT);
-      Box buttonBox = Box.createVerticalBox();
-      buttonBox.add(removePattern);
-      buttonBox.add(Box.createVerticalGlue());
-      add(buttonBox, BorderLayout.EAST);
-
-      subGuiPanel = new JPanel();
-//      subGuiPanel.setLayout(null);
-      subGuiPanel.setLayout(new GridBagLayout());
-      subGuiPanel.setOpaque(false);
-      subGuiPanel.setBorder(null);
-//      subGuiPanel.setAlignmentY(Component.TOP_ALIGNMENT);
-      subGuiPanelConstraints = new GridBagConstraints();
-      add(subGuiPanel, BorderLayout.CENTER);
-      subComponents = new ArrayList<Object>();
-    }
-
-    public void actionPerformed(ActionEvent ae) {
-      // we need to remove these things from the added stuff
-      forLoop: for(int i = 0; i < addedAnnotTypesInGUI.size(); i++) {
-        String type1 = (String)addedAnnotTypesInGUI.get(i);
-        if(type1.equals(type)) {
-          String f1 = (String)addedAnnotFeatureInGUI.get(i);
-          if(feature.equals(f1)) {
-            addedAnnotTypesInGUI.remove(i);
-            addedAnnotFeatureInGUI.remove(i);
-            break forLoop;
-          }
-        }
-      }
-
-      currentPatternRows.remove(this);
-      tableValueChanged();
-    }
-
-    /**
-     *  This method draws the subComponents that is to say the boxes that
-     *  contain the annotation types and/or features on a pattern row.
-     */
-    public void repaintComps() {
-
-      // clear all the components
-      subGuiPanel.removeAll();
-
-      subGuiPanelConstraints.anchor = GridBagConstraints.CENTER;
-      subGuiPanelConstraints.fill = GridBagConstraints.HORIZONTAL;
-
-      // draw each subComponent one at a time
-      for(int i = 0; i < subComponents.size(); i++) {
-
-        if(subComponents.get(i) instanceof AnnotType) {
-          // case of an annotation type
-
-          final AnnotType patG = (AnnotType)subComponents.get(i);
-
-          final JLabel tLabel = new JLabel(patG.featureVal);
-          tLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
-          tLabel.setAlignmentY(JLabel.TOP_ALIGNMENT);
-          tLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-          tLabel.setBackground(patG.color);
-          tLabel.setOpaque(true);
-//          tLabel.setMaximumSize(new Dimension(patG.width, patG.height));
-//          tLabel.setPreferredSize(new Dimension(patG.width, patG.height));
-
-          tLabel.addMouseListener(new MouseListener() {
-            JPopupMenu popup = null;
-
-            boolean visible = false;
-
-            public void mouseEntered(MouseEvent me) {
-              visible = true;
-              popup = new JPopupMenu();
-              popup.setBackground(new Color(249, 253, 213));
-              popup.setOpaque(true);
-              popup.setLayout(new GridLayout(2, 1));
-              popup.add(new JLabel("Text : " + patG.text));
-              popup.add(new JLabel("Value : " + patG.featureVal));
-              popup.show(subGuiPanel, me.getX(), me.getY());
-            }
-
-            public void mouseClicked(MouseEvent me) {
-              // here we need to add the
-              int caretPosition = newQuery.getCaretPosition();
-              if(caretPosition < 0) {
-                caretPosition = newQuery.getText().length();
-              }
-              String text = newQuery.getText();
-              text = text.substring(0, caretPosition) + "{" + type
-                      + (feature.equals("nothing") ? "" : "." + feature)
-                      + "==\"" + tLabel.getText() + "\"}"
-                      + text.substring(caretPosition, text.length());
-              newQuery.setText(text);
-            }
-
-            public void mousePressed(MouseEvent me) {
-            }
-
-            public void mouseReleased(MouseEvent me) {
-            }
-
-            public void mouseExited(MouseEvent me) {
-              if(popup == null) {
-                // do nothing
-              }
-              else if(visible) {
-                popup.setVisible(false);
-              }
-            }
-          });
-
-          subGuiPanelConstraints.gridwidth = patG.startingColumn;
-          subGuiPanelConstraints.gridx = patG.columnSpan;
-          subGuiPanel.add(tLabel, subGuiPanelConstraints);
-
-          // we find out the different between the location of the
-          // subGuiPanel and the
-          // and we need to place it at the proper place
-//          tLabel.setBounds(patG.x + 4, patG.y, patG.width, patG.height);
-        }
-      }
-      subGuiPanel.validate();
-    }
-
-    /**
-     * Add a feature in a pattern row.
-     * 
-     * @param startingColumn column where the feature start to span
-     * @param columnSpan number of columns that the feature span
-     * @param featureVal name of feature
-     * @param text text of the feature
-     * @param color color of the feature box displayed
-     */
-    public void addPattern(int startingColumn, int columnSpan,
-            String featureVal, String text, Color color) {
-
-      AnnotType rect = new AnnotType();
-      rect.startingColumn = startingColumn;
-      rect.columnSpan = columnSpan;
-      rect.featureVal = featureVal;
-      rect.text = text;
-      rect.color = color;
-      subComponents.add(rect);
-    }
-  }
-
-  /**
-   * Contains the informations to display one feature in a pattern row.
-   */
-  protected class AnnotType {
-
-    /**
-     * column where the feature start to span
-     */
-    int startingColumn;
-
-    /**
-     * number of columns that the feature span
-     */
-    int columnSpan;
-
-    /**
-     * name of feature
-     */
-    String featureVal;
-
-    /**
-     * text of the feature
-     */
-    String text;
-
-    /**
-     * color of the feature box displayed
-     */
-    Color color;
-  }
-
-  // initialize the local data
-  protected void initLocalData() {
-    Hit[] pats = searcher.getHits();
-    if(patterns == null) patterns = new ArrayList<Hit>();
-    patterns.clear();
-    for(int m = 0; m < pats.length; m++) {
-      patterns.add(pats[m]);
-    }
-    pats = null;
-    annotTypes = searcher.getAnnotationTypesMap();
   }
 
   /**
@@ -1853,42 +1645,4 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     }
   }
 
-  protected class VariableWidthJLabel extends JLabel {
-
-    private static final long serialVersionUID = -9214011164672538963L;
-
-    public VariableWidthJLabel() {
-      super();
-    }
-
-    public VariableWidthJLabel(Icon image, int horizontalAlignment) {
-      super(image, horizontalAlignment);
-    }
-
-    public VariableWidthJLabel(Icon image) {
-      super(image);
-    }
-
-    public VariableWidthJLabel(String text, Icon icon, int horizontalAlignment) {
-      super(text, icon, horizontalAlignment);
-    }
-
-    public VariableWidthJLabel(String text, int horizontalAlignment) {
-      super(text, horizontalAlignment);
-    }
-
-    public VariableWidthJLabel(String text) {
-      super(text);
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-      Dimension dim = super.getPreferredSize();
-      return new Dimension(firstColumnWidth, dim.height);
-    }
-
-    public Dimension getOriginalPreferredSize() {
-      return super.getPreferredSize();
-    }
-  }
 }
