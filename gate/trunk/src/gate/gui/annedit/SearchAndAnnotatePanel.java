@@ -477,6 +477,8 @@ public class SearchAndAnnotatePanel extends JPanel {
       if(getOwner() == null) { return; }
       String patternText = searchTextField.getText();
       if(patternText == null) { return; }
+      // TODO: flags = Pattern.UNICODE_CASE prevent insensitive case to work
+      // for Java 1.5 but works with Java 1.6
       int flags = 0;
       if(!searchCaseSensChk.isSelected()) {
         flags |= Pattern.CASE_INSENSITIVE; }
@@ -514,6 +516,7 @@ public class SearchAndAnnotatePanel extends JPanel {
           matchedIndexes.add(v);
           getOwner().getTextComponent().requestFocus();
           getOwner().getTextComponent().select(start, end);
+          getAnnotationEditor().placeDialog(start, end);
           // FIXME: put the focus back on the "First" button
 //          firstSmallButton.requestFocusInWindow();
           searchPane.requestFocus();
