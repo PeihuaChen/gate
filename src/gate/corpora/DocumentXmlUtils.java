@@ -443,6 +443,52 @@ public class DocumentXmlUtils {
     buffer.append("</AnnotationSet>\n");
   }// annotationSetToXml
 
+  
+  /**
+   * This method saves an AnnotationSet as XML.
+   * 
+   * @param anAnnotationSet
+   *          The annotation set that has to be saved as XML.
+   * @param annotationSetNameToUse
+   *          The standard annotationSetToXml(AnnotaionSet, StringBuffer) uses the name that belongs to the provided annotation set,
+   *          however, this method allows one to store the provided annotation set under a different annotation set name.
+   * @return a String like this: <AnnotationSet> <Annotation>....
+   *         </AnnotationSet>
+   */
+  public static void annotationSetToXml(AnnotationSet anAnnotationSet, String annotationSetNameToUse,
+          StringBuffer buffer) {
+    if(anAnnotationSet == null) {
+      buffer.append("<AnnotationSet>\n");
+      buffer.append("</AnnotationSet>\n");
+      return;
+    }// End if
+    if(annotationSetNameToUse == null || annotationSetNameToUse.trim().length() == 0)
+      buffer.append("<AnnotationSet>\n");
+    else {
+      buffer.append("<AnnotationSet Name=\"");
+      buffer.append(annotationSetNameToUse);
+      buffer.append("\" >\n");
+    }
+    HashMap convertedKeys = new HashMap();
+    // Iterate through AnnotationSet and save each Annotation as XML
+    Iterator<Annotation> iterator = anAnnotationSet.iterator();
+    while(iterator.hasNext()) {
+      Annotation annot = iterator.next();
+      buffer.append("<Annotation Id=\"");
+      buffer.append(annot.getId());
+      buffer.append("\" Type=\"");
+      buffer.append(annot.getType());
+      buffer.append("\" StartNode=\"");
+      buffer.append(annot.getStartNode().getOffset());
+      buffer.append("\" EndNode=\"");
+      buffer.append(annot.getEndNode().getOffset());
+      buffer.append("\">\n");
+      buffer.append(featuresToXml(annot.getFeatures(),convertedKeys));
+      buffer.append("</Annotation>\n");
+    }// End while
+    buffer.append("</AnnotationSet>\n");
+  }// annotationSetToXml
+
   /**
    * A map initialized in init() containing entities that needs to be replaced
    * in strings
