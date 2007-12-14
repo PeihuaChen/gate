@@ -25,6 +25,11 @@ public class Constants {
   public final static String DOCUMENT_ID_FOR_SERIALIZED_FILE = "DOCUMENT_ID_FOR_SERIALIZED_FILE";
   
   /**
+   * Indexed features
+   */
+  public final static String INDEXED_FEATURES = "INDEXED_FEATURES";
+  
+  /**
    * Default annotation set name
    */
   public final static String DEFAULT_ANNOTATION_SET_NAME = "<null>";

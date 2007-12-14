@@ -68,7 +68,8 @@ public class LuceneDocument {
           ArrayList<String> annotSetsToExclude,
           ArrayList<String> featuresToInclude,
           ArrayList<String> featuresToExclude, String indexLocation,
-          String baseTokenAnnotationType, Boolean createTokensAutomatically, String indexUnitAnnotationType) {
+          String baseTokenAnnotationType, Boolean createTokensAutomatically,
+          String indexUnitAnnotationType) {
 
     baseTokenAnnotationType = baseTokenAnnotationType.trim();
 
@@ -202,11 +203,11 @@ public class LuceneDocument {
     if(createManualTokens) {
       if(!createTokensAutomatically.booleanValue()) {
         System.out
-        .println("Tokens couldn't be found in the document - Ignoring the document "
-                + gateDoc.getName());
+                .println("Tokens couldn't be found in the document - Ignoring the document "
+                        + gateDoc.getName());
         return null;
       }
-      
+
       baseTokenAnnotationType = Constants.ANNIC_TOKEN;
 
       if(baseTokenAnnotationSet == null) {
@@ -311,17 +312,19 @@ public class LuceneDocument {
               .equals(Constants.DEFAULT_ANNOTATION_SET_NAME) ? gateDoc
               .getAnnotations() : gateDoc.getAnnotations(annotSet);
 
+      Set<String> indexedFeatures = new HashSet<String>();
       // tempBaseTokenAnnotationSet is not null
       ArrayList<Token>[] tokenStreams = getTokens(gateDoc, aSetToIndex,
               featuresToInclude, featuresToExclude, baseTokenAnnotationType,
               baseTokenAnnotationSet, indexUnitAnnotationType,
-              indexUnitAnnotationSet);
+              indexUnitAnnotationSet, indexedFeatures);
 
       // if there was some problem inside obtaining tokens
       // tokenStream is set to null
       if(tokenStreams == null) return null;
 
-      // this is enabled only if there are  more than one annotation sets available to search in
+      // this is enabled only if there are more than one annotation sets
+      // available to search in
       if(createMergeSet) {
         if(mergedSet == null) mergedSet = new AnnotationSetImpl(gateDoc);
 
@@ -353,6 +356,13 @@ public class LuceneDocument {
         doc.add(Field.Keyword(Constants.DOCUMENT_ID, documentID));
         doc.add(Field.Keyword(Constants.DOCUMENT_ID_FOR_SERIALIZED_FILE,
                 documentID + "-" + j));
+        StringBuffer indexedFeaturesString = new StringBuffer();
+        for(String aFeat : indexedFeatures) {
+          indexedFeaturesString.append(aFeat + ";");
+        }
+        doc.add(Field.Keyword(Constants.INDEXED_FEATURES, indexedFeaturesString
+                .substring(0, indexedFeaturesString.length() - 1)));
+
         if(corpusPersistenceID != null)
           doc.add(Field.Keyword(Constants.CORPUS_ID, corpusPersistenceID));
         doc.add(Field.Keyword(Constants.ANNOTATION_SET_ID, annotSet));
@@ -360,7 +370,8 @@ public class LuceneDocument {
         doc.add(Field.Text("contents", reader));
         // here we store token stream on the file system
         try {
-          writeOnDisk(tokenStreams[i], documentID, documentID + "-" + j, indexLocation);
+          writeOnDisk(tokenStreams[i], documentID, documentID + "-" + j,
+                  indexLocation);
         }
         catch(Exception e) {
           Err.println("\nIgnoring the document : " + gateDoc.getName()
@@ -378,11 +389,11 @@ public class LuceneDocument {
 
     // one again do an index with everything merged all together
     if(createMergeSet && mergedSet != null) {
-
+      Set<String> indexedFeatures = new HashSet<String>();
       ArrayList<Token>[] tokenStreams = getTokens(gateDoc, mergedSet,
               featuresToInclude, featuresToExclude, baseTokenAnnotationType,
               baseTokenAnnotationSet, indexUnitAnnotationType,
-              indexUnitAnnotationSet);
+              indexUnitAnnotationSet, indexedFeatures);
 
       if(tokenStreams == null) return null;
 
@@ -397,6 +408,13 @@ public class LuceneDocument {
         doc.add(Field.Keyword(Constants.DOCUMENT_ID, documentID));
         doc.add(Field.Keyword(Constants.DOCUMENT_ID_FOR_SERIALIZED_FILE,
                 documentID + "-" + j));
+        StringBuffer indexedFeaturesString = new StringBuffer();
+        for(String aFeat : indexedFeatures) {
+          indexedFeaturesString.append(aFeat + ";");
+        }
+        doc.add(Field.Keyword(Constants.INDEXED_FEATURES, indexedFeaturesString
+                .substring(0, indexedFeaturesString.length() - 1)));
+
         if(corpusPersistenceID != null)
           doc.add(Field.Keyword(Constants.CORPUS_ID, corpusPersistenceID));
         doc.add(Field.Keyword(Constants.ANNOTATION_SET_ID,
@@ -405,7 +423,8 @@ public class LuceneDocument {
         doc.add(Field.Text("contents", reader));
         // here we store token stream on the file system
         try {
-          writeOnDisk(tokenStreams[i], documentID, documentID + "-" + j, indexLocation);
+          writeOnDisk(tokenStreams[i], documentID, documentID + "-" + j,
+                  indexLocation);
         }
         catch(Exception e) {
           Err.println("\nIgnoring the document : " + gateDoc.getName()
@@ -484,19 +503,19 @@ public class LuceneDocument {
    * @param location
    * @throws Exception
    */
-  private void writeOnDisk(ArrayList tokenStream, String folderName, String fileName,
-          String location) throws Exception {
+  private void writeOnDisk(ArrayList tokenStream, String folderName,
+          String fileName, String location) throws Exception {
 
     // before we write it on a disk, we need to change its name to
     // underlying file system name
     fileName = getCompatibleName(fileName);
     folderName = getCompatibleName(folderName);
-    
+
     if(location.startsWith("file:/"))
       location = location.substring(6, location.length());
 
     if(location.charAt(1) != ':') location = "/" + location;
-    
+
     File locationFile = new File(location);
     File folder = new File(locationFile, Constants.SERIALIZED_FOLDER_NAME);
     if(!folder.exists()) {
@@ -511,7 +530,7 @@ public class LuceneDocument {
     if(!folder.exists()) {
       folder.mkdirs();
     }
-    
+
     if(!folder.exists()) {
       throw new IOException("Directory could not be created :"
               + folder.getAbsolutePath());
@@ -556,7 +575,7 @@ public class LuceneDocument {
           AnnotationSet inputAs, ArrayList<String> featuresToInclude,
           ArrayList<String> featuresToExclude, String baseTokenAnnotationType,
           AnnotationSet baseTokenSet, String indexUnitAnnotationType,
-          AnnotationSet indexUnitSet) {
+          AnnotationSet indexUnitSet, Set<String> indexedFeatures) {
 
     boolean excludeFeatures = false;
     boolean includeFeatures = false;
@@ -668,6 +687,7 @@ public class LuceneDocument {
                 || (annot.getFeatures().get("string") == null)) {
           // we need to create one string feature for this
           Token tk1 = new Token(text, startOffset, endOffset, type + ".string");
+          indexedFeatures.add(type + ".string");
           tk1.setPositionIncrement(0);
           tk1.setPosition(position);
           newTokens.add(tk1);
@@ -680,8 +700,9 @@ public class LuceneDocument {
           String type1 = (String)fIter.next();
           // if the feature is specified in featuresToExclude -exclude
           // it
-          if(excludeFeatures && featuresToExclude.contains(type + "." + type1))
+          if(excludeFeatures && featuresToExclude.contains(type + "." + type1)) {
             continue;
+          }
 
           // if the feature is not sepcified in the include features -
           // exclude it
@@ -695,6 +716,7 @@ public class LuceneDocument {
           // we need to qualify the type names
           Token tempToken = new Token(text1, startOffset, endOffset, type + "."
                   + type1);
+          indexedFeatures.add(type + "." + type1);
           tempToken.setPositionIncrement(0);
           tempToken.setPosition(position);
           newTokens.add(tempToken);

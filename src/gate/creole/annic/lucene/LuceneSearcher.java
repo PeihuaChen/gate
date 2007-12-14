@@ -12,9 +12,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,9 +29,12 @@ import gate.creole.annic.apache.lucene.document.Document;
 import gate.creole.annic.apache.lucene.index.IndexReader;
 import gate.creole.annic.apache.lucene.index.Term;
 import gate.creole.annic.apache.lucene.index.TermEnum;
+import gate.creole.annic.apache.lucene.index.TermFreqVector;
+import gate.creole.annic.apache.lucene.search.BooleanQuery;
 import gate.creole.annic.apache.lucene.search.Hits;
 import gate.creole.annic.apache.lucene.search.IndexSearcher;
 import gate.creole.annic.apache.lucene.search.TermQuery;
+import gate.util.GateRuntimeException;
 
 /**
  * This class provides the Searching functionality for annic.
@@ -128,7 +131,6 @@ public class LuceneSearcher implements Searcher {
    */
   public Hit[] next(int numberOfHits) throws SearchException {
 
-    annotationTypesMap = new HashMap<String, List<String>>();
     annicPatterns = new ArrayList<Pattern>();
 
     if(!success) {
@@ -366,32 +368,6 @@ public class LuceneSearcher implements Searcher {
                 && k < patternText.length; m++, k++) {
           patternText[k] = ga.getText().charAt(m);
         }
-
-        // we will initiate the annotTypes as well
-        if(annotationTypesMap.keySet().contains(ga.getType())) {
-          List<String> aFeatures = annotationTypesMap.get(ga.getType());
-          Map<String, String> features = ga.getFeatures();
-          if(features != null) {
-            Iterator<String> fSet = features.keySet().iterator();
-            while(fSet.hasNext()) {
-              String feature = fSet.next();
-              if(!aFeatures.contains(feature)) {
-                aFeatures.add(feature);
-              }
-            }
-          }
-          annotationTypesMap.put(ga.getType(), aFeatures);
-        }
-        else {
-          Map<String, String> features = ga.getFeatures();
-          List<String> aFeatures = new ArrayList<String>();
-          aFeatures.add("All");
-          if(features != null) {
-            aFeatures.addAll(features.keySet());
-          }
-          annotationTypesMap.put(ga.getType(), aFeatures);
-        }
-        // end of initializing annotationTypes for the comboBox
       }
 
       // we have the text
@@ -460,28 +436,95 @@ public class LuceneSearcher implements Searcher {
 
   /**
    * Gets the map of found annotation types and annotation features.
+   * This call must be invoked only
+   * after a call to the getIndexedAnnotationSetNames(String indexLocation) method.
+   * Otherwise this method doesn't guranttee the correct results.
+   * The results obtained has the following format.
+   * Key: CorpusName;AnnotationSetName;AnnotationType
+   * Value: respective features
    */
   public Map<String, List<String>> getAnnotationTypesMap() {
-    return annotationTypesMap;
+      return annotationTypesMap;
   }
 
   /**
    * This method returns a set of annotation set names that are indexed.
-   * 
+   * Each entry has the following format:
+   * <p>corpusName;annotationSetName</p>
+   * where, the corpusName is the name of the corpus the annotationSetName belongs to.
    * @return
    */
   public String[] getIndexedAnnotationSetNames(String indexLocation) throws SearchException {
+    annotationTypesMap = new HashMap<String, List<String>>();
     Set<String> toReturn = new HashSet<String>();
-
     IndexReader reader = null;
     try {
       reader = IndexReader.open(indexLocation);
-      TermEnum terms = reader.terms(new Term(Constants.ANNOTATION_SET_ID, ""));
-      if(terms == null || terms.term() == null) return new String[0];
       
-      while(Constants.ANNOTATION_SET_ID.equals(terms.term().field())) {
-        toReturn.add(terms.term().text());
-        if(!terms.next()) break;
+      // lets first obtain stored corpora
+      TermEnum corpusTerms = reader.terms(new Term(Constants.CORPUS_ID, ""));
+      if(corpusTerms == null || corpusTerms.term() == null) return new String[0];
+      
+      
+      Set<String> corpora = new HashSet<String>();
+      while(Constants.CORPUS_ID.equals(corpusTerms.term().field())) {
+        corpora.add(corpusTerms.term().text());
+        if(!corpusTerms.next()) break;
+      }
+      
+      // for each corpus we obtain its annotation set ids
+      for(String corpus : corpora) {
+        Term term = new Term(Constants.CORPUS_ID, corpus);
+        TermQuery tq = new TermQuery(term);
+        try {
+          gate.creole.annic.apache.lucene.search.Searcher searcher = new IndexSearcher(indexLocation);
+          Hits corpusHits = searcher.search(tq);
+          for(int i = 0; i < corpusHits.length(); i++) {
+            Document luceneDoc = corpusHits.doc(i);
+            String annotationSetID = luceneDoc.get(Constants.ANNOTATION_SET_ID);
+            if(toReturn.contains(corpus+";"+annotationSetID)) continue;
+            toReturn.add(corpus+";"+annotationSetID);
+            
+            // lets create a boolean query
+            Term annotSetTerm = new Term(Constants.ANNOTATION_SET_ID, annotationSetID);
+            TermQuery atq = new TermQuery(annotSetTerm);
+            
+            BooleanQuery bq = new BooleanQuery();
+            bq.add(tq, true, false);
+            bq.add(atq, true, false);
+            gate.creole.annic.apache.lucene.search.Searcher indexFeatureSearcher = new IndexSearcher(indexLocation);
+            Hits indexFeaturesHits = searcher.search(bq);
+            for(int j=0;j < indexFeaturesHits.length();j++) {
+              Document aDoc = indexFeaturesHits.doc(j);
+              String indexedFeatures = aDoc.get(Constants.INDEXED_FEATURES);
+              if(indexedFeatures != null) {
+                String [] features = indexedFeatures.split(";");
+                for(String aFeature : features) {
+                  // AnnotationType.FeatureName
+                  int index = aFeature.lastIndexOf(".");
+                  if(index == -1) {
+                    continue;
+                  }
+                  String type = aFeature.substring(0, index);
+                  String featureName = aFeature.substring(index+1);
+                  String key = corpus+";"+annotationSetID+";"+type;
+                  List<String> listOfFeatures = annotationTypesMap.get(key);
+                  if(listOfFeatures == null) {
+                    listOfFeatures = new ArrayList<String>();
+                    annotationTypesMap.put(key, listOfFeatures);
+                  }
+                  if(!listOfFeatures.contains(featureName)) {
+                    listOfFeatures.add(featureName);
+                  }
+                }
+              }
+            }
+          }
+        }
+        catch(IOException ioe) {
+          ioe.printStackTrace();
+          throw new SearchException(ioe);
+        }
       }
     }
     catch(IOException ioe) {

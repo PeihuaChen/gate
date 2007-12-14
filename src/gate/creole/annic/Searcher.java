@@ -46,8 +46,12 @@ public interface Searcher {
   
   /**
    * Returns the Map containing all possible values of AnnotationTypes
-   * and Feature Values for each of this annotationType
-   * 
+   * and Feature Values for each of this annotationType.  This call must only be invoked
+   * after a call to the getIndexedAnnotationSetNames(String indexLocation) method.
+   * Otherwise this method doesn't guranttee the correct results.
+   * The results obtained has the following format.
+   * Key: CorpusName;AnnotationSetName;AnnotationType
+   * Value: respective features
    * @return
    */
   public Map<String, List<String>> getAnnotationTypesMap();
@@ -55,6 +59,9 @@ public interface Searcher {
   
   /**
    * Returns an containing names of the indexed annotation sets
+   *    * Each entry has the following format:
+   * <p>corpusName;annotationSetName</p>
+   * where, the corpusName is the name of the corpus the annotationSetName belongs to.
    * @param indexLocation
    * @return
    * @throws SearchException
