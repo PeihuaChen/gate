@@ -350,13 +350,11 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
               // add the options box if not already there
               optionsBox.add(optionsPane);
               thisInstance.validate();
-//              topPanel.validate();
             }
           } else {
             if(optionsBox.isAncestorOf(optionsPane)){
               optionsBox.remove(optionsPane);
               thisInstance.validate();
-//              topPanel.validate();
             }
           }
         }
@@ -474,24 +472,10 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     progressLabel.setEnabled(false);
 
     topPanel.add(progressLabel, BorderLayout.EAST);
-//    topTopPanel.add(progressLabel, BorderLayout.EAST);
-//    JPanel topTopPanel = new JPanel(new BorderLayout());
 
     JScrollPane scrollPane = new JScrollPane(topPanel);
     scrollPane.setOpaque(false);
-//    topTopPanel.add(scrollPane, BorderLayout.CENTER);
-//    topTopPanel.add(topPanel, BorderLayout.CENTER);
 
-//    topTopPanel.validate();
-//    topTopPanel.setMinimumSize(new Dimension(
-//            topPanel.getPreferredSize().width
-//           +progressLabel.getPreferredSize().width,
-//            (topPanel.getPreferredSize().height
-//           > progressLabel.getPreferredSize().height)?
-//               topPanel.getPreferredSize().height
-//              :progressLabel.getPreferredSize().height));
-
-//    add(topTopPanel, BorderLayout.NORTH);
     add(scrollPane, BorderLayout.NORTH);
 
     /****************
@@ -499,8 +483,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
      ****************/
 
     guiCons = new GridBagConstraints();
-//    guiCons.fill = GridBagConstraints.HORIZONTAL;
-//    guiCons.anchor = GridBagConstraints.FIRST_LINE_START;
 
     guiPanel = new JPanel();
     guiPanel.setLayout(new GridBagLayout());
@@ -608,10 +590,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
 
-//    JPanel tempPanel = new JPanel(new BorderLayout());
-//    tempPanel.add(sPane, BorderLayout.CENTER);
-
-//    add(tempPanel, BorderLayout.CENTER);
     add(sPane, BorderLayout.CENTER);
 
   }
@@ -660,6 +638,9 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
    */
   public void tableValueChanged() {
 
+    // clear the pattern row
+    guiPanel.removeAll();
+
     guiCons.gridx = 0;
     guiCons.gridy = 0;
     guiCons.gridwidth = 1;
@@ -668,13 +649,12 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     guiCons.insets = new java.awt.Insets(0, 0, 0, 0);
     guiCons.anchor = GridBagConstraints.CENTER;
     guiCons.weighty = 0.0;
-    guiCons.weightx = 1.0;
-    guiPanel.removeAll();
+    guiCons.weightx = 0.0;
 
     // get the row selected in the pattern table
     int row = patternTable.getSelectedRow();
 
-    if(row == -1) { // no pattern is selected in the pattern table
+    if (row == -1) { // no pattern is selected in the pattern table
       guiPanel.add(new JLabel(
               "Please select a row in the pattern table."), guiCons);
       guiPanel.validate();
@@ -693,6 +673,14 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     // display on the first line the text matching the pattern and its context
     guiCons.gridx = 0;
     guiPanel.add(new JLabel("Text"), guiCons);
+    PatternAnnotation[] baseUnitPatternAnnotation =
+      pattern.getPatternAnnotations("Token", "string");
+    //TODO: makes it work
+//    pattern.getPatternAnnotations(((String)searcher.getParameters()
+//            .get(Constants.BASE_TOKEN_ANNOTATION_TYPE)), "string");
+    int BaseUnitNum = 0;
+    String baseUnit =
+      ((PatternAnnotation)baseUnitPatternAnnotation[BaseUnitNum]).getText();
     for (int charNum = 0;
          charNum < pattern.getPatternText().length(); charNum++) {
       guiCons.gridx = charNum + 1;
@@ -702,13 +690,23 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
                    - pattern.getLeftContextStartOffset()
        && charNum < pattern.getEndOffset()
                   - pattern.getLeftContextStartOffset()) {
+        // this part is matched by the pattern
         label.setBackground(new Color(240, 201, 184));
       } else {
+        // this part is the context
         label.setBackground(Color.WHITE);
       }
       label.setOpaque(true);
+      if (((PatternAnnotation)baseUnitPatternAnnotation[BaseUnitNum])
+              .getEndOffset() - pattern.getLeftContextStartOffset()
+           < charNum) {
+        BaseUnitNum++;
+        // get the next base token unit
+        baseUnit = ((PatternAnnotation)
+                baseUnitPatternAnnotation[BaseUnitNum]).getText();
+      }
       label.addMouseListener(
-              new AddPatternRowInQueryMouseInputListener(label.getText()));
+              new AddPatternRowInQueryMouseInputListener(baseUnit));
       guiPanel.add(label, guiCons);
     }
 
@@ -728,11 +726,10 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
           annots = new PatternAnnotation[0];
         }
 
-        // add a JPanel in the gridbag layout for each feature
+        // add a JLabel in the gridbag layout for each feature
         // of the current annotation type
         for(int k = 0, j = 0; k < annots.length; k++, j += 2) {
-          gate.creole.annic.PatternAnnotation ann =
-            (gate.creole.annic.PatternAnnotation)annots[k];
+          PatternAnnotation ann = (PatternAnnotation)annots[k];
           guiCons.gridx =
             ann.getStartOffset() - pattern.getLeftContextStartOffset() + 1;
           guiCons.gridwidth =
@@ -753,11 +750,10 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         removePattern.setAction(new DeletePatternRowAction(type, feature));
         removePattern.setBorderPainted(true);
         removePattern.setMargin(new Insets(0, 0, 0, 0));
-        guiCons.anchor = GridBagConstraints.LINE_END;
         guiCons.gridwidth = 1;
-        guiCons.gridx = GridBagConstraints.RELATIVE;
+        // last cell of the row
+        guiCons.gridx = pattern.getPatternText().length() + 1;
         guiPanel.add(removePattern, guiCons);
-        guiCons.anchor = GridBagConstraints.CENTER;
     }
 
     validate();
@@ -926,30 +922,34 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 
       String featureType = (String)featuresBox.getItemAt(index);
       if(featureType.equals("All")) {
-        // the user has not selected a feature
-        featureType = "nothing";
-      }
+        // add all the features
+        for (int i = 1; i < featuresBox.getItemCount(); i++) {
+          addedAnnotTypesInGUI.add(annotType);
+          addedAnnotFeatureInGUI.add((String)featuresBox.getItemAt(i));
+        }
+
+      } else {
+        // add only one feature
 
       boolean add = true;
-
-      // is the feature already displayed ?
-      for(int i = 0; i < addedAnnotTypesInGUI.size(); i++) {
-        if(((String)addedAnnotTypesInGUI.get(i)).equals(annotType)) {
-          if(((String)addedAnnotFeatureInGUI.get(i)).equals(featureType)) {
-            add = false;
-            break;
+        // is the feature already displayed ?
+        for(int i = 0; i < addedAnnotTypesInGUI.size(); i++) {
+          if(((String)addedAnnotTypesInGUI.get(i)).equals(annotType)) {
+            if(((String)addedAnnotFeatureInGUI.get(i)).equals(featureType)) {
+              add = false;
+              break;
+            }
           }
         }
-      }
-
-      if(add) {
-        addedAnnotTypesInGUI.add(annotType);
-        addedAnnotFeatureInGUI.add(featureType);
-      }
-      else {
-        JOptionPane.showMessageDialog(null,
-                "This feature is already displayed.");
-        return;
+        if(add) {
+          addedAnnotTypesInGUI.add(annotType);
+          addedAnnotFeatureInGUI.add(featureType);
+        }
+        else {
+          JOptionPane.showMessageDialog(null,
+                  "This feature is already displayed.");
+          return;
+        }
       }
 
       // update the gui
