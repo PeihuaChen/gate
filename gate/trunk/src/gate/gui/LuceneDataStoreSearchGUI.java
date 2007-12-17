@@ -564,7 +564,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     comboPanel.add(selectedPatterns);
     comboPanel.add(exportToHTML);
 
-    progressLabel = new JLabel(MainFrame.getIcon("working"));
+    progressLabel = new JLabel("            ");//MainFrame.getIcon("working"));
 
     topPanel.add(newQueryPanel);
     topPanel.add(toSearchInPanel);
@@ -576,7 +576,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     topPanel.setOpaque(false);
     topTopPanel.add(scrollPane, BorderLayout.CENTER);
     topTopPanel.add(progressLabel, BorderLayout.EAST);
-    progressLabel.setEnabled(false);
 
     add(topTopPanel, BorderLayout.NORTH);
     titleTextPanel = new JPanel(new BorderLayout());
@@ -1202,9 +1201,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     public void actionPerformed(ActionEvent ae) {
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-          progressLabel.setEnabled(true);
           SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+              progressLabel.setText("Searching ...");
               progressLabel.updateUI();
 
               thisInstance.setEnabled(false);
@@ -1259,11 +1258,13 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               catch(Exception e) {
                 e.printStackTrace();
                 thisInstance.setEnabled(true);
-                progressLabel.setEnabled(false);
+                progressLabel.setText("            ");
+                progressLabel.updateUI();
               }
               processFinished();
               thisInstance.setEnabled(true);
-              progressLabel.setEnabled(false);
+              progressLabel.setText("            ");
+              progressLabel.updateUI();
             }
           });
 
