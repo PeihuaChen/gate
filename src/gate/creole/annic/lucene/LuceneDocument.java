@@ -16,6 +16,7 @@ import gate.creole.annic.apache.lucene.document.Field;
 import java.util.ArrayList;
 import gate.AnnotationSet;
 import gate.util.Err;
+import gate.util.GateRuntimeException;
 import gate.util.InvalidOffsetException;
 import gate.util.OffsetComparator;
 
@@ -42,11 +43,6 @@ import java.util.Iterator;
 public class LuceneDocument {
 
   /**
-   * Separator used in serialized tokenstream files.
-   */
-  public final static String separator = "\0";
-
-  /**
    * Given an instance of Gate Document, it converts it into the format
    * that lucene can understand and can store in its indexes. This
    * method also stores the tokenStream on the disk in order to retrieve
@@ -71,7 +67,8 @@ public class LuceneDocument {
           String baseTokenAnnotationType, Boolean createTokensAutomatically,
           String indexUnitAnnotationType) {
 
-    baseTokenAnnotationType = baseTokenAnnotationType.trim();
+    if(baseTokenAnnotationType != null)
+      baseTokenAnnotationType = baseTokenAnnotationType.trim();
 
     ArrayList<Document> toReturnBack = new ArrayList<Document>();
     ArrayList<String> annotSetsToIndex = new ArrayList<String>();
@@ -110,6 +107,12 @@ public class LuceneDocument {
       annotSetsToIndex.add(Constants.DEFAULT_ANNOTATION_SET_NAME);
     }
 
+    
+    System.out.println("Sets to index");
+    for(String s : annotSetsToIndex) {
+      System.out.println("\t"+s);
+    }
+    
     // lets find out the annotation set that contains tokens in it
     AnnotationSet baseTokenAnnotationSet = null;
 
@@ -165,6 +168,12 @@ public class LuceneDocument {
       searchBaseTokensInAllAnnotationSets = true;
     }
 
+    
+    if(searchBaseTokensInAllAnnotationSets) {
+      System.out.println("Searching for the base token annotation type \""+baseTokenAnnotationType+"\"in all sets");
+    }
+    
+    
     if(baseTokenAnnotationType != null && baseTokenAnnotationType.length() > 0
             && searchBaseTokensInAllAnnotationSets) {
       // we set this to true and if we find basetokens in any of the
@@ -173,11 +182,13 @@ public class LuceneDocument {
       createManualTokens = true;
 
       for(String aSet : annotSetsToIndex) {
+        System.out.println("Searching in :"+aSet);
         if(aSet.equals(Constants.DEFAULT_ANNOTATION_SET_NAME)) {
           AnnotationSet tempSet = gateDoc.getAnnotations().get(
                   baseTokenAnnotationType);
           if(tempSet.size() > 0) {
             baseTokenAnnotationSet = tempSet;
+            System.out.println("Found");
             createManualTokens = false;
             break;
           }
@@ -187,6 +198,7 @@ public class LuceneDocument {
                   baseTokenAnnotationType);
           if(tempSet.size() > 0) {
             baseTokenAnnotationSet = tempSet;
+            System.out.println("Found");
             createManualTokens = false;
             break;
           }
@@ -201,6 +213,7 @@ public class LuceneDocument {
 
     // lets check if we have to create ManualTokens
     if(createManualTokens) {
+      System.out.println("Creating manual base token annotations");
       if(!createTokensAutomatically.booleanValue()) {
         System.out
                 .println("Tokens couldn't be found in the document - Ignoring the document "
@@ -341,7 +354,14 @@ public class LuceneDocument {
             continue;
           }
 
-          mergedSet.addAll(aSetToIndex.get(aType));
+          for(Annotation a : aSetToIndex.get(aType)) {
+            try {
+              mergedSet.add(a.getStartNode().getOffset(), a.getEndNode().getOffset(), a.getType(), a.getFeatures());
+            } catch(InvalidOffsetException ioe) {
+              throw new GateRuntimeException(ioe);
+            }
+          }
+         
         }
       }
 
@@ -622,8 +642,13 @@ public class LuceneDocument {
 
     AnnotationSet toUseSet = new AnnotationSetImpl(document);
     for(String type : allTypes) {
-      toUseSet.addAll(inputAs.get(type));
-
+      for(Annotation a : inputAs.get(type)) {
+        try {
+          toUseSet.add(a.getStartNode().getOffset(), a.getEndNode().getOffset(), a.getType(), a.getFeatures());
+        } catch(InvalidOffsetException ioe) {
+          throw new GateRuntimeException(ioe);
+        }
+      }
     }
 
     ArrayList<Token> toReturn[] = new ArrayList[unitOffsetsSet.size()];
