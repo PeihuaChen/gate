@@ -628,10 +628,14 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
             : annotationSetToSearchIn.getSelectedItem());
     populatedAnnotationTypesAndFeatures = getAnnotTypesFeatures(corpusName,
             annotationSetName);
-
     // we need to update the annotTypesBox
+    List<String> annotTypes = new ArrayList<String>();
+    if(populatedAnnotationTypesAndFeatures != null && populatedAnnotationTypesAndFeatures.keySet() != null)
+      annotTypes.addAll(populatedAnnotationTypesAndFeatures.keySet());
+    
+    Collections.sort(annotTypes);
     DefaultComboBoxModel aNewModel = new DefaultComboBoxModel(
-            populatedAnnotationTypesAndFeatures.keySet().toArray());
+            annotTypes.toArray());
     annotTypesBox.setModel(aNewModel);
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
@@ -651,12 +655,18 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     if(choice != null && !choice.equals(previousChoice)) {
       previousChoice = choice;
       // yes we need to update the featuresBox
+      List<String> features = new ArrayList<String>();
       Set<String> featuresToAdd = populatedAnnotationTypesAndFeatures
               .get(choice);
+
+      if(featuresToAdd != null)
+        features.addAll(featuresToAdd);
+      
+      Collections.sort(features);
       // and finally update the featuresBox
       featuresBox.removeAllItems();
       featuresBox.addItem("All");
-      for(String aFeat : featuresToAdd) {
+      for(String aFeat : features) {
         featuresBox.addItem(aFeat);
       }
       featuresBox.updateUI();
