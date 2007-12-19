@@ -22,6 +22,7 @@ import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import gate.*;
@@ -83,7 +84,11 @@ public class AnnotationDiffGUI extends JFrame{
     constraints.gridwidth = 1;
     getContentPane().add(new JLabel("F-Measure Weight"), constraints);
     constraints.gridheight = 2;
-    doDiffBtn = new JButton(new DiffAction());
+    diffAction = new DiffAction();
+    diffAction.setEnabled(false);
+    doDiffBtn = new JButton(diffAction);
+    doDiffBtn.setToolTipText("Please, choose two annotation sets "
+            +"that have at least one annotation type in common.");
     getContentPane().add(doDiffBtn, constraints);
     constraints.weightx = 1;
     getContentPane().add(Box.createHorizontalGlue(), constraints);
@@ -260,7 +265,11 @@ public class AnnotationDiffGUI extends JFrame{
 
     //COLMUN 6
     constraints.gridx = 6;
-    resultsPane.add(new JButton(new HTMLExportAction()), constraints);
+    htmlExportAction = new HTMLExportAction();
+    htmlExportAction.setEnabled(false);
+    htmlExportBtn = new JButton(htmlExportAction);
+    htmlExportBtn.setToolTipText("Please, first use the \"Do Diff\" button.");
+    resultsPane.add(htmlExportBtn, constraints);
 
     //Finished building the results pane
     //Add it to the dialog
@@ -387,7 +396,16 @@ public class AnnotationDiffGUI extends JFrame{
         List typesList = new ArrayList(types);
         Collections.sort(typesList);
         annTypeCombo.setModel(new DefaultComboBoxModel(typesList.toArray()));
-        if(typesList.size() > 0) annTypeCombo.setSelectedIndex(0);
+        if(typesList.size() > 0) {
+          annTypeCombo.setSelectedIndex(0);
+          diffAction.setEnabled(true);
+          doDiffBtn.setToolTipText(
+                  (String)diffAction.getValue(Action.SHORT_DESCRIPTION));
+        } else {
+          diffAction.setEnabled(false);
+          doDiffBtn.setToolTipText("Please, choose two annotation sets "
+                  +"that have at least one annotation type in common.");
+        }
       }
     };
     keySetCombo.addActionListener(setComboActionListener);
@@ -434,6 +452,21 @@ public class AnnotationDiffGUI extends JFrame{
         }
       }
     });
+
+    diffTableModel.addTableModelListener(new TableModelListener() {
+
+      public void tableChanged(javax.swing.event.TableModelEvent e) {
+        if (diffTableModel.getRowCount() > 0) {
+          htmlExportAction.setEnabled(true);
+          htmlExportBtn.setToolTipText(
+                  (String)htmlExportAction.getValue(Action.SHORT_DESCRIPTION));
+        } else {
+          htmlExportAction.setEnabled(false);
+          htmlExportBtn.setToolTipText("Please, first use the \"Do Diff\" button.");
+        }
+      }
+    });
+
   }
 
 
@@ -524,6 +557,11 @@ public class AnnotationDiffGUI extends JFrame{
     }
   }
 
+  
+  /**
+   * @return a new file chooser if Gate is not used as a standalone application
+   * otherwise the filechooser of the standalone application.
+   */
   protected JFileChooser getFileChooser() {
     if(MainFrame.getFileChooser() != null) {
       return MainFrame.getFileChooser();
@@ -535,6 +573,7 @@ public class AnnotationDiffGUI extends JFrame{
   protected class HTMLExportAction extends AbstractAction{
     public HTMLExportAction(){
       super("Export to HTML");
+      putValue(SHORT_DESCRIPTION, "Export the results to HTML");
     }
     public void actionPerformed(ActionEvent evt){
       JFileChooser fileChooser = getFileChooser();
@@ -804,7 +843,9 @@ public class AnnotationDiffGUI extends JFrame{
   protected List resSets;
   protected AnnotationSet keySet;
   protected AnnotationSet resSet;
-
+  protected HTMLExportAction htmlExportAction;
+  protected DiffAction diffAction;
+  
   protected JList featuresList;
   protected DefaultListModel featureslistModel;
   protected DiffTableModel diffTableModel;
@@ -822,6 +863,7 @@ public class AnnotationDiffGUI extends JFrame{
   protected JRadioButton noFeaturesBtn;
   protected JTextField weightTxt;
   protected JButton doDiffBtn;
+  protected JButton htmlExportBtn;
 
   protected JPanel resultsPane;
   protected JLabel correctLbl;
