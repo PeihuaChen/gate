@@ -99,7 +99,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
   private String previousChoice = "";
 
   /** Button to allow addition of annotations and features */
-  private JButton addAnnotTypeButton;
+//  private JButton addAnnotTypeButton;
 
   /**
    * Button that allows retrieving next n number of results
@@ -153,12 +153,12 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
   /**
    * User will specify the noOfPatternsToSearch here
    */
-  private JTextField noOfPatternsTF;
+  private JSpinner numberOfResultsSpinner;
 
   /**
    * No Of tokens to be shown in context window
    */
-  private JTextField contextWindowTF;
+  private JSpinner contextSizeSpinner;
 
   /** Label */
   private JLabel queryToExecute;
@@ -174,11 +174,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
   private int pageOfResults;
 
   /** JPanel that contains the center panel of pattern rows. */
-  private JPanel guiPanel;
-
-  /** JPanel that contains the drop down lists for choosing annotation
-   * type and feature, buttons to add and export the patterns. */
-  private JPanel comboPanel;
+  private JPanel centerPanel;
 
   /**
    * JPanel that contains the top panel of drop down lists and buttons for
@@ -192,9 +188,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 
   /** Added Annotation features */
   private ArrayList<String> addedAnnotFeatureInGUI;
-
-  /** Gridbagconstraints for the guiPanel */
-  private GridBagConstraints guiCons;
 
   /** Color Generator */
   private gate.swing.ColorGenerator colorGenerator = new gate.swing.ColorGenerator();
@@ -232,7 +225,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
    * Hashtable that contains the annotation type + feature as key and
    * the shortcut as value.
    */
-  private HashMap<String, String> featuresShortcuts;
+  private TreeMap<String, String> featuresShortcuts;
 
   /**
    * Searcher object obtained from the datastore
@@ -252,7 +245,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     thisInstance = this;
     corpusIds = new ArrayList<Object>();
     populatedAnnotationTypesAndFeatures = new HashMap<String, Set<String>>();
-    featuresShortcuts = new HashMap<String, String>();
+    featuresShortcuts = new TreeMap<String, String>();
 
     // initialize GUI
     initGui();
@@ -299,16 +292,17 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.anchor = GridBagConstraints.CENTER;
+//    gbc.insets = new Insets(0, 0, 0, 3);
     gbc.gridwidth = 1;
 
     // first line of top panel
     gbc.gridy = 0;
-    topPanel.add(new JLabel("Corpus :"), gbc);
+    topPanel.add(new JLabel("Corpus:"), gbc);
     DefaultComboBoxModel corpusToSearchInModel = new DefaultComboBoxModel();
     corpusToSearchInModel.addElement("Entire DataStore");
     corpusToSearchIn = new JComboBox(corpusToSearchInModel);
-    corpusToSearchIn.setPrototypeDisplayValue("Entire DataStore   ");
-    corpusToSearchIn.setToolTipText("Corpus Name");
+    corpusToSearchIn.setPrototypeDisplayValue("Entire DataStore");
+    corpusToSearchIn.setToolTipText("Select the corpus to search in.");
     if(target == null || target instanceof Searcher) {
       corpusToSearchIn.setEnabled(false);
     }
@@ -317,34 +311,41 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         updateAnnotationSetsToSearchInBox();
       }
     });
+    gbc.weightx = 1;
     topPanel.add(corpusToSearchIn, gbc);
-    topPanel.add(new JLabel("AnnotationSet :"), gbc);
-    DefaultComboBoxModel annotationSetToSearchInModel =
-      new DefaultComboBoxModel();
-    annotationSetToSearchInModel.addElement(Constants.ALL_SETS);
-    annotationSetToSearchIn = new JComboBox(annotationSetToSearchInModel);
+    gbc.weightx = 0;
+    topPanel.add(new JLabel("Annotation set:"), gbc);
+//    DefaultComboBoxModel annotationSetToSearchInModel =
+//      new DefaultComboBoxModel();
+//    annotationSetToSearchInModel.addElement(Constants.ALL_SETS);
+//    annotationSetToSearchIn = new JComboBox(annotationSetToSearchInModel);
     annotationSetToSearchIn
-            .setPrototypeDisplayValue("Results from combined Sets");
-    annotationSetToSearchIn.setToolTipText("AnnotationSet Name");
+            .setPrototypeDisplayValue("Combined Sets");
+    annotationSetToSearchIn.setToolTipText("Select the annotation set to search in.");
     annotationSetToSearchIn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ie) {
         updateAnnotationTypeBox();
       }
     });
+    gbc.weightx = 1;
     topPanel.add(annotationSetToSearchIn, gbc);
+    gbc.weightx = 0;
+    topPanel.add(Box.createHorizontalStrut(0), gbc);
+    topPanel.add(Box.createHorizontalStrut(0), gbc);
     JLabel contextWindowLabel = new JLabel("Context size: ");
     topPanel.add(contextWindowLabel, gbc);
-    contextWindowTF = new JTextField("5", 2);
-    contextWindowTF
-            .setToolTipText("Number of Tokens to be displayed in context");
-    contextWindowTF.setEnabled(true);
-    topPanel.add(contextWindowTF, gbc);
+    contextSizeSpinner = new JSpinner(new SpinnerNumberModel(5, 1, 30, 1));
+    contextSizeSpinner
+            .setToolTipText("Number of Tokens to be displayed in the context.");
+    contextSizeSpinner.setEnabled(true);
+    topPanel.add(contextSizeSpinner, gbc);
 
     // second line of top panel
     gbc.gridy = 1;
     queryToExecute = new JLabel("Query: ");
     topPanel.add(queryToExecute, gbc);
-    newQuery = new JTextField(10);
+    newQuery = new JTextField();
+    newQuery.setToolTipText("Please enter a query to search in the datastore.");
     newQuery.setEnabled(true);
     newQuery.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -353,6 +354,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       }
     });
     gbc.gridwidth = 3;
+    gbc.weightx = 1;
     topPanel.add(newQuery, gbc);
     execQueryAction = new ExecuteQueryAction();
     executeQuery = new JButton();
@@ -360,6 +362,10 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     executeQuery.setContentAreaFilled(false);
     executeQuery.setAction(execQueryAction);
     executeQuery.setEnabled(true);
+    gbc.gridwidth = 1;
+    gbc.weightx = 0;
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.anchor = GridBagConstraints.WEST;
     topPanel.add(executeQuery, gbc);
     clearQueryAction = new ClearQueryAction();
     clearQueryTF = new JButton();
@@ -369,32 +375,52 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     clearQueryTF.setEnabled(true);
     topPanel.add(clearQueryTF, gbc);
 
-//    JScrollPane topScrollPane = new JScrollPane(topPanel);
-//    topScrollPane.setOpaque(false);
-//
-//    add(topScrollPane, BorderLayout.NORTH);
     add(topPanel, BorderLayout.NORTH);
 
     /****************
      * Center panel *
      ****************/
 
-    guiCons = new GridBagConstraints();
-
-    guiPanel = new JPanel();
-    guiPanel.setLayout(new GridBagLayout());
-    guiPanel.setOpaque(true);
-    guiPanel.setBackground(Color.WHITE);
+    // just initialized the components, they will be add in tableValueChanged()
+    centerPanel = new JPanel();
+    centerPanel.setLayout(new GridBagLayout());
+    centerPanel.setOpaque(true);
+    centerPanel.setBackground(Color.WHITE);
 
     shortcutsBox = new JComboBox();
     shortcutsBox.setBackground(Color.WHITE);
+    shortcutsBox.setToolTipText("Select a shortcut to display it.");
     if (featuresShortcuts.size() > 0) {
-      DefaultComboBoxModel comboBoxModel = new DefaultComboBoxModel(
-            featuresShortcuts.values().toArray());
-      shortcutsBox.setModel(comboBoxModel);
+      TreeSet<String> ts = new TreeSet<String>(featuresShortcuts.values());
+      shortcutsBox.setModel(new DefaultComboBoxModel(ts.toArray()));
     }
+    shortcutsBox.addItemListener(new ItemListener() {
+      // when a shortcut is selected, select the corresponding items in the
+      // annotTypesBox ComboBox and featuresBox ComboBox
+      public void itemStateChanged (ItemEvent ie) {
+        String annotationType = null;
+        String feature = null;
+        for (Map.Entry<String, String> me : featuresShortcuts.entrySet()) {
+          if (me.getValue().equals(ie.getItem())) {
+            // in featuresShortcuts TreeMap get the key that matchs the value
+            // displayed in the shortcutsBox ComboBox
+            annotationType = me.getKey().split("\\.")[0];
+            feature = me.getKey().split("\\.")[1];
+          }
+        }
+        if (annotationType != null) {
+//          featuresBox.setActionCommand("not a user input");
+          annotTypesBox.setSelectedItem(annotationType);
+//          featuresBox.setActionCommand("");
+        }
+        if (feature != null){
+          featuresBox.setSelectedItem(feature);
+        }
+      }
+    });
     annotTypesBox = new JComboBox();
     annotTypesBox.setBackground(Color.WHITE);
+    annotTypesBox.setToolTipText("Select an annotation type then a feature.");
     annotTypesBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
         updateFeaturesBox();
@@ -402,16 +428,28 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     });
     featuresBox = new JComboBox();
     featuresBox.setBackground(Color.WHITE);
-    addAnnotTypeButton = new JButton();
-    addAnnotTypeButton.setBorderPainted(false);
-    addAnnotTypeButton.setContentAreaFilled(false);
-    addAnnotTypeButton.setAction(new AddAnnotTypeAction());
-    addAnnotTypeButton.setBackground(Color.WHITE);
+    featuresBox.setToolTipText("Select a feature to display it.");
+    featuresBox.addItemListener(new ItemListener() {
+      public void itemStateChanged (ItemEvent ie) {
+//        System.out.println("itemStateChanged: "+ie.getStateChange());
+        if (ie.getStateChange() == ItemEvent.DESELECTED) {
+//         || featuresBox.getActionCommand().equals("not a user input")) {
+//          featuresBox.setActionCommand("not a user input");
+          addAnnotType();
+          tableValueChanged();
+//          featuresBox.setActionCommand("");
+        }
+      }
+    });
+//    addAnnotTypeButton = new JButton();
+//    addAnnotTypeButton.setBorderPainted(false);
+//    addAnnotTypeButton.setContentAreaFilled(false);
+//    addAnnotTypeButton.setAction(new AddAnnotTypeAction());
+//    addAnnotTypeButton.setBackground(Color.WHITE);
 
     progressLabel = new JLabel(MainFrame.getIcon("working"));
     progressLabel.setOpaque(false);
     progressLabel.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
-//    progressLabel.setEnabled(false);
     progressLabel.setEnabled(true);
 
     // will be added to the GUI via a split panel
@@ -423,12 +461,13 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     JPanel bottomPanel = new JPanel(new GridBagLayout());
     bottomPanel.setOpaque(false);
     gbc = new GridBagConstraints();
-    gbc.fill = GridBagConstraints.BOTH;
-    gbc.anchor = GridBagConstraints.CENTER;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.insets = new Insets(0, 0, 0, 3);
     gbc.gridwidth = 1;
 
     // title of the table, results options, export and next results button
     gbc.gridy = 0;
+    gbc.anchor = GridBagConstraints.WEST;
     titleResults = new JLabel("Results");
     bottomPanel.add(titleResults, gbc);
     nextResultAction = new NextResultAction();
@@ -438,20 +477,24 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     nextResults.setAction(nextResultAction);
     nextResults.setEnabled(true);
     bottomPanel.add(nextResults, gbc);
-    JLabel noOfPatternsLabel = new JLabel("Number of results: ");
+    JLabel noOfPatternsLabel = new JLabel("Results per page: ");
     bottomPanel.add(noOfPatternsLabel, gbc);
-    noOfPatternsTF = new JTextField("50", 3);
-    noOfPatternsTF.setToolTipText("Number of Patterns to retrieve");
-    noOfPatternsTF.setEnabled(true);
-    bottomPanel.add(noOfPatternsTF, gbc);
-    bottomPanel.add(new JLabel("Export patterns:"), gbc);
+    numberOfResultsSpinner =
+      new JSpinner(new SpinnerNumberModel(50, 1, 1000, 5));
+    numberOfResultsSpinner.setToolTipText("Number of results per page.");
+    numberOfResultsSpinner.setEnabled(true);
+    bottomPanel.add(numberOfResultsSpinner, gbc);
+    gbc.weightx = 1;
+    bottomPanel.add(Box.createHorizontalStrut(1), gbc);
+    gbc.weightx = 0;
+    bottomPanel.add(new JLabel("Export results:"), gbc);
     allPatterns = new JRadioButton("All");
-    allPatterns.setToolTipText("exports all the patterns on this screen");
+    allPatterns.setToolTipText("Exports all the patterns in the table.");
     allPatterns.setSelected(true);
     allPatterns.setEnabled(true);
     bottomPanel.add(allPatterns, gbc);
     selectedPatterns = new JRadioButton("Selected");
-    selectedPatterns.setToolTipText("exports only the selected patterns");
+    selectedPatterns.setToolTipText("Exports selected patterns in the table.");
     selectedPatterns.setSelected(false);
     selectedPatterns.setEnabled(true);
     bottomPanel.add(selectedPatterns, gbc);
@@ -549,10 +592,15 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.anchor = GridBagConstraints.NORTH;
     gbc.gridy = 1;
     gbc.gridx= 0;
+    gbc.insets = new Insets(0, 0, 0, 0);
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridheight = GridBagConstraints.REMAINDER;
+    gbc.weightx = 2;
+    gbc.weighty = 2;
     bottomPanel.add(tableScrollPane, gbc);
 
     // will be added to the GUI via a split panel
@@ -564,7 +612,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     JSplitPane centerBottomSplitPane =
       new JSplitPane(JSplitPane.VERTICAL_SPLIT);
     centerBottomSplitPane.setDividerLocation(350);
-    centerBottomSplitPane.add(new JScrollPane(guiPanel,
+    centerBottomSplitPane.add(new JScrollPane(centerPanel,
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
     centerBottomSplitPane.add(bottomPanel);
@@ -588,9 +636,9 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
    * Initializes the comboboxes for annotation Types and their features.
    */
   public void updateGui() {
-    guiPanel.removeAll();
-    guiPanel.validate();
-    guiPanel.updateUI();
+    centerPanel.removeAll();
+    centerPanel.validate();
+    centerPanel.updateUI();
     newQuery.setText(searcher.getQuery());
   }
 
@@ -601,32 +649,33 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
   public void tableValueChanged() {
 
     // clear the pattern row
-    guiPanel.removeAll();
+    centerPanel.removeAll();
 
-    guiCons.gridx = 0;
-    guiCons.gridy = 0;
-    guiCons.gridwidth = 1;
-    guiCons.gridheight = 1;
-    guiCons.fill = GridBagConstraints.BOTH;
-    guiCons.insets = new java.awt.Insets(0, 0, 0, 0);
-    guiCons.anchor = GridBagConstraints.CENTER;
-    guiCons.weighty = 0.0;
-    guiCons.weightx = 0.0;
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.insets = new java.awt.Insets(0, 0, 0, 0);
+    gbc.anchor = GridBagConstraints.CENTER;
+    gbc.weighty = 0.0;
+    gbc.weightx = 0.0;
 
     // get the row selected in the pattern table
     int row = patternTable.getSelectedRow();
 
     if (row == -1) { // no pattern is selected in the pattern table
-      guiPanel.add(new JLabel(
-              "Please select a row in the pattern table."), guiCons);
-      guiPanel.validate();
+      centerPanel.add(new JLabel(
+              "Please select a row in the pattern table."), gbc);
+      centerPanel.validate();
       return;
     }
 
     shortcutsBox.setEnabled(true);
     annotTypesBox.setEnabled(true);
     featuresBox.setEnabled(true);
-    addAnnotTypeButton.setEnabled(true);
+//    addAnnotTypeButton.setEnabled(true);
 
     // in case the user has sorted a column in the pattern table
     row = patternTable.rowViewToModel(row);
@@ -635,13 +684,13 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 
     // display on the first line the text matching the pattern and its context
     // we display one character per cell
-    guiCons.gridx = 0;
-    guiCons.insets = new java.awt.Insets(0, 0, 0, 4);
-    guiPanel.add(new JLabel("Text"), guiCons);
-    guiCons.insets = new java.awt.Insets(0, 0, 0, 0);
+    gbc.gridx = 0;
+    gbc.insets = new java.awt.Insets(0, 0, 0, 4);
+    centerPanel.add(new JLabel("Text"), gbc);
+    gbc.insets = new java.awt.Insets(0, 0, 0, 0);
     PatternAnnotation[] baseUnitPatternAnnotations =
       pattern.getPatternAnnotations("Token", "string");
-    //TODO: why Constants.BASE_TOKEN_ANNOTATION_TYPE is null/empty ?
+    //TODO: modify the searcher to load this parameter
 //    pattern.getPatternAnnotations(((String)searcher.getParameters()
 //            .get(Constants.BASE_TOKEN_ANNOTATION_TYPE)), "string");
 //    System.out.println("BASE_TOKEN_ANNOTATION_TYPE = "+searcher.getParameters()
@@ -653,7 +702,8 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     for (int charNum = 0;
          charNum < pattern.getPatternText().length(); charNum++) {
 
-      guiCons.gridx = charNum + 1;
+      // set the text and color of the feature value
+      gbc.gridx = charNum + 1;
       JLabel label = new JLabel(String.valueOf(
                 (pattern.getPatternText().charAt(charNum))));
       if (charNum >= pattern.getStartOffset()
@@ -668,6 +718,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       }
       label.setOpaque(true);
 
+      // add a mouse listener that modify the query
       if (((PatternAnnotation)baseUnitPatternAnnotations[BaseUnitNum])
            .getEndOffset() - pattern.getLeftContextStartOffset() < charNum) {
         BaseUnitNum++;
@@ -677,7 +728,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       }
       label.addMouseListener(
               new AddPatternRowInQueryMouseInputListener(baseUnit));
-      guiPanel.add(label, guiCons);
+      centerPanel.add(label, gbc);
     }
 
     // for each annotation type / feature to display
@@ -685,8 +736,8 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       String type = (String)addedAnnotTypesInGUI.get(i);
       String feature = (String)addedAnnotFeatureInGUI.get(i);
 
-      guiCons.gridy++;
-      guiCons.gridx = 0;
+      gbc.gridy++;
+      gbc.gridx = 0;
 
       // add the annotation type / feature header
       JLabel annotationTypeAndFeature = new JLabel();
@@ -700,22 +751,21 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
               new javax.swing.event.MouseInputAdapter() {
         public void mouseClicked(MouseEvent me) {
           String inputValue = JOptionPane.showInputDialog(
-            "Please, give a shortcut for \""
-            +((JLabel)me.getSource()).getName()+"\".", 
+            "Please, give a shortcut for ["
+            +((JLabel)me.getSource()).getName()+"].", 
             ((JLabel)me.getSource()).getText());
           if (inputValue != null && !inputValue.trim().equals("")) {
             featuresShortcuts.put(
                     ((JLabel)me.getSource()).getName(), inputValue);
-            DefaultComboBoxModel comboBoxModel = new DefaultComboBoxModel(
-                    featuresShortcuts.values().toArray());
-            shortcutsBox.setModel(comboBoxModel);
+            TreeSet<String> ts = new TreeSet<String>(featuresShortcuts.values());
+            shortcutsBox.setModel(new DefaultComboBoxModel(ts.toArray()));
             tableValueChanged();
           }
         }
       });
-      guiCons.insets = new java.awt.Insets(0, 0, 0, 4);
-      guiPanel.add(annotationTypeAndFeature, guiCons);
-      guiCons.insets = new java.awt.Insets(0, 0, 0, 0);
+      gbc.insets = new java.awt.Insets(0, 0, 0, 4);
+      centerPanel.add(annotationTypeAndFeature, gbc);
+      gbc.insets = new java.awt.Insets(0, 0, 0, 0);
 
         // get the annotation type / feature to display
         PatternAnnotation[] annots =
@@ -728,18 +778,18 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         // of the current annotation type
         for(int k = 0, j = 0; k < annots.length; k++, j += 2) {
           PatternAnnotation ann = (PatternAnnotation)annots[k];
-          guiCons.gridx =
+          gbc.gridx =
             ann.getStartOffset() - pattern.getLeftContextStartOffset() + 1;
-          guiCons.gridwidth =
+          gbc.gridwidth =
             ann.getEndOffset() - pattern.getLeftContextStartOffset()
-            - guiCons.gridx + 1;
+            - gbc.gridx + 1;
           JLabel label = new JLabel((String)ann.getFeatures().get(feature));
           label.setBackground(getAnnotationTypeColor(ann.getType()));
           label.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
           label.setOpaque(true);
           label.addMouseListener(new AddPatternRowInQueryMouseInputListener(
                   type, feature, (String)ann.getFeatures().get(feature)));
-          guiPanel.add(label, guiCons);
+          centerPanel.add(label, gbc);
         }
 
         // add a remove button at the end of the row
@@ -748,15 +798,17 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         removePattern.setAction(new DeletePatternRowAction(type, feature));
         removePattern.setBorderPainted(true);
         removePattern.setMargin(new Insets(0, 0, 0, 0));
-        guiCons.gridwidth = 1;
+        gbc.gridwidth = 1;
         // last cell of the row
-        guiCons.gridx = pattern.getPatternText().length() + 1;
-        guiPanel.add(removePattern, guiCons);
+        gbc.gridx = pattern.getPatternText().length() + 1;
+        gbc.fill = GridBagConstraints.NONE;
+        centerPanel.add(removePattern, gbc);
+        gbc.fill = GridBagConstraints.BOTH;
     }
 
-    guiCons.gridy++;
-    guiCons.gridwidth = GridBagConstraints.REMAINDER;
-    guiCons.gridx = 0;
+    gbc.gridy++;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridx = 0;
 
     // add a features manager button on the last row
 //    JButton featureManagerButton;
@@ -764,22 +816,23 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 //    featureManagerButton.setAction(new ManageFeaturesToDisplayAction());
 //    featureManagerButton.setBorderPainted(true);
 //    featureManagerButton.setMargin(new Insets(0, 0, 0, 0));
-//    guiPanel.add(featureManagerButton, guiCons);
+//    centerPanel.add(featureManagerButton, gbc);
 
     // add drop down boxes to add a new annotation type / feature row
     JPanel annotationTypeFeaturePanel =
       new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
     annotationTypeFeaturePanel.add(new JLabel("Shortcut : "));
     annotationTypeFeaturePanel.add(shortcutsBox);
-    annotationTypeFeaturePanel.add(new JLabel("Annotation Types : "));
+    annotationTypeFeaturePanel.add(Box.createHorizontalGlue());
+    annotationTypeFeaturePanel.add(new JLabel("or Annotation Types : "));
     annotationTypeFeaturePanel.add(annotTypesBox);
-    annotationTypeFeaturePanel.add(new JLabel("Features : "));
+    annotationTypeFeaturePanel.add(new JLabel("and Features : "));
     annotationTypeFeaturePanel.add(featuresBox);
-    annotationTypeFeaturePanel.add(addAnnotTypeButton);
+//    annotationTypeFeaturePanel.add(addAnnotTypeButton);
     annotationTypeFeaturePanel.setBackground(Color.WHITE);
     annotationTypeFeaturePanel.setOpaque(true);
-    guiPanel.add(annotationTypeFeaturePanel, guiCons);
-    guiPanel.setOpaque(true);
+    centerPanel.add(annotationTypeFeaturePanel, gbc);
+    centerPanel.setOpaque(true);
 
     validate();
     updateUI();
@@ -792,8 +845,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
   protected void updateDisplay() {
     // initialize maps
     patterns.clear();
-//    addedAnnotTypesInGUI.clear();
-//    addedAnnotFeatureInGUI.clear();
 
     // if target itself is null, we don't want to update anything
     if(target != null) {
@@ -865,11 +916,16 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     // obtain annotationsetnames available for this corpus
     final Set<String> annotSetNames = getAnnotationSetNames(corpusName);
     // populate them in the default combobox model
-    DefaultComboBoxModel aNewModel = new DefaultComboBoxModel(annotSetNames
-            .toArray());
+//    DefaultComboBoxModel aNewModel = new DefaultComboBoxModel(annotSetNames
+//            .toArray());
     // add the all sets element at the top
-    aNewModel.insertElementAt(Constants.ALL_SETS, 0);
-    annotationSetToSearchIn.setModel(aNewModel);
+//    aNewModel.insertElementAt(Constants.ALL_SETS, 0);
+    TreeSet<String> ts = new TreeSet<String>();
+    ts.add(Constants.ALL_SETS);
+    ts.addAll(annotSetNames);
+//    annotationSetToSearchIn.setModel(aNewModel);
+    annotationSetToSearchIn.setModel(new DefaultComboBoxModel(ts.toArray()));
+    annotationSetToSearchIn.setSelectedItem(Constants.ALL_SETS);
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         annotationSetToSearchIn.updateUI();
@@ -902,9 +958,12 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     Collections.sort(annotTypes);
     DefaultComboBoxModel aNewModel = new DefaultComboBoxModel(
             annotTypes.toArray());
+//    featuresBox.setActionCommand("not a user input");
     annotTypesBox.setModel(aNewModel);
+//    featuresBox.setActionCommand("");
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
+//        featuresBox.setActionCommand("not a user input");
         annotTypesBox.updateUI();
         if(annotTypesBox.getItemCount() > 0)
           updateFeaturesBox();
@@ -912,6 +971,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
           ((DefaultComboBoxModel)featuresBox.getModel()).removeAllElements();
           featuresBox.updateUI();
         }
+//        featuresBox.setActionCommand("");
       }
     });
   }
@@ -929,12 +989,14 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       }
       Collections.sort(features);
       // and finally update the featuresBox
+//      featuresBox.setActionCommand("not a user input");
       featuresBox.removeAllItems();
       featuresBox.addItem("All");
       for(String aFeat : features) {
         featuresBox.addItem(aFeat);
       }
       featuresBox.updateUI();
+//      featuresBox.setActionCommand("");
     }
   }
 
@@ -1078,71 +1140,111 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
   }
 
   /**
-   * Adds the pattern Row gui for newly selected annotation type and
-   * feature.
+   * Add the selected annotation type / feature to the pattern rows.
    */
-  protected class AddAnnotTypeAction extends AbstractAction {
+  private void addAnnotType() {
 
-    private static final long serialVersionUID = 3256438118801225013L;
-
-    public AddAnnotTypeAction() {
-      super("", MainFrame.getIcon("annic-down"));
-      super.putValue(SHORT_DESCRIPTION,
-        "Add selected annotation type and feature to the visualization below.");
-      super.putValue(MNEMONIC_KEY, KeyEvent.VK_DOWN);
+    if (annotTypesBox.getSelectedIndex() < 0
+     || featuresBox.getSelectedIndex() < 0
+     || featuresBox.getActionCommand().equals("not a user input")) {
+      return;
     }
 
-    public void actionPerformed(ActionEvent ae) {
-      // find out the selected annotation type and feature
-      int index = annotTypesBox.getSelectedIndex();
-      if(index < 0 && annotTypesBox.getItemCount() > 0) {
-        index = 0;
-      }
-      String annotType = (String)annotTypesBox.getItemAt(index);
+    String annotationType = (String)annotTypesBox.getSelectedItem();
+    String feature = (String)featuresBox.getSelectedItem();
 
-      index = featuresBox.getSelectedIndex();
-      if(index < 0 && featuresBox.getItemCount() > 0) {
-        index = 0;
+    if(feature.equals("All")) { // add all the features
+      for (int i = 1; i < featuresBox.getItemCount(); i++) {
+        addedAnnotTypesInGUI.add(annotationType);
+        addedAnnotFeatureInGUI.add((String)featuresBox.getItemAt(i));
       }
 
-      String featureType = (String)featuresBox.getItemAt(index);
-      if(featureType.equals("All")) {
-        // add all the features
-        for (int i = 1; i < featuresBox.getItemCount(); i++) {
-          addedAnnotTypesInGUI.add(annotType);
-          addedAnnotFeatureInGUI.add((String)featuresBox.getItemAt(i));
-        }
-
-      } else {
-        // add only one feature
-
+    } else { // add only one feature
       boolean add = true;
-        // is the feature already displayed ?
-        for(int i = 0; i < addedAnnotTypesInGUI.size(); i++) {
-          if(((String)addedAnnotTypesInGUI.get(i)).equals(annotType)) {
-            if(((String)addedAnnotFeatureInGUI.get(i)).equals(featureType)) {
-              add = false;
-              break;
-            }
+      // is the feature already displayed ?
+      for(int i = 0; i < addedAnnotTypesInGUI.size(); i++) {
+        if(((String)addedAnnotTypesInGUI.get(i)).equals(annotationType)) {
+          if(((String)addedAnnotFeatureInGUI.get(i)).equals(feature)) {
+            add = false;
+            break;
           }
         }
-        if(add) {
-          addedAnnotTypesInGUI.add(annotType);
-          addedAnnotFeatureInGUI.add(featureType);
-        }
-        else {
-          JOptionPane.showMessageDialog(null,
-                  "This feature is already displayed.");
-          return;
-        }
       }
-
-      // update the gui
-      patternTable.setRowSelectionInterval(patternTable.getSelectedRow(),
-              patternTable.getSelectedRow());
-      tableValueChanged();
+      if(add) {
+        addedAnnotTypesInGUI.add(annotationType);
+        addedAnnotFeatureInGUI.add(feature);
+      } else {
+        JOptionPane.showMessageDialog(null,
+        "The feature ["+annotationType+"."+feature+"] is already displayed.");
+      }
     }
   }
+
+  /**
+   * Add the selected annotation type / feature to the pattern rows.
+   */
+//  protected class AddAnnotTypeAction extends AbstractAction {
+//
+//    private static final long serialVersionUID = 3256438118801225013L;
+//
+//    public AddAnnotTypeAction() {
+//      super("", MainFrame.getIcon("annic-down"));
+//      super.putValue(SHORT_DESCRIPTION,
+//        "Add selected annotation type and feature to the visualization below.");
+//      super.putValue(MNEMONIC_KEY, KeyEvent.VK_DOWN);
+//    }
+//
+//    public void actionPerformed(ActionEvent ae) {
+//      // find out the selected annotation type and feature
+//      int index = annotTypesBox.getSelectedIndex();
+//      if(index < 0 && annotTypesBox.getItemCount() > 0) {
+//        index = 0;
+//      }
+//      String annotType = (String)annotTypesBox.getItemAt(index);
+//
+//      index = featuresBox.getSelectedIndex();
+//      if(index < 0 && featuresBox.getItemCount() > 0) {
+//        index = 0;
+//      }
+//
+//      String featureType = (String)featuresBox.getItemAt(index);
+//      if(featureType.equals("All")) {
+//        // add all the features
+//        for (int i = 1; i < featuresBox.getItemCount(); i++) {
+//          addedAnnotTypesInGUI.add(annotType);
+//          addedAnnotFeatureInGUI.add((String)featuresBox.getItemAt(i));
+//        }
+//
+//      } else {
+//        // add only one feature
+//
+//      boolean add = true;
+//        // is the feature already displayed ?
+//        for(int i = 0; i < addedAnnotTypesInGUI.size(); i++) {
+//          if(((String)addedAnnotTypesInGUI.get(i)).equals(annotType)) {
+//            if(((String)addedAnnotFeatureInGUI.get(i)).equals(featureType)) {
+//              add = false;
+//              break;
+//            }
+//          }
+//        }
+//        if(add) {
+//          addedAnnotTypesInGUI.add(annotType);
+//          addedAnnotFeatureInGUI.add(featureType);
+//        }
+//        else {
+//          JOptionPane.showMessageDialog(null,
+//                  "This feature is already displayed.");
+//          return;
+//        }
+//      }
+//
+//      // update the gui
+//      patternTable.setRowSelectionInterval(patternTable.getSelectedRow(),
+//              patternTable.getSelectedRow());
+//      tableValueChanged();
+//    }
+//  }
 
   /**
    * Exports all patterns to the XML File.
@@ -1330,24 +1432,15 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
           // TODO: the progress icon doesn't work
-          progressLabel.setEnabled(true);
-          guiPanel.removeAll();
-          guiCons = new GridBagConstraints();
-//          guiCons.gridx = 0;
-//          guiCons.gridy = 0;
-//          guiCons.gridwidth = 1;
-//          guiCons.gridheight = 1;
-//          guiCons.fill = GridBagConstraints.BOTH;
-//          guiCons.insets = new java.awt.Insets(0, 0, 0, 0);
-//          guiCons.anchor = GridBagConstraints.CENTER;
-//          guiCons.weighty = 1.0;
-//          guiCons.weightx = 1.0;
-          guiPanel.add(progressLabel, guiCons);
-//          guiPanel.add(new JLabel("Query in progress..."), guiCons);
+          centerPanel.removeAll();
+          GridBagConstraints gbc = new GridBagConstraints();
+          gbc.weighty = 1.0;
+          gbc.weightx = 1.0;
+          centerPanel.add(progressLabel, gbc);
 
           SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-              progressLabel.updateUI();
+//              progressLabel.updateUI();
 
               thisInstance.setEnabled(false);
               Map<Object, Object> parameters = searcher.getParameters();
@@ -1375,13 +1468,14 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
                 parameters.put(Constants.CORPUS_ID, corpus2SearchIn);
               }
 
-              Integer noOfPatterns = new Integer(noOfPatternsTF.getText()
-                      .trim());
-              Integer contextWindow = new Integer(contextWindowTF.getText()
-                      .trim());
+              int noOfPatterns =
+                ((Number)numberOfResultsSpinner.getValue()).intValue();
+              int contextWindow =
+                ((Number)contextSizeSpinner.getValue()).intValue();
               String query = newQuery.getText().trim();
-              parameters.put(Constants.CONTEXT_WINDOW, contextWindow);
+              parameters.put(Constants.CONTEXT_WINDOW, new Integer(contextWindow));
               int index = annotationSetToSearchIn.getSelectedIndex();
+              // TODO: to correct in order that "All annotationset" works
               if(index > 0) {
                 String annotationSet = (String)annotationSetToSearchIn
                         .getSelectedItem();
@@ -1392,21 +1486,19 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 
               try {
                 if(searcher.search(query, parameters)) {
-                  searcher.next(noOfPatterns.intValue());
+                  searcher.next(noOfPatterns);
                 }
               } catch(Exception e) {
                 e.printStackTrace();
                 thisInstance.setEnabled(true);
-                progressLabel.setEnabled(false);
-//                guiPanel.removeAll();
+//                centerPanel.removeAll();
 //                progressLabel.updateUI();
               }
               processFinished();
               pageOfResults = 1;
               titleResults.setText("Results - Page "+pageOfResults);
               thisInstance.setEnabled(true);
-              progressLabel.setEnabled(false);
-//              guiPanel.removeAll();
+//              centerPanel.removeAll();
 //              progressLabel.updateUI();
             }
           });
@@ -1435,7 +1527,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 
           thisInstance.setEnabled(false);
           try {
-            searcher.next(Integer.parseInt(noOfPatternsTF.getText()));
+            searcher.next(((Number)numberOfResultsSpinner.getValue()).intValue());
           }
           catch(Exception e) {
             e.printStackTrace();
@@ -1754,8 +1846,10 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 
       // here we need to find out all annotation sets that are indexed
       try {
-        DefaultComboBoxModel annotationSetToSearchInModel = new DefaultComboBoxModel();
-        annotationSetToSearchInModel.addElement(Constants.ALL_SETS);
+//        DefaultComboBoxModel annotationSetToSearchInModel = new DefaultComboBoxModel();
+//        annotationSetToSearchInModel.addElement(Constants.ALL_SETS);
+        TreeSet<String> ts = new TreeSet<String>();
+        ts.add(Constants.ALL_SETS);
         annotationSetIDsFromDataStore = this.searcher
                 .getIndexedAnnotationSetNames(null);
         allAnnotTypesAndFeaturesFromDatastore = this.searcher
@@ -1764,11 +1858,12 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         // each ID has the corpusName;annotationsetname
         for(String aSetName : annotationSetIDsFromDataStore) {
           // and we need to add the name to the combobox
-          annotationSetToSearchInModel.addElement(aSetName.substring(aSetName
-                  .indexOf(";") + 1));
+          ts.add(aSetName.substring(aSetName.indexOf(";") + 1));
         }
-
-        annotationSetToSearchIn.setModel(annotationSetToSearchInModel);
+//        annotationSetToSearchIn.setModel(annotationSetToSearchInModel);
+        annotationSetToSearchIn.setModel(
+                new DefaultComboBoxModel(ts.toArray()));
+        annotationSetToSearchIn.setSelectedItem(Constants.ALL_SETS);
 
         // lets fire the update event on combobox
         SwingUtilities.invokeLater(new Runnable() {
@@ -1788,10 +1883,9 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     annotationSetToSearchIn.setEnabled(true);
     executeQuery.setEnabled(true);
     nextResults.setEnabled(true);
-    newQuery.setToolTipText("Enter your new query here...");
     newQuery.setEnabled(true);
-    noOfPatternsTF.setEnabled(true);
-    contextWindowTF.setEnabled(true);
+    numberOfResultsSpinner.setEnabled(true);
+    contextSizeSpinner.setEnabled(true);
     clearQueryTF.setEnabled(true);
     updateDisplay();
 
@@ -1828,8 +1922,8 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         else {
           corpusToSearchIn.setEnabled(false);
         }
-        noOfPatternsTF.setEnabled(true);
-        contextWindowTF.setEnabled(true);
+        numberOfResultsSpinner.setEnabled(true);
+        contextSizeSpinner.setEnabled(true);
         clearQueryTF.setEnabled(true);
         updateDisplay();
       }
