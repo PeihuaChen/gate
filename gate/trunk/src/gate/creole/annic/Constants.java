@@ -122,13 +122,17 @@ public class Constants {
   public final static String ANNOTATION_SET_ID = "ANNOTATION_SET_ID";
   
   /**
-   * Name of the Merged Annotation Set
+   * Contains the merged annotation set in combined sets.
    */
-  public final static String COMBINED_SET = "COMBINED SETS";
+  public final static String COMBINED_SET = "Combined sets";
   
   /**
-   * Name of the Merged Annotation Set
+   * Contains the merged annotation set.
    */
-  public final static String ALL_SETS = "ALL SETS";
+  public final static String ALL_SETS = "All sets";
 
+  /**
+   * Contains the entire datastore.
+   */
+  public final static String ENTIRE_DATASTORE = "Entire datastore";
 }
