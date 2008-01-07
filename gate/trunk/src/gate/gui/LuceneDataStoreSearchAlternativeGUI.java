@@ -93,12 +93,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 
   private JComboBox featuresBox;
 
-  /**
-   * This is to remember the previously selected annotation type in the
-   * drop-down combobox
-   */
-  private String previousChoice = "";
-
   /** Button to allow addition of annotations and features */
 //  private JButton addAnnotTypeButton;
 
@@ -294,25 +288,14 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     if(target != null) {
       if(target instanceof Searcher) {
         searcher = (Searcher)target;
-      }
-      else if(target instanceof LuceneDataStoreImpl) {
+      } else if(target instanceof LuceneDataStoreImpl) {
         searcher = ((LuceneDataStoreImpl)target).getSearcher();
-      }
-      else {
+      } else {
         throw new GateRuntimeException("Invalid target specified for the GUI");
       }
-
-      initLocalData();
-      updateGui();
-      patternsTableModel.fireTableDataChanged();
-      if(patternTable.getRowCount() > 0) {
-        patternTable.setRowSelectionInterval(0, 0);
-        tableValueChanged();
-      }
+      updateDisplay();
     }
     validate();
-    // TODO: put focus on the query text field at start
-    newQuery.requestFocusInWindow();
     return this;
   }
 
@@ -320,9 +303,46 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     // save the user config data
     // TODO: not called if the user doesn't close the datastore
     OptionsMap userConfig = Gate.getUserConfig();
-    userConfig.put("Features_shortcuts", featuresShortcuts);
-    userConfig.put("Added_annotation_types", addedAnnotTypesInGUI);
-    userConfig.put("Added_annotation_feature", addedAnnotFeatureInGUI);
+    if (featuresShortcuts.size() > 0) {
+      userConfig.put("Features_shortcuts", featuresShortcuts);
+    }
+    if (addedAnnotTypesInGUI.size() > 0 && addedAnnotFeatureInGUI.size() > 0) {
+      userConfig.put("Added_annotation_types", addedAnnotTypesInGUI);
+      userConfig.put("Added_annotation_feature", addedAnnotFeatureInGUI);
+    }
+  }
+
+  /**
+   * Initialize the local data (i.e. Pattern data etc.) and then update
+   * the GUI
+   */
+  protected void updateDisplay() {
+    // initialize maps
+    patterns.clear();
+
+    // if target itself is null, we don't want to update anything
+    if (target != null) {
+      initLocalData();
+      updateGui();
+      patternsTableModel.fireTableDataChanged();
+      if(patternTable.getRowCount() > 0) {
+        patternTable.setRowSelectionInterval(0, 0);
+        tableValueChanged();
+        exportResultsAction.setEnabled(true);
+      } else if (newQuery.getText().trim().length() < 1) {
+        centerPanel.removeAll();
+        centerPanel.add(new JLabel("Please, enter a query in the query text field."),
+                new GridBagConstraints());
+        centerPanel.validate();
+        newQuery.requestFocusInWindow();
+      } else {
+        centerPanel.removeAll();
+        centerPanel.add(new JLabel("No pattern found for your query."),
+                new GridBagConstraints());
+        centerPanel.validate();
+        exportResultsAction.setEnabled(false);
+      }
+    }
   }
 
   /**
@@ -464,7 +484,12 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         if (annotationType != null) {
           annotTypesBox.setSelectedItem(annotationType);
         }
-        if (feature != null) {
+        if (!annotTypesBox.getSelectedItem().equals(annotationType)) {
+          JOptionPane.showMessageDialog(null,
+              "The annotation type ["+annotationType+"] associated with the "
+              +"shortcut ["+ie.getItem()+"]\n"
+              +"was not found in the current annotation set.");
+        } else  if (feature != null) {
           featuresBox.setSelectedItem(feature);
         }
       }
@@ -472,11 +497,10 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     annotTypesBox = new JComboBox();
     annotTypesBox.setBackground(Color.WHITE);
     annotTypesBox.setToolTipText("Select an annotation type then a feature.");
-    annotTypesBox.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent ae) {
-        featuresBox.setActionCommand("not a user input");
+    annotTypesBox.addItemListener(new ItemListener() {
+      public void itemStateChanged (ItemEvent ie) {
+        if (ie.getStateChange() == ItemEvent.DESELECTED) { return; }
         updateFeaturesBox();
-        featuresBox.setActionCommand("");
       }
     });
     featuresBox = new JComboBox();
@@ -696,9 +720,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
    */
   public void tableValueChanged() {
 
-    // clear the pattern row
-    centerPanel.removeAll();
-
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.gridx = 0;
     gbc.gridy = 0;
@@ -706,13 +727,19 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 
     if (patternTable.getSelectedRow() == -1) {
       // no pattern is selected in the pattern table
-      centerPanel.add(new JLabel(
-        "Please select a row in the pattern table."), gbc);
-      centerPanel.validate();
-      centerPanel.repaint();
-      selectedPatterns.setEnabled(false);
+      if (patternTable.getRowCount() > 0) {
+        centerPanel.removeAll();
+        centerPanel.add(new JLabel(
+          "Please select a row in the pattern table."), gbc);
+        centerPanel.validate();
+        centerPanel.repaint();
+        selectedPatterns.setEnabled(false);
+      }
       return;
     }
+
+    // clear the pattern row
+    centerPanel.removeAll();
 
     selectedPatterns.setEnabled(true);
     shortcutsBox.setEnabled(true);
@@ -724,7 +751,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       .get(patternTable.rowViewToModel(patternTable.getSelectedRow()));
 
     // display on the first line the text matching the pattern and its context
-    // display one character per cell in the grid bag layout
     gbc.gridx = 0;
     gbc.insets = new java.awt.Insets(0, 0, 0, 4);
     centerPanel.add(new JLabel("Text"), gbc);
@@ -737,6 +763,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     String baseUnit =
       ((PatternAnnotation)baseUnitPatternAnnotations[BaseUnitNum]).getText();
 
+    // for each character in the line of text
     for (int charNum = 0;
          charNum < pattern.getPatternText().length(); charNum++) {
 
@@ -883,40 +910,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     updateUI();
   }
 
-  /**
-   * Initialize the local data (i.e. Pattern data etc.) and then update
-   * the GUI
-   */
-  protected void updateDisplay() {
-    // initialize maps
-    patterns.clear();
-
-    // if target itself is null, we don't want to update anything
-    if(target != null) {
-      initLocalData();
-      updateGui();
-      // change the totalFoundLabel
-      patternsTableModel.fireTableDataChanged();
-      if(patternTable.getRowCount() > 0) {
-        patternTable.setRowSelectionInterval(0, 0);
-        tableValueChanged();
-        exportResultsAction.setEnabled(true);
-      } else if (newQuery.getText().trim().length() < 1) {
-        centerPanel.removeAll();
-        centerPanel.add(new JLabel("Please, enter a query in the query text field."),
-                new GridBagConstraints());
-        centerPanel.validate();
-        newQuery.requestFocusInWindow();
-      } else {
-        centerPanel.removeAll();
-        centerPanel.add(new JLabel("No pattern found for your query."),
-                new GridBagConstraints());
-        centerPanel.validate();
-        exportResultsAction.setEnabled(false);
-      }
-    }
-  }
-
   private void updateAnnotationSetsToSearchInBox() {
     String corpusName = 
       (corpusToSearchIn.getSelectedItem().equals(Constants.ENTIRE_DATASTORE))?
@@ -958,9 +951,12 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     Collections.sort(annotTypes);
     DefaultComboBoxModel aNewModel =
       new DefaultComboBoxModel(annotTypes.toArray());
+//    featuresBox.setActionCommand("not a user input");
     annotTypesBox.setModel(aNewModel);
+//    featuresBox.setActionCommand("");
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
+        featuresBox.setActionCommand("not a user input");
         annotTypesBox.updateUI();
         if (annotTypesBox.getItemCount() > 0) {
           updateFeaturesBox();
@@ -968,30 +964,27 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
           ((DefaultComboBoxModel)featuresBox.getModel()).removeAllElements();
           featuresBox.updateUI();
         }
+        featuresBox.setActionCommand("");
       }
     });
   }
 
   private void updateFeaturesBox() {
-    String choice = (String)annotTypesBox.getSelectedItem();
-    if(choice != null && !choice.equals(previousChoice)) {
-      previousChoice = choice;
-      // yes we need to update the featuresBox
       List<String> features = new ArrayList<String>();
       Set<String> featuresToAdd = populatedAnnotationTypesAndFeatures
-              .get(choice);
+          .get((String)annotTypesBox.getSelectedItem());
       if(featuresToAdd != null) {
         features.addAll(featuresToAdd);
       }
       Collections.sort(features);
-      // and finally update the featuresBox
+      featuresBox.setActionCommand("not a user input");
       featuresBox.removeAllItems();
       featuresBox.addItem("All");
       for(String aFeat : features) {
         featuresBox.addItem(aFeat);
       }
       featuresBox.updateUI();
-    }
+      featuresBox.setActionCommand("");
   }
 
   /**
@@ -1137,6 +1130,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
    * Add the selected annotation type / feature to the pattern rows.
    */
   private void addAnnotType() {
+
     if (annotTypesBox.getSelectedIndex() < 0
      || featuresBox.getSelectedIndex() < 0
      || featuresBox.getActionCommand().equals("not a user input")) {
@@ -1147,6 +1141,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     String feature = (String)featuresBox.getSelectedItem();
 
     if(feature.equals("All")) { // add all the features
+      int rows = addedAnnotTypesInGUI.size();
       for (int i = 1; i < featuresBox.getItemCount(); i++) {
         if (!addedAnnotTypesInGUI.contains(annotationType)
          || !addedAnnotFeatureInGUI.contains(
@@ -1155,19 +1150,15 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
           addedAnnotFeatureInGUI.add((String)featuresBox.getItemAt(i));
         }
       }
+      if (addedAnnotTypesInGUI.size() == rows) {
+        JOptionPane.showMessageDialog(null,
+                "All the features of the annotation type ["
+                +annotationType+"] are already displayed.");
+      }
 
     } else { // add only one feature
-      boolean add = true;
-      // is the feature already displayed ?
-      for(int i = 0; i < addedAnnotTypesInGUI.size(); i++) {
-        if(((String)addedAnnotTypesInGUI.get(i)).equals(annotationType)) {
-          if(((String)addedAnnotFeatureInGUI.get(i)).equals(feature)) {
-            add = false;
-            break;
-          }
-        }
-      }
-      if(add) {
+      if(!addedAnnotTypesInGUI.contains(annotationType)
+      || !addedAnnotFeatureInGUI.contains(feature)) {
         addedAnnotTypesInGUI.add(annotationType);
         addedAnnotFeatureInGUI.add(feature);
       } else {
