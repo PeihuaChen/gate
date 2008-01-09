@@ -11,30 +11,37 @@ import gate.Gate;
 import gate.Resource;
 import gate.creole.ResourceData;
 import gate.creole.ResourceInstantiationException;
-import gate.creole.annic.SearchException;
 import gate.creole.ontology.OConstants;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
 import gate.gui.ActionsPublisher;
 import gate.gui.MainFrame;
+import gate.util.Files;
 import gate.util.GateRuntimeException;
 import gate.util.Out;
+
 import java.awt.event.ActionEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.io.Writer;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
+
+import org.openrdf.sesame.config.SystemConfig;
+import org.openrdf.sesame.config.handlers.SystemConfigFileHandler;
 import org.openrdf.sesame.repository.SesameRepository;
+import org.openrdf.sesame.repository.local.LocalService;
 
 /**
  * This LR provides an implementation of Ontology interface and uses
@@ -138,7 +145,6 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
       if(DEBUG) System.out.println("Creating repository");
       String ontoURLString = ontologyURL == null ? "" : ontologyURL
               .toExternalForm();
-      owlim = new OWLIMServiceImpl();
 
       // determine the URL to the Ontology_Tools plugin directory
       ResourceData myResourceData = (ResourceData)Gate.getCreoleRegister().get(
@@ -146,19 +152,23 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
       URL creoleXml = myResourceData.getXmlFileUrl();
       URL gosHomeURL = new URL(creoleXml, ".");
 
-      ((OWLIMServiceImpl)owlim).init(gosHomeURL);
-      ((OWLIMServiceImpl)owlim).login("admin", "admin");
+      // create a standalone OWLIMServiceImpl
+      OWLIMServiceImpl owlimService = new OWLIMServiceImpl();
+      owlimService.setGosHomeURL(gosHomeURL);
+      SystemConfig sesameConfig = createStandaloneConfiguration();
+      LocalService sesameService = new LocalService(sesameConfig);
+      owlimService.setSesameLocalService(sesameService);
+      owlimService.setSystemConfLocation(null);
+      owlimService.setShutDownOnLogout(true);
+      owlimService.init();
+      owlimService.login("admin", "admin");
+      
+      owlim = owlimService;
 
       String persistLocationPath = null;
       if(persistLocation != null
               && persistLocation.toString().trim().length() != 0) {
-        try {
-          persistLocationPath = new File(persistLocation.toURI())
-                .getAbsolutePath();
-        } catch(URISyntaxException use) {
-          persistLocationPath = new File(persistLocation.getFile())
-          .getAbsolutePath();
-        }
+        persistLocationPath = Files.fileFromURL(persistLocation).getAbsolutePath();
       }
       else if(persistRepository.booleanValue()) {
         throw new ResourceInstantiationException(
@@ -194,6 +204,32 @@ public class OWLIMOntologyLR extends AbstractOWLIMOntologyImpl implements
       getPropertyDefinitions();
     } catch(IOException ioe) {
       throw new ResourceInstantiationException(ioe);
+    }
+  }
+
+  /**
+   * Create a fixed sesame system configuration for the standalone OWLIM service.
+   */
+  private SystemConfig createStandaloneConfiguration() throws ResourceInstantiationException {
+    String s = "<?xml version='1.0'?>"
+      + "<system-conf>"
+      + "<admin password=''/>"
+      + "<log dir='plugins/Ontology_Tools/logs' level='3'/>"
+      + "<tmp dir='plugins/Ontology_Tools/tmp'/>"
+      + "<rmi-factory enabled='false' class='com.ontotext.util.rmi.CustomRMIFactory' port='1099'/>"
+      + "<userlist>"
+      + "<user id='1' login='admin'><fullname>Admin</fullname><password>admin</password></user>"
+      + "<user id='3' login='guest'><fullname>Guest</fullname><password>guest</password></user>"
+      + "</userlist>"
+      + "<repositorylist></repositorylist></system-conf>";
+    try {
+      Reader reader = new StringReader(s);
+      SystemConfig config = SystemConfigFileHandler.readConfiguration(reader);
+      reader.close();
+      return config;
+    }
+    catch(IOException e) {
+      throw new ResourceInstantiationException("Error loading sesame configuration", e);
     }
   }
 

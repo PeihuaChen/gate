@@ -1,21 +1,18 @@
 package gate.creole.ontology.owlim;
 
 import gate.creole.ontology.GateOntologyException;
+import gate.creole.ontology.InvalidValueException;
 import gate.creole.ontology.OConstants;
 import gate.creole.ontology.OntologyUtilities;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.Reader;
-import java.io.StringReader;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -29,8 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
-import javax.xml.rpc.ServiceException;
+import javax.jws.WebService;
 
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
@@ -49,7 +45,6 @@ import org.openrdf.sesame.config.ConfigurationException;
 import org.openrdf.sesame.config.RepositoryConfig;
 import org.openrdf.sesame.config.RepositoryInfo;
 import org.openrdf.sesame.config.SailConfig;
-import org.openrdf.sesame.config.SystemConfig;
 import org.openrdf.sesame.config.UnknownRepositoryException;
 import org.openrdf.sesame.config.UserInfo;
 import org.openrdf.sesame.config.handlers.SystemConfigFileHandler;
@@ -66,7 +61,6 @@ import org.openrdf.sesame.sail.NamespaceIterator;
 import org.openrdf.sesame.sail.SailUpdateException;
 import org.openrdf.sesame.sail.StatementIterator;
 import org.openrdf.sesame.sailimpl.OWLIMSchemaRepository;
-import org.openrdf.sesame.server.SesameServer;
 import org.openrdf.vocabulary.OWL;
 import org.openrdf.vocabulary.RDF;
 import org.openrdf.vocabulary.RDFS;
@@ -78,9 +72,13 @@ import org.openrdf.vocabulary.RDFS;
  * 
  * @author niraj
  */
+@WebService(endpointInterface = "gate.creole.ontology.owlim.OWLIM",
+        targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
 public class OWLIMServiceImpl implements OWLIM,
-                             javax.xml.rpc.server.ServiceLifecycle,
                              AdminListener {
+  private static int nextIndex = 0;
+  private int myIndex = nextIndex++;
+  
   private HashMap<String, RepositoryDetails> mapToRepositoryDetails = new HashMap<String, RepositoryDetails>();
 
   private HashMap<String, Resource> resourcesMap = new HashMap<String, Resource>();
@@ -93,15 +91,15 @@ public class OWLIMServiceImpl implements OWLIM,
    * Debug parameter, if set to true, shows various messages when
    * different methods are invoked
    */
-  private static boolean DEBUG = false;
-
-  /**
-   * Certain operations should be invoked only once. The variable is set
-   * to true after the invocation of such operations.
-   */
-  private static boolean initiated = false;
-
-  private static boolean serviceCall = false;
+  private boolean debug = false;
+  
+  public void setDebug(boolean debug) {
+    this.debug = debug;
+  }
+  
+  public boolean getDebug() {
+    return debug;
+  }
 
   /**
    * OWLIMSchemaRepository is used as an interaction layer on top of
@@ -130,12 +128,30 @@ public class OWLIMServiceImpl implements OWLIM,
   /**
    * The file that stores the various configuration parameters
    */
-  private URL systemConf = null;
+  private File systemConf = null;
+  
+  public void setSystemConfLocation(File systemConf) {
+    this.systemConf = systemConf;
+  }
 
-  private static URL owlRDFS = null;
+  /**
+   * The file that stores the RDFS schema defining OWL.
+   */
+  private URL owlRDFS = null;
+  
+  public void setOwlRDFSLocation(URL owlRDFS) {
+    this.owlRDFS = owlRDFS;
+  }
 
-  private static URL rdfSchema = null;
+  /**
+   * The file that stores the RDF schema defining RDFS.
+   */
+  private URL rdfSchema = null;
 
+  public void setRdfSchemaLocation(URL rdfSchema) {
+    this.rdfSchema = rdfSchema;
+  }
+  
   /**
    * Ontology URL
    */
@@ -149,9 +165,31 @@ public class OWLIMServiceImpl implements OWLIM,
   /**
    * GOS Home
    */
-  private static URL gosHome;
+  private URL gosHomeURL;
+  
+  public void setGosHomeURL(URL gosHomeURL) {
+    this.gosHomeURL = gosHomeURL;
+  }
 
+  /**
+   * LocalService used to talk to Sesame.
+   */
   private LocalService service;
+  
+  public void setSesameLocalService(LocalService service) {
+    this.service = service;
+  }
+  
+  /**
+   * Should the sesame service be shut down on a logout?
+   * <code>true</code> for a standalone service,
+   * <code>false</code> for a shared service.
+   */
+  private boolean shutDownOnLogout = true;
+  
+  public void setShutDownOnLogout(boolean shutDownOnLogout) {
+    this.shutDownOnLogout = shutDownOnLogout;
+  }
 
   /**
    * Constructor
@@ -256,20 +294,24 @@ public class OWLIMServiceImpl implements OWLIM,
   }
 
   /**
-   * This method intializes the OWLIMService. It tries to locate the
-   * system configuration file. The system configuration file contains
-   * various parameters/settings such as available repositories and
-   * users with their rights on each repository
-   * 
-   * @param context
-   * @throws GateOntologyException
+   * Initialises the OWLIM service.
+   * {@link #setSesameLocalService} must have been called before calling this
+   * method.  You may also wish to set the gosHomeURL, owl.rdfs and
+   * rdf-schema.xml locations explicitly, though reasonable defaults will be
+   * used if these are not set.  Also, if you wish to persist the system
+   * configuration, {@link #setSystemConfLocation} must have been called
+   * with a valid non-null path.
    */
-  public void init(ServletContext context) throws GateOntologyException {
-    if(!initiated || service == null || systemConf == null) {
-      try {
-        if(DEBUG)
-          System.out.println("Initiating OWLIMService... with servlet context");
-        // create an instance of service
+  public void init() throws GateOntologyException {
+    // sanity checks first
+    if(service == null) {
+      throw new GateOntologyException("Sesame Local Service must not be null");
+    }
+    if(debug) {
+      System.out.println("Initialising OWLIMServiceImpl: index = " + myIndex);
+    }
+    try {
+      if(gosHomeURL == null) {
         URL classURL = this.getClass().getResource(
                 "/" + this.getClass().getName().replace('.', '/') + ".class");
         if(classURL.getProtocol().equals("jar")) {
@@ -278,182 +320,52 @@ public class OWLIMServiceImpl implements OWLIM,
           URL gosJarURL = new URL(classURLStr.substring(0, classURLStr
                   .indexOf('!')));
           // gosURLJar is "file:/path/to/gos/lib/file.jar"
-          gosHome = new URL(gosJarURL, "..");
-          // gosHome is "file:/path/to/gos/"
+          gosHomeURL = new URL(gosJarURL, "..");
+          // gosHomeURL is "file:/path/to/gos/"
         }
         else if(classURL.getProtocol().equals("file")) {
           // running from classes directory (e.g.inside Eclipse)
           // classURL is
           // "file:/path/to/gos/classes/gate/creole/ontology/owlim/OWLIMServiceImpl.class"
-          gosHome = new URL(classURL, "../../../../..");
-          // gosHome is "file:/path/to/gos/"
+          gosHomeURL = new URL(classURL, "../../../../..");
+          // gosHomeURL is "file:/path/to/gos/"
         }
-        else {
-          // this should not happen and will cause a JUnit error if it
-          // does.
-          gosHome = null;
-        }
-
-        systemConf = new URL(gosHome, "system.conf");
-
-        String userHome = System.getProperty("user.home");
-        System.out.println("USERHOME : " + userHome);
-        File sysConfFile = new File(new File(new File(
-                new File(userHome, "safe"), getInstanceName()), "owlim"),
-                "system.conf");
-        // lets check if it exists
-        if(sysConfFile.exists()) {
-          systemConf = sysConfFile.toURI().toURL();
-        }
-        else {
-          systemConf = new URL(gosHome, "system.conf");
-          if(sysConfFile.getParentFile().mkdirs()) {
-            copyFile(new File(systemConf.getFile()), sysConfFile);
-            systemConf = sysConfFile.toURI().toURL();
-            System.out.println("SystemConf :" + systemConf.toExternalForm());
-          }
-        }
-
-        owlRDFS = new URL(gosHome, "owl.rdfs");
-        rdfSchema = new URL(gosHome, "rdf-schema.xml");
-
-        SesameServer.setSystemConfig(readConfiguration());
-        service = SesameServer.getLocalService();
-        login("admin", "admin");
-        String[] repositories = getRepositoryList();
-        if(repositories != null) {
-          for(String rep : repositories) {
-            setCurrentRepositoryID(rep);
-          }
-        }
-        hasSystemNameSpace.put("http://www.w3.org/2002/07/owl#Thing",
-                new Boolean(false));
-        initiated = true;
-        serviceCall = true;
       }
-      catch(IOException ioe) {
-        throw new GateOntologyException(ioe);
+
+      if(!gosHomeURL.getPath().endsWith("/")) {
+        // add a slash to the end - should we throw an exception instead?
+        gosHomeURL = new URL(gosHomeURL.toExternalForm() + "/");
       }
     }
-  }
-
-  /**
-   * Gets the instance name
-   * 
-   * @return
-   */
-  private String getInstanceName() {
-    // lets first try to find out the repository localtion from system
-    // properties
-    String instanceName = System.getProperty("instance.name");
-    if(instanceName == null) {
-      try {
-        InputStream stream = this.getClass().getResourceAsStream(
-                "/gos.properties");
-        BufferedReader reader = new BufferedReader(
-                new InputStreamReader(stream));
-        String line = reader.readLine();
-        while(line != null) {
-          String pdata[] = line.split("=");
-          if(pdata.length > 1) {
-            if(pdata[0].trim().equals("instance.name")) {
-              instanceName = pdata[1].trim();
-              break;
-            }
-          }
-          line = reader.readLine();
-        }
-        reader.close();
-      }
-      catch(IOException ioe) {
-        throw new GateOntologyException(
-                "Exception occurred while reading the gos.property file", ioe);
-      }
-      if(instanceName == null) {
-        instanceName = "dev";
-      }
-      System.setProperty("instance.name", instanceName);
+    catch(MalformedURLException e) {
+      throw new GateOntologyException("Could not determine gosHomeURL", e);
     }
-    return instanceName;
-  }
-
-  private void copyFile(File fromFile, File toFile) throws IOException {
-    FileInputStream from = null;
-    FileOutputStream to = null;
+    
+    if(debug) {
+      System.out.println("GOS Home: " + gosHomeURL);
+    }
+    
+    hasSystemNameSpace.put("http://www.w3.org/2002/07/owl#Thing",
+            new Boolean(false));
+    
     try {
-      from = new FileInputStream(fromFile);
-      to = new FileOutputStream(toFile);
-      byte[] buffer = new byte[4096];
-      int bytesRead;
-      while((bytesRead = from.read(buffer)) != -1)
-        to.write(buffer, 0, bytesRead); // write
-    }
-    finally {
-      if(from != null) {
-        try {
-          from.close();
-        }
-        catch(IOException e) {
-        }
+      if(owlRDFS == null) {
+        owlRDFS = new URL(gosHomeURL, "owl.rdfs");
       }
-      if(to != null) {
-        try {
-          to.close();
-        }
-        catch(IOException e) {
-        }
+      if(rdfSchema == null) {
+        rdfSchema = new URL(gosHomeURL, "rdf-schema.xml");
       }
     }
-  }
-
-  /**
-   * This method intializes the OWLIMService. It locates the system
-   * configuration file in the directory whose URL is passed in. The
-   * system configuration file contains various parameters/settings such
-   * as available repositories and users with their rights on each
-   * repository
-   * 
-   * @param gosHomeURL the URL to the GOS home directory. This must
-   *          point to a directory, i.e. it must end in a forward slash.
-   * @throws ServiceException
-   */
-  public void init(URL gosHomeURL) throws GateOntologyException {
-    try {
-      if(DEBUG) System.out.println("Initiating OWLIMService... with URL");
-      gosHome = gosHomeURL;
-      hasSystemNameSpace.put("http://www.w3.org/2002/07/owl#Thing",
-              new Boolean(false));
-
-      systemConf = null;
-      owlRDFS = new URL(gosHome, "owl.rdfs");
-      rdfSchema = new URL(gosHome, "rdf-schema.xml");
-
-      SystemConfig conf = readConfiguration();
-      service = new LocalService(conf);
-      login("admin", "admin");
-      String[] repositories = getRepositoryList();
-      if(repositories != null) {
-        for(String rep : repositories) {
-          setCurrentRepositoryID(rep);
-        }
-      }
+    catch(MalformedURLException e) {
+      throw new GateOntologyException("Could not construct owl.rdfs and rdf-schema.xml URLs.  " +
+      		"Please set them explicitly.", e);
     }
-    catch(IOException ioe) {
-      throw new GateOntologyException(ioe);
-    }
-
-  }
-
-  /** This is called by axis before calling the operation* */
-  public void init(Object arg0) throws ServiceException {
-    if(arg0 instanceof javax.xml.rpc.server.ServletEndpointContext) {
-      javax.xml.rpc.server.ServletEndpointContext servlet_context = (javax.xml.rpc.server.ServletEndpointContext)arg0;
-      ServletContext context = servlet_context.getServletContext();
-      try {
-        init(context);
-      }
-      catch(GateOntologyException ioe) {
-        throw new ServiceException(ioe);
+    
+    login("admin", "admin");
+    String[] repositories = getRepositoryList();
+    if(repositories != null) {
+      for(String rep : repositories) {
+        setCurrentRepositoryID(rep);
       }
     }
   }
@@ -1581,7 +1493,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void addSymmetricProperty(String repositoryID, String aPropertyURI,
           String[] domainAndRangeClassesURIs) throws GateOntologyException {
-    if(DEBUG) print("addSymmetricProperty");
+    if(debug) print("addSymmetricProperty");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(aPropertyURI, RDF.TYPE, OWL.SYMMETRICPROPERTY);
     currentEventsLog.addEvent(new OEvent(aPropertyURI, RDF.TYPE, OWL.SYMMETRICPROPERTY, true));
@@ -2181,11 +2093,11 @@ public class OWLIMServiceImpl implements OWLIM,
   }
 
   /** This should be called by axis after each call to the operator?* */
-  public void destroy() {
+  /*public void destroy() {
     // we don't want to do anything here
     // because we want to keep alive all our resources
     // until the logout method is called
-  }
+  }*/
 
   // ****************************************************************************
   // user management methods
@@ -2203,7 +2115,7 @@ public class OWLIMServiceImpl implements OWLIM,
    * @return
    */
   public boolean login(String username, String password) {
-    if(DEBUG) print("login");
+    if(debug) print("login");
     try {
       service.login(username, password);
     }
@@ -2221,10 +2133,10 @@ public class OWLIMServiceImpl implements OWLIM,
    * End the session by logging out
    */
   public void logout(String repositoryID) throws GateOntologyException {
-    if(DEBUG) print("logout");
+    if(debug) print("logout");
     // mapToRepositoryDetails.remove(repositoryID);
     service.logout();
-    if(!serviceCall) {
+    if(shutDownOnLogout) {
       service.shutDown();
     }
     currentRepository = null;
@@ -2239,7 +2151,7 @@ public class OWLIMServiceImpl implements OWLIM,
    * Find out the list of repository list
    */
   public String[] getRepositoryList() throws GateOntologyException {
-    if(DEBUG) print("getRepositoryList");
+    if(debug) print("getRepositoryList");
     RepositoryList rList = service.getRepositoryList();
     List repositories = rList.getRepositories();
     if(repositories == null) return new String[0];
@@ -2256,7 +2168,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void setCurrentRepositoryID(String repositoryID)
           throws GateOntologyException {
-    if(DEBUG) print("setCurrentRepository with ID " + repositoryID);
+    if(debug) print("setCurrentRepository with ID " + repositoryID);
     if(sail != null && sail.transactionStarted()) {
       // we need to commit all changes
       sail.commitTransaction();
@@ -2303,7 +2215,7 @@ public class OWLIMServiceImpl implements OWLIM,
    * This method returns the ID of current repository
    */
   public String getCurrentRepositoryID() {
-    if(DEBUG) print("getCurrentRepository");
+    if(debug) print("getCurrentRepository");
     return currentRepository.getRepositoryId();
   }
 
@@ -2334,15 +2246,15 @@ public class OWLIMServiceImpl implements OWLIM,
           String password, String ontoData, String baseURI, byte format,
           String absolutePersistLocation, boolean persist,
           boolean returnSystemStatements) throws GateOntologyException {
-    if(DEBUG) print("createRepository");
+    if(debug) print("createRepository");
     // if(absolutePersistLocation == null) {
     // try {
     // absolutePersistLocation = new
-    // File(gosHome.toURI()).getAbsolutePath();
+    // File(gosHomeURL.toURI()).getAbsolutePath();
     // }
     // catch(URISyntaxException e) {
     // throw new GateOntologyException(
-    // "Cannot construct persistence location " + "from gosHome", e);
+    // "Cannot construct persistence location " + "from gosHomeURL", e);
     // }
     // }
     // check if user exists
@@ -2362,7 +2274,7 @@ public class OWLIMServiceImpl implements OWLIM,
     addOntologyData(repositoryID, ontoData, true, baseURI, format);
     service.getSystemConfig().addRepositoryConfig(repConfig);
     if(persist) saveConfiguration();
-    if(DEBUG) System.out.println("Repository created!");
+    if(debug) System.out.println("Repository created!");
 
     // and here we check if there's any statement referring to owl:Thing
     loadRepositoryDetails(repositoryID);
@@ -2395,15 +2307,15 @@ public class OWLIMServiceImpl implements OWLIM,
           String password, String ontoFileUrl, String baseURI, byte format,
           String absolutePersistLocation, boolean persist,
           boolean returnSystemStatements) throws GateOntologyException {
-    if(DEBUG) print("createRepository");
+    if(debug) print("createRepository");
     // if(absolutePersistLocation == null) {
     // try {
     // absolutePersistLocation = new
-    // File(gosHome.toURI()).getAbsolutePath();
+    // File(gosHomeURL.toURI()).getAbsolutePath();
     // }
     // catch(URISyntaxException e) {
     // throw new GateOntologyException(
-    // "Cannot construct persistence location " + "from gosHome", e);
+    // "Cannot construct persistence location " + "from gosHomeURL", e);
     // }
     // }
     // check if user exists
@@ -2421,7 +2333,7 @@ public class OWLIMServiceImpl implements OWLIM,
     addOntologyData(repositoryID, ontoFileUrl, false, baseURI, format);
     service.getSystemConfig().addRepositoryConfig(repConfig);
     if(persist) saveConfiguration();
-    if(DEBUG) System.out.println("Repository created!");
+    if(debug) System.out.println("Repository created!");
     this.ontologyUrl = ontoFileUrl;
 
     // and here we check if there's any statement referring to owl:Thing
@@ -2460,7 +2372,7 @@ public class OWLIMServiceImpl implements OWLIM,
    * The method removes all data from the available graph.
    */
   public void cleanOntology(String repositoryID) throws GateOntologyException {
-    if(DEBUG) print("cleanOntology");
+    if(debug) print("cleanOntology");
     loadRepositoryDetails(repositoryID);
     if(currentRepository == null) return;
     RepositoryConfig rc = service.getSystemConfig().getRepositoryConfig(
@@ -2489,7 +2401,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public String getOntologyData(String repositoryID, byte format)
           throws GateOntologyException {
-    if(DEBUG) print("getOntologyData");
+    if(debug) print("getOntologyData");
     loadRepositoryDetails(repositoryID);
     // before we extract anything
     // lets commit all our changes
@@ -2522,7 +2434,7 @@ public class OWLIMServiceImpl implements OWLIM,
   public void setVersion(String repositoryID, String versionInfo)
           throws GateOntologyException {
     loadRepositoryDetails(repositoryID);
-    if(DEBUG) print("setVersion");
+    if(debug) print("setVersion");
     addUULStatement(this.ontologyUrl, OWL.VERSIONINFO, versionInfo, null);
     currentEventsLog.addEvent(new OEvent(this.ontologyUrl.toString(), OWL.VERSIONINFO, versionInfo,true));
   }
@@ -2533,7 +2445,7 @@ public class OWLIMServiceImpl implements OWLIM,
    * @return
    */
   public String getVersion(String repositoryID) throws GateOntologyException {
-    if(DEBUG) print("getVersion");
+    if(debug) print("getVersion");
     loadRepositoryDetails(repositoryID);
     StatementIterator iter = sail.getStatements(getResource(this.ontologyUrl),
             getURI(OWL.VERSIONINFO), null);
@@ -2555,7 +2467,7 @@ public class OWLIMServiceImpl implements OWLIM,
   public void addClass(String repositoryID, String classURI, byte classType)
           throws GateOntologyException {
     loadRepositoryDetails(repositoryID);
-    if(DEBUG) print("addClass");
+    if(debug) print("addClass");
     switch(classType) {
       case OConstants.OWL_CLASS:
         addUUUStatement(classURI, RDF.TYPE, OWL.CLASS);
@@ -2582,7 +2494,7 @@ public class OWLIMServiceImpl implements OWLIM,
   public String[] removeClass(String repositoryID, String classURI,
           boolean removeSubTree) throws GateOntologyException {
     loadRepositoryDetails(repositoryID);
-    if(DEBUG) print("removeClass");
+    if(debug) print("removeClass");
     ResourceInfo[] superClasses = getSuperClasses(null, classURI,
             OConstants.DIRECT_CLOSURE);
 
@@ -2696,7 +2608,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public boolean hasClass(String repositoryID, String classURI)
           throws GateOntologyException {
-    if(DEBUG) print("hasClass");
+    if(debug) print("hasClass");
     loadRepositoryDetails(repositoryID);
     return sail.isClass(getResource(classURI));
   }
@@ -2711,7 +2623,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public ResourceInfo[] getClasses(String repositoryID, boolean top)
           throws GateOntologyException {
-    if(DEBUG) print("getClasses");
+    if(debug) print("getClasses");
     loadRepositoryDetails(repositoryID);
 
     String query = "";
@@ -2731,7 +2643,7 @@ public class OWLIMServiceImpl implements OWLIM,
     for(int i = 0; i < iter.getRowCount(); i++) {
       list.add(iter.getValue(i, 0).toString());
     }
-    if(DEBUG) System.out.println("Top Classes : " + list.size());
+    if(debug) System.out.println("Top Classes : " + list.size());
     return listToResourceInfoArray(list);
   }
 
@@ -2743,7 +2655,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public boolean isTopClass(String repositoryID, String classURI)
           throws GateOntologyException {
-    if(DEBUG) print("isTopClass");
+    if(debug) print("isTopClass");
     return getSuperClasses(repositoryID, classURI, OConstants.DIRECT_CLOSURE).length == 0;
   }
 
@@ -2755,7 +2667,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public boolean isTopProperty(String repositoryID, String aPropertyURI)
           throws GateOntologyException {
-    if(DEBUG) print("isTopProperty");
+    if(debug) print("isTopProperty");
     return getSuperProperties(repositoryID, aPropertyURI,
             OConstants.DIRECT_CLOSURE).length == 0;
   }
@@ -2773,7 +2685,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void addSubClass(String repositoryID, String superClassURI,
           String subClassURI) throws GateOntologyException {
-    if(DEBUG) print("addSubClass");
+    if(debug) print("addSubClass");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(subClassURI, RDFS.SUBCLASSOF, superClassURI);
     currentEventsLog.addEvent(new OEvent(subClassURI, RDFS.SUBCLASSOF, superClassURI,true));
@@ -2789,7 +2701,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void addSuperClass(String repositoryID, String superClassURI,
           String subClassURI) throws GateOntologyException {
-    if(DEBUG) print("addSuperClass");
+    if(debug) print("addSuperClass");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(subClassURI, RDFS.SUBCLASSOF, superClassURI);
     currentEventsLog.addEvent(new OEvent(subClassURI, RDFS.SUBCLASSOF, superClassURI,true));
@@ -2803,7 +2715,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void removeSubClass(String repositoryID, String superClassURI,
           String subClassURI) throws GateOntologyException {
-    if(DEBUG) print("removeSubClass");
+    if(debug) print("removeSubClass");
     loadRepositoryDetails(repositoryID);
     removeUUUStatement(subClassURI, RDFS.SUBCLASSOF, superClassURI);
     currentEventsLog.addEvent(new OEvent(subClassURI, RDFS.SUBCLASSOF, superClassURI,false));
@@ -2818,7 +2730,7 @@ public class OWLIMServiceImpl implements OWLIM,
   public void removeSuperClass(String repositoryID, String superClassURI,
           String subClassURI) throws GateOntologyException {
     loadRepositoryDetails(repositoryID);
-    if(DEBUG) print("removeSuperClass");
+    if(debug) print("removeSuperClass");
     removeUUUStatement(subClassURI, RDFS.SUBCLASSOF, superClassURI);
     currentEventsLog.addEvent(new OEvent(subClassURI, RDFS.SUBCLASSOF, superClassURI,false));
   }
@@ -2832,7 +2744,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public ResourceInfo[] getSubClasses(String repositoryID,
           String superClassURI, byte direct) throws GateOntologyException {
-    if(DEBUG) print("getSubClasses");
+    if(debug) print("getSubClasses");
     loadRepositoryDetails(repositoryID);
 
     Resource r = getResource(superClassURI);
@@ -2891,7 +2803,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public ResourceInfo[] getSuperClasses(String repositoryID,
           String subClassURI, byte direct) throws GateOntologyException {
-    if(DEBUG) print("getSuperClasses");
+    if(debug) print("getSuperClasses");
     loadRepositoryDetails(repositoryID);
     Resource r = getResource(subClassURI);
     String queryRep = "{<" + subClassURI + ">}";
@@ -2949,7 +2861,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void setDisjointClassWith(String repositoryID, String class1URI,
           String class2URI) throws GateOntologyException {
-    if(DEBUG) print("setDisjointWith");
+    if(debug) print("setDisjointWith");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(class1URI, OWL.DISJOINTWITH, class2URI);
     currentEventsLog.addEvent(new OEvent(class1URI, OWL.DISJOINTWITH, class2URI,true));
@@ -2963,7 +2875,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void setEquivalentClassAs(String repositoryID, String class1URI,
           String class2URI) throws GateOntologyException {
-    if(DEBUG) print("setEquivalentClassAs");
+    if(debug) print("setEquivalentClassAs");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(class1URI, OWL.EQUIVALENTCLASS, class2URI);
     currentEventsLog.addEvent(new OEvent(class1URI, OWL.EQUIVALENTCLASS, class2URI,true));
@@ -2978,7 +2890,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public String[] getDisjointClasses(String repositoryID, String aClassURI)
           throws GateOntologyException {
-    if(DEBUG) print("setDisjointClasses");
+    if(debug) print("setDisjointClasses");
     loadRepositoryDetails(repositoryID);
 
     Resource r1 = getResource(aClassURI);
@@ -3006,7 +2918,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public ResourceInfo[] getEquivalentClasses(String repositoryID,
           String aClassURI) throws GateOntologyException {
-    if(DEBUG) print("getSameClasses");
+    if(debug) print("getSameClasses");
     loadRepositoryDetails(repositoryID);
     Resource r1 = getResource(aClassURI);
     String queryRep1 = "<" + aClassURI + ">";
@@ -3039,7 +2951,7 @@ public class OWLIMServiceImpl implements OWLIM,
   public String[] removePropertyFromOntology(String repositoryID,
           String aPropertyURI, boolean removeSubTree)
           throws GateOntologyException {
-    if(DEBUG) print("removePropertyWithName");
+    if(debug) print("removePropertyWithName");
     loadRepositoryDetails(repositoryID);
     List<String> deletedResources = new ArrayList<String>();
     if(removeUUUStatement(aPropertyURI, RDF.TYPE, null) == 0) {
@@ -3097,7 +3009,7 @@ public class OWLIMServiceImpl implements OWLIM,
   public void addObjectProperty(String repositoryID, String aPropertyURI,
           String[] domainClassesURIs, String[] rangeClassesTypes)
           throws GateOntologyException {
-    if(DEBUG) print("addObjectProperty");
+    if(debug) print("addObjectProperty");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(aPropertyURI, RDF.TYPE, OWL.OBJECTPROPERTY);
     currentEventsLog.addEvent(new OEvent(aPropertyURI, RDF.TYPE, OWL.OBJECTPROPERTY,true));
@@ -3126,7 +3038,7 @@ public class OWLIMServiceImpl implements OWLIM,
   public void addTransitiveProperty(String repositoryID, String aPropertyURI,
           String[] domainClassesURIs, String[] rangeClassesTypes)
           throws GateOntologyException {
-    if(DEBUG) print("addTransitiveProperty");
+    if(debug) print("addTransitiveProperty");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(aPropertyURI, RDF.TYPE, OWL.TRANSITIVEPROPERTY);
     currentEventsLog.addEvent(new OEvent(aPropertyURI, RDF.TYPE, OWL.TRANSITIVEPROPERTY,true));
@@ -3324,7 +3236,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public ResourceInfo[] getDomain(String repositoryID, String aPropertyURI)
           throws GateOntologyException {
-    if(DEBUG) print("getDomain");
+    if(debug) print("getDomain");
     if(isAnnotationProperty(repositoryID, aPropertyURI)) {
       throw new GateOntologyException(
               "AnnotationProperties do no specify any domain or range");
@@ -3351,7 +3263,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public ResourceInfo[] getRange(String repositoryID, String aPropertyURI)
           throws GateOntologyException {
-    if(DEBUG) print("getRange");
+    if(debug) print("getRange");
     if(isAnnotationProperty(repositoryID, aPropertyURI)) {
       throw new GateOntologyException(
               "AnnotationProperties do no specify any domain or range");
@@ -3382,7 +3294,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public boolean isFunctional(String repositoryID, String aPropertyURI)
           throws GateOntologyException {
-    if(DEBUG) print("isFunctional");
+    if(debug) print("isFunctional");
     loadRepositoryDetails(repositoryID);
     String query = "Select * FROM {X} rdf:type {<" + OWL.FUNCTIONALPROPERTY
             + ">} WHERE X=<" + aPropertyURI + ">";
@@ -3397,7 +3309,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void setFunctional(String repositoryID, String aPropertyURI,
           boolean isFunctional) throws GateOntologyException {
-    if(DEBUG) print("setFunctional");
+    if(debug) print("setFunctional");
     loadRepositoryDetails(repositoryID);
     if(isFunctional) {
       addUUUStatement(aPropertyURI, RDF.TYPE, OWL.FUNCTIONALPROPERTY);
@@ -3417,7 +3329,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public boolean isInverseFunctional(String repositoryID, String aPropertyURI)
           throws GateOntologyException {
-    if(DEBUG) print("isInverseFunctional");
+    if(debug) print("isInverseFunctional");
     loadRepositoryDetails(repositoryID);
     String query = "Select * FROM {X} rdf:type {<"
             + OWL.INVERSEFUNCTIONALPROPERTY + ">} WHERE X=<" + aPropertyURI
@@ -3433,7 +3345,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void setInverseFunctional(String repositoryID, String aPropertyURI,
           boolean isInverseFunctional) throws GateOntologyException {
-    if(DEBUG) print("setInverseFunctional");
+    if(debug) print("setInverseFunctional");
     loadRepositoryDetails(repositoryID);
     if(isInverseFunctional) {
       addUUUStatement(aPropertyURI, RDF.TYPE, OWL.INVERSEFUNCTIONALPROPERTY);
@@ -3453,7 +3365,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public boolean isSymmetricProperty(String repositoryID, String aPropertyURI)
           throws GateOntologyException {
-    if(DEBUG) print("isSymmetricProperty");
+    if(debug) print("isSymmetricProperty");
     loadRepositoryDetails(repositoryID);
     String query = "Select * FROM {X} rdf:type {<" + OWL.SYMMETRICPROPERTY
             + ">} WHERE X=<" + aPropertyURI + ">";
@@ -3468,7 +3380,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public boolean isTransitiveProperty(String repositoryID, String aPropertyURI)
           throws GateOntologyException {
-    if(DEBUG) print("isTransitiveProperty");
+    if(debug) print("isTransitiveProperty");
     loadRepositoryDetails(repositoryID);
     String query = "Select * FROM {X} rdf:type {<" + OWL.TRANSITIVEPROPERTY
             + ">} WHERE X=<" + aPropertyURI + ">";
@@ -3483,7 +3395,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public boolean isDatatypeProperty(String repositoryID, String aPropertyURI)
           throws GateOntologyException {
-    if(DEBUG) print("isDatatypeProperty");
+    if(debug) print("isDatatypeProperty");
     loadRepositoryDetails(repositoryID);
     String query = "Select * FROM {X} rdf:type {<" + OWL.DATATYPEPROPERTY
             + ">} WHERE X=<" + aPropertyURI + ">";
@@ -3498,7 +3410,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public boolean isObjectProperty(String repositoryID, String aPropertyURI)
           throws GateOntologyException {
-    if(DEBUG) print("isObjectProperty");
+    if(debug) print("isObjectProperty");
     loadRepositoryDetails(repositoryID);
     String query = "Select * FROM {X} rdf:type {<" + OWL.OBJECTPROPERTY
             + ">} WHERE X=<" + aPropertyURI + ">";
@@ -3516,7 +3428,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void setEquivalentPropertyAs(String repositoryID, String property1URI,
           String property2URI) throws GateOntologyException {
-    if(DEBUG) print("setEquivalentPropertyAs");
+    if(debug) print("setEquivalentPropertyAs");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(property1URI, OWL.EQUIVALENTPROPERTY, property2URI);
     currentEventsLog.addEvent(new OEvent(property1URI, OWL.EQUIVALENTPROPERTY, property2URI,true));
@@ -3531,7 +3443,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public Property[] getEquivalentPropertyAs(String repositoryID,
           String aPropertyURI) throws GateOntologyException {
-    if(DEBUG) print("getEquivalentPropertyAs");
+    if(debug) print("getEquivalentPropertyAs");
     loadRepositoryDetails(repositoryID);
 
     String query = "Select DISTINCT Y FROM {X} owl:equivalentProperty {Y} WHERE X=<"
@@ -3553,7 +3465,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void addSuperProperty(String repositoryID, String superPropertyURI,
           String subPropertyURI) throws GateOntologyException {
-    if(DEBUG) print("addSuperProperty");
+    if(debug) print("addSuperProperty");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(subPropertyURI, RDFS.SUBPROPERTYOF, superPropertyURI);
     currentEventsLog.addEvent(new OEvent(subPropertyURI, RDFS.SUBPROPERTYOF, superPropertyURI,true));
@@ -3568,7 +3480,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void removeSuperProperty(String repositoryID, String superPropertyURI,
           String subPropertyURI) throws GateOntologyException {
-    if(DEBUG) print("removeSuperProperty");
+    if(debug) print("removeSuperProperty");
     loadRepositoryDetails(repositoryID);
     removeUUUStatement(subPropertyURI, RDFS.SUBPROPERTYOF, superPropertyURI);
     currentEventsLog.addEvent(new OEvent(subPropertyURI, RDFS.SUBPROPERTYOF, superPropertyURI,false));
@@ -3583,7 +3495,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void addSubProperty(String repositoryID, String superPropertyURI,
           String subPropertyURI) throws GateOntologyException {
-    if(DEBUG) print("addSubProperty");
+    if(debug) print("addSubProperty");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(subPropertyURI, RDFS.SUBPROPERTYOF, superPropertyURI);
     currentEventsLog.addEvent(new OEvent(subPropertyURI, RDFS.SUBPROPERTYOF, superPropertyURI,true));
@@ -3598,7 +3510,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void removeSubProperty(String repositoryID, String superPropertyURI,
           String subPropertyURI) throws GateOntologyException {
-    if(DEBUG) print("removeSubProperty");
+    if(debug) print("removeSubProperty");
     loadRepositoryDetails(repositoryID);
     removeUUUStatement(subPropertyURI, RDFS.SUBPROPERTYOF, superPropertyURI);
     currentEventsLog.addEvent(new OEvent(subPropertyURI, RDFS.SUBPROPERTYOF, superPropertyURI,false));
@@ -3641,7 +3553,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public Property[] getInverseProperties(String repositoryID,
           String aPropertyURI) throws GateOntologyException {
-    if(DEBUG) print("getInverseProperties");
+    if(debug) print("getInverseProperties");
     loadRepositoryDetails(repositoryID);
 
     String query = "Select DISTINCT Y FROM {X} owl:inverseOf {Y} WHERE X=<"
@@ -3662,7 +3574,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void setInverseOf(String repositoryID, String propertyURI1,
           String propertyURI2) throws GateOntologyException {
-    if(DEBUG) print("setInverseOf");
+    if(debug) print("setInverseOf");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(propertyURI1, OWL.INVERSEOF, propertyURI2);
     currentEventsLog.addEvent(new OEvent(propertyURI1, OWL.INVERSEOF, propertyURI2,true));
@@ -3681,7 +3593,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void addIndividual(String repositoryID, String superClassURI,
           String individualURI) throws GateOntologyException {
-    if(DEBUG) print("addIndividual");
+    if(debug) print("addIndividual");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(individualURI, RDF.TYPE, superClassURI);
     currentEventsLog.addEvent(new OEvent(individualURI, RDF.TYPE, superClassURI,true));
@@ -3695,7 +3607,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public String[] removeIndividual(String repositoryID, String individualURI)
           throws GateOntologyException {
-    if(DEBUG) print("removeIndividual");
+    if(debug) print("removeIndividual");
     loadRepositoryDetails(repositoryID);
     int no = removeUUUStatement(individualURI, RDF.TYPE, null);
     if(no == 0)
@@ -3739,7 +3651,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public String[] getIndividuals(String repositoryID, String superClassURI,
           byte direct) throws GateOntologyException {
-    if(DEBUG) print("getIndividulas");
+    if(debug) print("getIndividulas");
     loadRepositoryDetails(repositoryID);
     Resource r = getResource(superClassURI);
     String queryRep = "{<" + superClassURI + ">}";
@@ -3772,7 +3684,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public String[] getIndividuals(String repositoryID)
           throws GateOntologyException {
-    if(DEBUG) print("getIndividuals");
+    if(debug) print("getIndividuals");
     loadRepositoryDetails(repositoryID);
 
     String query = "Select distinct X from {X} rdf:type {} rdf:type {<http://www.w3.org/2002/07/owl#Class>}";
@@ -3796,7 +3708,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public boolean hasIndividual(String repositoryID, String aSuperClassURI,
           String individualURI, boolean direct) throws GateOntologyException {
-    if(DEBUG) print("hasIndividual");
+    if(debug) print("hasIndividual");
 
     loadRepositoryDetails(repositoryID);
     Resource r = getResource(aSuperClassURI);
@@ -3826,7 +3738,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public ResourceInfo[] getClassesOfIndividual(String repositoryID,
           String individualURI, byte direct) throws GateOntologyException {
-    if(DEBUG) print("getClassesOfIndividual");
+    if(debug) print("getClassesOfIndividual");
     loadRepositoryDetails(repositoryID);
     String query = "";
     if(direct == OConstants.DIRECT_CLOSURE) {
@@ -3858,7 +3770,7 @@ public class OWLIMServiceImpl implements OWLIM,
   public void setDifferentIndividualFrom(String repositoryID,
           String individual1URI, String individual2URI)
           throws GateOntologyException {
-    if(DEBUG) print("setDifferentIndividualFrom");
+    if(debug) print("setDifferentIndividualFrom");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(individual1URI, OWL.DIFFERENTFROM, individual2URI);
     currentEventsLog.addEvent(new OEvent(individual1URI,OWL.DIFFERENTFROM, individual1URI, true));
@@ -3873,7 +3785,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public String[] getDifferentIndividualFrom(String repositoryID,
           String individualURI) throws GateOntologyException {
-    if(DEBUG) print("getDifferentIndividualFrom");
+    if(debug) print("getDifferentIndividualFrom");
     loadRepositoryDetails(repositoryID);
 
     String query = "Select distinct B from {X} owl:differentFrom {B} WHERE X=<"
@@ -3894,7 +3806,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public void setSameIndividualAs(String repositoryID, String individual1URI,
           String individual2URI) throws GateOntologyException {
-    if(DEBUG) print("setSameIndividualAs");
+    if(debug) print("setSameIndividualAs");
     loadRepositoryDetails(repositoryID);
     addUUUStatement(individual1URI, OWL.SAMEAS, individual2URI);
     currentEventsLog.addEvent(new OEvent(individual1URI,OWL.SAMEAS, individual1URI, true));
@@ -3909,7 +3821,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public String[] getSameIndividualAs(String repositoryID, String individualURI)
           throws GateOntologyException {
-    if(DEBUG) print("getSameIndividualAs");
+    if(debug) print("getSameIndividualAs");
     loadRepositoryDetails(repositoryID);
     String query = "select distinct B from {X} owl:sameAs {B} WHERE X=<"
             + individualURI + "> AND X!=B";
@@ -3936,7 +3848,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   public Property getOnPropertyValue(String repositoryId, String restrictionURI)
           throws GateOntologyException {
-    if(DEBUG) print("getOnPropertyValue");
+    if(debug) print("getOnPropertyValue");
     loadRepositoryDetails(repositoryId);
     Resource r1 = getResource(restrictionURI);
     String queryRep = "<" + restrictionURI + ">";
@@ -3966,7 +3878,7 @@ public class OWLIMServiceImpl implements OWLIM,
   public void setOnPropertyValue(String repositoryId, String restrictionURI,
           String propertyURI) throws GateOntologyException {
 
-    if(DEBUG) print("setOnPropertyValue");
+    if(debug) print("setOnPropertyValue");
     loadRepositoryDetails(repositoryId);
     addUUUStatement(restrictionURI, OWL.ONPROPERTY, propertyURI);
     currentEventsLog.addEvent(new OEvent(restrictionURI,OWL.ONPROPERTY, propertyURI, true));
@@ -3984,7 +3896,7 @@ public class OWLIMServiceImpl implements OWLIM,
           String restrictionURI, byte restrictionType)
           throws GateOntologyException {
 
-    if(DEBUG) print("getDataType");
+    if(debug) print("getDataType");
     loadRepositoryDetails(repositoryId);
     String whatValueURI = null;
     switch(restrictionType) {
@@ -4025,7 +3937,7 @@ public class OWLIMServiceImpl implements OWLIM,
   public void setPropertyValue(String repositoryId, String restrictionURI,
           byte restrictionType, String value, String datatypeURI)
           throws GateOntologyException {
-    if(DEBUG) print("getDataType");
+    if(debug) print("getDataType");
     loadRepositoryDetails(repositoryId);
     String whatValueURI = null;
     switch(restrictionType) {
@@ -4080,7 +3992,7 @@ public class OWLIMServiceImpl implements OWLIM,
   public ResourceInfo getRestrictionValue(String repositoryId,
           String restrictionURI, byte restrictionType)
           throws GateOntologyException {
-    if(DEBUG) print("getRestrictionValue");
+    if(debug) print("getRestrictionValue");
     loadRepositoryDetails(repositoryId);
 
     String whatValueURI = null;
@@ -4146,7 +4058,7 @@ public class OWLIMServiceImpl implements OWLIM,
   public void setRestrictionValue(String repositoryId, String restrictionURI,
           byte restrictionType, String value) throws GateOntologyException {
 
-    if(DEBUG) print("setRestrictionValue");
+    if(debug) print("setRestrictionValue");
     loadRepositoryDetails(repositoryId);
 
     String whatValueURI = null;
@@ -4632,22 +4544,18 @@ public class OWLIMServiceImpl implements OWLIM,
   private void saveConfiguration() throws GateOntologyException {
     try {
       if(systemConf == null) return;
-      if(DEBUG) System.out.println("System conf : " + systemConf);
-      Writer writer = new BufferedWriter(new FileWriter(new File(systemConf
-              .toURI())));
+      if(debug) System.out.println("System conf : " + systemConf);
+      OutputStream os = new BufferedOutputStream(new FileOutputStream(systemConf));
       SystemConfigFileHandler.writeConfiguration(service.getSystemConfig(),
-              writer);
-      writer.close();
+              os);
+      os.close();
     }
     catch(IOException e) {
       throw new GateOntologyException(e);
     }
-    catch(URISyntaxException use) {
-      throw new GateOntologyException(use);
-    }
   }
 
-  private SystemConfig readConfiguration() throws IOException {
+  /*private SystemConfig readConfiguration() throws IOException {
     if(systemConf == null) {
       String s = "<?xml version='1.0'?>"
               + "<system-conf>"
@@ -4672,7 +4580,7 @@ public class OWLIMServiceImpl implements OWLIM,
       reader.close();
       return config;
     }
-  }
+  }*/
 
   /**
    * given a string, return the equivalent RDFFormat
@@ -4735,7 +4643,7 @@ public class OWLIMServiceImpl implements OWLIM,
           boolean isOntologyData, String baseURI, byte format,
           String absolutePersistLocation, boolean persist) {
     // check if repository exists
-    if(DEBUG) print("setRepository");
+    if(debug) print("setRepository");
     boolean found = false;
     try {
       setCurrentRepositoryID(repositoryID);
@@ -4769,7 +4677,7 @@ public class OWLIMServiceImpl implements OWLIM,
           if(map == null) map = new HashMap();
           map.put("noPersist", Boolean.toString(!persist));
           map.put("compressFile", "no");
-          map.put("dataFormat", formatToUse);
+          map.put("dataFormat", "ntriples");
           String imports = (String)map.get("imports");
           String defaultNS = (String)map.get("defaultNS");
           if(imports == null) imports = "";
@@ -4792,12 +4700,7 @@ public class OWLIMServiceImpl implements OWLIM,
             systemConfFile = new File("temp");
           }
           else {
-            try {
-              systemConfFile = new File(systemConf.toURI());
-            }
-            catch(Exception e) {
-              systemConfFile = new File("temp");
-            }
+            systemConfFile = systemConf;
           }
 
           String persistFile = absolutePersistLocation == null
@@ -4822,22 +4725,22 @@ public class OWLIMServiceImpl implements OWLIM,
         currentRepository.addData(ontoFileUrl, baseURI, getRDFFormat(format),
                 true, this);
         if(persist) saveConfiguration();
-        if(DEBUG) System.out.println("Data added!");
+        if(debug) System.out.println("Data added!");
       }
       found = true;
     }
     catch(AccessDeniedException exception) {
       // repository doesn't exist
       // lets create one
-      if(DEBUG) exception.printStackTrace();
+      if(debug) exception.printStackTrace();
       found = false;
     }
     catch(IOException ioe) {
-      if(DEBUG) ioe.printStackTrace();
+      if(debug) ioe.printStackTrace();
       found = false;
     }
     catch(GateOntologyException goe) {
-      if(DEBUG) goe.printStackTrace();
+      if(debug) goe.printStackTrace();
       found = false;
     }
     return found;
@@ -4965,7 +4868,7 @@ public class OWLIMServiceImpl implements OWLIM,
                     else {
                       toReturn.add(fileName);
                       foundFile = true;
-                      if(DEBUG)
+                      if(debug)
                         System.out.println("\t File To Be Imported : "
                                 + fileName);
                     }
@@ -4984,7 +4887,7 @@ public class OWLIMServiceImpl implements OWLIM,
                 System.out.println(originalFileName);
                 new URL(originalFileName).openStream();
                 if(parsedValues.contains(originalFileName)) continue;
-                if(DEBUG)
+                if(debug)
                   System.out.println("\t URL To Be Imported : " + originalFileName);
                 toReturn.add(originalFileName);
                 continue;
@@ -5003,10 +4906,10 @@ public class OWLIMServiceImpl implements OWLIM,
       if(currentRepository != null) loadRepositoryDetails(currentRepository);
     }
     catch(AccessDeniedException e) {
-      if(DEBUG) e.printStackTrace();
+      if(debug) e.printStackTrace();
     }
     catch(IOException ioe) {
-      if(DEBUG) ioe.printStackTrace();
+      if(debug) ioe.printStackTrace();
     }
 
     HashSet<String> finallyToReturn = new HashSet<String>();
@@ -5032,7 +4935,7 @@ public class OWLIMServiceImpl implements OWLIM,
    */
   private int createNewUser(String username, String password)
           throws GateOntologyException {
-    if(DEBUG) print("createUser");
+    if(debug) print("createUser");
     int id = -1;
     if(username != null) {
       id = getUserID(username, password);
@@ -5105,7 +5008,7 @@ public class OWLIMServiceImpl implements OWLIM,
       map.put("stackSafe", "true");
       map.put("noPersist", Boolean.toString(!persist));
       map.put("compressFile", "no");
-      map.put("dataFormat", formatToUse);
+      map.put("dataFormat", "ntriples");
 
       File systemConfFile = null;
 
@@ -5113,12 +5016,7 @@ public class OWLIMServiceImpl implements OWLIM,
         systemConfFile = new File("temp");
       }
       else {
-        try {
-          systemConfFile = new File(systemConf.toURI());
-        }
-        catch(Exception e) {
-          systemConfFile = new File("temp");
-        }
+        systemConfFile = systemConf;
       }
 
       String persistFile = absolutePersistLocation == null
@@ -5189,7 +5087,7 @@ public class OWLIMServiceImpl implements OWLIM,
         else {
           ontoFileUrl = null;
         }
-        if(DEBUG) System.out.println("Data added!");
+        if(debug) System.out.println("Data added!");
       }
     }
     catch(IOException e) {
@@ -5331,7 +5229,7 @@ public class OWLIMServiceImpl implements OWLIM,
   private PropertyValue[] getPropertyValues(String repositoryID,
           String aResourceURI, String aPropertyURI)
           throws GateOntologyException {
-    if(DEBUG) print("getPropertyValues");
+    if(debug) print("getPropertyValues");
     loadRepositoryDetails(repositoryID);
 
     Resource r = getResource(aResourceURI);
