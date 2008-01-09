@@ -2,6 +2,13 @@ package gate.creole.ontology.owlim;
 
 import gate.creole.ontology.GateOntologyException;
 
+import javax.jws.WebMethod;
+import javax.jws.WebParam;
+import javax.jws.WebResult;
+import javax.jws.WebService;
+import javax.xml.ws.ResponseWrapper;
+
+@WebService(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
 public interface OWLIM extends java.rmi.Remote {
 
   /**
@@ -15,7 +22,12 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    * @throws GateOntologyException
    */
-  public String[] getEventsLog(String repositoryID) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.StringArrayResponse")
+  public String[] getEventsLog(
+          @WebParam(name = "repositoryID") String repositoryID)
+          throws GateOntologyException;
   
   /**
    * Gets the default name space for this ontology. The defaultNameSpace
@@ -23,7 +35,11 @@ public interface OWLIM extends java.rmi.Remote {
    * 
    * @return a String value.
    */
-  public String getDefaultNameSpace(String repositoryID) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public String getDefaultNameSpace(
+          @WebParam(name = "repositoryID") String repositoryID)
+          throws GateOntologyException;
 
   /**
    * Adds the ontology data
@@ -34,8 +50,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param format
    * @throws GateOntologyException
    */
-  public void addOntologyData(String repositoryID, String data, String baseURI,
-          byte format) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void addOntologyData(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "data") String data,
+          @WebParam(name = "baseURI") String baseURI,
+          @WebParam(name = "format") byte format)
+          throws GateOntologyException;
 
   /**
    * This method tells whether the resource is imported or added as an explicit statement.
@@ -43,7 +65,12 @@ public interface OWLIM extends java.rmi.Remote {
    * @param resourceID
    * @return
    */
-  public boolean isImplicitResource(String repositoryID, String resourceID) throws GateOntologyException ;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean isImplicitResource(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "resourceID") String resourceID)
+          throws GateOntologyException ;
   
   /**
    * Returns whether the theSuperClass is indeed a super class of the
@@ -55,8 +82,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param direct
    * @return
    */
-  public boolean isSuperClassOf(String repositoryID, String theSuperClassURI,
-          String theSubClassURI, byte direct) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean isSuperClassOf(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "theSuperClassURI") String theSuperClassURI,
+          @WebParam(name = "theSubClassURI") String theSubClassURI,
+          @WebParam(name = "direct") byte direct)
+          throws GateOntologyException;
 
   /**
    * Returns whether the theSubClass is indeed a sub class of the
@@ -68,8 +101,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param direct
    * @return
    */
-  public boolean isSubClassOf(String repositoryID, String theSuperClassURI,
-          String theSubClassURI, byte direct) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean isSubClassOf(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "theSuperClassURI") String theSuperClassURI,
+          @WebParam(name = "theSubClassURI") String theSubClassURI,
+          @WebParam(name = "direct") byte direct)
+          throws GateOntologyException;
 
   /**
    * Given a property URI, this method returns an object of Property
@@ -79,8 +118,12 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    * @throws GateOntologyException
    */
-  public Property getPropertyFromOntology(String repositoryID,
-          String thePropertyURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public Property getPropertyFromOntology(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "thePropertyURI") String thePropertyURI)
+          throws GateOntologyException;
 
   /**
    * Checks whether the two classes defined as same in the ontology.
@@ -90,8 +133,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    * @throws Exception
    */
-  public boolean isEquivalentClassAs(String repositoryID, String theClassURI1,
-          String theClassURI2) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean isEquivalentClassAs(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "theClassURI1") String theClassURI1,
+          @WebParam(name = "theClassURI2") String theClassURI2)
+          throws GateOntologyException;
 
   // *******************************************************************
   // property methods
@@ -105,7 +153,11 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aPropertyURI URI of the property to be added into the
    *          ontology. Done
    */
-  public void addAnnotationProperty(String repositoryID, String aPropertyURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void addAnnotationProperty(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI)
           throws GateOntologyException;
 
   /**
@@ -116,8 +168,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    * @throws GateOntologyException
    */
-  public Property[] getAnnotationProperties(String repositoryID,
-          String theResourceURI) throws GateOntologyException;
+  @WebMethod(operationName = "getAnnotationPropertiesForResource")
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyArrayResponse")
+  public Property[] getAnnotationProperties(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "theResourceURI") String theResourceURI)
+          throws GateOntologyException;
 
   /**
    * Gets the RDF properties set on the specified resource
@@ -127,7 +184,12 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    * @throws GateOntologyException
    */
-  public Property[] getRDFProperties(String repositoryID, String theResourceURI)
+  @WebMethod(operationName = "getRDFPropertiesForResource")
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyArrayResponse")
+  public Property[] getRDFProperties(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "theResourceURI") String theResourceURI)
           throws GateOntologyException;
 
   /**
@@ -138,8 +200,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    * @throws GateOntologyException
    */
-  public Property[] getDatatypeProperties(String repositoryID,
-          String theResourceURI) throws GateOntologyException;
+  @WebMethod(operationName = "getDatatypePropertiesForResource")
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyArrayResponse")
+  public Property[] getDatatypeProperties(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "theResourceURI") String theResourceURI)
+          throws GateOntologyException;
 
   /**
    * Gets the object properties set on the specified resource
@@ -149,8 +216,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    * @throws GateOntologyException
    */
-  public Property[] getObjectProperties(String repositoryID,
-          String theResourceURI) throws GateOntologyException;
+  @WebMethod(operationName = "getObjectPropertiesForResource")
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyArrayResponse")
+  public Property[] getObjectProperties(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "theResourceURI") String theResourceURI)
+          throws GateOntologyException;
 
   /**
    * Gets the transitive properties set on the specified resource
@@ -160,8 +232,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    * @throws GateOntologyException
    */
-  public Property[] getTransitiveProperties(String repositoryID,
-          String theResourceURI) throws GateOntologyException;
+  @WebMethod(operationName = "getTransitivePropertiesForResource")
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyArrayResponse")
+  public Property[] getTransitiveProperties(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "theResourceURI") String theResourceURI)
+          throws GateOntologyException;
 
   /**
    * Gets the symmetric properties set on the specified resource
@@ -171,8 +248,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    * @throws GateOntologyException
    */
-  public Property[] getSymmetricProperties(String repositoryID,
-          String theResourceURI) throws GateOntologyException;
+  @WebMethod(operationName = "getSymmetricPropertiesForResource")
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyArrayResponse")
+  public Property[] getSymmetricProperties(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "theResourceURI") String theResourceURI)
+          throws GateOntologyException;
 
   /**
    * returns if the given property is an Annotation property
@@ -180,7 +262,11 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aPropertyURI
    * @return Done
    */
-  public boolean isAnnotationProperty(String repositoryID, String aPropertyURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean isAnnotationProperty(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI)
           throws GateOntologyException;
 
   /**
@@ -190,9 +276,15 @@ public interface OWLIM extends java.rmi.Remote {
    * @param value the value containing some value
    * @return
    */
-  public void addAnnotationPropertyValue(String repositoryID,
-          String theResourceURI, String theAnnotationPropertyURI, String value,
-          String language) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void addAnnotationPropertyValue(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "theResourceURI") String theResourceURI,
+          @WebParam(name = "theAnnotationPropertyURI") String theAnnotationPropertyURI,
+          @WebParam(name = "value") String value,
+          @WebParam(name = "language") String language)
+          throws GateOntologyException;
 
   /**
    * Gets the list of annotation property values
@@ -202,8 +294,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param theAnnotationPropertyURI
    * @return
    */
-  public PropertyValue[] getAnnotationPropertyValues(String repositoryID,
-          String theResourceURI, String theAnnotationPropertyURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyValueArrayResponse")
+  public PropertyValue[] getAnnotationPropertyValues(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "theResourceURI") String theResourceURI,
+          @WebParam(name = "theAnnotationPropertyURI") String theAnnotationPropertyURI)
           throws GateOntologyException;
 
   /**
@@ -215,9 +312,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param language
    * @return
    */
-  public String getAnnotationPropertyValue(String repositoryID,
-          String theResourceURI, String theAnnotationPropertyURI,
-          String language) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public String getAnnotationPropertyValue(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "theResourceURI") String theResourceURI,
+          @WebParam(name = "theAnnotationPropertyURI") String theAnnotationPropertyURI,
+          @WebParam(name = "language") String language)
+          throws GateOntologyException;
 
   /**
    * For the current resource, the method removes the given literal for
@@ -226,17 +328,27 @@ public interface OWLIM extends java.rmi.Remote {
    * @param theAnnotationProperty
    * @param literal
    */
-  public void removeAnnotationPropertyValue(String repositoryID,
-          String theResourceURI, String theAnnotationPropertyURI, String value,
-          String language) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void removeAnnotationPropertyValue(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "theResourceURI") String theResourceURI,
+          @WebParam(name = "theAnnotationPropertyURI") String theAnnotationPropertyURI,
+          @WebParam(name = "value") String value,
+          @WebParam(name = "language") String language)
+          throws GateOntologyException;
 
   /**
    * Removes all values for a named property.
    * 
    * @param theProperty the property
    */
-  public void removeAnnotationPropertyValues(String repositoryID,
-          String theResourceURI, String theAnnotationPropertyURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void removeAnnotationPropertyValues(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "theResourceURI") String theResourceURI,
+          @WebParam(name = "theAnnotationPropertyURI") String theAnnotationPropertyURI)
           throws GateOntologyException;
 
   // **************
@@ -250,8 +362,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param domainClassesURIs
    * @param rangeClassesTypes Done
    */
-  public void addRDFProperty(String repositoryID, String aPropertyURI,
-          String[] domainClassesURIs, String[] rangeClassesTypes)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void addRDFProperty(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI,
+          @WebParam(name = "domainClassesURIs") String[] domainClassesURIs,
+          @WebParam(name = "rangeClassesTypes") String[] rangeClassesTypes)
           throws GateOntologyException;
 
   /**
@@ -260,7 +377,11 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aPropertyURI
    * @return Done
    */
-  public boolean isRDFProperty(String repositoryID, String aPropertyURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean isRDFProperty(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI)
           throws GateOntologyException;
 
   // **************
@@ -274,8 +395,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param domainClassesURIs
    * @param dataTypeURI Done
    */
-  public void addDataTypeProperty(String repositoryID, String aPropertyURI,
-          String[] domainClassesURIs, String dataTypeURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void addDataTypeProperty(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI,
+          @WebParam(name = "domainClassesURIs") String[] domainClassesURIs,
+          @WebParam(name = "dataTypeURI") String dataTypeURI)
           throws GateOntologyException;
 
   /**
@@ -286,7 +412,11 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    * @throws GateOntologyException
    */
-  public String getDatatype(String repositoryID, String theDatatypePropertyURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public String getDatatype(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "theDatatypePropertyURI") String theDatatypePropertyURI)
           throws GateOntologyException;
 
   // **************
@@ -299,8 +429,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aPropertyURI
    * @param domainAndRangeClassesURIs Done
    */
-  public void addSymmetricProperty(String repositoryID, String aPropertyURI,
-          String[] domainAndRangeClassesURIs) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void addSymmetricProperty(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI,
+          @WebParam(name = "domainAndRangeClassesURIs") String[] domainAndRangeClassesURIs)
+          throws GateOntologyException;
 
   /**
    * Checkes whether the two properties are Equivalent.
@@ -310,8 +445,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    * @throws GateOntologyException
    */
-  public boolean isEquivalentPropertyAs(String repositoryID,
-          String aPropertyURI1, String aPropertyURI2) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean isEquivalentPropertyAs(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI1") String aPropertyURI1,
+          @WebParam(name = "aPropertyURI2") String aPropertyURI2)
+          throws GateOntologyException;
 
   /**
    * for the given property, the method returns all its super properties
@@ -320,8 +460,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param direct
    * @return
    */
-  public Property[] getSuperProperties(String repositoryID,
-          String aPropertyURI, byte direct) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyArrayResponse")
+  public Property[] getSuperProperties(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI,
+          @WebParam(name = "direct") byte direct)
+          throws GateOntologyException;
 
   /**
    * for the given property, the method returns all its sub properties
@@ -330,21 +476,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param direct
    * @return
    */
-  public Property[] getSubProperties(String repositoryID, String aPropertyURI,
-          byte direct) throws GateOntologyException;
-
-  /**
-   * Checkes whether the two properties have a super-sub relation.
-   * 
-   * @param repositoryID
-   * @param aSuperPropertyURI
-   * @param aSubPropertyURI
-   * @param direct
-   * @return
-   * @throws GateOntologyException
-   */
-  public boolean isSuperPropertyOf(String repositoryID,
-          String aSuperPropertyURI, String aSubPropertyURI, byte direct)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyArrayResponse")
+  public Property[] getSubProperties(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI,
+          @WebParam(name = "direct") byte direct)
           throws GateOntologyException;
 
   /**
@@ -357,8 +495,33 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    * @throws GateOntologyException
    */
-  public boolean isSubPropertyOf(String repositoryID, String aSuperPropertyURI,
-          String aSubPropertyURI, byte direct) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean isSuperPropertyOf(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aSuperPropertyURI") String aSuperPropertyURI,
+          @WebParam(name = "aSubPropertyURI") String aSubPropertyURI,
+          @WebParam(name = "direct") byte direct)
+          throws GateOntologyException;
+
+  /**
+   * Checkes whether the two properties have a super-sub relation.
+   * 
+   * @param repositoryID
+   * @param aSuperPropertyURI
+   * @param aSubPropertyURI
+   * @param direct
+   * @return
+   * @throws GateOntologyException
+   */
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean isSubPropertyOf(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aSuperPropertyURI") String aSuperPropertyURI,
+          @WebParam(name = "aSubPropertyURI") String aSubPropertyURI,
+          @WebParam(name = "direct") byte direct)
+          throws GateOntologyException;
 
   /**
    * Given a class and instance URIs, the method checks if the latter is
@@ -370,8 +533,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param individualURI
    * @return Done
    */
-  public boolean hasIndividual(String repositoryID, String aSuperClassURI,
-          String individualURI, byte direct) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean hasIndividual(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aSuperClassURI") String aSuperClassURI,
+          @WebParam(name = "individualURI") String individualURI,
+          @WebParam(name = "direct") byte direct)
+          throws GateOntologyException;
 
   /**
    * Returns whether the individual1 is different from the individual2.
@@ -381,8 +550,12 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    * @throws GateOntologyException
    */
-  public boolean isDifferentIndividualFrom(String repositoryID,
-          String theInstanceURI1, String theInstanceURI2)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean isDifferentIndividualFrom(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "theInstanceURI1") String theInstanceURI1,
+          @WebParam(name = "theInstanceURI2") String theInstanceURI2)
           throws GateOntologyException;
 
   /**
@@ -394,8 +567,12 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    * @throws GateOntologyException
    */
-  public boolean isSameIndividualAs(String repositoryID,
-          String theInstanceURI1, String theInstanceURI2)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean isSameIndividualAs(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "theInstanceURI1") String theInstanceURI1,
+          @WebParam(name = "theInstanceURI2") String theInstanceURI2)
           throws GateOntologyException;
 
   // *************
@@ -410,8 +587,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aResourceURI
    * @throws InvalidValueException
    */
-  public void addRDFPropertyValue(String repositoryID, String anInstanceURI,
-          String anRDFPropertyURI, String aResourceURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void addRDFPropertyValue(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "anInstanceURI") String anInstanceURI,
+          @WebParam(name = "anRDFPropertyURI") String anRDFPropertyURI,
+          @WebParam(name = "aResourceURI") String aResourceURI)
+          throws GateOntologyException;
 
   /**
    * Removes the specified RDF Property Value
@@ -421,8 +604,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param anRDFPropertyURI
    * @param aResourceURI
    */
-  public void removeRDFPropertyValue(String repositoryID, String anInstanceURI,
-          String anRDFPropertyURI, String aResourceURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void removeRDFPropertyValue(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "anInstanceURI") String anInstanceURI,
+          @WebParam(name = "anRDFPropertyURI") String anRDFPropertyURI,
+          @WebParam(name = "aResourceURI") String aResourceURI)
+          throws GateOntologyException;
 
   /**
    * gets the rdf property values for the specified instance.
@@ -432,8 +621,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param anRDFPropertyURI
    * @return resource URIs
    */
-  public ResourceInfo[] getRDFPropertyValues(String repositoryID,
-          String anInstanceURI, String anRDFPropertyURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.ResourceInfoArrayResponse")
+  public ResourceInfo[] getRDFPropertyValues(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "anInstanceURI") String anInstanceURI,
+          @WebParam(name = "anRDFPropertyURI") String anRDFPropertyURI)
+          throws GateOntologyException;
 
   /**
    * Removes all the RDF Property values from the given instance.
@@ -442,8 +637,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param anInstanceURI
    * @param anRDFPropertyURI
    */
-  public void removeRDFPropertyValues(String repositoryID,
-          String anInstanceURI, String anRDFPropertyURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void removeRDFPropertyValues(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "anInstanceURI") String anInstanceURI,
+          @WebParam(name = "anRDFPropertyURI") String anRDFPropertyURI)
+          throws GateOntologyException;
 
   // ******************
   // DataType Properties
@@ -458,9 +658,15 @@ public interface OWLIM extends java.rmi.Remote {
    * @param value
    * @throws InvalidValueException
    */
-  public void addDatatypePropertyValue(String repositoryID,
-          String anInstanceURI, String aDatatypePropertyURI,
-          String datatypeURI, String value) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void addDatatypePropertyValue(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "anInstanceURI") String anInstanceURI,
+          @WebParam(name = "aDatatypePropertyURI") String aDatatypePropertyURI,
+          @WebParam(name = "datatypeURI") String datatypeURI,
+          @WebParam(name = "value") String value)
+          throws GateOntologyException;
 
   /**
    * Removes the provided value for the given instance.
@@ -471,9 +677,15 @@ public interface OWLIM extends java.rmi.Remote {
    * @param datatypeURI
    * @param value
    */
-  public void removeDatatypePropertyValue(String repositoryID,
-          String anInstanceURI, String aDatatypePropertyURI,
-          String datatypeURI, String value) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void removeDatatypePropertyValue(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "anInstanceURI") String anInstanceURI,
+          @WebParam(name = "aDatatypePropertyURI") String aDatatypePropertyURI,
+          @WebParam(name = "datatypeURI") String datatypeURI,
+          @WebParam(name = "value") String value)
+          throws GateOntologyException;
 
   /**
    * Gets a list of values for the given Property.
@@ -483,8 +695,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aDatatypePropertyURI
    * @return
    */
-  public PropertyValue[] getDatatypePropertyValues(String repositoryID,
-          String anInstanceURI, String aDatatypePropertyURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyValueArrayResponse")
+  public PropertyValue[] getDatatypePropertyValues(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "anInstanceURI") String anInstanceURI,
+          @WebParam(name = "aDatatypePropertyURI") String aDatatypePropertyURI)
           throws GateOntologyException;
 
   /**
@@ -495,8 +712,12 @@ public interface OWLIM extends java.rmi.Remote {
    * @param anInstanceURI
    * @param aDatatypePropertyURI
    */
-  public void removeDatatypePropertyValues(String repositoryID,
-          String anInstanceURI, String aDatatypePropertyURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void removeDatatypePropertyValues(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "anInstanceURI") String anInstanceURI,
+          @WebParam(name = "aDatatypePropertyURI") String aDatatypePropertyURI)
           throws GateOntologyException;
 
   // ******************
@@ -512,9 +733,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param theValueInstanceURI
    * @throws InvalidValueException
    */
-  public void addObjectPropertyValue(String repositoryID,
-          String sourceInstanceURI, String anObjectPropertyURI,
-          String theValueInstanceURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void addObjectPropertyValue(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "sourceInstanceURI") String sourceInstanceURI,
+          @WebParam(name = "anObjectPropertyURI") String anObjectPropertyURI,
+          @WebParam(name = "theValueInstanceURI") String theValueInstanceURI)
+          throws GateOntologyException;
 
   /**
    * Remove the provided value for the given property (Object, Symmetric
@@ -526,9 +752,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param theValueInstanceURI
    * @return
    */
-  public void removeObjectPropertyValue(String repositoryID,
-          String sourceInstanceURI, String anObjectPropertyURI,
-          String theValueInstanceURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void removeObjectPropertyValue(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "sourceInstanceURI") String sourceInstanceURI,
+          @WebParam(name = "anObjectPropertyURI") String anObjectPropertyURI,
+          @WebParam(name = "theValueInstanceURI") String theValueInstanceURI)
+          throws GateOntologyException;
 
   /**
    * Gets a list of values for the given Property (Object, Symmetric and
@@ -539,8 +770,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param anObjectPropertyURI
    * @return
    */
-  public String[] getObjectPropertyValues(String repositoryID,
-          String sourceInstanceURI, String anObjectPropertyURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.StringArrayResponse")
+  public String[] getObjectPropertyValues(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "sourceInstanceURI") String sourceInstanceURI,
+          @WebParam(name = "anObjectPropertyURI") String anObjectPropertyURI)
           throws GateOntologyException;
 
   /**
@@ -551,8 +787,12 @@ public interface OWLIM extends java.rmi.Remote {
    * @param sourceInstanceURI
    * @param anObjectPropertyURI
    */
-  public void removeObjectPropertyValues(String repositoryID,
-          String sourceInstanceURI, String anObjectPropertyURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void removeObjectPropertyValues(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "sourceInstanceURI") String sourceInstanceURI,
+          @WebParam(name = "anObjectPropertyURI") String anObjectPropertyURI)
           throws GateOntologyException;
 
   // ****************************************************************************
@@ -570,12 +810,21 @@ public interface OWLIM extends java.rmi.Remote {
    * @param password
    * @return
    */
-  public boolean login(String username, String password) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean login(
+          @WebParam(name = "username") String username,
+          @WebParam(name = "password") String password)
+          throws GateOntologyException;
 
   /**
    * End the session by logging out
    */
-  public void logout(String repositoryID) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void logout(
+          @WebParam(name = "repositoryID") String repositoryID)
+          throws GateOntologyException;
 
   // ****************************************************************************
   // repository methods
@@ -583,18 +832,28 @@ public interface OWLIM extends java.rmi.Remote {
   /**
    * Find out the list of repository list
    */
-  public String[] getRepositoryList() throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.StringArrayResponse")
+  public String[] getRepositoryList()
+          throws GateOntologyException;
 
   /**
    * sets the provided repository as a current repository
    */
-  public void setCurrentRepositoryID(String repositoryID)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void setCurrentRepositoryID(
+          @WebParam(name = "repositoryID") String repositoryID)
           throws GateOntologyException;
 
   /**
    * This method returns the ID of current repository
    */
-  public String getCurrentRepositoryID() throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public String getCurrentRepositoryID()
+          throws GateOntologyException;
 
   /**
    * Users are allowed to create new repositories and add data into it.
@@ -619,10 +878,19 @@ public interface OWLIM extends java.rmi.Remote {
    * @param persist
    * @return
    */
-  public String createRepository(String repositoryID, String username,
-          String password, String ontoData, String baseURI, byte format,
-          String absolutePersistLocation, boolean persist,
-          boolean returnSystemStatements) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public String createRepository(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "username") String username,
+          @WebParam(name = "password") String password,
+          @WebParam(name = "ontoData") String ontoData,
+          @WebParam(name = "baseURI") String baseURI,
+          @WebParam(name = "format") byte format,
+          @WebParam(name = "absolutePersistLocation") String absolutePersistLocation,
+          @WebParam(name = "persist") boolean persist,
+          @WebParam(name = "returnSystemStatements") boolean returnSystemStatements)
+          throws GateOntologyException;
 
   /**
    * Users are allowed to create new repositories and add data into it.
@@ -646,10 +914,19 @@ public interface OWLIM extends java.rmi.Remote {
    * @param persist
    * @return
    */
-  public String createRepositoryFromUrl(String repositoryID, String username,
-          String password, String ontoFileUrl, String baseURI, byte format,
-          String absolutePersistLocation, boolean persist,
-          boolean returnSystemStatements) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public String createRepositoryFromUrl(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "username") String username,
+          @WebParam(name = "password") String password,
+          @WebParam(name = "ontoFileUrl") String ontoFileUrl,
+          @WebParam(name = "baseURI") String baseURI,
+          @WebParam(name = "format") byte format,
+          @WebParam(name = "absolutePersistLocation") String absolutePersistLocation,
+          @WebParam(name = "persist") boolean persist,
+          @WebParam(name = "returnSystemStatements") boolean returnSystemStatements)
+          throws GateOntologyException;
 
   /**
    * Removes the repository with given ID
@@ -657,7 +934,11 @@ public interface OWLIM extends java.rmi.Remote {
    * @param repositoryID
    * @return
    */
-  public void removeRepository(String repositoryID, boolean persist)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void removeRepository(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "persist") boolean persist)
           throws GateOntologyException;
 
   // *******************************************************************
@@ -666,7 +947,11 @@ public interface OWLIM extends java.rmi.Remote {
   /**
    * The method removes all data from the available graph.
    */
-  public void cleanOntology(String repositoryID) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void cleanOntology(
+          @WebParam(name = "repositoryID") String repositoryID)
+          throws GateOntologyException;
 
   /**
    * This method is useful to export results. Given one of the four
@@ -677,7 +962,11 @@ public interface OWLIM extends java.rmi.Remote {
    * @param format
    * @return
    */
-  public String getOntologyData(String repositoryID, byte format)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public String getOntologyData(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "format") byte format)
           throws GateOntologyException;
 
   /**
@@ -685,7 +974,11 @@ public interface OWLIM extends java.rmi.Remote {
    * 
    * @param versionInfo
    */
-  public void setVersion(String repositoryID, String versionInfo)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void setVersion(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "versionInfo") String versionInfo)
           throws GateOntologyException;
 
   /**
@@ -693,7 +986,11 @@ public interface OWLIM extends java.rmi.Remote {
    * 
    * @return
    */
-  public String getVersion(String repositoryID) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public String getVersion(
+          @WebParam(name = "repositoryID") String repositoryID)
+          throws GateOntologyException;
 
   // *******************************************************************
   // class methods
@@ -707,7 +1004,12 @@ public interface OWLIM extends java.rmi.Remote {
    *          MIN_CARDINALITY_RESTRICTION, MAX_CARDINALITY_RESTRICTION,
    *          HAS_VALUE_RESTRICTION, ALL_VALUES_FROM_RESTRICTION.
    */
-  public void addClass(String repositoryID, String classURI, byte classType)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void addClass(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "classURI") String classURI,
+          @WebParam(name = "classType") byte classType)
           throws GateOntologyException;
 
   /**
@@ -719,7 +1021,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @return a list of other resources, which got removed as a result of
    *         this deletion
    */
-  public String[] removeClass(String repositoryID, String classURI, boolean deleteSubTree)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.StringArrayResponse")
+  public String[] removeClass(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "classURI") String classURI,
+          @WebParam(name = "deleteSubTree") boolean deleteSubTree)
           throws GateOntologyException;
 
   
@@ -729,7 +1037,11 @@ public interface OWLIM extends java.rmi.Remote {
    * 
    * @return
    */
-  public boolean hasClass(String repositoryID, String classURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean hasClass(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "classURI") String classURI)
           throws GateOntologyException;
 
   /**
@@ -740,7 +1052,12 @@ public interface OWLIM extends java.rmi.Remote {
    * @param top
    * @return
    */
-  public ResourceInfo[] getClasses(String repositoryID, boolean top)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.ResourceInfoArrayResponse")
+  public ResourceInfo[] getClasses(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "top") boolean top)
           throws GateOntologyException;
 
   /**
@@ -750,7 +1067,11 @@ public interface OWLIM extends java.rmi.Remote {
    * @param classURI
    * @return
    */
-  public boolean isTopClass(String repositoryID, String classURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean isTopClass(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "classURI") String classURI)
           throws GateOntologyException;
 
   // ****************************************************************************
@@ -764,8 +1085,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param superClassURI
    * @param subClassURI
    */
-  public void addSubClass(String repositoryID, String superClassURI,
-          String subClassURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void addSubClass(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "superClassURI") String superClassURI,
+          @WebParam(name = "subClassURI") String subClassURI)
+          throws GateOntologyException;
 
   /**
    * The method creates a new class with the URI as specified in
@@ -775,8 +1101,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param superClassURI
    * @param subClassURI
    */
-  public void addSuperClass(String repositoryID, String superClassURI,
-          String subClassURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void addSuperClass(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "superClassURI") String superClassURI,
+          @WebParam(name = "subClassURI") String subClassURI)
+          throws GateOntologyException;
 
   /**
    * Removes the subclass relationship
@@ -784,8 +1115,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param superClassURI
    * @param subClassURI
    */
-  public void removeSubClass(String repositoryID, String superClassURI,
-          String subClassURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void removeSubClass(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "superClassURI") String superClassURI,
+          @WebParam(name = "subClassURI") String subClassURI)
+          throws GateOntologyException;
 
   /**
    * Removes the superclass relationship
@@ -793,8 +1129,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param superClassURI
    * @param subClassURI
    */
-  public void removeSuperClass(String repositoryID, String superClassURI,
-          String subClassURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void removeSuperClass(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "superClassURI") String superClassURI,
+          @WebParam(name = "subClassURI") String subClassURI)
+          throws GateOntologyException;
 
   /**
    * This method returns all sub classes of the given class
@@ -803,8 +1144,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param direct
    * @return
    */
-  public ResourceInfo[] getSubClasses(String repositoryID,
-          String superClassURI, byte direct) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.ResourceInfoArrayResponse")
+  public ResourceInfo[] getSubClasses(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "superClassURI") String superClassURI,
+          @WebParam(name = "direct") byte direct)
+          throws GateOntologyException;
 
   /**
    * This method returns all super classes of the given class
@@ -813,8 +1160,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param direct
    * @return
    */
-  public ResourceInfo[] getSuperClasses(String repositoryID,
-          String subClassURI, byte direct) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.ResourceInfoArrayResponse")
+  public ResourceInfo[] getSuperClasses(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "subClassURI") String subClassURI,
+          @WebParam(name = "direct") byte direct)
+          throws GateOntologyException;
 
   /**
    * Sets the classes as disjoint
@@ -822,8 +1175,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param class1URI
    * @param class2URI
    */
-  public void setDisjointClassWith(String repositoryID, String class1URI,
-          String class2URI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void setDisjointClassWith(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "class1URI") String class1URI,
+          @WebParam(name = "class2URI") String class2URI)
+          throws GateOntologyException;
 
   /**
    * Sets the classes as same classes
@@ -831,8 +1189,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param class1URI
    * @param class2URI
    */
-  public void setEquivalentClassAs(String repositoryID, String class1URI,
-          String class2URI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void setEquivalentClassAs(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "class1URI") String class1URI,
+          @WebParam(name = "class2URI") String class2URI)
+          throws GateOntologyException;
 
   /**
    * returns an array of classes which are marked as disjoint for the
@@ -841,7 +1204,12 @@ public interface OWLIM extends java.rmi.Remote {
    * @param classURI
    * @return
    */
-  public String[] getDisjointClasses(String repositoryID, String classURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.StringArrayResponse")
+  public String[] getDisjointClasses(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "classURI") String classURI)
           throws GateOntologyException;
 
   /**
@@ -850,8 +1218,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aClassURI
    * @return
    */
-  public ResourceInfo[] getEquivalentClasses(String repositoryID,
-          String aClassURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.ResourceInfoArrayResponse")
+  public ResourceInfo[] getEquivalentClasses(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aClassURI") String aClassURI)
+          throws GateOntologyException;
 
   /**
    * Removes the given property
@@ -860,8 +1233,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param removeSubTree
    * @return a list of names of resources deleted as a result of deleting this property from the ontology.
    */
-  public String[] removePropertyFromOntology(String repositoryID,
-          String aPropertyURI, boolean removeSubTree) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.StringArrayResponse")
+  public String[] removePropertyFromOntology(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI,
+          @WebParam(name = "removeSubTree") boolean removeSubTree)
+          throws GateOntologyException;
 
   /**
    * The method adds an object property specifiying domain and range for
@@ -871,8 +1250,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param domainClassesURIs
    * @param rangeClassesTypes
    */
-  public void addObjectProperty(String repositoryID, String aPropertyURI,
-          String[] domainClassesURIs, String[] rangeClassesTypes)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void addObjectProperty(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI,
+          @WebParam(name = "domainClassesURIs") String[] domainClassesURIs,
+          @WebParam(name = "rangeClassesTypes") String[] rangeClassesTypes)
           throws GateOntologyException;
 
   /**
@@ -883,8 +1267,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param domainClassesURIs
    * @param rangeClassesTypes
    */
-  public void addTransitiveProperty(String repositoryID, String aPropertyURI,
-          String[] domainClassesURIs, String[] rangeClassesTypes)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void addTransitiveProperty(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI,
+          @WebParam(name = "domainClassesURIs") String[] domainClassesURIs,
+          @WebParam(name = "rangeClassesTypes") String[] rangeClassesTypes)
           throws GateOntologyException;
 
   /**
@@ -894,7 +1283,11 @@ public interface OWLIM extends java.rmi.Remote {
    * 
    * @return
    */
-  public Property[] getRDFProperties(String repositoryID)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyArrayResponse")
+  public Property[] getRDFProperties(
+          @WebParam(name = "repositoryID") String repositoryID)
           throws GateOntologyException;
 
   /**
@@ -904,7 +1297,11 @@ public interface OWLIM extends java.rmi.Remote {
    * 
    * @return
    */
-  public Property[] getObjectProperties(String repositoryID)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyArrayResponse")
+  public Property[] getObjectProperties(
+          @WebParam(name = "repositoryID") String repositoryID)
           throws GateOntologyException;
 
   /**
@@ -914,7 +1311,11 @@ public interface OWLIM extends java.rmi.Remote {
    * 
    * @return
    */
-  public Property[] getSymmetricProperties(String repositoryID)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyArrayResponse")
+  public Property[] getSymmetricProperties(
+          @WebParam(name = "repositoryID") String repositoryID)
           throws GateOntologyException;
 
   /**
@@ -924,7 +1325,11 @@ public interface OWLIM extends java.rmi.Remote {
    * 
    * @return
    */
-  public Property[] getTransitiveProperties(String repositoryID)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyArrayResponse")
+  public Property[] getTransitiveProperties(
+          @WebParam(name = "repositoryID") String repositoryID)
           throws GateOntologyException;
 
   /**
@@ -934,7 +1339,11 @@ public interface OWLIM extends java.rmi.Remote {
    * 
    * @return
    */
-  public Property[] getDatatypeProperties(String repositoryID)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyArrayResponse")
+  public Property[] getDatatypeProperties(
+          @WebParam(name = "repositoryID") String repositoryID)
           throws GateOntologyException;
 
   /**
@@ -944,7 +1353,11 @@ public interface OWLIM extends java.rmi.Remote {
    * 
    * @return
    */
-  public Property[] getAnnotationProperties(String repositoryID)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyArrayResponse")
+  public Property[] getAnnotationProperties(
+          @WebParam(name = "repositoryID") String repositoryID)
           throws GateOntologyException;
 
   /**
@@ -953,7 +1366,12 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aPropertyURI
    * @return
    */
-  public ResourceInfo[] getDomain(String repositoryID, String aPropertyURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.ResourceInfoArrayResponse")
+  public ResourceInfo[] getDomain(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI)
           throws GateOntologyException;
 
   /**
@@ -962,7 +1380,12 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aPropertyURI
    * @return
    */
-  public ResourceInfo[] getRange(String repositoryID, String aPropertyURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.ResourceInfoArrayResponse")
+  public ResourceInfo[] getRange(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI)
           throws GateOntologyException;
 
   /**
@@ -971,7 +1394,11 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aPropertyURI
    * @return
    */
-  public boolean isFunctional(String repositoryID, String aPropertyURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean isFunctional(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI)
           throws GateOntologyException;
 
   /**
@@ -980,8 +1407,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aPropertyURI
    * @param isFunctional
    */
-  public void setFunctional(String repositoryID, String aPropertyURI,
-          boolean isFunctional) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void setFunctional(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI,
+          @WebParam(name = "isFunctional") boolean isFunctional)
+          throws GateOntologyException;
 
   /**
    * returns if the given property is inverse functional property
@@ -989,7 +1421,11 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aPropertyURI
    * @return
    */
-  public boolean isInverseFunctional(String repositoryID, String aPropertyURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean isInverseFunctional(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI)
           throws GateOntologyException;
 
   /**
@@ -998,8 +1434,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aPropertyURI
    * @param isInverseFunctional
    */
-  public void setInverseFunctional(String repositoryID, String aPropertyURI,
-          boolean isInverseFunctional) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void setInverseFunctional(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI,
+          @WebParam(name = "isInverseFunctional") boolean isInverseFunctional)
+          throws GateOntologyException;
 
   /**
    * returns if the given property is a symmetric property
@@ -1007,7 +1448,11 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aPropertyURI
    * @return
    */
-  public boolean isSymmetricProperty(String repositoryID, String aPropertyURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean isSymmetricProperty(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI)
           throws GateOntologyException;
 
   /**
@@ -1016,7 +1461,11 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aPropertyURI
    * @return
    */
-  public boolean isTransitiveProperty(String repositoryID, String aPropertyURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean isTransitiveProperty(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI)
           throws GateOntologyException;
 
   /**
@@ -1025,7 +1474,11 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aPropertyURI
    * @return
    */
-  public boolean isDatatypeProperty(String repositoryID, String aPropertyURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean isDatatypeProperty(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI)
           throws GateOntologyException;
 
   /**
@@ -1034,7 +1487,11 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aPropertyURI
    * @return
    */
-  public boolean isObjectProperty(String repositoryID, String aPropertyURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean isObjectProperty(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI)
           throws GateOntologyException;
 
   // *************************************
@@ -1046,8 +1503,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param property1URI
    * @param property2URI
    */
-  public void setEquivalentPropertyAs(String repositoryID, String property1URI,
-          String property2URI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void setEquivalentPropertyAs(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "property1URI") String property1URI,
+          @WebParam(name = "property2URI") String property2URI)
+          throws GateOntologyException;
 
   /**
    * For the given property, this method returns all properties marked
@@ -1056,8 +1518,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aPropertyURI
    * @return
    */
-  public Property[] getEquivalentPropertyAs(String repositoryID,
-          String aPropertyURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyArrayResponse")
+  public Property[] getEquivalentPropertyAs(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI)
+          throws GateOntologyException;
 
   /**
    * For the given properties, this method registers the super, sub
@@ -1066,8 +1533,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param superPropertyURI
    * @param subPropertyURI
    */
-  public void addSuperProperty(String repositoryID, String superPropertyURI,
-          String subPropertyURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void addSuperProperty(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "superPropertyURI") String superPropertyURI,
+          @WebParam(name = "subPropertyURI") String subPropertyURI)
+          throws GateOntologyException;
 
   /**
    * For the given properties, this method removes the super, sub
@@ -1076,8 +1548,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param superPropertyURI
    * @param subPropertyURI
    */
-  public void removeSuperProperty(String repositoryID, String superPropertyURI,
-          String subPropertyURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void removeSuperProperty(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "superPropertyURI") String superPropertyURI,
+          @WebParam(name = "subPropertyURI") String subPropertyURI)
+          throws GateOntologyException;
 
   /**
    * For the given properties, this method registers the super, sub
@@ -1086,8 +1563,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param superPropertyURI
    * @param subPropertyURI
    */
-  public void addSubProperty(String repositoryID, String superPropertyURI,
-          String subPropertyURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void addSubProperty(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "superPropertyURI") String superPropertyURI,
+          @WebParam(name = "subPropertyURI") String subPropertyURI)
+          throws GateOntologyException;
 
   /**
    * For the given properties, this method removes the super, sub
@@ -1096,8 +1578,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param superPropertyURI
    * @param subPropertyURI
    */
-  public void removeSubProperty(String repositoryID, String superPropertyURI,
-          String subPropertyURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void removeSubProperty(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "superPropertyURI") String superPropertyURI,
+          @WebParam(name = "subPropertyURI") String subPropertyURI)
+          throws GateOntologyException;
 
   /**
    * for the given property, the method returns all its super properties
@@ -1106,8 +1593,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param direct
    * @return
    */
-  public Property[] getSuperProperties(String repositoryID,
-          String aPropertyURI, boolean direct) throws GateOntologyException;
+  @WebMethod(operationName = "getSuperPropertiesBoolClosure")
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyArrayResponse")
+  public Property[] getSuperProperties(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI,
+          @WebParam(name = "direct") boolean direct)
+          throws GateOntologyException;
 
   /**
    * for the given property, the method returns all its sub properties
@@ -1116,8 +1609,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param direct
    * @return
    */
-  public Property[] getSubProperties(String repositoryID, String aPropertyURI,
-          boolean direct) throws GateOntologyException;
+  @WebMethod(operationName = "getSubPropertiesBoolClosure")
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyArrayResponse")
+  public Property[] getSubProperties(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI,
+          @WebParam(name = "direct") boolean direct)
+          throws GateOntologyException;
 
   /**
    * for the given property, the method returns all its inverse
@@ -1126,8 +1625,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param aPropertyURI
    * @return
    */
-  public Property[] getInverseProperties(String repositoryID,
-          String aPropertyURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyArrayResponse")
+  public Property[] getInverseProperties(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aPropertyURI") String aPropertyURI)
+          throws GateOntologyException;
 
   /**
    * property1 is set as inverse of property 2
@@ -1135,8 +1639,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param property1URI
    * @param property2URI
    */
-  public void setInverseOf(String repositoryID, String propertyURI1,
-          String propertyURI2) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void setInverseOf(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "propertyURI1") String propertyURI1,
+          @WebParam(name = "propertyURI2") String propertyURI2)
+          throws GateOntologyException;
 
   // *******************************************************************
   // *************************** Instance Methods **********************
@@ -1149,8 +1658,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param superClassURI
    * @param individualURI
    */
-  public void addIndividual(String repositoryID, String superClassURI,
-          String individualURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void addIndividual(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "superClassURI") String superClassURI,
+          @WebParam(name = "individualURI") String individualURI)
+          throws GateOntologyException;
 
   /**
    * The method removes the provided instance from the repository.
@@ -1158,7 +1672,12 @@ public interface OWLIM extends java.rmi.Remote {
    * @param individual
    * @return
    */
-  public String[] removeIndividual(String repositoryID, String individualURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.StringArrayResponse")
+  public String[] removeIndividual(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "individualURI") String individualURI)
           throws GateOntologyException;
 
   /**
@@ -1169,15 +1688,26 @@ public interface OWLIM extends java.rmi.Remote {
    * @param superClassURI
    * @param direct
    */
-  public String[] getIndividuals(String repositoryID, String superClassURI,
-          byte direct) throws GateOntologyException;
+  @WebMethod(operationName = "getIndividualsOfClass")
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.StringArrayResponse")
+  public String[] getIndividuals(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "superClassURI") String superClassURI,
+          @WebParam(name = "direct") byte direct)
+          throws GateOntologyException;
 
   /**
    * returns all resources registered as individuals in the ontology
    * 
    * @return
    */
-  public String[] getIndividuals(String repositoryID) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.StringArrayResponse")
+  public String[] getIndividuals(
+          @WebParam(name = "repositoryID") String repositoryID)
+          throws GateOntologyException;
 
   /**
    * Given a class and instance URIs, the method checks if the latter is
@@ -1189,8 +1719,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param individualURI
    * @return
    */
-  public boolean hasIndividual(String repositoryID, String aSuperClassURI,
-          String individualURI, boolean direct) throws GateOntologyException;
+  @WebMethod(operationName = "hasIndividualBoolClosure")
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public boolean hasIndividual(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "aSuperClassURI") String aSuperClassURI,
+          @WebParam(name = "individualURI") String individualURI,
+          @WebParam(name = "direct") boolean direct)
+          throws GateOntologyException;
 
   /**
    * For the given individual, the method returns a set of classes for
@@ -1198,8 +1734,14 @@ public interface OWLIM extends java.rmi.Remote {
    * 
    * @param individualURI
    */
-  public ResourceInfo[] getClassesOfIndividual(String repositoryID,
-          String individualURI, byte direct) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.ResourceInfoArrayResponse")
+  public ResourceInfo[] getClassesOfIndividual(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "individualURI") String individualURI,
+          @WebParam(name = "direct") byte direct)
+          throws GateOntologyException;
 
   // *******************************************************************
   // relations among individuals
@@ -1210,8 +1752,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param individual1URI
    * @param individual2URI
    */
-  public void setDifferentIndividualFrom(String repositoryID,
-          String individual1URI, String individual2URI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void setDifferentIndividualFrom(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "individual1URI") String individual1URI,
+          @WebParam(name = "individual2URI") String individual2URI)
+          throws GateOntologyException;
 
   /**
    * for the given individual, the method returns all individuals
@@ -1220,8 +1767,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param individualURI
    * @return
    */
-  public String[] getDifferentIndividualFrom(String repositoryID,
-          String individualURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.StringArrayResponse")
+  public String[] getDifferentIndividualFrom(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "individualURI") String individualURI)
+          throws GateOntologyException;
 
   /**
    * individual1 is set as same as the individual2
@@ -1229,8 +1781,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param individual1URI
    * @param individual2URI
    */
-  public void setSameIndividualAs(String repositoryID, String individual1URI,
-          String individual2URI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void setSameIndividualAs(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "individual1URI") String individual1URI,
+          @WebParam(name = "individual2URI") String individual2URI)
+          throws GateOntologyException;
 
   /**
    * for the given individual, the method returns all individuals which
@@ -1239,7 +1796,12 @@ public interface OWLIM extends java.rmi.Remote {
    * @param inidividualURI
    * @return
    */
-  public String[] getSameIndividualAs(String repositoryID, String individualURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.StringArrayResponse")
+  public String[] getSameIndividualAs(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "individualURI") String individualURI)
           throws GateOntologyException;
 
   // ***********************************************
@@ -1255,7 +1817,11 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    * @throws GateOntologyException
    */
-  public Property getOnPropertyValue(String repositoryId, String restrictionURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public Property getOnPropertyValue(
+          @WebParam(name = "repositoryId") String repositoryId,
+          @WebParam(name = "restrictionURI") String restrictionURI)
           throws GateOntologyException;
 
   /**
@@ -1267,8 +1833,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @param propertyURI
    * @throws GateOntologyException
    */
-  public void setOnPropertyValue(String repositoryId, String restrictionURI,
-          String propertyURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void setOnPropertyValue(
+          @WebParam(name = "repositoryId") String repositoryId,
+          @WebParam(name = "restrictionURI") String restrictionURI,
+          @WebParam(name = "propertyURI") String propertyURI)
+          throws GateOntologyException;
 
   /**
    * Gets the property value specified on the given restriction uri.
@@ -1279,8 +1850,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    * @throws GateOntologyException
    */
-  public PropertyValue getPropertyValue(String repositoryID,
-          String restrictionURI, byte restrictionType) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public PropertyValue getPropertyValue(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "restrictionURI") String restrictionURI,
+          @WebParam(name = "restrictionType") byte restrictionType)
+          throws GateOntologyException;
 
   /**
    * Sets the datatype uri for the given restriction uri.
@@ -1292,8 +1868,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param datatypeURI
    * @throws GateOntologyException
    */
-  public void setPropertyValue(String repositoryID, String restrictionURI,
-          byte restrictionType, String value, String datatypeURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void setPropertyValue(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "restrictionURI") String restrictionURI,
+          @WebParam(name = "restrictionType") byte restrictionType,
+          @WebParam(name = "value") String value,
+          @WebParam(name = "datatypeURI") String datatypeURI)
           throws GateOntologyException;
 
   /**
@@ -1307,8 +1889,13 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    * @throws GateOntologyException
    */
-  public ResourceInfo getRestrictionValue(String repositoryID, String restrictionURI,
-          byte restrictionType) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public ResourceInfo getRestrictionValue(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "restrictionURI") String restrictionURI,
+          @WebParam(name = "restrictionType") byte restrictionType)
+          throws GateOntologyException;
 
   /**
    * Sets the cardinality value for the given restriction uri.
@@ -1322,8 +1909,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    * @throws GateOntologyException
    */
-  public void setRestrictionValue(String repositoryID, String restrictionURI,
-          byte restrictionType, String value) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void setRestrictionValue(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "restrictionURI") String restrictionURI,
+          @WebParam(name = "restrictionType") byte restrictionType,
+          @WebParam(name = "value") String value)
+          throws GateOntologyException;
 
   /**
    * This method tells what type of restriction the given uri refers to.
@@ -1338,16 +1931,30 @@ public interface OWLIM extends java.rmi.Remote {
    * @return
    * @throws GateOntologyException
    */
-  public byte getClassType(String repositoryID, String restrictionURI)
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public byte getClassType(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "restrictionURI") String restrictionURI)
           throws GateOntologyException;
 
   
-  public Property[] getPropertiesWithResourceAsDomain(String repositoryID,
-          String theResourceURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyArrayResponse")
+  public Property[] getPropertiesWithResourceAsDomain(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "theResourceURI") String theResourceURI)
+          throws GateOntologyException;
   
   
-  public Property[] getPropertiesWithResourceAsRange(String repositoryID,
-          String theResourceURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  @ResponseWrapper(className = "gate.creole.ontology.owlim.PropertyArrayResponse")
+  public Property[] getPropertiesWithResourceAsRange(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "theResourceURI") String theResourceURI)
+          throws GateOntologyException;
   
   // ****************************************************
   // ******************** Generic statements ************
@@ -1361,8 +1968,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param predicateURI
    * @param objectURI
    */
-  public void addStatement(String repositoryID, String subjectURI,
-          String predicateURI, String objectURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void addStatement(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "subjectURI") String subjectURI,
+          @WebParam(name = "predicateURI") String predicateURI,
+          @WebParam(name = "objectURI") String objectURI)
+          throws GateOntologyException;
 
   /**
    * The method is useful for removing statements from the graph of
@@ -1374,8 +1987,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param predicateURI
    * @param objectURI
    */
-  public void removeStatement(String repositoryID, String subjectURI,
-          String predicateURI, String objectURI) throws GateOntologyException;
+  @WebMethod
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void removeStatement(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "subjectURI") String subjectURI,
+          @WebParam(name = "predicateURI") String predicateURI,
+          @WebParam(name = "objectURI") String objectURI)
+          throws GateOntologyException;
 
 
   /**
@@ -1388,8 +2007,15 @@ public interface OWLIM extends java.rmi.Remote {
    * @param objectURI
    * @param datatype
    */
-  public void addStatement(String repositoryID, String subject, String predicate,
-          String object, String datatype) throws GateOntologyException;
+  @WebMethod(operationName = "addStatementWithDatatype")
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void addStatement(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "subject") String subject,
+          @WebParam(name = "predicate") String predicate,
+          @WebParam(name = "object") String object,
+          @WebParam(name = "datatype") String datatype)
+          throws GateOntologyException;
 
   /**
    * The method is useful for adding statements into the graph. All
@@ -1401,7 +2027,14 @@ public interface OWLIM extends java.rmi.Remote {
    * @param objectURI
    * @param datatype
    */
-  public void removeStatement(String repositoryID, String subject, String predicate,
-          String object, String datatype) throws GateOntologyException;
+  @WebMethod(operationName = "removeStatementWithDatatype")
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public void removeStatement(
+          @WebParam(name = "repositoryID") String repositoryID,
+          @WebParam(name = "subject") String subject,
+          @WebParam(name = "predicate") String predicate,
+          @WebParam(name = "object") String object,
+          @WebParam(name = "datatype") String datatype)
+          throws GateOntologyException;
 
 }
