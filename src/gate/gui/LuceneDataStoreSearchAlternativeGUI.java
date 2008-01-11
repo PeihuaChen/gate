@@ -29,8 +29,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
+import java.util.regex.*;
 
-import javax.swing.table.AbstractTableModel;
+import javax.swing.table.*;
 import javax.swing.*;
 
 import gate.*;
@@ -83,18 +84,15 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
    */
   private PatternsTableModel patternsTableModel;
 
-  /**
-   * Contains the shortcuts for annotation type / feature saved by the user.
-   */
-  private JComboBox shortcutsBox;
-
   /** Combobox to list the types */
   private JComboBox annotTypesBox;
 
   private JComboBox featuresBox;
 
-  /** Button to allow addition of annotations and features */
-//  private JButton addAnnotTypeButton;
+  /**
+   * Display the feature manager.
+   */
+  private JButton featureManagerButton;
 
   /**
    * Button that allows retrieving next n number of results
@@ -177,12 +175,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
    */
   private JPanel topPanel;
   
-  /** Added Annotation Types */
-  private ArrayList<String> addedAnnotTypesInGUI;
-
-  /** Added Annotation features */
-  private ArrayList<String> addedAnnotFeatureInGUI;
-
   /** Color Generator */
   private gate.swing.ColorGenerator colorGenerator = new gate.swing.ColorGenerator();
 
@@ -213,13 +205,35 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
   /**
    * Current instance of the feature manager.
    */
-//  private FeaturesManager featuresManager;
+  private FeaturesManager featuresManager;
+
+  /** Names of the columns for shortcuts data. */
+  String[] columnNames =
+    {"Display", "Shortcut", "Annotation type","Feature", "Crop"};
+
+  /** Column (second dimension) of shortcuts double array. */
+  static private final int DISPLAY = 0;
+  /** Column (second dimension) of shortcuts double array. */
+  static private final int SHORTCUT = 1;
+  /** Column (second dimension) of shortcuts double array. */
+  static private final int ANNOTATION_TYPE = 2;
+  /** Column (second dimension) of shortcuts double array. */
+  static private final int FEATURE = 3;
+  /** Column (second dimension) of shortcuts double array. */
+  static private final int CROP = 4;
+
+  /** Maximum number of shortcut */
+  static private final int maxShortcuts = 100;
+
+  /** Number of shortcuts. */
+  private int numShortcuts = 0;
 
   /**
-   * Hashtable that contains the annotation type + feature as key and
-   * the shortcut as value.
+   * Double array that contains [row, column] of the shortcuts
+   * data.
    */
-  private TreeMap<String, String> featuresShortcuts;
+  private String[][] shortcuts =
+    new String[maxShortcuts][columnNames.length];
 
   /**
    * Searcher object obtained from the datastore
@@ -239,43 +253,22 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     populatedAnnotationTypesAndFeatures = new HashMap<String, Set<String>>();
 
     // read the user config data
-    featuresShortcuts = new TreeMap<String, String>();
     OptionsMap userConfig = Gate.getUserConfig();
     if (userConfig.get("Features_shortcuts") != null) {
-      // FIXME: depending of HashMap.toString() implementation !!!
-      // it would be better to rewrite gate.util.OptionsMap
-      // saved as a string: "{Token.category=Category, Token.kind=Kind}"
-      String featuresShortcutsString =
+      // saved as a string: "[[true, Cat, Token, category, Crop end], [...]]"
+      String shortcutsString =
         (String)userConfig.get("Features_shortcuts");
-      featuresShortcutsString = featuresShortcutsString.replaceAll("[{}]", ""); 
-      String[] featureShortcuts = featuresShortcutsString.split(", ");
-      for (String featureShortcut : featureShortcuts) {
-        String[] keyValue = featureShortcut.split("=");
-        featuresShortcuts.put(keyValue[0], keyValue[1]);
-      }
-    }
-    addedAnnotTypesInGUI = new ArrayList<String>();
-    if (userConfig.get("Added_annotation_types") != null) {
-      // saved as a string: Added_annotation_types="[Token, Token, Token]"
-      String addedAnnotTypesInGUIString =
-        (String)userConfig.get("Added_annotation_types");
-      addedAnnotTypesInGUIString =
-        addedAnnotTypesInGUIString.replaceAll("[\\]\\[]", "");
-      String[] features = addedAnnotTypesInGUIString.split(", ");
-      for (String feature : features) {
-        addedAnnotTypesInGUI.add(feature);
-      }
-    }
-    addedAnnotFeatureInGUI = new ArrayList<String>();
-    if (userConfig.get("Added_annotation_feature") != null) {
-      // saved as a string: Added_annotation_feature="[category, kind, length]"
-      String addedAnnotFeatureInGUIString =
-        (String)userConfig.get("Added_annotation_feature");
-      addedAnnotFeatureInGUIString =
-        addedAnnotFeatureInGUIString.replaceAll("[\\]\\[]", "");
-      String[] features = addedAnnotFeatureInGUIString.split(", ");
-      for (String feature : features) {
-        addedAnnotFeatureInGUI.add(feature);
+      shortcutsString = shortcutsString.replaceAll("^\\[\\[", ""); 
+      shortcutsString = shortcutsString.replaceAll("\\]\\]$", ""); 
+      String[] rows = shortcutsString.split("\\], \\[");
+      numShortcuts = rows.length;
+      if (shortcutsString.length() > 0) {
+        for (int row = 0; row < numShortcuts; row++) {
+          String[] cols = rows[row].split(", ");
+          for (int col = 0; col < cols.length; col++) {
+            shortcuts[row][col] = cols[col];
+          }
+        }
       }
     }
 
@@ -303,13 +296,17 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     // save the user config data
     // TODO: not called if the user doesn't close the datastore
     OptionsMap userConfig = Gate.getUserConfig();
-    if (featuresShortcuts.size() > 0) {
-      userConfig.put("Features_shortcuts", featuresShortcuts);
+    String shortcutsString = "[";
+    for (int row = 0; row < numShortcuts; row++) {
+      shortcutsString += (row==0)?"[":", [";
+      for (int col = 0; col < columnNames.length; col++) {
+        shortcutsString +=
+          (col==0)?shortcuts[row][col]:", "+shortcuts[row][col];
+      }
+      shortcutsString += "]";
     }
-    if (addedAnnotTypesInGUI.size() > 0 && addedAnnotFeatureInGUI.size() > 0) {
-      userConfig.put("Added_annotation_types", addedAnnotTypesInGUI);
-      userConfig.put("Added_annotation_feature", addedAnnotFeatureInGUI);
-    }
+    shortcutsString += "]";
+    userConfig.put("Features_shortcuts", shortcutsString);
   }
 
   /**
@@ -325,20 +322,67 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       initLocalData();
       updateGui();
       patternsTableModel.fireTableDataChanged();
+
       if(patternTable.getRowCount() > 0) {
+        // from the query display all the existing shortcuts that are not
+        // already displayed
+        String query = newQuery.getText();
+        ArrayList<String> toAdd = new ArrayList<String>();
+
+        if(query.length() > 0 && !patterns.isEmpty()) {
+          String[] posStart = new String[] {"{", ",", " "};
+          String[] posEnd = new String[] {"}", ".", ",", " ", "="};
+          outer: for(String annotType :
+                     populatedAnnotationTypesAndFeatures.keySet()) {
+            for(String start : posStart) {
+              for(String end : posEnd) {
+                String toSearch = start + annotType + end;
+                if(query.indexOf(toSearch) > -1) {
+                  toAdd.add(annotType);
+                  continue outer;
+                }
+              }
+            }
+          }
+          if(!toAdd.isEmpty()) {
+            for(String at : toAdd) {
+              for (int row = 0; row < numShortcuts; row++) {
+                if (shortcuts[row][ANNOTATION_TYPE].equals(at)
+                 && shortcuts[row][DISPLAY].equals("false")) {
+                  shortcuts[row][DISPLAY] = "true";
+                }
+              }
+            }
+          }
+        }
         patternTable.setRowSelectionInterval(0, 0);
         tableValueChanged();
         exportResultsAction.setEnabled(true);
+
       } else if (newQuery.getText().trim().length() < 1) {
         centerPanel.removeAll();
         centerPanel.add(new JLabel("Please, enter a query in the query text field."),
                 new GridBagConstraints());
         centerPanel.validate();
         newQuery.requestFocusInWindow();
+
       } else {
         centerPanel.removeAll();
-        centerPanel.add(new JLabel("No pattern found for your query."),
-                new GridBagConstraints());
+        centerPanel.add(new JTextArea("No pattern found for your query.\n\n"+
+
+          "Here are the different type of queries you can use:\n"+
+          "1. String, ex. the\n"+
+          "2. {AnnotationType}, ex. {Person}\n"+
+          "3. {AnnotationType == String}, ex. {Person == \"Smith\"}\n"+
+          "4. {AnnotationType.feature == featureValue}, ex. {Person.gender == \"male\"}\n"+
+          "5. {AnnotationType1, AnnotationType2.feature == featureValue}\n"+
+          "6. {AnnotationType1.feature == featureValue, AnnotationType2.feature == featureValue}\n\n"+
+
+          "ANNIC also supports the ∣ (OR) operator.\n"+
+          "For instance, {A} ({B}∣{C}) is a pattern of two annotations where the ﬁrst is an annotation of type A followed by the annotation of type either B or C.\n"+
+          "ANNIC supports two operators, + and *, to specify the number of times a particular annotation or a sub pattern should appear in the main query pattern.\n"+
+          "Here, ({A})+n means one and up to n occurrences of annotation {A} and ({A})*n means zero or up to n occurrences of annotation {A}.\n")
+           , new GridBagConstraints());
         centerPanel.validate();
         exportResultsAction.setEnabled(false);
       }
@@ -457,68 +501,14 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     centerPanel.setLayout(new GridBagLayout());
     centerPanel.setOpaque(true);
     centerPanel.setBackground(Color.WHITE);
+//    centerPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+//    centerPanel.setAlignmentY(Component.TOP_ALIGNMENT);
+//    centerPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
 
-    shortcutsBox = new JComboBox();
-    shortcutsBox.setBackground(Color.WHITE);
-    shortcutsBox.setToolTipText("Select a shortcut to display it. "
-            +"To add a new shortcut, click on the title of a line above.");
-    if (featuresShortcuts.size() > 0) {
-      TreeSet<String> ts = new TreeSet<String>(featuresShortcuts.values());
-      shortcutsBox.setModel(new DefaultComboBoxModel(ts.toArray()));
-    }
-    shortcutsBox.addItemListener(new ItemListener() {
-      // when a shortcut is selected, select the corresponding items in the
-      // annotTypesBox ComboBox and featuresBox ComboBox
-      public void itemStateChanged (ItemEvent ie) {
-        if (ie.getStateChange() == ItemEvent.DESELECTED) { return; }
-        String annotationType = null;
-        String feature = null;
-        for (Map.Entry<String, String> me : featuresShortcuts.entrySet()) {
-          if (me.getValue().equals(ie.getItem())) {
-            // in featuresShortcuts TreeMap get the key that matchs the value
-            // displayed in the shortcutsBox ComboBox
-            annotationType = me.getKey().split("\\.")[0];
-            feature = me.getKey().split("\\.")[1];
-          }
-        }
-        if (annotationType != null) {
-          annotTypesBox.setSelectedItem(annotationType);
-        }
-        if (!annotTypesBox.getSelectedItem().equals(annotationType)) {
-          JOptionPane.showMessageDialog(null,
-              "The annotation type ["+annotationType+"] associated with the "
-              +"shortcut ["+ie.getItem()+"]\n"
-              +"was not found in the current annotation set.");
-        } else  if (feature != null) {
-          featuresBox.setSelectedItem(feature);
-        }
-      }
-    });
-    annotTypesBox = new JComboBox();
-    annotTypesBox.setBackground(Color.WHITE);
-    annotTypesBox.setToolTipText("Select an annotation type then a feature.");
-    annotTypesBox.addItemListener(new ItemListener() {
-      public void itemStateChanged (ItemEvent ie) {
-        if (ie.getStateChange() == ItemEvent.DESELECTED) { return; }
-        updateFeaturesBox();
-      }
-    });
-    featuresBox = new JComboBox();
-    featuresBox.setBackground(Color.WHITE);
-    featuresBox.setToolTipText("Select a feature to display it.");
-    featuresBox.addItemListener(new ItemListener() {
-      public void itemStateChanged (ItemEvent ie) {
-        if (ie.getStateChange() == ItemEvent.SELECTED) {
-          addAnnotType();
-          tableValueChanged();
-        }
-      }
-    });
-//    addAnnotTypeButton = new JButton();
-//    addAnnotTypeButton.setBorderPainted(false);
-//    addAnnotTypeButton.setContentAreaFilled(false);
-//    addAnnotTypeButton.setAction(new AddAnnotTypeAction());
-//    addAnnotTypeButton.setBackground(Color.WHITE);
+    featureManagerButton = new JButton();
+    featureManagerButton.setAction(new ManageFeaturesToDisplayAction());
+    featureManagerButton.setBorderPainted(true);
+    featureManagerButton.setMargin(new Insets(0, 0, 0, 0));
 
     progressLabel = new JLabel(MainFrame.getIcon("working"));
     progressLabel.setOpaque(false);
@@ -686,11 +676,29 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       new JSplitPane(JSplitPane.VERTICAL_SPLIT);
     centerBottomSplitPane.setDividerLocation(350);
     centerBottomSplitPane.add(new JScrollPane(centerPanel,
-            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
+//      (new JPanel(new GridLayout(1, 1, 0, 0))).add(centerPanel),
+      JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+      JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
     centerBottomSplitPane.add(bottomPanel);
 
     add(centerBottomSplitPane, BorderLayout.CENTER);
+
+    /****************************
+     * Feature Manager elements *
+     ****************************/
+
+    annotTypesBox = new JComboBox();
+    annotTypesBox.setBackground(Color.WHITE);
+    annotTypesBox.setToolTipText("Select an annotation type then a feature.");
+    annotTypesBox.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ie) {
+        updateFeaturesBox();
+      }
+    });
+    featuresBox = new JComboBox();
+    featuresBox.setBackground(Color.WHITE);
+    featuresBox.setToolTipText("Select a feature to display it.");
+
   }
 
   // initialize the local data
@@ -711,7 +719,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     centerPanel.removeAll();
     centerPanel.validate();
     centerPanel.updateUI();
-    newQuery.setText(searcher.getQuery());
+//    newQuery.setText(searcher.getQuery());
   }
 
   /**
@@ -719,6 +727,11 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
    * his/her selection of pattern in the patternTable.
    */
   public void tableValueChanged() {
+
+    // maximum number of columns to display, i.e. maximum number of characters
+    int maxColumns = 200;
+    // maximum length of a feature value displayed
+    int maxValueLength = 20;
 
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.gridx = 0;
@@ -742,17 +755,14 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     centerPanel.removeAll();
 
     selectedPatterns.setEnabled(true);
-    shortcutsBox.setEnabled(true);
     annotTypesBox.setEnabled(true);
     featuresBox.setEnabled(true);
-//    addAnnotTypeButton.setEnabled(true);
 
     Pattern pattern = (Pattern)patterns
       .get(patternTable.rowViewToModel(patternTable.getSelectedRow()));
 
     // display on the first line the text matching the pattern and its context
-    gbc.gridx = 0;
-    gbc.insets = new java.awt.Insets(0, 0, 0, 4);
+    gbc.insets = new java.awt.Insets(0, 0, 0, 30);
     centerPanel.add(new JLabel("Text"), gbc);
     gbc.insets = new java.awt.Insets(0, 0, 0, 0);
     PatternAnnotation[] baseUnitPatternAnnotations =
@@ -762,19 +772,20 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     int BaseUnitNum = 0;
     String baseUnit =
       ((PatternAnnotation)baseUnitPatternAnnotations[BaseUnitNum]).getText();
+    int startOffsetPattern =
+      pattern.getStartOffset() - pattern.getLeftContextStartOffset();
+    int endOffsetPattern =
+      pattern.getEndOffset() - pattern.getLeftContextStartOffset();
 
     // for each character in the line of text
-    for (int charNum = 0;
-         charNum < pattern.getPatternText().length(); charNum++) {
+    for (int charNum = 0; charNum < pattern.getPatternText().length()
+        && charNum < maxColumns; charNum++) {
 
       // set the text and color of the feature value
       gbc.gridx = charNum + 1;
       JLabel label = new JLabel(String.valueOf(
                 (pattern.getPatternText().charAt(charNum))));
-      if (charNum >= pattern.getStartOffset()
-                   - pattern.getLeftContextStartOffset()
-       && charNum < pattern.getEndOffset()
-                  - pattern.getLeftContextStartOffset()) {
+      if (charNum >= startOffsetPattern && charNum < endOffsetPattern) {
         // this part is matched by the pattern, color it
         label.setBackground(new Color(240, 201, 184));
       } else {
@@ -782,6 +793,15 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         label.setBackground(Color.WHITE);
       }
       label.setOpaque(true);
+      // add a border around the whole text line
+      if (charNum == 0) {
+        label.setBorder(BorderFactory.createMatteBorder(1,1,1,0,Color.BLACK));
+      } else if (charNum == pattern.getPatternText().length()-1
+              || charNum == maxColumns-1) {
+        label.setBorder(BorderFactory.createMatteBorder(1,0,1,1,Color.BLACK));
+      } else {
+        label.setBorder(BorderFactory.createMatteBorder(1,0,1,0,Color.BLACK));
+      }
 
       // add a mouse listener that modify the query
       if (((PatternAnnotation)baseUnitPatternAnnotations[BaseUnitNum])
@@ -796,43 +816,39 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       centerPanel.add(label, gbc);
     }
 
+    if (pattern.getPatternText().length() > maxColumns) {
+      // add ellipsis dots in case of a too long text displayed
+      gbc.gridx++;
+      centerPanel.add(new JLabel(String.valueOf('\u2026')), gbc);
+    }
+
     // vertical spacer
     gbc.gridy++;
     centerPanel.add(Box.createVerticalStrut(5), gbc);
 
     // for each annotation type / feature to display
-    for(int i = 0; i < addedAnnotTypesInGUI.size(); i++) {
-      String type = (String)addedAnnotTypesInGUI.get(i);
-      String feature = (String)addedAnnotFeatureInGUI.get(i);
+    for (int row = 0; row < numShortcuts; row++) {
+      if (shortcuts[row][DISPLAY].equals("false")) { continue; }
+      String type = shortcuts[row][ANNOTATION_TYPE];
+      String feature = shortcuts[row][FEATURE];
 
       gbc.gridy++;
       gbc.gridx = 0;
 
       // add the annotation type / feature header
       JLabel annotationTypeAndFeature = new JLabel();
-      annotationTypeAndFeature.setText(
-        (featuresShortcuts.containsKey(type+"."+feature))?
-        featuresShortcuts.get(type+"."+feature):type+"."+feature);
-      annotationTypeAndFeature.setToolTipText(
-              "Click for replacing with a shortcut.");
-      annotationTypeAndFeature.setName(type+"."+feature);
-      annotationTypeAndFeature.addMouseListener(
-              new javax.swing.event.MouseInputAdapter() {
-        public void mouseClicked(MouseEvent me) {
-          String inputValue = JOptionPane.showInputDialog(
-            "Please, give a shortcut for ["
-            +((JLabel)me.getSource()).getName()+"].", 
-            ((JLabel)me.getSource()).getText());
-          if (inputValue != null && !inputValue.trim().equals("")) {
-            featuresShortcuts.put(
-                    ((JLabel)me.getSource()).getName(), inputValue);
-            TreeSet<String> ts = new TreeSet<String>(featuresShortcuts.values());
-            shortcutsBox.setModel(new DefaultComboBoxModel(ts.toArray()));
-            tableValueChanged();
-          }
+      String shortcut = null;
+      for (int row2 = 0; row2 < numShortcuts; row2++) {
+        if (shortcuts[row2][ANNOTATION_TYPE].equals(type)
+         && shortcuts[row2][FEATURE].equals(feature)) {
+            shortcut = shortcuts[row2][SHORTCUT];
+            break;
         }
-      });
-      gbc.insets = new java.awt.Insets(0, 0, 0, 4);
+      }
+      annotationTypeAndFeature.setText(
+              (shortcut != null)?shortcut:type+"."+feature);
+      annotationTypeAndFeature.setName(type+"."+feature);
+      gbc.insets = new java.awt.Insets(0, 0, 0, 30);
       centerPanel.add(annotationTypeAndFeature, gbc);
       gbc.insets = new java.awt.Insets(0, 0, 0, 0);
 
@@ -845,6 +861,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 
         // add a JLabel in the gridbag layout for each feature
         // of the current annotation type
+        HashMap<Integer,Integer> gridSet = new HashMap<Integer,Integer>();
         for(int k = 0, j = 0; k < annots.length; k++, j += 2) {
           PatternAnnotation ann = (PatternAnnotation)annots[k];
           gbc.gridx =
@@ -852,27 +869,49 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
           gbc.gridwidth =
             ann.getEndOffset() - pattern.getLeftContextStartOffset()
             - gbc.gridx + 1;
-          JLabel label = new JLabel((String)ann.getFeatures().get(feature));
+          if ((gbc.gridx+gbc.gridwidth) > maxColumns) { continue; }
+          String value = (String)ann.getFeatures().get(feature);
+          if (value.length() > maxValueLength) {
+            if (shortcuts[row][CROP].equals("Crop end")) {
+              value = value.substring(0, maxValueLength-2)
+                      +String.valueOf('\u2026');
+            } else {
+              value = String.valueOf('\u2026')
+                      +value.substring(value.length()-maxValueLength-1);
+            }
+          }
+          JLabel label = new JLabel(value);
           label.setBackground(getAnnotationTypeColor(ann.getType()));
           label.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
           label.setOpaque(true);
           label.addMouseListener(new AddPatternRowInQueryMouseInputListener(
-                  type, feature, (String)ann.getFeatures().get(feature)));
-          centerPanel.add(label, gbc);
+            type, feature, (String)ann.getFeatures().get(feature),
+            (gbc.gridx < startOffsetPattern)?
+            AddPatternRowInQueryMouseInputListener.LEFT:
+              (gbc.gridx > endOffsetPattern)?
+              AddPatternRowInQueryMouseInputListener.RIGHT:
+              AddPatternRowInQueryMouseInputListener.CENTER));
+          if (gridSet.containsKey(gbc.gridx)) {
+            // two values for the same row and column
+            int oldGridy = gbc.gridy;
+            gbc.gridy = gridSet.get(gbc.gridx)+1;
+            centerPanel.add(label, gbc);
+            for (int w = 0; w < gbc.gridwidth; w++) {
+              gridSet.put(gbc.gridx+w, gbc.gridy);
+            }
+            gbc.gridy = oldGridy;
+          } else {
+            centerPanel.add(label, gbc);
+            // save the row x and column y locations of the current value
+            for (int w = 0; w < gbc.gridwidth; w++) {
+              gridSet.put(gbc.gridx+w, gbc.gridy);
+            }
+          }
         }
-
-        // add a remove button at the end of the row
-        JButton removePattern;
-        removePattern = new JButton();
-        removePattern.setAction(new DeletePatternRowAction(type, feature));
-        removePattern.setBorderPainted(true);
-        removePattern.setMargin(new Insets(0, 0, 0, 0));
-        gbc.gridwidth = 1;
-        // last cell of the row
-        gbc.gridx = pattern.getPatternText().length() + 1;
-        gbc.fill = GridBagConstraints.NONE;
-        centerPanel.add(removePattern, gbc);
-        gbc.fill = GridBagConstraints.BOTH;
+        // set the new gridy to the maximum row we put a value
+        if (gridSet.size() > 0) {
+          gbc.gridy = Collections.max(gridSet.values()).intValue();
+        }
     }
 
     // vertical spacer
@@ -880,31 +919,10 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     centerPanel.add(Box.createVerticalStrut(5), gbc);
 
     // add a features manager button on the last row
-//    JButton featureManagerButton;
-//    featureManagerButton = new JButton();
-//    featureManagerButton.setAction(new ManageFeaturesToDisplayAction());
-//    featureManagerButton.setBorderPainted(true);
-//    featureManagerButton.setMargin(new Insets(0, 0, 0, 0));
-//    centerPanel.add(featureManagerButton, gbc);
-
-    // add drop down boxes to add a new annotation type / feature row
     gbc.gridy++;
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridwidth = 1;
     gbc.gridx = 0;
-    JPanel annotationTypeFeaturePanel =
-      new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
-    annotationTypeFeaturePanel.add(new JLabel("Shortcut : "));
-    annotationTypeFeaturePanel.add(shortcutsBox);
-    annotationTypeFeaturePanel.add(Box.createHorizontalGlue());
-    annotationTypeFeaturePanel.add(new JLabel("or Annotation Types : "));
-    annotationTypeFeaturePanel.add(annotTypesBox);
-    annotationTypeFeaturePanel.add(new JLabel("and Features : "));
-    annotationTypeFeaturePanel.add(featuresBox);
-//    annotationTypeFeaturePanel.add(addAnnotTypeButton);
-    annotationTypeFeaturePanel.setBackground(Color.WHITE);
-    annotationTypeFeaturePanel.setOpaque(true);
-    centerPanel.add(annotationTypeFeaturePanel, gbc);
-    centerPanel.setOpaque(true);
+    centerPanel.add(featureManagerButton, gbc);
 
     validate();
     updateUI();
@@ -951,9 +969,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     Collections.sort(annotTypes);
     DefaultComboBoxModel aNewModel =
       new DefaultComboBoxModel(annotTypes.toArray());
-//    featuresBox.setActionCommand("not a user input");
     annotTypesBox.setModel(aNewModel);
-//    featuresBox.setActionCommand("");
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         featuresBox.setActionCommand("not a user input");
@@ -979,7 +995,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       Collections.sort(features);
       featuresBox.setActionCommand("not a user input");
       featuresBox.removeAllItems();
-      featuresBox.addItem("All");
       for(String aFeat : features) {
         featuresBox.addItem(aFeat);
       }
@@ -1125,114 +1140,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     }
     return toReturn;
   }
-
-  /**
-   * Add the selected annotation type / feature to the pattern rows.
-   */
-  private void addAnnotType() {
-
-    if (annotTypesBox.getSelectedIndex() < 0
-     || featuresBox.getSelectedIndex() < 0
-     || featuresBox.getActionCommand().equals("not a user input")) {
-      return;
-    }
-
-    String annotationType = (String)annotTypesBox.getSelectedItem();
-    String feature = (String)featuresBox.getSelectedItem();
-
-    if(feature.equals("All")) { // add all the features
-      int rows = addedAnnotTypesInGUI.size();
-      for (int i = 1; i < featuresBox.getItemCount(); i++) {
-        if (!addedAnnotTypesInGUI.contains(annotationType)
-         || !addedAnnotFeatureInGUI.contains(
-                 (String)featuresBox.getItemAt(i))) {
-          addedAnnotTypesInGUI.add(annotationType);
-          addedAnnotFeatureInGUI.add((String)featuresBox.getItemAt(i));
-        }
-      }
-      if (addedAnnotTypesInGUI.size() == rows) {
-        JOptionPane.showMessageDialog(null,
-                "All the features of the annotation type ["
-                +annotationType+"] are already displayed.");
-      }
-
-    } else { // add only one feature
-      if(!addedAnnotTypesInGUI.contains(annotationType)
-      || !addedAnnotFeatureInGUI.contains(feature)) {
-        addedAnnotTypesInGUI.add(annotationType);
-        addedAnnotFeatureInGUI.add(feature);
-      } else {
-        JOptionPane.showMessageDialog(null,
-        "The feature ["+annotationType+"."+feature+"] is already displayed.");
-      }
-    }
-  }
-
-  /**
-   * Add the selected annotation type / feature to the pattern rows.
-   */
-//  protected class AddAnnotTypeAction extends AbstractAction {
-//
-//    private static final long serialVersionUID = 3256438118801225013L;
-//
-//    public AddAnnotTypeAction() {
-//      super("", MainFrame.getIcon("annic-down"));
-//      super.putValue(SHORT_DESCRIPTION,
-//        "Add selected annotation type and feature to the visualization below.");
-//      super.putValue(MNEMONIC_KEY, KeyEvent.VK_DOWN);
-//    }
-//
-//    public void actionPerformed(ActionEvent ae) {
-//      // find out the selected annotation type and feature
-//      int index = annotTypesBox.getSelectedIndex();
-//      if(index < 0 && annotTypesBox.getItemCount() > 0) {
-//        index = 0;
-//      }
-//      String annotType = (String)annotTypesBox.getItemAt(index);
-//
-//      index = featuresBox.getSelectedIndex();
-//      if(index < 0 && featuresBox.getItemCount() > 0) {
-//        index = 0;
-//      }
-//
-//      String featureType = (String)featuresBox.getItemAt(index);
-//      if(featureType.equals("All")) {
-//        // add all the features
-//        for (int i = 1; i < featuresBox.getItemCount(); i++) {
-//          addedAnnotTypesInGUI.add(annotType);
-//          addedAnnotFeatureInGUI.add((String)featuresBox.getItemAt(i));
-//        }
-//
-//      } else {
-//        // add only one feature
-//
-//      boolean add = true;
-//        // is the feature already displayed ?
-//        for(int i = 0; i < addedAnnotTypesInGUI.size(); i++) {
-//          if(((String)addedAnnotTypesInGUI.get(i)).equals(annotType)) {
-//            if(((String)addedAnnotFeatureInGUI.get(i)).equals(featureType)) {
-//              add = false;
-//              break;
-//            }
-//          }
-//        }
-//        if(add) {
-//          addedAnnotTypesInGUI.add(annotType);
-//          addedAnnotFeatureInGUI.add(featureType);
-//        }
-//        else {
-//          JOptionPane.showMessageDialog(null,
-//                  "This feature is already displayed.");
-//          return;
-//        }
-//      }
-//
-//      // update the gui
-//      patternTable.setRowSelectionInterval(patternTable.getSelectedRow(),
-//              patternTable.getSelectedRow());
-//      tableValueChanged();
-//    }
-//  }
 
   /**
    * Exports all patterns to the XML File.
@@ -1460,6 +1367,26 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
               int contextWindow =
                 ((Number)contextSizeSpinner.getValue()).intValue();
               String query = newQuery.getText().trim();
+              java.util.regex.Pattern pattern =
+                java.util.regex.Pattern.compile("\\{([^\\{=]+)==");
+              Matcher matcher = pattern.matcher(query);
+              int start = 0;
+              while (matcher.find(start)) {
+                start = matcher.end(1); // avoid infinite loop
+                for (int row = 0; row < numShortcuts; row++) {
+                  if (shortcuts[row][SHORTCUT].equals(matcher.group(1))) {
+                    // rewrite the query to put the long form of the
+                    // shortcut found
+                    query = query.substring(0, matcher.start(1))
+                            +shortcuts[row][ANNOTATION_TYPE]+"."
+                            +shortcuts[row][FEATURE]
+                            +query.substring(matcher.end(1));
+                    matcher = pattern.matcher(query);
+                    break;
+                  }
+                }
+              }
+
               parameters.put(Constants.CONTEXT_WINDOW, new Integer(contextWindow));
               if (annotationSetToSearchIn.getSelectedItem()
                       .equals(Constants.ALL_SETS)) {
@@ -1525,59 +1452,30 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
   }
 
   /**
-   * Delete the current pattern row.
-   */
-  protected class DeletePatternRowAction extends AbstractAction {
-
-    private static final long serialVersionUID = 1L;
-    private String type;
-    private String feature;
-
-    public DeletePatternRowAction(String type, String feature) {
-      super("", MainFrame.getIcon("delete.gif"));
-      super.putValue(SHORT_DESCRIPTION, "Delete the pattern row for ["+type+"."+feature+"].");
-      this.type = type;
-      this.feature= feature;
-    }
-
-    public void actionPerformed(ActionEvent ae) {
-    // we need to remove these things from the added stuff
-    forLoop: for(int i = 0; i < addedAnnotTypesInGUI.size(); i++) {
-      String type1 = (String)addedAnnotTypesInGUI.get(i);
-      if(type1.equals(type)) {
-        String f1 = (String)addedAnnotFeatureInGUI.get(i);
-        if(feature.equals(f1)) {
-          addedAnnotTypesInGUI.remove(i);
-          addedAnnotFeatureInGUI.remove(i);
-          break forLoop;
-        }
-      }
-    }
-    tableValueChanged();
-  }
-  }
-
-  /**
    * Manage the features to display in the pattern row.
    */
-//  protected class ManageFeaturesToDisplayAction extends AbstractAction {
-//
-//    private static final long serialVersionUID = 1L;
-//
-//    public ManageFeaturesToDisplayAction() {
-//      super("", MainFrame.getIcon("add.gif"));
-//      super.putValue(SHORT_DESCRIPTION, "Display Features Manager.");
-//    }
-//
-//    public void actionPerformed(ActionEvent e) {
-//      featuresManager = new FeaturesManager("Features Manager");
-//      featuresManager.pack();
-//      featuresManager.setIconImage(
-//              ((ImageIcon)MainFrame.getIcon("add.gif")).getImage());
-//      featuresManager.setLocationRelativeTo(thisInstance);
-//      featuresManager.setVisible(true);
-//    }
-//  }
+  protected class ManageFeaturesToDisplayAction extends AbstractAction {
+
+    private static final long serialVersionUID = 1L;
+
+    public ManageFeaturesToDisplayAction() {
+      super("", MainFrame.getIcon("add.gif"));
+      super.putValue(SHORT_DESCRIPTION, "Display the features manager.");
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      if (featuresManager == null) {
+        featuresManager = new FeaturesManager("Features Manager");
+        featuresManager.setIconImage(
+              ((ImageIcon)MainFrame.getIcon("add.gif")).getImage());
+        featuresManager.setLocationRelativeTo(thisInstance);
+        featuresManager.validate();
+        featuresManager.pack();
+      }
+      featuresManager.setVisible(false);
+      featuresManager.setVisible(true);
+    }
+  }
 
   /**
    * Modify the query with the current clicked pattern row.
@@ -1588,34 +1486,59 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     private String type;
     private String feature;
     private String text;
+    private int position;
+    public static final int LEFT = 0;
+    public static final int CENTER = 1;
+    public static final int RIGHT = 2;
 
     public AddPatternRowInQueryMouseInputListener(
-            String type, String feature, String text) {
+            String type, String feature, String text, int position) {
       this.type = type;
       this.feature= feature;
       this.text = text;
+      this.position = position;
     }
 
     public AddPatternRowInQueryMouseInputListener(String text) {
       this.type = null;
       this.feature= null;
       this.text = text;
+      this.position = -1;
     }
 
     public void mouseClicked(MouseEvent me) {
       int caretPosition = newQuery.getCaretPosition();
       String query = newQuery.getText();
-      String queryLeft =
-        (newQuery.getSelectionStart() == newQuery.getSelectionEnd())?
-          query.substring(0, caretPosition):
-          query.substring(0, newQuery.getSelectionStart());
-      String queryMiddle = (type != null && feature != null)?
-                           "{"+type+"."+feature+"==\""+text+"\"}":text;
-      String queryRight =
-        (newQuery.getSelectionStart() == newQuery.getSelectionEnd())?
-          query.substring(caretPosition, query.length()):
-          query.substring(newQuery.getSelectionEnd(), query.length());
-      newQuery.setText(queryLeft+queryMiddle+queryRight);
+      String queryMiddle;
+      if (type != null && feature != null) {
+        queryMiddle = "{"+type+"."+feature+"==\""+text+"\"}";
+        for (int row = 0; row < numShortcuts; row++) {
+          if (shortcuts[row][ANNOTATION_TYPE].equals(type)
+           && shortcuts[row][FEATURE].equals(feature)) {
+            queryMiddle = "{"+shortcuts[row][SHORTCUT]+"==\""+text+"\"}";
+            break;
+          }
+        }
+      } else {
+        queryMiddle = text;
+      }
+      if (position == LEFT) {
+        newQuery.setText(queryMiddle+query);
+
+      } else if (position == RIGHT) {
+        newQuery.setText(query+queryMiddle);
+
+      } else {
+        String queryLeft =
+          (newQuery.getSelectionStart() == newQuery.getSelectionEnd())?
+            query.substring(0, caretPosition):
+            query.substring(0, newQuery.getSelectionStart());
+        String queryRight =
+          (newQuery.getSelectionStart() == newQuery.getSelectionEnd())?
+            query.substring(caretPosition, query.length()):
+            query.substring(newQuery.getSelectionEnd(), query.length());
+        newQuery.setText(queryLeft+queryMiddle+queryRight);
+      }
     }
   }
 
@@ -1703,13 +1626,9 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     }
 
     static private final int DOC_NAME_COLUMN = 3;
-
     static private final int ANNOTATION_SET_NAME_COLUMN = 4;
-
     static private final int LEFT_CONTEXT_COLUMN = 0;
-
     static private final int PATTERN_COLUMN = 1;
-
     static private final int RIGHT_CONTEXT_COLUMN = 2;
 
   }
@@ -1718,30 +1637,168 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
    * Panel that show a table of shortcut, annotation type and feature
    * to display in the pattern row.
    */
-//  protected class FeaturesManager extends JFrame {
-//
-//    private static final long serialVersionUID = 1L;
-//
-//    public FeaturesManager(String title) {
-//      super(title);
-//
-//      setLayout(new BorderLayout());
-//
-//      JScrollPane scrollPane = new JScrollPane();
-//
-//      XJTable featuresXJTable;
-//      String[] columnNames =
-//        {"Display", "Shortcut", "Annotation type", "Feature"};
-//      javax.swing.table.DefaultTableModel tableModel =
-//        new javax.swing.table.DefaultTableModel(columnNames, 10);
-//      featuresXJTable = new XJTable(tableModel);
-//      scrollPane.add(featuresXJTable);
-//
-//      add(scrollPane, BorderLayout.CENTER);
-//
-//    }
-////    featuresShortcuts
-//  }
+  protected class FeaturesManager extends JFrame {
+
+    private static final long serialVersionUID = 1L;
+    private JTable featuresJTable;
+
+    public FeaturesManager(String title) {
+      super(title);
+
+      setLayout(new BorderLayout());
+
+      JScrollPane scrollPane = new JScrollPane(
+              JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+              JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+      featuresJTable = new JTable(new FeatureManagerTableModel());
+      // set the cell editor for each column
+      DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
+      renderer.setToolTipText("Tick to display this row in the pattern row.");
+      featuresJTable.getColumnModel().getColumn(DISPLAY)
+        .setCellRenderer(renderer);
+//      featuresJTable.getColumnModel()
+//        .getColumn(DISPLAY)
+//        .setCellEditor(new DefaultCellEditor(new JCheckBox()));
+      featuresJTable.getColumnModel()
+        .getColumn(SHORTCUT)
+        .setCellEditor(new DefaultCellEditor(new JTextField(10)));
+      featuresJTable.getColumnModel()
+        .getColumn(ANNOTATION_TYPE)
+        .setCellEditor(new DefaultCellEditor(annotTypesBox));
+      featuresJTable.getColumnModel()
+        .getColumn(FEATURE)
+        .setCellEditor(new DefaultCellEditor(featuresBox));
+      String[] s = {"Crop start", "Crop end"};
+      featuresJTable.getColumnModel()
+        .getColumn(CROP)
+        .setCellEditor(new DefaultCellEditor(new JComboBox(s)));
+      featuresJTable.getColumnModel()
+        .getColumn(columnNames.length)
+        .setCellRenderer(new removeButtonRenderer());
+
+      scrollPane.setViewportView(featuresJTable);
+
+      add(scrollPane, BorderLayout.CENTER);
+      
+      setSize(10,10);
+    }
+  }
+
+  /**
+   * Table model for the feature manager.
+   */
+  protected class FeatureManagerTableModel extends AbstractTableModel {
+
+    private static final long serialVersionUID = 3977012959534854193L;
+    private final int REMOVE = columnNames.length;
+
+    // plus one to let the user adding a new row
+    public int getRowCount() {
+      return numShortcuts+1;
+    }
+
+    // plus one for the delete row icon
+    public int getColumnCount() {
+      return columnNames.length+1;
+    }
+
+    public String getColumnName(int col) {
+      if (col == REMOVE) {
+        return "Remove";
+      } else {
+        return columnNames[col];
+      }
+    }
+
+    public boolean isCellEditable(int row, int col) {
+      if (row == getRowCount()-1 && col == REMOVE) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+
+    public Class<?> getColumnClass(int c) {
+      return getValueAt(0, c).getClass();
+    }
+
+    public Object getValueAt(int row, int col) {
+      if (col == DISPLAY) {
+        return (shortcuts[row][col] == null
+             || shortcuts[row][col].equals("true"))?
+                new Boolean(true):new Boolean(false);
+
+      } else if (col == REMOVE) {
+        return (row == getRowCount()-1)?"":"remove";
+
+      } else {
+        return shortcuts[row][col];
+      }
+    }
+
+    public void setValueAt(Object value, int row, int col) {
+      if (col == REMOVE) { return; }
+      if (value == null) { return; }
+
+      shortcuts[row][col] = value.toString();
+      fireTableRowsUpdated(row, row);
+
+      if (row == getRowCount()-1
+       && shortcuts[row][SHORTCUT] != null
+       && shortcuts[row][ANNOTATION_TYPE] != null
+       && shortcuts[row][FEATURE] != null) {
+        // add a new row when the user has filled all mandatory columns
+        if (shortcuts[row][DISPLAY] == null) {
+          shortcuts[row][DISPLAY] = "true";
+        }
+        if (shortcuts[row][CROP] == null) {
+          shortcuts[row][CROP] = "Crop end";
+        }
+        numShortcuts++;
+        fireTableRowsInserted(row+1, row+1);
+        featuresManager.pack();
+      }
+    }
+  }
+
+  /**
+   * Use to add a button in the last row of the FeatureManagerTable.
+   */
+  public class removeButtonRenderer extends JButton implements
+                                                   TableCellRenderer {
+
+    private static final long serialVersionUID = 1L;
+
+    public Component getTableCellRendererComponent(JTable table, Object value,
+            boolean isSelected, boolean hasFocus, int row, int column) {
+
+      if  (!value.equals("remove")) {
+        setIcon(null);
+        setEnabled(false);
+        return this;
+      }
+
+      setIcon(MainFrame.getIcon("delete.gif"));
+      setEnabled(true);
+      
+      if (isSelected && hasFocus) {
+        setSelected(true);
+        // shift the rows in the data
+        for(int row2 = row + 1; row2 < numShortcuts; row2++) {
+          for(int col2 = 0; col2 < columnNames.length; col2++) {
+            shortcuts[row2 - 1][col2] = shortcuts[row2][col2];
+            if (row2 == numShortcuts-1) { shortcuts[row2][col2] = null; }
+          }
+        }
+        numShortcuts--;
+        ((FeatureManagerTableModel)table.getModel())
+          .fireTableStructureChanged();
+      }
+
+      return this;
+    }
+  }
 
   /**
    * Called by the GUI when this viewer/editor has to initialise itself
