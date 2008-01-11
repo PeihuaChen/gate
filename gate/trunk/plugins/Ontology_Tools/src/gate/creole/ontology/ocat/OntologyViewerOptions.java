@@ -1003,6 +1003,18 @@ public class OntologyViewerOptions implements DocumentListener {
     }
   }
   
+  /**
+   * Disable Filtering.
+   * @param shouldDisable
+   */
+  public void disableFiltering(boolean shouldDisable) {
+    if(disableFilteringRB.isSelected() != shouldDisable) {
+      disableFilteringRB.setSelected(shouldDisable);
+      if(shouldDisable) {
+        ontologyTreePanel.ontoTreeListener.refreshHighlights();
+      }
+    }
+  }
   
   public boolean shouldShow(String aResourceName) {
     if(disableFilteringRB.isSelected())
