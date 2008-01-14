@@ -1469,6 +1469,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         featuresManager.setIconImage(
               ((ImageIcon)MainFrame.getIcon("add.gif")).getImage());
         featuresManager.setLocationRelativeTo(thisInstance);
+        featuresManager.setSize(10,10);
         featuresManager.validate();
         featuresManager.pack();
       }
@@ -1680,8 +1681,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       scrollPane.setViewportView(featuresJTable);
 
       add(scrollPane, BorderLayout.CENTER);
-      
-      setSize(10,10);
     }
   }
 
@@ -1733,7 +1732,11 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         return (row == getRowCount()-1)?"":"remove";
 
       } else {
-        return shortcuts[row][col];
+        if (shortcuts[row][col] == null) {
+          return "";
+        } else {
+          return shortcuts[row][col];
+        }
       }
     }
 
