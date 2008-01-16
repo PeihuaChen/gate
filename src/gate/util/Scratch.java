@@ -75,6 +75,7 @@ public class Scratch
   
     
   public static void main(String args[]) throws Exception {   
+    System.out.println(System.getenv());
     
     System.out.println("Text fg: " + UIManager.getColor("Tree.textForeground"));
     System.out.println("Text bg: " + UIManager.getColor("Tree.textBackground"));
