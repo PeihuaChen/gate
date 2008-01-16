@@ -343,10 +343,17 @@ public class JTreeTable extends XJTable {
      * Paints only the current cell in the table
      */
     public void paint(Graphics g){
-      Rectangle rect = getRowBounds(visibleRow);
-      Rectangle bounds = g.getClipBounds();
-      g.translate(0, -rect.y);
-      g.setClip(bounds.x, rect.y, bounds.width, rect.height);
+      Rectangle rowBounds = getRowBounds(visibleRow);
+      Rectangle oldClip = g.getClipBounds();
+      g.translate(0, -rowBounds.y);
+      Rectangle parentBounds = JTreeTable.this.getParent().getBounds();
+      Rectangle newBounds = new Rectangle(oldClip.x, rowBounds.y, oldClip.width,
+              rowBounds.height);
+      g.setClip(newBounds);
+      
+      
+//      g.setClip(bounds.x, Math.max(rect.y, bounds.y), 
+//                bounds.width, Math.min(rect.height, bounds.height));
       super.paint(g);
     }
 
