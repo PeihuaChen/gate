@@ -19,6 +19,7 @@ package gate.creole.gazetteer;
 import java.util.*;
 import gate.util.*;
 import gate.*;
+import gate.corpora.DocumentImpl;
 import gate.creole.*;
 
 /**
@@ -208,6 +209,11 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser implements
     try {
       FeatureMap params = Factory.newFeatureMap();
       params.put("stringContent", newdocString.toString());
+      if(document instanceof DocumentImpl) {
+        params.put("encoding", ((DocumentImpl)document).getEncoding());
+        params.put("markupAware", ((DocumentImpl)document).getMarkupAware());
+      }
+      
       FeatureMap features = Factory.newFeatureMap();
       // Gate.setHiddenAttribute(features, true);
       tempDoc = (Document)Factory.createResource("gate.corpora.DocumentImpl",
@@ -245,7 +251,8 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser implements
       for(; i < changedNodes.size(); i++) {
         NodePosition np = (NodePosition)changedNodes.get(i);
 
-        // continue until we find a node whose new end node has a value greater than or equal to the current lookup
+        // continue until we find a node whose new end node has a value
+        // greater than or equal to the current lookup
         if(np.getNewStartNode() < startOffset) {
           continue;
         }
@@ -277,7 +284,8 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser implements
       for(; i < changedNodes.size(); i++) {
         NodePosition np = (NodePosition)changedNodes.get(i);
 
-        // continue until we find a node whose new start node has a value greater than or equal to the current lookup's end node
+        // continue until we find a node whose new start node has a
+        // value greater than or equal to the current lookup's end node
         if(np.getNewEndNode() < endOffset) {
           continue;
         }
@@ -289,8 +297,9 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser implements
         break;
       }
       
-      //0xyz3 4resources13 14xyzresources26 27pqr30  0 3 0 3 0 -> 4 13 4 12 1 -> 14 26 13 24 2 -> 27 30 25 28 2
-      //0xyz3 4resource12 13xyz16resource24 25pqr28  
+      // 0xyz3 4resources13 14xyzresources26 27pqr30 0 3 0 3 0 -> 4 13 4
+      // 12 1 -> 14 26 13 24 2 -> 27 30 25 28 2
+      // 0xyz3 4resource12 13xyz16resource24 25pqr28
 
       try {
         original.add(new Long(startOffset + spacesToAddToSO), new Long(
