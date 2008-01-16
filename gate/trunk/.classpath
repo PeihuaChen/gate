@@ -103,5 +103,7 @@
 	<classpathentry kind="lib" path="plugins/uima/lib/xml.jar"/>
 	<classpathentry kind="lib" path="plugins/uima/lib/xsdbeans.jar"/>
 	<classpathentry kind="lib" path="plugins/yahoo/lib/yahoo_search-1.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-core-2.2.0.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/tools.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
