@@ -80,6 +80,8 @@ public class LuceneDocument {
     // about annotation sets to exclude
     if(annotSetsToInclude.size() > 0) {
       annotSetsToIndex = annotSetsToInclude;
+      
+      // if there's only one annotation to index, we don't need to create a MergeSet
       if(annotSetsToIndex.size() == 1) createMergeSet = false;
     }
     else if(annotSetsToExclude.size() > 0) {
@@ -92,6 +94,7 @@ public class LuceneDocument {
         if(annotSetsToExclude.contains(setName)) continue;
         annotSetsToIndex.add(setName);
       }
+      
       if(!annotSetsToExclude.contains(Constants.DEFAULT_ANNOTATION_SET_NAME)) {
         annotSetsToIndex.add(Constants.DEFAULT_ANNOTATION_SET_NAME);
       }
@@ -107,12 +110,6 @@ public class LuceneDocument {
       annotSetsToIndex.add(Constants.DEFAULT_ANNOTATION_SET_NAME);
     }
 
-    
-    System.out.println("Sets to index");
-    for(String s : annotSetsToIndex) {
-      System.out.println("\t"+s);
-    }
-    
     // lets find out the annotation set that contains tokens in it
     AnnotationSet baseTokenAnnotationSet = null;
 
@@ -121,6 +118,7 @@ public class LuceneDocument {
     // initially this is set to false
     boolean searchBaseTokensInAllAnnotationSets = false;
     boolean searchIndexUnitInAllAnnotationSets = false;
+
     // this variable tells whether we want to create manual tokens or
     // not
     boolean createManualTokens = false;
@@ -182,13 +180,11 @@ public class LuceneDocument {
       createManualTokens = true;
 
       for(String aSet : annotSetsToIndex) {
-        System.out.println("Searching in :"+aSet);
         if(aSet.equals(Constants.DEFAULT_ANNOTATION_SET_NAME)) {
           AnnotationSet tempSet = gateDoc.getAnnotations().get(
                   baseTokenAnnotationType);
           if(tempSet.size() > 0) {
             baseTokenAnnotationSet = tempSet;
-            System.out.println("Found");
             createManualTokens = false;
             break;
           }
@@ -198,7 +194,6 @@ public class LuceneDocument {
                   baseTokenAnnotationType);
           if(tempSet.size() > 0) {
             baseTokenAnnotationSet = tempSet;
-            System.out.println("Found");
             createManualTokens = false;
             break;
           }
@@ -213,7 +208,6 @@ public class LuceneDocument {
 
     // lets check if we have to create ManualTokens
     if(createManualTokens) {
-      System.out.println("Creating manual base token annotations");
       if(!createTokensAutomatically.booleanValue()) {
         System.out
                 .println("Tokens couldn't be found in the document - Ignoring the document "
@@ -631,7 +625,13 @@ public class LuceneDocument {
       }
     }
 
-    Set<String> allTypes = inputAs.getAllTypes();
+    
+    Set<String> allTypes = new HashSet<String>();
+    
+    for(String aType : inputAs.getAllTypes()) {
+      allTypes.add(aType);
+    }
+
 
     if(baseTokenSet != null && baseTokenSet.size() > 0) {
       allTypes.remove(baseTokenAnnotationType);
