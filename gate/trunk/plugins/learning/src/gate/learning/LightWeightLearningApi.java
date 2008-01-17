@@ -236,6 +236,10 @@ public class LightWeightLearningApi extends Object {
         docFV.obtainFVsFromNLPFeatures(nlpFeatDoc, featuresList,
           featurePositionTotal, maxNegPositionTotal, featuresList.totalNumDocs,
           ngramWeight);
+        if(engineSettings.datasetDefinition.isSameWinSize) {
+          //expand the feature vector to include the context words
+          docFV.expandFV(engineSettings.datasetDefinition.windowSize);
+        }
         if(isTraining) {
           LabelsOfFeatureVectorDoc labelsDoc = new LabelsOfFeatureVectorDoc();
           labelsDoc.obtainMultiLabelsFromNLPDocSurround(nlpFeatDoc,
