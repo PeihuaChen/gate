@@ -142,6 +142,9 @@ public class TestJTreeTable {
     treeTable.getTree().setCellRenderer(treeRenderer);
 //    treeTable.getTree().setShowsRootHandles(false);
 //    treeTable.getTree().setRootVisible(false);
+    //according to the Swing tutorial at 
+    //http://java.sun.com/docs/books/tutorial/uiswing/components/tree.html#display,
+    //this will only work on the Java LookAndFeel. 
     treeTable.getTree().putClientProperty("JTree.lineStyle", "None");
     mainFrame.getContentPane().add(new JScrollPane(treeTable));
     
