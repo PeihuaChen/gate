@@ -54,6 +54,10 @@ public class DataSetDefinition {
   ArgOfRelation arg2 = null;
   /** List of ATTRIBUTE_REL type features. */
   protected java.util.List relAttributes;
+  /** Is the same window size for all NLP features. */
+  public boolean isSameWinSize=false;
+  /** The common window size. */
+  public int windowSize = 0;
 
   /**
    * Constructor A DataSetDefinition is built using an XML element in
@@ -69,6 +73,14 @@ public class DataSetDefinition {
       instanceType = anElement.getTextTrim();
     else throw new GateException(
       "Required element \"INSTANCE-TYPE\" not present!");
+    //Check if use the same window size to speed up preprocessing
+    anElement = domElement.getChild("WINDOWSIZE");
+    if(anElement != null) {
+      isSameWinSize = true;
+      windowSize = Integer.parseInt(anElement.getTextTrim());
+    } else {
+      isSameWinSize = false;
+    }
     // Check the dataset definition file is for relation extraction or
     // not
     anElement = domElement.getChild("INSTANCE-ARG1");
@@ -172,8 +184,19 @@ public class DataSetDefinition {
       while(childrenSerieIter.hasNext()) {
         Element child = (Element)childrenSerieIter.next();
         List attributelist = Attribute.parseSerie(child);
-        attributes.addAll(attributelist);
-        attrIndex += attributelist.size();
+        if(isSameWinSize) {
+         for(int i=0; i<attributelist.size(); ++i) { 
+           Attribute att0 = (Attribute)attributelist.get(i);
+           if(att0.position == 0) {
+             attributes.add(att0);
+             break;
+           }
+         }
+         ++attrIndex;
+        } else {
+          attributes.addAll(attributelist);
+          attrIndex += attributelist.size();
+        }
       }
       if(classAttribute == null)
         throw new GateException("No class attribute defined!");

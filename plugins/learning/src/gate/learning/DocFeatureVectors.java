@@ -259,4 +259,51 @@ public class DocFeatureVectors {
   public void setDocID(String docI) {
     this.docId = docI;
   }
+  
+  /** Expand the feature vector to including the context tokens. */
+  public void expandFV(int winSize) {
+    SparseFeatureVector[] fvsExpand = new SparseFeatureVector[fvs.length];
+    for(int i=0; i<fvs.length; ++i) {
+      int lenT0 = fvs[i].len;
+      for(int j=-1; j>= -winSize; --j) {
+        if(j+i>=0) lenT0 += fvs[j+i].len;
+      } 
+      for(int j=1; j<=winSize; ++j)
+        if(j+i<fvs.length) lenT0 += fvs[j+i].len;
+      
+      fvsExpand[i] = new SparseFeatureVector(lenT0);
+      //System.out.println("lent0="+lenT0);
+      for(int j1=0; j1<fvs[i].len; ++j1) {
+        fvsExpand[i].indexes[j1]  = fvs[i].indexes[j1];
+        fvsExpand[i].values[j1]  = fvs[i].values[j1];
+      }
+      
+      int lenTotal = fvs[i].len;
+      for(int j=-1; j>= -winSize; --j) {
+        int kk = j+i;
+        if(kk>=0) {
+          int gapLen = -j * (int)ConstantParameters.MAXIMUMFEATURES;
+          for(int j1=0; j1<fvs[kk].len; ++j1) {
+            if(j1+lenTotal>=lenT0)
+              System.out.println("i="+i+", j="+j+",j1="+j1+", newlen="+lenTotal);
+            fvsExpand[i].indexes[j1+lenTotal]  = fvs[kk].indexes[j1]+gapLen;
+            fvsExpand[i].values[j1+lenTotal]  = fvs[kk].values[j1]/(-j);
+          }
+          lenTotal += fvs[kk].len;
+        }
+      }
+      for(int j=1; j<=winSize; ++j) {
+        int kk = j+i;
+        if(kk<fvs.length) {
+          int gapLen = (j+winSize) * (int)ConstantParameters.MAXIMUMFEATURES;
+          for(int j1=0; j1<fvs[kk].len; ++j1) {
+            fvsExpand[i].indexes[j1+lenTotal]  = fvs[kk].indexes[j1]+gapLen;
+            fvsExpand[i].values[j1+lenTotal]  = fvs[kk].values[j1]/j;
+          }
+          lenTotal += fvs[kk].len;
+        }
+      }
+    }//end of the loop for each fv
+    fvs = fvsExpand;
+  }
 }
