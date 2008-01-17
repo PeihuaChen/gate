@@ -84,6 +84,8 @@ public class JTreeTable extends XJTable {
     getColumnModel().getColumn(0).setCellEditor(new TreeTableCellEditor());
 
     setShowGrid(false);
+    
+    setRowMargin(0);
   }
 
   protected void initListeners(){
