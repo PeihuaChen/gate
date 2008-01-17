@@ -36,6 +36,11 @@ public class JTreeTable extends XJTable {
 
   /**The model for this component*/
   protected TreeTableModel treeTableModel;
+  
+  /**
+   * The adapter used internally to convert a tree model into a table model. 
+   */
+  protected TreeTableModelAdapter modelAdapter;
 
   /**
    * Constructs a JTreeTable from a model
@@ -62,7 +67,8 @@ public class JTreeTable extends XJTable {
     tree.setEditable(false);
 
     // Install a tableModel representing the visible rows in the tree.
-    super.setModel(new TreeTableModelAdapter(treeTableModel));
+    modelAdapter = new TreeTableModelAdapter(treeTableModel);
+    super.setModel(modelAdapter);
 
     // Force the JTable and JTree to share their row selection models.
     tree.setSelectionModel(new DefaultTreeSelectionModel() {
@@ -284,8 +290,6 @@ public class JTreeTable extends XJTable {
       });
     }
 
-
-
     // Wrappers, implementing TableModel interface.
     public int getColumnCount() {
       return treeTableModel.getColumnCount();
@@ -371,6 +375,18 @@ public class JTreeTable extends XJTable {
     public void repaint(Rectangle r){}
 
     protected int visibleRow;
+
+    /* (non-Javadoc)
+     * @see javax.swing.JTree#setRootVisible(boolean)
+     */
+    @Override
+    public void setRootVisible(boolean rootVisible) {
+      boolean oldValue = isRootVisible();
+      if(oldValue != rootVisible){
+        super.setRootVisible(rootVisible);
+        modelAdapter.fireTableDataChanged();
+      }
+    }
   }
 
 /*

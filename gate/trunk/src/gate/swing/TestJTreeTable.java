@@ -12,11 +12,14 @@
  */
 package gate.swing;
 
+import gate.gui.MainFrame;
+
 import java.io.File;
 import java.util.Date;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
+import javax.swing.tree.DefaultTreeCellRenderer;
 
 /**
  * This class is used to demonstrate the functionality of {@link JTreeTable}.
@@ -116,12 +119,26 @@ public class TestJTreeTable {
   }
   
   public TestJTreeTable(){
-    mainFrame = new JFrame("JTreeTable");
+    initGui();
+  }
+  
+  private void initGui(){
+    mainFrame = new JFrame(JTreeTable.class.getName());
     mainFrame.setSize(800, 600);
     mainFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    
     treeTableModel = new FileTTModel(new File("/"));
     treeTable = new JTreeTable(treeTableModel);
+    
+    DefaultTreeCellRenderer treeRenderer = new DefaultTreeCellRenderer();
+    treeRenderer.setOpenIcon(MainFrame.getIcon("expanded"));
+    treeRenderer.setClosedIcon(MainFrame.getIcon("closed"));
+    treeTable.getTree().setCellRenderer(treeRenderer);
+//    treeTable.getTree().setShowsRootHandles(false);
+//    treeTable.getTree().setRootVisible(false);
+    treeTable.getTree().putClientProperty("JTree.lineStyle", "None");
     mainFrame.getContentPane().add(new JScrollPane(treeTable));
+    
   }
   
   public static void main(String[] args) {
