@@ -87,7 +87,7 @@ public class Scratch
     
     Map defaultsMap = UIManager.getLookAndFeelDefaults();
     System.out.println(defaultsMap.keySet());
-    
+    System.out.println(defaultsMap);
     if(true) return;
     boolean value = OkCancelDialog.showDialog(null, new JLabel("OK?"), "Answer please!");
     System.out.println(value ? "Yes!" : "No!");
