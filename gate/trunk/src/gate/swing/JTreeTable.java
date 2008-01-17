@@ -344,16 +344,17 @@ public class JTreeTable extends XJTable {
      */
     public void paint(Graphics g){
       Rectangle rowBounds = getRowBounds(visibleRow);
-      Rectangle oldClip = g.getClipBounds();
       g.translate(0, -rowBounds.y);
-      Rectangle parentBounds = JTreeTable.this.getParent().getBounds();
-      Rectangle newBounds = new Rectangle(oldClip.x, rowBounds.y, oldClip.width,
-              rowBounds.height);
-      g.setClip(newBounds);
-      
-      
-//      g.setClip(bounds.x, Math.max(rect.y, bounds.y), 
-//                bounds.width, Math.min(rect.height, bounds.height));
+      Rectangle oldClip = g.getClipBounds();
+//      Rectangle newClip = oldClip.intersection(
+//              new Rectangle(oldClip.x, rowBounds.y, oldClip.width, 
+//                      rowBounds.height));
+//      g.setClip(newClip);
+      //re-implemented more efficiently below:
+      int newY = Math.max(oldClip.y, rowBounds.y);
+      int newHeight = Math.min(rowBounds.height - (rowBounds.y - newY), 
+              oldClip.height);
+      g.setClip(oldClip.x, newY, oldClip.width, newHeight);
       super.paint(g);
     }
 
