@@ -122,9 +122,10 @@ public class TestJTreeTable {
   }
   
   private void initGui(){
+    //Unfortunately this will affect ALL trees
+    //There seems to be no way of setting this up on a tree by tree basis.
     UIManager.put("Tree.collapsedIcon", MainFrame.getIcon("closed"));
     UIManager.put("Tree.expandedIcon", MainFrame.getIcon("expanded"));
-    UIManager.put("Tree.line", "None");
     
     mainFrame = new JFrame(JTreeTable.class.getName());
     mainFrame.setSize(800, 600);
