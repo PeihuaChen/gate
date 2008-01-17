@@ -17,8 +17,7 @@ import gate.gui.MainFrame;
 import java.io.File;
 import java.util.Date;
 
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
+import javax.swing.*;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 /**
@@ -123,6 +122,10 @@ public class TestJTreeTable {
   }
   
   private void initGui(){
+    UIManager.put("Tree.collapsedIcon", MainFrame.getIcon("closed"));
+    UIManager.put("Tree.expandedIcon", MainFrame.getIcon("expanded"));
+    UIManager.put("Tree.line", "None");
+    
     mainFrame = new JFrame(JTreeTable.class.getName());
     mainFrame.setSize(800, 600);
     mainFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -131,8 +134,10 @@ public class TestJTreeTable {
     treeTable = new JTreeTable(treeTableModel);
     
     DefaultTreeCellRenderer treeRenderer = new DefaultTreeCellRenderer();
-    treeRenderer.setOpenIcon(MainFrame.getIcon("expanded"));
-    treeRenderer.setClosedIcon(MainFrame.getIcon("closed"));
+    treeRenderer.setOpenIcon(MainFrame.getIcon("open-file"));
+    treeRenderer.setClosedIcon(MainFrame.getIcon("open-file"));
+    treeRenderer.setLeafIcon(MainFrame.getIcon("document"));
+    
     treeTable.getTree().setCellRenderer(treeRenderer);
 //    treeTable.getTree().setShowsRootHandles(false);
 //    treeTable.getTree().setRootVisible(false);
