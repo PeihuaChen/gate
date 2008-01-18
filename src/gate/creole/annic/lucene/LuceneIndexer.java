@@ -259,42 +259,38 @@ public class LuceneIndexer implements Indexer {
               .getFile()).getAbsolutePath();
     }
 
-    IndexWriter writer = null;
     try {
-      writer = new IndexWriter(location, new LuceneAnalyzer(), false);
+      IndexWriter writer = new IndexWriter(location, new LuceneAnalyzer(), false);
 
-      if(added != null) {
-        for(int i = 0; i < added.size(); i++) {
+      try {
+        if(added != null) {
+          for(int i = 0; i < added.size(); i++) {
 
-          gate.Document gateDoc = added.get(i);
+            gate.Document gateDoc = added.get(i);
 
-          String idToUse = gateDoc.getLRPersistenceId() == null ? gateDoc
-                  .getName() : gateDoc.getLRPersistenceId().toString();
-          System.out.print("Indexing : " + idToUse + " ...");
-          List<gate.creole.annic.apache.lucene.document.Document> docs = getLuceneDocuments(
-                  corpusPersistenceID, gateDoc, location);
-          if(docs == null) {
+            String idToUse = gateDoc.getLRPersistenceId() == null ? gateDoc
+                    .getName() : gateDoc.getLRPersistenceId().toString();
+            System.out.print("Indexing : " + idToUse + " ...");
+            List<gate.creole.annic.apache.lucene.document.Document> docs = getLuceneDocuments(
+                    corpusPersistenceID, gateDoc, location);
+            if(docs == null) {
+              System.out.println("Done");
+              continue;
+            }
+            for(int j = 0; j < docs.size(); j++) {
+              writer.addDocument(docs.get(j));
+            }
             System.out.println("Done");
-            continue;
-          }
-          for(int j = 0; j < docs.size(); j++) {
-            writer.addDocument(docs.get(j));
-          }
-          System.out.println("Done");
-        }// for (add all added documents)
+          }// for (add all added documents)
+        }
+      }
+      finally {
+        // make sure we close the writer, whatever happens
+        writer.close();
       }
     }
     catch(java.io.IOException ioe) {
       throw new IndexException(ioe);
-    }
-    finally {
-      // whatever happens we need to try to close the writer
-      try {
-        writer.close();
-      }
-      catch(java.io.IOException ioe) {
-        throw new IndexException(ioe);
-      }
     }
   }
 
