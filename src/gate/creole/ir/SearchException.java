@@ -16,9 +16,32 @@ package gate.creole.ir;
 
 public class SearchException extends Exception{
 
-  /** Consructor of the class.*/
   public SearchException(String msg){
     super(msg);
+  }
+
+  public SearchException(String errorType, String error,
+          String erroneousLine) {
+
+    super("\nError: "+errorType+" - "+error+".\n"
+          +erroneousLine);
+  }
+
+  public SearchException(String errorType, String error,
+          String erroneousLine, int errorPosition) {
+
+    super("\nError: "+errorType+" - "+error+".\n"
+            +erroneousLine+"\n"
+            +caretLine(errorPosition));
+  }
+
+  final static private String caretLine(int errorPosition) {
+    StringBuffer s = new StringBuffer();
+    for (int c = 0; c < errorPosition; c++) {
+      s.append(" ");
+    }
+    s.append("^");
+    return s.toString();
   }
 
 }

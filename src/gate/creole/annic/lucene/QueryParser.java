@@ -316,8 +316,8 @@ public class QueryParser {
       ch = query.charAt(i);
       if(isOpeneningBrace(ch, prev)) {
         if(balance != 0) {
-          throwError();
-          return null;
+          throw new SearchException("unbalanced braces",
+            "a closing brace (}) is missing before this opening brace", query, i);
         }
 
         if(!token.trim().equals("")) {
@@ -332,8 +332,8 @@ public class QueryParser {
       if(isClosingBrace(ch, prev)) {
         balance--;
         if(balance != 0) {
-          throwError();
-          return null;
+          throw new SearchException("unbalanced braces",
+            "an opening brace ({) is missing before this closing brace", query, i);
         }
 
         token += "}";
@@ -346,8 +346,13 @@ public class QueryParser {
     }
 
     if(balance != 0) {
-      throwError();
-      return null;
+      if (balance > 0) {
+        throw new SearchException("unbalanced braces",
+          balance+" closing brace/s (}) is/are missing in this expression", query);
+      } else {
+        throw new SearchException("unbalanced braces",
+          balance+" opening brace/s ({) is/are missing in this expression", query);
+      }
     }
 
     if(!token.trim().equals("")) tokens.add(token);
@@ -522,8 +527,9 @@ public class QueryParser {
 
       }
       else if(index == -1 && index1 != -1) {
-        throwError();
-        return null;
+        throw new SearchException("incorrect operator",
+          "insert one equal (=) to obtain a correct equal operator (==)",
+          elem, elem.indexOf("=", index1));
       }
       else if(index != -1 && index1 != -1) {
 
@@ -630,7 +636,7 @@ public class QueryParser {
   }
 
   private void throwError() throws gate.creole.ir.SearchException {
-    throw new gate.creole.ir.SearchException("Error in Query");
+    throw new SearchException("Error in Query");
   }
 
   public boolean needValidation() {
