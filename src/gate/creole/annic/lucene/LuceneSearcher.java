@@ -457,86 +457,82 @@ public class LuceneSearcher implements Searcher {
   public String[] getIndexedAnnotationSetNames(String indexLocation) throws SearchException {
     annotationTypesMap = new HashMap<String, List<String>>();
     Set<String> toReturn = new HashSet<String>();
-    IndexReader reader = null;
     try {
-      reader = IndexReader.open(indexLocation);
+      IndexReader reader = IndexReader.open(indexLocation);
       
-      // lets first obtain stored corpora
-      TermEnum corpusTerms = reader.terms(new Term(Constants.CORPUS_ID, ""));
-      if(corpusTerms == null || corpusTerms.term() == null) return new String[0];
-      
-      
-      Set<String> corpora = new HashSet<String>();
-      while(Constants.CORPUS_ID.equals(corpusTerms.term().field())) {
-        corpora.add(corpusTerms.term().text());
-        if(!corpusTerms.next()) break;
-      }
-      
-      // for each corpus we obtain its annotation set ids
-      for(String corpus : corpora) {
-        Term term = new Term(Constants.CORPUS_ID, corpus);
-        TermQuery tq = new TermQuery(term);
-        try {
-          gate.creole.annic.apache.lucene.search.Searcher searcher = new IndexSearcher(indexLocation);
-          Hits corpusHits = searcher.search(tq);
-          for(int i = 0; i < corpusHits.length(); i++) {
-            Document luceneDoc = corpusHits.doc(i);
-            String annotationSetID = luceneDoc.get(Constants.ANNOTATION_SET_ID);
-            if(toReturn.contains(corpus+";"+annotationSetID)) continue;
-            toReturn.add(corpus+";"+annotationSetID);
-            
-            // lets create a boolean query
-            Term annotSetTerm = new Term(Constants.ANNOTATION_SET_ID, annotationSetID);
-            TermQuery atq = new TermQuery(annotSetTerm);
-            
-            BooleanQuery bq = new BooleanQuery();
-            bq.add(tq, true, false);
-            bq.add(atq, true, false);
-            gate.creole.annic.apache.lucene.search.Searcher indexFeatureSearcher = new IndexSearcher(indexLocation);
-            Hits indexFeaturesHits = searcher.search(bq);
-            for(int j=0;j < indexFeaturesHits.length();j++) {
-              Document aDoc = indexFeaturesHits.doc(j);
-              String indexedFeatures = aDoc.get(Constants.INDEXED_FEATURES);
-              if(indexedFeatures != null) {
-                String [] features = indexedFeatures.split(";");
-                for(String aFeature : features) {
-                  // AnnotationType.FeatureName
-                  int index = aFeature.lastIndexOf(".");
-                  if(index == -1) {
-                    continue;
-                  }
-                  String type = aFeature.substring(0, index);
-                  String featureName = aFeature.substring(index+1);
-                  String key = corpus+";"+annotationSetID+";"+type;
-                  List<String> listOfFeatures = annotationTypesMap.get(key);
-                  if(listOfFeatures == null) {
-                    listOfFeatures = new ArrayList<String>();
-                    annotationTypesMap.put(key, listOfFeatures);
-                  }
-                  if(!listOfFeatures.contains(featureName)) {
-                    listOfFeatures.add(featureName);
+      try {
+        // lets first obtain stored corpora
+        TermEnum corpusTerms = reader.terms(new Term(Constants.CORPUS_ID, ""));
+        if(corpusTerms == null || corpusTerms.term() == null) return new String[0];
+        
+        
+        Set<String> corpora = new HashSet<String>();
+        while(Constants.CORPUS_ID.equals(corpusTerms.term().field())) {
+          corpora.add(corpusTerms.term().text());
+          if(!corpusTerms.next()) break;
+        }
+        
+        // for each corpus we obtain its annotation set ids
+        for(String corpus : corpora) {
+          Term term = new Term(Constants.CORPUS_ID, corpus);
+          TermQuery tq = new TermQuery(term);
+          try {
+            gate.creole.annic.apache.lucene.search.Searcher searcher = new IndexSearcher(indexLocation);
+            Hits corpusHits = searcher.search(tq);
+            for(int i = 0; i < corpusHits.length(); i++) {
+              Document luceneDoc = corpusHits.doc(i);
+              String annotationSetID = luceneDoc.get(Constants.ANNOTATION_SET_ID);
+              if(toReturn.contains(corpus+";"+annotationSetID)) continue;
+              toReturn.add(corpus+";"+annotationSetID);
+              
+              // lets create a boolean query
+              Term annotSetTerm = new Term(Constants.ANNOTATION_SET_ID, annotationSetID);
+              TermQuery atq = new TermQuery(annotSetTerm);
+              
+              BooleanQuery bq = new BooleanQuery();
+              bq.add(tq, true, false);
+              bq.add(atq, true, false);
+              gate.creole.annic.apache.lucene.search.Searcher indexFeatureSearcher = new IndexSearcher(indexLocation);
+              Hits indexFeaturesHits = searcher.search(bq);
+              for(int j=0;j < indexFeaturesHits.length();j++) {
+                Document aDoc = indexFeaturesHits.doc(j);
+                String indexedFeatures = aDoc.get(Constants.INDEXED_FEATURES);
+                if(indexedFeatures != null) {
+                  String [] features = indexedFeatures.split(";");
+                  for(String aFeature : features) {
+                    // AnnotationType.FeatureName
+                    int index = aFeature.lastIndexOf(".");
+                    if(index == -1) {
+                      continue;
+                    }
+                    String type = aFeature.substring(0, index);
+                    String featureName = aFeature.substring(index+1);
+                    String key = corpus+";"+annotationSetID+";"+type;
+                    List<String> listOfFeatures = annotationTypesMap.get(key);
+                    if(listOfFeatures == null) {
+                      listOfFeatures = new ArrayList<String>();
+                      annotationTypesMap.put(key, listOfFeatures);
+                    }
+                    if(!listOfFeatures.contains(featureName)) {
+                      listOfFeatures.add(featureName);
+                    }
                   }
                 }
               }
             }
           }
+          catch(IOException ioe) {
+            ioe.printStackTrace();
+            throw new SearchException(ioe);
+          }
         }
-        catch(IOException ioe) {
-          ioe.printStackTrace();
-          throw new SearchException(ioe);
-        }
+      }
+      finally {
+        reader.close();
       }
     }
     catch(IOException ioe) {
       throw new SearchException(ioe);
-    }
-    finally {
-      try {
-        if(reader != null) reader.close();
-      }
-      catch(IOException ioe) {
-        throw new SearchException(ioe);
-      }
     }
     return toReturn.toArray(new String[0]);
   }

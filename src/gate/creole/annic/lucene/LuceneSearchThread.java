@@ -214,13 +214,18 @@ public class LuceneSearchThread {
       java.io.FileReader fileReader = new java.io.FileReader(indexLocation
               + "LuceneIndexDefinition.xml");
 
-      // other wise read this file
-      com.thoughtworks.xstream.XStream xstream = new com.thoughtworks.xstream.XStream(
-              new com.thoughtworks.xstream.io.xml.StaxDriver());
-
-      // Saving was accomplished by using XML serialization of the map.
-      HashMap indexInformation = (HashMap)xstream.fromXML(fileReader);
-      fileReader.close();
+      HashMap indexInformation = null;
+      try {
+        // other wise read this file
+        com.thoughtworks.xstream.XStream xstream = new com.thoughtworks.xstream.XStream(
+                new com.thoughtworks.xstream.io.xml.StaxDriver());
+  
+        // Saving was accomplished by using XML serialization of the map.
+        indexInformation = (HashMap)xstream.fromXML(fileReader);
+      }
+      finally {
+        fileReader.close();
+      }
 
       // find out if the current index was indexed by annicIndexPR
       String indexedWithANNICIndexPR = (String)indexInformation
@@ -258,93 +263,97 @@ public class LuceneSearchThread {
       // create an instance of Index Searcher
       LuceneIndexSearcher searcher = new LuceneIndexSearcher(indexLocation);
       
-      // we need to iterate through one query at a time
-      for(int luceneQueryIndex = 0; luceneQueryIndex < luceneQueries.length; luceneQueryIndex++) {
-          
-        /*
-         * this call reinitializes the first Term positions arraylists
-         * which are being used to store the results
-         */
-        searcher.initializeTermPositions();
-
-        /*
-         * and now execute the query result of which will be stored in
-         * hits
-         */
-        Hits hits = searcher.search(luceneQueries[luceneQueryIndex]);
-
-        /*
-         * and so now find out the positions of the first terms in the
-         * returned results. first term position is the position of the
-         * first term in the found pattern
-         */
-        ArrayList[] firstTermPositions = searcher.getFirstTermPositions();
-
-        // if no result available, set null to our scores
-        if(firstTermPositions[0].size() == 0) {
-          // do nothing
-          continue;
-        }
-
-
-        
-        // iterate through each result and collect necessary
-        // information
-        for(int hitIndex = 0; hitIndex < hits.length(); hitIndex++) {
-          int index = firstTermPositions[0].indexOf(new Integer(hits
-                  .id(hitIndex)));
-
-          // we fetch all the first term positions for the query
-          // issued
-          ArrayList ftp = (ArrayList)firstTermPositions[1].get(index);
-
+      try {
+        // we need to iterate through one query at a time
+        for(int luceneQueryIndex = 0; luceneQueryIndex < luceneQueries.length; luceneQueryIndex++) {
+            
           /*
-           * pattern length (in terms of total number of annotations
-           * following one other)
+           * this call reinitializes the first Term positions arraylists
+           * which are being used to store the results
            */
-          int patLen = ((Integer)firstTermPositions[2].get(index)).intValue();
-
+          searcher.initializeTermPositions();
+  
           /*
-           * and the type of query (if it has only one annotation in it,
-           * or multiple terms following them)
+           * and now execute the query result of which will be stored in
+           * hits
            */
-          int qType = ((Integer)firstTermPositions[3].get(index)).intValue();
-
-          // find out the documentID
-          String serializedFileID = hits.doc(hitIndex).get(Constants.DOCUMENT_ID_FOR_SERIALIZED_FILE);
-          QueryItem queryItem = new QueryItem();
-          queryItem.annotationSetName = hits.doc(hitIndex).get(
-                  Constants.ANNOTATION_SET_ID).intern();
-          queryItem.id = hits.id(hitIndex);
-          queryItem.documentID = hits.doc(hitIndex).get(Constants.DOCUMENT_ID).intern();
-          queryItem.ftp = ftp;
-          queryItem.patLen = patLen;
-          queryItem.qType = qType;
-          queryItem.query = luceneQueries[luceneQueryIndex];
-          queryItem.queryString = queryParser.getQueryString(luceneQueryIndex).intern();
-
+          Hits hits = searcher.search(luceneQueries[luceneQueryIndex]);
+  
           /*
-           * all these information go in the top level arrayList. we
-           * create separate arrayList for each individual document
-           * where each element in the arrayList provides information
-           * about different query issued over it
+           * and so now find out the positions of the first terms in the
+           * returned results. first term position is the position of the
+           * first term in the found pattern
            */
-          List<QueryItem> queryItemsList = searchResultInfoMap.get(serializedFileID);
-          if(queryItemsList == null) {
-            queryItemsList = new ArrayList<QueryItem>();
-            queryItemsList.add(queryItem);
-            searchResultInfoMap.put(serializedFileID, queryItemsList);
-            serializedFilesIDsList.add(serializedFileID);
+          ArrayList[] firstTermPositions = searcher.getFirstTermPositions();
+  
+          // if no result available, set null to our scores
+          if(firstTermPositions[0].size() == 0) {
+            // do nothing
+            continue;
           }
-          else {
-            // before inserting we check if it is already added
-            if(!doesAlreadyExist(queryItem, queryItemsList)) {
+  
+  
+          
+          // iterate through each result and collect necessary
+          // information
+          for(int hitIndex = 0; hitIndex < hits.length(); hitIndex++) {
+            int index = firstTermPositions[0].indexOf(new Integer(hits
+                    .id(hitIndex)));
+  
+            // we fetch all the first term positions for the query
+            // issued
+            ArrayList ftp = (ArrayList)firstTermPositions[1].get(index);
+  
+            /*
+             * pattern length (in terms of total number of annotations
+             * following one other)
+             */
+            int patLen = ((Integer)firstTermPositions[2].get(index)).intValue();
+  
+            /*
+             * and the type of query (if it has only one annotation in it,
+             * or multiple terms following them)
+             */
+            int qType = ((Integer)firstTermPositions[3].get(index)).intValue();
+  
+            // find out the documentID
+            String serializedFileID = hits.doc(hitIndex).get(Constants.DOCUMENT_ID_FOR_SERIALIZED_FILE);
+            QueryItem queryItem = new QueryItem();
+            queryItem.annotationSetName = hits.doc(hitIndex).get(
+                    Constants.ANNOTATION_SET_ID).intern();
+            queryItem.id = hits.id(hitIndex);
+            queryItem.documentID = hits.doc(hitIndex).get(Constants.DOCUMENT_ID).intern();
+            queryItem.ftp = ftp;
+            queryItem.patLen = patLen;
+            queryItem.qType = qType;
+            queryItem.query = luceneQueries[luceneQueryIndex];
+            queryItem.queryString = queryParser.getQueryString(luceneQueryIndex).intern();
+  
+            /*
+             * all these information go in the top level arrayList. we
+             * create separate arrayList for each individual document
+             * where each element in the arrayList provides information
+             * about different query issued over it
+             */
+            List<QueryItem> queryItemsList = searchResultInfoMap.get(serializedFileID);
+            if(queryItemsList == null) {
+              queryItemsList = new ArrayList<QueryItem>();
               queryItemsList.add(queryItem);
+              searchResultInfoMap.put(serializedFileID, queryItemsList);
+              serializedFilesIDsList.add(serializedFileID);
+            }
+            else {
+              // before inserting we check if it is already added
+              if(!doesAlreadyExist(queryItem, queryItemsList)) {
+                queryItemsList.add(queryItem);
+              }
             }
           }
         }
       }
-      searcher.close();
+      finally {
+        searcher.close();
+      }
       // if any result possible, return true
       if(searchResultInfoMap.size() > 0)
         success = true;
