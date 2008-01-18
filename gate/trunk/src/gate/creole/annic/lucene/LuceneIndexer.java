@@ -157,34 +157,38 @@ public class LuceneIndexer implements Indexer {
       IndexWriter writer = new IndexWriter(file.getAbsolutePath(),
               new LuceneAnalyzer(), true);
 
-      if(corpus != null) {
-        // load documents and add them one by one
-        for(int i = 0; i < corpus.size(); i++) {
-          gate.Document gateDoc = (gate.Document)corpus.get(i);
-          String idToUse = gateDoc.getLRPersistenceId() == null ? gateDoc
-                  .getName() : gateDoc.getLRPersistenceId().toString();
-
-          System.out.print("Indexing : " + idToUse + " ...");
-          String corpusName = corpus.getLRPersistenceId() == null ? corpus
-                  .getName() : corpus.getLRPersistenceId().toString();
-
-          List<gate.creole.annic.apache.lucene.document.Document> luceneDocs = getLuceneDocuments(
-                  corpusName, gateDoc, indexLocation.toString());
-
-          if(luceneDocs != null) {
-            for(int j = 0; j < luceneDocs.size(); j++) {
-              if(luceneDocs.get(j) != null) {
-                writer.addDocument(luceneDocs.get(j));
+      try {
+        if(corpus != null) {
+          // load documents and add them one by one
+          for(int i = 0; i < corpus.size(); i++) {
+            gate.Document gateDoc = (gate.Document)corpus.get(i);
+            String idToUse = gateDoc.getLRPersistenceId() == null ? gateDoc
+                    .getName() : gateDoc.getLRPersistenceId().toString();
+  
+            System.out.print("Indexing : " + idToUse + " ...");
+            String corpusName = corpus.getLRPersistenceId() == null ? corpus
+                    .getName() : corpus.getLRPersistenceId().toString();
+  
+            List<gate.creole.annic.apache.lucene.document.Document> luceneDocs = getLuceneDocuments(
+                    corpusName, gateDoc, indexLocation.toString());
+  
+            if(luceneDocs != null) {
+              for(int j = 0; j < luceneDocs.size(); j++) {
+                if(luceneDocs.get(j) != null) {
+                  writer.addDocument(luceneDocs.get(j));
+                }
               }
             }
+            if(gateDoc.getLRPersistenceId() != null) {
+              gate.Factory.deleteResource(gateDoc);
+            }
+            System.out.println("Done");
           }
-          if(gateDoc.getLRPersistenceId() != null) {
-            gate.Factory.deleteResource(gateDoc);
-          }
-          System.out.println("Done");
-        }
-      }// for (all documents)
-      writer.close();
+        }// for (all documents)
+      }
+      finally {
+        writer.close();
+      }
       writeParametersToDisk();
     }
     catch(java.io.IOException ioe) {
@@ -199,8 +203,12 @@ public class LuceneIndexer implements Indexer {
               .toString();
       IndexWriter writer = new IndexWriter(location,
               new gate.creole.annic.lucene.LuceneAnalyzer(), false);
-      writer.optimize();
-      writer.close();
+      try {
+        writer.optimize();
+      }
+      finally {
+        writer.close();
+      }
     }
     catch(java.io.IOException ioe) {
       throw new IndexException(ioe);
@@ -323,43 +331,46 @@ public class LuceneIndexer implements Indexer {
 
       IndexReader reader = IndexReader.open(location);
 
-      // let us first remove the documents which need to be removed
-      if(removedIDs != null) {
-        for(int i = 0; i < removedIDs.size(); i++) {
-          String id = removedIDs.get(i).toString();
-          
-          Set<String> serializedFilesIDs = getNamesOfSerializedFiles(id);
-          
-          if(serializedFilesIDs.size() > 0) {
-            System.out.print("Removing => " + id + "...");
-          
-          id = getCompatibleName(id);
-          File file = new File(location, Constants.SERIALIZED_FOLDER_NAME);
-          file = new File(file, id);
-          
-          for(String serializedFileID : serializedFilesIDs) {
-            gate.creole.annic.apache.lucene.index.Term term = new gate.creole.annic.apache.lucene.index.Term(
-                    Constants.DOCUMENT_ID_FOR_SERIALIZED_FILE, serializedFileID);
-            reader.delete(term);
-            serializedFileID = getCompatibleName(serializedFileID);
-            // deleting them from the disk as well
-            // we have a subfolder for each document
+      try {
+        // let us first remove the documents which need to be removed
+        if(removedIDs != null) {
+          for(int i = 0; i < removedIDs.size(); i++) {
+            String id = removedIDs.get(i).toString();
             
-            File toDelete = new File(file, serializedFileID
-                    + ".annic");
-            if(toDelete.exists()) toDelete.delete();
-          }
-          
-          if(file.exists() && file.isDirectory()) {
-            file.delete();
-          }
-          
-          System.out.println("Done ");
-          }
-        }// for (remove all removed documents)
+            Set<String> serializedFilesIDs = getNamesOfSerializedFiles(id);
+            
+            if(serializedFilesIDs.size() > 0) {
+              System.out.print("Removing => " + id + "...");
+            
+            id = getCompatibleName(id);
+            File file = new File(location, Constants.SERIALIZED_FOLDER_NAME);
+            file = new File(file, id);
+            
+            for(String serializedFileID : serializedFilesIDs) {
+              gate.creole.annic.apache.lucene.index.Term term = new gate.creole.annic.apache.lucene.index.Term(
+                      Constants.DOCUMENT_ID_FOR_SERIALIZED_FILE, serializedFileID);
+              reader.delete(term);
+              serializedFileID = getCompatibleName(serializedFileID);
+              // deleting them from the disk as well
+              // we have a subfolder for each document
+              
+              File toDelete = new File(file, serializedFileID
+                      + ".annic");
+              if(toDelete.exists()) toDelete.delete();
+            }
+            
+            if(file.exists() && file.isDirectory()) {
+              file.delete();
+            }
+            
+            System.out.println("Done ");
+            }
+          }// for (remove all removed documents)
+        }
       }
-
-      reader.close();
+      finally {
+        reader.close();
+      }
     }
     catch(java.io.IOException ioe) {
       throw new IndexException(ioe);
@@ -463,13 +474,17 @@ public class LuceneIndexer implements Indexer {
 
     java.io.FileReader fileReader = new java.io.FileReader(file);
 
-    // other wise read this and
-    com.thoughtworks.xstream.XStream xstream = new com.thoughtworks.xstream.XStream(
-            new com.thoughtworks.xstream.io.xml.StaxDriver());
-
-    // Saving is accomplished just using XML serialization of the map.
-    this.parameters = (HashMap)xstream.fromXML(fileReader);
-    fileReader.close();
+    try {
+      // other wise read this and
+      com.thoughtworks.xstream.XStream xstream = new com.thoughtworks.xstream.XStream(
+              new com.thoughtworks.xstream.io.xml.StaxDriver());
+  
+      // Saving is accomplished just using XML serialization of the map.
+      this.parameters = (HashMap)xstream.fromXML(fileReader);
+    }
+    finally {
+      fileReader.close();
+    }
   }
 
   /**
@@ -540,32 +555,28 @@ public class LuceneIndexer implements Indexer {
     }
     
     Set<String> toReturn = new HashSet<String>();
-    gate.creole.annic.apache.lucene.search.Searcher searcher = null;
     try {
       Term term = new Term(Constants.DOCUMENT_ID, documentID);
       TermQuery tq = new TermQuery(term);
-      searcher = new IndexSearcher(location);
-      // and now execute the query
-      // result of which will be stored in hits
-      Hits luceneHits = searcher.search(tq);
-      for(int i = 0; i < luceneHits.length(); i++) {
-        Document luceneDoc = luceneHits.doc(i);
-        String documentIdOfSerializedFile = luceneDoc
-                .get(Constants.DOCUMENT_ID_FOR_SERIALIZED_FILE);
-        toReturn.add(documentIdOfSerializedFile);
+      gate.creole.annic.apache.lucene.search.Searcher searcher = new IndexSearcher(location);
+      try {
+        // and now execute the query
+        // result of which will be stored in hits
+        Hits luceneHits = searcher.search(tq);
+        for(int i = 0; i < luceneHits.length(); i++) {
+          Document luceneDoc = luceneHits.doc(i);
+          String documentIdOfSerializedFile = luceneDoc
+                  .get(Constants.DOCUMENT_ID_FOR_SERIALIZED_FILE);
+          toReturn.add(documentIdOfSerializedFile);
+        }
+        return toReturn;
       }
-      return toReturn;
+      finally {
+        searcher.close();
+      }
     }
     catch(IOException ioe) {
       throw new IndexException(ioe);
-    }
-    finally {
-      try {
-        if(searcher != null) searcher.close();
-      }
-      catch(IOException ioe) {
-        throw new IndexException(ioe);
-      }
     }
   }
 }
