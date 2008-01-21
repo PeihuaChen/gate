@@ -91,7 +91,8 @@ public class SubQueryParser {
           // so find out where it gets closed
           int brClPos = findBracketClosingPosition(i + 1, query);
           if(brClPos == -1) {
-            throw new SearchException("Invalid Query");
+            throw new SearchException("unbalanced brackets",
+              "a closing bracket ()) is missing for this opening bracket", query, i);
           }
 
           String wildCardString = findWildCardString(brClPos, query);
@@ -208,7 +209,8 @@ public class SubQueryParser {
           // so find out where it gets closed
           int brClPos = findBracketClosingPosition(i + 1, query);
           if(brClPos == -1) {
-            throw new SearchException("Error in Query!");
+            throw new SearchException("unbalanced brackets",
+              "a closing bracket ()) is missing for this opening bracket", query, i);
           }
 
           // see if there are any OR operators in it
@@ -297,7 +299,8 @@ public class SubQueryParser {
           i = brClPos;
         }
         else if(isClosingBracket(ch, pre)) {
-          throw new SearchException("Error in Query!");
+          throw new SearchException("unbalanced brackets",
+            "a opening bracket (() is missing for this closing bracket", query, i);
         }
         else {
           if(duplicated) {
