@@ -29,6 +29,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
+import java.util.regex.Matcher;
 
 import javax.swing.table.AbstractTableModel;
 import javax.swing.*;
@@ -256,6 +257,16 @@ public class LuceneDataStoreSearchEasyGUI extends AbstractVisualResource
       patternsTableModel.fireTableDataChanged();
 
       if(patternTable.getRowCount() > 0) {
+        String query = newQuery.getText().trim();
+        java.util.regex.Pattern pattern =
+          java.util.regex.Pattern.compile("\\{([^\\{\\}=]+)[=\\}]");
+        Matcher matcher = pattern.matcher(query);
+        // expand all annotation types used in the query
+        while (matcher.find()) {
+          expandedAnnotationType.add((matcher.group(1).contains("."))?
+            matcher.group(1).substring(0, matcher.group(1).indexOf(".")):
+            matcher.group(1));
+        }
         patternTable.setRowSelectionInterval(0, 0);
         tableValueChanged();
         exportResultsAction.setEnabled(true);
@@ -269,13 +280,13 @@ public class LuceneDataStoreSearchEasyGUI extends AbstractVisualResource
 
       } else {
         GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
         if (errorOnLastQuery) {
           errorOnLastQuery = false;
         } else {
           centerPanel.removeAll();
           centerPanel.add(new JTextArea("No result found for your query."), gbc);
         }
-        gbc.gridy = 2;
         gbc.insets = new Insets(20, 0, 0, 0);
         centerPanel.add(new JTextArea(
           "Here are the different type of queries you can use:\n"+
@@ -409,7 +420,6 @@ public class LuceneDataStoreSearchEasyGUI extends AbstractVisualResource
 
     progressLabel = new JLabel(MainFrame.getIcon("working"));
     progressLabel.setOpaque(false);
-    progressLabel.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
     progressLabel.setEnabled(true);
 
     // will be added to the GUI via a split panel
@@ -1156,84 +1166,85 @@ public class LuceneDataStoreSearchEasyGUI extends AbstractVisualResource
     }
 
     public void actionPerformed(ActionEvent ae) {
+      centerPanel.removeAll();
+      centerPanel.add(progressLabel, new GridBagConstraints());
+      progressLabel.repaint();
+      centerPanel.repaint();
 
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-          centerPanel.removeAll();
-          GridBagConstraints gbc = new GridBagConstraints();
-          gbc.weighty = 1.0;
-          gbc.weightx = 1.0;
-          centerPanel.add(progressLabel, gbc);
+          progressLabel.repaint();
+          centerPanel.repaint();
+          thisInstance.setEnabled(false);
+          Map<Object, Object> parameters = searcher.getParameters();
+          if(parameters == null)
+            parameters = new HashMap<Object, Object>();
 
-          SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-              progressLabel.updateUI();
-
-              thisInstance.setEnabled(false);
-              Map<Object, Object> parameters = searcher.getParameters();
-              if(parameters == null)
-                parameters = new HashMap<Object, Object>();
-
-              if(target instanceof LuceneDataStoreImpl) {
-                URL indexLocationURL = (URL)((LuceneDataStoreImpl)target)
-                        .getIndexer().getParameters().get(
-                                Constants.INDEX_LOCATION_URL);
-                String indexLocation = null;
-                try {
-                  indexLocation = new File(indexLocationURL.toURI())
-                          .getAbsolutePath();
-                } catch(URISyntaxException use) {
-                  indexLocation = new File(indexLocationURL.getFile()).getAbsolutePath();
-                }
-                ArrayList<String> indexLocations = new ArrayList<String>();
-                indexLocations.add(indexLocation);
-                parameters.put(Constants.INDEX_LOCATIONS, indexLocations);
-
-                String corpus2SearchIn = 
-                  (corpusToSearchIn.getSelectedItem().equals(Constants.ENTIRE_DATASTORE))?
-                      null:(String)corpusIds.get(corpusToSearchIn.getSelectedIndex() - 1);
-                parameters.put(Constants.CORPUS_ID, corpus2SearchIn);
-              }
-
-              int noOfPatterns =
-                ((Number)numberOfResultsSpinner.getValue()).intValue();
-              int contextWindow =
-                ((Number)contextSizeSpinner.getValue()).intValue();
-              String query = newQuery.getText().trim();
-              parameters.put(Constants.CONTEXT_WINDOW, new Integer(contextWindow));
-              if (annotationSetToSearchIn.getSelectedItem()
-                      .equals(Constants.ALL_SETS)) {
-                parameters.remove(Constants.ANNOTATION_SET_ID);
-              } else {
-                String annotationSet =
-                  (String)annotationSetToSearchIn.getSelectedItem();
-                parameters.put(Constants.ANNOTATION_SET_ID, annotationSet);
-              }
-
-              try {
-                if(searcher.search(query, parameters)) {
-                  searcher.next(noOfPatterns);
-                }
-              } catch (SearchException se) {
-                errorOnLastQuery = true;
-                centerPanel.removeAll();
-                JTextArea jta =
-                  new JTextArea(se.getMessage().replaceFirst("^[^\\n]+\\n", ""));
-                jta.setFont(new Font("Monospaced", Font.PLAIN, 12));
-                centerPanel.add(jta, new GridBagConstraints());
-                thisInstance.setEnabled(true);
-
-              } catch(Exception e) {
-                e.printStackTrace();
-                thisInstance.setEnabled(true);
-              }
-              processFinished();
-              pageOfResults = 1;
-              titleResults.setText("Results - Page "+pageOfResults);
-              thisInstance.setEnabled(true);
+          if(target instanceof LuceneDataStoreImpl) {
+            URL indexLocationURL = (URL)((LuceneDataStoreImpl)target)
+            .getIndexer().getParameters().get(
+                    Constants.INDEX_LOCATION_URL);
+            String indexLocation = null;
+            try {
+              indexLocation = new File(indexLocationURL.toURI())
+              .getAbsolutePath();
+            } catch(URISyntaxException use) {
+              indexLocation = new File(indexLocationURL.getFile()).getAbsolutePath();
             }
-          });
+            ArrayList<String> indexLocations = new ArrayList<String>();
+            indexLocations.add(indexLocation);
+            parameters.put(Constants.INDEX_LOCATIONS, indexLocations);
 
+            String corpus2SearchIn = 
+              (corpusToSearchIn.getSelectedItem().equals(Constants.ENTIRE_DATASTORE))?
+                      null:(String)corpusIds.get(corpusToSearchIn.getSelectedIndex() - 1);
+            parameters.put(Constants.CORPUS_ID, corpus2SearchIn);
+          }
+
+          int noOfPatterns =
+            ((Number)numberOfResultsSpinner.getValue()).intValue();
+          int contextWindow =
+            ((Number)contextSizeSpinner.getValue()).intValue();
+          String query = newQuery.getText().trim();
+          parameters.put(Constants.CONTEXT_WINDOW, new Integer(contextWindow));
+          if (annotationSetToSearchIn.getSelectedItem()
+                  .equals(Constants.ALL_SETS)) {
+            parameters.remove(Constants.ANNOTATION_SET_ID);
+          } else {
+            String annotationSet =
+              (String)annotationSetToSearchIn.getSelectedItem();
+            parameters.put(Constants.ANNOTATION_SET_ID, annotationSet);
+          }
+
+          try {
+            if(searcher.search(query, parameters)) {
+              searcher.next(noOfPatterns);
+            }
+          } catch (SearchException se) {
+            errorOnLastQuery = true;
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.gridwidth = GridBagConstraints.REMAINDER;
+            centerPanel.removeAll();
+            String[] message = se.getMessage().split("\\n");
+            // message[0] contains the Java error
+            JTextArea jta = new JTextArea(message[1]);
+            centerPanel.add(jta, gbc);
+            jta = new JTextArea(message[2]);
+            if (message.length > 3) {
+              jta.setText(message[2]+"\n"+message[3]);
+            }
+            jta.setFont(new Font("Monospaced", Font.PLAIN, 12));
+            centerPanel.add(jta, gbc);
+            thisInstance.setEnabled(true);
+
+          } catch(Exception e) {
+            e.printStackTrace();
+            thisInstance.setEnabled(true);
+          }
+          processFinished();
+          pageOfResults = 1;
+          titleResults.setText("Results - Page "+pageOfResults);
+          thisInstance.setEnabled(true);
         }
       });
     }

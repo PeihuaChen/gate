@@ -348,10 +348,10 @@ public class QueryParser {
     if(balance != 0) {
       if (balance > 0) {
         throw new SearchException("unbalanced braces",
-          balance+" closing brace/s (}) is/are missing in this expression", query);
+                "One closing brace (}) is missing in this expression", query);
       } else {
         throw new SearchException("unbalanced braces",
-          balance+" opening brace/s ({) is/are missing in this expression", query);
+                "One opening brace ({) is missing in this expression", query);
       }
     }
 
@@ -527,9 +527,10 @@ public class QueryParser {
 
       }
       else if(index == -1 && index1 != -1) {
-        throw new SearchException("incorrect operator",
-          "insert one equal (=) to obtain a correct equal operator (==)",
-          elem, elem.indexOf("=", index1));
+        throw new SearchException("missing operator",
+                "an equal operator (==) is missing",
+                elem, (elem.indexOf("=", index1)!=-1)?
+                       elem.indexOf("=", index1):elem.length());
       }
       else if(index != -1 && index1 != -1) {
 
