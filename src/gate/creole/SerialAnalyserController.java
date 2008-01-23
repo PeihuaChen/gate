@@ -61,20 +61,19 @@ public class SerialAnalyserController extends SerialController
         ((LanguageAnalyser)prList.get(j)).setCorpus(corpus);
       }
 
-//      try{
-      if (DEBUG) 
-        Out.pr("SerialAnalyserController processing doc=" + doc.getName()+ "...");      
-      super.executeImpl();
-      if (DEBUG) 
-        Out.prln("done.");      
-//      }catch(Exception e){
-//        e.printStackTrace(Err.getPrintWriter());
-//      }
-
-      //unset the doc and corpus
-      for(int j = 0; j < prList.size(); j++){
-        ((LanguageAnalyser)prList.get(j)).setDocument(null);
-        ((LanguageAnalyser)prList.get(j)).setCorpus(null);
+      try{
+        if (DEBUG) 
+          Out.pr("SerialAnalyserController processing doc=" + doc.getName()+ "...");      
+        super.executeImpl();
+        if (DEBUG) 
+          Out.prln("done.");      
+      }
+      finally {
+        // make sure we unset the doc and corpus even if we got an exception
+        for(int j = 0; j < prList.size(); j++){
+          ((LanguageAnalyser)prList.get(j)).setDocument(null);
+          ((LanguageAnalyser)prList.get(j)).setCorpus(null);
+        }
       }
 
       if(!docWasLoaded){
