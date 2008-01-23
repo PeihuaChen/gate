@@ -296,6 +296,8 @@ public abstract class Factory {
       fm.putAll(resData.getFeatures());
       res.setFeatures(fm);
     }
+    // add the features specified by the user
+    if(features != null) res.getFeatures().putAll(features);
 
     // initialise the resource
     if(DEBUG) Out.prln("Initialising resource " + res.toString());
@@ -316,8 +318,6 @@ public abstract class Factory {
     }
     // record the instantiation on the resource data's stack
     resData.addInstantiation(res);
-    // add the features specified by the user
-    if(features != null) res.getFeatures().putAll(features);
     // fire the event
     creoleProxy.fireResourceLoaded(
       new CreoleEvent(res, CreoleEvent.RESOURCE_LOADED)
