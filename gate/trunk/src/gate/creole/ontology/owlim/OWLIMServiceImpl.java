@@ -230,7 +230,8 @@ public class OWLIMServiceImpl implements OWLIM,
         System.err.println("Object : not available");
       }
     }
-    throw new RuntimeException("Some Error Occured");
+    throw new RuntimeException("ERROR :" + msg + "\n at line number :" + lineNo
+            + " column number :" + columnNo);
   }
 
   /**
@@ -428,10 +429,10 @@ public class OWLIMServiceImpl implements OWLIM,
       endTransaction(repositoryID);
     }
     catch(AccessDeniedException ioe) {
-      throw new GateOntologyException(ioe);
+      throw new GateOntologyException("Could not add data into the repository because "+ioe.getMessage(),ioe);
     }
     catch(IOException ioe) {
-      throw new GateOntologyException(ioe);
+      throw new GateOntologyException("Could not add data into the repository because "+ioe.getMessage(),ioe);
     }
   }
 
@@ -605,21 +606,22 @@ public class OWLIMServiceImpl implements OWLIM,
 
   private QueryResultsTable performQuery(String serqlQuery)
           throws GateOntologyException {
+    String errorMsg = "Problem in retrieving data from the repository with query "+serqlQuery;
     try {
       return currentRepository.performTableQuery(QueryLanguage.SERQL,
               serqlQuery);
     }
     catch(AccessDeniedException ade) {
-      throw new GateOntologyException(ade);
+      throw new GateOntologyException(errorMsg, ade);
     }
     catch(IOException ioe) {
-      throw new GateOntologyException(ioe);
+      throw new GateOntologyException(errorMsg, ioe);
     }
     catch(MalformedQueryException mqe) {
-      throw new GateOntologyException(mqe);
+      throw new GateOntologyException(errorMsg, mqe);
     }
     catch(QueryEvaluationException qee) {
-      throw new GateOntologyException(qee);
+      throw new GateOntologyException(errorMsg, qee);
     }
   }
 
@@ -1362,7 +1364,7 @@ public class OWLIMServiceImpl implements OWLIM,
       currentEventsLog.addEvent(new OEvent(theResourceURI, theAnnotationPropertyURI, null, false));
     }
     catch(SailUpdateException e) {
-      throw new GateOntologyException(e);
+      throw new GateOntologyException("Error while removing annotation property values "+e.getMessage(), e);
     }
   }
 
@@ -1870,7 +1872,7 @@ public class OWLIMServiceImpl implements OWLIM,
       currentEventsLog.addEvent(new OEvent(anInstanceURI, anRDFPropertyURI, null, true));
     }
     catch(SailUpdateException sue) {
-      throw new GateOntologyException(sue);
+      throw new GateOntologyException("Error while removing RDF Property Values "+sue.getMessage(), sue);
     }
   }
 
@@ -2356,7 +2358,7 @@ public class OWLIMServiceImpl implements OWLIM,
       sail.clearRepository();
     }
     catch(SailUpdateException sue) {
-      throw new GateOntologyException(sue);
+      throw new GateOntologyException("Error while removing repository:"+repositoryID,sue);
     }
     service.getSystemConfig().removeRepository(
             currentRepository.getRepositoryId());
@@ -2383,7 +2385,7 @@ public class OWLIMServiceImpl implements OWLIM,
       sail.clearRepository();
     }
     catch(SailUpdateException sue) {
-      throw new GateOntologyException(sue);
+      throw new GateOntologyException("error while cleaning repository:"+repositoryID,sue);
     }
 
     endTransaction(null);
@@ -2419,10 +2421,10 @@ public class OWLIMServiceImpl implements OWLIM,
       return sb.toString();
     }
     catch(AccessDeniedException ade) {
-      throw new GateOntologyException(ade);
+      throw new GateOntologyException("error while obtaining ontology data",ade);
     }
     catch(IOException ioe) {
-      throw new GateOntologyException(ioe);
+      throw new GateOntologyException("error while obtaining ontology data",ioe);
     }
   }
 
@@ -2515,7 +2517,7 @@ public class OWLIMServiceImpl implements OWLIM,
       currentEventsLog.addEvent(new OEvent(classURI, RDFS.SUBCLASSOF, null,false));
     }
     catch(SailUpdateException sue) {
-      throw new GateOntologyException(sue.getMessage());
+      throw new GateOntologyException("error while removing a class:"+classURI,sue);
     }
 
     // this should happen only if removeSubTree is set to true
@@ -2593,7 +2595,7 @@ public class OWLIMServiceImpl implements OWLIM,
       endTransaction(null);
     }
     catch(SailUpdateException sue) {
-      throw new GateOntologyException(sue);
+      throw new GateOntologyException("error while removing a class:"+classURI,sue);
     }
 
     Collections.reverse(deletedResources);
@@ -2974,7 +2976,7 @@ public class OWLIMServiceImpl implements OWLIM,
       endTransaction(null);
     }
     catch(SailUpdateException sue) {
-      throw new GateOntologyException(sue);
+      throw new GateOntologyException("error while removing a property:"+aPropertyURI,sue);
     }
 
     // this should happen only if removeSubTree is set to true
@@ -3630,7 +3632,7 @@ public class OWLIMServiceImpl implements OWLIM,
       endTransaction(null);
     }
     catch(SailUpdateException sue) {
-      throw new GateOntologyException(sue);
+      throw new GateOntologyException("error while removing individual:"+individualURI,sue);
     }
     removeUUUStatement(individualURI, null, null);
     currentEventsLog.addEvent(new OEvent(individualURI,null, null, false));
@@ -3910,7 +3912,7 @@ public class OWLIMServiceImpl implements OWLIM,
         whatValueURI = OWL.MINCARDINALITY;
         break;
       default:
-        throw new GateOntologyException("Invalid restriction type");
+        throw new GateOntologyException("Invalid restriction type :"+restrictionType+" for the "+restrictionURI);
     }
 
     StatementIterator iter = sail.getStatements(getResource(restrictionURI),
@@ -3951,7 +3953,7 @@ public class OWLIMServiceImpl implements OWLIM,
         whatValueURI = OWL.MINCARDINALITY;
         break;
       default:
-        throw new GateOntologyException("Invalid restriction type");
+        throw new GateOntologyException("Invalid restriction type :"+restrictionType+" for the restriction "+restrictionURI);
     }
 
     StatementIterator iter = sail.getStatements(getResource(restrictionURI),
@@ -4007,7 +4009,7 @@ public class OWLIMServiceImpl implements OWLIM,
         whatValueURI = OWL.SOMEVALUESFROM;
         break;
       default:
-        throw new GateOntologyException("Invalid restriction type");
+        throw new GateOntologyException("Invalid restriction type:"+restrictionType+" for the restriction "+restrictionURI);
     }
 
     StatementIterator iter = sail.getStatements(getResource(restrictionURI),
@@ -4073,7 +4075,7 @@ public class OWLIMServiceImpl implements OWLIM,
         whatValueURI = OWL.SOMEVALUESFROM;
         break;
       default:
-        throw new GateOntologyException("Invalid restriction type");
+        throw new GateOntologyException("Invalid restriction type:"+restrictionType+" for the restriction "+restrictionURI);
 
     }
 
@@ -4181,7 +4183,7 @@ public class OWLIMServiceImpl implements OWLIM,
       endTransaction(null);
     }
     catch(SailUpdateException e) {
-      throw new GateOntologyException(e);
+      throw new GateOntologyException("error while adding statement into the repository where subject:"+subjectURI+" predicate:"+predicateURI+" objectURI:"+objectURI,e);
     }
   }
 
@@ -4209,7 +4211,7 @@ public class OWLIMServiceImpl implements OWLIM,
       endTransaction(null);
     }
     catch(SailUpdateException e) {
-      throw new GateOntologyException(e);
+      throw new GateOntologyException("error while removing statement from the repository where subject:"+subjectURI+" predicate:"+predicateURI+" objectURI:"+objectURI, e);
     }
 
   }
@@ -4230,7 +4232,7 @@ public class OWLIMServiceImpl implements OWLIM,
       endTransaction(null);
     }
     catch(SailUpdateException e) {
-      throw new GateOntologyException(e);
+      throw new GateOntologyException("error while adding statement into the repository where subject:"+subject+" predicate:"+predicate+" objectURI:"+object, e);
     }
   }
 
@@ -4253,7 +4255,7 @@ public class OWLIMServiceImpl implements OWLIM,
       endTransaction(null);
     }
     catch(SailUpdateException e) {
-      throw new GateOntologyException(e);
+      throw new GateOntologyException("error while adding statement into the repository where subject:"+subject+" predicate:"+predicate+" objectURI:"+object, e);
     }
   }
 
@@ -4275,7 +4277,7 @@ public class OWLIMServiceImpl implements OWLIM,
       endTransaction(null);
     }
     catch(SailUpdateException e) {
-      throw new GateOntologyException(e);
+      throw new GateOntologyException("error while adding statement into the repository where subject:"+subject+" predicate:"+predicate+" objectURI:"+object, e);
     }
   }
 
@@ -4296,7 +4298,7 @@ public class OWLIMServiceImpl implements OWLIM,
       endTransaction(null);
     }
     catch(SailUpdateException e) {
-      throw new GateOntologyException(e);
+      throw new GateOntologyException("error while adding statement into the repository where subject:"+subject+" predicate:"+predicate+" objectURI:"+object, e);
     }
   }
 
@@ -4314,7 +4316,7 @@ public class OWLIMServiceImpl implements OWLIM,
       return no;
     }
     catch(SailUpdateException e) {
-      throw new GateOntologyException(e);
+      throw new GateOntologyException("error while removing statement from the repository where subject:"+subject+" predicate:"+predicate+" objectURI:"+object, e);
     }
   }
 
@@ -4340,7 +4342,7 @@ public class OWLIMServiceImpl implements OWLIM,
       endTransaction(null);
     }
     catch(SailUpdateException e) {
-      throw new GateOntologyException(e);
+      throw new GateOntologyException("error while removing statement from the repository where subject:"+subject+" predicate:"+predicate+" objectURI:"+object, e);
     }
   }
 
@@ -4368,7 +4370,7 @@ public class OWLIMServiceImpl implements OWLIM,
       endTransaction(null);
     }
     catch(SailUpdateException e) {
-      throw new GateOntologyException(e);
+      throw new GateOntologyException("error while removing statement from the repository where subject:"+subject+" predicate:"+predicate+" objectURI:"+object, e);
     }
   }
 
@@ -4397,7 +4399,7 @@ public class OWLIMServiceImpl implements OWLIM,
       endTransaction(null);
     }
     catch(SailUpdateException e) {
-      throw new GateOntologyException(e);
+      throw new GateOntologyException("error while removing statement from the repository where subject:"+subject+" predicate:"+predicate+" objectURI:"+object, e);
     }
   }
 
@@ -4551,7 +4553,7 @@ public class OWLIMServiceImpl implements OWLIM,
       os.close();
     }
     catch(IOException e) {
-      throw new GateOntologyException(e);
+      throw new GateOntologyException("Error while saving configuration file",e);
     }
   }
 
@@ -5045,7 +5047,7 @@ public class OWLIMServiceImpl implements OWLIM,
       return repConfig;
     }
     catch(ConfigurationException ce) {
-      throw new GateOntologyException(ce);
+      throw new GateOntologyException("error while creating a new repository because "+ce.getMessage(), ce);
     }
   }
 
@@ -5091,10 +5093,10 @@ public class OWLIMServiceImpl implements OWLIM,
       }
     }
     catch(IOException e) {
-      throw new GateOntologyException(e);
+      throw new GateOntologyException("error while adding ontology data into the repository because "+e.getMessage(),e);
     }
     catch(AccessDeniedException ade) {
-      throw new GateOntologyException(ade);
+      throw new GateOntologyException("error while adding ontology data into the repository because "+ade.getMessage(),ade);
     }
   }
 
