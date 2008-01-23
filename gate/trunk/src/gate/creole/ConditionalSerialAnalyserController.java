@@ -17,8 +17,8 @@ package gate.creole;
 import java.util.*;
 
 import gate.*;
-import gate.util.Err;
-import gate.util.GateRuntimeException;
+import gate.event.CreoleEvent;
+import gate.util.*;
 
 /**
  * This class implements a SerialController that only contains
@@ -33,6 +33,9 @@ import gate.util.GateRuntimeException;
 public class ConditionalSerialAnalyserController
        extends ConditionalSerialController implements CorpusController {
 
+  /** Debug flag */
+  private static final boolean DEBUG = false;
+
   public gate.Corpus getCorpus() {
     return corpus;
   }
@@ -45,7 +48,7 @@ public class ConditionalSerialAnalyserController
   protected void executeImpl() throws ExecutionException{
     interrupted = false;
     if(corpus == null) throw new ExecutionException(
-      "(SerialAnalyserController) \"" + getName() + "\":\n" +
+      "(ConditionalSerialAnalyserController) \"" + getName() + "\":\n" +
       "The corpus supplied for execution was null!");
     //iterate through the documents in the corpus
     for(int i = 0; i < corpus.size(); i++){
@@ -63,19 +66,26 @@ public class ConditionalSerialAnalyserController
       }
 
       try{
+        if (DEBUG) 
+          Out.pr("ConditionalSerialAnalyserController processing doc=" + doc.getName()+ "...");      
         super.executeImpl();
-      }catch(Exception e){
-        e.printStackTrace(Err.getPrintWriter());
+        if (DEBUG) 
+          Out.prln("done.");      
+      }
+      finally {
+        // make sure we unset the doc and corpus even if we got an exception
+        for(int j = 0; j < prList.size(); j++){
+          ((LanguageAnalyser)prList.get(j)).setDocument(null);
+          ((LanguageAnalyser)prList.get(j)).setCorpus(null);
+        }
       }
 
-      //unset the doc and corpus
-      for(int j = 0; j < prList.size(); j++){
-        ((LanguageAnalyser)prList.get(j)).setDocument(null);
-        ((LanguageAnalyser)prList.get(j)).setCorpus(null);
+      if(!docWasLoaded){
+        //trigger saving
+        corpus.unloadDocument(doc);
+        //close the previoulsy unloaded Doc
+        Factory.deleteResource(doc);
       }
-
-      corpus.unloadDocument(doc);
-      if(!docWasLoaded) Factory.deleteResource(doc);
     }
   }
 
@@ -153,5 +163,15 @@ public class ConditionalSerialAnalyserController
   }
 
 
-  private gate.Corpus corpus;
+  protected gate.Corpus corpus;
+
+  /**
+   * Overridden to also clean up the corpus value.
+   */
+  public void resourceUnloaded(CreoleEvent e) {
+    super.resourceUnloaded(e);    
+    if(e.getResource() == corpus){
+      setCorpus(null);
+    }
+  }
 }
