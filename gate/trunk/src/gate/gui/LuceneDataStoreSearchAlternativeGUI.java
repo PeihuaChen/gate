@@ -41,7 +41,6 @@ import gate.event.DatastoreEvent;
 import gate.event.DatastoreListener;
 //import gate.event.ProgressListener;
 import gate.gui.MainFrame;
-import gate.gui.LuceneDataStoreSearchEasyGUI.ExecuteQueryAction;
 import gate.persist.LuceneDataStoreImpl;
 import gate.persist.PersistenceException;
 import gate.swing.XJTable;
@@ -249,6 +248,8 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
    */
   private boolean errorOnLastQuery;
 
+  private OptionsMap userConfig;
+
 
   /**
    * Called when a View is loaded in GATE.
@@ -267,9 +268,9 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       annotationRows[row][FEATURE] = "";
       annotationRows[row][CROP] = "Crop end";
     }
+    userConfig = Gate.getUserConfig();
 
     // read the user config data
-    OptionsMap userConfig = Gate.getUserConfig();
     if (userConfig.get("Annotation_rows") != null) {
       // saved as a string: "[[true, Cat, Token, category, Crop end], [...]]"
       String annotationRowsString =
@@ -295,9 +296,15 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     // initialize GUI
     initGui();
 
+    // called when Gate is exited, in case the user doesn't close the datastore
+    MainFrame.getInstance().addWindowListener(new WindowAdapter() {
+      public void windowClosed(WindowEvent e) {
+        annotationRowsManager.dispose();
+      }
+    });
+
     // unless the AnnicSerachPR is initialized, we don't have any data
-    // to
-    // show
+    // to show
     if(target != null) {
       if(target instanceof Searcher) {
         searcher = (Searcher)target;
@@ -312,10 +319,18 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     return this;
   }
 
+  /**
+   * Called when the user close the datastore.
+   */
   public void cleanup() {
-    // save the user config data
-    // TODO: not called if the user doesn't close the datastore
-    OptionsMap userConfig = Gate.getUserConfig();
+    // close the annotation rows manager window
+    annotationRowsManager.dispose();
+  }
+
+  /**
+   * Save the user config data.
+   */
+  protected void saveConfiguration() {
     String annotationRowsString = "[";
     for (int row = 0; row < numAnnotationRows; row++) {
       annotationRowsString += (row==0)?"[":", [";
@@ -327,11 +342,8 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     }
     annotationRowsString += "]";
     userConfig.put("Annotation_rows", annotationRowsString);
-    
-    // close the annotation rows manager window
-    annotationRowsManager.dispose();
   }
-
+  
   /**
    * Initialize the local data (i.e. Pattern data etc.) and then update
    * the GUI
@@ -753,7 +765,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
    * Updates the central view of annotation rows when the user changes
    * his/her selection of pattern in the patternTable.
    */
-  public void updateCentralView() {
+  protected void updateCentralView() {
 
     // maximum number of columns to display, i.e. maximum number of characters
     int maxColumns = 200;
@@ -819,6 +831,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       if (charNum >= startOffsetPattern && charNum < endOffsetPattern) {
         // this part is matched by the pattern, color it
         label.setBackground(new Color(240, 201, 184));
+        label.setToolTipText(pattern.getQueryString());
       } else {
         // this part is the context, no color
         label.setBackground(Color.WHITE);
@@ -918,6 +931,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
                       (gbc.gridx > endOffsetPattern)?
                       AddAnnotationRowInQueryMouseInputListener.RIGHT:
                       AddAnnotationRowInQueryMouseInputListener.CENTER));
+            label.setToolTipText(ann.getFeatures().toString());
           } else {
             label.addMouseListener(new AddAnnotationRowInQueryMouseInputListener(
                     type, feature, (String)ann.getFeatures().get(feature),
@@ -996,7 +1010,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     updateUI();
   }
 
-  private void updateAnnotationSetsToSearchInBox() {
+  protected void updateAnnotationSetsToSearchInBox() {
     String corpusName = 
       (corpusToSearchIn.getSelectedItem().equals(Constants.ENTIRE_DATASTORE))?
           null:(String)corpusIds.get(corpusToSearchIn.getSelectedIndex() - 1);
@@ -1018,7 +1032,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 //    });
   }
 
-  private void updateAnnotationTypeBox() {
+  protected void updateAnnotationTypeBox() {
     String corpusName = 
       (corpusToSearchIn.getSelectedItem().equals(Constants.ENTIRE_DATASTORE))?
           null:(String)corpusIds.get(corpusToSearchIn.getSelectedIndex() - 1);
@@ -1053,7 +1067,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     });
   }
 
-  private void updateFeaturesBox() {
+  protected void updateFeaturesBox() {
       List<String> features = new ArrayList<String>();
       Set<String> featuresToAdd = populatedAnnotationTypesAndFeatures
           .get((String)annotTypesBox.getSelectedItem());
@@ -1077,7 +1091,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
    * @param rows table of rows to sort
    * @return rows sorted 
    */
-  private int[] sortRows(int[] rows) {
+  protected int[] sortRows(int[] rows) {
     for(int i = 0; i < rows.length; i++) {
       for(int j = 0; j < rows.length - 1; j++) {
         if(rows[j] > rows[j + 1]) {
@@ -1098,7 +1112,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
    * @param annotationType
    * @return
    */
-  private Color getAnnotationTypeColor(String annotationType) {
+  protected Color getAnnotationTypeColor(String annotationType) {
     java.util.prefs.Preferences prefRoot = null;
     try {
       prefRoot = java.util.prefs.Preferences.userNodeForPackage(Class
@@ -1125,7 +1139,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     return colour;
   }
 
-  private Set<String> getAnnotationSetNames(String corpusName) {
+  protected Set<String> getAnnotationSetNames(String corpusName) {
     Set<String> toReturn = new HashSet<String>();
 
     if(corpusName == null) {
@@ -1145,7 +1159,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     return toReturn;
   }
 
-  private Map<String, Set<String>> getAnnotTypesFeatures(String corpusName,
+  protected Map<String, Set<String>> getAnnotTypesFeatures(String corpusName,
           String annotationSetName) {
     HashMap<String, Set<String>> toReturn = new HashMap<String, Set<String>>();
     if(corpusName == null && annotationSetName == null) {
@@ -1217,7 +1231,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
    * row satisfying the parameters otherwise
    * @see constants for columns
    */
-  private int findAnnotationRow(Object... parameters) {
+  protected int findAnnotationRow(Object... parameters) {
     //test the number of parameters
     if ((parameters.length % 2) != 0) { return -2; }
     // test the type and value of the parameters
@@ -1252,7 +1266,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
    * @param row row to delete in the annotationRows array
    * @return true if deleted, false otherwise
    */
-  private boolean deleteAnnotationRow(int row) {
+  protected boolean deleteAnnotationRow(int row) {
     if (row < 0 || row > numAnnotationRows) { return false; }
     // shift the rows in the array
     for(int row2 = row; row2 < numAnnotationRows; row2++) {
@@ -1528,6 +1542,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
             String[] message = se.getMessage().split("\\n");
             // message[0] contains the Java error
             JTextArea jta = new JTextArea(message[1]);
+            jta.setForeground(Color.RED);
             centerPanel.add(jta, gbc);
             jta = new JTextArea(message[2]);
             if (message.length > 3) {
@@ -2004,6 +2019,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       annotationRows[row][col] = value.toString();
       fireTableRowsUpdated(row, row);
       updateCentralView();
+      saveConfiguration();
     }
   }
 
