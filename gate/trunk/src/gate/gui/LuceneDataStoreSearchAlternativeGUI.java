@@ -39,8 +39,9 @@ import gate.corpora.SerialCorpusImpl;
 import gate.creole.AbstractVisualResource;
 import gate.event.DatastoreEvent;
 import gate.event.DatastoreListener;
-import gate.event.ProgressListener;
+//import gate.event.ProgressListener;
 import gate.gui.MainFrame;
+import gate.gui.LuceneDataStoreSearchEasyGUI.ExecuteQueryAction;
 import gate.persist.LuceneDataStoreImpl;
 import gate.persist.PersistenceException;
 import gate.swing.XJTable;
@@ -52,7 +53,7 @@ import gate.util.OptionsMap;
  * {@link gate.creole.ir.SearchPR}.
  */
 public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
-               implements ProgressListener, DatastoreListener {
+               implements DatastoreListener { //, ProgressListener {
 
   private static final long serialVersionUID = 3256720688877285686L;
 
@@ -382,14 +383,14 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
           annotationRowsManager.pack();
         }
         patternTable.setRowSelectionInterval(0, 0);
-        tableValueChanged();
+        updateCentralView();
         exportResultsAction.setEnabled(true);
 
       } else if (newQuery.getText().trim().length() < 1) {
         centerPanel.removeAll();
         centerPanel.add(new JLabel("Please, enter a query in the query text field."),
                 new GridBagConstraints());
-        centerPanel.validate();
+        centerPanel.updateUI();
         newQuery.requestFocusInWindow();
 
       } else {
@@ -402,6 +403,9 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
           centerPanel.add(new JTextArea("No result found for your query."), gbc);
         }
         gbc.insets = new Insets(20, 0, 0, 0);
+        if (corpusToSearchIn.getItemCount() == 1) {
+          centerPanel.add(new JTextArea("Your Datastore seems empty, please add some document or corpus."), gbc);
+        } else {
         centerPanel.add(new JTextArea(
           "Here are the different type of queries you can use:\n"+
           "1. String, ex. the\n"+
@@ -416,7 +420,8 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
           "ANNIC supports two operators, + and *, to specify the number of times a particular annotation or a sub query should appear in the main query.\n"+
           "Here, ({A})+n means one and up to n occurrences of annotation {A} and ({A})*n means zero or up to n occurrences of annotation {A}.\n"),
           gbc);
-        centerPanel.validate();
+        }
+        centerPanel.updateUI();
         exportResultsAction.setEnabled(false);
       }
     }
@@ -488,7 +493,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     newQuery.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         // pressing enter in the query text field execute the query
-        executeQuery.doClick();        
+        new ExecuteQueryAction().actionPerformed(null);
       }
     });
     gbc.gridwidth = 4;
@@ -638,7 +643,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
               }
               patternsTableModel.fireTableDataChanged();
               // and finally update the table
-              tableValueChanged();
+              updateCentralView();
               popup.setVisible(false);
             }
           });
@@ -666,7 +671,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     patternTable.getSelectionModel().addListSelectionListener(
             new javax.swing.event.ListSelectionListener() {
               public void valueChanged(javax.swing.event.ListSelectionEvent e) {
-                tableValueChanged();
+                updateCentralView();
               }
             });
 
@@ -748,7 +753,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
    * Updates the central view of annotation rows when the user changes
    * his/her selection of pattern in the patternTable.
    */
-  public void tableValueChanged() {
+  public void updateCentralView() {
 
     // maximum number of columns to display, i.e. maximum number of characters
     int maxColumns = 200;
@@ -952,7 +957,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
             int row = findAnnotationRow(
                     ANNOTATION_TYPE, typeFinal, FEATURE, featureFinal);
             if (row >= 0) { annotationRows[row][DISPLAY] = "false"; }
-            tableValueChanged();
+            updateCentralView();
           }
         });
         removePattern.setBorderPainted(true);
@@ -1001,16 +1006,16 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     dcbm.insertElementAt(Constants.ALL_SETS, 0);
     annotationSetToSearchIn.setModel(dcbm);
     annotationSetToSearchIn.setSelectedItem(Constants.ALL_SETS);
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        annotationSetToSearchIn.updateUI();
-        // if there are more than one annotation sets why not
-        // refresh the annotationTypesBox as well
-        if(annotationSetToSearchIn.getItemCount() > 1) {
-          updateAnnotationTypeBox();
-        }
-      }
-    });
+//    SwingUtilities.invokeLater(new Runnable() {
+//      public void run() {
+//        annotationSetToSearchIn.updateUI();
+//        // if there are more than one annotation sets why not
+//        // refresh the annotationTypesBox as well
+//        if(annotationSetToSearchIn.getItemCount() > 1) {
+//          updateAnnotationTypeBox();
+//        }
+//      }
+//    });
   }
 
   private void updateAnnotationTypeBox() {
@@ -1423,7 +1428,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 
     public ClearQueryAction() {
       super("", MainFrame.getIcon("annic-clean"));
-      super.putValue(SHORT_DESCRIPTION, "Clear Query Text Box.");
+      super.putValue(SHORT_DESCRIPTION, "Clear the query text box.");
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_BACK_SPACE);
     }
 
@@ -1441,20 +1446,17 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 
     public ExecuteQueryAction() {
       super("", MainFrame.getIcon("annic-search"));
-      super.putValue(SHORT_DESCRIPTION, "Execute Query.");
+      super.putValue(SHORT_DESCRIPTION, "Execute the query.");
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_ENTER);
     }
 
     public void actionPerformed(ActionEvent ae) {
       centerPanel.removeAll();
       centerPanel.add(progressLabel, new GridBagConstraints());
-      progressLabel.repaint();
-      centerPanel.repaint();
+      centerPanel.updateUI();
       
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-          progressLabel.repaint();
-          centerPanel.repaint();
           thisInstance.setEnabled(false);
           Map<Object, Object> parameters = searcher.getParameters();
           if(parameters == null)
@@ -1592,6 +1594,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     public DisplayAnnotationRowsManagerAction() {
       super("", MainFrame.getIcon("add.gif"));
       super.putValue(SHORT_DESCRIPTION, "Display the annotation rows manager.");
+      super.putValue(MNEMONIC_KEY, KeyEvent.VK_DOWN);
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -1601,7 +1604,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
   }
 
   /**
-   * Modify the query with the current clicked pattern row.
+   * Modify the query with the current clicked annotation row.
    */
   protected class AddAnnotationRowInQueryMouseInputListener
     extends javax.swing.event.MouseInputAdapter {
@@ -1818,7 +1821,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         }
         public void actionPerformed(ActionEvent e) {
           fireEditingStopped();
-          tableValueChanged();
+          updateCentralView();
         }
         public Object getCellEditorValue() {
           return (checkBox.isSelected())?"true":"false";
@@ -1927,7 +1930,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
             numAnnotationRows++;
             annotationRowsManagerTableModel.fireTableRowsInserted(row, row+1);
             annotationRowsManager.pack();
-            tableValueChanged();
+            updateCentralView();
           } else {
             JOptionPane.showMessageDialog(annotationRowsManager,
               "Please, fill the Annotation type column at least.",
@@ -1938,7 +1941,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
           deleteAnnotationRow(row);
           annotationRowsManagerTableModel.fireTableDataChanged();
           annotationRowsManager.pack();
-          tableValueChanged();
+          updateCentralView();
         }
         fireEditingStopped();
       }
@@ -1962,7 +1965,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
   }
 
   /**
-   * Table model for the feature manager.
+   * Table model for the annotation rows manager.
    */
   protected class AnnotationRowsManagerTableModel extends AbstractTableModel {
 
@@ -2000,7 +2003,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       if (col == REMOVE) { return; }
       annotationRows[row][col] = value.toString();
       fireTableRowsUpdated(row, row);
-      tableValueChanged();
+      updateCentralView();
     }
   }
 
@@ -2070,7 +2073,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             corpusToSearchIn.updateUI();
-            if(corpusIds.size() > 0) corpusToSearchIn.setSelectedIndex(0);
+            corpusToSearchIn.setSelectedItem(Constants.ENTIRE_DATASTORE);
           }
         });
       }
@@ -2097,16 +2100,17 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         }
         annotationSetToSearchIn.setModel(
                 new DefaultComboBoxModel(ts.toArray()));
-        annotationSetToSearchIn.addItem(Constants.ALL_SETS);
-        annotationSetToSearchIn.setSelectedItem(Constants.ALL_SETS);
+        annotationSetToSearchIn.insertItemAt(Constants.ALL_SETS, 0);
+//        annotationSetToSearchIn.setSelectedItem(Constants.ALL_SETS);
 
         // lets fire the update event on combobox
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             annotationSetToSearchIn.updateUI();
-            if(annotationSetIDsFromDataStore.length > 0) {
-              annotationSetToSearchIn.setSelectedIndex(0);
-            }
+            annotationSetToSearchIn.setSelectedItem(Constants.ALL_SETS);
+//            if(annotationSetIDsFromDataStore.length > 0) {
+//              annotationSetToSearchIn.setSelectedIndex(0);
+//            }
           }
         });
       }
@@ -2128,10 +2132,10 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 
   }
 
-  public void progressChanged(int i) {
-    // do nothing
-  }
-
+//  public void progressChanged(int i) {
+//    // do nothing
+//  }
+//
   /**
    * Called when the process is finished, fires a refresh for this VR.
    */
