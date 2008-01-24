@@ -24,43 +24,63 @@ import java.util.List;
 import java.util.Iterator;
 
 /**
- * Helper class to support GATE initialisation via
+ * <p>Helper class to support GATE initialisation via
  * <a href="http://www.springframework.org">Spring</a>.  The following is a
- * typical XML fragment to initialise GATE.
+ * typical XML fragment to initialise GATE.</p>
  *
  * <pre>
- * &lt;bean id="init-gate" class="gate.util.spring.Init"
- *      singleton="true" init-method="init"&gt;
+ * &lt;beans xmlns="http://www.springframework.org/schema/beans"
+ *        xmlns:gate="http://gate.ac.uk/ns/spring"
+ *        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ *        xsi:schemaLocation="
+ *          http://www.springframework.org/schema/beans
+ *          http://www.springframework.org/schema/beans/spring-beans.xsd
+ *          http://gate.ac.uk/ns/spring
+ *          http://gate.ac.uk/ns/spring.xsd"&gt;
+ *
+ *   &lt;gate:init gate-home="path/to/GATE"
+ *              site-config-file="site/gate.xml"
+ *              user-config-file="user/gate.xml"&gt;
+ *     &lt;gate:preload-plugins&gt;
+ *       &lt;value&gt;plugins/ANNIE&lt;/value&gt;
+ *       &lt;value&gt;http://plugins.org/another/plugin&lt;/value&gt;
+ *     &lt;/gate:preload-plugins&gt;
+ *   &lt;/gate:init&gt;
+ * </pre>
+ *
+ * <p>Valid attributes are <code>gate-home</code>, <code>plugins-home</code>,
+ * <code>site-config-file</code>, <code>user-config-file</code> and
+ * <code>builtin-creole-dir</code> - Spring <code>Resource</code>s
+ * corresponding to the equivalent static set methods of {@link gate.Gate}.
+ * Also, <code>preload-plugins</code> is a list of <code>Resource</code>s that
+ * will be loaded as GATE plugins after GATE is initialised.</p>
+ *
+ * <p>The equivalent definition in "normal" Spring form (without the
+ * <code>gate:</code> namespace) would be:</p>
+ * <pre>
+ * &lt;bean class="gate.util.spring.Init"
+ *      init-method="init"&gt;
  *   &lt;property name="gateHome" value="path/to/GATE" /&gt;
  *   &lt;property name="siteConfigFile" value="site/gate.xml" /&gt;
  *   &lt;property name="userConfigFile" value="user/gate.xml" /&gt;
  *   &lt;property name="preloadPlugins"&gt;
  *     &lt;list&gt;
- *       &lt;value type="org.springframework.core.io.Resource"&gt;plugins/ANNIE&lt;/value&gt;
+ *       &lt;value&gt;plugins/ANNIE&lt;/value&gt;
  *       &lt;value&gt;http://plugins.org/another/plugin&lt;/value&gt;
  *     &lt;/list&gt;
  *   &lt;/property&gt;
  * &lt;/bean&gt;
  * </pre>
  *
- * Valid properties are: <code>gateHome</code>, <code>pluginsHome</code>,
- * <code>siteConfigFile</code>, <code>userConfigFile</code>,
- * <code>builtinCreoleDir</code> - Spring <code>Resource</code>s corresponding
- * to the equivalent static set methods of {@link gate.Gate}.
- *
- * Also, <code>preloadPlugins</code>, a List containing URLs, Spring Resources
- * or Files, giving plugins that will be loaded after GATE has been
- * initialised.
- *
- * <b>Note that the init-method="init" in the above definition is vital.  GATE
- * will not work if it is omitted.</b>
+ * <b>Note that when using this form the init-method="init" in the above
+ * definition is vital.  GATE will not work if it is omitted.</b>
  */
 public class Init {
 
   /**
    * An optional list of plugins to load after GATE initialisation.
    */
-  private List plugins;
+  private List<Resource> plugins;
   
   public void setGateHome(Resource gateHome) throws IOException {
     Gate.setGateHome(gateHome.getFile());
@@ -82,7 +102,7 @@ public class Init {
     Gate.setBuiltinCreoleDir(builtinCreoleDir.getURL());
   }
 
-  public void setPreloadPlugins(List plugins) {
+  public void setPreloadPlugins(List<Resource> plugins) {
     this.plugins = plugins;
   }
 
@@ -92,29 +112,21 @@ public class Init {
   public void init() throws Exception {
     Gate.init();
     if(plugins != null && !plugins.isEmpty()) {
-      Iterator pluginsIt = plugins.iterator();
-      while(pluginsIt.hasNext()) {
-        Object plugin = pluginsIt.next();
-        URL pluginURL;
-        if(plugin instanceof URL) {
-          pluginURL = (URL)plugin;
+      for(Resource plugin : plugins) {
+        File pluginFile = null;
+        try {
+          pluginFile = plugin.getFile();
         }
-        else if(plugin instanceof Resource) {
-          pluginURL = ((Resource)plugin).getURL();
+        catch(IOException e) {
+          // no problem, try just as URL
         }
-        else if(plugin instanceof String) {
-          pluginURL = new URL((String)plugin);
-        }
-        else if(plugin instanceof File) {
-          pluginURL = ((File)plugin).toURI().toURL();
+
+        if(pluginFile == null) {
+          Gate.getCreoleRegister().registerDirectories(plugin.getURL());
         }
         else {
-          throw new IllegalArgumentException(
-              "Found a " + plugin.getClass().getName() + " in preloadPlugins, "
-              + "but it must contain only "
-              + "URL, org.springframework.core.io.Resource, File or String");
+          Gate.getCreoleRegister().registerDirectories(pluginFile.toURI().toURL());
         }
-        Gate.getCreoleRegister().registerDirectories(pluginURL);
       }
     }
   }

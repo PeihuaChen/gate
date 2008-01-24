@@ -1,5 +1,5 @@
 /*
- *  Init.java
+ *  SpringFactory.java
  *
  *  Copyright (c) 1998-2007, The University of Sheffield.
  *
@@ -15,7 +15,6 @@
 
 package gate.util.spring;
 
-import gate.Factory;
 import gate.FeatureMap;
 import gate.util.GateException;
 import gate.util.persistence.PersistenceManager;
@@ -23,14 +22,15 @@ import gate.util.persistence.PersistenceManager;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.springframework.core.io.Resource;
 
 /**
  * This class contains spring-aware factory methods for useful GATE
- * components.
+ * components.  These methods have now been superseded by (and delegate their
+ * processing to) the specific factory beans in this package, but are retained
+ * for compatibility with existing configurations.
  */
 public class SpringFactory {
 
@@ -54,26 +54,14 @@ public class SpringFactory {
    *     &lt;/bean&gt;
    * </pre>
    * 
-   * This is ideal for use in anonymous nested bean definitions to
-   * provide, e.g. parameters for gate.Factory.createResource().
+   * For an easier way to achieve this see {@link FeatureMapFactoryBean}, to
+   * which this method delegates.
    */
   public static FeatureMap createFeatureMap(Map sourceMap) throws IOException {
-    FeatureMap fm = Factory.newFeatureMap();
-    Iterator sourceEntries = sourceMap.entrySet().iterator();
-    while(sourceEntries.hasNext()) {
-      Map.Entry entry = (Map.Entry)sourceEntries.next();
-      Object key = entry.getKey();
-      Object value = entry.getValue();
-
-      // convert Spring resources to URLs
-      if(value instanceof Resource) {
-        value = ((Resource)value).getURL();
-      }
-
-      fm.put(key, value);
-    }
-
-    return fm;
+    FeatureMapFactoryBean factory = new FeatureMapFactoryBean();
+    factory.setSourceMap(sourceMap);
+    
+    return (FeatureMap)factory.getObject();
   }
 
   /**
@@ -85,29 +73,15 @@ public class SpringFactory {
    * {@link URL} and the application loaded with
    * {@link PersistenceManager#loadObjectFromUrl(URL) loadObjectFromUrl}.
    * This is useful as many PRs either require or function better with
-   * file: URLs than with other kinds of URL.
-   * 
-   * @param res
-   * @return
-   * @throws GateException
-   * @throws IOException
+   * file: URLs than with other kinds of URL.  For an easier way to achieve
+   * this, see {@link SavedApplicationFactoryBean}, to which this method
+   * delegates.
    */
   public static Object loadObjectFromResource(Resource res)
           throws GateException, IOException {
-    File resourceFile = null;
-    try {
-      resourceFile = res.getFile();
-    }
-    catch(IOException ioe) {
-      // OK, so we can't get a file...
-    }
-
-    if(resourceFile != null) {
-      return PersistenceManager.loadObjectFromFile(resourceFile);
-    }
-    else {
-      URL resourceURL = res.getURL();
-      return PersistenceManager.loadObjectFromUrl(resourceURL);
-    }
+    SavedApplicationFactoryBean factory = new SavedApplicationFactoryBean();
+    factory.setLocation(res);
+    
+    return factory.getObject();
   }
 }

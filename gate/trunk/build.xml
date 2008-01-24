@@ -255,6 +255,15 @@
 			<fileset dir="${srcDir}/gate/util"
                includes="*.tcl"/>
 		</copy>
+    <!-- This is for the Spring support -->
+    <copy todir="${outputDir}/META-INF" includeEmptyDirs="true">
+      <fileset dir="${srcDir}/META-INF" />
+    </copy>
+    <copy todir="${outputDir}/gate/util/spring/xml"
+          includeEmptyDirs="true">
+      <fileset dir="${srcDir}/gate/util/spring/xml"
+               includes="*.xsd" />
+    </copy>
 	</target>
 
 
@@ -329,7 +338,7 @@
          update="false"
          index="true">
       <fileset dir="${outputDir}/"
-               includes="gate/**,com/**,debugger/**,hepple/**"/>
+               includes="META-INF/**,gate/**,com/**,debugger/**,hepple/**"/>
 <!--    <zipgroupfileset refid="libs"/> -->
     </jar>
 	</target>
