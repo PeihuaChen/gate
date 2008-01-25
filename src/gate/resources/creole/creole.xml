@@ -254,7 +254,7 @@
     <RESOURCE>
       <NAME>Lucene Datastore Searcher</NAME>
       <CLASS>gate.gui.LuceneDataStoreSearchGUI</CLASS>
-      <!-- type values can be "large" or "small"-->
+      <!-- type values can be "large" or "small" -->
       <GUI TYPE="large">
         <RESOURCE_DISPLAYED>gate.creole.annic.SearchableDataStore</RESOURCE_DISPLAYED>
       </GUI>
@@ -263,16 +263,7 @@
     <RESOURCE>
       <NAME>Lucene Datastore Alternative Searcher</NAME>
       <CLASS>gate.gui.LuceneDataStoreSearchAlternativeGUI</CLASS>
-      <!-- type values can be "large" or "small"-->
-      <GUI TYPE="large">
-        <RESOURCE_DISPLAYED>gate.creole.annic.SearchableDataStore</RESOURCE_DISPLAYED>
-      </GUI>
-    </RESOURCE>
-
-    <RESOURCE>
-      <NAME>Lucene Datastore Easy Searcher</NAME>
-      <CLASS>gate.gui.LuceneDataStoreSearchEasyGUI</CLASS>
-      <!-- type values can be "large" or "small"-->
+      <!-- type values can be "large" or "small" -->
       <GUI TYPE="large">
         <RESOURCE_DISPLAYED>gate.creole.annic.SearchableDataStore</RESOURCE_DISPLAYED>
       </GUI>
