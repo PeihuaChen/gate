@@ -129,7 +129,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
   private JRadioButton selectedPatterns;
 
   /** Text Field that holds the query */
-  private JTextField queryTextField;
+  private QueryTextField queryTextField;
 
   /**
    * Which corpus to use when searching in
@@ -424,12 +424,12 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     queryTextField = new QueryTextField();
     queryTextField.setToolTipText("Please enter a query to search in the datastore.");
     queryTextField.setEnabled(true);
-    queryTextField.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        // pressing enter in the query text field execute the query
-        new ExecuteQueryAction().actionPerformed(null);
-      }
-    });
+//    queryTextField.addActionListener(new ActionListener() {
+//      public void actionPerformed(ActionEvent e) {
+//        // pressing enter in the query text field execute the query
+//        new ExecuteQueryAction().actionPerformed(null);
+//      }
+//    });
     gbc.gridwidth = 4;
     gbc.weightx = 1;
     topPanel.add(queryTextField, gbc);
@@ -2038,17 +2038,19 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     private static final String COMMIT_ACTION = "commit";
     private static final String CANCEL_ACTION = "cancel";
     private static final String DOWN_ACTION = "down";
+    private static final String UP_ACTION = "up";
     private static final int INSERT = 0;
     private static final int COMPLETION = 1;
-    private static final int POPUP = 2;
+    private static final int POPUP_TYPES = 2;
+    private static final int POPUP_FEATURES = 3;
     private int mode;
 
     public QueryTextField() {
       super();
 
       getDocument().addDocumentListener(this);
-
-      InputMap im = getInputMap();
+      
+      InputMap im = getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
       ActionMap am = getActionMap();
       // if the Enter key is pressed then call CommitAction()
       im.put(KeyStroke.getKeyStroke("ENTER"), COMMIT_ACTION);
@@ -2057,37 +2059,39 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       am.put(CANCEL_ACTION, new CancelAction());
       im.put(KeyStroke.getKeyStroke("DOWN"), DOWN_ACTION);
       am.put(DOWN_ACTION, new DownAction());
+      im.put(KeyStroke.getKeyStroke("UP"), UP_ACTION);
+      am.put(UP_ACTION, new UpAction());
 
       // annotation type combobox for autocompletion
       queryTypesBox = new JComboBox();
       queryTypesBox.setBackground(Color.WHITE);
       queryTypesBox.setMaximumRowCount(10);
-      queryTypesBox.setEditable(true);
       queryTypesBox.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ie) {
-            try {
+          if (ie.getActionCommand().equals("popup")) { return; }
+          try {
             queryTextField.getDocument().insertString(
               queryTextField.getCaretPosition(),
               (String)queryTypesBox.getSelectedItem(), null);
-            } catch (javax.swing.text.BadLocationException e) {
-              e.printStackTrace();
-            }
-            queryPopup.setVisible(false);
+          } catch (javax.swing.text.BadLocationException ble) {
+            ble.printStackTrace();
           }
+          queryPopup.setVisible(false);
+        }
       });
 
       // features combobox for autocompletion
       queryFeaturesBox = new JComboBox();
       queryFeaturesBox.setBackground(Color.WHITE);
       queryFeaturesBox.setMaximumRowCount(10);
-      queryFeaturesBox.setEditable(true);
       queryFeaturesBox.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ie) {
+          if (ie.getActionCommand().equals("popup")) { return; }
             try {
             queryTextField.getDocument().insertString(
               queryTextField.getCaretPosition(),
               (String)queryFeaturesBox.getSelectedItem(), null);
-            queryTextField.setCaretPosition(queryTextField.getCaretPosition()+3);
+            queryTextField.setCaretPosition(queryTextField.getCaretPosition());
             } catch (javax.swing.text.BadLocationException e) {
               e.printStackTrace();
             }
@@ -2102,60 +2106,91 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     }
 
     public void removeUpdate(DocumentEvent ev) {
+//      if (ev.getLength() != 1) { return; }
+//
+//      int pos = ev.getOffset();
+//
+//      if (mode != POPUP_TYPES) {
+//        SwingUtilities.invokeLater(new PopupTaskType("}", pos+1));
+//      }
+//      
+//        String type = getText().substring(
+//          getText().substring(0, pos+1).lastIndexOf("{")+1, pos+1);
+//        for (int i = 0; i < queryTypesBox.getItemCount(); i++) {
+//          if (((String)queryTypesBox.getItemAt(i)).startsWith(type)) {
+//            queryTypesBox.setActionCommand("popup");
+//            queryTypesBox.setSelectedIndex((i));
+//            queryTypesBox.setActionCommand("");
+//            break;
+//          }
+//        }
     }
 
     public void insertUpdate(DocumentEvent ev) {
-        if (ev.getLength() != 1) { return; }
+      if (ev.getLength() != 1) { return; }
 
-        int pos = ev.getOffset();
-        String content = null;
-        try {
-            content = getText(0, pos + 1);
-        } catch (javax.swing.text.BadLocationException e) {
-            e.printStackTrace();
+      int pos = ev.getOffset();
+      String content = null;
+      try {
+        content = getText(0, pos + 1);
+      } catch (javax.swing.text.BadLocationException e) {
+        e.printStackTrace();
+      }
+      String typedChar = Character.toString(content.charAt(pos));
+      String previousChar = (pos>0)?
+              Character.toString(content.charAt(pos-1)):"";
+
+      // switch accordinly to the key pressed and the context
+      if (typedChar.equals("\"")
+      && !previousChar.equals("\\")
+      && !previousChar.equals("\"")) {
+        mode = COMPLETION;
+        SwingUtilities.invokeLater(new CompletionTask("\"", pos+1));
+
+      } else if (typedChar.equals("{")
+             && !previousChar.equals("\\")) {
+        mode = POPUP_TYPES;
+        SwingUtilities.invokeLater(new PopupTaskType("}", pos+1));
+
+      } else if (typedChar.matches("[a-zA-Z]")
+              && mode == POPUP_TYPES) {
+        String type = getText().substring(
+          getText().substring(0, pos+1).lastIndexOf("{")+1, pos+1);
+        if (!type.matches("[a-zA-Z]+")) { return; }
+        for (int i = 0; i < queryTypesBox.getItemCount(); i++) {
+          if (((String)queryTypesBox.getItemAt(i)).startsWith(type)) {
+            queryTypesBox.setActionCommand("popup");
+            queryTypesBox.setSelectedIndex((i));
+            queryTypesBox.setActionCommand("");
+            break;
+          }
         }
-        String typedChar = Character.toString(content.charAt(pos));
-        String previousChar = (pos>0)?
-                Character.toString(content.charAt(pos-1)):"";
 
-        // switch accordinly to the key pressed and the context
-        if (typedChar.equals("\"")
-        && !previousChar.equals("\\")
-        && !previousChar.equals("\"")) {
-          SwingUtilities.invokeLater(new CompletionTask("\"", pos+1));
-
-        } else if (typedChar.equals("{")
-               && !previousChar.equals("\\")) {
-          SwingUtilities.invokeLater(new PopupTaskType("}", pos+1));
-
-        } else if (typedChar.equals(".")) {
-           SwingUtilities.invokeLater(new PopupTaskFeature("==\"\"", pos+1));
-
-        } else {
-          mode = INSERT;
-        }
+      } else if (typedChar.equals(".")) {
+        mode = POPUP_FEATURES;
+        SwingUtilities.invokeLater(new PopupTaskFeature("==\"\"", pos+1));
+      }
     }
 
     private class CompletionTask implements Runnable {
-        String completion;
-        int position;
+      String completion;
+      int position;
 
-        CompletionTask(String completion, int position) {
-            this.completion = completion;
-            this.position = position;
+      CompletionTask(String completion, int position) {
+        this.completion = completion;
+        this.position = position;
+      }
+
+      public void run() {
+        try {
+          getDocument().insertString(position, completion, null);
+          setCaretPosition(position + completion.length());
+          moveCaretPosition(position);
+
+        } catch (javax.swing.text.BadLocationException e) {
+          e.printStackTrace();
         }
-
-        public void run() {
-          try {
-            getDocument().insertString(position, completion, null);
-            setCaretPosition(position + completion.length());
-            moveCaretPosition(position);
-            mode = COMPLETION;
-
-          } catch (javax.swing.text.BadLocationException e) {
-            e.printStackTrace();
-          }
-        }
+      }
     }
 
     private class PopupTaskType implements Runnable {
@@ -2163,29 +2198,26 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       int position;
 
       PopupTaskType(String completion, int position) {
-          this.completion = completion;
-          this.position = position;
+        this.completion = completion;
+        this.position = position;
       }
 
       public void run() {
         try {
-          getDocument().insertString(position, completion, null);
-          setCaretPosition(position);
-          queryPopup = new BasicComboPopup(queryTypesBox);
-          Rectangle dotRect = modelToView(getCaret().getDot());
-          queryPopup.setLocation(
-            getLocationOnScreen().x // x location of top-left text field
-          + new Double(dotRect.getMaxX()).intValue(), // caret relative position
-            getLocationOnScreen().y // y location of top-left text field
-          + getHeight()); // height of text field
-          TreeSet<String> types =
-            new TreeSet<String>(populatedAnnotationTypesAndFeatures.keySet());
-          queryTypesBox.setModel(new DefaultComboBoxModel(types.toArray()));
-          queryPopup.setName("type");
-          queryPopup.pack();
-          queryPopup.setVisible(true);
-          requestFocus();
-          mode = POPUP;
+        getDocument().insertString(position, completion, null);
+        setCaretPosition(position);
+        TreeSet<String> types =
+          new TreeSet<String>(populatedAnnotationTypesAndFeatures.keySet());
+        queryTypesBox.setModel(new DefaultComboBoxModel(types.toArray()));
+        queryPopup = new BasicComboPopup(queryTypesBox);
+        Rectangle dotRect = modelToView(getCaret().getDot());
+        queryPopup.setLocation(
+          getLocationOnScreen().x // x location of top-left text field
+        + new Double(dotRect.getMaxX()).intValue(), // caret relative position
+          getLocationOnScreen().y // y location of top-left text field
+        + getHeight()); // height of text field
+        queryPopup.pack();
+        queryPopup.setVisible(true);
 
         } catch (javax.swing.text.BadLocationException e) {
           e.printStackTrace();
@@ -2203,26 +2235,27 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       }
 
       public void run() {
+        String type = getText().substring( // return the annotation type
+          getText().substring(0, position).lastIndexOf("{")+1, position-1);
+        if (!populatedAnnotationTypesAndFeatures.containsKey(type)) {
+          return;
+        }
         try {
-          getDocument().insertString(position, completion, null);
-          setCaretPosition(position);
-          queryPopup = new BasicComboPopup(queryFeaturesBox);
-          Rectangle dotRect = modelToView(getCaret().getDot());
-          queryPopup.setLocation(
-            getLocationOnScreen().x // x location of top-left text field
+        getDocument().insertString(position, completion, null);
+        setCaretPosition(position);
+        TreeSet<String> features =
+          new TreeSet<String>(populatedAnnotationTypesAndFeatures.get(type));
+        queryFeaturesBox
+          .setModel(new DefaultComboBoxModel(features.toArray()));
+        queryPopup = new BasicComboPopup(queryFeaturesBox);
+        Rectangle dotRect = modelToView(getCaret().getDot());
+        queryPopup.setLocation(
+          getLocationOnScreen().x // x location of top-left text field
           + new Double(dotRect.getMaxX()).intValue(), // caret relative position
             getLocationOnScreen().y // y location of top-left text field
           + getHeight()); // height of text field
-          String type = getText().substring( // return the annotation type
-            getText().substring(0, position).lastIndexOf("{")+1, position-1);
-          TreeSet<String> features =
-            new TreeSet<String>(populatedAnnotationTypesAndFeatures.get(type));
-          queryFeaturesBox.setModel(new DefaultComboBoxModel(features.toArray()));
-          queryPopup.setName("feature");
-          queryPopup.pack();
-          queryPopup.setVisible(true);
-          requestFocus();
-          mode = POPUP;
+        queryPopup.pack();
+        queryPopup.setVisible(true);
 
         } catch (javax.swing.text.BadLocationException e) {
           e.printStackTrace();
@@ -2234,19 +2267,42 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       private static final long serialVersionUID = 1L;
 
       public void actionPerformed(ActionEvent ev) {
-        if (mode == COMPLETION || mode == POPUP) {
-          int pos = queryTextField.getSelectionEnd();
+        if (mode == POPUP_TYPES) {
           try {
-            getDocument().insertString(pos, " ", null);
+          queryTextField.getDocument().insertString(
+            queryTextField.getCaretPosition(),
+            (String)queryTypesBox.getSelectedItem(), null);
+//          queryTextField.setCaretPosition(queryTextField.getCaretPosition()+3);
           } catch (javax.swing.text.BadLocationException e) {
             e.printStackTrace();
           }
-//          setCaretPosition(pos + 1);
-          mode = INSERT;
+          queryPopup.setVisible(false);
+
+        } else if (mode == POPUP_FEATURES) {
+          try {
+          queryTextField.getDocument().insertString(
+            queryTextField.getCaretPosition(),
+            (String)queryFeaturesBox.getSelectedItem(), null);
+//            queryTextField.setCaretPosition(queryTextField.getCaretPosition()+3);
+          } catch (javax.swing.text.BadLocationException e) {
+            e.printStackTrace();
+          }
+          queryPopup.setVisible(false);
 
         } else {
-//          replaceSelection("\n");
+          new ExecuteQueryAction().actionPerformed(null); 
         }
+//        if (mode == COMPLETION) {
+//          int pos = queryTextField.getSelectionEnd();
+//          try {
+//            getDocument().insertString(pos, " ", null);
+//          } catch (javax.swing.text.BadLocationException e) {
+//            e.printStackTrace();
+//          }
+//          setCaretPosition(pos + 1);
+//      }
+          mode = INSERT;
+
       }
     }
 
@@ -2254,9 +2310,9 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       private static final long serialVersionUID = 1L;
 
       public void actionPerformed(ActionEvent ev) {
-//        if (mode == POPUP) {
+      if (mode == POPUP_TYPES || mode == POPUP_FEATURES) {
           queryPopup.setVisible(false);
-//        }
+        }
         mode = INSERT;
       }
     }
@@ -2265,12 +2321,43 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       private static final long serialVersionUID = 1L;
 
       public void actionPerformed(ActionEvent ev) {
-//        if (mode == POPUP) {
-          int index = queryPopup.getSelectionModel().getSelectedIndex();
-          if ((index+1) < queryPopup.getComponentCount()) {
-            queryPopup.getSelectionModel().setSelectedIndex((index+1));
+        if (mode == POPUP_TYPES) {
+          int index = queryTypesBox.getSelectedIndex();
+          if ((index+1) < queryTypesBox.getItemCount()) {
+            queryTypesBox.setActionCommand("popup");
+            queryTypesBox.setSelectedIndex((index+1));
+            queryTypesBox.setActionCommand("");
           }
-//        }
+        } else if (mode == POPUP_FEATURES) {
+          int index = queryFeaturesBox.getSelectedIndex();
+          if ((index+1) < queryFeaturesBox.getItemCount()) {
+            queryFeaturesBox.setActionCommand("popup");
+            queryFeaturesBox.setSelectedIndex((index+1));
+            queryFeaturesBox.setActionCommand("");
+          }
+        }
+      }
+    }
+
+    private class UpAction extends AbstractAction {
+      private static final long serialVersionUID = 1L;
+
+      public void actionPerformed(ActionEvent ev) {
+        if (mode == POPUP_TYPES) {
+          int index = queryTypesBox.getSelectedIndex();
+          if (index > 0) {
+            queryTypesBox.setActionCommand("popup");
+            queryTypesBox.setSelectedIndex((index-1));
+            queryTypesBox.setActionCommand("");
+          }
+        } else if (mode == POPUP_FEATURES) {
+          int index = queryFeaturesBox.getSelectedIndex();
+          if (index > 0) {
+            queryFeaturesBox.setActionCommand("popup");
+            queryFeaturesBox.setSelectedIndex((index-1));
+            queryFeaturesBox.setActionCommand("");
+          }
+        }
       }
     }
 
