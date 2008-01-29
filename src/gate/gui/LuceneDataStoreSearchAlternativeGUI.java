@@ -35,8 +35,15 @@ import gate.creole.annic.PatternAnnotation;
 import gate.creole.annic.Pattern;
 import gate.creole.annic.SearchException;
 import gate.creole.annic.Searcher;
+import gate.creole.annic.lucene.QueryParser;
+import gate.creole.annic.apache.lucene.search.IndexSearcher;
+import gate.creole.annic.apache.lucene.search.TermQuery;
+import gate.creole.annic.apache.lucene.search.BooleanQuery;
+import gate.creole.annic.apache.lucene.search.Hits;
+import gate.creole.annic.apache.lucene.index.Term;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
@@ -422,14 +429,9 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     queryToExecute = new JLabel("Query:");
     topPanel.add(queryToExecute, gbc);
     queryTextField = new QueryTextField();
-    queryTextField.setToolTipText("Please enter a query to search in the datastore.");
+    queryTextField.setToolTipText("Please enter a query to search in the datastore. "
+            +"Enter '{' to activate autocompletion. ");
     queryTextField.setEnabled(true);
-//    queryTextField.addActionListener(new ActionListener() {
-//      public void actionPerformed(ActionEvent e) {
-//        // pressing enter in the query text field execute the query
-//        new ExecuteQueryAction().actionPerformed(null);
-//      }
-//    });
     gbc.gridwidth = 4;
     gbc.weightx = 1;
     topPanel.add(queryTextField, gbc);
@@ -1016,6 +1018,75 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 //        }
 //      }
 //    });
+
+//    if (target == null) { return; }
+//    //  create a new searcher
+//    IndexSearcher indexSearcher = null;
+//    if(target instanceof Searcher) {
+//      indexSearcher = (IndexSearcher)target;
+//    } else if(target instanceof LuceneDataStoreImpl) {
+//      indexSearcher = (IndexSearcher)
+//        ((LuceneDataStoreImpl)target).getSearcher();
+//    } else {
+//      return;
+//    }
+
+    URL indexLocationURL = (URL)((LuceneDataStoreImpl)target).getIndexer()
+      .getParameters().get(Constants.INDEX_LOCATION_URL);
+    String location = null;
+    try {
+      location = new File(indexLocationURL.toURI()).getAbsolutePath();
+    } catch(URISyntaxException use) {
+      location = new File(indexLocationURL.getFile()).getAbsolutePath();
+    }
+
+    IndexSearcher indexSearcher = null;
+    try {
+      indexSearcher = new IndexSearcher(location);
+    } catch (IOException ioe) {
+      ioe.printStackTrace();
+      return;
+    }
+
+    for (String at : ts) {
+    // term that contains a value to be searched in the index
+    Term term = new Term("contents", at, "*");
+//    term = new Term("contents", value, AT.feature);
+    TermQuery tq = new TermQuery(term);
+//    boolean useBooleanQuery = false;
+    BooleanQuery bq = new BooleanQuery();
+
+    // search in a specific corpus
+//    System.out.println("=>"+corpusName+"<=");
+//    System.out.println(indexSearcher+"<=");
+    if(corpusName != null) { 
+      TermQuery cq = new TermQuery(new Term(Constants.CORPUS_ID, corpusName));
+      bq.add(cq, true, false);
+    }
+//    useBooleanQuery = true;
+
+    // search in a specific annotation set
+//       TermQuery aq = new TermQuery(new Term(Constants.ANNOTATION_SET_ID, annotationSetID));
+//       bq.add(aq, true, false);
+//       useBooleanQuery = true;
+
+//    try {
+//      if (useBooleanQuery) {
+        bq.add(tq, true, false);
+//        Hits corpusHits = indexSearcher.search(bq);
+//        indexSearcher.close();
+//        System.out.println(at+" ("+corpusHits.length()+")");
+//      } else {
+//        Hits corpusHits = indexSearcher.search(tq);
+//        indexSearcher.close();
+//        System.out.println(corpusHits.length());
+//      }
+//    } catch (IOException ioe) {
+//      ioe.printStackTrace();
+//      return;
+//    }
+    }
+
   }
 
   protected void updateAnnotationTypeBox() {
@@ -1788,7 +1859,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
   }
 
   /**
-   * Panel that show a table of shortcut, annotation type and feature
+   * Panel that shows a table of shortcut, annotation type and feature
    * to display in the central view of the GUI.
    */
   protected class AnnotationRowsManager extends JFrame {
@@ -2027,40 +2098,61 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
   }
 
   /**
-   * JtextField with autocompletion. 
+   * JtextField with key autocompletion for the annotation types and
+   * features and mouse autocompletion for the "number of times" operators. 
    */
-  protected class QueryTextField extends JTextField implements DocumentListener {
+  protected class QueryTextField extends JTextField
+    implements DocumentListener, MouseListener {
 
     private static final long serialVersionUID = 1L;
     private JComboBox queryTypesBox;
     private JComboBox queryFeaturesBox;
     private BasicComboPopup queryPopup;
-    private static final String COMMIT_ACTION = "commit";
+    private JPopupMenu mousePopup;
+    private javax.swing.undo.UndoManager undo;
+    private UndoAction undoAction;
+    private RedoAction redoAction;
+    private static final String ENTER_ACTION = "enter";
+    private static final String PERIOD_ACTION = "period";
     private static final String CANCEL_ACTION = "cancel";
     private static final String DOWN_ACTION = "down";
     private static final String UP_ACTION = "up";
+    private static final String UNDO_ACTION = "undo";
+    private static final String REDO_ACTION = "redo";
     private static final int INSERT = 0;
     private static final int COMPLETION = 1;
     private static final int POPUP_TYPES = 2;
     private static final int POPUP_FEATURES = 3;
+    private static final int PROGRAMMATIC_INSERT = 4;
     private int mode;
+    private int initialPosition;
+    private int finalPosition;
 
     public QueryTextField() {
       super();
 
       getDocument().addDocumentListener(this);
+      addMouseListener(this);
       
       InputMap im = getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
       ActionMap am = getActionMap();
       // if the Enter key is pressed then call CommitAction()
-      im.put(KeyStroke.getKeyStroke("ENTER"), COMMIT_ACTION);
-      am.put(COMMIT_ACTION, new CommitAction());
+      im.put(KeyStroke.getKeyStroke("ENTER"), ENTER_ACTION);
+      am.put(ENTER_ACTION, new EnterAction());
+      im.put(KeyStroke.getKeyStroke("PERIOD"), PERIOD_ACTION);
+      am.put(PERIOD_ACTION, new PeriodAction());
       im.put(KeyStroke.getKeyStroke("ESCAPE"), CANCEL_ACTION);
       am.put(CANCEL_ACTION, new CancelAction());
       im.put(KeyStroke.getKeyStroke("DOWN"), DOWN_ACTION);
       am.put(DOWN_ACTION, new DownAction());
       im.put(KeyStroke.getKeyStroke("UP"), UP_ACTION);
       am.put(UP_ACTION, new UpAction());
+      undoAction = new UndoAction();
+      im.put(KeyStroke.getKeyStroke("control Z"), UNDO_ACTION);
+      am.put(UNDO_ACTION, undoAction);
+      redoAction = new RedoAction();
+      im.put(KeyStroke.getKeyStroke("control Y"), REDO_ACTION);
+      am.put(REDO_ACTION, redoAction);
 
       // annotation type combobox for autocompletion
       queryTypesBox = new JComboBox();
@@ -2068,11 +2160,12 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       queryTypesBox.setMaximumRowCount(10);
       queryTypesBox.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ie) {
-          if (ie.getActionCommand().equals("popup")) { return; }
+          if (ie.getActionCommand().equals("not the user")) { return; }
           try {
-            queryTextField.getDocument().insertString(
-              queryTextField.getCaretPosition(),
+            getDocument().insertString(
+              getCaretPosition(),
               (String)queryTypesBox.getSelectedItem(), null);
+            setCaretPosition(getCaretPosition()+1);
           } catch (javax.swing.text.BadLocationException ble) {
             ble.printStackTrace();
           }
@@ -2086,12 +2179,12 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       queryFeaturesBox.setMaximumRowCount(10);
       queryFeaturesBox.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ie) {
-          if (ie.getActionCommand().equals("popup")) { return; }
+          if (ie.getActionCommand().equals("not the user")) { return; }
             try {
-            queryTextField.getDocument().insertString(
-              queryTextField.getCaretPosition(),
+            getDocument().insertString(
+              getCaretPosition(),
               (String)queryFeaturesBox.getSelectedItem(), null);
-            queryTextField.setCaretPosition(queryTextField.getCaretPosition());
+            setCaretPosition(getCaretPosition()+3);
             } catch (javax.swing.text.BadLocationException e) {
               e.printStackTrace();
             }
@@ -2099,46 +2192,194 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
           }
       });
 
+      mousePopup = new JPopupMenu();
+      JMenuItem menuItem = new JMenuItem("0 to 1 time");
+      menuItem.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent ie) {
+          try {
+          getDocument().insertString(getSelectionStart(), "(", null);
+          getDocument().insertString(getSelectionEnd(), ")*1", null);
+        } catch (javax.swing.text.BadLocationException e) {
+          e.printStackTrace();
+        }
+        }
+      });
+      mousePopup.add(menuItem);
+      menuItem = new JMenuItem("0 to 2 times");
+      menuItem.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent ie) {
+          try {
+          getDocument().insertString(getSelectionStart(), "(", null);
+          getDocument().insertString(getSelectionEnd(), ")*2", null);
+        } catch (javax.swing.text.BadLocationException e) {
+          e.printStackTrace();
+        }
+        }
+      });
+      mousePopup.add(menuItem);
+      menuItem = new JMenuItem("0 to 3 times");
+      menuItem.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent ie) {
+          try {
+          getDocument().insertString(getSelectionStart(), "(", null);
+          getDocument().insertString( getSelectionEnd(), ")*3", null);
+        } catch (javax.swing.text.BadLocationException e) {
+          e.printStackTrace();
+        }
+        }
+      });
+      mousePopup.add(menuItem);
+      menuItem = new JMenuItem("0 to 4 times");
+      menuItem.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent ie) {
+          try {
+          getDocument().insertString(getSelectionStart(), "(", null);
+          getDocument().insertString(getSelectionEnd(), ")*4", null);
+        } catch (javax.swing.text.BadLocationException e) {
+          e.printStackTrace();
+        }
+        }
+      });
+      mousePopup.add(menuItem);
+      menuItem = new JMenuItem("0 to 5 times");
+      menuItem.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent ie) {
+          try {
+          getDocument().insertString(getSelectionStart(), "(", null);
+          getDocument().insertString(getSelectionEnd(), ")*5", null);
+        } catch (javax.swing.text.BadLocationException e) {
+          e.printStackTrace();
+        }
+        }
+      });
+      mousePopup.add(menuItem);
+      menuItem = new JMenuItem("1 to 2 times");
+      menuItem.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent ie) {
+          try {
+          getDocument().insertString(getSelectionStart(), "(", null);
+          getDocument().insertString(getSelectionEnd(), ")+2", null);
+        } catch (javax.swing.text.BadLocationException e) {
+          e.printStackTrace();
+        }
+        }
+      });
+      mousePopup.add(menuItem);
+      menuItem = new JMenuItem("1 to 3 times");
+      menuItem.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent ie) {
+          try {
+          getDocument().insertString(getSelectionStart(), "(", null);
+          getDocument().insertString(getSelectionEnd(), ")+3", null);
+        } catch (javax.swing.text.BadLocationException e) {
+          e.printStackTrace();
+        }
+        }
+      });
+      mousePopup.add(menuItem);
+      menuItem = new JMenuItem("1 to 4 times");
+      menuItem.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent ie) {
+          try {
+          getDocument().insertString(getSelectionStart(), "(", null);
+          getDocument().insertString(getSelectionEnd(), ")+4", null);
+        } catch (javax.swing.text.BadLocationException e) {
+          e.printStackTrace();
+        }
+        }
+      });
+      mousePopup.add(menuItem);
+      menuItem = new JMenuItem("1 to 5 times");
+      menuItem.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent ie) {
+          try {
+          getDocument().insertString(getSelectionStart(), "(", null);
+          getDocument().insertString(getSelectionEnd(), ")+5", null);
+        } catch (javax.swing.text.BadLocationException e) {
+          e.printStackTrace();
+        }
+        }
+      });
+      mousePopup.add(menuItem);
+
+      undo = new javax.swing.undo.UndoManager();
+      getDocument().addUndoableEditListener(
+              new javax.swing.event.UndoableEditListener() {
+        public void undoableEditHappened(
+                javax.swing.event.UndoableEditEvent e) {
+          //Remember the edit and update the menus
+          undo.addEdit(e.getEdit());
+          undoAction.updateUndoState();
+          redoAction.updateRedoState();
+        }
+      });
+
       mode = INSERT;
+      initialPosition = 0;
+      finalPosition = 0;
     }
 
     public void changedUpdate(DocumentEvent ev) {
     }
 
     public void removeUpdate(DocumentEvent ev) {
-//      if (ev.getLength() != 1) { return; }
-//
-//      int pos = ev.getOffset();
-//
-//      if (mode != POPUP_TYPES) {
-//        SwingUtilities.invokeLater(new PopupTaskType("}", pos+1));
-//      }
-//      
-//        String type = getText().substring(
-//          getText().substring(0, pos+1).lastIndexOf("{")+1, pos+1);
-//        for (int i = 0; i < queryTypesBox.getItemCount(); i++) {
-//          if (((String)queryTypesBox.getItemAt(i)).startsWith(type)) {
-//            queryTypesBox.setActionCommand("popup");
-//            queryTypesBox.setSelectedIndex((i));
-//            queryTypesBox.setActionCommand("");
-//            break;
-//          }
-//        }
+      if (ev.getLength() != 1) {
+        mode = INSERT;
+        queryPopup.setVisible(false);
+        return;
+      }
+
+      int pos = ev.getOffset()-1;
+
+//      System.out.println("ev.getOffset() = "+ev.getOffset()+", ev.getLength() ="+ev.getLength());
+      if (mode == POPUP_TYPES) {
+        finalPosition = pos+1;
+        String type = getText().substring(
+          getText().substring(0, pos+1).lastIndexOf("{")+1, pos+1);
+        if (!type.matches("[a-zA-Z0-9]+")) { return; }
+        for (int i = 0; i < queryTypesBox.getItemCount(); i++) {
+          if (startsWithIgnoreCase(((String)queryTypesBox.getItemAt(i)), type)) {
+            queryTypesBox.setActionCommand("not the user");
+            queryTypesBox.setSelectedIndex((i));
+            queryTypesBox.setActionCommand("");
+            break;
+          }
+        }
+      } else if (mode == POPUP_FEATURES) {
+        finalPosition = pos+1;
+        String feature = getText().substring(
+          getText().substring(0, pos+1).lastIndexOf(".")+1, pos+1);
+        if (!feature.matches("[a-zA-Z0-9]+")) { return; }
+        for (int i = 0; i < queryFeaturesBox.getItemCount(); i++) {
+          if (startsWithIgnoreCase(((String)queryFeaturesBox.getItemAt(i)), feature)) {
+            queryFeaturesBox.setActionCommand("not the user");
+            queryFeaturesBox.setSelectedIndex((i));
+            queryFeaturesBox.setActionCommand("");
+            break;
+          }
+        }
+      }
     }
 
     public void insertUpdate(DocumentEvent ev) {
-      if (ev.getLength() != 1) { return; }
+      if (mode == PROGRAMMATIC_INSERT) { return; }
+
+      if (ev.getLength() != 1) {
+        mode = INSERT;
+        queryPopup.setVisible(false);
+        return;
+      }
 
       int pos = ev.getOffset();
-      String content = null;
-      try {
-        content = getText(0, pos + 1);
-      } catch (javax.swing.text.BadLocationException e) {
-        e.printStackTrace();
-      }
-      String typedChar = Character.toString(content.charAt(pos));
+//      if (finalPosition >= getDocument().getLength()) {
+//        finalPosition = getDocument().getLength()-1;
+//      } else {
+//        if (finalPosition < pos) { finalPosition = pos; }
+//      }
+//      System.out.println("finalPosition = "+finalPosition);
+      String typedChar = Character.toString(getText().charAt(pos));
       String previousChar = (pos>0)?
-              Character.toString(content.charAt(pos-1)):"";
+              Character.toString(getText().charAt(pos-1)):"";
 
       // switch accordinly to the key pressed and the context
       if (typedChar.equals("\"")
@@ -2150,26 +2391,50 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       } else if (typedChar.equals("{")
              && !previousChar.equals("\\")) {
         mode = POPUP_TYPES;
-        SwingUtilities.invokeLater(new PopupTaskType("}", pos+1));
+        initialPosition = pos;
+        finalPosition = pos+1;
+        SwingUtilities.invokeLater(new PopupTypeTask("}", pos+1));
 
-      } else if (typedChar.matches("[a-zA-Z]")
+      } else if (typedChar.equals(".")) {
+        mode = POPUP_FEATURES;
+        initialPosition = pos;
+        finalPosition = pos+1;
+        SwingUtilities.invokeLater(new PopupFeatureTask("==\"\"", pos+1));
+
+      } else if (typedChar.matches("[a-zA-Z0-9]")
               && mode == POPUP_TYPES) {
+        finalPosition = pos+1;
         String type = getText().substring(
           getText().substring(0, pos+1).lastIndexOf("{")+1, pos+1);
-        if (!type.matches("[a-zA-Z]+")) { return; }
+        if (!type.matches("[a-zA-Z0-9]+")) { return; }
         for (int i = 0; i < queryTypesBox.getItemCount(); i++) {
-          if (((String)queryTypesBox.getItemAt(i)).startsWith(type)) {
-            queryTypesBox.setActionCommand("popup");
+          if (startsWithIgnoreCase(((String)queryTypesBox.getItemAt(i)), type)) {
+            queryTypesBox.setActionCommand("not the user");
             queryTypesBox.setSelectedIndex((i));
             queryTypesBox.setActionCommand("");
             break;
           }
         }
 
-      } else if (typedChar.equals(".")) {
-        mode = POPUP_FEATURES;
-        SwingUtilities.invokeLater(new PopupTaskFeature("==\"\"", pos+1));
+      } else if (typedChar.matches("[a-zA-Z0-9]")
+              && mode == POPUP_FEATURES) {
+        finalPosition = pos+1;
+        String feature = getText().substring(
+          getText().substring(0, pos+1).lastIndexOf(".")+1, pos+1);
+        if (!feature.matches("[a-zA-Z0-9]+")) { return; }
+        for (int i = 0; i < queryFeaturesBox.getItemCount(); i++) {
+          if (startsWithIgnoreCase(((String)queryFeaturesBox.getItemAt(i)), feature)) {
+            queryFeaturesBox.setActionCommand("not the user");
+            queryFeaturesBox.setSelectedIndex((i));
+            queryFeaturesBox.setActionCommand("");
+            break;
+          }
+        }
       }
+    }
+
+    private boolean startsWithIgnoreCase(String str1, String str2) {
+      return str1.toUpperCase().startsWith(str2.toUpperCase());
     }
 
     private class CompletionTask implements Runnable {
@@ -2184,8 +2449,8 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       public void run() {
         try {
           getDocument().insertString(position, completion, null);
-          setCaretPosition(position + completion.length());
-          moveCaretPosition(position);
+          setCaretPosition(position + completion.length() - 1);
+//          moveCaretPosition(position);
 
         } catch (javax.swing.text.BadLocationException e) {
           e.printStackTrace();
@@ -2193,21 +2458,25 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       }
     }
 
-    private class PopupTaskType implements Runnable {
+    private class PopupTypeTask implements Runnable {
       String completion;
       int position;
 
-      PopupTaskType(String completion, int position) {
+      PopupTypeTask(String completion, int position) {
         this.completion = completion;
         this.position = position;
       }
 
       public void run() {
         try {
+        mode = PROGRAMMATIC_INSERT;
         getDocument().insertString(position, completion, null);
+        mode = POPUP_TYPES;
         setCaretPosition(position);
-        TreeSet<String> types =
-          new TreeSet<String>(populatedAnnotationTypesAndFeatures.keySet());
+        java.text.Collator collator = java.text.Collator.getInstance();
+        collator.setStrength(java.text.Collator.TERTIARY);
+        TreeSet<String> types = new TreeSet<String>(collator);
+        types.addAll(populatedAnnotationTypesAndFeatures.keySet());
         queryTypesBox.setModel(new DefaultComboBoxModel(types.toArray()));
         queryPopup = new BasicComboPopup(queryTypesBox);
         Rectangle dotRect = modelToView(getCaret().getDot());
@@ -2225,11 +2494,11 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       }
     }
 
-    private class PopupTaskFeature implements Runnable {
+    private class PopupFeatureTask implements Runnable {
       String completion;
       int position;
 
-      PopupTaskFeature(String completion, int position) {
+      PopupFeatureTask(String completion, int position) {
           this.completion = completion;
           this.position = position;
       }
@@ -2241,7 +2510,9 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
           return;
         }
         try {
+        mode = PROGRAMMATIC_INSERT;
         getDocument().insertString(position, completion, null);
+        mode = POPUP_FEATURES;
         setCaretPosition(position);
         TreeSet<String> features =
           new TreeSet<String>(populatedAnnotationTypesAndFeatures.get(type));
@@ -2263,75 +2534,110 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       }
     }
 
-    private class CommitAction extends AbstractAction {
+    private class EnterAction extends AbstractAction {
       private static final long serialVersionUID = 1L;
-
       public void actionPerformed(ActionEvent ev) {
         if (mode == POPUP_TYPES) {
+          mode = INSERT;
+//          System.out.println("initialPosition = "+initialPosition);
           try {
-          queryTextField.getDocument().insertString(
-            queryTextField.getCaretPosition(),
+          if (getText().charAt(finalPosition) == '}') { finalPosition--; }
+          getDocument().remove(initialPosition+1,
+            finalPosition-initialPosition);
+          getDocument().insertString(initialPosition+1,
             (String)queryTypesBox.getSelectedItem(), null);
-//          queryTextField.setCaretPosition(queryTextField.getCaretPosition()+3);
+          setCaretPosition(getCaretPosition()+1);
           } catch (javax.swing.text.BadLocationException e) {
             e.printStackTrace();
           }
           queryPopup.setVisible(false);
 
         } else if (mode == POPUP_FEATURES) {
+          mode = INSERT;
           try {
-          queryTextField.getDocument().insertString(
-            queryTextField.getCaretPosition(),
+          if (getText().charAt(finalPosition) == '=') { finalPosition--; }
+          getDocument().remove(initialPosition+1,
+            finalPosition-initialPosition);
+          getDocument().insertString(initialPosition+1,
             (String)queryFeaturesBox.getSelectedItem(), null);
-//            queryTextField.setCaretPosition(queryTextField.getCaretPosition()+3);
+          setCaretPosition(getCaretPosition()+3);
           } catch (javax.swing.text.BadLocationException e) {
             e.printStackTrace();
           }
           queryPopup.setVisible(false);
 
         } else {
+          mode = INSERT;
           new ExecuteQueryAction().actionPerformed(null); 
         }
-//        if (mode == COMPLETION) {
-//          int pos = queryTextField.getSelectionEnd();
-//          try {
-//            getDocument().insertString(pos, " ", null);
-//          } catch (javax.swing.text.BadLocationException e) {
-//            e.printStackTrace();
-//          }
-//          setCaretPosition(pos + 1);
-//      }
-          mode = INSERT;
+      }
+    }
 
+
+    private class PeriodAction extends AbstractAction {
+      private static final long serialVersionUID = 1L;
+      public void actionPerformed(ActionEvent ev) {
+        if (mode == POPUP_TYPES) {
+          mode = INSERT;
+          try {
+          if (getText().charAt(finalPosition) == '}') { finalPosition--; }
+          getDocument().remove(initialPosition+1,
+            finalPosition-initialPosition);
+          getDocument().insertString(initialPosition+1,
+            (String)queryTypesBox.getSelectedItem(), null);
+          setCaretPosition(getCaretPosition());
+          } catch (javax.swing.text.BadLocationException e) {
+            e.printStackTrace();
+          }
+          queryPopup.setVisible(false);
+        }
       }
     }
 
     private class CancelAction extends AbstractAction {
       private static final long serialVersionUID = 1L;
-
       public void actionPerformed(ActionEvent ev) {
-      if (mode == POPUP_TYPES || mode == POPUP_FEATURES) {
+        if (mode == POPUP_TYPES) {
+          mode = INSERT;
+//          System.out.println("initialPosition = "+initialPosition);
+          queryPopup.setVisible(false);
+          try {
+            getDocument().remove(initialPosition,
+              finalPosition-initialPosition+1);
+          } catch (javax.swing.text.BadLocationException e) {
+            e.printStackTrace();
+          }
+        } else if (mode == POPUP_FEATURES) {
+            mode = INSERT;
+//            System.out.println("initialPosition = "+initialPosition);
+            queryPopup.setVisible(false);
+            try {
+              getDocument().remove(initialPosition,
+                finalPosition-initialPosition+4);
+            } catch (javax.swing.text.BadLocationException e) {
+              e.printStackTrace();
+            }
+        } else {
+          mode = INSERT;
           queryPopup.setVisible(false);
         }
-        mode = INSERT;
       }
     }
 
     private class DownAction extends AbstractAction {
       private static final long serialVersionUID = 1L;
-
       public void actionPerformed(ActionEvent ev) {
         if (mode == POPUP_TYPES) {
           int index = queryTypesBox.getSelectedIndex();
           if ((index+1) < queryTypesBox.getItemCount()) {
-            queryTypesBox.setActionCommand("popup");
+            queryTypesBox.setActionCommand("not the user");
             queryTypesBox.setSelectedIndex((index+1));
             queryTypesBox.setActionCommand("");
           }
         } else if (mode == POPUP_FEATURES) {
           int index = queryFeaturesBox.getSelectedIndex();
           if ((index+1) < queryFeaturesBox.getItemCount()) {
-            queryFeaturesBox.setActionCommand("popup");
+            queryFeaturesBox.setActionCommand("not the user");
             queryFeaturesBox.setSelectedIndex((index+1));
             queryFeaturesBox.setActionCommand("");
           }
@@ -2341,19 +2647,18 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 
     private class UpAction extends AbstractAction {
       private static final long serialVersionUID = 1L;
-
       public void actionPerformed(ActionEvent ev) {
         if (mode == POPUP_TYPES) {
           int index = queryTypesBox.getSelectedIndex();
           if (index > 0) {
-            queryTypesBox.setActionCommand("popup");
+            queryTypesBox.setActionCommand("not the user");
             queryTypesBox.setSelectedIndex((index-1));
             queryTypesBox.setActionCommand("");
           }
         } else if (mode == POPUP_FEATURES) {
           int index = queryFeaturesBox.getSelectedIndex();
           if (index > 0) {
-            queryFeaturesBox.setActionCommand("popup");
+            queryFeaturesBox.setActionCommand("not the user");
             queryFeaturesBox.setSelectedIndex((index-1));
             queryFeaturesBox.setActionCommand("");
           }
@@ -2361,8 +2666,121 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       }
     }
 
+    private class UndoAction extends AbstractAction {
+      private static final long serialVersionUID = 1L;
+      public UndoAction() {
+        super("Undo");
+        setEnabled(false);
+      }
+
+      public void actionPerformed(ActionEvent e) {
+        try {
+          undo.undo();
+        } catch (javax.swing.undo.CannotUndoException ex) {
+          System.out.println("Unable to undo: " + ex);
+          ex.printStackTrace();
+        }
+        updateUndoState();
+        redoAction.updateRedoState();
+      }
+
+      protected void updateUndoState() {
+        if (undo.canUndo()) {
+          setEnabled(true);
+          putValue(Action.NAME, undo.getUndoPresentationName());
+        } else {
+          setEnabled(false);
+          putValue(Action.NAME, "Undo");
+        }
+      }
+    }
+
+    private class RedoAction extends AbstractAction {
+      private static final long serialVersionUID = 1L;
+      public RedoAction() {
+        super("Redo");
+        setEnabled(false);
+      }
+
+      public void actionPerformed(ActionEvent e) {
+        try {
+          undo.redo();
+        } catch (javax.swing.undo.CannotRedoException ex) {
+          System.out.println("Unable to redo: " + ex);
+          ex.printStackTrace();
+        }
+        updateRedoState();
+        undoAction.updateUndoState();
+      }
+
+      protected void updateRedoState() {
+        if (undo.canRedo()) {
+          setEnabled(true);
+          putValue(Action.NAME, undo.getRedoPresentationName());
+        } else {
+          setEnabled(false);
+          putValue(Action.NAME, "Redo");
+        }
+      }
+    }
+
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    public void mouseClicked(MouseEvent e) {
+    }
+
+    public void mouseExited(MouseEvent e) {
+    }
+
+    public void mousePressed(MouseEvent e) {
+      if (e.getButton() == MouseEvent.BUTTON3) {
+        if (getSelectedText() != null
+         && QueryParser.isValidQuery(getSelectedText())) {
+          // if the selected text is a valid expression then shows a popup menu
+          showPopup(e);
+
+        } else if (getDocument().getLength() > 3) {
+          int positionclicked = viewToModel(e.getPoint());
+          if (positionclicked >= getDocument().getLength()) {
+            positionclicked = getDocument().getLength()-1;
+          }
+//          System.out.println("positionclicked = "+positionclicked);
+          int start = getText()
+            .substring(0, positionclicked+1).lastIndexOf("{");
+//          System.out.println("start = "+start);
+          int end = getText().substring(positionclicked, getDocument()
+             .getLength()).indexOf("}") + positionclicked;
+//          System.out.println("end = "+end);
+          if (start != -1 && end != -1
+           && QueryParser.isValidQuery(getText().substring(start, end+1))) {
+            // select the shortest valid enclosing braced expression
+            // and shows a popup menu
+            setSelectionStart(start);
+            setSelectionEnd(end+1);
+            showPopup(e);
+          }
+        }
+      }
+    }
+
+    public void mouseReleased(MouseEvent e) {
+      if (e.getButton() == MouseEvent.BUTTON3) {
+        if (getSelectedText() != null
+         && QueryParser.isValidQuery(getSelectedText())) {
+          showPopup(e);
+        }
+      }
+    }
+
+    private void showPopup(MouseEvent e) {
+      if (e.isPopupTrigger()) {
+        mousePopup.show(e.getComponent(), e.getX(), e.getY());
+      }
+    }
+
   }
-  
+
   /**
    * Called by the GUI when this viewer/editor has to initialise itself
    * for a specific object.
@@ -2437,7 +2855,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         // couldn't find any available corpusIds
       }
     }
-    else {
+    else {// TODO: this part has not been tested
       this.searcher = (Searcher)this.target;
       corpusToSearchIn.setEnabled(false);
 
