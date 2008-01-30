@@ -612,8 +612,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
             });
 
     // user should be allowed to select multiple rows
-    patternTable
-            .setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+    patternTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     patternTable.setSortable(true);
 
     JScrollPane tableScrollPane = new JScrollPane(patternTable,
@@ -853,7 +852,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       centerPanel.add(new JLabel(String.valueOf('\u2026')), gbc);
     }
 
-    // for each annotation type / feature value to display
+    // for each annotation type to display
     for (int row = 0; row < numAnnotationRows; row++) {
       if (annotationRows[row][DISPLAY].equals("false")) { continue; }
       String type = annotationRows[row][ANNOTATION_TYPE];
@@ -885,17 +884,21 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         annots = new PatternAnnotation[0];
       }
 
-      // add a JLabel in the gridbag layout for each feature
+      // add a JLabel in the gridbag layout for each feature value
       // of the current annotation type
       HashMap<Integer,Integer> gridSet = new HashMap<Integer,Integer>();
-      for(int k = 0, j = 0; k < annots.length; k++, j += 2) {
+      for (int k = 0; k < annots.length; k++) {
         PatternAnnotation ann = (PatternAnnotation)annots[k];
         gbc.gridx =
             ann.getStartOffset() - pattern.getLeftContextStartOffset() + 1;
         gbc.gridwidth =
             ann.getEndOffset() - pattern.getLeftContextStartOffset()
             - gbc.gridx + 1;
-        if ((gbc.gridx+gbc.gridwidth) > maxColumns) { continue; }
+        if (gbc.gridx > maxColumns) {
+          continue;
+        } else if ((gbc.gridx+gbc.gridwidth) > maxColumns) {
+          gbc.gridwidth = maxColumns-gbc.gridx+1;
+        }
         JLabel label = new JLabel();
         String value = (feature.equals(""))?"":(String)ann.getFeatures().get(feature);
         if (value.length() > maxValueLength) {
@@ -966,7 +969,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       removePattern.setMargin(new Insets(0, 0, 0, 0));
       gbc.gridwidth = 1;
       // last cell of the row
-      gbc.gridx = pattern.getPatternText().length() + 1;
+      gbc.gridx = Math.min(pattern.getPatternText().length()+1, maxColumns+1);
       gbc.fill = GridBagConstraints.NONE;
       centerPanel.add(removePattern, gbc);
       gbc.fill = GridBagConstraints.BOTH;
@@ -1522,6 +1525,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 
     public void actionPerformed(ActionEvent ae) {
       queryTextField.setText("");
+      queryTextField.requestFocus();
     }
   }
 
@@ -1542,7 +1546,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       centerPanel.removeAll();
       centerPanel.add(progressLabel, new GridBagConstraints());
       centerPanel.updateUI();
-      
+
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
           thisInstance.setEnabled(false);
@@ -1614,6 +1618,11 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
             gbc.gridwidth = GridBagConstraints.REMAINDER;
             centerPanel.removeAll();
             String[] message = se.getMessage().split("\\n");
+            if (message.length == 1) {
+              // FIXME: some errors to fix into QueryParser
+              se.printStackTrace();
+              return;
+            }
             // message[0] contains the Java error
             JTextArea jta = new JTextArea(message[1]);
             jta.setForeground(Color.RED);
@@ -1634,6 +1643,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
           pageOfResults = 1;
           titleResults.setText("Results - Page "+pageOfResults);
           thisInstance.setEnabled(true);
+          queryTextField.requestFocus();
         }
       });
     }
@@ -2105,13 +2115,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     implements DocumentListener, MouseListener {
 
     private static final long serialVersionUID = 1L;
-    private JComboBox queryTypesBox;
-    private JComboBox queryFeaturesBox;
-    private BasicComboPopup queryPopup;
-    private JPopupMenu mousePopup;
-    private javax.swing.undo.UndoManager undo;
-    private UndoAction undoAction;
-    private RedoAction redoAction;
     private static final String ENTER_ACTION = "enter";
     private static final String PERIOD_ACTION = "period";
     private static final String CANCEL_ACTION = "cancel";
@@ -2119,28 +2122,35 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     private static final String UP_ACTION = "up";
     private static final String UNDO_ACTION = "undo";
     private static final String REDO_ACTION = "redo";
+    private JComboBox queryTypesBox;
+    private JComboBox queryFeaturesBox;
+    private BasicComboPopup queryPopup;
+    private JPopupMenu mousePopup;
+    private javax.swing.undo.UndoManager undo;
+    private UndoAction undoAction;
+    private RedoAction redoAction;
+    private int initialPosition;
+    private int finalPosition;
+    private int mode;
     private static final int INSERT = 0;
     private static final int COMPLETION = 1;
     private static final int POPUP_TYPES = 2;
     private static final int POPUP_FEATURES = 3;
     private static final int PROGRAMMATIC_INSERT = 4;
-    private int mode;
-    private int initialPosition;
-    private int finalPosition;
 
     public QueryTextField() {
       super();
 
       getDocument().addDocumentListener(this);
       addMouseListener(this);
-      
+
       InputMap im = getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
       ActionMap am = getActionMap();
-      // if the Enter key is pressed then call CommitAction()
+      // bind keys to actions
       im.put(KeyStroke.getKeyStroke("ENTER"), ENTER_ACTION);
       am.put(ENTER_ACTION, new EnterAction());
       im.put(KeyStroke.getKeyStroke("PERIOD"), PERIOD_ACTION);
-      am.put(PERIOD_ACTION, new PeriodAction());
+      am.put(PERIOD_ACTION, new PeriodActionWhenPopupTypesMode());
       im.put(KeyStroke.getKeyStroke("ESCAPE"), CANCEL_ACTION);
       am.put(CANCEL_ACTION, new CancelAction());
       im.put(KeyStroke.getKeyStroke("DOWN"), DOWN_ACTION);
@@ -2192,7 +2202,18 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
           }
       });
 
+      queryPopup = new BasicComboPopup(queryTypesBox);
+      addComponentListener(new ComponentAdapter() {
+        public void componentHidden(ComponentEvent e) {
+          super.componentHidden(e);
+          System.out.println("componentHidden");
+          // TODO: remove from memory this popup when the datastore is closed
+          remove(queryPopup);
+        }
+      });
+
       mousePopup = new JPopupMenu();
+
       JMenuItem menuItem = new JMenuItem("0 to 1 time");
       menuItem.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ie) {
@@ -2314,22 +2335,30 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         }
       });
 
-      mode = INSERT;
       initialPosition = 0;
       finalPosition = 0;
+      mode = INSERT;
     }
 
     public void changedUpdate(DocumentEvent ev) {
     }
 
     public void removeUpdate(DocumentEvent ev) {
-      if (ev.getLength() != 1) {
+//      if (finalPosition >= getDocument().getLength()) {
+//        finalPosition = getDocument().getLength()-1;
+//      }
+
+      int pos = ev.getOffset()-1;
+
+      if (ev.getLength() != 1
+      || ( (pos+1 >= finalPosition || pos < initialPosition)
+        && (mode == POPUP_TYPES || mode == POPUP_FEATURES) )) {
+        // cancel any autocompletion if the user cut some text
+        // or delete outside brackets when in POPUP mode
         mode = INSERT;
         queryPopup.setVisible(false);
         return;
       }
-
-      int pos = ev.getOffset()-1;
 
 //      System.out.println("ev.getOffset() = "+ev.getOffset()+", ev.getLength() ="+ev.getLength());
       if (mode == POPUP_TYPES) {
@@ -2340,6 +2369,8 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         for (int i = 0; i < queryTypesBox.getItemCount(); i++) {
           if (startsWithIgnoreCase(((String)queryTypesBox.getItemAt(i)), type)) {
             queryTypesBox.setActionCommand("not the user");
+            queryTypesBox.setSelectedIndex(((i+7<queryTypesBox.getItemCount())?
+                    i+7:queryTypesBox.getItemCount()-1));
             queryTypesBox.setSelectedIndex((i));
             queryTypesBox.setActionCommand("");
             break;
@@ -2353,6 +2384,8 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         for (int i = 0; i < queryFeaturesBox.getItemCount(); i++) {
           if (startsWithIgnoreCase(((String)queryFeaturesBox.getItemAt(i)), feature)) {
             queryFeaturesBox.setActionCommand("not the user");
+            queryFeaturesBox.setSelectedIndex(((i+7<queryFeaturesBox.getItemCount())?
+                    i+7:queryFeaturesBox.getItemCount()-1));
             queryFeaturesBox.setSelectedIndex((i));
             queryFeaturesBox.setActionCommand("");
             break;
@@ -2364,19 +2397,20 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     public void insertUpdate(DocumentEvent ev) {
       if (mode == PROGRAMMATIC_INSERT) { return; }
 
-      if (ev.getLength() != 1) {
+      int pos = ev.getOffset();
+
+//      System.out.println("finalPosition = "+finalPosition);
+//      System.out.println("initialPosition = "+initialPosition);
+      if (ev.getLength() != 1
+      || ( (pos > finalPosition || pos <= initialPosition)
+        && (mode == POPUP_TYPES || mode == POPUP_FEATURES) )) {
+        // cancel any autocompletion if the user paste some text
+        // or write outside brackets when in POPUP mode
         mode = INSERT;
         queryPopup.setVisible(false);
         return;
       }
 
-      int pos = ev.getOffset();
-//      if (finalPosition >= getDocument().getLength()) {
-//        finalPosition = getDocument().getLength()-1;
-//      } else {
-//        if (finalPosition < pos) { finalPosition = pos; }
-//      }
-//      System.out.println("finalPosition = "+finalPosition);
       String typedChar = Character.toString(getText().charAt(pos));
       String previousChar = (pos>0)?
               Character.toString(getText().charAt(pos-1)):"";
@@ -2384,18 +2418,20 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       // switch accordinly to the key pressed and the context
       if (typedChar.equals("\"")
       && !previousChar.equals("\\")
-      && !previousChar.equals("\"")) {
+      && mode == INSERT) {
         mode = COMPLETION;
         SwingUtilities.invokeLater(new CompletionTask("\"", pos+1));
 
       } else if (typedChar.equals("{")
-             && !previousChar.equals("\\")) {
+             && !previousChar.equals("\\")
+             && mode == INSERT) {
         mode = POPUP_TYPES;
         initialPosition = pos;
         finalPosition = pos+1;
         SwingUtilities.invokeLater(new PopupTypeTask("}", pos+1));
 
-      } else if (typedChar.equals(".")) {
+      } else if (typedChar.equals(".")
+              && mode == INSERT) {
         mode = POPUP_FEATURES;
         initialPosition = pos;
         finalPosition = pos+1;
@@ -2410,7 +2446,9 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         for (int i = 0; i < queryTypesBox.getItemCount(); i++) {
           if (startsWithIgnoreCase(((String)queryTypesBox.getItemAt(i)), type)) {
             queryTypesBox.setActionCommand("not the user");
-            queryTypesBox.setSelectedIndex((i));
+            queryTypesBox.setSelectedIndex(((i+7<queryTypesBox.getItemCount())?
+                    i+7:queryTypesBox.getItemCount()-1));
+            queryTypesBox.setSelectedIndex(i);
             queryTypesBox.setActionCommand("");
             break;
           }
@@ -2425,7 +2463,9 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         for (int i = 0; i < queryFeaturesBox.getItemCount(); i++) {
           if (startsWithIgnoreCase(((String)queryFeaturesBox.getItemAt(i)), feature)) {
             queryFeaturesBox.setActionCommand("not the user");
-            queryFeaturesBox.setSelectedIndex((i));
+            queryFeaturesBox.setSelectedIndex(((i+7<queryFeaturesBox.getItemCount())?
+                    i+7:queryFeaturesBox.getItemCount()-1));
+            queryFeaturesBox.setSelectedIndex(i);
             queryFeaturesBox.setActionCommand("");
             break;
           }
@@ -2507,6 +2547,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         String type = getText().substring( // return the annotation type
           getText().substring(0, position).lastIndexOf("{")+1, position-1);
         if (!populatedAnnotationTypesAndFeatures.containsKey(type)) {
+          mode = INSERT;
           return;
         }
         try {
@@ -2514,8 +2555,22 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         getDocument().insertString(position, completion, null);
         mode = POPUP_FEATURES;
         setCaretPosition(position);
-        TreeSet<String> features =
-          new TreeSet<String>(populatedAnnotationTypesAndFeatures.get(type));
+        java.text.Collator collator = java.text.Collator.getInstance();
+        collator.setStrength(java.text.Collator.TERTIARY);
+        TreeSet<String> features = new TreeSet<String>(collator);
+        features.addAll(populatedAnnotationTypesAndFeatures.get(type));
+        if (features.size() == 1) {
+          // if there is only one choice, write it directly without popup
+          mode = PROGRAMMATIC_INSERT;
+          try {
+          getDocument().insertString(initialPosition+1, features.first(), null);
+          setCaretPosition(getCaretPosition()+3);
+          } catch (javax.swing.text.BadLocationException e) {
+            e.printStackTrace();
+          }
+          mode = INSERT;
+          return;
+        }
         queryFeaturesBox
           .setModel(new DefaultComboBoxModel(features.toArray()));
         queryPopup = new BasicComboPopup(queryFeaturesBox);
@@ -2574,22 +2629,25 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     }
 
 
-    private class PeriodAction extends AbstractAction {
+    private class PeriodActionWhenPopupTypesMode extends AbstractAction {
       private static final long serialVersionUID = 1L;
       public void actionPerformed(ActionEvent ev) {
         if (mode == POPUP_TYPES) {
-          mode = INSERT;
+          mode = PROGRAMMATIC_INSERT;
           try {
           if (getText().charAt(finalPosition) == '}') { finalPosition--; }
           getDocument().remove(initialPosition+1,
             finalPosition-initialPosition);
           getDocument().insertString(initialPosition+1,
             (String)queryTypesBox.getSelectedItem(), null);
-          setCaretPosition(getCaretPosition());
+          queryPopup.setVisible(false);
+          mode = POPUP_FEATURES;
+          initialPosition = getCaretPosition();
+          finalPosition = initialPosition+1;
+          SwingUtilities.invokeLater(new PopupFeatureTask("==\"\"", finalPosition));
           } catch (javax.swing.text.BadLocationException e) {
             e.printStackTrace();
           }
-          queryPopup.setVisible(false);
         }
       }
     }
@@ -2641,6 +2699,13 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
             queryFeaturesBox.setSelectedIndex((index+1));
             queryFeaturesBox.setActionCommand("");
           }
+        } else if (mode == INSERT) {
+          if (patternTable.getSelectedRow()+1 < patternTable.getRowCount()) {
+            patternTable.setRowSelectionInterval(patternTable.getSelectedRow()+1,
+                    patternTable.getSelectedRow()+1);
+            patternTable.scrollRectToVisible(patternTable.getCellRect(
+                    patternTable.getSelectedRow()+1, 0, true));
+          }
         }
       }
     }
@@ -2661,6 +2726,13 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
             queryFeaturesBox.setActionCommand("not the user");
             queryFeaturesBox.setSelectedIndex((index-1));
             queryFeaturesBox.setActionCommand("");
+          }
+        } else if (mode == INSERT) {
+          if (patternTable.getSelectedRow() > 0) {
+            patternTable.setRowSelectionInterval(patternTable.getSelectedRow()-1,
+                    patternTable.getSelectedRow()-1);
+            patternTable.scrollRectToVisible(patternTable.getCellRect(
+                    patternTable.getSelectedRow()-1, 0, true));
           }
         }
       }
