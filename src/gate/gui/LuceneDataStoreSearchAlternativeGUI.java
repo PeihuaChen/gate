@@ -55,6 +55,10 @@ import java.awt.event.*;
 
 import javax.swing.table.*;
 import javax.swing.*;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.plaf.basic.*;
@@ -889,11 +893,13 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       HashMap<Integer,Integer> gridSet = new HashMap<Integer,Integer>();
       for (int k = 0; k < annots.length; k++) {
         PatternAnnotation ann = (PatternAnnotation)annots[k];
+//        System.out.println(type+"."+feature+"["+k+"] = "+ann.getFeatures().toString()+", ["+ann.getStartOffset()+", "+ann.getEndOffset()+"]");
         gbc.gridx =
             ann.getStartOffset() - pattern.getLeftContextStartOffset() + 1;
         gbc.gridwidth =
             ann.getEndOffset() - pattern.getLeftContextStartOffset()
             - gbc.gridx + 1;
+        if (gbc.gridwidth == 0) { gbc.gridwidth = 1; }
         if (gbc.gridx > maxColumns) {
           continue;
         } else if ((gbc.gridx+gbc.gridwidth) > maxColumns) {
@@ -1141,7 +1147,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       for(String aFeat : features) {
         featuresBox.addItem(aFeat);
       }
-      featuresBox.updateUI();
+//      featuresBox.updateUI();
       featuresBox.setActionCommand("");
   }
 
@@ -1935,7 +1941,13 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       annotationRowsJTable.getColumnModel().getColumn(DISPLAY)
         .setCellEditor(new DisplayCellEditor());
 
-      DefaultCellEditor cellEditor = new DefaultCellEditor(annotTypesBox);
+      DefaultCellEditor cellEditor = new DefaultCellEditor(new JTextField());
+      cellEditor.setClickCountToStart(0);
+      annotationRowsJTable.getColumnModel()
+        .getColumn(SHORTCUT)
+        .setCellEditor(cellEditor);
+
+      cellEditor = new DefaultCellEditor(annotTypesBox);
       cellEditor.setClickCountToStart(0);
       annotationRowsJTable.getColumnModel()
         .getColumn(ANNOTATION_TYPE)
@@ -1949,6 +1961,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
           boolean hasFocus, int row, int col) {
           String[] s = {annotationRows[row][ANNOTATION_TYPE]};
           JComboBox comboBox = new JComboBox(s);
+          comboBox.setBackground(Color.WHITE);
           return comboBox;
         }
       });
@@ -1967,6 +1980,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
           boolean hasFocus, int row, int col) {
           String[] s = {annotationRows[row][FEATURE]};
           JComboBox comboBox = new JComboBox(s);
+          comboBox.setBackground(Color.WHITE);
           return comboBox;
         }
       });
@@ -1985,6 +1999,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
           boolean hasFocus, int row, int col) {
           String[] s = {annotationRows[row][CROP]};
           JComboBox comboBox = new JComboBox(s);
+          comboBox.setBackground(Color.WHITE);
           return comboBox;
         }
       });
@@ -2182,6 +2197,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
           queryPopup.setVisible(false);
         }
       });
+//      add(queryTypesBox);
 
       // features combobox for autocompletion
       queryFeaturesBox = new JComboBox();
@@ -2201,18 +2217,27 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
             queryPopup.setVisible(false);
           }
       });
+//      add(queryFeaturesBox);
 
       queryPopup = new BasicComboPopup(queryTypesBox);
-      addComponentListener(new ComponentAdapter() {
-        public void componentHidden(ComponentEvent e) {
-          super.componentHidden(e);
-          System.out.println("componentHidden");
-          // TODO: remove from memory this popup when the datastore is closed
-          remove(queryPopup);
-        }
-      });
+//      add(queryPopup);
+      // TODO: remove from memory this popup when the datastore is closed
+//      addAncestorListener(new AncestorListener() {
+//        public void ancestorRemoved(AncestorEvent event) {
+//          System.out.println("ancestorRemoved");
+//          queryPopup = null;
+//          mousePopup = null;
+//        }
+//        public void ancestorAdded(AncestorEvent event) {
+//          System.out.println("ancestorAdded");
+//        }
+//        public void ancestorMoved(AncestorEvent event) {
+//          System.out.println("ancestorMoved");
+//        }
+//      });
 
       mousePopup = new JPopupMenu();
+//      add(mousePopup);
 
       JMenuItem menuItem = new JMenuItem("0 to 1 time");
       menuItem.addActionListener(new ActionListener() {
@@ -2338,16 +2363,26 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       initialPosition = 0;
       finalPosition = 0;
       mode = INSERT;
+      
+      addCaretListener(new CaretListener() {
+        public void caretUpdate(CaretEvent e) {
+          if ( (mode == POPUP_TYPES || mode == POPUP_FEATURES)
+            && (getCaretPosition() > finalPosition
+             || getCaretPosition() <= initialPosition) ) {
+            // cancel any autocompletion if the user put the caret
+            // outside brackets when in POPUP mode
+            mode = INSERT;
+            queryPopup.setVisible(false);
+            return;
+          }
+        }
+      });
     }
 
     public void changedUpdate(DocumentEvent ev) {
     }
 
     public void removeUpdate(DocumentEvent ev) {
-//      if (finalPosition >= getDocument().getLength()) {
-//        finalPosition = getDocument().getLength()-1;
-//      }
-
       int pos = ev.getOffset()-1;
 
       if (ev.getLength() != 1
@@ -2360,7 +2395,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         return;
       }
 
-//      System.out.println("ev.getOffset() = "+ev.getOffset()+", ev.getLength() ="+ev.getLength());
       if (mode == POPUP_TYPES) {
         finalPosition = pos+1;
         String type = getText().substring(
@@ -2399,13 +2433,8 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 
       int pos = ev.getOffset();
 
-//      System.out.println("finalPosition = "+finalPosition);
-//      System.out.println("initialPosition = "+initialPosition);
-      if (ev.getLength() != 1
-      || ( (pos > finalPosition || pos <= initialPosition)
-        && (mode == POPUP_TYPES || mode == POPUP_FEATURES) )) {
+      if (ev.getLength() != 1) {
         // cancel any autocompletion if the user paste some text
-        // or write outside brackets when in POPUP mode
         mode = INSERT;
         queryPopup.setVisible(false);
         return;
@@ -2490,7 +2519,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         try {
           getDocument().insertString(position, completion, null);
           setCaretPosition(position + completion.length() - 1);
-//          moveCaretPosition(position);
 
         } catch (javax.swing.text.BadLocationException e) {
           e.printStackTrace();
@@ -2594,7 +2622,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       public void actionPerformed(ActionEvent ev) {
         if (mode == POPUP_TYPES) {
           mode = INSERT;
-//          System.out.println("initialPosition = "+initialPosition);
           try {
           if (getText().charAt(finalPosition) == '}') { finalPosition--; }
           getDocument().remove(initialPosition+1,
@@ -2628,7 +2655,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       }
     }
 
-
     private class PeriodActionWhenPopupTypesMode extends AbstractAction {
       private static final long serialVersionUID = 1L;
       public void actionPerformed(ActionEvent ev) {
@@ -2657,7 +2683,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       public void actionPerformed(ActionEvent ev) {
         if (mode == POPUP_TYPES) {
           mode = INSERT;
-//          System.out.println("initialPosition = "+initialPosition);
           queryPopup.setVisible(false);
           try {
             getDocument().remove(initialPosition,
@@ -2667,7 +2692,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
           }
         } else if (mode == POPUP_FEATURES) {
             mode = INSERT;
-//            System.out.println("initialPosition = "+initialPosition);
             queryPopup.setVisible(false);
             try {
               getDocument().remove(initialPosition,
@@ -2817,13 +2841,10 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
           if (positionclicked >= getDocument().getLength()) {
             positionclicked = getDocument().getLength()-1;
           }
-//          System.out.println("positionclicked = "+positionclicked);
           int start = getText()
             .substring(0, positionclicked+1).lastIndexOf("{");
-//          System.out.println("start = "+start);
           int end = getText().substring(positionclicked, getDocument()
              .getLength()).indexOf("}") + positionclicked;
-//          System.out.println("end = "+end);
           if (start != -1 && end != -1
            && QueryParser.isValidQuery(getText().substring(start, end+1))) {
             // select the shortest valid enclosing braced expression
