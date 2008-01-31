@@ -80,8 +80,9 @@ public class LuceneDocument {
     // about annotation sets to exclude
     if(annotSetsToInclude.size() > 0) {
       annotSetsToIndex = annotSetsToInclude;
-      
-      // if there's only one annotation to index, we don't need to create a MergeSet
+
+      // if there's only one annotation to index, we don't need to
+      // create a MergeSet
       if(annotSetsToIndex.size() == 1) createMergeSet = false;
     }
     else if(annotSetsToExclude.size() > 0) {
@@ -94,7 +95,7 @@ public class LuceneDocument {
         if(annotSetsToExclude.contains(setName)) continue;
         annotSetsToIndex.add(setName);
       }
-      
+
       if(!annotSetsToExclude.contains(Constants.DEFAULT_ANNOTATION_SET_NAME)) {
         annotSetsToIndex.add(Constants.DEFAULT_ANNOTATION_SET_NAME);
       }
@@ -166,12 +167,11 @@ public class LuceneDocument {
       searchBaseTokensInAllAnnotationSets = true;
     }
 
-    
     if(searchBaseTokensInAllAnnotationSets) {
-      System.out.println("Searching for the base token annotation type \""+baseTokenAnnotationType+"\"in all sets");
+      System.out.println("Searching for the base token annotation type \""
+              + baseTokenAnnotationType + "\"in all sets");
     }
-    
-    
+
     if(baseTokenAnnotationType != null && baseTokenAnnotationType.length() > 0
             && searchBaseTokensInAllAnnotationSets) {
       // we set this to true and if we find basetokens in any of the
@@ -350,12 +350,14 @@ public class LuceneDocument {
 
           for(Annotation a : aSetToIndex.get(aType)) {
             try {
-              mergedSet.add(a.getStartNode().getOffset(), a.getEndNode().getOffset(), a.getType(), a.getFeatures());
-            } catch(InvalidOffsetException ioe) {
+              mergedSet.add(a.getStartNode().getOffset(), a.getEndNode()
+                      .getOffset(), a.getType(), a.getFeatures());
+            }
+            catch(InvalidOffsetException ioe) {
               throw new GateRuntimeException(ioe);
             }
           }
-         
+
         }
       }
 
@@ -465,14 +467,17 @@ public class LuceneDocument {
       if(Character.isWhitespace(c)) {
         if(start != -1) {
           FeatureMap features = gate.Factory.newFeatureMap();
-          features.put("string", gateContent.substring(start, i));
-          try {
-            set.add(new Long(start), new Long(i), Constants.ANNIC_TOKEN,
+          String string = gateContent.substring(start, i);
+          if(string.trim().length() > 0) {
+            features.put("string", string);
+            try {
+              set.add(new Long(start), new Long(i), Constants.ANNIC_TOKEN,
                     features);
-          }
-          catch(InvalidOffsetException ioe) {
-            ioe.printStackTrace();
-            return false;
+            }
+            catch(InvalidOffsetException ioe) {
+              ioe.printStackTrace();
+              return false;
+            }
           }
           start = i + 1;
         }
@@ -483,15 +488,18 @@ public class LuceneDocument {
     }
     if(start < gateContent.length()) {
       FeatureMap features = gate.Factory.newFeatureMap();
-      features
-              .put("string", gateContent.substring(start, gateContent.length()));
-      try {
-        set.add(new Long(start), new Long(gateContent.length()),
-                Constants.ANNIC_TOKEN, features);
-      }
-      catch(InvalidOffsetException ioe) {
-        ioe.printStackTrace();
-        return false;
+      String string = gateContent.substring(start, gateContent.length());
+      if(string.trim().length() > 0) {
+        features
+                .put("string", string);
+        try {
+          set.add(new Long(start), new Long(gateContent.length()),
+                  Constants.ANNIC_TOKEN, features);
+        }
+        catch(InvalidOffsetException ioe) {
+          ioe.printStackTrace();
+          return false;
+        }
       }
     }
     return true;
@@ -625,13 +633,11 @@ public class LuceneDocument {
       }
     }
 
-    
     Set<String> allTypes = new HashSet<String>();
-    
+
     for(String aType : inputAs.getAllTypes()) {
       allTypes.add(aType);
     }
-
 
     if(baseTokenSet != null && baseTokenSet.size() > 0) {
       allTypes.remove(baseTokenAnnotationType);
@@ -644,8 +650,10 @@ public class LuceneDocument {
     for(String type : allTypes) {
       for(Annotation a : inputAs.get(type)) {
         try {
-          toUseSet.add(a.getStartNode().getOffset(), a.getEndNode().getOffset(), a.getType(), a.getFeatures());
-        } catch(InvalidOffsetException ioe) {
+          toUseSet.add(a.getStartNode().getOffset(),
+                  a.getEndNode().getOffset(), a.getType(), a.getFeatures());
+        }
+        catch(InvalidOffsetException ioe) {
           throw new GateRuntimeException(ioe);
         }
       }
