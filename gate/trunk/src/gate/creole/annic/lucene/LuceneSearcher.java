@@ -478,6 +478,7 @@ public class LuceneSearcher implements Searcher {
           TermQuery tq = new TermQuery(term);
           try {
             gate.creole.annic.apache.lucene.search.Searcher searcher = new IndexSearcher(indexLocation);
+            try {
             Hits corpusHits = searcher.search(tq);
             for(int i = 0; i < corpusHits.length(); i++) {
               Document luceneDoc = corpusHits.doc(i);
@@ -493,6 +494,7 @@ public class LuceneSearcher implements Searcher {
               bq.add(tq, true, false);
               bq.add(atq, true, false);
               gate.creole.annic.apache.lucene.search.Searcher indexFeatureSearcher = new IndexSearcher(indexLocation);
+              try {
               Hits indexFeaturesHits = searcher.search(bq);
               for(int j=0;j < indexFeaturesHits.length();j++) {
                 Document aDoc = indexFeaturesHits.doc(j);
@@ -519,6 +521,12 @@ public class LuceneSearcher implements Searcher {
                   }
                 }
               }
+              } finally {
+                indexFeatureSearcher.close();
+              }
+            }
+            } finally {
+              searcher.close();
             }
           }
           catch(IOException ioe) {
