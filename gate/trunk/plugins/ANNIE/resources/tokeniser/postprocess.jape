@@ -74,7 +74,10 @@ Rule: ordinals
      |
      (numberStr.endsWith("2") && endingStr.equals("nd"))
      |
-     (numberStr.endsWith("3") && endingStr.equals("rd"))){
+     (numberStr.endsWith("3") && endingStr.equals("rd"))
+     |
+     (endingStr.equals("th"))
+){
     //remove old tokens
     gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("left");
     inputAS.removeAll(toRemove);
@@ -85,6 +88,7 @@ Rule: ordinals
     features.put("length", (numberStr + endingStr).length());
     outputAS.add(toRemove.firstNode(), toRemove.lastNode(), "Token", features);
   }
+  
 }
 
 
