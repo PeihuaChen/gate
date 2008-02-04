@@ -52,7 +52,7 @@ public class SubQueryParser {
   private static String findWildCardString(int brClPos, String query) {
     String wcs = "";
     if(brClPos + 1 < query.length()) {
-      if(query.charAt(brClPos + 1) == '*' || query.charAt(brClPos + 1) == '+') {
+      if(query.charAt(brClPos + 1) == '*' || query.charAt(brClPos + 1) == '+' || query.charAt(brClPos + 1) == '?') {
         wcs = query.charAt(brClPos + 1) + "";
         // ok so lets fetch the number
         for(int i = brClPos + 2; i < query.length(); i++) {
@@ -109,7 +109,7 @@ public class SubQueryParser {
               wcsLen = 1;
             }
             else {
-              atLeastOne = (wildCardString.charAt(0) == '*') ? false : true;
+              atLeastOne = (wildCardString.charAt(0) == '*' || wildCardString.charAt(0) == '?') ? false : true;
               // now find out the number of Times we need to
               // duplicate the bracketClause
               repeatClause = Integer.parseInt(wildCardString.substring(1,
