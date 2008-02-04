@@ -224,7 +224,6 @@ public class QueryParser {
     }
 
     int totalTerms = 0;
-    boolean isTermBaseToken = true;
     boolean hadPreviousTermsAToken = true;
 
     needValidation = false;
@@ -422,7 +421,7 @@ public class QueryParser {
     int index1 = -1;
     int start = -1;
     while(true) {
-      index1 = element.indexOf(".", start);
+      index1 = element.indexOf(ch, start);
       if(isEscapeSequence(element, index1)) {
         start = index1 + 1;
       }
@@ -548,6 +547,7 @@ public class QueryParser {
           }
         }
 
+        int lengthTravelledSoFar = 0;
         for(int j = 0; j < subElems.length; j++) {
           // 7. {AnnotationType.feature==string}
           // 8. {AnnotationType.feature=="string"}
@@ -582,6 +582,12 @@ public class QueryParser {
             else consider.add(new Boolean(false));
 
           }
+          else if(index == -1 && index1 != -1) {
+            throw new SearchException("missing operator",
+                    "an equal operator (==) is missing",
+                    elem, (elem.indexOf("=", lengthTravelledSoFar)!=-1)?
+                           elem.indexOf("=", lengthTravelledSoFar):elem.length());
+          }
           else {
             // this is {AT.f == "s"}
             String annotType = norm(subElems[j].substring(0, index1).trim());
@@ -602,6 +608,7 @@ public class QueryParser {
               consider.add(new Boolean(true));
             else consider.add(new Boolean(false));
           }
+          lengthTravelledSoFar += subElems[j].length() + 1;
         }
         position++;
       }
@@ -634,10 +641,6 @@ public class QueryParser {
       }
     }
     return new ArrayList[] {terms, pos, consider};
-  }
-
-  private void throwError() throws gate.creole.ir.SearchException {
-    throw new SearchException("Error in Query");
   }
 
   public boolean needValidation() {
