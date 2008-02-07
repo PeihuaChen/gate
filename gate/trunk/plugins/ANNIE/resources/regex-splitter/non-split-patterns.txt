@@ -28,6 +28,7 @@
 \b\.NET
 \b\.Net
 \bAG\.
+\bA\.M\.
 \bAPR\.
 \bAUG\.
 \bAdm\.
@@ -68,6 +69,7 @@
 \bOCT\.
 \bOy\.
 \bPLC\.
+\bP\.M\.
 \bProf\.
 \bRep\.
 \bSA\.
@@ -95,6 +97,7 @@
 \betc\.
 \bfig\.
 \bp\.
+\bp\.m\.
 \busu\.
 \bvs\.
 \byr\.
