@@ -32,6 +32,7 @@ public class NamespaceHandler extends NamespaceHandlerSupport {
             new SavedApplicationBeanDefinitionParser());
     registerBeanDefinitionParser("set-parameter",
             new SetParameterBeanDefinitionParser());
+    registerBeanDefinitionParser("add-pr", new AddPRBeanDefinitionParser());
   }
 
 }
