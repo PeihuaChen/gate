@@ -148,4 +148,25 @@
     </xsd:complexType>
   </xsd:element>
   
+  <xsd:element name="add-pr">
+    <xsd:annotation>
+      <xsd:documentation>
+        Resource customiser that adds a PR to a serial controller.  The PR
+        to add is defined by either a ref attribute, or a bean, ref, or
+        custom namespace sub-element.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:choice minOccurs="0" maxOccurs="1">
+        <xsd:element ref="beans:ref" />
+        <xsd:element ref="beans:bean" />
+        <xsd:any namespace="##any" processContents="strict"/>
+      </xsd:choice>
+      <xsd:attribute name="ref" type="xsd:string" use="optional" />
+      <xsd:attribute name="add-before" type="xsd:string" use="optional" />
+      <xsd:attribute name="add-after" type="xsd:string" use="optional" />
+      <xsd:attribute name="index" type="xsd:nonNegativeInteger" use="optional" />
+    </xsd:complexType>
+  </xsd:element>
+  
 </xsd:schema>
