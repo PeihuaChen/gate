@@ -56,8 +56,10 @@ final class ExactPhraseScorer extends PhraseScorer {
           if(!first.nextPosition()) {
             /* Niraj */
             // here 1 represents the ExactPhraseQuery
-            ((LuceneIndexSearcher)searcher).setFirstTermPositions(1, first.doc,
-                    firstPositions, patternSize);
+            if(searcher instanceof IndexSearcher) {
+              ((IndexSearcher)searcher).setFirstTermPositions(1, first.doc,
+                      firstPositions, patternSize, 1);
+            }
             /* End */
             return (float)freq;
           }
@@ -67,9 +69,11 @@ final class ExactPhraseScorer extends PhraseScorer {
       firstPositions.add(new Integer(first.position));
       freq++; // all equal: a match
     } while(last.nextPosition());
+
     /* Niraj */
-    ((LuceneIndexSearcher)searcher).setFirstTermPositions(1, first.doc,
-            firstPositions, patternSize);
+    if(searcher instanceof IndexSearcher)
+    ((IndexSearcher)searcher).setFirstTermPositions(1, first.doc,
+            firstPositions, patternSize, 1);
     /* End */
     return (float)freq;
   }

@@ -35,7 +35,7 @@ public class IndexSearcher extends Searcher {
 	IndexReader reader;
 
 	private boolean closeReader;
-
+	
 	/** Creates a searcher searching the index in the named directory. */
 	public IndexSearcher(String path) throws IOException {
 		this(IndexReader.open(path), true);
@@ -85,7 +85,7 @@ public class IndexSearcher extends Searcher {
 	// inherit javadoc
 	public TopDocs search(Query query, Filter filter, final int nDocs)
 			throws IOException {
-
+	  initializeTermPositions();
 		Scorer scorer = query.weight(this)
 				.scorer(reader,/* Niraj */this /* End */);
 		if (scorer == null)
@@ -115,7 +115,7 @@ public class IndexSearcher extends Searcher {
 	// inherit javadoc
 	public TopFieldDocs search(Query query, Filter filter, final int nDocs,
 			Sort sort) throws IOException {
-
+	  initializeTermPositions();
 		Scorer scorer = query.weight(this).scorer(reader, this);
 		if (scorer == null)
 			return new TopFieldDocs(0, new ScoreDoc[0], sort.fields);
@@ -146,6 +146,7 @@ public class IndexSearcher extends Searcher {
 	// inherit javadoc
 	public void search(Query query, Filter filter, final HitCollector results)
 			throws IOException {
+	  initializeTermPositions();
 		HitCollector collector = results;
 		if (filter != null) {
 			final BitSet bits = filter.bits(reader);
@@ -176,5 +177,75 @@ public class IndexSearcher extends Searcher {
 	public Explanation explain(Query query, int doc) throws IOException {
 		return query.weight(this).explain(reader, doc);
 	}
+	
+  /**
+   * Each pattern is a result of either simple or a boolean query. The
+   * type number indicates if the query used to retrieve that pattern
+   * was simple or boolean.
+   */
+  private ArrayList<Integer> queryType = new ArrayList<Integer>();
 
+  /**
+   * Each terms has a frequency.
+   */
+  private ArrayList<Integer> frequencies = new ArrayList<Integer>();
+  
+  /**
+   * Each Integer value in this list is an index of first annotation of
+   * the pattern that matches with the user query.
+   */
+  private ArrayList firstTermPositions = new ArrayList();
+
+  /**
+   * document numbers
+   */
+  private ArrayList<Integer> documentNumbers = new ArrayList<Integer>();
+
+  /**
+   * Stores how long each pattern is (in terms of number of
+   * annotations).
+   */
+  private ArrayList<Integer> patternLengths = new ArrayList<Integer>();
+
+  /**
+   * Sets the firstTermPositions.
+   * 
+   * @param qType
+   * @param doc
+   * @param positions
+   * @param patternLength
+   */
+  public void setFirstTermPositions(int qType, int doc, ArrayList positions,
+          int patternLength, int frequency) {
+    queryType.add(new Integer(qType));
+    firstTermPositions.add(positions);
+    documentNumbers.add(new Integer(doc));
+    patternLengths.add(new Integer(patternLength));
+    frequencies.add(new Integer(frequency));
+  }
+
+  /**
+   * Initializes all local variables
+   * 
+   */
+  public void initializeTermPositions() {
+    queryType = new ArrayList<Integer>();
+    firstTermPositions = new ArrayList();
+    documentNumbers = new ArrayList<Integer>();
+    patternLengths = new ArrayList<Integer>();
+    frequencies = new ArrayList<Integer>();
+  }
+
+  /**
+   * Returns an array of arrayLists where the first list contains
+   * document numbers, second list contains first term positions, third
+   * list contains the pattern lengths and the fourth one contains the
+   * query type for each pattern.
+   * 
+   * @return
+   */
+  public ArrayList[] getFirstTermPositions() {
+    return new ArrayList[] {documentNumbers, firstTermPositions,
+        patternLengths, queryType, frequencies};
+  }
 }

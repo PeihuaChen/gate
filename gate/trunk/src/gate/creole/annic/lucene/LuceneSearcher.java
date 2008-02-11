@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -29,12 +28,10 @@ import gate.creole.annic.apache.lucene.document.Document;
 import gate.creole.annic.apache.lucene.index.IndexReader;
 import gate.creole.annic.apache.lucene.index.Term;
 import gate.creole.annic.apache.lucene.index.TermEnum;
-import gate.creole.annic.apache.lucene.index.TermFreqVector;
 import gate.creole.annic.apache.lucene.search.BooleanQuery;
 import gate.creole.annic.apache.lucene.search.Hits;
 import gate.creole.annic.apache.lucene.search.IndexSearcher;
 import gate.creole.annic.apache.lucene.search.TermQuery;
-import gate.util.GateRuntimeException;
 
 /**
  * This class provides the Searching functionality for annic.

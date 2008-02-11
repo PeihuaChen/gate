@@ -103,13 +103,12 @@ final class TermScorer extends Scorer {
       // (e.g. specifying
       // a corpus to search in and therefore should not be set as first
       // term position
-      if(term.type() != null) {
+      if(term.type() != null && this.searcher instanceof IndexSearcher) {
         // we need to add this into the IndexSercher
         java.util.ArrayList termInfo = new java.util.ArrayList();
         termInfo.add(term.text());
         termInfo.add(term.type());
-        ((LuceneIndexSearcher)this.searcher).setFirstTermPositions(0, doc(),
-                termInfo, 1);
+        ((IndexSearcher)this.searcher).setFirstTermPositions(0, doc(), termInfo, 1, f);
       }
     }
     return score;
