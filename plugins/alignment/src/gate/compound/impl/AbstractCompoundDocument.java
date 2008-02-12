@@ -1,6 +1,8 @@
 package gate.compound.impl;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +17,7 @@ import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
 import gate.Resource;
+import gate.annotation.AnnotationSetImpl;
 import gate.compound.CompoundDocument;
 import gate.corpora.DocumentContentImpl;
 import gate.corpora.DocumentImpl;
@@ -263,9 +266,9 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements C
 	/** Set method for the document content */
 	public void setContent(DocumentContent content) {
 		if (currentDocument == null) {
-			throw new RuntimeException(
-					"CompoundDocumentImpl does not contain any text but its member does!"
-							+ " Please use the setDocument(String documentID) to set a specific document!");
+      System.err.println(
+              "CompoundDocumentImpl does not have any content but its member does!"
+                  + " Please use the setDocument(String documentID) to set a specific document!");
 		} else {
 			currentDocument.setContent(content);
 		}
@@ -295,9 +298,10 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements C
 	 */
 	public AnnotationSet getAnnotations() {
 		if (currentDocument == null) {
-			throw new RuntimeException(
+		  System.err.println(
 					"CompoundDocumentImpl does not have any annotationSet but its member does!"
 							+ " Please use the setDocument(String documentID) to set a specific document!");
+		  return new AnnotationSetImpl(this);
 		} else {
 			return currentDocument.getAnnotations();
 		}
@@ -310,9 +314,10 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements C
 	 */
 	public AnnotationSet getAnnotations(String name) {
 		if (currentDocument == null) {
-			throw new RuntimeException(
-					"CompoundDocumentImpl does not have any annotationSet but its member does!"
-							+ " Please use the setDocument(String documentID) to set a specific document!");
+      System.err.println(
+              "CompoundDocumentImpl does not have any annotationSet but its member does!"
+                  + " Please use the setDocument(String documentID) to set a specific document!");
+          return new AnnotationSetImpl(this);
 		} else {
 			return currentDocument.getAnnotations(name);
 		}
@@ -358,9 +363,10 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements C
 	 */
 	public String toXml(Set aSourceAnnotationSet) {
 		if (currentDocument == null) {
-			throw new RuntimeException(
-					"CompoundDocumentImpl does not have any content to convert it to XML but its members have!"
-							+ " Please use the setDocument(String documentID) to set a specific document!");
+      System.err.println(
+              "CompoundDocumentImpl does not implement toXml(Set) but its member does!"
+                  + " Please use the setDocument(String documentID) to set a specific document!");
+      return currentDocument.toXml(new AnnotationSetImpl(this));
 		} else {
 			return currentDocument.toXml(aSourceAnnotationSet);
 		}
@@ -387,9 +393,10 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements C
 	 */
 	public String toXml(Set aSourceAnnotationSet, boolean includeFeatures) {
 		if (currentDocument == null) {
-			throw new RuntimeException(
-					"CompoundDocumentImpl does not have any content to convert it to XML but its members have!"
-							+ " Please use the setDocument(String documentID) to set a specific document!");
+      System.err.println(
+              "CompoundDocumentImpl does not implement toXml(Set, boolean) but its member does!"
+                  + " Please use the setDocument(String documentID) to set a specific document!");
+      return currentDocument.toXml(new AnnotationSetImpl(this));
 		} else {
 			return currentDocument.toXml(aSourceAnnotationSet, includeFeatures);
 		}
@@ -404,9 +411,10 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements C
 	 */
 	public String toXml() {
 		if (currentDocument == null) {
-			throw new RuntimeException(
-					"CompoundDocumentImpl does not have any content to convert it to XML but its members have!"
-							+ " Please use the setDocument(String documentID) to set a specific document!");
+      System.err.println(
+              "CompoundDocumentImpl does not implement toXml() but its member does!"
+                  + " Please use the setDocument(String documentID) to set a specific document!");
+      return currentDocument.toXml(new AnnotationSetImpl(this));
 		} else {
 			return currentDocument.toXml();
 		}
@@ -418,9 +426,10 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements C
 	 */
 	public Map getNamedAnnotationSets() {
 		if (currentDocument == null) {
-			throw new RuntimeException(
-					"CompoundDocumentImpl does not have any annotationSets!"
-							+ " Please use the setDocument(String documentID) to set a specific document!");
+      System.err.println(
+              "CompoundDocumentImpl does not implement getNamedAnnotationSets() but its member does!"
+                  + " Please use the setDocument(String documentID) to set a specific document!");
+      return new HashMap();
 		} else {
 			return currentDocument.getNamedAnnotationSets();
 		}
@@ -431,9 +440,10 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements C
 	 */
 	public Set getAnnotationSetNames() {
 		if (currentDocument == null) {
-			throw new RuntimeException(
-					"CompoundDocumentImpl does not have any annotationSets!"
-							+ " Please use the setDocument(String documentID) to set a specific document!");
+      System.err.println(
+              "CompoundDocumentImpl does not implement getAnnotationSetNames() but its member does!"
+                  + " Please use the setDocument(String documentID) to set a specific document!");
+      return new HashSet();
 		} else {
 			return currentDocument.getAnnotationSetNames();
 		}
@@ -448,7 +458,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements C
 	 */
 	public void removeAnnotationSet(String name) {
 		if (currentDocument == null) {
-			throw new RuntimeException(
+			System.err.println(
 					"CompoundDocumentImpl does not have any annotationSets!"
 							+ " Please use the setDocument(String documentID) to set a specific document!");
 		} else {
@@ -460,7 +470,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements C
 	public void edit(Long start, Long end, DocumentContent replacement)
 			throws InvalidOffsetException {
 		if (currentDocument == null) {
-			throw new RuntimeException(
+		  System.err.println(
 					"CompoundDocumentImpl does not have any content!"
 							+ " Please use the setDocument(String documentID) to set a specific document!");
 		} else {

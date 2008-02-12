@@ -21,6 +21,7 @@ public interface CombiningMethod extends Serializable {
 	 * @param compoundDocument
 	 * @return
 	 */
+  @SuppressWarnings("unchecked")
 	public CompositeDocument combine(CompoundDocument compoundDocument,
 			Map parameters) throws CombiningMethodException;
 
