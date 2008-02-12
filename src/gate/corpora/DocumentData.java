@@ -28,6 +28,12 @@ public class DocumentData implements Serializable {
     this.classType = classType; 
   }
 
+  public DocumentData(String name, Object ID){
+    docName = name;
+    persistentID = ID;
+    this.classType = "gate.corpora.DocumentImpl"; 
+  }
+  
   public String getDocumentName() {
     return docName;
   }
