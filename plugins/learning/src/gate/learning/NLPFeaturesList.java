@@ -43,7 +43,7 @@ public class NLPFeaturesList {
   public NLPFeaturesList() {
     featuresList = new Hashtable();
     idfFeatures = new Hashtable();
-    totalNumDocs = 1;
+    totalNumDocs = 0;
   }
 
   /** Loading the list from a file. */
@@ -81,7 +81,7 @@ public class NLPFeaturesList {
       PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(
         fileFeaturesList), "UTF-8"));
       // for the total number of docs
-      out.println("totalNumDocs=" + new Integer(totalNumDocs));
+      out.println("totalNumDocs=" + totalNumDocs);
       List keys = new ArrayList(featuresList.keySet());
       Collections.sort(keys);
       // write the features list into the output file
@@ -146,4 +146,39 @@ public class NLPFeaturesList {
     featuresList.clear();
     idfFeatures.clear();
   }
+  /** convert the NLP list into Ngram language model and write it into a file. */
+ public void writeToLM(File parentDir, String filename, int nGram) {
+   File ngramList = new File(parentDir, filename);
+   if(LogService.minVerbosityLevel > 1)
+     System.out.println("Lengh of List = " + featuresList.size());
+   try {
+     PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(
+       ngramList), "UTF-8"));
+     // for the total number of docs
+     //out.println("totalNumDocs=" + new Integer(totalNumDocs));
+     out.println("## The following "+nGram+"-gram were obtained from " + totalNumDocs+ " documents or examples");
+     List keys = new ArrayList(featuresList.keySet());
+     //Collections.sort(keys);
+     int numT = keys.size();
+     float [] freqs = new float[numT];
+     for(int i=0; i<numT; ++i)
+       freqs[i] = Float.parseFloat(idfFeatures.get(keys.get(i)).toString());
+     int [] indexSort = new int[numT];
+     LightWeightLearningApi.sortFloatAscIndex(freqs, indexSort, numT, numT);
+     // write the features list into the output file
+     //Iterator iterator = keys.iterator();
+     //while(iterator.hasNext()) {
+     for(int i=0; i<numT; ++i) {
+       Object key = keys.get(indexSort[i]);
+       String str = key.toString();
+       if(str.contains("<>")) { //if it is a ngram feature
+         str = str.substring(str.indexOf("_",1)+1, str.lastIndexOf("<>"));
+         out.println(str + " " + (int)freqs[indexSort[i]]);
+        //System.out.println("*"+key+ "* " + featuresList.get(key));
+       }
+     }
+     out.close();
+   } catch(IOException e) {
+   }
+ }
 }

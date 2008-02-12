@@ -68,7 +68,7 @@ public class TestLearningAPI extends TestCase {
   /** Loading the configurationg file and corpus for testing. 
    * And make settings as in the GATE Gui. 
    */
-  void loadSettings(String configFileName, String corpusDirName, String inputasN)
+  void loadSettings(String configFileName, String corpusDirName, String inputasN, String outputasN)
     throws GateException, IOException {
     LogService.minVerbosityLevel = 0;
     if(LogService.minVerbosityLevel>0)
@@ -99,6 +99,7 @@ public class TestLearningAPI extends TestCase {
 //    corpus.populate(tempURL, fileFilter, "UTF-8", false);
     // Set the inputAS
     learningApi.setInputASName(inputasN);
+    learningApi.setOutputASName(outputasN);
     controller = (gate.creole.SerialAnalyserController)Factory
       .createResource("gate.creole.SerialAnalyserController");
     controller.setCorpus(corpus);
@@ -130,7 +131,7 @@ public class TestLearningAPI extends TestCase {
       ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
     emptySavedFiles(wdResults);
     String inputASN = "Key";
-    loadSettings(configFileURL, corpusDirName, inputASN);
+    loadSettings(configFileURL, corpusDirName, inputASN, inputASN);
     // Set the evaluation mode
     RunMode runM=RunMode.EVALUATION;
     learningApi.setLearningMode(runM);
@@ -163,7 +164,7 @@ public class TestLearningAPI extends TestCase {
       ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
     emptySavedFiles(wdResults);
     String inputASN = "Key";
-    loadSettings(configFileURL, corpusDirName, inputASN);
+    loadSettings(configFileURL, corpusDirName, inputASN, inputASN);
     // Set the evaluation mode
     RunMode runM=RunMode.EVALUATION;
     learningApi.setLearningMode(runM);
@@ -199,7 +200,7 @@ public class TestLearningAPI extends TestCase {
       ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
     emptySavedFiles(wdResults);
     String inputASN = null;
-    loadSettings(configFileURL, corpusDirName, inputASN);
+    loadSettings(configFileURL, corpusDirName, inputASN, inputASN);
     // Set the evaluation mode
     RunMode runM=RunMode.EVALUATION;
     learningApi.setLearningMode(runM);
@@ -231,7 +232,7 @@ public class TestLearningAPI extends TestCase {
       ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
     emptySavedFiles(wdResults);
     String inputASN = null;
-    loadSettings(configFileURL, corpusDirName, inputASN);
+    loadSettings(configFileURL, corpusDirName, inputASN, inputASN);
     // Set the evaluation mode
     RunMode runM=RunMode.EVALUATION;
     learningApi.setLearningMode(runM);
@@ -263,7 +264,7 @@ public class TestLearningAPI extends TestCase {
       ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
     emptySavedFiles(wdResults);
     String inputASN = null;
-    loadSettings(configFileURL, corpusDirName, inputASN);
+    loadSettings(configFileURL, corpusDirName, inputASN, inputASN);
     // Set the evaluation mode
     RunMode runM=RunMode.EVALUATION;
     learningApi.setLearningMode(runM);
@@ -295,7 +296,7 @@ public class TestLearningAPI extends TestCase {
       ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
     emptySavedFiles(wdResults);
     String inputASN = null;
-    loadSettings(configFileURL, corpusDirName, inputASN);
+    loadSettings(configFileURL, corpusDirName, inputASN, inputASN);
     // Set the evaluation mode
     RunMode runM=RunMode.EVALUATION;
     learningApi.setLearningMode(runM);
@@ -327,7 +328,7 @@ public class TestLearningAPI extends TestCase {
       ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
     emptySavedFiles(wdResults);
     String inputASN = "Key";
-    loadSettings(configFileURL, corpusDirName, inputASN);
+    loadSettings(configFileURL, corpusDirName, inputASN, inputASN);
     // Set the evaluation mode
     RunMode runM=RunMode.EVALUATION;
     learningApi.setLearningMode(runM);
@@ -363,7 +364,7 @@ public class TestLearningAPI extends TestCase {
       ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
     emptySavedFiles(wdResults);
     String inputASN = "Key";
-    loadSettings(configFileURL, corpusDirName, inputASN);
+    loadSettings(configFileURL, corpusDirName, inputASN, inputASN);
     // Set the evaluation mode
     RunMode runM=RunMode.EVALUATION;
     learningApi.setLearningMode(runM);

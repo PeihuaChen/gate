@@ -228,7 +228,7 @@ public class Attribute {
    * attribute element first locates all required variable and creates multiple
    * attributes for the given RANGE.
    */
-  public static java.util.List parseSerie(Element jdomElement)
+  public static java.util.List<Attribute> parseSerie(Element jdomElement)
     throws GateException {
     // find the name
     Element anElement = jdomElement.getChild("NAME");
@@ -284,7 +284,7 @@ public class Attribute {
     if(isClass) { throw new GateException(
       "Cannot define the class in a serie:\n" + jdomElement.toString() + "!"); }
     // Create a list of Attributes
-    ArrayList attributes = new ArrayList();
+    ArrayList<Attribute>attributes = new ArrayList<Attribute>();
     for(int position = minpos; position < maxpos + 1; position++) {
       Attribute attribute = new Attribute();
       attribute.setClass(false);

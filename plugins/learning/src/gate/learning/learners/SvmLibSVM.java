@@ -27,7 +27,7 @@ import java.io.IOException;
  */
 public class SvmLibSVM extends SupervisedLearner {
   /** The uneven margins parameter. */
-  private float tau = (float)1.0;
+  public float tau = (float)1.0;
   svm_parameter param;
 
   /** Class constructor without parameter. */
