@@ -75,9 +75,11 @@ public class SerialCorpusImpl extends
 
     docDataList = new ArrayList();
     //now cache the names of all docs for future use
-    Iterator iter = tCorpus.getDocumentNames().iterator();
-    while (iter.hasNext())
-      docDataList.add(new DocumentData((String) iter.next(), null));
+    List docNames = tCorpus.getDocumentNames();
+    for(int i=0;i<docNames.size();i++) {
+      Document doc = (Document) tCorpus.get(i);
+      docDataList.add(new DocumentData((String) docNames.get(i), null, doc.getClass().getName())); 
+    }
 
     //copy all the documents from the transient corpus
     documents = new ArrayList();
@@ -122,6 +124,22 @@ public class SerialCorpusImpl extends
   }
 
   /**
+   * Gets the persistent IDs of the documents in this corpus.
+   * @return a {@link List} of Objects representing the persistent IDs of the documents
+   * in this corpus.
+   */
+  public List getDocumentClassTypes(){
+    List docsIDs = new ArrayList();
+    if(docDataList == null)
+      return docsIDs;
+    Iterator iter = docDataList.iterator();
+    while (iter.hasNext()) {
+      DocumentData data = (DocumentData) iter.next();
+      docsIDs.add(data.getClassType());
+    }
+    return docsIDs;
+  }  
+  /**
    * This method should only be used by the Serial Datastore to set
    */
   public void setDocumentPersistentID(int index, Object persID){
@@ -153,6 +171,11 @@ public class SerialCorpusImpl extends
     return ((DocumentData) docDataList.get(index)).getPersistentID();
   }
   
+  public String getDocumentClassType(int index){
+    if (index >= docDataList.size()) return null;
+    return ((DocumentData) docDataList.get(index)).getClassType();
+  }
+
   /**
    * Unloads a document from memory.
    * @param index the index of the document to be unloaded.
@@ -508,7 +531,7 @@ public class SerialCorpusImpl extends
     //the index will be the size of the docDataList before
     //the addition
     DocumentData docData = new DocumentData(doc.getName(),
-                                            doc.getLRPersistenceId());
+                                            doc.getLRPersistenceId(), doc.getClass().getName());
     boolean result = docDataList.add(docData);
     documents.add(doc);
     documentAdded(doc);
@@ -570,7 +593,8 @@ public class SerialCorpusImpl extends
     for (index = 0;  iter.hasNext(); index++) {
       docData = (DocumentData) iter.next();
       if (docData.getDocumentName().equals(doc.getName()) &&
-          docData.getPersistentID().equals(doc.getLRPersistenceId())) {
+          docData.getPersistentID().equals(doc.getLRPersistenceId()) &&
+          docData.getClassType().equals(doc.getClass().getName())) {
         found = true;
         break;
       }
@@ -667,7 +691,7 @@ public class SerialCorpusImpl extends
         try {
           parameters.put(DataStore.LR_ID_FEATURE_NAME,
                       ((DocumentData)docDataList.get(index)).getPersistentID());
-          Resource lr = Factory.createResource("gate.corpora.DocumentImpl",
+          Resource lr = Factory.createResource(((DocumentData)docDataList.get(index)).getClassType(),
                                                 parameters);
           if (DEBUG)
             Out.prln("Loaded document :" + lr.getName());
@@ -705,7 +729,7 @@ public class SerialCorpusImpl extends
     Document doc = (Document) o;
 
     DocumentData docData = new DocumentData(doc.getName(),
-                                            doc.getLRPersistenceId());
+                                            doc.getLRPersistenceId(), doc.getClass().getName());
     docDataList.add(index, docData);
 
     documents.add(index, doc);
@@ -785,9 +809,11 @@ public class SerialCorpusImpl extends
 
     docDataList = new ArrayList();
     //now cache the names of all docs for future use
-    Iterator iter = tCorpus.getDocumentNames().iterator();
-    while (iter.hasNext())
-      docDataList.add(new DocumentData((String) iter.next(), null));
+    List docNames = tCorpus.getDocumentNames();
+    for(int i=0;i<docNames.size();i++) {
+      Document aDoc = (Document) tCorpus.get(i);
+      docDataList.add(new DocumentData((String) docNames.get(i), null, aDoc.getClass().getName()));
+    }
 
     //copy all the documents from the transient corpus
     documents = new ArrayList();

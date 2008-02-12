@@ -22,9 +22,10 @@ public class DocumentData implements Serializable {
   //fix the ID for serialisation
   static final long serialVersionUID = 4192762901421847525L;
 
-  public DocumentData(String name, Object ID){
+  public DocumentData(String name, Object ID, String classType){
     docName = name;
     persistentID = ID;
+    this.classType = classType; 
   }
 
   public String getDocumentName() {
@@ -40,10 +41,19 @@ public class DocumentData implements Serializable {
   }
 
   public String toString() {
-    return new String("DocumentData: " + docName + ", " + persistentID);
+    return new String("DocumentData: " + docName + ", " + persistentID + ", " + classType);
   }
 
   String docName;
   Object persistentID;
+  String classType;
+
+  public String getClassType() {
+    return classType;
+  }
+
+  public void setClassType(String classType) {
+    this.classType = classType;
+  }
 }
 
