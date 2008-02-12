@@ -486,6 +486,7 @@ public class LuceneDocument {
         if(start == -1) start = i;
       }
     }
+    if(start == -1) return false;
     if(start < gateContent.length()) {
       FeatureMap features = gate.Factory.newFeatureMap();
       String string = gateContent.substring(start, gateContent.length());
