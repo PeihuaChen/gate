@@ -7,6 +7,7 @@
  */
 package gate.learning;
 
+import gate.util.GateException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class DocFeatureVectors {
    */
   public void obtainFVsFromNLPFeatures(NLPFeaturesOfDoc nlpDoc,
     NLPFeaturesList featList, int[] featurePosition, int maxNegPosition,
-    int numDocs, float ngramWeight) {
+    int numDocs, float ngramWeight, int valueType) {
     numInstances = nlpDoc.numInstances;
     docId = new String(nlpDoc.getDocId());
     fvs = new SparseFeatureVector[numInstances];
@@ -53,12 +54,13 @@ public class DocFeatureVectors {
       String[] feat = nlpDoc.featuresInLine[i].toString().split(
         ConstantParameters.ITEMSEPARATOR);
       //Some variables for normalising the feature values of the same ngram
-      boolean sameNgram=true;
+      //boolean sameNgram=true;
       int prevPosition = -99999;
       float [] tempVals = new float[9999];
       long [] tempInds = new long[9999];
       int tempSize = 0;
       int positionCurr=0;
+      
       for(int j = 0; j < feat.length; ++j) {
         //First get the position information for the current NLP feature
         positionCurr=0;
@@ -96,15 +98,28 @@ public class DocFeatureVectors {
               else shiftNum = -positionCurr;
               long featInd= Long.parseLong(featList.featuresList.get(featCur).toString()) 
                 + shiftNum*ConstantParameters.MAXIMUMFEATURES;
-              // for only the presence of Ngram in the sentence
-              // indexValues.put(featInd,"1");
-              // for tf representation
-              // indexValues.put(featInd, featVal);
-              // for tf*idf representation
-              double val = (Long.parseLong(featVal) + 1)
-                * Math.log((double)numDocs
-                  / (Long.parseLong(featList.idfFeatures.get(featCur)
-                    .toString())));
+              double val = 0.0;
+              switch(valueType) {
+                case 1: // for only the presence of Ngram in the sentence
+                  val = 1.0;
+                  break;
+                case 2: // for tf representation
+                  val = Long.parseLong(featVal);
+                  break;
+                case 3: // for tf*idf representation
+                  val = (Long.parseLong(featVal) + 1)
+                  * Math.log((double)numDocs
+                    / (Long.parseLong(featList.idfFeatures.get(featCur)
+                      .toString())));
+                  break;
+                  default:
+                    try {
+                    throw new GateException("The value type for ngram is not defined!");
+                  } catch(GateException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                  }
+              }
              // indexValues.put(featInd, new Float(val));
               tempInds[tempSize] = featInd;
               tempVals[tempSize] = (float)val;
@@ -130,14 +145,20 @@ public class DocFeatureVectors {
       } // end of the loop on the features of one instances
       //For the last ngram features
       if(tempSize>0) {
-        double sum=0.0;
-        for(int ii=0; ii<tempSize; ++ii)
-          sum += tempVals[ii]*tempVals[ii];
-        sum = Math.sqrt(sum);
-        for(int ii=0; ii<tempSize; ++ii){
-          tempVals[ii] /= sum;
-          tempVals[ii] *= ngramWeight;
-          indexValues.put(new Long(tempInds[ii]), new Float(tempVals[ii]));
+        if(valueType == 3) {
+          double sum=0.0;
+          for(int ii=0; ii<tempSize; ++ii)
+            sum += tempVals[ii]*tempVals[ii];
+          sum = Math.sqrt(sum);
+          for(int ii=0; ii<tempSize; ++ii){
+            tempVals[ii] /= sum;
+            tempVals[ii] *= ngramWeight;
+            indexValues.put(new Long(tempInds[ii]), new Float(tempVals[ii]));
+          }
+        } else {
+          for(int ii=0; ii<tempSize; ++ii){
+            indexValues.put(new Long(tempInds[ii]), new Integer((int)tempVals[ii]));
+          }
         }
         tempSize = 0;
       }
@@ -261,14 +282,14 @@ public class DocFeatureVectors {
   }
   
   /** Expand the feature vector to including the context tokens. */
-  public void expandFV(int winSize) {
+  public void expandFV(int winSizeLeft, int winSizeRight) {
     SparseFeatureVector[] fvsExpand = new SparseFeatureVector[fvs.length];
     for(int i=0; i<fvs.length; ++i) {
       int lenT0 = fvs[i].len;
-      for(int j=-1; j>= -winSize; --j) {
+      for(int j=-1; j>= -winSizeLeft; --j) {
         if(j+i>=0) lenT0 += fvs[j+i].len;
       } 
-      for(int j=1; j<=winSize; ++j)
+      for(int j=1; j<=winSizeRight; ++j)
         if(j+i<fvs.length) lenT0 += fvs[j+i].len;
       
       fvsExpand[i] = new SparseFeatureVector(lenT0);
@@ -279,7 +300,7 @@ public class DocFeatureVectors {
       }
       
       int lenTotal = fvs[i].len;
-      for(int j=-1; j>= -winSize; --j) {
+      for(int j=-1; j>= -winSizeLeft; --j) {
         int kk = j+i;
         if(kk>=0) {
           int gapLen = -j * (int)ConstantParameters.MAXIMUMFEATURES;
@@ -292,10 +313,10 @@ public class DocFeatureVectors {
           lenTotal += fvs[kk].len;
         }
       }
-      for(int j=1; j<=winSize; ++j) {
+      for(int j=1; j<=winSizeRight; ++j) {
         int kk = j+i;
         if(kk<fvs.length) {
-          int gapLen = (j+winSize) * (int)ConstantParameters.MAXIMUMFEATURES;
+          int gapLen = (j+winSizeLeft) * (int)ConstantParameters.MAXIMUMFEATURES;
           for(int j1=0; j1<fvs[kk].len; ++j1) {
             fvsExpand[i].indexes[j1+lenTotal]  = fvs[kk].indexes[j1]+gapLen;
             fvsExpand[i].values[j1+lenTotal]  = fvs[kk].values[j1]/j;

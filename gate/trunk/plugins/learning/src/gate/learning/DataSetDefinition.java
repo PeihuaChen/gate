@@ -24,7 +24,7 @@ import org.jdom.Element;
  */
 public class DataSetDefinition {
   /** List of ATTRIBUTE type features. */
-  protected java.util.List attributes;
+  protected java.util.List<Attribute>attributes;
   /** ATTRIBUTE for the class label. */
   protected Attribute classAttribute = null;
   /** Instance type. */
@@ -57,8 +57,11 @@ public class DataSetDefinition {
   /** Is the same window size for all NLP features. */
   public boolean isSameWinSize=false;
   /** The common window size. */
-  public int windowSize = 0;
-
+  public int windowSizeLeft = 1;
+  public int windowSizeRight = 1;
+  /** value type of the ngram feature, 1--binary, 2--tf, 3--tf*idf. */
+  public int valueTypeNgram =3;
+ 
   /**
    * Constructor A DataSetDefinition is built using an XML element in
    * configuration file.
@@ -74,12 +77,27 @@ public class DataSetDefinition {
     else throw new GateException(
       "Required element \"INSTANCE-TYPE\" not present!");
     //Check if use the same window size to speed up preprocessing
+    windowSizeLeft = 1;
+    windowSizeRight = 1;
     anElement = domElement.getChild("WINDOWSIZE");
     if(anElement != null) {
       isSameWinSize = true;
-      windowSize = Integer.parseInt(anElement.getTextTrim());
+      String value;
+      value = anElement.getAttributeValue("windowSizeLeft");
+      if(value!= null) 
+        windowSizeLeft = Integer.parseInt(value);
+      value = anElement.getAttributeValue("windowSizeRight");
+      if(value != null) 
+        windowSizeRight = Integer.parseInt(value);
     } else {
       isSameWinSize = false;
+    }
+   
+    //  Check if specify the value type of ngram feature
+    valueTypeNgram = 3;
+    anElement = domElement.getChild("ValueTypeNgram");
+    if(anElement != null) {
+      valueTypeNgram = Integer.parseInt(anElement.getTextTrim());
     }
     // Check the dataset definition file is for relation extraction or
     // not
@@ -161,7 +179,7 @@ public class DataSetDefinition {
       dataType = ChunkLearningData;
       // find the attributes
       int attrIndex = 0;
-      attributes = new ArrayList();
+      attributes = new ArrayList<Attribute>();
       Iterator childrenIter = domElement.getChildren("ATTRIBUTE").iterator();
       while(childrenIter.hasNext()) {
         Element child = (Element)childrenIter.next();
@@ -183,23 +201,31 @@ public class DataSetDefinition {
         .iterator();
       while(childrenSerieIter.hasNext()) {
         Element child = (Element)childrenSerieIter.next();
-        List attributelist = Attribute.parseSerie(child);
+        List<Attribute>attributelist = Attribute.parseSerie(child);
         if(isSameWinSize) {
+          //if(attributelist.size()>0) {
+            //Attribute att0 = (Attribute)attributelist.get(0);
+            //att0.position=0;
+            //attributes.add(att0);
+            //++attrIndex;
+          //}
+          
          for(int i=0; i<attributelist.size(); ++i) { 
            Attribute att0 = (Attribute)attributelist.get(i);
            if(att0.position == 0) {
              attributes.add(att0);
+             ++attrIndex;
              break;
            }
          }
-         ++attrIndex;
+         
         } else {
           attributes.addAll(attributelist);
           attrIndex += attributelist.size();
         }
       }
       if(classAttribute == null)
-        throw new GateException("No class attribute defined!");
+        System.out.println("!! Warning: No class attribute defined! You CANNOT learn, but it's OK for producing the feature files.");
       // find the Ngrams
       ngrams = new ArrayList();
       childrenIter = domElement.getChildren("NGRAM").iterator();

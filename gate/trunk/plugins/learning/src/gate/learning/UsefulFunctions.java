@@ -16,4 +16,8 @@ public class UsefulFunctions {
   public static double sigmoid(double x) {
     return 1.0 / (1 + Math.exp(-2.0 * x));
   }
+  /** inverse of sigmoid function. */
+  public static double inversesigmoid(double x) {
+    return Math.log(1.0/x-1.0)/(-2.);
+  }
 }

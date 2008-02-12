@@ -77,7 +77,8 @@ public class LearningEngineSettings {
   public int numPosSVMModel;
   /** Define the number of the NLP features with the smallest weight in linear SVM model. */
   public int numNegSVMModel;
-  
+  /** Active learning settings. */
+  ActiveLearningSetting alSetting;
   
   /** The verbosity level for writing information into log file. 
    * 0: no real output.
@@ -173,11 +174,23 @@ public class LearningEngineSettings {
       if(value != null)
         learningSettings.numNegSVMModel = Integer.parseInt(value);
     }
+    //  for active learning setting
+    learningSettings.alSetting = new ActiveLearningSetting();
+    if(rootElement.getChild("ACTIVELEARNING") != null) {
+      String value = rootElement.getChild("ACTIVELEARNING").
+      getAttributeValue("numTokensPerDoc");
+      learningSettings.alSetting.numTokensSelect = Integer.parseInt(value);
+    }
     //Read the evaluation method: k-fold CV or k-run hold-out
     try {
       Element evalelem = rootElement.getChild("EVALUATION");
-      learningSettings.evaluationconfig = EvaluationConfiguration
-        .fromXML(evalelem);
+      if(evalelem!= null)
+        learningSettings.evaluationconfig = EvaluationConfiguration
+          .fromXML(evalelem);
+      else {
+        System.out.println("! Warning no evaluation scheme is specified. So it will use the default scheme.");
+        learningSettings.evaluationconfig=new EvaluationConfiguration();
+      }
     } catch(RuntimeException e) {
     }
     // Loading the dataset definition
@@ -205,8 +218,9 @@ public class LearningEngineSettings {
     learningSettings.learnerSettings = new LearnerSettings();
     Element UEelement = rootElement.getChild("ENGINE");
     if(UEelement == null)
-      throw new GateException(
-        "The Engine element in the configureation file is missing or invalid");
+      System.out.println(
+        "!! Warning: the Engine element in the configureation file is missing or invalid. " +
+        "You CANNOT learn and apply model, but it's OK for producing the feature files.");
     else {
       if(UEelement.getAttribute("nickname") != null)
         learningSettings.learnerSettings.learnerNickName = UEelement

@@ -20,7 +20,7 @@ options=" -c 0.7 -t 0 -m 100 -tau 0.6  "/>
 <DATASET>
 		<INSTANCE-TYPE>Token</INSTANCE-TYPE>
 
-<WINDOWSIZE>5</WINDOWSIZE>
+<WINDOWSIZE windowSizeLeft="5" windowSizeRight="5"/>
 
 		<ATTRIBUTELIST>
 			<NAME>Form</NAME>

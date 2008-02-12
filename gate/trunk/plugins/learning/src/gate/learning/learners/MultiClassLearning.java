@@ -49,7 +49,7 @@ public class MultiClassLearning {
    * The number of instances in the training data without label (or with label
    * null).
    */
-  int numNull = 0;
+  public int numNull = 0;
   /** Constructor*/
   public MultiClassLearning() {
   }
@@ -219,6 +219,8 @@ public class MultiClassLearning {
       // include the total number of features and number of tags (numClasses)
       int totalNumFeatures;
       String learnerNameFromModel = learner.getLearnerName();
+      //note that reading the training meta data also read the number of class
+      //in the model, e.g. changing the numClasses.
       totalNumFeatures = ReadTrainingMetaData(modelsBuff, learnerNameFromModel);
       if(LogService.minVerbosityLevel>1)
         System.out.println(" *** numClasses=" + numClasses + " totalfeatures="

@@ -27,7 +27,10 @@ public class ConstantParameters {
   public static final String FILENAMEOFLOGFILE = "logFileForNLPLearning"
     + FILETYPEOFSAVEDFILE;
   /** Name of the file storing the NLP feature list. */
-  public static final String FILENAMEOFNLPFeatureList = "NLPFeaturesList"
+  public static final String FILENAMEOFNLPFeatureList = "NLPFeatureList"
+    + FILETYPEOFSAVEDFILE;
+  /** Name of the file storing the Ngram language model. */
+  public static final String FILENAMEOFNgramLM = "NgramList"
     + FILETYPEOFSAVEDFILE;
   /** Name of the file storing the NLP data from all documents. */
   public static final String FILENAMEOFNLPFeaturesData = "NLPFeatureData"
@@ -43,6 +46,13 @@ public class ConstantParameters {
     + FILETYPEOFSAVEDFILE;
   /** Name of the file storing the feature vectors in sparse format for application. */
   public static final String FILENAMEOFFeatureVectorDataApp = "featureVectorsDataApp"
+    + FILETYPEOFSAVEDFILE;
+  /** Name of the file storing the feature vectors in sparse format for ordering and
+   * selecting documents for active learning. */
+  public static final String FILENAMEOFFVDataSelecting = "fvsDataSelecting"
+    + FILETYPEOFSAVEDFILE;
+  /** Name of the file storing the term frequence matrix for each document. */
+  public static final String FILENAMEOFTermFreqMatrix = "documentByTermMatrix"
     + FILETYPEOFSAVEDFILE;
   // public static final String PARTFILENAMEOFDocNLPFeaturess =
   // "DOCNLPFeaetures";
@@ -61,9 +71,19 @@ public class ConstantParameters {
   /** Name of the file storing the unique label indexes from training data. */
   public static final String FILENAMEOFLabelsInData = "LabelListInData"
     + FILETYPEOFSAVEDFILE;
-  /** Name fo the file storing the number of documents got so far and number
+  /** Name of the file storing the number of documents got so far and number
    * of new documents got since last training. */
   public static final String FILENAMEOFMILearningInfor = "MILearningInformation"
+    + FILETYPEOFSAVEDFILE;
+  /** Name of the file storing the number of all documents for selecting and
+   * number of documents selected, and the names of documents selected. */
+  public static final String FILENAMEOFSelectedDOCForAL = "ALSelectedDocs"
+    + FILETYPEOFSAVEDFILE;
+  /** Name of the file storing the names of ranked documents for selecting. */
+  public static final String FILENAMEOFRankedDOCForAL = "ALRankedDocs"
+    + FILETYPEOFSAVEDFILE;
+  /** Name of the file storing the true names of documents in the features files. */
+  public static final String FILENAMEOFDocsName = "docsName"
     + FILETYPEOFSAVEDFILE;
   /** Training mode. */
   public static final String LEARNINGMODE1 = "TRAINING";
