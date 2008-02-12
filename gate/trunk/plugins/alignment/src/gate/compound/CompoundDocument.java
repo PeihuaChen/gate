@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import gate.Document;
 import gate.TextualDocument;
+import gate.alignment.Alignment;
 
 /**
  * Compound document is a collection of individual documents. When it is
@@ -85,4 +86,10 @@ public interface CompoundDocument extends TextualDocument {
 	 * Should be called to remove a document member
 	 */
 	public void removeCompoundDocumentListener(CompoundDocumentListener listener);
+	
+	/**
+	 * The alignment object contains information about the alignment of text.
+	 * @return
+	 */
+	public Alignment getAlignmentInformation();
 }
