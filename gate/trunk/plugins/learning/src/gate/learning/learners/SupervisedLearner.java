@@ -42,9 +42,9 @@ public abstract class SupervisedLearner {
   public abstract void training(BufferedWriter modelFile,
     SparseFeatureVector[] dataLearning, int totalNumFeatures,
     short[] classLabels, int numTraining);
-  /** Abstract method for application. */
+  /** Abstract method for application. Called once per class by {@link MultiClassLearning}.*/
   public abstract void applying(BufferedReader modelFile,
-    DataForLearning dataLearning, int totalNumFeatures, int numClasses);
+    DataForLearning dataLearning, int totalNumFeatures, int classIndex);
  
   public void setCommandLine(String command) {
     this.commandLine = command;
