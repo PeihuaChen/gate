@@ -129,78 +129,70 @@ public class SvmLibSVM extends SupervisedLearner {
 
   /** Apply the SVM model to the data. */
   public void applying(BufferedReader modelFile, DataForLearning dataFVinDoc,
-    int totalNumFeatures, int numClasses) {
+    int totalNumFeatures, int classIndex) {
     float optB;
     if(isUseTau)
       optB = (1 - tau) / (1 + tau);
     else optB = 0;
-    svmApplying(modelFile, dataFVinDoc, totalNumFeatures, numClasses, optB,
+    svmApplying(modelFile, dataFVinDoc, totalNumFeatures, classIndex, optB,
       param, this.isUseTauALLCases);
   }
 
   /** Applying the svm models. */
   public static void svmApplying(BufferedReader modelFile,
-    DataForLearning dataFVinDoc, int totalNumFeatures, int numClasses,
+    DataForLearning dataFVinDoc, int totalNumFeatures, int classIndex,
     float optB, svm_parameter svmParam, boolean isUseTauAll) {
     if(svmParam.kernel_type == svm_parameter.LINEAR) {
       if(LogService.minVerbosityLevel > 1) System.out.println("Linear kernel used.");
-      applyLinearModel(modelFile, dataFVinDoc, totalNumFeatures, numClasses,
+      applyLinearModel(modelFile, dataFVinDoc, totalNumFeatures, classIndex,
         optB, isUseTauAll);
     } else {
       if(LogService.minVerbosityLevel > 1) System.out.println("Non-linear kernel used.");
-      applyingDualFormModel(modelFile, dataFVinDoc, numClasses, optB, svmParam,
+      applyingDualFormModel(modelFile, dataFVinDoc, classIndex, optB, svmParam,
         isUseTauAll);
     }
   }
 
   /** Applying the svm models in dual form. */
   public static void applyingDualFormModel(BufferedReader modelFile,
-    DataForLearning dataFVinDoc, int numClasses, float optB,
+    DataForLearning dataFVinDoc, int classIndex, float optB,
     svm_parameter svmParam, boolean isUseTauAll) {
     try {
-      // set the multi class number and allocate the memory
-      for(int i = 0; i < dataFVinDoc.getNumTrainingDocs(); ++i)
-        for(int j = 0; j < dataFVinDoc.trainingFVinDoc[i].getNumInstances(); ++j) {
-          dataFVinDoc.labelsFVDoc[i].multiLabels[j] = new LabelsOfFV(numClasses);
-          dataFVinDoc.labelsFVDoc[i].multiLabels[j].probs = new float[numClasses];
-        }
       // for each class
       if(LogService.minVerbosityLevel>1) {
-        System.out.println("****  numClasses=" + numClasses);
+        System.out.println("****  classIndex=" + classIndex);
         System.out.println("  d=" + svmParam.degree + ", g=" + svmParam.gamma
           + ", r=" + svmParam.coef0);
       }
-      for(int iClass = 0; iClass < numClasses; ++iClass) {
-        float b;
-        String[] items = modelFile.readLine().split(" ");
-        // Get the number of positive examples and negative examples
-        int[] instDist = new int[2];
-        obtainInstDist(items, instDist);
-        b = new Float(modelFile.readLine()).floatValue();
-        if(isUseTauAll)
-          b += optB;
-        else {
-          if(instDist[0] > 0 && instDist[1] / instDist[0] > 10) b += optB;
-          if(instDist[1] > 0 && instDist[0] / instDist[1] > 10) b -= optB;
-        }
-        int numSV;
-        numSV = new Integer(modelFile.readLine()).intValue();
-        SparseFeatureVector[] svFVs = new SparseFeatureVector[numSV];
-        double[] alphas = new double[numSV];
-        for(int i = 0; i < numSV; ++i) {
-          alphas[i] = readOneSV(modelFile.readLine(), svFVs, i);
-        }
-        for(int i = 0; i < dataFVinDoc.getNumTrainingDocs(); ++i) {
-          SparseFeatureVector[] fvs = dataFVinDoc.trainingFVinDoc[i].getFvs();
-          for(int j = 0; j < dataFVinDoc.trainingFVinDoc[i].getNumInstances(); ++j) {
-            double sum = 0.0;
-            for(int j1 = 0; j1 < numSV; ++j1) {
-              sum += alphas[j1] * kernel_function(fvs[j], svFVs[j1], svmParam);
-            }
-            sum += b;
-            sum = UsefulFunctions.sigmoid(sum);
-            dataFVinDoc.labelsFVDoc[i].multiLabels[j].probs[iClass] = (float)sum;
+      float b;
+      String[] items = modelFile.readLine().split(" ");
+      // Get the number of positive examples and negative examples
+      int[] instDist = new int[2];
+      obtainInstDist(items, instDist);
+      b = new Float(modelFile.readLine()).floatValue();
+      if(isUseTauAll)
+        b += optB;
+      else {
+        if(instDist[0] > 0 && instDist[1] / instDist[0] > 10) b += optB;
+        if(instDist[1] > 0 && instDist[0] / instDist[1] > 10) b -= optB;
+      }
+      int numSV;
+      numSV = new Integer(modelFile.readLine()).intValue();
+      SparseFeatureVector[] svFVs = new SparseFeatureVector[numSV];
+      double[] alphas = new double[numSV];
+      for(int i = 0; i < numSV; ++i) {
+        alphas[i] = readOneSV(modelFile.readLine(), svFVs, i);
+      }
+      for(int i = 0; i < dataFVinDoc.getNumTrainingDocs(); ++i) {
+        SparseFeatureVector[] fvs = dataFVinDoc.trainingFVinDoc[i].getFvs();
+        for(int j = 0; j < dataFVinDoc.trainingFVinDoc[i].getNumInstances(); ++j) {
+          double sum = 0.0;
+          for(int j1 = 0; j1 < numSV; ++j1) {
+            sum += alphas[j1] * kernel_function(fvs[j], svFVs[j1], svmParam);
           }
+          sum += b;
+          sum = UsefulFunctions.sigmoid(sum);
+          dataFVinDoc.labelsFVDoc[i].multiLabels[j].probs[classIndex] = (float)sum;
         }
       }
     } catch(NumberFormatException e) {
@@ -363,45 +355,36 @@ public class SvmLibSVM extends SupervisedLearner {
 
   /** Apply the linear SVM model to the data. */
   public static void applyLinearModel(BufferedReader modelFile,
-    DataForLearning dataFVinDoc, int totalNumFeatures, int numClasses,
+    DataForLearning dataFVinDoc, int totalNumFeatures, int classIndex,
     float optB, boolean isUseTauAll) {
     try {
-      // set the multi class number and allocate the memory
-      for(int i = 0; i < dataFVinDoc.getNumTrainingDocs(); ++i)
+      float b;
+      float[] w = new float[totalNumFeatures];
+      String items[] = modelFile.readLine().split(" ");
+      // Get the number of positive examples and negative examples
+      int[] instDist = new int[2];
+      obtainInstDist(items, instDist);
+      b = readWeightVectorFromFile(modelFile, w);
+      //normalise the weight vector
+      //b = normalisation(w, b);
+      // modify the b by using the uneven margins parameter tau
+      if(isUseTauAll)
+        b += optB;
+      else {
+        if(instDist[0] > 0 && instDist[1] / instDist[0] > 10) b += optB;
+        if(instDist[1] > 0 && instDist[0] / instDist[1] > 10) b -= optB;
+      }
+      for(int i = 0; i < dataFVinDoc.getNumTrainingDocs(); ++i) {
+        SparseFeatureVector[] fvs = dataFVinDoc.trainingFVinDoc[i].getFvs();
         for(int j = 0; j < dataFVinDoc.trainingFVinDoc[i].getNumInstances(); ++j) {
-          dataFVinDoc.labelsFVDoc[i].multiLabels[j] = new LabelsOfFV(numClasses);
-          dataFVinDoc.labelsFVDoc[i].multiLabels[j].probs = new float[numClasses];
-        }
-      // for each class
-      for(int iClass = 0; iClass < numClasses; ++iClass) {
-        float b;
-        float[] w = new float[totalNumFeatures];
-        String items[] = modelFile.readLine().split(" ");
-        // Get the number of positive examples and negative examples
-        int[] instDist = new int[2];
-        obtainInstDist(items, instDist);
-        b = readWeightVectorFromFile(modelFile, w);
-        //normalise the weight vector
-        //b = normalisation(w, b);
-        // modify the b by using the uneven margins parameter tau
-        if(isUseTauAll)
-          b += optB;
-        else {
-          if(instDist[0] > 0 && instDist[1] / instDist[0] > 10) b += optB;
-          if(instDist[1] > 0 && instDist[0] / instDist[1] > 10) b -= optB;
-        }
-        for(int i = 0; i < dataFVinDoc.getNumTrainingDocs(); ++i) {
-          SparseFeatureVector[] fvs = dataFVinDoc.trainingFVinDoc[i].getFvs();
-          for(int j = 0; j < dataFVinDoc.trainingFVinDoc[i].getNumInstances(); ++j) {
-            int[] index = fvs[j].getIndexes();
-            float[] value = fvs[j].getValues();
-            double sum = 0.0;
-            for(int j1 = 0; j1 < fvs[j].getLen(); ++j1)
-              sum += value[j1] * w[index[j1]];
-            sum += b;
-            sum = UsefulFunctions.sigmoid(sum);
-            dataFVinDoc.labelsFVDoc[i].multiLabels[j].probs[iClass] = (float)sum;
-          }
+          int[] index = fvs[j].getIndexes();
+          float[] value = fvs[j].getValues();
+          double sum = 0.0;
+          for(int j1 = 0; j1 < fvs[j].getLen(); ++j1)
+            sum += value[j1] * w[index[j1]];
+          sum += b;
+          sum = UsefulFunctions.sigmoid(sum);
+          dataFVinDoc.labelsFVDoc[i].multiLabels[j].probs[classIndex] = (float)sum;
         }
       }
     } catch(NumberFormatException e) {

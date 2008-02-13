@@ -236,8 +236,16 @@ public class MultiClassLearning {
             +"Number of classes in model: " + numClasses, 1);
           // Use the tau modification in all cases
           learner.isUseTauALLCases = true;
-          learner.applying(modelsBuff, dataFVinDoc, totalNumFeatures,
-            numClasses);
+          for(int i = 0; i < dataFVinDoc.getNumTrainingDocs(); ++i)
+            for(int j = 0; j < dataFVinDoc.trainingFVinDoc[i].getNumInstances(); ++j) {
+              dataFVinDoc.labelsFVDoc[i].multiLabels[j] = new LabelsOfFV(numClasses);
+              dataFVinDoc.labelsFVDoc[i].multiLabels[j].probs = new float[numClasses];
+            }
+          // for each class
+          for(int iClass = 0; iClass < numClasses; ++iClass) {
+            learner.applying(modelsBuff, dataFVinDoc, totalNumFeatures,
+              iClass);
+          }
           if(LogService.minVerbosityLevel>1)
             System.out.println("**** One against all others, numNull=" + numNull);
           break;
@@ -245,8 +253,18 @@ public class MultiClassLearning {
           LogService.logMessage("One against another for multi to binary class conversion.", 1);
           // not use the tau modification in all cases
           learner.isUseTauALLCases = false;
-          learner.applying(modelsBuff, dataFVinDoc, totalNumFeatures,
-            numClasses);
+          // set the multi class number and allocate the memory
+          for(int i = 0; i < dataFVinDoc.getNumTrainingDocs(); ++i)
+            for(int j = 0; j < dataFVinDoc.trainingFVinDoc[i].getNumInstances(); ++j) {
+              dataFVinDoc.labelsFVDoc[i].multiLabels[j] = new LabelsOfFV(numClasses);
+              dataFVinDoc.labelsFVDoc[i].multiLabels[j].probs = new float[numClasses];
+            }
+
+          // for each class
+          for(int iClass = 0; iClass < numClasses; ++iClass) {
+            learner.applying(modelsBuff, dataFVinDoc, totalNumFeatures,
+                    iClass);
+          }
           PostProcessing postProc = new PostProcessing();
           // Get the number of classes of the problem, since the numClasses
           // refers to the number
