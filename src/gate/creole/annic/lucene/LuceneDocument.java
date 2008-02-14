@@ -90,8 +90,14 @@ public class LuceneDocument {
       // provided any annotation sets to exclude
       // if so, we need to index all annotation sets but provided in the
       // annotationsetstoexclude list
-      for(String setName : (Set<String>)gateDoc.getNamedAnnotationSets()
-              .keySet()) {
+
+      Set<String> namedAnnotSets = new HashSet<String>();
+      if(gateDoc.getNamedAnnotationSets() != null && gateDoc.getNamedAnnotationSets().keySet() != null) {
+        namedAnnotSets = gateDoc.getNamedAnnotationSets().keySet();
+      } 
+      
+      
+      for(String setName : namedAnnotSets) {
         if(annotSetsToExclude.contains(setName)) continue;
         annotSetsToIndex.add(setName);
       }
@@ -104,8 +110,12 @@ public class LuceneDocument {
       // if both annotation sets to include and annotation sets to
       // exclude are empty
       // we need to index all annotation sets
-      for(String setName : (Set<String>)gateDoc.getNamedAnnotationSets()
-              .keySet()) {
+      Set<String> namedAnnotSets = new HashSet<String>();
+      if(gateDoc.getNamedAnnotationSets() != null && gateDoc.getNamedAnnotationSets().keySet() != null) {
+        namedAnnotSets = gateDoc.getNamedAnnotationSets().keySet();
+      } 
+      
+      for(String setName : namedAnnotSets) {
         annotSetsToIndex.add(setName);
       }
       annotSetsToIndex.add(Constants.DEFAULT_ANNOTATION_SET_NAME);
