@@ -100,6 +100,7 @@ public class StatsCalculator {
         Integer freq = (Integer)firstTermPositions[4].get(index);
         size += freq.intValue();
       }
+      return size;
     }
     catch(IOException ioe) {
       throw new SearchException(ioe);
@@ -107,8 +108,6 @@ public class StatsCalculator {
     finally {
       searcher.initializeTermPositions();
     }
-
-    return 0;
   }
 
   /**
