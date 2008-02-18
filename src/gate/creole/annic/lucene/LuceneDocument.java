@@ -758,12 +758,21 @@ public class LuceneDocument {
 
           String text1 = (String)tempText.toString();
           // we need to qualify the type names
+          // for each annotation type feature we add AT.Feature=="*" to be able to search for it
+          // to calculate stats
+          
           Token tempToken = new Token(text1, startOffset, endOffset, type + "."
                   + type1);
           indexedFeatures.add(type + "." + type1);
           tempToken.setPositionIncrement(0);
           tempToken.setPosition(position);
           newTokens.add(tempToken);
+          
+          Token onlyATFeature = new Token(type+"."+type1, startOffset, endOffset, "**");
+          onlyATFeature.setPosition(position);
+          onlyATFeature.setPositionIncrement(0);
+          newTokens.add(onlyATFeature);
+          
         }
       }
       toReturn[counter] = newTokens;

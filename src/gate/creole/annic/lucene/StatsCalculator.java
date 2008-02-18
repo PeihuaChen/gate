@@ -42,8 +42,12 @@ public class StatsCalculator {
 
       // term that contains a value to be searched in the index
       Term term = null;
-      if(featureName == null || value == null) {
+      if(featureName == null && value == null) {
         term = new Term("contents", annotationType, "*");
+      } else if(featureName != null && value == null) {
+        term = new Term("contents", annotationType+"."+featureName, "**");
+      } else if(featureName == null) {
+        throw new SearchException("FeatureName cannot be null");
       }
       else {
         term = new Term("contents", value, annotationType + "." + featureName);
@@ -129,5 +133,27 @@ public class StatsCalculator {
 
     return freq(searcher, corpusToSearchIn, annotationSetToSearchIn,
             annotationType, null, null);
+  }
+
+  /**
+   * Allows retriving frequencies for the given parameters.
+   * Please make sure that you close the searcher on your own. Failing
+   * to do so may result into many files being opened at the same time
+   * and that can cause the problem with your OS.
+   * 
+   * @param searcher
+   * @param corpusToSearchIn
+   * @param annotationSetToSearchIn
+   * @param annotationType
+   * @param featureName
+   * @return
+   * @throws SearchException
+   */
+  public static int freq(IndexSearcher searcher, String corpusToSearchIn,
+          String annotationSetToSearchIn, String annotationType, String featureName)
+          throws SearchException {
+
+    return freq(searcher, corpusToSearchIn, annotationSetToSearchIn,
+            annotationType, featureName, null);
   }
 }

@@ -1015,6 +1015,8 @@ public class LuceneSearchThread {
             patternGateAnnotations.add(ga);
           }
           continue;
+        } else if(type.equals("**")) {
+          continue;
         }
 
         // and from here all are the features
