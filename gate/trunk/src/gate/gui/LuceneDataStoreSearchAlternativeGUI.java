@@ -269,7 +269,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
    * data.
    */
   private String[][] annotationRows =
-    new String[maxAnnotationRows][columnNames.length];
+    new String[maxAnnotationRows+1][columnNames.length];
 
   private AnnotationRowsManagerTableModel annotationRowsManagerTableModel;
   /**
@@ -295,7 +295,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     thisInstance = this;
     corpusIds = new ArrayList<Object>();
     populatedAnnotationTypesAndFeatures = new HashMap<String, Set<String>>();
-    for (int row = 0; row < maxAnnotationRows; row++) {
+    for (int row = 0; row <= maxAnnotationRows; row++) {
       annotationRows[row][DISPLAY] = "true";
       annotationRows[row][SHORTCUT] = "";
       annotationRows[row][ANNOTATION_TYPE] = "";
@@ -314,7 +314,8 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       String[] rows = annotationRowsString.split("\\], \\[");
       numAnnotationRows = 0;
       if (annotationRowsString.length() > 0) {
-        for (int row = 0; row < rows.length; row++) {
+        for (int row = 0; row < rows.length
+             && row < maxAnnotationRows; row++) {
           String[] cols = rows[row].split(", ");
           if (cols.length == columnNames.length) {
             // skip the data if incorrect format
@@ -623,14 +624,11 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 
       public void mousePressed(MouseEvent me) {
         if(SwingUtilities.isRightMouseButton(me)) {
-          // if yes show the option to delete
           mousePopup = new JPopupMenu();
-//          JButton delete = new JButton("Delete");
           menuItem = new JMenuItem("Remove the selected result");
-          if(patternTable.getSelectedRowCount()>1) {
+          if(patternTable.getSelectedRowCount() > 1) {
             menuItem.setText(menuItem.getText()+"s");
           }
-  //        popup.add(delete);
           mousePopup.add(menuItem);
           menuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
@@ -645,14 +643,12 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
                 patterns.remove(rows[i]);
               }
               patternsTableModel.fireTableDataChanged();
-              // and finally update the table
-//              updateCentralView();
               mousePopup.setVisible(false);
             }
           });
           if(patternTable.getSelectedRowCount() == 1
           && target instanceof LuceneDataStoreImpl) {
-          menuItem = new JMenuItem("Open the document");
+          menuItem = new JMenuItem("Open the selected document");
           menuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
               int row =
@@ -696,10 +692,8 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     patternTable.getSelectionModel().addListSelectionListener(
             new javax.swing.event.ListSelectionListener() {
               public void valueChanged(javax.swing.event.ListSelectionEvent e) {
-//                System.out.println("e.getFirstIndex() ="+e.getFirstIndex()+", e.getLastIndex() = "+e.getLastIndex());
                 if (!e.getValueIsAdjusting()
-                  && e.getFirstIndex() != -1
-                  && patternTable.getRowCount() > 0) {
+                  && patternTable.getSelectedRows().length == 1) {
                   updateCentralView();
                 }
               }
@@ -761,16 +755,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     // if target itself is null, we don't want to update anything
     if (target == null) { return; }
 
-//    Hit[] pats = searcher.getHits();
-//    if (patterns == null) {
-//      patterns = new ArrayList<Hit>();
-//    }
-//    patterns.clear();
     Collections.addAll(patterns, searcher.getHits());
-//    for (int m = 0; m < pats.length; m++) {
-//      patterns.add(pats[m]);
-//    }
-//    pats = null;
 
     // update the table of results
     patternsTableModel.fireTableDataChanged();
@@ -785,21 +770,42 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         } while (row >= 0);
         // from the query display all the existing annotationRows
         // that are not already displayed
-        Matcher matcher = java.util.regex.Pattern
-          .compile("\\{([^\\{\\}=]+)[=\\}]").matcher(query);
-        String type, feature;
+        Matcher matcher = java.util.regex.Pattern.compile(
+          "\\{" // first condition
+          +"([^\\{\\}=,.]+)" // annotation type or shortcut (1)
+          +"(?:(?:\\.([^=]+)==\"([^\\}\"]+)\")" // feature (2), value (3)
+          +"|(?:==([^\\}]+)))?" // value of a shortcut (4)
+          +"(?:, ?" // second condition
+          +"([^\\{\\}=,.]+)" // annotation type or shortcut (5)
+          +"(?:(?:\\.([^=]+)==\"([^\\}\"]+)\")" // feature (6), value (7)
+          +"|(?:==([^\\}]+)))?)?" // value of a shortcut (8)
+          +"\\}").matcher(query);
         while (matcher.find()) {
-          if (matcher.group(1).contains(".")) {
-            type = matcher.group(1).substring(0, matcher.group(1).indexOf("."));
-            feature = matcher.group(1).substring(matcher.group(1).indexOf(".")+1);
-          } else {
-            type = matcher.group(1);
+          for (int i = 0; i <= 4; i += 4) { // first then second condition
+          String type = null, feature = null, shortcut = null; row = -1;
+          if (matcher.group(1+i) != null
+           && matcher.group(2+i) == null
+           && matcher.group(3+i) == null
+           && matcher.group(4+i) == null) {
+            type = matcher.group(1+i);
             feature = "";
+            row = findAnnotationRow(ANNOTATION_TYPE, type, FEATURE, feature);
+          } else if (matcher.group(1+i) != null
+                  && matcher.group(2+i) == null
+                  && matcher.group(3+i) == null) {
+            shortcut = matcher.group(1+i);
+            row = findAnnotationRow(SHORTCUT, shortcut);
+          } else if (matcher.group(1+i) != null
+                  && matcher.group(2+i) != null
+                  && matcher.group(4+i) == null) {
+            type = matcher.group(1+i);
+            feature = matcher.group(2+i);
+            row = findAnnotationRow(ANNOTATION_TYPE, type, FEATURE, feature);
           }
-          row = findAnnotationRow(ANNOTATION_TYPE, type, FEATURE, feature);
           if (row >= 0) {
             annotationRows[row][DISPLAY] = "true";
-          } else {
+          } else if (type != null && feature != null
+                  && numAnnotationRows < maxAnnotationRows) {
             annotationRows[numAnnotationRows][DISPLAY] = "one time";
             annotationRows[numAnnotationRows][SHORTCUT] = "";
             annotationRows[numAnnotationRows][ANNOTATION_TYPE] = type;
@@ -807,12 +813,13 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
             annotationRows[numAnnotationRows][CROP] = "Crop end";
             numAnnotationRows++;
           }
+          }
         }
         annotationRowsManagerTableModel.fireTableDataChanged();
         annotationRowsManager.pack();
       }
       patternTable.setRowSelectionInterval(0, 0);
-//      updateCentralView();
+      updateCentralView();
       exportResultsAction.setEnabled(true);
 
     } else if (queryTextField.getText().trim().length() < 1) {
@@ -840,9 +847,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         }
       }
       gbc.insets = new Insets(20, 0, 0, 0);
-//        if (corpusToSearchIn.getItemCount() == 1) {
-//          centerPanel.add(new JTextArea("Your Datastore seems empty, please add some document or corpus."), gbc);
-//        } else {
       centerPanel.add(new JTextArea(
         "Here are the different type of queries you can use:\n"+
         "1. String, ex. the\n"+
@@ -857,18 +861,16 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         "ANNIC supports two operators, + and *, to specify the number of times a particular annotation or a sub query should appear in the main query.\n"+
         "Here, ({A})+n means one and up to n occurrences of annotation {A} and ({A})*n means zero or up to n occurrences of annotation {A}.\n"),
         gbc);
-//        }
       centerPanel.updateUI();
       exportResultsAction.setEnabled(false);
     }
   }
-//int updateCentralViewCount = 0;
+
   /**
    * Updates the central view of annotation rows when the user changes
    * his/her selection of pattern in the patternTable.
    */
   protected void updateCentralView() {
-//    System.out.println("\nupdateCentralView "+updateCentralViewCount++);
     // maximum number of columns to display, i.e. maximum number of characters
     int maxColumns = 150;
     // maximum length of a feature value displayed
@@ -910,13 +912,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
     centerPanel.add(labelTitle, gbc);
     gbc.insets = new java.awt.Insets(10, 0, 10, 0);
 
-//    PatternAnnotation[] baseUnitPatternAnnotations =
-//      pattern.getPatternAnnotations((String)((LuceneDataStoreImpl)target)
-//      .getIndexer().getParameters().get(Constants.BASE_TOKEN_ANNOTATION_TYPE),
-//      "string");
-//    int BaseUnitNum = 0;
-//    String baseUnit =
-//      ((PatternAnnotation)baseUnitPatternAnnotations[BaseUnitNum]).getText();
     int startOffsetPattern =
       pattern.getStartOffset() - pattern.getLeftContextStartOffset();
     int endOffsetPattern =
@@ -958,29 +953,15 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       }
       label.setOpaque(true);
 
-      // add a mouse listener that modify the query
-//      if (((PatternAnnotation)baseUnitPatternAnnotations[BaseUnitNum])
-//           .getEndOffset() - pattern.getLeftContextStartOffset() < charNum) {
-//        BaseUnitNum++;
-//        // get the next base token unit
-//        baseUnit = ((PatternAnnotation)
-//                baseUnitPatternAnnotations[BaseUnitNum]).getText();
-//      }
       // get the word from which belongs the current character charNum
       int start = pattern.getPatternText().lastIndexOf(" ", charNum);
       int end = pattern.getPatternText().indexOf(" ", charNum);
       String word = pattern.getPatternText().substring(
-              (start==-1)?0:start,
-              (end==-1)?pattern.getPatternText().length():end);
-      label.addMouseListener(
-              new AddAnnotationRowInQueryMouseInputListener(
-//                      (gbc.gridx < startOffsetPattern)?
-//                      AddAnnotationRowInQueryMouseInputListener.LEFT:
-//                        (gbc.gridx > endOffsetPattern)?
-//                        AddAnnotationRowInQueryMouseInputListener.RIGHT:
-                        AddAnnotationRowInQueryMouseInputListener.CENTER,
-//                        baseUnit));
-                           word));
+        (start==-1)?0:start,
+        (end==-1)?pattern.getPatternText().length():end);
+      // add a mouse listener that modify the query
+      label.addMouseListener(new AddAnnotationRowInQueryMouseInputListener(
+        AddAnnotationRowInQueryMouseInputListener.CENTER,word));
       centerPanel.add(label, gbc);
     }
 //    System.out.println(message+"\n");
@@ -1268,8 +1249,11 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         // of the choosen Annotation Set
         count = StatsCalculator.freq(searcher, corpusName,
           annotationSetName, annotationType);
-        gbc.gridy++;
+        gbc.gridwidth = 1;
+        gbc.insets = new Insets(0, 0, 0, 10);
         statisticsPanel.add(new JLabel(annotationType), gbc);
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.insets = new Insets(0, 0, 0, 0);
         statisticsPanel.add(new JLabel(String.valueOf(count)), gbc);
       }
     } catch(SearchException se) {
@@ -1985,8 +1969,8 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
                   null:(String)annotationSetsToSearchIn.getSelectedItem();
 
         mousePopup = new JPopupMenu();
-        menuItem = new JMenuItem("Statistics for {"
-          +type+"."+feature+"==\""+value+"\"}.");
+        menuItem = new JMenuItem("Statistics for "
+          +type+"."+feature+"==\""+value+"\".");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
             IndexSearcher searcher;
@@ -1997,9 +1981,11 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
               return;
             }
             GridBagConstraints gbc = new GridBagConstraints();
-            gbc.gridy = GridBagConstraints.RELATIVE;
-            statisticsPanel.add(new JLabel("{"+type+"."+feature+"==\""
-              +value+"\"}"), gbc);
+            JLabel label = new JLabel(type+"."+feature+"==\""+value+"\"");
+            label.setToolTipText("Corpus: "+corpusName
+              +", Annotation Set: "+annotationSetName);
+            gbc.insets = new Insets(0, 0, 0, 10);
+            statisticsPanel.add(label, gbc);
             int count;
             try { // retrieves the number of occurrences
               count = StatsCalculator.freq(searcher, corpusName,
@@ -2014,34 +2000,39 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
               ioe.printStackTrace();
               return;
             }
+            gbc.gridwidth = GridBagConstraints.REMAINDER;
+            gbc.insets = new Insets(0, 0, 0, 0);
             statisticsPanel.add(new JLabel(String.valueOf(count)), gbc);
           }
         });
         mousePopup.add(menuItem);
 
-        menuItem = new JMenuItem("Statistics for {"
-                +type+"."+feature+"==\""+value+"\"} matching the query.");
-              menuItem.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent ie) {
-                  IndexSearcher searcher;
-                  // use the searcher of the last query
-                  searcher = (IndexSearcher)thisInstance.searcher;
-                  GridBagConstraints gbc = new GridBagConstraints();
-                  gbc.gridy = GridBagConstraints.RELATIVE;
-                  statisticsPanel.add(new JLabel("{"+type+"."+feature+"==\""
-                    +value+"\"}"+" (matching query)"), gbc);
-                  int count;
-                  try { // retrieves the number of occurrences
-                    count = StatsCalculator.freq(searcher, corpusName,
-                      annotationSetName, type, feature, text);
-                  } catch(SearchException se) {
-                    se.printStackTrace();
-                    return;
-                  }
-                  statisticsPanel.add(new JLabel(String.valueOf(count)), gbc);
-                }
-              });
-              mousePopup.add(menuItem);
+//        menuItem = new JMenuItem("Statistics for "
+//                +type+"."+feature+"==\""+value+"\" matching the query.");
+//        menuItem.addActionListener(new ActionListener() {
+//          public void actionPerformed(ActionEvent ie) {
+//            IndexSearcher searcher;
+//            // use the searcher of the last query
+//            searcher = (IndexSearcher)thisInstance.searcher;
+//            GridBagConstraints gbc = new GridBagConstraints();
+//            gbc.insets = new Insets(0, 0, 0, 10);
+//            statisticsPanel.add(new JLabel(type+"."+feature+"==\""
+//              +value+"\""+" (matching query)"), gbc);
+//            int count;
+//            try { // retrieves the number of occurrences
+//              count = StatsCalculator.freq(searcher, corpusName,
+//                annotationSetName, type, feature, text);
+//            } catch(SearchException se) {
+//              se.printStackTrace();
+//              return;
+//            }
+//            gbc.gridwidth = GridBagConstraints.REMAINDER;
+//            gbc.insets = new Insets(0, 0, 0, 0);
+//            statisticsPanel.add(new JLabel(String.valueOf(count)), gbc);
+//          }
+//        });
+//        mousePopup.add(menuItem);
+
         showPopup(me);
       }
     }
@@ -2203,7 +2194,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         }
         public void actionPerformed(ActionEvent e) {
           fireEditingStopped();
-//          updateCentralView();
         }
         public Object getCellEditorValue() {
           return (checkBox.isSelected())?"true":"false";
@@ -2329,7 +2319,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
             boolean hasFocus, int row, int col) {
             JButton button = new JButton();
             button.setHorizontalAlignment(SwingConstants.CENTER);
-            if (row == table.getRowCount()-1) {
+            if (row == numAnnotationRows) {
               // add button if it's the last row of the table
               button.setIcon(MainFrame.getIcon("add.gif"));
               button.setToolTipText("Click to add this line.");
@@ -2356,16 +2346,23 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
         public void actionPerformed(ActionEvent e) {
           if (addButton) {
             if (annotationRows[row][ANNOTATION_TYPE] != null
-                    && !annotationRows[row][ANNOTATION_TYPE].equals("")) {
-              // add a new row
-              numAnnotationRows++;
-              annotationRowsManagerTableModel.fireTableRowsInserted(row, row+1);
-              annotationRowsManager.pack();
-              updateCentralView();
+             && !annotationRows[row][ANNOTATION_TYPE].equals("")) {
+              if (numAnnotationRows == maxAnnotationRows) {
+                JOptionPane.showMessageDialog(annotationRowsManager,
+                  "The number of rows is limited to "+maxAnnotationRows+".",
+                  "Alert", JOptionPane.ERROR_MESSAGE);
+              } else {
+                // add a new row
+                numAnnotationRows++;
+                annotationRowsManagerTableModel
+                  .fireTableRowsInserted(row, row+1);
+                annotationRowsManager.pack();
+                updateCentralView();
+              }
             } else {
               JOptionPane.showMessageDialog(annotationRowsManager,
-                      "Please, fill the Annotation type column at least.",
-                      "Alert", JOptionPane.ERROR_MESSAGE);
+                "Please, fill the Annotation type column at least.",
+                "Alert", JOptionPane.ERROR_MESSAGE);
             }
           } else {
             // delete a row
@@ -2409,7 +2406,7 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 
     // plus one to let the user adding a new row
     public int getRowCount() {
-      return numAnnotationRows+1;
+      return Math.min(numAnnotationRows+1, maxAnnotationRows+1);
     }
 
     // plus one for the add/remove column
@@ -3299,7 +3296,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
       this.searcher = ((LuceneDataStoreImpl)this.target).getSearcher();
       allPatterns.setEnabled(true);
 
-//      System.out.println("setTarget");
       updateAnnotationSetsTypesFeatures();
 
       try {
@@ -3418,7 +3414,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
    */
   public void resourceAdopted(DatastoreEvent de) {
     // don't want to do anything here
-//    System.out.println("resourceAdopted");
   }
 
   /**
@@ -3448,7 +3443,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 //        }
 //      });
     }
-//    System.out.println("resourceDeleted");
     updateAnnotationSetsTypesFeatures();
   }
 
@@ -3472,7 +3466,6 @@ public class LuceneDataStoreSearchAlternativeGUI extends AbstractVisualResource
 //        });
       }
     }
-//    System.out.println("resourceWritten");
     updateAnnotationSetsTypesFeatures();
   }
 
