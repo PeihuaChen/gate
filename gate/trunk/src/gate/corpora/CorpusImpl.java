@@ -16,6 +16,7 @@
 package gate.corpora;
 
 import java.io.*;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
@@ -26,30 +27,31 @@ import gate.event.*;
 import gate.util.Err;
 import gate.util.Strings;
 
-/** Corpora are sets of Document. They are ordered by lexicographic collation
-  * on Url.
-  */
-public class CorpusImpl extends AbstractLanguageResource
-                        implements Corpus, CreoleListener {
+/**
+ * Corpora are sets of Document. They are ordered by lexicographic
+ * collation on Url.
+ */
+public class CorpusImpl extends AbstractLanguageResource implements Corpus,
+                                                        CreoleListener {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  public CorpusImpl(){
+  public CorpusImpl() {
     supportList = Collections.synchronizedList(new VerboseList());
     Gate.getCreoleRegister().addCreoleListener(this);
   }
 
-
   /**
    * Gets the names of the documents in this corpus.
-   * @return a {@link List} of Strings representing the names of the documents
-   * in this corpus.
+   * 
+   * @return a {@link List} of Strings representing the names of the
+   *         documents in this corpus.
    */
-  public List getDocumentNames(){
+  public List getDocumentNames() {
     ArrayList res = new ArrayList(supportList.size());
     Iterator docIter = supportList.iterator();
-    while(docIter.hasNext()){
+    while(docIter.hasNext()) {
       res.add(((Document)docIter.next()).getName());
     }
     return res;
@@ -57,11 +59,12 @@ public class CorpusImpl extends AbstractLanguageResource
 
   /**
    * Gets the name of a document in this corpus.
+   * 
    * @param index the index of the document
    * @return a String value representing the name of the document at
-   * <tt>index</tt> in this corpus.
+   *         <tt>index</tt> in this corpus.
    */
-  public String getDocumentName(int index){
+  public String getDocumentName(int index) {
     return ((Document)supportList.get(index)).getName();
   }
 
@@ -73,82 +76,70 @@ public class CorpusImpl extends AbstractLanguageResource
     return;
   }
 
-
   /**
    * The underlying list that holds the documents in this corpus.
    */
   protected List supportList = null;
 
   /**
-   * A proxy list that stores the actual data in an internal list and forwards
-   * all operations to that one but it also fires the appropiate corpus events
-   * when necessary.
-   * It also does some type checking so only Documents are accepted as corpus
-   * members.
+   * A proxy list that stores the actual data in an internal list and
+   * forwards all operations to that one but it also fires the
+   * appropiate corpus events when necessary. It also does some type
+   * checking so only Documents are accepted as corpus members.
    */
-  protected class VerboseList extends AbstractList implements Serializable{
+  protected class VerboseList extends AbstractList implements Serializable {
 
-
-
-    VerboseList(){
+    VerboseList() {
       data = new ArrayList();
     }
 
-    public Object get(int index){
+    public Object get(int index) {
       return data.get(index);
     }
 
-    public int size(){
+    public int size() {
       return data.size();
     }
 
-    public Object set(int index, Object element){
-      if(element instanceof Document){
+    public Object set(int index, Object element) {
+      if(element instanceof Document) {
         Document oldDoc = (Document)data.set(index, element);
         Document newDoc = (Document)element;
 
-        //fire the 2 events
-        fireDocumentRemoved(new CorpusEvent(CorpusImpl.this,
-                                            oldDoc,
-                                            index,
-                                            CorpusEvent.DOCUMENT_REMOVED));
-        fireDocumentAdded(new CorpusEvent(CorpusImpl.this,
-                                          newDoc,
-                                          index,
-                                          CorpusEvent.DOCUMENT_ADDED));
+        // fire the 2 events
+        fireDocumentRemoved(new CorpusEvent(CorpusImpl.this, oldDoc, index,
+                CorpusEvent.DOCUMENT_REMOVED));
+        fireDocumentAdded(new CorpusEvent(CorpusImpl.this, newDoc, index,
+                CorpusEvent.DOCUMENT_ADDED));
         return oldDoc;
-      }else{
-        throw new UnsupportedOperationException(
-          getClass().getName() +
-          " only accepts gate.Document values as members!\n" +
-          element.getClass().getName() + " is not a gate.Document");
+      }
+      else {
+        throw new UnsupportedOperationException(getClass().getName()
+                + " only accepts gate.Document values as members!\n"
+                + element.getClass().getName() + " is not a gate.Document");
       }
     }
 
-    public void add(int index, Object element){
-      if(element instanceof Document){
+    public void add(int index, Object element) {
+      if(element instanceof Document) {
         data.add(index, element);
 
-        //fire the event
-        fireDocumentAdded(new CorpusEvent(CorpusImpl.this,
-                                          (Document)element,
-                                          index,
-                                          CorpusEvent.DOCUMENT_ADDED));
-      }else{
-        throw new UnsupportedOperationException(
-          getClass().getName() +
-          " only accepts gate.Document values as members!\n" +
-          element.getClass().getName() + " is not a gate.Document");
+        // fire the event
+        fireDocumentAdded(new CorpusEvent(CorpusImpl.this, (Document)element,
+                index, CorpusEvent.DOCUMENT_ADDED));
+      }
+      else {
+        throw new UnsupportedOperationException(getClass().getName()
+                + " only accepts gate.Document values as members!\n"
+                + element.getClass().getName() + " is not a gate.Document");
       }
     }
 
-    public Object remove(int index){
+    public Object remove(int index) {
       Document oldDoc = (Document)data.remove(index);
 
-      fireDocumentRemoved(new CorpusEvent(CorpusImpl.this,
-                                          oldDoc,
-                                          index,
-                                          CorpusEvent.DOCUMENT_REMOVED));
+      fireDocumentRemoved(new CorpusEvent(CorpusImpl.this, oldDoc, index,
+              CorpusEvent.DOCUMENT_REMOVED));
       return oldDoc;
     }
 
@@ -159,22 +150,20 @@ public class CorpusImpl extends AbstractLanguageResource
   }
 
   /**
-   * This method returns true when the document is already loaded in memory
+   * This method returns true when the document is already loaded in
+   * memory
    */
   public boolean isDocumentLoaded(int index) {
     return true;
   }
 
-
   protected void clearDocList() {
-    if (supportList == null)
-      return;
+    if(supportList == null) return;
     supportList.clear();
   }
 
-
-  //List methods
-  //java docs will be automatically copied from the List interface.
+  // List methods
+  // java docs will be automatically copied from the List interface.
 
   public int size() {
     return supportList.size();
@@ -184,232 +173,371 @@ public class CorpusImpl extends AbstractLanguageResource
     return supportList.isEmpty();
   }
 
-  public boolean contains(Object o){
+  public boolean contains(Object o) {
     return supportList.contains(o);
   }
 
-  public Iterator iterator(){
+  public Iterator iterator() {
     return supportList.iterator();
   }
 
-  public Object[] toArray(){
+  public Object[] toArray() {
     return supportList.toArray();
   }
 
-  public Object[] toArray(Object[] a){
+  public Object[] toArray(Object[] a) {
     return supportList.toArray(a);
   }
 
-  public boolean add(Object o){
+  public boolean add(Object o) {
     return supportList.add(o);
   }
 
-  public boolean remove(Object o){
+  public boolean remove(Object o) {
     return supportList.remove(o);
   }
 
-  public boolean containsAll(Collection c){
+  public boolean containsAll(Collection c) {
     return supportList.containsAll(c);
   }
 
-  public boolean addAll(Collection c){
+  public boolean addAll(Collection c) {
     return supportList.addAll(c);
   }
 
-  public boolean addAll(int index, Collection c){
+  public boolean addAll(int index, Collection c) {
     return supportList.addAll(index, c);
   }
 
-  public boolean removeAll(Collection c){
+  public boolean removeAll(Collection c) {
     return supportList.removeAll(c);
   }
 
-  public boolean retainAll(Collection c){
+  public boolean retainAll(Collection c) {
     return supportList.retainAll(c);
   }
 
-  public void clear(){
+  public void clear() {
     supportList.clear();
   }
 
-  public boolean equals(Object o){
-    if (! (o instanceof CorpusImpl))
-      return false;
+  public boolean equals(Object o) {
+    if(!(o instanceof CorpusImpl)) return false;
 
     return supportList.equals(o);
   }
 
-  public int hashCode(){
+  public int hashCode() {
     return supportList.hashCode();
   }
 
-  public Object get(int index){
+  public Object get(int index) {
     return supportList.get(index);
   }
 
-  public Object set(int index, Object element){
+  public Object set(int index, Object element) {
     return supportList.set(index, element);
   }
 
-  public void add(int index, Object element){
+  public void add(int index, Object element) {
     supportList.add(index, element);
   }
 
-  public Object remove(int index){
+  public Object remove(int index) {
     return supportList.remove(index);
   }
 
-  public int indexOf(Object o){
+  public int indexOf(Object o) {
     return supportList.indexOf(o);
   }
 
-  public int lastIndexOf(Object o){
+  public int lastIndexOf(Object o) {
     return lastIndexOf(o);
   }
 
-  public ListIterator listIterator(){
+  public ListIterator listIterator() {
     return supportList.listIterator();
   }
 
-  public ListIterator listIterator(int index){
+  public ListIterator listIterator(int index) {
     return supportList.listIterator(index);
   }
 
-  public List subList(int fromIndex, int toIndex){
+  public List subList(int fromIndex, int toIndex) {
     return supportList.subList(fromIndex, toIndex);
   }
 
-
   /** Construction */
 
-  public void cleanup(){
+  public void cleanup() {
     Gate.getCreoleRegister().removeCreoleListener(this);
   }
 
   /** Initialise this resource, and return it. */
   public Resource init() {
-    if(documentsList != null && !documentsList.isEmpty()){
+    if(documentsList != null && !documentsList.isEmpty()) {
       addAll(documentsList);
     }
     return this;
   } // init()
 
-
   /**
-   * Fills the provided corpus with documents created on the fly from selected
-   * files in a directory. Uses a {@link FileFilter} to select which files will
-   * be used and which will be ignored.
-   * A simple file filter based on extensions is provided in the Gate
-   * distribution ({@link gate.util.ExtensionFileFilter}).
+   * Fills the provided corpus with documents created on the fly from
+   * selected files in a directory. Uses a {@link FileFilter} to select
+   * which files will be used and which will be ignored. A simple file
+   * filter based on extensions is provided in the Gate distribution ({@link gate.util.ExtensionFileFilter}).
+   * 
    * @param corpus the corpus to be populated
-   * @param directory the directory from which the files will be picked. This
-   * parameter is an URL for uniformity. It needs to be a URL of type file
-   * otherwise an InvalidArgumentException will be thrown.
+   * @param directory the directory from which the files will be picked.
+   *          This parameter is an URL for uniformity. It needs to be a
+   *          URL of type file otherwise an InvalidArgumentException
+   *          will be thrown.
    * @param filter the file filter used to select files from the target
-   * directory. If the filter is <tt>null</tt> all the files will be accepted.
+   *          directory. If the filter is <tt>null</tt> all the files
+   *          will be accepted.
    * @param encoding the encoding to be used for reading the documents
-   * @param recurseDirectories should the directory be parsed recursively?. If
-   * <tt>true</tt> all the files from the provided directory and all its
-   * children directories (on as many levels as necessary) will be picked if
-   * accepted by the filter otherwise the children directories will be ignored.
+   * @param recurseDirectories should the directory be parsed
+   *          recursively?. If <tt>true</tt> all the files from the
+   *          provided directory and all its children directories (on as
+   *          many levels as necessary) will be picked if accepted by
+   *          the filter otherwise the children directories will be
+   *          ignored.
    */
   public static void populate(Corpus corpus, URL directory, FileFilter filter,
-                              String encoding, boolean recurseDirectories)
-                     throws IOException {
-    //check input
+          String encoding, boolean recurseDirectories) throws IOException {
+    // check input
     if(!directory.getProtocol().equalsIgnoreCase("file"))
       throw new IllegalArgumentException(
-        "The URL provided is not of type \"file:\"!");
+              "The URL provided is not of type \"file:\"!");
 
     File dir = new File(directory.getPath());
-    if(!dir.exists())
-      throw new FileNotFoundException(dir.toString());
+    if(!dir.exists()) throw new FileNotFoundException(dir.toString());
 
     if(!dir.isDirectory())
-      throw new IllegalArgumentException(
-        dir.getAbsolutePath() + " is not a directory!");
+      throw new IllegalArgumentException(dir.getAbsolutePath()
+              + " is not a directory!");
 
-    //populate the corpus
+    // populate the corpus
     File[] files = dir.listFiles(filter);
-    if(files != null){
-      for(int i = 0; i < files.length; i++){
+    if(files != null) {
+      for(int i = 0; i < files.length; i++) {
         File aFile = files[i];
-        if(aFile.isDirectory()){
-          //recurse dir if required
-          if(recurseDirectories){
-            populate(corpus, aFile.toURI().toURL(), filter,
-                     encoding, recurseDirectories);
+        if(aFile.isDirectory()) {
+          // recurse dir if required
+          if(recurseDirectories) {
+            populate(corpus, aFile.toURI().toURL(), filter, encoding,
+                    recurseDirectories);
           }
-        }else{
-          //create the doc
-          StatusListener sListener = (StatusListener)
-                                     gate.gui.MainFrame.getListeners().
-                                     get("gate.event.StatusListener");
-          if(sListener != null) sListener.statusChanged(
-            "Reading: " + aFile.getName());
+        }
+        else {
+          // create the doc
+          StatusListener sListener = (StatusListener)gate.gui.MainFrame
+                  .getListeners().get("gate.event.StatusListener");
+          if(sListener != null)
+            sListener.statusChanged("Reading: " + aFile.getName());
           String docName = aFile.getName() + "_" + Gate.genSym();
           FeatureMap params = Factory.newFeatureMap();
-          params.put(Document.DOCUMENT_URL_PARAMETER_NAME, aFile.toURI().toURL());
+          params.put(Document.DOCUMENT_URL_PARAMETER_NAME, aFile.toURI()
+                  .toURL());
           if(encoding != null)
             params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, encoding);
 
           try {
-            Document doc = (Document)Factory.createResource(
-                DocumentImpl.class.getName(), params, null, docName
-              );
+            Document doc = (Document)Factory.createResource(DocumentImpl.class
+                    .getName(), params, null, docName);
             corpus.add(doc);
-            if(corpus.getLRPersistenceId() != null){
-              //persistent corpus -> unload the document
+            if(corpus.getLRPersistenceId() != null) {
+              // persistent corpus -> unload the document
               corpus.unloadDocument(doc);
               Factory.deleteResource(doc);
             }
-          } catch(Throwable t) {
+          }
+          catch(Throwable t) {
             String nl = Strings.getNl();
-            Err.prln(
-              "WARNING: Corpus.populate could not instantiate document" + nl +
-              "  Document name was: " + docName + nl +
-              "  Exception was: " + t + nl + nl
-            );
+            Err.prln("WARNING: Corpus.populate could not instantiate document"
+                    + nl + "  Document name was: " + docName + nl
+                    + "  Exception was: " + t + nl + nl);
             t.printStackTrace();
           }
-          if(sListener != null) sListener.statusChanged(
-            aFile.getName() + " read");
+          if(sListener != null)
+            sListener.statusChanged(aFile.getName() + " read");
         }
       }
     }
-  }//public static void populate
+  }// public static void populate
 
   /**
    * Fills this corpus with documents created from files in a directory.
+   * 
    * @param filter the file filter used to select files from the target
-   * directory. If the filter is <tt>null</tt> all the files will be accepted.
-   * @param directory the directory from which the files will be picked. This
-   * parameter is an URL for uniformity. It needs to be a URL of type file
-   * otherwise an InvalidArgumentException will be thrown.
-   * An implementation for this method is provided as a static method at
-   * {@link gate.corpora.CorpusImpl#populate(Corpus, URL, FileFilter, String, boolean)}.
+   *          directory. If the filter is <tt>null</tt> all the files
+   *          will be accepted.
+   * @param directory the directory from which the files will be picked.
+   *          This parameter is an URL for uniformity. It needs to be a
+   *          URL of type file otherwise an InvalidArgumentException
+   *          will be thrown. An implementation for this method is
+   *          provided as a static method at
+   *          {@link gate.corpora.CorpusImpl#populate(Corpus, URL, FileFilter, String, boolean)}.
    * @param encoding the encoding to be used for reading the documents
-   * @param recurseDirectories should the directory be parsed recursively?. If
-   * <tt>true</tt> all the files from the provided directory and all its
-   * children directories (on as many levels as necessary) will be picked if
-   * accepted by the filter otherwise the children directories will be ignored.
+   * @param recurseDirectories should the directory be parsed
+   *          recursively?. If <tt>true</tt> all the files from the
+   *          provided directory and all its children directories (on as
+   *          many levels as necessary) will be picked if accepted by
+   *          the filter otherwise the children directories will be
+   *          ignored.
    */
   public void populate(URL directory, FileFilter filter, String encoding,
-                       boolean recurseDirectories)
-              throws IOException, ResourceInstantiationException{
+          boolean recurseDirectories) throws IOException,
+          ResourceInstantiationException {
     populate(this, directory, filter, encoding, recurseDirectories);
   }
 
+  /**
+   * Fills the provided corpus with documents extracted from the
+   * provided trec file.
+   * 
+   * @param corpus the corpus to be populated.
+   * @param trecfile the trec file.
+   * @param encoding the encoding of the trec file.
+   */
+  public static void populate(Corpus corpus, URL trecFile, String encoding)
+          throws IOException {
+    File dir = null;
+    try {
+      dir = new File(trecFile.toURI());
+    }
+    catch(URISyntaxException use) {
+      throw new IOException(use.getMessage());
+    }
+
+    if(!dir.exists()) throw new FileNotFoundException(dir.toString());
+
+    if(dir.isDirectory())
+      throw new IllegalArgumentException(dir.getAbsolutePath()
+              + " is a directory!");
+
+    // we start a new document when we find <DOC> and close it when we
+    // find </DOC>
+    BufferedReader br = null;
+    try {
+      String encodingLine = null;
+      if(encoding != null && encoding.trim().length() != 0) {
+        br = new BufferedReader(new InputStreamReader(new FileInputStream(dir),
+                encoding), 10485760);
+        encodingLine = "<?xml version=\"1.0\" encoding=\"" + encoding + "\" ?>";
+      }
+      else {
+        br = new BufferedReader(new InputStreamReader(new FileInputStream(dir)), 10485760);
+        encodingLine = "<?xml version=\"1.0\" ?>";
+      }
+
+      String line = br.readLine();
+      String documentString = "";
+      boolean searchingForStartElement = true;
+      int count = 1;
+      while(line != null) {
+        if(searchingForStartElement) {
+          int index = line.indexOf("<DOC>");
+          if(index < 0) {
+            line = br.readLine();
+            continue;
+          }
+          else {
+            documentString = encodingLine + "\n" + line.substring(index) + "\n";
+            searchingForStartElement = false;
+            line = br.readLine();
+            continue;
+          }
+        }
+        else {
+          int index = line.indexOf("</DOC>");
+          if(index < 0) {
+            documentString += line + "\n";
+            line = br.readLine();
+            continue;
+          }
+          else {
+            documentString += line.substring(0, index + 6);
+            searchingForStartElement = true;
+
+            // here lets create a new document
+            // create the doc
+            StatusListener sListener = (StatusListener)gate.gui.MainFrame
+                    .getListeners().get("gate.event.StatusListener");
+            if(sListener != null)
+              sListener.statusChanged("Reading File Number :" + count);
+            String docName = "Trec_File_" + count + "_" + Gate.genSym();
+            FeatureMap params = Factory.newFeatureMap();
+            params.put(Document.DOCUMENT_STRING_CONTENT_PARAMETER_NAME,
+                    documentString);
+            if(encoding != null && encoding.trim().length() > 0)
+              params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, encoding);
+
+            try {
+              Document doc = (Document)Factory.createResource(
+                      DocumentImpl.class.getName(), params, null, docName);
+              count++;
+              corpus.add(doc);
+              if(corpus.getLRPersistenceId() != null) {
+                // persistent corpus -> unload the document
+                corpus.unloadDocument(doc);
+                Factory.deleteResource(doc);
+              }
+            }
+            catch(Throwable t) {
+              String nl = Strings.getNl();
+              Err
+                      .prln("WARNING: Corpus.populate could not instantiate document"
+                              + nl
+                              + "  Document name was: "
+                              + docName
+                              + nl
+                              + "  Exception was: " + t + nl + nl);
+              t.printStackTrace();
+            }
+            documentString = "";
+            if(sListener != null) sListener.statusChanged(docName + " read");
+
+            if(line.length() > index+7)
+              line = line.substring(index+6);
+            else 
+              line = br.readLine();
+            continue;
+          }
+        }
+      }
+    }
+    finally {
+      if(br != null) br.close();
+    }
+  }// public static void populate
+
+  /**
+   * Fills the provided corpus with documents extracted from the
+   * provided trec file.
+   * 
+   * @param trecfile the trec file.
+   * @param encoding the encoding of the trec file.
+   * @param isZip indicates if the provided file a zip file
+   */
+  public void populate(URL trecFile, String encoding) throws IOException,
+          ResourceInstantiationException {
+    populate(this, trecFile, encoding);
+  }
+
   public synchronized void removeCorpusListener(CorpusListener l) {
-    if (corpusListeners != null && corpusListeners.contains(l)) {
-      Vector v = (Vector) corpusListeners.clone();
+    if(corpusListeners != null && corpusListeners.contains(l)) {
+      Vector v = (Vector)corpusListeners.clone();
       v.removeElement(l);
       corpusListeners = v;
     }
   }
+
   public synchronized void addCorpusListener(CorpusListener l) {
-    Vector v = corpusListeners == null ? new Vector(2) : (Vector) corpusListeners.clone();
-    if (!v.contains(l)) {
+    Vector v = corpusListeners == null
+            ? new Vector(2)
+            : (Vector)corpusListeners.clone();
+    if(!v.contains(l)) {
       v.addElement(l);
       corpusListeners = v;
     }
@@ -417,50 +545,58 @@ public class CorpusImpl extends AbstractLanguageResource
 
   /** Freeze the serialization UID. */
   static final long serialVersionUID = -1113142759053898456L;
+
   private transient Vector corpusListeners;
+
   protected transient java.util.List documentsList;
 
-
   protected void fireDocumentAdded(CorpusEvent e) {
-    if (corpusListeners != null) {
+    if(corpusListeners != null) {
       Vector listeners = corpusListeners;
       int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((CorpusListener) listeners.elementAt(i)).documentAdded(e);
+      for(int i = 0; i < count; i++) {
+        ((CorpusListener)listeners.elementAt(i)).documentAdded(e);
       }
     }
   }
+
   protected void fireDocumentRemoved(CorpusEvent e) {
-    if (corpusListeners != null) {
+    if(corpusListeners != null) {
       Vector listeners = corpusListeners;
       int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((CorpusListener) listeners.elementAt(i)).documentRemoved(e);
+      for(int i = 0; i < count; i++) {
+        ((CorpusListener)listeners.elementAt(i)).documentRemoved(e);
       }
     }
   }
+
   public void setDocumentsList(java.util.List documentsList) {
     this.documentsList = documentsList;
   }
+
   public java.util.List getDocumentsList() {
     return documentsList;
   }
+
   public void resourceLoaded(CreoleEvent e) {
   }
+
   public void resourceUnloaded(CreoleEvent e) {
     Resource res = e.getResource();
-    //remove all occurences
-    if(res instanceof Document) while(contains(res)) remove(res);
+    // remove all occurences
+    if(res instanceof Document) while(contains(res))
+      remove(res);
   }
 
-  public void resourceRenamed(Resource resource, String oldName,
-                              String newName){
+  public void resourceRenamed(Resource resource, String oldName, String newName) {
   }
 
   public void datastoreOpened(CreoleEvent e) {
   }
+
   public void datastoreCreated(CreoleEvent e) {
   }
+
   public void datastoreClosed(CreoleEvent e) {
   }
 } // class CorpusImpl

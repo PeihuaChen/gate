@@ -316,8 +316,10 @@ public class NameBearerHandle implements Handle, StatusListener,
       else if(target instanceof Corpus) {
         staticPopupItems.add(null);
         corpusFiller = new CorpusFillerComponent();
+        trecWebFileInputDialog = new TrecWebFileInputDialog();
         staticPopupItems.add(new XJMenuItem(new PopulateCorpusAction(),
                 sListenerProxy));
+        staticPopupItems.add(new XJMenuItem(new PopulateCorpusWithTrecWebDataAction(), sListenerProxy));
         staticPopupItems.add(null);
         staticPopupItems.add(new XJMenuItem(new SaveCorpusAsXmlAction(false),
                 sListenerProxy));
@@ -500,7 +502,8 @@ public class NameBearerHandle implements Handle, StatusListener,
    * Component used to select the options for corpus populating
    */
   CorpusFillerComponent corpusFiller;
-
+  TrecWebFileInputDialog trecWebFileInputDialog;
+  
   StatusListener sListenerProxy;
 
   // File currentDir = null;
@@ -1310,6 +1313,81 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
   }
 
+  class PopulateCorpusWithTrecWebDataAction extends AbstractAction {
+    PopulateCorpusWithTrecWebDataAction() {
+      super("Populate With TrecWebData");
+      putValue(SHORT_DESCRIPTION,
+              "Fills this corpus by extracting documents from a big trecweb file");
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      Runnable runnable = new Runnable() {
+        public void run() {
+          trecWebFileInputDialog.setEncoding("");
+          boolean answer = OkCancelDialog.showDialog(getLargeView(),
+                  trecWebFileInputDialog, "Select a trecweb file");
+          if(answer) {
+            long startTime = System.currentTimeMillis();
+            URL url = null;
+            try {
+              url = new URL(trecWebFileInputDialog.getUrlString());
+              ((Corpus)target).populate(url, trecWebFileInputDialog.getEncoding()); 
+              if(((Corpus)target).getDataStore() != null) {
+                ((LanguageResource)target).getDataStore().sync(
+                      (LanguageResource)target);
+              }
+              
+              long endTime = System.currentTimeMillis();
+              fireStatusChanged("Corpus populated in "
+                      + NumberFormat.getInstance().format(
+                              (double)(endTime - startTime) / 1000)
+                      + " seconds!");
+
+            }
+            catch(MalformedURLException mue) {
+              JOptionPane.showMessageDialog(getLargeView(), "Invalid URL!\n "
+                      + "See \"Messages\" tab for details!", "GATE",
+                      JOptionPane.ERROR_MESSAGE);
+              mue.printStackTrace(Err.getPrintWriter());
+            }
+            catch(IOException ioe) {
+              JOptionPane.showMessageDialog(getLargeView(), "I/O error!\n "
+                      + "See \"Messages\" tab for details!", "GATE",
+                      JOptionPane.ERROR_MESSAGE);
+              ioe.printStackTrace(Err.getPrintWriter());
+            }
+            catch(ResourceInstantiationException rie) {
+              JOptionPane.showMessageDialog(getLargeView(),
+                      "Could not create document!\n "
+                              + "See \"Messages\" tab for details!", "GATE",
+                      JOptionPane.ERROR_MESSAGE);
+              rie.printStackTrace(Err.getPrintWriter());
+            }
+            catch(PersistenceException pe) {
+              JOptionPane.showMessageDialog(getLargeView(),
+                      "Corpus couldn't be synchronized!\n "
+                              + "See \"Messages\" tab for details!", "GATE",
+                      JOptionPane.ERROR_MESSAGE);
+              pe.printStackTrace(Err.getPrintWriter());
+            }
+            catch(SecurityException pe) {
+              JOptionPane.showMessageDialog(getLargeView(),
+                      "Corpus couldn't be synchronized!\n "
+                              + "See \"Messages\" tab for details!", "GATE",
+                      JOptionPane.ERROR_MESSAGE);
+              pe.printStackTrace(Err.getPrintWriter());
+            }
+          }
+        }
+      };
+      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+              runnable);
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
+    }
+  }
+  
+  
   class CreateIndexAction1 extends AbstractAction {
     CreateIndexAction1() {
       super("Create Index");
