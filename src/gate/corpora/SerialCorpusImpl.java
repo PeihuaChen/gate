@@ -303,6 +303,16 @@ public class SerialCorpusImpl extends
     CorpusImpl.populate(this, directory, filter, encoding, recurseDirectories);
   }
 
+  /**
+   * Fills the provided corpus with documents extracted from the provided trec file.
+   * @param trecfile the trec file.
+   * @param encoding the encoding of the trec file.
+   */
+  public void populate(URL trecFile, String encoding)
+              throws IOException, ResourceInstantiationException {
+    CorpusImpl.populate(this, trecFile, encoding);
+  }
+  
 
   public synchronized void removeCorpusListener(CorpusListener l) {
     if (corpusListeners != null && corpusListeners.contains(l)) {
