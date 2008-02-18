@@ -3,6 +3,9 @@ package gate.creole.annic.lucene;
 import java.io.*;
 import java.util.*;
 import gate.creole.annic.Constants;
+import gate.creole.annic.Hit;
+import gate.creole.annic.Pattern;
+import gate.creole.annic.PatternAnnotation;
 import gate.creole.annic.SearchException;
 import gate.creole.annic.apache.lucene.index.Term;
 import gate.creole.annic.apache.lucene.search.*;
@@ -10,10 +13,10 @@ import gate.creole.annic.apache.lucene.search.*;
 public class StatsCalculator {
 
   /**
-   * Allows retriving frequencies for the given parameters.
-   * Please make sure that you close the searcher on your own. Failing
-   * to do so may result into many files being opened at the same time
-   * and that can cause the problem with your OS.
+   * Allows retriving frequencies for the given parameters. Please make
+   * sure that you close the searcher on your own. Failing to do so may
+   * result into many files being opened at the same time and that can
+   * cause the problem with your OS.
    * 
    * @param searcher
    * @param corpusToSearchIn
@@ -44,9 +47,11 @@ public class StatsCalculator {
       Term term = null;
       if(featureName == null && value == null) {
         term = new Term("contents", annotationType, "*");
-      } else if(featureName != null && value == null) {
-        term = new Term("contents", annotationType+"."+featureName, "**");
-      } else if(featureName == null) {
+      }
+      else if(featureName != null && value == null) {
+        term = new Term("contents", annotationType + "." + featureName, "**");
+      }
+      else if(featureName == null) {
         throw new SearchException("FeatureName cannot be null");
       }
       else {
@@ -115,10 +120,10 @@ public class StatsCalculator {
   }
 
   /**
-   * Allows retriving frequencies for the given parameters.
-   * Please make sure that you close the searcher on your own. Failing
-   * to do so may result into many files being opened at the same time
-   * and that can cause the problem with your OS.
+   * Allows retriving frequencies for the given parameters. Please make
+   * sure that you close the searcher on your own. Failing to do so may
+   * result into many files being opened at the same time and that can
+   * cause the problem with your OS.
    * 
    * @param searcher
    * @param corpusToSearchIn
@@ -136,10 +141,10 @@ public class StatsCalculator {
   }
 
   /**
-   * Allows retriving frequencies for the given parameters.
-   * Please make sure that you close the searcher on your own. Failing
-   * to do so may result into many files being opened at the same time
-   * and that can cause the problem with your OS.
+   * Allows retriving frequencies for the given parameters. Please make
+   * sure that you close the searcher on your own. Failing to do so may
+   * result into many files being opened at the same time and that can
+   * cause the problem with your OS.
    * 
    * @param searcher
    * @param corpusToSearchIn
@@ -150,10 +155,225 @@ public class StatsCalculator {
    * @throws SearchException
    */
   public static int freq(IndexSearcher searcher, String corpusToSearchIn,
-          String annotationSetToSearchIn, String annotationType, String featureName)
-          throws SearchException {
+          String annotationSetToSearchIn, String annotationType,
+          String featureName) throws SearchException {
 
     return freq(searcher, corpusToSearchIn, annotationSetToSearchIn,
             annotationType, featureName, null);
   }
+
+  /**
+   * Allows retrieving frequencies for the given parameters.
+   * @param patternsToSearchIn 
+   * @param annotationType 
+   * @param feature 
+   * @param value - set to null if only wants to retrieve frequencies for AT.feature
+   * @param inMatchedSpan - true if only interested in frequencies from the matched spans.
+   * @param inContext - true if only interested in frequencies from the contexts. Please note that both isMatchedSpan 
+   * and inContext can be set to true if interested in frequencies from the entire patterns, but cannot be set false
+   * at the same time.
+   * @return
+   * @throws SearchException
+   */
+  public static int freq(List<Hit> patternsToSearchIn,
+          String annotationType, String feature, String value,
+          boolean inMatchedSpan, boolean inContext) throws SearchException {
+    if(patternsToSearchIn == null || patternsToSearchIn.isEmpty()) return 0;
+
+    if(!inMatchedSpan && !inContext)
+      throw new SearchException(
+              "Both inMatchedSpan and inContext cannot be set to false");
+
+    int count = 0;
+    for(Hit aResult1 : patternsToSearchIn) {
+      Pattern aResult = (Pattern) aResult1;
+      
+      List<PatternAnnotation> annots = new ArrayList<PatternAnnotation>();
+      if(inMatchedSpan && !inContext) {
+        annots = aResult.getPatternAnnotations(aResult.getStartOffset(),
+                aResult.getEndOffset());
+      }
+      else if(!inMatchedSpan && inContext) {
+        annots = aResult.getPatternAnnotations(aResult
+                .getLeftContextStartOffset(), aResult.getStartOffset());
+        annots.addAll(aResult.getPatternAnnotations(aResult.getEndOffset(),
+                aResult.getRightContextEndOffset()));
+      }
+      else {
+        // both matchedSpan and context are set to true
+        annots = Arrays.asList(aResult.getPatternAnnotations());
+      }
+
+      if(annots.isEmpty()) continue;
+      List<PatternAnnotation> subAnnots = null;
+      if(value == null) {
+        subAnnots = getPatternAnnotations(annots, annotationType, feature);
+      }
+      else {
+        subAnnots = getPatternAnnotations(annots, annotationType, feature,
+                value);
+      }
+
+      count += subAnnots.size();
+    }
+    return count;
+  }
+
+  
+  /**
+   * Allows retrieving frequencies for the given parameters.
+   * @param patternsToSearchIn 
+   * @param annotationType 
+   * @param inMatchedSpan - true if only interested in frequencies from the matched spans.
+   * @param inContext - true if only interested in frequencies from the contexts. Please note that both isMatchedSpan 
+   * and inContext can be set to true if interested in frequencies from the entire patterns, but cannot be set false
+   * at the same time.
+   * @return
+   * @throws SearchException
+   */
+  public static int freq(List<Hit> patternsToSearchIn,
+          String annotationType, boolean inMatchedSpan, boolean inContext) throws SearchException {
+    if(patternsToSearchIn == null || patternsToSearchIn.isEmpty()) return 0;
+
+    if(!inMatchedSpan && !inContext)
+      throw new SearchException(
+              "Both inMatchedSpan and inContext cannot be set to false");
+
+    int count = 0;
+    for(Hit aResult1 : patternsToSearchIn) {
+      Pattern aResult = (Pattern) aResult1;
+
+
+      List<PatternAnnotation> annots = new ArrayList<PatternAnnotation>();
+      if(inMatchedSpan && !inContext) {
+        annots = aResult.getPatternAnnotations(aResult.getStartOffset(),
+                aResult.getEndOffset());
+      }
+      else if(!inMatchedSpan && inContext) {
+        annots = aResult.getPatternAnnotations(aResult
+                .getLeftContextStartOffset(), aResult.getStartOffset());
+        annots.addAll(aResult.getPatternAnnotations(aResult.getEndOffset(),
+                aResult.getRightContextEndOffset()));
+      }
+      else {
+        // both matchedSpan and context are set to true
+        annots = Arrays.asList(aResult.getPatternAnnotations());
+      }
+
+      if(annots.isEmpty()) continue;
+      List<PatternAnnotation> subAnnots = getPatternAnnotations(annots, annotationType);
+
+      count += subAnnots.size();
+    }
+    return count;
+  }
+  
+  
+  /**
+   * Calculates frequenices for all possible values of the provided AT.feature
+   * @param patternsToSearchIn
+   * @param annotationType
+   * @param feature
+   * @param inMatchedSpan
+   * @param inContext
+   * @return returns a map where key is the unique value of AT.feature and value is the Integer object giving count for the value.
+   * @throws SearchException
+   */
+  public static Map<String, Integer> freqForAllValues(
+          List<Hit> patternsToSearchIn, String annotationType,
+          String feature, boolean inMatchedSpan, boolean inContext)
+          throws SearchException {
+    Map<String, Integer> toReturn = new HashMap<String, Integer>();
+    if(patternsToSearchIn == null || patternsToSearchIn.isEmpty())
+      return toReturn;
+
+    
+    if(!inMatchedSpan && !inContext)
+      throw new SearchException(
+              "Both inMatchedSpan and inContext cannot be set to false");
+
+    for(Hit aResult1 : patternsToSearchIn) {
+      Pattern aResult = (Pattern) aResult1;
+
+
+      List<PatternAnnotation> annots = new ArrayList<PatternAnnotation>();
+      if(inMatchedSpan && !inContext) {
+        annots = aResult.getPatternAnnotations(aResult.getStartOffset(),
+                aResult.getEndOffset());
+      }
+      else if(!inMatchedSpan && inContext) {
+        annots = aResult.getPatternAnnotations(aResult
+                .getLeftContextStartOffset(), aResult.getStartOffset());
+        annots.addAll(aResult.getPatternAnnotations(aResult.getEndOffset(),
+                aResult.getRightContextEndOffset()));
+      }
+      else {
+        // both matchedSpan and context are set to true
+        annots = Arrays.asList(aResult.getPatternAnnotations());
+      }
+
+      if(annots.isEmpty()) continue;
+      List<PatternAnnotation> subAnnots = getPatternAnnotations(annots,
+              annotationType, feature);
+
+      for(PatternAnnotation pa : subAnnots) {
+        String uniqueKey = pa.getFeatures().get(feature);
+        Integer counter = toReturn.get(uniqueKey);
+        if(counter == null) {
+          counter = new Integer(1);
+          toReturn.put(uniqueKey, counter);
+        }
+        else {
+          counter = new Integer(counter.intValue() + 1);
+          toReturn.put(uniqueKey, counter);
+        }
+      }
+    }
+    return toReturn;
+  }
+
+  private static List<PatternAnnotation> getPatternAnnotations(
+          List<PatternAnnotation> annotations, String type, String feature,
+          String value) {
+    List<PatternAnnotation> annots = new ArrayList<PatternAnnotation>();
+    for(int i = 0; i < annotations.size(); i++) {
+      PatternAnnotation ga1 = annotations.get(i);
+      if(ga1.getType().equals(type)) {
+        Map<String, String> features = ga1.getFeatures();
+        if(features != null && features.keySet().contains(feature)) {
+          if(features.get(feature).equals(value)) annots.add(ga1);
+        }
+      }
+    }
+    return annots;
+  }
+
+  private static List<PatternAnnotation> getPatternAnnotations(
+          List<PatternAnnotation> annotations, String type, String feature) {
+    List<PatternAnnotation> annots = new ArrayList<PatternAnnotation>();
+    for(int i = 0; i < annotations.size(); i++) {
+      PatternAnnotation ga1 = annotations.get(i);
+      if(ga1.getType().equals(type)) {
+        Map<String, String> features = ga1.getFeatures();
+        if(features != null && features.keySet().contains(feature)) {
+          annots.add(ga1);
+        }
+      }
+    }
+    return annots;
+  }
+
+  private static List<PatternAnnotation> getPatternAnnotations(
+          List<PatternAnnotation> annotations, String type) {
+    List<PatternAnnotation> annots = new ArrayList<PatternAnnotation>();
+    for(int i = 0; i < annotations.size(); i++) {
+      PatternAnnotation ga1 = annotations.get(i);
+      if(ga1.getType().equals(type)) {
+         annots.add(ga1);
+      }
+    }
+    return annots;
+  }
+  
+  
 }
