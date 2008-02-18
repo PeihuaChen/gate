@@ -713,8 +713,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     
-    statisticsPanel = new JPanel(
-      new BoxLayout(statisticsPanel, BoxLayout.PAGE_AXIS));
+    statisticsPanel = new JPanel();
+    statisticsPanel.setLayout(new BoxLayout(statisticsPanel, 
+            BoxLayout.PAGE_AXIS));
     globalStatisticsTable = new XJTable();
     String[] columnNames = {"Annotation Type", "Count"};
 //    globalStatisticsTable.addColumn();
