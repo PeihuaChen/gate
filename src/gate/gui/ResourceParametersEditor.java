@@ -536,32 +536,6 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       }
     }// public Component getTableCellRendererComponent
 
-    /**
-     * Gets a string representation for a list value
-     */
-    protected String textForList(Collection list) {
-      if(list == null || list.isEmpty()) return "[]";
-      StringBuffer res = new StringBuffer("[");
-      Iterator elemIter = list.iterator();
-      while(elemIter.hasNext()) {
-        Object elem = elemIter.next();
-        if(elem != null)
-          res.append(((elem instanceof NameBearer) ? ((NameBearer)elem)
-                  .getName() : elem.toString())
-                  + ", ");
-        else res.append("<null>");
-      }
-      res.delete(res.length() - 2, res.length() - 1);
-      res.append("]");
-      return res.toString();
-    }
-
-    /**
-     * Get a string representation for a FeatureMap value.
-     */
-    protected String textForFeatureMap(FeatureMap fm) {
-      return (fm == null) ? "" : fm.toString();
-    }
 
     JButton fileButton;
 
@@ -906,32 +880,6 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       }
     }// getTableCellEditorComponent
 
-    /**
-     * Gets a string representation for a list value
-     */
-    protected String textForList(Collection list) {
-      if(list == null || list.isEmpty()) return "[]";
-      StringBuffer res = new StringBuffer("[");
-      Iterator elemIter = list.iterator();
-      while(elemIter.hasNext()) {
-        Object elem = elemIter.next();
-        res.append(((elem instanceof NameBearer)
-                ? ((NameBearer)elem).getName()
-                : elem.toString())
-                + ", ");
-      }
-      res.delete(res.length() - 2, res.length() - 1);
-      res.append("]");
-      return res.toString();
-    }
-
-    /**
-     * Gets a string representation for a FeatureMap value.
-     */
-    protected String textForFeatureMap(FeatureMap fm) {
-      return (fm == null) ? "" : fm.toString();
-    }
-
     public Object getCellEditorValue() {
       if(comboUsed) {
         Object value = combo.getSelectedItem();
@@ -1010,4 +958,32 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
 
     JPanel textButtonBox;
   }// /class ParameterValueEditor
+
+  /**
+   * Gets a string representation for a list value
+   */
+  protected String textForList(Collection list) {
+    if(list == null || list.isEmpty()) return "[]";
+    StringBuilder res = new StringBuilder("[");
+    Iterator elemIter = list.iterator();
+    while(elemIter.hasNext()) {
+      Object elem = elemIter.next();
+      if(elem != null)
+        res.append(((elem instanceof NameBearer) ? ((NameBearer)elem)
+                .getName() : elem.toString())
+                + ", ");
+      else res.append("<null>, ");
+    }
+    res.delete(res.length() - 2, res.length() - 1);
+    res.append("]");
+    return res.toString();
+  }
+
+  /**
+   * Get a string representation for a FeatureMap value.
+   */
+  protected String textForFeatureMap(FeatureMap fm) {
+    return (fm == null) ? "" : fm.toString();
+  }
+
 }// class NewResourceDialog
