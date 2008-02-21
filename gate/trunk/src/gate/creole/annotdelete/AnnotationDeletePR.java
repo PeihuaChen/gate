@@ -73,52 +73,57 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
     if(document == null)
       throw new GateRuntimeException("No document to process!");
 
+    // determine which sets to keep
+    List keepSets = new ArrayList();
+    if(setsToKeep != null) keepSets.addAll(setsToKeep);
+    if(keepOriginalMarkupsAS.booleanValue() && 
+       !keepSets.contains(markupSetName)) {
+        keepSets.add(markupSetName);
+    }
+    
     Map matchesMap = null;
     Object matchesMapObject = document.getFeatures().get(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME);
     if(matchesMapObject instanceof Map) {
       matchesMap = (Map) matchesMapObject;
     }
 
-    //first clear the default set, which cannot be removed
-    if (annotationTypes == null || annotationTypes.isEmpty()) {
-      document.getAnnotations().clear();
-      removeFromDocumentCorefData( (String)null, matchesMap);
-    } else {
-      removeSubSet(document.getAnnotations(), matchesMap);
+    //Unless we've been asked to keep it, first clear the default set,
+    //which cannot be removed
+    if(!keepSets.contains(null) && !keepSets.contains("")) {
+      if (annotationTypes == null || annotationTypes.isEmpty()) {
+        document.getAnnotations().clear();
+        removeFromDocumentCorefData( (String)null, matchesMap);
+      } else {
+        removeSubSet(document.getAnnotations(), matchesMap);
+      }
     }
 
     //get the names of all sets
     Map namedSets = document.getNamedAnnotationSets();
     //nothing left to do if there are no named sets
-    if (namedSets == null || namedSets.isEmpty())
-      return;
-
-    //loop through the sets and delete them all unless they're original markups
-    List setNames = new ArrayList(namedSets.keySet());
-    Iterator iter = setNames.iterator();
-    String setName;
-    
-    if(setsToKeep == null) setsToKeep = new ArrayList();
-    if(keepOriginalMarkupsAS.booleanValue() && 
-       !setsToKeep.contains(markupSetName)) {
-        setsToKeep.add(markupSetName);
-    }
-    
-    while (iter.hasNext()) {
-      setName = (String) iter.next();
-      //check first whether this is the original markups or one of the sets
-      //that we want to keep
-      if (setName != null) {
-        // skip named sets from setsToKeep
-        if(setsToKeep != null && setsToKeep.contains(setName)) continue;
-
-        if (annotationTypes == null || annotationTypes.isEmpty()) {
-          document.removeAnnotationSet(setName);
-          removeFromDocumentCorefData( (String) setName, matchesMap);
-        } else {
-          removeSubSet(document.getAnnotations(setName), matchesMap);
-        }
-      }//if
+    if (namedSets != null && !namedSets.isEmpty()) {
+      //loop through the sets and delete them all unless
+      //we've been asked to keep them
+      List setNames = new ArrayList(namedSets.keySet());
+      Iterator iter = setNames.iterator();
+      String setName;
+      
+      while (iter.hasNext()) {
+        setName = (String) iter.next();
+        //check first whether this is the original markups or one of the sets
+        //that we want to keep
+        if (setName != null) {
+          // skip named sets from setsToKeep
+          if(keepSets.contains(setName)) continue;
+  
+          if (annotationTypes == null || annotationTypes.isEmpty()) {
+            document.removeAnnotationSet(setName);
+            removeFromDocumentCorefData( (String) setName, matchesMap);
+          } else {
+            removeSubSet(document.getAnnotations(setName), matchesMap);
+          }
+        }//if
+      }
     }
 
     // and finally we add it to the document
