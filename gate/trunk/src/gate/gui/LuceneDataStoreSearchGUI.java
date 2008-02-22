@@ -128,7 +128,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
   /**
    * Clear the statistics panel.
    */
-  private JButton clearStatistics;
+//  private JButton clearStatistics;
 
   /**
    * Contains statistics for the corpus and the annotation set selected.
@@ -147,6 +147,11 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
   private Comparator<Integer> integerComparator;
 
   /**
+   *  Comparator for Integer in statistics tables.
+   */
+  private Comparator<String> lastWordComparator;
+
+  /**
    * Collator for String with insensitive case.
    */
   private java.text.Collator stringCollator;
@@ -158,7 +163,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
   /**
    * Display statistics on the datastore.
    */
-  private JPanel statisticsPanel;
+  private JTabbedPane statisticsTabbedPane;
   
   /**
    * group for allPatterns and selectedPatterns, only one of them should
@@ -393,14 +398,19 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     stringCollator = java.text.Collator.getInstance();
     stringCollator.setStrength(java.text.Collator.TERTIARY);
 
+    lastWordComparator = new Comparator<String>() {
+      public int compare(String o1, String o2) {
+        if (o1 == null || o2 == null) { return 0; }
+        return stringCollator.compare(
+          ((String)o1).substring(((String)o1).trim().lastIndexOf(' ')+1),
+          ((String)o2).substring(((String)o2).trim().lastIndexOf(' ')+1));
+      }
+    };
+
     integerComparator = new Comparator<Integer>() {
       public int compare(Integer o1, Integer o2) {
         if (o1 == null || o2 == null) { return 0; }
-//        if (o1 instanceof Integer && o2 instanceof Integer) {
         return ((Integer)o1).compareTo((Integer)o2);
-//        } else {
-//          return 0;
-//        }
       }
     };
 
@@ -516,8 +526,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
     annotationRowsManagerButton = new JButton();
     annotationRowsManagerButton.setAction(new DisplayAnnotationRowsManagerAction());
-//    annotationRowsManagerButton.setBorderPainted(true);
-//    annotationRowsManagerButton.setMargin(new Insets(0, 0, 0, 0));
 
     progressLabel = new JLabel(MainFrame.getIcon("working"));
     progressLabel.setOpaque(false);
@@ -542,8 +550,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     nextResultAction = new NextResultAction();
     nextResultAction.setEnabled(false);
     nextResults = new JButton();
-//    nextResults.setBorderPainted(false);
-//    nextResults.setContentAreaFilled(false);
     nextResults.setAction(nextResultAction);
     bottomPanel.add(nextResults, gbc);
     titleResults = new JLabel("Results");
@@ -577,12 +583,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     gbc.weightx = 1;
     bottomPanel.add(Box.createHorizontalStrut(1), gbc);
     gbc.weightx = 0;
-//    bottomPanel.add(new JLabel("Export:"), gbc);
     exportResultsAction = new ExportResultsAction();
     exportResultsAction.setEnabled(false);
     exportToHTML = new JButton();
-//    exportToHTML.setBorderPainted(false);
-//    exportToHTML.setContentAreaFilled(false);
     exportToHTML.setAction(exportResultsAction);
     bottomPanel.add(exportToHTML, gbc);
     allPatterns = new JRadioButton("All");
@@ -603,9 +606,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     displayStatistics.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ie) {
         if (bottomSplitPane.getComponentCount() == 2) {
-          bottomSplitPane.add(new JScrollPane(statisticsPanel,
-                  JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                  JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
+          bottomSplitPane.add(statisticsTabbedPane);
           bottomSplitPane.setDividerLocation(
             (bottomSplitPane.getMaximumDividerLocation()>500)?
             (bottomSplitPane.getMaximumDividerLocation()-200):-1);
@@ -622,21 +623,16 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     displayStatistics.setToolTipText(
       "Display statistics on the datastore and the result of the query.");
     bottomPanel.add(displayStatistics, gbc);
-    clearStatistics = new JButton("Clear");
-    clearStatistics.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent ie) {
-        statisticsPanel.removeAll();
-        oneRowStatisticsTable.removeAll();
-        statisticsPanel.add(globalStatisticsTable.getTableHeader());
-        statisticsPanel.add(globalStatisticsTable);
-        statisticsPanel.add(oneRowStatisticsTable.getTableHeader());
-        statisticsPanel.add(oneRowStatisticsTable);
-        statisticsPanel.updateUI();
-      }
-    });
-    clearStatistics.setEnabled(true);
-    clearStatistics.setToolTipText("Clear statistics.");
-    bottomPanel.add(clearStatistics, gbc);
+//    clearStatistics = new JButton("Clear");
+//    clearStatistics.addActionListener(new ActionListener() {
+//      public void actionPerformed(ActionEvent ie) {
+//        oneRowStatisticsTable.removeAll();
+//        statisticsTabbedPane.updateUI();
+//      }
+//    });
+//    clearStatistics.setEnabled(true);
+//    clearStatistics.setToolTipText("Clear statistics.");
+//    bottomPanel.add(clearStatistics, gbc);
     
 
     // table of results
@@ -744,32 +740,59 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     // user should be allowed to select multiple rows
     patternTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     patternTable.setSortable(true);
+    patternTable.setComparator(
+      PatternsTableModel.LEFT_CONTEXT_COLUMN, lastWordComparator);
+    patternTable.setComparator(
+      PatternsTableModel.PATTERN_COLUMN, stringCollator);
+    patternTable.setComparator(
+      PatternsTableModel.RIGHT_CONTEXT_COLUMN, stringCollator);
+    // right-alignment of the column
+    patternTable.getColumnModel()
+      .getColumn(PatternsTableModel.LEFT_CONTEXT_COLUMN)
+      .setCellRenderer(new DefaultTableCellRenderer() {
+        private static final long serialVersionUID = 1L;
+        public Component getTableCellRendererComponent(
+                JTable table, Object color, boolean isSelected,
+                boolean hasFocus, int row, int col) {
+          Component component = super.getTableCellRendererComponent(
+            table, color, isSelected, hasFocus, row, col);
+          if (component instanceof JLabel) {
+            ((JLabel)component).setHorizontalAlignment(SwingConstants.RIGHT);
+          }
+          return component;
+        }
+      });
+    patternTable.getColumnModel()
+      .getColumn(PatternsTableModel.PATTERN_COLUMN)
+      .setCellRenderer(new DefaultTableCellRenderer() {
+        private static final long serialVersionUID = 1L;
+        public Component getTableCellRendererComponent(
+                JTable table, Object color, boolean isSelected,
+                boolean hasFocus, int row, int col) {
+          Component component = super.getTableCellRendererComponent(
+            table, color, isSelected, hasFocus, row, col);
+          if (component instanceof JLabel) {
+            ((JLabel)component).setHorizontalAlignment(SwingConstants.CENTER);
+          }
+          return component;
+        }
+      });
 
     JScrollPane tableScrollPane = new JScrollPane(patternTable,
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-    statisticsPanel = new JPanel();
-    statisticsPanel.setLayout(
-      new BoxLayout(statisticsPanel, BoxLayout.Y_AXIS));
+    statisticsTabbedPane = new JTabbedPane();
 
     globalStatisticsTable = new XJTable();
-    String[] columns = {"Annotation Type", "Count"};
-    Object[][] data = {{"", new Integer(0)}};
-    JTable table = new JTable(data, columns);
-    globalStatisticsTable.setModel(table.getModel());
-    globalStatisticsTable.setTableHeader(table.getTableHeader());
-    statisticsPanel.add(globalStatisticsTable.getTableHeader());
-    statisticsPanel.add(globalStatisticsTable);
+    statisticsTabbedPane.addTab("Global", null,
+      new JScrollPane(globalStatisticsTable),
+      "Global statistics on the Corpus and Annotation Set selected.");
 
     oneRowStatisticsTable = new XJTable();
-    String[] columns2 = {"Annot. Type/Feature", "Count"};
-    table = new JTable(data, columns2);
-    oneRowStatisticsTable.setModel(table.getModel());
-    oneRowStatisticsTable.setTableHeader(table.getTableHeader());
-    oneRowStatisticsTable.removeAll();
-    statisticsPanel.add(oneRowStatisticsTable.getTableHeader());
-    statisticsPanel.add(oneRowStatisticsTable);
+    statisticsTabbedPane.addTab("One item", null,
+      new JScrollPane(oneRowStatisticsTable),
+      "One item statistics.");
 
     bottomSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
     bottomSplitPane.setDividerLocation(
@@ -1027,8 +1050,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         (start==-1)?0:start,
         (end==-1)?pattern.getPatternText().length():end);
       // add a mouse listener that modify the query
-      label.addMouseListener(new AddAnnotationRowInQueryMouseInputListener(
-        AddAnnotationRowInQueryMouseInputListener.CENTER,word));
+      label.addMouseListener(new TextRowMouseListener(word));
       centerPanel.add(label, gbc);
     }
 //    System.out.println(message+"\n");
@@ -1055,6 +1077,13 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         +((feature.equals(""))?"all its features":"feature: "+feature)+".</html>");
       annotationTypeAndFeature.setOpaque(true);
       annotationTypeAndFeature.setBackground(new Color(240, 240, 240));
+      if (feature.equals("")) {
+        annotationTypeAndFeature.addMouseListener(
+          new AnnotationRowHeaderMouseListener(type));
+      } else {
+        annotationTypeAndFeature.addMouseListener(
+          new AnnotationRowHeaderMouseListener(type, feature));
+      }
       gbc.insets = new java.awt.Insets(0, 10, 3, 10);
       centerPanel.add(annotationTypeAndFeature, gbc);
       gbc.insets = new java.awt.Insets(0, 0, 3, 0);
@@ -1136,8 +1165,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         label.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
         label.setOpaque(true);
         if (feature.equals("")) {
-          label.addMouseListener(new AddAnnotationRowInQueryMouseInputListener(
-            type, AddAnnotationRowInQueryMouseInputListener.CENTER));
+          label.addMouseListener(new AnnotationRowValueMouseListener(type));
           String width = (ann.getFeatures().toString().length()>100)?"500":"100%";
           String toolTip = "<html><table width=\""+width
             +"\" border=\"0\" cellspacing=\"1\">";
@@ -1152,9 +1180,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           }
           label.setToolTipText(toolTip+"</table></html>");
         } else {
-          label.addMouseListener(new AddAnnotationRowInQueryMouseInputListener(
-            type, feature, (String)ann.getFeatures().get(feature),
-            AddAnnotationRowInQueryMouseInputListener.CENTER));
+          label.addMouseListener(new AnnotationRowValueMouseListener(
+            type, feature, (String)ann.getFeatures().get(feature)));
         }
         if (gridSet.containsKey(gbc.gridx)) {
           // two values for the same row and column
@@ -1277,22 +1304,20 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       return;
     }
     try {
-      int count, row = 0;
+      int count;
+      DefaultTableModel model = new DefaultTableModel();
+      model.addColumn("Annotation Type");
+      model.addColumn("Count");
       TreeSet<String> ts = new TreeSet<String>(stringCollator);
       ts.addAll(populatedAnnotationTypesAndFeatures.keySet());
-      String[] columnNames = {"Annotation Type", "Count"};
-      Object[][] data = new Object[ts.size()][columnNames.length];
       for (String annotationType : ts) {
         // retrieves the number of occurrences for each Annotation Type
         // of the choosen Annotation Set
         count = StatsCalculator.freq(searcher, corpusName,
           annotationSetName, annotationType);
-        data[row][0] = annotationType;
-        data[row][1] = new Integer(count);
-        row++;
+        model.addRow(new Object[]{annotationType, new Integer(count)});
       }
-      JTable table = new JTable(data, columnNames);
-      globalStatisticsTable.setModel(table.getModel());
+      globalStatisticsTable.setModel(model);
       globalStatisticsTable.setComparator(0, stringCollator);
       globalStatisticsTable.setComparator(1, integerComparator);
     } catch(SearchException se) {
@@ -1857,38 +1882,60 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
   }
 
   /**
-   * Modify the query with the current clicked annotation row cell.
+   * Add at the caret position or replace the selection in the query
+   * according to the text row value left clicked.
    */
-  protected class AddAnnotationRowInQueryMouseInputListener
+  protected class TextRowMouseListener
+    extends javax.swing.event.MouseInputAdapter {
+
+    private String text;
+    
+    public TextRowMouseListener(String text) {
+      this.text = text;
+    }
+
+    public void mousePressed(MouseEvent me) {
+      if (SwingUtilities.isLeftMouseButton(me)) {
+        int caretPosition = queryTextField.getCaretPosition();
+        String query = queryTextField.getText();
+        String queryMiddle = text;
+        String queryLeft =
+          (queryTextField.getSelectionStart() == queryTextField.getSelectionEnd())?
+          query.substring(0, caretPosition):
+          query.substring(0, queryTextField.getSelectionStart());
+        String queryRight =
+          (queryTextField.getSelectionStart() == queryTextField.getSelectionEnd())?
+          query.substring(caretPosition, query.length()):
+          query.substring(queryTextField.getSelectionEnd(), query.length());
+        queryTextField.setText(queryLeft+queryMiddle+queryRight);
+      }
+    }
+  }
+
+  /**
+   * Modifies the query or displays statistics according to the
+   * annotation row value left or right clicked.
+   */
+  protected class AnnotationRowValueMouseListener
     extends javax.swing.event.MouseInputAdapter {
 
     private String type;
     private String feature;
     private String text;
-    public static final int LEFT = 0;
-    public static final int CENTER = 1;
-    public static final int RIGHT = 2;
     private JPopupMenu mousePopup;
     JMenuItem menuItem;
     
-    public AddAnnotationRowInQueryMouseInputListener(
-            String type, String feature, String text, int position) {
+    public AnnotationRowValueMouseListener(
+            String type, String feature, String text) {
       this.type = type;
       this.feature = feature;
       this.text = text;
     }
 
-    public AddAnnotationRowInQueryMouseInputListener(
-            String type, int position) {
+    public AnnotationRowValueMouseListener(String type) {
       this.type = type;
       this.feature = null;
       this.text = null;
-    }
-
-    public AddAnnotationRowInQueryMouseInputListener(int position, String text) {
-      this.type = null;
-      this.feature = null;
-      this.text = text;
     }
 
     public void mousePressed(MouseEvent me) {
@@ -1958,20 +2005,20 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               se.printStackTrace();
               return;
             }
-            String[] columns = {"Annotation Type/Feature", "Count"};
-            Object[][] data =
-              new Object[oneRowStatisticsTable.getRowCount()+1][2];
+            DefaultTableModel model = new DefaultTableModel();
+            model.addColumn("Annotation Type/Feature");
+            model.addColumn("Count");
             for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
-              data[row][0] = oneRowStatisticsTable.getValueAt(row, 0);
-              data[row][1] = oneRowStatisticsTable.getValueAt(row, 1);
+              model.addRow(new Object[]{
+                oneRowStatisticsTable.getValueAt(row,0),
+                oneRowStatisticsTable.getValueAt(row,1)});
             }
-            data[oneRowStatisticsTable.getRowCount()][0] =
-              type+"."+feature+"==\""+value+"\"";
-            data[oneRowStatisticsTable.getRowCount()][1] = new Integer(count);
-            JTable table = new JTable(data, columns);
-            oneRowStatisticsTable.setModel(table.getModel());
+            model.addRow(new Object[]{type+"."+feature+"==\""+value+"\"",
+                         new Integer(count)});
+            oneRowStatisticsTable.setModel(model);
             oneRowStatisticsTable.setComparator(0, stringCollator);
             oneRowStatisticsTable.setComparator(1, integerComparator);
+            statisticsTabbedPane.setSelectedIndex(1);
 //            label.setToolTipText("Corpus: "+(String)corpusToSearchIn.getSelectedItem()
 //              +", Annotation Set: "+(String)annotationSetsToSearchIn.getSelectedItem());
             try { // close the IndexSearcher
@@ -2002,20 +2049,20 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               se.printStackTrace();
               return;
             }
-            String[] columns = {"Annotation Type/Feature", "Count"};
-            Object[][] data =
-              new Object[oneRowStatisticsTable.getRowCount()+1][2];
+            DefaultTableModel model = new DefaultTableModel();
+            model.addColumn("Annotation Type/Feature");
+            model.addColumn("Count");
             for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
-              data[row][0] = oneRowStatisticsTable.getValueAt(row, 0);
-              data[row][1] = oneRowStatisticsTable.getValueAt(row, 1);
+              model.addRow(new Object[]{
+                oneRowStatisticsTable.getValueAt(row,0),
+                oneRowStatisticsTable.getValueAt(row,1)});
             }
-            data[oneRowStatisticsTable.getRowCount()][0] =
-              type+"."+feature+"==\""+value+"\"";
-            data[oneRowStatisticsTable.getRowCount()][1] = new Integer(count);
-            JTable table = new JTable(data, columns);
-            oneRowStatisticsTable.setModel(table.getModel());
+            model.addRow(new Object[]{type+"."+feature+"==\""+value+"\"",
+                         new Integer(count)});
+            oneRowStatisticsTable.setModel(model);
             oneRowStatisticsTable.setComparator(0, stringCollator);
             oneRowStatisticsTable.setComparator(1, integerComparator);
+            statisticsTabbedPane.setSelectedIndex(1);
             try { // close the IndexSearcher
               searcher.close();
             } catch (IOException ioe) {
@@ -2044,20 +2091,20 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               se.printStackTrace();
               return;
             }
-            String[] columns = {"Annotation Type/Feature", "Count"};
-            Object[][] data =
-              new Object[oneRowStatisticsTable.getRowCount()+1][2];
+            DefaultTableModel model = new DefaultTableModel();
+            model.addColumn("Annotation Type/Feature");
+            model.addColumn("Count");
             for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
-              data[row][0] = oneRowStatisticsTable.getValueAt(row, 0);
-              data[row][1] = oneRowStatisticsTable.getValueAt(row, 1);
+              model.addRow(new Object[]{
+                oneRowStatisticsTable.getValueAt(row,0),
+                oneRowStatisticsTable.getValueAt(row,1)});
             }
-            data[oneRowStatisticsTable.getRowCount()][0] =
-              type+"."+feature+"==\""+value+"\"";
-            data[oneRowStatisticsTable.getRowCount()][1] = new Integer(count);
-            JTable table = new JTable(data, columns);
-            oneRowStatisticsTable.setModel(table.getModel());
+            model.addRow(new Object[]{type+"."+feature+"==\""+value+"\"",
+                         new Integer(count)});
+            oneRowStatisticsTable.setModel(model);
             oneRowStatisticsTable.setComparator(0, stringCollator);
             oneRowStatisticsTable.setComparator(1, integerComparator);
+            statisticsTabbedPane.setSelectedIndex(1);
             try { // close the IndexSearcher
               searcher.close();
             } catch (IOException ioe) {
@@ -2086,20 +2133,20 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               se.printStackTrace();
               return;
             }
-            String[] columns = {"Annotation Type/Feature", "Count"};
-            Object[][] data =
-              new Object[oneRowStatisticsTable.getRowCount()+1][2];
+            DefaultTableModel model = new DefaultTableModel();
+            model.addColumn("Annotation Type/Feature");
+            model.addColumn("Count");
             for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
-              data[row][0] = oneRowStatisticsTable.getValueAt(row, 0);
-              data[row][1] = oneRowStatisticsTable.getValueAt(row, 1);
+              model.addRow(new Object[]{
+                oneRowStatisticsTable.getValueAt(row,0),
+                oneRowStatisticsTable.getValueAt(row,1)});
             }
-            data[oneRowStatisticsTable.getRowCount()][0] =
-              type+"."+feature+"==\""+value+"\"";
-            data[oneRowStatisticsTable.getRowCount()][1] = new Integer(count);
-            JTable table = new JTable(data, columns);
-            oneRowStatisticsTable.setModel(table.getModel());
+            model.addRow(new Object[]{type+"."+feature+"==\""+value+"\"",
+                         new Integer(count)});
+            oneRowStatisticsTable.setModel(model);
             oneRowStatisticsTable.setComparator(0, stringCollator);
             oneRowStatisticsTable.setComparator(1, integerComparator);
+            statisticsTabbedPane.setSelectedIndex(1);
             try { // close the IndexSearcher
               searcher.close();
             } catch (IOException ioe) {
@@ -2112,6 +2159,540 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
         showPopup(me);
       }
+    }
+
+    private void showPopup(MouseEvent e) {
+      if (e.isPopupTrigger()) {
+        mousePopup.show(e.getComponent(), e.getX(), e.getY());
+      }
+    }
+
+  }
+
+  /**
+   * Displays statistics according to the annotation row header right-clicked.
+   */
+  protected class AnnotationRowHeaderMouseListener
+    extends javax.swing.event.MouseInputAdapter {
+
+    private String type;
+    private String feature;
+    private JPopupMenu mousePopup;
+    JMenuItem menuItem;
+    XJTable table;
+    
+    public AnnotationRowHeaderMouseListener(String type, String feature) {
+      this.type = type;
+      this.feature = feature;
+    }
+
+    public AnnotationRowHeaderMouseListener(String type) {
+      this.type = type;
+      this.feature = null;
+    }
+
+    public void mousePressed(MouseEvent me) {
+      
+      final String corpusName =
+        (corpusToSearchIn.getSelectedItem().equals(Constants.ENTIRE_DATASTORE))?
+            null:(String)corpusIds.get(corpusToSearchIn.getSelectedIndex() - 1);
+      final String annotationSetName =
+        (annotationSetsToSearchIn.getSelectedItem().equals(Constants.ALL_SETS))?
+                null:(String)annotationSetsToSearchIn.getSelectedItem();
+
+      mousePopup = new JPopupMenu();
+      mousePopup.add("Add statistics");
+      mousePopup.addSeparator();
+
+      if (SwingUtilities.isRightMouseButton(me)
+       && type != null && feature != null) {
+
+        // count values for one Feature of an Annotation type
+
+        menuItem = new JMenuItem("In DataStore");
+        menuItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent ie) {
+            IndexSearcher searcher;
+            try { // open the IndexSearcher
+              searcher = new IndexSearcher(indexLocation);
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+            int count;
+            try { // retrieves the number of occurrences
+              count = StatsCalculator.freq(searcher, corpusName,
+                annotationSetName, type, feature);
+            } catch(SearchException se) {
+              se.printStackTrace();
+              return;
+            }
+            DefaultTableModel model = new DefaultTableModel();
+            model.addColumn("Annotation Type/Feature");
+            model.addColumn("Count");
+            for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
+              model.addRow(new Object[]{
+                oneRowStatisticsTable.getValueAt(row,0),
+                oneRowStatisticsTable.getValueAt(row,1)});
+            }
+            model.addRow(new Object[]{type+"."+feature,
+                         new Integer(count)});
+            oneRowStatisticsTable.setModel(model);
+            oneRowStatisticsTable.setComparator(0, stringCollator);
+            oneRowStatisticsTable.setComparator(1, integerComparator);
+            statisticsTabbedPane.setSelectedIndex(1);
+            try { // close the IndexSearcher
+              searcher.close();
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+          }
+        });
+        mousePopup.add(menuItem);
+
+        menuItem = new JMenuItem("In matched spans");
+        menuItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent ie) {
+            IndexSearcher searcher;
+            try { // open the IndexSearcher
+              searcher = new IndexSearcher(indexLocation);
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+            int count;
+            try { // retrieves the number of occurrences
+              count = StatsCalculator.freq(patterns, type,
+                feature, null, true, false);
+            } catch(SearchException se) {
+              se.printStackTrace();
+              return;
+            }
+            DefaultTableModel model = new DefaultTableModel();
+            model.addColumn("Annotation Type/Feature");
+            model.addColumn("Count");
+            for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
+              model.addRow(new Object[]{
+                oneRowStatisticsTable.getValueAt(row,0),
+                oneRowStatisticsTable.getValueAt(row,1)});
+            }
+            model.addRow(new Object[]{type+"."+feature,
+                         new Integer(count)});
+            oneRowStatisticsTable.setModel(model);
+            oneRowStatisticsTable.setComparator(0, stringCollator);
+            oneRowStatisticsTable.setComparator(1, integerComparator);
+            statisticsTabbedPane.setSelectedIndex(1);
+            try { // close the IndexSearcher
+              searcher.close();
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+          }
+        });
+        mousePopup.add(menuItem);
+
+        menuItem = new JMenuItem("In contexts");
+        menuItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent ie) {
+            IndexSearcher searcher;
+            try { // open the IndexSearcher
+              searcher = new IndexSearcher(indexLocation);
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+            int count;
+            try { // retrieves the number of occurrences
+              count = StatsCalculator.freq(patterns, type,
+                      feature, null, false, true);
+            } catch(SearchException se) {
+              se.printStackTrace();
+              return;
+            }
+            DefaultTableModel model = new DefaultTableModel();
+            model.addColumn("Annotation Type/Feature");
+            model.addColumn("Count");
+            for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
+              model.addRow(new Object[]{
+                oneRowStatisticsTable.getValueAt(row,0),
+                oneRowStatisticsTable.getValueAt(row,1)});
+            }
+            model.addRow(new Object[]{type+"."+feature,
+                         new Integer(count)});
+            oneRowStatisticsTable.setModel(model);
+            oneRowStatisticsTable.setComparator(0, stringCollator);
+            oneRowStatisticsTable.setComparator(1, integerComparator);
+            statisticsTabbedPane.setSelectedIndex(1);
+            try { // close the IndexSearcher
+              searcher.close();
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+          }
+        });
+        mousePopup.add(menuItem);
+
+        menuItem = new JMenuItem("In matched spans + contexts");
+        menuItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent ie) {
+            IndexSearcher searcher;
+            try { // open the IndexSearcher
+              searcher = new IndexSearcher(indexLocation);
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+            int count;
+            try { // retrieves the number of occurrences
+              count = StatsCalculator.freq(patterns, type,
+                      feature, null, true, true);
+            } catch(SearchException se) {
+              se.printStackTrace();
+              return;
+            }
+            DefaultTableModel model = new DefaultTableModel();
+            model.addColumn("Annotation Type/Feature");
+            model.addColumn("Count");
+            for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
+              model.addRow(new Object[]{
+                oneRowStatisticsTable.getValueAt(row,0),
+                oneRowStatisticsTable.getValueAt(row,1)});
+            }
+            model.addRow(new Object[]{type+"."+feature,
+                         new Integer(count)});
+            oneRowStatisticsTable.setModel(model);
+            oneRowStatisticsTable.setComparator(0, stringCollator);
+            oneRowStatisticsTable.setComparator(1, integerComparator);
+            statisticsTabbedPane.setSelectedIndex(1);
+            try { // close the IndexSearcher
+              searcher.close();
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+          }
+        });
+        mousePopup.add(menuItem);
+
+        // count values for all Features of an Annotation Type
+
+        mousePopup.addSeparator();
+        mousePopup.add("Add all values");
+        mousePopup.addSeparator();
+
+        menuItem = new JMenuItem("In matched spans");
+        menuItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent ie) {
+            IndexSearcher searcher;
+            try { // open the IndexSearcher
+              searcher = new IndexSearcher(indexLocation);
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+            Map<String, Integer> freqs;
+            try { // retrieves the number of occurrences
+              freqs = StatsCalculator.freqForAllValues(
+                      patterns, type, feature, true, false);
+            } catch(SearchException se) {
+              se.printStackTrace();
+              return;
+            }
+            DefaultTableModel model = new DefaultTableModel();
+            model.addColumn(type+'.'+feature);
+            model.addColumn("Count");
+            for (Map.Entry<String,Integer> map : freqs.entrySet()) {
+              model.addRow(new Object[]{map.getKey(), map.getValue()});
+            }
+            table = new XJTable();
+            table.setModel(model);
+            table.setComparator(0, stringCollator);
+            table.setComparator(1, integerComparator);
+            statisticsTabbedPane.addTab(
+              String.valueOf(statisticsTabbedPane.getTabCount()-1),
+              null, new JScrollPane(table),
+              "Statistics on the Corpus: "
+              +(String)corpusToSearchIn.getSelectedItem()
+              +" and Annotation Set: "
+              +(String)annotationSetsToSearchIn.getSelectedItem()
+              +" in matched spans.");
+            statisticsTabbedPane.setSelectedIndex(
+              statisticsTabbedPane.getTabCount()-1);
+            try { // close the IndexSearcher
+              searcher.close();
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+          }
+        });
+        mousePopup.add(menuItem);
+
+        menuItem = new JMenuItem("In contexts");
+        menuItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent ie) {
+            IndexSearcher searcher;
+            try { // open the IndexSearcher
+              searcher = new IndexSearcher(indexLocation);
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+            Map<String, Integer> freqs;
+            try { // retrieves the number of occurrences
+              freqs = StatsCalculator.freqForAllValues(
+                      patterns, type, feature, false, true);
+            } catch(SearchException se) {
+              se.printStackTrace();
+              return;
+            }
+            DefaultTableModel model = new DefaultTableModel();
+            model.addColumn(type+'.'+feature);
+            model.addColumn("Count");
+            for (Map.Entry<String,Integer> map : freqs.entrySet()) {
+              model.addRow(new Object[]{map.getKey(), map.getValue()});
+            }
+            table = new XJTable();
+            table.setModel(model);
+            table.setComparator(0, stringCollator);
+            table.setComparator(1, integerComparator);
+            statisticsTabbedPane.addTab(
+              String.valueOf(statisticsTabbedPane.getTabCount()-1),
+              null, new JScrollPane(table),
+              "Statistics on the Corpus: "
+              +(String)corpusToSearchIn.getSelectedItem()
+              +" and Annotation Set: "
+              +(String)annotationSetsToSearchIn.getSelectedItem()
+              +" in contexts.");
+            statisticsTabbedPane.setSelectedIndex(
+              statisticsTabbedPane.getTabCount()-1);
+            try { // close the IndexSearcher
+              searcher.close();
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+          }
+        });
+        mousePopup.add(menuItem);
+
+        menuItem = new JMenuItem("In matched spans + contexts");
+        menuItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent ie) {
+            IndexSearcher searcher;
+            try { // open the IndexSearcher
+              searcher = new IndexSearcher(indexLocation);
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+            Map<String, Integer> freqs;
+            try { // retrieves the number of occurrences
+              freqs = StatsCalculator.freqForAllValues(
+                      patterns, type, feature, true, true);
+            } catch(SearchException se) {
+              se.printStackTrace();
+              return;
+            }
+            DefaultTableModel model = new DefaultTableModel();
+            model.addColumn(type+'.'+feature);
+            model.addColumn("Count");
+            for (Map.Entry<String,Integer> map : freqs.entrySet()) {
+              model.addRow(new Object[]{map.getKey(), map.getValue()});
+            }
+            table = new XJTable();
+            table.setModel(model);
+            table.setComparator(0, stringCollator);
+            table.setComparator(1, integerComparator);
+            statisticsTabbedPane.addTab(
+              String.valueOf(statisticsTabbedPane.getTabCount()-1),
+              null, new JScrollPane(table),
+              "Statistics on the Corpus: "
+              +(String)corpusToSearchIn.getSelectedItem()
+              +" and Annotation Set: "
+              +(String)annotationSetsToSearchIn.getSelectedItem()
+              +" in matched spans + contexts.");
+            statisticsTabbedPane.setSelectedIndex(
+              statisticsTabbedPane.getTabCount()-1);
+            try { // close the IndexSearcher
+              searcher.close();
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+          }
+        });
+        mousePopup.add(menuItem);
+
+      } else {
+
+        // count values of one Annotation type
+
+        menuItem = new JMenuItem("In datastore");
+        menuItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent ie) {
+            IndexSearcher searcher;
+            try { // open the IndexSearcher
+              searcher = new IndexSearcher(indexLocation);
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+            int count;
+            try { // retrieves the number of occurrences
+              count = StatsCalculator.freq(
+                searcher, corpusName, annotationSetName, type);
+            } catch(SearchException se) {
+              se.printStackTrace();
+              return;
+            }
+            DefaultTableModel model = new DefaultTableModel();
+            model.addColumn("Annotation Type/Feature");
+            model.addColumn("Count");
+            for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
+              model.addRow(new Object[]{
+                oneRowStatisticsTable.getValueAt(row,0),
+                oneRowStatisticsTable.getValueAt(row,1)});
+            }
+            model.addRow(new Object[]{type, new Integer(count)});
+            oneRowStatisticsTable.setModel(model);
+            oneRowStatisticsTable.setComparator(0, stringCollator);
+            oneRowStatisticsTable.setComparator(1, integerComparator);
+            statisticsTabbedPane.setSelectedIndex(1);
+            try { // close the IndexSearcher
+              searcher.close();
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+          }
+        });
+        mousePopup.add(menuItem);
+
+        menuItem = new JMenuItem("In matched spans");
+        menuItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent ie) {
+            IndexSearcher searcher;
+            try { // open the IndexSearcher
+              searcher = new IndexSearcher(indexLocation);
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+            int count;
+            try { // retrieves the number of occurrences
+              count = StatsCalculator.freq(patterns, type, true, false);
+            } catch(SearchException se) {
+              se.printStackTrace();
+              return;
+            }
+            DefaultTableModel model = new DefaultTableModel();
+            model.addColumn("Annotation Type/Feature");
+            model.addColumn("Count");
+            for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
+              model.addRow(new Object[]{
+                oneRowStatisticsTable.getValueAt(row,0),
+                oneRowStatisticsTable.getValueAt(row,1)});
+            }
+            model.addRow(new Object[]{type, new Integer(count)});
+            oneRowStatisticsTable.setModel(model);
+            oneRowStatisticsTable.setComparator(0, stringCollator);
+            oneRowStatisticsTable.setComparator(1, integerComparator);
+            statisticsTabbedPane.setSelectedIndex(1);
+            try { // close the IndexSearcher
+              searcher.close();
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+          }
+        });
+        mousePopup.add(menuItem);
+
+        menuItem = new JMenuItem("In contexts");
+        menuItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent ie) {
+            IndexSearcher searcher;
+            try { // open the IndexSearcher
+              searcher = new IndexSearcher(indexLocation);
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+            int count;
+            try { // retrieves the number of occurrences
+              count = StatsCalculator.freq(patterns, type, false, true);
+            } catch(SearchException se) {
+              se.printStackTrace();
+              return;
+            }
+            DefaultTableModel model = new DefaultTableModel();
+            model.addColumn("Annotation Type/Feature");
+            model.addColumn("Count");
+            for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
+              model.addRow(new Object[]{
+                oneRowStatisticsTable.getValueAt(row,0),
+                oneRowStatisticsTable.getValueAt(row,1)});
+            }
+            model.addRow(new Object[]{type, new Integer(count)});
+            oneRowStatisticsTable.setModel(model);
+            oneRowStatisticsTable.setComparator(0, stringCollator);
+            oneRowStatisticsTable.setComparator(1, integerComparator);
+            statisticsTabbedPane.setSelectedIndex(1);
+            try { // close the IndexSearcher
+              searcher.close();
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+          }
+        });
+        mousePopup.add(menuItem);
+
+        menuItem = new JMenuItem("In matched spans + contexts");
+        menuItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent ie) {
+            IndexSearcher searcher;
+            try { // open the IndexSearcher
+              searcher = new IndexSearcher(indexLocation);
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+            int count;
+            try { // retrieves the number of occurrences
+              count = StatsCalculator.freq(patterns, type, true, true);
+            } catch(SearchException se) {
+              se.printStackTrace();
+              return;
+            }
+            DefaultTableModel model = new DefaultTableModel();
+            model.addColumn("Annotation Type/Feature");
+            model.addColumn("Count");
+            for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
+              model.addRow(new Object[]{
+                oneRowStatisticsTable.getValueAt(row,0),
+                oneRowStatisticsTable.getValueAt(row,1)});
+            }
+            model.addRow(new Object[]{type, new Integer(count)});
+            oneRowStatisticsTable.setModel(model);
+            oneRowStatisticsTable.setComparator(0, stringCollator);
+            oneRowStatisticsTable.setComparator(1, integerComparator);
+            statisticsTabbedPane.setSelectedIndex(1);
+            try { // close the IndexSearcher
+              searcher.close();
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              return;
+            }
+          }
+        });
+        mousePopup.add(menuItem);
+      }
+      showPopup(me);
     }
 
     private void showPopup(MouseEvent e) {
