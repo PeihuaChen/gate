@@ -9,6 +9,10 @@
 <PARAMETER name="thresholdProbabilityClassification" value="0.5"/>
 
 <multiClassification2Binary method="one-vs-others"/>
+<!-- To test with a thread pool, comment out the line above and uncomment the
+next one.
+<multiClassification2Binary method="one-vs-others" thread-pool-size="4"/>
+-->
 
 <!-- Evaluation : how to split the corpus into test and learn? -->
 <EVALUATION method="split" runs="2" ratio="0.66"/>

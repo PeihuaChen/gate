@@ -59,6 +59,15 @@ public class ConstantParameters {
   /** Name of the file storing the learned models */
   public static final String FILENAMEOFModels = "learnedModels"
     + FILETYPEOFSAVEDFILE;
+  
+  /** Name of the file within a multi-class models directory holding the model
+   * meta-data. */
+  public static final String FILENAMEOFModelMetaData = "metaData";
+  
+  /** Format string for names of individual model files in a multi-class model
+   * directory. */
+  public static final String FILENAMEOFPerClassModel = "class%03d.model";
+  
   /**
    * Name of the file storing NLP feature data with label indexes, instead
    * labels itsesl.
