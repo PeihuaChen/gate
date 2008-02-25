@@ -10,6 +10,9 @@ package gate.learning;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.Iterator;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import gate.creole.ResourceInstantiationException;
@@ -47,6 +50,15 @@ public class LearningEngineSettings {
    * mode conversion.
    */
   final static String multi2BinaryN = "multiClassification2BinaryMethod";
+  
+  /**
+   * Executor used to run the individual binary training and classification
+   * tasks in multi-binary mode.  If this is not set, {@link MultiClassLearning}
+   * will simply run the tasks sequentially in its main thread, but as the
+   * binary tasks are independent they could instead be run in a thread pool.
+   */
+  public ExecutorService multiBinaryExecutor;
+  
   /** The settings of learner specified. */
   public LearnerSettings learnerSettings;
   /** The surround mode. */
@@ -156,10 +168,25 @@ public class LearningEngineSettings {
     }
     learningSettings.multi2BinaryMode = 1;
     if(rootElement.getChild("multiClassification2Binary") != null) {
-      String value = rootElement.getChild("multiClassification2Binary")
-        .getAttribute("method").getValue();
+      Element mc2b = rootElement.getChild("multiClassification2Binary");
+      String value = mc2b.getAttribute("method").getValue();
       if(value.equalsIgnoreCase("one-vs-another"))
         learningSettings.multi2BinaryMode = 2;
+      // thread-pool-size attribute causes multi-binary learning to use
+      // a pool of threads to run the binary learning tasks, rather than
+      // running them sequentially.  This can give a big speedup on large
+      // training sets with a multi-processor machine.
+      String threadPoolSize = mc2b.getAttributeValue("thread-pool-size");
+      if(threadPoolSize != null) {
+        try {
+          int poolSize = Integer.parseInt(threadPoolSize);
+          learningSettings.multiBinaryExecutor = Executors.newFixedThreadPool(poolSize);
+        }
+        catch(NumberFormatException nfe) {
+          throw new ResourceInstantiationException(threadPoolSize
+                  + " is not a valid thread-pool-size: integer expected");
+        }
+      }
     }
     //Read the parameter for displaying the NLP features from linear SVM model
     learningSettings.numPosSVMModel = 10;

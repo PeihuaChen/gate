@@ -671,6 +671,9 @@ public class LightWeightLearningApi extends Object {
         LogService.logMessage("Multi to binary conversion.", 1);
         MultiClassLearning chunkLearning = new MultiClassLearning(
           engineSettings.multi2BinaryMode);
+        if(engineSettings.multiBinaryExecutor != null) {
+          chunkLearning.setExecutor(engineSettings.multiBinaryExecutor);
+        }
         // read data
         chunkLearning.getDataFromFile(numDocs, dataFile);
         LogService.logMessage("The number of classes in dataset: "

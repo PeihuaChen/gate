@@ -52,6 +52,9 @@ public class WekaLearning {
     wekaCl.training(instancesData);
     // Write the learner class into the modelfile by class serialisation
     try {
+      if(modelFile.exists()) {
+        deleteRecursively(modelFile);
+      }
       FileOutputStream modelOutFile = new FileOutputStream(modelFile);
       ObjectOutputStream modelOutputObjectFile = new ObjectOutputStream(
         modelOutFile);
@@ -66,6 +69,24 @@ public class WekaLearning {
       e.printStackTrace();
     }
   }
+  
+  /**
+   * Recursively delete a file or directory (think "rm -rf file").
+   */
+  private void deleteRecursively(File file) throws IOException {
+    if(!file.exists()) {
+      return;
+    }
+    if(file.isDirectory()) {
+      for(File f : file.listFiles()) {
+        deleteRecursively(f);
+      }
+    }
+    if(!file.delete()) {
+      throw new IOException("Couldn't delete file " + file);
+    }
+  }
+  
   /** Read the model from the file and apply it to the data. */
   public void apply(WekaLearner wekaCl, File modelFile,
     boolean distributionOutput) {
