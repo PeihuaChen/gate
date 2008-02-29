@@ -69,11 +69,6 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
   protected Document document;
   
   /**
-   * Input annotation set name.
-   */
-  protected String inputASName;
-  
-  /**
    * Output annotation set name.
    */  
   protected String outputASName;
@@ -156,11 +151,6 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
     int lastProgress = 0;
     fireProgressChanged(lastProgress);
     //get pointers to the annotation sets
-    AnnotationSet inputAS = (inputASName == null || 
-            inputASName.trim().length() == 0) ?
-                            document.getAnnotations() :
-                            document.getAnnotations(inputASName);
-
     AnnotationSet outputAS = (outputASName == null || 
             outputASName.trim().length() == 0) ?
                              document.getAnnotations() :
@@ -372,20 +362,6 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
    */
   public void setDocument(Document document) {
     this.document = document;
-  }
-
-  /**
-   * @return the inputASName
-   */
-  public String getInputASName() {
-    return inputASName;
-  }
-
-  /**
-   * @param inputASName the inputASName to set
-   */
-  public void setInputASName(String inputASName) {
-    this.inputASName = inputASName;
   }
 
   /**

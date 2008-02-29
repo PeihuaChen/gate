@@ -358,11 +358,6 @@
 				NAME="document" RUNTIME="true">
 				gate.Document
 			</PARAMETER>
-			<PARAMETER NAME="inputASName"
-				COMMENT="The name used for the temporary annotation set"
-				RUNTIME="true" OPTIONAL="true">
-				java.lang.String
-			</PARAMETER>
 			<PARAMETER NAME="outputASName"
 				COMMENT="The name used for the temporary annotation set"
 				RUNTIME="true" OPTIONAL="true">
