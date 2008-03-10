@@ -100,7 +100,6 @@
   <loadfile property="gate.version" srcFile="${buildDir}/version.txt"/>
   <loadfile property="gate.build" srcFile="${buildDir}/build.txt"/>
 
-  
   <!-- Use the new 1.3+ compiler -->
   <property name="build.compiler"  value="modern"/>
 
