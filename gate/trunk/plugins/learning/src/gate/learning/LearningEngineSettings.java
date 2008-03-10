@@ -12,6 +12,7 @@ import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
@@ -180,7 +181,16 @@ public class LearningEngineSettings {
       if(threadPoolSize != null) {
         try {
           int poolSize = Integer.parseInt(threadPoolSize);
-          learningSettings.multiBinaryExecutor = Executors.newFixedThreadPool(poolSize);
+          // override the default thread factory with one that returns daemon threads
+          // so as not to stop the VM from exiting
+          learningSettings.multiBinaryExecutor = Executors.newFixedThreadPool(poolSize, new ThreadFactory() {
+            private ThreadFactory fac = Executors.defaultThreadFactory();
+            public Thread newThread(Runnable r) {
+              Thread t = fac.newThread(r);
+              t.setDaemon(true);
+              return t;
+            }
+          });
         }
         catch(NumberFormatException nfe) {
           throw new ResourceInstantiationException(threadPoolSize
