@@ -27,7 +27,7 @@ public interface Searcher {
    * @return
    * @throws SearchException
    */
-  public boolean search(String query, Map parameters) throws SearchException;
+  public boolean search(String query, Map<String, Object> parameters) throws SearchException;
 
   /**
    * Query to search
@@ -66,14 +66,14 @@ public interface Searcher {
    * @return
    * @throws SearchException
    */
-  public String[] getIndexedAnnotationSetNames(String indexLocation) throws SearchException;
+  public String[] getIndexedAnnotationSetNames() throws SearchException;
   
   /**
    * Returns the recently set parameters
    * 
    * @return
    */
-  public Map<Object, Object> getParameters();
+  public Map<String, Object> getParameters();
 
   /**
    * This method can be used for exporting results
@@ -88,4 +88,47 @@ public interface Searcher {
    * @return
    */
   public Hit[] getHits();
+
+  /**
+   * @see StatsCalculator#freq(String, String, String, String, String)
+   */
+  public int freq(String corpusToSearchIn,
+          String annotationSetToSearchIn, String annotationType,
+          String featureName, String value) throws SearchException;
+
+  /**
+   * @see StatsCalculator#freq(String, String, String, String, String)
+   */
+  public int freq(String corpusToSearchIn,
+          String annotationSetToSearchIn, String annotationType)
+          throws SearchException;
+
+  /**
+   * @see StatsCalculator#freq(String, String, String, String, String)
+   */
+  public int freq(String corpusToSearchIn,
+          String annotationSetToSearchIn, String annotationType,
+          String featureName) throws SearchException;
+
+  /**
+   * @see StatsCalculator#freq(List<Hit>, String, String, String, boolean, boolean)
+   */
+  public int freq(List<Hit> patternsToSearchIn,
+          String annotationType, String feature, String value,
+          boolean inMatchedSpan, boolean inContext) throws SearchException;
+
+  /**
+   * @see StatsCalculator#freq(List<Hit>, String, String, String, boolean, boolean)
+   */
+  public int freq(List<Hit> patternsToSearchIn,
+          String annotationType, boolean inMatchedSpan, boolean inContext) throws SearchException;
+
+  /**
+   * @see StatsCalculator#freq(List<Hit>, String, String, boolean, boolean)
+   */
+  public Map<String, Integer> freqForAllValues(
+          List<Hit> patternsToSearchIn, String annotationType,
+          String feature, boolean inMatchedSpan, boolean inContext)
+          throws SearchException;
+
 }
