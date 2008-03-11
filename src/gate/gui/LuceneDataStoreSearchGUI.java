@@ -37,11 +37,8 @@ import gate.creole.annic.Pattern;
 import gate.creole.annic.SearchException;
 import gate.creole.annic.Searcher;
 import gate.creole.annic.lucene.QueryParser;
-import gate.creole.annic.lucene.StatsCalculator;
-import gate.creole.annic.apache.lucene.search.IndexSearcher;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
@@ -79,7 +76,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
   /**
    * URL or file path of the index location of the searcher.
    */
-  private String indexLocation;
+//  private String indexLocation;
   
   /**
    * arraylist consist of instances of patterns associated found in the
@@ -356,19 +353,26 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       }
     });
 
-    // unless the AnnicSerachPR is initialized, we don't have any data
-    // to show
+//    // unless the AnnicSerachPR is initialized, we don't have any data
+//    // to show
     if(target != null) {
-      if(target instanceof Searcher) {
-        searcher = (Searcher)target;
-      } else if(target instanceof LuceneDataStoreImpl) {
-        searcher = ((LuceneDataStoreImpl)target).getSearcher();
-      } else {
-        throw new GateRuntimeException("Invalid target specified for the GUI");
-      }
+//      if(target instanceof Searcher) {
+//        searcher = (Searcher)target;
+//      } else if(target instanceof LuceneDataStoreImpl) {
+//        searcher = ((LuceneDataStoreImpl)target).getSearcher();
+//      } else {
+//        throw new GateRuntimeException("Invalid target specified for the GUI");
+//      }
       updateDisplay();
     }
     validate();
+
+//    LogArea log = new LogArea();
+//    JFrame logFrame = new JFrame();
+//    logFrame.add(new JScrollPane(log));
+//    logFrame.setSize(400, 400);
+//    logFrame.setVisible(true);
+
     return this;
   }
 
@@ -704,42 +708,60 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               timer.schedule(new TimerTask() {
                 public void run() {
                 try {
-                  for (Resource r : Gate.getCreoleRegister().getAllInstances(
-                      "gate.gui.docview.TextualDocumentView")) {
-                    TextualDocumentView t = (TextualDocumentView)r;
-                    // find the document opened in DocumentEditor
-                    if (t.getDocument().getName().equals(doc.getName())) {
-                      // scroll then select the expression that match
-                      // the query result
-                      try {
-                        t.getTextView().scrollRectToVisible(
-                          t.getTextView().modelToView(
-                          result.getRightContextEndOffset()));
-                      } catch (BadLocationException e) {
-                        e.printStackTrace();
-                        return;
-                      }
-                      t.getTextView().select(
-                        result.getLeftContextStartOffset(),
-                        result.getRightContextEndOffset());
-                      t.getTextView().requestFocus();
-                      // display the same annotation types as in Annic
-                      for (int row = 0; row < numAnnotationRows; row++) {
-                        if (annotationRows[row][DISPLAY].equals("false")) {
-                          continue;
-                        }
-                        for (Object asn : doc.getAnnotationSetNames()) {
-                          String type = annotationRows[row][ANNOTATION_TYPE];
-                          AnnotationSet as = doc.getAnnotations((String)asn);
-                          AnnotationSet ast = as.get(type);
-                          if (!ast.isEmpty()) {
-                            t.addHighlights(ast, as,
-                              getAnnotationTypeColor(type));
-                          }
-                        }
-                      }
+//                // find the DocumentEditor then the AnnotationSetsView
+//                // associated with the document
+//                gate.gui.docview.AnnotationSetsView asv;
+//                for (Resource r : Gate.getCreoleRegister().getAllInstances(
+//                    "gate.gui.docview.DocumentEditor")) {
+//                  gate.gui.docview.DocumentEditor de =
+//                    (gate.gui.docview.DocumentEditor)r;
+//                  
+//                  if (de.getCentralViews().get(0).getDocument().getName().equals(doc.getName())) {
+//                    asv = (gate.gui.docview.AnnotationSetsView)
+//                      de.getHorizontalViews();
+//                    break;
+//                  }
+//                }
+                for (Resource r : Gate.getCreoleRegister().getAllInstances(
+                    "gate.gui.docview.TextualDocumentView")) {
+                  TextualDocumentView t = (TextualDocumentView)r;
+                  // find the document opened in DocumentEditor
+                  if (t.getDocument().getName().equals(doc.getName())) {
+                    // scroll then select the expression that matches
+                    // the query result
+                    try {
+                    t.getTextView().scrollRectToVisible(
+                      t.getTextView().modelToView(
+                      result.getRightContextEndOffset()));
+                    } catch (BadLocationException e) {
+                      e.printStackTrace();
+                      return;
                     }
+                    t.getTextView().select(
+                      result.getLeftContextStartOffset(),
+                      result.getRightContextEndOffset());
+                    t.getTextView().requestFocus();
+                    // display the same annotation types as in Annic
+//                    for (int row = 0; row < numAnnotationRows; row++) {
+//                      if (annotationRows[row][DISPLAY].equals("false")) {
+//                        continue;
+//                      }
+//                      // for each annotation set in the document
+//                      for (Object asn : doc.getAnnotationSetNames()) {
+//                        String type = annotationRows[row][ANNOTATION_TYPE];
+//                        AnnotationSet as = doc.getAnnotations((String)asn);
+//                        // look if there is the type displayed in Annic
+//                        AnnotationSet ast = as.get(type);
+//                        if (!ast.isEmpty()) {
+////                          t.addHighlights(ast, as,
+////                            getAnnotationTypeColor(type));
+//                          asv.setTypeSelected((String)asn, type, true);
+//                        }
+//                      }
+//                    }
+                    break;
                   }
+                }
                 } catch (gate.util.GateException e) {
                   e.printStackTrace();
                   return;
@@ -1049,8 +1071,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
   }
 
   /**
-   * Updates the central view of annotation rows when the user changes
-   * his/her selection of pattern in the patternTable.
+   * Updates the central view of annotation rows.
    */
   protected void updateCentralView() {
     // maximum number of columns to display, i.e. maximum number of characters
@@ -1314,7 +1335,10 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         public void actionPerformed(ActionEvent ie) {
           int row = findAnnotationRow(
                   ANNOTATION_TYPE, typeFinal, FEATURE, featureFinal);
-          if (row >= 0) { annotationRows[row][DISPLAY] = "false"; }
+          if (row >= 0) {
+            annotationRows[row][DISPLAY] = "false";
+            saveConfiguration();
+          }
           updateCentralView();
         }
       });
@@ -1398,13 +1422,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     populatedAnnotationTypesAndFeatures =
       getAnnotTypesFeatures(corpusName, annotationSetName);
 
-    IndexSearcher searcher;
-    try { // open the IndexSearcher
-      searcher = new IndexSearcher(indexLocation);
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-      return;
-    }
     try {
       int count;
       DefaultTableModel model = new DefaultTableModel();
@@ -1415,8 +1432,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       for (String annotationType : ts) {
         // retrieves the number of occurrences for each Annotation Type
         // of the choosen Annotation Set
-        count = StatsCalculator.freq(searcher, corpusName,
-          annotationSetName, annotationType);
+        count = searcher.freq(corpusName, annotationSetName, annotationType);
         model.addRow(new Object[]{annotationType, new Integer(count)});
       }
       globalStatisticsTable.setModel(model);
@@ -1424,12 +1440,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       globalStatisticsTable.setComparator(1, integerComparator);
     } catch(SearchException se) {
       se.printStackTrace();
-      return;
-    }
-    try { // close the IndexSearcher
-      searcher.close();
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
       return;
     }
   }
@@ -1665,7 +1675,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
     public void actionPerformed(ActionEvent ae) {
 
-      Map<Object, Object> parameters = searcher.getParameters();
+      Map<String, Object> parameters = searcher.getParameters();
 
       // if there are no pattern say so
       if(patterns == null || patterns.isEmpty()) {
@@ -1841,15 +1851,15 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
           thisInstance.setEnabled(false);
-          Map<Object, Object> parameters = searcher.getParameters();
+          Map<String, Object> parameters = searcher.getParameters();
           if(parameters == null)
-            parameters = new HashMap<Object, Object>();
+            parameters = new HashMap<String, Object>();
 
           if(target instanceof LuceneDataStoreImpl) {
-            ArrayList<String> indexLocations = new ArrayList<String>();
-            indexLocations.add(indexLocation);
-            parameters.put(Constants.INDEX_LOCATIONS, indexLocations);
-
+//            ArrayList<String> indexLocations = new ArrayList<String>();
+//            indexLocations.add(indexLocation);
+//            parameters.put(Constants.INDEX_LOCATIONS, indexLocations);
+//
             String corpus2SearchIn = 
               (corpusToSearchIn.getSelectedItem().equals(Constants.ENTIRE_DATASTORE))?
                       null:(String)corpusIds.get(corpusToSearchIn.getSelectedIndex() - 1);
@@ -1963,7 +1973,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           if (searcher.getHits().length < noOfPatterns) {
             nextResultsAction.setEnabled(false);
           }
-          saveConfiguration();
         }
       });
     }
@@ -2100,17 +2109,10 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         menuItem = new JMenuItem("In DataStore");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
-            IndexSearcher searcher;
-            try { // open the IndexSearcher
-              searcher = new IndexSearcher(indexLocation);
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
             int count;
             try { // retrieves the number of occurrences
-              count = StatsCalculator.freq(searcher, corpusID,
-                annotationSetID, type, feature, text);
+              count = searcher.freq(corpusID, annotationSetID,
+                                    type, feature, text);
             } catch(SearchException se) {
               se.printStackTrace();
               return;
@@ -2136,12 +2138,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               displayStatistics.doClick();
             }
             statisticsTabbedPane.setSelectedIndex(1);
-            try { // close the IndexSearcher
-              searcher.close();
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
           }
         });
         mousePopup.add(menuItem);
@@ -2149,16 +2145,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         menuItem = new JMenuItem("In matched spans");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
-            IndexSearcher searcher;
-            try { // open the IndexSearcher
-              searcher = new IndexSearcher(indexLocation);
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
             int count;
             try { // retrieves the number of occurrences
-              count = StatsCalculator.freq(patterns, type,
+              count = searcher.freq(patterns, type,
                 feature, text, true, false);
             } catch(SearchException se) {
               se.printStackTrace();
@@ -2185,12 +2174,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               displayStatistics.doClick();
             }
             statisticsTabbedPane.setSelectedIndex(1);
-            try { // close the IndexSearcher
-              searcher.close();
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
           }
         });
         mousePopup.add(menuItem);
@@ -2198,16 +2181,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         menuItem = new JMenuItem("In contexts");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
-            IndexSearcher searcher;
-            try { // open the IndexSearcher
-              searcher = new IndexSearcher(indexLocation);
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
             int count;
             try { // retrieves the number of occurrences
-              count = StatsCalculator.freq(patterns, type,
+              count = searcher.freq(patterns, type,
                       feature, text, false, true);
             } catch(SearchException se) {
               se.printStackTrace();
@@ -2234,12 +2210,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               displayStatistics.doClick();
             }
             statisticsTabbedPane.setSelectedIndex(1);
-            try { // close the IndexSearcher
-              searcher.close();
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
           }
         });
         mousePopup.add(menuItem);
@@ -2247,16 +2217,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         menuItem = new JMenuItem("In matched spans + contexts");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
-            IndexSearcher searcher;
-            try { // open the IndexSearcher
-              searcher = new IndexSearcher(indexLocation);
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
             int count;
             try { // retrieves the number of occurrences
-              count = StatsCalculator.freq(patterns, type,
+              count = searcher.freq(patterns, type,
                       feature, text, true, true);
             } catch(SearchException se) {
               se.printStackTrace();
@@ -2284,12 +2247,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               displayStatistics.doClick();
             }
             statisticsTabbedPane.setSelectedIndex(1);
-            try { // close the IndexSearcher
-              searcher.close();
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
           }
         });
         mousePopup.add(menuItem);
@@ -2350,18 +2307,10 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         menuItem = new JMenuItem("In DataStore");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
-            IndexSearcher searcher;
-            try { // open the IndexSearcher
-              searcher = new IndexSearcher(indexLocation);
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
             int count;
             try { // retrieves the number of occurrences
               // TODO: gives always zero
-              count = StatsCalculator.freq(searcher, corpusID,
-                annotationSetID, type, feature);
+              count = searcher.freq(corpusID, annotationSetID, type, feature);
             } catch(SearchException se) {
               se.printStackTrace();
               return;
@@ -2387,12 +2336,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               displayStatistics.doClick();
             }
             statisticsTabbedPane.setSelectedIndex(1);
-            try { // close the IndexSearcher
-              searcher.close();
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
           }
         });
         mousePopup.add(menuItem);
@@ -2400,16 +2343,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         menuItem = new JMenuItem("In matched spans");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
-            IndexSearcher searcher;
-            try { // open the IndexSearcher
-              searcher = new IndexSearcher(indexLocation);
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
             int count;
             try { // retrieves the number of occurrences
-              count = StatsCalculator.freq(patterns, type,
+              count = searcher.freq(patterns, type,
                 feature, null, true, false);
             } catch(SearchException se) {
               se.printStackTrace();
@@ -2436,12 +2372,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               displayStatistics.doClick();
             }
             statisticsTabbedPane.setSelectedIndex(1);
-            try { // close the IndexSearcher
-              searcher.close();
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
           }
         });
         mousePopup.add(menuItem);
@@ -2449,16 +2379,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         menuItem = new JMenuItem("In contexts");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
-            IndexSearcher searcher;
-            try { // open the IndexSearcher
-              searcher = new IndexSearcher(indexLocation);
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
             int count;
             try { // retrieves the number of occurrences
-              count = StatsCalculator.freq(patterns, type,
+              count = searcher.freq(patterns, type,
                       feature, null, false, true);
             } catch(SearchException se) {
               se.printStackTrace();
@@ -2485,12 +2408,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               displayStatistics.doClick();
             }
             statisticsTabbedPane.setSelectedIndex(1);
-            try { // close the IndexSearcher
-              searcher.close();
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
           }
         });
         mousePopup.add(menuItem);
@@ -2498,16 +2415,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         menuItem = new JMenuItem("In matched spans + contexts");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
-            IndexSearcher searcher;
-            try { // open the IndexSearcher
-              searcher = new IndexSearcher(indexLocation);
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
             int count;
             try { // retrieves the number of occurrences
-              count = StatsCalculator.freq(patterns, type,
+              count = searcher.freq(patterns, type,
                       feature, null, true, true);
             } catch(SearchException se) {
               se.printStackTrace();
@@ -2535,12 +2445,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               displayStatistics.doClick();
             }
             statisticsTabbedPane.setSelectedIndex(1);
-            try { // close the IndexSearcher
-              searcher.close();
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
           }
         });
         mousePopup.add(menuItem);
@@ -2554,16 +2458,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         menuItem = new JMenuItem("In matched spans");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
-            IndexSearcher searcher;
-            try { // open the IndexSearcher
-              searcher = new IndexSearcher(indexLocation);
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
             Map<String, Integer> freqs;
             try { // retrieves the number of occurrences
-              freqs = StatsCalculator.freqForAllValues(
+              freqs = searcher.freqForAllValues(
                       patterns, type, feature, true, false);
             } catch(SearchException se) {
               se.printStackTrace();
@@ -2592,12 +2489,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
             }
             statisticsTabbedPane.setSelectedIndex(
               statisticsTabbedPane.getTabCount()-1);
-            try { // close the IndexSearcher
-              searcher.close();
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
           }
         });
         mousePopup.add(menuItem);
@@ -2605,16 +2496,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         menuItem = new JMenuItem("In contexts");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
-            IndexSearcher searcher;
-            try { // open the IndexSearcher
-              searcher = new IndexSearcher(indexLocation);
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
             Map<String, Integer> freqs;
             try { // retrieves the number of occurrences
-              freqs = StatsCalculator.freqForAllValues(
+              freqs = searcher.freqForAllValues(
                       patterns, type, feature, false, true);
             } catch(SearchException se) {
               se.printStackTrace();
@@ -2643,12 +2527,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
             }
             statisticsTabbedPane.setSelectedIndex(
               statisticsTabbedPane.getTabCount()-1);
-            try { // close the IndexSearcher
-              searcher.close();
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
           }
         });
         mousePopup.add(menuItem);
@@ -2656,16 +2534,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         menuItem = new JMenuItem("In matched spans + contexts");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
-            IndexSearcher searcher;
-            try { // open the IndexSearcher
-              searcher = new IndexSearcher(indexLocation);
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
             Map<String, Integer> freqs;
             try { // retrieves the number of occurrences
-              freqs = StatsCalculator.freqForAllValues(
+              freqs = searcher.freqForAllValues(
                       patterns, type, feature, true, true);
             } catch(SearchException se) {
               se.printStackTrace();
@@ -2694,12 +2565,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
             }
             statisticsTabbedPane.setSelectedIndex(
               statisticsTabbedPane.getTabCount()-1);
-            try { // close the IndexSearcher
-              searcher.close();
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
           }
         });
         mousePopup.add(menuItem);
@@ -2711,17 +2576,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         menuItem = new JMenuItem("In datastore");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
-            IndexSearcher searcher;
-            try { // open the IndexSearcher
-              searcher = new IndexSearcher(indexLocation);
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
             int count;
             try { // retrieves the number of occurrences
-              count = StatsCalculator.freq(
-                searcher, corpusID, annotationSetID, type);
+              count = searcher.freq(corpusID, annotationSetID, type);
             } catch(SearchException se) {
               se.printStackTrace();
               return;
@@ -2746,12 +2603,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               displayStatistics.doClick();
             }
             statisticsTabbedPane.setSelectedIndex(1);
-            try { // close the IndexSearcher
-              searcher.close();
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
           }
         });
         mousePopup.add(menuItem);
@@ -2759,16 +2610,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         menuItem = new JMenuItem("In matched spans");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
-            IndexSearcher searcher;
-            try { // open the IndexSearcher
-              searcher = new IndexSearcher(indexLocation);
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
             int count;
             try { // retrieves the number of occurrences
-              count = StatsCalculator.freq(patterns, type, true, false);
+              count = searcher.freq(patterns, type, true, false);
             } catch(SearchException se) {
               se.printStackTrace();
               return;
@@ -2793,12 +2637,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               displayStatistics.doClick();
             }
             statisticsTabbedPane.setSelectedIndex(1);
-            try { // close the IndexSearcher
-              searcher.close();
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
           }
         });
         mousePopup.add(menuItem);
@@ -2806,16 +2644,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         menuItem = new JMenuItem("In contexts");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
-            IndexSearcher searcher;
-            try { // open the IndexSearcher
-              searcher = new IndexSearcher(indexLocation);
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
             int count;
             try { // retrieves the number of occurrences
-              count = StatsCalculator.freq(patterns, type, false, true);
+              count = searcher.freq(patterns, type, false, true);
             } catch(SearchException se) {
               se.printStackTrace();
               return;
@@ -2840,12 +2671,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               displayStatistics.doClick();
             }
             statisticsTabbedPane.setSelectedIndex(1);
-            try { // close the IndexSearcher
-              searcher.close();
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
           }
         });
         mousePopup.add(menuItem);
@@ -2853,16 +2678,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         menuItem = new JMenuItem("In matched spans + contexts");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
-            IndexSearcher searcher;
-            try { // open the IndexSearcher
-              searcher = new IndexSearcher(indexLocation);
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
             int count;
             try { // retrieves the number of occurrences
-              count = StatsCalculator.freq(patterns, type, true, true);
+              count = searcher.freq(patterns, type, true, true);
             } catch(SearchException se) {
               se.printStackTrace();
               return;
@@ -2888,12 +2706,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               displayStatistics.doClick();
             }
              statisticsTabbedPane.setSelectedIndex(1);
-            try { // close the IndexSearcher
-              searcher.close();
-            } catch (IOException ioe) {
-              ioe.printStackTrace();
-              return;
-            }
           }
         });
         mousePopup.add(menuItem);
@@ -3056,6 +2868,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           checkBox.setHorizontalAlignment(SwingConstants.CENTER);
           checkBox.addActionListener(this);
         }
+        public boolean shouldSelectCell(EventObject anEvent) {
+          return false;
+        }
         public void actionPerformed(ActionEvent e) {
           fireEditingStopped();
         }
@@ -3206,6 +3021,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           button.setHorizontalAlignment(SwingConstants.CENTER);
           button.addActionListener(this);
         }
+        public boolean shouldSelectCell(EventObject anEvent) {
+          return false;
+        }
         public void actionPerformed(ActionEvent e) {
           if (addButton) {
             if (annotationRows[row][ANNOTATION_TYPE] != null
@@ -3220,6 +3038,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
                 annotationRowsManagerTableModel
                   .fireTableRowsInserted(row, row+1);
                 updateCentralView();
+                saveConfiguration();
               }
             } else {
               JOptionPane.showMessageDialog(annotationRowsManager,
@@ -3231,6 +3050,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
             deleteAnnotationRow(row);
             annotationRowsManagerTableModel.fireTableDataChanged();
             updateCentralView();
+            saveConfiguration();
           }
           fireEditingStopped();
         }
@@ -3318,11 +3138,12 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       if (!annotationRows[row][SHORTCUT].equals("")) {
         if (annotationRows[row][ANNOTATION_TYPE].equals("")
          || annotationRows[row][FEATURE].equals("")) {
-//          annotationRowsManager.getTable().
-          annotationRows[row][col] = previousValue;
 //          fireTableRowsUpdated(row, row);
           // TODO table should be update
 //          fireTableCellUpdated(row, col);
+          annotationRowsManager.getTable().getColumnModel().getColumn(col)
+            .getCellEditor().cancelCellEditing();
+          annotationRows[row][col] = previousValue;
           JOptionPane.showMessageDialog(annotationRowsManager,
             "A Shortcut need to have a Feature.\n"
             +"Please choose a Feature or delete the Shortcut value.",
@@ -3332,10 +3153,11 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           int row2 = findAnnotationRow(
                   ANNOTATION_TYPE, annotationRows[row][ANNOTATION_TYPE],
                   FEATURE,         annotationRows[row][FEATURE]);
-          if (row2 >= 0 && row2 != row) {
+          if (row2 >= 0 && row2 != row
+           && !annotationRows[row2][SHORTCUT].equals("")) {
+            annotationRowsManager.getTable().getColumnModel().getColumn(col)
+              .getCellEditor().cancelCellEditing();
             annotationRows[row][col] = previousValue;
-//            fireTableRowsUpdated(row, row);
-//            fireTableCellUpdated(row, col);
             JOptionPane.showMessageDialog(annotationRowsManager,
               "You can only have one Shortcut for a couple (Annotation "
               +"type, Feature).", "Alert", JOptionPane.ERROR_MESSAGE);
@@ -3347,6 +3169,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       annotationRows[row][col] = value.toString();
       fireTableRowsUpdated(row, row);
       updateCentralView();
+      saveConfiguration();
     }
   }
 
@@ -4115,6 +3938,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
    *          display
    */
   public void setTarget(Object target) {
+
     if(!(target instanceof LuceneDataStoreImpl)
     && !(target instanceof Searcher)) {
       throw new IllegalArgumentException(
@@ -4125,23 +3949,35 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
     this.target = target;
 
-    if(this.target instanceof LuceneDataStoreImpl) {
+    // standalone Java application
+    if(target instanceof LuceneDataStoreImpl) {
 
-      ((LuceneDataStoreImpl)this.target).addDatastoreListener(this);
+      ((LuceneDataStoreImpl)target).addDatastoreListener(this);
       corpusToSearchIn.setEnabled(true);
       annotationSetsToSearchIn.setEnabled(true);
-      this.searcher = ((LuceneDataStoreImpl)this.target).getSearcher();
+      searcher = ((LuceneDataStoreImpl)target).getSearcher();
+
+//      try {
+//        indexLocation = new File(((URL)((LuceneDataStoreImpl)target)
+//          .getIndexer().getParameters().get(Constants.INDEX_LOCATION_URL))
+//          .toURI()).getAbsolutePath();
+//
+//      } catch(URISyntaxException use) {
+//        indexLocation = new File(((URL)((LuceneDataStoreImpl)target)
+//          .getIndexer().getParameters().get(Constants.INDEX_LOCATION_URL))
+//          .getFile()).getAbsolutePath();
+//      }
 
       updateAnnotationSetsTypesFeatures();
 
       try {
         // get the corpus names from the datastore
-        java.util.List corpusPIds = ((LuceneDataStoreImpl)this.target)
+        java.util.List corpusPIds = ((LuceneDataStoreImpl)target)
                 .getLrIds(SerialCorpusImpl.class.getName());
         if(corpusIds != null) {
           for(int i = 0; i < corpusPIds.size(); i++) {
             String name =
-              ((LuceneDataStoreImpl)this.target).getLrName(corpusPIds.get(i));
+              ((LuceneDataStoreImpl)target).getLrName(corpusPIds.get(i));
             this.corpusIds.add(corpusPIds.get(i));
             // add the corpus name to combobox
             ((DefaultComboBoxModel)corpusToSearchIn.getModel())
@@ -4155,46 +3991,32 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           }
         });
       }
-      catch(PersistenceException pe) {
-        // couldn't find any available corpusIds
+      catch(PersistenceException e) {
+        System.out.println("Couldn't find any available corpusIds.");
+        throw new GateRuntimeException(e);
       }
     }
-    else {// TODO: this part has not been tested
-      this.searcher = (Searcher)this.target;
+    // Java Web Start application
+    else {
+      searcher = (Searcher)target;
       corpusToSearchIn.setEnabled(false);
-
-      // here we need to find out all annotation sets that are indexed
+      
+      // find out all annotation sets that are indexed
       try {
-        annotationSetIDsFromDataStore = this.searcher
-                .getIndexedAnnotationSetNames(null);
-        allAnnotTypesAndFeaturesFromDatastore = this.searcher
+        annotationSetIDsFromDataStore = searcher
+                .getIndexedAnnotationSetNames();
+        allAnnotTypesAndFeaturesFromDatastore = searcher
                 .getAnnotationTypesMap();
-
-//        // each ID has the corpusName;annotationsetname
-//        TreeSet<String> ts = new TreeSet<String>();
-//        for(String aSetName : annotationSetIDsFromDataStore) {
-//          // and we need to add the name to the combobox
-//          ts.add(aSetName.substring(aSetName.indexOf(";") + 1));
-//        }
-//        annotationSetsToSearchIn.setModel(
-//                new DefaultComboBoxModel(ts.toArray()));
-//        annotationSetsToSearchIn.insertItemAt(Constants.ALL_SETS, 0);
-////        annotationSetsToSearchIn.setSelectedItem(Constants.ALL_SETS);
 
         // lets fire the update event on combobox
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             updateAnnotationSetsToSearchInBox();
-//            annotationSetsToSearchIn.updateUI();
-//            annotationSetsToSearchIn.setSelectedItem(Constants.ALL_SETS);
-//            if(annotationSetIDsFromDataStore.length > 0) {
-//              annotationSetsToSearchIn.setSelectedIndex(0);
-//            }
           }
         });
       }
-      catch(SearchException pe) {
-        throw new GateRuntimeException(pe);
+      catch(SearchException e) {
+        throw new GateRuntimeException(e);
       }
     }
 
@@ -4231,8 +4053,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       }
     });
   }
-
-  // Listening to datastore events
 
   /**
    * This method is called by datastore when a new resource is adopted
@@ -4285,21 +4105,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
   protected void updateAnnotationSetsTypesFeatures() {
 
-    URL indexLocationURL = (URL)((LuceneDataStoreImpl)target).getIndexer()
-      .getParameters().get(Constants.INDEX_LOCATION_URL);
-    indexLocation = null;
     try {
-      indexLocation = new File(indexLocationURL.toURI()).getAbsolutePath();
-
-    } catch(URISyntaxException use) {
-      indexLocation = new File(indexLocationURL.getFile()).getAbsolutePath();
-    }
-
-    try {
-      annotationSetIDsFromDataStore = ((LuceneDataStoreImpl)this.target)
-      .getSearcher().getIndexedAnnotationSetNames(indexLocation);
-      allAnnotTypesAndFeaturesFromDatastore = ((LuceneDataStoreImpl)this.target)
-      .getSearcher().getAnnotationTypesMap();
+      annotationSetIDsFromDataStore = searcher.getIndexedAnnotationSetNames();
+      allAnnotTypesAndFeaturesFromDatastore = searcher.getAnnotationTypesMap();
       updateAnnotationSetsToSearchInBox();
 
     } catch(SearchException se) {

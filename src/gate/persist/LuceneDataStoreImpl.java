@@ -88,6 +88,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
 				indexURL = new URL(url);
 				this.indexer = new LuceneIndexer(indexURL);
 				this.searcher = new LuceneSearcher();
+        ((LuceneSearcher)this.searcher).setLuceneDatastore(this);
 			}
 			isr.close();
 		} catch (IOException e) {
@@ -319,6 +320,9 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
 
 	public void setSearcher(Searcher searcher) throws SearchException {
 		this.searcher = searcher;
+    if(this.searcher instanceof LuceneSearcher) {
+      ((LuceneSearcher)this.searcher).setLuceneDatastore(this);
+    }
 	}
 
 	public Searcher getSearcher() {
