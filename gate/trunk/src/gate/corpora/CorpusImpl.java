@@ -392,6 +392,16 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
     populate(this, directory, filter, encoding, recurseDirectories);
   }
 
+  
+  private static String replaceAmpChars(String s) {
+    s = s.replaceAll("&","&amp;");
+    //s = s.replaceAll("<","&lt;");
+    //s = s.replaceAll(">","&gt;");
+    //s = s.replaceAll("\"","&quot;");
+    //s = s.replaceAll("'","&apos;");
+    return s;
+  }
+  
   /**
    * Fills the provided corpus with documents extracted from the
    * provided trec file.
@@ -469,7 +479,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
             String docName = "Trec_File_" + count + "_" + Gate.genSym();
             FeatureMap params = Factory.newFeatureMap();
             params.put(Document.DOCUMENT_STRING_CONTENT_PARAMETER_NAME,
-                    documentString);
+                    replaceAmpChars(documentString));
             if(encoding != null && encoding.trim().length() > 0)
               params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, encoding);
 
