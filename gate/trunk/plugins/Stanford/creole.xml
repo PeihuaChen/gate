@@ -1,0 +1,90 @@
+<?xml version="1.0"?>  
+<CREOLE-DIRECTORY>  
+<CREOLE>  
+
+<RESOURCE>
+      <NAME>StanfordParser</NAME> 
+      <CLASS>gate.stanford.Parser</CLASS> 
+      <JAR>gate-stanford.jar</JAR>
+      <JAR>lib/stanford-parser.jar</JAR>
+
+      <PARAMETER NAME="document"  
+         COMMENT="The document to be processed"  
+         RUNTIME="true">gate.Document</PARAMETER>  
+
+      <PARAMETER NAME="inputASName"  
+         COMMENT="name of the annotationSet used for input (Token and Sentence annotations)"  
+         RUNTIME="true"  
+         OPTIONAL="true">java.lang.String</PARAMETER>  
+ 
+      <PARAMETER NAME="outputASName"  
+         COMMENT="name of the annotationSet used for output"  
+         RUNTIME="true"  
+         OPTIONAL="true">java.lang.String</PARAMETER>  
+
+      <PARAMETER NAME="parserFile"  
+         COMMENT="path to the parser's grammar file"  
+         RUNTIME="false"
+         DEFAULT="resources/englishPCFG.ser.gz"
+         OPTIONAL="true">java.net.URL</PARAMETER>  
+
+      <!--  default is now null  -->
+      <PARAMETER NAME="mappingFile"  
+         COMMENT="path to the tag mapping file"  
+         RUNTIME="false"
+         OPTIONAL="true">java.net.URL</PARAMETER>  
+
+      <PARAMETER NAME="debug"  
+         COMMENT="verbose mode for debugging"  
+         RUNTIME="true"
+         DEFAULT="false"
+         OPTIONAL="true">java.lang.Boolean</PARAMETER>  
+
+      <PARAMETER NAME="addPosTags"
+         COMMENT="Create POS tags on the Token annotations"
+         RUNTIME="true"
+         DEFAULT="false"
+         OPTIONAL="true">java.lang.Boolean</PARAMETER>
+
+      <PARAMETER NAME="reusePosTags"
+         COMMENT="Re-use existing POS tags on tokens"
+         RUNTIME="true"
+         DEFAULT="false"
+         OPTIONAL="true">java.lang.Boolean</PARAMETER>  
+
+      <PARAMETER NAME="useMapping"
+         COMMENT="use tag mapping"
+         RUNTIME="true"
+         DEFAULT="false"
+         OPTIONAL="true">java.lang.Boolean</PARAMETER>  
+         
+      <PARAMETER NAME="addConstituentAnnotations"
+         COMMENT="Create annotations to show phrase structures"
+         RUNTIME="true"
+         DEFAULT="true"
+         OPTIONAL="true">java.lang.Boolean</PARAMETER>  
+
+      <PARAMETER NAME="addDependencyAnnotations"
+         COMMENT="Create annotations to show dependencies"
+         RUNTIME="true"
+         DEFAULT="true"
+         OPTIONAL="true">java.lang.Boolean</PARAMETER>  
+
+      <PARAMETER NAME="addDependencyFeatures"
+         COMMENT="Create dependency features on Token annotations"
+         RUNTIME="true"
+         DEFAULT="true"
+         OPTIONAL="true">java.lang.Boolean</PARAMETER>  
+
+      <PARAMETER NAME="tlppClass"
+         COMMENT="Class name of the TreebankLangParserParams implementation used to extract the dependencies"
+         RUNTIME="false"
+         DEFAULT="edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams"
+         >java.lang.String</PARAMETER>  
+ 
+</RESOURCE>
+
+
+</CREOLE>  
+
+</CREOLE-DIRECTORY> 
