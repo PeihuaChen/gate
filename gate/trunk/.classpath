@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" output="plugins/Stanford/classes" path="plugins/Stanford/src"/>
 	<classpathentry kind="src" output="plugins/chinese/build" path="plugins/chinese/src"/>
 	<classpathentry kind="src" output="plugins/google/build" path="plugins/google/src"/>
 	<classpathentry kind="src" output="plugins/uima/classes" path="plugins/uima/src"/>
@@ -106,5 +107,6 @@
 	<classpathentry kind="lib" path="plugins/yahoo/lib/yahoo_search-1.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-core-2.2.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/tools.jar"/>
+	<classpathentry kind="lib" path="plugins/Stanford/lib/stanford-parser.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
