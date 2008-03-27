@@ -132,7 +132,17 @@ public class MultiClassLearning {
           throw new IOException("Couldn't create directory for model files");
         }
       }
-      File metaDataFile = new File(modelFile, ConstantParameters.FILENAMEOFModelMetaData);
+
+      // create a temporary directory for the new learned models
+      File tmpDirFile = new File(modelFile, "tmp");
+      if(tmpDirFile.exists()) {
+        deleteRecursively(tmpDirFile);
+      }
+      if(!tmpDirFile.mkdir()) {
+        throw new IOException("Couldn't create temporary directory for training");
+      }        
+      
+      File metaDataFile = new File(tmpDirFile, ConstantParameters.FILENAMEOFModelMetaData);
       BufferedWriter metaDataBuff = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(metaDataFile), "UTF-8"));
       // convert the multi-class to binary class -- labels conversion
       // can't share these arrays between concurrent threads, so must use ThreadLocal
@@ -159,7 +169,7 @@ public class MultiClassLearning {
           metaDataBuff.close();
           for(int iCounter = 0; iCounter < array1.size(); ++iCounter) {
             final int i = iCounter;
-            final File thisClassModelFile = new File(modelFile,
+            final File thisClassModelFile = new File(tmpDirFile,
                     String.format(ConstantParameters.FILENAMEOFPerClassModel, Integer.valueOf(classIndex++)));
             tasks.add(new Callable<String>() {
               public String call() throws Exception {
@@ -205,7 +215,7 @@ public class MultiClassLearning {
           if(numNull > 0) {
             for(int jCounter = 0; jCounter < array1.size(); ++jCounter) {
               final int j = jCounter;
-              final File thisClassModelFile = new File(modelFile,
+              final File thisClassModelFile = new File(tmpDirFile,
                       String.format(ConstantParameters.FILENAMEOFPerClassModel, Integer.valueOf(classIndex++)));
               tasks.add(new Callable<String>() {
                 public String call() throws Exception {
@@ -241,7 +251,7 @@ public class MultiClassLearning {
             final int i = iCounter;
             for(int jCounter = i + 1; jCounter < array1.size(); ++jCounter) {
               final int j = jCounter;
-              final File thisClassModelFile = new File(modelFile,
+              final File thisClassModelFile = new File(tmpDirFile,
                       String.format(ConstantParameters.FILENAMEOFPerClassModel, Integer.valueOf(classIndex++)));
               tasks.add(new Callable<String>() {
                 public String call() throws Exception {
@@ -285,6 +295,7 @@ public class MultiClassLearning {
       // actually run the tasks, print any exception traces that result
       LogService.logMessage("Running tasks using executor " + executor, 1);
       List<Future<String>> futures = executor.invokeAll(tasks);
+      boolean success = true;
       for(Future<String> f : futures) {
         try {
           String message = f.get();
@@ -293,18 +304,30 @@ public class MultiClassLearning {
           }
         }
         catch(java.util.concurrent.ExecutionException e) {
+          success = false;
           e.printStackTrace();
         }
       }
       
-      // delete any classNNN.model files beyond the last one we have learned on
-      // this run
-      for(File orphanedModelFile = new File(modelFile,
-              String.format(ConstantParameters.FILENAMEOFPerClassModel, Integer.valueOf(classIndex)));
-            orphanedModelFile.exists();
-            classIndex++) {
-        orphanedModelFile.delete();
+      if(success) {
+        // replace the old model with the new one
+        moveAllFiles(tmpDirFile, modelFile);
+        // delete any classNNN.model files beyond the last one we have learned on
+        // this run
+        for(File orphanedModelFile = new File(modelFile,
+                String.format(ConstantParameters.FILENAMEOFPerClassModel, Integer.valueOf(classIndex)));
+              orphanedModelFile.exists();
+              classIndex++) {
+          orphanedModelFile.delete();
+        }
       }
+      else {
+        LogService.logMessage("Error during training, old model not overwritten", 1);
+      }
+      
+      // delete the temporary directory
+      deleteRecursively(tmpDirFile);
+      
     } catch(IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -314,7 +337,43 @@ public class MultiClassLearning {
       e.printStackTrace();
     }
   }
+  
+  /**
+   * Delete a file or directory.  If the argument is a directory,
+   * delete its contents first, then remove the directory itself.
+   */
+  private void deleteRecursively(File fileOrDir) throws IOException {
+    if(fileOrDir.isDirectory()) {
+      for(File f : fileOrDir.listFiles()) {
+        deleteRecursively(f);
+      }
+    }
 
+    if(!fileOrDir.delete()) {
+      throw new IOException("Couldn't delete "
+              + (fileOrDir.isDirectory() ? "directory " : "file ") + fileOrDir);
+    }
+  }
+
+  /**
+   * Move all the files from one directory into another.
+   * 
+   * @param src the directory whose contents are to be moved
+   * @param dest the directory into which the files should go
+   */
+  private void moveAllFiles(File src, File dest) throws IOException {
+    for(String fileName : src.list()) {
+      File srcFile = new File(src, fileName);
+      File targetFile = new File(dest, fileName);
+      
+      if(targetFile.exists() && !targetFile.delete()) {
+        throw new IOException("Couldn't delete file " + targetFile);
+      }
+      if(!srcFile.renameTo(targetFile)) {
+        throw new IOException("Couldn't move " + srcFile + " to directory " + dest);
+      }
+    }
+  }
   /** Apply the model to the data. */
   public void apply(final SupervisedLearner learner, File modelFile) {
     // Open the mode file and read the model
