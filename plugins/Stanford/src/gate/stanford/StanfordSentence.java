@@ -141,6 +141,10 @@ public class StanfordSentence {
     return nbrOfMissingPosTags;
   }
   
+  public boolean isNotEmpty() {
+    return (nbrOfTokens > 0);
+  }
+  
 
   /**
    * Convert a Stanford start position to the GATE Annotation of type

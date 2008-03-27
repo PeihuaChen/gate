@@ -12,16 +12,11 @@
          COMMENT="The document to be processed"  
          RUNTIME="true">gate.Document</PARAMETER>  
 
-      <PARAMETER NAME="inputASName"  
-         COMMENT="name of the annotationSet used for input (Token and Sentence annotations)"  
+      <PARAMETER NAME="annotationSetName"  
+         COMMENT="annotationSet used for input (Token and Sentence annotations) and output"
          RUNTIME="true"  
          OPTIONAL="true">java.lang.String</PARAMETER>  
  
-      <PARAMETER NAME="outputASName"  
-         COMMENT="name of the annotationSet used for output"  
-         RUNTIME="true"  
-         OPTIONAL="true">java.lang.String</PARAMETER>  
-
       <PARAMETER NAME="parserFile"  
          COMMENT="path to the parser's grammar file"  
          RUNTIME="false"

@@ -42,8 +42,8 @@ implements ProcessingResource {
   private static final String DEP_ARG_FEATURE       = "args";
   private static final String DEP_LABEL_FEATURE     = "kind"; 
 
-  protected String                         inputASName, outputASName;
-  protected AnnotationSet                  inputAS, outputAS;
+  protected String                         annotationSetName;
+  protected AnnotationSet                  annotationSet;
   protected gate.Document                  document;
   private   URL                            parserFile;
   protected boolean                        debugMode;
@@ -59,7 +59,6 @@ implements ProcessingResource {
   
   private OffsetComparator                 offsetComparator;
   private Map<String, String>              tagMap;
-  private boolean                          sameAS;
   
   protected StanfordSentence               stanfordSentence;
   
@@ -103,9 +102,7 @@ implements ProcessingResource {
   
 
   public void execute() throws ExecutionException {
-    inputAS  = convertASName(inputASName);
-    outputAS = convertASName(outputASName);
-    sameAS   = (inputAS == outputAS);
+    annotationSet  = convertASName(annotationSetName);
     
     if (debugMode) {
       System.out.println("Parsing document: " + document.getName());
@@ -179,7 +176,7 @@ implements ProcessingResource {
    */
   @SuppressWarnings("unchecked")
   private void parseSentences() { 
-    List<Annotation> sentences = new ArrayList<Annotation>(inputAS.get(inputSentenceType));
+    List<Annotation> sentences = new ArrayList<Annotation>(annotationSet.get(inputSentenceType));
     java.util.Collections.sort(sentences, offsetComparator);
     Iterator<Annotation> sentenceIter = sentences.iterator();
 
@@ -191,18 +188,26 @@ implements ProcessingResource {
     while (sentenceIter.hasNext()) {
       debugS++;
       tree = parseOneSentence(sentenceIter.next(), debugS);
+      
+      // Here null is the result from an empty Sentence.
+      if (tree != null) {
+        if (addConstituentAnnotations || addPosTags) {
+          annotatePhraseStructureRecursively(tree, tree);
+        }
 
-      if (addConstituentAnnotations || addPosTags) {
-        annotatePhraseStructureRecursively(tree, tree);
+        if (addDependencyFeatures || addDependencyAnnotations) {
+          annotateDependencies(tree);
+        }
+
+        if (debugMode) {
+          System.out.println("Parsed sentence " + debugS + " of " + debugNbrS);
+        }
       }
       
-      if (addDependencyFeatures || addDependencyAnnotations) {
-        annotateDependencies(tree);
+      else if (debugMode) {
+        System.out.println("Ignored empty sentence " + debugS + " of " + debugNbrS);
       }
-
-      if (debugMode) {
-        System.out.println("Parsed sentence " + debugS + " of " + debugNbrS);
-      }
+      
     }
   }
 
@@ -217,25 +222,35 @@ implements ProcessingResource {
    *          sentence number of debugging output
    * @param ofS
    *          total number of sentences for debugging output
-   * @return
+   * @return  null if the sentence is empty
    */
   @SuppressWarnings("unchecked")
   private Tree parseOneSentence(Annotation sentence, int sentenceNo) {
-    stanfordSentence = new StanfordSentence(sentence, inputTokenType, inputAS, reusePosTags);
-    List<Word> wordList = stanfordSentence.getWordList();
+    Tree result = null;
     
-    if (reusePosTags) {
-      int nbrMissingTags = stanfordSentence.numberOfMissingPosTags();
-      if (nbrMissingTags > 0)  {
-        double percentMissing = Math.ceil(100.0 * ((float) nbrMissingTags) /
-                    ((float) stanfordSentence.numberOfTokens()) );
-        System.err.println("Warning (sentence " + sentenceNo + "): " + (int) percentMissing 
-          + "% of the Tokens are missing POS tags." );
+    stanfordSentence = new StanfordSentence(sentence, inputTokenType, annotationSet, reusePosTags);
+
+    /* Ignore an empty Sentence (sometimes the regex splitter can create one
+     * with no Token annotations in it).
+     */
+    if ( stanfordSentence.isNotEmpty() ) {
+      List<Word> wordList = stanfordSentence.getWordList();
+
+      if (reusePosTags) {
+        int nbrMissingTags = stanfordSentence.numberOfMissingPosTags();
+        if (nbrMissingTags > 0)  {
+          double percentMissing = Math.ceil(100.0 * ((float) nbrMissingTags) /
+                  ((float) stanfordSentence.numberOfTokens()) );
+          System.err.println("Warning (sentence " + sentenceNo + "): " + (int) percentMissing 
+                  + "% of the Tokens are missing POS tags." );
+        }
       }
+
+      stanfordParser.parse(wordList);
+      result = stanfordParser.getBestParse();
     }
     
-    stanfordParser.parse(wordList);
-    return 	stanfordParser.getBestParse();
+    return result;
   }
 
 
@@ -324,29 +339,19 @@ implements ProcessingResource {
           fm.put("consists", consists);
         }
 
-        phrID  = outputAS.add(startOffset, endOffset, OUTPUT_PHRASE_TYPE, fm);
-        phrAnnotation = outputAS.get(phrID);
-        recordID(outputAS, phrID);
+        phrID  = annotationSet.add(startOffset, endOffset, OUTPUT_PHRASE_TYPE, fm);
+        phrAnnotation = annotationSet.get(phrID);
+        recordID(annotationSet, phrID);
       }
 
       if ( addPosTags && (depth == 1) ) {
         /* Expected to be a singleton set! */
-        AnnotationSet tokenSet = inputAS.get(inputTokenType, startOffset, endOffset);
+        AnnotationSet tokenSet = annotationSet.get(inputTokenType, startOffset, endOffset);
         if (tokenSet.size() == 1) {
           Annotation token = tokenSet.iterator().next();
 
-          if (sameAS) {  
-            /* add POS tag to token */
-            token.getFeatures().put(POS_TAG_FEATURE, cat);
-          }
-          
-          else {  
-            /* copy to outputAS and add */
-            FeatureMap fmCopy = gate.Factory.newFeatureMap();
-            fmCopy.putAll(token.getFeatures());
-            fmCopy.put(POS_TAG_FEATURE, cat);
-            outputAS.add(startOffset, endOffset, inputTokenType, fmCopy);
-          }
+          /* add POS tag to token */
+          token.getFeatures().put(POS_TAG_FEATURE, cat);
           
         }
         else {
@@ -388,14 +393,9 @@ implements ProcessingResource {
       governorTokenID = governorToken.getId();
       dependentTokenID = dependentToken.getId();
 
-      /*
-       * TO DO: deal with the (! sameAS) problem.
-       */
-      
       if (addDependencyFeatures) {
         List<DependencyRelation> depsForTok =
-          (List<DependencyRelation>) governorToken.getFeatures().get(
-            dependenciesFeature);
+          (List<DependencyRelation>) governorToken.getFeatures().get(dependenciesFeature);
 
         if(depsForTok == null) {
           depsForTok = new ArrayList<DependencyRelation>();
@@ -423,7 +423,7 @@ implements ProcessingResource {
         depRH = Math.max(offsetRH0, offsetRH1);
       
         try {
-          outputAS.add(depLH, depRH, DEP_ANNOTATION_TYPE, depFeatures);
+          annotationSet.add(depLH, depRH, DEP_ANNOTATION_TYPE, depFeatures);
         }
         catch(InvalidOffsetException e) {
           e.printStackTrace();
@@ -532,20 +532,12 @@ implements ProcessingResource {
 
   /* get & set methods for the CREOLE parameters */
 
-  public void setOutputASName(String outputASName) {
-    this.outputASName = outputASName;
+  public void setAnnotationSetName(String annotationSetName) {
+    this.annotationSetName = annotationSetName;
   }
 
-  public String getOutputASName() {
-    return this.outputASName;
-  }
-
-  public void setInputASName(String inputASName){
-    this.inputASName = inputASName;
-  }
-
-  public String getInputASName() {
-    return this.inputASName;
+  public String getAnnotationSetName() {
+    return this.annotationSetName;
   }
 
   public void setParserFile(URL parserFile) {
