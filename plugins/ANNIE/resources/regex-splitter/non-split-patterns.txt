@@ -6,21 +6,10 @@
 //
 // Lines starting with // are comments; empty lines are ignored
 
-
-//four or more dots are ignored
-\.{4,}+
-
-//five or more ?,! are ignored
-(?:!|\?).{5}+
-
-//a sequence of single upper case letters followed by dot
-\b(?:\p{Upper}\.)+
-
-//numbers with decimal part or IP addresses, or Internet addresses
-\p{Alnum}+(\.(?:\p{Alnum})+)+
-
-//java dotted names or Internet addresses
-//\p{Alpha}+(\.\p{Alpha}+)+
+//The Java RegEx matching machine is eager to return the first match
+//because of this, the explicit abbreviations need to apper before the
+//generic patterns so that for example "a.m." is matched in preference to
+//"a.m" (which would match under the internet address rule). 
 
 
 //known abbreviations
@@ -102,3 +91,18 @@
 \bvs\.
 \byr\.
 \byrs\.
+
+//four or more dots are ignored
+\.{4,}+
+
+//five or more ?,! are ignored
+(?:!|\?).{5}+
+
+//a sequence of single upper case letters followed by dot
+\b(?:\p{Upper}\.)+
+
+//numbers with decimal part or IP addresses, or Internet addresses
+//\p{Alnum}+(\.(?:\p{Alnum})+)+
+
+//java dotted names or Internet addresses
+\p{Alpha}+(\.\p{Alpha}+)+
