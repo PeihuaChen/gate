@@ -427,8 +427,8 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     public Component getTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
 
-      ParameterDisjunction pDisj = (ParameterDisjunction)table.getValueAt(row,
-              0);
+      ParameterDisjunction pDisj = (ParameterDisjunction)table
+        .getValueAt(row, convertColumnIndexToView(0));
       String type = pDisj.getType();
       // set the tooltip
       combo.setToolTipText(pDisj.getComment());
@@ -741,8 +741,8 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       comboUsed = false;
       listUsed = false;
       fmUsed = false;
-      ParameterDisjunction pDisj = (ParameterDisjunction)table.getValueAt(row,
-              0);
+      ParameterDisjunction pDisj = (ParameterDisjunction)table
+        .getValueAt(row, convertColumnIndexToView(0));
       type = pDisj.getType();
       // set the tooltip
       combo.setToolTipText(pDisj.getComment());
