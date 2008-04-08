@@ -62,6 +62,7 @@ import javax.swing.event.DocumentEvent;
  * annotations and their values.
  *
  * This VR is associated to {@link gate.creole.ir.SearchPR}.
+ * You have to set the target with setTarget().
  * 
  * Features: query auto-completion, syntactic error checker,
  * display of very big values, export of results in a file,
@@ -69,6 +70,13 @@ import javax.swing.event.DocumentEvent;
  * 
  * TODO:
  *
+ * - when someone invokes a search gui, in which case, entire datastore and
+ *   "all sets" options are selected, it should also check if there are any
+ *   annotations available to search in - if none available, and show an
+ *   information message, the same when the corpus / annotation set change
+ * - could be interesting to have statistics per document
+ *   it is just adding one condition to the query that retrieves data out of
+ *   the index
  * - add shortcut to autocompletion ?
  * - where to store the configuration for shortcut: user config or datastore ?
  * - plus other todos in this file
@@ -365,7 +373,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
 //    // unless the AnnicSerachPR is initialized, we don't have any data
 //    // to show
-    if(target != null) {
+//    if(target != null) {
 //      if(target instanceof Searcher) {
 //        searcher = (Searcher)target;
 //      } else if(target instanceof LuceneDataStoreImpl) {
@@ -373,8 +381,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 //      } else {
 //        throw new GateRuntimeException("Invalid target specified for the GUI");
 //      }
-      updateDisplay();
-    }
+    updateDisplay();
+//    }
     validate();
 
 //    LogArea log = new LogArea();
@@ -627,14 +635,11 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       public void actionPerformed(ActionEvent ie) {
         if (bottomSplitPane.getComponentCount() == 2) {
           bottomSplitPane.add(statisticsTabbedPane);
-          bottomSplitPane.setDividerLocation(
-            (bottomSplitPane.getMaximumDividerLocation()>500)?
-            (bottomSplitPane.getMaximumDividerLocation()-200):-1);
+          bottomSplitPane.setDividerLocation(0.66);
           displayStatistics.setSelected(true);
         } else if (bottomSplitPane.getComponentCount() == 3) {
           bottomSplitPane.remove(2);
-          bottomSplitPane.setDividerLocation(
-            bottomSplitPane.getMaximumDividerLocation());
+          bottomSplitPane.setDividerLocation(1.0);
           displayStatistics.setSelected(false);
         }
       }
@@ -890,13 +895,21 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
     statisticsTabbedPane = new JTabbedPane();
 
-    globalStatisticsTable = new XJTable();
+    globalStatisticsTable = new XJTable() {
+      private static final long serialVersionUID = 1L;
+      public boolean isCellEditable(int rowIndex, int vColIndex) {
+        return false;
+      }
+    };
     statisticsTabbedPane.addTab("Global", null,
       new JScrollPane(globalStatisticsTable),
       "Global statistics on the Corpus and Annotation Set selected.");
 
     oneRowStatisticsTable = new XJTable() {
       private static final long serialVersionUID = 1L;
+      public boolean isCellEditable(int rowIndex, int vColIndex) {
+        return false;
+      }
       public Component prepareRenderer(TableCellRenderer renderer,
               int row, int col) {
         Component c = super.prepareRenderer(renderer, row, col);
@@ -935,26 +948,25 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
      */
 
     bottomSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-    bottomSplitPane.setDividerLocation(
-      bottomSplitPane.getMaximumDividerLocation());
     bottomSplitPane.add(bottomLeftPanel);
+    bottomSplitPane.setDividerLocation(1.0);
 
     JSplitPane centerBottomSplitPane =
       new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-    centerBottomSplitPane.setDividerLocation(350);
     centerBottomSplitPane.add(new JScrollPane(centerPanel,
       JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
       JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
     centerBottomSplitPane.add(bottomSplitPane);
+    centerBottomSplitPane.setResizeWeight(0.5);
 
     JSplitPane topBottomSplitPane =
       new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-    topBottomSplitPane.setDividerLocation(80);
     topBottomSplitPane.add(topPanel);
     topBottomSplitPane.add(centerBottomSplitPane);
+    topBottomSplitPane.setDividerLocation(80);
 
     add(topBottomSplitPane, BorderLayout.CENTER);
-    
+
   }
 
   /**
@@ -1275,7 +1287,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
         JLabel label = new JLabel();
         String value = (feature.equals(""))?
-          "":(String)ann.getFeatures().get(feature);
+          " ":(String)ann.getFeatures().get(feature);
 //        message += value;
         if (value.length() > maxValueLength) {
           label.setToolTipText((value.length()>500)?
@@ -1447,8 +1459,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     populatedAnnotationTypesAndFeatures =
       getAnnotTypesFeatures(corpusName, annotationSetName);
 
+    int countTotal = 0;
     try {
-      int count;
+      int count = 0;
       DefaultTableModel model = new DefaultTableModel();
       model.addColumn("Annotation Type");
       model.addColumn("Count");
@@ -1459,6 +1472,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         // of the choosen Annotation Set
         count = searcher.freq(corpusName, annotationSetName, annotationType);
         model.addRow(new Object[]{annotationType, new Integer(count)});
+        countTotal += count;
       }
       globalStatisticsTable.setModel(model);
       globalStatisticsTable.setComparator(0, stringCollator);
@@ -1466,6 +1480,14 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     } catch(SearchException se) {
       se.printStackTrace();
       return;
+    }
+    if (countTotal == 0) {
+      centerPanel.removeAll();
+      centerPanel.add(new JLabel("<html>There is no annotation for the moment "
+        +"for the selected corpus and annotation set.<br><br>"
+        +"Please select another corpus or annotation set or wait for the "
+        +"end of the automatic indexation."),
+        new GridBagConstraints());
     }
   }
 
@@ -2002,7 +2024,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
             e.printStackTrace();
           }
           pageOfResults = 1;
-          titleResults.setText("Page "+pageOfResults+" ("+searcher.getHits().length+")");
+          titleResults.setText("Page "+pageOfResults+" ("+searcher.getHits().length+" results)");
         }
       });
     }
@@ -2027,8 +2049,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         public void run() {
 
           thisInstance.setEnabled(false);
+          noOfPatterns = ((Number)numberOfResultsSpinner.getValue()).intValue();
           try {
-            searcher.next(((Number)numberOfResultsSpinner.getValue()).intValue());
+            searcher.next(noOfPatterns);
           }
           catch(Exception e) {
             e.printStackTrace();
@@ -2036,7 +2059,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           }
           processFinished();
           pageOfResults++;
-          titleResults.setText("Page "+pageOfResults+" ("+searcher.getHits().length+")");
+          titleResults.setText("Page "+pageOfResults+" ("+searcher.getHits().length+" results)");
           thisInstance.setEnabled(true);
           if (searcher.getHits().length < noOfPatterns) {
             nextResultsAction.setEnabled(false);
@@ -2132,7 +2155,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     }
 
     public void mousePressed(MouseEvent e) {
-      if (e.isPopupTrigger()) {
+      if (e.isPopupTrigger() && type != null && feature != null) {
         createPopup();
         mousePopup.show(e.getComponent(), e.getX(), e.getY());
       } else {
@@ -2141,7 +2164,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     }
 
     public void mouseReleased(MouseEvent e) {
-      if (e.isPopupTrigger()) {
+      if (e.isPopupTrigger() && type != null && feature != null) {
         createPopup();
         mousePopup.show(e.getComponent(), e.getX(), e.getY());
       }
@@ -2177,7 +2200,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       }
     
     private void createPopup() {
-      if (type != null && feature != null) {
         final String value;
         if (text.replace("\\s", "").length() > 20) {
           value = text.replace("\\s", "").substring(0, 20)+("...");
@@ -2186,10 +2208,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         }
 
         mousePopup = new JPopupMenu();
-        mousePopup.add("Add statistics");
-        mousePopup.addSeparator();
 
-        menuItem = new JMenuItem("In DataStore");
+        menuItem = new JMenuItem("Occurrences in data store");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
             int count;
@@ -2208,12 +2228,12 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
                 oneRowStatisticsTable.getValueAt(row,0),
                 oneRowStatisticsTable.getValueAt(row,1)});
             }
-            model.addRow(new Object[]{type+"."+feature+"==\""+value+"\"",
-                                      new Integer(count)});
+            model.addRow(new Object[]{type+"."+feature+"==\""+value+"\""
+              +" (datastore)", new Integer(count)});
             oneRowStatisticsTable.setModel(model);
             oneRowStatisticsTable.setComparator(0, stringCollator);
             oneRowStatisticsTable.setComparator(1, integerComparator);
-            oneRowStatisticsTableToolTips.add("Statistics in DataStore"
+            oneRowStatisticsTableToolTips.add("Statistics in data store"
               +"<br>on Corpus: "+corpusName
               +"<br>and Annotation Set: "+annotationSetName
               +"<br>for the query: "+patterns.get(0).getQueryString());
@@ -2225,7 +2245,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         });
         mousePopup.add(menuItem);
 
-        menuItem = new JMenuItem("In matched spans");
+        menuItem = new JMenuItem("Occurrences in matches");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
             int count;
@@ -2244,12 +2264,12 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
                 oneRowStatisticsTable.getValueAt(row,0),
                 oneRowStatisticsTable.getValueAt(row,1)});
             }
-            model.addRow(new Object[]{type+"."+feature+"==\""+value+"\"",
-                         new Integer(count)});
+            model.addRow(new Object[]{type+"."+feature+"==\""+value+"\""
+              +" (matches)", new Integer(count)});
             oneRowStatisticsTable.setModel(model);
             oneRowStatisticsTable.setComparator(0, stringCollator);
             oneRowStatisticsTable.setComparator(1, integerComparator);
-            oneRowStatisticsTableToolTips.add("Statistics in matched spans"
+            oneRowStatisticsTableToolTips.add("Statistics in matches"
               +"<br>on Corpus: "+corpusName
               +"<br>and Annotation Set: "+annotationSetName
               +"<br>for the query: "+patterns.get(0).getQueryString());
@@ -2261,7 +2281,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         });
         mousePopup.add(menuItem);
 
-        menuItem = new JMenuItem("In contexts");
+        menuItem = new JMenuItem("Occurrences in contexts");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
             int count;
@@ -2280,8 +2300,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
                 oneRowStatisticsTable.getValueAt(row,0),
                 oneRowStatisticsTable.getValueAt(row,1)});
             }
-            model.addRow(new Object[]{type+"."+feature+"==\""+value+"\"",
-                         new Integer(count)});
+            model.addRow(new Object[]{type+"."+feature+"==\""+value+"\""
+              +" (contexts)", new Integer(count)});
             oneRowStatisticsTable.setModel(model);
             oneRowStatisticsTable.setComparator(0, stringCollator);
             oneRowStatisticsTable.setComparator(1, integerComparator);
@@ -2297,7 +2317,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         });
         mousePopup.add(menuItem);
 
-        menuItem = new JMenuItem("In matched spans + contexts");
+        menuItem = new JMenuItem("Occurrences in matches+contexts");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
             int count;
@@ -2316,13 +2336,13 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
                 oneRowStatisticsTable.getValueAt(row,0),
                 oneRowStatisticsTable.getValueAt(row,1)});
             }
-            model.addRow(new Object[]{type+"."+feature+"==\""+value+"\"",
-                         new Integer(count)});
+            model.addRow(new Object[]{type+"."+feature+"==\""+value+"\""
+              +" (mch+ctxt)", new Integer(count)});
             oneRowStatisticsTable.setModel(model);
             oneRowStatisticsTable.setComparator(0, stringCollator);
             oneRowStatisticsTable.setComparator(1, integerComparator);
             oneRowStatisticsTableToolTips.add(
-              "Statistics in matched spans + contexts"
+              "Statistics in matches+contexts"
               +"<br>on Corpus: "+corpusName
               +"<br>and Annotation Set: "+annotationSetName
               +"<br>for the query: "+patterns.get(0).getQueryString());
@@ -2333,7 +2353,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           }
         });
         mousePopup.add(menuItem);
-      }
     }
   }
 
@@ -2383,14 +2402,12 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
     private void createPopup() {
       mousePopup = new JPopupMenu();
-      mousePopup.add("Add statistics");
-      mousePopup.addSeparator();
 
       if (type != null && feature != null) {
 
         // count values for one Feature of an Annotation type
 
-        menuItem = new JMenuItem("In DataStore");
+        menuItem = new JMenuItem("Occurrences in data store");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
             int count;
@@ -2409,12 +2426,12 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
                 oneRowStatisticsTable.getValueAt(row,0),
                 oneRowStatisticsTable.getValueAt(row,1)});
             }
-            model.addRow(new Object[]{type+"."+feature,
-                         new Integer(count)});
+            model.addRow(new Object[]{type+"."+feature
+              +" (datastore)", new Integer(count)});
             oneRowStatisticsTable.setModel(model);
             oneRowStatisticsTable.setComparator(0, stringCollator);
             oneRowStatisticsTable.setComparator(1, integerComparator);
-            oneRowStatisticsTableToolTips.add("Statistics in DataStore"
+            oneRowStatisticsTableToolTips.add("Statistics in data store"
               +"<br>on Corpus: "+corpusName
               +"<br>and Annotation Set: "+annotationSetName
               +"<br>for the query: "+patterns.get(0).getQueryString());
@@ -2426,7 +2443,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         });
         mousePopup.add(menuItem);
 
-        menuItem = new JMenuItem("In matched spans");
+        menuItem = new JMenuItem("Occurrences in matches");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
             int count;
@@ -2445,12 +2462,12 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
                 oneRowStatisticsTable.getValueAt(row,0),
                 oneRowStatisticsTable.getValueAt(row,1)});
             }
-            model.addRow(new Object[]{type+"."+feature,
-                         new Integer(count)});
+            model.addRow(new Object[]{type+"."+feature
+              +" (matches)", new Integer(count)});
             oneRowStatisticsTable.setModel(model);
             oneRowStatisticsTable.setComparator(0, stringCollator);
             oneRowStatisticsTable.setComparator(1, integerComparator);
-            oneRowStatisticsTableToolTips.add("Statistics in matched spans"
+            oneRowStatisticsTableToolTips.add("Statistics in matches"
               +"<br>on Corpus: "+corpusName
               +"<br>and Annotation Set: "+annotationSetName
               +"<br>for the query: "+patterns.get(0).getQueryString());
@@ -2462,7 +2479,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         });
         mousePopup.add(menuItem);
 
-        menuItem = new JMenuItem("In contexts");
+        menuItem = new JMenuItem("Occurrences in contexts");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
             int count;
@@ -2481,8 +2498,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
                 oneRowStatisticsTable.getValueAt(row,0),
                 oneRowStatisticsTable.getValueAt(row,1)});
             }
-            model.addRow(new Object[]{type+"."+feature,
-                         new Integer(count)});
+            model.addRow(new Object[]{type+"."+feature
+              +" (contexts)", new Integer(count)});
             oneRowStatisticsTable.setModel(model);
             oneRowStatisticsTable.setComparator(0, stringCollator);
             oneRowStatisticsTable.setComparator(1, integerComparator);
@@ -2498,7 +2515,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         });
         mousePopup.add(menuItem);
 
-        menuItem = new JMenuItem("In matched spans + contexts");
+        menuItem = new JMenuItem("Occurrences in matches+contexts");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
             int count;
@@ -2517,13 +2534,13 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
                 oneRowStatisticsTable.getValueAt(row,0),
                 oneRowStatisticsTable.getValueAt(row,1)});
             }
-            model.addRow(new Object[]{type+"."+feature,
-                         new Integer(count)});
+            model.addRow(new Object[]{type+"."+feature
+              +" (mch+ctxt)", new Integer(count)});
             oneRowStatisticsTable.setModel(model);
             oneRowStatisticsTable.setComparator(0, stringCollator);
             oneRowStatisticsTable.setComparator(1, integerComparator);
             oneRowStatisticsTableToolTips.add(
-              "Statistics in matched spans + contexts"
+              "Statistics in matches+contexts"
               +"<br>on Corpus: "+corpusName
               +"<br>and Annotation Set: "+annotationSetName
               +"<br>for the query: "+patterns.get(0).getQueryString());
@@ -2538,10 +2555,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         // count values for all Features of an Annotation Type
 
         mousePopup.addSeparator();
-        mousePopup.add("Add all values");
-        mousePopup.addSeparator();
 
-        menuItem = new JMenuItem("In matched spans");
+        menuItem = new JMenuItem("All values from matches");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
             Map<String, Integer> freqs;
@@ -2553,19 +2568,25 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               return;
             }
             DefaultTableModel model = new DefaultTableModel();
-            model.addColumn(type+'.'+feature);
+            model.addColumn(type+'.'+feature+" (matches)");
             model.addColumn("Count");
             for (Map.Entry<String,Integer> map : freqs.entrySet()) {
               model.addRow(new Object[]{map.getKey(), map.getValue()});
             }
-            table = new XJTable();
+            table = new XJTable() {
+              private static final long serialVersionUID = 1L;
+              public boolean isCellEditable(int rowIndex, int vColIndex) {
+                return false;
+              }
+            };
             table.setModel(model);
             table.setComparator(0, stringCollator);
             table.setComparator(1, integerComparator);
+            JScrollPane scrollPaneTable = new JScrollPane(table);
             statisticsTabbedPane.addTab(
               String.valueOf(statisticsTabbedPane.getTabCount()-1),
-              null, new JScrollPane(table),
-              "<html>Statistics in matched spans"
+              null, scrollPaneTable,
+              "<html>Statistics in matches"
               +"<br>on Corpus: "+corpusName
               +"<br>and Annotation Set: "+annotationSetName
               +"<br>for the query: "+patterns.get(0).getQueryString()
@@ -2579,7 +2600,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         });
         mousePopup.add(menuItem);
 
-        menuItem = new JMenuItem("In contexts");
+        menuItem = new JMenuItem("All values from contexts");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
             Map<String, Integer> freqs;
@@ -2591,12 +2612,17 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               return;
             }
             DefaultTableModel model = new DefaultTableModel();
-            model.addColumn(type+'.'+feature);
+            model.addColumn(type+'.'+feature+" (contexts)");
             model.addColumn("Count");
             for (Map.Entry<String,Integer> map : freqs.entrySet()) {
               model.addRow(new Object[]{map.getKey(), map.getValue()});
             }
-            table = new XJTable();
+            table = new XJTable() {
+              private static final long serialVersionUID = 1L;
+              public boolean isCellEditable(int rowIndex, int vColIndex) {
+                return false;
+              }
+            };
             table.setModel(model);
             table.setComparator(0, stringCollator);
             table.setComparator(1, integerComparator);
@@ -2617,7 +2643,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         });
         mousePopup.add(menuItem);
 
-        menuItem = new JMenuItem("In matched spans + contexts");
+        menuItem = new JMenuItem("All values from matches+contexts");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
             Map<String, Integer> freqs;
@@ -2629,19 +2655,24 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               return;
             }
             DefaultTableModel model = new DefaultTableModel();
-            model.addColumn(type+'.'+feature);
+            model.addColumn(type+'.'+feature+" (mch+ctxt)");
             model.addColumn("Count");
             for (Map.Entry<String,Integer> map : freqs.entrySet()) {
               model.addRow(new Object[]{map.getKey(), map.getValue()});
             }
-            table = new XJTable();
+            table = new XJTable() {
+              private static final long serialVersionUID = 1L;
+              public boolean isCellEditable(int rowIndex, int vColIndex) {
+                return false;
+              }
+            };
             table.setModel(model);
             table.setComparator(0, stringCollator);
             table.setComparator(1, integerComparator);
             statisticsTabbedPane.addTab(
               String.valueOf(statisticsTabbedPane.getTabCount()-1),
               null, new JScrollPane(table),
-              "<html>Statistics in matched spans + contexts"
+              "<html>Statistics in matches+contexts"
               +"<br>on Corpus: "+corpusName
               +"<br>and Annotation Set: "+annotationSetName
               +"<br>for the query: "+patterns.get(0).getQueryString()
@@ -2658,7 +2689,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       } else {
         // count values of one Annotation type
 
-        menuItem = new JMenuItem("In datastore");
+        menuItem = new JMenuItem("Occurrences in data store");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
             int count;
@@ -2676,11 +2707,12 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
                 oneRowStatisticsTable.getValueAt(row,0),
                 oneRowStatisticsTable.getValueAt(row,1)});
             }
-            model.addRow(new Object[]{type, new Integer(count)});
+            model.addRow(new Object[]{type+" (datastore)",
+              new Integer(count)});
             oneRowStatisticsTable.setModel(model);
             oneRowStatisticsTable.setComparator(0, stringCollator);
             oneRowStatisticsTable.setComparator(1, integerComparator);
-            oneRowStatisticsTableToolTips.add("Statistics in DataStore"
+            oneRowStatisticsTableToolTips.add("Statistics in data store"
               +"<br>on Corpus: "+corpusName
               +"<br>and Annotation Set: "+annotationSetName
               +"<br>for the query: "+patterns.get(0).getQueryString());
@@ -2692,7 +2724,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         });
         mousePopup.add(menuItem);
 
-        menuItem = new JMenuItem("In matched spans");
+        menuItem = new JMenuItem("Occurrences in matches");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
             int count;
@@ -2710,11 +2742,12 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
                 oneRowStatisticsTable.getValueAt(row,0),
                 oneRowStatisticsTable.getValueAt(row,1)});
             }
-            model.addRow(new Object[]{type, new Integer(count)});
+            model.addRow(new Object[]{type+" (matches)",
+              new Integer(count)});
             oneRowStatisticsTable.setModel(model);
             oneRowStatisticsTable.setComparator(0, stringCollator);
             oneRowStatisticsTable.setComparator(1, integerComparator);
-            oneRowStatisticsTableToolTips.add("Statistics in matched spans"
+            oneRowStatisticsTableToolTips.add("Statistics in matches"
               +"<br>on Corpus: "+corpusName
               +"<br>and Annotation Set: "+annotationSetName
               +"<br>for the query: "+patterns.get(0).getQueryString());
@@ -2726,7 +2759,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         });
         mousePopup.add(menuItem);
 
-        menuItem = new JMenuItem("In contexts");
+        menuItem = new JMenuItem("Occurrences in contexts");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
             int count;
@@ -2744,7 +2777,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
                 oneRowStatisticsTable.getValueAt(row,0),
                 oneRowStatisticsTable.getValueAt(row,1)});
             }
-            model.addRow(new Object[]{type, new Integer(count)});
+            model.addRow(new Object[]{type+" (contexts)",
+              new Integer(count)});
             oneRowStatisticsTable.setModel(model);
             oneRowStatisticsTable.setComparator(0, stringCollator);
             oneRowStatisticsTable.setComparator(1, integerComparator);
@@ -2760,7 +2794,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         });
         mousePopup.add(menuItem);
 
-        menuItem = new JMenuItem("In matched spans + contexts");
+        menuItem = new JMenuItem("Occurrences in matches+contexts");
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ie) {
             int count;
@@ -2778,12 +2812,13 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
                 oneRowStatisticsTable.getValueAt(row,0),
                 oneRowStatisticsTable.getValueAt(row,1)});
             }
-            model.addRow(new Object[]{type, new Integer(count)});
+            model.addRow(new Object[]{type+" (mch+ctxt)",
+              new Integer(count)});
             oneRowStatisticsTable.setModel(model);
             oneRowStatisticsTable.setComparator(0, stringCollator);
             oneRowStatisticsTable.setComparator(1, integerComparator);
             oneRowStatisticsTableToolTips.add(
-              "Statistics in matched spans + contexts"
+              "Statistics in matches+contexts"
               +"<br>on Corpus: "+corpusName
               +"<br>and Annotation Set: "+annotationSetName
               +"<br>for the query: "+patterns.get(0).getQueryString());
@@ -2824,13 +2859,13 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         case DOC_NAME_COLUMN:
           return "Document";
         case ANNOTATION_SET_NAME_COLUMN:
-          return "AnnotationSet";
+          return "Annotation set";
         case LEFT_CONTEXT_COLUMN:
-          return "Left Context";
+          return "Left context";
         case PATTERN_COLUMN:
-          return "Pattern";
+          return "Match";
         case RIGHT_CONTEXT_COLUMN:
-          return "Right Context";
+          return "Right context";
         default:
           return "?";
       }
@@ -3666,6 +3701,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         setCaretPosition(position);
         TreeSet<String> types = new TreeSet<String>(stringCollator);
         types.addAll(populatedAnnotationTypesAndFeatures.keySet());
+        if (types.isEmpty()) {
+          types.add("No annotation type found !");
+        }
         queryListModel.clear();
         Iterator it = types.iterator();
         while (it.hasNext()) {
