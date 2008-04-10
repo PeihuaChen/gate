@@ -36,7 +36,7 @@ import gate.swing.JChoice;
 /**
  * A GUI component for editing a feature map based on a feature schema object.
  */
-public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
+public class SchemaFeaturesEditor extends JPanel{
 
   protected static enum FeatureType{
     /**
@@ -76,11 +76,12 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
      * @param featureName
      * @param defaultValue
      */
-    public FeatureEditor(String featureName, boolean defaultValue){
+    public FeatureEditor(String featureName, Boolean defaultValue){
       this.featureName = featureName;
       this.type = FeatureType.bool;
-      this.defaultValue = defaultValue ? "true" : "false";
-      this.values = null;
+      this.defaultValue = defaultValue.booleanValue() ? BOOLEAN_TRUE : 
+        BOOLEAN_FALSE;
+      this.values = new String[]{BOOLEAN_FALSE, BOOLEAN_TRUE};
       buildGui();
     }
     
@@ -111,6 +112,10 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
             newValue = textField.getText();
           }else if(e.getSource() == jchoice){
             newValue = jchoice.getSelectedItem();
+            if(newValue != null && type == FeatureType.bool){
+              //convert eh new value to Boolean
+              newValue = new Boolean(BOOLEAN_TRUE == newValue);
+            }
           }else if(e.getSource() == SchemaFeaturesEditor.this){
             //synthetic event
             newValue = getValue();
@@ -154,14 +159,26 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
           gui.add(jchoice);
           break;
         case bool:
-          gui.setLayout(new BoxLayout(gui, BoxLayout.LINE_AXIS));
-          checkbox = new JCheckBox();
-          checkbox.addActionListener(sharedActionListener);
-          if(defaultValue != null){ 
-            checkbox.setSelected(Boolean.parseBoolean(defaultValue));
-          }
-          gui.add(checkbox);
+          //new implementation -> use JChoice instead of JCheckBox in order
+          //to allow "unset" value (i.e. null)
+          jchoice = new JChoice(values);
+          jchoice.setDefaultButtonMargin(new Insets(0, 2, 0, 2));
+          jchoice.setMaximumFastChoices(20);
+          jchoice.setMaximumWidth(300);
+          jchoice.setSelectedItem(value);
+          jchoice.addActionListener(sharedActionListener);
+          gui.add(jchoice);
           break;
+          
+//        case bool:
+//          gui.setLayout(new BoxLayout(gui, BoxLayout.LINE_AXIS));
+//          checkbox = new JCheckBox();
+//          checkbox.addActionListener(sharedActionListener);
+//          if(defaultValue != null){ 
+//            checkbox.setSelected(Boolean.parseBoolean(defaultValue));
+//          }
+//          gui.add(checkbox);
+//          break;
         case text:
           gui.setLayout(new BoxLayout(gui, BoxLayout.LINE_AXIS));
           textField = new JTextField(20);
@@ -295,8 +312,11 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
           jchoice.setSelectedItem(value);
           break;
         case bool:
-          checkbox.setSelected(value != null && Boolean.parseBoolean(value));
-          break;
+          jchoice.setSelectedItem(value);
+          break;          
+//        case bool:
+//          checkbox.setSelected(value != null && Boolean.parseBoolean(value));
+//          break;
         case text:
           textField.setText(value);
           break;
@@ -312,7 +332,11 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
         case nominal:
           return jchoice.getSelectedItem();
         case bool:
-          return new Boolean(checkbox.isSelected());
+          Object choiceValue = jchoice.getSelectedItem();        
+          return choiceValue == null ? null : 
+            new Boolean(choiceValue == BOOLEAN_TRUE);
+//        case bool:
+//          return new Boolean(checkbox.isSelected());
         case text:
           return textField.getText();
         default:
@@ -531,19 +555,19 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
           FeatureSchema fSchema = featureSchemas.get(aFeatureName);
           Object aFeatureValue = featureMap.get(aFeatureName);
           //check if the value is permitted
-          if(fSchema.getFeatureValueClass().equals(Boolean.class) ||
-             fSchema.getFeatureValueClass().equals(Integer.class) ||
-             fSchema.getFeatureValueClass().equals(Short.class) ||
-             fSchema.getFeatureValueClass().equals(Byte.class) ||
-             fSchema.getFeatureValueClass().equals(Float.class) ||
-             fSchema.getFeatureValueClass().equals(Double.class)){
+          Class<?> featureValueClass = fSchema.getFeatureValueClass(); 
+          if(featureValueClass.equals(Boolean.class) ||
+             featureValueClass.equals(Integer.class) ||
+             featureValueClass.equals(Short.class) ||
+             featureValueClass.equals(Byte.class) ||
+             featureValueClass.equals(Float.class) ||
+             featureValueClass.equals(Double.class)){
             //just check the right type
-            if(!fSchema.getFeatureValueClass().isAssignableFrom(
-                    aFeatureValue.getClass())){
+            if(!featureValueClass.isAssignableFrom(aFeatureValue.getClass())){
               //invalid value type
               featureMap.remove(aFeatureName);
             }
-          }else if(fSchema.getFeatureValueClass().equals(String.class)){
+          }else if(featureValueClass.equals(String.class)){
             if(fSchema.getPermittedValues() != null &&
                     !fSchema.getPermittedValues().contains(aFeatureValue)){
                    //invalid value
@@ -577,14 +601,36 @@ public class SchemaFeaturesEditor extends JPanel implements FeatureMapListener{
           //we managed to find a relevant value -> save it in the feature map
           featureMap.put(featureName, featureValue);
         }
+      }else{
+        
+        //Some values need converting to String
+        FeatureSchema fSchema = featureSchemas.get(featureName);
+        Class<?> featureValueClass = fSchema.getFeatureValueClass();
+        if(featureValueClass.equals(Boolean.class)){
+            featureValue = ((Boolean)featureValue).booleanValue() ?
+                    BOOLEAN_TRUE : BOOLEAN_FALSE;
+        }else if(featureValueClass.equals(String.class)){
+          //already a String - nothing to do
+        }else{
+          //some other type
+          featureValue = featureValue.toString();
+        }
       }
-      aFeatureEditor.setValue(
-              featureValue == null ? null  :
-                (featureValue instanceof String ?  (String)featureValue  :
-                                                featureValue.toString()));
+      aFeatureEditor.setValue((String)featureValue);
     }
   }
   
+  
+  /**
+   * Label for the <tt>true</tt> boolean value.
+   */
+  private static final String BOOLEAN_TRUE = "True";
+
+  /**
+   * Label for the <tt>false</tt> boolean value.
+   */
+  private static final String BOOLEAN_FALSE = "False";
+
   
   /**
    * The feature schema for this editor
