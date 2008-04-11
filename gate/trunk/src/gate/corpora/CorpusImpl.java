@@ -447,10 +447,14 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
       int count = 1;
       while(line != null) {
         if(searchingForStartElement) {
-          int index = line.indexOf("<DOC>");
+          int index = line.indexOf("<DOC ");
           if(index < 0) {
-            line = br.readLine();
-            continue;
+            index = line.indexOf("<DOC>");
+          }
+          
+          if(index < 0) {
+              line = br.readLine();
+              continue;
           }
           else {
             documentString = encodingLine + "\n" + line.substring(index) + "\n";
