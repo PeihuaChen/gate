@@ -159,7 +159,10 @@ public class JChoice extends JPanel implements ItemSelectable{
               Object aValue = buttonToValueMap.get(aBtn);
               if(aValue.equals(e.getItem())){
                 //this is the selected button
-                if(!aBtn.isSelected()) aBtn.setSelected(true);
+                if(!aBtn.isSelected()){
+                  aBtn.setSelected(true);
+                  aBtn.requestFocusInWindow();
+                }
               }else{
                 //this is a button that should not be selected
                 if(aBtn.isSelected()) aBtn.setSelected(false);
