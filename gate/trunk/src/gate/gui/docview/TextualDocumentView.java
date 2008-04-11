@@ -251,17 +251,17 @@ public class TextualDocumentView extends AbstractDocumentView {
   }
   
   protected void initListeners(){
-    textView.addComponentListener(new ComponentAdapter(){
-      public void componentResized(ComponentEvent e){
-        try{
-    	    scroller.getViewport().setViewPosition(
-    	            textView.modelToView(0).getLocation());
-    	    scroller.paintImmediately(textView.getBounds());
-        }catch(BadLocationException ble){
-          //ignore
-        }
-      }      
-    });
+//    textView.addComponentListener(new ComponentAdapter(){
+//      public void componentResized(ComponentEvent e){
+//        try{
+//    	    scroller.getViewport().setViewPosition(
+//    	            textView.modelToView(0).getLocation());
+//    	    scroller.paintImmediately(textView.getBounds());
+//        }catch(BadLocationException ble){
+//          //ignore
+//        }
+//      }      
+//    });
   }
   
   
