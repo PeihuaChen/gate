@@ -149,7 +149,8 @@ public class AnnotationSetsView extends AbstractDocumentView
     mainTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     mainTable.setColumnSelectionAllowed(false);
     mainTable.setRowSelectionAllowed(true);
-    
+    //block autocreation of new columns from now on
+    mainTable.setAutoCreateColumnsFromModel(false);
     mainTable.setTableHeader(null);
     mainTable.setShowGrid(false);
     mainTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
