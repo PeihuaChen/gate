@@ -158,22 +158,21 @@ public class AnnotationEditor extends AbstractVisualResource
     btn.setMargin(insets0);
     pane.add(btn, constraints);
     
-    constraints.weightx = 0;
     pinnedButton = new JToggleButton(MainFrame.getIcon("pin"));
     pinnedButton.setSelectedIcon(MainFrame.getIcon("pin-in"));
     pinnedButton.setSelected(false);
     pinnedButton.setToolTipText("Press to pin window in place.");
-    pinnedButton.setMargin(new Insets(0, 2, 0, 2));
     pinnedButton.setBorderPainted(false);
     pinnedButton.setContentAreaFilled(false);
-    pane.add(pinnedButton);
+    constraints.weightx = 1;
+    constraints.insets = new Insets(0, 0, 0, 0);
+    constraints.anchor = GridBagConstraints.EAST;
+    pane.add(pinnedButton, constraints);
 
     dismissAction = new DismissAction(); 
     btn = new JButton(dismissAction);
-    constraints.insets = new Insets(0, 10, 0, 0);
-    constraints.anchor = GridBagConstraints.NORTHEAST;
-    constraints.weightx = 1;
     btn.setBorder(null);
+    constraints.anchor = GridBagConstraints.NORTHEAST;
     pane.add(btn, constraints);
     constraints.anchor = GridBagConstraints.CENTER;
     constraints.insets = insets0;
@@ -185,7 +184,7 @@ public class AnnotationEditor extends AbstractVisualResource
             getColor("ToolTip.background"));
     constraints.fill = GridBagConstraints.HORIZONTAL;
     constraints.gridy = 1;
-    constraints.gridwidth = 6;
+    constraints.gridwidth = 7;
     constraints.weightx = 1;
     constraints.insets = new Insets(3, 2, 2, 2);
     pane.add(typeCombo, constraints);
