@@ -210,6 +210,10 @@ public class TextualDocumentView extends AbstractDocumentView {
     textView.setAutoscrolls(false);
     textView.setLineWrap(true);
     textView.setWrapStyleWord(true);
+    // the selection is hidden when the focus is lost for some system
+    // like Linux, so we make sure it stays
+    // it is needed when doing a selection in the search textfield
+    textView.setCaret(new PermanentSelectionCaret());
     scroller = new JScrollPane(textView);
 
     textView.setText(document.getContent().toString());
@@ -466,6 +470,21 @@ public class TextualDocumentView extends AbstractDocumentView {
     }
   }//class SwingDocumentListener implements javax.swing.event.DocumentListener
 
+  // When the textPane loses the focus it doesn't really lose
+  // the selection, it just stops painting it so we need to force
+  // the painting
+  public class PermanentSelectionCaret extends DefaultCaret {
+    
+    private boolean isFocused;
+
+    public void setSelectionVisible(boolean hasFocus) {
+      if (hasFocus != isFocused) {
+        isFocused = hasFocus;
+        super.setSelectionVisible(false);
+        super.setSelectionVisible(true);
+      }
+    }
+  }
 
   /**
    * The scroll pane holding the text

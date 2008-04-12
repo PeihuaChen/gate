@@ -509,13 +509,29 @@ public class DocumentEditor extends AbstractVisualResource
               MainFrame.getGuiRoots().add(searchDialog);
           }
 
+          // FIXME: that's ugly !!
+          javax.swing.text.JTextComponent textPane =
+              (javax.swing.text.JTextComponent)
+              ((javax.swing.JViewport)
+               ((JScrollPane)getCentralView().getGUI())
+               .getViewport()).getView();
+
+          // if the user never gives the focus to the textPane then
+          // there will never be any selection in it so we force it
+          textPane.requestFocusInWindow();
+
+          // put the selection of the document into the search text field
+          if (textPane.getSelectedText() != null) {
+            searchDialog.patternTextField.setText(textPane.getSelectedText());
+          }
+
           if (searchDialog.isVisible()) {
               searchDialog.toFront();
-              searchDialog.patternTextField.selectAll();
           } else {
               searchDialog.setVisible(true);
-              searchDialog.patternTextField.selectAll();
           }
+          searchDialog.patternTextField.selectAll();
+          searchDialog.patternTextField.requestFocus();
       }
   }
 
@@ -545,6 +561,7 @@ public class DocumentEditor extends AbstractVisualResource
           findFirstAction = new AbstractAction("Find first") {
                   {
                       putValue(SHORT_DESCRIPTION, "Finds first match");
+                      putValue(MNEMONIC_KEY, KeyEvent.VK_F);
                   }
 
             public void actionPerformed(ActionEvent evt) {
@@ -581,9 +598,6 @@ public class DocumentEditor extends AbstractVisualResource
                     //display the result
                     textPane.setCaretPosition(start);
                     textPane.moveCaretPosition(end);
-                    textPane.requestFocusInWindow();
-                    SwingUtilities.getWindowAncestor(textPane)
-                        .toFront();
 
                 } else {
                     JOptionPane.showMessageDialog(searchDialog,
@@ -595,6 +609,7 @@ public class DocumentEditor extends AbstractVisualResource
           findNextAction = new AbstractAction("Find next") {
                   {
                       putValue(SHORT_DESCRIPTION, "Finds next match");
+                      putValue(MNEMONIC_KEY, KeyEvent.VK_N);
                   }
             public void actionPerformed(ActionEvent evt) {
                 //needed to create the right RE
@@ -629,7 +644,6 @@ public class DocumentEditor extends AbstractVisualResource
                     //display the result
                     textPane.setCaretPosition(start);
                     textPane.moveCaretPosition(end);
-                    textPane.requestFocusInWindow();
 
                 } else {
                     JOptionPane.showMessageDialog(searchDialog,
@@ -731,6 +745,11 @@ public class DocumentEditor extends AbstractVisualResource
                 }
             });
 
+          ((JComponent)getContentPane())
+            .getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).
+            put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "cancelAction");
+          ((JComponent)getContentPane())
+            .getActionMap().put("cancelAction", cancelAction);
       }
 
       /**
@@ -778,7 +797,7 @@ public class DocumentEditor extends AbstractVisualResource
           if (pattern == null) {}
       }
 
-      // FIXME
+      // FIXME: that's ugly !!
       javax.swing.text.JTextComponent textPane =
           (javax.swing.text.JTextComponent)
           ((javax.swing.JViewport)
