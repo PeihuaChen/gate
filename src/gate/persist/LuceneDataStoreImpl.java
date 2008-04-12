@@ -198,7 +198,8 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
             documentsToIndex.remove(lrID);
 
             Document doc = null;
-            synchronized(canonicalID(lrID)) {
+            Object canonID = canonicalID(lrID);
+            synchronized(canonID) {
               // read the document from datastore
               FeatureMap features = Factory.newFeatureMap();
               features.put(DataStore.LR_ID_FEATURE_NAME, lrID);
@@ -216,6 +217,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
               // as soon as we have a document to be indexed, we relase
               // the lock by ending the synchronized block
             }
+            canonID = null;
 
             // if the document is not null,
             // proceed to indexing it
@@ -280,7 +282,8 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
                       Object corpusID = corpusPIDs.get(i);
 
                       SerialCorpusImpl corpusLR = null;
-                      synchronized(canonicalID(corpusID)) {
+                      canonID = canonicalID(corpusID);
+                      synchronized(canonID) {
                         // we will have to load this corpus
                         FeatureMap params = Factory.newFeatureMap();
                         params.put(DataStore.DATASTORE_FEATURE_NAME, thisInstance);
@@ -290,8 +293,9 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
                         corpusLR = (SerialCorpusImpl)Factory.createResource(
                                 SerialCorpusImpl.class.getCanonicalName(),
                                 params, hidefeatures);
-                        canonicalID(corpusID).notify();
+                        canonID.notify();
                       }
+                      canonID = null;
 
                       if(corpusLR != null) {
                         if(corpusLR.contains(doc)) {
@@ -357,9 +361,11 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
     // we obtained the lock on this - in order to avoid clashing between
     // the object being loaded by the indexer thread and the thread that
     // deletes it
-    synchronized(canonicalID(lrPersistenceId)) {
+    Object canonID = canonicalID(lrPersistenceId);
+    synchronized(canonID) {
       super.delete(lrClassName, lrPersistenceId);
     }
+    canonID = null;
 
     /*
      * lets first find out if the deleted resource is a corpus. Deleting
@@ -442,9 +448,11 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
    */
   public void sync(LanguageResource lr) throws PersistenceException {
     if(lr.getLRPersistenceId() != null) {
-      synchronized(canonicalID(lr.getLRPersistenceId())) {
+      Object canonID = canonicalID(lr.getLRPersistenceId());
+      synchronized(canonID) {
         super.sync(lr);
       }
+      canonID = null;
     } else {
       super.sync(lr);
     }
