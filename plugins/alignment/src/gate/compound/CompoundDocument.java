@@ -32,13 +32,6 @@ public interface CompoundDocument extends TextualDocument {
 	public Document getDocument(String docid);
 
 	/**
-	 * Given a document, it should set it to be the current document
-	 * 
-	 * @param currentDocument
-	 */
-	public void setCurrentDocument(Document currentDocument);
-
-	/**
 	 * Given a language of the document, it should set the respective document
 	 * to be the current document
 	 * 

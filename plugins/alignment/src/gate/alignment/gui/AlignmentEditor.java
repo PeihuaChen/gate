@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.List;
 
 import javax.swing.*;
-import javax.swing.Timer;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.MouseInputAdapter;
 import javax.swing.text.BadLocationException;
@@ -18,6 +17,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import gate.*;
 import gate.alignment.*;
@@ -146,14 +148,6 @@ public class AlignmentEditor extends AbstractVisualResource implements
     this.add(mainPanel, BorderLayout.CENTER);
     unitColor = getColor(new Color(234, 245, 246));
     color = getColor(null);
-
-    highlightsMinder = new Timer(400, new UpdateHighlightsAction());
-    highlightsMinder.setInitialDelay(100);
-    highlightsMinder.setDelay(400);
-    highlightsMinder.setRepeats(true);
-    highlightsMinder.setCoalesce(true);
-    highlightsMinder.start();
-
   }
 
   /*
@@ -192,9 +186,6 @@ public class AlignmentEditor extends AbstractVisualResource implements
   }
 
   protected void executeAction(AlignmentAction aa) {
-    highlightsMinder.stop();
-    removeAllBlinkingHighlights(true);
-
     Map<Document, Set<Annotation>> latestSelectedAnnotations = new HashMap<Document, Set<Annotation>>();
     boolean clearCurrentSelection = true;
     if(currentAnnotationHightlight == null) {
@@ -296,9 +287,6 @@ public class AlignmentEditor extends AbstractVisualResource implements
   }
 
   private void nextAction() {
-    highlightsMinder.stop();
-    removeAllBlinkingHighlights(true);
-
     if(alignFactory != null && alignFactory.hasNext()) {
       updateGUI(alignFactory.next());
     }
@@ -500,9 +488,6 @@ public class AlignmentEditor extends AbstractVisualResource implements
   }
 
   private void previousAction() {
-    highlightsMinder.stop();
-    removeAllBlinkingHighlights(true);
-
     if(alignFactory.hasPrevious()) {
       updateGUI(alignFactory.previous());
     }
@@ -558,8 +543,6 @@ public class AlignmentEditor extends AbstractVisualResource implements
   protected class MouseActionListener extends MouseInputAdapter {
 
     public void mouseClicked(MouseEvent me) {
-      highlightsMinder.stop();
-      removeAllBlinkingHighlights(true);
       JEditorPane ta = (JEditorPane)me.getSource();
 
       // firstly obtain all highlights for this editor pane
@@ -649,87 +632,6 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
               annotations.remove(ah.annotation);
               latestAnnotationsSelection.put(ta, annotations);
-
-            } else {
-//              // if the annotation is aligned, we are asked to select it
-//              // in other words highlight it
-//              if(alignment.isAnnotationAligned(ah.annotation)) {
-//                
-//                // so lets first remove all blinking highlights
-//                removeAllBlinkingHighlights(true);
-//                Set<Annotation> addedHighlights = new HashSet<Annotation>();
-//                Set<Annotation> alignedAnnots = alignment.getAlignedAnnotations(ah.annotation);
-//                alignedAnnots.add(ah.annotation);
-//
-//                // ok we need to generate a new color
-//                Color newColor = Color.ORANGE;
-//                for(Annotation ann : alignedAnnots) {
-//                  if(addedHighlights.contains(ann)) continue;
-//                  addedHighlights.add(ann);
-//                  
-//                  // find out the language/id of the document
-//                  String docId = alignment.getDocument(ann).getName();
-//
-//                  // find out the editor pane
-//                  JEditorPane pane = tas[documentIDs.indexOf(docId)];
-//                 
-//                  // and find out the default annotation highlight
-//                  AnnotationHighlight annh = getHighlight(pane, ann);
-//                  if(annh == null) continue;
-//                  
-//                  // and we add the highlight
-//                  try {
-//                    Object obj = pane.getHighlighter().addHighlight(annh.start, annh.end,
-//                            new DefaultHighlighter.DefaultHighlightPainter(newColor));
-//                    AnnotationHighlight tempAH = new AnnotationHighlight(newColor, annh.start, annh.end, ann);
-//                    tempAH.setAlignedHighlight(obj, newColor);
-//                    Set<AnnotationHighlight> bhset = blinkingHighlights.get(pane);
-//                    if(bhset == null) {
-//                      bhset = new HashSet<AnnotationHighlight>();
-//                      blinkingHighlights.put(pane, bhset);
-//                    }
-//                    bhset.add(tempAH);
-//                  }
-//                  catch(Exception e) {
-//                    e.printStackTrace();
-//                  }
-//                  
-//                  
-//                  Set<Annotation> subAnnots = alignment.getAlignedAnnotations(ann);
-//                  for(Annotation ann1 : subAnnots) {
-//                    if(addedHighlights.contains(ann1)) continue;
-//                    addedHighlights.add(ann1);
-//                    
-//                    // find out the language/id of the document
-//                    docId = alignment.getDocument(ann1).getName();
-//
-//                    // find out the editor pane
-//                    pane = tas[documentIDs.indexOf(docId)];
-//                   
-//                    // and find out the default annotation highlight
-//                    annh = getHighlight(pane, ann1);
-//                    if(annh == null) continue;
-//                    
-//                    // and we add the highlight
-//                    try {
-//                      Object obj = pane.getHighlighter().addHighlight(annh.start, annh.end,
-//                              new DefaultHighlighter.DefaultHighlightPainter(newColor));
-//                      AnnotationHighlight tempAH = new AnnotationHighlight(newColor, annh.start, annh.end, ann1);
-//                      tempAH.setAlignedHighlight(obj, newColor);
-//                      Set<AnnotationHighlight> bhset = blinkingHighlights.get(pane);
-//                      if(bhset == null) {
-//                        bhset = new HashSet<AnnotationHighlight>();
-//                        blinkingHighlights.put(pane, bhset);
-//                      }
-//                      bhset.add(tempAH);
-//                    }
-//                    catch(Exception e) {
-//                      e.printStackTrace();
-//                    }
-//                  }
-//                }
-//                highlightsMinder.restart();
-//              }
             }
           }
           else {
@@ -852,7 +754,6 @@ public class AlignmentEditor extends AbstractVisualResource implements
   public void annotationsUnaligned(Annotation srcAnnotation,
           Document srcDocument, Annotation tgtAnnotation, Document tgtDocument) {
 
-    removeAllBlinkingHighlights(true);
     if(srcAnnotation == null || tgtAnnotation == null || srcDocument == null
             || tgtDocument == null) {
       System.err.println("One of the src/tgt annotation/document is null");
@@ -901,9 +802,24 @@ public class AlignmentEditor extends AbstractVisualResource implements
   }
 
   private void readActions() {
-    File actionsConfFile = new File(new File(new File(Gate.getPluginsHome(),
-            "alignment"), "resources"), ACTIONS_CONFIG_FILE);
-    if(actionsConfFile.exists()) {
+    ResourceData myResourceData = (ResourceData)Gate.getCreoleRegister().get(
+            this.getClass().getName());
+    URL creoleXml = myResourceData.getXmlFileUrl();
+    URL alignmentHomeURL = null;
+    File actionsConfFile = null;
+    try {
+      alignmentHomeURL = new URL(creoleXml, ".");
+      actionsConfFile = new File(new File(new File(alignmentHomeURL.toURI()),
+              "resources"), ACTIONS_CONFIG_FILE);
+    }
+    catch(MalformedURLException mue) {
+      throw new GateRuntimeException(mue);
+    }
+    catch(URISyntaxException use) {
+      throw new GateRuntimeException(use);
+    }
+
+    if(actionsConfFile != null && actionsConfFile.exists()) {
       try {
         BufferedReader br = new BufferedReader(new FileReader(actionsConfFile));
         String line = br.readLine();
@@ -955,61 +871,6 @@ public class AlignmentEditor extends AbstractVisualResource implements
       }
       catch(IOException ioe) {
         throw new GateRuntimeException(ioe);
-      }
-    }
-  }
-
-  protected Timer highlightsMinder;
-  protected Map<JEditorPane, Set<AnnotationHighlight>> blinkingHighlights = new HashMap<JEditorPane, Set<AnnotationHighlight>>();
-  protected boolean highlightsBlinking = false;
-
-  public void removeAllBlinkingHighlights(boolean clearBlinkingMap) {
-    synchronized(blinkingHighlights) {
-      if(highlightsBlinking) {
-        for(JEditorPane jp : blinkingHighlights.keySet()) {
-          if(blinkingHighlights.get(jp) != null) {
-            for(AnnotationHighlight h : blinkingHighlights.get(jp)) {
-              jp.getHighlighter().removeHighlight(h.alignedHighlight);
-            }
-          }
-        }
-      }
-      if(clearBlinkingMap) {
-        blinkingHighlights.clear();
-      }
-      highlightsBlinking = false;
-    }
-  }
-
-  public void addAllBlinkingHighlights() {
-    synchronized(blinkingHighlights) {
-      if(!highlightsBlinking) {
-        for(JEditorPane jp : blinkingHighlights.keySet()) {
-          if(blinkingHighlights.get(jp) != null) {
-            for(AnnotationHighlight h : blinkingHighlights.get(jp)) {
-              try {
-                jp.getHighlighter().addHighlight(h.start, h.end, h);
-              } catch(BadLocationException ble) {
-                // do nothing
-              }
-            }
-          }
-        }
-      }
-      highlightsBlinking = true;
-    }
-  }
-
-  protected class UpdateHighlightsAction extends AbstractAction {
-    public void actionPerformed(ActionEvent evt) {
-      synchronized(blinkingHighlights) {
-        removeAllBlinkingHighlights(false);
-        try {
-          Thread.sleep(1000);
-        } catch(Exception e) {
-          e.printStackTrace();
-        }
-        addAllBlinkingHighlights();
       }
     }
   }

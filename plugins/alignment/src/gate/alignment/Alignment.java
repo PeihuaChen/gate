@@ -184,7 +184,6 @@ public class Alignment implements Serializable {
 		if (alignedTo == null)
 			return false;
 		else {
-		  System.out.println("Aligned Annots : "+alignedTo.size());
 			return !alignedTo.isEmpty();
 		}
 	}
