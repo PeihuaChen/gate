@@ -51,7 +51,7 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
               "Document IDs parameter is set to null!");
     }
 
-    // source URL can be either a file or a directory
+    // source URL can be a file
     File file = new File(sourceUrl.getFile());
     if(file.isDirectory()) {
       throw new ResourceInstantiationException(
