@@ -212,6 +212,7 @@ public class SearchAndAnnotatePanel extends JPanel {
     searchPane.setLayout(new BoxLayout(searchPane, BoxLayout.Y_AXIS));
     searchPane.setBackground(color);
       hBox = Box.createHorizontalBox();
+      hBox.setBorder(BorderFactory.createEmptyBorder(3, 0, 5, 0));
       hBox.add(Box.createHorizontalStrut(5));
         searchTextField = new JTextField(10);
         searchTextField.setToolTipText("Searched expression.");
