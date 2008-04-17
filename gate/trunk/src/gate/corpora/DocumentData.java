@@ -55,11 +55,15 @@ public class DocumentData implements Serializable {
   String classType;
 
   public String getClassType() {
+    if(classType == null) {
+      classType = DocumentImpl.class.getName();
+    }
     return classType;
   }
 
   public void setClassType(String classType) {
-    this.classType = classType;
+     this.classType = classType;
+    
   }
 }
 
