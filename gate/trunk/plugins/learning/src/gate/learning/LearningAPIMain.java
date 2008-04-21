@@ -7,28 +7,29 @@
  */
 package gate.learning;
 
-import gate.Corpus;
 import gate.Document;
 import gate.Factory;
+import gate.FeatureMap;
 import gate.ProcessingResource;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
+import gate.util.Benchmark;
+import gate.util.Benchmarkable;
 import gate.util.GateException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
+
+import org.apache.log4j.Logger;
 
 /**
  * The main object of the ML Api. It does initialiation, read parameter values
@@ -36,7 +37,7 @@ import java.util.Date;
  * code, as an API (an GATE class), for using this learning api.
  */
 public class LearningAPIMain extends AbstractLanguageAnalyser implements
-                                                             ProcessingResource {
+                                                             ProcessingResource, Benchmarkable {
   /** This is where the model(s) should be saved */
   private URL configFileURL;
   /**
@@ -83,7 +84,10 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
   public LearningAPIMain() {
     // do nothing
   }
-
+  
+  // featureMap that is used for exporting log messages
+  protected FeatureMap benchmarkingFeatures = Factory.newFeatureMap();
+  
   /** Initialise this resource, and return it. */
   public gate.Resource init() throws ResourceInstantiationException {
     fireStatusChanged("Checking and reading learning settings!");
@@ -95,6 +99,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
     // it is not null, check it is a file: URL
     if(!"file".equals(configFileURL.getProtocol())) { throw new ResourceInstantiationException(
       "WorkingDirectory must be a file: URL"); }
+    
     // Get the working directory which the configuration
     // file reside in.
     File wd = null;
@@ -103,22 +108,27 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
     } catch(URISyntaxException use) {
       wd = new File(configFileURL.getFile()).getParentFile();
     }
+    
     // it must be a directory
     if(!wd.isDirectory()) { throw new ResourceInstantiationException(wd
       + " must be a reference to directory"); }
+    
     if(LogService.minVerbosityLevel > 0)
       System.out.println("Configuration File=" + configFileURL.toString());
+    
     try {
+      
       if(!new File(configFileURL.toURI()).exists()) {
-        // System.out.println("Error: the configuration file specified does not
-        // exist!!");
+
         throw new ResourceInstantiationException(
           "Error: the configuration file specified does not exist!!");
       }
+      
     } catch(URISyntaxException e1) {
       // TODO Auto-generated catch block
       e1.printStackTrace();
     }
+    
     miLearningInfor = new MiLearningInformation();
     try {
       // Load the learning setting file
@@ -128,6 +138,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
     } catch(Exception e) {
       throw new ResourceInstantiationException(e);
     }
+    
     try {
       // Creat the sub-directory of the workingdirectroy where the data
       // files will be stored in
@@ -135,25 +146,41 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
         System.out.println("\n\n*************************");
         System.out.println("A new session for NLP learning is starting.\n");
       }
+      
       wdResults = new File(wd,
         gate.learning.ConstantParameters.SUBDIRFORRESULTS);
       wdResults.mkdir();
+      
       logFile = new File(new File(wd, ConstantParameters.SUBDIRFORRESULTS),
         ConstantParameters.FILENAMEOFLOGFILE);
-      // PrintWriter logFileIn = new PrintWriter(new FileWriter(logFile, true));
       LogService.init(logFile, true, learningSettings.verbosityLogService);
+      
+      
       StringBuffer logMessage = new StringBuffer();
       logMessage.append("\n\n*************************\n");
       logMessage.append("A new session for NLP learning is starting.\n");
+      
+      // adding WorkingDirectory parameter in the benchmarkingFeatures
+      benchmarkingFeatures.put("WorkingDirectory", wd.getAbsolutePath());
+      Benchmark.checkPoint(getBenchmarkID(), this,"Initializing ML PR", benchmarkingFeatures);
+      
       logMessage.append("The initiliased time of NLP learning: "
         + new Date().toString() + "\n");
       logMessage.append("Working directory: " + wd.getAbsolutePath() + "\n");
       logMessage.append("The feature files and models are saved at: "
         + wdResults.getAbsolutePath() + "\n");
+
       // Call the lightWeightLearningApi
       lightWeightApi = new LightWeightLearningApi(wd);
+      
       // more initialisation
       lightWeightApi.furtherInit(wdResults, learningSettings);
+      
+      // adding WorkingDirectory parameter in the benchmarkingFeatures
+      //benchmarkingFeatures.put("LearnerName", learningSettings.learnerSettings.getLearnerName());
+      //benchmarkingFeatures.put("LearnerNickName", learningSettings.learnerSettings.getLearnerNickName());
+      //benchmarkingFeatures.put("SurroundMode", learningSettings.surround);
+      
       logMessage.append("Learner name: "
         + learningSettings.learnerSettings.getLearnerName() + "\n");
       logMessage.append("Learner nick name: "
@@ -173,7 +200,6 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
     learningModeVIEWSVMMODEL = RunMode.VIEWPRIMALFORMMODELS;
     learningModeSelectingDocs = RunMode.RankingDocsForAL;
     fireProcessFinished();
-    // System.out.println("initialisation finished.");
     return this;
   } // init()
 
@@ -183,6 +209,12 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
    * @throws ExecutionException
    */
   public void execute() throws ExecutionException {
+
+    System.out.println("Executing!!");
+    // mode in which the PR is executed
+    benchmarkingFeatures.put("LearningMode", learningMode);
+    lightWeightApi.setBenchmarkID(getBenchmarkID());
+    
     if(learningMode.equals(learningModeVIEWSVMMODEL)) {
       if(corpus == null || corpus.size() == 0 || corpus.indexOf(document) == 0)
         lightWeightApi.viewSVMmodelsInNLPFeatures(new File(wdResults,
@@ -199,29 +231,43 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
       }
       return;
     }
+    
     // now we need to see if the corpus is provided
     if(corpus == null)
       throw new ExecutionException("Provided corpus is null!");
+    
     if(corpus.size() == 0)
       throw new ExecutionException("No Document found in corpus!");
+    
     // first, get the NLP features from the documents, according to the
     // feature types specified in DataSetDefinition file
     int positionDoc = corpus.indexOf(document);
-    // To see if the corpus is from a datastore or not
-    // docsName.add(positionDoc, document.getName());
+    
+    // first document in the corpus
     if(positionDoc == 0) {
       lightWeightApi.inputASName = inputASName;
       lightWeightApi.outputASName = outputASName;
+
       /** Obtain the MI learning information of the last time learning. */
       if(learningMode.equals(this.learningModeMiTraining)) {
         miLearningInfor = new MiLearningInformation();
         File miLeFile = new File(wdResults,
           ConstantParameters.FILENAMEOFMILearningInfor);
+
+        long startTime = Benchmark.startPoint();
+        benchmarkingFeatures.put("MILearningInformationFile", miLeFile.getAbsolutePath());
+        Benchmark.checkPoint(getBenchmarkID(), this, "Obtaining Learning Information from the last-time", benchmarkingFeatures);
+        
         miLearningInfor.readDataFromFile(miLeFile);
+        
+        Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Obtaining Learning Information from the last-time", benchmarkingFeatures);
+        benchmarkingFeatures.remove("MILearningInformationFile");
       }
+      
       /** Set the information for batch application. */
       startDocIdApp = 0;
       endDocIdApp = 0;
+      
       if(LogService.minVerbosityLevel > 0)
         System.out.println("Pre-processing the " + corpus.size()
           + " documents...");
@@ -250,20 +296,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
         e.printStackTrace();
       }
     }
-    /*
-     * //for apply the model to each document
-     * if(learningMode.equals(learningModeAppl)) { LogService.logMessage("**
-     * Application mode:", 1); isTraining = false;
-     * lightWeightApi.annotations2NLPFeatures(this.document, 0, wdResults,
-     * isTraining, learningSettings); lightWeightApi.finishFVs(wdResults, 1,
-     * isTraining, learningSettings); lightWeightApi.nlpfeatures2FVs(wdResults,
-     * 1, isTraining, learningSettings); // Applying th model String
-     * classTypeOriginal = learningSettings.datasetDefinition
-     * .getClassAttribute().getType(); try {
-     * lightWeightApi.applyModelInJavaPerDoc(this.document, classTypeOriginal,
-     * learningSettings); } catch(GateException e) { // TODO Auto-generated
-     * catch block e.printStackTrace(); } }
-     */
+
     // Apply the model to a bunch of documents
     if(learningMode.equals(learningModeAppl)) {
       ++endDocIdApp;
@@ -284,19 +317,23 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
           if(LogService.minVerbosityLevel > 0)
             System.out.println("** " + "Application mode for document from "
               + startDocIdApp + " to " + endDocIdApp + "(not included):");
+          
           LogService.logMessage("** Application mode for document from "
             + startDocIdApp + " to " + endDocIdApp + "(not included):", 1);
           isTraining = false;
           String classTypeOriginal = learningSettings.datasetDefinition
             .getClassAttribute().getType();
+          
           outNLPFeatures = new BufferedWriter(new OutputStreamWriter(
             new FileOutputStream(new File(wdResults,
               ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
           int numDoc;
           numDoc = endDocIdApp - startDocIdApp;
-          // time bug
-          // Date date1 = new Date();
-          // long time1 = date1.getTime();
+
+          long startTime = Benchmark.startPoint();
+          benchmarkingFeatures.put("NumDocs",""+numDoc);
+          Benchmark.checkPoint(getBenchmarkID(), this, "Converting Annotation to NLPFeatures", benchmarkingFeatures);
+          
           for(int i = startDocIdApp; i < endDocIdApp; ++i) {
             Document toProcess = (Document)corpus.get(i);
             lightWeightApi.annotations2NLPFeatures(toProcess,
@@ -309,14 +346,16 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
           }
           outNLPFeatures.flush();
           outNLPFeatures.close();
+          
           lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
             learningSettings);
-          // time bug
-          // Date date2 = new Date();
-          // long time2 = date2.getTime();
-          // time1 = time2 - time1;
-          // System.out.println("docName="+document.getName());
-          // System.out.println("time for getting NLP features is "+time1);
+
+          Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Converting annotation to NLPFeatures", benchmarkingFeatures);
+          
+          
+          startTime = Benchmark.startPoint();
+          Benchmark.checkPoint(getBenchmarkID(), this, "Writing Feature Vectors", benchmarkingFeatures);
+          
           /** Open the normal NLP feature file. */
           inNLPFeatures = new BufferedReader(new InputStreamReader(
             new FileInputStream(new File(wdResults,
@@ -324,49 +363,49 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
           outFeatureVectors = new BufferedWriter(new OutputStreamWriter(
             new FileOutputStream(new File(wdResults,
               ConstantParameters.FILENAMEOFFeatureVectorDataApp)), "UTF-8"));
+
+          
           lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures,
             outFeatureVectors, numDoc, isTraining, learningSettings);
           inNLPFeatures.close();
           outFeatureVectors.flush();
           outFeatureVectors.close();
-          // time bug
-          // Date date3 = new Date();
-          // long time3 = date3.getTime();
-          // time2 = time3 - time2;
-          // System.out.println("time for getting feature vector is "+time2);
+          
+          Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Writing Feature Vectors", benchmarkingFeatures);
+          
           // Applying th model
           String fvFileName = wdResults.toString() + File.separator
             + ConstantParameters.FILENAMEOFFeatureVectorDataApp;
+
+          startTime = Benchmark.startPoint();
+          Benchmark.checkPoint(getBenchmarkID(), this, "Applying Model", benchmarkingFeatures);
+          
           lightWeightApi.applyModelInJava(corpus, startDocIdApp, endDocIdApp,
             classTypeOriginal, learningSettings, fvFileName);
-          // time bug
-          // Date date4 = new Date();
-          // long time4 = date4.getTime();
-          // time3 = time4 - time3;
-          // System.out.println("time for applying models is "+time3);
+          
+          Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Applying Model", benchmarkingFeatures);
+          benchmarkingFeatures.remove("NumDocs");
+          
           startDocIdApp = endDocIdApp;
         } catch(IOException e) {
-          // TODO Auto-generated catch block
           e.printStackTrace();
         } catch(GateException e) {
-          // TODO Auto-generated catch block
           e.printStackTrace();
         }
       }
     }
+
+    // we've reached the last document
     if(positionDoc == corpus.size() - 1) {
       // first select the training data and test data according to the
       // learning setting
       // set the inputASName in here, because it is a runtime parameter
       int numDoc = corpus.size();
+      
       try {
-        // PrintWriter logFileIn = new PrintWriter(new FileWriter(logFile,
-        // true));
         LogService.init(logFile, true, learningSettings.verbosityLogService);
-        LogService.logMessage("The learning start at " + new Date().toString(),
-          1);
-        LogService.logMessage("The number of documents in dataset: " + numDoc,
-          1);
+        LogService.logMessage("The learning start at " + new Date().toString(), 1);
+        LogService.logMessage("The number of documents in dataset: " + numDoc, 1);
         // Open the NLP feature file for storing the NLP feature vectors
         BufferedWriter outNLPFeatures = null;
         BufferedReader inNLPFeatures = null;
@@ -379,6 +418,11 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
             if(LogService.minVerbosityLevel > 0)
               System.out.println("** Producing the feature files only!");
             LogService.logMessage("** Producing the feature files only!", 1);
+            
+            long startTime = Benchmark.startPoint();
+            benchmarkingFeatures.put("NumDocs", numDoc);
+            Benchmark.checkPoint(getBenchmarkID(), this, "Converting annotations to NLP features", benchmarkingFeatures);
+            
             isTraining = true;
             outNLPFeatures = new BufferedWriter(new OutputStreamWriter(
               new FileOutputStream(new File(wdResults,
@@ -392,8 +436,13 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
             }
             outNLPFeatures.flush();
             outNLPFeatures.close();
+            
+            
             lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
               learningSettings);
+            Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Converting annotations to NLP features", benchmarkingFeatures);
+            
+            
             /** Open the normal NLP feature file. */
             inNLPFeatures = new BufferedReader(new InputStreamReader(
               new FileInputStream(new File(wdResults,
@@ -401,31 +450,54 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
             outFeatureVectors = new BufferedWriter(new OutputStreamWriter(
               new FileOutputStream(new File(wdResults,
                 ConstantParameters.FILENAMEOFFeatureVectorData)), "UTF-8"));
+            
+            startTime = Benchmark.startPoint();
+            Benchmark.checkPoint(getBenchmarkID(), this, "Converting NLPFeatures To FeatureVectors", benchmarkingFeatures);
+            
             lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures,
               outFeatureVectors, numDoc, isTraining, learningSettings);
             inNLPFeatures.close();
             outFeatureVectors.flush();
             outFeatureVectors.close();
+            Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Converting NLPFeaturesToFeatureVectors", benchmarkingFeatures);
+            
             //produce the ngram language model from feature list
             if(LogService.minVerbosityLevel > 0)
               System.out.println("Write the language model in N-grams into the file "
                 +ConstantParameters.FILENAMEOFNgramLM+"!");
             LogService.logMessage("Write the language model in N-grams into the file "
                 +ConstantParameters.FILENAMEOFNgramLM+"!", 1);
+            
             if(learningSettings.datasetDefinition.getNgrams().size()>=1) {
+              
+              startTime = Benchmark.startPoint();
+              Benchmark.checkPoint(getBenchmarkID(), this, "Writing the language model in N-grams", benchmarkingFeatures);
+              
               lightWeightApi.featureList2LM(wdResults, ((Ngram)learningSettings.datasetDefinition.getNgrams().get(0)).getNumber());
+              
+              Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Writing the language model in N-grams", benchmarkingFeatures);
+              
               //produce the term-frequency matrix
               if(LogService.minVerbosityLevel > 0)
                 System.out.println("Write the term-document statistics into the file "
                   +ConstantParameters.FILENAMEOFTermFreqMatrix+"!");
               LogService.logMessage("Write the term-document statistics into the file "
                   +ConstantParameters.FILENAMEOFTermFreqMatrix+"!", 1);
+              
+              startTime = Benchmark.startPoint();
+              Benchmark.checkPoint(getBenchmarkID(), this, "Writing the term-document statistics into the file", benchmarkingFeatures);
+              
               lightWeightApi.termfrequenceMatrix(wdResults, numDoc);
+              Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Writing the term-document statistics into the file", benchmarkingFeatures);
+              
             }
-            else 
+            else {
               System.out.println("!! Warning: cannot produce N-gram data because there is no Ngram " +
                 "defintion in the configuration file!");
+            }
     
+            benchmarkingFeatures.remove("NumDocs");
+            
             //Write the name of documents and total number of them into a file
             BufferedWriter outDocsName = new BufferedWriter(new OutputStreamWriter(
               new FileOutputStream(new File(wdResults,
@@ -441,6 +513,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
             }
             outDocsName.flush();
             outDocsName.close();
+            
             //Create the document for storing the names of selected documents if it doesn't exist. 
             File selectedFile = new File(wdResults, ConstantParameters.FILENAMEOFSelectedDOCForAL);
             if(!selectedFile.exists())
@@ -458,6 +531,11 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
             if(LogService.minVerbosityLevel > 0)
               System.out.println("** Training mode:");
             LogService.logMessage("** Training mode:", 1);
+            
+            startTime = Benchmark.startPoint();
+            benchmarkingFeatures.put("NumDocs",""+numDoc);
+            Benchmark.checkPoint(getBenchmarkID(), this, "Converting annotations to NLP Features", benchmarkingFeatures);
+
             isTraining = true;
             outNLPFeatures = new BufferedWriter(new OutputStreamWriter(
               new FileOutputStream(new File(wdResults,
@@ -473,6 +551,9 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
             outNLPFeatures.close();
             lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
               learningSettings);
+            
+            Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Converting annotations to NLP Features", benchmarkingFeatures);
+            
             if(LogService.DEBUG>1) {
               tm2 = new Date().getTime();
               tm3 = tm2- tm1;
@@ -486,11 +567,19 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
             outFeatureVectors = new BufferedWriter(new OutputStreamWriter(
               new FileOutputStream(new File(wdResults,
                 ConstantParameters.FILENAMEOFFeatureVectorData)), "UTF-8"));
+            
+            startTime = Benchmark.startPoint();
+            Benchmark.checkPoint(getBenchmarkID(), this, "Converting NLPFeatures To FeatureVectors", benchmarkingFeatures);
+            
             lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures,
               outFeatureVectors, numDoc, isTraining, learningSettings);
+
             inNLPFeatures.close();
             outFeatureVectors.flush();
             outFeatureVectors.close();
+
+            Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Converting NLPFeatures To FeatureVectors", benchmarkingFeatures);
+            
             if(LogService.DEBUG>1) {
               tm1 = new Date().getTime();
               tm3 =tm1- tm2;
@@ -499,17 +588,34 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
             }
             // if fitering the training data
             if(learningSettings.fiteringTrainingData
-              && learningSettings.filteringRatio > 0.0)
+              && learningSettings.filteringRatio > 0.0) {
+
+              startTime = Benchmark.startPoint();
+              Benchmark.checkPoint(getBenchmarkID(), this, "Filtering Negative Instances", benchmarkingFeatures);
+              
+              
               lightWeightApi.FilteringNegativeInstsInJava(corpus.size(),
                 learningSettings);
+
+              Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Filtering Negative Instances", benchmarkingFeatures);
+            }
+
             if(LogService.DEBUG>1) {
               tm2 = new Date().getTime();
               tm3 = tm2- tm1;
               tm3 /=1000;
               System.out.println("time for filtering: "+tm3);
             }
+            
+            startTime = Benchmark.startPoint();
+            Benchmark.checkPoint(getBenchmarkID(), this, "Training", benchmarkingFeatures);
+            
             // using the java code for training
             lightWeightApi.trainingJava(corpus.size(), learningSettings);
+            
+            Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Training", benchmarkingFeatures);
+            benchmarkingFeatures.remove("NumDocs");
+            
             if(LogService.DEBUG>1) {
               tm1 = new Date().getTime();
               tm3 = tm1 - tm2;
@@ -518,31 +624,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
             }
             break;
           case APPLICATION:
-            // if application
-            /*
-             * EvaluationBasedOnDocs.emptyDatafile(wdResults, false);
-             * if(LogService.minVerbosityLevel> 0) System.out.println("**
-             * Application mode:"); LogService.logMessage("** Application
-             * mode:", 1); isTraining = false; String classTypeOriginal =
-             * learningSettings.datasetDefinition
-             * .getClassAttribute().getType(); outNLPFeatures = new
-             * BufferedWriter(new OutputStreamWriter(new FileOutputStream(new
-             * File(wdResults, ConstantParameters.FILENAMEOFNLPFeaturesData)),
-             * "UTF-8")); for(int i = 0; i < numDoc; ++i) {
-             * lightWeightApi.annotations2NLPFeatures((Document)corpus.get(i),
-             * i, outNLPFeatures, isTraining, learningSettings); }
-             * outNLPFeatures.flush(); outNLPFeatures.close();
-             * lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
-             * learningSettings); // Open the normal NLP feature file.
-             * inNLPFeatures = new BufferedReader(new InputStreamReader(new
-             * FileInputStream(new File(wdResults,
-             * ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
-             * lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, numDoc,
-             * isTraining, learningSettings); inNLPFeatures.close(); // Applying
-             * th model lightWeightApi.applyModelInJava(corpus, 0,
-             * corpus.size(), classTypeOriginal, learningSettings);
-             */
-            // EvaluationBasedOnDocs.emptyDatafile(wdResults, false);
+
             // first checking if the model file is available or not
             String modelFileName = wdResults.toString() + File.separator
               + ConstantParameters.FILENAMEOFModels;
@@ -558,6 +640,8 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
                   + " to " + endDocIdApp + "(not included):");
               LogService.logMessage("** Application mode for document from "
                 + startDocIdApp + " to " + endDocIdApp + "(not included):", 1);
+              
+              
               isTraining = false;
               String classTypeOriginal = learningSettings.datasetDefinition
                 .getClassAttribute().getType();
@@ -565,6 +649,11 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
                 new FileOutputStream(new File(wdResults,
                   ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
               numDoc = endDocIdApp - startDocIdApp;
+
+              benchmarkingFeatures.put("NumDocs",""+numDoc);
+              startTime = Benchmark.startPoint();
+              Benchmark.checkPoint(getBenchmarkID(), this, "Converting annotations to NLP Features", benchmarkingFeatures);
+
               for(int i = startDocIdApp; i < endDocIdApp; ++i) {
                 Document toProcess = (Document)corpus.get(i);
                 lightWeightApi
@@ -578,8 +667,12 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               }
               outNLPFeatures.flush();
               outNLPFeatures.close();
+              
               lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
                 learningSettings);
+              
+              Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Converting annotations to NLP Features", benchmarkingFeatures);
+              
               /** Open the normal NLP feature file. */
               inNLPFeatures = new BufferedReader(new InputStreamReader(
                 new FileInputStream(new File(wdResults,
@@ -587,16 +680,31 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               outFeatureVectors = new BufferedWriter(new OutputStreamWriter(
                 new FileOutputStream(new File(wdResults,
                   ConstantParameters.FILENAMEOFFeatureVectorDataApp)), "UTF-8"));
+
+              startTime = Benchmark.startPoint();
+              Benchmark.checkPoint(getBenchmarkID(), this, "Converting NLPFeatures to FeatureVectors", benchmarkingFeatures);
+              
               lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures,
                 outFeatureVectors, numDoc, isTraining, learningSettings);
+              
               inNLPFeatures.close();
               outFeatureVectors.flush();
               outFeatureVectors.close();
+              
+              Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Converting NLPFeatures to FeatureVectors", benchmarkingFeatures);
+              
               // Applying th model
               String fvFileName = wdResults.toString() + File.separator
                 + ConstantParameters.FILENAMEOFFeatureVectorDataApp;
+
+              startTime = Benchmark.startPoint();
+              Benchmark.checkPoint(getBenchmarkID(), this, "Applying the model", benchmarkingFeatures);
+              
               lightWeightApi.applyModelInJava(corpus, startDocIdApp,
                 endDocIdApp, classTypeOriginal, learningSettings, fvFileName);
+              
+              Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Applying the model", benchmarkingFeatures);
+              benchmarkingFeatures.remove("NumDocs");
               // Update the datastore for the added annotations
             }
             break;
@@ -606,13 +714,26 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
             LogService.logMessage("** Evaluation mode:", 1);
             evaluation = new EvaluationBasedOnDocs(corpus, wdResults,
               inputASName);
+            
+            benchmarkingFeatures.put("NumDocs", corpus.size());
+            startTime = Benchmark.startPoint();
+            Benchmark.checkPoint(getBenchmarkID(), this, "Starting Evaluation", benchmarkingFeatures);
+
             evaluation.evaluation(learningSettings, lightWeightApi);
+            Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Starting Evaluation", benchmarkingFeatures);
+            benchmarkingFeatures.remove("NumDocs");
+
             break;
           case MITRAINING:
             if(LogService.minVerbosityLevel > 0)
               System.out.println("** MITRAINING mode:");
             LogService.logMessage("** MITRAINING mode:", 1);
             isTraining = true;
+
+            benchmarkingFeatures.put("NumDocs", ""+numDoc);
+            startTime = Benchmark.startPoint();
+            Benchmark.checkPoint(getBenchmarkID(), this, "Converting annotations to NLP features", benchmarkingFeatures);
+            
             /**
              * Need to write the NLP features into a temporary file, then copy
              * it into the NLP file.
@@ -624,10 +745,14 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               lightWeightApi.annotations2NLPFeatures((Document)corpus.get(i),
                 i, outNLPFeaturesTemp, isTraining, learningSettings);
             }
+            
+            
             outNLPFeaturesTemp.flush();
             outNLPFeaturesTemp.close();
             lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
               learningSettings);
+            Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Converting annotations to NLP features", benchmarkingFeatures);
+            
             lightWeightApi.copyNLPFeat2NormalFile(wdResults,
               miLearningInfor.miNumDocsTraining);
             /**
@@ -640,11 +765,19 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
             outFeatureVectors = new BufferedWriter(
               new OutputStreamWriter(new FileOutputStream(new File(wdResults,
                 ConstantParameters.FILENAMEOFFeatureVectorData), true), "UTF-8"));
+
+            startTime = Benchmark.startPoint();
+            Benchmark.checkPoint(getBenchmarkID(), this, "Converting NLPFeatures to FeatureVectors", benchmarkingFeatures);
+            
             lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures,
               outFeatureVectors, numDoc, isTraining, learningSettings);
             inNLPFeatures.close();
             outFeatureVectors.flush();
             outFeatureVectors.close();
+
+            Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Converting NLPFeatures to FeatureVectors", benchmarkingFeatures);
+
+
             System.gc(); // to make effort to delete the files.
             miLearningInfor.miNumDocsTraining += numDoc;
             miLearningInfor.miNumDocsFromLast += numDoc;
@@ -652,12 +785,28 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
               // Start learning
               // if fitering the training data
               if(learningSettings.fiteringTrainingData
-                && learningSettings.filteringRatio > 0.0)
+                && learningSettings.filteringRatio > 0.0) {
+                
+                benchmarkingFeatures.put("NumDocs", miLearningInfor.miNumDocsTraining+"");
+                startTime = Benchmark.startPoint();
+                Benchmark.checkPoint(getBenchmarkID(), this, "Filtering negative instances", benchmarkingFeatures);
+
                 lightWeightApi.FilteringNegativeInstsInJava(
                   miLearningInfor.miNumDocsTraining, learningSettings);
+                
+                Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Filtering negative instances", benchmarkingFeatures);
+              }
+
+              startTime = Benchmark.startPoint();
+              Benchmark.checkPoint(getBenchmarkID(), this, "Training", benchmarkingFeatures);
+              
               // using the java code for training
               lightWeightApi.trainingJava(miLearningInfor.miNumDocsTraining,
                 learningSettings);
+
+              Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Training", benchmarkingFeatures);
+              benchmarkingFeatures.remove("NumDocs");
+              
               // Reset the num from last training as 0
               miLearningInfor.miNumDocsFromLast = 0;
             }
@@ -743,4 +892,55 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
   public EvaluationBasedOnDocs setEvaluation(EvaluationBasedOnDocs eval) {
     return this.evaluation = eval;
   }
+  
+  ///////// Benchmarkable ////////////////
+  
+  private String parentBenchmarkID;
+  private String benchmarkID;
+  
+  /**
+   * Returns the benchmark ID of the parent of this resource.
+   * @return
+   */
+  public String getParentBenchmarkID() {
+    return this.parentBenchmarkID;
+  }
+  
+  /**
+   * Returns the benchmark ID of this resource.
+   * @return
+   */
+  public String getBenchmarkID() {
+    if(this.benchmarkID == null) {
+      benchmarkID = getName().replaceAll("[ ]+", "_");;
+    }
+    return this.benchmarkID;
+  }
+  
+  /**
+   * Given an ID of the parent resource, this method is responsible for producing the Benchmark ID, unique to this resource.
+   * @param parentID
+   */
+  public void createBenchmarkID(String parentID) {
+    parentBenchmarkID = parentID;
+    benchmarkID = Benchmark.createBenchmarkID(getName(), parentID);
+  }
+  
+  /**
+   * This method sets the benchmarkID for this resource.
+   * @param benchmarkID
+   */
+  public void setParentBenchmarkID(String benchmarkID) {
+    parentBenchmarkID = benchmarkID;
+  }
+  
+  /**
+   * Returns the logger object being used by this resource.
+   * @return
+   */
+  public Logger getLogger() {
+    return Benchmark.logger;
+  }
+
+ 
 }

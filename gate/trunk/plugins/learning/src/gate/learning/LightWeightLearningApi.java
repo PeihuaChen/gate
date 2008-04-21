@@ -40,6 +40,7 @@ import gate.learning.learners.SupervisedLearner;
 import gate.learning.learners.SvmLibSVM;
 import gate.learning.learners.weka.WekaLearner;
 import gate.learning.learners.weka.WekaLearning;
+import gate.util.Benchmark;
 import gate.util.GateException;
 import gate.util.InvalidOffsetException;
 import gate.util.OffsetComparator;
@@ -78,11 +79,21 @@ public class LightWeightLearningApi extends Object {
    */
   HashMap chunkLenHash;
 
+  private String benchmarkID = null;
+  
   /** Constructor, with working directory setting. */
   public LightWeightLearningApi(File wd) {
     this.wd = wd;
   }
 
+  /**
+   * Sets the benchmark ID
+   * @param id
+   */
+  public void setBenchmarkID(String id) {
+    this.benchmarkID = id;
+  }
+  
   /**
    * Further initialisation for the main object LearningAPIMain().
    */
@@ -633,6 +644,10 @@ public class LightWeightLearningApi extends Object {
     File labelInData = new File(labelInDataFileName);
     File nlpDataLabelFile = new File(nlpDataLabelFileName);
     int learnerType = obtainLearnerType(engineSettings.learnerSettings.learnerName);
+
+    // benchmarking features
+    FeatureMap benchmarkingFeatures = Factory.newFeatureMap();
+    
     switch(learnerType){
       case 1: // for weka learner
         LogService.logMessage("Use weka learner.", 1);
@@ -645,15 +660,38 @@ public class LightWeightLearningApi extends Object {
             // Transfer the labels in nlpDataFile into
             // the label in the sparse data
             // and collect the labels and write them into a file
+            long startTime = Benchmark.startPoint();
+            Benchmark.checkPoint(benchmarkID, this, "Converting NLP Labels to DataLabel", benchmarkingFeatures);
+            
             convertNLPLabelsTDataLabel(nlpDataFile, dataFile, labelInData,
               nlpDataLabelFile, numDocs, engineSettings.surround);
+            
+            Benchmark.finish(startTime, benchmarkID, this, "Finished: Converting NLP Labels to DataLabel", benchmarkingFeatures);
+            
+            startTime = Benchmark.startPoint();
+            benchmarkingFeatures.put("NLPFeaturesFile", nlpDataLabelFile.getAbsolutePath());
+            Benchmark.checkPoint(benchmarkID, this, "Reading NLP Features From a File", benchmarkingFeatures);
+            
             wekaL.readNLPFeaturesFromFile(nlpDataLabelFile, numDocs,
               this.featuresList, true, labelsAndId.label2Id.size(),
               engineSettings.surround);
+            
+            Benchmark.finish(startTime, benchmarkID, this, "Finished: Reading NLP Features From a file", benchmarkingFeatures);
+            benchmarkingFeatures.remove("NLPFeaturesFile");
+            
             break;
           case WekaLearning.SPARSEFVDATA:
+            
+            startTime = Benchmark.startPoint();
+            benchmarkingFeatures.put("FeatureVectorFile", dataFile.getAbsolutePath());
+            Benchmark.checkPoint(benchmarkID, this, "Reading Feature Vectors From a File", benchmarkingFeatures);
+            
+            
             wekaL.readSparseFVsFromFile(dataFile, numDocs, true,
               labelsAndId.label2Id.size(), engineSettings.surround);
+            
+            Benchmark.finish(startTime, benchmarkID, this, "Finished: Reading Feature Vectors From a File", benchmarkingFeatures);
+            benchmarkingFeatures.remove("FeatureVectorFile");
             break;
         }
         // Get the wekaLearner from the learnername
@@ -662,8 +700,16 @@ public class LightWeightLearningApi extends Object {
           engineSettings.learnerSettings.paramsOfLearning);
         LogService.logMessage("Weka learner name: "
           + wekaLearner.getLearnerName(), 1);
+
+        long startTime = Benchmark.startPoint();
+        benchmarkingFeatures.put("modelFile", modelFile.getAbsolutePath());
+        Benchmark.checkPoint(benchmarkID, this, "Training a weka model", benchmarkingFeatures);
+        
         // Training.
         wekaL.train(wekaLearner, modelFile);
+        
+        Benchmark.finish(startTime, benchmarkID, this, "Finished: Training a weka model", benchmarkingFeatures);
+        benchmarkingFeatures.remove("modelFile");
         break;
       case 2: // for learner of multi to binary conversion
         if(LogService.minVerbosityLevel > 1)
@@ -675,7 +721,15 @@ public class LightWeightLearningApi extends Object {
           chunkLearning.setExecutor(engineSettings.multiBinaryExecutor);
         }
         // read data
+        startTime = Benchmark.startPoint();
+        benchmarkingFeatures.put("dataFile", dataFile.getAbsolutePath());
+        Benchmark.checkPoint(benchmarkID, this, "Reading Data From a File", benchmarkingFeatures);
+        
         chunkLearning.getDataFromFile(numDocs, dataFile);
+        
+        Benchmark.finish(startTime, benchmarkID, this, "Finished: Reading Data From a File", benchmarkingFeatures);
+        benchmarkingFeatures.remove("dataFile");
+        
         LogService.logMessage("The number of classes in dataset: "
           + chunkLearning.numClasses, 1);
         // get a learner
@@ -693,7 +747,15 @@ public class LightWeightLearningApi extends Object {
         LogService.logMessage("The learners: " + paumLearner.getLearnerName(),
           1);
         // training
+        startTime = Benchmark.startPoint();
+        benchmarkingFeatures.put("modelFile", modelFile.getAbsolutePath());
+        Benchmark.checkPoint(benchmarkID, this, "Training a paum learner", benchmarkingFeatures);
+        
         chunkLearning.training(paumLearner, modelFile);
+        
+        Benchmark.finish(startTime, benchmarkID, this, "Finished: Training a paum learner", benchmarkingFeatures);
+        benchmarkingFeatures.remove("modelFile");
+        
         break;
       default:
         System.out.println("Error! Wrong learner type.");
@@ -729,6 +791,7 @@ public class LightWeightLearningApi extends Object {
     // Store the label information from the model application
     LabelsOfFeatureVectorDoc[] labelsFVDoc = null;
     short featureType = WekaLearning.SPARSEFVDATA;
+    FeatureMap benchmarkingFeatures = Factory.newFeatureMap();
     switch(learnerType){
       case 1: // for weka learner
         LogService.logMessage("Use weka learner.", 1);
@@ -737,6 +800,10 @@ public class LightWeightLearningApi extends Object {
         // features
         featureType = WekaLearning
           .obtainWekaLeanerDataType(engineSettings.learnerSettings.learnerName);
+
+        long startTime = Benchmark.startPoint();
+        Benchmark.checkPoint(benchmarkID, this, "Reading data from file", benchmarkingFeatures);
+        
         switch(featureType){
           case WekaLearning.NLPFEATUREFVDATA:
             wekaL.readNLPFeaturesFromFile(nlpDataFile, numDocs,
@@ -748,6 +815,9 @@ public class LightWeightLearningApi extends Object {
               labelsAndId.label2Id.size(), engineSettings.surround);
             break;
         }
+        
+        Benchmark.finish(startTime, benchmarkID, this, "Finished: Reading data from file", benchmarkingFeatures);
+        
         // Check if the weka learner has distribute output of classify
         boolean distributionOutput = WekaLearning
           .obtainWekaLearnerOutputType(engineSettings.learnerSettings.learnerName);
@@ -757,8 +827,17 @@ public class LightWeightLearningApi extends Object {
           engineSettings.learnerSettings.paramsOfLearning);
         LogService.logMessage("Weka learner name: "
           + wekaLearner.getLearnerName(), 1);
-        // Training.
+        
+        // Application
+        startTime = Benchmark.startPoint();
+        benchmarkingFeatures.put("modelFile", modelFile.getAbsolutePath());
+        Benchmark.checkPoint(benchmarkID, this, "Applying model", benchmarkingFeatures);
+        
         wekaL.apply(wekaLearner, modelFile, distributionOutput);
+        
+        Benchmark.finish(startTime, benchmarkID, this, "Finished: Applying model", benchmarkingFeatures);
+        benchmarkingFeatures.remove("modelFile");
+        
         labelsFVDoc = wekaL.labelsFVDoc;
         numClasses = labelsAndId.label2Id.size() * 2; // subtract the
         // null class
@@ -769,7 +848,13 @@ public class LightWeightLearningApi extends Object {
         MultiClassLearning chunkLearning = new MultiClassLearning(
           engineSettings.multi2BinaryMode);
         // read data
+        startTime = Benchmark.startPoint();
+        Benchmark.checkPoint(benchmarkID, this, "Reading data from file", benchmarkingFeatures);
+
         chunkLearning.getDataFromFile(numDocs, dataFile);
+
+        Benchmark.finish(startTime, benchmarkID, this, "Finished: Reading data from file", benchmarkingFeatures);
+        
         // get a learner
         String learningCommand = engineSettings.learnerSettings.paramsOfLearning;
         learningCommand = learningCommand.trim();
@@ -785,7 +870,16 @@ public class LightWeightLearningApi extends Object {
         LogService.logMessage("The learners: " + paumLearner.getLearnerName(),
           1);
         // apply
+        
+        startTime = Benchmark.startPoint();
+        benchmarkingFeatures.put("modelFile", modelFile.getAbsolutePath());
+        Benchmark.checkPoint(benchmarkID, this, "Applying model", benchmarkingFeatures);
+        
         chunkLearning.apply(paumLearner, modelFile);
+        
+        Benchmark.finish(startTime, benchmarkID, this, "Finished: Applying model", benchmarkingFeatures);
+        benchmarkingFeatures.remove("modelFile");
+        
         labelsFVDoc = chunkLearning.dataFVinDoc.labelsFVDoc;
         numClasses = chunkLearning.numClasses;
         break;
@@ -804,6 +898,10 @@ public class LightWeightLearningApi extends Object {
         engineSettings.thrBoundaryProb, engineSettings.thrEntityProb,
         engineSettings.thrClassificationProb);
       // System.out.println("** Application mode:");
+      
+      long startTime = Benchmark.startPoint();
+      Benchmark.checkPoint(benchmarkID, this, "Post processing", benchmarkingFeatures);
+      
       for(int i = 0; i < numDocs; ++i) {
         HashSet chunks = new HashSet();
         postPr.postProcessingChunk((short)3, labelsFVDoc[i].multiLabels,
@@ -818,6 +916,9 @@ public class LightWeightLearningApi extends Object {
           Factory.deleteResource(toProcess);
         }
       }
+      
+      Benchmark.finish(startTime, benchmarkID, this, "Finished: Post processing", benchmarkingFeatures);
+      
     } else {
       String featName = engineSettings.datasetDefinition.arrs.classFeature;
       String instanceType = engineSettings.datasetDefinition.getInstanceType();
