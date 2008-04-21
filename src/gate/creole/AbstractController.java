@@ -15,14 +15,33 @@ package gate.creole;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.*;
 
+import org.apache.log4j.Logger;
+
 import gate.*;
 import gate.event.*;
+import gate.util.Benchmark;
+import gate.util.Benchmarkable;
 
 
 public abstract class AbstractController extends AbstractResource
-                                         implements Controller{
+                                         implements Controller, Benchmarkable {
 
 
+  /**
+   * Benchmark ID of this resource.
+   */
+  protected String benchmarkID;
+  
+  /**
+   * Benchmark ID of the parent object.
+   */
+  protected String parentBenchmarkID;
+  
+  /**
+   * Shared featureMap
+   */
+  protected FeatureMap benchmarkFeatures = Factory.newFeatureMap();
+  
   //executable code
   /**
    * Execute this controller.  This implementation takes care of
@@ -32,6 +51,12 @@ public abstract class AbstractController extends AbstractResource
    * {@link #executeImpl()} rather than this method.
    */
   public void execute() throws ExecutionException {
+
+    // record when the execution started
+    long startTime = Benchmark.startPoint();
+    benchmarkFeatures.put(Benchmark.APPLICATION_NAME_FEATURE, getName());
+    Benchmark.checkPoint(getBenchmarkID(), this, "Executing Application", benchmarkFeatures);
+    
     // inform ControllerAware PRs that execution has started
     for(ControllerAwarePR pr : getControllerAwarePRs()) {
       pr.controllerExecutionStarted(this);
@@ -74,6 +99,10 @@ public abstract class AbstractController extends AbstractResource
         }
       }
     }
+    
+    // report the end of execution
+    Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Executing Application", benchmarkFeatures);
+    benchmarkFeatures.remove(Benchmark.APPLICATION_NAME_FEATURE);
   }
 
   /**
@@ -376,4 +405,50 @@ public abstract class AbstractController extends AbstractResource
       }
     }
   }
+  
+
+  /**
+   * Returns the benchmark ID of the parent of this resource.
+   * @return
+   */
+  public String getParentBenchmarkID() {
+    return parentBenchmarkID;
+  }
+  
+  /**
+   * Returns the benchmark ID of this resource.
+   * @return
+   */
+  public String getBenchmarkID() {
+    if(benchmarkID == null) {
+      benchmarkID = getName().replaceAll("[ ]+", "_");
+    }
+    return benchmarkID;
+  }
+  
+  /**
+   * Given an ID of the parent resource, this method is responsible for producing the Benchmark ID, unique to this resource.
+   * @param parentID
+   */
+  public void createBenchmarkID(String parentBenchmarkID) {
+    this.parentBenchmarkID = parentBenchmarkID;
+    Benchmark.createBenchmarkID(getName(), parentBenchmarkID);
+  }
+  
+  /**
+   * This method sets the benchmarkID for this resource.
+   * @param benchmarkID
+   */
+  public void setParentBenchmarkID(String parentBenchmarkID) {
+    this.parentBenchmarkID = parentBenchmarkID;
+  }
+  
+  /**
+   * Returns the logger object being used by this resource.
+   * @return
+   */
+  public Logger getLogger() {
+    return Benchmark.logger;
+  }
+  
 }

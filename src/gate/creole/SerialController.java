@@ -19,6 +19,8 @@ import java.util.*;
 
 import gate.*;
 import gate.event.*;
+import gate.util.Benchmark;
+import gate.util.Benchmarkable;
 import gate.util.Err;
 import gate.util.GateRuntimeException;
 import gate.util.profile.Profiler;
@@ -27,7 +29,8 @@ import gate.util.Out;
 /** Execute a list of PRs serially.
  */
 public class SerialController extends AbstractController
-    implements CreoleListener{
+    implements CreoleListener {
+  
   private final static boolean DEBUG = false;
 
   /** Profiler to track PR execute time */
@@ -132,10 +135,14 @@ public class SerialController extends AbstractController
     //execute all PRs in sequence
     interrupted = false;
     for (int i = 0; i < prList.size(); i++){
-      if(isInterrupted()) throw new ExecutionInterruptedException(
+      if(isInterrupted()) {
+        
+        throw new ExecutionInterruptedException(
           "The execution of the " + getName() +
           " application has been abruptly interrupted!");
+      }
 
+ 
       runComponent(i);
       if (DEBUG) {
         prof.checkPoint("~Execute PR ["+((ProcessingResource)
@@ -154,7 +161,7 @@ public class SerialController extends AbstractController
 
       }
     }
-
+    
     if (DEBUG) {
       prof.checkPoint("Execute controller [" + getName() + "] finished");
     }
@@ -187,10 +194,40 @@ public class SerialController extends AbstractController
       Err.prln("Could not set listeners for " + currentPR.getClass().getName() +
                "\n" + e.toString() + "\n...nothing to lose any sleep over.");
     }
+    
+
+    // id that holds the existing parent ID ofthe PR
+    String oldParentIDOfThePR = null;
+    
+    // check if the PR is benchmarkable
+    // if so we need to set the appropriate IDs on it.
+    if(currentPR instanceof Benchmarkable) {
+      Benchmarkable b = (Benchmarkable) currentPR;
+
+      // obtain its old parentBenchmarkID
+      oldParentIDOfThePR = b.getParentBenchmarkID();
+
+      // create a new ID for the PR
+      b.createBenchmarkID(getBenchmarkID());
+    }
+    
+    // report the starting of execution
+    long startTime = Benchmark.startPoint();
+    benchmarkFeatures.put(Benchmark.PR_NAME_FEATURE, currentPR.getName());
+    Benchmark.checkPoint(getBenchmarkID(), this, "Executing PR", benchmarkFeatures);
 
     //run the thing
     currentPR.execute();
 
+    // report the end of execution
+    Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Executing PR", benchmarkFeatures);
+    benchmarkFeatures.remove(Benchmark.PR_NAME_FEATURE);
+    
+    // reset the parent benchmark id of the PR
+    if(currentPR instanceof Benchmarkable) {
+      ((Benchmarkable) currentPR).setParentBenchmarkID(oldParentIDOfThePR);
+    }
+    
     //remove the listeners
     try{
       AbstractResource.removeResourceListeners(currentPR, listeners);

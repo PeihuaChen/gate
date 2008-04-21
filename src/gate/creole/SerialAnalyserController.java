@@ -46,14 +46,33 @@ public class SerialAnalyserController extends SerialController
     if(corpus == null) throw new ExecutionException(
       "(SerialAnalyserController) \"" + getName() + "\":\n" +
       "The corpus supplied for execution was null!");
+
+    long startTime = Benchmark.startPoint(); 
+    benchmarkFeatures.put(Benchmark.CORPUS_NAME_FEATURE, corpus.getName());
+    
     //iterate through the documents in the corpus
     for(int i = 0; i < corpus.size(); i++){
-      if(isInterrupted()) throw new ExecutionInterruptedException(
+      if(isInterrupted()) {
+
+        // report the process interruption
+        Benchmark.finish(startTime, getBenchmarkID(), this, "user interrupted the process", benchmarkFeatures);
+        
+        throw new ExecutionInterruptedException(
         "The execution of the " + getName() +
         " application has been abruptly interrupted!");
+      }
 
       boolean docWasLoaded = corpus.isDocumentLoaded(i);
+      
+      // record the time before loading the document
+      long documentLoadingStartTime = Benchmark.startPoint();
+      
       Document doc = (Document)corpus.get(i);
+
+      // report the document loading
+      benchmarkFeatures.put(Benchmark.DOCUMENT_NAME_FEATURE, doc.getName());
+      Benchmark.finish(documentLoadingStartTime, getBenchmarkID(), this, "document loaded", benchmarkFeatures);
+      
       //run the system over this document
       //set the doc and corpus
       for(int j = 0; j < prList.size(); j++){
@@ -63,7 +82,8 @@ public class SerialAnalyserController extends SerialController
 
       try{
         if (DEBUG) 
-          Out.pr("SerialAnalyserController processing doc=" + doc.getName()+ "...");      
+          Out.pr("SerialAnalyserController processing doc=" + doc.getName()+ "...");
+        
         super.executeImpl();
         if (DEBUG) 
           Out.prln("done.");      
@@ -83,6 +103,10 @@ public class SerialAnalyserController extends SerialController
         Factory.deleteResource(doc);
       }
     }
+    
+    // remove the features that we added 
+    benchmarkFeatures.remove(Benchmark.DOCUMENT_NAME_FEATURE);
+    benchmarkFeatures.remove(Benchmark.CORPUS_NAME_FEATURE);
   }
 
   /**
