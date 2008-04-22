@@ -361,6 +361,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
                 new JDialog((Dialog)parentWindow, 
                         "Annotation Editor Dialog", false);
       dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+      MainFrame.getGuiRoots().add(dialog);
     }
 
     setLayout(new BorderLayout());
