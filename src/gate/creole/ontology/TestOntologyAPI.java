@@ -66,7 +66,7 @@ public class TestOntologyAPI extends TestCase {
     assertEquals(20, classNum);
     // count the number of top classes
     Set topclasses = ontology.getOClasses(true);
-    assertEquals(topclasses.size(), 6);
+    assertEquals(7, topclasses.size());
     // get the class Department
     OClass aClass = ontology.getOClass(new URI(ontology.getDefaultNameSpace()
             + "Department", false));
@@ -74,14 +74,14 @@ public class TestOntologyAPI extends TestCase {
     // and count the number of super classes
     Set supclassbydist = aClass.getSuperClasses(OConstants.TRANSITIVE_CLOSURE);
     // the list contains 2 arrays of classes i-e 2 levels
-    assertEquals(supclassbydist.size(), 2);
+    assertEquals(1, supclassbydist.size());
     // get the class Department
     aClass = ontology.getOClass(new URI(ontology.getDefaultNameSpace()
             + "Organization", false));
     assertNotNull(aClass);
     assertTrue(aClass.isTopClass());
     Set subclasses = aClass.getSubClasses(OConstants.TRANSITIVE_CLOSURE);
-    assertEquals(subclasses.size(), 5);
+    assertEquals(3, subclasses.size());
     Factory.deleteResource(ontology);
   }
 
