@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
 /**
  * Resources that want to log their progress or results into a shared log
  * centrally maintained by GATE, should implement this interface and use
- * the java.util.Benchmark class to log their entries.
+ * the gate.util.Benchmark class to log their entries.
  * @author niraj
  */
 public interface Benchmarkable {
