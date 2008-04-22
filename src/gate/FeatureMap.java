@@ -35,16 +35,16 @@ public interface FeatureMap extends SimpleFeatureMap
     */
   public boolean subsumes(FeatureMap aFeatureMap);
 
-	/** Tests if <b>this</b> featureMap object includes aFeatureMap features. <br>
-	  * If the feature map contains <code>class</code> and (optionally) <code>ontology</code> features:<br>
-	  * then the ontologyLR is used to provide ontology based subsume with respect to the subClassOf relations.
-	  * @param ontologyLR an ontology to be used for the subsume
-		* @param aFeatureMap object which will be included  or not in  <b>this</b>
-		* FeatureMap obj.
-		* @return <code>true</code> if <b>this</b> includes aFeatureMap
-		* and <code>false</code> if not.
-		*/
-	public boolean subsumes(Ontology ontologyLR, FeatureMap aFeatureMap);
+  /** Tests if <b>this</b> featureMap object includes aFeatureMap features. <br>
+    * If the feature map contains <code>class</code> and (optionally) <code>ontology</code> features:<br>
+    * then the ontologyLR is used to provide ontology based subsume with respect to the subClassOf relations.
+    * @param ontologyLR an ontology to be used for the subsume
+    * @param aFeatureMap object which will be included  or not in  <b>this</b>
+    * FeatureMap obj.
+    * @return <code>true</code> if <b>this</b> includes aFeatureMap
+    * and <code>false</code> if not.
+    */
+  public boolean subsumes(Ontology ontologyLR, FeatureMap aFeatureMap);
 
   /** Tests if <b>this</b> featureMap object includes aFeatureMap but only
     * for the features present in the aFeatureNamesSet.
