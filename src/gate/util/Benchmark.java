@@ -1,3 +1,15 @@
+/*
+ *  Benchmark.java
+ *
+ *  Copyright (c) 1998-2008, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ */
+
+
 package gate.util;
 
 import java.io.File;
@@ -19,15 +31,17 @@ import org.apache.log4j.Logger;
  * </p>
  * 
  * @author niraj
- * 
  */
 public class Benchmark {
 
   // initialize the log4J configuration
   static {
-    File log4jFile = new File(new File(Gate.getGateHome(), "bin"), "gateLog4j.properties");
+    File log4jFile =
+      new File(new File(Gate.getGateHome(), "bin"), "gateLog4j.properties");
     if(System.getProperties().get("log4j.configuration") == null)
-      System.getProperties().put("log4j.configuration", log4jFile.toURI().toString());
+      System.getProperties().put(
+        "log4j.configuration", log4jFile.toURI().toString()
+      );
   }
   
   /**
@@ -100,8 +114,10 @@ public class Benchmark {
    *          reported in the log message. toString() method will be
    *          invoked on the objects.
    */
-  public static void checkPoint(String benchmarkID,
-          Object objectInvokingThisCheckPoint, String message, FeatureMap benchmarkingFeatures) {
+  public static void checkPoint(
+    String benchmarkID, Object objectInvokingThisCheckPoint, String message,
+    FeatureMap benchmarkingFeatures
+  ) {
     
     // finally build the string to be logged
     StringBuilder messageToLog = new StringBuilder();
@@ -117,7 +133,9 @@ public class Benchmark {
    * @param messageToLog
    * @param userMessage
    */
-  private static void log(StringBuilder messageToLog, String userMessage, FeatureMap features) {
+  private static void log(
+    StringBuilder messageToLog, String userMessage, FeatureMap features
+  ) {
     messageToLog.append(featureMapToString(features, userMessage)).append("\n");
     logger.info(messageToLog.toString());
   }
@@ -137,23 +155,24 @@ public class Benchmark {
    *          reported in the log message. toString() method will be
    *          invoked on the objects.
    */
-  public static void finish(long processStartTime, String benchmarkID,
-          Object objectInvokingThisCheckPoint, String message, FeatureMap benchmarkingFeatures) {
-    
+  public static void finish(
+    long processStartTime, String benchmarkID,
+    Object objectInvokingThisCheckPoint, String message,
+    FeatureMap benchmarkingFeatures
+  ) {
     // we calculate processEndTime here as we don't want to consider
     // the time to convert featureMapToString
     long processingTime = System.currentTimeMillis() - processStartTime;
     
     // finally build the string to be logged
     StringBuilder messageToLog = new StringBuilder();
-    messageToLog.append(PROCESS_FINISH_CODE + " " + processingTime  
-            + " " + benchmarkID + " "
-            + objectInvokingThisCheckPoint.getClass().getName() + " \\\n");
+    messageToLog.append(
+      PROCESS_FINISH_CODE + " " + processingTime  + " " + benchmarkID + " " +
+      objectInvokingThisCheckPoint.getClass().getName() + " \\\n"
+    );
 
     log(messageToLog, message, benchmarkingFeatures);
   }
-  
- 
   
   /**
    * A utility method to convert the featureBearer into a string
@@ -162,18 +181,21 @@ public class Benchmark {
    * @param features
    * @return
    */
-  protected static String featureMapToString(FeatureMap features, String userMessage) {
+  protected static String featureMapToString(
+    FeatureMap features, String userMessage
+  ) {
 
     StringBuilder toReturn = new StringBuilder();
     toReturn.append('[');
 
     if(userMessage != null) {
-      userMessage = userMessage.replaceAll("(,)","\\,").replaceAll("(:)", "\\:");
+      userMessage =
+        userMessage.replaceAll("(,)","\\,").replaceAll("(:)", "\\:");
       toReturn.append(Benchmark.MESSAGE_FEATURE+":"+userMessage);
     }
     
-    if(features == null || features.isEmpty()) return toReturn.append("]").toString();
-
+    if(features == null || features.isEmpty())
+      return toReturn.append("]").toString();
 
     synchronized(features) {
       for(Object key : features.keySet()) {
@@ -182,11 +204,13 @@ public class Benchmark {
         }
 
         Object value = features.get(key);
-        toReturn.append(key.toString().replaceAll("(:)", "\\:").replaceAll(
-                "(,)", "\\,")
-                + ":");
-        toReturn.append(value.toString().replaceAll("(:)", "\\:").replaceAll(
-                "(,)", "\\,"));
+        toReturn.append(
+          key.toString().replaceAll("(:)", "\\:").replaceAll("(,)", "\\,") +
+          ":"
+        );
+        toReturn.append(
+          value.toString().replaceAll("(:)", "\\:").replaceAll("(,)", "\\,")
+        );
       }
       features.notifyAll();
       toReturn.append("]");
@@ -200,7 +224,9 @@ public class Benchmark {
    * @param parentBenchmarkID
    * @return
    */
-  public static String createBenchmarkID(String resourceName, String parentBenchmarkID) {
+  public static String createBenchmarkID(
+    String resourceName, String parentBenchmarkID
+  ) {
     if(parentBenchmarkID != null) {
       if(resourceName != null) {
         return (parentBenchmarkID + "." + resourceName).replaceAll("[ ]+", "_");
