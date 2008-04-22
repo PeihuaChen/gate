@@ -9,7 +9,6 @@ package gate.learning;
 
 import gate.Document;
 import gate.Factory;
-import gate.FeatureMap;
 import gate.ProcessingResource;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
@@ -28,6 +27,7 @@ import java.io.OutputStreamWriter;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
+import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 
@@ -86,7 +86,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
   }
   
   // featureMap that is used for exporting log messages
-  protected FeatureMap benchmarkingFeatures = Factory.newFeatureMap();
+  protected java.util.Map benchmarkingFeatures = new HashMap();
   
   /** Initialise this resource, and return it. */
   public gate.Resource init() throws ResourceInstantiationException {
@@ -210,7 +210,6 @@ public class LearningAPIMain extends AbstractLanguageAnalyser implements
    */
   public void execute() throws ExecutionException {
 
-    System.out.println("Executing!!");
     // mode in which the PR is executed
     benchmarkingFeatures.put("LearningMode", learningMode);
     lightWeightApi.setBenchmarkID(getBenchmarkID());

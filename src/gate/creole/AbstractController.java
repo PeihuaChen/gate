@@ -40,7 +40,7 @@ public abstract class AbstractController extends AbstractResource
   /**
    * Shared featureMap
    */
-  protected FeatureMap benchmarkFeatures = Factory.newFeatureMap();
+  protected Map benchmarkFeatures = new HashMap();
   
   //executable code
   /**
@@ -102,7 +102,7 @@ public abstract class AbstractController extends AbstractResource
     
     // report the end of execution
     Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Executing Application", benchmarkFeatures);
-    benchmarkFeatures.remove(Benchmark.APPLICATION_NAME_FEATURE);
+    benchmarkFeatures.remove(Benchmark.APPLICATION_NAME_FEATURE); 
   }
 
   /**
