@@ -87,7 +87,8 @@ public class TestAnnic extends TestCase {
     File[] files = directory.listFiles();
     for(int i = 0; i < files.length; i++) {
       if(files[i].isFile()) {
-        Document doc = Factory.newDocument(files[i].toURI().toURL());
+        Document doc = Factory.newDocument(files[i].toURI().toURL(), 
+                "ISO-8859-1");
         testCorpus.add(doc);
       }
     }
@@ -128,7 +129,7 @@ public class TestAnnic extends TestCase {
     String query = "{Person}";
     boolean success = searcher.search(query, parameters);
     int noOfHits = searcher.next(-1).length;
-    assertEquals(noOfHits, 12);
+    assertEquals(12, noOfHits);
 
     query = "{Organization}({Token})*3{Person}";
     success = searcher.search(query, parameters);
