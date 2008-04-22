@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import gate.Document;
 import gate.learning.DocFeatureVectors.LongCompactor;
@@ -646,7 +647,7 @@ public class LightWeightLearningApi extends Object {
     int learnerType = obtainLearnerType(engineSettings.learnerSettings.learnerName);
 
     // benchmarking features
-    FeatureMap benchmarkingFeatures = Factory.newFeatureMap();
+    Map benchmarkingFeatures = new HashMap();
     
     switch(learnerType){
       case 1: // for weka learner
@@ -791,7 +792,7 @@ public class LightWeightLearningApi extends Object {
     // Store the label information from the model application
     LabelsOfFeatureVectorDoc[] labelsFVDoc = null;
     short featureType = WekaLearning.SPARSEFVDATA;
-    FeatureMap benchmarkingFeatures = Factory.newFeatureMap();
+    Map benchmarkingFeatures = new HashMap();
     switch(learnerType){
       case 1: // for weka learner
         LogService.logMessage("Use weka learner.", 1);

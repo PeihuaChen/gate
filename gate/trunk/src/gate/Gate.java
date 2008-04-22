@@ -28,86 +28,89 @@ import gate.creole.ResourceData;
 import gate.event.CreoleListener;
 import gate.util.*;
 
-/** The class is responsible for initialising the GATE libraries, and
-  * providing access to singleton utility objects, such as the GATE class
-  * loader, CREOLE register and so on.
-  */
-public class Gate implements GateConstants
-{
+/**
+ * The class is responsible for initialising the GATE libraries, and providing
+ * access to singleton utility objects, such as the GATE class loader, CREOLE
+ * register and so on.
+ */
+public class Gate implements GateConstants {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
   /**
-   *  The default StringBuffer size, it seems that we need longer string
-   *  than the StringBuffer class default because of the high number of
-   *  buffer expansions
-   *  */
+   * The default StringBuffer size, it seems that we need longer string than the
+   * StringBuffer class default because of the high number of buffer expansions
+   */
   public static final int STRINGBUFFER_SIZE = 1024;
 
   /**
-   *  The default size to be used for Hashtable, HashMap and HashSet.
-   *  The defualt is 11 and it leads to big memory usage. Having a default
-   *  load factor of 0.75, table of size 4 can take 3 elements before being
-   *  re-hashed - a values that seems to be optimal for most of the cases.
-   *  */
+   * The default size to be used for Hashtable, HashMap and HashSet. The defualt
+   * is 11 and it leads to big memory usage. Having a default load factor of
+   * 0.75, table of size 4 can take 3 elements before being re-hashed - a values
+   * that seems to be optimal for most of the cases.
+   */
   public static final int HASH_STH_SIZE = 4;
-    
 
   /**
-   *  The database schema owner (GATEADMIN is default)
-   *  this one should not be hardcoded but set in the
-   *  XML initialization files
-   *
-   *  */
+   * The database schema owner (GATEADMIN is default) this one should not be
+   * hardcoded but set in the XML initialization files
+   * 
+   */
   public static final String DB_OWNER = "gateadmin";
-
 
   /** The list of builtin URLs to search for CREOLE resources. */
   private static String builtinCreoleDirectoryUrls[] = {
-    // "http://derwent.dcs.shef.ac.uk/gate.ac.uk/creole/"
+  // "http://derwent.dcs.shef.ac.uk/gate.ac.uk/creole/"
 
     // this has been moved to initCreoleRegister and made relative to
     // the base URL returned by getUrl()
     // "http://gate.ac.uk/creole/"
-  };
+    };
 
-
-  /** The GATE URI used to interpret custom GATE tags*/
+  /** The GATE URI used to interpret custom GATE tags */
   public static final String URI = "http://www.gate.ac.uk";
 
   /** Minimum version of JDK we support */
   protected static final String MIN_JDK_VERSION = "1.4.1";
 
+  /**
+   * Feature name that should be used to set if the benchmarking logging should
+   * be enabled or disabled.
+   */
+  protected static final String ENABLE_BENCHMARKING_FEATURE_NAME =
+    "gate.enable.benchmark";
+
   /** Get the minimum supported version of the JDK */
-  public static String getMinJdkVersion() { return MIN_JDK_VERSION; }
+  public static String getMinJdkVersion() {
+    return MIN_JDK_VERSION;
+  }
 
-  /** Initialisation - must be called by all clients before using
-    * any other parts of the library. Also initialises the CREOLE
-    * register and reads config data (<TT>gate.xml</TT> files).
-    * @see #initCreoleRegister
-    */
+  /**
+   * Initialisation - must be called by all clients before using any other parts
+   * of the library. Also initialises the CREOLE register and reads config data (<TT>gate.xml</TT>
+   * files).
+   * 
+   * @see #initCreoleRegister
+   */
   public static void init() throws GateException {
-    //init local paths
+    // init local paths
     initLocalPaths();
-    
-    // register the URL handler  for the "gate://" URLs
-    System.setProperty(
-      "java.protocol.handler.pkgs",
-      System.getProperty("java.protocol.handler.pkgs")
-        + "|" + "gate.util.protocols"
-    );
 
-    //System.setProperty("javax.xml.parsers.SAXParserFactory",
-      //                       "org.apache.xerces.jaxp.SAXParserFactoryImpl");
+    // register the URL handler for the "gate://" URLs
+    System.setProperty("java.protocol.handler.pkgs", System
+      .getProperty("java.protocol.handler.pkgs")
+      + "|" + "gate.util.protocols");
 
-    //initialise the symbols generator
+    // System.setProperty("javax.xml.parsers.SAXParserFactory",
+    // "org.apache.xerces.jaxp.SAXParserFactoryImpl");
+
+    // initialise the symbols generator
     lastSym = 0;
 
     // create class loader and creole register if they're null
     if(classLoader == null)
       classLoader = new GateClassLoader(Gate.class.getClassLoader());
-    if(creoleRegister == null)
-      creoleRegister = new CreoleRegisterImpl();
+    if(creoleRegister == null) creoleRegister = new CreoleRegisterImpl();
     if(knownPlugins == null) knownPlugins = new ArrayList();
     if(autoloadPlugins == null) autoloadPlugins = new ArrayList();
     if(pluginData == null) pluginData = new HashMap();
@@ -115,10 +118,11 @@ public class Gate implements GateConstants
     initCreoleRegister();
     // init the data store register
     initDataStoreRegister();
+
     // read gate.xml files; this must come before creole register
     // initialisation in order for the CREOLE-DIR elements to have and effect
     initConfigData();
-    
+
     initCreoleRepositories();
     // the creoleRegister acts as a proxy for datastore related events
     dataStoreRegister.addCreoleListener(creoleRegister);
@@ -127,142 +131,139 @@ public class Gate implements GateConstants
     Factory.addCreoleListener(creoleRegister);
 
     // check we have a useable JDK
-    if(System.getProperty("java.version").compareTo(MIN_JDK_VERSION) < 0) {
-      throw new GateException(
-        "GATE requires JDK " + MIN_JDK_VERSION + " or newer"
-      );
-    }
+    if(System.getProperty("java.version").compareTo(MIN_JDK_VERSION) < 0) { throw new GateException(
+      "GATE requires JDK " + MIN_JDK_VERSION + " or newer"); }
 
-    //register Lucene as a IR search engine
-    try{
+    // register Lucene as a IR search engine
+    try {
       registerIREngine("gate.creole.ir.lucene.LuceneIREngine");
-    }catch(ClassNotFoundException cnfe){
+    }
+    catch(ClassNotFoundException cnfe) {
       throw new GateRuntimeException(cnfe);
     }
   } // init()
-  
+
   /**
-   * Initialises the paths to local files of interest like the GATE home, 
-   * the installed plugins home and site and user configuration files.
+   * Initialises the paths to local files of interest like the GATE home, the
+   * installed plugins home and site and user configuration files.
    */
-  protected static void initLocalPaths(){
-    //GATE Home
-    if(gateHome == null){
+  protected static void initLocalPaths() {
+    // GATE Home
+    if(gateHome == null) {
       String gateHomeStr = System.getProperty(GATE_HOME_PROPERTY_NAME);
-      if(gateHomeStr != null && gateHomeStr.length() > 0){
+      if(gateHomeStr != null && gateHomeStr.length() > 0) {
         gateHome = new File(gateHomeStr);
       }
-      //if failed, try to guess
-      if(gateHome == null || !gateHome.exists()){
-        Err.println("GATE home system property (\"" + 
-                GATE_HOME_PROPERTY_NAME + "\") not set.\nAttempting to guess...");
-        URL gateURL = Thread.currentThread().getContextClassLoader().
-          getResource("gate/Gate.class");
-        try{
-          if(gateURL.getProtocol().equals("jar")){
-            //running from gate.jar
+      // if failed, try to guess
+      if(gateHome == null || !gateHome.exists()) {
+        Err.println("GATE home system property (\"" + GATE_HOME_PROPERTY_NAME
+          + "\") not set.\nAttempting to guess...");
+        URL gateURL =
+          Thread.currentThread().getContextClassLoader().getResource(
+            "gate/Gate.class");
+        try {
+          if(gateURL.getProtocol().equals("jar")) {
+            // running from gate.jar
             String gateURLStr = gateURL.getFile();
-              File gateJarFile = new File(
-                      new URI(
-                          gateURLStr.substring(0, gateURLStr.indexOf('!'))));
-              gateHome = gateJarFile.getParentFile().getParentFile();
-          }else if(gateURL.getProtocol().equals("file")){
-            //running from classes directory
-            File gateClassFile = new File(gateURL.getFile());
-            gateHome = gateClassFile.getParentFile().
-              getParentFile().getParentFile();
+            File gateJarFile =
+              new File(
+                new URI(gateURLStr.substring(0, gateURLStr.indexOf('!'))));
+            gateHome = gateJarFile.getParentFile().getParentFile();
           }
-          Err.println("Using \"" + 
-                  gateHome.getCanonicalPath() + 
-                  "\" as GATE Home.\nIf this is not correct please set it manually" + 
-                  " using the -D" + GATE_HOME_PROPERTY_NAME + 
-                  " option in your start-up script");
-        }catch(Throwable thr){
+          else if(gateURL.getProtocol().equals("file")) {
+            // running from classes directory
+            File gateClassFile = new File(gateURL.getFile());
+            gateHome =
+              gateClassFile.getParentFile().getParentFile().getParentFile();
+          }
+          Err.println("Using \"" + gateHome.getCanonicalPath()
+            + "\" as GATE Home.\nIf this is not correct please set it manually"
+            + " using the -D" + GATE_HOME_PROPERTY_NAME
+            + " option in your start-up script");
+        }
+        catch(Throwable thr) {
           throw new GateRuntimeException(
-                  "Cannot guess GATE Home. Pease set it manually!", thr);
-        }          
+            "Cannot guess GATE Home. Pease set it manually!", thr);
+        }
       }
     }
     Out.println("Using " + gateHome.toString() + " as GATE home");
-    
-    //Plugins home
-    if(pluginsHome == null){
+
+    // Plugins home
+    if(pluginsHome == null) {
       String pluginsHomeStr = System.getProperty(PLUGINS_HOME_PROPERTY_NAME);
-      if(pluginsHomeStr != null && pluginsHomeStr.length() > 0){
+      if(pluginsHomeStr != null && pluginsHomeStr.length() > 0) {
         File homeFile = new File(pluginsHomeStr);
-        if(homeFile.exists() && homeFile.isDirectory()){
+        if(homeFile.exists() && homeFile.isDirectory()) {
           pluginsHome = homeFile;
         }
       }
-      //if not set, use the GATE Home as a base directory
-      if(pluginsHome == null){
+      // if not set, use the GATE Home as a base directory
+      if(pluginsHome == null) {
         File homeFile = new File(gateHome, PLUGINS);
-        if(homeFile.exists() && homeFile.isDirectory()){
+        if(homeFile.exists() && homeFile.isDirectory()) {
           pluginsHome = homeFile;
         }
       }
-      //if still not set, throw exception
-      if(pluginsHome == null){
-        throw new GateRuntimeException(
-                "Could not infer installed plug-ins home!\n" + 
-                "Please set it manually using the -D" + 
-                PLUGINS_HOME_PROPERTY_NAME + " option in your start-up script.");
-      }
+      // if still not set, throw exception
+      if(pluginsHome == null) { throw new GateRuntimeException(
+        "Could not infer installed plug-ins home!\n"
+          + "Please set it manually using the -D" + PLUGINS_HOME_PROPERTY_NAME
+          + " option in your start-up script."); }
     }
-    Out.println("Using " + pluginsHome.toString() + 
-            " as installed plug-ins directory.");
-    
-    //site config
-    if(siteConfigFile == null){
+    Out.println("Using " + pluginsHome.toString()
+      + " as installed plug-ins directory.");
+
+    // site config
+    if(siteConfigFile == null) {
       String siteConfigStr = System.getProperty(SITE_CONFIG_PROPERTY_NAME);
-      if(siteConfigStr != null && siteConfigStr.length() > 0){
+      if(siteConfigStr != null && siteConfigStr.length() > 0) {
         File configFile = new File(siteConfigStr);
         if(configFile.exists()) siteConfigFile = configFile;
       }
-      //if not set, use GATE home as base directory
-      if(siteConfigFile == null){
+      // if not set, use GATE home as base directory
+      if(siteConfigFile == null) {
         File configFile = new File(gateHome, GATE_DOT_XML);
         if(configFile.exists()) siteConfigFile = configFile;
       }
-      //if still not set, throw exception
-      if(siteConfigFile == null){
-        throw new GateRuntimeException(
-            "Could not locate the site configuration file!\n" + 
-            "Please create it at " + 
-            new File(gateHome, GATE_DOT_XML).toString() +
-            " or point to an existing one using the -D" + 
-            SITE_CONFIG_PROPERTY_NAME + " option in your start-up script!");
-      }
+      // if still not set, throw exception
+      if(siteConfigFile == null) { throw new GateRuntimeException(
+        "Could not locate the site configuration file!\n"
+          + "Please create it at "
+          + new File(gateHome, GATE_DOT_XML).toString()
+          + " or point to an existing one using the -D"
+          + SITE_CONFIG_PROPERTY_NAME + " option in your start-up script!"); }
     }
-    Out.println("Using " + siteConfigFile.toString() + 
-    " as site configuration file.");
-    
-    //user config
-    if(userConfigFile == null){
+    Out.println("Using " + siteConfigFile.toString()
+      + " as site configuration file.");
+
+    // user config
+    if(userConfigFile == null) {
       String userConfigStr = System.getProperty(USER_CONFIG_PROPERTY_NAME);
-      if(userConfigStr != null && userConfigStr.length() > 0){
+      if(userConfigStr != null && userConfigStr.length() > 0) {
         File configFile = new File(userConfigStr);
         if(configFile.exists()) userConfigFile = configFile;
       }
-      //if still not set, use the user's home as a base directory
-      if(userConfigFile == null){
+      // if still not set, use the user's home as a base directory
+      if(userConfigFile == null) {
         userConfigFile = new File(getDefaultUserConfigFileName());
-      }  
+      }
     }
     Out.println("Using " + userConfigFile + " as user configuration file");
-    
-    //user session
-    if(userSessionFile == null){
-      String userSessionStr = 
+
+    // user session
+    if(userSessionFile == null) {
+      String userSessionStr =
         System.getProperty(GATE_USER_SESSION_PROPERTY_NAME);
-      if(userSessionStr != null && userSessionStr.length() > 0){
+      if(userSessionStr != null && userSessionStr.length() > 0) {
         userSessionFile = new File(userSessionStr);
-      } else {
+      }
+      else {
         userSessionFile = new File(getDefaultUserSessionFileName());
       }
-    }//if(userSessionFile == null)
+    }// if(userSessionFile == null)
     Out.println("Using " + userSessionFile + " as user session file");
-    
+
     // builtin creole dir
     if(builtinCreoleDir == null) {
       String builtinCreoleDirPropertyValue =
@@ -284,94 +285,111 @@ public class Gate implements GateConstants
         catch(MalformedURLException mue) {
           // couldn't parse as a File either, so throw an exception
           throw new GateRuntimeException(BUILTIN_CREOLE_DIR_PROPERTY_NAME
-              + " value \"" + builtinCreoleDirPropertyValue + "\" could"
-              + " not be parsed as either a URL or a file path.");
+            + " value \"" + builtinCreoleDirPropertyValue + "\" could"
+            + " not be parsed as either a URL or a file path.");
         }
         Out.println("Using " + builtinCreoleDir + " as built-in CREOLE"
-            + " directory URL");
+          + " directory URL");
       }
     }
-  }
-  
-  /**
-   * Loads the CREOLE repositories (aka plugins) that the user has selected for 
-   * automatic loading.
-   * Loads the information about known plugins in memory.
-   */
-  protected static void initCreoleRepositories(){
-    //the logic is:
-    //get the list of know plugins from gate.xml
-    //add all the installed plugins
-    //get the list of loadable plugins 
-    //or use ANNIE if value not set
-    //load loadable plugins
     
-    //process the known plugins list
-    String knownPluginsPath = (String)getUserConfig().get(KNOWN_PLUGIN_PATH_KEY);
-    if(knownPluginsPath != null && knownPluginsPath.length() > 0){
-      StringTokenizer strTok = new StringTokenizer(knownPluginsPath, ";", false);
-      while(strTok.hasMoreTokens()){
+    // check if benchmarking should be enabled or disabled
+    if(System.getProperty(ENABLE_BENCHMARKING_FEATURE_NAME) != null
+      && System.getProperty(ENABLE_BENCHMARKING_FEATURE_NAME).equalsIgnoreCase(
+        "true")) {
+      Benchmark.setBenchmarkingEnabled(true);
+    }
+    else {
+      Benchmark.setBenchmarkingEnabled(false);
+    }
+    
+    
+  }
+
+  /**
+   * Loads the CREOLE repositories (aka plugins) that the user has selected for
+   * automatic loading. Loads the information about known plugins in memory.
+   */
+  protected static void initCreoleRepositories() {
+    // the logic is:
+    // get the list of know plugins from gate.xml
+    // add all the installed plugins
+    // get the list of loadable plugins
+    // or use ANNIE if value not set
+    // load loadable plugins
+
+    // process the known plugins list
+    String knownPluginsPath =
+      (String)getUserConfig().get(KNOWN_PLUGIN_PATH_KEY);
+    if(knownPluginsPath != null && knownPluginsPath.length() > 0) {
+      StringTokenizer strTok =
+        new StringTokenizer(knownPluginsPath, ";", false);
+      while(strTok.hasMoreTokens()) {
         String aKnownPluginPath = strTok.nextToken();
-        try{
+        try {
           URL aPluginURL = new URL(aKnownPluginPath);
           addKnownPlugin(aPluginURL);
-        }catch(MalformedURLException mue){
+        }
+        catch(MalformedURLException mue) {
           Err.prln("Plugin error: " + aKnownPluginPath + " is an invalid URL!");
         }
       }
     }
-    //add all the installed plugins
+    // add all the installed plugins
     // pluginsHome is now set by initLocalPaths
-    //File pluginsHome = new File(System.getProperty(GATE_HOME_PROPERTY_NAME), 
-    //        "plugins");
+    // File pluginsHome = new File(System.getProperty(GATE_HOME_PROPERTY_NAME),
+    // "plugins");
     File[] dirs = pluginsHome.listFiles();
-    for(int i = 0; i < dirs.length; i++){
+    for(int i = 0; i < dirs.length; i++) {
       File creoleFile = new File(dirs[i], "creole.xml");
-      if(creoleFile.exists()){
-        try{
+      if(creoleFile.exists()) {
+        try {
           URL pluginURL = dirs[i].toURI().toURL();
           addKnownPlugin(pluginURL);
-        }catch(MalformedURLException mue){
-          //this shoulod never happen
+        }
+        catch(MalformedURLException mue) {
+          // this shoulod never happen
           throw new GateRuntimeException(mue);
         }
       }
     }
 
-    //process the autoload plugins
+    // process the autoload plugins
     String pluginPath = getUserConfig().getString(AUTOLOAD_PLUGIN_PATH_KEY);
-    //can be overridden by system property
+    // can be overridden by system property
     String prop = System.getProperty(AUTOLOAD_PLUGIN_PATH_PROPERTY_NAME);
     if(prop != null && prop.length() > 0) pluginPath = prop;
-    
-    if(pluginPath == null || pluginPath.length() == 0){
-      //value not set -> use the default
-      try{
+
+    if(pluginPath == null || pluginPath.length() == 0) {
+      // value not set -> use the default
+      try {
         pluginPath = new File(pluginsHome, "ANNIE/").toURI().toURL().toString();
         getUserConfig().put(AUTOLOAD_PLUGIN_PATH_KEY, pluginPath);
-      }catch(MalformedURLException mue){
+      }
+      catch(MalformedURLException mue) {
         throw new GateRuntimeException(mue);
       }
     }
-    
-    //load all loadable plugins
-    StringTokenizer strTok = new StringTokenizer(pluginPath, 
-            ";", false);
-    while(strTok.hasMoreTokens()){
+
+    // load all loadable plugins
+    StringTokenizer strTok = new StringTokenizer(pluginPath, ";", false);
+    while(strTok.hasMoreTokens()) {
       String aDir = strTok.nextToken();
-      try{
+      try {
         URL aPluginURL = new URL(aDir);
         addAutoloadPlugin(aPluginURL);
-      }catch(MalformedURLException mue){
+      }
+      catch(MalformedURLException mue) {
         Err.println("Cannot load " + aDir + " CREOLE repository.");
         mue.printStackTrace();
       }
-      try{
+      try {
         Iterator<URL> loadPluginsIter = getAutoloadPlugins().iterator();
-        while(loadPluginsIter.hasNext()){  
+        while(loadPluginsIter.hasNext()) {
           getCreoleRegister().registerDirectories(loadPluginsIter.next());
         }
-      }catch(GateException ge){
+      }
+      catch(GateException ge) {
         Err.println("Cannot load " + aDir + " CREOLE repository.");
         ge.printStackTrace();
       }
@@ -382,23 +400,21 @@ public class Gate implements GateConstants
   public static void initCreoleRegister() throws GateException {
 
     // register the builtin CREOLE directories
-    for(int i=0; i<builtinCreoleDirectoryUrls.length; i++)
+    for(int i = 0; i < builtinCreoleDirectoryUrls.length; i++)
       try {
-        creoleRegister.addDirectory(
-          new URL(builtinCreoleDirectoryUrls[i])
-        );
-      } catch(MalformedURLException e) {
+        creoleRegister.addDirectory(new URL(builtinCreoleDirectoryUrls[i]));
+      }
+      catch(MalformedURLException e) {
         throw new GateException(e);
       }
 
-/*
-We'll have to think about this. Right now it points to the creole inside the
-jar/classpath so it's the same as registerBuiltins
-*/
-//    // add the GATE base URL creole directory
-//    creoleRegister.addDirectory(Gate.getUrl("creole/"));
-//    creoleRegister.registerDirectories();
-
+    /*
+     * We'll have to think about this. Right now it points to the creole inside
+     * the jar/classpath so it's the same as registerBuiltins
+     */
+    // // add the GATE base URL creole directory
+    // creoleRegister.addDirectory(Gate.getUrl("creole/"));
+    // creoleRegister.registerDirectories();
     // register the resources that are actually in gate.jar
     creoleRegister.registerBuiltins();
   } // initCreoleRegister
@@ -409,142 +425,132 @@ jar/classpath so it's the same as registerBuiltins
   } // initDataStoreRegister()
 
   /**
-   * Reads config data (<TT>gate.xml</TT> files). There are three
-   * sorts of these files:
+   * Reads config data (<TT>gate.xml</TT> files). There are three sorts of
+   * these files:
    * <UL>
-   * <LI>
-   * The builtin file from GATE's resources - this is read first.
-   * <LI>
-   * A site-wide init file given as a command-line argument or as a
+   * <LI> The builtin file from GATE's resources - this is read first.
+   * <LI> A site-wide init file given as a command-line argument or as a
    * <TT>gate.config</TT> property - this is read second.
-   * <LI>
-   * The user's file from their home directory - this is read last.
+   * <LI> The user's file from their home directory - this is read last.
    * </UL>
-   * Settings from files read after some settings have already been
-   * made will simply overwrite the previous settings.
+   * Settings from files read after some settings have already been made will
+   * simply overwrite the previous settings.
    */
   public static void initConfigData() throws GateException {
     ConfigDataProcessor configProcessor = new ConfigDataProcessor();
-    //parse the site configuration file
+    // parse the site configuration file
     URL configURL;
-    try{
+    try {
       configURL = siteConfigFile.toURI().toURL();
-    }catch(MalformedURLException mue){
-      //this should never happen
+    }
+    catch(MalformedURLException mue) {
+      // this should never happen
       throw new GateRuntimeException(mue);
     }
     try {
       InputStream configStream = new FileInputStream(siteConfigFile);
       configProcessor.parseConfigFile(configStream, configURL);
-    } catch(IOException e) {
-      throw new GateException(
-        "Couldn't open site configuration file: " + configURL + " " + e
-      );
     }
-    
-    //parse the user configuration data if present
-    if(userConfigFile != null && userConfigFile.exists()){
-      try{
+    catch(IOException e) {
+      throw new GateException("Couldn't open site configuration file: "
+        + configURL + " " + e);
+    }
+
+    // parse the user configuration data if present
+    if(userConfigFile != null && userConfigFile.exists()) {
+      try {
         configURL = userConfigFile.toURI().toURL();
-      }catch(MalformedURLException mue){
-        //this should never happen
+      }
+      catch(MalformedURLException mue) {
+        // this should never happen
         throw new GateRuntimeException(mue);
       }
       try {
         InputStream configStream = new FileInputStream(userConfigFile);
         configProcessor.parseConfigFile(configStream, configURL);
-      } catch(IOException e) {
-        throw new GateException(
-          "Couldn't open user configuration file: " + configURL + " " + e
-        );
-      }    
+      }
+      catch(IOException e) {
+        throw new GateException("Couldn't open user configuration file: "
+          + configURL + " " + e);
+      }
     }
 
     // remember the init-time config options
     originalUserConfig.putAll(userConfig);
 
     if(DEBUG) {
-      Out.prln(
-        "user config loaded; DBCONFIG=" + DataStoreRegister.getConfigData()
-      );
+      Out.prln("user config loaded; DBCONFIG="
+        + DataStoreRegister.getConfigData());
     }
   } // initConfigData()
 
   /**
    * Attempts to guess the Unicode font for the platform.
    */
-  public static String guessUnicodeFont(){
-    //guess the Unicode font for the platform
-    String[] fontNames = java.awt.GraphicsEnvironment.
-                         getLocalGraphicsEnvironment().
-                         getAvailableFontFamilyNames();
+  public static String guessUnicodeFont() {
+    // guess the Unicode font for the platform
+    String[] fontNames =
+      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment()
+        .getAvailableFontFamilyNames();
     String unicodeFontName = null;
-    for(int i = 0; i < fontNames.length; i++){
-      if(fontNames[i].equalsIgnoreCase("Arial Unicode MS")){
+    for(int i = 0; i < fontNames.length; i++) {
+      if(fontNames[i].equalsIgnoreCase("Arial Unicode MS")) {
         unicodeFontName = fontNames[i];
         break;
       }
-      if(fontNames[i].toLowerCase().indexOf("unicode") != -1){
+      if(fontNames[i].toLowerCase().indexOf("unicode") != -1) {
         unicodeFontName = fontNames[i];
       }
-    }//for(int i = 0; i < fontNames.length; i++)
+    }// for(int i = 0; i < fontNames.length; i++)
     return unicodeFontName;
   }
 
-  /** Get a URL that points to either an HTTP server or a file system
-    * that contains GATE files (such as test cases). The following locations
-    * are tried in sequence:
-    * <UL>
-    * <LI>
-    * <TT>http://derwent.dcs.shef.ac.uk/gate.ac.uk/</TT>, a Sheffield-internal
-    * development server (the gate.ac.uk affix is a copy of the file system
-    * present on GATE's main public server - see next item);
-    * <LI>
-    * <TT>http://gate.ac.uk/</TT>, GATE's main public server;
-    * <LI>
-    * <TT>http://localhost/gate.ac.uk/</TT>, a Web server running on the
-    * local machine;
-    * <LI>
-    * the local file system where the binaries for the
-    * current invocation of GATE are stored.
-    * </UL>
-    * In each case we assume that a Web server will be running on port 80,
-    * and that if we can open a socket to that port then the server is
-    * running. (This is a bit of a strong assumption, but this URL is used
-    * largely by the test suite, so we're not betting anything too critical
-    * on it.)
-    * <P>
-    * Note that the value returned will only be calculated when the existing
-    * value recorded by this class is null (which will be the case when
-    * neither setUrlBase nor getUrlBase have been called, or if
-    * setUrlBase(null) has been called).
-    */
+  /**
+   * Get a URL that points to either an HTTP server or a file system that
+   * contains GATE files (such as test cases). The following locations are tried
+   * in sequence:
+   * <UL>
+   * <LI> <TT>http://derwent.dcs.shef.ac.uk/gate.ac.uk/</TT>, a
+   * Sheffield-internal development server (the gate.ac.uk affix is a copy of
+   * the file system present on GATE's main public server - see next item);
+   * <LI> <TT>http://gate.ac.uk/</TT>, GATE's main public server;
+   * <LI> <TT>http://localhost/gate.ac.uk/</TT>, a Web server running on the
+   * local machine;
+   * <LI> the local file system where the binaries for the current invocation of
+   * GATE are stored.
+   * </UL>
+   * In each case we assume that a Web server will be running on port 80, and
+   * that if we can open a socket to that port then the server is running. (This
+   * is a bit of a strong assumption, but this URL is used largely by the test
+   * suite, so we're not betting anything too critical on it.)
+   * <P>
+   * Note that the value returned will only be calculated when the existing
+   * value recorded by this class is null (which will be the case when neither
+   * setUrlBase nor getUrlBase have been called, or if setUrlBase(null) has been
+   * called).
+   */
   public static URL getUrl() throws GateException {
     if(urlBase != null) return urlBase;
 
     try {
 
-       // if we're assuming a net connection, try network servers
+      // if we're assuming a net connection, try network servers
       if(isNetConnected()) {
         if(
-//          tryNetServer("gate-internal.dcs.shef.ac.uk", 80, "/") ||
-   //       tryNetServer("derwent.dcs.shef.ac.uk", 80, "/gate.ac.uk/") ||
-          tryNetServer("gate.ac.uk", 80, "/")
-        ) {
-            if(DEBUG) Out.prln("getUrl() returned " + urlBase);
-            return urlBase;
+        // tryNetServer("gate-internal.dcs.shef.ac.uk", 80, "/") ||
+        // tryNetServer("derwent.dcs.shef.ac.uk", 80, "/gate.ac.uk/") ||
+        tryNetServer("gate.ac.uk", 80, "/")) {
+          if(DEBUG) Out.prln("getUrl() returned " + urlBase);
+          return urlBase;
         }
       } // if isNetConnected() ...
 
       // no network servers; try for a local host web server.
       // we use InetAddress to get host name instead of using "localhost" coz
       // badly configured Windoze IP sometimes doesn't resolve the latter
-      if(
-        isLocalWebServer() &&
-        tryNetServer(
-          InetAddress.getLocalHost().getHostName(), 80, "/gate.ac.uk/"
-        )
-      ) {
+      if(isLocalWebServer()
+        && tryNetServer(InetAddress.getLocalHost().getHostName(), 80,
+          "/gate.ac.uk/")) {
         if(DEBUG) Out.prln("getUrlBase() returned " + urlBase);
         return urlBase;
       }
@@ -552,9 +558,11 @@ jar/classpath so it's the same as registerBuiltins
       // try the local file system
       tryFileSystem();
 
-    } catch(MalformedURLException e) {
+    }
+    catch(MalformedURLException e) {
       throw new GateException("Bad URL, getUrlBase(): " + urlBase + ": " + e);
-    } catch(UnknownHostException e) {
+    }
+    catch(UnknownHostException e) {
       throw new GateException("No host, getUrlBase(): " + urlBase + ": " + e);
     }
 
@@ -563,22 +571,24 @@ jar/classpath so it's the same as registerBuiltins
     return urlBase;
   } // getUrl()
 
-  /** Get a URL that points to either an HTTP server or a file system
-    * that contains GATE files (such as test cases).
-    * Calls <TT>getUrl()</TT> then adds the <TT>path</TT> parameter to
-    * the result.
-    * @param path a path to add to the base URL.
-    * @see #getUrl()
-    */
+  /**
+   * Get a URL that points to either an HTTP server or a file system that
+   * contains GATE files (such as test cases). Calls <TT>getUrl()</TT> then
+   * adds the <TT>path</TT> parameter to the result.
+   * 
+   * @param path
+   *          a path to add to the base URL.
+   * @see #getUrl()
+   */
   public static URL getUrl(String path) throws GateException {
     getUrl();
-    if(urlBase == null)
-      return null;
+    if(urlBase == null) return null;
 
     URL newUrl = null;
     try {
       newUrl = new URL(urlBase, path);
-    } catch(MalformedURLException e) {
+    }
+    catch(MalformedURLException e) {
       throw new GateException("Bad URL, getUrl( " + path + "): " + e);
     }
 
@@ -586,9 +596,10 @@ jar/classpath so it's the same as registerBuiltins
     return newUrl;
   } // getUrl(path)
 
-  /** Flag controlling whether we should try to access the net, e.g. when
-    * setting up a base URL.
-    */
+  /**
+   * Flag controlling whether we should try to access the net, e.g. when setting
+   * up a base URL.
+   */
   private static boolean netConnected = true;
 
   private static int lastSym;
@@ -603,107 +614,125 @@ jar/classpath so it's the same as registerBuiltins
    * Registers a new IR engine. The class named should implement
    * {@link gate.creole.ir.IREngine} and be accessible via the GATE class
    * loader.
-   * @param className the fully qualified name of the class to be registered
-   * @throws GateException if the class does not implement the
-   * {@link gate.creole.ir.IREngine} interface.
-   * @throws ClassNotFoundException if the named class cannot be found.
+   * 
+   * @param className
+   *          the fully qualified name of the class to be registered
+   * @throws GateException
+   *           if the class does not implement the
+   *           {@link gate.creole.ir.IREngine} interface.
+   * @throws ClassNotFoundException
+   *           if the named class cannot be found.
    */
-  public static void registerIREngine(String className)
-    throws GateException, ClassNotFoundException{
+  public static void registerIREngine(String className) throws GateException,
+    ClassNotFoundException {
     Class aClass = Class.forName(className, true, Gate.getClassLoader());
-    if(gate.creole.ir.IREngine.class.isAssignableFrom(aClass)){
+    if(gate.creole.ir.IREngine.class.isAssignableFrom(aClass)) {
       registeredIREngines.add(className);
-    }else{
-      throw new GateException(className + " does not implement the " +
-                              gate.creole.ir.IREngine.class.getName() +
-                              " interface!");
+    }
+    else {
+      throw new GateException(className + " does not implement the "
+        + gate.creole.ir.IREngine.class.getName() + " interface!");
     }
   }
 
   /**
    * Unregisters a previously registered IR engine.
-   * @param className the name of the class to be removed from the list of
-   * registered IR engines.
+   * 
+   * @param className
+   *          the name of the class to be removed from the list of registered IR
+   *          engines.
    * @return true if the class was found and removed.
    */
-  public static boolean unregisterIREngine(String className){
+  public static boolean unregisterIREngine(String className) {
     return registeredIREngines.remove(className);
   }
 
   /**
    * Gets the set of registered IR engines.
+   * 
    * @return an unmodifiable {@link java.util.Set} value.
    */
-  public static Set getRegisteredIREngines(){
+  public static Set getRegisteredIREngines() {
     return Collections.unmodifiableSet(registeredIREngines);
   }
-  
+
   /**
    * Gets the GATE home location.
+   * 
    * @return a File value.
    */
-  public static File getGateHome(){
+  public static File getGateHome() {
     return gateHome;
   }
 
   /** Should we assume we're connected to the net? */
-  public static boolean isNetConnected() { return netConnected; }
+  public static boolean isNetConnected() {
+    return netConnected;
+  }
 
   /**
-   * Tell GATE whether to assume we're connected to the net. Has to be
-   * called <B>before</B> {@link #init()}.
+   * Tell GATE whether to assume we're connected to the net. Has to be called
+   * <B>before</B> {@link #init()}.
    */
-  public static void setNetConnected(boolean b) { netConnected = b; }
+  public static void setNetConnected(boolean b) {
+    netConnected = b;
+  }
 
   /**
-   * Flag controlling whether we should try to access a web server on
-   * localhost, e.g. when setting up a base URL. Has to be
-   * called <B>before</B> {@link #init()}.
+   * Flag controlling whether we should try to access a web server on localhost,
+   * e.g. when setting up a base URL. Has to be called <B>before</B>
+   * {@link #init()}.
    */
   private static boolean localWebServer = true;
 
   /** Should we assume there's a local web server? */
-  public static boolean isLocalWebServer() { return localWebServer; }
+  public static boolean isLocalWebServer() {
+    return localWebServer;
+  }
 
   /** Tell GATE whether to assume there's a local web server. */
-  public static void setLocalWebServer(boolean b) { localWebServer = b; }
+  public static void setLocalWebServer(boolean b) {
+    localWebServer = b;
+  }
 
-  /** Try to contact a network server. When sucessfull sets urlBase to an HTTP
-    * URL for the server.
-    * @param hostName the name of the host to try and connect to
-    * @param serverPort the port to try and connect to
-    * @param path a path to append to the URL when we make a successfull
-    * connection. E.g. for host xyz, port 80, path /thing, the resultant URL
-    * would be <TT>http://xyz:80/thing</TT>.
-    */
-  public static boolean tryNetServer(
-    String hostName, int serverPort, String path
-  ) throws MalformedURLException {
+  /**
+   * Try to contact a network server. When sucessfull sets urlBase to an HTTP
+   * URL for the server.
+   * 
+   * @param hostName
+   *          the name of the host to try and connect to
+   * @param serverPort
+   *          the port to try and connect to
+   * @param path
+   *          a path to append to the URL when we make a successfull connection.
+   *          E.g. for host xyz, port 80, path /thing, the resultant URL would
+   *          be <TT>http://xyz:80/thing</TT>.
+   */
+  public static boolean tryNetServer(String hostName, int serverPort,
+    String path) throws MalformedURLException {
 
     if(DEBUG)
-      Out.prln(
-        "tryNetServer(hostName=" + hostName + ", serverPort=" + serverPort +
-        ", path=" + path +")"
-      );
+      Out.prln("tryNetServer(hostName=" + hostName + ", serverPort="
+        + serverPort + ", path=" + path + ")");
 
     // is the host listening at the port?
-    try{
+    try {
       URL url = new URL("http://" + hostName + ":" + serverPort + "/");
-      URLConnection uConn =  url.openConnection();
+      URLConnection uConn = url.openConnection();
       HttpURLConnection huConn = null;
-      if(uConn instanceof HttpURLConnection)
-        huConn = (HttpURLConnection)uConn;
+      if(uConn instanceof HttpURLConnection) huConn = (HttpURLConnection)uConn;
       if(huConn.getResponseCode() == -1) return false;
-    } catch (IOException e){
+    }
+    catch(IOException e) {
       return false;
     }
 
-//    if(socket != null) {
-      urlBase = new URL("http", hostName, serverPort, path);
-      return true;
-//    }
+    // if(socket != null) {
+    urlBase = new URL("http", hostName, serverPort, path);
+    return true;
+    // }
 
-//    return false;
+    // return false;
   } // tryNetServer()
 
   /** Try to find GATE files in the local file system */
@@ -716,8 +745,8 @@ jar/classpath so it's the same as registerBuiltins
   } // tryFileSystem()
 
   /**
-   * Find the location of the GATE binaries (and resources) in the
-   * local file system.
+   * Find the location of the GATE binaries (and resources) in the local file
+   * system.
    */
   public static String locateGateFiles() {
     String aGateResourceName = "gate/resources/creole/creole.xml";
@@ -733,15 +762,17 @@ jar/classpath so it's the same as registerBuiltins
   /**
    * Checks whether a particular class is a Gate defined type
    */
-  public static boolean isGateType(String classname){
+  public static boolean isGateType(String classname) {
     boolean res = getCreoleRegister().containsKey(classname);
-    if(!res){
-      try{
+    if(!res) {
+      try {
         Class aClass = Class.forName(classname, true, Gate.getClassLoader());
-        res = Resource.class.isAssignableFrom(aClass) ||
-              Controller.class.isAssignableFrom(aClass) ||
-              DataStore.class.isAssignableFrom(aClass);
-      }catch(ClassNotFoundException cnfe){
+        res =
+          Resource.class.isAssignableFrom(aClass)
+            || Controller.class.isAssignableFrom(aClass)
+            || DataStore.class.isAssignableFrom(aClass);
+      }
+      catch(ClassNotFoundException cnfe) {
         return false;
       }
     }
@@ -749,49 +780,56 @@ jar/classpath so it's the same as registerBuiltins
   }
 
   /** Returns the value for the HIDDEN attribute of a feature map */
-  static public boolean getHiddenAttribute(FeatureMap fm){
+  static public boolean getHiddenAttribute(FeatureMap fm) {
     if(fm == null) return false;
     Object value = fm.get(HIDDEN_FEATURE_KEY);
-    return value != null &&
-           value instanceof String &&
-           ((String)value).equals("true");
+    return value != null && value instanceof String
+      && ((String)value).equals("true");
   }
 
   /** Sets the value for the HIDDEN attribute of a feature map */
-  static public void setHiddenAttribute(FeatureMap fm, boolean hidden){
-    if(hidden){
+  static public void setHiddenAttribute(FeatureMap fm, boolean hidden) {
+    if(hidden) {
       fm.put(HIDDEN_FEATURE_KEY, "true");
-    }else{
+    }
+    else {
       fm.remove(HIDDEN_FEATURE_KEY);
     }
   }
 
-
-  /** Registers a {@link gate.event.CreoleListener} with the Gate system
-    */
-  public static synchronized void addCreoleListener(CreoleListener l){
+  /**
+   * Registers a {@link gate.event.CreoleListener} with the Gate system
+   */
+  public static synchronized void addCreoleListener(CreoleListener l) {
     creoleRegister.addCreoleListener(l);
   } // addCreoleListener
 
   /** Set the URL base for GATE files, e.g. <TT>http://gate.ac.uk/</TT>. */
-  public static void setUrlBase(URL urlBase) { Gate.urlBase = urlBase; }
+  public static void setUrlBase(URL urlBase) {
+    Gate.urlBase = urlBase;
+  }
 
   /** The URL base for GATE files, e.g. <TT>http://gate.ac.uk/</TT>. */
   private static URL urlBase = null;
 
-  /** Class loader used e.g. for loading CREOLE modules, of compiling
-    * JAPE rule RHSs.
-    */
+  /**
+   * Class loader used e.g. for loading CREOLE modules, of compiling JAPE rule
+   * RHSs.
+   */
   private static GateClassLoader classLoader = null;
 
   /** Get the GATE class loader. */
-  public static GateClassLoader getClassLoader() { return classLoader; }
+  public static GateClassLoader getClassLoader() {
+    return classLoader;
+  }
 
   /** The CREOLE register. */
   private static CreoleRegister creoleRegister = null;
 
   /** Get the CREOLE register. */
-  public static CreoleRegister getCreoleRegister() { return creoleRegister; }
+  public static CreoleRegister getCreoleRegister() {
+    return creoleRegister;
+  }
 
   /** The DataStore register */
   private static DataStoreRegister dataStoreRegister = null;
@@ -807,19 +845,21 @@ jar/classpath so it's the same as registerBuiltins
   } // getDataStoreRegister
 
   /**
-   * Sets the {@link Executable} currently under execution.
-   * At a given time there can be only one executable set. After the executable
-   * has finished its execution this value should be set back to null.
-   * An attempt to set the executable while this value is not null will result
-   * in the method call waiting until the old executable is set to null.
+   * Sets the {@link Executable} currently under execution. At a given time
+   * there can be only one executable set. After the executable has finished its
+   * execution this value should be set back to null. An attempt to set the
+   * executable while this value is not null will result in the method call
+   * waiting until the old executable is set to null.
    */
   public synchronized static void setExecutable(gate.Executable executable) {
-    if(executable == null) currentExecutable = executable;
-    else{
-      while(getExecutable() != null){
-        try{
+    if(executable == null)
+      currentExecutable = executable;
+    else {
+      while(getExecutable() != null) {
+        try {
           Thread.sleep(200);
-        }catch(InterruptedException ie){
+        }
+        catch(InterruptedException ie) {
           throw new LuckyException(ie.toString());
         }
       }
@@ -829,20 +869,21 @@ jar/classpath so it's the same as registerBuiltins
 
   /**
    * Returns the curently set executable.
+   * 
    * @see #setExecutable(gate.Executable)
    */
   public synchronized static gate.Executable getExecutable() {
     return currentExecutable;
   } // getExecutable
 
-
   /**
    * Returns a new unique string
    */
   public synchronized static String genSym() {
-    StringBuffer buff = new StringBuffer(Integer.toHexString(lastSym++).
-                                         toUpperCase());
-    for(int i = buff.length(); i <= 4; i++) buff.insert(0, '0');
+    StringBuffer buff =
+      new StringBuffer(Integer.toHexString(lastSym++).toUpperCase());
+    for(int i = buff.length(); i <= 4; i++)
+      buff.insert(0, '0');
     return buff.toString();
   } // genSym
 
@@ -850,8 +891,8 @@ jar/classpath so it's the same as registerBuiltins
   private static OptionsMap userConfig = new OptionsMap();
 
   /**
-   * This map stores the init-time config data in case we need it later.
-   * GATE development environment configuration data (stored in gate.xml).
+   * This map stores the init-time config data in case we need it later. GATE
+   * development environment configuration data (stored in gate.xml).
    */
   private static OptionsMap originalUserConfig = new OptionsMap();
 
@@ -859,16 +900,17 @@ jar/classpath so it's the same as registerBuiltins
   private static String userConfigElement = "GATECONFIG";
 
   /**
-   * Gate the name of the XML element for GATE development environment
-   * config data.
+   * Gate the name of the XML element for GATE development environment config
+   * data.
    */
-  public static String getUserConfigElement() { return userConfigElement; }
+  public static String getUserConfigElement() {
+    return userConfigElement;
+  }
 
   /**
-   * Get the site config file (generally set during command-line processing
-   * or as a <TT>gate.config</TT> property).
-   * If the config is null, this method checks the <TT>gate.config</TT>
-   * property and uses it if non-null.
+   * Get the site config file (generally set during command-line processing or
+   * as a <TT>gate.config</TT> property). If the config is null, this method
+   * checks the <TT>gate.config</TT> property and uses it if non-null.
    */
   public static File getSiteConfigFile() {
     if(siteConfigFile == null) {
@@ -889,88 +931,89 @@ jar/classpath so it's the same as registerBuiltins
 
   /** An empty config data file. */
   private static String emptyConfigFile =
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + nl +
-    "<!-- " + GATE_DOT_XML + ": GATE configuration data -->" + nl +
-    "<GATE>" + nl +
-    "" + nl +
-    "<!-- NOTE: the next element may be overwritten by the GUI!!! -->" + nl +
-    "<" + userConfigElement + "/>" + nl +
-    "" + nl +
-    "</GATE>" + nl;
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + nl + "<!-- " + GATE_DOT_XML
+      + ": GATE configuration data -->" + nl + "<GATE>" + nl + "" + nl
+      + "<!-- NOTE: the next element may be overwritten by the GUI!!! -->" + nl
+      + "<" + userConfigElement + "/>" + nl + "" + nl + "</GATE>" + nl;
 
   /**
-   * Get an empty config file. <B>NOTE:</B> this method is intended only
-   * for use by the test suite.
+   * Get an empty config file. <B>NOTE:</B> this method is intended only for
+   * use by the test suite.
    */
-  public static String getEmptyConfigFile() { return emptyConfigFile; }
+  public static String getEmptyConfigFile() {
+    return emptyConfigFile;
+  }
 
   /**
-   * Get the GATE development environment configuration data
-   * (initialised from <TT>gate.xml</TT>).
+   * Get the GATE development environment configuration data (initialised from
+   * <TT>gate.xml</TT>).
    */
-  public static OptionsMap getUserConfig() { return userConfig; }
+  public static OptionsMap getUserConfig() {
+    return userConfig;
+  }
 
   /**
-   * Get the original, initialisation-time,
-   * GATE development environment configuration data
-   * (initialised from <TT>gate.xml</TT>).
+   * Get the original, initialisation-time, GATE development environment
+   * configuration data (initialised from <TT>gate.xml</TT>).
    */
   public static OptionsMap getOriginalUserConfig() {
     return originalUserConfig;
   } // getOriginalUserConfig
 
   /**
-   * Update the GATE development environment configuration data in the
-   * user's <TT>gate.xml</TT> file (create one if it doesn't exist).
+   * Update the GATE development environment configuration data in the user's
+   * <TT>gate.xml</TT> file (create one if it doesn't exist).
    */
   public static void writeUserConfig() throws GateException {
     String pluginsHomeStr;
-    try{
+    try {
       pluginsHomeStr = pluginsHome.getCanonicalPath();
-    }catch(IOException ioe){
-      throw new GateRuntimeException("Problem while locating the plug-ins home!",
-              ioe);
     }
-    //update the values for knownPluginPath
+    catch(IOException ioe) {
+      throw new GateRuntimeException(
+        "Problem while locating the plug-ins home!", ioe);
+    }
+    // update the values for knownPluginPath
     String knownPluginPath = "";
     Iterator<URL> pluginIter = getKnownPlugins().iterator();
-    while(pluginIter.hasNext()){
+    while(pluginIter.hasNext()) {
       URL aPluginURL = pluginIter.next();
-      //do not save installed plug-ins - they get loaded automatically
-      if(aPluginURL.getProtocol().equals("file")){
+      // do not save installed plug-ins - they get loaded automatically
+      if(aPluginURL.getProtocol().equals("file")) {
         File pluginDirectory = new File(aPluginURL.getFile());
-        try{
-          if(pluginDirectory.getCanonicalPath().startsWith(pluginsHomeStr)) continue;
-        }catch(IOException ioe){
-          throw new GateRuntimeException("Problem while locating the plug-in" + 
-                  aPluginURL.toString(),
-                  ioe);
+        try {
+          if(pluginDirectory.getCanonicalPath().startsWith(pluginsHomeStr))
+            continue;
+        }
+        catch(IOException ioe) {
+          throw new GateRuntimeException("Problem while locating the plug-in"
+            + aPluginURL.toString(), ioe);
         }
       }
       if(knownPluginPath.length() > 0) knownPluginPath += ";";
       knownPluginPath += aPluginURL.toExternalForm();
     }
     getUserConfig().put(KNOWN_PLUGIN_PATH_KEY, knownPluginPath);
-    
-    //update the autoload plugin list
+
+    // update the autoload plugin list
     String loadPluginPath = "";
     pluginIter = getAutoloadPlugins().iterator();
-    while(pluginIter.hasNext()){
+    while(pluginIter.hasNext()) {
       URL aPluginURL = pluginIter.next();
       if(loadPluginPath.length() > 0) loadPluginPath += ";";
       loadPluginPath += aPluginURL.toExternalForm();
     }
     getUserConfig().put(AUTOLOAD_PLUGIN_PATH_KEY, loadPluginPath);
-    
+
     // the user's config file
-    //String configFileName = getUserConfigFileName();
-    //File configFile = new File(configFileName);
+    // String configFileName = getUserConfigFileName();
+    // File configFile = new File(configFileName);
     File configFile = getUserConfigFile();
 
     // create if not there, then update
     try {
       // if the file doesn't exist, create one with an empty GATECONFIG
-      if(! configFile.exists()) {
+      if(!configFile.exists()) {
         FileOutputStream fos = new FileOutputStream(configFile);
         OutputStreamWriter writer = new OutputStreamWriter(fos, "UTF-8");
         writer.write(emptyConfigFile);
@@ -978,21 +1021,19 @@ jar/classpath so it's the same as registerBuiltins
       }
 
       // update the config element of the file
-      Files.updateXmlElement(
-        configFile, userConfigElement, userConfig
-      );
+      Files.updateXmlElement(configFile, userConfigElement, userConfig);
 
-    } catch(IOException e) {
-      throw new GateException(
-        "problem writing user " + GATE_DOT_XML + ": " + nl + e.toString()
-      );
+    }
+    catch(IOException e) {
+      throw new GateException("problem writing user " + GATE_DOT_XML + ": "
+        + nl + e.toString());
     }
   } // writeUserConfig
 
   /**
-   * Get the name of the user's <TT>gate.xml</TT> config file (this
-   * doesn't guarantee that file exists!).
-   *
+   * Get the name of the user's <TT>gate.xml</TT> config file (this doesn't
+   * guarantee that file exists!).
+   * 
    * @deprecated Use {@link #getUserConfigFile} instead.
    */
   public static String getUserConfigFileName() {
@@ -1003,7 +1044,7 @@ jar/classpath so it's the same as registerBuiltins
    * Get the default path to the user's config file, which is used unless an
    * alternative name has been specified via system properties or
    * {@link #setUserConfigFile}.
-   *
+   * 
    * @return the default user config file path.
    */
   public static String getDefaultUserConfigFileName() {
@@ -1011,14 +1052,14 @@ jar/classpath so it's the same as registerBuiltins
     if(runningOnUnix()) filePrefix = ".";
 
     String userConfigName =
-      System.getProperty("user.home") + Strings.getFileSep() +
-      filePrefix + GATE_DOT_XML;
+      System.getProperty("user.home") + Strings.getFileSep() + filePrefix
+        + GATE_DOT_XML;
     return userConfigName;
   } // getDefaultUserConfigFileName
 
   /**
    * Get the default path to the user's session file, which is used unless an
-   * alternative name has been specified via system properties or 
+   * alternative name has been specified via system properties or
    * {@link #setUserSessionFile(File)}
    * 
    * @return the default user session file path.
@@ -1028,270 +1069,294 @@ jar/classpath so it's the same as registerBuiltins
     if(runningOnUnix()) filePrefix = ".";
 
     String userSessionName =
-        System.getProperty("user.home") + Strings.getFileSep() +
-        filePrefix + GATE_DOT_SER;
+      System.getProperty("user.home") + Strings.getFileSep() + filePrefix
+        + GATE_DOT_SER;
 
     return userSessionName;
   } // getUserSessionFileName
 
   /**
-   * This method tries to guess if we are on a UNIX system. It does this
-   * by checking the value of <TT>System.getProperty("file.separator")</TT>;
-   * if this is "/" it concludes we are on UNIX. <B>This is obviously not
-   * a very good idea in the general case, so nothing much should be made
-   * to depend on this method (e.g. just naming of config file
-   * <TT>.gate.xml</TT> as opposed to <TT>gate.xml</TT>)</B>.
+   * This method tries to guess if we are on a UNIX system. It does this by
+   * checking the value of <TT>System.getProperty("file.separator")</TT>; if
+   * this is "/" it concludes we are on UNIX. <B>This is obviously not a very
+   * good idea in the general case, so nothing much should be made to depend on
+   * this method (e.g. just naming of config file <TT>.gate.xml</TT> as
+   * opposed to <TT>gate.xml</TT>)</B>.
    */
   public static boolean runningOnUnix() {
     return Strings.getFileSep().equals("/");
   } // runningOnUnix
 
   /**
-   * Returns the list of CREOLE directories the system knows about (either 
+   * Returns the list of CREOLE directories the system knows about (either
    * pre-installed plugins in the plugins directory or CREOLE directories that
    * have previously been loaded manually).
+   * 
    * @return a {@link List} of {@link URL}s.
    */
-  public static List<URL> getKnownPlugins(){
+  public static List<URL> getKnownPlugins() {
     return knownPlugins;
   }
-  
+
   /**
    * Adds the plugin to the list of known plugins.
-   * @param pluginURL the URL for the new plugin.
+   * 
+   * @param pluginURL
+   *          the URL for the new plugin.
    */
-  public static void addKnownPlugin(URL pluginURL){
+  public static void addKnownPlugin(URL pluginURL) {
     pluginURL = normaliseCreoleUrl(pluginURL);
     if(knownPlugins.contains(pluginURL)) return;
     knownPlugins.add(pluginURL);
   }
 
   /**
-   * Makes sure the provided URL ends with "/" (CREOLE URLs always point to 
+   * Makes sure the provided URL ends with "/" (CREOLE URLs always point to
    * directories so thry should always end with a slash.
-   * @param url the URL to be normalised
+   * 
+   * @param url
+   *          the URL to be normalised
    * @return the (maybe) corrected URL.
    */
-  private static URL normaliseCreoleUrl(URL url){
-    //CREOLE URLs are directory URLs so they should end with "/"
+  private static URL normaliseCreoleUrl(URL url) {
+    // CREOLE URLs are directory URLs so they should end with "/"
     String urlName = url.toExternalForm();
     String separator = "/";
-    if(urlName.endsWith(separator)){
+    if(urlName.endsWith(separator)) {
       return url;
-    }else{
+    }
+    else {
       urlName += separator;
-      try{
+      try {
         return new URL(urlName);
-      }catch(MalformedURLException mue){
+      }
+      catch(MalformedURLException mue) {
         throw new GateRuntimeException(mue);
       }
     }
   }
-  
+
   /**
    * Returns the list of CREOLE directories the system loads automatically at
    * start-up.
+   * 
    * @return a {@link List} of {@link URL}s.
    */
-  public static List<URL> getAutoloadPlugins(){
+  public static List<URL> getAutoloadPlugins() {
     return autoloadPlugins;
   }
-  
+
   /**
    * Adds a new directory to the list of plugins that are loaded automatically
    * at start-up.
-   * @param pluginUrl the URL for the new plugin.
+   * 
+   * @param pluginUrl
+   *          the URL for the new plugin.
    */
-  public static void addAutoloadPlugin(URL pluginUrl){
+  public static void addAutoloadPlugin(URL pluginUrl) {
     pluginUrl = normaliseCreoleUrl(pluginUrl);
-    if(autoloadPlugins.contains(pluginUrl))return;
-    //make sure it's known
+    if(autoloadPlugins.contains(pluginUrl)) return;
+    // make sure it's known
     addKnownPlugin(pluginUrl);
-    //add it to autoload list
+    // add it to autoload list
     autoloadPlugins.add(pluginUrl);
   }
-  
+
   /**
    * Gets the information about a known directory.
-   * @param directory the URL for the directory in question.
+   * 
+   * @param directory
+   *          the URL for the directory in question.
    * @return a {@link DirectoryInfo} value.
    */
-  public static DirectoryInfo getDirectoryInfo(URL directory){
+  public static DirectoryInfo getDirectoryInfo(URL directory) {
     if(!knownPlugins.contains(directory)) return null;
     DirectoryInfo dInfo = pluginData.get(directory);
-    if(dInfo == null){
+    if(dInfo == null) {
       dInfo = new DirectoryInfo(directory);
       pluginData.put(directory, dInfo);
-    }    
+    }
     return dInfo;
   }
-  
+
   /**
-   * Tells the system to &quot;forget&quot; about one previously known 
-   * directory. If the specified directory was loaded, it will be unloaded as 
-   * well - i.e. all the metadata relating to resources defined by this 
+   * Tells the system to &quot;forget&quot; about one previously known
+   * directory. If the specified directory was loaded, it will be unloaded as
+   * well - i.e. all the metadata relating to resources defined by this
    * directory will be removed from memory.
+   * 
    * @param pluginURL
    */
-  public static void removeKnownPlugin(URL pluginURL){
+  public static void removeKnownPlugin(URL pluginURL) {
     pluginURL = normaliseCreoleUrl(pluginURL);
     knownPlugins.remove(pluginURL);
     autoloadPlugins.remove(pluginURL);
     creoleRegister.removeDirectory(pluginURL);
     pluginData.remove(pluginURL);
-  }  
-  
+  }
+
   /**
    * Tells the system to remove a plugin URL from the list of plugins that are
-   * loaded automatically at system start-up. This will be reflected in the 
+   * loaded automatically at system start-up. This will be reflected in the
    * user's configuration data file.
-   * @param pluginURL the URL to be removed.
+   * 
+   * @param pluginURL
+   *          the URL to be removed.
    */
-  public static void removeAutoloadPlugin(URL pluginURL){
+  public static void removeAutoloadPlugin(URL pluginURL) {
     pluginURL = normaliseCreoleUrl(pluginURL);
     autoloadPlugins.remove(pluginURL);
-  }  
-  
+  }
+
   /**
    * Stores information about the contents of a CREOLE directory.
    */
-  public static class DirectoryInfo{
-    public DirectoryInfo(URL url){
+  public static class DirectoryInfo {
+    public DirectoryInfo(URL url) {
       this.url = normaliseCreoleUrl(url);
       valid = true;
       resourceInfoList = new ArrayList();
-      //this may invalidate it if something goes wrong
+      // this may invalidate it if something goes wrong
       parseCreole();
     }
-    
+
     /**
-     * Performs a shallow parse of the creole.xml file to get the information 
+     * Performs a shallow parse of the creole.xml file to get the information
      * about the resources contained.
      */
-    protected void parseCreole(){
+    protected void parseCreole() {
       SAXBuilder builder = new SAXBuilder(false);
-      try{
+      try {
         URL creoleFileURL = new URL(url, "creole.xml");
         org.jdom.Document creoleDoc = builder.build(creoleFileURL);
         List jobsList = new ArrayList();
         jobsList.add(creoleDoc.getRootElement());
-        while(!jobsList.isEmpty()){
+        while(!jobsList.isEmpty()) {
           Element currentElem = (Element)jobsList.remove(0);
-          if(currentElem.getName().equalsIgnoreCase("RESOURCE")){
-            //we don't go deeper than resources so no recursion here
+          if(currentElem.getName().equalsIgnoreCase("RESOURCE")) {
+            // we don't go deeper than resources so no recursion here
             String resName = currentElem.getChildTextTrim("NAME");
             String resClass = currentElem.getChildTextTrim("CLASS");
             String resComment = currentElem.getChildTextTrim("COMMENT");
-            //create the handler
-            ResourceInfo rHandler = new ResourceInfo(resName, resClass, 
-                    resComment);
+            // create the handler
+            ResourceInfo rHandler =
+              new ResourceInfo(resName, resClass, resComment);
             resourceInfoList.add(rHandler);
-          }else{
-            //this is some higher level element -> simulate recursion
-            //we want Depth-first-search so we need to add at the beginning
+          }
+          else {
+            // this is some higher level element -> simulate recursion
+            // we want Depth-first-search so we need to add at the beginning
             List newJobsList = new ArrayList(currentElem.getChildren());
             newJobsList.addAll(jobsList);
             jobsList = newJobsList;
           }
         }
-      }catch(IOException ioe){
+      }
+      catch(IOException ioe) {
         valid = false;
-        Err.prln("Problem while parsing plugin " + url.toExternalForm() +
-                "!\n" + ioe.toString() + "\nPlugin not available!");
-      }catch(JDOMException jde){
+        Err.prln("Problem while parsing plugin " + url.toExternalForm() + "!\n"
+          + ioe.toString() + "\nPlugin not available!");
+      }
+      catch(JDOMException jde) {
         valid = false;
-        Err.prln("Problem while parsing plugin " + url.toExternalForm() +
-                "!\n" + jde.toString() + "\nPlugin not available!");
+        Err.prln("Problem while parsing plugin " + url.toExternalForm() + "!\n"
+          + jde.toString() + "\nPlugin not available!");
       }
     }
-    
+
     /**
      * @return Returns the resourceInfoList.
      */
-    public List<ResourceInfo> getResourceInfoList(){
+    public List<ResourceInfo> getResourceInfoList() {
       return resourceInfoList;
     }
+
     /**
      * @return Returns the url.
      */
-    public URL getUrl(){
+    public URL getUrl() {
       return url;
     }
+
     /**
      * @return Returns the valid.
      */
-    public boolean isValid(){
+    public boolean isValid() {
       return valid;
     }
+
     /**
-     * The URL for the CREOLE directory. 
+     * The URL for the CREOLE directory.
      */
     protected URL url;
-    
+
     /**
-     * Is the directory valid (i.e. is the location reachable and the 
-     * creole.xml file parsable).
+     * Is the directory valid (i.e. is the location reachable and the creole.xml
+     * file parsable).
      */
     protected boolean valid;
-    
+
     /**
      * The list of {@link Gate.ResourceInfo} objects.
      */
     protected List<ResourceInfo> resourceInfoList;
   }
-  
+
   /**
-   * Stores information about a resource defined by a CREOLE directory. The 
+   * Stores information about a resource defined by a CREOLE directory. The
    * resource might not have been loaded in the system so not all information
-   * normally provided by the {@link ResourceData} class is available. This is 
-   * what makes this class different from {@link ResourceData}. 
+   * normally provided by the {@link ResourceData} class is available. This is
+   * what makes this class different from {@link ResourceData}.
    */
-  public static class ResourceInfo{
-    public ResourceInfo(String name, String className, String comment){
+  public static class ResourceInfo {
+    public ResourceInfo(String name, String className, String comment) {
       this.resourceClassName = className;
       this.resourceName = name;
       this.resourceComment = comment;
     }
-    
+
     /**
      * @return Returns the resourceClassName.
      */
-    public String getResourceClassName(){
+    public String getResourceClassName() {
       return resourceClassName;
     }
+
     /**
      * @return Returns the resourceComment.
      */
-    public String getResourceComment(){
+    public String getResourceComment() {
       return resourceComment;
     }
+
     /**
      * @return Returns the resourceName.
      */
-    public String getResourceName(){
+    public String getResourceName() {
       return resourceName;
     }
+
     /**
      * The class for the resource.
      */
     protected String resourceClassName;
-    
+
     /**
      * The resource name.
      */
     protected String resourceName;
-    
+
     /**
      * The comment for the resource.
      */
     protected String resourceComment;
   }
-  
+
   /**
    * The top level directory of the GATE installation.
    */
   protected static File gateHome;
- 
+
   /** Site config file */
   private static File siteConfigFile;
 
@@ -1310,39 +1375,39 @@ jar/classpath so it's the same as registerBuiltins
   protected static URL builtinCreoleDir;
 
   /**
-   * The user session file to use. 
+   * The user session file to use.
    */
   protected static File userSessionFile;
-  
+
   /**
    * Set the location of the GATE home directory.
-   *
-   * @throws IllegalStateException if the value has already been set.
+   * 
+   * @throws IllegalStateException
+   *           if the value has already been set.
    */
   public static void setGateHome(File gateHome) {
-    if(Gate.gateHome != null) {
-      throw new IllegalStateException("gateHome has already been set");
-    }
+    if(Gate.gateHome != null) { throw new IllegalStateException(
+      "gateHome has already been set"); }
     Gate.gateHome = gateHome;
   }
-  
+
   /**
    * Set the location of the plugins directory.
-   *
-   * @throws IllegalStateException if the value has already been set.
+   * 
+   * @throws IllegalStateException
+   *           if the value has already been set.
    */
   public static void setPluginsHome(File pluginsHome) {
-    if(Gate.pluginsHome != null) {
-      throw new IllegalStateException("pluginsHome has already been set");
-    }
+    if(Gate.pluginsHome != null) { throw new IllegalStateException(
+      "pluginsHome has already been set"); }
     Gate.pluginsHome = pluginsHome;
   }
 
   /**
    * Get the location of the plugins directory.
-   *
+   * 
    * @return the plugins drectory, or null if this has not yet been set (i.e.
-   * <code>Gate.init()</code> has not yet been called).
+   *         <code>Gate.init()</code> has not yet been called).
    */
   public static File getPluginsHome() {
     return pluginsHome;
@@ -1350,36 +1415,36 @@ jar/classpath so it's the same as registerBuiltins
 
   /**
    * Set the location of the user's config file.
-   *
-   * @throws IllegalStateException if the value has already been set.
+   * 
+   * @throws IllegalStateException
+   *           if the value has already been set.
    */
   public static void setUserConfigFile(File userConfigFile) {
-    if(Gate.userConfigFile != null) {
-      throw new IllegalStateException("userConfigFile has already been set");
-    }
+    if(Gate.userConfigFile != null) { throw new IllegalStateException(
+      "userConfigFile has already been set"); }
     Gate.userConfigFile = userConfigFile;
   }
 
   /**
    * Get the location of the user's config file.
-   *
+   * 
    * @return the user config file, or null if this has not yet been set (i.e.
-   * <code>Gate.init()</code> has not yet been called).
+   *         <code>Gate.init()</code> has not yet been called).
    */
   public static File getUserConfigFile() {
     return userConfigFile;
   }
 
   /**
-   * Set the URL to the "builtin" creole directory.  The URL must point to a
+   * Set the URL to the "builtin" creole directory. The URL must point to a
    * directory, and must end with a forward slash.
-   *
-   * @throws IllegalStateException if the value has already been set.
+   * 
+   * @throws IllegalStateException
+   *           if the value has already been set.
    */
   public static void setBuiltinCreoleDir(URL builtinCreoleDir) {
-    if(Gate.builtinCreoleDir != null) {
-      throw new IllegalStateException("builtinCreoleDir has already been set");
-    }
+    if(Gate.builtinCreoleDir != null) { throw new IllegalStateException(
+      "builtinCreoleDir has already been set"); }
     Gate.builtinCreoleDir = builtinCreoleDir;
   }
 
@@ -1394,85 +1459,89 @@ jar/classpath so it's the same as registerBuiltins
 
   /**
    * Set the user session file. This can only done prior to calling Gate.init()
-   * which will set the file to either the OS-specific default 
-   * or whatever has been set by the property gate.user.session
-   *
-   * @throws IllegalStateException if the value has already been set.
+   * which will set the file to either the OS-specific default or whatever has
+   * been set by the property gate.user.session
+   * 
+   * @throws IllegalStateException
+   *           if the value has already been set.
    */
   public static void setUserSessionFile(File newUserSessionFile) {
-    if(Gate.userSessionFile != null) {
-      throw new IllegalStateException("userSessionFile has already been set");
-    }
+    if(Gate.userSessionFile != null) { throw new IllegalStateException(
+      "userSessionFile has already been set"); }
     Gate.userSessionFile = newUserSessionFile;
   }
 
   /**
    * Get the user session file.
-   *
-   * @return the file corresponding to the user session file or null, 
-   * if not yet set.
+   * 
+   * @return the file corresponding to the user session file or null, if not yet
+   *         set.
    */
   public static File getUserSessionFile() {
     return userSessionFile;
   }
 
   /**
-   * The list of plugins (aka CREOLE directories) the system knows about.
-   * This list contains URL objects.
+   * The list of plugins (aka CREOLE directories) the system knows about. This
+   * list contains URL objects.
    */
   protected static List<URL> knownPlugins;
-  
+
   /**
    * The list of plugins (aka CREOLE directories) the system loads automatically
-   * at start-up.
-   * This list contains URL objects.
+   * at start-up. This list contains URL objects.
    */
   protected static List<URL> autoloadPlugins;
-  
-  
+
   /**
    * Map from URL of directory to {@link DirectoryInfo}.
    */
   protected static Map<URL, DirectoryInfo> pluginData;
-  
-  
-  
+
   /** Flag for SLUG GUI start instead of standart GATE GUI. */
   private static boolean slugGui = false;
 
   /** Should we start SLUG GUI. */
-  public static boolean isSlugGui() { return slugGui; }
+  public static boolean isSlugGui() {
+    return slugGui;
+  }
 
   /** Tell GATE whether to start SLUG GUI. */
-  public static void setSlugGui(boolean b) { slugGui = b; }
+  public static void setSlugGui(boolean b) {
+    slugGui = b;
+  }
 
   /** Flag for Jape Debugger integration. */
   private static boolean enableJapeDebug = true;
 
   /** Should we enable Jape Debugger. */
-  public static boolean isEnableJapeDebug() { return enableJapeDebug; }
+  public static boolean isEnableJapeDebug() {
+    return enableJapeDebug;
+  }
 
   /** Tell GATE whether to enable Jape Debugger. */
-  public static void setEnableJapeDebug(boolean b) { enableJapeDebug = b; }
-  
+  public static void setEnableJapeDebug(boolean b) {
+    enableJapeDebug = b;
+  }
+
   /**
    * Flag for whether to use native serialization or xml serialization when
    * saving applications.
    */
   private static boolean useXMLSerialization = true;
-  
+
   /**
    * Tell GATE whether to use XML serialization for applications.
    */
   public static void setUseXMLSerialization(boolean useXMLSerialization) {
-  	Gate.useXMLSerialization = useXMLSerialization;
+    Gate.useXMLSerialization = useXMLSerialization;
   }
-  
+
   /**
    * Should we use XML serialization for applications.
    */
   public static boolean getUseXMLSerialization() {
-  	return useXMLSerialization;
+    return useXMLSerialization;
   }
-  
+
 } // class Gate
