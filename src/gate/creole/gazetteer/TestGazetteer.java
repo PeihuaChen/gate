@@ -59,8 +59,7 @@ public class TestGazetteer extends TestCase {
     //test with partial words
     gaz.setWholeWordsOnly(false);
     gaz.execute();
-    assertTrue("Found " + resultAS.size() + 
-            " annotations instead of the expected 135!", resultAS.size() == 135);
+    assertEquals("Wrong number of annotations produced", 125, resultAS.size());
     gaz.setWholeWordsOnly(true);
     resultAS.clear();
 
@@ -81,8 +80,7 @@ public class TestGazetteer extends TestCase {
     gaz.setDocument(doc);
     gaz.setAnnotationSetName("GazetteerAS");
     gaz.execute();
-    assertTrue("Found " + resultAS.size() + 
-            " annotations instead of the expected 99!", resultAS.size() == 99);
+    assertEquals("Wrong number of annotations generated", 96, resultAS.size());
     gaz.setCaseSensitive(true);
     resultAS.clear();
     Factory.deleteResource(gaz);
