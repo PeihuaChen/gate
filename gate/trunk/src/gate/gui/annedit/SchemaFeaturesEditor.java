@@ -547,7 +547,7 @@ public class SchemaFeaturesEditor extends JPanel{
    */
   public void featureMapUpdated() {
     //the underlying F-map was changed
-    // 1) remove all non schema compliant values
+    // 1) validate that known features are schema-compliant
     if(featureMap != null){
       for(Object aFeatureName : new HashSet<Object>(featureMap.keySet())){
         //first check if the feature is allowed
@@ -575,8 +575,8 @@ public class SchemaFeaturesEditor extends JPanel{
                  }
           }
         }else{
-          //feature not permitted
-          featureMap.remove(aFeatureName);
+          //feature not permitted -> ignore
+//          featureMap.remove(aFeatureName);
         }
       }
     }
