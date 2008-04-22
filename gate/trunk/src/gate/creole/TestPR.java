@@ -133,24 +133,24 @@ public class TestPR extends TestCase
     gaz.execute();
     assertTrue("Found in "+ doc1.getSourceUrl().getFile()+ " "+
       doc1.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size() +
-      " Lookup annotations, instead of the expected 65.",
-      doc1.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size()== 65);
+      " Lookup annotations, instead of the expected 60.",
+      doc1.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size()== 60);
 
     //run gazetteer for doc2
     gaz.setDocument(doc2);
     gaz.execute();
     assertTrue("Found in "+ doc2.getSourceUrl().getFile()+ " "+
       doc2.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size() +
-      " Lookup annotations, instead of the expected 139.",
-      doc2.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size()== 139);
+      " Lookup annotations, instead of the expected 134.",
+      doc2.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size()== 134);
 
     //run gazetteer for doc3
     gaz.setDocument(doc3);
     gaz.execute();
     assertTrue("Found in "+ doc3.getSourceUrl().getFile()+ " "+
       doc3.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size() +
-      " Lookup annotations, instead of the expected 145.",
-      doc3.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size()== 145);
+      " Lookup annotations, instead of the expected 144.",
+      doc3.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size()== 144);
     Factory.deleteResource(gaz);
   }//testGazetteer
 
