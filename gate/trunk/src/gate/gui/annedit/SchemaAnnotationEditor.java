@@ -574,7 +574,18 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
           getToolkit().beep();
         }
       }
+
+      @Override
+      public void windowActivated(WindowEvent e) {
+        super.windowActivated(e);
+        if(windowNotShownYet){
+          windowNotShownYet = false;
+          pinnedButton.setSelected(true);
+        }
+      }
+      boolean windowNotShownYet = true;  
     });
+     
   }
   
   /**
