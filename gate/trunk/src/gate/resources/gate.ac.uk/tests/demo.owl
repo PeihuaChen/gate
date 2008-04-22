@@ -50,7 +50,7 @@
   <owl:Class rdf:ID="Businessman">
     <rdfs:subClassOf rdf:resource="#Person"/>
   </owl:Class>
-  <owl:Class rdf:about="#Government">
+  <owl:Class rdf:about="Government">
     <rdfs:subClassOf rdf:resource="#Organization"/>
   </owl:Class>
   <owl:Class rdf:ID="Date"/>
