@@ -60,27 +60,27 @@ public class Benchmark {
   public final static String PROCESS_INTERRUPTED_FEATURE = "PROCESS_INTERRUPTED";
   
   /**
-   * corpus name feature
+   * Corpus name feature
    */
   public final static String CORPUS_NAME_FEATURE = "CORPUS_NAME";
 
   /**
-   * corpus name feature
+   * Corpus name feature
    */
   public final static String APPLICATION_NAME_FEATURE = "APPLICATION_NAME";
   
   /**
-   * document name feature
+   * Document name feature
    */
   public final static String DOCUMENT_NAME_FEATURE = "DOCUMENT_NAME";
   
   /**
-   * processing resource name feature
+   * Processing resource name feature
    */
   public final static String PR_NAME_FEATURE = "PR_NAME";
   
   /**
-   * message feature
+   * Message feature
    */
   public final static String MESSAGE_FEATURE = "MESSAGE";
   
@@ -101,15 +101,15 @@ public class Benchmark {
 
   /**
    * This method is responsible for making entries into the log.
-   * @param processStartTime - when did the actual process started. This
-   *          value should be the value obtained by
+   * @param processStartTime - when the process started. This
+   *          value should be the value obtained from the
    *          Benchmark.startPoint() method invoked at the begining of
    *          the process.
    * @param benchmarkID - a unique ID of the resource that should be
    *          logged with this message.
-   * @param objectInvokingThisCheckPoint - The benchmarkable object that
+   * @param objectInvokingThisCheckPoint - the benchmarkable object that
    *          invokes this method.
-   * @param message - General message.
+   * @param message - general message.
    * @param features - any features (key-value pairs) that should be
    *          reported in the log message. toString() method will be
    *          invoked on the objects.
@@ -118,12 +118,12 @@ public class Benchmark {
     String benchmarkID, Object objectInvokingThisCheckPoint, String message,
     FeatureMap benchmarkingFeatures
   ) {
-    
-    // finally build the string to be logged
+    // build the string to be logged
     StringBuilder messageToLog = new StringBuilder();
-    messageToLog.append(CHECK_POINT_CODE  
-            + " " + benchmarkID + " "
-            + objectInvokingThisCheckPoint.getClass().getName() + " \\\n");
+    messageToLog.append(
+      CHECK_POINT_CODE  + " " + benchmarkID + " " +
+      objectInvokingThisCheckPoint.getClass().getName() + " \\\n"
+    );
     
     log(messageToLog, message, benchmarkingFeatures);
   }
