@@ -16,6 +16,8 @@ ESEDING ==> "es" OR "ed" OR "ing"
 defineRules
 
 #misc. irregular exceptions
+<*>"POS" ==> irreg_stem("POS","")
+<*>"pos" ==> irreg_stem("pos","")
 <*>"aches"                 ==> irreg_stem("ache","s")
 <verb>"ach"{EDING}     ==> semi_reg_stem(0,"e")
 <verb>"being"          ==> irreg_stem("be","ing")
