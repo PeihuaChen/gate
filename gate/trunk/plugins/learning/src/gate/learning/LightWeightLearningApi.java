@@ -737,7 +737,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
 
             startTime = Benchmark.startPoint();
 
-            benchmarkingFeatures.put("NLPFeaturesFile", nlpDataLabelFile
+            benchmarkingFeatures.put("nlpFeaturesFile", nlpDataLabelFile
               .getAbsolutePath());
 
             wekaL.readNLPFeaturesFromFile(nlpDataLabelFile, numDocs,
@@ -746,13 +746,13 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
 
             Benchmark.checkPoint(startTime, benchmarkID + "."
               + "readingNlpFeatures", this, benchmarkingFeatures);
-            benchmarkingFeatures.remove("NLPFeaturesFile");
+            benchmarkingFeatures.remove("nlpFeaturesFile");
 
             break;
           case WekaLearning.SPARSEFVDATA:
 
             startTime = Benchmark.startPoint();
-            benchmarkingFeatures.put("FeatureVectorFile", dataFile
+            benchmarkingFeatures.put("featureVectorFile", dataFile
               .getAbsolutePath());
 
             wekaL.readSparseFVsFromFile(dataFile, numDocs, true,
@@ -760,7 +760,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
 
             Benchmark.checkPoint(startTime, benchmarkID + "." + "readingFVs",
               this, benchmarkingFeatures);
-            benchmarkingFeatures.remove("FeatureVectorFile");
+            benchmarkingFeatures.remove("featureVectorFile");
             break;
         }
         // Get the wekaLearner from the learnername

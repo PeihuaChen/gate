@@ -11,12 +11,8 @@
 
 package gate.util;
 
-import java.io.File;
 import java.util.Date;
 import java.util.Map;
-
-import gate.Gate;
-
 import org.apache.log4j.Logger;
 
 /**
