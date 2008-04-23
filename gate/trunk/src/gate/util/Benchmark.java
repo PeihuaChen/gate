@@ -39,23 +39,6 @@ public class Benchmark {
    */
   protected static boolean benchmarkingEnabled = false;
 
-  // initialize the log4J configuration
-  static {
-    // obtain the log4j properties file
-    File log4jFile =
-      new File(new File(Gate.getGateHome(), "bin"), "gateLog4j.properties");
-
-    // check if it exists
-    if(!log4jFile.exists()) {
-      setBenchmarkingEnabled(false);
-    }
-
-    // only if there's no other log4j.configuration available
-    if(System.getProperties().get("log4j.configuration") == null)
-      System.getProperties().put("log4j.configuration",
-        log4jFile.toURI().toString());
-  }
-
   /**
    * corpus name feature
    */

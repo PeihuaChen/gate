@@ -192,6 +192,7 @@
   
   <!-- The run CLASSPATH -->
   <path id="run.class.path">
+    <pathelement location="${binDir}" />
     <pathelement location="${binDir}/gate.jar"/>
     <path refid="tools.jar.path"/>
 		<fileset refid="libs"/>
