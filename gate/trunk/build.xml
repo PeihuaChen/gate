@@ -361,7 +361,7 @@
        Montreal_Transducer NP_Chunking Ontology_Tools TreeTagger
        Stanford
        arabic cebuano chinese crawl google hindi alignment annotationMerging 
-       learning rasp romanian uima yahoo" />
+       learning rasp romanian uima yahoo Ontology_Based_Gazetteer" />
 
   <target name="plugins.build" depends="jar" >
     <for param="plugin">
