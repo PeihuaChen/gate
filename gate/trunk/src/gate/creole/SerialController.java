@@ -201,29 +201,27 @@ public class SerialController extends AbstractController implements
       Benchmarkable b = (Benchmarkable)currentPR;
 
       // obtain its old parentBenchmarkID
-      oldParentIDOfThePR = b.getParentBenchmarkID();
+      oldParentIDOfThePR = b.getParentBenchmarkId();
 
       // create a new ID for the PR
-      b.createBenchmarkID(getBenchmarkID());
+      b.createBenchmarkId(getBenchmarkId());
     }
 
     // report the starting of execution
     long startTime = Benchmark.startPoint();
     benchmarkFeatures.put(Benchmark.PR_NAME_FEATURE, currentPR.getName());
-    Benchmark.checkPoint(getBenchmarkID(), this, "Executing PR",
-      benchmarkFeatures);
 
     // run the thing
     currentPR.execute();
 
     // report the end of execution
-    Benchmark.finish(startTime, getBenchmarkID(), this,
-      "Finished: Executing PR", benchmarkFeatures);
+    Benchmark.checkPoint(startTime, getBenchmarkId() + "."
+      + Benchmark.PR_EXECUTION, this, benchmarkFeatures);
     benchmarkFeatures.remove(Benchmark.PR_NAME_FEATURE);
 
     // reset the parent benchmark id of the PR
     if(currentPR instanceof Benchmarkable) {
-      ((Benchmarkable)currentPR).setParentBenchmarkID(oldParentIDOfThePR);
+      ((Benchmarkable)currentPR).setParentBenchmarkId(oldParentIDOfThePR);
     }
 
     // remove the listeners
