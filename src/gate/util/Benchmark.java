@@ -57,46 +57,56 @@ public class Benchmark {
   }
 
   /**
-   * This code appears in the log to indicate the check point entry
-   */
-  public final static String CHECK_POINT_CODE = "CP";
-
-  /**
-   * This code appears in the log to indicate finishing of the process.
-   */
-  public final static String PROCESS_FINISH_CODE = "PF";
-
-  /**
-   * This feature in the FeatureMap indicates the process was interrupted.
-   */
-  public final static String PROCESS_INTERRUPTED_FEATURE =
-    "PROCESS_INTERRUPTED";
-
-  /**
    * corpus name feature
    */
-  public final static String CORPUS_NAME_FEATURE = "CORPUS_NAME";
+  public final static String CORPUS_NAME_FEATURE = "corpusName";
 
   /**
-   * corpus name feature
+   * application name feature
    */
-  public final static String APPLICATION_NAME_FEATURE = "APPLICATION_NAME";
+  public final static String APPLICATION_NAME_FEATURE = "applicationName";
 
   /**
    * document name feature
    */
-  public final static String DOCUMENT_NAME_FEATURE = "DOCUMENT_NAME";
+  public final static String DOCUMENT_NAME_FEATURE = "documentName";
 
   /**
    * processing resource name feature
    */
-  public final static String PR_NAME_FEATURE = "PR_NAME";
+  public final static String PR_NAME_FEATURE = "prName";
 
   /**
    * message feature
    */
-  public final static String MESSAGE_FEATURE = "MESSAGE";
+  public final static String MESSAGE_FEATURE = "message";
 
+  // various check point ids
+  public final static String PROCESS_INTERRUPTED = "processInterrupted";
+  public final static String APPLICATION_EXECUTION = "applicationExecution";
+  public final static String PR_EXECUTION = "prExecution";
+  public final static String DOCUMENT_LOADED = "documentLoaded";
+  public final static String WRITING_FVS_TO_DISK = "writingFVsToDisk";
+  public final static String ANNOTS_TO_NLP_FEATURES = "annotsToNlpFeatures";
+  public final static String NLP_FEATURES_TO_FVS = "nlpFeaturesToFVs";
+  public final static String READING_LEARNING_INFO = "readingLearningInfo";
+  public final static String MODEL_APPLICATION = "modelApplication";
+  public final static String WRITING_NGRAM_MODEL = "writingNgramModel";
+  public final static String TERM_DOC_STATS = "termDocStats";
+  public final static String FILTERING = "filtering";
+  public final static String MODEL_TRAINING = "modelTraining";
+  public final static String EVALUATION = "evaluation";
+  public final static String NLP_LABELS_TO_DATA_LABELS =
+    "nlpLabelsToDataLabels";
+  public final static String READING_NLP_FEATURES = "readingNlpFeatures";
+  public final static String READING_FVS = "readingFVs";
+  public final static String WEKA_MODEL_TRAINING = "wekaModelTraining";
+  public final static String PAUM_MODEL_TRAINING = "paumModelTraining";
+  public final static String READING_CHUNK_LEARNING_DATA =
+    "readingChunkLearningData";
+  public final static String WEKA_MODEL_APPLICATION = "wekaModelApplication";
+  public final static String PAUM_MODEL_APPLICATION = "paumModelApplication";
+  public final static String POST_PROCESSING = "postProcessing";
   /**
    * Static shared logger used for logging.
    */
@@ -114,53 +124,7 @@ public class Benchmark {
   /**
    * This method is responsible for making entries into the log.
    * 
-   * @param processStartTime -
-   *          when did the actual process started. This value should be the
-   *          value obtained by Benchmark.startPoint() method invoked at the
-   *          begining of the process.
-   * @param benchmarkID -
-   *          a unique ID of the resource that should be logged with this
-   *          message.
-   * @param objectInvokingThisCheckPoint -
-   *          The benchmarkable object that invokes this method.
-   * @param message -
-   *          General message.
-   * @param features -
-   *          any features (key-value pairs) that should be reported in the log
-   *          message. toString() method will be invoked on the objects.
-   */
-  public static void checkPoint(String benchmarkID,
-    Object objectInvokingThisCheckPoint, String message,
-    Map benchmarkingFeatures) {
-
-    // check if logging is disabled
-    if(!benchmarkingEnabled) return;
-
-    // finally build the string to be logged
-    StringBuilder messageToLog = new StringBuilder();
-    messageToLog.append("" + new Date().getTime() + " ");
-    messageToLog.append(CHECK_POINT_CODE + " " + benchmarkID + " "
-      + objectInvokingThisCheckPoint.getClass().getName() + " ");
-
-    log(messageToLog, message, benchmarkingFeatures);
-  }
-
-  /**
-   * Helper method
-   * 
-   * @param messageToLog
-   * @param userMessage
-   */
-  private static void log(StringBuilder messageToLog, String userMessage,
-    Map features) {
-    messageToLog.append(featureMapToString(features, userMessage)).append("\n");
-    logger.info(messageToLog.toString());
-  }
-
-  /**
-   * This method is responsible for making entries into the log.
-   * 
-   * @param processStartTime -
+   * @param startTime -
    *          when did the actual process started. This value should be the
    *          value obtained by Benchmark.startPoint() method invoked at the
    *          begining of the process.
@@ -173,61 +137,25 @@ public class Benchmark {
    *          any features (key-value pairs) that should be reported in the log
    *          message. toString() method will be invoked on the objects.
    */
-  public static void finish(long processStartTime, String benchmarkID,
-    Object objectInvokingThisCheckPoint, String message,
-    Map benchmarkingFeatures) {
+  public static void checkPoint(long startTime, String benchmarkID,
+    Object objectInvokingThisCheckPoint, Map benchmarkingFeatures) {
 
     // check if logging is disabled
     if(!benchmarkingEnabled) return;
 
     // we calculate processEndTime here as we don't want to consider
     // the time to convert featureMapToString
-    long processingTime = System.currentTimeMillis() - processStartTime;
+    long processingTime = System.currentTimeMillis() - startTime;
 
     // finally build the string to be logged
     StringBuilder messageToLog = new StringBuilder();
     messageToLog.append("" + new Date().getTime() + " ");
-    messageToLog.append(PROCESS_FINISH_CODE + " " + processingTime + " "
-      + benchmarkID + " " + objectInvokingThisCheckPoint.getClass().getName()
-      + " ");
+    messageToLog.append(processingTime + " " + benchmarkID + " "
+      + objectInvokingThisCheckPoint.getClass().getName() + " ");
 
-    log(messageToLog, message, benchmarkingFeatures);
-  }
-
-  /**
-   * A utility method to convert the featureBearer into a string representation.
-   * 
-   * @param features
-   * @return
-   */
-  protected static String featureMapToString(Map features, String userMessage) {
-
-    StringBuilder toReturn = new StringBuilder();
-    toReturn.append('[');
-
-    if(userMessage != null) {
-      userMessage =
-        userMessage.replaceAll("(,)", "\\,").replaceAll("(:)", "\\:");
-      toReturn.append(Benchmark.MESSAGE_FEATURE + ":" + userMessage);
-    }
-
-    if(features == null || features.isEmpty())
-      return toReturn.append("]").toString();
-
-    for(Object key : features.keySet()) {
-      if(toReturn.length() != 1) {
-        toReturn.append(", ");
-      }
-
-      Object value = features.get(key);
-      toReturn.append(key.toString().replaceAll("(:)", "\\:").replaceAll("(,)",
-        "\\,")
-        + ":");
-      toReturn.append(value.toString().replaceAll("(:)", "\\:").replaceAll(
-        "(,)", "\\,"));
-    }
-    toReturn.append("]");
-    return toReturn.toString();
+    messageToLog.append(benchmarkingFeatures.toString().replaceAll("\n", ""))
+      .append("\n");
+    logger.info(messageToLog.toString());
   }
 
   /**
@@ -237,7 +165,7 @@ public class Benchmark {
    * @param parentBenchmarkID
    * @return
    */
-  public static String createBenchmarkID(String resourceName,
+  public static String createBenchmarkId(String resourceName,
     String parentBenchmarkID) {
     if(parentBenchmarkID != null) {
       if(resourceName != null) {

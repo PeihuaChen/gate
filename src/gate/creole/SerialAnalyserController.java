@@ -22,12 +22,12 @@ import gate.util.*;
 
 /**
  * This class implements a SerialController that only contains
- * {@link gate.LanguageAnalyser}s.
- * It has a {@link gate.Corpus} and its execute method runs all the analysers in
- * turn over each of the documents in the corpus.
+ * {@link gate.LanguageAnalyser}s. It has a {@link gate.Corpus} and its execute
+ * method runs all the analysers in turn over each of the documents in the
+ * corpus.
  */
-public class SerialAnalyserController extends SerialController
-              implements CorpusController{
+public class SerialAnalyserController extends SerialController implements
+                                                              CorpusController {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -41,70 +41,71 @@ public class SerialAnalyserController extends SerialController
   }
 
   /** Run the Processing Resources in sequence. */
-  protected void executeImpl() throws ExecutionException{
+  protected void executeImpl() throws ExecutionException {
     interrupted = false;
-    if(corpus == null) throw new ExecutionException(
-      "(SerialAnalyserController) \"" + getName() + "\":\n" +
-      "The corpus supplied for execution was null!");
+    if(corpus == null)
+      throw new ExecutionException("(SerialAnalyserController) \"" + getName()
+        + "\":\n" + "The corpus supplied for execution was null!");
 
-    long startTime = Benchmark.startPoint(); 
+    long startTime = Benchmark.startPoint();
     benchmarkFeatures.put(Benchmark.CORPUS_NAME_FEATURE, corpus.getName());
-    
-    //iterate through the documents in the corpus
-    for(int i = 0; i < corpus.size(); i++){
+
+    // iterate through the documents in the corpus
+    for(int i = 0; i < corpus.size(); i++) {
       if(isInterrupted()) {
 
         // report the process interruption
-        Benchmark.finish(startTime, getBenchmarkID(), this, "user interrupted the process", benchmarkFeatures);
-        
-        throw new ExecutionInterruptedException(
-        "The execution of the " + getName() +
-        " application has been abruptly interrupted!");
+        Benchmark.checkPoint(startTime, getBenchmarkId() + "."
+          + Benchmark.PROCESS_INTERRUPTED, this, benchmarkFeatures);
+
+        throw new ExecutionInterruptedException("The execution of the "
+          + getName() + " application has been abruptly interrupted!");
       }
 
       boolean docWasLoaded = corpus.isDocumentLoaded(i);
-      
+
       // record the time before loading the document
       long documentLoadingStartTime = Benchmark.startPoint();
-      
+
       Document doc = (Document)corpus.get(i);
 
       // report the document loading
       benchmarkFeatures.put(Benchmark.DOCUMENT_NAME_FEATURE, doc.getName());
-      Benchmark.finish(documentLoadingStartTime, getBenchmarkID(), this, "document loaded", benchmarkFeatures);
-      
-      //run the system over this document
-      //set the doc and corpus
-      for(int j = 0; j < prList.size(); j++){
+      Benchmark.checkPoint(documentLoadingStartTime, getBenchmarkId() + "."
+        + Benchmark.DOCUMENT_LOADED, this, benchmarkFeatures);
+
+      // run the system over this document
+      // set the doc and corpus
+      for(int j = 0; j < prList.size(); j++) {
         ((LanguageAnalyser)prList.get(j)).setDocument(doc);
         ((LanguageAnalyser)prList.get(j)).setCorpus(corpus);
       }
 
-      try{
-        if (DEBUG) 
-          Out.pr("SerialAnalyserController processing doc=" + doc.getName()+ "...");
-        
+      try {
+        if(DEBUG)
+          Out.pr("SerialAnalyserController processing doc=" + doc.getName()
+            + "...");
+
         super.executeImpl();
-        if (DEBUG) 
-          Out.prln("done.");      
+        if(DEBUG) Out.prln("done.");
       }
       finally {
         // make sure we unset the doc and corpus even if we got an exception
-        for(int j = 0; j < prList.size(); j++){
+        for(int j = 0; j < prList.size(); j++) {
           ((LanguageAnalyser)prList.get(j)).setDocument(null);
           ((LanguageAnalyser)prList.get(j)).setCorpus(null);
         }
       }
 
-      if(!docWasLoaded){
-        //trigger saving
+      if(!docWasLoaded) {
+        // trigger saving
         corpus.unloadDocument(doc);
-        //close the previoulsy unloaded Doc
+        // close the previoulsy unloaded Doc
         Factory.deleteResource(doc);
       }
     }
-    
-    // remove the features that we added 
+
+    // remove the features that we added
     benchmarkFeatures.remove(Benchmark.DOCUMENT_NAME_FEATURE);
     benchmarkFeatures.remove(Benchmark.CORPUS_NAME_FEATURE);
   }
@@ -113,75 +114,75 @@ public class SerialAnalyserController extends SerialController
    * Overidden from {@link SerialController} to only allow
    * {@link LanguageAnalyser}s as components.
    */
-  public void add(ProcessingResource pr){
-    if(pr instanceof LanguageAnalyser){
+  public void add(ProcessingResource pr) {
+    if(pr instanceof LanguageAnalyser) {
       super.add(pr);
-    }else{
-      throw new GateRuntimeException(getClass().getName() +
-                                     "only accepts " +
-                                     LanguageAnalyser.class.getName() +
-                                     "s as components\n" +
-                                     pr.getClass().getName() +
-                                     " is not!");
+    }
+    else {
+      throw new GateRuntimeException(getClass().getName() + "only accepts "
+        + LanguageAnalyser.class.getName() + "s as components\n"
+        + pr.getClass().getName() + " is not!");
     }
   }
+
   /**
    * Sets the current document to the memeber PRs
    */
-  protected void setDocToPrs(Document doc){
+  protected void setDocToPrs(Document doc) {
     Iterator prIter = getPRs().iterator();
-    while(prIter.hasNext()){
+    while(prIter.hasNext()) {
       ((LanguageAnalyser)prIter.next()).setDocument(doc);
     }
   }
 
-
   /**
    * Checks whether all the contained PRs have all the required runtime
-   * parameters set. Ignores the corpus and document parameters as these will
-   * be set at run time.
-   *
+   * parameters set. Ignores the corpus and document parameters as these will be
+   * set at run time.
+   * 
    * @return a {@link List} of {@link ProcessingResource}s that have required
-   * parameters with null values if they exist <tt>null</tt> otherwise.
-   * @throws {@link ResourceInstantiationException} if problems occur while
-   * inspecting the parameters for one of the resources. These will normally be
-   * introspection problems and are usually caused by the lack of a parameter
-   * or of the read accessor for a parameter.
+   *         parameters with null values if they exist <tt>null</tt>
+   *         otherwise.
+   * @throws {@link ResourceInstantiationException}
+   *           if problems occur while inspecting the parameters for one of the
+   *           resources. These will normally be introspection problems and are
+   *           usually caused by the lack of a parameter or of the read accessor
+   *           for a parameter.
    */
   public List getOffendingPocessingResources()
-         throws ResourceInstantiationException{
-    //take all the contained PRs
+    throws ResourceInstantiationException {
+    // take all the contained PRs
     ArrayList badPRs = new ArrayList(getPRs());
-    //remove the ones that no parameters problems
+    // remove the ones that no parameters problems
     Iterator prIter = getPRs().iterator();
-    while(prIter.hasNext()){
+    while(prIter.hasNext()) {
       ProcessingResource pr = (ProcessingResource)prIter.next();
-      ResourceData rData = (ResourceData)Gate.getCreoleRegister().
-                                              get(pr.getClass().getName());
-      //this is a list of lists
+      ResourceData rData =
+        (ResourceData)Gate.getCreoleRegister().get(pr.getClass().getName());
+      // this is a list of lists
       List parameters = rData.getParameterList().getRuntimeParameters();
-      //remove corpus and document
+      // remove corpus and document
       List newParameters = new ArrayList();
       Iterator pDisjIter = parameters.iterator();
-      while(pDisjIter.hasNext()){
+      while(pDisjIter.hasNext()) {
         List aDisjunction = (List)pDisjIter.next();
         List newDisjunction = new ArrayList(aDisjunction);
         Iterator internalParIter = newDisjunction.iterator();
-        while(internalParIter.hasNext()){
+        while(internalParIter.hasNext()) {
           Parameter parameter = (Parameter)internalParIter.next();
-          if(parameter.getName().equals("corpus") ||
-             parameter.getName().equals("document")) internalParIter.remove();
+          if(parameter.getName().equals("corpus")
+            || parameter.getName().equals("document"))
+            internalParIter.remove();
         }
         if(!newDisjunction.isEmpty()) newParameters.add(newDisjunction);
       }
 
-      if(AbstractResource.checkParameterValues(pr, newParameters)){
+      if(AbstractResource.checkParameterValues(pr, newParameters)) {
         badPRs.remove(pr);
       }
     }
     return badPRs.isEmpty() ? null : badPRs;
   }
-
 
   protected gate.Corpus corpus;
 
@@ -189,8 +190,8 @@ public class SerialAnalyserController extends SerialController
    * Overridden to also clean up the corpus value.
    */
   public void resourceUnloaded(CreoleEvent e) {
-    super.resourceUnloaded(e);    
-    if(e.getResource() == corpus){
+    super.resourceUnloaded(e);
+    if(e.getResource() == corpus) {
       setCorpus(null);
     }
   }

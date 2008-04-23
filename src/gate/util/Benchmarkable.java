@@ -27,14 +27,14 @@ public interface Benchmarkable {
    * 
    * @return
    */
-  public String getParentBenchmarkID();
+  public String getParentBenchmarkId();
 
   /**
    * Returns the benchmark ID of this resource.
    * 
    * @return
    */
-  public String getBenchmarkID();
+  public String getBenchmarkId();
 
   /**
    * Given an ID of the parent resource, this method is responsible for
@@ -42,14 +42,14 @@ public interface Benchmarkable {
    * 
    * @param parentID
    */
-  public void createBenchmarkID(String parentID);
+  public void createBenchmarkId(String parentId);
 
   /**
    * This method sets the benchmarkID for this resource.
    * 
    * @param benchmarkID
    */
-  public void setParentBenchmarkID(String benchmarkID);
+  public void setParentBenchmarkId(String benchmarkId);
 
   /**
    * Returns the logger object being used by this resource.

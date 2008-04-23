@@ -22,49 +22,53 @@ import gate.event.*;
 import gate.util.Benchmark;
 import gate.util.Benchmarkable;
 
-
-public abstract class AbstractController extends AbstractResource
-                                         implements Controller, Benchmarkable {
-
+public abstract class AbstractController extends AbstractResource implements
+                                                                 Controller,
+                                                                 Benchmarkable {
 
   /**
    * Benchmark ID of this resource.
    */
   protected String benchmarkID;
-  
+
   /**
    * Benchmark ID of the parent object.
    */
   protected String parentBenchmarkID;
-  
+
   /**
    * Shared featureMap
    */
   protected Map benchmarkFeatures = new HashMap();
-  
-  //executable code
+
+  // executable code
   /**
-   * Execute this controller.  This implementation takes care of
-   * informing any {@link ControllerAwarePR}s of the start and end
-   * of execution, and delegates to the {@link #executeImpl()}
-   * method to do the real work.  Subclasses should override
-   * {@link #executeImpl()} rather than this method.
+   * Execute this controller. This implementation takes care of informing any
+   * {@link ControllerAwarePR}s of the start and end of execution, and
+   * delegates to the {@link #executeImpl()} method to do the real work.
+   * Subclasses should override {@link #executeImpl()} rather than this method.
    */
   public void execute() throws ExecutionException {
 
-    // record when the execution started
-    long startTime = Benchmark.startPoint();
-    benchmarkFeatures.put(Benchmark.APPLICATION_NAME_FEATURE, getName());
-    Benchmark.checkPoint(getBenchmarkID(), this, "Executing Application", benchmarkFeatures);
-    
     // inform ControllerAware PRs that execution has started
     for(ControllerAwarePR pr : getControllerAwarePRs()) {
       pr.controllerExecutionStarted(this);
     }
     Throwable thrown = null;
     try {
+
+      // record when the execution started
+      long startTime = Benchmark.startPoint();
+      benchmarkFeatures.put(Benchmark.APPLICATION_NAME_FEATURE, getName());
+
       // do the real work
       this.executeImpl();
+
+      // report the end of execution
+      Benchmark.checkPoint(startTime, getBenchmarkId() + "."
+        + Benchmark.APPLICATION_EXECUTION, this, benchmarkFeatures);
+      benchmarkFeatures.remove(Benchmark.APPLICATION_NAME_FEATURE);
+
     }
     catch(Throwable t) {
       thrown = t;
@@ -81,7 +85,7 @@ public abstract class AbstractController extends AbstractResource
         for(ControllerAwarePR pr : getControllerAwarePRs()) {
           pr.controllerExecutionAborted(this, thrown);
         }
-        
+
         // rethrow the aborting exception or error
         if(thrown instanceof Error) {
           throw (Error)thrown;
@@ -99,19 +103,15 @@ public abstract class AbstractController extends AbstractResource
         }
       }
     }
-    
-    // report the end of execution
-    Benchmark.finish(startTime, getBenchmarkID(), this, "Finished: Executing Application", benchmarkFeatures);
-    benchmarkFeatures.remove(Benchmark.APPLICATION_NAME_FEATURE); 
+
   }
 
   /**
    * Get the set of PRs from this controller that implement
-   * {@link ControllerAwarePR}. If there are no such PRs in this
-   * controller, an empty set is returned. This implementation
-   * simply filters the collection returned by
-   * {@link Controller#getPRs()}, override this method if your subclass
-   * admits a more efficient implementation.
+   * {@link ControllerAwarePR}. If there are no such PRs in this controller, an
+   * empty set is returned. This implementation simply filters the collection
+   * returned by {@link Controller#getPRs()}, override this method if your
+   * subclass admits a more efficient implementation.
    */
   protected Set<ControllerAwarePR> getControllerAwarePRs() {
     Set<ControllerAwarePR> returnSet = null;
@@ -135,46 +135,48 @@ public abstract class AbstractController extends AbstractResource
   }
 
   /**
-   * Executes the PRs in this controller, according to the execution
-   * strategy of the particular controller type (simple pipeline,
-   * parallel execution, once-per-document in a corpus, etc.). Subclasses
-   * should override this method, allowing the default {@link #execute()}
-   * method to handle sending notifications to controller aware PRs.
+   * Executes the PRs in this controller, according to the execution strategy of
+   * the particular controller type (simple pipeline, parallel execution,
+   * once-per-document in a corpus, etc.). Subclasses should override this
+   * method, allowing the default {@link #execute()} method to handle sending
+   * notifications to controller aware PRs.
    */
   protected void executeImpl() throws ExecutionException {
     throw new ExecutionException("Controller " + getClass()
-            + " hasn't overriden the executeImpl() method");
+      + " hasn't overriden the executeImpl() method");
   }
 
-
   /** Initialise this resource, and return it. */
-  public Resource init() throws ResourceInstantiationException{
+  public Resource init() throws ResourceInstantiationException {
     return this;
   }
 
-  /** Clears the internal data of the resource, when it gets released **/
-  public void cleanup(){
+  /** Clears the internal data of the resource, when it gets released * */
+  public void cleanup() {
   }
 
   /**
    * Populates this controller from a collection of {@link ProcessingResource}s
    * (optional operation).
-   *
+   * 
    * Controllers that are serializable must implement this method needed by GATE
    * to restore their contents.
-   * @throws UnsupportedOperationException if the <tt>setPRs</tt> method
-   * 	       is not supported by this controller.
+   * 
+   * @throws UnsupportedOperationException
+   *           if the <tt>setPRs</tt> method is not supported by this
+   *           controller.
    */
-  public void setPRs(Collection PRs){}
+  public void setPRs(Collection PRs) {
+  }
 
   /**
    * Notifies all the PRs in this controller that they should stop their
    * execution as soon as possible.
    */
-  public synchronized void interrupt(){
+  public synchronized void interrupt() {
     interrupted = true;
     Iterator prIter = getPRs().iterator();
-    while(prIter.hasNext()){
+    while(prIter.hasNext()) {
       ((ProcessingResource)prIter.next()).interrupt();
     }
   }
@@ -183,27 +185,27 @@ public abstract class AbstractController extends AbstractResource
     return interrupted;
   }
 
-
-  //events code
+  // events code
   /**
    * Removes a {@link gate.event.StatusListener} from the list of listeners for
    * this processing resource
    */
   public synchronized void removeStatusListener(StatusListener l) {
-    if (statusListeners != null && statusListeners.contains(l)) {
-      Vector v = (Vector) statusListeners.clone();
+    if(statusListeners != null && statusListeners.contains(l)) {
+      Vector v = (Vector)statusListeners.clone();
       v.removeElement(l);
       statusListeners = v;
     }
   }
 
   /**
-   * Adds a {@link gate.event.StatusListener} to the list of listeners for
-   * this processing resource
+   * Adds a {@link gate.event.StatusListener} to the list of listeners for this
+   * processing resource
    */
   public synchronized void addStatusListener(StatusListener l) {
-    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
-    if (!v.contains(l)) {
+    Vector v =
+      statusListeners == null ? new Vector(2) : (Vector)statusListeners.clone();
+    if(!v.contains(l)) {
       v.addElement(l);
       statusListeners = v;
     }
@@ -211,14 +213,16 @@ public abstract class AbstractController extends AbstractResource
 
   /**
    * Notifies all the {@link gate.event.StatusListener}s of a change of status.
-   * @param e the message describing the status change
+   * 
+   * @param e
+   *          the message describing the status change
    */
   protected void fireStatusChanged(String e) {
-    if (statusListeners != null) {
+    if(statusListeners != null) {
       Vector listeners = statusListeners;
       int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
+      for(int i = 0; i < count; i++) {
+        ((StatusListener)listeners.elementAt(i)).statusChanged(e);
       }
     }
   }
@@ -228,8 +232,10 @@ public abstract class AbstractController extends AbstractResource
    * this processing resource.
    */
   public synchronized void addProgressListener(ProgressListener l) {
-    Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
-    if (!v.contains(l)) {
+    Vector v =
+      progressListeners == null ? new Vector(2) : (Vector)progressListeners
+        .clone();
+    if(!v.contains(l)) {
       v.addElement(l);
       progressListeners = v;
     }
@@ -240,26 +246,26 @@ public abstract class AbstractController extends AbstractResource
    * for this processing resource.
    */
   public synchronized void removeProgressListener(ProgressListener l) {
-    if (progressListeners != null && progressListeners.contains(l)) {
-      Vector v = (Vector) progressListeners.clone();
+    if(progressListeners != null && progressListeners.contains(l)) {
+      Vector v = (Vector)progressListeners.clone();
       v.removeElement(l);
       progressListeners = v;
     }
   }
 
-
-
   /**
    * Notifies all the {@link gate.event.ProgressListener}s of a progress change
    * event.
-   * @param e the new value of execution completion
+   * 
+   * @param e
+   *          the new value of execution completion
    */
   protected void fireProgressChanged(int e) {
-    if (progressListeners != null) {
+    if(progressListeners != null) {
       Vector listeners = progressListeners;
       int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
+      for(int i = 0; i < count; i++) {
+        ((ProgressListener)listeners.elementAt(i)).progressChanged(e);
       }
     }
   }
@@ -269,11 +275,11 @@ public abstract class AbstractController extends AbstractResource
    * finished.
    */
   protected void fireProcessFinished() {
-    if (progressListeners != null) {
+    if(progressListeners != null) {
       Vector listeners = progressListeners;
       int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((ProgressListener) listeners.elementAt(i)).processFinished();
+      for(int i = 0; i < count; i++) {
+        ((ProgressListener)listeners.elementAt(i)).processFinished();
       }
     }
   }
@@ -281,85 +287,87 @@ public abstract class AbstractController extends AbstractResource
   /**
    * A progress listener used to convert a 0..100 interval into a smaller one
    */
-  protected class IntervalProgressListener implements ProgressListener{
-    public IntervalProgressListener(int start, int end){
+  protected class IntervalProgressListener implements ProgressListener {
+    public IntervalProgressListener(int start, int end) {
       this.start = start;
       this.end = end;
     }
-    public void progressChanged(int i){
+
+    public void progressChanged(int i) {
       fireProgressChanged(start + (end - start) * i / 100);
     }
 
-    public void processFinished(){
+    public void processFinished() {
       fireProgressChanged(end);
     }
 
     int start;
     int end;
-  }//CustomProgressListener
-
+  }// CustomProgressListener
 
   /**
    * A simple status listener used to forward the events upstream.
    */
-  protected class InternalStatusListener implements StatusListener{
-    public void statusChanged(String message){
+  protected class InternalStatusListener implements StatusListener {
+    public void statusChanged(String message) {
       fireStatusChanged(message);
     }
   }
 
-
   /**
    * Checks whether all the contained PRs have all the required runtime
    * parameters set.
-   *
+   * 
    * @return a {@link List} of {@link ProcessingResource}s that have required
-   * parameters with null values if they exist <tt>null</tt> otherwise.
-   * @throws {@link ResourceInstantiationException} if problems occur while
-   * inspecting the parameters for one of the resources. These will normally be
-   * introspection problems and are usually caused by the lack of a parameter
-   * or of the read accessor for a parameter.
+   *         parameters with null values if they exist <tt>null</tt>
+   *         otherwise.
+   * @throws {@link ResourceInstantiationException}
+   *           if problems occur while inspecting the parameters for one of the
+   *           resources. These will normally be introspection problems and are
+   *           usually caused by the lack of a parameter or of the read accessor
+   *           for a parameter.
    */
   public List getOffendingPocessingResources()
-         throws ResourceInstantiationException{
-    //take all the contained PRs
+    throws ResourceInstantiationException {
+    // take all the contained PRs
     ArrayList badPRs = new ArrayList(getPRs());
-    //remove the ones that no parameters problems
+    // remove the ones that no parameters problems
     Iterator prIter = getPRs().iterator();
-    while(prIter.hasNext()){
+    while(prIter.hasNext()) {
       ProcessingResource pr = (ProcessingResource)prIter.next();
-      ResourceData rData = (ResourceData)Gate.getCreoleRegister().
-                                              get(pr.getClass().getName());
-      if(AbstractResource.checkParameterValues(pr,
-                                               rData.getParameterList().
-                                               getRuntimeParameters())){
+      ResourceData rData =
+        (ResourceData)Gate.getCreoleRegister().get(pr.getClass().getName());
+      if(AbstractResource.checkParameterValues(pr, rData.getParameterList()
+        .getRuntimeParameters())) {
         badPRs.remove(pr);
       }
     }
     return badPRs.isEmpty() ? null : badPRs;
   }
 
-  /** Sets the name of this resource*/
-  public void setName(String name){
+  /** Sets the name of this resource */
+  public void setName(String name) {
     this.name = name;
   }
 
-  /** Returns the name of this resource*/
-  public String getName(){
+  /** Returns the name of this resource */
+  public String getName() {
     return name;
   }
 
   public synchronized void removeControllerListener(ControllerListener l) {
-    if (controllerListeners != null && controllerListeners.contains(l)) {
-      Vector v = (Vector) controllerListeners.clone();
+    if(controllerListeners != null && controllerListeners.contains(l)) {
+      Vector v = (Vector)controllerListeners.clone();
       v.removeElement(l);
       controllerListeners = v;
     }
   }
 
   public synchronized void addControllerListener(ControllerListener l) {
-    Vector v = controllerListeners == null ? new Vector(2) : (Vector) controllerListeners.clone();
-    if (!v.contains(l)) {
+    Vector v =
+      controllerListeners == null ? new Vector(2) : (Vector)controllerListeners
+        .clone();
+    if(!v.contains(l)) {
       v.addElement(l);
       controllerListeners = v;
     }
@@ -379,7 +387,6 @@ public abstract class AbstractController extends AbstractResource
    */
   private transient Vector progressListeners;
 
-
   /**
    * The list of {@link gate.event.ControllerListener}s registered with this
    * resource
@@ -387,68 +394,75 @@ public abstract class AbstractController extends AbstractResource
   private transient Vector controllerListeners;
 
   protected boolean interrupted = false;
+
   protected void fireResourceAdded(ControllerEvent e) {
-    if (controllerListeners != null) {
+    if(controllerListeners != null) {
       Vector listeners = controllerListeners;
       int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((ControllerListener) listeners.elementAt(i)).resourceAdded(e);
+      for(int i = 0; i < count; i++) {
+        ((ControllerListener)listeners.elementAt(i)).resourceAdded(e);
       }
     }
   }
+
   protected void fireResourceRemoved(ControllerEvent e) {
-    if (controllerListeners != null) {
+    if(controllerListeners != null) {
       Vector listeners = controllerListeners;
       int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((ControllerListener) listeners.elementAt(i)).resourceRemoved(e);
+      for(int i = 0; i < count; i++) {
+        ((ControllerListener)listeners.elementAt(i)).resourceRemoved(e);
       }
     }
   }
-  
 
   /**
    * Returns the benchmark ID of the parent of this resource.
+   * 
    * @return
    */
-  public String getParentBenchmarkID() {
+  public String getParentBenchmarkId() {
     return parentBenchmarkID;
   }
-  
+
   /**
    * Returns the benchmark ID of this resource.
+   * 
    * @return
    */
-  public String getBenchmarkID() {
+  public String getBenchmarkId() {
     if(benchmarkID == null) {
       benchmarkID = getName().replaceAll("[ ]+", "_");
     }
     return benchmarkID;
   }
-  
+
   /**
-   * Given an ID of the parent resource, this method is responsible for producing the Benchmark ID, unique to this resource.
+   * Given an ID of the parent resource, this method is responsible for
+   * producing the Benchmark ID, unique to this resource.
+   * 
    * @param parentID
    */
-  public void createBenchmarkID(String parentBenchmarkID) {
+  public void createBenchmarkId(String parentBenchmarkID) {
     this.parentBenchmarkID = parentBenchmarkID;
-    Benchmark.createBenchmarkID(getName(), parentBenchmarkID);
+    Benchmark.createBenchmarkId(getName(), parentBenchmarkID);
   }
-  
+
   /**
    * This method sets the benchmarkID for this resource.
+   * 
    * @param benchmarkID
    */
-  public void setParentBenchmarkID(String parentBenchmarkID) {
+  public void setParentBenchmarkId(String parentBenchmarkID) {
     this.parentBenchmarkID = parentBenchmarkID;
   }
-  
+
   /**
    * Returns the logger object being used by this resource.
+   * 
    * @return
    */
   public Logger getLogger() {
     return Benchmark.logger;
   }
-  
+
 }
