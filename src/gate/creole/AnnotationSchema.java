@@ -212,7 +212,7 @@ public class AnnotationSchema extends AbstractLanguageResource{
                                                                    namespace);
       Iterator complexTypeCildrenIterator = complexTypeCildrenList.iterator();
       if (complexTypeCildrenIterator.hasNext())
-        featureSchemaSet = new HashSet();
+        featureSchemaSet = new LinkedHashSet<FeatureSchema>();
       while (complexTypeCildrenIterator.hasNext()) {
         org.jdom.Element childElement =
                     (org.jdom.Element) complexTypeCildrenIterator.next();
