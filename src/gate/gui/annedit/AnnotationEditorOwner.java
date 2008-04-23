@@ -15,6 +15,7 @@ package gate.gui.annedit;
 import javax.swing.text.JTextComponent;
 
 import gate.*;
+import gate.gui.docview.AnnotationList;
 
 /**
  * Objects of this type control the interaction with an 
@@ -34,6 +35,12 @@ public interface AnnotationEditorOwner {
    * @return a {@link JTextComponent} object.
    */
   public JTextComponent getTextComponent();
+  
+  /**
+   * Gets the UI component used to display a list view for annotations.
+   * @return
+   */
+  public AnnotationList getListComponent();
   
   /**
    * Called by the annotation editor when an annotation has been 
