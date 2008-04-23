@@ -387,7 +387,7 @@ public class SchemaFeaturesEditor extends JPanel{
   
   public SchemaFeaturesEditor(AnnotationSchema schema){
     this.schema = schema;
-    featureSchemas = new HashMap<String, FeatureSchema>();
+    featureSchemas = new LinkedHashMap<String, FeatureSchema>();
     if(schema != null && schema.getFeatureSchemaSet() != null){
       for(FeatureSchema aFSchema : schema.getFeatureSchemaSet()){
         featureSchemas.put(aFSchema.getFeatureName(), aFSchema);
@@ -470,7 +470,7 @@ public class SchemaFeaturesEditor extends JPanel{
 
     
     //build the feature editors
-    featureEditors = new TreeMap<String, FeatureEditor>();
+    featureEditors = new LinkedHashMap<String, FeatureEditor>();
     Set<FeatureSchema> fsSet = schema.getFeatureSchemaSet();
     if(fsSet != null){
       for(FeatureSchema aFeatureSchema : fsSet){
