@@ -92,6 +92,14 @@ public class AnnotationSetsView extends AbstractDocumentView
     return textPane;
   }
 
+  
+  /* (non-Javadoc)
+   * @see gate.gui.annedit.AnnotationEditorOwner#getListComponent()
+   */
+  public AnnotationList getListComponent() {
+    return listView;
+  }
+
   public AnnotationSetsView(){
     setHandlers = new ArrayList<SetHandler>();
     tableRows = new ArrayList();
@@ -1116,9 +1124,9 @@ public class AnnotationSetsView extends AbstractDocumentView
         }
         //add to the list view
         annListTagsForAnn.clear();
-        List<AnnotationListView.AnnotationData> listTags = 
+        List<AnnotationListView.AnnotationDataImpl> listTags = 
             listView.addAnnotations(annots, setHandler.set);
-        for(AnnotationListView.AnnotationData aData: listTags)
+        for(AnnotationListView.AnnotationDataImpl aData: listTags)
           annListTagsForAnn.put(aData.ann.getId(), aData);
       }else{
         //hide highlights
@@ -1167,7 +1175,7 @@ public class AnnotationSetsView extends AbstractDocumentView
         //single annotation removal
         Object tag = hghltTagsForAnn.remove(ann.getId());
         if(tag != null) textView.removeHighlight(tag);
-        AnnotationListView.AnnotationData listTag = 
+        AnnotationListView.AnnotationDataImpl listTag = 
             annListTagsForAnn.remove(ann.getId());
         if(tag != null) listView.removeAnnotation(listTag);
       }
@@ -1237,7 +1245,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     /**
      * Map from annotation ID (which is immutable) to AnnotationListView tag
      */
-    Map<Integer, AnnotationListView.AnnotationData> annListTagsForAnn;
+    Map<Integer, AnnotationListView.AnnotationDataImpl> annListTagsForAnn;
     
     String name;
     SetHandler setHandler;
