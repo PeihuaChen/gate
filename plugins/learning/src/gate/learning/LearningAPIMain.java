@@ -165,7 +165,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
       logMessage.append("A new session for NLP learning is starting.\n");
 
       // adding WorkingDirectory parameter in the benchmarkingFeatures
-      benchmarkingFeatures.put("WorkingDirectory", wd.getAbsolutePath());
+      benchmarkingFeatures.put("workingDirectory", wd.getAbsolutePath());
 
       logMessage.append("The initiliased time of NLP learning: "
         + new Date().toString() + "\n");
@@ -217,7 +217,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
   public void execute() throws ExecutionException {
 
     // mode in which the PR is executed
-    benchmarkingFeatures.put("LearningMode", learningMode);
+    benchmarkingFeatures.put("learningMode", learningMode);
 
     if(learningMode.equals(learningModeVIEWSVMMODEL)) {
       if(corpus == null || corpus.size() == 0 || corpus.indexOf(document) == 0)
@@ -266,14 +266,14 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
           new File(wdResults, ConstantParameters.FILENAMEOFMILearningInfor);
 
         long startTime = Benchmark.startPoint();
-        benchmarkingFeatures.put("MILearningInformationFile", miLeFile
+        benchmarkingFeatures.put("miLearningInformationFile", miLeFile
           .getAbsolutePath());
 
         miLearningInfor.readDataFromFile(miLeFile);
 
         Benchmark.checkPoint(startTime, getBenchmarkId() + "."
           + Benchmark.READING_LEARNING_INFO, this, benchmarkingFeatures);
-        benchmarkingFeatures.remove("MILearningInformationFile");
+        benchmarkingFeatures.remove("miLearningInformationFile");
       }
 
       /** Set the information for batch application. */
@@ -346,7 +346,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
           numDoc = endDocIdApp - startDocIdApp;
 
           long startTime = Benchmark.startPoint();
-          benchmarkingFeatures.put("NumDocs", "" + numDoc);
+          benchmarkingFeatures.put("numDocs", "" + numDoc);
 
           for(int i = startDocIdApp; i < endDocIdApp; ++i) {
             Document toProcess = (Document)corpus.get(i);
@@ -400,7 +400,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
 
           Benchmark.checkPoint(startTime, getBenchmarkId() + "."
             + Benchmark.MODEL_APPLICATION, this, benchmarkingFeatures);
-          benchmarkingFeatures.remove("NumDocs");
+          benchmarkingFeatures.remove("numDocs");
 
           startDocIdApp = endDocIdApp;
         }
@@ -440,7 +440,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
             LogService.logMessage("** Producing the feature files only!", 1);
 
             long startTime = Benchmark.startPoint();
-            benchmarkingFeatures.put("NumDocs", numDoc);
+            benchmarkingFeatures.put("numDocs", numDoc);
 
             isTraining = true;
             outNLPFeatures =
@@ -525,7 +525,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
                   + "defintion in the configuration file!");
             }
 
-            benchmarkingFeatures.remove("NumDocs");
+            benchmarkingFeatures.remove("numDocs");
 
             // Write the name of documents and total number of them into a file
             BufferedWriter outDocsName =
@@ -566,7 +566,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
             LogService.logMessage("** Training mode:", 1);
 
             startTime = Benchmark.startPoint();
-            benchmarkingFeatures.put("NumDocs", "" + numDoc);
+            benchmarkingFeatures.put("numDocs", "" + numDoc);
 
             isTraining = true;
             outNLPFeatures =
@@ -649,7 +649,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
 
             Benchmark.checkPoint(startTime, getBenchmarkId() + "."
               + Benchmark.MODEL_TRAINING, this, benchmarkingFeatures);
-            benchmarkingFeatures.remove("NumDocs");
+            benchmarkingFeatures.remove("numDocs");
 
             if(LogService.DEBUG > 1) {
               tm1 = new Date().getTime();
@@ -687,7 +687,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
                     ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
               numDoc = endDocIdApp - startDocIdApp;
 
-              benchmarkingFeatures.put("NumDocs", "" + numDoc);
+              benchmarkingFeatures.put("numDocs", "" + numDoc);
               startTime = Benchmark.startPoint();
 
               for(int i = startDocIdApp; i < endDocIdApp; ++i) {
@@ -745,7 +745,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
 
               Benchmark.checkPoint(startTime, getBenchmarkId() + "."
                 + Benchmark.MODEL_APPLICATION, this, benchmarkingFeatures);
-              benchmarkingFeatures.remove("NumDocs");
+              benchmarkingFeatures.remove("numDocs");
               // Update the datastore for the added annotations
             }
             break;
@@ -756,13 +756,13 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
             evaluation =
               new EvaluationBasedOnDocs(corpus, wdResults, inputASName);
 
-            benchmarkingFeatures.put("NumDocs", corpus.size());
+            benchmarkingFeatures.put("numDocs", corpus.size());
             startTime = Benchmark.startPoint();
 
             evaluation.evaluation(learningSettings, lightWeightApi);
             Benchmark.checkPoint(startTime, getBenchmarkId() + "."
               + Benchmark.EVALUATION, this, benchmarkingFeatures);
-            benchmarkingFeatures.remove("NumDocs");
+            benchmarkingFeatures.remove("numDocs");
 
             break;
           case MITRAINING:
@@ -771,7 +771,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
             LogService.logMessage("** MITRAINING mode:", 1);
             isTraining = true;
 
-            benchmarkingFeatures.put("NumDocs", "" + numDoc);
+            benchmarkingFeatures.put("numDocs", "" + numDoc);
             startTime = Benchmark.startPoint();
 
             /**
@@ -830,7 +830,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
               if(learningSettings.fiteringTrainingData
                 && learningSettings.filteringRatio > 0.0) {
 
-                benchmarkingFeatures.put("NumDocs",
+                benchmarkingFeatures.put("numDocs",
                   miLearningInfor.miNumDocsTraining + "");
                 startTime = Benchmark.startPoint();
 
@@ -849,7 +849,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
 
               Benchmark.checkPoint(startTime, getBenchmarkId() + "." + "."
                 + Benchmark.MODEL_TRAINING, this, benchmarkingFeatures);
-              benchmarkingFeatures.remove("NumDocs");
+              benchmarkingFeatures.remove("numDocs");
 
               // Reset the num from last training as 0
               miLearningInfor.miNumDocsFromLast = 0;
