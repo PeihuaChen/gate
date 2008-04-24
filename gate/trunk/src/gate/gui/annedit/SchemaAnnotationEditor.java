@@ -23,14 +23,14 @@ import java.util.List;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.event.AncestorEvent;
-import javax.swing.event.AncestorListener;
+import javax.swing.event.*;
 import javax.swing.text.BadLocationException;
 
 import gate.*;
 import gate.creole.*;
 import gate.event.*;
 import gate.gui.MainFrame;
+import gate.gui.docview.AnnotationList;
 import gate.swing.JChoice;
 import gate.util.*;
 
@@ -275,6 +275,13 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
   protected AncestorListener textAncestorListener;
   
   /**
+   * A listener for selection event from the list view used to either follow
+   * selection changes or to veto a change when the current editing action
+   * has not completed.
+   */
+  protected ListSelectionListener listSelectionListener;
+  
+  /**
    * Stores the Annotation schema objects available in the system.
    * The annotation types are used as keys for the map.
    */
@@ -314,27 +321,23 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     initData();
     initGui();
     initListeners();
-    registerAncestorListener();
+    registerListeners();
     return this;
   }
 
-  protected void registerAncestorListener(){
-    //the text itself may be hidden for efficiency reasons (e.g. when hiding a 
-    //large number of highlights. We need to hook to the text's parent
-//    Container textparent = getOwner().getTextComponent().getParent();
-//    if(textparent instanceof JComponent){
-//      ((JComponent)textparent).addAncestorListener(textAncestorListener);
-//    }
-    getOwner().getTextComponent().addAncestorListener(textAncestorListener);
+  protected void registerListeners(){
+    if(textAncestorListener != null && getOwner().getTextComponent() != null){
+      getOwner().getTextComponent().addAncestorListener(textAncestorListener);
+    }
+    
+    if(listSelectionListener != null && 
+            getOwner().getListComponent() != null &&
+            getOwner().getListComponent().getSelectionModel() != null){
+      getOwner().getListComponent().getSelectionModel().
+          addListSelectionListener(listSelectionListener);
+    }
   }
   
-  protected void unregisterAncestorListener(){
-//    Container textparent = getOwner().getTextComponent().getParent();
-//    if(textparent instanceof JComponent){
-//      ((JComponent)textparent).removeAncestorListener(textAncestorListener);
-//    }
-    getOwner().getTextComponent().removeAncestorListener(textAncestorListener);
-  }
   
   protected void initData(){
     schemasByType = new TreeMap<String, AnnotationSchema>();
@@ -534,6 +537,15 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       }
     };
     
+    listSelectionListener = new ListSelectionListener(){
+      public void valueChanged(ListSelectionEvent e) {
+        AnnotationList annListView = getOwner().getListComponent();
+        if(annListView != null){
+          
+        }
+      }      
+    };
+    
     typesChoice.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e) {
         String newType;
@@ -585,7 +597,6 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       }
       boolean windowNotShownYet = true;  
     });
-     
   }
   
   /**
@@ -893,13 +904,25 @@ System.out.println("Window up");
    * @param owner the owner to set
    */
   public void setOwner(AnnotationEditorOwner owner) {
-    if(this.owner != null && this.owner != owner && 
-       textAncestorListener != null){
-      unregisterAncestorListener();
+    //first remove old listeners
+    if(this.owner != null && this.owner != owner){
+      if(textAncestorListener != null && getOwner().getTextComponent() != null){
+        getOwner().getTextComponent().
+          removeAncestorListener(textAncestorListener);
+      }
+      if(listSelectionListener != null && 
+              getOwner().getListComponent() != null &&
+              getOwner().getListComponent().getSelectionModel() != null){
+        getOwner().getListComponent().getSelectionModel().
+          removeListSelectionListener(listSelectionListener);
+      }
     }
-    this.owner = owner;
-    if(this.owner != null && textAncestorListener != null){
-      registerAncestorListener();
+    //if the owner is new, register existing listeners to new owner elements
+    if(this.owner != owner){  
+      this.owner = owner;
+      if(this.owner != null){
+        registerListeners();
+      }
     }
   }
 
