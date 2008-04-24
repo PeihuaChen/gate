@@ -20,7 +20,8 @@ import gate.creole.*;
 import gate.event.AnnotationEvent;
 import gate.event.AnnotationListener;
 import gate.gui.ResizableVisualResource;
-import gate.gui.docview.AnnotationList.AnnotationData;
+import gate.gui.annedit.AnnotationData;
+import gate.gui.annedit.AnnotationDataImpl;
 import gate.swing.XJTable;
 import gate.util.*;
 import java.awt.*;
@@ -41,7 +42,7 @@ public class AnnotationListView extends AbstractDocumentView
 		implements AnnotationListener, AnnotationList{
   
   public AnnotationListView(){
-    annDataList = new ArrayList<AnnotationDataImpl>();
+    annDataList = new ArrayList<AnnotationData>();
   }
 
   
@@ -64,8 +65,8 @@ public class AnnotationListView extends AbstractDocumentView
   @Override
   public void cleanup() {
     super.cleanup();
-    for(AnnotationDataImpl aData : annDataList){
-      aData.ann.removeAnnotationListener(this);
+    for(AnnotationData aData : annDataList){
+      aData.getAnnotation().removeAnnotationListener(this);
     }
     annDataList.clear();
     textView = null;
@@ -189,9 +190,9 @@ public class AnnotationListView extends AbstractDocumentView
                 rows = new int[]{modelRow};
               }
               for(int i = 0; i < rows.length; i++){
-                AnnotationDataImpl aData = annDataList.
+                AnnotationData aData = annDataList.
                     get(table.rowViewToModel(rows[i]));
-                aData.set.remove(aData.ann);
+                aData.getAnnotationSet().remove(aData.getAnnotation());
               }
             }
           };
@@ -199,9 +200,9 @@ public class AnnotationListView extends AbstractDocumentView
           
           //add the custom edit actions
           if(modelRow != -1){
-            AnnotationDataImpl aHandler = annDataList.get(modelRow);
+            AnnotationData aHandler = annDataList.get(modelRow);
             List editorClasses = Gate.getCreoleRegister().
-              getAnnotationVRs(aHandler.ann.getType());
+              getAnnotationVRs(aHandler.getAnnotation().getType());
             if(editorClasses != null && editorClasses.size() > 0){
               popup.addSeparator();
               Iterator editorIter = editorClasses.iterator();
@@ -219,8 +220,8 @@ public class AnnotationListView extends AbstractDocumentView
                     rie.printStackTrace(Err.getPrintWriter());
                   }
                 }
-                popup.add(new EditAnnotationAction(aHandler.set, 
-                        aHandler.ann, editor));
+                popup.add(new EditAnnotationAction(aHandler.getAnnotationSet(), 
+                        aHandler.getAnnotation(), editor));
               }
             }
           }
@@ -231,10 +232,10 @@ public class AnnotationListView extends AbstractDocumentView
           if(me.getID() == MouseEvent.MOUSE_CLICKED &&
              table.getSelectionModel().isSelectedIndex(viewRow) &&
              modelRow >= 0){
-            AnnotationDataImpl aHandler = annDataList.get(modelRow);
+            AnnotationData aHandler = annDataList.get(modelRow);
             //scroll to show the last highlight
-            if(aHandler != null && aHandler.ann != null)
-                textView.scrollAnnotationToVisible(aHandler.ann);
+            if(aHandler != null && aHandler.getAnnotation() != null)
+                textView.scrollAnnotationToVisible(aHandler.getAnnotation());
           }
         }
       }
@@ -271,12 +272,12 @@ public class AnnotationListView extends AbstractDocumentView
 
   protected void showHighlights(){
     int[] viewRows = table.getSelectedRows();
-    AnnotationDataImpl aHandler = null;
+    AnnotationData aHandler = null;
     for(int i = 0; i < viewRows.length; i++){
       int modelRow = table.rowViewToModel(viewRows[i]);
       if(modelRow >= 0){
         aHandler = annDataList.get(modelRow);
-        textView.addBlinkingHighlight(aHandler.ann);
+        textView.addBlinkingHighlight(aHandler.getAnnotation());
       }
     }    
   }
@@ -294,38 +295,38 @@ public class AnnotationListView extends AbstractDocumentView
     int row = annDataList.size() -1;
     if(tableModel != null) tableModel.fireTableRowsInserted(row, row);
     //listen for the new annotation's events
-    aData.ann.addAnnotationListener(AnnotationListView.this);
+    aData.getAnnotation().addAnnotationListener(AnnotationListView.this);
     return aData;
   }
 
-  public void removeAnnotation(AnnotationDataImpl tag){
+  public void removeAnnotation(AnnotationData tag){
     int row = annDataList.indexOf(tag);
     if(row >= 0){
-      AnnotationDataImpl aHandler = annDataList.get(row);
+      AnnotationData aHandler = annDataList.get(row);
       //remove from selection, if the table is built
       if(table != null){
         int viewRow = table.rowModelToView(row);
         if(table.isRowSelected(viewRow)){
           table.getSelectionModel().removeIndexInterval(viewRow, viewRow);
           //remove the blinking highlight
-          textView.removeBlinkingHighlight(aHandler.ann);
+          textView.removeBlinkingHighlight(aHandler.getAnnotation());
         }
       }
-      aHandler.ann.removeAnnotationListener(AnnotationListView.this);
+      aHandler.getAnnotation().removeAnnotationListener(AnnotationListView.this);
       annDataList.remove(row);
       if(tableModel != null) tableModel.fireTableRowsDeleted(row, row);
     }
   }
   
-  public void removeAnnotations(Collection<AnnotationDataImpl> tags){
+  public void removeAnnotations(Collection<AnnotationData> tags){
     //cache the selected annotations
-    final List<AnnotationDataImpl> selectedAnns = new ArrayList<AnnotationDataImpl>();
+    final List<AnnotationData> selectedAnns = new ArrayList<AnnotationData>();
     if(table != null){
       int[] selRows = table.getSelectedRows();
       if(selRows != null && selRows.length > 0){
         for(int viewRow : selRows){
           int modelRow = table.rowViewToModel(viewRow);
-          AnnotationDataImpl aData = annDataList.get(modelRow);
+          AnnotationData aData = annDataList.get(modelRow);
           //only save it if it's not to be removed
           if(!tags.contains(aData)) selectedAnns.add(aData);
         }
@@ -334,14 +335,14 @@ public class AnnotationListView extends AbstractDocumentView
       table.getSelectionModel().clearSelection();      
     }
     //now do the actual removal
-    for(AnnotationDataImpl aData : tags) removeAnnotation(aData);
+    for(AnnotationData aData : tags) removeAnnotation(aData);
     //restore the selection, if necessary
     if(selectedAnns.size() > 0){
       //this needs to happen after the table has caught up with all the changes
       //hence we need to queue it to the GUI thread
       SwingUtilities.invokeLater(new Runnable(){
         public void run(){
-          for(AnnotationDataImpl aData : selectedAnns){
+          for(AnnotationData aData : selectedAnns){
             int modelRow = annDataList.indexOf(aData);
             if(modelRow != -1){
               int viewRow = table.rowModelToView(modelRow);
@@ -363,12 +364,12 @@ public class AnnotationListView extends AbstractDocumentView
    * @param annotations a collection of annotations
    * @param set the annotation set to which all the annotations belong.
    */
-  public List<AnnotationDataImpl> addAnnotations(List<Annotation> annotations,
+  public List<AnnotationData> addAnnotations(List<Annotation> annotations,
           AnnotationSet set){
-    List<AnnotationDataImpl> tags = new ArrayList<AnnotationDataImpl>();
+    List<AnnotationData> tags = new ArrayList<AnnotationData>();
     for(Annotation ann : annotations) tags.add(new AnnotationDataImpl(set, ann));
     annDataList.addAll(tags);
-    for(AnnotationDataImpl aData : tags) aData.ann.addAnnotationListener(
+    for(AnnotationData aData : tags) aData.getAnnotation().addAnnotationListener(
             AnnotationListView.this);
     if(tableModel != null) tableModel.fireTableDataChanged();
     return tags;
@@ -379,7 +380,7 @@ public class AnnotationListView extends AbstractDocumentView
    * Returns the tags for all the annotations currently displayed
    * @return a list of {@link AnnotationDataImpl}.
    */
-  public List<AnnotationDataImpl> getAllAnnotations(){
+  public List<AnnotationData> getAllAnnotations(){
     return annDataList;
   }
 
@@ -393,8 +394,8 @@ public class AnnotationListView extends AbstractDocumentView
     Annotation ann = (Annotation)e.getSource();
     if(tableModel != null){
       for(int i = 0; i < annDataList.size(); i++){
-        AnnotationDataImpl aHandler = annDataList.get(i);
-        if(aHandler.ann == ann)tableModel.fireTableRowsUpdated(i, i);
+        AnnotationData aHandler = annDataList.get(i);
+        if(aHandler.getAnnotation() == ann)tableModel.fireTableRowsUpdated(i, i);
       }
     }
     //restore selection
@@ -459,15 +460,15 @@ public class AnnotationListView extends AbstractDocumentView
 
     public Object getValueAt(int row, int column){
       if(row >= annDataList.size()) return null;
-      AnnotationDataImpl aData = annDataList.get(row);
+      AnnotationData aData = annDataList.get(row);
       switch(column){
-        case TYPE_COL: return aData.ann.getType();
-        case SET_COL: return aData.set.getName();
-        case START_COL: return aData.ann.getStartNode().getOffset();
-        case END_COL: return aData.ann.getEndNode().getOffset();
+        case TYPE_COL: return aData.getAnnotation().getType();
+        case SET_COL: return aData.getAnnotationSet().getName();
+        case START_COL: return aData.getAnnotation().getStartNode().getOffset();
+        case END_COL: return aData.getAnnotation().getEndNode().getOffset();
         case FEATURES_COL:
           //sort the features by name
-          FeatureMap features = aData.ann.getFeatures();
+          FeatureMap features = aData.getAnnotation().getFeatures();
           List keyList = new ArrayList(features.keySet());
           Collections.sort(keyList);
           StringBuffer strBuf = new StringBuffer("{");
@@ -493,28 +494,6 @@ public class AnnotationListView extends AbstractDocumentView
 
   }
 
-  public static class AnnotationDataImpl implements AnnotationList.AnnotationData{
-    public AnnotationDataImpl(AnnotationSet set, Annotation ann){
-      this.ann = ann;
-      this.set = set;
-    }
-    
-    
-    Annotation ann;
-    AnnotationSet set;
-    /**
-     * @return the ann
-     */
-    public Annotation getAnnotation() {
-      return ann;
-    }
-    /**
-     * @return the set
-     */
-    public AnnotationSet getAnnotationSet() {
-      return set;
-    }
-  }
 
   protected class EditAnnotationAction extends AbstractAction{
     public EditAnnotationAction(AnnotationSet set, Annotation ann, 
@@ -566,10 +545,10 @@ public class AnnotationListView extends AbstractDocumentView
   protected JScrollPane scroller;
 
   /**
-   * Stores the {@link AnnotationDataImpl} objects representing the annotations
+   * Stores the {@link AnnotationData} objects representing the annotations
    * displayed by this view.
    */
-  protected List<AnnotationDataImpl> annDataList;
+  protected List<AnnotationData> annDataList;
   
   protected JPanel mainPanel;
   protected JLabel statusLabel;

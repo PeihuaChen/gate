@@ -37,8 +37,8 @@ import gate.event.*;
 import gate.event.DocumentEvent;
 import gate.event.DocumentListener;
 import gate.gui.*;
+import gate.gui.annedit.*;
 import gate.gui.annedit.AnnotationEditor;
-import gate.gui.annedit.AnnotationEditorOwner;
 import gate.gui.annedit.SchemaAnnotationEditor;
 import gate.swing.ColorGenerator;
 import gate.swing.XJTable;
@@ -1124,10 +1124,10 @@ public class AnnotationSetsView extends AbstractDocumentView
         }
         //add to the list view
         annListTagsForAnn.clear();
-        List<AnnotationListView.AnnotationDataImpl> listTags = 
+        List<AnnotationData> listTags = 
             listView.addAnnotations(annots, setHandler.set);
-        for(AnnotationListView.AnnotationDataImpl aData: listTags)
-          annListTagsForAnn.put(aData.ann.getId(), aData);
+        for(AnnotationData aData: listTags)
+          annListTagsForAnn.put(aData.getAnnotation().getId(), aData);
       }else{
         //hide highlights
         try{
@@ -1175,8 +1175,7 @@ public class AnnotationSetsView extends AbstractDocumentView
         //single annotation removal
         Object tag = hghltTagsForAnn.remove(ann.getId());
         if(tag != null) textView.removeHighlight(tag);
-        AnnotationListView.AnnotationDataImpl listTag = 
-            annListTagsForAnn.remove(ann.getId());
+        AnnotationData listTag = annListTagsForAnn.remove(ann.getId());
         if(tag != null) listView.removeAnnotation(listTag);
       }
       //if this was the last annotation of this type then the handler is no
@@ -1245,7 +1244,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     /**
      * Map from annotation ID (which is immutable) to AnnotationListView tag
      */
-    Map<Integer, AnnotationListView.AnnotationDataImpl> annListTagsForAnn;
+    Map<Integer, AnnotationData> annListTagsForAnn;
     
     String name;
     SetHandler setHandler;
@@ -1297,16 +1296,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     }
   }
   
-  
-  protected static class AnnotationHandler{
-    public AnnotationHandler(AnnotationSet set, Annotation ann){
-      this.ann = ann;
-      this.set = set;
-    }
-    Annotation ann;
-    AnnotationSet set;
-  }
-  
+
   /**
    * A mouse listener used for events in the text view. 
    */
@@ -1719,7 +1709,7 @@ public class AnnotationSetsView extends AbstractDocumentView
             Annotation ann = (Annotation)annIter.next();
             TypeHandler tHandler = sHandler.getTypeHandler(ann.getType()); 
             if(sHandler != null && tHandler.isSelected()){
-              annotsAtPoint.add(new AnnotationHandler(sHandler.set, ann));
+              annotsAtPoint.add(new AnnotationDataImpl(sHandler.set, ann));
             }
           }
         }
@@ -1728,11 +1718,11 @@ public class AnnotationSetsView extends AbstractDocumentView
             JPopupMenu popup = new JPopupMenu();
             Iterator annIter = annotsAtPoint.iterator();
             while(annIter.hasNext()){
-              AnnotationHandler aHandler = (AnnotationHandler)annIter.next();
+              AnnotationData aHandler = (AnnotationData)annIter.next();
               popup.add(new HighlightMenuItem(
                       new EditAnnotationAction(aHandler),
-                      aHandler.ann.getStartNode().getOffset().intValue(),
-                      aHandler.ann.getEndNode().getOffset().intValue(),
+                      aHandler.getAnnotation().getStartNode().getOffset().intValue(),
+                      aHandler.getAnnotation().getEndNode().getOffset().intValue(),
                       popup));
             }
             try{
@@ -1743,7 +1733,7 @@ public class AnnotationSetsView extends AbstractDocumentView
             }
           }else{
             //only one annotation: start the editing directly
-            new EditAnnotationAction((AnnotationHandler)annotsAtPoint.get(0)).
+            new EditAnnotationAction((AnnotationData)annotsAtPoint.get(0)).
               actionPerformed(null);
           }
         }
@@ -1819,13 +1809,13 @@ public class AnnotationSetsView extends AbstractDocumentView
   
   
   protected class EditAnnotationAction extends AbstractAction{
-    public EditAnnotationAction(AnnotationHandler aHandler){
-      super(aHandler.ann.getType() + " [" + 
-              (aHandler.set.getName() == null ? "  " : 
-                aHandler.set.getName()) +
+    public EditAnnotationAction(AnnotationData aData){
+      super(aData.getAnnotation().getType() + " [" + 
+              (aData.getAnnotationSet().getName() == null ? "  " : 
+                aData.getAnnotationSet().getName()) +
               "]");
-      putValue(SHORT_DESCRIPTION, aHandler.ann.getFeatures().toString());
-      this.aHandler = aHandler;
+      putValue(SHORT_DESCRIPTION, aData.getAnnotation().getFeatures().toString());
+      this.aData = aData;
     }
     
     public void actionPerformed(ActionEvent evt){
@@ -1833,12 +1823,13 @@ public class AnnotationSetsView extends AbstractDocumentView
       //if the editor is done with the current annotation, we can move to the 
       //next one
       if(annotationEditor.editingFinished()){
-        selectAnnotation(aHandler.ann, aHandler.set);
-        annotationEditor.editAnnotation(aHandler.ann, aHandler.set);
+        selectAnnotation(aData.getAnnotation(), aData.getAnnotationSet());
+        annotationEditor.editAnnotation(aData.getAnnotation(), 
+                aData.getAnnotationSet());
       }
     }
     
-    private AnnotationHandler aHandler;
+    private AnnotationData aData;
   }
   
   protected class DeleteSelectedAnnotationGroupAction extends AbstractAction{
