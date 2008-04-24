@@ -15,8 +15,7 @@
 
 package gate.gui.docview;
 
-import gate.Annotation;
-import gate.AnnotationSet;
+import gate.gui.annedit.AnnotationData;
 
 import javax.swing.ListSelectionModel;
 
@@ -25,24 +24,6 @@ import javax.swing.ListSelectionModel;
  */
 public interface AnnotationList extends DocumentView {
   
-  /**
-   * A structure for storing the information describing an annotation (i.e. the 
-   * {@link Annotation} object and its enclosing {@link AnnotationSet}.
-   */
-  public interface AnnotationData{
-    /**
-     * Gets the {@link Annotation} object represented by this structure.
-     * @return an {@link Annotation} value.
-     */
-    public Annotation getAnnotation();
-    
-    /**
-     * Gets the {@link AnnotationSet} object containing the annotation stored 
-     * by this structure.
-     * @return an {@link AnnotationSet} value.
-     */    
-    public AnnotationSet getAnnotationSet();
-  }
   /**
    * Obtains the selection model used by this list view.
    * @return a {@link ListSelectionModel} object.

@@ -38,7 +38,7 @@ public interface AnnotationEditorOwner {
   
   /**
    * Gets the UI component used to display a list view for annotations.
-   * @return
+   * @return an {@link AnnotationList} object
    */
   public AnnotationList getListComponent();
   
