@@ -499,18 +499,16 @@ public class OntoRootGaz extends DefaultGazetteer {
       }
     }
     addLookups(allLookups);
-    allLookups = null;
+    allLookups = new ArrayList<Lookup>();
     /*release GATE resources*/
     Factory.deleteResource(applicationCorpus);
     applicationCorpus = null;
     rootFinderApplication.remove(morpher);
-    morpher = null;
     rootFinderApplication.remove(posTagger);
-    posTagger = null;
     rootFinderApplication.remove(sentenceSplitter);
+    Factory.deleteResource(sentenceSplitter);
     sentenceSplitter = null;
     rootFinderApplication.remove(tokeniser);
-    tokeniser = null;
     Factory.deleteResource(rootFinderApplication);
     rootFinderApplication = null;
     long currentTime = System.currentTimeMillis();
@@ -788,18 +786,6 @@ public class OntoRootGaz extends DefaultGazetteer {
    */
   public void setSeparateCamelCasedWords(Boolean separateCamelCasedWords) {
     this.separateCamelCasedWords = separateCamelCasedWords;
-  }
-
-  /**
-   * @param sentenceSplitter
-   *          the sentenceSplitter to set
-   */
-  public void setSentenceSplitter(FakeSentenceSplitter sentenceSplitter) {
-    this.sentenceSplitter = sentenceSplitter;
-  }
-
-  public FakeSentenceSplitter getSentenceSplitter() {
-    return sentenceSplitter;
   }
 
   /**
