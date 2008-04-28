@@ -46,11 +46,13 @@ public class AnnotationListView extends AbstractDocumentView
   }
 
   
-  /* (non-Javadoc)
+  /**
+   *  (non-Javadoc)
    * @see gate.gui.docview.AnnotationList#getAnnotationAtRow(int)
    */
   public AnnotationData getAnnotationAtRow(int row) {
-    return annDataList == null ? null : annDataList.get(row);
+    return annDataList == null ? null : annDataList.get(
+            table.rowViewToModel(row));
   }
 
 
@@ -423,6 +425,13 @@ public class AnnotationListView extends AbstractDocumentView
     }
   }
   
+  /* (non-Javadoc)
+   * @see gate.gui.docview.AnnotationList#getRowForAnnotation(gate.gui.annedit.AnnotationData)
+   */
+  public int getRowForAnnotation(AnnotationData data) {
+    return annDataList.indexOf(data);
+  }
+
   class AnnotationTableModel extends AbstractTableModel{
     public int getRowCount(){
       return annDataList.size();

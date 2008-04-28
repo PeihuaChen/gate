@@ -37,4 +37,10 @@ public interface AnnotationList extends DocumentView {
    */
   public AnnotationData getAnnotationAtRow(int row);
 
+  /**
+   * Returns the display row for a given annotation. 
+   * @param aData the annotation for which the row is required
+   * @return a positive int value if the annotation is found or -1 otherwise 
+   */
+  public int getRowForAnnotation(AnnotationData aData);
 }
