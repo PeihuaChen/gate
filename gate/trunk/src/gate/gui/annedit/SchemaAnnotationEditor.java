@@ -180,7 +180,8 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       
       dialog.pack();
       if(where != null){
-        dialog.setLocation(where);
+        dialogLocation.move(where.x, where.y);
+        dialog.setLocation(dialogLocation);
       }
     }else{
       //calculate position
@@ -221,7 +222,8 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
         //correct position
         if(y > maxY) y = maxY;
         if(x > maxX) x = maxX;
-        dialog.setLocation(x, y);
+        dialogLocation.move(x, y);
+        dialog.setLocation(dialogLocation);
       }catch(BadLocationException ble){
         //this should never occur
         throw new GateRuntimeException(ble);
@@ -294,6 +296,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
    * has not completed.
    */
   protected ListSelectionListener listSelectionListener;
+  
   
   /**
    * Stores the Annotation schema objects available in the system.
@@ -505,6 +508,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
                         "Annotation Editor Dialog", false);
       dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
       MainFrame.getGuiRoots().add(dialog);
+      
     }
 
     setLayout(new BorderLayout());
@@ -673,7 +677,28 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
         pinnedButton.setSelected(true);
        }
     });
+    
+    dialog.addComponentListener(new ComponentAdapter(){
+      /* (non-Javadoc)
+       * @see java.awt.event.ComponentAdapter#componentMoved(java.awt.event.ComponentEvent)
+       */
+      @Override
+      public void componentMoved(ComponentEvent e) {
+        Point newLocation =  dialog.getLocation();
+        if(!newLocation.equals(dialogLocation)){
+          pinnedButton.setSelected(true);
+        }
+      }
+    });
+    
   }
+
+  /**
+   * Stores the currently set dialog location (which is used to identify cases
+   * when the dialog was moved by hand, which causes the dialog to be pinned).
+   */
+  private Point dialogLocation = new Point(0, 0);
+  
   
   /**
    * @param args
