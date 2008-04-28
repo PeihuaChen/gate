@@ -39,8 +39,9 @@ import gate.util.*;
 
 
 /**
- * @author Valentin Tablan
- *
+ * A generic annotation editor, which uses the known annotation schemas to help
+ * speed up the annotation process (e.g. by pre-populating sets of choices) but
+ * does not enforce the schemas, allowing the user full control.
  */
 public class AnnotationEditor extends AbstractVisualResource 
     implements gate.gui.annedit.AnnotationEditor{
