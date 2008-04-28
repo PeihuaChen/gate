@@ -61,4 +61,9 @@ public interface AnnotationEditor extends VisualResource{
    */
   public AnnotationSet getAnnotationSetCurrentlyEdited();
 
+  /**
+   * @param pinned true if the window should not move
+   * when an annotation is selected.
+   */
+  public void setPinnedMode(boolean pinned);
 }

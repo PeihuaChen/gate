@@ -86,7 +86,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
   
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
-    featureList = new ArrayList();
+    featureList = new ArrayList<Feature>();
     emptyFeature = new Feature("", null);
     featureList.add(emptyFeature);
     initGUI();
@@ -140,7 +140,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
    */
   protected void populate(){
     featureList.clear();
-    //get all the exisitng features
+    //get all the existing features
     Set fNames = new HashSet();
     
     if(targetFeatures != null){
@@ -163,9 +163,10 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
         featureList.add(new Feature(name, value));
       }
     }
-    featureList.add(emptyFeature);
+    if (!featureList.contains(emptyFeature)) {
+      featureList.add(emptyFeature);
+    }
     featuresModel.fireTableDataChanged();
-//    mainTable.setSize(mainTable.getPreferredScrollableViewportSize());
     mainTable.setSize(mainTable.getPreferredScrollableViewportSize());
   }
 
@@ -174,7 +175,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
   Feature emptyFeature;
   AnnotationSchema schema;
   FeaturesTableModel featuresModel;
-  List featureList;
+  List<Feature> featureList;
   FeatureEditorRenderer featureEditorRenderer;
   XJTable mainTable;
   JScrollPane scroller;
@@ -253,19 +254,24 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
       }
       switch(columnIndex){
         case VALUE_COL:
+          if (feature.value != null
+           && feature.value.equals((String)aValue)) { return; }
           feature.value = aValue;
           if(feature.name != null && feature.name.length() > 0){
             targetFeatures.put(feature.name, aValue);
             fireTableRowsUpdated(rowIndex, rowIndex);
-            mainTable.setSize(mainTable.getPreferredScrollableViewportSize());
           }
           break;
         case NAME_COL:
+          if (feature.name.equals((String)aValue)) {
+            return;
+          }
           targetFeatures.remove(feature.name);
           feature.name = (String)aValue;
           targetFeatures.put(feature.name, feature.value);
           if(feature == emptyFeature) emptyFeature = new Feature("", null);
           populate();
+          requestFocusInWindow();
           break;
         case DELETE_COL:
           //nothing
@@ -366,11 +372,11 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
           Feature feature = (Feature)featureList.get(row);
           if(feature == emptyFeature){
             feature.value = null;
-            featuresModel.fireTableRowsUpdated(row, row);
           }else{
             featureList.remove(row);
             targetFeatures.remove(feature.name);
-            populate();
+            featuresModel.fireTableRowsDeleted(row, row);
+            mainTable.setSize(mainTable.getPreferredScrollableViewportSize());
           }
         }
       });
@@ -389,7 +395,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
         case NAME_COL:
           rendererCombo.setPreferredSize(null);
           prepareCombo(rendererCombo, row, column);
-          Dimension dim = rendererCombo.getPreferredSize();
+//          Dimension dim = rendererCombo.getPreferredSize();
 //          rendererCombo.setPreferredSize(new Dimension(dim.width + 5, dim.height));
           return rendererCombo;
         case VALUE_COL:

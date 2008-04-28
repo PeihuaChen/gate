@@ -308,6 +308,9 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
    */
   protected SchemaFeaturesEditor featuresEditor = null;
 
+  protected MouseEvent pressed;
+
+
   public SchemaAnnotationEditor(){
   }
   
@@ -586,16 +589,25 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
           getToolkit().beep();
         }
       }
+    });
 
-      @Override
-      public void windowActivated(WindowEvent e) {
-        super.windowActivated(e);
-        if(windowNotShownYet){
-          windowNotShownYet = false;
-          pinnedButton.setSelected(true);
-        }
+    dialog.getRootPane().addMouseListener(new MouseAdapter() {
+      // allow dialog to be dragged with a mouse
+      public void mousePressed(MouseEvent me) {
+        pressed = me;
       }
-      boolean windowNotShownYet = true;  
+    });
+
+    dialog.getRootPane().addMouseMotionListener(new MouseMotionAdapter() {
+      Point location;
+      // allow a dialog to be dragged with a mouse
+      public void mouseDragged(MouseEvent me) {
+        location = dialog.getLocation(location);
+        int x = location.x - pressed.getX() + me.getX();
+        int y = location.y - pressed.getY() + me.getY();
+        dialog.setLocation(x, y);
+        pinnedButton.setSelected(true);
+       }
     });
   }
   
@@ -934,4 +946,8 @@ System.out.println("Window up");
     return annotation;
   }
 
+  public void setPinnedMode(boolean pinned) {
+    pinnedButton.setSelected(pinned);
+  }
+  
 }
