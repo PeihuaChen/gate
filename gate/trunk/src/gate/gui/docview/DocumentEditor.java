@@ -491,330 +491,333 @@ public class DocumentEditor extends AbstractVisualResource
    */
   protected class SearchAction extends AbstractAction {
 
-      public SearchAction() {
-          super("Search text", MainFrame.getIcon("search"));
-          putValue(SHORT_DESCRIPTION, "Search within the text");
-      }
+    public SearchAction() {
+      super("Search text", MainFrame.getIcon("search"));
+      putValue(SHORT_DESCRIPTION, "Search within the text");
+    }
 
-      public void actionPerformed(ActionEvent evt) {
-          if (searchDialog == null) {
-              Window parent =
-                  SwingUtilities.getWindowAncestor(DocumentEditor.this);
-              searchDialog = (parent instanceof Dialog) ?
-                  new SearchDialog((Dialog)parent) :
-                  new SearchDialog((Frame)parent);
-              searchDialog.pack();
-              searchDialog.setLocationRelativeTo(DocumentEditor.this);
-              searchDialog.setResizable(false);
-              MainFrame.getGuiRoots().add(searchDialog);
-          }
-
-          // FIXME: that's ugly !!
-          javax.swing.text.JTextComponent textPane =
-              (javax.swing.text.JTextComponent)
-              ((javax.swing.JViewport)
-               ((JScrollPane)getCentralView().getGUI())
-               .getViewport()).getView();
-
-          // if the user never gives the focus to the textPane then
-          // there will never be any selection in it so we force it
-          textPane.requestFocusInWindow();
-
-          // put the selection of the document into the search text field
-          if (textPane.getSelectedText() != null) {
-            searchDialog.patternTextField.setText(textPane.getSelectedText());
-          }
-
-          if (searchDialog.isVisible()) {
-              searchDialog.toFront();
-          } else {
-              searchDialog.setVisible(true);
-          }
-          searchDialog.patternTextField.selectAll();
-          searchDialog.patternTextField.requestFocus();
-      }
-  }
-
-  protected class SearchDialog extends JDialog {
-
-      SearchDialog(Frame owner) {
-          super(owner, false);
-          setTitle("Find in \"" + document.getName() + "\"");
-          initLocalData();
-          initGuiComponents();
-          initListeners();
-      }
-
-      SearchDialog(Dialog owner) {
-          super(owner, false);
-          setTitle("Find in \"" + document.getName() + "\"");
-          initLocalData();
-          initGuiComponents();
-          initListeners();
-      }
-
-      protected void initLocalData() {
-          pattern = null;
-          nextMatchStartsFrom = 0;
-          content = document.getContent().toString();
-
-          findFirstAction = new AbstractAction("Find first") {
-                  {
-                      putValue(SHORT_DESCRIPTION, "Finds first match");
-                      putValue(MNEMONIC_KEY, KeyEvent.VK_F);
-                  }
-
-            public void actionPerformed(ActionEvent evt) {
-                //needed to create the right RE
-                refresh();
-                if(!validateRE()) return;
-                //remove selection
-                textPane.setCaretPosition(textPane.getCaretPosition());
-                boolean found = false;
-                int start = -1;
-                int end = -1;
-                nextMatchStartsFrom = 0;
-
-                Matcher matcher = pattern.matcher(content);
-                while (matcher.find(nextMatchStartsFrom)
-                       && (found == false)) {
-                    start = matcher.start();
-                    end = matcher.end();
-                    if (wholeWordsChk.isSelected()) {
-                        //validate the result
-                        found = (start == 0
-                        || !Character.isLetterOrDigit(
-                                 content.charAt(start - 1)))
-                            && (end == content.length()
-                                || !Character.isLetterOrDigit(
-                                                 content.charAt(end)));
-                    } else {
-                        found = true;
-                    }
-                    nextMatchStartsFrom = start + 1;
-                }
-
-                if (found) {
-                    //display the result
-                    textPane.setCaretPosition(start);
-                    textPane.moveCaretPosition(end);
-
-                } else {
-                    JOptionPane.showMessageDialog(searchDialog,
-                      "String not found!", "GATE",
-                      JOptionPane.INFORMATION_MESSAGE);
-                }
-            }};
-
-          findNextAction = new AbstractAction("Find next") {
-                  {
-                      putValue(SHORT_DESCRIPTION, "Finds next match");
-                      putValue(MNEMONIC_KEY, KeyEvent.VK_N);
-                  }
-            public void actionPerformed(ActionEvent evt) {
-                //needed to create the right RE
-                refresh();
-                if(!validateRE()) return;
-                //remove selection
-                textPane.setCaretPosition(textPane.getCaretPosition());
-                boolean found = false;
-                int start = -1;
-                int end = -1;
-
-                Matcher matcher = pattern.matcher(content);
-                while (matcher.find(nextMatchStartsFrom)
-                       && (found == false)) {
-                    start = matcher.start();
-                    end = matcher.end();
-                    if (wholeWordsChk.isSelected()) {
-                        //validate the result
-                        found = (start == nextMatchStartsFrom
-                        || !Character.isLetterOrDigit(
-                                 content.charAt(start - 1)))
-                            && (end == content.length()
-                                || !Character.isLetterOrDigit(
-                                                 content.charAt(end)));
-                    } else {
-                        found = true;
-                    }
-                    nextMatchStartsFrom = start + 1;
-                }
-
-                if (found) {
-                    //display the result
-                    textPane.setCaretPosition(start);
-                    textPane.moveCaretPosition(end);
-
-                } else {
-                    JOptionPane.showMessageDialog(searchDialog,
-                      "String not found!", "GATE",
-                      JOptionPane.INFORMATION_MESSAGE);
-                }
-            }};
-
-          cancelAction = new AbstractAction("Cancel") {
-                  {
-                      putValue(SHORT_DESCRIPTION, "Cancel");
-                  }
-                  public void actionPerformed(ActionEvent evt){
-                      searchDialog.setVisible(false);
-                  }
-              };
-      }
-
-      protected void initGuiComponents() {
-          getContentPane().setLayout(new BoxLayout(getContentPane(),
-                                                   BoxLayout.Y_AXIS));
-
-          getContentPane().add(Box.createVerticalStrut(5));
-
-          Box hBox = Box.createHorizontalBox();
-          hBox.add(Box.createHorizontalStrut(5));
-          hBox.add(new JLabel("Find what:"));
-          hBox.add(Box.createHorizontalStrut(5));
-          hBox.add(patternTextField = new JTextField(20));
-          hBox.add(Box.createHorizontalStrut(5));
-          hBox.add(Box.createHorizontalGlue());
-          getContentPane().add(hBox);
-
-          getContentPane().add(Box.createVerticalStrut(5));
-
-          hBox = Box.createHorizontalBox();
-          hBox.add(Box.createHorizontalStrut(5));
-          hBox.add(ignoreCaseChk = new JCheckBox("Ignore case", false));
-          hBox.add(Box.createHorizontalStrut(5));
-          hBox.add(wholeWordsChk =
-                   new JCheckBox("Whole words", false));
-          hBox.add(Box.createHorizontalStrut(5));
-          hBox.add(regularExpressionChk =
-                   new JCheckBox("Regular Expression", false));
-          hBox.add(Box.createHorizontalStrut(5));
-          hBox.add(Box.createHorizontalGlue());
-          getContentPane().add(hBox);
-
-          getContentPane().add(Box.createVerticalStrut(5));
-
-          hBox = Box.createHorizontalBox();
-          hBox.add(Box.createHorizontalGlue());
-          hBox.add(new JButton(findFirstAction));
-          hBox.add(Box.createHorizontalStrut(5));
-          findNextJButton = new JButton(findNextAction);
-          hBox.add(findNextJButton);
-          hBox.add(Box.createHorizontalStrut(5));
-          hBox.add(new JButton(cancelAction));
-          hBox.add(Box.createHorizontalGlue());
-          getContentPane().add(hBox);
-
-          getContentPane().add(Box.createVerticalStrut(5));
-
-          getRootPane().setDefaultButton(findNextJButton);
-      }
-
-      protected void initListeners() {
-
-          addComponentListener(new ComponentAdapter() {
-                  public void componentHidden(ComponentEvent e) {
-                  }
-
-                  public void componentMoved(ComponentEvent e) {
-                  }
-
-                  public void componentResized(ComponentEvent e) {
-                  }
-
-                  public void componentShown(ComponentEvent e) {
-                      refresh();
-                  }
-              });
-
-          patternTextField.getDocument().addDocumentListener(
-            new javax.swing.event.DocumentListener() {
-                public void insertUpdate(javax.swing.event
-                                         .DocumentEvent e) {
-                    refresh();
-                }
-
-                public void removeUpdate(javax.swing.event
-                                         .DocumentEvent e) {
-                    refresh();
-                }
-
-                public void changedUpdate(javax.swing.event
-                                          .DocumentEvent e) {
-                    refresh();
-                }
-            });
-
-          ((JComponent)getContentPane())
-            .getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).
-            put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "cancelAction");
-          ((JComponent)getContentPane())
-            .getActionMap().put("cancelAction", cancelAction);
-      }
-
-      /**
-       * Validates the regular expression before use.
-       * @return true if the regular expression is valid, false otherwise.
-       */
-      protected boolean validateRE(){
-        String patternText = patternTextField.getText();
-        boolean res = true;
-        //update patternRE
-        try {
-            if (regularExpressionChk.isSelected()) {
-                pattern = ignoreCaseChk.isSelected() ?
-                    Pattern.compile(patternText,
-                                    Pattern.CASE_INSENSITIVE) :
-                    Pattern.compile(patternText);
-            } else {
-                pattern = ignoreCaseChk.isSelected() ?
-                    Pattern.compile("\\Q"+patternText+"\\E",
-                                    Pattern.CASE_INSENSITIVE) :
-                    Pattern.compile("\\Q"+patternText+"\\E");
-            }
-
-        } catch (Exception ree) {
-            JOptionPane.showMessageDialog(searchDialog,
-              "Invalid pattern!\n" + ree.toString(), "GATE",
-              JOptionPane.ERROR_MESSAGE);
-            res = false;
-        }
-        return res;
-      }
-      
-      protected void refresh() {
-          String patternText = patternTextField.getText();
-
-          if (patternText != null && patternText.length() > 0) {
-              //update actions state
-              findFirstAction.setEnabled(true);
-              findNextAction.setEnabled(true);
-          } else {
-              findFirstAction.setEnabled(false);
-              findNextAction.setEnabled(false);
-          }
-
-          if (pattern == null) {}
+    public void actionPerformed(ActionEvent evt) {
+      if (searchDialog == null) {
+        Window parent =
+          SwingUtilities.getWindowAncestor(DocumentEditor.this);
+        searchDialog = (parent instanceof Dialog)?
+          new SearchDialog((Dialog)parent):new SearchDialog((Frame)parent);
+        searchDialog.pack();
+        searchDialog.setLocationRelativeTo(DocumentEditor.this);
+        searchDialog.setResizable(false);
+        MainFrame.getGuiRoots().add(searchDialog);
       }
 
       // FIXME: that's ugly !!
       javax.swing.text.JTextComponent textPane =
-          (javax.swing.text.JTextComponent)
-          ((javax.swing.JViewport)
-           ((JScrollPane)getCentralView().getGUI())
-           .getViewport()).getView();
+        (javax.swing.text.JTextComponent)
+        ((javax.swing.JViewport)
+                ((JScrollPane)getCentralView().getGUI())
+                .getViewport()).getView();
 
-      JTextField patternTextField;
-      JCheckBox ignoreCaseChk;
-      JCheckBox wholeWordsChk;
-      JCheckBox regularExpressionChk;
-      Pattern pattern;
-      int nextMatchStartsFrom;
-      String content;
-      Action findFirstAction;
-      Action findNextAction;
-      Action cancelAction;
-      JButton findNextJButton;
+      // if the user never gives the focus to the textPane then
+      // there will never be any selection in it so we force it
+      textPane.requestFocusInWindow();
+
+      // put the selection of the document into the search text field
+      if (textPane.getSelectedText() != null) {
+        searchDialog.patternTextField.setText(textPane.getSelectedText());
+      }
+
+      if (searchDialog.isVisible()) {
+        searchDialog.toFront();
+      } else {
+        searchDialog.setVisible(true);
+      }
+      searchDialog.patternTextField.selectAll();
+      searchDialog.patternTextField.requestFocus();
+    }
+  }
+
+  protected class SearchDialog extends JDialog {
+
+    SearchDialog(Frame owner) {
+      super(owner, false);
+      setTitle("Find in \"" + document.getName() + "\"");
+      initLocalData();
+      initGuiComponents();
+      initListeners();
+    }
+
+    SearchDialog(Dialog owner) {
+      super(owner, false);
+      setTitle("Find in \"" + document.getName() + "\"");
+      initLocalData();
+      initGuiComponents();
+      initListeners();
+    }
+
+    protected void initLocalData() {
+      pattern = null;
+      nextMatchStartsFrom = 0;
+      content = document.getContent().toString();
+
+      findFirstAction = new AbstractAction("Find first") {
+        {
+          putValue(SHORT_DESCRIPTION, "Finds first match");
+          putValue(MNEMONIC_KEY, KeyEvent.VK_F);
+        }
+
+        public void actionPerformed(ActionEvent evt) {
+          //needed to create the right RE
+          refresh();
+          if(!validateRE()) return;
+          //remove selection
+          textPane.setCaretPosition(textPane.getCaretPosition());
+          boolean found = false;
+          int start = -1;
+          int end = -1;
+          nextMatchStartsFrom = 0;
+
+          Matcher matcher = pattern.matcher(content);
+          while (matcher.find(nextMatchStartsFrom) && !found) {
+            start = matcher.start();
+            end = matcher.end();
+            found = false;
+            if (highlightsChk.isSelected()) {
+              javax.swing.text.Highlighter.Highlight[] highlights =
+                textPane.getHighlighter().getHighlights();
+              for (javax.swing.text.Highlighter.Highlight h : highlights) {
+                if (h.getStartOffset() <= start && h.getEndOffset() >= end) {
+                  found = true;
+                  break;
+                }
+              }
+            } else {
+              found = true;
+            }
+            nextMatchStartsFrom = end + 1;
+          }
+
+          if (found) {
+            //display the result
+            textPane.setCaretPosition(start);
+            textPane.moveCaretPosition(end);
+
+          } else {
+            JOptionPane.showMessageDialog(searchDialog, "String not found!",
+              "GATE", JOptionPane.INFORMATION_MESSAGE);
+          }
+        }};
+
+      findNextAction = new AbstractAction("Find next") {
+        {
+          putValue(SHORT_DESCRIPTION, "Finds next match");
+          putValue(MNEMONIC_KEY, KeyEvent.VK_N);
+        }
+        public void actionPerformed(ActionEvent evt) {
+          //needed to create the right RE
+          refresh();
+          if(!validateRE()) return;
+          //remove selection
+          textPane.setCaretPosition(textPane.getCaretPosition());
+          boolean found = false;
+          int start = -1;
+          int end = -1;
+          nextMatchStartsFrom = textPane.getCaretPosition() + 1;
+
+          Matcher matcher = pattern.matcher(content);
+          while (matcher.find(nextMatchStartsFrom) && !found) {
+            start = matcher.start();
+            end = matcher.end();
+            found = false;
+            if (highlightsChk.isSelected()) {
+              javax.swing.text.Highlighter.Highlight[] highlights =
+                textPane.getHighlighter().getHighlights();
+              for (javax.swing.text.Highlighter.Highlight h : highlights) {
+                if (h.getStartOffset() <= start && h.getEndOffset() >= end) {
+                  found = true;
+                  break;
+                }
+              }
+            } else {
+              found = true;
+            }
+            nextMatchStartsFrom = end + 1;
+          }
+
+          if (found) {
+            //display the result
+            textPane.setCaretPosition(start);
+            textPane.moveCaretPosition(end);
+
+          } else {
+            JOptionPane.showMessageDialog(searchDialog, "String not found!",
+              "GATE", JOptionPane.INFORMATION_MESSAGE);
+          }
+        }};
+
+      cancelAction = new AbstractAction("Cancel") {
+        {
+          putValue(SHORT_DESCRIPTION, "Cancel");
+        }
+        public void actionPerformed(ActionEvent evt){
+          searchDialog.setVisible(false);
+        }
+      };
+    }
+
+    protected void initGuiComponents() {
+      getContentPane().setLayout(new BoxLayout(getContentPane(),
+              BoxLayout.Y_AXIS));
+
+      getContentPane().add(Box.createVerticalStrut(5));
+
+      Box hBox = Box.createHorizontalBox();
+      hBox.add(Box.createHorizontalStrut(5));
+      hBox.add(new JLabel("Find what:"));
+      hBox.add(Box.createHorizontalStrut(5));
+      hBox.add(patternTextField = new JTextField(20));
+      hBox.add(Box.createHorizontalStrut(5));
+      hBox.add(Box.createHorizontalGlue());
+      getContentPane().add(hBox);
+
+      getContentPane().add(Box.createVerticalStrut(5));
+
+      hBox = Box.createHorizontalBox();
+      hBox.add(Box.createHorizontalStrut(5));
+      hBox.add(ignoreCaseChk = new JCheckBox("Ignore case", false));
+      hBox.add(Box.createHorizontalStrut(5));
+      hBox.add(wholeWordsChk = new JCheckBox("Whole word", false));
+      hBox.add(Box.createHorizontalStrut(5));
+      hBox.add(regularExpressionChk =
+        new JCheckBox("Regular Exp.", false));
+      regularExpressionChk.setToolTipText(
+        "<html>Regular expression search."+
+        "<br>See java.util.regex.Pattern.</html>");
+      hBox.add(Box.createHorizontalStrut(5));
+      hBox.add(highlightsChk = new JCheckBox("Highlights", false));
+      highlightsChk.setToolTipText(
+        "Restrict the search on the highlighted annotations.");
+      hBox.add(Box.createHorizontalStrut(5));
+      hBox.add(Box.createHorizontalGlue());
+      getContentPane().add(hBox);
+
+      getContentPane().add(Box.createVerticalStrut(5));
+
+      hBox = Box.createHorizontalBox();
+      hBox.add(Box.createHorizontalGlue());
+      JButton findFirstButton = new JButton(findFirstAction);
+      hBox.add(findFirstButton);
+      hBox.add(Box.createHorizontalStrut(5));
+      hBox.add(new JButton(findNextAction));
+      hBox.add(Box.createHorizontalStrut(5));
+      hBox.add(new JButton(cancelAction));
+      hBox.add(Box.createHorizontalGlue());
+      getContentPane().add(hBox);
+
+      getContentPane().add(Box.createVerticalStrut(5));
+
+      getRootPane().setDefaultButton(findFirstButton);
+    }
+
+    protected void initListeners() {
+
+      addComponentListener(new ComponentAdapter() {
+        public void componentHidden(ComponentEvent e) {
+        }
+
+        public void componentMoved(ComponentEvent e) {
+        }
+
+        public void componentResized(ComponentEvent e) {
+        }
+
+        public void componentShown(ComponentEvent e) {
+          refresh();
+        }
+      });
+
+      patternTextField.getDocument().addDocumentListener(
+              new javax.swing.event.DocumentListener() {
+                public void insertUpdate(javax.swing.event
+                        .DocumentEvent e) {
+                  refresh();
+                }
+
+                public void removeUpdate(javax.swing.event
+                        .DocumentEvent e) {
+                  refresh();
+                }
+
+                public void changedUpdate(javax.swing.event
+                        .DocumentEvent e) {
+                  refresh();
+                }
+              });
+
+      ((JComponent)getContentPane())
+      .getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).
+      put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "cancelAction");
+      ((JComponent)getContentPane())
+      .getActionMap().put("cancelAction", cancelAction);
+    }
+
+    /**
+     * Validates the regular expression before use.
+     * @return true if the regular expression is valid, false otherwise.
+     */
+    protected boolean validateRE(){
+      String patternText = patternTextField.getText();
+      boolean res = true;
+      //update patternRE
+      try {
+        String prefixPattern = wholeWordsChk.isSelected() ? "\\b":"";
+        prefixPattern += regularExpressionChk.isSelected() ? "":"\\Q";
+        String suffixPattern = regularExpressionChk.isSelected() ? "":"\\E";
+        suffixPattern += wholeWordsChk.isSelected() ? "\\b":"";
+        patternText = prefixPattern + patternText + suffixPattern;
+        pattern = ignoreCaseChk.isSelected() ?
+                  Pattern.compile(patternText, Pattern.CASE_INSENSITIVE) :
+                  Pattern.compile(patternText);
+
+      } catch (Exception ree) {
+        JOptionPane.showMessageDialog(searchDialog,
+                "Invalid pattern!\n" + ree.toString(), "GATE",
+                JOptionPane.ERROR_MESSAGE);
+        res = false;
+      }
+      return res;
+    }
+
+    protected void refresh() {
+      String patternText = patternTextField.getText();
+
+      if (patternText != null && patternText.length() > 0) {
+        //update actions state
+        findFirstAction.setEnabled(true);
+        findNextAction.setEnabled(true);
+      } else {
+        findFirstAction.setEnabled(false);
+        findNextAction.setEnabled(false);
+      }
+
+      if (pattern == null) {}
+    }
+
+    // FIXME: that's ugly !!
+    javax.swing.text.JTextComponent textPane =
+      (javax.swing.text.JTextComponent)
+      ((javax.swing.JViewport)
+              ((JScrollPane)getCentralView().getGUI())
+              .getViewport()).getView();
+
+    JTextField patternTextField;
+    JCheckBox ignoreCaseChk;
+    JCheckBox wholeWordsChk;
+    JCheckBox regularExpressionChk;
+    JCheckBox highlightsChk;
+    Pattern pattern;
+    int nextMatchStartsFrom;
+    String content;
+    Action findFirstAction;
+    Action findNextAction;
+    Action cancelAction;
 
   } // end of class SearchDialog
 

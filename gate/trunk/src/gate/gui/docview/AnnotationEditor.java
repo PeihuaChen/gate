@@ -24,6 +24,7 @@ import javax.swing.Timer;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.event.TableModelListener;
+import javax.swing.event.TableModelEvent;
 import javax.swing.text.BadLocationException;
 
 import gate.*;
@@ -57,11 +58,12 @@ public class AnnotationEditor extends AbstractVisualResource
   public Resource init() throws ResourceInstantiationException {
     super.init();
     initGUI();
+    annotationEditorInstance = this;
     return this;
   }
 
   protected void initData(){
-    schemasByType = new HashMap();
+    schemasByType = new HashMap<String, AnnotationSchema>();
     java.util.List schemas = Gate.getCreoleRegister().
         getLrInstances("gate.creole.AnnotationSchema");
     for(Iterator schIter = schemas.iterator(); 
@@ -126,37 +128,37 @@ public class AnnotationEditor extends AbstractVisualResource
     constraints.weighty= 0;
     constraints.insets = insets0;
 
-    JButton btn = new JButton(solAction);
-    btn.setContentAreaFilled(false);
-    btn.setBorderPainted(false);
-    btn.setMargin(insets0);
-    pane.add(btn, constraints);
+    solButton = new JButton();
+    solButton.setContentAreaFilled(false);
+    solButton.setBorderPainted(false);
+    solButton.setMargin(insets0);
+    pane.add(solButton, constraints);
     
-    btn = new JButton(sorAction);
-    btn.setContentAreaFilled(false);
-    btn.setBorderPainted(false);
-    btn.setMargin(insets0);
-    pane.add(btn, constraints);
+    sorButton = new JButton();
+    sorButton.setContentAreaFilled(false);
+    sorButton.setBorderPainted(false);
+    sorButton.setMargin(insets0);
+    pane.add(sorButton, constraints);
     
-    btn = new JButton(delAction);
-    btn.setContentAreaFilled(false);
-    btn.setBorderPainted(false);
-    btn.setMargin(insets0);
+    delButton = new JButton();
+    delButton.setContentAreaFilled(false);
+    delButton.setBorderPainted(false);
+    delButton.setMargin(insets0);
     constraints.insets = new Insets(0, 20, 0, 20);
-    pane.add(btn, constraints);
+    pane.add(delButton, constraints);
     constraints.insets = insets0;
     
-    btn = new JButton(eolAction);
-    btn.setContentAreaFilled(false);
-    btn.setBorderPainted(false);
-    btn.setMargin(insets0);
-    pane.add(btn, constraints);
+    eolButton = new JButton();
+    eolButton.setContentAreaFilled(false);
+    eolButton.setBorderPainted(false);
+    eolButton.setMargin(insets0);
+    pane.add(eolButton, constraints);
     
-    btn = new JButton(eorAction);
-    btn.setContentAreaFilled(false);
-    btn.setBorderPainted(false);
-    btn.setMargin(insets0);
-    pane.add(btn, constraints);
+    eorButton = new JButton();
+    eorButton.setContentAreaFilled(false);
+    eorButton.setBorderPainted(false);
+    eorButton.setMargin(insets0);
+    pane.add(eorButton, constraints);
     
     pinnedButton = new JToggleButton(MainFrame.getIcon("pin"));
     pinnedButton.setSelectedIcon(MainFrame.getIcon("pin-in"));
@@ -169,11 +171,10 @@ public class AnnotationEditor extends AbstractVisualResource
     constraints.anchor = GridBagConstraints.EAST;
     pane.add(pinnedButton, constraints);
 
-    dismissAction = new DismissAction(); 
-    btn = new JButton(dismissAction);
-    btn.setBorder(null);
+    dismissButton = new JButton();
+    dismissButton.setBorder(null);
     constraints.anchor = GridBagConstraints.NORTHEAST;
-    pane.add(btn, constraints);
+    pane.add(dismissButton, constraints);
     constraints.anchor = GridBagConstraints.CENTER;
     constraints.insets = insets0;
 
@@ -198,14 +199,16 @@ public class AnnotationEditor extends AbstractVisualResource
       throw new GateRuntimeException(rie);
     }
     JScrollPane scroller = new JScrollPane(featuresEditor.getTable());
+    scroller.getViewport().setBackground(UIManager.getLookAndFeelDefaults().
+      getColor("ToolTip.background"));
     // resize the annotation editor window when some data
     // are modified in the features table
     featuresEditor.getTable().getModel().addTableModelListener(
-            new TableModelListener() {
-              public void tableChanged(javax.swing.event.TableModelEvent e) {
-                popupWindow.pack();
-              }
-            });
+      new TableModelListener() {
+        public void tableChanged(TableModelEvent e) {
+            popupWindow.pack();
+        }
+      });
 
     constraints.gridy = 2;
     constraints.weighty = 1;
@@ -250,19 +253,84 @@ public class AnnotationEditor extends AbstractVisualResource
         int x = location.x - pressed.getX() + me.getX();
         int y = location.y - pressed.getY() + me.getY();
         popupWindow.setLocation(x, y);
+        pinnedButton.setSelected(true);
        }
     };
 
     popupWindow.getRootPane().addMouseListener(windowMouseListener);
     popupWindow.getRootPane().addMouseMotionListener(windowMouseMotionListener);
 //    featuresEditor.addMouseListener(windowMouseListener);
-    
-    ((JComponent)popupWindow.getContentPane()).
-    		getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).
-    		put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "dismiss");
-    ((JComponent)popupWindow.getContentPane()).
-    		getActionMap().put("dismiss", dismissAction);
-    
+
+    inputMap = ((JComponent)popupWindow.getContentPane()).
+        getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    actionMap = ((JComponent)popupWindow.getContentPane()).getActionMap();
+    // add the key-action bindings of this Component to the parent window
+
+    solAction = new StartOffsetLeftAction("", MainFrame.getIcon("extend-left"),
+      "<html><b>Extend start</b><small>" +
+      "<br>ALT + LEFT = 1 character" +
+      "<br> + SHIFT = 5 characters, "+
+      "<br> + CTRL + SHIFT = 10 characters</small></html>",
+       KeyEvent.VK_LEFT);
+    solButton.setAction(solAction);
+    inputMap.put(KeyStroke.getKeyStroke("alt LEFT"), "solAction");
+    inputMap.put(KeyStroke.getKeyStroke("alt shift LEFT"), "solAction");
+    inputMap.put(KeyStroke.getKeyStroke("control alt shift released LEFT"), "solAction");
+    actionMap.put("solAction", solAction);
+
+    sorAction = new StartOffsetRightAction("", MainFrame.getIcon("extend-right"),
+      "<html><b>Shrink start</b><small>" +
+      "<br>ALT + RIGHT = 1 character" +
+      "<br> + SHIFT = 5 characters, "+
+      "<br> + CTRL + SHIFT = 10 characters</small></html>",
+      KeyEvent.VK_RIGHT);
+    sorButton.setAction(sorAction);
+    inputMap.put(KeyStroke.getKeyStroke("alt RIGHT"), "sorAction");
+    inputMap.put(KeyStroke.getKeyStroke("alt shift RIGHT"), "sorAction");
+    inputMap.put(KeyStroke.getKeyStroke("control alt shift released RIGHT"), "sorAction");
+    actionMap.put("sorAction", sorAction);
+
+    delAction = new DeleteAnnotationAction("", MainFrame.getIcon("remove-annotation"),
+      "Delete the annotation", KeyEvent.VK_DELETE);
+    delButton.setAction(delAction);
+    inputMap.put(KeyStroke.getKeyStroke("alt DELETE"), "delAction");
+    actionMap.put("delAction", delAction);
+
+    eolAction = new EndOffsetLeftAction("", MainFrame.getIcon("extend-left"),
+      "<html><b>Shrink end</b><small>" +
+      "<br>ALT + DOWN = 1 character" +
+      "<br> + SHIFT = 5 characters, "+
+      "<br> + CTRL + SHIFT = 10 characters</small></html>",
+       KeyEvent.VK_DOWN);
+    eolButton.setAction(eolAction);
+    inputMap.put(KeyStroke.getKeyStroke("alt DOWN"), "eolAction");
+    inputMap.put(KeyStroke.getKeyStroke("alt shift DOWN"), "eolAction");
+    inputMap.put(KeyStroke.getKeyStroke("control alt shift released DOWN"), "eolAction");
+    actionMap.put("eolAction", eolAction);
+
+    eorAction = new EndOffsetRightAction("", MainFrame.getIcon("extend-right"),
+      "<html><b>Extend end</b><small>" +
+      "<br>ALT + UP = 1 character" +
+      "<br> + SHIFT = 5 characters, "+
+      "<br> + CTRL + SHIFT = 10 characters</small></html>",
+      KeyEvent.VK_UP);
+    eorButton.setAction(eorAction);
+    inputMap.put(KeyStroke.getKeyStroke("alt UP"), "eorAction");
+    inputMap.put(KeyStroke.getKeyStroke("alt shift UP"), "eorAction");
+    inputMap.put(KeyStroke.getKeyStroke("control alt shift released UP"), "eorAction");
+    actionMap.put("eorAction", eorAction);
+
+    dismissAction = new DismissAction("", null,
+      "Close the window", KeyEvent.VK_ESCAPE);
+    dismissButton.setAction(dismissAction);
+    inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "dismissAction");
+    inputMap.put(KeyStroke.getKeyStroke("alt ESCAPE"), "dismissAction");
+    actionMap.put("dismissAction", dismissAction);
+
+    applyAction = new ApplyAction("Apply", null, "", KeyEvent.VK_ENTER);
+    inputMap.put(KeyStroke.getKeyStroke("alt ENTER"), "applyAction");
+    actionMap.put("applyAction", applyAction);
+
     typeCombo.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent evt){
         String newType = typeCombo.getSelectedItem().toString();
@@ -287,11 +355,6 @@ public class AnnotationEditor extends AbstractVisualResource
   }
   
   protected void initGUI() {
-    solAction = new StartOffsetLeftAction();
-    sorAction = new StartOffsetRightAction();
-    eolAction = new EndOffsetLeftAction();
-    eorAction = new EndOffsetRightAction();
-    delAction = new DeleteAnnotationAction();
 
     initData();
     initBottomWindow(SwingUtilities.getWindowAncestor(owner.getTextComponent()));
@@ -299,21 +362,23 @@ public class AnnotationEditor extends AbstractVisualResource
 
     hideTimer = new Timer(HIDE_DELAY, new ActionListener() {
       public void actionPerformed(ActionEvent evt) {
-        hide();
+        annotationEditorInstance.setVisible(false);
       }
     });
     hideTimer.setRepeats(false);
 
     AncestorListener textAncestorListener = new AncestorListener() {
       public void ancestorAdded(AncestorEvent event) {
-        if(wasShowing) show(false);
+        if(wasShowing) {
+          annotationEditorInstance.setVisible(true);
+        }
         wasShowing = false;
       }
 
       public void ancestorRemoved(AncestorEvent event) {
         if(isShowing()) {
           wasShowing = true;
-          hide();
+          popupWindow.dispose();
         }
       }
 
@@ -330,21 +395,23 @@ public class AnnotationEditor extends AbstractVisualResource
     this.set = set;
     //repopulate the types combo
     String annType = ann.getType();
-    Set types = new HashSet(schemasByType.keySet());
+    Set<String> types = new HashSet<String>(schemasByType.keySet());
     types.add(annType);
     types.addAll(set.getAllTypes());
-    java.util.List typeList = new ArrayList(types);
+    java.util.List<String> typeList = new ArrayList<String>(types);
     Collections.sort(typeList);
     typeCombo.setModel(new DefaultComboBoxModel(typeList.toArray()));
     typeCombo.setSelectedItem(annType);
    
     featuresEditor.setSchema((AnnotationSchema)schemasByType.get(annType));
     featuresEditor.setTargetFeatures(ann.getFeatures());
+    featuresEditorRowCount = 0;
     popupWindow.doLayout();
     if (pinnedButton.isSelected()) {
-      show(false);
+      setVisible(true);
     } else {
-      show(true);
+      setVisible(true);
+      hideTimer.restart();
     }
   }
 
@@ -367,16 +434,22 @@ public class AnnotationEditor extends AbstractVisualResource
   }
   
   /**
-   * Shows the UI(s) involved in annotation editing.
-   *
+   * Shows/Hides the UI(s) involved in annotation editing.
    */
-  public void show(boolean autohide){
-    placeDialog(ann.getStartNode().getOffset().intValue(),
-      ann.getEndNode().getOffset().intValue());
-    popupWindow.setVisible(true);
-    if(autohide) hideTimer.restart();
+  @Override
+  public void setVisible(boolean setVisible) {
+    super.setVisible(setVisible);
+    if (setVisible) {
+      placeDialog(ann.getStartNode().getOffset().intValue(),
+        ann.getEndNode().getOffset().intValue());
+      popupWindow.setVisible(true);
+
+    } else {
+      popupWindow.setVisible(false);
+      pinnedButton.setSelected(false);
+    }
   }
-  
+
   /**
    * Finds the best location for the editor dialog for a given span of text.
    */
@@ -474,33 +547,25 @@ public class AnnotationEditor extends AbstractVisualResource
     owner.annotationChanged(newAnn, set, null);
   }   
   
-  public void hide(){
-//    topWindow.setVisible(false);
-    popupWindow.setVisible(false);
-  }
-  
   /**
    * Base class for actions on annotations.
    */
   protected abstract class AnnotationAction extends AbstractAction{
-    public AnnotationAction(String name, Icon icon){
-      super("", icon);
-      putValue(SHORT_DESCRIPTION, name);
-      
+    public AnnotationAction(String text, Icon icon,
+                            String desc, int mnemonic){
+      super(text, icon);
+      putValue(SHORT_DESCRIPTION, desc);
+      putValue(MNEMONIC_KEY, mnemonic);
     }
   }
 
   protected class StartOffsetLeftAction extends AnnotationAction{
-
     private static final long serialVersionUID = 1L;
-
-    public StartOffsetLeftAction(){
-      super("<html><b>Extend</b><br><small>SHIFT = 5 characters, CTRL-SHIFT = 10 characters</small></html>", 
-              MainFrame.getIcon("extend-left"));
+    public StartOffsetLeftAction(String text, Icon icon,
+                                 String desc, int mnemonic) {
+      super(text, icon, desc, mnemonic);
     }
-    
     public void actionPerformed(ActionEvent evt){
-      Annotation oldAnn = ann;
       int increment = 1;
       if((evt.getModifiers() & ActionEvent.SHIFT_MASK) > 0){
         //CTRL pressed -> use tokens for advancing
@@ -521,15 +586,11 @@ public class AnnotationEditor extends AbstractVisualResource
   }
   
   protected class StartOffsetRightAction extends AnnotationAction{
-
     private static final long serialVersionUID = 1L;
-
-    public StartOffsetRightAction(){
-      super("<html><b>Shrink</b><br><small>SHIFT = 5 characters, " +
-            "CTRL-SHIFT = 10 characters</small></html>", 
-            MainFrame.getIcon("extend-right"));
+    public StartOffsetRightAction(String text, Icon icon,
+                                 String desc, int mnemonic) {
+      super(text, icon, desc, mnemonic);
     }
-    
     public void actionPerformed(ActionEvent evt){
       long endOffset = ann.getEndNode().getOffset().longValue(); 
       int increment = 1;
@@ -553,15 +614,11 @@ public class AnnotationEditor extends AbstractVisualResource
   }
 
   protected class EndOffsetLeftAction extends AnnotationAction{
-
     private static final long serialVersionUID = 1L;
-
-    public EndOffsetLeftAction(){
-      super("<html><b>Shrink</b><br><small>SHIFT = 5 characters, " +
-            "CTRL-SHIFT = 10 characters</small></html>",
-            MainFrame.getIcon("extend-left"));
+    public EndOffsetLeftAction(String text, Icon icon,
+                                 String desc, int mnemonic) {
+      super(text, icon, desc, mnemonic);
     }
-    
     public void actionPerformed(ActionEvent evt){
       long startOffset = ann.getStartNode().getOffset().longValue(); 
       int increment = 1;
@@ -585,19 +642,14 @@ public class AnnotationEditor extends AbstractVisualResource
   }
   
   protected class EndOffsetRightAction extends AnnotationAction{
-
-    private static final long serialVersionUID = 1L;
-
-    public EndOffsetRightAction(){
-      super("<html><b>Extend</b><br><small>SHIFT = 5 characters, " +
-            "CTRL-SHIFT = 10 characters</small></html>", 
-            MainFrame.getIcon("extend-right"));
+    public EndOffsetRightAction(String text, Icon icon,
+                                 String desc, int mnemonic) {
+      super(text, icon, desc, mnemonic);
     }
-    
+    private static final long serialVersionUID = 1L;
     public void actionPerformed(ActionEvent evt){
       long maxOffset = owner.getDocument().
       		getContent().size().longValue() -1; 
-//      Long newEndOffset = ann.getEndNode().getOffset();
       int increment = 1;
       if((evt.getModifiers() & ActionEvent.SHIFT_MASK) > 0){
         //CTRL pressed -> use tokens for advancing
@@ -617,49 +669,40 @@ public class AnnotationEditor extends AbstractVisualResource
     }
   }
   
-  
   protected class DeleteAnnotationAction extends AnnotationAction{
-
    private static final long serialVersionUID = 1L;
-
-    public DeleteAnnotationAction(){
-      super("Delete", MainFrame.getIcon("remove-annotation"));
+    public DeleteAnnotationAction(String text, Icon icon,
+                                 String desc, int mnemonic) {
+      super(text, icon, desc, mnemonic);
     }
-    
     public void actionPerformed(ActionEvent evt){
       set.remove(ann);
-      hide();
+      annotationEditorInstance.setVisible(false);
     }
   }
   
-  protected class DismissAction extends AbstractAction{
-
+  protected class DismissAction extends AnnotationAction{
     private static final long serialVersionUID = 1L;
-
-    public DismissAction(){
-      super("");
-      Icon icon = UIManager.getIcon("InternalFrame.closeIcon");
-      if(icon == null) icon = MainFrame.getIcon("exit");
-      putValue(SMALL_ICON, icon);
-      putValue(SHORT_DESCRIPTION, "Dismiss");
+    public DismissAction(String text, Icon icon,
+                       String desc, int mnemonic) {
+      super(text, icon, desc, mnemonic);
+      Icon exitIcon = UIManager.getIcon("InternalFrame.closeIcon");
+      if(exitIcon == null) exitIcon = MainFrame.getIcon("exit");
+      putValue(SMALL_ICON, exitIcon);
     }
-    
     public void actionPerformed(ActionEvent evt){
-      hide();
+      annotationEditorInstance.setVisible(false);
     }
   }
   
-  protected class ApplyAction extends AbstractAction{
-
+  protected class ApplyAction extends AnnotationAction{
     private static final long serialVersionUID = 1L;
-
-    public ApplyAction(){
-      super("Apply");
-//      putValue(SHORT_DESCRIPTION, "Apply");
+    public ApplyAction(String text, Icon icon,
+                       String desc, int mnemonic) {
+      super(text, icon, desc, mnemonic);
     }
-    
     public void actionPerformed(ActionEvent evt){
-      hide();
+      annotationEditorInstance.setVisible(false);
     }
   }
   
@@ -685,11 +728,19 @@ public class AnnotationEditor extends AbstractVisualResource
   
   protected StartOffsetLeftAction solAction;
   protected StartOffsetRightAction sorAction;
+  protected DeleteAnnotationAction delAction;
   protected EndOffsetLeftAction eolAction;
   protected EndOffsetRightAction eorAction;
   protected DismissAction dismissAction;
+  protected ApplyAction applyAction;
   
-  protected DeleteAnnotationAction delAction;
+  protected JButton solButton;
+  protected JButton sorButton;
+  protected JButton delButton;
+  protected JButton eolButton;
+  protected JButton eorButton;
+  protected JButton dismissButton;
+  
   protected Timer hideTimer;
   protected MouseEvent pressed;
 
@@ -714,7 +765,7 @@ public class AnnotationEditor extends AbstractVisualResource
    * Stores the Annotation schema objects available in the system.
    * The annotation types are used as keys for the map.
    */
-  protected Map schemasByType;
+  protected Map<String, AnnotationSchema> schemasByType;
   
   /**
    * The controlling object for this editor.
@@ -730,6 +781,27 @@ public class AnnotationEditor extends AbstractVisualResource
    * The parent set of the current annotation.
    */
   protected AnnotationSet set;
+
+  /**
+   * Current instance of this class.
+   */
+  protected AnnotationEditor annotationEditorInstance;
+
+  /**
+   * Features table row count.
+   * Exists only because its TableModelEvent gives no usable information.
+   */
+  protected int featuresEditorRowCount;
+
+  /**
+   * Key bindings for the popup window.
+   */
+  InputMap inputMap;
+
+  /**
+   * Action bindings for the popup window.
+   */
+  ActionMap actionMap;
 
   /* (non-Javadoc)
    * @see gate.gui.annedit.AnnotationEditor#getAnnotationSetCurrentlyEdited()
@@ -751,4 +823,9 @@ public class AnnotationEditor extends AbstractVisualResource
   public void setOwner(AnnotationEditorOwner owner) {
     this.owner = owner;
   }
+
+  public void setPinnedMode(boolean pinned) {
+    pinnedButton.setSelected(pinned);
+  }
+  
 }

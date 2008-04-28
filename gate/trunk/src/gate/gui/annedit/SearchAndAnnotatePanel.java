@@ -79,25 +79,35 @@ public class SearchAndAnnotatePanel extends JPanel {
   protected JTextField searchTextField;
   
   /**
-   * Checkbox for enabling RegEx searching 
+   * Checkbox for enabling RegEx searching.
    */
   protected JCheckBox searchRegExpChk;
   
   /**
-   * Checkbox for enabling case sensitive searching 
+   * Checkbox for enabling case sensitive searching.
    */
   protected JCheckBox searchCaseSensChk;
   
+  /**
+   * Checkbox for enabling whole word searching.
+   */
+  protected JCheckBox searchWholeWordsChk;
+
+  /**
+   * Checkbox for enabling whole word searching.
+   */
+  protected JCheckBox searchHighlightsChk;
+
   /**
    * Checkbox for showing the search UI.
    */
   protected JCheckBox searchEnabledCheck;
 
   /**
-   * Shared regex matcher used for search functionality. 
+   * Shared instance of the matcher.
    */
   protected Matcher matcher;
-  
+
   protected FindFirstAction findFirstAction;
   
   protected FindPreviousAction findPreviousAction;
@@ -109,6 +119,10 @@ public class SearchAndAnnotatePanel extends JPanel {
   protected AnnotateAllMatchesAction annotateAllMatchesAction;
   
   protected UndoAnnotateAllMatchesAction undoAnnotateAllMatchesAction;
+
+  protected int nextMatchStartsFrom;
+  
+  protected String content;
 
   /**
    * Start and end index of the all the matches. 
@@ -139,6 +153,8 @@ public class SearchAndAnnotatePanel extends JPanel {
     searchBox.remove(searchPane);
     searchCaseSensChk.setVisible(false);
     searchRegExpChk.setVisible(false);
+    searchWholeWordsChk.setVisible(false);
+    searchHighlightsChk.setVisible(false);
 
     // if the user never gives the focus to the textPane then
     // there will never be any selection in it so we force it
@@ -150,14 +166,16 @@ public class SearchAndAnnotatePanel extends JPanel {
     }
 
     initListeners();
+    
+    content = getOwner().getDocument().getContent().toString();
   }
 
   /**
    * Build the GUI with JPanels and Boxes.
    *
    * @param color Color of the background.
-   * _                      _        _
-   * V Search & Annotate   |_| Case |_| Regexp
+   * _                    _        _          _         _
+   * V Search & Annotate |_| Case |_| Regexp |_| Whole |_| Highlights
    *  _______________________________________________
    * |V_Searched_Expression__________________________|
    * 
@@ -174,10 +192,10 @@ public class SearchAndAnnotatePanel extends JPanel {
     add(mainPane, BorderLayout.CENTER);
 
     searchBox = Box.createVerticalBox();
-    String aTitle = "Search & Annotate";
-    JLabel aLabel = new JLabel(aTitle);
+    String aTitle = "Open Search & Annotate tool";
+    JLabel label = new JLabel(aTitle);
     searchBox.setMinimumSize(
-      new Dimension(aLabel.getPreferredSize().width, 0));    
+      new Dimension(label.getPreferredSize().width, 0));    
     searchBox.setAlignmentX(Component.LEFT_ALIGNMENT);
 
     JPanel firstLinePane = new JPanel();
@@ -199,9 +217,22 @@ public class SearchAndAnnotatePanel extends JPanel {
     hBox.add(searchCaseSensChk);
     hBox.add(Box.createHorizontalStrut(5));
       searchRegExpChk = new JCheckBox("Regexp", false);
-      searchRegExpChk.setToolTipText("Regular expression search.");
+      searchRegExpChk.setToolTipText(
+        "<html>Regular expression search."+
+        "<br>See java.util.regex.Pattern.</html>");
       searchRegExpChk.setBackground(color);
     hBox.add(searchRegExpChk);
+    hBox.add(Box.createHorizontalStrut(5));
+      searchWholeWordsChk = new JCheckBox("Whole", false);
+      searchWholeWordsChk.setBackground(color);
+      searchWholeWordsChk.setToolTipText("Whole word search.");
+    hBox.add(searchWholeWordsChk);
+    hBox.add(Box.createHorizontalStrut(5));
+      searchHighlightsChk = new JCheckBox("Highlights", false);
+      searchHighlightsChk.setToolTipText(
+        "Restrict the search on the highlighted annotations.");
+      searchHighlightsChk.setBackground(color);
+    hBox.add(searchHighlightsChk);
     hBox.add(Box.createHorizontalGlue());
     firstLinePane.add(hBox);
     searchBox.add(firstLinePane);
@@ -282,15 +313,25 @@ public class SearchAndAnnotatePanel extends JPanel {
               }
             }
             searchBox.add(searchPane);
-            searchCaseSensChk.setVisible(true);
-            searchRegExpChk.setVisible(true);
-            getAnnotationEditorWindow().pack();
           }
+          searchEnabledCheck.setText("");
+          searchCaseSensChk.setVisible(true);
+          searchRegExpChk.setVisible(true);
+          searchWholeWordsChk.setVisible(true);
+          searchHighlightsChk.setVisible(true);
+          searchTextField.requestFocusInWindow();
+          searchTextField.selectAll();
+          getAnnotationEditorWindow().pack();
+          annotationEditor.setPinnedMode(true);
+
         } else {
           if(searchBox.isAncestorOf(searchPane)){
+            searchEnabledCheck.setText("Open Search & Annotate tool");
             searchBox.remove(searchPane);
             searchCaseSensChk.setVisible(false);
             searchRegExpChk.setVisible(false);
+            searchWholeWordsChk.setVisible(false);
+            searchHighlightsChk.setVisible(false);
             getAnnotationEditorWindow().pack();
           }
         }
@@ -359,43 +400,21 @@ public class SearchAndAnnotatePanel extends JPanel {
 
     public void actionPerformed(ActionEvent evt){
       if(getOwner() == null) { return; }
+      annotationEditor.setPinnedMode(true);
       String patternText = searchTextField.getText();
-      if(patternText == null) { return; }
-      // TODO: flags = Pattern.UNICODE_CASE prevent insensitive case to work
-      // for Java 1.5 but works with Java 1.6
-      int flags = 0;
-      if(!searchCaseSensChk.isSelected()) {
-        flags |= Pattern.CASE_INSENSITIVE; }
-      if(!searchRegExpChk.isSelected()) {
-        flags |= Pattern.LITERAL; }
       Pattern pattern = null;
 
       try {
-        pattern = Pattern.compile(patternText, flags);
-        String text = getOwner().getDocument().getContent().toString();
-        matcher = pattern.matcher(text);
-
-        boolean found = matcher.find();
-        if (found) {
-          findNextAction.setEnabled(true);
-          annotateMatchAction.setEnabled(true);
-          annotateAllMatchesAction.setEnabled(false);
-          int start = matcher.start();
-          int end = matcher.end();
-          matchedIndexes = new LinkedList<Vector<Integer>>();
-          Vector<Integer> v = new Vector<Integer>(2);
-          v.add(new Integer(start));
-          v.add(new Integer(end));
-          matchedIndexes.add(v);
-          getOwner().getTextComponent().select(start, end);
-          getAnnotationEditor().placeDialog(start, end);
-
-        } else {
-          // no match found
-          findNextAction.setEnabled(false);
-          annotateMatchAction.setEnabled(false);
-        }
-        findPreviousAction.setEnabled(false);
+        String prefixPattern = searchWholeWordsChk.isSelected() ? "\\b":"";
+        prefixPattern += searchRegExpChk.isSelected() ? "":"\\Q";
+        String suffixPattern = searchRegExpChk.isSelected() ? "":"\\E";
+        suffixPattern += searchWholeWordsChk.isSelected() ? "\\b":"";
+        patternText = prefixPattern + patternText + suffixPattern;
+        // TODO: Pattern.UNICODE_CASE prevent insensitive case to work
+        // for Java 1.5 but works with Java 1.6
+        pattern = searchCaseSensChk.isSelected() ?
+                  Pattern.compile(patternText) :
+                  Pattern.compile(patternText, Pattern.CASE_INSENSITIVE);
 
       } catch(PatternSyntaxException e) {
         // FIXME: put this error dialog in front of the editor dialog
@@ -411,6 +430,49 @@ public class SearchAndAnnotatePanel extends JPanel {
         errorDialog.setVisible(true);
 //          errorDialog.toFront();
       }
+
+      matcher = pattern.matcher(content);
+      boolean found = false;
+      int start = -1;
+      int end = -1;
+      nextMatchStartsFrom = 0;
+      while (matcher.find(nextMatchStartsFrom) && !found) {
+        start = matcher.start();
+        end = matcher.end();
+        found = false;
+        if (searchHighlightsChk.isSelected()) {
+          javax.swing.text.Highlighter.Highlight[] highlights =
+            getOwner().getTextComponent().getHighlighter().getHighlights();
+          for (javax.swing.text.Highlighter.Highlight h : highlights) {
+            if (h.getStartOffset() <= start && h.getEndOffset() >= end) {
+              found = true;
+              break;
+            }
+          }
+        } else {
+          found = true;
+        }
+        nextMatchStartsFrom = end + 1;
+      }
+
+      if (found) {
+        findNextAction.setEnabled(true);
+        annotateMatchAction.setEnabled(true);
+        annotateAllMatchesAction.setEnabled(false);
+        matchedIndexes = new LinkedList<Vector<Integer>>();
+        Vector<Integer> v = new Vector<Integer>(2);
+        v.add(new Integer(start));
+        v.add(new Integer(end));
+        matchedIndexes.add(v);
+        getOwner().getTextComponent().select(start, end);
+        getAnnotationEditor().placeDialog(start, end);
+
+      } else {
+        // no match found
+        findNextAction.setEnabled(false);
+        annotateMatchAction.setEnabled(false);
+      }
+      findPreviousAction.setEnabled(false);
     }
   }
   
@@ -441,7 +503,7 @@ public class SearchAndAnnotatePanel extends JPanel {
       getOwner().getTextComponent().select(start, end);
       getAnnotationEditor().placeDialog(start, end);
       // reset the matcher for the next FindNextAction
-      matcher.find(start);
+      nextMatchStartsFrom = start;
       findNextAction.setEnabled(true);
       annotateMatchAction.setEnabled(true);
     }
@@ -458,11 +520,32 @@ public class SearchAndAnnotatePanel extends JPanel {
     }
 
     public void actionPerformed(ActionEvent evt){
-      if(matcher != null){
-        boolean found = matcher.find();
+        boolean found = false;
+        int start = -1;
+        int end = -1;
+        nextMatchStartsFrom =
+          getOwner().getTextComponent().getCaretPosition() + 1;
+
+        while (matcher.find(nextMatchStartsFrom) && !found) {
+          start = matcher.start();
+          end = matcher.end();
+          found = false;
+          if (searchHighlightsChk.isSelected()) {
+            javax.swing.text.Highlighter.Highlight[] highlights =
+              getOwner().getTextComponent().getHighlighter().getHighlights();
+            for (javax.swing.text.Highlighter.Highlight h : highlights) {
+              if (h.getStartOffset() <= start && h.getEndOffset() >= end) {
+                found = true;
+                break;
+              }
+            }
+          } else {
+            found = true;
+          }
+          nextMatchStartsFrom = end + 1;
+        }
+
         if (found) {
-          int start = matcher.start();
-          int end = matcher.end();
           Vector<Integer> v = new Vector<Integer>(2);
           v.add(new Integer(start));
           v.add(new Integer(end));
@@ -475,11 +558,6 @@ public class SearchAndAnnotatePanel extends JPanel {
           findNextAction.setEnabled(false);
           annotateMatchAction.setEnabled(false);
         }
-
-      } else {
-        //matcher is not prepared
-        new FindFirstAction().actionPerformed(evt);
-      }
     }
   }
   
@@ -494,9 +572,8 @@ public class SearchAndAnnotatePanel extends JPanel {
     }
     
     public void actionPerformed(ActionEvent evt){
-      if(matcher != null){
-        int start = matcher.start();
-        int end = matcher.end();
+        int start = getOwner().getTextComponent().getSelectionStart();
+        int end = getOwner().getTextComponent().getSelectionEnd();
         FeatureMap features = Factory.newFeatureMap();
         if(getAnnotationEditor().getAnnotationCurrentlyEdited().getFeatures() != null) 
           features.putAll(getAnnotationEditor().getAnnotationCurrentlyEdited().getFeatures());
@@ -521,7 +598,6 @@ public class SearchAndAnnotatePanel extends JPanel {
           //the offsets here should always be valid.
           throw new LuckyException(e);
         }
-      }
     }
   }
   
@@ -537,20 +613,39 @@ public class SearchAndAnnotatePanel extends JPanel {
 
     public void actionPerformed(ActionEvent evt){
       annotateAllAnnotationsID = new LinkedList<Annotation>();
-      boolean found = matcher.find();
-      while(found) {
-        annotateCurrentMatch();
-        found = matcher.find();
+      boolean found = false;
+      int start = -1;
+      int end = -1;
+      nextMatchStartsFrom =
+        getOwner().getTextComponent().getCaretPosition() + 1;
+ 
+      do {
+      found = false;
+      while (matcher.find(nextMatchStartsFrom) && !found) {
+        start = matcher.start();
+        end = matcher.end();
+        if (searchHighlightsChk.isSelected()) {
+          javax.swing.text.Highlighter.Highlight[] highlights =
+            getOwner().getTextComponent().getHighlighter().getHighlights();
+          for (javax.swing.text.Highlighter.Highlight h : highlights) {
+            if (h.getStartOffset() <= start && h.getEndOffset() >= end) {
+              found = true;
+              break;
+            }
+          }
+        } else {
+          found = true;
+        }
+        nextMatchStartsFrom = end + 1;
       }
+      if (found) { annotateCurrentMatch(start, end); }
+      } while (found && !matcher.hitEnd());
 
       annotateAllMatchesSmallButton.setAction(undoAnnotateAllMatchesAction);
       undoAnnotateAllMatchesAction.setEnabled(true);
     }
 
-    private void annotateCurrentMatch(){
-      if(matcher != null){
-        int start = matcher.start();
-        int end = matcher.end();
+    private void annotateCurrentMatch(int start, int end){
         FeatureMap features = Factory.newFeatureMap();
         features.put("safe.regex", "true");
         if(getAnnotationEditor().getAnnotationCurrentlyEdited().getFeatures() != null) 
@@ -568,7 +663,6 @@ public class SearchAndAnnotatePanel extends JPanel {
           //the offsets here should always be valid.
           throw new LuckyException(e);
         }
-      }
     }
   }
   
@@ -594,6 +688,7 @@ public class SearchAndAnnotatePanel extends JPanel {
 
       // just hide the editor to avoid editing null annotation
       getAnnotationEditorWindow().setVisible(false);
+      annotationEditor.setPinnedMode(false);
 
       annotateAllMatchesSmallButton.setAction(annotateAllMatchesAction);
       annotateAllMatchesAction.setEnabled(false);
