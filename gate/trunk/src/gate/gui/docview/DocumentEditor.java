@@ -591,7 +591,7 @@ public class DocumentEditor extends AbstractVisualResource
             } else {
               found = true;
             }
-            nextMatchStartsFrom = end + 1;
+            nextMatchStartsFrom = end;
           }
 
           if (found) {
@@ -619,7 +619,7 @@ public class DocumentEditor extends AbstractVisualResource
           boolean found = false;
           int start = -1;
           int end = -1;
-          nextMatchStartsFrom = textPane.getCaretPosition() + 1;
+          nextMatchStartsFrom = textPane.getCaretPosition();
 
           Matcher matcher = pattern.matcher(content);
           while (matcher.find(nextMatchStartsFrom) && !found) {
@@ -638,7 +638,7 @@ public class DocumentEditor extends AbstractVisualResource
             } else {
               found = true;
             }
-            nextMatchStartsFrom = end + 1;
+            nextMatchStartsFrom = end;
           }
 
           if (found) {

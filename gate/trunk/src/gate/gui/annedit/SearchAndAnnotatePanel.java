@@ -375,6 +375,18 @@ public class SearchAndAnnotatePanel extends JPanel {
       }
     });
 
+    searchWholeWordsChk.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        enableActions(false);
+      }
+    });
+
+      searchHighlightsChk.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        enableActions(false);
+      }
+    });
+
   }
 
   private void enableActions(boolean state){
@@ -452,7 +464,7 @@ public class SearchAndAnnotatePanel extends JPanel {
         } else {
           found = true;
         }
-        nextMatchStartsFrom = end + 1;
+        nextMatchStartsFrom = end;
       }
 
       if (found) {
@@ -524,7 +536,7 @@ public class SearchAndAnnotatePanel extends JPanel {
         int start = -1;
         int end = -1;
         nextMatchStartsFrom =
-          getOwner().getTextComponent().getCaretPosition() + 1;
+          getOwner().getTextComponent().getCaretPosition();
 
         while (matcher.find(nextMatchStartsFrom) && !found) {
           start = matcher.start();
@@ -542,7 +554,7 @@ public class SearchAndAnnotatePanel extends JPanel {
           } else {
             found = true;
           }
-          nextMatchStartsFrom = end + 1;
+          nextMatchStartsFrom = end;
         }
 
         if (found) {
@@ -585,7 +597,7 @@ public class SearchAndAnnotatePanel extends JPanel {
               features);
           Annotation newAnn =
             getAnnotationEditor().getAnnotationSetCurrentlyEdited().get(id);
-          getOwner().getTextComponent().select(start, start);
+          getOwner().getTextComponent().select(end, end);
           getAnnotationEditor().editAnnotation(newAnn,
             getAnnotationEditor().getAnnotationSetCurrentlyEdited());
           annotateAllMatchesAction.setEnabled(true);
@@ -617,7 +629,7 @@ public class SearchAndAnnotatePanel extends JPanel {
       int start = -1;
       int end = -1;
       nextMatchStartsFrom =
-        getOwner().getTextComponent().getCaretPosition() + 1;
+        getOwner().getTextComponent().getCaretPosition();
  
       do {
       found = false;
@@ -636,7 +648,7 @@ public class SearchAndAnnotatePanel extends JPanel {
         } else {
           found = true;
         }
-        nextMatchStartsFrom = end + 1;
+        nextMatchStartsFrom = end;
       }
       if (found) { annotateCurrentMatch(start, end); }
       } while (found && !matcher.hitEnd());
