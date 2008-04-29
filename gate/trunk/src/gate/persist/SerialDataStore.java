@@ -337,7 +337,11 @@ extends AbstractFeatureBearer implements DataStore {
       (! resourceTypeDirectory.exists()) ||
       (! resourceTypeDirectory.isDirectory())
     ) {
-      if(! resourceTypeDirectory.mkdir())
+      // try to create the directory, throw an exception if it does not
+      // exist after this attempt.  It is possible for mkdir to fail and exists
+      // still to return true if another thread managed to sneak in and
+      // create the directory in the meantime
+      if(! resourceTypeDirectory.mkdir() && ! resourceTypeDirectory.exists())
         throw new PersistenceException("Can't write " + resourceTypeDirectory);
     }
 
