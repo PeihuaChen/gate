@@ -187,8 +187,12 @@ public class DumpingPR extends AbstractLanguageAnalyser
 
   protected void write2File(AnnotationSet exportSet) {
       File outputFile;
-
-      String fileName = getFileName(document.getSourceUrl());
+      String fileName = null;
+      if(document.getSourceUrl() == null)
+        fileName = document.getName() + Gate.genSym();
+      else 
+        fileName = getFileName(document.getSourceUrl());
+      
       fileName = getNewFileName(outputDirectoryUrl, fileName);
       StringBuffer tempBuff = new StringBuffer(fileName);
       //now append the special suffix if we want to use it
@@ -232,8 +236,12 @@ public class DumpingPR extends AbstractLanguageAnalyser
 
   protected void write2File() {
       File outputFile;
+      String fileName = null;
+      if(document.getSourceUrl() == null)
+        fileName = document.getName() + Gate.genSym();
+      else 
+        fileName = getFileName(document.getSourceUrl());
 
-      String fileName = getFileName(document.getSourceUrl());
       fileName = getNewFileName(outputDirectoryUrl, fileName);
       StringBuffer tempBuff = new StringBuffer(fileName);
       //now append the special suffix if we want to use it
