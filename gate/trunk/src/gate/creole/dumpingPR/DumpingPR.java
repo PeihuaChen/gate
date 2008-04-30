@@ -189,7 +189,7 @@ public class DumpingPR extends AbstractLanguageAnalyser
       File outputFile;
       String fileName = null;
       if(document.getSourceUrl() == null)
-        fileName = document.getName() + Gate.genSym();
+        fileName = document.getName() + "_" + Gate.genSym();
       else 
         fileName = getFileName(document.getSourceUrl());
       
@@ -238,7 +238,7 @@ public class DumpingPR extends AbstractLanguageAnalyser
       File outputFile;
       String fileName = null;
       if(document.getSourceUrl() == null)
-        fileName = document.getName() + Gate.genSym();
+        fileName = document.getName() + "_" + Gate.genSym();
       else 
         fileName = getFileName(document.getSourceUrl());
 
