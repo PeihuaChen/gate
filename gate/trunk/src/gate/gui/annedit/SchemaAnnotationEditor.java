@@ -444,7 +444,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
         }
       }
       public void ancestorMoved(AncestorEvent event) {
-        if(dialog.isVisible()){
+        if(dialog.isVisible() && annotation != null){
           placeDialog(annotation.getStartNode().getOffset().intValue(),
                   annotation.getEndNode().getOffset().intValue());
         }
