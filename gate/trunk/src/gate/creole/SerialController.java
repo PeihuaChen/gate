@@ -37,11 +37,13 @@ public class SerialController extends AbstractController implements
   /** Profiler to track PR execute time */
   protected Profiler prof;
   protected HashMap timeMap;
-
+  protected HashMap<String, Long> prTimeMap;
+  
   public SerialController() {
     prList = Collections.synchronizedList(new ArrayList());
     sListener = new InternalStatusListener();
-
+    prTimeMap = new HashMap<String, Long>();
+    
     if(DEBUG) {
       prof = new Profiler();
       prof.enableGCCalling(false);
@@ -168,6 +170,21 @@ public class SerialController extends AbstractController implements
   } // executeImpl()
 
   /**
+   * Resets the Time taken by various PRs
+   */
+  public void resetPrTimeMap() {
+    prTimeMap.clear();
+  }
+  
+  /**
+   * Returns the HashMap that lists the total time taken by each PR
+   * @return
+   */
+  public HashMap<String, Long> getPrTimeMap() {
+    return this.prTimeMap;
+  }
+  
+  /**
    * Executes a {@link ProcessingResource}.
    */
   protected void runComponent(int componentIndex) throws ExecutionException {
@@ -219,6 +236,16 @@ public class SerialController extends AbstractController implements
       + Benchmark.PR_EXECUTION, this, benchmarkFeatures);
     benchmarkFeatures.remove(Benchmark.PR_NAME_FEATURE);
 
+    // calculate the time taken by the PR
+    long timeTakenByThePR = System.currentTimeMillis() - startTime;
+    Long time = prTimeMap.get(currentPR.getName());
+    if(time == null) {
+      time = new Long(0);
+    }
+    time = new Long(time.longValue() + timeTakenByThePR);
+    prTimeMap.put(currentPR.getName(), time);
+    
+    
     // reset the parent benchmark id of the PR
     if(currentPR instanceof Benchmarkable) {
       ((Benchmarkable)currentPR).setParentBenchmarkId(oldParentIDOfThePR);

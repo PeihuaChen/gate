@@ -444,7 +444,8 @@ public abstract class AbstractController extends AbstractResource implements
    */
   public void createBenchmarkId(String parentBenchmarkID) {
     this.parentBenchmarkID = parentBenchmarkID;
-    Benchmark.createBenchmarkId(getName(), parentBenchmarkID);
+    this.benchmarkID =
+      Benchmark.createBenchmarkId(getName(), parentBenchmarkID);
   }
 
   /**

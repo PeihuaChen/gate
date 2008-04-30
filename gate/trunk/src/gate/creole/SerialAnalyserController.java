@@ -50,6 +50,10 @@ public class SerialAnalyserController extends SerialController implements
     long startTime = Benchmark.startPoint();
     benchmarkFeatures.put(Benchmark.CORPUS_NAME_FEATURE, corpus.getName());
 
+    // reset the prTimeMap that keeps track of the time
+    // taken by each PR to process the entire corpus
+    super.resetPrTimeMap();
+    
     // iterate through the documents in the corpus
     for(int i = 0; i < corpus.size(); i++) {
       if(isInterrupted()) {

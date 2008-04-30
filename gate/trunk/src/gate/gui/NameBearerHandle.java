@@ -41,10 +41,10 @@ import gate.swing.XJPopupMenu;
 import gate.util.*;
 
 /**
- * Class used to store the GUI information about an open entity
- * (resource, controller, datastore). Such information will include icon
- * to be used for tree components, popup menu for right click events,
- * large and small views, etc.
+ * Class used to store the GUI information about an open entity (resource,
+ * controller, datastore). Such information will include icon to be used for
+ * tree components, popup menu for right click events, large and small views,
+ * etc.
  */
 public class NameBearerHandle implements Handle, StatusListener,
                              ProgressListener, CreoleListener {
@@ -57,8 +57,8 @@ public class NameBearerHandle implements Handle, StatusListener,
     sListenerProxy = new ProxyStatusListener();
     String iconName = null;
     if(target instanceof Resource) {
-      rData = (ResourceData)Gate.getCreoleRegister().get(
-              target.getClass().getName());
+      rData =
+        (ResourceData)Gate.getCreoleRegister().get(target.getClass().getName());
       if(rData != null) {
         iconName = rData.getIcon();
         if(iconName == null) {
@@ -70,8 +70,9 @@ public class NameBearerHandle implements Handle, StatusListener,
         }
         if(target instanceof Controller && target.getName().startsWith("ANNIE"))
           iconName = "annie-application";
-        tooltipText = "<HTML> <b>" + rData.getComment() + "</b><br>(<i>"
-                + rData.getClassName() + "</i>)</HTML>";
+        tooltipText =
+          "<HTML> <b>" + rData.getComment() + "</b><br>(<i>"
+            + rData.getClassName() + "</i>)</HTML>";
       }
       else {
         iconName = "lr";
@@ -111,8 +112,8 @@ public class NameBearerHandle implements Handle, StatusListener,
   }
 
   /**
-   * Returns <tt>true</tt> if the views have already been built for
-   * this handle.
+   * Returns <tt>true</tt> if the views have already been built for this
+   * handle.
    * 
    * @return a <tt>boolean</tt> value.
    */
@@ -121,8 +122,8 @@ public class NameBearerHandle implements Handle, StatusListener,
   }
 
   /**
-   * Returns a GUI component to be used as a small viewer/editor, e.g.
-   * below the main tree in the Gate GUI for the selected resource
+   * Returns a GUI component to be used as a small viewer/editor, e.g. below the
+   * main tree in the Gate GUI for the selected resource
    */
   public JComponent getSmallView() {
     if(!viewsBuilt) buildViews();
@@ -130,8 +131,8 @@ public class NameBearerHandle implements Handle, StatusListener,
   }
 
   /**
-   * Returns the large view for this resource. This view will go into
-   * the main display area.
+   * Returns the large view for this resource. This view will go into the main
+   * display area.
    */
   public JComponent getLargeView() {
     if(!viewsBuilt) buildViews();
@@ -189,18 +190,19 @@ public class NameBearerHandle implements Handle, StatusListener,
   private void fillHMMActions(List popupItems) {
     Action action;
 
-    com.ontotext.gate.hmm.agent.AlternativeHMMAgent hmmPR = (com.ontotext.gate.hmm.agent.AlternativeHMMAgent)target;
+    com.ontotext.gate.hmm.agent.AlternativeHMMAgent hmmPR =
+      (com.ontotext.gate.hmm.agent.AlternativeHMMAgent)target;
 
     popupItems.add(null);
     action = new com.ontotext.gate.hmm.agent.SaveAction(hmmPR);
     action.putValue(Action.SHORT_DESCRIPTION,
-            "Save trained HMM model into PR URL file");
+      "Save trained HMM model into PR URL file");
     // Add Save trained HMM model action
     popupItems.add(new XJMenuItem(action, sListenerProxy));
 
     action = new com.ontotext.gate.hmm.agent.SaveAsAction(hmmPR);
     action.putValue(Action.SHORT_DESCRIPTION,
-            "Save trained HMM model into new file");
+      "Save trained HMM model into new file");
     // Add Save As... trained HMM model action
     popupItems.add(new XJMenuItem(action, sListenerProxy));
   } // fillHMMActions(gate.gui.ProtegeWrapper protege)
@@ -290,7 +292,7 @@ public class NameBearerHandle implements Handle, StatusListener,
 
     XJMenuItem closeItem = new XJMenuItem(new CloseAction(), sListenerProxy);
     closeItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4,
-            ActionEvent.CTRL_MASK));
+      ActionEvent.CTRL_MASK));
     staticPopupItems.add(closeItem);
 
     if(target instanceof ProcessingResource) {
@@ -306,10 +308,10 @@ public class NameBearerHandle implements Handle, StatusListener,
       staticPopupItems.add(new XJMenuItem(new SaveAction(), sListenerProxy));
       staticPopupItems.add(new XJMenuItem(new SaveToAction(), sListenerProxy));
       if(target instanceof gate.TextualDocument) {
-        XJMenuItem saveAsXmlItem = new XJMenuItem(new SaveAsXmlAction(),
-                sListenerProxy);
+        XJMenuItem saveAsXmlItem =
+          new XJMenuItem(new SaveAsXmlAction(), sListenerProxy);
         saveAsXmlItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,
-                ActionEvent.CTRL_MASK));
+          ActionEvent.CTRL_MASK));
 
         staticPopupItems.add(saveAsXmlItem);
       }
@@ -318,27 +320,28 @@ public class NameBearerHandle implements Handle, StatusListener,
         corpusFiller = new CorpusFillerComponent();
         trecWebFileInputDialog = new TrecWebFileInputDialog();
         staticPopupItems.add(new XJMenuItem(new PopulateCorpusAction(),
-                sListenerProxy));
-        staticPopupItems.add(new XJMenuItem(new PopulateCorpusWithTrecWebDataAction(), sListenerProxy));
+          sListenerProxy));
+        staticPopupItems.add(new XJMenuItem(
+          new PopulateCorpusWithTrecWebDataAction(), sListenerProxy));
         staticPopupItems.add(null);
         staticPopupItems.add(new XJMenuItem(new SaveCorpusAsXmlAction(false),
-                sListenerProxy));
+          sListenerProxy));
         // staticPopupItems.add(new XJMenuItem(new
         // SaveCorpusAsXmlAction(true), sListenerProxy));
         if(target instanceof IndexedCorpus) {
           IndexedCorpus ic = (IndexedCorpus)target;
           if(ic.getDataStore() != null
-                  && ic.getDataStore() instanceof LuceneDataStoreImpl) {
+            && ic.getDataStore() instanceof LuceneDataStoreImpl) {
             // do nothing
           }
           else {
             staticPopupItems.add(null);
             staticPopupItems.add(new XJMenuItem(new CreateIndexAction(),
-                    sListenerProxy));
+              sListenerProxy));
             staticPopupItems.add(new XJMenuItem(new OptimizeIndexAction(),
-                    sListenerProxy));
+              sListenerProxy));
             staticPopupItems.add(new XJMenuItem(new DeleteIndexAction(),
-                    sListenerProxy));
+              sListenerProxy));
           }
         }
       }
@@ -346,7 +349,7 @@ public class NameBearerHandle implements Handle, StatusListener,
       if(target instanceof Document) {
         staticPopupItems.add(null);
         staticPopupItems.add(new XJMenuItem(new CreateCorpusForDocAction(),
-                sListenerProxy));
+          sListenerProxy));
       }
 
     }
@@ -354,7 +357,7 @@ public class NameBearerHandle implements Handle, StatusListener,
       // Applications
       staticPopupItems.add(null);
       staticPopupItems.add(new XJMenuItem(new DumpToFileAction(),
-              sListenerProxy));
+        sListenerProxy));
     }
   }
 
@@ -363,21 +366,22 @@ public class NameBearerHandle implements Handle, StatusListener,
     fireStatusChanged("Building views...");
 
     // build the large views
-    List largeViewNames = Gate.getCreoleRegister().getLargeVRsForResource(
-            target.getClass().getName());
+    List largeViewNames =
+      Gate.getCreoleRegister().getLargeVRsForResource(
+        target.getClass().getName());
     if(largeViewNames != null && !largeViewNames.isEmpty()) {
       largeView = new JTabbedPane(JTabbedPane.BOTTOM);
       Iterator classNameIter = largeViewNames.iterator();
       while(classNameIter.hasNext()) {
         try {
           String className = (String)classNameIter.next();
-          ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(
-                  className);
+          ResourceData rData =
+            (ResourceData)Gate.getCreoleRegister().get(className);
           FeatureMap params = Factory.newFeatureMap();
           FeatureMap features = Factory.newFeatureMap();
           Gate.setHiddenAttribute(features, true);
-          VisualResource view = (VisualResource)Factory.createResource(
-                  className, params, features);
+          VisualResource view =
+            (VisualResource)Factory.createResource(className, params, features);
           view.setTarget(target);
           view.setHandle(this);
           ((JTabbedPane)largeView).add((Component)view, rData.getName());
@@ -398,21 +402,22 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
 
     // build the small views
-    List smallViewNames = Gate.getCreoleRegister().getSmallVRsForResource(
-            target.getClass().getName());
+    List smallViewNames =
+      Gate.getCreoleRegister().getSmallVRsForResource(
+        target.getClass().getName());
     if(smallViewNames != null && !smallViewNames.isEmpty()) {
       smallView = new JTabbedPane(JTabbedPane.BOTTOM);
       Iterator classNameIter = smallViewNames.iterator();
       while(classNameIter.hasNext()) {
         try {
           String className = (String)classNameIter.next();
-          ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(
-                  className);
+          ResourceData rData =
+            (ResourceData)Gate.getCreoleRegister().get(className);
           FeatureMap params = Factory.newFeatureMap();
           FeatureMap features = Factory.newFeatureMap();
           Gate.setHiddenAttribute(features, true);
-          VisualResource view = (VisualResource)Factory.createResource(
-                  className, params, features);
+          VisualResource view =
+            (VisualResource)Factory.createResource(className, params, features);
           view.setTarget(target);
           view.setHandle(this);
           ((JTabbedPane)smallView).add((Component)view, rData.getName());
@@ -456,9 +461,9 @@ public class NameBearerHandle implements Handle, StatusListener,
   // l)
 
   public synchronized void addProgressListener(ProgressListener l) {
-    Vector v = progressListeners == null
-            ? new Vector(2)
-            : (Vector)progressListeners.clone();
+    Vector v =
+      progressListeners == null ? new Vector(2) : (Vector)progressListeners
+        .clone();
     if(!v.contains(l)) {
       v.addElement(l);
       progressListeners = v;
@@ -472,14 +477,14 @@ public class NameBearerHandle implements Handle, StatusListener,
   NameBearer target;
 
   /**
-   * Stores all the action providers for this resource. They will be
-   * questioned when the getPopup() method is called.
+   * Stores all the action providers for this resource. They will be questioned
+   * when the getPopup() method is called.
    */
   protected List actionPublishers;
 
   /**
-   * A list of menu items that constitute the static part of the popup.
-   * Null values are used for separators.
+   * A list of menu items that constitute the static part of the popup. Null
+   * values are used for separators.
    */
   protected List staticPopupItems;
 
@@ -503,7 +508,7 @@ public class NameBearerHandle implements Handle, StatusListener,
    */
   CorpusFillerComponent corpusFiller;
   TrecWebFileInputDialog trecWebFileInputDialog;
-  
+
   StatusListener sListenerProxy;
 
   // File currentDir = null;
@@ -527,9 +532,9 @@ public class NameBearerHandle implements Handle, StatusListener,
         }
         catch(PersistenceException pe) {
           JOptionPane.showMessageDialog(largeView != null
-                  ? largeView
-                  : smallView, "Error!\n" + pe.toString(), "GATE",
-                  JOptionPane.ERROR_MESSAGE);
+            ? largeView
+            : smallView, "Error!\n" + pe.toString(), "GATE",
+            JOptionPane.ERROR_MESSAGE);
         }
       }
 
@@ -579,7 +584,7 @@ public class NameBearerHandle implements Handle, StatusListener,
           if(filtersIter.hasNext()) {
             filter = (FileFilter)filtersIter.next();
             while(filtersIter.hasNext()
-                    && filter.getDescription().indexOf("XML") == -1) {
+              && filter.getDescription().indexOf("XML") == -1) {
               filter = (FileFilter)filtersIter.next();
             }
           }
@@ -599,17 +604,17 @@ public class NameBearerHandle implements Handle, StatusListener,
           fileChooser.setDialogTitle("Select document to save ...");
           fileChooser.setSelectedFiles(null);
 
-          int res = (getLargeView() != null) ? fileChooser.showDialog(
-                  getLargeView(), "Save") : (getSmallView() != null)
-                  ? fileChooser.showDialog(getSmallView(), "Save")
-                  : fileChooser.showDialog(null, "Save");
+          int res =
+            (getLargeView() != null) ? fileChooser.showDialog(getLargeView(),
+              "Save") : (getSmallView() != null) ? fileChooser.showDialog(
+              getSmallView(), "Save") : fileChooser.showDialog(null, "Save");
           if(res == JFileChooser.APPROVE_OPTION) {
             selectedFile = fileChooser.getSelectedFile();
             File currentDir = fileChooser.getCurrentDirectory();
             if(selectedFile == null) return;
             long start = System.currentTimeMillis();
             NameBearerHandle.this.statusChanged("Saving as XML to "
-                    + selectedFile.toString() + "...");
+              + selectedFile.toString() + "...");
             try {
               MainFrame.lockGUI("Saving...");
               // Prepare to write into the xmlFile using the original
@@ -632,7 +637,7 @@ public class NameBearerHandle implements Handle, StatusListener,
 
               // write directly to the file using StAX
               DocumentStaxUtils.writeDocument((gate.Document)target,
-                      selectedFile);
+                selectedFile);
             }
             catch(Exception ex) {
               ex.printStackTrace(Out.getPrintWriter());
@@ -642,8 +647,8 @@ public class NameBearerHandle implements Handle, StatusListener,
             }
             long time = System.currentTimeMillis() - start;
             NameBearerHandle.this.statusChanged("Finished saving as xml into "
-                    + " the file: " + selectedFile.toString() + " in "
-                    + ((double)time) / 1000 + " s");
+              + " the file: " + selectedFile.toString() + " in "
+              + ((double)time) / 1000 + " s");
           }// End if
         }// End run()
       };// End Runnable
@@ -678,22 +683,22 @@ public class NameBearerHandle implements Handle, StatusListener,
             // we need a directory
             JFileChooser filer = MainFrame.getFileChooser();
             filer
-                    .setDialogTitle("Select the directory that will contain the corpus");
+              .setDialogTitle("Select the directory that will contain the corpus");
             filer.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             filer.setFileFilter(filer.getAcceptAllFileFilter());
 
             if(filer.showDialog(getLargeView() != null
-                    ? getLargeView()
-                    : getSmallView(), "Select") == JFileChooser.APPROVE_OPTION) {
+              ? getLargeView()
+              : getSmallView(), "Select") == JFileChooser.APPROVE_OPTION) {
 
               File dir = filer.getSelectedFile();
               // create the top directory if needed
               if(!dir.exists()) {
                 if(!dir.mkdirs()) {
                   JOptionPane.showMessageDialog(largeView != null
-                          ? largeView
-                          : smallView, "Could not create top directory!",
-                          "GATE", JOptionPane.ERROR_MESSAGE);
+                    ? largeView
+                    : smallView, "Could not create top directory!", "GATE",
+                    JOptionPane.ERROR_MESSAGE);
                   return;
                 }
               }
@@ -731,18 +736,18 @@ public class NameBearerHandle implements Handle, StatusListener,
                   docFile = new File(dir, fileName);
                   if(docFile.exists() && !overwriteAll) {
                     // ask the user if we can ovewrite the file
-                    Object[] options = new Object[] {"Yes", "All", "No",
-                        "Cancel"};
+                    Object[] options =
+                      new Object[]{"Yes", "All", "No", "Cancel"};
                     MainFrame.unlockGUI();
-                    int answer = JOptionPane.showOptionDialog(largeView != null
-                            ? largeView
-                            : smallView, "File " + docFile.getName()
-                            + " already exists!\n" + "Overwrite?", "GATE",
-                            JOptionPane.DEFAULT_OPTION,
-                            JOptionPane.WARNING_MESSAGE, null, options,
-                            options[2]);
+                    int answer =
+                      JOptionPane.showOptionDialog(largeView != null
+                        ? largeView
+                        : smallView, "File " + docFile.getName()
+                        + " already exists!\n" + "Overwrite?", "GATE",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.WARNING_MESSAGE, null, options, options[2]);
                     MainFrame.lockGUI("Saving...");
-                    switch(answer) {
+                    switch(answer){
                       case 0: {
                         nameOK = true;
                         break;
@@ -756,11 +761,12 @@ public class NameBearerHandle implements Handle, StatusListener,
                         // user said NO, allow them to provide an
                         // alternative name;
                         MainFrame.unlockGUI();
-                        fileName = (String)JOptionPane.showInputDialog(
-                                largeView != null ? largeView : smallView,
-                                "Please provide an alternative file name",
-                                "GATE", JOptionPane.QUESTION_MESSAGE, null,
-                                null, fileName);
+                        fileName =
+                          (String)JOptionPane.showInputDialog(largeView != null
+                            ? largeView
+                            : smallView,
+                            "Please provide an alternative file name", "GATE",
+                            JOptionPane.QUESTION_MESSAGE, null, null, fileName);
                         if(fileName == null) {
                           fireProcessFinished();
                           return;
@@ -791,21 +797,23 @@ public class NameBearerHandle implements Handle, StatusListener,
                     // annotations,
                     // i.e., leave the annotationsToDump null
                     if(largeView instanceof JTabbedPane) {
-                      Component shownComponent = ((JTabbedPane)largeView)
-                              .getSelectedComponent();
+                      Component shownComponent =
+                        ((JTabbedPane)largeView).getSelectedComponent();
                       if(shownComponent instanceof DocumentEditor) {
                         // so we only get annotations for dumping
                         // if they are shown in the table of the
                         // document editor,
                         // which is currently in front of the user
-                        annotationsToDump = ((DocumentEditor)shownComponent)
-                                .getDisplayedAnnotations();
+                        annotationsToDump =
+                          ((DocumentEditor)shownComponent)
+                            .getDisplayedAnnotations();
                       }// if we have a document editor
                     }// if tabbed pane
 
                     // determine if the features need to be saved first
-                    Boolean featuresSaved = Gate.getUserConfig().getBoolean(
-                            GateConstants.SAVE_FEATURES_WHEN_PRESERVING_FORMAT);
+                    Boolean featuresSaved =
+                      Gate.getUserConfig().getBoolean(
+                        GateConstants.SAVE_FEATURES_WHEN_PRESERVING_FORMAT);
                     boolean saveFeatures = true;
                     if(featuresSaved != null)
                       saveFeatures = featuresSaved.booleanValue();
@@ -815,11 +823,12 @@ public class NameBearerHandle implements Handle, StatusListener,
 
                     // Prepare to write into the xmlFile using the
                     // original encoding
-                    String encoding = ((gate.TextualDocument)currentDoc)
-                            .getEncoding();
+                    String encoding =
+                      ((gate.TextualDocument)currentDoc).getEncoding();
 
-                    OutputStreamWriter writer = new OutputStreamWriter(
-                            new FileOutputStream(docFile), encoding);
+                    OutputStreamWriter writer =
+                      new OutputStreamWriter(new FileOutputStream(docFile),
+                        encoding);
 
                     writer.write(content);
                     writer.flush();
@@ -833,9 +842,9 @@ public class NameBearerHandle implements Handle, StatusListener,
                 catch(Exception ioe) {
                   MainFrame.unlockGUI();
                   JOptionPane.showMessageDialog(largeView != null
-                          ? largeView
-                          : smallView, "Could not create write file:"
-                          + ioe.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
+                    ? largeView
+                    : smallView, "Could not create write file:"
+                    + ioe.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
                   ioe.printStackTrace(Err.getPrintWriter());
                   return;
                 }
@@ -858,8 +867,9 @@ public class NameBearerHandle implements Handle, StatusListener,
           }
         }// public void run(){
       };// Runnable runnable = new Runnable()
-      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-              runnable, "Corpus XML dumper");
+      Thread thread =
+        new Thread(Thread.currentThread().getThreadGroup(), runnable,
+          "Corpus XML dumper");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
 
@@ -876,13 +886,13 @@ public class NameBearerHandle implements Handle, StatusListener,
     }// SaveAsXmlAction()
 
     public void actionPerformed(ActionEvent e) {
-      int answer = JOptionPane.showOptionDialog(largeView != null
-              ? largeView
-              : smallView, "This is an advanced option!\n"
-              + "You should not use this unless your name is Hamish.\n"
-              + "Are you sure you want to do this?", "GATE",
-              JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null,
-              null, null);
+      int answer =
+        JOptionPane.showOptionDialog(largeView != null ? largeView : smallView,
+          "This is an advanced option!\n"
+            + "You should not use this unless your name is Hamish.\n"
+            + "Are you sure you want to do this?", "GATE",
+          JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, null,
+          null);
       if(answer == JOptionPane.OK_OPTION) {
         try {
           String className = target.getClass().getName();
@@ -890,11 +900,11 @@ public class NameBearerHandle implements Handle, StatusListener,
           fireStatusChanged("Class " + className + " reloaded!");
         }
         catch(Exception ex) {
-          JOptionPane.showMessageDialog(largeView != null
-                  ? largeView
-                  : smallView, "Look what you've done: \n" + ex.toString()
-                  + "\nI told you not to do it...", "GATE",
-                  JOptionPane.ERROR_MESSAGE);
+          JOptionPane
+            .showMessageDialog(largeView != null ? largeView : smallView,
+              "Look what you've done: \n" + ex.toString()
+                + "\nI told you not to do it...", "GATE",
+              JOptionPane.ERROR_MESSAGE);
           ex.printStackTrace(Err.getPrintWriter());
         }
       }
@@ -914,31 +924,32 @@ public class NameBearerHandle implements Handle, StatusListener,
           if(ds != null) {
             try {
               MainFrame.lockGUI("Saving "
-                      + ((LanguageResource)target).getName());
-              StatusListener sListener = (StatusListener)gate.gui.MainFrame
-                      .getListeners().get("gate.event.StatusListener");
+                + ((LanguageResource)target).getName());
+              StatusListener sListener =
+                (StatusListener)gate.gui.MainFrame.getListeners().get(
+                  "gate.event.StatusListener");
               if(sListener != null)
                 sListener.statusChanged("Saving: "
-                        + ((LanguageResource)target).getName());
+                  + ((LanguageResource)target).getName());
               double timeBefore = System.currentTimeMillis();
               ((LanguageResource)target).getDataStore().sync(
-                      (LanguageResource)target);
+                (LanguageResource)target);
               double timeAfter = System.currentTimeMillis();
               if(sListener != null)
                 sListener.statusChanged(((LanguageResource)target).getName()
-                        + " saved in "
-                        + NumberFormat.getInstance().format(
-                                (timeAfter - timeBefore) / 1000) + " seconds");
+                  + " saved in "
+                  + NumberFormat.getInstance().format(
+                    (timeAfter - timeBefore) / 1000) + " seconds");
             }
             catch(PersistenceException pe) {
               MainFrame.unlockGUI();
               JOptionPane.showMessageDialog(getLargeView(), "Save failed!\n "
-                      + pe.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
+                + pe.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
             }
             catch(SecurityException se) {
               MainFrame.unlockGUI();
               JOptionPane.showMessageDialog(getLargeView(), "Save failed!\n "
-                      + se.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
+                + se.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
             }
             finally {
               MainFrame.unlockGUI();
@@ -946,9 +957,9 @@ public class NameBearerHandle implements Handle, StatusListener,
           }
           else {
             JOptionPane.showMessageDialog(getLargeView(),
-                    "This resource has not been loaded from a datastore.\n"
-                            + "Please use the \"Save to\" option!\n", "GATE",
-                    JOptionPane.ERROR_MESSAGE);
+              "This resource has not been loaded from a datastore.\n"
+                + "Please use the \"Save to\" option!\n", "GATE",
+              JOptionPane.ERROR_MESSAGE);
 
           }
         }
@@ -961,7 +972,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     public DumpToFileAction() {
       super("Save application state");
       putValue(SHORT_DESCRIPTION,
-              "Saves the data needed to recreate this application");
+        "Saves the data needed to recreate this application");
     }
 
     public void actionPerformed(ActionEvent ae) {
@@ -975,11 +986,11 @@ public class NameBearerHandle implements Handle, StatusListener,
           public void run() {
             try {
               gate.util.persistence.PersistenceManager.saveObjectToFile(
-                      (Resource)target, file);
+                (Resource)target, file);
             }
             catch(Exception e) {
               JOptionPane.showMessageDialog(getLargeView(), "Error!\n"
-                      + e.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
+                + e.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
               e.printStackTrace(Err.getPrintWriter());
             }
           }
@@ -1025,47 +1036,46 @@ public class NameBearerHandle implements Handle, StatusListener,
             List dsNames = new ArrayList(dsByName.keySet());
             if(dsNames.isEmpty()) {
               JOptionPane.showMessageDialog(getLargeView(),
-                      "There are no open datastores!\n "
-                              + "Please open a datastore first!", "GATE",
-                      JOptionPane.ERROR_MESSAGE);
+                "There are no open datastores!\n "
+                  + "Please open a datastore first!", "GATE",
+                JOptionPane.ERROR_MESSAGE);
 
             }
             else {
-              Object answer = JOptionPane.showInputDialog(getLargeView(),
-                      "Select the datastore", "GATE",
-                      JOptionPane.QUESTION_MESSAGE, null, dsNames.toArray(),
-                      dsNames.get(0));
+              Object answer =
+                JOptionPane.showInputDialog(getLargeView(),
+                  "Select the datastore", "GATE", JOptionPane.QUESTION_MESSAGE,
+                  null, dsNames.toArray(), dsNames.get(0));
               if(answer == null) return;
               DataStore ds = (DataStore)dsByName.get(answer);
               if(ds == null) {
                 Err.prln("The datastore does not exists. Saving procedure"
-                        + " has FAILED! This should never happen again!");
+                  + " has FAILED! This should never happen again!");
                 return;
               }// End if
               DataStore ownDS = ((LanguageResource)target).getDataStore();
               if(ds == ownDS) {
                 MainFrame.lockGUI("Saving "
-                        + ((LanguageResource)target).getName());
+                  + ((LanguageResource)target).getName());
 
-                StatusListener sListener = (StatusListener)gate.gui.MainFrame
-                        .getListeners().get("gate.event.StatusListener");
+                StatusListener sListener =
+                  (StatusListener)gate.gui.MainFrame.getListeners().get(
+                    "gate.event.StatusListener");
                 if(sListener != null)
                   sListener.statusChanged("Saving: "
-                          + ((LanguageResource)target).getName());
+                    + ((LanguageResource)target).getName());
                 double timeBefore = System.currentTimeMillis();
                 ds.sync((LanguageResource)target);
                 double timeAfter = System.currentTimeMillis();
                 if(sListener != null)
-                  sListener
-                          .statusChanged(((LanguageResource)target).getName()
-                                  + " saved in "
-                                  + NumberFormat.getInstance().format(
-                                          (timeAfter - timeBefore) / 1000)
-                                  + " seconds");
+                  sListener.statusChanged(((LanguageResource)target).getName()
+                    + " saved in "
+                    + NumberFormat.getInstance().format(
+                      (timeAfter - timeBefore) / 1000) + " seconds");
               }
               else {
-                FeatureMap securityData = (FeatureMap)DataStoreRegister
-                        .getSecurityData(ds);
+                FeatureMap securityData =
+                  (FeatureMap)DataStoreRegister.getSecurityData(ds);
                 SecurityInfo si = null;
                 // check whether the datastore supports security data
                 // serial ones do not for example
@@ -1074,22 +1084,25 @@ public class NameBearerHandle implements Handle, StatusListener,
                   if(!AccessRightsDialog.showDialog(window)) return;
                   int accessType = AccessRightsDialog.getSelectedMode();
                   if(accessType < 0) return;
-                  si = new SecurityInfo(accessType, (User)securityData
-                          .get("user"), (Group)securityData.get("group"));
+                  si =
+                    new SecurityInfo(accessType,
+                      (User)securityData.get("user"), (Group)securityData
+                        .get("group"));
                 }// if security info
-                StatusListener sListener = (StatusListener)gate.gui.MainFrame
-                        .getListeners().get("gate.event.StatusListener");
+                StatusListener sListener =
+                  (StatusListener)gate.gui.MainFrame.getListeners().get(
+                    "gate.event.StatusListener");
                 MainFrame.lockGUI("Saving "
-                        + ((LanguageResource)target).getName());
+                  + ((LanguageResource)target).getName());
 
                 if(sListener != null)
                   sListener.statusChanged("Saving: "
-                          + ((LanguageResource)target).getName());
+                    + ((LanguageResource)target).getName());
                 double timeBefore = System.currentTimeMillis();
                 LanguageResource lr = ds.adopt((LanguageResource)target, si);
                 ds.sync(lr);
                 if(ds instanceof LuceneDataStoreImpl
-                        && lr instanceof IndexedCorpus) {
+                  && lr instanceof IndexedCorpus) {
                   Object persistanceID = lr.getLRPersistenceId();
                   String lrType = lr.getClass().getName();
                   String lrName = lr.getName();
@@ -1099,23 +1112,22 @@ public class NameBearerHandle implements Handle, StatusListener,
                   params.put(DataStore.LR_ID_FEATURE_NAME, persistanceID);
                   FeatureMap features = Factory.newFeatureMap();
                   try {
-                    lr = (LanguageResource)Factory.createResource(lrType,
-                            params, features, lrName);
+                    lr =
+                      (LanguageResource)Factory.createResource(lrType, params,
+                        features, lrName);
                   }
                   catch(ResourceInstantiationException rie) {
                     throw new GateRuntimeException("Could not load the corpus",
-                            rie);
+                      rie);
                   }
                 }
 
                 double timeAfter = System.currentTimeMillis();
                 if(sListener != null)
-                  sListener
-                          .statusChanged(((LanguageResource)target).getName()
-                                  + " saved in "
-                                  + NumberFormat.getInstance().format(
-                                          (timeAfter - timeBefore) / 1000)
-                                  + " seconds");
+                  sListener.statusChanged(((LanguageResource)target).getName()
+                    + " saved in "
+                    + NumberFormat.getInstance().format(
+                      (timeAfter - timeBefore) / 1000) + " seconds");
 
                 // check whether the new LR is different from the
                 // transient one and
@@ -1134,12 +1146,12 @@ public class NameBearerHandle implements Handle, StatusListener,
           catch(PersistenceException pe) {
             MainFrame.unlockGUI();
             JOptionPane.showMessageDialog(getLargeView(), "Save failed!\n "
-                    + pe.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
+              + pe.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
           }
           catch(gate.security.SecurityException se) {
             MainFrame.unlockGUI();
             JOptionPane.showMessageDialog(getLargeView(), "Save failed!\n "
-                    + se.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
+              + se.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
           }
           finally {
             MainFrame.unlockGUI();
@@ -1202,23 +1214,24 @@ public class NameBearerHandle implements Handle, StatusListener,
             }
             long endTime = System.currentTimeMillis();
             fireStatusChanged(target.getName()
-                    + " reinitialised in "
-                    + NumberFormat.getInstance().format(
-                            (double)(endTime - startTime) / 1000) + " seconds");
+              + " reinitialised in "
+              + NumberFormat.getInstance().format(
+                (double)(endTime - startTime) / 1000) + " seconds");
             fireProcessFinished();
           }
           catch(ResourceInstantiationException rie) {
             fireStatusChanged("reinitialisation failed");
             rie.printStackTrace(Err.getPrintWriter());
             JOptionPane.showMessageDialog(getLargeView(), "Reload failed!\n "
-                    + "See \"Messages\" tab for details!", "GATE",
-                    JOptionPane.ERROR_MESSAGE);
+              + "See \"Messages\" tab for details!", "GATE",
+              JOptionPane.ERROR_MESSAGE);
             fireProcessFinished();
           }
         }// public void run()
       };
-      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-              runnable, "DefaultResourceHandle1");
+      Thread thread =
+        new Thread(Thread.currentThread().getThreadGroup(), runnable,
+          "DefaultResourceHandle1");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }// public void actionPerformed(ActionEvent e)
@@ -1229,7 +1242,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     PopulateCorpusAction() {
       super("Populate");
       putValue(SHORT_DESCRIPTION,
-              "Fills this corpus with documents from a directory");
+        "Fills this corpus with documents from a directory");
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -1237,8 +1250,9 @@ public class NameBearerHandle implements Handle, StatusListener,
         public void run() {
           corpusFiller.setExtensions(new ArrayList());
           corpusFiller.setEncoding("");
-          boolean answer = OkCancelDialog.showDialog(getLargeView(),
-                  corpusFiller, "Select a directory and allowed extensions");
+          boolean answer =
+            OkCancelDialog.showDialog(getLargeView(), corpusFiller,
+              "Select a directory and allowed extensions");
           if(answer) {
             long startTime = System.currentTimeMillis();
             URL url = null;
@@ -1255,59 +1269,58 @@ public class NameBearerHandle implements Handle, StatusListener,
                   filter.addExtension((String)extIter.next());
                 }
               }
-              ((Corpus)target).populate(url, filter,
-                      corpusFiller.getEncoding(), corpusFiller
-                              .isRecurseDirectories());
+              ((Corpus)target)
+                .populate(url, filter, corpusFiller.getEncoding(), corpusFiller
+                  .isRecurseDirectories());
               if(((Corpus)target).getDataStore() != null) {
                 ((LanguageResource)target).getDataStore().sync(
-                      (LanguageResource)target);
+                  (LanguageResource)target);
               }
-              
+
               long endTime = System.currentTimeMillis();
               fireStatusChanged("Corpus populated in "
-                      + NumberFormat.getInstance().format(
-                              (double)(endTime - startTime) / 1000)
-                      + " seconds!");
+                + NumberFormat.getInstance().format(
+                  (double)(endTime - startTime) / 1000) + " seconds!");
 
             }
             catch(MalformedURLException mue) {
               JOptionPane.showMessageDialog(getLargeView(), "Invalid URL!\n "
-                      + "See \"Messages\" tab for details!", "GATE",
-                      JOptionPane.ERROR_MESSAGE);
+                + "See \"Messages\" tab for details!", "GATE",
+                JOptionPane.ERROR_MESSAGE);
               mue.printStackTrace(Err.getPrintWriter());
             }
             catch(IOException ioe) {
               JOptionPane.showMessageDialog(getLargeView(), "I/O error!\n "
-                      + "See \"Messages\" tab for details!", "GATE",
-                      JOptionPane.ERROR_MESSAGE);
+                + "See \"Messages\" tab for details!", "GATE",
+                JOptionPane.ERROR_MESSAGE);
               ioe.printStackTrace(Err.getPrintWriter());
             }
             catch(ResourceInstantiationException rie) {
               JOptionPane.showMessageDialog(getLargeView(),
-                      "Could not create document!\n "
-                              + "See \"Messages\" tab for details!", "GATE",
-                      JOptionPane.ERROR_MESSAGE);
+                "Could not create document!\n "
+                  + "See \"Messages\" tab for details!", "GATE",
+                JOptionPane.ERROR_MESSAGE);
               rie.printStackTrace(Err.getPrintWriter());
             }
             catch(PersistenceException pe) {
               JOptionPane.showMessageDialog(getLargeView(),
-                      "Corpus couldn't be synchronized!\n "
-                              + "See \"Messages\" tab for details!", "GATE",
-                      JOptionPane.ERROR_MESSAGE);
+                "Corpus couldn't be synchronized!\n "
+                  + "See \"Messages\" tab for details!", "GATE",
+                JOptionPane.ERROR_MESSAGE);
               pe.printStackTrace(Err.getPrintWriter());
             }
             catch(SecurityException pe) {
               JOptionPane.showMessageDialog(getLargeView(),
-                      "Corpus couldn't be synchronized!\n "
-                              + "See \"Messages\" tab for details!", "GATE",
-                      JOptionPane.ERROR_MESSAGE);
+                "Corpus couldn't be synchronized!\n "
+                  + "See \"Messages\" tab for details!", "GATE",
+                JOptionPane.ERROR_MESSAGE);
               pe.printStackTrace(Err.getPrintWriter());
             }
           }
         }
       };
-      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-              runnable);
+      Thread thread =
+        new Thread(Thread.currentThread().getThreadGroup(), runnable);
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }
@@ -1317,77 +1330,77 @@ public class NameBearerHandle implements Handle, StatusListener,
     PopulateCorpusWithTrecWebDataAction() {
       super("Populate With TrecWebData");
       putValue(SHORT_DESCRIPTION,
-              "Fills this corpus by extracting documents from a big trecweb file");
+        "Fills this corpus by extracting documents from a big trecweb file");
     }
 
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable() {
         public void run() {
           trecWebFileInputDialog.setEncoding("");
-          boolean answer = OkCancelDialog.showDialog(getLargeView(),
-                  trecWebFileInputDialog, "Select a trecweb file");
+          boolean answer =
+            OkCancelDialog.showDialog(getLargeView(), trecWebFileInputDialog,
+              "Select a trecweb file");
           if(answer) {
             long startTime = System.currentTimeMillis();
             URL url = null;
             try {
               url = new URL(trecWebFileInputDialog.getUrlString());
-              ((Corpus)target).populate(url, trecWebFileInputDialog.getEncoding()); 
+              ((Corpus)target).populate(url, trecWebFileInputDialog
+                .getEncoding(), -1);
               if(((Corpus)target).getDataStore() != null) {
                 ((LanguageResource)target).getDataStore().sync(
-                      (LanguageResource)target);
+                  (LanguageResource)target);
               }
-              
+
               long endTime = System.currentTimeMillis();
               fireStatusChanged("Corpus populated in "
-                      + NumberFormat.getInstance().format(
-                              (double)(endTime - startTime) / 1000)
-                      + " seconds!");
+                + NumberFormat.getInstance().format(
+                  (double)(endTime - startTime) / 1000) + " seconds!");
 
             }
             catch(MalformedURLException mue) {
               JOptionPane.showMessageDialog(getLargeView(), "Invalid URL!\n "
-                      + "See \"Messages\" tab for details!", "GATE",
-                      JOptionPane.ERROR_MESSAGE);
+                + "See \"Messages\" tab for details!", "GATE",
+                JOptionPane.ERROR_MESSAGE);
               mue.printStackTrace(Err.getPrintWriter());
             }
             catch(IOException ioe) {
               JOptionPane.showMessageDialog(getLargeView(), "I/O error!\n "
-                      + "See \"Messages\" tab for details!", "GATE",
-                      JOptionPane.ERROR_MESSAGE);
+                + "See \"Messages\" tab for details!", "GATE",
+                JOptionPane.ERROR_MESSAGE);
               ioe.printStackTrace(Err.getPrintWriter());
             }
             catch(ResourceInstantiationException rie) {
               JOptionPane.showMessageDialog(getLargeView(),
-                      "Could not create document!\n "
-                              + "See \"Messages\" tab for details!", "GATE",
-                      JOptionPane.ERROR_MESSAGE);
+                "Could not create document!\n "
+                  + "See \"Messages\" tab for details!", "GATE",
+                JOptionPane.ERROR_MESSAGE);
               rie.printStackTrace(Err.getPrintWriter());
             }
             catch(PersistenceException pe) {
               JOptionPane.showMessageDialog(getLargeView(),
-                      "Corpus couldn't be synchronized!\n "
-                              + "See \"Messages\" tab for details!", "GATE",
-                      JOptionPane.ERROR_MESSAGE);
+                "Corpus couldn't be synchronized!\n "
+                  + "See \"Messages\" tab for details!", "GATE",
+                JOptionPane.ERROR_MESSAGE);
               pe.printStackTrace(Err.getPrintWriter());
             }
             catch(SecurityException pe) {
               JOptionPane.showMessageDialog(getLargeView(),
-                      "Corpus couldn't be synchronized!\n "
-                              + "See \"Messages\" tab for details!", "GATE",
-                      JOptionPane.ERROR_MESSAGE);
+                "Corpus couldn't be synchronized!\n "
+                  + "See \"Messages\" tab for details!", "GATE",
+                JOptionPane.ERROR_MESSAGE);
               pe.printStackTrace(Err.getPrintWriter());
             }
           }
         }
       };
-      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-              runnable);
+      Thread thread =
+        new Thread(Thread.currentThread().getThreadGroup(), runnable);
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }
   }
-  
-  
+
   class CreateIndexAction1 extends AbstractAction {
     CreateIndexAction1() {
       super("Create Index");
@@ -1414,8 +1427,9 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
 
     public void actionPerformed(ActionEvent e) {
-      boolean ok = OkCancelDialog.showDialog(largeView, createIndexGui,
-              "Index \"" + target.getName() + "\" corpus");
+      boolean ok =
+        OkCancelDialog.showDialog(largeView, createIndexGui, "Index \""
+          + target.getName() + "\" corpus");
       if(ok) {
         DefaultIndexDefinition did = new DefaultIndexDefinition();
         IREngine engine = createIndexGui.getIREngine();
@@ -1426,14 +1440,14 @@ public class NameBearerHandle implements Handle, StatusListener,
         // add the content if wanted
         if(createIndexGui.getUseDocumentContent()) {
           did.addIndexField(new IndexField("body", new DocumentContentReader(),
-                  false));
+            false));
         }
         // add all the features
         Iterator featIter = createIndexGui.getFeaturesList().iterator();
         while(featIter.hasNext()) {
           String featureName = (String)featIter.next();
           did.addIndexField(new IndexField(featureName, new FeatureReader(
-                  featureName), false));
+            featureName), false));
         }
 
         ((IndexedCorpus)target).setIndexDefinition(did);
@@ -1450,18 +1464,16 @@ public class NameBearerHandle implements Handle, StatusListener,
               fireProgressChanged(100);
               fireProcessFinished();
               fireStatusChanged("Corpus indexed in "
-                      + NumberFormat
-                              .getInstance()
-                              .format(
-                                      (double)(System.currentTimeMillis() - start) / 1000)
-                      + " seconds");
+                + NumberFormat.getInstance().format(
+                  (double)(System.currentTimeMillis() - start) / 1000)
+                + " seconds");
             }
             catch(IndexException ie) {
               JOptionPane.showMessageDialog(getLargeView() != null
-                      ? getLargeView()
-                      : getSmallView(), "Could not create index!\n "
-                      + "See \"Messages\" tab for details!", "GATE",
-                      JOptionPane.ERROR_MESSAGE);
+                ? getLargeView()
+                : getSmallView(), "Could not create index!\n "
+                + "See \"Messages\" tab for details!", "GATE",
+                JOptionPane.ERROR_MESSAGE);
               ie.printStackTrace(Err.getPrintWriter());
             }
             finally {
@@ -1497,18 +1509,16 @@ public class NameBearerHandle implements Handle, StatusListener,
             long start = System.currentTimeMillis();
             ((IndexedCorpus)target).getIndexManager().optimizeIndex();
             fireStatusChanged("Index optimised in "
-                    + NumberFormat
-                            .getInstance()
-                            .format(
-                                    (double)(System.currentTimeMillis() - start) / 1000)
-                    + " seconds");
+              + NumberFormat.getInstance().format(
+                (double)(System.currentTimeMillis() - start) / 1000)
+              + " seconds");
             fireProcessFinished();
           }
           catch(IndexException ie) {
             JOptionPane.showMessageDialog(getLargeView() != null
-                    ? getLargeView()
-                    : getSmallView(), "Errors during optimisation!", "GATE",
-                    JOptionPane.PLAIN_MESSAGE);
+              ? getLargeView()
+              : getSmallView(), "Errors during optimisation!", "GATE",
+              JOptionPane.PLAIN_MESSAGE);
             ie.printStackTrace(Err.getPrintWriter());
           }
           finally {
@@ -1532,24 +1542,25 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
 
     public void actionPerformed(ActionEvent e) {
-      int answer = JOptionPane.showOptionDialog(getLargeView() != null
-              ? getLargeView()
-              : getSmallView(), "Do you want to delete index?", "Gate",
-              JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
-              null, null);
+      int answer =
+        JOptionPane.showOptionDialog(getLargeView() != null
+          ? getLargeView()
+          : getSmallView(), "Do you want to delete index?", "Gate",
+          JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null,
+          null);
       if(answer == JOptionPane.YES_OPTION) {
         try {
           IndexedCorpus ic = (IndexedCorpus)target;
           if(ic.getIndexManager() != null) {
             ic.getIndexManager().deleteIndex();
             ic.getFeatures().remove(
-                    GateConstants.CORPUS_INDEX_DEFINITION_FEATURE_KEY);
+              GateConstants.CORPUS_INDEX_DEFINITION_FEATURE_KEY);
           }
           else {
             JOptionPane.showMessageDialog(getLargeView() != null
-                    ? getLargeView()
-                    : getSmallView(), "There is no index to delete!", "GATE",
-                    JOptionPane.PLAIN_MESSAGE);
+              ? getLargeView()
+              : getSmallView(), "There is no index to delete!", "GATE",
+              JOptionPane.PLAIN_MESSAGE);
           }
         }
         catch(gate.creole.ir.IndexException ie) {
@@ -1621,8 +1632,8 @@ public class NameBearerHandle implements Handle, StatusListener,
   }
 
   /**
-   * Releases the memory, removes the listeners, cleans up. Will get
-   * called when the target resource is unloaded from the system
+   * Releases the memory, removes the listeners, cleans up. Will get called when
+   * the target resource is unloaded from the system
    */
   public void cleanup() {
 
@@ -1666,9 +1677,8 @@ public class NameBearerHandle implements Handle, StatusListener,
   }// public synchronized void removeStatusListener(StatusListener l)
 
   public synchronized void addStatusListener(StatusListener l) {
-    Vector v = statusListeners == null
-            ? new Vector(2)
-            : (Vector)statusListeners.clone();
+    Vector v =
+      statusListeners == null ? new Vector(2) : (Vector)statusListeners.clone();
     if(!v.contains(l)) {
       v.addElement(l);
       statusListeners = v;
