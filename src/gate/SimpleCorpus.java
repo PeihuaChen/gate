@@ -14,6 +14,7 @@
  */
 
 package gate;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -23,8 +24,9 @@ import java.io.FileFilter;
 
 import gate.util.NameBearer;
 
-/** Corpora are lists of Document. TIPSTER equivalent: Collection.
-  */
+/**
+ * Corpora are lists of Document. TIPSTER equivalent: Collection.
+ */
 public interface SimpleCorpus extends LanguageResource, List, NameBearer {
 
   public static final String CORPUS_NAME_PARAMETER_NAME = "name";
@@ -32,48 +34,65 @@ public interface SimpleCorpus extends LanguageResource, List, NameBearer {
 
   /**
    * Gets the names of the documents in this corpus.
+   * 
    * @return a {@link List} of Strings representing the names of the documents
-   * in this corpus.
+   *         in this corpus.
    */
   public List getDocumentNames();
 
   /**
    * Gets the name of a document in this corpus.
-   * @param index the index of the document
+   * 
+   * @param index
+   *          the index of the document
    * @return a String value representing the name of the document at
-   * <tt>index</tt> in this corpus.
+   *         <tt>index</tt> in this corpus.
    */
   public String getDocumentName(int index);
 
   /**
    * Fills this corpus with documents created on the fly from selected files in
    * a directory. Uses a {@link FileFilter} to select which files will be used
-   * and which will be ignored.
-   * A simple file filter based on extensions is provided in the Gate
-   * distribution ({@link gate.util.ExtensionFileFilter}).
-   * @param directory the directory from which the files will be picked. This
-   * parameter is an URL for uniformity. It needs to be a URL of type file
-   * otherwise an InvalidArgumentException will be thrown.
-   * An implementation for this method is provided as a static method at
-   * {@link gate.corpora.CorpusImpl#populate(Corpus, URL, FileFilter, String, boolean)}.
-   * @param filter the file filter used to select files from the target
-   * directory. If the filter is <tt>null</tt> all the files will be accepted.
-   * @param encoding the encoding to be used for reading the documents
-   * @param recurseDirectories should the directory be parsed recursively?. If
-   * <tt>true</tt> all the files from the provided directory and all its
-   * children directories (on as many levels as necessary) will be picked if
-   * accepted by the filter otherwise the children directories will be ignored.
+   * and which will be ignored. A simple file filter based on extensions is
+   * provided in the Gate distribution ({@link gate.util.ExtensionFileFilter}).
+   * 
+   * @param directory
+   *          the directory from which the files will be picked. This parameter
+   *          is an URL for uniformity. It needs to be a URL of type file
+   *          otherwise an InvalidArgumentException will be thrown. An
+   *          implementation for this method is provided as a static method at
+   *          {@link gate.corpora.CorpusImpl#populate(Corpus, URL, FileFilter, String, boolean)}.
+   * @param filter
+   *          the file filter used to select files from the target directory. If
+   *          the filter is <tt>null</tt> all the files will be accepted.
+   * @param encoding
+   *          the encoding to be used for reading the documents
+   * @param recurseDirectories
+   *          should the directory be parsed recursively?. If <tt>true</tt>
+   *          all the files from the provided directory and all its children
+   *          directories (on as many levels as necessary) will be picked if
+   *          accepted by the filter otherwise the children directories will be
+   *          ignored.
    */
-  public void populate(URL directory, FileFilter filter,
-                       String encoding, boolean recurseDirectories)
-                       throws IOException, ResourceInstantiationException;
+  public void populate(URL directory, FileFilter filter, String encoding,
+    boolean recurseDirectories) throws IOException,
+    ResourceInstantiationException;
 
   /**
-   * Fills the provided corpus with documents extracted from the provided trec file.
-   * @param trecfile the trec file.
-   * @param encoding the encoding of the trec file.
+   * Fills the provided corpus with documents extracted from the provided trec
+   * file.
+   * 
+   * @param trecfile
+   *          the trec file.
+   * @param encoding
+   *          the encoding of the trec file.
+   * @param numberOfDocumentsToExtract -
+   *          extracts the specified number of documents from the trecweb file;
+   *          -1 to indicate all files.
+   * @return total length of populated documents in the corpus in number of bytes
    */
-  public void populate(URL trecFile, String encoding)
-              throws IOException, ResourceInstantiationException;  
+  public long populate(URL trecFile, String encoding,
+    int numberOfDocumentsToExtract) throws IOException,
+    ResourceInstantiationException;
 
 } // interface SimpleCorpus
