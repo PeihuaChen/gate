@@ -412,6 +412,12 @@ public class SearchAndAnnotatePanel extends JPanel {
 
     public void actionPerformed(ActionEvent evt){
       if(getOwner() == null) { return; }
+      if (!annotationEditor.editingFinished()) {
+        JOptionPane.showMessageDialog(getAnnotationEditorWindow(),
+          "Please set all required features first.", "GATE",
+          JOptionPane.INFORMATION_MESSAGE);
+        return;
+      }
       annotationEditor.setPinnedMode(true);
       String patternText = searchTextField.getText();
       Pattern pattern = null;
@@ -499,7 +505,12 @@ public class SearchAndAnnotatePanel extends JPanel {
     }
 
     public void actionPerformed(ActionEvent evt) {
-
+      if (!annotationEditor.editingFinished()) {
+        JOptionPane.showMessageDialog(getAnnotationEditorWindow(),
+          "Please set all required features first.", "GATE",
+          JOptionPane.INFORMATION_MESSAGE);
+        return;
+      }
       // the first time we invoke previous action we want to go two
       // previous matches back not just one
       matchedIndexes.removeLast();
@@ -532,44 +543,49 @@ public class SearchAndAnnotatePanel extends JPanel {
     }
 
     public void actionPerformed(ActionEvent evt){
-        boolean found = false;
-        int start = -1;
-        int end = -1;
-        nextMatchStartsFrom =
-          getOwner().getTextComponent().getCaretPosition();
+      if (!annotationEditor.editingFinished()) {
+        JOptionPane.showMessageDialog(getAnnotationEditorWindow(),
+          "Please set all required features first.", "GATE",
+          JOptionPane.INFORMATION_MESSAGE);
+        return;
+      }
+      boolean found = false;
+      int start = -1;
+      int end = -1;
+      nextMatchStartsFrom = getOwner().getTextComponent().getCaretPosition();
 
-        while (matcher.find(nextMatchStartsFrom) && !found) {
-          start = matcher.start();
-          end = matcher.end();
-          found = false;
-          if (searchHighlightsChk.isSelected()) {
-            javax.swing.text.Highlighter.Highlight[] highlights =
-              getOwner().getTextComponent().getHighlighter().getHighlights();
-            for (javax.swing.text.Highlighter.Highlight h : highlights) {
-              if (h.getStartOffset() <= start && h.getEndOffset() >= end) {
-                found = true;
-                break;
-              }
+      while (matcher.find(nextMatchStartsFrom) && !found) {
+        start = matcher.start();
+        end = matcher.end();
+        found = false;
+        if (searchHighlightsChk.isSelected()) {
+          javax.swing.text.Highlighter.Highlight[] highlights =
+            getOwner().getTextComponent().getHighlighter().getHighlights();
+          for (javax.swing.text.Highlighter.Highlight h : highlights) {
+            if (h.getStartOffset() <= start && h.getEndOffset() >= end) {
+              found = true;
+              break;
             }
-          } else {
-            found = true;
           }
-          nextMatchStartsFrom = end;
-        }
-
-        if (found) {
-          Vector<Integer> v = new Vector<Integer>(2);
-          v.add(new Integer(start));
-          v.add(new Integer(end));
-          matchedIndexes.add(v);
-          getOwner().getTextComponent().select(start, end);
-          getAnnotationEditor().placeDialog(start, end);
-          findPreviousAction.setEnabled(true);
         } else {
-          //no more matches possible
-          findNextAction.setEnabled(false);
-          annotateMatchAction.setEnabled(false);
+          found = true;
         }
+        nextMatchStartsFrom = end;
+      }
+
+      if (found) {
+        Vector<Integer> v = new Vector<Integer>(2);
+        v.add(new Integer(start));
+        v.add(new Integer(end));
+        matchedIndexes.add(v);
+        getOwner().getTextComponent().select(start, end);
+        getAnnotationEditor().placeDialog(start, end);
+        findPreviousAction.setEnabled(true);
+      } else {
+        //no more matches possible
+        findNextAction.setEnabled(false);
+        annotateMatchAction.setEnabled(false);
+      }
     }
   }
   
@@ -584,32 +600,38 @@ public class SearchAndAnnotatePanel extends JPanel {
     }
     
     public void actionPerformed(ActionEvent evt){
-        int start = getOwner().getTextComponent().getSelectionStart();
-        int end = getOwner().getTextComponent().getSelectionEnd();
-        FeatureMap features = Factory.newFeatureMap();
-        if(getAnnotationEditor().getAnnotationCurrentlyEdited().getFeatures() != null) 
-          features.putAll(getAnnotationEditor().getAnnotationCurrentlyEdited().getFeatures());
-        try {
-          Integer id =
-            getAnnotationEditor().getAnnotationSetCurrentlyEdited().add(
-              new Long(start), new Long(end), 
-              getAnnotationEditor().getAnnotationCurrentlyEdited().getType(),
-              features);
-          Annotation newAnn =
-            getAnnotationEditor().getAnnotationSetCurrentlyEdited().get(id);
-          getOwner().getTextComponent().select(end, end);
-          getAnnotationEditor().editAnnotation(newAnn,
-            getAnnotationEditor().getAnnotationSetCurrentlyEdited());
-          annotateAllMatchesAction.setEnabled(true);
-          if (annotateAllMatchesSmallButton.getAction()
-                  .equals(undoAnnotateAllMatchesAction)) {
-            annotateAllMatchesSmallButton.setAction(annotateAllMatchesAction);
-          }
+      if (!annotationEditor.editingFinished()) {
+        JOptionPane.showMessageDialog(getAnnotationEditorWindow(),
+          "Please set all required features first.", "GATE",
+          JOptionPane.INFORMATION_MESSAGE);
+        return;
+      }
+      int start = getOwner().getTextComponent().getSelectionStart();
+      int end = getOwner().getTextComponent().getSelectionEnd();
+      FeatureMap features = Factory.newFeatureMap();
+      if(getAnnotationEditor().getAnnotationCurrentlyEdited().getFeatures() != null) 
+        features.putAll(getAnnotationEditor().getAnnotationCurrentlyEdited().getFeatures());
+      try {
+        Integer id =
+          getAnnotationEditor().getAnnotationSetCurrentlyEdited().add(
+             new Long(start), new Long(end), 
+             getAnnotationEditor().getAnnotationCurrentlyEdited().getType(),
+             features);
+        Annotation newAnn =
+          getAnnotationEditor().getAnnotationSetCurrentlyEdited().get(id);
+        getOwner().getTextComponent().select(end, end);
+        getAnnotationEditor().editAnnotation(newAnn,
+           getAnnotationEditor().getAnnotationSetCurrentlyEdited());
+        annotateAllMatchesAction.setEnabled(true);
+        if (annotateAllMatchesSmallButton.getAction()
+                .equals(undoAnnotateAllMatchesAction)) {
+          annotateAllMatchesSmallButton.setAction(annotateAllMatchesAction);
         }
-        catch(InvalidOffsetException e) {
-          //the offsets here should always be valid.
-          throw new LuckyException(e);
-        }
+      }
+      catch(InvalidOffsetException e) {
+        //the offsets here should always be valid.
+        throw new LuckyException(e);
+      }
     }
   }
   
@@ -624,6 +646,12 @@ public class SearchAndAnnotatePanel extends JPanel {
     }
 
     public void actionPerformed(ActionEvent evt){
+      if (!annotationEditor.editingFinished()) {
+        JOptionPane.showMessageDialog(getAnnotationEditorWindow(),
+          "Please set all required features first.", "GATE",
+          JOptionPane.INFORMATION_MESSAGE);
+        return;
+      }
       annotateAllAnnotationsID = new LinkedList<Annotation>();
       boolean found = false;
       int start = -1;
