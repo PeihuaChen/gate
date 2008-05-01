@@ -58,6 +58,9 @@ public class TestControllers extends TestCase
     SerialController c1 = new SerialController();
     assertNotNull("c1 controller is null", c1);
 
+    // set a name for this controller
+    c1.setName("SerialController_"+Gate.genSym());
+    
     //get a document
     FeatureMap params = Factory.newFeatureMap();
     params.put(Document.DOCUMENT_URL_PARAMETER_NAME, Gate.getUrl("tests/doc0.html"));
