@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -788,6 +789,11 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   }
 
   public void setDocumentIDs(List<String> docIDs) {
-    this.documentIDs = docIDs;
+    if(docIDs != null) {
+      this.documentIDs = new ArrayList<String>();
+      this.documentIDs.addAll(docIDs);
+    } else {
+      this.documentIDs = null;
+    }
   }
 }
