@@ -27,6 +27,7 @@ import java.util.*;
 import gate.creole.*;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
+import gate.jape.constraint.ConstraintFactory;
 import gate.jape.parser.ParseCpsl;
 import gate.persist.PersistenceException;
 import gate.persist.SerialDataStore;
@@ -411,7 +412,7 @@ public abstract class Factory {
           throw new IllegalArgumentException("Parser class must inherit from " + ParseCpsl.class);
       japeParserClass = newClass;
   }
-  
+
   public static ParseCpsl newJapeParser(java.io.Reader stream, HashMap existingMacros) {
       try {
           Constructor c = japeParserClass.getConstructor
@@ -429,17 +430,30 @@ public abstract class Factory {
           throw new RuntimeException(e);
       }
   }
-  
+
   public static ParseCpsl newJapeParser(URL japeURL, String encoding) throws IOException {
       java.io.Reader stream = new InputStreamReader
         (new BufferedInputStream(japeURL.openStream()), encoding);
-      
+
       ParseCpsl parser = newJapeParser(stream, new HashMap());
       parser.setBaseURL(japeURL);
       parser.setEncoding(encoding);
       return parser;
   }
-  
+
+  /**
+   * Active ConstraintFactory for creating and initializing Jape <b>Constraint</b>s.
+   */
+  private static ConstraintFactory japeConstraintFactory = new ConstraintFactory();
+  /**
+   * Return the active {@link ConstraintFactory} for creating and initializing Jape
+   * <b>Constraint</b>s.
+   * @return
+   */
+  public static ConstraintFactory getConstraintFactory() {
+    return japeConstraintFactory;
+  }
+
   /** Create a new FeatureMap. */
   public static FeatureMap newFeatureMap() {
     return new SimpleFeatureMapImpl();

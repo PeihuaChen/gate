@@ -20,8 +20,7 @@ import java.util.*;
 
 import gate.*;
 import gate.annotation.AnnotationSetImpl;
-import gate.util.Out;
-import gate.util.Strings;
+import gate.util.*;
 
 
 /**
@@ -42,7 +41,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   private Constraint[] constraints2;
 
   /** A map of constraint annot type to constraint. Used during parsing. */
-  private HashMap constraintsMap;
+  private HashMap<Object, Constraint> constraintsMap;
 
   /** Cache of the last position we failed at (-1 when none). */
   private int lastFailurePoint = -1;
@@ -60,7 +59,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
 
   /** Construction. */
   public BasicPatternElement() {
-    constraintsMap = new HashMap();
+    constraintsMap = new HashMap<Object, Constraint>();
     constraints1 = new ArrayList<Constraint>();
     lastFailurePoint = -1;
     //nextAvailable = new MutableInteger();
@@ -72,7 +71,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     */
   public Object clone() {
     BasicPatternElement newPE = (BasicPatternElement) super.clone();
-    newPE.constraintsMap = (HashMap) constraintsMap.clone();
+    newPE.constraintsMap = (HashMap<Object, Constraint>) constraintsMap.clone();
     newPE.constraints1 = new ArrayList<Constraint>();
     int consLen = constraints1.size();
     for(int i = 0; i < consLen; i++)
@@ -85,25 +84,23 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   } // clone
 
   /** Add a constraint. Ensures that only one constraint of any given
-    * annotation type exists.
+    * annotation type and negation state exists.
     */
   public void addConstraint(Constraint newConstraint) {
-    /* if the constraint is already mapped, put it's attributes on the
-     * existing constraint, else add it
+    /* if a constraint with the same negation state as this constraint is
+     * already mapped, put it's attributes on the existing constraint, else
+     * add it
      */
     String annotType = newConstraint.getAnnotType();
-    Constraint existingConstraint = (Constraint) constraintsMap.get(annotType);
+    Pair typeNegKey = new Pair(annotType, newConstraint.isNegated());
+
+    Constraint existingConstraint = constraintsMap.get(typeNegKey);
     if(existingConstraint == null) {
-      constraintsMap.put(annotType, newConstraint);
+      constraintsMap.put(typeNegKey, newConstraint);
       constraints1.add(newConstraint);
     }
     else {
-      FeatureMap newAttrs = newConstraint.getAttributeSeq();
-      FeatureMap existingAttrs =
-        existingConstraint.getAttributeSeq();
-        existingAttrs.putAll(newAttrs);
-      if(newConstraint.isNegated())
-        existingConstraint.negate();
+      existingConstraint.addAttributes(newConstraint.getAttributeSeq());
     }
   } // addConstraint
 
@@ -154,6 +151,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   public boolean matches (
     Document doc, int position, MutableInteger newPosition
   ) {
+    @SuppressWarnings("unused")
     final int startingCacheSize = matchedAnnots.size();
     AnnotationSet addedAnnots = new AnnotationSetImpl((Document) null);
 
@@ -166,34 +164,47 @@ extends PatternElement implements JapeConstants, java.io.Serializable
 
     for(int len = constraints2.length, i = 0; i < len; i++) {
       Constraint constraint = constraints2[i];
-      String annotType = constraint.getAnnotType();
-      JdmAttribute[] constraintAttrs = constraint.getAttributeArray();
       MutableBoolean moreToTry = new MutableBoolean();
 
       if(DEBUG) {
         Out.println(
           "BPE.matches: selectAnn on lFP = " + lastFailurePoint +
           "; max(pos,lfp) = " + Math.max(position, lastFailurePoint) +
-          "; annotType = " + annotType + "; attrs = " +
-          constraintAttrs.toString() + Strings.getNl()
+          "; constraint = " + constraint.getDisplayString("") + Strings.getNl()
         );
-        for(int j=0; j<constraintAttrs.length; j++)
-          Out.println(
-            "BPE.matches attr: " + constraintAttrs[j].toString()
-          );
       }
-      FeatureMap features = Factory.newFeatureMap();
-      for(int j = constraintAttrs.length - 1; j >= 0; j--)
-        features.put(constraintAttrs[j].getName(), constraintAttrs[j].getValue());
-      AnnotationSet match = doc.getAnnotations().get(
+
+      // ERS change begin:
+      // I changed this just to compile, but as far as I can tell this
+      // code is not used any more.
+      //
+      // Do not screen on the feature set or type from the Constraint
+      // when selecting annotations that may match it. The Constraint
+      // will do that. This allows the use of predicates other than equals
+      // and for testing for non-existence of a given annotation type
+      //
+      // Of course, the previous code was incorrect as well because of a
+      // change 8 years ago - it would never retrieve the attributes from
+      // the constraint.
+      AnnotationSet match = null;
+      AnnotationSet potentialMatches = doc.getAnnotations().get(
         // this loses "April 2" on the frozen tests:
         // Math.max(nextAvailable.value, Math.max(position, lastFailurePoint)),
-        annotType,
-        features,
+        //annotType,
+        //(FeatureMap)null,
         new Long(Math.max(position, lastFailurePoint))  /*,
         nextAvailable,
         moreToTry */
       );
+      List<Annotation> matchList = constraint.matches(potentialMatches, null, doc);
+      if (!matchList.isEmpty()) {
+        match = doc.getAnnotations().get("");
+        for(Annotation annot : matchList) {
+          match.add(annot);
+        }
+      }
+      //ERS change end
+
       if(DEBUG) Out.println(
         "BPE.matches: selectAnn returned " + match + ".... moreToTry = " +
         moreToTry.value + "    nextAvailable = " + nextAvailable.value
@@ -317,11 +328,11 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     if(constraints1 != null) {
       for(int len = constraints1.size(), i = 0; i < len; i++)
         buf.append(
-          newline + constraints1.get(i).toString(newPad)
+          newline + constraints1.get(i).getDisplayString(newPad)
         );
     } else {
       for(int len = constraints2.length, i = 0; i < len; i++)
-        buf.append(newline + constraints2[i].toString(newPad));
+        buf.append(newline + constraints2[i].getDisplayString(newPad));
     }
 
     // matched annots
@@ -357,12 +368,12 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   public ArrayList<Constraint> getUnfinishedConstraints() {
     return constraints1;
   }
-  
+
   /**
    * Get the finished Constraint objects. Can only be used after the
-   * finish() method has been used. 
+   * finish() method has been used.
    * @return an array of constraint objects. Will be null before the
-   * finish() method has been used. 
+   * finish() method has been used.
    */
   public Constraint[] getConstraints(){
     return constraints2;

@@ -181,7 +181,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       // dam: was
       /*
        * // Long offset = ann.getStartNode().getOffset();
-       * 
+       *
        * List annsAtThisOffset = null; if(keys.add(offset)){
        * annsAtThisOffset = new LinkedList(); map.put(offset,
        * annsAtThisOffset); }else{ annsAtThisOffset =
@@ -300,10 +300,10 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
   /**
    * Try to advance the activeFSMInstances.
-   * 
+   *
    * @return true if we ended in a 'final' state, false otherwise.
    */
-
+  @SuppressWarnings("unchecked")
   protected boolean attemptAdvance(java.util.ArrayList activeFSMInstances,
           java.util.ArrayList acceptingFSMInstances, SimpleSortedSet offsets,
           SimpleSortedSet annotationsByOffset, Document doc)
@@ -322,93 +322,120 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       acceptingFSMInstances.add(currentFSM.clone());
 
       // if we're only looking for the shortest stop here
-      if(ruleApplicationStyle == FIRST_STYLE) return true; // Ended in
-                                                            // a final
-                                                            // state
+      if(ruleApplicationStyle == FIRST_STYLE) return true;
     }
 
     // get all the annotations that start where the current FSM finishes
     SimpleSortedSet offsetsTailSet = offsets.tailSet(currentFSM.getAGPosition()
             .getOffset().longValue());
-    ArrayList paths;
+    List<Annotation> paths;
     long theFirst = offsetsTailSet.first();
     if(theFirst < 0) return false;
 
-    paths = (ArrayList)annotationsByOffset.get(theFirst);
+    paths = (List)annotationsByOffset.get(theFirst);
 
     if(paths.isEmpty()) return false;
 
-    Iterator pathsIter = paths.iterator();
-    Annotation onePath;
+    // get the transitions for the current state of the FSM
     State currentState = currentFSM.getFSMPosition();
-    Iterator transitionsIter;
-    // foreach possible annotation
-    while(pathsIter.hasNext()) {
-      onePath = (Annotation)pathsIter.next();
-      transitionsIter = currentState.getTransitions().iterator();
-      Transition currentTransition;
-      Constraint[] currentConstraints;
-      transitionsWhile: while(transitionsIter.hasNext()) {
-        currentTransition = (Transition)transitionsIter.next();
-        // check if the current transition can use the current
-        // annotation (path)
-        currentConstraints = currentTransition.getConstraints()
-                .getConstraints();
+    Iterator transitionsIter = currentState.getTransitions().iterator();
 
-        // We initially only check the first constraint for a match. If
-        // it
-        // does match, we go on to check the others with the other
-        // annotations
-        // that exist at this point in the doc.
-        if(!onePath.getType().equals(currentConstraints[0].getAnnotType())
-                || !onePath.getFeatures().subsumes(ontology,
-                        currentConstraints[0].getAttributeSeq())) {
-          continue transitionsWhile;
+    // for each transition, keep the set of annotations starting at
+    // current node (the "paths") that match each constraint of the
+    // transition
+    transitionsWhile: while(transitionsIter.hasNext()) {
+      Transition currentTransition = (Transition)transitionsIter.next();
+      Constraint[] currentConstraints = currentTransition.getConstraints()
+              .getConstraints();
+
+      // Since no negative constraints matched, test against positive
+      // constraints. Keep track of which annot is the longest and which
+      // constraint it matched
+      Annotation longestAnnot = null;
+      Constraint matchingConstraint = null;
+      int maxEnding=-1;
+      boolean hasPositiveConstraint = false;
+      Map<Constraint, Collection<Annotation>> matchingMap =
+        new LinkedHashMap<Constraint, Collection<Annotation>>();
+
+      // check all negated constraints first.  If any annotation matches any
+      // negated constraint, then the transition fails.
+      for(Constraint c : currentConstraints) {
+        if (!c.isNegated()) {
+          hasPositiveConstraint = true;
+          continue;
         }
-
-        Constraint oneConstraint = currentConstraints[0];
-
-        // The first constraint matches. Now check the other
-        // constraints,
-        // which are of a different type.
-        if(currentConstraints.length > 1) {
-          /*
-           * TODO - if there are multiple constraints matching, which
-           * matched constraint do we bind to? For the moment, bind to
-           * the longest one. To be completely correct, we should
-           * actually fire off a new FSMInstance for each potential
-           * bind.
-           */
-
-          int maxEnding = onePath.getEndNode().getOffset().intValue();
-
-          otherConstraints: for(int i = 1; i < currentConstraints.length; i++) {
-            Constraint c = currentConstraints[i];
-
-            // Look for a path that matches c
-            for(Iterator j = paths.iterator(); j.hasNext();) {
-              Annotation a = (Annotation)j.next();
-              if(a.getType().equals(c.getAnnotType())
-                      && a.getFeatures()
-                              .subsumes(ontology, c.getAttributeSeq())) {
-
-                if(a.getEndNode().getOffset().intValue() > maxEnding) {
-                  onePath = a;
-                  oneConstraint = c;
-                  maxEnding = a.getEndNode().getOffset().intValue();
-                }
-                continue otherConstraints;
-              }
-            }
-            // No match found for c, go to the next transition
+        List<Annotation> matchList = c.matches(paths, ontology, doc);
+        if (!matchList.isEmpty())
             continue transitionsWhile;
+        // store the first negated constraint to use in the debug trace
+        // in case there are no non-negated constraints
+        if (matchingConstraint == null)
+          matchingConstraint = c;
+      }
+
+      // Now check all non-negated constraints.  At least one annotation must
+      // match each constraint.
+      if (hasPositiveConstraint){
+        for(Constraint c : currentConstraints) {
+          if (c.isNegated()) continue;
+          List<Annotation> matchList = c.matches(paths, ontology, doc);
+          //if no annotations matched, then the transition fails.
+          if (matchList.isEmpty())
+            continue transitionsWhile;
+          else
+            matchingMap.put(c, matchList);
+        }
+      } //end if hasPositiveConstraint
+      else {
+        // There are no non-negated constraints.  Since the negated constraints
+        // did not fail, this means that all of the current annotations
+        // are potentially valid.  Add the whole set to the matchingMap.
+        // Use the first negated constraint for the debug trace.
+        matchingMap.put(matchingConstraint, paths);
+      }
+
+      //check which annotation is the longest from all that matched.
+      /*
+       * TODO - To be completely correct, we should fire off a new
+       * FSMInstance for each potential bind rather than just using
+       * the longest annotation.  The original Montreal Transducer
+       * does that.
+       */
+      for(Map.Entry<Constraint,Collection<Annotation>> entry : matchingMap.entrySet()) {
+        Constraint c = entry.getKey();
+        Collection<Annotation> matchList = entry.getValue();
+        for(Annotation a : matchList) {
+          if(a.getEndNode().getOffset().intValue() > maxEnding) {
+            longestAnnot = a;
+            matchingConstraint = c;
+            maxEnding = a.getEndNode().getOffset().intValue();
           }
         }
+      }
 
-        // we have a match
-        // create a new FSMInstance, advance it over the current
-        // annotation
-        // take care of the bindings and add it to ActiveFSM
+/*
+      // We have a match if every positive constraint is met by at least one annot.
+      // Given the sets Sx of the annotations that match constraint x,
+      // compute all tuples (A1, A2, ..., An) where Ax comes from the
+      // set Sx and n is the number of constraints
+      List combinations = combine(matchingAnnot,
+              matchingAnnot.size(), new LinkedList());
+*/
+      List<List<Annotation>> combinations = new ArrayList<List<Annotation>>();
+      List<Annotation> annotList = new ArrayList<Annotation>();
+      annotList.add(longestAnnot);
+      combinations.add(annotList);
+
+      // Create a new FSM for every tuple of annot
+      for(List<Annotation> tuple : combinations) {
+
+        // Find longest annotation and use that to mark the start of the
+        // new FSM
+        Annotation onePath = getRightMostAnnotation(tuple);
+
+        // we have a match. create a new FSMInstance, advance it over the current
+        // annotation take care of the bindings and add it to ActiveFSM
         FSMInstance newFSMI = (FSMInstance)currentFSM.clone();
         newFSMI.setAGPosition(onePath.getEndNode());
         newFSMI.setFSMPosition(currentTransition.getTarget());
@@ -421,15 +448,13 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
             if(currRuleTrace == null) {
               currRuleTrace = new RuleTrace(newFSMI.getFSMPosition(), doc);
               currRuleTrace.addAnnotation(onePath);
-              currRuleTrace
-                      .putPattern(onePath, oneConstraint.getAttributeSeq());
+              currRuleTrace.putPattern(onePath, matchingConstraint);
               rulesTrace.add(currRuleTrace);
             }
             else {
               currRuleTrace.addState(newFSMI.getFSMPosition());
               currRuleTrace.addAnnotation(onePath);
-              currRuleTrace
-                      .putPattern(onePath, oneConstraint.getAttributeSeq());
+              currRuleTrace.putPattern(onePath, matchingConstraint);
             }
           }
         }
@@ -447,20 +472,78 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
           if(boundAnnots != null)
             newSet = new AnnotationSetImpl(boundAnnots);
           else newSet = new AnnotationSetImpl(doc);
-          newSet.add(onePath);
-          binds.put(oneLabel, newSet);
 
+          for(Annotation annot : tuple) {
+            newSet.add(annot);
+          }
+
+          binds.put(oneLabel, newSet);
         }// while(labelsIter.hasNext())
         activeFSMInstances.add(newFSMI);
-      }// while(transitionsIter.hasNext())
-    }// while(pathsIter.hasNext())
+      } // iter over matching combinations
+
+    }// while(transitionsIter.hasNext())
 
     return false;
-  } // attemptAdvance
+  }
+
+  /**
+   * Return the annotation with the right-most end node
+   * @param annots
+   * @return
+   */
+  protected Annotation getRightMostAnnotation(Collection<Annotation> annots) {
+    long maxOffset = -1;
+    Annotation retVal = null;
+    for(Annotation annot : annots) {
+      Long curOffset = annot.getEndNode().getOffset();
+      if(curOffset > maxOffset) {
+        maxOffset = curOffset;
+        retVal = annot;
+      }
+    }
+
+    return retVal;
+  }
+
+  /**
+   * Computes all tuples (x1, x2, ..., xn) resulting from the linear
+   * combination of the elements of n lists, where x1 comes from the 1st
+   * list, x2 comes from the second, etc. This method works recursively.
+   * The first call should have those parameters:
+   *
+   * @param sourceLists an array of n lists whose elements will be
+   *          combined
+   * @param maxTupleSize the number of elements per tuple
+   * @param incompleteTuple an empty list
+   */
+
+  private static List combine(List sourceLists, int maxTupleSize,
+          List incompleteTuple) {
+
+    List newTupleList = new LinkedList();
+
+    if(incompleteTuple.size() == maxTupleSize) {
+      newTupleList.add(incompleteTuple);
+    }
+    else {
+      List currentSourceList = (List)sourceLists
+              .get(incompleteTuple.size());
+      // use for loop instead of ListIterator to increase speed
+      // (critical here)
+      for(int i = 0; i < currentSourceList.size(); i++) {
+        List augmentedTuple = (List)((LinkedList)incompleteTuple).clone();
+        augmentedTuple.add(currentSourceList.get(i));
+        newTupleList.addAll(combine(sourceLists, maxTupleSize, augmentedTuple));
+      }
+    }
+
+    return newTupleList;
+  }
 
   /**
    * Fire the rule that matched.
-   * 
+   *
    * @return true if processing should keep going, false otherwise.
    */
 
@@ -792,32 +875,32 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   public void addInput(String ident) {
     input.add(ident);
   }
-  
+
   /**
-   * Checks if this Phase has the annotation type as input. This is the 
+   * Checks if this Phase has the annotation type as input. This is the
    * case if either no input annotation types were specified, in which case
    * all annotation types will be used, or if the annotation type was
    * specified.
-   * 
+   *
    * @param ident the type of an annotation to be checked
    * @return true if the annotation type will be used in this phase
    */
   public boolean hasInput(String ident) {
     return input.isEmpty() || input.contains(ident);
   }
-  
-  /** 
+
+  /**
    * Check if there is a restriction on the input annotation types
    * for this SPT, i.e. if there were annotation types specified for
    * the "Input:" declaration of this phase.
-   * 
+   *
    * @return true if only certain annotation types are considered in this
    *   phase, false if all are considered.
    */
   public boolean isInputRestricted() {
     return !input.isEmpty();
   }
-  
+
   public synchronized void removeProgressListener(ProgressListener l) {
     if(progressListeners != null && progressListeners.contains(l)) {
       Vector v = (Vector)progressListeners.clone();
@@ -883,18 +966,18 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
 /*
  * class SimpleSortedSet {
- * 
+ *
  * static final int INCREMENT = 1023; int[] theArray = new
  * int[INCREMENT]; Object[] theObject = new Object[INCREMENT]; int
  * tsindex = 0; int size = 0; public static int avesize = 0; public
  * static int maxsize = 0; public static int avecount = 0; public
  * SimpleSortedSet() { avecount++; java.util.Arrays.fill(theArray,
  * Integer.MAX_VALUE); }
- * 
+ *
  * public Object get(int elValue) { int index =
  * java.util.Arrays.binarySearch(theArray, elValue); if (index >=0)
  * return theObject[index]; return null; }
- * 
+ *
  * public boolean add(int elValue, Object o) { int index =
  * java.util.Arrays.binarySearch(theArray, elValue); if (index >=0) {
  * ((ArrayList)theObject[index]).add(o); return false; } if (size ==
@@ -910,16 +993,16 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
  * ArrayList(); ((ArrayList)theObject[index]).add(o); size++; return
  * true; } public int first() { if (tsindex >= size) return -1; return
  * theArray[tsindex]; }
- * 
+ *
  * public Object getFirst() { if (tsindex >= size) return null; return
  * theObject[tsindex]; }
- * 
+ *
  * public SimpleSortedSet tailSet(int elValue) { if (tsindex <
  * theArray.length && elValue != theArray[tsindex]) { if (tsindex<(size-1) &&
  * elValue > theArray[tsindex] && elValue <= theArray[tsindex+1]) {
  * tsindex++; return this; } int index =
  * java.util.Arrays.binarySearch(theArray, elValue); if (index < 0)
  * index = ~index; tsindex = index; } return this; }
- * 
+ *
  * public boolean isEmpty() { return size ==0; } };
  */

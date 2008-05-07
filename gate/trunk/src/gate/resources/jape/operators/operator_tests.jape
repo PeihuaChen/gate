@@ -1,0 +1,57 @@
+/*
+ * $Id$
+ */
+
+Phase:	first
+Options: control = appelt
+
+Macro: RegExDe
+(
+
+  {Token.string =~ "[v|V][a|o]n"}
+  |
+  ({Token.string == "[d|D[e|i]([L|l]a)?"})
+)
+
+  Rule:	AndEqual
+  ({A.f1=="atext",B.f1=="btext"}):abc
+  -->
+	:abc.Result = {rule="AndEqual"}
+
+  Rule: SimpleRegEx
+  ({B.f1=~".text"}):abc
+  -->
+    :abc.Result = {rule="SimpleRegEx"}
+
+  Rule: DoNotMatch
+  ({B,!C}):abc
+  -->
+    :abc.Result = {rule="DoNotMatch"}
+
+  Rule: NotEqualandGreaterEqual
+  ({B.f1!="btext",C.f2>=2,C.f3>2}):abc
+  -->
+    :abc.Result = {rule="NotEqualandGreaterEqual"}
+
+  Rule: NotEqual
+  ({!D}):abc
+  -->
+    :abc.Result = {rule="NotEqual"}
+
+  Rule: EqualAndNotEqualRexEx
+  ({D,D.f1 !~ "..text",D.f3 == 3}):abc
+  -->
+    :abc.Result = {rule="EqualAndNotEqualRexEx"}
+
+  Rule: EqualAndNotExistance
+  ({D,D.f1 !~ ""}):abc
+  -->
+    :abc.Result = {rule="EqualAndNotExistance"}
+
+  Rule: OntoTest
+  ({D.ontology=="http://gate.ac.uk/tests/demo.owl", D.class=="Person"}):abc
+  -->
+    :abc.Result = {rule="OntoTest"}
+
+      // $Log$
+
