@@ -31,8 +31,11 @@ package gate.jape.parser;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.regex.*;
+import gate.Factory;
 import gate.util.*;
 import gate.jape.*;
+import gate.jape.constraint.*;
 import gate.event.*;
 
 
@@ -57,7 +60,7 @@ public class ParseCpsl implements JapeConstants {
     baseURL = url;
     this.encoding = encoding;
   }
-  
+
   public ParseCpsl(java.io.Reader stream, HashMap existingMacros) {
     this(stream);
     macrosMap = existingMacros;
@@ -75,24 +78,24 @@ public class ParseCpsl implements JapeConstants {
     while(listenersIter.hasNext())
       ((StatusListener)listenersIter.next()).statusChanged(text);
   }
-  
+
   protected SinglePhaseTransducer createSinglePhaseTransducer(String name){
     return new SinglePhaseTransducer(name);
   }
-  
+
   protected ParseCpsl spawn(URL sptURL) throws IOException{
     return new ParseCpsl(sptURL, encoding, macrosMap);
   }
-  
+
   protected void finishSPT(SinglePhaseTransducer t) throws ParseException {
     if(ruleNumber == 0)
       throw(new ParseException("no rules defined in transducer " + t.getName()));
     t.setBaseURL(baseURL);
   }
-  
+
   protected void finishBPE(BasicPatternElement bpe) {
   }
-  
+
   protected void appendAnnotationAdd(StringBuffer blockBuffer, String newAnnotType, String annotSetName)
   {
       String nl = Strings.getNl();
@@ -122,17 +125,17 @@ public class ParseCpsl implements JapeConstants {
   public void setBaseURL (URL newURL) {
     baseURL = newURL;
   }
-  
+
   public void setEncoding (String newEncoding) {
     encoding = newEncoding;
   }
-  
+
   private String errorMsgPrefix(Token t) {
     return ((baseURL != null) ? baseURL.toExternalForm() : "(No URL)")+
       ( (t == null) ? " " :
           ":"+t.beginLine+":"+t.beginColumn+": ");
    }
-  
+
   private transient java.util.List myStatusListeners = new java.util.LinkedList();
 
   /** Position of the current rule */
@@ -148,8 +151,8 @@ public class ParseCpsl implements JapeConstants {
 
   protected URL baseURL;
   protected String encoding;
-  
-  protected SinglePhaseTransducer curSPT; 
+
+  protected SinglePhaseTransducer curSPT;
 } // class ParseCpsl
 
 PARSER_END(ParseCpsl)
@@ -214,6 +217,7 @@ PARSER_END(ParseCpsl)
 <DEFAULT> TOKEN [IGNORE_CASE]: { <priority:     "Priority:"> }
 <DEFAULT> TOKEN: { <pling: "!"> }
 <DEFAULT> TOKEN: { <kleeneOp: "*" | "+" | "?"> }
+<DEFAULT> TOKEN: { <attrOp: "==" | "!=" | ">" | "<" | ">=" | "<=" | "=~" | "!~"> }
 <DEFAULT> TOKEN: { <integer: ( ["0"-"9"] )+ > }
 
 
@@ -268,7 +272,6 @@ PARSER_END(ParseCpsl)
 <DEFAULT> TOKEN: { <leftBracket: "("> }
 <DEFAULT> TOKEN: { <rightBracket: ")"> }
 <DEFAULT> TOKEN: { <assign: "="> }
-<DEFAULT> TOKEN: { <equals: "=="> }
 <DEFAULT> TOKEN: { <colonplus: ":+"> }
 /*<DEFAULT> SPECIAL_TOKEN: { // catch all for Java block processing
   <other: (~[])>
@@ -364,13 +367,13 @@ MultiPhaseTransducer MultiPhaseTransducer() :
           // adding the resultant spt to m
           if(parser != null) {
           	ArrayList phases = parser.MultiPhaseTransducer().getPhases();
-          	
+
             //s = parser.SinglePhaseTransducer();
             //if(s != null)
             //  m.addPhase(s.getName(), s);
 
             if(phases != null) {
-              for(int i=0; i < phases.size(); i++) {              	
+              for(int i=0; i < phases.size(); i++) {
                 m.addPhase(
                   ((Transducer)phases.get(i)).getName(),
                   (Transducer)phases.get(i)
@@ -431,7 +434,7 @@ SinglePhaseTransducer SinglePhaseTransducer() :
           else if(optionValueTok.image.equalsIgnoreCase("once"))
             t.setRuleApplicationStyle(ONCE_STYLE);
           else if(optionValueTok.image.equalsIgnoreCase("all"))
-            t.setRuleApplicationStyle(ALL_STYLE);  
+            t.setRuleApplicationStyle(ALL_STYLE);
           else
             System.err.println(errorMsgPrefix(optionValueTok)+
               "ignoring unknown control strategy " + option +
@@ -496,8 +499,8 @@ Rule Rule(String phaseName) :
 
   lhs=LeftHandSide() "-->" rhs=RightHandSide(phaseName, ruleName, lhs)
   {
-    try { 
-      rhs.createActionClass(); 
+    try {
+      rhs.createActionClass();
     } catch(JapeException e) {
       /*Debug.pr(
         this, "ParseCpsl.Rule, FAILED rhs: " + rhs.getActionClassString()
@@ -509,7 +512,7 @@ Rule Rule(String phaseName) :
     newRule = new Rule(ruleName, ruleNumber, rulePriority, lhs, rhs);
 	// if there were "Input:" annotation types specified ...
   	if(curSPT.isInputRestricted()) {
-      // find all the different annotation types used in the 
+      // find all the different annotation types used in the
       // LHS of the rule
       HashSet<String> set = new HashSet<String>();
   	  lhs.getConstraintGroup().getContainedAnnotationTypes(set);
@@ -668,7 +671,7 @@ BasicPatternElement BasicPatternElement() :
       );
     }
   )
-  { 
+  {
     finishBPE(bpe);
     return bpe;
   }
@@ -710,11 +713,13 @@ ComplexPatternElement ComplexPatternElement(LeftHandSide lhs) :
 Constraint Constraint() :
 {
   Token annotTypeTok = null;
-  Token attrNameTok = null;
+  AnnotationAccessor accessor = null;
+  Token opTok = null;
   Object attrValObj = null;
   Pair attrValPair = null;
   boolean negate = false;
   Constraint c = null;
+  String opString = null;
 }
 {
   // negation
@@ -723,18 +728,27 @@ Constraint Constraint() :
   // the annotation type
   annotTypeTok=<ident>
   {
-    c = new Constraint(annotTypeTok.image);
+    c = Factory.getConstraintFactory().createConstraint(annotTypeTok.image);
     if(negate) c.negate();
   }
 
-  // optional attribute value
+  // optional attribute value with comparison operator
   (
-    <period> attrNameTok=<ident> <equals> attrValPair=AttrVal()
+    accessor=Accessor() opTok=<attrOp> attrValPair=AttrVal()
     {
-      attrValObj = attrValPair.second;
-      c.addAttribute(
-        new JdmAttribute(attrNameTok.image, attrValObj)
-      );
+      // check for some "short cut" negation operators that need to be translated
+      // to the positive equivalents.  Change the sign of the constraint when
+      // using these.
+      opString = opTok.image;
+      if (opString.equals("!=")) {
+          opString = "==";
+          c.changeSign();
+      }
+      else if (opString.equals("!~")) {
+          opString = "=~";
+          c.changeSign();
+      }
+      c.addAttribute(Factory.getConstraintFactory().createPredicate(opString, accessor, attrValPair.second));
     }
   )?
 
@@ -744,6 +758,22 @@ Constraint Constraint() :
   }
 } // Constraint
 
+//attribute values: strings, identifers (=strings), integers, floats,
+//booleans
+AnnotationAccessor Accessor() :
+{
+Token attrNameTok = null;
+AnnotationAccessor accessor = null;
+}
+{
+  (
+    <period> attrNameTok=<ident>
+  )
+  {
+    accessor = Factory.getConstraintFactory().createDefaultAccessor(attrNameTok.image);
+    return accessor;
+  }
+}
 
 // attribute values: strings, identifers (=strings), integers, floats,
 //                   booleans
@@ -1042,7 +1072,7 @@ String[] AssignmentExpression() :
         //   add a new attribute copied from that one
         {
           blockBuffer.append(
-"        if (" + existingAnnotSetName + " != null) {" + nl +                  
+"        if (" + existingAnnotSetName + " != null) {" + nl +
 "          AnnotationSet existingAnnots = " + nl +
 "          " + existingAnnotSetName + ".get(\"" + existingAnnotType + "\");" + nl +
 "          if (existingAnnots != null) {" + nl +

@@ -30,23 +30,23 @@ public interface ParseCpslConstants {
   int priority = 24;
   int pling = 25;
   int kleeneOp = 26;
-  int integer = 27;
-  int string = 34;
-  int bool = 35;
-  int ident = 36;
-  int floatingPoint = 37;
-  int exponent = 38;
-  int colon = 39;
-  int semicolon = 40;
-  int period = 41;
-  int bar = 42;
-  int comma = 43;
-  int leftBrace = 44;
-  int rightBrace = 45;
-  int leftBracket = 46;
-  int rightBracket = 47;
-  int assign = 48;
-  int equals = 49;
+  int attrOp = 27;
+  int integer = 28;
+  int string = 35;
+  int bool = 36;
+  int ident = 37;
+  int floatingPoint = 38;
+  int exponent = 39;
+  int colon = 40;
+  int semicolon = 41;
+  int period = 42;
+  int bar = 43;
+  int comma = 44;
+  int leftBrace = 45;
+  int rightBrace = 46;
+  int leftBracket = 47;
+  int rightBracket = 48;
+  int assign = 49;
   int colonplus = 50;
   int whiteSpace = 51;
   int singleLineCStyleComment = 52;
@@ -90,13 +90,14 @@ public interface ParseCpslConstants {
     "\"Priority:\"",
     "\"!\"",
     "<kleeneOp>",
+    "<attrOp>",
     "<integer>",
     "\"\\\"\"",
     "\"\\\\n\"",
     "\"\\\\r\"",
     "\"\\\\t\"",
     "\"\\\\\\\"\"",
-    "<token of kind 33>",
+    "<token of kind 34>",
     "\"\\\"\"",
     "<bool>",
     "<ident>",
@@ -112,7 +113,6 @@ public interface ParseCpslConstants {
     "\"(\"",
     "\")\"",
     "\"=\"",
-    "\"==\"",
     "\":+\"",
     "<whiteSpace>",
     "<singleLineCStyleComment>",

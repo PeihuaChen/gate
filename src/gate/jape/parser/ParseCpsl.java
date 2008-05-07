@@ -4,8 +4,11 @@ package gate.jape.parser;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.regex.*;
+import gate.Factory;
 import gate.util.*;
 import gate.jape.*;
+import gate.jape.constraint.*;
 import gate.event.*;
 
 
@@ -411,7 +414,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     newRule = new Rule(ruleName, ruleNumber, rulePriority, lhs, rhs);
         // if there were "Input:" annotation types specified ...
         if(curSPT.isInputRestricted()) {
-      // find all the different annotation types used in the 
+      // find all the different annotation types used in the
       // LHS of the rule
       HashSet<String> set = new HashSet<String>();
           lhs.getConstraintGroup().getContainedAnnotationTypes(set);
@@ -685,11 +688,13 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   // ComplexPatternElement
   final public Constraint Constraint() throws ParseException {
   Token annotTypeTok = null;
-  Token attrNameTok = null;
+  AnnotationAccessor accessor = null;
+  Token opTok = null;
   Object attrValObj = null;
   Pair attrValPair = null;
   boolean negate = false;
   Constraint c = null;
+  String opString = null;
     switch (jj_nt.kind) {
     case pling:
       jj_consume_token(pling);
@@ -701,18 +706,26 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     }
     // the annotation type
       annotTypeTok = jj_consume_token(ident);
-    c = new Constraint(annotTypeTok.image);
+    c = Factory.getConstraintFactory().createConstraint(annotTypeTok.image);
     if(negate) c.negate();
     switch (jj_nt.kind) {
     case period:
-      jj_consume_token(period);
-      attrNameTok = jj_consume_token(ident);
-      jj_consume_token(equals);
+      accessor = Accessor();
+      opTok = jj_consume_token(attrOp);
       attrValPair = AttrVal();
-      attrValObj = attrValPair.second;
-      c.addAttribute(
-        new JdmAttribute(attrNameTok.image, attrValObj)
-      );
+      // check for some "short cut" negation operators that need to be translated
+      // to the positive equivalents.  Change the sign of the constraint when
+      // using these.
+      opString = opTok.image;
+      if (opString.equals("!=")) {
+          opString = "==";
+          c.changeSign();
+      }
+      else if (opString.equals("!~")) {
+          opString = "=~";
+          c.changeSign();
+      }
+      c.addAttribute(Factory.getConstraintFactory().createPredicate(opString, accessor, attrValPair.second));
       break;
     default:
       jj_la1[23] = jj_gen;
@@ -724,6 +737,17 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
 
   // Constraint
 
+//attribute values: strings, identifers (=strings), integers, floats,
+//booleans
+  final public AnnotationAccessor Accessor() throws ParseException {
+Token attrNameTok = null;
+AnnotationAccessor accessor = null;
+    jj_consume_token(period);
+    attrNameTok = jj_consume_token(ident);
+    accessor = Factory.getConstraintFactory().createDefaultAccessor(attrNameTok.image);
+    {if (true) return accessor;}
+    throw new Error("Missing return statement in function");
+  }
 
 // attribute values: strings, identifers (=strings), integers, floats,
 //                   booleans
@@ -1133,6 +1157,85 @@ existingAttrName + "\");" + nl +
     finally { jj_save(1, xla); }
   }
 
+  final private boolean jj_3R_21() {
+    Token xsp;
+    if (jj_3R_23()) return true;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_23()) { jj_scanpos = xsp; break; }
+    }
+    return false;
+  }
+
+  final private boolean jj_3R_15() {
+    if (jj_3R_17()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_14() {
+    if (jj_scan_token(ident)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_24() {
+    if (jj_scan_token(pling)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_19() {
+    if (jj_scan_token(leftBrace)) return true;
+    if (jj_3R_22()) return true;
+    return false;
+  }
+
+  final private boolean jj_3_1() {
+    if (jj_3R_12()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_22() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_24()) jj_scanpos = xsp;
+    if (jj_scan_token(ident)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_12() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_14()) {
+    jj_scanpos = xsp;
+    if (jj_3R_15()) {
+    jj_scanpos = xsp;
+    if (jj_3R_16()) return true;
+    }
+    }
+    return false;
+  }
+
+  final private boolean jj_3_2() {
+    if (jj_3R_13()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_17() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_19()) {
+    jj_scanpos = xsp;
+    if (jj_3R_20()) return true;
+    }
+    return false;
+  }
+
+  final private boolean jj_3R_13() {
+    if (jj_scan_token(colon)) return true;
+    if (jj_scan_token(ident)) return true;
+    if (jj_scan_token(leftBrace)) return true;
+    return false;
+  }
+
   final private boolean jj_3R_20() {
     if (jj_scan_token(string)) return true;
     return false;
@@ -1154,85 +1257,6 @@ existingAttrName + "\");" + nl +
     return false;
   }
 
-  final private boolean jj_3R_21() {
-    Token xsp;
-    if (jj_3R_23()) return true;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_23()) { jj_scanpos = xsp; break; }
-    }
-    return false;
-  }
-
-  final private boolean jj_3R_15() {
-    if (jj_3R_17()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_14() {
-    if (jj_scan_token(ident)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_19() {
-    if (jj_scan_token(leftBrace)) return true;
-    if (jj_3R_22()) return true;
-    return false;
-  }
-
-  final private boolean jj_3_1() {
-    if (jj_3R_12()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_24() {
-    if (jj_scan_token(pling)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_12() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_14()) {
-    jj_scanpos = xsp;
-    if (jj_3R_15()) {
-    jj_scanpos = xsp;
-    if (jj_3R_16()) return true;
-    }
-    }
-    return false;
-  }
-
-  final private boolean jj_3R_22() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_24()) jj_scanpos = xsp;
-    if (jj_scan_token(ident)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_17() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_19()) {
-    jj_scanpos = xsp;
-    if (jj_3R_20()) return true;
-    }
-    return false;
-  }
-
-  final private boolean jj_3_2() {
-    if (jj_3R_13()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_13() {
-    if (jj_scan_token(colon)) return true;
-    if (jj_scan_token(ident)) return true;
-    if (jj_scan_token(leftBrace)) return true;
-    return false;
-  }
-
   public ParseCpslTokenManager token_source;
   SimpleCharStream jj_input_stream;
   public Token token, jj_nt;
@@ -1249,10 +1273,10 @@ existingAttrName + "\");" + nl +
       jj_la1_1();
    }
    private static void jj_la1_0() {
-      jj_la1_0 = new int[] {0x400,0x80000,0x1000,0x80800,0x0,0x100000,0x0,0x0,0x200000,0xc00000,0xc00000,0x1000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4000000,0x8000000,0x0,0x2000000,0x0,0x8000000,0x0,0x0,0x0,0x0,0x8000000,0x0,};
+      jj_la1_0 = new int[] {0x400,0x80000,0x1000,0x80800,0x0,0x100000,0x0,0x0,0x200000,0xc00000,0xc00000,0x1000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4000000,0x10000000,0x0,0x2000000,0x0,0x10000000,0x0,0x0,0x0,0x0,0x10000000,0x0,};
    }
    private static void jj_la1_1() {
-      jj_la1_1 = new int[] {0x0,0x0,0x0,0x0,0x10,0x0,0x10,0x18,0x0,0x0,0x0,0x0,0x41090,0x5014,0x400,0x5014,0x5014,0x800,0x1004,0x0,0x10,0x80,0x0,0x200,0x3c,0x800,0x41090,0x40080,0x10,0xbc,0x800,};
+      jj_la1_1 = new int[] {0x0,0x0,0x0,0x0,0x20,0x0,0x20,0x30,0x0,0x0,0x0,0x0,0x42120,0xa028,0x800,0xa028,0xa028,0x1000,0x2008,0x0,0x20,0x100,0x0,0x400,0x78,0x1000,0x42120,0x40100,0x20,0x178,0x1000,};
    }
   final private JJCalls[] jj_2_rtns = new JJCalls[2];
   private boolean jj_rescan = false;

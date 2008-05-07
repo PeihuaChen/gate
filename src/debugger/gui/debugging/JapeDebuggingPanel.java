@@ -13,6 +13,7 @@ import java.awt.event.*;
 import java.util.*;
 
 import gate.*;
+import gate.jape.Constraint;
 import gate.util.*;
 import gate.Document;
 
@@ -436,34 +437,24 @@ public class JapeDebuggingPanel extends JPanel {
                     }
                     // end of highlighting
 
-                    // Set standard annotation tooltip - annotation's features
-                    String toolTipText = "";
-                    FeatureMap featureMap = null;
-                    if (ruleTrace != null) {
-                        featureMap = ruleTrace.getPattern(currentAnnotation);
-                    }
-                    if (featureMap == null && containedAnnotationsOfTheSameType != null) {
-                        if (ruleTrace != null) {
-                            for (Iterator<Annotation> iterator = containedAnnotationsOfTheSameType.iterator(); iterator.hasNext();) {
-                                featureMap = ruleTrace.getPattern(iterator.next());
-                                if (featureMap != null)
-                                    break;
-                            }
+                    // Set standard annotation tooltip - information about the constraint which matched this annotation
+                    if (textPanel.isTextVisible() && (textPanel.isHighlighted() || textPanel.isRed()) && withHighlighting) {
+                      String toolTipText = "";
+                      Constraint constraint = null;
+                      if (ruleTrace != null) {
+                        constraint = ruleTrace.getPattern(currentAnnotation);
+                        if (constraint == null && containedAnnotationsOfTheSameType != null) {
+                          for (Iterator<Annotation> iterator = containedAnnotationsOfTheSameType.iterator(); iterator.hasNext();) {
+                              constraint = ruleTrace.getPattern(iterator.next());
+                              if (constraint != null)
+                                  break;
+                          }
                         }
-                    }
-                    if (featureMap != null) {
-                        for (Iterator i = featureMap.keySet().iterator(); i.hasNext();) {
-                            toolTipText = toolTipText + " " + annotationsType + ".";
-                            Object key = i.next();
-                            toolTipText = toolTipText + key + "=" + featureMap.get(key);
-                        }
-                        if (featureMap.keySet().isEmpty()) {
-                            toolTipText = annotationsType;
-                        }
-                    }
-                    if (featureMap != null && textPanel.isTextVisible() && (textPanel.isHighlighted() || textPanel.isRed())
-                            && withHighlighting) {
-                        textPanel.setToolTipText(toolTipText);
+                      }
+                      if (constraint != null) {
+                          toolTipText = constraint.getDisplayString("");
+                          textPanel.setToolTipText(toolTipText);
+                      }
                     }
                     // end of setting tooltip
 

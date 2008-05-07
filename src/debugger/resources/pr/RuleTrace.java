@@ -14,11 +14,10 @@ import gate.FeatureMap;
 import gate.annotation.AnnotationSetImpl;
 import gate.fsm.State;
 import gate.fsm.Transition;
+import gate.jape.Constraint;
 import gate.jape.RightHandSide;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * Copyright (c) Ontos AG (http://www.ontosearch.com).
@@ -115,12 +114,12 @@ public class RuleTrace {
         return null;
     }
 
-    public void putPattern(Annotation ann, FeatureMap fm) {
-        patterns.put(ann, fm);
+    public void putPattern(Annotation ann, Constraint constraint) {
+        patterns.put(ann, constraint);
     }
 
-    public FeatureMap getPattern(Annotation ann) {
-        return (FeatureMap) patterns.get(ann);
+    public Constraint getPattern(Annotation ann) {
+        return (Constraint) patterns.get(ann);
     }
 
     public void setOverrided(RuleModel ruleModel) {

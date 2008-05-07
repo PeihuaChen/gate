@@ -73,7 +73,7 @@ public class Transition implements Serializable, Comparable {
   }
 
   /**
-    * Creates a new transition to the given State with the same 
+    * Creates a new transition to the given State with the same
     * bindings as this one.
     */
   public Transition spawn(State s)
@@ -93,7 +93,7 @@ public class Transition implements Serializable, Comparable {
   public BasicPatternElement getConstraints(){ return constraints; }
 
   /**
-    * Returns a boolean value indicating whether this Transition 
+    * Returns a boolean value indicating whether this Transition
     * has any constraints on it.
     */
   public boolean hasConstraints()
@@ -109,43 +109,41 @@ public class Transition implements Serializable, Comparable {
     */
   public boolean satisfiedBy(Annotation[] coIncidentAnnos) {
       Constraint[] allConstraints = getConstraints().getConstraints();
-      
+
       processAllConstraints:
       for (int i = 0; i < allConstraints.length; i++)
       {
           Constraint c = allConstraints[i];
           boolean negated = c.isNegated();
-          
+
           for (int j = 0; j < coIncidentAnnos.length; j++)
           {
-              if (coIncidentAnnos[j].getType().equals(c.getAnnotType())
-                  &&
-                  coIncidentAnnos[j].getFeatures().subsumes(c.getAttributeSeq()))
+              if (c.matches(coIncidentAnnos[j], null))
               {
                   // One of these puppies being satisfied invalidates the whole transition
                   if (negated) return false;
-                  
+
                   // This constraint is satisfied, go on to the next one
                   continue processAllConstraints;
               }
           }
-          
+
           // No matching annotations found for this constraint
           if (!negated) return false;
       }
-      
+
       // All constraints satisfied
       return true;
   }
 
   /**
-    * Returns a boolean value indicating whether this Transition 
+    * Returns a boolean value indicating whether this Transition
     * deals with multiple types of annotations.
     */
   public boolean isMultiType() {
       return constraints != null && constraints.isMultiType();
   }
-  
+
   /**
     * Returns a textual desciption of this transition.
     * @return a String

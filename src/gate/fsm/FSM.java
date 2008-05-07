@@ -34,7 +34,7 @@ public class FSM implements JapeConstants {
    */
   protected FSM() {
     initialState = new State();
-  } 
+  }
 
   /**
     * Builds a standalone FSM starting from a single phase transducer.
@@ -43,8 +43,8 @@ public class FSM implements JapeConstants {
   public FSM(SinglePhaseTransducer spt){
     this();
     addRules(spt.getRules());
-  }  
-  
+  }
+
   /**
    * Do the work involved in creating an FSM from a PrioritisedRuleList.
    */
@@ -189,7 +189,7 @@ public class FSM implements JapeConstants {
    * Builds a FSM starting from a ComplexPatternElement. This FSM is usually
    * part of a larger FSM based on the Rule that contains the
    * ComplexPatternElement.
-   * 
+   *
    * @param cpe
    *            the ComplexPatternElement to be used for the building process.
    */
@@ -201,19 +201,19 @@ public class FSM implements JapeConstants {
 
   /**
    * A factory method for new FSMs like this one, given a Rule object.
-   */ 
+   */
   protected FSM spawn(Rule r) {
     return new FSM(r);
   }
-  
+
   /**
    * A factory method for new FSMs like this one, given a ComplexPatternElement
    * object.
-   */ 
+   */
   protected FSM spawn(ComplexPatternElement currentPattern) {
       return new FSM(currentPattern);
   }
-  
+
   /**
     * Gets the initial state of this FSM
     * @return an object of type gate.fsm.State representing the initial state.
@@ -492,13 +492,13 @@ public class FSM implements JapeConstants {
     return lambdaClosure;
   } // lambdaClosure
 
-  
+
   /**
    * Two members used by forEachState().
    */
   protected State currentState;
   protected Transition currentTransition;
-  
+
   /**
    * Iterates over all the states in this FSM, setting currentState and
    * currentTransition, then calling the given Runnable callback.
@@ -559,7 +559,7 @@ public class FSM implements JapeConstants {
 
     return statesToReturn;
   }
-  
+
   /**
    * Returns a representation of this FSM in the GraphViz graph-visualization
    * language. We use the "digraph" (directed graph) format. Nodes are labeled
@@ -567,10 +567,10 @@ public class FSM implements JapeConstants {
    * state, and round otherwise. A node is green if it's an initial state, red
    * if it's a final state, and black otherwise. Final states are also marked
    * with a double-line outline.
-   * 
+   *
    * @see <a href="http://www.graphviz.org/">the GraphViz web site </a> for
    *      software to translate the output of this method into pretty pictures.
-   * 
+   *
    * @param includeConstraints
    *            whether to include a stringified representation of each
    *            transition object as part of its label. The default is false.
@@ -633,7 +633,7 @@ public class FSM implements JapeConstants {
     }
     return toReturn.toString();
   }
-  
+
 
   /**
     * Returns a GML (Graph Modelling Language) representation of the transition
@@ -642,7 +642,7 @@ public class FSM implements JapeConstants {
   public String getGML() {
 
     String res = "graph[ \ndirected 1\n";
-    
+
     StringBuffer nodes = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE),
                  edges = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
 
@@ -681,7 +681,7 @@ public class FSM implements JapeConstants {
     * The initial state of this FSM.
     */
   private State initialState;
-  
+
  /**
    * The final state of this FSM (usually only valid during construction).
    */
@@ -719,25 +719,9 @@ public class FSM implements JapeConstants {
 
         }
         else {
-          binds += ind + "   {";
-          BasicPatternElement basicPatternElement = (BasicPatternElement)
-              patternElement;
-          Constraint[] cons = basicPatternElement.getConstraints();
-          for (int k = 0; k < cons.length; k++) {
-            Constraint con = cons[k];
-            String annType = con.getAnnotType();
-            gate.FeatureMap fm = con.getAttributeSeq();
-            Iterator iter = fm.keySet().iterator();
-            if (!iter.hasNext())
-              binds += annType + ",";
-            while (iter.hasNext()) {
-              String key = (String) iter.next();
-              binds += annType + "." + key + "==\"" + fm.get(key) + "\",";
-
-            }
-          }
-          binds = binds.substring(0, binds.length() - 1);
-          binds += "}" + " *" + bpeId++ +"*" + "\n";
+          binds += ind + "   ";
+          binds += currentBasicBinding((BasicPatternElement) patternElement);
+          binds += "\n";
         }
       }
       binds += ind + "   |\n";
@@ -758,25 +742,15 @@ public class FSM implements JapeConstants {
   }
 
   private String currentBasicBinding(BasicPatternElement bpe) {
-    String bind = "";
-    bind += "{";
+    StringBuilder sb = new StringBuilder("{");
     Constraint[] cons = bpe.getConstraints();
     for (int k = 0; k < cons.length; k++) {
-      Constraint con = cons[k];
-      String annType = con.getAnnotType();
-      gate.FeatureMap fm = con.getAttributeSeq();
-      Iterator iter = fm.keySet().iterator();
-      if (!iter.hasNext())
-        bind += annType + ",";
-      while (iter.hasNext()) {
-        String key = (String) iter.next();
-        bind += annType + "." + key + "==\"" + fm.get(key) + "\",";
-
-      }
+      sb.append(cons[k].getDisplayString(""));
+      if (k < cons.length - 1)
+        sb.append(",");
     }
-    bind = bind.substring(0, bind.length() - 1);
-    bind += "}" + " *" + bpeId++ +"*";
-    return bind;
+    sb.append("}").append(" *").append(bpeId++).append("*");
+    return sb.toString();
   }
 
   private String currentLHSBinding(LeftHandSide lhs) {
@@ -794,25 +768,9 @@ public class FSM implements JapeConstants {
 
         }
         else {
-          binds += "   {";
-          BasicPatternElement basicPatternElement = (BasicPatternElement)
-              patternElement;
-          Constraint[] cons = basicPatternElement.getConstraints();
-          for (int k = 0; k < cons.length; k++) {
-            Constraint con = cons[k];
-            String annType = con.getAnnotType();
-            gate.FeatureMap fm = con.getAttributeSeq();
-            Iterator iter = fm.keySet().iterator();
-            if (!iter.hasNext())
-              binds += annType + ",";
-            while (iter.hasNext()) {
-              String key = (String) iter.next();
-              binds += annType + "." + key + "==\"" + fm.get(key) + "\",";
-
-            }
-          }
-          binds = binds.substring(0, binds.length() - 1);
-          binds += "}" + " *" + bpeId++ +"*" + "\n";
+          binds += "   ";
+          binds += currentBasicBinding((BasicPatternElement) patternElement);
+          binds += "\n";
         }
       }
       binds += "   |\n";

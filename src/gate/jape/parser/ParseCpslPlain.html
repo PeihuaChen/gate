@@ -55,10 +55,15 @@
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod12">Constraint</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
-<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;pling&gt; )? &lt;ident&gt; ( &lt;period&gt; &lt;ident&gt; &lt;equals&gt; <A HREF="#prod13">AttrVal</A> )?</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;pling&gt; )? &lt;ident&gt; ( <A HREF="#prod13">Accessor</A> &lt;attrOp&gt; <A HREF="#prod14">AttrVal</A> )?</TD>
 </TR>
 <TR>
-<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod13">AttrVal</A></TD>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod13">Accessor</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;period&gt; &lt;ident&gt; )</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod14">AttrVal</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
 <TD ALIGN=LEFT VALIGN=BASELINE>( &lt;string&gt; | &lt;ident&gt; | &lt;integer&gt; | &lt;floatingPoint&gt; | &lt;bool&gt; )</TD>
 </TR>
@@ -70,25 +75,25 @@
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod8">Action</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
-<TD ALIGN=LEFT VALIGN=BASELINE>( <A HREF="#prod14">NamedJavaBlock</A> | <A HREF="#prod15">AnonymousJavaBlock</A> | <A HREF="#prod16">AssignmentExpression</A> | &lt;ident&gt; )</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( <A HREF="#prod15">NamedJavaBlock</A> | <A HREF="#prod16">AnonymousJavaBlock</A> | <A HREF="#prod17">AssignmentExpression</A> | &lt;ident&gt; )</TD>
 </TR>
 <TR>
-<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod14">NamedJavaBlock</A></TD>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod15">NamedJavaBlock</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
-<TD ALIGN=LEFT VALIGN=BASELINE>&lt;colon&gt; &lt;ident&gt; &lt;leftBrace&gt; <A HREF="#prod17">ConsumeBlock</A></TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>&lt;colon&gt; &lt;ident&gt; &lt;leftBrace&gt; <A HREF="#prod18">ConsumeBlock</A></TD>
 </TR>
 <TR>
-<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod15">AnonymousJavaBlock</A></TD>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod16">AnonymousJavaBlock</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
-<TD ALIGN=LEFT VALIGN=BASELINE>&lt;leftBrace&gt; <A HREF="#prod17">ConsumeBlock</A></TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>&lt;leftBrace&gt; <A HREF="#prod18">ConsumeBlock</A></TD>
 </TR>
 <TR>
-<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod16">AssignmentExpression</A></TD>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod17">AssignmentExpression</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
-<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;colon&gt; | &lt;colonplus&gt; ) &lt;ident&gt; &lt;period&gt; &lt;ident&gt; &lt;assign&gt; &lt;leftBrace&gt; ( &lt;ident&gt; &lt;assign&gt; ( <A HREF="#prod13">AttrVal</A> | ( &lt;colon&gt; &lt;ident&gt; &lt;period&gt; &lt;ident&gt; &lt;period&gt; &lt;ident&gt; ) ) ( &lt;comma&gt; )? )* &lt;rightBrace&gt;</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;colon&gt; | &lt;colonplus&gt; ) &lt;ident&gt; &lt;period&gt; &lt;ident&gt; &lt;assign&gt; &lt;leftBrace&gt; ( &lt;ident&gt; &lt;assign&gt; ( <A HREF="#prod14">AttrVal</A> | ( &lt;colon&gt; &lt;ident&gt; &lt;period&gt; &lt;ident&gt; &lt;period&gt; &lt;ident&gt; ) ) ( &lt;comma&gt; )? )* &lt;rightBrace&gt;</TD>
 </TR>
 <TR>
-<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod17">ConsumeBlock</A></TD>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod18">ConsumeBlock</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
 <TD ALIGN=LEFT VALIGN=BASELINE><I>java code</I></TD></TR>
 </TABLE>
