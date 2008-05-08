@@ -153,6 +153,16 @@
       <CLASS>gate.creole.ConditionalSerialAnalyserController</CLASS>
       <ICON>application</ICON>
     </RESOURCE>
+    <RESOURCE>
+      <NAME>Real-time Corpus Pipeline</NAME>
+      <COMMENT>A serial controller for PR pipelines over corpora</COMMENT>
+      <CLASS>gate.creole.RealtimeCorpusController</CLASS>
+      <PARAMETER NAME="timeout"
+                 COMMENT="Timeout in milliseconds before execution on a document is stopped."
+                 OPTIONAL="false"
+                 RUNTIME="false">java.lang.Long</PARAMETER>      
+      <ICON>application</ICON>
+    </RESOURCE>
   </CREOLE>
   
   <!-- creole.xml for Visual Resources -->
