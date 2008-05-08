@@ -160,8 +160,9 @@
       <PARAMETER NAME="timeout"
                  COMMENT="Timeout in milliseconds before execution on a document is stopped."
                  OPTIONAL="false"
+                 DEFAULT="60000"
                  RUNTIME="false">java.lang.Long</PARAMETER>      
-      <ICON>application</ICON>
+      <ICON>application-realtime</ICON>
     </RESOURCE>
   </CREOLE>
   
