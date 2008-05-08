@@ -137,8 +137,9 @@ public class RealtimeCorpusController extends SerialAnalyserController {
     }
     
   }
+  
   /** Run the Processing Resources in sequence. */
-  public void execute() throws ExecutionException{
+  public void executeImpl() throws ExecutionException{
     Timer timeoutTimer = new Timer(this.getClass().getName() + 
         " timeout timer");
     interrupted = false;
