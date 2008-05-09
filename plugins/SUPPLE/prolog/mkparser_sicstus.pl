@@ -35,7 +35,16 @@ NOTE: -n reserved for mkparser script (it triggers assertion of
 :- prolog_flag(redefine_warnings,_,off).
 :- prolog_flag(single_var_warnings,_,off).
 
-:- compile('sicstus_utils.pl').
+% compile either sicstus3_utils or sicstus4_utils, depending on SICStus major
+% version number.  The 'version' prolog_flag on SICStus starts 'SICStus
+% major.minor.patch', we extract the major version and condition on that.
+:- (prolog_flag(version, V),
+    atom_concat('SICStus ', Vtail, V),
+    atom_codes(Vtail, [Major|_]),
+    number_codes(Major, [MajorVersion]),
+    MajorVersion =< 3,
+    compile('sicstus3_utils.pl'))
+   ; compile('sicstus4_utils.pl').
 
 :- dynamic non_interactive/0.
 ?- ((prolog_flag(argv,A,A), member('-n', A), assert(non_interactive)) 
