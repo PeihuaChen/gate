@@ -167,15 +167,15 @@ public class CompoundDocumentEditor extends AbstractVisualResource
           return;
         }
 
-        String xmlString = "";
+        StringBuilder xmlString = new StringBuilder();
         BufferedReader br = new BufferedReader(new InputStreamReader(
                 new FileInputStream(fileToOpen), "utf-8"));
         String line = br.readLine();
         while(line != null) {
-          xmlString += " "+line;
+          xmlString.append("\n").append(line);
           line = br.readLine();
         }
-        AbstractCompoundDocument.fromXml(xmlString);
+        AbstractCompoundDocument.fromXml(xmlString.toString());
         br.close();
       }
       catch(Exception e) {

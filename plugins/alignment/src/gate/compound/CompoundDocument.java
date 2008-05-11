@@ -84,5 +84,5 @@ public interface CompoundDocument extends TextualDocument {
 	 * The alignment object contains information about the alignment of text.
 	 * @return
 	 */
-	public Alignment getAlignmentInformation();
+	public Alignment getAlignmentInformation(String alignmentFeatureName);
 }
