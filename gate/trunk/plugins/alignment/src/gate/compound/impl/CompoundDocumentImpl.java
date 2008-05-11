@@ -139,6 +139,7 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
         Document doc = (Document)Factory.createResource(
                 "gate.corpora.DocumentImpl", features, subFeatures);
         doc.setName(documentID);
+        System.out.println(documentID);
         documents.put(documentID, doc);
       }
 
@@ -221,15 +222,19 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
    * The alignment object contains information about the alignment of
    * text.
    * 
+   * @param alignmentFeatureName
    * @return
    */
-  public Alignment getAlignmentInformation() {
-    if(this.features.get(AlignmentFactory.ALIGNMENT_FEATURE_NAME) == null) {
-      this.features.put(AlignmentFactory.ALIGNMENT_FEATURE_NAME,
-              new Alignment());
+  public Alignment getAlignmentInformation(String alignmentFeatureName) {
+    if(alignmentFeatureName == null) {
+      alignmentFeatureName = AlignmentFactory.ALIGNMENT_FEATURE_NAME;
+    }
+    if(this.features.get(alignmentFeatureName) == null) {
+      this.features.put(alignmentFeatureName,
+              new Alignment(this));
     }
 
-    return (Alignment)this.features.get(AlignmentFactory.ALIGNMENT_FEATURE_NAME);
+    return (Alignment)this.features.get(alignmentFeatureName);
   }
 
 } // class CompoundDocumentImpl

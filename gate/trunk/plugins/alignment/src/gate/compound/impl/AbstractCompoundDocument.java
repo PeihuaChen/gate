@@ -26,7 +26,6 @@ import gate.FeatureMap;
 import gate.Gate;
 import gate.Resource;
 import gate.alignment.Alignment;
-import gate.alignment.gui.AlignmentFactory;
 import gate.annotation.AnnotationSetImpl;
 import gate.compound.CompoundDocument;
 import gate.corpora.DocumentContentImpl;
@@ -463,29 +462,29 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
     }
   }// toXml
 
-  
   /**
    * Gives a single XML representation for the entire document.
+   * 
    * @param aCompoundDoc
    * @return
    */
   public static String toXmlAsASingleDocument(CompoundDocument aCompoundDoc) {
     Map<String, String> docXmls = new HashMap<String, String>();
     Map<String, Object> globalMap = new HashMap<String, Object>();
-    
+
     for(String id : aCompoundDoc.getDocumentIDs()) {
       docXmls.put(id, aCompoundDoc.getDocument(id).toXml());
     }
-    
+
     // add document xmls
     globalMap.put("docXmls", docXmls);
-    
+
     // we would use XStream library to store annic patterns
     com.thoughtworks.xstream.XStream xstream = new com.thoughtworks.xstream.XStream();
 
     // Saving is accomplished just using XML serialization of the map.
     StringWriter stringToReturn = new StringWriter();
-    
+
     // other features
     Map<String, Object> features = new HashMap<String, Object>();
     features.put("encoding", aCompoundDoc.getEncoding());
@@ -496,18 +495,22 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
     features.put("documentIDs", aCompoundDoc.getDocumentIDs());
     features.put("markupAware", new Boolean(true));
     features.put("name", aCompoundDoc.getName());
-    features.put("alignment", aCompoundDoc.getAlignmentInformation());
-
     globalMap.put("feats", features);
-    
+
+    Document aDoc = aCompoundDoc.getCurrentDocument();
+    aCompoundDoc.setCurrentDocument(null);
+    globalMap.put("docFeats", aCompoundDoc.getFeatures());
+    if(aDoc != null) aCompoundDoc.setCurrentDocument(aDoc.getName());
+
     xstream.toXML(globalMap, stringToReturn);
     return stringToReturn.toString();
   }
-  
 
   /**
-   * Loads the compound document with given xmlString. Please note that the
-   * string should have been generated with the toXmlAsASingleDocument method.
+   * Loads the compound document with given xmlString. Please note that
+   * the string should have been generated with the
+   * toXmlAsASingleDocument method.
+   * 
    * @param xmlString
    * @return
    */
@@ -518,16 +521,17 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
 
     // asking the xstream library to use gate class loader
     xstream.setClassLoader(Gate.getClassLoader());
-    
+
     // reading the xml object
-    Map<String, Object> globalMap = (HashMap<String, Object>)xstream.fromXML(reader);
-    
+    Map<String, Object> globalMap = (HashMap<String, Object>)xstream
+            .fromXML(reader);
+
     // now we read individual information
-    Map<String, String> docXmls = (HashMap<String, String>)globalMap.get("docXmls");
+    Map<String, String> docXmls = (HashMap<String, String>)globalMap
+            .get("docXmls");
     Map<String, Object> features = (Map<String, Object>)globalMap.get("feats");
     String encoding = (String)features.get("encoding");
-    
-    Alignment alignmentInformation = (Alignment)features.get("alignment");
+
     try {
       File tempFile = File.createTempFile("example", ".xml");
       File tempFolder = new File(tempFile.getParentFile(), "temp"
@@ -551,18 +555,30 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
       }
 
       features.put("sourceUrl", sourceUrl);
-      String name = (String) features.get("name");
+      String name = (String)features.get("name");
       features.remove("name");
       FeatureMap fets = Factory.newFeatureMap();
       for(String s : features.keySet()) {
         fets.put(s, features.get(s));
       }
-      fets.remove("alignment");
+
       CompoundDocument cd = (CompoundDocument)Factory.createResource(
               "gate.compound.impl.CompoundDocumentImpl", fets);
       cd.setName(name);
-      cd.getFeatures().put(AlignmentFactory.ALIGNMENT_FEATURE_NAME,
-              alignmentInformation);
+      Document aDoc = cd.getCurrentDocument();
+      cd.setCurrentDocument(null);
+      FeatureMap docFeatures = (FeatureMap)globalMap.get("docFeats");
+      for(Object key : docFeatures.keySet()) {
+        Object value = docFeatures.get(key);
+        if(value instanceof Alignment) {
+          ((Alignment)value).setSourceDocument(cd);
+        }
+      }
+      
+      cd.setFeatures(docFeatures);
+      
+      if(aDoc != null) cd.setCurrentDocument(aDoc.getName());
+
       return cd;
     }
     catch(IOException ioe) {
@@ -771,6 +787,11 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   }
 
   public void setCurrentDocument(String documentID) {
+    if(documentID == null) {
+      currentDocument = null;
+      return;
+    }
+
     Object obj = documents.get(documentID);
     if(obj == null) {
       currentDocument = null;
@@ -792,7 +813,8 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
     if(docIDs != null) {
       this.documentIDs = new ArrayList<String>();
       this.documentIDs.addAll(docIDs);
-    } else {
+    }
+    else {
       this.documentIDs = null;
     }
   }
