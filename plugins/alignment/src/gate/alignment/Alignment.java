@@ -2,6 +2,7 @@ package gate.alignment;
 
 import gate.Annotation;
 import gate.Document;
+import gate.compound.CompoundDocument;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -36,19 +37,25 @@ public class Alignment implements Serializable {
 	 * used for letting the user know which document the given annotation
 	 * belongs to.
 	 */
-	protected Map<Annotation, Document> annotation2Document;
+	protected Map<Annotation, String> annotation2Document;
 
 	protected transient List<AlignmentListener> listeners = new ArrayList<AlignmentListener>();
+	protected transient CompoundDocument compoundDocument;
 	
-	/**
+  /**
 	 * Constructor
 	 */
-	public Alignment() {
-		alignmentMatrix = new HashMap<Annotation, Set<Annotation>>();
-		annotation2Document = new HashMap<Annotation, Document>();
+	public Alignment(CompoundDocument compoundDocument) {
+		this.compoundDocument = compoundDocument;
+    alignmentMatrix = new HashMap<Annotation, Set<Annotation>>();
+		annotation2Document = new HashMap<Annotation, String>();
 		counter++;
 	}
 
+  public void setSourceDocument(CompoundDocument cd) {
+    this.compoundDocument = cd;
+  }
+  
 	/**
 	 * Returns if two annotations are aligned with each other.
 	 * 
@@ -92,10 +99,10 @@ public class Alignment implements Serializable {
     }
     
     alignedToT.add(targetAnnotation);
-    annotation2Document.put(srcAnnotation, srcDocument);
+    annotation2Document.put(srcAnnotation, srcDocument.getName());
 
     alignedToS.add(srcAnnotation);
-    annotation2Document.put(targetAnnotation, targetDocument);
+    annotation2Document.put(targetAnnotation, targetDocument.getName());
     fireAnnotationsAligned(srcAnnotation, srcDocument, targetAnnotation, targetDocument);
 	}
 
@@ -147,7 +154,9 @@ public class Alignment implements Serializable {
 	public Set<Annotation> getAlignedAnnotations() {
 		Set<Annotation> annots = alignmentMatrix.keySet();
 		if(annots == null) return null;
-		else return new HashSet<Annotation>(annots);
+		else {
+      return new HashSet<Annotation>(annots);
+    }
 	}
 
 	/**
@@ -157,7 +166,7 @@ public class Alignment implements Serializable {
 	 * @return
 	 */
 	public Document getDocument(Annotation annotation) {
-		return annotation2Document.get(annotation);
+		return compoundDocument.getDocument(annotation2Document.get(annotation));
 	}
 
 	/**
@@ -196,7 +205,11 @@ public class Alignment implements Serializable {
 	}
 	
 	public void removeAlignmentListener(AlignmentListener listener) {
-	  if(listener !=null) this.listeners.remove(listener);
+    if(this.listeners == null) {
+       this.listeners = new ArrayList<AlignmentListener>(); 
+      }
+
+    if(listener !=null) this.listeners.remove(listener);
 	}
 	
 	protected void fireAnnotationsAligned(Annotation srcAnnotation, Document srcDocument,
