@@ -127,6 +127,8 @@ public class AlignmentFactory {
     }
   }
 
+  private HashMap<String, Annotation> currentAnnotations;
+  
   /**
    * The method returns a hashmap that has the following format e.g. en ->
    * english sentence (if document is sentence algined and user wants to
@@ -139,6 +141,7 @@ public class AlignmentFactory {
     for (String lang : documentIDs) {
       annotations.put(lang, ((AASequence) asMap.get(lang)).next());
     }
+    this.currentAnnotations = annotations;
     return annotations;
   }
 
@@ -148,7 +151,12 @@ public class AlignmentFactory {
       annotations
           .put(lang, ((AASequence) asMap.get(lang)).previous());
     }
+    this.currentAnnotations = annotations;
     return annotations;
+  }
+  
+  public HashMap<String, Annotation> current() {
+    return currentAnnotations;
   }
 
   public boolean hasNext() {

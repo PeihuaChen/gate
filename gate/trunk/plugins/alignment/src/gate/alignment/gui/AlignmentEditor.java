@@ -47,7 +47,8 @@ public class AlignmentEditor extends AbstractVisualResource implements
   private JPanel mainPanel, paramPanel, waPanel;
 
   // TextFields for users to provide parameter
-  private JTextField inputASName, parentOfUnitOfAlignment, unitOfAlignment;
+  private JTextField inputASName, parentOfUnitOfAlignment, unitOfAlignment,
+          alignmentFeatureName;
 
   private JButton populate, next, previous;
 
@@ -75,6 +76,8 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
   private AnnotationHighlight currentAnnotationHightlight = null;
 
+  private AlignmentEditor thisInstance = null;
+  
   /*
    * (non-Javadoc)
    * 
@@ -85,6 +88,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
     latestAnnotationsSelection = new HashMap<JEditorPane, List<Annotation>>();
     actions = new HashMap<JMenuItem, AlignmentAction>();
     readActions();
+    thisInstance = this;
     return this;
   }
 
@@ -93,18 +97,20 @@ public class AlignmentEditor extends AbstractVisualResource implements
    */
   private void initGui() {
     mainPanel = new JPanel(new BorderLayout());
-    paramPanel = new JPanel(new GridLayout(4, 1));
+    paramPanel = new JPanel(new GridLayout(5, 1));
 
     waPanel = new JPanel(new GridLayout(documentIDs.size(), 1));
 
     inputASName = new JTextField(40);
     parentOfUnitOfAlignment = new JTextField(40);
     unitOfAlignment = new JTextField(40);
+    alignmentFeatureName = new JTextField(40);
     populate = new JButton("Populate");
     JPanel temp1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
     JPanel temp2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
     JPanel temp3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
     JPanel temp6 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    JPanel temp7 = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
     temp1.add(new JLabel("Input Annotation Set Name:"));
     temp1.add(inputASName);
@@ -115,10 +121,26 @@ public class AlignmentEditor extends AbstractVisualResource implements
     temp3.add(unitOfAlignment);
     unitOfAlignment.setText("Token");
     temp6.add(populate);
+    temp7.add(new JLabel("Alignment Feature Name:"));
+    temp7.add(alignmentFeatureName);
+    alignmentFeatureName.setText(AlignmentFactory.ALIGNMENT_FEATURE_NAME);
+    alignmentFeatureName.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) {
+        alignment = document.getAlignmentInformation(alignmentFeatureName
+                .getText().trim());
+        if(alignment != null) {
+          alignment.removeAlignmentListener(thisInstance);
+          alignment.addAlignmentListener(thisInstance);
+          refresh();
+        }
+      }
+    });
+
     paramPanel.add(temp1);
     paramPanel.add(temp2);
     paramPanel.add(temp3);
     paramPanel.add(temp6);
+    paramPanel.add(temp7);
 
     mainPanel.add(paramPanel, BorderLayout.NORTH);
     populate.addActionListener(this);
@@ -159,7 +181,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
     this.document = (CompoundDocument)target;
     this.documentIDs = new ArrayList<String>(this.document.getDocumentIDs());
     this.documentIDs.remove(CompositeDocument.COMPOSITE_DOC_NAME);
-    alignment = this.document.getAlignmentInformation();
+    alignment = this.document.getAlignmentInformation(null);
     alignment.addAlignmentListener(this);
     initGui();
   }
@@ -264,6 +286,15 @@ public class AlignmentEditor extends AbstractVisualResource implements
     }
   }
 
+  /**
+   * Get the alignment feature name
+   * 
+   * @return
+   */
+  public String getAlignmentFeatureName() {
+    return this.alignmentFeatureName.getText().trim();
+  }
+
   public void actionPerformed(ActionEvent ae) {
     if(ae.getSource() == populate) {
       try {
@@ -289,6 +320,12 @@ public class AlignmentEditor extends AbstractVisualResource implements
   private void nextAction() {
     if(alignFactory != null && alignFactory.hasNext()) {
       updateGUI(alignFactory.next());
+    }
+  }
+
+  private void refresh() {
+    if(alignFactory != null && alignFactory.current() != null) {
+      updateGUI(alignFactory.current());
     }
   }
 
@@ -551,8 +588,9 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
       // and iterate through each annotation highlight
       // and find out where did the user click
-      ArrayList<AnnotationHighlight> hilites = new ArrayList<AnnotationHighlight>(
-              hilights.values());
+      ArrayList<AnnotationHighlight> hilites = new ArrayList<AnnotationHighlight>();
+      if(hilights != null)
+        hilites = new ArrayList<AnnotationHighlight>(hilights.values());
       boolean found = false;
       for(AnnotationHighlight ah : hilites) {
         if(found) break;
