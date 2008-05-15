@@ -131,7 +131,10 @@ public abstract class Factory {
     * @param resourceClassName the name of the class implementing the resource.
     * @param parameterValues the feature map containing intialisation time
     *   parameterValues for the resource.
-    * @param features the features for the new resource
+    * @param features the features for the new resource or null to not assign
+    *   any (new) features. 
+    * @param resourceName the name to be given to the resource or null to assign
+    *   a default name.
     * @return an instantiated resource.
     */
   public static Resource createResource(
