@@ -1946,7 +1946,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
   /** Propagate edit changes to the document content and annotations. */
   public void edit(Long start, Long end, DocumentContent replacement)
           throws InvalidOffsetException {
-    if(!isValidOffsetRange(start, end)) throw new InvalidOffsetException();
+    if(!isValidOffsetRange(start, end)) throw new InvalidOffsetException("Offsets: "+start+"/"+end);
     if(content != null)
       ((DocumentContentImpl)content).edit(start, end, replacement);
     if(defaultAnnots != null)
