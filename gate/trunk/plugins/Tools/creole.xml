@@ -49,12 +49,23 @@
         COMMENT="The name of the annotation set used for output" RUNTIME="true"
         OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="tagASName"
-        COMMENT="The name of the annotation set where the BODY tag is"
+        COMMENT="The name of the annotation set that contains textTagName"
         RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="textTagName" RUNTIME="true" OPTIONAL="true">
+      <PARAMETER NAME="textTagName" RUNTIME="true" OPTIONAL="true"
+        COMMENT="The annotation type that contains the annotations to transfer">
         java.lang.String</PARAMETER>
-      <PARAMETER NAME="annotationTypes" RUNTIME="true" OPTIONAL="true">
+      <PARAMETER NAME="annotationTypes" 
+        COMMENT="The annotation types to transfer, leave blank for all types"
+        RUNTIME="true" OPTIONAL="true">
         java.util.ArrayList</PARAMETER>
+      <PARAMETER NAME="copyAnnotations"
+        COMMENT="If true, the annotations will remain in the inputAS, otherwise they will be removed"
+        DEFAULT="false"
+        RUNTIME="true">java.lang.Boolean</PARAMETER>
+      <PARAMETER NAME="copyAllUnlessFound"
+        COMMENT="If true (default), all annotations are copied if no annotation of the type specified for textTagName is found"
+        DEFAULT="true"
+        RUNTIME="true">java.lang.Boolean</PARAMETER>
     </RESOURCE>
 
     <RESOURCE>

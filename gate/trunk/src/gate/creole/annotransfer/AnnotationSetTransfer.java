@@ -55,6 +55,8 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
   protected String                textTagName = DEFAULT_TEXT_TAG_NAME;
   protected gate.AnnotationSet    bodyAnnotations = null;
   protected List annotationTypes;
+  protected Boolean copyAnnotations = false;
+  protected Boolean copyAllUnlessFound = true;
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException
@@ -131,7 +133,9 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
                  + "' found, so transferring all annotations to the target set");
       }
       //outputAS.addAll(inputAS);
-      outputAS.addAll(annotsToTransfer);
+      if(copyAllUnlessFound) {
+        outputAS.addAll(annotsToTransfer);
+      }
       return;
     }
 
@@ -149,7 +153,8 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
       annots2Move.addAll(annots2Copy);
     }
     outputAS.addAll(annots2Move);
-    inputAS.removeAll(annots2Move);
+    if(!copyAnnotations)
+      inputAS.removeAll(annots2Move);
 
 
   } // execute()
@@ -198,5 +203,19 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
     annotationTypes = newTypes;
   }
 
+  public Boolean getCopyAnnotations() {
+    return this.copyAnnotations;
+  }
 
+  public void setCopyAnnotations(Boolean copyAnnotations) {
+    this.copyAnnotations = copyAnnotations;
+  }
+
+  public Boolean getCopyAllUnlessFound() {
+    return this.copyAllUnlessFound;
+  }
+  
+  public void setCopyAllUnlessFound(Boolean value) {
+    this.copyAllUnlessFound = value;
+  }
 } // class AnnotationSetTransfer
