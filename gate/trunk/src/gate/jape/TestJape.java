@@ -16,16 +16,16 @@
 package gate.jape;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.Iterator;
+import java.net.URL;
 
 import junit.framework.*;
 
 import gate.*;
+import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
-import gate.creole.gazetteer.DefaultGazetteer;
-import gate.creole.tokeniser.DefaultTokeniser;
+import gate.persist.PersistenceException;
 import gate.util.*;
+import gate.util.persistence.PersistenceManager;
 
 
 
@@ -44,40 +44,6 @@ public class TestJape extends TestCase
     //Out.println("TestJape.setUp()");
   } // setUp
 
-  /** Test using the large "combined" grammar from the gate/resources
-    * tree.
-    */
-  public void _testCombined() throws IOException, GateException, Exception {
-    DoTestBigGrammar("AveShort");
-
-    /*
-    Corpus c = Factory.newCorpus("TestJape corpus");
-    c.add(
-      Factory.newDocument(Files.getResourceAsString("texts/doc0.html"))
-    );
-
-    //add some annotations on the first (only) document in corpus c
-    Document doc = (Document) c.first();
-    AnnotationSet defaultAS = doc.getAnnotations();
-    FeatureMap feat = Factory.newFeatureMap();
-    defaultAS.add(new Long( 2), new Long( 4), "A",feat);
-    defaultAS.add(new Long( 4), new Long(6), "B",feat);
-    defaultAS.add(new Long(6), new Long(8), "C",feat);
-    defaultAS.add(new Long(8), new Long(10), "C",feat);
-
-    // run the parser test
-    Gate.init();
-    Batch batch = null;
-    batch = new Batch("jape/combined/", "main.jape");
-
-    // test the transducers
-    batch.transduce(c);
-    //Out.println(batch.getTransducer());
-
-    // check the results
-    doc = (Document)c.first();
-    */
-  } // testCombined()
 
   /** Batch run */
   public void testBatch() throws Exception{
@@ -132,123 +98,50 @@ public class TestJape extends TestCase
     // Out.println(defaultAS);
   } // testBatch()
 
-  public void DoTestBigGrammar(String textName) throws GateException, Exception{
-    long startCorpusLoad = 0, startCorpusTokenization = 0,
-         startGazeteerLoad = 0, startLookup = 0,
-         startJapeFileOpen = 0, startCorpusTransduce = 0,
-         endProcess = 0;
-    Out.print("Procesing " + textName + "...\n" +
-                     "Started at: " + (new Date()) + "\n");
-    startCorpusLoad = System.currentTimeMillis();
-    Out.print("Loading corpus... ");
-    Corpus corpus = Factory.newCorpus("Jape Corpus");
-    try {
-    corpus.add(Factory.newDocument(
-        Files.getGateResourceAsString("jape/InputTexts/" + textName)));
-    } catch(IOException ioe) {
-      ioe.printStackTrace(Err.getPrintWriter());
+  /**
+   * This test loads a saved application which runs several JAPE grammars
+   * using different application modes on a specially prepared document.
+   * The resulting annotations are checked against gold-standard versions
+   * saved in the test document. 
+   * @throws IOException 
+   * @throws ResourceInstantiationException 
+   * @throws PersistenceException 
+   * @throws ExecutionException 
+   */
+  public void testApplicationModes() throws PersistenceException, ResourceInstantiationException, IOException, ExecutionException{
+    //load the application
+    URL applicationURL = Files.getGateResource(
+            "gate.ac.uk/tests/jape/jape-test.xgapp");
+    java.io.File applicationFile = Files.fileFromURL(applicationURL);
+    CorpusController application = (CorpusController)
+        PersistenceManager.loadObjectFromFile(applicationFile);
+    //load the test file
+    Document testDoc = Factory.newDocument(Files.getGateResource(
+            "gate.ac.uk/tests/jape/test-doc.xml"), "UTF-8");
+    Corpus testCorpus = Factory.newCorpus("JAPE Test Corpus");
+    testCorpus.add(testDoc);
+    //run the application
+    application.setCorpus(testCorpus);
+    application.execute();
+    //check the results
+    AnnotationDiffer annDiff = new AnnotationDiffer();
+    annDiff.setSignificantFeaturesSet(null);
+    for(String testName : new String[]{"appelt", "brill", "all", "once"}){
+      AnnotationSet keySet = testDoc.getAnnotations(testName);
+      AnnotationSet responseSet = testDoc.getAnnotations(testName + "-test");
+      annDiff.calculateDiff(keySet, responseSet);
+      double fMeasure = annDiff.getFMeasureStrict(1); 
+      assertEquals("Incorrect F-measure for test " + testName, 
+              (double)1, fMeasure);
     }
-
-    if(corpus.isEmpty()) {
-      Err.println("Missing corpus !");
-      return;
-    }
-
-    //tokenize all documents
-    gate.creole.tokeniser.DefaultTokeniser tokeniser = null;
-    try {
-      //create a default tokeniser
-      FeatureMap params = Factory.newFeatureMap();
-      tokeniser = (DefaultTokeniser) Factory.createResource(
-                            "gate.creole.tokeniser.DefaultTokeniser", params);
-      /*Files.getResourceAsStream("creole/tokeniser/DefaultTokeniser.rules"));*/
-    } catch(ResourceInstantiationException re) {
-      re.printStackTrace(Err.getPrintWriter());
-    }
-    startCorpusTokenization = System.currentTimeMillis();
-    Out.print(": " +
-                       (startCorpusTokenization - startCorpusLoad) +
-                       "ms\n");
-
-    Out.print("Tokenizing the corpus... ");
-    int progress = 0;
-    int docCnt = corpus.size();
-    Iterator docIter = corpus.iterator();
-    Document currentDoc;
-    while(docIter.hasNext()){
-      currentDoc = (Document)docIter.next();
-      tokeniser.setDocument(currentDoc);
-      //use the default anotation set
-      tokeniser.setAnnotationSetName(null);
-      tokeniser.execute();
-      // Verfy if all annotations from the default annotation set are consistent
-      gate.corpora.TestDocument.verifyNodeIdConsistency(currentDoc);
-    }
-
-    startJapeFileOpen = System.currentTimeMillis();
-    Out.print(": " + (startJapeFileOpen - startCorpusTokenization) +
-                     "ms\n");
-
-    //Do gazeteer lookup
-    gate.creole.gazetteer.DefaultGazetteer gazeteer = null;
-    startGazeteerLoad = startLookup = System.currentTimeMillis();
-    Out.print("Loading gazeteer lists...");
-    try {
-      //create a default gazetteer
-      FeatureMap params = Factory.newFeatureMap();
-      gazeteer = (DefaultGazetteer) Factory.createResource(
-                            "gate.creole.gazetteer.DefaultGazetteer", params);
-      gazeteer.init();
-      startLookup = System.currentTimeMillis();
-      Out.print(": " +
-                         (startLookup - startGazeteerLoad) +
-                         "ms\n");
-
-      Out.print("Doing gazeteer lookup... ");
-      docIter = corpus.iterator();
-      while(docIter.hasNext()){
-        currentDoc = (Document)docIter.next();
-        gazeteer.setDocument(currentDoc);
-        gazeteer.execute();
-        // Verfy if all annotations from the default annotation set are consistent
-        gate.corpora.TestDocument.verifyNodeIdConsistency(currentDoc);
-      }
-    } catch(ResourceInstantiationException re) {
-      Err.println("Cannot read the gazeteer lists!" +
-                         "\nAre the GATE resources in place?\n" + re);
-    }
-
-    startJapeFileOpen = System.currentTimeMillis();
-    Out.print(": " + (startJapeFileOpen - startLookup) +
-                     "ms\n");
-
-
-    //do the jape stuff
-    Gate.init();
-
-
-    try {
-      Out.print("Opening Jape grammar... ");
-      Batch batch = new Batch(
-              Files.getGateResource("/jape/combined/main.jape"), "UTF-8");
-      /*
-      Batch batch = new Batch("jape/combined/", "brian-soc-loc1.jape");
-      Batch batch =
-        new Batch("z:/gate/src/gate/resources/jape/combined/main.jape");
-      Batch batch = new Batch("jape/", "Country.jape");
-      */
-      startCorpusTransduce = (new Date()).getTime();
-      Out.print(": " + (startCorpusTransduce - startJapeFileOpen) +
-                       "ms\n");
-      Out.print("Transducing the corpus... ");
-      batch.transduce(corpus);
-      endProcess = System.currentTimeMillis();
-      Out.print(": " + (endProcess - startCorpusTransduce) + "ms\n");
-    } catch(JapeException je) {
-      je.printStackTrace(Err.getPrintWriter());
-    }
-  } // DoBugTestGrammar
-
+    //cleanup
+    application.setCorpus(null);
+    Factory.deleteResource(application);
+    testCorpus.remove(0);
+    Factory.deleteResource(testDoc);
+    Factory.deleteResource(testCorpus);
+  }
+  
   /**
    * This test sets up a JAPE transducer based on a grammar
    * (RhsError.jape) that will throw a null pointer exception.
@@ -282,63 +175,12 @@ public class TestJape extends TestCase
     assertTrue("Bad JAPE grammar didn't throw an exception", gotException);
 
   }  // testRhsErrorMessages
-
-//  /**
-//   * This test sets up a JAPE transducer based on a grammar
-//   * (RhsError2.jape) that will throw a compiler error.
-//   * The test succeeds so long as we get that exception.
-//   */
-//  public void testRhsErrorMessages2() {
-//    boolean gotException = false;
-//
-//    // disable System.out so that the compiler can't splash its error on screen
-//    if(DEBUG) System.out.println("hello 1");
-//    PrintStream sysout = System.out;
-//    System.setOut(new PrintStream(new ByteArrayOutputStream()));
-//    if(DEBUG) System.out.println("hello 2");
-//
-//    // run a JAPE batch on the faulty grammar
-//    try {
-//      if(DEBUG) {
-//        Out.print(
-//          "Opening Jape grammar... " + Gate.getUrl("tests/RhsError2.jape")
-//        );
-//      }
-//      // a JAPE batcher
-//      Batch batch = new Batch(Gate.getUrl("tests/RhsError2.jape"), "UTF-8");
-//    } catch(Exception e) {
-//      if(DEBUG) Out.prln(e);
-//      gotException = true;
-//    } finally {
-//
-//      // re-enable System.out
-//      System.setOut(sysout);
-//      if(DEBUG) System.out.println("hello 3");
-//    }
-//
-//    assertTrue("Bad JAPE grammar (2) didn't throw an exception", gotException);
-//
-//  }  // testRhsErrorMessages2
-//
+  
+  
 
   /** Test suite routine for the test runner */
   public static Test suite() {
     return new TestSuite(TestJape.class);
   } // suite
-
-  //main method for running this test as a standalone test
-  public static void main(String[] args) {
-    for(int i = 0; i < 6; i++){
-    System.gc();
-    Out.println("Run " + i + "   ==============");
-      try{
-        TestJape testJape = new TestJape("Test Jape");
-        testJape.setUp();
-        if(args.length < 1) testJape.DoTestBigGrammar("AveShort");
-       else testJape.DoTestBigGrammar(args[0]);
-      } catch(Exception e) {
-        e.printStackTrace(Err.getPrintWriter());
-      }
-    }
-  }
+  
 } // class TestJape
