@@ -17,6 +17,8 @@ package gate.jape;
 
 import java.util.*;
 
+import org.apache.log4j.Logger;
+
 import gate.*;
 import gate.annotation.AnnotationSetImpl;
 import gate.creole.ExecutionException;
@@ -40,6 +42,9 @@ import debugger.resources.PhaseController;
  */
 public class SinglePhaseTransducer extends Transducer implements JapeConstants,
                                                      java.io.Serializable {
+  protected static final Logger log = Logger
+          .getLogger(SinglePhaseTransducer.class);
+
   /*
    * A structure to pass information to/from the fireRule() method.
    * Since Java won't let us return multiple values, we stuff them into
@@ -58,9 +63,6 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       this.oldStartNodeOff = oldStartNodeOff;
     }
   }
-
-  /** Debug flag */
-  private static final boolean DEBUG = false;
 
   // by Shafirin Andrey start
   PhaseController phaseController = null;
@@ -199,6 +201,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   public void transduce(Document doc, AnnotationSet inputAS,
           AnnotationSet outputAS) throws JapeException, ExecutionException {
     interrupted = false;
+    log.debug("Start: " + name);
     fireProgressChanged(0);
 
     // the input annotations will be read from this map
@@ -348,9 +351,8 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       Constraint[] currentConstraints = currentTransition.getConstraints()
               .getConstraints();
 
-      // Since no negative constraints matched, test against positive
-      // constraints. Keep track of which annot is the longest and which
-      // constraint it matched
+      // Keep track of which annot is the longest and which constraint it
+      // matched
       Annotation longestAnnot = null;
       Constraint matchingConstraint = null;
       int maxEnding=-1;
@@ -391,17 +393,30 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
         // There are no non-negated constraints.  Since the negated constraints
         // did not fail, this means that all of the current annotations
         // are potentially valid.  Add the whole set to the matchingMap.
-        // Use the first negated constraint for the debug trace.
+        // Use the first negated constraint (saved into matchingContraint, above)
+        // for the debug trace.
         matchingMap.put(matchingConstraint, paths);
       }
 
-      //check which annotation is the longest from all that matched.
-      /*
-       * TODO - To be completely correct, we should fire off a new
-       * FSMInstance for each potential bind rather than just using
-       * the longest annotation.  The original Montreal Transducer
-       * does that.
-       */
+      // We have a match if every positive constraint is met by at least one annot.
+      // Given the sets Sx of the annotations that match constraint x,
+      // compute all tuples (A1, A2, ..., An) where Ax comes from the
+      // set Sx and n is the number of constraints
+      List<List<Annotation>> matchLists = new ArrayList<List<Annotation>>();
+      for(Map.Entry<Constraint,Collection<Annotation>> entry : matchingMap.entrySet()) {
+        Constraint c = entry.getKey();
+        Collection<Annotation> matchList = entry.getValue();
+        if (matchList instanceof List)
+          matchLists.add((List<Annotation>)matchList);
+        else
+          matchLists.add(new ArrayList<Annotation>(matchList));
+      }
+      List<List<Annotation>> combinations = combine(matchLists, matchLists.size(), new LinkedList());
+
+      // check which annotation is the longest from all that matched.
+      // this was removed in favor of the above, proper method of
+      // generating all possible combinations.
+/*
       for(Map.Entry<Constraint,Collection<Annotation>> entry : matchingMap.entrySet()) {
         Constraint c = entry.getKey();
         Collection<Annotation> matchList = entry.getValue();
@@ -414,18 +429,11 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
         }
       }
 
-/*
-      // We have a match if every positive constraint is met by at least one annot.
-      // Given the sets Sx of the annotations that match constraint x,
-      // compute all tuples (A1, A2, ..., An) where Ax comes from the
-      // set Sx and n is the number of constraints
-      List combinations = combine(matchingAnnot,
-              matchingAnnot.size(), new LinkedList());
-*/
-      List<List<Annotation>> combinations = new ArrayList<List<Annotation>>();
+      combinations = new ArrayList<List<Annotation>>();
       List<Annotation> annotList = new ArrayList<Annotation>();
       annotList.add(longestAnnot);
       combinations.add(annotList);
+*/
 
       // Create a new FSM for every tuple of annot
       for(List<Annotation> tuple : combinations) {
@@ -483,7 +491,6 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       } // iter over matching combinations
 
     }// while(transitionsIter.hasNext())
-
     return false;
   }
 
@@ -518,21 +525,20 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
    * @param incompleteTuple an empty list
    */
 
-  private static List combine(List sourceLists, int maxTupleSize,
-          List incompleteTuple) {
+  private static List<List<Annotation>> combine(List<List<Annotation>> sourceLists,
+          int maxTupleSize, List<Annotation> incompleteTuple) {
 
-    List newTupleList = new LinkedList();
+    List<List<Annotation>> newTupleList = new LinkedList<List<Annotation>>();
 
     if(incompleteTuple.size() == maxTupleSize) {
       newTupleList.add(incompleteTuple);
     }
     else {
-      List currentSourceList = (List)sourceLists
-              .get(incompleteTuple.size());
+      List<Annotation> currentSourceList = sourceLists.get(incompleteTuple.size());
       // use for loop instead of ListIterator to increase speed
       // (critical here)
       for(int i = 0; i < currentSourceList.size(); i++) {
-        List augmentedTuple = (List)((LinkedList)incompleteTuple).clone();
+        List<Annotation> augmentedTuple = (List<Annotation>)((LinkedList<Annotation>)incompleteTuple).clone();
         augmentedTuple.add(currentSourceList.get(i));
         newTupleList.addAll(combine(sourceLists, maxTupleSize, augmentedTuple));
       }
@@ -639,12 +645,12 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
           }
         }
         if(conflicts.size() > 1) {
-          Out.prln("\nConflicts found during matching:"
+          log.debug("\nConflicts found during matching:"
                   + "\n================================");
           accIter = conflicts.iterator();
           int i = 0;
           while(accIter.hasNext()) {
-            Out.prln(i++ + ") " + accIter.next().toString());
+            log.debug(i++ + ") " + accIter.next().toString());
           }
         }
       }
@@ -681,7 +687,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       // if in matchGroup mode check other possible patterns in this
       // span
       if(isMatchGroupMode()) {
-        // Out.prln("Jape grammar in MULTI application style.");
+        // log.debug("Jape grammar in MULTI application style.");
         // ~bp: check for other matching fsm instances with same length,
         // priority and rule index : if such execute them also.
         String currentAcceptorString = null;
@@ -706,12 +712,12 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
                   Out
                           .prln("~Jape Grammar Transducer : "
                                   + "\nConcurrent Patterns by length,priority and index (all transduced):");
-                  Out.prln(currentAcceptorString);
-                  Out.prln("bindings : " + currentAcceptor.getBindings());
-                  Out.prln("Rivals Follow: ");
+                  log.debug(currentAcceptorString);
+                  log.debug("bindings : " + currentAcceptor.getBindings());
+                  log.debug("Rivals Follow: ");
                 }
-                Out.prln(rivalAcceptor);
-                Out.prln("bindings : " + rivalAcceptor.getBindings());
+                log.debug(rivalAcceptor);
+                log.debug("bindings : " + rivalAcceptor.getBindings());
               }// DEBUG
               currentRHS = rivalAcceptor.getFSMPosition().getAction();
 
