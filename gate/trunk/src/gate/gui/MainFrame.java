@@ -133,20 +133,19 @@ public class MainFrame extends JFrame implements ProgressListener,
   protected WaitDialog waitDialog;
 
   /**
-   * Holds all the icons used in the Gate GUI indexed by filename. This
-   * is needed so we do not need to decode the icon everytime we need it
-   * as that would use unecessary CPU time and memory. Access to this
-   * data is avaialable through the {@link #getIcon(String)} method.
+   * Holds all the icons used in the Gate GUI indexed by filename. This is
+   * needed so we do not need to decode the icon everytime we need it as that
+   * would use unecessary CPU time and memory. Access to this data is avaialable
+   * through the {@link #getIcon(String)} method.
    */
   protected static Map iconByName = new HashMap();
 
   /**
-   * A Map which holds listeners that are singletons (e.g. the status
-   * listener that updates the status bar on the main frame or the
-   * progress listener that updates the progress bar on the main frame).
-   * The keys used are the class names of the listener interface and the
-   * values are the actual listeners (e.g "gate.event.StatusListener" ->
-   * this).
+   * A Map which holds listeners that are singletons (e.g. the status listener
+   * that updates the status bar on the main frame or the progress listener that
+   * updates the progress bar on the main frame). The keys used are the class
+   * names of the listener interface and the values are the actual listeners
+   * (e.g "gate.event.StatusListener" -> this).
    */
   private static java.util.Map listeners = new HashMap();
 
@@ -194,26 +193,29 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   /**
    * Gets the original system output stream, which was later redirected to the
-   * messages pane.  
+   * messages pane.
+   * 
    * @return a {@link PrintStream} value.
    */
-  public PrintStream getOriginalOut(){
+  public PrintStream getOriginalOut() {
     return logArea.getOriginalOut();
   }
-  
+
   /**
-   * Gets the original system error output stream, which was later redirected 
-   * to the messages pane.  
+   * Gets the original system error output stream, which was later redirected to
+   * the messages pane.
+   * 
    * @return a {@link PrintStream} value.
    */
-  public PrintStream getOriginalErr(){
+  public PrintStream getOriginalErr() {
     return logArea.getOriginalErr();
   }
 
   /**
    * Selects a resource if loaded in the system and not invisible.
    * 
-   * @param res the resource to be selected.
+   * @param res
+   *          the resource to be selected.
    */
   public void select(Resource res) {
     // first find the handle for the resource
@@ -238,7 +240,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   protected void select(Handle handle) {
     if(handle.viewsBuilt()
-            && mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1) {
+      && mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1) {
       // select
       JComponent largeView = handle.getLargeView();
       if(largeView != null) {
@@ -250,7 +252,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       JComponent largeView = handle.getLargeView();
       if(largeView != null) {
         mainTabbedPane.addTab(handle.getTitle(), handle.getIcon(), largeView,
-                handle.getTooltipText());
+          handle.getTooltipText());
         mainTabbedPane.setSelectedComponent(handle.getLargeView());
       }
     }
@@ -280,8 +282,8 @@ public class MainFrame extends JFrame implements ProgressListener,
     if(fileChooser == null) {
       fileChooser = new GateFileChooser();
       fileChooser.setMultiSelectionEnabled(false);
-      String lastUsedDir = Gate.getUserConfig().getString(
-              GateConstants.LAST_FILECHOOSER_LOCATION);
+      String lastUsedDir =
+        Gate.getUserConfig().getString(GateConstants.LAST_FILECHOOSER_LOCATION);
       if(lastUsedDir != null && lastUsedDir.length() > 0) {
         File lastDir = new File(lastUsedDir);
         if(lastDir.exists() && lastDir.isDirectory())
@@ -314,11 +316,11 @@ public class MainFrame extends JFrame implements ProgressListener,
       languageResourcesRoot = new DefaultMutableTreeNode("Documents", true);
     }
     else {
-      languageResourcesRoot = new DefaultMutableTreeNode("Language Resources",
-              true);
+      languageResourcesRoot =
+        new DefaultMutableTreeNode("Language Resources", true);
     } // if
-    processingResourcesRoot = new DefaultMutableTreeNode(
-            "Processing Resources", true);
+    processingResourcesRoot =
+      new DefaultMutableTreeNode("Processing Resources", true);
     datastoresRoot = new DefaultMutableTreeNode("Data stores", true);
     resourcesTreeRoot.add(applicationsRoot);
     resourcesTreeRoot.add(languageResourcesRoot);
@@ -332,22 +334,23 @@ public class MainFrame extends JFrame implements ProgressListener,
     this.getContentPane().setLayout(new BorderLayout());
 
     Integer width = Gate.getUserConfig().getInt(GateConstants.MAIN_FRAME_WIDTH);
-    Integer height = Gate.getUserConfig().getInt(
-            GateConstants.MAIN_FRAME_HEIGHT);
+    Integer height =
+      Gate.getUserConfig().getInt(GateConstants.MAIN_FRAME_HEIGHT);
     this.setSize(new Dimension(width == null ? 800 : width.intValue(),
-            height == null ? 600 : height.intValue()));
+      height == null ? 600 : height.intValue()));
 
     this.setIconImage(Toolkit.getDefaultToolkit().getImage(
-            Files.getGateResource("/img/gate-icon.png")));
+      Files.getGateResource("/img/gate-icon.png")));
     resourcesTree = new ResourcesTree();
     resourcesTree.setModel(resourcesTreeModel);
     resourcesTree.setRowHeight(0);
 
     resourcesTree.setEditable(true);
-    ResourcesTreeCellRenderer treeCellRenderer = new ResourcesTreeCellRenderer();
+    ResourcesTreeCellRenderer treeCellRenderer =
+      new ResourcesTreeCellRenderer();
     resourcesTree.setCellRenderer(treeCellRenderer);
     resourcesTree.setCellEditor(new ResourcesTreeCellEditor(resourcesTree,
-            treeCellRenderer));
+      treeCellRenderer));
 
     resourcesTree.setRowHeight(0);
     // expand all nodes
@@ -357,7 +360,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     resourcesTree.expandRow(3);
     resourcesTree.expandRow(4);
     resourcesTree.getSelectionModel().setSelectionMode(
-            TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+      TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
     resourcesTree.setEnabled(true);
     ToolTipManager.sharedInstance().registerComponent(resourcesTree);
     resourcesTreeScroll = new JScrollPane(resourcesTree);
@@ -388,14 +391,15 @@ public class MainFrame extends JFrame implements ProgressListener,
     lowerPane.add(lowerScroll);
 
     animator = new CartoonMinder(animationPane);
-    Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-            animator, "MainFrame1");
+    Thread thread =
+      new Thread(Thread.currentThread().getThreadGroup(), animator,
+        "MainFrame1");
     thread.setDaemon(true);
     thread.setPriority(Thread.MIN_PRIORITY);
     thread.start();
 
-    leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, resourcesTreeScroll,
-            lowerPane);
+    leftSplit =
+      new JSplitPane(JSplitPane.VERTICAL_SPLIT, resourcesTreeScroll, lowerPane);
 
     leftSplit.setResizeWeight((double)0.7);
 
@@ -405,14 +409,14 @@ public class MainFrame extends JFrame implements ProgressListener,
     // Out has been redirected to the logArea
 
     Out.prln("GATE " + Main.version + " build " + Main.build + " started at: "
-            + new Date().toString());
+      + new Date().toString());
     mainTabbedPane = new XJTabbedPane(JTabbedPane.TOP);
     mainTabbedPane.insertTab("Messages", null, logScroll, "GATE log", 0);
 
     logHighlighter = new TabHighlighter(mainTabbedPane, logScroll, Color.red);
 
-    mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftSplit,
-            mainTabbedPane);
+    mainSplit =
+      new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftSplit, mainTabbedPane);
 
     mainSplit.setDividerLocation(leftSplit.getPreferredSize().width + 10);
     this.getContentPane().add(mainSplit, BorderLayout.CENTER);
@@ -420,7 +424,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     // status and progress bars
     statusBar = new JLabel(" ");
     statusBar.setPreferredSize(new Dimension(200,
-            statusBar.getPreferredSize().height));
+      statusBar.getPreferredSize().height));
 
     UIManager.put("ProgressBar.cellSpacing", new Integer(0));
     progressBar = new JProgressBar(JProgressBar.HORIZONTAL);
@@ -447,7 +451,8 @@ public class MainFrame extends JFrame implements ProgressListener,
     progressBar.setVisible(false);
 
     // extra stuff
-    newResourceDialog = new NewResourceDialog(this, "Resource parameters", true);
+    newResourceDialog =
+      new NewResourceDialog(this, "Resource parameters", true);
     waitDialog = new WaitDialog(this, "");
 
     // build the Help->About dialog
@@ -486,11 +491,12 @@ public class MainFrame extends JFrame implements ProgressListener,
     splashBox.add(htmlLbl, constraints);
 
     constraints.gridy = 3;
-    htmlLbl = new JLabel("<HTML><FONT color=\"blue\">Version <B>"
-            + Main.version + "</B></FONT>" + ", <FONT color=\"red\">build <B>"
-            + Main.build + "</B></FONT>" + "<P><B>JVM version</B>: "
-            + System.getProperty("java.version") + " from "
-            + System.getProperty("java.vendor") + "</HTML>");
+    htmlLbl =
+      new JLabel("<HTML><FONT color=\"blue\">Version <B>" + Main.version
+        + "</B></FONT>" + ", <FONT color=\"red\">build <B>" + Main.build
+        + "</B></FONT>" + "<P><B>JVM version</B>: "
+        + System.getProperty("java.version") + " from "
+        + System.getProperty("java.vendor") + "</HTML>");
     constraints.fill = GridBagConstraints.HORIZONTAL;
     splashBox.add(htmlLbl, constraints);
 
@@ -541,7 +547,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     loadANNIEMenu.setIcon(getIcon("annie-application"));
     loadANNIEMenu.add(new XJMenuItem(new LoadANNIEWithDefaultsAction(), this));
     loadANNIEMenu
-            .add(new XJMenuItem(new LoadANNIEWithoutDefaultsAction(), this));
+      .add(new XJMenuItem(new LoadANNIEWithoutDefaultsAction(), this));
     fileMenu.add(loadANNIEMenu);
 
     // fileMenu.add(new XJMenuItem(new LoadCreoleRepositoryAction(),
@@ -574,7 +580,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       Class.forName("guk.im.GateIMDescriptor");
       // add the Gate input methods
       installedLocales.addAll(Arrays.asList(new guk.im.GateIMDescriptor()
-              .getAvailableLocales()));
+        .getAvailableLocales()));
     }
     catch(Exception e) {
       // something happened; most probably guk not present.
@@ -586,8 +592,8 @@ public class MainFrame extends JFrame implements ProgressListener,
       Class.forName("mpi.alt.java.awt.im.spi.lookup.LookupDescriptor");
 
       installedLocales.addAll(Arrays
-              .asList(new mpi.alt.java.awt.im.spi.lookup.LookupDescriptor()
-                      .getAvailableLocales()));
+        .asList(new mpi.alt.java.awt.im.spi.lookup.LookupDescriptor()
+          .getAvailableLocales()));
     }
     catch(Exception e) {
       // something happened; most probably MPI not present.
@@ -597,7 +603,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     Collections.sort(installedLocales, new Comparator() {
       public int compare(Object o1, Object o2) {
         return ((Locale)o1).getDisplayName().compareTo(
-                ((Locale)o2).getDisplayName());
+          ((Locale)o2).getDisplayName());
       }
     });
     JMenuItem item;
@@ -637,8 +643,8 @@ public class MainFrame extends JFrame implements ProgressListener,
     corpusEvalMenu.add(new StoredMarkedCorpusEvalAction());
     corpusEvalMenu.add(new CleanMarkedCorpusEvalAction());
     corpusEvalMenu.addSeparator();
-    verboseModeItem = new JCheckBoxMenuItem(
-            new VerboseModeCorpusEvalToolAction());
+    verboseModeItem =
+      new JCheckBoxMenuItem(new VerboseModeCorpusEvalToolAction());
     corpusEvalMenu.add(verboseModeItem);
     // JCheckBoxMenuItem datastoreModeItem =
     // new JCheckBoxMenuItem(datastoreModeCorpusEvalToolAction);
@@ -658,12 +664,12 @@ public class MainFrame extends JFrame implements ProgressListener,
     if(Gate.isEnableJapeDebug()) {
       // by Shafirin Andrey start
       toolsMenu
-              .add(new AbstractAction("JAPE Debugger", getIcon("application")) {
-                public void actionPerformed(ActionEvent evt) {
-                  System.out.println("Creating Jape Debugger");
-                  new debugger.JapeDebugger();
-                }
-              });
+        .add(new AbstractAction("JAPE Debugger", getIcon("application")) {
+          public void actionPerformed(ActionEvent evt) {
+            System.out.println("Creating Jape Debugger");
+            new debugger.JapeDebugger();
+          }
+        });
       // by Shafirin Andrey end
     }
 
@@ -807,7 +813,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             // multiple selection in tree-> show a popup for delete all
             popup = new XJPopupMenu();
             popup.add(new XJMenuItem(new CloseSelectedResourcesAction(),
-                    MainFrame.this));
+              MainFrame.this));
             popup.show(resourcesTree, e.getX(), e.getY());
           }
           else if(popup != null) {
@@ -821,7 +827,7 @@ public class MainFrame extends JFrame implements ProgressListener,
               // add a rename action
               popup.insert(new JPopupMenu.Separator(), 2);
               popup.insert(new XJMenuItem(new RenameResourceAction(path),
-                      MainFrame.this), 3);
+                MainFrame.this), 3);
 
               // Put the action command in the component's action map
               // if (handle.getLargeView() != null){
@@ -862,8 +868,8 @@ public class MainFrame extends JFrame implements ProgressListener,
       public void keyPressed(KeyEvent e) {
         // If Ctrl+F4 was pressed then close the active resource
         if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_F4) {
-          JComponent resource = (JComponent)mainTabbedPane
-                  .getSelectedComponent();
+          JComponent resource =
+            (JComponent)mainTabbedPane.getSelectedComponent();
           if(resource != null) {
             Action act = resource.getActionMap().get("Close resource");
             if(act != null) act.actionPerformed(null);
@@ -871,8 +877,8 @@ public class MainFrame extends JFrame implements ProgressListener,
         }// End if
         // If CTRL+H was pressed then hide the active view.
         if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_H) {
-          JComponent resource = (JComponent)mainTabbedPane
-                  .getSelectedComponent();
+          JComponent resource =
+            (JComponent)mainTabbedPane.getSelectedComponent();
           if(resource != null) {
             Action act = resource.getActionMap().get("Hide current view");
             if(act != null) act.actionPerformed(null);
@@ -880,8 +886,8 @@ public class MainFrame extends JFrame implements ProgressListener,
         }// End if
         // If CTRL+X was pressed then save as XML
         if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_X) {
-          JComponent resource = (JComponent)mainTabbedPane
-                  .getSelectedComponent();
+          JComponent resource =
+            (JComponent)mainTabbedPane.getSelectedComponent();
           if(resource != null) {
             Action act = resource.getActionMap().get("Save As XML");
             if(act != null) act.actionPerformed(null);
@@ -898,16 +904,17 @@ public class MainFrame extends JFrame implements ProgressListener,
         // use this to synchronise the selection in the tabbed pane with
         // the one
         // in the resources tree
-        JComponent largeView = (JComponent)mainTabbedPane
-                .getSelectedComponent();
+        JComponent largeView =
+          (JComponent)mainTabbedPane.getSelectedComponent();
         Enumeration nodesEnum = resourcesTreeRoot.preorderEnumeration();
         boolean done = false;
         DefaultMutableTreeNode node = resourcesTreeRoot;
         while(!done && nodesEnum.hasMoreElements()) {
           node = (DefaultMutableTreeNode)nodesEnum.nextElement();
-          done = node.getUserObject() instanceof Handle
-                  && ((Handle)node.getUserObject()).viewsBuilt()
-                  && ((Handle)node.getUserObject()).getLargeView() == largeView;
+          done =
+            node.getUserObject() instanceof Handle
+              && ((Handle)node.getUserObject()).viewsBuilt()
+              && ((Handle)node.getUserObject()).getLargeView() == largeView;
         }
         if(done) {
           Handle handle = (Handle)node.getUserObject();
@@ -934,9 +941,10 @@ public class MainFrame extends JFrame implements ProgressListener,
             DefaultMutableTreeNode node = resourcesTreeRoot;
             while(!done && nodesEnum.hasMoreElements()) {
               node = (DefaultMutableTreeNode)nodesEnum.nextElement();
-              done = node.getUserObject() instanceof Handle
-                      && ((Handle)node.getUserObject()).viewsBuilt()
-                      && ((Handle)node.getUserObject()).getLargeView() == view;
+              done =
+                node.getUserObject() instanceof Handle
+                  && ((Handle)node.getUserObject()).viewsBuilt()
+                  && ((Handle)node.getUserObject()).getLargeView() == view;
             }
             if(done) {
               Handle handle = (Handle)node.getUserObject();
@@ -1005,44 +1013,44 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     // blink the messages tab when new information is displayed
     logArea.getDocument().addDocumentListener(
-            new javax.swing.event.DocumentListener() {
-              public void insertUpdate(javax.swing.event.DocumentEvent e) {
-                changeOccured();
-              }
+      new javax.swing.event.DocumentListener() {
+        public void insertUpdate(javax.swing.event.DocumentEvent e) {
+          changeOccured();
+        }
 
-              public void removeUpdate(javax.swing.event.DocumentEvent e) {
-                changeOccured();
-              }
+        public void removeUpdate(javax.swing.event.DocumentEvent e) {
+          changeOccured();
+        }
 
-              public void changedUpdate(javax.swing.event.DocumentEvent e) {
-              }
+        public void changedUpdate(javax.swing.event.DocumentEvent e) {
+        }
 
-              protected void changeOccured() {
-                logHighlighter.highlight();
-              }
-            });
+        protected void changeOccured() {
+          logHighlighter.highlight();
+        }
+      });
 
     logArea.addPropertyChangeListener("document", new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent evt) {
         // add the document listener
         logArea.getDocument().addDocumentListener(
-                new javax.swing.event.DocumentListener() {
-                  public void insertUpdate(javax.swing.event.DocumentEvent e) {
-                    changeOccured();
-                  }
+          new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+              changeOccured();
+            }
 
-                  public void removeUpdate(javax.swing.event.DocumentEvent e) {
-                    changeOccured();
-                  }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+              changeOccured();
+            }
 
-                  public void changedUpdate(javax.swing.event.DocumentEvent e) {
-                    changeOccured();
-                  }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+              changeOccured();
+            }
 
-                  protected void changeOccured() {
-                    logHighlighter.highlight();
-                  }
-                });
+            protected void changeOccured() {
+              logHighlighter.highlight();
+            }
+          });
       }
     });
 
@@ -1055,10 +1063,9 @@ public class MainFrame extends JFrame implements ProgressListener,
   }// protected void initListeners()
 
   /**
-   * Set up the handlers to support the Macintosh Application menu. This
-   * makes the About, Quit and Preferences menu items map to their
-   * equivalents in GATE. If an exception occurs during this process we
-   * print a warning.
+   * Set up the handlers to support the Macintosh Application menu. This makes
+   * the About, Quit and Preferences menu items map to their equivalents in
+   * GATE. If an exception occurs during this process we print a warning.
    */
   protected void initMacListeners() {
     // What this method effectively does is:
@@ -1086,16 +1093,17 @@ public class MainFrame extends JFrame implements ProgressListener,
     // depend on Apple classes.
     try {
       // load the Apple classes
-      final Class eawtApplicationClass = Gate.getClassLoader().loadClass(
-              "com.apple.eawt.Application");
-      final Class eawtApplicationListenerInterface = Gate.getClassLoader()
-              .loadClass("com.apple.eawt.ApplicationListener");
-      final Class eawtApplicationEventClass = Gate.getClassLoader().loadClass(
-              "com.apple.eawt.ApplicationEvent");
+      final Class eawtApplicationClass =
+        Gate.getClassLoader().loadClass("com.apple.eawt.Application");
+      final Class eawtApplicationListenerInterface =
+        Gate.getClassLoader().loadClass("com.apple.eawt.ApplicationListener");
+      final Class eawtApplicationEventClass =
+        Gate.getClassLoader().loadClass("com.apple.eawt.ApplicationEvent");
 
       // method used in the InvocationHandler
-      final Method appEventSetHandledMethod = eawtApplicationEventClass
-              .getMethod("setHandled", new Class[] {boolean.class});
+      final Method appEventSetHandledMethod =
+        eawtApplicationEventClass.getMethod("setHandled",
+          new Class[]{boolean.class});
 
       // Invocation handler used to process Apple application events
       InvocationHandler handler = new InvocationHandler() {
@@ -1104,21 +1112,21 @@ public class MainFrame extends JFrame implements ProgressListener,
         private Action exitAction = new ExitGateAction();
 
         public Object invoke(Object proxy, Method method, Object[] args)
-                throws Throwable {
+          throws Throwable {
           Object appEvent = args[0];
           if("handleAbout".equals(method.getName())) {
             appEventSetHandledMethod.invoke(appEvent,
-                    new Object[] {Boolean.TRUE});
+              new Object[]{Boolean.TRUE});
             aboutAction.actionPerformed(null);
           }
           else if("handleQuit".equals(method.getName())) {
             appEventSetHandledMethod.invoke(appEvent,
-                    new Object[] {Boolean.FALSE});
+              new Object[]{Boolean.FALSE});
             exitAction.actionPerformed(null);
           }
           else if("handlePreferences".equals(method.getName())) {
             appEventSetHandledMethod.invoke(appEvent,
-                    new Object[] {Boolean.TRUE});
+              new Object[]{Boolean.TRUE});
             optionsDialog.showDialog();
           }
 
@@ -1127,35 +1135,35 @@ public class MainFrame extends JFrame implements ProgressListener,
       };
 
       // Create an ApplicationListener proxy instance
-      Object applicationListenerObject = Proxy.newProxyInstance(Gate
-              .getClassLoader(),
-              new Class[] {eawtApplicationListenerInterface}, handler);
+      Object applicationListenerObject =
+        Proxy.newProxyInstance(Gate.getClassLoader(),
+          new Class[]{eawtApplicationListenerInterface}, handler);
 
       // get hold of the Application object
-      Method getApplicationMethod = eawtApplicationClass.getMethod(
-              "getApplication", new Class[0]);
-      Object applicationObject = getApplicationMethod.invoke(null,
-              new Object[0]);
+      Method getApplicationMethod =
+        eawtApplicationClass.getMethod("getApplication", new Class[0]);
+      Object applicationObject =
+        getApplicationMethod.invoke(null, new Object[0]);
 
       // enable the preferences menu item
-      Method setEnabledPreferencesMenuMethod = eawtApplicationClass.getMethod(
-              "setEnabledPreferencesMenu", new Class[] {boolean.class});
+      Method setEnabledPreferencesMenuMethod =
+        eawtApplicationClass.getMethod("setEnabledPreferencesMenu",
+          new Class[]{boolean.class});
       setEnabledPreferencesMenuMethod.invoke(applicationObject,
-              new Object[] {Boolean.TRUE});
+        new Object[]{Boolean.TRUE});
 
       // Register our proxy instance as an ApplicationListener
-      Method addApplicationListenerMethod = eawtApplicationClass.getMethod(
-              "addApplicationListener",
-              new Class[] {eawtApplicationListenerInterface});
+      Method addApplicationListenerMethod =
+        eawtApplicationClass.getMethod("addApplicationListener",
+          new Class[]{eawtApplicationListenerInterface});
       addApplicationListenerMethod.invoke(applicationObject,
-              new Object[] {applicationListenerObject});
+        new Object[]{applicationListenerObject});
     }
     catch(Throwable t) {
       // oh well, we tried
-      System.out
-              .println("Warning: there was a problem setting up the Mac "
-                      + "application\nmenu.  Your options/session will not be saved if "
-                      + "you exit\nwith command-Q, use \"File/Exit GATE\" instead");
+      System.out.println("Warning: there was a problem setting up the Mac "
+        + "application\nmenu.  Your options/session will not be saved if "
+        + "you exit\nwith command-Q, use \"File/Exit GATE\" instead");
     }
   }
 
@@ -1202,7 +1210,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   public void resourceLoaded(CreoleEvent e) {
     Resource res = e.getResource();
     if(Gate.getHiddenAttribute(res.getFeatures())
-            || res instanceof VisualResource) return;
+      || res instanceof VisualResource) return;
     NameBearerHandle handle = new NameBearerHandle(res, MainFrame.this);
     DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
     if(res instanceof ProcessingResource) {
@@ -1326,7 +1334,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           NameBearerHandle handle = (NameBearerHandle)node.getUserObject();
 
           if(handle.viewsBuilt()
-                  && mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1) {
+            && mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1) {
             mainTabbedPane.remove(handle.getLargeView());
           }
           if(lowerScroll.getViewport().getView() == handle.getSmallView()) {
@@ -1359,14 +1367,13 @@ public class MainFrame extends JFrame implements ProgressListener,
   }// processWindowEvent(WindowEvent e)
 
   /**
-   * Returns the listeners map, a map that holds all the listeners that
-   * are singletons (e.g. the status listener that updates the status
-   * bar on the main frame or the progress listener that updates the
-   * progress bar on the main frame). The keys used are the class names
-   * of the listener interface and the values are the actual listeners
-   * (e.g "gate.event.StatusListener" -> this). The returned map is the
-   * actual data member used to store the listeners so any changes in
-   * this map will be visible to everyone.
+   * Returns the listeners map, a map that holds all the listeners that are
+   * singletons (e.g. the status listener that updates the status bar on the
+   * main frame or the progress listener that updates the progress bar on the
+   * main frame). The keys used are the class names of the listener interface
+   * and the values are the actual listeners (e.g "gate.event.StatusListener" ->
+   * this). The returned map is the actual data member used to store the
+   * listeners so any changes in this map will be visible to everyone.
    */
   public static java.util.Map getListeners() {
     return listeners;
@@ -1377,13 +1384,14 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   /**
-   * This method will lock all input to the gui by means of a modal
-   * dialog. If Gate is not currently running in GUI mode this call will
-   * be ignored. A call to this method while the GUI is locked will
-   * cause the GUI to be unlocked and then locked again with the new
-   * message. If a message is provided it will show in the dialog.
+   * This method will lock all input to the gui by means of a modal dialog. If
+   * Gate is not currently running in GUI mode this call will be ignored. A call
+   * to this method while the GUI is locked will cause the GUI to be unlocked
+   * and then locked again with the new message. If a message is provided it
+   * will show in the dialog.
    * 
-   * @param message the message to be displayed while the GUI is locked
+   * @param message
+   *          the message to be displayed while the GUI is locked
    */
   public synchronized static void lockGUI(final String message) {
     // check whether GUI is up
@@ -1392,9 +1400,10 @@ public class MainFrame extends JFrame implements ProgressListener,
     unlockGUI();
 
     // build the dialog contents
-    Object[] options = new Object[] {new JButton(new StopAction())};
-    JOptionPane pane = new JOptionPane(message, JOptionPane.WARNING_MESSAGE,
-            JOptionPane.DEFAULT_OPTION, null, options, null);
+    Object[] options = new Object[]{new JButton(new StopAction())};
+    JOptionPane pane =
+      new JOptionPane(message, JOptionPane.WARNING_MESSAGE,
+        JOptionPane.DEFAULT_OPTION, null, options, null);
 
     // build the dialog
     Component parentComp = (Component)((ArrayList)getGuiRoots()).get(0);
@@ -1497,18 +1506,19 @@ public class MainFrame extends JFrame implements ProgressListener,
     if(fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
       try {
         URL dsURL = fileChooser.getSelectedFile().toURI().toURL();
-        ds = Factory.createDataStore("gate.persist.SerialDataStore", dsURL
-                .toExternalForm());
+        ds =
+          Factory.createDataStore("gate.persist.SerialDataStore", dsURL
+            .toExternalForm());
       }
       catch(MalformedURLException mue) {
         JOptionPane.showMessageDialog(MainFrame.this,
-                "Invalid location for the datastore\n " + mue.toString(),
-                "GATE", JOptionPane.ERROR_MESSAGE);
+          "Invalid location for the datastore\n " + mue.toString(), "GATE",
+          JOptionPane.ERROR_MESSAGE);
       }
       catch(PersistenceException pe) {
         JOptionPane.showMessageDialog(MainFrame.this,
-                "Datastore creation error!\n " + pe.toString(), "GATE",
-                JOptionPane.ERROR_MESSAGE);
+          "Datastore creation error!\n " + pe.toString(), "GATE",
+          JOptionPane.ERROR_MESSAGE);
       } // catch
     } // if
 
@@ -1525,18 +1535,19 @@ public class MainFrame extends JFrame implements ProgressListener,
     if(fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
       try {
         URL dsURL = fileChooser.getSelectedFile().toURI().toURL();
-        ds = Factory.openDataStore("gate.persist.SerialDataStore", dsURL
-                .toExternalForm());
+        ds =
+          Factory.openDataStore("gate.persist.SerialDataStore", dsURL
+            .toExternalForm());
       }
       catch(MalformedURLException mue) {
         JOptionPane.showMessageDialog(MainFrame.this,
-                "Invalid location for the datastore\n " + mue.toString(),
-                "GATE", JOptionPane.ERROR_MESSAGE);
+          "Invalid location for the datastore\n " + mue.toString(), "GATE",
+          JOptionPane.ERROR_MESSAGE);
       }
       catch(PersistenceException pe) {
         JOptionPane.showMessageDialog(MainFrame.this,
-                "Datastore opening error!\n " + pe.toString(), "GATE",
-                JOptionPane.ERROR_MESSAGE);
+          "Datastore opening error!\n " + pe.toString(), "GATE",
+          JOptionPane.ERROR_MESSAGE);
       } // catch
     } // if
 
@@ -1547,19 +1558,21 @@ public class MainFrame extends JFrame implements ProgressListener,
   protected DataStore openDocServiceDataStore() {
     DataStore ds = null;
     try {
-      String DSLocation = JOptionPane.showInputDialog(MainFrame.this,
-              "Enter document service URL",
-              "http://localhost:8080/docservice/services/docservice");
+      String DSLocation =
+        JOptionPane.showInputDialog(MainFrame.this,
+          "Enter document service URL",
+          "http://localhost:8080/docservice/services/docservice");
       // System.out.println("DEBUG: MainFrame.openDocServiceDataStore()
       // DSLocation='" + DSLocation + "'");
-      ds = Factory.openDataStore("gleam.docservice.gate.DocServiceDataStore",
-              DSLocation);
+      ds =
+        Factory.openDataStore("gleam.docservice.gate.DocServiceDataStore",
+          DSLocation);
     }
     catch(Exception pe) {
       pe.printStackTrace();
       JOptionPane.showMessageDialog(MainFrame.this,
-              "Datastore opening error!\n " + pe.toString(), "GATE",
-              JOptionPane.ERROR_MESSAGE);
+        "Datastore opening error!\n " + pe.toString(), "GATE",
+        JOptionPane.ERROR_MESSAGE);
     }
     return ds;
   } // openWSDataStore()
@@ -1568,25 +1581,21 @@ public class MainFrame extends JFrame implements ProgressListener,
    * synchronized void showWaitDialog() { Point location =
    * getLocationOnScreen(); location.translate(10, getHeight() -
    * waitDialog.getHeight() - southBox.getHeight() - 10);
-   * waitDialog.setLocation(location); waitDialog.showDialog(new
-   * Component[]{}); }
+   * waitDialog.setLocation(location); waitDialog.showDialog(new Component[]{}); }
    * 
    * synchronized void hideWaitDialog() { waitDialog.goAway(); }
    */
 
   /*
-   * class NewProjectAction extends AbstractAction { public
-   * NewProjectAction(){ super("New Project", new
-   * ImageIcon(MainFrame.class.getResource(
-   * "/gate/resources/img/newProject")));
-   * putValue(SHORT_DESCRIPTION,"Create a new project"); } public void
-   * actionPerformed(ActionEvent e){ fileChooser.setDialogTitle("Select
-   * new project file");
+   * class NewProjectAction extends AbstractAction { public NewProjectAction(){
+   * super("New Project", new ImageIcon(MainFrame.class.getResource(
+   * "/gate/resources/img/newProject"))); putValue(SHORT_DESCRIPTION,"Create a
+   * new project"); } public void actionPerformed(ActionEvent e){
+   * fileChooser.setDialogTitle("Select new project file");
    * fileChooser.setFileSelectionMode(fileChooser.FILES_ONLY);
-   * if(fileChooser.showOpenDialog(parentFrame) ==
-   * fileChooser.APPROVE_OPTION){ ProjectData pData = new
-   * ProjectData(fileChooser.getSelectedFile(), parentFrame);
-   * addProject(pData); } } }
+   * if(fileChooser.showOpenDialog(parentFrame) == fileChooser.APPROVE_OPTION){
+   * ProjectData pData = new ProjectData(fileChooser.getSelectedFile(),
+   * parentFrame); addProject(pData); } } }
    */
 
   /** This class represent an action which brings up the Annot Diff tool */
@@ -1615,8 +1624,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   }// class NewAnnotDiffAction
 
   /**
-   * This class represent an action which brings up the corpus
-   * evaluation tool
+   * This class represent an action which brings up the corpus evaluation tool
    */
   class NewCorpusEvalAction extends AbstractAction {
     public NewCorpusEvalAction() {
@@ -1630,7 +1638,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         public void run() {
           JFileChooser chooser = MainFrame.getFileChooser();
           chooser.setDialogTitle("Please select a directory which contains "
-                  + "the documents to be evaluated");
+            + "the documents to be evaluated");
           chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           chooser.setMultiSelectionEnabled(false);
           int state = chooser.showOpenDialog(MainFrame.this);
@@ -1638,7 +1646,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           if(state == JFileChooser.CANCEL_OPTION || startDir == null) return;
 
           chooser
-                  .setDialogTitle("Please select the application that you want to run");
+            .setDialogTitle("Please select the application that you want to run");
           chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           state = chooser.showOpenDialog(MainFrame.this);
           File testApp = chooser.getSelectedFile();
@@ -1658,24 +1666,24 @@ public class MainFrame extends JFrame implements ProgressListener,
           theTool.printStatistics();
 
           Out.prln("<BR>Overall average precision: "
-                  + theTool.getPrecisionAverage());
+            + theTool.getPrecisionAverage());
           Out.prln("<BR>Overall average recall: " + theTool.getRecallAverage());
           Out.prln("<BR>Overall average fMeasure : "
-                  + theTool.getFMeasureAverage());
+            + theTool.getFMeasureAverage());
           Out.prln("<BR>Finished!");
           theTool.unloadPRs();
         }
       };
-      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-              runnable, "Eval thread");
+      Thread thread =
+        new Thread(Thread.currentThread().getThreadGroup(), runnable,
+          "Eval thread");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }// actionPerformed();
   }// class NewCorpusEvalAction
 
   /**
-   * This class represent an action which brings up the corpus
-   * evaluation tool
+   * This class represent an action which brings up the corpus evaluation tool
    */
   class StoredMarkedCorpusEvalAction extends AbstractAction {
     public StoredMarkedCorpusEvalAction() {
@@ -1689,7 +1697,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         public void run() {
           JFileChooser chooser = MainFrame.getFileChooser();
           chooser.setDialogTitle("Please select a directory which contains "
-                  + "the documents to be evaluated");
+            + "the documents to be evaluated");
           chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           chooser.setMultiSelectionEnabled(false);
           int state = chooser.showOpenDialog(MainFrame.this);
@@ -1705,7 +1713,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           // MainFrame.this.datastoreModeCorpusEvalToolAction.isDatastoreMode());
 
           Out
-                  .prln("Evaluating human-marked documents against pre-stored results.");
+            .prln("Evaluating human-marked documents against pre-stored results.");
           // initialise the tool
           theTool.init();
           // and execute it
@@ -1713,24 +1721,24 @@ public class MainFrame extends JFrame implements ProgressListener,
           theTool.printStatistics();
 
           Out.prln("<BR>Overall average precision: "
-                  + theTool.getPrecisionAverage());
+            + theTool.getPrecisionAverage());
           Out.prln("<BR>Overall average recall: " + theTool.getRecallAverage());
           Out.prln("<BR>Overall average fMeasure : "
-                  + theTool.getFMeasureAverage());
+            + theTool.getFMeasureAverage());
           Out.prln("<BR>Finished!");
           theTool.unloadPRs();
         }
       };
-      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-              runnable, "Eval thread");
+      Thread thread =
+        new Thread(Thread.currentThread().getThreadGroup(), runnable,
+          "Eval thread");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }// actionPerformed();
   }// class StoredMarkedCorpusEvalActionpusEvalAction
 
   /**
-   * This class represent an action which brings up the corpus
-   * evaluation tool
+   * This class represent an action which brings up the corpus evaluation tool
    */
   class CleanMarkedCorpusEvalAction extends AbstractAction {
     public CleanMarkedCorpusEvalAction() {
@@ -1744,7 +1752,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         public void run() {
           JFileChooser chooser = MainFrame.getFileChooser();
           chooser.setDialogTitle("Please select a directory which contains "
-                  + "the documents to be evaluated");
+            + "the documents to be evaluated");
           chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           chooser.setMultiSelectionEnabled(false);
           int state = chooser.showOpenDialog(MainFrame.this);
@@ -1752,7 +1760,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           if(state == JFileChooser.CANCEL_OPTION || startDir == null) return;
 
           chooser
-                  .setDialogTitle("Please select the application that you want to run");
+            .setDialogTitle("Please select the application that you want to run");
           chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           state = chooser.showOpenDialog(MainFrame.this);
           File testApp = chooser.getSelectedFile();
@@ -1766,7 +1774,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           theTool.setVerboseMode(verboseModeItem.isSelected());
 
           Out
-                  .prln("Evaluating human-marked documents against current processing results.");
+            .prln("Evaluating human-marked documents against current processing results.");
           // initialise the tool
           theTool.init();
           // and execute it
@@ -1774,25 +1782,24 @@ public class MainFrame extends JFrame implements ProgressListener,
           theTool.printStatistics();
 
           Out.prln("Overall average precision: "
-                  + theTool.getPrecisionAverage());
+            + theTool.getPrecisionAverage());
           Out.prln("Overall average recall: " + theTool.getRecallAverage());
           Out
-                  .prln("Overall average fMeasure : "
-                          + theTool.getFMeasureAverage());
+            .prln("Overall average fMeasure : " + theTool.getFMeasureAverage());
           Out.prln("Finished!");
           theTool.unloadPRs();
         }
       };
-      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-              runnable, "Eval thread");
+      Thread thread =
+        new Thread(Thread.currentThread().getThreadGroup(), runnable,
+          "Eval thread");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }// actionPerformed();
   }// class CleanMarkedCorpusEvalActionpusEvalAction
 
   /**
-   * This class represent an action which brings up the corpus
-   * evaluation tool
+   * This class represent an action which brings up the corpus evaluation tool
    */
   class GenerateStoredCorpusEvalAction extends AbstractAction {
     public GenerateStoredCorpusEvalAction() {
@@ -1806,7 +1813,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         public void run() {
           JFileChooser chooser = MainFrame.getFileChooser();
           chooser.setDialogTitle("Please select a directory which contains "
-                  + "the documents to be evaluated");
+            + "the documents to be evaluated");
           chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           chooser.setMultiSelectionEnabled(false);
           int state = chooser.showOpenDialog(MainFrame.this);
@@ -1814,7 +1821,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           if(state == JFileChooser.CANCEL_OPTION || startDir == null) return;
 
           chooser
-                  .setDialogTitle("Please select the application that you want to run");
+            .setDialogTitle("Please select the application that you want to run");
           chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           state = chooser.showOpenDialog(MainFrame.this);
           File testApp = chooser.getSelectedFile();
@@ -1835,16 +1842,16 @@ public class MainFrame extends JFrame implements ProgressListener,
           Out.prln("Finished!");
         }
       };
-      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-              runnable, "Eval thread");
+      Thread thread =
+        new Thread(Thread.currentThread().getThreadGroup(), runnable,
+          "Eval thread");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }// actionPerformed();
   }// class GenerateStoredCorpusEvalAction
 
   /**
-   * This class represent an action which brings up the corpus
-   * evaluation tool
+   * This class represent an action which brings up the corpus evaluation tool
    */
   class VerboseModeCorpusEvalToolAction extends AbstractAction {
     public VerboseModeCorpusEvalToolAction() {
@@ -1865,28 +1872,25 @@ public class MainFrame extends JFrame implements ProgressListener,
   }// class f
 
   /**
-   * This class represent an action which brings up the corpus
-   * evaluation tool
+   * This class represent an action which brings up the corpus evaluation tool
    */
   /*
-   * class DatastoreModeCorpusEvalToolAction extends AbstractAction {
-   * public DatastoreModeCorpusEvalToolAction() { super("Use a datastore
-   * for human annotated texts"); putValue(SHORT_DESCRIPTION,"Use a
-   * datastore for the human annotated texts"); }//
-   * DatastoreModeCorpusEvalToolAction
+   * class DatastoreModeCorpusEvalToolAction extends AbstractAction { public
+   * DatastoreModeCorpusEvalToolAction() { super("Use a datastore for human
+   * annotated texts"); putValue(SHORT_DESCRIPTION,"Use a datastore for the
+   * human annotated texts"); }// DatastoreModeCorpusEvalToolAction
    * 
    * public boolean isDatastoreMode() {return datastoreMode;}
    * 
    * public void actionPerformed(ActionEvent e) { if (! (e.getSource()
    * instanceof JCheckBoxMenuItem)) return; datastoreMode =
-   * ((JCheckBoxMenuItem)e.getSource()).getState(); }//
-   * actionPerformed(); protected boolean datastoreMode = false;
-   * }//class DatastoreModeCorpusEvalToolListener
+   * ((JCheckBoxMenuItem)e.getSource()).getState(); }// actionPerformed();
+   * protected boolean datastoreMode = false; }//class
+   * DatastoreModeCorpusEvalToolListener
    */
 
   /**
-   * This class represent an action which loads ANNIE with default
-   * params
+   * This class represent an action which loads ANNIE with default params
    */
   class LoadANNIEWithDefaultsAction extends AbstractAction implements
                                                           ANNIEConstants {
@@ -1906,23 +1910,24 @@ public class MainFrame extends JFrame implements ProgressListener,
             // lock the gui
             lockGUI("ANNIE is being loaded...");
             // Create a serial analyser
-            SerialAnalyserController sac = (SerialAnalyserController)Factory
-                    .createResource("gate.creole.SerialAnalyserController",
-                            Factory.newFeatureMap(), Factory.newFeatureMap(),
-                            "ANNIE_" + Gate.genSym());
+            SerialAnalyserController sac =
+              (SerialAnalyserController)Factory.createResource(
+                "gate.creole.SerialAnalyserController",
+                Factory.newFeatureMap(), Factory.newFeatureMap(), "ANNIE_"
+                  + Gate.genSym());
             // Load each PR as defined in
             // gate.creole.ANNIEConstants.PR_NAMES
             for(int i = 0; i < PR_NAMES.length; i++) {
-              ProcessingResource pr = (ProcessingResource)Factory
-                      .createResource(PR_NAMES[i], params);
+              ProcessingResource pr =
+                (ProcessingResource)Factory.createResource(PR_NAMES[i], params);
               // Add the PR to the sac
               sac.add(pr);
             }// End for
 
             long endTime = System.currentTimeMillis();
             statusChanged("ANNIE loaded in "
-                    + NumberFormat.getInstance().format(
-                            (double)(endTime - startTime) / 1000) + " seconds");
+              + NumberFormat.getInstance().format(
+                (double)(endTime - startTime) / 1000) + " seconds");
           }
           catch(gate.creole.ResourceInstantiationException ex) {
             ex.printStackTrace(Err.getPrintWriter());
@@ -1939,8 +1944,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   }// class LoadANNIEWithDefaultsAction
 
   /**
-   * This class represent an action which loads ANNIE with default
-   * params
+   * This class represent an action which loads ANNIE with default params
    */
   class LoadANNIEWithoutDefaultsAction extends AbstractAction implements
                                                              ANNIEConstants {
@@ -1957,22 +1961,23 @@ public class MainFrame extends JFrame implements ProgressListener,
           FeatureMap params = Factory.newFeatureMap();
           try {
             // Create a serial analyser
-            SerialAnalyserController sac = (SerialAnalyserController)Factory
-                    .createResource("gate.creole.SerialAnalyserController",
-                            Factory.newFeatureMap(), Factory.newFeatureMap(),
-                            "ANNIE_" + Gate.genSym());
+            SerialAnalyserController sac =
+              (SerialAnalyserController)Factory.createResource(
+                "gate.creole.SerialAnalyserController",
+                Factory.newFeatureMap(), Factory.newFeatureMap(), "ANNIE_"
+                  + Gate.genSym());
             // NewResourceDialog resourceDialog = new NewResourceDialog(
             // MainFrame.this, "Resource parameters", true );
             // Load each PR as defined in
             // gate.creole.ANNIEConstants.PR_NAMES
             for(int i = 0; i < PR_NAMES.length; i++) {
               // get the params for the Current PR
-              ResourceData resData = (ResourceData)Gate.getCreoleRegister()
-                      .get(PR_NAMES[i]);
+              ResourceData resData =
+                (ResourceData)Gate.getCreoleRegister().get(PR_NAMES[i]);
               if(newResourceDialog.show(resData, "Parameters for the new "
-                      + resData.getName())) {
+                + resData.getName())) {
                 sac.add((ProcessingResource)Factory.createResource(PR_NAMES[i],
-                        newResourceDialog.getSelectedParameters()));
+                  newResourceDialog.getSelectedParameters()));
               }
               else {
                 // the user got bored and aborted the operation
@@ -1980,7 +1985,7 @@ public class MainFrame extends JFrame implements ProgressListener,
                 Iterator loadedPRsIter = new ArrayList(sac.getPRs()).iterator();
                 while(loadedPRsIter.hasNext()) {
                   Factory.deleteResource((ProcessingResource)loadedPRsIter
-                          .next());
+                    .next());
                 }
                 Factory.deleteResource(sac);
                 statusChanged("Loading cancelled!");
@@ -2002,8 +2007,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   }// class LoadANNIEWithoutDefaultsAction
 
   /**
-   * This class represent an action which loads ANNIE without default
-   * param
+   * This class represent an action which loads ANNIE without default param
    */
   class LoadANNIEWithoutDefaultsAction1 extends AbstractAction implements
                                                               ANNIEConstants {
@@ -2018,10 +2022,10 @@ public class MainFrame extends JFrame implements ProgressListener,
       for(int i = 0; i < PR_NAMES.length; i++) {
         ResourceData resData = (ResourceData)reg.get(PR_NAMES[i]);
         if(resData != null) {
-          NewResourceDialog resourceDialog = new NewResourceDialog(
-                  MainFrame.this, "Resource parameters", true);
+          NewResourceDialog resourceDialog =
+            new NewResourceDialog(MainFrame.this, "Resource parameters", true);
           resourceDialog
-                  .setTitle("Parameters for the new " + resData.getName());
+            .setTitle("Parameters for the new " + resData.getName());
           resourceDialog.show(resData);
         }
         else {
@@ -2031,8 +2035,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       try {
         // Create an application at the end.
         Factory.createResource("gate.creole.SerialAnalyserController", Factory
-                .newFeatureMap(), Factory.newFeatureMap(), "ANNIE_"
-                + Gate.genSym());
+          .newFeatureMap(), Factory.newFeatureMap(), "ANNIE_" + Gate.genSym());
       }
       catch(gate.creole.ResourceInstantiationException ex) {
         ex.printStackTrace(Err.getPrintWriter());
@@ -2069,12 +2072,14 @@ public class MainFrame extends JFrame implements ProgressListener,
         Dimension screenSize = /* Toolkit.getDefaultToolkit().getScreenSize(); */
         getGraphicsConfiguration().getBounds().getSize();
         Dimension dialogSize = pluginManager.getPreferredSize();
-        int width = dialogSize.width > screenSize.width
-                ? screenSize.width * 3 / 4
-                : dialogSize.width;
-        int height = dialogSize.height > screenSize.height
-                ? screenSize.height * 3 / 4
-                : dialogSize.height;
+        int width =
+          dialogSize.width > screenSize.width
+            ? screenSize.width * 3 / 4
+            : dialogSize.width;
+        int height =
+          dialogSize.height > screenSize.height
+            ? screenSize.height * 3 / 4
+            : dialogSize.height;
         pluginManager.setSize(width, height);
         pluginManager.validate();
         // center the window on screen
@@ -2121,7 +2126,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           if(result == JFileChooser.APPROVE_OPTION) {
             try {
               textField.setText(fileChooser.getSelectedFile().toURI().toURL()
-                      .toExternalForm());
+                .toExternalForm());
             }
             catch(MalformedURLException mue) {
               throw new GateRuntimeException(mue.toString());
@@ -2146,10 +2151,11 @@ public class MainFrame extends JFrame implements ProgressListener,
       // null, names,
       // names[0]);
 
-      int res = JOptionPane.showConfirmDialog(MainFrame.this, messageBox,
-              "Enter an URL to the directory containig the "
-                      + "\"creole.xml\" file", JOptionPane.OK_CANCEL_OPTION,
-              JOptionPane.QUESTION_MESSAGE, null);
+      int res =
+        JOptionPane.showConfirmDialog(MainFrame.this, messageBox,
+          "Enter an URL to the directory containig the "
+            + "\"creole.xml\" file", JOptionPane.OK_CANCEL_OPTION,
+          JOptionPane.QUESTION_MESSAGE, null);
       if(res == JOptionPane.OK_OPTION) {
         try {
           URL creoleURL = new URL(urlTextField.getText());
@@ -2157,8 +2163,8 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
         catch(Exception ex) {
           JOptionPane.showMessageDialog(MainFrame.this,
-                  "There was a problem with your selection:\n" + ex.toString(),
-                  "GATE", JOptionPane.ERROR_MESSAGE);
+            "There was a problem with your selection:\n" + ex.toString(),
+            "GATE", JOptionPane.ERROR_MESSAGE);
           ex.printStackTrace(Err.getPrintWriter());
         }
       }
@@ -2180,7 +2186,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       Runnable runnable = new Runnable() {
         public void run() {
           newResourceDialog.setTitle("Parameters for the new "
-                  + rData.getName());
+            + rData.getName());
           newResourceDialog.show(rData);
         }
       };
@@ -2208,17 +2214,20 @@ public class MainFrame extends JFrame implements ProgressListener,
   protected DataStore createSearchableDataStore() {
     try {
       JPanel mainPanel = new JPanel(new GridBagLayout());
-      
+
       final JTextField dsLocation = new JTextField("", 20);
       final JTextField indexLocation = new JTextField("", 20);
-      
+
       JTextField btat = new JTextField("Token", 20);
-      btat.setToolTipText("Examples: Token, AnnotationSetName.Token, "+Constants.DEFAULT_ANNOTATION_SET_NAME+".Token");
-      JCheckBox createTokensAutomatically = new JCheckBox("Create Tokens Automatically");
+      btat.setToolTipText("Examples: Token, AnnotationSetName.Token, "
+        + Constants.DEFAULT_ANNOTATION_SET_NAME + ".Token");
+      JCheckBox createTokensAutomatically =
+        new JCheckBox("Create Tokens Automatically");
       createTokensAutomatically.setSelected(true);
       JTextField iuat = new JTextField("", 20);
-      iuat.setToolTipText("Examples: Sentence, AnnotationSetName.Sentence, "+Constants.DEFAULT_ANNOTATION_SET_NAME+".Sentence");
-      
+      iuat.setToolTipText("Examples: Sentence, AnnotationSetName.Sentence, "
+        + Constants.DEFAULT_ANNOTATION_SET_NAME + ".Sentence");
+
       final List<String> inputASList = new ArrayList<String>();
       inputASList.add("Key");
       final JTextField inputAS = new JTextField("", 20);
@@ -2227,29 +2236,36 @@ public class MainFrame extends JFrame implements ProgressListener,
       JButton editInputAS = new JButton(MainFrame.getIcon("edit-list"));
       editInputAS.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ae) {
-          ListEditorDialog listEditor = new ListEditorDialog(getInstance(), 
-                  inputASList,
-                  "java.lang.String");
+          ListEditorDialog listEditor =
+            new ListEditorDialog(getInstance(), inputASList, "java.lang.String");
           List result = listEditor.showDialog();
-          if(result != null){
+          if(result != null) {
             inputASList.clear();
             inputASList.addAll(result);
-            if(inputASList.size() > 0){
-              String text = inputASList.get(0) == null ? Constants.DEFAULT_ANNOTATION_SET_NAME : inputASList.get(0).toString();
-              for(int j = 1; j < inputASList.size(); j++){
-                text += ";" + (inputASList.get(j) == null ? Constants.DEFAULT_ANNOTATION_SET_NAME : inputASList.get(j).toString());
+            if(inputASList.size() > 0) {
+              String text =
+                inputASList.get(0) == null
+                  ? Constants.DEFAULT_ANNOTATION_SET_NAME
+                  : inputASList.get(0).toString();
+              for(int j = 1; j < inputASList.size(); j++) {
+                text +=
+                  ";"
+                    + (inputASList.get(j) == null
+                      ? Constants.DEFAULT_ANNOTATION_SET_NAME
+                      : inputASList.get(j).toString());
               }
               inputAS.setText(text);
-            }else{
+            }
+            else {
               inputAS.setText("");
             }
           }
         }
       });
-      
+
       JComboBox asie = new JComboBox(new String[]{"include", "exclude"});
       inputAS.setToolTipText("Leave blank for indexing all annotation sets");
-      
+
       final List<String> fteList = new ArrayList<String>();
       fteList.add("SpaceToken");
       fteList.add("Split");
@@ -2259,42 +2275,49 @@ public class MainFrame extends JFrame implements ProgressListener,
       JButton editFTE = new JButton(MainFrame.getIcon("edit-list"));
       editFTE.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ae) {
-          ListEditorDialog listEditor = new ListEditorDialog(getInstance(), 
-                  fteList,
-                  "java.lang.String");
+          ListEditorDialog listEditor =
+            new ListEditorDialog(getInstance(), fteList, "java.lang.String");
           List result = listEditor.showDialog();
-          if(result != null){
+          if(result != null) {
             fteList.clear();
             fteList.addAll(result);
-            if(fteList.size() > 0){
-              String text = fteList.get(0) == null ? Constants.DEFAULT_ANNOTATION_SET_NAME : fteList.get(0).toString();
-              for(int j = 1; j < fteList.size(); j++){
-                text += ";" + (fteList.get(j) == null ? Constants.DEFAULT_ANNOTATION_SET_NAME : fteList.get(j).toString());
+            if(fteList.size() > 0) {
+              String text =
+                fteList.get(0) == null
+                  ? Constants.DEFAULT_ANNOTATION_SET_NAME
+                  : fteList.get(0).toString();
+              for(int j = 1; j < fteList.size(); j++) {
+                text +=
+                  ";"
+                    + (fteList.get(j) == null
+                      ? Constants.DEFAULT_ANNOTATION_SET_NAME
+                      : fteList.get(j).toString());
               }
               fte.setText(text);
-            }else{
+            }
+            else {
               fte.setText("");
             }
           }
         }
       });
-            
+
       JComboBox ftie = new JComboBox(new String[]{"include", "exclude"});
       ftie.setSelectedIndex(1);
       fte.setToolTipText("Leave blank for inclusion of all features");
-      
+
       JButton dsBrowse = new JButton(MainFrame.getIcon("open-file"));
       JButton indexBrowse = new JButton(MainFrame.getIcon("open-file"));
       dsBrowse.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ae) {
           // first we need to ask for a new empty directory
           fileChooser
-                  .setDialogTitle("Please create a new empty directory for datastore");
+            .setDialogTitle("Please create a new empty directory for datastore");
           fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           if(fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
             try {
               dsLocation.setText(fileChooser.getSelectedFile().toURI().toURL()
-                      .toExternalForm());
+                .toExternalForm());
             }
             catch(Exception e) {
               dsLocation.setText("");
@@ -2307,12 +2330,12 @@ public class MainFrame extends JFrame implements ProgressListener,
         public void actionPerformed(ActionEvent ae) {
           // first we need to ask for a new empty directory
           fileChooser
-                  .setDialogTitle("Please create a new empty directory for datastore");
+            .setDialogTitle("Please create a new empty directory for datastore");
           fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           if(fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
             try {
-              indexLocation.setText(fileChooser.getSelectedFile().toURI().toURL()
-                      .toExternalForm());
+              indexLocation.setText(fileChooser.getSelectedFile().toURI()
+                .toURL().toExternalForm());
             }
             catch(Exception e) {
               indexLocation.setText("");
@@ -2321,7 +2344,6 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
       });
 
-      
       GridBagConstraints constraints = new GridBagConstraints();
       constraints.gridx = GridBagConstraints.RELATIVE;
       constraints.gridy = 0;
@@ -2348,7 +2370,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       dsBrowse.setBorderPainted(false);
       dsBrowse.setContentAreaFilled(false);
 
-      //second row
+      // second row
       constraints = new GridBagConstraints();
       constraints.gridx = GridBagConstraints.RELATIVE;
       constraints.gridy = 1;
@@ -2374,8 +2396,8 @@ public class MainFrame extends JFrame implements ProgressListener,
       mainPanel.add(indexBrowse, constraints);
       indexBrowse.setBorderPainted(false);
       indexBrowse.setContentAreaFilled(false);
-      
-      //third row row
+
+      // third row row
       constraints = new GridBagConstraints();
       constraints.gridx = GridBagConstraints.RELATIVE;
       constraints.gridy = 2;
@@ -2400,7 +2422,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       constraints.fill = GridBagConstraints.HORIZONTAL;
       constraints.insets = new Insets(0, 0, 0, 10);
       mainPanel.add(inputAS, constraints);
-      
+
       constraints = new GridBagConstraints();
       constraints.gridx = GridBagConstraints.RELATIVE;
       constraints.gridy = 2;
@@ -2409,8 +2431,8 @@ public class MainFrame extends JFrame implements ProgressListener,
       mainPanel.add(editInputAS, constraints);
       editInputAS.setBorderPainted(false);
       editInputAS.setContentAreaFilled(false);
-      
-      //fourth row row
+
+      // fourth row row
       constraints = new GridBagConstraints();
       constraints.gridx = GridBagConstraints.RELATIVE;
       constraints.gridy = 3;
@@ -2426,8 +2448,8 @@ public class MainFrame extends JFrame implements ProgressListener,
       constraints.gridwidth = 5;
       constraints.anchor = GridBagConstraints.NORTHWEST;
       mainPanel.add(btat, constraints);
-      
-      //fifth row
+
+      // fifth row
       constraints = new GridBagConstraints();
       constraints.gridx = 4;
       constraints.gridy = 4;
@@ -2437,8 +2459,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       constraints.insets = new Insets(0, 0, 0, 5);
       mainPanel.add(createTokensAutomatically, constraints);
 
-      
-      //sixth row
+      // sixth row
       constraints = new GridBagConstraints();
       constraints.gridx = GridBagConstraints.RELATIVE;
       constraints.gridy = 5;
@@ -2455,7 +2476,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       constraints.anchor = GridBagConstraints.NORTHWEST;
       mainPanel.add(iuat, constraints);
 
-      //seventh row
+      // seventh row
       constraints = new GridBagConstraints();
       constraints.gridx = GridBagConstraints.RELATIVE;
       constraints.gridy = 6;
@@ -2480,7 +2501,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       constraints.fill = GridBagConstraints.HORIZONTAL;
       constraints.insets = new Insets(0, 0, 0, 10);
       mainPanel.add(fte, constraints);
-      
+
       constraints = new GridBagConstraints();
       constraints.gridx = GridBagConstraints.RELATIVE;
       constraints.gridy = 6;
@@ -2489,31 +2510,35 @@ public class MainFrame extends JFrame implements ProgressListener,
       mainPanel.add(editFTE, constraints);
       editFTE.setBorderPainted(false);
       editFTE.setContentAreaFilled(false);
-      
-      int returnValue = JOptionPane.showOptionDialog(MainFrame.getInstance(),
-              mainPanel, "SearchableDataStore", JOptionPane.PLAIN_MESSAGE,
-              JOptionPane.OK_CANCEL_OPTION, MainFrame.getIcon("empty"),
-              new String[] {"OK", "Cancel"}, "OK");
+
+      int returnValue =
+        JOptionPane.showOptionDialog(MainFrame.getInstance(), mainPanel,
+          "SearchableDataStore", JOptionPane.PLAIN_MESSAGE,
+          JOptionPane.OK_CANCEL_OPTION, MainFrame.getIcon("empty"),
+          new String[]{"OK", "Cancel"}, "OK");
       if(returnValue == JOptionPane.OK_OPTION) {
 
-        DataStore ds = Factory.createDataStore(
-                "gate.persist.LuceneDataStoreImpl", dsLocation.getText());
+        DataStore ds =
+          Factory.createDataStore("gate.persist.LuceneDataStoreImpl",
+            dsLocation.getText());
 
         // we need to set Indexer
         Class[] consParam = new Class[1];
         consParam[0] = URL.class;
-        Constructor constructor = Class.forName(
-                "gate.creole.annic.lucene.LuceneIndexer", true,
-                Gate.getClassLoader()).getConstructor(consParam);
-        Object indexer = constructor.newInstance(new URL(indexLocation
-                .getText()));
+        Constructor constructor =
+          Class.forName("gate.creole.annic.lucene.LuceneIndexer", true,
+            Gate.getClassLoader()).getConstructor(consParam);
+        Object indexer =
+          constructor.newInstance(new URL(indexLocation.getText()));
 
         Map parameters = new HashMap();
-        parameters.put(Constants.INDEX_LOCATION_URL, new URL(indexLocation.getText()));
+        parameters.put(Constants.INDEX_LOCATION_URL, new URL(indexLocation
+          .getText()));
         parameters.put(Constants.BASE_TOKEN_ANNOTATION_TYPE, btat.getText());
         parameters.put(Constants.INDEX_UNIT_ANNOTATION_TYPE, iuat.getText());
-        parameters.put(Constants.CREATE_TOKENS_AUTOMATICALLY, new Boolean(createTokensAutomatically.isSelected()));
-        
+        parameters.put(Constants.CREATE_TOKENS_AUTOMATICALLY, new Boolean(
+          createTokensAutomatically.isSelected()));
+
         if(inputAS.getText().trim().length() > 0) {
           ArrayList<String> inputASList1 = new ArrayList<String>();
           String[] inputASArray = inputAS.getText().trim().split(";");
@@ -2524,18 +2549,26 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
           if(asie.getSelectedIndex() == 0) {
             // user has provided values for inclusion
-            parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE, inputASList1);
-            parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_EXCLUDE, new ArrayList<String>());
-          } else {
-            // user has provided values for exclusion
-            parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_EXCLUDE, inputASList1); 
-            parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE, new ArrayList<String>());
+            parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE,
+              inputASList1);
+            parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_EXCLUDE,
+              new ArrayList<String>());
           }
-        } else {
-          parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_EXCLUDE, new ArrayList<String>());
-          parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE, new ArrayList<String>());
+          else {
+            // user has provided values for exclusion
+            parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_EXCLUDE,
+              inputASList1);
+            parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE,
+              new ArrayList<String>());
+          }
         }
-        
+        else {
+          parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_EXCLUDE,
+            new ArrayList<String>());
+          parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE,
+            new ArrayList<String>());
+        }
+
         if(fte.getText().trim().length() > 0) {
           ArrayList<String> fteList1 = new ArrayList<String>();
           String[] inputASArray = fte.getText().trim().split(";");
@@ -2547,35 +2580,42 @@ public class MainFrame extends JFrame implements ProgressListener,
           if(ftie.getSelectedIndex() == 0) {
             // user has provided values for inclusion
             parameters.put(Constants.FEATURES_TO_INCLUDE, fteList1);
-            parameters.put(Constants.FEATURES_TO_EXCLUDE, new ArrayList<String>());
-          } else {
+            parameters.put(Constants.FEATURES_TO_EXCLUDE,
+              new ArrayList<String>());
+          }
+          else {
             // user has provided values for exclusion
             parameters.put(Constants.FEATURES_TO_EXCLUDE, fteList1);
-            parameters.put(Constants.FEATURES_TO_INCLUDE, new ArrayList<String>());
+            parameters.put(Constants.FEATURES_TO_INCLUDE,
+              new ArrayList<String>());
           }
-        } else {
-          parameters.put(Constants.FEATURES_TO_EXCLUDE, new ArrayList<String>());
-          parameters.put(Constants.FEATURES_TO_INCLUDE, new ArrayList<String>());
+        }
+        else {
+          parameters
+            .put(Constants.FEATURES_TO_EXCLUDE, new ArrayList<String>());
+          parameters
+            .put(Constants.FEATURES_TO_INCLUDE, new ArrayList<String>());
         }
 
-        
         Class[] params = new Class[2];
-        params[0] = Class.forName("gate.creole.annic.Indexer", true, Gate
-                .getClassLoader());
+        params[0] =
+          Class.forName("gate.creole.annic.Indexer", true, Gate
+            .getClassLoader());
         params[1] = Map.class;
         Method indexerMethod = ds.getClass().getMethod("setIndexer", params);
         indexerMethod.invoke(ds, indexer, parameters);
 
         // Class[] searchConsParams = new Class[0];
-        Constructor searcherConst = Class.forName(
-                "gate.creole.annic.lucene.LuceneSearcher", true,
-                Gate.getClassLoader()).getConstructor();
+        Constructor searcherConst =
+          Class.forName("gate.creole.annic.lucene.LuceneSearcher", true,
+            Gate.getClassLoader()).getConstructor();
         Object searcher = searcherConst.newInstance();
         Class[] searchParams = new Class[1];
-        searchParams[0] = Class.forName("gate.creole.annic.Searcher", true,
-                Gate.getClassLoader());
-        Method searcherMethod = ds.getClass().getMethod("setSearcher",
-                searchParams);
+        searchParams[0] =
+          Class.forName("gate.creole.annic.Searcher", true, Gate
+            .getClassLoader());
+        Method searcherMethod =
+          ds.getClass().getMethod("setSearcher", searchParams);
         searcherMethod.invoke(ds, searcher);
         return ds;
       }
@@ -2596,18 +2636,19 @@ public class MainFrame extends JFrame implements ProgressListener,
     if(fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
       try {
         URL dsURL = fileChooser.getSelectedFile().toURI().toURL();
-        ds = Factory.openDataStore("gate.persist.LuceneDataStoreImpl", dsURL
-                .toExternalForm());
+        ds =
+          Factory.openDataStore("gate.persist.LuceneDataStoreImpl", dsURL
+            .toExternalForm());
       }
       catch(MalformedURLException mue) {
         JOptionPane.showMessageDialog(MainFrame.this,
-                "Invalid location for the datastore\n " + mue.toString(),
-                "GATE", JOptionPane.ERROR_MESSAGE);
+          "Invalid location for the datastore\n " + mue.toString(), "GATE",
+          JOptionPane.ERROR_MESSAGE);
       }
       catch(PersistenceException pe) {
         JOptionPane.showMessageDialog(MainFrame.this,
-                "Datastore opening error!\n " + pe.toString(), "GATE",
-                JOptionPane.ERROR_MESSAGE);
+          "Datastore opening error!\n " + pe.toString(), "GATE",
+          JOptionPane.ERROR_MESSAGE);
       } // catch
     } // if
 
@@ -2633,9 +2674,10 @@ public class MainFrame extends JFrame implements ProgressListener,
 
       if(!dsTypeByName.isEmpty()) {
         Object[] names = dsTypeByName.keySet().toArray();
-        Object answer = JOptionPane.showInputDialog(MainFrame.this,
-                "Select type of Datastore", "GATE",
-                JOptionPane.QUESTION_MESSAGE, null, names, names[0]);
+        Object answer =
+          JOptionPane.showInputDialog(MainFrame.this,
+            "Select type of Datastore", "GATE", JOptionPane.QUESTION_MESSAGE,
+            null, names, names[0]);
         if(answer != null) {
           String className = (String)dsTypeByName.get(answer);
           if(className.equals("gate.persist.SerialDataStore")) {
@@ -2646,23 +2688,23 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
           else if(className.equals("gate.persist.OracleDataStore")) {
             JOptionPane.showMessageDialog(MainFrame.this,
-                    "Oracle datastores can only be created "
-                            + "by your Oracle administrator!", "GATE",
-                    JOptionPane.ERROR_MESSAGE);
+              "Oracle datastores can only be created "
+                + "by your Oracle administrator!", "GATE",
+              JOptionPane.ERROR_MESSAGE);
           }
           else {
 
             throw new UnsupportedOperationException("Unimplemented option!\n"
-                    + "Use a serial datastore");
+              + "Use a serial datastore");
           }
         }
       }
       else {
         // no ds types
         JOptionPane.showMessageDialog(MainFrame.this,
-                "Could not find any registered types " + "of datastores...\n"
-                        + "Check your GATE installation!", "GATE",
-                JOptionPane.ERROR_MESSAGE);
+          "Could not find any registered types " + "of datastores...\n"
+            + "Check your GATE installation!", "GATE",
+          JOptionPane.ERROR_MESSAGE);
 
       }
     }
@@ -2688,13 +2730,13 @@ public class MainFrame extends JFrame implements ProgressListener,
             catch(ResourceInstantiationException rie) {
               processFinished();
               JOptionPane.showMessageDialog(MainFrame.this, "Error!\n"
-                      + rie.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
+                + rie.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
               rie.printStackTrace(Err.getPrintWriter());
             }
             catch(Exception ex) {
               processFinished();
               JOptionPane.showMessageDialog(MainFrame.this, "Error!\n"
-                      + ex.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
+                + ex.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
               ex.printStackTrace(Err.getPrintWriter());
             }
           }
@@ -2707,8 +2749,8 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   /**
-   * Closes the view associated to a resource. Does not remove the
-   * resource from the system, only its view.
+   * Closes the view associated to a resource. Does not remove the resource from
+   * the system, only its view.
    */
   class CloseViewAction extends AbstractAction {
     public CloseViewAction(Handle handle) {
@@ -2720,7 +2762,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     public void actionPerformed(ActionEvent e) {
       mainTabbedPane.remove(handle.getLargeView());
       mainTabbedPane.setSelectedIndex(mainTabbedPane.getTabCount() - 1);
-      //remove all GUI resources used by this handle
+      // remove all GUI resources used by this handle
       handle.removeViews();
     }// public void actionPerformed(ActionEvent e)
 
@@ -2752,11 +2794,12 @@ public class MainFrame extends JFrame implements ProgressListener,
         public void run() {
           TreePath[] paths = resourcesTree.getSelectionPaths();
           for(int i = 0; i < paths.length; i++) {
-            Object userObject = ((DefaultMutableTreeNode)paths[i]
-                    .getLastPathComponent()).getUserObject();
+            Object userObject =
+              ((DefaultMutableTreeNode)paths[i].getLastPathComponent())
+                .getUserObject();
             if(userObject instanceof NameBearerHandle) {
               ((NameBearerHandle)userObject).getCloseAction().actionPerformed(
-                      null);
+                null);
             }
           }
         }
@@ -2768,8 +2811,8 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   /**
-   * Closes the view associated to a resource. Does not remove the
-   * resource from the system, only its view.
+   * Closes the view associated to a resource. Does not remove the resource from
+   * the system, only its view.
    */
   class ExitGateAction extends AbstractAction {
     public ExitGateAction() {
@@ -2784,7 +2827,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           // save the options
           OptionsMap userConfig = Gate.getUserConfig();
           if(userConfig.getBoolean(GateConstants.SAVE_OPTIONS_ON_EXIT)
-                  .booleanValue()) {
+            .booleanValue()) {
             // save the window size
             Integer width = new Integer(MainFrame.this.getWidth());
             Integer height = new Integer(MainFrame.this.getHeight());
@@ -2793,8 +2836,8 @@ public class MainFrame extends JFrame implements ProgressListener,
             try {
               File lastCurrentDirectory = fileChooser.getCurrentDirectory();
               userConfig.put(GateConstants.LAST_FILECHOOSER_LOCATION,
-                      lastCurrentDirectory == null ? "" : lastCurrentDirectory
-                              .getCanonicalPath());
+                lastCurrentDirectory == null ? "" : lastCurrentDirectory
+                  .getCanonicalPath());
             }
             catch(IOException ioe) {
               // ignore
@@ -2812,7 +2855,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             // save the option not to save the options
             OptionsMap originalUserConfig = Gate.getOriginalUserConfig();
             originalUserConfig.put(GateConstants.SAVE_OPTIONS_ON_EXIT,
-                    new Boolean(false));
+              new Boolean(false));
             userConfig.clear();
             userConfig.putAll(originalUserConfig);
             try {
@@ -2827,19 +2870,20 @@ public class MainFrame extends JFrame implements ProgressListener,
           // save the session;
           File sessionFile = Gate.getUserSessionFile();
           if(userConfig.getBoolean(GateConstants.SAVE_SESSION_ON_EXIT)
-                  .booleanValue()) {
+            .booleanValue()) {
             // save all the open applications
             try {
-              ArrayList appList = new ArrayList(Gate.getCreoleRegister()
-                      .getAllInstances("gate.Controller"));
+              ArrayList appList =
+                new ArrayList(Gate.getCreoleRegister().getAllInstances(
+                  "gate.Controller"));
               // remove all hidden instances
               Iterator appIter = appList.iterator();
               while(appIter.hasNext())
                 if(Gate.getHiddenAttribute(((Controller)appIter.next())
-                        .getFeatures())) appIter.remove();
+                  .getFeatures())) appIter.remove();
 
               gate.util.persistence.PersistenceManager.saveObjectToFile(
-                      appList, sessionFile);
+                appList, sessionFile);
             }
             catch(Exception ex) {
               logArea.getOriginalErr().println("Failed to save session data:");
@@ -2868,31 +2912,53 @@ public class MainFrame extends JFrame implements ProgressListener,
 
           // trying to release all resources occupied by all
           try {
-            List<Resource> resources = Gate.getCreoleRegister()
-                    .getAllInstances(gate.Resource.class.getName());
+            List<Resource> resources =
+              Gate.getCreoleRegister().getAllInstances(
+                gate.Resource.class.getName());
+
             // we need to call the clean up method for each of these
             // resources
             for(Resource aResource : resources) {
               try {
-                //System.out.print("Cleaning up :" + aResource.getName());
+                // System.out.print("Cleaning up :" + aResource.getName());
                 aResource.cleanup();
-                //System.out.println(" Done!");
+                // System.out.println(" Done!");
               }
               catch(Throwable e) {
                 // this may throw somekind of exception
                 // but we just ignore it as anyway we are closing
                 // everything
-                System.err.println(" Some problem cleaning up the resource " + e.getMessage());
+                System.err.println(" Some problem cleaning up the resource "
+                  + e.getMessage());
               }
             }
+
+            // close all the opened datastores
+            if(Gate.getDataStoreRegister() != null) {
+              Set dataStores = new HashSet(Gate.getDataStoreRegister());
+              for(Object aDs : dataStores) {
+                try {
+                  if(aDs instanceof DataStore) {
+                    ((DataStore)aDs).close();
+                  }
+                }
+                catch(Throwable e) {
+                  System.err.println("Some problem in closing the datastore"
+                    + e.getMessage());
+                }
+              }
+            }
+
           }
           catch(GateException exception) {
             // we just ignore this
           }
+
         }// run
       };// Runnable
-      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-              runnable, "Shutdown thread");
+      Thread thread =
+        new Thread(Thread.currentThread().getThreadGroup(), runnable,
+          "Shutdown thread");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }
@@ -2917,9 +2983,10 @@ public class MainFrame extends JFrame implements ProgressListener,
 
       if(!dsTypeByName.isEmpty()) {
         Object[] names = dsTypeByName.keySet().toArray();
-        Object answer = JOptionPane.showInputDialog(MainFrame.this,
-                "Select type of Datastore", "GATE",
-                JOptionPane.QUESTION_MESSAGE, null, names, names[0]);
+        Object answer =
+          JOptionPane.showInputDialog(MainFrame.this,
+            "Select type of Datastore", "GATE", JOptionPane.QUESTION_MESSAGE,
+            null, names, names[0]);
         if(answer != null) {
           String className = (String)dsTypeByName.get(answer);
           if(className.indexOf("SerialDataStore") != -1) {
@@ -2932,10 +2999,10 @@ public class MainFrame extends JFrame implements ProgressListener,
             openDocServiceDataStore();
           }
           else if(className.equals("gate.persist.OracleDataStore")
-                  || className.equals("gate.persist.PostgresDataStore")) {
+            || className.equals("gate.persist.PostgresDataStore")) {
             List dbPaths = new ArrayList();
-            Iterator keyIter = DataStoreRegister.getConfigData().keySet()
-                    .iterator();
+            Iterator keyIter =
+              DataStoreRegister.getConfigData().keySet().iterator();
             while(keyIter.hasNext()) {
               String keyName = (String)keyIter.next();
               if(keyName.startsWith("url"))
@@ -2943,14 +3010,15 @@ public class MainFrame extends JFrame implements ProgressListener,
             }
             if(dbPaths.isEmpty())
               throw new GateRuntimeException(
-                      "JDBC URL not configured in gate.xml");
+                "JDBC URL not configured in gate.xml");
             // by default make it the first
             String storageURL = (String)dbPaths.get(0);
             if(dbPaths.size() > 1) {
               Object[] paths = dbPaths.toArray();
-              answer = JOptionPane.showInputDialog(MainFrame.this,
-                      "Select a database", "GATE",
-                      JOptionPane.QUESTION_MESSAGE, null, paths, paths[0]);
+              answer =
+                JOptionPane.showInputDialog(MainFrame.this,
+                  "Select a database", "GATE", JOptionPane.QUESTION_MESSAGE,
+                  null, paths, paths[0]);
               if(answer != null)
                 storageURL = (String)answer;
               else return;
@@ -2996,25 +3064,23 @@ public class MainFrame extends JFrame implements ProgressListener,
                 listPanel.add(panel2);
 
                 if(OkCancelDialog.showDialog(MainFrame.this.getContentPane(),
-                        listPanel, "Please enter login details")) {
+                  listPanel, "Please enter login details")) {
 
                   userName = usrField.getText();
                   userPass = new String(pwdField.getPassword());
                   group = (String)grpField.getSelectedItem();
 
                   if(userName.equals("") || userPass.equals("")
-                          || group.equals("")) {
+                    || group.equals("")) {
                     JOptionPane
-                            .showMessageDialog(
-                                    MainFrame.this,
-                                    "You must provide non-empty user name, password and group!",
-                                    "Login error", JOptionPane.ERROR_MESSAGE);
+                      .showMessageDialog(
+                        MainFrame.this,
+                        "You must provide non-empty user name, password and group!",
+                        "Login error", JOptionPane.ERROR_MESSAGE);
                     return;
                   }
                 }
-                else if(OkCancelDialog.userHasPressedCancel) {
-                  return;
-                }
+                else if(OkCancelDialog.userHasPressedCancel) { return; }
 
                 grp = ac.findGroup(group);
                 usr = ac.findUser(userName);
@@ -3026,18 +3092,16 @@ public class MainFrame extends JFrame implements ProgressListener,
               }
               catch(gate.security.SecurityException ex) {
                 JOptionPane.showMessageDialog(MainFrame.this, ex.getMessage(),
-                        "Login error", JOptionPane.ERROR_MESSAGE);
+                  "Login error", JOptionPane.ERROR_MESSAGE);
                 ac.close();
                 return;
               }
 
               if(!ac.isValidSession(mySession)) {
-                JOptionPane
-                        .showMessageDialog(
-                                MainFrame.this,
-                                "Incorrect session obtained. "
-                                        + "Probably there is a problem with the database!",
-                                "Login error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(MainFrame.this,
+                  "Incorrect session obtained. "
+                    + "Probably there is a problem with the database!",
+                  "Login error", JOptionPane.ERROR_MESSAGE);
                 ac.close();
                 return;
               }
@@ -3059,48 +3123,46 @@ public class MainFrame extends JFrame implements ProgressListener,
             }
             catch(PersistenceException pe) {
               JOptionPane.showMessageDialog(MainFrame.this,
-                      "Datastore open error!\n " + pe.toString(), "GATE",
-                      JOptionPane.ERROR_MESSAGE);
+                "Datastore open error!\n " + pe.toString(), "GATE",
+                JOptionPane.ERROR_MESSAGE);
             }
             catch(gate.security.SecurityException se) {
               JOptionPane.showMessageDialog(MainFrame.this,
-                      "User identification error!\n " + se.toString(), "GATE",
-                      JOptionPane.ERROR_MESSAGE);
+                "User identification error!\n " + se.toString(), "GATE",
+                JOptionPane.ERROR_MESSAGE);
               try {
                 if(ac != null) ac.close();
                 if(ds != null) ds.close();
               }
               catch(gate.persist.PersistenceException ex) {
                 JOptionPane.showMessageDialog(MainFrame.this,
-                        "Persistence error!\n " + ex.toString(), "GATE",
-                        JOptionPane.ERROR_MESSAGE);
+                  "Persistence error!\n " + ex.toString(), "GATE",
+                  JOptionPane.ERROR_MESSAGE);
               }
             }
 
           }
           else {
-            JOptionPane
-                    .showMessageDialog(
-                            MainFrame.this,
-                            "Support for this type of datastores is not implemenented!\n",
-                            "GATE", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(MainFrame.this,
+              "Support for this type of datastores is not implemenented!\n",
+              "GATE", JOptionPane.ERROR_MESSAGE);
           }
         }
       }
       else {
         // no ds types
         JOptionPane.showMessageDialog(MainFrame.this,
-                "Could not find any registered types " + "of datastores...\n"
-                        + "Check your GATE installation!", "GATE",
-                JOptionPane.ERROR_MESSAGE);
+          "Could not find any registered types " + "of datastores...\n"
+            + "Check your GATE installation!", "GATE",
+          JOptionPane.ERROR_MESSAGE);
 
       }
     }
   }// class OpenDSAction extends AbstractAction
 
   /**
-   * A menu that self populates based on CREOLE register data before
-   * being shown. Used for creating new resources of all possible types.
+   * A menu that self populates based on CREOLE register data before being
+   * shown. Used for creating new resources of all possible types.
    */
   class LiveMenu extends XJMenu {
     public LiveMenu(int type) {
@@ -3122,7 +3184,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           // find out the available types of LRs and repopulate the menu
           CreoleRegister reg = Gate.getCreoleRegister();
           List resTypes;
-          switch(type) {
+          switch(type){
             case LR:
               resTypes = reg.getPublicLrTypes();
               break;
@@ -3147,8 +3209,8 @@ public class MainFrame extends JFrame implements ProgressListener,
             Collections.sort(resNames);
             resIter = resNames.iterator();
             while(resIter.hasNext()) {
-              ResourceData rData = (ResourceData)resourcesByName.get(resIter
-                      .next());
+              ResourceData rData =
+                (ResourceData)resourcesByName.get(resIter.next());
               add(new XJMenuItem(new NewResourceAction(rData), MainFrame.this));
             }
           }
@@ -3184,10 +3246,11 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     /**
-     * Overrides <code>JTree</code>'s <code>getToolTipText</code>
-     * method in order to allow custom tips to be used.
+     * Overrides <code>JTree</code>'s <code>getToolTipText</code> method in
+     * order to allow custom tips to be used.
      * 
-     * @param event the <code>MouseEvent</code> that initiated the
+     * @param event
+     *          the <code>MouseEvent</code> that initiated the
      *          <code>ToolTip</code> display
      * @return a string containing the tooltip or <code>null</code> if
      *         <code>event</code> is null
@@ -3290,7 +3353,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       Dimension d = tipComponent.getPreferredSize();
       Insets ins = getInsets();
       return new Dimension(d.width + ins.left + ins.right, d.height + ins.top
-              + ins.bottom);
+        + ins.bottom);
     }
 
   }
@@ -3318,15 +3381,15 @@ public class MainFrame extends JFrame implements ProgressListener,
           try {
             HelpFrame helpFrame = new HelpFrame();
             helpFrame.setPage(new URL(
-                    "http://www.gate.ac.uk/sale/tao/index.html"));
+              "http://www.gate.ac.uk/sale/tao/index.html"));
             helpFrame.setSize(800, 600);
             // center on screen
             Dimension frameSize = helpFrame.getSize();
             Dimension ownerSize = Toolkit.getDefaultToolkit().getScreenSize();
             Point ownerLocation = new Point(0, 0);
             helpFrame.setLocation(ownerLocation.x
-                    + (ownerSize.width - frameSize.width) / 2, ownerLocation.y
-                    + (ownerSize.height - frameSize.height) / 2);
+              + (ownerSize.width - frameSize.width) / 2, ownerLocation.y
+              + (ownerSize.height - frameSize.height) / 2);
 
             helpFrame.setVisible(true);
           }
@@ -3346,10 +3409,9 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     public Component getTreeCellRendererComponent(JTree tree, Object value,
-            boolean sel, boolean expanded, boolean leaf, int row,
-            boolean hasFocus) {
+      boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
       super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row,
-              hasFocus);
+        hasFocus);
       if(value == resourcesTreeRoot) {
         setIcon(MainFrame.getIcon("root"));
         setToolTipText("GATE");
@@ -3383,10 +3445,9 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     public Component getTreeCellRendererComponent1(JTree tree, Object value,
-            boolean sel, boolean expanded, boolean leaf, int row,
-            boolean hasFocus) {
+      boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
       super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf,
-              row, hasFocus);
+        row, hasFocus);
       Object handle = ((DefaultMutableTreeNode)value).getUserObject();
       if(handle != null && handle instanceof Handle) {
         setIcon(((Handle)handle).getIcon());
@@ -3404,8 +3465,8 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     /**
-     * This is the original implementation from the super class with
-     * some changes (i.e. shorter timer: 500 ms instead of 1200)
+     * This is the original implementation from the super class with some
+     * changes (i.e. shorter timer: 500 ms instead of 1200)
      */
     protected void startEditingTimer() {
       if(timer == null) {
@@ -3416,23 +3477,24 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     /**
-     * This is the original implementation from the super class with
-     * some changes (i.e. correct discovery of icon)
+     * This is the original implementation from the super class with some
+     * changes (i.e. correct discovery of icon)
      */
     public Component getTreeCellEditorComponent(JTree tree, Object value,
-            boolean isSelected, boolean expanded, boolean leaf, int row) {
-      Component retValue = super.getTreeCellEditorComponent(tree, value,
-              isSelected, expanded, leaf, row);
+      boolean isSelected, boolean expanded, boolean leaf, int row) {
+      Component retValue =
+        super.getTreeCellEditorComponent(tree, value, isSelected, expanded,
+          leaf, row);
       // lets find the actual icon
       if(renderer != null) {
         renderer.getTreeCellRendererComponent(tree, value, isSelected,
-                expanded, leaf, row, false);
+          expanded, leaf, row, false);
         editingIcon = renderer.getIcon();
       }
       return retValue;
     }
   }// protected class ResourcesTreeCellEditor extends
-    // DefaultTreeCellEditor {
+  // DefaultTreeCellEditor {
 
   protected class ResourcesTreeModel extends DefaultTreeModel {
     ResourcesTreeModel(TreeNode root, boolean asksAllowChildren) {
@@ -3440,14 +3502,14 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     public void valueForPathChanged(TreePath path, Object newValue) {
-      DefaultMutableTreeNode aNode = (DefaultMutableTreeNode)path
-              .getLastPathComponent();
+      DefaultMutableTreeNode aNode =
+        (DefaultMutableTreeNode)path.getLastPathComponent();
       Object userObject = aNode.getUserObject();
       if(userObject instanceof Handle) {
         Object target = ((Handle)userObject).getTarget();
         if(target instanceof Resource) {
           Gate.getCreoleRegister().setResourceName((Resource)target,
-                  (String)newValue);
+            (String)newValue);
         }
       }
       nodeChanged(aNode);
@@ -3455,16 +3517,16 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   /**
-   * Extends {@link JFileChooser} to make sure the shared
-   * {@link MainFrame} instance is used as a parent.
+   * Extends {@link JFileChooser} to make sure the shared {@link MainFrame}
+   * instance is used as a parent.
    */
   public static class GateFileChooser extends JFileChooser {
     /**
-     * Overridden to make sure the shared MainFrame instance is used as
-     * a parent when no parent is specified
+     * Overridden to make sure the shared MainFrame instance is used as a parent
+     * when no parent is specified
      */
     public int showDialog(Component parent, String approveButtonText)
-            throws HeadlessException {
+      throws HeadlessException {
       if(parent == null)
         return super.showDialog(getInstance(), approveButtonText);
       else return super.showDialog(parent, approveButtonText);
@@ -3499,14 +3561,13 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   /**
-   * During longer operations it is nice to keep the user entertained so
-   * (s)he doesn't fall asleep looking at a progress bar that seems have
-   * stopped. Also there are some operations that do not support
-   * progress reporting so the progress bar would not work at all so we
-   * need a way to let the user know that things are happening. We chose
-   * for purpose to show the user a small cartoon in the form of an
-   * animated gif. This class handles the diplaying and updating of
-   * those cartoons.
+   * During longer operations it is nice to keep the user entertained so (s)he
+   * doesn't fall asleep looking at a progress bar that seems have stopped. Also
+   * there are some operations that do not support progress reporting so the
+   * progress bar would not work at all so we need a way to let the user know
+   * that things are happening. We chose for purpose to show the user a small
+   * cartoon in the form of an animated gif. This class handles the diplaying
+   * and updating of those cartoons.
    */
   class CartoonMinder implements Runnable {
 
@@ -3610,24 +3671,23 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   /*
-   * class JGateMenuItem extends JMenuItem {
-   * JGateMenuItem(javax.swing.Action a){ super(a);
-   * this.addMouseListener(new MouseAdapter() { public void
+   * class JGateMenuItem extends JMenuItem { JGateMenuItem(javax.swing.Action
+   * a){ super(a); this.addMouseListener(new MouseAdapter() { public void
    * mouseEntered(MouseEvent e) { oldText = statusBar.getText();
    * statusChanged((String)getAction().
    * getValue(javax.swing.Action.SHORT_DESCRIPTION)); }
    * 
-   * public void mouseExited(MouseEvent e) { statusChanged(oldText); }
-   * }); } String oldText; }
+   * public void mouseExited(MouseEvent e) { statusChanged(oldText); } }); }
+   * String oldText; }
    * 
-   * class JGateButton extends JButton { JGateButton(javax.swing.Action
-   * a){ super(a); this.addMouseListener(new MouseAdapter() { public
-   * void mouseEntered(MouseEvent e) { oldText = statusBar.getText();
+   * class JGateButton extends JButton { JGateButton(javax.swing.Action a){
+   * super(a); this.addMouseListener(new MouseAdapter() { public void
+   * mouseEntered(MouseEvent e) { oldText = statusBar.getText();
    * statusChanged((String)getAction().
    * getValue(javax.swing.Action.SHORT_DESCRIPTION)); }
    * 
-   * public void mouseExited(MouseEvent e) { statusChanged(oldText); }
-   * }); } String oldText; }
+   * public void mouseExited(MouseEvent e) { statusChanged(oldText); } }); }
+   * String oldText; }
    */
   class LocaleSelectorMenuItem extends JRadioButtonMenuItem {
     public LocaleSelectorMenuItem(Locale locale) {
@@ -3641,7 +3701,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             Object aRoot = rootIter.next();
             if(aRoot instanceof Window) {
               me.setSelected(((Window)aRoot).getInputContext()
-                      .selectInputMethod(myLocale));
+                .selectInputMethod(myLocale));
             }
           }
         }
@@ -3659,7 +3719,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             Object aRoot = rootIter.next();
             if(aRoot instanceof Window) {
               me.setSelected(((Window)aRoot).getInputContext()
-                      .selectInputMethod(myLocale));
+                .selectInputMethod(myLocale));
             }
           }
         }
@@ -3672,8 +3732,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   }// //class LocaleSelectorMenuItem extends JRadioButtonMenuItem
 
   /**
-   * This class represent an action which brings up the Gazetteer Editor
-   * tool
+   * This class represent an action which brings up the Gazetteer Editor tool
    */
   class NewGazetteerEditorAction extends AbstractAction {
     public NewGazetteerEditorAction() {
@@ -3689,16 +3748,16 @@ public class MainFrame extends JFrame implements ProgressListener,
         frame.setTitle("Gazetteer Editor");
         frame.getContentPane().add(editor);
 
-        Set gazetteers = new HashSet(Gate.getCreoleRegister().getLrInstances(
-                "gate.creole.gazetteer.DefaultGazetteer"));
+        Set gazetteers =
+          new HashSet(Gate.getCreoleRegister().getLrInstances(
+            "gate.creole.gazetteer.DefaultGazetteer"));
         if(gazetteers == null || gazetteers.isEmpty()) return;
         Iterator iter = gazetteers.iterator();
         while(iter.hasNext()) {
-          gate.creole.gazetteer.Gazetteer gaz = (gate.creole.gazetteer.Gazetteer)iter
-                  .next();
+          gate.creole.gazetteer.Gazetteer gaz =
+            (gate.creole.gazetteer.Gazetteer)iter.next();
           if(gaz.getListsURL().toString().endsWith(
-                  System.getProperty("gate.slug.gazetteer")))
-            editor.setTarget(gaz);
+            System.getProperty("gate.slug.gazetteer"))) editor.setTarget(gaz);
         }
 
         frame.setSize(Gaze.SIZE_X, Gaze.SIZE_Y);
