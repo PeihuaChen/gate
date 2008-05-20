@@ -15,11 +15,6 @@
 
 package gate.jape;
 
-import java.io.IOException;
-import java.net.URL;
-
-import junit.framework.*;
-
 import gate.*;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
@@ -27,11 +22,18 @@ import gate.persist.PersistenceException;
 import gate.util.*;
 import gate.util.persistence.PersistenceManager;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.Set;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 
 
 /** Tests for the Corpus classes
   */
-public class TestJape extends TestCase
+public class TestJape extends BaseJapeTests
 {
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -102,11 +104,11 @@ public class TestJape extends TestCase
    * This test loads a saved application which runs several JAPE grammars
    * using different application modes on a specially prepared document.
    * The resulting annotations are checked against gold-standard versions
-   * saved in the test document. 
-   * @throws IOException 
-   * @throws ResourceInstantiationException 
-   * @throws PersistenceException 
-   * @throws ExecutionException 
+   * saved in the test document.
+   * @throws IOException
+   * @throws ResourceInstantiationException
+   * @throws PersistenceException
+   * @throws ExecutionException
    */
   public void testApplicationModes() throws PersistenceException, ResourceInstantiationException, IOException, ExecutionException{
     //load the application
@@ -130,8 +132,8 @@ public class TestJape extends TestCase
       AnnotationSet keySet = testDoc.getAnnotations(testName);
       AnnotationSet responseSet = testDoc.getAnnotations(testName + "-test");
       annDiff.calculateDiff(keySet, responseSet);
-      double fMeasure = annDiff.getFMeasureStrict(1); 
-      assertEquals("Incorrect F-measure for test " + testName, 
+      double fMeasure = annDiff.getFMeasureStrict(1);
+      assertEquals("Incorrect F-measure for test " + testName,
               (double)1, fMeasure);
     }
     //cleanup
@@ -141,7 +143,7 @@ public class TestJape extends TestCase
     Factory.deleteResource(testDoc);
     Factory.deleteResource(testCorpus);
   }
-  
+
   /**
    * This test sets up a JAPE transducer based on a grammar
    * (RhsError.jape) that will throw a null pointer exception.
@@ -175,12 +177,141 @@ public class TestJape extends TestCase
     assertTrue("Bad JAPE grammar didn't throw an exception", gotException);
 
   }  // testRhsErrorMessages
-  
-  
+
+  public void testBrill() throws IOException, GateException, Exception {
+    String japeFile = "/gate.ac.uk/tests/jape/control_mode_tests/brill_test.jape";
+    String[] expectedResults = {"Find_A", "Find_A_B", "Find_A_B_copy", "Find_A_B_C"};
+
+    AnnotationCreator annotCreator = new AnnotationCreator() {
+      public AnnotationSet createAnnots(Document doc) {
+        AnnotationSet defaultAS = doc.getAnnotations();
+
+        try {
+          FeatureMap feat = Factory.newFeatureMap();
+
+          defaultAS.add(new Long(2), new Long(4), "A", feat);
+          defaultAS.add(new Long(4), new Long(6), "B", feat);
+          defaultAS.add(new Long(6), new Long(8), "C", feat);
+          defaultAS.add(new Long(8), new Long(10), "D", feat);
+        }
+        catch(gate.util.InvalidOffsetException ioe) {
+          ioe.printStackTrace(Err.getPrintWriter());
+        }
+        return defaultAS;
+      }
+    };
+
+    Set<Annotation> actualResults = doTest(DEFAULT_DATA_FILE, japeFile, annotCreator);
+    Out.println(actualResults);
+    compareResults(expectedResults, actualResults);
+
+  } // testBrill()
+
+  public void testAppeltMode() throws IOException, GateException, Exception {
+    String japeFile = "/gate.ac.uk/tests/jape/control_mode_tests/appelt_test.jape";
+    String[] expectedResults = {"Find_A_B", "Find_C_D_E_F_G"};
+
+    AnnotationCreator annotCreator = new AnnotationCreator() {
+      public AnnotationSet createAnnots(Document doc) {
+        AnnotationSet defaultAS = doc.getAnnotations();
+
+        try {
+          FeatureMap feat = Factory.newFeatureMap();
+
+          defaultAS.add(new Long(2), new Long(4), "A", feat);
+          defaultAS.add(new Long(4), new Long(6), "B", feat);
+          defaultAS.add(new Long(6), new Long(8), "C", feat);
+          defaultAS.add(new Long(8), new Long(10), "D", feat);
+          defaultAS.add(new Long(10), new Long(12), "E", feat);
+          defaultAS.add(new Long(12), new Long(14), "F", feat);
+          defaultAS.add(new Long(14), new Long(16), "G", feat);
+          defaultAS.add(new Long(16), new Long(18), "H", feat);
+        }
+        catch(gate.util.InvalidOffsetException ioe) {
+          ioe.printStackTrace(Err.getPrintWriter());
+        }
+        return defaultAS;
+      }
+    };
+
+    Set<Annotation> actualResults = doTest(DEFAULT_DATA_FILE, japeFile, annotCreator);
+    Out.println(actualResults);
+    compareResults(expectedResults, actualResults);
+
+  } // testAppelt()
+
+
+  public void testAllMode() throws IOException, GateException, Exception {
+    String japeFile = "/gate.ac.uk/tests/jape/control_mode_tests/all_mode_test.jape";
+    String[] expectedResults = {"Find_A", "Find_A_B", "Find_A_B_copy", "Find_A_B_C", "Find_B_C"};
+
+    AnnotationCreator annotCreator = new AnnotationCreator() {
+      public AnnotationSet createAnnots(Document doc) {
+        AnnotationSet defaultAS = doc.getAnnotations();
+
+        try {
+          FeatureMap feat = Factory.newFeatureMap();
+
+          defaultAS.add(new Long(2), new Long(4), "A", feat);
+          defaultAS.add(new Long(4), new Long(6), "B", feat);
+          defaultAS.add(new Long(6), new Long(8), "C", feat);
+          defaultAS.add(new Long(8), new Long(10), "D", feat);
+        }
+        catch(gate.util.InvalidOffsetException ioe) {
+          ioe.printStackTrace(Err.getPrintWriter());
+        }
+        return defaultAS;
+      }
+    };
+
+    Set<Annotation> actualResults = doTest(DEFAULT_DATA_FILE, japeFile, annotCreator);
+    Out.println(actualResults);
+    compareResults(expectedResults, actualResults);
+
+  } // testAppelt()
+
+
+//  /**
+//   * This test sets up a JAPE transducer based on a grammar
+//   * (RhsError2.jape) that will throw a compiler error.
+//   * The test succeeds so long as we get that exception.
+//   */
+//  public void testRhsErrorMessages2() {
+//    boolean gotException = false;
+//
+//    // disable System.out so that the compiler can't splash its error on screen
+//    if(DEBUG) System.out.println("hello 1");
+//    PrintStream sysout = System.out;
+//    System.setOut(new PrintStream(new ByteArrayOutputStream()));
+//    if(DEBUG) System.out.println("hello 2");
+//
+//    // run a JAPE batch on the faulty grammar
+//    try {
+//      if(DEBUG) {
+//        Out.print(
+//          "Opening Jape grammar... " + Gate.getUrl("tests/RhsError2.jape")
+//        );
+//      }
+//      // a JAPE batcher
+//      Batch batch = new Batch(Gate.getUrl("tests/RhsError2.jape"), "UTF-8");
+//    } catch(Exception e) {
+//      if(DEBUG) Out.prln(e);
+//      gotException = true;
+//    } finally {
+//
+//      // re-enable System.out
+//      System.setOut(sysout);
+//      if(DEBUG) System.out.println("hello 3");
+//    }
+//
+//    assertTrue("Bad JAPE grammar (2) didn't throw an exception", gotException);
+//
+//  }  // testRhsErrorMessages2
+//
 
   /** Test suite routine for the test runner */
   public static Test suite() {
     return new TestSuite(TestJape.class);
   } // suite
-  
+
 } // class TestJape
