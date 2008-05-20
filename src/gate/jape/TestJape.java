@@ -180,7 +180,7 @@ public class TestJape extends BaseJapeTests
 
   public void testBrill() throws IOException, GateException, Exception {
     String japeFile = "/gate.ac.uk/tests/jape/control_mode_tests/brill_test.jape";
-    String[] expectedResults = {"Find_A", "Find_A_B", "Find_A_B_copy", "Find_A_B_C"};
+    String[] expectedResults = {"Find_A", "Find_A", "Find_A_B", "Find_A_B", "Find_A_B_C"};
 
     AnnotationCreator annotCreator = new AnnotationCreator() {
       public AnnotationSet createAnnots(Document doc) {
@@ -190,7 +190,10 @@ public class TestJape extends BaseJapeTests
           FeatureMap feat = Factory.newFeatureMap();
 
           defaultAS.add(new Long(2), new Long(4), "A", feat);
+          defaultAS.add(new Long(2), new Long(5), "A", feat);
+          defaultAS.add(new Long(3), new Long(5), "A", feat);
           defaultAS.add(new Long(4), new Long(6), "B", feat);
+          defaultAS.add(new Long(5), new Long(7), "B", feat);
           defaultAS.add(new Long(6), new Long(8), "C", feat);
           defaultAS.add(new Long(8), new Long(10), "D", feat);
         }
@@ -209,7 +212,7 @@ public class TestJape extends BaseJapeTests
 
   public void testAppeltMode() throws IOException, GateException, Exception {
     String japeFile = "/gate.ac.uk/tests/jape/control_mode_tests/appelt_test.jape";
-    String[] expectedResults = {"Find_A_B", "Find_C_D_E_F_G"};
+    String[] expectedResults = {"Find_A_B_C"};
 
     AnnotationCreator annotCreator = new AnnotationCreator() {
       public AnnotationSet createAnnots(Document doc) {
@@ -220,12 +223,11 @@ public class TestJape extends BaseJapeTests
 
           defaultAS.add(new Long(2), new Long(4), "A", feat);
           defaultAS.add(new Long(4), new Long(6), "B", feat);
-          defaultAS.add(new Long(6), new Long(8), "C", feat);
-          defaultAS.add(new Long(8), new Long(10), "D", feat);
-          defaultAS.add(new Long(10), new Long(12), "E", feat);
-          defaultAS.add(new Long(12), new Long(14), "F", feat);
-          defaultAS.add(new Long(14), new Long(16), "G", feat);
-          defaultAS.add(new Long(16), new Long(18), "H", feat);
+          defaultAS.add(new Long(2), new Long(3), "C", feat);
+          defaultAS.add(new Long(3), new Long(8), "D", feat);
+          defaultAS.add(new Long(2), new Long(3), "A", feat);
+          defaultAS.add(new Long(3), new Long(4), "B", feat);
+          defaultAS.add(new Long(4), new Long(9), "C", feat);
         }
         catch(gate.util.InvalidOffsetException ioe) {
           ioe.printStackTrace(Err.getPrintWriter());
@@ -243,7 +245,8 @@ public class TestJape extends BaseJapeTests
 
   public void testAllMode() throws IOException, GateException, Exception {
     String japeFile = "/gate.ac.uk/tests/jape/control_mode_tests/all_mode_test.jape";
-    String[] expectedResults = {"Find_A", "Find_A_B", "Find_A_B_copy", "Find_A_B_C", "Find_B_C"};
+    String[] expectedResults = {"Find_A", "Find_A", "Find_A_B", "Find_A_B", "Find_A_B_C",
+            "Find_A", "Find_A_B", "Find_B_C"};
 
     AnnotationCreator annotCreator = new AnnotationCreator() {
       public AnnotationSet createAnnots(Document doc) {
@@ -252,8 +255,17 @@ public class TestJape extends BaseJapeTests
         try {
           FeatureMap feat = Factory.newFeatureMap();
 
-          defaultAS.add(new Long(2), new Long(4), "A", feat);
+/*          defaultAS.add(new Long(2), new Long(4), "A", feat);
+          defaultAS.add(new Long(2), new Long(6), "A", feat);
           defaultAS.add(new Long(4), new Long(6), "B", feat);
+          defaultAS.add(new Long(6), new Long(8), "C", feat);
+          defaultAS.add(new Long(8), new Long(10), "D", feat);
+*/
+          defaultAS.add(new Long(2), new Long(4), "A", feat);
+          defaultAS.add(new Long(2), new Long(5), "A", feat);
+          defaultAS.add(new Long(3), new Long(5), "A", feat);
+          defaultAS.add(new Long(4), new Long(6), "B", feat);
+          defaultAS.add(new Long(5), new Long(7), "B", feat);
           defaultAS.add(new Long(6), new Long(8), "C", feat);
           defaultAS.add(new Long(8), new Long(10), "D", feat);
         }

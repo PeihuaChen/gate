@@ -23,15 +23,6 @@ Rule:Find_A_B
 -->
 :res.Result = {rule="Find_A_B"}
 
-Rule:Find_A_B_copy
-(
-    (
-        {A}{B}
-    ) :res
-)
--->
-:res.Result = {rule="Find_A_B_copy"}
-
 Rule:Find_B_C
 (
     (

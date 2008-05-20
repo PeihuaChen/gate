@@ -23,20 +23,11 @@ Rule:Find_A_B_C
 -->
 :res.Result = {rule="Find_A_B_C"}
 
-Rule:Find_D_E_F_G
+Rule:Find_C_D
 (
     (
-        {D}{E}{F}{G}
+        {C}{D}
     ) :res
 )
 -->
-:res.Result = {rule="Find_D_E_F_G"}
-
-Rule:Find_C_D_E_F_G
-(
-    (
-        {C}{D}{E}{F}{G}
-    ) :res
-)
--->
-:res.Result = {rule="Find_C_D_E_F_G"}
+:res.Result = {rule="Find_C_D"}
