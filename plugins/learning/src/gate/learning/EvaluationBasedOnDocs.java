@@ -79,10 +79,40 @@ public class EvaluationBasedOnDocs {
     inputASName = inputAsN;
   }
 
-  /** Main method for evluation. */
+  /** Main method for evluation. 
+   * @throws IOException */
   public void evaluation(LearningEngineSettings learningSettings,
     LightWeightLearningApi lightWeightApi)
-    throws GateException {
+    throws GateException, IOException {
+    //first obtain the feature vectors from documents
+    /*BufferedWriter outNLPFeatures=null;
+    BufferedReader inNLPFeatures = null;
+    BufferedWriter outFeatureVectors = null;
+    boolean isTraining = true;
+    outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(wdResults,
+      ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
+    for(int i = 0; i < corpusOn.size(); ++i) {
+        Document toProcess=  (Document)corpusOn.get(i);
+        lightWeightApi.annotations2NLPFeatures(toProcess, i,
+          outNLPFeatures, isTraining, learningSettings);
+        if(toProcess.getDataStore() != null && corpusOn.getDataStore() != null)
+          Factory.deleteResource(toProcess);
+        //++numDoc;
+    }
+    outNLPFeatures.flush();
+    outNLPFeatures.close();
+    lightWeightApi.finishFVs(wdResults, numDoc, isTraining, learningSettings);
+    // Open the normal NLP feature file. 
+    inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
+      ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
+    outFeatureVectors = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+      new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorTotalData)), "UTF-8"));
+    lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, outFeatureVectors, numDoc, isTraining, learningSettings);
+    inNLPFeatures.close();
+    outFeatureVectors.flush();
+    outFeatureVectors.close();*/
+      
+      //outFeatureVectors.close();
     // k-fold
     if(learningSettings.evaluationconfig.mode == EvaluationConfiguration.kfold)
       kfoldEval(learningSettings, lightWeightApi);
@@ -303,14 +333,17 @@ public class EvaluationBasedOnDocs {
         ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
       for(int i = 0; i < corpusOn.size(); ++i)
         if(isUsedForTraining[i]) {
-          lightWeightApi.annotations2NLPFeatures((Document)corpusOn.get(i), numDoc,
+          Document toProcess=  (Document)corpusOn.get(i);
+          lightWeightApi.annotations2NLPFeatures(toProcess, numDoc,
             outNLPFeatures, isTraining, learningSettings);
+          if(toProcess.getDataStore() != null && corpusOn.getDataStore() != null)
+            Factory.deleteResource(toProcess);
           ++numDoc;
         }
       outNLPFeatures.flush();
       outNLPFeatures.close();
       lightWeightApi.finishFVs(wdResults, numDoc, isTraining, learningSettings);
-      /** Open the normal NLP feature file. */
+      // Open the normal NLP feature file.
       inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
         ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
       outFeatureVectors = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
@@ -320,6 +353,40 @@ public class EvaluationBasedOnDocs {
       outFeatureVectors.flush();
       outFeatureVectors.close();
       //outFeatureVectors.close();
+      //read the fv data from total file and write them into fv files for training and application, respectively 
+      /*BufferedReader inFVs = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
+        ConstantParameters.FILENAMEOFFeatureVectorTotalData)), "UTF-8"));
+      BufferedWriter outFVs = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+        new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorData)), "UTF-8"));
+      BufferedWriter outFVsApp = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+        new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorDataApp)), "UTF-8"));
+      for(int i = 0; i < corpusOn.size(); ++i) {
+        String str = inFVs.readLine();
+        int numLines = Integer.parseInt(str.substring(str.indexOf(ConstantParameters.ITEMSEPARATOR)+1, 
+          str.lastIndexOf(ConstantParameters.ITEMSEPARATOR)));
+        if(isUsedForTraining[i]) {
+          outFVs.append(str);
+          outFVs.newLine();
+          for(int j=0; j<numLines; ++j) {
+            outFVs.append(inFVs.readLine());
+            outFVs.newLine();
+          }
+          ++numDoc;
+        } else {
+          outFVsApp.append(str);
+          outFVsApp.newLine();
+          for(int j=0; j<numLines; ++j) {
+            outFVsApp.append(inFVs.readLine());
+            outFVsApp.newLine();
+          }
+        }
+      }
+      inFVs.close();
+      outFVs.flush();
+      outFVs.close();
+      outFVsApp.flush();
+      outFVsApp.close();*/
+      
       // if fitering the training data
       if(learningSettings.fiteringTrainingData
         && learningSettings.filteringRatio > 0.0)
@@ -344,6 +411,8 @@ public class EvaluationBasedOnDocs {
         System.out.println("classType=" + classTypeOriginal + ", testType="
           + classTypeTest + ".");
       isTraining = false;
+      
+      //numDoc = isUsedForTraining.length - numDoc;
       numDoc = 0;
       outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(wdResults,
         ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
@@ -364,6 +433,7 @@ public class EvaluationBasedOnDocs {
       inNLPFeatures.close();
       outFeatureVectors.flush();
       outFeatureVectors.close();
+      
       // lightWeightApi.finishDocAnnotation();
       Corpus corpusTest;
       corpusTest = Factory.newCorpus("testCorpus");
@@ -387,7 +457,8 @@ public class EvaluationBasedOnDocs {
       HashMap uniqueLabels = new HashMap();
       for(int i = 0; i < corpusOn.size(); ++i)
         if(isUsedForTraining[i]) {
-          AnnotationSet keyAnns = getInputAS((Document)corpusOn.get(i)).get(
+          Document toProcess = (Document)corpusOn.get(i);
+          AnnotationSet keyAnns = getInputAS(toProcess).get(
             classTypeOriginal);
           for(Object obj : keyAnns) {
             if(((Annotation)obj).getFeatures().get(classFeature) != null) {
@@ -398,6 +469,10 @@ public class EvaluationBasedOnDocs {
                   label).toString()).intValue() + 1));
               else uniqueLabels.put(label, "1");
             }
+          }
+          if(toProcess.getDataStore() != null && corpusOn.getDataStore() != null) {
+            corpusOn.getDataStore().sync(corpusOn);
+            Factory.deleteResource(toProcess);
           }
         }
       // Then create one evaluationMeasure object for each label
@@ -467,11 +542,16 @@ public class EvaluationBasedOnDocs {
       classTypeOriginal);
     for(int i = 0; i < corpusOn.size(); ++i) {
       if(!isUsedForTraining[i]) {
-        AnnotationSet annsInput = getInputAS((Document)corpusOn.get(i));
+        Document toProcess = (Document)corpusOn.get(i);
+        AnnotationSet annsInput = getInputAS(toProcess);
         AnnotationSet anns = annsInput.get(classTypeTest);
         Iterator iter = anns.iterator();
         while(iter.hasNext())
           annsInput.remove((Annotation)iter.next());
+        if(toProcess.getDataStore() != null && corpusOn.getDataStore() != null) {
+          corpusOn.getDataStore().sync(corpusOn);
+          Factory.deleteResource(toProcess);
+        }
       }
     }
     } catch(ResourceInstantiationException e) {
