@@ -606,7 +606,8 @@ public class MultiClassLearning {
     modelsBuff.append(numTrainingDocs + " #numTrainingDocs\n");
     modelsBuff.append(numClasses + " #numClasses\n");
     modelsBuff.append(numNull + " #numNullLabelInstances\n");
-    modelsBuff.append(totalFeatures + " #totalFeatures\n");
+    long actualNum = totalFeatures - 5; //because added 5 in DataForLearning class
+    modelsBuff.append(actualNum + " #totalFeatures\n");
     modelsBuff.append(modelFile + " #modelFile\n");
     modelsBuff.append(learner.getLearnerName() + " #learnerName\n");
     modelsBuff.append(learner.getLearnerExecutable() + " #learnerExecutable\n");
@@ -626,6 +627,7 @@ public class MultiClassLearning {
     line = modelsBuff.readLine(); // read the total number of features
     totalFeatures = new Integer(line.substring(0, line.indexOf(" ")))
       .intValue();
+    totalFeatures += 5;
     modelsBuff.readLine(); // read the model file name
     line = modelsBuff.readLine(); // read the learner's name
     learnerNameFromModel = line.substring(0, line.indexOf(" "));
