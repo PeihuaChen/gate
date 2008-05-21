@@ -30,9 +30,10 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-/** 
- * Learning and application by converting the multi-class
- * problem into several binary class problems.
+
+/**
+ * Learning and application by converting the multi-class problem into several
+ * binary class problems.
  */
 public class MultiClassLearning {
   /** The training data -- FVs in doc format. */
@@ -45,31 +46,31 @@ public class MultiClassLearning {
   public int numClasses;
   /** The name of class and the number of instances in training document */
   public HashMap class2NumberInstances;
-  /** Use the one against all others, or use the one against another. 
-   * 1 for one against all others, 
-   * 2 for one against another.
+  /**
+   * Use the one against all others, or use the one against another. 1 for one
+   * against all others, 2 for one against another.
    */
-  short multi2BinaryMode = 1; 
+  short multi2BinaryMode = 1;
   /**
    * The number of instances in the training data without label (or with label
    * null).
    */
   public int numNull = 0;
-  
   /**
    * The executor used to run the (possibly concurrent) binary learning and
    * classification tasks.
    */
   ExecutorService executor = new InThreadExecutorService();
-  
-  /** Constructor*/
+
+  /** Constructor */
   public MultiClassLearning() {
   }
+
   /** Constructor with conversion mode. */
   public MultiClassLearning(short mode) {
     multi2BinaryMode = mode;
   }
-  
+
   public void setExecutor(ExecutorService executor) {
     this.executor = executor;
   }
@@ -84,6 +85,7 @@ public class MultiClassLearning {
     numClasses = class2NumberInstances.size();
     return;
   }
+
   /** Reset the labels for learning for training data filtering. */
   public int resetClassInData() {
     // Reset the data's class as 1 or -1
@@ -92,7 +94,7 @@ public class MultiClassLearning {
       // LabelsOfFeatureVectorDoc labelsDoc = dataFVinDoc.labelsFVDoc[i];
       for(int j = 0; j < dataFVinDoc.labelsFVDoc[i].multiLabels.length; ++j) {
         if(dataFVinDoc.labelsFVDoc[i].multiLabels[j].num > 0) { // if it has
-                                                                // label
+          // label
           LabelsOfFV simpLabels = new LabelsOfFV(1);
           simpLabels.labels = new int[1];
           simpLabels.labels[0] = 1;
@@ -114,7 +116,7 @@ public class MultiClassLearning {
     final ArrayList array1 = new ArrayList(classesName);
     LongCompactor c = new LongCompactor();
     Collections.sort(array1, c);
-    if(LogService.minVerbosityLevel>1)
+    if(LogService.minVerbosityLevel > 1)
       System.out.println("total Number of classes for learning is "
         + array1.size());
     LogService.logMessage("total Number of classes for learning is "
@@ -122,30 +124,27 @@ public class MultiClassLearning {
     // Open the mode file for writing the model into it
     try {
       if(modelFile.exists() && !modelFile.isDirectory()) {
-        if(!modelFile.delete()) {
-          throw new IOException("Existing single-file model "
-                  + modelFile + " could not be deleted.");
-        }
+        if(!modelFile.delete()) { throw new IOException(
+          "Existing single-file model " + modelFile + " could not be deleted."); }
       }
       if(!modelFile.exists()) {
-        if(!modelFile.mkdirs()) {
-          throw new IOException("Couldn't create directory for model files");
-        }
+        if(!modelFile.mkdirs()) { throw new IOException(
+          "Couldn't create directory for model files"); }
       }
-
       // create a temporary directory for the new learned models
       File tmpDirFile = new File(modelFile, "tmp");
       if(tmpDirFile.exists()) {
         deleteRecursively(tmpDirFile);
       }
-      if(!tmpDirFile.mkdir()) {
-        throw new IOException("Couldn't create temporary directory for training");
-      }        
-      
-      File metaDataFile = new File(tmpDirFile, ConstantParameters.FILENAMEOFModelMetaData);
-      BufferedWriter metaDataBuff = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(metaDataFile), "UTF-8"));
+      if(!tmpDirFile.mkdir()) { throw new IOException(
+        "Couldn't create temporary directory for training"); }
+      File metaDataFile = new File(tmpDirFile,
+        ConstantParameters.FILENAMEOFModelMetaData);
+      BufferedWriter metaDataBuff = new BufferedWriter(new OutputStreamWriter(
+        new FileOutputStream(metaDataFile), "UTF-8"));
       // convert the multi-class to binary class -- labels conversion
-      // can't share these arrays between concurrent threads, so must use ThreadLocal
+      // can't share these arrays between concurrent threads, so must use
+      // ThreadLocal
       labelsTraining = new ThreadLocal<short[]>() {
         protected short[] initialValue() {
           return new short[dataFVinDoc.numTraining];
@@ -169,16 +168,18 @@ public class MultiClassLearning {
           metaDataBuff.close();
           for(int iCounter = 0; iCounter < array1.size(); ++iCounter) {
             final int i = iCounter;
-            final File thisClassModelFile = new File(tmpDirFile,
-                    String.format(ConstantParameters.FILENAMEOFPerClassModel, Integer.valueOf(classIndex++)));
+            final File thisClassModelFile = new File(tmpDirFile, String.format(
+              ConstantParameters.FILENAMEOFPerClassModel, Integer
+                .valueOf(classIndex++)));
             tasks.add(new Callable<String>() {
               public String call() throws Exception {
                 short[] myLabelsTraining = labelsTraining.get();
                 SparseFeatureVector[] myFvsTraining = fvsTraining.get();
-                BufferedWriter modelBuff = new BufferedWriter(new OutputStreamWriter(
-                        new FileOutputStream(thisClassModelFile), "UTF-8"));
-                Multi2BinaryClass.oneVsOthers(dataFVinDoc,
-                  array1.get(i).toString(), myLabelsTraining, myFvsTraining);
+                BufferedWriter modelBuff = new BufferedWriter(
+                  new OutputStreamWriter(new FileOutputStream(
+                    thisClassModelFile), "UTF-8"));
+                Multi2BinaryClass.oneVsOthers(dataFVinDoc, array1.get(i)
+                  .toString(), myLabelsTraining, myFvsTraining);
                 int numTraining = myLabelsTraining.length;
                 int numP = 0;
                 for(int i1 = 0; i1 < numTraining; ++i1)
@@ -204,9 +205,9 @@ public class MultiClassLearning {
           if(numNull > 0)
             numClasses0 = (numClasses + 1) * numClasses / 2;
           else numClasses0 = (numClasses - 1) * numClasses / 2;
-          LogService.logMessage("One against another for multi to binary class conversion.\n"+
-            "So actually we have " + numClasses0
-            + " binary classes.", 1);
+          LogService.logMessage(
+            "One against another for multi to binary class conversion.\n"
+              + "So actually we have " + numClasses0 + " binary classes.", 1);
           writeTrainingMetaData(metaDataBuff, numClasses0, numNull, dataFVinDoc
             .getNumTrainingDocs(), dataFVinDoc.getTotalNumFeatures(), modelFile
             .getAbsolutePath(), learner);
@@ -215,14 +216,16 @@ public class MultiClassLearning {
           if(numNull > 0) {
             for(int jCounter = 0; jCounter < array1.size(); ++jCounter) {
               final int j = jCounter;
-              final File thisClassModelFile = new File(tmpDirFile,
-                      String.format(ConstantParameters.FILENAMEOFPerClassModel, Integer.valueOf(classIndex++)));
+              final File thisClassModelFile = new File(tmpDirFile, String
+                .format(ConstantParameters.FILENAMEOFPerClassModel, Integer
+                  .valueOf(classIndex++)));
               tasks.add(new Callable<String>() {
                 public String call() throws Exception {
                   short[] myLabelsTraining = labelsTraining.get();
                   SparseFeatureVector[] myFvsTraining = fvsTraining.get();
-                  BufferedWriter modelBuff = new BufferedWriter(new OutputStreamWriter(
-                          new FileOutputStream(thisClassModelFile), "UTF-8"));
+                  BufferedWriter modelBuff = new BufferedWriter(
+                    new OutputStreamWriter(new FileOutputStream(
+                      thisClassModelFile), "UTF-8"));
                   int numTraining;
                   numTraining = Multi2BinaryClass.oneVsNull(dataFVinDoc, array1
                     .get(j).toString(), myLabelsTraining, myFvsTraining);
@@ -251,25 +254,27 @@ public class MultiClassLearning {
             final int i = iCounter;
             for(int jCounter = i + 1; jCounter < array1.size(); ++jCounter) {
               final int j = jCounter;
-              final File thisClassModelFile = new File(tmpDirFile,
-                      String.format(ConstantParameters.FILENAMEOFPerClassModel, Integer.valueOf(classIndex++)));
+              final File thisClassModelFile = new File(tmpDirFile, String
+                .format(ConstantParameters.FILENAMEOFPerClassModel, Integer
+                  .valueOf(classIndex++)));
               tasks.add(new Callable<String>() {
                 public String call() throws Exception {
                   short[] myLabelsTraining = labelsTraining.get();
                   SparseFeatureVector[] myFvsTraining = fvsTraining.get();
-                  BufferedWriter modelBuff = new BufferedWriter(new OutputStreamWriter(
-                          new FileOutputStream(thisClassModelFile), "UTF-8"));
+                  BufferedWriter modelBuff = new BufferedWriter(
+                    new OutputStreamWriter(new FileOutputStream(
+                      thisClassModelFile), "UTF-8"));
                   int numTraining;
-                  numTraining = Multi2BinaryClass.oneVsAnother(dataFVinDoc, array1
-                    .get(i).toString(), array1.get(j).toString(), myLabelsTraining,
-                    myFvsTraining);
+                  numTraining = Multi2BinaryClass.oneVsAnother(dataFVinDoc,
+                    array1.get(i).toString(), array1.get(j).toString(),
+                    myLabelsTraining, myFvsTraining);
                   int numP = 0;
                   for(int i1 = 0; i1 < numTraining; ++i1) {
                     if(myLabelsTraining[i1] > 0) ++numP;
                   }
-                  modelBuff.append("Class1=" + array1.get(i).toString() + " Class2="
-                    + array1.get(j).toString() + " numTraining=" + numTraining
-                    + " numPos=" + numP + "\n");
+                  modelBuff.append("Class1=" + array1.get(i).toString()
+                    + " Class2=" + array1.get(j).toString() + " numTraining="
+                    + numTraining + " numPos=" + numP + "\n");
                   long time1 = new Date().getTime();
                   learner.training(modelBuff, myFvsTraining, totalNumFeatures,
                     myLabelsTraining, numTraining);
@@ -288,10 +293,9 @@ public class MultiClassLearning {
         default:
           System.out.println("Incorrect multi2BinaryMode value="
             + multi2BinaryMode);
-        LogService.logMessage("Incorrect multi2BinaryMode value="
-            + multi2BinaryMode,0);
+          LogService.logMessage("Incorrect multi2BinaryMode value="
+            + multi2BinaryMode, 0);
       }
-      
       // actually run the tasks, print any exception traces that result
       LogService.logMessage("Running tasks using executor " + executor, 1);
       List<Future<String>> futures = executor.invokeAll(tasks);
@@ -302,45 +306,40 @@ public class MultiClassLearning {
           if(message != null) {
             LogService.logMessage(message, 1);
           }
-        }
-        catch(java.util.concurrent.ExecutionException e) {
+        } catch(java.util.concurrent.ExecutionException e) {
           success = false;
           e.printStackTrace();
         }
       }
-      
       if(success) {
         // replace the old model with the new one
         moveAllFiles(tmpDirFile, modelFile);
-        // delete any classNNN.model files beyond the last one we have learned on
+        // delete any classNNN.model files beyond the last one we have learned
+        // on
         // this run
-        for(File orphanedModelFile = new File(modelFile,
-                String.format(ConstantParameters.FILENAMEOFPerClassModel, Integer.valueOf(classIndex)));
-              orphanedModelFile.exists();
-              classIndex++) {
+        for(File orphanedModelFile = new File(modelFile, String.format(
+          ConstantParameters.FILENAMEOFPerClassModel, Integer
+            .valueOf(classIndex))); orphanedModelFile.exists(); classIndex++) {
           orphanedModelFile.delete();
         }
+      } else {
+        LogService.logMessage(
+          "Error during training, old model not overwritten", 1);
       }
-      else {
-        LogService.logMessage("Error during training, old model not overwritten", 1);
-      }
-      
       // delete the temporary directory
       deleteRecursively(tmpDirFile);
-      
     } catch(IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
-    }
-    catch(InterruptedException e) {
+    } catch(InterruptedException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
-  
+
   /**
-   * Delete a file or directory.  If the argument is a directory,
-   * delete its contents first, then remove the directory itself.
+   * Delete a file or directory. If the argument is a directory, delete its
+   * contents first, then remove the directory itself.
    */
   private void deleteRecursively(File fileOrDir) throws IOException {
     if(fileOrDir.isDirectory()) {
@@ -348,32 +347,29 @@ public class MultiClassLearning {
         deleteRecursively(f);
       }
     }
-
-    if(!fileOrDir.delete()) {
-      throw new IOException("Couldn't delete "
-              + (fileOrDir.isDirectory() ? "directory " : "file ") + fileOrDir);
-    }
+    if(!fileOrDir.delete()) { throw new IOException("Couldn't delete "
+      + (fileOrDir.isDirectory() ? "directory " : "file ") + fileOrDir); }
   }
 
   /**
    * Move all the files from one directory into another.
    * 
-   * @param src the directory whose contents are to be moved
-   * @param dest the directory into which the files should go
+   * @param src
+   *          the directory whose contents are to be moved
+   * @param dest
+   *          the directory into which the files should go
    */
   private void moveAllFiles(File src, File dest) throws IOException {
     for(String fileName : src.list()) {
       File srcFile = new File(src, fileName);
       File targetFile = new File(dest, fileName);
-      
-      if(targetFile.exists() && !targetFile.delete()) {
-        throw new IOException("Couldn't delete file " + targetFile);
-      }
-      if(!srcFile.renameTo(targetFile)) {
-        throw new IOException("Couldn't move " + srcFile + " to directory " + dest);
-      }
+      if(targetFile.exists() && !targetFile.delete()) { throw new IOException(
+        "Couldn't delete file " + targetFile); }
+      if(!srcFile.renameTo(targetFile)) { throw new IOException(
+        "Couldn't move " + srcFile + " to directory " + dest); }
     }
   }
+
   /** Apply the model to the data. */
   public void apply(final SupervisedLearner learner, File modelFile) {
     // Open the mode file and read the model
@@ -381,36 +377,36 @@ public class MultiClassLearning {
       if(modelFile.exists() && !modelFile.isDirectory()) {
         // see whether we're trying to apply an old-style model
         // stored all in one file
-        BufferedReader buff = new BufferedReader(new InputStreamReader(new FileInputStream(modelFile), "UTF-8"));
+        BufferedReader buff = new BufferedReader(new InputStreamReader(
+          new FileInputStream(modelFile), "UTF-8"));
         String firstLine = buff.readLine();
         buff.close();
         if(firstLine != null && firstLine.endsWith("#numTrainingDocs")) {
           // this is an old-style model, so try and transparently upgrade it to
           // the new format
           upgradeSingleFileModelToDirectory(modelFile);
-        }
-        else {
-          throw new IOException("Unrecognised model file format for file " + modelFile);
+        } else {
+          throw new IOException("Unrecognised model file format for file "
+            + modelFile);
         }
       }
-
-      if(!modelFile.exists()) {
-        throw new IllegalStateException("Model directory " + modelFile + " does not exist");
-      }
-      
-      File metaDataFile = new File(modelFile, ConstantParameters.FILENAMEOFModelMetaData);
+      if(!modelFile.exists()) { throw new IllegalStateException(
+        "Model directory " + modelFile + " does not exist"); }
+      File metaDataFile = new File(modelFile,
+        ConstantParameters.FILENAMEOFModelMetaData);
       BufferedReader metaDataBuff = new BufferedReader(new InputStreamReader(
-              new FileInputStream(metaDataFile), "UTF-8"));
+        new FileInputStream(metaDataFile), "UTF-8"));
       // Read the training meta information from the model file's header
       // include the total number of features and number of tags (numClasses)
       int totalNumFeatures;
       String learnerNameFromModel = learner.getLearnerName();
-      //note that reading the training meta data also read the number of class
-      //in the model, e.g. changing the numClasses.
-      totalNumFeatures = ReadTrainingMetaData(metaDataBuff, learnerNameFromModel);      
-      if(LogService.minVerbosityLevel>1)
+      // note that reading the training meta data also read the number of class
+      // in the model, e.g. changing the numClasses.
+      totalNumFeatures = ReadTrainingMetaData(metaDataBuff,
+        learnerNameFromModel);
+      if(LogService.minVerbosityLevel > 1)
         System.out.println(" *** numClasses=" + numClasses + " totalfeatures="
-        + totalNumFeatures);
+          + totalNumFeatures);
       metaDataBuff.close();
       // compare with the meta data of test data
       if(totalNumFeatures < dataFVinDoc.getTotalNumFeatures())
@@ -423,26 +419,30 @@ public class MultiClassLearning {
       List<Future<Boolean>> futures = null;
       switch(multi2BinaryMode){
         case 1:
-          LogService.logMessage("One against others for multi to binary class conversion.\n"
-            +"Number of classes in model: " + numClasses, 1);
+          LogService.logMessage(
+            "One against others for multi to binary class conversion.\n"
+              + "Number of classes in model: " + numClasses, 1);
           // Use the tau modification in all cases
           learner.isUseTauALLCases = true;
           for(int i = 0; i < dataFVinDoc.getNumTrainingDocs(); ++i)
             for(int j = 0; j < dataFVinDoc.trainingFVinDoc[i].getNumInstances(); ++j) {
-              dataFVinDoc.labelsFVDoc[i].multiLabels[j] = new LabelsOfFV(numClasses);
+              dataFVinDoc.labelsFVDoc[i].multiLabels[j] = new LabelsOfFV(
+                numClasses);
               dataFVinDoc.labelsFVDoc[i].multiLabels[j].probs = new float[numClasses];
             }
           // for each class
           for(int iClassCounter = 0; iClassCounter < numClasses; ++iClassCounter) {
             final int iClass = iClassCounter;
-            final File thisClassModelFile = new File(modelFile,
-                    String.format(ConstantParameters.FILENAMEOFPerClassModel, Integer.valueOf(classIndex++)));
+            final File thisClassModelFile = new File(modelFile, String.format(
+              ConstantParameters.FILENAMEOFPerClassModel, Integer
+                .valueOf(classIndex++)));
             tasks.add(new Callable<Boolean>() {
               public Boolean call() throws Exception {
-                BufferedReader modelBuff = new BufferedReader(new InputStreamReader(
-                        new FileInputStream(thisClassModelFile), "UTF-8"));
+                BufferedReader modelBuff = new BufferedReader(
+                  new InputStreamReader(
+                    new FileInputStream(thisClassModelFile), "UTF-8"));
                 learner.applying(modelBuff, dataFVinDoc, finalTotalNumFeatures,
-                        iClass);
+                  iClass);
                 modelBuff.close();
                 return Boolean.TRUE;
               }
@@ -453,36 +453,39 @@ public class MultiClassLearning {
           for(Future<Boolean> f : futures) {
             try {
               f.get();
-            }
-            catch(java.util.concurrent.ExecutionException e) {
+            } catch(java.util.concurrent.ExecutionException e) {
               e.printStackTrace();
             }
           }
-          if(LogService.minVerbosityLevel>1)
-            System.out.println("**** One against all others, numNull=" + numNull);
+          if(LogService.minVerbosityLevel > 1)
+            System.out.println("**** One against all others, numNull="
+              + numNull);
           break;
         case 2:
-          LogService.logMessage("One against another for multi to binary class conversion.", 1);
+          LogService.logMessage(
+            "One against another for multi to binary class conversion.", 1);
           // not use the tau modification in all cases
           learner.isUseTauALLCases = false;
           // set the multi class number and allocate the memory
           for(int i = 0; i < dataFVinDoc.getNumTrainingDocs(); ++i)
             for(int j = 0; j < dataFVinDoc.trainingFVinDoc[i].getNumInstances(); ++j) {
-              dataFVinDoc.labelsFVDoc[i].multiLabels[j] = new LabelsOfFV(numClasses);
+              dataFVinDoc.labelsFVDoc[i].multiLabels[j] = new LabelsOfFV(
+                numClasses);
               dataFVinDoc.labelsFVDoc[i].multiLabels[j].probs = new float[numClasses];
             }
-
           // for each class
           for(int iClassCounter = 0; iClassCounter < numClasses; ++iClassCounter) {
             final int iClass = iClassCounter;
-            final File thisClassModelFile = new File(modelFile,
-                    String.format(ConstantParameters.FILENAMEOFPerClassModel, Integer.valueOf(classIndex++)));
+            final File thisClassModelFile = new File(modelFile, String.format(
+              ConstantParameters.FILENAMEOFPerClassModel, Integer
+                .valueOf(classIndex++)));
             tasks.add(new Callable<Boolean>() {
               public Boolean call() throws Exception {
-                BufferedReader modelBuff = new BufferedReader(new InputStreamReader(
-                        new FileInputStream(thisClassModelFile), "UTF-8"));
+                BufferedReader modelBuff = new BufferedReader(
+                  new InputStreamReader(
+                    new FileInputStream(thisClassModelFile), "UTF-8"));
                 learner.applying(modelBuff, dataFVinDoc, finalTotalNumFeatures,
-                        iClass);
+                  iClass);
                 modelBuff.close();
                 return Boolean.TRUE;
               }
@@ -493,8 +496,7 @@ public class MultiClassLearning {
           for(Future<Boolean> f : futures) {
             try {
               f.get();
-            }
-            catch(java.util.concurrent.ExecutionException e) {
+            } catch(java.util.concurrent.ExecutionException e) {
               e.printStackTrace();
             }
           }
@@ -506,9 +508,9 @@ public class MultiClassLearning {
           numClassesL = rootQuaEqn(numClassesL);
           if(numNull == 0) numClassesL += 1;
           LogService.logMessage("Number of classes in training data: "
-            + numClassesL+"\nActuall number of binary classes in model: "
+            + numClassesL + "\nActuall number of binary classes in model: "
             + numClasses, 1);
-          if(LogService.minVerbosityLevel>1)
+          if(LogService.minVerbosityLevel > 1)
             System.out.println("**** One against another, numNull=" + numNull);
           if(numNull > 0)
             postProc.voteForOneVSAnotherNull(dataFVinDoc, numClassesL);
@@ -519,7 +521,7 @@ public class MultiClassLearning {
         default:
           System.out.println("Incorrect multi2BinaryMode value="
             + multi2BinaryMode);
-        LogService.logMessage("Incorrect multi2BinaryMode value="
+          LogService.logMessage("Incorrect multi2BinaryMode value="
             + multi2BinaryMode, 1);
       }
       long time2 = new Date().getTime();
@@ -528,18 +530,18 @@ public class MultiClassLearning {
     } catch(IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
-    }
-    catch(InterruptedException e) {
+    } catch(InterruptedException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
-  
+
   /**
-   * Upgrade an old-style single file model to directory format, with
-   * the meta data and the individual models in separate files.
+   * Upgrade an old-style single file model to directory format, with the meta
+   * data and the individual models in separate files.
    */
-  private void upgradeSingleFileModelToDirectory(File modelFile) throws IOException {
+  public void upgradeSingleFileModelToDirectory(File modelFile)
+    throws IOException {
     // copy the old model file to a backup
     byte[] buf = new byte[8192];
     int bytesRead = 0;
@@ -552,37 +554,38 @@ public class MultiClassLearning {
     backupModelOut.close();
     oldModelIn.close();
     buf = null;
-    
     // delete the old model file and create a directory in its place
     modelFile.delete();
     modelFile.mkdir();
-    
     // open the backup model file and copy its sections into new files
     BufferedReader oldModelsBuff = new BufferedReader(new InputStreamReader(
-            new FileInputStream(backupModelFile), "UTF-8"));
+      new FileInputStream(backupModelFile), "UTF-8"));
     // first 8 lines are the meta data
-    File metaDataFile = new File(modelFile, ConstantParameters.FILENAMEOFModelMetaData);
+    File metaDataFile = new File(modelFile,
+      ConstantParameters.FILENAMEOFModelMetaData);
     BufferedWriter metaDataBuff = new BufferedWriter(new OutputStreamWriter(
-            new FileOutputStream(metaDataFile), "UTF-8"));
+      new FileOutputStream(metaDataFile), "UTF-8"));
     for(int i = 0; i < 8; i++) {
       metaDataBuff.write(oldModelsBuff.readLine());
       metaDataBuff.write('\n');
     }
     metaDataBuff.close();
-    
     int classIndex = 1;
     BufferedWriter modelWriter = null;
     String line = null;
     while((line = oldModelsBuff.readLine()) != null) {
-      if(line.startsWith("Class=") && line.contains("numTraining=") && line.contains("numPos=")) {
+      if(line.startsWith("Class=") && line.contains("numTraining=")
+        && line.contains("numPos=")) {
         // found the start of a new model, so close the previous file and start
         // the next one
         if(modelWriter != null) {
           modelWriter.close();
         }
-        File nextModel = new File(modelFile,
-                String.format(ConstantParameters.FILENAMEOFPerClassModel, Integer.valueOf(classIndex++)));
-        modelWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(nextModel), "UTF-8"));
+        File nextModel = new File(modelFile, String.format(
+          ConstantParameters.FILENAMEOFPerClassModel, Integer
+            .valueOf(classIndex++)));
+        modelWriter = new BufferedWriter(new OutputStreamWriter(
+          new FileOutputStream(nextModel), "UTF-8"));
       }
       modelWriter.write(line);
       modelWriter.write('\n');
@@ -591,14 +594,16 @@ public class MultiClassLearning {
       modelWriter.close();
     }
   }
-  
-  /** Get the number of classes in the problem from the number of classes
-   * in the one vs. another method, by solving a quadratic equation. 
+
+  /**
+   * Get the number of classes in the problem from the number of classes in the
+   * one vs. another method, by solving a quadratic equation.
    */
   private int rootQuaEqn(int numClassesL) {
     // The positive root of quadratic equation x^2+x-numClassesL=0.
     return (int)((-1 + Math.sqrt(1.0 + numClassesL * 4)) / 2.0);
   }
+
   /** Writting the meta information about the learning into the model file. */
   public void writeTrainingMetaData(BufferedWriter modelsBuff, int numClasses,
     int numNull, int numTrainingDocs, long totalFeatures, String modelFile,
@@ -606,7 +611,8 @@ public class MultiClassLearning {
     modelsBuff.append(numTrainingDocs + " #numTrainingDocs\n");
     modelsBuff.append(numClasses + " #numClasses\n");
     modelsBuff.append(numNull + " #numNullLabelInstances\n");
-    long actualNum = totalFeatures - 5; //because added 5 in DataForLearning class
+    long actualNum = totalFeatures - 5; // because added 5 in DataForLearning
+                                        // class
     modelsBuff.append(actualNum + " #totalFeatures\n");
     modelsBuff.append(modelFile + " #modelFile\n");
     modelsBuff.append(learner.getLearnerName() + " #learnerName\n");
@@ -614,6 +620,7 @@ public class MultiClassLearning {
     modelsBuff.append(learner.getLearnerParams() + " #learnerParams\n");
     return;
   }
+
   /** Read the meta data from the header of the file. */
   public int ReadTrainingMetaData(BufferedReader modelsBuff,
     String learnerNameFromModel) throws IOException {
@@ -635,6 +642,7 @@ public class MultiClassLearning {
     modelsBuff.readLine(); // read the learnerParams string
     return totalFeatures;
   }
+
   /** Obtain the unqilabels from the training data. */
   int obtainUniqueLabels(DataForLearning dataFVinDoc,
     HashMap class2NumberInstances) {
@@ -660,7 +668,8 @@ public class MultiClassLearning {
   /**
    * Obtain the learner from the learner's name speficied by the learning
    * configuration file.
-   * @throws GateException 
+   * 
+   * @throws GateException
    */
   public static SupervisedLearner obtainLearnerFromName(String learnerName,
     String commandLine, String dataFilesName) throws GateException {
@@ -671,8 +680,8 @@ public class MultiClassLearning {
       learner.setCommandLine(commandLine + " " + dataFilesName);
       learner.getParametersFromCommmand();
     } else {
-      throw new GateException("The learner's name \""+learnerName +
-        "\" is not defined!");
+      throw new GateException("The learner's name \"" + learnerName
+        + "\" is not defined!");
     }
     return learner;
   }
