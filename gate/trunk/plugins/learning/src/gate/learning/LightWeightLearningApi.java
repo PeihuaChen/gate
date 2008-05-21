@@ -31,9 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-
 import org.apache.log4j.Logger;
-
 import gate.Document;
 import gate.learning.learners.ChunkOrEntity;
 import gate.learning.learners.MultiClassLearning;
@@ -54,7 +52,6 @@ import gate.util.OffsetComparator;
  * examples if want.
  */
 public class LightWeightLearningApi extends Object implements Benchmarkable {
-
   /** This is where the model(s) should be saved */
   private File wd;
   /**
@@ -99,64 +96,55 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     labelsAndId = new Label2Id();
     labelsAndId.loadLabelAndIdFromFile(wdResults,
       ConstantParameters.FILENAMEOFLabelList);
-    chunkLenHash =
-      ChunkLengthStats.loadChunkLenStats(wdResults,
-        ConstantParameters.FILENAMEOFChunkLenStats);
+    chunkLenHash = ChunkLengthStats.loadChunkLenStats(wdResults,
+      ConstantParameters.FILENAMEOFChunkLenStats);
     // Get the feature position of all features
     // Keep the order of the three types of features as that in
     // NLPFeaturesOfDoc.obtainDocNLPFeatures()
     int num;
     num = engineSettings.datasetDefinition.arrs.featurePosition.length;
     if(engineSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
-      num +=
-        engineSettings.datasetDefinition.arg1.arrs.featurePosition.length
-          + engineSettings.datasetDefinition.arg2.arrs.featurePosition.length;
+      num += engineSettings.datasetDefinition.arg1.arrs.featurePosition.length
+        + engineSettings.datasetDefinition.arg2.arrs.featurePosition.length;
     }
     this.featurePositionTotal = new int[num];
     num = 0;
     if(engineSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
       for(int i = 0; i < engineSettings.datasetDefinition.arg1.arrs.featurePosition.length; ++i)
-        this.featurePositionTotal[num++] =
-          engineSettings.datasetDefinition.arg1.arrs.featurePosition[i];
+        this.featurePositionTotal[num++] = engineSettings.datasetDefinition.arg1.arrs.featurePosition[i];
       for(int i = 0; i < engineSettings.datasetDefinition.arg2.arrs.featurePosition.length; ++i)
-        this.featurePositionTotal[num++] =
-          engineSettings.datasetDefinition.arg2.arrs.featurePosition[i];
+        this.featurePositionTotal[num++] = engineSettings.datasetDefinition.arg2.arrs.featurePosition[i];
     }
     for(int i = 0; i < engineSettings.datasetDefinition.arrs.featurePosition.length; ++i)
-      this.featurePositionTotal[num++] =
-        engineSettings.datasetDefinition.arrs.featurePosition[i];
+      this.featurePositionTotal[num++] = engineSettings.datasetDefinition.arrs.featurePosition[i];
     maxNegPositionTotal = 0;
     if(maxNegPositionTotal < engineSettings.datasetDefinition.arrs.maxNegPosition)
-      maxNegPositionTotal =
-        engineSettings.datasetDefinition.arrs.maxNegPosition;
+      maxNegPositionTotal = engineSettings.datasetDefinition.arrs.maxNegPosition;
     if(engineSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
       if(maxNegPositionTotal < engineSettings.datasetDefinition.arg1.arrs.maxNegPosition)
-        maxNegPositionTotal =
-          engineSettings.datasetDefinition.arg1.arrs.maxNegPosition;
+        maxNegPositionTotal = engineSettings.datasetDefinition.arg1.arrs.maxNegPosition;
       if(maxNegPositionTotal < engineSettings.datasetDefinition.arg2.arrs.maxNegPosition
         + engineSettings.datasetDefinition.arg1.maxTotalPosition + 2)
-        maxNegPositionTotal =
-          engineSettings.datasetDefinition.arg2.arrs.maxNegPosition
-            + engineSettings.datasetDefinition.arg1.maxTotalPosition + 2;
+        maxNegPositionTotal = engineSettings.datasetDefinition.arg2.arrs.maxNegPosition
+          + engineSettings.datasetDefinition.arg1.maxTotalPosition + 2;
     }
     // Get the ngram weight from the datasetdefintion.
     ngramWeight = 1.0f;
     if(engineSettings.datasetDefinition.ngrams != null
       && engineSettings.datasetDefinition.ngrams.size() > 0
       && ((Ngram)engineSettings.datasetDefinition.ngrams.get(0)).weight != 1.0)
-      ngramWeight =
-        ((Ngram)engineSettings.datasetDefinition.ngrams.get(0)).weight;
+      ngramWeight = ((Ngram)engineSettings.datasetDefinition.ngrams.get(0)).weight;
     if(engineSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
       if(engineSettings.datasetDefinition.arg1.ngrams != null
         && engineSettings.datasetDefinition.arg1.ngrams.size() > 0
         && ((Ngram)engineSettings.datasetDefinition.arg1.ngrams.get(0)).weight != 1.0)
-        ngramWeight =
-          ((Ngram)engineSettings.datasetDefinition.arg1.ngrams.get(0)).weight;
+        ngramWeight = ((Ngram)engineSettings.datasetDefinition.arg1.ngrams
+          .get(0)).weight;
       if(engineSettings.datasetDefinition.arg2.ngrams != null
         && engineSettings.datasetDefinition.arg2.ngrams.size() > 0
         && ((Ngram)engineSettings.datasetDefinition.arg2.ngrams.get(0)).weight != 1.0)
-        ngramWeight =
-          ((Ngram)engineSettings.datasetDefinition.arg2.ngrams.get(0)).weight;
+        ngramWeight = ((Ngram)engineSettings.datasetDefinition.arg2.ngrams
+          .get(0)).weight;
     }
   }
 
@@ -170,8 +158,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     AnnotationSet annotations = null;
     if(inputASName == null || inputASName.trim().length() == 0) {
       annotations = doc.getAnnotations();
-    }
-    else {
+    } else {
       annotations = doc.getAnnotations(inputASName);
     }
     /*
@@ -182,15 +169,14 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
      * e.printStackTrace(); } }
      */
     // obtain the NLP features for the document
-    String docName =
-      doc.getName().replaceAll(ConstantParameters.ITEMSEPARATOR, "_");
+    String docName = doc.getName().replaceAll(ConstantParameters.ITEMSEPARATOR,
+      "_");
     if(docName.contains("_"))
       docName = docName.substring(0, docName.lastIndexOf("_"));
     if(LogService.minVerbosityLevel > 1)
       System.out.println(numDocs + " docname=" + docName + ".");
-    NLPFeaturesOfDoc nlpFeaturesDoc =
-      new NLPFeaturesOfDoc(annotations, engineSettings.datasetDefinition
-        .getInstanceType(), docName);
+    NLPFeaturesOfDoc nlpFeaturesDoc = new NLPFeaturesOfDoc(annotations,
+      engineSettings.datasetDefinition.getInstanceType(), docName);
     nlpFeaturesDoc.obtainDocNLPFeatures(annotations,
       engineSettings.datasetDefinition);
     // update the NLP features list
@@ -276,16 +262,14 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
             labelsAndId, engineSettings.surround);
           addDocFVsMultiLabelToFile(i, outFeatureVectors,
             labelsDoc.multiLabels, docFV);
-        }
-        else {
+        } else {
           int[] labels = new int[nlpFeatDoc.numInstances];
           addDocFVsToFile(i, outFeatureVectors, labels, docFV);
         }
       }
       // outFeatureVectors.flush();
       // outFeatureVectors.close();
-    }
-    catch(IOException e) {
+    } catch(IOException e) {
       System.out
         .println("Error occured in reading the NLP data from file for converting to FVs"
           + "or writing the FVs data into file!");
@@ -311,8 +295,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         out.write(line.toString());
         out.newLine();
       }
-    }
-    catch(IOException e) {
+    } catch(IOException e) {
     }
   }
 
@@ -338,8 +321,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         out.write(line.toString());
         out.newLine();
       }
-    }
-    catch(IOException e) {
+    } catch(IOException e) {
     }
   }
 
@@ -350,9 +332,9 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       // Reading the names of all documents and the total number of them
       int numDocs = 0;
       // Read the names of documents from a file
-      BufferedReader inDocsName =
-        new BufferedReader(new InputStreamReader(new FileInputStream(new File(
-          wdResults, ConstantParameters.FILENAMEOFDocsName)), "UTF-8"));
+      BufferedReader inDocsName = new BufferedReader(new InputStreamReader(
+        new FileInputStream(new File(wdResults,
+          ConstantParameters.FILENAMEOFDocsName)), "UTF-8"));
       String str = inDocsName.readLine();
       numDocs = Integer.parseInt(str.substring(str.indexOf("=") + 1));
       String[] docsName = new String[numDocs];
@@ -362,8 +344,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       // Read the selected document
       int numDocsSelected;
       Vector selectedDocs = new Vector();
-      File docsFile =
-        new File(wdResults, ConstantParameters.FILENAMEOFSelectedDOCForAL);
+      File docsFile = new File(wdResults,
+        ConstantParameters.FILENAMEOFSelectedDOCForAL);
       if(docsFile.exists())
         numDocsSelected = obtainDocsForAL(docsFile, selectedDocs);
       else {
@@ -373,10 +355,9 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       }
       boolean[] countedDocs = new boolean[numDocs];
       int[] indexSortedDocs = new int[numDocs];
-
       // first apply the current models to the data
-      File dataFile =
-        new File(wdResults, ConstantParameters.FILENAMEOFFVDataSelecting);
+      File dataFile = new File(wdResults,
+        ConstantParameters.FILENAMEOFFVDataSelecting);
       if(!dataFile.exists()) {
         System.out
           .println("!!! Warning: The data file named "
@@ -386,10 +367,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       }
       File modelFile = new File(wdResults, ConstantParameters.FILENAMEOFModels);
       int learnerType;
-      learnerType =
-        obtainLearnerType(engineSettings.learnerSettings.learnerName);
+      learnerType = obtainLearnerType(engineSettings.learnerSettings.learnerName);
       int numClasses = 0;
-
       switch(learnerType){
         case 1: // for weka learner
           LogService.logMessage("Use weka learner.", 1);
@@ -403,20 +382,18 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         case 2: // for learner of multi to binary conversion
           LogService.logMessage("Multi to binary conversion.", 1);
           // System.out.println("** multi to binary:");
-          MultiClassLearning chunkLearning =
-            new MultiClassLearning(engineSettings.multi2BinaryMode);
+          MultiClassLearning chunkLearning = new MultiClassLearning(
+            engineSettings.multi2BinaryMode);
           // read data
           chunkLearning.getDataFromFile(numDocs, dataFile);
           // get a learner
-          String learningCommand =
-            engineSettings.learnerSettings.paramsOfLearning;
+          String learningCommand = engineSettings.learnerSettings.paramsOfLearning;
           learningCommand = learningCommand.trim();
           learningCommand = learningCommand.replaceAll("[ \t]+", " ");
           String dataSetFile = null;
-          SupervisedLearner paumLearner =
-            MultiClassLearning.obtainLearnerFromName(
-              engineSettings.learnerSettings.learnerName, learningCommand,
-              dataSetFile);
+          SupervisedLearner paumLearner = MultiClassLearning
+            .obtainLearnerFromName(engineSettings.learnerSettings.learnerName,
+              learningCommand, dataSetFile);
           paumLearner
             .setLearnerExecutable(engineSettings.learnerSettings.executableTraining);
           paumLearner
@@ -440,9 +417,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           }
           // then compute the margins for documents
           float[] marginsD = new float[numDocs];
-          float optB =
-            (1 - ((SvmLibSVM)paumLearner).tau)
-              / (1 + ((SvmLibSVM)paumLearner).tau);
+          float optB = (1 - ((SvmLibSVM)paumLearner).tau)
+            / (1 + ((SvmLibSVM)paumLearner).tau);
           computeDocBasedMargins(chunkLearning.dataFVinDoc.labelsFVDoc,
             numClasses, engineSettings.multi2BinaryMode, optB,
             engineSettings.alSetting, marginsD);
@@ -453,12 +429,10 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           }
           LightWeightLearningApi.sortFloatAscIndex(marginsD, indexSortedDocs,
             numDocs, numDocs);
-
           // write the ranked documents into a file
-          BufferedWriter outDocs =
-            new BufferedWriter(new OutputStreamWriter(
-              new FileOutputStream(new File(wdResults,
-                ConstantParameters.FILENAMEOFRankedDOCForAL)), "UTF-8"));
+          BufferedWriter outDocs = new BufferedWriter(new OutputStreamWriter(
+            new FileOutputStream(new File(wdResults,
+              ConstantParameters.FILENAMEOFRankedDOCForAL)), "UTF-8"));
           // String [] str =
           // inDocs.readLine().split(ConstantParameters.ITEMSEPARATOR);
           int numRanked = numDocs - numDocsSelected;
@@ -480,16 +454,13 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           System.out.println("Error! Wrong learner type.");
           LogService.logMessage("Error! Wrong learner type.", 0);
       }
-    }
-    catch(GateException e) {
+    } catch(GateException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch(IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    catch(IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-
   }
 
   /**
@@ -500,9 +471,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
   private int obtainDocsForAL(File docsFile, List<String> selectedDocs)
     throws IOException {
     int numDocsSelected = 0;
-    BufferedReader inDocs =
-      new BufferedReader(new InputStreamReader(new FileInputStream(docsFile),
-        "UTF-8"));
+    BufferedReader inDocs = new BufferedReader(new InputStreamReader(
+      new FileInputStream(docsFile), "UTF-8"));
     String str = inDocs.readLine();
     while(str != null && str != "") {
       selectedDocs.add(str);
@@ -526,9 +496,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       float[] valueInst = new float[numInstances];
       for(int i = 0; i < numClasses; ++i) {
         for(int ni = 0; ni < numInstances; ++ni) {
-          valueInst[ni] =
-            (float)UsefulFunctions
-              .inversesigmoid((double)labelsFVDoc[nd].multiLabels[ni].probs[i]);
+          valueInst[ni] = (float)UsefulFunctions
+            .inversesigmoid((double)labelsFVDoc[nd].multiLabels[ni].probs[i]);
           if(multi2BinaryMode == 1) valueInst[ni] -= optB;
           if(valueInst[ni] > 0) valueInst[ni] = -valueInst[ni]; // get the
           // negative
@@ -549,8 +518,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
             sum += valueInst[indexSort[j]]; // still use the negative values
           sum /= numExamples;
           marginsD[nd] -= sum; // because values are negative.
-        }
-        else {
+        } else {
           float sum = 0;
           int k = 0;
           for(int j = 0; j < numInstances; ++j)
@@ -564,7 +532,6 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           marginsD[nd] -= sum; // because values are negative.
         }
       }// end of loop over all classes
-
     }// end of loop over all documents
   }
 
@@ -574,13 +541,12 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
    */
   public void termfrequenceMatrix(File wdResults, int numDocs) {
     try {
-      BufferedWriter outTFs =
-        new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-          new File(wdResults, ConstantParameters.FILENAMEOFTermFreqMatrix),
-          true), "UTF-8"));
-      BufferedReader inFVs =
-        new BufferedReader(new InputStreamReader(new FileInputStream(new File(
-          wdResults, ConstantParameters.FILENAMEOFFeatureVectorData)), "UTF-8"));
+      BufferedWriter outTFs = new BufferedWriter(new OutputStreamWriter(
+        new FileOutputStream(new File(wdResults,
+          ConstantParameters.FILENAMEOFTermFreqMatrix), true), "UTF-8"));
+      BufferedReader inFVs = new BufferedReader(new InputStreamReader(
+        new FileInputStream(new File(wdResults,
+          ConstantParameters.FILENAMEOFFeatureVectorData)), "UTF-8"));
       HashMap<Integer, String> indexTerm = new HashMap<Integer, String>();
       for(Object obj : featuresList.featuresList.keySet()) {
         indexTerm.put(
@@ -594,15 +560,15 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         outTFs.newLine();
         int npart = Integer.parseInt(ts[1]);
         for(int i = 0; i < npart; ++i) {
-          String[] ts1 =
-            inFVs.readLine().split(ConstantParameters.ITEMSEPARATOR);
+          String[] ts1 = inFVs.readLine().split(
+            ConstantParameters.ITEMSEPARATOR);
           HashMap<String, Integer> termFreq = new HashMap<String, Integer>();
           int bindex = 2 + Integer.parseInt(ts1[1]);
           for(int j = bindex; j < ts1.length; ++j) {
             int isep = ts1[j].indexOf(ConstantParameters.INDEXVALUESEPARATOR);
             Integer index = new Integer(ts1[j].substring(0, isep));
-            Integer valI =
-              new Integer((int)(Float.parseFloat((ts1[j].substring(isep + 1)))));
+            Integer valI = new Integer((int)(Float.parseFloat((ts1[j]
+              .substring(isep + 1)))));
             termFreq.put(indexTerm.get(index), valI);
           }
           List<String> keys = new ArrayList<String>(termFreq.keySet());
@@ -612,8 +578,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
             String ks = keys.get(j);
             String str = ks;
             if(str.contains("<>")) { // if it is a ngram feature
-              str =
-                str.substring(str.indexOf("_", 1) + 1, str.lastIndexOf("<>"));
+              str = str.substring(str.indexOf("_", 1) + 1, str
+                .lastIndexOf("<>"));
               sb.append(str + ConstantParameters.INDEXVALUESEPARATOR
                 + termFreq.get(ks) + " ");
             }
@@ -625,16 +591,13 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       inFVs.close();
       outTFs.flush();
       outTFs.close();
-    }
-    catch(UnsupportedEncodingException e) {
+    } catch(UnsupportedEncodingException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
-    }
-    catch(FileNotFoundException e) {
+    } catch(FileNotFoundException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
-    }
-    catch(IOException e) {
+    } catch(IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
@@ -643,14 +606,12 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
   /** Copy the NLP features from tempory file to normal file. */
   public void copyNLPFeat2NormalFile(File wdResults, int miNumDocsTraining) {
     try {
-      BufferedWriter outNLPFeatures =
-        new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-          new File(wdResults, ConstantParameters.FILENAMEOFNLPFeaturesData),
-          true), "UTF-8"));
-      BufferedReader inNLPFeaturesTemp =
-        new BufferedReader(new InputStreamReader(new FileInputStream(new File(
-          wdResults, ConstantParameters.FILENAMEOFNLPFeaturesDataTemp)),
-          "UTF-8"));
+      BufferedWriter outNLPFeatures = new BufferedWriter(
+        new OutputStreamWriter(new FileOutputStream(new File(wdResults,
+          ConstantParameters.FILENAMEOFNLPFeaturesData), true), "UTF-8"));
+      BufferedReader inNLPFeaturesTemp = new BufferedReader(
+        new InputStreamReader(new FileInputStream(new File(wdResults,
+          ConstantParameters.FILENAMEOFNLPFeaturesDataTemp)), "UTF-8"));
       String line = inNLPFeaturesTemp.readLine();
       if(miNumDocsTraining == 0) {
         outNLPFeatures.append(line);
@@ -665,16 +626,13 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       inNLPFeaturesTemp.close();
       outNLPFeatures.flush();
       outNLPFeatures.close();
-    }
-    catch(UnsupportedEncodingException e) {
+    } catch(UnsupportedEncodingException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
-    }
-    catch(FileNotFoundException e) {
+    } catch(FileNotFoundException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
-    }
-    catch(IOException e) {
+    } catch(IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
@@ -688,39 +646,30 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     LogService.logMessage("\nTraining starts.\n", 1);
     // The files for training data and model
     File wdResults = new File(wd, ConstantParameters.SUBDIRFORRESULTS);
-    String fvFileName =
-      wdResults.toString() + File.separator
-        + ConstantParameters.FILENAMEOFFeatureVectorData;
-    String nlpFileName =
-      wdResults.toString() + File.separator
-        + ConstantParameters.FILENAMEOFNLPFeaturesData;
-    String modelFileName =
-      wdResults.toString() + File.separator
-        + ConstantParameters.FILENAMEOFModels;
-    String labelInDataFileName =
-      wdResults.toString() + File.separator
-        + ConstantParameters.FILENAMEOFLabelsInData;
-    String nlpDataLabelFileName =
-      wdResults.toString() + File.separator
-        + ConstantParameters.FILENAMEOFNLPDataLabel;
+    String fvFileName = wdResults.toString() + File.separator
+      + ConstantParameters.FILENAMEOFFeatureVectorData;
+    String nlpFileName = wdResults.toString() + File.separator
+      + ConstantParameters.FILENAMEOFNLPFeaturesData;
+    String modelFileName = wdResults.toString() + File.separator
+      + ConstantParameters.FILENAMEOFModels;
+    String labelInDataFileName = wdResults.toString() + File.separator
+      + ConstantParameters.FILENAMEOFLabelsInData;
+    String nlpDataLabelFileName = wdResults.toString() + File.separator
+      + ConstantParameters.FILENAMEOFNLPDataLabel;
     File dataFile = new File(fvFileName);
     File nlpDataFile = new File(nlpFileName);
     File modelFile = new File(modelFileName);
     File labelInData = new File(labelInDataFileName);
     File nlpDataLabelFile = new File(nlpDataLabelFileName);
-    int learnerType =
-      obtainLearnerType(engineSettings.learnerSettings.learnerName);
-
+    int learnerType = obtainLearnerType(engineSettings.learnerSettings.learnerName);
     // benchmarking features
     Map benchmarkingFeatures = new HashMap();
-
     switch(learnerType){
       case 1: // for weka learner
         LogService.logMessage("Use weka learner.", 1);
         WekaLearning wekaL = new WekaLearning();
-        short featureType =
-          WekaLearning
-            .obtainWekaLeanerDataType(engineSettings.learnerSettings.learnerName);
+        short featureType = WekaLearning
+          .obtainWekaLeanerDataType(engineSettings.learnerSettings.learnerName);
         // Convert and read training data
         switch(featureType){
           case WekaLearning.NLPFEATUREFVDATA:
@@ -728,55 +677,41 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
             // the label in the sparse data
             // and collect the labels and write them into a file
             long startTime = Benchmark.startPoint();
-
             convertNLPLabelsTDataLabel(nlpDataFile, dataFile, labelInData,
               nlpDataLabelFile, numDocs, engineSettings.surround);
-
             Benchmark.checkPoint(startTime, benchmarkID + "."
               + "nlpLabelsToDataLabels", this, benchmarkingFeatures);
-
             startTime = Benchmark.startPoint();
-
             benchmarkingFeatures.put("nlpFeaturesFile", nlpDataLabelFile
               .getAbsolutePath());
-
             wekaL.readNLPFeaturesFromFile(nlpDataLabelFile, numDocs,
               this.featuresList, true, labelsAndId.label2Id.size(),
               engineSettings.surround);
-
             Benchmark.checkPoint(startTime, benchmarkID + "."
               + "readingNlpFeatures", this, benchmarkingFeatures);
             benchmarkingFeatures.remove("nlpFeaturesFile");
-
             break;
           case WekaLearning.SPARSEFVDATA:
-
             startTime = Benchmark.startPoint();
             benchmarkingFeatures.put("featureVectorFile", dataFile
               .getAbsolutePath());
-
             wekaL.readSparseFVsFromFile(dataFile, numDocs, true,
               labelsAndId.label2Id.size(), engineSettings.surround);
-
             Benchmark.checkPoint(startTime, benchmarkID + "." + "readingFVs",
               this, benchmarkingFeatures);
             benchmarkingFeatures.remove("featureVectorFile");
             break;
         }
         // Get the wekaLearner from the learnername
-        WekaLearner wekaLearner =
-          WekaLearning.obtainWekaLearner(
-            engineSettings.learnerSettings.learnerName,
-            engineSettings.learnerSettings.paramsOfLearning);
+        WekaLearner wekaLearner = WekaLearning.obtainWekaLearner(
+          engineSettings.learnerSettings.learnerName,
+          engineSettings.learnerSettings.paramsOfLearning);
         LogService.logMessage("Weka learner name: "
           + wekaLearner.getLearnerName(), 1);
-
         long startTime = Benchmark.startPoint();
         benchmarkingFeatures.put("modelFile", modelFile.getAbsolutePath());
-
         // Training.
         wekaL.train(wekaLearner, modelFile);
-
         Benchmark.checkPoint(startTime,
           benchmarkID + "." + "wekaModelTraining", this, benchmarkingFeatures);
         benchmarkingFeatures.remove("modelFile");
@@ -785,33 +720,28 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         if(LogService.minVerbosityLevel > 1)
           System.out.println("Using the SVM");
         LogService.logMessage("Multi to binary conversion.", 1);
-        MultiClassLearning chunkLearning =
-          new MultiClassLearning(engineSettings.multi2BinaryMode);
+        MultiClassLearning chunkLearning = new MultiClassLearning(
+          engineSettings.multi2BinaryMode);
         if(engineSettings.multiBinaryExecutor != null) {
           chunkLearning.setExecutor(engineSettings.multiBinaryExecutor);
         }
         // read data
         startTime = Benchmark.startPoint();
         benchmarkingFeatures.put("dataFile", dataFile.getAbsolutePath());
-
         chunkLearning.getDataFromFile(numDocs, dataFile);
-
         Benchmark.checkPoint(startTime, benchmarkID + "."
           + "readingChunkLearningData", this, benchmarkingFeatures);
         benchmarkingFeatures.remove("dataFile");
-
         LogService.logMessage("The number of classes in dataset: "
           + chunkLearning.numClasses, 1);
         // get a learner
-        String learningCommand =
-          engineSettings.learnerSettings.paramsOfLearning;
+        String learningCommand = engineSettings.learnerSettings.paramsOfLearning;
         learningCommand = learningCommand.trim();
         learningCommand = learningCommand.replaceAll("[ \t]+", " ");
         String dataSetFile = null;
-        SupervisedLearner paumLearner =
-          MultiClassLearning.obtainLearnerFromName(
-            engineSettings.learnerSettings.learnerName, learningCommand,
-            dataSetFile);
+        SupervisedLearner paumLearner = MultiClassLearning
+          .obtainLearnerFromName(engineSettings.learnerSettings.learnerName,
+            learningCommand, dataSetFile);
         paumLearner
           .setLearnerExecutable(engineSettings.learnerSettings.executableTraining);
         paumLearner
@@ -821,13 +751,10 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         // training
         startTime = Benchmark.startPoint();
         benchmarkingFeatures.put("modelFile", modelFile.getAbsolutePath());
-
         chunkLearning.training(paumLearner, modelFile);
-
         Benchmark.checkPoint(startTime,
           benchmarkID + "." + "paumModelTraining", this, benchmarkingFeatures);
         benchmarkingFeatures.remove("modelFile");
-
         break;
       default:
         System.out.println("Error! Wrong learner type.");
@@ -848,12 +775,10 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     File wdResults = new File(wd, ConstantParameters.SUBDIRFORRESULTS);
     // String fvFileName = wdResults.toString() + File.separator
     // + ConstantParameters.FILENAMEOFFeatureVectorData;
-    String nlpFileName =
-      wdResults.toString() + File.separator
-        + ConstantParameters.FILENAMEOFNLPFeaturesData;
-    String modelFileName =
-      wdResults.toString() + File.separator
-        + ConstantParameters.FILENAMEOFModels;
+    String nlpFileName = wdResults.toString() + File.separator
+      + ConstantParameters.FILENAMEOFNLPFeaturesData;
+    String modelFileName = wdResults.toString() + File.separator
+      + ConstantParameters.FILENAMEOFModels;
     // String labelInDataFileName = wdResults.toString() + File.separator
     // + ConstantParameters.FILENAMEOFLabelsInData;
     File dataFile = new File(fvFileName);
@@ -872,12 +797,9 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         WekaLearning wekaL = new WekaLearning();
         // Check if the learner uses the sparse feaature vectors or NLP
         // features
-        featureType =
-          WekaLearning
-            .obtainWekaLeanerDataType(engineSettings.learnerSettings.learnerName);
-
+        featureType = WekaLearning
+          .obtainWekaLeanerDataType(engineSettings.learnerSettings.learnerName);
         long startTime = Benchmark.startPoint();
-
         switch(featureType){
           case WekaLearning.NLPFEATUREFVDATA:
             wekaL.readNLPFeaturesFromFile(nlpDataFile, numDocs,
@@ -889,32 +811,24 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
               labelsAndId.label2Id.size(), engineSettings.surround);
             break;
         }
-
         Benchmark.checkPoint(startTime, benchmarkID + "."
           + "readingNlpFeatures", this, benchmarkingFeatures);
-
         // Check if the weka learner has distribute output of classify
-        boolean distributionOutput =
-          WekaLearning
-            .obtainWekaLearnerOutputType(engineSettings.learnerSettings.learnerName);
+        boolean distributionOutput = WekaLearning
+          .obtainWekaLearnerOutputType(engineSettings.learnerSettings.learnerName);
         // Get the wekaLearner from the learnername
-        WekaLearner wekaLearner =
-          WekaLearning.obtainWekaLearner(
-            engineSettings.learnerSettings.learnerName,
-            engineSettings.learnerSettings.paramsOfLearning);
+        WekaLearner wekaLearner = WekaLearning.obtainWekaLearner(
+          engineSettings.learnerSettings.learnerName,
+          engineSettings.learnerSettings.paramsOfLearning);
         LogService.logMessage("Weka learner name: "
           + wekaLearner.getLearnerName(), 1);
-
         // Application
         startTime = Benchmark.startPoint();
         benchmarkingFeatures.put("modelFile", modelFile.getAbsolutePath());
-
         wekaL.apply(wekaLearner, modelFile, distributionOutput);
-
         Benchmark.checkPoint(startTime, benchmarkID + "."
           + "wekaModelApplication", this, benchmarkingFeatures);
         benchmarkingFeatures.remove("modelFile");
-
         labelsFVDoc = wekaL.labelsFVDoc;
         numClasses = labelsAndId.label2Id.size() * 2; // subtract the
         // null class
@@ -922,26 +836,21 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       case 2: // for learner of multi to binary conversion
         LogService.logMessage("Multi to binary conversion.", 1);
         // System.out.println("** multi to binary:");
-        MultiClassLearning chunkLearning =
-          new MultiClassLearning(engineSettings.multi2BinaryMode);
+        MultiClassLearning chunkLearning = new MultiClassLearning(
+          engineSettings.multi2BinaryMode);
         // read data
         startTime = Benchmark.startPoint();
-
         chunkLearning.getDataFromFile(numDocs, dataFile);
-
         Benchmark.checkPoint(startTime, benchmarkID + "."
           + "readingChunkLearningData", this, benchmarkingFeatures);
-
         // get a learner
-        String learningCommand =
-          engineSettings.learnerSettings.paramsOfLearning;
+        String learningCommand = engineSettings.learnerSettings.paramsOfLearning;
         learningCommand = learningCommand.trim();
         learningCommand = learningCommand.replaceAll("[ \t]+", " ");
         String dataSetFile = null;
-        SupervisedLearner paumLearner =
-          MultiClassLearning.obtainLearnerFromName(
-            engineSettings.learnerSettings.learnerName, learningCommand,
-            dataSetFile);
+        SupervisedLearner paumLearner = MultiClassLearning
+          .obtainLearnerFromName(engineSettings.learnerSettings.learnerName,
+            learningCommand, dataSetFile);
         paumLearner
           .setLearnerExecutable(engineSettings.learnerSettings.executableTraining);
         paumLearner
@@ -949,16 +858,12 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         LogService.logMessage("The learners: " + paumLearner.getLearnerName(),
           1);
         // apply
-
         startTime = Benchmark.startPoint();
         benchmarkingFeatures.put("modelFile", modelFile.getAbsolutePath());
-
         chunkLearning.apply(paumLearner, modelFile);
-
         Benchmark.checkPoint(startTime, benchmarkID + "."
           + "paumModelApplication", this, benchmarkingFeatures);
         benchmarkingFeatures.remove("modelFile");
-
         labelsFVDoc = chunkLearning.dataFVinDoc.labelsFVDoc;
         numClasses = chunkLearning.numClasses;
         break;
@@ -973,13 +878,11 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       labelsAndId.loadLabelAndIdFromFile(wdResults,
         ConstantParameters.FILENAMEOFLabelList);
       // post-processing and add new annotation to the text
-      PostProcessing postPr =
-        new PostProcessing(engineSettings.thrBoundaryProb,
-          engineSettings.thrEntityProb, engineSettings.thrClassificationProb);
+      PostProcessing postPr = new PostProcessing(
+        engineSettings.thrBoundaryProb, engineSettings.thrEntityProb,
+        engineSettings.thrClassificationProb);
       // System.out.println("** Application mode:");
-
       long startTime = Benchmark.startPoint();
-
       for(int i = 0; i < numDocs; ++i) {
         HashSet chunks = new HashSet();
         postPr.postProcessingChunk((short)3, labelsFVDoc[i].multiLabels,
@@ -994,12 +897,9 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           Factory.deleteResource(toProcess);
         }
       }
-
       Benchmark.checkPoint(startTime, benchmarkID + "." + "postProcessing",
         this, benchmarkingFeatures);
-
-    }
-    else {
+    } else {
       String featName = engineSettings.datasetDefinition.arrs.classFeature;
       String instanceType = engineSettings.datasetDefinition.getInstanceType();
       labelsAndId = new Label2Id();
@@ -1007,9 +907,9 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         ConstantParameters.FILENAMEOFLabelList);
       // post-processing and add new annotation to the text
       // PostProcessing postPr = new PostProcessing(0.42, 0.2);
-      PostProcessing postPr =
-        new PostProcessing(engineSettings.thrBoundaryProb,
-          engineSettings.thrEntityProb, engineSettings.thrClassificationProb);
+      PostProcessing postPr = new PostProcessing(
+        engineSettings.thrBoundaryProb, engineSettings.thrEntityProb,
+        engineSettings.thrClassificationProb);
       for(int i = 0; i < numDocs; ++i) {
         int[] selectedLabels = new int[labelsFVDoc[i].multiLabels.length];
         float[] valuesLabels = new float[labelsFVDoc[i].multiLabels.length];
@@ -1020,10 +920,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         // addLabelListInDocClassification(toProcess,
         // labelsFVDoc[i].multiLabels,
         // instanceType, featName, labelName, labelsAndId, engineSettings);
-
         addAnnsInDocClassification(toProcess, selectedLabels, valuesLabels,
           instanceType, featName, labelName, labelsAndId, engineSettings);
-
         if(toProcess.getDataStore() != null && corpus.getDataStore() != null) {
           corpus.getDataStore().sync(corpus);
           Factory.deleteResource(toProcess);
@@ -1041,15 +939,12 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     LogService.logMessage("\nApplication starts.", 1);
     // The files for training data and model
     File wdResults = new File(wd, ConstantParameters.SUBDIRFORRESULTS);
-    String fvFileName =
-      wdResults.toString() + File.separator
-        + ConstantParameters.FILENAMEOFFeatureVectorData;
-    String nlpFileName =
-      wdResults.toString() + File.separator
-        + ConstantParameters.FILENAMEOFNLPFeaturesData;
-    String modelFileName =
-      wdResults.toString() + File.separator
-        + ConstantParameters.FILENAMEOFModels;
+    String fvFileName = wdResults.toString() + File.separator
+      + ConstantParameters.FILENAMEOFFeatureVectorData;
+    String nlpFileName = wdResults.toString() + File.separator
+      + ConstantParameters.FILENAMEOFNLPFeaturesData;
+    String modelFileName = wdResults.toString() + File.separator
+      + ConstantParameters.FILENAMEOFModels;
     // String labelInDataFileName = wdResults.toString() + File.separator
     // + ConstantParameters.FILENAMEOFLabelsInData;
     File dataFile = new File(fvFileName);
@@ -1068,9 +963,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         WekaLearning wekaL = new WekaLearning();
         // Check if the learner uses the sparse feaature vectors or NLP
         // features
-        featureType =
-          WekaLearning
-            .obtainWekaLeanerDataType(engineSettings.learnerSettings.learnerName);
+        featureType = WekaLearning
+          .obtainWekaLeanerDataType(engineSettings.learnerSettings.learnerName);
         switch(featureType){
           case WekaLearning.NLPFEATUREFVDATA:
             wekaL.readNLPFeaturesFromFile(nlpDataFile, numDocs,
@@ -1083,14 +977,12 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
             break;
         }
         // Check if the weka learner has distribute output of classify
-        boolean distributionOutput =
-          WekaLearning
-            .obtainWekaLearnerOutputType(engineSettings.learnerSettings.learnerName);
+        boolean distributionOutput = WekaLearning
+          .obtainWekaLearnerOutputType(engineSettings.learnerSettings.learnerName);
         // Get the wekaLearner from the learnername
-        WekaLearner wekaLearner =
-          WekaLearning.obtainWekaLearner(
-            engineSettings.learnerSettings.learnerName,
-            engineSettings.learnerSettings.paramsOfLearning);
+        WekaLearner wekaLearner = WekaLearning.obtainWekaLearner(
+          engineSettings.learnerSettings.learnerName,
+          engineSettings.learnerSettings.paramsOfLearning);
         LogService.logMessage("Weka learner name: "
           + wekaLearner.getLearnerName(), 1);
         // Training.
@@ -1102,21 +994,19 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       case 2: // for learner of multi to binary conversion
         LogService.logMessage("Multi to binary conversion.", 1);
         // System.out.println("** multi to binary:");
-        MultiClassLearning chunkLearning =
-          new MultiClassLearning(engineSettings.multi2BinaryMode);
+        MultiClassLearning chunkLearning = new MultiClassLearning(
+          engineSettings.multi2BinaryMode);
         // read data
         chunkLearning.getDataFromFile(numDocs, dataFile); // corpus.size(),
         // dataFile);
         // get a learner
-        String learningCommand =
-          engineSettings.learnerSettings.paramsOfLearning;
+        String learningCommand = engineSettings.learnerSettings.paramsOfLearning;
         learningCommand = learningCommand.trim();
         learningCommand = learningCommand.replaceAll("[ \t]+", " ");
         String dataSetFile = null;
-        SupervisedLearner paumLearner =
-          MultiClassLearning.obtainLearnerFromName(
-            engineSettings.learnerSettings.learnerName, learningCommand,
-            dataSetFile);
+        SupervisedLearner paumLearner = MultiClassLearning
+          .obtainLearnerFromName(engineSettings.learnerSettings.learnerName,
+            learningCommand, dataSetFile);
         paumLearner
           .setLearnerExecutable(engineSettings.learnerSettings.executableTraining);
         paumLearner
@@ -1139,9 +1029,9 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       labelsAndId.loadLabelAndIdFromFile(wdResults,
         ConstantParameters.FILENAMEOFLabelList);
       // post-processing and add new annotation to the text
-      PostProcessing postPr =
-        new PostProcessing(engineSettings.thrBoundaryProb,
-          engineSettings.thrEntityProb, engineSettings.thrClassificationProb);
+      PostProcessing postPr = new PostProcessing(
+        engineSettings.thrBoundaryProb, engineSettings.thrEntityProb,
+        engineSettings.thrClassificationProb);
       // System.out.println("** Application mode:");
       for(int i = 0; i < numDocs; ++i) {
         HashSet chunks = new HashSet();
@@ -1152,8 +1042,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         addAnnsInDoc(doc, chunks, instanceType, featName, labelName,
           labelsAndId);
       }
-    }
-    else {
+    } else {
       String featName = engineSettings.datasetDefinition.arrs.classFeature;
       String instanceType = engineSettings.datasetDefinition.getInstanceType();
       labelsAndId = new Label2Id();
@@ -1161,9 +1050,9 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         ConstantParameters.FILENAMEOFLabelList);
       // post-processing and add new annotation to the text
       // PostProcessing postPr = new PostProcessing(0.42, 0.2);
-      PostProcessing postPr =
-        new PostProcessing(engineSettings.thrBoundaryProb,
-          engineSettings.thrEntityProb, engineSettings.thrClassificationProb);
+      PostProcessing postPr = new PostProcessing(
+        engineSettings.thrBoundaryProb, engineSettings.thrEntityProb,
+        engineSettings.thrClassificationProb);
       for(int i = 0; i < numDocs; ++i) { // numDocs is always 1
         int[] selectedLabels = new int[labelsFVDoc[i].multiLabels.length];
         float[] valuesLabels = new float[labelsFVDoc[i].multiLabels.length];
@@ -1186,20 +1075,19 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     AnnotationSet annsDoc = null;
     if(inputASName == null || inputASName.trim().length() == 0) {
       annsDoc = doc.getAnnotations();
-    }
-    else {
+    } else {
       annsDoc = doc.getAnnotations(inputASName);
     }
     AnnotationSet annsDocResults = null;
     if(outputASName == null || outputASName.trim().length() == 0) {
       annsDocResults = doc.getAnnotations();
-    }
-    else {
+    } else {
       annsDocResults = doc.getAnnotations(outputASName);
     }
     AnnotationSet anns = annsDoc.get(instanceType);
-    ArrayList annotationArray =
-      (anns == null || anns.isEmpty()) ? new ArrayList() : new ArrayList(anns);
+    ArrayList annotationArray = (anns == null || anns.isEmpty())
+      ? new ArrayList()
+      : new ArrayList(anns);
     Collections.sort(annotationArray, new OffsetComparator());
     for(Object obj : chunks) {
       ChunkOrEntity entity = (ChunkOrEntity)obj;
@@ -1229,28 +1117,26 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     AnnotationSet annsDoc = null;
     if(inputASName == null || inputASName.trim().length() == 0) {
       annsDoc = doc.getAnnotations();
-    }
-    else {
+    } else {
       annsDoc = doc.getAnnotations(inputASName);
     }
     AnnotationSet annsDocResults = null;
     if(outputASName == null || outputASName.trim().length() == 0) {
       annsDocResults = doc.getAnnotations();
-    }
-    else {
+    } else {
       annsDocResults = doc.getAnnotations(outputASName);
     }
     AnnotationSet annsLabel = annsDoc.get(labelName);
     AnnotationSet anns = annsDoc.get(instanceType);
-    ArrayList annotationArray =
-      (anns == null || anns.isEmpty()) ? new ArrayList() : new ArrayList(anns);
+    ArrayList annotationArray = (anns == null || anns.isEmpty())
+      ? new ArrayList()
+      : new ArrayList(anns);
     Collections.sort(annotationArray, new OffsetComparator());
     // For the relation extraction
     String arg1F = null;
     String arg2F = null;
     if(engineSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
-      AttributeRelation relAtt =
-        (AttributeRelation)engineSettings.datasetDefinition.classAttribute;
+      AttributeRelation relAtt = (AttributeRelation)engineSettings.datasetDefinition.classAttribute;
       arg1F = relAtt.getArg1();
       arg2F = relAtt.getArg2();
     }
@@ -1263,12 +1149,10 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       Annotation ann = (Annotation)annotationArray.get(i);
       // For relation data, need the argument features
       if(engineSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
-        String arg1V =
-          ann.getFeatures().get(engineSettings.datasetDefinition.arg1Feat)
-            .toString();
-        String arg2V =
-          ann.getFeatures().get(engineSettings.datasetDefinition.arg2Feat)
-            .toString();
+        String arg1V = ann.getFeatures().get(
+          engineSettings.datasetDefinition.arg1Feat).toString();
+        String arg2V = ann.getFeatures().get(
+          engineSettings.datasetDefinition.arg2Feat).toString();
         features.put(arg1F, arg1V);
         features.put(arg2F, arg2V);
       }
@@ -1296,27 +1180,25 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     AnnotationSet annsDoc = null;
     if(inputASName == null || inputASName.trim().length() == 0) {
       annsDoc = doc.getAnnotations();
-    }
-    else {
+    } else {
       annsDoc = doc.getAnnotations(inputASName);
     }
     AnnotationSet annsDocResults = null;
     if(outputASName == null || outputASName.trim().length() == 0) {
       annsDocResults = doc.getAnnotations();
-    }
-    else {
+    } else {
       annsDocResults = doc.getAnnotations(outputASName);
     }
     AnnotationSet anns = annsDoc.get(instanceType);
-    ArrayList annotationArray =
-      (anns == null || anns.isEmpty()) ? new ArrayList() : new ArrayList(anns);
+    ArrayList annotationArray = (anns == null || anns.isEmpty())
+      ? new ArrayList()
+      : new ArrayList(anns);
     Collections.sort(annotationArray, new OffsetComparator());
     // For the relation extraction
     String arg1F = null;
     String arg2F = null;
     if(engineSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
-      AttributeRelation relAtt =
-        (AttributeRelation)engineSettings.datasetDefinition.classAttribute;
+      AttributeRelation relAtt = (AttributeRelation)engineSettings.datasetDefinition.classAttribute;
       arg1F = relAtt.getArg1();
       arg2F = relAtt.getArg2();
     }
@@ -1327,24 +1209,20 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       // get the labels and their scores
       StringBuffer strB = new StringBuffer();
       for(int j = 0; j < len; ++j) {
-        String label =
-          labelsAndId.id2Label.get(new Integer(indexSort[j] + 1).toString())
-            .toString();
+        String label = labelsAndId.id2Label.get(
+          new Integer(indexSort[j] + 1).toString()).toString();
         strB.append(label + ":" + multiLabels[i].probs[indexSort[j]] + " ");
       }
-
       FeatureMap features = Factory.newFeatureMap();
       features.put(featName, strB.toString().trim());
       // features.put("prob", valuesLabels[i]);
       Annotation ann = (Annotation)annotationArray.get(i);
       // For relation data, need the argument features
       if(engineSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
-        String arg1V =
-          ann.getFeatures().get(engineSettings.datasetDefinition.arg1Feat)
-            .toString();
-        String arg2V =
-          ann.getFeatures().get(engineSettings.datasetDefinition.arg2Feat)
-            .toString();
+        String arg1V = ann.getFeatures().get(
+          engineSettings.datasetDefinition.arg1Feat).toString();
+        String arg2V = ann.getFeatures().get(
+          engineSettings.datasetDefinition.arg2Feat).toString();
         features.put(arg1F, arg1V);
         features.put(arg2F, arg2V);
       }
@@ -1360,7 +1238,6 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       // }
       annsDocResults.add(ann.getStartNode().getOffset(), ann.getEndNode()
         .getOffset(), labelName, featO);
-
       // annsDoc.add(ann.getStartNode(), ann.getEndNode(), labelName, features);
     }
   }
@@ -1370,15 +1247,12 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     File labelInDataFile, File nlpDataLabelFile, int numDocs,
     boolean surroundingMode) {
     try {
-      BufferedReader inData =
-        new BufferedReader(new InputStreamReader(new FileInputStream(dataFile),
-          "UTF-8"));
-      BufferedReader inNlpData =
-        new BufferedReader(new InputStreamReader(new FileInputStream(
-          nlpDataFile), "UTF-8"));
-      BufferedWriter outNlpDataLabel =
-        new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-          nlpDataLabelFile), "UTF-8"));
+      BufferedReader inData = new BufferedReader(new InputStreamReader(
+        new FileInputStream(dataFile), "UTF-8"));
+      BufferedReader inNlpData = new BufferedReader(new InputStreamReader(
+        new FileInputStream(nlpDataFile), "UTF-8"));
+      BufferedWriter outNlpDataLabel = new BufferedWriter(
+        new OutputStreamWriter(new FileOutputStream(nlpDataLabelFile), "UTF-8"));
       HashSet uniqueLabels = new HashSet();
       // The head line of NLP feature file
       String line = inNlpData.readLine();
@@ -1426,9 +1300,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       outNlpDataLabel.close();
       inData.close();
       inNlpData.close();
-      BufferedWriter labelInData =
-        new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-          labelInDataFile), "UTF-8"));
+      BufferedWriter labelInData = new BufferedWriter(new OutputStreamWriter(
+        new FileOutputStream(labelInDataFile), "UTF-8"));
       labelInData.append(uniqueLabels.size() + " #total_labels");
       labelInData.newLine();
       for(Object obj : uniqueLabels) {
@@ -1437,12 +1310,10 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       }
       labelInData.flush();
       labelInData.close();
-    }
-    catch(FileNotFoundException e) {
+    } catch(FileNotFoundException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
-    }
-    catch(IOException e) {
+    } catch(IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
@@ -1458,50 +1329,47 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     LogService.logMessage("\nFiltering starts.", 1);
     // The files for training data and model
     File wdResults = new File(wd, ConstantParameters.SUBDIRFORRESULTS);
-    String fvFileName =
-      wdResults.toString() + File.separator
-        + ConstantParameters.FILENAMEOFFeatureVectorData;
-    String modelFileName =
-      wdResults.toString() + File.separator
-        + ConstantParameters.FILENAMEOFModels;
+    String fvFileName = wdResults.toString() + File.separator
+      + ConstantParameters.FILENAMEOFFeatureVectorData;
+    String modelFileName = wdResults.toString() + File.separator
+      + ConstantParameters.FILENAMEOFModels;
     File dataFile = new File(fvFileName);
     File modelFile = new File(modelFileName);
     // for learner of multi to binary conversion
     LogService.logMessage("Multi to binary conversion.", 1);
-    MultiClassLearning chunkLearning =
-      new MultiClassLearning(engineSettings.multi2BinaryMode);
+    MultiClassLearning chunkLearning = new MultiClassLearning(
+      engineSettings.multi2BinaryMode);
     // read data
     chunkLearning.getDataFromFile(numDocs, dataFile);
     // Back up the label data before it is reset.
-    LabelsOfFeatureVectorDoc[] labelsFVDocB =
-      new LabelsOfFeatureVectorDoc[numDocs];
+    LabelsOfFeatureVectorDoc[] labelsFVDocB = new LabelsOfFeatureVectorDoc[numDocs];
     for(int i = 0; i < numDocs; ++i) {
       labelsFVDocB[i] = new LabelsOfFeatureVectorDoc();
-      labelsFVDocB[i].multiLabels =
-        new LabelsOfFV[chunkLearning.dataFVinDoc.labelsFVDoc[i].multiLabels.length];
+      labelsFVDocB[i].multiLabels = new LabelsOfFV[chunkLearning.dataFVinDoc.labelsFVDoc[i].multiLabels.length];
       for(int j = 0; j < chunkLearning.dataFVinDoc.labelsFVDoc[i].multiLabels.length; ++j)
-        labelsFVDocB[i].multiLabels[j] =
-          chunkLearning.dataFVinDoc.labelsFVDoc[i].multiLabels[j];
+        labelsFVDocB[i].multiLabels[j] = chunkLearning.dataFVinDoc.labelsFVDoc[i].multiLabels[j];
     }
     // Reset the class label of data for binary class for filtering
     // purpose
     int numNeg; // number of negative example in the training data
     numNeg = chunkLearning.resetClassInData();
-    if(numNeg ==0) {//No negative example (null lable) at all in training data
-      LogService.logMessage("!Cannot do the filtering, because there is no negative examples" +
-          "in the training data for filtering!", 1);
+    if(numNeg == 0) {// No negative example (null lable) at all in training
+                      // data
+      LogService.logMessage(
+        "!Cannot do the filtering, because there is no negative examples"
+          + "in the training data for filtering!", 1);
       if(LogService.minVerbosityLevel > 0)
-        System.out.println("!Cannot do the filtering, because there is no negative examples" +
-          "in the training data for filtering!");
+        System.out
+          .println("!Cannot do the filtering, because there is no negative examples"
+            + "in the training data for filtering!");
       return;
     }
     LogService.logMessage("The number of classes in dataset: "
       + chunkLearning.numClasses, 1);
     // Use the SVM only for filtering
     String dataSetFile = null;
-    SupervisedLearner paumLearner =
-      MultiClassLearning.obtainLearnerFromName("SVMLibSvmJava",
-        "-c 1.0 -t 0 -m 100 -tau 1.0 ", dataSetFile);
+    SupervisedLearner paumLearner = MultiClassLearning.obtainLearnerFromName(
+      "SVMLibSvmJava", "-c 1.0 -t 0 -m 100 -tau 1.0 ", dataSetFile);
     paumLearner
       .setLearnerExecutable(engineSettings.learnerSettings.executableTraining);
     paumLearner
@@ -1510,11 +1378,13 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     // training
     // if number of classes is zero, not filtering at all
     if(chunkLearning.numClasses == 0) {
-      LogService.logMessage("!Cannot do the filtering, because there is no positive examples" +
-        "in the training data!", 1);
-    if(LogService.minVerbosityLevel > 0)
-      System.out.println("!Cannot do the filtering, because there is no positive examples" +
-        "in the training data!");
+      LogService.logMessage(
+        "!Cannot do the filtering, because there is no positive examples"
+          + "in the training data!", 1);
+      if(LogService.minVerbosityLevel > 0)
+        System.out
+          .println("!Cannot do the filtering, because there is no positive examples"
+            + "in the training data!");
       return;
     }
     chunkLearning.training(paumLearner, modelFile);
@@ -1529,8 +1399,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       for(int j = 0; j < labelsFVDocB[i].multiLabels.length; ++j)
         if(labelsFVDocB[i].multiLabels[j].num == 0) {
           // System.out.println("(i, j, kk)="+i+","+j+","+kk+"*");
-          scoresNeg[kk++] =
-            chunkLearning.dataFVinDoc.labelsFVDoc[i].multiLabels[j].probs[0];
+          scoresNeg[kk++] = chunkLearning.dataFVinDoc.labelsFVDoc[i].multiLabels[j].probs[0];
         }
     }
     // If want to remove the negative that are close to positive one,
@@ -1556,9 +1425,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     // Write the filtered data into the data file
     BufferedWriter out;
     try {
-      out =
-        new BufferedWriter(new OutputStreamWriter(
-          new FileOutputStream(dataFile), "UTF-8"));
+      out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+        dataFile), "UTF-8"));
       numNeg = 0;
       for(int i = 0; i < labelsFVDocB.length; ++i) {
         int kk1 = 0;
@@ -1567,8 +1435,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           if(labelsFVDocB[i].multiLabels[j].num == 0) {
             if(!isFiltered[numNeg + kk1]) ++numK;
             ++kk1;
-          }
-          else {
+          } else {
             ++numK;
           }
         out.write(i + ConstantParameters.ITEMSEPARATOR + numK
@@ -1586,8 +1453,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
               line.append(ConstantParameters.ITEMSEPARATOR
                 + labelsFVDocB[i].multiLabels[j].labels[j1]);
             }
-            SparseFeatureVector fv =
-              chunkLearning.dataFVinDoc.trainingFVinDoc[i].fvs[j];
+            SparseFeatureVector fv = chunkLearning.dataFVinDoc.trainingFVinDoc[i].fvs[j];
             for(int j1 = 0; j1 < fv.len; ++j1)
               line.append(ConstantParameters.ITEMSEPARATOR + fv.indexes[j1]
                 + ConstantParameters.INDEXVALUESEPARATOR + fv.values[j1]);
@@ -1600,8 +1466,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       }
       out.flush();
       out.close();
-    }
-    catch(IOException e) {
+    } catch(IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
@@ -1615,12 +1480,10 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       || learnerName.equals("KNNWeka") || learnerName.equals("NaiveBayesWeka")) {
       if(learnerName.endsWith("Weka")) {
         return 1;
-      }
-      else {
+      } else {
         return 2;
       }
-    }
-    else {
+    } else {
       throw new GateException("The learning engine named as \"" + learnerName
         + "\" is not defined!");
     }
@@ -1652,24 +1515,57 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         int k = Integer.parseInt(featuresList.featuresList.get(obj).toString());
         featId2Form.put(k, obj);
       }
-      BufferedReader modelsBuff;
-      modelsBuff =
-        new BufferedReader(new InputStreamReader(
+      // Need some methods from MultiClassLearning
+      MultiClassLearning mulL = new MultiClassLearning();
+      // Open the mode file and read the model
+      if(modelFile.exists() && !modelFile.isDirectory()) {
+        // see whether we're trying to apply an old-style model
+        // stored all in one file
+        BufferedReader buff = new BufferedReader(new InputStreamReader(
           new FileInputStream(modelFile), "UTF-8"));
-      // Read the training meta information from the model file's header
+        String firstLine = buff.readLine();
+        buff.close();
+        if(firstLine != null && firstLine.endsWith("#numTrainingDocs")) {
+          // this is an old-style model, so try and transparently upgrade it to
+          // the new format
+          mulL.upgradeSingleFileModelToDirectory(modelFile);
+        } else {
+          throw new IOException("Unrecognised model file format for file "
+            + modelFile);
+        }
+      }
+      if(!modelFile.exists()) { throw new IllegalStateException(
+        "Model directory " + modelFile + " does not exist"); 
+      }
+      //Read the training meta information from the meta data file
       // include the total number of features and number of tags (numClasses)
+      File metaDataFile = new File(modelFile, ConstantParameters.FILENAMEOFModelMetaData);
+      BufferedReader metaDataBuff = new BufferedReader(new InputStreamReader(
+              new FileInputStream(metaDataFile), "UTF-8"));
       int totalNumFeatures;
       String learnerNameFromModel = null;
-      MultiClassLearning mulL = new MultiClassLearning();
-      totalNumFeatures =
-        mulL.ReadTrainingMetaData(modelsBuff, learnerNameFromModel);
+      // note that reading the training meta data also read the number of class
+      // in the model, e.g. changing the numClasses.
+      totalNumFeatures = mulL.ReadTrainingMetaData(metaDataBuff,
+        learnerNameFromModel);
+      metaDataBuff.close();
       // for each class
+      int classIndex = 1;
       for(int iClass = 0; iClass < mulL.numClasses; ++iClass) {
         float b;
         float[] w = new float[totalNumFeatures];
-        String items[] = modelsBuff.readLine().split(" ");
+        //Read the model file
+        final File thisClassModelFile = new File(modelFile, String.format(
+          ConstantParameters.FILENAMEOFPerClassModel, Integer
+            .valueOf(classIndex++)));
+        BufferedReader modelBuff = new BufferedReader(
+          new InputStreamReader(
+            new FileInputStream(thisClassModelFile), "UTF-8"));
+        //Read the header line
+        String items[] = modelBuff.readLine().split(" ");
         // Get the weight vector
-        b = SvmLibSVM.readWeightVectorFromFile(modelsBuff, w);
+        b = SvmLibSVM.readWeightVectorFromFile(modelBuff, w);
+        modelBuff.close();
         int numT;
         int numP;
         if(numP0 > 0) {
@@ -1692,31 +1588,27 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           sortFloatAscIndex(wP, indexSort, numT, numP);
           String st1 = null;
           if(surroundMode) {
-            st1 =
-              labelsAndId.id2Label.get(new Integer(iClass / 2 + 1).toString())
-                .toString();
+            st1 = labelsAndId.id2Label.get(
+              new Integer(iClass / 2 + 1).toString()).toString();
             if(iClass % 2 == 0)
               st1 += "-StartToken";
             else st1 += "-LastToken";
-          }
-          else {
-            st1 =
-              labelsAndId.id2Label.get(new Integer(iClass + 1).toString())
-                .toString();
+          } else {
+            st1 = labelsAndId.id2Label.get(new Integer(iClass + 1).toString())
+              .toString();
           }
           System.out.println("The " + numP
             + " most significiant positive NLP feature for class:   " + st1
             + ":");
           for(int i = 0; i < numP; ++i) {
-            int k1 =
-              indexW[indexSort[i]] / (int)ConstantParameters.MAXIMUMFEATURES;
-            int k2 =
-              indexW[indexSort[i]] % (int)ConstantParameters.MAXIMUMFEATURES;
+            int k1 = indexW[indexSort[i]]
+              / (int)ConstantParameters.MAXIMUMFEATURES;
+            int k2 = indexW[indexSort[i]]
+              % (int)ConstantParameters.MAXIMUMFEATURES;
             String st = null;
             if(k1 == 0) {
               st = "0";
-            }
-            else {
+            } else {
               if(k1 <= maxNegPositionTotal)
                 st = "-" + k1;
               else {
@@ -1750,31 +1642,27 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           sortFloatAscIndex(wN, indexSortN, numT, numP);
           String st1 = null;
           if(surroundMode) {
-            st1 =
-              labelsAndId.id2Label.get(new Integer(iClass / 2 + 1).toString())
-                .toString();
+            st1 = labelsAndId.id2Label.get(
+              new Integer(iClass / 2 + 1).toString()).toString();
             if(iClass % 2 == 0)
               st1 += "-StartToken";
             else st1 += "-LastToken";
-          }
-          else {
-            st1 =
-              labelsAndId.id2Label.get(new Integer(iClass + 1).toString())
-                .toString();
+          } else {
+            st1 = labelsAndId.id2Label.get(new Integer(iClass + 1).toString())
+              .toString();
           }
           System.out.println("The " + numP
             + " most significiant negative NLP feature for class:   " + st1
             + ":");
           for(int i = 0; i < numP; ++i) {
-            int k1 =
-              indexWN[indexSortN[i]] / (int)ConstantParameters.MAXIMUMFEATURES;
-            int k2 =
-              indexWN[indexSortN[i]] % (int)ConstantParameters.MAXIMUMFEATURES;
+            int k1 = indexWN[indexSortN[i]]
+              / (int)ConstantParameters.MAXIMUMFEATURES;
+            int k2 = indexWN[indexSortN[i]]
+              % (int)ConstantParameters.MAXIMUMFEATURES;
             String st = null;
             if(k1 == 0) {
               st = "0";
-            }
-            else {
+            } else {
               if(k1 <= maxNegPositionTotal)
                 st = "-" + k1;
               else {
@@ -1788,9 +1676,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           }
         }
       }
-      modelsBuff.close();
-    }
-    catch(IOException e) {
+    } catch(IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
@@ -1807,7 +1693,6 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     float[] rp1 = new float[numK];
     float one;
     if(numT <= 0) return;
-
     rp1[0] = wP[0];
     indexSort[0] = 0;
     for(i = 1; i < numT; ++i) {
@@ -1838,7 +1723,6 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
   }
 
   // /////// Benchmarkable ////////////////
-
   private String parentBenchmarkID;
   private String benchmarkID;
 
@@ -1871,8 +1755,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
    */
   public void createBenchmarkId(String parentID) {
     parentBenchmarkID = parentID;
-    benchmarkID =
-      Benchmark.createBenchmarkId("LightWeightLearningApi", parentID);
+    benchmarkID = Benchmark.createBenchmarkId("LightWeightLearningApi",
+      parentID);
   }
 
   /**
@@ -1892,5 +1776,4 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
   public Logger getLogger() {
     return Benchmark.logger;
   }
-
 }
