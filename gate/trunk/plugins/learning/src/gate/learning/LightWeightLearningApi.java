@@ -1487,6 +1487,14 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     // purpose
     int numNeg; // number of negative example in the training data
     numNeg = chunkLearning.resetClassInData();
+    if(numNeg ==0) {//No negative example (null lable) at all in training data
+      LogService.logMessage("!Cannot do the filtering, because there is no negative examples" +
+          "in the training data for filtering!", 1);
+      if(LogService.minVerbosityLevel > 0)
+        System.out.println("!Cannot do the filtering, because there is no negative examples" +
+          "in the training data for filtering!");
+      return;
+    }
     LogService.logMessage("The number of classes in dataset: "
       + chunkLearning.numClasses, 1);
     // Use the SVM only for filtering
@@ -1501,7 +1509,14 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     LogService.logMessage("The learners: " + paumLearner.getLearnerName(), 1);
     // training
     // if number of classes is zero, not filtering at all
-    if(chunkLearning.numClasses == 0) return;
+    if(chunkLearning.numClasses == 0) {
+      LogService.logMessage("!Cannot do the filtering, because there is no positive examples" +
+        "in the training data!", 1);
+    if(LogService.minVerbosityLevel > 0)
+      System.out.println("!Cannot do the filtering, because there is no positive examples" +
+        "in the training data!");
+      return;
+    }
     chunkLearning.training(paumLearner, modelFile);
     // applying the learning model to training example and get the
     // confidence score for each example

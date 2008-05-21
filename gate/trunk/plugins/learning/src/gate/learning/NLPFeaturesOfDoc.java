@@ -253,7 +253,8 @@ public class NLPFeaturesOfDoc {
       feats[i] = obtainAnnotationForTypeAndFeature(annsCurrent, gateFeature,
         ((Annotation)(annotationArray.get(i))).getStartNode().getOffset(),
         ((Annotation)(annotationArray.get(i))).getEndNode().getOffset());
-      feats[i] = feats[i].trim().replaceAll(ConstantParameters.ITEMSEPARATOR,
+      if(feats[i] != null)
+        feats[i] = feats[i].trim().replaceAll(ConstantParameters.ITEMSEPARATOR,
         ConstantParameters.ITEMSEPREPLACEMENT);
     }
     return feats;
