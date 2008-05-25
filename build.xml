@@ -655,7 +655,9 @@
       <sysproperty key="java.ext.dirs" value="${extDir}"/>
       <sysproperty key="java.awt.headless" value="true"/>
       <!-- set this property to run just a single test case -->
-      <!--<sysproperty key="gate.testcase" value="gate.html.TestHtml" />-->
+      <syspropertyset>
+        <propertyref name="gate.testcase" />
+      </syspropertyset>
       <formatter type="plain"
                  usefile="false"/>
       <formatter type="xml"
