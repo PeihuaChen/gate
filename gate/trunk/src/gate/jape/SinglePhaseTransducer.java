@@ -115,7 +115,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   } // addRule
 
   /** The values of any option settings given. */
-  private java.util.HashMap optionSettings = new java.util.HashMap();
+  private Map<String, String> optionSettings = new HashMap<String, String>();
 
   /**
    * Add an option setting. If this option is set already, the new value
@@ -127,7 +127,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
   /** Get the value for a particular option. */
   public String getOption(String name) {
-    return (String)optionSettings.get(name);
+    return optionSettings.get(name);
   } // getOption
 
   /** Whether the finish method has been called or not. */
@@ -345,17 +345,18 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
     // for each transition, keep the set of annotations starting at
     // current node (the "paths") that match each constraint of the
-    // transition
+    // transition.
     transitionsWhile: while(transitionsIter.hasNext()) {
       Transition currentTransition = (Transition)transitionsIter.next();
+
+      // There will only be multiple constraints if this transition is over
+      // a written constraint that has the "and" operator (comma) and the
+      // parts referr to different annotation types.  For example -
+      // {A,B} would result in 2 constraints in the array, while
+      // {A.foo=="val", A.bar=="val"} would only be a single constraint.
       Constraint[] currentConstraints = currentTransition.getConstraints()
               .getConstraints();
 
-      // Keep track of which annot is the longest and which constraint it
-      // matched
-      Annotation longestAnnot = null;
-      Constraint matchingConstraint = null;
-      int maxEnding=-1;
       boolean hasPositiveConstraint = false;
       Map<Constraint, Collection<Annotation>> matchingMap =
         new LinkedHashMap<Constraint, Collection<Annotation>>();
@@ -370,10 +371,6 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
         List<Annotation> matchList = c.matches(paths, ontology, doc);
         if (!matchList.isEmpty())
             continue transitionsWhile;
-        // store the first negated constraint to use in the debug trace
-        // in case there are no non-negated constraints
-        if (matchingConstraint == null)
-          matchingConstraint = c;
       }
 
       // Now check all non-negated constraints.  At least one annotation must
@@ -393,9 +390,8 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
         // There are no non-negated constraints.  Since the negated constraints
         // did not fail, this means that all of the current annotations
         // are potentially valid.  Add the whole set to the matchingMap.
-        // Use the first negated constraint (saved into matchingContraint, above)
-        // for the debug trace.
-        matchingMap.put(matchingConstraint, paths);
+        // Use the first negated constraint for the debug trace since any will do.
+        matchingMap.put(currentConstraints[0], paths);
       }
 
       // We have a match if every positive constraint is met by at least one annot.
@@ -404,6 +400,8 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       // set Sx and n is the number of constraints
       List<List<Annotation>> matchLists = new ArrayList<List<Annotation>>();
       for(Map.Entry<Constraint,Collection<Annotation>> entry : matchingMap.entrySet()) {
+        //seeing the constaint is useful when debugging
+        @SuppressWarnings("unused")
         Constraint c = entry.getKey();
         Collection<Annotation> matchList = entry.getValue();
         if (matchList instanceof List)
@@ -413,39 +411,27 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       }
       List<List<Annotation>> combinations = combine(matchLists, matchLists.size(), new LinkedList());
 
-      // check which annotation is the longest from all that matched.
-      // this was removed in favor of the above, proper method of
-      // generating all possible combinations.
-/*
-      for(Map.Entry<Constraint,Collection<Annotation>> entry : matchingMap.entrySet()) {
-        Constraint c = entry.getKey();
-        Collection<Annotation> matchList = entry.getValue();
-        for(Annotation a : matchList) {
-          if(a.getEndNode().getOffset().intValue() > maxEnding) {
-            longestAnnot = a;
-            matchingConstraint = c;
-            maxEnding = a.getEndNode().getOffset().intValue();
-          }
-        }
-      }
-
-      combinations = new ArrayList<List<Annotation>>();
-      List<Annotation> annotList = new ArrayList<Annotation>();
-      annotList.add(longestAnnot);
-      combinations.add(annotList);
-*/
-
       // Create a new FSM for every tuple of annot
       for(List<Annotation> tuple : combinations) {
 
         // Find longest annotation and use that to mark the start of the
         // new FSM
-        Annotation onePath = getRightMostAnnotation(tuple);
+        Annotation matchingAnnot = getRightMostAnnotation(tuple);
+
+        // figure out which constaint this came from so can include it in
+        // debug trace
+        Constraint matchingConstraint = null;
+        for(Map.Entry<Constraint,Collection<Annotation>> entry : matchingMap.entrySet()) {
+          if (entry.getValue().contains(matchingAnnot)) {
+            matchingConstraint = entry.getKey();
+            break;
+          }
+        }
 
         // we have a match. create a new FSMInstance, advance it over the current
         // annotation take care of the bindings and add it to ActiveFSM
         FSMInstance newFSMI = (FSMInstance)currentFSM.clone();
-        newFSMI.setAGPosition(onePath.getEndNode());
+        newFSMI.setAGPosition(matchingAnnot.getEndNode());
         newFSMI.setFSMPosition(currentTransition.getTarget());
 
         // by Shafirin Andrey start (according to Vladimir Karasev)
@@ -455,14 +441,14 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
                     .getFSMPosition());
             if(currRuleTrace == null) {
               currRuleTrace = new RuleTrace(newFSMI.getFSMPosition(), doc);
-              currRuleTrace.addAnnotation(onePath);
-              currRuleTrace.putPattern(onePath, matchingConstraint);
+              currRuleTrace.addAnnotation(matchingAnnot);
+              currRuleTrace.putPattern(matchingAnnot, matchingConstraint);
               rulesTrace.add(currRuleTrace);
             }
             else {
               currRuleTrace.addState(newFSMI.getFSMPosition());
-              currRuleTrace.addAnnotation(onePath);
-              currRuleTrace.putPattern(onePath, matchingConstraint);
+              currRuleTrace.addAnnotation(matchingAnnot);
+              currRuleTrace.putPattern(matchingAnnot, matchingConstraint);
             }
           }
         }
@@ -553,7 +539,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
    * @return true if processing should keep going, false otherwise.
    */
 
-  protected boolean fireRule(java.util.ArrayList acceptingFSMInstances,
+  protected boolean fireRule(List<FSMInstance> acceptingFSMInstances,
           SearchState state, long lastNodeOff, SimpleSortedSet offsets,
           AnnotationSet inputAS, AnnotationSet outputAS, Document doc,
           SimpleSortedSet annotationsByOffset) throws JapeException,
@@ -572,13 +558,13 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     else if(ruleApplicationStyle == BRILL_STYLE
             || ruleApplicationStyle == ALL_STYLE) {
       // fire the rules corresponding to all accepting FSM instances
-      java.util.Iterator accFSMIter = acceptingFSMInstances.iterator();
+      Iterator<FSMInstance> accFSMIter = acceptingFSMInstances.iterator();
       FSMInstance currentAcceptor;
       RightHandSide currentRHS;
       lastAGPosition = startNode.getOffset().longValue();
 
       while(accFSMIter.hasNext()) {
-        currentAcceptor = (FSMInstance)accFSMIter.next();
+        currentAcceptor = accFSMIter.next();
         currentRHS = currentAcceptor.getFSMPosition().getAction();
 
         // by Shafirin Andrey start
@@ -628,15 +614,15 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       // AcceptingFSMInstances is an ordered structure:
       // just execute the longest (last) rule
       Collections.sort(acceptingFSMInstances, Collections.reverseOrder());
-      Iterator accFSMIter = acceptingFSMInstances.iterator();
-      FSMInstance currentAcceptor = (FSMInstance)accFSMIter.next();
+      Iterator<FSMInstance> accFSMIter = acceptingFSMInstances.iterator();
+      FSMInstance currentAcceptor = accFSMIter.next();
       if(isDebugMode()) {
         // see if we have any conflicts
-        Iterator accIter = acceptingFSMInstances.iterator();
+        Iterator<FSMInstance> accIter = acceptingFSMInstances.iterator();
         FSMInstance anAcceptor;
-        List conflicts = new ArrayList();
+        List<FSMInstance> conflicts = new ArrayList<FSMInstance>();
         while(accIter.hasNext()) {
-          anAcceptor = (FSMInstance)accIter.next();
+          anAcceptor = accIter.next();
           if(anAcceptor.equals(currentAcceptor)) {
             conflicts.add(anAcceptor);
           }
@@ -645,12 +631,13 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
           }
         }
         if(conflicts.size() > 1) {
-          log.debug("\nConflicts found during matching:"
+          log.info("Conflicts found during matching:"
                   + "\n================================");
           accIter = conflicts.iterator();
           int i = 0;
           while(accIter.hasNext()) {
-            log.debug(i++ + ") " + accIter.next().toString());
+            if (log.isInfoEnabled())
+              log.info(i++ + ") " + accIter.next().toString());
           }
         }
       }
@@ -692,32 +679,31 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
         // priority and rule index : if such execute them also.
         String currentAcceptorString = null;
         multiModeWhile: while(accFSMIter.hasNext()) {
-          FSMInstance rivalAcceptor = (FSMInstance)accFSMIter.next();
+          FSMInstance rivalAcceptor = accFSMIter.next();
           // get rivals that match the same document segment
           // makes use of the semantic difference between the compareTo
-          // and
-          // equals methods on FSMInstance
+          // and equals methods on FSMInstance
           if(rivalAcceptor.compareTo(currentAcceptor) == 0) {
             // gets the rivals that are NOT COMPLETELY IDENTICAL with
-            // the
-            // current acceptor.
+            // the current acceptor.
             if(!rivalAcceptor.equals(currentAcceptor)) {
-              if(isDebugMode()) { /*
-                                   * depends on the debug option in the
-                                   * transducer
-                                   */
+              //depends on the debug option in the transducer
+              if(isDebugMode()) {
                 if(currentAcceptorString == null) {
                   // first rival
                   currentAcceptorString = currentAcceptor.toString();
-                  Out
-                          .prln("~Jape Grammar Transducer : "
-                                  + "\nConcurrent Patterns by length,priority and index (all transduced):");
-                  log.debug(currentAcceptorString);
-                  log.debug("bindings : " + currentAcceptor.getBindings());
-                  log.debug("Rivals Follow: ");
+                  if (log.isInfoEnabled()) {
+                    log.info("~Jape Grammar Transducer : "
+                            + "\nConcurrent Patterns by length,priority and index (all transduced):");
+                    log.info(currentAcceptorString);
+                    log.info("bindings : " + currentAcceptor.getBindings());
+                    log.info("Rivals Follow: ");
+                  }
                 }
-                log.debug(rivalAcceptor);
-                log.debug("bindings : " + rivalAcceptor.getBindings());
+                if (log.isInfoEnabled()) {
+                  log.info(rivalAcceptor);
+                  log.info("bindings : " + rivalAcceptor.getBindings());
+                }
               }// DEBUG
               currentRHS = rivalAcceptor.getFSMPosition().getAction();
 
